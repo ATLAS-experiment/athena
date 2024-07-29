@@ -55,6 +55,11 @@ namespace MuonGM {
     void RpcReadoutElement::setDoubletR(int doubletR) { m_dbR = doubletR;}
     void RpcReadoutElement::setDoubletZ(int doubletZ) { m_dbZ = doubletZ; }
     void RpcReadoutElement::setDoubletPhi(int doubletPhi) { m_dbPhi = doubletPhi; }
+    double RpcReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
+        const MuonStripDesign* design = getDesign(id);
+        THROW_EXCEPTION("Method is not implemented");
+        return design ? design->distanceToReadout(pos) : 0.;
+    }
     double RpcReadoutElement::localStripSCoord(int doubletPhi, bool measphi, int strip) const {
         bool notintheribs = !inTheRibs();
         if ((doubletPhi != m_dbPhi && NphiStripPanels() == 1 && notintheribs) ||
@@ -86,13 +91,13 @@ namespace MuonGM {
 
         double local_z{0};
         if (!measphi) {
-            local_z = m_first_etastrip_z + (strip - 1) * StripPitch(measphi  );
+            local_z = m_first_etastrip_z + (strip - 1) * StripPitch(measphi);
         } else {           
             local_z = m_phistrip_z;
         }
-        ATH_MSG_VERBOSE("Zsize, ndvz, nstr/pan, zpitch, 1st-strp " << m_Zsize << " "
-                << m_netastripsperpanel << " " << m_etastrippitch << " " << m_first_etastrip_z << std::endl
-                << "localStripZCoord: local_z is " << local_z << " measuresPhi, " << measphi   << ", strip: " << strip );
+        ATH_MSG_VERBOSE(idHelperSvc()->toStringDetEl(identify())<<", strip: "<<strip<<", zpitch: "<<StripPitch(measphi)
+                     <<", ndvz:" << m_netastripsperpanel<<", 1st-strp: " << m_first_etastrip_z 
+                     << ", localStripZCoord: local_z is " << local_z << " measuresPhi, " << measphi   << ", strip: " << strip );
         return local_z;
     }
 
@@ -157,11 +162,6 @@ namespace MuonGM {
             ATH_MSG_VERBOSE("localstrippos special not mirrored at eta<0 = lstrip, ldoublerZ " << lstrip);
         }
 
-        // the only RPCs in ATLAS which have 3 gasGaps (layers) are BI RPCs and those only have 1 doubletPhi
-        if (m_nlayers == 3 && ldoubletPhi != 1) {
-           THROW_EXCEPTION("localStripPos() - found ldoubletPhi=" << ldoubletPhi 
-                        << " for BI RPC which cannot be true, setting to 1");
-        }
         Amg::Vector3D localP(m_gasGap_xPos[gasGap - 1], 
                              localStripSCoord(ldoubletPhi, measphi, lstrip),
                              localStripZCoord(measphi, lstrip));
@@ -403,7 +403,8 @@ namespace MuonGM {
                     m_surfaceData->m_layerTransforms.push_back(trans);
                     m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
 
-                    if (measphi) {
+                    /// BI-RPCs don't have phi elements.. Ensure that they're filled
+                    if (!measphi) {
                         /// Changing this line to transform().translation which is effectively the same as multipltying the same 
                         /// thing by the null vector triggers the FT0V check.... My train station...
                         m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());

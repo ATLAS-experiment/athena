@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONGEOMETRYCNV_MUONREADOUTGEOMCNVALG_H
-#define MUONGEOMETRYCNV_MUONREADOUTGEOMCNVALG_H
+#ifndef MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
+#define MUONGEOMETRYCNV_ReadoutGeomCnvAlg_H
 
 #include "TrkSurfaces/Surface.h" // Work around cppcheck false positive
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
@@ -22,16 +22,17 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 
-/** The MuonReadoutGeomCnvAlg converts the Run4 Readout geometry build from the GeoModelXML into the legacy MuonReadoutGeometry.
+/** The ReadoutGeomCnvAlg converts the Run4 Readout geometry build from the GeoModelXML into the legacy MuonReadoutGeometry.
  *  The algorithm is meant to serve as an adapter allowing to dynamically exchange individual components in the Muon processing chain
  *  by their Run4 / Acts equivalents
  * 
 */
 
-class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
+namespace MuonGMR4{
+class ReadoutGeomCnvAlg : public AthReentrantAlgorithm {
     public:
-        MuonReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator);
-        ~MuonReadoutGeomCnvAlg() = default;
+        ReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator);
+        ~ReadoutGeomCnvAlg() = default;
 
         StatusCode execute(const EventContext& ctx) const override;
         StatusCode initialize() override;
@@ -125,9 +126,7 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
         
         Gaudi::Property<bool> m_checkGeo{this, "checkGeo", false, "Checks the positions of the sensors"};
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-
-
  
 };
-
+}
 #endif

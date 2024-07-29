@@ -59,14 +59,6 @@ namespace MuonGM {
     inline int RpcReadoutElement::layerHash(const Identifier& id) const {
         return layerHash(m_idHelper.doubletPhi(id), m_idHelper.gasGap(id));
     }
-
-
-
-    inline double RpcReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
-        const MuonStripDesign* design = getDesign(id);
-        throw std::runtime_error("Method is not implemented");
-        return design ? design->distanceToReadout(pos) : 0.;
-    }
     inline int RpcReadoutElement::stripNumber(const Amg::Vector2D& pos, const Identifier& id) const {
         const MuonStripDesign* design = getDesign(id);
         return design ? design->stripNumber(pos) : -1;

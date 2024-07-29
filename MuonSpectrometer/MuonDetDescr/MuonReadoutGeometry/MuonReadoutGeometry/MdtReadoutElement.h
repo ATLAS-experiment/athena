@@ -13,8 +13,9 @@
 #include "TrkDistortedSurfaces/SaggedLineSurface.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 class BLinePar;
-class MuonReadoutGeomCnvAlg;
-
+namespace MuonGMR4{
+    class ReadoutGeomCnvAlg;
+}
 namespace Trk {
     class CylinderBounds;
     class SurfaceBounds;
@@ -48,7 +49,7 @@ namespace MuonGM {
     constexpr int maxnsteps = 10;
 
     class MdtReadoutElement final : public MuonReadoutElement {
-        friend class ::MuonReadoutGeomCnvAlg;
+        friend class MuonGMR4::ReadoutGeomCnvAlg;
         friend class MuonChamber;
         friend class MuonChamberLite;
 

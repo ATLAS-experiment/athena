@@ -2,7 +2,7 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonReadoutGeomCnvAlg.h"
+#include "ReadoutGeomCnvAlg.h"
 
 #include <GeoModelKernel/GeoVPhysVol.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
@@ -62,10 +62,11 @@ namespace {
     };
 }
 
-MuonReadoutGeomCnvAlg::MuonReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
+namespace MuonGMR4{
+ReadoutGeomCnvAlg::ReadoutGeomCnvAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm{name, pSvcLocator} {}
 
-StatusCode MuonReadoutGeomCnvAlg::initialize()  {
+StatusCode ReadoutGeomCnvAlg::initialize()  {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_alignStoreKeys.initialize());
@@ -74,7 +75,7 @@ StatusCode MuonReadoutGeomCnvAlg::initialize()  {
 }
 
 
-StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
+StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     SG::WriteCondHandle<MuonGM::MuonDetectorManager> writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("The current readout geometry is still valid.");
@@ -142,9 +143,9 @@ StatusCode MuonReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(writeHandle.record(std::move(cacheObj.detMgr)));
     return StatusCode::SUCCESS;
 }
-StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
-                                               const Identifier& stationId,
-                                               ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
+                                           const Identifier& stationId,
+                                           ConstructionCache& cacheObj) const {
     const std::string stName{m_idHelperSvc->stationNameString(stationId)};
     const int stEta{m_idHelperSvc->stationEta(stationId)};
     const int stPhi{m_idHelperSvc->stationPhi(stationId)};
@@ -236,11 +237,11 @@ StatusCode MuonReadoutGeomCnvAlg::buildStation(const ActsGeometryContext& gctx,
 }
 
 
-StatusCode MuonReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx,
-                                                     const Identifier& reId,
-                                                     ConstructionCache& cacheObj,
-                                                     GeoIntrusivePtr<GeoVFullPhysVol>& physVol,
-                                                     MuonGM::MuonStation* & station) const {
+StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& gctx,
+                                                 const Identifier& reId,
+                                                 ConstructionCache& cacheObj,
+                                                 GeoIntrusivePtr<GeoVFullPhysVol>& physVol,
+                                                 MuonGM::MuonStation* & station) const {
     
     ATH_CHECK(buildStation(gctx, reId, cacheObj));
     const std::string stName{m_idHelperSvc->stationNameString(reId)};
@@ -252,8 +253,23 @@ StatusCode MuonReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& 
     const MuonGMR4::MuonReadoutElement* copyMe = m_detMgr->getReadoutElement(reId);
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
     parentPhysVol->add(cacheObj.newIdTag());
-    parentPhysVol->add(cacheObj.makeTransform(copyMe->alignableTransform()->getDefTransform().inverse() *
-                                              readOutVol->getParent()->getX() * readOutVol->getX()));
+    /// This is a hack to include the BIL Rpcs into the translation. Recall that the BI-RPCs break the station paradigm
+    /// Hence, in the new description they have their own alignable transform. However, the legacy geometry tries to sort
+    /// them into the corresponding Mdt station with the same stName, stEta, stPhi. So quite a lot of gymnastics is now needed
+    /// to place them accordingly into that frame. 
+    ///             getX(Mdt) * delta(Mdt) * X  = getX(Rpc) * delta(Rpc)
+    ///                                      X  = [getX(Mdt) * delta(Mdt)]^{-1} * getX(Rpc) * delta(Rpc) 
+    /// The second term is the transform of the transform of the Muon station. The second one needs to be rewritten
+    ///             Y = getX(Rpc) * delta(Rpc)  * getX(alignNode -> readoutFrame)
+    ///             X = Y * getX(alignNode -> readoutFrame)^{-1}
+    ///              
+    const Amg::Transform3D alignNodeToRE{copyMe->alignableTransform()->getDefTransform().inverse() *
+                                         readOutVol->getParent()->getX() * readOutVol->getX()};
+    const Amg::Transform3D alignedNode{copyMe->localToGlobalTrans(gctx) * alignNodeToRE.inverse()};
+    
+    const Amg::Transform3D stationTrf{station->getTransform().inverse() * alignedNode};
+
+    parentPhysVol->add(cacheObj.makeTransform(stationTrf*alignNodeToRE));
     /// Clone the detector element with all of its subvolumes
     PVLink clonedVol{cloneVolume(const_pointer_cast<GeoVFullPhysVol>(readOutVol))};
     physVol = dynamic_pointer_cast<GeoVFullPhysVol>(clonedVol);
@@ -261,8 +277,7 @@ StatusCode MuonReadoutGeomCnvAlg::cloneReadoutVolume(const ActsGeometryContext& 
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
-                                           ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
     
     const std::vector<const MuonGMR4::RpcReadoutElement*> readoutEles = m_detMgr->getAllRpcReadoutElements();
     ATH_MSG_INFO("Copy "<<readoutEles.size()<<" Rpc readout elements to the legacy system");
@@ -272,7 +287,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
         const MuonGMR4::RpcReadoutElement::parameterBook& pars{copyMe->getParameters()};
         GeoIntrusivePtr<GeoVFullPhysVol> physVol{};
         MuonGM::MuonStation* station{nullptr};
-        ATH_CHECK(cloneReadoutVolume(gctx,reId, cacheObj, physVol, station));
+        ATH_CHECK(cloneReadoutVolume(gctx, reId, cacheObj, physVol, station));
         auto newElement = std::make_unique<MuonGM::RpcReadoutElement>(physVol, 
                                                                       m_idHelperSvc->stationNameString(reId), 
                                                                       1, 1, false, cacheObj.detMgr.get());
@@ -305,7 +320,8 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
         newElement->m_hasDEDontop = true;
         newElement->m_descratzneg = false;
 
-         for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
+        std::vector<Identifier> gapIds{};
+        for (unsigned int gasGap = 1; gasGap <= copyMe->nGasGaps(); ++gasGap) {
             for (int doubPhi = copyMe->doubletPhiMax(); doubPhi >= copyMe->doubletPhi(); --doubPhi) {
                 for (bool measPhi : {false, true}) {
                     if (measPhi && copyMe->nPhiStrips()==0) continue;
@@ -315,6 +331,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
                                                                 doubPhi, gasGap, measPhi, 
                                                                 channel);
 
+                    gapIds.push_back(gapId);
                     const Amg::Vector3D locStripPos = copyMe->globalToLocalTrans(gctx) * copyMe->stripPosition(gctx, gapId);
                     ATH_MSG_VERBOSE("GasGap "<<m_idHelperSvc->toString(gapId)<<", local strip position: "<<Amg::toString(locStripPos));
                     newElement->m_gasGap_xPos[gasGap -1] = locStripPos.x();
@@ -331,9 +348,16 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
                 }
             }
         }
-        newElement->m_mirrored = true;
         newElement->fillCache();
-        newElement->m_mirrored = false;
+        /// Resignment in face of the rpc readout geometry. Overwrite all the parameters
+        for (const Identifier& gapId : gapIds) {
+            const int surfaceHash = newElement->surfaceHash(gapId);
+            const int layerHash = newElement->layerHash(gapId);
+            const Amg::Transform3D& refTrf{copyMe->localToGlobalTrans(gctx, gapId)};
+            newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
+            newElement->m_surfaceData->m_layerCenters[layerHash] = refTrf.translation();
+            newElement->m_surfaceData->m_layerNormals[layerHash] = refTrf.linear() * Amg::Vector3D::UnitZ();
+        }       
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newElement));
         cacheObj.detMgr->addRpcReadoutElement(std::move(newElement));
     }
@@ -341,8 +365,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildRpc(const ActsGeometryContext& gctx,
 }
 
 
-StatusCode MuonReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx,
-                                           ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     std::vector<const MuonGMR4::TgcReadoutElement*> tgcReadouts{m_detMgr->getAllTgcReadoutElements()};
     std::stable_sort(tgcReadouts.begin(), tgcReadouts.end(),
@@ -439,9 +462,10 @@ StatusCode MuonReadoutGeomCnvAlg::buildTgc(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
-GeoIntrusivePtr<GeoVFullPhysVol> MuonReadoutGeomCnvAlg::cloneNswWedge(const ActsGeometryContext& gctx,
-                                                                      const MuonGMR4::MuonReadoutElement* copyMe,
-                                                                      ConstructionCache& cacheObj) const {
+GeoIntrusivePtr<GeoVFullPhysVol> 
+            ReadoutGeomCnvAlg::cloneNswWedge(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::MuonReadoutElement* copyMe,
+                                             ConstructionCache& cacheObj) const {
     GeoIntrusivePtr<const GeoVFullPhysVol> readOutVol{copyMe->getMaterialGeom()};
     cacheObj.translatedStations.insert(readOutVol->getParent());
         
@@ -452,8 +476,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> MuonReadoutGeomCnvAlg::cloneNswWedge(const Acts
     cacheObj.world->add(physVol);
     return physVol;
 }
-StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
-                                          ConstructionCache& cacheObj) const {
+StatusCode ReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {
 
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mm);
     const auto alignStore = alignItr ?
@@ -507,8 +530,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMM(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
-                                             ConstructionCache& cacheObj) const{
+StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const{
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::sTgc);
     auto alignStore = alignItr ? static_cast<const sTgcAlignmentStore*>(alignItr->internalAlignment.get()) : nullptr;
 
@@ -610,8 +632,7 @@ StatusCode  MuonReadoutGeomCnvAlg::buildSTGC(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
-                                           ConstructionCache& cacheObj) const {    
+StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx, ConstructionCache& cacheObj) const {    
     /// Access the B-Line and As-built parameters
     SubDetAlignment alignItr = gctx.getStore(ActsTrk::DetectorType::Mdt);
     const MdtAlignmentStore* alignStore = alignItr ?
@@ -706,8 +727,8 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
-                                                     const MuonGM::MuonReadoutElement& testEle) const{
+StatusCode ReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadoutElement& refEle,
+                                                 const MuonGM::MuonReadoutElement& testEle) const{
     
     if (refEle.identify() != testEle.identify()) {
         ATH_MSG_FATAL("Two different elements are compared "
@@ -723,9 +744,9 @@ StatusCode MuonReadoutGeomCnvAlg::checkIdCompability(const MuonGMR4::MuonReadout
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::MmReadoutElement& refEle,
-                                                 const MuonGM::MMReadoutElement& testEle) const {
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::MmReadoutElement& refEle,
+                                             const MuonGM::MMReadoutElement& testEle) const {
 
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
@@ -771,9 +792,9 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::MdtReadoutElement& refEle,
-                                                 const MuonGM::MdtReadoutElement& testEle) const {
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::MdtReadoutElement& refEle,
+                                             const MuonGM::MdtReadoutElement& testEle) const {
     
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
@@ -828,9 +849,9 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
 
     return StatusCode::SUCCESS;
 }
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::RpcReadoutElement& refEle,
-                                                 const MuonGM::RpcReadoutElement& testEle) const {
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::RpcReadoutElement& refEle,
+                                             const MuonGM::RpcReadoutElement& testEle) const {
     
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
@@ -838,24 +859,27 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     ATH_CHECK(checkIdCompability(refEle, testEle));
 
     ATH_MSG_VERBOSE("Compare basic readout transforms"<<std::endl
-                <<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
-                <<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true));
+                 <<"  ref: "<<GeoTrf::toString(refEle.localToGlobalTrans(gctx), true)<<std::endl
+                 <<" test: "<<GeoTrf::toString(testEle.absTransform(),true)<<std::endl
+                 <<"delta: "<<GeoTrf::toString(testEle.absTransform().inverse()*refEle.localToGlobalTrans(gctx), true ));
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++gasGap) {
         for (int doubPhi = refEle.doubletPhi(); doubPhi <= refEle.doubletPhiMax(); ++doubPhi) {
             for (bool measPhi : {false, true}) {
+                if (measPhi && !refEle.nPhiStrips()) continue;
                 for (int strip = 1; strip <= testEle.Nstrips(measPhi); ++strip) {
                     const Identifier stripId = idHelper.channelID(refEle.identify(), 
-                                                                refEle.doubletZ(), 
-                                                                doubPhi, gasGap, measPhi, strip);
+                                                                  refEle.doubletZ(), 
+                                                                  doubPhi, gasGap, measPhi, strip);
                     
                     const Amg::Transform3D& refTrans{refEle.localToGlobalTrans(gctx, stripId)};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
-                    if (strip == 1 && Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
-                        ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<std::endl
-                            <<" *** ref:  "<<GeoTrf::toString(refTrans, true)<<std::endl
-                            <<" *** test: "<<GeoTrf::toString(testTrans, true));
-                            return StatusCode::FAILURE;
+                    if (strip == 1 && !Amg::doesNotDeform(refTrans.inverse()*testTrans)) {
+                        ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
+                            <<" *** ref:  "<<GeoTrf::toString(refTrans)<<std::endl
+                            <<" *** test: "<<GeoTrf::toString(testTrans)<<std::endl
+                            <<" -> delta: "<<GeoTrf::toString(refTrans.inverse()*testTrans));                            
+                        return StatusCode::FAILURE;
                     }
 
                     const Amg::Vector3D refStripPos = refEle.stripPosition(gctx, stripId);
@@ -871,21 +895,22 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
                     if ((refStripPos - testStripPos).mag() > 2e-4){
                         ATH_MSG_ERROR("Mismatch in strip positions "<<m_idHelperSvc->toString(stripId)
                                 <<" ref: "<<Amg::toString(refStripPos)<<" test: "<<Amg::toString(testStripPos)
-                                <<" local coordinates -- ref: "<<Amg::toString(testEle.absTransform().inverse()*refStripPos)
-                                <<" test: "<<Amg::toString(testEle.absTransform().inverse()*testStripPos));
+                                <<" local coordinates -- ref: "<<Amg::toString(refTrans.inverse()*refStripPos)
+                                <<" test: "<<Amg::toString(refTrans.inverse()*testStripPos));
                         return StatusCode::FAILURE;
                     }
                     ATH_MSG_VERBOSE("Agreement between new and old geometry for channel "<<m_idHelperSvc->toString(stripId)
-                                    <<" strip position "<<Amg::toString(refStripPos));
+                                    <<" strip position "<<Amg::toString(refStripPos)
+                                    <<", local: "<<Amg::toString(refTrans.inverse()*refStripPos));
                 }
             }
         }
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::TgcReadoutElement& refEle,
-                                                 const MuonGM::TgcReadoutElement& testEle) const {
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::TgcReadoutElement& refEle,
+                                             const MuonGM::TgcReadoutElement& testEle) const {
     
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
@@ -957,9 +982,9 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
-                                                 const MuonGMR4::sTgcReadoutElement& refEle,
-                                                 const MuonGM::sTgcReadoutElement& testEle) const {
+StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx,
+                                             const MuonGMR4::sTgcReadoutElement& refEle,
+                                             const MuonGM::sTgcReadoutElement& testEle) const {
     
     if (!m_checkGeo) {
         return StatusCode::SUCCESS;
@@ -1047,4 +1072,5 @@ StatusCode MuonReadoutGeomCnvAlg::dumpAndCompare(const ActsGeometryContext& gctx
         }
     }
     return StatusCode::SUCCESS;
+}
 }
