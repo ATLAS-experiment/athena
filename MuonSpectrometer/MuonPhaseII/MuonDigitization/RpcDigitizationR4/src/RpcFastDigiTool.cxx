@@ -49,17 +49,17 @@ namespace MuonR4 {
             RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
             if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
                 /// Standard digitization path
-                bool digitized = digitizeHit(hitId, false, readOutEle->getParameters().etaDesign, 
-                                             hitTime(simHit), locPos.x(), 
+                bool digitized = digitizeHit(hitId, false, *readOutEle, 
+                                             hitTime(simHit), locPos.block<2,1>(0,0), 
                                              efficiencyMap, *digiColl, rndEngine);
-                digitized |=  digitizeHit(hitId, true, readOutEle->getParameters().phiDesign,  
-                                          hitTime(simHit), locPos.y(),
+
+                digitized |=  digitizeHit(hitId, true, *readOutEle, hitTime(simHit),
+                                            Eigen::Rotation2D{90.*Gaudi::Units::deg}*locPos.block<2,1>(0,0),
                                           efficiencyMap, *digiColl, rndEngine);
                 if (digitized) {
                     addSDO(simHit, sdoContainer);
                 }
-            } else if (digitizeHit(hitId, readOutEle->getParameters().etaDesign, 
-                       hitTime(simHit), locPos.block<2,1>(0,0),
+            } else if (digitizeHitBI(hitId, *readOutEle, hitTime(simHit), locPos.block<2,1>(0,0),
                        efficiencyMap, *digiColl, rndEngine)) {
                 addSDO(simHit, sdoContainer);
             }
@@ -70,23 +70,20 @@ namespace MuonR4 {
     }   
     bool RpcFastDigiTool::digitizeHit(const Identifier& gasGapId,
                                       const bool measuresPhi,
-                                      const MuonGMR4::StripDesignPtr& designPtr,
+                                      const MuonGMR4::RpcReadoutElement& reEle,
                                       const double hitTime,
-                                      const double locPosOnStrip,
+                                      const Amg::Vector2D& locPos,
                                       const Muon::DigitEffiData* effiMap,
                                       RpcDigitCollection& outContainer,
                                       CLHEP::HepRandomEngine* rndEngine) const {
 
-        /// There're Rpc chambers without phi strips (BI)
-        if (!designPtr){
-            return false;
-        }
         ++(m_allHits[measuresPhi]);
-        const MuonGMR4::StripDesign& design{*designPtr};
+        const MuonGMR4::StripDesign& design{measuresPhi ? *reEle.getParameters().phiDesign
+                                                        : *reEle.getParameters().etaDesign};
 
         const double uncert = design.stripPitch() / std::sqrt(12.);
-        const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPosOnStrip, uncert);
-        const Amg::Vector2D locHitPos{smearedX * Amg::Vector2D::UnitX()};
+        const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
+        const Amg::Vector2D locHitPos{smearedX, locPos.y()};
 
         if (!design.insideTrapezoid(locHitPos)) {
             ATH_MSG_VERBOSE("The hit "<<Amg::toString(locHitPos)<<" is outside of the trapezoid bounds for "
@@ -121,20 +118,24 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Hit is marked as inefficient");
             return false;            
         }
-        outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime, timeOverThreshold(rndEngine)));
+        /// Correct for the signal propagation time
+        const double signalTime = hitTime + reEle.distanceToEdge(reEle.measurementHash(digitId),
+                                                                 locHitPos, EdgeSide::readOut) / m_propagationVelocity;
+        const double digitTime = CLHEP::RandGaussZiggurat::shoot(rndEngine, signalTime, m_stripTimeResolution);
+        outContainer.push_back(std::make_unique<RpcDigit>(digitId, digitTime, timeOverThreshold(rndEngine)));
         ++(m_acceptedHits[measuresPhi]);
         return true;
     }
-    bool RpcFastDigiTool::digitizeHit(const Identifier& gasGapId,
-                                      const MuonGMR4::StripDesignPtr& designPtr,
-                                      const double hitTime,
-                                      const Amg::Vector2D& locPos,
-                                      const Muon::DigitEffiData* effiMap,
-                                      RpcDigitCollection& outContainer,
-                                      CLHEP::HepRandomEngine* rndEngine) const {
+    bool RpcFastDigiTool::digitizeHitBI(const Identifier& gasGapId,
+                                        const MuonGMR4::RpcReadoutElement& reEle,
+                                        const double hitTime,
+                                        const Amg::Vector2D& locPos,
+                                        const Muon::DigitEffiData* effiMap,
+                                        RpcDigitCollection& outContainer,
+                                        CLHEP::HepRandomEngine* rndEngine) const {
         
         ++(m_allHits[false]);
-        const MuonGMR4::StripDesign& design{*designPtr};
+        const MuonGMR4::StripDesign& design{*reEle.getParameters().etaDesign};
         const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
 
 
@@ -143,17 +144,10 @@ namespace MuonR4 {
         const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locPos.x(), uncert);
 
         /// Smear the Phi Coordinate
-        const double stripLength = design.stripLength(1); // in mm, assuming lenLeftEdge() == lenRightEdge() i.e. rectangular strip
-
-        // Distance in mm along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
-        const double stripLeft = -(stripLength / 2);     
-        const double stripRight = (stripLength / 2);     
-        const double distToL = std::abs(stripLeft  - locPos.y());  
-        const double distToR = std::abs(stripRight - locPos.y()); 
-    
         // True propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
-        const double propagationTimeL = distToL / m_propagationVelocity; 
-        const double propagationTimeR = distToR / m_propagationVelocity; 
+        const IdentifierHash layHash = reEle.measurementHash(gasGapId);
+        const double propagationTimeL = reEle.distanceToEdge(layHash, locPos, EdgeSide::readOut)    / m_propagationVelocity; 
+        const double propagationTimeR = reEle.distanceToEdge(layHash, locPos, EdgeSide::highVoltage)/ m_propagationVelocity; 
 
         /// Smeared propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
         const double smearedTimeL = CLHEP::RandGaussZiggurat::shoot(rndEngine, propagationTimeL, m_stripTimeResolution); 
