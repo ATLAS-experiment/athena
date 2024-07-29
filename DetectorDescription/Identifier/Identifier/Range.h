@@ -585,7 +585,7 @@ Range::field::get_value_at (size_type index) const
 { 
     // Only both_bounded and enumerated are valid to calculate the
     // value.
-    // both_bounded if the more frequent case and so comes first.
+    // both_bounded is the more frequent case and so comes first.
 
     if (both_bounded == m_mode) {
         if (index >= (size_type) (m_maximum - m_minimum + 1)) {
