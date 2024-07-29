@@ -44,6 +44,7 @@ namespace MuonGMR4 {
     inline int RpcReadoutElement::doubletPhiMax() const {return std::max(nPhiPanels(), doubletPhi()); }
     inline unsigned int RpcReadoutElement::nEtaStrips() const { return (m_pars.etaDesign ? m_pars.etaDesign->numStrips(): 0u); }
     inline unsigned int RpcReadoutElement::nPhiStrips() const { return (m_pars.phiDesign ? m_pars.phiDesign->numStrips(): 0u); }
+    inline unsigned int RpcReadoutElement::nStrips(const IdentifierHash& hash) const { return measuresPhi(hash) ? nPhiStrips() : nEtaStrips(); }
     inline double RpcReadoutElement::stripEtaPitch() const { return (m_pars.etaDesign ? m_pars.etaDesign->stripPitch() : 0.); }
     inline double RpcReadoutElement::stripPhiPitch() const { return (m_pars.phiDesign ? m_pars.phiDesign->stripPitch() : 0.); }
     inline double RpcReadoutElement::stripEtaWidth() const { return (m_pars.etaDesign ? m_pars.etaDesign->stripWidth() : 0.); }

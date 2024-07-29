@@ -8,6 +8,7 @@
 #include "MuonDigitizationR4/MuonDigitizationTool.h"
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonCondData/DigitEffiData.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -24,7 +25,8 @@ namespace MuonR4{
                                 xAOD::MuonSimHitContainer* sdoContainer) const override final; 
         
  
-        private:            
+        private:
+            using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;            
             int m_stIdxBIL{-1}; // Station name index of the BIL stations
             
             /**  @brief Digitize the sim hit as Rpc strip 1D hit.  
@@ -38,13 +40,13 @@ namespace MuonR4{
              *   @param rndEngine:  Random engine used for smearing
             */
             bool digitizeHit(const Identifier& gasGapId,
-                            const bool measuresPhi,
-                            const MuonGMR4::StripDesignPtr& designPtr,
-                            const double hitTime,
-                            const double locPos,
-                            const Muon::DigitEffiData* effiMap,
-                            RpcDigitCollection& outContainer,
-                            CLHEP::HepRandomEngine* rndEngine) const;
+                             const bool measuresPhi,
+                             const MuonGMR4::RpcReadoutElement& reEle,
+                             const double hitTime,
+                             const Amg::Vector2D& locPos,
+                             const Muon::DigitEffiData* effiMap,
+                             RpcDigitCollection& outContainer,
+                             CLHEP::HepRandomEngine* rndEngine) const;
             
             /**  @brief Digitize the sim hit as Rpc strip 2D hit.  
              *   @param gasGapId: Identifier of the associated gasGap
@@ -55,13 +57,13 @@ namespace MuonR4{
              *   @param outContainer: DigitCollection to push the new digit into
              *   @param rndEngine:  Random engine used for smearing
             */
-            bool digitizeHit(const Identifier& gasGapId,
-                            const MuonGMR4::StripDesignPtr& designPtr,
-                            const double hitTime,
-                            const Amg::Vector2D& locPos,
-                            const Muon::DigitEffiData* effiMap,
-                            RpcDigitCollection& outContainer,
-                            CLHEP::HepRandomEngine* rndEngine) const;
+            bool digitizeHitBI(const Identifier& gasGapId,
+                               const MuonGMR4::RpcReadoutElement& reEle,
+                               const double hitTime,
+                               const Amg::Vector2D& locPos,
+                               const Muon::DigitEffiData* effiMap,
+                               RpcDigitCollection& outContainer,
+                               CLHEP::HepRandomEngine* rndEngine) const;
 
             /** @brief Roll the time over threshold for each signal digit */
             static double timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) ;

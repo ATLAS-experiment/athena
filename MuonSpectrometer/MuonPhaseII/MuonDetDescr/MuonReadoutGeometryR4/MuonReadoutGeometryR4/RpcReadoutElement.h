@@ -75,6 +75,8 @@ class RpcReadoutElement : public MuonReadoutElement {
     unsigned int nEtaStrips() const;
     /// Number of strips measuring the phi coordinate
     unsigned int nPhiStrips() const;
+    /// Returns the number of strips
+    unsigned int nStrips(const IdentifierHash& hash) const;
 
     /// Strip pitch in eta
     double stripEtaPitch() const;
@@ -101,8 +103,19 @@ class RpcReadoutElement : public MuonReadoutElement {
     /// Returns the global posiition of the strip edge at positive local Y
     Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
     Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
-    
 
+    enum class EdgeSide{
+        readOut,
+        highVoltage,
+    };
+    /** @brief Returns the disance to the readout
+     *  @param layerHash: Hash of the considered gasGap (Essentially whether it's the phi or eta gasGap)
+     *  @param posInStripPlane: Local position of the crossing point on the plane (In gasGap frame)
+     *  @param side: Switch indicating whether the readout or the highVoltage side is targeted. 
+     */
+    double distanceToEdge(const IdentifierHash& layerHash, 
+                          const Amg::Vector2D& posInStripPlane,
+                          const EdgeSide side) const;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to
