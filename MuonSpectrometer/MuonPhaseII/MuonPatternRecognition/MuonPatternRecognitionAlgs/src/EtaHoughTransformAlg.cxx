@@ -88,11 +88,30 @@ StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
                                 (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
         Amg::Vector3D rightSide = hs.bucket->chamber()->globalToLocalTrans(gctx).translation() -
                                  (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
-        const double tanThetaLeft = leftSide.y() / leftSide.z();
-        const double tanThetaRight = rightSide.y() / rightSide.z();
+
+        // get the average z of our hits and use it to correct our angle estimate
+        double z = std::accumulate(sp->begin(), sp->end(), 0., [](double val, const  std::shared_ptr<MuonR4::SpacePoint> & sp){
+            return val + sp->positionInChamber().z(); 
+        }); 
+        z /= static_cast<double>(sp->size()); 
+
+        // estimate the angle, adding extra tolerance based on our target resolution
+        const double tanThetaLeft = (leftSide.y() -  m_targetResoIntercept) / (leftSide.z() - z) - m_targetResoTanTheta;
+        const double tanThetaRight = (rightSide.y() + m_targetResoIntercept) /( rightSide.z() - z) + m_targetResoTanTheta;
         hs.searchWindowTanAngle = {tanThetaLeft, tanThetaRight};
-        hs.searchWindowIntercept = {hs.bucket->coveredMin(),
-                                    hs.bucket->coveredMax()};
+        double y1=1e9,y2=-1e9; 
+
+        /// Project the hits onto the center (z=0) axis of the chamber, using 
+        /// our guesstimate of tan(theta) 
+        for (auto & hit : *sp){
+            // two estimates: For the two extrema of tan(theta) resulting from the guesstimate
+            double y0l = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaLeft - m_targetResoIntercept;
+            double y0r = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaRight+ m_targetResoIntercept;
+            // pick the widest envelope
+            y1=std::min(y1, std::min(y0l, y0r)); 
+            y2=std::max(y2, std::max(y0l, y0r)); 
+        }
+        hs.searchWindowIntercept = {y1, y2};
     }
     return StatusCode::SUCCESS;
 }
@@ -103,7 +122,7 @@ StatusCode EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     cfg.nBinsY = m_nBinsIntercept;
     ActsPeakFinderForMuonCfg peakFinderCfg;
     peakFinderCfg.fractionCutoff = 0.6;
-    peakFinderCfg.threshold = 3;
+    peakFinderCfg.threshold = 2.5;
     peakFinderCfg.minSpacingBetweenPeaks = {0., 30.};
     data.houghPlane = std::make_unique<HoughPlane>(cfg);
     data.peakFinder = std::make_unique<ActsPeakFinderForMuon>(peakFinderCfg);
@@ -145,6 +164,7 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
 
     data.currAxisRanges = Acts::HoughTransformUtils::HoughAxisRanges{
         searchStartTanTheta, searchEndTanTheta, searchStart, searchEnd};
+
     data.houghPlane->reset();
     for (const SpacePointBucket::value_type& hit : *(bucket.bucket)) {
         fillFromSpacePoint(data, hit.get());
@@ -152,6 +172,23 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     auto maxima =
         data.peakFinder->findPeaks(*(data.houghPlane), data.currAxisRanges);
     if (maxima.empty()) {
+        ATH_MSG_DEBUG("Station "<<bucket.bucket->chamber()->stationName() 
+            <<" eta "<<bucket.bucket->chamber()->stationEta()
+            <<" "<<bucket.bucket->chamber()->stationPhi()
+            <<":\n     Mean tanTheta was "<<tanThetaMean 
+            << " and my intercept "<<chamberCenter 
+            <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 
+            <<" - "<<bucket.bucket->coveredMax() 
+            <<". The bucket found a search range of ("
+            <<bucket.searchWindowTanAngle.first<<" - "
+            <<bucket.searchWindowTanAngle.second<<") and ("
+            <<bucket.searchWindowIntercept.first<<" - "
+            <<bucket.searchWindowIntercept.second 
+            <<") , and my final search range is ["
+            <<searchStartTanTheta<<" - "<<searchEndTanTheta
+            <<"] and ["<<searchStart<<" - "<<searchEnd
+            <<"] with "<<m_nBinsTanTheta<<" and "
+            <<m_nBinsIntercept<<" bins.");  
         return StatusCode::SUCCESS;
     }
     for (const auto& max : maxima) {
@@ -167,17 +204,23 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     return StatusCode::SUCCESS;
 }
 void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughHitType& SP) const {
+    using namespace std::placeholders; 
+    double w = 1.0; 
+    // downweight RPC measurements in the barrel relative to MDT  
+    if (SP->primaryMeasurement()->type() == xAOD::UncalibMeasType::RpcStripType){
+        w = 0.5; 
+    }
     if (SP->primaryMeasurement()->type() ==
         xAOD::UncalibMeasType::MdtDriftCircleType) {
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
-                                            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2, m_targetResoIntercept), SP, 0, w);
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
-                                            HoughHelpers::Eta::houghWidthMdt, SP, 0, 1.0);
+                                            std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2, m_targetResoIntercept), SP, 0, w);
     } else {
         if (SP->measuresEta()) {
             data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamStrip,
-                                                HoughHelpers::Eta::houghWidthStrip, SP, 0, 
-                                                m_downWeightMultiplePrd ? 1.0 / SP->nEtaInstanceCounts() : 1.);
+                                                std::bind(HoughHelpers::Eta::houghWidthStrip, _1, _2, m_targetResoIntercept), SP, 0, w * (
+                                                m_downWeightMultiplePrd ? 1.0 / SP->nEtaInstanceCounts() : 1.));
         }
     }
 }

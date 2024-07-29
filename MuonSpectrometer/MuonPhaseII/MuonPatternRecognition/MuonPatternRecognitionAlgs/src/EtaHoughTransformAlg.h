@@ -78,19 +78,19 @@ namespace MuonR4{
             void extendWithPhiHits(std::vector<HoughHitType> & hitList, HoughSetupForBucket& bucket) const ;  
 
             // target resolution in the angle
-            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.02};
+            DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.03};
             // target resolution in the y intercept
             DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
             // minimum search window half width, tan(theta) 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 3.};
+            DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 1.0};
             // minimum search window half width, intercept 
             // - in multiples of the target resolution
-            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 3.};
+            DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 1.0};
             // number of accumulator bins for the angle 
-            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 20};
+            IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 5};
             // number of accumulator bins for the intercept 
-            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 200};
+            IntegerProperty m_nBinsIntercept{this, "nBinsIntercept", 10};
             // Flag to steer whether space points shall be downweighted according to their instance
             // multiplicity of the phi measurement such that it effectively contributes with weight 1
             BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};

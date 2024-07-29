@@ -18,14 +18,14 @@ using namespace MuonR4;
     return strip->positionInChamber().y() - tanTheta * strip->positionInChamber().z();
   }
 
-  double HoughHelpers::Eta::houghWidthMdt(double /*tanTheta*/, const MuonR4::HoughHitType & DC){
-    return std::min(DC->uncertainty().y() * 3.,
-                    1.0);  // scale reported errors up to at least 1mm or 3
+  double HoughHelpers::Eta::houghWidthMdt(double /*tanTheta*/, const MuonR4::HoughHitType & DC, double targetReso){
+    return std::max(DC->uncertainty().y() * 3.,
+                    targetReso);  // scale reported errors up to at least 1mm or 3
                            // times the reported error as drift circle calib not
                            // fully reliable at this stage
   }
-  double HoughHelpers::Eta::houghWidthStrip(double /*tanTheta*/, const MuonR4::HoughHitType & strip){
-      return 3 * strip->uncertainty().y() * ((strip->primaryMeasurement()->type() == xAOD::UncalibMeasType::TgcStripType && !strip->measuresPhi()) ? 1.5 : 1.0);  // return positional uncertainty defined during SP creation
+  double HoughHelpers::Eta::houghWidthStrip(double /*tanTheta*/, const MuonR4::HoughHitType & strip, double targetReso){
+      return std::max(targetReso, 3 * strip->uncertainty().y() * ((strip->primaryMeasurement()->type() == xAOD::UncalibMeasType::TgcStripType && !strip->measuresPhi()) ? 1.5 : 1.0));  // return positional uncertainty defined during SP creation
   }
 
   double HoughHelpers::Phi::houghParamStrip(double tanPhi, const MuonR4::HoughHitType & strip){

@@ -148,6 +148,7 @@ namespace MuonValR4 {
         m_out_gen_tanphi = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
+        ATH_MSG_DEBUG("A true max on "<<m_out_stationName.getVariable()<<" eta "<<m_out_stationEta.getVariable()<<" phi "<<m_out_stationPhi.getVariable()<<" with "<<m_out_gen_nMDTHits.getVariable()<<" MDT and "<<m_out_gen_nRPCHits.getVariable()+m_out_gen_nTGCHits.getVariable()<< " trigger hits is at "<<m_out_gen_tantheta.getVariable()<<" and "<<m_out_gen_y0.getVariable()); 
     }
     void MuonHoughTransformTester::fillSeedInfo(const MuonR4::SegmentSeed* foundMax, 
                                                 double matchProb) {

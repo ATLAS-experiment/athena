@@ -37,13 +37,13 @@ namespace MuonR4{
             /// @param dc the drift circle (expressed as a space point)
             /// @return the uncertainty on the y offset - calculated from an inflated 
             /// drift circle error and a baseline uncertainty to account for the not fully known t0
-            double houghWidthMdt(double tanTheta, const MuonR4::HoughHitType & dc); 
+            double houghWidthMdt(double tanTheta, const MuonR4::HoughHitType & dc, double targetReso); 
 
             /// @brief Uncertainty parametrisation for strip measurements
             /// @param tanTheta: the input inclination angle (not used) 
             /// @param strip: the strip measurement (expressed as a space point) 
             /// @return the uncertainty on the y offset - based on the strip pitch 
-            double houghWidthStrip(double tanTheta, const MuonR4::HoughHitType & strip);
+            double houghWidthStrip(double tanTheta, const MuonR4::HoughHitType & strip, double targetReso);
         }
         namespace Phi{
             /// @brief straight line parametrisation for strip detector measurements, in the x-direction 
