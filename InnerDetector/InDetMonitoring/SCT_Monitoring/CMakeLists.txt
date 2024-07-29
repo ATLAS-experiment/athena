@@ -7,11 +7,18 @@ atlas_subdir( SCT_Monitoring )
 find_package( ROOT COMPONENTS Core Hist )
 
 # Component(s) in the package:
+atlas_add_library( SCT_MonitoringLib
+                   SCT_Monitoring/*.h
+                   INTERFACE
+                   PUBLIC_HEADERS SCT_Monitoring
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} )
+
 atlas_add_component( SCT_Monitoring
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib CommissionEvent GaudiKernel Identifier InDetConditionsSummaryService InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetRawData InDetReadoutGeometry LumiBlockData MagFieldConditions MagFieldElements SCT_ConditionsToolsLib SCT_ReadoutGeometry StoreGateLib TrkEventUtils TrkMeasurementBase TrkParameters TrkRIO_OnTrack TrkSpacePoint TrkSurfaces TrkToolInterfaces TrkTrack TrkTrackSummary xAODEventInfo )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib CommissionEvent GaudiKernel Identifier InDetConditionsSummaryService InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetRawData InDetReadoutGeometry LumiBlockData MagFieldConditions MagFieldElements SCT_ConditionsToolsLib SCT_MonitoringLib SCT_ReadoutGeometry StoreGateLib TrkEventUtils TrkMeasurementBase TrkParameters TrkRIO_OnTrack TrkSpacePoint TrkSurfaces TrkToolInterfaces TrkTrack TrkTrackSummary xAODEventInfo )
 
 atlas_add_dictionary( SCT_MonitoringDict
                       SCT_Monitoring/SCT_MonitoringDict.h
