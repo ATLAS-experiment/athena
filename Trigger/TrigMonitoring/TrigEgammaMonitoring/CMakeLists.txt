@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigEgammaMonitoring )
@@ -18,6 +18,11 @@ atlas_add_component( TrigEgammaMonitoring
                      TrigEgammaEmulationToolLib xAODBase xAODEgamma xAODEventInfo xAODJet
                      xAODMissingET xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigger 
                      xAODTruth egammaRecEvent LArRecEvent)
+
+# Suppress spurious warnings seen in the LTO build originating 
+# in the boost parser code.
+set_target_properties( TrigEgammaMonitoring
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
