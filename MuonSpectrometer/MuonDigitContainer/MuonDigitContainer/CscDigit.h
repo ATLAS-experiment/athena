@@ -45,7 +45,7 @@ public:
   /** in new EDM, it's obsolete (return 0)  **/ 
   float time() const { return m_time; }
 
-  const std::vector<float>  sampleCharges() const { return m_sampleCharges; }
+  const std::vector<float>&  sampleCharges() const { return m_sampleCharges; }
   
 };
 
