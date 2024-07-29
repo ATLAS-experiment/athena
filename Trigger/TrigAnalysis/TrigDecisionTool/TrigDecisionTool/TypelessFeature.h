@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGDECISIONTOOL_TYPELESSFEATURE_H
@@ -19,11 +19,11 @@ namespace Trig{
    **/
   class TypelessFeature {
   public:
-    TypelessFeature(const HLT::TriggerElement::FeatureAccessHelper accessor, const HLT::TriggerElement* te, const std::string& label) : m_accessor(accessor), m_te(te), m_label(label) {;}
+    TypelessFeature(const HLT::TriggerElement::FeatureAccessHelper& accessor, const HLT::TriggerElement* te, const std::string& label) : m_accessor(accessor), m_te(te), m_label(label) {;}
     virtual ~TypelessFeature(){;}
-    const HLT::TriggerElement::FeatureAccessHelper accessHelper() const {return m_accessor;}
+    const HLT::TriggerElement::FeatureAccessHelper& accessHelper() const {return m_accessor;}
     const HLT::TriggerElement* te() const {return m_te;}
-    const std::string label() const {return m_label;}
+    const std::string& label() const {return m_label;}
   private:
     const HLT::TriggerElement::FeatureAccessHelper m_accessor;
     const HLT::TriggerElement*  m_te;
