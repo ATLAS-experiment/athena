@@ -17,6 +17,7 @@ namespace FlavorTagDiscriminants {
     t.declareProperty("trackLinkType", props->trackLinkType,
       "access tracks as IParticleContainer or as TrackParticleContainer");
     t.declareProperty("defaultOutputValue", props->default_output_value);
+    t.declareProperty("defaultOutputValues", props->default_output_values);
   }
 
   GNNOptions getOptions(const GNNToolProperties& props) {
@@ -29,6 +30,9 @@ namespace FlavorTagDiscriminants {
       opts.track_link_type = trackLinkTypeFromString(props.trackLinkType);
     }
     opts.default_output_value = props.default_output_value;
+    for (auto [k, v]: props.default_output_values) {
+      opts.default_output_values.emplace(k, v);
+    }
     return opts;
   }
 

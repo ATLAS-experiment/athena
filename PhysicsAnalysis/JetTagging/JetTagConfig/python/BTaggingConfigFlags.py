@@ -151,4 +151,10 @@ def createBTaggingConfigFlags():
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
 
+    # In some cases we have to make the GNN refuse to tag jets unless
+    # they have at least this many tracks. See AFT-726 for more details.
+    #
+    # Todo: set this to 1
+    btagcf.addFlag("BTagging.minTracksForAFT726Workaround", 0)
+
     return btagcf

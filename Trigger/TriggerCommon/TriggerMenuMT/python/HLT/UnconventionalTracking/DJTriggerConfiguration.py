@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import (parOR)
+from AthenaCommon.CFElements import (parOR,seqAND)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -59,7 +59,7 @@ def DJDispFragment(flags):
     reco = InViewRecoCA("DJRoIFTF", im_alg)
     
     acc = ComponentAccumulator()
-    reco_seq = parOR('UncTrkrecoSeqDJTrigDispRecoSeq')
+    reco_seq = seqAND('UncTrkrecoSeqDJTrigDispRecoSeq')
     acc.addSequence(reco_seq)
 
     flagsWithTrk = cloneFlagsToActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.input_name)

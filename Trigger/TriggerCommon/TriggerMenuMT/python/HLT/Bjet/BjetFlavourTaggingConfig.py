@@ -22,7 +22,7 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
     acc = ComponentAccumulator()
 
     acc.merge(JetTagCalibCfg(flags))
-    
+
     #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
         flags,
@@ -71,7 +71,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     ca = ComponentAccumulator()
 
     ca.merge(JetTagCalibCfg(flags))
-    
+
     # first add the track augmentation
     jet_name = inputJets
     if isPFlow:
@@ -217,6 +217,17 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # can ignore some of them.
     missingKeys = getStaticTrackVars(inputTracks)
 
+    # optionally avoid cases with zero tracks
+    nonzero_tracks = 'nonzeroTracks'
+    ca.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.CountIParticleAlg(
+            f'CountTrackParticleAlg{jet_name}',
+            links=f'{jet_name}.{tracksOnJetDecoratorName}',
+            minimumLinks=flags.BTagging.minTracksForAFT726Workaround,
+            flag=f'{jet_name}.{nonzero_tracks}',
+        )
+    )
+
     for nnFile, variableRemapping in dl2_configs:
         nnAlgo = nnFile.replace('/','_').split('.')
         nnAlgoKey = nnAlgo[0]
@@ -225,6 +236,9 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             "json": CompFactory.FlavorTagDiscriminants.DL2Tool,
             "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
         }
+        tag_flags = {pass_flag}
+        if nnAlgoext == 'onnx':
+            tag_flags.add(nonzero_tracks)
         ca.addEventAlgo(
             CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
                 name='_'.join([
@@ -236,7 +250,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                 container=jet_name,
                 constituentContainer=inputTracks,
                 undeclaredReadDecorKeys=missingKeys,
-                tagFlag=pass_flag,
+                tagFlags=list(tag_flags),
                 decorator=toolDict[nnAlgoext](
                     name='_'.join([
                         'simpleDipsToJet',

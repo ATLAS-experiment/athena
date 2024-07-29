@@ -2,8 +2,13 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
+
 from os.path import commonpath
 from pathlib import PurePath
+from warnings import warn
+
 
 def addAndReturnSharingSvc(flags, ca):
     svc = CompFactory.FlavorTagDiscriminants.NNSharingSvc('FTagNNSharingSvc')
@@ -131,6 +136,9 @@ def getUndeclaredBtagVars(BTaggingCollection):
     ]
     return [f'{BTaggingCollection}.{x}' for x in undeclared_btag]
 
+# name of a flag we use in a few places
+NONZERO_TRACKS = 'nonzeroTracks'
+
 def FlavorTagNNCfg(
         flags,
         BTaggingCollection,
@@ -138,6 +146,10 @@ def FlavorTagNNCfg(
         NNFile,
         FlipConfig="STANDARD",
         variableRemapping={}):
+
+    FTD = CompFactory.FlavorTagDiscriminants
+    alg = FTD.BTagDecoratorAlg
+    alg_args = {}
 
     acc = ComponentAccumulator()
 
@@ -152,6 +164,17 @@ def FlavorTagNNCfg(
     elif NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
         decorator = acc.popToolsAndMerge(GNNToolCfg(flags, **nn_opts))
+        acc.addEventAlgo(
+            FTD.CountTrackParticleAlg(
+                f'CountTrackParticleAlg{BTaggingCollection}',
+                links=f'{BTaggingCollection}.BTagTrackToJetAssociator',
+                minimumLinks=flags.BTagging.minTracksForAFT726Workaround,
+                flag=f'{BTaggingCollection}.{NONZERO_TRACKS}',
+            )
+        )
+        alg = FTD.BTagConditionalDecoratorAlg
+        alg_args = dict(tagFlag=NONZERO_TRACKS)
+
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
@@ -164,12 +187,13 @@ def FlavorTagNNCfg(
     veto_list = getStaticTrackVars(TrackCollection)
     veto_list += getUndeclaredBtagVars(BTaggingCollection)
 
-    decorAlg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(
+    decorAlg = alg(
         name=name,
         container=BTaggingCollection,
         constituentContainer=TrackCollection,
         decorator=decorator,
         undeclaredReadDecorKeys=veto_list,
+        **alg_args,
     )
 
     # -- create the association algorithm
@@ -180,41 +204,103 @@ def FlavorTagNNCfg(
 
 def MultifoldGNNCfg(
         flags,
-        BTaggingCollection,
-        TrackCollection,
+        BTaggingCollection=None,
+        TrackCollection=None,
         FlipConfig="STANDARD",
         nnFilePaths=None,
         remapping={},
-        useBTaggingObject=True,
-        JetCollection=None
+        useBTaggingObject=None,
+        JetCollection=None,
+        conditions=set(),
+        defaultOutputValues={},
 ):
     if nnFilePaths is None:
         raise ValueError('nnFilePaths must be specified')
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = f'{nn_name}_{FlipConfig}'
+
+    if TrackCollection is None:
+        raise ValueError('TrackCollection must be specified')
+
     veto_list = getStaticTrackVars(TrackCollection)
+
     acc = ComponentAccumulator()
 
-    if useBTaggingObject:
-        Alg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg
+    if JetCollection is not None:
+        acc.merge(
+            FoldDecoratorCfg(
+                flags,
+                jetCollection=JetCollection
+            )
+        )
+
+    tp_assoc = 'BTagTrackToJetAssociator'
+    ip_assoc = 'TracksForBTagging'
+    tag_flag = NONZERO_TRACKS
+    min_links = flags.BTagging.minTracksForAFT726Workaround
+
+    FTD = CompFactory.FlavorTagDiscriminants
+
+    if BTaggingCollection is not None:
+        if conditions:
+            Alg = FTD.BTagConditionalDecoratorAlg
+            if len(conditions) > 1:
+                raise ValueError(f'{conditions=} must have size 0 or 1')
+            alg_args = dict(tagFlag=next(iter(conditions)))
+        else:
+            Alg = FTD.BTagDecoratorAlg
+            alg_args = {}
+        if tag_flag in conditions:
+            remapped_tp = remapping.get(tp_assoc, tp_assoc)
+            acc.addEventAlgo(
+                FTD.CountTrackParticleAlg(
+                    f'CountTrackParticleAlg{BTaggingCollection}',
+                    links=f'{BTaggingCollection}.{remapped_tp}',
+                    minimumLinks=min_links,
+                    flag=f'{BTaggingCollection}.{tag_flag}',
+                )
+            )
         trackLinkType = 'TRACK_PARTICLE'
         veto_list += getUndeclaredBtagVars(BTaggingCollection)
         container = BTaggingCollection
-    else:
-        if JetCollection is None:
-            raise ValueError('JetCollection must be specified if useBTaggingObject is set to False')
-        Alg = CompFactory.FlavorTagDiscriminants.JetTagDecoratorAlg
+    elif JetCollection is not None:
+        remapping.setdefault(tp_assoc, ip_assoc)
+        if conditions:
+            Alg = FTD.JetTagConditionalDecoratorAlg
+            alg_args = dict(tagFlags=list(conditions))
+        else:
+            Alg = FTD.JetTagDecoratorAlg
+            alg_args = {}
+        if tag_flag in conditions:
+            acc.addEventAlgo(
+                FTD.CountIParticleAlg(
+                    f'CountTrackParticleAlg{JetCollection}',
+                    links=f'{JetCollection}.{remapping[tp_assoc]}',
+                    minimumLinks=min_links,
+                    flag=f'{JetCollection}.{tag_flag}',
+                )
+            )
         trackLinkType = 'IPARTICLE'
         algname += '_Jet'
         container = JetCollection
+    else:
+        raise ValueError(
+            'b-tagging or jet collection is required,'
+            f' {BTaggingCollection=}, {JetCollection=}' )
+
+    # we don't remove this outright because it will complicate
+    # sweeping between branches.
+    if useBTaggingObject is not None:
+        warn(f'the option {useBTaggingObject=} is deprecated', stacklevel=2)
+
 
     acc.addEventAlgo(
         Alg(
             name=algname,
             container=container,
             constituentContainer=TrackCollection,
-            decorator=CompFactory.FlavorTagDiscriminants.MultifoldGNNTool(
+            decorator=FTD.MultifoldGNNTool(
                 name=f'{algname}_tool',
                 foldHashName='jetFoldHash',
                 nnFiles=nnFilePaths,
@@ -222,8 +308,10 @@ def MultifoldGNNCfg(
                 variableRemapping=remapping,
                 nnSharingService=addAndReturnSharingSvc(flags, acc),
                 trackLinkType=trackLinkType,
+                defaultOutputValues=defaultOutputValues,
             ),
             undeclaredReadDecorKeys=veto_list,
+            **alg_args
         )
     )
 

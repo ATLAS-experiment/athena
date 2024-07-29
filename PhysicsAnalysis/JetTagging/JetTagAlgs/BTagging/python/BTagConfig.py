@@ -391,9 +391,21 @@ def BTagAlgsCfg(
             BTaggingCollection=BTagCollection,
             TrackCollection=trackCollection,
             nnFilePaths=networks['folds'],
-            remapping=networks.get('remapping', {})
+            remapping=networks.get('remapping', {}),
         )
-        
+
+        # disable GN2v01 if there are 0 tracks
+        if '/GN2v01/' in dirname:
+            args['conditions'] = {'nonzeroTracks'}
+            # TODO: choose something closer to the actual zero track
+            # output
+            args['defaultOutputValues'] = {
+                'GN2v01_pu': 1.0,
+                'GN2v01_pc': 0.0,
+                'GN2v01_pb': 0.0,
+                'GN2v01_ptau': 0.0,
+            }
+
         # run the standard (unflipped tagger)
         result.merge(MultifoldGNNCfg(**args))
 
