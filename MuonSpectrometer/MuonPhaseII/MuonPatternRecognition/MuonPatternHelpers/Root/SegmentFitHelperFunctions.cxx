@@ -31,7 +31,7 @@ double SegmentFitHelpers::segmentChiSquare(const double* par, const std::vector<
     size_t iHit{0u},nPhi{0u}; 
     for (auto & hit : hits){
         double localchi2 = 0; 
-        switch (hit->primaryMeasurement()->type()){
+        switch (hit->type()){
             case xAOD::UncalibMeasType::MdtDriftCircleType: 
                 localchi2 = SegmentFitHelpers::chiSqTermMdt(y0,tanTheta, hit);
                 ++nDF; 

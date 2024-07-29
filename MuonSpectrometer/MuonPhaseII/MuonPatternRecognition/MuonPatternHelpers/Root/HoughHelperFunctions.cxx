@@ -25,7 +25,7 @@ using namespace MuonR4;
                            // fully reliable at this stage
   }
   double HoughHelpers::Eta::houghWidthStrip(double /*tanTheta*/, const MuonR4::HoughHitType & strip, double targetReso){
-      return std::max(targetReso, 3 * strip->uncertainty().y() * ((strip->primaryMeasurement()->type() == xAOD::UncalibMeasType::TgcStripType && !strip->measuresPhi()) ? 1.5 : 1.0));  // return positional uncertainty defined during SP creation
+      return std::max(targetReso, 3 * strip->uncertainty().y() * ((strip->type() == xAOD::UncalibMeasType::TgcStripType && !strip->measuresPhi()) ? 1.5 : 1.0));  // return positional uncertainty defined during SP creation
   }
 
   double HoughHelpers::Phi::houghParamStrip(double tanPhi, const MuonR4::HoughHitType & strip){

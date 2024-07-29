@@ -204,14 +204,14 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     return StatusCode::SUCCESS;
 }
 void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughHitType& SP) const {
+
     using namespace std::placeholders; 
     double w = 1.0; 
     // downweight RPC measurements in the barrel relative to MDT  
     if (SP->primaryMeasurement()->type() == xAOD::UncalibMeasType::RpcStripType){
         w = 0.5; 
     }
-    if (SP->primaryMeasurement()->type() ==
-        xAOD::UncalibMeasType::MdtDriftCircleType) {
+    if (SP->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtLeft,
                                             std::bind(HoughHelpers::Eta::houghWidthMdt, _1, _2, m_targetResoIntercept), SP, 0, w);
         data.houghPlane->fill<HoughHitType>(SP, data.currAxisRanges, HoughHelpers::Eta::houghParamMdtRight,
