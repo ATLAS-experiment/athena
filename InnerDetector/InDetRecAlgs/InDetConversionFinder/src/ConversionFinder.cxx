@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -21,24 +21,12 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexAuxContainer.h"
 
-#include "egammaInterfaces/IEMExtrapolationTools.h"
-
 
 namespace InDet
 {
   ConversionFinder::ConversionFinder(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-  m_tracksName("InDetTrackParticles"),
-  m_InDetConversionOutputName("InDetConversion"),
-  m_EMExtrapolationTool("EMExtrapolationTools"),
-  m_doExtrapolation(false)
-  {
-    /* Retrieve StoreGate container and tool names from job options */
-    declareProperty("TracksName",m_tracksName);
-    declareProperty("InDetConversionOutputName", m_InDetConversionOutputName);
-    declareProperty("ExtrapolationTool", m_EMExtrapolationTool, "Handle of the extrapolation tool");
-    declareProperty("doExtrapolation", m_doExtrapolation );
-	}
+  : AthAlgorithm(name, pSvcLocator)
+  {}
 
   ConversionFinder::~ConversionFinder()= default;
 
@@ -46,7 +34,7 @@ namespace InDet
   {
     ATH_CHECK( m_VertexFinderTool.retrieve() );
 
-    m_doExtrapolation &= !m_EMExtrapolationTool.name().empty();
+    m_doExtrapolation.value() &= !m_EMExtrapolationTool.name().empty();
     ATH_CHECK( m_EMExtrapolationTool.retrieve( EnableTool {m_doExtrapolation} ) );
 
     ATH_CHECK( m_tracksName.initialize() );

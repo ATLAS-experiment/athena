@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -58,33 +58,51 @@ namespace InDet {
     //
     // --- job options
     //
-    SG::ReadHandleKey<TrackCollection>    m_trackName;        //!< Name of input Trackcollection
-    bool m_cosmics;          //!< whether we are running cosmics
-    SG::ReadHandleKey<TrackExtensionMap>  m_extensionMapName; //!< Name of input extension map
-    SG::WriteHandleKey<TrackCollection>   m_newTrackName;     //!< Name of output Trackcollection
-    ToolHandle<Trk::ITrackFitter>         m_trackFitter;      //!< track fitter tool handle
+    SG::ReadHandleKey<TrackCollection> m_trackName{
+      this, "TrackName", "Tracks", "Name of the input Trackcollection"};
+    SG::ReadHandleKey<TrackExtensionMap> m_extensionMapName{
+      this, "ExtensionMap", "TrackExtensionMap", "Name of the input extension map"};
+    SG::WriteHandleKey<TrackCollection> m_newTrackName{
+      this, "NewTrackName", "ExtendedTrack", "Name of the output Trackcollection"};
 
-    ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool
-    //      {this, "TrackSummaryTool", "InDetTrackSummaryTool"};
-    {
-      this, "TrackSummaryTool", ""
-    };
+    PublicToolHandle<Trk::ITrackFitter> m_trackFitter{
+      this, "TrackFitter", "Trk::KalmanFitter/InDetTrackFitter",
+      "Toolhandle for the track fitter"};
 
-    ToolHandle<Trk::ITrackScoringTool>    m_scoringTool;      //!< track scorer tool handle
-    Trk::RunOutlierRemoval m_runOutlier;               //!< whether to run outlier logics
-    //! switch whether to append a rejected extension as outlier trajectory
-    bool m_keepFailedExtensionOnTrack;
-    //! fitter steering: whether to do the fit with re-calibrated clusters (true) or not
-    bool m_refitPrds;
-    //! type of material interaction in extrapolation
-    int m_matEffects;
-    bool m_suppressHoleSearch;  //!< no hole search ?
-    bool m_tryBremFit;          //!< brem recovery mode ?
-    bool m_caloSeededBrem;      //!< run in Calo seeded mode
-    float m_pTminBrem;           //!< min pt for a brem fit
+    ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{
+      this, "TrackSummaryTool", ""};
+
+    PublicToolHandle<Trk::ITrackScoringTool> m_scoringTool{
+      this, "ScoringTool", "Trk::TrackScoringTool",
+      "Toolhandle for the track scorer"};
+
+    BooleanProperty m_cosmics{
+      this, "Cosmics", false, "switch whether we are running on cosmics"};
+    Gaudi::Property<Trk::RunOutlierRemoval> m_runOutlier{
+      this, "runOutlier", true, "switch whether to run outlier logics or not"};
+    BooleanProperty m_keepFailedExtensionOnTrack{
+      this, "keepFailedExtension", true,
+      "switch whether to keep failed extension as outlier hits on the new track"};
+    BooleanProperty m_refitPrds{
+      this, "RefitPrds", true,
+      "switch whether to do the fit with re-calibrated clusters (true) or not"};
+    IntegerProperty m_matEffects{
+      this, "matEffects", 3,
+      "particle hypothesis to assume for material effects in track fit"};
+    BooleanProperty m_suppressHoleSearch{
+      this, "suppressHoleSearch", false, "suppressing hole search for comparison"};
+    BooleanProperty m_tryBremFit{
+      this, "tryBremFit", false, "brem recovery mode"};
+    BooleanProperty m_caloSeededBrem{
+      this, "caloSeededBrem", false, "calo seeded brem recovery"};
+    FloatProperty m_pTminBrem{
+      this, "pTminBrem", 1000., "min pT for trying a brem recovery"};
+    Gaudi::Property<std::vector<float>> m_etabounds{
+      this, "etaBounds", {0.8, 1.6, 2.10}, "eta intervals for internal monitoring"};
+    //note: only three values!
 
     // -- algorithm members
-    Trk::ParticleHypothesis m_particleHypothesis; //!< nomen est omen
+    Trk::ParticleHypothesis m_particleHypothesis{Trk::undefined}; //!< nomen est omen
 
     //! internal monitoring: categories for counting different types of extension results
     enum StatIndex {
@@ -99,8 +117,6 @@ namespace InDet {
     // -- Using atomics to be multi-thread safe
     mutable std::array< std::array<std::atomic<int>, Nregions>, nTypes > m_counters ATLAS_THREAD_SAFE;
     mutable std::atomic<int> m_Nevents ATLAS_THREAD_SAFE;
-    
-    std::vector<float>  m_etabounds;           //!< eta intervals for internal monitoring
 
     //! monitoring and validation: does success/failure counting for each detector region
     void incrementRegionCounter(std::array<std::atomic<int>, 4>&, const Trk::Track*, bool = true) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -18,7 +18,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "InDetRecToolInterfaces/IVertexFinder.h"
-class IEMExtrapolationTools;
+#include "egammaInterfaces/IEMExtrapolationTools.h"
 
 
 namespace InDet{
@@ -36,8 +36,10 @@ namespace InDet{
 
   protected:
 
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksName;                //!< Name of track container in StoreGate
-    SG::WriteHandleKey<xAOD::VertexContainer>       m_InDetConversionOutputName; //!< Name of output container to store results
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksName{
+      this, "TracksName", "InDetTrackParticles"}; //!< Name of track container in StoreGate
+    SG::WriteHandleKey<xAOD::VertexContainer> m_InDetConversionOutputName{
+      this, "InDetConversionOutputName", "InDetConversion"}; //!< Name of output container to store results
 
     ToolHandle<IVertexFinder> m_VertexFinderTool{
       this,
@@ -45,9 +47,14 @@ namespace InDet{
       "InDet::InDetConversionFinderTools",
       "vertex finder tool"
     };
-    ToolHandle<IEMExtrapolationTools> m_EMExtrapolationTool;
+    PublicToolHandle<IEMExtrapolationTools> m_EMExtrapolationTool{
+      this,
+      "ExtrapolationTool",
+      "EMExtrapolationTools",
+      "Handle of the extrapolation tool"
+    };
 
-    bool m_doExtrapolation;
+    BooleanProperty m_doExtrapolation{this, "doExtrapolation", false};
 
       /** Statistics  */
     long m_events_processed{};    //!< Number of events processed
