@@ -33,8 +33,8 @@ run () {
     time ${cmd}
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
-    # they are different. We do not expect these tests to succeed
-    [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
+    # they are different. We do not expect this test to succeed
+    [ "${name}" = "dcube-ckf-ambi" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -44,20 +44,16 @@ run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
+    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.ckf.root \
     --maxEvents ${nEvents}
 
 reco_rc=$?
 
-# Rename log
-mv log.RAWtoALL log.RAWtoALL.CKF
-
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
-
 
 run "IDPVM" \
     runIDPVM.py \
@@ -75,39 +71,6 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-# Run with ACTS ambi. resolution
-run "Reconstruction-ambi" \
-    Reco_tf.py --CA \
-    --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
-    --inputRDOFile ${rdo} \
-    --outputAODFile AOD.ambi.root \
-    --perfmon fullmonmt \
-    --maxEvents ${nEvents}
-
-reco_rc=$?
-
-# Rename log
-mv log.RAWtoALL log.RAWtoALL.AMBI
-
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
-run "IDPVM" \
-    runIDPVM.py \
-    --filesInput AOD.ambi.root \
-    --outputFile idpvm.ambi.root \
-    --doTightPrimary \
-    --doHitLevelPlots \
-    --HSFlag All \
-    --doExpertPlots
-
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
@@ -118,21 +81,6 @@ run "dcube-ckf-last" \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.ckf.root \
     idpvm.ckf.root
-
-run "dcube-ambi-last" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ambi_last \
-    -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.ambi.root \
-    idpvm.ambi.root
-
-# Compare performance w/ and w/o ambi. resolution
-run "dcube-ckf-ambi" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_ambi \
-    -c ${dcubeXmlAbsPath} \
-    -r idpvm.ckf.root \
-    idpvm.ambi.root
 
 # Compare performance WRT legacy Athena
 run "dcube-ckf-athena" \

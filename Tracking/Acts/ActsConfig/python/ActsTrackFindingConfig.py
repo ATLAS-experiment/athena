@@ -186,7 +186,7 @@ def ActsTrackFindingCfg(flags,
     if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius']:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
-    elif flags.Tracking.ActiveConfig.extension in ['Acts'] and flags.Tracking.doITkFastTracking:
+    elif flags.Tracking.doITkFastTracking:
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
