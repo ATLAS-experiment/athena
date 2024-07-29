@@ -138,7 +138,7 @@ namespace Pythia8 {
                 : m_debug("Powheg:bb4l:DEBUG", false),
                     m_vetoFSREmission("Powheg:bb4l:FSREmission:veto", true),
                     m_vetoQED("Powheg:bb4l:vetoQED", false),
-                    m_topresscale(-1.), m_vetoDecScale(-1.), m_atopresscale(-1.), 
+                    m_topresscale(-1.), m_atopresscale(-1.), 
                     m_wpresscale(-1.),m_wmresscale(-1.),
                     m_nInResonanceFSRveto(0),
                     m_pTmin("Powheg:bb4l:pTminVeto", 0.5),
@@ -160,7 +160,7 @@ namespace Pythia8 {
             ~PowhegBB4Ldlsl()  override { }
 
             //--- Initialization -------------------------------------------------------
-            virtual bool initAfterBeams() {
+            virtual bool initAfterBeams() override {
                 // initialize settings of the parent class
                 PowhegHooks::initAfterBeams();
                 // initialize settings of this class already initialized in constructor
@@ -211,8 +211,8 @@ namespace Pythia8 {
             //--- FSR EMISSION LEVEL HOOK ----------------------------------------------
             // This hook gets triggered everytime the parton shower attempts to attach
             // a FSR emission.
-            inline bool canVetoFSREmission() { return m_vetoFSREmission(settingsPtr) || m_vetoProduction(settingsPtr); }
-            inline bool doVetoFSREmission(int sizeOld, const Event &e, int iSys, bool inResonance) {
+            inline virtual bool canVetoFSREmission() override { return m_vetoFSREmission(settingsPtr) || m_vetoProduction(settingsPtr); }
+            inline virtual bool doVetoFSREmission(int sizeOld, const Event &e, int iSys, bool inResonance) override {
 
                 // FSR VETO INSIDE THE RESONANCE (if it is switched on)
                 if (inResonance && m_vetoFSREmission(settingsPtr)) {
@@ -225,10 +225,8 @@ namespace Pythia8 {
 
                     // find the resonance the radiator originates from
                     int iRes = e[iRadBef].mother1();
-                    int distance = 1;
                     while ( iRes > 0 && (abs(e[iRes].id()) !=6 && abs(e[iRes].id()) != 24) ) {
                         iRes = e[iRes].mother1();
-                        distance ++;
                     }
                     if (iRes == 0) {
                         #if PYTHIA_VERSION_INTEGER >= 8310
@@ -319,14 +317,14 @@ namespace Pythia8 {
 
             //--- SCALE RESONANCE HOOK -------------------------------------------------
             // called before each resonance decay shower
-            inline bool canSetResonanceScale() { return m_scaleResonanceVeto(settingsPtr); }
+            inline virtual bool canSetResonanceScale() override { return m_scaleResonanceVeto(settingsPtr); }
             // if the resonance is the (anti)top or W+/W- set the scale to:
             // - if radtype=2 (remnant): resonance virtuality 
             // - if radtype=1 (btilde): 
             //    - (a)topresscale/wp(m)resscale for tops and Ws
             //    - a large number otherwise
             // if is not the top, set it to a big number
-            inline double scaleResonance(int iRes, const Event &e) {
+            inline virtual double scaleResonance(int iRes, const Event &e) override {
                 if(radtype_.radtype == 2)
                     return sqrt(e[iRes].m2Calc());
                 else {
@@ -517,7 +515,7 @@ namespace Pythia8 {
         private:
             Pythia8_UserHooks::UserSetting<bool> m_debug;
             Pythia8_UserHooks::UserSetting<bool> m_vetoFSREmission, m_vetoQED;
-            double m_topresscale,  m_vetoDecScale, m_atopresscale, m_wpresscale, m_wmresscale;
+            double m_topresscale,  m_atopresscale, m_wpresscale, m_wmresscale;
             unsigned long int m_nInResonanceFSRveto;
             Pythia8_UserHooks::UserSetting<double> m_pTmin;
             Pythia8_UserHooks::UserSetting<int> m_vetoProduction, m_pTpythiaVeto, m_vetoDipoleFrame;
