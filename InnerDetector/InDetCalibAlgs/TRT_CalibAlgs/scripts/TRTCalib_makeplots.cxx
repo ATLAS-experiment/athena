@@ -1307,7 +1307,7 @@ BoardVariationsRes::BoardVariationsRes(char *infile, int det)
 
     // ofstream txtfile(Form("BoardVarRes_%i.txt",det),ios::out);
 
-    float t0, dt0, bindex;
+    float t0{}, dt0{}, bindex{};
 
     minx = 0;
     maxx = 289;
@@ -1750,6 +1750,9 @@ BoardVariationsTRes::BoardVariationsTRes(char *infile, int det)
     }
     else
     {   
+        if (det+1 >=3){
+          throw std::out_of_range("Out-of-bounds access to the detlet array");
+        }
         this->SetTitle(Form("Endcap Board Sigma Time Residuals (%c-side)", detlet[det + 1]));
     }
     this->SetLineColor(4);
@@ -1828,11 +1831,11 @@ DvGraph::DvGraph(char *infile, string path, string folder, int det, int lay, boo
     TDirectory *trt = (TDirectory *)file->FindKey("TRT_all")->ReadObj();
     if (folder != "")
     {
-        TDirectory *det = (TDirectory *)trt->FindKey(folder.c_str())->ReadObj();
+        TDirectory *thisdet = (TDirectory *)trt->FindKey(folder.c_str())->ReadObj();
         cout << "PLOT FOR " << folder << endl;
-        if (det->FindKey("rtgraph"))
+        if (thisdet->FindKey("rtgraph"))
         {
-            rtgraph = (TGraphErrors *)det->FindKey("rtgraph")->ReadObj();
+            rtgraph = (TGraphErrors *)thisdet->FindKey("rtgraph")->ReadObj();
             cout << "found rtgraph " << folder << endl;
         }
         else
@@ -2048,14 +2051,14 @@ class RtGraphs : public TCanvas
 {
 public:
     // RtGraphs(char*,int,int);
-    RtGraphs(char *, string, bool);
+    RtGraphs(char *, const string& , bool);
     TH2F *rthist{};
     TGraphErrors *rtgraph{};
     TGraphErrors *trgraph{};
     TF1 *oldrtfunc{};
 };
 
-RtGraphs::RtGraphs(char *infile, string folder, bool isAr = false)
+RtGraphs::RtGraphs(char *infile, const string & folder, bool isAr = false)
 {
 
     this->SetName(Form("Rt_%s", folder.c_str()));
@@ -2096,7 +2099,7 @@ RtGraphs::RtGraphs(char *infile, string folder, bool isAr = false)
             cout << " Argon. Did not find TRT_Ar_all " << endl;
     }
 
-    if (folder != "")
+    if (trt and (not folder.empty()))
     {
         cout << "  PLOT FOR " << folder << endl;
         TDirectory *det = (TDirectory *)trt->FindKey(folder.c_str())->ReadObj();
@@ -2959,6 +2962,9 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
     }
     else
     {
+        if (not trt){
+          throw std::runtime_error("trt pointer is null");
+        }
         cout << " In ResidualPlots Argon" << endl;
         if (file->FindKey("TRT_Ar_all"))
             trt = (TDirectory *)file->FindKey("TRT_Ar_all")->ReadObj();
@@ -2984,6 +2990,7 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
     TH2F *treshist5 = nullptr;
 
     cout << "    Find residual histograms " << endl;
+   
     if (trt->FindKey("residual"))
         reshist1 = (TH2F *)trt->FindKey("residual")->ReadObj();
     if (det1)
@@ -3722,11 +3729,11 @@ FirstPage::FirstPage(char * /*filename*/, TFile *file)
     {
         ratioba = residualAr_baP->GetEntries() / residualAr_ba->GetEntries();
     }
-    if (residualAr_bc && residualAr_bcP && residualAr_bc->GetEntries() > 0)
+    if (residualAr_bc && residualAr_bcP && residualAr_ea && residualAr_bc->GetEntries() > 0)
     {
         ratiobc = residualAr_bcP->GetEntries() / residualAr_bc->GetEntries();
     }
-    if (residual_ea && residual_eaP && residualAr_eaP && residual_ea->GetEntries() > 0)
+    if (residual_ea && residual_eaP && residualAr_ea && residualAr_eaP && residual_ea->GetEntries() > 0)
     {
         ratioea = (residual_eaP->GetEntries() + residualAr_eaP->GetEntries()) / (residual_ea->GetEntries() + residualAr_ea->GetEntries());
     }
@@ -3780,7 +3787,10 @@ SettingsInfo::SettingsInfo(char *filename)
         while (!myfile.eof())
         {
             getline(myfile, line);
-            if (line.find("#") && line.find("Clean") && line.find("Submit") && line.find("Relink") && line.find("JobPrefix") && line.find("Tag") && line.find("WWW"))
+            auto notfirst = [&line](const std::string & sub)->bool{
+              return line.find(sub)!=0;
+            };
+            if (notfirst("#") && notfirst("Clean") && notfirst("Submit") && notfirst("Relink") && notfirst("JobPrefix") && notfirst("Tag") && notfirst("WWW"))
             {
                 int space = line.find_first_of(" ");
                 if (space != -1)
@@ -3910,16 +3920,8 @@ TGraphErrors *GetMean(TH2F *histo)
         ff->SetParameter(0, slice->GetEntries());
         ff->SetParameter(1, mean);
         ff->SetParameter(2, rms);
-        // int fitresult = slice->Fit("ff", "QR", "", mean - 1.5 * rms, mean + 1.5 * rms);
         mean = ff->GetParameter(1);
         rms = ff->GetParameter(2);
-        for (int j = 0; j < 6; j++)
-        {
-            // fitresult = slice->Fit("ff", "QR", "", mean - 1.5 * rms, mean + 1.5 * rms);
-            mean = ff->GetParameter(1);
-            rms = ff->GetParameter(2);
-        }
-        // fitresult = slice->Fit("ff", "QR", "", mean - 1.5 * rms, mean + 1.5 * rms);
         float x = histo->GetBinCenter(i + 1);
         Means->SetPoint(i, x, mean);
         Means->SetPointError(i, 0.5 * histo->GetBinWidth(i), ff->GetParError(1));
