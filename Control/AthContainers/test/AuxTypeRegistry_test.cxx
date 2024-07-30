@@ -529,6 +529,7 @@ void test_linked()
   assert (SG::AuxTypeRegistry::linkedName ("bar") == "bar_linked");
 
   assert (!SG::AuxTypeRegistry::classNameHasLink ("foo"));
+  assert (SG::AuxTypeRegistry::classNameHasLink ("SG::JaggedVecElt<double>"));
 }
 
 

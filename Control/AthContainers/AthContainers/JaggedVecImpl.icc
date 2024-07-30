@@ -1,0 +1,86 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/JaggedVecImpl.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jul, 2024
+ * @brief Definition of JaggedVecElt.
+ */
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param beg Index of the start of the range.
+ * @param end Index of the end of the range.
+ */
+inline
+JaggedVecEltBase::JaggedVecEltBase (index_type beg, index_type end)
+  : m_beg (beg), m_end (end)
+{
+}
+
+
+/**
+ * @brief Return the index of the start of the range.
+ */
+inline
+JaggedVecEltBase::index_type JaggedVecEltBase::begin() const
+{
+  return m_beg;
+}
+
+
+/**
+ * @brief Return the index of the end of the range.
+ */
+inline
+JaggedVecEltBase::index_type JaggedVecEltBase::end() const
+{
+  return m_end;
+}
+
+
+/**
+ * @brief Return the number of payload items in this jagged vector element.
+ */
+inline
+JaggedVecEltBase::index_type JaggedVecEltBase::size() const
+{
+  return m_end - m_beg;
+}
+
+
+/**
+ * @brief Equality test.
+ * @param other Other element with which to compare.
+ */
+inline
+bool JaggedVecEltBase::operator== (const JaggedVecEltBase& other) const
+{
+  return m_beg == other.m_beg && m_end == other.m_end;
+}
+
+
+/// Constructor.
+inline
+JaggedVecEltBase::Shift::Shift (int offs)
+  : m_offs (offs)
+{
+}
+
+
+/// Shift indices in @c e by the offset given to the constructor.
+inline
+void JaggedVecEltBase::Shift::operator() (JaggedVecEltBase& e) const
+{
+  e.m_beg += m_offs;
+  e.m_end += m_offs;
+}
+
+
+
+} // namespace SG
