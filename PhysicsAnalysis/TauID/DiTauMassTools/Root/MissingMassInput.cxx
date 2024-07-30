@@ -9,6 +9,8 @@
 #include "DiTauMassTools/MissingMassInput.h"
 
 using namespace DiTauMassTools;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::XYVector;
 
 // Default Constructor
 MissingMassInput::MissingMassInput(){
@@ -23,9 +25,9 @@ void MissingMassInput::ClearInput(){
 
   if(m_fUseVerbose == 1){ Info("DiTauMassTools", "MissingMassCalculator::ClearInput()"); }
 
-  m_MetVec.Set(0.,0.);
-  m_vistau1.SetPtEtaPhiM(0.,0.,0.,0.);
-  m_vistau2.SetPtEtaPhiM(0.,0.,0.,0.);
+  m_MetVec.SetXY(0.,0.);
+  m_vistau1.SetCoordinates(0.,0.,0.,0.);
+  m_vistau2.SetCoordinates(0.,0.,0.,0.);
 
   m_type_visTau1 = 0;
   m_type_visTau2 = 0;
@@ -56,7 +58,7 @@ void MissingMassInput::ClearInput(){
 void MissingMassInput::PrintInputInfo() {
   if(m_fUseVerbose!=1) return;
 
-  Info("DiTauMassTools", "%s", ("met_x="+std::to_string(m_MetVec.Px())+" met_y="+std::to_string(m_MetVec.Py())+" MET="+std::to_string(m_MetVec.Mod())+" met_phi="+std::to_string(m_MetVec.Phi())).c_str());
+  Info("DiTauMassTools", "%s", ("met_x="+std::to_string(m_MetVec.X())+" met_y="+std::to_string(m_MetVec.Y())+" MET="+std::to_string(m_MetVec.R())+" met_phi="+std::to_string(m_MetVec.Phi())).c_str());
   Info("DiTauMassTools", "%s", ("sumEt="+std::to_string(m_SumEt)+" METsigmaP="+std::to_string(m_METsigmaP)+" METsigmaL="+std::to_string(m_METsigmaL)+" METcovphi="+std::to_string(m_METcovphi)).c_str());
   //Info("DiTauMassTools", "%s", (" Njet25="+std::to_string(Njet25)+" allowUseHT="+std::to_string(prob->GetAllowUseHT())+" useHT="+std::to_string(prob->GetUseHT())).c_str());
 
@@ -118,14 +120,14 @@ void MissingMassInput::SetVisTauType(int i, int tautype) {
   return;
 }
 // ----- input vis Tau vectors
-void MissingMassInput::SetVisTauVec(int i, const TLorentzVector & vec) {
+void MissingMassInput::SetVisTauVec(int i, const PtEtaPhiMVector & vec) {
   if(m_fUseVerbose==1) { Info("DiTauMassTools", "%s", ("Seting input "+std::to_string(i)+" to pT="+std::to_string(vec.Pt())).c_str()); }
   if(i==0) m_vistau1 = vec;
   if(i==1) m_vistau2 = vec;
   return;
 }
 // ---- input Met vector
-void MissingMassInput::SetMetVec(const TVector2 & vec) {
+void MissingMassInput::SetMetVec(const XYVector & vec) {
   m_MetVec = vec;
   return;
 }

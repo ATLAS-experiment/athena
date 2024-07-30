@@ -12,18 +12,16 @@
 #include "AsgTools/IAsgTool.h"
 
 // ROOT includes
-#include "TLorentzVector.h"
-#include "TVector2.h"
-
+#include "Math/Vector4D.h"
+#include "Math/Vector2D.h"
 
 // EDM Include
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMissingET/MissingET.h"
 #include "xAODBase/IParticle.h"
 
-// fwd declarations
-class TLorentzVector;
-class TVector2;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::XYVector;
 
 class IMissingMassTool : public virtual asg::IAsgTool
 
@@ -45,8 +43,8 @@ class IMissingMassTool : public virtual asg::IAsgTool
 				    const int & njets)=0;
   
   virtual void calculate(const xAOD::EventInfo & ei, 
-			 const TLorentzVector & vis_tau1,
-			 const TLorentzVector & vis_tau2,
+			 const PtEtaPhiMVector & vis_tau1,
+			 const PtEtaPhiMVector & vis_tau2,
 			 const int & tau1_decay_type,
 			 const int & tau2_decay_type,
 			 const xAOD::MissingET & met,
@@ -57,10 +55,10 @@ class IMissingMassTool : public virtual asg::IAsgTool
   virtual double GetFittedMass(const int method)=0;
   virtual double GetFittedMassErrorUp(int method)=0;
   virtual double GetFittedMassErrorLow(int method)=0;
-  virtual TLorentzVector GetResonanceVec(int method) = 0;
-  virtual TVector2 GetFittedMetVec(int method) = 0;
-  virtual TLorentzVector GetNeutrino4vec(int method, int index) = 0;
-  virtual TLorentzVector GetTau4vec(int method, int index) = 0;
+  virtual PtEtaPhiMVector GetResonanceVec(int method) = 0;
+  virtual XYVector GetFittedMetVec(int method) = 0;
+  virtual PtEtaPhiMVector GetNeutrino4vec(int method, int index) = 0;
+  virtual PtEtaPhiMVector GetTau4vec(int method, int index) = 0;
   virtual int GetNNoSol()=0;
   virtual int GetNMetroReject()=0;
   virtual int GetNSol()=0;

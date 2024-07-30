@@ -17,12 +17,6 @@ double DiTauMassTools::MaxDelPhi(int tau_type, double Pvis, double dRmax_tau)
   return dRmax_tau+0*Pvis*tau_type; // hack to avoid warning
 }
 
-double DiTauMassTools::Angle(const TLorentzVector & vec1, const TLorentzVector & vec2) {
-  //SpeedUp (both are equivalent in fact)
-  return acos((vec1.Px()*vec2.Px()+vec1.Py()*vec2.Py()+vec1.Pz()*vec2.Pz())/(vec1.P()*vec2.P()));
-  //return vec1.Angle(vec2.Vect());
-}
-
 //put back phi within -pi, +pi
 double DiTauMassTools::fixPhiRange  (const double & phi)
 {
@@ -180,15 +174,6 @@ int DiTauMassTools::mmcType(const xAOD::IParticle* part)
 }
 //________________________________________________________________________
 
-double DiTauMassTools::mT(const TLorentzVector & vec,const TVector2 & met_vec) {
-  double mt=0.0;
-  double dphi=std::abs(TVector2::Phi_mpi_pi(vec.Phi()-met_vec.Phi()));
-  double cphi=1.0-cos(dphi);
-  if(cphi>0.0) mt=sqrt(2.0*vec.Pt()*met_vec.Mod()*cphi);
-  return mt;
-}
-
-//________________________________________________________________________
 void DiTauMassTools::readInParams(TDirectory* dir, MMCCalibrationSetV2::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio) {
 	std::string paramcode;
 	if (aset == MMCCalibrationSetV2::MMC2019) paramcode = "MMC2019MC16";

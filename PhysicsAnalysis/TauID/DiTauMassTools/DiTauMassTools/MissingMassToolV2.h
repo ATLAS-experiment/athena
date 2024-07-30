@@ -18,6 +18,8 @@
 #include <string>
 
 namespace DiTauMassTools{
+  using ROOT::Math::PtEtaPhiMVector;
+  using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::AsgTool
 {
@@ -50,8 +52,8 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
 				    const int & njets);
 
   virtual void calculate(const xAOD::EventInfo & ei, 
-			 const TLorentzVector & vis_tau1,
-			 const TLorentzVector & vis_tau2,
+			 const PtEtaPhiMVector & vis_tau1,
+			 const PtEtaPhiMVector & vis_tau2,
 			 const int & tau1_decay_type,
 			 const int & tau2_decay_type,
 			 const xAOD::MissingET & met,
@@ -65,10 +67,10 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
   virtual double GetFittedMass(int method) {return m_MMC->OutputInfo.GetFittedMass(method);}
   virtual double GetFittedMassErrorUp(int method) {return m_MMC->OutputInfo.GetFittedMassErrorUp(method);}
   virtual double GetFittedMassErrorLow(int method) {return m_MMC->OutputInfo.GetFittedMassErrorLow(method);}
-  virtual TLorentzVector GetResonanceVec(int method) {return m_MMC->OutputInfo.GetResonanceVec(method);}
-  virtual TVector2 GetFittedMetVec(int method) {return m_MMC->OutputInfo.GetFittedMetVec(method);}
-  virtual TLorentzVector GetNeutrino4vec(int method, int index) {return m_MMC->OutputInfo.GetNeutrino4vec(method, index);}
-  virtual TLorentzVector GetTau4vec(int method, int index) {return m_MMC->OutputInfo.GetTau4vec(method, index);}
+  virtual PtEtaPhiMVector GetResonanceVec(int method) {return m_MMC->OutputInfo.GetResonanceVec(method);}
+  virtual XYVector GetFittedMetVec(int method) {return m_MMC->OutputInfo.GetFittedMetVec(method);}
+  virtual PtEtaPhiMVector GetNeutrino4vec(int method, int index) {return m_MMC->OutputInfo.GetNeutrino4vec(method, index);}
+  virtual PtEtaPhiMVector GetTau4vec(int method, int index) {return m_MMC->OutputInfo.GetTau4vec(method, index);}
   virtual int GetNNoSol() {return m_MMC->GetNNoSol();}
   virtual int GetNMetroReject() {return m_MMC->GetNMetroReject();}
   virtual int GetNSol() {return m_MMC->GetNSol();}

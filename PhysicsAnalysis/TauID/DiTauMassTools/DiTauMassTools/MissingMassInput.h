@@ -15,6 +15,8 @@
 #include "DiTauMassTools/HelperFunctions.h"
 
 namespace DiTauMassTools{
+  using ROOT::Math::PtEtaPhiMVector;
+  using ROOT::Math::XYVector;
 
 class MissingMassInput {
 
@@ -30,9 +32,9 @@ class MissingMassInput {
     void SetMetScanParamsUE(double sumEt, double phi_scan=0.0, int data_code=0);
     void SetNjet25(int val);
     void SetSumEt(double sumEt);
-    void SetVisTauVec(int i, const TLorentzVector & vec);
+    void SetVisTauVec(int i, const PtEtaPhiMVector & vec);
     void SetVisTauType(int i, int tautype);
-    void SetMetVec(const TVector2 & vec);
+    void SetMetVec(const XYVector & vec);
     void SetNprong(int i, int nprong);
     void SetIsData(int val);
     void SetMHtSigma1(double val) { m_MHtSigma1=val; }
@@ -48,9 +50,9 @@ class MissingMassInput {
     friend class MissingMassProb;
 
   private:
-    TVector2 m_MetVec;
-    TLorentzVector m_vistau1;
-    TLorentzVector m_vistau2;
+    XYVector m_MetVec;
+    PtEtaPhiMVector m_vistau1;
+    PtEtaPhiMVector m_vistau2;
     int m_type_visTau1; // 0: l, 1:1-prong, 3:3-prong
     int m_type_visTau2;  // 0: l, 1:1-prong, 3:3-prong
     int m_Nprong_tau1;
@@ -60,7 +62,7 @@ class MissingMassInput {
     double m_METsigmaP;
     double m_METsigmaL;
     double m_SumEt;
-    std::vector<TLorentzVector> m_jet4vecs;
+    std::vector<PtEtaPhiMVector> m_jet4vecs;
     int m_Njet25;
     double m_DelPhiTT;
     double m_MHtSigma1; // sigma of 1st Gaussian in missing Ht resolution
@@ -74,8 +76,8 @@ class MissingMassInput {
     bool m_fUseDefaults; // switch to control defaults: 1== use defaults, 0== don't use defaults (useful for studies) 
     bool m_fUseTailCleanup; // switch to apply tail clean-up
     bool m_fUseVerbose; // code to turn ON printouts for debugging
-    TVector2 m_metVec;
-    TLorentzVector m_tlv_tmp;
+    XYVector m_metVec;
+    PtEtaPhiMVector m_tlv_tmp;
     double m_inputMEtX,m_inputMEtY,m_inputMEtT;
     double m_MEtX, m_MEtY,m_MEtT;
     double m_htOffset;

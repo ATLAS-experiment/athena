@@ -23,9 +23,10 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include <DiTauMassTools/MissingMassToolV2.h>
-#include <TLorentzVector.h>
+#include "Math/Vector4D.h"
 
 namespace CP {
+  using ROOT::Math::PtEtaPhiMVector;
 
   class DiTauMassCalculatorAlg final : public EL::AnaAlgorithm
   {
@@ -67,20 +68,20 @@ namespace CP {
     SysReadSelectionHandle                  m_preselection      {this, "eventSelection", "", "Name of the selection on which this MMC instance is allowed to run"};
 
     // output decorations
-    SysWriteDecorHandle<int>            m_fitStatus_decor         {this, "fitStatus", "mmc_fit_status_%SYS%", "Status of the MMC fit"};
-    SysWriteDecorHandle<double>         m_maxw_mass_decor         {this, "maxw_mass", "mmc_maxw_mass_%SYS%", "Mass of the resonance estimated by the MMC MaxW method"};
-    SysWriteDecorHandle<double>         m_mlm_mass_decor          {this, "mlm_mass", "mmc_mlm_mass_%SYS%", "Mass of the resonance estimated by the MMC MLM method"};
-    SysWriteDecorHandle<double>         m_mlnu3p_mass_decor       {this, "mlnu3p_mass", "mmc_mlnu3p_mass_%SYS%", "Mass of the resonance estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_mlnu3p_res_4vect_decor  {this, "mlnu3p_res_4vect", "mmc_mlnu3p_res_4vect_%SYS%", "Four-momentum of the resonance estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_mlnu3p_nu1_4vect_decor  {this, "mlnu3p_nu1_4vect", "mmc_mlnu3p_nu1_4vect_%SYS%", "Four-momentum of the leading pt neutrino estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_mlnu3p_nu2_4vect_decor  {this, "mlnu3p_nu2_4vect", "mmc_mlnu3p_nu2_4vect_%SYS%", "Four-momentum of the subleading pt neutrino estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_mlnu3p_tau1_4vect_decor {this, "mlnu3p_tau1_4vect", "mmc_mlnu3p_tau1_4vect_%SYS%", "Four-momentum of the leading lepton estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_mlnu3p_tau2_4vect_decor {this, "mlnu3p_tau2_4vect", "mmc_mlnu3p_tau2_4vect_%SYS%", "Four-momentum of the subleading lepton estimated by the MMC MLNU3P method"};
-    SysWriteDecorHandle<TLorentzVector> m_maxw_res_4vect_decor    {this, "maxw_res_4vect", "mmc_maxw_res_4vect_%SYS%", "Mass of the resonance estimated by the MMC MaxW method"};
-    SysWriteDecorHandle<TLorentzVector> m_maxw_nu1_4vect_decor    {this, "maxw_nu1_4vect", "mmc_maxw_nu1_4vect_%SYS%", "Four-momentum of the leading pt neutrino estimated by the MMC MaxW method"};
-    SysWriteDecorHandle<TLorentzVector> m_maxw_nu2_4vect_decor    {this, "maxw_nu2_4vect", "mmc_maxw_nu2_4vect_%SYS%", "Four-momentum of the subleading pt neutrino estimated by the MMC MaxW method"};
-    SysWriteDecorHandle<TLorentzVector> m_maxw_tau1_4vect_decor   {this, "maxw_tau1_4vect", "mmc_maxw_tau1_4vect_%SYS%", "Four-momentum of the leading lepton estimated by the MMC MaxW method"};
-    SysWriteDecorHandle<TLorentzVector> m_maxw_tau2_4vect_decor   {this, "maxw_tau2_4vect", "mmc_maxw_tau2_4vect_%SYS%", "Four-momentum of the subleading lepton estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<int>            m_fitStatus_decor          {this, "fitStatus", "mmc_fit_status_%SYS%", "Status of the MMC fit"};
+    SysWriteDecorHandle<double>         m_maxw_mass_decor          {this, "maxw_mass", "mmc_maxw_mass_%SYS%", "Mass of the resonance estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<double>         m_mlm_mass_decor           {this, "mlm_mass", "mmc_mlm_mass_%SYS%", "Mass of the resonance estimated by the MMC MLM method"};
+    SysWriteDecorHandle<double>         m_mlnu3p_mass_decor        {this, "mlnu3p_mass", "mmc_mlnu3p_mass_%SYS%", "Mass of the resonance estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_mlnu3p_res_4vect_decor  {this, "mlnu3p_res_4vect", "mmc_mlnu3p_res_4vect_%SYS%", "Four-momentum of the resonance estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_mlnu3p_nu1_4vect_decor  {this, "mlnu3p_nu1_4vect", "mmc_mlnu3p_nu1_4vect_%SYS%", "Four-momentum of the leading pt neutrino estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_mlnu3p_nu2_4vect_decor  {this, "mlnu3p_nu2_4vect", "mmc_mlnu3p_nu2_4vect_%SYS%", "Four-momentum of the subleading pt neutrino estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_mlnu3p_tau1_4vect_decor {this, "mlnu3p_tau1_4vect", "mmc_mlnu3p_tau1_4vect_%SYS%", "Four-momentum of the leading lepton estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_mlnu3p_tau2_4vect_decor {this, "mlnu3p_tau2_4vect", "mmc_mlnu3p_tau2_4vect_%SYS%", "Four-momentum of the subleading lepton estimated by the MMC MLNU3P method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_res_4vect_decor    {this, "maxw_res_4vect", "mmc_maxw_res_4vect_%SYS%", "Mass of the resonance estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_nu1_4vect_decor    {this, "maxw_nu1_4vect", "mmc_maxw_nu1_4vect_%SYS%", "Four-momentum of the leading pt neutrino estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_nu2_4vect_decor    {this, "maxw_nu2_4vect", "mmc_maxw_nu2_4vect_%SYS%", "Four-momentum of the subleading pt neutrino estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_tau1_4vect_decor   {this, "maxw_tau1_4vect", "mmc_maxw_tau1_4vect_%SYS%", "Four-momentum of the leading lepton estimated by the MMC MaxW method"};
+    SysWriteDecorHandle<PtEtaPhiMVector> m_maxw_tau2_4vect_decor   {this, "maxw_tau2_4vect", "mmc_maxw_tau2_4vect_%SYS%", "Four-momentum of the subleading lepton estimated by the MMC MaxW method"};
 
   };
 
