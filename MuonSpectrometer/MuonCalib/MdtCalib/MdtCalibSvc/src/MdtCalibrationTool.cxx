@@ -189,8 +189,8 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
         const Amg::Vector2D locBField = calibIn.projectMagneticField(globalB);
         using BFieldComp = MdtCalibInput::BFieldComp;
         calibResult.setLorentzTime(corrections->bField()->correction(calibResult.driftTime(), 
-                                                                     locBField[BFieldComp::alongWire], 
-                                                                     locBField[BFieldComp::alongTrack]));
+                                                                     locBField[static_cast<int>(BFieldComp::alongWire)], 
+                                                                     locBField[static_cast<int>(BFieldComp::alongTrack)]));
         corrTime -= calibResult.lorentzTime();
       }
       if(m_doTemp && rt && rt->HasTmaxDiff()) {
