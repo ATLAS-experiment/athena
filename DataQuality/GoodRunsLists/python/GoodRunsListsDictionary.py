@@ -3,12 +3,17 @@
 def getGoodRunsLists():
     GRLDict={}
     ## RUN 3
+
+    # 2024
+    GRLDict['GRL2024_EtoI'] = ['GoodRunsLists/data24_13p6TeV/20240723/data24_13p6TeV.periodsEtoI_DetStatus-v123-pro36-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    GRLDict['GRL2024_EtoI_ignoreTrig_HLT_BSPOT_invalid'] = ['GoodRunsLists/data24_13p6TeV/20240723/data24_13p6TeV.periodsEtoI_DetStatus-v123-pro36-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLT_IDT_BSPOT_INVALID_STATUS.xml']
+
     
     # 2023
-    GRLDict['GRL2023']= ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
-    GRLDict['GRL2023_ignoreTRIG']= ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_JETCTPIN.xml']
-    GRLDict['GRL2023_ignoreTRIG_HLTmisconf']= ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf.xml']
-    GRLDict['GRL2023_ignoreTRIG_HLTmisconf_JETCTPIN']= ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf_JETCTPIN.xml']
+    GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
+    GRLDict['GRL2023_ignoreTRIG'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_JETCTPIN.xml']
+    GRLDict['GRL2023_ignoreTRIG_HLTmisconf'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf.xml']
+    GRLDict['GRL2023_ignoreTRIG_HLTmisconf_JETCTPIN'] = ['GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns_ignoreTRIG_HLTmisconf_JETCTPIN.xml']
 
     # 2022
     GRLDict['GRL2022'] = ['GoodRunsLists/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml']
