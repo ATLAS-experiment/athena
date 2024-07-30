@@ -1295,8 +1295,11 @@ std::string AuxTypeRegistry::linkedName (const std::string& name)
  * @brief Test to see if a class name corresponds to a class
  *        with a linked variable.
  */
-bool AuxTypeRegistry::classNameHasLink (const std::string& /*className*/)
+bool AuxTypeRegistry::classNameHasLink (const std::string& className)
 {
+  if (className.find ("SG::JaggedVecElt<") != std::string::npos) {
+    return true;
+  }
   return false;
 }
 

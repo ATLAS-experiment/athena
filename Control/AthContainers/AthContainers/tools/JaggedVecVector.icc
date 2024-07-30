@@ -1,0 +1,257 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/JaggedVecVector.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Mar, 2024
+ * @brief Implementation of @c IAuxTypeVector for @c JaggedVecElt types.
+ */
+
+
+#include "AthContainers/AuxTypeRegistry.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param auxid The auxid of the variable this vector represents.
+ * @param vecPtr Pointer to the object.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param ownFlag If true, take ownership of the object.
+ */
+template <class T, class ALLOC>
+JaggedVecVectorHolder<T, ALLOC>::JaggedVecVectorHolder
+  (auxid_t auxid,
+   vector_type* vecPtr,
+   IAuxTypeVector* linkedVec,
+   bool ownFlag)
+    : Base (auxid, vecPtr, ownFlag, false),
+      m_linkedVec (linkedVec)
+{
+}
+
+
+/**
+ * @brief Change the size of the vector.
+ * @param sz The new vector size.
+ * Returns true if it is known that iterators have not been invalidated;
+ * false otherwise.
+ */
+template <class T, class ALLOC>
+inline
+bool JaggedVecVectorHolder<T, ALLOC>::resize (size_t sz)
+{
+  bool valid = true;
+  vector_type& vec = this->vec();
+  Elt zero;
+  if (sz < vec.size()) {
+    size_t payload_sz = sz > 0 ? vec[sz-1].end() : 0;
+    valid = m_linkedVec->resize (payload_sz);
+  }
+  else if (vec.size() > 0) {
+    size_t payload_sz = vec.back().end();
+    zero = Elt (payload_sz, payload_sz);
+  }
+  const void* orig = vec.data();
+  vec.resize (sz, zero);
+  this->storeDataSpan();
+  return valid && vec.data() == orig;
+}
+
+
+/**
+ * @brief Shift the elements of the vector.
+ * @param pos The starting index for the shift.
+ * @param offs The (signed) amount of the shift.
+ *
+ * This operation shifts the elements in the vectors for all
+ * aux data items, to implement an insertion or deletion.
+ * @c offs may be either positive or negative.
+ *
+ * If @c offs is positive, then the container is growing.
+ * The container size should be increased by @c offs,
+ * the element at @c pos moved to @c pos + @c offs,
+ * and similarly for following elements.
+ * The elements between @c pos and @c pos + @c offs should
+ * be default-initialized.
+ *
+ * If @c offs is negative, then the container is shrinking.
+ * The element at @c pos should be moved to @c pos + @c offs,
+ * and similarly for following elements.
+ * The container should then be shrunk by @c -offs elements
+ * (running destructors as appropriate).
+ *
+ * Returns true if it is known that iterators have not been invalidated;
+ * false otherwise.  (Will always return false when increasing the size
+ * of an empty container.)
+ */
+template <class T, class ALLOC>
+bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
+{
+  vector_type& vec = this->vec();
+  if (offs < 0) {
+    if (-offs > static_cast<ptrdiff_t>(pos)) offs = -pos;
+    size_t ppos = pos < vec.size() ? vec[pos].begin() : m_linkedVec->size();
+    ptrdiff_t poffs = - (ppos - vec[pos+offs].begin());
+    m_linkedVec->shift (ppos, poffs);
+    vec.erase (vec.begin() + pos+offs, vec.begin() + pos);
+    std::for_each (vec.begin() + pos+offs, vec.end(), Shift (poffs));
+    this->storeDataSpan();
+    return true;
+  }
+  else if (offs > 0) {
+    const void* orig = vec.data();
+    size_t oldsz = vec.size();
+    Elt zero;
+    if (!vec.empty()) {
+      index_type end = vec.back().end();
+      zero = Elt (end, end);
+    }
+    // Add to the end, zero-filled.
+    vec.resize (vec.size() + offs, zero);
+    if (oldsz != pos) {
+      // Shift existing elements.  If we're just extending,
+      // then we can skip this.
+      std::copy (vec.rbegin() + offs,
+                 vec.rbegin() + (offs+oldsz-pos),
+                 vec.rbegin());
+      if (pos == 0) {
+        zero = Elt (0, 0);
+      }
+      else {
+        index_type end = vec[pos-1].end();
+        zero = Elt (end, end);
+      }
+      std::fill_n (vec.begin() + pos, offs, zero);
+    }
+    this->storeDataSpan();
+    return vec.data() == orig;
+  }
+  return true;
+}
+
+
+/**
+ * @brief Insert elements into the vector via move semantics.
+ * @param pos The starting index of the insertion.
+ * @param beg Start of the range of elements to insert.
+ * @param end End of the range of elements to insert.
+ * @param srcStore The source store.
+ *
+ * @c beg and @c end define a range of container elements, with length
+ * @c len defined by the difference of the pointers divided by the
+ * element size.
+ *
+ * The size of the container will be increased by @c len, with the elements
+ * starting at @c pos copied to @c pos+len.
+ *
+ * The contents of the @c beg:end range will then be moved to our vector
+ * starting at @c pos.  This will be done via move semantics if possible;
+ * otherwise, it will be done with a copy.
+ *
+ * Returns true if it is known that the vector's memory did not move,
+ * false otherwise.
+ */
+template <class T, class ALLOC>
+bool JaggedVecVectorHolder<T, ALLOC>::insertMove
+  (size_t pos, void* vbeg, void* vend, IAuxStore& srcStore)
+{
+  element_type* beg = reinterpret_cast<element_type*> (vbeg);
+  element_type* end = reinterpret_cast<element_type*> (vend);
+  ptrdiff_t nelt = end - beg;
+  if (nelt <= 0) return true;
+
+  vector_type& vec = this->vec();
+  const element_type* orig = vec.data();
+  vec.insert (vec.begin() + pos, beg, end);
+  size_t npayload = vec[pos+nelt-1].end() - vec[pos].begin();
+  size_t ppos = pos > 0 ? vec[pos-1].end() : 0;
+  IAuxTypeVector* srcPayloadVec = srcStore.linkedVector (this->auxid());
+  T* srcPayload = reinterpret_cast<T*> (srcPayloadVec->toPtr());
+  bool pflag = m_linkedVec->insertMove (ppos,
+                                        srcPayload + vec[pos].begin(),
+                                        srcPayload + vec[pos+nelt-1].end(),
+                                        srcStore);
+  std::for_each (vec.begin() + pos, vec.begin() + pos + nelt,
+                 Shift (ppos - vec[pos].begin()));
+  std::for_each (vec.begin() + pos + nelt, vec.end(),
+                 Shift (npayload));
+  this->storeDataSpan();
+  return pflag && (vec.data() == orig);
+}
+
+
+//*****************************************************************************
+
+
+/**
+ * @brief Constructor.  Makes a new vector.
+ * @param auxid The auxid of the variable this vector represents.
+ * @param size Initial size of the new vector.
+ * @param capacity Initial capacity of the new vector.
+ * @param linkedVec Ownership of the linked vector.
+ */
+template <class HOLDER>
+JaggedVecVectorT<HOLDER>::JaggedVecVectorT (auxid_t auxid,
+                                            size_t size,
+                                            size_t capacity,
+                                            std::unique_ptr<IAuxTypeVector> linkedVec)
+  : Base (auxid, &m_vec, linkedVec.get(), false),
+    m_linkedVecHolder (std::move (linkedVec))
+{
+  m_vec.reserve (capacity);
+  m_vec.resize (size);
+}
+
+
+/**
+ * @brief Copy constructor.
+ */
+template <class HOLDER>
+JaggedVecVectorT<HOLDER>::JaggedVecVectorT (const JaggedVecVectorT& other)
+  : Base (other.auxid(), &m_vec, false, false),
+    m_vec (other.m_vec),
+    m_linkedVecHolder (other.m_linkedVec->clone())
+{
+  Base::m_linkedVec = m_linkedVecHolder.get();
+}
+
+
+/**
+ * @brief Move constructor.
+ */
+template <class HOLDER>
+JaggedVecVectorT<HOLDER>::JaggedVecVectorT (JaggedVecVectorT&& other)
+  : Base (other.auxid(), &m_vec, false, other.m_linkedVec),
+    m_vec (std::move (other.m_vec)),
+    m_linkedVecHolder (std::move (other.m_linkedVecHolder))
+{
+}
+
+
+/**
+ * @brief Make a copy of this vector.
+ */
+template <class HOLDER>
+inline
+std::unique_ptr<IAuxTypeVector> JaggedVecVectorT<HOLDER>::clone() const
+{
+  return std::make_unique<JaggedVecVectorT> (*this);
+}
+
+
+/**
+ * @brief Return ownership of the linked vector.
+ */
+template <class HOLDER>
+inline
+std::unique_ptr<IAuxTypeVector> JaggedVecVectorT<HOLDER>::linkedVector()
+{
+  return std::move (m_linkedVecHolder);
+}
+
+
+} // namespace SG
