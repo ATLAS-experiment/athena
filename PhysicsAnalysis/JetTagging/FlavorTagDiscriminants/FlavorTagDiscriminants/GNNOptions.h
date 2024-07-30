@@ -18,6 +18,7 @@ namespace FlavorTagDiscriminants {
     std::map<std::string, std::string> variable_remapping = {};
     TrackLinkType track_link_type = TrackLinkType::TRACK_PARTICLE;
     float default_output_value = NAN;
+    std::map<std::string, float> default_output_values;
     bool operator==(const GNNOptions&) const;
     std::size_t hash() const;
   };

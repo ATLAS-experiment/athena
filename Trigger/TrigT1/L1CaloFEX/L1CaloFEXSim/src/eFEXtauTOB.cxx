@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -12,24 +12,6 @@
 
 #include "L1CaloFEXSim/eFEXtauTOB.h"
 
-
-LVL1::eFEXtauTOB::eFEXtauTOB():
-	m_eta{99999},
-	m_phi{99999},
-	m_et{99999},
-	m_rcore_core{99999},
-	m_rcore_env{99999},
-	m_rhad_core{99999},
-	m_rhad_env{99999},
-	m_fpga_id{99999},
-	m_efex_id{99999},
-	m_seed_und{true},
-	m_seed{99999},
-	m_bdt_score{99999},
-	m_tobword{0},
-	m_xtobword0{0},
-	m_xtobword1{0}
-{}
 
 void LVL1::eFEXtauTOB::setEta(unsigned int eta)
 {

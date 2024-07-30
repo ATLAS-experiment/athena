@@ -1,7 +1,7 @@
 #!/bin/bash
-# art-description: art job for InDetPhysValMonitoring, Single muon 100GeV
+# art-description: art job for InDetPhysValMonitoring, Single ele 5GeV
 # art-type: grid
-# art-input: user.keli:user.keli.mc16_13TeV.422036.ParticleGun_single_mu_Pt100GeV_Rel22073
+# art-input: user.keli:user.keli.mc16_13TeV.422028.ParticleGun_single_ele_Pt5GeV_Rel22073
 # art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
@@ -41,7 +41,7 @@ case $ArtProcess in
 
       dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml"
       dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml"
-      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_mu100GeV_reco_2024-06-01T2101.root"
+      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_ele5GeV_reco_2024-06-01T2101.root"
 
       echo "compare with 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -60,7 +60,7 @@ case $ArtProcess in
       echo "art-result: $? shifter_plots_last"
 
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-	   -p -x dcube_expert\
+	   -p -x dcube_expert \
 	   -c ${dcubeExpertXml} \
 	   -r ${dcubeRef} \
 	   physval.root
@@ -89,8 +89,8 @@ case $ArtProcess in
       --CA \
       --inputRDOFile $x \
       --outputAODFile   physval.AOD.root \
-      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
       --steering        doRAWtoALL \
+      --conditionsTag   'default:OFLCOND-MC23-SDR-RUN3-07' \
       --checkEventCount False \
       --ignoreErrors    True \
       --maxEvents       -1 

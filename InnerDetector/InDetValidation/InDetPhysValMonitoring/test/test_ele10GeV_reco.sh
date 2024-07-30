@@ -1,6 +1,8 @@
 #!/bin/bash
 # art-description: art job for InDetPhysValMonitoring, Single ele 10GeV
 # art-type: grid
+# art-input: user.keli:user.keli.mc16_13TeV.422029.ParticleGun_single_ele_Pt10GeV_Rel22073
+# art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
 # art-include: main/Athena
@@ -15,11 +17,10 @@
 #reference plots are made at rel 22.0.73
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-inFile=${artdata}/InDetPhysValMonitoring/inputs/24.0.55/physval.ele10GeV.RDO.root
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/physval_ele10GeV_reco_r24.root
 
 script=test_MC_mu0_reco.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtProcess} ${inFile} ${dcubeRef}
+"$script" ${dcubeRef}

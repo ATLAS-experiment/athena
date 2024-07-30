@@ -1,6 +1,8 @@
 #!/bin/bash
 # art-description: art job for InDetPhysValMonitoring, Single pi 1GeV
 # art-type: grid
+# art-input: user.keli:user.keli.mc16_13TeV.422047.ParticleGun_single_piplus_Pt1GeV_Rel22073
+# art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
 # art-include: main/Athena
@@ -11,8 +13,8 @@
 # art-output: dcube*
 # art-html: dcube_shifter_last
 
-artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-inFile=${artdata}/InDetPhysValMonitoring/inputs/24.0.55/physval.piplus1GeV.RDO.root
+#RDO is made at rel 22.0.73
+#reference plots are made at rel 22.0.73
 
 set -x
 
@@ -24,7 +26,7 @@ success_run=0
 case $ArtProcess in
   "start")
     echo "Starting"
-    echo "List of files = " ${inFile}
+    echo "List of files = " ${ArtInFile}
     ;;
   "end")
     echo "Ending"
@@ -37,9 +39,9 @@ case $ArtProcess in
       echo "postprocess"
       postProcessIDPVMHistos physval.root
 
-      dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
-      dcubeExpertXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml
-      dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_piplus1GeV_reco_2024-06-01T2101.root
+      dcubeShifterXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml"
+      dcubeExpertXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_expert.xml"
+      dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_piplus1GeV_reco_2024-06-01T2101.root"
 
       echo "compare with 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -76,7 +78,7 @@ case $ArtProcess in
     echo "Test $ArtProcess"
     mkdir "art_core_${ArtProcess}"
     cd "art_core_${ArtProcess}"
-    IFS=',' read -r -a file <<< "${inFile}"
+    IFS=',' read -r -a file <<< "${ArtInFile}"
     file=${file[${ArtProcess}]}
     x="../$file"
     echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC} and ATHENA_PROC_NUMBER=${ATHENA_PROC_NUMBER}"

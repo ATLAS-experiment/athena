@@ -8,6 +8,7 @@
 #include "FlavorTagDiscriminants/DecoratorAlg.h"
 #include "FlavorTagDiscriminants/IJetTagConditionalDecorator.h"
 
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
@@ -28,11 +29,10 @@ namespace FlavorTagDiscriminants {
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& cxt ) const override;
   private:
-    Gaudi::Property<std::string>  m_tagFlag {
-      this, "tagFlag", "", "Jet variable to flag a jet for tagging"
+    Gaudi::Property<std::vector<std::string>>  m_tagFlags {
+      this, "tagFlags", {}, "Jet variable to flag a jet for tagging"
     };
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_tagFlagReadDecor{
-      this, "fullTagFlag", "", "filled internally"};
+    SG::ReadDecorHandleKeyArray<xAOD::JetContainer> m_tagFlagReadDecors;
   };
 }
 

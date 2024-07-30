@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -20,28 +20,28 @@ namespace LVL1 {
     /** The eFEXtauAlgo.h class store the energy, the location and the isolation variables of eFEX TOBs
      */
   private:
-    unsigned int m_eta;
-    unsigned int m_phi;
-    unsigned int m_et;
-    unsigned int m_bitwise_et;
-    float m_iso;
-    unsigned int m_rcore_core;
-    unsigned int m_rcore_env;
-    unsigned int m_rhad_core;
-    unsigned int m_rhad_env;
-    unsigned int m_fpga_id;
-    unsigned int m_efex_id;
-    bool m_seed_und;
-    unsigned int m_seed;
-    unsigned int m_bdt_score;
-    unsigned int m_is_bdt_algo;
-    uint32_t m_tobword;
-    uint32_t m_xtobword0;
-    uint32_t m_xtobword1;
+    unsigned int m_eta{99999};
+    unsigned int m_phi{99999};
+    unsigned int m_et{99999};
+    unsigned int m_bitwise_et{99999};
+    float m_iso{0};
+    unsigned int m_rcore_core{99999};
+    unsigned int m_rcore_env{99999};
+    unsigned int m_rhad_core{99999};
+    unsigned int m_rhad_env{99999};
+    unsigned int m_fpga_id{99999};
+    unsigned int m_efex_id{99999};
+    bool m_seed_und{true};
+    unsigned int m_seed{99999};
+    unsigned int m_bdt_score{99999};
+    unsigned int m_is_bdt_algo{99999};
+    uint32_t m_tobword{0};
+    uint32_t m_xtobword0{0};
+    uint32_t m_xtobword1{0};
     
   public:
-    eFEXtauTOB();
-    ~eFEXtauTOB() {};
+    eFEXtauTOB() = default;
+    ~eFEXtauTOB() = default;
     
     inline unsigned int getEta() const {return m_eta;}
     inline unsigned int getPhi() const {return m_phi;}

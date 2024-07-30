@@ -4,9 +4,7 @@
 #
 # Steering script for IDPVM ART jobs with MC Reco mu=0 config
 
-ArtProcess=$1
-ArtInFile=$2
-dcubeRef=$3
+dcubeRef=$1
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml

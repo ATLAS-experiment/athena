@@ -20,6 +20,7 @@ def SpCountMonitoring(flags):
     monTool.defineHistogram('sctSPEndcapA', path='EXPERT', type='TH1I', title='sctSPEndcapA', xbins = 500, xmin=0, xmax=3000)
     monTool.defineHistogram('pixCL, sctSP', path='EXPERT', type='TH2I', title='SP ; pix SP after ToT cut; sct SP', xbins = 50, xmin=0, xmax=6000, ybins = 50, ymin=0, ymax=6000)
     monTool.defineHistogram('sctModulesOverThreshold', path='EXPERT', type='TH1I', title='SCT ModulesOverThreshold', xbins = 100, xmin=1, xmax=200)
+    monTool.defineHistogram('pixQ2mod', path='EXPERT', type='TH1I', title='Q2', xbins = 50, xmin=0, xmax=1)
 
     return monTool
 
