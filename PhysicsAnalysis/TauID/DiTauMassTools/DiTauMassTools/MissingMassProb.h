@@ -16,11 +16,12 @@
 #include <TFile.h>
 #include <TF1.h>
 #include <TGraphAsymmErrors.h>
-#include <TLorentzVector.h>
+#include <Math/Vector4D.h>
 
 #include <string>
 
 namespace DiTauMassTools{
+  using ROOT::Math::PtEtaPhiMVector;
 
 class MissingMassCalculatorV2;
 
@@ -30,9 +31,9 @@ class MissingMassProb {
     MissingMassProb(MMCCalibrationSetV2::e aset, const std::string& paramFilePath);
     ~MissingMassProb();
 
-    double apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2, bool constant=false, bool oneTau=false, bool twoTau=false);
+    double apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2, bool constant=false, bool oneTau=false, bool twoTau=false);
 
-    void setParamAngle(const TLorentzVector & tauvec, int tau, int tautype);
+    void setParamAngle(const PtEtaPhiMVector & tauvec, int tau, int tautype);
     void setParamRatio(int tau, int tautype);
     void setParamNuMass();
     TF1* GetFormulaAngle1() {return m_formulaAngle1;}
@@ -72,25 +73,25 @@ class MissingMassProb {
     double mEtAndTauProbability(MissingMassInput& preparedInput);
     double MnuProbability(MissingMassInput& preparedInput, double mnu, double binsize);
     double MnuProbability(MissingMassInput& preparedInput, double mnu);
-    double TauProbability(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1, 
-			       const int & type2, const TLorentzVector & vis2, const TLorentzVector & nu2);
-    double TauProbability(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1, 
-			       const int & type2, const TLorentzVector & vis2, const TLorentzVector & nu2, const double & detmet);
-    double TauProbabilityLFV(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1);
+    double TauProbability(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1, 
+			       const int & type2, const PtEtaPhiMVector & vis2, const PtEtaPhiMVector & nu2);
+    double TauProbability(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1, 
+			       const int & type2, const PtEtaPhiMVector & vis2, const PtEtaPhiMVector & nu2, const double & detmet);
+    double TauProbabilityLFV(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1);
 
-    static double MetProbabilityWrapper(MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2);
-    static double mEtAndTauProbabilityWrapper(MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2);
-    static double dTheta3d_probabilityFastWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
-    static double TauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
-    static double MnuProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
-    static double MnuProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
+    static double MetProbabilityWrapper(MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2);
+    static double mEtAndTauProbabilityWrapper(MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2);
+    static double dTheta3d_probabilityFastWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
+    static double TauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
+    static double MnuProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
+    static double MnuProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
 
-     static double dTheta3d_probabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
-     static double TauProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 );
+     static double dTheta3d_probabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
+     static double TauProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 );
 
-    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2)>> m_probListConstant;
-    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2)>> m_probListOneTau;
-    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2)>> m_probListTwoTau;
+    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2)>> m_probListConstant;
+    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2)>> m_probListOneTau;
+    std::list<std::function<double(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2)>> m_probListTwoTau;
   private:
     //SpeedUp static array for efficient access
     thread_local static double s_fit_param[2][3][6][5];
@@ -123,10 +124,10 @@ class MissingMassProb {
     bool m_fUseDphiLL; //for leplep
 
   // comment by Sasha to keep this for the future
-  //inline double AngularProbability(TLorentzVector nu_vec, TLorentzVector vis_vec, int decayType);
+  //inline double AngularProbability(PtEtaPhiMVector nu_vec, PtEtaPhiMVector vis_vec, int decayType);
 
   // to be tested if helpful
-  //inline double ResonanceProbability(TLorentzVector vec1, TLorentzVector vec2);
+  //inline double ResonanceProbability(PtEtaPhiMVector vec1, PtEtaPhiMVector vec2);
 };
 } // namespace DiTauMassTools
 

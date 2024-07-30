@@ -18,8 +18,12 @@
 #include "TKey.h"
 #include "TDirectory.h"
 #include "TROOT.h"
+#include "Math/VectorUtil.h"
+#include "Math/Vector2D.h"
 
 namespace DiTauMassTools{
+  using ROOT::Math::XYVector;
+  using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 namespace MaxHistStrategyV2
 {
@@ -53,14 +57,34 @@ namespace TauTypes
 // see source file of MissingMassProb for further reasoning
 template <typename T> void ignore(T &&){}
 
-double Angle(const TLorentzVector & vec1, const TLorentzVector & vec2);
+template <typename VectorType1, typename VectorType2>
+double Angle(const VectorType1& vec1, const VectorType2& vec2) {
+    // Calculate the dot product and magnitudes (similar to but faster than ::Angle())
+    double dotProduct = vec1.Px() * vec2.Px() + vec1.Py() * vec2.Py() + vec1.Pz() * vec2.Pz();
+    double magnitude1 = vec1.P();
+    double magnitude2 = vec2.P();
+
+    // Calculate and return the angle
+    return acos(dotProduct / (magnitude1 * magnitude2));
+}
+
+template <typename VectorType>
+double mT(const VectorType & vec,const XYVector & met_vec) {
+  double mt=0.0;
+  double dphi=std::abs(Phi_mpi_pi(vec.Phi()-met_vec.Phi()));
+  double cphi=1.0-cos(dphi);
+  if(cphi>0.0) mt=sqrt(2.0*vec.Pt()*met_vec.R()*cphi);
+  return mt;
+}
+
+//________________________________________________________________________
+
 bool updateDouble  (const double in, double & out) ;
 void fastSinCos (const double & phi, double & sinPhi, double & cosPhi);
 double fixPhiRange (const double & phi);
 double MaxDelPhi(int tau_type, double Pvis, double dRmax_tau);
 int getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle* p2, int mmcType1, int mmcType2);
 int mmcType(const xAOD::IParticle* part); // returns particle type as required by MMC
-double mT(const TLorentzVector & vec,const TVector2 & met_vec);
 void readInParams(TDirectory* dir, MMCCalibrationSetV2::e aset, std::vector<TF1*>& lep_numass, std::vector<TF1*>& lep_angle, std::vector<TF1*>& lep_ratio, std::vector<TF1*>& had_angle, std::vector<TF1*>& had_ratio);
 } // namespace DiTauMassTools
 

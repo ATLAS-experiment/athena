@@ -11,6 +11,8 @@
 #include <cmath>
 
 using namespace DiTauMassTools;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 // The wrapper functions make use of the ignore template defined in HelperFunctions.h.
 // This is to avoid warnings during compilation.
@@ -18,7 +20,7 @@ using namespace DiTauMassTools;
 // handled within the probList vectors and the "user" from the Calculator only
 // has to call Prob->apply() to have a common handling of all probability calculations.
 
-double MissingMassProb::MetProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::MetProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
 	ignore(tau_type1);
 	ignore(tau_type2);
 	ignore(tauvec1);
@@ -28,7 +30,7 @@ double MissingMassProb::MetProbabilityWrapper( MissingMassProb* prob, MissingMas
 	return prob->MetProbability(preparedInput, 1.,1.,1.,1.);
 }
 
-double MissingMassProb::mEtAndTauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::mEtAndTauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
 	ignore(tau_type1);
 	ignore(tau_type2);
 	ignore(tauvec1);
@@ -38,10 +40,10 @@ double MissingMassProb::mEtAndTauProbabilityWrapper( MissingMassProb* prob, Miss
 	return prob->mEtAndTauProbability(preparedInput);
 }
 
-double MissingMassProb::dTheta3d_probabilityFastWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::dTheta3d_probabilityFastWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   double Prob = 1.;
   if (tau_type1>=0) {
-    TLorentzVector totalTau1;
+    PtEtaPhiMVector totalTau1;
     totalTau1+=tauvec1;
     totalTau1+=nuvec1;
     const double tau1_tmpp = totalTau1.P();
@@ -49,7 +51,7 @@ double MissingMassProb::dTheta3d_probabilityFastWrapper( MissingMassProb* prob, 
     Prob*=prob->dTheta3d_probabilityFast(preparedInput, tau_type1, angle1, tau1_tmpp);
   }
   if (tau_type2>=0) {
-    TLorentzVector totalTau2;
+    PtEtaPhiMVector totalTau2;
     totalTau2+=tauvec2;
     totalTau2+=nuvec2;
     const double tau2_tmpp = totalTau2.P();
@@ -59,15 +61,15 @@ double MissingMassProb::dTheta3d_probabilityFastWrapper( MissingMassProb* prob, 
   return Prob;
 }
 
-double MissingMassProb::TauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::TauProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   if( prob->GetUseHT() || (preparedInput.m_tauTypes==TauTypes::hh) ) {
-    return prob->TauProbability(preparedInput, tau_type1, tauvec1, nuvec1, tau_type2, tauvec2, nuvec2, preparedInput.m_MetVec.Mod()); // customized prob for Njet25=0
+    return prob->TauProbability(preparedInput, tau_type1, tauvec1, nuvec1, tau_type2, tauvec2, nuvec2, preparedInput.m_MetVec.R()); // customized prob for Njet25=0
   } else {
     return prob->TauProbability(preparedInput, tau_type1, tauvec1, nuvec1, tau_type2, tauvec2, nuvec2);
   }
 }
 
-double MissingMassProb::MnuProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::MnuProbabilityWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   ignore(tauvec1);
   ignore(tauvec2);
   if(prob->GetUseMnuProbability()==1){
@@ -83,11 +85,11 @@ double MissingMassProb::MnuProbabilityWrapper( MissingMassProb* prob, MissingMas
   }
 }
 
-double MissingMassProb::dTheta3d_probabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::dTheta3d_probabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   ignore(preparedInput);
   double Prob = 1.;
   if (tau_type1>=0) {
-    TLorentzVector totalTau1;
+    PtEtaPhiMVector totalTau1;
     totalTau1+=tauvec1;
     totalTau1+=nuvec1;
     const double angle1 = Angle(nuvec1,tauvec1);
@@ -97,7 +99,7 @@ double MissingMassProb::dTheta3d_probabilityNewWrapper( MissingMassProb* prob, M
     Prob*=prob_tmp;
   }
   if (tau_type2>=0) {
-    TLorentzVector totalTau2;
+    PtEtaPhiMVector totalTau2;
     totalTau2+=tauvec2;
     totalTau2+=nuvec2;
     const double angle2 = Angle(nuvec2,tauvec2);
@@ -111,7 +113,7 @@ double MissingMassProb::dTheta3d_probabilityNewWrapper( MissingMassProb* prob, M
   return Prob;
 }
 
-double MissingMassProb::TauProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::TauProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   ignore(preparedInput);
   ignore(tau_type1);
   ignore(tau_type2);
@@ -125,7 +127,7 @@ double MissingMassProb::TauProbabilityNewWrapper( MissingMassProb* prob, Missing
   return Prob;
 }
 
-double MissingMassProb::MnuProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2 ){
+double MissingMassProb::MnuProbabilityNewWrapper( MissingMassProb* prob, MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2 ){
   ignore(tauvec1);
   ignore(tauvec2);
   double Prob = 1.;
@@ -150,7 +152,7 @@ void MissingMassProb::setParamNuMass() {
   }
 }
 
-void MissingMassProb::setParamAngle(const TLorentzVector& tauvec, int tau, int tautype) {
+void MissingMassProb::setParamAngle(const PtEtaPhiMVector& tauvec, int tau, int tautype) {
   double Pt_tau = tauvec.Pt();
   int type = tautype;
   if (tautype > 4 && tautype < 8) type = 4;
@@ -528,7 +530,7 @@ MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, const std::string&
 MissingMassProb::~MissingMassProb() {
 }
 
-double MissingMassProb::apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const TLorentzVector & tauvec1, const TLorentzVector & tauvec2, const TLorentzVector nuvec1, const TLorentzVector & nuvec2, bool constant, bool oneTau, bool twoTau) {
+double MissingMassProb::apply(MissingMassInput& preparedInput, const int & tau_type1, const int & tau_type2, const PtEtaPhiMVector & tauvec1, const PtEtaPhiMVector & tauvec2, const PtEtaPhiMVector nuvec1, const PtEtaPhiMVector & nuvec2, bool constant, bool oneTau, bool twoTau) {
   double prob = 1.;
   if (constant == true) {
     for (auto& f: m_probListConstant) {
@@ -608,7 +610,7 @@ double MissingMassProb::mEtAndTauProbability(MissingMassInput& preparedInput)
 }
 
 //------------------- simple TauProbability for LFV
-double MissingMassProb::TauProbabilityLFV(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1)
+double MissingMassProb::TauProbabilityLFV(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1)
 {
   double prob=1.0;
   if(m_fUseTauProbability==0) return prob; // don't apply TauProbability
@@ -645,8 +647,8 @@ double MissingMassProb::TauProbabilityLFV(MissingMassInput& preparedInput, const
   return prob;
 }
 
-double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1,
-                                             const int & type2, const TLorentzVector & vis2, const TLorentzVector & nu2)
+double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1,
+                                             const int & type2, const PtEtaPhiMVector & vis2, const PtEtaPhiMVector & nu2)
 {
   double prob=1.0;
   if(m_fUseTauProbability==0) return prob; // don't apply TauProbability
@@ -718,8 +720,8 @@ double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const in
 
 
 // --------- Updated version of TauProbability for lep-had events with Njet25=0, takes into account Winter-2012 analysis cuts
-double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const int & type1, const TLorentzVector & vis1, const TLorentzVector & nu1,
-                                             const int & type2, const TLorentzVector & vis2, const TLorentzVector & nu2, const double & detmet) {
+double MissingMassProb::TauProbability(MissingMassInput& preparedInput, const int & type1, const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1,
+                                             const int & type2, const PtEtaPhiMVector & vis2, const PtEtaPhiMVector & nu2, const double & detmet) {
   double prob=1.0;
 
   if(m_fUseTauProbability==0) return prob; // don't apply TauProbability
@@ -1274,7 +1276,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       // placeholder for 2019 tune
                       if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2016MC15C ||
 			  m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
-                        if(preparedInput.m_MetVec.Mod()<20.0) // 0-jet low MET case
+                        if(preparedInput.m_MetVec.R()<20.0) // 0-jet low MET case
                           {
                             if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
                               {
@@ -1500,7 +1502,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                             double p0 = 2.60131;
                             double p1const = 1.22427;
                             double p2quad = -1.71261;
-                            double DphiLL = std::abs(TVector2::Phi_mpi_pi(preparedInput.m_vistau1.Phi()-preparedInput.m_vistau2.Phi()));
+                            double DphiLL = std::abs(Phi_mpi_pi(preparedInput.m_vistau1.Phi()-preparedInput.m_vistau2.Phi()));
                             sigma *= (DphiLL < p0) ? p1const : p1const+
                               p2quad*p0*p0 - 2*p2quad*p0*DphiLL+p2quad*DphiLL*DphiLL;
                           }
@@ -1522,7 +1524,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                             double p0 = 2.24786;
                             double p1const = 0.908597;
                             double p2quad = 0.544577;
-                            double DphiLL = std::abs(TVector2::Phi_mpi_pi(preparedInput.m_vistau1.Phi()-preparedInput.m_vistau2.Phi()));
+                            double DphiLL = std::abs(Phi_mpi_pi(preparedInput.m_vistau1.Phi()-preparedInput.m_vistau2.Phi()));
                             sigma *= (DphiLL < p0) ? p1const : p1const+
                               p2quad*p0*p0 - 2*p2quad*p0*DphiLL+p2quad*DphiLL*DphiLL;
                           }

@@ -15,6 +15,8 @@
 #include <TH1.h>
 
 namespace DiTauMassTools{
+  using ROOT::Math::PtEtaPhiMVector;
+  using ROOT::Math::XYVector;
 
 class MissingMassCalculatorV2;
 
@@ -37,11 +39,11 @@ class MissingMassOutput {
     double GetAveSolRMS() const; // ave RMS of solutions (for one event)
 
     double GetRms2Mpv() const; // returns RMS/MPV according to histogram method
-    TLorentzVector GetNeutrino4vec(int fitcode, int ind) const; // returns neutrino 4-vec
+    PtEtaPhiMVector GetNeutrino4vec(int fitcode, int ind) const; // returns neutrino 4-vec
     double GetFitSignificance(int fitcode) const; // returns fit significance
-    TLorentzVector GetTau4vec(int fitcode, int ind) const; // returns full tau 4-vec
-    TLorentzVector GetResonanceVec(int fitcode) const; // returns 4-vec for resonance
-    TVector2 GetFittedMetVec(int fitcode) const; // returns 2-vec for fitted MET
+    PtEtaPhiMVector GetTau4vec(int fitcode, int ind) const; // returns full tau 4-vec
+    PtEtaPhiMVector GetResonanceVec(int fitcode) const; // returns 4-vec for resonance
+    XYVector GetFittedMetVec(int fitcode) const; // returns 2-vec for fitted MET
 
     friend class MissingMassCalculatorV2;
 
@@ -52,12 +54,12 @@ class MissingMassOutput {
     double m_FittedMass[MMCFitMethodV2::MAX];
     double m_FittedMassUpperError[MMCFitMethodV2::MAX];
     double m_FittedMassLowerError[MMCFitMethodV2::MAX];
-    TLorentzVector m_nuvec1[MMCFitMethodV2::MAX];
-    TLorentzVector m_objvec1[MMCFitMethodV2::MAX];
-    TLorentzVector m_nuvec2[MMCFitMethodV2::MAX];
-    TLorentzVector m_objvec2[MMCFitMethodV2::MAX];
-    TLorentzVector m_totalvec[MMCFitMethodV2::MAX];
-    TVector2 m_FittedMetVec[MMCFitMethodV2::MAX];
+    PtEtaPhiMVector m_nuvec1[MMCFitMethodV2::MAX];
+    PtEtaPhiMVector m_objvec1[MMCFitMethodV2::MAX];
+    PtEtaPhiMVector m_nuvec2[MMCFitMethodV2::MAX];
+    PtEtaPhiMVector m_objvec2[MMCFitMethodV2::MAX];
+    PtEtaPhiMVector m_totalvec[MMCFitMethodV2::MAX];
+    XYVector m_FittedMetVec[MMCFitMethodV2::MAX];
     double m_RMS2MPV;
     std::shared_ptr<TH1F> m_hMfit_all;
     std::shared_ptr<TH1F> m_hMfit_allNoWeight;

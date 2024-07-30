@@ -21,8 +21,8 @@ events where two particles decay into states with missing ET.
 #include <TGraph.h>
 #include <TF1.h>
 #include <TMath.h>
-#include <TLorentzVector.h>
-#include <TVector3.h>
+#include <Math/Vector4D.h>
+#include <Math/Vector2D.h>
 #include <vector>
 #include <TObject.h>
 #include <TDirectory.h>
@@ -41,6 +41,7 @@ events where two particles decay into states with missing ET.
 
 
 namespace DiTauMassTools{
+  using ROOT::Math::PtEtaPhiMVector;
 
 class MissingMassCalculatorV2 {
 
@@ -52,10 +53,10 @@ class MissingMassCalculatorV2 {
   struct DitauStuff {
     double Mditau_best; // best fitted M(ditau)
     double Sign_best;   // best significance of M(ditau) fit
-    TLorentzVector nutau1;  // fitted 4-vec for neutrino from tau-1
-    TLorentzVector nutau2;  // fitted 4-vec for neutrino from tau-2
-    TLorentzVector vistau1;  // fitted 4-vec for visible tau-1
-    TLorentzVector vistau2;  // fitted 4-vec for visible tau-2
+    PtEtaPhiMVector nutau1;  // fitted 4-vec for neutrino from tau-1
+    PtEtaPhiMVector nutau2;  // fitted 4-vec for neutrino from tau-2
+    PtEtaPhiMVector vistau1;  // fitted 4-vec for visible tau-1
+    PtEtaPhiMVector vistau2;  // fitted 4-vec for visible tau-2
     double RMSoverMPV;
   };
 
@@ -72,19 +73,19 @@ class MissingMassCalculatorV2 {
   int m_rmsStop;
   double m_meanbinStop;
   
-  // these are temporary vectors. Dclared globally to avoid construction/destruction
-  std::vector<TLorentzVector> m_nuvecsol1;
-  std::vector<TLorentzVector> m_nuvecsol2;
+  // these are temporary vectors. Declared globally to avoid construction/destruction
+  std::vector<PtEtaPhiMVector> m_nuvecsol1;
+  std::vector<PtEtaPhiMVector> m_nuvecsol2;
 
-  std::vector<TLorentzVector> m_tauvecsol1;
-  std::vector<TLorentzVector> m_tauvecsol2;
+  std::vector<PtEtaPhiMVector> m_tauvecsol1;
+  std::vector<PtEtaPhiMVector> m_tauvecsol2;
   std::vector<double> m_tauvecprob1;
   std::vector<double> m_tauvecprob2;
 
-  std::vector<TLorentzVector> m_nuvec1_tmp;
-  std::vector<TLorentzVector> m_nuvec2_tmp;
+  std::vector<PtEtaPhiMVector> m_nuvec1_tmp;
+  std::vector<PtEtaPhiMVector> m_nuvec2_tmp;
 
-  TLorentzVector m_tautau_tmp;
+  PtEtaPhiMVector m_tautau_tmp;
 
   bool m_debugThisIteration, m_lfvLeplepRefit;
   
@@ -154,14 +155,14 @@ class MissingMassCalculatorV2 {
   int m_nsolOld;
   std::vector<double>   m_probFinalSolOldVec;
   std::vector<double>   m_mtautauFinalSolOldVec;
-  std::vector<TLorentzVector>  m_nu1FinalSolOldVec;
-  std::vector<TLorentzVector>  m_nu2FinalSolOldVec;
+  std::vector<PtEtaPhiMVector>  m_nu1FinalSolOldVec;
+  std::vector<PtEtaPhiMVector>  m_nu2FinalSolOldVec;
 
   int m_nsol;
   std::vector<double>   m_probFinalSolVec;
   std::vector<double>   m_mtautauFinalSolVec;
-  std::vector<TLorentzVector>  m_nu1FinalSolVec;
-  std::vector<TLorentzVector>  m_nu2FinalSolVec;
+  std::vector<PtEtaPhiMVector>  m_nu1FinalSolVec;
+  std::vector<PtEtaPhiMVector>  m_nu2FinalSolVec;
 
 
   double m_Mnu1ExcludeMin,m_Mnu1ExcludeMax,m_Mnu1ExcludeRange;
@@ -171,7 +172,7 @@ class MissingMassCalculatorV2 {
   
   bool m_scanMnu1,m_scanMnu2;
 
-  TLorentzVector m_tauVec1,m_tauVec2;
+  PtEtaPhiMVector m_tauVec1,m_tauVec2;
   double m_tauVec1Phi, m_tauVec2Phi;
   double m_tauVec1M, m_tauVec2M;
   double m_tauVec1Px, m_tauVec1Py, m_tauVec1Pz;
@@ -237,7 +238,7 @@ class MissingMassCalculatorV2 {
   TH1F* m_fTauProb;
 
   // for intermediate calc
-  TLorentzVector m_TLVdummy;
+  PtEtaPhiMVector m_TLVdummy;
 
   //---------------- protected variables
   DitauStuff m_fDitauStuffFit; // results based on fit method
@@ -267,14 +268,14 @@ class MissingMassCalculatorV2 {
   inline int NuPsolutionV3(const double & mNu1, const double & mNu2, const double & phi1, const double & phi2, 
 			   int & nsol1, int & nsol2);
 
-  inline int NuPsolutionLFV(const TVector2 & met_vec, const TLorentzVector & tau, 
-			    const double & m_nu, std::vector<TLorentzVector> &nu_vec);
+  inline int NuPsolutionLFV(const XYVector & met_vec, const PtEtaPhiMVector & tau, 
+			    const double & m_nu, std::vector<PtEtaPhiMVector> &nu_vec);
 
   
  protected:
-  inline int CheckSolutions(TLorentzVector nu_vec, TLorentzVector vis_vec, int decayType);
-  inline int TailCleanUp(const TLorentzVector & vis1, const TLorentzVector & nu1, 
-			 const TLorentzVector & vis2, const TLorentzVector & nu2, 
+  inline int CheckSolutions(PtEtaPhiMVector nu_vec, PtEtaPhiMVector vis_vec, int decayType);
+  inline int TailCleanUp(const PtEtaPhiMVector & vis1, const PtEtaPhiMVector & nu1, 
+			 const PtEtaPhiMVector & vis2, const PtEtaPhiMVector & nu2, 
 			 const double & mmc_mass, const double & vis_mass, const double & eff_mass, const double & dphiTT);
 
 
@@ -408,7 +409,7 @@ public:
     return maxFromHist(theHist.get(), histInfo, maxHistStrategy, winHalfWidth, debug);
   }
 
-  TVector2 metvec_tmp;
+  XYVector metvec_tmp;
   inline double dTheta3DLimit(const int & tau_type, const int & limit_code,const double & P_tau);
 
 };

@@ -10,6 +10,7 @@
 #include "xAODTau/TauJet.h"
 
 using namespace DiTauMassTools;
+using ROOT::Math::PtEtaPhiMVector;
 
 // Default constructor
 MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(name)
@@ -113,12 +114,12 @@ CP::CorrectionCode MissingMassToolV2::apply(const xAOD::EventInfo& ei,
     static const SG::Decorator<double> dec_mmc_maxw_mass ("mmc_maxw_mass");
     static const SG::Decorator<double> dec_mmc_mlm_mass ("mmc_mlm_mass");
     static const SG::Decorator<double> dec_mmc_mlnu3p_mass ("mmc_mlnu3p_mass");
-    static const SG::Decorator<TLorentzVector> dec_mmc_mlnu3p_4vect ("mmc_mlnu3p_4vect");
+    static const SG::Decorator<PtEtaPhiMVector> dec_mmc_mlnu3p_4vect ("mmc_mlnu3p_4vect");
     dec_mmc_fit_status(ei) = aFitStatus;
     dec_mmc_maxw_mass(ei)  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MAXW) : -1;
     dec_mmc_mlm_mass(ei)   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLM) : -1;
     dec_mmc_mlnu3p_mass(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethodV2::MLNU3P) : -1;
-    TLorentzVector null4V(-1,-1,-1,-1);
+    PtEtaPhiMVector null4V(0.,0.,0.,0.);
     dec_mmc_mlnu3p_4vect(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethodV2::MLNU3P) : null4V;
   }
 

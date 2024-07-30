@@ -9,6 +9,8 @@
 #include "DiTauMassTools/MissingMassOutput.h"
 
 using namespace DiTauMassTools;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::XYVector;
 
 // Default Constructor
 MissingMassOutput::MissingMassOutput(){
@@ -34,7 +36,7 @@ void MissingMassOutput::ClearOutput(bool fUseVerbose) {
       m_nuvec2[imeth].SetPxPyPzE(0.0,0.0,0.0,0.0);
       m_objvec2[imeth].SetPxPyPzE(0.0,0.0,0.0,0.0);
       m_totalvec[imeth].SetPxPyPzE(0.0,0.0,0.0,0.0);
-      m_FittedMetVec[imeth].Set(0.0,0.0);
+      m_FittedMetVec[imeth].SetXY(0.0,0.0);
     }
 
   m_RMS2MPV = 0.0;
@@ -152,9 +154,9 @@ std::shared_ptr<TH1F> MissingMassOutput::GetMassHistogramNoWeight() const
 }
 
 // returns neutrino 4-vec
-TLorentzVector MissingMassOutput::GetNeutrino4vec(int fitcode, int ind) const
+PtEtaPhiMVector MissingMassOutput::GetNeutrino4vec(int fitcode, int ind) const
 {
-  TLorentzVector vec(0.0,0.0,0.0,0.0);
+  PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
   if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
     {
       Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetNeutrino4Vec ERROR ! fitcode="+std::to_string(fitcode)
@@ -169,9 +171,9 @@ TLorentzVector MissingMassOutput::GetNeutrino4vec(int fitcode, int ind) const
 }
 
 // returns neutrino 4-vec
-TLorentzVector MissingMassOutput::GetTau4vec(int fitcode, int ind) const
+PtEtaPhiMVector MissingMassOutput::GetTau4vec(int fitcode, int ind) const
 {
-  TLorentzVector vec(0.0,0.0,0.0,0.0);
+  PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
   if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
     {
       Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetTau4vec ERROR ! fitcode="+std::to_string(fitcode)
@@ -186,8 +188,8 @@ TLorentzVector MissingMassOutput::GetTau4vec(int fitcode, int ind) const
 }
 
 // returns 4-vec for resonance
-TLorentzVector MissingMassOutput::GetResonanceVec(int fitcode) const {
-  TLorentzVector vec(0.0,0.0,0.0,0.0);
+PtEtaPhiMVector MissingMassOutput::GetResonanceVec(int fitcode) const {
+  PtEtaPhiMVector vec(0.0,0.0,0.0,0.0);
   if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
     {
       Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetResonanceVec ERROR ! fitcode="+std::to_string(fitcode)
@@ -202,8 +204,8 @@ TLorentzVector MissingMassOutput::GetResonanceVec(int fitcode) const {
 }
 
 // returns 2-vec for fitted MET
-TVector2 MissingMassOutput::GetFittedMetVec(int fitcode) const {
-  TVector2 vec(0.0,0.0);
+XYVector MissingMassOutput::GetFittedMetVec(int fitcode) const {
+  XYVector vec(0.0,0.0);
   if (fitcode!=MMCFitMethodV2::MAXW && fitcode!=MMCFitMethodV2::MLNU3P )
     {
       Error("DiTauMassTools", "%s", ("MissingMassCalculatorV2::GetFittedMetVec ERROR ! fitcode="+std::to_string(fitcode)

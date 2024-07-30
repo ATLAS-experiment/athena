@@ -30,8 +30,14 @@
 #include <TMatrixDSym.h>
 #include <TObject.h>
 #include <TVectorD.h>
+#include "Math/VectorUtil.h"
 
 using namespace DiTauMassTools;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::PxPyPzMVector;
+using ROOT::Math::XYVector;
+using ROOT::Math::VectorUtil::DeltaR;
+using ROOT::Math::VectorUtil::Phi_mpi_pi;
 
 //______________________________constructor________________________________
 MissingMassCalculatorV2::MissingMassCalculatorV2(
@@ -290,7 +296,7 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
         //              preparedInput.MetVec.Set(-(preparedInput.vistau1+preparedInput.vistau2).Px(),-(preparedInput.vistau1+preparedInput.vistau2).Py());
         //              // replace MET by MPT
 
-        TVector2 dummy_met(-(preparedInput.m_vistau1 + preparedInput.m_vistau2).Px(),
+        XYVector dummy_met(-(preparedInput.m_vistau1 + preparedInput.m_vistau2).Px(),
                            -(preparedInput.m_vistau1 + preparedInput.m_vistau2).Py());
         preparedInput.m_METcovphi = dummy_met.Phi();
         double dummy_METres =
@@ -356,10 +362,10 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
 void MissingMassCalculatorV2::ClearDitauStuff(DitauStuff &fStuff) {
   fStuff.Mditau_best = 0.0;
   fStuff.Sign_best = 1.0E6;
-  fStuff.nutau1 = TLorentzVector(0., 0., 0., 0.);
-  fStuff.nutau2 = TLorentzVector(0., 0., 0., 0.);
-  fStuff.vistau1 = TLorentzVector(0., 0., 0., 0.);
-  fStuff.vistau2 = TLorentzVector(0., 0., 0., 0.);
+  fStuff.nutau1 = PtEtaPhiMVector(0., 0., 0., 0.);
+  fStuff.nutau2 = PtEtaPhiMVector(0., 0., 0., 0.);
+  fStuff.vistau1 = PtEtaPhiMVector(0., 0., 0., 0.);
+  fStuff.vistau2 = PtEtaPhiMVector(0., 0., 0., 0.);
   fStuff.RMSoverMPV = 0.0;
 
   return;
@@ -393,7 +399,7 @@ void MissingMassCalculatorV2::DoOutputInfo() {
     OutputInfo.m_totalvec[MMCFitMethodV2::MAXW] =
         OutputInfo.m_objvec1[MMCFitMethodV2::MAXW] +
         OutputInfo.m_objvec2[MMCFitMethodV2::MAXW];
-    TVector2 metmaxw(OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW].Px() +
+    XYVector metmaxw(OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW].Px() +
                          OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW].Px(),
                      OutputInfo.m_nuvec1[MMCFitMethodV2::MAXW].Py() +
                          OutputInfo.m_nuvec2[MMCFitMethodV2::MAXW].Py());
@@ -403,8 +409,8 @@ void MissingMassCalculatorV2::DoOutputInfo() {
     OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MLM] = yq[0];
     OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MLM] = yq[1];
 
-    TLorentzVector tlvdummy(0., 0., 0., 0.);
-    TVector2 metdummy(0., 0.);
+    PtEtaPhiMVector tlvdummy(0., 0., 0., 0.);
+    XYVector metdummy(0., 0.);
     OutputInfo.m_FitSignificance[MMCFitMethodV2::MLM] = -1.;
     OutputInfo.m_nuvec1[MMCFitMethodV2::MLM] = tlvdummy;
     OutputInfo.m_objvec1[MMCFitMethodV2::MLM] = tlvdummy;
@@ -428,7 +434,7 @@ void MissingMassCalculatorV2::DoOutputInfo() {
     OutputInfo.m_FittedMassUpperError[MMCFitMethodV2::MLNU3P] = 0.;
     OutputInfo.m_FittedMassLowerError[MMCFitMethodV2::MLNU3P] = 0.;
 
-    TVector2 metmlnu3p(OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P].Px() +
+    XYVector metmlnu3p(OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P].Px() +
                            OutputInfo.m_nuvec2[MMCFitMethodV2::MLNU3P].Px(),
                        OutputInfo.m_nuvec1[MMCFitMethodV2::MLNU3P].Py() +
                            OutputInfo.m_nuvec2[MMCFitMethodV2::MLNU3P].Py());
@@ -445,8 +451,8 @@ void MissingMassCalculatorV2::DoOutputInfo() {
   //----------------- Check if input was re-ordered in FinalizeInputStuff() and
   // restore the original order if needed
   if (preparedInput.m_InputReorder == 1) {
-    TLorentzVector dummy_vec1(0.0, 0.0, 0.0, 0.0);
-    TLorentzVector dummy_vec2(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector dummy_vec1(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector dummy_vec2(0.0, 0.0, 0.0, 0.0);
     for (int i = 0; i < 3; i++) {
       // re-ordering neutrinos
       dummy_vec1 = OutputInfo.m_nuvec1[i];
@@ -512,8 +518,8 @@ void MissingMassCalculatorV2::PrintResults() {
   if (preparedInput.m_fUseVerbose != 1)
     return;
 
-  const TLorentzVector *origVisTau1 = 0;
-  const TLorentzVector *origVisTau2 = 0;
+  const PtEtaPhiMVector *origVisTau1 = 0;
+  const PtEtaPhiMVector *origVisTau2 = 0;
 
   if (preparedInput.m_InputReorder == 0) {
     origVisTau1 = &preparedInput.m_vistau1;
@@ -550,11 +556,11 @@ void MissingMassCalculatorV2::PrintResults() {
       Info("DiTauMassTools", " fit failed ");
     }
 
-    const TLorentzVector &tlvnu1 = OutputInfo.m_nuvec1[imeth];
-    const TLorentzVector &tlvnu2 = OutputInfo.m_nuvec2[imeth];
-    const TLorentzVector &tlvo1 = OutputInfo.m_objvec1[imeth];
-    const TLorentzVector &tlvo2 = OutputInfo.m_objvec2[imeth];
-    const TVector2 &tvmet = OutputInfo.m_FittedMetVec[imeth];
+    const PtEtaPhiMVector &tlvnu1 = OutputInfo.m_nuvec1[imeth];
+    const PtEtaPhiMVector &tlvnu2 = OutputInfo.m_nuvec2[imeth];
+    const PtEtaPhiMVector &tlvo1 = OutputInfo.m_objvec1[imeth];
+    const PtEtaPhiMVector &tlvo2 = OutputInfo.m_objvec2[imeth];
+    const XYVector &tvmet = OutputInfo.m_FittedMetVec[imeth];
 
     Info("DiTauMassTools", "%s",
          (" Neutrino-1: P=" + std::to_string(tlvnu1.P()) + "  Pt=" + std::to_string(tlvnu1.Pt()) +
@@ -582,13 +588,13 @@ void MissingMassCalculatorV2::PrintResults() {
              .c_str());
 
     Info("DiTauMassTools", "%s",
-         (" dR(nu1-visTau1)=" + std::to_string(tlvnu1.DeltaR(*origVisTau1))).c_str());
+         (" dR(nu1-visTau1)=" + std::to_string(DeltaR(tlvnu1,*origVisTau1))).c_str());
     Info("DiTauMassTools", "%s",
-         (" dR(nu2-visTau2)=" + std::to_string(tlvnu2.DeltaR(*origVisTau2))).c_str());
+         (" dR(nu2-visTau2)=" + std::to_string(DeltaR(tlvnu2,*origVisTau2))).c_str());
 
     Info("DiTauMassTools", "%s",
-         (" Fitted MET =" + std::to_string(tvmet.Mod()) + "  Phi=" + std::to_string(tlvnu1.Phi()) +
-          " Px=" + std::to_string(tvmet.Px()) + " Py=" + std::to_string(tvmet.Py()))
+         (" Fitted MET =" + std::to_string(tvmet.R()) + "  Phi=" + std::to_string(tlvnu1.Phi()) +
+          " Px=" + std::to_string(tvmet.X()) + " Py=" + std::to_string(tvmet.Y()))
              .c_str());
 
     Info("DiTauMassTools", "%s", (" Resonance: P=" + std::to_string(OutputInfo.m_totalvec[imeth].P()) +
@@ -817,16 +823,14 @@ int MissingMassCalculatorV2::NuPsolutionV3(const double &mNu1, const double &mNu
 }
 
 // returns solution for Lepton Flavor Violating X->lep+tau studies
-int MissingMassCalculatorV2::NuPsolutionLFV(const TVector2 &met_vec,
-                                                     const TLorentzVector &tau, const double &l_nu,
-                                                     std::vector<TLorentzVector> &nu_vec) {
+int MissingMassCalculatorV2::NuPsolutionLFV(const XYVector &met_vec,
+                                                     const PtEtaPhiMVector &tau, const double &l_nu,
+                                                     std::vector<PtEtaPhiMVector> &nu_vec) {
   int solution_code = 0; // 0 with no solution, 1 with solution
 
   nu_vec.clear();
-  TLorentzVector nu(0.0, 0.0, 0.0, 0.0);
-  TLorentzVector nu2(0.0, 0.0, 0.0, 0.0);
-  nu.SetXYZM(met_vec.Px(), met_vec.Py(), 0.0, l_nu);
-  nu2.SetXYZM(met_vec.Px(), met_vec.Py(), 0.0, l_nu);
+  PxPyPzMVector nu(met_vec.X(), met_vec.Y(), 0.0, l_nu);
+  PxPyPzMVector nu2(met_vec.X(), met_vec.Y(), 0.0, l_nu);
 
   const double Mtau = 1.777;
   //   double msq = (Mtau*Mtau-tau.M()*tau.M())/2;
@@ -843,10 +847,14 @@ int MissingMassCalculatorV2::NuPsolutionLFV(const TVector2 &met_vec,
     solution_code = 2;
   double pvz1 = (-b + sqrt(b * b - 4 * a * c)) / (2 * a);
   double pvz2 = (-b - sqrt(b * b - 4 * a * c)) / (2 * a);
-  nu.SetXYZM(met_vec.Px(), met_vec.Py(), pvz1, l_nu);
-  nu2.SetXYZM(met_vec.Px(), met_vec.Py(), pvz2, l_nu);
-  nu_vec.push_back(nu);
-  nu_vec.push_back(nu2);
+
+  nu.SetCoordinates(met_vec.X(), met_vec.Y(), pvz1, l_nu);
+  nu2.SetCoordinates(met_vec.X(), met_vec.Y(), pvz2, l_nu);
+
+  PtEtaPhiMVector return_nu(nu.Pt(), nu.Eta(), nu.Phi(), nu.M());
+  PtEtaPhiMVector return_nu2(nu2.Pt(), nu2.Eta(), nu2.Phi(), nu2.M());
+  nu_vec.push_back(return_nu);
+  nu_vec.push_back(return_nu2);
   return solution_code;
 }
 
@@ -903,7 +911,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
   m_totalProbSum = 0;
   m_mtautauSum = 0;
 
-  TVector2 deltamet_vec;
+  XYVector deltamet_vec;
 
   // initialize a spacewalker, which walks the parameter space according to some
   // algorithm
@@ -921,13 +929,13 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
     const double deltaMety = m_MEtL * m_metCovPhiSin + m_MEtP * m_metCovPhiCos;
 
     //    deltaMetVec.Set(met_smear_x,met_smear_y);
-    preparedInput.m_metVec.Set(preparedInput.m_inputMEtX + deltaMetx,
-                               preparedInput.m_inputMEtY + deltaMety);
+    preparedInput.m_metVec.SetXY(preparedInput.m_inputMEtX + deltaMetx,
+                                 preparedInput.m_inputMEtY + deltaMety);
 
     // save in global variable for speed sake
-    preparedInput.m_MEtX = preparedInput.m_metVec.Px();
-    preparedInput.m_MEtY = preparedInput.m_metVec.Py();
-    preparedInput.m_MEtT = preparedInput.m_metVec.Mod();
+    preparedInput.m_MEtX = preparedInput.m_metVec.X();
+    preparedInput.m_MEtY = preparedInput.m_metVec.Y();
+    preparedInput.m_MEtT = preparedInput.m_metVec.R();
 
     if (paramInsideRange)
       probCalculatorV9fast(m_Phi1, m_Phi2, m_Mnu1, m_Mnu2);
@@ -1006,10 +1014,12 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
     Pz2 = maxFromHist(m_fPZfit2, histInfoOther);
 
     //---- setting 4-vecs
-    TLorentzVector fulltau1, fulltau2;
-
-    fulltau1.SetXYZM(Px1, Py1, Pz1, 1.777);
-    fulltau2.SetXYZM(Px2, Py2, Pz2, 1.777);
+    PxPyPzMVector fulltau1, fulltau2;
+    fulltau1.SetCoordinates(Px1, Py1, Pz1, 1.777);
+    fulltau2.SetCoordinates(Px2, Py2, Pz2, 1.777);
+    //    PtEtaPhiMVector fulltau1(_fulltau1.Pt(), _fulltau1.Eta(), _fulltau1.Phi(), _fulltau1.M());
+    //PtEtaPhiMVector fulltau2(_fulltau2.Pt(), _fulltau2.Eta(), _fulltau2.Phi(), _fulltau2.M());
+    
     if (fulltau1.P() < preparedInput.m_vistau1.P())
       fulltau1 = 1.01 * preparedInput.m_vistau1; // protection against cases when fitted tau
                                                // momentum is smaller than visible tau momentum
@@ -1059,9 +1069,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
                               "  phi=" + std::to_string(preparedInput.m_vistau2.Phi()) +
                               "  type=" + std::to_string(preparedInput.m_type_visTau2))
                                  .c_str());
-      Info("DiTauMassTools", "%s", ("  MET=" + std::to_string(preparedInput.m_MetVec.Mod()) +
-                              "  Met_X=" + std::to_string(preparedInput.m_MetVec.Px()) +
-                              "  Met_Y=" + std::to_string(preparedInput.m_MetVec.Py()))
+      Info("DiTauMassTools", "%s", ("  MET=" + std::to_string(preparedInput.m_MetVec.R()) +
+                              "  Met_X=" + std::to_string(preparedInput.m_MetVec.X()) +
+                              "  Met_Y=" + std::to_string(preparedInput.m_MetVec.Y()))
                                  .c_str());
       Info("DiTauMassTools", " ---------------------------------------------------------- ");
     }
@@ -1106,7 +1116,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 
   int solution = 0;
 
-  std::vector<TLorentzVector> nu_vec;
+  std::vector<PtEtaPhiMVector> nu_vec;
 
   m_totalProbSum = 0;
   m_mtautauSum = 0;
@@ -1154,10 +1164,10 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
   m_iang1high = 0;
 
   //   double Mvis=(tau_vec1+tau_vec2).M();
-  //   TLorentzVector met4vec(0.0,0.0,0.0,0.0);
-  //   met4vec.SetPxPyPzE(met_vec.X(),met_vec.Y(),0.0,met_vec.Mod());
+  //   PtEtaPhiMVector met4vec(0.0,0.0,0.0,0.0);
+  //   met4vec.SetPxPyPzE(met_vec.X(),met_vec.Y(),0.0,met_vec.R());
   //   double Meff=(tau_vec1+tau_vec2+met4vec).M();
-  //   double met_det=met_vec.Mod();
+  //   double met_det=met_vec.R();
 
   //---------------------------------------------
   if (preparedInput.m_tauTypes == TauTypes::ll) // dilepton case
@@ -1168,8 +1178,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
     double input_metX = preparedInput.m_MetVec.X();
     double input_metY = preparedInput.m_MetVec.Y();
 
-    TLorentzVector tau_tmp(0.0, 0.0, 0.0, 0.0);
-    TLorentzVector lep_tmp(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector tau_tmp(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector lep_tmp(0.0, 0.0, 0.0, 0.0);
     int tau_type_tmp;
     int tau_ind = 0;
 
@@ -1237,7 +1247,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
             continue; // use ellipse instead of square
           met_smear_x = met_smearL * met_coscovphi - met_smearP * met_sincovphi;
           met_smear_y = met_smearL * met_sincovphi + met_smearP * met_coscovphi;
-          metvec_tmp.Set(input_metX + met_smear_x, input_metY + met_smear_y);
+          metvec_tmp.SetXY(input_metX + met_smear_x, input_metY + met_smear_y);
 
           solution = NuPsolutionLFV(metvec_tmp, tau_tmp, M_nu, nu_vec);
 
@@ -1327,10 +1337,10 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 
     //----- Stuff below are for Winter 2012 lep-had analysis only; it has to be
     // replaced by a more common scheme once other channels are optimized
-    //       TVector2
+    //       XYVector
     //       mht_vec((tau_vec1+tau_vec2).Px(),(tau_vec1+tau_vec2).Py()); //
     //       missing Ht vector for Njet25=0 events const double
-    //       mht=mht_vec.Mod();
+    //       mht=mht_vec.R();
     double input_metX = preparedInput.m_MetVec.X();
     double input_metY = preparedInput.m_MetVec.Y();
 
@@ -1347,8 +1357,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
     //          input_metY=met_vec.Y();
     //        }
 
-    TLorentzVector tau_tmp(0.0, 0.0, 0.0, 0.0);
-    TLorentzVector lep_tmp(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector tau_tmp(0.0, 0.0, 0.0, 0.0);
+    PtEtaPhiMVector lep_tmp(0.0, 0.0, 0.0, 0.0);
     int tau_type_tmp;
     if (preparedInput.m_type_visTau1 == 8) {
       tau_tmp = preparedInput.m_vistau2;
@@ -1372,7 +1382,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
           continue; // use ellipse instead of square
         met_smear_x = met_smearL * m_metCovPhiCos - met_smearP * m_metCovPhiSin;
         met_smear_y = met_smearL * m_metCovPhiSin + met_smearP * m_metCovPhiCos;
-        metvec_tmp.Set(input_metX + met_smear_x, input_metY + met_smear_y);
+        metvec_tmp.SetXY(input_metX + met_smear_x, input_metY + met_smear_y);
 
         solution = NuPsolutionLFV(metvec_tmp, tau_tmp, 0.0, nu_vec);
 
@@ -1505,15 +1515,15 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
     double Py1 = maxFromHist(m_fPYfit1, histInfoOther);
     double Pz1 = maxFromHist(m_fPZfit1, histInfoOther);
     //---- setting 4-vecs
-    TLorentzVector nu1_tmp(0.0, 0.0, 0.0, 0.0);
-    TLorentzVector nu2_tmp(0.0, 0.0, 0.0, 0.0);
+    PxPyPzMVector nu1_tmp(0.0, 0.0, 0.0, 0.0);
+    PxPyPzMVector nu2_tmp(0.0, 0.0, 0.0, 0.0);
     if (preparedInput.m_type_visTau1 == 8) {
       nu1_tmp = preparedInput.m_vistau1;
-      nu2_tmp.SetXYZM(Px1, Py1, Pz1, 1.777);
+      nu2_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
     }
     if (preparedInput.m_type_visTau2 == 8) {
       nu2_tmp = preparedInput.m_vistau2;
-      nu1_tmp.SetXYZM(Px1, Py1, Pz1, 1.777);
+      nu1_tmp.SetCoordinates(Px1, Py1, Pz1, 1.777);
     }
     m_fDitauStuffHisto.nutau1 = nu1_tmp - preparedInput.m_vistau1;
     m_fDitauStuffHisto.nutau2 = nu2_tmp - preparedInput.m_vistau2;
@@ -1542,8 +1552,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
                 +"  M="+std::to_string(preparedInput.m_vistau2.M())+" eta="+std::to_string(preparedInput.m_vistau2.Eta())
                 +"  phi="+std::to_string(preparedInput.m_vistau2.Phi())
                 +"  type="+std::to_string(preparedInput.m_type_visTau2)).c_str());
-      Info("DiTauMassTools", "%s", ("  MET="+std::to_string(preparedInput.m_MetVec.Mod())+"  Met_X="+std::to_string(preparedInput.m_MetVec.Px())
-                +"  Met_Y="+std::to_string(preparedInput.m_MetVec.Py())).c_str());
+      Info("DiTauMassTools", "%s", ("  MET="+std::to_string(preparedInput.m_MetVec.R())+"  Met_X="+std::to_string(preparedInput.m_MetVec.X())
+                +"  Met_Y="+std::to_string(preparedInput.m_MetVec.Y())).c_str());
       Info("DiTauMassTools", " ---------------------------------------------------------- ");
     }
   }
@@ -1860,7 +1870,7 @@ int MissingMassCalculatorV2::probCalculatorV9fast(const double &phi1, const doub
   if (solution != 1)
     return -4;
   //  refineSolutions (            M_nu1,M_nu2,
-  //                              met_smearL,met_smearP,metvec_tmp.Mod(),
+  //                              met_smearL,met_smearP,metvec_tmp.R(),
   //                              nsol1, nsol2,m_Mvis,m_Meff);
   refineSolutions(M_nu1, M_nu2, nsol1, nsol2, m_Mvis, m_Meff);
 
@@ -1908,12 +1918,12 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
   int ngoodsol1 = 0;
   int ngoodsol2 = 0;
   double constProb =
-      Prob->apply(preparedInput, -99, -99, TLorentzVector(0, 0, 0, 0), TLorentzVector(0, 0, 0, 0),
-                  TLorentzVector(0, 0, 0, 0), TLorentzVector(0, 0, 0, 0), true, false, false);
+      Prob->apply(preparedInput, -99, -99, PtEtaPhiMVector(0, 0, 0, 0), PtEtaPhiMVector(0, 0, 0, 0),
+                  PtEtaPhiMVector(0, 0, 0, 0), PtEtaPhiMVector(0, 0, 0, 0), true, false, false);
 
   for (int j1 = 0; j1 < nsol1; ++j1) {
-    TLorentzVector &nuvec1_tmpj = m_nuvecsol1[j1];
-    TLorentzVector &tauvecsol1j = m_tauvecsol1[j1];
+    PtEtaPhiMVector &nuvec1_tmpj = m_nuvecsol1[j1];
+    PtEtaPhiMVector &tauvecsol1j = m_tauvecsol1[j1];
     double &tauvecprob1j = m_tauvecprob1[j1];
     tauvecprob1j = 0.;
     // take first or second solution
@@ -1930,21 +1940,21 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
     }
 
     if (!m_switch1) {
-      nuvec1_tmpj.SetXYZM(nuvec1_tmpj.Px(), nuvec1_tmpj.Py(), nuvec1_tmpj.Pz(), M_nu1);
+      nuvec1_tmpj.SetCoordinates(nuvec1_tmpj.Pt(), nuvec1_tmpj.Eta(), nuvec1_tmpj.Phi(), M_nu1);
       tauvecsol1j.SetPxPyPzE(0., 0., 0., 0.);
       tauvecsol1j += nuvec1_tmpj;
       tauvecsol1j += m_tauVec1;
       if (tauvecsol1j.E() >= preparedInput.m_beamEnergy)
         continue;
       tauvecprob1j = Prob->apply(preparedInput, preparedInput.m_type_visTau1, -99, m_tauVec1,
-                                 TLorentzVector(0, 0, 0, 0), nuvec1_tmpj,
-                                 TLorentzVector(0, 0, 0, 0), false, true, false);
+                                 PtEtaPhiMVector(0, 0, 0, 0), nuvec1_tmpj,
+                                 PtEtaPhiMVector(0, 0, 0, 0), false, true, false);
       ++ngoodsol1;
     }
 
     for (int j2 = 0; j2 < nsol2; ++j2) {
-      TLorentzVector &nuvec2_tmpj = m_nuvecsol2[j2];
-      TLorentzVector &tauvecsol2j = m_tauvecsol2[j2];
+      PtEtaPhiMVector &nuvec2_tmpj = m_nuvecsol2[j2];
+      PtEtaPhiMVector &tauvecsol2j = m_tauvecsol2[j2];
       double &tauvecprob2j = m_tauvecprob2[j2];
       if (j1 == 0) {
         tauvecprob2j = 0.;
@@ -1962,15 +1972,15 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
         }
 
         if (!m_switch2) {
-          nuvec2_tmpj.SetXYZM(nuvec2_tmpj.Px(), nuvec2_tmpj.Py(), nuvec2_tmpj.Pz(), M_nu2);
+          nuvec2_tmpj.SetCoordinates(nuvec2_tmpj.Pt(), nuvec2_tmpj.Eta(), nuvec2_tmpj.Phi(), M_nu2);
           tauvecsol2j.SetPxPyPzE(0., 0., 0., 0.);
           tauvecsol2j += nuvec2_tmpj;
           tauvecsol2j += m_tauVec2;
           if (tauvecsol2j.E() >= preparedInput.m_beamEnergy)
             continue;
           tauvecprob2j = Prob->apply(preparedInput, -99, preparedInput.m_type_visTau2,
-                                     TLorentzVector(0, 0, 0, 0), m_tauVec2,
-                                     TLorentzVector(0, 0, 0, 0), nuvec2_tmpj, false, true, false);
+                                     PtEtaPhiMVector(0, 0, 0, 0), m_tauVec2,
+                                     PtEtaPhiMVector(0, 0, 0, 0), nuvec2_tmpj, false, true, false);
           ++ngoodsol2;
         }
       }
@@ -2022,8 +2032,8 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
         m_mtautauFinalSolVec[m_nsol] = mtautau;
         m_probFinalSolVec[m_nsol] = totalProb;
 
-        TLorentzVector &nu1Final = m_nu1FinalSolVec[m_nsol];
-        TLorentzVector &nu2Final = m_nu2FinalSolVec[m_nsol];
+        PtEtaPhiMVector &nu1Final = m_nu1FinalSolVec[m_nsol];
+        PtEtaPhiMVector &nu2Final = m_nu2FinalSolVec[m_nsol];
         //      for (int iv=0;iv<4;++iv){
 
         nu1Final.SetPxPyPzE(nuvec1_tmpj.Px(), nuvec1_tmpj.Py(), nuvec1_tmpj.Pz(), nuvec1_tmpj.E());
@@ -2044,10 +2054,10 @@ int MissingMassCalculatorV2::refineSolutions(const double &M_nu1, const double &
   return m_nsol;
 }
 
-int MissingMassCalculatorV2::TailCleanUp(const TLorentzVector &vis1,
-                                                  const TLorentzVector &nu1,
-                                                  const TLorentzVector &vis2,
-                                                  const TLorentzVector &nu2, const double &mmc_mass,
+int MissingMassCalculatorV2::TailCleanUp(const PtEtaPhiMVector &vis1,
+                                                  const PtEtaPhiMVector &nu1,
+                                                  const PtEtaPhiMVector &vis2,
+                                                  const PtEtaPhiMVector &nu2, const double &mmc_mass,
                                                   const double &vis_mass, const double &eff_mass,
                                                   const double &dphiTT) {
 
@@ -2248,8 +2258,8 @@ void MissingMassCalculatorV2::handleSolutions()
     ++m_iter5;
     double totalProb;
     double mtautau;
-    const TLorentzVector *pnuvec1_tmpj;
-    const TLorentzVector *pnuvec2_tmpj;
+    const PtEtaPhiMVector *pnuvec1_tmpj;
+    const PtEtaPhiMVector *pnuvec2_tmpj;
 
     if (oldToBeUsed) {
       totalProb = m_probFinalSolOldVec[isol];
@@ -2262,8 +2272,8 @@ void MissingMassCalculatorV2::handleSolutions()
       pnuvec1_tmpj = &m_nu1FinalSolVec[isol];
       pnuvec2_tmpj = &m_nu2FinalSolVec[isol];
     }
-    const TLorentzVector &nuvec1_tmpj = *pnuvec1_tmpj;
-    const TLorentzVector &nuvec2_tmpj = *pnuvec2_tmpj;
+    const PtEtaPhiMVector &nuvec1_tmpj = *pnuvec1_tmpj;
+    const PtEtaPhiMVector &nuvec2_tmpj = *pnuvec2_tmpj;
 
     solSum += mtautau;
     solSum2 += mtautau * mtautau;
@@ -2673,7 +2683,7 @@ inline bool MissingMassCalculatorV2::precomputeCache() {
   m_tauVec1 = preparedInput.m_vistau1;
   m_tauVec2 = preparedInput.m_vistau2;
 
-  const TVector2 &metVec = preparedInput.m_MetVec;
+  const XYVector &metVec = preparedInput.m_MetVec;
 
   bool same = true;
   same = updateDouble(m_tauVec1.Phi(), m_tauVec1Phi) && same;
@@ -2697,16 +2707,16 @@ inline bool MissingMassCalculatorV2::precomputeCache() {
   same = updateDouble(sin(preparedInput.m_METcovphi), m_metCovPhiSin) && same;
   same = updateDouble((m_tauVec1 + m_tauVec2).M(), m_Mvis) && same;
 
-  TLorentzVector Met4vec;
+  PtEtaPhiMVector Met4vec;
   Met4vec.SetPxPyPzE(preparedInput.m_MetVec.X(), preparedInput.m_MetVec.Y(), 0.0,
-                     preparedInput.m_MetVec.Mod());
+                     preparedInput.m_MetVec.R());
   same = updateDouble((m_tauVec1 + m_tauVec2 + Met4vec).M(), m_Meff) && same;
 
   same = updateDouble(preparedInput.m_HtOffset, preparedInput.m_htOffset) && same;
   // note that if useHT met_vec is actually -HT
   same = updateDouble(metVec.X(), preparedInput.m_inputMEtX) && same;
   same = updateDouble(metVec.Y(), preparedInput.m_inputMEtY) && same;
-  same = updateDouble(metVec.Mod(), preparedInput.m_inputMEtT) && same;
+  same = updateDouble(metVec.R(), preparedInput.m_inputMEtT) && same;
 
   return same;
 }
@@ -2900,15 +2910,15 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
 
   // this will be in MeV but MMC allows MeV
   // assume the mass is correct as well
-  TLorentzVector tlvTau1 = part1->p4();
-  TLorentzVector tlvTau2 = part2->p4();
+  PtEtaPhiMVector tlvTau1(part1->pt(), part1->eta(), part1->phi(), part1->m());
+  PtEtaPhiMVector tlvTau2(part2->pt(), part2->eta(), part2->phi(), part2->m());
 
   // Convert to GeV. In principle, MMC should cope with MeV but should check
   // thoroughly
-  TLorentzVector fixedtau1;
-  fixedtau1.SetPtEtaPhiM(tlvTau1.Pt() / GEV, tlvTau1.Eta(), tlvTau1.Phi(), tlvTau1.M() / GEV);
-  TLorentzVector fixedtau2;
-  fixedtau2.SetPtEtaPhiM(tlvTau2.Pt() / GEV, tlvTau2.Eta(), tlvTau2.Phi(), tlvTau2.M() / GEV);
+  PtEtaPhiMVector fixedtau1;
+  fixedtau1.SetCoordinates(tlvTau1.Pt() / GEV, tlvTau1.Eta(), tlvTau1.Phi(), tlvTau1.M() / GEV);
+  PtEtaPhiMVector fixedtau2;
+  fixedtau2.SetCoordinates(tlvTau2.Pt() / GEV, tlvTau2.Eta(), tlvTau2.Phi(), tlvTau2.M() / GEV);
 
   preparedInput.SetVisTauType(0, mmcType1);
   preparedInput.SetVisTauType(1, mmcType2);
@@ -2924,7 +2934,7 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   }
   if (preparedInput.m_fUseVerbose)
     Info("DiTauMassTools", "%s", ("running for tau types "+std::to_string(preparedInput.m_type_visTau1)+" "+std::to_string(preparedInput.m_type_visTau2)).c_str());
-  TVector2 met_vec(met->mpx() / GEV, met->mpy() / GEV);
+  XYVector met_vec(met->mpx() / GEV, met->mpy() / GEV);
   preparedInput.SetMetVec(met_vec);
   if (preparedInput.m_fUseVerbose)
     Info("DiTauMassTools", "%s", ("passing SumEt="+std::to_string(met->sumet() / GEV)).c_str());
@@ -2967,7 +2977,7 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   //--------- re-ordering is done ---------------------------------------
 
   preparedInput.m_DelPhiTT =
-      std::abs(TVector2::Phi_mpi_pi(preparedInput.m_vistau1.Phi() - preparedInput.m_vistau2.Phi()));
+      std::abs(Phi_mpi_pi(preparedInput.m_vistau1.Phi() - preparedInput.m_vistau2.Phi()));
 
   for (unsigned int i = 0; i < preparedInput.m_jet4vecs.size(); i++) {
     // correcting sumEt, give priority to SetMetScanParamsUE()
@@ -3003,49 +3013,49 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   if (m_mmcCalibrationSet == MMCCalibrationSetV2::LFVMMC2012 ) {
     if ((preparedInput.m_type_visTau1 >= 0 && preparedInput.m_type_visTau1 <= 2) &&
         preparedInput.m_vistau1.M() != 1.1) {
-      preparedInput.m_vistau1.SetPtEtaPhiM(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
+      preparedInput.m_vistau1.SetCoordinates(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
                                          preparedInput.m_vistau1.Phi(), 1.1);
     }
     if ((preparedInput.m_type_visTau1 >= 3 && preparedInput.m_type_visTau1 <= 5) &&
         preparedInput.m_vistau1.M() != 1.35) {
-      preparedInput.m_vistau1.SetPtEtaPhiM(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
+      preparedInput.m_vistau1.SetCoordinates(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
                                          preparedInput.m_vistau1.Phi(), 1.35);
     }
     // checking input mass of hadronic tau-2
     if ((preparedInput.m_type_visTau2 >= 0 && preparedInput.m_type_visTau2 <= 2) &&
         preparedInput.m_vistau2.M() != 1.1) {
-      preparedInput.m_vistau2.SetPtEtaPhiM(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
+      preparedInput.m_vistau2.SetCoordinates(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
                                          preparedInput.m_vistau2.Phi(), 1.1);
     }
     if ((preparedInput.m_type_visTau2 >= 3 && preparedInput.m_type_visTau2 <= 5) &&
         preparedInput.m_vistau2.M() != 1.35) {
-      preparedInput.m_vistau2.SetPtEtaPhiM(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
+      preparedInput.m_vistau2.SetCoordinates(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
                                          preparedInput.m_vistau2.Phi(), 1.35);
     }
   } else {
     // DRMERGE end LFV addition
     if ((preparedInput.m_type_visTau1 >= 0 && preparedInput.m_type_visTau1 <= 2) &&
         preparedInput.m_vistau1.M() != 0.8) {
-      preparedInput.m_vistau1.SetPtEtaPhiM(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
+      preparedInput.m_vistau1.SetCoordinates(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
                                          preparedInput.m_vistau1.Phi(), 0.8);
     }
     // 3 prong
     if ((preparedInput.m_type_visTau1 >= 3 && preparedInput.m_type_visTau1 <= 5) &&
         preparedInput.m_vistau1.M() != 1.2) {
-      preparedInput.m_vistau1.SetPtEtaPhiM(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
+      preparedInput.m_vistau1.SetCoordinates(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
                                          preparedInput.m_vistau1.Phi(), 1.2);
     }
     // checking input mass of hadronic tau-2
     // one prong
     if ((preparedInput.m_type_visTau2 >= 0 && preparedInput.m_type_visTau2 <= 2) &&
         preparedInput.m_vistau2.M() != 0.8) {
-      preparedInput.m_vistau2.SetPtEtaPhiM(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
+      preparedInput.m_vistau2.SetCoordinates(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
                                          preparedInput.m_vistau2.Phi(), 0.8);
     }
     // 3 prong
     if ((preparedInput.m_type_visTau2 >= 3 && preparedInput.m_type_visTau2 <= 5) &&
         preparedInput.m_vistau2.M() != 1.2) {
-      preparedInput.m_vistau2.SetPtEtaPhiM(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
+      preparedInput.m_vistau2.SetCoordinates(preparedInput.m_vistau2.Pt(), preparedInput.m_vistau2.Eta(),
                                          preparedInput.m_vistau2.Phi(), 1.2);
     }
   } // DRDRMERGE LFV else closing
@@ -3138,7 +3148,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
         preparedInput.m_MHtSigma2; // sigma of 2nd Gaussian for missing Ht resolution
     preparedInput.m_METsigmaL = preparedInput.m_MHtSigma2;
 
-    TLorentzVector tauSum = preparedInput.m_vistau1 + preparedInput.m_vistau2;
-    preparedInput.m_MetVec.Set(-tauSum.Px(), -tauSum.Py()); // WARNING this replace metvec by -mht
+    PtEtaPhiMVector tauSum = preparedInput.m_vistau1 + preparedInput.m_vistau2;
+    preparedInput.m_MetVec.SetXY(-tauSum.Px(), -tauSum.Py()); // WARNING this replace metvec by -mht
   }
 }
