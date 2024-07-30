@@ -20,7 +20,7 @@ __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 __all__ = [ 'theApp', 'ServiceMgr', 'ToolSvc', 'theAuditorSvc',
             'athMasterSeq',
             'athCondSeq',
-            'athAlgSeq',    'topSequence',
+            'athAlgSeq',
             'athOutSeq',
             ]
 
@@ -823,7 +823,7 @@ theAuditorSvc = ServiceMgr.AuditorSvc
 #                         |
 #                         +--- athCondSeq (after athAlgSeq in MT)
 #                         |
-#                         +--- athAlgSeq == topSequence
+#                         +--- athAlgSeq
 #                 |
 #                 +--- athEndSeq
 #         |
@@ -834,5 +834,3 @@ athAlgSeq    = AlgSequence.AthSequencer( "AthAlgSeq" )
 athOutSeq    = AlgSequence.AthSequencer( "AthOutSeq" )
 athBeginSeq  = AlgSequence.AthSequencer( "AthBeginSeq" )
 athEndSeq    = AlgSequence.AthSequencer( "AthEndSeq" )
-
-topSequence  = athAlgSeq  # for backward compatibility
