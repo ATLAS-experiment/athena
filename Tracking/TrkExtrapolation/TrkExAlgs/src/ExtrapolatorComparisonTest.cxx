@@ -15,7 +15,6 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkParametersBase/ParametersT.h"
 #include "EventPrimitives/EventPrimitives.h"
-#include "MagFieldInterfaces/IMagFieldSvc.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ISvcLocator.h"
