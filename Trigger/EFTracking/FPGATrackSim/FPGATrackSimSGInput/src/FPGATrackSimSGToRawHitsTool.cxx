@@ -775,7 +775,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{ m_beamSpotKey, eventContext };
         Trk::PerigeeSurface persf(beamSpotHandle->beamPos());
       }
-      const Trk::TrackParameters* tP = m_extrapolator->extrapolate(eventContext, cParameters, persf, Trk::anyDirection, false).release();
+      const std::unique_ptr<Trk::TrackParameters> tP = m_extrapolator->extrapolate(eventContext, cParameters, persf, Trk::anyDirection, false);
       const double track_truth_d0 = tP ? tP->parameters()[Trk::d0] : 999.;
       const double track_truth_phi = tP ? tP->parameters()[Trk::phi] : 999.;
       const double track_truth_p = (tP && fabs(tP->parameters()[Trk::qOverP]) > 1.e-8) ?
