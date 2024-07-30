@@ -64,18 +64,21 @@ class TriggerAPISession:
     """
 
 
-    def __init__(self, input=None, *, grl=None, flags=None, json=None, menu=None, period=None):
+    def __init__(self, input=None, *, grl=None, flags=None, json=None, menu=None, file=None, period=None):
         """
         Specify one and only one of the following parameters to construct your API session:
 
         :param input: If specified, will try to auto-infer which of the things below it is:
 
         :param grl: Path to a GRL file, locatable by PathResolver
-        :param flags: flag container, used if reading triggers from the trigger menu
+        :param flags: flag container, used if reading triggers from the trigger menu (in the file or the release) - EXPERT OPTION
         :param json: Path to a JSON file, locatable by PathResolver, containing a cache of TriggerAPI session
         :param menu: Specify a menu to use, such as "Physics_pp_run3_v1". This is otherwise taken from flags
+        :param file: Specify a root file (AOD etc) from which the menu will be taken
         :param period: Legacy option, can specify a TriggerPeriod and will load through the hardcoded GRLs (TriggerPeriodData)
         """
+
+        import os
 
         if input is not None:
             if type(input)==str:
@@ -85,6 +88,9 @@ class TriggerAPISession:
                 elif input.endswith(".json"):
                     log.info("Loading saved session from:" + input)
                     json = input
+                elif os.path.exists(input):
+                    log.info("Loading session with menu from file:" + input)
+                    file = input
                 else:
                     log.info("Loading session for menu:" + input)
                     menu = input
@@ -111,6 +117,11 @@ class TriggerAPISession:
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
             self.flags = initConfigFlags()
             self.flags.Trigger.triggerMenuSetup = menu
+            self.flags.lock()
+        elif file is not None:
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            self.flags = initConfigFlags()
+            self.flags.Input.Files = [file]
             self.flags.lock()
         elif period is not None:
             TriggerAPI.reset()
@@ -237,7 +248,7 @@ class TriggerAPISession:
         import tqdm
         pbar = tqdm.tqdm(self.runs(),unit=" runs",bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}')
         for run in pbar:
-            pbar.set_description(f"Getting lowest unprescaled for run {run}")
+            pbar.set_description(f"Determining lowest unprescaled for run {run}")
             if int(run)<runStart or int(run)>runEnd: continue
             out[run] = self.getLowestUnprescaled(triggerType=triggerType,livefraction=livefraction,runStart=run,runEnd=run)
         return out
@@ -288,16 +299,20 @@ class TriggerAPISession:
 if __name__ == "__main__":
     import argparse
 
+    class Formatter(     argparse.ArgumentDefaultsHelpFormatter,     argparse.RawDescriptionHelpFormatter): pass
+
     parser = argparse.ArgumentParser(
         prog='tapis',
-        description="Example usage: tapis path/to/grl.xml getLowestUnprescaled --triggerType el_single",
-        epilog='General command structure is: tapis [grl/menu/json] [command] [--commandOpt1] [--commandOpt2] ...',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        description="""    Example: tapis path/to/grl.xml getLowestUnprescaledByRun
+        
+    See below for available commands. For help on a command, do: tapis dummy [command] --help""",
+        epilog='General command structure is: tapis [grl/menu/file/json] [command] [--commandOpt1] [--commandOpt2] ...',
+        formatter_class=Formatter)
 
     parser.add_argument("--save",default=None,help="If specified, the path to save the session to as a json file")
 
-    parser.add_argument("input",metavar="grl/menu/json",help="Either a GRL, a menu name, or a json session cache file. PathResolve paths supported")
-    subparsers = parser.add_subparsers(help="Available subcommands",dest="command")
+    parser.add_argument("input",metavar="grl/menu/file/json",help="Either a GRL, a menu name, a pool file (with menu metadata), or a json session cache file. PathResolver paths supported")
+    subparsers = parser.add_subparsers(help="Available commands",dest="command",required=True)
 
 
     parser_getLowestUnprescaled = subparsers.add_parser('getLowestUnprescaled',help='Get lowest unprescaled chain names',
@@ -307,6 +322,7 @@ if __name__ == "__main__":
     parser_chains = subparsers.add_parser('chains',help='Show info about a chain or selection of chains',
                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_chains.add_argument('chainName',type=str,help="name of chain or wildcarded string",default="*",nargs='?')
+    parser_chains.add_argument('--debug',action='store_true',help="Show additional information about each chain")
 
     parser_runs = subparsers.add_parser('runs',help='List runs available in the session')
 
@@ -348,7 +364,7 @@ if __name__ == "__main__":
                                     runStart=args.runStart,runEnd=args.runEnd)
         s.setRunRange(args.runStart,args.runEnd) # do so that livefractions are correctly updated
         chains = s.chains(triggerType=args.triggerType)
-        result = [{"name":chains[c].name,"triggerType":TriggerType.toStr(chains[c].triggerType),"livefraction":chains[c].livefraction} for c in result]
+        result = [{"name":chains[c].name,"triggerType":TriggerType.toStr(chains[c].triggerType).replace("|"," "),"livefraction":chains[c].livefraction} for c in result]
         pandasPrint=True
     elif args.command == "getLowestUnprescaledByRun":
         result = s.getLowestUnprescaledByRun(triggerType=args.triggerType,
@@ -361,7 +377,10 @@ if __name__ == "__main__":
         chains = s.chains(triggerType=args.triggerType) # used to get livefractions for each trigger chain
         badRuns = []
         prevRun = 0
-        for run in sorted(result.keys()): # go through runs in order
+        import tqdm
+        pbar = tqdm.tqdm(sorted(result.keys()),unit=" runs",bar_format='{l_bar}{bar:10}{r_bar}{bar:-10b}') # go through runs in order
+        for run in pbar:
+            pbar.set_description(f"Collating result for run {run}")
             s.setRunRange(run,run) # do so that livefractions are calculated for the chains
             if not result[run]: # no chain met livefraction and triggerType requirement for this run, so declare a dummy trigger
                 result[run].update(["---"])
@@ -380,7 +399,7 @@ if __name__ == "__main__":
         for c,ranges in runRanges.items():
             for start,end,livefraction in ranges:
                 #s.setRunRange(start,end) # do so that livefractions are correctly updated
-                result += [{"runStart":start,"runEnd":end,"name":c,"triggerType":TriggerType.toStr(chains[c].triggerType) if c != "---" else "---",
+                result += [{"runStart":start,"runEnd":end,"name":c,"triggerType":TriggerType.toStr(chains[c].triggerType).replace("|"," ") if c != "---" else "---",
                             "livefraction":livefraction
                             }]
 
@@ -394,14 +413,17 @@ if __name__ == "__main__":
         s.setRunRange(args.runStart,args.runEnd)
         import fnmatch
         result = {k: v for k,v in s.chains(triggerType=args.triggerType).items() if fnmatch.fnmatch(k,args.chainName)}
-        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result.values()]
+        if args.debug:
+            result = [{"name":c.name,"legs":str({l.legname:TriggerType.toStr(l.legtype) for l in c.legs}),"triggerType":TriggerType.toStr(c.triggerType).replace("|"," "),"livefraction":c.livefraction} for c in result.values()]
+        else:
+            result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType).replace("|"," "),"livefraction":c.livefraction} for c in result.values()]
         pandasPrint = True
     elif args.command == "runs":
         s.setRunRange(args.runStart,args.runEnd)
         result = sorted(list(s.runs()))
     elif args.command == "getLowerUnprescaled":
         result = s.getLowerUnprescaled(chainName=args.chainName,triggerType=args.triggerType,livefraction=args.livefraction,runStart=args.runStart,runEnd=args.runEnd)
-        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType),"livefraction":c.livefraction} for c in result]
+        result = [{"name":c.name,"triggerType":TriggerType.toStr(c.triggerType).replace("|"," "),"livefraction":c.livefraction} for c in result]
         pandasPrint=True
     if pandasPrint:
         import pandas as pd
