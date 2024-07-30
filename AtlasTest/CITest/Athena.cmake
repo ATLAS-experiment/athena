@@ -274,6 +274,9 @@ atlas_add_citest( ACTS_ValidateSeeds
 atlas_add_citest( ACTS_ValidateOrthogonalSeeds 
    SCRIPT ActsValidateOrthogonalSeeds.sh )
 
+atlas_add_citest( ACTS_ValidateGbtsSeeds 
+   SCRIPT ActsValidateGbtsSeeds.sh )
+
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
 

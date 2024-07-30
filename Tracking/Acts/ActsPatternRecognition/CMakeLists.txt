@@ -26,6 +26,7 @@ atlas_add_component( ActsPatternRecognition
 		       InDetRecToolInterfaces
 		       MagFieldConditions
 		       MagFieldElements
+		       PixelReadoutGeometryLib
 		       SiSPSeededTrackFinderData
 		       SiSpacePoint
 		       StoreGateLib
@@ -33,3 +34,5 @@ atlas_add_component( ActsPatternRecognition
 		       TrkParameters
 		       TrkSpacePoint
 		       xAODInDetMeasurement )
+
+atlas_install_data( share/*.txt )

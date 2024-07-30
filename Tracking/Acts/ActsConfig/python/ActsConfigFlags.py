@@ -6,6 +6,7 @@ from AthenaConfiguration.Enums import FlagEnum
 class SeedingStrategy(FlagEnum):
     Default = "Default"
     Orthogonal = "Orthogonal"
+    Gbts = "Gbts"
 
 # This is temporary during the integration of ACTS.
 class SpacePointStrategy(FlagEnum):
