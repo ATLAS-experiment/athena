@@ -18,7 +18,7 @@ from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTra
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 from PyJobTransforms.trfExe import DQMergeExecutor
 from PyJobTransforms.trfExe import bsMergeExecutor
-from PyJobTransforms.trfArgs import addD3PDArguments, addExtraDPDTypes
+from PyJobTransforms.trfArgs import addExtraDPDTypes
 from PATJobTransforms.PATTransformUtils import addNTUPMergeSubsteps, addPhysValidationMergeFiles
 from PATJobTransforms.PATTransformUtils import addDAODArguments, addDAODMergerSubsteps
 
@@ -58,7 +58,6 @@ def getTransform():
 
     addDAODArguments(trf.parser)
     addPhysValidationMergeFiles(trf.parser)
-    addD3PDArguments(trf.parser, transform=trf, addD3PDMRGtypes=True)
     addExtraDPDTypes(trf.parser, transform=trf, NTUPMergerArgs = True)
 
     # Add HITSMerge and RDOMerge only if SimuJobTransforms is available
