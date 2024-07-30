@@ -252,7 +252,159 @@ BOOST_AUTO_TEST_CASE(RangeFieldOperators){
   //...and inequality
   BOOST_CHECK(f2 != f3);
   //conversion to string, with conversion operator
-  BOOST_TEST_MESSAGE(std::string(f2));
+  BOOST_TEST(std::string(f2) == std::string("0,1,2,3,4,5"));
+}
+BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
+  //Field 'or' is the method for combining range fields, giving a superset of valid indices
+  //start with an unbounded virgin field
+  //UNBOUNDED
+  Range::field f1;
+  const std::vector<Range::element_type> ev{0,1,2,3,4,5};
+  f1.set(ev); //f1 is now enumerated (check...)
+  const auto enum1 = f1;//use this later
+  BOOST_CHECK(f1.get_mode() == Range::field::enumerated);
+  const Range::field f2;//unbounded
+  BOOST_CHECK_NO_THROW(f1 |= f2); //or them into f1
+  BOOST_CHECK(f1.get_mode() == Range::field::unbounded);
+  //BOTH bounded
+  //add overlapping bounded
+  Range::field both1(0,6);//both bounded
+  BOOST_TEST(both1.get_mode() == Range::field::both_bounded);
+  Range::field both2(3,8);//both bounded
+  BOOST_CHECK_NO_THROW(both1 |= both2);
+  BOOST_TEST(both1.get_mode() == Range::field::both_bounded);
+  BOOST_TEST(both1.get_minimum() == 0);
+  BOOST_TEST(both1.get_maximum() == 8);
+  //add a disjoint bounded region
+  Range::field both3(11,20);//both bounded
+  BOOST_CHECK_NO_THROW(both1 |= both2);
+  BOOST_TEST(both1.get_minimum() == 0);
+  //the following would fail (as per comment in the code)
+  BOOST_TEST(both1.get_maximum() == 20);
+  BOOST_TEST(both1.get_mode() == Range::field::both_bounded);
+  //HIGH bounded
+  Range::field hi1;
+  hi1.set_maximum(10);
+  //check mode
+  BOOST_TEST(hi1.get_mode() == Range::field::high_bounded);
+  Range::field hi2;
+  hi2.set_maximum(12);
+  BOOST_CHECK_NO_THROW(hi1 |= hi2);
+  BOOST_TEST(hi1.get_mode() == Range::field::high_bounded);
+  BOOST_TEST(hi1.get_maximum() == 12);
+  //'or' a high bounded with a both bounded
+  BOOST_CHECK_NO_THROW(hi1 |= both3);
+  BOOST_TEST(hi1.get_mode() == Range::field::high_bounded);
+  BOOST_TEST(hi1.get_maximum() == 20);
+  //'or' a high bounded with a low bounded
+  Range::field lo1;
+  lo1.set_minimum(3);
+  BOOST_CHECK_NO_THROW(hi1 |= lo1);
+  BOOST_TEST(hi1.get_mode() == Range::field::unbounded);
+  //'or' a high bounded with an enumerated
+  hi1.set_maximum(2);
+  BOOST_TEST(hi1.get_maximum() == 2);
+  BOOST_CHECK_NO_THROW(hi1 |= enum1);//{0,1,2,3,4,5}
+  BOOST_TEST(hi1.get_mode() == Range::field::high_bounded);
+  BOOST_TEST(hi1.get_maximum() == 5);
+  //'or' a high bounded with disjoint enumerated
+  const std::vector<Range::element_type> ev2{8,9,10,11};
+  Range::field enum2;
+  enum2.set(ev2);
+  BOOST_CHECK_NO_THROW(hi1 |= enum2);
+  BOOST_TEST(hi1.get_maximum() == 11);
+  Range::element_type e{};
+  BOOST_TEST(hi1.get_next(5,e));
+  //fails, it treats the regions as one contiguous field, giving 6 as next to 5
+  BOOST_TEST(e == 8);
+  //ENUMERATED
+  Range::field enumField;
+  enumField.set(ev);//{0,1,2,3,4,5}
+  //...disjoint enumerated region
+  BOOST_CHECK_NO_THROW(enumField |= enum2); //{8,9,10,11}, enumerated with enumerated
+  BOOST_TEST(enumField.get_values().size() == 10); //disjoint; add entries
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);
+  BOOST_TEST(enumField.get_maximum() == 11);
+  BOOST_TEST(enumField.get_minimum() == 0);
+  BOOST_TEST(enumField.get_next(5,e));
+  BOOST_TEST(e == 8);
+  //overlapping enumerated region
+  enumField.clear();
+  enumField.set(ev);//{0,1,2,3,4,5}
+  Range::field enum3;
+  const std::vector<Range::element_type> ev3{5,6,7,8};
+  enum3.set(ev3);
+  BOOST_CHECK_NO_THROW(enumField |= enum3);//{0,1,2,3,4,5,6,7,8}; it removes duplicates
+  BOOST_TEST(enumField.get_values().size() == 9);
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);
+  BOOST_TEST(hi1.get_next(5,e));
+  BOOST_TEST(e == 6);
+  enumField.clear();
+  //..with a high bound field which encompasses all values
+  Range::field hi;
+  enumField.clear();
+  enumField.set(ev);
+  hi.set_maximum(20);
+  BOOST_CHECK_NO_THROW(enumField |= hi);
+  //whats its type?
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);//unexpectedly, it is a both_bounded
+  //whats the possible value?
+  BOOST_TEST(enumField.get_maximum() == 20);
+  BOOST_TEST(enumField.has_minimum() == false);//failing
+  BOOST_TEST(enumField.get_minimum() == 0);//it doesnt have a minimum
+  //..with a high bound field which is disjoint
+  enumField.clear();
+  hi.clear();
+  enumField.set(ev);//{0,1,2,3,4,5}
+  hi.set_maximum(-2);
+  BOOST_CHECK_NO_THROW(enumField |= hi);
+  //whats its type?
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);//unexpectedly, it is a both_bounded
+  BOOST_TEST(enumField.get_maximum() == 5);
+  BOOST_TEST(enumField.get_minimum() == 0);
+  //with a lo bound field encompassing all values
+  enumField.clear();
+  Range::field lo;
+  enumField.set(ev);//{0,1,2,3,4,5}
+  lo.set_minimum(-1);
+  BOOST_CHECK_NO_THROW(enumField |= lo);
+  //whats its type?
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);//unexpectedly, it is a both_bounded
+  BOOST_TEST(enumField.has_maximum() == false);//failing
+  BOOST_TEST(enumField.get_maximum() == 0);//fails, gives 5
+  BOOST_TEST(enumField.get_minimum() == -1);
+  //with a disjoint lo bound field
+  enumField.clear();
+  lo.clear();
+  enumField.set(ev);//{0,1,2,3,4,5}
+  lo.set_minimum(8);
+  BOOST_CHECK_NO_THROW(enumField |= lo);
+  //whats its type?
+  BOOST_TEST(enumField.get_mode() == Range::field::enumerated);//unexpectedly, it is a both_bounded
+  BOOST_TEST(enumField.has_maximum() == false);//failing
+  BOOST_TEST(enumField.get_maximum() == 0);//fails, gives 5
+  BOOST_TEST(enumField.get_minimum() == 0);
+  //with a both_bounded field encompassing the enumerated values
+  enumField.clear();
+  enumField.set(ev);//{0,1,2,3,4,5}
+  Range::field bounded(-1,10);
+  BOOST_CHECK_NO_THROW(enumField |= bounded);
+  BOOST_TEST(enumField.get_mode() == Range::field::both_bounded);
+  BOOST_TEST(enumField.has_maximum() == true);
+  BOOST_TEST(enumField.get_maximum() == 10);
+  BOOST_TEST(enumField.get_minimum() == -1);
+  //with a disjoint both_bounded field
+  enumField.clear();
+  enumField.set(ev);//{0,1,2,3,4,5}
+  bounded.clear();
+  bounded.set_minimum(10);
+  bounded.set_maximum(20);
+  BOOST_CHECK_NO_THROW(enumField |= bounded);
+  BOOST_TEST(enumField.get_mode() == Range::field::both_bounded);
+  BOOST_TEST(enumField.has_maximum() == true);
+  BOOST_TEST(enumField.get_maximum() == 20);
+  BOOST_TEST(enumField.get_minimum() == 0);
+  
 }
 
 //Range::identifier_factory is a publicly accessible class defined in the Range class
