@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsConfigFlags import SeedingStrategy
 from ActsConfig.ActsUtilities import extractChildKwargs
 from ActsInterop import UnitConstants
+from AthenaCommon.Utils.unixtools import find_datafile
 
 # ACTS tools
 def ActsPixelSeedingToolCfg(flags,
@@ -139,6 +140,16 @@ def ActsStripOrthogonalSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
     return acc
 
+def ActsPixelGbtsSeedingToolCfg(flags,
+                                name: str = "ActsPixelGbtsSeedingTool", 
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
+    # need to get correct path for these files 
+    kwargs.setdefault("connector_input_file" , find_datafile("ActsPatternRecognition/GBTS_EdgeProbabilites_ITKPixels.txt"))
+    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
+    return acc
+
 def ActsSiSpacePointsSeedMakerToolCfg(flags,
                                       name: str = 'ActsSiSpacePointsSeedMakerTool',
                                       **kwargs) -> ComponentAccumulator:
@@ -188,6 +199,8 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
                 seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags))
             else:
                 seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
+        elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+            seedTool_pixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
@@ -257,6 +270,8 @@ def ActsPixelSeedingAlgCfg(flags,
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags)))
             else:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags)))
+        elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags)))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags)))

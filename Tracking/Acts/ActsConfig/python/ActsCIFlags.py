@@ -64,6 +64,12 @@ def actsValidateOrthogonalSeedsFlags(flags) -> None:
     flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
     actsValidateSeedsFlags(flags)
 
+def actsValidateGbtsSeedsFlags(flags) -> None:
+    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (GBTS seeding)"""
+    from ActsConfig.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Gbts 
+    actsValidateSeedsFlags(flags)
+
 def actsValidateTracksFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction"""
     flags.Acts.doAmbiguityResolution = False
