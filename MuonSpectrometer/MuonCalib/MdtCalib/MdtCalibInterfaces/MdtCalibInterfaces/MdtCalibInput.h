@@ -1,28 +1,36 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MDTCALIBINTEFACES_MDTCALIBINPUT_H
 #define MDTCALIBINTEFACES_MDTCALIBINPUT_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
-///
-
-#include <MuonReadoutGeometry/MdtReadoutElement.h>
-#include <MuonReadoutGeometry/MuonDetectorManager.h>
-///
-#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-///
-#include <MuonDigitContainer/MdtDigit.h>
-#include <MuonPrepRawData/MdtPrepData.h>
-#include <TrkSurfaces/StraightLineSurface.h>
-
 
 #include <GaudiKernel/PhysicalConstants.h>
+#include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <CxxUtils/CachedUniquePtr.h>
+///
+namespace MuonGM{
+  class MuonDetectorManager;
+  class MdtReadoutElement;
+}
+namespace MuonGMR4{
+  class MuonDetectorManager;
+  class MdtReadoutElement;
+}
+namespace Muon{
+  class MdtPrepData;
+}
 
-#include <iostream>
+namespace Trk {
+  class StraightLineSurface;
+  class SaggedLineSurface;
+}
 
+class MdtDigit;
+class ActsGeometryContext;
+class Identifier;
+class IdentifierHash;
 
 class MdtCalibInput {
 public:
@@ -40,12 +48,20 @@ public:
     
     /** Constructor taking the MdtPrepdata  */
     MdtCalibInput(const Muon::MdtPrepData& prd);
+    /** Constructor taking taking the xAOD::MdtDriftCircle
+      * @param prd: Reference to the uncalibrated Drift circle
+      * @param gctx: Geometry context to place the drift circle globally within ATLAS
+     */
+    MdtCalibInput(const xAOD::MdtDriftCircle& prd,
+                  const ActsGeometryContext& gctx);
+    
     /** Constructor taking the */
     MdtCalibInput(const Identifier& id, 
                   const int adc, 
                   const int tdc, 
                   const Amg::Vector3D& globalPos);
 
+    ~MdtCalibInput();
     /// Returns the Identifier of the hit
     const Identifier& identify() const;
     /// Returns the tdc counts of the hit
@@ -83,7 +99,7 @@ public:
     void setTriggerTime(const double trigTime);
     /// Returns the distance to track (signed)
     double distanceToTrack() const;
-    enum BFieldComp{
+    enum class BFieldComp{
       alongWire = 0,
       alongTrack = 1,
     };

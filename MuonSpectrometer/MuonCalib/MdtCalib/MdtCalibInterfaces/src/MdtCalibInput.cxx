@@ -1,9 +1,21 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibInterfaces/MdtCalibInput.h"
+
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+
+#include <MuonReadoutGeometry/MdtReadoutElement.h>
+#include <MuonReadoutGeometry/MuonDetectorManager.h>
+///
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+///
+#include <MuonDigitContainer/MdtDigit.h>
+#include <MuonPrepRawData/MdtPrepData.h>
+#include <TrkSurfaces/StraightLineSurface.h>
+#include <GeoModelHelpers/throwExcept.h>
 
 std::ostream& operator<<(std::ostream& ostr, const MdtCalibInput& input){
    ostr<<"adc: "<<input.adc()<<", ";
@@ -19,6 +31,7 @@ std::ostream& operator<<(std::ostream& ostr, const MdtCalibInput& input){
    return ostr;
 }
 
+MdtCalibInput::~MdtCalibInput() = default;
 MdtCalibInput::MdtCalibInput(const MdtDigit& digit, 
                              const MuonGM::MuonDetectorManager& detMgr):
    m_id{digit.identify()},
@@ -29,6 +42,16 @@ MdtCalibInput::MdtCalibInput(const MdtDigit& digit,
    m_globToLoc{m_legRE->globalToLocalTransf(m_id)},
    m_globPos{m_legRE->center(m_id)}  {}
 
+MdtCalibInput::MdtCalibInput(const xAOD::MdtDriftCircle& prd,
+                             const ActsGeometryContext& gctx):
+   m_id{prd.identify()},
+   m_adc{prd.adc()},
+   m_tdc{prd.tdc()},
+   m_gctx{&gctx},
+   m_RE{prd.readoutElement()},
+   m_hash{prd.measurementHash()},
+   m_globToLoc{m_RE->globalToLocalTrans(gctx, m_hash)},
+   m_globPos{m_RE->center(gctx, m_hash)} {}
 MdtCalibInput::MdtCalibInput(const MdtDigit& digit,
                              const MuonGMR4::MuonDetectorManager& detMgr,
                              const ActsGeometryContext& gctx):
@@ -55,9 +78,7 @@ MdtCalibInput::MdtCalibInput(const Muon::MdtPrepData& prd):
    m_legRE{prd.detectorElement()},
    m_globToLoc{m_legRE->globalToLocalTransf(m_id)},
    m_globPos{prd.globalPosition()} {
-
 }
-
 
 const Identifier& MdtCalibInput::identify() const { return m_id; }
 int MdtCalibInput::tdc() const{ return m_tdc; }
@@ -101,17 +122,13 @@ Amg::Vector2D MdtCalibInput::projectMagneticField(const Amg::Vector3D& fieldInGl
 }
 const Trk::SaggedLineSurface& MdtCalibInput::idealSurface() const {
     if (!m_legRE) {
-      std::stringstream except{};
-      except<<__FILE__<<":"<<__LINE__<<" idealSurface() can only be called together with the legacy readout geometry";
-      throw std::runtime_error(except.str());         
+      THROW_EXCEPTION(" idealSurface() can only be called together with the legacy readout geometry");
    }
    return m_legRE->surface(identify());
 }
 const Trk::StraightLineSurface& MdtCalibInput::saggedSurface() const {
    if (!m_legRE) {
-      std::stringstream except{};
-      except<<__FILE__<<":"<<__LINE__<<" saggedSurface() can only be called together with the legacy readout geometry";
-      throw std::runtime_error(except.str());         
+      THROW_EXCEPTION(" saggedSurface() can only be called together with the legacy readout geometry");
    }
    if (!m_saggedSurf) {
       const Trk::SaggedLineSurface& surf{idealSurface()};
@@ -148,6 +165,6 @@ double MdtCalibInput::tubeLength() const {
 double MdtCalibInput::readOutSide() const {
    /// By convention the new readout geometry points along the negative z-axis
    if (m_legRE) return m_legRE->tubeFrame_localROPos(identify()).z() > 0. ? 1. : -1.;
-   else if (m_RE) return -1.;
+   else if (m_RE) return m_RE->getParameters().readoutSide;
    return 0.;
 }
