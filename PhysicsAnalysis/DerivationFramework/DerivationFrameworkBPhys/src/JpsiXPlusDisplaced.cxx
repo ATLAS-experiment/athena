@@ -372,15 +372,19 @@ namespace DerivationFramework {
       // Iterate over displaced vertices
       if(m_disVDaug_num==2) {
 	for(auto V0Itr=selectedV0Candidates.begin(); V0Itr!=selectedV0Candidates.end(); ++V0Itr) {
-	  Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr->first, V0Itr->second, trackContainer.cptr(), trackCols);
-	  if(result) cascadeinfoContainer.push_back(result);
+	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(*jxItr, massesJX, V0Itr->first, V0Itr->second, trackContainer.cptr(), trackCols);
+	  for(auto cascade_info : result) {
+	    if(cascade_info) cascadeinfoContainer.push_back(cascade_info);
+	  }
 	}
       } // m_disVDaug_num==2
       else if(m_disVDaug_num==3) {
 	for(auto disVItr=disVtxContainer.begin(); disVItr!=disVtxContainer.end(); ++disVItr) {
 	  XiCandidate disVtx = *disVItr;
-	  Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, disVtx, trackCols);
-	  if(result) cascadeinfoContainer.push_back(result);
+	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(*jxItr, massesJX, disVtx, trackContainer.cptr(), trackCols);
+	  for(auto cascade_info : result) {
+	    if(cascade_info) cascadeinfoContainer.push_back(cascade_info);
+	  }
 	}
       } // m_disVDaug_num==3
     } // Iterate over JX vertices
@@ -786,8 +790,8 @@ namespace DerivationFramework {
     return disVtx;
   }
 
-  Trk::VxCascadeInfo* JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
-    Trk::VxCascadeInfo* result(nullptr);
+  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+    std::vector<Trk::VxCascadeInfo*> result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
     for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
@@ -876,8 +880,8 @@ namespace DerivationFramework {
 	}
 	vrtList.push_back(vID2);
 	// Mother vertex including JX and V0
-	std::vector<const xAOD::TrackParticle*> tp; tp.clear();
-	std::vector<double> tp_masses; tp_masses.clear();
+	std::vector<const xAOD::TrackParticle*> tp;
+	std::vector<double> tp_masses;
 	if(m_constrMainV) {
 	  m_iVertexFitter->nextVertex(tp,tp_masses,vrtList,*state,m_massMainV);
 	} else {
@@ -892,20 +896,20 @@ namespace DerivationFramework {
 	  vID2 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
 	}
 	if (m_constrJX && m_jxDaug_num>2) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	  std::vector<Trk::VertexID> cnstV;
 	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
 	    ATH_MSG_WARNING("addMassConstraint for JX failed");
 	  }
 	}
       }
       if (m_constrJpsi) {
-	std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	std::vector<Trk::VertexID> cnstV;
 	if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
 	  ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
 	}
       }
       if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
-	std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	std::vector<Trk::VertexID> cnstV;
 	if ( !m_iVertexFitter->addMassConstraint(vID2,tracksX,cnstV,*state,m_massX).isSuccess() ) {
 	  ATH_MSG_WARNING("addMassConstraint for X failed");
 	}
@@ -914,7 +918,7 @@ namespace DerivationFramework {
       std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
 
       if (fit_result) {
-	for(auto v : fit_result->vertices()) {
+	for(auto& v : fit_result->vertices()) {
 	  if(v->nTrackParticles()==0) {
 	    std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
 	    v->setTrackParticleLinks(nullLinkVector);
@@ -956,7 +960,7 @@ namespace DerivationFramework {
 	  trk_pyDeco(*cascadeVertices[0]) = trk_py;
 	  trk_pzDeco(*cascadeVertices[0]) = trk_pz;
 
-	  result = fit_result.release();
+	  result.push_back( fit_result.release() );
 	}
       }
     } // m_extraTrkMassHypo<=0
@@ -967,7 +971,7 @@ namespace DerivationFramework {
       for(auto tpIter=trackContainer->cbegin(); tpIter!=trackContainer->cend(); ++tpIter) {
 	const xAOD::TrackParticle* tpExtra = (*tpIter);
 	if ( tpExtra->pt()<m_extraTrkMinPt ) continue;
-	if ( !m_trkSelector->decision(*tpExtra, NULL) ) continue;
+	if ( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
 	// Check identical tracks in input
 	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
 	if(std::find(tracksV0.cbegin(),tracksV0.cend(),tpExtra) != tracksV0.cend()) continue;
@@ -1002,8 +1006,8 @@ namespace DerivationFramework {
 	  vID2 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,*state);     
 	  vrtList.push_back(vID2);
 	  // Mother vertex includes two subvertices: V0, JX+extra track
-	  std::vector<const xAOD::TrackParticle*> tp; tp.clear();
-	  std::vector<double> tp_masses; tp_masses.clear();
+	  std::vector<const xAOD::TrackParticle*> tp;
+	  std::vector<double> tp_masses;
 	  if(m_constrMainV) {
 	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList,*state,m_massMainV);
 	  } else {
@@ -1019,19 +1023,19 @@ namespace DerivationFramework {
 	  }
 	}
 	if (m_constrJX && m_jxDaug_num>2) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	  std::vector<Trk::VertexID> cnstV;
 	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
 	    ATH_MSG_WARNING("addMassConstraint for JX failed");
 	  }
 	}
 	if (m_constrJpsi) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	  std::vector<Trk::VertexID> cnstV;
 	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
 	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
 	  }
 	}
 	if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	  std::vector<Trk::VertexID> cnstV;
 	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksX,cnstV,*state,m_massX).isSuccess() ) {
 	    ATH_MSG_WARNING("addMassConstraint for X failed");
 	  }
@@ -1040,7 +1044,7 @@ namespace DerivationFramework {
 	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
 
 	if (fit_result) {
-	  for(auto v : fit_result->vertices()) {
+	  for(auto& v : fit_result->vertices()) {
 	    if(v->nTrackParticles()==0) {
 	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
 	      v->setTrackParticleLinks(nullLinkVector);
@@ -1081,7 +1085,7 @@ namespace DerivationFramework {
 	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
 	    trk_pzDeco(*cascadeVertices[0]) = trk_pz;
 
-	    result = fit_result.release();
+	    result.push_back( fit_result.release() );
 	  }
 	}
       } // loop over trackContainer
@@ -1090,8 +1094,8 @@ namespace DerivationFramework {
     return result;
   }
 
-  Trk::VxCascadeInfo* JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const XiCandidate& disVtx, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
-    Trk::VxCascadeInfo* result(nullptr);
+  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+    std::vector<Trk::VxCascadeInfo*> result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
     for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
@@ -1128,158 +1132,301 @@ namespace DerivationFramework {
       p4_moth += tmp;
     }
     p4_moth += disVtx.p4_V0track1; p4_moth += disVtx.p4_V0track2; p4_moth += disVtx.p4_disVtrack;
-    if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) return result;
+
+    SG::AuxElement::Decorator<float>       chi2_V0_decor("ChiSquared_V0");
+    SG::AuxElement::Decorator<int>         ndof_V0_decor("nDoF_V0");
+    SG::AuxElement::Decorator<std::string> type_V0_decor("Type_V0");
+
+    SG::AuxElement::Accessor<int>    mAcc_gfit("gamma_fit");
+    SG::AuxElement::Accessor<float>  mAcc_gmass("gamma_mass");
+    SG::AuxElement::Accessor<float>  mAcc_gmasserr("gamma_massError");
+    SG::AuxElement::Accessor<float>  mAcc_gchisq("gamma_chisq");
+    SG::AuxElement::Accessor<int>    mAcc_gndof("gamma_ndof");
+    SG::AuxElement::Accessor<float>  mAcc_gprob("gamma_probability");
+
+    SG::AuxElement::Decorator<int>   mDec_gfit("gamma_fit");
+    SG::AuxElement::Decorator<float> mDec_gmass("gamma_mass");
+    SG::AuxElement::Decorator<float> mDec_gmasserr("gamma_massError");
+    SG::AuxElement::Decorator<float> mDec_gchisq("gamma_chisq");
+    SG::AuxElement::Decorator<int>   mDec_gndof("gamma_ndof");
+    SG::AuxElement::Decorator<float> mDec_gprob("gamma_probability");
+    SG::AuxElement::Decorator< std::vector<float> > trk_pxDeco("TrackPx_V0nc");
+    SG::AuxElement::Decorator< std::vector<float> > trk_pyDeco("TrackPy_V0nc");
+    SG::AuxElement::Decorator< std::vector<float> > trk_pzDeco("TrackPz_V0nc");
+    SG::AuxElement::Decorator<float> trk_px_deco("TrackPx_DisVnc");
+    SG::AuxElement::Decorator<float> trk_py_deco("TrackPy_DisVnc");
+    SG::AuxElement::Decorator<float> trk_pz_deco("TrackPz_DisVnc");
 
     std::vector<float> trk_px;
     std::vector<float> trk_py;
     std::vector<float> trk_pz;
 
-    // Apply the user's settings to the fitter
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
-    // Robustness: http://cdsweb.cern.ch/record/685551
-    int robustness = 0;
-    m_iVertexFitter->setRobustness(robustness, *state);
-    // Build up the topology
-    // Vertex list
-    std::vector<Trk::VertexID> vrtList;
-    std::vector<Trk::VertexID> vrtList2;
-    // https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
-    // V0 vertex
-    Trk::VertexID vID1;
-    if (m_constrV0) {
-      vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
-    } else {
-      vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
-    }
-    vrtList.push_back(vID1);
-    // Displaced vertex
-    Trk::VertexID vID2;
-    if (m_constrDisV) {
-      vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state,m_massDisV);
-    } else {
-      vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state);
-    }
-    vrtList2.push_back(vID2);
-    Trk::VertexID vID3;
-    if(m_JXSubVtx) {
-      // JX vertex
-      if (m_constrJX && m_jxDaug_num>2) {
-	vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,*state,m_massJX);
+    if(m_extraTrkMassHypo<=0) {
+      if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) return result;
+
+      // Apply the user's settings to the fitter
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      // Robustness: http://cdsweb.cern.ch/record/685551
+      int robustness = 0;
+      m_iVertexFitter->setRobustness(robustness, *state);
+      // Build up the topology
+      // Vertex list
+      std::vector<Trk::VertexID> vrtList;
+      std::vector<Trk::VertexID> vrtList2;
+      // https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+      // V0 vertex
+      Trk::VertexID vID1;
+      if (m_constrV0) {
+	vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
       } else {
-	vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,*state);
+	vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
       }
-      vrtList2.push_back(vID3);
-      // Mother vertex includes two subvertices: DisV and JX
-      std::vector<const xAOD::TrackParticle*> tp; tp.clear();
-      std::vector<double> tp_masses; tp_masses.clear();
-      if(m_constrMainV) {
-	m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state,m_massMainV);
+      vrtList.push_back(vID1);
+      // Displaced vertex
+      Trk::VertexID vID2;
+      if (m_constrDisV) {
+	vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state,m_massDisV);
       } else {
-	m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state);
+	vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state);
       }
-    }
-    else { // m_JXSubVtx=false
-      // Mother vertex includes just one subvertex (DisV) and JX tracks
-      if(m_constrMainV) {
-	vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList2,*state,m_massMainV);
-      } else {
-	vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList2,*state);
-      }
-      if (m_constrJX && m_jxDaug_num>2) {
-	std::vector<Trk::VertexID> cnstV; cnstV.clear();
-	if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
-	  ATH_MSG_WARNING("addMassConstraint for JX failed");
+      vrtList2.push_back(vID2);
+      Trk::VertexID vID3;
+      if(m_JXSubVtx) {
+	// JX vertex
+	if (m_constrJX && m_jxDaug_num>2) {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,*state,m_massJX);
+	} else {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,*state);
+	}
+	vrtList2.push_back(vID3);
+	// Mother vertex includes two subvertices: DisV and JX
+	std::vector<const xAOD::TrackParticle*> tp;
+	std::vector<double> tp_masses;
+	if(m_constrMainV) {
+	  m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state,m_massMainV);
+	} else {
+	  m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state);
 	}
       }
-    }
-    if (m_constrJpsi) {
-      std::vector<Trk::VertexID> cnstV; cnstV.clear();
-      if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
-	ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
-      }
-    }
-    if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
-      std::vector<Trk::VertexID> cnstV; cnstV.clear();
-      if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
-	ATH_MSG_WARNING("addMassConstraint for X failed");
-      }
-    }
-    // Do the work
-    std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
-
-    if (fit_result) {
-      for(auto v : fit_result->vertices()) {
-	if(v->nTrackParticles()==0) {
-	  std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
-	  v->setTrackParticleLinks(nullLinkVector);
+      else { // m_JXSubVtx=false
+	// Mother vertex includes just one subvertex (DisV) and JX tracks
+	if(m_constrMainV) {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList2,*state,m_massMainV);
+	} else {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList2,*state);
+	}
+	if (m_constrJX && m_jxDaug_num>2) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	  }
 	}
       }
-      // reset links to original tracks
-      BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
-
-      // necessary to prevent memory leak
-      fit_result->setSVOwnership(true);
-
-      // Chi2/DOF cut
-      double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
-      bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
-
-      const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
-      const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
-      size_t iMoth = cascadeVertices.size()-1;
-      double lxy_SV1_sub = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
-      double lxy_SV1 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
-
-      if(chi2CutPassed && lxy_SV1>m_lxyDisV_cut && lxy_SV1_sub>m_lxyV0_cut) {
-	SG::AuxElement::Decorator<float>       chi2_V0_decor("ChiSquared_V0");
-	SG::AuxElement::Decorator<int>         ndof_V0_decor("nDoF_V0");
-	SG::AuxElement::Decorator<std::string> type_V0_decor("Type_V0");
-
-	SG::AuxElement::Accessor<int>    mAcc_gfit("gamma_fit");
-	SG::AuxElement::Accessor<float>  mAcc_gmass("gamma_mass");
-	SG::AuxElement::Accessor<float>  mAcc_gmasserr("gamma_massError");
-	SG::AuxElement::Accessor<float>  mAcc_gchisq("gamma_chisq");
-	SG::AuxElement::Accessor<int>    mAcc_gndof("gamma_ndof");
-	SG::AuxElement::Accessor<float>  mAcc_gprob("gamma_probability");
-
-	SG::AuxElement::Decorator<int>   mDec_gfit("gamma_fit");
-	SG::AuxElement::Decorator<float> mDec_gmass("gamma_mass");
-	SG::AuxElement::Decorator<float> mDec_gmasserr("gamma_massError");
-	SG::AuxElement::Decorator<float> mDec_gchisq("gamma_chisq");
-	SG::AuxElement::Decorator<int>   mDec_gndof("gamma_ndof");
-	SG::AuxElement::Decorator<float> mDec_gprob("gamma_probability");
-	SG::AuxElement::Decorator< std::vector<float> > trk_pxDeco("TrackPx_V0nc");
-	SG::AuxElement::Decorator< std::vector<float> > trk_pyDeco("TrackPy_V0nc");
-	SG::AuxElement::Decorator< std::vector<float> > trk_pzDeco("TrackPz_V0nc");
-	SG::AuxElement::Decorator<float> trk_px_deco("TrackPx_DisVnc");
-	SG::AuxElement::Decorator<float> trk_py_deco("TrackPy_DisVnc");
-	SG::AuxElement::Decorator<float> trk_pz_deco("TrackPz_DisVnc");
-
-	chi2_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->chiSquared();
-	ndof_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->numberDoF();
-	if(disVtx.V0type==LAMBDA)         type_V0_decor(*cascadeVertices[0]) = "Lambda";
-	else if(disVtx.V0type==LAMBDABAR) type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
-	else if(disVtx.V0type==KS)        type_V0_decor(*cascadeVertices[0]) = "Ks";
-	mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*disVtx.V0vtx) ? mAcc_gfit(*disVtx.V0vtx) : 0;
-	mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*disVtx.V0vtx) ? mAcc_gmass(*disVtx.V0vtx) : -1;
-	mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*disVtx.V0vtx) ? mAcc_gmasserr(*disVtx.V0vtx) : -1;
-	mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*disVtx.V0vtx) ? mAcc_gchisq(*disVtx.V0vtx) : 999999;
-	mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*disVtx.V0vtx) ? mAcc_gndof(*disVtx.V0vtx) : 0;
-	mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*disVtx.V0vtx) ? mAcc_gprob(*disVtx.V0vtx) : -1;
-	trk_px.clear(); trk_py.clear(); trk_pz.clear();
-	trk_px.push_back( disVtx.p4_V0track1.Px() ); trk_px.push_back( disVtx.p4_V0track2.Px() );
-	trk_py.push_back( disVtx.p4_V0track1.Py() ); trk_py.push_back( disVtx.p4_V0track2.Py() );
-	trk_pz.push_back( disVtx.p4_V0track1.Pz() ); trk_pz.push_back( disVtx.p4_V0track2.Pz() );
-	trk_pxDeco(*cascadeVertices[0]) = trk_px;
-	trk_pyDeco(*cascadeVertices[0]) = trk_py;
-	trk_pzDeco(*cascadeVertices[0]) = trk_pz;
-	trk_px_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Px();
-	trk_py_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Py();
-	trk_pz_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Pz();
-
-	result = fit_result.release();
+      if (m_constrJpsi) {
+	std::vector<Trk::VertexID> cnstV;
+	if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	  ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	}
       }
-    }
+      if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
+	std::vector<Trk::VertexID> cnstV;
+	if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	  ATH_MSG_WARNING("addMassConstraint for X failed");
+	}
+      }
+      // Do the work
+      std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+
+      if (fit_result) {
+	for(auto& v : fit_result->vertices()) {
+	  if(v->nTrackParticles()==0) {
+	    std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	    v->setTrackParticleLinks(nullLinkVector);
+	  }
+	}
+	// reset links to original tracks
+	BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
+
+	// necessary to prevent memory leak
+	fit_result->setSVOwnership(true);
+
+	// Chi2/DOF cut
+	double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
+	bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+
+	const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
+	const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
+	size_t iMoth = cascadeVertices.size()-1;
+	double lxy_SV1_sub = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	double lxy_SV1 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+
+	if(chi2CutPassed && lxy_SV1>m_lxyDisV_cut && lxy_SV1_sub>m_lxyV0_cut) {
+	  chi2_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->chiSquared();
+	  ndof_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->numberDoF();
+	  if(disVtx.V0type==LAMBDA)         type_V0_decor(*cascadeVertices[0]) = "Lambda";
+	  else if(disVtx.V0type==LAMBDABAR) type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
+	  else if(disVtx.V0type==KS)        type_V0_decor(*cascadeVertices[0]) = "Ks";
+	  mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*disVtx.V0vtx) ? mAcc_gfit(*disVtx.V0vtx) : 0;
+	  mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*disVtx.V0vtx) ? mAcc_gmass(*disVtx.V0vtx) : -1;
+	  mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*disVtx.V0vtx) ? mAcc_gmasserr(*disVtx.V0vtx) : -1;
+	  mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*disVtx.V0vtx) ? mAcc_gchisq(*disVtx.V0vtx) : 999999;
+	  mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*disVtx.V0vtx) ? mAcc_gndof(*disVtx.V0vtx) : 0;
+	  mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*disVtx.V0vtx) ? mAcc_gprob(*disVtx.V0vtx) : -1;
+	  trk_px.clear(); trk_py.clear(); trk_pz.clear();
+	  trk_px.push_back( disVtx.p4_V0track1.Px() ); trk_px.push_back( disVtx.p4_V0track2.Px() );
+	  trk_py.push_back( disVtx.p4_V0track1.Py() ); trk_py.push_back( disVtx.p4_V0track2.Py() );
+	  trk_pz.push_back( disVtx.p4_V0track1.Pz() ); trk_pz.push_back( disVtx.p4_V0track2.Pz() );
+	  trk_pxDeco(*cascadeVertices[0]) = trk_px;
+	  trk_pyDeco(*cascadeVertices[0]) = trk_py;
+	  trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+	  trk_px_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Px();
+	  trk_py_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Py();
+	  trk_pz_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Pz();
+
+	  result.push_back( fit_result.release() );
+	}
+      }
+    } // m_extraTrkMassHypo<=0
+    else { // m_extraTrkMassHypo>0
+      std::vector<double> massesJXExtra = massesJX;
+      massesJXExtra.push_back(m_extraTrkMassHypo);
+
+      for(auto tpIter=trackContainer->cbegin(); tpIter!=trackContainer->cend(); ++tpIter) {
+	const xAOD::TrackParticle* tpExtra = (*tpIter);
+	if ( tpExtra->pt()<m_extraTrkMinPt ) continue;
+	if ( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
+	// Check identical tracks in input
+	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
+	if(std::find(tracksV0.cbegin(),tracksV0.cend(),tpExtra) != tracksV0.cend()) continue;
+	if(tpExtra == disVtx.track) continue;
+
+	TLorentzVector tmp;
+	tmp.SetPtEtaPhiM(tpExtra->pt(),tpExtra->eta(),tpExtra->phi(),m_extraTrkMassHypo);
+	if ((p4_moth+tmp).M() < m_MassLower || (p4_moth+tmp).M() > m_MassUpper) continue;
+
+	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
+	tracksJXExtra.push_back(tpExtra);
+
+	// Apply the user's settings to the fitter
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	// Robustness: http://cdsweb.cern.ch/record/685551
+	int robustness = 0;
+	m_iVertexFitter->setRobustness(robustness, *state);
+	// Build up the topology
+	// Vertex list
+	std::vector<Trk::VertexID> vrtList;
+	std::vector<Trk::VertexID> vrtList2;
+	// https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+	// V0 vertex
+	Trk::VertexID vID1;
+	if (m_constrV0) {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
+	} else {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+	}
+	vrtList.push_back(vID1);
+	// Displaced vertex
+	Trk::VertexID vID2;
+	if (m_constrDisV) {
+	  vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state,m_massDisV);
+	} else {
+	  vID2 = m_iVertexFitter->nextVertex(tracks3,massesDis3,vrtList,*state);
+	}
+	vrtList2.push_back(vID2);
+	Trk::VertexID vID3;
+	if(m_JXSubVtx) {
+	  // JXExtra vertex
+	  vID3 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,*state);
+	  vrtList2.push_back(vID3);
+	  // Mother vertex includes two subvertices (DisV and JX) and extra track
+	  std::vector<const xAOD::TrackParticle*> tp;
+	  std::vector<double> tp_masses;
+	  if(m_constrMainV) {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state,m_massMainV);
+	  } else {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList2,*state);
+	  }
+	}
+	else { // m_JXSubVtx=false
+	  // Mother vertex includes just one subvertex (DisV) and JX tracks + extra track
+	  if(m_constrMainV) {
+	    vID3 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList2,*state,m_massMainV);
+	  } else {
+	    vID3 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList2,*state);
+	  }
+	}
+	if (m_constrJX && m_jxDaug_num>2) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	  }
+	}
+	if (m_constrJpsi) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	  }
+	}
+	if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for X failed");
+	  }
+	}
+	// Do the work
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+
+	if (fit_result) {
+	  for(auto& v : fit_result->vertices()) {
+	    if(v->nTrackParticles()==0) {
+	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	      v->setTrackParticleLinks(nullLinkVector);
+	    }
+	  }
+	  // reset links to original tracks
+	  BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
+
+	  // necessary to prevent memory leak
+	  fit_result->setSVOwnership(true);
+
+	  // Chi2/DOF cut
+	  double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
+	  bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+
+	  const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
+	  const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
+	  size_t iMoth = cascadeVertices.size()-1;
+	  double lxy_SV1_sub = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	  double lxy_SV1 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+
+	  if(chi2CutPassed && lxy_SV1>m_lxyDisV_cut && lxy_SV1_sub>m_lxyV0_cut) {
+	    chi2_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->chiSquared();
+	    ndof_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->numberDoF();
+	    if(disVtx.V0type==LAMBDA)         type_V0_decor(*cascadeVertices[0]) = "Lambda";
+	    else if(disVtx.V0type==LAMBDABAR) type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
+	    else if(disVtx.V0type==KS)        type_V0_decor(*cascadeVertices[0]) = "Ks";
+	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*disVtx.V0vtx) ? mAcc_gfit(*disVtx.V0vtx) : 0;
+	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*disVtx.V0vtx) ? mAcc_gmass(*disVtx.V0vtx) : -1;
+	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*disVtx.V0vtx) ? mAcc_gmasserr(*disVtx.V0vtx) : -1;
+	    mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*disVtx.V0vtx) ? mAcc_gchisq(*disVtx.V0vtx) : 999999;
+	    mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*disVtx.V0vtx) ? mAcc_gndof(*disVtx.V0vtx) : 0;
+	    mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*disVtx.V0vtx) ? mAcc_gprob(*disVtx.V0vtx) : -1;
+	    trk_px.clear(); trk_py.clear(); trk_pz.clear();
+	    trk_px.push_back( disVtx.p4_V0track1.Px() ); trk_px.push_back( disVtx.p4_V0track2.Px() );
+	    trk_py.push_back( disVtx.p4_V0track1.Py() ); trk_py.push_back( disVtx.p4_V0track2.Py() );
+	    trk_pz.push_back( disVtx.p4_V0track1.Pz() ); trk_pz.push_back( disVtx.p4_V0track2.Pz() );
+	    trk_pxDeco(*cascadeVertices[0]) = trk_px;
+	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
+	    trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+	    trk_px_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Px();
+	    trk_py_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Py();
+	    trk_pz_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Pz();
+
+	    result.push_back( fit_result.release() );
+	  }
+	}
+      } // loop over trackContainer
+    } // m_extraTrkMassHypo>0
 
     return result;
   }
