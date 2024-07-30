@@ -20,24 +20,18 @@ atlas_install_python_modules( python/*.py
 # Test the packages
 atlas_add_test( AthExOnnxRuntimeTest
    SCRIPT python -m AthExOnnxRuntime.AthExOnnxRuntime_test
-   PROPERTIES TIMEOUT 100
-   POST_EXEC_SCRIPT noerror.sh 
-   )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthExOnnxRuntimeTest_pkl
    SCRIPT athena --evtMax 2 --CA test_AthExOnnxRuntimeExampleCfg.pkl
    DEPENDS AthExOnnxRuntimeTest
-   PROPERTIES TIMEOUT 100
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthInferORTTest
    SCRIPT python -m AthExOnnxRuntime.AthExOnnxRuntime_test_infer
-   PROPERTIES TIMEOUT 100
-   POST_EXEC_SCRIPT noerror.sh 
-   )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthInferORTTest_pkl
    SCRIPT athena --evtMax 2 --CA test_AthInferORTExampleCfg.pkl
-   DEPENDS AthExOnnxRuntimeTest
-   PROPERTIES TIMEOUT 100
+   DEPENDS AthInferORTTest
    POST_EXEC_SCRIPT noerror.sh )
