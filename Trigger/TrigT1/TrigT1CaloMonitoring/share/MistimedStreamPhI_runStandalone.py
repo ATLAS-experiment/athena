@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # ===============================================================
 #  __mistimedAlg(flags)__
@@ -6,13 +6,8 @@
 def mistimedAlg(flags, legacy, phaseI):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    from AthenaConfiguration.Enums import Format
 
     acc = ComponentAccumulator()
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
 
     type_names = [
         # ===== CPM ================================================================
@@ -81,8 +76,6 @@ if __name__ == "__main__": # typically not needed in top level script
     parser.add_option("-v", dest="systemVersion",type="string", help="Input legacy or phaseI (default: %default)")
     parser.set_defaults(runNumber="00455857", systemVersion="phaseI")
     (options,args) = parser.parse_args()
-
-    import sys
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
