@@ -34,6 +34,11 @@ atlas_add_executable( TRTCalib_makeplots
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils)
 
+atlas_add_executable( TRTCalib_StrawStatus_merge 
+    scripts/TRTCalib_StrawStatus_merge.cxx
+    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+    LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils)
+
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
