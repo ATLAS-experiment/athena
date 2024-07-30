@@ -262,6 +262,8 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="whether to also save the cut bookkeepers systematics. The "
             "default is None (follows the global systematics flag). Set to "
             "False or True to override.")
+        self.addOption ('histPattern', None, type=str,
+            info="the histogram name pattern for the cut-bookkeeper histogram names")
 
     def makeAlgs (self, config) :
 
@@ -277,13 +279,15 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
-          alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
-          alg.runNumber = self.runNumber
-          if self.cutBookkeepersSystematics:
-              alg.enableSystematics = self.cutBookkeepersSystematics
-          else:
-              alg.enableSystematics = not config.noSystematics()
-          config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
+            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
+            alg.runNumber = self.runNumber
+            if self.cutBookkeepersSystematics:
+                alg.enableSystematics = self.cutBookkeepersSystematics
+            else:
+                alg.enableSystematics = not config.noSystematics()
+            if self.histPattern:
+                alg.histPattern = self.histPattern
+            config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
