@@ -50,18 +50,18 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 
 	const float zMinus = dSettings->m_zedMinus - zTolerance; 
 	const float zPlus  = dSettings->m_zedPlus  + zTolerance; 
-	const float maxTheta = 2*atan(exp(-maxEta));
-	const float maxCtg = cos(maxTheta)/sin(maxTheta);
+	const float maxTheta = 2.0f*atanf(expf(-maxEta));
+	const float maxCtg = cosf(maxTheta)/sinf(maxTheta);
 	const float minZ0     = dSettings->m_zedMinus;
 	const float maxZ0     = dSettings->m_zedPlus;
 	const float minOuterZ = minZ0 - maxOuterRadius*maxCtg - zTolerance; 
 	const float maxOuterZ = maxZ0 + maxOuterRadius*maxCtg + zTolerance;
 
-	const double ptCoeff = 0.29997*dSettings->m_magFieldZ/2.0;// ~0.3*B/2 - assumes nominal field of 2*T
+	const float ptCoeff = 0.29997f*dSettings->m_magFieldZ/2.0f;// ~0.3*B/2 - assumes nominal field of 2*T
 	const float tripletPtMin = dSettings->m_tripletPtMin; // Retrieve from settings
-	const float minR_squ = tripletPtMin*tripletPtMin/std::pow(ptCoeff,2);
-	const float maxKappa_high_eta          = 0.8/minR_squ;
-	const float maxKappa_low_eta           = 0.6/minR_squ;
+	const float minR_squ = tripletPtMin*tripletPtMin/powf(ptCoeff,2.0f);
+	const float maxKappa_high_eta          = 0.8f/minR_squ;
+	const float maxKappa_low_eta           = 0.6f/minR_squ;
 
 	//1. get a tile of middle spacepoints
 
@@ -99,8 +99,8 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 
 		if (isBarrel) {
 			float clusterWidth = dSpacepoints->m_clusterWidth[spmIdx];
-			minTau = 6.7*(clusterWidth - 0.2);
-			maxTau = 1.6 + 0.15/(clusterWidth + 0.2) + 6.1*(clusterWidth - 0.2);
+			minTau = 6.7f*(clusterWidth - 0.2f);
+			maxTau = 1.6f + 0.15f/(clusterWidth + 0.2f) + 6.1f*(clusterWidth - 0.2f);
 		}
 
 		//2. loop over other phi-bins / layers
@@ -124,7 +124,7 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 				bool isBarrelSp = (layerGeoSp.m_type == 0);
 
 				float refCoord = layerGeoSp.m_refCoord;
-				if(isBarrelSp && std::abs(refCoord-rm)>maxDoubletLength) continue;
+				if(isBarrelSp && fabsf(refCoord-rm)>maxDoubletLength) continue;
 
 				//boundaries for nextLayer
 
@@ -161,13 +161,13 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 					float dz = zsp - zm;
 
 					// Cut on doublet length
-					float dL = std::sqrt( dr*dr + dz*dz);
+					float dL = sqrtf( dr*dr + dz*dz);
 					float maxDL = GPUTrackSeedingItkHelpers::getMaxDeltaLEta(GPUTrackSeedingItkHelpers::getEta(dr, dz, dL));
-					if(std::abs(dL)>maxDL || std::abs(dL)<minDoubletLength) continue;
+					if(fabsf(dL)>maxDL || fabsf(dL)<minDoubletLength) continue;
 								
 					// Cut on tau
 					float tau = dz/dr;
-					float ftau = std::abs(tau);
+					float ftau = fabsf(tau);
 					if(ftau>maxCtg) continue;
 
 					// Cut on pixel width
@@ -190,11 +190,11 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 
 					float dx = xsp - xm;
 					float dy = ysp - ym;
-					float L2 = 1/(dx*dx+dy*dy);
+					float L2 = 1.0f/(dx*dx+dy*dy);
 					float D = (ysp*xm - ym*xsp)/(rm*rsp);
 					float kappa = D*D*L2;
 
-					if (std::abs(tau) < 4.0) {//eta = 2.1
+					if (fabsf(tau) < 4.0f) {//eta = 2.1
 						if (kappa > maxKappa_low_eta) {
 							continue;
 						}

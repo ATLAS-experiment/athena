@@ -20,7 +20,7 @@ namespace GPUTrackSeedingItkHelpers {
  * @param dL doublet length
  */
 __device__ static float getEta (float dr, float dz, float dL) {
-  return -std::log((dL-dz)/dr);
+  return -logf((dL-dz)/dr);
 }
 
 /**
@@ -29,7 +29,7 @@ __device__ static float getEta (float dr, float dz, float dL) {
  */
 __device__ static float getMaxDeltaLEta (float eta) {
   float hardCut = 1300;
-  float maxDL = eta*eta*eta*eta*1.97572003 + eta*eta*92.29732795 + 168.54257599;
+  float maxDL = eta*eta*eta*eta*1.97572003f + eta*eta*92.29732795f + 168.54257599f;
   return (maxDL > hardCut) ? hardCut : maxDL;
 }
 
