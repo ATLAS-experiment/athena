@@ -137,11 +137,30 @@ public:
     void setEventIndex(long v) { m_eventindex = v; }
     void setParentageMask(unsigned long v) { m_parentage_mask = v; }
     void setTruth(const FPGATrackSimMultiTruth& v) { m_truth = v; }
+    unsigned getToT() const { return m_ToT ;}
     unsigned long getBarcode() const { return m_barcode; }
     long getEventIndex() const { return m_eventindex; }
     float getBarcodePt() const { return m_barcode_pt; }
     unsigned long getParentageMask() const { return m_parentage_mask; }
     const FPGATrackSimMultiTruth& getTruth() const { return m_truth; }
+
+
+    ///////////////////////////////////////////////////////////////////////
+    // Add information for creating the bytestream TV for ITk pixel and strip
+    // The current athena EDM is using ID bytestream encoders and these happens 
+    // to have issues and we need to work around them to make TV
+    // Hence these special function - Please talk to Haider [sabidi@cern.ch]
+    // If these need to functions are being used anywhere outside bytestream encoders
+
+    bool isValidForITkHit() const {return m_isValidForITK;}
+    int getStripRowIDForITk() const {return m_stripRowinITKEDM;}
+    int getStripChipIDForITk() const {return m_stripChipinITKEDM;}
+    int getStripHitMapForITk() const {return m_stripHitMapinITKEDM;}
+
+    void setisValidForITkHit(bool v){ m_isValidForITK = v;}
+    void setStripRowIDForITk(int v){ m_stripRowinITKEDM = v;}
+    void setStripChipIDForITk(int v){ m_stripChipinITKEDM = v;}
+    void setStripHitMapForITk(int v){ m_stripHitMapinITKEDM = v;}
 
     ///////////////////////////////////////////////////////////////////////
     // Other Interface
@@ -205,6 +224,13 @@ protected:
     // geant truth data (clusters only). filled during clustering using the m_barcode and
     // m_barcode_frac data for each raw hit in the cluster.
 
+
+    // For ITk EDM encoding
+
+    bool m_isValidForITK = false; // Should this hit be used for ITk EDM testing
+    int m_stripRowinITKEDM = -1; // Strip hit row ID in ITk EDM format
+    int m_stripChipinITKEDM = -1; // Strip chip ID in ITk EDM format
+    int m_stripHitMapinITKEDM = -1; // Strip hit map in ITk EDM format
 
     int m_roadID = 0;
     
