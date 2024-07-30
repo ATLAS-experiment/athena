@@ -8,7 +8,7 @@ msg = msg.getChild(__name__)
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
-from PyJobTransforms.trfArgs import listKnownD3PDs, getExtraDPDList
+from PyJobTransforms.trfArgs import getExtraDPDList
 from PyJobTransforms.trfExe import  NTUPMergeExecutor, POOLMergeExecutor
 
 
@@ -32,10 +32,6 @@ def addPhysValidationMergeFiles(parser):
 def addNTUPMergeSubsteps(executorSet):
     # Ye olde NTUPs
     try:
-        # 'Standard' D3PDs
-        inDataList, outDataList = listKnownD3PDs()
-        for (inData, outData) in iter(zip(inDataList, outDataList)):
-            executorSet.add(NTUPMergeExecutor(name='NTUPLEMerge'+inData.replace('_',''), exe='hadd', inData=[inData], outData=[outData], exeArgs=[]))
         # Physics Validation NTUP
         executorSet.add(NTUPMergeExecutor(name='NTUPLEMergePHYSVAL', exe='hadd', inData=['NTUP_PHYSVAL'], outData=['NTUP_PHYSVAL_MRG0'], exeArgs=[]))
         #add post processing for some Pull histograms in ID track monitoring
