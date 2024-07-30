@@ -37,6 +37,9 @@
 #include "GaudiKernel/IPartPropSvc.h"
 #include "FPGATrackSimSGToRawHitsTool.h"
 
+#include <bitset>
+
+
 namespace {
   // A few constants for truth cuts
   const float FPGATrackSim_PT_TRUTHMIN = 400.;
@@ -288,6 +291,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setY(globalPos[Amg::y]);
       tmpSGhit.setZ(globalPos[Amg::z]);
       tmpSGhit.setToT(pixelRawData->getToT());
+      tmpSGhit.setisValidForITkHit(true); // Pixel clusters are close enough right now that they all can be considered valid for ITK
       index_type index, position;
       bestExtcode.eventIndex(index, position);
       if (bestParent)
@@ -296,12 +300,12 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
 
       if (bestParent) {
-	unsigned int id2, barcode2;
-	bestExtcode.uniqueID(id2, barcode2);
-	tmpSGhit.setBarcode(id2);
+        unsigned int id2, barcode2;
+        bestExtcode.uniqueID(id2, barcode2);  
+        tmpSGhit.setBarcode(id2);
       }
       else {
-	tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+        tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
       }
 
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
@@ -323,12 +327,73 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
 StatusCode
 FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext) {
 
+  constexpr int MaxChannelinStripRow = 128;
+
   auto stripSDOHandle = SG::makeHandle(m_stripSDOKey, eventContext);
   ATH_MSG_DEBUG("Found SCT SDO Map");
   auto stripRDOHandle = SG::makeHandle(m_stripRDOKey, eventContext);
   for (const InDetRawDataCollection<SCT_RDORawData>* SCT_Collection : *stripRDOHandle) {
     if (SCT_Collection == nullptr) { continue; }
-    for (const SCT_RDORawData* sctRawData : *SCT_Collection) {
+
+    std::map<int, bool> firedStrips;
+    // Preprocess the SCT collection hits to get information for encoding strip in ITK format
+    // All strips fired read into a map to an overview of full module that should be used to encode
+    // the data into the ITk formatl
+    for (const SCT_RDORawData* sctRawData : *SCT_Collection) 
+    {
+      const Identifier rdoId = sctRawData->identify();
+      const int baseLineStrip{m_sctId->strip(rdoId)};
+      for(int i = 0; i < sctRawData->getGroupSize(); i++) {
+        firedStrips[baseLineStrip+ i] = true;
+      }
+    }
+
+    // Loop over the fired hits and encode them in the ITk strips hit map
+    // It find unique hits in the list that can be encoded and don't overlap
+    std::map<int, int> stripEncodingForITK;
+    for(auto& [stripID, fired]: firedStrips)
+    {
+      // Don't use the strip that has been set false. 
+      // This will be the case where neighbouring strip will "used up in the cluster"
+      // And then we don't want to re use them 
+      if(!fired) continue;
+
+      // Check the next 3 hits if they are there and have a hit in them
+      std::bitset<3> hitMap;
+
+
+      // Get the current chip id of the strip
+      int currChipID = stripID / MaxChannelinStripRow;
+      // Compute the maximum stripID this chip can have
+      int maxStripIDForCurrChip = (currChipID + 1) * MaxChannelinStripRow;
+
+      for(int i = 0; i < 3; i++)
+      {    
+        // We don't want to "cluster" strips that are outside the range of this chip
+        if((stripID + 1 + i) >= maxStripIDForCurrChip) continue;
+
+        if(firedStrips.find(stripID + 1 + i) != firedStrips.end())
+        {
+          if(firedStrips.at(stripID + 1 + i))
+          {
+            hitMap[2 - i] = 1;
+            firedStrips[stripID + 1 + i] = false;
+          }
+          else
+          {
+            hitMap[2 - i] = 0;
+          }
+        }
+      }
+
+      // Encode the hit map into a int
+      stripEncodingForITK[stripID] = (int)(hitMap.to_ulong());
+
+    }
+
+    // Actual creation of the FPGAHit objects
+    for (const SCT_RDORawData* sctRawData : *SCT_Collection) 
+    {
       const Identifier rdoId = sctRawData->identify();
       // get the det element from the det element collection
       const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(rdoId);
@@ -378,12 +443,37 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
       
       if (bestParent) {
-	unsigned int id2, barcode2;
-	bestExtcode.uniqueID(id2, barcode2);
-	tmpSGhit.setBarcode(id2);
+        unsigned int id2, barcode2;
+        bestExtcode.uniqueID(id2, barcode2);
+        tmpSGhit.setBarcode(id2);
       }
       else {
-	tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+        tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+      }
+
+
+      // If the strip has been identified by the previous for loop as a valid hit that can be encoded into ITk Strip format
+      int stripID   = m_sctId->strip(rdoId);
+      if(stripEncodingForITK.find(stripID) != stripEncodingForITK.end())
+      { 
+        // Each ITK ABC chip reads 128 channels in one row, so we just need to divide the current strip with 128 to get the chip index
+        // for the Strip ID, it is the remainder left after dividing by 128
+        int chipID = stripID / MaxChannelinStripRow;
+        int ITkStripID = stripID % MaxChannelinStripRow;
+
+        // for each ABC chip readout, each reads 256 channels actually. 0-127 corresponds to lower row and then 128-255 corresponds to the 
+        // upper. This can be simulated in the code by using the eta module index. Even index are not offest, while odd index, the 
+        // strip id is offest by 128
+        // One point to not is that for barrel, the eta module index start at 1, and not zero. Hence a shift of 1 is needed
+        int offset = m_sctId->eta_module(rdoId) % 2;
+        if(m_sctId->barrel_ec(rdoId) == 0) offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
+
+        ITkStripID += offset * MaxChannelinStripRow;
+
+        tmpSGhit.setisValidForITkHit(true);
+        tmpSGhit.setStripRowIDForITk(ITkStripID);
+        tmpSGhit.setStripChipIDForITk(chipID);
+        tmpSGhit.setStripHitMapForITk(stripEncodingForITK.at(stripID));
       }
       
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));

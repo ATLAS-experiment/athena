@@ -19,12 +19,14 @@ public:
 
     // First Stage FPGATrackSim Roads
     void getFPGATrackSimRoads_1st(std::vector<FPGATrackSimRoad*>& roads_1st) { roads_1st.reserve(m_FPGATrackSimRoads_1st.size()); for ( auto& r : m_FPGATrackSimRoads_1st) roads_1st.push_back(&r); }
+    const std::vector<FPGATrackSimRoad>&  getFPGATrackSimRoads_1st() const { return m_FPGATrackSimRoads_1st; }
     size_t nFPGATrackSimRoads_1st() const { return m_FPGATrackSimRoads_1st.size(); }
     void reserveFPGATrackSimRoads_1st(size_t size) { m_FPGATrackSimRoads_1st.reserve(size); }
     void addFPGATrackSimRoads_1st(std::vector<FPGATrackSimRoad*> const& roads_1st) { for ( auto& r : roads_1st) m_FPGATrackSimRoads_1st.push_back(*r); }
 
     // Second Stage FPGATrackSim Roads
     void getFPGATrackSimRoads_2nd(std::vector<FPGATrackSimRoad*>& roads_2nd) { roads_2nd.reserve(m_FPGATrackSimRoads_2nd.size()); for ( auto& r : m_FPGATrackSimRoads_2nd) roads_2nd.push_back(&r); }
+    const std::vector<FPGATrackSimRoad>&  getFPGATrackSimRoads_2nd() const { return m_FPGATrackSimRoads_2nd; }
     size_t nFPGATrackSimRoads_2nd() const { return m_FPGATrackSimRoads_2nd.size(); }
     void reserveFPGATrackSimRoads_2nd(size_t size) { m_FPGATrackSimRoads_2nd.reserve(size); }
     void addFPGATrackSimRoads_2nd(std::vector<FPGATrackSimRoad*> const& roads_2nd) { for ( auto& r : roads_2nd) m_FPGATrackSimRoads_2nd.push_back(*r); }
