@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTMONITORINGRUN3ESD_ALG_H
@@ -8,9 +8,6 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "TRandom3.h"
-
-#include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "GaudiKernel/StatusCode.h"
 
 // Data handles
@@ -31,12 +28,9 @@
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-#include "MagFieldInterfaces/IMagFieldSvc.h"
-
 // STDLIB
 #include <string>
 #include <vector>
-#include <set>
 
 namespace Trk {
     class Track;

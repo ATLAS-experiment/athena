@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTMONITORINGRUN3RAW_ALG_H
@@ -8,7 +8,6 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "GaudiKernel/StatusCode.h"
 
 // Data handles
@@ -16,8 +15,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkTrack/TrackCollection.h"
-#include "CommissionEvent/ComTime.h"
-#include "xAODTrigger/TrigDecision.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "InDetRawData/InDetTimeCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
@@ -28,8 +25,6 @@
 #include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
-
-#include "MagFieldInterfaces/IMagFieldSvc.h"
 
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
 #include "TRT_ConditionsServices/ITRT_ByteStream_ConditionsSvc.h"
@@ -45,10 +40,6 @@ namespace InDetDD {
     class TRT_DetectorManager;
 }
  
-namespace InDet {
-    class IInDetTrackSelectionTool;
-}
-
 class AtlasDetectorID;
 class TRT_ID;
 class Identifier;
