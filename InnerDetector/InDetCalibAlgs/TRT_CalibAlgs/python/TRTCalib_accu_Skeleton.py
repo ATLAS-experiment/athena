@@ -67,8 +67,10 @@ def fromRunArgs(runArgs):
     try:
         os.rename(outputFile, outputFile+'.basic.root')
         command = 'TRTCalib_bhadd dumfile %s.basic.root' % (outputFile)
-        print("\n Running:",command)
-        stdout, stderr = subprocess.Popen(command, shell=True).communicate()
+        print("\n Running: %s \n" % (command))
+        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        print("OUTPUT:\n%s" % (stdout.decode('ascii')))
+        print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))
     except OSError as e:
         print("ERROR: Failed in process TRTCalib_bhadd\n",e)
         sys.exit(e.errno)
@@ -104,7 +106,7 @@ def fromRunArgs(runArgs):
        
     try:
         # Getting list of files to be compressed
-        files_list=glob.glob(outputFile+"*")
+        files_list=glob.glob(outputFile+".*")
         # Compressing
         tar = tarfile.open(outputFile, "w:gz")
         print("\nCompressing files in %s output file:" % outputFile)
@@ -117,3 +119,7 @@ def fromRunArgs(runArgs):
         sys.exit(e.errno)        
             
     
+    # Prints all types of txt files present in a Path
+    print("\nListing files:")
+    for file in sorted(glob.glob("./*", recursive=True)):
+        print("\t-",file)     
