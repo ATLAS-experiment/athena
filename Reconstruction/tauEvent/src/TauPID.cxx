@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file TauPID.cxx
@@ -87,11 +87,11 @@ namespace Analysis {
     {
       return m_params;
     }
-    const std::bitset<32> TauPID::isTauFlags() const
+    const std::bitset<32>& TauPID::isTauFlags() const
     {
       return m_isTauFlags;
     }
-    const std::bitset<32> TauPID::vetoFlags() const
+    const std::bitset<32>& TauPID::vetoFlags() const
     {
       return m_vetoFlags;
     }
