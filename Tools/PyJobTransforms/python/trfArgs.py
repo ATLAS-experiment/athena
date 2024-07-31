@@ -311,50 +311,6 @@ def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=Fal
         msg.warning('PrimaryDPDFlags not available - cannot add primary DPD arguments')
 
         
-## @brief Add D3PD arguments
-# @details Get the list of current D3PDs and add then to the parser
-# optionally only some DPDs may be added, using the @c pick list.
-# @param parser Argument parser object to add arguments to
-# @param pick Optional list of DPD types to add (use short names, e.g., @c NTUP_EGAMMA)
-# @param transform Transform object. DPD data types will be added to the correct executor (by name or substep)
-# @param multipleOK If the @c multipleOK flag should be set for this argument
-# @param addD3PDMRGtypes Instead of normal output types for D3PDs, add @em input NTUPs and
-# @em output merge NTUPs
-def addD3PDArguments(parser, pick = None, transform = None, multipleOK=False, addD3PDMRGtypes = False):
-    parser.defineArgGroup('D3PD NTUPs', 'D3PD File Options')
-    # listAllKnownD3PD is a list of D3PD JobProperty type objects
-    try:
-        from D3PDMakerConfig.D3PDProdFlags import listAllKnownD3PD
-        for dpdWriter in listAllKnownD3PD:
-            dpdName = dpdWriter.StreamName.replace('Stream', '')
-           
-            if pick is None or dpdName in pick: 
-                if addD3PDMRGtypes:
-                    parser.add_argument('--input' + dpdName + 'File', 
-                                        type=argFactory(trfArgClasses.argNTUPFile, treeNames=dpdWriter.TreeNames, io='input'),
-                                        group='D3PD NTUPs',
-                                        metavar=dpdName.upper(), help='D3PD input {0} file )'.format(dpdName), nargs='+')
-                    parser.add_argument('--output' + dpdName + '_MRGFile', 
-                                        type=argFactory(trfArgClasses.argNTUPFile, treeNames=dpdWriter.TreeNames),
-                                        group='D3PD NTUPs',
-                                        metavar=dpdName.upper(), help='D3PD merged output {0} file )'.format(dpdName))
-                else:
-                    parser.add_argument('--output' + dpdName + 'File', 
-                                        type=argFactory(trfArgClasses.argNTUPFile, treeNames=dpdWriter.TreeNames, multipleOK=multipleOK),
-                                        group='D3PD NTUPs', metavar=dpdName.upper(),
-                                        help='D3PD output {0} file (can be made in substeps {1})'.format(dpdName, ','.join(dpdWriter.SubSteps)))
-                    # Automatically add D3PDs as data arguments of their relevant executors
-                    if transform:
-                        for executor in transform.executors:
-                            if hasattr(executor, 'substep') and executor.substep in dpdWriter.SubSteps:
-                                executor.outDataUpdate([dpdName])
-                            if executor.name in dpdWriter.SubSteps:
-                                executor.outDataUpdate([dpdName])
-       
-    except ImportError:
-        msg.warning('D3PDProdFlags not available - cannot add D3PD arguments')
-
-
 ## @brief Simple class to store information about extra DPD filetypes
 #  @details Implement this type of information as a class allowing for
 #  extensions to be easily added and for some convenient heuristics
@@ -579,15 +535,3 @@ def addTeaArguments(parser):
     parser.add_argument('--mugVolume', group='Tea', type=argFactory(trfArgClasses.argFloat), help='How large a cup to use (float)')
     parser.add_argument('--drinkers', group='Tea', nargs='+', type=argFactory(trfArgClasses.argList), help='Who is drinking tea (list)')
 
-## @brief This method adds the current valid list of D3PDs to two lists
-def listKnownD3PDs():
-    inputD3PDList = []
-    outputD3PDList = []
-    from D3PDMakerConfig.D3PDProdFlags import listAllKnownD3PD
-    for dpdWriter in listAllKnownD3PD:
-        dpdName = dpdWriter.StreamName.replace('Stream', '')
-        inputD3PDList.append(dpdName)
-        outputD3PDList.append(dpdName+'_MRG')
-    
-    return inputD3PDList, outputD3PDList
-   

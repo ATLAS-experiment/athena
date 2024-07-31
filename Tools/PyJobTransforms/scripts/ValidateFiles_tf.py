@@ -33,9 +33,6 @@ def getTransform():
     addArgs(trf.parser)
     trfArgs.addParallelJobProcessorArguments(trf.parser)
 
-    # Add all known D3PD types
-    trfArgs.addD3PDArguments(trf.parser, transform = trf, multipleOK=True)
-
     return trf
         
 def addArgs(parser):
