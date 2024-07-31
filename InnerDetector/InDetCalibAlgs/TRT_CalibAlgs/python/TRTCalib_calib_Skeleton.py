@@ -9,6 +9,46 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def fromRunArgs(runArgs):
     
+    inputFile  = runArgs.inputTARFile[0]
+    outputFile = runArgs.outputTAR_CALIBFile
+    
+    ##################################################################################################
+    #
+    #       UNTAR input file
+    #
+    ##################################################################################################   
+    
+    print("\nUncompressing files:")
+    try:
+        print("\t-",inputFile)
+        tarfile.open(inputFile).extractall(".") 
+    except OSError as e:
+        print("ERROR: Failed uncompressing TAR file\n",e)
+        sys.exit(e.errno)  
+    
+    ##################################################################################################
+    #
+    #       Renaming some files for the final output
+    #
+    ##################################################################################################   
+    
+    print("\nUncompressing files:")
+    try:
+        print("\tRunning: mv %s.merged.straw.txt %s.merged.straw.txt" % (inputFile,outputFile))
+        os.rename(inputFile+'.merged.straw.txt' , outputFile+'.merged.straw.txt') 
+        print("\tRunning: mv %s.tracktuple.root %s.tracktuple.root" % (inputFile,outputFile))
+        os.rename(inputFile+'.tracktuple.root' , outputFile+'.tracktuple.root') 
+    except OSError as e:
+        print("ERROR: Failed uncompressing TAR file\n",e)
+        sys.exit(e.errno)  
+    
+    
+    ##################################################################################################
+    #
+    #       Calculating constants
+    #
+    ##################################################################################################    
+    
     myFile = []
     # generating the RAW file path
     if runArgs.rawfile:
@@ -65,7 +105,7 @@ def fromRunArgs(runArgs):
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     cfg.merge(InDetTrackRecoCfg(flags))    
     
-    cfg.merge(TRT_CalibrationMgrCfg(flags,DoCalibrate=True, Hittuple=runArgs.inputTARFile[0], caltag=runArgs.piecetoken))
+    cfg.merge(TRT_CalibrationMgrCfg(flags,DoCalibrate=True, Hittuple=inputFile+".basic.root", caltag=runArgs.piecetoken))
     cfg.merge(TRT_StrawStatusCfg(flags))
 
     processPostInclude(runArgs, flags, cfg)
@@ -77,8 +117,6 @@ def fromRunArgs(runArgs):
     sc = cfg.run()
     if not sc.isSuccess():
          sys.exit(not sc.isSuccess())
-         
-    outputFile = runArgs.outputTAR_CALIBFile
     
     ##################################################################################################
     #
@@ -97,7 +135,6 @@ def fromRunArgs(runArgs):
     except OSError as e:
         print("ERROR: Failed renaming files in TRT calib step\n",e)
         sys.exit(100) 
-        
            
     ##################################################################################################
     #
@@ -106,7 +143,7 @@ def fromRunArgs(runArgs):
     ################################################################################################## 
     try:
         # Getting list of files to be compressed
-        files_list=glob.glob(outputFile+"*")
+        files_list=glob.glob(outputFile+".*")
         # Compressing
         tar = tarfile.open(outputFile, "w:gz")
         print("\nCompressing files in %s output file:" % outputFile)
@@ -117,5 +154,8 @@ def fromRunArgs(runArgs):
     except OSError as e:
         print("ERROR: Failed compressing the output files\n",e)
         sys.exit(101)    
-         
-         
+
+    # Prints all types of txt files present in a Path
+    print("\nListing files:")
+    for file in sorted(glob.glob("./*", recursive=True)):
+        print("\t-",file)            
