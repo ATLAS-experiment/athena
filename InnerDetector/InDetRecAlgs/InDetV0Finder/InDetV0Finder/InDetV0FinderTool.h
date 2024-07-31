@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,6 +27,13 @@
 #include "TrkParameters/TrackParameters.h"
 #include "GeoPrimitives/GeoPrimitives.h" //Needed for Amg::Vector3D
 #include <atomic>
+
+#include "InDetConversionFinderTools/VertexPointEstimator.h"
+#include "ITrackToVertex/ITrackToVertex.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "TrkVertexFitterInterfaces/IVertexFitter.h"
+
 /**
    The InDetV0FinderTool reads in the TrackParticle container from StoreGate,
    if useorigin = True only tracks not associated to a primary vertex are used.
@@ -75,25 +82,16 @@
 
 namespace Trk
 {
-  class IVertexFitter;
   class TrkV0VertexFitter;
   class V0Tools;
-  class IExtrapolator;
-  class ITrackSelectorTool;
 }
 
 namespace HepPDT{
   class ParticleDataTable;
 }
 
-namespace Reco{
-  class ITrackToVertex;
-}
-
 namespace InDet
 {
-  class VertexPointEstimator;
-
   static const InterfaceID IID_InDetV0FinderTool("InDetV0FinderTool", 1, 0);
 
   class InDetV0FinderTool:  public AthAlgTool
@@ -119,52 +117,64 @@ namespace InDet
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleKey { this, "TrackParticleCollection", "InDetTrackParticles",
                                                                          "key for retrieval of TrackParticles" };
 
-    ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
-    ToolHandle < Trk::IVertexFitter > m_iVKVertexFitter;
-    ToolHandle < Trk::IVertexFitter > m_iKshortFitter;
-    ToolHandle < Trk::IVertexFitter > m_iLambdaFitter;
-    ToolHandle < Trk::IVertexFitter > m_iLambdabarFitter;
-    ToolHandle < Trk::IVertexFitter > m_iGammaFitter;
-    ToolHandle < Trk::V0Tools > m_V0Tools;
-    ToolHandle < Reco::ITrackToVertex > m_trackToVertexTool;
-    ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-    ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
-    ToolHandle < Trk::IExtrapolator > m_extrapolator;
+    PublicToolHandle<Trk::IVertexFitter> m_iVertexFitter {
+      this, "VertexFitterTool", "Trk::V0VertexFitter"};
+    PublicToolHandle<Trk::IVertexFitter> m_iVKVertexFitter{
+      this, "VKVertexFitterTool", "Trk::TrkVKalVrtFitter"};
+    PublicToolHandle<Trk::IVertexFitter> m_iKshortFitter{
+      this, "KshortFitterTool", "Trk::TrkVKalVrtFitter"};
+    PublicToolHandle<Trk::IVertexFitter> m_iLambdaFitter{
+      this, "LambdaFitterTool", "Trk::TrkVKalVrtFitter"};
+    PublicToolHandle<Trk::IVertexFitter> m_iLambdabarFitter{
+      this, "LambdabarFitterTool", "Trk::TrkVKalVrtFitter"};
+    PublicToolHandle<Trk::IVertexFitter> m_iGammaFitter{
+      this, "GammaFitterTool", "Trk::TrkVKalVrtFitter"};
+    PublicToolHandle<Trk::V0Tools> m_V0Tools{
+      this, "V0Tools", "Trk::V0Tools"};
+    PublicToolHandle<Reco::ITrackToVertex> m_trackToVertexTool{
+      this, "TrackToVertexTool", "Reco::TrackToVertex"};
+    PublicToolHandle<Trk::ITrackSelectorTool> m_trkSelector{
+      this, "TrackSelectorTool", "InDet::TrackSelectorTool"};
+    PublicToolHandle<InDet::VertexPointEstimator> m_vertexEstimator{
+      this, "VertexPointEstimator", "InDet::VertexPointEstimator"};
+    PublicToolHandle<Trk::IExtrapolator> m_extrapolator{
+      this, "Extrapolator", "Trk::Extrapolator"};
 
-    const HepPDT::ParticleDataTable *m_particleDataTable;
+    const HepPDT::ParticleDataTable *m_particleDataTable = nullptr;
 
-    bool          m_doSimpleV0;               //!< = true equivalent to the old InDetSimpleV0Finder (false)
-    bool          m_useorigin;                //!< = true only using tracks that have no vertex association (true)
-    bool          m_samesign;                 //!< = true select tracks with same sign (false)
-    bool          m_pv;                       //!< = true select tracks wrt primary vertex (false)
-    bool          m_use_vertColl;             //!< = true select tracks wrt a vertex collection (false)
-    bool          m_useTRTplusTRT;            //!< = use TRT+TRT pairs (true)
-    bool          m_useTRTplusSi;             //!< = use TRT+Si pairs (true)
-    bool          m_useV0Fitter;              //!< = true if using TrkV0Fitter, = false if using VKalVert (true)
-    int           m_masses;                   //!< = 1 if using PDG values, = 2 if user set (1)
-    double        m_masspi;                   //!< pion mass (139.57 MeV)
-    double        m_massp;                    //!< proton mass (938.272 MeV)
-    double        m_masse;                    //!< electron mass (0.510999 MeV)
-    double        m_massK0S;                  //!< Kshort mass (497.672 MeV)
-    double        m_massLambda;               //!< Lambda mass (1115.68 MeV)
-    double        m_ptTRT;                    //!< Minimum pT for TRT tracks (700. MeV)
-    double        m_maxsxy;                   //!< Maximum Rxy of starting point (1000. mm)
-    double        m_uksmin;                   //!< min Kshort mass, unconstrained fit (400. MeV)
-    double        m_uksmax;                   //!< max Kshort mass, unconstrained fit (600. MeV)
-    double        m_ulamin;                   //!< min Lambda mass, unconstrained fit (1000. MeV)
-    double        m_ulamax;                   //!< max Lambda mass, unconstrained fit (1200. MeV)
-    double        m_ksmin;                    //!< min Kshort mass (400. MeV)
-    double        m_ksmax;                    //!< max Kshort mass (600. MeV)
-    double        m_lamin;                    //!< min Lambda mass (1000. MeV)
-    double        m_lamax;                    //!< max Lambda mass (1200. MeV)
-    double        m_errmass;                  //!< Maximum mass error (100. MeV)
-    double        m_minVertProb;              //!< Minimum vertex probability (0.0001)
-    double        m_minConstrVertProb;        //!< Minimum vertex probability for constrained fit (0.0001)
-    double        m_d0_cut;                   //!< track d0 significance wrt a vertex (>2.)
-    double        m_vert_lxy_sig;             //!< V0 lxy significance wrt a vertex (>2.)
-    double        m_vert_lxy_cut;             //!< V0 lxy V0 lxy  (<500.)
-    double        m_vert_a0xy_cut;            //!< V0 |a0xy| wrt a vertex (<3.)
-    double        m_vert_a0z_cut;             //!< V0 |a0z| wrt a vertex (<15.)
+    BooleanProperty m_doSimpleV0{this, "doSimpleV0", false};            //!< = true equivalent to the old InDetSimpleV0Finder (false)
+    BooleanProperty m_useorigin{this, "useorigin", true};               //!< = true only using tracks that have no vertex association (true)
+    BooleanProperty m_samesign{this, "AddSameSign", false};             //!< = true select tracks with same sign (false)
+    BooleanProperty m_pv{this, "trkSelPV", false};                      //!< = true select tracks wrt primary vertex (false)
+    BooleanProperty m_use_vertColl{this, "useVertexCollection", false}; //!< = true select tracks wrt a vertex collection (false)
+    BooleanProperty m_useTRTplusTRT{this, "useTRTplusTRT", false};      //!< = use TRT+TRT pairs (true)
+    BooleanProperty m_useTRTplusSi{this, "useTRTplusSi", false};        //!< = use TRT+Si pairs (true)
+    BooleanProperty m_useV0Fitter{this, "useV0Fitter", false};          //!< = true if using TrkV0Fitter, = false if using VKalVert (true)
+
+    IntegerProperty m_masses{this, "masses", 1};                        //!< = 1 if using PDG values, = 2 if user set (1)
+    DoubleProperty m_masspi{this, "masspi", 139.57};                    //!< pion mass (139.57 MeV)
+    DoubleProperty m_massp{this, "massp", 938.272};                     //!< proton mass (938.272 MeV)
+    DoubleProperty m_masse{this, "masse", 0.510999};                    //!< electron mass (0.510999 MeV)
+    DoubleProperty m_massK0S{this, "massK0S", 497.672};                 //!< Kshort mass (497.672 MeV)
+    DoubleProperty m_massLambda{this, "massLambda", 1115.68};           //!< Lambda mass (1115.68 MeV)
+    DoubleProperty m_ptTRT{this, "ptTRT", 700.};                        //!< Minimum pT for TRT tracks (700. MeV)
+    DoubleProperty m_maxsxy{this, "maxsxy", 1000.};                     //!< Maximum Rxy of starting point (1000. mm)
+    DoubleProperty m_uksmin{this, "uksmin", 400.};                      //!< min Kshort mass, unconstrained fit (400. MeV)
+    DoubleProperty m_uksmax{this, "uksmax", 600.};                      //!< max Kshort mass, unconstrained fit (600. MeV)
+    DoubleProperty m_ulamin{this, "ulamin", 1000.};                     //!< min Lambda mass, unconstrained fit (1000. MeV)
+    DoubleProperty m_ulamax{this, "ulamax", 1200.};                     //!< max Lambda mass, unconstrained fit (1200. MeV)
+    DoubleProperty m_ksmin{this, "ksmin", 400.};                        //!< min Kshort mass (400. MeV)
+    DoubleProperty m_ksmax{this, "ksmax", 600.};                        //!< max Kshort mass (600. MeV)
+    DoubleProperty m_lamin{this, "lamin", 1000.};                       //!< min Lambda mass (1000. MeV)
+    DoubleProperty m_lamax{this, "lamax", 1200.};                       //!< max Lambda mass (1200. MeV)
+    DoubleProperty m_errmass{this, "errmass", 100.};                    //!< Maximum mass error (100. MeV)
+    DoubleProperty m_minVertProb{this, "minVertProb", 0.0001};          //!< Minimum vertex probability (0.0001)
+    DoubleProperty m_minConstrVertProb{this, "minConstrVertProb", 0.0001}; //!< Minimum vertex probability for constrained fit (0.0001)
+    DoubleProperty m_d0_cut{this, "d0_cut", 2.};                        //!< track d0 significance wrt a vertex (>2.)
+    DoubleProperty m_vert_lxy_sig{this, "vert_lxy_sig", 2.};            //!< V0 lxy significance wrt a vertex (>2.)
+    DoubleProperty m_vert_lxy_cut{this, "vert_lxy_cut", 500.};          //!< V0 lxy V0 lxy  (<500.)
+    DoubleProperty m_vert_a0xy_cut{this, "vert_a0xy_cut", 3.};          //!< V0 |a0xy| wrt a vertex (<3.)
+    DoubleProperty m_vert_a0z_cut{this, "vert_a0z_cut", 15.};           //!< V0 |a0z| wrt a vertex (<15.)
 
     mutable std::atomic<unsigned int>  m_events_processed{};
     mutable std::atomic<unsigned int>  m_V0s_stored{};

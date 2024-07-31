@@ -12,20 +12,7 @@ namespace InDet
 {
 V0MainDecorator::V0MainDecorator(const std::string& t, const std::string& n, const IInterface* p)
   :
-  AthAlgTool(t,n,p),  m_masses(1),
-  m_masspi(139.57),
-  m_massp(938.272),
-  m_masse(0.510999),
-  m_massK0S(497.672),
-  m_massLambda(1115.68)
-  {
-  declareProperty("masses", m_masses);
-  declareProperty("masspi", m_masspi);
-  declareProperty("massp", m_massp);
-  declareProperty("masse", m_masse);
-  declareProperty("massK0S", m_massK0S);
-  declareProperty("massLambda", m_massLambda);
-  }
+  AthAlgTool(t,n,p){}
 
 V0MainDecorator::~V0MainDecorator() = default;
 

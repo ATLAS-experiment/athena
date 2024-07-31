@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,22 +16,14 @@
  ***************************************************************************/
 
 #include "InDetV0Finder/InDetV0FinderTool.h"
-#include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkExInterfaces/IExtrapolator.h"
-
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "InDetConversionFinderTools/VertexPointEstimator.h"
-
-#include "ITrackToVertex/ITrackToVertex.h"
 
 #include "GaudiKernel/IPartPropSvc.h"
 
 #include "xAODTracking/TrackingPrimitives.h"
 #include "HepPDT/ParticleDataTable.hh"
-#include "xAODTracking/VertexContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -43,108 +35,9 @@ namespace InDet
   
 InDetV0FinderTool::InDetV0FinderTool(const std::string& t, const std::string& n, const IInterface* p)
   :
-  AthAlgTool(t,n,p),
-  m_iVertexFitter("Trk::V0VertexFitter"),
-  m_iVKVertexFitter("Trk::TrkVKalVrtFitter"),
-  m_iKshortFitter("Trk::TrkVKalVrtFitter"),
-  m_iLambdaFitter("Trk::TrkVKalVrtFitter"),
-  m_iLambdabarFitter("Trk::TrkVKalVrtFitter"),
-  m_iGammaFitter("Trk::TrkVKalVrtFitter"),
-  m_V0Tools("Trk::V0Tools"),
-  m_trackToVertexTool("Reco::TrackToVertex"),
-  m_trkSelector("InDet::TrackSelectorTool"),
-  m_vertexEstimator("InDet::VertexPointEstimator"),
-  m_extrapolator("Trk::Extrapolator"),
-  m_particleDataTable(nullptr),
-  m_doSimpleV0(false),
-  m_useorigin(true),
-  m_samesign(false),
-  m_pv(false),
-  m_use_vertColl(false),
-  m_useTRTplusTRT(false),
-  m_useTRTplusSi(false),
-  m_useV0Fitter(false),
-  m_masses(1),
-  m_masspi(139.57),
-  m_massp(938.272),
-  m_masse(0.510999),
-  m_massK0S(497.672),
-  m_massLambda(1115.68),
-  m_ptTRT(700.),
-  m_maxsxy(1000.),
-  m_uksmin(400.),
-  m_uksmax(600.),
-  m_ulamin(1000.),
-  m_ulamax(1200.),
-  m_ksmin(400.),
-  m_ksmax(600.),
-  m_lamin(1000.),
-  m_lamax(1200.),
-  m_errmass(100.),
-  m_minVertProb(0.0001),
-  m_minConstrVertProb(0.0001),
-  m_d0_cut(2.),
-  m_vert_lxy_sig(2.),
-  m_vert_lxy_cut(500.),
-  m_vert_a0xy_cut(3.),
-  m_vert_a0z_cut(15.)
+  AthAlgTool(t,n,p)
 {
   declareInterface<InDetV0FinderTool>(this);
-  declareProperty("VertexFitterTool", m_iVertexFitter);
-  declareProperty("VKVertexFitterTool", m_iVKVertexFitter);
-  declareProperty("KshortFitterTool", m_iKshortFitter);
-  declareProperty("LambdaFitterTool", m_iLambdaFitter);
-  declareProperty("LambdabarFitterTool", m_iLambdabarFitter);
-  declareProperty("GammaFitterTool", m_iGammaFitter);
-  declareProperty("V0Tools",m_V0Tools);
-  declareProperty("TrackToVertexTool",m_trackToVertexTool);
-  declareProperty("TrackSelectorTool", m_trkSelector);
-  declareProperty("VertexPointEstimator", m_vertexEstimator);
-  declareProperty("Extrapolator", m_extrapolator);
-  declareProperty("doSimpleV0", m_doSimpleV0);
-  declareProperty("useorigin", m_useorigin);
-  declareProperty("AddSameSign", m_samesign);
-  declareProperty("trkSelPV", m_pv);
-  declareProperty("useVertexCollection", m_use_vertColl);
-  declareProperty("useTRTplusTRT", m_useTRTplusTRT);
-  declareProperty("useTRTplusSi", m_useTRTplusSi);
-  declareProperty("useV0Fitter", m_useV0Fitter);
-  declareProperty("masses", m_masses);
-  declareProperty("masspi", m_masspi);
-  declareProperty("massp", m_massp);
-  declareProperty("masse", m_masse);
-  declareProperty("massK0S", m_massK0S);
-  declareProperty("massLambda", m_massLambda);
-  declareProperty("ptTRT", m_ptTRT);
-  declareProperty("maxsxy", m_maxsxy);
-  declareProperty("uksmin", m_uksmin);
-  declareProperty("uksmax", m_uksmax);
-  declareProperty("ulamin", m_ulamin);
-  declareProperty("ulamax", m_ulamax);
-  declareProperty("ksmin", m_ksmin);
-  declareProperty("ksmax", m_ksmax);
-  declareProperty("lamin", m_lamin);
-  declareProperty("lamax", m_lamax);
-  declareProperty("errmass", m_errmass);
-  declareProperty("minVertProb", m_minVertProb);
-  declareProperty("minConstrVertProb", m_minConstrVertProb);
-  declareProperty("d0_cut", m_d0_cut );
-  declareProperty("vert_lxy_sig", m_vert_lxy_sig );
-  declareProperty("vert_lxy_cut", m_vert_lxy_cut );
-  declareProperty("vert_a0xy_cut", m_vert_a0xy_cut );
-  declareProperty("vert_a0z_cut", m_vert_a0z_cut );
-
-  declareProperty("V0Linkks", m_v0LinksDecorkeyks);
-  declareProperty("V0Linklb", m_v0LinksDecorkeylb);
-  declareProperty("V0Linklbb", m_v0LinksDecorkeylbb);
-  declareProperty("KshortLink", m_v0_ksLinksDecorkey);
-  declareProperty("LambdaLink", m_v0_laLinksDecorkey);
-  declareProperty("LambdabarLink", m_v0_lbLinksDecorkey);
-
-  declareProperty("gamma_fit", m_mDecor_gfit);
-  declareProperty("gamma_mass", m_mDecor_gmass);
-  declareProperty("gamma_massError", m_mDecor_gmasserr);
-  declareProperty("gamma_probability", m_mDecor_gprob);  
 }
 
 InDetV0FinderTool::~InDetV0FinderTool() = default;
