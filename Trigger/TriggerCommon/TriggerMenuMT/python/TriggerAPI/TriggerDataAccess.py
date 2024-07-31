@@ -172,6 +172,11 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
 
     from collections import defaultdict
 
+    # for run2 or earlier, need to quieten output of TrigConfigSvcUtils
+    tcsLogger = logging.getLogger("TrigConfigSvcUtils.py")
+    tcsLogLevel = tcsLogger.level
+    tcsLogger.setLevel(logging.ERROR)
+
     lvl = int(logging.root.level)
     logging.root.setLevel(logging.WARNING)
 
@@ -185,8 +190,8 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
             if "L1" not in value["l1item"]: continue # filtering
             chainsHLT[value["nameHash"]] = (name,value["l1item"])
     else:
-        items = getL1Items('TRIGGERDB', info['smk'])
-        chainsHLT = getChainsWithL1seed('TRIGGERDB', info['smk']) # returns map HLT ID => (HLT name, L1 seed)
+        items = getL1Items('oracle://ATLAS_CONFIG/ATLAS_CONF_TRIGGER_RUN2', info['smk'])
+        chainsHLT = getChainsWithL1seed('oracle://ATLAS_CONFIG/ATLAS_CONF_TRIGGER_RUN2', info['smk']) # returns map HLT ID => (HLT name, L1 seed)
         chainsHLT = {k:v for (k,v) in six.iteritems (chainsHLT) if "L1" in v[1]} # filtering
 
 
@@ -202,7 +207,7 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
                 # key seems to be a float (from looking at type(list(getHLTPrescalesRun2("TRIGGERDB",3000).keys())[0]))
                 hltprescales[value["hash"]] = (value["prescale"],rerun)
         else:
-            hltprescales = getHLTPrescalesRun2('TRIGGERDB', lbrange[0])
+            hltprescales = getHLTPrescalesRun2('oracle://ATLAS_CONFIG/ATLAS_CONF_TRIGGER_RUN2', lbrange[0])
         tmphltList.append(( lbstart, lbend,hltprescales) )
 
     tmpl1List = []
@@ -213,11 +218,13 @@ def fillHLTmap( info, hltMap_prev , lbCount, run, grlblocks):
             l1ps = L1PrescalesSetAccess(dbalias='TRIGGERDB_RUN3',l1pskey=lbrange[0])
             l1prescales    = {name: l1ps.prescale(name) for name in l1ps.itemNames()}
         else:
-            l1psname, l1prescales = getL1Prescales('TRIGGERDB', lbrange[0])
+            l1psname, l1prescales = getL1Prescales('oracle://ATLAS_CONFIG/ATLAS_CONF_TRIGGER_RUN2', lbrange[0])
+            l1prescales = list(l1prescales)
             l1prescales    = {l1name: l1prescales[int(l1id)] for (l1name, l1id) in six.iteritems (items)}
         tmpl1List.append(( lbstart, lbend,l1prescales) )
 
     logging.root.setLevel(lvl)
+    tcsLogger.setLevel(tcsLogLevel)
 
     #merge the lb ranges of HLT and L1
     hltindex, l1index = 0,0
@@ -342,20 +349,37 @@ def getHLTmap_fromTM(flags, period, release):
         The format is the same as for TriggerDBAccess for compatibility but rerun is always false
     '''
 
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
-    menu = GenerateMenuMT()
-    menu.getChainsFromMenu(flags)
-
     if not period & TriggerPeriod.future: return {}, 0
     hltMap = {}
     dummyfutureLBs = 1e6
 
-    for chain in itertools.chain.from_iterable(menu.chainsInMenu.values()):
-        hltname = chain.name
-        l1seed  = chain.name[chain.name.rfind("_L1")+3:] #surely a better way to do this
-        primary = any('Primary' in g or 'TagAndProbe' in g for g in chain.groups)
-        ps = 1 if primary else 0
-        hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
+    from TrigConfigSvc.TrigConfigSvcCfg import getTrigConfigFromFlag
+    if (flags.Input.Files and os.path.exists(flags.Input.Files[0]) and getTrigConfigFromFlag(flags)["SOURCE"]=='INFILE' and
+        (flags.Input.isMC or flags.Input.DataYear>=2022) ): # R2 data should not use this infile menu for now, to keep outputs the same as before this feature was added
+        # get menu out of the first input file
+        from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+        try:
+            menu = getHLTMenuAccess(flags)
+            for hltname,chain in menu.chains().items():
+                l1seed  = chain["l1item"]
+            primary = any('Primary' in g or 'TagAndProbe' in g for g in chain["groups"])
+            ps = 1 if primary else 0
+            hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
+        except RuntimeError:
+            log.info("Failed to read infile menu, which can happen with old MC, reverting to release menu")
+
+    if not hltMap:
+        # use the generated menus from the release, and pick the menu given according to the flags (Trigger.triggerMenuSetup)
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
+        menu = GenerateMenuMT()
+        menu.getChainsFromMenu(flags)
+        for chain in itertools.chain.from_iterable(menu.chainsInMenu.values()):
+            hltname = chain.name
+            l1seed  = chain.name[chain.name.rfind("_L1")+3:] #surely a better way to do this
+            primary = any('Primary' in g or 'TagAndProbe' in g for g in chain.groups)
+            ps = 1 if primary else 0
+            hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
+
     return hltMap, dummyfutureLBs, {}
 
 def getMenuPathFromRelease(release):

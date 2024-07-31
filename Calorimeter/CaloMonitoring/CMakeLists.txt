@@ -10,11 +10,11 @@ find_package( ROOT COMPONENTS Core Hist MathCore )
 atlas_add_component( CaloMonitoring
    CaloMonitoring/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloIdentifier CommissionEvent
+   LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloIdentifier
    AthenaMonitoringLib StoreGateLib Identifier xAODCaloEvent GaudiKernel
-   LArIdentifier LArRecConditions LArCablingLib MissingETEvent egammaEvent
-   AthContainers LumiBlockData TrigDecisionToolLib CaloDetDescrLib
-   CaloGeoHelpers AthenaKernel xAODEventInfo LArRecEvent JetEvent
+   LArIdentifier LArRecConditions LArCablingLib
+   LumiBlockData TrigDecisionToolLib CaloDetDescrLib
+   CaloGeoHelpers AthenaKernel LArRecEvent
    RecBackgroundEvent CaloConditions )
 
 # Install files from the package:

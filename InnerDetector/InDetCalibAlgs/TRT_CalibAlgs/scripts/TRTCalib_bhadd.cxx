@@ -79,7 +79,7 @@ public:
     ~CalHist();
     int IncreaseBin(short, unsigned short);
     //  void Print(int);
-    void GetArray(std::vector<int>, int);
+    void GetArray(std::vector<int> &, int);
     // void AddHist(int*, int);
     int maxvalue;
 
@@ -122,7 +122,7 @@ void CalHist::Print(int nbins){
   cout << endl;
 }
 */
-void CalHist::GetArray(std::vector<int> array, int nbins)
+void CalHist::GetArray(std::vector<int>& array, int nbins)
 {
     for (int ibin = 0; ibin < nbins; ibin++)
     {
@@ -880,7 +880,7 @@ int main(int argc, char *argv[])
                     if (histmap[sid]->maxvalue > maxvalue)
                         maxvalue = histmap[sid]->maxvalue;
 
-                    if ((nhits % 1000000 == 0) | (ievt == (nevents - 1)))
+                    if ((nhits % 1000000 == 0) | (ievt == nevents - 1))
                     {
                         process_mem_usage(vm, rss);
                         // cppcheck-suppress invalidPrintfArgType_uint
@@ -1315,7 +1315,6 @@ int main(int argc, char *argv[])
             {
                 // Since we access here in the last loop iteration, better to use RECREATE than UPDATE
                 TFile *ttfile = new TFile("tracktuple.root", "RECREATE");
-
 
                 TDirectory *trtdir   = ttfile->mkdir("TRT_all");
                 TDirectory *binhist  = trtdir->mkdir("reshists");

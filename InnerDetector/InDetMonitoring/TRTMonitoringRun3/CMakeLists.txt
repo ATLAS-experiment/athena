@@ -1,18 +1,13 @@
-
-################################################################################
-# Package: TRTMonitoringRun3
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TRTMonitoringRun3 )
-find_package( ROOT )
-                  
+
+# Component(s) in the package:
 atlas_add_component( TRTMonitoringRun3
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES AthenaMonitoringLib TrkToolInterfaces CommissionEvent TRT_DriftFunctionToolLib TRT_ConditionsServicesLib MagFieldInterfaces InDetByteStreamErrors InDetRIO_OnTrack InDetTrackSelectionToolLib
-                     )
-                   
+                     LINK_LIBRARIES AthContainers AthenaMonitoringKernelLib AthenaMonitoringLib AtlasDetDescr CommissionEvent EventPrimitives GaudiKernel InDetByteStreamErrors InDetConditionsSummaryService InDetIdentifier InDetRIO_OnTrack InDetRawData InDetTrackSelectionToolLib StoreGateLib TRT_ConditionsServicesLib TRT_DriftFunctionToolLib TRT_ReadoutGeometry TrkToolInterfaces TrkTrack TrkTrackSummary xAODEventInfo xAODTrigger )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
