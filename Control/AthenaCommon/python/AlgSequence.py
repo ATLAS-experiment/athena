@@ -64,49 +64,6 @@ from AthenaCommon import CfgMgr
 CfgMgr.AthSequencer = AthSequencer
 del CfgMgr
 
-### AthRetrySequencer ----------------------------------------------------------
-if hasattr(GaudiSequencerConf, 'AthRetrySequencer'):
-    # create a new base class type to replace the old configurable
-    class AthRetrySequencer( GaudiSequencerConf.AthRetrySequencer ):
-        """Sequence of Gaudi algorithms"""
-
-        def __init__( self, name = "AthRetrySequencer", **kwargs ):
-            # call base class __init__ to pass new name
-            super( AthRetrySequencer, self ).__init__( name, **kwargs )
-
-        def getProperties( self ):
-            ## call base class
-            props = super( AthRetrySequencer, self ).getProperties()
-
-            ## correctly display the value of 'Members' by gathering children
-            if 'Members' in props:
-                props['Members'] = [ c.getFullName() for c in self.getChildren() ]
-            return props
-
-        def insert( self, index, item ):
-            self.__iadd__( item, index = index )
-
-        def setup( self ):
-
-            ## synchronize the list of Members with our Configurable children
-            self.Members = [ c.getFullName() for c in self.getChildren() ]
-
-            from AthenaCommon import Logging
-            msg = Logging.logging.getLogger( "AthRetrySequencer" )
-            msg.debug( 'setup of sequence: %s', self.getName() )
-            if msg.isEnabledFor( Logging.logging.VERBOSE ):
-                # call of __repr__ is relatively expensive
-                msg.verbose( 'layout of sequence: %s\n%s', self.getName(), str(self) )
-
-            ## delegate to base class...
-            super( AthRetrySequencer, self ).setup()
-        pass # AthRetrySequencer
-    # store the new AthRetrySequencer into CfgMgr to make it available
-    from AthenaCommon import CfgMgr
-    CfgMgr.AthRetrySequencer = AthRetrySequencer
-    del CfgMgr
-    pass # monkey-patching AthRetrySequencer
-
 
 ### default algorithm sequence
 def AlgSequence( name="AthAlgSeq", **kwargs ):
