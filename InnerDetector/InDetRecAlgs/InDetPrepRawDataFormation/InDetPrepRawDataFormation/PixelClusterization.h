@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,8 +39,6 @@
 
 
 // Fwd declarations
-class ISvcLocator;
-class StatusCode;
 class PixelRDORawData;
 class PixelID;
 
@@ -76,21 +74,38 @@ public:
    //@}
                               
 private:
-  ToolHandle< IPixelClusteringTool > m_clusteringTool;
+  SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey{
+    this, "DataObjectName", "PixelRDOs"};
+  SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{
+    this, "RoIs", "", "RoIs to read in"};
+
+  ToolHandle<IPixelClusteringTool> m_clusteringTool{
+    this, "clusteringTool", "InDet::MergedPixelsTool"};
   /// class to find out which clusters shares ganged pixels
-  ToolHandle< PixelGangedAmbiguitiesFinder > m_gangedAmbiguitiesFinder; 
-  SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey;
-  SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
-  ToolHandle<IRegSelTool>     m_regionSelector { this, "RegSelTool", "RegSelTool/RegSelTool_Pixel" };     //!< region selector tool
-  ToolHandle< GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };
-  bool m_roiSeeded;
+  ToolHandle<PixelGangedAmbiguitiesFinder> m_gangedAmbiguitiesFinder{
+    this, "gangedAmbiguitiesFinder", "InDet::PixelGangedAmbiguitiesFinder"};
+  ToolHandle<IRegSelTool> m_regionSelector{
+    this, "RegSelTool", "RegSelTool/RegSelTool_Pixel" };
+  ToolHandle<GenericMonitoringTool> m_monTool{
+    this, "MonTool", "", "Monitoring tool" };
+
+  BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
   const PixelID* m_idHelper;
-  SG::WriteHandleKey<PixelClusterContainer> m_clusterContainerKey;
-  SG::WriteHandleKey<SiClusterContainer> m_clusterContainerLinkKey;
-  SG::WriteHandleKey<PixelGangedClusterAmbiguities> m_ambiguitiesMapKey;
-  SG::UpdateHandleKey<InDet::PixelClusterContainerCache> m_clusterContainercacheKey;
-  Gaudi::Property<bool> m_useDataPoolWithCache{
-      this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+
+  SG::WriteHandleKey<PixelClusterContainer> m_clusterContainerKey{
+    this, "ClustersName", "PixelClusters", "Pixel cluster container"};
+  SG::WriteHandleKey<SiClusterContainer> m_clusterContainerLinkKey{
+    this, "ClustersLinkName_", "PixelClusters" ,
+    "Pixel cluster container link name (don't set this)"};
+  SG::WriteHandleKey<PixelGangedClusterAmbiguities> m_ambiguitiesMapKey{
+    this, "AmbiguitiesMap", "PixelClusterAmbiguitiesMap",
+    "Ambiguity Map container"};
+
+  SG::UpdateHandleKey<InDet::PixelClusterContainerCache> m_clusterContainercacheKey{
+    this, "ClusterContainerCacheKey", "",
+    "Optional External Pixel cluster Cache"};
+  BooleanProperty m_useDataPoolWithCache{
+    this, "useDataPoolWithCache", false, "use DataPool With Cache"};
 };
 
 }//end of ns

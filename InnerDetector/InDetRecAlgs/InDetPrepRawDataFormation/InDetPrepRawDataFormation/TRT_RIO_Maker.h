@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,14 +28,10 @@
 #include "InDetRawData/TRT_RDO_Container.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "IRegionSelector/IRegSelTool.h"
+#include "TRT_DriftCircleTool/ITRT_DriftCircleTool.h"
+
 //fwd declarations
-class StatusCode;
 class ISvcLocator;
-
-namespace InDet{
-  class ITRT_DriftCircleTool;
-
-}
 
 namespace InDet{
 
@@ -63,19 +59,28 @@ namespace InDet{
     TRT_RIO_Maker &operator=(const TRT_RIO_Maker&) = delete;
   
     const TRT_ID* m_pTRTHelper;
-    SG::ReadHandleKey<TRT_RDO_Container> m_rdoContainerKey;
-    ToolHandle< ITRT_DriftCircleTool > m_driftcircle_tool;
-    SG::WriteHandleKey<InDet::TRT_DriftCircleContainer> m_rioContainerKey;
-    int                            m_mode_rio_production;
-    bool                           m_trtBadChannels;
+    SG::ReadHandleKey<TRT_RDO_Container> m_rdoContainerKey{
+      this, "TRTRDOLocation", "TRT_RDOs"};
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{
+      this, "RoIs", "", "RoIs to read in"};
 
-    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "", "RoIs to read in"};
+    ToolHandle<ITRT_DriftCircleTool> m_driftcircle_tool{
+      this, "TRT_DriftCircleTool", "InDet::TRT_DriftCircleTool"};
+    ToolHandle<IRegSelTool> m_regionSelector {
+      this, "RegSelTool", "RegSelTool/RegSelTool_TRT" }; //!< region selector tool
+
+    IntegerProperty m_mode_rio_production{this, "ModeRIOProduction", 0};
+    BooleanProperty m_trtBadChannels{
+      this, "TRTBadChannels", true,
+      "selection of the TRT bad channels(true/false)"};
     BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
-    Gaudi::Property<bool> m_useDataPoolWithCache{
-        this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+    BooleanProperty m_useDataPoolWithCache{
+      this, "useDataPoolWithCache", false, "use DataPool With Cache"};
 
-    ToolHandle<IRegSelTool>     m_regionSelector { this, "RegSelTool", "RegSelTool/RegSelTool_TRT" };     //!< region selector tool
-    SG::UpdateHandleKey<InDet::TRT_DriftCircleContainerCache> m_rioContainerCacheKey;
+    SG::WriteHandleKey<InDet::TRT_DriftCircleContainer> m_rioContainerKey{
+      this, "TRTRIOLocation", "TRT_DriftCircles"};
+    SG::UpdateHandleKey<InDet::TRT_DriftCircleContainerCache>
+    m_rioContainerCacheKey{this, "TRT_DriftCircleCache", ""};
     
 
   };
