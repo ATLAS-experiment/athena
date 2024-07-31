@@ -438,7 +438,7 @@ def CAtoGlobalWrapper(cfgFunc, flags, **kwargs):
 
 def appendCAtoAthena(ca):
     from AthenaCommon.AppMgr import (ServiceMgr, ToolSvc, theApp,
-                                     athCondSeq, athOutSeq, athAlgSeq, topSequence)
+                                     athCondSeq, athOutSeq, athAlgSeq)
     _log = logging.getLogger( "conf2toConfigurable" )
     _log.debug( "Merging ComponentAccumulator into global configuration" )
 
@@ -484,7 +484,7 @@ def appendCAtoAthena(ca):
                     raise DeduplicationFailed(f"ApplicationMgr property {propName} set twice: "
                                               "{origPropValue} and {propValue}")
 
-    preconfigured = [athCondSeq,athOutSeq,athAlgSeq,topSequence]
+    preconfigured = [athCondSeq,athOutSeq,athAlgSeq]
 
     for seq in ca._allSequences:
         merged = False
