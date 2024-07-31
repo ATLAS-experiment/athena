@@ -37,7 +37,7 @@ namespace CP {
         m_efficiencyMap(),
         m_efficiencyMapReplicaArray(),
         m_muonquality("Medium"),
-        m_calibration_version("230222_Winter_r22"),
+        m_calibration_version("240717_mc23ad"),
         m_custom_dir(),
         m_binning("fine"),
         m_allowZeroSF(false),
@@ -74,7 +74,8 @@ namespace CP {
           else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v1.root";
           else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v1.root";
           else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v2.root";
-          else if (year == 2022) fileName = "muontrigger_sf_2022_mc21_v05.root";
+          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v02.root";
+          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v02.root";
           else{
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
