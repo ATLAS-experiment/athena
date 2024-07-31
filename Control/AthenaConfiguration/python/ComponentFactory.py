@@ -3,8 +3,7 @@
 import sys
 import AthenaConfiguration.AtlasSemantics # noqa: F401 (load ATLAS-specific semantics)
 from AthenaCommon.Configurable import Configurable
-from AthenaCommon.ConfigurableDb import getConfigurable
-from GaudiConfig2 import Configurables as _cfgs
+from GaudiConfig2 import Configurables as cfg2
 
 
 def isComponentAccumulatorCfg():
@@ -17,48 +16,27 @@ def isComponentAccumulatorCfg():
         return False
 
 
-class _compFactory1():
-    """Factory providing legacy Configurables with global namespace"""
-
-    def __getattr__(self,cfgName):
-        if not cfgName.startswith("__"):
-            return getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False)
-
-    def getComp(self, cfgName):
-        return getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False)
-
-    def getComps(self, *manyNames):
-        return [getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False) for cfgName in manyNames]
-
-
-class _compFactory2():
-    """Factory providing GaudiConfig2 Configurable without global namespace"""
-
-    def __getattr__(self,cfgName):
-        if not cfgName.startswith("__"):
-            return getattr(_cfgs,cfgName)
-
-    def getComp(self, oneName):
-        return _cfgs.getByType(oneName)
-
-    def getComps(self, *manyNames):
-        return [_cfgs.getByType(cfgName) for cfgName in manyNames]
+def _getConf1(name):
+    """Return legacy Configurable class with given name"""
+    from AthenaCommon.ConfigurableDb import getConfigurable
+    return getConfigurable(name.replace("::","__"), assumeCxxClass=False)
 
 
 class _compFactory():
     """Return Configurable factory for legacy/CA jobs"""
 
-    def _getFactory(self):
-        return _compFactory2() if isComponentAccumulatorCfg() else _compFactory1()
+    def __getattr__(self, name):
+        """Return Configurable class with given name"""
+        if not name.startswith("__"):
+            return getattr(cfg2, name) if isComponentAccumulatorCfg() else _getConf1(name)
 
-    def __getattr__(self,cfgName):
-        return getattr(self._getFactory(),cfgName)
+    def getComp(self, name):
+        """Return Configurable class with given name"""
+        return cfg2.getByType(name) if isComponentAccumulatorCfg() else _getConf1(name)
 
-    def getComp(self, oneName):
-        return self._getFactory().getComp(oneName)
-
-    def getComps(self, *manyNames):
-        return self._getFactory().getComps(*manyNames)
+    def getComps(self, *names):
+        """Return list of Configurable classes with given names"""
+        return [self.getComp(name) for name in names]
 
 
-CompFactory=_compFactory()
+CompFactory = _compFactory()
