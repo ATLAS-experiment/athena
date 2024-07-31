@@ -47,6 +47,7 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::initialize() {
 }
 
 StatusCode MuonInDetToMuonSystemExtensionAlg::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("Cakes are availablei in "<<ctx.eventID().event_number());
     InDetCandidateCache output_cache{};
 
     SG::ReadHandle<InDetCandidateCollection> input_container{m_inputCandidate, ctx};
@@ -361,8 +362,8 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::createStaus(const EventContext& ct
         cache.requireSystemExtension = true;
 
         if (!m_muonSystemExtensionTool->muonLayerInterSections(ctx, *idMuidCo.cmb_trk, cache)) {
-            ATH_MSG_DEBUG("Could not determine the intersections. Although that should be possible");
-            continue;
+            ATH_MSG_FATAL("Could not determine the intersections. Although that should be possible");
+            return StatusCode::FAILURE;
         }
         stau_cache.outputContainer->push_back(std::move(cache.candidate));
     }
