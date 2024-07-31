@@ -15,8 +15,6 @@ import re
 from optparse import OptionParser
 
 import TrigEDMConfig.TriggerEDM as edm
-from edm import getRawTriggerEDMList
-
 
 # 'Counter' just contains the list of classes you want to include and the size
 class Counter:
@@ -44,13 +42,10 @@ class checkFileTrigSize:
 
         self.checkFile = paramDict.get('checkFile', 'AOD.pool.root.checkFile')
         self.triggerAlgList = []
-        self.triggerAlgListCOMM = []
         self.triggerAlgListNotIncluded = []
         self.nontriggerAlgList = []
         self.triggerAlgSize = {}
-        self.triggerAlgSizeCOMM = {}
         self.totalAlgSize = 0.0
-        self.totalAlgSizeCOMM = 0.0
 
         self.totalAlgSizeInLists = 0.0
         self.total = 0.0
@@ -1156,37 +1151,6 @@ class checkFileTrigSize:
         for item in allAlgList:
             self.totalAlgSizeInLists += item[2]
 
-        ## ========================================================
-        ## Calculate trigger category sizes for AODCOMM
-
-        self.triggerAlgListCOMM = []
-        edmRun3List = getRawTriggerEDMList(flags=None, runVersion=3)
-        for tup in edmRun3List:
-            contName = tup[0].split("#")[1]
-            edmSet = tup[1]
-            
-            if ("AODCOMM" in edmSet):
-                for trigAlg in self.triggerAlgList:
-                    if contName in trigAlg[0]:
-                        self.triggerAlgListCOMM.append(trigAlg)
-
-        self.triggerAlgSizeCOMM = {}
-        self.triggerAlgSizeCOMM[ 'AODCOMM_Total' ] = 0.0
-
-        for trigAlg in self.triggerAlgListCOMM:
-            if not trigAlg[1] in self.triggerAlgSizeCOMM: 
-                self.triggerAlgSizeCOMM[ trigAlg[1] ] = trigAlg[2]
-            else: 
-                self.triggerAlgSizeCOMM[ trigAlg[1] ] += trigAlg[2]
-
-            self.triggerAlgSizeCOMM[ 'AODCOMM_Total' ] += trigAlg[2]
-            
-
-        ## ================================
-        ## Calculating total sizes without AODCOMM
-
-        totalAlgSizeNoAODCOMM = float(self.triggerAlgSize['Total'])-float(self.triggerAlgSizeCOMM['AODCOMM_Total'])
-
         ## ================================
         ## Printing to file and do some computations 
         
@@ -1228,10 +1192,6 @@ class checkFileTrigSize:
             fout.write("Total file size".ljust(23) + "%6.3f" % self.totalAlgSize + "\n")
             print()
             fout.write("\n ")
-            print("File size wo AODCOMM".ljust(23), totalAlgSizeNoAODCOMM)
-            fout.write("File size wo AODCOMM ".ljust(23) + "%6.3f" % totalAlgSizeNoAODCOMM + "\n")
-            print()
-            fout.write("\n ")
             print("Total file size (list)".ljust(23), self.totalAlgSizeInLists)
             fout.write("Total file size (list)".ljust(23) + "%6.3f" % self.totalAlgSizeInLists + "\n")
             print("Total (from checkFile)".ljust(23), self.total)
@@ -1241,20 +1201,7 @@ class checkFileTrigSize:
             print("*******************************************************************")
             fout.write( "\n********************************************************************\n")
             print("")
-            print("Summary of categories for AODCOMM:")
-            fout.write( "\n Summary of AODCOMM categories:\n")
-            for key in sorted(self.triggerAlgSizeCOMM):
-                if not key == 'AODCOMM_Total':
-                    print("COMM_"+key.ljust(24), "%6.3f" % self.triggerAlgSizeCOMM[key])
-                    fout.write( "COMM_trigger"+key.ljust(24) + "%6.3f" % self.triggerAlgSizeCOMM[key] + "\n")
-            
-            print("=====================")
-            fout.write( "\n=========================\n")
-            print("Total AODCOMM Size ".ljust(23), "%6.3f" % self.triggerAlgSizeCOMM[ 'AODCOMM_Total' ])
-            fout.write("Total AODCOMM Size".ljust(23) + "%6.3f" % self.triggerAlgSizeCOMM[ 'AODCOMM_Total' ] + "\n")
-
             print()
-            print("=====================")
             if len(self.triggerAlgList) > 0:
                 fout.write( "\nThe following were found in TriggerEDM and counted but have a classification 'Unknown': \n")
                 for item in self.triggerAlgList:

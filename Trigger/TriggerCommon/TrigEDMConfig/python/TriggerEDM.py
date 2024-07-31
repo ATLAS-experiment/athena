@@ -23,7 +23,7 @@ log = logging.getLogger('TriggerEDM')
 # ------------------------------------------------------------
 # AllowedOutputFormats
 # ------------------------------------------------------------
-AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODCOMM', 'AODBLSSLIM' ]
+AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODBLSSLIM' ]
 from TrigEDMConfig import DataScoutingInfo
 AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
@@ -163,20 +163,10 @@ def getTriggerEDMList(flags, key, runVersion=-1):
             
         # this keeps only the dynamic variables that have been specified in TriggerEDMRun3
         Run3TrigEDM = {}
-        Run3TrigEDMCOMM = {}
         Run3TrigEDMSLIM = {}
 
         if "AODFULL" in key: 
-            #Containers marked with AODCOMM to be added to AODFULL
-
             Run3TrigEDM.update(_getRun3TrigEDMSlimList(key, RawEDMList))
-
-            Run3TrigEDMCOMM.update(_getRun3TrigEDMSlimList("AODCOMM", RawEDMList))
-            for kcomm,vcomm in Run3TrigEDMCOMM.items():
-                if kcomm in Run3TrigEDM:
-                    Run3TrigEDM[kcomm].extend(vcomm)
-                else:
-                    Run3TrigEDM[kcomm] = vcomm
 
         elif "AODSLIM" in key:
             # remove the variables that are defined in TriggerEDMRun3.varToRemoveFromAODSLIM from the containers
