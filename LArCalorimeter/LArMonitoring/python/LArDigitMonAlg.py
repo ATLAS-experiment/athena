@@ -71,83 +71,83 @@ def LArDigitMonConfigCore(helper, algoinstance,flags):
        crates_n = lArDQGlobals.FEB_Crates[lArDQGlobals.Partitions[subdet*2]][1]
        crates_low = 0.5
        crates_up = lArDQGlobals.FEB_Crates[lArDQGlobals.Partitions[subdet*2]][1] + 0.5
-       array.defineHistogram('Outslot,OutFT;RAW_OutOfRange', 
-                                  title='% chan/FEB/events with max out of ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='Outweight',
-                                  xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
-                                  ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
-       array.defineHistogram('Outcrate,Outchan;RAW_OutOfRangeChan', 
-                                  title='% chan/events with max out of  ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='weight',
-                                  xbins=crates_n,xmin=crates_low,xmax=crates_up,
-                                  ybins=chan_n, ymin=chan_low, ymax=chan_up)
+       array.defineHistogram('Outslot,OutFT;RAW_OutOfRange',
+                             title='% chan/FEB/events with max out of range;Slot;FT',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='Outweight',
+                             xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
+                             ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
+       array.defineHistogram('Outcrate,Outchan;RAW_OutOfRangeChan',
+                             title='% chan/events with max out of range;Crate (Slot + N_slots*FT);Channel',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='weight',
+                             xbins=crates_n,xmin=crates_low,xmax=crates_up,
+                             ybins=chan_n, ymin=chan_low, ymax=chan_up)
 
-       array.defineHistogram('Saturslot,SaturFT;RAW_Saturation', 
-                                  title='% chan/FEB/events with max=4095 ADC ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='Saturweight',
-                                  xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
-                                  ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
-       array.defineHistogram('Saturcrate,Saturchan;RAW_SaturationChan', 
-                                  title='% chan/events with max=4095 ADC - Med/High Gain - All Stream',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='weight',
-                                  xbins=crates_n,xmin=crates_low,xmax=crates_up,
-                                  ybins=chan_n, ymin=chan_low, ymax=chan_up)
+       array.defineHistogram('Saturslot,SaturFT;RAW_Saturation',
+                             title='% chan/FEB/events with max=4095 ADC;Slot;FT',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='Saturweight',
+                             xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
+                             ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
+       array.defineHistogram('Saturcrate,Saturchan;RAW_SaturationChan',
+                             title='% chan/events with max=4095 ADC - Med/High Gain - All Stream;Crate (Slot + N_slots*FT);Channel',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='weight',
+                             xbins=crates_n,xmin=crates_low,xmax=crates_up,
+                             ybins=chan_n, ymin=chan_low, ymax=chan_up)
 
-       array.defineHistogram('SaturLowslot,SaturLowFT;RAW_SaturationLow', 
-                                  title='% chan/FEB/events with max=4095 ADC ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='SaturLowweight',
-                                  xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
-                                  ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
+       array.defineHistogram('SaturLowslot,SaturLowFT;RAW_SaturationLow',
+                             title='% chan/FEB/events with max=4095 ADC ;Slot;FT',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='SaturLowweight',
+                             xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
+                             ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
        array.defineHistogram('SaturLowcrate,SaturLowchan;RAW_SaturationChanLow', 
-                                  title='% chan/events with max=4095 ADC - Low Gain - All Stream',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='weight',
-                                  xbins=crates_n,xmin=crates_low,xmax=crates_up,
-                                  ybins=chan_n, ymin=chan_low, ymax=chan_up)
+                             title='% chan/events with max=4095 ADC - Low Gain - All Stream;Crate (Slot + N_slots*FT);Channel',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='weight',
+                             xbins=crates_n,xmin=crates_low,xmax=crates_up,
+                             ybins=chan_n, ymin=chan_low, ymax=chan_up)
 
-       array.defineHistogram('Nullslot,NullFT;tNullDigit', 
-                                  title='% chan/FEB/events with min=0 ADC ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  weight='Nullweight',
-                                  xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
-                                  ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
+       array.defineHistogram('Nullslot,NullFT;tNullDigit',
+                             title='% chan/FEB/events with min=0 ADC;Slot;FT',
+                             type='TH2F',
+                             path=hist_path,
+                             weight='Nullweight',
+                             xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
+                             ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
        array.defineHistogram('Nullcrate,Nullchan;RAW_NullDigitChan', 
-                                  title='% chan/events with min=0 ADC - All Gain - All Stream;Crate;Channel',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  xbins=crates_n,xmin=crates_low,xmax=crates_up,
-                                  ybins=chan_n, ymin=chan_low, ymax=chan_up)
+                             title='% chan/events with min=0 ADC - All Gain - All Stream;Crate;Channel',
+                             type='TH2F',
+                             path=hist_path,
+                             xbins=crates_n,xmin=crates_low,xmax=crates_up,
+                             ybins=chan_n, ymin=chan_low, ymax=chan_up)
 
        array.defineHistogram('slot,FT,MaxPos;RAW_AvePosMaxDig', 
-                                  title='Average position of Max Digit;Slot;FT',
-                                  type='TProfile2D',
-                                  path=hist_path,
-                                  xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
-                                  ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
+                             title='Average position of Max Digit;Slot;FT',
+                             type='TProfile2D',
+                             path=hist_path,
+                             xbins=int(slot_n),xmin=slot_low,xmax=slot_up,
+                             ybins=int(ft_n), ymin=ft_low, ymax=ft_up)
 
        array.defineHistogram('LBN,MaxPos;MaxVsTime', 
-                                  title='Average Max Sample vs LumiBlock;Luminosity Block;Average Max Sample',
-                                  type='TProfile',
-                                  path=hist_path,
-                                  xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
+                             title='Average Max Sample vs LumiBlock;Luminosity Block;Average Max Sample',
+                             type='TProfile',
+                             path=hist_path,
+                             xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
        array.defineHistogram('MaxPos,Energy;EnVsMaxSample', 
-                                  title='Energy vs max sample;Sample Number;Energy [ADC] ',
-                                  type='TH2F',
-                                  path=hist_path,
-                                  xbins=lArDQGlobals.Samples_Bins,xmin=lArDQGlobals.Samples_Min,xmax=lArDQGlobals.Samples_Max,
-                                  ybins=lArDQGlobals.Energy_Bins, ymin=lArDQGlobals.Energy_Min, ymax=lArDQGlobals.Energy_Max)
+                             title='Energy vs max sample;Sample Number;Energy [ADC] ',
+                             type='TH2F',
+                             path=hist_path,
+                             xbins=lArDQGlobals.Samples_Bins,xmin=lArDQGlobals.Samples_Min,xmax=lArDQGlobals.Samples_Max,
+                             ybins=lArDQGlobals.Energy_Bins, ymin=lArDQGlobals.Energy_Min, ymax=lArDQGlobals.Energy_Max)
 
        array.defineHistogram('MaxPos,streamBin;MaxSample_PerStream',
                              title="Position of the Max Sample;Average Max Sample",
@@ -159,17 +159,17 @@ def LArDigitMonConfigCore(helper, algoinstance,flags):
                              
 
        array.defineHistogram('l1trig,MaxPos;TriggerWord', 
-                                  title='Position of max sample per L1 trigger word (8 bits);L1 trigger word;Position of max Sample ',
-                                  type='TProfile',
-                                  path=hist_path,
-                                  xbins=lArDQGlobals.L1Trig_Bins,xmin=lArDQGlobals.L1Trig_Min,xmax=lArDQGlobals.L1Trig_Max)
+                             title='Position of max sample per L1 trigger word (8 bits);L1 trigger word;Position of max Sample ',
+                             type='TProfile',
+                             path=hist_path,
+                             xbins=lArDQGlobals.L1Trig_Bins,xmin=lArDQGlobals.L1Trig_Min,xmax=lArDQGlobals.L1Trig_Max)
 
        array.defineHistogram('Sample,SignalNorm;SignShape', 
-                                  title='Normalized Signal Shape;Sample Number;Normalized Signal Shape ',
-                                  type='TProfile',
-                                  weight='weight',
-                                  path=hist_path,
-                                  xbins=lArDQGlobals.Samples_Bins,xmin=lArDQGlobals.Samples_Min,xmax=lArDQGlobals.Samples_Max)
+                             title='Normalized Signal Shape;Sample Number;Normalized Signal Shape ',
+                             type='TProfile',
+                             weight='weight',
+                             path=hist_path,
+                             xbins=lArDQGlobals.Samples_Bins,xmin=lArDQGlobals.Samples_Min,xmax=lArDQGlobals.Samples_Max)
     
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
