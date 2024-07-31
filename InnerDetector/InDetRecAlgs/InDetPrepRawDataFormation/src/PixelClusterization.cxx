@@ -10,7 +10,6 @@
 
 
 // Silicon trackers includes
-#include "InDetRawData/PixelRDO_Container.h"
 #include "InDetPrepRawDataFormation/PixelClusterization.h"
 #include "InDetRawData/PixelRDORawData.h"
 
@@ -18,10 +17,6 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
-
-
-#include "SiClusterizationTool/IPixelClusteringTool.h"
-#include "SiClusterizationTool/PixelGangedAmbiguitiesFinder.h"
 
 #include "StoreGate/WriteHandle.h"
 
@@ -31,33 +26,7 @@ namespace InDet{
   // Constructor with parameters:
   PixelClusterization::PixelClusterization(const std::string &name, ISvcLocator *pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
-  m_clusteringTool("InDet::MergedPixelsTool", this), //made private
-  m_gangedAmbiguitiesFinder("InDet::PixelGangedAmbiguitiesFinder", this), //made private
-  m_rdoContainerKey(""),
-  m_roiCollectionKey(""),
-  m_roiSeeded(false),
-  m_idHelper(nullptr),
-  m_clusterContainerKey(""),
-  m_clusterContainerLinkKey(""),
-  m_ambiguitiesMapKey(""),
-  m_clusterContainercacheKey("") {
-    // Get parameter values from jobOptions file
-    declareProperty("DataObjectName", m_rdoContainerKey = std::string("PixelRDOs"));
-    declareProperty("clusteringTool", m_clusteringTool);
-    declareProperty("gangedAmbiguitiesFinder", m_gangedAmbiguitiesFinder);
-    declareProperty("ClustersName", 
-                  m_clusterContainerKey = std::string("PixelClusters"),
-                  "Pixel cluster container");
-    declareProperty("ClustersLinkName_", 
-                  m_clusterContainerLinkKey = std::string("PixelClusters"),
-                  "Pixel cluster container link name (don't set this)");
-    declareProperty("AmbiguitiesMap", 
-                  m_ambiguitiesMapKey = std::string("PixelClusterAmbiguitiesMap"),
-                  "Ambiguity Map container");
-    declareProperty("RoIs", m_roiCollectionKey = std::string(""), "RoIs to read in");
-    declareProperty("isRoI_Seeded", m_roiSeeded = false, "Use RoI");
-    declareProperty("ClusterContainerCacheKey", m_clusterContainercacheKey, "Optional External Pixel cluster Cache");
-  }
+  m_idHelper(nullptr) {}
   
   //-----------------------------------------------------------------------------
   // Initialize method:

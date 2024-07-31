@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,7 +12,6 @@
  **/
 
 #include "InDetPrepRawDataFormation/TRT_RIO_Maker.h"
-#include "TRT_DriftCircleTool/ITRT_DriftCircleTool.h"
 #include "InDetIdentifier/TRT_ID.h"
 //
 #include "GaudiKernel/ISvcLocator.h"
@@ -28,23 +27,7 @@ namespace InDet {
   TRT_RIO_Maker::TRT_RIO_Maker
   (const std::string& name,ISvcLocator* pSvcLocator) : 
   AthReentrantAlgorithm(name,pSvcLocator),
-  m_pTRTHelper(nullptr),
-  m_rdoContainerKey("TRT_RDOs"),
-  m_driftcircle_tool("InDet::TRT_DriftCircleTool", this), //made private
-  m_rioContainerKey("TRT_DriftCircles"),
-  m_mode_rio_production(0),
-  m_trtBadChannels(0),
-  m_rioContainerCacheKey("")
-  {
-    // Read TRT_RIO_Maker steering parameters
-    declareProperty("TRTRDOLocation"      ,m_rdoContainerKey  );
-    declareProperty("ModeRIOProduction"   ,m_mode_rio_production);
-    //selection of the TRT bad channels(true/false)
-    declareProperty("TRTBadChannels"    ,m_trtBadChannels = true );
-    declareProperty("TRT_DriftCircleTool", m_driftcircle_tool);
-    declareProperty("TRTRIOLocation",  m_rioContainerKey);
-    declareProperty("TRT_DriftCircleCache",  m_rioContainerCacheKey);
-  }
+  m_pTRTHelper(nullptr){}
   
   ///////////////////////////////////////////////////////////////////
   // Initialisation

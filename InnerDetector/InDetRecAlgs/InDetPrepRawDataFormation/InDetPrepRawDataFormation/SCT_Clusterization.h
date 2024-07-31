@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -100,8 +100,11 @@ private:
   SG::WriteHandleKey<SCT_ClusterContainer> m_clusterContainerKey{this, "ClustersName", "SCT_Clusters", "SCT cluster container"};
   SG::WriteHandleKey<SiClusterContainer> m_clusterContainerLinkKey{this, "ClustersLinkName_", "SCT_Clusters", "SCT cluster container link name (don't set this)"};
   SG::WriteHandleKey<IDCInDetBSErrContainer> m_flaggedCondDataKey{this, "SCT_FlaggedCondData", "SCT_FlaggedCondData", "SCT flagged conditions data"};
-  SG::UpdateHandleKey<SCT_ClusterContainerCache> m_clusterContainerCacheKey; //!< For HLT cache
-  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_flaggedCondCacheKey; //!< For HLT cache
+
+  SG::UpdateHandleKey<SCT_ClusterContainerCache> m_clusterContainerCacheKey{
+    this, "ClusterContainerCacheKey", ""}; //!< For HLT cache
+  SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_flaggedCondCacheKey{
+    this, "FlaggedCondCacheKey", ""}; //!< For HLT cache
   //@}
 
   /** @brief Optional read handle to get status data to test whether a SCT detector element is good.
