@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file TauCommonDetails.h
@@ -1285,7 +1285,7 @@ namespace Analysis {
         //@{ -----------------------------------------------------------------
 
         // vector bool of which tracks pass the track filter
-        std::vector<bool> TrackFilterPass() const;
+        const std::vector<bool>& TrackFilterPass() const;
         void setTrackFilterPass(const std::vector<bool>& value);
 
         // nProng based on what the track filter passes

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file TauCommonDetails.h
@@ -102,8 +102,8 @@ namespace Analysis
                     TauJetParameters::VetoFlags flag ) const;
 
             const std::vector<std::pair<TauJetParameters::TauID, double> >& params() const;
-            const std::bitset<32> isTauFlags() const;
-            const std::bitset<32> vetoFlags() const;
+            const std::bitset<32>& isTauFlags() const;
+            const std::bitset<32>& vetoFlags() const;
 
         //@}
         private:

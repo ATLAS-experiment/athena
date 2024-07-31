@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@file TauJet.h
@@ -566,7 +566,7 @@ namespace Analysis
             void clearHLV();
 
             ///Get the list of links to PanTauSeed objects that were created for this tauJet      
-            std::vector<PanTau::PanTauSeed*> getListOfPanTauSeeds() const;                        
+            const std::vector<PanTau::PanTauSeed*>& getListOfPanTauSeeds() const;
                                                                                                  
             ///add a new PanTauSeed to this tau                                                   
             void addPanTauSeed(PanTau::PanTauSeed* pantauSeed);     

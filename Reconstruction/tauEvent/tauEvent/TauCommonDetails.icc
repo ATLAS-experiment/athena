@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///@file TauCommonDetails.icc
@@ -1653,7 +1653,7 @@ namespace Analysis {
     //-----------------------------------------------------------------------
 
     // vector bool of which tracks pass the track filter
-    inline std::vector<bool> TauCommonDetails::TrackFilterPass() const
+    inline const std::vector<bool>& TauCommonDetails::TrackFilterPass() const
     {
         return m_TrackFilterPass;
     }
