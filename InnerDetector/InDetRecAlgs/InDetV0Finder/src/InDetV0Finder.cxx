@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -29,18 +29,7 @@ namespace InDet
   
 InDetV0Finder::InDetV0Finder(const std::string &n, ISvcLocator *pSvcLoc)
   :
-  AthAlgorithm(n, pSvcLoc),
-  m_v0FinderTool("InDet::InDetV0FinderTool",this),
-  m_decorate(true),
-  m_events_processed(0),
-  m_V0s_stored(0),
-  m_Kshort_stored(0),
-  m_Lambda_stored(0),
-  m_Lambdabar_stored(0)
-{
-  declareProperty("InDetV0FinderToolName"   , m_v0FinderTool);
-  declareProperty("decorateV0", m_decorate);
-}
+  AthAlgorithm(n, pSvcLoc) {}
 
 InDetV0Finder::~InDetV0Finder() = default;
 

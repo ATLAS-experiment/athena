@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -60,19 +60,18 @@ namespace InDet
 
     // Tools
 
-    ToolHandle<InDet::InDetV0FinderTool> m_v0FinderTool;
+    ToolHandle<InDet::InDetV0FinderTool> m_v0FinderTool{this, "InDetV0FinderToolName", "InDet::InDetV0FinderTool"};
     ToolHandle<InDet::V0MainDecorator> m_v0DecoTool{this, "Decorator", "InDet::V0MainDecorator"};
 
     // Other members
 
-    bool          m_decorate;                 //!< decorate V0 containers
+    BooleanProperty m_decorate{this, "decorateV0", true}; //!< decorate V0 containers
 
-
-    long          m_events_processed;
-    long          m_V0s_stored;
-    long          m_Kshort_stored;
-    long          m_Lambda_stored;
-    long          m_Lambdabar_stored;
+    long m_events_processed = 0;
+    long m_V0s_stored = 0;
+    long m_Kshort_stored = 0;
+    long m_Lambda_stored = 0;
+    long m_Lambdabar_stored = 0;
 
   };
 

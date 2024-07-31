@@ -26,12 +26,12 @@ namespace InDet
     StatusCode decoratelb(xAOD::VertexContainer *container, const EventContext& ctx) const;
     private:
 
-    int           m_masses;                   //!< = 1 if using PDG values, = 2 if user set (1)
-    double        m_masspi;                   //!< pion mass (139.57 MeV)
-    double        m_massp;                    //!< proton mass (938.272 MeV)
-    double        m_masse;                    //!< electron mass (0.510999 MeV)
-    double        m_massK0S;                  //!< Kshort mass (497.672 MeV)
-    double        m_massLambda;               //!< Lambda mass (1115.68 MeV)
+    IntegerProperty m_masses{this, "masses", 1};              //!< = 1 if using PDG values, = 2 if user set (1)
+    DoubleProperty m_masspi{this, "masspi", 139.57};          //!< pion mass (139.57 MeV)
+    DoubleProperty m_massp{this, "massp", 938.272};           //!< proton mass (938.272 MeV)
+    DoubleProperty m_masse{this, "masse", 0.510999};          //!< electron mass (0.510999 MeV)
+    DoubleProperty m_massK0S{this, "massK0s", 497.672};       //!< Kshort mass (497.672 MeV)
+    DoubleProperty m_massLambda{this, "massLambda", 1115.68}; //!< Lambda mass (1115.68 MeV)
     ToolHandle<Trk::V0Tools> m_V0Tools {this, "V0Tools", "Trk::V0Tools", "V0 tools to calculate things like Lxy"};
     StatusCode initKey(const std::string&, SG::WriteDecorHandleKey<xAOD::VertexContainer> &decokey) const;
     

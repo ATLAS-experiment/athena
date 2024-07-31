@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -59,7 +59,10 @@ namespace InDet {
     /// @{
 
     /// ToolHandle for the IInDetUsedInFitTrackDecoratorTool
-    ToolHandle<InDet::IInDetUsedInFitTrackDecoratorTool> m_decoTool;
+    ToolHandle<InDet::IInDetUsedInFitTrackDecoratorTool> m_decoTool{
+      this, "UsedInFitDecoratorTool",
+	"InDet::InDetUsedInFitTrackDecoratorTool/IDUsedInFitDecoratorTool",
+	"IInDetUsedInFitTrackDecoratorTool for decorating tracks"};
 
     /// @}
 

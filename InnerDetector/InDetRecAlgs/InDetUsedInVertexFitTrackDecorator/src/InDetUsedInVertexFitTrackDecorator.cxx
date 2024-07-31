@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,12 +13,8 @@
 
 // Constructor with parameters:
 InDet::InDetUsedInVertexFitTrackDecorator::InDetUsedInVertexFitTrackDecorator(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator),
-  m_decoTool("InDet::InDetUsedInFitTrackDecoratorTool/" + name + "_IDUsedInFitDecoratorTool", this)
-{
-  // Property declarations
-  declareProperty("UsedInFitDecoratorTool", m_decoTool, "IInDetUsedInFitTrackDecoratorTool for decorating tracks");
-}
+  AthReentrantAlgorithm(name, pSvcLocator) {}
+
 
 StatusCode InDet::InDetUsedInVertexFitTrackDecorator::initialize()
 {
