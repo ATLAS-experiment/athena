@@ -23,4 +23,4 @@ script=test_MC_mu0_reco.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${dcubeRef}
+"$script" ${ArtProcess} ${ArtInFile} ${dcubeRef}
