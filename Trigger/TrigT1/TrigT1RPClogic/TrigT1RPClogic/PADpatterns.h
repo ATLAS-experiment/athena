@@ -49,7 +49,7 @@ class PADpatterns : public RPCtrigDataObject
     int pad_id(void) const {return m_pad_id;}
     unsigned long int debug(void) const {return m_debug;}
     
-    const CMAdata::PatternsList cma_patterns(void) const 
+    const CMAdata::PatternsList& cma_patterns(void) const 
                                       {return m_cma_patterns;}
 
   Pad* give_pad(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO);

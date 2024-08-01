@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -46,7 +46,7 @@ namespace asg {
     inline unsigned int getNCuts() const { return m_cutMap.size(); };
 
     /** Get a bitmask for all cuts defined */
-    inline std::bitset<NBITS> getCutMask() const { return m_cutMask; };
+    inline const std::bitset<NBITS>& getCutMask() const { return m_cutMask; };
 
 
     /** Add a cut; returning the cut position */
