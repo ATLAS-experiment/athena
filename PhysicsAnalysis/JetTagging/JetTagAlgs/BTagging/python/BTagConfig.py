@@ -381,7 +381,7 @@ def BTagAlgsCfg(
 
         # disable GN2v01 if there are 0 tracks
         if '/GN2v01/' in dirname:
-            args['conditions'] = {'nonzeroTracks'}
+            args['tag_requirements'] = {'nonzeroTracks'}
             # TODO: choose something closer to the actual zero track
             # output
             args['defaultOutputValues'] = {
