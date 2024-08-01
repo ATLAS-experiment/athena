@@ -9,6 +9,7 @@
 #include <vector>
 #include <cassert>
 #include <stdexcept>
+#include <bit>
  
 /** 
  *    A Range describes the possible ranges for the field values of an ExpandedIdentifier 
@@ -560,22 +561,9 @@ inline const Range::field::index_vector& Range::field::get_indexes () const
 inline ExpandedIdentifier::size_type Range::field::get_bits () const 
 //------------------------------------------------------------------
 {
-  ExpandedIdentifier::size_type result = 1;
-
   size_t indices = get_indices ();
-
-  indices--;
-  if (indices > 0)
-    {
-      result = 0;
-      while (indices > 0)
-        {
-          indices /= 2;
-          result++;
-        }
-    }
-
-  return (result);
+  if (--indices) return  std::bit_width(indices);
+  return 1;
 }
 
 //----------------------------------------------- 
@@ -592,13 +580,11 @@ Range::field::get_value_at (size_type index) const
           throw std::out_of_range("Range::field::get_value_at");
         }
 	return (m_minimum + index); 
-//  	if (index >= (size_type) (m_maximum - m_minimum + 1)) return (0); 
-//  	else return (m_minimum + index); 
+
     }
     else if (enumerated == m_mode) {
         return (m_values.at(index)); 
-//        if (index >= m_values.size ()) return (0); 
-//        else return (m_values[index]); 
+
     }
  
     return (0); 
@@ -615,13 +601,9 @@ Range::field::get_value_index (element_type value) const
     // both_bounded if the more frequent case and so comes first.
 
     if (both_bounded == m_mode) {
-//  	if ((value >= m_minimum) &&
-//  	    (value <= m_maximum)) {
 	    return (value - m_minimum); 
-//  	}
     }
     else if (enumerated == m_mode) {
-//	if ((int)m_indexes.size() > ((int)value - (int)m_minimum)) {
 	if (m_indexes.size()) {
 	    // Table has been created, do simple lookup
             assert (value >= m_minimum && value - m_minimum < (int)m_indexes.size());
