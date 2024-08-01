@@ -19,7 +19,6 @@ run.job_options = 'TriggerJobOpts/runHLT.py'
 run.flags = ['Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             'Trigger.enabledSignatures=[\\\"Egamma\\\",\\\"Electron\\\",\\\"Photon\\\",\\\"Muon\\\",\\\"Tau\\\",\\\"Jet\\\",\\\"MET\\\"]',
              'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-02"']
 
 # The full test configuration
