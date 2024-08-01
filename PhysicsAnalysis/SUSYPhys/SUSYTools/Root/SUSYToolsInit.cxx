@@ -364,6 +364,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22
     ATH_MSG_INFO("Set up Jet Uncertainty tool...");
 
+    // if not set, derive the MCType from the simulation type and MC campaign
+    if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? "MC23" : (isAtlfast() ? "AF3" : "MC20");
+
     if (!m_jetUncertaintiesTool.isUserConfigured()) {
       std::string jetdef("AntiKt4" + xAOD::JetInput::typeName(xAOD::JetInput::Type(m_jetInputType)));
 
@@ -377,10 +380,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           ATH_MSG_WARNING("Jet Uncertaintes pre-recommendations for Run3 only exist for full sim");
       }
 
-      if (m_jetUncertaintiesMCType.empty()) m_jetUncertaintiesMCType = m_isRun3 ? "MC23" : (isAtlfast() ? "AF3" : "MC20");
-
       m_jetUncertaintiesTool.setTypeAndName("JetUncertaintiesTool/"+toolName);
-
 
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("JetDefinition", jetdef) );
       ATH_CHECK( m_jetUncertaintiesTool.setProperty("MCType", m_jetUncertaintiesMCType) );
@@ -412,7 +412,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("JetDefinition", jetdef) );
-      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", isAtlfast() ? "AF3" : (m_isRun3 ? "MC21" : "MC20")) );
+      ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("MCType", m_jetUncertaintiesMCType) );
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("IsData", true) ); // Set to True by default for PDSmear-named tool.
       ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("ConfigFile", m_jetUncertaintiesConfig) );
       if (m_jetUncertaintiesCalibArea != "default") ATH_CHECK( m_jetUncertaintiesPDSmearTool.setProperty("CalibArea", m_jetUncertaintiesCalibArea) );
