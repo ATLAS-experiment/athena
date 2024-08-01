@@ -64,6 +64,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
       const int pixclToT = pixClust->totalToT();
 
       ++nPixCLnoToT;
+      pixQ2sum += std::polar(1.0, 2.0*pSP->phi()); // this is complex value exp(2i*phi)
       if (pixclToT > m_pixelClusToTCut) {
         ++nPixSP;
         if (pixClSize == 1) {
@@ -75,7 +76,6 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
         if (pixClSize >= 3) {
           ++nPixCLmin3;
         }
-        pixQ2sum += std::polar(1.0, 2.0*pSP->phi()); // this is complex value exp(2i*phi)
       }
     }
 
@@ -102,7 +102,7 @@ StatusCode TrigCountSpacePoints::execute(const EventContext &context) const {
       }
     }
   }
-  const float pixQ2mod = pixCL !=0 ? std::abs(pixQ2TotSum)/pixCL : 0.0;
+  const float pixQ2mod = pixCLnoToT !=0 ? std::abs(pixQ2TotSum)/pixCLnoToT : 0.0;
   ATH_MSG_DEBUG("REGTEST : Formed  " << pixCLBeforeCuts << " pixel spacepoints in total before cuts.");
   ATH_MSG_DEBUG("REGTEST : " << pixCL_1 << " have cl size == 1 in total.");
   ATH_MSG_DEBUG("REGTEST : " << pixCL_2 << " have cl size == 2 in total.");
