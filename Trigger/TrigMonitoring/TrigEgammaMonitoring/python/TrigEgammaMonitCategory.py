@@ -20,7 +20,7 @@ def mongroupsCfg(moniAccess, data_type):
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
-                'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L'
+                'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L',
         }
 
         t0_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["t0_tp"])
