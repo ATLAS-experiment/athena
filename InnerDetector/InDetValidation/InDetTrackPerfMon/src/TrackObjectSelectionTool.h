@@ -23,6 +23,7 @@
 
 /// EDM includes
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTruth/TruthParticle.h"
 
 
 namespace IDTPM {
@@ -56,7 +57,8 @@ namespace IDTPM {
       return StatusCode::SUCCESS;
     }
 
-    bool accept( const xAOD::TrackParticle& offTrack ) const;
+    bool accept( const xAOD::TrackParticle& offTrack,
+                 const std::vector< const xAOD::TruthParticle* >& truthVec ) const;
 
   private:
 

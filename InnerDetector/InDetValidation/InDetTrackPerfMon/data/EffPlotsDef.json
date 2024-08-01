@@ -1,27 +1,27 @@
 {
     "eff_vs_$TRKTAG_pt" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_eta" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_phi" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "100", "low" : "-$PI", "high" : "$PI" },
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "25", "low" : "-$PI", "high" : "$PI" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_d0" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "100", "low" : "-$D0MAX", "high" : "$D0MAX" },
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm]", "nBins" : "80", "low" : "-10.0", "high" : "10.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_z0" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "xAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_R" : {

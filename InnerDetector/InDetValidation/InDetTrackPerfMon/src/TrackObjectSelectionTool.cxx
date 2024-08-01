@@ -60,16 +60,29 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
   std::vector< const xAOD::TrackParticle* > newVec;
   for( const xAOD::TrackParticle* thisTrack :
        trkAnaColls.offlTrackVec( TrackAnalysisCollections::FS ) ) {
-    if( accept( *thisTrack ) ) newVec.push_back( thisTrack );
+    if( accept( *thisTrack,
+                trkAnaColls.truthPartVec( TrackAnalysisCollections::FS ) ) ) newVec.push_back( thisTrack );
   }
 
   /// update selected Full-Scan offline track vector
   ATH_CHECK( trkAnaColls.fillOfflTrackVec( newVec,
                 TrackAnalysisCollections::FS ) );
 
-  /// Debug printout
-  ATH_MSG_DEBUG( "Tracks after offline object-matching: " << 
-      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
+  /// Do the truth-link selection (EF) Trigger, too
+  if( not trkAnaDefSvc->useEFTrigger() and
+      m_objectType.value().find("Truth") != std::string::npos ) {
+    /// started loop over trigger tracks
+    newVec.clear();
+    for( const xAOD::TrackParticle* thisTrack :
+         trkAnaColls.trigTrackVec( TrackAnalysisCollections::FS ) ) {
+      if( accept( *thisTrack,
+                  trkAnaColls.truthPartVec( TrackAnalysisCollections::FS ) ) ) newVec.push_back( thisTrack );
+    }
+
+    /// update selected Full-Scan offline track vector
+    ATH_CHECK( trkAnaColls.fillTrigTrackVec( newVec,
+                  TrackAnalysisCollections::FS ) );
+  } // end if
 
   return StatusCode::SUCCESS;
 }
@@ -79,7 +92,8 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
 ///------- accept --------
 ///-----------------------
 bool IDTPM::TrackObjectSelectionTool::accept(
-    const xAOD::TrackParticle& offTrack ) const {
+    const xAOD::TrackParticle& offTrack,
+    const std::vector< const xAOD::TruthParticle* >& truthVec ) const {
 
   /// Electron
   if( m_objectType.value().find("Electron") != std::string::npos ) {
@@ -136,8 +150,17 @@ bool IDTPM::TrackObjectSelectionTool::accept(
 
     if( not truth ) return false;
 
+    if( truthVec.empty() ) {
+      ATH_MSG_ERROR( "Truth vector is empty" );
+      return false;
+    }
+
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with truth particle with pt = " << pT( *truth ) );
+
+    /// Skip linked not-selected truth particles 
+    if( std::find( truthVec.begin(), truthVec.end(),
+                   truth ) == truthVec.end() ) return false;
 
     return true;
   }

@@ -1,8 +1,16 @@
 {
-    "TrkAnaOffl1" : {
+    "TrkAnaOffl" : {
         "enabled" : true,
         "TestType"  : "Offline",
         "RefType"   : "Truth", 
-        "MatchingType"  : "TruthMatch" 
+        "MatchingType"  : "TruthMatch",
+        "OfflineQualityWP"  : "" 
+    },
+    "TrkAnaOffl_TightPrimary" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth", 
+        "MatchingType"  : "TruthMatch",
+        "OfflineQualityWP"  : "TightPrimary" 
     }
 }

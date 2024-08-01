@@ -57,21 +57,27 @@ namespace IDTPM {
 
   private:
 
+    BooleanProperty m_doOfflSelection {
+        this, "DoOfflineSelection", false, "Perform offline tracks quality selection" };
+
+    ToolHandle< ITrackSelectionTool > m_offlineSelectionTool {
+        this, "OfflineSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool",
+        "Tool to perform track quality selection selection" };
+
+    BooleanProperty m_doTruthSelection {
+        this, "DoTruthSelection", false, "Perform truth particles quality selection" };
+
+    ToolHandle< ITrackSelectionTool > m_truthSelectionTool {
+        this, "TruthSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool",
+        "Tool to perform truth track selection" };
+
     BooleanProperty m_doObjSelection {
         this, "DoObjectSelection", false, "Perform track-object selection" };
 
     ToolHandle< ITrackSelectionTool > m_objSelectionTool {
-        this, "TrackObjectSelectionTool", "", 
+        this, "TrackObjectSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool",
         "Tool to perform track-object selection" };
 
-    ToolHandle< ITrackSelectionTool > m_offlineSelectionTool {
-        this, "OfflineSelectionTool", {}, 
-        "Tool to perform track quality selection selection" };
-
-
-    ToolHandle< ITrackSelectionTool > m_truthSelectionTool {
-        this, "TruthTrackSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 
-        "Tool to perform truth track selection" };
   }; // class InDetGeneralSelectionTool
 
 } // namespace IDTPM
