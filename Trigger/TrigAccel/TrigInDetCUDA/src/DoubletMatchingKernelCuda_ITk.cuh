@@ -58,11 +58,11 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 	const float dtCut = 0.3; // Cut on cot(theta) difference between two doublets
 	const float radLen = 0.036;
-	const float dp = 13.6/dSettings->m_tripletPtMin;
+	const float dp = 13.6f/dSettings->m_tripletPtMin;
 	const float CovMS = dp*dp*radLen;
 
 
-	const float ptCoeff = 0.29997*dSettings->m_magFieldZ/2;// ~0.3 
+	const float ptCoeff = 0.29997f*dSettings->m_magFieldZ/2.0f;// ~0.3 
 	const float minPt2 = dSettings->m_tripletPtMin*dSettings->m_tripletPtMin; 
 	const float ptCoeff2 = ptCoeff*ptCoeff; // multiple scattering term
 	const float maxD0 = dSettings->m_tripletD0Max;
@@ -122,8 +122,8 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				float dy_inn = dSpacepoints->m_y[spiIdx] - y0;
 				float dz_inn = dSpacepoints->m_z[spiIdx] - z0;
 
-				float R2inv = 1.0/(dx_inn*dx_inn+dy_inn*dy_inn); 
-				Rinv_array[k] = sqrt(R2inv);	
+				float R2inv = 1.0f/(dx_inn*dx_inn+dy_inn*dy_inn); 
+				Rinv_array[k] = sqrtf(R2inv);	
 				tau_array[k] = Rinv_array[k]*dz_inn;
 
 				tauCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spiIdx] + tau_array[k]*tau_array[k]*(covR + dSpacepoints->m_covR[spiIdx]));
@@ -160,8 +160,8 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				float dy_out =  dSpacepoints->m_y[spoIdx] - y0;
 				float dz_out = -dSpacepoints->m_z[spoIdx] + z0;
 
-				float R2inv = 1.0/(dx_out*dx_out+dy_out*dy_out);
-				Rinv_array[k] = sqrt(R2inv);
+				float R2inv = 1.0f/(dx_out*dx_out+dy_out*dy_out);
+				Rinv_array[k] = sqrtf(R2inv);
 				tau_array[k] = Rinv_array[k]*dz_out;
 
 				tauCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spoIdx] + tau_array[k]*tau_array[k]*(covR + dSpacepoints->m_covR[spoIdx]));
@@ -189,7 +189,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		float tau_inn = tau_array[doublet_i];
 		float tau_out = tau_array[doublet_j];
 		float dt = tau_inn - tau_out;	
-		if (std::abs(dt)>dtCut) continue;
+		if (fabsf(dt)>dtCut) continue;
 		
 		//1. rz matching
 
@@ -197,11 +197,11 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		float tauCov_inn = tauCov_array[doublet_i];
 		float tauCov_out = tauCov_array[doublet_j];
 
-		double dCov = CovMS*(1+tau_inn2);
+		float dCov = CovMS*(1.0f+tau_inn2);
 		
 		float covdt = tauCov_inn + tauCov_out; 
-		covdt += 2*Rinv_array[doublet_i]*Rinv_array[doublet_j]*(tau_inn*tau_out*covR + covZ); 
-		float dt2 = dt*dt*(1/4.0);
+		covdt += 2.0f*Rinv_array[doublet_i]*Rinv_array[doublet_j]*(tau_inn*tau_out*covR + covZ); 
+		float dt2 = dt*dt*(1.0f/4.0f);
 		if(dt2 > covdt+dCov) continue;//i.e. 2-sigma cut 
 
 		//2. pT estimate 
@@ -215,7 +215,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		if(du==0.0) continue;
 		float A = (v_out - v_inn)/du; 
 		float B = v_inn - A*u_inn; 
-		float pT2 = ptCoeff2*(1+A*A)/(B*B); 
+		float pT2 = ptCoeff2*(1.0f+A*A)/(B*B); 
 		if(pT2 < minPt2) continue;
 		
 		//3. the 3-sigma cut with estimated pT 
@@ -226,14 +226,14 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		//4. d0 cut 
 		
 		float d0 = rm*(B*rm-A);
-		float fd0 = std::abs(d0);
+		float fd0 = fabsf(d0);
 
 		if(fd0 > maxD0) continue;
 
 		if(!isFullscan){
 			//calculate phi
-			float uc = 2*B*rm - A;
-			float phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
+			float uc = 2.0f*B*rm - A;
+			float phi0 = atan2f(sinA - uc*cosA, cosA + uc*sinA);
 
 			if(phiPlus > phiMinus){
 				if(phi0 < phiPlus && phi0 > phiMinus){
@@ -248,7 +248,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 		//Calculate Quality    
 		float Q = d0*d0;
-		float pt = ptCoeff*std::sqrt(1+A*A)/(B);
+		float pt = ptCoeff*sqrtf(1.0f+A*A)/(B);
 
 		int l = atomicAdd(&nTriplets, 1);
 		if(l<MAX_TRIPLETS_ITk) {
@@ -292,9 +292,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				// Triplet duplicates (from the same track) will not lay on the same layer
 				bool isBarrel1 = (dSpacepoints->m_type[spoIdx] == 0); // barrel = 0, ec != 0
 				bool isBarrel2 = (dSpacepoints->m_type[otherSpoIdx] == 0);
-				if ( isBarrel1 && isBarrel2 && std::abs(dSpacepoints->m_r[spoIdx]-dSpacepoints->m_r[otherSpoIdx]) < 20 ) {
+				if ( isBarrel1 && isBarrel2 && fabsf(dSpacepoints->m_r[spoIdx]-dSpacepoints->m_r[otherSpoIdx]) < 20 ) {
 					continue;
-				} else if ( !isBarrel1 && !isBarrel2 && std::abs(dSpacepoints->m_z[spoIdx]-dSpacepoints->m_z[otherSpoIdx]) < 20 ) {
+				} else if ( !isBarrel1 && !isBarrel2 && fabsf(dSpacepoints->m_z[spoIdx]-dSpacepoints->m_z[otherSpoIdx]) < 20 ) {
 					continue;
 				} 
 
@@ -302,14 +302,14 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				if (pt_array[l] * pt_array[l2] < 0) continue;
 
 				// Triplet duplicates (from the same track) will have the same pt within stddev (based on 1GeV single muon)
-				float dPt = std::abs(1./pt_array[l] - 1./pt_array[l2]);
-				if (dPt > 0.00015243) continue;
+				float dPt = fabsf(1.0f/pt_array[l] - 1.0f/pt_array[l2]);
+				if (dPt > 0.00015243f) continue;
 
 				++nDupes;
 			}
 			
 			// Reject the seeds without duplicates - will not have a track extension
-			if (nDupes < 1) Q_array[l] += 10000;
+			if (nDupes < 1) Q_array[l] += 10000.f;
 
 		}
 	}

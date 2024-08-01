@@ -92,8 +92,8 @@ __global__ static void tripletConfirmationKernel_ITk(
             if (d_Triplets->m_pT[currentTripletIdx]  * d_Triplets->m_pT[otherTripletIdx] < 0) continue;
 
             // Triplet from the same track will have the same pt within stddev (based on 1GeV single muon)
-            float dPt = std::abs(1./d_Triplets->m_pT[currentTripletIdx] - 1./d_Triplets->m_pT[otherTripletIdx]);
-            if (dPt > 0.00015243) continue;
+            float dPt = fabsf(1.0f/d_Triplets->m_pT[currentTripletIdx] - 1.0f/d_Triplets->m_pT[otherTripletIdx]);
+            if (dPt > 0.00015243f) continue;
 
             atomicAdd(&nConfirming, 1); 
         }
