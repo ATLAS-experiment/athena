@@ -22,6 +22,7 @@ namespace AthCUDA {
       /// Custom destructor, deleting the CUDA streams.
       ~StreamPoolSvcImplData() {
          while( ! m_streams.empty() ) {
+            [[maybe_unused]]
             cudaStream_t stream = reinterpret_cast< cudaStream_t >( m_streams.pop() );
             assert( stream != nullptr );
             CUDA_IGNORE( cudaStreamDestroy( stream ) );
