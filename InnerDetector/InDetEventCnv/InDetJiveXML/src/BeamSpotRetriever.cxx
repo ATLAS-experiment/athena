@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamSpotRetriever.h"
@@ -113,17 +113,17 @@ namespace JiveXML {
     //Create a data map
     DataMap dataMap;
     //Add the data vectors to our map
-    dataMap["x"]=x;
-    dataMap["y"]=y;
-    dataMap["z"]=z;
-    dataMap["sigmaX"]=sigmaX;
-    dataMap["sigmaY"]=sigmaY;
-    dataMap["sigmaXY"]=sigmaXY;
-    dataMap["sigmaZ"]=sigmaZ;
-    dataMap["tiltX"]=tiltX;
-    dataMap["tiltY"]=tiltY;
-    dataMap["label"]=label;
-    dataMap["status"]=status;
+    dataMap["x"]=std::move(x);
+    dataMap["y"]=std::move(y);
+    dataMap["z"]=std::move(z);
+    dataMap["sigmaX"]=std::move(sigmaX);
+    dataMap["sigmaY"]=std::move(sigmaY);
+    dataMap["sigmaXY"]=std::move(sigmaXY);
+    dataMap["sigmaZ"]=std::move(sigmaZ);
+    dataMap["tiltX"]=std::move(tiltX);
+    dataMap["tiltY"]=std::move(tiltY);
+    dataMap["label"]=std::move(label);
+    dataMap["status"]=std::move(status);
 
     //Forward data to formatting tool
     if ( FormatTool->AddToEvent(dataTypeName(), "BeamSpot", &dataMap).isFailure())
