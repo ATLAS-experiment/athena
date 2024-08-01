@@ -143,7 +143,7 @@ def setup_SMEFT(process,model_nick,param_name,reweight_name,eft_params):
             process=process.replace('NP==0','')
         restriction='without_irrelevant_couplings'
         if len(eft_params_to_keep)>0:  
-            shutil.copy('/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'+model+'/restrict_massless.dat','./my_restrict_massless.dat')
+            shutil.copy('/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/'+model+'/restrict_SMlimit_massless.dat','./my_restrict_massless.dat')
             restrict_card_default="my_restrict_massless.dat"
             output_location=restricted_model+'/'+'restrict_'+restriction+'.dat'
             modify_param_card(restrict_card_default,output_location=restricted_model+'/'+'restrict_'+restriction+'.dat',params={eft_parameter_block:eft_params_to_keep})
