@@ -214,7 +214,7 @@ class TopoAlgoDefMultiplicity(object):
 
             #additional jTE thresholds needed for 2023 heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
-            'jTE100', 'jTE600', 'jTE1500', 'jTE3000', 'jTE6500', 'jTE7000', 'jTE7500',
+            'jTE100', 'jTE600', 'jTE1500', 'jTE3000', 'jTE4000', 'jTE6500', 'jTE7000', 'jTE7500',
             'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5',
 
             'gMHT500',
@@ -224,7 +224,7 @@ class TopoAlgoDefMultiplicity(object):
             #spares (for any energy thresholds)
             #replace jXESPARE16 - jXESPARE27 with heavy ion jTE threhsolds
             'jXESPARE1', 'jXESPARE2', 'jXESPARE3', 'jXESPARE4',
-            'jXESPARE5', 'jXESPARE6', #'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
+            'jXESPARE5', #'jXESPARE6', 'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
             #'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13',
             #'jXESPARE14',
             #'jXESPARE15',

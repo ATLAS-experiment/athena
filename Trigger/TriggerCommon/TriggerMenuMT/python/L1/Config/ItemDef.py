@@ -1106,6 +1106,9 @@ class ItemDef:
         MenuItem('L1_TE50_VTE600p0ETA49_PEB').setLogic( d.TE50 & Not(d.TE6000ETA49) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TE600p0ETA49_PEB'      ).setLogic( d.TE6000ETA49 & physcond).setTriggerType(TT.calo)
 
+        MenuItem('L1_jTE1500_OVERLAY').setLogic( d.jTE1500 & physcond).setTriggerType(TT.zerobs)
+        MenuItem('L1_jTE4000_OVERLAY').setLogic( d.jTE4000 & physcond).setTriggerType(TT.zerobs)
+
         MenuItem('L1_VTE2' ).setLogic( Not(d.TE2)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VTE3' ).setLogic( Not(d.TE3)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VTE4' ).setLogic( Not(d.TE4)  & physcond).setTriggerType(TT.calo)
@@ -1254,6 +1257,8 @@ class ItemDef:
         MenuItem('L1_TE20_OVERLAY'    ).setLogic( d.TE20 & physcond).setTriggerType(TT.zerobs)
         MenuItem('L1_TE50_OVERLAY'    ).setLogic( d.TE50 & physcond).setTriggerType(TT.zerobs)
         MenuItem('L1_MBTS_1_VTE50_OVERLAY' ).setLogic( MBTS_1 & Not(d.TE50) & physcond).setTriggerType(TT.zerobs)
+        MenuItem('L1_jTE50_OVERLAY'    ).setLogic( d.jTE50 & physcond).setTriggerType(TT.zerobs)
+        MenuItem('L1_ZDC_A_C_VjTE50_OVERLAY').setLogic( ZDC_A_C & Not(d.jTE50) & physcond).setTriggerType(TT.zerobs)
 
         MenuItem('L1_ZDC_VTE200'      ).setLogic((ZDC_A | ZDC_C) & Not(d.TE200) & physcond)
         MenuItem('L1_ZDC_AND_VTE50'   ).setLogic( ZDC_AND & Not(d.TE50) & physcond)

@@ -31,7 +31,7 @@ from .Physics_pp_run3_v1 import (
 )
 
 from .SignatureDicts import ChainStore
-from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream
+from .PhysicsP1_HI_run3_v1 import HardProbesStream,MinBiasStream,UPCStream,MinBiasOverlayStream
 from . import MC_HI_run3_v1 as mc_menu
 
 
@@ -160,6 +160,8 @@ def getDevHISignatures():
 
         #----Physics streamer for 2022 Nov HI test run, ATR-26405
         ChainProp(name='HLT_mb_sptrk_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
+        #MinBiasOverlay
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VjTE50_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportPhIGroup),
     ]
 
 
@@ -186,6 +188,10 @@ def getDevHISignatures():
 
         ChainProp(name='HLT_noalg_L1eTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        #MinBiasOverlay
+        ChainProp(name='HLT_noalg_L1jTE50_OVERLAY',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jTE1500_OVERLAY',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1jTE4000_OVERLAY',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
     ]
 
 
