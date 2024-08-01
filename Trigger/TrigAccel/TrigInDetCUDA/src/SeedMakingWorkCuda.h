@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_SEEDMAKINGWORKCUDA_H
 #define TRIGINDETCUDA_SEEDMAKINGWORKCUDA_H
 
 
-#include "tbb/concurrent_vector.h"
 #include "TrigAccelEvent/Work.h" //base class
 #include "CommonStructures.h" //for WorkTimeStamp
 
@@ -20,7 +19,7 @@ class SeedMakingWorkCuda : public TrigAccel::Work{
 
 public:
   SeedMakingWorkCuda(unsigned int, SeedMakingDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
-  tbb::concurrent_vector<WorkTimeStamp>*);
+  WorkTimeStampQueue*);
   ~SeedMakingWorkCuda();
   std::shared_ptr<TrigAccel::OffloadBuffer> getOutput();
   bool run();
@@ -41,7 +40,7 @@ private:
   unsigned int m_workId;
   SeedMakingDeviceContext* m_context;  
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
-  tbb::concurrent_vector<WorkTimeStamp>* m_timeLine;
+  WorkTimeStampQueue* m_timeLine;
 
   float m_CovMS, m_ptCoeff, m_minPt2, m_ptCoeff2, m_maxD0; 
 };
@@ -50,7 +49,7 @@ class SeedMakingWorkCudaManaged : public TrigAccel::Work{
 
 public:
   SeedMakingWorkCudaManaged(unsigned int, SeedMakingManagedDeviceContext*, std::shared_ptr<TrigAccel::OffloadBuffer>, 
-  tbb::concurrent_vector<WorkTimeStamp>*);
+  WorkTimeStampQueue*);
   ~SeedMakingWorkCudaManaged();
   std::shared_ptr<TrigAccel::OffloadBuffer> getOutput();
   bool run();
@@ -71,7 +70,7 @@ private:
   unsigned int m_workId;
   SeedMakingManagedDeviceContext* m_context;  
   std::shared_ptr<TrigAccel::OffloadBuffer> m_input, m_output;
-  tbb::concurrent_vector<WorkTimeStamp>* m_timeLine;
+  WorkTimeStampQueue* m_timeLine;
 
   float m_CovMS{}, m_ptCoeff{}, m_minPt2{}, m_ptCoeff2{}, m_maxD0{}; 
 };

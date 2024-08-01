@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETCUDA_TRIGINDETMODULECUDA_H
@@ -12,9 +12,6 @@
 #include "TrigAccelEvent/TrigInDetAccelCodes.h"
 
 #include "device_context.h"
-
-#include "tbb/concurrent_queue.h"
-#include "tbb/concurrent_vector.h"
 
 class TrigInDetModuleCuda : public TrigAccel::WorkFactory {
 
@@ -65,7 +62,7 @@ class TrigInDetModuleCuda : public TrigAccel::WorkFactory {
     bool m_dumpTimeLine;
     
     std::atomic<unsigned int> m_workItemCounters[100];//atomic counters for unique Work identification
-    tbb::concurrent_vector<WorkTimeStamp> m_timeLine;
+    WorkTimeStampQueue m_timeLine;
   };
 
 #endif

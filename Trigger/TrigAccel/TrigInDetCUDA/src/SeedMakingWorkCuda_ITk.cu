@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -22,7 +22,7 @@
 #include "TripletConfirmationKernelCuda_ITk.cuh"
 
 SeedMakingWorkCudaITk::SeedMakingWorkCudaITk(unsigned int id, SeedMakingDeviceContext* ctx, std::shared_ptr<TrigAccel::OffloadBuffer> data, 
-  tbb::concurrent_vector<WorkTimeStamp>* TL) : 
+  WorkTimeStampQueue* TL) : 
   m_workId(id),
   m_context(ctx), 
   m_input(data),
@@ -168,7 +168,7 @@ bool SeedMakingWorkCudaITk::run() {
   return true;
 }
 
-SeedMakingWorkCudaManagedITk::SeedMakingWorkCudaManagedITk(unsigned int id, SeedMakingManagedDeviceContext* ctx, std::shared_ptr<TrigAccel::OffloadBuffer> data, tbb::concurrent_vector<WorkTimeStamp>* TL) :
+SeedMakingWorkCudaManagedITk::SeedMakingWorkCudaManagedITk(unsigned int id, SeedMakingManagedDeviceContext* ctx, std::shared_ptr<TrigAccel::OffloadBuffer> data, WorkTimeStampQueue* TL) :
   m_workId(id),
   m_context(ctx), 
   m_input(data),
