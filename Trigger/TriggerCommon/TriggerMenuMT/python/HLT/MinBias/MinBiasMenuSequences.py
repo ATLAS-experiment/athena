@@ -36,6 +36,9 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixCLnoToT = int(chainDict["chainParts"][0]["hypoSPInfo"].removeprefix("nototpix"))
     if "q2" in chainDict["chainName"]:
         hypo.pixQ2mod = 0.4 # to be adjusted
+    if "mb_pixsptrk_" in chainDict["chainName"]: #to be adjusted
+        hypo.pixCL = 2
+        hypo.sctSP = 3
 
     return hypo
 
@@ -68,6 +71,9 @@ def TrackCountHypoToolGen(chainDict):
         limits =  trk[0:trk.index("trk")], trk[trk.index("trk")+3:]
         hypo.minNtrks = int(limits[0])
         hypo.maxNtrks = int(limits[1])
+    if "mb_pixsptrk" in chainDict["chainName"]: # to be adjusted
+        hypo.minPt = 100*Units.MeV
+        hypo.maxZ0 = 401*Units.millimeter
 
         # will set here cuts
     return hypo

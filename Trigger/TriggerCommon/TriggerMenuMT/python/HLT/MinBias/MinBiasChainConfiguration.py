@@ -37,10 +37,10 @@ class MinBiasChainConfig(ChainConfigurationBase):
         elif "afptof" in self.chainPart['recoAlg']:
             steps.append(self.getAFPGlobalStep(flags))
 
-        if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
+        if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl', 'pixsptrk']:
             steps.append(self.getMinBiasSpStep(flags))
 
-        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl']:
+        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl', 'pixsptrk']:
             steps.append(self.getMinBiasZFindStep(flags))
             steps.append(self.getMinBiasTrkStep(flags))
 
