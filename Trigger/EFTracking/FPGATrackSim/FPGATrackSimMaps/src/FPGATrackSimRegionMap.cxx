@@ -25,7 +25,7 @@ using namespace asg::msgUserCode;
 // Constructor/Desctructor
 ///////////////////////////////////////////////////////////////////////////////
 
-
+/*
 FPGATrackSimRegionMap::FPGATrackSimRegionMap(const FPGATrackSimPlaneMap *pmap, std::string const & filepath) :
     m_pmap(pmap)
 {
@@ -44,30 +44,65 @@ FPGATrackSimRegionMap::FPGATrackSimRegionMap(const FPGATrackSimPlaneMap *pmap, s
     // Read all the region data
     for (int region = 0; region < m_nregions; region++) readRegion(fin, region);
 }
+*/
+//FPGATrackSimRegionMap::FPGATrackSimRegionMap(std::vector<FPGATrackSimPlaneMap> const * pmaps, std::string const & filepath ) 
+//FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::shared_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath ) :
+FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath ) :
+    m_pmaps(pmaps)
+{
+    //makepmapcopy(pmaps);
+    ANA_MSG_INFO("Line 54 \n");
+    // Open the file
+    ANA_MSG_INFO("Reading " << filepath);
+    ifstream fin(filepath);
+    ANA_MSG_INFO("Line 58 \n");
+    if (!fin.is_open())
+    {
+        ANA_MSG_INFO("Line 61 \n");
+        ANA_MSG_FATAL("Couldn't open " << filepath);
+        throw ("FPGATrackSimRegionMap Couldn't open " + filepath);
+    }
 
+    ANA_MSG_INFO("Line 66 \n");
+    // Reads the header of the file to resize all the vector members
+    allocateMap(fin);
 
+    ANA_MSG_INFO("Line 67 \n");
+    // Read all the region data
+    for (int region = 0; region < m_nregions; region++) readRegion(fin, region);
+}
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 {
+    ANA_MSG_INFO("Line 77 \n");
     string line, towerKey;
     bool ok = true;
+    ANA_MSG_INFO("Line 80 \n");
 
     ok = ok && getline(fin, line);
     ANA_MSG_DEBUG(line << " <  " << ok);
 
+    ANA_MSG_INFO("Line 85 \n");
     istringstream sline(line);
     ok = ok && (sline >> towerKey >> m_nregions);
     ok = ok && (towerKey == "towers");
 
 
+    ANA_MSG_INFO("Line 90 \n");
     if (!ok) ANA_MSG_FATAL("Error reading header");
 
     m_map.resize(m_nregions);
+    ANA_MSG_INFO("Line 95 \n");
     for (auto & vv : m_map)
     {
-        vv.resize(m_pmap->getNLogiLayers());
+        ANA_MSG_INFO("Line 98 \n");
+        ANA_MSG_INFO("RSIZ:"<<m_pmaps.at(0)->getNLogiLayers());
+        vv.resize(m_pmaps.at(0)->getNLogiLayers());
+        ANA_MSG_INFO("Line 100 \n");
         for (size_t l = 0; l < vv.size(); l++) vv[l].resize(m_pmap->getNSections(l));
+        ANA_MSG_INFO("Line 102 \n");
     }
+    ANA_MSG_INFO("Line 104\n");
 }
 
 
@@ -97,7 +132,7 @@ void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
             //should check these are within sensible limits after they are read
             ok = ok && (sline >> isPix >> BEC >> physLayer >> phi_min >> phi_max >> phi_tot >> eta_min >> eta_max >> eta_tot);
             if (!ok) break;
-
+            //region WW
             int logiLayer = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).layer;
             int section   = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).section;
 
@@ -128,7 +163,7 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
     }
 
     m_global_local_map.clear();
-    m_global_local_map.resize(m_nregions, vector<map<uint32_t, uint32_t>>(m_pmap->getNLogiLayers()));
+    m_global_local_map.resize(m_nregions, vector<map<uint32_t, uint32_t>>(m_pmaps.at(0)->getNLogiLayers()));
 
     string line;
     while (getline(fin, line))
@@ -357,3 +392,17 @@ double FPGATrackSimRegionMap::getAvgRadius(unsigned region, unsigned layer) cons
     // Return the radius we loaded for this region.
     return m_radii_map[region][layer];
 }
+//void FPGATrackSimRegionMap::makepmapcopy(std::vector<FPGATrackSimPlaneMap> const * pmaps){
+//makepmapcopy(std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const * pmaps);
+//void FPGATrackSimRegionMap::makepmapcopy(std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const * pmaps){
+/*
+void FPGATrackSimRegionMap::makepmapcopy(std::vector<std::shared_ptr<FPGATrackSimPlaneMap>> const * pmaps){
+    for (auto & ipmap:*pmaps){
+        //m_pmaps.push_back(std::make_unique<FPGATrackSimPlaneMap>(*ipmap));
+        //m_pmaps->push_back(ipmap->get());
+        //m_pmaps->push_back( ipmap);
+        m_pmaps->push_back(ipmap.get());
+    }
+
+}
+*/

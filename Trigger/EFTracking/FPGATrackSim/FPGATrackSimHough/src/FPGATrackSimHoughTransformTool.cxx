@@ -138,7 +138,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
 
 StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
 {
-    std::cout<<"IN ROADS"<<'\n';
+//    std::cout<<"IN ROADS"<<'\n';
   roads.clear();
   m_roads.clear();
 //    std::cout<<"getRoads:"<<StatusCode::SUCCESS<<'\n';
@@ -155,11 +155,11 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
 //            std::cout<<"getRoads155:"<<StatusCode::SUCCESS<<'\n';
 	      if (m_traceHits)
           {
-            std::cout<<"getRoads158:"<<StatusCode::SUCCESS<<'\n';
+//            std::cout<<"getRoads158:"<<StatusCode::SUCCESS<<'\n';
 	        addRoad(m_image(y, x).second, x, y);
           }
 	      else{
-            std::cout<<"getRoads162:"<<StatusCode::SUCCESS<<'\n';
+//            std::cout<<"getRoads162:"<<StatusCode::SUCCESS<<'\n';
 	        addRoad(hits, x, y);
           }
 //          std::cout<<"getRoads165:"<<StatusCode::SUCCESS<<'\n';
@@ -487,18 +487,18 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::vector<std::
 // Creates a road from hits that pass through the given bin (x, y), and pushes it onto m_roads
 void FPGATrackSimHoughTransformTool::addRoad(const std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y)
 {
-    std::cout<<"ROAD A"<<"unordered_set.size():"<<hits.size()<<"   "<<'\n';
+//    std::cout<<"ROAD A"<<"unordered_set.size():"<<hits.size()<<"   "<<'\n';
   layer_bitmask_t hitLayers = 0;
   for (auto const & hit : hits)
     hitLayers |= 1 << hit->getLayer();
 
-    std::cout<<"ROAD A 496"<<'\n';
+//    std::cout<<"ROAD A 496"<<'\n';
   auto sorted_hits = ::sortByLayer(hits);
   sorted_hits.resize(m_nLayers); // If no hits in last layer, return from sortByLayer will be too short
 
-    std::cout<<"ROAD A 500---"<<sorted_hits.size()<<"  "<<sorted_hits.size()<<"  x:"<<x<<"  y:"<<y<<'\n';
+//    std::cout<<"ROAD A 500---"<<sorted_hits.size()<<"  "<<sorted_hits.size()<<"  x:"<<x<<"  y:"<<y<<'\n';
   addRoad(sorted_hits, hitLayers, x, y);
-    std::cout<<"ROAD A 502"<<'\n';
+//    std::cout<<"ROAD A 502"<<'\n';
 }
 
 // Use this version of addRoad when hit tracing is turned off

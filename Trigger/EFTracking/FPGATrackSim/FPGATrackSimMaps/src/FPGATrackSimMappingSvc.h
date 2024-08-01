@@ -53,8 +53,12 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
 
             // Map unique pointers
         //std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_1st = nullptr; //  pointer to the pmap object for 1st stage
+        //std::vector<std::shared_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
+        //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
         std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_2nd = nullptr; //  pointer to the pmap object for 2nd stage
+        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
+        //std::vector<std::shared_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
         //vector of pmaps
         //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> = m_pap_vector_1st; 
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_1st = nullptr; //  pointer to the RMAP object using 1st stage plane map

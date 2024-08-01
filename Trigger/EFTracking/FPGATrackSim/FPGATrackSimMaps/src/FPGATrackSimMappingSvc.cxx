@@ -119,24 +119,22 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> m_pmap_vector_1st;
 
         ATH_MSG_DEBUG("Creating the 1st stage plane map");
-        std::cout<<"\n line 131 \n";
         //m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(PathResolverFindCalibFile(m_pmap_path.value()), m_EvtSel->getRegionID(), 1, m_layerOverrides));
         for (int i = 0; i<m_numberOfPmaps; i++)
         {
-            std::cout<<"\n test \n";
+            std::cout<<"\n test "<<m_EvtSel->getRegionID()<<"\n";
+            //m_pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
             m_pmap_vector_1st.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+            //m_pmap_vector_1st.push_back(std::shared_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
             std::cout<<"\n test DONE \n";
         }
         //std::unique_ptr<FPGATrackSimPlaneMap> m_pmap_1st = std::move(planeMapVector[0]);
         //m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
-        std::cout<<"\n line 133 \n";
-        std::cout<<"\n line 134 \n";
         //fin.seekg(0);
         //fin.close();
         //fin.open(filepath);
         //readPmapSize(fin);
         //m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides));
-        std::cout<<"\n line 137 \n";
         fin.close();
         fin.open(filepath);
         readPmapSize(fin);
@@ -149,23 +147,25 @@ StatusCode FPGATrackSimMappingSvc::initialize()
 
         ATH_MSG_DEBUG("Creating the 1st stage region map");
         //m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_rmap_path.value())));
-        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_rmap_path.value())));
+        //m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
 
         std::cout<<"\n line 157 \n";
+        //m_pmap_vector_2nd.push_back(std::shared_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+        m_pmap_vector_2nd.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
         ATH_MSG_DEBUG("Creating the 2nd stage region map");
-        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_2nd.get(), PathResolverFindCalibFile(m_rmap_path.value())));
+        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
 
-        std::cout<<"\n line 161 \n";
         ATH_MSG_DEBUG("Creating the sub-region map");
         //m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_subrmap_path.value())));
-        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_subrmap_path.value())));
+        //m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_subrmap_path.value())));
+        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
 
         std::cout<<"\n line 165 \n";
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
 
-        std::cout<<"\n line 171 \n";
         // We probably need two versions of this path for the second stage.
         ATH_MSG_DEBUG("Setting the average radius per logical layer for Region and Subregion Maps");
         m_rmap_1st->loadRadiiFile(PathResolverFindCalibFile(m_radii_path.value()));

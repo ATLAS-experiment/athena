@@ -47,13 +47,13 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
     for (FPGATrackSimHit const & hit : header_1st->towers().at(0).hits()) {
-        info->nMappedHits_1st_layer[hit.getLayer()]++;
+        //info->nMappedHits_1st_layer[hit.getLayer()]++;//TODO WW
         info->nMappedHits_1st_total++;
     }
 
     info->nClusters_1st_layer.resize(m_nLayers_1st);
     for (FPGATrackSimCluster const & cluster : clusters_1st) {
-        info->nClusters_1st_layer[cluster.getClusterEquiv().getLayer()]++;
+        //info->nClusters_1st_layer[cluster.getClusterEquiv().getLayer()]++;
         info->nClusters_1st_total = clusters_1st.size();
     }
 
@@ -138,6 +138,7 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
         if (m_runSecondStage) info->nTracks_2nd_over_nOfflineTracks = (float)tracks_2nd.size() / (float)info->nOfflineTracks;
     }
 
+    ATH_MSG_INFO("line 146");
     ATH_CHECK(getDataFlowInfo(*info));
 
     return StatusCode::SUCCESS;

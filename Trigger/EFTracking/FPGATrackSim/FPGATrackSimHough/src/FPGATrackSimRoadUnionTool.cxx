@@ -56,26 +56,65 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     //find and make vector of hists associated with layer
     std::vector<std::vector<const FPGATrackSimHit*>> sliceHits(m_tools.size());
+    const FPGATrackSimPlaneMap *pmap = nullptr;
     //std::cout<<"~~~~~~~~~~~~~~~~~~~~~"<<m_tools.size()<<"~~~~~~ \n";
+    int toolNum = 0;//same as sliceNum
     for (auto & tool : m_tools)
     {
+        pmap = m_FPGATrackSimMapping->PlaneMap_1st(toolNum);
         auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
         for (auto & iHit:hits)
         {
             //std::cout<<"****testSR"<<tool->getSubRegion()<<"\n";
             //if (tool->getSubRegion() >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(tool->getSubRegion(), *iHit)) continue;
-            if ((subrmap->isInRegion(tool->getSubRegion(), *iHit))) {
-                sliceHits[tool->getSubRegion()].push_back(new FPGATrackSimHit(*iHit));
-                continue;
+            ATH_MSG_INFO("PRE INSERT SliceNum"<<tool->getSubRegion()<<"  NumberOfHits"<<sliceHits[toolNum].size() );
+
+
+            FPGATrackSimHit* hitCopy = new FPGATrackSimHit(*iHit);
+            ATH_MSG_INFO("hitCopyLL_PRE  :"<<hitCopy->getLayer());
+            pmap->map(*hitCopy);
+            ATH_MSG_INFO("hitCopyLL_AFTER:"<<hitCopy->getLayer());
+            if (hitCopy->getLayer()>=0)
+            {
+                if ((subrmap->isInRegion(tool->getSubRegion(), *hitCopy))) {
+                    sliceHits[toolNum].push_back(hitCopy);
+                }
             }
+            else{
+                delete hitCopy;
+            }
+
+            /*
+            if ((subrmap->isInRegion(tool->getSubRegion(), *iHit))) {
+                FPGATrackSimHit* hitCopy = new FPGATrackSimHit(*iHit);
+                ATH_MSG_INFO("hitCopyLL_PRE  :"<<hitCopy->getLayer());
+                pmap->map(*hitCopy);
+                ATH_MSG_INFO("hitCopyLL_AFTER:"<<hitCopy->getLayer());
+                if (hitCopy->getLayer()>=0)
+                {
+                    sliceHits[toolNum].push_back(hitCopy);
+                }
+                else{
+                    delete hitCopy;
+                }
+//                continue;//TODO WHY IS THIS HERE WW
+            }
+            */
+            ATH_MSG_INFO("~PRE2 INSERT SliceNum"<<tool->getSubRegion()<<"  NumberOfHits"<<sliceHits[toolNum].size() );
         }   
+        toolNum++;  
     }
     roads.clear();
     std::cout<<m_tools.size()<<"\n";
     for (auto & tool : m_tools)
     {
+       // std::cout<<"SUBR:"<<tool->getSubRegion()<<"\n";
+        //std::vector<FPGATrackSimRoad*> r;
         std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
-        ATH_CHECK(tool->getRoads(sliceHits_filter[tool->getSubRegion()], r));
+//        std::cout<<"slice"<<tool->getSubRegion()<<" hitNum:"<<sliceHits[tool->getSubRegion()].size()<<"\n";
+        ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r));
+        //ATH_CHECK(tool->getRoads(hits, r));
+        ATH_MSG_INFO("SliceNum"<<tool->getSubRegion()<<"  NumberOfHits"<<sliceHits[tool->getSubRegion()].size() );
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
     }
     /*

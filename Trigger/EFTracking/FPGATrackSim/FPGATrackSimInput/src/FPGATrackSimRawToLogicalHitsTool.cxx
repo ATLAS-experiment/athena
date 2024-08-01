@@ -59,7 +59,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   const FPGATrackSimRegionMap *rmap = nullptr;
   if (stage == 1)
   {
-      pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+      //~~pmap = m_FPGATrackSimMapping->PlaneMap_1st(0); //TODO WW
       rmap = m_FPGATrackSimMapping->RegionMap_1st();
   }
   else if (stage == 2)
@@ -77,37 +77,59 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
     logicEventHeader.addTower( tower);
   }
+    ATH_MSG_INFO("Line80");
 
+/*~//TODO WW removed adding hits here to instead be done down stream 
   ATH_MSG_DEBUG ("Created "<<logicEventHeader.nTowers()<<" towers. Now map Hits");
+    //~pulled from commented out section
+    for (auto hit: eventHeader.hits()) { // hit loop
 
-  m_missing_hits.clear(); // reset vector of missing hits
-  m_missing_hit_codes.clear();
+        //~bool mapped=false;
+        for (unsigned int ireg=0;ireg!=m_towers.size();++ireg){
+            if (rmap->isInRegion(ireg, hit)) {
+                // if the equivalent hit is compatible with this tower the hit is saved                            
+                logicEventHeader.getTower( ireg )->addHit(hit);
+                ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
+                //~mapped=true;
+            }
+        }
+    }
+~*/
 
+  //~m_missing_hits.clear(); // reset vector of missing hits
+  //~m_missing_hit_codes.clear();
 
+    //~~~
   // fill the towers/slices with mapped hits
   for (auto hit: eventHeader.hits()) { // hit loop
+    ATH_MSG_INFO("Line105");
       // map to the logical hit, copying across the truth
-      pmap->map(hit);
+//~      pmap->map(hit);
 
       // In the ITk geometry, some of the plane IDs are -1 if the layers are not yet being used.
       // This causes the code in this hit loop to crash. As a workaround for the moment, we currently
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
-      if (pmap->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer()).layer == -1)
-      {
-	m_missing_hits.push_back(hit); 
-	continue;
-      }
+//~      if (pmap->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer()).layer == -1)
+//~      {
+//~	m_missing_hits.push_back(hit); 
+//~	continue;
+//~      }
 
       bool mapped=false;
       for (unsigned int ireg=0;ireg!=m_towers.size();++ireg){
-	        if (rmap->isInRegion(ireg, hit)) {
-              // if the equivalent hit is compatible with this tower the hit is saved                            
-              logicEventHeader.getTower( ireg )->addHit(hit);
-              ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
-              mapped=true;
-          }
+            ATH_MSG_INFO("Line120  irig:"<<ireg<<"  towerS:"<<m_towers.size());
+//~	        if (rmap->isInRegion(ireg, hit)) {
+            ATH_MSG_INFO("Line122");
+            // if the equivalent hit is compatible with this tower the hit is saved                            
+            logicEventHeader.getTower( ireg )->addHit(hit);
+            ATH_MSG_INFO("Line125"<< logicEventHeader.getTower(ireg)->nHits());
+            ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
+            mapped=true;
+//~          }
+            ATH_MSG_INFO("Line129  irig:"<<ireg<<"  towerS:"<<m_towers.size());
       }
-
+    ATH_MSG_INFO("Line129");
+      /*
       if (!mapped) {
           // get unmapped hit's error codes
           ATH_MSG_DEBUG("Unmapped hit: pixel="<<hit.isPixel()<<" Barrel="<<hit.isBarrel() <<" Layer="<<hit.getLayer() <<" PLayer="<<hit.getPhysLayer() << " section="<<hit.getSection());
@@ -118,8 +140,10 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
           hit.setHitType(HitType::unmapped);
           m_missing_hits.push_back(hit);
       }
+      */
   } // end hit loop
-
+  //
+/*~~
   unsigned int notStoredHits = m_missing_hits.size();
   if (notStoredHits != 0){
       ATH_MSG_DEBUG ("Found " << notStoredHits << " missing mapped hits in this event");
@@ -127,7 +151,7 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
         ATH_MSG_VERBOSE ("Missing Hit Code: " << m_missing_hit_codes[iter]);
       }
   }
-
+*/
   if (stage == 1) {
     FPGATrackSimOptionalEventInfo op = eventHeader.optional();
     if (m_saveOptional == 2) {
@@ -150,10 +174,11 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimRawToLogicalHitsTool::getUnmapped(std::vector<FPGATrackSimHit>& missing_hits) {
-    std::copy(m_missing_hits.begin(), m_missing_hits.end(), back_inserter(missing_hits));    
-    return StatusCode::SUCCESS;
-}
+//~StatusCode FPGATrackSimRawToLogicalHitsTool::getUnmapped(std::vector<FPGATrackSimHit>& missing_hits) {
+//~    std::copy(m_missing_hits.begin(), m_missing_hits.end(), back_inserter(missing_hits));    
+//~    return StatusCode::SUCCESS;
+//~    return StatusCode::FAILURE;
+//~}
 
 const FPGATrackSimPlaneMap* FPGATrackSimRawToLogicalHitsTool::getPlaneMap_1st(int sliceNum) {
   return m_FPGATrackSimMapping->PlaneMap_1st(sliceNum);

@@ -65,7 +65,10 @@ class FPGATrackSimRegionMap
         ///////////////////////////////////////////////////////////////////////
         // Constructors/Initialization
 
-        FPGATrackSimRegionMap(FPGATrackSimPlaneMap const * pmap, std::string const & filepath);
+        //FPGATrackSimRegionMap(FPGATrackSimPlaneMap const * pmap, std::string const & filepath);
+        //FPGATrackSimRegionMap(std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const * pmaps, std::string const & filepath);
+        //FPGATrackSimRegionMap(const std::vector<std::shared_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath);
+        FPGATrackSimRegionMap(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> & pmaps, std::string const & filepath);
 
         void loadModuleIDLUT(std::string const & filepath);
 
@@ -103,8 +106,13 @@ class FPGATrackSimRegionMap
         const std::vector<double>& getAvgRadii(unsigned region) const { return m_radii_map.at(region); };
 
     private:
-
-        const FPGATrackSimPlaneMap *m_pmap = nullptr;
+        
+        //const FPGATrackSimPlaneMap *m_pmap = nullptr;
+        //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> m_pmaps  ;
+        //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> *m_pmaps  ;
+        //std::vector<std::shared_ptr<FPGATrackSimPlaneMap>> const & m_pmaps  ;
+        std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const & m_pmaps  ;
+        //std::vector<FPGATrackSimPlaneMap> *m_pmaps  ;
         int m_nregions = 0;
 
         std::vector<std::vector<std::vector<FPGATrackSimRegionBoundaries>>> m_map;
@@ -118,7 +126,12 @@ class FPGATrackSimRegionMap
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions
-
+        //void makepmapcopy(const std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> pmaps);
+        //void makepmapcopy(std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const * pmaps);
+        //void makepmapcopy(std::vector<std::shared_ptr<FPGATrackSimPlaneMap>> const * pmaps);
+        //void makepmapcopy(std::vector<FPGATrackSimPlaneMap> const * pmaps);
+        //void makepmapcopy(std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const * pmaps);
+        //void makepmapcopy(std::vector<FPGATrackSimPlaneMap> const * pmaps);
         void allocateMap(std::ifstream & fin);
         void readRegion(std::ifstream & fin, int expected_region);
 };
