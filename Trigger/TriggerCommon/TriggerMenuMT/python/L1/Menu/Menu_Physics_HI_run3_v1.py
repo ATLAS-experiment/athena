@@ -91,6 +91,7 @@ def defineMenu():
         'L1_jTE6500',
         'L1_jTE7000',
         'L1_jTE7500',
+        'L1_VjTE10',
         'L1_VjTE200',
         'L1_VjTE600',
         'L1_jTE50_VjTE600',
@@ -109,7 +110,7 @@ def defineMenu():
         'L1_eTAU1', 'L1_jTAU1',
         
         #UPC - TRT,  phase-1 calo
-        'L1_TRT_VjTE50',
+        'L1_TRT_VjTE20', 'L1_TRT_VjTE50',
          #UPC, calo only, phase-1
          'L1_jTE5_VjTE200',
 
