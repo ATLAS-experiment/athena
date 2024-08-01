@@ -64,8 +64,33 @@ def OfflineQualitySelectionCfg(flags, name):
     acc.setPrivateTools(selTool)
     return acc    
 
+
+def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs):
+    acc = ComponentAccumulator()
+    
+    from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
+    truthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags))
+    kwargs.setdefault( "truthTool" , truthSelectionTool)
+    acc.setPrivateTools( CompFactory.IDTPM.TruthQualitySelectionTool( name, **kwargs ) )
+    return acc
+
+
 def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwargs ):
     acc = ComponentAccumulator()
+
+    ## Offline tracks quality selection
+    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "":
+        kwargs.setdefault( "DoOfflineSelection", True )
+    
+        kwargs.setdefault( "OfflineSelectionTool", acc.popToolsAndMerge(
+            OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
+    ## Truth particles quality selection
+    if flags.Input.isMC:
+        kwargs.setdefault( "DoTruthSelection", True )
+    
+        kwargs.setdefault( "TruthSelectionTool", acc.popToolsAndMerge(
+            TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     ## offline track-object selection
     if flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject != "":
@@ -76,22 +101,5 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
                TrackObjectSelectionToolCfg( flags,
                    name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
-    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "":
-        kwargs.setdefault("OfflineSelectionTool", acc.popToolsAndMerge(
-            OfflineQualitySelectionCfg(flags, name="OfflineSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag)))
-
-    if flags.Input.isMC:
-        truthSelectionTool = acc.popToolsAndMerge(TruthTrackQualitySelectionToolCfg(flags))
-        kwargs.setdefault( "TruthTrackSelectionTool" , truthSelectionTool)
     acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
-    return acc
-
-
-def TruthTrackQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs):
-    acc = ComponentAccumulator()
-    
-    from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
-    truthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags))
-    kwargs.setdefault( "truthTool" , truthSelectionTool)
-    acc.setPrivateTools( CompFactory.IDTPM.TruthTrackQualitySelectionTool( name, **kwargs ) )
     return acc

@@ -2,21 +2,21 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TruthTrackQualitySelectionTool.h"
+#include "TruthQualitySelectionTool.h"
 #include <GaudiKernel/StatusCode.h>
 #include "TrackAnalysisCollections.h"
 
-IDTPM::TruthTrackQualitySelectionTool::TruthTrackQualitySelectionTool( const std::string& name )
+IDTPM::TruthQualitySelectionTool::TruthQualitySelectionTool( const std::string& name )
   : asg::AsgTool( name ) { }
 
-StatusCode IDTPM::TruthTrackQualitySelectionTool::initialize() {
+StatusCode IDTPM::TruthQualitySelectionTool::initialize() {
   ATH_CHECK(not m_truthTool.empty());
   ATH_CHECK(m_truthTool.retrieve());
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode IDTPM::TruthTrackQualitySelectionTool::selectTracks( TrackAnalysisCollections& trkAnaColls ) {
+StatusCode IDTPM::TruthQualitySelectionTool::selectTracks( TrackAnalysisCollections& trkAnaColls ) {
   std::vector< const xAOD::TruthParticle* > selected;
   for ( auto trk: trkAnaColls.truthPartVec(IDTPM::TrackAnalysisCollections::FS)) {
     if ( m_truthTool->accept(trk)) {

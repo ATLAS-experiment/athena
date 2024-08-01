@@ -16,12 +16,12 @@
     },
     "$TRKTAG_d0" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "100", "low" : "-$D0MAX", "high" : "$D0MAX" },
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm]", "nBins" : "100", "low" : "-$D0MAX", "high" : "$D0MAX" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_z0" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "xAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_R" : {

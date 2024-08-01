@@ -25,6 +25,7 @@
 
 /// STL include(s)
 #include <string>
+#include <vector>
 
 
 namespace IDTPM {
@@ -128,6 +129,67 @@ namespace IDTPM {
         TEfficiency* pTeff2d, float xvalue, float yvalue, bool accepted, float weight=1. ) const;
 
   protected:
+
+    /// SetVariableBins
+    template < class P >
+    StatusCode setVariableBins(
+      P*& pHisto, const std::vector<float>& binning, char axis )
+    {
+      if( binning.empty() ) {
+        ATH_MSG_ERROR( "Non-valid variable plot binning : " << pHisto->GetName() );
+        return StatusCode::FAILURE;
+      }
+      if( axis == 'X' ) pHisto->GetXaxis()->Set( binning.size()-1, binning.data() );
+      if( axis == 'Y' ) pHisto->GetYaxis()->Set( binning.size()-1, binning.data() );
+      if( axis == 'Z' ) pHisto->GetZaxis()->Set( binning.size()-1, binning.data() );
+      return StatusCode::SUCCESS;
+    }
+
+    /// SetVariableBins (for Efficiencies)
+    template < class P >
+    StatusCode setVariableBinsEff(
+      P*& pHisto, const std::vector<float>& binning, char axis )
+    {
+      if( binning.empty() ) {
+        ATH_MSG_ERROR( "Non-valid variable plot binning : " << pHisto->GetName() );
+        return StatusCode::FAILURE;
+      }
+      std::vector<double> binningD( binning.begin(), binning.end() );
+      if( axis == 'X' ) pHisto->SetBins( binningD.size()-1, binningD.data() );
+      if( axis == 'Y' ) {
+        pHisto->SetBins(
+          pHisto->GetTotalHistogram()->GetNbinsX(),
+          pHisto->GetTotalHistogram()->GetXaxis()->GetXbins()->GetArray(),
+          binningD.size()-1, binningD.data() );
+      }
+      return StatusCode::SUCCESS;
+    }
+
+    /// Set Log-Linear axis
+    template < class P >
+    StatusCode setLogLinearBins(
+      P*& pHisto, unsigned int nBins, float absMin, float absMax, char axis )
+    {
+      std::vector<float> binning = getLogLinearBins( nBins, absMin, absMax );
+      ATH_CHECK( setVariableBins( pHisto, binning, axis ) );
+      return StatusCode::SUCCESS;
+    }
+
+    /// Set Log-Linear axis (for Efficiencies)
+    template < class P >
+    StatusCode setLogLinearBinsEff(
+      P*& pHisto, unsigned int nBins, float absMin, float absMax, char axis )
+    {
+      std::vector<float> binning = getLogLinearBins( nBins, absMin, absMax );
+      ATH_CHECK( setVariableBinsEff( pHisto, binning, axis ) );
+      return StatusCode::SUCCESS;
+    }
+
+    /// Get Log-Linear binning vector
+    /// inherited from InDetPhysValMonitoring/src/logLinearBinning.h
+    std::vector<float> getLogLinearBins(
+        unsigned int nBins, float absMin, float absMax,
+        bool symmetriseAroundZero = false );
 
     std::string m_anaTag;
 

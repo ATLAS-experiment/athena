@@ -33,10 +33,9 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
 
   ATH_MSG_INFO( "Initializing " << name() );
 
+  ATH_CHECK( m_offlineSelectionTool.retrieve( EnableTool{ m_doOfflSelection.value() } ) );
+  ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ m_doTruthSelection.value() } ) );
   ATH_CHECK( m_objSelectionTool.retrieve( EnableTool{ m_doObjSelection.value() } ) );
-  ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool{ not m_truthSelectionTool.empty() } ) );
-
-  ATH_CHECK( m_offlineSelectionTool.retrieve(EnableTool{ not m_offlineSelectionTool.empty() } ));
 
   return StatusCode::SUCCESS;
 }
@@ -71,21 +70,30 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
     ATH_CHECK( trkAnaColls.fillTruthPartVec(
         trkAnaColls.truthPartVec( TrackAnalysisCollections::FULL ),
         TrackAnalysisCollections::FS ) );
-    ATH_CHECK (m_truthSelectionTool->selectTracks( trkAnaColls ));
   }
 
   /// Debug printout
   ATH_MSG_DEBUG( "Tracks after initial FullScan copy: " << 
       trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
 
+  /// Offline track selection
+  if( trkAnaDefSvc->useOffline() and m_doOfflSelection.value() ) {
+    ATH_CHECK( m_offlineSelectionTool->selectTracks( trkAnaColls ) );
+  }
+
+  /// Truth particles selection
+  if( trkAnaDefSvc->useTruth() and m_doTruthSelection.value() ) {
+    ATH_CHECK( m_truthSelectionTool->selectTracks( trkAnaColls ) );
+  }
+
   /// Select offline tracks matched to offline objects
   if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {
     ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
   }
 
-  if ( m_offlineSelectionTool ) {
-    ATH_CHECK(m_offlineSelectionTool->selectTracks(trkAnaColls));
-  }
+  /// Debug printout
+  ATH_MSG_DEBUG( "Tracks after full quality selection: " << 
+      trkAnaColls.printInfo( TrackAnalysisCollections::FS ) );
 
   return StatusCode::SUCCESS;
 }

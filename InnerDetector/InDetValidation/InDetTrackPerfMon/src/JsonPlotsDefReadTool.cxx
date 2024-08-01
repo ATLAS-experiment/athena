@@ -34,6 +34,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
 {
   using json = nlohmann::json;
   using cstr_t = const std::string&;
+  using strVec_t = std::vector< std::string >;
 
   std::vector< SinglePlotDefinition > plotDefVec;
 
@@ -94,6 +95,63 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     float zHigh = plotDef.contains( "zAxis_high" ) ?
         std::stof( plotDef.at( "zAxis_high" ).get_ref< cstr_t >() ) : 0.;
 
+    /// xAxis doLogLin
+    bool xDoLogLinBins(false);
+    if( plotDef.contains( "xAxis_doLogLinBins" ) ) {
+      std::string xDoLogLinBinsStr = plotDef.at( "xAxis_doLogLinBins" ).get_ref< cstr_t >();
+      if( xDoLogLinBinsStr == "true" ) xDoLogLinBins = true;
+      else if( xDoLogLinBinsStr == "false" ) xDoLogLinBins = false;
+      else ATH_MSG_WARNING( "xAxis_doLogLinBins not valid" );
+    }
+
+    /// yAxis doLogLin
+    bool yDoLogLinBins(false);
+    if( plotDef.contains( "yAxis_doLogLinBins" ) ) {
+      std::string yDoLogLinBinsStr = plotDef.at( "yAxis_doLogLinBins" ).get_ref< cstr_t >();
+      if( yDoLogLinBinsStr == "true" ) yDoLogLinBins = true;
+      else if( yDoLogLinBinsStr == "false" ) yDoLogLinBins = false;
+      else ATH_MSG_WARNING( "yAxis_doLogLinBins not valid" );
+    }
+
+    /// zAxis doLogLin
+    bool zDoLogLinBins(false);
+    if( plotDef.contains( "zAxis_doLogLinBins" ) ) {
+      std::string zDoLogLinBinsStr = plotDef.at( "zAxis_doLogLinBins" ).get_ref< cstr_t >();
+      if( zDoLogLinBinsStr == "true" ) zDoLogLinBins = true;
+      else if( zDoLogLinBinsStr == "false" ) zDoLogLinBins = false;
+      else ATH_MSG_WARNING( "zAxis_doLogLinBins not valid" );
+    }
+
+    /// xAxis bins (variable size)
+    strVec_t xBinsStrVec;
+    if( plotDef.contains( "xAxis_bins" ) ) xBinsStrVec = plotDef.at( "xAxis_bins" ).get< strVec_t >();
+    std::vector< float > xBinsVec;
+    for( cstr_t thisBin : xBinsStrVec ) xBinsVec.push_back( std::stof( thisBin ) );
+    if( not xBinsVec.empty() ) {
+      /// overwriting binning
+      xLow = xBinsVec.front();  xHigh = xBinsVec.back();  nBinsX = xBinsVec.size() - 1;
+    }
+
+    /// yAxis bins (variable size)
+    strVec_t yBinsStrVec;
+    if( plotDef.contains( "yAxis_bins" ) ) yBinsStrVec = plotDef.at( "yAxis_bins" ).get< strVec_t >();
+    std::vector< float > yBinsVec;
+    for( cstr_t thisBin : yBinsStrVec ) yBinsVec.push_back( std::stof( thisBin ) );
+    if( not yBinsVec.empty() ) {
+      /// overwriting binning
+      yLow = yBinsVec.front();  yHigh = yBinsVec.back();  nBinsY = yBinsVec.size() - 1;
+    }
+
+    /// zAxis bins (variable size)
+    strVec_t zBinsStrVec;
+    if( plotDef.contains( "zAxis_bins" ) ) zBinsStrVec = plotDef.at( "zAxis_bins" ).get< strVec_t >();
+    std::vector< float > zBinsVec;
+    for( cstr_t thisBin : zBinsStrVec ) zBinsVec.push_back( std::stof( thisBin ) );
+    if( not zBinsVec.empty() ) {
+      /// overwriting binning
+      zLow = zBinsVec.front();  zHigh = zBinsVec.back();  nBinsZ = zBinsVec.size() - 1;
+    }
+
     /// xTitle
     cstr_t xTitle = plotDef.contains( "xAxis_title" ) ?
         plotDef.at( "xAxis_title" ).get_ref< cstr_t >() : "";
@@ -109,9 +167,9 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     /// Adding new SinglePlotDefinition to vector
     plotDefVec.emplace_back(
         name, type, title,
-        xTitle, nBinsX, xLow, xHigh,
-        yTitle, nBinsY, yLow, yHigh,
-        zTitle, nBinsZ, zLow, zHigh,
+        xTitle, nBinsX, xLow, xHigh, xDoLogLinBins, xBinsVec,
+        yTitle, nBinsY, yLow, yHigh, yDoLogLinBins, yBinsVec,
+        zTitle, nBinsZ, zLow, zHigh, zDoLogLinBins, zBinsVec,
         folder );
 
     /// Check if plot definition is valid. Removing

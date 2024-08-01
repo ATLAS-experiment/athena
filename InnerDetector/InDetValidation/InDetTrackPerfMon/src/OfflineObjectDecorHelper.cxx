@@ -60,7 +60,8 @@ namespace IDTPM {
   const xAOD::TruthParticle* getLinkedTruth( const xAOD::TrackParticle& track,
                                              const float truthProbCut ) {
     float prob = getTruthMatchProb( track );
-    if( prob < truthProbCut ) return nullptr;
+    if( std::isnan(prob) ) return nullptr;
+    if( prob <= truthProbCut ) return nullptr;
 
     return getLinkedObject< xAOD::TruthParticleContainer >(
         track, "truthParticleLink" );

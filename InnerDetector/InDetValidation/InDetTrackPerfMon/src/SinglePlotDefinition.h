@@ -16,6 +16,7 @@
 
 /// STL include(s)
 #include <string>
+#include <vector>
 #include <utility> // std::pair
 
 
@@ -33,10 +34,13 @@ namespace IDTPM {
       const std::string& name = "", const std::string& type = "", const std::string& title = "",
       const std::string& xTitle = "",
       unsigned int nBinsX = 0, float xLow = 0., float xHigh = 0.,
+      bool doLogLinBinsX = false, const std::vector<float>& xBinsVec = {},
       const std::string& yTitle = "",
       unsigned int nBinsY = 0, float yLow = 0., float yHigh = 0.,
+      bool doLogLinBinsY = false, const std::vector<float>& yBinsVec = {},
       const std::string& zTitle = "",
       unsigned int nBinsZ = 0, float zLow = 0., float zHigh = 0.,
+      bool doLogLinBinsZ = false, const std::vector<float>& zBinsVec = {},
       const std::string& folder = "" );
 
     /// Default destructor
@@ -63,6 +67,15 @@ namespace IDTPM {
     float yHigh() const { return m_yAxis.second; }
     float zLow() const {  return m_zAxis.first; }
     float zHigh() const { return m_zAxis.second; }
+    bool doLogLinBinsX() const { return m_doLogLinBinsX; }
+    bool doLogLinBinsY() const { return m_doLogLinBinsY; }
+    bool doLogLinBinsZ() const { return m_doLogLinBinsZ; }
+    const std::vector<float>& xBinsVec() const { return m_xBinsVec; }
+    const std::vector<float>& yBinsVec() const { return m_yBinsVec; }
+    const std::vector<float>& zBinsVec() const { return m_zBinsVec; }
+    bool doVarBinsX() const { return ( not m_xBinsVec.empty() ); }
+    bool doVarBinsY() const { return ( not m_yBinsVec.empty() ); }
+    bool doVarBinsZ() const { return ( not m_zBinsVec.empty() ); }
     const std::string& folder() const { return m_folder; }
     bool isEmpty() const { return m_empty; }
     const std::string& identifier() const { return m_identifier; }
@@ -87,6 +100,18 @@ namespace IDTPM {
     void xLimits( float xLow, float xHigh ) { m_xAxis = std::make_pair( xLow, xHigh ); digest(); }
     void yLimits( float yLow, float yHigh ) { m_yAxis = std::make_pair( yLow, yHigh ); digest(); } 
     void zLimits( float zLow, float zHigh ) { m_zAxis = std::make_pair( zLow, zHigh ); digest(); }
+    void doLogLinBinsX( bool doLogLinBinsX_b ) { m_doLogLinBinsX = doLogLinBinsX_b; }
+    void doLogLinBinsY( bool doLogLinBinsY_b ) { m_doLogLinBinsY = doLogLinBinsY_b; }
+    void doLogLinBinsZ( bool doLogLinBinsZ_b ) { m_doLogLinBinsZ = doLogLinBinsZ_b; }
+    void setxBinsVec( const std::vector<float>& vec ) { if( not vec.empty() ) {
+      m_xBinsVec = vec; m_nBinsX = vec.size() - 1;
+      m_xAxis = std::make_pair( vec.front(), vec.back() ); digest(); } }
+    void setyBinsVec( const std::vector<float>& vec ) { if( not vec.empty() ) {
+      m_yBinsVec = vec; m_nBinsY = vec.size() - 1;
+      m_yAxis = std::make_pair( vec.front(), vec.back() ); digest(); } }
+    void setzBinsVec( const std::vector<float>& vec ) { if( not vec.empty() ) {
+      m_zBinsVec = vec; m_nBinsZ = vec.size() - 1;
+      m_zAxis = std::make_pair( vec.front(), vec.back() ); digest(); } }
     void folder( std::string_view folder_s ) { m_folder = folder_s; digest(); } 
     void setEmpty( bool empty = true ) { m_empty = empty; }
 
@@ -118,6 +143,8 @@ namespace IDTPM {
     std::string m_title, m_xTitle, m_yTitle, m_zTitle;
     unsigned int m_nBinsX, m_nBinsY, m_nBinsZ;
     axesLimits_t m_xAxis, m_yAxis, m_zAxis;
+    bool m_doLogLinBinsX, m_doLogLinBinsY, m_doLogLinBinsZ;
+    std::vector<float> m_xBinsVec, m_yBinsVec, m_zBinsVec;
     std::string m_folder;
 
     /// status member

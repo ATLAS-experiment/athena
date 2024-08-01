@@ -24,14 +24,18 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
     const std::string& name, const std::string& type, const std::string& title,
     const std::string& xTitle,
     unsigned int nBinsX, float xLow, float xHigh,
+    bool doLogLinBinsX, const std::vector<float>& xBinsVec,
     const std::string& yTitle,
     unsigned int nBinsY, float yLow, float yHigh,
+    bool doLogLinBinsY, const std::vector<float>& yBinsVec,
     const std::string& zTitle,
     unsigned int nBinsZ, float zLow, float zHigh,
+    bool doLogLinBinsZ, const std::vector<float>& zBinsVec,
     const std::string& folder ) :
         m_name( name ), m_type( type ), m_title( title ),
         m_xTitle( xTitle ), m_yTitle( yTitle ), m_zTitle( zTitle ),
         m_nBinsX( nBinsX ), m_nBinsY( nBinsY ), m_nBinsZ( nBinsZ ),
+        m_doLogLinBinsX( doLogLinBinsX ), m_doLogLinBinsY( doLogLinBinsY ), m_doLogLinBinsZ( doLogLinBinsZ ),
         m_folder( folder ), m_is1D( false ), m_is2D( false ), m_is3D( false )
 {
   /// initialise title = name if title is empty
@@ -49,6 +53,9 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
   m_zAxis = ( nBinsZ != 0 ) ? std::make_pair( zLow, zHigh ) :
             std::make_pair( std::numeric_limits<float>::quiet_NaN(),
                             std::numeric_limits<float>::quiet_NaN() );
+
+  /// Recomputing limits and sizes (for variable bin sizes)
+  setxBinsVec( xBinsVec );  setyBinsVec( yBinsVec );  setzBinsVec( zBinsVec );
 
   /// Sanity check
   m_empty = not isValid();

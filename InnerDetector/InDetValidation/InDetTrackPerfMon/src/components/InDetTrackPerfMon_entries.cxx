@@ -5,7 +5,7 @@
 #include "../InDetTrackPerfMonTool.h"
 #include "../TrackAnalysisDefinitionSvc.h"
 #include "../TrackQualitySelectionTool.h"
-#include "../TruthTrackQualitySelectionTool.h"
+#include "../TruthQualitySelectionTool.h"
 #include "../RoiSelectionTool.h"
 #include "../TrackRoiSelectionTool.h"
 #include "../TruthHitDecoratorAlg.h"
@@ -27,7 +27,7 @@ DECLARE_COMPONENT( TrackAnalysisDefinitionSvc )
 DECLARE_COMPONENT( PlotsDefinitionSvc )
 DECLARE_COMPONENT( IDTPM::JsonPlotsDefReadTool )
 DECLARE_COMPONENT( IDTPM::TrackQualitySelectionTool )
-DECLARE_COMPONENT( IDTPM::TruthTrackQualitySelectionTool )
+DECLARE_COMPONENT( IDTPM::TruthQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::RoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackRoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::TruthHitDecoratorAlg )
