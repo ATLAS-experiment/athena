@@ -154,6 +154,7 @@ def FlavorTagNNCfg(
     acc = ComponentAccumulator()
 
     NNFile_extension = NNFile.split(".")[-1]
+    min_links = 1 if flags.BTagging.vetoZeroTrackForAFT276 else 0
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
@@ -168,7 +169,7 @@ def FlavorTagNNCfg(
             FTD.CountTrackParticleAlg(
                 f'CountTrackParticleAlg{BTaggingCollection}',
                 links=f'{BTaggingCollection}.BTagTrackToJetAssociator',
-                minimumLinks=flags.BTagging.minTracksForAFT726Workaround,
+                minimumLinks=min_links,
                 flag=f'{BTaggingCollection}.{NONZERO_TRACKS}',
             )
         )
@@ -211,7 +212,7 @@ def MultifoldGNNCfg(
         remapping={},
         useBTaggingObject=None,
         JetCollection=None,
-        conditions=set(),
+        tag_requirements=set(),
         defaultOutputValues={},
 ):
     if nnFilePaths is None:
@@ -238,20 +239,20 @@ def MultifoldGNNCfg(
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
     tag_flag = NONZERO_TRACKS
-    min_links = flags.BTagging.minTracksForAFT726Workaround
+    min_links = 1 if flags.BTagging.vetoZeroTrackForAFT276 else 0
 
     FTD = CompFactory.FlavorTagDiscriminants
 
     if BTaggingCollection is not None:
-        if conditions:
+        if tag_requirements:
             Alg = FTD.BTagConditionalDecoratorAlg
-            if len(conditions) > 1:
-                raise ValueError(f'{conditions=} must have size 0 or 1')
-            alg_args = dict(tagFlag=next(iter(conditions)))
+            if len(tag_requirements) > 1:
+                raise ValueError(f'{tag_requirements=} must have size 0 or 1')
+            alg_args = dict(tagFlag=next(iter(tag_requirements)))
         else:
             Alg = FTD.BTagDecoratorAlg
             alg_args = {}
-        if tag_flag in conditions:
+        if tag_flag in tag_requirements:
             remapped_tp = remapping.get(tp_assoc, tp_assoc)
             acc.addEventAlgo(
                 FTD.CountTrackParticleAlg(
@@ -266,13 +267,13 @@ def MultifoldGNNCfg(
         container = BTaggingCollection
     elif JetCollection is not None:
         remapping.setdefault(tp_assoc, ip_assoc)
-        if conditions:
+        if tag_requirements:
             Alg = FTD.JetTagConditionalDecoratorAlg
-            alg_args = dict(tagFlags=list(conditions))
+            alg_args = dict(tagFlags=tag_requirements)
         else:
             Alg = FTD.JetTagDecoratorAlg
             alg_args = {}
-        if tag_flag in conditions:
+        if tag_flag in tag_requirements:
             acc.addEventAlgo(
                 FTD.CountIParticleAlg(
                     f'CountTrackParticleAlg{JetCollection}',

@@ -30,8 +30,9 @@ namespace FlavorTagDiscriminants {
       opts.track_link_type = trackLinkTypeFromString(props.trackLinkType);
     }
     opts.default_output_value = props.default_output_value;
-    for (auto [k, v]: props.default_output_values) {
-      opts.default_output_values.emplace(k, v);
+    {
+      const auto& d = props.default_output_values;
+      opts.default_output_values.insert(d.begin(), d.end());
     }
     return opts;
   }

@@ -12,6 +12,9 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
+// needed to parse set<string>
+#include "Gaudi/Parsers/Factory.h"
+
 namespace detail {
   using JetCondTag_t = FlavorTagDiscriminants::DecoratorAlg<
     xAOD::JetContainer,
@@ -29,7 +32,7 @@ namespace FlavorTagDiscriminants {
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& cxt ) const override;
   private:
-    Gaudi::Property<std::vector<std::string>>  m_tagFlags {
+    Gaudi::Property<std::unordered_set<std::string>>  m_tagFlags {
       this, "tagFlags", {}, "Jet variable to flag a jet for tagging"
     };
     SG::ReadDecorHandleKeyArray<xAOD::JetContainer> m_tagFlagReadDecors;
