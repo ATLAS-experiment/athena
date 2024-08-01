@@ -94,6 +94,8 @@ def defineMenu():
         'L1_VjTE200',
         'L1_VjTE600',
         'L1_jTE50_VjTE600',
+        #Overlay items
+        'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
 
         #L1 forward GAP
         'L1_GAP_A', 'L1_GAP_C', 'L1_GAP_AANDC',
