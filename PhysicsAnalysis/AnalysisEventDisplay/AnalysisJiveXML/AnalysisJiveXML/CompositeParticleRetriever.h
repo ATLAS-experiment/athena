@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_COMPOSITEPARTICLERETRIEVER_H
 #define JIVEXML_COMPOSITEPARTICLERETRIEVER_H
 
 #include <string>
-#include <vector>
-#include <map>
+
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "JiveXML/DataType.h" //DataMap typedef
 
 class CompositeParticleContainer;
 

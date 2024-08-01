@@ -1,17 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/CompositeParticleRetriever.h"
 
 #include "CompositeParticleEvent/CompositeParticle.h"
 #include "CompositeParticleEvent/CompositeParticleContainer.h"
-
-// for associations:
-//#include "Particle/TrackParticleContainer.h"
-//#include "CaloEvent/CaloClusterContainer.h"
-
 #include "CLHEP/Units/SystemOfUnits.h"
+#include <cmath> //std::abs
 
 namespace JiveXML {
 
@@ -23,12 +19,9 @@ namespace JiveXML {
    **/
   CompositeParticleRetriever::CompositeParticleRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("CompositeParticle")
-  {
-
+    m_typeName("CompositeParticle"){
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
-
     declareProperty("StoreGateKey", m_sgKey = "AllObjects", 
         "Collection to be first in output, shown in Atlantis without switching");
   }
@@ -38,42 +31,36 @@ namespace JiveXML {
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   StatusCode CompositeParticleRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
-    
+    ATH_MSG_DEBUG("in retrieveAll()" );
     SG::ConstIterator<CompositeParticleContainer> iterator, end;
-    const CompositeParticleContainer* compPart;
-    
+    const CompositeParticleContainer* compPart{};
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")");
     StatusCode sc = evtStore()->retrieve(compPart, m_sgKey);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " ); 
     }else{
       DataMap data = getData(compPart);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey, &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
+	      ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") CompositeParticle retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKey << ") CompositeParticle retrieved" );
       }
     }
-
     //obtain all other collections from StoreGate
     if (( evtStore()->retrieve(iterator, end)).isFailure()){
-       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING)  << "Unable to retrieve iterator for Jet collection" << endmsg;
-//        return StatusCode::WARNING;
+       ATH_MSG_WARNING( "Unable to retrieve iterator for Jet collection" );
     }
-      
     for (; iterator!=end; ++iterator) {
-       if (iterator.key()!=m_sgKey) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-            DataMap data = getData(&(*iterator));
-            if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
-	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") CompositeParticle retrieved" << endmsg;
-            }
-	  }
+      if (iterator.key()!=m_sgKey) {
+        ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
+        DataMap data = getData(&(*iterator));
+        if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
+	        ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
+	      }else{
+	         ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") CompositeParticle retrieved");
+        }
+	    }
     }	  
     //All collections retrieved okay
     return StatusCode::SUCCESS;
@@ -85,35 +72,22 @@ namespace JiveXML {
    * Also association with clusters (ElementLink).
    */
   const DataMap CompositeParticleRetriever::getData(const CompositeParticleContainer* cpcont) {
-    
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "retrieve()" << endmsg;
-
+    ATH_MSG_DEBUG( "retrieve()");
     DataMap DataMap;
-
-    DataVect phi; phi.reserve(cpcont->size());
-    DataVect eta; eta.reserve(cpcont->size());
-    DataVect et; et.reserve(cpcont->size());
-    DataVect mass; mass.reserve(cpcont->size());
-    DataVect energy; energy.reserve(cpcont->size());
-    DataVect px; px.reserve(cpcont->size());
-    DataVect py; py.reserve(cpcont->size());
-    DataVect pz; pz.reserve(cpcont->size());
-    DataVect pdgId; pdgId.reserve(cpcont->size());
-    DataVect typeEV; typeEV.reserve(cpcont->size());
-    DataVect charge; charge.reserve(cpcont->size());
-    DataVect dataType; dataType.reserve(cpcont->size());
-    DataVect label; label.reserve(cpcont->size());
-
-    //planned, not working yet:
-//    DataVect childID; childID.reserve(cpcont->size());
-//    DataVect motherID; motherID.reserve(cpcont->size());
-
-    // for associations. Just placeholder here, for full implementation
-    // see MuonRetriever.
-//    DataVect clusterKeyVec; clusterKeyVec.reserve(cpcont->size());
-//    DataVect clusterIndexVec; clusterIndexVec.reserve(cpcont->size());
-//    DataVect clusterKeyVec; clusterKeyVec.reserve(cpcont->size());
-//    DataVect clusterIndexVec; clusterIndexVec.reserve(cpcont->size());
+    const auto nParticles = cpcont->size();
+    DataVect phi; phi.reserve(nParticles);
+    DataVect eta; eta.reserve(nParticles);
+    DataVect et; et.reserve(nParticles);
+    DataVect mass; mass.reserve(nParticles);
+    DataVect energy; energy.reserve(nParticles);
+    DataVect px; px.reserve(nParticles);
+    DataVect py; py.reserve(nParticles);
+    DataVect pz; pz.reserve(nParticles);
+    DataVect pdgId; pdgId.reserve(nParticles);
+    DataVect typeEV; typeEV.reserve(nParticles);
+    DataVect charge; charge.reserve(nParticles);
+    DataVect dataType; dataType.reserve(nParticles);
+    DataVect label; label.reserve(nParticles);
 
     CompositeParticleContainer::const_iterator compPartItr  = cpcont->begin();
     CompositeParticleContainer::const_iterator compPartItrE = cpcont->end();
@@ -121,59 +95,81 @@ namespace JiveXML {
     std::string typeLabel = "n_a"; // same as in TruthParticleRetriever
     int pdgId2 = 0;
     for (; compPartItr != compPartItrE; ++compPartItr) {
-      phi.push_back(DataType((*compPartItr)->phi()));
-      eta.push_back(DataType((*compPartItr)->eta()));
-      et.push_back(DataType((*compPartItr)->et()/CLHEP::GeV));
-      mass.push_back(DataType((*compPartItr)->m()/CLHEP::GeV));
-      energy.push_back( DataType((*compPartItr)->e()/CLHEP::GeV ) );
-      px.push_back( DataType((*compPartItr)->px()/CLHEP::GeV ) );
-      py.push_back( DataType((*compPartItr)->py()/CLHEP::GeV ) );
-      pz.push_back( DataType((*compPartItr)->pz()/CLHEP::GeV ) );
+      const auto & pCompPart = *compPartItr;
+      phi.emplace_back(pCompPart->phi());
+      eta.emplace_back(pCompPart->eta());
+      et.emplace_back(pCompPart->et()/CLHEP::GeV);
+      mass.emplace_back(pCompPart->m()/CLHEP::GeV);
+      energy.emplace_back( pCompPart->e()/CLHEP::GeV  );
+      px.emplace_back( pCompPart->px()/CLHEP::GeV  );
+      py.emplace_back( pCompPart->py()/CLHEP::GeV  );
+      pz.emplace_back( pCompPart->pz()/CLHEP::GeV  );
 
-      charge.push_back( DataType( (*compPartItr)->charge() ));
-      dataType.push_back( DataType( (*compPartItr)->dataType() ));
-      typeLabel = "n_a";
-      pdgId2 = (*compPartItr)->pdgId();
-      pdgId.push_back( DataType( pdgId2 ));
-      if( abs(pdgId2) == 11) typeLabel = "EV_Electron";
-      if( abs(pdgId2) == 12) typeLabel = "EV_NeutrinoElectron";
-      if( abs(pdgId2) == 13) typeLabel = "EV_Muon";
-      if( abs(pdgId2) == 14) typeLabel = "EV_NeutrinoMuon";
-      if( abs(pdgId2) == 15) typeLabel = "EV_Tau";
-      if( abs(pdgId2) == 16) typeLabel = "EV_NeutrinoTau";
-      if( abs(pdgId2) == 6) typeLabel = "EV_Top";  
-      if( abs(pdgId2) == 5) typeLabel = "EV_Bottom";
-      if( abs(pdgId2) == 22) typeLabel = "EV_Photon";
-      if( abs(pdgId2) == 23) typeLabel = "EV_Z0";
-      if( pdgId2 == 24) typeLabel = "EV_Wplus";
-      if( pdgId2 == -24) typeLabel = "EV_Wminus";
-      typeEV.push_back( DataType( typeLabel ));
-      label.push_back( DataType( "none" ) );
-
-//    childID.push_back( DataType( "none" ) ); // placeholders
-//    motherID.push_back( DataType( "none" ) );
+      charge.emplace_back(  pCompPart->charge() );
+      dataType.emplace_back(  pCompPart->dataType() );
+      pdgId2 = pCompPart->pdgId();
+      pdgId.emplace_back(pdgId2);
+      const auto absId = std::abs(pdgId2);
+      switch (absId){
+        case 11:
+          typeLabel = "EV_Electron";
+          break;
+        case 12:
+          typeLabel = "EV_NeutrinoElectron";
+          break;
+        case 13:
+          typeLabel = "EV_Muon";
+          break;
+        case 14:
+          typeLabel = "EV_NeutrinoMuon";
+          break;
+        case 15:
+          typeLabel = "EV_Tau";
+          break;
+        case 16:
+          typeLabel = "EV_NeutrinoTau";
+          break;
+        case  6:
+          typeLabel = "EV_Top";
+          break;
+        case 5:
+          typeLabel = "EV_Bottom";
+          break;
+        case 22:
+          typeLabel = "EV_Photon";
+          break;
+        case 23:
+          typeLabel = "EV_Z0";
+          break;
+        case 24:
+          typeLabel = ( pdgId2 == 24) ? "EV_Wplus":  "EV_Wminus";
+          break;
+        default:
+          typeLabel = "n_a";
+          break;
+      }
+      
+      typeEV.emplace_back(typeLabel);
+      label.emplace_back( "none" );
     }
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
-    DataMap["pdgId"] = pdgId;
-    DataMap["typeEV"] = typeEV;
-    DataMap["charge"] = charge;
-    DataMap["dataType"] = dataType;
-    DataMap["label"] = label;
-    
-//    DataMap["childID"] = childID;
-//    DataMap["motherID"] = motherID;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
+    DataMap["pdgId"] = std::move(pdgId);
+    DataMap["typeEV"] = std::move(typeEV);
+    DataMap["charge"] = std::move(charge);
+    DataMap["dataType"] = std::move(dataType);
+    DataMap["label"] = std::move(label);
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( " retrieved with " << nEntries << " entries");
+    
 
     //All collections retrieved okay
     return DataMap;
