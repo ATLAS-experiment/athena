@@ -194,7 +194,7 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
         acc = RoIPEBInfoWriterToolCfg(
             flags, name,
             # Add subdetectors within a ROI for PEB
-            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'],
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE', 'MDT', 'RPC', 'TGC', 'CSC', 'MM', 'STGC'],
             # DS HLT result
             ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
                                      DataScoutingInfo.getDataScoutingResultID(eventBuildType))],
