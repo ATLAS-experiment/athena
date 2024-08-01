@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_ALSPAMAT_H
@@ -70,8 +70,8 @@ class AlSpaMat : public AlSymMatBase {
     virtual  double determinant() override final;
 
     inline void elem(const indices&, long int&, long int&) const;
-    inline std::string pathBin() const;
-    inline std::string pathTxt() const;
+    inline const std::string& pathBin() const;
+    inline const std::string& pathTxt() const;
 
     virtual TMatrixDSparse* makeTMatrix() override final;
   protected:
@@ -105,11 +105,11 @@ inline long int AlSpaMat::nele() {
   return m_nele;
 }
 
-inline std::string AlSpaMat::pathBin() const {
+inline const std::string& AlSpaMat::pathBin() const {
   return m_pathbin;
 }
 
-inline std::string AlSpaMat::pathTxt() const {
+inline const std::string& AlSpaMat::pathTxt() const {
   return m_pathtxt;
 }
 
