@@ -323,8 +323,9 @@ def MUON5Cfg(flags):
     acc.merge(MUON5KernelCfg(flags, name="MUON5Kernel", StreamName = stream_name, TriggerListsHelper = MUON5TriggerListsHelper))
     
     #Adding Lepton Taggers
-    from LeptonTaggers.LeptonTaggersConfig import DecorateImprovedPromptLeptonAlgsCfg
+    from LeptonTaggers.LeptonTaggersConfig import DecorateImprovedPromptLeptonAlgsCfg, DecoratePLITAlgsCfg
     acc.merge(DecorateImprovedPromptLeptonAlgsCfg(flags))
+    acc.merge(DecoratePLITAlgsCfg(flags))
 
     # ============================
     # Define contents of the format
@@ -439,8 +440,9 @@ def MUON5Cfg(flags):
                                               "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                               "TauJets.jetLink",
                                            ]
-    from LeptonTaggers.LeptonTaggersConfig import GetExtraImprovedPromptVariablesForDxAOD
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraImprovedPromptVariablesForDxAOD, GetExtraPLITVariablesForDxAOD
     MUON5SlimmingHelper.ExtraVariables += GetExtraImprovedPromptVariablesForDxAOD()
+    MUON5SlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
     
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
     MUON5SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent

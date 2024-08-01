@@ -272,6 +272,51 @@ def getStringFloatVars(BDT_name, part_type=''):
     return float_vars
 
 
+def DecoratePLITCfg(
+    flags, Tagger_name="", lepton_name="",
+    **kwargs
+) -> ComponentAccumulator:
+    """
+    Configure the PLIT decorator.
+    """
+    lep_tag_log.info("calling DecoratePLITCfg with BDT_name="+Tagger_name+" lepton_name="+lepton_name)
+
+    acc = ComponentAccumulator()
+
+    #
+    # Prepare DecoratePromptLepton alg
+    #
+    kwargs.setdefault("LeptonContainerName", lepton_name)
+    kwargs.setdefault("TrackJetContainerKey", "AntiKtVR30Rmax4Rmin02PV0TrackJets")
+    kwargs.setdefault("TracksContainerKey", "InDetTrackParticles")
+    kwargs.setdefault("CaloClusterContainerKey", "egammaClusters")
+
+    kwargs.setdefault("ConfigFileVersion", '')
+    kwargs.setdefault("TaggerName", Tagger_name)
+
+    # path on calib area (found by path resolver
+    # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/IsolationSelection/
+    kwargs["ConfigPath"] = "dev/IsolationSelection/2024-05-24/PLIT/"
+    if lepton_name == 'Electrons':
+        kwargs["ConfigFileVersion"] = 'network_PLITel_barrel.onnx'                                       
+        kwargs["ConfigFileVersion_endcap"] = 'network_PLITel_endcap.onnx'                                       
+    elif lepton_name == 'Muons':
+        kwargs["ConfigFileVersion"] = 'network_PLITmu.onnx'                                       
+    else:
+        raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
+
+    alg = CompFactory.Prompt.DecoratePLIT(
+        f'{lepton_name}_decorate{Tagger_name}', **kwargs
+    )
+    acc.addEventAlgo(alg, primary=True)
+
+    lep_tag_log.info(
+        'Decorate%s - prepared %s algorithm for: %s',
+        Tagger_name, Tagger_name, lepton_name
+    )
+
+    return acc
+
 def DecoratePromptLeptonImprovedCfg(
     flags, BDT_name="", lepton_name="", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets",
     **kwargs
@@ -300,7 +345,6 @@ def DecoratePromptLeptonImprovedCfg(
     kwargs.setdefault("BDTName", BDT_name)
     kwargs.setdefault("InputVarDecoratePrefix", 'PromptLeptonImprovedInput_')
     kwargs.setdefault("PrintTime", False)
-    kwargs.setdefault("OutputLevel", 10)
 
     #
     # Read configuration from AFS for this initial merge request, will switch to cvmfs with second request
@@ -386,6 +430,30 @@ def DecorateImprovedPromptLeptonAlgsCfg(
             lepton_name="Muons", track_jet_name="AntiKtVR30Rmax4Rmin02PV0TrackJets"
         ))
 
+    return acc
+
+def DecoratePLITAlgsCfg(
+    ConfigFlags, name="DecoratePLITAlgsCfg",
+    lepton_type="", **kwargs
+) -> ComponentAccumulator:
+    """
+    CA to decorate with PLIT input algorithms
+    """
+    valid_lepton_types = ["", "Electrons", "Muons"]
+    if lepton_type not in valid_lepton_types:
+        lep_tag_log.error("Requested lepton type: %s", lepton_type)
+        lep_tag_log.error("Allowed lepton types: %s", valid_lepton_types)
+        raise ValueError('DecoratePLITAlgsCfg - '
+                         + f'unknown lepton type: "{lepton_type}"')
+
+    acc = ComponentAccumulator()
+
+    if lepton_type in ["", "Electrons"]:
+        acc.merge(DecoratePLITCfg(ConfigFlags, Tagger_name="PLIT", lepton_name="Electrons"))
+      
+    if lepton_type in ["", "Muons"]:
+        acc.merge(DecoratePLITCfg(ConfigFlags, Tagger_name="PLIT", lepton_name="Muons"))
+  
     return acc
 
 #------------------------------------------------------------------------------
@@ -479,6 +547,22 @@ def GetExtraImprovedPromptVariablesForDxAOD(name='', onlyBDT=False):
         prompt_mu_vars += "PromptLeptonImprovedVeto.PromptLeptonImprovedInput_ptvarcone30_TightTTVA_pt500rel.PromptLeptonImprovedInput_CaloClusterERel.PromptLeptonImprovedInput_CandVertex_normDistToPriVtxLongitudinalBest"
 
         prompt_lep_vars += ["Muons." + prompt_vars + prompt_mu_vars]
+
+    return prompt_lep_vars
+
+#------------------------------------------------------------------------------
+def GetExtraPLITVariablesForDxAOD(name=''):
+
+    prompt_lep_vars = []
+
+    #
+    # Decorate lepton with the score outputs
+    #
+    if name == "" or name == "Electrons":
+        prompt_lep_vars += ["Electrons.PLIT_PLITel_pelxpromp", "Electrons.PLIT_PLITel_pnpxall"]
+
+    if name == "" or name == "Muons":
+        prompt_lep_vars += ["Muons.PLIT_TPLTmu_pmuxpromp", "Muons.PLIT_TPLTmu_pnpxall"]
 
     return prompt_lep_vars
 
