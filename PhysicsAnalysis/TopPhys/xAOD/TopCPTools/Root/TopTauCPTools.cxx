@@ -218,9 +218,6 @@ namespace top {
 
         top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSF()),
                     "Failed to set UseTauSubstructure for " + tauEffCorrName);
-
-        top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
-                   "Failed to set isAFII for " + tauEffCorrName);
       }
 
       top::check(asg::setProperty(tauEffCorrTool, "JetIDLevel", tauJetIDWP),
@@ -302,9 +299,6 @@ namespace top {
 
         top::check(asg::setProperty(tauEffCorrTool, "UseTauSubstructure", m_config->tauSubstructureSFLoose()),
                    "Failed to set UseTauSubstructure for " + tauEffCorrNameLoose);
-
-        top::check(asg::setProperty(tauEffCorrTool, "isAFII", m_config->isAFII()),
-                "Failed to set isAFII for " + tauEffCorrNameLoose);
       }
 
       top::check(asg::setProperty(tauEffCorrTool, "JetIDLevel", tauJetIDWPLoose),
@@ -330,8 +324,6 @@ namespace top {
       m_tauSmearingTool = asg::ToolStore::get<ITauSmearTool>(tauSmearName);
     } else {
       std::unique_ptr<TauSmearTool> tauSmearingTool = std::make_unique<TauSmearTool>(tauSmearName);
-      top::check(asg::setProperty(tauSmearingTool, "isAFII", m_config->isAFII()),
-                 "Failed to set TauSmearingTools isAFII property");
       top::check(tauSmearingTool->initialize(), "Failed to initialize");
       m_tauSmearingTool = tauSmearingTool.release();
     }
