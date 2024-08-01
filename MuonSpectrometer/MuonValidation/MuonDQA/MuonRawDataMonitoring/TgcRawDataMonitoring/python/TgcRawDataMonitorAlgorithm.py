@@ -1190,6 +1190,34 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                                         title='InnerCoin_'+htype+'1D_'+Det+'_Eta_Bc'+Bunch+goodBcid+';RoI Eta;Efficiency',
                                                         path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5)
 
+    ### Another signal timing scan for NSW ###
+    for bcmask in ['1','2','3','4','5','6','7']:
+        bcmaskmean = ''
+        if bcmask == '1': bcmaskmean = 'NextOnly'
+        elif bcmask == '2': bcmaskmean = 'CurrOnly'
+        elif bcmask == '3': bcmaskmean = 'CurrAndNextOnly'
+        elif bcmask == '4': bcmaskmean = 'PrevOnly'
+        elif bcmask == '5': bcmaskmean = 'PrevAndNextOnly'
+        elif bcmask == '6': bcmaskmean = 'PrevAndCurrOnly'
+        elif bcmask == '7': bcmaskmean = 'PrevAndCurrAndNext'
+        myGroupCoin.defineHistogram('coin_inner_tgc_Nsw_bcmask'+bcmask+',coin_inner_tgc_eta,coin_inner_tgc_phi;InnerCoin_Eff2D_Nsw_EtaVsPhi_'+bcmaskmean,
+                                    title='InnerCoin_Eff2D_Nsw_EtaVsPhi_'+bcmaskmean+';RoI Eta;RoI Phi',
+                                    path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5,ybins=48,ymin=-math.pi,ymax=math.pi)
+        myGroupCoin.defineHistogram('coin_inner_tgc_Nsw_bcmask'+bcmask+',coin_inner_tgc_eta;InnerCoin_Eff1D_Nsw_Eta_'+bcmaskmean,
+                                    title='InnerCoin_Eff1D_Nsw_Eta_'+bcmaskmean+';RoI Eta;Efficiency',
+                                    path=coinPath,type='TEfficiency',xbins=100,xmin=-2.5,xmax=2.5)
+        for Region in ['Endcap','Forward']:
+            nrois = 64 if Region == 'Forward' else 148
+            nsectors = 24 if Region == 'Forward' else 48
+            rmask_endfwd = 'coin_inner_tgc_forward' if Region == 'Forward' else 'coin_inner_tgc_endcap'
+            rmask_coverage = 'coin_inner_tgc_forward' if Region == 'Forward' else 'coin_inner_tgc_etafrom1p3_endcap'
+            myGroupCoin.defineHistogram('coin_inner_tgc_Nsw_bcmask'+bcmask+',coin_inner_tgc_sector;InnerCoin_Eff1D_Nsw_'+Region+'_Sector_'+bcmaskmean,
+                                        title='InnerCoin_Eff1D_Nsw_'+Region+'_Sector_'+bcmaskmean+';SL Trigger Sector +1  (>0 for A, <0 for C);Efficiency',
+                                        path=coinPath,type='TEfficiency',cutmask=rmask_coverage,xbins=nsectors*2+1,xmin=-1*nsectors-0.5,xmax=nsectors+0.5)
+            myGroupCoin.defineHistogram('coin_inner_tgc_Nsw_bcmask'+bcmask+',coin_inner_tgc_roi,coin_inner_tgc_sector;InnerCoin_Eff2D_Nsw_'+Region+'_SectorVsRoI_'+bcmaskmean,
+                                        title='InnerCoin_Eff2D_Nsw_'+Region+'_SectorVsRoI_'+bcmaskmean+';RoI;SL Trigger Sector +1  (>0 for A, <0 for C)',
+                                        path=coinPath,type='TEfficiency',cutmask=rmask_endfwd,ybins=nsectors*2+1,ymin=-1*nsectors-0.5,ymax=nsectors+0.5,xbins=nrois,xmin=-0.5,xmax=nrois-0.5)
+
     #Tile inner coincidence
     myGroupCoin.defineHistogram('coin_inner_tile2_slSector,coin_inner_tile2_tmdbDecisions;InnerCoin_Evt2D_Tile_SectorVsTmdbDecisions',
                                 title='InnerCoin_Evt2D_Tile_SectorVsTmdbDecisions;SL Trigger Sector +1  (>0 for A, <0 for C);TMDB Module Decisions',
@@ -1423,6 +1451,7 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.isMC = True
+    flags.Concurrency.NumThreads = 6
 
     import glob
     import sys
@@ -1436,7 +1465,7 @@ if __name__=='__main__':
         flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
     if not flags.Input.isMC:
-        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-02"
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2024-03"
 
     flags.lock()
     flags.dump()
