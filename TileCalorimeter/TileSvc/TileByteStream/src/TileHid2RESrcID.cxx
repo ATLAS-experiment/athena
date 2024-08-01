@@ -42,7 +42,7 @@ void TileHid2RESrcID::setTileHWID(const TileHWID* tileHWID, uint32_t runnum)
 
 void TileHid2RESrcID::initialize(const std::vector<std::vector<uint32_t> > & allmap)
 {
-  for (auto v : allmap) {
+  for (const std::vector<uint32_t>& v : allmap) {
     if (v.size()>0) {
       int id = v[0];
       if (v.size()>1) {
