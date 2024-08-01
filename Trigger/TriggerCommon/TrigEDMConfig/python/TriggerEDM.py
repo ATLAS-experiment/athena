@@ -157,6 +157,17 @@ def getTriggerEDMList(flags, key, runVersion=-1):
 
     elif runVersion >= 3:
         RawEDMList = getRawTriggerEDMList(flags, 3)
+
+        # Run 4 will eventually use only its own distinct EDM, but for now we will append the Run 4 specific items to the Run 3 list.
+        if runVersion >= 4:
+            # Replace if existing
+            for i in range(len(RawEDMList)-1, -1, -1): # Back iterate by index, we might be removing as we go
+                for r4item in TriggerHLTListRun4:
+                    if RawEDMList[i][0] == r4item[0]:
+                        del RawEDMList[i]
+                        break
+            RawEDMList.extend(TriggerHLTListRun4)
+
         if key not in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD         
             log.warning('Output format: %s is not in list of allowed formats, please check!', key)
             return _getRun3TrigObjList(key, [RawEDMList])
