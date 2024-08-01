@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -9,9 +9,6 @@
 #include <atomic>
 #include <iostream>
 #include "gpu_helpers.h"
-
-#include "tbb/concurrent_queue.h"
-#include "tbb/concurrent_vector.h"
 
 int GPUHelpers::getNumberOfGPUs() {
   pid_t childpid;
