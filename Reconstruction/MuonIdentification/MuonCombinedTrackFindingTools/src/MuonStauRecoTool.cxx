@@ -1339,8 +1339,8 @@ namespace MuonCombined {
         // lambda to handle calibration and selection of clusters
         auto handleCluster = [intersection, this](const Muon::MuonCluster& prd,
                                                   std::vector<std::shared_ptr<const Muon::MuonClusterOnTrack>>& clusters) {
-            std::unique_ptr<const Muon::MuonClusterOnTrack> cluster{m_muonPRDSelectionTool->calibrateAndSelect(intersection, prd)};
-            if (cluster) clusters.push_back(std::move(cluster));
+            const Muon::MuonClusterOnTrack* cluster = m_muonPRDSelectionTool->calibrateAndSelect(intersection, prd);
+            if (cluster) clusters.push_back(std::shared_ptr<const Muon::MuonClusterOnTrack>(cluster));
         };
 
         // loop over maxima and associate phi hits with the extrapolation, should optimize this but calculating the residual with the phi
@@ -1356,8 +1356,7 @@ namespace MuonCombined {
                     Identifier id = hit->tgc->phiCluster.front()->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
                     for (const Muon::MuonCluster* prd : hit->tgc->phiCluster) handleCluster(*prd, phiClusterOnTracks);
-                } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || 
-                                         hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
+                } else if (hit->prd && !(hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData))) {
                     const Identifier id = hit->prd->identify();
                     if (m_idHelperSvc->layerIndex(id) != intersection.layerSurface.layerIndex) continue;
                     handleCluster(static_cast<const Muon::MuonCluster&>(*hit->prd), phiClusterOnTracks);
@@ -1370,23 +1369,20 @@ namespace MuonCombined {
                                                 << " angle " << theta);
 
         // loop over maxima and associate them to the extrapolation
-        for (const auto& mit : maxVec) {
-            const MuonHough::MuonLayerHough::Maximum& maximum = *mit;
-            if (std::find_if(maximum.hits.begin(),maximum.hits.end(),
-                             [](const std::shared_ptr<MuonHough::Hit>& hit){
-                                return hit->prd && (hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || 
-                                                    hit->prd->type(Trk::PrepRawDataType::MMPrepData));
-                            }) != maximum.hits.end()) continue;
+        Muon::MuonLayerHoughTool::MaximumVec::const_iterator mit = maxVec.begin();
+        Muon::MuonLayerHoughTool::MaximumVec::const_iterator mit_end = maxVec.end();
+        for (; mit != mit_end; ++mit) {
+            const MuonHough::MuonLayerHough::Maximum& maximum = **mit;
+            if (std::find_if(maximum.hits.begin(),maximum.hits.end(),[](const std::shared_ptr<MuonHough::Hit>& hit){
+                return hit->prd && (hit->prd->type(Trk::PrepRawDataType::sTgcPrepData) || hit->prd->type(Trk::PrepRawDataType::MMPrepData));
+            }) != maximum.hits.end()) continue;
             float residual = maximum.pos - x;
             float residualTheta = maximum.theta - theta;
             float refPos = (maximum.hough != nullptr) ? maximum.hough->m_descriptor.referencePosition : 0;
             float maxwidth = (maximum.binposmax - maximum.binposmin);
-            
-            if (maximum.hough){
-                maxwidth *= maximum.hough->m_binsize;
-            }
-            const float pullUncert = std::sqrt(errx * errx + maxwidth * maxwidth / 12.);  
-            float pull = residual / (pullUncert > std::numeric_limits<float>::epsilon() ? pullUncert : 1.) ;
+            if (maximum.hough) maxwidth *= maximum.hough->m_binsize;
+
+            float pull = residual / std::sqrt(errx * errx + maxwidth * maxwidth / 12.);
 
             ATH_MSG_DEBUG("   Hough maximum " << maximum.max << " position (" << refPos << "," << maximum.pos << ") residual " << residual
                                               << " pull " << pull << " angle " << maximum.theta << " residual " << residualTheta);
