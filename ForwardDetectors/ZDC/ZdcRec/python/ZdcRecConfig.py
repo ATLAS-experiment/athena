@@ -134,7 +134,9 @@ def ZdcRecRun3Cfg(flags):
     doTimeCalib = False
     doTrigEff = False
     
-    if flags.Input.ProjectName == "data22_13p6TeV":
+    if flags.Input.isMC:
+        config = "MonteCarloPbPb2023"
+    elif flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
     elif flags.Input.ProjectName == "data23_900GeV":
         config = "pp2023"
@@ -171,6 +173,7 @@ def ZdcRecRun3Cfg(flags):
     if flags.Input.isMC:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc.merge(PoolReadCfg(flags))
+        acc.addEventAlgo(CompFactory.ZdcMCTruthAlg())
 
     zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
     acc.addEventAlgo(zdcAlg, primary=True)
@@ -219,6 +222,7 @@ def ZdcNtupleRun3Cfg(flags):
     zdcNtuple.lhcf2022zdc = False
     zdcNtuple.lhcf2022afp = False
     zdcNtuple.enableTrigger = False if flags.Input.isMC else True
+    zdcNtuple.isMC = True if flags.Input.isMC else False
     zdcNtuple.enableOutputSamples = True
     zdcNtuple.enableOutputTree = True
     zdcNtuple.writeOnlyTriggers = False
@@ -352,6 +356,9 @@ if __name__ == '__main__':
        print('ZdcRecConfig: Running LED data!')
     if (isCalib):
        print('ZdcRecConfig: Running ZDC calibration data!')
+    if (flags.Input.isMC):
+       print('ZdcRecConfig: Running over MC Samples')
+       flags.Input.ProjectName = "data23_hi"
  
     # supply missing metadata based on project name
     pn = flags.Input.ProjectName
@@ -404,6 +411,8 @@ if __name__ == '__main__':
             acc.merge(ZdcMonitoringConfig(flags,'PbPb2023'))
         if (isCalib): # don't configure ntuple for typical reco jobs
             acc.merge(ZdcNtupleCfg(flags))
+    else:
+        acc.merge(ZdcNtupleCfg(flags))
 
     acc.printConfig(withDetails=True)
 

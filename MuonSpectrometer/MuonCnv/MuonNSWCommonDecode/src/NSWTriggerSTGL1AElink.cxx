@@ -23,6 +23,7 @@ Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink(const uint32_t* bs, cons
   // 2 felix header 32b words already decoded;
   constexpr static auto START_DATA = std::size_t{2 * 32};
   auto readPointer = std::size_t{START_DATA};
+
   m_packet_version = parse_version_workaround(readPointer);
   decode_header(readPointer, m_packet_version);
   decode_data(readPointer, m_packet_version);
@@ -74,9 +75,15 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_header(std::size_t& readPointer, i
       {
           version  = 2;
       }
-      else
+      else if (m_l1a_versionID == 3)
       {
           version = m_l1a_versionID;
+      }
+      else
+      {
+           Muon::nsw::NSWTriggerException e ( Muon::nsw::format( "Stgc packet version not existent (corrupted message) expected 3, got ({})", m_l1a_versionID));
+          throw e;
+
       }
       m_l1a_local_req_BCID =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_local_req_BCID);
       m_l1a_local_rel_BCID =    Muon::nsw::decode_and_advance<uint64_t>(m_data, readPointer, Muon::nsw::STGTPL1A::size_l1a_local_rel_BCID);
@@ -140,8 +147,10 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_data_v3(std::size_t& readPointer, 
 }
 
 void Muon::nsw::NSWTriggerSTGL1AElink::decode_data(std::size_t& readPointer, int version) {
-  if (version >= 3)
+  if (version == 3)
+  {
      return decode_data_v3(readPointer, version);
+  }
   auto PADDING_BITS_END = std::size_t{16};
 
   const auto endOfData = m_wordCountFlx * WORD_SIZE - Muon::nsw::STGTPL1A::size_trailer_CRC - PADDING_BITS_END;
@@ -174,8 +183,8 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
     std::size_t& readPointer, int version) {
   
 
-  if (version < 3){
-  	throw std::invalid_argument("decode_data_header_v3 version should be at least 3"); 
+  if (version != 3){
+  	throw std::invalid_argument("decode_data_header_v3 version should be exactly 3"); 
   }
 
   size_t felix_word_size =  WORD_SIZE_DOUBLE;

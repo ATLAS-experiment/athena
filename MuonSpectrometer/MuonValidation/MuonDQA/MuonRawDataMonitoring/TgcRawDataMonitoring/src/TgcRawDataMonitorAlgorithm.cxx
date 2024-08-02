@@ -1399,6 +1399,7 @@ return (m.muon->charge()>0);
       std::vector< TgcTrigNsw > tgcTrigNswMap;
       std::vector< TgcTrigRpc > tgcTrigRpcMap;
       std::vector< TgcTrigEifi > tgcTrigEifiMap;
+      std::map<TString, TgcTrigNsw > tgcTrigNswMapUnique;
       int n_TgcCoin_detElementIsNull = 0;
       int n_TgcCoin_postOutPtrIsNull = 0;
       for (auto thisCoin : tgcCoin) {
@@ -1437,8 +1438,16 @@ return (m.muon->charge()>0);
 		nswCoin.R = (data->inner() >> Muon::TgcCoinData::INNER_NSW_R_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_R_BIT;
 		nswCoin.Phi = (data->inner() >> Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_PHI_BIT;
 		nswCoin.deltaTheta = (data->inner() >> Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT) & Muon::TgcCoinData::INNER_NSW_DTHETA_BIT;
-		if(nswCoin.R!=0 && nswCoin.Phi!=0)
+		if(nswCoin.R!=0 && nswCoin.Phi!=0){
 		  tgcTrigNswMap.push_back(nswCoin);
+		  TString uniqueinfo = Form("%d:%d:%d:%d:%d:%d:%d:%d",nswCoin.slSector,nswCoin.slInput,nswCoin.slInputIndex,nswCoin.isAside,nswCoin.isForward,nswCoin.R,nswCoin.Phi,nswCoin.deltaTheta);
+		  if(tgcTrigNswMapUnique.find(uniqueinfo)==tgcTrigNswMapUnique.end()){
+		    nswCoin.bcmask = 0x1 << (1-bunch);
+		    tgcTrigNswMapUnique[uniqueinfo] = nswCoin;
+		  }else{
+		    tgcTrigNswMapUnique[uniqueinfo].bcmask |= 0x1 << (1-bunch);
+		  }
+		}
 	      } else if (!data->isInner() && data->isStrip()) {  // TMDB
 		TgcTrigTile tileCoin;
 		tileCoin.slSector = slsector;
@@ -1638,6 +1647,23 @@ return (m.muon->charge()>0);
 	    inner.goodBcid2 = (std::abs(inner.deltaBcid)<=2 || (16-std::abs(inner.deltaBcid))<=2);
 	    inner.goodTiming = (inner.bunch==sl.bunch && sl.bunch==0 && sl.muonMatched==1 && sl.isBiased==0);
 	    sl.nsw.push_back(&inner);
+	  }
+	}
+	for(auto& inner : tgcTrigNswMapUnique){
+	  if( sl.sector != inner.second.slSector )continue;
+	  if( sl.isForward != inner.second.isForward )continue;
+	  inner.second.deltaR = inner.second.R - std::abs(getNswRindexFromEta(sl.eta));
+	  inner.second.roiEta = sl.eta;
+	  inner.second.roiPhi = sl.phi;
+	  inner.second.roiNum = sl.roi;
+	  if( std::abs(inner.second.deltaR) < m_NswDeltaRCut ){
+	    inner.second.deltaBcid = (sl.bunch==0 && sl.muonMatched==1 && sl.isBiased==0) ? (inner.second.bcid - sl.bcid) : -999;
+	    inner.second.deltaTiming = (sl.bunch==0 && sl.muonMatched==1 && sl.isBiased==0) ? (inner.second.bunch - sl.bunch) : -999;
+	    inner.second.goodBcid0  = inner.second.deltaBcid==0;
+	    inner.second.goodBcid1 = (std::abs(inner.second.deltaBcid)<=1 || (16-std::abs(inner.second.deltaBcid))<=1);
+	    inner.second.goodBcid2 = (std::abs(inner.second.deltaBcid)<=2 || (16-std::abs(inner.second.deltaBcid))<=2);
+	    inner.second.goodTiming = (inner.second.bunch==sl.bunch && sl.bunch==0 && sl.muonMatched==1 && sl.isBiased==0);
+	    sl.nsw_unique.push_back(&inner.second);
 	  }
 	}
 	for(auto& inner : tgcTrigTileMap){
@@ -1951,6 +1977,55 @@ return (m.muon->charge()>0);
 	  return 0.;
 	});
       tgcCoin_variables.push_back(coin_inner_tgc_nextnextBcNsw_goodBcid0);
+      auto coin_inner_tgc_Nsw_bcmask1=Monitored::Collection("coin_inner_tgc_Nsw_bcmask1",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==1) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask1);
+      auto coin_inner_tgc_Nsw_bcmask2=Monitored::Collection("coin_inner_tgc_Nsw_bcmask2",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==2) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask2);
+      auto coin_inner_tgc_Nsw_bcmask3=Monitored::Collection("coin_inner_tgc_Nsw_bcmask3",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==3) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask3);
+      auto coin_inner_tgc_Nsw_bcmask4=Monitored::Collection("coin_inner_tgc_Nsw_bcmask4",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==4) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask4);
+      auto coin_inner_tgc_Nsw_bcmask5=Monitored::Collection("coin_inner_tgc_Nsw_bcmask5",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==5) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask5);
+      auto coin_inner_tgc_Nsw_bcmask6=Monitored::Collection("coin_inner_tgc_Nsw_bcmask6",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==6) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask6);
+      auto coin_inner_tgc_Nsw_bcmask7=Monitored::Collection("coin_inner_tgc_Nsw_bcmask7",tgcTrigMap_SL,[](const TgcTrig&m){
+	  for(const auto& inner : m.nsw_unique){
+	    if(inner->bcmask==7) return 1.;
+	  }
+	  return 0.;
+	});
+      tgcCoin_variables.push_back(coin_inner_tgc_Nsw_bcmask7);
 
       // Tile
       auto coin_inner_tgc_anyBcTile=Monitored::Collection("coin_inner_tgc_anyBcTile",tgcTrigMap_SL,[](const TgcTrig&m) -> double{

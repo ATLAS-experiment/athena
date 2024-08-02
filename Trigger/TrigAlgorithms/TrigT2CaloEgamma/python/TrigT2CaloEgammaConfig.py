@@ -140,10 +140,11 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
     monTool.defineHistogram('TrigEMCluster_rEta', path='EXPERT', type='TH1F', title="T2Calo Egamma rEta; rEta (e237/e277) ; Nclusters", xbins=140, xmin=-0.2, xmax=1.2)
     monTool.defineHistogram('TIME_exec', path='EXPERT', type='TH1F', title="T2Calo Egamma time; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
     monTool.defineHistogram('TrigEMCluster_eta,TIME_exec', path='EXPERT', type='TH2F', title="T2Calo Egamma time vs #eta ; #eta ; time [ us ]", xbins=100, xmin=-2.5, xmax=2.5, ybins=80, ymin=0.0, ymax=8000.0)
-    monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_eT', path='EXPERT', type='TH2F', title="Egamma E_T vs #eta ; #eta; E_T", xbins=100, xmin=-2.5, xmax=2.5)
-    monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_et_rings', path='EXPERT', type='TH2F', title="Egamma E_T[calib] vs #eta ; #eta; E_T", xbins=100, xmin=-2.5, xmax=2.5)
-    monTool.defineHistogram('Resolution_et', path='EXPERT', type='TH1F', title="Egamma Resolution E_T; (E_T[calib] - E_T)/ E_T ; Nclusters", xbins=80, xmin=-10.0, xmax=10.0)
-    monTool.defineHistogram('TrigEMCluster_et_rings', path='EXPERT', type='TH1F', title="Egamma E_T [calib]; E_T [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=140.0)
+    if flags.Trigger.doValidationMonitoring:
+        monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_eT', path='EXPERT', type='TH2F', title="Egamma E_T vs #eta ; #eta; E_T", xbins=100, xmin=-2.5, xmax=2.5)
+        monTool.defineHistogram('TrigEMCluster_eta,TrigEMCluster_et_rings', path='EXPERT', type='TH2F', title="Egamma E_T[calib] vs #eta ; #eta; E_T", xbins=100, xmin=-2.5, xmax=2.5)
+        monTool.defineHistogram('Resolution_et', path='EXPERT', type='TH1F', title="Egamma Resolution E_T; (E_T[calib] - E_T)/ E_T ; Nclusters", xbins=80, xmin=-10.0, xmax=10.0)
+        monTool.defineHistogram('TrigEMCluster_et_rings', path='EXPERT', type='TH1F', title="Egamma E_T [calib]; E_T [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=140.0)
 
     alg = CompFactory.T2CaloEgammaReFastAlgo(
         name,
