@@ -68,7 +68,6 @@ private:
   std::string m_sRecommendationTag;
   std::string m_sGenerator;
   std::string m_sCampaign;
-  bool m_sAFII;
   bool m_useFastSim;
   bool m_bSkipTruthMatchCheck;
   bool m_bApplyFading;

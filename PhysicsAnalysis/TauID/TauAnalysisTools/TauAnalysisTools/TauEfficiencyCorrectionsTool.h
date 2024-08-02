@@ -118,7 +118,6 @@ private:
   int m_iJetIDLevel;
   int m_iEleIDLevel;
   std::string m_sMCCampaign;
-  bool m_sAFII;
   bool m_useFastSim;
   bool m_firstEvent = false;
   unsigned int m_iRunNumber;
