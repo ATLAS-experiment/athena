@@ -75,6 +75,7 @@ BOOST_AUTO_TEST_CASE(DefaultRangeFieldProperties){
   BOOST_TEST(f1.match_any());
   Range::field f2;//default constructed...
   BOOST_TEST(f1.overlaps_with(f2));
+  BOOST_TEST(f1.match(3));
 }
 
 BOOST_AUTO_TEST_CASE(UniqueRangeFieldProperties){

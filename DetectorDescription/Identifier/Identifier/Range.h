@@ -61,15 +61,8 @@ public:
  
     typedef std::vector <element_type> element_vector; 
     typedef std::vector <size_type>    index_vector; 
- 
-    /// Create a wild-card value. 
-    field (); 
- 
-    /// Create a field copy 
-    field (const field& other); 
-
-    /// Move constructor.
-    field (field&& other);
+    
+    field() = default;
  
     /// Create a unique value (understood as : low bound = high bound = value) 
     field (element_type value); 
@@ -116,7 +109,6 @@ public:
     void set (bool wraparound); 
     void set_next (int next);
     void set_previous (int previous);
-    field& operator = (const field& other); 
     void operator |= (const field& other); 
  
     operator std::string () const; 
@@ -145,15 +137,15 @@ public:
     /// Set m_indices
     void set_indices();
 
-    element_type m_minimum; 
-    element_type m_maximum; 
-    element_vector m_values; 
-    index_vector m_indexes; 
-    size_type    m_indices;
-    element_type m_previous; 
-    element_type m_next; 
-    mode m_mode; 
-    continuation_mode m_continuation_mode; 
+    element_type m_minimum{}; 
+    element_type m_maximum{}; 
+    element_vector m_values{}; 
+    index_vector m_indexes{}; 
+    size_type    m_indices{};
+    element_type m_previous{}; 
+    element_type m_next{}; 
+    mode m_mode{unbounded}; 
+    continuation_mode m_continuation_mode{none}; 
   }; 
  
   typedef std::vector<field> field_vector; 
