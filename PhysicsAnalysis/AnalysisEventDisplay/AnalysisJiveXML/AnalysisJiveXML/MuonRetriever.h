@@ -1,19 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_MUONRETRIEVER_H
 #define JIVEXML_MUONRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <map>
+
+#include "JiveXML/DataType.h" //DataMap typedef
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "muonEvent/MuonContainer.h"
-
+#include <string>
 namespace JiveXML{
   
   /**

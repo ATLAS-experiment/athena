@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/BJetRetriever.h"
@@ -139,7 +139,7 @@ namespace JiveXML {
     std::string myLabel ="none";
 
     if ( jets->size() == 0 ){
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "JetCollection for BJets is empty" << endmsg;
+      ATH_MSG_DEBUG( "JetCollection for BJets is empty" );
     }else{
       JetCollection::const_iterator itr = jets->begin();
       for (; itr != jets->end(); ++itr) {
@@ -166,43 +166,41 @@ namespace JiveXML {
 	 + "WeightSV1=" + DataType( (*itr)->getFlavourTagWeight("SV1") ).toString() + "_" 
 	 + "WeightSV2=" + DataType( (*itr)->getFlavourTagWeight("SV2") ).toString() + "_";
 
-        phi.push_back(DataType((*itr)->phi()));
-        eta.push_back(DataType((*itr)->eta()));
-        pt.push_back(DataType((*itr)->pt()/CLHEP::GeV));
-        energy.push_back( DataType((*itr)->e()/CLHEP::GeV ) );
-        mass.push_back(DataType((*itr)->m()/CLHEP::GeV));
-        px.push_back( DataType((*itr)->px()/CLHEP::GeV ) );
-        py.push_back( DataType((*itr)->py()/CLHEP::GeV ) );
-        pz.push_back( DataType((*itr)->pz()/CLHEP::GeV ) );
-        weight.push_back( DataType((*itr)->getFlavourTagWeight("JetFitterCOMBNN"))); // recommended choice 30Nov11
-        lhSig.push_back( DataType( dummyLhSig )); // dummy only ! See above.
-        charge.push_back( DataType((*itr)->charge()));
-        label.push_back( DataType( myLabel ));
+        phi.emplace_back((*itr)->phi());
+        eta.emplace_back((*itr)->eta());
+        pt.emplace_back((*itr)->pt()/CLHEP::GeV);
+        energy.emplace_back( (*itr)->e()/CLHEP::GeV  );
+        mass.emplace_back((*itr)->m()/CLHEP::GeV);
+        px.emplace_back( (*itr)->px()/CLHEP::GeV  );
+        py.emplace_back( (*itr)->py()/CLHEP::GeV  );
+        pz.emplace_back( (*itr)->pz()/CLHEP::GeV  );
+        weight.emplace_back( (*itr)->getFlavourTagWeight("JetFitterCOMBNN")); // recommended choice 30Nov11
+        lhSig.emplace_back( dummyLhSig ); // dummy only ! See above.
+        charge.emplace_back( (*itr)->charge());
+        label.emplace_back(  myLabel );
       }
     }
     // Start with mandatory entries
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
     // four-vectors
-    DataMap["mass"] = mass;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
+    DataMap["mass"] = std::move(mass);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
 
     // further details
-    DataMap["weight"] = weight;
-    DataMap["lhSig"] = lhSig;
-    DataMap["charge"] = charge;
-    DataMap["label"] = label;
+    DataMap["weight"] = std::move(weight);
+    DataMap["lhSig"] = std::move(lhSig);
+    DataMap["charge"] = std::move(charge);
+    DataMap["label"] = std::move(label);
 
-    //Be verbose
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " BJets (AOD, no cells), collection: " << dataTypeName();
-      msg(MSG::DEBUG) << " retrieved with " << phi.size() << " entries, weight cut set to: "
-        << m_weightCut << endmsg;
-    }
+   ATH_MSG_DEBUG( dataTypeName() << " BJets (AOD, no cells), collection: " << dataTypeName()
+      << " retrieved with " << nEntries << " entries, weight cut set to: "
+      << m_weightCut);
 
     //All collections retrieved okay
     return DataMap;

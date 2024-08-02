@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/AODCaloClusterRetriever.h"
@@ -40,46 +40,44 @@ namespace JiveXML {
    */
   StatusCode AODCaloClusterRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
+    ATH_MSG_DEBUG( "in retrieveAll()" );
     
     SG::ConstIterator<CaloClusterContainer> iterator, end;
     const CaloClusterContainer* ccc;
 
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" );
     StatusCode sc = evtStore()->retrieve(ccc, m_sgKeyFavourite);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " ); 
     }else{
       DataMap data = getData(ccc, false);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite, &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg;
+	ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKeyFavourite << ") AODCaloCluster retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKeyFavourite << ") AODCaloCluster retrieved" );
       }
     }
 
     // uncalibrated topo clusters: calibFlag=true
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve CaloCalTopoCluster (for non-calib)" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve CaloCalTopoCluster (for non-calib)" );
     StatusCode sc3 = evtStore()->retrieve(ccc, "CaloCalTopoCluster");
     if (sc3.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection CaloCalTopoCluster (for non-calib) not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection CaloCalTopoCluster (for non-calib) not found in SG " ); 
     }else{
       DataMap data = getData(ccc, true); // calibFlag: If true, use getBasicEnergy() instead of et()
       if ( FormatTool->AddToEvent(dataTypeName(), "BasicEnergyCaloCalTopoCluster", &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection CaloCalTopoCluster (for non-calib) not found in SG " << endmsg;
+	ATH_MSG_WARNING( "Collection CaloCalTopoCluster (for non-calib) not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " CaloCalTopoCluster (for non-calib) AODCaloCluster retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " CaloCalTopoCluster (for non-calib) AODCaloCluster retrieved" );
       }
     }
 
     if ( m_otherKeys.empty() ) {
       //obtain all other collections from StoreGate
       if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << 
-	 "Unable to retrieve iterator for AODCaloCluster collection" << endmsg;
-//        return false;
+         ATH_MSG_WARNING( "Unable to retrieve iterator for AODCaloCluster collection" );
       }
       
       for (; iterator!=end; ++iterator) {
@@ -87,16 +85,15 @@ namespace JiveXML {
         std::string::size_type position = iterator.key().find("HLTAutoKey",0);
         if ( m_doWriteHLT ){ position = 99; } // override SG key find
 
-//      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " AODCaloCluster: HLTAutoKey in " << iterator.key() << " at position " 
-//	    << position << endmsg;
+
         if ( position != 0 ){  // SG key doesn't contain HLTAutoKey         
 	  if (iterator.key()!=m_sgKeyFavourite) {
-             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
+             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
              DataMap data = getData(&(*iterator), false);
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
+	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
 	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") AODCaloCluster retrieved" << endmsg;
+	      ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") AODCaloCluster retrieved" );
 	    }
           }
 	}
@@ -107,12 +104,12 @@ namespace JiveXML {
       for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
 	StatusCode sc = evtStore()->retrieve( ccc, (*keyIter) );
 	if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
+          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" );
           DataMap data = getData(ccc, false);
           if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter), &data).isFailure()){
-	    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
+	    ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG " );
 	  }else{
-	     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
+	     ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved" );
 	  }
 	}
       }
@@ -130,7 +127,7 @@ namespace JiveXML {
    */
   const DataMap AODCaloClusterRetriever::getData(const CaloClusterContainer* ccc, bool calibFlag) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "retrieve()" << endmsg;
+    ATH_MSG_DEBUG( "retrieve()" );
 
     DataMap DataMap;
 
@@ -190,48 +187,39 @@ namespace JiveXML {
       eInSampleFull = 0.;
 
       labelVec.push_back( label );
-      if (msgLvl(MSG::DEBUG)) {
-	msg(MSG::DEBUG) << "label is " << label << endmsg;
-      }
+      ATH_MSG_DEBUG(  "label is " << label );
+      
 
 // now the standard variables
 
-      phi.push_back(DataType((*itr)->phi()));
-      eta.push_back(DataType((*itr)->eta()));
+      phi.emplace_back((*itr)->phi());
+      eta.emplace_back((*itr)->eta());
       if (!calibFlag){ // default: just take et
-        et.push_back(DataType((*itr)->et()/CLHEP::GeV));
+        et.emplace_back((*itr)->et()/CLHEP::GeV);
       }else{ // non-calib energies: need to convert to et by hand
-        et.push_back(DataType( (((*itr)->getBasicEnergy()/CLHEP::GeV)*((*itr)->sinTh())) ));
-//// this would work also for egClusterCollection, but is it necessary ?
-////        et.push_back(DataType( (  eInSampleFull *((*itr)->sinTh())) ));
-      }
-      // emfrac.push_back(DataType( (*itr)->getMomentValue(CaloClusterMoment::ENG_FRAC_EM) )); // doesn't work for AOD
-      numCells.push_back(DataType( "0" ));
-      cells.push_back(DataType( "0" ));
-      idVec.push_back(DataType( ++id ));
+        et.emplace_back( (((*itr)->getBasicEnergy()/CLHEP::GeV)*((*itr)->sinTh())) );
 
-//      if (msgLvl(MSG::DEBUG)) {
-//        msg(MSG::DEBUG) << dataTypeName() << " cluster basic=" << (*itr)->getBasicEnergy()/CLHEP::GeV << " ,e=" <<  (*itr)->e()/CLHEP::GeV  << ", et=";
-//        msg(MSG::DEBUG) << (*itr)->et()/CLHEP::GeV << ", eta=" << (*itr)->eta() << ", phi=" << (*itr)->phi() << ", sinTheta=" <<
-//	   (*itr)->sinTh() << ",calc=" << ((*itr)->getBasicEnergy()/CLHEP::GeV)*((*itr)->sinTh()) << endmsg;
-//      }
+      }
+      numCells.emplace_back( "0" );
+      cells.emplace_back( "0" );
+      idVec.emplace_back( ++id );
+
 
     }
     // Start with mandatory entries
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap[tagCells] = cells;
-    DataMap["numCells"] = numCells;
-    DataMap["id"] = idVec;
-    DataMap["emfrac"] = emfracVec; // not in Atlantis yet ! Could be used in legoplot
-    DataMap["label"] = labelVec; // not in Atlantis yet ! 
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap[tagCells] = std::move(cells);
+    DataMap["numCells"] = std::move(numCells);
+    DataMap["id"] = std::move(idVec);
+    DataMap["emfrac"] = std::move(emfracVec); // not in Atlantis yet ! Could be used in legoplot
+    DataMap["label"] = std::move(labelVec); // not in Atlantis yet ! 
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " (AOD, no cells), collection: " << dataTypeName();
-      msg(MSG::DEBUG) << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( dataTypeName() << " (AOD, no cells), collection: " << dataTypeName()
+      << " retrieved with " << phi.size() << " entries");
+    
 
     //All collections retrieved okay
     return DataMap;
