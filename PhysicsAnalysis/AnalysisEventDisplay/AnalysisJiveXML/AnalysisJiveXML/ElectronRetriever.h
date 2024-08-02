@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ELECTRONRETRIEVER_H
 #define JIVEXML_ELECTRONRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <map>
+
+
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "egammaEvent/ElectronContainer.h"
-
+#include "JiveXML/DataType.h" //DataMap typedef
+#include <string>
 class ElectronContainer;
 
 namespace JiveXML{

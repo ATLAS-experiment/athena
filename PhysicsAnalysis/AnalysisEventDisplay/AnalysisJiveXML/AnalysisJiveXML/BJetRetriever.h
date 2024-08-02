@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_BJETRETRIEVER_H
 #define JIVEXML_BJETRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <map>
+
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-
+#include <string>
+#include <vector>
 class JetCollection;
 
 namespace JiveXML{
@@ -51,8 +50,8 @@ namespace JiveXML{
 
       std::string m_sgKeyFavourite;
       std::vector<std::string> m_otherKeys;
-      bool m_doWriteHLT;
-      float m_weightCut;
+      bool m_doWriteHLT{};
+      float m_weightCut{};
   };
 }
 #endif

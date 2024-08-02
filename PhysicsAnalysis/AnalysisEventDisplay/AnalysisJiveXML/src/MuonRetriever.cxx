@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/MuonRetriever.h"
@@ -37,29 +37,28 @@ namespace JiveXML {
    */
   StatusCode MuonRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
+    ATH_MSG_DEBUG( "in retrieveAll()" );
     
     SG::ConstIterator<Analysis::MuonContainer> iterator, end;
     const Analysis::MuonContainer* muCont;
     
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" );
     StatusCode sc = evtStore()->retrieve(muCont, m_sgKey);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " ); 
     }else{
       DataMap data = getData(muCont);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey, &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
+	ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") Muon retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKey << ") Muon retrieved" );
       }
     }
 
     //obtain all other collections from StoreGate
     if (( evtStore()->retrieve(iterator, end)).isFailure()){
-       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING)  << "Unable to retrieve iterator for Jet collection" << endmsg;
-//        return StatusCode::WARNING;
+       ATH_MSG_WARNING( "Unable to retrieve iterator for Jet collection" );
     }
       
     for (; iterator!=end; ++iterator) {
@@ -71,9 +70,9 @@ namespace JiveXML {
           if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
             DataMap data = getData(&(*iterator));
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
+	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
 	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") Muon retrieved" << endmsg;
+	      ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") Muon retrieved" );
             }
 	  }
     }	  
@@ -88,7 +87,7 @@ namespace JiveXML {
    */
   const DataMap MuonRetriever::getData(const Analysis::MuonContainer* muoncont) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+    ATH_MSG_DEBUG( "in getData()" );
 
     DataMap DataMap;
 
@@ -123,42 +122,42 @@ namespace JiveXML {
     int trackIndex = -1; // index number inside the container 
 
     for (; muonItr != muonItrE; ++muonItr) {
-      phi.push_back(DataType((*muonItr)->phi()));
-      eta.push_back(DataType((*muonItr)->eta()));
-      pt.push_back(DataType((*muonItr)->pt()/CLHEP::GeV));
-      mass.push_back(DataType((*muonItr)->m()/CLHEP::GeV));
-      energy.push_back( DataType((*muonItr)->e()/CLHEP::GeV ) );
-      px.push_back( DataType((*muonItr)->px()/CLHEP::GeV ) );
-      py.push_back( DataType((*muonItr)->py()/CLHEP::GeV ) );
-      pz.push_back( DataType((*muonItr)->pz()/CLHEP::GeV ) );
+      phi.emplace_back((*muonItr)->phi());
+      eta.emplace_back((*muonItr)->eta());
+      pt.emplace_back((*muonItr)->pt()/CLHEP::GeV);
+      mass.emplace_back((*muonItr)->m()/CLHEP::GeV);
+      energy.emplace_back( (*muonItr)->e()/CLHEP::GeV  );
+      px.emplace_back( (*muonItr)->px()/CLHEP::GeV  );
+      py.emplace_back( (*muonItr)->py()/CLHEP::GeV  );
+      pz.emplace_back( (*muonItr)->pz()/CLHEP::GeV  );
 
-      pdgId.push_back( DataType((*muonItr)->pdgId() ) );
+      pdgId.emplace_back( (*muonItr)->pdgId()  );
 
       std::string muonAuthor = "none";
       if (( (*muonItr)->author()) == 0){ muonAuthor = "unknown"; } 
       if (( (*muonItr)->author()) == 1){ muonAuthor = "highpt"; } 
       if (( (*muonItr)->author()) == 2){ muonAuthor = "lowpt"; } 
-      author.push_back( DataType( muonAuthor ) );
+      author.emplace_back(  muonAuthor  );
  
       MCdataType = (*muonItr)->dataType();
-      dataType.push_back( DataType(  MCdataType ) );
+      dataType.emplace_back(   MCdataType  );
 
 // check: full simulation input file (1) or fast (0) 
 // code from:
 // PhysicsAnalysis/AnalysisCommon/AnalysisExamples/src/MiscellaneousExamples.cxx
       if (MCdataType != 3){ // full simulation
-          chi2.push_back( DataType((*muonItr)->matchChi2OverDoF() ) );
-          etConeIsol.push_back( DataType(
-              ((*muonItr)->parameter(MuonParameters::etcone20))/CLHEP::GeV ) );
+          chi2.emplace_back( (*muonItr)->matchChi2OverDoF()  );
+          etConeIsol.emplace_back( 
+              ((*muonItr)->parameter(MuonParameters::etcone20))/CLHEP::GeV  );
 
 // print some more variables, taken from: 
 //   PhysicsAnalysis/EventViewBuilder/EventViewUserData/EVUDMuonAll
 
-     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << 
+     ATH_MSG_DEBUG( 
        " Muon: matchChi2OverDoF: " << (*muonItr)->matchChi2OverDoF() << 
        ", matchChi2: " << (*muonItr)->matchChi2() << 
        ", fitChi2: " << (*muonItr)->fitChi2() << 
-       ", isCombined: " << (int)(*muonItr)->isCombinedMuon() << endmsg;
+       ", isCombined: " << (int)(*muonItr)->isCombinedMuon() );
        
 // parameters for associations:
 // stricly speaking, these should be ElementLinkVectors (see TauJet association)
@@ -169,57 +168,56 @@ namespace JiveXML {
           if (trackLink.isValid()) {
              trackKey = trackLink.dataID(); // Storegate key of 
              trackIndex = trackLink.index(); // index into the contianer
-	     trackKeyVec.push_back(DataType( trackKey ));
-	     trackIndexVec.push_back(DataType( trackIndex ));
+	     trackKeyVec.emplace_back( trackKey );
+	     trackIndexVec.emplace_back( trackIndex );
           } else {
-             trackKeyVec.push_back( DataType( "none" ) );
-             trackIndexVec.push_back( DataType( -1 ) );
+             trackKeyVec.emplace_back(  "none"  );
+             trackIndexVec.emplace_back(  -1  );
           }
           const ElementLink<CaloClusterContainer> clusterLink = (*muonItr)->clusterLink();
           if (clusterLink.isValid()) {
             clusterKey = clusterLink.dataID(); // Storegate key of container 
             clusterIndex = clusterLink.index(); // index number inside the container 
-            clusterKeyVec.push_back(DataType( clusterKey ));
-	    clusterIndexVec.push_back(DataType( clusterIndex ));
+            clusterKeyVec.emplace_back( clusterKey );
+	    clusterIndexVec.emplace_back( clusterIndex );
           } else { // no clusterLink
-	    clusterKeyVec.push_back(DataType( "none" ));
-	    clusterIndexVec.push_back(DataType( -1 ));
+	    clusterKeyVec.emplace_back( "none" );
+	    clusterIndexVec.emplace_back( -1 );
           }
 
       } else {  // fast simulation
-          chi2.push_back( DataType( 0 ) );
-          etConeIsol.push_back( DataType( 0 ) );
-          trackKeyVec.push_back(DataType( "none" ));
-          trackIndexVec.push_back(DataType( -1 ));
-          clusterKeyVec.push_back(DataType( "none" ));
-          clusterIndexVec.push_back(DataType( -1 ));
+          chi2.emplace_back(  0  );
+          etConeIsol.emplace_back(  0  );
+          trackKeyVec.emplace_back( "none" );
+          trackIndexVec.emplace_back( -1 );
+          clusterKeyVec.emplace_back( "none");
+          clusterIndexVec.emplace_back( -1 );
       }
     }
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
 
     // special muon parameters
-    DataMap["chi2"] = chi2;
-    DataMap["etConeIsol"] = etConeIsol;
-    DataMap["author"] = author;
-    DataMap["pdgId"] = pdgId;
-    DataMap["dataType"] = dataType;
+    DataMap["chi2"] = std::move(chi2);
+    DataMap["etConeIsol"] = std::move(etConeIsol);
+    DataMap["author"] = std::move(author);
+    DataMap["pdgId"] = std::move(pdgId);
+    DataMap["dataType"] = std::move(dataType);
     // further details and associations
-    DataMap["clusterKey"] = clusterKeyVec;
-    DataMap["clusterIndex"] = clusterIndexVec;
-    DataMap["trackKey"] = trackKeyVec;
-    DataMap["trackIndex"] = trackIndexVec;
+    DataMap["clusterKey"] = std::move(clusterKeyVec);
+    DataMap["clusterIndex"] = std::move(clusterIndexVec);
+    DataMap["trackKey"] = std::move(trackKeyVec);
+    DataMap["trackIndex"] = std::move(trackIndexVec);
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries << " entries");
 
     //All collections retrieved okay
     return DataMap;
