@@ -6,6 +6,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from PathResolver import PathResolver
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
+from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
 
 def parseTDPdatabase(tdpFile, dsid):
     """function to parse the TopDataPreparation database
@@ -217,6 +218,11 @@ class FTagConfig (ConfigBlock):
             bTagCalibFile = self.bTagCalibFile
         else:
             bTagCalibFile = getRecommendedBTagCalib(config.geometry())
+
+        # Check if the right CDI is used for the MC campaign
+        if config.dataType() is not DataType.Data:
+            campaign = config.campaign()
+            check_CDI_campaign(campaign.value, bTagCalibFile)
 
         # Set up the ftag selection algorithm(s):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
