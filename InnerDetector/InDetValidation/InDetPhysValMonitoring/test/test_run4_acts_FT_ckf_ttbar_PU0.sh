@@ -4,7 +4,9 @@
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_ambi_last
@@ -31,8 +33,8 @@ run () {
     echo "Running ${name}..."
     time ${cmd}
     rc=$?
-    # Only report hard failures for 21.9 vs master tests since both
-    # branches are unlikely to ever match perfectly
+    # Only report hard failures for comparison Acts-Trk since we know
+    # they are different. We do not expect this test to succeed
     [ "${name}" = "dcube-ckf-ambi" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
@@ -45,7 +47,7 @@ run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;'\
+    --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Acts.doMonitoring=True; flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.root \
@@ -90,4 +92,6 @@ run "dcube-ckf-athena" \
     -p -x dcube_ckf_athena \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
+    -M "acts" \
+    -R "athena" \
     idpvm.root

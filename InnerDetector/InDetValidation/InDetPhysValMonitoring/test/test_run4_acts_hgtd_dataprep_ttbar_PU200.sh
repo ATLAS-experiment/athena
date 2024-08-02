@@ -2,7 +2,10 @@
 # art-description: Run 4 configuration, ITK only recontruction, all-hadronic ttbar, full pileup, acts activated
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: acts-*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_last
@@ -115,4 +118,6 @@ run "dcube-athena-acts" \
     -p -x dcube_athena_acts \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
+    -M "acts" \
+    -R "athena" \
     idpvm.acts.root

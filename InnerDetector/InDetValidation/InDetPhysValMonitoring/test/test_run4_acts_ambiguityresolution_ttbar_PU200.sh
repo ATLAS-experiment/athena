@@ -4,7 +4,9 @@
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_ambi_last
@@ -29,8 +31,8 @@ run () {
     echo "Running ${name}..."
     time ${cmd}
     rc=$?
-    # Only report hard failures for 21.9 vs master tests since both
-    # branches are unlikely to ever match perfectly
+    # Only report hard failures for comparison Acts-Trk since we know
+    # they are different. We do not expect these tests to succeed
     [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
@@ -38,7 +40,7 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
-# Run w/o ambi. resolution
+# Run with legacy Athena
 run "Reconstruction-athena" \
     Reco_tf.py --CA \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
@@ -68,7 +70,7 @@ fi
 
 ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+SurfaceError:1"
 
-# Run w/ ambi. resolution
+# Run with full ACTS chain, including ACTS ambi. resolution
 run "Reconstruction-acts" \
     Reco_tf.py --CA \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
@@ -114,10 +116,12 @@ run "dcube-acts-last" \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
 
-# Compare performance w/ and w/o ambi. resolution
+# Compare performance ACTS vs Athena
 run "dcube-athena-acts" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_athena_acts \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
+    -M "acts" \
+    -R "athena" \
     idpvm.acts.root

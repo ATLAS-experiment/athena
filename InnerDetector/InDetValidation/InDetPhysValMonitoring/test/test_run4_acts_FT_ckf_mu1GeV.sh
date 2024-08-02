@@ -2,7 +2,9 @@
 # art-description: Run 4 configuration, ITK only recontruction with Fast Tracking, Single muon 1GeV, acts activated
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_last
@@ -37,7 +39,7 @@ run () {
     return $rc
 }
 
-# Run w/o ambi. resolution
+# Run with Athena ambi. resolution
 run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
@@ -64,8 +66,6 @@ run "IDPVM" \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
-   
-    
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -91,5 +91,6 @@ run "dcube-ckf-athena" \
     -p -x dcube_ckf_athena \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
+    -M "acts" \
+    -R "athena" \
     idpvm.root
-
