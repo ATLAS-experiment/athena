@@ -96,8 +96,17 @@ def PoolWriteCfg(flags):
         elif "D2AOD" in stream:
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 500, 1, 1 # Change the defaults for D2AODs
 
-        # For temporary files we always use ZLIB for compression algorithm
-        compAlg = 1 if fileName.endswith('_000') or fileName.startswith('tmp.') else compAlg
+        # For temporary streams/files we always use ZLIB for the compression algorithm to save CPU cycles
+        # Temporary in this context might mean one of three things:
+        #   a) Outputs of intermediate steps of chained workflows (file name begins with tmp.),
+        #   b) Outputs of workers in AthenaMP jobs that are to be merged (file name ends with _000), and
+        #   c) Any output stream that is marked by the user as being temporary (via the CA flag Output.TemporaryStreams)
+        # The ultimate goal is to reconcile all three cases and propagate the information between the job transform
+        # and the job configuration (CA) so that we don't need to rely on the file names here...
+        isTemporaryStream = fileName.endswith('_000') or fileName.startswith('tmp.') or stream in flags.Output.TemporaryStreams
+        if isTemporaryStream:
+            logger.info(f"Stream {stream} is marked as temporary, overwriting the compression settings to 101")
+        compAlg, compLvl = (1, 1) if isTemporaryStream else (compAlg, compLvl)
 
         # See if the user asked for the AutoFlush to be overwritten
         autoFlush = _overrideTreeAutoFlush(logger, flags, stream, autoFlush)
