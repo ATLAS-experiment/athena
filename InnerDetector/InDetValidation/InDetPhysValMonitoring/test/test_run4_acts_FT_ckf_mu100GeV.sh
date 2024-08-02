@@ -3,10 +3,10 @@
 # art-type: grid
 # art-include: main/Athena
 # art-output: idpvm*.root
-# art-output: acts-*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
-# art-output: last_results/idpvm*.root
 # art-html: dcube_ambi_last
 
 lastref_dir=last_results
@@ -58,7 +58,7 @@ fi
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.ckf.root \
-    --outputFile idpvm.ckf.root \
+    --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
@@ -79,8 +79,8 @@ run "dcube-ckf-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_ckf_last \
     -c ${dcubeXmlTechEffAbsPath} \
-    -r ${lastref_dir}/idpvm.ckf.root \
-    idpvm.ckf.root
+    -r ${lastref_dir}/idpvm.root \
+    idpvm.root
 
 # Compare performance WRT legacy Athena
 run "dcube-ckf-athena" \
@@ -88,4 +88,6 @@ run "dcube-ckf-athena" \
     -p -x dcube_ckf_athena \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
-    idpvm.ckf.root
+    -M "acts" \
+    -R "athena" \
+    idpvm.root

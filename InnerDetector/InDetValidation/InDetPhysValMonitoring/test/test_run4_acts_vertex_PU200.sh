@@ -2,7 +2,10 @@
 # art-description: Run 4 configuration, ACTS reco vs Athena reco, vertex
 # art-type: grid
 # art-include: main/Athena
-# art-output: *.root
+# art-output: idpvm*.root
+# art-output: acts-*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_acts_last
@@ -105,4 +108,6 @@ run "dcube-acts-athena" \
     -p -x dcube_acts_athena \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.athena.root \
+    -M "acts" \
+    -R "athena" \
     idpvm.acts.root

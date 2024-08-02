@@ -3,10 +3,10 @@
 # art-type: grid
 # art-include: main/Athena
 # art-output: idpvm*.root
-# art-output: acts-*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
-# art-output: last_results/idpvm*.root
 # art-html: dcube_ambi_last
 
 lastref_dir=last_results
@@ -100,8 +100,8 @@ run "IDPVM" \
     --outputFile idpvm.ambi.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All \
-    --doExpertPlots
+    --doExpertPlots \
+    --HSFlag All
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -132,6 +132,8 @@ run "dcube-ckf-ambi" \
     -p -x dcube_ckf_ambi \
     -c ${dcubeXmlAbsPath} \
     -r idpvm.ckf.root \
+    -M "ckf" \
+    -R "ambi" \
     idpvm.ambi.root
 
 # Compare performance WRT legacy Athena
@@ -140,4 +142,6 @@ run "dcube-ckf-athena" \
     -p -x dcube_ckf_athena \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
+    -M "acts" \
+    -R "athena" \
     idpvm.ckf.root

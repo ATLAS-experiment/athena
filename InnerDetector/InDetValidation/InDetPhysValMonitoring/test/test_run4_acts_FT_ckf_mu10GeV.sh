@@ -3,10 +3,10 @@
 # art-type: grid
 # art-include: main/Athena
 # art-output: idpvm*.root
-# art-output: acts-*.root
+# art-output: last_results/idpvm*.root
+# art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
-# art-output: last_results/idpvm*.root
 # art-html: dcube_ambi_last
 
 lastref_dir=last_results
@@ -55,7 +55,6 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-
 run "IDPVM" \
     runIDPVM.py \
     --filesInput AOD.root \
@@ -89,4 +88,6 @@ run "dcube-ckf-athena" \
     -p -x dcube_ckf_athena \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${ref_idpvm_athena} \
+    -M "acts" \
+    -R "athena" \
     idpvm.root
