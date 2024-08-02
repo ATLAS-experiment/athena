@@ -91,9 +91,12 @@ def defineMenu():
         'L1_jTE6500',
         'L1_jTE7000',
         'L1_jTE7500',
+        'L1_VjTE10',
         'L1_VjTE200',
         'L1_VjTE600',
         'L1_jTE50_VjTE600',
+        #Overlay items
+        'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
 
         #L1 forward GAP
         'L1_GAP_A', 'L1_GAP_C', 'L1_GAP_AANDC',
@@ -109,7 +112,7 @@ def defineMenu():
         'L1_eTAU1', 'L1_jTAU1',
         
         #UPC - TRT,  phase-1 calo
-        'L1_TRT_VjTE50',
+        'L1_TRT_VjTE20', 'L1_TRT_VjTE50',
          #UPC, calo only, phase-1
          'L1_jTE5_VjTE200',
 

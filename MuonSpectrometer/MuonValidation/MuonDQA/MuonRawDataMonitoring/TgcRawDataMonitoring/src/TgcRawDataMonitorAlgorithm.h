@@ -133,6 +133,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int goodBcid1{0};
     int goodBcid2{0};
     int goodTiming{0};
+    int bcmask{0};
   };
   struct TgcTrigRpc{
     int slSector{-999};
@@ -201,6 +202,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     int bcid{};
     std::vector<TgcTrigTile*> tile;
     std::vector<TgcTrigNsw*> nsw;
+    std::vector<TgcTrigNsw*> nsw_unique;
     std::vector<TgcTrigRpc*> rpc;
     std::vector<TgcTrigEifi*> eifi;
   };

@@ -92,6 +92,22 @@ protected:
         return dR(tau_1->eta(), tau_1->phi(), tau_2->eta(), tau_2->phi()) < threshold;
     }
 
+    template <typename T1 = xAOD::IParticle, typename T2 = xAOD::IParticle>
+    inline bool matchTruthObjects(const T1* true_tau, const std::vector<const T2*>& tau_vec, float threshold) const
+    {
+      static const SG::AuxElement::ConstAccessor<double> acc_ptvis("pt_vis");
+      static const SG::AuxElement::ConstAccessor<double> acc_etavis("eta_vis");
+      static const SG::AuxElement::ConstAccessor<double> acc_phivis("phi_vis");
+      static const SG::AuxElement::ConstAccessor<double> acc_mvis("mvis");
+      TLorentzVector true_tau_p4;
+      true_tau_p4.SetPtEtaPhiM(acc_ptvis(*true_tau), acc_etavis(*true_tau), acc_phivis(*true_tau), acc_mvis(*true_tau));
+
+      for(auto tau : tau_vec) {
+	if(true_tau_p4.DeltaR(tau->p4()) < threshold) return true;
+      }
+      return false;
+    }
+
     std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
     std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
     std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;

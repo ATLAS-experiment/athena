@@ -118,6 +118,7 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializeLHCf2022();
   std::unique_ptr<ZDCDataAnalyzer> initializepp2023();
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2023();
+  std::unique_ptr<ZDCDataAnalyzer> initializeMonteCarloPbPb2023();
 
   StatusCode configureNewRun(unsigned int runNumber);
 

@@ -13,11 +13,10 @@
 # art-html: dcube_shifter_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-# To be updated once we have those references
-relname="r24"
-dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SiHitValid_mu_100GeV_simreco_${relname}.root
-dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/RDOAnalysis_mu_100GeV_simreco_${relname}.root
-dcuberef_rec=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/physval_ele10GeV_reco_${relname}.root
+nightly="2024-07-28T2101"
+dcuberef_sim=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/${nightly}/SiHitValid_ele10GeV.root
+dcuberef_rdo=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/${nightly}/RDOAnalysis_ele10GeV.root
+dcuberef_rec=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/${nightly}/physval_ele10GeV_simreco.root
 
 script=test_MC_mu0_simreco.sh
 
