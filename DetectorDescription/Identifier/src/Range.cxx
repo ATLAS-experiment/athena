@@ -311,50 +311,6 @@ private:
  
  
  
- 
- 
-//----------------------------------------------- 
-Range::field::field () 
-    :
-    m_minimum(0),
-    m_maximum(0),
-    m_indices(0),
-    m_previous(0),
-    m_next(0),
-    m_mode(unbounded),
-    m_continuation_mode(none)
-{ 
-} 
- 
-//----------------------------------------------- 
-Range::field::field (const field& other) 
-  : m_minimum (other.m_minimum),
-    m_maximum (other.m_maximum),
-    m_values (other.m_values),
-    m_indexes (other.m_indexes),
-    m_indices (other.m_indices),
-    m_previous (other.m_previous),
-    m_next (other.m_next),
-    m_mode (other.m_mode),
-    m_continuation_mode (other.m_continuation_mode)
-{ 
-} 
-
-//----------------------------------------------- 
-Range::field::field (field&& other) 
-{ 
-  m_minimum  = other.m_minimum; 
-  m_maximum  = other.m_maximum; 
-  m_values.swap (other.m_values);
-  m_indexes.swap (other.m_indexes);
-  m_indices  = other.m_indices;
-  m_previous = other.m_previous;
-  m_next     = other.m_next;
-  m_mode     = other.m_mode; 
-  m_continuation_mode = other.m_continuation_mode;
-
-} 
- 
 //----------------------------------------------- 
 Range::field::field (element_type value) 
     :
@@ -805,23 +761,6 @@ void Range::field::set_previous (int previous)
     m_previous = previous;
 }
 
-//----------------------------------------------- 
-Range::field& Range::field::operator = (const field& other)
-{
-  if (this != &other) {
-    m_minimum  = other.m_minimum; 
-    m_maximum  = other.m_maximum; 
-    m_values   = other.m_values; 
-    m_indexes  = other.m_indexes;
-    m_indices  = other.m_indices;
-    m_previous = other.m_previous;
-    m_next     = other.m_next;
-    m_mode     = other.m_mode; 
-    m_continuation_mode = other.m_continuation_mode;
-  }
-
-  return (*this);
-}
 
 //----------------------------------------------- 
 void Range::field::operator |= (const field& other)
