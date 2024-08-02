@@ -103,7 +103,6 @@ namespace ActsTrk {
     
     std::unique_ptr<Acts::GbtsGeometry<ActsTrk::GbtsSeedingTool::GbtsSpacePoint>> m_gbtsGeo = nullptr;
 
-    bool m_fill_module_csv = false;
     const PixelID* m_pixelId = nullptr ; 
     const InDetDD::PixelDetectorManager* m_pixelManager = nullptr ; 
 

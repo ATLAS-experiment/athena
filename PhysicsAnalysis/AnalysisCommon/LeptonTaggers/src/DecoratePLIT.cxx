@@ -37,10 +37,10 @@ namespace Prompt {
 
     // Load and initialize the neural network model from the given file path.
     if(m_leptonsName == "Electrons") {
-        std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath + m_configFileVersion);
+      std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
         m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
 
-        std::string fullPathToOnnxFile_endcap = PathResolverFindCalibFile(m_configPath + m_configFileVersion_endcap);
+        std::string fullPathToOnnxFile_endcap = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion_endcap.value());
         m_onnxUtil_endcap = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile_endcap);
 
         // set up decorators using a dummy query of the onnx model
@@ -63,7 +63,7 @@ namespace Prompt {
         ATH_CHECK(m_dec_el_plit_output.initialize());
     }
     else if (m_leptonsName == "Muons") {
-        std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath + m_configFileVersion);
+      std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
         m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
 
         // set up decorators using a dummy query of the onnx model
