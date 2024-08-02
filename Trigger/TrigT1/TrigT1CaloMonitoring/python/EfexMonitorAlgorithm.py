@@ -88,6 +88,15 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
                                    xbins=1,xmin=0,xmax=1,ybins=20,ymin=-0.5,ymax=19.5, opt=['kAddBinsDynamically'])
 
 
+    helper.defineDQAlgorithm("Efex_eEM_etaThiMapFilled",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
+                             thresholdConfig={"NBins":[1,64*50]}, # currently there is 1 known deadspot in eEM, so that is allowed, anything else is a warning. Error if fully empty
+                             )
+    helper.defineDQAlgorithm("Efex_eTAU_etaThiMapFilled",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
+                             thresholdConfig={"NBins":[0,64*50]}, # everywhere should be filled, otherwise a warning (error if entirely empty)
+                             )
+
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
         cut_title_addition = '' if (cut_val == 0.0) else ' [Et>=' + '%.1f'%(cut_val/1000) + 'GeV]'
@@ -116,10 +125,10 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
             helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
-                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/coldspots"},
+                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/coldspots. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
                                     type='TH2F',
                                     path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else trigPath+keyDirPathMap[containerKey]+cut_name),
-                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             helper.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
                                    fillGroup=fillGroup,
@@ -187,10 +196,10 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
             helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eTAU '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                     fillGroup = fillGroup,
-                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/cold spots</a>"},
+                                   hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/cold spots. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
                                    type='TH2F',
                                    path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+keyDirPathMap[containerKey]+cut_name)),
-                                   xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                   xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             helper.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,
                                     fillGroup = fillGroup,
