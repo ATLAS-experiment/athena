@@ -73,7 +73,6 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
 StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<xAOD::TruthParticle>& xTruthTau) const
 {
     if(!xTruthTau->hasDecayVtx()) return StatusCode::FAILURE;
-
     static const SG::AuxElement::Accessor<double> acc_ptvis("pt_vis");
     static const SG::AuxElement::Accessor<double> acc_etavis("eta_vis");
     static const SG::AuxElement::Accessor<double> acc_phivis("phi_vis");
@@ -101,10 +100,10 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
                 if(MC::isSMNeutrino(child)) continue;
                 if(!MC::isPhysical(child)) continue;
                 ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << child->status() << ", charge " << child->charge());
-                if(MC::isSMLepton(child)) IsLeptonicTauDec(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
+                if(MC::isSMLepton(child)) acc_isleptonic(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
                 VisSumTLV += child->p4();
-                childChargeSumDec(*xTruthTau) += child->charge();
-                nTracksDec(*xTruthTau) += std::abs(child->charge());
+                acc_childChargeSum(*xTruthTau) += child->charge();
+                acc_ntracks(*xTruthTau) += std::abs(child->charge());
             }
         }
     }
@@ -113,8 +112,8 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
     acc_phivis(*xTruthTau) = VisSumTLV.Phi();
     acc_mvis(*xTruthTau) = VisSumTLV.M();
 
-    if(childChargeSumDec(*xTruthTau) != xTruthTau->charge() || nTracksDec(*xTruthTau)%2 == 0) { 
-        ATH_MSG_WARNING("Strange tau: charge " << childChargeSumDec(*xTruthTau) << " and " << nTracksDec(*xTruthTau)  << " tracks");
+    if(acc_childChargeSum(*xTruthTau) != xTruthTau->charge() || acc_ntracks(*xTruthTau)%2 == 0) { 
+        ATH_MSG_WARNING("Strange tau: charge " << acc_childChargeSum(*xTruthTau) << " and " << acc_ntracks(*xTruthTau)  << " tracks");
         const std::size_t nChildren = decayvtx->nOutgoingParticles();
         for(std::size_t iChild = 0; iChild != nChildren; ++iChild) {
         const xAOD::TruthParticle * child = decayvtx->outgoingParticle(iChild);
