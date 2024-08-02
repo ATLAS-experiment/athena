@@ -27,7 +27,6 @@ TauSmearingTool::TauSmearingTool( const std::string& sName )
   declareProperty( "ApplyFading",             m_bApplyFading = true );
   declareProperty( "ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck = false );
   declareProperty( "ApplyInsituCorrection",   m_bApplyInsituCorrection = true );
-  declareProperty( "isAFII",	              m_sAFII = false );
   declareProperty( "useFastSim",              m_useFastSim = false );
 }
 
@@ -56,10 +55,7 @@ StatusCode TauSmearingTool::initialize()
         return StatusCode::FAILURE;
       }
 
-      if (m_sAFII) {
-        ATH_MSG_ERROR("isAFII property is now deprecated, please use useFastSim property and AF3 samples");
-	return StatusCode::FAILURE;
-      } else if(m_useFastSim) {
+      if(m_useFastSim) {
         ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
       }
 
@@ -106,9 +102,7 @@ StatusCode TauSmearingTool::beginInputFile()
     // if no result -> no simFlavor metadata, so must be data
     if(result)  std::transform(simType.begin(), simType.end(), simType.begin(), ::toupper);
 
-    if (simType.find("ATLFASTII")!=std::string::npos){
-      ATH_MSG_WARNING("Input file is AFII sample which should be replaced by AF3 as this will be the only atlas fast simulation supported by TauCP");
-    } else if( simType.find("ATLFAST3") != std::string::npos && !m_useFastSim){
+    if( simType.find("ATLFAST3") != std::string::npos && !m_useFastSim){
       ATH_MSG_WARNING("Input file is AF3 sample but you are _not_ using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"true\"");
     } else if (simType.find("FULLG4")!=std::string::npos && m_useFastSim){
       ATH_MSG_WARNING("Input file is full simulation but you are using AF3 corrections and uncertainties, you should set \"useFastSim\" to \"false\"");
