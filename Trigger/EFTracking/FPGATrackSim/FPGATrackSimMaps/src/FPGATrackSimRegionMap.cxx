@@ -69,7 +69,13 @@ FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<F
 
     ANA_MSG_INFO("Line 67 \n");
     // Read all the region data
-    for (int region = 0; region < m_nregions; region++) readRegion(fin, region);
+    ANA_MSG_INFO("Line 67:"<<m_nregions<<"  filepath:"<<filepath<< "\n");
+    for (int region = 0; region < m_nregions; region++){
+        ANA_MSG_INFO("Line 74"<<region<<"\n");
+
+        readRegion(fin, region);
+    }
+    ANA_MSG_INFO("Line 78 \n");
 }
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
@@ -92,14 +98,18 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
     if (!ok) ANA_MSG_FATAL("Error reading header");
 
     m_map.resize(m_nregions);
-    ANA_MSG_INFO("Line 95 \n");
-    for (auto & vv : m_map)
+    ANA_MSG_INFO("Line 95 m_nregions:"<<m_nregions<<'\n');
+    //for (auto & vv : m_map)
+    ANA_MSG_INFO("m_mapSize:"<<m_map.size());
+    
+    //for (auto & vv : m_map)
+    for (int iRegion=0; iRegion<m_map.size(); iRegion++)
     {
         ANA_MSG_INFO("Line 98 \n");
         ANA_MSG_INFO("RSIZ:"<<m_pmaps.at(0)->getNLogiLayers());
-        vv.resize(m_pmaps.at(0)->getNLogiLayers());
+        m_map.at(iRegion).resize(m_pmaps.at(0)->getNLogiLayers());
         ANA_MSG_INFO("Line 100 \n");
-        for (size_t l = 0; l < vv.size(); l++) vv[l].resize(m_pmap->getNSections(l));
+        for (size_t l = 0; l < m_map.at(iRegion).size(); l++) m_map.at(iRegion).at(l).resize(m_pmaps.at(iRegion)->getNSections(l));
         ANA_MSG_INFO("Line 102 \n");
     }
     ANA_MSG_INFO("Line 104\n");
@@ -109,45 +119,56 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 // Reads one region from file.
 void FPGATrackSimRegionMap::readRegion(ifstream & fin, int expected_region)
 {
+    ANA_MSG_INFO("readRegion Line 116 \n");
+
     string line, dummy;
     bool ok = true;
     int region = -1;
     uint32_t linesRead = 0; // detLayer lines read
 
+    ANA_MSG_INFO("readRegion Line 123 \n");
     while (getline(fin, line))
     {
         if (line.empty() || line[0] == '#') continue;
         istringstream sline(line);
 
+        ANA_MSG_INFO("readRegion Line 129: "<<line<<"\n");
         if (region < 0) // Find the starting header of the next region
         {
+            ANA_MSG_INFO("line 138 region:"<<region<<"\n");
             ok = ok && (sline >> region);// should check this is a sensible number
+            ANA_MSG_INFO("line 140 region:"<<region<<"\n");
             ok = ok && !(sline >> dummy); // No keyword to check that we're not reading a detector line, so make sure rest of string is empty
             ok = ok && (region == expected_region);
+            ANA_MSG_INFO("line 143 region:"<<region<<"\n");
             if (!ok) break;
         }
         else // Detector layer line
         {
+            ANA_MSG_INFO("line 148 ~~ \n");
             int isPix{}, BEC{}, physLayer{}, phi_min{}, phi_max{}, phi_tot{}, eta_min{}, eta_max{}, eta_tot{};
             //should check these are within sensible limits after they are read
             ok = ok && (sline >> isPix >> BEC >> physLayer >> phi_min >> phi_max >> phi_tot >> eta_min >> eta_max >> eta_tot);
             if (!ok) break;
             //region WW
-            int logiLayer = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).layer;
-            int section   = m_pmap->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).section;
+            int logiLayer = m_pmaps.at(region)->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).layer;
+            int section   = m_pmaps.at(region)->getLayerSection(static_cast<SiliconTech>(isPix), static_cast<DetectorZone>(BEC), physLayer).section;
 
+            ANA_MSG_INFO("line 157  LOGILAYER:"<<logiLayer<<"  section:"<<section<<"\n");
             if (logiLayer > -1)
                 m_map[region][logiLayer][section] = { phi_min, phi_max, eta_min, eta_max };
 
-            if (++linesRead == m_pmap->getNDetLayers()) break;
+            if (++linesRead == m_pmaps.at(region)->getNDetLayers()) break;
         }
     }
 
+    ANA_MSG_INFO("readRegion Line 154 \n");
     if (!ok)
     {
         ANA_MSG_FATAL("Found error reading file at line: " << line);
         throw "FPGATrackSimRegionMap read error";
     }
+    ANA_MSG_INFO("readRegion Line 160 \n");
 }
 
 
@@ -173,7 +194,7 @@ void FPGATrackSimRegionMap::loadModuleIDLUT(std::string const & filepath)
 
         if (!(sline >> region >> layer >> globalID >> localID))
             ANA_MSG_WARNING("Error reading module LUT");
-        else if (region >= m_global_local_map.size() || layer >= m_pmap->getNLogiLayers())
+        else if (region >= m_global_local_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
             ANA_MSG_WARNING("loadModuleIDLUT() bad region=" << region << " or layer=" << layer);
         else
             m_global_local_map[region][layer][globalID] = localID;
@@ -186,7 +207,7 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
     // Resize the radius structure  appropriately.
     m_radii_map.clear();
-    m_radii_map.resize(m_nregions, std::vector<double>(m_pmap->getNLogiLayers()));
+    m_radii_map.resize(m_nregions, std::vector<double>(m_pmaps.at(0)->getNLogiLayers()));
 
     // Open the file
     std::ifstream fin(filepath);
@@ -221,7 +242,7 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
             continue;
         }
 
-        for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++) {
+        for (unsigned layer = 0; layer < m_pmaps.at(0)->getNLogiLayers(); layer++) {
             ok = ok && (sline >> r);
             if (!ok) break;
             if (r<=0) {
@@ -368,7 +389,7 @@ uint32_t FPGATrackSimRegionMap::getLocalID(uint32_t region, uint32_t layer, uint
 
 uint32_t FPGATrackSimRegionMap::getGlobalID(uint32_t region, uint32_t layer, uint32_t localModuleID) const
 {
-    if (region >= m_global_local_map.size() || layer >= m_pmap->getNLogiLayers())
+    if (region >= m_global_local_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
     {
         ANA_MSG_ERROR("getGlobalID() bad region=" << region << " or layer=" << layer);
         return -1;
@@ -383,7 +404,7 @@ uint32_t FPGATrackSimRegionMap::getGlobalID(uint32_t region, uint32_t layer, uin
 
 double FPGATrackSimRegionMap::getAvgRadius(unsigned region, unsigned layer) const {
 
-    if (region >= m_radii_map.size() || layer >= m_pmap->getNLogiLayers())
+    if (region >= m_radii_map.size() || layer >= m_pmaps.at(0)->getNLogiLayers())
     {
         ANA_MSG_ERROR("getAvgRadius() bad region=" << region << " or layer=" << layer);
         return -1;

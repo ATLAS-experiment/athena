@@ -77,7 +77,8 @@ class FPGATrackSimRegionMap
         ///////////////////////////////////////////////////////////////////////
         // Simple Getters/Setters
 
-        const FPGATrackSimPlaneMap* getPlaneMap() const { return m_pmap; }
+        //const FPGATrackSimPlaneMap* getPlaneMap() const { return m_pmap; }
+        const FPGATrackSimPlaneMap* getPlaneMap(int iRegion) const { return m_pmaps.at(iRegion).get(); }
 
         int getNRegions() const { return m_nregions; }
 

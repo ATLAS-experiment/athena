@@ -150,18 +150,25 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         //m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_rmap_path.value())));
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
 
-        std::cout<<"\n line 157 \n";
+        std::cout<<"\n line 167 FPGATrackSimMappingSvc~initialize \n";
         //m_pmap_vector_2nd.push_back(std::shared_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+        fin.open(filepath);
+        readPmapSize(fin);
         m_pmap_vector_2nd.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
+        fin.close();
+
+        std::cout<<"m_pmap_vector_2nd"<<m_pmap_vector_2nd.size()<<"  \n";
+        std::cout<<"\n line 170 FPGATrackSimMappingSvc::initialize \n";
         ATH_MSG_DEBUG("Creating the 2nd stage region map");
         m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_2nd, PathResolverFindCalibFile(m_rmap_path.value())));
+        std::cout<<"\n line 173 FPGATrackSimMappingSvc::initialize \n";
 
         ATH_MSG_DEBUG("Creating the sub-region map");
         //m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_subrmap_path.value())));
         //m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st.at(0).get(), PathResolverFindCalibFile(m_subrmap_path.value())));
         m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_subrmap_path.value())));
 
-        std::cout<<"\n line 165 \n";
+        std::cout<<"\n line 180 \n";
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
         m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
         m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
