@@ -34,6 +34,23 @@ def checkLegacyEventInfo(inputlist):
 
     return present
 
+def validateGeometryTag(logger, target, value):
+    """Validate geometry tag so it is the same as target"""
+    target_layout = target.split('-')
+    value_layout = value.split('-')
+    if len(target_layout) != len(value_layout):
+        return False
+
+    import re
+    for p, s in zip(target_layout[:-1], value_layout[:-1]):
+        if not re.match(p, s):
+            return False
+
+    if not re.match(target_layout[-1], value_layout[-1]):
+        logger.warning("Simulation geometry tag mismatch! %s vs %s", target, value)
+
+    return True
+
 def checkTileCalibrationHitFormat(inputlist):
     """Check the Tile CaloCalibrationHit format"""
     oldnames = ["TileCalibrationCellHitCnt","TileCalibrationDMHitCnt"]
@@ -280,7 +297,7 @@ def signalMetaDataCheck(metadatadict):
     if not skipCheck('SimLayout'):
         if 'SimLayout' in simkeys:
             from AthenaCommon.GlobalFlags import globalflags
-            if re.match(metadatadict['SimLayout'], globalflags.DetDescrVersion.get_Value()):
+            if validateGeometryTag(logOverlayReadMetadata, metadatadict['SimLayout'], globalflags.DetDescrVersion.get_Value()):
                 logOverlayReadMetadata.debug("Digitization properties matches Signal Simulation MetaData. [DetDescrVersion = %s]",
                                             globalflags.DetDescrVersion.get_Value())
             else:
@@ -398,7 +415,9 @@ def pileupMetaDataCheck(sigsimdict,pileupsimdict):
             logOverlayReadMetadata.error("%s key missing from Signal Simulation MetaData!", o)
             raise AssertionError("Simulation MetaData key not found")
         try:
-            if not isinstance(pileupsimdict[o],type(sigsimdict[o])):
+            if o == "SimLayout":  # allow last part of the simulation tag to differ
+                assert validateGeometryTag(logOverlayReadMetadata, sigsimdict[o], pileupsimdict[o])
+            elif not isinstance(pileupsimdict[o],type(sigsimdict[o])):
                 assert re.match(str(pileupsimdict[o]), str(sigsimdict[o]))
             else:
                 if isinstance(pileupsimdict[o],str):
