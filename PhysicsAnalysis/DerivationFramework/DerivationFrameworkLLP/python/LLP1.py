@@ -487,7 +487,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                name                    = "LLP1JetTPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                JetKey                  = "AntiKt4EMTopoJets",
-                                                                               SelectionString         = "(AntiKt4EMTopoJets.pt > 10.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
+                                                                               SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  flags,
