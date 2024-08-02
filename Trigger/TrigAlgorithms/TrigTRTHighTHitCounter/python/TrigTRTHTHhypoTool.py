@@ -17,7 +17,7 @@ def _IncTool(flags, name):
                                            MinTRTHTHitsRoad = 20,
                                            MinHTRatioRoad = 0.4,
                                            MinTRTHTHitsWedge = 30,
-                                           MinHTRatioWedge = 0.4,
+                                           MinHTRatioWedge = 0.5,
                                            DoWedge = True,
                                            DoRoad = False,
                                            MonTool = monTool )
