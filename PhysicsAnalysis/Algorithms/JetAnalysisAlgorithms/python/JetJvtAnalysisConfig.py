@@ -25,30 +25,31 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        if config.dataType() is DataType.Data: return
+
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        if config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
+        alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
+        preselection = config.getFullSelection (self.containerName, '')
+        alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'
+        alg.scaleFactorInputDecoration = 'jvt_effSF_%SYS%'
+        alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
+        alg.particles = config.readName (self.containerName)
+
+        config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF')
+
+        if self.enableFJvt:
+            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
             preselection = config.getFullSelection (self.containerName, '')
-            alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'
-            alg.scaleFactorInputDecoration = 'jvt_effSF_%SYS%'
-            alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
+            alg.preselection = preselection + '&&no_fjvt' if preselection else 'no_fjvt'
+            alg.scaleFactorInputDecoration = 'fjvt_effSF_%SYS%'
+            alg.scaleFactorOutputDecoration = 'fjvt_effSF_%SYS%'
             alg.particles = config.readName (self.containerName)
 
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF')
-
-            if self.enableFJvt:
-                alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
-                preselection = config.getFullSelection (self.containerName, '')
-                alg.preselection = preselection + '&&no_fjvt' if preselection else 'no_fjvt'
-                alg.scaleFactorInputDecoration = 'fjvt_effSF_%SYS%'
-                alg.scaleFactorOutputDecoration = 'fjvt_effSF_%SYS%'
-                alg.particles = config.readName (self.containerName)
-
-                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF')
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF')
 
 
 def makeJetJvtAnalysisConfig( seq, containerName,

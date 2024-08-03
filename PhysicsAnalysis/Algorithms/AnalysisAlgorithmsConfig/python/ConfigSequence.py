@@ -3,6 +3,7 @@
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from functools import wraps
 from random import randrange
 def groupBlocks(func):
@@ -54,6 +55,10 @@ class ConfigSequence:
         how the blocks are configured right now.
         """
         for block in self._blocks:
+            if block.skipOnData and config.dataType() is DataType.Data:
+                continue
+            if block.skipOnMC and config.dataType() is not DataType.Data:
+                continue
             block.makeAlgs (config)
 
     def reorderAlgs(self):

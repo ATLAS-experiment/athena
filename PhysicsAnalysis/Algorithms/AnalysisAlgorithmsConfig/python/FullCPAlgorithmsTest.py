@@ -1010,7 +1010,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     if not forCompare:
         configSeq += config.makeConfig ('Bootstraps')
         configSeq.setOptionValue ('.nReplicas', 2000 )
-        configSeq.setOptionValue ('.runOnMC', True )
+        configSeq.setOptionValue ('.skipOnMC', False)
 
     # per-event lepton SF
     if not forCompare:

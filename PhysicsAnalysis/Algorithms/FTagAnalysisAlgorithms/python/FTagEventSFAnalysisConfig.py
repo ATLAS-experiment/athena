@@ -26,6 +26,8 @@ class FTagEventSFConfig(ConfigBlock):
 
     def makeAlgs(self, config):
 
+        if config.dataType() is DataType.Data: return
+
         selectionName = self.selectionName
         if selectionName is None or selectionName == '':
             selectionName = self.btagger + '_' + self.btagWP
@@ -35,18 +37,17 @@ class FTagEventSFConfig(ConfigBlock):
             postfix = '_' + postfix
 
         # Set up the per-event FTAG efficiency scale factor calculation algorithm
-        if config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
-                                         'FTagEventScaleFactorAlg' + postfix)
-            particles, preselection = config.readNameAndSelection(self.containerName)
-            alg.particles = particles
-            alg.preselection = ((preselection + '&&' if preselection else '')
-                                + 'no_ftag_' + selectionName + ',as_char')
-            alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
-            alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
+                                     'FTagEventScaleFactorAlg' + postfix)
+        particles, preselection = config.readNameAndSelection(self.containerName)
+        alg.particles = particles
+        alg.preselection = ((preselection + '&&' if preselection else '')
+                            + 'no_ftag_' + selectionName + ',as_char')
+        alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+        alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
 
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
-                                'weight_ftag_effSF_' + selectionName)
+        config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
+                            'weight_ftag_effSF_' + selectionName)
 
 
 def makeFTagEventSFConfig(seq, containerName,
