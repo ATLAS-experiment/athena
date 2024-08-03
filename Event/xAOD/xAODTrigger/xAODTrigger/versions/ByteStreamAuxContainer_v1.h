@@ -69,6 +69,9 @@ namespace xAOD {
       /// Get the types(names) of variables handled by this container
       virtual const auxid_set_t& getAuxIDs() const override;
 
+      /// Get the types(names) of decorations handled by this container
+      virtual const auxid_set_t& getDecorIDs() const override;
+
       /// Get a pointer to a given array, as a decoration.
       virtual void* getDecoration (auxid_t auxid, size_t size, size_t capacity) override;
 

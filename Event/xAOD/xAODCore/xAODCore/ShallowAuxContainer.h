@@ -104,6 +104,9 @@ namespace xAOD {
       /// Get the types(names) of variables handled by this container
       virtual const auxid_set_t& getAuxIDs() const override;
 
+      /// Get the types(names) of decorations handled by this container
+      virtual const auxid_set_t& getDecorIDs() const override;
+
       /// Test if a variable is a decoration.
       virtual bool isDecoration (auxid_t auxid) const override;
 
@@ -199,6 +202,7 @@ namespace xAOD {
       // Mutable is thread-safe since we lock access, and the object
       // is a ConcurrentBitset.
       mutable auxid_set_t m_auxids ATLAS_THREAD_SAFE;
+      mutable auxid_set_t m_decorids ATLAS_THREAD_SAFE;
       mutable bool m_auxidsValid ATLAS_THREAD_SAFE;
 
       /// Name of the container in memory. Set externally.

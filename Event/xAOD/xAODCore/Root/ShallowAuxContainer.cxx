@@ -224,6 +224,16 @@ namespace xAOD {
       return m_auxids;
    }
 
+   const ShallowAuxContainer::auxid_set_t&
+   ShallowAuxContainer::getDecorIDs() const {
+
+      guard_t guard( m_mutex );
+      if (!m_auxidsValid) {
+        remakeAuxIDs();
+      }
+      return m_decorids;
+   }
+
    bool ShallowAuxContainer::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );
@@ -589,6 +599,13 @@ namespace xAOD {
        ids.insert (m_parentLink->getAuxIDs());
      }
      m_auxids = ids;
+
+     auxid_set_t decors = m_store->getDecorIDs();
+     if( m_parentLink.isValid() ) {
+       ids.insert (m_parentLink->getDecorIDs());
+     }
+     m_decorids = decors;
+
      m_auxidsValid = true;
    }
 

@@ -147,6 +147,7 @@ void test_get_types()
   AuxVectorData_test b1;
 
   assert (b1.getAuxIDs().size() == 0);
+  assert (b1.getDecorIDs().size() == 0);
 
   SG::AuxStoreInternal store;
   b1.setStore (&store);
@@ -161,6 +162,14 @@ void test_get_types()
   assert (b1.getAuxIDs().find(ityp2) != b1.getAuxIDs().end());
 
   assert (b1.getWritableAuxIDs() == b1.getAuxIDs());
+
+  assert (b1.getDecorIDs().size() == 0);
+
+  b1.lock();
+  SG::auxid_t ityp3 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt3");
+  b1.getDecoration<int> (ityp3, 1) = 10;
+  assert (b1.getDecorIDs().size() == 1);
+  assert (b1.getDecorIDs().find(ityp3) != b1.getDecorIDs().end());
 }
 
 
@@ -355,6 +364,7 @@ public:
   virtual const void* getData (SG::auxid_t) const { std::abort(); }
   virtual void* getDecoration (SG::auxid_t, size_t, size_t) { std::abort(); }
   virtual const SG::auxid_set_t& getAuxIDs() const { std::abort(); }
+  virtual const SG::auxid_set_t& getDecorIDs() const { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
   virtual void lock() { std::abort(); }
   virtual void lockDecoration (SG::auxid_t) { std::abort(); }

@@ -72,6 +72,7 @@ class ConstAuxStoreTest
 public:
   virtual const void* getData (SG::auxid_t auxid) const;
   virtual const SG::auxid_set_t& getAuxIDs() const { return m_set; }
+  virtual const SG::auxid_set_t& getDecorIDs() const { return m_decors; }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
   virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { std::abort(); }
   virtual void lock() { std::abort(); }
@@ -82,6 +83,7 @@ public:
   void add (SG::auxid_t auxid, std::unique_ptr<std::vector<float> > vec);
 
   SG::auxid_set_t m_set;
+  SG::auxid_set_t m_decors;
   typedef std::vector<float> vec_t;
   typedef std::map<SG::auxid_t, std::unique_ptr<vec_t> > map_t;
   map_t m_vecs;
