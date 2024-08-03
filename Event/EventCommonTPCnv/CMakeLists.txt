@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventCommonTPCnv )
@@ -7,13 +7,20 @@ atlas_subdir( EventCommonTPCnv )
 find_package( CLHEP )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( EventCommonTPCnv
-                         src/*.cxx
+atlas_add_library( EventCommonTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS EventCommonTPCnv
+                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   DEFINITIONS ${CLHEP_DEFINITIONS}
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthLinks AthenaPoolCnvSvcLib DataModelAthenaPoolLib FourMom NavFourMom
+                   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
+
+atlas_add_tpcnv_library( EventCommonTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS EventCommonTPCnv
                          INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                          DEFINITIONS ${CLHEP_DEFINITIONS}
-                         LINK_LIBRARIES ${CLHEP_LIBRARIES} AthLinks AthenaPoolCnvSvcLib DataModelAthenaPoolLib FourMom NavFourMom
-                         PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
+                         LINK_LIBRARIES EventCommonTPCnv )
 
 atlas_add_dictionary( EventCommonTPCnvDict
                       EventCommonTPCnv/EventCommonTPCnvDict.h

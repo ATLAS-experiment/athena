@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( InDetEventTPCnv
+atlas_add_library( InDetEventTPCnv
    InDetEventTPCnv/*.h src/*.cxx
    InDetEventTPCnv/InDetRIO_OnTrack/*.h src/InDetRIO_OnTrack/*.cxx
    InDetEventTPCnv/InDetPrepRawData/*.h src/InDetPrepRawData/*.cxx
@@ -19,6 +19,11 @@ atlas_add_tpcnv_library( InDetEventTPCnv
    PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaKernel
    EventPrimitives InDetReadoutGeometry TRT_ReadoutGeometry TrkSurfaces TrkEventPrimitives
    TrkMeasurementBase TrkRIO_OnTrack )
+
+atlas_add_tpcnv_library( InDetEventTPCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS InDetEventTPCnv
+   LINK_LIBRARIES InDetEventTPCnv )
 
 atlas_add_dictionary( InDetEventTPCnvDict
    InDetEventTPCnv/InDetEventTPCnvDict.h InDetEventTPCnv/selection.xml
