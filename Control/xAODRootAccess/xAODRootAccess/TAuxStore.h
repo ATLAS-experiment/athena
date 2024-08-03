@@ -112,6 +112,9 @@ namespace xAOD {
       /// Get the types(names) of variables handled by this container
       virtual const auxid_set_t& getAuxIDs() const override;
 
+      /// Get the types(names) of decorations handled by this container
+      virtual const auxid_set_t& getDecorIDs() const override;
+
       /// Get a pointer to a given array, creating the array if necessary
       virtual void* getDecoration( auxid_t auxid, size_t size,
                                    size_t capacity ) override;
@@ -228,6 +231,7 @@ namespace xAOD {
 
       /// Internal list of variable IDs handled currently by the object
       auxid_set_t m_auxIDs;
+      auxid_set_t m_decorIDs;
       /// Variables handled currently by the object
       std::vector< SG::IAuxTypeVector* > m_vecs;
       /// The current size of the container being described

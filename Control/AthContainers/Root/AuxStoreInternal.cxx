@@ -372,6 +372,16 @@ AuxStoreInternal::getAuxIDs() const
 
 
 /**
+ * @brief Return a set of identifiers for decorations in this store.
+ */
+const SG::auxid_set_t&
+AuxStoreInternal::getDecorIDs() const
+{
+  return m_decorations;
+}
+
+
+/**
  * @brief Test if a particular variable is tagged as a decoration.
  * @param auxid The identifier of the desired aux data item.
  */
