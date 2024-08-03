@@ -173,9 +173,14 @@ class OutputAnalysisConfig (ConfigBlock):
         pT, eta selections, some object ID selection, overlap removal, etc.
         The goal is to have only one flag per object and working point in the output NTuple.
         """
+        originalContainersSeen = []
         for prefix in self.containers.keys() :
             outputContainerName = self.containers[prefix]
             containerName = config.getOutputContainerOrigin(outputContainerName)
+            if containerName in originalContainersSeen:
+                continue
+            else:
+                originalContainersSeen.append(containerName)
 
             # EventInfo is one obvious example of a container that has no object selections
             if containerName == 'EventInfo':
