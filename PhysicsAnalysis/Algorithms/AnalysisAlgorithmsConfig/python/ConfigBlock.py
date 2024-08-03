@@ -94,6 +94,14 @@ class ConfigBlock:
         self.addOption('groupName', '', type=str,
             info=('Used to specify this block when setting an'
                 ' option at an arbitrary location.'))
+        self.addOption('skipOnData', False, type=bool,
+            info=('User option to prevent the block from running'
+                  ' on data. This only affects blocks that are'
+                  ' intended to run on data.'))
+        self.addOption('skipOnMC', False, type=bool,
+            info=('User option to prevent the block from running'
+                  ' on MC. This only affects blocks that are'
+                  ' intended to run on MC.'))
 
 
     def setBlockName(self, name):

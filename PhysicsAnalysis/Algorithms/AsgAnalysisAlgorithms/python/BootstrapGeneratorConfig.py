@@ -15,15 +15,9 @@ class BootstrapGeneratorConfig(ConfigBlock):
         self.addOption ('decoration', None, type=str,
             info="the name of the output vector branch containing the "
             "bootstrapped weights. The default is bootstrapWeights.")
-        self.addOption ('runOnMC', False, type=bool,
-            info="toggle to force running on MC samples. The default is "
-            "False, i.e. run only on data.")
+        self.setOptionValue('skipOnMC', True)
     
     def makeAlgs(self, config):
-        if config.dataType() is not DataType.Data and not self.runOnMC:
-            print("Skipping the configuration of CP::BootstrapGeneratorAlg since we are not running on data. "
-                  "Set the option 'runOnMC' to True if you want to force the bootstrapping of MC too.")
-            return
         
         alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')
         alg.nReplicas = self.nReplicas
@@ -39,19 +33,16 @@ class BootstrapGeneratorConfig(ConfigBlock):
 
 def makeBootstrapGeneratorConfig(seq,
                                  nReplicas = None,
-                                 decoration = None,
-                                 runOnMC = None):
+                                 decoration = None):
     """
     Setup a simple bootstrapping algorithm
 
     Keyword arguments:
       nReplicas -- the number of bootstrap replicas to generate
       decoration -- the name of the output vector branch containing the bootstrapped weights
-      runOnMC -- toggle to force running on MC samples (default: only data)
     """
 
     config = BootstrapGeneratorConfig()
     config.setOptionValue ('nReplicas', nReplicas)
     config.setOptionValue ('decoration', decoration)
-    config.setOptionValue ('runOnMC', runOnMC)
     seq.append (config)
