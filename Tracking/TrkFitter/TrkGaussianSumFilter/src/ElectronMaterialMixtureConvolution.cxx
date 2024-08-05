@@ -380,9 +380,9 @@ Trk::ElectronMaterialMixtureConvolution::update(
   // Merge components "From" to components "To"
   MultiComponentStateAssembler::Cache assemblerCache;
   std::array<bool, GSFConstants::maxComponentsAfterConvolution> isMerged = {};
-  int32_t returnedMerges = KL.numMerges;
+  int returnedMerges = KL.numMerges;
 
-  for (int32_t i = 0; i < returnedMerges; ++i) {
+  for (int i = 0; i < returnedMerges; ++i) {
     const int8_t mini = KL.merges[i].To;
     const int8_t minj = KL.merges[i].From;
     if (isMerged[minj]) {

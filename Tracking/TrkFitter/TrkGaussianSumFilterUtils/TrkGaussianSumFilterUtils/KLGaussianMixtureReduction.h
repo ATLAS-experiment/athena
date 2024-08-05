@@ -43,7 +43,7 @@ struct Component1DArray
   alignas(GSFConstants::alignment)
     std::array<Component1D,
                GSFConstants::maxComponentsAfterConvolution> components{};
-  int32_t numComponents = 0;
+  int numComponents = 0;
 };
 /**
  * @brief struct representing an array or the merges.
@@ -58,7 +58,7 @@ struct MergeArray
     int8_t From = 0;
   };
   std::array<merge, GSFConstants::maxComponentsAfterConvolution> merges{};
-  int32_t numMerges = 0;
+  int numMerges = 0;
 };
 
 /**

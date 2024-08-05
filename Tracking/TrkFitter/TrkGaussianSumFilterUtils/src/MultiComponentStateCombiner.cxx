@@ -28,9 +28,9 @@ Trk::MultiComponentState mergeFullDistArray(
     Trk::MultiComponentState&& statesToMerge,
     const unsigned int maximumNumberOfComponents) {
   GSFUtils::Component1DArray componentsArray;
-  const int32_t n = statesToMerge.size();
+  const int n = statesToMerge.size();
   componentsArray.numComponents = n;
-  for (int32_t i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     const AmgSymMatrix(5)* measuredCov = statesToMerge[i].params->covariance();
     const AmgVector(5)& parameters = statesToMerge[i].params->parameters();
     // Fill in infomation
@@ -47,8 +47,8 @@ Trk::MultiComponentState mergeFullDistArray(
       findMerges(componentsArray, maximumNumberOfComponents);
 
   // Do the full 5D calculations of the merge
-  const int32_t numMerges = KL.numMerges;
-  for (int32_t i = 0; i < numMerges; ++i) {
+  const int numMerges = KL.numMerges;
+  for (int i = 0; i < numMerges; ++i) {
     const int8_t mini = KL.merges[i].To;
     const int8_t minj = KL.merges[i].From;
     Trk::MultiComponentStateCombiner::combineWithWeight(statesToMerge[mini],
