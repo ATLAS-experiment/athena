@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DetDescrCondTPCnv )
@@ -8,13 +8,20 @@ find_package( CLHEP )
 find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( DetDescrCondTPCnv
-                         src/*.cxx
+atlas_add_library( DetDescrCondTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS DetDescrCondTPCnv
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib DetDescrConditions Identifier RootConversions
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} )
+
+atlas_add_tpcnv_library( DetDescrCondTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS DetDescrCondTPCnv
                          PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                          PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                         LINK_LIBRARIES LINK_LIBRARIES AthenaPoolCnvSvcLib DetDescrConditions Identifier RootConversions
-                         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} )
+                         LINK_LIBRARIES DetDescrCondTPCnv )
 
 atlas_add_dictionary( DetDescrCondTPCnvDict
                       DetDescrCondTPCnv/DetDescrCondTPCnvDict.h
