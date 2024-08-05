@@ -422,6 +422,12 @@ public:
 
 
   /**
+   * @brief Return a set of identifiers for decorations for this object.
+   */
+  const SG::auxid_set_t& getDecorIDs() const;
+
+
+  /**
    * @brief Return a set of identifiers for writable data items
    *        in this store.
    *

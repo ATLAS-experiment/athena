@@ -124,6 +124,12 @@ public:
 
 
   /**
+   * @brief Return a set of identifiers for decorations in this store.
+   */
+  virtual const SG::auxid_set_t& getDecorIDs() const = 0;
+
+
+  /**
    * @brief Test if a particular variable is tagged as a decoration.
    * @param auxid The identifier of the desired aux data item.
    */

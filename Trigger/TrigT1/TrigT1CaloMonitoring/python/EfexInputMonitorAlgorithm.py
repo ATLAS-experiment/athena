@@ -17,9 +17,9 @@ def EfexInputMonitoringConfig(flags):
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
     helper = L1CaloMonitorCfgHelper(flags,CompFactory.EfexInputMonitorAlgorithm,'EfexInputMonAlg')
 
-    helper.defineHistogram('LBN,Error;h_summary',title='EfexInput Monitoring summary;LBN;Error',
+    helper.defineHistogram('LBN,ErrorAndLocation;h_summary',title='EfexInput Monitoring summary;LBN;Error:TowerID',
                               path="Expert/Inputs/eFEX/detail",
-                              hanConfig={"description":"Notes: 'BadEMStatus:[E]EPPMMF' and 'BadHadStatus:[E]EPPMMF', where E=eta index, P=phi index,M=module,F=fpga"},
+                              hanConfig={"description":"TowerID format: '[E]EPPMMF', where E=eta index, P=phi index,M=module,F=fpga"},
                               fillGroup="errors",
                               type='TH2I',
                               xbins=1,xmin=0,xmax=1,

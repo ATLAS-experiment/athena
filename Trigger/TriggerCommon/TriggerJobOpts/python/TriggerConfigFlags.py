@@ -137,7 +137,6 @@ def createTriggerFlags(doTriggerRecoFlags):
                   [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI],
                   help='select ROB prefetching types, empty list disables prefetching')
 
-    # if 1, Run1 decoding version is set; if 2, Run2; if 3, Run 3
     def EDMVersion(flags):
         """Determine Trigger EDM version based on the input file."""
         _log = logging.getLogger('TriggerConfigFlags.EDMVersion')
@@ -172,8 +171,12 @@ def createTriggerFlags(doTriggerRecoFlags):
                 _log.info("Determined EDMVersion to be 2, because TrigNavigation found in POOL file")
                 return 2
             elif any("HLTNav_Summary" in s for s in collections):
-                _log.info("Determined EDMVersion to be 3, because HLTNav_Summary.* found in POOL file")
-                return 3
+                if flags.GeoModel.Run >= LHCPeriod.Run4:
+                    _log.info("Determined EDMVersion to be 4, because HLTNav_Summary.* found in POOL file and GeoModel.Run >= 4")
+                    return 4
+                else:
+                    _log.info("Determined EDMVersion to be 3, because HLTNav_Summary.* found in POOL file")
+                    return 3
             elif not flags.Input.Collections:
                 # Special case for empty input files (can happen in merge jobs on the grid)
                 # The resulting version doesn't really matter as there's nothing to be done, but we want a valid configuration

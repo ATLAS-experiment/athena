@@ -36,8 +36,8 @@ flags.DQ.enableLumiAccess = False # in fact, we don't need lumi access for now .
 flags.DQ.FileKey = "" if partition.isValid() else "EXPERT" # histsvc file "name" to record to - Rafal asked it to be blank @ P1 ... means monitoring.root will be empty
 flags.Output.HISTFileName = os.getenv("L1CALO_ATHENA_JOB_NAME","") + "monitoring.root" # control names of monitoring root file - ensure each online monitoring job gets a different filename to avoid collision between processes
 flags.DQ.useTrigger = False # don't do TrigDecisionTool in MonitorCfg helper methods
-# flag for saying if inputs should be decoded or not
-flags.Trigger.L1.doCaloInputs = True
+flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
+flags.Trigger.enableL1CaloPhase1 = True # used by this script to turn on/off the simulation
 # flags for rerunning simulation
 flags.Trigger.L1.doeFex = True
 flags.Trigger.L1.dojFex = True
@@ -57,7 +57,26 @@ else:
 
 # now parse
 
-parser = flags.getArgumentParser()
+parser = flags.getArgumentParser(epilog="""
+Extra flags are specified after a " -- " and the following are most relevant bool flags for this script:
+  
+  Trigger.enableL1CaloPhase1 : turn on/off the offline simulation
+  DQ.doMonitoring            : turn on/off the monitoring
+  Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring
+  Trigger.L1.doeFex          : controls efex simulation and monitoring
+  Trigger.L1.dojFex          : controls jfex simulation and monitoring
+  Trigger.L1.dogFex          : controls gfex simulation and monitoring
+  DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not (default is false)
+  PerfMon.doFullMonMT        : if true, gives extra printout about execution time of algorithms and memory use etc
+
+E.g. to run just the jFex monitoring, without offline simulation, you can do:
+
+athena TrigT1CaloMonitoring/L1CalPhase1Monitoring.py .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
+
+""")
+import argparse
+#class combinedFormatter(parser.formatter_class,argparse.RawDescriptionHelpFormatter): pass
+parser.formatter_class = argparse.RawDescriptionHelpFormatter
 parser.add_argument('--runNumber',default=None,help="specify to select a run number")
 parser.add_argument('--lumiBlock',default=None,help="specify to select a lumiBlock")
 parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
@@ -67,6 +86,11 @@ parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specif
 parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config")
 args = flags.fillFromArgs(parser=parser)
 if args.runNumber is not None:
+  # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
+  # e.g: event-lookup -D RAW "477048 3459682284"
+  # use GUID result to do:
+  # ~/getRucioLFNbyGUID.sh 264a4214-e922-ef11-ab28-b8cef6444828
+  # gives a filename (last part): data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0975._SFO-13._0001.data
   from glob import glob
   if args.lumiBlock is None: args.lumiBlock="*"
   print("Looking up files in atlastier0 for run",args.runNumber,"lb =",args.lumiBlock)
@@ -96,15 +120,25 @@ if len(flags.Input.Files)>0:
     # this happens with AOD data files, but this is incompatible with the setup of the LVL1ConfigSvc
     flags.Trigger.triggerConfig="DB" # so force onto DB usage
 
+if flags.Exec.MaxEvents == 0:
+  # in this mode, ensure all monitoring activated, so that generated han config is complete
+  flags.DQ.doMonitoring=True
+  flags.Trigger.L1.doCaloInputs=True
+  flags.Trigger.L1.doeFex=True
+  flags.Trigger.L1.dojFex=True
+  flags.Trigger.L1.dogFex=True
+  flags.DQ.useTrigger=True # enables JetEfficiency algorithms
+
 # due to https://gitlab.cern.ch/atlas/athena/-/merge_requests/65253 must now specify geomodel explicitly if cant take from input file, but can autoconfigure it based on LHCPeriod set above
 if flags.GeoModel.AtlasVersion is None:
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
-# add detector conditions flags required for rerunning simulation
-# needs input files declared if offline, hence doing after parsing
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
+if flags.Trigger.enableL1CaloPhase1:
+  # add detector conditions flags required for rerunning simulation
+  # needs input files declared if offline, hence doing after parsing
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
+  setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 cfg = MainServicesCfg(flags)
@@ -193,18 +227,10 @@ if partition.isValid() or (flags.Input.Format != Format.POOL and not flags.Input
       ),sequenceName='AthAlgSeq'
     )
 
-#from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
-#cfg.merge( LArOnOffIdMappingSCCfg(flags) )
-# from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-# cfg.merge(LArGMCfg(flags))
-
 # rerun sim if required
-if flags.Trigger.L1.doeFex or flags.Trigger.L1.dojFex or flags.Trigger.L1.dogFex or flags.Trigger.L1.doCaloInputs:
+if flags.Trigger.enableL1CaloPhase1:
   from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
   cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="DAODSim" if flags.Input.Format == Format.POOL else ""))
-
-  # ensure reloading OTF masking every event if running online monitoring
-  cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
 
   # do otf masking:
   # from IOVDbSvc.IOVDbSvcConfig import addFolders,addOverride
@@ -230,7 +256,7 @@ if flags.DQ.doMonitoring:
     #  Adjust eFEX containers to be monitored to also monitor the sim RoI
     for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + "Sim" for x in l ]
     # monitoring of simulation vs hardware
-    if not flags.Input.isMC:
+    if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
       cfg.merge(EfexSimMonitoringConfig(flags))
     # EfexSimMonitorAlgorithm = cfg.getEventAlgo('EfexSimMonAlg')
@@ -241,13 +267,15 @@ if flags.DQ.doMonitoring:
   if flags.Trigger.L1.dojFex:
     from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
     cfg.merge(JfexMonitoringConfig(flags))
-    from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
-    cfg.merge(JfexSimMonitoringConfig(flags))
+    if flags.Trigger.enableL1CaloPhase1:
+      from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
+      cfg.merge(JfexSimMonitoringConfig(flags))
   if flags.Trigger.L1.dogFex:
     from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
     cfg.merge(GfexMonitoringConfig(flags))
-    from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
-    cfg.merge(GfexSimMonitoringConfig(flags))
+    if flags.Trigger.enableL1CaloPhase1:
+      from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
+      cfg.merge(GfexSimMonitoringConfig(flags))
     # generally can't include efficiency monitoring because requires too many things we don't have
     # but b.c. alg requires TrigDecisionTool, we activate it if DQ.useTrigger explicitly set
     if flags.DQ.useTrigger:
@@ -344,6 +372,9 @@ if flags.Output.AODFileName != "":
   from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
   cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
+# ensure reloading OTF masking every event if running online monitoring
+if "MaskedSCCondAlg" in cfg.getCondAlgos(): cfg.getCondAlgo("MaskedSCCondAlg").ReloadEveryEvent=flags.Common.isOnline
+
 # example of adding user algorithm
 # cfg.addEventAlgo(CompFactory.AnotherPackageAlg(),sequenceName="AthAlgSeq")
 
@@ -375,6 +406,8 @@ if cfg.getService("StoreGateSvc").Dump:
 
 if flags.Exec.MaxEvents==0:
   # create a han config file if running in config-only mode
+  # command used to generate official config:
+  #   athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py --filesInput /eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data --evtMax 0 -- DQ.useTrigger=True
   from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
   L1CaloMonitorCfgHelper.printHanConfig()
   sys.exit(0)

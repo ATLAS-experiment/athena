@@ -62,7 +62,7 @@ namespace xAOD {
         m_topStore( topStore ), m_structMode( mode ), m_basketSize( basketSize ),
         m_splitLevel( splitLevel ), m_inTree( 0 ), m_outTree( 0 ),
         m_inputScanned( kFALSE ), m_selection(), m_transientStore( 0 ),
-        m_auxIDs(), m_vecs(), m_size( 0 ), m_locked( kFALSE ), m_isDecoration(),
+        m_auxIDs(), m_decorIDs(), m_vecs(), m_size( 0 ), m_locked( kFALSE ), m_isDecoration(),
         m_mutex1(), m_mutex2(),
         m_branches(), m_branchesWritten(), m_missingBranches() {
 
@@ -238,6 +238,7 @@ namespace xAOD {
       if( m_transientStore && ( getall != 99 ) ) {
          // Remove the transient auxiliary IDs from the internal list:
          m_auxIDs -= m_transientStore->getAuxIDs();
+         m_decorIDs -= m_transientStore->getDecorIDs();
          // Delete the object:
          delete m_transientStore;
          m_transientStore = 0;
@@ -250,6 +251,7 @@ namespace xAOD {
                continue;
             }
             m_auxIDs.erase( auxid );
+            m_decorIDs.erase( auxid );
          }
       }
 
@@ -333,6 +335,11 @@ namespace xAOD {
       return m_auxIDs;
    }
 
+   const TAuxStore::auxid_set_t& TAuxStore::getDecorIDs() const {
+
+      return m_decorIDs;
+   }
+
    void* TAuxStore::getDecoration( auxid_t auxid, size_t size,
                                    size_t capacity ) {
 
@@ -386,6 +393,9 @@ namespace xAOD {
                                                          capacity );
          if( result && ( nids != m_transientStore->getAuxIDs().size() ) ) {
             m_auxIDs.insert( auxid );
+            if( m_transientStore->isDecoration( auxid ) ) {
+               m_decorIDs.insert( auxid );
+            }
          }
          // Return the memory address from the transient store:
          return result;
@@ -399,6 +409,7 @@ namespace xAOD {
             m_isDecoration.resize( auxid + 1 );
          }
          m_isDecoration[ auxid ] = ::kTRUE;
+         m_decorIDs.insert( auxid );
       }
 
       // Return the pointer made by getData(...):
@@ -451,6 +462,7 @@ namespace xAOD {
            old_id_set -= m_transientStore->getAuxIDs();
            // old_id_set is now the set of ids that were cleared.
            m_auxIDs -= old_id_set;
+           m_decorIDs.clear();
          }
       }
 
@@ -467,6 +479,7 @@ namespace xAOD {
      if( m_transientStore ) {
        m_transientStore->lockDecoration (auxid);
      }
+     m_decorIDs.erase( auxid );
    }
 
 

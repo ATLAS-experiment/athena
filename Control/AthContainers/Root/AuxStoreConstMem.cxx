@@ -6,7 +6,7 @@
  * @file AthContainers/AuxStoreConstMem.h
  * @author scott snyder <snyder@bnl.gov>
  * @date Sep, 2021
- * @brief 
+ * @brief IConstAuxStore implementation referencing external buffers.
  */
 
 
@@ -103,6 +103,16 @@ void* AuxStoreConstMem::getDecoration (auxid_t /*auxid*/, size_t /*size*/, size_
 const SG::auxid_set_t& AuxStoreConstMem::getAuxIDs() const
 {
   return m_auxids;
+}
+
+
+/**
+ * @brief Return a set of identifiers for decorations in this store.
+ */
+const SG::auxid_set_t& AuxStoreConstMem::getDecorIDs() const
+{
+  static const auxid_set_t empty;
+  return empty;
 }
 
 

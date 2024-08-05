@@ -199,6 +199,7 @@ void test1()
   assert (ids.find (ityp1) != ids.end());
   assert (ids.find (ityp2) != ids.end());
   assert (ids.find (ftyp1) != ids.end());
+  assert (s.getDecorIDs().empty());
 
   assert (s.getAuxIDs() == s.getWritableAuxIDs());
 
@@ -276,7 +277,9 @@ void test2()
   s.lock();
 
   SG::auxid_set_t idset {ityp1, ityp2};
+  SG::auxid_set_t decorset;
   assert (s.getAuxIDs() == idset);
+  assert (s.getDecorIDs() == decorset);
 
   assert (i1 == s.getData(ityp1));
   //EXPECT_EXCEPTION (SG::ExcStoreLocked, s.getData(ityp1, 10, 20));
@@ -297,8 +300,10 @@ void test2()
   assert (i3 == s.getDecoration (ityp3, 10, 20));
 
   idset.insert (ityp3);
+  decorset.insert (ityp3);
   assert (idset.size() == 3);
   assert (s.getAuxIDs() == idset);
+  assert (s.getDecorIDs() == decorset);
 
   assert (!s.isDecoration (ityp1));
   assert (!s.isDecoration (ityp2));
@@ -307,8 +312,10 @@ void test2()
 
   assert (s.clearDecorations() == true);
   idset.erase (ityp3);
+  decorset.erase (ityp3);
   assert (idset.size() == 2);
   assert (s.getAuxIDs() == idset);
+  assert (s.getDecorIDs() == decorset);
   assert (s.getData(ityp3) == 0);
   assert (s.getData(ityp1) == i1);
   assert (s.getData(ityp2) == i2);
@@ -320,6 +327,7 @@ void test2()
 
   assert (s.clearDecorations() == false);
   assert (s.getAuxIDs() == idset);
+  assert (s.getDecorIDs() == decorset);
 
   i3 = reinterpret_cast<int*> (s.getDecoration(ityp3, 10, 20));
   assert (i3 != 0);
@@ -329,6 +337,9 @@ void test2()
   assert (!s.isDecoration (ityp9));
   assert ( s.isDecoration (ityp3));
 
+  decorset.insert (ityp3);
+  assert (s.getDecorIDs() == decorset);
+
   s.lockDecoration (ityp3);
   EXPECT_EXCEPTION (SG::ExcStoreLocked, s.getDecoration (ityp3, 10, 20));
   assert (i3 == s.getData (ityp3));
@@ -337,6 +348,9 @@ void test2()
   assert (!s.isDecoration (ityp2));
   assert (!s.isDecoration (ityp9));
   assert (!s.isDecoration (ityp3));
+
+  decorset.erase (ityp3);
+  assert (s.getDecorIDs() == decorset);
 
   EXPECT_EXCEPTION (SG::ExcStoreLocked, s.resize(100));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, s.reserve(100));

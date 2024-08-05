@@ -209,6 +209,17 @@ const SG::auxid_set_t& AuxVectorData::getAuxIDs() const
 
 
 /**
+ * @brief Return a set of identifiers for decorations for this object.
+ */
+const SG::auxid_set_t& AuxVectorData::getDecorIDs() const
+{
+  if (getConstStore())
+    return getConstStore()->getDecorIDs();
+  return s_emptySet;
+}
+
+
+/**
  * @brief Return a set of identifiers for writable data items
  *        in this store.
  *

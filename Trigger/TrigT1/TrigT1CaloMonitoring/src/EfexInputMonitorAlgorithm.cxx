@@ -90,6 +90,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         timeUntilCapped = std::min(int(timeUntil),199);
     }
     auto Decision = Monitored::Scalar<std::string>("Error","");
+    auto ErrorAndLocation = Monitored::Scalar<std::string>("ErrorAndLocation","");
 
     auto TowerId = Monitored::Scalar<int32_t>("TowerId",0);
     auto Towereta = Monitored::Scalar<float>("TowerEta",0.0);
@@ -210,10 +211,14 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           SlotSCID = itr->second.second;
                       }
                   }
-                  fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
+                  ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+                  fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID);
               }
           }
-          fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount);
+          // since lar invalid codes will be treated as a 0 energy, don't fill into plot
+          if (i==10 || TowerCount != 1022) {
+              fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount);
+          }
       }
   }
 

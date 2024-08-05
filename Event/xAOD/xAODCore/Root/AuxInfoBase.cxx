@@ -252,6 +252,16 @@ namespace xAOD {
       return getWritableAuxIDs();
    }
 
+   const AuxInfoBase::auxid_set_t&
+   AuxInfoBase::getDecorIDs() const {
+
+      if( m_store ) {
+         return m_store->getDecorIDs();
+      }
+      static const auxid_set_t empty;
+      return empty;
+   }
+
    void* AuxInfoBase::getDecoration( auxid_t auxid, size_t size,
                                      size_t capacity ) {
      {

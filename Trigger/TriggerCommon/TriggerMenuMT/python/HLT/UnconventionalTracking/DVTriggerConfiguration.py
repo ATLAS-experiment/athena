@@ -74,8 +74,6 @@ def DVRecoFragment(flags):
     return selAcc
 
 
-
-
 def DVRecoSequenceGenCfg(flags):
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 

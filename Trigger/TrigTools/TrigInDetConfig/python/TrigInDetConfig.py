@@ -78,17 +78,17 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
   acc = ComponentAccumulator()
   if in_view:
     acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
-      name = viewname + "_" + flags.Tracking.ActiveConfig.input_name,
+      name = "LRTInputVDV_"+viewname + "_" + flags.Tracking.ActiveConfig.input_name,
       DataObjects = {
         ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
         ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
-        ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
-        ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
-        ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
       } | set(extra_view_inputs)
     ) )
 
-    acc.merge(seq.viewDataVerifierAfterDataPrep(viewname))
+    #need to make sure the cache containers are available
+    acc.merge(seq.viewDataVerifier(viewname))
+    acc.merge(seq.dataPreparation())
+    acc.merge(seq.spacePointFormation())
     
   acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
   
@@ -113,7 +113,7 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
 
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.input_name,
                                                       DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                                                                    ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
+                                                                    ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{rois}' ),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
                                                                     ( ('ActsTrk::TrackContainer' if "Acts" in flags.Tracking.ActiveConfig.trkTracks_FTF else 'TrackCollection'), flags.Tracking.ActiveConfig.trkTracks_FTF )} )
 
