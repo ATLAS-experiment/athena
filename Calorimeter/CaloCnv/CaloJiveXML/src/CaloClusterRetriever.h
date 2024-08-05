@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOCLUSTERRETRIEVER_H
 #define JIVEXML_CALOCLUSTERRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <map>
 
 #include "CaloEvent/CaloClusterContainer.h"
 #include "JiveXML/IDataRetriever.h"
@@ -15,7 +12,9 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
-
+#include "JiveXML/DataType.h" //DataMap typedef
+#include <string>
+#include <vector>
 namespace JiveXML{
   
   /**

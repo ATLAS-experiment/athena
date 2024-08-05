@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BadLArRetriever.h"
@@ -7,6 +7,7 @@
 #include "AthenaKernel/Units.h"
 
 #include "EventContainers/SelectAllObject.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArElecCalib/ILArPedestal.h"
@@ -90,71 +91,57 @@ namespace JiveXML {
     ATH_MSG_DEBUG( "getBadLArData()"  );
 
     DataMap DataMap;
+    const auto nCells = cellContainer->size();
+    DataVect phi; phi.reserve(nCells);
+    DataVect eta; eta.reserve(nCells);
+    DataVect energy; energy.reserve(nCells);
+    DataVect idVec; idVec.reserve(nCells);
+    DataVect channel; channel.reserve(nCells);
+    DataVect feedThrough; feedThrough.reserve(nCells);
+    DataVect slot; slot.reserve(nCells);
 
-    DataVect phi; phi.reserve(cellContainer->size());
-    DataVect eta; eta.reserve(cellContainer->size());
-    DataVect energy; energy.reserve(cellContainer->size());
-    DataVect idVec; idVec.reserve(cellContainer->size());
-    DataVect channel; channel.reserve(cellContainer->size());
-    DataVect feedThrough; feedThrough.reserve(cellContainer->size());
-    DataVect slot; slot.reserve(cellContainer->size());
 
     char rndStr[30]; // for rounding (3 digit precision)
-
     CaloCellContainer::const_iterator it1 = cellContainer->beginConstCalo(CaloCell_ID::LAREM);
     CaloCellContainer::const_iterator it2 = cellContainer->endConstCalo(CaloCell_ID::LAREM);
-
-
     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
     const LArOnOffIdMapping* cabling{*cablingHdl};
-      
     const LArOnlineID* onlineId = nullptr;
     if ( detStore()->retrieve(onlineId, "LArOnlineID").isFailure()) {
       ATH_MSG_ERROR( "in getBadLArData(),Could not get LArOnlineID!"  );
     }
 
     if (m_doBadLAr && cabling) {
-
       double energyGeV;
-
       ATH_MSG_DEBUG( "Start iterator loop over cells"  );
-      
       for(;it1!=it2;++it1){
-
-	if( !(*it1)->badcell() ) continue;
-	//if( (*it1)->energy() < m_cellThreshold) continue;
-	
-	if ((((*it1)->provenance()&0xFF)!=0xA5)&&m_cellConditionCut) continue; // check full conditions for LAr
-	//Identifier cellid = (*it1)->ID(); 
-	
-	HWIdentifier LArhwid = cabling->createSignalChannelIDFromHash((*it1)->caloDDE()->calo_hash());
-	
-	energyGeV = (*it1)->energy()*(1./GeV);
+        if( !(*it1)->badcell() ) continue;        
+        if ((((*it1)->provenance()&0xFF)!=0xA5)&&m_cellConditionCut) continue; // check full conditions for LAr        
+        HWIdentifier LArhwid = cabling->createSignalChannelIDFromHash((*it1)->caloDDE()->calo_hash());
+        energyGeV = (*it1)->energy()*(1./GeV);
         if (energyGeV == 0) energyGeV = 0.001; // 1 MeV due to LegoCut > 0.0 (couldn't be >= 0.0) 
-	energy.push_back(DataType( gcvt( energyGeV, m_cellEnergyPrec, rndStr) ));
-	
-	idVec.push_back(DataType((Identifier::value_type)(*it1)->ID().get_compact() ));
-	phi.push_back(DataType((*it1)->phi()));
-	eta.push_back(DataType((*it1)->eta()));
-	channel.push_back(DataType(onlineId->channel(LArhwid))); 
-	feedThrough.push_back(DataType(onlineId->feedthrough(LArhwid))); 
-	slot.push_back(DataType(onlineId->slot(LArhwid))); 
 
+        energy.emplace_back( gcvt( energyGeV, m_cellEnergyPrec, rndStr) );
+        idVec.emplace_back((Identifier::value_type)(*it1)->ID().get_compact() );
+        phi.emplace_back((*it1)->phi());
+        eta.emplace_back((*it1)->eta());
+        channel.emplace_back(onlineId->channel(LArhwid)); 
+        feedThrough.emplace_back(onlineId->feedthrough(LArhwid)); 
+        slot.emplace_back(onlineId->slot(LArhwid)); 
       } // end cell iterator
-
     } // doBadLAr
-
     // write values into DataMap
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["energy"] = energy;
-    DataMap["id"] = idVec;
-    DataMap["channel"] = channel;
-    DataMap["feedThrough"] = feedThrough;
-    DataMap["slot"] = slot;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["energy"] = std::move(energy);
+    DataMap["id"] = std::move(idVec);
+    DataMap["channel"] = std::move(channel);
+    DataMap["feedThrough"] = std::move(feedThrough);
+    DataMap["slot"] = std::move(slot);
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " , collection: " << dataTypeName()
-                   << " retrieved with " << phi.size() << " entries" );
+                   << " retrieved with " << nEntries << " entries" );
 
     //All collections retrieved okay
     return DataMap;

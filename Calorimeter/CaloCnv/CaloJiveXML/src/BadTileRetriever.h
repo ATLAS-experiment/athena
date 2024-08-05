@@ -1,26 +1,22 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_BADTILERETRIEVER_H
 #define JIVEXML_BADTILERETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
+
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "JiveXML/DataType.h" //DataMap typedef
 
-class IToolSvc;
+#include <string>
 
+class CaloCell_ID;
 class Identifier;
-class CaloCellContainer;
 
 namespace JiveXML{
   

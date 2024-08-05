@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BadTileRetriever.h"
@@ -53,11 +53,9 @@ namespace JiveXML {
    */
 
   StatusCode BadTileRetriever::initialize() {
-
     ATH_MSG_DEBUG( "Initialising Tool"  );
     ATH_CHECK( detStore()->retrieve (m_calocell_id, "CaloCell_ID") );
     ATH_CHECK(m_sgKey.initialize());
-
     return StatusCode::SUCCESS;	
   }
   
@@ -65,21 +63,17 @@ namespace JiveXML {
    * Tile data retrieval from chosen collection
    */
   StatusCode BadTileRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
-    
     ATH_MSG_DEBUG( "in retrieve()"  );
-
     SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
     if (!cellContainer.isValid()){
 	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
-    }
-    else{
+    } else {
       if(m_tile){
         DataMap data = getBadTileData(&(*cellContainer));
         ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &data) );
         ATH_MSG_DEBUG( "Bad Tile retrieved"  );
       }
     }
-
     //Tile cells retrieved okay
     return StatusCode::SUCCESS;
   }
@@ -90,64 +84,44 @@ namespace JiveXML {
    * @param FormatTool the tool that will create formated output from the DataMap
    */
   const DataMap BadTileRetriever::getBadTileData(const CaloCellContainer* cellContainer) {
-    
     ATH_MSG_DEBUG( "getBadTileData()"  );
     char rndStr[30];
     DataMap DataMap;
-
     DataVect phi; phi.reserve(cellContainer->size());
     DataVect eta; eta.reserve(cellContainer->size());
     DataVect idVec; idVec.reserve(cellContainer->size());
     DataVect energyVec; energyVec.reserve(cellContainer->size());
-
-//    m_sub; m_sub.reserve(cellContainer->size());
     m_sub.clear();
-	  
-//Loop Over CaloCellContainer to retrieve TileCell information
-
+    //Loop Over CaloCellContainer to retrieve TileCell information
     CaloCellContainer::const_iterator it1 = cellContainer->beginConstCalo(CaloCell_ID::TILE);
     CaloCellContainer::const_iterator it2 = cellContainer->endConstCalo(CaloCell_ID::TILE);
-
     if (m_doBadTile==true) {
-
       double energyGeV;
       //int cellInd;
-
       ATH_MSG_DEBUG( "Start iterator loop over cells"  );
-
       for(;it1!=it2;++it1){
-      
-	if( !(*it1)->badcell() ) continue;
-	//if( (*it1)->energy() < m_cellThreshold ) continue;   
-	Identifier cellid = (*it1)->ID();   
-	//IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( cellid );
-	//cellInd = cellContainer->findIndex(cell_hash);
-	calcTILELayerSub(cellid);
-
+        if( !(*it1)->badcell() ) continue;
+        Identifier cellid = (*it1)->ID();   
+        calcTILELayerSub(cellid);
         energyGeV = (*it1)->energy()*(1./GeV);
-	energyVec.push_back(DataType( gcvt( energyGeV, m_cellEnergyPrec, rndStr) ));
-	
-	idVec.push_back(DataType( (Identifier::value_type)(*it1)->ID().get_compact() ));
-	phi.push_back(DataType((*it1)->phi()));
-	eta.push_back(DataType((*it1)->eta()));
-
+        energyVec.emplace_back( gcvt( energyGeV, m_cellEnergyPrec, rndStr) );
+        idVec.emplace_back( (Identifier::value_type)(*it1)->ID().get_compact() );
+        phi.emplace_back((*it1)->phi());
+        eta.emplace_back((*it1)->eta());
       } // end cell iterator
-
     } // doBadTile
     
     // write values into DataMap
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["sub"] = m_sub;
-    DataMap["id"] = idVec;
-    DataMap["energy"] = energyVec;
-    
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["sub"] = std::move(m_sub);
+    DataMap["id"] = std::move(idVec);
+    DataMap["energy"] = std::move(energyVec);
     //Be verbose
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
-
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries << " entries" );
     //All collections retrieved okay
     return DataMap;
-
   } // getTileData
 
   //-----------------------------------------------------------------------------------------------------
@@ -157,24 +131,24 @@ namespace JiveXML {
     if(m_calocell_id->is_tile_barrel(cellid))
       {
 	if(m_calocell_id->is_tile_negative(cellid))
-	  m_sub.push_back(DataType(2));
+	  m_sub.emplace_back(2);
 	else
-	  m_sub.push_back(DataType(3));
+	  m_sub.emplace_back(3);
       }
     else if(m_calocell_id->is_tile_extbarrel(cellid))
       {
 	if(m_calocell_id->is_tile_negative(cellid))
-	  m_sub.push_back(DataType(0));
+	  m_sub.emplace_back(0);
 	else
-	  m_sub.push_back(DataType(5));
+	  m_sub.emplace_back(5);
       }
     //else in ITC or scint
     else
       {
 	if(m_calocell_id->is_tile_negative(cellid))
-	  m_sub.push_back(DataType(1));
+	  m_sub.emplace_back(1);
 	else
-	  m_sub.push_back(DataType(4));
+	  m_sub.emplace_back(4);
       }
   }
 
