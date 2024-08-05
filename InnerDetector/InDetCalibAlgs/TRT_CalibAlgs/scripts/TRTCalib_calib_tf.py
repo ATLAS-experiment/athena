@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # Use arggroup to get these arguments in their own sub-section (of --help)
     trf.parser.defineArgGroup('TRTCalib_calib_tf', 'TRT r-t calibrator transform')
     
-    # Input file! Always must be RAW data 
+    # Input file!
     trf.parser.add_argument('--inputTARFile',
                             type=trfArgClasses.argFactory(trfArgClasses.argBZ2File, io='input'),
                             help='Compressed input data from TRTCalibratorMgr', group='TRTCalib_calib_tf')
