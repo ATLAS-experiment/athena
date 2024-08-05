@@ -8,6 +8,6 @@ atlas_subdir( TrkPatternParameters )
 atlas_add_library( TrkPatternParameters
                    src/*.cxx
                    PUBLIC_HEADERS TrkPatternParameters
-                   LINK_LIBRARIES TrkEventPrimitives TrkParametersBase
+                   LINK_LIBRARIES TrkEventPrimitives TrkParameters
                    PRIVATE_LINK_LIBRARIES GaudiKernel TrkSurfaces )
 

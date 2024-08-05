@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,15 +21,16 @@
 
 namespace Trk {
 
+constexpr size_t NeutralParametersDim = 5;
 // Alias declarations
-using NeutralParameters = ParametersBase<5, Neutral>;
-using NeutralCurvilinearParameters = CurvilinearParametersT<5, Neutral, PlaneSurface>;
-using NeutralAtaCone = ParametersT<5, Neutral, ConeSurface>;
-using NeutralAtaCylinder = ParametersT<5, Neutral, CylinderSurface>;
-using NeutralAtaDisc = ParametersT<5, Neutral, DiscSurface>;
-using NeutralPerigee = ParametersT<5, Neutral, PerigeeSurface>;
-using NeutralAtaPlane = ParametersT<5, Neutral, PlaneSurface>;
-using NeutralAtaStraightLine = ParametersT<5, Neutral, StraightLineSurface>;
+using NeutralParameters = ParametersBase<NeutralParametersDim, Neutral>;
+using NeutralCurvilinearParameters = CurvilinearParametersT<NeutralParametersDim, Neutral, PlaneSurface>;
+using NeutralAtaCone = ParametersT<NeutralParametersDim, Neutral, ConeSurface>;
+using NeutralAtaCylinder = ParametersT<NeutralParametersDim, Neutral, CylinderSurface>;
+using NeutralAtaDisc = ParametersT<NeutralParametersDim, Neutral, DiscSurface>;
+using NeutralPerigee = ParametersT<NeutralParametersDim, Neutral, PerigeeSurface>;
+using NeutralAtaPlane = ParametersT<NeutralParametersDim, Neutral, PlaneSurface>;
+using NeutralAtaStraightLine = ParametersT<NeutralParametersDim, Neutral, StraightLineSurface>;
 }
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug

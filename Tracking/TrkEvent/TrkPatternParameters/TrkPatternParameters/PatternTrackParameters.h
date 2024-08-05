@@ -3,24 +3,18 @@
 */
 
 /////////////////////////////////////////////////////////////////////////////////
-//  Header file for class PatternTrackParameters
-/////////////////////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-/////////////////////////////////////////////////////////////////////////////////
+// Header file for class PatternTrackParameters
 // Class for pattern track parameters
-/////////////////////////////////////////////////////////////////////////////////
-// Version 1.0 09/08/2006 I.Gavrilenko
+// author  I.Gavrilenko  09/08/2006
 /////////////////////////////////////////////////////////////////////////////////
 
 #ifndef PatternTrackParameters_H
 #define PatternTrackParameters_H
 
-#include "TrkParametersBase/ParametersCommon.h"
-#include "TrkParametersBase/Charged.h"
+#include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkPatternParameters/NoiseOnSurface.h"
-#include "CxxUtils/CachedValue.h"
 #include <cmath>
 #include <iosfwd>
 
@@ -35,7 +29,7 @@ namespace Trk {
   class PerigeeSurface     ;
   class ConeSurface        ;
 
-  class PatternTrackParameters final : public ParametersCommon<5, Trk::Charged>{
+  class PatternTrackParameters final : public BaseParameters{
     public:
       PatternTrackParameters();
       PatternTrackParameters(const PatternTrackParameters&);
@@ -73,8 +67,8 @@ namespace Trk {
       void setParametersWithCovariance(const Surface*,const double*,const AmgSymMatrix(5)&);
 
       // Convertors
-      std::unique_ptr<ParametersBase<5, Trk::Charged>> convert(bool) const;
-      bool production(const ParametersBase<5, Trk::Charged>*);
+      std::unique_ptr<TrackParameters> convert(bool) const;
+      bool production(const TrackParameters*);
 
       // Init methods
       void diagonalization (double);

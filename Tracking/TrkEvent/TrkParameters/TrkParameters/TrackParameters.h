@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,17 +19,20 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 
 namespace Trk {
+constexpr size_t TrackParametersDim = 5;
 
-// Alias declarations
-using TrackParameters = ParametersBase<5, Charged>;
-using CurvilinearParameters = CurvilinearParametersT<5, Charged, PlaneSurface>;
-using AtaCone = ParametersT<5, Charged, ConeSurface>;
-using AtaCylinder = ParametersT<5, Charged, CylinderSurface>;
-using AtaDisc = ParametersT<5, Charged, DiscSurface>;
-using Perigee = ParametersT<5, Charged, PerigeeSurface>;
-using AtaPlane = ParametersT<5, Charged, PlaneSurface>;
-using AtaStraightLine = ParametersT<5, Charged, StraightLineSurface>;
-
+// Abstract  base for Pattern Track Parameters and Track Parameters
+using BaseParameters = ParametersCommon<TrackParametersDim, Charged>;
+// Abstract base for Track Parameters
+using TrackParameters = ParametersBase<TrackParametersDim, Charged>;
+// Concrete representations of Track Parameters
+using CurvilinearParameters = CurvilinearParametersT<TrackParametersDim, Charged, PlaneSurface>;
+using AtaCone = ParametersT<TrackParametersDim, Charged, ConeSurface>;
+using AtaCylinder = ParametersT<TrackParametersDim, Charged, CylinderSurface>;
+using AtaDisc = ParametersT<TrackParametersDim, Charged, DiscSurface>;
+using Perigee = ParametersT<TrackParametersDim, Charged, PerigeeSurface>;
+using AtaPlane = ParametersT<TrackParametersDim, Charged, PlaneSurface>;
+using AtaStraightLine = ParametersT<TrackParametersDim, Charged, StraightLineSurface>;
 }
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug

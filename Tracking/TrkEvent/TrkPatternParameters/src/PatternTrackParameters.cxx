@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@
 // Conversion Trk::PatternTrackParameters to  Trk::TrackParameters
 ///////////////////////////////////////////////////////////////////
 
-std::unique_ptr<Trk::ParametersBase<5, Trk::Charged>>
+std::unique_ptr<Trk::TrackParameters>
 Trk::PatternTrackParameters::convert(bool covariance) const
 {
   std::optional<AmgSymMatrix(5)> e = std::nullopt;
