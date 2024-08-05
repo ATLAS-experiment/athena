@@ -75,24 +75,27 @@ namespace MuonR4{
         
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
         for (const auto& [chamber, collectedParts] : hitCollector) {
+            const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
+            const Amg::Transform3D  globToLoc{locToGlob.inverse()};
+            
             for (const auto& [particle, simHits]: collectedParts) {
                 const xAOD::MuonSimHit* simHit = simHits.front(); 
                 const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(simHit->identify());
-                const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt? 
-                                             reEle->measurementHash(simHit->identify()) :
-                                             reEle->layerHash(simHit->identify())};
-                const Amg::Transform3D toChamber = chamber->globalToLocalTrans(*gctx) *
-                                                   reEle->localToGlobalTrans(*gctx, trfHash);
+                const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ? 
+                                                    reEle->measurementHash(simHit->identify()) :
+                                                    reEle->layerHash(simHit->identify())};
+                
+                const Amg::Transform3D toChamber = globToLoc * reEle->localToGlobalTrans(*gctx, trfHash);
                 
                 const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
                 const Amg::Vector3D chamberDir = toChamber.linear() * xAOD::toEigen(simHit->localDirection());
 
                 /// Express the simulated hit in the center of the chamber
                 const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
-                const Amg::Vector3D chamberPos = localPos + (*lambda)*chamberDir;
+                const Amg::Vector3D chamberPos = localPos + lambda.value_or(0.)*chamberDir;
                 
-                const Amg::Vector3D globPos = chamber->localToGlobalTrans(*gctx) * chamberPos;
-                const Amg::Vector3D globDir = chamber->localToGlobalTrans(*gctx).linear() * chamberPos;
+                const Amg::Vector3D globPos = locToGlob * chamberPos;
+                const Amg::Vector3D globDir = locToGlob.linear() * chamberDir;
 
                 xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
                 truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
