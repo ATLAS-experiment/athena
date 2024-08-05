@@ -412,12 +412,11 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
               // track component on the normal to the module
               float trknormcomp = my_track.dot(my_normal);
               // Track angle
-              PixTrkAngle = atan2(trkphicomp, trknormcomp);
-              PixTrkThetaI = atan2(trketacomp, trknormcomp);
-              float length =
-                sqrt(trketacomp * trketacomp + trkphicomp * trkphicomp + trknormcomp * trknormcomp);
-              theta = acos(trknormcomp / length);
-              cotthetaz = 1. / tan(PixTrkThetaI);
+              PixTrkAngle = std::atan2(trkphicomp, trknormcomp);
+              PixTrkThetaI = std::atan2(trketacomp, trknormcomp);
+              float length = std::sqrt(trketacomp * trketacomp + trkphicomp * trkphicomp + trknormcomp * trknormcomp);
+              theta = std::acos(trknormcomp / length);
+              cotthetaz = 1. / std::tan(PixTrkThetaI);
 
               // reducing the angle in the right quadrant
               // M_PI (pi) and M_PI_2 (pi/2.) are defined in cmath.
@@ -1176,85 +1175,90 @@ TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::Trac
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map(m_assoMapContainer, ctx);
 
-  for(const auto* const ms : *measurements){
+  for (const auto* const ms : *measurements) {
     // check if it's a rot
     const Trk::RIO_OnTrack* rot = nullptr;
-    if(ms->type(Trk::MeasurementBaseType::RIO_OnTrack)){
+    if (ms->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
       rot = static_cast<const Trk::RIO_OnTrack*>(ms);
     }
-    if(!rot){
+    if (!rot) {
       ATH_MSG_DEBUG("Cannot cast measurement to RIO_OnTrack");
       continue;
     }
 
     const Identifier& id = rot->identify();
 
-    if(m_doSharedSiHits && m_pixelID->is_pixel(id)){
+    if (m_doSharedSiHits && m_pixelID->is_pixel(id)) {
       // check if split, when running TIDE
       bool hitIsSplit(false);
-      if(m_runningTIDE_Ambi){
-	const InDet::PixelClusterOnTrack* pix = nullptr;
-	if(rot->rioType(Trk::RIO_OnTrackType::PixelCluster)){
-	  pix = static_cast<const InDet::PixelClusterOnTrack*>(rot);
-	}
-	if(pix){
-	  const InDet::PixelCluster* pixPrd = pix->prepRawData();
-	  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
-	    splitProb = getClusterSplittingProbability(pixPrd);
-	  int layer = m_pixelID->layer_disk(id);
-	  if(pixPrd and splitProb.isSplit()){
-	    ATH_MSG_DEBUG("split Pixel hit found");
-	    hitIsSplit = true;
-	    nPixSplitHits++;
-	    if(m_pixelID->is_barrel(id)){
-	      if(layer==0)      nInPixSplitHits++;
-	      else if(layer==1) nNInPixSplitHits++;
-	    }
-	    else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
-	      if(layer==0)                  nInPixSplitEndcapHits++;
-	      else if(layer==1 || layer==2) nNInPixSplitEndcapHits++; // L0.5 + L1 disks
-	    }
-	  }
-	}
+      if (m_runningTIDE_Ambi) {
+        const InDet::PixelClusterOnTrack* pix = nullptr;
+        if (rot->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
+          pix = static_cast<const InDet::PixelClusterOnTrack*>(rot);
+        }
+        if (pix) {
+          const InDet::PixelCluster* pixPrd = pix->prepRawData();
+          const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
+              splitProb = getClusterSplittingProbability(pixPrd);
+          int layer = m_pixelID->layer_disk(id);
+          if (pixPrd and splitProb.isSplit()) {
+            ATH_MSG_DEBUG("split Pixel hit found");
+            hitIsSplit = true;
+            nPixSplitHits++;
+            if (m_pixelID->is_barrel(id)) {
+              if (layer == 0)
+                nInPixSplitHits++;
+              else if (layer == 1)
+                nNInPixSplitHits++;
+            } else if (m_doITk) {  // isITk && isEndCap -> ITk specific counters
+              if (layer == 0)
+                nInPixSplitEndcapHits++;
+              else if (layer == 1 || layer == 2)
+                nNInPixSplitEndcapHits++;  // L0.5 + L1 disks
+            }
+          }
+        }
       }
 
       // check if shared
       // if we are running the TIDE ambi don't count split hits as shared
-      if(!hitIsSplit){
-	if(prd_to_track_map->isShared(*(rot->prepRawData()))){
-	  ATH_MSG_DEBUG("shared Pixel hit found");
-	  nPixSharedHits++;
-	  int layer = m_pixelID->layer_disk(id);
-	  if(m_pixelID->is_barrel(id)){
-	    if(layer==0)      nInPixSharedHits++;
-	    else if(layer==1) nNInPixSharedHits++;
-	  }
-	  else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
-	    if(layer==0)                  nInPixSharedEndcapHits++;
-	    else if(layer==1 || layer==2) nNInPixSharedEndcapHits++; // L0.5 + L1 disks
-	  }
-	}
+      if (!hitIsSplit) {
+        if (prd_to_track_map->isShared(*(rot->prepRawData()))) {
+          ATH_MSG_DEBUG("shared Pixel hit found");
+          nPixSharedHits++;
+          int layer = m_pixelID->layer_disk(id);
+          if (m_pixelID->is_barrel(id)) {
+            if (layer == 0)
+              nInPixSharedHits++;
+            else if (layer == 1)
+              nNInPixSharedHits++;
+          } else if (m_doITk) {  // isITk && isEndCap -> ITk specific counters
+            if (layer == 0)
+              nInPixSharedEndcapHits++;
+            else if (layer == 1 || layer == 2)
+              nNInPixSharedEndcapHits++;  // L0.5 + L1 disks
+          }
+        }
       }
 
-    } // end pixel
+    }  // end pixel
 
-    else if(m_doSharedSiHits && m_sctID->is_sct(id)){
-      if(prd_to_track_map->isShared(*(rot->prepRawData()))){
-	ATH_MSG_DEBUG("shared SCT hit found");
-	nSCTSharedHits++;
-      }
-    }
-
-    else if(m_doSharedTRTHits && m_trtID->is_trt(id)){
-      if(prd_to_track_map->isShared(*(rot->prepRawData()))){
-	ATH_MSG_DEBUG("shared TRT hit found");
-	nTRTSharedHits++;
+    else if (m_doSharedSiHits && m_sctID->is_sct(id)) {
+      if (prd_to_track_map->isShared(*(rot->prepRawData()))) {
+        ATH_MSG_DEBUG("shared SCT hit found");
+        nSCTSharedHits++;
       }
     }
 
+    else if (m_doSharedTRTHits && m_trtID->is_trt(id)) {
+      if (prd_to_track_map->isShared(*(rot->prepRawData()))) {
+        ATH_MSG_DEBUG("shared TRT hit found");
+        nTRTSharedHits++;
+      }
+    }
   }
 
-  tp.setSummaryValue(nPixSplitHits,     xAOD::numberOfPixelSplitHits);
+  tp.setSummaryValue(nPixSplitHits, xAOD::numberOfPixelSplitHits);
   tp.setSummaryValue(nInPixSplitHits,   xAOD::numberOfInnermostPixelLayerSplitHits);
   tp.setSummaryValue(nNInPixSplitHits,  xAOD::numberOfNextToInnermostPixelLayerSplitHits);
 
