@@ -16,6 +16,7 @@
 #include <fstream>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 
 #include <CrestApi/picosha2.h>
 
@@ -1740,8 +1741,9 @@ namespace Crest {
 
   std::string CrestClient::getFileString(const std::string& path) {
     std::ifstream ifs(path);
-    return std::string((std::istreambuf_iterator<char>(ifs)),
-                       (std::istreambuf_iterator<char>()));
+    std::stringstream buf;
+    buf << ifs.rdbuf();
+    return buf.str();
   }
 
   void CrestClient::getFileList(const std::string& path) {
