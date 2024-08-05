@@ -199,37 +199,7 @@ namespace JiveXML {
       isUgly.push_back(DataType( 0 ));
       emfrac.push_back(DataType( 0.5 ));
 
-      // isGood.push_back(DataType(JetCaloQualityUtils::isGood(*itr)));
-      // isBad.push_back(DataType(JetCaloQualityUtils::isBad(*itr)));
-      // isUgly.push_back(DataType(JetCaloQualityUtils::isUgly(*itr)));
-      // emfrac.push_back(DataType(JetCaloHelper::jetEMFraction(*itr)));
 
-      /* not working anymore with xAOD - temporarily removed 
-      if (m_writeJetQuality){ // extended jet quality
-        qualityLAr.push_back(DataType(JetCaloQualityUtils::jetQualityLAr(*itr))); // this caused problems in AOD !
-        qualityTile.push_back(DataType(JetCaloQualityUtils::jetQualityTile(*itr))); // this caused problems in AOD !
-        time.push_back(DataType(JetCaloQualityUtils::jetTime(*itr))); //(*itr)->getJetTime() without sign
-        timeClusters.push_back(DataType(JetCaloQualityUtils::jetTimeClusters(*itr)));
-        n90cells.push_back(DataType(JetCaloQualityUtils::nLeadingCells(*itr,0.9))); //(*itr)->getMoment("n90")
-        n90const.push_back(DataType(JetCaloQualityUtils::nLeadingConstituents(*itr,0.9)));
-        hecf.push_back(DataType(JetCaloQualityUtils::hecF(*itr)));
-        tileGap3f.push_back(DataType(JetCaloQualityUtils::tileGap3F(*itr)));
-        fcorCell.push_back(DataType((*itr)->getMoment("BCH_CORR_CELL")));
-        fcorDotx.push_back(DataType((*itr)->getMoment("BCH_CORR_DOTX")));
-        fcorJet.push_back(DataType((*itr)->getMoment("BCH_CORR_JET")));
-        fcorJetForCell.push_back(DataType((*itr)->getMoment("BCH_CORR_JET_FORCELL")));
-        nbadcells.push_back(DataType((*itr)->getMoment("N_BAD_CELLS_CORR")));
-        int SamplingMax = CaloSampling::Unknown;
-        fracSamplingMax.push_back(DataType(JetCaloQualityUtils::fracSamplingMax(*itr, SamplingMax)));
-        sMax.push_back(DataType(SamplingMax));
-        OutOfTimeEfrac.push_back(DataType(JetCaloQualityUtils::jetOutOfTimeEnergyFraction(*itr,25)));
-      } // writeJetQuality
-      */
- 
-/* need to be added to AtlantisJava/event.dtd !
-      charge.push_back( DataType((*itr)->charge()));
-      flavourTagWeight.push_back( DataType((*itr)->getFlavourTagWeight()));
-*/
       jvf.push_back( DataType((*itr)->getMoment("JVF") ));
 
       energy.push_back( DataType((*itr)->e()/CLHEP::GeV ) );
@@ -280,10 +250,7 @@ namespace JiveXML {
  
     // further details
     // four-vectors
-/* need to be added to AtlantisJava/event.dtd !
-    DataMap["charge"] = charge;
-    DataMap["flavourTagWeight"] = flavourTagWeight;
-*/
+
     DataMap["mass"] = std::move(mass);
     DataMap["px"] = std::move(px);
     DataMap["py"] = std::move(py);

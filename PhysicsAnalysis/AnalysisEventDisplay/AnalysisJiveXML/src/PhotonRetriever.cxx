@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/PhotonRetriever.h"
@@ -40,16 +40,16 @@ namespace JiveXML {
     const PhotonContainer* photons;
     
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" );
     StatusCode sc = evtStore()->retrieve(photons, m_sgKey);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " ); 
     }else{
       DataMap data = getData(photons);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey, &data).isFailure()){
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
+	      ATH_MSG_WARNING( "Collection " << m_sgKey << " not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") Photon retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKey << ") Photon retrieved" );
       }
     }
 
@@ -61,12 +61,12 @@ namespace JiveXML {
       
     for (; iterator!=end; ++iterator) {
        if (iterator.key()!=m_sgKey) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
+          ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
             DataMap data = getData(&(*iterator));
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
-	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") Photon retrieved" << endmsg;
+	            ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
+	          }else{
+	            ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") Photon retrieved" );
             }
 	  }
     }	  
@@ -81,7 +81,7 @@ namespace JiveXML {
    */
   const DataMap PhotonRetriever::getData(const PhotonContainer* photcont) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "retrieve()" << endmsg;
+    ATH_MSG_DEBUG( "retrieve()" );
 
     DataMap DataMap;
 
@@ -130,109 +130,105 @@ namespace JiveXML {
       if (( (*photonItr)->author()) == 0x10){ photonAuthor = "rconv"; photonLabel += "_recoveredconversion"; }
       if (( (*photonItr)->author()) == 0x4){ photonAuthor = "photon"; photonLabel += "_photon"; }
       if ( (*photonItr)->isem(egammaPIDObs::PhotonLoose)==0){
-	  photonLabel += "_Loose";
-	  photonIsEMString = "Loose"; // assume that hierarchy is obeyed !
+	      photonLabel += "_Loose";
+	      photonIsEMString = "Loose"; // assume that hierarchy is obeyed !
       }  
       if ( (*photonItr)->isem(egammaPIDObs::PhotonTight)==0){
-	  photonLabel += "_Tight";
-	  photonIsEMString = "Tight"; // assume that hierarchy is obeyed !
+	      photonLabel += "_Tight";
+	      photonIsEMString = "Tight"; // assume that hierarchy is obeyed !
       }  
       if ( (*photonItr)->isem(egammaPIDObs::PhotonLooseAR)==0){
-	  photonLabel += "_LooseAR";
+	      photonLabel += "_LooseAR";
       }  
       if ( (*photonItr)->isem(egammaPIDObs::PhotonTightAR)==0){
-	  photonLabel += "_TightAR";
+	      photonLabel += "_TightAR";
       }  
       if ( (*photonItr)->isem(egammaPIDObs::PhotonTightARIso)==0){
-	  photonLabel += "_TightARIso";
+	       photonLabel += "_TightARIso";
       }  
       if ( (*photonItr)->isem(egammaPIDObs::PhotonTightIso)==0){
-	  photonLabel += "_TightIso";
+	      photonLabel += "_TightIso";
       }  
 
-      phi.push_back(DataType((*photonItr)->phi()));
-      eta.push_back(DataType((*photonItr)->eta()));
-      pt.push_back(DataType((*photonItr)->pt()/CLHEP::GeV));
-      mass.push_back(DataType((*photonItr)->m()/CLHEP::GeV));
-      energy.push_back( DataType((*photonItr)->e()/CLHEP::GeV ) );
-      px.push_back( DataType((*photonItr)->px()/CLHEP::GeV ) );
-      py.push_back( DataType((*photonItr)->py()/CLHEP::GeV ) );
-      pz.push_back( DataType((*photonItr)->pz()/CLHEP::GeV ) );
+      phi.emplace_back((*photonItr)->phi());
+      eta.emplace_back((*photonItr)->eta());
+      pt.emplace_back((*photonItr)->pt()/CLHEP::GeV);
+      mass.emplace_back((*photonItr)->m()/CLHEP::GeV);
+      energy.emplace_back((*photonItr)->e()/CLHEP::GeV  );
+      px.emplace_back((*photonItr)->px()/CLHEP::GeV  );
+      py.emplace_back((*photonItr)->py()/CLHEP::GeV  );
+      pz.emplace_back((*photonItr)->pz()/CLHEP::GeV  );
 
-      MCdataType = (*photonItr)->dataType();
-      // if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << " Which MC datatype, fast or full ? " << m_dataType() << " (" << m_sgKey << ")" << endmsg;
-  
+      MCdataType = (*photonItr)->dataType();  
       if (MCdataType != 3){ // full simulation
-          isEM.push_back( DataType((**photonItr).isem()) );
+          isEM.emplace_back((**photonItr).isem() );
 // do associations:
           const ElementLink<CaloClusterContainer> clusterLink = (*photonItr)->clusterElementLink();
           if (clusterLink.isValid()) {
             clusterKey = clusterLink.dataID(); // Storegate key of container 
             clusterIndex = clusterLink.index(); // index number inside the container 
-            clusterKeyVec.push_back(DataType( clusterKey ));
-	    clusterIndexVec.push_back(DataType( clusterIndex ));
+            clusterKeyVec.emplace_back( clusterKey );
+	          clusterIndexVec.emplace_back( clusterIndex );
           } else { // no clusterLink
-	    clusterKeyVec.push_back(DataType( "none" ));
-	    clusterIndexVec.push_back(DataType( -1 ));
+	          clusterKeyVec.emplace_back( "none" );
+	          clusterIndexVec.emplace_back( -1 );
           }
 	  /// get shower variables. Booked in AtlantisJava/event.dtd:
           // emWeight|et37|etCone|etHad1|f1|fracs1|pionWeight
 	  const EMShower* emShower = (*photonItr)->detail<EMShower>("egDetailAOD");
 	  if (emShower) {
-	    //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "found photon shower, example wtots=" 
-	    //      << emShower->parameter(egammaParameters::wtots1) << endmsg;
-	    f1Vec.push_back(    DataType( emShower->parameter(egammaParameters::f1) )); 
-            etConeVec.push_back(DataType( emShower->parameter(egammaParameters::etcone20)));
-            fracs1Vec.push_back(DataType( emShower->parameter(egammaParameters::fracs1)));
-            et37Vec.push_back(   DataType( emShower->parameter(egammaParameters::e237)));
-          }else{ //placeholders if no shower available
-	    f1Vec.push_back( DataType( -1.)); 
-            etConeVec.push_back(DataType( -1. ));
-            fracs1Vec.push_back(DataType( -1. ));
-            et37Vec.push_back( DataType( -1.));
-          }
+      f1Vec.emplace_back( emShower->parameter(egammaParameters::f1) ); 
+      etConeVec.emplace_back( emShower->parameter(egammaParameters::etcone20));
+      fracs1Vec.emplace_back( emShower->parameter(egammaParameters::fracs1));
+      et37Vec.emplace_back(  emShower->parameter(egammaParameters::e237));
+    }else{ //placeholders if no shower available
+      f1Vec.emplace_back( -1.); 
+      etConeVec.emplace_back( -1. );
+      fracs1Vec.emplace_back( -1. );
+      et37Vec.emplace_back( -1.);
+    }
         } else {  // fast simulation: just placeholders
-          isEM.push_back( DataType( 0 ) );
-          clusterKeyVec.push_back(DataType( "none" ));
-          clusterIndexVec.push_back(DataType( -1 ));
+          isEM.emplace_back( 0  );
+          clusterKeyVec.emplace_back( "none" );
+          clusterIndexVec.emplace_back( -1 );
           f1Vec.push_back( -1.); 
-          etConeVec.push_back(DataType( -1. ));
-          fracs1Vec.push_back(DataType( -1. ));
-          et37Vec.push_back(DataType( -1. ));
+          etConeVec.emplace_back( -1. );
+          fracs1Vec.emplace_back( -1. );
+          et37Vec.emplace_back( -1. );
           photonLabel += "_fastSim";
           photonIsEMString = "fastSim";
-	}
-        author.push_back( DataType(photonAuthor ) );
-        label.push_back( DataType( photonLabel ) );
-        isEMString.push_back( DataType( photonIsEMString ) );
+	  }
+        author.emplace_back(photonAuthor  );
+        label.emplace_back( photonLabel  );
+        isEMString.emplace_back( photonIsEMString  );
     }
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["px"] = px;
-    DataMap["py"] = py;
-    DataMap["pz"] = pz;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["px"] = std::move(px);
+    DataMap["py"] = std::move(py);
+    DataMap["pz"] = std::move(pz);
 
     // further details and associations
-    DataMap["isEM"] = isEM;
-    DataMap["clusterKey"] = clusterKeyVec;
-    DataMap["clusterIndex"] = clusterIndexVec;
+    DataMap["isEM"] = std::move(isEM);
+    DataMap["clusterKey"] = std::move(clusterKeyVec);
+    DataMap["clusterIndex"] = std::move(clusterIndexVec);
     // shower details
-    DataMap["f1"] = f1Vec;
-    DataMap["etCone"] = etConeVec;
-    DataMap["fracs1"] = fracs1Vec;
-    DataMap["et37"] = et37Vec;
+    DataMap["f1"] = std::move(f1Vec);
+    DataMap["etCone"] = std::move(etConeVec);
+    DataMap["fracs1"] = std::move(fracs1Vec);
+    DataMap["et37"] = std::move(et37Vec);
 
-    DataMap["author"] = author;
-    DataMap["isEMString"] = isEMString;
-    DataMap["label"] = label;
+    DataMap["author"] = std::move(author);
+    DataMap["isEMString"] = std::move(isEMString);
+    DataMap["label"] = std::move(label);
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries << " entries");
+    
 
     //All collections retrieved okay
     return DataMap;
