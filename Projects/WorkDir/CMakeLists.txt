@@ -112,30 +112,32 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
    "(Re-)Check wildcards in file specifications on every build" )
 
 # Set up CppCheck.
-# We require version > 2.9 to avoid picking up cppcheck installed with EL9.
-find_package( Cppcheck 2.11 )
-if( CPPCHECK_FOUND )
-   # Prepend cppcheck command to already defined command line options:
-   list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+if( ATLAS_USE_CPPCHECK )
+   find_package( Cppcheck 2.14 )
 
-   # Ignore externals:
-   foreach( ignored_path "${LCG_RELEASE_BASE}"
-         "${TDAQ-COMMON_INCLUDE_DIR}" "${TDAQ_INCLUDE_DIR}"
-         "${${ATLAS_PROJECT}Externals_INCLUDE_DIR}" )
-      if( ignored_path )
-         list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:${ignored_path}/*" )
+   if( CPPCHECK_FOUND )
+      # Prepend cppcheck command to already defined command line options:
+      list( PREPEND CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" )
+
+      # Ignore externals:
+      foreach( ignored_path "${LCG_RELEASE_BASE}"
+            "${TDAQ-COMMON_INCLUDE_DIR}" "${TDAQ_INCLUDE_DIR}"
+            "${${ATLAS_PROJECT}Externals_INCLUDE_DIR}" )
+         if( ignored_path )
+            list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:${ignored_path}/*" )
+         endif()
+      endforeach()
+
+      # Set the cache variable(s) that CMake uses to decide how to use cppcheck:
+      set( CMAKE_C_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
+         CACHE STRING "CppCheck command to use for the C source files" )
+      set( CMAKE_CXX_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
+         CACHE STRING "CppCheck command to use for the C++ source files" )
+      # Let the user know what happened:
+      if( CMAKE_C_CPPCHECK OR CMAKE_CXX_CPPCHECK )
+         list( JOIN CMAKE_CPPCHECK_DEFAULT " " _cmd )
+         message( STATUS "Checking C/C++ files with: ${_cmd}" )
       endif()
-   endforeach()
-
-  # Set the cache variable(s) that CMake uses to decide how to use cppcheck:
-   set( CMAKE_C_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
-      CACHE STRING "CppCheck command to use for the C source files" )
-   set( CMAKE_CXX_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
-      CACHE STRING "CppCheck command to use for the C++ source files" )
-   # Let the user know what happened:
-   if( CMAKE_C_CPPCHECK OR CMAKE_CXX_CPPCHECK )
-      list( JOIN CMAKE_CPPCHECK_DEFAULT " " _cmd )
-      message( STATUS "Checking C/C++ files with: ${_cmd}" )
    endif()
 endif()
 
