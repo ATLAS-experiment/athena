@@ -202,7 +202,7 @@ namespace xAOD {
       // to all the variables yet that it has available...
       size_t nids = m_store->getAuxIDs().size();
       const SG::IAuxTypeVector* result = m_store->getVector( auxid );
-      if( result ) {
+      if( result != nullptr && result->toPtr() != nullptr ) {
          if( nids != m_store->getAuxIDs().size() ) {
             remakeAuxIDs();
          }
