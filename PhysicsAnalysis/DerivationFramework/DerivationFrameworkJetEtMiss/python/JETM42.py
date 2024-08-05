@@ -127,9 +127,14 @@ def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper, TauJets_EleRM_in_
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM42SlimmingHelper, jetOutputList, JETM42SlimmingHelper.SmartCollections)
 
+    # Pass through all trigger content
+    from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
+    addTrigEDMSetToOutput(flags, helper=JETM42SlimmingHelper, edmSet="ESD")
+
     # Output stream    
     JETM42ItemList = JETM42SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_"+name, ItemList=JETM42ItemList, AcceptAlgs=[name+"Kernel"]))
+
     return acc
 
 
