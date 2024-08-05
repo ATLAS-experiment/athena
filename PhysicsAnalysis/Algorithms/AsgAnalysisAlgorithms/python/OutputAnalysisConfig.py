@@ -3,6 +3,8 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigSequence import filter_dsids
+from AthenaCommon.Logging import logging
 import copy, re
 
 class OutputAnalysisConfig (ConfigBlock):
@@ -28,10 +30,12 @@ class OutputAnalysisConfig (ConfigBlock):
             info="a dictionary mapping prefixes (key) to container names "
             "(values) to be used when saving to the output tree. Branches "
             "are then of the form prefix_decoration.")
-        # TODO: add info string
         self.addOption ('containersOnlyForMC', {}, type=None,
             info="same as containers, but for MC-only containers so as to avoid "
             "a crash when running on data.")
+        self.addOption ('containersOnlyForDSIDs', {}, type=None,
+            info="specify which DSIDs are allowed to produce a given container. "
+            "This works like 'onlyForDSIDs': pass a list of DSIDs or regexps.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save. The default is analysis.")
         self.addOption ('metTermName', 'Final', type=str,
@@ -55,6 +59,8 @@ class OutputAnalysisConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('OutputAnalysisConfig')
+
         self.vars = set(self.vars)
         self.varsOnlyForMC = set(self.varsOnlyForMC)
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
@@ -70,6 +76,14 @@ class OutputAnalysisConfig (ConfigBlock):
                 raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
 
             self.containers.update(self.containersOnlyForMC)
+        # now filter the containers depending on DSIDs
+        for container,dsid_filters in self.containersOnlyForDSIDs.items():
+            if container not in self.containers:
+                log.warning(f"Skipping unrecognised container {container} for DSID-filtering in OutputAnalysisConfig...")
+                continue
+            if not filter_dsids (dsid_filters, config):
+                # if current DSID is not allowed for this container, remove it
+                self.containers.pop (container)
 
         if self.storeSelectionFlags:
             self.createSelectionFlagBranches(config)

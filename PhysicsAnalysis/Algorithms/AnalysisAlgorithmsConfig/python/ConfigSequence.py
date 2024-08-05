@@ -6,6 +6,7 @@ logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from functools import wraps
 from random import randrange
+import re
 def groupBlocks(func):
     """
     Decorates a configSequence or function with 'seq' as a
@@ -24,6 +25,22 @@ def groupBlocks(func):
             block.setOptionValue('groupName', groupName)
     return wrapper
 
+def filter_dsids (filterList, config) :
+    """check whether the sample being run passes a"""
+    """possible DSID filter on the block"""
+    if len(filterList) == 0:
+        return True
+    for dsid_filter in filterList:
+        # Check if the pattern is enclosed in regex delimiters (e.g., starts with '^' or contains regex metacharacters)
+        if any(char in dsid_filter for char in "^$*+?.()|[]{}\\"):
+            pattern = re.compile(dsid_filter)
+            if pattern.match(str(config.dsid())):
+                return True
+        else:
+            # Otherwise it's an exact DSID (but could be int or string)
+            if str(dsid_filter) == str(config.dsid()):
+                return True
+    return False
 
 class ConfigSequence:
     """a sequence of ConfigBlock objects
@@ -58,6 +75,8 @@ class ConfigSequence:
             if block.skipOnData and config.dataType() is DataType.Data:
                 continue
             if block.skipOnMC and config.dataType() is not DataType.Data:
+                continue
+            if not filter_dsids(block.onlyForDSIDs, config):
                 continue
             block.makeAlgs (config)
 

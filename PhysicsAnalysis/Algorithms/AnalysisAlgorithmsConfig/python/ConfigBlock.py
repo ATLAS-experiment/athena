@@ -102,6 +102,13 @@ class ConfigBlock:
             info=('User option to prevent the block from running'
                   ' on MC. This only affects blocks that are'
                   ' intended to run on MC.'))
+        self.addOption('onlyForDSIDs', [], type=list,
+            info=('Used to specify which MC DSIDs to allow this'
+                  ' block to run on. Each element of the list'
+                  ' can be a full DSID (e.g. 410470), or a regex'
+                  ' (e.g. 410.* to select all 410xxx DSIDs, or'
+                  ' ^(?!410) to veto them). An empty list means no'
+                  ' DSID restriction.'))
 
 
     def setBlockName(self, name):
