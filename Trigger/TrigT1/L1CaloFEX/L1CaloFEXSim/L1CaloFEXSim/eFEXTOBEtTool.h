@@ -53,8 +53,8 @@ namespace LVL1 {
                                   std::vector<unsigned int> &RhadSums, 
                                   std::vector<unsigned int> &WstotSums) override;
 								  
-	  virtual							  
-	  StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<int> &ClusterCellETs) override;
+    virtual
+    StatusCode getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs) override;
 
 
     /** Tool to calculate eTaudiscriminant sums */
