@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,10 +10,8 @@
 #define EVENT_EVENTPRIMITIVES_H
 
 #define EIGEN_MATRIXBASE_PLUGIN "EventPrimitives/AmgMatrixBasePlugin.h"
-#define EIGEN_MATRIX_PLUGIN "EventPrimitives/AmgMatrixPlugin.h"
 #define EIGEN_TRANSFORM_PLUGIN "EventPrimitives/AmgTransformPlugin.h"
 
-#include <unistd.h>
 
 #include <Eigen/Core>
 #include <Eigen/Dense>
