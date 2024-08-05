@@ -41,6 +41,10 @@ namespace Prompt {
   private:
     std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil{};
     std::shared_ptr<const FlavorTagDiscriminants::OnnxUtil> m_onnxUtil_endcap{};
+
+    int m_num_lepton_features;
+    int m_num_track_features;
+
     StatusCode initializeAccessors();
 
     StatusCode predictElec(const xAOD::Electron &electron,
@@ -126,7 +130,6 @@ namespace Prompt {
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_z0SinThetaUncertainty {this, "acc_trk_z0SinThetaUncertainty", m_tracksKey, m_btagIp_prefix + "z0SinThetaUncertainty"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_muon_track {this, "acc_trk_muon_track", m_tracksKey, "muon_track"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_electron_track {this,"acc_trk_electron_track", m_tracksKey, "electron_track"};
-    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_acc_trk_leptonID {this, "acc_trk_leptonID", m_tracksKey, "leptonID"};
 
     SG::WriteDecorHandleKeyArray<xAOD::ElectronContainer>  m_dec_el_plit_output{this, "PLITelOutput", {}};
     SG::WriteDecorHandleKeyArray<xAOD::MuonContainer> m_dec_mu_plit_output{this, "PLITmuOutput", {}};
