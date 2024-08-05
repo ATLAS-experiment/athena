@@ -91,7 +91,7 @@ constexpr size_t strideOfNumSIMDVec(size_t NumSIMDVec){
 /// new n >= n that is padded to
 /// the required STRIDE
 template <size_t STRIDE>
-constexpr int32_t numPadded(const int32_t n) {
+constexpr int numPadded(const int n) {
   // This always return a padded number dividable
   // with STRIDE , eg if STRIDE = 16
   // e.g ((33+15)&~15) = 48
@@ -104,7 +104,7 @@ constexpr int32_t numPadded(const int32_t n) {
 /// processing four simd vectors at a time
 template <size_t ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
-T vFindMinimum(const T* distancesIn, int32_t n) {
+T vFindMinimum(const T* distancesIn, int n) {
 
   using namespace CxxUtils;
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
@@ -124,7 +124,7 @@ T vFindMinimum(const T* distancesIn, int32_t n) {
   vec_t values2;
   vec_t values3;
   vec_t values4;
-  for (int32_t i = 4 * VEC_WIDTH; i < n; i += 4 * VEC_WIDTH) {
+  for (int i = 4 * VEC_WIDTH; i < n; i += 4 * VEC_WIDTH) {
     // 1
     vload(values1, array + i);
     vmin(minValues1, values1, minValues1);
@@ -159,12 +159,12 @@ T vFindMinimum(const T* distancesIn, int32_t n) {
 /// processing four simd vectors at a time
 template <size_t ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
-int32_t vIdxOfValue(const T value,
-                const T* distancesIn, int32_t n) {
+int vIdxOfValue(const T value,
+                const T* distancesIn, int n) {
   using namespace CxxUtils;
 
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
-  constexpr int32_t VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
+  constexpr int VEC_WIDTH = ISA_WIDTH / (sizeof(T) * CHAR_BIT);
   const T* array =
       std::assume_aligned<alignmentForArray<ISA_WIDTH>()>(distancesIn);
   using vec_t = vec<T, VEC_WIDTH>;
@@ -175,7 +175,7 @@ int32_t vIdxOfValue(const T value,
   vec_t values4;
   vec_t target;
   vbroadcast(target, value);
-  for (int32_t i = 0; i < n; i += 4 * VEC_WIDTH) {
+  for (int i = 0; i < n; i += 4 * VEC_WIDTH) {
     // 1
     vload(values1, array + i);
     vec_mask eq1 = values1 == target;
@@ -193,7 +193,7 @@ int32_t vIdxOfValue(const T value,
     vec_mask eq34 = eq3 || eq4;
     vec_mask eqAny = eq12 || eq34;
     if (vany(eqAny)) {
-      for (int32_t idx = i; idx < i + 4 * VEC_WIDTH; ++idx) {
+      for (int idx = i; idx < i + 4 * VEC_WIDTH; ++idx) {
         if (distancesIn[idx] == value) {
           return idx;
         }
@@ -205,27 +205,27 @@ int32_t vIdxOfValue(const T value,
 
 /// @brief Find the index of the minimum
 /// in the array of distances
-template <int32_t ISA_WIDTH, typename T>
+template <int ISA_WIDTH, typename T>
 ATH_ALWAYS_INLINE
-int32_t vIdxOfMin(const T* distancesIn, int32_t n) {
+int vIdxOfMin(const T* distancesIn, int n) {
   using namespace CxxUtils;
   const T* array =
       std::assume_aligned<vAlgs::alignmentForArray<ISA_WIDTH>()>(distancesIn);
   static_assert(std::is_floating_point_v<T>, "T not a floating point type");
   //We process elements in blocks. When we find the minimum we also
   //keep track in which block it was
-  constexpr int32_t blockSize = 512;
+  constexpr int blockSize = 512;
   // case for n less than blockSize
   if (n <= blockSize) {
     T min = vFindMinimum<ISA_WIDTH>(array, n);
     return vIdxOfValue<ISA_WIDTH>(min, array, n);
   }
-  int32_t idx = 0;
+  int idx = 0;
   T min = array[0];
   // We might have a remainder that we need to handle
-  const int32_t remainder = n & (blockSize - 1);
+  const int remainder = n & (blockSize - 1);
   // process elements up to the remainder in blocks
-  for (int32_t i = 0; i < (n - remainder); i += blockSize) {
+  for (int i = 0; i < (n - remainder); i += blockSize) {
     T mintmp = vFindMinimum<ISA_WIDTH>(array + i, blockSize);
     if (mintmp < min) {
       min = mintmp;
@@ -235,7 +235,7 @@ int32_t vIdxOfMin(const T* distancesIn, int32_t n) {
 
   //Process the remaining elements if any
   if (remainder != 0) {
-    int32_t index = n - remainder;
+    int index = n - remainder;
     T mintmp = vFindMinimum<ISA_WIDTH>(array + index, remainder);
     // if the minimu is here
     if (mintmp < min) {

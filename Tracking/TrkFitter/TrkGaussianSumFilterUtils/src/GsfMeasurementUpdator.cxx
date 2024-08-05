@@ -203,7 +203,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   AmgSymMatrix(5) newCov =
     trkCov.similarity(M) + K * measCov * K.transpose();
 
-  if (!thetaPhiWithinRange_5D(newPar, absoluteCheck) && 
+  if (!thetaPhiWithinRange_5D(newPar, absoluteCheck) &&
       !correctThetaPhiRange_5D(newPar, newCov, absoluteCheck)) {
     return false;
   }
@@ -855,7 +855,7 @@ Trk::GsfMeasurementUpdator::fitQuality(const MultiComponentState& updatedState,
 
     chi2 += component.weight * componentFitQuality.chiSquared();
   }
-  
+
   //The same measurement is included
   return { chi2, componentFitQuality.numberDoF() };
 }

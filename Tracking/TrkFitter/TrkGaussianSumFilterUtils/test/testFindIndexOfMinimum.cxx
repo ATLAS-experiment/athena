@@ -14,22 +14,22 @@
 //Multiversion for the test
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
-int32_t vIdxOfMin(const float* distancesIn, int n) {
+int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<256>(distancesIn, n);
 }
 [[gnu::target("default")]]
 #endif
-int32_t vIdxOfMin(const float* distancesIn, int n) {
+int vIdxOfMin(const float* distancesIn, int n) {
   return vAlgs::vIdxOfMin<128>(distancesIn, n);
 }
 #if HAVE_FUNCTION_MULTIVERSIONING
 [[gnu::target("avx2")]]
-int32_t vIdxOfMin(const double* distancesIn, int n) {
+int vIdxOfMin(const double* distancesIn, int n) {
   return vAlgs::vIdxOfMin<256>(distancesIn, n);
 }
 [[gnu::target("default")]]
 #endif
-int32_t vIdxOfMin(const double* distancesIn, int n) {
+int vIdxOfMin(const double* distancesIn, int n) {
   return vAlgs::vIdxOfMin<128>(distancesIn, n);
 }
 //constants
@@ -66,7 +66,7 @@ static void findIdxOfMinimumSTL() {
   const float* arrayF =
       std::assume_aligned<ALIGNMENT>(
           initArrayF.distances.buffer());
-  int32_t minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
+  int minIndex = std::distance(arrayF, std::min_element(arrayF, arrayF + N));
   std::cout << "STL Index of Minimum : " << minIndex << " with value "
             << initArrayF.distances[minIndex] << '\n';
   const double* arrayD =
@@ -79,7 +79,7 @@ static void findIdxOfMinimumSTL() {
 
 //Test using Vec code
 static void findVecMinThenIdx() {
-  int32_t minIndex = vIdxOfMin(initArrayF.distances.buffer(), N);
+  int minIndex = vIdxOfMin(initArrayF.distances.buffer(), N);
   std::cout << "vIdxOfMin Index of Minimum : " << minIndex << " with value "
             << initArrayF.distances[minIndex] << '\n';
   minIndex = vIdxOfMin(initArrayD.distances.buffer(), N);
@@ -88,7 +88,7 @@ static void findVecMinThenIdx() {
 
 }
 
-int32_t main() {
+int main() {
   findIdxOfMinimumSTL();
   findVecMinThenIdx();
   return 0;

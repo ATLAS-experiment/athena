@@ -99,8 +99,8 @@ main()
     componentsArray.components[i].weight = input[i].weight;
   }
   const GSFUtils::MergeArray order = findMerges(componentsArray, 12);
-  const int32_t numMerges = order.numMerges;
-  for (int32_t i = 0; i < numMerges; ++i) {
+  const int numMerges = order.numMerges;
+  for (int i = 0; i < numMerges; ++i) {
     std::cout << "[" << static_cast<int>(order.merges[i].To) << ", "
               << static_cast<int>(order.merges[i].From) << "]" << '\n';
   }
