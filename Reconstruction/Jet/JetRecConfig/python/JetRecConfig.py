@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 JetRecConfig: A helper module for configuring jet reconstruction     
@@ -669,7 +669,7 @@ def getModifier(jetdef, moddef, modspec, flags=None):
     try:
         modtool = moddef.createfn(jetdef, modspec)
     except Exception as e:
-        jetlog.error( f"Unhandled modifier specification {modspec} for mod {moddef} acting on jet def {jetdef.basetype}!")
+        jetlog.error( f"Unhandled modifier specification {modspec} for mod {moddef} acting on jet def {jetdef.basename}!")
         jetlog.error( f"Received exception \"{e}\"" )
         jetlog.error( f"Helper function is \"{moddef.createfn}\"" )
         raise ValueError( f"JetModConfig unable to handle mod {moddef} with spec \"{modspec}\"")
