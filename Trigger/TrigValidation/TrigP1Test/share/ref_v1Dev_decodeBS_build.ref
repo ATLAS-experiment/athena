@@ -5327,14 +5327,14 @@ HLT_g20_medium_L1eEM18M:
 HLT_g20_medium_ringer_L1eEM18M:
   eventCount: 2
   stepCounts:
-    0: 5
-    1: 5
-    2: 5
+    0: 6
+    1: 6
+    2: 6
     3: 2
   stepFeatures:
-    0: 5
-    1: 5
-    2: 5
+    0: 6
+    1: 6
+    2: 6
     3: 2
 HLT_g20_tight_L1eEM18M:
   eventCount: 1
@@ -5856,14 +5856,14 @@ HLT_g25_medium_mu24_ivarmedium_L1MU18VFCH:
 HLT_g25_medium_ringer_L1eEM24L:
   eventCount: 2
   stepCounts:
-    0: 5
-    1: 5
-    2: 5
+    0: 7
+    1: 6
+    2: 6
     3: 2
   stepFeatures:
-    0: 5
-    1: 5
-    2: 5
+    0: 7
+    1: 6
+    2: 6
     3: 2
 HLT_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
@@ -6837,14 +6837,14 @@ HLT_g35_medium_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS700j35_pf_ftf_presela20b
 HLT_g35_medium_ringer_L1eEM24L:
   eventCount: 1
   stepCounts:
-    0: 3
-    1: 3
-    2: 2
+    0: 5
+    1: 4
+    2: 3
     3: 1
   stepFeatures:
-    0: 3
-    1: 3
-    2: 2
+    0: 5
+    1: 4
+    2: 3
     3: 1
 HLT_g35_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
   eventCount: 0
