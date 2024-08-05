@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // generate the T/P converter entries
 #include "AthenaKernel/TPCnvFactory.h"
 
-#include "IDCInDetBSErrContainerCnv_p1.h"
-#include "InDetBSErrContainerCnv_p1.h"
-#include "InDetBSErrContainerCnv_p2.h"
-#include "TRT_BSErrContainerCnv_p1.h"
-#include "TRT_BSErrContainerCnv_p2.h"
-#include "TRT_BSIdErrContainerCnv_p1.h"
+#include "../IDCInDetBSErrContainerCnv_p1.h"
+#include "../InDetBSErrContainerCnv_p1.h"
+#include "../InDetBSErrContainerCnv_p2.h"
+#include "../TRT_BSErrContainerCnv_p1.h"
+#include "../TRT_BSErrContainerCnv_p2.h"
+#include "../TRT_BSIdErrContainerCnv_p1.h"
 
 DECLARE_TPCNV_FACTORY(IDCInDetBSErrContainerCnv_p1,
                       IDCInDetBSErrContainer,
