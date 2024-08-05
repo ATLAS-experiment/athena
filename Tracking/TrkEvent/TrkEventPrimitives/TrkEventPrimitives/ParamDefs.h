@@ -14,15 +14,9 @@
 
 namespace Trk {
 
- /** @enum ParamDefs 
+ /** @enum ParamDefs
      @brief This file defines the parameter enums in the Trk namespace.
 
-     Note that the enums refer to the [] operator and not to the () operator
-     which makes a big difference in classes inherited or used from CLHEP.
-     CLHEP::HepVector and not CLHEP::Hep2Vector is taken, as CLHEP::Hep2Vector provides
-     additional functions like x(), y(), phi() which might be meaningless
-     when using specific natural detector frames.
-   
      <b>Usage examples:</b>
      - Access the y-coordinate of the cartesian local frame:<br>
        \c LocalPosition \c locpos(2.3, 4.5);<br>
@@ -31,7 +25,7 @@ namespace Trk {
        \c double \c theEta = \c Tsos[Trk::eta]
      - Access the eta-value of a track state on a surface (Tsos):<br>
        \c double \c theEta = \c Tsos[Trk::eta]
-   
+
     @author Andreas.Salzburger@cern.ch
    */
 
@@ -93,27 +87,13 @@ enum ParamDefs {
     ParamDefs enum with ints
 
     @author Andreas.Salzburger@cern.ch
-    @author Christos Anastopouls (use array rather than vector)
+    @author Christos Anastopouls (Athena MT)
   */
 struct ParamDefsAccessor {
   /**Constructor*/
-  const std::array<ParamDefs, 6> pardef = {Trk::loc1, Trk::loc2, Trk::phi, 
-                                           Trk::theta, Trk::qOverP, Trk::trkMass};
- };
-
- /** @struct ParamDefsStrings
-     Simple struct to access the
-     strings of the ParamDefs enum names
-     for output reasons
-
-     @author Andreas.Salzburger@cern.ch
-     @author Christos Anastopouls (use array rather than vector)
-   */
- struct ParamDefsStrings {
-   /**Constructor*/
-   const std::array<std::string, 6> pardefname = {"loc1",  "loc2",   "phi",
-                                                  "theta", "qOverP", "trkMass"};
- };
+  static constexpr std::array<ParamDefs, 6> pardef = {
+      Trk::loc1, Trk::loc2, Trk::phi, Trk::theta, Trk::qOverP, Trk::trkMass};
+};
 
  } // namespace Trk
 
