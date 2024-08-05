@@ -25,7 +25,6 @@ extern int gErrorIgnoreLevel;
 
 bool ZDCPulseAnalyzer::s_quietFits         = true;
 bool ZDCPulseAnalyzer::s_saveFitFunc       = false;
-std::string ZDCPulseAnalyzer::s_fitOptions = "";
 TH1* ZDCPulseAnalyzer::s_undelayedFitHist  = nullptr;
 TH1* ZDCPulseAnalyzer::s_delayedFitHist    = nullptr;
 TF1* ZDCPulseAnalyzer::s_combinedFitFunc   = nullptr;
@@ -94,7 +93,7 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const s
   m_tag(tag), m_Nsample(Nsample),
   m_preSampleIdx(preSampleIdx),
   m_deltaTSample(deltaTSample),
-  m_pedestal(pedestal), m_gainHG(gainHG), m_forceLG(false), m_fitFunction(fitFunction),
+  m_pedestal(pedestal), m_gainHG(gainHG), m_fitFunction(fitFunction),
   m_peak2ndDerivMinSample(peak2ndDerivMinSample),
     m_peak2ndDerivMinThreshLG(peak2ndDerivMinThreshLG),
   m_peak2ndDerivMinThreshHG(peak2ndDerivMinThreshHG),
@@ -108,9 +107,13 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const s
   m_tmax = m_tmin + ((float) Nsample) * deltaTSample;
 
   std::string histName = "ZDCFitHist" + tag;
+  std::string histNameLGRefit = "ZDCFitHist" + tag + "_LGRefit";
 
   m_fitHist = std::make_unique<TH1F>(histName.c_str(), "", m_Nsample, m_tmin, m_tmax);
+  m_fitHistLGRefit = std::make_unique<TH1F>(histNameLGRefit.c_str(), "", m_Nsample, m_tmin, m_tmax);
+
   m_fitHist->SetDirectory(0);
+  m_fitHistLGRefit->SetDirectory(0);
 
   SetDefaults();
   Reset();
@@ -127,10 +130,17 @@ void ZDCPulseAnalyzer::enableDelayed(float deltaT, float pedestalShift, bool fix
 
   m_deltaTSample /= 2.;
 
-  m_delayedHist = std::make_unique<TH1F>((std::string(m_fitHist->GetName()) + "delayed").c_str(), "", m_Nsample, m_tmin + m_delayedDeltaT, m_tmax + m_delayedDeltaT);
+  std::string delayedHGName = std::string(m_fitHist->GetName()) + "delayed";
+  std::string delayedLGName = std::string(m_fitHistLGRefit->GetName()) + "delayed";
+
+  m_delayedHist = std::make_unique<TH1F>(delayedHGName.c_str(), "", m_Nsample, m_tmin + m_delayedDeltaT, m_tmax + m_delayedDeltaT);
   m_delayedHist->SetDirectory(0);
 
+  m_delayedHistLGRefit = std::make_unique<TH1F>(delayedLGName.c_str(), "", m_Nsample, m_tmin + m_delayedDeltaT, m_tmax + m_delayedDeltaT);
+  m_delayedHistLGRefit->SetDirectory(0);
+
   m_ADCSamplesHGSub.assign(2 * m_Nsample, 0);
+  m_ADCSamplesLGSub.assign(2 * m_Nsample, 0);
 }
 
 void ZDCPulseAnalyzer::enableRepass(float peak2ndDerivMinRepassHG, float peak2ndDerivMinRepassLG)
@@ -142,6 +152,8 @@ void ZDCPulseAnalyzer::enableRepass(float peak2ndDerivMinRepassHG, float peak2nd
 
 void ZDCPulseAnalyzer::SetDefaults()
 {
+  m_LGMode = LGModeNormal;
+  
   m_nominalTau1 = 4;
   m_nominalTau2 = 21;
 
@@ -195,6 +207,7 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_initialExpAmp = 0;
   m_fitPostT0lo   = 0;
 
+  m_useDelayed = false;
   m_enablePreExcl = false;
   m_enablePostExcl = false;
   m_haveUserFilter = false;
@@ -202,7 +215,7 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_timingCorrMode = NoTimingCorr;
   m_haveNonlinCorr = false;
   
-  s_fitOptions = "s";
+  m_fitOptions = "s";
 }
 
 void ZDCPulseAnalyzer::Reset(bool repass)
@@ -250,6 +263,7 @@ void ZDCPulseAnalyzer::Reset(bool repass)
     m_firstHGOverFlowSample = 999;
   }
 
+  
   m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 0.5);
   m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 0.5);
 
@@ -274,6 +288,8 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_repassPulse = false;
 
   m_fitMinAmp = false;
+  m_evtLGRefit = false;
+  
 
   // -----------------------
 
@@ -305,7 +321,12 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_expAmplitude    = 0;
   m_bkgdMaxFraction = 0;
 
-
+  m_refitLGAmpl = 0;
+  m_refitLGAmpError = 0;
+  m_refitLGChisq = 0;
+  m_refitLGTime = -100;
+  m_refitLGTimeSub = -100;
+    
   m_initialPrePulseT0  = -10;
   m_initialPrePulseAmp = 5;
 
@@ -418,7 +439,7 @@ void ZDCPulseAnalyzer::enableTimeSigCut(bool AND, float sigCut, std::string TF1S
 }
 
 
-std::vector<float>  ZDCPulseAnalyzer::GetFitPulls() const
+std::vector<float>  ZDCPulseAnalyzer::GetFitPulls(bool refitLG) const
 {
   //
   // If there was no pulse for this event, return an empty vector (see reset() method)
@@ -439,8 +460,8 @@ std::vector<float>  ZDCPulseAnalyzer::GetFitPulls() const
     //
     std::vector<float> pulls(m_Nsample, -100);
     
-    const TH1* dataHist_p = m_fitHist.get();
-    const TF1* fit_p = (const TF1*) dataHist_p->GetListOfFunctions()->Last();
+    const TH1* dataHist_p = refitLG ? m_fitHistLGRefit.get() : m_fitHist.get();
+    const TF1* fit_p = static_cast<const TF1*>(dataHist_p->GetListOfFunctions()->Last());
     
     for (size_t ibin = 0; ibin < m_Nsample ; ibin++) {
       float t = dataHist_p->GetBinCenter(ibin + 1);
@@ -642,27 +663,28 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
   //
   // Dump samples to verbose output
   //
-  (*m_msgFunc_p)(ZDCMsg::Verbose, "Dumping all samples before subtraction: ");
+  bool doDump = (*m_msgFunc_p)(ZDCMsg::Verbose, "Dumping all samples before subtraction: ");
+  if (doDump) {
+    std::ostringstream dumpStringHG;
+    dumpStringHG << "HG: ";
+    for (auto val : m_ADCSamplesHG) {
+      dumpStringHG << std::setw(4) << val << " ";
+    }
+    
+    (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringHG.str().c_str());
+    
+    
+    // Now low gain
+    //
+    std::ostringstream dumpStringLG;
+    dumpStringLG << "LG: " << std::setw(4) << std::setfill(' ');
+    for (auto val : m_ADCSamplesLG) {
+      dumpStringLG <<  std::setw(4) << val << " ";
+    }
 
-  std::ostringstream dumpStringHG;
-  dumpStringHG << "HG: ";
-  for (auto val : m_ADCSamplesHG) {
-    dumpStringHG << std::setw(4) << val << " ";
+    (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringLG.str().c_str());
   }
-
-  (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringHG.str().c_str());
-
   
-  // Now low gain
-  //
-  std::ostringstream dumpStringLG;
-  dumpStringLG << "LG: " << std::setw(4) << std::setfill(' ');
-  for (auto val : m_ADCSamplesLG) {
-    dumpStringLG <<  std::setw(4) << val << " ";
-  }
-
-  (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringLG.str().c_str());
-
   m_NSamplesAna = m_ADCSamplesHG.size();
 
   m_ADCSamplesHGSub.assign(m_NSamplesAna, 0);
@@ -751,24 +773,25 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       }
     }
   }
-  
-  (*m_msgFunc_p)(ZDCMsg::Verbose, "Dump of useSamples: ");
-  
-  std::ostringstream dumpStringUseHG;
-  dumpStringUseHG << "HG: ";
-  for (auto val : m_useSampleHG) {
-    dumpStringUseHG  << val << " ";
+
+  if (doDump) {
+    (*m_msgFunc_p)(ZDCMsg::Verbose, "Dump of useSamples: ");
+    
+    std::ostringstream dumpStringUseHG;
+    dumpStringUseHG << "HG: ";
+    for (auto val : m_useSampleHG) {
+      dumpStringUseHG  << val << " ";
+    }
+    (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringUseHG.str().c_str());
+    
+    std::ostringstream dumpStringUseLG;
+    dumpStringUseLG << "LG: ";
+    for (auto val : m_useSampleLG) {
+      dumpStringUseLG  << val << " ";
+    }
+    (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringUseLG.str().c_str());
   }
-  (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringUseHG.str().c_str());
-
-  std::ostringstream dumpStringUseLG;
-  dumpStringUseLG << "LG: ";
-  for (auto val : m_useSampleLG) {
-    dumpStringUseLG  << val << " ";
-  }
-  (*m_msgFunc_p)(ZDCMsg::Verbose, dumpStringUseLG.str().c_str());
-
-
+ 
   // This ugly code should be obseleted by the introduction of the better, pre- and post-sample exclusion but
   //   that code still has to be fully validated.
   //
@@ -783,7 +806,7 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       m_backToHG_pre = true;
       m_ExcludeEarly = true;
     }
-    else if (m_firstHGOverFlowSample < static_cast<int>(m_NSampleAna) && m_firstHGOverFlowSample >= static_cast<int>(m_NSampleAna - 2) ) {
+    else if (m_firstHGOverFlowSample < static_cast<int>(m_NSamplesAna) && m_firstHGOverFlowSample >= static_cast<int>(m_NSamplesAna - 2) ) {
       m_maxSampleEvt = m_firstHGOverFlowSample - 1;
       m_HGOverflow = false;
       m_adjTimeRangeEvent = true;
@@ -812,7 +835,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
     deriv2ndThreshLG = m_peak2ndDerivMinRepassLG;
   }
 
-  m_useLowGain = m_HGUnderflow || m_HGOverflow || m_forceLG;
+  m_useLowGain = m_HGUnderflow || m_HGOverflow || (m_LGMode == LGModeForceLG);
   if (m_useLowGain) {
     (*m_msgFunc_p)(ZDCMsg::Verbose, "ZDCPulseAnalyzer:: " + m_tag + " using low gain data ");
 
@@ -908,6 +931,13 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       }
     }
 
+    // If LG refit has been requested, do it now
+    //
+    if (m_LGMode == LGModeRefitLG && m_havePulse) {
+      prepareLGRefit(m_ADCSamplesLGSub, m_ADCSSampSigLG, m_useSampleLG);
+      DoFit(true);
+    }
+    
     return result;
   }
 }
@@ -976,7 +1006,9 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   (*m_msgFunc_p)(ZDCMsg::Verbose, pedMessage.str().c_str());
 
   m_samplesSub = samples;
-
+  m_samplesSig.assign(m_NSamplesAna, noiseSig);
+      
+  
   //
   // When we are combinig delayed and undelayed samples we have to deal with the fact that
   //   the two readouts can have different noise and thus different baselines. Which is a huge
@@ -1221,8 +1253,6 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   
   // -----------------------------------------------------
 
-  FillHistogram(m_samplesSub, noiseSig);
-
   //  Stop now if we have no pulse or we've detected a failure
   //
   if (m_fail || !m_havePulse) return false;
@@ -1303,17 +1333,61 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   return !m_fitFailed;
 }
 
-void ZDCPulseAnalyzer::DoFit()
+void ZDCPulseAnalyzer::prepareLGRefit(const std::vector<float>& samplesLG, const std::vector<float>& samplesSig,
+				      const std::vector<bool>& useSamples)
 {
-  float fitAmpMin = (m_useLowGain ? m_fitAmpMinLG : m_fitAmpMinHG);
-  float fitAmpMax = (m_useLowGain ? m_fitAmpMaxLG : m_fitAmpMaxHG);
+  m_samplesLGRefit.clear();
+  m_samplesSigLGRefit.clear();
+ 
+  float presampleLG = m_ADCSamplesLGSub[m_usedPresampIdx];
+    
+  // Do the presample subtraction
+  //
+  for (unsigned int idx = 0; idx < samplesLG.size(); idx++) {
+    m_samplesLGRefit.push_back(samplesLG[idx] - presampleLG);
 
+    if (useSamples[idx]) {
+      m_samplesSigLGRefit.push_back(samplesSig[idx]);
+    }
+    else {
+      m_samplesSigLGRefit.push_back(0);
+    }
+  }
+}
+
+
+void ZDCPulseAnalyzer::DoFit(bool refitLG)
+{
+  bool fitLG = m_useLowGain || refitLG;
+  
+  TH1* hist_p = nullptr;
+  FillHistogram(refitLG);
+    
   // Set the initial values
   //
-  float ampInitial = m_maxADCValue - m_minADCValue;   // ???   sometime it is smaller than 5???? why
-  float t0Initial = (m_useLowGain ? m_nominalT0LG : m_nominalT0HG);
+  float ampInitial, fitAmpMin, fitAmpMax, t0Initial;
 
+  if (fitLG) {
+    fitAmpMin = m_fitAmpMinLG;
+    fitAmpMax = m_fitAmpMaxLG;
+    t0Initial = m_nominalT0LG;
+  }
+  else {
+    fitAmpMin = m_fitAmpMinHG;
+    fitAmpMax = m_fitAmpMaxHG;
+    t0Initial = m_nominalT0HG;
+ }
+
+  if (refitLG) {
+    hist_p = m_fitHistLGRefit.get();
+    ampInitial = (m_maxADCValue - m_minADCValue)*m_gainFactorHG/m_gainFactorLG;
+  }
+  else {
+    hist_p = m_fitHist.get();
+    ampInitial = m_maxADCValue - m_minADCValue;
+  }
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
+
 
   ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
   if (preExpTail()) {
@@ -1339,19 +1413,19 @@ void ZDCPulseAnalyzer::DoFit()
 
   // Now perform the fit
   //
-  std::string options = s_fitOptions + "N";
+  std::string options = m_fitOptions + "Ns";
   if (QuietFits()) {
     options += "Q";
   }
 
-  m_fitFailed = false;
+  bool fitFailed = false;
 
   dumpTF1(fitWrapper->GetWrapperTF1RawPtr());
   
   //
   //  Fit the data with the function provided by the fit wrapper
   //
-  TFitResultPtr result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+  TFitResultPtr result_ptr = hist_p->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
   int fitStatus = result_ptr;
   
   //
@@ -1365,31 +1439,31 @@ void ZDCPulseAnalyzer::DoFit()
     //
     fitWrapper->ConstrainFit();
 
-    TFitResultPtr constrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+    TFitResultPtr constrFitResult_ptr = hist_p->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
     fitWrapper->UnconstrainFit();
 
     if ((int) constrFitResult_ptr != 0) {
       //
       // Even the constrained fit failed, so we quit.
       //
-      m_fitFailed = true;
+      fitFailed = true;
     }
     else {
       // Now we try the fit again with the constraint removed
       //
-      TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+      TFitResultPtr unconstrFitResult_ptr = hist_p->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
       if ((int) unconstrFitResult_ptr != 0) {
 	//
 	// The unconstrained fit failed again, so we redo the constrained fit
 	//
 	fitWrapper->ConstrainFit();
       
-	TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+	TFitResultPtr constrFit2Result_ptr = hist_p->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
 	if ((int) constrFit2Result_ptr != 0) {
 	  //
 	  // Even the constrained fit failed the second time, so we quit.
 	  //
-	  m_fitFailed = true;
+	  fitFailed = true;
 	}
 
 	result_ptr = constrFit2Result_ptr;
@@ -1402,49 +1476,83 @@ void ZDCPulseAnalyzer::DoFit()
   }
 
   if (!m_fitFailed && s_saveFitFunc) {
-    m_fitHist->GetListOfFunctions()->Clear();
-    m_fitHist->GetListOfFunctions()->Add(fitWrapper->GetWrapperTF1RawPtr());
+    hist_p->GetListOfFunctions()->Clear();
+
+    TF1* func = fitWrapper->GetWrapperTF1RawPtr();
+    std::string name = func->GetName();
+
+    TF1* copyFunc = static_cast<TF1*>(func->Clone((name + "_copy").c_str()));
+    hist_p->GetListOfFunctions()->Add(copyFunc);
   }
 
-  m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
-  m_fitAmplitude = fitWrapper->GetAmplitude();
-  m_fitAmpError = fitWrapper->GetAmpError();
+  if (!refitLG) {
+    m_fitFailed = fitFailed;
+    m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
+    m_fitAmplitude = fitWrapper->GetAmplitude();
+    m_fitAmpError = fitWrapper->GetAmpError();
 
-  if (preExpTail()) {
-    m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+    if (preExpTail()) {
+      m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+    }
+    else {
+      m_fitExpAmp = 0;
+    }
+    
+    m_fitTime      = fitWrapper->GetTime();
+    m_fitTimeSub = m_fitTime - t0Initial;
+
+    m_fitChisq = result_ptr->Chi2();
+    m_fitNDoF = result_ptr->Ndf();
+    
+    m_fitTau1 = fitWrapper->GetTau1();
+    m_fitTau2 = fitWrapper->GetTau2();
+    
+    // Here we need to check if the fit amplitude is small (close) enough to fitAmpMin.
+    // with "< 1+epsilon" where epsilon ~ 1%
+    if (m_fitAmplitude < fitAmpMin * 1.01) {
+      m_fitMinAmp = true;
+    }
   }
   else {
-    m_fitExpAmp = 0;
+    m_evtLGRefit = true;
+    m_refitLGAmpl = fitWrapper->GetAmplitude();
+    m_refitLGAmpError = fitWrapper->GetAmpError();
+    m_refitLGChisq = result_ptr->Chi2();
+    m_refitLGTime = fitWrapper->GetTime();
+    m_refitLGTimeSub = m_refitLGTime - t0Initial;
   }
-  
-  m_fitTime      = fitWrapper->GetTime();
-
-  m_fitTimeSub = m_fitTime - t0Initial;
-
-  m_fitChisq = result_ptr->Chi2();
-  m_fitNDoF = result_ptr->Ndf();
-
-  m_fitTau1 = fitWrapper->GetTau1();
-  m_fitTau2 = fitWrapper->GetTau2();
-
-  // Here we need to check if the fit amplitude is small (close) enough to fitAmpMin.
-  // with "< 1+epsilon" where epsilon ~ 1%
-  if (m_fitAmplitude < fitAmpMin * 1.01) {
-    m_fitMinAmp = true;
-  }
-
 }
 
-void ZDCPulseAnalyzer::DoFitCombined()
+void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
 {
-  float fitAmpMin = (m_useLowGain ? m_fitAmpMinLG : m_fitAmpMinHG);
-  float fitAmpMax = (m_useLowGain ? m_fitAmpMaxLG : m_fitAmpMaxHG);
+  bool fitLG = refitLG || m_useLowGain;
+  TH1* hist_p = nullptr, *delayedHist_p = nullptr;
+
+  FillHistogram(refitLG);
+  if (refitLG) {
+    hist_p = m_fitHistLGRefit.get();
+    delayedHist_p = m_delayedHistLGRefit.get();
+  }
+  else {
+    hist_p = m_fitHist.get();
+    delayedHist_p = m_delayedHist.get();
+  }
+  
+  float fitAmpMin, fitAmpMax, t0Initial;
+  if (fitLG) {
+    fitAmpMin = m_fitAmpMinLG;
+    fitAmpMax = m_fitAmpMaxLG;
+    t0Initial = m_nominalT0LG;
+  }
+  else {
+    fitAmpMin = m_fitAmpMinHG;
+    fitAmpMax = m_fitAmpMaxHG;
+    t0Initial = m_nominalT0HG;
+  }
 
   // Set the initial values
   //
   float ampInitial = m_maxADCValue - m_minADCValue;
-  float t0Initial = (m_useLowGain ? m_nominalT0LG : m_nominalT0HG);
-
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
   ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
@@ -1493,8 +1601,8 @@ void ZDCPulseAnalyzer::DoFitCombined()
 
   // Set the static pointers to histograms and function for use in FCN
   //
-  s_undelayedFitHist = m_fitHist.get();
-  s_delayedFitHist = m_delayedHist.get();
+  s_undelayedFitHist = hist_p;
+  s_delayedFitHist = delayedHist_p;
   s_combinedFitFunc = fitWrapper->GetWrapperTF1RawPtr();
   s_combinedFitTMax = m_fitTMax;
   s_combinedFitTMin = m_fitTMin;
@@ -1637,37 +1745,47 @@ void ZDCPulseAnalyzer::DoFitCombined()
     s_delayedFitHist->GetListOfFunctions()->Add(s_combinedFitFunc);
   }
 
-  // Save the pull values from the last call to FCN
-  //
-  arglist[0] = 3; // number of function calls
-  theFitter->ExecuteCommand("Cal1fcn", arglist, 1);
-  m_fitPulls = s_pullValues;
-  
-  m_fitAmplitude = fitWrapper->GetAmplitude();
-  m_fitTime      = fitWrapper->GetTime();
-  if (PrePulse()) {
-    m_fitPreT0   = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreT0();
-    m_fitPreAmp  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreAmp();
-    m_fitPostT0  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostT0();
-    m_fitPostAmp = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostAmp();
-  }
-  
-  if (preExpTail()) {
-    m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+  if (!refitLG) {
+    // Save the pull values from the last call to FCN
+    //
+    arglist[0] = 3; // number of function calls
+    theFitter->ExecuteCommand("Cal1fcn", arglist, 1);
+    m_fitPulls = s_pullValues;
+    
+    m_fitAmplitude = fitWrapper->GetAmplitude();
+    m_fitTime      = fitWrapper->GetTime();
+    if (PrePulse()) {
+      m_fitPreT0   = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreT0();
+      m_fitPreAmp  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreAmp();
+      m_fitPostT0  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostT0();
+      m_fitPostAmp = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostAmp();
+    }
+    
+    if (preExpTail()) {
+      m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+    }
+    else {
+      m_fitExpAmp = 0;
+    }
+    
+    m_fitTimeSub = m_fitTime - t0Initial;
+    m_fitChisq = chi2;
+    m_fitNDoF = ndf;
+    
+    m_fitTau1 = fitWrapper->GetTau1();
+    m_fitTau2 = fitWrapper->GetTau2();
+    
+    m_fitAmpError = fitWrapper->GetAmpError();
+    m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
   }
   else {
-    m_fitExpAmp = 0;
+    m_evtLGRefit = true;
+    m_refitLGAmpl = fitWrapper->GetAmplitude();
+    m_refitLGAmpError = fitWrapper->GetAmpError();
+    m_refitLGChisq = chi2;
+    m_refitLGTime = fitWrapper->GetTime();
+    m_refitLGTimeSub = m_refitLGTime - t0Initial;
   }
-  
-  m_fitTimeSub = m_fitTime - t0Initial;
-  m_fitChisq = chi2;
-  m_fitNDoF = ndf;
-
-  m_fitTau1 = fitWrapper->GetTau1();
-  m_fitTau2 = fitWrapper->GetTau2();
-
-  m_fitAmpError = fitWrapper->GetAmpError();
-  m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
 }
 
 
@@ -1757,8 +1875,9 @@ void ZDCPulseAnalyzer::dump() const
 void ZDCPulseAnalyzer::dumpTF1(const TF1* func) const
 {
   std::string message = "Dump of TF1: " + std::string(func->GetName());
-  (*m_msgFunc_p)(ZDCMsg::Verbose, message);
-
+  bool continueDump = (*m_msgFunc_p)(ZDCMsg::Verbose, message);
+  if (!continueDump) return;
+  
   unsigned int npar = func->GetNpar();
   for (unsigned int ipar = 0; ipar < npar; ipar++) {
     std::ostringstream msgstr;
@@ -1818,32 +1937,43 @@ unsigned int ZDCPulseAnalyzer::GetStatusMask() const
   return statusMask;
 }
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph() const {
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph(bool LGRefit) const
+{
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
   //
-  GetHistogramPtr();
+  GetHistogramPtr(LGRefit);
 
+  TH1* hist_p = nullptr, *delayedHist_p = nullptr;
+  if (LGRefit) {
+    hist_p = m_fitHistLGRefit.get();
+    delayedHist_p = m_delayedHistLGRefit.get();
+  }
+  else {
+    hist_p = m_fitHist.get();
+    delayedHist_p = m_delayedHist.get();
+  }
+  
   std::shared_ptr<TGraphErrors> theGraph = std::make_shared<TGraphErrors>(TGraphErrors(2 * m_Nsample));
   size_t npts = 0;
 
-  for (int ipt = 0; ipt < m_fitHist->GetNbinsX(); ipt++) {
-    theGraph->SetPoint(npts, m_fitHist->GetBinCenter(ipt + 1), m_fitHist->GetBinContent(ipt + 1));
-    theGraph->SetPointError(npts++, 0, m_fitHist->GetBinError(ipt + 1));
+  for (int ipt = 0; ipt < hist_p->GetNbinsX(); ipt++) {
+    theGraph->SetPoint(npts, hist_p->GetBinCenter(ipt + 1), hist_p->GetBinContent(ipt + 1));
+    theGraph->SetPointError(npts++, 0, hist_p->GetBinError(ipt + 1));
   }
 
-  for (int iDelayPt = 0; iDelayPt < m_delayedHist->GetNbinsX(); iDelayPt++) {
-    theGraph->SetPoint(npts, m_delayedHist->GetBinCenter(iDelayPt + 1), m_delayedHist->GetBinContent(iDelayPt + 1) - m_delayedBaselineShift);
-    theGraph->SetPointError(npts++, 0, m_delayedHist->GetBinError(iDelayPt + 1));
+  for (int iDelayPt = 0; iDelayPt < delayedHist_p->GetNbinsX(); iDelayPt++) {
+    theGraph->SetPoint(npts, delayedHist_p->GetBinCenter(iDelayPt + 1), delayedHist_p->GetBinContent(iDelayPt + 1) - m_delayedBaselineShift);
+    theGraph->SetPointError(npts++, 0, delayedHist_p->GetBinError(iDelayPt + 1));
   }
   if (m_havePulse) {
-    TF1* func_p = (TF1*) m_fitHist->GetListOfFunctions()->Last();
+    TF1* func_p = static_cast<TF1*>(hist_p->GetListOfFunctions()->Last());
     if (func_p) {
       theGraph->GetListOfFunctions()->Add(new TF1(*func_p));
-      m_fitHist->GetListOfFunctions()->SetOwner (false);
+      hist_p->GetListOfFunctions()->SetOwner (false);
     }
   }
-  theGraph->SetName(( std::string(m_fitHist->GetName()) + "combinaed").c_str());
+  theGraph->SetName(( std::string(hist_p->GetName()) + "combinaed").c_str());
 
   theGraph->SetMarkerStyle(20);
   theGraph->SetMarkerColor(1);
@@ -1852,23 +1982,24 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetCombinedGraph() const {
 }
 
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph() const {
+std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph(bool forceLG) const
+{
   //
   // We defer filling the histogram if we don't have a pulse until the histogram is requested
   //
-  GetHistogramPtr();
+  const TH1* hist_p = GetHistogramPtr(forceLG);
 
   std::shared_ptr<TGraphErrors> theGraph = std::make_shared<TGraphErrors>(TGraphErrors(m_Nsample));
   size_t npts = 0;
 
-  for (int ipt = 0; ipt < m_fitHist->GetNbinsX(); ipt++) {
-    theGraph->SetPoint(npts, m_fitHist->GetBinCenter(ipt + 1), m_fitHist->GetBinContent(ipt + 1));
-    theGraph->SetPointError(npts++, 0, m_fitHist->GetBinError(ipt + 1));
+  for (int ipt = 0; ipt < hist_p->GetNbinsX(); ipt++) {
+    theGraph->SetPoint(npts, hist_p->GetBinCenter(ipt + 1), hist_p->GetBinContent(ipt + 1));
+    theGraph->SetPointError(npts++, 0, hist_p->GetBinError(ipt + 1));
   }
 
-  TF1* func_p = (TF1*) m_fitHist->GetListOfFunctions()->Last();
+  TF1* func_p = static_cast<TF1*>(hist_p->GetListOfFunctions()->Last());
   theGraph->GetListOfFunctions()->Add(func_p);
-  theGraph->SetName(( std::string(m_fitHist->GetName()) + "not_combinaed").c_str());
+  theGraph->SetName(( std::string(hist_p->GetName()) + "not_combinaed").c_str());
 
   theGraph->SetMarkerStyle(20);
   theGraph->SetMarkerColor(1);
@@ -1876,53 +2007,6 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetGraph() const {
   return theGraph;
 }
 
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetUndelayedGraph() const {
-  //
-  // We defer filling the histogram if we don't have a pulse until the histogram is requested
-  //
-  GetHistogramPtr();
-
-  std::shared_ptr<TGraphErrors> theGraph = std::make_shared<TGraphErrors>(TGraphErrors(m_Nsample));
-  size_t npts = 0;
-
-  for (int ipt = 0; ipt < m_fitHist->GetNbinsX(); ipt++) {
-    theGraph->SetPoint(npts, m_fitHist->GetBinCenter(ipt + 1), m_fitHist->GetBinContent(ipt + 1));
-    theGraph->SetPointError(npts++, 0, m_fitHist->GetBinError(ipt + 1));
-  }
-
-  TF1* func_p = (TF1*) m_fitHist->GetListOfFunctions()->Last();
-  theGraph->GetListOfFunctions()->Add(func_p);
-  theGraph->SetName(( std::string(m_fitHist->GetName()) + "undelayed").c_str());
-
-  theGraph->SetMarkerStyle(20);
-  theGraph->SetMarkerColor(1);
-
-  return theGraph;
-}
-
-std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetDelayedGraph() const {
-  //
-  // We defer filling the histogram if we don't have a pulse until the histogram is requested
-  //
-  GetHistogramPtr();
-
-  std::shared_ptr<TGraphErrors> theGraph = std::make_shared<TGraphErrors>(TGraphErrors(m_Nsample));
-  size_t npts = 0;
-
-  for (int iDelayPt = 0; iDelayPt < m_delayedHist->GetNbinsX(); iDelayPt++) {
-    theGraph->SetPoint(npts, m_delayedHist->GetBinCenter(iDelayPt + 1), m_delayedHist->GetBinContent(iDelayPt + 1) - m_delayedBaselineShift);
-    theGraph->SetPointError(npts++, 0, m_delayedHist->GetBinError(iDelayPt + 1));
-  }
-
-  TF1* func_p = (TF1*) m_fitHist->GetListOfFunctions()->Last();
-  theGraph->GetListOfFunctions()->Add(func_p);
-  theGraph->SetName(( std::string(m_fitHist->GetName()) + "delayed").c_str());
-
-  theGraph->SetMarkerStyle(20);
-  theGraph->SetMarkerColor(kBlue);
-
-  return theGraph;
-}
 
 std::vector<float> ZDCPulseAnalyzer::CalculateDerivative(const std::vector <float>& inputData, unsigned int step)
 {

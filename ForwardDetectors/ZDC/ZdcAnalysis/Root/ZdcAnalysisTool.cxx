@@ -34,7 +34,7 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
     declareProperty("Configuration", m_configuration = "PbPb2015");
     declareProperty("FlipEMDelay", m_flipEMDelay = false);
-    declareProperty("LowGainOnly", m_lowGainOnly = false);
+    declareProperty("LowGainMode", m_lowGainMode = 0);
     declareProperty("WriteAux", m_writeAux = true);
     declareProperty("AuxSuffix", m_auxSuffix = "");
 
@@ -249,7 +249,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   
   // For the LHCf run, use low gain samples 
   //
-  m_lowGainOnly = true;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
 
   //  Construct the data analyzer
   //
@@ -259,7 +259,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG, 
 									peak2ndDerivMinThresholdsLG, 
-									m_lowGainOnly)); 
+									m_lowGainMode)); 
 
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
   zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
@@ -319,6 +319,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   
   m_deltaTSample = 3.125;
   m_numSample = 24;
+  m_lowGainMode = ZDCPulseAnalyzer::LGModeForceLG;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
@@ -370,7 +371,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG, 
 									peak2ndDerivMinThresholdsLG, 
-									m_lowGainOnly)); 
+									m_lowGainMode)); 
 
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
   zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
@@ -444,13 +445,13 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
   ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.1, 1.1, 1.1, 1.1},
-						{1.1, 1.1, 1.1, 1.1}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.2, 1.4, 1.3, 1.2},
+						{1.35, 1.4, 1.3, 1.1}}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{28, 28, 28, 28}, {28, 28, 28, 28}}};
     
   ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
@@ -478,12 +479,12 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG,
 									peak2ndDerivMinThresholdsLG,
-									m_lowGainOnly));
+									ZDCPulseAnalyzer::LGModeRefitLG));
   zdcDataAnalyzer->set2ndDerivStep(2);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1, 1, 1, 1},{1, 1, 1, 1}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{9.63, 9.29, 10.08, 9.34},{9.79, 9.45, 9.94, 10.36}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsHG = {{{1.042, 1.078, 1.008, 1.066},{1.047, 1.060, 1.010, 0.99}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray gainsLG = {{{10, 10, 10, 10}, {10, 10, 10, 10}}};
 
   zdcDataAnalyzer->SetGainFactorsHGLG(gainsHG, gainsLG); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
@@ -507,8 +508,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   // Enable two-pass analysis                                                                                 
   //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-10, -10, -10, -10},
-								   {-10, -10, -10, -10}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-20, -20, -20, -20},
+								   {-20, -20, -20, -20},}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
 								   {-8, -8, -8, -8}}};
@@ -524,15 +525,15 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //
   std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
   
-  nonLinearCorrCoefficHG = {{ {{{-0.039464, 0.013250, -0.003676},
-				{-0.050573, 0.019664, -0.004340},
-				{-0.052816, 0.016221, -0.003364},
-				{-0.014327, 0.000226, -0.000943}}},
-			      {{{-0.059663, 0.019482, -0.004615},
-				{-0.036908, 0.008920, -0.002805},
-				{-0.046814, 0.019434, -0.004207},
-				{-0.060879, 0.026635, -0.004833}}} }};
-
+  nonLinearCorrCoefficHG[0][0] = {-0.0225871, 0.00702802, 0.00201155, -0.00675293, 0.00186212} ;
+  nonLinearCorrCoefficHG[0][1] = {-0.0155562, 0.00594092, 0.00382112, -0.00665466, 0.00143384} ;
+  nonLinearCorrCoefficHG[0][2] = {-0.0313621, 0.0134528, 0.00529013, -0.0111751, 0.0029913} ;
+  nonLinearCorrCoefficHG[0][3] = {-0.025108, 0.00301898, 0.022472, -0.0204288, 0.00453215} ;
+  nonLinearCorrCoefficHG[1][0] = {-0.0266648, 0.0106792, -0.00939959, 0.000833011, 0.000199051} ;
+  nonLinearCorrCoefficHG[1][1] = {-0.0246541, 0.000327376, 0.00754946, -0.00710273, 0.00136899} ;
+  nonLinearCorrCoefficHG[1][2] = {-0.0175283, 0.0127954, 0.000235749, -0.00769698, 0.00221995} ;;
+  nonLinearCorrCoefficHG[1][3] = {-0.0279931, 0.0188122, 0.0126234, -0.0169907, 0.00398826} ;
+  
   // For now we don't use corrections on the LG as it's much harder to measure them
   //
   nonLinearCorrCoefficLG = {{ {{{0},
@@ -543,8 +544,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 				{0},
 				{0},
 				{0}}} }};
-    
-  zdcDataAnalyzer->SetNonlinCorrParams(0, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+
+  // Now use 1000 as the offset for the high gain non-linear correction due to the improved
+  //  clarity in the high gain/low gain response change around the 10 bit mark with the new LG refit procedure
+  //
+  zdcDataAnalyzer->SetNonlinCorrParams(1000, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
@@ -557,22 +561,31 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   timeCorrCoefficHG[1][2] = {-0.01, 0.006711, -0.001652, -0.004223, -0.000573, 0.000161};
   timeCorrCoefficHG[1][3] = {0.015, 0.017993, 0.006339, 0.003122, 0.002980, 0.000735};
 
-  timeCorrCoefficLG[0][0] = {0.035, -0.126189, 0.022724, 0.039116, -0.098255};
-  timeCorrCoefficLG[0][1] = {0.022, -0.165988, -0.014125, 0.057323, -0.205109};
-  timeCorrCoefficLG[0][2] = {0.01, -0.136087, -0.007248, -0.014452, -0.060469};
-  timeCorrCoefficLG[0][3] = {0.0, -0.131067, 0.025579, 0.059994, -0.065595};
+  // +++ BAC 07-26-24
+  //
+  //  The +3.25 in the constant t0 correction term accounts for a change in the nominal T0 from 31.25 to 28
+  //    made at the same time to match the timing shift of the LG channels 
+  //
+  // ---
+  timeCorrCoefficLG[0][0] = {0.035+3.25, -0.126189, 0.022724, 0.039116, -0.098255};
+  timeCorrCoefficLG[0][1] = {0.022+3.25, -0.165988, -0.014125, 0.057323, -0.205109};
+  timeCorrCoefficLG[0][2] = {0.01+3.25, -0.136087, -0.007248, -0.014452, -0.060469};
+  timeCorrCoefficLG[0][3] = {0.0+3.25, -0.131067, 0.025579, 0.059994, -0.065595};
   
-  timeCorrCoefficLG[1][0] = {0.076, -0.300587, -0.041827, 0.641108, -0.594157};
-  timeCorrCoefficLG[1][1] = {0.057, -0.223443, -0.125013, -0.176900, 0.348081};
-  timeCorrCoefficLG[1][2] = {0.015, -0.141721, 0.023936, 0.099657, -0.188526};
-  timeCorrCoefficLG[1][3] = {0.01, -0.152589, 0.016122, -0.086580, 0.563625};
+  timeCorrCoefficLG[1][0] = {0.076+3.25, -0.300587, -0.041827, 0.641108, -0.594157};
+  timeCorrCoefficLG[1][1] = {0.057+3.25, -0.223443, -0.125013, -0.176900, 0.348081};
+  timeCorrCoefficLG[1][2] = {0.015+3.25, -0.141721, 0.023936, 0.099657, -0.188526};
+  timeCorrCoefficLG[1][3] = {0.01+3.25, -0.152589, 0.016122, -0.086580, 0.563625};
 
   zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoefficHG, timeCorrCoefficLG);
   
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
-  
+
+  //
+  // The RPD configuration
+  //
   RPDConfig rpdConfig{};
   rpdConfig.nRows = 4;
   rpdConfig.nColumns = 4;
@@ -651,7 +664,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeMonteCarloPbPb2023()
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG,
 									peak2ndDerivMinThresholdsLG,
-									m_lowGainOnly));
+									m_lowGainMode));
   zdcDataAnalyzer->set2ndDerivStep(2);
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
 
@@ -815,7 +828,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
     //  Construct the data analyzer
     //
     std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(), m_numSample, m_deltaTSample, m_presample, "FermiExp", peak2ndDerivMinSamples,
-            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainOnly));
+            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode));
 
     zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
     zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0, t0);
@@ -877,7 +890,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2015G4()
     m_deltaTSample = 12.5;
 
     std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(), 7, m_deltaTSample, 0, "FermiExp", peak2ndDerivMinSamples,
-        peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainOnly));
+        peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode));
 
     // Open up tolerances on the position of the peak for now
     //
@@ -975,7 +988,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepPb2016()
     //  We adopt hard-coded values for the number of samples and the frequency which we kept fixed for all physics data
     //
     std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(), 7, 25, 0, "FermiExpLinear", peak2ndDerivMinSamples,
-            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainOnly));
+            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode));
 
     // Open up tolerances on the position of the peak for now
     //
@@ -1093,7 +1106,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2018()
     //  We adopt hard-coded values for the number of samples and the frequency which we kept fixed for all physics data
     //
     std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer = std::make_unique<ZDCDataAnalyzer>(MakeMessageFunction(), 7, 25, 0, "FermiExpLinear", peak2ndDerivMinSamples, // presample index changed to zero 4/6/19
-            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainOnly);
+            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode);
 
     // Open up tolerances on the position of the peak for now
     //
@@ -1220,7 +1233,7 @@ void ZdcAnalysisTool::initialize40MHz()
     slewingParamsLG[1][3] = {0, 1.939e-01, 2.188e-02, -5.579e-02  };
     
     m_zdcDataAnalyzer_40MHz.reset (new ZDCDataAnalyzer(MakeMessageFunction(), 7, 25, 0, "FermiExp", peak2ndDerivMinSamples,
-                                   peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainOnly));
+                                   peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode));
 
     m_zdcDataAnalyzer_40MHz->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
     m_zdcDataAnalyzer_40MHz->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
@@ -1340,7 +1353,7 @@ void ZdcAnalysisTool::initialize80MHz()
 
     
     m_zdcDataAnalyzer_80MHz.reset (new ZDCDataAnalyzer(MakeMessageFunction(), 7 , 12.5, 0, "FermiExp", m_peak2ndDerivMinSamples,
-                                   m_peak2ndDerivMinThresholdsHG, m_peak2ndDerivMinThresholdsLG, m_lowGainOnly));
+                                   m_peak2ndDerivMinThresholdsHG, m_peak2ndDerivMinThresholdsLG, m_lowGainMode));
 
     m_zdcDataAnalyzer_80MHz->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
     m_zdcDataAnalyzer_80MHz->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
@@ -1440,7 +1453,7 @@ StatusCode ZdcAnalysisTool::initialize()
 
     ATH_MSG_INFO("Configuration: " << m_configuration);
     ATH_MSG_DEBUG("FlipEMDelay: " << m_flipEMDelay);
-    ATH_MSG_DEBUG("LowGainOnly: " << m_lowGainOnly);
+    ATH_MSG_DEBUG("LowGainMode: " << m_lowGainMode);
 
     ATH_MSG_DEBUG("Using Combined delayed and undelayed samples: " << m_combineDelay);
 
@@ -1497,6 +1510,20 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_zdcModuleMinDeriv2nd.initialize());
     m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleMaxADC.initialize());
+
+    // LG refit data
+    //
+    m_zdcModuleAmpLGRefit = m_zdcModuleContainerName+".AmpLGRefit"+m_auxSuffix;
+    ATH_CHECK(m_zdcModuleAmpLGRefit.initialize());
+    m_zdcModuleT0LGRefit = m_zdcModuleContainerName+".T0LGRefit"+m_auxSuffix;
+    ATH_CHECK(m_zdcModuleT0LGRefit.initialize());
+    m_zdcModuleT0SubLGRefit = m_zdcModuleContainerName+".T0SubLGRefit"+m_auxSuffix;
+    ATH_CHECK(m_zdcModuleT0SubLGRefit.initialize());
+    m_zdcModuleChisqLGRefit = m_zdcModuleContainerName+".ChisqLGRefit"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleChisqLGRefit.initialize());
+
+    // RPD per-channel data
+    //
     m_rpdChannelBaseline = m_zdcModuleContainerName+".RPDChannelBaseline"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelBaseline.initialize());
     m_rpdChannelPileupExpFitParams = m_zdcModuleContainerName+".RPDChannelPileupExpFitParams"+m_auxSuffix;
@@ -1526,6 +1553,8 @@ StatusCode ZdcAnalysisTool::initialize()
     m_rpdChannelPileupFrac = m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelPileupFrac.initialize());
 
+    // ZDC per-calorimeter data
+    //
     m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
     ATH_CHECK( m_zdcSumUncalibSum.initialize());
     m_zdcSumCalibEnergy = m_zdcSumContainerName+".CalibEnergy"+m_auxSuffix;
@@ -1776,6 +1805,12 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePresample(m_zdcModulePresample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMinDeriv2nd(m_zdcModuleMinDeriv2nd);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmpLGRefit(m_zdcModuleAmpLGRefit);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0LGRefit(m_zdcModuleT0LGRefit);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0SubLGRefit(m_zdcModuleT0SubLGRefit);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleChisqLGRefit(m_zdcModuleChisqLGRefit);
+    
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelBaseline(m_rpdChannelBaseline);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupExpFitParams(m_rpdChannelPileupExpFitParams);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupStretchedExpFitParams(m_rpdChannelPileupStretchedExpFitParams);
@@ -1858,7 +1893,12 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	      zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
 	      zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
 	      zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
-            }
+
+	      zdcModuleAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmp();
+	      zdcModuleT0LGRefit(*zdcModule) = pulseAna_p->getRefitLGTime();
+	      zdcModuleT0SubLGRefit(*zdcModule) = pulseAna_p->getRefitLGTimeSub();
+	      zdcModuleChisqLGRefit(*zdcModule) = pulseAna_p->getRefitLGChisq();
+	  }
 	  //ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
           //                  << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
         }
