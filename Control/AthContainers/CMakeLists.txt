@@ -83,6 +83,7 @@ _add_test( Decorator_test )
 _add_test( Accessor_test )
 _add_test( JaggedVecElt_test )
 _add_test( JaggedVecVector_test )
+_add_test( JaggedVecVectorFactory_test )
 
 
 if( NOT XAOD_STANDALONE )

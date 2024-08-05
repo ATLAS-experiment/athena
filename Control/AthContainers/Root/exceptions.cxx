@@ -665,4 +665,32 @@ ExcBadVarName::ExcBadVarName (const std::string& name)
 }
 
 
+//*************************************************************************
+
+
+/// Helper: format exception error string.
+std::string excJaggedVecOverlappingCopy_format()
+{
+  return "SG::ExcJaggedVecOverlappingCopy: Overlapping copies not implemented for jagged vectors.  Talk to core software if this is an issue.";
+}
+
+
+/**
+ * @brief Constructor.
+ */
+ExcJaggedVecOverlappingCopy::ExcJaggedVecOverlappingCopy()
+  : std::runtime_error (excJaggedVecOverlappingCopy_format())
+{
+}
+
+
+/**
+ * @brief Throw a SG::ExcJaggedVecOverlappingCopy exception.
+ */
+void throwJaggedVecOverlappingCopy()
+{
+  throw ExcJaggedVecOverlappingCopy();
+}
+
+
 } // namespace SG

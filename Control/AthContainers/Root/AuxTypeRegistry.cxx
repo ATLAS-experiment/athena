@@ -13,6 +13,7 @@
 #include "AthContainers/exceptions.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainers/tools/AuxTypeVector.h"
+#include "AthContainers/JaggedVec.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainers/tools/threading.h"
 #include "AthContainers/tools/concurrent_vector.h"
@@ -266,6 +267,20 @@ AuxTypeRegistryImpl::AuxTypeRegistryImpl()
   ADD_FACTORY (std::vector<unsigned int>);
   ADD_FACTORY (std::vector<float>);
   ADD_FACTORY (std::vector<double>);
+
+  ADD_FACTORY (SG::JaggedVecElt<char>);
+  ADD_FACTORY (SG::JaggedVecElt<unsigned char>);
+  ADD_FACTORY (SG::JaggedVecElt<short>);
+  ADD_FACTORY (SG::JaggedVecElt<unsigned short>);
+  ADD_FACTORY (SG::JaggedVecElt<int>);
+  ADD_FACTORY (SG::JaggedVecElt<unsigned int>);
+  ADD_FACTORY (SG::JaggedVecElt<long>);
+  ADD_FACTORY (SG::JaggedVecElt<unsigned long>);
+  ADD_FACTORY (SG::JaggedVecElt<long long>);
+  ADD_FACTORY (SG::JaggedVecElt<unsigned long long>);
+  ADD_FACTORY (SG::JaggedVecElt<float>);
+  ADD_FACTORY (SG::JaggedVecElt<double>);
+  ADD_FACTORY (SG::JaggedVecElt<std::string>);
 #undef ADD_FACTORY
 }
 
