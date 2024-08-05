@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BarrelFastSimDedicatedSD.h"
@@ -20,13 +20,13 @@ using HepGeom::Transform3D;
 using CLHEP::Hep3Vector;
 
 // Constructor:
-BarrelFastSimDedicatedSD::BarrelFastSimDedicatedSD(StoreGateSvc* detStore)
+BarrelFastSimDedicatedSD::BarrelFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
   : IFastSimDedicatedSD("BarrelFastSimDedicatedSD", detStore)
   , m_embManager(nullptr)
   , m_accordionDetails(nullptr)
   , m_absorberSections(nullptr)
 {
-  G4cout << GetName() << "::initialize()" << G4endl;
+  if (verbose) { G4cout << GetName() << "::initialize()" << G4endl; }
   if ( detStore->retrieve( m_embManager ).isFailure()  ){
     throw std::runtime_error("Could not retrieve EMB manager");
   }

@@ -64,11 +64,11 @@ G4VFastSimulationModel* LArFastShowerTool::makeFastSimModel()
   if (fastSD){
     ATH_MSG_INFO( "SD " << m_fastSimDedicatedSD << " already created." );
   } else if ("BarrelFastSimDedicatedSD" == m_fastSimDedicatedSD){
-    fastSD = new BarrelFastSimDedicatedSD( &*detStore() );
+    fastSD = new BarrelFastSimDedicatedSD( &*detStore(), msgLevel(MSG::DEBUG) );
   } else if ("EndcapFastSimDedicatedSD" == m_fastSimDedicatedSD){
-    fastSD = new EndcapFastSimDedicatedSD( &*detStore() );
+    fastSD = new EndcapFastSimDedicatedSD( &*detStore(), msgLevel(MSG::DEBUG) );
   } else if ("FCALFastSimDedicatedSD" == m_fastSimDedicatedSD){
-    fastSD = new FCALFastSimDedicatedSD( &*detStore() );
+    fastSD = new FCALFastSimDedicatedSD( &*detStore(), msgLevel(MSG::DEBUG) );
   } else {
     ATH_MSG_FATAL( "Fast sim SD type " << m_fastSimDedicatedSD << " not found!" );
     throw std::runtime_error("Bad SD name");
