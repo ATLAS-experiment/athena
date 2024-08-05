@@ -26,7 +26,7 @@ class EndcapFastSimDedicatedSD : public IFastSimDedicatedSD
 public:
 
   // Constructor:
-  EndcapFastSimDedicatedSD(StoreGateSvc*);
+  EndcapFastSimDedicatedSD(StoreGateSvc*, bool verbose);
 
   // Destructor:
   ~EndcapFastSimDedicatedSD() {}

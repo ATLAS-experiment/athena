@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_BARRELFASTSIMDEDICATEDSD_H
@@ -28,7 +28,7 @@ class BarrelFastSimDedicatedSD : public IFastSimDedicatedSD
 public:
 
   // Constructor:
-  BarrelFastSimDedicatedSD(StoreGateSvc*);
+  BarrelFastSimDedicatedSD(StoreGateSvc*, bool verbose);
 
   // Destructor:
   ~BarrelFastSimDedicatedSD() {}

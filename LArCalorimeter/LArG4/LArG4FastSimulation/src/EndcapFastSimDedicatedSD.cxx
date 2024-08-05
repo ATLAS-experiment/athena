@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -33,15 +33,15 @@ using HepGeom::Point3D;
 using HepGeom::Transform3D;
 
 // Constructor:
-EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore)
-  : IFastSimDedicatedSD("EndcapFastSimDedicatedSD", detStore) 
+EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
+  : IFastSimDedicatedSD("EndcapFastSimDedicatedSD", detStore)
   , m_emecManager(nullptr)
   , m_innerWheelCalculatorPos(nullptr)
   , m_innerWheelCalculatorNeg(nullptr)
   , m_outerWheelCalculatorPos(nullptr)
   , m_outerWheelCalculatorNeg(nullptr)
 {
-  G4cout << GetName() << "::initialize()" << G4endl;
+  if (verbose) { G4cout << GetName() << "::initialize()" << G4endl; }
   if ( detStore->retrieve( m_emecManager ).isFailure()  ){
     throw std::runtime_error("Could not retrieve EMEC manager");
   }

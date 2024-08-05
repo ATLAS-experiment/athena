@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FCALFastSimDedicatedSD.h"
@@ -18,11 +18,11 @@ using HepGeom::Transform3D;
 using HepGeom::Point3D;
 
 // Constructor:
-FCALFastSimDedicatedSD::FCALFastSimDedicatedSD(StoreGateSvc* detStore)
-  : IFastSimDedicatedSD("FCALFastSimDedicatedSD", detStore) 
+FCALFastSimDedicatedSD::FCALFastSimDedicatedSD(StoreGateSvc* detStore, bool verbose)
+  : IFastSimDedicatedSD("FCALFastSimDedicatedSD", detStore)
   , m_fcalManager(nullptr)
 {
-  G4cout << GetName() << "::initialize()" << G4endl;
+  if (verbose) { G4cout << GetName() << "::initialize()" << G4endl; }
   if ( detStore->retrieve(m_fcalManager).isFailure() ){
     throw std::runtime_error("Could not retrieve FCAL manager");
   }
