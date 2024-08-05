@@ -277,6 +277,16 @@ namespace xAOD {
       return getWritableAuxIDs();
    }
 
+   const AuxContainerBase::auxid_set_t&
+   AuxContainerBase::getDecorIDs() const {
+
+      if( m_store ) {
+         return m_store->getDecorIDs();
+      }
+      static const auxid_set_t empty;
+      return empty;
+   }
+
    bool AuxContainerBase::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );

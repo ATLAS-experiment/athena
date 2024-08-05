@@ -39,12 +39,19 @@ class L1CaloMonitorCfgHelper(object):
                             print(prefix,key,"{")
                             if(key=="dir detail" or key=="dir Developer"):
                                 print(prefix+"  algorithm = GatherData") # define GatherData as default algo for all of these hists
+                            if key.startswith("dir ") and any([x.startswith("hist ") for x in value.keys()]):
+                                # this is a dir with hists, so specify output as the path .. take from the first hist child
+                                for childKey,childVal in value.items():
+                                    if childKey.startswith("hist ") and "output" in childVal:
+                                        print(prefix+"  output = "+childVal["output"])
+                                        break
                             printConf(value,prefix + "  ")
                             print(prefix,"}")
                         else:
-                            print(prefix,key,"=",value)
-                            # save all output paths to add to output block
+                            # save all output paths to add to output block (don't need to print here b.c. specified at dir level
                             if key == "output": outputs.add(value)
+                            else: print(prefix,key,"=",value)
+
 
                 print("#inputs")
                 print("dir L1Calo {")
@@ -158,6 +165,8 @@ thresholds th_AnyBinIsError {
         :return:
         '''
 
+        hanConfig = dict(hanConfig) # create a copy since will modify below (otherwise we end up modifying the default empty dict)
+
         if paths != []:
             for path in paths:
                 # create a copy of the histogram in each of the extra locations
@@ -203,15 +212,17 @@ thresholds th_AnyBinIsError {
             if "description" not in hanConfig: hanConfig["description"] = linkUrl
             else: hanConfig["description"] += " - " + linkUrl
 
-        splitPathWithHist = splitPath + [histName]
-        x = L1CaloMonitorCfgHelper.hanConfigs
-        for i,p in enumerate(splitPathWithHist):
-            key = ("dir " if i!=len(splitPathWithHist)-1 else "hist ") + p
-            if key not in x:
-                x[key] = {}
-            x = x[key]
-        hanConfig["output"] = "/".join(["L1Calo"]+splitPath)
-        x.update(hanConfig)
+        # only add to hanConfig if in Expert folder ... perhaps need to allow exception if doing local testing!
+        if splitPath[0] == "Expert":
+            splitPathWithHist = splitPath + [histName]
+            x = L1CaloMonitorCfgHelper.hanConfigs
+            for i,p in enumerate(splitPathWithHist):
+                key = ("dir " if i!=len(splitPathWithHist)-1 else "hist ") + p
+                if key not in x:
+                    x[key] = {}
+                x = x[key]
+            hanConfig["output"] = "/".join(["L1Calo"]+splitPath)
+            x.update(hanConfig)
 
         return out
 

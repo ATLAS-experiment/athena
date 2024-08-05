@@ -120,6 +120,13 @@ namespace xAOD {
       return getWritableAuxIDs();
    }
 
+   const ByteStreamAuxContainer_v1::auxid_set_t&
+   ByteStreamAuxContainer_v1::getDecorIDs() const {
+
+      // Return the full list of IDs:
+      return m_decorations;
+   }
+
    /// Get a pointer to a given array, as a decoration.
    void* ByteStreamAuxContainer_v1::getDecoration (auxid_t auxid,
                                                    size_t size,

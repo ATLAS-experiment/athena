@@ -56,6 +56,7 @@
      <field name="m_shallowIO" transient="true" />
      <field name="m_mutex" transient="true" />
      <field name="m_auxids" transient="true" />
+     <field name="m_decorids" transient="true" />
      <field name="m_name" transient="true" />
      <field name="m_locked" transient="true" />
      <field name="m_auxidsValid" transient="true" />
