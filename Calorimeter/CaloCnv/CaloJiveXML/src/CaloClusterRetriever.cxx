@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterRetriever.h"
@@ -138,13 +138,13 @@ namespace JiveXML {
     
     int id = 0;
     for (const auto cluster : *ccc) {
-      phi.push_back(DataType(cluster->phi()));
-      eta.push_back(DataType(cluster->eta()));
-      et.push_back(DataType(cluster->et()*(1./GeV)));
-      idVec.push_back(DataType( ++id ));
+      phi.emplace_back(cluster->phi());
+      eta.emplace_back(cluster->eta());
+      et.emplace_back(cluster->et()*(1./GeV));
+      idVec.emplace_back( ++id );
 
       int numCells = cluster->size();
-      numCellsVec.push_back(DataType( numCells ));
+      numCellsVec.emplace_back( numCells );
       noCells += numCells;
 
       for (const auto cell : *cluster) {
@@ -160,16 +160,17 @@ namespace JiveXML {
     }
 
     // Start with mandatory entries
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap[tagCells] = cells;
-    DataMap["numCells"] = numCellsVec;
-    DataMap["id"] = idVec;
+    const auto nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap[tagCells] = std::move(cells);
+    DataMap["numCells"] = std::move(numCellsVec);
+    DataMap["id"] = std::move(idVec);
 
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " , collection: " << dataTypeName()
-                   << " retrieved with " << phi.size() << " entries" );
+                   << " retrieved with " << nEntries << " entries" );
 
     //All collections retrieved okay
     return DataMap;

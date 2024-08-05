@@ -1,28 +1,23 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_BADLARRETRIEVER_H
 #define JIVEXML_BADLARRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
+
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-class IToolSvc;
+#include "JiveXML/DataType.h" //DataMap typedef
 
-class Identifier;
-class CaloCellContainer;
-
+#include <string>
+class CaloCell_ID;
 namespace JiveXML{
   
   /**
@@ -56,7 +51,6 @@ namespace JiveXML{
       /// Return the name of the data type
       virtual std::string dataTypeName() const { return "BadLAr"; };
 
-	
       ///Default AthAlgTool methods
       StatusCode initialize();
 
