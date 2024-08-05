@@ -207,6 +207,7 @@ namespace JiveXML {
 
     }
     // Start with mandatory entries
+    const auto nEntries = phi.size();
     DataMap["phi"] = std::move(phi);
     DataMap["eta"] = std::move(eta);
     DataMap["et"] = std::move(et);
@@ -218,7 +219,7 @@ namespace JiveXML {
 
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " (AOD, no cells), collection: " << dataTypeName()
-      << " retrieved with " << phi.size() << " entries");
+      << " retrieved with " << nEntries << " entries");
     
 
     //All collections retrieved okay
