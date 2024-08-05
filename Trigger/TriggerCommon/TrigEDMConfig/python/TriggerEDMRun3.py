@@ -906,10 +906,6 @@ TriggerHLTListRun3 = [
     ('xAOD::HIEventShapeAuxContainer#HLT_HIEventShapeEGAux.',   'BS ESD AODFULL',   'Egamma'),
 
     # HI event shape for jet
-    ('xAOD::HIEventShapeContainer#HLTHIEventShape',          'BS ESD AODFULL',   'Jet'),
-    ('xAOD::HIEventShapeAuxContainer#HLTHIEventShapeAux.',   'BS ESD AODFULL',   'Jet'),
-    ('xAOD::HIEventShapeContainer#HLTHIEventShape_iter_egamma',          'BS ESD AODFULL',   'Jet'),
-    ('xAOD::HIEventShapeAuxContainer#HLTHIEventShape_iter_egammaAux.',   'BS ESD AODFULL',   'Jet'),
     ('xAOD::HIEventShapeContainer#HLTHIEventShapeWeighted',          'BS ESD AODFULL',   'Jet'),
     ('xAOD::HIEventShapeAuxContainer#HLTHIEventShapeWeightedAux.',   'BS ESD AODFULL',   'Jet'),
     ('xAOD::HIEventShapeContainer#HLTHIEventShapeWeighted_iter0',          'BS ESD AODFULL',   'Jet'),
