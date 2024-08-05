@@ -54,15 +54,20 @@ namespace CP {
   PhotonVertexSelectionTool::PhotonVertexSelectionTool(const std::string &name)
   : asg::AsgTool(name)
   {
+    // run 2 NN model:
+    //  m_doSkipByZSigma = true, m_isTMVA = true
+    // run 3 NN model:
+    //  m_doSkipByZSigma = false, m_isTMVA = false
+  
     // default variables
     declareProperty("nVars",  m_nVars = 4);
     declareProperty("conversionPtCut", m_convPtCut = 2e3);
-    declareProperty("DoSkipByZSigma",  m_doSkipByZSigma = true);
+    declareProperty("DoSkipByZSigma",  m_doSkipByZSigma = false);
     
     declareProperty("derivationPrefix", m_derivationPrefix = "");
 
     // boolean for TMVA, default true
-    declareProperty("isTMVA", m_isTMVA = true);
+    declareProperty("isTMVA", m_isTMVA = false);
 
     // config files (TMVA), default paths if not set
     declareProperty("ConfigFileCase1",
