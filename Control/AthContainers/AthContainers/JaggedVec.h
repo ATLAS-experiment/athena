@@ -19,6 +19,7 @@
 
 
 #include "AthContainers/JaggedVecImpl.h"
+#include "AthContainers/tools/JaggedVecVectorFactory.h"
 
 
 #endif // not ATHCONTAINERS_JAGGEDVEC_H

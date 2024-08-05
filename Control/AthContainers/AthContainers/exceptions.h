@@ -505,6 +505,29 @@ public:
 };
 
 
+/**
+ * @brief Exception --- Overlapping copies not implemented for jagged vectors.
+ *
+ * Talk to core software if this is an issue.
+ */
+class ExcJaggedVecOverlappingCopy
+  : public std::runtime_error
+{
+public:
+  /**
+   * @brief Constructor.
+   */
+  ExcJaggedVecOverlappingCopy();
+};
+
+
+/**
+ * @brief Throw a SG::ExcJaggedVecOverlappingCopy exception.
+ */
+[[noreturn]]
+void throwJaggedVecOverlappingCopy();
+
+
 } // namespace SG
 
 
