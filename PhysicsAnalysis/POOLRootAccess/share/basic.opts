@@ -1,6 +1,7 @@
 
 #pragma print off //do not print
 ApplicationMgr.OutputLevel = 0; //NIL ... so ApplicationMgr is silent
+ApplicationMgr.CreateSvc = {"StoreGateSvc/DetectorStore","StoreGateSvc/InputMetaDataStore"};
 //MessageSvc.OutputLevel = 5; //ERROR
 ApplicationMgr.EventLoop = "MinimalEventLoopMgr"; //for minimal service creation
 
