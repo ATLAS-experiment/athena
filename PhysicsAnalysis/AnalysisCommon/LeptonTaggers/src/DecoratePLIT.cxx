@@ -37,20 +37,23 @@ namespace Prompt {
 
     // Load and initialize the neural network model from the given file path.
     if(m_leptonsName == "Electrons") {
-      std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
+        std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
         m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
 
         std::string fullPathToOnnxFile_endcap = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion_endcap.value());
         m_onnxUtil_endcap = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile_endcap);
 
+        m_num_lepton_features = 15;
+        m_num_track_features = 19;
+
         // set up decorators using a dummy query of the onnx model
         std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
-        std::vector<float> elec_feat(15, 0.);
+        std::vector<float> elec_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> elec_feat_dim = {1, static_cast<int64_t>(elec_feat.size())};
         FlavorTagDiscriminants::Inputs elec_info (elec_feat, elec_feat_dim);
         gnn_input.insert({"jet_features", elec_info});
-        std::vector<float> track_feat(19, 0.);
-        std::vector<int64_t> track_feat_dim = {1, 19};
+        std::vector<float> track_feat(m_num_track_features, 0.);
+        std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
         FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
         auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
@@ -63,17 +66,20 @@ namespace Prompt {
         ATH_CHECK(m_dec_el_plit_output.initialize());
     }
     else if (m_leptonsName == "Muons") {
-      std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
+        std::string fullPathToOnnxFile = PathResolverFindCalibFile(m_configPath.value() + m_configFileVersion.value());
         m_onnxUtil = std::make_shared<FlavorTagDiscriminants::OnnxUtil>(fullPathToOnnxFile);
+
+        m_num_lepton_features = 10;
+        m_num_track_features = 18;
 
         // set up decorators using a dummy query of the onnx model
         std::map<std::string, FlavorTagDiscriminants::Inputs> gnn_input;
-        std::vector<float> muon_feat(10, 0.);
+        std::vector<float> muon_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> muon_feat_dim = {1, static_cast<int64_t>(muon_feat.size())};
         FlavorTagDiscriminants::Inputs muon_info (muon_feat, muon_feat_dim);
         gnn_input.insert({"jet_features", muon_info});
-        std::vector<float> track_feat(19, 0.);
-        std::vector<int64_t> track_feat_dim = {1, 19};
+        std::vector<float> track_feat(m_num_track_features, 0.);
+        std::vector<int64_t> track_feat_dim = {1, m_num_track_features};
         FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
         gnn_input.insert({"track_features", track_info});
         auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_input);
@@ -150,7 +156,6 @@ namespace Prompt {
     ATH_CHECK(m_acc_trk_z0SinThetaUncertainty.initialize());
     ATH_CHECK(m_acc_trk_muon_track.initialize());
     ATH_CHECK(m_acc_trk_electron_track.initialize());
-    ATH_CHECK(m_acc_trk_leptonID.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -172,7 +177,6 @@ namespace Prompt {
     SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> acc_z0SinTheta{m_acc_trk_z0SinTheta, ctx};
     SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> acc_d0Uncertainty{m_acc_trk_d0Uncertainty, ctx};
     SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> acc_z0SinThetaUncertainty{m_acc_trk_z0SinThetaUncertainty, ctx};
-    SG::ReadDecorHandle<xAOD::TrackParticleContainer, char> acc_leptonID{m_acc_trk_leptonID, ctx};
 
     // prepare input
     // -------------
@@ -333,15 +337,11 @@ namespace Prompt {
         return StatusCode::FAILURE;
       }
       track_feat.push_back(sct_shared);
-
-      char leptonid = acc_leptonID(*track);
-      track_feat.push_back(leptonid);
     }
 
     // prepare track features for inference
-    constexpr int num_vars = 19;
     int num_cnsts = parts.size();
-    std::vector<int64_t> track_feat_dim = {num_cnsts, num_vars};
+    std::vector<int64_t> track_feat_dim = {num_cnsts, m_num_track_features};
 
     FlavorTagDiscriminants::Inputs track_info(track_feat, track_feat_dim);
     gnn_input.insert({"track_features", track_info});
@@ -629,9 +629,8 @@ namespace Prompt {
     }
 
     // prepare track features for inference
-    int num_vars = 19;
     int num_cnsts = parts.size();
-    std::vector<int64_t> track_feat_dim = {num_cnsts, num_vars};
+    std::vector<int64_t> track_feat_dim = {num_cnsts, m_num_track_features};
 
     FlavorTagDiscriminants::Inputs track_info (track_feat, track_feat_dim);
     gnn_input.insert({"track_features", track_info});

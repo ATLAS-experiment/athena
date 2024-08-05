@@ -6,6 +6,9 @@ lep_tag_log = logging.getLogger('LeptonTaggersConfig')
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from AthenaConfiguration.Enums import LHCPeriod
+
+
 # TO DELETE:
 #
 # How LeptonTagger was called in MUON5:
@@ -290,18 +293,23 @@ def DecoratePLITCfg(
     kwargs.setdefault("TrackJetContainerKey", "AntiKtVR30Rmax4Rmin02PV0TrackJets")
     kwargs.setdefault("TracksContainerKey", "InDetTrackParticles")
     kwargs.setdefault("CaloClusterContainerKey", "egammaClusters")
-
     kwargs.setdefault("ConfigFileVersion", '')
     kwargs.setdefault("TaggerName", Tagger_name)
 
+    # check if Run3 configs should be used
+    isRun3 = (flags.GeoModel.Run >= LHCPeriod.Run3)
+
     # path on calib area (found by path resolver
-    # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/IsolationSelection/
-    kwargs["ConfigPath"] = "dev/IsolationSelection/2024-05-24/PLIT/"
+    # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
+    kwargs["ConfigPath"] = "IsolationSelection/2024-08-02/PLIT/"
     if lepton_name == 'Electrons':
         kwargs["ConfigFileVersion"] = 'network_PLITel_barrel.onnx'                                       
         kwargs["ConfigFileVersion_endcap"] = 'network_PLITel_endcap.onnx'                                       
     elif lepton_name == 'Muons':
-        kwargs["ConfigFileVersion"] = 'network_PLITmu.onnx'                                       
+        if isRun3:
+            kwargs["ConfigFileVersion"] = 'network_run3_muons.onnx'
+        else:
+            kwargs["ConfigFileVersion"] = 'network_run2_muons.onnx'
     else:
         raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
 

@@ -289,6 +289,10 @@ def MUON1Cfg(flags):
     # Common augmentations
     acc.merge(MUON1KernelCfg(flags, name="MUON1Kernel", StreamName = stream_name, TriggerListsHelper = MUON1TriggerListsHelper))
 
+    # LeptonTaggers isolation to schedule PLIT
+    from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
+    acc.merge(DecoratePLITAlgsCfg(flags))
+
     # ============================
     # Define contents of the format
     # =============================
@@ -367,6 +371,10 @@ def MUON1Cfg(flags):
                                            "MuonSpectrometerTrackParticles.vx.vy.vz",
                                            "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                            "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+
+    # LeptonTaggers PLIT content
+    from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
+    MUON1SlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
 
     # Truth content
     if flags.Input.isMC:
