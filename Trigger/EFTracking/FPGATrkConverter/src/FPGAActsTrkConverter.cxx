@@ -81,42 +81,44 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
     
     ATH_MSG_INFO("Creating Acts proto-tracks from FPGA tracks...");
 
-    if (tracks.size()>1){
-      for(const FPGATrackSimTrack& track: tracks) { 
-        if (not track.passedOR()) continue;
-        std::vector<ActsTrk::ATLASUncalibSourceLink> points;  
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+    for (const FPGATrackSimTrack& track : tracks) {
+      if (not track.passedOR()) continue;
+      std::vector<ActsTrk::ATLASUncalibSourceLink> points;
+      const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
 
-        if (hits.size()>0){
+      if (hits.size() > 0) {
 
-          // TODO: move from loops over cluster container to links 
+        // TODO: move from loops over cluster container to links 
 
-          for(const FPGATrackSimHit& h : hits){
-            IdentifierHash hash = h.getIdentifierHash();
-            if (h.isReal()){
-              if (h.isPixel()){
-                Identifier wafer_id = m_pixelId->wafer_id(hash);
-                Identifier id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex()); 
-                for (const xAOD::PixelCluster *cl : pixelContainer){
-                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer,cl->index(),ctx));
-                }
+        for (const FPGATrackSimHit& h : hits) {
+          IdentifierHash hash = h.getIdentifierHash();
+          if (h.isReal()) {
+            if (h.isPixel()) {
+              Identifier wafer_id = m_pixelId->wafer_id(hash);
+              Identifier id = m_pixelId->pixel_id(wafer_id, h.getPhiIndex(), h.getEtaIndex());
+              for (const xAOD::PixelCluster* cl : pixelContainer) {
+                if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&pixelContainer, cl->index(), ctx));
               }
-              if (h.isStrip()) {
-                int strip = static_cast<int>(h.getPhiCoord());
-                Identifier wafer_id = m_SCTId->wafer_id(hash);
-                Identifier id = m_SCTId->strip_id(wafer_id, strip); 
-                for (const xAOD::StripCluster *cl : stripContainer){
-                  if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer,cl->index(),ctx)); 
-                }
+            }
+            if (h.isStrip()) {
+              int strip = static_cast<int>(h.getPhiCoord());
+              Identifier wafer_id = m_SCTId->wafer_id(hash);
+              Identifier id = m_SCTId->strip_id(wafer_id, strip);
+              for (const xAOD::StripCluster* cl : stripContainer) {
+                if (id == cl->rdoList().front()) points.push_back(ActsTrk::makeATLASUncalibSourceLink(&stripContainer, cl->index(), ctx));
               }
             }
           }
-          ATH_MSG_INFO("\tMade a proto-track with " <<points.size()<<" clusters");
-        
-          // Make the intput perigee
-          std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(track);
-          foundProtoTracks.emplace_back(points,std::move(inputPerigee));
         }
+        ATH_MSG_INFO("\tMade a proto-track with " << points.size() << " clusters");
+
+        // Make the intput perigee
+        std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(track);
+        foundProtoTracks.emplace_back(points, std::move(inputPerigee));
+      }
+      else {
+        ATH_MSG_ERROR("Found FPGATrack without hits");
+        return StatusCode::FAILURE;
       }
     }
 
