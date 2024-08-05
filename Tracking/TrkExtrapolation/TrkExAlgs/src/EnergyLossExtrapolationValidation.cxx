@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////
 
 // Tracking
+#include <cmath>
+
 #include "TrkExAlgs/EnergyLossExtrapolationValidation.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
@@ -309,13 +311,13 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
     // are adopted for planar and straight line surfaces
     m_parameterPhi[0]   = M_PI * (2 * m_flatDist->shoot() - 1);
     m_parameterEta[0]   = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
-    m_parameterTheta[0] = 2.*atan(exp(-m_parameterEta[0]));
+    m_parameterTheta[0] = 2.*atan(std::exp(-m_parameterEta[0]));
 
     double charge = -1.;
     m_parameterP[0] = m_momentum;
     // convert transverse momentum (pt) to momentum (p) if flag is set: p = pt/sin(theta)
     if (m_usePt)
-        m_parameterP[0] /= sin(m_parameterTheta[0]);
+        m_parameterP[0] /= std::sin(m_parameterTheta[0]);
     m_parameterQoverP[0] = charge/m_parameterP[0];
 
     double mass = Trk::ParticleMasses::mass[m_particleType];

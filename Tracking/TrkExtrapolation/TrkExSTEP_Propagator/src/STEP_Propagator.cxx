@@ -2378,28 +2378,23 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
                                                                    localp[3], localp[4]);
           if (cache.m_identifiedParameters) {
             if (binIDMat && binIDMat->second > 0 && !iMat) {  // exit from active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), -binIDMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), -binIDMat->second);
             } else if (binIDMat && binIDMat->second > 0 &&
                        (iMat->second == 0 || iMat->second == binIDMat->second)) {  // exit from active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), -binIDMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), -binIDMat->second);
             } else if (iMat && iMat->second > 0) {  // entry active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), iMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), iMat->second);
             }
           }
           if (cache.m_hitVector) {
             double hitTiming = cache.m_timeIn + cache.m_timeOfFlight + cache.m_timeStep;
             if (binIDMat && binIDMat->second > 0 && !iMat) {  // exit from active layer
-              cache.m_hitVector->push_back(
-                  Trk::HitInfo(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.);
             } else if (binIDMat && binIDMat->second > 0 &&
                        (iMat->second == 0 || iMat->second == binIDMat->second)) {  // exit from active layer
-              cache.m_hitVector->push_back(
-                  Trk::HitInfo(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.);
             } else if (iMat && iMat->second > 0) {  // entry active layer
-              cache.m_hitVector->push_back(Trk::HitInfo(cPar->uniqueClone(), hitTiming, iMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, iMat->second, 0.);
             }
           }
 
@@ -2436,30 +2431,25 @@ bool Trk::STEP_Propagator::propagateWithJacobian(Cache& cache, bool errorPropaga
 
           if (cache.m_identifiedParameters) {
             if (binIDMat && binIDMat->second > 0 && !nextMat) {  // exit from active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), -binIDMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), -binIDMat->second);
             } else if (binIDMat && binIDMat->second > 0 &&
                        (nextMat->second == 0 || nextMat->second == binIDMat->second)) {
               // exit from active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), -binIDMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), -binIDMat->second);
             } else if (nextMat && nextMat->second > 0) {  // entry active layer
-              cache.m_identifiedParameters->push_back(
-                  std::pair<std::unique_ptr<Trk::TrackParameters>, int>(cPar->clone(), nextMat->second));
+              cache.m_identifiedParameters->emplace_back(cPar->clone(), nextMat->second);
             }
           }
           if (cache.m_hitVector) {
             double hitTiming = cache.m_timeIn + cache.m_timeOfFlight + cache.m_timeStep;
             if (binIDMat && binIDMat->second > 0 && !nextMat) {  // exit from active layer
-              cache.m_hitVector->push_back(
-                  Trk::HitInfo(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.);
             } else if (binIDMat && binIDMat->second > 0 &&
                        (nextMat->second == 0 ||
                         nextMat->second == binIDMat->second)) {  // exit from active layer
-              cache.m_hitVector->push_back(
-                  Trk::HitInfo(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, -binIDMat->second, 0.);
             } else if (nextMat && nextMat->second > 0) {  // entry active layer
-              cache.m_hitVector->push_back(Trk::HitInfo(cPar->uniqueClone(), hitTiming, nextMat->second, 0.));
+              cache.m_hitVector->emplace_back(cPar->uniqueClone(), hitTiming, nextMat->second, 0.);
             }
           }
 

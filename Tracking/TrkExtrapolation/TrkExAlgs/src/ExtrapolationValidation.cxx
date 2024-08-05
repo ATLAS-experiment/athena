@@ -7,6 +7,8 @@
 ///////////////////////////////////////////////////////////////////
 
 // Tracking
+#include <cmath>
+
 #include "TrkExAlgs/ExtrapolationValidation.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
@@ -247,7 +249,7 @@ StatusCode Trk::ExtrapolationValidation::execute()
    m_parameterPhi[m_parameters]   = M_PI * m_flatDist->shoot();
    m_parameterPhi[m_parameters]  *= (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;
    m_parameterEta[m_parameters]   = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
-   m_parameterTheta[m_parameters] = 2.*atan(exp(-m_parameterEta[m_parameters]));
+   m_parameterTheta[m_parameters] = 2.*atan(std::exp(-m_parameterEta[m_parameters]));
 
 
    m_covarianceLoc1[m_parameters] = fabs( m_parameterLoc1[m_parameters] * 0.1);                                          
