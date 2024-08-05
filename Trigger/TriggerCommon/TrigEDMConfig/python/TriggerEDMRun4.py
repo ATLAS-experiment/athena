@@ -21,6 +21,26 @@ __log = logging.getLogger('TriggerEDMRun4Config')
 TriggerHLTListRun4 = [
 
     # framework/steering
-    #('xAOD::TrigDecision#xTrigDecision' ,                    'ESD AODFULL AODSLIM', 'Steer'),
- 
+    #('xAOD::TrigDecision#xTrigDecision' ,                    'ESD AODFULL AODSLIM', 'Steer'), 
+
+    # Collections for Run 4 calorimeter studies
+    ('xAOD::TrigRingerRingsContainer#Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'),
+    ('xAOD::TrigRingerRingsAuxContainer#Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'), 
+
+    ('xAOD::TrigEMClusterContainer#CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'), 
+    ('xAOD::TrigEMClusterAuxContainer#CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'),
+
+    ('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), 
+    ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), 
+
+    ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), 
+    ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo'),
+
+    ('CaloCellContainer#SeedLessFS',  'BS ESD AODFULL', 'Calo'), 
+
+    # L1 Calo inputs, note we are giving these extended EDM targets
+    ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
+    ("TileContainer#TileTTL1Container",                        'ESD AODFULL', 'L1'),
+
+
 ]
