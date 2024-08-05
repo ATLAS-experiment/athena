@@ -68,7 +68,7 @@ public:
   bool zdcCalib; // run calibration file
   bool zdcLaser; // run laser file
   bool zdcOnly; // process only ZDC+trigger 
-  bool zdcLowGainOnly; // ZDC LG only
+  unsigned int zdcLowGainMode; // ZDC LG mode
   size_t trackLimit; // max tracks for writing tree
   bool trackLimitReject;
   bool flipDelay; // whether or not to flip un/delay for EM ZDC modules
@@ -211,6 +211,11 @@ public:
   float t_ZdcModulePreSampleAmp[2][4];
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
   float t_ZdcModuleMaxADC[2][4];
+  float t_ZdcModuleAmpLGRefit[2][4];
+  float t_ZdcModuleT0LGRefit[2][4];
+  float t_ZdcModuleT0SubLGRefit[2][4];
+  float t_ZdcModuleChisqLGRefit[2][4];
+
   float t_ZdcModuleTruthTotal[2][7];
   float t_ZdcModuleTruthInvis[2][7];
   float t_ZdcModuleTruthEM[2][7];

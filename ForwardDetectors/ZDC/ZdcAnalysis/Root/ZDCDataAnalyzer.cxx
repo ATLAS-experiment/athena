@@ -15,11 +15,11 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
                                  const ZDCModuleIntArray& peak2ndDerivMinSamples,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                                  const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
-                                 bool forceLG) :
+                                 unsigned int LGMode) :
   m_msgFunc_p(msgFunc_p),
   m_nSample(nSample), m_deltaTSample(deltaTSample), m_preSampleIdx(preSampleIdx),
   m_fitFunction(std::move(fitFunction)),
-  m_forceLG(forceLG),
+  m_LGMode(LGMode),
   m_repassEnabled(false),
   m_eventCount(0),
   m_haveECalib(false),
@@ -79,7 +79,7 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSamp
                                              peak2ndDerivMinSamples[side][module],
                                              peak2ndDerivMinThresholdsHG[side][module],
                                              peak2ndDerivMinThresholdsLG[side][module]));
-      if (m_forceLG) m_moduleAnalyzers[side][module]->SetForceLG(true);
+      m_moduleAnalyzers[side][module]->setLGMode(m_LGMode);
     }
   }
 }
