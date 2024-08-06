@@ -32,7 +32,7 @@ JetParticleShrinkingConeAssociation::match(const xAOD::JetContainer& jets, const
             part_itr != parts.end(); ++part_itr) {
 
         const xAOD::IParticle& part = **part_itr;
-
+        //std::cout << "Mario: trying " << part.TrkOriginVertex() << std::endl;
         double drmin = -1;
         int matchjetidx = -1;
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
@@ -62,4 +62,37 @@ JetParticleShrinkingConeAssociation::match(const xAOD::JetContainer& jets, const
 
 
     return matchedparts;
+}
+
+const vector<vector<ElementLink<IParticleContainer> > >*
+JetParticleShrinkingConeAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx, const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
+
+    SG::ReadDecorHandle<xAOD::IParticleContainer, xAOD::Vertex> trkOrigin(m_trk_origin_vtx);
+    vector<vector<ElementLink<IParticleContainer> > >* matchedparts =
+        new vector<vector<ElementLink<IParticleContainer> > >(jets.size());
+    
+    for (const xAOD::IParticle* part: parts) {
+
+        //const xAOD::IParticle* part = *part_itr;
+        const xAOD::Vertex* vtx_to_trk = &trkOrigin(*part);
+        int matchjetidx = -1;
+        for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
+            const xAOD::Jet* jet = jets[iJet];
+            if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") == vtx_to_trk){
+                matchjetidx = iJet;
+            }else{
+                continue;
+            }
+
+        }
+
+        if (matchjetidx >= 0) {
+            ElementLink<IParticleContainer> EL; 
+            EL.toContainedElement(parts, part);
+            (*matchedparts)[matchjetidx].push_back(EL);
+        }
+    }
+
+    return matchedparts;
+    
 }

@@ -12,6 +12,7 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODBase/IParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 #include "JetInterface/IJetDecorator.h"
 
 #include <vector>
@@ -33,6 +34,9 @@ class JetParticleAssociation : public asg::AsgTool,
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
 
+        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+            matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
+
     private:
 
         // note
@@ -42,6 +46,7 @@ class JetParticleAssociation : public asg::AsgTool,
         SG::ReadHandleKey<xAOD::IParticleContainer> m_particleKey{this, "InputParticleContainer", "", "Input particle collection name"};
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_decKey{this, "OutputDecoration", "", "Output decoration name"};
         SG::WriteDecorHandleKey<xAOD::JetContainer> m_passPtKey{this, "PassPtFlag", "", "Name for decoration indicating we passed pt threshold"};
+        SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_trk_origin_vtx { this, "TrkOriginVertex", "InDetTrackParticles.btagIp_TrkOriginVertex", "Decoration for vertex matching to track" };
 };
 
 #endif

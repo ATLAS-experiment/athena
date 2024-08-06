@@ -7,6 +7,7 @@
 #include "ParticleJetTools/JetParticleAssociation.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AthContainers/ConstDataVector.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 JetParticleAssociation::JetParticleAssociation(const std::string& name)
     : asg::AsgTool(name) {
@@ -16,10 +17,11 @@ StatusCode JetParticleAssociation::initialize() {
 
     ATH_MSG_DEBUG("Initializing JetParticleAssociator");
     m_decKey = m_jetContainerName + "." + m_decKey.key();
-
+    
     ATH_CHECK(m_decKey.initialize());
     ATH_CHECK(m_particleKey.initialize());
-
+    ATH_CHECK(m_trk_origin_vtx.initialize());
+    
     ATH_MSG_DEBUG("Minimum pt threshold: " << m_ptMinimum);
     if (m_ptMinimum > 0.0) {
       if (!m_passPtKey.key().empty()) {
@@ -56,8 +58,14 @@ StatusCode JetParticleAssociation::decorate(const xAOD::JetContainer& jets) cons
         skipped.push_back(i);
       }
     }
-
-    matches = match(*viewJets.asDataVector(), *parts);
+    
+    
+    
+    if (m_jetContainerName == "AntiKt4EMPFlowByVertexJets"){
+      matches = matchOriginTrk(m_trk_origin_vtx, *viewJets.asDataVector(), *parts);
+    }else{
+      matches = match(*viewJets.asDataVector(), *parts);
+    }
 
     ATH_MSG_DEBUG("About to decorate jets with" << m_decKey);
 
