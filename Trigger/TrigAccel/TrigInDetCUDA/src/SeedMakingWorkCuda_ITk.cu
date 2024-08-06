@@ -171,7 +171,7 @@ bool SeedMakingWorkCudaITk::run() {
 SeedMakingWorkCudaManagedITk::SeedMakingWorkCudaManagedITk(unsigned int id, SeedMakingManagedDeviceContext* ctx, std::shared_ptr<TrigAccel::OffloadBuffer> data, WorkTimeStampQueue* TL) :
   m_workId(id),
   m_context(ctx), 
-  m_input(data),
+  m_input(std::move(data)),
   m_timeLine(TL){
   
   m_output = std::make_shared<TrigAccel::OffloadBuffer>(sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));//output data
