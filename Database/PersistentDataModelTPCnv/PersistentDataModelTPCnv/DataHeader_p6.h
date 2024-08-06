@@ -47,6 +47,10 @@ public:
       { return clid == rhs.clid && cont == rhs.cont && key == rhs.key && oid1 == rhs.oid1; }
   };
 
+  enum DHVersions { DHverFormRef = 600 };
+  /* DHverFormRef - has the self reference stored at the end of the provenance list
+  */
+
 public: // Constructor and Destructor
    DataHeaderForm_p6() {}
    DataHeaderForm_p6(const DataHeaderForm_p6& rhs);
@@ -72,11 +76,16 @@ public: // Constructor and Destructor
    std::set<unsigned int>       getObjSymLinks(unsigned int index) const;
    std::vector<sgkey_t>         getObjHashes(unsigned int index) const;
    std::string          calculateMdx();
-   bool                 wasModified() const;
+   bool                 isModified() const;
    void                 clearModified();
    void                 setToken(const std::string& tok);
    const std::string&   getToken() const;
    void                 resize(unsigned int size);
+   const std::string&   getProcessTag() const { return m_processTag; }
+   void                 setProcessTag(const std::string& tag) { m_processTag = tag; }
+   unsigned             version() const { return m_version; }
+   /// change version if writing backward compatible format
+   void                 setVersion(const DHVersions ver) { m_version = ver; }
 
 private:
    std::vector<DbRecord> m_dbRecords;
@@ -85,10 +94,12 @@ private:
    std::vector<std::vector<unsigned int> > m_objSymLinks;
    std::vector<std::vector<sgkey_t> > m_objHashes;
 
-   /// In case we need ot handle encoding changes later
-   unsigned             m_version { 600 };
+   /// Subversion of DHForm_p6 for small changes of data encoding
+   unsigned             m_version { DHverFormRef };
+   /// DataHeader SG Key
+   std::string          m_processTag;
   
-   // transient members
+   // transient members:
    /// indicates that the last event was somehow different and a new DHForm needs to be written
    bool                 m_modified { true };
    /// Reference to self in the persistent storage

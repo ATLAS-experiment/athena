@@ -1,6 +1,6 @@
 """Configuration for POOL file writing
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -58,6 +58,8 @@ def PoolWriteCfg(flags):
     # Set POOLContainerForm(DataHeaderForm) split level to 0
     PoolAttributes += ["ContainerName = 'TTree=POOLContainerForm(DataHeaderForm)'; CONTAINER_SPLITLEVEL = '0'"]
     PoolAttributes += ["TREE_BRANCH_OFFSETTAB_LEN ='100'"]
+
+    oneDHForm = flags.Output.OneDataHeaderForm
 
     # Kept in sync with RecoUtils.py
     from AthenaPoolCnvSvc import PoolAttributeHelper as pah
@@ -155,6 +157,8 @@ def PoolWriteCfg(flags):
         # For more information see ATEAM-1001
         if "EVNT" in stream or "RDO" in stream:
             PoolAttributes += [ f"DatabaseName = '{fileName}'; FILEFORWARD_COMPATIBILITY = '1'" ]
+            # also for compatibility with rel21 disable single DataHeaderForm
+            oneDHForm = False
 
         # Find the maximum AutoFlush across all formats
         maxAutoFlush = max(maxAutoFlush, autoFlush)
@@ -178,4 +182,5 @@ def PoolWriteCfg(flags):
                                PoolAttributes=PoolAttributes,
                                ParallelCompression=useParallelCompression,
                                StorageTechnology=flags.Output.StorageTechnology.EventData,
-                               OutputMetadataContainers=OutputMetadataContainers)
+                               OutputMetadataContainers=OutputMetadataContainers,
+                               OneDataHeaderForm = oneDHForm)

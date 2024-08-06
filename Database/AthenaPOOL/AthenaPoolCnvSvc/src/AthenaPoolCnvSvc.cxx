@@ -129,7 +129,24 @@ StatusCode AthenaPoolCnvSvc::io_reinit() {
    return(StatusCode::SUCCESS);
 }
 //______________________________________________________________________________
+void AthenaPoolCnvSvc::flushDataHeaderForms(const std::string& streamName) {
+   // Write remaining DataHeaderForms for a given streamName, "*"" means all
+   auto DHCnvListener = dynamic_cast<IIncidentListener*>( converter( ClassID_traits<DataHeader>::ID() ) );
+   FileIncident incident(name(), "WriteDataHeaderForms", streamName);
+   if( DHCnvListener ) DHCnvListener->handle(incident);
+}
+//______________________________________________________________________________
+StatusCode AthenaPoolCnvSvc::stop() {
+   ATH_MSG_VERBOSE("stop()");
+   // In case of direct writing without an OutputStream, this should be a good time to flush DHForms
+   flushDataHeaderForms();
+   return StatusCode::SUCCESS;
+}
+//______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::finalize() {
+   ATH_MSG_VERBOSE("Finalizing...");
+   // Some algorithms write in finalize(), flush DHForms if any are left
+   flushDataHeaderForms();
    // Release AthenaSerializeSvc
    if (!m_serializeSvc.empty()) {
       if (!m_serializeSvc.release().isSuccess()) {
@@ -388,9 +405,10 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
    }
    return(StatusCode::SUCCESS);
 }
+
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpec, bool doCommit) {
-// This is called after all DataObjects are converted.
+   // This is called after all DataObjects are converted.
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
    if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient()
 	   && (!m_parallelCompression || outputConnectionSpec.find("[PoolContainerPrefix=" + m_metadataContainerProp.value() + "]") != std::string::npos)) {
@@ -493,58 +511,89 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
                   this->setObjPtr(obj, &readToken); // Pull/read Object out of shared memory
                   if (len == 0 || contName.compare(0, len, m_metadataContainerProp.value()) != 0) {
                      // Write object
-                     Placement placement;
-                     placement.fromString(placementStr); placementStr = nullptr;
-                     std::unique_ptr<Token> token(registerForWrite(&placement, obj, classDesc));
-                     if (token == nullptr) {
-                        ATH_MSG_ERROR("Failed to write Data for: " << className);
-                        return abortSharedWrClients(num);
-                     }
-                     tokenStr = token->toString();
-                     if (className == "DataHeader_p6") {
-                        // Found DataHeader
-                        GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
-                                               tokenStr, placement.auxString());
-                        // call DH converter to add the ref to DHForm (stored earlier) and to itself
-                        if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
-                           ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
+                     if( m_oneDataHeaderForm.value() ) {
+                        auto placementWithSwn = [&] { return std::format("{}[SWN={}]",  placementStr, num); };
+                        if( className == "DataHeaderForm_p6" ) {
+                           // Pass DHForms to the converter for later writing in the correct order - do not write it now
+                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                                                  "", placementWithSwn());
+                           DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).ignore();
+                           tokenStr = "";
+                        } else {
+                           Placement placement;
+                           placement.fromString(placementStr);
+                           std::unique_ptr<Token> token(registerForWrite(&placement, obj, classDesc));
+                           if (token == nullptr) {
+                              ATH_MSG_ERROR("Failed to write Data for: " << className);
+                              return abortSharedWrClients(num);
+                           }
+                           tokenStr = token->toString();
+                        }
+                        if( className == "DataHeader_p6" ) {
+                           // Found DataHeader - call the converter to update DHForm Ref
+                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                                                  tokenStr, placementWithSwn());
+                           if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
+                              ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
+                              return abortSharedWrClients(num);
+                           }
+                        } else 
+                        if (className != "Token" && className != "DataHeaderForm_p6" && !classDesc.IsFundamental()) {
+                           commitCache.insert(std::pair<void*, RootType>(obj, classDesc));
+                        }
+                        placementStr = nullptr;
+                     } else { 
+
+                        // Multiple shared DataHeaderForms
+                        Placement placement;
+                        placement.fromString(placementStr); placementStr = nullptr;
+                        std::unique_ptr<Token> token(registerForWrite(&placement, obj, classDesc));
+                        if (token == nullptr) {
+                           ATH_MSG_ERROR("Failed to write Data for: " << className);
                            return abortSharedWrClients(num);
                         }
-                        dataHeaderSeen = true;
-                        // This dataHeaderID is used in DataHeaderCnv to index the DataHeaderForm cache.
-                        // It must be unique per worker per stream so that we have a correct DataHeader(Form) association.
-                        // This is achieved by building it as "CONTID/WORKERID/DBID".
-                        // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
-                        // WORKERID allows us to distinguish AthenaMP workers,
-                        // and DBID allows us to distinguish streams.
-                        dataHeaderID = token->contID();
-                        dataHeaderID += '/';
-                        dataHeaderID += oss2.str();
-                        dataHeaderID += '/';
-                        dataHeaderID += token->dbID().toString();
-                     } else if (dataHeaderSeen) {
-                        dataHeaderSeen = false;
-                        // next object after DataHeader - may be a DataHeaderForm
-                        // in any case we need to call the DH converter to update the DHForm Ref
-                        if (className == "DataHeaderForm_p6") {
-                           // Tell DataHeaderCnv that it should use a new DHForm
+                        tokenStr = token->toString();
+                        if (className == "DataHeader_p6") {
+                           // Found DataHeader
                            GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
-                                                  tokenStr, dataHeaderID);
-                           if (!DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).isSuccess()) {
-                              ATH_MSG_ERROR("Failed updateRepRefs for obj = " << tokenStr);
+                                                  tokenStr, placement.auxString());
+                           // call DH converter to add the ref to DHForm (stored earlier) and to itself
+                           if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
+                              ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
                               return abortSharedWrClients(num);
                            }
-                        } else {
-                           // Tell DataHeaderCnv that it should use the old DHForm
-                           GenericAddress address(0, 0, "", dataHeaderID);
-                           if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
-                              ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
-                              return abortSharedWrClients(num);
+                           dataHeaderSeen = true;
+                           // This dataHeaderID is used in DataHeaderCnv to index the DataHeaderForm cache.
+                           // It must be unique per worker per stream so that we have a correct DataHeader(Form) association.
+                           // This is achieved by building it as "CONTID/WORKERID/DBID".
+                           // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
+                           // WORKERID allows us to distinguish AthenaMP workers,
+                           // and DBID allows us to distinguish streams.
+                           dataHeaderID = std::format("{}/{}/{}", token->contID(), oss2.str(), token->dbID().toString());
+                        } else if (dataHeaderSeen) {
+                           dataHeaderSeen = false;
+                           // next object after DataHeader - may be a DataHeaderForm
+                           // in any case we need to call the DH converter to update the DHForm Ref
+                           if (className == "DataHeaderForm_p6") {
+                              // Tell DataHeaderCnv that it should use a new DHForm
+                              GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                                                     tokenStr, dataHeaderID);
+                              if (!DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).isSuccess()) {
+                                 ATH_MSG_ERROR("Failed updateRepRefs for obj = " << tokenStr);
+                                 return abortSharedWrClients(num);
+                              }
+                           } else {
+                              // Tell DataHeaderCnv that it should use the old DHForm
+                              GenericAddress address(0, 0, "", dataHeaderID);
+                              if (!DHcnv->updateRepRefs(&address, nullptr).isSuccess()) {
+                                 ATH_MSG_ERROR("Failed updateRepRefs for DataHeader");
+                                 return abortSharedWrClients(num);
+                              }
                            }
                         }
-                     }
-                     if (className != "Token" && className != "DataHeaderForm_p6" && !classDesc.IsFundamental()) {
-                        commitCache.insert(std::pair<void*, RootType>(obj, classDesc));
+                        if (className != "Token" && className != "DataHeaderForm_p6" && !classDesc.IsFundamental()) {
+                           commitCache.insert(std::pair<void*, RootType>(obj, classDesc));
+                        }
                      }
                   }
                }
@@ -843,6 +892,7 @@ void AthenaPoolCnvSvc::setObjPtr(void*& obj, const Token* token) {
             ATH_MSG_ERROR("Failed to get Data for " << token->toString());
             obj = nullptr;
          } else {
+            ATH_MSG_DEBUG("Server deserializing " << token->toString());
             if (token->classID() != Guid::null()) {
                // Deserialize object
                RootType cltype(pool::DbReflex::forGuid(token->classID()));

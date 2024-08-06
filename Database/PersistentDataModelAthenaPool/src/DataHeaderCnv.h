@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATAHEADERCNV_H
@@ -58,9 +58,6 @@ public:
    /// Delete cached DHForms for a given input file GUID
    void clearInputDHFormCache( const std::string& dbGuid );
 
-   /// query if a new DHForm was written in the last createPersistent()
-   bool         wroteNewDHForm()    { return m_wroteDHForm; }
-
    /// Remove DataHeaderElements with incomplete (dbID="") refs
    void         removeBadElements(DataHeader* dh);
   
@@ -68,11 +65,15 @@ protected:
    DataHeaderCnv_p6     m_tpOutConverter;
    DataHeaderCnv_p6     m_tpInConverter;
   
+   /// cached shape of the DataHeaderForm_pN
    RootType             m_dhFormType;
-
-   /// DHForm cache indexed by filename or reference for writing
-   std::map<std::string,  std::unique_ptr<DataHeaderForm_p6> >    m_persFormMap;
-   /// DHForm cache indexed by its parent DataHeader reference (for  readinh)
+   /// if true write only one DataHeaderForm at the end (stop, finalize, or WriteDataHeaderForms incident)
+   /// the value is read from AthenaPoolCnvSvc OneDataHeaderForm property
+   bool                 m_oneDHForm = true;
+   /// Cache for new DHForms created when writing, indexed by ref or placement.
+   struct placementComp{ bool operator() (const std::string& lhs, const std::string& rhs) const; };
+   std::map<std::string,  std::unique_ptr<DataHeaderForm_p6>, placementComp >  m_persFormMap;
+   /// DHForm cache indexed by the DHForm reference (from DataHeader) that was used to read it
    std::map<std::string,  std::unique_ptr<DataHeaderForm_p6> >  m_inputDHForms;
 
    /// How many DHForms for an input file are in the cache
@@ -80,8 +81,6 @@ protected:
    /// Max DHForms to cache per input file
    unsigned                                                     m_inDHFMapMaxsize;
 
-   /// true if the last writing of the DataHeader had to write a new DHForm
-   bool                 m_wroteDHForm {false};
    std::map< std::string, std::string>  m_lastGoodDHFRef;
 
    /// for use when reading DataHeader_p5

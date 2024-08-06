@@ -228,6 +228,7 @@ StatusCode PoolSvc::start() {
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::stop() {
+   ATH_MSG_VERBOSE("stop()");
    bool retError = false;
    for (unsigned int contextId = 0, imax = m_persistencySvcVec.size(); contextId < imax; contextId++) {
       if (!disconnect(contextId).isSuccess()) {

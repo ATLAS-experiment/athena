@@ -41,6 +41,7 @@
 #include "OutputStreamSequencerSvc.h"
 #include "MetaDataSvc.h"
 #include "SelectionVetoes.h"
+#include "PersistentDataModel/DataHeader.h"
 
 #include <boost/tokenizer.hpp>
 #include <cassert>
@@ -158,10 +159,11 @@ AthenaOutputStream::AthenaOutputStream(const string& name, ISvcLocator* pSvcLoca
         m_metadataStore("MetaDataStore", name),
         m_currentStore(&m_dataStore),
         m_itemSvc("ItemListSvc", name),
-	m_metaDataSvc("MetaDataSvc", name),
-	m_dictLoader("AthDictLoaderSvc", name),
+        m_metaDataSvc("MetaDataSvc", name),
+        m_dictLoader("AthDictLoaderSvc", name),
         m_tpCnvSvc("AthTPCnvSvc", name),
-	m_outputAttributes(),
+        m_incidentSvc("IncidentSvc", name),
+        m_outputAttributes(),
         m_pCLIDSvc("ClassIDSvc", name),
         m_outSeqSvc("OutputStreamSequencerSvc", name),
         m_p2BWritten(string("SG::Folder/") + name + string("_TopFolder"), this),
@@ -305,15 +307,11 @@ StatusCode AthenaOutputStream::initialize() {
    m_dictLoader->load_type ("Token");
 
    // listen to event range incidents if incident name is configured
+   ATH_CHECK( m_incidentSvc.retrieve() );
    if( !m_outSeqSvc->incidentName().empty() ) {
-      ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
-      if (!incsvc.retrieve().isSuccess()) {
-         ATH_MSG_FATAL("Cannot get IncidentSvc.");
-         return(StatusCode::FAILURE);
-      }
       // use priority 95 to make sure the Output Sequencer goes first (it has priority 100)
-      incsvc->addListener(this, IncidentType::BeginProcessing, 95);
-      incsvc->addListener(this, IncidentType::EndProcessing, 95);
+      m_incidentSvc->addListener(this, IncidentType::BeginProcessing, 95);
+      m_incidentSvc->addListener(this, IncidentType::EndProcessing, 95);
    }
 
    // Check compression settings and print some information about the configuration
@@ -446,7 +444,7 @@ void AthenaOutputStream::handle(const Incident& inc)
 void AthenaOutputStream::finalizeRange( const std::string & rangeFN )
 {
    ATH_MSG_DEBUG("Writing MetaData to " << rangeFN);
-   // MN: not calling StopMetaDataIncident here but directly writeMetaData() - OK for Sim, check others
+   // MN: not calling StopMetaData Incident here but directly writeMetaData() - OK for Sim, check others
    // metadata tools like CutFlowSvc are not able to handle this yet
    const std::string rememberID = m_outSeqSvc->setRangeID( m_rangeIDforRangeFN[ rangeFN ] );
    writeMetaData( rangeFN );
@@ -469,8 +467,6 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
    // use main stream tool by default, or per outputFile in ES mode
    IAthenaOutputStreamTool* streamer = outputFN.empty()? &*m_streamer : m_streamerMap[outputFN].get();
 
-   // Moved preFinalize of helper tools to stop - want to optimize the
-   // output file in finalize RDS 12/2009
    for (ToolHandle<IAthenaOutputTool>& tool : m_helperTools) {
       if (!tool->preFinalize().isSuccess()) {
          throw GaudiException("Cannot finalize helper tool", name(), StatusCode::FAILURE);
@@ -489,6 +485,14 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
       }
       ATH_MSG_INFO("Records written: " << m_events);
    }
+   // Prepare the WriteDataHeaderForms incident
+   std::string DHFWriteIncidentfileName = m_outSeqSvc->buildSequenceFileName(m_outputName);
+   // remove technology from the name
+   size_t pos = DHFWriteIncidentfileName.find(':');
+   if( pos != std::string::npos ) DHFWriteIncidentfileName = DHFWriteIncidentfileName.substr(pos+1);
+   FileIncident incident(name(), "WriteDataHeaderForms", DHFWriteIncidentfileName);
+   m_incidentSvc->fireIncident(incident);
+
    ATH_MSG_DEBUG("metadataItemList: " << m_metadataItemList.value() );
    if (!m_metadataItemList.value().empty()) {
       m_currentStore = &m_metadataStore;
@@ -505,9 +509,12 @@ void AthenaOutputStream::writeMetaData(const std::string& outputFN)
           (pAsIProp->setProperty("ItemList", m_metadataItemList.toString())).isFailure()) {
          throw GaudiException("Folder property [metadataItemList] not found", name(), StatusCode::FAILURE);
       }
-      if (write().isFailure()) {  // true mean write AND commit
+      if (write().isFailure()) {
          throw GaudiException("Cannot write metadata", name(), StatusCode::FAILURE);
       }
+      FileIncident incident(name(), "WriteDataHeaderForms", DHFWriteIncidentfileName + m_outputAttributes);
+      m_incidentSvc->fireIncident(incident);
+   
       m_outputAttributes.clear();
       m_currentStore = &m_dataStore;
       status = streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord);
@@ -588,12 +595,11 @@ StatusCode AthenaOutputStream::write() {
    std::string outputFN;
 
    std::unique_lock<mutex_t>  lock(m_mutex);
+   outputFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
 
    // Handle Event Ranges
    if( m_outSeqSvc->inUse() and m_outSeqSvc->inConcurrentEventsMode() ) {
-      outputFN = m_outSeqSvc->buildSequenceFileName( m_outputName );
       ATH_MSG_DEBUG( "Writing event sequence to " << outputFN );
-
       streamer = m_streamerMap[ outputFN ].get();
       if( !streamer ) {
          // new range, needs a new streamer tool
@@ -612,8 +618,6 @@ StatusCode AthenaOutputStream::write() {
          }
          m_streamerMap[ outputFN ].reset( streamer );
       }
-   } else {
-      outputFN = m_outSeqSvc->buildSequenceFileName(m_outputName);
    }
    
    // Clear any previously existing item list
@@ -1230,13 +1234,8 @@ StatusCode AthenaOutputStream::io_reinit() {
    // and perform write at this point. This happens at 'stop' of the
    // event selector. RDS 04/2010
    // Set to be listener for end of event
-   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", this->name());
-   if (!incSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get the IncidentSvc");
-      return StatusCode::FAILURE;
-   }
-   incSvc->removeListener(this, "MetaDataStop"); // Remove any existing listener to avoid handling the incident multiple times
-   incSvc->addListener(this, "MetaDataStop", 50);
+   m_incidentSvc->removeListener(this, "MetaDataStop"); // Remove any existing listener to avoid handling the incident multiple times
+   m_incidentSvc->addListener(this, "MetaDataStop", 50);
    for (ToolHandle<IAthenaOutputTool>& tool : m_helperTools) {
       if (!tool->postInitialize().isSuccess()) {
           ATH_MSG_ERROR("Cannot initialize helper tool");
@@ -1255,12 +1254,7 @@ StatusCode AthenaOutputStream::io_finalize() {
    }
    const Incident metaDataStopIncident(name(), "MetaDataStop");
    this->handle(metaDataStopIncident);
-   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", this->name());
-   if (!incSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get the IncidentSvc");
-      return StatusCode::FAILURE;
-   }
-   incSvc->removeListener(this, "MetaDataStop");
+   m_incidentSvc->removeListener(this, "MetaDataStop");
    if (m_dataStore->clearStore().isFailure()) {
       ATH_MSG_WARNING("Cannot clear the DataStore");
    }

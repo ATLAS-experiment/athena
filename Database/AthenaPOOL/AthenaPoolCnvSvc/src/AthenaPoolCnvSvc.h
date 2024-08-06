@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_ATHENAPOOLCNVSVC_H
@@ -53,6 +53,7 @@ public:
    /// Required of all Gaudi Services
    StatusCode finalize();
    StatusCode io_finalize();
+   virtual StatusCode stop() override final;
    /// Required of all Gaudi services:  see Gaudi documentation for details
    StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
 
@@ -165,6 +166,9 @@ public:
    /// Implementation of IIncidentListener: Handle for EndEvent incidence
    void handle(const Incident& incident);
 
+   /// Tell DataHeaderCnv to write out all DataHeaderForms for a given streamName (default is all)
+   void flushDataHeaderForms(const std::string& streamName = "*");
+
    /// Standard Service Constructor
    AthenaPoolCnvSvc(const std::string& name, ISvcLocator* pSvcLocator);
    /// Destructor
@@ -262,6 +266,8 @@ private: // properties
    /// When using TMemFile call Write on number of Events, respecting CollectionTree auto_flush
    IntegerProperty m_numberEventsPerWrite{this,"NumberEventsPerWrite",-1};
 
+   /// If true, use only one DataHeaderForm per Stream
+   BooleanProperty m_oneDataHeaderForm { this, "OneDataHeaderForm", true };
    /// Property for DataHeaderCnv input DHForm cache size
    IntegerProperty m_DHFormCacheSize { this, "maxDHFormCacheSize", 100 };
    /// Flag to control SG alias filtering when writing out DataHeader (see DataHeaderCnv_p6)
