@@ -122,7 +122,7 @@ StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
     PFOElementLink.toContainedElement( hadronicPFOContainer, hadronicPFO );
     tau.addHadronicPFOLink( PFOElementLink );
     
-    ATH_CHECK(configureHadronicPFO(cluster, clusterEnergyHad, *hadronicPFO));
+    ATH_CHECK(configureHadronicPFO(vertexedCluster, clusterEnergyHad, *hadronicPFO));
   }
 
   return StatusCode::SUCCESS;
@@ -476,7 +476,7 @@ StatusCode TauPi0ClusterCreator::configureNeutralPFO(const xAOD::CaloCluster& cl
 
 
 
-StatusCode TauPi0ClusterCreator::configureHadronicPFO(const xAOD::CaloCluster& cluster, 
+StatusCode TauPi0ClusterCreator::configureHadronicPFO(const xAOD::CaloVertexedTopoCluster& cluster, 
                                                       double clusterEnergyHad, 
                                                       xAOD::PFO& hadronicPFO) const {
   double clusterPtHad = clusterEnergyHad/std::cosh(cluster.eta());
