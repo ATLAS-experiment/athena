@@ -766,6 +766,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
   SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
   SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
   SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
+  SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix);
+  SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix);
+  SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix);
+  SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
@@ -888,13 +892,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
         t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
         t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
 
-	if (zdcMod->isAvailable<float>("AmpLGRefit" + auxSuffix)) {
-	  t_ZdcModuleAmpLGRefit[iside][imod] = zdcMod->auxdataConst<float>("AmpLGRefit" + auxSuffix);
-	  t_ZdcModuleT0LGRefit[iside][imod] = zdcMod->auxdataConst<float>("T0LGRefit" + auxSuffix);
-	  t_ZdcModuleT0SubLGRefit[iside][imod] = zdcMod->auxdataConst<float>("T0SubLGRefit" + auxSuffix);
-	  t_ZdcModuleChisqLGRefit[iside][imod] = zdcMod->auxdataConst<float>("ChisqLGRefit" + auxSuffix);
+	if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
+	  t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
+	  t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
+	  t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
+	  t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
 	}
-	
+
 	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
 	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
 	if (MaxADCAcc.isAvailable(*zdcMod))
