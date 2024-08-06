@@ -185,16 +185,15 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         jFEXInputs.IsMC = flags.Input.isMC
         jFEXInputs.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
         jFEXInputs.jSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
-        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
-        jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
+        # need to set an IsMC property on a tool deep inside the toolstack:
+        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver',jFEXSysSimTool=CompFactory.LVL1.jFEXSysSim(
+                                            'jFEXSysSimTool',jFEXSimTool=CompFactory.LVL1.jFEXSim(
+                                              'LVL1::jFEXSim',jFEXFPGATool=CompFactory.LVL1.jFEXFPGA(
+                                                'LVL1::jFEXFPGA',IjFEXFormTOBsTool=CompFactory.LVL1.jFEXFormTOBs(
+                                                 'LVL1::jFEXFormTOBs',IsMC=flags.Input.isMC)))))
         acc.addEventAlgo(jFEXInputs)
         acc.addEventAlgo(jFEX)
 
-        # database reading in MC
-        jFEXCondAlg = acc.getCondAlgo("jFEXCondAlgo")
-        jFEXCondAlg.IsMC = flags.Input.isMC
-        jFEXFormTOBsTool = CompFactory.LVL1.jFEXFormTOBs('jFEXFormTOBs')
-        jFEXFormTOBsTool.IsMC = flags.Input.isMC
 
     if flags.Trigger.L1.dogFex:
 
