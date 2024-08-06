@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RecTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( RecTPCnv
-                         src/*.cxx
+atlas_add_library( RecTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS RecTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel MissingETEvent ParticleEventTPCnv StoreGateLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel RootConversions )
+
+atlas_add_tpcnv_library( RecTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS RecTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel MissingETEvent ParticleEventTPCnv StoreGateLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel RootConversions )
+                         LINK_LIBRARIES RecTPCnv )
 
 atlas_add_dictionary( RecTPCnvDict
                       RecTPCnv/RecTPCnvDict.h
