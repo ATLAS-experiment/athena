@@ -24,7 +24,7 @@ SeedMakingWorkCuda::SeedMakingWorkCuda(unsigned int id, SeedMakingDeviceContext*
   WorkTimeStampQueue* TL) : 
   m_workId(id),
   m_context(ctx), 
-  m_input(data),
+  m_input(std::move(data)),
   m_timeLine(TL)
  {
   
@@ -172,7 +172,7 @@ SeedMakingWorkCudaManaged::SeedMakingWorkCudaManaged(unsigned int id, SeedMaking
   WorkTimeStampQueue* TL) : 
   m_workId(id),
   m_context(ctx), 
-  m_input(data),
+  m_input(std::move(data)),
   m_timeLine(TL)
  {
   
