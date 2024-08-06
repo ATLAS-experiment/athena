@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
@@ -163,7 +163,9 @@ def TRTPhysicsRegionToolCfg(flags, name='TRTPhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
     rangeCut = flags.Sim.TRTRangeCut
     kwargs.setdefault("RegionName", 'TRT')
-    volumeList = ['TRT::Gas', 'TRT::GasMA']
+    volumeList = ['TRT::Gas']
+    if flags.GeoModel.Run in [LHCPeriod.Run2]:
+        volumeList += ["TRT::GasMA"]
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", rangeCut)
     kwargs.setdefault("PositronCut", rangeCut)
