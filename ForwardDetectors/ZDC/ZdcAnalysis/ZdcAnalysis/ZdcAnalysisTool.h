@@ -151,7 +151,7 @@ private:
   std::string m_zdcSumContainerName;
   const xAOD::ZdcModuleContainer* m_zdcSums {nullptr};
   bool m_flipEMDelay;
-  bool m_lowGainOnly;
+  unsigned int m_lowGainMode;
   bool m_combineDelay;
   bool m_doCalib;
   bool m_doTrigEff;
@@ -217,13 +217,22 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleTime{this, "ZdcModuleTime", "", "ZDC module time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisq{this, "ZdcModuleChisq", "", "ZDC module fit chisq"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmp{this, "ZdcModuleFitAmp", "", "ZDC module fit amp"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpError{this, "ZdcModuleFitAmpError", "", "ZDC module fit amp error"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpError{this, "ZdcModuleFitAmpError", "", "ZDC module fit amp error"};  
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitT0{this, "ZdcModuleFitT0", "", "ZDC module fit t0"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleBkgdMaxFraction{this, "ZdcModuleBkgdMaxFraction", "", "ZDC module background max fraction"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePreSampleAmp{this, "ZdcModulePreSampleAmp", "", "ZDC module presample amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePresample{this, "ZdcModulePresample", "", "ZDC module presample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMinDeriv2nd{this, "ZdcModuleMinDeriv2nd", "", "ZDC module min 2nd derivative"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pedestal"};
+
+  // LG refit data
+  // 
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmpLGRefit{this, "ZdcModuleAmpLGRefit", "", "ZDC module fit amp LG refit"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0LGRefit{this, "ZdcModuleT0LGRefit", "", "ZDC module fit t0 LG refit"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0SubLGRefit{this, "ZdcModuleT0SubLGRefit", "", "ZDC module subtracted t0 LG refit"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisqLGRefit{this, "ZdcModuleChisqLGRefit", "", "ZDC module LG refit chi square"};
+
+  // RPD data
   //
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelBaseline{this, "RPDChannelBaseline", "", "RPD channel baseline"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupExpFitParams{this, "RPDChannelPileupExpFitParams", "", "RPD channel pileup exponential fit parameters: exp( [0] + [1]*sample )"};

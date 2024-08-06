@@ -159,6 +159,7 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
   std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc.get())};
   if(m_loadMmT0Data){
     if(!m_mmT0FilePath.empty()  ){ // let's read the constants from a  file
+      ATH_MSG_INFO("processing MM T0 from file " << m_stgcT0FilePath);
       wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
       std::unique_ptr<TFile> file (TFile::Open(m_mmT0FilePath.value().c_str()));
       if(!file || file->IsZombie()){
@@ -185,10 +186,11 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
   }
   if(m_loadsTgcT0Data){
     if(!m_stgcT0FilePath.empty()  ){ // let's read the constants from a  file
+      ATH_MSG_INFO("processing sTGC T0 from file " << m_stgcT0FilePath);
       wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
       std::unique_ptr<TFile> file (TFile::Open(m_stgcT0FilePath.value().c_str()));
       if(!file || file->IsZombie()){
-        ATH_MSG_FATAL("Failed to open file containing the MM T0Data. Filepath: "<<m_stgcT0FilePath);
+        ATH_MSG_FATAL("Failed to open file containing the sTGC T0Data. Filepath: "<<m_stgcT0FilePath);
         return StatusCode::FAILURE;
       }
       std::unique_ptr<TTree> tree{(TTree*)file->Get("tree_ch")};
@@ -201,7 +203,7 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
     } else if(!m_readKey_stgc_t0.empty()){
       ATH_MSG_DEBUG("LOAD NSW sTGC T0 FROM DB");
       std::unique_ptr<TTree> tree; 
-      ATH_CHECK(loadT0ToTree(ctx, m_readKey_mm_t0, wrHdl, tree));
+      ATH_CHECK(loadT0ToTree(ctx, m_readKey_stgc_t0, wrHdl, tree));
       ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::STGC));
 
     } else {

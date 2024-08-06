@@ -14,8 +14,6 @@
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
 
-
-
 namespace LVL1 {
 
   eFexTOBSuperCellDecorator::eFexTOBSuperCellDecorator(const std::string& name, ISvcLocator* svc) : AthAlgorithm(name, svc){}
@@ -54,11 +52,11 @@ namespace LVL1 {
     const xAOD::eFexTauRoIContainer* tauEDMConstPtr = eFEXtauEDMContainerObj.cptr();
 
     //Setup EM Decorator Handlers
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<int>>   SCEt_e  ( m_SCEtVec_ele);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<unsigned int>>   SCEt_e  ( m_SCEtVec_ele);
 	
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, std::vector<int>>   SCEt_t  ( m_SCEtVec_tau);
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, std::vector<unsigned int>>   SCEt_t  ( m_SCEtVec_tau);
     
-    std::vector<int > ClusterCellETs;
+    std::vector<unsigned int > ClusterCellETs;  //
     
     ////looping over EM TOB to decorate them
     for ( const xAOD::eFexEMRoI* emRoI : *emEDMConstPtr ){

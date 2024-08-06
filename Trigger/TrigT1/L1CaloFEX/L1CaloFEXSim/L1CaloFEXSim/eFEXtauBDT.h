@@ -51,7 +51,6 @@ public:
   void computeBDTCondition();
   void computeTowers();
   void computeIsCentralTowerSeed();
-  void debugPrintSCellValues();
   void debugPrintBDTVariables();
   void debugPrintTowers();
   void initBDTVars();

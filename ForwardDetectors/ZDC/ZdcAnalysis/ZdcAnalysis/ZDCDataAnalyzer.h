@@ -29,7 +29,7 @@ private:
   float m_deltaTSample{};
   size_t m_preSampleIdx{};
   std::string m_fitFunction;
-  bool m_forceLG{};
+  unsigned int m_LGMode{};
 
   bool m_repassEnabled{};
 
@@ -87,7 +87,7 @@ public:
                   const ZDCModuleIntArray& peak2ndDerivMinSamples,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
-                  bool forceLG = false);
+                  unsigned int LGMode = ZDCPulseAnalyzer::LGModeNormal);
 
   ~ZDCDataAnalyzer();
 
