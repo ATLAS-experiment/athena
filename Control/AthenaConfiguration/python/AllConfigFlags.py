@@ -255,6 +255,7 @@ def initConfigFlags():
     acf.addFlag('Output.doWriteDAOD', False, help='write at least one DAOD file')
     acf.addFlag('Output.doJiveXML', False, help='write JiveXML file')
 
+    acf.addFlag('Output.OneDataHeaderForm', False, help="Write only a single common DataHeaderForm per stream")
     acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
     acf.addFlag('Output.TemporaryStreams', [], help='list of output streams that are marked temporary')
     acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for event data')

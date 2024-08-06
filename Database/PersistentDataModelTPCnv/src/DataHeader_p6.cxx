@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModelTPCnv/DataHeader_p6.h"
@@ -132,8 +132,7 @@ DataHeaderForm_p6::getObjHashes(unsigned int index) const {
    return(m_objHashes[index]);
 }
 
-
-bool DataHeaderForm_p6::wasModified() const {
+bool DataHeaderForm_p6::isModified() const {
    return m_modified;
 }
 

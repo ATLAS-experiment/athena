@@ -49,9 +49,7 @@ namespace SG {
 
 /** @class AthenaOutputStream
    * @brief algorithm that marks for write data objects in SG
-   * 
    * @author srinir@bnl.gov
-   * $Id: AthenaOutputStream.h,v 1.12 2008-12-15 19:14:58 binet Exp $
    */
 class AthenaOutputStream : public FilteredAlgorithm,
                            virtual public IIncidentListener,
@@ -72,6 +70,8 @@ protected:
 
    ServiceHandle<IDictLoaderSvc> m_dictLoader;
    ServiceHandle<ITPCnvSvc>      m_tpCnvSvc;
+
+   ServiceHandle<IIncidentSvc>   m_incidentSvc;
 
    /// Name of the persistency service capable to write data from the store
    std::string              m_persName;

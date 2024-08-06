@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv_p6.cxx
@@ -58,12 +58,18 @@ bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
 }
 
 //______________________________________________________________________________
-DataHeader* DataHeaderCnv_p6::createTransient(const DataHeader_p6* pers, const DataHeaderForm_p6& form)
+DataHeader* DataHeaderCnv_p6::createTransient( const DataHeader_p6* pers,
+                                               const DataHeaderForm_p6& form,
+                                               const Token* dhToken )
 {
    DataHeader* trans = new DataHeader();
    const unsigned int provSize = pers->m_provenanceSize;
    trans->m_inputDataHeader.resize(provSize);
-   trans->m_dataHeader.resize(pers->m_shortElements.size() - provSize - 1); // Take into account self reference
+   // DataHeaders with a self Reference at the end have the list longer by 1 element
+   int hasSelfRefSizeCorrection = (form.version() ==  DataHeaderForm_p6::DHverFormRef? 1 : 0);
+   trans->m_dataHeader.resize( pers->m_shortElements.size() - hasSelfRefSizeCorrection - provSize );
+
+   // convert all elements - transient vectors need to have the right sizes
    unsigned i = 0;
    for( auto& elem : trans->m_dataHeader ) {
       persToElem( pers, i++, &elem, form );
@@ -71,14 +77,18 @@ DataHeader* DataHeaderCnv_p6::createTransient(const DataHeader_p6* pers, const D
    for( auto& elem : trans->m_inputDataHeader ) {
       persToElem( pers, i++, &elem, form );
    }
-   trans->m_dataHeader.resize(pers->m_shortElements.size() - provSize); // Add self reference, which was appended to end
+   // Add the self reference
+   trans->m_dataHeader.resize( trans->m_dataHeader.size() + 1 );
    auto& elem = trans->m_dataHeader.back();
+   // convert the self ref that was stored at the end of the element list
    persToElem( pers, i++, &elem, form );
+
    if( elem.getToken()->contID().find("DataHeader") == std::string::npos ) {
       // discard wrong element
       trans->m_dataHeader.pop_back();
    }
    trans->setStatus(DataHeader::Input);
+   trans->setEvtRefTokenStr( dhToken->toString() );
    return trans;
 }
 
