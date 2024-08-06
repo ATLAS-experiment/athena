@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TileTPCnv
-                         src/*.cxx
+atlas_add_library( TileTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TileTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib EventContainers TileEvent TileSimEventTPCnv
+                   PRIVATE_LINK_LIBRARIES AthenaKernel )
+
+atlas_add_tpcnv_library( TileTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TileTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib EventContainers TileEvent TileSimEventTPCnv
-                         PRIVATE_LINK_LIBRARIES AthenaKernel )
+                         LINK_LIBRARIES TileTPCnv )
 
 atlas_add_dictionary( TileTPCnvDict
                       TileTPCnv/TileTPCnvDict.h
