@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( LArTPCnv
-                         src/*.cxx
+atlas_add_library( LArTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS LArTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils Identifier LArRawEvent LArRecEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel LArIdentifier AthAllocators)
+
+atlas_add_tpcnv_library( LArTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS LArTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils Identifier LArRawEvent LArRecEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel LArIdentifier AthAllocators)
+                         LINK_LIBRARIES LArTPCnv )
 
 atlas_add_dictionary( LArTPCnvDict
                       LArTPCnv/LArTPCnvDict.h
