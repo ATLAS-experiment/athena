@@ -44,7 +44,6 @@ Input files with 10k events each can be found in:
 Simulation is run with calibration hits in batches of 5000 events per job with the following simulation command
 ```
 Sim_tf.py --simulator 'FullG4MT' \
---CA \
 --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
 --physicsList 'FTFP_BERT_ATL' \
 --truthStrategy 'MC15aPlus' \
@@ -78,11 +77,10 @@ For a sufficient precision, ~40k electrons in the barrel and ~40k electrons in t
 G4version=10.1
 PhysList=FTFP_BERT_ATL
 resultdir=$PWD/"$G4version"-$PhysList
-get_files LarEMSamplingFraction_topOptions.py
-athena.py -c 'import glob;inFileName=glob.glob("'$resultdir'/mc.PG_pid11_Mom50000_Radius1500000*.HITS.*.pool.root")' LarEMSamplingFraction_topOptions.py
+athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Radius1500000*.HITS.*.pool.root" LArEMSamplingFractionCfg.py
 mv LArEM_SF.root $resultdir/LArEM_SF_barrel.root
 
-athena.py -c 'import glob;inFileName=glob.glob("'$resultdir'/mc.PG_pid11_Mom50000_Z3740500*.HITS.*.pool.root")' LarEMSamplingFraction_topOptions.py
+athena.py --filesInput="'$resultdir'/mc.PG_pid11_Mom50000_Z3740500*.HITS.*.pool.root"' LArEMSamplingFractionCfg.py
 mv LArEM_SF.root $resultdir/LArEM_SF_endcap.root
 
 get_files LarEMSamplingFraction_analysis.C
@@ -97,8 +95,7 @@ For a sufficient precision, 5k events per pdgid and Z position are needed, so in
 G4version=10.1
 PhysList=FTFP_BERT_ATL
 resultdir=$PWD/"$G4version"-$PhysList
-get_files LarEMSamplingFraction_topOptions.py
-for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.*.pool.root;do echo $file;athena.py -c 'inFileName=["'$file'"]' LarEMSamplingFraction_topOptions.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
+for file in $resultdir/mc.PG_pid*Mom100000_Z[45]*HITS.*.pool.root;do echo $file;athena.py -c 'inFileName=["'$file'"]' LArEMSamplingFractionCfg.py;a=$file;b=${a/Z4319500_bec_eta_150_330.HITS/HECfwh.NTUP};c=${b/Z5175000_bec_eta_160_330.HITS/HECrwh.NTUP};mv LArEM_SF.root $c;done
 
 get_files HEC_SF_analysis
 root -b -q HEC_SF_analysis/init.C 'HEC_SF_analysis/store_eta.C("'$G4version'","'$PhysList'","'$PWD'")' 'HEC_SF_analysis/get_SF.C("'$G4version'","'$PhysList'")'
@@ -123,7 +120,7 @@ cd build
 asetup Athena,<version>
 cmake <path/to/source>
 make
-athena share/LarFCalSamplingFraction_G4Atlas_jobOptions.py
+athena LArFCalSamplingFractionG4AtlasCfg.py
 ```
 
 The results of the simulations are saved to an output ntuple file named `LArFCalSamplingFraction.<module>.<el_energy>GeV.aan.root`, where `<module>` is the FCal module name and `<el_energy>` is the energy of the incident electrons in GeV.
