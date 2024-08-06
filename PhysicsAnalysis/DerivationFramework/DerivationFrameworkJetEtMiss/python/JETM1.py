@@ -148,10 +148,16 @@ def JETM1ExtraContentCfg(flags):
     #=======================================
     if flags.Input.isMC:
         from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut
-        jetList += [AntiKt4UFOCSSKNoPtCut]
+        AntiKt4UFOCSSKNoPtCut_JETM1 = AntiKt4UFOCSSKNoPtCut.clone(
+            modifiers = AntiKt4UFOCSSKNoPtCut.modifiers+("NNJVT",)
+        )
+        jetList += [AntiKt4UFOCSSKNoPtCut_JETM1]
     else:
         from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
-        jetList += [AntiKt4UFOCSSK]
+        AntiKt4UFOCSSK_JETM1 = AntiKt4UFOCSSK.clone(
+            modifiers = AntiKt4UFOCSSK.modifiers+("NNJVT",)
+        )
+        jetList += [AntiKt4UFOCSSK_JETM1]
 
 
     for jd in jetList:

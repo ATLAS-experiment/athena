@@ -186,7 +186,10 @@ def JETM3ExtraContentCfg(flags):
     #======================================= 
     # Low pT cut containers
     #=======================================
-    jetList = [AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt]
+    AntiKt4UFOCSSKLowPt_JETM3 = AntiKt4UFOCSSKLowPt.clone(
+        modifiers = AntiKt4UFOCSSKLowPt.modifiers+("NNJVT",)
+    )
+    jetList = [AntiKt4EMPFlowLowPt, AntiKt4EMTopoLowPt, AntiKt4UFOCSSKLowPt_JETM3]
 
 
     for jd in jetList:
