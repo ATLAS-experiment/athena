@@ -235,9 +235,9 @@ void ForwardTransportModel::KillPrimaryTrack(const G4FastTrack& fastTrack, G4Fas
                                                                          fastTrack.GetPrimaryTrack()->GetGlobalTime()));
   // Flag the fact that Forward Transport has occurred using the vertex status
 #ifdef HEPMC3
-  gVertex->set_status(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARDTRANSPORTMODELSTATUS);
+  gVertex->set_status(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARD_TRANSPORT_MODEL_PROCESS);
 #else
-  gVertex->set_id(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARDTRANSPORTMODELSTATUS);
+  gVertex->set_id(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARD_TRANSPORT_MODEL_PROCESS);
 #endif
   gEvent->add_vertex(gVertex);
   gVertex->add_particle_in(part);
