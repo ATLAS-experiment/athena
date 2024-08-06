@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-, 20242024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LumiBlockTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( LumiBlockTPCnv
-                         src/*.cxx
+atlas_add_library( LumiBlockTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS LumiBlockTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib LumiBlockData
+                   PRIVATE_LINK_LIBRARIES AthenaKernel )
+
+atlas_add_tpcnv_library( LumiBlockTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS LumiBlockTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib LumiBlockData
-                         PRIVATE_LINK_LIBRARIES AthenaKernel )
+                         LINK_LIBRARIES LumiBlockTPCnv )
 
 atlas_add_dictionary( LumiBlockTPCnvDict
                       LumiBlockTPCnv/LumiBlockTPCnvDict.h
