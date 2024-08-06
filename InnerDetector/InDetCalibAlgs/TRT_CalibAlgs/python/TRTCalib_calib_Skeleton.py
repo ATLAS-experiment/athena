@@ -60,7 +60,13 @@ def fromRunArgs(runArgs):
         sys.exit(1)
     else:
         rawpath = "/eos/atlas/atlastier0/rucio/%s/%s/%s/%s.%s.%s.merge.RAW/" % (runArgs.project,runArgs.stream,runArgs.runnr.zfill(8),runArgs.project,runArgs.runnr.zfill(8),runArgs.stream)
-        myFile.append(random.choice(glob.glob(rawpath+"*")))
+        globedFiles = glob.glob(rawpath+"*")
+        if not globedFiles:
+            print("ERROR: Not able to find any file under %s. Please check that the path is correct or files exists" % (rawpath))
+            sys.exit(1)            
+        
+        myFile.append(random.choice(globedFiles))
+        print("RAW file selected for testing:",myFile)
         if not myFile:
             print("ERROR: provide a valid project=\"%s\" or runNumber=\"%s\" or stream=\"%s\"" % (runArgs.project, runArgs.runnr, runArgs.stream))
             sys.exit(1)
@@ -134,7 +140,7 @@ def fromRunArgs(runArgs):
         os.rename('calib_constants_out.txt', outputFile+'.calib_constants_out.txt')
     except OSError as e:
         print("ERROR: Failed renaming files in TRT calib step\n",e)
-        sys.exit(100) 
+        sys.exit(e.errno) 
            
     ##################################################################################################
     #
@@ -153,7 +159,7 @@ def fromRunArgs(runArgs):
         tar.close()
     except OSError as e:
         print("ERROR: Failed compressing the output files\n",e)
-        sys.exit(101)    
+        sys.exit(e.errno)    
 
     # Prints all types of txt files present in a Path
     print("\nListing files:")

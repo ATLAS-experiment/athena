@@ -40,8 +40,8 @@ namespace LVL1 {
     SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eFEXtauEDMContainerKey{this,"eFexTauRoIContainer","L1_eTauRoI","SG key of the input eFex Tau RoI container"};
 
     // WriteDecor handles
-    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer>  m_SCEtVec_ele { this, "EMDecorKey"  , m_eFEXegEDMContainerKey, "SCs", "name of the decoration key for eFexEMRoI"};
-    SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer>  m_SCEtVec_tau { this, "TauDecorKey"  ,  m_eFEXtauEDMContainerKey, "SCs", "name of the decoration key for eFexTauRoI"};
+    SG::WriteDecorHandleKey<xAOD::eFexEMRoIContainer>  m_SCEtVec_ele { this, "EMDecorKey"  , m_eFEXegEDMContainerKey, "SuperCells", "name of the decoration key for eFexEMRoI"};
+    SG::WriteDecorHandleKey<xAOD::eFexTauRoIContainer>  m_SCEtVec_tau { this, "TauDecorKey"  ,  m_eFEXtauEDMContainerKey, "SuperCells", "name of the decoration key for eFexTauRoI"};
 
   
     ToolHandle<IeFEXTOBEtTool> m_eFEXTOBEtTool {this, "eFEXTOBEtTool", "LVL1::eFEXTOBEtTool", "Tool for reconstructing TOB ET s"};

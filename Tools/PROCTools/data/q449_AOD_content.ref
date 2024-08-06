@@ -366,16 +366,12 @@ GSFTrackParticlesAuxDyn.parameterY
 GSFTrackParticlesAuxDyn.parameterZ
 GSFTrackParticlesAuxDyn.trackLink
 GSFTrackParticlesAuxDyn.trackParameterCovarianceMatrices
-HLTHIEventShape
-HLTHIEventShapeAux.
 HLTHIEventShapeWeighted
 HLTHIEventShapeWeightedAux.
 HLTHIEventShapeWeighted_iter0
 HLTHIEventShapeWeighted_iter0Aux.
 HLTHIEventShape_iter1
 HLTHIEventShape_iter1Aux.
-HLTHIEventShape_iter_egamma
-HLTHIEventShape_iter_egammaAux.
 HLTNav_Summary_AODSlimmed
 HLTNav_Summary_AODSlimmedAux.
 HLT_AFPProtonContainer

@@ -48,6 +48,12 @@ public:
         ArmSumIncludeBit      = 18,
        };
 
+  enum LowGainMode {
+    LGModeNormal = 0,
+    LGModeForceLG,
+    LGModeRefitLG
+  };
+  
   enum TimingCorrMode {NoTimingCorr = 0, TimingCorrLin, TimingCorrLog};
 
 private:
@@ -55,7 +61,6 @@ private:
 
   //  Static data
   //
-  static std::string s_fitOptions;
   static bool s_quietFits;
   static bool s_saveFitFunc;
   static TH1* s_undelayedFitHist;
@@ -74,7 +79,7 @@ private:
   float m_deltaTSample{};
   int m_pedestal{};
   float m_gainHG{};
-  bool m_forceLG{false};
+  unsigned int m_LGMode{LGModeNormal};
   float m_tmin{};
   float m_tmax{};
 
@@ -103,6 +108,7 @@ private:
 
   // Default fit values and cuts that can be set via modifier methods
   //
+  std::string m_fitOptions;
   int m_HGOverflowADC{};
   int m_HGUnderflowADC{};
   int m_LGOverflowADC{};
@@ -170,6 +176,7 @@ private:
   // Histogram used to perform the fits and function wrappers
   //
   mutable std::unique_ptr<TH1> m_fitHist;
+  mutable std::unique_ptr<TH1> m_fitHistLGRefit;
 
   bool m_initializedFits{false};
   std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper;
@@ -178,7 +185,6 @@ private:
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
-  unsigned int m_NSampleAna{0};
   bool m_adjTimeRangeEvent{}; // indicates whether we adjust the time range for this specific event
 
   unsigned int m_minSampleEvt{};
@@ -190,6 +196,7 @@ private:
   float m_delayedDeltaT{};
   float m_delayedPedestalDiff{};
   mutable std::unique_ptr<TH1> m_delayedHist;
+  mutable std::unique_ptr<TH1> m_delayedHistLGRefit;
 
   std::unique_ptr<TFitter> m_prePulseCombinedFitter;
   std::unique_ptr<TFitter> m_defaultCombinedFitter;
@@ -289,10 +296,17 @@ private:
   float m_bkgdMaxFraction{};
   float m_delayedBaselineShift{};
 
-  int m_lastHGOverFlowSample{};
-  int m_firstHGOverFlowSample{};
+  bool m_evtLGRefit{false};
+  float  m_refitLGAmpl{0};
+  float m_refitLGAmpError{0};
+  float m_refitLGChisq{0};
+  float m_refitLGTime{0};
+  float m_refitLGTimeSub{0};
+  
+  int m_lastHGOverFlowSample{-1};
+  int m_firstHGOverFlowSample{-1};
 
-  unsigned int m_NSamplesAna{};
+  unsigned int m_NSamplesAna{0};
   std::vector<float> m_ADCSamplesHG;
   std::vector<float> m_ADCSamplesLG;
   std::vector<float> m_ADCSamplesHGSub;
@@ -305,7 +319,11 @@ private:
   std::vector<float> m_ADCSSampSigLG;
 
   std::vector<float> m_samplesSub;
+  std::vector<float> m_samplesSig;
 
+  std::vector<float> m_samplesLGRefit;
+  std::vector<float> m_samplesSigLGRefit;
+  
   std::vector<float> m_samplesDeriv2nd;
 
   // When using combined delayed + undelayed pulses we calculate the chisquare ourselves
@@ -339,33 +357,56 @@ private:
   static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
   static std::vector<float> CalculateDerivative(const std::vector <float>& inputData, unsigned int step);
   static float obtainDelayedBaselineCorr(const std::vector<float>& samples);
+
+  void prepareLGRefit(const std::vector<float>& samplesLG, const std::vector<float>& samplesSig,
+		      const std::vector<bool>& useSamples);
   
-  void FillHistogram(const std::vector<float>& samples, float noiseSig) const
+  void FillHistogram(bool refitLG) const
   {
     if (!m_useDelayed) {
-      // Set the data and errors in the histogram object
-      //
-      for (size_t isample = 0; isample < m_Nsample; isample++) {
-        m_fitHist->SetBinContent(isample + 1, samples[isample]);
-        m_fitHist->SetBinError(isample + 1, noiseSig);
+      if (!refitLG) {
+	// Set the data and errors in the histogram object
+	//
+	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
+	  m_fitHist->SetBinContent(isample + 1, m_samplesSub[isample]);
+	  m_fitHist->SetBinError(isample + 1, m_samplesSig[isample]);
+	}
+      }
+      else {
+	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
+	  m_fitHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample]);
+	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]);
+	}
       }
     }
     else {
-      // Set the data and errors in the histogram object
-      //
-      for (size_t isample = 0; isample < m_Nsample; isample++) {
-        m_fitHist->SetBinContent(isample + 1, samples[isample * 2]);
-        m_delayedHist->SetBinContent(isample + 1, samples[isample * 2 + 1]);
-
-        m_fitHist->SetBinError(isample + 1, noiseSig); 
-        m_delayedHist->SetBinError(isample + 1, noiseSig);
+      if (!refitLG) {
+        // Set the data and errors in the histogram object
+	//
+	for (size_t isample = 0; isample < m_Nsample; isample++) {
+	  m_fitHist->SetBinContent(isample + 1, m_samplesSub[isample * 2]);
+	  m_delayedHist->SetBinContent(isample + 1, m_samplesSub[isample * 2 + 1]);
+	  
+	  m_fitHist->SetBinError(isample + 1, m_samplesSig[isample]); 
+	  m_delayedHist->SetBinError(isample + 1, m_samplesSig[isample]);
+	}
       }
-
+      else {
+        // Set the data and errors in the histogram object
+	//
+	for (size_t isample = 0; isample < m_Nsample; isample++) {
+	  m_fitHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample * 2]);
+	  m_delayedHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample * 2 + 1]);
+	  
+	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]); 
+	  m_delayedHistLGRefit->SetBinError(isample + 1, m_samplesSigLGRefit[isample]);
+	}
+      }
     }
   }
 
-  void DoFit();
-  void DoFitCombined();
+  void DoFit(bool refitLG = false);
+  void DoFitCombined(bool refitLG = false);
 
   static std::unique_ptr<TFitter> MakeCombinedFitter(TF1* func);
 
@@ -382,7 +423,7 @@ public:
 
   ~ZDCPulseAnalyzer(){}
 
-  static void SetFitOPtions(const std::string& fitOptions) { s_fitOptions = fitOptions;}
+  void SetFitOPtions(const std::string& fitOptions) { m_fitOptions = fitOptions;}
   static void SetQuietFits  (bool quiet) {s_quietFits = quiet;}
   static void SetSaveFitFunc(bool save ) {s_saveFitFunc = save;}
   static bool QuietFits() {return s_quietFits;}
@@ -416,8 +457,8 @@ public:
     m_initializedFits = false;
   }
 
-  void SetForceLG(bool forceLG) {m_forceLG = forceLG;}
-  bool ForceLG() const {return m_forceLG;}
+  void setLGMode(unsigned int mode) {m_LGMode = mode;}
+  unsigned int getLGMode() const {return m_LGMode;}
 
   void set2ndDerivStep(size_t step) {m_2ndDerivStep = step;}
 
@@ -533,11 +574,33 @@ public:
   float GetAmpNoNonLin() const {return m_ampNoNonLin;}
   float GetAmplitude() const {return m_amplitude;}
   float GetAmpError() const {return m_ampError;}
-
   float GetPreExpAmp() const {return m_expAmplitude;}
 
-  float GetPresample() const {return m_preSample;}
+  float getRefitLGAmp() const
+  {
+    if (m_evtLGRefit) return m_refitLGAmpl;
+    else return 0;
+  }
 
+  float getRefitLGChisq() const
+  {
+    if (m_evtLGRefit) return m_refitLGChisq;
+    else return 0;
+  }
+
+  float getRefitLGTime() const
+  {
+    if (m_evtLGRefit) return m_refitLGTime;
+    else return 0;
+  }
+
+  float getRefitLGTimeSub() const
+  {
+    if (m_evtLGRefit) return m_refitLGTimeSub;
+    else return 0;
+  }
+
+  float GetPresample() const {return m_preSample;}
   float GetMaxADC() const {return m_maxADCValue;}
   float GetMinADC() const {return m_minADCValue;}
 
@@ -563,25 +626,22 @@ public:
   float GetDelayedBaselineShiftFit() const {return m_delayedBaselineShift;}
   float GetDelayedBaselineCorr() const {return m_baselineCorr;}
 
-  const TH1* GetHistogramPtr() const {
+  const TH1* GetHistogramPtr(bool refitLG = false) const
+  {
     //
     // We defer filling the histogram if we don't have a pulse until the histogram is requested
     //
     if (!m_havePulse) {
-      if (UseLowGain()) FillHistogram(m_samplesSub, m_noiseSigLG);
-      else FillHistogram(m_samplesSub, m_noiseSigHG);
+      FillHistogram(refitLG);
     }
-
-    return m_fitHist.get();
+    
+    return refitLG ? m_fitHistLGRefit.get() : m_fitHist.get();
   }
 
-  std::shared_ptr<TGraphErrors> GetCombinedGraph() const;
-  std::shared_ptr<TGraphErrors> GetGraph() const;
+  std::shared_ptr<TGraphErrors> GetCombinedGraph(bool forceLG = false) const;
+  std::shared_ptr<TGraphErrors> GetGraph(bool forceLG = false) const;
 
-  std::vector<float> GetFitPulls() const;
-
-  std::shared_ptr<TGraphErrors> GetUndelayedGraph() const;
-  std::shared_ptr<TGraphErrors> GetDelayedGraph() const;
+  std::vector<float> GetFitPulls(bool forceLG = false) const;
 
   void dump() const;
   void dumpSetting() const;

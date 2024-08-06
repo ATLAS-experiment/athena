@@ -44,7 +44,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("zdcCalib",  zdcCalib = false, "comment");
   declareProperty("zdcLaser",  zdcLaser = false, "comment");
   declareProperty("zdcOnly", zdcOnly = false, "comment");
-  declareProperty("zdcLowGainOnly",  zdcLowGainOnly = false, "comment");
+  declareProperty("zdcLowGainMode",  zdcLowGainMode = 0, "comment");
 
   declareProperty("flipDelay",  flipDelay = 0, "comment");
   declareProperty("reprocZdc",  reprocZdc = 0, "comment");
@@ -168,6 +168,10 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSampleAmp[2][4]/F");
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
+    m_outputTree->Branch("zdc_ZdcModuleAmpLGRefit", &t_ZdcModuleAmpLGRefit, "zdc_ZdcModuleAmpLGRefit[2][4]/F");
+    m_outputTree->Branch("zdc_ZdcModuleT0LGRefit", &t_ZdcModuleT0LGRefit, "zdc_ZdcModuleT0LGRefit[2][4]/F");
+    m_outputTree->Branch("zdc_ZdcModuleT0SubLGRefit", &t_ZdcModuleT0SubLGRefit, "zdc_ZdcModuleT0SubLGRefit[2][4]/F");
+    m_outputTree->Branch("zdc_ZdcModuleChisqLGRefit", &t_ZdcModuleChisqLGRefit, "zdc_ZdcModuleChisqLGRefit[2][4]/F");
     
     if(m_isMC){
       //Modules
@@ -388,7 +392,7 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("zdcConfig = " << zdcConfig);
   ANA_MSG_INFO("reprocZdc = " << reprocZdc);
   ANA_MSG_INFO("auxSuffix = " << auxSuffix );
-  ANA_MSG_INFO("zdcLowGainOnly = " << zdcLowGainOnly);
+  ANA_MSG_INFO("zdcLowGainMode = " << zdcLowGainMode);
   ANA_MSG_INFO("enableClusters = " << enableClusters);
   ANA_MSG_INFO("trackLimit = " << trackLimit);
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
@@ -441,7 +445,7 @@ StatusCode ZdcNtuple :: initialize ()
     ANA_MSG_INFO("Trying to configure ZDC Analysis Tool!");
 
     ANA_CHECK(m_zdcAnalysisTool.setProperty("FlipEMDelay", flipDelay));
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("LowGainOnly", zdcLowGainOnly));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("LowGainMode", zdcLowGainMode));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("DoCalib", doZdcCalib));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("Configuration", zdcConfig));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("AuxSuffix", auxSuffix));
@@ -632,7 +636,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
       t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
       t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
-      t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcModuleMaxADC[iside][imod] = 0;
+      t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleAmpLGRefit[iside][imod] = 0; 
+      t_ZdcModuleT0LGRefit[iside][imod] = 0; t_ZdcModuleT0SubLGRefit[iside][imod] = 0; t_ZdcModuleChisqLGRefit[iside][imod] = 0;
 
       if (enableOutputSamples)
 	{
@@ -761,6 +766,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
   SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
   SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
   SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
+  SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix);
+  SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix);
+  SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix);
+  SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
@@ -882,6 +891,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
         t_ZdcModuleMinDeriv2nd[iside][imod] = MinDeriv2ndAcc(*zdcMod);
         t_ZdcModulePresample[iside][imod] = PresampleAcc(*zdcMod);
         t_ZdcModulePreSampleAmp[iside][imod] = PreSampleAmpAcc(*zdcMod);
+
+	if (AmpLGRefitAcc.isAvailable(*zdcMod)) {
+	  t_ZdcModuleAmpLGRefit[iside][imod] = AmpLGRefitAcc(*zdcMod);
+	  t_ZdcModuleT0LGRefit[iside][imod] = T0LGRefitAcc(*zdcMod);
+	  t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
+	  t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
+	}
 
 	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
 	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);

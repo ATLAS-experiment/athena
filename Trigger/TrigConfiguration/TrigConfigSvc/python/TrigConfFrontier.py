@@ -181,12 +181,12 @@ class FrontierCursor(object):
                 fields = [x for i,x in enumerate(firstRow.split()) if i%2==0]
                 types = [x for i,x in enumerate(firstRow.split()) if i%2==1]
                 ptypes = []
-                for t in types:
+                for _f,t in zip(fields, types):
                     if t.startswith("NUMBER"):
-                        if ",0" in t:
-                            ptypes.append(int)
-                        else:
+                        if _f in ["HPR_VALUE", "L1CI_GLOBAL_JET_SCALE", "L1CI_GLOBAL_EM_SCALE"]: # float columns in run 2 DB                        if ",0" in t:
                             ptypes.append(float)
+                        else:
+                            ptypes.append(int)
                     else:
                         ptypes.append(str)
 

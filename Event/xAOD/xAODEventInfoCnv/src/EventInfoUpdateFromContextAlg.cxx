@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Michael Duehrssen <michael.duehrssen@cern.ch>
@@ -98,6 +98,10 @@ namespace xAODMaker
       ATH_MSG_ERROR("Input mcEventWeights are empty. This should not happen.");
       return StatusCode::FAILURE;
     }
+    // This is sometimes marked as a decoration in the source, meaning
+    // it won't get copied by the assignment above.  Make sure it
+    // gets copied.
+    outputEvent->setMCEventWeights (signalEvent->mcEventWeights());
 
     // Ensure correct beam spot info
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)

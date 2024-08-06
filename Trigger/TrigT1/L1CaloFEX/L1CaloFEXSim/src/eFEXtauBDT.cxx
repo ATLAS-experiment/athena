@@ -10,7 +10,6 @@
 //*************************************************************************
 
 #include "L1CaloFEXSim/eFEXtauBDT.h"
-#include "L1CaloFEXSim/SCellIndexing.h"
 #include <string>
 
 #define ENERGY_WIDTH 16
@@ -184,46 +183,6 @@ void LVL1::eFEXtauBDT::next() {
   computeIsCentralTowerSeed();
 }
 
-void LVL1::eFEXtauBDT::debugPrintSCellValues() {
-
-  std::string scellValues = "";
-  std::string em0Values = "";
-  std::string em1Values = "";
-  std::string em2Values = "";
-  std::string em3Values = "";
-  std::string hadValues = "";
-  for (size_t i = 0; i < LVL1::locMap.size(); i++) {
-    int eta = LVL1::locMap[i][0];
-    int phi = LVL1::locMap[i][1];
-    int layer = LVL1::locMap[i][2];
-    scellValues += std::to_string(*superCellToPtr(eta, phi, layer)) + " ";
-    switch (layer) {
-    case 0:
-      em0Values += std::to_string(*m_em0cells[eta][phi]) + " ";
-      break;
-    case 1:
-      em1Values += std::to_string(*m_em1cells[eta][phi]) + " ";
-      break;
-    case 2:
-      em2Values += std::to_string(*m_em2cells[eta][phi]) + " ";
-      break;
-    case 3:
-      em3Values += std::to_string(*m_em3cells[eta][phi]) + " ";
-      break;
-    case 4:
-      hadValues += std::to_string(*m_hadcells[eta][phi]) + " ";
-      break;
-    }
-  }
-
-  m_log->msg(MSG::DEBUG) << "SCell values: " << scellValues << endmsg;
-  m_log->msg(MSG::DEBUG) << "layer 0 values: " << em0Values << endmsg;
-  m_log->msg(MSG::DEBUG) << "layer 1 values: " << em1Values << endmsg;
-  m_log->msg(MSG::DEBUG) << "layer 2 values: " << em2Values << endmsg;
-  m_log->msg(MSG::DEBUG) << "layer 3 values: " << em3Values << endmsg;
-  m_log->msg(MSG::DEBUG) << "layer 4 values: " << hadValues << endmsg;
-}
-
 void LVL1::eFEXtauBDT::debugPrintBDTVariables() {
   std::string bdtVariables = "";
   for (size_t i = 0; i < m_bdtVars.size(); i++) {
@@ -235,7 +194,6 @@ void LVL1::eFEXtauBDT::debugPrintBDTVariables() {
 
 // Build BDT Variables
 void LVL1::eFEXtauBDT::buildBDTVariables() {
-  debugPrintSCellValues();
   for (size_t i = 0; i < m_bdtVarComputeSCellPointers.size(); i++) {
     bool overflow;
     m_bdtVars[i] = computeEstimate(m_bdtVarComputeSCellPointers[i], overflow,

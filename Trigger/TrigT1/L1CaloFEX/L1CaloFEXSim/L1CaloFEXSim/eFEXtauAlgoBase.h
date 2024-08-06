@@ -83,8 +83,6 @@ protected:
   unsigned int m_hadcells[3][3];
   unsigned int m_twrcells[3][3];
 
-  Gaudi::Property<bool> m_dumpSCells{this, "DumpSuperCells", false,
-                                     "Should decorate TOBs with supercells"};
 };
 
 } // namespace LVL1

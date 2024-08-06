@@ -88,7 +88,7 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
 
 }
 
-StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<int> &ClusterCellETs){
+StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::vector<unsigned int> &ClusterCellETs){
 	
 	  /// Form grid of 3x3 tower IDs for this window
   int tobtable[3][3];
@@ -110,19 +110,19 @@ StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::ve
 
   SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
   ClusterCellETs.reserve(99); // will have a total of 99 supercell values (they are in counts of 25 MeV)
-  
+
   for (unsigned int il = 0; il < 5; il++) { // layer loop
       size_t nCells = (il==1 || il==2) ? 4 : 1;
       for (unsigned int iphi = 0; iphi < 3; iphi++) { // tower phi loop
           for (unsigned int ieta = 0; ieta < 3; ieta++) { // tower eta loop
-              if (tobtable[ieta][iphi]==0){ 
+              if (tobtable[iphi][ieta]==0){ 
                   for(size_t c=0;c<nCells;c++) {
 		                ClusterCellETs.push_back(0); // no energies for TOBs are the extreme eta values 
 				          }
               } else {
-                  const eTower * tower = eTowerContainer->findTower(tobtable[ieta][iphi]);
+                  const eTower * tower = eTowerContainer->findTower(tobtable[iphi][ieta]);
                   if (tower==nullptr) {
-                    ATH_MSG_ERROR("No tower with id " << tobtable[ieta][iphi]);
+                    ATH_MSG_ERROR("No tower with id " << tobtable[iphi][ieta]);
                     return StatusCode::FAILURE;
                   }
                   for(size_t c=0;c<nCells;c++) {
@@ -132,8 +132,24 @@ StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::ve
             }
         }
     }
-
-  // and we're done
+    
+    /*----------- SuperCells eta, phi, layer coordinates ----------------------
+     0:{0, 0, 0}, 1:{1, 0, 0}, 2:{2, 0, 0},  
+     3:{0, 1, 0}, 4:{1, 1, 0}, 5:{2, 1, 0},
+     6:{0, 2, 0}, 7:{1, 2, 0}, 8:{2, 2, 0},  
+     9:{0, 0, 1}, 10:{1, 0, 1}, 11:{2, 0, 1}, 12:{3, 0, 1}, 13:{4, 0, 1}, 14:{5, 0, 1},  15:{6, 0, 1}, 16:{7, 0, 1}, 17:{8, 0, 1}, 18:{9, 0, 1}, 19:{10, 0, 1}, 20:{11, 0, 1}, 
+    21:{0, 1, 1}, 22:{1, 1, 1}, 23:{2, 1, 1}, 24:{3, 1, 1}, 25:{4, 1, 1}, 26:{5, 1, 1},  27:{6, 1, 1}, 28:{7, 1, 1}, 29:{8, 1, 1}, 30:{9, 1, 1}, 31:{10, 1, 1}, 32:{11, 1, 1}, 
+    33:{0, 2, 1}, 34:{1, 2, 1}, 35:{2, 2, 1}, 36:{3, 2, 1}, 37:{4, 2, 1}, 38:{5, 2, 1},  39:{6, 2, 1}, 40:{7, 2, 1}, 41:{8, 2, 1}, 42:{9, 2, 1}, 43:{10, 2, 1}, 44:{11, 2, 1}, 
+    44:{0, 0, 2}, 45:{1, 0, 2}, 46:{2, 0, 2}, 47:{3, 0, 2}, 48:{4, 0, 2},  49:{5, 0, 2},  50:{6, 0, 2}, 51:{7, 0, 2}, 52:{8, 0, 2}, 53:{9, 0, 2}, 54:{10, 0, 2}, 55:{11, 0, 2}, 
+    56:{0, 1, 2}, 57:{1, 1, 2}, 58:{2, 1, 2}, 59:{3, 1, 2}, 60:{4, 1, 2},  61:{5, 1, 2},  62:{6, 1, 2}, 63:{7, 1, 2}, 64:{8, 1, 2}, 65:{9, 1, 2}, 66:{10, 1, 2}, 67:{11, 1, 2}, 
+    68:{0, 2, 2}, 69:{1, 2, 2}, 70:{2, 2, 2}, 71:{3, 2, 2}, 72:{4, 2, 2},  73:{5, 2, 2},  74:{6, 2, 2}, 75:{7, 2, 2}, 76:{8, 2, 2}, 77:{9, 2, 2}, 78:{10, 2, 2}, 79:{11, 2, 2}, 
+    81:{0, 0, 3}, 82:{1, 0, 3}, 83:{2, 0, 3},
+    84:{0, 1, 3}, 85:{1, 1, 3}, 86:{2, 1, 3},  
+    87:{0, 2, 3}, 88:{1, 2, 3}, 89:{2, 2, 3},
+    90:{0, 0, 4}, 91:{1, 0, 4},  92:{2, 0, 4},  
+    93:{0, 1, 4}, 94:{1, 1, 4}, 95:{2, 1, 4},
+    96:{0, 2, 4}, 97:{1, 2, 4}, 98:{2, 2, 4}; */
+  
   return StatusCode::SUCCESS;
 }
 

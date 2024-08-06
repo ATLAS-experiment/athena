@@ -194,7 +194,7 @@ def NswCalibDbAlgCfg(flags, **kwargs):
     kwargs.setdefault('ReadKey_MM_T0', "")
     
     if(kwargs["loadsTgcT0Data"] and not kwargs['sTgcT0FileName']):
-        kwargs.setdefault('ReadKey_STGC_T0', "") # empty for now but will be set once DB folder is in place
+        kwargs['ReadKey_STGC_T0'] = "/TGC/NSW/T0"
     kwargs.setdefault('ReadKey_STGC_T0', "")
 
 

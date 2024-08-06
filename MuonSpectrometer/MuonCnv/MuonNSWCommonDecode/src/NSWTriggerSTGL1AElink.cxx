@@ -283,9 +283,10 @@ std::vector<std::vector<std::uint32_t>> Muon::nsw::NSWTriggerSTGL1AElink::decode
   }
 
   size_t word_size = WORD_SIZE;
+  size_t felix_n_words = std::ceil(header.data_size / header.nwords); // the number of felix words per stream word
   for (std::size_t i = 0; i < header.nwords; ++i) {
     std::vector<std::uint32_t> data{};
-    for (std::size_t j = 0; j < header.data_size; ++j) {
+    for (std::size_t j = 0; j < felix_n_words; ++j) {
       data.push_back(decode(readPointer, word_size));
     }
     current_stream_data.push_back(data);
