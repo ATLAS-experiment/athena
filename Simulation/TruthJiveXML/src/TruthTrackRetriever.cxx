@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthTrackRetriever.h"
@@ -12,6 +12,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "TrackRecord/TrackRecord.h"
 #include "TrackRecord/TrackRecordCollection.h"
+#include <cmath>
 
 namespace JiveXML {
 
@@ -47,16 +48,16 @@ namespace JiveXML {
   StatusCode TruthTrackRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() << endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
 
     //Retrieve the collection
     const McEventCollection* McEvtColl = NULL;
     if ( !evtStore()->contains<McEventCollection>( m_McEvtCollName )){ 
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Could not find McEventCollection " << m_McEvtCollName << endmsg;
+      ATH_MSG_DEBUG( "Could not find McEventCollection " << m_McEvtCollName );
       return StatusCode::SUCCESS;
     }
     if( evtStore()->retrieve(McEvtColl, m_McEvtCollName).isFailure() ){
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Could not retrieve McEventCollection " << m_McEvtCollName << endmsg;
+      ATH_MSG_DEBUG( "Could not retrieve McEventCollection " << m_McEvtCollName );
       return StatusCode::SUCCESS;
     }
     
@@ -67,8 +68,7 @@ namespace JiveXML {
       NParticles +=  (*McEvtCollItr)->particles_size();
 
     //Show in verbose mode
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) <<  "Total number of particles in McEventCollection \""
-                                            << m_McEvtCollName << "\" is " << NParticles << endmsg;
+    ATH_MSG_DEBUG(  "Total number of particles in McEventCollection \""  << m_McEvtCollName << "\" is " << NParticles );
 
     //Reserve space for the output data
     DataVect pt; pt.reserve(NParticles);
@@ -104,61 +104,62 @@ namespace JiveXML {
         }
 
         //Get basic parameters (eta, phi, pt, ...)
-        pt.push_back(DataType(particle->momentum().perp()/Gaudi::Units::GeV));
+        pt.emplace_back(particle->momentum().perp()/Gaudi::Units::GeV);
         float thePhi = particle->momentum().phi();
-        phi.push_back(DataType( (thePhi<0) ? thePhi+=2*M_PI : thePhi ));
-        eta.push_back(DataType( particle->momentum().pseudoRapidity() ));
-        code.push_back(DataType( particle->pdg_id() ));
+        phi.emplace_back( (thePhi<0) ? thePhi+=2*M_PI : thePhi );
+        eta.emplace_back( particle->momentum().pseudoRapidity() );
+        code.emplace_back( particle->pdg_id() );
 #ifdef HEPMC3
-        id.push_back(DataType( id_to_barcode_map.at(particle->id() )));
+        id.emplace_back( id_to_barcode_map.at(particle->id() ));
 #else
-        id.push_back(DataType( HepMC::barcode(*particle) ));
+        id.emplace_back( HepMC::barcode(*particle) );
 #endif
 
         // Get the vertex information
         const auto& vertexprod =  particle->production_vertex();
         if (vertexprod) {
           const auto& pos=vertexprod->position();
-          rhoVertex.push_back(DataType( std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm ));
+          rhoVertex.emplace_back( std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm );
           float vtxPhi = pos.phi();
-          phiVertex.push_back(DataType( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi ));
-          zVertex.push_back(DataType( pos.z()*Gaudi::Units::mm/Gaudi::Units::cm )); 
+          phiVertex.emplace_back( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi );
+          zVertex.emplace_back( pos.z()*Gaudi::Units::mm/Gaudi::Units::cm ); 
         } else {
-          rhoVertex.push_back(DataType( 0. ));
-          phiVertex.push_back(DataType( 0. ));
-          zVertex.push_back(DataType( 0. )); 
+          rhoVertex.emplace_back( 0. );
+          phiVertex.emplace_back( 0. );
+          zVertex.emplace_back( 0. ); 
         }
         //Do the same for the end vertex
         const auto& vertexend =  particle->end_vertex();
         if ( vertexend ) {
          const auto& pos=vertexend->position();
-         rhoEndVertex.push_back(DataType(std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm));
+         rhoEndVertex.emplace_back(std::sqrt(pos.x()*pos.x()+pos.y()*pos.y()+pos.z()*pos.z())*Gaudi::Units::mm/Gaudi::Units::cm);
          float vtxPhi = pos.phi();
-         phiEndVertex.push_back(DataType( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi ));
-         zEndVertex.push_back(DataType(pos.z()*Gaudi::Units::mm/Gaudi::Units::cm)); 
+         phiEndVertex.emplace_back( (vtxPhi<0)? vtxPhi+=2*M_PI : vtxPhi );
+         zEndVertex.emplace_back(pos.z()*Gaudi::Units::mm/Gaudi::Units::cm); 
         } else {
-         rhoEndVertex.push_back(DataType( 0. ));
-         phiEndVertex.push_back(DataType( 0. ));
-         zEndVertex.push_back(DataType( 0. )); 
+         rhoEndVertex.emplace_back( 0. );
+         phiEndVertex.emplace_back( 0. );
+         zEndVertex.emplace_back( 0. ); 
         }
       }
     }
 
     DataMap myDataMap;
-    myDataMap["pt"] = pt;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["code"] = code;
-    myDataMap["id"] = id;
-    myDataMap["rhoVertex"] = rhoVertex;
-    myDataMap["phiVertex"] = phiVertex;
-    myDataMap["zVertex"] = zVertex;
-    myDataMap["rhoEndVertex"] = rhoEndVertex;
-    myDataMap["phiEndVertex"] = phiEndVertex;
-    myDataMap["zEndVertex"] = zEndVertex;
+    const auto nEntries = pt.size();
+    myDataMap["pt"] = std::move(pt);
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["code"] = std::move(code);
+    myDataMap["id"] = std::move(id);
+    myDataMap["rhoVertex"] = std::move(rhoVertex);
+    myDataMap["phiVertex"] = std::move(phiVertex);
+    myDataMap["zVertex"] = std::move(zVertex);
+    myDataMap["rhoEndVertex"] = std::move(rhoEndVertex);
+    myDataMap["phiEndVertex"] = std::move(phiEndVertex);
+    myDataMap["zEndVertex"] = std::move(zEndVertex);
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< pt.size() << endmsg;
+    ATH_MSG_DEBUG( dataTypeName() << ": "<< nEntries );
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_McEvtCollName, &myDataMap);

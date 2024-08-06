@@ -4,8 +4,6 @@
 
 #include "TruthMuonTrackRetriever.h"
 
-//#include "GaudiKernel/Bootstrap.h"
-//#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IPartPropSvc.h"
 
 #include "AtlasHepMC/GenParticle.h"
@@ -86,7 +84,7 @@ namespace JiveXML {
     DataVect id; id.reserve(TrackRecordColl->size()); 
 
     //Now loop over the collection and retrieve data
-    for (auto record : *TrackRecordColl ) {
+    for (const auto & record : *TrackRecordColl ) {
 
       //Get the pdg code
       int pdgCode = record.GetPDGCode();
@@ -102,26 +100,26 @@ namespace JiveXML {
       HepGeom::Vector3D<double> momentum = record.GetMomentum();
 
       //And store output
-      pt.push_back(DataType( momentum.perp()/CLHEP::GeV ));
-      phi.push_back(DataType( momentum.phi() < 0 ? momentum.phi() + 2*M_PI : momentum.phi() ));
-      eta.push_back(DataType( momentum.pseudoRapidity() ));
-      rhoVertex.push_back(DataType( vertex.perp()*CLHEP::mm/CLHEP::cm ));
-      phiVertex.push_back(DataType( vertex.phi() < 0 ? vertex.phi() + 2*M_PI : vertex.phi() ));
-      zVertex.push_back(DataType( vertex.z()*CLHEP::mm/CLHEP::cm ));
-      code.push_back(DataType( pdgCode ));
-      id.push_back(DataType( HepMC::barcode(record) )); // FIXME barcode-based
+      pt.emplace_back( momentum.perp()/CLHEP::GeV );
+      phi.emplace_back( momentum.phi() < 0 ? momentum.phi() + 2*M_PI : momentum.phi() );
+      eta.emplace_back( momentum.pseudoRapidity() );
+      rhoVertex.emplace_back( vertex.perp()*CLHEP::mm/CLHEP::cm );
+      phiVertex.emplace_back( vertex.phi() < 0 ? vertex.phi() + 2*M_PI : vertex.phi() );
+      zVertex.emplace_back( vertex.z()*CLHEP::mm/CLHEP::cm );
+      code.emplace_back( pdgCode );
+      id.emplace_back( HepMC::barcode(record) ); // FIXME barcode-based
     }
     
     //Finall add everything to the datamap
     DataMap dataMap;
-    dataMap["pt"] = pt;
-    dataMap["phi"] = phi;
-    dataMap["eta"] = eta;
-    dataMap["rhoVertex"] = rhoVertex;
-    dataMap["phiVertex"] = phiVertex;
-    dataMap["zVertex"] = zVertex;
-    dataMap["code"] = code;
-    dataMap["id"] = id;
+    dataMap["pt"] = std::move(pt);
+    dataMap["phi"] = std::move(phi);
+    dataMap["eta"] = std::move(eta);
+    dataMap["rhoVertex"] = std::move(rhoVertex);
+    dataMap["phiVertex"] = std::move(phiVertex);
+    dataMap["zVertex"] = std::move(zVertex);
+    dataMap["code"] = std::move(code);
+    dataMap["id"] = std::move(id);
     
     //some summary
     ATH_MSG_DEBUG( dataTypeName() << ": "<< pt.size() );
