@@ -34,8 +34,8 @@ class JetParticleAssociation : public asg::AsgTool,
         virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
             match(const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
 
-        virtual const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
-            matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const = 0;
+        const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+            matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer>, const xAOD::JetContainer&, const xAOD::IParticleContainer&) const;
 
     private:
 

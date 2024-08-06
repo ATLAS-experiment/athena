@@ -9,6 +9,44 @@
 #include "AthContainers/ConstDataVector.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 
+const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
+JetParticleAssociation::matchOriginTrk(SG::ReadDecorHandleKey<xAOD::IParticleContainer> trk_origin_vtx, const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
+
+    //Get the vertex associated to each track by reading the decoration
+    SG::ReadDecorHandle<xAOD::IParticleContainer, xAOD::Vertex> trkOrigin(m_trk_origin_vtx);
+    //Create the 2d output vector 
+    std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matchedparts =
+        new std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >(jets.size());
+    
+    //loop through the tracks
+    for (const xAOD::IParticle* part: parts) {
+
+        //Get vertex associated with the track
+        const xAOD::Vertex* vtx_to_trk = &trkOrigin(*part);
+        int matchjetidx = -1;
+        for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
+            //get jet
+            const xAOD::Jet* jet = jets[iJet];
+            // if origin of jet is the same as the vertex associated to the track then get index of jet
+            if (jet->getAssociatedObject<xAOD::Vertex>("OriginVertex") == vtx_to_trk){
+                matchjetidx = iJet;
+            }else{
+                continue;
+            }
+
+        }
+
+        if (matchjetidx >= 0) {
+            ElementLink<xAOD::IParticleContainer> EL; 
+            EL.toContainedElement(parts, part);
+            (*matchedparts)[matchjetidx].push_back(EL);
+        }
+    }
+
+    return matchedparts;
+    
+}
+
 JetParticleAssociation::JetParticleAssociation(const std::string& name)
     : asg::AsgTool(name) {
 }
