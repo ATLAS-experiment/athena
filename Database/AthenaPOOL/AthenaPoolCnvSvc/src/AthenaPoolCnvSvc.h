@@ -48,63 +48,63 @@ class AthenaPoolCnvSvc : public ::AthCnvSvc,
 public:
 
    /// Required of all Gaudi Services
-   StatusCode initialize();
-   StatusCode io_reinit();
+   virtual StatusCode initialize() override;
+   virtual StatusCode io_reinit() override;
    /// Required of all Gaudi Services
-   StatusCode finalize();
-   StatusCode io_finalize();
+   virtual StatusCode finalize() override;
+   virtual StatusCode io_finalize() override;
    virtual StatusCode stop() override final;
    /// Required of all Gaudi services:  see Gaudi documentation for details
-   StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
+   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
    /// Implementation of IConversionSvc: Create the transient representation of an object from persistent state.
    /// @param pAddress [IN] pointer to IOpaqueAddress of the representation.
    /// @param refpObject [OUT] pointer to DataObject to be created.
-   StatusCode createObj(IOpaqueAddress* pAddress, DataObject*& refpObject);
+   virtual StatusCode createObj(IOpaqueAddress* pAddress, DataObject*& refpObject) override;
 
    /// Implementation of IConversionSvc: Convert the transient object to the requested representation.
    /// @param pObject [IN] pointer to DataObject.
    /// @param refpAddress [OUT] pointer to IOpaqueAddress of the representation to be created.
-   StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress);
+   virtual StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress) override;
 
    /// Implementation of IConversionSvc: Resolve the references of the converted object.
    /// @param pAddress [IN] pointer to IOpaqueAddress of the representation to be resolved.
    /// @param pObject [IN] pointer to DataObject to be created.
-   StatusCode fillRepRefs(IOpaqueAddress* pAddress, DataObject* pObject);
+   virtual StatusCode fillRepRefs(IOpaqueAddress* pAddress, DataObject* pObject) override;
 
    /// Implementation of IConversionSvc: Connect to the output connection specification with open mode.
    /// @param outputConnectionSpec [IN] the name of the output connection specification as string.
    /// @param openMode [IN] the open mode of the file as string.
-   StatusCode connectOutput(const std::string& outputConnectionSpec,
-		   const std::string& openMode);
+   virtual StatusCode connectOutput(const std::string& outputConnectionSpec,
+		   const std::string& openMode) override;
 
    /// Implementation of IConversionSvc: Connect to the output connection specification with open mode.
    /// @param outputConnectionSpec [IN] the name of the output
    /// connection specification as string.
-   StatusCode connectOutput(const std::string& outputConnectionSpec);
+   virtual StatusCode connectOutput(const std::string& outputConnectionSpec) override;
 
    /// Implementation of IConversionSvc: Commit pending output.
    /// @param doCommit [IN] boolean to force full commit
-   StatusCode commitOutput(const std::string& outputConnectionSpec, bool doCommit);
+   virtual StatusCode commitOutput(const std::string& outputConnectionSpec, bool doCommit) override;
 
    /// Disconnect to the output connection.
-   StatusCode disconnectOutput(const std::string& outputConnectionSpec);
+   virtual StatusCode disconnectOutput(const std::string& outputConnectionSpec) override;
 
    /// @return pointer to PoolSvc instance.
-   IPoolSvc* getPoolSvc();
+   virtual IPoolSvc* getPoolSvc() override;
 
    /// @return a string token to a Data Object written to Pool
    /// @param placement [IN] pointer to the placement hint
    /// @param obj [IN] pointer to the Data Object to be written to Pool
    /// @param classDesc [IN] pointer to the Seal class description for the Data Object.
-   Token* registerForWrite(Placement* placement, const void* obj, const RootType& classDesc);
+   virtual Token* registerForWrite(Placement* placement, const void* obj, const RootType& classDesc) override;
 
    /// @param obj [OUT] pointer to the Data Object.
    /// @param token [IN] string token of the Data Object for which a Pool Ref is filled.
-   void setObjPtr(void*& obj, const Token* token);
+   virtual void setObjPtr(void*& obj, const Token* token) override;
 
    /// @return a boolean for using detailed time and size statistics.
-   bool useDetailChronoStat() const;
+   virtual bool useDetailChronoStat() const override;
 
    /// Create a Generic address using explicit arguments to identify a single object.
    /// @param svcType [IN] service type of the address.
@@ -116,55 +116,55 @@ public:
 		   const CLID& clid,
 		   const std::string* par,
 		   const unsigned long* ip,
-		   IOpaqueAddress*& refpAddress);
+		   IOpaqueAddress*& refpAddress) override;
 
    /// Create address from string form
    /// @param svcType [IN] service type of the address.
    /// @param clid [IN] class id for the address.
    /// @param refAddress [IN] string form to be converted.
    /// @param refpAddress [OUT] converted address.
-   StatusCode createAddress(long svcType,
+   virtual StatusCode createAddress(long svcType,
 		   const CLID& clid,
 		   const std::string& refAddress,
-		   IOpaqueAddress*& refpAddress);
+		   IOpaqueAddress*& refpAddress) override;
 
    /// Convert address to string form
    /// @param pAddress [IN] address to be converted.
    /// @param refAddress [OUT] converted string form.
-   StatusCode convertAddress(const IOpaqueAddress* pAddress, std::string& refAddress);
+   virtual StatusCode convertAddress(const IOpaqueAddress* pAddress, std::string& refAddress) override;
 
    /// Extract/deduce the DB technology from the connection
    /// string/file specification
-   StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const;
+   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const override;
 
    /// Implement registerCleanUp to register a IAthenaPoolCleanUp to be called during cleanUp.
-   StatusCode registerCleanUp(IAthenaPoolCleanUp* cnv);
+   virtual StatusCode registerCleanUp(IAthenaPoolCleanUp* cnv) override;
 
    /// Implement cleanUp to call all registered IAthenaPoolCleanUp cleanUp() function.
-   StatusCode cleanUp(const std::string& connection);
+   virtual StatusCode cleanUp(const std::string& connection) override;
 
    /// Set the input file attributes, if any are requested from jobOpts
    /// @param fileName [IN] name of the input file
-   StatusCode setInputAttributes(const std::string& fileName);
+   virtual StatusCode setInputAttributes(const std::string& fileName) override;
 
    /// Make this a server.
-   virtual StatusCode makeServer(int num);
+   virtual StatusCode makeServer(int num) override;
 
    /// Make this a client.
-   virtual StatusCode makeClient(int num);
+   virtual StatusCode makeClient(int num) override;
 
    /// Read the next data object
-   virtual StatusCode readData();
+   virtual StatusCode readData() override;
 
    /// Commit Catalog
-   virtual StatusCode commitCatalog();
+   virtual StatusCode commitCatalog() override;
 
    /// Send abort to SharedWriter clients if the server quits on error
    /// @param client_n [IN] number of the current client, -1 if no current
    StatusCode abortSharedWrClients(int client_n);
 
    /// Implementation of IIncidentListener: Handle for EndEvent incidence
-   void handle(const Incident& incident);
+   virtual void handle(const Incident& incident) override;
 
    /// Tell DataHeaderCnv to write out all DataHeaderForms for a given streamName (default is all)
    void flushDataHeaderForms(const std::string& streamName = "*");
