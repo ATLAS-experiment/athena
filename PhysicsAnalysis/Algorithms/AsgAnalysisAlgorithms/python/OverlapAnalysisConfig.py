@@ -14,9 +14,8 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="any possible label used to pick up the selected objects with. This should not be a label already used elsewhere, e.g. preselectOR.")
         self.addOption ('outputLabel', 'passesOR', type=str,
             info="decoration applied (internally) to the output objects, e.g. passesOR.")
-        # TODO: add info string
         self.addOption ('selectionName', None, type=str,
-            info="")
+            info="name of the common selection to which to append the OR decision, needed to distinguish between the various overlap removal strategies that may be set up. The default is '' (empty string), which applies the OR decision to the entire input containers.")
         self.addOption ('linkOverlapObjects', False, type=bool,
             info="whether to set up an element link between overlapping objects. The default is False.")
         self.addOption ('enableUserPriority', False, type=bool,
@@ -25,12 +24,10 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="flag to select b-jets with. If left empty, no b-jets are used in the overlap removal. The default is '' (empty string).")
         self.addOption ('boostedLeptons', False, type=bool,
             info="whether to enable boosted lepton overlap removal (toggles on the property UseSlidingDR of the ORUtils::EleJetOverlapTool and ORUtils::MuJetOverlapTool tools). The default is False.")
-        # TODO: add info string
         self.addOption ('nominalOnly', False, type=bool,
-            info="")
-        # TODO: add info string
+            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal). The default is False.")
         self.addOption ('nominalOnlyUnifiedSelection', False, type=bool,
-            info="")
+            info="(experimental) toggle off the running of overlap removal on systematically-varied objects (instead, copy from nominal), but consider the union of all systematically-varied object selections (not just nominal). The default is False.")
         self.addOption ('jets', "", type=str,
             info="the input jet container.")
         self.addOption ('fatJets', "", type=str,
@@ -49,7 +46,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             info="flag to select the anti-tau-jet for the tau-antitau-jet overlap removal. The default is '' (empty string).")
         self.addOption ('antiTauBJetLabel', '', type=str,
             info="flag to select b-jets for the tau-antitau-jet overlap removal. The default is '' (empty string).")
-        self.addOption ('addToAllSelections', True, type=bool,
+        self.addOption ('addToAllSelections', False, type=bool,
             info="add OR selection decision into all object selections")
         self.addOption ('addPreselection', False, type=bool,
             info="add preselection decorations without systematics")
@@ -109,9 +106,6 @@ class OverlapAnalysisConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        if self.addToAllSelections and self.selectionName is not None:
-            raise Exception('When addToAllSelections=True, you cannot configure selectionName!')
-
         if self.selectionName is not None:
             selectionName = self.selectionName
             outputLabel = self.outputLabel + '_' + selectionName
@@ -121,37 +115,61 @@ class OverlapAnalysisConfig (ConfigBlock):
         else:
             if self.addToAllSelections:
                 selectionName = ""
+                select_or_decoration = 'select_or'
             else:
                 selectionName = self.outputLabel
+                select_or_decoration = 'select_' + self.outputLabel
             outputLabel = self.outputLabel
             inputLabel = self.inputLabel
-            select_or_decoration = 'select_or'
-            postfix = ''
+            postfix = self.outputLabel
 
+        # here the logic is:
+        # - either the user has provided a specific selection name for the object, and we use that one
+        # - or they haven't and then either
+        #    - we take the selection from 'container.selection' (because it doesn't make sense to apply it to other selections)
+        #    - we use selectionName (which is either specified or '', i.e. everything)
         if self.jetsSelectionName is not None:
             jetsSelectionName = self.jetsSelectionName
         else:
-            jetsSelectionName = selectionName
+            if len(self.jets.split(".")) == 2 and not self.addToAllSelections:
+                jetsSelectionName = self.jets.split(".")[1]
+            else:
+                jetsSelectionName = selectionName
         if self.fatJetsSelectionName is not None:
             fatJetsSelectionName = self.fatJetsSelectionName
         else:
-            fatJetsSelectionName = selectionName
+            if len(self.fatJets.split(".")) == 2 and not self.addToAllSelections:
+                fatJetsSelectionName = self.fatJets.split(".")[1]
+            else:
+                fatJetsSelectionName = selectionName
         if self.electronsSelectionName is not None:
             electronsSelectionName = self.electronsSelectionName
         else:
-            electronsSelectionName = selectionName
+            if len(self.electrons.split(".")) == 2 and not self.addToAllSelections:
+                electronsSelectionName = self.electrons.split(".")[1]
+            else:
+                electronsSelectionName = selectionName
         if self.muonsSelectionName is not None:
             muonsSelectionName = self.muonsSelectionName
         else:
-            muonsSelectionName = selectionName
+            if len(self.muons.split(".")) == 2 and not self.addToAllSelections:
+                muonsSelectionName = self.muons.split(".")[1]
+            else:
+                muonsSelectionName = selectionName
         if self.photonsSelectionName is not None:
             photonsSelectionName = self.photonsSelectionName
         else:
-            photonsSelectionName = selectionName
+            if len(self.photons.split(".")) == 2 and not self.addToAllSelections:
+                photonsSelectionName = self.photons.split(".")[1]
+            else:
+                photonsSelectionName = selectionName
         if self.tausSelectionName is not None:
             tausSelectionName = self.tausSelectionName
         else:
-            tausSelectionName = selectionName
+            if len(self.taus.split(".")) == 2 and not self.addToAllSelections:
+                tausSelectionName = self.taus.split(".")[1]
+            else:
+                tausSelectionName = selectionName
 
         # For now we have to decorate our selections on the objects in
         # separate algorithms beforehand, so that the overlap
