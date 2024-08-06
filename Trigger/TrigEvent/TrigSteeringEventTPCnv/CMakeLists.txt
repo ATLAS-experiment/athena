@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigSteeringEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigSteeringEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigSteeringEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigSteeringEventTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities TrigSteeringEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+
+atlas_add_tpcnv_library( TrigSteeringEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigSteeringEventTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities TrigSteeringEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+                         LINK_LIBRARIES TrigSteeringEventTPCnv )
 
 atlas_add_dictionary( TrigSteeringEventTPCnvDict
                       TrigSteeringEventTPCnv/TrigSteeringEventTPCnvDict.h
