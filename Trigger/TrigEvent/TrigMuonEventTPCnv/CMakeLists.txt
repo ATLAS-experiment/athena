@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigMuonEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigMuonEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigMuonEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigMuonEventTPCnv
+                   LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities DataModelAthenaPoolLib EventCommonTPCnv FourMom Particle TrigInDetEventTPCnv TrigMuonEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel )
+
+atlas_add_tpcnv_library( TrigMuonEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigMuonEventTPCnv
-                         LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities DataModelAthenaPoolLib EventCommonTPCnv FourMom Particle TrigInDetEventTPCnv TrigMuonEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel )
+                         LINK_LIBRARIES TrigMuonEventTPCnv )
 
 atlas_add_dictionary( TrigMuonEventTPCnvDict
                       TrigMuonEventTPCnv/TrigMuonEventTPCnvDict.h
