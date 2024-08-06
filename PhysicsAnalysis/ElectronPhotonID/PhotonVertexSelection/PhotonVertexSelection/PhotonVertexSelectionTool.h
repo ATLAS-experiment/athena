@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_PhotonVertexSelectionTool_h
@@ -86,13 +86,13 @@ namespace CP {
 
     // ONNX Methods
     // create ONNX session and return both the allocator and session handler from user-defined onnx env and model
-    std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> setONNXSession(Ort::Env& env, std::string modelFilePath);
+    std::tuple<std::shared_ptr<Ort::Session>, Ort::AllocatorWithDefaultOptions> setONNXSession(Ort::Env& env, const std::string& modelFilePath);
     // get the input nodes info from the onnx model file (using session and allocator)
     std::tuple<std::vector<int64_t>, std::vector<const char*>> getInputNodes( const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
     // get the output nodes info from the onnx model file (using session and allocator)
     std::tuple<std::vector<int64_t>, std::vector<const char*>> getOutputNodes(const std::shared_ptr<Ort::Session> sessionHandle, Ort::AllocatorWithDefaultOptions& allocator);
     // wrapper for getting the NN score from onnx model file (passed as onnx session)
-    float getScore(int nVars, std::vector<std::vector<float>> input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const;
+    float getScore(int nVars, const std::vector<std::vector<float>>& input_data, const std::shared_ptr<Ort::Session> sessionHandle, std::vector<int64_t> input_node_dims, std::vector<const char*> input_node_names, std::vector<const char*> output_node_names) const;
     // ==================================================
 
   private:
