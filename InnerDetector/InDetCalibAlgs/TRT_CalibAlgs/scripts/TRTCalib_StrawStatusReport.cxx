@@ -25,7 +25,7 @@ using namespace std;
 int deadStraws[2][32][5482];
 
 void initializeDeadStrawsList();                   // initialize deadStraws, read in permanently dead list
-void simpleAnalysis(std::string filename);         // identify problematic straws
+void simpleAnalysis(const std::string& filename);  // identify problematic straws
 void printAthena(int run);                         // print athena format
 void printAthenaBoardsOnly(int run);               // print athena format but only for entire boards
 void reportResults(const std::string & filename, int run); // print for root plots
@@ -153,7 +153,7 @@ void initializeDeadStrawsList()
     return;
 }
 
-void simpleAnalysis(std::string filename)
+void simpleAnalysis(const std::string& filename)
 {
     // input format of straws.RUNNUMBER.txt:
     // bec, phi, strawID, # hits, # track hits, # HT hits, # HT track hits, # holes, # holes with hit (hit not assigned to track)
