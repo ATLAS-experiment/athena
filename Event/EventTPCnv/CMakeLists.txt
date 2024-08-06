@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( EventTPCnv
-                         src/*.cxx
+atlas_add_library( EventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS EventTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib EventInfo
+                   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+
+atlas_add_tpcnv_library( EventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS EventTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib EventInfo
-                         PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+                         LINK_LIBRARIES EventTPCnv )
 
 atlas_add_dictionary( EventTPCnvDict
                       EventTPCnv/EventTPCnvDict.h
