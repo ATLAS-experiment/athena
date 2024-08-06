@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigCaloEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigCaloEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigCaloEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigCaloEventTPCnv
+                   PRIVATE_LINK_LIBRARIES AthenaKernel
+                   LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities CxxUtils DataModelAthenaPoolLib TrigCaloEvent )
+
+atlas_add_tpcnv_library( TrigCaloEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigCaloEventTPCnv
-                         PRIVATE_LINK_LIBRARIES AthenaKernel
-                         LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities CxxUtils DataModelAthenaPoolLib TrigCaloEvent )
+                         LINK_LIBRARIES TrigCaloEventTPCnv )
 
 atlas_add_dictionary( TrigCaloEventTPCnvDict
                       TrigCaloEventTPCnv/TrigCaloEventTPCnvDict.h
