@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ParticleEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( ParticleEventTPCnv
-                         src/*.cxx
+atlas_add_library( ParticleEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS ParticleEventTPCnv
+                   LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel Particle ParticleEvent
+                   PRIVATE_LINK_LIBRARIES AthAllocators AthenaKernel VxVertex )
+
+atlas_add_tpcnv_library( ParticleEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS ParticleEventTPCnv
-                         LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel Particle ParticleEvent
-                         PRIVATE_LINK_LIBRARIES AthAllocators AthenaKernel VxVertex )
+                         LINK_LIBRARIES ParticleEventTPCnv )
 
 atlas_add_dictionary( ParticleEventTPCnvDict
                       ParticleEventTPCnv/ParticleEventTPCnvDict.h
