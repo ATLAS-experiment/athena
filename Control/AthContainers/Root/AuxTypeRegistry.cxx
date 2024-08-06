@@ -1315,6 +1315,9 @@ bool AuxTypeRegistry::classNameHasLink (const std::string& className)
   if (className.find ("SG::JaggedVecElt<") != std::string::npos) {
     return true;
   }
+  if (className.find ("SG::PackedLink<") != std::string::npos) {
+    return true;
+  }
   return false;
 }
 

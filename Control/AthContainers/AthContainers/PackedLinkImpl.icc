@@ -1,0 +1,96 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/PackedLinkImpl.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Oct, 2023
+ * @brief Definition of PackedLink type.
+ */
+
+
+namespace SG {
+
+
+/**
+ * @brief Default constructor.
+ *
+ * Initialize a null link.
+ */
+inline
+PackedLinkBase::PackedLinkBase()
+  : m_packed (0)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param collection The index of the collection in the @c DataLink vector,
+ * @param index The index of the element within the collection.
+ */
+inline
+PackedLinkBase::PackedLinkBase (unsigned int collection, unsigned int index) :
+  m_packed ((collection << INDEX_NBITS) + index)
+{
+  assert (index <= INDEX_MAX);
+  assert (collection <= COLLECTION_MAX);
+}
+
+
+/**
+ * @brief Comparison.
+ * @param other The link with which to compare.
+ */
+inline
+bool PackedLinkBase::operator== (const PackedLinkBase& other) const
+{
+  return m_packed == other.m_packed;
+}
+
+
+/**
+ * @brief Unpack the collection index from the link.
+ */
+inline
+unsigned int PackedLinkBase::collection() const
+{
+  return m_packed >> INDEX_NBITS;
+}
+
+
+/**
+ * @brief Unpack the element index from the link.
+ */
+inline
+unsigned int PackedLinkBase::index() const
+{
+  return (m_packed & INDEX_MAX);
+}
+
+
+/**
+ * @brief Set the collection index;
+ * @param collection The index of the collection in the @c DataLink vector,
+ */
+inline
+void PackedLinkBase::setCollection (unsigned int collection)
+{
+  assert (collection <= COLLECTION_MAX);
+  m_packed = (m_packed & INDEX_MAX) | (collection << INDEX_NBITS);
+}
+
+
+/**
+ * @brief Set the element index;
+ * @param index The index of the element within the collection.
+ */
+inline
+void PackedLinkBase::setIndex (unsigned int index)
+{
+  assert (index <= INDEX_MAX);
+  m_packed = (m_packed & (COLLECTION_MAX << INDEX_NBITS)) | index;
+}
+
+
+} // namespace SG

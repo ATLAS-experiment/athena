@@ -1,0 +1,361 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/PackedLinkVectorHelper.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date May, 2024
+ * @brief Helper functions for managing @c PackedLink variables.
+ */
+
+
+namespace SG::detail {
+
+
+/**
+ * @brief Constructor from an @c IAuxTypeVector directly.
+ * @param linkedVector The @c IAuxTypeVector for the aux variable.
+ */
+inline
+PackedLinkVectorHelperBase::LinkedVector::LinkedVector (IAuxTypeVector& linkedVector)
+  : m_data (&linkedVector)
+{
+}
+
+
+/**
+ * @brief Constructor from a container and aux ID.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ */
+inline
+PackedLinkVectorHelperBase::LinkedVector::LinkedVector (AuxVectorData& container, SG::auxid_t auxid)
+  : m_data (std::make_pair (&container, auxid))
+{
+}
+
+
+/**
+ * @brief Return the @c IAuxTypeVector.
+ */
+inline
+IAuxTypeVector* PackedLinkVectorHelperBase::LinkedVector::get()
+{
+  // If we already have it, return it.
+  if (m_data.index() == 0)
+    return std::get<0>(m_data);
+
+  // Look it up from the container.
+  auto [container, auxid] = std::get<1>(m_data);
+  IAuxTypeVector* lv = container->getStore()->linkedVector (auxid);
+
+  // Remember it to possibly use again.
+  m_data = lv;
+  return lv;
+}
+
+
+/**
+ * @brief Return the @c IAuxTypeVector.
+ */
+inline
+IAuxTypeVector&
+PackedLinkVectorHelperBase::LinkedVector::operator*()
+{
+  return *get();
+}
+
+
+/**
+ * @brief Return the @c IAuxTypeVector.
+ */
+inline
+IAuxTypeVector* PackedLinkVectorHelperBase::LinkedVector::operator->()
+{
+  return get();
+}
+
+
+/**
+ * @brief Return the current store from the first valid link in the span.
+ *        If there are no valid links, then return the global default.
+ * @param links The span of links.
+ */
+inline
+auto PackedLinkVectorHelperBase::storeFromSpan ([[maybe_unused]] DataLinkBase_span& links)
+  -> IProxyDict*
+{
+#ifndef XAOD_STANDALONE
+  if (links.size() > 1) {
+    return links[1].source();
+  }
+#endif
+  return CurrentEventStore::store();
+}
+
+
+/**
+ * @brief Return a span over all the linked @c DataLinkBase's.
+ *        from the linked vector.
+ * @param linkedVec Interface for the linked vector of @c DataLinkBase's.
+ */
+inline
+auto PackedLinkVectorHelperBase::getLinkBaseSpan (IAuxTypeVector& linkedVec)
+  -> DataLinkBase_span
+{
+  return DataLinkBase_span (linkedVec.getDataSpan());
+}
+
+
+/**
+ * @brief Return a span over all the linked @c DataLinkBase's.
+ *        from the linked vector.
+ * @param linkedVec Interface for the linked vector of @c DataLinkBase's.
+ */
+inline
+auto PackedLinkVectorHelperBase::getLinkBaseSpan (const IAuxTypeVector& linkedVec)
+  -> const_DataLinkBase_span
+{
+  return const_DataLinkBase_span (linkedVec.getDataSpan());
+}
+
+
+/**
+ * @brief Find the collection index in the linked DataLinks for a sgkey.
+ * @param linkedVec How to find the linked vector.
+ * @param sgkey Hashed key for which to search.
+ * @param links Span over the vector of @c DataLinks, as @c DataLinkBase.
+ *              May be modified if the vector grows.
+ * @param sg The @c IProxyDict of the current store.
+ *           May be null to use the global, thread-local default.
+ *
+ * Searches for a @c DataLink matching @c sgkey in the linked vector.
+ * If not found, then a new entry is added.
+ * Returns a pair (INDEX, CACHEVALID).  INDEX is the index in the vector
+ * of the sgkey (and thus the collection index to store in the @c PackedLink).
+ * CACHEVALID is true if it is known that the payload of the vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+inline
+std::pair<size_t, bool> PackedLinkVectorHelper<CONT>::findCollection
+   (LinkedVector& linkedVec,
+    sgkey_t sgkey, DataLinkBase_span& links, IProxyDict* sg)
+{
+  return findCollectionBase (linkedVec, sgkey, links, sg, initLink);
+}
+
+
+/**
+ * @brief Update collection index of a collection of @c PackedLink.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param ptr Pointer to the start of the PackedLink collection.
+ * @param n Length of the PackedLink collection.
+ * @param srcDLinks Span over the vector of DataLinks
+ *                  for the source container of the links.
+ * @param sg The @c IProxyDict of the current store.
+ *           If null, take it from the links in @c srcDlinks,
+ *           or use the global, thread-local default.
+ *
+ * To be used after links have been copied/moved from one container
+ * to another.  The collection indices are updated to be appropriate
+ * for the destination container.
+ * Returns true if it is known that the payload of the linked vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+inline
+bool PackedLinkVectorHelper<CONT>::updateLinks (IAuxTypeVector& linkedVec,
+                                                SG::PackedLink<CONT>* ptr,
+                                                size_t n,
+                                                const const_DataLinkBase_span& srcDLinks,
+                                                IProxyDict* sg)
+{
+  PackedLinkBase_span span (static_cast<PackedLinkBase*>(ptr), n);
+  return updateLinksBase (linkedVec, span, srcDLinks, sg, initLink);
+}
+
+
+/**
+ * @brief Update collection index of a collection of @c PackedLink.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param ptr Pointer to the start of the PackedLink collection.
+ * @param n Length of the PackedLink collection.
+ * @param srclv Interface for the linked vector
+ *              for the source container of the links.
+ * @param sg The @c IProxyDict of the current store.
+ *           If null, take it from the links in @c srcDlinks,
+ *           or use the global, thread-local default.
+ *
+ * To be used after links have been copied/moved from one container
+ * to another.  The collection indices are updated to be appropriate
+ * for the destination container.
+ * Returns true if it is known that the payload of the linked vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+inline
+bool PackedLinkVectorHelper<CONT>::updateLinks (IAuxTypeVector& linkedVec,
+                                                SG::PackedLink<CONT>* ptr,
+                                                size_t n,
+                                                const IAuxTypeVector& srclv,
+                                                IProxyDict* sg)
+{
+  const_DataLinkBase_span srcDLinks = getLinkBaseSpan (srclv);
+  PackedLinkBase_span span (static_cast<PackedLinkBase*>(ptr), n);
+  return updateLinksBase (linkedVec, span, srcDLinks, sg, initLink);
+}
+
+
+/**
+ * @brief Update collection index of a collection of @c PackedLink vectors.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param ptr Pointer to the start of the PackedLink vector collection.
+ * @param n Length of the PackedLink vector collection.
+ * @param srclv Interface for the linked vector
+ *              for the source container of the links.
+ * @param sg The @c IProxyDict of the current store.
+ *           If null, take it from the links in @c srcDlinks,
+ *           or use the global, thread-local default.
+ *
+ * To be used after links have been copied/moved from one container
+ * to another.  The collection indices are updated to be appropriate
+ * for the destination container.
+ * Returns true if it is known that the payload of the linked vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+template <class VALLOC>
+bool PackedLinkVectorHelper<CONT>::updateLinks (IAuxTypeVector& linkedVec,
+                                                std::vector<SG::PackedLink<CONT>, VALLOC>* ptr,
+                                                size_t n,
+                                                const IAuxTypeVector& srclv,
+                                                IProxyDict* sg)
+{
+  const_DataLinkBase_span srcDLinks = getLinkBaseSpan (srclv);
+  if (sg == nullptr) {
+    DataLinkBase_span DLinks (getLinkBaseSpan (linkedVec));
+    sg = storeFromSpan (DLinks);
+  }
+  bool cacheValid = true;
+  for (size_t i = 0; i < n; i++) {
+    PackedLinkBase_span span (static_cast<PackedLinkBase*>(ptr[i].data()),
+                              ptr[i].size());
+    cacheValid &= updateLinksBase (linkedVec, span, srcDLinks, sg, initLink);
+  }
+  return cacheValid;
+}
+
+
+/**
+ * @brief Assign a range of @c ElementLink to a vector of @c Packedlink.
+ * @param vect The vector of @c PackedLink to which to assign.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param dlinks Span over the link vector, as @c DataLinkBase.
+ * @param x The range to assign.
+ *
+ * Returns true if it is known that the payload of the linked vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+template <class VALLOC, ElementLinkRange<CONT> RANGE>
+bool
+PackedLinkVectorHelper<CONT>::assignVElt (std::vector<PLink_t, VALLOC>& velt,
+                                          IAuxTypeVector& linkedVec,
+                                          DataLinkBase_span& dlinks,
+                                          const RANGE& x)
+{
+  // Define a ElementLink->PackedLink transform.
+  bool cacheValid = true;
+  LinkedVector lv (linkedVec);
+  auto xform = [&] (const Link_t& el) {
+    auto [dlindex, flag] = findCollection (lv,
+                                           el.key(),
+                                           dlinks,
+                                           el.source());
+    cacheValid &= flag;
+    return PackedLink<CONT> (dlindex, el.isDefault() ? 0 : el.index());
+  };
+
+  // Make a transformed range and assign it to the vector.
+#ifdef __cpp_lib_containers_ranges // c++23
+  velt.assign_range (x | std::views::transform (xform));
+#else
+  const auto r = x | std::views::transform (xform);
+  velt.assign (r.begin(), r.end());
+#endif
+  return cacheValid;
+}
+
+
+/**
+ * @brief Insert a range of @c ElementLink into a vector of @c Packedlink.
+ * @param vect The vector of @c PackedLink to which to assign.
+ * @param pos The position at which to do the insertion.
+ * @param linkedVec Interface for the linked vector of DataLinks.
+ * @param dlinks Span over the link vector, as @c DataLinkBase.
+ * @param x The range to assign.
+ *
+ * Returns true if it is known that the payload of the linked vector
+ * has not moved.  (If this is false, any caches/iterators must be assumed
+ * to be invalid.)
+ */
+template <class CONT>
+template <class VALLOC, ElementLinkRange<CONT> RANGE>
+bool
+PackedLinkVectorHelper<CONT>::insertVElt (std::vector<PLink_t, VALLOC>& velt,
+                                          size_t pos,
+                                          IAuxTypeVector& linkedVec,
+                                          DataLinkBase_span& dlinks,
+                                          const RANGE& x)
+{
+  // Define a ElementLink->PackedLink transform.
+  bool cacheValid = true;
+  LinkedVector lv (linkedVec);
+  auto xform = [&] (const Link_t& el) {
+    auto [dlindex, flag] = findCollection (lv,
+                                           el.key(),
+                                           dlinks,
+                                           el.source());
+    cacheValid &= flag;
+    return PackedLink<CONT> (dlindex, el.isDefault() ? 0 : el.index());
+  };
+
+  // Make a transformed range and assign it to the vector.
+#ifdef __cpp_lib_containers_ranges // c++23
+  velt.assign_range (velt.begin()+pos, x | std::views::transform (xform));
+#else
+  const auto r = x | std::views::transform (xform);
+  velt.insert (velt.begin()+pos, r.begin(), r.end());
+#endif
+  return cacheValid;
+}
+
+
+/**
+ * @brief Initialize a @c DataLink.
+ * @param dl The link to initialize.  Really of type @c DLink_t.
+ * @param sgkey Hashed key to which to initialize the link.
+ * @param sg The @c IProxyDict of the current store.
+ *           May be null to use the global, thread-local default.
+ */
+template <class CONT>
+inline
+void PackedLinkVectorHelper<CONT>::initLink (DataLinkBase& dl,
+                                             sgkey_t sgkey,
+                                             [[maybe_unused]] IProxyDict* sg)
+{
+#ifdef XAOD_STANDALONE
+  dl.setPersKey (sgkey);
+#else
+  static_cast<DLink_t&>(dl).toIdentifiedObject (sgkey, sg);
+#endif
+}
+
+
+} // namespace SG::detail

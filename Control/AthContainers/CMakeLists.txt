@@ -105,3 +105,8 @@ if( NOT XAOD_STANDALONE )
    _add_test( dataVectorAsELV_test )
    _add_test( DataVectorWithAlloc_test )
 endif()
+
+
+_add_test( PackedLink_test )
+_add_test( PackedLinkVectorHelper_test )
+_add_test( PackedLinkVector_test )
