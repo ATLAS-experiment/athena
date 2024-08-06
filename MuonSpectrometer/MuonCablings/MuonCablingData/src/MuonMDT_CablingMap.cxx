@@ -263,7 +263,7 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map,
         }
     } else {
         const TdcOnlSet& attachedTdcs = module_itr->second.all_modules;
-        if (attachedTdcs.size() < cabling_map.tdcId) {
+        if (attachedTdcs.size() <= cabling_map.tdcId) {
             log << MSG::WARNING << "getOfflineId() -- Tdc: "
                 << static_cast<unsigned>(cabling_map.tdcId)
                 << " is not part of " << module_itr->first << ". Maximally "
