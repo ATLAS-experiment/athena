@@ -275,20 +275,15 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
        eta = -std::log(std::tan(theta / 2));
 
        if (MC::isStable(p) && (!p->end_vertex())) {
-         // Change the status code from Pythia (1) to 201 //added 120124
-         p->set_status(HepMC::PYTHIA8NOENDVERTEXSTATUS);
 
          int pid = p->pdg_id();
          if (eta > m_EtaCut && 1 - std::abs(mom / m_FPConfig.pbeam0) < m_XiCut) {
 
            // save a copy of the particles which passed the cut
            HepMC::FourVector Position = p->production_vertex()->position();
-
            HepMC::FourVector Momentum = p->momentum();
-
            HepMC::GenVertexPtr Vertex = HepMC::newGenVertexPtr(Position); // copy of the vertex
-           HepMC::GenParticlePtr Particle =
-             HepMC::newGenParticlePtr(Momentum, pid, 202);
+           HepMC::GenParticlePtr Particle = HepMC::newGenParticlePtr(Momentum, pid, 1);
 
            Vertex->add_particle_out(Particle);
            evt.add_vertex(Vertex);

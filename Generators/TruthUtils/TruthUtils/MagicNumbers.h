@@ -47,8 +47,8 @@ namespace HepMC {
   /// @brief Constant that the meaning of which is currently lost, to be recovered...
   constexpr int SPECIALSTATUS = 902;
   constexpr int PYTHIA8LHESTATUS = 1003;
-  constexpr int PYTHIA8NOENDVERTEXSTATUS = 201;
-  constexpr int FORWARDTRANSPORTMODELSTATUS = 212;
+  /// @brief Special Forward transport Geant process for vertices
+  constexpr int FORWARD_TRANSPORT_MODEL_PROCESS = 212;
 
   /// @brief This barcode is used by objects matched to particles from pile-up interactions in standard MC Production
   constexpr int SUPPRESSED_PILEUP_BARCODE(std::numeric_limits<int32_t>::max());
