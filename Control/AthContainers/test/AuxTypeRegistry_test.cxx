@@ -530,6 +530,7 @@ void test_linked()
 
   assert (!SG::AuxTypeRegistry::classNameHasLink ("foo"));
   assert (SG::AuxTypeRegistry::classNameHasLink ("SG::JaggedVecElt<double>"));
+  assert (SG::AuxTypeRegistry::classNameHasLink ("SG::PackedLink<DataVector<Foo> >"));
 }
 
 

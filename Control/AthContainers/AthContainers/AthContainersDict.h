@@ -17,6 +17,7 @@
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "AthContainersInterfaces/IAuxSetOption.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/PackedLink.h"
 #include "AthContainers/OwnershipPolicy.h"
 #include "AthContainers/PackedParameters.h"
 #include "AthContainers/PackedContainer.h"

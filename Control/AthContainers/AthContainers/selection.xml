@@ -56,6 +56,8 @@
 
   <class name="SG::ThinningDecision"/>
 
+  <class name="SG::PackedLinkBase"/>
+
   <class name="SG::ConstAccessor<char>"/>
   <class name="SG::ConstAccessor<unsigned char>"/>
   <class name="SG::ConstAccessor<int>"/>
