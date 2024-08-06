@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloTPCnv )
@@ -7,12 +7,19 @@ atlas_subdir( CaloTPCnv )
 find_package( CLHEP )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( CaloTPCnv
-                         src/*.cxx
+atlas_add_library( CaloTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS CaloTPCnv
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloEvent AthenaKernel AthAllocators AthLinks DataModelAthenaPoolLib Navigation AthenaPoolCnvSvcLib EventCommonTPCnv GaudiKernel TestTools CaloConditions CaloGeoHelpers CaloUtilsLib SGTools EventKernel LArRecEvent TileEvent CxxUtils )
+
+atlas_add_tpcnv_library( CaloTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS CaloTPCnv
                          PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                          PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                         LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloEvent AthenaKernel AthAllocators AthLinks DataModelAthenaPoolLib Navigation AthenaPoolCnvSvcLib EventCommonTPCnv GaudiKernel TestTools CaloConditions CaloGeoHelpers CaloUtilsLib SGTools EventKernel LArRecEvent TileEvent CxxUtils )
+                         LINK_LIBRARIES CaloTPCnv )
 
 atlas_add_dictionary( CaloTPCnvDict
                       CaloTPCnv/CaloTPCnvDict.h
