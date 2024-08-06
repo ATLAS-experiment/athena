@@ -50,7 +50,7 @@ private:
                                  xAOD::PFO& neutralPFO) const;
 
   /** @brief Configure the haronic PFO*/
-  StatusCode configureHadronicPFO(const xAOD::CaloCluster& cluster,
+  StatusCode configureHadronicPFO(const xAOD::CaloVertexedTopoCluster& cluster,
                                   double clusterEnergyHad,
                                   xAOD::PFO& hadronicPFO) const;
 
