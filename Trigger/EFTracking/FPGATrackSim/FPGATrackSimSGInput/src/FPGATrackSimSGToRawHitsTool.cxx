@@ -271,6 +271,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setHitType(HitType::unmapped);
       tmpSGhit.setDetType(SiliconTech::pixel);
       tmpSGhit.setIdentifierHash(sielement->identifyHash());
+      tmpSGhit.setIdentifier(sielement->identify().get_identifier32().get_compact());
 
       int barrel_ec = m_pixelId->barrel_ec(rdoId);
       if (barrel_ec == 0)
@@ -418,6 +419,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setHitType(HitType::unmapped);
       tmpSGhit.setDetType(SiliconTech::strip);
       tmpSGhit.setIdentifierHash(sielement->identifyHash());
+      tmpSGhit.setIdentifier(sielement->identify().get_identifier32().get_compact());
 
       int barrel_ec = m_sctId->barrel_ec(rdoId);
       if (barrel_ec == 0)
@@ -599,6 +601,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       clusterEquiv.setZ(globalPos.z());
       clusterEquiv.setDetType(SiliconTech::pixel);
       clusterEquiv.setIdentifierHash(sielement->identifyHash());
+      clusterEquiv.setIdentifier(sielement->identify().get_identifier32().get_compact());
 
       int barrel_ec = m_pixelId->barrel_ec(theID);
       if (barrel_ec == 0)
@@ -677,6 +680,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       clusterEquiv.setZ(gPos.z());
       clusterEquiv.setDetType(SiliconTech::strip);
       clusterEquiv.setIdentifierHash(sielement->identifyHash());
+      clusterEquiv.setIdentifier(sielement->identify().get_identifier32().get_compact());
 
       int barrel_ec = m_sctId->barrel_ec(rdoId);
       if (barrel_ec == 0)
