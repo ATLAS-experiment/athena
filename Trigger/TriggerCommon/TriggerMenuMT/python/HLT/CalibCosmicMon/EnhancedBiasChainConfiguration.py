@@ -46,10 +46,10 @@ l1seeds = { 'low'  : \
                 'L1_gXEJWOJ100',\
                 'L1_jJ60p30ETA49',\
                 'L1_jJ80p0ETA25_2jJ40p30ETA49',\
-                'L1_J50',\
+                'L1_jJ90',\
                 'L1_jJ90_DETA20-jJ90J',\
                 'L1_LFV-MU5VF',\
-                'L1_MU5VF_J40',\
+                'L1_MU5VF_jJ80',\
                 'L1_MU8F_eTAU30M',\
                 #'L1_MU5VF_J20',\
                 #'L1_MU5VF_J30p0ETA49_2J20p0ETA49',\
