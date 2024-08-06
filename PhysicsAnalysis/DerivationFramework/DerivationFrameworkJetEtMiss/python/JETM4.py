@@ -137,7 +137,10 @@ def JETM4ExtraContentCfg(flags):
 
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKLowPt
-    jetList = [AntiKt4UFOCSSKLowPt]
+    AntiKt4UFOCSSKLowPt_JETM4 = AntiKt4UFOCSSKLowPt.clone(
+        modifiers = AntiKt4UFOCSSKLowPt.modifiers+("NNJVT",)
+    )
+    jetList = [AntiKt4UFOCSSKLowPt_JETM4]
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
 
