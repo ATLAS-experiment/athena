@@ -66,6 +66,7 @@ public:
     int getRoadID() const { return m_roadID; }
 
     // --- Unmapped Location ---
+    void setIdentifier(unsigned int v) { m_identifier = v; } // 32 bit (short) module identifier
     void setIdentifierHash(unsigned v) { m_identifierHash = v; }
     void setLayerDisk(unsigned v) { m_layer_disk = v; } // ITk layer number
     void setSide(unsigned v) { m_side = v; }
@@ -74,6 +75,7 @@ public:
     void setPhiModule(unsigned v) { m_phiModule = v; }
     void setEtaWidth(unsigned v) { m_etaWidth = v; }
     void setPhiWidth(unsigned v) { m_phiWidth = v; }
+    unsigned int getIdentifier() const { return m_identifier; } // 32 bit (short) module identifier
     unsigned getIdentifierHash() const { return m_identifierHash; } // TODO note this might break things in the same way as getSide() a few lines below. If so, recomment.
     unsigned getLayerDisk() const { return m_layer_disk; } // ITk layer number
     unsigned getSide() const { return m_side; } // strip side TODO note this has been uncommented on 4/20/21. If wrappers suddenly break, recomment this. Same for getIdentifierHash above.
@@ -175,7 +177,8 @@ protected:
     SiliconTech m_detType = SiliconTech::undefined; // strip / pixel
 
     // --- Unmapped Location ---
-    unsigned m_identifierHash = 0; // Global module ID, from ITk
+    unsigned int m_identifier = 0; // Global module ID, from offline (32 bit variant)
+    unsigned m_identifierHash = 0; // Global module ID hash, from ITk
     unsigned m_layer_disk = 0;     // ITk layer number
     unsigned m_side = 0;           // Side of the strip module
     int m_etaModule = 0; // eta index of the module that the hit is located on
