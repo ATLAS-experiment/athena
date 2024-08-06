@@ -23,6 +23,7 @@ if __name__=='__main__':
   parser.add_argument("--objects",dest="objects",default="PEDESTAL,RAMP",help="List of conditions types to be dumped",type=str)
   parser.add_argument("--folders",dest="folders",default="/LAR/ElecCalibFlat/Pedestal,/LAR/ElecCalibFlat/Ramp",help="List of folders to be taken from sqlite",type=str)
   parser.add_argument('--offline',dest="offline", action='store_true', default=False, help='is offline folder?')
+  parser.add_argument('--poolcat',dest="poolcat", default="", type=str, help='is offline folder?')
    
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -174,6 +175,9 @@ if __name__=='__main__':
                                                   ))
   if "Ramp" in objects:
     ckey = "LArRampSC" if flags.LArCalib.isSC else "LArRamp"
+    if args.offline:
+       from IOVDbSvc.IOVDbSvcConfig import addFolders
+       cfg.merge(addFolders(flags,'/LAR/ElecCalibOflSC/Ramps/RampLinea',modifiers='<key>LArRampSC</key>',className='LArRampComplete'))
     cfg.addEventAlgo(CompFactory.LArRamps2Ntuple(RampKey="LArRampSym" if flags.Input.isMC else ckey,
                                                  AddFEBTempInfo = False, 
                                                  AddCalib = True,
@@ -282,8 +286,7 @@ if __name__=='__main__':
     else:   
        fld = "/LAR/ElecCalibOflSC/CaliWaves/CaliWave" if flags.LArCalib.isSC else "/LAR/ElecCalibOfl/CaliWaves/CaliWave"   
        from IOVDbSvc.IOVDbSvcConfig import addFolders
-       #cfg.merge(addFolders(flags,fld,className="LArCaliWaveContainer"))
-       cfg.merge(addFolders(flags,fld))
+       cfg.merge(addFolders(flags,fld,modifiers='<key>LArCaliWave</key><typeName>LArCaliWaveContainer</typeName>'))
        cfg.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave"],
                                                  NtupleName = "CALIWAVE",
                                                  AddFEBTempInfo = False,   
@@ -301,7 +304,6 @@ if __name__=='__main__':
     else:   
        fld = "/LAR/ElecCalibOflSC/PhysWaves/RTM" if flags.LArCalib.isSC else "/LAR/ElecCalibOfl/PhysWaves/RTM"   
        from IOVDbSvc.IOVDbSvcConfig import addFolders
-       #cfg.merge(addFolders(flags,fld,className="LArPhysWaveContainer"))
        cfg.merge(addFolders(flags,fld))
        cfg.addEventAlgo(CompFactory.LArPhysWaves2Ntuple(KeyList = ["LArPhysWave"],
                                                  NtupleName = "PHYSWAVE",
@@ -322,6 +324,9 @@ if __name__=='__main__':
   if args.dbtag and 'CALIB' in args.dbtag:
      cfg.getService("IOVDbSvc").DBInstance=""
     
+  if args.poolcat:
+     cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:%s"%args.poolcat,]  
+
   cfg.run(1)
   sys.exit(0)
   

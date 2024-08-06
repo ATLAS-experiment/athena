@@ -32,6 +32,7 @@ if __name__=='__main__':
    parser.add_argument('-x','--ignoreBarrel', dest='ignoreB', default=False, action="store_true", help='ignore Barrel channels ?')
    parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
+   parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -174,7 +175,7 @@ if __name__=='__main__':
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    flags.lock()
-   flags.dump()
+   flags.dump(evaluate=True)
    
    cfg=MainServicesCfg(flags)
    
@@ -188,6 +189,10 @@ if __name__=='__main__':
    #
    #   # block standard patching for this CB
    #   cfg.getEventAlgo("LArCaliWavePatch").DoNotPatchCBs=[0x3df70000]
+
+   if args.fw6:
+      from IOVDbSvc.IOVDbSvcConfig import addOverride
+      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
 
    # ignore some channels ?
    if args.ignoreB:
