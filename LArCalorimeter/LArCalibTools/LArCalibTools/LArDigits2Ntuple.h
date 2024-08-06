@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITS2NTUPLE_H
@@ -8,6 +8,7 @@
 #include "LArCalibTools/LArCond2NtupleBase.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "LArRawEvent/LArDigitContainer.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"
 
 
@@ -40,6 +41,14 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<unsigned long> m_ELVL1Id;
   NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Array<short>  m_samples;
+  // variables for accCalibDigit case
+  NTuple::Array<unsigned long>  m_samplesSum;
+  NTuple::Array<unsigned long>  m_samples2Sum;
+  NTuple::Item<unsigned int> m_nTriggers;
+  NTuple::Item<unsigned int> m_dac;
+  NTuple::Item<unsigned int> m_delay;
+  NTuple::Item<unsigned int> m_pulsed;
+
   //
   //Event based ntuple pointer
   NTuple::Tuple* m_evt_nt = nullptr;
@@ -48,6 +57,7 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<short> m_LB;
 
   SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "FREE", "key for LArDigitContainer"};
+  SG::ReadHandleKey<LArAccumulatedCalibDigitContainer> m_accContKey{this, "AccContainerKey", "HIGH", "key for LArAccumulatedCalibDigitDigitContainer"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_LArFebHeaderContainerKey { this, "LArFebHeaderKey", "LArFebHeader" };
 };
 

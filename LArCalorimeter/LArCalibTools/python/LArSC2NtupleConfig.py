@@ -9,8 +9,19 @@ def LArSC2NtupleCfg(flags, isEmf=False, **kwargs):
 
        cfg=ComponentAccumulator()
 
-       from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
-       cfg.merge(LArRawSCDataReadingCfg(flags,OutputLevel=kwargs['OutputLevel']))
+       if kwargs.get("ContainerKey") != "" or "SC_ADC_BAS" in kwargs.get('SCContainerKeys'):
+          from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+          cfg.merge(LArRawSCDataReadingCfg(flags,OutputLevel=kwargs['OutputLevel']))
+       else:
+          theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
+          # this needs also legacy maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          cfg.merge(LArOnOffIdMappingCfg(flags))
+          cfg.merge(LArCalibIdMappingCfg(flags))
+          cfg.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = flags.LArSCDump.accdigitsKey,
+                                                                      CalibCablingKeyLeg="LArCalibLineMap",
+                                                                      OnOffMapLeg="LArOnOffIdMap",
+                                                                      LATOMEDecoder = theLArLATOMEDecoder, ))
 
        from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg,LArCalibIdMappingSCCfg,LArLATOMEMappingCfg
        cfg.merge(LArOnOffIdMappingSCCfg(flags))

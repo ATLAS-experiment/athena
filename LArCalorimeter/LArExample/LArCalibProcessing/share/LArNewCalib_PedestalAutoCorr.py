@@ -34,6 +34,7 @@ if __name__=='__main__':
    parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
    parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file with bad chans.', type=str)
+   parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -163,6 +164,7 @@ if __name__=='__main__':
    flags.GeoModel.Run = LHCPeriod.Run3
 
    flags.lock()
+   flags.dump(evaluate=True) 
    
    # create bad chan sqlite file
    cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
@@ -192,6 +194,10 @@ if __name__=='__main__':
    cfg=MainServicesCfg(flags)
 
    cfg.merge(LArPedestalAutoCorrCfg(flags))
+
+   if args.fw6:
+      from IOVDbSvc.IOVDbSvcConfig import addOverride
+      cfg.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))   
 
    #run the application
    cfg.run() 

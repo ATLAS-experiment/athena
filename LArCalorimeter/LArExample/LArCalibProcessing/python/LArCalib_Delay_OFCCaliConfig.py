@@ -117,7 +117,7 @@ def LArDelay_OFCCaliCfg(flags):
         theLArCaliWavePatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
         if flags.LArCalib.isSC:
            theLArCaliWavePatcher.ProblemsToPatch = [
-            "deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs",]
+            "deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs","transmissionErrorFibre",]
            theLArCaliWavePatcher.OnOffMap="LArOnOffIdMapSC" 
            theLArCaliWavePatcher.CalibLineKey="LArCalibIdMapSC"
         else:
@@ -135,8 +135,12 @@ def LArDelay_OFCCaliCfg(flags):
        from AthenaCommon.Constants import WARNING
 
        theCaliWaveValidationAlg=CompFactory.LArCaliWaveValidationAlg("CaliWaveVal")
-       theCaliWaveValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
-                                                "highNoiseHG","highNoiseMG","highNoiseLG"]
+       if flags.LArCalib.isSC:
+          theCaliWaveValidationAlg.ProblemsToMask=["deadCalib","deadReadout","deadPhys","maskedOSUM",
+                                                   "OffOFCs","transmissionErrorFibre",]
+       else:   
+          theCaliWaveValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
+                                                   "highNoiseHG","highNoiseMG","highNoiseLG"]
        theCaliWaveValidationAlg.ValidationKey="LArCaliWave"
        theCaliWaveValidationAlg.ReferenceKey="LArCaliWaveRef"
        theCaliWaveValidationAlg.MsgLevelForDeviations=WARNING
