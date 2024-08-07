@@ -294,7 +294,7 @@ def PHYSVALCfg(flags):
 
     # Full trigger content (needed for T0-style monitoring)
     from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-    addTrigEDMSetToOutput(flags, PHYSVALSlimmingHelper, "AODFULL")
+    addTrigEDMSetToOutput(flags, PHYSVALSlimmingHelper, "ESD")
 
     # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()

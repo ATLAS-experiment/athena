@@ -36,11 +36,9 @@ TriggerHLTListRun4 = [
     ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), 
     ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo'),
 
-    ('CaloCellContainer#SeedLessFS',  'BS ESD AODFULL', 'Calo'), 
+    ('CaloCellContainer#SeedLessFS',  'ESD AODFULL', 'Calo'), 
 
-    # L1 Calo inputs, note we are giving these extended EDM targets
+    # L1 Calo inputs, note we are giving extended EDM targets
     ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
-    ("TileContainer#TileTTL1Container",                        'ESD AODFULL', 'L1'),
-
 
 ]
