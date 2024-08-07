@@ -1,15 +1,20 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( AFP_EventTPCnv )
 
 # Component(s) in the package.
-atlas_add_tpcnv_library( AFP_EventTPCnv
+atlas_add_library( AFP_EventTPCnv
    AFP_EventTPCnv/*.h src/*.cxx
    PUBLIC_HEADERS AFP_EventTPCnv
    LINK_LIBRARIES AthenaPoolUtilities AthenaPoolCnvSvcLib AFP_DigiEv
    AFP_LocRecoEv AFP_SimEv AthenaPoolCnvSvcLib
    PRIVATE_LINK_LIBRARIES Identifier GaudiKernel )
+
+atlas_add_tpcnv_library( AFP_EventTPCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS AFP_EventTPCnv
+   LINK_LIBRARIES AFP_EventTPCnv )
 
 atlas_add_dictionary( AFP_EventTPCnvDict
    AFP_EventTPCnv/AFP_EventTPCnvDict.h
