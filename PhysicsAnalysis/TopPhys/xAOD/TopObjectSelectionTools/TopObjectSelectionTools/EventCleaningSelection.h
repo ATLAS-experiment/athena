@@ -20,7 +20,6 @@
 #include "TrigConfInterfaces/ITrigConfigTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
-#include "TrigTauMatching/ITrigTauMatching.h"
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 
 // Top include(s):
@@ -84,9 +83,6 @@ namespace top {
 
     // Trigger matching tool
     ToolHandle<Trig::IMatchingTool> m_trigMatchTool;
-
-    //Tau trigger matching
-    ToolHandle<Trig::ITrigTauMatchingTool> m_trigMatchTauTool;
 
     //Global trigger efficiency tool
     ToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_globalTriggerSF;
