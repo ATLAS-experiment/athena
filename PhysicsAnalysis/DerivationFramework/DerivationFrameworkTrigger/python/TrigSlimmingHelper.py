@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Helper functions for adding trigger EDM content to a derivation"""
 
@@ -19,10 +19,11 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
     edmList = getTriggerEDMList(flags, key=edmSet, runVersion=edmVersion)
     # This list is a mapping from container type to a list of required container names
     # This includes the Aux containers and their lists of aux variables.
-    # The SlimmingHelper however requires the list of *interface* (non-Aux) containers with
-    # the dynamic aux variables specified
+    # The SlimmingHelper however requires the list of *interface* (non-Aux) containers.
+    # At this point we want all xAOD EDM members and all decorations which have propagated
+    # to the AOD to propagate down to the DAOD as well, so we fill the containers into AllVariables.
+    # We additionally pick up non-xAOD items in StaticContent
     # Collate that information here
-    interface_containers = []
     for cont_type, cont_list in edmList.items():
         for container in cont_list:
             # For the next part we need to know all the container names and the associated aux items
@@ -30,8 +31,7 @@ def addTrigEDMSetToOutput(flags, helper: SlimmingHelper, edmSet: str, edmVersion
             # probably safe) then we just need to look at the aux names for this.
             interface_name, aux, auxitems = container.partition("Aux.")
             if aux:
-                # If the string doesn't contain 'Aux.' then aux will be the empty string
-                # i.e. we only enter this block if we're really looking at an aux container
-                interface_containers.append(f"{interface_name}.{auxitems}")
+                helper.AllVariables += [interface_name]
 
-    helper.ExtraVariables += interface_containers
+            if "xAOD::" not in cont_type:
+                helper.StaticContent += [f"{cont_type}#{container}"]
