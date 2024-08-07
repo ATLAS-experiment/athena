@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def map_mc_campaign(MCCampaign):
+    MCCampaign = MCCampaign.value
     if MCCampaign.lower().startswith("mc20"):
         return "MC20"
     elif MCCampaign.lower().startswith("mc21"):
@@ -15,6 +16,11 @@ def check_CDI_campaign(MCCampaign, CDIFile):
     MCCampaign = map_mc_campaign(MCCampaign)
     if MCCampaign == "MCUnknown":
         raise ValueError("The MC Campaign is not recognized. Currently we only have CDI file for MC20, MC21 and MC23.")
-    if MCCampaign not in CDIFile and "noSF" not in CDIFile:
+
+    run3_campaigns = ["MC21", "MC23"]
+    if MCCampaign == "MC20":
+        if MCCampaign not in CDIFile and "noSF" not in CDIFile:
+            raise ValueError("Mismatch of MC Campaign and CDI file. CDI file %s being used for %s campaign" % (CDIFile, MCCampaign))
+    elif not any (campaign in CDIFile for campaign in run3_campaigns) and "noSF" not in CDIFile:
         raise ValueError("Mismatch of MC Campaign and CDI file. CDI file %s being used for %s campaign" % (CDIFile, MCCampaign))
 
