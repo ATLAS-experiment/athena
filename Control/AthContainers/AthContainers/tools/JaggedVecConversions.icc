@@ -1,0 +1,44 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/JaggedVecConversions.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jul, 2024
+ * @brief Conversions for accessing jagged vector variables.
+ */
+
+
+namespace SG { namespace detail {
+
+
+/**
+ * @brief Constructor.
+ * @param payload Span over the payload vector.
+ */
+template <class PAYLOAD_T>
+inline
+JaggedVecConstConverter<PAYLOAD_T>::JaggedVecConstConverter (const_Payload_span payload)
+  : m_payload (payload)
+{
+}
+
+
+/**
+ * @brief Convert to a span.
+ * @param elt The jagged vector element to transform.
+ */
+template <class PAYLOAD_T>
+inline
+auto JaggedVecConstConverter<PAYLOAD_T>::operator() (const JaggedVecEltBase& elt) const
+  -> const element_type
+{
+  if (elt.begin() > elt.end() || elt.end() > m_payload.size()) {
+    throw std::out_of_range ("JaggedVecConstConverter");
+  }
+  const Payload_t* payload = m_payload.data();
+  return element_type (payload + elt.begin(), payload + elt.end());
+}
+
+
+} } // namespace SG::detail

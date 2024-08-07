@@ -20,6 +20,7 @@
 
 #include "AthContainers/JaggedVecImpl.h"
 #include "AthContainers/tools/JaggedVecVectorFactory.h"
+#include "AthContainers/JaggedVecConstAccessor.h"
 
 
 #endif // not ATHCONTAINERS_JAGGEDVEC_H

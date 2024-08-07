@@ -81,9 +81,12 @@ _add_test( TypelessConstAccessor_test )
 _add_test( ConstAccessor_test )
 _add_test( Decorator_test )
 _add_test( Accessor_test )
+_add_test( LinkedVarAccessorBase_test )
 _add_test( JaggedVecElt_test )
 _add_test( JaggedVecVector_test )
 _add_test( JaggedVecVectorFactory_test )
+_add_test( JaggedVecConversions_test )
+_add_test( JaggedVecConstAccessor_test )
 
 
 if( NOT XAOD_STANDALONE )
