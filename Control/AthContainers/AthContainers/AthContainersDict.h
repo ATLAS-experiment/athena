@@ -22,6 +22,7 @@
 #include "AthContainers/PackedParameters.h"
 #include "AthContainers/PackedContainer.h"
 #include "AthContainers/ThinningDecision.h"
+#include "AthContainers/JaggedVec.h"
 #include "AthContainers/tools/AtomicConstAccessor.h"
 #include "AthContainers/debug.h"
 #include "AthLinks/DataLink.h"
@@ -84,7 +85,9 @@ template class std::vector<std::pair<unsigned int, unsigned int> >;
   template const TYP& SG::ConstAuxElement::auxdataConst<TYP> ARGS1 const; \
   template const TYP& SG::ConstAuxElement::auxdataConst<TYP> ARGS2 const; \
   template TYP& SG::ConstAuxElement::auxdecor<TYP> ARGS1 const; \
-  template TYP& SG::ConstAuxElement::auxdecor<TYP> ARGS2 const
+  template TYP& SG::ConstAuxElement::auxdecor<TYP> ARGS2 const; \
+  template class SG::JaggedVecElt<TYP>; \
+  template class std::vector<SG::JaggedVecElt<TYP> >
 
 INSTAN_TYPE(char);
 INSTAN_TYPE(unsigned char);
