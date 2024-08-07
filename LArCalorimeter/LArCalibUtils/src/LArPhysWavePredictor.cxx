@@ -297,7 +297,7 @@ StatusCode LArPhysWavePredictor::stop()
       ATH_MSG_WARNING( "Cannot retrieve FCAL Phys waves" ); 
       return sc;
     }else {
-      ATH_MSG_INFO( "LArPhysCaliTdiff successfully retrieved" );
+      ATH_MSG_INFO( "LArPhysWave fro FCAL successfully retrieved" );
     }
   }
 
@@ -432,7 +432,18 @@ StatusCode LArPhysWavePredictor::stop()
                 default : ATH_MSG_ERROR("Wrong layer for FCAL SC: "<<layer<<" skipping channel 0x"<< MSG::hex << chid << MSG::dec); continue;
              }
                           
-             larPhysWaveContainer->setPdata(chid,fcalw, gain);
+             // we need full length phys wave (truncation during merging
+             if(fcalw.getSize()<768) {
+                std::vector<double> amp;
+                amp.resize(768, 0.); // TODO: from where to take this number ? To be fixed later
+                const std::vector<double>& fvec = fcalw.getWave();     
+                std::copy(fvec.begin(), fvec.end(), amp.begin());
+                LArPhysWave ptmp(amp, fcalw.getDt(), fcalw.getFlag());
+                larPhysWaveContainer->setPdata(chid,ptmp, gain);
+             } else {
+                larPhysWaveContainer->setPdata(chid,fcalw, gain);
+             }
+
              continue;
           } //isFCALchannel 
 

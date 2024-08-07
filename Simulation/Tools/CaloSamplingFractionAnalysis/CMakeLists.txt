@@ -16,3 +16,5 @@ atlas_add_component( CaloSamplingFractionAnalysis
 
 # Install files from the package:
 atlas_install_runtime( share/*.C share/HEC_SF_analysis share/run*.sh share/LarFCalSamplingFraction_analysis.py )
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

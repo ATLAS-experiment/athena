@@ -226,6 +226,19 @@ StatusCode LArSC2Ntuple::execute()
      }
   } else hasDigitContainer=false;   
 
+  bool hasAccDigitContainer=true;
+  const LArAccumulatedCalibDigitContainer *AccDigitContainer   = nullptr;
+  if(!m_accContKey.key().empty()) {
+     SG::ReadHandle<LArAccumulatedCalibDigitContainer> hdlAccDigit(m_accContKey, ctx);
+     if(!hdlAccDigit.isValid()) {
+       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedCalibDigitContainer with key " << m_accContKey << " from DetectorStore. " );
+       hasAccDigitContainer=false;
+     } else {
+       ATH_MSG_DEBUG( "Got LArAccumulatedCalibDigitContainer with key " << m_accContKey.key() );
+       AccDigitContainer   = hdlAccDigit.cptr();
+     }
+  } else hasAccDigitContainer=false;   
+
   const LArDigitContainer*	DigitContainer_next	   = nullptr;
   const LArRawSCContainer*	etcontainer	   = nullptr;
   const LArRawSCContainer*	etcontainer_next	   = nullptr;
@@ -324,6 +337,16 @@ StatusCode LArSC2Ntuple::execute()
   }
   ATH_MSG_DEBUG("DigitContainer has size: "<<cellsno<<" hasDigitContainer: "<<hasDigitContainer);
 
+  if (hasAccDigitContainer) {
+     if( !AccDigitContainer->empty() ) {
+        cellsno = AccDigitContainer->size();
+        ATH_MSG_DEBUG("AccDigitContainer has size: "<<cellsno<<" hasAccDigitContainer: "<<hasAccDigitContainer);
+     } else {
+       ATH_MSG_WARNING("AccDigitContainer has zero size, but asked, will be not filled... ");
+       return StatusCode::SUCCESS;
+     }
+  }
+
   if (DigitContainer_next){
     if ( cellsno == 0 ){ 
       cellsno	   = DigitContainer_next->size();
@@ -344,6 +367,7 @@ StatusCode LArSC2Ntuple::execute()
   }
   unsigned	cellCounter	   = 0;
   ATH_MSG_DEBUG("cellsno size: "<<cellsno);
+
   for( int c    = 0;c<cellsno;++c ){
     if(m_fillBCID) m_bcid	   = thisbcid; 
 
@@ -351,16 +375,11 @@ StatusCode LArSC2Ntuple::execute()
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
 
-    if( hasDigitContainer ){
+    if( hasAccDigitContainer ){
 
-      const LArDigit* digi   = DigitContainer->at(c);     
+      const LArAccumulatedCalibDigit* digi   = AccDigitContainer->at(c);     
       // ======================
 
-      if(m_FTlist.size() > 0) {	// should do a selection
-	if(std::find(std::begin(m_FTlist), std::end(m_FTlist), m_FT)  == std::end(m_FTlist)) {	// is our FT in list ?
-	  continue;
-	}
-      }
 
       unsigned int trueMaxSample	   = digi->nsamples();
 
@@ -374,6 +393,42 @@ StatusCode LArSC2Ntuple::execute()
       m_ntNsamples   = trueMaxSample;
 
       fillFromIdentifier(digi->hardwareID());      
+
+      for(unsigned i =	0; i<trueMaxSample;++i) {
+         m_samplesSum[i]           = digi->sampleSum().at(i);
+         m_samples2Sum[i]          = digi->sample2Sum().at(i);
+      }
+      m_nTriggers = digi->nTriggers();
+      m_dac = digi->DAC();
+      m_delay = digi->delay();
+      m_pulsed = digi->getIsPulsedInt();
+
+    }//hasAccDigitContainer
+
+    if( hasDigitContainer ){
+
+      const LArDigit* digi   = DigitContainer->at(c);     
+      // ======================
+
+      unsigned int trueMaxSample	   = digi->nsamples();
+
+      if(trueMaxSample>m_Nsamples){
+	if(!m_ipass){
+	  ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
+	  m_ipass   = 1;
+	}
+	trueMaxSample   = m_Nsamples;
+      }
+      m_ntNsamples   = trueMaxSample;
+
+      fillFromIdentifier(digi->hardwareID());      
+
+      if(m_FTlist.size() > 0) {	// should do a selection
+	if(std::find(std::begin(m_FTlist), std::end(m_FTlist), m_FT)  == std::end(m_FTlist)) {	// is our FT in list ?
+	  continue;
+	}
+      }
+
 
       for(unsigned i =	0; i<trueMaxSample;++i) m_samples[i]	   = digi->samples().at(i);
 
@@ -455,53 +510,6 @@ StatusCode LArSC2Ntuple::execute()
     ATH_MSG_DEBUG("After DigitContainer_next ");
     
 
-    // DigitContainer 1 -> SC_ADC_BAS
-    if( DigitContainer_next ){
-      
-      const LArDigit* digi = DigitContainer_next->at(c);
-
-      unsigned int trueMaxSample = digi->nsamples();
-    
-      if(trueMaxSample>m_Nsamples){
-        if(!m_ipass){
-          ATH_MSG_DEBUG( "The number of samples in data is larger than the one specified by JO: " << trueMaxSample << " > " << m_Nsamples << " --> only " << m_Nsamples << " will be available in the ntuple " );
-          m_ipass=1;
-        }
-        trueMaxSample = m_Nsamples;
-      }
-      m_ntNsamples = trueMaxSample;
-      ATH_MSG_DEBUG("m_ntNsamples: "<<m_ntNsamples);
-
-      if( !hasDigitContainer){ //// already filled in DigitContainer?
-        fillFromIdentifier(digi->hardwareID());
-        if( m_fillRawChan && RawChannelContainer ){
-	   fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
-        }
-      }
-         
-     for(unsigned i =	0; i<trueMaxSample;++i) m_samples_ADC_BAS[i]   = digi->samples().at(i);
-
-     const LArSCDigit*	scdigi   = dynamic_cast<const LArSCDigit*>(digi);
-     if(!scdigi){ 
-        ATH_MSG_DEBUG(" Can't cast digi to LArSCDigit*");
-     }else{
-       if ( !hasDigitContainer){
-         if (headcontainer){
-           const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
-           if(headmap){
-             m_bcidLATOMEHEAD	   = headmap->BCId();
-             m_ELVL1Id = headmap->L1Id();
-           }
-         }
-         m_latomeChannel	   = scdigi->Channel();
-         m_latomeSourceId	   = scdigi->SourceId();
-       }
-
-       for( unsigned i = 0; i<scdigi->BCId().size();++i){
-         m_bcidVec_ADC_BAS[i]	   = scdigi->BCId().at(i);
-       }
-     }
-    }//DigitContainer_next
 
     // etcontainer -> SC_ET
     if( etcontainer ){

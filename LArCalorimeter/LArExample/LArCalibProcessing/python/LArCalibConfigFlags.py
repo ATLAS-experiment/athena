@@ -36,6 +36,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.Output.ROOTFile","")
     flags.addFlag("LArCalib.Output.POOLFile2","ouput2.pool.root")
     flags.addFlag("LArCalib.Output.ROOTFile2","")
+    flags.addFlag("LArCalib.Output.SaveAverages",True)
 
     flags.addFlag("LArCalib.Gain",0)
 
