@@ -131,7 +131,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("CreateWireSagFunctions", flags.Muon.Calib.correctMdtRtWireSag)
     kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
-    kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     alg = CompFactory.MdtCalibDbAlg (name, **kwargs)

@@ -122,8 +122,8 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
                 dbTagSchema = "MDTOflCablingMapSchema_RUN124_MC15_02"
                 dbTagMezz = "MDTOflCablingMezzanineSchema_RUN124_MC15_02"
             if kwargs["UseJSONFormat"]:
-                kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA_JSON")
-                kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA_JSON")
+                kwargs.setdefault("MapFolders", "/MDT/CABLING/MAP_SCHEMA_JSON")
+                kwargs.setdefault("MezzanineFolders", "/MDT/CABLING/MEZZANINE_SCHEMA_JSON")
             else:
                 kwargs.setdefault("MapFolders", "/MDT/Ofl/CABLING/MAP_SCHEMA")
                 kwargs.setdefault("MezzanineFolders", "/MDT/Ofl/CABLING/MEZZANINE_SCHEMA")
