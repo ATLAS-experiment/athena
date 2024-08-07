@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -85,7 +85,7 @@ public:
   /// Book a TTree
   TTree* BookTree(const std::string & name, bool prependDir = true);
   
-  std::string getDirectory(){return m_sDirectory;}
+  const std::string& getDirectory(){return m_sDirectory;}
 
 private:
   virtual void initializePlots(){;}

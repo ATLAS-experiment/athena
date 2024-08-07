@@ -109,7 +109,7 @@ public:
   void SetTime(double time) {m_time = time;}
 
   /** @brief Volume name */
-  std::string GetVolName() const {return m_volName;}
+  const std::string& GetVolName() const {return m_volName;}
 
   /** @brief Set Volume name */
   void SetVolName(const std::string& theName){m_volName = theName;}
