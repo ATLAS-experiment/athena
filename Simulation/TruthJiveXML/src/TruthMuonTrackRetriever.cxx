@@ -112,6 +112,7 @@ namespace JiveXML {
     
     //Finall add everything to the datamap
     DataMap dataMap;
+    const auto nEntries = pt.size();
     dataMap["pt"] = std::move(pt);
     dataMap["phi"] = std::move(phi);
     dataMap["eta"] = std::move(eta);
@@ -122,7 +123,7 @@ namespace JiveXML {
     dataMap["id"] = std::move(id);
     
     //some summary
-    ATH_MSG_DEBUG( dataTypeName() << ": "<< pt.size() );
+    ATH_MSG_DEBUG( dataTypeName() << ": "<< nEntries );
 
     //forward data to formating tool
     //return FormatTool->AddToEvent(dataTypeName(), (*CollNameItr), &dataMap);
