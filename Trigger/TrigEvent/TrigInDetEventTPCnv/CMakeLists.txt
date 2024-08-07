@@ -1,14 +1,19 @@
-# Copyright (C) 2020, 2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2020, 2022, 2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigInDetEventTPCnv
+atlas_add_library( TrigInDetEventTPCnv
    TrigInDetEventTPCnv/*.h src/*.cxx
    PUBLIC_HEADERS TrigInDetEventTPCnv
    LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities EventCommonTPCnv InDetIdentifier RootConversions StoreGateLib TrigCaloEventTPCnv TrigInDetEvent
    PRIVATE_LINK_LIBRARIES AthenaKernel IdDictParser )
+
+atlas_add_tpcnv_library( TrigInDetEventTPCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS TrigInDetEventTPCnv
+   LINK_LIBRARIES TrigInDetEventTPCnv )
 
 atlas_add_dictionary( TrigInDetEventTPCnvDict
    TrigInDetEventTPCnv/TrigInDetEventTPCnvDict.h
