@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( eflowEventTPCnv )
@@ -7,13 +7,20 @@ atlas_subdir( eflowEventTPCnv )
 find_package( CLHEP )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( eflowEventTPCnv
-                         src/*.cxx
+atlas_add_library( eflowEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS eflowEventTPCnv
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib CaloEvent DataModelAthenaPoolLib Particle VxVertex eflowEvent muonEvent
+                   PRIVATE_LINK_LIBRARIES AthLinks AthenaKernel Navigation )
+
+atlas_add_tpcnv_library( eflowEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS eflowEventTPCnv
                          PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                          PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib CaloEvent DataModelAthenaPoolLib Particle VxVertex eflowEvent muonEvent
-                         PRIVATE_LINK_LIBRARIES AthLinks AthenaKernel Navigation )
+                         LINK_LIBRARIES eflowEventTPCnv )
 
 atlas_add_dictionary( eflowEventTPCnvDict
                       eflowEventTPCnv/eflowEventTPCnvDict.h
