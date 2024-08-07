@@ -83,7 +83,7 @@ def LArRampCfg(flags):
     theLArRampBuilder.KeyList      = [digKey,]
     theLArRampBuilder.SubtractDac0 = False
     if flags.LArCalib.isSC:
-       theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs"]
+       theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs","transmissionErrorFibre",]
     else:
        theLArRampBuilder.ProblemsToMask=["deadCalib","deadReadout","deadPhys","almostDead","short"]
 
@@ -124,7 +124,7 @@ def LArRampCfg(flags):
         theLArRampPatcher.SuperCells=flags.LArCalib.isSC
    
         if flags.LArCalib.isSC:
-          theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs"]
+          theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","maskedOSUM","OffOFCs","transmissionErrorFibre"]
           theLArRampPatcher.OnOffMap="LArOnOffIdMapSC"
           theLArRampPatcher.CalibLineKey="LArCalibIdMapSC"
         else:  
@@ -155,8 +155,12 @@ def LArRampCfg(flags):
        theRampValidationAlg=CompFactory.LArRampValidationAlg("RampVal")
        theRampValidationAlg.RampTolerance=rampThr
        theRampValidationAlg.RampToleranceFEB=rampThrFEB
-       theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
-                                            "highNoiseHG","highNoiseMG","highNoiseLG"]
+       if flags.LArCalib.isSC:
+          theRampValidationAlg.ProblemsToMask=["deadCalib","deadReadout","deadPhys","maskedOSUM",
+                                               "OffOFCs","transmissionErrorFibre"]
+       else:   
+          theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
+                                               "highNoiseHG","highNoiseMG","highNoiseLG"]
        theRampValidationAlg.KeyList=[digKey,]
        if flags.LArCalib.isSC:
           theRampValidationAlg.PatchMissingFEBs = False
@@ -212,6 +216,12 @@ def LArRampCfg(flags):
                                                          ApplyCorr=True,
                                                          isSC = flags.LArCalib.isSC
                                                      ))
+        if flags.LArCalib.Output.SaveAverages:
+           result.addEventAlgo(CompFactory.LArAverages2Ntuple( "LArAverages2Ntuple"+digKey,
+                                                               ContainerKey = "SC" if flags.LArCalib.isSC else digKey, 
+                                                               BadChanKey = bcKey,
+                                                               isSC = flags.LArCalib.isSC
+                                                              ))
 
         import os
         if os.path.exists(rootfile):

@@ -21,6 +21,8 @@
 #include "xAODTrigger/jFexSumETRoIContainer.h"
 #include "xAODTrigger/jFexSumETRoI.h"
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 
 class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
@@ -31,8 +33,11 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
     private:
+        mutable bool m_firstEvent = true;
+        mutable std::mutex m_mutex;
 
         StringProperty m_Grouphist{this,"Grouphist","JfexMonitor","group name for histograming"};
+        StringProperty m_Groupmaps{this,"Groupmaps","jFEXMaps","group name for jFEX TOB maps"};
 
         // container keys including this, steering parameter, default value and help description
         SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer > m_jFexSRJetContainerKey {this,"jFexSRJetRoIContainer","L1_jFexSRJetRoI","SG key of the input jFex SR Jet Roi container"};
@@ -41,6 +46,5 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadHandleKey< xAOD::jFexFwdElRoIContainer > m_jFexFwdElContainerKey {this,"jFexFwdElRoIContainer","L1_jFexFwdElRoI","SG key of the input jFex EM Roi container"};
         SG::ReadHandleKey< xAOD::jFexMETRoIContainer   > m_jFexMETContainerKey   {this,"jFexMETRoIContainer"  ,"L1_jFexMETRoI"  ,"SG key of the input jFex MET Roi container"};
         SG::ReadHandleKey< xAOD::jFexSumETRoIContainer > m_jFexSumEtContainerKey {this,"jFexSumETRoIContainer","L1_jFexSumETRoI","SG key of the input jFex SumEt Roi container"};
-
 };
 #endif

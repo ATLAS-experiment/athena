@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def addSCDumpFlags(flags):
     
     flags.Input.isMC=False
 
     flags.addFlag("LArSCDump.digitsKey","SC")
+    flags.addFlag("LArSCDump.accdigitsKey","")
     flags.addFlag("LArSCDump.nSamples",32)
     flags.addFlag("LArSCDump.nEt",3)
     flags.addFlag("LArSCDump.doSamples",True)

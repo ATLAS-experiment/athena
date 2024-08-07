@@ -28,6 +28,8 @@ def mergeDBCfg(flags, InputKeys=[], InputSQLiteFiles=[]):
       KeyOutput = key
       FlagInput = key
 
+      if 'Pedestal' == key or 'PhysWave' == key or 'MphysOverMcal' == key or 'Ramp' == key or 'Params' in key:
+         KeyInput="LAr"+key
       if 'Pedestal' == key or 'PhysWave' == key or 'CaliWave' or 'MphysOverMcal' == key or 'Ramp' == key or 'Params' in key:
          KeyInput="LAr"+key
          KeyOutput="LAr"+key
@@ -128,19 +130,20 @@ def mergeDBCfg(flags, InputKeys=[], InputSQLiteFiles=[]):
       print("** TagSpec: ",TagSpec)
       print("** keyOutput: ",KeyOutput)
 
-      result.addEventAlgo(CompFactory.getComp('LArBlockCorrections')())
-
-      result.addEventAlgo(CompFactory.getComp('LArBlockCorrections')())
 
       inkeys=[]
       inobjs=[]
 
       for sqf in InputSQLiteFiles:
          thiskey = KeyInput+str(InputSQLiteFiles.index(sqf))
+
+         if 'PhysAutoCorr' in key: thiskey='Phys'+thiskey
+
          if 'OFC' in key and 'Mu' in key:
             thiskey+="Mu"
          if 'OFC' in key and 'Cali' in key:
             thiskey+="Cali"   
+
          inkeys.append(thiskey)
          if 'Wave' in KeyInput: 
             inobjs.append(KeyInput+"Container#"+thiskey)
@@ -151,8 +154,10 @@ def mergeDBCfg(flags, InputKeys=[], InputSQLiteFiles=[]):
             result.merge(addFolders(flags,Folder,tag=TagSpec,detDb=sqf,modifiers="<key>"+thiskey+"</key>"))
          else:   
             result.merge(addFolders(flags,Folder,tag=TagSpec,detDb=sqf,modifiers="<key>"+thiskey+"</key>", className=KeyInput+"Complete"))
-
-
+         pass   
+ 
+      pass
+ 
       if 'Wave' in KeyInput:
          result.addCondAlgo(CompFactory.getComp('ForceLoadCondObj')(KeyOutput,ObjectList=inobjs))
          result.addCondAlgo(CompFactory.getComp('LArConditionsMergerAlg<LArDAC2uAComplete,'+KeyInput+'Container>')(key+"Merger",

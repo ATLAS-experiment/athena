@@ -4,6 +4,10 @@
 
 #include "JfexMonitorAlgorithm.h"
 #include "TMath.h"
+#include "JfexMapForwardEmptyBins.h"
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 JfexMonitorAlgorithm::JfexMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)
@@ -135,18 +139,56 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     auto jFexSumEt_high  = Monitored::Scalar<int>  ("jTE_high",0);
     auto jFexSumEt_total = Monitored::Scalar<float>("jTE_SumEt",0.0);
 
+    auto weight = Monitored::Scalar<float>("weight",1);
+
+    // write -1 into bins in maps that are always empty
+    {
+        std::scoped_lock lock(m_mutex);
+        if (m_firstEvent) {
+            weight = -1;
+            // empty bins due to irregular structure of FCAL
+            for (auto& [eta, phi] : jFEXMapEmptyBinCenters) {
+                jFexSRJeteta = eta;
+                jFexSRJetphi = phi;
+                jFexEMeta = eta;
+                jFexEMphi = phi;
+                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
+            }
+
+            // central region without jEM
+            for (int ieta=-23; ieta<23; ieta++){
+                jFexEMeta = 0.1 * ieta + 0.05;
+                for (int iphi=-32; iphi<33; iphi++){
+                    jFexEMphi = M_PI/32 * iphi + M_PI/64;
+                    fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+                }
+            }
+            m_firstEvent = false;
+            weight = 1;
+        }
+    }
+
     if(!jJ_isInValid) {
         for(const xAOD::jFexSRJetRoI* jFexSRJetRoI : *jFexSRJetContainer) {
             if(jFexSRJetRoI->tobWord()==0) continue; //remove empty TOBs
             jFexSRJetModule=jFexSRJetRoI->jFexNumber();
             jFexSRJetFPGA=jFexSRJetRoI->fpgaNumber();
             jFexSRJetEt=jFexSRJetRoI->tobEt();
-            jFexSRJeteta=jFexSRJetRoI->eta();
-            jFexSRJetphi=jFexSRJetRoI->phi();
+            float eta = jFexSRJetRoI->eta();
+            float phi = jFexSRJetRoI->phi();
+            jFexSRJeteta=eta;
+            jFexSRJetphi=phi;
             jFexSRJeteta_glo=jFexSRJetRoI->globalEta();
             jFexSRJetphi_glo=jFexSRJetRoI->globalPhi();
             fill(m_Grouphist,jFexSRJetModule,jFexSRJetFPGA,jFexSRJetEt,jFexSRJeteta,jFexSRJetphi,jFexSRJeteta_glo,jFexSRJetphi_glo);
-
+            if (abs(eta) > 2.5 && abs(eta) < 3.2) {
+                jFexSRJetphi = phi - M_PI/64;
+                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                jFexSRJetphi = phi + M_PI/64;
+                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+            } else {
+                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+            }
         }
     }
 
@@ -185,14 +227,24 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexEMModule =jFexFwdElRoI->jFexNumber();
             jFexEMFPGA =jFexFwdElRoI->fpgaNumber();
             jFexEMEt =jFexFwdElRoI->tobEt();
-            jFexEMeta=jFexFwdElRoI->eta();
-            jFexEMphi=jFexFwdElRoI->phi();
+            float eta = jFexFwdElRoI->eta();
+            float phi = jFexFwdElRoI->phi();
+            jFexEMeta=eta;
+            jFexEMphi=phi;
             jFexEMeta_glo=jFexFwdElRoI->globalEta();
             jFexEMphi_glo=jFexFwdElRoI->globalPhi();
             jFexEMIso=jFexFwdElRoI->tobEMIso();
             jFexEMf1 =jFexFwdElRoI->tobEMf1();
             jFexEMf2 =jFexFwdElRoI->tobEMf2();
             fill(m_Grouphist,jFexEMModule,jFexEMFPGA,jFexEMEt,jFexEMeta,jFexEMphi,jFexEMeta_glo,jFexEMphi_glo,jFexEMIso,jFexEMf1,jFexEMf2);
+            if (abs(eta) > 2.5 && abs(eta) < 3.2) {
+                jFexEMphi = phi - M_PI/64;
+                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+                jFexEMphi = phi + M_PI/64;
+                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+            } else {
+                fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+            }
         }    
     }
 
