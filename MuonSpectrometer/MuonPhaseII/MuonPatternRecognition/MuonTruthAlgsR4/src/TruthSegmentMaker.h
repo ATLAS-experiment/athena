@@ -16,6 +16,12 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 namespace MuonR4{
+  /*** @brief The TruthSegmentMaker collects hits inside the chamber stemming from the same HepMC::GenParticle. 
+   *          The particle state at the first sim hit is propagated via a simple straight line onto the plane 
+   *          z=0 in the chamber frame. The parameters are then translated into the global frame and a xAOD::MuonSegment
+   *          is created. The segment hit summary is written based on the sim hit type. If a gasGap has eta & phi measurements,
+   *          the counters in the respective categories are each increased for the given sim hit. Finally, a vector of ElementLinks
+   *          pointing to the sim hits is decorated to the segment. */
   class TruthSegmentMaker : public AthReentrantAlgorithm {
       public:
           using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -26,24 +32,27 @@ namespace MuonR4{
           StatusCode execute(const EventContext& ctx) const override;
       
       private:
-  
-          /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
-          /// Failure is returned in cases, of non-empty keys and failed retrieval
+          /** @brief Helper method to retrieve any kind of container from a ReadHandleKey. If the 
+           *         key is empty, it's assumed that it shall be the case and the parsed point is to nullptr
+           * @param ctx: EventContext to access the data in the event
+           * @param key: Refrence to the initialized ReadHandleKey from which the object shall be retrieved
+           * @param contToPush: Reference to a pointer to which eventually points to the retrieved container */
           template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
                                                                       const SG::ReadHandleKey<ContainerType>& key,
                                                                       const ContainerType* & contToPush) const;
 
+          /** @brief IdHelperSvc to decode the Identifiers */
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
+          /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
-
+          /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
           SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-
+          /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "TruthSegmentsR4"};
-
+          /** @brief Decoration key of the associated sim hit links */
           using HitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_eleLinkKey{this, "SimHitLink", m_segmentKey, "simHitLinks"};
-
+          /** @brief Pointer to the muon readout geometry */
           const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
   };
 }
