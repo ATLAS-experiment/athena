@@ -232,7 +232,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             info="save the d0 significance and z0sinTheta variables so they can be written out")
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
-            "MediumLH, LooseBLayerLH. ")
+            "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
+            "TightDNNnoCF, MediumDNNnoCF, LooseDNNnoCF.")
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
