@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/LinkedVarAccessorBase.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jun, 2024
+ * @brief Base class usable for accessors for variables with linked variables.
+ */
+
+
+namespace SG { namespace detail {
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param e An element of the container which to test the variable.
+ */
+template <class ELT>
+requires( IsConstAuxElement<ELT> )
+inline
+bool LinkedVarAccessorBase::isAvailable (const ELT& e) const
+{
+  return e.container() &&
+    e.container()->isAvailable (m_auxid) &&
+    e.container()->isAvailable (m_linkedAuxid);
+}
+
+
+/**
+ * @brief Return the aux id for this variable.
+ */
+inline
+auxid_t LinkedVarAccessorBase::auxid() const
+{
+  return m_auxid;
+}
+
+
+/**
+ * @brief Return the aux id for the linked DataLink vector.
+ */
+inline
+auxid_t LinkedVarAccessorBase::linkedAuxid() const
+{
+  return m_linkedAuxid;
+}
+
+
+} } // namespace SG::detail
