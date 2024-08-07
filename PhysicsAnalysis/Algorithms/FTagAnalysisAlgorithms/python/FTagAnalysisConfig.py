@@ -221,8 +221,7 @@ class FTagConfig (ConfigBlock):
 
         # Check if the right CDI is used for the MC campaign
         if config.dataType() is not DataType.Data:
-            campaign = config.campaign()
-            check_CDI_campaign(campaign.value, bTagCalibFile)
+            check_CDI_campaign(config.campaign(), bTagCalibFile)
 
         # Set up the ftag selection algorithm(s):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
