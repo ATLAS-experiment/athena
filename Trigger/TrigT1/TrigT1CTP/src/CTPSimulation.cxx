@@ -753,7 +753,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       }
    }
    for ( auto & thr : l1menu->thresholds() ) {
-      if (thr->type() == "TOPO" or thr->type() == "R2TOPO" or thr->type() == "MULTTOPO" or thr->type() == "MUTOPO")
+      if (thr->type() == "TOPO" or thr->type() == "MULTTOPO" or thr->type() == "MUTOPO")
       {
          continue;
       }
