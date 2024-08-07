@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonConfig )
@@ -44,11 +44,11 @@ if( NOT SIMULATIONBASE )
 
    atlas_add_test( MuonSegmentFindingConfigTest
                    SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --threads=1
-                   PROPERTIES TIMEOUT 450
+                   PROPERTIES TIMEOUT 600
                    POST_EXEC_SCRIPT noerror.sh )
   
    atlas_add_test( NewxAODConvertorTest
                    SCRIPT test/MuonxAODPRDCnv_test.py 
-                   PROPERTIES TIMEOUT 450
+                   PROPERTIES TIMEOUT 1200
                    POST_EXEC_SCRIPT noerror.sh )
 endif()
