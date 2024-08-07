@@ -177,7 +177,7 @@ public:
 
     void setMother(SCT_ModuleSideDesign* mother);
     const SCT_ModuleSideDesign * getMother() const;
-    std::map<int, const SCT_ModuleSideDesign *> getChildren() const;
+    const std::map<int, const SCT_ModuleSideDesign *>& getChildren() const;
     void addChildDesign(int index, const SCT_ModuleSideDesign * element);
     virtual std::pair<int,int> getStripRow(SiCellId id) const;
     /** Test if point is in the active part of the detector with specified tolerances */
@@ -284,7 +284,7 @@ inline int SCT_ModuleSideDesign::strip1Dim(int strip, int /*row not used */) con
    return m_motherDesign;
  }
  
- inline std::map<int, const SCT_ModuleSideDesign *> SCT_ModuleSideDesign::getChildren() const {
+ inline const std::map<int, const SCT_ModuleSideDesign *>& SCT_ModuleSideDesign::getChildren() const {
    return m_childDesigns;
  }
 
