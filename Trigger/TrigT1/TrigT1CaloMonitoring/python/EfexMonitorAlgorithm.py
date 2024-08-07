@@ -54,11 +54,17 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     # mainDir = 'L1Calo'
     trigPath = 'Developer/Efex/' # Directory trigger path for output histos
     # Map from the key name to the output directory substructure.
-    keyDirPathMap = {'L1_eEMRoI' : 'eEM',
-                     'L1_eEMxRoI' : 'eEMx', 'L1_eEMRoISim' : 'TOBSim/eEM', 'L1_eEMxRoISim' : 'xTOBSim/eEM',
-                     'L1_eTauRoI' : 'eTAU',
-                     'L1_eTauxRoI' : 'eTAUx', 'L1_eTauRoISim' : 'TOBSim/eTau',
-                     'L1_eTauxRoISim' : 'xTOBSim/eTau'} 
+    
+    def pathFromKey(key):
+        path=""
+        if "DAODSim" in key: path = "DAODSim/"
+        elif "Sim" in key: path = "Sim/"
+        if "_eEMx" in key: path += "eEMx"
+        elif "_eEM" in key: path += "eEM"
+        elif "_eTaux" in key: path += "eTAUx"
+        elif "_eTau" in key: path += "eTAU"
+        return path 
+    
     cut_names = ["LowPtCut", "HiPtCut"] # List of cut names, for looping over to separate out histograms into directories
     cut_vals = [EfexMonAlg.LowPtCut, EfexMonAlg.HiPtCut] # List of values, for looping over to add to histogram titles
 
@@ -78,7 +84,7 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             # don't make these expensive plots for simulation
             helper.defineHistogram("LBN,locIdx,tobEt;h_"+containerKey+"_et_posLbnMap", title = "Average " + containerKey + " ET;LB;Position (Octant:Eta)",
                                 fillGroup = baseGroupName + "_" + containerKey,
-                                   path = ("Expert/Outputs/" if "x" not in containerKey else trigPath)+keyDirPathMap[containerKey],
+                                   path = ("Expert/Outputs/" if "x" not in containerKey else trigPath)+pathFromKey(containerKey),
                                    hanConfig={"description":"Check for horizontal anomalies (hotspot/coldspot) or vertical anomalies (whole-system hot/cold)"},
                                    type="TProfile2D",
                                    xbins=1,xmin=0,xmax=1, ylabels=locIdxs, opt=['kAddBinsDynamically'])
@@ -109,67 +115,67 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             # histograms of eEM variables
             helper.defineHistogram('nEMTOBs;h_nEmTOBs', title='Number of eFex EM '+tobStr+'s'+cut_title_addition+';EM '+tobStr+'s;Number of EM '+tobStr+'s',
                                    fillGroup=fillGroup,
-                                    type='TH1I', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=10,xmin=0,xmax=10)
+                                    type='TH1I', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=10,xmin=0,xmax=10)
 
             helper.defineHistogram('TOBTransverseEnergy;h_TOBTransverseEnergy', title='eFex '+tobStr+' EM Transverse Energy [MeV]'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=100,xmin=0,xmax=50000)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=0,xmax=50000)
 
             helper.defineHistogram('TOBEta;h_TOBEta', title='eFex '+tobStr+' EM Eta'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=50,xmin=-2.5,xmax=2.5)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=50,xmin=-2.5,xmax=2.5)
 
             helper.defineHistogram('TOBPhi;h_TOBPhi', title='eFex '+tobStr+' EM Phi'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=64,xmin=-math.pi,xmax=math.pi)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=64,xmin=-math.pi,xmax=math.pi)
 
             helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
                                    hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/coldspots. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
                                     type='TH2F',
-                                    path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else trigPath+keyDirPathMap[containerKey]+cut_name),
+                                    path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else trigPath+pathFromKey(containerKey)+cut_name),
                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             helper.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=2,xmin=0,xmax=2)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=2,xmin=0,xmax=2)
 
             helper.defineHistogram('TOBeFEXNumberSh0;h_TOBeFEXNumberShelf0', title='eFex '+tobStr+' EM Module Number Shelf 0'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=12,xmin=0,xmax=12)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
             helper.defineHistogram('TOBeFEXNumberSh1;h_TOBeFEXNumberShelf1', title='eFex '+tobStr+' EM Module Number Shelf 1'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=12,xmin=0,xmax=12)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
             helper.defineHistogram('TOBfpga;h_TOBfpga', title='eFex '+tobStr+' EM FPGA'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4)
 
             helper.defineHistogram('TOBReta;h_TOBReta', title='eFex '+tobStr+' EM Reta'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name,xbins=250,xmin=0,xmax=1)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name,xbins=250,xmin=0,xmax=1)
 
             helper.defineHistogram('TOBRhad;h_TOBRhad', title='eFex '+tobStr+' EM Rhad'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=250,xmin=0,xmax=1)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
             helper.defineHistogram('TOBWstot;h_TOBWstot', title='eFex '+tobStr+' EM Wstot'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=250,xmin=0,xmax=1)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
             threshold_labels = ['fail','loose','medium','tight']
             helper.defineHistogram('TOBReta_threshold;h_TOBReta_threshold', title='eFex '+tobStr+' EM Reta threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name,xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name,xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
             helper.defineHistogram('TOBRhad_threshold;h_TOBRhad_threshold', title='eFex '+tobStr+' EM Rhad threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
             helper.defineHistogram('TOBWstot_threshold;h_TOBWstot_threshold', title='eFex '+tobStr+' EM Wstot threshold'+cut_title_addition,
                                    fillGroup=fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
         # Now Tau
         for containerKey in EfexMonAlg.eFexTauTobKeyList:
@@ -180,63 +186,63 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
             # plotting of eTau variables
             helper.defineHistogram('nTauTOBs;h_nTauTOBs', title='Number of eFex Tau '+tobStr+'s'+cut_title_addition+';Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
                                     fillGroup = fillGroup,
-                                    type='TH1I', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=10,xmin=0,xmax=10)
+                                    type='TH1I', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=10,xmin=0,xmax=10)
 
             helper.defineHistogram('tauTOBTransverseEnergy;h_tauTOBTransverseEnergy', title='eFex '+tobStr+' Tau Transverse Energy [MeV]'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=100,xmin=0,xmax=50000)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=0,xmax=50000)
 
             helper.defineHistogram('tauTOBEta;h_tauTOBEta', title='eFex '+tobStr+' Tau Eta'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=60,xmin=-2.5,xmax=2.5)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=60,xmin=-2.5,xmax=2.5)
 
             helper.defineHistogram('tauTOBPhi;h_tauTOBPhi', title='eFex '+tobStr+' Tau Phi'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=100,xmin=-math.pi,xmax=math.pi)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=100,xmin=-math.pi,xmax=math.pi)
 
             helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eTAU '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                     fillGroup = fillGroup,
                                    hanConfig={"description":"Inspect for hot/cold spots - check help for list of known hot/cold spots. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
                                    type='TH2F',
-                                   path=(("Expert/Outputs/"+keyDirPathMap[containerKey]) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+keyDirPathMap[containerKey]+cut_name)),
+                                   path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+pathFromKey(containerKey)+cut_name)),
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
             helper.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=2,xmin=0,xmax=2)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=2,xmin=0,xmax=2)
 
             helper.defineHistogram('tauTOBeFEXNumberSh0;h_tauTOBeFEXNumberShelf0', title='eFex '+tobStr+' Tau Module Number Shelf 0'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=12,xmin=0,xmax=12)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
             helper.defineHistogram('tauTOBeFEXNumberSh1;h_tauTOBeFEXNumberShelf1', title='eFex '+tobStr+' Tau Module Number Shelf 1'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=12,xmin=0,xmax=12)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=12,xmin=0,xmax=12)
 
 
             helper.defineHistogram('tauTOBfpga;h_tauTOBfpga', title='eFex '+tobStr+' Tau FPGA'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4)
 
             helper.defineHistogram('tauTOBRcore;h_tauTOBRcore', title='eFex '+tobStr+' Tau rCore'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=250,xmin=0,xmax=1)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
             helper.defineHistogram('tauTOBRhad;h_tauTOBRhad', title='eFex '+tobStr+' Tau rHad'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=250,xmin=0,xmax=1)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=250,xmin=0,xmax=1)
 
             helper.defineHistogram('tauTOBRcore_threshold;h_tauTOBRcore_threshold', title='eFex '+tobStr+' Tau rCore threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 
             helper.defineHistogram('tauTOBRhad_threshold;h_tauTOBRhad_threshold', title='eFex '+tobStr+' Tau rHad threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 
             helper.defineHistogram('tauTOBthree_threshold;h_tauTOBthree_threshold', title='eFex '+tobStr+' Tau 3 taus threshold'+cut_title_addition,
                                     fillGroup = fillGroup,
-                                    type='TH1F', path=trigPath+keyDirPathMap[containerKey]+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
+                                    type='TH1F', path=trigPath+pathFromKey(containerKey)+cut_name, xbins=4,xmin=0,xmax=4.0, xlabels=threshold_labels)
 
     acc = helper.result()
     result.merge(acc)
