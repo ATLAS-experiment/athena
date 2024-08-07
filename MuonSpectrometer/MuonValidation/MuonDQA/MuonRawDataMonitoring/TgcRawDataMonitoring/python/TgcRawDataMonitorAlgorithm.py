@@ -1082,6 +1082,12 @@ def TgcRawDataMonitoringConfig(inputFlags):
                             path=coinPath,xbins=101,xmin=-0.5,xmax=100.5)
     myGroupCoin.defineHistogram('nTgcCoinPostOutPtrIsNull;h_nTgcCoinPostOutPtrIsNull',title='nTgcCoinPostOutPtrIsNull',
                             path=coinPath,xbins=101,xmin=-0.5,xmax=100.5)
+    myGroupCoin.defineHistogram('trigger_sectors_endcap,trigger_multiplicity_endcap;SL_Endcap_TgcCoin_Evt_SectorVsMultiplicity',
+                                title='SL_Endcap_TgcCoin_Evt_SectorVsMultiplicity;SL Trigger Sector +1  (>0 for A, <0 for C);Multiplicity',
+                                path=coinPath,type='TH2F',ybins=10,ymin=-0.5,ymax=9.5,xbins=97,xmin=-48.5,xmax=48.5)
+    myGroupCoin.defineHistogram('trigger_sectors_forward,trigger_multiplicity_forward;SL_Forward_TgcCoin_Evt_SectorVsMultiplicity',
+                                title='SL_Forward_TgcCoin_Evt_SectorVsMultiplicity;SL Trigger Sector +1  (>0 for A, <0 for C);Multiplicity',
+                                path=coinPath,type='TH2F',ybins=10,ymin=-0.5,ymax=9.5,xbins=49,xmin=-24.5,xmax=24.5)
 
     for Det in ['Eifi','Tile','Rpc','Nsw']:
         det = Det.lower()
