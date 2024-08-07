@@ -30,7 +30,6 @@ namespace top {
     m_trigConfTool("xAODConfigTool"),
     m_trigDecisionTool("TrigDecisionTool"),
     m_trigMatchTool("MatchingTool"),
-    m_trigMatchTauTool("TrigTauMatchingTool"),
     m_globalTriggerSF("TrigGlobalEfficiencyCorrectionTool::TrigGlobal"),
     m_globalTriggerSFLoose("TrigGlobalEfficiencyCorrectionTool::TrigGlobalLoose"),
 
@@ -45,7 +44,6 @@ namespace top {
     declareProperty("TrigConfigTool", m_trigConfTool);
     declareProperty("TrigDecisionTool", m_trigDecisionTool);
     declareProperty("TrigMatchTool", m_trigMatchTool);
-    declareProperty("TrigMatchTauTool", m_trigMatchTauTool);
   }
 
   StatusCode EventCleaningSelection::initialize() {
@@ -57,8 +55,6 @@ namespace top {
     top::check(m_trigDecisionTool.retrieve(), "Failed to retrieve TrigDecisionTool");
     top::check(m_trigMatchTool.retrieve(),
                "Failed to retrieve trigger matching tool");
-    if (m_config->useTaus()) top::check(m_trigMatchTauTool.retrieve(),
-                                        "Failed to retrieve TrigMatchTauTool");
 
     if (!m_config->isMC()) {
       top::check(m_grlTool.retrieve(), "Failed to retrieve TrigDecisionTool");
@@ -741,7 +737,6 @@ namespace top {
       for (const auto& trigger : m_tauTriggers_Tight) {
         bool match(false);
         // Match even if event fails trigger decistion - it's important in case of pre-scaled menus
-        match = m_trigMatchTauTool->match(tau, trigger.first);
         if (tau->isAvailable<char>(m_config->getDerivationStream() + "_" + trigger.first)) {
           match = tau->auxdataConst<char>(m_config->getDerivationStream() + "_" + trigger.first);
         } else {
@@ -756,7 +751,6 @@ namespace top {
         if (tau->isAvailable<char>("TRIGMATCH_" + trigger.first)) continue;
         bool match(false);
         // Match even if event fails trigger decistion - it's important in case of pre-scaled menus
-        match = m_trigMatchTauTool->match(tau, trigger.first);
         if (tau->isAvailable<char>(m_config->getDerivationStream() + "_" + trigger.first)) {
           match = tau->auxdataConst<char>(m_config->getDerivationStream() + "_" + trigger.first);
         } else {

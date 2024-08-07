@@ -31,7 +31,6 @@ atlas_add_library( TopObjectSelectionTools TopObjectSelectionTools/*.h Root/*.cx
                                   TrigConfInterfaces
                                   TrigDecisionToolLib
                                   TriggerMatchingToolLib
-                                  TrigTauMatchingLib
                                   InDetTrackSelectionToolLib
                                   ElectronPhotonSelectorToolsLib
                                   TauAnalysisToolsLib

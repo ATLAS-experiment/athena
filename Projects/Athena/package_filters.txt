@@ -37,7 +37,6 @@
 - PhysicsAnalysis/TopPhys/xAOD/.*
 - Reconstruction/Jet/JetAnalysisTools/JetTileCorrection
 - Reconstruction/Jet/JetReclustering
-- Trigger/TrigAnalysis/TrigTauAnalysis/TrigTauMatching
 
 # Don't build PerfMonVTune which has external Intel tool dependency
 - Control/PerformanceMonitoring/PerfMonVTune

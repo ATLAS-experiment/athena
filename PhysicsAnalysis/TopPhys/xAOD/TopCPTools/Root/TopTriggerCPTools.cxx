@@ -23,7 +23,6 @@
 #include "TriggerMatchingTool/MatchFromCompositeTool.h"
 #include "TriggerMatchingTool/R3MatchingTool.h"
 #include "TriggerMatchingTool/DRScoringTool.h"
-#include "TrigTauMatching/TrigTauMatching.h"
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
@@ -110,20 +109,6 @@ namespace top {
           }
         }
 
-        ///-- Tau matching --///
-        if (m_config->useTaus()) {
-          const std::string tauMatchName = "TrigTauMatchingTool";
-          if (asg::ToolStore::contains<Trig::ITrigTauMatchingTool>(tauMatchName)) {
-            m_trigMatchTauTool = asg::ToolStore::get<Trig::ITrigTauMatchingTool>(tauMatchName);
-          } else {
-            Trig::TrigTauMatchingTool* trigMatchTauTool = new Trig::TrigTauMatchingTool(tauMatchName);
-            top::check(trigMatchTauTool->setProperty("TrigDecisionTool", m_trigDecisionTool),
-                       "Failed to set trig dec tool for tau matching");
-            top::check(trigMatchTauTool->initialize(),
-                       "Failed to initialize tau trigger matching tool");
-            m_trigMatchTauTool = trigMatchTauTool;
-          }
-        }
         ///-- Trigger global efficiency corrections --///
         if (m_config->useGlobalTrigger()) {
           top::check(this->initialiseGlobalTriggerEff(),
