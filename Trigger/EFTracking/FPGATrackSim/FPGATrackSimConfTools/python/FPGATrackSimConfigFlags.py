@@ -101,8 +101,8 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('xBufferBins', 6)
     cf.addFlag('yBufferBins', 2)
     #cf.addFlag('threshold', [5])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
-    #cf.addFlag('threshold', [8])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
-    cf.addFlag('threshold', [5])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
+    cf.addFlag('threshold', [8])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
+    #cf.addFlag('threshold', [5])#TODO change to 4 #CODER This is eddited from 8 to 5 to match bin number
     cf.addFlag('IdealGeoRoads', True)
     cf.addFlag('convolution', [])
     cf.addFlag('convSizeX', 0)
@@ -165,8 +165,8 @@ def createHough1dFPGATrackSimConfigFlags():
     cf.xBins = 200
     #cf.threshold = [7]
     cf.threshold = [5]
-    #cf.hitExtendX = [1] * 9
-    cf.hitExtendX = [1] * 5
+    cf.hitExtendX = [1] * 9
+    #cf.hitExtendX = [1] * 5
 
     cf.addFlag('phiRangeCut', True)
     cf.addFlag('splitpt', 1)
@@ -192,8 +192,8 @@ def createHoughFPGATrackSimConfigFlags():
     cf.yBufferBins = 2
     cf.addFlag('combineLayers', [])
     cf.addFlag('scale', [])
-    #cf.hitExtendX = [2,1,0,0,0,0,0,0,0]
-    cf.hitExtendX = [0,0,0,0,0]
+    cf.hitExtendX = [2,1,0,0,0,0,0,0,0]
+    #cf.hitExtendX = [0,0,0,0,0]
 
     cf.addFlag('lrtSkipHitFiltering', False)
     cf.addFlag('lrtPtmin', 5)

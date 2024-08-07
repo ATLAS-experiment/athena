@@ -26,8 +26,6 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
 
         virtual StatusCode initialize() override;
 
-        //virtual const FPGATrackSimPlaneMap* PlaneMap_1st()       const override { return m_pmap_vector_1st.at(0).get(); }
-        //virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice)       const override { return m_pmap_vector_1st.at(slice).get(); }
         virtual const FPGATrackSimPlaneMap* PlaneMap_1st(int slice)       const { return m_pmap_vector_1st.at(slice).get(); }
         virtual const FPGATrackSimPlaneMap* PlaneMap_2nd()       const override { return m_pmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* RegionMap_1st()     const override { return m_rmap_1st.get(); }
@@ -52,15 +50,10 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         Gaudi::Property<std::vector <int> > m_layerOverrides {this, "layerOverride", {}, "Overrides the selection of the 1st stage logical layers in the plane map. Each entry declares a detector layer to use as a logical layer. Specify a detector layer with { SiliconTech * 1000 + DetectorZone * 100 + PhysicalLayer }"};
 
             // Map unique pointers
-        //std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_1st = nullptr; //  pointer to the pmap object for 1st stage
-        //std::vector<std::shared_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
+        //vector of pmaps
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
-        //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_1st; //  pointer to the pmap object for 1st stage
         std::unique_ptr<FPGATrackSimPlaneMap>  m_pmap_2nd = nullptr; //  pointer to the pmap object for 2nd stage
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
-        //std::vector<std::shared_ptr<FPGATrackSimPlaneMap>>  m_pmap_vector_2nd; //  pointer to the pmap object for 1st stage
-        //vector of pmaps
-        //std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> = m_pap_vector_1st; 
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_1st = nullptr; //  pointer to the RMAP object using 1st stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_rmap_2nd = nullptr; //  pointer to the RMAP object using 2nd stage plane map
         std::unique_ptr<FPGATrackSimRegionMap> m_subrmap = nullptr;
@@ -69,8 +62,6 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         //TODO cahnge to a nullptr or somthing kie that?
         int m_numberOfPmaps = 0;
         // Helpers
-        //TODO KILL readPmapSize with bad arg in the commented 
-        //int readPmapSize(const std::string & filepath);
         int readPmapSize(std::ifstream& fileIn);
         StatusCode checkInputs();
         StatusCode checkAllocs();

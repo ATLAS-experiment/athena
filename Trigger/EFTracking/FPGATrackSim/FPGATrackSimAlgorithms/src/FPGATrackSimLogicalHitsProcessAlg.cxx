@@ -90,8 +90,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Finished");
 
-    ATH_MSG_INFO("line 119");
-//    std::cout<<"LogcalHitProcessAlg: 118~"<<StatusCode::SUCCESS<<'\n';
     
     return StatusCode::SUCCESS;
 }
@@ -108,7 +106,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     t_0 = std::chrono::steady_clock::now();
 #endif
 
-//    ATH_MSG_INFO("line 137");
     const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
@@ -126,7 +123,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
         return appMgr->stopRun();
     }
-//    ATH_MSG_INFO("line 153");
 
     // Set up write handles.
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
@@ -175,7 +171,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
-//    std::cout<<"LogcalHitProcessAlg: 228~"<<StatusCode::SUCCESS<<'\n';
 
     for (auto const &road:roads_1st){
         std::vector<FPGATrackSimHit> road_hits;
@@ -189,7 +184,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         FPGARoads_1st->push_back(*road);
     }
 
-    //std::cout<<"LogcalHitProcessAlg: 246~"<<StatusCode::SUCCESS<<'\n';
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
     for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
@@ -202,14 +196,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     Monitored::Group(m_monTool, mon_nroads_1st);
     
-//    ATH_MSG_INFO("line 266");
-//    std::cout<<"LogcalHitProcessAlg: 209~"<<StatusCode::SUCCESS<<'\n';
     TIME(m_troads);
     // Standard road Filter
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
     if (m_filterRoads)
     {
-//        ATH_MSG_INFO("line 273");
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
         roads_1st = postfilter_roads;
     }
@@ -223,7 +214,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
     std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter3_roads;
     if (m_doSpacepoints) {
-//        ATH_MSG_INFO("line 288");
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
         roads_1st = postfilter3_roads;
     }
@@ -322,8 +312,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         Monitored::Group(m_monTool,passroad,passtrack,truthpT_zoom,truthpT,trutheta,truthphi,truthd0,truthz0,passtrackchi2);
     }
 
-//    ATH_MSG_INFO("line 376");
-//    std::cout<<"LogcalHitProcessAlg: 354~"<<StatusCode::SUCCESS<<'\n';
     for (const FPGATrackSimTrack& track : tracks_1st) FPGATracks_1stHandle->push_back(track);
    
     TIME(m_tOR);
@@ -383,7 +371,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vecto
                                                                 std::vector<FPGATrackSimTrack> const& tracks_1st,
                                                                 FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {
-    ATH_MSG_INFO("line 681");
   m_logicEventOutputHeader->reset();
   
   ATH_MSG_DEBUG("NFPGATrackSimRoads_1st = " << roads_1st.size() << ", NFPGATrackSimTracks_1st = " << tracks_1st.size());
@@ -428,7 +415,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
     );
 #endif
     
-    ATH_MSG_INFO("line 737");
     
     ATH_MSG_INFO("PRINTING FPGATRACKSIM SIMPLE STATS");
     ATH_MSG_INFO("========================================================================================");    
@@ -454,7 +440,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::finalize()
 
 void FPGATrackSimLogicalHitsProcessAlg::printHitSubregions(std::vector<FPGATrackSimHit> const & hits)
 {
-    ATH_MSG_INFO("line 764");
     ATH_MSG_WARNING("Hit regions:");
     for (auto hit : hits)
     {

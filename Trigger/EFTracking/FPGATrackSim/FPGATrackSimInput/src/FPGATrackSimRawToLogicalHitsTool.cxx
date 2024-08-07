@@ -77,7 +77,6 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
     FPGATrackSimTowerInputHeader tower = FPGATrackSimTowerInputHeader(ireg);//default header, can eventually set eta/phi/deta/dphi
     logicEventHeader.addTower( tower);
   }
-    ATH_MSG_INFO("Line80");
 
 /*~//TODO WW removed adding hits here to instead be done down stream 
   ATH_MSG_DEBUG ("Created "<<logicEventHeader.nTowers()<<" towers. Now map Hits");
@@ -102,7 +101,6 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
     //~~~
   // fill the towers/slices with mapped hits
   for (auto hit: eventHeader.hits()) { // hit loop
-    ATH_MSG_INFO("Line105");
       // map to the logical hit, copying across the truth
 //~      pmap->map(hit);
 
@@ -117,18 +115,13 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
 
       bool mapped=false;
       for (unsigned int ireg=0;ireg!=m_towers.size();++ireg){
-            ATH_MSG_INFO("Line120  irig:"<<ireg<<"  towerS:"<<m_towers.size());
 //~	        if (rmap->isInRegion(ireg, hit)) {
-            ATH_MSG_INFO("Line122");
             // if the equivalent hit is compatible with this tower the hit is saved                            
             logicEventHeader.getTower( ireg )->addHit(hit);
-            ATH_MSG_INFO("Line125"<< logicEventHeader.getTower(ireg)->nHits());
             ATH_MSG_VERBOSE ("Hit mapped to tower="<<ireg << ", nHits now=" << logicEventHeader.getTower(ireg)->nHits());
             mapped=true;
 //~          }
-            ATH_MSG_INFO("Line129  irig:"<<ireg<<"  towerS:"<<m_towers.size());
       }
-    ATH_MSG_INFO("Line129");
       /*
       if (!mapped) {
           // get unmapped hit's error codes

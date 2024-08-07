@@ -30,16 +30,12 @@ FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(const std::string & filepath, unsigne
     ),
     m_layerOverrides(std::move(layerOverrides))
 {
-    ANA_MSG_INFO("Reading " << filepath);
     ifstream fin(filepath);
-    std::cout<<"\n \n TST FILE PATH"<<filepath<<'\n';
     if (!fin.is_open())
     {
         ANA_MSG_FATAL("Couldn't open " << filepath);
         throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
     }
-    //TODO KILL cout 
-    //std::cout<<"~~~~FILE PAHT INPIT"<<filepath<<'\n';
     // Reads the header of the file to resize all the vector members
     allocateMap(fin, stage);
 
@@ -67,16 +63,6 @@ FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, 
     ),
     m_layerOverrides(std::move(layerOverrides))
 {
-    //ANA_MSG_INFO("Reading " << filepath);
-    //ifstream fin(filepath);
-    //std::cout<<"\n \n TST FILE PATH"<<filepath<<'\n';
-    //if (!fin.is_open())
-    //{
-    //    ANA_MSG_FATAL("Couldn't open " << filepath);
-    //    throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
-    //}
-    //TODO KILL cout 
-    //std::cout<<"~~~~FILE PAHT INPIT"<<filepath<<'\n';
     // Reads the header of the file to resize all the vector members
     allocateMap(fin, stage);
 
@@ -95,27 +81,8 @@ FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(std::ifstream& fin, unsigned region, 
             m_coordLayer.push_back(l);
     }
 
-    ANA_MSG_INFO("Using " << m_nLogiLayers << " logical layers and " << m_nCoords << " coordinates");
+    ANA_MSG_DEBUG("Using " << m_nLogiLayers << " logical layers and " << m_nCoords << " coordinates");
 }
-/*
-int FPGATrackSimPlaneMap::readPmapSize()
-{
-    //TODO KILL THIS BLOCK PUT IN SVC INSTEAD OF HERE
-    std::cout<<"~~PMAP"<<'\n';
-    const std::string &  filepath = "/home/wcas/pmap.config";
-        //int readPmapSize();
-    ifstream fin(filepath);
-
-    if (!fin.is_open())
-    {
-        ANA_MSG_FATAL("Couldn't open " << filepath);
-        throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
-    }
-    //TODO KILL cout 
-    std::cout<<"~~~~FILE PAHT INPIT pmap"<<filepath<<'\n';
-    return 1;
-}
-*/
 // Reads the header of the file to resize all the vector members
 void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
 {
@@ -123,23 +90,18 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     vector<int> layerCounts((int)SiliconTech::nTechs * static_cast<int>(DetectorZone::nZones)); // pixel_barrel, pixel_EC, SCT_barrel, SCT_EC
     std::string line, silicon, detReg, layerKey, geoKey;
     bool ok = true;
-    std::cout<<"~~allocateMap:"<<ok<<"\n";
     // Read Geometry Version
     ok = ok && getline(fin, line);
     while (line.empty() || line[0] == '!')
     {
         ok = ok && getline(fin, line);
     }
-    //std::cout<<"~~allocateMap:"<<ok<<"  ~LINE:"<<line<<"\n";
     ANA_MSG_VERBOSE(line);
     istringstream sline(line);
-    //std::cout<<"~~allocateMap:"<<ok<<"  ~2LINE2:"<<line<<"\n";
     ok = ok && (sline >> geoKey);
-    //std::cout<<"~~allocateMap:"<<ok<<" ge:"<<geoKey<<"\n";
-    //std::cout<<"~~allocateMap:"<<ok<<"\n";
     m_diskIndex = Remappings::diskIndices(geoKey);
 
-    ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
+    ANA_MSG_DEBUG("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
     m_moduleRelabel = std::make_unique<FPGATrackSimModuleRelabel>(geoKey, false);
 
 
@@ -181,9 +143,6 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
         ok = ok && ( (i < (nHeaderLines/2) && silicon == "pixel") || (i >= (nHeaderLines/2) && silicon == "SCT") );
         ok = ok && ( (i % (nHeaderLines/2) == 0 && detReg == "barrel") || (i % (nHeaderLines/2) != 0 && (detReg == "endcap+" || detReg == "endcap-")) );
     }
-    //getline(fin, line);
-    //TODO KILL cout 
-    //std::cout<<"~~~~FILE PMAP NUM"<<line<<'\n';
     
     if (!ok) ANA_MSG_FATAL("Error reading layer counts");
     m_nDetLayers = std::accumulate(layerCounts.begin(), layerCounts.end(), 0);
@@ -289,7 +248,6 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
             m_map[sil][BEC][physLayer].section = m_layerInfo[logiLayer].size(); // i.e. index into m_layerInfo[logiLayer] entry below
             m_layerInfo[logiLayer].push_back({ siTech, zone, physLayer, physDisk, stereo});
         }
-        //std::cout<<"line~~"<<line<<"m_nDetLayers:"<<m_nDetLayers<<"   linesRead:"<<linesRead<<'\n';
         if (m_nDetLayers == linesRead) break;
     }
 
@@ -314,24 +272,7 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
-    //std::cout<<"\n before L:"<<pinfo.layer;
-    /*
-    if (hit.isMapped()){
-        std::cout<<"\n before L:"<<pinfo.layer<<","<<hit.getLayer();
-    }
-    else{
-        std::cout<<"\n before L:"<<pinfo.layer<<",~";
-    }
-    */
     hit.setLayer(pinfo.layer);
-    /*
-    if (hit.isMapped()){
-        std::cout<<"  AfterSet:"<<pinfo.layer<<", "<<hit.getLayer()<<"\n \n";
-    }
-    else{
-        std::cout<<"  AfterSet:"<<pinfo.layer<<", ~"<<"\n \n";
-    }
-    */
     if (!hit.isMapped()) // failsafe if for some reason someone calls this on a clustered hit again, or something
         hit.setHitType(HitType::mapped);
 }

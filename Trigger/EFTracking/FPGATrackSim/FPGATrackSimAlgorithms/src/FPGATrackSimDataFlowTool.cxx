@@ -138,7 +138,6 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
         if (m_runSecondStage) info->nTracks_2nd_over_nOfflineTracks = (float)tracks_2nd.size() / (float)info->nOfflineTracks;
     }
 
-    ATH_MSG_INFO("line 146");
     ATH_CHECK(getDataFlowInfo(*info));
 
     return StatusCode::SUCCESS;
