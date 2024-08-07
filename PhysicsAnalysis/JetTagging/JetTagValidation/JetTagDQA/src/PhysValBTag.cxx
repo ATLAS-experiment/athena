@@ -365,11 +365,10 @@ namespace JetTagDQA {
 
     // also loop over the tracks associated to the MSV vertices -> can be missing in the other track list
     // get the MSV vertices
-    std::vector< ElementLink< xAOD::VertexContainer > > MSV_vertices;
     static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
       MSV_verticesAcc("MSV_vertices");
-    try { MSV_vertices = MSV_verticesAcc(*btag); }
-    catch(std::exception& exception) {  }
+    std::vector< ElementLink< xAOD::VertexContainer > > MSV_vertices =
+      MSV_verticesAcc.withDefault(*btag, std::vector< ElementLink< xAOD::VertexContainer > >());
 
     // loop over the MSV vertices
     for (unsigned int i = 0; i < MSV_vertices.size(); i++) {
