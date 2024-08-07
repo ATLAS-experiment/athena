@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventBookkeeperTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( EventBookkeeperTPCnv
-                         src/*.cxx
+atlas_add_library( EventBookkeeperTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS EventBookkeeperTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib EventBookkeeperMetaData
+                   PRIVATE_LINK_LIBRARIES AthenaKernel )
+
+atlas_add_tpcnv_library( EventBookkeeperTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS EventBookkeeperTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib EventBookkeeperMetaData
-                         PRIVATE_LINK_LIBRARIES AthenaKernel )
+                         LINK_LIBRARIES EventBookkeeperTPCnv )
 
 atlas_add_dictionary( EventBookkeeperTPCnvDict
                       EventBookkeeperTPCnv/EventBookkeeperTPCnvDict.h
