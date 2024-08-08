@@ -120,12 +120,18 @@ class FTagConfig (ConfigBlock):
                 if version is not None:
                     if "2.2.10" in version:
                         result = "Sherpa2210"
-                    elif "2.2.11" in version:
-                        result = "Sherpa2210"
+                    # Sherpa versions between 2.2.11 and 2.2.16 are supposed to have same properties
+                    # There are MC/MC efficiency maps for Sherpa 2.2.12 available,
+                    # so map the Sherpa versions with no MC/MC efficiency maps to Sherpa 2.2.12 for Run2.
+                    # For Run3, MC/MC efficiency maps for Sherpa 2.2.14 will be available in the future, 
+                    # so map Sherpa versions 2.2.11 and 2.2.14 to Sherpa 2.2.14
+                    elif "2.2.11" in version or "2.2.14" in version:
+                        if config.geometry() is LHCPeriod.Run2:
+                            result = "Sherpa2212"
+                        elif config.geometry() is LHCPeriod.Run3:
+                            result = "Sherpa2214"
                     elif "2.2.12" in version:
                         result = "Sherpa2212"
-                    elif "2.2.14" in version:
-                        result = "Sherpa2214"
                     elif "2.2.1" in version:
                         result = "Sherpa221"
 
@@ -160,7 +166,9 @@ class FTagConfig (ConfigBlock):
                     'herwigpp713': 'Herwig713',
                     'sherpa228': 'Sherpa228',
                     'sherpa2210': 'Sherpa2210',
+                    'sherpa2211': 'Sherpa2212',
                     'sherpa2212': 'Sherpa2212',
+                    'sherpa2214': 'Sherpa2214',
                     'herwigpp721': 'Herwig721',
                 }
                 try:
@@ -193,7 +201,7 @@ class FTagConfig (ConfigBlock):
                 if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
                     raise ValueError ("invalid generator type: " + self.generator)
             elif config.geometry() is LHCPeriod.Run3:
-                if self.generator not in ["default", "Pythia8", "Sherpa2212", "Herwig713"]:
+                if self.generator not in ["default", "Pythia8", "Sherpa2212", "Sherpa2214", "Herwig713"]:
                     raise ValueError ("invalid generator type: " + self.generator)
 
         # MC/MC scale factors configuration
@@ -203,6 +211,10 @@ class FTagConfig (ConfigBlock):
         elif self.generator == "Sherpa2210":
             DSID = "700122"
         elif self.generator == "Sherpa2212":
+            DSID = "700660"
+        # 700660 is DSID for Sherpa 2212, but shower properties should be the same for Sherpa 2214
+        # Until MC/MC efficiency maps are available for Sherpa 2214, map it to DSID for Sherpa 2212
+        elif self.generator == "Sherpa2214":
             DSID = "700660"
         elif self.generator == "Herwig713":
             DSID = "411233"
