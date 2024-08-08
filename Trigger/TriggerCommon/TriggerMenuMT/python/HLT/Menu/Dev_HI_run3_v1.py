@@ -103,6 +103,13 @@ def getDevHISignatures():
         #ATR-29025 - J/Psi chains
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VjTE20', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryPhIGroup),
+        #ATR-29025 - ditau chains
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU1_TRT_VjTE100', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1jTAU1_TRT_VjTE100', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eEM1_TRT_VjTE100', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU1_TRT_VjTE100_GAP_AANDC', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1jTAU1_TRT_VjTE100_GAP_AANDC', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eEM1_TRT_VjTE100_GAP_AANDC', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
    
     ]
 

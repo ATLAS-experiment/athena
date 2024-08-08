@@ -113,6 +113,8 @@ def defineMenu():
         
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE20', 'L1_TRT_VjTE50',
+        'L1_eEM1_TRT_VjTE100', 'L1_eTAU1_TRT_VjTE100', 'L1_jTAU1_TRT_VjTE100',
+        'L1_eEM1_TRT_VjTE100_GAP_AANDC', 'L1_eTAU1_TRT_VjTE100_GAP_AANDC', 'L1_jTAU1_TRT_VjTE100_GAP_AANDC',
          #UPC, calo only, phase-1
          'L1_jTE5_VjTE200',
 
