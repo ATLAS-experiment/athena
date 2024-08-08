@@ -47,11 +47,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
     if flags.Egamma.doCentral:
         from egammaAlgs.egammaRecBuilderConfig import (
             egammaRecBuilderCfg)
-        if flags.HeavyIon.Egamma.doSubtractedClusters:
-            acc.merge(egammaRecBuilderCfg(
-                flags, InputClusterContainerName=flags.HeavyIon.Egamma.CaloTopoCluster))
-        else:
-            acc.merge(egammaRecBuilderCfg(flags))
+        acc.merge(egammaRecBuilderCfg(flags))
 
         from egammaAlgs.egammaSuperClusterBuilderConfig import (
             electronSuperClusterBuilderCfg, photonSuperClusterBuilderCfg)
