@@ -433,6 +433,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
+
+            if config.geometry() is LHCPeriod.Run2:
+                raise ValueError('Run 2 does not yet have efficiency correction, '
+                                 'please disable it by setting `noEffSF` to True.')
+            if 'DNN' in self.identificationWP:
+                raise ValueError('DNN does not yet have efficiency correction, '
+                                 'please disable it by setting `noEffSF` to True.')
+
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -442,7 +450,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             if self.correlationModelReco not in correlationModels:
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
-            if config.geometry() >= LHCPeriod.Run3:
+            if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
                 print("WARNING! Only TOTAL correlation model is currently supported "
                       "for reconstruction efficiency correction in Run 3.")
                 alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL" 
@@ -455,8 +463,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_reco_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
@@ -471,7 +477,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
-            alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if self.correlationModelId not in correlationModels:
                 raise ValueError('Invalid correlation model for identification efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
@@ -483,8 +488,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_id_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)
@@ -516,11 +519,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"
-                if self.correlationModelIso == 'TOTAL':
-                    raise ValueError('TOTAL correlation model is currently not '
-                                     'supported for electron isolation efficiency.')
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'el_isol_bad_eff' + selectionPostfix
             alg.electrons = config.readName (self.containerName)

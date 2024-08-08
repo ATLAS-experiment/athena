@@ -7,6 +7,7 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator, DataType
+from AthenaConfiguration.Enums import LHCPeriod
 
 # Config:
 triggerChainsPerYear = {
@@ -790,6 +791,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
+    else:
+        configSeq.setOptionValue ('.noEffSF', geometry is LHCPeriod.Run2)
     if likelihood:
         configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
@@ -1015,7 +1018,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     # per-event lepton SF
     if not forCompare:
         configSeq += config.makeConfig ('LeptonSF')
-        configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
+        if geometry is not LHCPeriod.Run2:
+            configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
         configSeq.setOptionValue ('.muons', 'AnaMuons.medium')
         configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
         configSeq.setOptionValue ('.lepton_postfix', 'nominal')
