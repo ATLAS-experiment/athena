@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -258,7 +258,7 @@ StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundary( std::string  &node,
     double curR = (*recIt)->getDouble("R") * CLHEP::mm;
     double curZ = (*recIt)->getDouble("Z") * CLHEP::mm;
     // store (r,z) duplet locally
-    rzVec.push_back( RZPair(curR, curZ) );
+    rzVec.emplace_back(curR, curZ );
   }
 
   return StatusCode::SUCCESS;
@@ -286,7 +286,7 @@ StatusCode DetDescrDBEnvelopeSvc::fallbackRZBoundary( FallbackDoubleVector &r,
     double curR = r[pos];
     double curZ = z[pos];
     // store (r,z) duplet locally
-    rzVec.push_back( RZPair(curR, curZ) );
+    rzVec.emplace_back(curR, curZ );
   }
 
   return StatusCode::SUCCESS;

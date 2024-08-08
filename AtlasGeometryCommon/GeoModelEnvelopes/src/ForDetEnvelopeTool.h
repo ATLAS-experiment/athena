@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ForDetEnvelopeTool_h 
+#ifndef ForDetEnvelopeTool_h
 #define ForDetEnvelopeTool_h 1
 
 #include "GeoModelUtilities/GeoModelTool.h"
 class ForDetEnvelopeManager;
 
-class ForDetEnvelopeTool final : public GeoModelTool 
+class ForDetEnvelopeTool final : public GeoModelTool
 {
  public:
 
@@ -16,7 +16,7 @@ class ForDetEnvelopeTool final : public GeoModelTool
   ForDetEnvelopeTool( const std::string& type, const std::string& name, const IInterface* parent );
 
   // Standard Destructor
-  virtual ~ForDetEnvelopeTool() override final;
+  virtual ~ForDetEnvelopeTool() override final = default;
 
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
@@ -24,4 +24,4 @@ class ForDetEnvelopeTool final : public GeoModelTool
   const ForDetEnvelopeManager* m_manager;
 };
 
-#endif 
+#endif

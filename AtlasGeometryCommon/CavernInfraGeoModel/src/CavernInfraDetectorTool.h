@@ -8,7 +8,7 @@
 #include "GeoModelUtilities/GeoModelTool.h"
 class CavernInfraDetectorManager;
 
-class CavernInfraDetectorTool final : public GeoModelTool 
+class CavernInfraDetectorTool final : public GeoModelTool
 {
  public:
   CavernInfraDetectorTool( const std::string& type, const std::string& name, const IInterface* parent );
@@ -16,9 +16,9 @@ class CavernInfraDetectorTool final : public GeoModelTool
 
   virtual StatusCode create() override;
   virtual StatusCode clear() override;
-  
+
  private:
   const CavernInfraDetectorManager* m_manager{nullptr};
 };
 
-#endif 
+#endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ForDetEnvelopeManager_h
@@ -10,7 +10,7 @@
 
 #include <vector>
 
-class ForDetEnvelopeManager : public GeoVDetectorManager  
+class ForDetEnvelopeManager : public GeoVDetectorManager
 {
  public:
 
@@ -22,19 +22,19 @@ class ForDetEnvelopeManager : public GeoVDetectorManager
 
   // Access to raw geometry:
   virtual unsigned int getNumTreeTops() const;
-  
+
   // Access to raw geometry:
   virtual PVConstLink getTreeTop(unsigned int i) const;
 
   // Add a Tree top:
-  void addTreeTop(PVLink);
+  void addTreeTop(const PVLink&);
 
- private:  
+ private:
 
   const ForDetEnvelopeManager & operator=(const ForDetEnvelopeManager &right);
   ForDetEnvelopeManager(const ForDetEnvelopeManager &right);
-  
-  std::vector<PVLink> m_volume;  
+
+  std::vector<PVLink> m_volume;
 
 };
 
