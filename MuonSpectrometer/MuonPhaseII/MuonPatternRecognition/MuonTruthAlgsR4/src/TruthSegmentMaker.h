@@ -40,7 +40,11 @@ namespace MuonR4{
           template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
                                                                       const SG::ReadHandleKey<ContainerType>& key,
                                                                       const ContainerType* & contToPush) const;
-
+          /** @brief Returns the transform from the local simHit frame -> chamber frame
+           *  @param gctx: Geometry context to align the chambers within ATLAS
+           *  @param chanId: Identifier of the channel for which the transform shall be fetched */
+          Amg::Transform3D toChamber(const ActsGeometryContext& gctx,
+                                     const Identifier& chanId) const;
           /** @brief IdHelperSvc to decode the Identifiers */
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */

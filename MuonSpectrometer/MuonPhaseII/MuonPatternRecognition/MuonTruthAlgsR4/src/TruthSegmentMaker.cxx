@@ -43,14 +43,24 @@ namespace MuonR4{
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
     }
+    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsGeometryContext& gctx,
+                                                  const Identifier& chanId) const {
+        const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(chanId);
+        const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
+                                                    reEle->measurementHash(chanId) :
+                                                    reEle->layerHash(chanId)};
+        return reEle->getChamber()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, trfHash);
+
+    }
     StatusCode TruthSegmentMaker::execute(const EventContext& ctx) const {
         const ActsGeometryContext* gctx{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
         
         
         using HitsPerParticle = std::unordered_map<HepMC::ConstGenParticlePtr, std::vector<const xAOD::MuonSimHit*>>;
         using HitCollector = std::unordered_map<const MuonGMR4::MuonChamber*, HitsPerParticle>;
         HitCollector hitCollector{};
-        ATH_CHECK(retrieveContainer(ctx, m_geoCtxKey, gctx));
+
         for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_readKeys) {
             const xAOD::MuonSimHitContainer* simHits{nullptr};
             ATH_CHECK(retrieveContainer(ctx, key, simHits));        
@@ -74,21 +84,21 @@ namespace MuonR4{
                                      std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
-        for (const auto& [chamber, collectedParts] : hitCollector) {
+        for (auto& [chamber, collectedParts] : hitCollector) {
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
-            const Amg::Transform3D  globToLoc{locToGlob.inverse()};
             
-            for (const auto& [particle, simHits]: collectedParts) {
+            for (auto& [particle, simHits]: collectedParts) {
+                /* Take the hit that's closest to the chamber centre as reference */
+                std::ranges::stable_sort(simHits,[gctx,this](const xAOD::MuonSimHit*a, const xAOD::MuonSimHit*b){
+                    return std::abs((toChamber(*gctx, a->identify())* xAOD::toEigen(a->localPosition())).z()) <
+                           std::abs((toChamber(*gctx, b->identify())* xAOD::toEigen(b->localPosition())).z());
+                });
                 const xAOD::MuonSimHit* simHit = simHits.front(); 
-                const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(simHit->identify());
-                const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ? 
-                                                    reEle->measurementHash(simHit->identify()) :
-                                                    reEle->layerHash(simHit->identify())};
+                const Identifier segId{simHit->identify()};
                 
-                const Amg::Transform3D toChamber = globToLoc * reEle->localToGlobalTrans(*gctx, trfHash);
-                
-                const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
-                const Amg::Vector3D chamberDir = toChamber.linear() * xAOD::toEigen(simHit->localDirection());
+                const Amg::Transform3D inChamb = toChamber(*gctx, segId);
+                const Amg::Vector3D localPos{inChamb * xAOD::toEigen(simHit->localPosition())};
+                const Amg::Vector3D chamberDir = inChamb.linear() * xAOD::toEigen(simHit->localDirection());
 
                 /// Express the simulated hit in the center of the chamber
                 const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
@@ -138,6 +148,10 @@ namespace MuonR4{
                     associatedHits.push_back(std::move(link));
                 }
                 truthSegment->setNHits(nMdt + nMm + nStgcEta, nTgcPhi + nRpcPhi + nStgcPhi, nTgcEta + nRpcEta);
+                truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 
+                                            m_idHelperSvc->chamberIndex(segId),
+                                            m_idHelperSvc->stationEta(segId),
+                                            m_idHelperSvc->technologyIndex(segId));
                 hitDecor(*truthSegment) = std::move(associatedHits);
             }
         }
