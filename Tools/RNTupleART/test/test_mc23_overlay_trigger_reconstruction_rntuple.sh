@@ -30,7 +30,7 @@ Reco_tf.py \
   --autoConfiguration="everything" \
   --conditionsTag="default:OFLCOND-MC23-SDR-RUN3-05" \
   --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
-  --runNumbe="601237" \
+  --runNumber="601237" \
   --digiSeedOffset1="232" \
   --digiSeedOffset2="232" \
   --AMITag="r14799" \
