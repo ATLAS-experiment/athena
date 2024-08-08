@@ -33,16 +33,15 @@
 
 BeamPipeDetectorFactory::BeamPipeDetectorFactory(StoreGateSvc *detStore,
 						 IRDBAccessSvc *pAccess)
-  :m_detectorManager(0),
-   m_materialManager(0),
+  :m_detectorManager(nullptr),
+   m_materialManager(nullptr),
    m_detectorStore(detStore),
    m_access(pAccess),
    m_centralRegionZMax(1500*Gaudi::Units::mm)
 {}
 
 BeamPipeDetectorFactory::~BeamPipeDetectorFactory()
-{
-}
+= default;
 
 void BeamPipeDetectorFactory::create(GeoPhysVol *world)
 {
@@ -163,7 +162,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
 
   // Sections 2 & 3 are placed in section 1. 
   // pvMotherSection will point to section 1.
-  GeoPhysVol* pvMotherSection = 0;
+  GeoPhysVol* pvMotherSection = nullptr;
   bool addToFirstSection = true;
   double rminSec1 = 0;
   double rmaxSec1 = 0;
@@ -234,7 +233,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
     }
 
     const GeoMaterial* mat = m_materialManager->getMaterial(material);
-    if (mat == 0) {
+    if (mat == nullptr) {
       // For backward compatibility - older geometry versions didn't specify the
       // material namespace
       // std::cout << "Material """ << material << """ not found. Trying  std::" << material << std::endl;
@@ -263,7 +262,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
     }
 	     
 
-    GeoTransform* tfSection = 0;
+    GeoTransform* tfSection = nullptr;
     if (znew != 0 && (secNum==1 || !addToFirstSection)) tfSection = new GeoTransform(GeoTrf::TranslateZ3D(znew));
     GeoIntrusivePtr<GeoNameTag> ntSection{new GeoNameTag(name)};
 
@@ -287,7 +286,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
     // Not needed, but just in case in the future we have +/- sections in central region
     if(central && z!=0.) {
       // add rotated section as well
-      GeoTransform* tfSectionRot = 0;
+      GeoTransform* tfSectionRot = nullptr;
       if (isTube) { 
 	// No need for rotation.
 	tfSectionRot = new GeoTransform(GeoTrf::TranslateZ3D(-znew));
@@ -336,16 +335,16 @@ BeamPipeDetectorFactory::makeEnvelope(const IRDBRecordset_ptr& bpipeEnvelope)
   }
 
   double rFwd = 0;
-  if (fwdEntry.size()) {
+  if (!fwdEntry.empty()) {
     rFwd = fwdEntry[0].r();    
-  } else if (centralEntry.size()) {
+  } else if (!centralEntry.empty()) {
     rFwd = centralEntry[0].r();    
   } else {
     std::cout << "Unexpected condition when building beam pipe." << std::endl;
   }
  
   // central
-  if (centralEntry.size() == 0) {
+  if (centralEntry.empty()) {
     envelopes.centralShape  = new GeoTube(0, rFwd, m_centralRegionZMax);
   } else {
     // This case probably will never get used and is untested.
@@ -371,7 +370,7 @@ BeamPipeDetectorFactory::makeEnvelope(const IRDBRecordset_ptr& bpipeEnvelope)
   {
     GeoRef<GeoPcon> pcone (new GeoPcon(0, 360*Gaudi::Units::deg));
     pcone->addPlane(m_centralRegionZMax,0,rFwd);
-    if (fwdEntry.size() == 0) { 
+    if (fwdEntry.empty()) { 
       // Unlikely case but for completeness
       // we make small fwd region if everything is in central region.
       pcone->addPlane(m_centralRegionZMax+0.1*Gaudi::Units::mm,0,rFwd);

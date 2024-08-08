@@ -9,29 +9,29 @@
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include <vector>
 
-class CavernInfraDetectorManager : public GeoVDetectorManager  
+class CavernInfraDetectorManager : public GeoVDetectorManager
 {
  public:
   CavernInfraDetectorManager();
 
   const CavernInfraDetectorManager & operator=(const CavernInfraDetectorManager &right) = delete;
   CavernInfraDetectorManager(const CavernInfraDetectorManager &right) = delete;
-  
+
   ~CavernInfraDetectorManager();
 
   // Access to raw geometry:
   virtual unsigned int getNumTreeTops() const override;
   virtual PVConstLink getTreeTop(unsigned int i) const override;
- 
-  void addTreeTop(PVLink);      // Add a Tree top:
 
- private:  
+  void addTreeTop(const PVLink&);      // Add a Tree top:
+
+ private:
   // Tree Tops
   std::vector<PVLink> m_treeTops;
 };
 
 #ifndef GAUDI_NEUTRAL
-#include "AthenaKernel/CLASS_DEF.h" 
+#include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(CavernInfraDetectorManager, 1500000300, 1)
 #endif
 

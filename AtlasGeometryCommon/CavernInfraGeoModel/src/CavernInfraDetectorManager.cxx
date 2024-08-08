@@ -26,7 +26,7 @@ PVConstLink CavernInfraDetectorManager::getTreeTop(unsigned int i) const
     return nullptr;
 }
 
-void  CavernInfraDetectorManager::addTreeTop(PVLink link) 
+void  CavernInfraDetectorManager::addTreeTop(const PVLink& link)
 {
   m_treeTops.push_back(link);
 }

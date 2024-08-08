@@ -27,7 +27,7 @@ class BeamPipeDetectorManager : public GeoVDetectorManager
   virtual PVConstLink getTreeTop(unsigned int i) const;
 
   // Add a Tree top:
-  void addTreeTop(PVConstLink);
+  void addTreeTop(const PVConstLink&);
 
  private:  
 

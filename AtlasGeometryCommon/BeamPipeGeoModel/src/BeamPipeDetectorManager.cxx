@@ -22,7 +22,7 @@ PVConstLink BeamPipeDetectorManager::getTreeTop(unsigned int i) const
   return m_volume[i];
 }
 
-void  BeamPipeDetectorManager::addTreeTop(PVConstLink vol)
+void  BeamPipeDetectorManager::addTreeTop(const PVConstLink& vol)
 {
   m_volume.push_back(vol);
 }

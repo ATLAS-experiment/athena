@@ -3,15 +3,15 @@
 */
 
 #include "CavernInfraDetectorTool.h"
-#include "CavernInfraDetectorFactory.h" 
-#include "CavernInfraDetectorManager.h" 
+#include "CavernInfraDetectorFactory.h"
+#include "CavernInfraDetectorManager.h"
 
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
 
-CavernInfraDetectorTool::CavernInfraDetectorTool( const std::string& type, 
+CavernInfraDetectorTool::CavernInfraDetectorTool( const std::string& type,
 						  const std::string& name,
 						  const IInterface* parent )
   : GeoModelTool( type, name, parent )
@@ -19,7 +19,7 @@ CavernInfraDetectorTool::CavernInfraDetectorTool( const std::string& type,
 }
 
 StatusCode CavernInfraDetectorTool::create()
-{ 
+{
   ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
   ATH_CHECK(geoDbTag.retrieve());
 
@@ -36,7 +36,7 @@ StatusCode CavernInfraDetectorTool::create()
 
   GeoModelExperiment* theExpt = nullptr;
   ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
- 
+
   GeoPhysVol *world=theExpt->getPhysVol();
   ServiceHandle<IRDBAccessSvc> raccess("RDBAccessSvc",name());
   ATH_CHECK(raccess.retrieve());

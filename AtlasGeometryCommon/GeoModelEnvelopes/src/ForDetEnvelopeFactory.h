@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELENVELOPES_FORDETENVELOPEFACTORY_H
@@ -12,36 +12,36 @@ class StoreGateSvc;
 class StoredMaterialManager;
 class GeoShape;
 
-class ForDetEnvelopeFactory final : public GeoVDetectorFactory  
+class ForDetEnvelopeFactory final : public GeoVDetectorFactory
 {
  public:
-  
+
   // Constructor:
   ForDetEnvelopeFactory(StoreGateSvc *pDetStore);
-  
+
   // Destructor:
-  ~ForDetEnvelopeFactory();
-  
+  ~ForDetEnvelopeFactory() = default;
+
   // Creation of geometry:
   virtual void create(GeoPhysVol *world) override;
-  
+
   // Access to the results:
   virtual const ForDetEnvelopeManager * getDetectorManager() const override;
-  
- private:  
+
+ private:
 
   // Illegal operations:
   const ForDetEnvelopeFactory & operator=(const ForDetEnvelopeFactory &right);
   ForDetEnvelopeFactory(const ForDetEnvelopeFactory &right);
-  
+
   // The manager:
   ForDetEnvelopeManager*   m_detectorManager;
-   
+
   StoredMaterialManager* m_materialManager;
   StoreGateSvc*             m_detectorStore;
 };
 
-// Class ForDetEnvelopeFactory 
+// Class ForDetEnvelopeFactory
 #endif
 
 
