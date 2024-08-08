@@ -362,9 +362,9 @@ def getHLTmap_fromTM(flags, period, release):
             menu = getHLTMenuAccess(flags)
             for hltname,chain in menu.chains().items():
                 l1seed  = chain["l1item"]
-            primary = any('Primary' in g or 'TagAndProbe' in g for g in chain["groups"])
-            ps = 1 if primary else 0
-            hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
+                primary = any('Primary' in g or 'TagAndProbe' in g for g in chain["groups"])
+                ps = 1 if primary else 0
+                hltMap[hltname] = (l1seed, dummyfutureLBs*ps, False, {})  #third arg is hasRerun=False
         except RuntimeError:
             log.info("Failed to read infile menu, which can happen with old MC, reverting to release menu")
 
