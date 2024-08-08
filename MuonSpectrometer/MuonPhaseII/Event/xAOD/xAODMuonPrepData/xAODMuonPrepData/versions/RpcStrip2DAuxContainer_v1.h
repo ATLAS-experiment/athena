@@ -27,6 +27,7 @@ class RpcStrip2DAuxContainer_v1 : public AuxContainerBase {
     std::vector<CovAccessor<2>::element_type> localCovariance{};
 
     std::vector<float> time{};
+    std::vector<float> timeCovariance{};
     std::vector<uint32_t> triggerInfo{}; // FIXME - how big do we need this to be?
     std::vector<uint8_t> ambiguityFlag{};
     std::vector<float> timeOverThreshold{};

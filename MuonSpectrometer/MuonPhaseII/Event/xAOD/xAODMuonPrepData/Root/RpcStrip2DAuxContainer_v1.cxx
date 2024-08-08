@@ -22,6 +22,7 @@ RpcStrip2DAuxContainer_v1::RpcStrip2DAuxContainer_v1()
     
     /// Names may be shared across different subdetectors
     PRD_AUXVARIABLE(time);
+    PRD_AUXVARIABLE(timeCovariance);
     PRD_AUXVARIABLE(triggerInfo);
     PRD_AUXVARIABLE(ambiguityFlag);
     PRD_AUXVARIABLE(timeOverThreshold);

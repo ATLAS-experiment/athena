@@ -41,6 +41,8 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
 
     /** @brief Returns the time. */
     float time() const;
+    /** @brief Returns the uncertainty squared on the time measurement */
+    float timeCovariance() const;
 
     /** @brief Returns the trigger coincidence - usually false, unless ijk>5 or highpt&&ijk==0*/
     uint32_t triggerInfo() const;
@@ -53,11 +55,16 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
 
     /** @brief Returns the time over threshold */
     float timeOverThreshold() const;
-
     /** @brief Returns the hash of the measurement channel */
     IdentifierHash measurementHash() const;
     /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
     IdentifierHash layerHash() const;
+
+    /** @brief Retrieve the associated RpcReadoutElement. 
+        If the element has not been set before, it's tried to load it on the fly. 
+        Exceptions are thrown if that fails as well */
+    const MuonGMR4::RpcReadoutElement* readoutElement() const;
+
     /** @brief Sets the the triger time of the hit */
     void setTime(float time);
     /** @brief Set the trigger info of the hit  */
@@ -74,11 +81,8 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     void setStripNumber(uint16_t strip);
     /** @brief set the pointer to the ReadoutElement */
     void setReadoutElement(const MuonGMR4::RpcReadoutElement* readoutEle);
-    /** @brief Retrieve the associated MdtReadoutElement. 
-        If the element has not been set before, it's tried to load it on the fly. 
-        Exceptions are thrown if that fails as well */
-    const MuonGMR4::RpcReadoutElement* readoutElement() const;
-
+    /** @brief Set the time covariance of the Measurement */
+    void setTimeCovariance(float timeCov);
     private:
 #ifdef __CLING__
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
