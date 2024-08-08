@@ -128,22 +128,22 @@ class TestAuxStore
 {
 public:
   TestAuxStore() : m_locked(false) {}
-  virtual const void* getData (SG::auxid_t /*auxid*/) const { return 0; }
-  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t /*auxid*/) const { std::abort(); }
-  virtual const SG::auxid_set_t& getAuxIDs() const { return m_set; }
-  virtual const SG::auxid_set_t& getDecorIDs() const { std::abort(); }
-  virtual void* getData (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { return 0; }
-  virtual const SG::auxid_set_t& getWritableAuxIDs() const { return m_set; }
-  virtual bool resize (size_t /*sz*/) { return false; }
-  virtual void reserve (size_t /*sz*/) {}
-  virtual void shift (size_t /*pos*/, ptrdiff_t /*offs*/) {}
-  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) { std::abort(); }
-  virtual void* getDecoration (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { std::abort(); }
-  virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
-  virtual void lock() { m_locked = true; }
-  virtual bool clearDecorations() { std::abort(); }
-  virtual size_t size() const { std::abort(); }
-  virtual void lockDecoration (SG::auxid_t) { std::abort(); }
+  virtual const void* getData (SG::auxid_t /*auxid*/) const override { return 0; }
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t /*auxid*/) const override { std::abort(); }
+  virtual const SG::auxid_set_t& getAuxIDs() const override { return m_set; }
+  virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual void* getData (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { return 0; }
+  virtual const SG::auxid_set_t& getWritableAuxIDs() const override { return m_set; }
+  virtual bool resize (size_t /*sz*/) override { return false; }
+  virtual void reserve (size_t /*sz*/) override {}
+  virtual void shift (size_t /*pos*/, ptrdiff_t /*offs*/) override {}
+  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
+  virtual void* getDecoration (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { std::abort(); }
+  virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
+  virtual void lock() override { m_locked = true; }
+  virtual bool clearDecorations() override { std::abort(); }
+  virtual size_t size() const override { std::abort(); }
+  virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
 
   bool m_locked;
 
