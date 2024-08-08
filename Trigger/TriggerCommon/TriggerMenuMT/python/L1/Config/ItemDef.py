@@ -1524,6 +1524,12 @@ class ItemDef:
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20)  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & GAPAC  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20) & GAPAC  & physcond)
+        MenuItem('L1_eEM1_TRT_VjTE100' ).setLogic( d.eEM1 & d.NIMTRT & Not(d.jTE100)   & physcond)
+        MenuItem('L1_eTAU1_TRT_VjTE100' ).setLogic( d.eTAU1 & d.NIMTRT & Not(d.jTE100)   & physcond)
+        MenuItem('L1_jTAU1_TRT_VjTE100' ).setLogic( d.jTAU1 & d.NIMTRT & Not(d.jTE100)   & physcond)
+        MenuItem('L1_eEM1_TRT_VjTE100_GAP_AANDC' ).setLogic( d.eEM1 & d.NIMTRT & Not(d.jTE100) & GAPAC  & physcond)
+        MenuItem('L1_eTAU1_TRT_VjTE100_GAP_AANDC' ).setLogic( d.eTAU1 & d.NIMTRT & Not(d.jTE100) & GAPAC  & physcond)
+        MenuItem('L1_jTAU1_TRT_VjTE100_GAP_AANDC' ).setLogic( d.jTAU1 & d.NIMTRT & Not(d.jTE100) & GAPAC  & physcond)
                 
         MenuItem('L1_1ZDC_A_1ZDC_C_VTE50' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & Not(d.TE50)  & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_VjTE50_GAP_AANDC' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & Not(d.jTE50) & GAPAC  & physcond)
