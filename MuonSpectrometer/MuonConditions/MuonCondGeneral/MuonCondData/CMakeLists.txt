@@ -14,6 +14,6 @@ atlas_add_library( MuonCondData
                    PUBLIC_HEADERS MuonCondData
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel 
-                                   AthenaPoolUtilities MuonIdHelpersLib 
+                                   AthenaPoolUtilities MuonIdHelpersLib MuonTesterTreeLib 
                    PRIVATE_LINK_LIBRARIES EventInfo MuonReadoutGeometry MuonNSWCommonDecode )
 

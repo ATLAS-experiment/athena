@@ -8,6 +8,7 @@
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <CxxUtils/StringUtils.h>
+#include "MuonTesterTree/throwExcept.h"
 
 MdtAsBuiltCondAlg::MdtAsBuiltCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
         AthReentrantAlgorithm{name, pSvcLocator} {}
@@ -103,7 +104,7 @@ StatusCode MdtAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
                     const std::string itrName = prefix.str()+val;
                     if (line.find(itrName) == line.end()) {
                         ATH_MSG_ERROR("JSON does not contain "<<itrName);
-                        throw std::runtime_error("Bad JSON key");
+                        THROW_EXCEPTION("Bad JSON key");
                     }
                     return line[prefix.str()+val];
                 };                

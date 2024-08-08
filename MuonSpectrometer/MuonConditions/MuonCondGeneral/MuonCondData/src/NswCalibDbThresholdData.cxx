@@ -9,9 +9,8 @@
 
 
 // general functions ---------------------------------
-NswCalibDbThresholdData::NswCalibDbThresholdData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stgcIdHelper):
-    m_mmIdHelper(mmIdHelper),
-    m_stgcIdHelper(stgcIdHelper)
+NswCalibDbThresholdData::NswCalibDbThresholdData(const Muon::IMuonIdHelperSvc* idHelperSvc):
+	m_idHelperSvc(idHelperSvc)
 {
 }
 
@@ -49,9 +48,9 @@ NswCalibDbThresholdData::getChannelIds(const std::string tech, const std::string
 	std::vector<Identifier> chnls;
 
 	for(unsigned int i=0; i<keys.size(); ++i){
-		bool isMM = m_mmIdHelper.is_mm(keys[i]);
-		bool isSTGC = m_stgcIdHelper.is_stgc(keys[i]);
-		int eta = (isSTGC)? m_stgcIdHelper.stationEta(keys[i]) : m_mmIdHelper.stationEta(keys[i]);
+		bool isMM = m_idHelperSvc->isMM(keys[i]);
+		bool isSTGC = m_idHelperSvc->issTgc(keys[i]);
+		int eta = (isSTGC)? m_idHelperSvc->stgcIdHelper().stationEta(keys[i]) : m_idHelperSvc->stgcIdHelper().stationEta(keys[i]);
 		if(!isSTGC && tech == "STGC")  continue;
 		if(!isMM && tech == "MM") continue;
 		if(eta<=0 && side == "A") continue;
@@ -72,7 +71,7 @@ NswCalibDbThresholdData::getThreshold(const Identifier& chnlId, float& threshold
 		return true;
 	}
 	// if channelId doesn't exist in buffer, use 0 channel data ("all channels"), if exists
-    const ThrsldTechType tech = (m_stgcIdHelper.is_stgc(chnlId))? ThrsldTechType::STGC : ThrsldTechType::MM;
+    const ThrsldTechType tech = (m_idHelperSvc->issTgc(chnlId))? ThrsldTechType::STGC : ThrsldTechType::MM;
     
 	ZeroMap::const_iterator zero_itr = m_zero.find(tech);
 	if (zero_itr != m_zero.end()) {
