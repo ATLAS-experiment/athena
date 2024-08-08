@@ -212,11 +212,8 @@ namespace CP {
             m_replicaSet.insert(trigToy);
 
         ATH_MSG_INFO("MuonTriggerScaleFactors::initialize");
-        static const int years_to_run[5] = {2015, 2016, 2017, 2018, 2022};
+        static const int years_to_run[6] = {2015, 2016, 2017, 2018, 2022, 2023};
         for (const int &year: years_to_run) {
-
-            // skip 2022 Tight WP as it is not supported
-            if ((year == 2022) && (m_muonquality == "Tight")) continue;
             ATH_CHECK(LoadTriggerMap(year));
         }
         return StatusCode::SUCCESS;
@@ -720,7 +717,9 @@ namespace CP {
       else if (run <= 311481) return 2016;
       else if (run <= 340453) return 2017;
       else if (run <= 364292) return 2018;
-      else return 2022;
+      else if (run <= 440613) return 2022;
+      else if (run <= 456749) return 2023;
+      else return 2024;
     }
   
     std::string MuonTriggerScaleFactors::getDataPeriod() const {
@@ -790,6 +789,10 @@ namespace CP {
             if(runNumber >= 430536 && runNumber <= 432180) return "F";
             else if (runNumber >= 435816 && runNumber <= 439927) return "H";
             else if (runNumber >= 440407 && runNumber <= 440613) return "J";
+        }
+        else if (year == 2023) {
+            if(runNumber >= 451094 && runNumber <= 455924) return "F";
+            else if (runNumber >= 455975 && runNumber <= 456749) return "G";
         }
     
       ATH_MSG_FATAL("RunNumber: " << runNumber << " not known! Will stop the code to prevent using wrong SFs.");
