@@ -210,6 +210,10 @@ bool operator< (const AuxVarSort& a, const AuxVarSort& b )
  */
 std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
 {
+  if (!p) {
+    return "(null)";
+  }
+
   std::ostringstream os;
 
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
