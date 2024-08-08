@@ -112,6 +112,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NMU_selector(text, cfg)
         elif "SUM_EL_N_MU_N" in text.split():
             self.add_SUMNELNMU_selector(text, cfg)
+        elif "JET_N_GHOST" in text.split():
+            self.add_NJETGHOST_selector(text, cfg)
         elif "JET_N" in text.split():
             self.add_NJET_selector(text, cfg)
         elif "JET_N_BTAG" in text.split():
@@ -120,6 +122,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NPH_selector(text, cfg)
         elif "TAU_N" in text.split():
             self.add_NTAU_selector(text, cfg)
+        elif "LJET_N_GHOST" in text.split():
+            self.add_NLJETGHOST_selector(text, cfg)
         elif "LJET_N" in text.split():
             self.add_NLJET_selector(text, cfg)
         elif "MET" in text.split():
@@ -207,6 +211,20 @@ class EventSelectionConfig(ConfigBlock):
             raise ValueError (f"[EventSelectionConfig] Misconfiguration! {test} should be provided as 'btagger:btagWP'")
         else:
             return test
+
+    def check_ghosts(self, test):
+        test = self.check_string(test)
+        values = test.split("!")
+        ghost_map = {
+            "B": "GhostBHadronsFinalCount",
+            "C": "GhostCHadronsFinalCount",
+            "T": "GhostTQuarksFinalCount",
+            "W": "GhostWBosonsCount",
+            "Z": "GhostZBosonsCount",
+            "H": "GhostHBosonsCount",
+            "TAU": "GhostTausFinalCount"
+        }
+        return [ghost_map.get(value.upper(), value) for value in values]
 
     def getCutflow(self):
         return self.cutflow
@@ -372,7 +390,7 @@ class EventSelectionConfig(ConfigBlock):
         alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
         particles, selection = config.readNameAndSelection(self.jets)
         alg.particles = particles
-        alg.objectSelection = f'{selection}&&{self.btagDecoration},as_char'
+        alg.objectSelection = f'{selection}&&{self.btagDecoration},as_char' if selection else f'{self.btagDecoration},as_char'
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         if len(items) == 3:
             alg.sign  = self.check_sign(items[1])
@@ -380,7 +398,7 @@ class EventSelectionConfig(ConfigBlock):
         elif len(items) == 4:
             btagger, btagWP = self.check_btagging(items[1])
             customBtag = f'ftag_select_{btagger}_{btagWP}'
-            alg.objectSelection = f'{selection}&&{customBtag},as_char'
+            alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
             alg.sign  = self.check_sign(items[2])
             alg.count = self.check_int(items[3])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
@@ -520,6 +538,54 @@ class EventSelectionConfig(ConfigBlock):
             alg.sign     = self.check_sign(items[4])
             alg.count    = self.check_int(items[5])
             alg.vetoMode = (len(items) ==7 and self.check_string(items[6]) == "veto")
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_NJETGHOST_selector(self, text, config):
+        items = text.split()
+        if items[0] != "JET_N_GHOST":
+            self.raise_misconfig(text, "JET_N_GHOST")
+        if len(items) != 4 and len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NJETGHOST_{self.step}'
+        alg = config.createAlgorithm('CP::JetNGhostSelectorAlg', thisalg)
+        alg.jets, alg.jetSelection = config.readNameAndSelection(self.jets)
+        ghosts = self.check_ghosts(items[1])
+        alg.ghost = ghosts[0]
+        if len(ghosts) > 1 :
+            alg.veto = ghosts[1]
+        if len(items) == 4:
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            alg.minPt = self.check_float(items[2])
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_NLJETGHOST_selector(self, text, config):
+        items = text.split()
+        if items[0] != "LJET_N_GHOST":
+            self.raise_misconfig(text, "LJET_N_GHOST")
+        if len(items) != 4 and len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NLJETGHOST_{self.step}'
+        alg = config.createAlgorithm('CP::JetNGhostSelectorAlg', thisalg)
+        alg.jets, alg.jetSelection = config.readNameAndSelection(self.largeRjets)
+        ghosts = self.check_ghosts(items[1])
+        alg.ghost = ghosts[0]
+        if len(ghosts) > 1 :
+            alg.veto = ghosts[1]
+        if len(items) == 4:
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            alg.minPt = self.check_float(items[2])
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return

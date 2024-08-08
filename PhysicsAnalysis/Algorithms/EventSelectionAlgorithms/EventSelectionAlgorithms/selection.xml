@@ -13,6 +13,7 @@
   <class name="CP::NLargeRJetMassWindowSelectorAlg" />
   <class name="CP::DileptonOSSFInvariantMassWindowSelectorAlg" />
   <class name="CP::SumNElNMuPtSelectorAlg" />
+  <class name="CP::JetNGhostSelectorAlg" />
 
 </lcgdict>
 
