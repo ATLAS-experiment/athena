@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArSimEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( LArSimEventTPCnv
-                         src/*.cxx
+atlas_add_library( LArSimEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS LArSimEventTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib LArSimEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel Identifier StoreGateLib )
+
+atlas_add_tpcnv_library( LArSimEventTPCnvFactory
+                         src/factory/*.cxx
                          PUBLIC_HEADERS LArSimEventTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib LArSimEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel CaloIdentifier GaudiKernel Identifier StoreGateLib )
+                         LINK_LIBRARIES LArSimEventTPCnv )
 
 atlas_add_dictionary( LArSimEventTPCnvDict
                       LArSimEventTPCnv/LArSimEventTPCnvDict.h

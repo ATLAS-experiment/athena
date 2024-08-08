@@ -1,13 +1,18 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloSimEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( CaloSimEventTPCnv
-                         src/*.cxx
+atlas_add_library( CaloSimEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS CaloSimEventTPCnv
+                   LINK_LIBRARIES CaloSimEvent AthenaPoolCnvSvcLib Identifier TestTools CaloIdentifier AthenaKernel GaudiKernel )
+
+atlas_add_tpcnv_library( CaloSimEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS CaloSimEventTPCnv
-                         LINK_LIBRARIES CaloSimEvent AthenaPoolCnvSvcLib Identifier TestTools CaloIdentifier AthenaKernel GaudiKernel )
+                         LINK_LIBRARIES CaloSimEventTPCnv )
 
 atlas_add_dictionary( CaloSimEventTPCnvDict
                       CaloSimEventTPCnv/CaloSimEventTPCnvDict.h

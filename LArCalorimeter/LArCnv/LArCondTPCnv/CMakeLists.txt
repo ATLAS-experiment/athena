@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCondTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( LArCondTPCnv
-                         src/*.cxx
+atlas_add_library( LArCondTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS LArCondTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib LArRawConditions
+                   PRIVATE_LINK_LIBRARIES AthenaKernel LArElecCalib )
+
+atlas_add_tpcnv_library( LArCondTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS LArCondTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib LArRawConditions
-                         PRIVATE_LINK_LIBRARIES AthenaKernel LArElecCalib )
+                         LINK_LIBRARIES LArCondTPCnv )
 
 atlas_add_dictionary( LArCondTPCnvDict
                       LArCondTPCnv/LArCondTPCnvDict.h
