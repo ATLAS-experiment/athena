@@ -27,7 +27,7 @@ atlas_add_test( SCT_ID_test
                 SOURCES
                 test/SCT_ID_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  
-                LINK_LIBRARIES ${Boost_LIBRARIES} IdDictParser InDetIdentifier
+                LINK_LIBRARIES ${Boost_LIBRARIES} IdDictParser Identifier InDetIdentifier
                 POST_EXEC_SCRIPT "nopost.sh"                
                 )
 set_target_properties( InDetIdentifier_SCT_ID_test  PROPERTIES ENABLE_EXPORTS True )

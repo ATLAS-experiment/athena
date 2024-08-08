@@ -9,7 +9,7 @@ find_package( Boost COMPONENTS container unit_test_framework)
 # Component(s) in the package:
 atlas_add_library( Identifier
    src/Identifier.cxx src/Identifier32.cxx
-   src/ExpandedIdentifier.cxx src/Range.cxx
+   src/ExpandedIdentifier.cxx src/Range.cxx src/IdentifierField.cxx
    src/Identifiable.cxx src/IdHelper.cxx src/IdContext.cxx
    PUBLIC_HEADERS Identifier
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -26,7 +26,13 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
 endif()
 
 atlas_add_test(range_test
-  SOURCES src/Range.cxx test/range_test.cxx
+  SOURCES src/Range.cxx src/IdentifierField.cxx test/range_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+  POST_EXEC_SCRIPT nopost.sh 
+)
+atlas_add_test(IdentifierField_test
+  SOURCES src/IdentifierField.cxx test/IdentifierField_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
   POST_EXEC_SCRIPT nopost.sh 
