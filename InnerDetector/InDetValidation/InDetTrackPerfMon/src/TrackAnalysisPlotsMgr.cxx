@@ -62,6 +62,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+    if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
+      m_plots_eff_vsTruth = std::make_unique< EfficiencyPlots >(
+          this, "Tracks/Efficiencies", m_anaTag, "truth" );
+    }
   }
 
   /// Resolution plots
@@ -122,6 +126,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
         trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.matches(), weight ) );
   } 
+
+  /// Plots w.r.t. truth quantities (for EFTruthMatch only)
+  if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
+    ATH_CHECK( fillPlotsTruth(
+        trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
+        trkAnaColls.truthPartVec( TrackAnalysisCollections::InRoI ),
+        trkAnaColls.matches(), weight ) );
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -242,3 +254,38 @@ template StatusCode
 IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle >(
     const std::vector< const xAOD::TruthParticle* >& particles,
     const ITrackMatchingLookup& matches, float weight );
+
+
+/// ------------------------------
+/// --- Fill plots w.r.t. truth ---
+/// ------------------------------
+StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
+    const std::vector< const xAOD::TrackParticle* >& tracks,
+    const std::vector< const xAOD::TruthParticle* >& truths,
+    const ITrackMatchingLookup& matches, float weight )
+{
+  for( const xAOD::TruthParticle* thisTruth : truths ) {
+
+    /// Loop over tracks to find if truth is matched
+    bool isMatched( false );
+    for( const xAOD::TrackParticle* thisTrack : tracks ) {
+      const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
+          *thisTrack, m_trkAnaDefSvc->truthProbCut() );
+      if( not linkedTruth ) {
+        ATH_MSG_WARNING( "Unlinked track!!" );
+        continue;
+      }
+      if( thisTruth == linkedTruth ) {
+        isMatched = matches.isTestMatched( *thisTrack );
+        break;
+      }
+    } // close loop over tracks
+
+    /// efficiency plots (for EFTruthMatch only)
+    if( m_plots_eff_vsTruth ) {
+      ATH_CHECK( m_plots_eff_vsTruth->fillPlots( *thisTruth, isMatched, weight ) );
+    }
+  } // close loop over truth particles
+
+  return StatusCode::SUCCESS;
+}

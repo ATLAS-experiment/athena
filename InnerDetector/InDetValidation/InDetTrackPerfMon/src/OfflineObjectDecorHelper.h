@@ -73,9 +73,12 @@ namespace IDTPM {
   inline bool isUnlinkedTruth( const xAOD::TruthParticle& ) { return false; }; // dummy - to avoid compilation errors
 
   float getTruthMatchProb( const xAOD::TrackParticle& track );
+  inline float getTruthMatchProb( const xAOD::TruthParticle& ) { return -1.; }; // dummy - to avoid compilation errors
 
   const xAOD::TruthParticle* getLinkedTruth( const xAOD::TrackParticle& track,
                                              const float truthProbCut=0. );
+  inline const xAOD::TruthParticle* getLinkedTruth(
+      const xAOD::TruthParticle&, const float ) { return nullptr; }; // dummy - to avoid compilation errors
 
   bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut=0. );
   inline bool isFakeTruth( const xAOD::TruthParticle&, const float ) { return false; }; // dummy - to avoid compilation errors

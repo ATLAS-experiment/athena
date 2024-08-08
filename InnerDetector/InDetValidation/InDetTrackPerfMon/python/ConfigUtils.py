@@ -174,6 +174,9 @@ def getPlotsDefList( flags ):
         getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
     ]
 
+    if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
+        trkLabels.append( getLabel( flags, "Truth" ) )
+
     plotsDefStrList = []
     for plotsDefStr in plotsDefStrList_v2 :
         if ( "$TRKTAG" not in plotsDefStr ) and ( "$TRKTYPE" not in plotsDefStr ) :
