@@ -11,11 +11,7 @@
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
-
-// Forward declarations
-class Identifier;
-class MmIdHelper;
-class sTgcIdHelper;
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 
 class NswCalibDbThresholdData {
@@ -28,7 +24,7 @@ public:
         STGC        
     };
 
-    NswCalibDbThresholdData(const MmIdHelper&, const sTgcIdHelper&);
+    NswCalibDbThresholdData(const Muon::IMuonIdHelperSvc* idHelperSvc);
     virtual ~NswCalibDbThresholdData() = default;
 
 	// setting functions
@@ -49,9 +45,7 @@ private:
     ZeroMap m_zero{};
 
 	// ID helpers
-	const MmIdHelper&   m_mmIdHelper;
-	const sTgcIdHelper& m_stgcIdHelper;
-
+  const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
 };
 
 CLASS_DEF( NswCalibDbThresholdData , 108292495 , 1 )

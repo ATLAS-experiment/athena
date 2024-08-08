@@ -15,6 +15,7 @@
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
+#include "MuonTesterTree/throwExcept.h"
 
 #include<ctime>
 
@@ -28,18 +29,21 @@ NswCalibDbAlg::initialize(){
   ATH_CHECK(m_idHelperSvc.retrieve());
 
   // initialize read keys
-  ATH_CHECK(m_readKey_mm_sidea_tdo  .initialize(!m_readKey_mm_sidea_tdo  .empty()             ));
-  ATH_CHECK(m_readKey_mm_sidec_tdo  .initialize(!m_readKey_mm_sidec_tdo  .empty()             ));
-  ATH_CHECK(m_readKey_mm_sidea_pdo  .initialize(!m_readKey_mm_sidea_pdo  .empty()             ));
-  ATH_CHECK(m_readKey_mm_sidec_pdo  .initialize(!m_readKey_mm_sidec_pdo  .empty()             ));
-  ATH_CHECK(m_readKey_mm_sidea_thr  .initialize(!m_readKey_mm_sidea_thr  .empty() && !m_isData));
-  ATH_CHECK(m_readKey_mm_sidec_thr  .initialize(!m_readKey_mm_sidec_thr  .empty() && !m_isData));
-  ATH_CHECK(m_readKey_stgc_sidea_tdo.initialize(!m_readKey_stgc_sidea_tdo.empty()             ));
-  ATH_CHECK(m_readKey_stgc_sidec_tdo.initialize(!m_readKey_stgc_sidec_tdo.empty()             ));
-  ATH_CHECK(m_readKey_stgc_sidea_pdo.initialize(!m_readKey_stgc_sidea_pdo.empty()             ));
-  ATH_CHECK(m_readKey_stgc_sidec_pdo.initialize(!m_readKey_stgc_sidec_pdo.empty()             ));
-  ATH_CHECK(m_readKey_stgc_sidea_thr.initialize(!m_readKey_stgc_sidea_thr.empty() && !m_isData));
-  ATH_CHECK(m_readKey_stgc_sidec_thr.initialize(!m_readKey_stgc_sidec_thr.empty() && !m_isData));
+  ATH_CHECK(m_readKey_mm_sidea_tdo  .initialize(!m_readKey_mm_sidea_tdo  .empty() && m_idHelperSvc->hasMM()             ));
+  ATH_CHECK(m_readKey_mm_sidec_tdo  .initialize(!m_readKey_mm_sidec_tdo  .empty() && m_idHelperSvc->hasMM()             ));
+  ATH_CHECK(m_readKey_mm_sidea_pdo  .initialize(!m_readKey_mm_sidea_pdo  .empty() && m_idHelperSvc->hasMM()             ));
+  ATH_CHECK(m_readKey_mm_sidec_pdo  .initialize(!m_readKey_mm_sidec_pdo  .empty() && m_idHelperSvc->hasMM()             ));
+  ATH_CHECK(m_readKey_mm_sidea_thr  .initialize(!m_readKey_mm_sidea_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData));
+  ATH_CHECK(m_readKey_mm_sidec_thr  .initialize(!m_readKey_mm_sidec_thr  .empty() && m_idHelperSvc->hasMM() && !m_isData));
+  ATH_CHECK(m_readKey_stgc_sidea_tdo.initialize(!m_readKey_stgc_sidea_tdo.empty() && m_idHelperSvc->hasSTGC()            ));
+  ATH_CHECK(m_readKey_stgc_sidec_tdo.initialize(!m_readKey_stgc_sidec_tdo.empty() && m_idHelperSvc->hasSTGC()            ));
+  ATH_CHECK(m_readKey_stgc_sidea_pdo.initialize(!m_readKey_stgc_sidea_pdo.empty() && m_idHelperSvc->hasSTGC()            ));
+  ATH_CHECK(m_readKey_stgc_sidec_pdo.initialize(!m_readKey_stgc_sidec_pdo.empty() && m_idHelperSvc->hasSTGC()            ));
+  ATH_CHECK(m_readKey_stgc_sidea_thr.initialize(!m_readKey_stgc_sidea_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData));
+  ATH_CHECK(m_readKey_stgc_sidec_thr.initialize(!m_readKey_stgc_sidec_thr.empty() && m_idHelperSvc->hasSTGC() && !m_isData));
+  m_loadMmT0Data = m_loadMmT0Data && m_idHelperSvc->hasMM() && (!m_mmT0FilePath.empty() || !m_readKey_mm_t0.empty());
+  m_loadsTgcT0Data = m_loadsTgcT0Data && m_idHelperSvc->hasSTGC() && (!m_stgcT0FilePath.empty() || !m_readKey_stgc_t0.empty()) ;
+
   ATH_CHECK(m_readKey_mm_t0.initialize(!m_readKey_mm_t0.empty() && m_loadMmT0Data));
   ATH_CHECK(m_readKey_stgc_t0.initialize(!m_readKey_stgc_t0.empty() && m_loadsTgcT0Data));
 
@@ -82,19 +86,35 @@ NswCalibDbAlg::processTdoPdoData(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of time/charge output is " << wrHdl.getRange());
-  std::unique_ptr<NswCalibDbTimeChargeData> wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  std::unique_ptr<NswCalibDbTimeChargeData> wrCdo{std::make_unique<NswCalibDbTimeChargeData>(m_idHelperSvc.get())};
 
   // MM
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidea_tdo  , TimeChargeTech::MM  , TimeChargeType::TDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidec_tdo  , TimeChargeTech::MM  , TimeChargeType::TDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidea_pdo  , TimeChargeTech::MM  , TimeChargeType::PDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidec_pdo  , TimeChargeTech::MM  , TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  if(!m_readKey_mm_sidea_tdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidea_tdo  , TimeChargeTech::MM  , TimeChargeType::TDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_mm_sidec_tdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidec_tdo  , TimeChargeTech::MM  , TimeChargeType::TDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_mm_sidea_pdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidea_pdo  , TimeChargeTech::MM  , TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_mm_sidec_pdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_mm_sidec_pdo  , TimeChargeTech::MM  , TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  }
 
   // sTGC
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidea_tdo, TimeChargeTech::STGC, TimeChargeType::TDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidec_tdo, TimeChargeTech::STGC, TimeChargeType::TDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidea_pdo, TimeChargeTech::STGC, TimeChargeType::PDO, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidec_pdo, TimeChargeTech::STGC, TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  if(!m_readKey_stgc_sidea_tdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidea_tdo, TimeChargeTech::STGC, TimeChargeType::TDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_stgc_sidec_tdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidec_tdo, TimeChargeTech::STGC, TimeChargeType::TDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_stgc_sidea_pdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidea_pdo, TimeChargeTech::STGC, TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_stgc_sidec_pdo.empty()) {
+    ATH_CHECK(loadTimeChargeData(ctx, m_readKey_stgc_sidec_pdo, TimeChargeTech::STGC, TimeChargeType::PDO, wrHdl, wrCdo.get()));
+  }
 
   // insert/write data for time/charge data
   if (wrHdl.record(std::move(wrCdo)).isFailure()) {
@@ -125,12 +145,20 @@ NswCalibDbAlg::processThrData(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of threshold output is " << wrHdl.getRange());
-  std::unique_ptr<NswCalibDbThresholdData> wrCdo{std::make_unique<NswCalibDbThresholdData>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  std::unique_ptr<NswCalibDbThresholdData> wrCdo{std::make_unique<NswCalibDbThresholdData>(m_idHelperSvc.get())};
 
-  ATH_CHECK(loadThresholdData(ctx, m_readKey_mm_sidea_thr  , ThresholdTech::MM  , wrHdl, wrCdo.get()));
-  ATH_CHECK(loadThresholdData(ctx, m_readKey_mm_sidec_thr  , ThresholdTech::MM  , wrHdl, wrCdo.get()));
-  ATH_CHECK(loadThresholdData(ctx, m_readKey_stgc_sidea_thr, ThresholdTech::STGC, wrHdl, wrCdo.get()));
-  ATH_CHECK(loadThresholdData(ctx, m_readKey_stgc_sidec_thr, ThresholdTech::STGC, wrHdl, wrCdo.get()));
+  if(!m_readKey_mm_sidea_thr.empty()) {
+    ATH_CHECK(loadThresholdData(ctx, m_readKey_mm_sidea_thr  , ThresholdTech::MM  , wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_mm_sidec_thr.empty()) {
+    ATH_CHECK(loadThresholdData(ctx, m_readKey_mm_sidec_thr  , ThresholdTech::MM  , wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_stgc_sidea_thr.empty()) {
+    ATH_CHECK(loadThresholdData(ctx, m_readKey_stgc_sidea_thr, ThresholdTech::STGC, wrHdl, wrCdo.get()));
+  }
+  if(!m_readKey_stgc_sidec_thr.empty()) {
+    ATH_CHECK(loadThresholdData(ctx, m_readKey_stgc_sidec_thr, ThresholdTech::STGC, wrHdl, wrCdo.get()));
+  }
   
   // insert/write data for threshold data
   if (wrHdl.record(std::move(wrCdo)).isFailure()) {
@@ -156,10 +184,10 @@ NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG("Range of MmT0 output is " << wrHdl.getRange());
-  std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc.get())};
   if(m_loadMmT0Data){
     if(!m_mmT0FilePath.empty()  ){ // let's read the constants from a  file
-      ATH_MSG_INFO("processing MM T0 from file " << m_stgcT0FilePath);
+      ATH_MSG_INFO("processing MM T0 from file " << m_mmT0FilePath);
       wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
       std::unique_ptr<TFile> file (TFile::Open(m_mmT0FilePath.value().c_str()));
       if(!file || file->IsZombie()){
@@ -481,7 +509,7 @@ NswCalibDbAlg::buildChannelId(Identifier& channelId, unsigned int elinkId, unsig
       stationName = resId->is_large_station () ? "STL" : "STS";
   } else {
       ATH_MSG_ERROR("NSWResource Id "<< elinkId << " does not yield detID that is either sTGC or MMG");
-      throw std::runtime_error("NSWCalibDbAlg buildChannelId called with detID that is neither sTGC or MMG"); 
+      THROW_EXCEPTION("NSWCalibDbAlg buildChannelId called with detID that is neither sTGC or MMG"); 
   }
 
   int8_t   stationEta    = resId->station_eta ();

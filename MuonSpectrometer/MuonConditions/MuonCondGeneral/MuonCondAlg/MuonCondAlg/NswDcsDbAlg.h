@@ -78,8 +78,10 @@ private:
 	Gaudi::Property<bool> m_loadTdaq{this, "LoadTdaq",false,"enable the processing of Elinks in the NswDcsDbAlg"};
 	Gaudi::Property<bool> m_loadEltx{this, "LoadEltx",false,"enable the processing of SCAs in the NswDcsDbAlg"};
 
-	const MuonGM::MuonDetectorManager *m_muDetMgrFromDetStore; 
- 
+	SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonManagerKey{
+        this, "DetectorManagerKey", "MuonDetectorManager",
+        "Key of input MuonDetectorManager condition data"};
+    const MuonGM::MuonDetectorManager* m_detManager{nullptr}; 
 };
 
 

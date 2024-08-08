@@ -31,7 +31,7 @@ public:
        //float interceptError{0.};       
     };
     
-    NswCalibDbTimeChargeData(const MmIdHelper& mmHelper, const sTgcIdHelper& stgcHelper);
+    NswCalibDbTimeChargeData(const Muon::IMuonIdHelperSvc* idHelperSvc);
     virtual ~NswCalibDbTimeChargeData() = default;
 
 	// setting functions
@@ -84,9 +84,7 @@ private:
     std::map<MuonCond::CalibTechType, ZeroCalibMap> m_zero{};
 
 	// ID helpers
-	const MmIdHelper&   m_mmIdHelper;
-	const sTgcIdHelper& m_stgcIdHelper;
-
+    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
 };
 
 std::ostream& operator<<(std::ostream& ostr, const NswCalibDbTimeChargeData::CalibConstants& obj);

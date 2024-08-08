@@ -41,6 +41,7 @@
 
 #include "TFile.h"
 #include "TSpline.h"
+#include "MuonTesterTree/throwExcept.h"
 
 using namespace MuonCalib;
 using namespace CxxUtils;
@@ -912,7 +913,7 @@ std::unique_ptr<MuonCalib::RtResolutionLookUp> MdtCalibDbAlg::getRtResolutionInt
       if (std::isnan(res_param[k + 2])) {
         TFile outf("kacke.root", "RECREATE");
         sp.Write("kacke");
-        throw std::runtime_error("MdtCalibDbAlg::getRtResolutionInterpolation "
+        THROW_EXCEPTION("MdtCalibDbAlg::getRtResolutionInterpolation "
                                  "encountered nan element");
       }
     }
