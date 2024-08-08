@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_InDetPhysHitDecoratorAlg_H
@@ -54,8 +54,8 @@ private:
   bool
   decorateTrack(const xAOD::TrackParticle &particle,
                 std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<float> > > &float_decor,
-		  std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<int> > > &int_decor,
-		  std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<uint64_t> > > &uint64_decor) const;
+                std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<int> > > &int_decor,
+                std::vector< SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector<uint64_t> > > &uint64_decor) const;
 
   ToolHandle<Trk::ITrackHoleSearchTool>    m_holeSearchTool;
   ToolHandle<Trk::IUpdator>    m_updatorHandle; // !< Tool handle of updator for unbiased states
@@ -102,8 +102,6 @@ private:
   Gaudi::Property<std::string> m_prefix
     {this, "Prefix", "", "Decoration prefix to avoid clashes."};
 
-  const double m_ptThreshold;
-  bool m_doUpgrade;
   mutable std::atomic<bool> m_alreadyWarned{false};
   // the following help identify a surface in the detector
   const AtlasDetectorID* m_idHelper;
