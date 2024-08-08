@@ -191,6 +191,10 @@ class PileupReweightingBlock (ConfigBlock):
                 log.info('Using user provided PRW configuration')
 
             else:
+                if self.useDefaultConfig and self.files is None:
+                    raise ValueError('useDefaultConfig requires files to be configured! '
+                                    'Either pass them as an option or use flags.')
+
                 from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
                 if campaign and campaign is not Campaign.Unknown:
                     toolConfigFiles = getConfigurationFiles(campaign=campaign,
