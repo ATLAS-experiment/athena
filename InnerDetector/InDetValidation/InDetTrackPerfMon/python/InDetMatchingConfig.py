@@ -142,7 +142,7 @@ def TrackMatchingToolCfg( flags, **kwargs ):
 
     ## Matching track to track via truthParticleLink decorations
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
-        if "EFtrigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and "Offline" in flags.PhysVal.IDTPM.currentTrkAna.RefType:
+        if "EFTrigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType and "Offline" in flags.PhysVal.IDTPM.currentTrkAna.RefType:
             return EFTrackMatchingToolCfg(
                     flags, name="EFTrackMatchingTool" +
                         flags.PhysVal.IDTPM.currentTrkAna.anaTag, **kwargs )

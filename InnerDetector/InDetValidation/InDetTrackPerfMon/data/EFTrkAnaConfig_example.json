@@ -1,16 +1,24 @@
 {
-    "TrkAnaEFOffl" : {
-        "enabled" : true,
-        "TestType"  : "EFTrigger",
-        "RefType"   : "Offline",
-        "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
-        "MatchingType"  : "EFTruthMatch" 
-    },
-    "TrkAnaEFTruth" : {
+    "TrkAnaEF" : {
         "enabled" : true,
         "TestType"  : "EFTrigger",
         "RefType"   : "Truth",
         "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
         "MatchingType"  : "TruthMatch" 
+    },
+    "TrkAnaOffl" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "MatchingType"  : "TruthMatch" 
+    },
+    "TrkAnaDoubleRatio" : {
+        "enabled" : true,
+        "TestType"  : "EFTrigger",
+        "RefType"   : "Offline",
+        "TrigTrkKey": "xAODFPGAProtoTracksTrackParticles",
+        "MatchingType"  : "EFTruthMatch",
+        "SelectOfflineObject" : "Truth",
+        "plotTrackParameters" : false 
     }
 }

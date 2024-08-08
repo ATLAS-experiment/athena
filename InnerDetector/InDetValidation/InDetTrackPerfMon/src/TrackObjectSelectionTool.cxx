@@ -69,8 +69,11 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
                 TrackAnalysisCollections::FS ) );
 
   /// Do the truth-link selection (EF) Trigger, too
-  if( not trkAnaDefSvc->useEFTrigger() and
+  if( trkAnaDefSvc->useEFTrigger() and
       m_objectType.value().find("Truth") != std::string::npos ) {
+
+    ATH_MSG_DEBUG( "Now doing EFTrack-truth selection" );
+
     /// started loop over trigger tracks
     newVec.clear();
     for( const xAOD::TrackParticle* thisTrack :

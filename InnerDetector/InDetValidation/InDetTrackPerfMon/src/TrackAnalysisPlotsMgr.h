@@ -76,6 +76,12 @@ namespace IDTPM {
         const std::vector< const PARTICLE* >& particles,
         const ITrackMatchingLookup& matches, float weight=1.0 );
 
+    /// Fill efficiency plots w.r.t. truth (for EFTruthMatch only)
+    StatusCode fillPlotsTruth(
+        const std::vector< const xAOD::TrackParticle* >& tracks,
+        const std::vector< const xAOD::TruthParticle* >& truths,
+        const ITrackMatchingLookup& matches, float weight=1.0 );
+
   private :
 
     std::string m_anaTag;
@@ -92,6 +98,8 @@ namespace IDTPM {
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
+    /// plots w.r.t. efficiency plots w.r.t. truth (for EFTruthMatch only)
+    std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTruth;
     /// resolution plots
     std::unique_ptr< ResolutionPlots >       m_plots_resolution;
     /// fake rate plots (only when reference=truth)
