@@ -624,15 +624,22 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].outputs
 
 
-    def getSelectionNames (self, containerName) :
+    def getSelectionNames (self, containerName, excludeFrom = None) :
         """Retrieve set of unique selections defined for a given container"""
         if containerName not in self._containerConfig :
             return []
+        if excludeFrom is None:
+            excludeFrom = set()
+        elif not isinstance(excludeFrom, set) :
+            raise ValueError ('invalid excludeFrom argument (need set of strings): ' + str(excludeFrom))
+
         config = self._containerConfig[containerName]
         # because cuts are registered individually, selection names can repeat themselves
         # but we are interested in unique names only
         selectionNames = set()
         for selection in config.selections:
+            if selection.comesFrom in excludeFrom:
+                continue
             # skip flags which should be disabled in output
             if selection.writeToOutput:
                 selectionNames.add(selection.name)
