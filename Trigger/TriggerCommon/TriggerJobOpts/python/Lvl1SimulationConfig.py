@@ -38,11 +38,6 @@ def Lvl1SimulationCfg(flags, seqName = None):
         from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
         acc.merge(L1TopoSimulationCfg(flags), sequenceName='L1TopoSimSeq')
 
-        if flags.Trigger.enableL1CaloLegacy:
-            acc.addSequence(seqAND('L1LegacyTopoSimSeq'), parentName='L1SimSeq')
-            from L1TopoSimulation.L1TopoSimulationConfig import L1LegacyTopoSimulationCfg
-            acc.merge(L1LegacyTopoSimulationCfg(flags), sequenceName='L1LegacyTopoSimSeq')
-
     if flags.Trigger.doZDC:
         acc.addSequence(seqAND('L1ZDCSimSeq'),parentName='L1SimSeq')
         from TrigT1ZDC.TrigT1ZDCConfig import L1ZDCSimCfg

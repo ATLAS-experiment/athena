@@ -23,6 +23,10 @@ namespace {
   constexpr double endcap_end = 1.9;
   constexpr double trigger_end = 2.4;
 
+  /// L1Muon geometric parameters
+  constexpr int number_of_trigger_sectors_endcap = 48;
+  constexpr int number_of_trigger_sectors_forward = 24;
+
   // offset for better drawing
   constexpr double tgc_coin_phi_small_offset = 0.0001;
 
@@ -1400,6 +1404,12 @@ return (m.muon->charge()>0);
       std::vector< TgcTrigRpc > tgcTrigRpcMap;
       std::vector< TgcTrigEifi > tgcTrigEifiMap;
       std::map<TString, TgcTrigNsw > tgcTrigNswMapUnique;
+      std::vector<int> multiplicity_endcap(number_of_trigger_sectors_endcap*2+1); // both A and C sides, plus one empty bin
+      std::vector<int> multiplicity_forward(number_of_trigger_sectors_forward*2+1); // both A and C sides, plus one empty bin
+      std::vector<int> sectors_endcap(number_of_trigger_sectors_endcap*2+1); // both A and C sides, plus one empty bin
+      std::vector<int> sectors_forward(number_of_trigger_sectors_forward*2+1); // both A and C sides, plus one empty bin
+      std::iota(sectors_endcap.begin(),sectors_endcap.end(),-number_of_trigger_sectors_endcap);
+      std::iota(sectors_forward.begin(),sectors_forward.end(),-number_of_trigger_sectors_forward);
       int n_TgcCoin_detElementIsNull = 0;
       int n_TgcCoin_postOutPtrIsNull = 0;
       for (auto thisCoin : tgcCoin) {
@@ -1409,7 +1419,7 @@ return (m.muon->charge()>0);
 	    if ( data->detectorElementOut() == nullptr ) n_TgcCoin_detElementIsNull++;
 	    if ( data->posOutPtr() == nullptr ) n_TgcCoin_postOutPtrIsNull++;
 
-	    int slsector = (data->isForward()) ? ( data->phi() % 24 + 1) : ( (data->phi() + 1) % 48 + 1); // translation from the phi index to trigger sector
+	    int slsector = (data->isForward()) ? ( data->phi() % number_of_trigger_sectors_forward + 1) : ( (data->phi() + 1) % number_of_trigger_sectors_endcap + 1); // translation from the phi index to trigger sector
 	    if(!data->isAside()) slsector *= -1;
 
 	    if(data->type() == Muon::TgcCoinData::TYPE_UNKNOWN){ // inner muon detectors (EI/FI/Tile/NSW/RPCBIS78)
@@ -1556,9 +1566,11 @@ return (m.muon->charge()>0);
 	      if (data->type() == Muon::TgcCoinData::TYPE_SL && !data->isForward()) {
 		tgcTrigMap_SL_Endcap.push_back(tgcTrig);
 		tgcTrigMap_SL.push_back(tgcTrig);
+		multiplicity_endcap[ slsector + number_of_trigger_sectors_endcap ]++;
 	      }else if (data->type() == Muon::TgcCoinData::TYPE_SL && data->isForward()) {
 		tgcTrigMap_SL_Forward.push_back(tgcTrig);
 		tgcTrigMap_SL.push_back(tgcTrig);
+		multiplicity_forward[ slsector + number_of_trigger_sectors_forward ]++;
 	      }else if(data->type() == Muon::TgcCoinData::TYPE_HIPT && !data->isForward()){
 		if(tgcTrig.isStrip){
 		  tgcTrigMap_HPT_Endcap_Strip.push_back(tgcTrig);
@@ -1713,8 +1725,17 @@ return (m.muon->charge()>0);
       
       auto mon_nTgcCoin_detElementIsNull = Monitored::Scalar<int>("nTgcCoinDetElementIsNull", n_TgcCoin_detElementIsNull);
       auto mon_nTgcCoin_postOutPtrIsNull = Monitored::Scalar<int>("nTgcCoinPostOutPtrIsNull", n_TgcCoin_postOutPtrIsNull);
-      tgcCoin_variables.push_back(mon_nTgcCoin_detElementIsNull);
-      tgcCoin_variables.push_back(mon_nTgcCoin_postOutPtrIsNull);
+      auto mon_sectors_endcap = Monitored::Collection("trigger_sectors_endcap", sectors_endcap);
+      auto mon_sectors_forward = Monitored::Collection("trigger_sectors_forward", sectors_forward);
+      auto mon_multiplicity_endcap = Monitored::Collection("trigger_multiplicity_endcap", multiplicity_endcap);
+      auto mon_multiplicity_forward = Monitored::Collection("trigger_multiplicity_forward", multiplicity_forward);
+      tgcCoin_variables.emplace_back(mon_nTgcCoin_detElementIsNull);
+      tgcCoin_variables.emplace_back(mon_nTgcCoin_postOutPtrIsNull);
+      tgcCoin_variables.emplace_back(mon_sectors_endcap);
+      tgcCoin_variables.emplace_back(mon_sectors_forward);
+      tgcCoin_variables.emplace_back(mon_multiplicity_endcap);
+      tgcCoin_variables.emplace_back(mon_multiplicity_forward);
+
 
       std::vector<Monitored::ObjectsCollection<std::vector<TgcTrig>, double>> vo_coin;
       vo_coin.reserve(38 * 21);
