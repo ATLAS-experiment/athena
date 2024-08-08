@@ -73,6 +73,9 @@ E.g. to run just the jFex monitoring, without offline simulation, you can do:
 
 athena TrigT1CaloMonitoring/L1CalPhase1Monitoring.py .... -- Trigger.enableL1CaloPhase1=False Trigger.L1.doCaloInputs=False Trigger.L1.doeFex=False Trigger.L1.dogFex=False
 
+Further notes: Run with "--evtMax 0" to print flags and ca config, and generate a hanConfig file.
+               Run with "--evtMax 1" to dump StoreGate contents after the first event
+
 """)
 import argparse
 #class combinedFormatter(parser.formatter_class,argparse.RawDescriptionHelpFormatter): pass
@@ -128,6 +131,7 @@ if flags.Exec.MaxEvents == 0:
   flags.Trigger.L1.dojFex=True
   flags.Trigger.L1.dogFex=True
   flags.DQ.useTrigger=True # enables JetEfficiency algorithms
+  flags.Exec.OutputLevel = Constants.INFO
 
 # due to https://gitlab.cern.ch/atlas/athena/-/merge_requests/65253 must now specify geomodel explicitly if cant take from input file, but can autoconfigure it based on LHCPeriod set above
 if flags.GeoModel.AtlasVersion is None:
@@ -254,7 +258,7 @@ if flags.DQ.doMonitoring:
     EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'] # default is just L1_eEMRoI
     EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
     #  Adjust eFEX containers to be monitored to also monitor the sim RoI
-    for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + "Sim" for x in l ]
+    for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + ("DAODSim" if flags.Input.Format == Format.POOL and flags.Trigger.enableL1CaloPhase1 else "Sim") for x in l ]
     # monitoring of simulation vs hardware
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
@@ -267,13 +271,13 @@ if flags.DQ.doMonitoring:
   if flags.Trigger.L1.dojFex:
     from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
     cfg.merge(JfexMonitoringConfig(flags))
-    if flags.Trigger.enableL1CaloPhase1:
+    if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
       cfg.merge(JfexSimMonitoringConfig(flags))
   if flags.Trigger.L1.dogFex:
     from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
     cfg.merge(GfexMonitoringConfig(flags))
-    if flags.Trigger.enableL1CaloPhase1:
+    if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
       cfg.merge(GfexSimMonitoringConfig(flags))
     # generally can't include efficiency monitoring because requires too many things we don't have
@@ -392,12 +396,12 @@ for conf in args.postConfig:
 
 # -------- CHANGES GO ABOVE ------------
 
-if flags.Exec.MaxEvents==0: cfg.printConfig()
+if flags.Exec.MaxEvents==0: cfg.printConfig(summariseProps=True)
 print("Configured Services:",*[svc.name for svc in cfg.getServices()])
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])
 
-#cfg.getService("StoreGateSvc").Dump=True
+cfg.getService("StoreGateSvc").Dump=(flags.Exec.MaxEvents==1)
 
 # ensure printout level is low enough if dumping
 if cfg.getService("StoreGateSvc").Dump:
