@@ -117,7 +117,7 @@ public:
 
     // Fill this.  The information comes from the database.
     void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm);//original
-    void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm, std::string hvFT);//29-03-07 include HV 
+    void add_tube (const std::string & tileName, int mod, int id, int i, int j, double xCm, double yCm, const std::string& hvFT);//29-03-07 include HV 
 
 
     // Finish the job. Create the tile map.

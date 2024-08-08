@@ -84,7 +84,7 @@ class FCALDetectorManager : public GeoVDetectorManager
   /**
    * @brief Add a Tree Top
    */
-  void addTreeTop (PVLink treeTop);
+  void addTreeTop (const PVLink& treeTop);
 
   /**
    * @brief Get the HV Manager:

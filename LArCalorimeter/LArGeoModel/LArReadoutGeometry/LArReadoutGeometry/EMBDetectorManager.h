@@ -86,7 +86,7 @@ class EMBDetectorManager : public GeoVDetectorManager
   /**
    * @brief	Add a Tree Top
    */
-  void addTreeTop (PVLink treeTop);
+  void addTreeTop (const PVLink& treeTop);
   
   /**
    * @brief	Collection of useful numerical data for the description of the barrel cells.

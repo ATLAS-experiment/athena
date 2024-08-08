@@ -28,7 +28,7 @@ unsigned int LArDetectorManager::getNumTreeTops () const
   return m_treeTop.size();
 }
 
-void LArDetectorManager::addTreeTop (PVConstLink treeTop)
+void LArDetectorManager::addTreeTop (const PVConstLink& treeTop)
 {
   if (std::find(m_treeTop.begin(),m_treeTop.end(),treeTop)!=m_treeTop.end())  return;
   m_treeTop.push_back(treeTop);

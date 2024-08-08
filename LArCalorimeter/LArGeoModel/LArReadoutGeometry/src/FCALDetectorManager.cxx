@@ -82,7 +82,7 @@ void FCALDetectorManager::addModule (FCALModule* fcalModule)
   fcalModule->setManager(this);
 }
 
-void FCALDetectorManager::addTreeTop (PVLink treeTop)
+void FCALDetectorManager::addTreeTop (const PVLink& treeTop)
 {
   m_treeTop.push_back(treeTop);
 }

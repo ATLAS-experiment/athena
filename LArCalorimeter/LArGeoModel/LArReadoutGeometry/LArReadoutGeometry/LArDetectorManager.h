@@ -43,7 +43,7 @@ class LArDetectorManager : public GeoVDetectorManager
   /**
    * @brief	Add a Tree Top
    */
-  void addTreeTop (PVConstLink treeTop);
+  void addTreeTop (const PVConstLink& treeTop);
       
   /**
    * @brief	Pointer to the manager for the Electromagnetic Barrel. May be NULL.
