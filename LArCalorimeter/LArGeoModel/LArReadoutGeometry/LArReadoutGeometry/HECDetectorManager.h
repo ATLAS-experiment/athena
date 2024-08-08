@@ -105,7 +105,7 @@ class HECDetectorManager : public GeoVDetectorManager
   /**
    * @brief	Add a Tree Top
    */
-  void addTreeTop (PVLink treeTop);
+  void addTreeTop (const PVLink& treeTop);
 
       
   /**

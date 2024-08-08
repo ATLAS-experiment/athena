@@ -173,7 +173,7 @@ void HECDetectorManager::addDetectorRegion (const HECDetectorRegion *region)
   m_DetRegionsIterative.push_back(region);
 }
 
-void HECDetectorManager::addTreeTop (PVLink treeTop)
+void HECDetectorManager::addTreeTop (const PVLink& treeTop)
 {
   m_treeTop.push_back(treeTop);
 }

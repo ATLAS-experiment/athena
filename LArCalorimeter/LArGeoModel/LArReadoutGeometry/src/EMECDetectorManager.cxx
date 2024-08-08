@@ -131,7 +131,7 @@ void EMECDetectorManager::addDetectorRegion (const EMECDetectorRegion *region)
   m_DetRegionsRandom[region->getRegionIndex()][region->getSamplingIndex()][region->getRadialIndex()][region->getEndcapIndex()] = region;
 }
 
-void EMECDetectorManager::addTreeTop (PVLink treeTop)
+void EMECDetectorManager::addTreeTop (const PVLink& treeTop)
 {
   m_treeTop.push_back(treeTop);
 }

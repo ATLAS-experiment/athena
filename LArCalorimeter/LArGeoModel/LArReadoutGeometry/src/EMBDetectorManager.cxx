@@ -94,7 +94,7 @@ void EMBDetectorManager::addDetectorRegion (const EMBDetectorRegion *region)
 
 }
 
-void EMBDetectorManager::addTreeTop (PVLink treeTop)
+void EMBDetectorManager::addTreeTop (const PVLink& treeTop)
 {
   m_treeTop.push_back(treeTop);
 }
