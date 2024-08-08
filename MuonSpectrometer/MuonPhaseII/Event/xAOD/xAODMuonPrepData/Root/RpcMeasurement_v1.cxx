@@ -23,6 +23,7 @@ namespace xAOD {
     IMPLEMENT_SETTER_GETTER(RpcMeasurement_v1, uint16_t, stripNumber, setStripNumber)
     IMPLEMENT_SETTER_GETTER(RpcMeasurement_v1, uint8_t, gasGap, setGasGap)
     IMPLEMENT_SETTER_GETTER(RpcMeasurement_v1, uint8_t, doubletPhi, setDoubletPhi)
+    IMPLEMENT_SETTER_GETTER(RpcMeasurement_v1, float, timeCovariance, setTimeCovariance)
     IMPLEMENT_READOUTELEMENT(RpcMeasurement_v1, m_readoutEle, RpcReadoutElement)
 
     IdentifierHash RpcMeasurement_v1::measurementHash() const {
