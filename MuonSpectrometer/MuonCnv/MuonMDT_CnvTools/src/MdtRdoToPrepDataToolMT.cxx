@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToPrepDataToolMT.h"
@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "GaudiKernel/PhysicalConstants.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "MdtRDO_Decoder.h"
 #include "MuonPrepRawData/MdtTwinPrepData.h"
@@ -16,7 +15,7 @@
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "xAODMuonPrepData/MdtDriftCircleAuxContainer.h"
-
+#include "MuonIdHelpers/IdentifierByDetElSorter.h" 
 using namespace MuonGM;
 using namespace Trk;
 
@@ -44,32 +43,61 @@ namespace {
 
 namespace Muon {
 
-    MdtPrepDataCollection* MdtRdoToPrepDataToolMT::ConvCache::createCollection(const Identifier& elementId, MsgStream& msg) {
+    
+    MdtRdoToPrepDataToolMT::ConvCache::ConvCache(const Muon::IMuonIdHelperSvc* idHelperSvc):
+        m_idHelperSvc{idHelperSvc} {
+        addedCols.resize(m_idHelperSvc->mdtIdHelper().module_hash_max());
+    }
+
+    MdtPrepDataCollection* MdtRdoToPrepDataToolMT::ConvCache::createCollection(const Identifier& elementId) {
 
         IdentifierHash mdtHashId = m_idHelperSvc->moduleHash(elementId);
-        if (static_cast<int>(mdtHashId) == -1) {
-            msg << MSG::ERROR << "Module hash creation failed. " << m_idHelperSvc->toString(elementId) << endmsg;
-            return nullptr;
-        }
-        PrdCollMap::iterator itr = addedCols.find(mdtHashId);
-        if (itr != addedCols.end()) return itr->second.get();
-        MdtPrepDataContainer::IDC_WriteHandle lock = legacyPrd->getWriteHandle(mdtHashId);
-        if (lock.alreadyPresent()) {
-            if (msg.level() <= MSG::DEBUG) {
-                msg << MSG::DEBUG << "MdtPrepDataCollection already contained in IDC " << elementId << " " << mdtHashId << endmsg;
-            }
-            return nullptr;
-        }
-        std::unique_ptr<MdtPrepDataCollection> newColl = std::make_unique<MdtPrepDataCollection>(mdtHashId);
-        newColl->setIdentifier(m_idHelperSvc->chamberId(elementId));
-        return addedCols.insert(std::make_pair(mdtHashId, std::move(newColl))).first->second.get();
+
+        std::unique_ptr<MdtPrepDataCollection>& coll {addedCols[mdtHashId]};
+        if (!coll) {
+            coll = std::make_unique<MdtPrepDataCollection>(mdtHashId);
+            coll->setIdentifier(m_idHelperSvc->chamberId(elementId));
+        }        
+        return coll.get();
     }
     StatusCode MdtRdoToPrepDataToolMT::ConvCache::finalize(MsgStream& msg) {
-        for (auto& to_insert : addedCols) {
-            if (to_insert.second->empty()) continue;
-            MdtPrepDataContainer::IDC_WriteHandle lock = legacyPrd->getWriteHandle(to_insert.first);
-            if (lock.addOrDelete(std::move(to_insert.second)).isFailure()) {
-                msg << MSG::ERROR << " Failed to add prep data collection " << to_insert.first << endmsg;
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+
+        for (unsigned int moduleHash =0; moduleHash < addedCols.size(); ++moduleHash) {
+            std::unique_ptr<MdtPrepDataCollection>& toInsert{addedCols[moduleHash]};
+            if (!toInsert || toInsert->empty()) continue;
+            if (xAODPrd) {
+                /// Fill the prepdata objects just at this stage
+                std::vector<const MdtPrepData*> sortMe{toInsert->begin(), toInsert->end()};
+                std::ranges::sort(sortMe, IdentifierByDetElSorter{m_idHelperSvc});
+                for (const MdtPrepData* prd : sortMe) {
+                    const Identifier prdId{prd->identify()};
+                    xAOD::MdtDriftCircle* dc = xAODPrd->push_back(std::make_unique<xAOD::MdtDriftCircle>());
+
+                    xAOD::MeasVector<1> driftRadius{0.f};
+                    xAOD::MeasMatrix<1> cov{0.f};
+                    if (prd->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        driftRadius[0] = prd->localPosition().x();
+                        cov(0,0) = prd->localCovariance()(0,0);
+                    } else {
+                        cov(0, 0) = std::pow(14.6 * Gaudi::Units::mm, 2);
+                    }
+                    /// That method is kind of depreciated but needed for the Acts conversion test..
+                    dc->setIdentifier(prdId.get_compact());
+                    dc->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId), std::move(driftRadius), std::move(cov));
+                    dc->setTdc(prd->tdc());
+                    dc->setAdc(prd->adc());
+                    dc->setTube(idHelper.tube(prdId));
+                    dc->setLayer(idHelper.tubeLayer(prdId));
+                    dc->setStatus(prd->status());
+                    if (r4DetMgr){
+                        dc->setReadoutElement(r4DetMgr->getMdtReadoutElement(prdId));
+                    }
+                }
+            }
+            MdtPrepDataContainer::IDC_WriteHandle lock = legacyPrd->getWriteHandle(moduleHash);
+            if (lock.addOrDelete(std::move(toInsert)).isFailure()) {
+                msg << MSG::ERROR << " Failed to add prep data collection " << moduleHash << endmsg;
                 return StatusCode::FAILURE;
             }
         }
@@ -279,55 +307,6 @@ namespace Muon {
                                             calibOutput.status());
     }
 
-    void MdtRdoToPrepDataToolMT::createxAODPrepData(const MdtCalibInput& calibInput,
-                                                    const MdtCalibOutput& calibOutput, 
-                                                    xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const {
-
-      if (!xAODMdtPrepDataContainer || !calibInput.decriptor() || calibInput.isMasked() ||
-          calibInput.adc() < m_adcCut || calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined) {
-        ATH_MSG_VERBOSE("Do not create calib hit for "
-                      << m_idHelperSvc->toString(calibInput.identify())
-                      << " because it's masked " << (calibInput.isMasked() ? "si" : "no")
-                      << ", " << "adc: " << calibInput.adc() << " vs. " << m_adcCut
-                      << ", calibration bailed out " << (calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined ? "si": "no"));
-        return;
-      }
-      ATH_MSG_VERBOSE("Calibrated xAOD prepdata "<< m_idHelperSvc->toString(calibInput.identify()) << std::endl
-                      << calibInput << std::endl << calibOutput);
-
-      xAOD::MeasVector<1> driftRadius{0.0};
-      xAOD::MeasMatrix<1> cov{0.0};
-
-      if (calibOutput.status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
-        /// Test by how much do we break frozen Tier0
-        const float r = calibOutput.driftRadius();
-        const float sigR = calibOutput.driftRadiusUncert();
-        driftRadius[0] = r;
-        (cov)(0, 0) = sigR * sigR;
-      } else
-        (cov)(0, 0) = 0;
-
-      auto xprd = new xAOD::MdtDriftCircle();
-      xAODMdtPrepDataContainer->push_back(xprd);
-
-      const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-
-      const Identifier prdId{calibInput.identify()};
-      xprd->setIdentifier(calibInput.identify().get_compact());
-
-      xprd->setMeasurement(calibInput.decriptor()  
-                           ? calibInput.decriptor()->identHash()
-                           : calibInput.legacyDescriptor()->identifyHash(), driftRadius, cov);
-
-      xprd->setTdc(calibInput.tdc());
-      xprd->setAdc(calibInput.adc());
-      xprd->setTube(id_helper.tube(prdId));
-      xprd->setLayer(id_helper.tubeLayer(prdId));
-      xprd->setStatus(calibOutput.status());
-      xprd->setReadoutElement(calibInput.decriptor());
-      return;                                        
-    }
-
     StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ConvCache& cache,  const MdtCsm* rdoColl) const {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         // first handle the case of twin tubes
@@ -375,7 +354,7 @@ namespace Muon {
 
             // Retrieve the proper PRD container. Note that there are cases where one CSM is either split into 2 chambers (BEE / BIS78
             // legacy) or 2 CSMs are split into one chamber
-            MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId, msgStream());
+            MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId);
             if (!driftCircleColl) {
                 ATH_MSG_DEBUG("Corresponding multi layer " << m_idHelperSvc->toString(channelId) << " is already decoded.");
                 continue;
@@ -406,7 +385,6 @@ namespace Muon {
                 newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                 driftCircleColl->push_back(std::move(newPrepData));
             }
-            createxAODPrepData(calibIn, calibResult, cache.xAODPrd);
         }
         return StatusCode::SUCCESS;
     }
@@ -505,7 +483,7 @@ namespace Muon {
             Identifier channelId = digit->identify();
             int multilayer = id_helper.multilayer(channelId);
 
-            MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId, msgStream());
+            MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId);
             if (!driftCircleColl) {
                 ATH_MSG_DEBUG("Corresponding multi layer " << m_idHelperSvc->toString(channelId) << " is already decoded.");
                 continue;
@@ -532,7 +510,6 @@ namespace Muon {
                         driftCircleColl->push_back(std::move(newPrepData));
 
                     } 
-                    createxAODPrepData(mdtCalibIn, mdtCalibOut, cache.xAODPrd);
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " " << mdtCalibOut);
                     continue;
                 }
@@ -598,7 +575,6 @@ namespace Muon {
                     driftCircleColl->push_back(std::move(newPrepData));
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " "<<calibResult1st);
                 }
-                createxAODPrepData(calibInput1st, calibResult1st, cache.xAODPrd);
                 
                 if (!second_digit) continue;
                     // Calculate radius
@@ -614,8 +590,6 @@ namespace Muon {
                     second_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                     driftCircleColl->push_back(std::move(second_newPrepData));
                 } 
-                createxAODPrepData(calibInput2nd, calibResult2nd, cache.xAODPrd);
-                
                 // second_digit
                 ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA FOR SECOND DIGIT " 
                               << m_idHelperSvc->toString(calibInput2nd.identify()) 
@@ -715,6 +689,7 @@ namespace Muon {
             }
             cache.legacyDetMgr = detMgrHandle.cptr();
         }
+        cache.r4DetMgr = m_detMgrR4;
         // Pass the container from the handle
         cache.isValid = true;
         return cache;
