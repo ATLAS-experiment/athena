@@ -58,9 +58,18 @@ def TruthHitAssociationCfg(flags):
 
     if flags.Detector.EnablesTGC: 
         result.merge(MeasToSimHitAssocAlgCfg(flags,
-                                             name="sTgcPrepDataToSimHitAssoc",
+                                             name="sTgcStripToSimHitAssoc",
                                              SimHits = "xStgcSimHits",
-                                             Measurements="xAODsTgcMeasurements"))
+                                             Measurements="xAODsTgcStrips"))
+        result.merge(MeasToSimHitAssocAlgCfg(flags,
+                                             name="sTgcWireToSimHitAssoc",
+                                             SimHits = "xStgcSimHits",
+                                             Measurements="xAODsTgcWires"))
+        result.merge(MeasToSimHitAssocAlgCfg(flags,
+                                             name="sTgcPadToSimHitAssoc",
+                                             SimHits = "xStgcSimHits",
+                                             Measurements="xAODsTgcPads",
+                                             AssocPull=1.))
 
     return result
 
