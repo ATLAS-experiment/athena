@@ -1,6 +1,5 @@
-// Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUON_VERSIONS_MUONSEGMENT_V1_H
 #define XAODMUON_VERSIONS_MUONSEGMENT_V1_H
@@ -15,6 +14,7 @@
 // xAOD include(s):
 
 // Athena include(s):
+#include "GeoPrimitives/GeoPrimitives.h"
 #if !(defined(GENERATIONBASE) || defined(XAOD_ANALYSIS))
 #include "TrkSegment/SegmentCollection.h"
 #endif
@@ -35,7 +35,9 @@ namespace xAOD {
   public:
 
     /// Default constructor
-    MuonSegment_v1();
+    MuonSegment_v1() = default;
+    /// Default destructor
+    virtual ~MuonSegment_v1() = default;
 
     /// @name Global position functions
     /// Returns the global position
@@ -49,7 +51,8 @@ namespace xAOD {
     /// Sets the global position
     void setPosition(float x, float y, float z);
     /// @}
-
+    /// @brief Returns the position as Amg::Vector
+    Amg::Vector3D position() const;
     /// @name Global direction functions
     /// Returns the global direction
     /// @{
@@ -62,7 +65,8 @@ namespace xAOD {
     /// Sets the direction
     void setDirection(float px, float py, float pz);
     /// @}
-
+    /// @brief Returns the direction as Amg::Vector
+    Amg::Vector3D direction() const;
     /// @name Fitted time functions
     /// Returns some information about fitted time and error on the time.
     /// @{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,9 +11,13 @@
 
 namespace xAOD {
 
-  MuonSegment_v1::MuonSegment_v1()
-    : SG::AuxElement() {    
-  }
+
+    Amg::Vector3D MuonSegment_v1::position() const {
+        return Amg::Vector3D{x(), y(), z()};
+    }
+    Amg::Vector3D MuonSegment_v1::direction() const {
+        return Amg::Vector3D{px(), py(), pz()};
+    }
 
   AUXSTORE_PRIMITIVE_GETTER( MuonSegment_v1, float, x )
   AUXSTORE_PRIMITIVE_GETTER( MuonSegment_v1, float, y )
