@@ -1,0 +1,369 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/PackedLinkVectorFactory.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Oct, 2023
+ * @brief Factory object that creates vectors using @c AuxTypeVector,
+ *        specialized for PackedLink.
+ */
+
+
+#include "AthContainers/tools/AuxTypeVector.h"
+#include "AthContainers/AuxTypeRegistry.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Create a vector object of this type.
+ * @param auxid ID for the variable being created.
+ * @param size Initial size of the new vector.
+ * @param capacity Initial capacity of the new vector.
+ * @param isLinked True if this variable is linked from another one.
+ *                 Must be false.
+ */
+template <class CONT, class ALLOC>
+std::unique_ptr<IAuxTypeVector>
+PackedLinkVectorFactory<CONT, ALLOC>::create (SG::auxid_t auxid,
+                                              size_t size, size_t capacity,
+                                              [[maybe_unused]] bool isLinked) const
+{
+  assert (!isLinked);
+  const AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  auxid_t linked_id = r.linkedVariable (auxid);
+
+  using linkedAlloc = typename std::allocator_traits<ALLOC>::template rebind_alloc<DataLink<CONT> >;
+  auto linkedVec =
+    std::make_unique<AuxTypeVector<DataLink<CONT>, linkedAlloc> > (linked_id,
+                                                                   0, 0, true);
+  return std::make_unique<AuxTypeVector_t> (auxid, size, capacity,
+                                            std::move (linkedVec));
+}
+
+
+/**
+ * @brief Create a vector object of this type from a data blob.
+ * @param auxid ID for the variable being created.
+ * @param data The vector object.
+ * @param linkedVector The interface for another variable linked to this one.
+ *                     (We do not take ownership.)
+ * @param isPacked If true, @c data is a @c PackedContainer.
+ * @param ownFlag If true, the newly-created IAuxTypeVector object
+ *                will take ownership of @c data.
+ * @param isLinked True if this variable is linked from another one.
+ *
+ * @c data should be a pointer to a
+ * std::vector<SG::PackedLink<CONT>, ALLOC<...> > object obtained with new.
+ * For this method, isPacked and isLinked must both be false.
+ */
+template <class CONT, class ALLOC>
+std::unique_ptr<IAuxTypeVector>
+PackedLinkVectorFactory<CONT, ALLOC>::createFromData (SG::auxid_t auxid,
+                                                      void* data,
+                                                      IAuxTypeVector* linkedVector,
+                                                      [[maybe_unused]] bool isPacked,
+                                                      bool ownFlag,
+                                                      [[maybe_unused]] bool isLinked) const
+{
+  assert (!isPacked && !isLinked && linkedVector != nullptr);
+  using Holder = SG::PackedLinkVectorHolder<CONT, ALLOC>;
+  using vector_type = typename Holder::vector_type;
+  return std::make_unique<Holder>
+    (auxid, reinterpret_cast<vector_type*>(data), linkedVector, ownFlag);
+}
+
+
+/**
+ * @brief Copy elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+template <class CONT, class ALLOC>
+void PackedLinkVectorFactory<CONT, ALLOC>::copy (SG::auxid_t auxid,
+                                                 AuxVectorData& dst,
+                                                 size_t dst_index,
+                                                 const AuxVectorData& src,
+                                                 size_t src_index,
+                                                 size_t n) const
+{
+  if (n == 0) return;
+  Base::copy (auxid, dst, dst_index, src, src_index, n);
+  if (&dst != &src && src.getDataArrayAllowMissing (auxid) != nullptr) {
+    IAuxTypeVector& dstlv = *dst.getStore()->linkedVector (auxid);
+    if (!Helper::updateLinks (dstlv,
+                              reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid)) + dst_index,
+                              n,
+                              *src.getConstStore()->linkedVector (auxid),
+                              nullptr))
+    {
+      dst.clearCache (dstlv.auxid());
+    }
+  }
+}
+
+
+/**
+ * @brief Copy elements between vectors, possibly applying thinning.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of source element in the vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+template <class CONT, class ALLOC>
+void PackedLinkVectorFactory<CONT, ALLOC>::copyForOutput
+   (SG::auxid_t auxid,
+    AuxVectorData& dst,        size_t dst_index,
+    const AuxVectorData& src,  size_t src_index,
+    size_t n) const
+{
+  if (n == 0) return;
+  copy (auxid, dst, dst_index, src, src_index, n);
+#ifndef XAOD_STANDALONE
+  auto dstptr = reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid)) + dst_index;
+  IAuxTypeVector& dstlv = *dst.getStore()->linkedVector (auxid);
+  typename Helper::DataLinkBase_span links = Helper::getLinkBaseSpan (dstlv);
+  const SG::ThinningCache* tc = SG::getThinningCache();
+  IProxyDict* sg = Helper::storeFromSpan (links);
+  bool cacheValid = Helper::applyThinning (dstlv, dstptr, n, links, tc, sg);
+  if (!cacheValid) dst.clearCache (dstlv.auxid());
+#endif
+}
+
+
+/**
+ * @brief Swap elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param a Container for the first vector.
+ * @param aindex Index of the first element in the first vector.
+ * @param b Container for the second vector.
+ * @param bindex Index of the first element in the second vector.
+ * @param n Number of elements to swap.
+ *
+ * @c a and @ b can be either the same or different.
+ * However, the ranges should not overlap.
+ */
+template <class CONT, class ALLOC>
+void PackedLinkVectorFactory<CONT, ALLOC>::swap (SG::auxid_t auxid,
+                                                 AuxVectorData& a, size_t aindex,
+                                                 AuxVectorData& b, size_t bindex,
+                                                 size_t n) const
+{
+  if (n == 0) return;
+  Base::swap (auxid, a, aindex, b, bindex, n);
+  if (&a != &b) {
+    IAuxTypeVector& alv = *a.getStore()->linkedVector (auxid);
+    IAuxTypeVector& blv = *b.getStore()->linkedVector (auxid);
+
+    if (!Helper::updateLinks (alv,
+                              reinterpret_cast<vector_value_type*>(a.getDataArray (auxid)) + aindex,
+                              n, blv, nullptr))
+    {
+      a.clearCache (alv.auxid());
+    }
+
+    if (!Helper::updateLinks (blv,
+                              reinterpret_cast<vector_value_type*>(b.getDataArray (auxid)) + bindex,
+                              n, alv, nullptr))
+    {
+      b.clearCache (blv.auxid());
+    }
+  }
+}
+
+
+//**************************************************************************
+
+
+/**
+ * @brief Create a vector object of this type.
+ * @param auxid ID for the variable being created.
+ * @param size Initial size of the new vector.
+ * @param capacity Initial capacity of the new vector.
+ * @param isLinked True if this variable is linked from another one.
+ *                 Must be false.
+ */
+template <class CONT, class VALLOC, class VELT, class ALLOC>
+std::unique_ptr<IAuxTypeVector>
+PackedLinkVVectorFactory<CONT, VALLOC, VELT, ALLOC>::
+create (SG::auxid_t auxid,
+        size_t size, size_t capacity,
+        [[maybe_unused]] bool isLinked) const
+{
+  assert (!isLinked);
+  const AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  auxid_t linked_id = r.linkedVariable (auxid);
+
+  using linkedAlloc = typename std::allocator_traits<ALLOC>::template rebind_alloc<DataLink<CONT> >;
+  auto linkedVec =
+    std::make_unique<AuxTypeVector<DataLink<CONT>, linkedAlloc> > (linked_id,
+                                                                   0, 0, true);
+  return std::make_unique<AuxTypeVector_t> (auxid, size, capacity,
+                                            std::move (linkedVec));
+}
+
+
+/**
+ * @brief Create a vector object of this type from a data blob.
+ * @param auxid ID for the variable being created.
+ * @param data The vector object.
+ * @param linkedVector The interface for another variable linked to this one.
+ *                     (We do not take ownership.)
+ * @param isPacked If true, @c data is a @c PackedContainer.
+ * @param ownFlag If true, the newly-created IAuxTypeVector object
+ *                will take ownership of @c data.
+ * @param isLinked True if this variable is linked from another one.
+ *
+ * @c data should be a pointer to a
+ * std::vector<std::vector<SG::PackedLink<CONT>, VALLOC<...> > >, ALLOC<...> > object obtained with new.
+ * For this method, isPacked and isLinked must both be false.
+ */
+template <class CONT, class VALLOC, class VELT, class ALLOC>
+std::unique_ptr<IAuxTypeVector>
+PackedLinkVVectorFactory<CONT, VALLOC, VELT, ALLOC>::
+createFromData (SG::auxid_t auxid,
+                void* data,
+                IAuxTypeVector* linkedVector,
+                [[maybe_unused]] bool isPacked,
+                bool ownFlag,
+                [[maybe_unused]] bool isLinked) const
+{
+  assert (!isPacked && !isLinked && linkedVector != nullptr);
+  using Holder = SG::PackedLinkVVectorHolder<CONT, VALLOC, VELT, ALLOC>;
+  using vector_type = typename Holder::vector_type;
+  return std::make_unique<Holder>
+    (auxid, reinterpret_cast<vector_type*>(data), linkedVector, ownFlag);
+}
+
+
+/**
+ * @brief Copy elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+template <class CONT, class VALLOC, class VELT, class ALLOC>
+void PackedLinkVVectorFactory<CONT, VALLOC, VELT, ALLOC>::
+copy (SG::auxid_t auxid,
+      AuxVectorData& dst,
+      size_t dst_index,
+      const AuxVectorData& src,
+      size_t src_index,
+      size_t n) const
+{
+  if (n == 0) return;
+  Base::copy (auxid, dst, dst_index, src, src_index, n);
+  if (&dst != &src && src.getDataArrayAllowMissing (auxid) != nullptr) {
+    IAuxTypeVector& dstlv = *dst.getStore()->linkedVector (auxid);
+    if (!Helper::updateLinks (dstlv,
+                              reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid)) + dst_index,
+                              n,
+                              *src.getConstStore()->linkedVector (auxid),
+                              nullptr))
+    {
+      dst.clearCache (dstlv.auxid());
+    }
+  }
+}
+
+
+/**
+ * @brief Copy elements between vectors, possibly applying thinning.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of source element in the vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+template <class CONT, class VALLOC, class VELT, class ALLOC>
+void PackedLinkVVectorFactory<CONT, VALLOC, VELT, ALLOC>::copyForOutput
+   (SG::auxid_t auxid,
+    AuxVectorData& dst,        size_t dst_index,
+    const AuxVectorData& src,  size_t src_index,
+    size_t n) const
+{
+  if (n == 0) return;
+  copy (auxid, dst, dst_index, src, src_index, n);
+#ifndef XAOD_STANDALONE
+  using DataLinkBase_span = typename Helper::DataLinkBase_span;
+  auto dstptr = reinterpret_cast<vector_value_type*>(dst.getDataArray (auxid)) + dst_index;
+  IAuxTypeVector& dstlv = *dst.getStore()->linkedVector (auxid);
+  DataLinkBase_span links = Helper::getLinkBaseSpan (dstlv);
+  const SG::ThinningCache* tc = SG::getThinningCache();
+  IProxyDict* sg = Helper::storeFromSpan (links);
+  bool cacheValid = true;
+  for (size_t i = 0; i < n; i++) {
+    VELT& v = dstptr[i];
+    cacheValid &= Helper::applyThinning (dstlv, v.data(), v.size(),
+                                         links, tc, sg);
+  }
+  if (!cacheValid) dst.clearCache (dstlv.auxid());
+#endif
+}
+
+
+/**
+ * @brief Swap elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param a Container for the first vector.
+ * @param aindex Index of the first element in the first vector.
+ * @param b Container for the second vector.
+ * @param bindex Index of the first element in the second vector.
+ * @param n Number of elements to swap.
+ *
+ * @c a and @ b can be either the same or different.
+ * However, the ranges should not overlap.
+ */
+template <class CONT, class VALLOC, class VELT, class ALLOC>
+void PackedLinkVVectorFactory<CONT, VALLOC, VELT, ALLOC>::
+swap (SG::auxid_t auxid,
+      AuxVectorData& a, size_t aindex,
+      AuxVectorData& b, size_t bindex,
+      size_t n) const
+{
+  if (n == 0) return;
+  Base::swap (auxid, a, aindex, b, bindex, n);
+  if (&a != &b) {
+    IAuxTypeVector& alv = *a.getStore()->linkedVector (auxid);
+    IAuxTypeVector& blv = *b.getStore()->linkedVector (auxid);
+
+    if (!Helper::updateLinks (alv,
+                              reinterpret_cast<vector_value_type*>(a.getDataArray (auxid)) + aindex,
+                              n, blv, nullptr))
+    {
+      a.clearCache (alv.auxid());
+    }
+
+    if (!Helper::updateLinks (blv,
+                              reinterpret_cast<vector_value_type*>(b.getDataArray (auxid)) + bindex,
+                              n, alv, nullptr))
+    {
+      b.clearCache (blv.auxid());
+    }
+  }
+}
+
+
+} // namespace SG
