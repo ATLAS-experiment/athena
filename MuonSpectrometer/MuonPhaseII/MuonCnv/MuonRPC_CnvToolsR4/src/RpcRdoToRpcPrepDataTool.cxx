@@ -8,6 +8,8 @@
 #include <xAODMuonPrepData/RpcStrip2DAuxContainer.h>
 #include <xAODMuonPrepData/RpcStripAuxContainer.h>
 #include <xAODMuonPrepData/RpcMeasurement.h>
+#include <MuonIdHelpers/IdentifierByDetElSorter.h>
+
 
 namespace MuonR4{
     RpcRdoToRpcPrepDataTool::RpcRdoToRpcPrepDataTool(const std::string& type,
@@ -39,7 +41,7 @@ namespace MuonR4{
         
         const std::unordered_set<IdentifierHash> hashToSelect(idVect.begin(), idVect.end());        
         using RdoPairs = std::array<const xAOD::NRPCRDO*, 2>;
-        std::map<Identifier, RdoPairs> sortedRdos{};
+        std::map<Identifier, RdoPairs, Muon::IdentifierByDetElSorter> sortedRdos{Muon::IdentifierByDetElSorter{m_idHelperSvc.get()}};
         for (const xAOD::NRPCRDO* rdo : *rdoContainer){
             /* cabling data conversion */
             NrpcCablingData cabling{};
