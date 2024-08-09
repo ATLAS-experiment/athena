@@ -1,0 +1,15 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+# Declare the package name:
+atlas_subdir( MuonClusterFormation )
+
+
+
+
+# Component(s) in the package:
+atlas_add_component( MuonClusterFormation
+                     src/*.cxx
+                     src/components/*.cxx                  
+                     LINK_LIBRARIES GaudiKernel AthenaBaseComps StoreGateLib xAODMuonPrepData )
+
+# atlas_install_python_modules( python/*.py)
