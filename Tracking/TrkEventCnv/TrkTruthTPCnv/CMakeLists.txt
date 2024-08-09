@@ -4,11 +4,16 @@
 atlas_subdir( TrkTruthTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrkTruthTPCnv
-                         src/*.cxx
+atlas_add_library( TrkTruthTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrkTruthTPCnv
+                   LINK_LIBRARIES AthLinks AthContainers DataModelAthenaPoolLib AthenaKernel Identifier StoreGateLib AthenaPoolCnvSvcLib GeneratorObjects GeneratorObjectsTPCnv InDetIdentifier TrkTrack TrkTruthData
+                   PRIVATE_LINK_LIBRARIES CxxUtils )
+
+atlas_add_tpcnv_library( TrkTruthTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrkTruthTPCnv
-                         LINK_LIBRARIES AthLinks AthContainers DataModelAthenaPoolLib AthenaKernel Identifier StoreGateLib AthenaPoolCnvSvcLib GeneratorObjects GeneratorObjectsTPCnv InDetIdentifier TrkTrack TrkTruthData
-                         PRIVATE_LINK_LIBRARIES CxxUtils )
+                         LINK_LIBRARIES TrkTruthTPCnv )
 
 atlas_add_dictionary( TrkTruthTPCnvDict
                       src/TrkTruthTPCnvDict.h

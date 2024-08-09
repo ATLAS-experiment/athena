@@ -4,11 +4,17 @@
 atlas_subdir( TrkEventTopLevelCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrkEventTopLevelCnv
+atlas_add_library( TrkEventTopLevelCnv
    TrkEventTopLevelCnv/*.h src/*.cxx
    PUBLIC_HEADERS TrkEventTopLevelCnv
    LINK_LIBRARIES
    InDetEventTPCnv MuonEventTPCnv TrkEventTPCnv RecTPCnv TPTools
+   )
+
+atlas_add_tpcnv_library( TrkEventTopLevelCnvFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS TrkEventTopLevelCnv
+   LINK_LIBRARIES TrkEventTopLevelCnv
    )
 
 atlas_add_dictionary( TrkEventTopLevelCnvDict

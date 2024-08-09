@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( McParticleEventTPCnv )
@@ -7,12 +7,18 @@ atlas_subdir( McParticleEventTPCnv )
 find_package( ROOT COMPONENTS EG Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( McParticleEventTPCnv
-                         src/*.cxx
+atlas_add_library( McParticleEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS McParticleEventTPCnv
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES LINK_LIBRARIES  TruthUtils AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AtlasHepMCLib GaudiKernel )
+
+atlas_add_tpcnv_library( McParticleEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS McParticleEventTPCnv
                          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                         LINK_LIBRARIES LINK_LIBRARIES  TruthUtils AthenaPoolCnvSvcLib DataModelAthenaPoolLib GeneratorObjects McParticleEvent McParticleKernel
-                         PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AtlasHepMCLib GaudiKernel )
+                         LINK_LIBRARIES  McParticleEventTPCnv )
 
 atlas_add_dictionary( McParticleEventTPCnvDict
                       McParticleEventTPCnv/McParticleEventTPCnvDict.h

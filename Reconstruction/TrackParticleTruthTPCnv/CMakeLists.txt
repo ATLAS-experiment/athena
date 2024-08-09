@@ -1,13 +1,18 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrackParticleTruthTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrackParticleTruthTPCnv
-                         src/*.cxx
+atlas_add_library( TrackParticleTruthTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrackParticleTruthTPCnv
+                   LINK_LIBRARIES AthContainers AthLinks CxxUtils DataModelAthenaPoolLib AthenaPoolCnvSvcLib AthenaPoolUtilities GeneratorObjectsTPCnv Particle ParticleTruth AthenaKernel StoreGateLib )
+
+atlas_add_tpcnv_library( TrackParticleTruthTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrackParticleTruthTPCnv
-                         LINK_LIBRARIES AthContainers AthLinks CxxUtils DataModelAthenaPoolLib AthenaPoolCnvSvcLib AthenaPoolUtilities GeneratorObjectsTPCnv Particle ParticleTruth AthenaKernel StoreGateLib )
+                         LINK_LIBRARIES TrackParticleTruthTPCnv )
 
 atlas_add_dictionary( TrackParticleTruthTPCnvDict
                       TrackParticleTruthTPCnv/TrackParticleTruthTPCnvDict.h

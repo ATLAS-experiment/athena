@@ -1,13 +1,18 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetByteStreamErrorsAthenaPool )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( InDetByteStreamErrorsAthenaPool
+atlas_add_library( InDetByteStreamErrorsAthenaPool
    src/*.cxx
    PUBLIC_HEADERS InDetByteStreamErrorsAthenaPool
    LINK_LIBRARIES AthAllocators AthenaPoolCnvSvcLib Identifier InDetByteStreamErrors )
+
+atlas_add_tpcnv_library( InDetByteStreamErrorsAthenaPoolFactories
+   src/factories/*.cxx
+   PUBLIC_HEADERS InDetByteStreamErrorsAthenaPool
+   LINK_LIBRARIES InDetByteStreamErrorsAthenaPool )
 
 atlas_add_poolcnv_library( InDetByteStreamErrorsAthenaPoolPoolCnv
    FILES InDetByteStreamErrors/InDetBSErrContainer.h
