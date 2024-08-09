@@ -56,183 +56,186 @@ void AnalysisR3_Tier0::initialise_R3() {
 
   m_debug = false;
 
-  m_hchain = new TIDA::Histogram<float>( monTool(),  "Chain" );
+  m_hchain = TIDA::Histogram<float>( monTool(),  "Chain" );
 
-  m_hroieta = new TIDA::Histogram<float>( monTool(),  "roi_eta" );
+  m_hroieta = TIDA::Histogram<float>( monTool(),  "roi_eta" );
 
   /// Limit the bins - to only the first 77 bins - so a range up to ~ 1000
   /// leave the previous selection commented for the time being
 
-  m_hntrk = new TIDA::Histogram<float>( monTool(),  "reftrk_N" );
+  m_hntrk = TIDA::Histogram<float>( monTool(),  "reftrk_N" );
 
   /// reference track distributions
 
-  m_htrkpT  = new TIDA::Histogram<float>( monTool(), "reftrk_pT" );
-  m_htrkphi = new TIDA::Histogram<float>( monTool(), "reftrk_phi" );
-  m_htrketa = new TIDA::Histogram<float>( monTool(), "reftrk_eta" );
+  m_htrkpT  = TIDA::Histogram<float>( monTool(), "reftrk_pT" );
+  m_htrkphi = TIDA::Histogram<float>( monTool(), "reftrk_phi" );
+  m_htrketa = TIDA::Histogram<float>( monTool(), "reftrk_eta" );
   if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0  = new TIDA::Histogram<float>( monTool(), "reftrk_d0" );
+    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
   } else { 
-    m_htrkd0  = new TIDA::Histogram<float>( monTool(), "reftrk_d0" );
+    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
   }      
-  m_htrkz0  = new TIDA::Histogram<float>( monTool(), "reftrk_z0" );
+  m_htrkz0  = TIDA::Histogram<float>( monTool(), "reftrk_z0" );
 
   /// the error estimates are always positive ...
-  m_htrkdd0  = new TIDA::Histogram<float>( monTool(), "reftrk_dd0" );
-  m_htrkdz0  = new TIDA::Histogram<float>( monTool(), "reftrk_dz0" );
+  m_htrkdd0  = TIDA::Histogram<float>( monTool(), "reftrk_dd0" );
+  m_htrkdz0  = TIDA::Histogram<float>( monTool(), "reftrk_dz0" );
 
-  m_htrkd0sig = new TIDA::Histogram<float>( monTool(), "reftrk_d0sig" );
+  m_htrkd0sig = TIDA::Histogram<float>( monTool(), "reftrk_d0sig" );
 
 
   /// test track distributions
 
   /// Limit the bins - to only the first 77 bins - so a range up to ~ 1000
   /// leave the previous selection commented for the time being
-  //  m_hntrk_rec = new TIDA::Histogram<float>( monTool(),  "testtrk_N", "Test tracks", 100, vnbins );
-  m_hntrk_rec = new TIDA::Histogram<float>( monTool(),  "testtrk_N" );
+  //  m_hntrk_rec = TIDA::Histogram<float>( monTool(),  "testtrk_N", "Test tracks", 100, vnbins );
+  m_hntrk_rec = TIDA::Histogram<float>( monTool(),  "testtrk_N" );
 
 
-  //  m_htrkpT_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_pT" , "Test track pT",  25,    0.,   100.);
-  m_htrkpT_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_pT" );
-  m_htrkphi_rec = new TIDA::Histogram<float>( monTool(), "testtrk_phi" );
-  m_htrketa_rec = new TIDA::Histogram<float>( monTool(), "testtrk_eta" );
+  //  m_htrkpT_rec  = TIDA::Histogram<float>( monTool(), "testtrk_pT" , "Test track pT",  25,    0.,   100.);
+  m_htrkpT_rec  = TIDA::Histogram<float>( monTool(), "testtrk_pT" );
+  m_htrkphi_rec = TIDA::Histogram<float>( monTool(), "testtrk_phi" );
+  m_htrketa_rec = TIDA::Histogram<float>( monTool(), "testtrk_eta" );
   if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_d0" );
+    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
   } else { 
-    m_htrkd0_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_d0" );
+    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
   }  
-  m_htrkz0_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_z0" );
+  m_htrkz0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_z0" );
 
-  m_htrkdd0_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_dd0" );
-  m_htrkdz0_rec  = new TIDA::Histogram<float>( monTool(), "testtrk_dz0" );
+  m_htrkdd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_dd0" );
+  m_htrkdz0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_dz0" );
 
-  m_htrkd0sig_rec = new TIDA::Histogram<float>( monTool(), "testtrk_d0sig" );
+  m_htrkd0sig_rec = TIDA::Histogram<float>( monTool(), "testtrk_d0sig" );
 
 
 
   /// trigger tracking efficiencies
 
 
-  m_htotal_efficiency = new TIDA::Histogram<float>( monTool(), "Eff_overall" );
+  m_htotal_efficiency = TIDA::Histogram<float>( monTool(), "Eff_overall" );
 
-  m_hpTeff    = new TIDA::Histogram<float>( monTool(),  "Eff_pT" );
-  m_hetaeff   = new TIDA::Histogram<float>( monTool(),  "Eff_Eta" );
-  m_hphieff   = new TIDA::Histogram<float>( monTool(),  "Eff_Phi" );
+  m_hpTeff    = TIDA::Histogram<float>( monTool(),  "Eff_pT" );
+  m_hetaeff   = TIDA::Histogram<float>( monTool(),  "Eff_Eta" );
+  m_hphieff   = TIDA::Histogram<float>( monTool(),  "Eff_Phi" );
   if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_hd0eff    = new TIDA::Histogram<float>( monTool(),  "Eff_d0" );
+    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
   } else { 
-    m_hd0eff    = new TIDA::Histogram<float>( monTool(),  "Eff_d0" );
+    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
   } 
-  m_hz0eff    = new TIDA::Histogram<float>( monTool(),  "Eff_z0" );
-  m_hnVtxeff  = new TIDA::Histogram<float>( monTool(),  "Eff_nVtx" );
+  m_hz0eff    = TIDA::Histogram<float>( monTool(),  "Eff_z0" );
+  m_hnVtxeff  = TIDA::Histogram<float>( monTool(),  "Eff_nVtx" );
   
   
-  m_hlbeff = new TIDA::Histogram<float>( monTool(),  "Eff_lb" );
+  m_hlbeff = TIDA::Histogram<float>( monTool(),  "Eff_lb" );
 
 
-  m_htrkvtx_x_lb = new TIDA::Histogram<float>( monTool(),  "trkvtx_x_vs_lb" );
-  m_htrkvtx_y_lb = new TIDA::Histogram<float>( monTool(),  "trkvtx_y_vs_lb" );
-  m_htrkvtx_z_lb = new TIDA::Histogram<float>( monTool(),  "trkvtx_z_vs_lb" );
+  m_htrkvtx_x_lb = TIDA::Histogram<float>( monTool(),  "trkvtx_x_vs_lb" );
+  m_htrkvtx_y_lb = TIDA::Histogram<float>( monTool(),  "trkvtx_y_vs_lb" );
+  m_htrkvtx_z_lb = TIDA::Histogram<float>( monTool(),  "trkvtx_z_vs_lb" );
 
   /// do we want to track the offline vertex ??? 
   /// leave this in in preparation ...
-  //  m_hotrkvtx_x_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_x_vs_lb" );
-  //  m_hotrkvtx_y_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_y_vs_lb" );
-  //  m_hotrkvtx_z_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_z_vs_lb" );
+  //  m_hotrkvtx_x_lb = TIDA::Histogram<float>( monTool(),  "otrkvtx_x_vs_lb" );
+  //  m_hotrkvtx_y_lb = TIDA::Histogram<float>( monTool(),  "otrkvtx_y_vs_lb" );
+  //  m_hotrkvtx_z_lb = TIDA::Histogram<float>( monTool(),  "otrkvtx_z_vs_lb" );
 
 
   /// han config too stufid to deal with spaces in histogram names
-  m_hnpixvseta     = new TIDA::Histogram<float>( monTool(), "npix_vs_eta" );
-  m_hnpixvseta_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_eta_rec" );
+  m_hnpixvseta     = TIDA::Histogram<float>( monTool(), "npix_vs_eta" );
+  m_hnpixvseta_rec = TIDA::Histogram<float>( monTool(), "npix_vs_eta_rec" );
 
-  m_hnsctvseta     = new TIDA::Histogram<float>( monTool(), "nsct_vs_eta" );
-  m_hnsctvseta_rec = new TIDA::Histogram<float>( monTool(), "nsct_vs_eta_rec" );
+  m_hnsctvseta     = TIDA::Histogram<float>( monTool(), "nsct_vs_eta" );
+  m_hnsctvseta_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_eta_rec" );
 
-  m_hntrtvseta     = new TIDA::Histogram<float>( monTool(), "ntrt_vs_eta" );
-  m_hntrtvseta_rec = new TIDA::Histogram<float>( monTool(), "ntrt_vs_eta_rec" );
+  m_hntrtvseta     = TIDA::Histogram<float>( monTool(), "ntrt_vs_eta" );
+  m_hntrtvseta_rec = TIDA::Histogram<float>( monTool(), "ntrt_vs_eta_rec" );
 
-  m_hnpixvsphi     = new TIDA::Histogram<float>( monTool(), "npix_vs_phi" );
-  m_hnpixvsphi_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_phi_rec" );
+  m_hnpixvsphi     = TIDA::Histogram<float>( monTool(), "npix_vs_phi" );
+  m_hnpixvsphi_rec = TIDA::Histogram<float>( monTool(), "npix_vs_phi_rec" );
 
-  m_hnsctvsphi     = new TIDA::Histogram<float>( monTool(), "nsct_vs_phi" );
-  m_hnsctvsphi_rec = new TIDA::Histogram<float>( monTool(), "nsct_vs_phi_rec" );
+  m_hnsctvsphi     = TIDA::Histogram<float>( monTool(), "nsct_vs_phi" );
+  m_hnsctvsphi_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_phi_rec" );
 
-  m_hntrtvsphi     = new TIDA::Histogram<float>( monTool(), "ntrt_vs_phi" );
-  m_hntrtvsphi_rec = new TIDA::Histogram<float>( monTool(), "ntrt_vs_phi_rec" );
+  m_hntrtvsphi     = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi" );
+  m_hntrtvsphi_rec = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi_rec" );
   
   if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) {
-    m_hnpixvsd0     = new TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
+    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
+    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
     
-    m_hnsctvsd0     = new TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = new TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
+    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
+    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
   } else {
-    m_hnpixvsd0     = new TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
+    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
+    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
     
-    m_hnsctvsd0     = new TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = new TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
+    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
+    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
   }  
   
-  m_hnpixvspT     = new TIDA::Histogram<float>( monTool(), "npix_vs_pT" );
-  m_hnpixvspT_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_pT_rec" );
+  m_hnpixvspT     = TIDA::Histogram<float>( monTool(), "npix_vs_pT" );
+  m_hnpixvspT_rec = TIDA::Histogram<float>( monTool(), "npix_vs_pT_rec" );
 
-  m_hnsctvspT     = new TIDA::Histogram<float>( monTool(), "nsct_vs_pT" );
-  m_hnsctvspT_rec = new TIDA::Histogram<float>( monTool(), "nsct_vs_pT_rec" );
+  m_hnsctvspT     = TIDA::Histogram<float>( monTool(), "nsct_vs_pT" );
+  m_hnsctvspT_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_pT_rec" );
   
   
-  m_hnsihits_lb     = new TIDA::Histogram<float>( monTool(),  "nsihits_lb" );
-  m_hnsihits_lb_rec = new TIDA::Histogram<float>( monTool(),  "nsihits_lb_rec" );
+  m_hnsihits_lb     = TIDA::Histogram<float>( monTool(),  "nsihits_lb" );
+  m_hnsihits_lb_rec = TIDA::Histogram<float>( monTool(),  "nsihits_lb_rec" );
   
   
-  m_hlayer_rec  = new TIDA::Histogram<float>( monTool(), "layer_rec" );
-  m_hlayer      = new TIDA::Histogram<float>( monTool(), "layer" );
+  m_hlayer_rec  = TIDA::Histogram<float>( monTool(), "layer_rec" );
+  m_hlayer      = TIDA::Histogram<float>( monTool(), "layer" );
 
   /// trigger tracking differential resolutions
 
 
-  m_hpTres  = new TIDA::Histogram<float>( monTool(), "Res_pT" );
-  m_hipTres = new TIDA::Histogram<float>( monTool(), "Res_ipT" );
-  m_hetares = new TIDA::Histogram<float>( monTool(), "Res_eta" );
-  m_hphires = new TIDA::Histogram<float>( monTool(), "Res_phi" );
-  m_hd0res  = new TIDA::Histogram<float>( monTool(), "Res_d0" );
-  m_hz0res  = new TIDA::Histogram<float>( monTool(), "Res_z0" );
+  m_hpTres  = TIDA::Histogram<float>( monTool(), "Res_pT" );
+  m_hipTres = TIDA::Histogram<float>( monTool(), "Res_ipT" );
+  m_hetares = TIDA::Histogram<float>( monTool(), "Res_eta" );
+  m_hphires = TIDA::Histogram<float>( monTool(), "Res_phi" );
+  m_hd0res  = TIDA::Histogram<float>( monTool(), "Res_d0" );
+  m_hz0res  = TIDA::Histogram<float>( monTool(), "Res_z0" );
 
 
   /// residuals
 
-  m_htrkpT_residual  = new TIDA::Histogram<float>( monTool(), "residual_pT" );
-  m_htrkipT_residual = new TIDA::Histogram<float>( monTool(), "residual_ipT" );
-  m_htrkphi_residual = new TIDA::Histogram<float>( monTool(), "residual_phi" );
-  m_htrketa_residual = new TIDA::Histogram<float>( monTool(), "residual_eta" );
-  m_htrkd0_residual  = new TIDA::Histogram<float>( monTool(), "residual_d0" );
-  m_htrkz0_residual  = new TIDA::Histogram<float>( monTool(), "residual_z0" );
+  m_htrkpT_residual  = TIDA::Histogram<float>( monTool(), "residual_pT" );
+  m_htrkipT_residual = TIDA::Histogram<float>( monTool(), "residual_ipT" );
+  m_htrkphi_residual = TIDA::Histogram<float>( monTool(), "residual_phi" );
+  m_htrketa_residual = TIDA::Histogram<float>( monTool(), "residual_eta" );
+  m_htrkd0_residual  = TIDA::Histogram<float>( monTool(), "residual_d0" );
+  m_htrkz0_residual  = TIDA::Histogram<float>( monTool(), "residual_z0" );
 
-  m_htrkdd0_residual  = new TIDA::Histogram<float>( monTool(), "residual_dd0" );
-  m_htrkdz0_residual  = new TIDA::Histogram<float>( monTool(), "residual_dz0" );
+  m_htrkdd0_residual  = TIDA::Histogram<float>( monTool(), "residual_dd0" );
+  m_htrkdz0_residual  = TIDA::Histogram<float>( monTool(), "residual_dz0" );
 
 
 
-  m_hnpix     = new TIDA::Histogram<float>( monTool(), "npix" );
-  m_hnpix_rec = new TIDA::Histogram<float>( monTool(), "npix_rec" );
+  m_hnpix     = TIDA::Histogram<float>( monTool(), "npix" );
+  m_hnpix_rec = TIDA::Histogram<float>( monTool(), "npix_rec" );
 
-  m_hnsct     = new TIDA::Histogram<float>( monTool(), "nsct" );
-  m_hnsct_rec = new TIDA::Histogram<float>( monTool(), "nsct_rec" );
+  m_hnsct     = TIDA::Histogram<float>( monTool(), "nsct" );
+  m_hnsct_rec = TIDA::Histogram<float>( monTool(), "nsct_rec" );
 
-  m_hnsihits     = new TIDA::Histogram<float>( monTool(), "nsiHits" );
-  m_hnsihits_rec = new TIDA::Histogram<float>( monTool(), "nsiHits_rec" );
+  m_hnsihits     = TIDA::Histogram<float>( monTool(), "nsiHits" );
+  m_hnsihits_rec = TIDA::Histogram<float>( monTool(), "nsiHits_rec" );
 
-  m_hntrt     = new TIDA::Histogram<float>( monTool(), "ntrt" );
-  m_hntrt_rec = new TIDA::Histogram<float>( monTool(), "ntrt_rec" );
+  m_hntrt     = TIDA::Histogram<float>( monTool(), "ntrt" );
+  m_hntrt_rec = TIDA::Histogram<float>( monTool(), "ntrt_rec" );
 
-  m_chi2dof     = new TIDA::Histogram<float>( monTool(), "chi2dof" );
-  m_chi2dof_rec = new TIDA::Histogram<float>( monTool(), "chi2dof_rec" );
+  m_chi2dof     = TIDA::Histogram<float>( monTool(), "chi2dof" );
+  m_chi2dof_rec = TIDA::Histogram<float>( monTool(), "chi2dof_rec" );
+  
+  //  m_hmu = TIDA::Histogram<float>( monTool(),  "mu" );
+  m_hmu = TIDA::Histogram<float>( monTool(),  "mu" );
 
 
   /// miscelaneous histograms
 
-  m_hd0vsphi       = new TIDA::Histogram<float>( monTool(),  "d0_vs_phi_prof" );
-  m_hd0vsphi_rec   = new TIDA::Histogram<float>( monTool(),  "d0_vs_phi_rec_prof" );
+  m_hd0vsphi       = TIDA::Histogram<float>( monTool(),  "d0_vs_phi_prof" );
+  m_hd0vsphi_rec   = TIDA::Histogram<float>( monTool(),  "d0_vs_phi_rec_prof" );
 
   /// should we protect this ? If initialise is called again do we really want 
   /// a new analysis ? Or should we just carry on with the ixisting on, so text 
@@ -285,6 +288,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   /// the number of passed RoIs for this chain 
   m_hchain->Fill( 0.5, 1 );
 
+  
   if ( roi!=nullptr ) m_hroieta->Fill( roi->eta(), 1 );
 
   //  if ( m_eventid != event()->event_number() ) { 
@@ -294,6 +298,9 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
     //    m_eventid = event()->event_number(); 
     m_eventid = tevt->event_number(); 
     m_hchain->Fill( 1.5, 1 );
+
+    m_hmu->Fill( tevt->mu() );
+
   }
 
   m_hntrk->Fill( referenceTracks.size() );
