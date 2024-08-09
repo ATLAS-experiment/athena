@@ -49,7 +49,38 @@ class RpcRdoToPrepDataToolMT
   virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
   
  protected:
-  struct State;
+   struct State {
+        State(const IMuonIdHelperSvc* idHelperSvc);
+
+        Muon::RpcPrepDataCollection* getPrepCollection(const Identifier& id);
+        Muon::RpcCoinDataCollection* getCoinCollection(const Identifier& id);
+        
+        
+        const IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+
+        std::vector<std::unique_ptr<Muon::RpcPrepDataCollection>> rpcPrepDataCollections{};
+        std::vector<std::unique_ptr<Muon::RpcCoinDataCollection>> rpcCoinDataCollections{};
+
+        /// Pointer of the prep container stored in store gate
+        std::unique_ptr<Muon::RpcPrepDataContainer> prepDataCont{nullptr};
+        /// Pointer of the coin container stored in store gate
+        std::unique_ptr<Muon::RpcCoinDataContainer> coinDataCont{nullptr};
+
+
+        // keepTrackOfFullEventDecoding
+        bool m_fullEventDone{false};
+
+        // the set of already requested and decoded offline (PrepRawData)
+        // collections
+        std::unordered_set<IdentifierHash> m_decodedOfflineHashIds{};
+
+        // the set of unrequested collections with phi hits stored with
+        // ambiguityFlag > 1
+        std::unordered_set<IdentifierHash> m_ambiguousCollections{};
+
+        // the set of already requested and decoded ROBs
+        std::unordered_set<uint32_t> m_decodedRobIds{};
+   };
 
   /// Stores the PrepData container into store gate
   StatusCode transferAndRecordPrepData(const EventContext& ctx,
@@ -85,46 +116,7 @@ class RpcRdoToPrepDataToolMT
 
   StatusCode processNrpcRdo(const EventContext& ctx, State& state) const;
 
-  struct State {
-    State(const RpcIdHelper& idHelper,
-          const SG::WriteHandleKey<xAOD::RpcStripContainer>& key,
-          const EventContext& ctx);
 
-    Muon::RpcPrepDataCollection* getPrepCollection(const IdentifierHash& hash,
-                                                   MsgStream& msg);
-    Muon::RpcCoinDataCollection* getCoinCollection(const IdentifierHash& hash,
-                                                   MsgStream& msg);
-
-    const RpcIdHelper& m_rpcIdHelper;
-
-    std::map<IdentifierHash, std::unique_ptr<Muon::RpcPrepDataCollection>>
-        m_rpcPrepDataCollections{};
-    std::map<IdentifierHash, std::unique_ptr<Muon::RpcCoinDataCollection>>
-        m_rpcCoinDataCollections{};
-
-    /// Pointer of the prep container stored in store gate
-    std::unique_ptr<Muon::RpcPrepDataContainer> m_prepDataCont{nullptr};
-    /// Pointer of the coin container stored in store gate
-    std::unique_ptr<Muon::RpcCoinDataContainer> m_coinDataCont{nullptr};
-    /// Handle to the xAOD container
-    SG::WriteHandle<xAOD::RpcStripContainer> m_xaodHandle;
-
-    // keepTrackOfFullEventDecoding
-    bool m_fullEventDone{false};
-
-    // the set of already requested and decoded offline (PrepRawData)
-    // collections
-    std::set<IdentifierHash> m_decodedOfflineHashIds{};
-
-    // the set of unrequested collections with phi hits stored with
-    // ambiguityFlag > 1
-    std::set<IdentifierHash> m_ambiguousCollections{};
-
-    // the set of already requested and decoded ROBs
-    std::set<uint32_t> m_decodedRobIds{};
-
-    const IdContext m_modContext{m_rpcIdHelper.module_context()};
-  };
 
   //!< 15 ns should be the max.diff. in prop.time in phi and eta strips
   Gaudi::Property<float> m_etaphi_coincidenceTime{
