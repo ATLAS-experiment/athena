@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONFIT_MDTTUBECALIBCONTAINER_H
@@ -49,9 +49,9 @@ namespace MuonCalib {
         /** set the name of the implementation used to fill this class */
         void setImplementation(const std::string& impl);
         /** return the name of this class */
-        std::string name() const;
+        const std::string& name() const;
         /** return the name of the implementation filling this class */
-        std::string implementation() const;
+        const std::string& implementation() const;
 
         void setGroupBy(const std::string& group_by);
      

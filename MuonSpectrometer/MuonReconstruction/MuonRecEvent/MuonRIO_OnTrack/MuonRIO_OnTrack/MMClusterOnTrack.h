@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRIOONTRACK_MMCLUSTERONTRACK_H
@@ -77,8 +77,8 @@ namespace Muon
     (i.e. a surface of a detector element) */
     virtual const Trk::Surface& associatedSurface() const;
 
-    const std::vector<float> stripDriftDists() const;
-    const std::vector<Amg::MatrixX> stripDriftDistErrors() const;
+    const std::vector<float>& stripDriftDists() const;
+    const std::vector<Amg::MatrixX>& stripDriftDistErrors() const;
 
     /** @brief Dumps information about the PRD*/
     virtual MsgStream&    dump( MsgStream&    stream) const;
@@ -147,12 +147,12 @@ namespace Muon
     return detectorElement()->surface(identify());
   }
 
-  inline const std::vector<float> MMClusterOnTrack::stripDriftDists() const
+  inline const std::vector<float>& MMClusterOnTrack::stripDriftDists() const
   {
     return m_stripDriftDists;
   }
 
-  inline const std::vector<Amg::MatrixX> MMClusterOnTrack::stripDriftDistErrors() const
+  inline const std::vector<Amg::MatrixX>& MMClusterOnTrack::stripDriftDistErrors() const
   {
     return m_stripDriftDistErrors;
   }

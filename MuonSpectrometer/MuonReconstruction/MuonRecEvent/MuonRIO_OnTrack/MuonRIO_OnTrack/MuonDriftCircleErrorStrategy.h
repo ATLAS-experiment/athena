@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONRIOONTRACK_MUONDRIFTCIRCLEERRORSTRATEGY_H
@@ -44,7 +44,7 @@ public:
   unsigned long calibWindow() const; //!< Returns calibration configuration
   Strategy strategy() const;
 
-  const MuonDriftCircleErrorStrategyInput getBits() const { return m_bits; }
+  const MuonDriftCircleErrorStrategyInput& getBits() const { return m_bits; }
   
 private:
   MuonDriftCircleErrorStrategyInput m_bits{}; //!< 0,1,2 are reserved for Strategy, 3-16 are Creation parameters, 17-20 are calib window bits
