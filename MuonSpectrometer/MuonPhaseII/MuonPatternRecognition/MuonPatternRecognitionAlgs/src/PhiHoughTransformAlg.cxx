@@ -9,6 +9,20 @@
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 
+namespace {
+    void sortHits(std::vector<MuonR4::HoughHitType>& hits) {
+        std::ranges::sort(hits, 
+              [](const MuonR4::HoughHitType&a, const MuonR4::HoughHitType& b){   
+                    const Amg::Vector3D& hitA{a->positionInChamber()};
+                    const Amg::Vector3D& hitB{b->positionInChamber()};
+                    constexpr double layerTol = 1.*Gaudi::Units::mm;
+                    if (std::abs(hitA.z() - hitB.z()) > layerTol) {
+                        return hitA.z() < hitB.z();
+                    }
+                    return hitA.y() < hitB.y();
+              });
+    }
+}
 namespace MuonR4{
 
 PhiHoughTransformAlg::PhiHoughTransformAlg(const std::string& name,
@@ -90,6 +104,7 @@ std::unique_ptr<SegmentSeed>
         // and then add all hits (2D and pure phi) from the phi-extension to it 
         hitsOnMax.insert(hitsOnMax.end(), phiMax.hitIdentifiers.begin(), phiMax.hitIdentifiers.end()); 
         // use this to construct the segment seed
+        sortHits(hitsOnMax);
         return std::make_unique<SegmentSeed>(etaMax.tanTheta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
@@ -179,11 +194,13 @@ std::unique_ptr<SegmentSeed>
     PhiHoughTransformAlg::recoverSinglePhiMax(HoughEventData & data, const HoughMaximum & maximum) const{
     // recovers cases of a single phi hit assuming a straight 
     // line extrapolation from the beam line to the phi measurement
+    std::vector<HoughHitType> hits{maximum.getHitsInMax()};
+    sortHits(hits);
     return std::make_unique<SegmentSeed>(maximum.tanTheta(), maximum.interceptY(), 
                         data.searchSpaceTanAngle.first, 
                         data.searchSpaceIntercept.first, 
                         maximum.getCounts(), 
-                        std::vector<HoughHitType>(maximum.getHitsInMax()), maximum.parentBucket()); 
+                        std::move(hits), maximum.parentBucket()); 
 
 } 
 

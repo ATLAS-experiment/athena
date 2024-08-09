@@ -35,12 +35,7 @@ if __name__=="__main__":
                                     "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
-    parser.add_argument("--displayFailedSeeds", 
-                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
-    parser.add_argument("--displayGoodSeeds", 
-                        help="Saves the hits of failed seeds in a pdf", action='store_true', default = False)
-
-
+   
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -69,7 +64,7 @@ if __name__=="__main__":
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    testerArgs = {"drawDisplayFailed": args.displayFailedSeeds, "drawDisplaySuccss":args.displayGoodSeeds}
+    testerArgs = {}
     if args.skipSegmentFit: 
         testerArgs["SegmentKey"] = ""
     else: 

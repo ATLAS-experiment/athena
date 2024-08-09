@@ -5,13 +5,15 @@
 # Declare the package name:
 atlas_subdir( MuonPatternRecognitionAlgs )
 
-# External ACTS dependency
-find_package( Acts COMPONENTS Core )
+# External dependencies:
+find_package( ROOT COMPONENTS Core MathCore Minuit2 Gpad Graf Hist HistPainter )
+
 
 atlas_add_component( MuonPatternRecognitionAlgs
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES  MuonPatternEvent ActsCore AthenaKernel StoreGateLib MuonTesterTreeLib
-                                    xAODMuonPrepData MuonSpacePoint MuonPatternHelpers )
+                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} MuonPatternEvent AthenaKernel StoreGateLib MuonTesterTreeLib
+                                    xAODMuonPrepData MuonSpacePoint MuonPatternHelpers MuonSpacePointCalibratorLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

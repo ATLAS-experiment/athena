@@ -7,9 +7,6 @@
 
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "MuonPatternEvent/HoughMaximum.h"
-#include "MuonPatternEvent/SegmentSeed.h"
-#include "MuonPatternEvent/MuonSegmentFitterEventData.h"
-
 /// This header ties the generic definitions in this package 
 //  to concrete types for representations of the hit, 
 /// the accumulator, and the peak finder. 
@@ -17,9 +14,7 @@
 namespace MuonR4{
   // representation of hits in the hough via space points
   using HoughHitType = HoughMaximum::HitType;
- 
-  using MuonSegmentFitterEventData = MuonSegmentFitterEventData_impl<HoughHitType>;
-  // ACTS representation of the hough accumulator
+ // ACTS representation of the hough accumulator
   using HoughPlane = Acts::HoughTransformUtils::HoughPlane<HoughHitType> ; 
   // configuration class for the accumulator
   using Acts::HoughTransformUtils::HoughPlaneConfig;
@@ -27,6 +22,22 @@ namespace MuonR4{
   using ActsPeakFinderForMuon = Acts::HoughTransformUtils::PeakFinders::IslandsAroundMax<HoughHitType>; 
   // config for the peak finder
   using ActsPeakFinderForMuonCfg = Acts::HoughTransformUtils::PeakFinders::IslandsAroundMaxConfig;
+
+  namespace SegmentFit {
+        enum class AxisDefs{
+            y0 = 0,
+            tanTheta = 1,
+            x0 = 2,
+            tanPhi = 3,
+            time = 4,
+            nPars
+        };
+        constexpr int toInt(const AxisDefs p) {
+            return static_cast<int>(p);
+        }
+        using Parameters = std::array<double, toInt(AxisDefs::nPars)>;
+        using Covariance = std::array<double, toInt(AxisDefs::nPars)>;
+  }
 
 }
 

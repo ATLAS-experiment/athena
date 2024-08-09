@@ -19,9 +19,10 @@ if __name__=="__main__":
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
     parser.set_defaults(outRootFile="HoughTransformTester.root")
-    parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
+    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     parser.set_defaults(inputFile=[
-                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
+                                   "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"
+                                   # "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
     parser.add_argument("--displayFailedSeeds", 
@@ -33,7 +34,10 @@ if __name__=="__main__":
 
 
     args = parser.parse_args()
-    flags, cfg = setupGeoR4TestCfg(args)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    # flags.PerfMon.doFullMonMT = True
+    flags, cfg = setupGeoR4TestCfg(args,flags)
     
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
@@ -51,12 +55,14 @@ if __name__=="__main__":
         cfg.merge(MuonByteStreamDecodersCfg(flags))
         from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
         cfg.merge(MuonRDOtoPRDConvertorsCfg(flags))
+
+
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))      
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))      
+    cfg.merge(MuonSegmentFittingAlgCfg(flags))
     
     from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg, MuonSegmentFinderAlgCfg, MuonSegmentCnvAlgCfg
     ### Build segments from the leagcy chain
@@ -68,29 +74,45 @@ if __name__=="__main__":
                                    xAODContainerName="MuonSegments"))
     from MuonConfig.MuonTrackBuildingConfig import MuPatTrackBuilderCfg
     cfg.merge(MuPatTrackBuilderCfg(flags))
+    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
+    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags))
+    
     ### What happens if you parse the R4 patterns to the legacy chain?
     from MuonPatternCnv.MuonPatternCnvConfig import MuonPatternCnvAlgCfg
     cfg.merge(MuonPatternCnvAlgCfg(flags,
-                                   PatternCombiKey="R4Patterns",
+                                   PatternCombiKey="R4HoughPatterns",
                                    HoughDataPerSecKey="R4HoughDataPerSec"))
     cfg.merge(MuonSegmentFinderAlgCfg(flags,
                                       name="MuonSegmentFinderR4Pattern",
-                                      MuonLayerHoughCombisKey="R4Patterns",
-                                      SegmentCollectionName="TrackMuonSegmentsFromR4",
+                                      MuonLayerHoughCombisKey="R4HoughPatterns",
+                                      SegmentCollectionName="TrkMuonSegmentsFromHoughR4",
                                       NSWSegmentCollectionName=""))
-    cfg.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgFromR4",
-                                   SegmentContainerName="TrackMuonSegmentsFromR4",
-                                   xAODContainerName="MuonSegmentsFromR4"))
+    cfg.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgFromHoughR4",
+                                   SegmentContainerName="TrkMuonSegmentsFromHoughR4",
+                                   xAODContainerName="MuonSegmentsFromHoughR4"))
     
-    cfg.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4",
-                                   MuonSegmentCollection = "TrackMuonSegmentsFromR4",
-                                   SpectrometerTrackOutputLocation="MuonTracksFromR4"))
+    cfg.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromHoughR4",
+                                   MuonSegmentCollection = "TrkMuonSegmentsFromHoughR4",
+                                   SpectrometerTrackOutputLocation="MuonTracksFromHoughR4"))
+    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonXAODParticleConvFromHoughR4",
+                                                   TrackContainerName="MuonTracksFromHoughR4",
+                                                   xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesFromHoughR4"))
 
-    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
-    cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags))
+    ### Convert the R4 segments into the legacy format
+    from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
+    cfg.merge(MuonR4SegmentCnvAlgCfg(flags))
+    
+    cfg.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlgR4Chain",
+                                   SegmentContainerName="TrackMuonSegmentsR4",
+                                   xAODContainerName="MuonSegmentsFromR4"))
+
+    cfg.merge(MuPatTrackBuilderCfg(flags, name="TrackBuildingFromR4Segments",
+                                   MuonSegmentCollection = "TrackMuonSegmentsR4",
+                                   SpectrometerTrackOutputLocation="MuonTracksR4"))
     cfg.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonXAODParticleConvR4",
-                                                   TrackContainerName="MuonTracksFromR4",
+                                                   TrackContainerName="MuonTracksR4",
                                                    xAODTrackParticlesFromTracksContainerName="MuonSpectrometerTrackParticlesR4"))
+
 
 
     cfg.merge(MuonRecoChainTesterCfg(flags))

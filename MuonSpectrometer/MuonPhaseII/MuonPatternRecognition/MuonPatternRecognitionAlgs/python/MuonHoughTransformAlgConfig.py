@@ -20,7 +20,9 @@ def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwar
 
 def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     result = ComponentAccumulator()
-    theAlg = CompFactory.MuonR4.MuonSegmentFittingAlg(name, **kwargs)
+    from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+    theAlg = CompFactory.MuonR4.SegmentFittingAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
 

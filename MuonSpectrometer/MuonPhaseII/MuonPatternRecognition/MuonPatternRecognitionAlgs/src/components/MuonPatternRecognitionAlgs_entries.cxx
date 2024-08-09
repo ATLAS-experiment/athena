@@ -3,7 +3,7 @@
 */
 #include "../EtaHoughTransformAlg.h"
 #include "../PhiHoughTransformAlg.h"
-#include "../MuonSegmentFittingAlg.h"
+#include "../SegmentFittingAlg.h"
 DECLARE_COMPONENT(MuonR4::EtaHoughTransformAlg)
 DECLARE_COMPONENT(MuonR4::PhiHoughTransformAlg)
-DECLARE_COMPONENT(MuonR4::MuonSegmentFittingAlg)
+DECLARE_COMPONENT(MuonR4::SegmentFittingAlg)

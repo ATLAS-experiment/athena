@@ -31,17 +31,27 @@ namespace MuonValR4{
         Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
         /** @brief Keys to the segment collections */
+        
+        /** @brief Segment made from the full legacy chain */
         Gaudi::Property<std::string> m_legacySegmentKey{this, "LegacySegmentKey", "MuonSegments"};
-        Gaudi::Property<std::string> m_r4PatternSegmentKey{this, "R4SegmentKey", "MuonSegmentsFromR4"};
-
+        /** @brief Segments seeded from the R4 pattern but made with the legacy segment maker */
+        Gaudi::Property<std::string> m_r4PatternSegmentKey{this, "SegmentFromR4HoughKey", "MuonSegmentsFromHoughR4"};
+        /** @brief Segments made from the R4 segment maker */
+        Gaudi::Property<std::string> m_segmentKeyR4{this, "R4SegmentKey", "MuonSegmentsFromR4"};
+        /** @brief Segment from the truth hits */
+        Gaudi::Property<std::string> m_truthSegmentKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
         /** @brief Key to the track collections */
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_r4TrackKey{this, "R4TrackKey", "MuonSpectrometerTrackParticlesR4"};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackKeyHoughR4{this, "TrackKeyHoughR4", "MuonSpectrometerTrackParticlesFromHoughR4"};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackKeyR4{this, "TrackKeyR4", "MuonSpectrometerTrackParticlesR4"};
+
         /** @brief Key to the truth particle collection */
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "TruthParticles"};
   
         std::shared_ptr<MuonVal::IParticleFourMomBranch> m_legacyTrks{};
-        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_r4Trks{};
+        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_TrksHoughR4{};
+        std::shared_ptr<MuonVal::IParticleFourMomBranch> m_TrksSegmentR4{};
+        
         std::shared_ptr<MuonVal::IParticleFourMomBranch> m_truthTrks{};
   
   };
