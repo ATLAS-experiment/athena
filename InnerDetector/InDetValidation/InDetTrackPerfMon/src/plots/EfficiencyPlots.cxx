@@ -47,6 +47,10 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_eff_vs_prodZ, "eff_vs_"+m_trackType+"_prodZ" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_R, "eff_vs_"+m_trackType+"_R" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_Z, "eff_vs_"+m_trackType+"_Z" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_eta_vs_pt, "eff_vs_"+m_trackType+"_eta_vs_pt" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_eta_vs_phi, "eff_vs_"+m_trackType+"_eta_vs_phi" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_z0_vs_d0, "eff_vs_"+m_trackType+"_z0_vs_d0" ) );
+  ATH_CHECK( retrieveAndBook( m_eff_vs_z0sin_vs_d0, "eff_vs_"+m_trackType+"_z0sin_vs_d0" ) );
   return StatusCode::SUCCESS;
 }
 
@@ -62,6 +66,7 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
   float pphi   = phi( particle );
+  float ptheta = theta( particle );
   float pd0    = d0( particle );
   float pz0    = z0( particle );
   float pR     = R( particle );
@@ -79,6 +84,11 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   ATH_CHECK( fill( m_eff_vs_Z, pZ, isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_prodR, pprodR, isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_prodZ, pprodZ, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_eta_vs_pt, ppt, peta, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_eta_vs_phi, pphi, peta, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_z0_vs_d0, pd0, pz0, isMatched, weight ) );
+  ATH_CHECK( fill( m_eff_vs_z0sin_vs_d0, pz0*std::sin(ptheta), pd0, isMatched, weight ) );
+
 
   return StatusCode::SUCCESS;
 }
