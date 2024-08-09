@@ -18,7 +18,11 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
+#include <TObject.h>
+
 #include <set>
+
+
 namespace ROOT {
   namespace Math{
     class Minimizer;
@@ -26,7 +30,7 @@ namespace ROOT {
 }
 
 class TCanvas;
-class TObject;
+
 namespace MuonR4{
     class CalibSegmentChi2Minimizer;
     
