@@ -58,7 +58,7 @@ namespace xAOD{
                 /** @brief Returns the i-the measurement from the current chamber */
                 const MeasType* at(const std::size_t idx) const {
                     if (idx >= size()) {
-                        THROW_EXCEPTION("Invalid index given "<<typeid(MeasType).name()<<" Size: "<<size()<<", requested"<<idx);
+                        THROW_EXCEPTION("Invalid index given "<<typeid(MeasType).name()<<" Size: "<<size()<<", requested: "<<idx);
                     }
                     return (*m_begin +idx);
                 }
@@ -73,6 +73,7 @@ namespace xAOD{
                     m_end = std::find_if(m_begin, m_container.end(),[this](const MeasType* meas){
                                             return meas->identifierHash() != m_currentHash;
                                         });
+                    if (m_begin == m_end) return next(); // veto empty views
                     return true;
                 }
 
