@@ -15,7 +15,6 @@
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
-#include <MuonPatternEvent/MuonSegment.h>
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
@@ -57,15 +56,6 @@ namespace MuonValR4{
     Amg::Transform3D toChamberTrf(const ActsGeometryContext& gctx,
                                   const Identifier& hitId) const;
 
-    StatusCode drawEventDisplay(const EventContext& ctx,
-                                const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                const MuonR4::SegmentSeed* foundMax) const;
-
-    StatusCode drawChi2(        const EventContext& ctx,
-                                const std::vector<const xAOD::MuonSimHit*>& simHits,
-                                const MuonR4::SegmentSeed* foundMax,
-                                const MuonR4::MuonSegment* foundSegment,
-                                const std::string & label, const ActsGeometryContext & gctx) const;
 
     struct chamberLevelObjects { 
         struct SeedMatchQuantites {
@@ -74,7 +64,7 @@ namespace MuonValR4{
             /** @brief Probability of which the segment is matched to it */
             double matchProb{0.};
             /** @brief Associated segment */
-            const MuonR4::MuonSegment* segment{nullptr};
+            const MuonR4::Segment* segment{nullptr};
         };
         using SeedMatchMap = std::map<const MuonR4::SegmentSeed*, SeedMatchQuantites>;
         SeedMatchMap seedMatching{};
@@ -89,19 +79,20 @@ namespace MuonValR4{
     };
 
     void matchSeedToTruth(const MuonR4::SegmentSeed* seed, chamberLevelObjects & objs ) const;                          
-    std::pair<HepMC::ConstGenParticlePtr, double> matchSegmentToTruth(const MuonR4::MuonSegment* seed, chamberLevelObjects & objs ) const;                          
+    std::pair<HepMC::ConstGenParticlePtr, double> matchSegmentToTruth(const MuonR4::Segment* seed, chamberLevelObjects & objs ) const;                          
     void matchSeedsToTruth(chamberLevelObjects & objs) const;          
     void matchSegmentsToTruth(chamberLevelObjects & objs) const;          
     void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);                
     void fillTruthInfo(const HepMC::ConstGenParticlePtr genParticlePtr, const std::vector<const xAOD::MuonSimHit*> & simHits, const ActsGeometryContext & gctx);     
     void fillSeedInfo(const MuonR4::SegmentSeed* segmentSeed, double matchProb);            
-    void fillSegmentInfo(const MuonR4::MuonSegment* segmentSeed, double matchProb);            
+    void fillSegmentInfo(const ActsGeometryContext& gctx,
+                         const MuonR4::Segment* segment, double matchProb);            
     
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
                                                           
     SG::ReadHandleKey<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKey{this, "SegmentSeedKey", "MuonHoughStationSegmentSeeds"};
-    SG::ReadHandleKey<MuonR4::MuonSegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
+    SG::ReadHandleKey<MuonR4::SegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
     SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spacePointKey{this, "SpacePointKey", "MuonSpacePoints"};
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
@@ -159,22 +150,20 @@ namespace MuonValR4{
     
     MuonVal::ScalarBranch<bool>&  m_out_hasSegment {m_tree.newScalar<bool>("hasSegment", false)}; 
     MuonVal::ScalarBranch<float>&  m_out_segment_matchFraction {m_tree.newScalar<float>("segmentMatchFraction", false)}; 
-    MuonVal::ScalarBranch<float>& m_out_segment_chi2{m_tree.newScalar<float>("segmentChi2", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_segment_tantheta{m_tree.newScalar<float>("segmentTanTheta", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_segment_z0{m_tree.newScalar<float>("segmentZ0", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_segment_tanphi{m_tree.newScalar<float>("segmentTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_chi2{m_tree.newScalar<float>("segmentChi2", -1.)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nDoF{m_tree.newScalar<unsigned short>("segmentNdoF", 0)};
+     
+    MuonVal::ScalarBranch<float>& m_out_segment_y0{m_tree.newScalar<float>("segmentY0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_x0{m_tree.newScalar<float>("segmentX0", 0.0)}; 
-    MuonVal::VectorBranch<double>& m_out_segment_chi2_measurement{m_tree.newVector<double>("segmentChi2Measurements", 0.0)}; 
-    
-    /// Draw the event display for the cases where the hough transform did not find any hough maximum
-    Gaudi::Property<bool> m_drawEvtDisplayFailure{this, "drawDisplayFailed", false};
-    /// Draw the event dispalty for the successful cases
-    Gaudi::Property<bool> m_drawEvtDisplaySuccess{this, "drawDisplaySuccss", false};
-    /// Add beamline constraint
-    Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
-    
-    std::unique_ptr<TCanvas> m_allCan{};
-    Gaudi::Property<std::string> m_allCanName{this, "AllCanvasName", "AllHoughiDiPuffDisplays.pdf"};
+    MuonVal::ScalarBranch<float>& m_out_segment_tantheta{m_tree.newScalar<float>("segmentTanTheta", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_tanphi{m_tree.newScalar<float>("segmentTanPhi", 0.0)}; 
+
+    MuonVal::ScalarBranch<float>& m_out_segment_err_y0{m_tree.newScalar<float>("segmentErrY0", -1.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_err_x0{m_tree.newScalar<float>("segmentErrX0", -1.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_err_tantheta{m_tree.newScalar<float>("segmentErrTanTheta", -1.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_err_tanphi{m_tree.newScalar<float>("segmentErrTanPhi", -1.0)}; 
+
+    MuonVal::VectorBranch<double>& m_out_segment_chi2_measurement{m_tree.newVector<double>("segmentChi2Measurements")}; 
 
   };
 }

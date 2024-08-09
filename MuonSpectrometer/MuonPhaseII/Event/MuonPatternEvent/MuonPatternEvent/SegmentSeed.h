@@ -3,14 +3,19 @@
 #ifndef MUONR4_MUONPATTERNEVENT_HOUGHSEGMENTSEED__H
 #define MUONR4_MUONPATTERNEVENT_HOUGHSEGMENTSEED__H
 
-#include "MuonPatternEvent/HoughMaximum.h"
+#include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonReadoutGeometryR4/MuonChamber.h"
+
 
 namespace MuonR4 {
 /// @brief Representation of a segment seed (a fully processed hough maximum) produced
 /// by the hough transform. 
 
-class SegmentSeed : public HoughMaximum {
+class SegmentSeed {
    public:
+    using HitType = HoughHitType;
+    using Parameters = SegmentFit::Parameters;
+    
     /// @brief Constructor to write a segment seed from an eta maximum and a valid
     /// phi extension. 
     /// @param tanTheta: tan(theta) from the eta-transform
@@ -23,42 +28,56 @@ class SegmentSeed : public HoughMaximum {
     SegmentSeed(double tanTheta, double interceptY, double tanPhi,
                 double interceptX, double counts,
                 std::vector<HitType>&& hits,
-                const SpacePointBucket* bucket):
-        HoughMaximum{tanTheta, interceptY, counts, std::move(hits), bucket},
-          m_tanPhi{tanPhi},
-          m_interceptX{interceptX},
-          m_hasPhiExt{true} {}
+                const SpacePointBucket* bucket);
+                  
 
     /// @brief Constructor to write a segment seed from an eta maximum without 
     /// a valid phi extension
     /// @param toCopy: Eta maximum 
-    SegmentSeed(const HoughMaximum& toCopy) : 
-        HoughMaximum{toCopy} {}
+    SegmentSeed(const HoughMaximum& toCopy);
 
-    /// @brief getter
-    /// @return  the angle from the phi extension
-    double tanPhi() const { return m_tanPhi; }
+    /// @brief Returns the angle from the phi extension
+    double tanPhi() const;
+    /// @brief Returns the intercept from the phi extension
+    double interceptX() const;  
+    /// @brief Returns the angular coordinate of the eta transform
+    double tanTheta() const;
+    /// @brief Returns the intercept coordinate of the eta transform
+    double interceptY() const;
+    /// @brief Returns the parameter array
+    const Parameters& parameters() const;
 
-    /// @brief getter
-    /// @return  the intercept from the phi extension
-    double interceptX() const { return m_interceptX; }
+    /// @return Returns the number of counts
+    double getCounts() const;
+    /// @brief Returns the list of assigned hits
+    const std::vector<HitType>& getHitsInMax() const;
+    
+    /// @brief Returns the bucket out of which the seed was formed
+    const SpacePointBucket* parentBucket() const;
+    /// @brief Returns the associated chamber
+    const MuonGMR4::MuonChamber* chamber() const;
 
     /// @brief check whether the segment seed includes a 
     /// valid phi extension
     /// @return true if an extension exists, false if 
     /// we are dealing with a pure eta maximum
-    bool hasPhiExtension() const { return m_hasPhiExt; }
+    bool hasPhiExtension() const;
 
-    Amg::Vector3D positionInChamber() const {
-        return Amg::Vector3D(interceptX(), interceptY(), 0.);
-    }
-    Amg::Vector3D directionInChamber() const {
-        return Amg::Vector3D(tanPhi(), tanTheta(), 1.).unit();
-    }
+    /** @brief Returns the position of the seed in the chamber frame */
+    Amg::Vector3D positionInChamber() const;
+    /** @brief Returns the direction of the seed in the chamber frame */
+    Amg::Vector3D directionInChamber() const; 
    private:
-    double m_tanPhi{0.};      // angle from phi extension
-    double m_interceptX{0.};  // intercept from phi extension
-    bool m_hasPhiExt{false};    // flag indicating presence of phi extension
+        /** @brief Set of defining parameters */
+        Parameters m_pars{};
+        /** @brief Pointer to the parent */
+        const SpacePointBucket* m_parent{nullptr};
+        /** @brief List of associated hits */
+        std::vector<HitType> m_hits{};
+        /** @brief Does the sed have a phi extension */
+        bool m_hasPhiExt{false};
+        /** @brief Effective countsfrom the hough seed */
+        double m_counts{0.};
 };
 
 }  // namespace MuonR4

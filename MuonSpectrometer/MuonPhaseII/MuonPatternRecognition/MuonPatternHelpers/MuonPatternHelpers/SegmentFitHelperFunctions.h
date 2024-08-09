@@ -6,17 +6,96 @@
 #define MUONR4__MuonSegmentFitHelperFunctions__H
 
 #include "Acts/Seeding/HoughTransformUtils.hpp"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "xAODMuonPrepData/RpcStripContainer.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 
+class MsgStream;
+
 namespace MuonR4{
+    class CalibratedSpacePoint;
+
     namespace SegmentFitHelpers{
-      double chiSqTermMdt(double y0, double tanTheta, const MuonR4::HoughHitType & measurement);
-      double chiSqTermStrip(double x0, double y0, double tanPhi, double tanTheta, const MuonR4::HoughHitType & measurement);
-      double segmentChiSquare(const double* par, const std::vector<MuonR4::HoughHitType> & hits, std::vector<double> & chi2PerMeas, const ActsGeometryContext & gctx, bool doBSConstraint);
-      double chiSqTermBeamspot(double x0, double y0, double tanPhi, double tanTheta, const MuonR4::HoughHitType & hit, const ActsGeometryContext & gctx);
+      /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated measurement.
+       *         Currently only Mdt, Tgc & Rpc are supported
+       *  @param posInChamber: Position of the chamber crossing expressed at z=0
+       *  @param dirInChamber: Segment direction inside the chamber
+       *  @param measurement: Mdt measurement
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */
+      double chiSqTerm(const Amg::Vector3D& posInChamber,
+                       const Amg::Vector3D& dirInChamber,
+                       const MuonR4::HoughHitType& measurement,
+                       MsgStream& msg);
+      /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated Mdt measurement.
+       *  @param posInChamber: Position of the chamber crossing expressed at z=0
+       *  @param dirInChamber: Segment direction inside the chamber
+       *  @param measurement: Mdt measurement
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */
+      double chiSqTermMdt(const Amg::Vector3D& posInChamber,
+                          const Amg::Vector3D& dirInChamber,
+                          const MuonR4::HoughHitType& measurement,
+                          MsgStream& msg);
+      /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated strip measurement.
+       *         Currently only Tgc & Rpc are supported
+       *  @param posInChamber: Position of the chamber crossing expressed at z=0
+       *  @param dirInChamber: Segment direction inside the chamber
+       *  @param measurement: Mdt measurement
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */
+      double chiSqTermStrip(const Amg::Vector3D& posInChamber,
+                            const Amg::Vector3D& dirInChamber,
+                            const MuonR4::HoughHitType& measurement,
+                            MsgStream& msg);
+      /** @brief Calculates the chi2 contribution from the given measurement. Currently,
+        *        MdtDriftCircles, Rpc & Tgc as well as the Beamspot are supported
+       *  @param posInChamber: Position of the segment in the chamber frame
+       *  @param dirInChamber: Direction of flight of the chamber
+       *  @param timeOfArrival: The arrival time of the particle at the measurement's plane. The
+       *                         parameter is optional  and only active for Rpcs. If passed, the 
+       *                         Rpc timing is considered
+       *  @param measurement: Space point to which the chi2 term is calculated
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */
+      double chiSqTerm(const Amg::Vector3D& posInChamber,
+                       const Amg::Vector3D& dirInChamber,
+                       std::optional<double> timeOfArrival,
+                       const CalibratedSpacePoint& measurement,
+                       MsgStream& msg);
+      /** @brief Calculates the chi2 contribution from a mdt space point to the segment line
+       *  @param posInChamber: Position of the segment in the chamber frame
+       *  @param dirInChamber: Direction of flight of the chamber
+       *  @param mdtSpacePoint: Space point to which the chi2 term is calculated
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */
+      double chiSqTermMdt(const Amg::Vector3D& posInChamber,
+                          const Amg::Vector3D& dirInChamber,
+                          const CalibratedSpacePoint& mdtSpacePoint,
+                          MsgStream& msg);
+      /** @brief Calculates the chi2 contribution from a strip measurement to the segment line
+       *  @param posInChamber: Position of the segment in the chamber frame
+       *  @param dirInChamber: Direction of flight of the chamber
+       *  @param timeOfArrival: The arrival time of the particle at the measurement's plane. The
+       *                        parameter is optional and if it's given the time information
+       *                        enters the chi2.
+       *  @param strip: Strip measurement to consider.  
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *              then all relevant parameters are printed */      
+      double chiSqTermStrip(const Amg::Vector3D& posInChamber,
+                            const Amg::Vector3D& dirInChamber,
+                            std::optional<double> timeOfArrival,
+                            const CalibratedSpacePoint& strip,
+                            MsgStream& msg);
+      /** @brief Calculates the chi2 contribution from an external beam spot constraint
+        *  @param posInChamber: Position of the segment in the chamber frame
+        *  @param dirInChamber: Direction of flight of the chamber
+        *  @param beamSpotMeas: Strip measurement to consider.  
+        *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+        *              then all relevant parameters are printed */
+      double chiSqTermBeamspot(const Amg::Vector3D& posInChamber,
+                               const Amg::Vector3D& dirInChamber,
+                               const CalibratedSpacePoint& beamSpotMeas,
+                               MsgStream& msg);
+    
     }
 }
 

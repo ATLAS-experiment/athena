@@ -200,18 +200,30 @@ namespace MuonValR4 {
 
     }
     
-    void MuonHoughTransformTester::fillSegmentInfo(const MuonR4::MuonSegment* segment, double matchProb){
+    void MuonHoughTransformTester::fillSegmentInfo(const ActsGeometryContext& gctx,
+                                                   const MuonR4::Segment* segment, double matchProb){
+        using namespace MuonR4::SegmentFit;
         if (!segment) return; 
         m_out_hasSegment = true; 
         m_out_segment_matchFraction = matchProb; 
         m_out_segment_chi2 = segment->chi2();
+        m_out_segment_nDoF = segment->nDoF();
+
+        m_out_segment_err_x0 = segment->covariance()[toInt(AxisDefs::x0)];
+        m_out_segment_err_y0 = segment->covariance()[toInt(AxisDefs::y0)];
+        m_out_segment_err_tantheta= segment->covariance()[toInt(AxisDefs::tanTheta)];
+        m_out_segment_err_tanphi = segment->covariance()[toInt(AxisDefs::tanPhi)];
+
+        const Amg::Transform3D trf{segment->chamber()->globalToLocalTrans(gctx)};
         for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 
         }
-        m_out_segment_tanphi = segment->tanPhi();
-        m_out_segment_tantheta = segment->tanTheta();
-        m_out_segment_z0 = segment->y0();
-        m_out_segment_x0 = segment->x0();
+        const Amg::Vector3D locPos = trf * segment->position();
+        const Amg::Vector3D locDir = trf.linear()* segment->direction();
+        m_out_segment_tanphi = locDir.x() / locDir.z();
+        m_out_segment_tantheta = locDir.y() / locDir.z();
+        m_out_segment_y0 = locPos.y();
+        m_out_segment_x0 = locPos.x();
     }
     StatusCode MuonHoughTransformTester::execute()  {
         
@@ -225,7 +237,7 @@ namespace MuonValR4 {
         const MuonR4::SegmentSeedContainer* readSegmentSeeds{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_inHoughSegmentSeedKey, readSegmentSeeds));
         
-        const MuonR4::MuonSegmentContainer* readMuonSegments{nullptr};
+        const MuonR4::SegmentContainer* readMuonSegments{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_inSegmentKey, readMuonSegments));
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
@@ -257,10 +269,10 @@ namespace MuonValR4 {
             allObjectsPerChamber[max->chamber()].seedMatching[max];
         }
         if (readMuonSegments) {
-            for (const MuonR4::MuonSegment& segment : *readMuonSegments){
-                chamberLevelObjects&  thechamber = allObjectsPerChamber[segment.chamber()];
+            for (const MuonR4::Segment* segment : *readMuonSegments){
+                chamberLevelObjects&  thechamber = allObjectsPerChamber[segment->chamber()];
                 chamberLevelObjects::SeedMatchMap& recoOnChamber = thechamber.seedMatching;
-                recoOnChamber[segment.parent()].segment = &segment; 
+                recoOnChamber[segment->parent()].segment = segment; 
             }
         }
 
@@ -281,7 +293,7 @@ namespace MuonValR4 {
                     m_out_SP->push_back(*seed->parentBucket());
                     fillSeedInfo(seed, seedMatch.matchProb);
                     if (seedMatch.segment) {
-                        fillSegmentInfo(seedMatch.segment, seedMatch.matchProb);
+                        fillSegmentInfo(gctx, seedMatch.segment, seedMatch.matchProb);
                     }
                     if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
                 }
@@ -292,8 +304,8 @@ namespace MuonValR4 {
                 fillChamberInfo(chamber);
                 m_out_SP->push_back(*seed->parentBucket());
                 fillSeedInfo(seed, 0.); 
-                    if (assocInfo.segment) {
-                    fillSegmentInfo(assocInfo.segment, 0.);
+                if (assocInfo.segment) {
+                    fillSegmentInfo(gctx, assocInfo.segment, 0.);
                 }
                 if (!m_tree.fill(ctx)) return StatusCode::FAILURE; 
             }

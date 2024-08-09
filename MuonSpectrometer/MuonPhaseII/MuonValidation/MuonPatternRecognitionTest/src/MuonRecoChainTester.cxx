@@ -43,21 +43,34 @@ namespace MuonValR4{
 
         m_tree.addBranch(std::make_shared<SegmentVariables>(m_tree, m_legacySegmentKey, "LegacySegments", msgLevel()));
         m_tree.addBranch(std::make_shared<SegmentVariables>(m_tree, m_r4PatternSegmentKey, "HoughSegments", msgLevel()));
+        m_tree.addBranch(std::make_shared<SegmentVariables>(m_tree, m_segmentKeyR4, "SegmentsR4", msgLevel()));
+        if (m_isMC) {
+            m_tree.addBranch(std::make_shared<SegmentVariables>(m_tree, m_truthSegmentKey, "TruthSegments", msgLevel()));
+        }
+
         ATH_CHECK(m_legacyTrackKey.initialize());
-        ATH_CHECK(m_r4TrackKey.initialize());
+        ATH_CHECK(m_TrackKeyHoughR4.initialize());
+        ATH_CHECK(m_TrackKeyR4.initialize());
         ATH_CHECK(m_truthKey.initialize(m_isMC));
 
         m_legacyTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "LegacyMSTrks");
         m_legacyTrks->addVariable(std::make_shared<TrackChi2Branch>(*m_legacyTrks));
-        m_r4Trks = std::make_shared<IParticleFourMomBranch>(m_tree, "HoughMSTrks");
-        m_r4Trks->addVariable(std::make_shared<TrackChi2Branch>(*m_r4Trks));
+        m_TrksHoughR4 = std::make_shared<IParticleFourMomBranch>(m_tree, "HoughMSTrks");
+        m_TrksHoughR4->addVariable(std::make_shared<TrackChi2Branch>(*m_TrksHoughR4));
+
+        m_TrksSegmentR4 = std::make_shared<IParticleFourMomBranch>(m_tree, "MSTrksR4");
+        m_TrksSegmentR4->addVariable(std::make_shared<TrackChi2Branch>(*m_TrksSegmentR4));
+
         m_tree.addBranch(m_legacyTrks);
-        m_tree.addBranch(m_r4Trks);
+        m_tree.addBranch(m_TrksSegmentR4);
+        m_tree.addBranch(m_TrksHoughR4);
         
         if (m_isMC) {
             m_truthTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "TruthMuons");
             m_truthTrks->addVariable<int>("legacyMatched");
             m_truthTrks->addVariable<int>("houghMatched");
+            m_truthTrks->addVariable<int>("r4Matched");
+            
             m_tree.addBranch(m_truthTrks);
         }
         ATH_CHECK(m_tree.init(this));
@@ -67,20 +80,25 @@ namespace MuonValR4{
     
       static const SG::Decorator<int> acc_legacyMatched{"legacyMatched"};
       static const SG::Decorator<int> acc_houghMatched{"houghMatched"};
-
+      static const SG::Decorator<int> acc_r4Matched{"r4Matched"};
+      
       const EventContext& ctx{Gaudi::Hive::currentContext()};
       SG::ReadHandle<xAOD::TrackParticleContainer> legacyTrks{m_legacyTrackKey, ctx};
       ATH_CHECK(legacyTrks.isPresent());
-      SG::ReadHandle<xAOD::TrackParticleContainer> r4Trks{m_r4TrackKey, ctx};
-      ATH_CHECK(r4Trks.isPresent());
+      SG::ReadHandle<xAOD::TrackParticleContainer> trksFromHoughR4{m_TrackKeyHoughR4, ctx};
+      ATH_CHECK(trksFromHoughR4.isPresent());      
+      SG::ReadHandle<xAOD::TrackParticleContainer> trksR4{m_TrackKeyR4, ctx};
+      ATH_CHECK(trksR4.isPresent());
       
       for (const xAOD::TrackParticle* trk : *legacyTrks) {
           m_legacyTrks->push_back(trk);
       }
-      for (const xAOD::TrackParticle* trk : *r4Trks) {
-          m_r4Trks->push_back(trk);
+      for (const xAOD::TrackParticle* trk : *trksR4) {
+          m_TrksSegmentR4->push_back(trk);
       }
-      
+      for (const xAOD::TrackParticle* trk : *trksFromHoughR4) {
+          m_TrksHoughR4->push_back(trk);
+      } 
       
       ConstDataVector<xAOD::TruthParticleContainer> truthParts{SG::VIEW_ELEMENTS};
       if (!m_truthKey.empty()) {
@@ -92,15 +110,17 @@ namespace MuonValR4{
               truthParts.push_back(truth);
           }
       }
+      constexpr double matchDR = 0.05;
       for (const xAOD::TruthParticle* truth : truthParts){
           const xAOD::TrackParticle* closestLeg = findClosestParticle(truth, *legacyTrks);
-          const xAOD::TrackParticle* closestR4 = findClosestParticle(truth, *r4Trks);
-          
-          acc_legacyMatched(*truth) = closestLeg && xAOD::P4Helpers::deltaR(truth, closestLeg) ?
-                                         static_cast<int>(m_legacyTrks->find(closestLeg)) : -1;
-          acc_houghMatched(*truth) = closestR4 && xAOD::P4Helpers::deltaR(truth, closestR4) ?
-                                         static_cast<int>(m_r4Trks->find(closestR4)) : -1;
-
+          const xAOD::TrackParticle* closestHoughR4 = findClosestParticle(truth, *trksFromHoughR4);
+          const xAOD::TrackParticle* closestR4 = findClosestParticle(truth, *trksR4);
+          acc_legacyMatched(*truth) = closestLeg && xAOD::P4Helpers::deltaR(truth, closestLeg) < matchDR?
+                                        static_cast<int>(m_legacyTrks->find(closestLeg)) : -1;
+          acc_houghMatched(*truth) = closestHoughR4 && xAOD::P4Helpers::deltaR(truth, closestHoughR4) < matchDR ?
+                                        static_cast<int>(m_TrksHoughR4->find(closestHoughR4)) : -1;          
+          acc_r4Matched(*truth) = closestR4 && xAOD::P4Helpers::deltaR(truth, closestR4) < matchDR ?
+                                        static_cast<int>(m_TrksSegmentR4->find(closestR4)) : -1;
           m_truthTrks->push_back(truth);
       }
       

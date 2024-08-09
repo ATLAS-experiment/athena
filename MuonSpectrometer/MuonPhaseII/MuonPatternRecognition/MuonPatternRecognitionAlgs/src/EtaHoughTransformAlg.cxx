@@ -9,6 +9,21 @@
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
 
+namespace {
+    void sortHits(std::vector<MuonR4::HoughHitType>& hits) {
+        std::ranges::sort(hits, 
+              [](const MuonR4::HoughHitType&a, const MuonR4::HoughHitType& b){   
+                    const Amg::Vector3D& hitA{a->positionInChamber()};
+                    const Amg::Vector3D& hitB{b->positionInChamber()};
+                    constexpr double layerTol = 1.*Gaudi::Units::mm;
+                    if (std::abs(hitA.z() - hitB.z()) > layerTol) {
+                        return hitA.z() < hitB.z();
+                    }
+                    return hitA.y() < hitB.y();
+              });
+    }
+}
+
 namespace MuonR4{
 EtaHoughTransformAlg::EtaHoughTransformAlg(const std::string& name,
                                                    ISvcLocator* pSvcLocator)
@@ -198,6 +213,7 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
                        max.hitIdentifiers.end());
         size_t nHits = hitList.size();
         extendWithPhiHits(hitList, bucket);
+        sortHits(hitList);
         data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket);
     }
 

@@ -27,7 +27,7 @@ namespace MuonR4{
         if (primaryMeas->numDimensions() == 1) {
             uvcov(0,0) = primaryMeas->localCovariance<1>()[0];
         }
-        Jac.col(0)  = m_normal.block<2,1>(0,0);
+        Jac.col(0)  = m_normal.block<2,1>(0,0).unit();
         if (secondaryMeas) {
             /// Position of the measurements expressed in the chamber frame
             const Amg::Vector3D pos1{xAOD::positionInChamber(gctx, primaryMeas)};
@@ -36,11 +36,11 @@ namespace MuonR4{
             const Amg::Vector3D dir2{xAOD::channelDirInChamber(gctx, secondaryMeas)};
             /// Intersect the two channels to define the space point
             m_pos = pos1 + Amg::intersect<3>(pos2,dir2, pos1, m_dir).value_or(0) * m_dir;
-            Jac.col(1)  = xAOD::channelNormalInChamber(gctx, secondaryMeas).block<2,1>(0,0);             
+            Jac.col(1)  = xAOD::channelNormalInChamber(gctx, secondaryMeas).block<2,1>(0,0).unit();
             uvcov(1,1) = secondaryMeas->localCovariance<1>()[0]; 
         } else { 
             m_pos = xAOD::positionInChamber(gctx, primaryMeas);
-            Jac.col(1) = m_dir.block<2,1>(0,0);
+            Jac.col(1) = m_dir.block<2,1>(0,0).unit();
             if (primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                 const xAOD::MdtDriftCircle* dc = static_cast<const xAOD::MdtDriftCircle*>(primaryMeas);
                 uvcov(1,1) = 0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash());
@@ -76,7 +76,7 @@ namespace MuonR4{
             }
             uvcov(1,1) = std::pow(uvcov(1,1), 2);
         }
-        Jac = Jac.inverse().eval();
+
         /// In case of 2D measurements like sTgc-pads or BI-RPC strips we can directly take the covariance
         /// from the measurement itself. To indicate that the space point measures both, eta & phi coordinate
         /// set the secondary measurement to be the primary one
@@ -84,7 +84,7 @@ namespace MuonR4{
             uvcov = xAOD::toEigen(primaryMeas->localCovariance<2>());
             m_secondaryMeas = m_primaryMeas;
         }
-        m_measCovariance = Jac * uvcov * Jac.transpose();
+        m_measCovariance = Jac.inverse() * uvcov * Jac;
     }
             
     const xAOD::UncalibratedMeasurement* SpacePoint::primaryMeasurement() const {
