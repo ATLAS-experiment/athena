@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
+from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
@@ -13,6 +14,21 @@ from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
+
+def JetCollectionsBTaggingCfg(cfgFlags, jet_cols, pv_cols=None,
+                             trackAugmenterPrefix=None):
+
+    if pv_cols is None:
+        pv_cols = ['PrimaryVertices'] * len(jet_cols)
+    if len(pv_cols) != len(jet_cols):
+        raise ValueError('PV collection length is not the same as Jets')
+
+    acc = ComponentAccumulator()
+
+    for jet_col, pv_col in zip(jet_cols, pv_cols):
+        acc.merge(JetBTagginglessAlgCfg(cfgFlags, jet_col, pv_col, trackAugmenterPrefix))
+
+    return acc
 
 def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
                           trackAugmenterPrefix=None):
