@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // P4Helpers.h
@@ -13,7 +13,7 @@
 
 /**
    P4Helpers provides static helper functions for kinematic calculation
-on objects deriving from I4Momentum.
+   on objects deriving from I4Momentum.
 
    @author David Rousseau rousseau@lal.in2p3.fr
    @author Sebastien Binet binet@cern.ch
@@ -21,33 +21,46 @@ on objects deriving from I4Momentum.
  */
 
 #include <cmath>
-
-namespace P4Helpers
-{
-  /** delta Phi in range [-pi,pi[ */
-  inline
-  double deltaPhi( double phiA, double phiB )
-  {
-    return  -remainder( -phiA + phiB, 2*M_PI );
-  }
-}
-
-// AthAnalysisBase/ManaCore doesn't currently include the Trigger Service
-#ifndef XAOD_ANALYSIS
-
-
-// STL includes
+// CxxUtils includes
+#include "CxxUtils/fpcompare.h" // for fpcompare::less
 #include <algorithm> // for std::sort
 #include <limits>    // for std::numeric_limits
 
-// CxxUtils includes
-#include "CxxUtils/fpcompare.h" // for fpcompare::less
+namespace P4Helpers
 
+//Not object dependent methods
+{
+/** delta Phi in range [-pi,pi[ */
+inline double deltaPhi(double phiA, double phiB) {
+  return -remainder(-phiA + phiB, 2 * M_PI);
+}
+
+/// sort a container according to the given predicate
+template <class Iterator_t, class Predicate_t>
+inline void sort(Iterator_t itr, Iterator_t itrEnd, Predicate_t p) {
+  // Koenig's look-up at our rescue: handle correctly DataVector's
+  // special sort method. => We inject the std::sort into our namespace
+  using std::sort;
+  return sort(itr, itrEnd, p);
+}
+
+/// sort a container according to the given predicate
+template <class Container_t, class Predicate_t>
+inline void sort(Container_t& container, Predicate_t p) {
+  return P4Helpers::sort(container.begin(), container.end(), p);
+}
+}  // namespace P4Helpers
+
+#ifndef XAOD_ANALYSIS
 // EventKernel includes
 #include "EventKernel/I4Momentum.h"
 
 namespace P4Helpers
 {
+  /*
+   * Old I4Momentum P4 Helpers see xAODP4Helpers for the xAOD::IParticle implementation
+   */
+
   /// Computes efficiently @f$ \Delta{\eta} @f$
   inline
   double deltaEta( const I4Momentum& p1, const I4Momentum& p2 )
@@ -256,117 +269,6 @@ namespace P4Helpers
       const I4Momentum * const pC, const I4Momentum * const pD )
   { return invMass( *pA, *pB, *pC, *pD ); }
 
-  // -------------------------------------------------------------
-  // --------------- Sorting functions ---------------------------
-  // -------------------------------------------------------------
-
-  /// sort a container according to the given predicate
-  template<class Iterator_t, class Predicate_t>
-  inline
-  void sort( Iterator_t itr, Iterator_t itrEnd, Predicate_t p )
-  {
-    // Koenig's look-up at our rescue: handle correctly DataVector's
-    // special sort method. => We inject the std::sort into our namespace
-    using std::sort;
-    return sort( itr, itrEnd, p );
-  }
-
-  /// sort a container according to the given predicate
-  template<class Container_t, class Predicate_t>
-  inline
-  void sort( Container_t& container, Predicate_t p )
-  {
-    return P4Helpers::sort( container.begin(), container.end(), p );
-  }
-
-  // -------------------------------------------------------------
-  // --------------- Matching functions --------------------------
-  // -------------------------------------------------------------
-
-  /// Find the closest element in a collection to an @c I4Momentum
-  /// @param index [out] index of the closest element
-  /// @param deltaR [out] @f$ \Delta{R} @f$
-  /// @return true if found
-  template <class Container_t>
-  inline
-  bool closestDeltaR( const double eta, const double phi,
-          Container_t& coll, std::size_t& index, double& deltaR )
-  {
-    deltaR = std::numeric_limits<double>::max(); // big value
-    bool l_return = false;
-    std::size_t l_idx = 0;
-    typename Container_t::const_iterator it  = coll.begin();
-    typename Container_t::const_iterator itE = coll.end();
-    for (; it != itE; ++it,++l_idx) {
-      double rtu = P4Helpers::deltaR(**it, eta, phi);
-      if ( CxxUtils::fpcompare::less(rtu, deltaR) ) {
-        index  = l_idx;
-        deltaR = rtu;
-        l_return = true;
-      }
-    }
-    return l_return;
-  }
-
-  /// Find the closest element in a collection to an @c I4Momentum
-  /// @param index [out] index of the closest element
-  /// @param deltaR [out] @f$ \Delta{R} @f$
-  /// @return true if found
-  template <class Container_t>
-  inline
-  bool closestDeltaR( const I4Momentum& p4,
-          Container_t& coll, std::size_t& index, double& deltaR )
-  {
-    return P4Helpers::closestDeltaR( p4.eta(), p4.phi(),
-                                     coll, index, deltaR );
-  }
-
-  /// find the closest element in R - with a condition on E
-  /// @param index [out] index of the closest element
-  /// @param deltaR [out] @f$ \Delta{R} @f$
-  /// @param deltaE [out] @f$ \Delta{E} @f$
-  /// @return true if found
-  template <class Container_t>
-  inline
-  bool closestDeltaR( const double eta, const double phi, const double ene,
-                      Container_t& coll, std::size_t& index,
-                      double &deltaR, double &deltaE )
-  {
-    using std::abs;
-    deltaR = deltaE = std::numeric_limits<double>::max(); // big value
-    bool l_return = false;
-    std::size_t l_idx = 0;
-    typename Container_t::const_iterator it  = coll.begin();
-    typename Container_t::const_iterator itE = coll.end();
-    for (; it != itE; ++it,++l_idx) {
-      const double dE  = abs( ene - (*it)->e() );
-      if ( CxxUtils::fpcompare::less(dE, deltaE) ) {
-        const double rtu = P4Helpers::deltaR(**it,eta,phi);
-        if ( CxxUtils::fpcompare::less(rtu, deltaR) ) {
-          index  = l_idx;
-          deltaR = rtu;
-          deltaE = dE;
-          l_return = true;
-        }
-      }
-    }
-    return l_return;
-  }
-
-  /// find the closest element in R - with a condition on E
-  /// @param index [out] index of the closest element
-  /// @param deltaR [out] @f$ \Delta{R} @f$
-  /// @param deltaE [out] @f$ \Delta{E} @f$
-  /// @return false if found
-  template <class Container_t>
-  inline
-  bool closestDeltaR( const I4Momentum& p4,
-          Container_t& coll, std::size_t& index,
-          double &deltaR, double &deltaE )
-  {
-    return P4Helpers::closestDeltaR( p4.eta(), p4.phi(), p4.e(),
-                                     coll, index, deltaR, deltaE );
-  }
 
 } //> namespace P4Helpers
 
