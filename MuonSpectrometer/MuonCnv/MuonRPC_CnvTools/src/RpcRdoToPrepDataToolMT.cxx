@@ -201,6 +201,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
         strip->setAmbiguityFlag(prd->ambiguityFlag());
         strip->setTimeOverThreshold(prd->timeOverThreshold());
         strip->setTime(prd->time());
+        strip->setTimeCovariance(std::pow(m_stripTimeResolution, 2));
         strip->setTriggerInfo(prd->triggerInfo());
         xAOD::MeasVector<1> locPos{prd->localPosition().x()};
         xAOD::MeasMatrix<1> locCov{prd->localCovariance()(0,0)};

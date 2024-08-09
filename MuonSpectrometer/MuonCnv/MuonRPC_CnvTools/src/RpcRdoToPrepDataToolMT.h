@@ -188,6 +188,9 @@ class RpcRdoToPrepDataToolMT
       this, "xAODKey", "",
       "If empty, do not produce xAOD, otherwise this is the key of the output "
       "xAOD MDT PRD container"};
+   
+   Gaudi::Property<double> m_stripTimeResolution{this, "timeResolution", 0.6 * Gaudi::Units::nanosecond,
+                                                          "Estimated time resolution of the strip readout"};
 };
 }  // namespace Muon
 

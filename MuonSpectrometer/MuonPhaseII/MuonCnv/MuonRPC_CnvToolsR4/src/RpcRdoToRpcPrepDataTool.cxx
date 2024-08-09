@@ -96,6 +96,7 @@ namespace MuonR4{
             outputMeas->setTimeOverThreshold(rdo->timeoverthr());
             /** TODO: Do we need to apply a time of flight correction here? */
             outputMeas->setTime(rdo->time());
+            outputMeas->setTimeCovariance(std::pow(m_stripTimeResolution,2));
         };
         
         /** Next step convert the RDOs into prepdata objects */
