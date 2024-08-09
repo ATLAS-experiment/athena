@@ -193,3 +193,10 @@ def BTaggingXbbContent(jetcol, ConfigFlags = None):
     btagcontent = _getVariableList(btagging, aux)
 
     return jetcontent + btagcontent
+
+def BTagginglessContent(jetcol, ConfigFlags=None):
+    BTaggingRun3AuxVar = _getVars("GN2v01", extra_flavours=['tau'])
+    isRun4 = _isRun4(ConfigFlags)
+    aux = BTaggingRun3AuxVar if not isRun4 else []
+    btagcontent = _getVariableList(jetcol, aux)
+    return btagcontent
