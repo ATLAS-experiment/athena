@@ -5,6 +5,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include <xAODMuonPrepData/ChamberMeasViewer.h>
 #include <thread>
 
 namespace {
@@ -147,85 +148,85 @@ template <class ContType>
         ATH_MSG_DEBUG("Key "<<typeid(ContType).name()<<" not set. Do not fill anything");
         return StatusCode::SUCCESS;
     }                          
-    SG::ReadHandle<ContType> readHandle{key, ctx};
+    SG::ReadHandle readHandle{key, ctx};
     ATH_CHECK(readHandle.isPresent());
 
-    SG::ReadHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
+    SG::ReadHandle gctx{m_geoCtxKey, ctx};
     ATH_CHECK(gctx.isPresent());
     
     using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
-    /// Fill the Mdt && Micromegas directly into their presorted container
-    if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value ||
-                  std::is_same<ContType, xAOD::MMClusterContainer>::value) {
-        for (const PrdType prd : *readHandle) {
-            SpacePointsPerChamber& hitVec = fillContainer[prd->readoutElement()->getChamber()];
-            if (hitVec.etaHits.capacity() == hitVec.etaHits.size()) {
-                hitVec.etaHits.reserve(m_capacityBucket + hitVec.etaHits.size());
+    xAOD::ChamberMeasViewer viewer{*readHandle};
+    do {
+
+      SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->getChamber()];
+      ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
+      if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer> ||
+                    std::is_same_v<ContType, xAOD::MMClusterContainer>) {
+ 
+            pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.capacity() + viewer.size());
+            for (const PrdType prd: viewer) {
+                ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())
+                              <<", hash: "<<prd->identifierHash());
+                pointsInChamb.etaHits.emplace_back(*gctx, prd, nullptr);           
             }
-            hitVec.etaHits.emplace_back(*gctx, prd, nullptr);
-        }
-    } else {
-        /// Helper pair to separate eta & phi hits
-        using EtaPhiHits = std::pair<PrdVec, PrdVec>;
-        /// To reduce the combinatorics store the eta & phi hits per gas gap. 
-        /// All strip detectors in the muon spectrometer have maximally 4 gasGaps (sTgc, MM, Tgc).
-        /// Rpcs have nominally 2 or 3 gasGaps but each gasGap in R can be split into two modules 
-        /// according to their doubletPhi value 
-        using EtaPhiHitsPerChamber = std::array<EtaPhiHits, 6>;
-        std::unordered_map<const MuonGMR4::MuonReadoutElement*, EtaPhiHitsPerChamber> collectedPrds{};
-        for (const PrdType prd : *readHandle) {
-            EtaPhiHitsPerChamber& hitsPerChamb = collectedPrds[prd->readoutElement()];
-            /// Sort the hit into a GasGap
-            unsigned int gapIdx = prd->gasGap() -1;
-            /// Split the Rpcs additionally according to their doubletPhi. 
-            if constexpr (std::is_same<ContType, xAOD::RpcMeasurementContainer>::value) {
-                gapIdx = 2*gapIdx + (prd->doubletPhi() - 1);
-            }
-            bool measPhi{false};
-            if constexpr (std::is_same<ContType, xAOD::sTgcMeasContainer>::value) {
-                /// directly sort the sTgc pads into the container                
-                if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                    fillContainer[prd->readoutElement()->getChamber()].etaHits.emplace_back(*gctx, prd, nullptr);
-                    continue;
-                }
-                measPhi = prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
-            } else {
-                measPhi = prd->measuresPhi();
-            }
-            EtaPhiHits& hitsPerLayer = hitsPerChamb[gapIdx];
-            PrdVec& toPush = measPhi ? hitsPerLayer.second : hitsPerLayer.first;
-            if (toPush.capacity() == toPush.size()) {
-                toPush.reserve(toPush.size() + m_capacityBucket);
-            }
-            toPush.push_back(prd);
-        }
-        /// Loop over the splitted hits and form the space points
-        for (auto& [reEle, hitsPerChamb] : collectedPrds) {
-           SpacePointsPerChamber& fillInto {fillContainer[reEle->getChamber()]};           
-           ATH_MSG_VERBOSE("Fill collected measurements for "<<m_idHelperSvc->toStringDetEl(reEle->identify()));
-           for (auto& [etaHits, phiHits]: hitsPerChamb) {
-                /// If one of the two is empty no chance to combine them
-                if (!passOccupancy2D(etaHits, phiHits)) {
-                    fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size());
-                    fillInto.phiHits.reserve(fillInto.phiHits.size() + phiHits.size());
-                    for (const PrdType etaPrd : etaHits) {
-                        fillInto.etaHits.emplace_back(*gctx, etaPrd);
-                    }
-                    for (const PrdType phiPrd : phiHits) {
-                        fillInto.phiHits.emplace_back(*gctx, phiPrd);
-                    }
-                    continue;
+       } else {
+            /// Loop over the chamber hits to split the hits per gasGap
+            using EtaPhiHits = std::array<PrdVec, 2>;
+            std::vector<EtaPhiHits> hitsPerGasGap{};
+            for (const PrdType prd : viewer) {
+                ATH_MSG_VERBOSE("Create space point from "<<m_idHelperSvc->toString(prd->identify())<<", hash: "<<prd->identifierHash());
+                unsigned int gapIdx = prd->gasGap() -1;
+                if constexpr (std::is_same_v<ContType, xAOD::RpcMeasurementContainer>) {
+                    gapIdx = prd->readoutElement()->createHash(0, prd->gasGap(), prd->doubletPhi(), false);
                 }
 
+                bool measPhi{false};
+                if constexpr( std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
+                    /// Make directly to a space point
+                    if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
+                        pointsInChamb.etaHits.emplace_back(*gctx, prd, nullptr);
+                        continue;
+                    }
+                    /// Wires measure the phi coordinate
+                    measPhi = prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire;
+                } else {
+                    /// Rpcs have the measuresPhi property
+                    measPhi = prd->measuresPhi();
+                }
+
+                if (hitsPerGasGap.size() <= gapIdx) {
+                    hitsPerGasGap.resize(gapIdx + 1);
+                }
+                /// Sort in the hit
+                PrdVec& toPush = hitsPerGasGap[gapIdx][measPhi];
+                if (toPush.capacity() == toPush.size()) {
+                    toPush.reserve(toPush.size() + m_capacityBucket);
+                }
+                toPush.push_back(prd);
+            }
+            /// Create the space points
+            for (auto& [etaHits, phiHits] : hitsPerGasGap) {
+                if (!passOccupancy2D(etaHits, phiHits)) {
+                    ATH_MSG_VERBOSE("Occupancy cut not passed "<<etaHits.size()<<", "<<phiHits.size());
+                    pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.size() + etaHits.size());
+                    pointsInChamb.phiHits.reserve(pointsInChamb.phiHits.size() + phiHits.size());
+                    for (const PrdType etaPrd : etaHits) {
+                        pointsInChamb.etaHits.emplace_back(*gctx, etaPrd);
+                    }
+                    for (const PrdType phiPrd : phiHits) {
+                        pointsInChamb.phiHits.emplace_back(*gctx, phiPrd);
+                    }
+                    continue;
+                }
                 std::vector<unsigned int> etaCounts(etaHits.size(), phiHits.size());
                 std::vector<unsigned int> phiCounts(phiHits.size(), etaHits.size());
                 if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value){
                     etaCounts = fillMatchCounts(etaHits, phiHits);
                     phiCounts = fillMatchCounts(phiHits, etaHits);
                 }
-                                
-                fillInto.etaHits.reserve(fillInto.etaHits.size() + etaHits.size() * phiHits.size());
+                pointsInChamb.etaHits.reserve(etaHits.size()*phiHits.size());
+
                 /// Flag whether an isolated phi hit which cannot be combined with others exists 
                 bool hasIsolatedPhi{false};
                 /// Flag whether an eta-phi space point has been made
@@ -234,36 +235,39 @@ template <class ContType>
                 for (unsigned int etaP = 0; etaP < etaHits.size(); ++etaP) {
                     /// There's no valid combination with another phi hit
                     if (!etaCounts[etaP]) {
-                        fillInto.etaHits.emplace_back(*gctx, etaHits[etaP]);
+                        pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP]);
                         continue;
                     }
                     for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
+                        /// The phi space point will never be combined 
                         if (!phiCounts[phiP]) {
                             hasIsolatedPhi = true;
                             continue;
                         }
+                        /** Tgc measurements with different bunch crossing tags cannot be combined */
                         if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value) {
                             if (!(etaHits[etaP]->bcBitMap() & phiHits[phiP]->bcBitMap())){
                                 continue;
                             }
                         }
-                        SpacePoint& spacePoint{fillInto.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
+                        SpacePoint& spacePoint{pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
                         spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
                         hasCombinedSpacePoint = true;
                     }
                 }
-                // Add isolated phi space points
+                /// If there's a phi measuremnt which cannot be combined with the others 
+                /// or no eta measurement is suitable, then manually push_back the phi hits
                 if (!hasCombinedSpacePoint || hasIsolatedPhi) {
                     for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
                         if (!hasCombinedSpacePoint || !phiCounts[phiP]) {
-                            fillInto.phiHits.emplace_back(*gctx, phiHits[phiP]);
+                            pointsInChamb.phiHits.emplace_back(*gctx, phiHits[phiP]);
                         }
                     }
                 }
             }
-        }
-    }
-    return StatusCode::SUCCESS;                                      
+       }
+    } while (viewer.next());
+    return StatusCode::SUCCESS;
 }
 
 
