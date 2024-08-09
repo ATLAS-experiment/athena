@@ -46,8 +46,7 @@ class FakeBkgBlock(ConfigBlock):
         alg.Definition = self.definition
 
         config.addPrivateTool('FakeTool', self.fakeTool)
-        from PathResolver import PathResolver
-        alg.FakeTool.InputFiles = [PathResolver.FindCalibFile(self.config)]
+        alg.FakeTool.InputFiles = [self.config]
         alg.FakeTool.Process = self.process
         alg.FakeTool.Selection = self.definition
         alg.FakeTool.EnergyUnit = 'GeV'

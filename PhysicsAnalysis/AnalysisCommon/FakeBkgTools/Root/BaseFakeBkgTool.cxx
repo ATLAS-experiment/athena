@@ -17,6 +17,7 @@
 #include <vector>
 #include <regex>
 #include <stdexcept>
+#include "PathResolver/PathResolver.h"
 
 using namespace FakeBkgTools;
 using namespace CP;
@@ -85,6 +86,7 @@ StatusCode BaseFakeBkgTool::initialize()
     }
     
     m_useDB = m_inputFiles.size();
+
     
     bool useGeV;
     if(m_energyUnit == "MeV" || m_energyUnit == "MEV") useGeV = false;
@@ -130,7 +132,7 @@ bool BaseFakeBkgTool::importEfficiencies(bool resetDB)
     {
         for(const auto& fn : m_inputFiles)
         {
-            filename = fn;
+            filename = PathResolverFindDataFile(fn);
             auto pos = filename.rfind(".xml");
             if(pos == filename.length()-4)
             {
