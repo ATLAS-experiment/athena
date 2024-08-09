@@ -11,6 +11,9 @@
 #undef NDEBUG
 #define XAOD_DEPRECATE_AUXDATA 0 // suppress deprecation warnings.
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/Decorator.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
 #include "CxxUtils/copy_bounded.h"
@@ -112,8 +115,8 @@ void test1()
 {
   std::cout << "test1\n";
 
-  SG::AuxElement::Accessor<int> ityp1 ("anInt");
-  SG::AuxElement::Accessor<float> ftyp1 ("aFloat");
+  SG::Accessor<int> ityp1 ("anInt");
+  SG::Accessor<float> ftyp1 ("aFloat");
 
   SG::AuxElement b;
   assert (b.index() == 0);
@@ -257,25 +260,25 @@ public:
 
   int& ityp1()
   {
-    static const Accessor<int> acc ("anInt");
+    static const SG::Accessor<int> acc ("anInt");
     return acc (*this);
   }
 
   int ityp1() const
   {
-    static const Accessor<int> acc ("anInt");
+    static const SG::Accessor<int> acc ("anInt");
     return acc (*this);
   }
 
   float& ftyp1()
   {
-    static const Accessor<float> acc ("aFloat");
+    static const SG::Accessor<float> acc ("aFloat");
     return acc (*this);
   }
 
   float ftyp1() const
   {
-    static const Accessor<float> acc ("aFloat");
+    static const SG::Accessor<float> acc ("aFloat");
     return acc (*this);
   }
 
@@ -293,7 +296,7 @@ void test2()
   Elt elt2 (10);
   assert (elt2.x == 10);
 
-  Elt::Accessor<int> ityp2 ("anotherInt");
+  SG::Accessor<int> ityp2 ("anotherInt");
 
   elt.ityp1() = 1;
   ityp2(elt) = 2;
@@ -401,7 +404,7 @@ void test_copy()
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
-  Elt::Accessor<int> ityp2 ("anotherInt");
+  SG::Accessor<int> ityp2 ("anotherInt");
 
   Elt elt1;
   Elt elt2;
@@ -439,7 +442,7 @@ void test_copy()
   assert (store1.getAuxIDs().find (linked_id) == store1.getAuxIDs().end());
 
   const Elt& celt2 = elt2;
-  Elt::Accessor<int> ityp3 ("yetAnotherInt");
+  SG::Accessor<int> ityp3 ("yetAnotherInt");
   Elt elt5;
   SG::AuxVectorBase dv5;
   dv5.set (elt5, 1);
@@ -484,7 +487,7 @@ void test_standalone()
   std::cout << "test_standalone\n";
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp1 = r.getAuxID<int> ("anInt");
-  SG::AuxElement::Accessor<int> int1 ("anInt");
+  SG::Accessor<int> int1 ("anInt");
   SG::AuxStoreInternal store1;
   int* i1 = reinterpret_cast<int*> (store1.getData(ityp1, 1, 1));
   i1[0] = 11;
@@ -569,8 +572,8 @@ void test_decoration()
   SG::AuxStoreInternal store;
   v.setStore (&store);
 
-  SG::AuxElement::Accessor<int>  ityp1 ("anInt1");
-  SG::AuxElement::Decorator<int> ityp2 ("anInt2");
+  SG::Accessor<int>  ityp1 ("anInt1");
+  SG::Decorator<int> ityp2 ("anInt2");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp2_id = r.getAuxID<int> ("anInt2");
@@ -585,7 +588,7 @@ void test_decoration()
   v.lock();
   const SG::AuxElement& cb = b;
 
-  SG::AuxElement::Decorator<int> ityp3 ("anInt3");
+  SG::Decorator<int> ityp3 ("anInt3");
   ityp3(cb) = 12;
   assert (ityp3.getDecorationArray (v)+5 == &ityp3(cb));
   assert (ityp3.getDecorationSpan(v)[5] == 12);
@@ -606,7 +609,7 @@ void test_decoration()
   assert (!ityp3.isAvailable(cb));
 #endif
 
-  SG::AuxElement::Accessor<int>  ityp4 ("anInt4");
+  SG::Accessor<int>  ityp4 ("anInt4");
 
   SG::AuxElement b2;
   b2.makePrivateStore();
@@ -727,7 +730,7 @@ void test_const_decoration()
   v.setStore (&store);
   SG::ConstAuxElement b (&v, 5);;
 
-  SG::ConstAuxElement::Decorator<int> ityp2 ("anInt2");
+  SG::Decorator<int> ityp2 ("anInt2");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp2_id = r.getAuxID<int> ("anInt2");
@@ -739,7 +742,7 @@ void test_const_decoration()
   v.lock();
   const SG::ConstAuxElement& cb = b;
 
-  SG::ConstAuxElement::Decorator<int> ityp3 ("anInt3");
+  SG::Decorator<int> ityp3 ("anInt3");
   ityp3(cb) = 12;
   assert (ityp3.getDecorationArray (v)+5 == &ityp3(cb));
   assert (ityp3.getDecorationSpan(v)[5] == 12);
