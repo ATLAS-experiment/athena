@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -eu
-noerror.sh
-h5ls output.h5
+
+# check that one number we set is there
+h5dump -o raw.txt -y -d '4d[0,1,2,3,4]' output.h5 > /dev/null
+EIGHTY_SIX=$(cat raw.txt | xargs | paste -s | cut -d , -f 2)
+if (( $EIGHTY_SIX == 86 )); then
+    echo "test magic number is correct!"
+else
+    echo "test magic number is incorrect ($EIGHTY_SIX != 86)"
+    exit 1
+fi
