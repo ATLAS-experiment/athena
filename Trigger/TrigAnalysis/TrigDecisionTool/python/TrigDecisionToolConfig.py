@@ -34,7 +34,7 @@ def TrigDecisionToolCfg(flags):
 
     tdt = CompFactory.Trig.TrigDecisionTool('TrigDecisionTool')
     tdt.TrigConfigSvc = cfgsvc
-    use_run3_format = flags.Trigger.EDMVersion == 3 # or flags.Trigger.doEDMVersionConversion (to be added when this is working)
+    use_run3_format = flags.Trigger.EDMVersion >= 3 # or flags.Trigger.doEDMVersionConversion (to be added when this is working)
     tdt.NavigationFormat = 'TrigComposite' if use_run3_format else 'TriggerElement'
     tdt.HLTSummary = getRun3NavigationContainerFromInput(flags)
 

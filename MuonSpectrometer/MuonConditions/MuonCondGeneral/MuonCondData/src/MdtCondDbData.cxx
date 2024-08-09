@@ -4,7 +4,7 @@
 
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
-
+#include "MuonTesterTree/throwExcept.h"
 
 using DcsConstants = MdtCondDbData::DcsConstants;
 // --- writing identifiers -------
@@ -61,7 +61,7 @@ const DcsConstants& MdtCondDbData::getHvState(const Identifier& multiLayerID) co
   m_id_helper.get_detectorElement_hash(multiLayerID, hash);
   unsigned int hashIdx =static_cast<unsigned int>(hash);
   if (hashIdx >= m_dcsStates.size()) {
-     throw std::runtime_error("MdtCondDbData::getHvState() - Out of bound access "+
+     THROW_EXCEPTION("MdtCondDbData::getHvState() - Out of bound access "+
                           std::to_string(hashIdx) + " vs. "+std::to_string(m_dcsStates.size()));
   } 
   return m_dcsStates[hashIdx];

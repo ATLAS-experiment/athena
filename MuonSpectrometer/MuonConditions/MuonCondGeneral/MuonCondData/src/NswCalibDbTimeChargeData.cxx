@@ -25,12 +25,14 @@ int NswCalibDbTimeChargeData::identToModuleIdx(const Identifier& chan_id) const{
     const IdentifierHash hash = m_idHelperSvc->detElementHash(chan_id);
     if (m_idHelperSvc->isMM(chan_id)) {
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-        return 4 * static_cast<int>(hash) + idHelper.gasGap(chan_id) -1;
+        return static_cast<unsigned int>(hash)*(idHelper.gasGapMax()) + (idHelper.gasGap(chan_id) -1);
+    } else if (m_idHelperSvc->issTgc(chan_id)) {
+        const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        return static_cast<unsigned int>(hash)*(idHelper.gasGapMax() * 3 /*3 channel types*/) +
+               (idHelper.gasGap(chan_id) -1  + idHelper.gasGapMax() * idHelper.channelType(chan_id)) + m_nMmElements;
     }
-    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-    return m_nMmElements + static_cast<int>(hash)*12 + 
-            3* (idHelper.gasGap(chan_id) - 1) + idHelper.channelType(chan_id);          
- }
+    return -1;
+}
 
 // setting functions ---------------------------------
 
@@ -46,11 +48,17 @@ NswCalibDbTimeChargeData::setData(CalibDataType type,
     ATH_MSG_VERBOSE("Set "<<(type == CalibDataType::PDO  ? "PDO" : "TDO")<<" calibration constants for channel "
                 <<m_idHelperSvc->toString(chnlId)<<", slot: "<< array_idx<<", "<<constants);
     CalibModule& calib_mod = calibMap.at(array_idx);
-    const unsigned int channel = (m_idHelperSvc->isMM(chnlId) ? 
-                                    m_idHelperSvc->mmIdHelper().channel(chnlId) : 
+    const unsigned int channel = (m_idHelperSvc->isMM(chnlId) ?
+                                    m_idHelperSvc->mmIdHelper().channel(chnlId) :
                                     m_idHelperSvc->stgcIdHelper().channel(chnlId)) -1;
     if (calib_mod.channels.empty()) {
-        calib_mod.layer_id = m_idHelperSvc->layerId(chnlId);
+        if (m_idHelperSvc->isMM(chnlId)) {
+            const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+            calib_mod.layer_id = idHelper.channelID(chnlId, idHelper.multilayer(chnlId), idHelper.gasGap(chnlId), 1);
+        } else if (m_idHelperSvc->issTgc(chnlId)) {
+            const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+            calib_mod.layer_id = idHelper.channelID(chnlId, idHelper.multilayer(chnlId), idHelper.gasGap(chnlId), idHelper.channelType(chnlId), 1);
+        }
     }
     if (calib_mod.channels.size() <= channel) calib_mod.channels.resize(channel +1);
     if (calib_mod.channels[channel]) {
