@@ -150,7 +150,10 @@ template <class ContType>
     }                          
     SG::ReadHandle readHandle{key, ctx};
     ATH_CHECK(readHandle.isPresent());
-
+    if (readHandle->empty()){
+        ATH_MSG_DEBUG("nothing to do"); 
+        return StatusCode::SUCCESS;
+    }
     SG::ReadHandle gctx{m_geoCtxKey, ctx};
     ATH_CHECK(gctx.isPresent());
     

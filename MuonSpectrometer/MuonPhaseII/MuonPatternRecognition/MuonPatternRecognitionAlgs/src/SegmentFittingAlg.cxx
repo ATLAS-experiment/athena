@@ -388,7 +388,7 @@ namespace MuonR4{
         CalibSegmentChi2Minimizer c2f = defineChi2Functor(ctx,gctx, data.segmentPars, std::move(uncalib));
        
         minimizer.SetFunction(c2f);
-        if(!minimizer.Minimize() || !minimizer.Hesse()) {
+        if(c2f.nDoF() <= 0 || !minimizer.Minimize() || !minimizer.Hesse()) {
             return false;
         }
         harvestParameters(minimizer, c2f, data);
@@ -609,7 +609,7 @@ namespace MuonR4{
         minimizer.SetFunction(c2f);
         recovered.nDoF = c2f.nDoF();
 
-        if (recovered.nDoF < 0 || !minimizer.Minimize() || !minimizer.Hesse()) {
+        if (recovered.nDoF <= 0 || !minimizer.Minimize() || !minimizer.Hesse()) {
             return false;
         }
         harvestParameters(minimizer,c2f, recovered);
@@ -618,10 +618,10 @@ namespace MuonR4{
         }
         ATH_MSG_VERBOSE("Chi2, nDOF before:"<<beforeRecov.chi2<<", "<<beforeRecov.nDoF
                     <<" after recovery: "<<recovered.chi2<<", "<<recovered.nDoF);
-        const double recChi2 = recovered.chi2 / recovered.nDoF;
+        const double recChi2 = recovered.chi2 / std::max(recovered.nDoF,1);
         /// If the chi2 is less than 5, no outlier rejection is launched. So also accept any recovered segment below
         /// that threshold
-        if (recChi2 < m_outlierRemovalCut || recChi2 < beforeRecov.chi2 / beforeRecov.nDoF) {
+        if (recChi2 < m_outlierRemovalCut || (beforeRecov.nDoF == 0) || recChi2 < beforeRecov.chi2 / beforeRecov.nDoF) {
             ATH_MSG_VERBOSE("Accept segment with recovered "<<candidateSPs.size() - beforeRecov.calibMeasurements.size()<<" hits.");
             beforeRecov = std::move(recovered);
             return plugHoles(ctx, gctx, seed, beforeRecov) || true;
