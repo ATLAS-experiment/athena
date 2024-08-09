@@ -1,0 +1,33 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+if __name__=="__main__":
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    parser = SetupArgParser()
+    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(noMM=True)
+    parser.set_defaults(noSTGC=True)
+    #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
+    #parser.set_defaults(inputFile=[
+    #                                "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
+    #                                ])
+    parser.set_defaults(inputFile=[
+                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"
+                                    ])
+
+
+    args       = parser.parse_args()
+    flags, cfg = setupGeoR4TestCfg(args)
+
+    if flags.Input.isMC:
+        from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+        cfg.merge(MuonSimHitToMeasurementCfg(flags))
+        from MuonTruthSegmentMaker.SegmentMakerConfig import TruthSegmentMakerCfg
+        cfg.merge(TruthSegmentMakerCfg(flags))
+        from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonTruthSegmentDumpCfg
+        cfg.merge(CsvMuonTruthSegmentDumpCfg(flags))
+
+
+    executeTest(cfg, num_events = args.nEvents)
+
+
+    

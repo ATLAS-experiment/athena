@@ -4,5 +4,7 @@
 */
 #include "../SimHitCsvDumperAlg.h"
 #include "../SpacePointCsvDumperAlg.h"
+#include "../TruthSegmentCsvDumperAlg.h"
 DECLARE_COMPONENT(MuonR4::SimHitCsvDumperAlg)
 DECLARE_COMPONENT(MuonR4::SpacePointCsvDumperAlg)
+DECLARE_COMPONENT(MuonR4::TruthSegmentCsvDumperAlg)

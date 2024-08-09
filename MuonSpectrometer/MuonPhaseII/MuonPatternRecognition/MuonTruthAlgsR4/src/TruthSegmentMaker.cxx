@@ -76,8 +76,7 @@ namespace MuonR4{
                 if (!genParticle) continue;
                 hitCollector[id][genParticle].push_back(simHit); 
             }
-        }
-        
+        } 
 
         SG::WriteHandle<xAOD::MuonSegmentContainer> writeHandle{m_segmentKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSegmentContainer>(),
@@ -88,6 +87,7 @@ namespace MuonR4{
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
             
             for (auto& [particle, simHits]: collectedParts) {
+
                 /* Take the hit that's closest to the chamber centre as reference */
                 std::ranges::stable_sort(simHits,[gctx,this](const xAOD::MuonSimHit*a, const xAOD::MuonSimHit*b){
                     return std::abs((toChamber(*gctx, a->identify())* xAOD::toEigen(a->localPosition())).z()) <
@@ -106,12 +106,7 @@ namespace MuonR4{
                 
                 const Amg::Vector3D globPos = locToGlob * chamberPos;
                 const Amg::Vector3D globDir = locToGlob.linear() * chamberDir;
-
-                xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
-                truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
-                truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
-                truthSegment->setT0Error(simHit->globalTime(), 0.);
-
+                
                 HitLinkVec associatedHits{};
                 unsigned int nMdt{0}, nRpcEta{0}, nRpcPhi{0}, nTgcEta{0}, nTgcPhi{0};
                 unsigned int nMm{0}, nStgcEta{0}, nStgcPhi{0};
@@ -147,11 +142,27 @@ namespace MuonR4{
                                                                 simHit->index()};
                     associatedHits.push_back(std::move(link));
                 }
-                truthSegment->setNHits(nMdt + nMm + nStgcEta, nTgcPhi + nRpcPhi + nStgcPhi, nTgcEta + nRpcEta);
+                int nPrecisionHits = nMdt + nMm + nStgcEta;
+                int nPhiLayers     = nTgcPhi + nRpcPhi + nStgcPhi;
+                // if nMdt + nMm + nStgcEta < 3, do not create a segment
+                if (nPrecisionHits < 3) continue;
+
+                xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
+                truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
+                truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
+                truthSegment->setT0Error(simHit->globalTime(), 0.);
+                
+                truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
                 truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 
                                             m_idHelperSvc->chamberIndex(segId),
                                             m_idHelperSvc->stationEta(segId),
                                             m_idHelperSvc->technologyIndex(segId));
+                // adding chi2 and ndof (nHits - 5 for 2 position, 2 direction and 1 time)
+                if (nPhiLayers == 0){
+                    truthSegment->setFitQuality(0, (nPrecisionHits + nTgcEta + nRpcEta - 3));
+                } else {
+                    truthSegment->setFitQuality(0, (nPrecisionHits + nPhiLayers + nTgcEta + nRpcEta - 5));
+                }
                 hitDecor(*truthSegment) = std::move(associatedHits);
             }
         }
