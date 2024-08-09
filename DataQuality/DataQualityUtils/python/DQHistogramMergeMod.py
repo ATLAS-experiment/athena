@@ -26,7 +26,7 @@ if DoProcMon:
     from . import DQProcMonitor
     DQProcMonitor.startProcMonThread()
   
-def DQHistogramMerge( listFileName, outFileName, runPostProcessing, directoryRegularExpression=".*", histogramRegularExpression=".*", isIncremental=False, compressionLevel=1,debugLevel=0 ):
+def DQHistogramMerge( listFileName, outFileName, runPostProcessing, directoryRegularExpression=".*", histogramRegularExpression=".*", isIncremental=False, compressionLevel=1,debugLevel=0,doTiming=False ):
   
     mf = dqutils.MonitoringFile()
     if directoryRegularExpression!=".*" or histogramRegularExpression!=".*":
@@ -34,6 +34,8 @@ def DQHistogramMerge( listFileName, outFileName, runPostProcessing, directoryReg
         mf.setHistogramRegEx(histogramRegularExpression)
     mf.setDebugLevel(debugLevel)
     mf.setCompressionLevel(compressionLevel)
+    if (doTiming): mf.doTiming()
+    
     mf.mergeFiles( outFileName, listFileName )
     mf.mergeLBintervals( outFileName )
   

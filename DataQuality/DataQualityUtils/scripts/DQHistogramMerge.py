@@ -27,6 +27,7 @@ if __name__ == "__main__":
   parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge')
   parser.add_argument('--excludeHist', help='Regex pattern for histogram names to exclude from merge\n'
                                             'Note that this is just the name - paths cannot be specified')
+  parser.add_argument('--doTiming',action = 'store_true', help="Print CPU timing per histogram")
 
   args = parser.parse_args()
   print(args)
@@ -49,8 +50,13 @@ if __name__ == "__main__":
   else:
     histogramRegularExpression = '.*'
 
+  doTiming=False
+  if args.doTiming:
+    doTiming=True
+    
   mod.DQHistogramMerge(args.input_list_file_name, args.merged_file_name, 
                        runPostProcessing, isIncremental=isIncremental, 
                        compressionLevel=compressionLevel, debugLevel=debugLevel,
+                       doTiming=doTiming,
                        directoryRegularExpression=directoryRegularExpression,
                        histogramRegularExpression=histogramRegularExpression)
