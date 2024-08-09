@@ -65,13 +65,13 @@ class MmRdoToPrepDataToolMT
       this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
   /// MdtPrepRawData containers
-  SG::WriteHandleKey<Muon::MMPrepDataContainer> m_mmPrepDataContainerKey{
+  SG::WriteHandleKey<Muon::MMPrepDataContainer> m_writeKey{
       this, "OutputCollection", "MM_Measurements"};
-  SG::ReadHandleKey<MM_RawDataContainer> m_rdoContainerKey{
+  SG::ReadHandleKey<MM_RawDataContainer> m_readKey{
       this, "InputCollection", "MMRDO"};
 
   /// This is the key for the cache for the MM PRD containers, can be empty
-  SG::UpdateHandleKey<MMPrepDataCollection_Cache> m_prdContainerCacheKey{
+  SG::UpdateHandleKey<MMPrepDataCollection_Cache> m_updateKey{
       this, "PrdCacheKey", "",
       "Optional external cache for the MM PRD container"};
   Gaudi::Property<bool> m_merge{this, "MergePrds", true};
