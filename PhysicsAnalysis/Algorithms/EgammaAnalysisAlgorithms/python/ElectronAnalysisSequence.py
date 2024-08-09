@@ -67,7 +67,7 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
     makeElectronCalibrationSequence (seq, dataType, postfix=postfix,
                                      crackVeto = crackVeto,
                                      ptSelectionOutput = ptSelectionOutput,
-                                     trackSelection = trackSelection, 
+                                     trackSelection = trackSelection,
                                      isolationCorrection = isolationCorrection,
                                      forceFullSimConfig = forceFullSimConfig)
     makeElectronWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,

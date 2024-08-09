@@ -108,7 +108,7 @@ namespace CP
         ATH_MSG_DEBUG("Recording " << cdv_var->size() << " objects in '" << sys.name() << "' container");
         ATH_CHECK(m_outputHandle.record(std::move(cdv_var), sys));
       }
-    }    
+    }
 
     return StatusCode::SUCCESS;
   }

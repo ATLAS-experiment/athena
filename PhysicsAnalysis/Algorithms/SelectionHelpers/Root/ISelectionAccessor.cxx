@@ -47,10 +47,10 @@ namespace CP
     }
 
   }
-  
 
 
-  StatusCode 
+
+  StatusCode
   makeSelectionReadAccessor(const std::string& expr,
                             std::unique_ptr<ISelectionReadAccessor>& accessor,
                             bool defaultToChar)

@@ -41,7 +41,7 @@ namespace CP {
       // check the preselection
       if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
         continue;
-      
+
       // retrieve the MET container
       const xAOD::MissingETContainer *met = nullptr;
       ANA_CHECK(m_metHandle.retrieve(met, sys));

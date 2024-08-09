@@ -20,7 +20,7 @@ CP::TrigGlobalEfficiencyAlg::TrigGlobalEfficiencyAlg(const std::string &name,
 StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 {
 
-  if (m_trigList_2015.empty() && m_trigList_2016.empty() && m_trigList_2017.empty() && m_trigList_2018.empty() 
+  if (m_trigList_2015.empty() && m_trigList_2016.empty() && m_trigList_2017.empty() && m_trigList_2018.empty()
       && m_trigList_2022.empty() && m_trigList_2023.empty() && m_trigList_2024.empty() && m_trigList_2025.empty()) {
     ATH_MSG_ERROR("A list of triggers needs to be provided");
     return StatusCode::FAILURE;

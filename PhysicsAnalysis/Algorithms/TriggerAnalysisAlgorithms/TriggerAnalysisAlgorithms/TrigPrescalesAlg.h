@@ -40,7 +40,7 @@ namespace CP
     /// \brief list of prescaled triggers or trigger chains
   private:
     Gaudi::Property<std::vector<std::string>> m_trigList {this, "triggers", {}, "trigger list"};
-  
+
     /// \brief list of all triggers or trigger chains
   private:
     Gaudi::Property<std::vector<std::string>> m_trigListAll {this, "triggersAll", {}, "all trigger list"};
@@ -57,7 +57,7 @@ namespace CP
   private:
     Gaudi::Property<std::string> m_prescaleDecoration {this, "prescaleDecoration", "", "decoration to store prescales"};
 
-    /// \brief whether to prescale MC instead of unprescale dat 
+    /// \brief whether to prescale MC instead of unprescale dat
   private:
     Gaudi::Property<bool> m_prescaleMC {this, "prescaleMC", false, "whether to do prescaling of MC instead of unprescaling of data"};
 

@@ -8,8 +8,8 @@
 #define TRIGGER_ANALYSIS_ALGORITHMS__TRIG_EVENT_SELECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <AsgTools/PropertyWrapper.h> 
-#include <AsgTools/ToolHandle.h> 
+#include <AsgTools/PropertyWrapper.h>
+#include <AsgTools/ToolHandle.h>
 #include <AthContainers/AuxElement.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
@@ -34,7 +34,7 @@ namespace CP
 
     /// \brief list of triggers or trigger chains
     Gaudi::Property<std::vector<std::string>> m_trigList {this, "triggers", {}, "trigger selection list"};
-    
+
     /// \brief the decoration for trigger selection
     Gaudi::Property<std::string> m_selectionDecoration {this, "selectionDecoration", "", "the decoration the trigger pass status"};
 

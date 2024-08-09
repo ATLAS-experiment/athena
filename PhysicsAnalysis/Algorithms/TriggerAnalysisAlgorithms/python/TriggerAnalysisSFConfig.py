@@ -75,7 +75,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
             "trigger legs. The default is False.")
-    
+
 
     def makeTriggerDecisionTool(self, config: ConfigAccumulator):
         # Might have already been added in TriggerAnalysisBlock

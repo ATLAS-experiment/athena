@@ -18,7 +18,7 @@
 namespace CP
 {
   JetDecoratorAlg ::
-  JetDecoratorAlg (const std::string& name, 
+  JetDecoratorAlg (const std::string& name,
                 ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
   {

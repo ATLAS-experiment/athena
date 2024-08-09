@@ -27,7 +27,7 @@ namespace CP
     {
       if (!m_label.empty())
         m_label.append(" && ");
-      
+
       m_label.append(acc->label());
     }
 

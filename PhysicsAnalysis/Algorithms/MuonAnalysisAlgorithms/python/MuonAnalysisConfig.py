@@ -48,7 +48,7 @@ class MuonCalibrationConfig (ConfigBlock):
             calibMode = 3
         else :
             raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
-        
+
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisMuons")
         else :
@@ -229,7 +229,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::MuonIsolationAlg',
                                    'MuonIsolationAlg' + postfix )
             config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
-            alg.isolationTool.MuonWP = self.isolation 
+            alg.isolationTool.MuonWP = self.isolation
             if self.closeByCorrection:
               alg.isolationTool.IsoDecSuffix = "CloseByCorr"
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'

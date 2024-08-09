@@ -72,7 +72,7 @@ namespace CP {
 
       m_fakeToolOutput.set(*evtInfo, asmWgt, sys);
     }
-    
+
     return StatusCode::SUCCESS;
   }
 

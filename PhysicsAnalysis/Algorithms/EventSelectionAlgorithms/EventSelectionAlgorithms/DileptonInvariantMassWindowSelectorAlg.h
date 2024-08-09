@@ -35,7 +35,7 @@ namespace CP {
       virtual StatusCode execute() override;
 
     private:
-    
+
       /// \brief the upper limit of the MLL window
       Gaudi::Property<float> m_mllupper {this, "highMLL", 0., "MLL < HIGH (in MeV)"};
 

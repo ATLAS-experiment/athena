@@ -12,5 +12,5 @@
    <class name="CP::EgammaFSRForMuonsCollectorAlg" />
    <class name="CP::ElectronSiHitDecAlg" />
    <class name="CP::PhotonExtraVariablesAlg" />
-   
+
 </lcgdict>

@@ -56,7 +56,7 @@ namespace CP
 
     /**
      * @brief Create and initialize all the sub-handles
-     * 
+     *
      * The arguments to this function should be the arguments to the initialize
      * function on the wrapped handle type
      */

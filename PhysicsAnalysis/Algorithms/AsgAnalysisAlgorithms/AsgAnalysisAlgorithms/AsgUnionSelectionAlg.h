@@ -28,7 +28,7 @@ namespace CP
     using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize () override;
     virtual StatusCode execute () override;
-    
+
 
 
     /// \brief the systematics list we run and have containers

@@ -90,10 +90,10 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.prescaleDecoration = 'prescale'
 
         return
- 
+
 
     def makeAlgs (self, config) :
-        
+
         if (self.multiTriggerChainsPerYear and self.triggerChainsPerYear and
             self.triggerChainsPerYear is not self.multiTriggerChainsPerYear.get('')):
             raise Exception('multiTriggerChainsPerYear and triggerChainsPerYear cannot be configured at the same time!')

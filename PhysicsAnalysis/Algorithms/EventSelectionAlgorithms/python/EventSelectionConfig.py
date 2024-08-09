@@ -459,7 +459,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
-    
+
     def add_NLJET_selector(self, text, config):
         items = text.split()
         if items[0] != "LJET_N":
@@ -607,7 +607,7 @@ class EventSelectionConfig(ConfigBlock):
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
-    
+
     def add_MWT_selector(self, text, config):
         items = text.split()
         if items[0] != "MWT":

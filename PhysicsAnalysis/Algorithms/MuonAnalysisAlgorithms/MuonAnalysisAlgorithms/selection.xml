@@ -6,5 +6,5 @@
    <class name="CP::MuonSelectionAlgV2" />
    <class name="CP::MuonTriggerEfficiencyScaleFactorAlg" />
    <class name="CP::MuonLRTMergingAlg" />
-   
+
 </lcgdict>

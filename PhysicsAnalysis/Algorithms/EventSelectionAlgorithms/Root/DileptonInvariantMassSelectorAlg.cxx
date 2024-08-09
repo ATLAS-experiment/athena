@@ -70,7 +70,7 @@ namespace CP {
 	    } else {
 	      break;
 	    }
-	  } 
+	  }
 	}
       }
       if (m_muonsHandle) {

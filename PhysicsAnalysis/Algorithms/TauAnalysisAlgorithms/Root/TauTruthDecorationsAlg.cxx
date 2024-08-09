@@ -61,7 +61,7 @@ namespace CP
       {
         const xAOD::TruthParticle* truthParticle = xAOD::TauHelpers::getTruthParticle(tau);
         if (truthParticle == nullptr) continue;
-        
+
         for (auto& [acc, writeHandle] : m_doubleWriteHandles) {
           if (truthParticle == nullptr or !acc->isAvailable(*truthParticle)) {
             writeHandle->set(*tau, -999., sys);

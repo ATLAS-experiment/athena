@@ -6,11 +6,11 @@ class PhotonExtraVariablesBlock(ConfigBlock):
     """a ConfigBlock for additional photon output variables"""
     """Decorates the output photons with the conversion type and calorimeter eta"""
     """and writes them to the output. Useful e.g. for photon-fake studies."""
- 
+
     def __init__(self):
         super(PhotonExtraVariablesBlock, self).__init__()
         self.addOption('containerName', None, type=str, info='the input photon container')
-    
+
     def makeAlgs(self, config):
 
         alg = config.createAlgorithm('CP::PhotonExtraVariablesAlg', 'PhotonExtraVariables' + self.containerName)

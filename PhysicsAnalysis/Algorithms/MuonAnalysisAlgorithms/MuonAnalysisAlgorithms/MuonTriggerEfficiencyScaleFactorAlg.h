@@ -31,7 +31,7 @@ namespace CP
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
     StatusCode execute () override;
-    
+
 
 
     /// \brief the smearing tool
@@ -64,7 +64,7 @@ namespace CP
     /// \brief trigger to run efficiency for
   private:
     Gaudi::Property<std::string> m_trigger {this, "trigger", "", "trigger or trigger leg to calculate efficiency for"};
-    
+
     /// \brief minimum run number this trigger is valid for
   private:
     Gaudi::Property<uint32_t> m_minRunNumber {this, "minRunNumber", 0, "minimum run number for the trigger or trigger leg to calculate efficiency for"};

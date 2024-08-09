@@ -102,7 +102,7 @@ namespace CP
     for (const xAOD::CutBookkeeper *cbk : *completeCBC)
     {
       ANA_MSG_DEBUG ("Complete cbk name: " << cbk->name() << " - stream: " << cbk->inputStream());
-  
+
       if (cbk->cycle() > maxCycle && cbk->name() == "AllExecutedEvents" && cbk->inputStream() == "StreamAOD")
       {
         allEvents = cbk;

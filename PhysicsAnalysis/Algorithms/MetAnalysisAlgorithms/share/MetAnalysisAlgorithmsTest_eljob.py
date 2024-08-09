@@ -63,7 +63,7 @@ algSeq = makeSequence (dataType)
 print (algSeq) # For debugging
 algSeq.addSelfToJob( job )
 
-# Find the right output directory:                                                                                      
+# Find the right output directory:
 submitDir = options.submission_dir
 if options.unit_test:
     import os

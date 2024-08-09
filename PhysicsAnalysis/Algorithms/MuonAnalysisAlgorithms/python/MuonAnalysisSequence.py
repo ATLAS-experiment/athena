@@ -54,7 +54,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
     seq.addMetaConfigDefault ("selectionDecorCount", [])
 
     makeMuonCalibrationSequence (seq, dataType, postfix=postfix,
-                                 ptSelectionOutput = ptSelectionOutput, 
+                                 ptSelectionOutput = ptSelectionOutput,
                                  trackSelection = trackSelection,
                                  maxEta = maxEta, isRun3Geo = isRun3Geo)
     makeMuonWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
@@ -132,7 +132,7 @@ def makeMuonCalibrationSequence( seq, dataType,
                            'MuonCalibrationAndSmearingAlg' + postfix )
     addPrivateTool( alg, 'calibrationAndSmearingTool',
                     'CP::MuonCalibTool' )
-                    
+
     alg.calibrationAndSmearingTool.IsRun3Geo = isRun3Geo
     alg.calibrationAndSmearingTool.calibMode = calibMode # choose ID+MS with no sagitta bias
     seq.append( alg, inputPropName = 'muons', outputPropName = 'muonsOut',

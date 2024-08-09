@@ -27,7 +27,7 @@ if __name__=='__main__':
     for path in args.filesInput.split(','):
         flags.Input.Files += glob(path)
     flags.Output.HISTFileName = args.outputFile
-                                    
+
     flags.Exec.SkipEvents = args.skipEvents
     flags.Exec.MaxEvents = args.maxEvents
 
@@ -37,10 +37,10 @@ if __name__=='__main__':
     acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
-    
+
     from TrackingAnalysisAlgorithms.TrackingAnalysisAlgorithmsConfig import SecVertexTruthMatchAlgCfg
-    acc.merge(SecVertexTruthMatchAlgCfg(flags, 
-                                        useLRTTracks = args.mergeLargeD0Tracks, 
+    acc.merge(SecVertexTruthMatchAlgCfg(flags,
+                                        useLRTTracks = args.mergeLargeD0Tracks,
                                         TargetPDGIDs = args.pdgIds,
                                         SecondaryVertexContainer = args.vertexContainer,
                                         TruthVertexContainer = args.truthVertexContainer

@@ -2,7 +2,7 @@
  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
-/// @author RD Schaffer 
+/// @author RD Schaffer
 
 
 
@@ -22,7 +22,7 @@ namespace CP
 {
     /// \brief an \ref IAsgSelectionTool that cuts on int decorations with mask
     ///
-    /// Can provide two lists of variables and masks, for each variable, 
+    /// Can provide two lists of variables and masks, for each variable,
     /// apply mask as selection
 
     class AsgMaskSelectionTool final

@@ -49,7 +49,7 @@ class MetAnalysisConfig (ConfigBlock):
             "and for jet-related systematics only. "
             "WARNING: this option is strictly for doing physics studies of the feasibility "
             "of this OR scheme, it should not be used in a regular analysis")
-        self.addOption ('saveSignificance', True, type=bool, 
+        self.addOption ('saveSignificance', True, type=bool,
             info="whether to save the MET significance (default=True)")
 
 

@@ -25,10 +25,10 @@
 namespace CP {
 
   /// \brief an algorithm that selects an event if the event has leptons
-  /// with opposite sign or same sign 
+  /// with opposite sign or same sign
 
   class ChargeSelectorAlg final : public EL::AnaAlgorithm {
-    
+
     public:
      /// \brief the standard constructor
       ChargeSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
@@ -36,7 +36,7 @@ namespace CP {
       virtual StatusCode execute() override;
 
     private:
-    
+
       /// \brief whether or not to select 2 opposite-sign leptons
       Gaudi::Property<bool> m_OSmode {this, "OS", true, "whether to request 2 opposite-sign leptons"};
 

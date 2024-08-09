@@ -421,7 +421,7 @@ namespace CP
       std::unique_ptr<ISelectionReadAccessor> acc;
       if(!p.build(acc).isSuccess()) {
         ADD_FAILURE() << "unable to parse expression";
-      } 
+      }
       return acc->label();
     };
 
@@ -468,7 +468,7 @@ namespace CP
     EXPECT_THROW(parse(")"), std::runtime_error);
     EXPECT_THROW(parse("("), std::runtime_error);
   }
-  
+
   TEST (SelectionExprParser, evaluate) {
     auto mkex = [](const std::string& s) {
       SelectionExprParser p(s, true);

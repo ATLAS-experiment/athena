@@ -41,7 +41,7 @@ namespace CP {
       // check the preselection
       if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
         continue;
-      
+
       // retrieve the MET container
       const xAOD::MissingETContainer *met = nullptr;
       ANA_CHECK(m_metHandle.retrieve(met, sys));
@@ -81,7 +81,7 @@ namespace CP {
 	}
       }
 
-      // exit 1 if there were no leptons or 2 or more leptons in the event 
+      // exit 1 if there were no leptons or 2 or more leptons in the event
       if (lep_count == 0){
         ATH_MSG_ERROR("No charged lepton in the event, cannot compute MWT!");
         return StatusCode::FAILURE;

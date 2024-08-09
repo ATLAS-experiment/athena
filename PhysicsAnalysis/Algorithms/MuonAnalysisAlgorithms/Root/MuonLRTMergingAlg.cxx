@@ -8,8 +8,8 @@
 ///////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////
-// Muon merger algorirthm is a wrapper algorithm around MuonMerger 
-// to be used downstream for combining LRTmuons and standard muons 
+// Muon merger algorirthm is a wrapper algorithm around MuonMerger
+// to be used downstream for combining LRTmuons and standard muons
 ///////////////////////////////////////////////////////////////////
 #include "MuonAnalysisAlgorithms/MuonLRTMergingAlg.h"
 #include "xAODMuon/MuonAuxContainer.h"
@@ -73,7 +73,7 @@ namespace CP{
             return StatusCode::FAILURE;
         }
 
-        // Check and resolve overlaps 
+        // Check and resolve overlaps
         std::vector<bool> writePromptMuon;
         std::vector<bool> writeLRTMuon;
         m_overlapRemovalTool->checkOverlap(*promptCol, *lrtCol, writePromptMuon, writeLRTMuon);

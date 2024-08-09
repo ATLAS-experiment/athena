@@ -18,7 +18,7 @@
 namespace CP
 {
   AsgEventScaleFactorAlg ::
-  AsgEventScaleFactorAlg (const std::string& name, 
+  AsgEventScaleFactorAlg (const std::string& name,
                           ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
   {}

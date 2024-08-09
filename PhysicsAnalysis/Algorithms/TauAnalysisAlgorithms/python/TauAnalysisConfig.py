@@ -13,8 +13,8 @@ class TauCalibrationConfig (ConfigBlock):
         super (TauCalibrationConfig, self).__init__ ()
         self.setBlockName('Taus')
         self.containerName = containerName
-        self.addOption ('inputContainer', 'TauJets', type=str, 
-            info="select tau input container, by default set to TauJets")     
+        self.addOption ('inputContainer', 'TauJets', type=str,
+            info="select tau input container, by default set to TauJets")
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the output container after calibration.")
@@ -112,8 +112,8 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="use selection with or without eVeto combined with tauID "
             "recommendations: set it to False if electron mis-reconstructed as tau is not large background for your analysis")
         self.addOption ('useGNTau', False, type=bool,
-            info="use GNTau based ID instead of RNNTau ID "    
-            "recommendations: that's new experimental feature and might come default soon") 
+            info="use GNTau based ID instead of RNNTau ID "
+            "recommendations: that's new experimental feature and might come default soon")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -134,7 +134,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         if self.useGNTau:
             nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}.conf'
             if not self.use_eVeto:
-                nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'    
+                nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'
         else:
             nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
             if not self.use_eVeto:
@@ -160,7 +160,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         if config.dataType() is not DataType.Data and not self.noEffSF and not self.useGNTau:
             # need multiple instances of the TauEfficiencyCorrectionTool
             # 1) Reco 2) TauID, 3) eVeto for fake tau 4) eVeto for true tau
-            # 3) and 4) are optional if eVeto is used in TauSelectionTool 
+            # 3) and 4) are optional if eVeto is used in TauSelectionTool
 
             # TauEfficiencyCorrectionTool for Reco, this should be always enabled
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
@@ -182,7 +182,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlgID' + postfix )
                 config.addPrivateTool( 'efficiencyCorrectionsTool',
-                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' ) 
+                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
                 if self.quality=="Loose":
                     JetIDLevel = 7
@@ -191,7 +191,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 elif self.quality=="Tight":
                     JetIDLevel = 9
                 else:
-                    raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight") 
+                    raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight")
 
                 alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -236,7 +236,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'EvetoTrueTau_effSF' + postfix)
-                
+
 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
     def __init__ (self, inputTaus = 'TauJets', inputTausMuRM = 'TauJets_MuonRM', outputTaus = 'TauJets_MuonRmCombined', postfix = '') :
@@ -276,9 +276,9 @@ class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
         alg.combined_taus = self.outputTaus
 
 
-def EXPERIMENTAL_makeTauCombineMuonRemovalConfig( seq, inputTaus = 'TauJets', 
-                                                 inputTausMuRM = 'TauJets_MuonRM', 
-                                                 outputTaus = 'TauJets_MuonRmCombined', 
+def EXPERIMENTAL_makeTauCombineMuonRemovalConfig( seq, inputTaus = 'TauJets',
+                                                 inputTausMuRM = 'TauJets_MuonRM',
+                                                 outputTaus = 'TauJets_MuonRmCombined',
                                                  postfix = ''):
     config = EXPERIMENTAL_TauCombineMuonRemovalConfig (
         inputTaus = inputTaus,

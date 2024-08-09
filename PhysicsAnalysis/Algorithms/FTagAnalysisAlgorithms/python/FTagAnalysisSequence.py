@@ -106,7 +106,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     alg.selectionDecoration = 'ftag_select_' + btagger + '_' + btagWP + ',as_char'
     seq.append( alg, inputPropName = 'particles',
                 stageName = 'selection' )
-    
+
     if btagWP == 'Continuous':
         alg = createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + btagger + btagWP + postfix )
         addPrivateTool( alg, 'selectionTool', 'BTaggingSelectionTool' )

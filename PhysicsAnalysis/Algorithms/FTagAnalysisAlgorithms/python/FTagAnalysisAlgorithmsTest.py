@@ -19,7 +19,7 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
                                            enableCutflow=True, enableKinematicHistograms=True )
     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-   
+
     btagOPs = ['FixedCutBEff_60', 'Continuous']
     for btagOP in btagOPs:
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True,

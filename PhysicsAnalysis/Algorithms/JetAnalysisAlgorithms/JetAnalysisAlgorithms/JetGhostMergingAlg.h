@@ -5,9 +5,9 @@
 ///////////////////////////////////////////////////////////////////
 //   JetGhostMergingAlg
 //
-//   Ghost merger algorithm merges multiple collections of ghost 
+//   Ghost merger algorithm merges multiple collections of ghost
 //   containers into one. This is useful for combining standard and
-//   LRT ghost tracks into a single collection to pass to 
+//   LRT ghost tracks into a single collection to pass to
 //   downstream taggers.
 ///////////////////////////////////////////////////////////////////
 
@@ -38,7 +38,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JetGhostMergingAlg (const std::string& name, 
+    JetGhostMergingAlg (const std::string& name,
                         ISvcLocator* pSvcLocator);
 
   public:

@@ -48,7 +48,7 @@ namespace CP
 
   public:
     StatusCode execute () override;
-    
+
 
 
     /// \brief the systematics list we run

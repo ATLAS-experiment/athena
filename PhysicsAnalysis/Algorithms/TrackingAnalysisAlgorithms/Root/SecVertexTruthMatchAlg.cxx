@@ -107,7 +107,7 @@ namespace CP {
 				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdPhi").c_str(), "truthParentProd vertex Phi", 64, -3.2, 3.2)));
 			}
 			// now add the efficiencies
-      Double_t bins[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 500}; 
+      Double_t bins[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 500};
       size_t nbins = sizeof(bins)/sizeof(bins[0])-1;
 			ANA_CHECK (book(TEfficiency("Acceptance", "Acceptance", nbins, bins)));
 			ANA_CHECK (book(TEfficiency("eff_seed", "Seed efficiency", nbins, bins)));
@@ -219,10 +219,10 @@ namespace CP {
 		// set of accessors for tracks and weights
 		xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
 		xAOD::Vertex::ConstAccessor<std::vector<float> > weightAcc("trackWeights");
-		
+
 		// set of decorators for truth matching info
 		const xAOD::Vertex::Decorator<std::vector<InDetSecVtxTruthMatchUtils::VertexTruthMatchInfo> > matchInfoDecor("truthVertexMatchingInfos");
-    
+
     TVector3 reco_pos(secVtx->x(), secVtx->y(), secVtx->z());
     float Lxy = reco_pos.Perp();
 
@@ -409,6 +409,6 @@ namespace CP {
     // if(matchTypeDecor(truthVtx) >= RECONSTRUCTEDSPLIT){
     //   m_truthSplit_r->Fill(truthVtx.perp());
     // }
-    // 
+    //
 	}
 } // namespace CP

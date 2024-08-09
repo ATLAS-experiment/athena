@@ -8,6 +8,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaCommon.Logging import logging
 import re
 
 
@@ -84,7 +85,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.containerName )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
- 
+
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
@@ -444,6 +445,8 @@ class RScanJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('RScanJetAnalysisConfig')
+
         jetCollectionName=self.jetCollection
         if(self.jetCollection=="AnalysisJets") :
             jetCollectionName="AntiKt4EMPFlowJets"
@@ -467,7 +470,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
             # Logging would be good
-            print("WARNING: uncertainties for R-Scan jets are not yet released!")
+            log.warning("Uncertainties for R-Scan jets are not yet released!")
 
 
 def _largeLCTopoConfigFile(config, self):
@@ -519,6 +522,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('LargeRJetAnalysisConfig')
+
         configFile = None
 
         jetCollectionName=self.jetCollection
@@ -568,7 +573,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         # Jet uncertainties
 
         if self.jetInput == "UFO":
-            print("WARNING: uncertainties for UFO jets are not yet released!")
+            log.warning("Uncertainties for UFO jets are not yet released!")
 
         if self.jetInput != "UFO":
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.containerName )

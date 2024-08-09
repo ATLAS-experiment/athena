@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////
 //   EgammaFSRForMuonsCollectorAlg
 //
-//   Algorithm to collect photons and electrons which close in dR 
+//   Algorithm to collect photons and electrons which close in dR
 //   to muons as FSR candidates
 ///////////////////////////////////////////////////////////////////
 
@@ -70,12 +70,12 @@ namespace CP
             const xAOD::IParticleContainer* egammaCont = nullptr;
             ANA_CHECK (m_egammaContKey.retrieve (egammaCont, sys));
 
-            // Retrieve muons 
+            // Retrieve muons
             const xAOD::MuonContainer* muonCont = nullptr;
             ANA_CHECK (m_muonContKey.retrieve (muonCont, sys));
 
             // Loop over each electron or photon. If already passing WP selection, decorate passWPorFSR as true
-            // If m_vetoFSR is set, then reverse logic is used - require electron or photon to pass WP selection, 
+            // If m_vetoFSR is set, then reverse logic is used - require electron or photon to pass WP selection,
             //   and then veto is if if passes the FSR selection
             for ( auto eg : *egammaCont ) {
                 if (!m_vetoFSR) {
@@ -111,19 +111,19 @@ namespace CP
 
                     if (dR < m_dRMax) {
 
-                        // if electron (not photon) check track matching 
+                        // if electron (not photon) check track matching
                         bool elmutrackmatchOK = true; // default true for photons
                         if (el) {
                             const xAOD::TrackParticle* electron_track = el->trackParticle();
                             const xAOD::TrackParticle* elOrig_track   = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
                             const xAOD::TrackParticle* muon_track     = mu->primaryTrackParticle();
 
-                            elmutrackmatchOK = 
+                            elmutrackmatchOK =
                             ( (std::abs(electron_track->theta()- muon_track->theta()) < 0.01) &&
                             (xAOD::P4Helpers::deltaPhi(electron_track->phi(),  muon_track->phi())   < 0.01) );
-                            ATH_MSG_DEBUG( "dtheta trk " << std::abs(electron_track->theta()- muon_track->theta()) << ", dphi trk " 
+                            ATH_MSG_DEBUG( "dtheta trk " << std::abs(electron_track->theta()- muon_track->theta()) << ", dphi trk "
                             << xAOD::P4Helpers::deltaPhi(electron_track->phi(),  muon_track->phi()));
-                            if (elOrig_track) ATH_MSG_DEBUG( "origTrk: dtheta trk " << std::abs(elOrig_track->theta()- muon_track->theta()) << ", dphi trk " 
+                            if (elOrig_track) ATH_MSG_DEBUG( "origTrk: dtheta trk " << std::abs(elOrig_track->theta()- muon_track->theta()) << ", dphi trk "
                             << xAOD::P4Helpers::deltaPhi(elOrig_track->phi(),  muon_track->phi()));
                             if (elmutrackmatchOK) ATH_MSG_DEBUG( "track match OK");
                             else                  ATH_MSG_DEBUG( "track match NOT OK");

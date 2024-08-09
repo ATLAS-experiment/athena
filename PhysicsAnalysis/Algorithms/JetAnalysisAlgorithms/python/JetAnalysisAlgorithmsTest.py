@@ -9,7 +9,7 @@ from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
 
     # config
-    
+
 
     algSeq = AlgSequence()
 
@@ -33,7 +33,7 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
 
     from AsgAnalysisAlgorithms.EventSelectionAnalysisSequence import \
         makeEventSelectionAnalysisSequence
-    
+
     evtselSequence = makeEventSelectionAnalysisSequence(dataType)
     evtselSequence.configure( inputName = {}, outputName = {} )
     print( evtselSequence )
@@ -43,13 +43,13 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
     jvtopts = dict(runJvtUpdate=True, runFJvtUpdate=True)
     if jetContainer=="AntiKt4EMPFlowJets":
        jvtopts.update(dict(runNNJvtUpdate=True))
-    
+
     jetSequence = makeJetAnalysisSequence(
         dataType, jetContainer,
         enableCutflow=True, enableKinematicHistograms=True,
         **jvtopts
     )
-        
+
     jetSequence.configure( inputName = jetContainer, outputName = 'AnalysisJetsBase_%SYS%' )
     print( jetSequence ) # For debugging
 
