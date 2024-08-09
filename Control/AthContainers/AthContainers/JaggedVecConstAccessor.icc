@@ -45,6 +45,7 @@ ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::ConstAccessor
   (const std::string& name, const std::string& clsname)
   : ConstAccessor (name, clsname, AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

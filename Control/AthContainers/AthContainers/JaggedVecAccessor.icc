@@ -1,0 +1,232 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/JaggedVecAccessor.h
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Apr, 2024
+ * @brief Helper class to provide type-safe access to aux data. xxx
+ */
+
+
+#include "AthContainers/AuxElement.h"
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
+#include "AthContainers/exceptions.h"
+#include "CxxUtils/checker_macros.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const std::string& name)
+  : Base (name)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const std::string& name,
+                                            const std::string& clsname)
+  : Base (name, clsname)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const SG::auxid_t auxid)
+  : Base (auxid)
+{
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a non-const reference.
+ * @param e The element for which to fetch the variable.
+ *
+ * Will return a proxy object, which will allow treating this
+ * jagged vector element as a vector.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (AuxElement& e) const
+  -> reference_type
+{
+  assert (e.container() != 0);
+  return (*this) (*e.container(), e.index());
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a non-const reference.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * Will return a proxy object, which will allow treating this
+ * jagged vector element as a vector.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (AuxVectorData& container,
+                                                      size_t index) const
+  -> reference_type
+{
+  (void)this->getEltArray (container); // const/locking checks
+  return reference_type (index,
+                         *container.getDataSpan (this->m_linkedAuxid),
+                         *container.getDataSpan (this->m_auxid),
+                         container,
+                         this->m_auxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to fetch the variable.
+ * @param x The variable value to set.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+inline
+void Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::set (AuxElement& e,
+                                                    const RANGE& x) const
+{
+  (*this) (*e.container(), e.index()) = x;
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ * @param x The variable value to set.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+void Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::set (AuxVectorData& container,
+                                                    size_t index,
+                                                    const RANGE& x) const
+{
+  (*this) (container, index) = x;
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of @c JaggedVecElt objects.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltArray (AuxVectorData& container) const
+  -> Elt_t*
+{
+  return reinterpret_cast<Elt_t*>
+    (container.getDataArray (this->m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the payload array.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadArray (AuxVectorData& container) const
+  -> Payload_t*
+{
+  return reinterpret_cast<Payload_t*>
+    (container.getDataArray (this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a span over the array of @c JaggedVecElt objects.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltSpan (AuxVectorData& container) const
+  -> Elt_span
+{
+  auto beg = reinterpret_cast<Elt_t*> (container.getDataArray (this->m_auxid));
+  return Elt_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the payload vector.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadSpan (AuxVectorData& container) const
+  -> Payload_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (this->m_linkedAuxid);
+  return Payload_span (reinterpret_cast<Payload_t*>(sp->beg), sp->size);
+}
+
+
+/**
+ * @brief Get a span over spans representing the jagged vector.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDataSpan (AuxVectorData& container) const
+  -> span
+{
+  return span (getEltSpan(container),
+               Converter_t (container, this->auxid(), this->linkedAuxid()));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+bool
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::isAvailableWritable (AuxElement& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritable (this->m_auxid) &&
+    e.container()->isAvailableWritable (this->m_linkedAuxid);
+}
+
+
+} // namespace SG
