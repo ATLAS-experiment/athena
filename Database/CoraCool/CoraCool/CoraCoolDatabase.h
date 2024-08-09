@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CORACOOL_CORACOOLDATABASE_H
@@ -36,7 +36,7 @@ class CoraCoolDatabase {
   bool disconnect();
 
   // return the COOL database name associated with the folder
-  const std::string dbname() const;
+  const std::string& dbname() const;
 
   // return the COOL database connection associated with the folder
   cool::IDatabasePtr coolDatabase() const;
@@ -94,7 +94,7 @@ class CoraCoolDatabase {
   coral::MessageStream m_log;
 };
 
-inline const std::string CoraCoolDatabase::dbname() const { return m_dbname; }
+inline const std::string& CoraCoolDatabase::dbname() const { return m_dbname; }
 
 inline cool::IDatabasePtr CoraCoolDatabase::coolDatabase() const 
 {return m_cooldb; }
