@@ -64,7 +64,7 @@ namespace InDetDD {
     virtual PVConstLink  getTreeTop(unsigned int i) const override;
     //@}
     /// Add tree top
-    void addTreeTop(PVConstLink vol);
+    void addTreeTop(const PVConstLink& vol);
 
     
     /**

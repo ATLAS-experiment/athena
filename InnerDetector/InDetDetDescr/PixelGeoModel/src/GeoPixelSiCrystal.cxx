@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -28,6 +28,7 @@
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
 #include <algorithm> //for std::min, std::max
+#include <utility>
 #include <vector>
 
 using namespace InDetDD;
@@ -38,7 +39,7 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                                      std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                      std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                      bool isBLayer, bool isModule3D)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
   // 
   //Builds the design for this crystal

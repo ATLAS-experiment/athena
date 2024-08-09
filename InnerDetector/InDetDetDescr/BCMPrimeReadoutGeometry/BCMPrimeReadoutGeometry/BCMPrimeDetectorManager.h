@@ -39,7 +39,7 @@ namespace InDetDD {
         virtual PVConstLink  getTreeTop(unsigned int i) const override;
 
         /** Add a Tree top: */
-        void addTreeTop (PVConstLink treeTop);
+        void addTreeTop (const PVConstLink& treeTop);
 
         void addAlignableTransform (int /*id*/, GeoAlignableTransform * /*transform*/, const GeoVPhysVol * /*child*/);
         StatusCode align( IOVSVC_CALLBACK_ARGS ) const;

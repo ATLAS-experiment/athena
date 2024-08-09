@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build The TMT.
@@ -27,7 +27,7 @@ GeoPixelTMT::GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr,
 			 GeoModelIO::ReadGeoModel* sqliteReader,
                          std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                          std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX):
-  GeoPixelStaveSupport(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  GeoPixelStaveSupport(ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
   m_transform(GeoTrf::Transform3D::Identity())
 {
   if(!m_sqliteReader) {

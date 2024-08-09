@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_Ski.h"
@@ -32,8 +32,9 @@
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include <sstream>
 #include <cmath>
+#include <sstream>
+#include <utility>
 
 SCT_Ski::SCT_Ski(const std::string & name,
                  SCT_Module * module,
@@ -46,7 +47,7 @@ SCT_Ski::SCT_Ski(const std::string & name,
                  GeoModelIO::ReadGeoModel* sqliteReader,
                  std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
                  std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_stereoSign(stereoSign),
     m_tilt(tilt), 
     m_length(length), 

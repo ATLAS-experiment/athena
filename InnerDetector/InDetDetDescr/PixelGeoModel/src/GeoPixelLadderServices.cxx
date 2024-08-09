@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -21,6 +21,7 @@
 #include "GaudiKernel/PhysicalConstants.h"
 
 #include <cmath>
+#include <utility>
 #include <vector>
 
 GeoPixelLadderServices::GeoPixelLadderServices(InDetDD::PixelDetectorManager* m_DDmgr,
@@ -29,7 +30,7 @@ GeoPixelLadderServices::GeoPixelLadderServices(InDetDD::PixelDetectorManager* m_
                                                std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                                std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                                int ladderType)
-  : GeoVPixelFactory(m_DDmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory(m_DDmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_ladderType(ladderType)
 {
   //std::cout << "Building GeoPixelLadderServices with ladder type : " << ladderType << std::endl; 

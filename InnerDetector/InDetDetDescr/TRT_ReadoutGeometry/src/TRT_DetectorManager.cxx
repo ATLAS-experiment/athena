@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
@@ -94,7 +94,7 @@ namespace InDetDD {
         return m_volume[i];
     }
 
-    void  TRT_DetectorManager::addTreeTop(PVLink vol) {
+    void  TRT_DetectorManager::addTreeTop(const PVLink& vol) {
         m_volume.push_back(vol);
     }
   

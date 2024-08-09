@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build detailed stave support : face plate + carbon foam + cable flex + cooling pipe + end blocks
@@ -20,6 +20,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <algorithm>
+#include <utility>
 using std::max;
 using namespace std;
 
@@ -28,7 +29,7 @@ GeoPixelStaveRing::GeoPixelStaveRing(InDetDD::PixelDetectorManager* ddmgr,
 				     GeoModelIO::ReadGeoModel* sqliteReader,
                                      std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                      std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_physVol (nullptr),
     m_zPosition (0),
     m_innerRadius (0),

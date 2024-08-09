@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
@@ -7,6 +7,7 @@
 #include "GeoModelRead/ReadGeoModel.h"
 #include <sstream>
 #include <string>
+#include <utility>
 
 using InDetDD::SCT_DetectorManager;
 
@@ -50,6 +51,6 @@ SCT_UniqueComponentFactory::SCT_UniqueComponentFactory(const std::string & name,
   SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
   m_logVolume(nullptr),
   m_sqliteReader(sqliteReader),
-  m_mapFPV(mapFPV),
-  m_mapAX(mapAX)
+  m_mapFPV(std::move(mapFPV)),
+  m_mapAX(std::move(mapAX))
 {};

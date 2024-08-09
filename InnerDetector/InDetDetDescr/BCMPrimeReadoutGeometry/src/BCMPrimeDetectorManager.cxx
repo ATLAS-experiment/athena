@@ -20,7 +20,7 @@ namespace InDetDD {
         return m_volume[i];
     }
 
-    void BCMPrimeDetectorManager::addTreeTop(PVConstLink vol) {
+    void BCMPrimeDetectorManager::addTreeTop(const PVConstLink& vol) {
         m_volume.push_back(vol);
     }
 

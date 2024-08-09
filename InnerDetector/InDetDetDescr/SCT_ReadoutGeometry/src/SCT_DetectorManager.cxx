@@ -57,7 +57,7 @@ namespace InDetDD {
     return m_volume[i];
   }
 
-  void SCT_DetectorManager::addTreeTop(PVConstLink vol){
+  void SCT_DetectorManager::addTreeTop(const PVConstLink& vol){
     m_volume.push_back(vol);
   }
 

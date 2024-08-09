@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_Barrel.h"
@@ -38,6 +38,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include <iostream>
+#include <utility>
 
 SCT_Barrel::SCT_Barrel(const std::string & name,
                        InDetDD::SCT_DetectorManager* detectorManager,
@@ -46,7 +47,7 @@ SCT_Barrel::SCT_Barrel(const std::string & name,
                        GeoModelIO::ReadGeoModel* sqliteReader,
                        std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
                        std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
   getParameters();
   if(!m_sqliteReader) {

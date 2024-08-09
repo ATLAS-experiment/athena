@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -106,9 +106,10 @@
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include <sstream>
-#include <iomanip>
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
+#include <utility>
 
 GeoPixelServices::GeoPixelServices(InDetDD::PixelDetectorManager* ddmgr,
                                    PixelGeometryManager* mgr,
@@ -116,7 +117,7 @@ GeoPixelServices::GeoPixelServices(InDetDD::PixelDetectorManager* ddmgr,
                                    std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                    std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                    InDetDD::Zone * pixZone) 
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_pixServBuilder(nullptr),
     m_servMatBuilder(nullptr),
     m_layerShift(0)

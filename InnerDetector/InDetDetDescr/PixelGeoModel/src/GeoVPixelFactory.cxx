@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
+#include <utility>
 
 #include "GeoVPixelFactory.h"
 
@@ -15,8 +17,8 @@ GeoVPixelFactory::GeoVPixelFactory(InDetDD::PixelDetectorManager* ddmgr,
   , m_mat_mgr (m_gmt_mgr->getMaterialManager())
   , m_DDmgr (ddmgr)
   , m_sqliteReader(sqliteReader)
-  , m_mapFPV(mapFPV)
-  , m_mapAX(mapAX)
+  , m_mapFPV(std::move(mapFPV))
+  , m_mapAX(std::move(mapAX))
   , m_epsilon(0.0001)
 {
 }

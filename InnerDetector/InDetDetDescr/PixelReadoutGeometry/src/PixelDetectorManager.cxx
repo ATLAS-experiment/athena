@@ -73,7 +73,7 @@ namespace InDetDD {
     return m_volume[i];
   }
 
-  void PixelDetectorManager::addTreeTop(PVConstLink vol){
+  void PixelDetectorManager::addTreeTop(const PVConstLink& vol){
     m_volume.push_back(vol);
   }
 
