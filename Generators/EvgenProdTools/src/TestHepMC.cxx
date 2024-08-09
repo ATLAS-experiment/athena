@@ -284,10 +284,10 @@ StatusCode TestHepMC::execute() {
     std::vector<HepMC::ConstGenParticlePtr> undisplaceds;
 
     m_looper.findLoops(evt,true);
-    ATH_MSG_INFO("Found " << m_looper.loop_vertices().size() << " vertices in loops");
-    ATH_MSG_INFO("Found " << m_looper.loop_particles().size() << " particles in loops");
-    if (m_looper.loop_particles().size() > 0) {
-      ATH_MSG_INFO("Please use MC::Loops::findLoops for this event to obtain all particles and vertices in the loops");
+    if (!m_looper.loop_particles().empty() || !m_looper.loop_vertices().empty()) {
+      ATH_MSG_DEBUG("Found " << m_looper.loop_vertices().size() << " vertices in loops");
+      ATH_MSG_DEBUG("Found " << m_looper.loop_particles().size() << " particles in loops");
+      ATH_MSG_DEBUG("Please use MC::Loops::findLoops for this event to obtain all particles and vertices in the loops");
       if (m_maxloops > 0 && m_looper.loop_particles().size() > static_cast<std::size_t>(m_maxloops) ) filter_pass = false;
     }
 
