@@ -17,7 +17,7 @@ using std::exp;
 bool
 jetMasses( const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
      double& heavyJetMass, double& lightJetMass,
-     CLHEP::Hep3Vector thrust )
+     const CLHEP::Hep3Vector& thrust )
 {
   if(abs(thrust.mag()-1)>0.01)
     return false;

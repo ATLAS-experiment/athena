@@ -17,7 +17,7 @@ namespace FourMomUtils
 
   bool jetMasses(const I4MomIter_t& iBeg, const I4MomIter_t& iEnd,
                  double& heavyJetMass, double& lightJetMass,
-                 CLHEP::Hep3Vector thrust );
+                 const CLHEP::Hep3Vector& thrust );
 
   inline
   bool jetMasses(const INavigable4MomentumCollection* theParticles,
