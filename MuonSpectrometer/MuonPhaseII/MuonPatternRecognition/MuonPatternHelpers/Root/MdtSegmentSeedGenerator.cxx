@@ -224,7 +224,6 @@ namespace MuonR4{
         
         HitVec assocHits{};
         unsigned int nMdt{0};
-        double chi2{0.};
         /** Check for the best Mdt hit per each layer */
         for (const std::vector<HoughHitType>& hitsInLayer : m_mdtHitsPerLayer) {
             HoughHitType bestHit{nullptr};
@@ -244,7 +243,6 @@ namespace MuonR4{
             }
             assocHits.push_back(bestHit);
             ++nMdt;
-            chi2 += bestChi2;
         }
         /** Reject seeds with too litle mdt hit association */
         if (nMdt < m_cfg.nMdtHitCut) {

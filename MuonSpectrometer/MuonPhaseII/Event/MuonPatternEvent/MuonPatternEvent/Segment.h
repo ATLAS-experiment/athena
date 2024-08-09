@@ -88,8 +88,6 @@ namespace MuonR4{
             unsigned int m_nDoF{0};
 
             double m_t0{0.};
-            double m_t0Err{0.};
-
 
             const MuonGMR4::MuonChamber* m_chamber{m_parent->chamber()};
             std::vector<double> m_chi2PerMeasurement{};
