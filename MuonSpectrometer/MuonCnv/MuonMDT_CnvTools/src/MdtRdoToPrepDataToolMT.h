@@ -63,12 +63,11 @@ namespace Muon {
 
         /// Helper struct to parse the event data around the tool
         struct ConvCache {
-            ConvCache(const Muon::IMuonIdHelperSvc* idHelperSvc):
-                m_idHelperSvc{idHelperSvc}{}
+            ConvCache(const Muon::IMuonIdHelperSvc* idHelperSvc);
             /// Creates a new MdtPrepDataCollection, if it's neccessary
             /// and also possible. Nullptr is returned if the collection
             /// cannot be modified
-            MdtPrepDataCollection* createCollection(const Identifier& id, MsgStream& msg);
+            MdtPrepDataCollection* createCollection(const Identifier& id);
             /// Copy the non-empty collections into the created prd container.
             StatusCode finalize(MsgStream& msg);
 
@@ -78,14 +77,14 @@ namespace Muon {
             const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
             /// Detector manager from the conditions store
             const MuonGM::MuonDetectorManager* legacyDetMgr{nullptr};
+            /// Detector manger from R4
+            const MuonGMR4::MuonDetectorManager* r4DetMgr{nullptr};
             /// Acts Geometry context
             const ActsGeometryContext* gctx{nullptr};
 
             /// Flag set to indicate that the complete validation was successful
             bool isValid{false};
-
-            using PrdCollMap = std::unordered_map<IdentifierHash, std::unique_ptr<MdtPrepDataCollection>>;
-            PrdCollMap addedCols{};
+            std::vector<std::unique_ptr<MdtPrepDataCollection>> addedCols{};
         };
 
         StatusCode processCsm(const EventContext& ctx, ConvCache& mdtPrepDataContainer, 
@@ -99,12 +98,6 @@ namespace Muon {
         std::unique_ptr<MdtPrepData> createPrepData(const MdtCalibInput& calibInput,
                                                     const MdtCalibOutput& calibOutput,
                                                     ConvCache& cache) const;
-        
-        /// Creates the xAOD PRD object
-        void createxAODPrepData(const MdtCalibInput& calibInput,
-                                const MdtCalibOutput& calibOutput, 
-                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const;
-
         /// Creates the prep data container to be written
         ConvCache setupMdtPrepDataContainer(const EventContext& ctx) const;
         
