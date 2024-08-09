@@ -57,6 +57,10 @@ namespace IDTPM {
     TH1* m_chi2;
     TH1* m_ndof;
     TH1* m_chi2OverNdof;
+    TH2* m_eta_vs_pt;
+    TH2* m_eta_vs_phi;
+    TH2* m_z0_vs_d0;
+    TH2* m_z0sin_vs_d0;
     /// TODO - include more plots
 
   }; // class TrackParametersPlots

@@ -58,5 +58,29 @@
         "type" : "TH1F",
         "xAxis" : { "title" : "$TRKTYPE #chi^2/DoF", "nBins" : "100", "low" : "0", "high" : "5" },
         "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_eta_vs_pt" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "100", "low" : "0.0", "high" : "100.0" },
+        "yAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "zAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_eta_vs_phi" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "25", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "zAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_z0_vs_d0" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm]", "nBins" : "80", "low" : "-10.0", "high" : "10.0" },
+        "yAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "zAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_z0sin_vs_d0" : {
+        "type" : "TH2F",
+        "xAxis" : { "title" : "$TRKTYPE d_{0} [mm]", "nBins" : "80", "low" : "-10.0", "high" : "10.0" },
+        "yAxis" : { "title" : "$TRKTYPE z_{0}sin(#theta) [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "zAxis" : { "title" : "Entries" }
     }
 }

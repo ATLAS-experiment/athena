@@ -50,6 +50,10 @@ StatusCode IDTPM::TrackParametersPlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_chi2, m_trackType+"_chi2" ) );
   ATH_CHECK( retrieveAndBook( m_ndof, m_trackType+"_ndof" ) );
   ATH_CHECK( retrieveAndBook( m_chi2OverNdof, m_trackType+"_chi2OverNdof" ) );
+  ATH_CHECK( retrieveAndBook( m_eta_vs_pt, m_trackType+"_eta_vs_pt" ) );
+  ATH_CHECK( retrieveAndBook( m_eta_vs_phi, m_trackType+"_eta_vs_phi" ) );
+  ATH_CHECK( retrieveAndBook( m_z0_vs_d0, m_trackType+"_z0_vs_d0" ) );
+  ATH_CHECK( retrieveAndBook( m_z0sin_vs_d0, m_trackType+"_z0sin_vs_d0" ) );
 
 
   return StatusCode::SUCCESS;
@@ -69,6 +73,7 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   float pphi   = phi( particle );
   float pd0    = d0( particle );
   float pz0    = z0( particle );
+  float ptheta = theta( particle );
   float pR     = R( particle );
   float pZ     = Z( particle );
   float pprodR = prodR( particle );
@@ -90,6 +95,10 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   ATH_CHECK( fill( m_chi2, pchi2, weight ) );
   ATH_CHECK( fill( m_ndof, pndof, weight ) );
   ATH_CHECK( fill( m_chi2OverNdof, pchi2OverNdof, weight ) );
+  ATH_CHECK( fill( m_eta_vs_pt, ppt, peta, weight ) );
+  ATH_CHECK( fill( m_eta_vs_phi, pphi, peta, weight ) );
+  ATH_CHECK( fill( m_z0_vs_d0, pd0, pz0, weight ) );
+  ATH_CHECK( fill( m_z0sin_vs_d0, pz0*std::sin(ptheta), pd0, weight ) );
 
   return StatusCode::SUCCESS;
 }
