@@ -26,8 +26,8 @@ class Histogram {
 
 public:
 
- Histogram() : m_monTool(0), m_name("") { } 
-
+  Histogram() : m_monTool(0), m_name("") { } 
+  
   Histogram( ToolHandle<GenericMonitoringTool>* m, const std::string& name ) : m_monTool(m), m_name(name)  { 
     //    std::cout << "book: " << m_name << "  " << m_monTool->name() << std::endl;
   } 
@@ -55,6 +55,8 @@ public:
 
   ToolHandle<GenericMonitoringTool>* monTool() const { return m_monTool; };
 
+  const Histogram* operator->() const { return this; }
+  
 private:
 
   ToolHandle<GenericMonitoringTool>* m_monTool;
