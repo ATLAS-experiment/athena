@@ -207,6 +207,32 @@ public:
                                InitLinkFunc_t* initLinkFunc);
 
 
+#ifndef XAOD_STANDALONE
+  /**
+   * @brief Apply thinning to packed links, to prepare them for output.
+   * @param linkedVec Interface for the linked vector of @c DataLinks.
+   * @param links Span over the links to update, as @c PackedLinkBase.
+   * @param dlinks Span over the source link vector, as @c DataLinkBase.
+   * @param tc The @c ThinningCache for this object, if it exists.
+   * @param sg The @c IProxyDict of the current store.
+   *           If null, take it from the links in @c srcDlinks,
+   *           or use the global, thread-local default.
+   * @param initFunc Function to initialize a @c DataLink to a given
+   *                 hashed key.
+   *
+   * Returns true if it is known that the payload of the linked vector
+   * has not moved.  (If this is false, any caches/iterators must be assumed
+   * to be invalid.)
+   */
+  static bool applyThinningBase (IAuxTypeVector& linkedVec,
+                                 PackedLinkBase_span& links,
+                                 DataLinkBase_span& dlinks,
+                                 const SG::ThinningCache* tc,
+                                 IProxyDict* sg,
+                                 InitLinkFunc_t* initLinkFunc);
+#endif
+
+
 private:
   /**
    * @brief Resize a linked vector of @c DataLinks.
@@ -376,6 +402,31 @@ public:
                           IAuxTypeVector& linkedVec,
                           DataLinkBase_span& dlinks,
                           const RANGE& x);
+
+
+#ifndef XAOD_STANDALONE
+  /**
+   * @brief Apply thinning to packed links, to prepare them for output.
+   * @param linkedVec Interface for the linked vector of @c DataLinks.
+   * @param ptr Pointer to the start of the PackedLink collection.
+   * @param n Length of the PackedLink collection.
+   * @param dlinks Span over the source link vector, as @c DataLinkBase.
+   * @param tc The @c ThinningCache for this object, if it exists.
+   * @param sg The @c IProxyDict of the current store.
+   *           If null, take it from the links in @c srcDlinks,
+   *           or use the global, thread-local default.
+   *
+   * Returns true if it is known that the payload of the linked vector
+   * has not moved.  (If this is false, any caches/iterators must be assumed
+   * to be invalid.)
+   */
+  static bool applyThinning (IAuxTypeVector& linkedVec,
+                             PackedLink<CONT>* ptr,
+                             size_t n,
+                             DataLinkBase_span& dlinks,
+                             const SG::ThinningCache* tc,
+                             IProxyDict* sg);
+#endif
 
 
 private:

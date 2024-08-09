@@ -18,6 +18,7 @@
 
 
 #include "AthContainers/PackedLinkImpl.h"
+#include "AthContainers/tools/PackedLinkVectorFactory.h"
 
 
 #endif // not ATHCONTAINERS_PACKEDLINK_H

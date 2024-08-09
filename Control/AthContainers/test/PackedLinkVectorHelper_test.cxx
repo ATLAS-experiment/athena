@@ -31,6 +31,7 @@ bool operator== (const DataLink<STORABLE>& a,
 
 #else
 
+#include "SGTools/TestStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( std::vector<int>, 12345, 0 )
 
@@ -209,9 +210,58 @@ void test1()
 }
 
 
+void test_applyThinning()
+{
+  std::cout << "test_applyThinning\n";
+
+#ifndef XAOD_STANDALONE
+  std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
+
+  using Container = std::vector<int>;
+  using DLink_t = DataLink<Container>;
+  using PLink_t = SG::PackedLink<Container>;
+  using Helper = SG::detail::PackedLinkVectorHelper<Container>;
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t foo_links_id = r.getAuxID<DataLink<Container> >
+    ("foo_links", "",
+       SG::AuxVarFlags::Linked);
+
+  std::unique_ptr<SG::IAuxTypeVector> linkedVec = r.makeVector (foo_links_id, 0, 0);
+  auto lv = reinterpret_cast<std::vector<DLink_t>*>(linkedVec->toVector());
+
+  lv->emplace_back (0);
+  lv->emplace_back (123);
+  lv->emplace_back (124);
+
+  auto dlinks = Helper::getLinkBaseSpan (*linkedVec);
+  PLink_t plinks[] = {{0, 0}, {1, 10}, {2, 11}};
+  assert (Helper::applyThinning (*linkedVec, plinks, std::size(plinks),
+                                 dlinks, nullptr, store.get()) == true);
+
+  store->remap (123, 456, 10, 20);
+  store->remap (124, 457, 11, 21);
+  store->remap (123, 456, 6, 12);
+  store->remap (124, 457, 8, 28);
+  (void)Helper::applyThinning (*linkedVec, plinks, std::size(plinks),
+                               dlinks, nullptr, store.get());
+  assert (plinks[0] == PLink_t(0, 0));
+  assert (plinks[1] == PLink_t(3, 20));
+  assert (plinks[2] == PLink_t(4, 21));
+  assert (lv->size() == 5);
+  assert (lv->at(0) == DLink_t());
+  assert (lv->at(1) == DLink_t(123));
+  assert (lv->at(2) == DLink_t(124));
+  assert (lv->at(3) == DLink_t(456));
+  assert (lv->at(4) == DLink_t(457));
+#endif
+}
+
+
 int main()
 {
   std::cout << "AthContainers/PackedLinkVectorHelper_test\n";
   test1();
+  test_applyThinning();
   return 0;
 }
