@@ -41,4 +41,765 @@ auto JaggedVecConstConverter<PAYLOAD_T>::operator() (const JaggedVecEltBase& elt
 }
 
 
+//****************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param elts The elements of the jagged vector.
+ * @param container The container holding this variable.
+ * @param auxid The aux ID of this variable.
+ */
+inline
+JaggedVecProxyBase::JaggedVecProxyBase (const AuxDataSpanBase& elts,
+                                        AuxVectorData& container,
+                                        SG::auxid_t auxid)
+  : m_elts (reinterpret_cast<Elt_t*> (elts.beg), elts.size),
+    m_container (container),
+    m_linkedVec (auxid)
+{
+}
+
+
+/**
+ * @brief Return one jagged vector element (non-const).
+ * @param elt_index The index of the element.
+ */
+inline
+auto JaggedVecProxyBase::elt (size_t elt_index) noexcept -> Elt_t&
+{
+  return m_elts[elt_index];
+}
+
+
+/**
+ * @brief Return one jagged vector element (const).
+ * @param elt_index The index of the element.
+ */
+inline
+auto JaggedVecProxyBase::elt (size_t elt_index) const noexcept -> const Elt_t&
+{
+  return m_elts[elt_index];
+}
+
+
+//****************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param elts The elements of the jagged vector.
+ * @param container The container holding this variable.
+ * @param auxid The aux ID of this variable.
+ */
+inline
+JaggedVecProxyValBase::JaggedVecProxyValBase (const AuxDataSpanBase& elts,
+                                              AuxVectorData& container,
+                                              SG::auxid_t auxid)
+  : m_base (elts, container, auxid)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param base The base information.
+ */
+inline
+JaggedVecProxyRefBase::JaggedVecProxyRefBase (JaggedVecProxyBase& base)
+  : m_base (base)
+{
+}
+
+
+//****************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param elt_index Index of the jagged vector element.
+ * @param payload Reference to a range over the payload vector.
+ * @param elts The elements of the jagged vector.
+ * @param container The container holding this variable.
+ * @param auxid The aux ID of this variable.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+JaggedVecProxyT<PAYLOAD_T, BASE>::JaggedVecProxyT (size_t elt_index,
+                                                   Payload_span payload,
+                                                   const AuxDataSpanBase& elts,
+                                                   AuxVectorData& container,
+                                                   SG::auxid_t auxid)
+  : BASE (elts, container, auxid),
+    m_index (elt_index),
+    m_payload (payload)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param elt_index Index of the jagged vector element.
+ * @param payload Reference to a range over the payload vector.
+ * @param base The base information.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+JaggedVecProxyT<PAYLOAD_T, BASE>::JaggedVecProxyT (size_t elt_index,
+                                                   Payload_span payload,
+                                                   JaggedVecProxyBase& base)
+  : BASE (base),
+    m_index (elt_index),
+    m_payload (payload)
+{
+}
+
+
+/**
+ * @brief Return the size of this jagged vector element.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+size_t JaggedVecProxyT<PAYLOAD_T, BASE>::size() const noexcept
+{
+  return elt().size();
+}
+
+
+/**
+ * @brief Test if this jagged vector element is empty.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+bool JaggedVecProxyT<PAYLOAD_T, BASE>::empty() const noexcept
+{
+  return size() == 0;
+}
+
+
+/**
+ * @brief Element access (non-const).
+ * @param i Index within this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::operator[] (size_t i) noexcept
+  -> reference
+{
+  return m_payload[elt().begin()+i];
+}
+
+
+/**
+ * @brief Element access (const).
+ * @param i Index within this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::operator[] (size_t i) const noexcept
+  -> const_reference
+{
+  return m_payload[elt().begin()+i];
+}
+
+
+/**
+ * @brief Element access (non-const, bounds-checked).
+ * @param i Index within this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) -> reference
+{
+  Elt_t e = elt();
+  if (i >= e.size()) throw std::out_of_range ("JaggedVecProxyT");
+  return m_payload[i+e.begin()];
+}
+
+
+/**
+ * @brief Element access (const, bounds-checked).
+ * @param i Index within this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) const -> const_reference
+{
+  Elt_t e = elt();
+  if (i >= e.size()) throw std::out_of_range ("JaggedVecProxyT");
+  return m_payload[i+e.begin()];
+}
+
+
+/**
+ * @brief Return a reference to the first item in this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::front() noexcept -> reference
+{
+  return m_payload[elt().begin()];
+}
+
+
+/**
+ * @brief Return the first item in this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::front() const noexcept -> const_reference
+{
+  return m_payload[elt().begin()];
+}
+
+
+/**
+ * @brief Return a reference to the last item in this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::back() noexcept -> reference
+{
+  return m_payload[elt().end()-1];
+}
+
+
+/**
+ * @brief Return the last item in this element's payload.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::back() const noexcept -> const_reference
+{
+  return m_payload[elt().end()-1];
+}
+
+
+/**
+ * @brief Return a (non-const) begin iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::begin() noexcept -> iterator
+{
+  return m_payload.data() + elt().begin();
+}
+
+
+/**
+ * @brief Return a (non-const) end iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::end() noexcept -> iterator
+{
+  return m_payload.data() + elt().end();
+}
+
+
+/**
+ * @brief Return a (const) begin iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::begin() const noexcept -> const_iterator
+{
+  return m_payload.data() + elt().begin();
+}
+
+
+/**
+ * @brief Return a (const) end iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::end() const noexcept -> const_iterator
+{
+  return m_payload.data() + elt().end();
+}
+
+
+/**
+ * @brief Return a (const) begin iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::cbegin() const noexcept -> const_iterator
+{
+  return m_payload.data() + elt().begin();
+}
+
+
+/**
+ * @brief Return a (const) end iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::cend() const noexcept -> const_iterator
+{
+  return m_payload.data() + elt().end();
+}
+
+
+/**
+ * @brief Return a (non-const) begin reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::rbegin() noexcept -> reverse_iterator
+{
+  return reverse_iterator (end());
+}
+
+
+/**
+ * @brief Return a (non-const) end reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::rend() noexcept -> reverse_iterator
+{
+  return reverse_iterator (begin());
+}
+
+
+/**
+ * @brief Return a (const) begin reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::rbegin() const noexcept
+  -> const_reverse_iterator
+{
+  return const_reverse_iterator (end());
+}
+
+
+/**
+ * @brief Return a (const) end reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::rend() const noexcept
+  -> const_reverse_iterator
+{
+  return const_reverse_iterator (begin());
+}
+
+
+/**
+ * @brief Return a (const) begin reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::crbegin() const noexcept
+  -> const_reverse_iterator
+{
+  return const_reverse_iterator (end());
+}
+
+
+/**
+ * @brief Return a (const) end reverse iterator.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::crend() const noexcept
+  -> const_reverse_iterator
+{
+  return const_reverse_iterator (begin());
+}
+
+
+/**
+ * @brief Assign this jagged vector element from a range.
+ * @param range The range from which to assign.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+JaggedVecProxyT<PAYLOAD_T, BASE>&
+JaggedVecProxyT<PAYLOAD_T, BASE>::operator= (const RANGE& range)
+{
+  this->m_base.resize1 (m_index, std::size(range));
+  std::copy (range.begin(), range.end(), begin());
+  return *this;
+}
+
+
+/**
+ * @brief Convert this jagged vector element to a vector.
+ */
+template <class PAYLOAD_T, class BASE>
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::asVector() const
+  -> std::vector<Payload_t>
+{
+  return std::vector<Payload_t> (this->begin(), this->end());
+}
+
+
+/**
+ * @brief Convert this jagged vector element to a vector.
+ */
+template <class PAYLOAD_T, class BASE>
+template <class VALLOC>
+JaggedVecProxyT<PAYLOAD_T, BASE>::operator std::vector<Payload_t, VALLOC>() const
+{
+  return std::vector<Payload_t, VALLOC> (this->begin(), this->end());
+}
+
+
+/**
+ * @brief Add an item to the end of this jagged vector element.
+ * @param x The item to add.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::push_back (const Payload_t& x)
+{
+  this->m_base.adjust1 (m_index, size(), 1);
+  back() = x;
+}
+
+
+/**
+ * @brief Clear this jagged vector element.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::clear()
+{
+  this->m_base.resize1 (m_index, 0);
+}
+
+
+/**
+ * @brief Resize this jagged vector element.
+ * @param n New size for the element.
+ * @param x If the element is being enlarged, initialize the new
+ *          elements with this value.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::resize (size_t n,
+                                               const Payload_t& x /*= Payload_t()*/)
+{
+  size_t sz = size();
+  this->m_base.adjust1 (m_index, sz, n - sz);
+  if (n > sz) {
+    std::fill_n (begin()+sz, n-sz, x);
+  }
+}
+
+
+/**
+ * @brief Erase one item from this jagged vector element.
+ * @param pos Position within the element of the item to erase.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::erase (nonnull_iterator pos)
+{
+  this->m_base.adjust1 (m_index, pos-begin()+1, -1);
+}
+
+
+/**
+ * @brief Erase one item from this jagged vector element.
+ * @param pos Index within the element of the item to erase.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::erase (index_type pos)
+{
+  this->m_base.adjust1 (m_index, pos+1, -1);
+}
+
+
+/**
+ * @brief Erase a range of items from this jagged vector element.
+ * @param first Position within the element of the first item to erase.
+ * @param last One past the position within the element of the last item to erase.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::erase (nonnull_iterator first,
+                                              nonnull_iterator last)
+{
+  this->m_base.adjust1 (m_index, last - begin(), -(last - first));
+}
+
+
+/**
+ * @brief Erase a range of items from this jagged vector element.
+ * @param first Index within the element of the first item to erase.
+ * @param last One past the index within the element of the last item to erase.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::erase (index_type first, index_type last)
+{
+  this->m_base.adjust1 (m_index, last, -(last - first));
+}
+
+
+/**
+ * @brief Insert an item into this jagged vector element.
+ * @param pos Position within the element at which to insert.
+ * @param x The item to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (nonnull_iterator pos,
+                                               const Payload_t& x)
+{
+  insert (pos, 1, x);
+}
+
+/**
+ * @brief Insert an item into this jagged vector element.
+ * @param pos Index within the element at which to insert.
+ * @param x The item to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (index_type pos,
+                                               const Payload_t& x)
+{
+  insert (pos, 1, x);
+}
+
+
+/**
+ * @brief Insert a number of items into this jagged vector element.
+ * @param pos Position within the element at which to insert.
+ * @param n The number of items to insert.
+ * @param x The value to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (nonnull_iterator pos,
+                                               size_t n,
+                                               const Payload_t& x)
+{
+  size_t i = pos - begin();
+  this->m_base.adjust1 (m_index, i, n);
+  std::fill_n (begin()+i, n, x);
+}
+
+
+/**
+ * @brief Insert a number of items into this jagged vector element.
+ * @param pos Index within the element at which to insert.
+ * @param n The number of items to insert.
+ * @param x The value to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (index_type pos,
+                                               size_t n,
+                                               const Payload_t& x)
+{
+  this->m_base.adjust1 (m_index, pos, n);
+  std::fill_n (begin()+pos, n, x);
+}
+
+/**
+ * @brief Insert a range of items into this jagged vector element.
+ * @param pos Position within the element at which to insert.
+ * @param first Start of the range to insert.
+ * @param last End of the range to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::detail::InputValIterator<PAYLOAD_T> ITERATOR>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (nonnull_iterator pos,
+                                               ITERATOR first,
+                                               ITERATOR last)
+{
+  size_t i = pos - begin();
+  size_t n_new = last - first;
+  this->m_base.adjust1 (m_index, i, n_new);
+  std::copy (first, last, begin()+i);
+}
+
+
+/**
+ * @brief Insert a range of items into this jagged vector element.
+ * @param pos Index within the element at which to insert.
+ * @param first Start of the range to insert.
+ * @param last End of the range to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::detail::InputValIterator<PAYLOAD_T> ITERATOR>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert (index_type pos,
+                                               ITERATOR first,
+                                               ITERATOR last)
+{
+  size_t n_new = last - first;
+  this->m_base.adjust1 (m_index, pos, n_new);
+  std::copy (first, last, begin()+pos);
+}
+
+
+/**
+ * @brief Insert a range of items into this jagged vector element.
+ * @param pos Position within the element at which to insert.
+ * @param range The range to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert_range (nonnull_iterator pos,
+                                                     const RANGE& range)
+{
+  size_t i = pos - begin();
+  size_t n_new = std::size (range);
+  this->m_base.adjust1 (m_index, i, n_new);
+  std::copy (range.begin(), range.end(), begin()+i);
+}
+
+
+/**
+ * @brief Insert a range of items into this jagged vector element.
+ * @param pos Index within the element at which to insert.
+ * @param range The range to insert.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::insert_range (index_type pos,
+                                                     const RANGE& range)
+{
+  size_t n_new = std::size (range);
+  this->m_base.adjust1 (m_index, pos, n_new);
+  std::copy (range.begin(), range.end(), begin()+pos);
+}
+
+
+/**
+ * @brief Append a range of items to the end of this jagged vector element.
+ * @param range The range to append.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::append_range (const RANGE& range)
+{
+  size_t sz = size();
+  size_t n_new = std::size (range);
+  this->m_base.adjust1 (m_index, sz, n_new);
+  std::copy (range.begin(), range.end(), begin()+sz);
+}
+
+
+/**
+ * @brief Remove the last item from this jagged vector element.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::pop_back()
+{
+  this->m_base.adjust1 (m_index, size(), -1);
+}
+
+
+/**
+ * @brief Set this jagged vector element to a number of items.
+ * @param n The number of items to assign.
+ * @param x The value to assign.
+ */
+template <class PAYLOAD_T, class BASE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::assign (size_t n, const Payload_t& x)
+{
+  this->m_base.resize1 (m_index, n);
+  std::fill_n (begin(), n, x);
+}
+
+
+/**
+ * @brief Assign this jagged vector element from a range.
+ * @param first Start of the range to assign.
+ * @param last End of the range to assign.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::detail::InputValIterator<PAYLOAD_T> ITERATOR>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::assign (ITERATOR first, ITERATOR last)
+{
+  this->m_base.resize1 (m_index, last-first);
+  std::copy (first, last, begin());
+}
+
+
+/**
+ * @brief Assign this jagged vector element from a range.
+ * @param range The range from which to assign.
+ */
+template <class PAYLOAD_T, class BASE>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+void JaggedVecProxyT<PAYLOAD_T, BASE>::assign_range (const RANGE& range)
+{
+  this->m_base.resize1 (m_index, std::size (range));
+  std::copy (range.begin(), range.end(), begin());
+}
+
+
+/**
+ * @brief Return a reference to this proxy's element.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::elt() noexcept -> Elt_t&
+{
+  return this->m_base.elt (m_index);
+}
+
+
+/**
+ * @brief Return a (const) reference to this proxy's element.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+auto JaggedVecProxyT<PAYLOAD_T, BASE>::elt() const noexcept -> const Elt_t&
+{
+  const JaggedVecProxyBase& base = this->m_base;
+  return base.elt (m_index);
+}
+
+
+//****************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param container The container holding this variable.
+ * @param auxid The aux ID of this variable.
+ * @param linked_auxid The aux ID for the linked payload variable.
+ */
+template <class PAYLOAD_T>
+inline
+JaggedVecConverter<PAYLOAD_T>::JaggedVecConverter (AuxVectorData& container,
+                                                   auxid_t auxid,
+                                                   auxid_t linked_auxid)
+  : m_base (*container.getDataSpan (auxid), container, auxid),
+    m_payload (*container.getDataSpan (linked_auxid))
+{
+}
+
+
+/**
+ * @brief Convert to a (read-only) span.
+ * @param elt The jagged vector element to transform.
+ */
+template <class PAYLOAD_T>
+inline
+auto JaggedVecConverter<PAYLOAD_T>::operator() (const SG::JaggedVecEltBase& elt) const
+  -> const element_type
+{
+  if (elt.begin() > elt.end() || elt.end() > m_payload.size()) {
+    throw std::out_of_range ("JaggedVecConverter");
+  }
+  const Payload_t* payload = m_payload.data();
+  return element_type (payload + elt.begin(), payload + elt.end());
+}
+
+
+/**
+ * @brief Convert to a (writable) span.
+ * @param elt The jagged vector element to transform.
+ */
+template <class PAYLOAD_T>
+inline
+auto JaggedVecConverter<PAYLOAD_T>::operator() (SG::JaggedVecEltBase& elt)
+  -> value_type
+{
+  return value_type (&elt - &m_base.elt(0),
+                     m_payload,
+                     m_base);
+}
+
+
 } } // namespace SG::detail

@@ -1,3 +1,8 @@
 AthContainers/JaggedVecConversions_test
 test_JaggedVecConstConverter
+test_JaggedVecProxyBase
+test_JaggedVecProxyValBase
+test_JaggedVecProxyRefBase
+test_JaggedVecProxy
+test_JaggedVecConverter
 
