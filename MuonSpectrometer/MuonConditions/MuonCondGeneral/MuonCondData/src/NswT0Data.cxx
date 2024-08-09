@@ -6,8 +6,9 @@
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
-
 #include "GeoModelHelpers/throwExcept.h"
+
+
 NswT0Data::NswT0Data(const Muon::IMuonIdHelperSvc* idHelperSvc): 
     m_idHelperSvc{idHelperSvc} {
     if (m_idHelperSvc->hasMM()) {
@@ -61,6 +62,7 @@ bool NswT0Data::getT0(const Identifier& id, float& value) const {
     }
     uint channelId = m_idHelperSvc->stgcIdHelper().channel(id)-1;
     if(m_data_stg.size() <= idx) return false;
+    if(m_data_stg[idx].size() <= idx) return false;
     value = m_data_stg[idx].at(channelId);
     return true;
 }

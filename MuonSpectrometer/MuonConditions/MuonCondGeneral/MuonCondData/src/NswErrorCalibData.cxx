@@ -1,5 +1,6 @@
 #include "MuonCondData/NswErrorCalibData.h"
 #include <sstream>
+#include "MuonTesterTree/throwExcept.h"
 
 using errorParametrizer = NswErrorCalibData::errorParametrizer;
 using Input = NswErrorCalibData::Input;
@@ -43,7 +44,7 @@ errorParametrizer NswErrorCalibData::getParametrizer(const std::string& funcName
         std::stringstream except_str{};
         except_str<<"NswErrorCalibData::parametrizer() - The function '"<<funcName<<"' is unknown.";
         except_str<<"Please check"<<__FILE__<<" for the set of valid function names. ";
-        throw std::runtime_error(except_str.str());
+        THROW_EXCEPTION(except_str.str());
         return 0.;
     };
 }

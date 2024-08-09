@@ -40,7 +40,7 @@ public:
         }
     };
     
-    NswDcsDbData(const MmIdHelper& mmHelper, const sTgcIdHelper& stgcHelper, const MuonGM::MuonDetectorManager* muonGeoMgr);
+    NswDcsDbData(const Muon::IMuonIdHelperSvc* idHelperSvc, const MuonGM::MuonDetectorManager* muonGeoMgr);
     virtual ~NswDcsDbData() = default;
 
     // setting functions
@@ -83,9 +83,7 @@ private:
     ChannelEltxMap m_data_eltx_stg{};
 
     // ID helpers
-    const MmIdHelper&   m_mmIdHelper;
-    const sTgcIdHelper& m_stgcIdHelper;
-
+     const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
     const MuonGM::MuonDetectorManager* m_muonGeoMgr{nullptr}; 
 
 };
