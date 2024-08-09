@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
 def CsvSpacePointDumpCfg(flags, name="CsvDriftCircleDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
@@ -15,5 +14,11 @@ def CsvSpacePointDumpCfg(flags, name="CsvDriftCircleDumper", **kwargs):
 def CsvMuonSimHitDumpCfg(flags, name="CsvMuonSimHitDumper", **kwargs):
     result = ComponentAccumulator()
     the_alg = CompFactory.MuonR4.SimHitCsvDumperAlg(name = name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def CsvMuonTruthSegmentDumpCfg(flags, name="CsvMuonTruthSegmentDumper", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonR4.TruthSegmentCsvDumperAlg(name = name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
