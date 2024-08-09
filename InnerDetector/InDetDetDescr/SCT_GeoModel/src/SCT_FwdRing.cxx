@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_FwdRing.h"
@@ -29,8 +29,9 @@
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include <sstream>
 #include <cmath>
+#include <sstream>
+#include <utility>
 
 inline double sqr(double x) {return x*x;}
 
@@ -45,7 +46,7 @@ SCT_FwdRing::SCT_FwdRing(const std::string & name,
                          GeoModelIO::ReadGeoModel* sqliteReader,
                          std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
                          std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, mapFPV, mapAX),
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_iWheel(iWheel),
     m_iRing(iRing),
     m_endcap(ec),

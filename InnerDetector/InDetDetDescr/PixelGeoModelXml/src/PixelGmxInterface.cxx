@@ -487,7 +487,7 @@ void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         std::map<std::string, int> index;
         for (const std::string & field:fields){
         size_t first = fullPhysVolInfoString.find(field+"_");
-        size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+        size_t last = fullPhysVolInfoString.find('_',first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
         if(first==std::string::npos || last==std::string::npos){
             ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
             continue;

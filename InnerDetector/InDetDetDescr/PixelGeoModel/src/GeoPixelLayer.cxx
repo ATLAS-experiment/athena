@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -33,13 +33,14 @@
 
 #include <memory>
 #include <sstream>
+#include <utility>
 
 GeoPixelLayer::GeoPixelLayer(InDetDD::PixelDetectorManager* ddmgr,
                              PixelGeometryManager* mgr,
 			     GeoModelIO::ReadGeoModel* sqliteReader, 
                              std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                              std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_supportPhysA (nullptr),
     m_supportPhysC (nullptr),
     m_supportMidRing (nullptr),

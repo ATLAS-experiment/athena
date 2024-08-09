@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
 // New description of the pixel support frame (M.Zdrazil + AR) 
 // The box part (of barrel)
 //
+#include <utility>
+
 #include "GeoPixelOldFrame.h"
 #include "PixelLegacyManager.h"
 #include "GeoModelKernel/GeoBox.h"
@@ -25,7 +27,7 @@ GeoPixelOldFrame::GeoPixelOldFrame(InDetDD::PixelDetectorManager* ddmgr,
 				   GeoModelIO::ReadGeoModel* sqliteReader,
                                    std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                    std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
   m_legacyManager = m_gmt_mgr->legacyManager();
 }

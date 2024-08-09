@@ -1,25 +1,26 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelEndCap.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelKernel/GeoIdentifierTag.h"
+#include "GeoModelKernel/GeoLogVol.h"
+#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelKernel/GeoNameTag.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelKernel/GeoTube.h"
 #include "GeoPixelDisk.h"
 #include "GeoPixelECCable.h"
 #include "GeoPixelServices.h"
-#include "GeoModelKernel/GeoTube.h"
-#include "GeoModelKernel/GeoLogVol.h"
-#include "GeoModelKernel/GeoNameTag.h"
-#include "GeoModelKernel/GeoIdentifierTag.h"
-#include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoTransform.h"
-#include "GeoModelKernel/GeoAlignableTransform.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "Identifier/Identifier.h"
-#include "InDetIdentifier/PixelID.h"
 #include "InDetGeoModelUtils/ExtraMaterial.h"
+#include "InDetIdentifier/PixelID.h"
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include <sstream>
+#include <utility>
 
 #include "InDetGeoModelUtils/VolumeBuilder.h"
 
@@ -29,7 +30,7 @@ GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr,
                                std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                GeoPixelServices * pixServices)
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_pixServices(pixServices)
 {}
 

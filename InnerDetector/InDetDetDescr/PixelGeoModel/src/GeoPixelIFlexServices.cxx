@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,6 +20,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <algorithm>
+#include <utility>
 using std::max;
 
 GeoPixelIFlexServices::GeoPixelIFlexServices(InDetDD::PixelDetectorManager* ddmgr,
@@ -28,7 +29,7 @@ GeoPixelIFlexServices::GeoPixelIFlexServices(InDetDD::PixelDetectorManager* ddmg
                                              std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                              std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                              int iSection)
-  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
   m_section(iSection),
   m_supportPhysA(nullptr),
   m_supportPhysC(nullptr),

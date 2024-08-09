@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // Build IBL fwd services (wavy shape)
-// This is built one time per layer. 
+// This is built one time per layer.
 
 #include "GeoPixelIBLFwdSvcModel1.h"
 
@@ -23,9 +23,10 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <algorithm>
-#include <iostream> 
-#include <iomanip> 
 #include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <utility>
 using std::max;
 
 GeoPixelIBLFwdSvcModel1::GeoPixelIBLFwdSvcModel1(InDetDD::PixelDetectorManager* ddmgr,
@@ -34,7 +35,7 @@ GeoPixelIBLFwdSvcModel1::GeoPixelIBLFwdSvcModel1(InDetDD::PixelDetectorManager* 
                                                  std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                                  std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
                                                  int /*section*/)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
   m_supportPhysA(nullptr),
   m_supportPhysC(nullptr),
   m_xformSupportA(nullptr),
@@ -52,13 +53,13 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   // IBL layer shift ( 2mm shift issue )
   double layerZshift = m_gmt_mgr->PixelLayerGlobalShift();
   int nSectors = m_gmt_mgr->NPixelSectors();
-  double phiOfModuleZero =  m_gmt_mgr->PhiOfModuleZero();  
+  double phiOfModuleZero =  m_gmt_mgr->PhiOfModuleZero();
   double layerRadius = m_gmt_mgr->PixelLayerRadius();
 
   // check if sectors are properly defined
   if(nSectors==0) return nullptr;
   double angle=360./(double)nSectors*Gaudi::Units::deg;
-  
+
   // Defines the IBL_Fwd02 section in the IBL services area
   double innerRadius = 33.;
   double outerRadius = 42.499;
@@ -78,8 +79,8 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   // Build encompassing volume for both A and C sides (assemblies)
   const GeoTube* supportShapeA = new GeoTube(innerRadius,outerRadius,halfLength);
   const GeoTube* supportShapeC = new GeoTube(innerRadius,outerRadius,halfLength);
-  const GeoMaterial* ether = m_mat_mgr->getMaterial("special::Ether");  
-  //  const GeoMaterial* ether = m_mat_mgr->getMaterial("std::Air");  
+  const GeoMaterial* ether = m_mat_mgr->getMaterial("special::Ether");
+  //  const GeoMaterial* ether = m_mat_mgr->getMaterial("std::Air");
   GeoLogVol* supportLogVol_A = new GeoLogVol(lnameA.str(),supportShapeA,ether);
   GeoLogVol* supportLogVol_C = new GeoLogVol(lnameC.str(),supportShapeC,ether);
 
@@ -110,7 +111,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   double cooling_radius = 35.1;
   double cooling_angle = -2.154*Gaudi::Units::deg;
 
-  if(m_gmt_mgr->PixelStaveAxe()==1)   
+  if(m_gmt_mgr->PixelStaveAxe()==1)
     {
       cooling_radius = 34.7 + layerRadius-33.25;
       cooling_angle = -.1*Gaudi::Units::deg;
@@ -122,7 +123,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   // Eta steps
   int nbSteps = 3;
   double etaSteps[3] = {3.8, 4.3, 4.8 };
-  
+
   // Z steps
   //  double zDelta1 = 50;
   std::vector<double> zSteps;
@@ -131,7 +132,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
     double tmp = 2.*atan(exp(etaSteps[i]));
     double tmp2 = tan(tmp);
     double z = fabs(cable_radius/tmp2);
-    
+
     if(i==0) {
       if(z>zMin){
 	zSteps.push_back(zMin+0.001);
@@ -157,7 +158,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   const GeoShape * gblShapeCoolingA = nullptr;
   const GeoShape * gblShapeCableC = nullptr;
   const GeoShape * gblShapeCoolingC = nullptr;
-  
+
 //   deltaPhi = (2.*pi)/28.;
 //   deltaPhi = .2815;
 //   double deltaMiddle_all = cable_radius*tan(deltaPhi);
@@ -179,23 +180,23 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
 
       //      std::cout<<"--- STEP "<<std::setprecision(13)<<iStep<<"  "<<zInit<<" "<<zFinal<<std::endl;
 
-//       double deltaPhiLoc = fabs(atan(deltaMiddle_all/(zHalfLength));      
+//       double deltaPhiLoc = fabs(atan(deltaMiddle_all/(zHalfLength));
 //       double cableHalfLength = zHalfLength / cos(deltaPhiLoc);
 //       double cableLength = zHalfLength / cos(deltaPhiLoc);
 //       double deltaMiddleLoc = deltaMiddle_all*.5;
 
-      double deltaPhiLoc = fabs(atan(deltaMiddle_all/zLength));      
+      double deltaPhiLoc = fabs(atan(deltaMiddle_all/zLength));
       double cableHalfLength = (zLength / cos(deltaPhiLoc))*.5;
       double deltaMiddleLoc = deltaMiddle_all*.5;
 
       //      std::cout<<"         "<<zHalfLength<<"/"<<cableHalfLength<<"   "<<deltaMiddleLoc<<std::endl;
 
       if((iStep==0&&bFirstLin)||iStep==nbSteps-2) {
-	// linear section 
+	// linear section
 	zpos += zHalfLength;
 
 	// Cable
-	const GeoTube* cableShape = new GeoTube(rminCable, rmaxCable, zHalfLength);	
+	const GeoTube* cableShape = new GeoTube(rminCable, rmaxCable, zHalfLength);
 	double angle = 0.; //11.*Gaudi::Units::deg;
 	GeoTrf::Transform3D trfA1 = GeoTrf::RotateZ3D(angle)*GeoTrf::TranslateZ3D(zpos-zMiddle);
 	gblShapeCableA = addShape(gblShapeCableA, cableShape, trfA1 );
@@ -203,7 +204,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
 	gblShapeCableC = addShape(gblShapeCableC, cableShape, trfC1 );
 
 	// Cooling
-	const GeoTube* coolingShape = new GeoTube(rminCooling, rmaxCooling, zHalfLength);	
+	const GeoTube* coolingShape = new GeoTube(rminCooling, rmaxCooling, zHalfLength);
 	gblShapeCoolingA = addShape(gblShapeCoolingA, coolingShape, trfA1 );
 	gblShapeCoolingC = addShape(gblShapeCoolingC, coolingShape, trfC1 );
 
@@ -216,22 +217,22 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
 
 	// Cable
 	const GeoTube* cableShape = new GeoTube(rminCable, rmaxCable, cableHalfLength);
-	double angle= 0.; 
+	double angle= 0.;
 	GeoTrf::Transform3D trfA1 = GeoTrf::RotateZ3D(angle)*GeoTrf::TranslateY3D(deltaMiddleLoc)* GeoTrf::TranslateZ3D(zpos-zMiddle)*GeoTrf::RotateX3D(-angleSign*deltaPhiLoc);
 	gblShapeCableA = addShape(gblShapeCableA, cableShape, trfA1 );
 	GeoTrf::Transform3D trfC1 = GeoTrf::RotateZ3D(angle)*GeoTrf::TranslateY3D(deltaMiddleLoc)* GeoTrf::TranslateZ3D(zMax-(zpos-zMin)-zMiddle)*GeoTrf::RotateX3D(angleSign*deltaPhiLoc);
 	gblShapeCableC = addShape(gblShapeCableC, cableShape, trfC1 );
-	
+
 	// Cooling
-	const GeoTube* coolingShape = new GeoTube(rminCooling, rmaxCooling, cableHalfLength);	
+	const GeoTube* coolingShape = new GeoTube(rminCooling, rmaxCooling, cableHalfLength);
 	gblShapeCoolingA = addShape(gblShapeCoolingA, coolingShape, trfA1 );
 	gblShapeCoolingC = addShape(gblShapeCoolingC, coolingShape, trfC1 );
 
  	zpos += zHalfLength;
 	angleSign*=-1;
       }
-     
-      
+
+
     }
 
   //  std::cout<<"--- MATERIAL  : length "<<devTotalLength<<"   surf "<<surfCable<<std::endl;
@@ -266,19 +267,19 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
   // Loop over the sectors to place the 14 bundles and cooling pipes
   for(int ii=0; ii<nSectors; ii++)
     {
-      m_gmt_mgr->SetPhi(ii);    
-      
-      // cooling transform 
+      m_gmt_mgr->SetPhi(ii);
+
+      // cooling transform
       double phiOfCooling = phiOfModuleZero+ cooling_angle + ii*angle;
-      
-      std::ostringstream tmp1; 
+
+      std::ostringstream tmp1;
       tmp1 << "IBL_Fwd02_Cooling_AC" << ii;
       GeoNameTag * tag1 = new GeoNameTag(tmp1.str());
       GeoTransform* xformA1 = new GeoTransform(GeoTrf::RotateZ3D(phiOfCooling)*GeoTrf::TranslateX3D(cooling_radius));
       m_supportPhysA->add(tag1);
       m_supportPhysA->add(xformA1);
       m_supportPhysA->add(coolingPhysVolA);
-      
+
       GeoTransform* xformC1 = new GeoTransform(GeoTrf::RotateZ3D(phiOfCooling)*GeoTrf::TranslateX3D(cooling_radius));
       m_supportPhysC->add(tag1);
       m_supportPhysC->add(xformC1);
@@ -286,14 +287,14 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
 
       double phiOfCable = phiOfCooling + angle*.5;
 
-      std::ostringstream tmp2; 
+      std::ostringstream tmp2;
       tmp2 << "IBL_Fwd02_Cable_AC" << ii;
       GeoNameTag * tag2 = new GeoNameTag(tmp2.str());
       GeoTransform* xformA2 = new GeoTransform(GeoTrf::RotateZ3D(phiOfCable)*GeoTrf::TranslateX3D(cable_radius)*GeoTrf::RotateZ3D(breakAngle));
       m_supportPhysA->add(tag2);
       m_supportPhysA->add(xformA2);
       m_supportPhysA->add(cablePhysVolA);
-      
+
       GeoTransform* xformC2 = new GeoTransform(GeoTrf::RotateZ3D(phiOfCable)*GeoTrf::TranslateX3D(cable_radius)*GeoTrf::RotateZ3D(breakAngle));
       m_supportPhysC->add(tag2);
       m_supportPhysC->add(xformC2);
@@ -306,7 +307,7 @@ GeoVPhysVol* GeoPixelIBLFwdSvcModel1::Build()
 
   GeoTrf::Transform3D supportTrfA = GeoTrf::TranslateZ3D(middleA);
   m_xformSupportA = new GeoTransform(supportTrfA);
-  
+
   GeoTrf::Transform3D supportTrfC = GeoTrf::TranslateZ3D(middleC);
   m_xformSupportC = new GeoTransform(supportTrfC);
 

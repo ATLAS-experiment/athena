@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,6 +22,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <algorithm>
+#include <utility>
 using std::max;
 
 GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
@@ -31,7 +32,7 @@ GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManag
                                                      std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX,
 						     GeoPixelLadder& ladder,
 						     GeoPixelStaveSupport& staveSupport)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
   , m_ladder(ladder)
   , m_staveSupport(staveSupport)
   , m_supportPhysA(nullptr)

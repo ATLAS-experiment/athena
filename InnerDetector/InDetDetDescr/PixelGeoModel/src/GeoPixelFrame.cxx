@@ -1,28 +1,29 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build the global support frame
 
 #include "GeoPixelFrame.h"
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "GeoModelKernel/GeoBox.h"
-#include "GeoModelKernel/GeoPara.h"
-#include "GeoModelKernel/GeoTrap.h"
-#include "GeoModelKernel/GeoPgon.h"
-#include "GeoModelKernel/GeoSimplePolygonBrep.h"
-#include "GeoModelKernel/GeoLogVol.h"
-#include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoTransform.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include "GeoModelKernel/GeoBox.h"
+#include "GeoModelKernel/GeoLogVol.h"
+#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelKernel/GeoPara.h"
+#include "GeoModelKernel/GeoPgon.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoSimplePolygonBrep.h"
+#include "GeoModelKernel/GeoTransform.h"
+#include "GeoModelKernel/GeoTrap.h"
+#include "GeoPrimitives/GeoPrimitives.h"
 #include <algorithm>
+#include <utility>
 
 GeoPixelFrame::GeoPixelFrame(InDetDD::PixelDetectorManager* ddmgr,
                              PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, 
                              std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                              std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
 }
 

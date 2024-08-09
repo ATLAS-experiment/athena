@@ -675,7 +675,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     if(stereoAnnulus->size() !=0){
        for (unsigned int iR =0;iR<stereoAnnulus->size();iR++){
             std::map<std::string,std::string> stereoAnnulusMap;
-            for(std::string paramName:stereoAnnulusParamNames){
+            for(const std::string& paramName:stereoAnnulusParamNames){
                 std::string paramValue = (*stereoAnnulus)[iR]->getString(paramName);
                 stereoAnnulusMap[paramName] = paramValue;
             }
@@ -691,7 +691,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     if(stripBox->size() !=0){
        for (unsigned int iR =0;iR<stripBox->size();iR++){
             std::map<std::string,std::string> stripBoxMap;
-            for(std::string paramName:stripBoxParamNames){
+            for(const std::string& paramName:stripBoxParamNames){
                 std::string paramValue = (*stripBox)[iR]->getString(paramName);
                 stripBoxMap[paramName] = paramValue;
             }
@@ -730,7 +730,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         std::map<std::string, int> index;
         for (const std::string & field:fields){
           size_t first = fullPhysVolInfoString.find(field+"_");
-          size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+          size_t last = fullPhysVolInfoString.find('_',first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
           if(first==std::string::npos || last==std::string::npos){
              ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
              continue;
@@ -741,7 +741,7 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         //now check if we need to split
         size_t splitPos = fullPhysVolInfoString.find("split_");
         if(splitPos!=std::string::npos){
-            size_t last = fullPhysVolInfoString.find("_",splitPos+6);//"split_" is 6 characters
+            size_t last = fullPhysVolInfoString.find('_',splitPos+6);//"split_" is 6 characters
             std::string strNew = fullPhysVolInfoString.substr(splitPos+6,last-(splitPos+6));
             int splitLevel = std::stoi(strNew);
             for(int i=0;i<splitLevel;i++){

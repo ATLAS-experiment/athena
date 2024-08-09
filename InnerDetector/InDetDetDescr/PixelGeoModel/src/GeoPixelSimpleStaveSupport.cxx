@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build simple stave support as a box
 // This is built one time per layer. 
+
+#include <utility>
 
 #include "GeoPixelSimpleStaveSupport.h"
 #include "GeoModelKernel/GeoBox.h"
@@ -18,7 +20,7 @@ GeoPixelSimpleStaveSupport::GeoPixelSimpleStaveSupport(InDetDD::PixelDetectorMan
 						       GeoModelIO::ReadGeoModel* sqliteReader,
                                                        std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                                                       std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoPixelStaveSupport(ddmgr, mgr, sqliteReader, mapFPV, mapAX),
+  : GeoPixelStaveSupport(ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX)),
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_physVol = GeoPixelSimpleStaveSupport::Build();

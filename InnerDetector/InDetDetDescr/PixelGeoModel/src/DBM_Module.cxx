@@ -1,7 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+
+#include <utility>
 
 #include "DBM_Module.h"
 
@@ -25,7 +27,7 @@ DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
 		       GeoModelIO::ReadGeoModel* sqliteReader,
                        std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                        std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, mapFPV, mapAX)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader, std::move(mapFPV), std::move(mapAX))
 {
 
   double thickness = 0.5;
