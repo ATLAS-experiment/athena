@@ -23,7 +23,7 @@ namespace CP
   namespace detail
   {
     /// \brief check what kind of object/container the argument is
-    template <typename T>  
+    template <typename T>
     struct ContainerType
     {
       template <class, class> class checker;

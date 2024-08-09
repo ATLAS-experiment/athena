@@ -736,7 +736,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.saveScores', 'All')
-    
+
     if not forCompare:
         configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
             containerName='AnaJets.baselineJvt',
@@ -994,7 +994,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq += config.makeConfig ('Thinning',
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
-        
+
     # disabling comparisons for triggers, because the config blocks do a lot
     # more than the sequences
     if not forCompare :

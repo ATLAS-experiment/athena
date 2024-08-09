@@ -29,7 +29,7 @@ def getDefaultArgs(func):
         k: v.default
         for k, v in signature.parameters.items()
         if v.default is not inspect.Parameter.empty
-    }   
+    }
 
 
 def getFuncArgs(func):
@@ -58,11 +58,11 @@ class FactoryBlock():
 
 
     def makeConfig(self, funcOptions):
-            """ 
+            """
             Parameters
             ----------
             funcName: str
-                name associated with the algorithm. This name must have been added to the 
+                name associated with the algorithm. This name must have been added to the
                 list of available algorithms
             funcOptions: dict
                 dictionary containing options for the algorithm read from the YAML file
@@ -133,7 +133,7 @@ class ConfigFactory():
             if block not in self._order:
                 self._order[block] = []
             order = self._order[block]
-            
+
             if block == self.ROOTNAME:
                 algs = self._algs
             else:
@@ -197,7 +197,7 @@ class ConfigFactory():
         Returns:
             configSeq: configSequence object
         """
-        try: 
+        try:
             if '.' in name:
                 algContext, algName = name.split('.')
                 block = self._algs[algContext].subAlgs[algName]
@@ -245,7 +245,7 @@ class ConfigFactory():
                                superBlocks="Jets")
 
         # electrons
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig 
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig
         self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,

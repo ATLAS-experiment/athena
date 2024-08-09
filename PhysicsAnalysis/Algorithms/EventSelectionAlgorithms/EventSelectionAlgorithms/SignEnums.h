@@ -20,7 +20,7 @@ namespace SignEnum {
     GE,
     LE
   };
-  
+
   /// \brief the map between user inputs and comparison operators
   static const std::map<std::string, ComparisonOperator> stringToOperator = {
     {"LT", ComparisonOperator::LT}, // <

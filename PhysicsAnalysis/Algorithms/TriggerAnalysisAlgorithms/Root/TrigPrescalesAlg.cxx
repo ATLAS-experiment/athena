@@ -35,13 +35,13 @@ namespace CP
       ANA_MSG_ERROR ("Either a list of triggers or trigger formula need to be provided");
       return StatusCode::FAILURE;
     }
-    
+
     if (!m_trigList.empty() && !m_trigFormula.empty())
     {
       ANA_MSG_ERROR ("Provide either only a list of triggers or only a trigger formula");
       return StatusCode::FAILURE;
     }
-    
+
     ANA_CHECK (m_pileupReweightingTool.retrieve());
 
     if (!m_trigFormula.empty())
@@ -52,8 +52,8 @@ namespace CP
         if(m_prescaleMC) return m_pileupReweightingTool->getPrescaleWeight(*evtInfo, trigger, true);
         return m_pileupReweightingTool->getDataWeight (*evtInfo, trigger, true);
       });
-      // By putting the formula into` m_trigListAll` 
-      // the logic in `execute` does not have to change 
+      // By putting the formula into` m_trigListAll`
+      // the logic in `execute` does not have to change
       // depending on if `m_trigFormula` or `m_trigList` is used
       std::vector<std::string> formulaVector = {m_trigFormula.value()};
       m_trigListAll = formulaVector;

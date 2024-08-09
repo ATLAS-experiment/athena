@@ -474,7 +474,7 @@ class ConfigAccumulator :
         """
         if containerName not in self._containerConfig :
             return ""
-        
+
         if excludeFrom is None :
             excludeFrom = set()
         elif not isinstance(excludeFrom, set) :

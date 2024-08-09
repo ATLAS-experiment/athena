@@ -27,7 +27,7 @@ namespace CP {
 
   class SumNElNMuPtSelectorAlg final : public EL::AnaAlgorithm {
 
-    /// \brief the standard constructor 
+    /// \brief the standard constructor
   public:
     SumNElNMuPtSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
     virtual StatusCode initialize() override;
@@ -83,7 +83,7 @@ namespace CP {
       this, "eventPreselection", "SetMe", "name of the preselection to check before applying this one"
     };
 
-    /// \brief the output selection decoration 
+    /// \brief the output selection decoration
     CP::SysWriteSelectionHandle m_decoration {
       this, "decorationName", "SetMe", "decoration name for the NObjects selector"
     };

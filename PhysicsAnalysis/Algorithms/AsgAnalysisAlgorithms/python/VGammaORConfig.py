@@ -2,6 +2,7 @@
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaCommon.Logging import logging
 
 class VGammaORBlock(ConfigBlock):
 
@@ -17,11 +18,14 @@ class VGammaORBlock(ConfigBlock):
                        info='list of DSIDs (integers) for which events are to be kept if found to be in the overlap region. For instance, Vy samples in V+jets vs Vy+jets overlap removal. The default list was taken from the PmgWeakBosonProcesses twiki but is not actively maintained!')
         self.addOption('removeInOverlap', [700320, 700321, 700322, 700467, 700468, 700469, 700323, 700324, 700325, 700470, 700471, 700472, 700326, 700327, 700328, 700329, 700330, 700331, 700332, 700333, 700334, 700473, 700474, 700475, 700476, 700477, 700478, 700479, 700480, 700481, 700341, 700342, 700343, 700338, 700339, 700340, 700344, 700345, 700346, 700347, 700348, 700349, 700598, 700599, 700439, 700440, 700441], type=list,
                        info='list of DSIDs (integers) for which events are to be remoevd if found to be in the overlap region. For instance, V samples in V+jets vs Vy+jets overlap removal. The default list was taken from the PmgWeakBosonProcesses twiki but is not actively maintained!')
-        
+
     def makeAlgs(self, config):
+
+        log = logging.getLogger('VGammaORBlock')
+
         if config.dataType() is DataType.Data: return
         if config.dsid() not in self.keepInOverlap and config.dsid() not in self.removeInOverlap:
-            print(f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}, which is not set up for overlap removal. Will skip the configuration of the algorithm!")
+            log.warning(f"CP::VGammaORAlg --> this sample has DSID {config.dsid()}, which is not set up for overlap removal. Will skip the configuration of the algorithm!")
             return
 
         alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg')

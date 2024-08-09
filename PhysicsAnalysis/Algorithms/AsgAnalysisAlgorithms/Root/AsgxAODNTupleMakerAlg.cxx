@@ -233,7 +233,7 @@ namespace {
                                                                   bool allowMissing,
                                                                   MsgStream& msg ) {
 
-      
+
       const SG::AuxElement* e = nullptr;
       if( !evtStore.retrieve( e, key ).isSuccess() ) {
         if(!allowMissing) {
@@ -497,7 +497,7 @@ namespace CP {
                      affecting.insert( variation );
                   }
                }
-            }            
+            }
          }
          CP::SystematicSet matching;
          ANA_CHECK( SystematicSet::filterForAffectingSystematics( sys, affecting, matching ) );

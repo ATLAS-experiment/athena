@@ -22,11 +22,11 @@ namespace CP {
     ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
- 
+
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
     ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
     ANA_CHECK(m_systematicsList.initialize());
- 
+
     return StatusCode::SUCCESS;
   }
 

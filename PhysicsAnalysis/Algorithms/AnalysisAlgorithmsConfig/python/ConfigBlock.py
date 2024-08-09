@@ -142,7 +142,7 @@ class ConfigBlock:
         """Return the list of dependencies. """
         return self._dependencies
 
-    def addOption (self, name, defaultValue, *, 
+    def addOption (self, name, defaultValue, *,
             type, info='', noneAction='ignore', required=False) :
         """declare the given option on the configuration block
 

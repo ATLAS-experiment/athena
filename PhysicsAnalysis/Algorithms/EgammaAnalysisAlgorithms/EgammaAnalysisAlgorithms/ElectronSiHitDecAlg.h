@@ -39,20 +39,20 @@ namespace CP
         /// \brief the systematics list we run
         SysListHandle m_systematicsList {this};
 
-        // EventInfo key        
+        // EventInfo key
         SysReadHandle<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "Input event information"};
 
-        // Primary vertex key        
+        // Primary vertex key
         SysReadHandle<xAOD::VertexContainer> m_vertexKey{this, "VertexContainer", "PrimaryVertices", "Primary vertex container"};
 
         // Electron container key
-        SysReadHandle<xAOD::ElectronContainer> m_electronContainerKey{this, "ElectronContainer", "AnalysisSiHitElectrons", "Sihit electrons to decorate"}; 
+        SysReadHandle<xAOD::ElectronContainer> m_electronContainerKey{this, "ElectronContainer", "AnalysisSiHitElectrons", "Sihit electrons to decorate"};
 
         // Muon container key for event selection
-        SysReadHandle<xAOD::MuonContainer> m_analMuonContKey{this, "AnalMuonContKey", "AnalysisMuons", "Muons use for event selection to decorate SiHit electrons"}; 
+        SysReadHandle<xAOD::MuonContainer> m_analMuonContKey{this, "AnalMuonContKey", "AnalysisMuons", "Muons use for event selection to decorate SiHit electrons"};
 
         // Electron container key for event selection
-        SysReadHandle<xAOD::ElectronContainer> m_analElectronContKey{this, "AnalElectronContKey", "AnalysisElectrons", "Electrons use for event selection to decorate SiHit electrons"}; 
+        SysReadHandle<xAOD::ElectronContainer> m_analElectronContKey{this, "AnalElectronContKey", "AnalysisElectrons", "Electrons use for event selection to decorate SiHit electrons"};
 
         // Apply event veto - require at least two muons or electrons to be present
         Gaudi::Property<bool> m_requireTwoLeptons {this, "RequireTwoLeptons", true, "boolean to select events with at least a pair of electrons or muons which pass the basic cuts, i.e. are in their corresponding analysis containers"};

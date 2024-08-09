@@ -48,7 +48,7 @@ namespace CP {
       for (const xAOD::IParticle *obj : *objects){
         if (!m_objectSelection || m_objectSelection.getBool(*obj, sys)){
           if (obj->m() > m_minmass){
-            count++; 
+            count++;
           }
         }
       }

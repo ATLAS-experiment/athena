@@ -29,7 +29,7 @@ namespace CP
       ANA_CHECK (makeSelectionWriteAccessor (m_decorationName, m_write_accessor));
       ANA_CHECK (makeSelectionReadAccessor (m_decorationName, m_read_accessor));
     }
-      
+
     m_isInitialized = true;
     return StatusCode::SUCCESS;
   }

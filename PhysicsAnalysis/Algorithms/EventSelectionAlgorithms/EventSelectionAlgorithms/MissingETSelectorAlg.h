@@ -36,7 +36,7 @@ namespace CP {
       virtual StatusCode execute() override;
 
     private:
-    
+
       /// \brief the MET threshold against which to compare
       Gaudi::Property<float> m_metref {this, "refMET", 0., "MET cut (in MeV)"};
 

@@ -23,7 +23,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JetGhostMuonAssociationAlg (const std::string& name, 
+    JetGhostMuonAssociationAlg (const std::string& name,
                                 ISvcLocator* pSvcLocator);
 
   public:

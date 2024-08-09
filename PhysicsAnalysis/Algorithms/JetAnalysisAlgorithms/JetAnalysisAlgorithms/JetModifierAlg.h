@@ -25,7 +25,7 @@ namespace CP
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
     StatusCode execute () override;
-    
+
 
 
     /// \brief the modifier tool

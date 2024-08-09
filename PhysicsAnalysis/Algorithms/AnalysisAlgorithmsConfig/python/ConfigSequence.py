@@ -220,7 +220,7 @@ class ConfigSequence:
                     'noneAction': noneAction, 'value': val})
         return options
 
-    
+
     def setOptions(self, options):
         """Set options for a ConfigBlock"""
         algOptions = self.getOptions()

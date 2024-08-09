@@ -42,7 +42,7 @@ namespace CP {
         this, "electrons", "", "the electron container to use"
       };
       CP::SysReadSelectionHandle m_electronSelection {
-        this, "electronSelection", "", "the selection on the input electrons" 
+        this, "electronSelection", "", "the selection on the input electrons"
       };
       CP::SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
         this, "muons", "", "the muon container to use"
@@ -75,4 +75,4 @@ namespace CP {
     }; // class
 } // namespace CP
 
-#endif // EVENT_SELECTOR_DILEPTONOSSFINVARIANTMASSWINDOWSELECTORALG_H 
+#endif // EVENT_SELECTOR_DILEPTONOSSFINVARIANTMASSWINDOWSELECTORALG_H

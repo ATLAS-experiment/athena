@@ -37,7 +37,7 @@ namespace CP {
       virtual StatusCode execute() override;
 
     private:
-    
+
       /// \brief the upper limit of the Mass window
       Gaudi::Property<float> m_mupper {this, "highMass", 0., "Mass < HIGH (in MeV)"};
 

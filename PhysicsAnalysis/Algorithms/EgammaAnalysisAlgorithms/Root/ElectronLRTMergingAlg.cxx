@@ -37,7 +37,7 @@ namespace CP
         {
             asg::AsgToolConfig config("CP::ElectronLRTOverlapRemovalTool/ElectronLRTOverlapRemovalTool");
             ATH_CHECK(config.setProperty("overlapStrategy", m_ORstrategy.value()));
-            ATH_CHECK(config.setProperty("isDAOD", m_isDAOD.value()));            
+            ATH_CHECK(config.setProperty("isDAOD", m_isDAOD.value()));
             ATH_CHECK(config.makePrivateTool(m_overlapRemovalTool));
         }
 

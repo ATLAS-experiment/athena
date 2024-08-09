@@ -130,7 +130,7 @@ namespace CP
         if (m_preselection.getBool (*particle, sys))
         {
           std::size_t cutIndex {0};
-          
+
           const xAOD::TrackParticle *track {nullptr};
           if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle)){
             track = muon->primaryTrackParticle();
@@ -142,16 +142,16 @@ namespace CP
           }
 
           acceptData.setCutResult (cutIndex ++, track != nullptr);
-          
+
           if (track != nullptr) {
             try {
               d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
               if (m_maxD0Significance > 0) acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
-            
+
             } catch (const std::runtime_error &) {
               acceptData.setCutResult (cutIndex ++, false);
             }
-            
+
             const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
             deltaZ0SinTheta = (track->z0() + track->vz() - vertex_z) * sin (particle->p4().Theta());
             if (m_maxDeltaZ0SinTheta > 0) acceptData.setCutResult (cutIndex ++, fabs (deltaZ0SinTheta) < m_maxDeltaZ0SinTheta);

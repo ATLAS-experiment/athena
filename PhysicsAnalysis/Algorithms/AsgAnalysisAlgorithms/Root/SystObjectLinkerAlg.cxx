@@ -20,7 +20,7 @@ namespace CP
                                   ISvcLocator *pSvcLocator)
       : EL::AnaReentrantAlgorithm(name, pSvcLocator)
   {
-  
+
   }
 
   StatusCode SystObjectLinkerAlg ::initialize()
@@ -72,7 +72,7 @@ namespace CP
         // Navigate to the full container, as this may be a view container
         // holding a subset of the objects
         // Cast from SG::AuxVectorData
-        const xAOD::IParticleContainer* full_container = 
+        const xAOD::IParticleContainer* full_container =
           static_cast<const xAOD::IParticleContainer*>(sys_container->front()->container());
         systhash_to_container.insert({sys.hash(), full_container});
         if(full_container == sys_container) {

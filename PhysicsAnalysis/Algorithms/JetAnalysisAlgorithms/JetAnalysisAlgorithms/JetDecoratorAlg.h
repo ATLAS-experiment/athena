@@ -22,7 +22,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JetDecoratorAlg (const std::string& name, 
+    JetDecoratorAlg (const std::string& name,
                   ISvcLocator* pSvcLocator);
 
 
@@ -31,7 +31,7 @@ namespace CP
 
   public:
     StatusCode execute () override;
-    
+
     /// \brief the update tool
   private:
     ToolHandle<IJetDecorator> m_decorator{this, "decorator", "", "the decorator tool we apply to the jet collection"};

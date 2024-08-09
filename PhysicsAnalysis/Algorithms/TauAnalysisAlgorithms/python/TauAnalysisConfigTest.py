@@ -26,15 +26,15 @@ def makeSequence (dataType, EXPERIMENTAL_CombineMuonRemovalTaus = False) :
     if EXPERIMENTAL_CombineMuonRemovalTaus:
         from TauAnalysisAlgorithms.TauAnalysisConfig import EXPERIMENTAL_makeTauCombineMuonRemovalConfig
         EXPERIMENTAL_makeTauCombineMuonRemovalConfig (
-            configSeq, 
-            inputTaus = 'TauJets', 
-            inputTausMuRM = 'TauJets_MuonRM', 
-            outputTaus = 'TauJets_MuonRmCombined', 
+            configSeq,
+            inputTaus = 'TauJets',
+            inputTausMuRM = 'TauJets_MuonRM',
+            outputTaus = 'TauJets_MuonRmCombined',
         )
         tau_container = 'TauJets_MuonRmCombined'
     else:
         tau_container = 'AnalysisTauJets'
-        
+
     makeTauCalibrationConfig (configSeq, tau_container, tau_container)
     makeTauWorkingPointConfig (configSeq, tau_container, workingPoint='Tight', selectionName='tight')
 

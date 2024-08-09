@@ -4,6 +4,7 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaCommon.Logging import logging
 
 import ROOT
 
@@ -65,7 +66,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
         """Create the calibration and smearing algorithm
-        
+
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
         # Set up the calibration and smearing algorithm:
@@ -83,7 +84,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
-        
+
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
@@ -96,13 +97,15 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('PhotonCalibrationConfig')
+
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
         if self.forceFullSimConfig:
-            print("WARNING! You are running PhotonCalibrationConfig forcing full sim config")
-            print("WARNING! This is only intended to be used for testing purposes")
+            log.warning("You are running PhotonCalibrationConfig forcing full sim config")
+            log.warning("This is only intended to be used for testing purposes")
 
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisPhotons")
@@ -283,13 +286,15 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('PhotonWorkingPointConfig')
+
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
 
         if self.forceFullSimConfig:
-            print("WARNING! You are running PhotonWorkingPointConfig forcing full sim config")
-            print("WARNING! This is only intended to be used for testing purposes")
+            log.warning("You are running PhotonWorkingPointConfig forcing full sim config")
+            log.warning("This is only intended to be used for testing purposes")
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :

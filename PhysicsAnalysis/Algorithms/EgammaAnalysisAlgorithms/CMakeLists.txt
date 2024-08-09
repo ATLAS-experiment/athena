@@ -42,7 +42,7 @@ if( XAOD_STANDALONE )
     #  SCRIPT EgammaAnalysisAlgorithmsTest_eljob.py --data-type afii --unit-test
     #  POST_EXEC_SCRIPT nopost.sh
     #  PROPERTIES TIMEOUT 600 )
-    
+
     # DNN not currently supported on DAOD_PHYS
     # atlas_add_test( testJobDataDNN
     #    SCRIPT EgammaAnalysisAlgorithmsTest_eljob.py --data-type data --dnn --unit-test

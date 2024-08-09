@@ -36,7 +36,7 @@ namespace CP {
       virtual StatusCode execute() override;
 
     private:
-    
+
       /// \brief the 2-lepton mass against which to compare
       Gaudi::Property<float> m_mllref {this, "refMLL", 0., "MLL cut (in MeV)"};
 

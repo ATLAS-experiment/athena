@@ -23,7 +23,7 @@ namespace CP
   initialize ()
   {
     ANA_CHECK (m_selectionTool.retrieve());
-      
+
     ANA_CHECK (m_egammasHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_egammasHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_egammasHandle));

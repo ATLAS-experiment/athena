@@ -14,13 +14,13 @@
 namespace CP
 {
   JetGhostMergingAlg ::
-  JetGhostMergingAlg (const std::string& name, 
+  JetGhostMergingAlg (const std::string& name,
                       ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
   {
   }
 
-  StatusCode JetGhostMergingAlg :: 
+  StatusCode JetGhostMergingAlg ::
   initialize ()
   {
     // containers
@@ -40,7 +40,7 @@ namespace CP
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JetGhostMergingAlg :: 
+  StatusCode JetGhostMergingAlg ::
   execute ()
   {
     const EventContext &ctx = Gaudi::Hive::currentContext();

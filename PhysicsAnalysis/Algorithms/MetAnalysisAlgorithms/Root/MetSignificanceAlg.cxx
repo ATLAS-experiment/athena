@@ -48,7 +48,7 @@ namespace CP
       // requires a non-const object
       xAOD::MissingETContainer *met {};
       ANA_CHECK (m_metHandle.getCopy (met, sys));
-	
+
       const xAOD::EventInfo* evtInfo = 0;
       ANA_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
 

@@ -26,10 +26,10 @@ namespace CP
   private:
     /// \brief flags that we want to select events with
     Gaudi::Property<std::vector<std::string>> m_selFlags {this, "selectionFlags", {}, "list of flags to use as selection criteria"};
-    
+
     /// \brief invert flags
     Gaudi::Property<std::vector<bool>> m_invertFlags {this, "invertFlags", {}, "toggles for inverting the selection (index-parallel to selectionFlags)"};
-    
+
     /// \brief a vector of accessors to read the flags
     std::vector<std::unique_ptr<ISelectionReadAccessor>> m_accessors;
 

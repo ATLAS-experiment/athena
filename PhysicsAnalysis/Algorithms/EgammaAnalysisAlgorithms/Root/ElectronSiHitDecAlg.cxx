@@ -32,20 +32,20 @@ namespace CP
         ATH_CHECK(m_electronContainerKey.initialize(m_systematicsList));
         ATH_CHECK(m_analMuonContKey.initialize(m_systematicsList));
         ATH_CHECK(m_analElectronContKey.initialize(m_systematicsList));
-        
+
         ATH_CHECK(m_z0stheta.initialize(m_systematicsList, m_electronContainerKey));
         ATH_CHECK(m_d0Normalized.initialize(m_systematicsList, m_electronContainerKey));
         ATH_CHECK(m_nInnerExpPix.initialize(m_systematicsList, m_electronContainerKey));
         ATH_CHECK(m_clEta.initialize(m_systematicsList, m_electronContainerKey));
         ATH_CHECK(m_clPhi.initialize(m_systematicsList, m_electronContainerKey));
         ATH_CHECK(m_evtOKDec.initialize(m_systematicsList, m_electronContainerKey));
-        
+
         ANA_CHECK (m_systematicsList.initialize());
 
         ATH_MSG_INFO("Reading " << m_eventInfoKey.getNamePattern() << ", vertex " <<  m_vertexKey.getNamePattern() << ", and electrons " << m_electronContainerKey.getNamePattern() << " for decorating SiHit electrons.");
 
-        if (m_requireTwoLeptons) ATH_MSG_INFO("Requiring at least one pair of leptons from containers " 
-                                 << m_analMuonContKey.getNamePattern() << " and " 
+        if (m_requireTwoLeptons) ATH_MSG_INFO("Requiring at least one pair of leptons from containers "
+                                 << m_analMuonContKey.getNamePattern() << " and "
                                  <<  m_analElectronContKey.getNamePattern());
         else ATH_MSG_INFO("No requirement on pairs of leptons. ");
 
@@ -97,14 +97,14 @@ namespace CP
             ANA_CHECK (m_electronContainerKey.retrieve (els, sys));
             ATH_MSG_DEBUG("Retrieved electrons: " << els->size());
 
-            // get primary vertex 
+            // get primary vertex
             const xAOD::Vertex*  primaryVtx = nullptr;
             for ( auto vtx : *vtxs) {
                 if (vtx->vertexType() == xAOD::VxType::PriVtx) {
                     primaryVtx = vtx;
                 }
             }
-        
+
             if (primaryVtx) {
                 ATH_MSG_DEBUG("Primary vtx z ntrk " << primaryVtx->z() << " "
                             << primaryVtx->nTrackParticles() << " index " << primaryVtx->index());
@@ -141,7 +141,7 @@ namespace CP
                 if (primaryVtx) z0stheta = (tp->z0() - primaryVtx->z() + tp->vz()) * sin(tp->theta());
                 m_z0stheta.set(*el, z0stheta, sys);
 
-                // Set d0 normalized 
+                // Set d0 normalized
                 float d0Normalized = std::abs(xAOD::TrackingHelpers::d0significance(tp, ei->beamPosSigmaX(), ei->beamPosSigmaY(), ei->beamPosSigmaXY()));
                 m_d0Normalized.set(*el, d0Normalized, sys);
 
@@ -152,7 +152,7 @@ namespace CP
                 m_clPhi.set(*el, clPhi, sys);
 
 
-                
+
                 ATH_MSG_DEBUG("el pt,eta,ph " << el->pt()/1000. << ", " << el->eta() << ", " << el->phi());
                 ATH_MSG_DEBUG("Set z0stheta to " << z0stheta);
                 ATH_MSG_DEBUG("Set d0Norm to " << d0Normalized);

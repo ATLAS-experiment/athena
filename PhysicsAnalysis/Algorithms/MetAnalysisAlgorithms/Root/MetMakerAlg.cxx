@@ -101,18 +101,18 @@ namespace CP
         };
 
       // Calculate the terms coming from the user's selected objects.
-      ANA_CHECK (processParticles (m_electronsHandle, m_electronsSelection, 
+      ANA_CHECK (processParticles (m_electronsHandle, m_electronsSelection,
                                    xAOD::Type::Electron, m_electronsKey));
-      ANA_CHECK (processParticles (m_photonsHandle, m_photonsSelection, 
+      ANA_CHECK (processParticles (m_photonsHandle, m_photonsSelection,
                                    xAOD::Type::Photon, m_photonsKey));
-      ANA_CHECK (processParticles (m_tausHandle, m_tausSelection, 
+      ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
                                    xAOD::Type::Tau, m_tausKey));
-      ANA_CHECK (processParticles (m_muonsHandle, m_muonsSelection, 
+      ANA_CHECK (processParticles (m_muonsHandle, m_muonsSelection,
                                    xAOD::Type::Muon, m_muonsKey));
 
       const xAOD::JetContainer *jets {nullptr};
       ANA_CHECK (m_jetsHandle.retrieve (jets, sys));
-	
+
       if (m_doTrackMet)
       {
         ANA_CHECK (m_makerTool->rebuildTrackMET (m_jetsKey, m_softTermKey, met.get(), jets, metcore, metHelper, m_doJetJVT));

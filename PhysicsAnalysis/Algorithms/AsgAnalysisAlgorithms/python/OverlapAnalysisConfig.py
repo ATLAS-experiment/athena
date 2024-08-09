@@ -449,7 +449,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.overlapTool.JetFatJetORT.LinkOverlapObjects = self.linkOverlapObjects
             alg.overlapTool.JetFatJetORT.DR = 1.0
             alg.overlapTool.JetFatJetORT.OutputPassValue = True
-        
+
         if self.nominalOnly or self.nominalOnlyUnifiedSelection :
             if electrons :
                 alg = config.createAlgorithm( 'CP::CopyNominalSelectionAlg', 'ORElectronsCopyAlg' + postfix)

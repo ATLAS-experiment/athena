@@ -94,7 +94,7 @@ class SelectionExprParser {
  private:
   // Construct a binary OR
   StatusCode expression(std::unique_ptr<ISelectionReadAccessor> &root);
-  // Construct an AND, attempts to group all ANDs it can see into a list 
+  // Construct an AND, attempts to group all ANDs it can see into a list
   StatusCode term(std::unique_ptr<ISelectionReadAccessor> &root);
   // Handle other constructs, potentially more ORs or ANDs.
   StatusCode factor(std::unique_ptr<ISelectionReadAccessor> &root);

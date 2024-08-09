@@ -16,7 +16,7 @@
 
 #include <xAODEventInfo/EventInfo.h>
 
-#include "GammaORTools/IVGammaORTool.h"  
+#include "GammaORTools/IVGammaORTool.h"
 
 namespace CP {
 
@@ -27,7 +27,7 @@ namespace CP {
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
-    
+
   private:
     /// \brief the systematics
     CP::SysListHandle m_systematicsList {this};

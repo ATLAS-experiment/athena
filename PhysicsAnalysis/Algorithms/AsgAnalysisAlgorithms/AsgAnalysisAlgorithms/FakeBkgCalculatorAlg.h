@@ -31,7 +31,7 @@ namespace CP {
     using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
-    
+
   private:
     CP::SysListHandle m_systematicsList {this};
 
@@ -49,7 +49,7 @@ namespace CP {
     CP::SysReadSelectionHandle m_electronSelectionTarget {
       this, "electronSelectionTarget", "", "the tight selection on the input electrons"
     };
-    
+
     CP::SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
       this, "muons", "", "the muon container to use"
     };

@@ -3,5 +3,5 @@
    <class name="CP::BTaggingEfficiencyAlg" />
    <class name="CP::BTaggingInformationDecoratorAlg" />
    <class name="CP::BTaggingScoresAlg" />
-   
+
 </lcgdict>

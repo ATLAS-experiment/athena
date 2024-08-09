@@ -46,11 +46,11 @@ namespace CP {
     // Input Tracks
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey{this, "TrackParticleContainer", "InDetTrackParticles",
                                                                 "Track container"};
-                                                                        
+
     Gaudi::Property<std::vector<int>> m_targetPDGIDs{this, "TargetPDGIDs", {}, "List of PDGIDs to select for matching"};
 
     Gaudi::Property<bool> m_writeHistograms{this, "WriteHistograms", true, "Write histograms"};
-    
+
     ToolHandle<IInDetSecVtxTruthMatchTool> m_matchTool{this, "MatchTool", "InDetSecVtxTruthMatchTool"};
 
     void fillRecoHistograms(const xAOD::Vertex* secVtx, std::string matchType);

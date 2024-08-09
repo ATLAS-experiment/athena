@@ -6,6 +6,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
 from Campaigns.Utils import Campaign
+from AthenaCommon.Logging import logging
 
 # E/gamma import(s).
 from xAODEgamma.xAODEgammaParameters import xAOD
@@ -60,7 +61,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
     def makeCalibrationAndSmearingAlg (self, config, name) :
         """Create the calibration and smearing algorithm
-        
+
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
         # Set up the calibration and smearing algorithm:
@@ -78,7 +79,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
-            
+
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
         alg.calibrationAndSmearingTool.useFastSim = (
             0 if self.forceFullSimConfig
@@ -91,9 +92,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('ElectronCalibrationConfig')
+
         if self.forceFullSimConfig:
-            print("WARNING! You are running ElectronCalibrationConfig forcing full sim config")
-            print("WARNING! This is only intended to be used for testing purposes")
+            log.warning("You are running ElectronCalibrationConfig forcing full sim config")
+            log.warning(" This is only intended to be used for testing purposes")
 
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisElectrons")
@@ -272,9 +275,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        log = logging.getLogger('ElectronWorkingPointConfig')
+
         if self.forceFullSimConfig:
-            print("WARNING! You are running ElectronWorkingPointConfig forcing full sim config")
-            print("WARNING! This is only intended to be used for testing purposes")
+            log.warning("You are running ElectronWorkingPointConfig forcing full sim config")
+            log.warning("This is only intended to be used for testing purposes")
 
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
@@ -296,18 +301,18 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                                         'ElectronTrackSelectionAlg' + postfix )
             alg.selectionDecoration = 'trackSelection' + postfix + ',as_bits'
             alg.maxD0Significance = self.maxD0Significance
-            alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta 
+            alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
             alg.decorateTTVAVars = self.writeTrackD0Z0
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            if self.trackSelection : 
+            if self.trackSelection :
                 config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
             if self.writeTrackD0Z0 :
                 alg.d0sigDecoration = 'd0sig' + postfix
                 alg.z0sinthetaDecoration = 'z0sintheta' + postfix
                 config.addOutputVar (self.containerName, alg.d0sigDecoration, alg.d0sigDecoration,noSys=True)
                 config.addOutputVar (self.containerName, alg.z0sinthetaDecoration, alg.z0sinthetaDecoration,noSys=True)
-                
+
         if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm
             # It is safe to do this before calibration, as the cluster E is used
@@ -332,7 +337,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         elif 'SiHit' in self.identificationWP:
             # Only want SiHit electrons, so veto loose LH electrons
             algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
-            algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_bits'  
+            algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
             algVeto.selectionTool.selectionFlags = ["DFCommonElectronsLHLoose"]
             algVeto.selectionTool.invertFlags    = [True]
@@ -392,8 +397,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix )
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
-            # For SiHit electrons, set flag to remove FSR electrons. 
-            # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection. 
+            # For SiHit electrons, set flag to remove FSR electrons.
+            # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection.
             # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.
             if 'SiHit' in self.identificationWP:
                 alg.vetoFSR = True
@@ -412,7 +417,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         if self.chargeIDSelectionRun2 and config.geometry() >= LHCPeriod.Run3:
-            print("WARNING! ECIDS is only available for Run 2 and will not have effect in run 3.")
+            log.warning("ECIDS is only available for Run 2 and will not have effect in run 3.")
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3:
@@ -451,9 +456,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for reconstruction efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
-                print("WARNING! Only TOTAL correlation model is currently supported "
-                      "for reconstruction efficiency correction in Run 3.")
-                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL" 
+                log.warning("Only TOTAL correlation model is currently supported "
+                            "for reconstruction efficiency correction in Run 3.")
+                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             else:
                 alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelReco
             if config.dataType() is DataType.FastSim:
@@ -507,9 +512,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 raise ValueError('Invalid correlation model for isolation efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
             if config.geometry() >= LHCPeriod.Run3:
-                print("WARNING! Only TOTAL correlation model is currently supported "
+                log.warning("Only TOTAL correlation model is currently supported "
                       "for isolation efficiency correction in Run 3.")
-                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL" 
+                alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             else:
                 alg.efficiencyCorrectionTool.CorrelationModel = self.correlationModelIso
             if config.dataType() is DataType.FastSim:

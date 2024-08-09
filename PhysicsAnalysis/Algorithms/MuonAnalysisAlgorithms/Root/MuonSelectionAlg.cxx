@@ -58,7 +58,7 @@ namespace CP
         {
           m_selectionHandle.setBits
             (*muon, selectionFromAccept (m_selectionTool->accept (*muon)), sys);
-          
+
           if (m_badMuonVetoHandle)
           {
             m_badMuonVetoHandle.setBool (*muon, m_selectionTool->isBadMuon (*muon), sys);

@@ -64,7 +64,7 @@ namespace CP
     void setBool (const SG::AuxElement& element,
                   bool selection,
                   const CP::SystematicSet& sys) const;
-    
+
     /// \brief get the name/label of the decoration
   public:
     std::string getLabel () const;

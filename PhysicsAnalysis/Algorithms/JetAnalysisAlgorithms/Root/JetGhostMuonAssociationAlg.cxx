@@ -18,7 +18,7 @@
 namespace CP
 {
   JetGhostMuonAssociationAlg ::
-  JetGhostMuonAssociationAlg (const std::string& name, 
+  JetGhostMuonAssociationAlg (const std::string& name,
                               ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
   {

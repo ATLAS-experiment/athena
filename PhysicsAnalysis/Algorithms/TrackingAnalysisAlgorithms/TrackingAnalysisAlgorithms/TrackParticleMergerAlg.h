@@ -25,7 +25,7 @@ namespace CP {
 
    /// Algorithm to merge multiple track collections into one
    ///
-   /// This algorithm is most commonly used to merge the 
+   /// This algorithm is most commonly used to merge the
    /// InDetTrackParticles and InDetLargeD0TrackParticles
    /// containers. The "CreateViewColllection" will do so
    /// without actually copying the TrackParticle objects.
@@ -61,7 +61,7 @@ namespace CP {
            "Input track collections to be merged"
       };
 
-      /// Output collection name 
+      /// Output collection name
       SG::WriteHandleKey<xAOD::TrackParticleContainer>  m_outputTrackParticleLocationCopy {
           this, "OutputTrackParticleLocationCopy", "InDetWithLRTTrackParticles", "Output collection name"
       };
@@ -75,7 +75,7 @@ namespace CP {
       /// Extra guard for deep-copy mode
       SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_requiredDecorations{
         this, "RequiredDecorations", {}, "Decorations that the algorithm needs to wait for"};
- 
+
 
       /// @}
 

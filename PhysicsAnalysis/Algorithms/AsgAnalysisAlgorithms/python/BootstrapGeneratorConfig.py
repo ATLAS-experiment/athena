@@ -16,9 +16,9 @@ class BootstrapGeneratorConfig(ConfigBlock):
             info="the name of the output vector branch containing the "
             "bootstrapped weights. The default is bootstrapWeights.")
         self.setOptionValue('skipOnMC', True)
-    
+
     def makeAlgs(self, config):
-        
+
         alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')
         alg.nReplicas = self.nReplicas
         alg.isData = config.dataType() is DataType.Data
@@ -26,7 +26,7 @@ class BootstrapGeneratorConfig(ConfigBlock):
             alg.decorationName = self.decoration
         else:
             alg.decorationName = "bootstrapWeights_%SYS%"
-        
+
         config.addOutputVar ('EventInfo', alg.decorationName, alg.decorationName.split("_%SYS%")[0], noSys=True)
 
         return
