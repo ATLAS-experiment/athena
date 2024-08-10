@@ -244,7 +244,8 @@ void MergeMcEventCollTool::printDetailsOfMergedMcEventCollection() const {
     while(outputEventItr!=m_pOvrlMcEvColl->cend()) {
       const int signal_process_id(HepMC::signal_process_id((*outputEventItr))), event_number((*outputEventItr)->event_number()), separator_hack(HepMC::mpi((*outputEventItr)));
       const IndexKey key(makekey(signal_process_id,event_number,separator_hack));
-      const PileUpBackgroundMap::const_iterator event(m_backgroundClassificationMap.find(key));
+      const auto event = m_backgroundClassificationMap.find(key);
+      if (event == m_backgroundClassificationMap.end()) continue;
       ATH_MSG_INFO ( "GenEvent #"<<event_number<<", signal_process_id="<<signal_process_id<<", category="<<event->second<<", number of Vertices="<<(*outputEventItr)->vertices_size() );
       ++outputEventItr;
     }
@@ -359,7 +360,7 @@ StatusCode MergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection *pMcEv
 //It should be clarified if ne wants to get a copy or the content
 #ifdef HEPMC3
      HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*(pMcEvtColl->at(0)->heavy_ion()));
-     m_pOvrlMcEvColl->at(0)->set_heavy_ion(hinew);
+     m_pOvrlMcEvColl->at(0)->set_heavy_ion(std::move(hinew));
 #else
       m_pOvrlMcEvColl->at(0)->set_heavy_ion(*(pMcEvtColl->at(0)->heavy_ion()));
 #endif
