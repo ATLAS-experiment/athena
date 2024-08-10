@@ -2,24 +2,20 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
+from CLIDComps.clidGenerator import clidGenerator
 log = logging.getLogger('testEDM')
 
 from TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
-                        TriggerLvl1List, TriggerIDTruth, TriggerHLTList, _addExtraCollectionsToEDMList)
+                        TriggerLvl1List, TriggerIDTruth, TriggerHLTList, _addExtraCollectionsToEDMList, isCLIDDefined)
 from TriggerEDMRun2 import EDMDetails
-from TrigEDMConfig.TriggerEDMDefs import InViews
+from TrigEDMConfig.TriggerEDMDefs import InViews, allowTruncation
 import TriggerEDMRun1
-from CLIDComps.clidGenerator import clidGenerator
-cgen = clidGenerator("", False)
-
-def isCLIDDefined(typename):
-  c = cgen.genClidFromName(typename)
-  return (cgen.getNameFromClid(c) is not None)
 
 def main():
   import re
   serializable_names = []
   serializable_names_no_label = []
+  cgen = clidGenerator("", False)
   TriggerList = TriggerL2List + TriggerEFList + TriggerResultsList + TriggerResultsRun1List + TriggerLvl1List + TriggerIDTruth + TriggerHLTList
   TriggerList += TriggerEDMRun1.TriggerL2List + TriggerEDMRun1.TriggerEFList + TriggerEDMRun1.TriggerResultsRun1List
   for TriggerSerializable in TriggerList:
@@ -29,8 +25,8 @@ def main():
     if '#' not in serializable_name:
       log.error("ERROR, no label for " + serializable_name)
       return 1
-    #Check container has a CLID
-    if not isCLIDDefined(serializable_name_no_label):
+    #Check container can be assigned a CLID
+    if not isCLIDDefined(cgen, serializable_name_no_label):
       log.error("no CLID for " + serializable_name)
       return 1
     if serializable_name_no_label not in EDMDetails.keys():
@@ -66,12 +62,14 @@ def main():
     ('xAOD::BAuxContainer#HLT_BAux.DecOne.', 'BS ESD', 'Steer'),
     ('xAOD::B#HLT_C',                        'BS ESD', 'Steer'),
     ('xAOD::BAuxContainer#HLT_CAux.',        'BS ESD', 'Steer'),
+    ('xAOD::E#HLT_E',                        'BS ESD', 'Steer', [allowTruncation]),
+    ('xAOD::EAuxContainer#HLT_EAux.',        'BS ESD', 'Steer', [allowTruncation]),
   ]
 
   updateList = [
     # Add new
-    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
-    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
+    ('xAOD::New#HLT_New',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::NewAuxContainer#HLT_NewAux.',                'BS ESD AODFULL', 'Steer'),
     # Add decorations & target
     ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD', 'Steer'),
     ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
@@ -84,14 +82,16 @@ def main():
   _addExtraCollectionsToEDMList(dummyEDM, updateList) # Note: Function updates dummyEDM in-place
 
   expectedEDM = [
+    ('xAOD::New#HLT_New',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::NewAuxContainer#HLT_NewAux.',                'BS ESD AODFULL', 'Steer'),
     ('xAOD::A#HLT_A',                                'BS ESD',         'Steer', [InViews('SomeView1')]),
     ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD',         'Steer'),
     ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
     ('xAOD::BAuxContainer#HLT_BAux.DecOne.DecFour',  'BS ESD AODFULL', 'Steer'),
     ('xAOD::C#HLT_C',                                'BS ESD', 'Steer'),
     ('xAOD::CAuxContainer#HLT_CAux.',                'BS ESD', 'Steer'),
-    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
-    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
+    ('xAOD::E#HLT_E',                        'BS ESD', 'Steer', [allowTruncation]),
+    ('xAOD::EAuxContainer#HLT_EAux.',        'BS ESD', 'Steer', [allowTruncation]),
   ]
 
   if (dummyEDM != expectedEDM):
