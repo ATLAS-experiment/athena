@@ -44,7 +44,7 @@ if __name__=="__main__":
                                     outStream="MuonEtaHoughTransformTest"))
 
     if flags.Input.isMC:
-        from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
         cfg.merge(MuonSimHitToMeasurementCfg(flags))
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthHitAssociationCfg
         cfg.merge(TruthSegmentMakerCfg(flags))
