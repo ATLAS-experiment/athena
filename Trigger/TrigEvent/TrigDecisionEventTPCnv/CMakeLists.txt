@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigDecisionEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigDecisionEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigDecisionEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigDecisionEventTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib TrigDecisionEvent TrigSteeringEventTPCnv
+                   PRIVATE_LINK_LIBRARIES AthenaKernel )
+
+atlas_add_tpcnv_library( TrigDecisionEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigDecisionEventTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib TrigDecisionEvent TrigSteeringEventTPCnv
-                         PRIVATE_LINK_LIBRARIES AthenaKernel )
+                         LINK_LIBRARIES TrigDecisionEventTPCnv )
 
 atlas_add_dictionary( TrigDecisionEventTPCnvDict
                       TrigDecisionEventTPCnv/TrigDecisionEventTPCnvDict.h

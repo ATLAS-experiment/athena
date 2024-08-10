@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigTruthEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigTruthEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigTruthEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigTruthEventTPCnv
+                   PRIVATE_LINK_LIBRARIES AthenaKernel
+                   LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities DataModelAthenaPoolLib GeneratorObjectsTPCnv RootConversions TrigInDetEvent TrigInDetEventTPCnv TrigInDetTruthEvent )
+
+atlas_add_tpcnv_library( TrigTruthEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigTruthEventTPCnv
-                         PRIVATE_LINK_LIBRARIES AthenaKernel
-                         LINK_LIBRARIES AthLinks AthenaPoolCnvSvcLib AthenaPoolUtilities DataModelAthenaPoolLib GeneratorObjectsTPCnv RootConversions TrigInDetEvent TrigInDetEventTPCnv TrigInDetTruthEvent )
+                         LINK_LIBRARIES TrigTruthEventTPCnv )
 
 atlas_add_dictionary( TrigTruthEventTPCnvDict
                       TrigTruthEventTPCnv/TrigTruthEventTPCnvDict.h

@@ -1,13 +1,18 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigCombinedEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( TrigCombinedEventTPCnv
-                         src/*.cxx
+atlas_add_library( TrigCombinedEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS TrigCombinedEventTPCnv
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities TrigCombinedEvent TrigNavigationLib TestTools AthenaKernel GaudiKernel )
+
+atlas_add_tpcnv_library( TrigCombinedEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS TrigCombinedEventTPCnv
-                         LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities TrigCombinedEvent TrigNavigationLib TestTools AthenaKernel GaudiKernel )
+                         LINK_LIBRARIES TrigCombinedEventTPCnv )
 
 atlas_add_dictionary( TrigCombinedEventTPCnvDict
                       TrigCombinedEventTPCnv/TrigCombinedEventTPCnvDict.h
