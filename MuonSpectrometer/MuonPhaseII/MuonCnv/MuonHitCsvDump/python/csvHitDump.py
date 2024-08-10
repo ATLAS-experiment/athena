@@ -14,7 +14,7 @@ if __name__=="__main__":
 
     from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonSimHitDumpCfg, CsvSpacePointDumpCfg
     if flags.Input.isMC:
-        from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
         cfg.merge(MuonSimHitToMeasurementCfg(flags))
 
         truthContainers = []

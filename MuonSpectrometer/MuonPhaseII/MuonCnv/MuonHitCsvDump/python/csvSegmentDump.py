@@ -19,7 +19,7 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)
 
     if flags.Input.isMC:
-        from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
         cfg.merge(MuonSimHitToMeasurementCfg(flags))
         from MuonTruthSegmentMaker.SegmentMakerConfig import TruthSegmentMakerCfg
         cfg.merge(TruthSegmentMakerCfg(flags))
