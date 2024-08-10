@@ -288,7 +288,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
     {
       CHECK((*m_storeGateFastCalo).clearStore(true));
       auto evt = SG::makeHandle<EventInfo>(m_pileup_evt, ctx);
-      const EventInfo* newEvt=new EventInfo(*evt);
+      auto newEvt=std::make_unique<EventInfo>(*evt);
 
       // Migration note: this was an evtStore()->retrieve for a non-const pointer
       // Using a const_cast to preserve the old behaviour, but this is MT-unfriendly
@@ -299,7 +299,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
       auto pOverEventHandle = SG::makeHandle<PileUpEventInfo>(m_pileup_pOverEvent, ctx);
       auto pOverEvent ATLAS_THREAD_SAFE =  // we checked above that this is not MT
         const_cast<PileUpEventInfo*>(pOverEventHandle.get());
-      pOverEvent->addSubEvt(0,PileUpTimeEventIndex::Signal,newEvt,&(*m_storeGateFastCalo));
+      pOverEvent->addSubEvt(0,PileUpTimeEventIndex::Signal,std::move(newEvt),&(*m_storeGateFastCalo));
     }
   return StatusCode::SUCCESS;
 }
