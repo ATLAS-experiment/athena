@@ -2,10 +2,6 @@
 #
 # Run this file in order to print out the empty slots
 
-#
-# ALL CHANGES TO THE RUN 4 MENU SHOULD BE MADE TO RELEASE 25 OR GREATER
-#
-
 from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
 from TriggerMenuMT.L1.Menu.MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
 
