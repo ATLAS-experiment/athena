@@ -83,10 +83,7 @@ void MuonParamElossPlots::initializePlots()
      static const SG::ConstAccessor<float> muonEnt_pxAcc("MuonEntryLayer_px");
      static const SG::ConstAccessor<float> muonEnt_pyAcc("MuonEntryLayer_py");
      static const SG::ConstAccessor<float> muonEnt_pzAcc("MuonEntryLayer_pz");
-     if (/*!truthprt.isAvailable<float>("CaloEntryLayer_px") ||
-	 !truthprt.isAvailable<float>("CaloEntryLayer_py") ||
-	 !truthprt.isAvailable<float>("CaloEntryLayer_pz") ||*/
-	 !pxAcc.isAvailable(truthprt) ||
+     if (!pxAcc.isAvailable(truthprt) ||
 	 !pyAcc.isAvailable(truthprt) ||
 	 !pzAcc.isAvailable(truthprt) ||
 	 !muonEnt_pxAcc.isAvailable(truthprt) ||
@@ -97,10 +94,6 @@ void MuonParamElossPlots::initializePlots()
      Amg::Vector3D vecCaloEntry{pxAcc(truthprt),
                                 pyAcc(truthprt),
                                 pzAcc(truthprt)};
-
-     /* Amg::Vector3D vecCaloEntry(truthprt.auxdata<float>("CaloEntryLayer_px"),
-			  truthprt.auxdata<float>("CaloEntryLayer_py"),
-			  truthprt.auxdata<float>("CaloEntryLayer_pz"));*/
 
      Amg::Vector3D vecMuonExit{muonEnt_pxAcc(truthprt),
                                muonEnt_pyAcc(truthprt),

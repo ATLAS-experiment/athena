@@ -1061,9 +1061,6 @@ namespace MuonPhysValMonitoring {
         static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
         TruthLink truthLink = truthParticleLinkAcc.withDefault(*tp, TruthLink());
 
-        // int truthType = tp->isAvailable<int>("truthType")? tp->auxdata< int >("truthType") :0;
-        // float truthMatchProb = getMatchingProbability(*tp);
-
         if (!truthLink.isValid()) {
             ATH_MSG_DEBUG("No truth link available");
             if (type == xAOD::Muon::InnerDetectorTrackParticle) return;

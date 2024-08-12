@@ -152,7 +152,6 @@ InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight)
 
       const std::vector<int>& result_measureType = measurement_typeAcc(trkprt);
       const std::vector<int>& result_region = measurement_regionAcc(trkprt);
-      // const std::vector<int> &result_iLayer = trkprt.auxdata< std::vector<int> >("HitResiduals_iLayer");
       const std::vector<float>& result_residualLocX = hitResiduals_residualLocXAcc(trkprt);
       const std::vector<float>& result_pullLocX = hitResiduals_pullLocXAcc(trkprt);
       const std::vector<float>& result_residualLocY = hitResiduals_residualLocYAcc(trkprt);
@@ -174,7 +173,6 @@ InDetPerfPlot_HitResidual::fill(const xAOD::TrackParticle& trkprt, float weight)
         }
         const int det = result_det[idx];
         const int region = result_region[idx];
-        // const int layer = result_iLayer.at(idx);
         const int width = result_phiWidth[idx];
         const int etaWidth = result_etaWidth[idx];
         const float residualLocX = result_residualLocX[idx];
