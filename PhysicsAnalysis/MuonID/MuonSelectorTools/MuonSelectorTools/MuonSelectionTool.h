@@ -66,17 +66,13 @@ namespace CP {
         /// set the passes ID cuts variable of the muon
         virtual void setPassesIDCuts(xAOD::Muon&) const override;
 
-        /// set the passes high pT cuts variable of the muon
-        virtual void setPassesHighPtCuts(xAOD::Muon& mu) const override;
-
         /// set the passes low pT cuts variable of the muon
         // void setPassesLowPtEfficiencyCuts( xAOD::Muon& mu ) const;
 
         /// set the passes quality variable of the muon
         virtual void setQuality(xAOD::Muon& mu) const override;
 
-        /// Returns true if the muon passes the standard MCP ID cuts. To set the value on the muon, instead call
-        /// setPassesIDCuts(xAOD::Muon&) const
+        /// Returns true if the muon passes the standard MCP ID cuts.
         virtual bool passedIDCuts(const xAOD::Muon&) const override;
 
         /// Returns true if the muon passes a standardized loose preselection.
@@ -85,8 +81,7 @@ namespace CP {
         /// Returns true if the track particle passes the standard MCP ID cuts.
         virtual bool passedIDCuts(const xAOD::TrackParticle&) const override;
 
-        /// Returns true if the muon passes the standard MCP High Pt cuts. To set the value on the muon, instead call
-        /// setPassesHighPtCuts(xAOD::Muon&) const
+        /// Returns true if the muon passes the standard MCP High Pt cuts.
         virtual bool passedHighPtCuts(const xAOD::Muon&) const override;
 
         /// Returns true if the muon passes the standard MCP low pt cuts. To set the value on the muon, instead call

@@ -431,7 +431,6 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Muon &muon) {
   std::vector<std::string> type = {"Combined", "Standalone", "SegmentTagged",
                                    "CaloTagged", "SiAssociatedForward"};
   data["Type"] = type[static_cast<unsigned int>(muon.muonType())];
-  data["PassedHighPt"] = muon.passesHighPtCuts();
 
   addLink(muon.clusterLink(), data["LinkedClusters"]);
   addLink(muon.inDetTrackParticleLink(), data["LinkedTracks"]);

@@ -253,28 +253,10 @@ namespace xAOD {
     return;      
   }
   
-  bool Muon_v1::passesHighPtCuts() const {
-    static const Accessor< uint8_t > acc( "quality" );
-    uint8_t temp =  acc( *this );
-    // We use 5th bit for 'passesHighPtCuts'
-    return temp&16;    
-  }
-  
-  void Muon_v1::setPassesHighPtCuts(bool value) {
-    static const Accessor< uint8_t > acc( "quality" );
-    // We use 5th bit for 'passesHighPtCuts'
-    if (value) acc( *this ) |= 16;
-    else       acc( *this ) &= 239;
-    return;      
-  }
-
   // AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( Muon_v1, uint8_t, Muon_v1::Quality,
   //                                      quality )
   // AUXSTORE_PRIMITIVE_SETTER_WITH_CAST( Muon_v1, uint8_t, Muon_v1::Quality,
   //                                      quality, setQuality )
-
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Muon_v1, bool, passesIDCuts,      setPassesIDCuts)
-  // AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Muon_v1, bool, passesHighPtCuts,  setPassesHighPtCuts)
   
   bool Muon_v1::isolation(float& value, const Iso::IsolationType information)  const {
     const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );

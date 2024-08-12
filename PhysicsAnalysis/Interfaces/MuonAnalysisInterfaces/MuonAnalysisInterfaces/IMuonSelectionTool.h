@@ -56,9 +56,6 @@ namespace CP {
         /// set the passes ID cuts variable of the muon
         virtual void setPassesIDCuts(xAOD::Muon& mu) const = 0;
 
-        /// set the passes high pT cuts variable of the muon
-        virtual void setPassesHighPtCuts(xAOD::Muon& mu) const = 0;
-
         /// set the passes low pT cuts variable of the muon
         // virtual void setPassesLowPtEfficiencyCuts( xAOD::Muon& mu ) const = 0;
 
