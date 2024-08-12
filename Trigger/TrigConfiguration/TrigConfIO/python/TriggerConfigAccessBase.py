@@ -3,6 +3,7 @@
 import os
 import json
 import re
+from typing import Any
 import six
 import xml.etree.ElementTree as ET
 from collections import OrderedDict as odict
@@ -125,6 +126,12 @@ class ConfigDBLoader(ConfigLoader):
             break
         if listOfServices is None:
             raise RuntimeError("DB %s not available in %s" % (dbalias, dblookupFile))
+        
+        if "FRONTIER_SERVER" not in os.environ:
+            # remove all frontier connnections in the list if the environment FRONTIER_SERVER variable does not exist
+            # this speeds up the resolution of the connection specification (dbalias)
+            listOfServices = [svc for svc in listOfServices if not svc.startswith("frontier:")]
+
         # now get the account and pw for oracle connections
         credentials = odict().fromkeys(listOfServices)
 
@@ -249,7 +256,11 @@ class ConfigDBLoader(ConfigLoader):
         return self.query[maxDefVersion]
 
     def load(self):
-        credentials = ConfigDBLoader.getConnectionParameters(self.dbalias)
+        credentials: dict[str,Any] = ConfigDBLoader.getConnectionParameters(self.dbalias)
+
+        if not credentials:
+            log.error("No TriggerDB connections found for %s", self.dbalias)
+            raise RuntimeError(f"No TriggerDB connections found for {self.dbalias}")
 
         svc = coral.ConnectionService() 
         svcconfig = svc.configuration()
@@ -309,13 +320,13 @@ class ConfigDBLoader(ConfigLoader):
             self.confirmConfigType(config)
             return config
 
-        log.error("Unsuccessful DB query: %s", qstr.format(**qdict))
-        log.error("Considered sources: %s", ", ".join(credentials))
         if failureMode == 1:
             log.error("TriggerDB query: could not connect to any source for %s", self.configType.basename)
+            log.error("Considered sources: %s", ", ".join(credentials))
             raise RuntimeError("TriggerDB query: could not connect to any source", self.configType.basename)
         if failureMode == 2:
             log.error("Query failed due to wrong definition for %s", self.configType.basename)
+            log.error("DB query was: %s", qstr.format(**qdict))
             raise RuntimeError("Query failed due to wrong definition", self.configType.basename)
         elif failureMode == 3:
             log.error("DB key %s does not exist for %s", self.dbkey, self.configType.basename)
@@ -383,7 +394,7 @@ class TriggerConfigAccess:
 
     def writeFile(self, filename = None):
         if filename is None:
-            filename = self.loader.getWriteFilename()
+            filename: str = self.loader.getWriteFilename()
         with open(filename, 'w') as fh:
             json.dump(self.config(), fh, indent = 4, separators=(',', ': '))
             log.info("Wrote file %s", filename)
