@@ -387,6 +387,13 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
 
         // extrapolate stepwise to this parameter (be careful, sorting might be wrong)
 
+        if(std::abs(startParameters->position().z())>10000.){
+          ATH_MSG_DEBUG("Pathological track parameter well outside of detector");
+          ATH_MSG_DEBUG("Propagator might have issue with this, discarding");
+          ATH_MSG_VERBOSE("dumping track parameters " << *startParameters);
+          continue;
+        }
+
         std::vector<std::unique_ptr<Trk::TrackParameters> > paramList =
           m_extrapolator->extrapolateStepwise(ctx,
                                               *startParameters,
