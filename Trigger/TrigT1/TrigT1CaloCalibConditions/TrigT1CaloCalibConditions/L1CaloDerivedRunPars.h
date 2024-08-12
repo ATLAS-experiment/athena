@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALODERIVEDRUNPARS_H
 #define TRIGT1CALOCALIBCONDITIONS_L1CALODERIVEDRUNPARS_H
@@ -21,8 +21,8 @@ public:
   L1CaloDerivedRunPars(unsigned int channelId, const std::string& timingRegime, const std::string& tierZeroTag);
 
   unsigned int channelId() const { return m_channelId; }
-  std::string timingRegime() const { return m_timingRegime; }
-  std::string tierZeroTag() const { return m_tierZeroTag; }
+  const std::string& timingRegime() const { return m_timingRegime; }
+  const std::string& tierZeroTag() const { return m_tierZeroTag; }
 
   void setChannelId(unsigned int channelId) { m_channelId = channelId; }
   void settimingRegime(const std::string& timingRegime) { m_timingRegime = timingRegime; }

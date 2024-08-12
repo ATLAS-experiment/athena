@@ -1,7 +1,7 @@
 // -*- C++ -*-
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALOREADOUTCONFIGJSON_H
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #define TRIGT1CALOCALIBCONDITIONS_L1CALOREADOUTCONFIGJSON_H
 
@@ -58,15 +58,15 @@ public:
   unsigned int bcOffsetJemSum() const { return m_bcOffsetJemSum; }
   int bcOffsetCmx() const { return m_bcOffsetCmx; }
   int bcOffsetTopo() const { return m_bcOffsetTopo; }
-  std::string formatTypePpm() const { return m_formatTypePpm; }
-  std::string formatTypeCpJep() const { return m_formatTypeCpJep; }
-  std::string formatTypeTopo() const { return m_formatTypeTopo; }
+  const std::string& formatTypePpm() const { return m_formatTypePpm; }
+  const std::string& formatTypeCpJep() const { return m_formatTypeCpJep; }
+  const std::string& formatTypeTopo() const { return m_formatTypeTopo; }
   unsigned int compressionThresholdPpm() const { return m_compressionThresholdPpm; }
   unsigned int compressionThresholdCpJep() const { return m_compressionThresholdCpJep; }
   unsigned int compressionThresholdTopo() const { return m_compressionThresholdTopo; }
   unsigned int compressionBaselinePpm() const { return m_compressionBaselinePpm; }
   unsigned int readout80ModePpm() const { return m_readout80ModePpm; }
-  std::string  inputReadoutModeFex() const { return m_inputReadoutModeFex;}
+  const std::string&  inputReadoutModeFex() const { return m_inputReadoutModeFex;}
   unsigned int readoutOffsetEfex()  const { return m_readoutOffsetEfex;}
   unsigned int readoutOffsetGfex()  const { return m_readoutOffsetGfex;}
   unsigned int readoutOffsetJfex()  const { return m_readoutOffsetJfex;}

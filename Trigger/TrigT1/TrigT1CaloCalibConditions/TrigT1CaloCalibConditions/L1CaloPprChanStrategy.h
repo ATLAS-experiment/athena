@@ -1,7 +1,7 @@
 // -*- C++ -*-
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALOPPRCHANSTRATEGY_H
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #define TRIGT1CALOCALIBCONDITIONS_L1CALOPPRCHANSTRATEGY_H
 
@@ -21,10 +21,10 @@ public:
   L1CaloPprChanStrategy(unsigned int channelId, const std::string& strategy, unsigned int code, const std::string& timingRegime, const std::string& description);
 
   unsigned int channelId() const { return m_channelId; }
-  std::string strategy() const { return m_strategy; }
+  const std::string& strategy() const { return m_strategy; }
   unsigned int code() const { return m_code; }
-  std::string  timingRegime() const { return m_timingRegime; }
-  std::string  description() const { return m_description; }
+  const std::string&  timingRegime() const { return m_timingRegime; }
+  const std::string&  description() const { return m_description; }
 
   void setChannelId(unsigned int channelId) { m_channelId = channelId; }
   void setStrategy(const std::string&  strategy) { m_strategy = strategy; }
