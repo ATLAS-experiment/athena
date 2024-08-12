@@ -656,6 +656,8 @@ def getChainsWithLowerChainNames(connection, smk):
 
     res = executeQuery(cursor, output, condition, schemaname, tables, bindvars)
 
+    if res == [()]: # happens when no HLT menu is attached
+        return chainshlt
 
     for x in res:
         chainshlt[x[1]] = (x[2],x[3])
