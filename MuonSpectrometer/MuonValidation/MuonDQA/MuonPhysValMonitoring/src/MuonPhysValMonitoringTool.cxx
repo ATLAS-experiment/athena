@@ -1438,7 +1438,6 @@ namespace MuonPhysValMonitoring {
             MuonSpectrometerPtDec(*mu_c) = metrk->pt();
         }
         m_muonSelectionTool->setQuality(*mu_c);
-        m_muonSelectionTool->setPassesHighPtCuts(*mu_c);
         m_muonSelectionTool->setPassesIDCuts(*mu_c);
         return mu_c;
     }

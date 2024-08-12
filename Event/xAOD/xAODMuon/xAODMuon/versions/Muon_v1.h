@@ -197,13 +197,6 @@ namespace xAOD {
     /// Set whether passes the MCP ID hit cuts.
     void setPassesIDCuts(bool);
 
-    /// Returns true if this Muon passes the MCP high pT cuts (see the MCP twiki for definitions:
-    /// https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MuonPerformance)
-    bool passesHighPtCuts() const;
-
-    /// Set whether passes the MCP ID hit cuts.
-    void setPassesHighPtCuts(bool);
-
     /// @}
 
     /// @name Isolation information.

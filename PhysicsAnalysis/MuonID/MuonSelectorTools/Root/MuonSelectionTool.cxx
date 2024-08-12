@@ -590,8 +590,6 @@ namespace CP {
 
     void MuonSelectionTool::setPassesIDCuts(xAOD::Muon& mu) const { mu.setPassesIDCuts(passedIDCuts(mu)); }
 
-    void MuonSelectionTool::setPassesHighPtCuts(xAOD::Muon& mu) const { mu.setPassesHighPtCuts(passedHighPtCuts(mu)); }
-
     bool MuonSelectionTool::passedIDCuts(const xAOD::Muon& mu) const {
         if (m_useLRT) {
             static const SG::AuxElement::Accessor<char> isLRTmuon("isLRT");
