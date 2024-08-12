@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -26,15 +26,10 @@
 #include "ZdcEvent/ZdcDigitsCollection.h"
 #include "ZdcConditions/ZdcCablingService.h"
 
-//#include "TrigT1CaloByteStream/L1CaloSubBlock.h" // Only for error codes
-//#include "TrigT1CaloByteStream/L1CaloSrcIdMap.h"
 #include "ZdcByteStream/ZdcSrcIdMap.h"
 #include "ZdcByteStream/ZdcPpmSubBlock.h"
 
 #include "ZdcByteStream/ZdcByteStreamReadV1V2Tool.h"
-
-//#include "xAODForward/ZdcModuleContainer.h"
-//#include "xAODForward/ZdcModuleAuxContainer.h"
 
 // ===========================================================================
 
@@ -1148,11 +1143,6 @@ ZdcDigitsCollection* ZdcByteStreamReadV1V2Tool::convertTT2ZD(xAOD::TriggerTowerC
 
   for (const xAOD::TriggerTower* tt : *ttCollection)
     {
-      //std::cout << "dumping TT" << std::endl;
-      //std::cout << ZdcToString(*tt ) << std::endl;
-
-      //uint32_t coolId = tt->coolId();
-      //uint32_t coolId = tt->auxdata<uint32_t>("coolId");
       uint32_t coolId = tt->coolId();
       uint32_t pin = (coolId>>8) & 0xf;
       uint32_t asic = coolId & 0xf;
@@ -1212,87 +1202,3 @@ ZdcDigitsCollection* ZdcByteStreamReadV1V2Tool::convertTT2ZD(xAOD::TriggerTowerC
   return zdcCollection;
 }
 
-/*
-xAOD::ZdcModuleContainer* ZdcByteStreamReadV1V2Tool::convertTT2ZM(xAOD::TriggerTowerContainer* const ttCollection)
-{
-  typedef std::map<uint32_t,xAOD::ZdcModule*> hashmapType;
-  hashmapType digits_map;
-  Identifier chan_id;
-  
-  xAOD::TriggerTowerContainer::iterator tt_itr = ttCollection->begin();
-  xAOD::TriggerTowerContainer::iterator tt_end = ttCollection->end();
-  
-  for (;tt_itr != tt_end;tt_itr++)
-    {
-      std::cout << "dumping TT" << std::endl;
-      std::cout << ZdcToString(*(*tt_itr) ) << std::endl;
-
-      //uint32_t coolId = (*tt_itr).coolId();
-      //uint32_t coolId = (*tt_itr)->auxdata<uint32_t>("coolId");
-      uint32_t coolId = (*tt_itr)->coolId();
-      uint32_t pin = (coolId>>8) & 0xf;
-      uint32_t asic = coolId & 0xf;
-      uint32_t slinkChannel = asic*16 + pin;
-      uint32_t ppmChannel = slink2ppmChannel[slinkChannel];
-
-      uint32_t module = (coolId>>16) & 0xf;
-
-      ATH_MSG_DEBUG( "--> ZCS: " << ZdcCablingService::getInstance() << " mod=" << module << " slinkC=" << slinkChannel << " ppmC=" << ppmChannel );
-      chan_id = ZdcCablingService::getInstance()->h2s_channel_id(module, ppmChannel);
-      
-      const uint32_t chan_hash = chan_id.get_identifier32().get_compact();
-      int gain  = ZdcCablingService::getInstance()->hwid2gain(module,ppmChannel);
-      int delay = ZdcCablingService::getInstance()->hwid2delay(module,ppmChannel);
-      
-      ATH_MSG_DEBUG("Trying to find chan_hash " << chan_hash << " g" << gain << "d" << delay);
-
-      hashmapType::iterator iter = digits_map.find(chan_hash);
-      if (iter == digits_map.end())
-	{
-	  ATH_MSG_DEBUG("new channel for " << chan_id);
-	  digits_map.insert(std::pair<uint32_t,xAOD::ZdcModule*>(chan_hash,new xAOD::ZdcModule()));
-	  iter = digits_map.find(chan_hash);
-	}
-      if (iter != digits_map.end())
-	{
-	  ATH_MSG_DEBUG("new elementlinks for " << chan_id);
-	  (*iter).second->setId(chan_hash);
-	  (*iter).second->setSide(m_zdcID->side(chan_id));
-	  (*iter).second->setModule(m_zdcID->module(chan_id));
-	  (*iter).second->setType(m_zdcID->type(chan_id));
-	  (*iter).second->setChannel(m_zdcID->channel(chan_id));
-	  if (gain==0&&delay==0) (*iter).second->setTTg0d0Link( ElementLink<xAOD::TriggerTowerContainer_v2> ((*tt_itr),*ttCollection ) );
-	  if (gain==0&&delay==1) (*iter).second->setTTg0d1Link( ElementLink<xAOD::TriggerTowerContainer_v2> ((*tt_itr),*ttCollection ) );
-	  if (gain==1&&delay==0) (*iter).second->setTTg1d0Link( ElementLink<xAOD::TriggerTowerContainer_v2> ((*tt_itr),*ttCollection ) );
-	  if (gain==1&&delay==1) (*iter).second->setTTg1d1Link( ElementLink<xAOD::TriggerTowerContainer_v2> ((*tt_itr),*ttCollection ) );
-	}
-      
-    }
-
-  xAOD::ZdcModuleContainer* zmc = new xAOD::ZdcModuleContainer;
-  xAOD::ZdcModuleAuxContainer* zmac = new xAOD::ZdcModuleAuxContainer;
-  zmc->setStore(zmac);
-
-  hashmapType::iterator iter = digits_map.begin();
-  hashmapType::iterator iter_end = digits_map.end();
-
-  while (iter != iter_end)
-    {
-      std::cout  
-	<< " side=" <<  ((*iter).second)->side()
-	<< " mod="  <<  ((*iter).second)->module()
-	<< " type=" <<  ((*iter).second)->type()
-	<< " chan=" <<  ((*iter).second)->channel()
-	<< std::endl;
-
-      zmc->push_back((*iter).second);
-      iter++;
-    }
-
-  return zmc;
-}
-*/
-
-// ===========================================================================
-//} // end namespace
-// ===========================================================================

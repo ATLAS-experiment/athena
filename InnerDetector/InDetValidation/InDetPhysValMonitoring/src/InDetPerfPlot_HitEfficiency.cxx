@@ -68,7 +68,6 @@ InDetPerfPlot_HitEfficiency::fill(const xAOD::TrackParticle& trkprt, float weigh
       static const SG::ConstAccessor< std::vector<int> > measurement_typeAcc("measurement_type");
       const std::vector<int>& result_measureType = measurement_typeAcc(trkprt);
       const std::vector<int>& result_region = measurement_regionAcc(trkprt);
-      // const std::vector<int> &result_iLayer = trkprt.auxdata< std::vector<int> >("hitResiduals_iLayer");
       // NP: this should be fine... residual filled with -1 if not hit
 
       for (unsigned int idx = 0; idx < result_region.size(); ++idx) {

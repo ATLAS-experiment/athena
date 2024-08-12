@@ -109,7 +109,7 @@ bool MuonPerformanceAlg::passID(const xAOD::TrackParticle* tp, bool debug) const
         int ntrt = static_cast<int>(ntrthi) + static_cast<int>(ntrtol);
         bool pass = true;
         if (ntrt > 5 && static_cast<int>(ntrtol) / (double)ntrt > 0.9) pass = false;
-        if ((fabs(tp->eta()) > 0.1 && fabs(tp->eta()) < 1.9) && ntrt <= 5) pass = false;
+        if ((std::abs(tp->eta()) > 0.1 && std::abs(tp->eta()) < 1.9) && ntrt <= 5) pass = false;
         if (pass) tightness += 16;
         //
         // B layer is not a requirement anymore
@@ -155,15 +155,15 @@ StatusCode MuonPerformanceAlg::execute() {
         const int theOrigin = truthOriginAcc(*truthMu);
         ATH_MSG_VERBOSE("Truth muon: pt " << truthMu->pt() << " eta " << truthMu->eta());
         ATH_MSG_VERBOSE("first loop: type " << theType << " origin " << theOrigin);
-        if (truthMu->pt() < 2000. || fabs(truthMu->eta()) > 2.8) continue;
-        if (fabs(truthMu->eta()) > 2.5)
+        if (truthMu->pt() < 2000. || std::abs(truthMu->eta()) > 2.8) continue;
+        if (std::abs(truthMu->eta()) > 2.5)
             ATH_MSG_VERBOSE(" SA |eta| > 2.5 muon with truth prec layers " << (int)nprecLayersAcc(*truthMu));
 
-        if (fabs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
+        if (std::abs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
         if (theType != 6 && theType != 7) continue;
         if (theOrigin == 0 || theOrigin > 17) continue;
         bool insideID = false;
-        if (fabs(truthMu->eta()) < 2.0) insideID = true;
+        if (std::abs(truthMu->eta()) < 2.0) insideID = true;
         ATH_MSG_VERBOSE("Accepted Truth muon: pt " << truthMu->pt() << " eta " << truthMu->eta());
 
         if (!insideID) m_ntruth[0] += 1;
@@ -347,20 +347,20 @@ StatusCode MuonPerformanceAlg::execute() {
 
     for (const auto truthMu : *TruthMuons) {
         MuonLink link;
-        if (truthMu->pt() < 2000. || fabs(truthMu->eta()) > 3.) continue;
+        if (truthMu->pt() < 2000. || std::abs(truthMu->eta()) > 3.) continue;
         const int theType = truthTypeAcc(*truthMu);
         const int theOrigin = truthOriginAcc(*truthMu);
         if (theType != 6 && theType != 7) continue;
         if (theOrigin == 0 || theOrigin > 17) continue;
-        if (fabs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
+        if (std::abs(truthMu->eta()) > 2.5 && (int)nprecLayersAcc(*truthMu) < 2) continue;
         bool insideID = false;
         if (recoMuonLinkAcc.isAvailable(*truthMu)) {
             link = recoMuonLinkAcc(*truthMu);
             if (link.isValid()) {
                 const xAOD::TrackParticle* tp = (*link)->primaryTrackParticle();
                 if (tp) {
-                    if ((*link)->pt() < 2000. || fabs((*link)->eta()) > 2.8) continue;
-                    if (fabs((*link)->eta()) < 2.0) insideID = true;
+                    if ((*link)->pt() < 2000. || std::abs((*link)->eta()) > 2.8) continue;
+                    if (std::abs((*link)->eta()) < 2.0) insideID = true;
                     bool loose = false;
                     bool medium = false;
                     bool tight = false;
@@ -454,7 +454,7 @@ StatusCode MuonPerformanceAlg::execute() {
     ATH_MSG_VERBOSE("Retrieved muons " << Muons->size());
 
     for (const auto mu : *Muons) {
-        if (mu->pt() < 2000. || fabs(mu->eta()) > 2.8) continue;
+        if (mu->pt() < 2000. || std::abs(mu->eta()) > 2.8) continue;
         const xAOD::TrackParticle* tp = mu->primaryTrackParticle();
 
         if (tp) {
@@ -464,18 +464,14 @@ StatusCode MuonPerformanceAlg::execute() {
             passesIDcuts = mu->passesIDCuts();
 
             bool insideID = false;
-            if (fabs(mu->eta()) < 2.0) insideID = true;
+            if (std::abs(mu->eta()) < 2.0) insideID = true;
             static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> >
               truthParticleLinkAcc ("truthParticleLink");
             if (truthParticleLinkAcc.isAvailable(*tp))
                truthLink = truthParticleLinkAcc(*tp);
             bool fake = true;
             if (truthLink.isValid()) {
-                //          if( (*truthLink)->auxdata<int>("truthType") == 6 || (*truthLink)->auxdata<int>("truthType") == 7 ) {
-                //            if( (*truthLink)->auxdata<int>("truthOrigin") > 0 && (*truthLink)->auxdata<int>("truthOrigin") <= 17 ) {
                 if (selectPdg((*truthLink)->pdgId())) fake = false;
-                //            }
-                //          }
             }
             bool loose = false;
             bool medium = false;
