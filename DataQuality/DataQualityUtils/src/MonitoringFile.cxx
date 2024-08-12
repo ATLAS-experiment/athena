@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -16,7 +16,8 @@
 #include <sstream>
 #include <vector>
 #include <map>
-
+#include <ctime>
+#include <format>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/lexical_cast.hpp>
@@ -119,6 +120,7 @@ MonitoringFile()
 {
   m_debugLevel=0;
   m_fileCompressionLevel=1;
+  m_doTiming=false;
   MonitoringFile::clearData();
 }
 
@@ -130,6 +132,7 @@ MonitoringFile( const std::string & fileName )
 {
   m_debugLevel=0;
   m_fileCompressionLevel=1;
+  m_doTiming=false;
   MonitoringFile::clearData();
   MonitoringFile::setFile( fileName );
 }
@@ -705,6 +708,9 @@ mergeFiles( const std::string & outFileName, const std::vector<std::string>& fil
     std::cout<<" Directory selection RE=\""<<m_mergeMatchDirREString<<"\""<<std::endl;
     std::cout<<" Object selection RE=\""<<m_mergeMatchHistoREString<<"\""<<std::endl;
   }
+  if (m_doTiming) {
+    std::cout << "CPU time measurement activated " << std::endl;
+  }
   typedef std::vector<TFile*>  TFileList_t;
   typedef std::map<TFile*, std::string> PrefixIgnore_t;
   
@@ -800,6 +806,20 @@ mergeFiles( const std::string & outFileName, const std::vector<std::string>& fil
     delete tf;
   }
 
+  if (m_doTiming) {
+    std::vector<std::pair<std::string,clock_t> > cpuPerHistVec;
+    std::cout << "CPU time for histogram merging:" << std::endl;
+    for ( const auto& [name,time] : m_cpuPerHistogram) {
+      cpuPerHistVec.emplace_back(name,time);
+    }
+    auto ordering=[](std::pair<std::string,clock_t> a, std::pair<std::string,clock_t> b) {return a.second<b.second;};
+    std::sort(cpuPerHistVec.begin(),cpuPerHistVec.end(),ordering);
+
+    for (const auto& [name,time] : cpuPerHistVec) {
+      const double tSec= double(time)/CLOCKS_PER_SEC;
+      std::cout << std::format("{:<30} : {:10.3f}",name,tSec) << std::endl;
+    }
+  }
   std::cout << "\n";
   std::cout << "****************************************\n\n";
 }
@@ -1495,6 +1515,7 @@ clearData()
   m_file = 0;
   m_debugLevel=0;
   m_fileCompressionLevel=1;
+  m_doTiming=false;
   delete m_mergeMatchHistoRE;
   delete m_mergeMatchDirRE;
   m_mergeMatchHistoREString=".*";
@@ -1680,6 +1701,7 @@ int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::strin
    if( debugLevel >= VERBOSE )
      std::cout << name << ": obj->GetName() = " << obj->GetName() << ", mergeType = " << mergeType << ", class = " << obj->IsA()->GetName() << std::endl;
 
+   const std::clock_t cpuStart=std::clock();
    TH1 *h=0, *nextH=0;
    TH2 *h2=0, *nextH2=0;
    TGraph *g=0; 
@@ -1768,6 +1790,10 @@ int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::strin
      listT.Clear();
    } else {
      std::cerr << name << ": object is not a histogram or graph, merging not implemented" << std::endl;
+   }
+   if (m_doTiming) {
+    const std::clock_t duration=std::clock()-cpuStart;
+    m_cpuPerHistogram[obj->GetName()]+=duration;
    }
    return 0;
 }
@@ -2294,8 +2320,11 @@ CheckHistogram(TFile* f,const char* HistoName)
 
 int MonitoringFile::getDebugLevel(){return m_debugLevel;}
 void MonitoringFile::setDebugLevel(int level){m_debugLevel=level;}
+void MonitoringFile::doTiming() {m_doTiming=true;}
 std::atomic<int> MonitoringFile::m_fileCompressionLevel=1;
 std::atomic<int> MonitoringFile::m_debugLevel=0;
+bool MonitoringFile::m_doTiming=false;
+std::map<std::string,std::clock_t> MonitoringFile::m_cpuPerHistogram;
 
 std::string MonitoringFile::getPath(TDirectory *dir){
   
