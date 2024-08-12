@@ -15,8 +15,8 @@ StatusCode OverviewMonitorAlgorithm::initialize() {
   ATH_MSG_DEBUG("Package Name "<< m_packageName);
   
   ATH_CHECK(m_ppmErrorLocation.initialize());
-  ATH_CHECK(m_cpmErrorLocation.initialize());
-  ATH_CHECK(m_cpmMismatchLocation.initialize());
+  ATH_CHECK(m_cpmErrorLocation.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_cpmMismatchLocation.initialize(SG::AllowEmpty));
   ATH_CHECK(m_ppmSimBSMismatchLocation.initialize());
 
 
@@ -76,7 +76,7 @@ StatusCode OverviewMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
 
   // CPM and CPM CMX Error data
-  {
+  if(!m_cpmErrorLocation.empty()) {
     const auto* errTES = SG::get(m_cpmErrorLocation, ctx);
 
     if (!errTES || errTES->size() != size_t(cpmCrates)) {
@@ -129,7 +129,7 @@ StatusCode OverviewMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   } 
 
   // CPM and CMX Simulation Mismatch data
-  { 
+  if(!m_cpmMismatchLocation.empty()) {
 	const auto* errTES = SG::get(m_cpmMismatchLocation, ctx);
 
     if (!errTES || errTES->size() != size_t(cpmCrates)) {
