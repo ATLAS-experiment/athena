@@ -18,6 +18,7 @@ def OverviewMonitoringConfig(inputFlags):
     # get any algorithms
     OverviewMonAlg = helper.addAlgorithm(CompFactory.OverviewMonitorAlgorithm,'OverviewMonAlg')
 
+
     # add any steering
     groupName = 'OverviewMonitor' # the monitoring group name is also used for the package name
     OverviewMonAlg.PackageName = groupName

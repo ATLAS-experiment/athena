@@ -309,17 +309,34 @@ def LVL1CaloMonitoringConfig(flags):
         result.merge(JepJemMonitoringConfig(flags))
         if flags.Input.Format is not Format.POOL or inputContainsRun3FormatConfigMetadata:
             # L1 menu available in the POOL file
-            from TrigT1CaloMonitoring.CpmMonitorAlgorithm import CpmMonitoringConfig
-            from TrigT1CaloMonitoring.CpmSimMonitorAlgorithm import CpmSimMonitoringConfig
-            from TrigT1CaloMonitoring.JepCmxMonitorAlgorithm import JepCmxMonitoringConfig
+
+            # since the legacy system started getting turned off in 2024, use detMask to determine
+            # which things are included, and therefore need monitoring ...
+            import eformat
+            detMask=eformat.helper.DetectorMask(f'{md.get("detectorMask",[0x0])[0]:032x}') #DetectorMask constructor swallows two 64bit ints
+            hasCPM = detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_CLUSTER_PROC_DAQ)
+            hasJEP = detMask.is_set(eformat.helper.SubDetector.TDAQ_CALO_JET_PROC_DAQ)
+
+            if hasCPM:
+                from TrigT1CaloMonitoring.CpmMonitorAlgorithm import CpmMonitoringConfig
+                from TrigT1CaloMonitoring.CpmSimMonitorAlgorithm import CpmSimMonitoringConfig
+                result.merge(CpmMonitoringConfig(flags))
+                result.merge(CpmSimMonitoringConfig(flags))
+
+            if hasJEP:
+                from TrigT1CaloMonitoring.JepCmxMonitorAlgorithm import JepCmxMonitoringConfig
+                result.merge(JepCmxMonitoringConfig(flags))
+
             from TrigT1CaloMonitoring.OverviewMonitorAlgorithm import OverviewMonitoringConfig
             from TrigT1CaloMonitoring.PPMSimBSMonitorAlgorithm import PPMSimBSMonitoringConfig
-            
-            result.merge(CpmMonitoringConfig(flags))
-            result.merge(CpmSimMonitoringConfig(flags))
-            result.merge(JepCmxMonitoringConfig(flags))
             result.merge(PPMSimBSMonitoringConfig(flags))
             result.merge(OverviewMonitoringConfig(flags))
+
+            if not hasCPM:
+                # CPM was disabled for run 480893 onwards, so stop monitoring that part
+                OverviewMonAlg = result.getEventAlgo("OverviewMonAlg")
+                OverviewMonAlg.CPMErrorLocation = ""
+                OverviewMonAlg.CPMMismatchLocation = ""
 
             if  flags.Input.TriggerStream == "physics_Mistimed":
                 from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
