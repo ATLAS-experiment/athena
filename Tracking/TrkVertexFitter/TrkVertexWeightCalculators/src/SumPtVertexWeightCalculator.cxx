@@ -37,7 +37,7 @@ SumPtVertexWeightCalculator::estimateSignalCompatibility(
   const xAOD::Vertex& vertex) const
 {
   double total_pt = 0;
-  ATH_MSG_DEBUG("Estimating vertex sorting score from "
+  ATH_MSG_VERBOSE("Estimating vertex sorting score from "
                 << vertex.nTrackParticles() << " tracks at vertex.");
   for (const auto& elTrackParticle : vertex.trackParticleLinks()) {
 
@@ -59,6 +59,7 @@ SumPtVertexWeightCalculator::estimateSignalCompatibility(
                   sin(perigee.parameters()[Trk::theta]) / 1000.;
     }
   }
+  ATH_MSG_DEBUG("Calculated vertex sumpt " << std::setprecision(3) << total_pt);
   return total_pt;
 }
 

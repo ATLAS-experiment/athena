@@ -74,5 +74,4 @@ atlas_install_scripts( test/test-h5-output )
 
 atlas_add_test( test_hdf5_writer
   SCRIPT test-hdf5-writer
-  LINK_LIBRARIES HDF5Utils
   POST_EXEC_SCRIPT test-h5-output)

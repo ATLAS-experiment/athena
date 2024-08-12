@@ -167,7 +167,7 @@ class FrontierCursor(object):
             
                 row = base64.decodebytes(node.data.encode())
                 if self.retrieveZiplevel != "":
-                    row = zlib.decompress(row).decode(self.encoding)
+                    row = zlib.decompress(row).decode("ISO-8859-1")
                 
                 #Hack to get these lines to work in python 2
                 if sys.version_info[0] < 3: 

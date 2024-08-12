@@ -729,7 +729,7 @@ class AthConfigFlags(object):
                 # if not found, add string directly
                 self.Input.Files += found if found else [f]
 
-        if arg_set('loglevel'):
+        if "-l" in argList or "--loglevel" in argList: # different check b.c. has a default value so will always be in args
             from AthenaCommon import Constants
             self.Exec.OutputLevel = getattr(Constants, args.loglevel)
 

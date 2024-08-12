@@ -230,8 +230,8 @@ namespace H5Utils {
         buffer() {
         hsize_t offset = 0;
         for (const auto& arg: args) {
-          const size_t this_dim_max = extent.at(N-1);
-          if (offset > this_dim_max) return;
+          const size_t this_dim_max = extent.at(extent.size() - N);
+          if (offset >= this_dim_max) return;
           DataFlattener<N-1, F, decltype(arg), M> in(filler, arg, extent);
           buffer.insert(buffer.end(), in.buffer.begin(), in.buffer.end());
           for (const auto& in_ele: in.element_offsets){

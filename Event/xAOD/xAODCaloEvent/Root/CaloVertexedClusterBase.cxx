@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -13,6 +13,7 @@
 
 #include "xAODCaloEvent/CaloVertexedClusterBase.h"
 #include "CxxUtils/sincos.h"
+#include "CxxUtils/phihelper.h"
 #include <cmath>
 
 using std::cosh;
@@ -73,12 +74,11 @@ CaloVertexedClusterBase::computeVertexCorr (const Amg::Vector3D& vx, double radi
 
   if (std::fabs(eta)>10. || std::fabs(phi)>10.) return;
 
-  
-
   CxxUtils::sincos sc (phi);
   double iradius = 1 / radius;
   m_eta += (-vx[2]/cosh(m_eta) + sc.apply (vx[1], vx[0])*tanh(m_eta)) * iradius;
   m_phi += sc.apply (vx[0], -vx[1]) * iradius;
+  m_phi = CxxUtils::wrapToPi(m_phi);
 
   double pt = m_p4.P() / cosh (m_eta);
   m_p4.SetPtEtaPhiE (pt, m_eta, m_phi, m_p4.E());
