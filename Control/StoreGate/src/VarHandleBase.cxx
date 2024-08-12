@@ -907,13 +907,16 @@ namespace SG {
       return nullptr;
     }
 
-    SG::DataProxy* proxy = store->proxy (this->clid(), this->key());
+    SG::DataProxy* proxy = store->proxy_exact(m_key->hashedKey());
     if (!proxy) {
-      if (!quiet)
-        REPORT_ERROR (StatusCode::FAILURE)
-          << "Cannot find proxy for "
-          << this->clid() << "/" << this->key();
-      return nullptr;
+      proxy = store->proxy(this->clid(), this->key());
+      if (!proxy) {
+        if (!quiet)
+          REPORT_ERROR (StatusCode::FAILURE)
+            << "Cannot find proxy for "
+            << this->clid() << "/" << this->key();
+        return nullptr;
+      }
     }
 
     return typeless_dataPointer_fromProxy (proxy, quiet);
