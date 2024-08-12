@@ -60,4 +60,4 @@ if __name__=="__main__":
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
     cfg.merge(MuonHitTesterCfg(flags,outFile=args.outRootFile))
-    executeTest(cfg, args.nEvents)
+    executeTest(cfg)

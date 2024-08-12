@@ -27,7 +27,7 @@ if __name__=="__main__":
         cfg.merge(CsvMuonTruthSegmentDumpCfg(flags))
 
 
-    executeTest(cfg, num_events = args.nEvents)
+    executeTest(cfg)
 
 
     

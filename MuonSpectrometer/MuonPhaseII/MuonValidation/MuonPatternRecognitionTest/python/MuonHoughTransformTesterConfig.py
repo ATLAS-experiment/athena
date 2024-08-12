@@ -72,5 +72,5 @@ if __name__=="__main__":
     cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))
     
     
-    executeTest(cfg, args.nEvents)
+    executeTest(cfg)
     
