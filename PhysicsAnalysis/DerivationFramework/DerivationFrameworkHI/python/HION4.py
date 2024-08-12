@@ -45,11 +45,16 @@ def HION4SkimmingToolCfg(flags):
     from DerivationFrameworkHI import ListTriggers
     VMtrigger=ListTriggers.HION4SkimmingTriggersVM()
     triggers=ListTriggers.HION4SkimmingTriggersALL()
-    
-    expression = '( (' + ' || '.join(triggers) + ') && '+objectSelection+') || ( '+ ' || '.join(VMtrigger)+ ' && '+tightTrackOnlySelection+')'
-    
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+        
+    tdt = None
+    if flags.Trigger.EDMVersion != -1: # Only for files with trigger payload
+        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+        tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+        expression = '( (' + ' || '.join(triggers) + ') && '+objectSelection+') || ( '+ ' || '.join(VMtrigger)+ ' && '+tightTrackOnlySelection+')'
+    else:
+        expression = '( '+objectSelection+' ) || ( '+tightTrackOnlySelection+' )'
+
+
     acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION4StringSkimmingTool",
                                                                              expression = expression,
                                                                              TrigDecisionTool=tdt), 
