@@ -31,6 +31,10 @@ public:
 
   /// Destructor.
   virtual ~IBTagConditionalDecorator() { };
+  // b-tagging decorator needs an override because the fold decoration
+  // comes off the jet.
+  virtual void decorateWithDefaults(const xAOD::BTagging& jet) const = 0;
+  using IDefaultDecorator::decorateWithDefaults;
 
 };
 

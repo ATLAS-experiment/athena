@@ -23,12 +23,20 @@ namespace FlavorTagDiscriminants {
 
   StatusCode MultifoldGNNTool::initialize() {
 
-    auto opts = getOptions(m_props);
+    const auto opts = getOptions(m_props);
     if (!m_nnsvc.empty()) {
       ATH_CHECK(m_nnsvc.retrieve());
       std::vector<std::shared_ptr<const GNN>> gnns;
       for (const auto& file: m_nn_files) {
-        gnns.emplace_back(m_nnsvc->get(file, opts));
+        auto newopts = opts;
+        if (auto def_handle = m_defaults.value().extract(file)) {
+          newopts.default_output_values = def_handle.mapped();
+        }
+        gnns.emplace_back(m_nnsvc->get(file, newopts));
+      }
+      if (!m_defaults.empty()) {
+        ATH_MSG_ERROR("unused per-fold defaults!");
+        return StatusCode::FAILURE;
       }
       m_gnn.reset(new MultifoldGNN(gnns, m_fold_hash_name));
     } else {
@@ -47,6 +55,9 @@ namespace FlavorTagDiscriminants {
   }
   void MultifoldGNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_gnn->decorateWithDefaults(jet);
+  }
+  void MultifoldGNNTool::decorateWithDefaults(const xAOD::BTagging& btag) const {
+    m_gnn->decorateWithDefaults(btag);
   }
 
   // Dependencies

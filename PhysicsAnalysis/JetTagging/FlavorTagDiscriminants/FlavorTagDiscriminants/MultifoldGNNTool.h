@@ -22,6 +22,10 @@
 #include <string>
 #include <map>
 
+// needed for map<string,<map<string,float>>
+#include "Gaudi/Parsers/Factory.h"
+
+
 namespace FlavorTagDiscriminants {
 
   class MultifoldGNN;
@@ -47,6 +51,7 @@ namespace FlavorTagDiscriminants {
       virtual void decorate(const xAOD::BTagging& btag) const override;
       virtual void decorate(const xAOD::Jet& jet) const override;
       virtual void decorateWithDefaults(const SG::AuxElement& jet) const override;
+      virtual void decorateWithDefaults(const xAOD::BTagging& btag) const override;
 
       virtual std::set<std::string> getDecoratorKeys() const override;
       virtual std::set<std::string> getAuxInputKeys() const override;
@@ -54,12 +59,16 @@ namespace FlavorTagDiscriminants {
 
     private:
 
+    using MMD = std::map<std::string, std::map<std::string, float>>;
+
     ServiceHandle<INNSharingSvc> m_nnsvc {
       this, "nnSharingService", "", "NN sharing service"};
     std::vector<std::string> m_nn_files;
     std::string m_fold_hash_name;
     GNNToolProperties m_props;
     std::shared_ptr<const MultifoldGNN> m_gnn;
+    Gaudi::Property<MMD> m_defaults {
+      this, "perFoldDefaultOutputValues", {}, "per-fold defaults"};
   };
 }
 #endif
