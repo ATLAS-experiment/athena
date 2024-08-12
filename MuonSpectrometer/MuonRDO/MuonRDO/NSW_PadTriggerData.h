@@ -65,22 +65,22 @@ public:
     uint32_t getNumberOfPfebs()      const { return m_pfeb_n; }
     uint32_t getNumberOfTriggers()   const { return m_trigger_n; }
     uint32_t getNumberOfBcids()      const { return m_bcid_n; }
-    uint32_vt getHitRelBcids()       const { return m_hit_relbcid; }
-    uint32_vt getHitPfebs()          const { return m_hit_pfeb; }
-    uint32_vt getHitTdsChannels()    const { return m_hit_tdschannel; }
-    uint32_vt getHitVmmChannels()    const { return m_hit_vmmchannel; }
-    uint32_vt getHitVmms()           const { return m_hit_vmm; }
-    uint32_vt getHitPadChannels()    const { return m_hit_padchannel; }
-    uint32_vt getPfebAddrs()         const { return m_pfeb_addr; }
-    uint32_vt getPfebNChannels()     const { return m_pfeb_nchan; }
-    uint32_vt getPfebDisconnecteds() const { return m_pfeb_disconnected; }
-    uint32_vt getTriggerBandIds()    const { return m_trigger_bandid; }
-    uint32_vt getTriggerPhiIds()     const { return m_trigger_phiid; }
-    uint32_vt getTriggerRelBcids()   const { return m_trigger_relbcid; }
-    uint32_vt getBcidRels()          const { return m_bcid_rel; }
-    uint32_vt getBcidStatuses()      const { return m_bcid_status; }
-    uint32_vt getBcidMultZeros()     const { return m_bcid_multzero; }
-    uint32_vt getBcidMultiplicities() const { return m_bcid_multiplicity; }
+    const uint32_vt& getHitRelBcids()       const { return m_hit_relbcid; }
+    const uint32_vt& getHitPfebs()          const { return m_hit_pfeb; }
+    const uint32_vt& getHitTdsChannels()    const { return m_hit_tdschannel; }
+    const uint32_vt& getHitVmmChannels()    const { return m_hit_vmmchannel; }
+    const uint32_vt& getHitVmms()           const { return m_hit_vmm; }
+    const uint32_vt& getHitPadChannels()    const { return m_hit_padchannel; }
+    const uint32_vt& getPfebAddrs()         const { return m_pfeb_addr; }
+    const uint32_vt& getPfebNChannels()     const { return m_pfeb_nchan; }
+    const uint32_vt& getPfebDisconnecteds() const { return m_pfeb_disconnected; }
+    const uint32_vt& getTriggerBandIds()    const { return m_trigger_bandid; }
+    const uint32_vt& getTriggerPhiIds()     const { return m_trigger_phiid; }
+    const uint32_vt& getTriggerRelBcids()   const { return m_trigger_relbcid; }
+    const uint32_vt& getBcidRels()          const { return m_bcid_rel; }
+    const uint32_vt& getBcidStatuses()      const { return m_bcid_status; }
+    const uint32_vt& getBcidMultZeros()     const { return m_bcid_multzero; }
+    const uint32_vt& getBcidMultiplicities() const { return m_bcid_multiplicity; }
 
     std::string string() const;
     friend std::ostream& operator<<(std::ostream& stream, const NSW_PadTriggerData& rhs);

@@ -16,7 +16,7 @@ public:
 
     uint8_t bandID() const noexcept;
     uint8_t phiID() const noexcept;
-    std::array<uint8_t, 2> activeLayers() const noexcept;
+    const std::array<uint8_t, 2>& activeLayers() const noexcept;
 
     std::string string() const;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_LUCRODDATA_H
@@ -75,7 +75,7 @@ class ZdcLucrodData {
   uint16_t GetTrigAvgA() const { return m_trigAvgA; }
   uint16_t GetTrigAvgC() const { return m_trigAvgC; }
 
-  std::vector<uint16_t> GetTrigData()       const { return m_trigData; }  
+  const std::vector<uint16_t>& GetTrigData()       const { return m_trigData; }  
   const ZdcLucrodChannel&    GetChanData(int it) const { return m_chanData[it]; }
 
   unsigned int GetTrigDataSize() const { return m_trigData.size(); }
