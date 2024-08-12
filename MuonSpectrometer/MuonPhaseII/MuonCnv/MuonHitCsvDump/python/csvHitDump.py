@@ -16,16 +16,8 @@ if __name__=="__main__":
     if flags.Input.isMC:
         from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
         cfg.merge(MuonSimHitToMeasurementCfg(flags))
-
-        truthContainers = []
-        if flags.Detector.GeometryMDT: truthContainers += ["xMdtSimHits"]
-        if flags.Detector.GeometryRPC: truthContainers += ["xMdtSimHits"] 
-        if flags.Detector.GeometryTGC: truthContainers += ["xTgcSimHits"]
-        if flags.Detector.GeometrysTGC: truthContainers += ["xStgcSimHits"]       
-        if flags.Detector.GeometryMM: truthContainers += ["xMmSimHits"]       
-
         ### Truth hit conversion
-        cfg.merge(CsvMuonSimHitDumpCfg(flags, MuonSimHitKey = truthContainers))
+        cfg.merge(CsvMuonSimHitDumpCfg(flags))
 
     else:
         from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
@@ -36,7 +28,7 @@ if __name__=="__main__":
 
     cfg.merge(CsvSpacePointDumpCfg(flags))
 
-    executeTest(cfg, num_events = args.nEvents)
+    executeTest(cfg)
 
 
     

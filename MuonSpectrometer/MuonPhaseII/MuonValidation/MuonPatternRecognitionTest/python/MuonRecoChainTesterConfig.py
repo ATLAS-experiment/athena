@@ -121,5 +121,5 @@ if __name__=="__main__":
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags, ProfiledAlgs=["MuonHoughTransformAlg"]))
 
-    executeTest(cfg, args.nEvents)
+    executeTest(cfg)
     

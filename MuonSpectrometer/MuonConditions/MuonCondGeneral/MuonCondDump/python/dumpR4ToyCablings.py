@@ -26,5 +26,5 @@ if __name__=="__main__":
     
     cfg.merge(RpcToyCablingJsonDumpAlgCfg(flags))
     cfg.merge(MdtToyCablingJsonDumpAlgCfg(flags))
-    executeTest(cfg, args.nEvents)
+    executeTest(cfg)
    
