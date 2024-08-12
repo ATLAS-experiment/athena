@@ -73,6 +73,9 @@ def isRun3Derivation(flags):
 def runFlipTag(flags):
     return isRun3Derivation(flags)
 
+def vetoZeroTracks(flags):
+    return not flags.Trigger.doHLT
+
 def getNNs(flags):
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
@@ -151,7 +154,7 @@ def createBTaggingConfigFlags():
     # In some cases we have to make the GNN refuse to tag jets unless
     # they have at least this many tracks. See AFT-726 for more details.
     #
-    # Todo: set this to 1
-    btagcf.addFlag("BTagging.vetoZeroTrackForAFT276", False)
+    # Todo: remove this once we're sure it's working
+    btagcf.addFlag("BTagging.vetoZeroTrackForAFT276", vetoZeroTracks)
 
     return btagcf

@@ -38,12 +38,8 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
     
     networks_by_jet_col = {
         "AntiKt4EMPFlow": [
-            "BTagging/201903/rnnip/antikt4empflow/network.json",
-            "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
-            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ],
         "AntiKt4EMPFlowCustomVtx": [ # PFlow jet with custom vertex definition used in HIGG1D1 
             "BTagging/201903/rnnip/antikt4empflow/network.json",
@@ -383,14 +379,6 @@ def BTagAlgsCfg(
         # disable GN2v01 if there are 0 tracks
         if '/GN2v01/' in dirname:
             args['tag_requirements'] = {'nonzeroTracks'}
-            # TODO: choose something closer to the actual zero track
-            # output
-            args['defaultOutputValues'] = {
-                'GN2v01_pu': 1.0,
-                'GN2v01_pc': 0.0,
-                'GN2v01_pb': 0.0,
-                'GN2v01_ptau': 0.0,
-            }
 
         # run the standard (unflipped tagger)
         result.merge(MultifoldGNNCfg(**args))

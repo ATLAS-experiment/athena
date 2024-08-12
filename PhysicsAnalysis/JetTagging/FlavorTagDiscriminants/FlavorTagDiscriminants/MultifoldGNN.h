@@ -32,6 +32,7 @@ namespace FlavorTagDiscriminants {
     void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::Jet& jet) const;
     void decorateWithDefaults(const SG::AuxElement& jet) const;
+    void decorateWithDefaults(const xAOD::BTagging& btag) const;
 
     std::set<std::string> getDecoratorKeys() const;
     std::set<std::string> getAuxInputKeys() const;
