@@ -1,14 +1,19 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( egammaEventTPCnv )
 
 # Component(s) in the package:
-atlas_add_tpcnv_library( egammaEventTPCnv
-                         src/*.cxx
+atlas_add_library( egammaEventTPCnv
+                   src/*.cxx
+                   PUBLIC_HEADERS egammaEventTPCnv
+                   LINK_LIBRARIES DataModelAthenaPoolLib AthenaPoolCnvSvcLib EventCommonTPCnv ParticleEventTPCnv egammaEvent
+                   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+
+atlas_add_tpcnv_library( egammaEventTPCnvFactories
+                         src/factories/*.cxx
                          PUBLIC_HEADERS egammaEventTPCnv
-                         LINK_LIBRARIES DataModelAthenaPoolLib AthenaPoolCnvSvcLib EventCommonTPCnv ParticleEventTPCnv egammaEvent
-                         PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel )
+                         LINK_LIBRARIES egammaEventTPCnv )
 
 atlas_add_dictionary( egammaEventTPCnvDict
                       egammaEventTPCnv/egammaEventTPCnvDict.h
