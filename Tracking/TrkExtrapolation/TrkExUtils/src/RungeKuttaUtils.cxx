@@ -1689,7 +1689,7 @@ Trk::RungeKuttaUtils::transformCurvilinearToGlobal(double* ATH_RESTRICT p,
 void
 Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(
   const Trk::TrackParameters& Tp,
-  double* Jac)
+  double* ATH_RESTRICT Jac)
 {
   const AmgVector(5)& Vp = Tp.parameters();
   double P[23];
@@ -1708,7 +1708,7 @@ Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(
 void
 Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(
   const Trk::PatternTrackParameters& Tp,
-  double* Jac)
+  double* ATH_RESTRICT Jac)
 {
   double P[23];
   const AmgVector(5)& p = Tp.parameters();
