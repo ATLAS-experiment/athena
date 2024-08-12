@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,10 @@
 #include <cmath>
 #include "logLinearBinning.h"
 #include "TruthUtils/MagicNumbers.h"
+
+/// Delta phi
+#include "FourMomUtils/xAODP4Helpers.h"
+
 
 namespace{
   constexpr float undefinedValue{-9999.};
@@ -357,6 +361,7 @@ void
 InDetPerfPlot_Resolution::getPlotParameters() {
   for (unsigned int iparam = 0; iparam < NPARAMS; iparam++) {
     m_resP[iparam] = m_trkP[iparam] - m_truetrkP[iparam];
+    if(iparam==PHI) m_resP[iparam] = xAOD::P4Helpers::deltaPhi(m_trkP[iparam], m_truetrkP[iparam]);
     m_sigP[iparam] = m_trkErrP[iparam];
     (m_sigP[iparam] != 0) ? m_pullP[iparam] = m_resP[iparam] / m_sigP[iparam] : m_pullP[iparam] = undefinedValue;
   }
@@ -384,7 +389,8 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
   const float cosTheta{std::cos(trkprt.theta())};
   const bool saneSineValue = (std::abs(sinTheta) > smallestAllowableSin);
   const float inverseSinTheta = saneSineValue ? 1./sinTheta : undefinedValue;
-  m_trkP[QOVERPT] = saneSineValue ? trkprt.qOverP()*inverseSinTheta : undefinedValue;
+  m_trkP[QOVERPT] = saneSineValue ?
+    trkprt.qOverP()*inverseSinTheta * Gaudi::Units::GeV : undefinedValue;
   m_trkP[THETA] = trkprt.theta();
   m_trkP[PHI] = trkprt.phi0();
   m_trkP[PT] = trkprt.pt() / Gaudi::Units::GeV;
