@@ -987,7 +987,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (!mother) return NonDefined;
   int motherPDG = mother->pdgId();
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
-  int motherStatus = mother->status();
   if (info) info->setMotherProperties(mother);
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();
