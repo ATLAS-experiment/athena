@@ -7,7 +7,6 @@ atlas_subdir( BarcodeServices )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
-find_package( Boost COMPONENTS unit_test_framework)
 
 # tag ROOTBasicLibs was not recognized in automatic conversion in cmt2cmake
 
