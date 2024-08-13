@@ -137,7 +137,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
   if (partOriVert != nullptr) {
     for (const auto& temp: partOriVert->particles_in()) {if (temp)  theMoth = temp;}
   }
-  int motherStatus = theMoth?theMoth->status():0;
   int motherPDG = theMoth?theMoth->pdg_id():0;
   info->setMotherProperties(theMoth);
 
@@ -198,7 +197,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
     }
   }
 
-  if (motherPDG == thePart->pdg_id() && motherStatus == 3 && thePart->status() == HepMC::SPECIALSTATUS) return std::make_pair(GenParticle, partOrig);
+  if (motherPDG == thePart->pdg_id() &&  theMoth && theMoth->status() == 3 && thePart->status() == HepMC::SPECIALSTATUS) return std::make_pair(GenParticle, partOrig);
 
   if (MC::isElectron(thePart)) {
     bool isPrompt = false;
@@ -1063,14 +1062,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 
   if ((numOfParents == 1 && (abs(motherPDG) == 22 || abs(motherPDG) == 11) && numOfDaug > 2 && NumOfNucFr != 0) ||
       (numOfParents == 1 && abs(motherPDG) == 211 && numOfDaug > 10 && NumOfNucFr != 0) ||
-      (numOfParents == 1 && motherPDG == 22 && numOfDaug > 10 && motherStatus == 1) ||
+      (numOfParents == 1 && motherPDG == 22 && numOfDaug > 10 && MC::isStable(mother)) ||
       (numOfParents == 1 && motherPDG > 1000000000))
     return NucReact;
 
   if (MC::isMuon(motherPDG) && NumOfMu == 0) return Mu;
   if (MC::isTau(motherPDG) && NumOfTau == 0) return TauLep;
 
-  if (numOfParents == 1 && motherStatus == 3) return (foundISR)? ISRPhot:UndrPhot;
+  if (numOfParents == 1 && mother && mother->status() == 3) return (foundISR)? ISRPhot:UndrPhot;
 
   //-- to find initial and final state raiation and underline photons
   //-- SUSY
