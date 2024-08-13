@@ -268,6 +268,7 @@ def defineInputsMenu():
                 "fpga" : 0,
                 "clock" : 0,
                 "algorithms" : [
+                    TopoMenuDef( '0INVM10-3MU3Vab',                          outputbits = 0 ), # added due to ATR-29924
                 ]
             },            
             {
@@ -319,6 +320,7 @@ def defineInputsMenu():
                 "fpga" : 1,
                 "clock" : 0,
                 "algorithms" : [
+                        TopoMenuDef( '7INVM14-MU5VFab-MU3VFab',              outputbits = 0 ), # added due to ATR-29924
                     ]
             },
             {
