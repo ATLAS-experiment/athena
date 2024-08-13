@@ -99,6 +99,7 @@ def TGCCablingConfigCfg(flags):
 # athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCablingConfig.py
 def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     acc = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT: return acc
     from AthenaConfiguration.Enums import LHCPeriod
     
     kwargs.setdefault("UseJSONFormat", flags.Muon.usePhaseIIGeoSetup and \
@@ -147,6 +148,15 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
    
     return acc
 
+def MdtTwinTubeMapCondAlgCfg(flags, name="MdtTwinTubeCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT: return result
+    from MuonCondDump.dumpTwinCabling import writeTwinTubeMap
+    kwargs.setdefault("JSONFile", "TwinTubeMap.json")
+    writeTwinTubeMap(kwargs["JSONFile"])
+    the_alg = CompFactory.Muon.TwinTubeMappingCondAlg(name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)    
+    return result
 
 # This should be checked by experts 
 def CSCCablingConfigCfg(flags):
@@ -176,18 +186,12 @@ def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
 #All the cabling configs together (convenience function)
 def MuonCablingConfigCfg(flags):
     acc = ComponentAccumulator()
+    acc.merge( RPCCablingConfigCfg(flags) )
+    acc.merge( TGCCablingConfigCfg(flags) )
 
-    result = RPCCablingConfigCfg(flags)
-    acc.merge( result )
+    acc.merge( MDTCablingConfigCfg(flags) )
 
-    result = TGCCablingConfigCfg(flags)
-    acc.merge( result )
-
-    result = MDTCablingConfigCfg(flags)
-    acc.merge( result )
-
-    result = CSCCablingConfigCfg(flags)
-    acc.merge( result )
+    acc.merge( CSCCablingConfigCfg(flags) )
 
     acc.merge(NswCablingCfg(flags))
 

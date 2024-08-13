@@ -61,6 +61,9 @@ public:
                   const int tdc, 
                   const Amg::Vector3D& globalPos);
 
+    MdtCalibInput(MdtCalibInput&& other) = default;
+    MdtCalibInput& operator=(MdtCalibInput&& other) = default;
+
     ~MdtCalibInput();
     /// Returns the Identifier of the hit
     const Identifier& identify() const;

@@ -3,13 +3,14 @@
 */
 #include "SpacePointCalibrator.h"
 
-
-
 #include "MdtCalibInterfaces/MdtCalibInput.h"
 #include "MdtCalibInterfaces/MdtCalibOutput.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
+#include "MuonDigitContainer/MdtDigit.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace MuonR4{
      using CalibSpacePointVec = ISpacePointCalibrator::CalibSpacePointVec;
@@ -26,6 +27,7 @@ namespace MuonR4{
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
     }
+    
     CalibSpacePointPtr SpacePointCalibrator::calibrate(const EventContext& ctx,
                                                        const SpacePoint* spacePoint,
                                                        const Amg::Vector3D& posInChamb,
@@ -45,33 +47,69 @@ namespace MuonR4{
         CalibSpacePointPtr calibSP{};
         switch (spacePoint->type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
-                MdtCalibInput calibInput{*dc, *gctx};
-                calibInput.setTrackDirection(locToGlob.linear() * dirInChamb);
-                calibInput.setTimeOfFlight(timeOfArrival);
-                
-                Amg::Vector3D closestApproach{locToGlob*(posInChamb + Amg::intersect<3>(spPos, chDir, posInChamb, dirInChamb).value_or(0) * dirInChamb)};
-                calibInput.setClosestApproach(std::move(closestApproach));
-                
-                /** In valid drift radius has been created */
-                MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
-                if (calibOutput.status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
-                    ATH_MSG_WARNING("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
-                                    <<std::endl<<calibInput<<std::endl<<calibOutput);
-                    break;                    
-                }
-                calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
-                calibSP->setDriftRadius(calibOutput.driftRadius());
+                const Amg::Vector3D locClosestApproach = posInChamb 
+                                                       + Amg::intersect<3>(spPos, chDir,
+                                                                           posInChamb, dirInChamb).value_or(0) * dirInChamb;
+                Amg::Vector3D closestApproach{locToGlob* locClosestApproach};
+
                 AmgSymMatrix(2) jac{AmgSymMatrix(2)::Identity()};
                 jac.col(0) = spacePoint->normalInChamber().block<2,1>(0,0).unit();
                 jac.col(1) = spacePoint->directionInChamber().block<2,1>(0,0).unit();
 
-                AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
-                diagCov(Amg::x, Amg::x) = std::pow(calibOutput.driftRadiusUncert(),2);
-                diagCov(Amg::y, Amg::y) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
+                if (spacePoint->dimension() == 1) {
+                    auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
+                    MdtCalibInput calibInput{*dc, *gctx};
+                    calibInput.setTrackDirection(locToGlob.linear() * dirInChamb);
+                    calibInput.setTimeOfFlight(timeOfArrival);
+                    calibInput.setClosestApproach(std::move(closestApproach));
 
-                AmgSymMatrix(2) cov{jac.inverse()*diagCov*jac};
-                calibSP->setCovariance(std::move(cov));
+                    AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
+                    diagCov(Amg::y, Amg::y) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
+
+                    /** In valid drift radius has been created */
+                    MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
+                    if (calibOutput.status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
+                                        <<std::endl<<calibInput<<std::endl<<calibOutput);
+                        diagCov(Amg::x, Amg::x) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
+                    } else {
+                        diagCov(Amg::x, Amg::x) = std::pow(calibOutput.driftRadiusUncert(), 2);
+                    }
+                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
+
+                    AmgSymMatrix(2) cov{jac.inverse()*diagCov*jac};
+                    calibSP->setCovariance(std::move(cov));
+                    calibSP->setDriftRadius(calibOutput.driftRadius());
+                } else {
+                    auto* dc = static_cast<const xAOD::MdtTwinDriftCircle*>(spacePoint->primaryMeasurement());
+                    MdtCalibInput calibInput{*dc, *gctx};
+                    calibInput.setClosestApproach(closestApproach);
+                    calibInput.setTimeOfFlight(timeOfArrival);
+
+                    MdtDigit digit{dc->twinIdentify(), dc->twinTdc(), dc->twinAdc()};
+                    MdtCalibInput twinInput{digit, *m_detMgr, *gctx};
+                    twinInput.setClosestApproach(closestApproach);
+                    twinInput.setTimeOfFlight(timeOfArrival);
+
+                    MdtCalibTwinOutput calibOutput = m_mdtCalibrationTool->calibrateTwinTubes(ctx,
+                                                                                              std::move(calibInput), 
+                                                                                              std::move(twinInput)); 
+                   AmgSymMatrix(2) diagCov{AmgSymMatrix(2)::Identity()};
+
+                    if (calibOutput.primaryStatus() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        ATH_MSG_DEBUG("Failed to create a valid hit from "<<m_idHelperSvc->toString(dc->identify())
+                                     <<std::endl<<calibOutput);
+                        diagCov(Amg::y, Amg::y) = std::pow(0.5* dc->readoutElement()->activeTubeLength(dc->measurementHash()),2);
+                        diagCov(Amg::x, Amg::x) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
+                    } else {
+                        diagCov(Amg::x, Amg::x) = std::pow(calibOutput.uncertPrimaryR(), 2);
+                        diagCov(Amg::y, Amg::y) = std::pow(calibOutput.sigmaZ(), 2);
+                    }
+                    calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir));
+                    AmgSymMatrix(2) cov{jac.inverse()*diagCov*jac};
+                    calibSP->setCovariance(std::move(cov));
+                    calibSP->setDriftRadius(calibOutput.primaryDriftR());
+                }
                 break;
            }
            case xAOD::UncalibMeasType::RpcStripType: {
