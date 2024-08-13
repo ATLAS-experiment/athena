@@ -140,7 +140,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
     # FTAG Xbb extra content
     extraList = []
-    for tagger in ["GN2Xv00", "GN2XWithMassv00", "GN2Xv01"]:
+    for tagger in ["GN2Xv01", "GN2Xv02"]:
         for score in ["phbb", "phcc", "ptop", "pqcd"]:
             extraList.append(f"{tagger}_{score}")
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
