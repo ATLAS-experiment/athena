@@ -182,7 +182,7 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches() co
       }
 
       // Now we have all the information for the special case of V->l(born) l(bare) l(born) l(bare)
-      if ( !(physical && has_V && !MC::isPhysical(theParticle)) && theParticle->status() != 23){
+      if ( !(physical && has_V && !MC::isPhysical(theParticle)) && !MC::Pythia8::isConditionB(theParticle)){
         // If not a special case, deal with the standard: has a boson parent, is a lepton, and has a descendent that is a bare lepton
         if (!theParticle->parent()) continue;
         if (!theParticle->parent()->isZ() && !theParticle->parent()->isW() && !theParticle->parent()->isHiggs()) continue;
