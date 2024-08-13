@@ -15,9 +15,10 @@ ATH_CHECK(tool.setProperty("Process", ">=1F")); /// fake lepton background = all
 ATH_CHECK(tool.initialize());
 { /// in the event loop:
     xAOD::IParticleContainer particles;
+    SG::Decorator<char> tightDecor("Tight");
     for(xAOD::Electron* p : electrons)
     {
-        p->auxdata<char>("Tight") = ???;
+        tightDecor(*p) = ???;
         particles.push_back(p);
     }
     /// ... and same for muons; then:
