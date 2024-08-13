@@ -7,6 +7,7 @@
 
 // EDM include(s).
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/ConstAccessor.h"
 #include "CxxUtils/pputils.h"
 
 /// Convenience macro for declaring an auxiliary variable
@@ -85,6 +86,24 @@ VARTYPE initAuxVar( AUXBASE* auxcont,
   static const SG::auxid_t auxid = auxcont->getAuxID( NAME, var, flags );
   auxcont->regAuxVar (auxid, NAME, var);
   return initAuxVar1<VARTYPE>( auxcont );
+}
+
+
+// Version to handle initializing a linked variable.
+// ELT is the type of the variable being linked to, LINKS is the type of the
+// member defined in the container for it.  LINKED is the member type
+// for the linked variable, and AUXBASE is the container base class.
+template <class ELT, const char* NAME, class AUXBASE, class LINKS, class LINKED>
+LINKED initLinkedVar( AUXBASE* auxcont,
+                      LINKS& links,
+                      LINKED& linked )
+{
+  // Use the @c ConstAccessor specialization to get the variable
+  // declared properly.
+  static SG::ConstAccessor<ELT> acc( NAME );
+  auxcont->regAuxVar( acc.linkedAuxid(), SG::AuxTypeRegistry::linkedName (NAME), linked );
+  auxcont->regAuxVar( acc.auxid(), NAME, links );
+  return xAOD::detail::initAuxVar1<LINKED>( auxcont );
 }
 
 
