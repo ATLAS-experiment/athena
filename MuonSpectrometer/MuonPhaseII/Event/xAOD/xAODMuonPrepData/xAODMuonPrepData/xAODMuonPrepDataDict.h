@@ -13,6 +13,13 @@
 #include "xAODMuonPrepData/versions/MdtDriftCircleContainer_v1.h"
 #include "xAODMuonPrepData/versions/MdtDriftCircle_v1.h"
 
+#include "xAODMuonPrepData/MdtTwinDriftCircle.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircleAuxContainer.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
+#include "xAODMuonPrepData/versions/MdtTwinDriftCircleAuxContainer_v1.h"
+#include "xAODMuonPrepData/versions/MdtTwinDriftCircleContainer_v1.h"
+#include "xAODMuonPrepData/versions/MdtTwinDriftCircle_v1.h"
+
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/RpcStripAuxContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
@@ -69,10 +76,14 @@ namespace {
 struct GCCXML_DUMMY_INSTANTIATION_XAODMUONPRD {
     // Type(s) needed for the dictionary generation to succeed.
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtDriftCircleContainer_v1);
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtTwinDriftCircleContainer_v1);
+
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStrip2DContainer_v1);
+
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, TgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MMClusterContainer_v1);
+
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcWireContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, sTgcPadContainer_v1);    

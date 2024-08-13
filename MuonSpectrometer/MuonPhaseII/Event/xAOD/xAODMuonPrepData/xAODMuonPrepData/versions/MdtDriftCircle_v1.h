@@ -28,11 +28,15 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MdtDriftCircleType;
     }
-    /** @brief: Returns the Athena identifier of the drift circle. 
-     *          It's constructed from the measurementHash & passed to the associated readoutElement */
+    /** @brief: Returns the Athena identifier of the drift circle. It's constructed 
+     *          from the measurementHash which's passed to the associated readoutElement */
     Identifier identify() const;
-
-    unsigned int numDimensions() const override final { return 1; }
+    /** @brief: Return the measurement's position vector in the local frame. If the
+     *          measurement is an ordinary 1D drift circle, the Zero vector is returned.
+     *          Otherwise the local position along z */
+    Amg::Vector3D localCirclePosition() const;
+    /** @brief Override the dimensions to be 1. */
+    unsigned int numDimensions() const override { return 1; }
     /** @brief Returns the TDC (typically range is 0 to 2500)*/
     int16_t tdc() const;
     /** @brief Returns the ADC (typically range is 0 to 250)*/
@@ -65,11 +69,6 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     void setLayer(uint8_t layer_n);
     /** @brief Sets the status of the drift circle */
     void setStatus(MdtDriftCircleStatus st);
-    /** @brief Sets the drift radius of the drift circle */
-    void setDriftRadius(float r);
-    /** @brief Sets the covariance on the drift circle */
-    void setDriftRadCov(float cov);
-
     /** @brief set the pointer to the MdtReadoutElement */
     void setReadoutElement(const MuonGMR4::MdtReadoutElement* readoutEle);
     /** @brief Retrieve the associated MdtReadoutElement. 

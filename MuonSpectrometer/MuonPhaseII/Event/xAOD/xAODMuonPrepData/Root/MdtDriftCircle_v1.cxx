@@ -29,25 +29,26 @@ IdentifierHash MdtDriftCircle_v1::measurementHash() const {
     return MuonGMR4::MdtReadoutElement::measurementHash(tubeLayer(),
                                                         driftTube());
 }
+Amg::Vector3D MdtDriftCircle_v1::localCirclePosition() const {
+    if (numDimensions() == 1) {
+        return Amg::Vector3D::Zero();
+    }
+    return localPosition<2>()[Trk::locZ] * Amg::Vector3D::UnitZ(); 
+}
 Identifier MdtDriftCircle_v1::identify() const {
     return readoutElement()->measurementId(measurementHash());
 }
 float MdtDriftCircle_v1::driftRadius() const {
-    return localPosition<1>()[Trk::locR];
+    return numDimensions() == 1 ? localPosition<1>()[Trk::locR] 
+                                : localPosition<2>()[Trk::locR];
 }
 /** @brief Returns the covariance of the drift radius*/
 float MdtDriftCircle_v1::driftRadiusCov() const {
-    return localCovariance<1>()(Trk::locR, Trk::locR);
+    return numDimensions() == 1 ? localCovariance<1>()(Trk::locR, Trk::locR) 
+                                : localCovariance<2>()(Trk::locR, Trk::locR);
 }
 /** @brief Returns the uncertainty on the drift radius*/
 float MdtDriftCircle_v1::driftRadiusUncert() const {
     return std::sqrt(driftRadiusCov());
 }
-void MdtDriftCircle_v1::setDriftRadius(float r) {
-    localPosition<1>()[Trk::locR] = r;
-}
-void MdtDriftCircle_v1::setDriftRadCov(float cov) {
-    localCovariance<1>()(Trk::locR, Trk::locR) = cov;
-}
-
 }  // namespace xAOD

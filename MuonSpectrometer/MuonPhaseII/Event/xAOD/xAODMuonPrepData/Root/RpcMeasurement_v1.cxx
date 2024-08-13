@@ -5,6 +5,7 @@
 // EDM include(s):
 #include "xAODMuonPrepData/versions/AccessorMacros.h"
 // Local include(s):
+#include "TrkEventPrimitives/ParamDefs.h"
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "xAODMuonPrepData/versions/RpcMeasurement_v1.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -37,5 +38,14 @@ namespace xAOD {
     }
     Identifier RpcMeasurement_v1::identify() const {
         return readoutElement()->measurementId(measurementHash());
+    }
+    Amg::Vector3D RpcMeasurement_v1::localMeasurementPos() const {
+        Amg::Vector3D lPos{Amg::Vector3D::Zero()};
+        if(numDimensions() == 1) {
+            lPos[Trk::locX] =  localPosition<1>()[Trk::locX];
+        } else {
+            lPos.block<2,1>(0,0) = xAOD::toEigen(localPosition<2>());
+        }
+        return lPos;
     }
 }

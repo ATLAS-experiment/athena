@@ -11,6 +11,17 @@
            id="1047F7E4-504B-4277-AB0B-41B5D5775A47" />
     <typedef name = "xAOD::MdtDriftCircleAuxContainer" />
 
+    <!-- Mdt Twin Drift Circle-->
+    <class name="xAOD::MdtTwinDriftCircle_v1" />
+    <class name="xAOD::MdtTwinDriftCircleContainer_v1"
+           id="FA91DA59-CE02-48C9-B1DF-994D5F9E1F0C" />
+    <typedef name="xAOD::MdtTwinDriftCircle" />
+    <typedef name="xAOD::MdtTwinDriftCircleContainer" />
+    
+    <class name="xAOD::MdtTwinDriftCircleAuxContainer_v1"
+           id="B887A0C9-8F46-4669-B1FF-D00BA789A4B5" />
+    <typedef name = "xAOD::MdtTwinDriftCircleAuxContainer" />
+
     <!-- Rpc Strip -->
     <class name="xAOD::RpcStrip_v1" />
     <class name="xAOD::RpcStripContainer_v1"

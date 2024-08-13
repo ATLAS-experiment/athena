@@ -118,7 +118,8 @@ namespace MuonR4{
         return m_id;
     }
     double SpacePoint::driftRadius() const { 
-        return m_primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType ? m_primaryMeas->localPosition<1>()[0] :0.;
+        return m_primaryMeas->type() == xAOD::UncalibMeasType::MdtDriftCircleType ?  
+               static_cast<const xAOD::MdtDriftCircle*>(m_primaryMeas)->driftRadius() : 0.;
     }
     Amg::Vector2D SpacePoint::uncertainty() const {
         return Amg::Vector2D{ Amg::error(m_measCovariance,0),Amg::error(m_measCovariance,1)  };
