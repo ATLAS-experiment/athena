@@ -72,9 +72,10 @@ Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::Accessor (const SG::auxid_t auxid)
  * jagged vector element as a vector.
  */
 template <class PAYLOAD_T, class ALLOC>
+template <IsAuxElement ELT>
 inline
 auto
-Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (AuxElement& e) const
+Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (ELT& e) const
   -> reference_type
 {
   assert (e.container() != 0);

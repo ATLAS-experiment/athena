@@ -156,7 +156,8 @@ public:
    * Will return a proxy object, which will allow treating this
    * jagged vector element as a vector.
    */
-  reference_type operator() (AuxElement& e) const;
+  template <IsAuxElement ELT>
+  reference_type operator() (ELT& e) const;
 
 
   /**

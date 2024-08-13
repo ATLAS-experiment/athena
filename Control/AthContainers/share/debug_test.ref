@@ -178,3 +178,6 @@ test4
 ::xfloat 1.500
 ::xint 1
 ::xvint [10, 11, 12]
+test5
+::jvec [0,4]
+  linked: ::jvec_linked [5, 4, 3, 2, 8, 10]

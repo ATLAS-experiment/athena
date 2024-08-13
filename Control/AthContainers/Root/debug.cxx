@@ -12,9 +12,11 @@
 
 #include "AthContainers/debug.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/JaggedVecImpl.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "CxxUtils/StrFormat.h"
+#include <format>
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -164,6 +166,12 @@ void convert (std::ostream& os, const double x)
 }
 
 
+void convert (std::ostream& os, const SG::JaggedVecEltBase& x)
+{
+  os << std::format ("[{},{}]", x.begin(), x.end());
+}
+
+
 template <class T>
 void convert (std::ostream& os, const std::vector<T>& x)
 {
@@ -235,7 +243,15 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
   CONVERT1 (bool)
   CONVERT1 (std::string)
   //else
-    os << "<??? " << AthContainers_detail::typeinfoName(*ti) << ">";
+  {
+    std::string tiname = AthContainers_detail::typeinfoName(*ti);
+    if (tiname.starts_with ("SG::JaggedVecElt<")) {
+      convert (os, *reinterpret_cast<const SG::JaggedVecEltBase*>(p));
+    }
+    else {
+      os << "<??? " << tiname << ">";
+    }
+  }
   return os.str();
 }
 
