@@ -528,6 +528,39 @@ public:
 void throwJaggedVecOverlappingCopy();
 
 
+/**
+ * @brief Exception --- Range reference out of bounds.
+ *
+ * An index within an range was out of bounds.
+ */
+class ExcOutOfRange
+  : public std::out_of_range
+{
+public:
+  /**
+   * @brief Constructor.
+   * @param what Description of the failing operation.
+   * @param i The attempted index.
+   * @param size The actual size of the range.
+   */
+  ExcOutOfRange (const char* what,
+                 size_t i,
+                 size_t size);
+};
+
+
+/**
+ * @brief Throw a SG::ExcOutOfRange exception.
+ * @param what Description of the failing operation.
+ * @param i The attempted index.
+ * @param size The actual size of the range.
+ */
+[[noreturn]]
+void throwExcOutOfRange (const char* what,
+                         size_t i,
+                         size_t size);
+
+
 } // namespace SG
 
 
