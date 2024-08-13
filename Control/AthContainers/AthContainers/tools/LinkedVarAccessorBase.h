@@ -53,10 +53,10 @@ protected:
   // Store these as uint32_t rather than auxid_t since we're going to want
   // to be able to create temporary instances of this.
   /// The cached @c auxid for the linked payload vector.
-  uint32_t m_linkedAuxid;
+  uint32_t m_linkedAuxid = 0;
 
   /// The cached @c auxid.
-  uint32_t m_auxid;
+  uint32_t m_auxid = 0;
 };
 
 
