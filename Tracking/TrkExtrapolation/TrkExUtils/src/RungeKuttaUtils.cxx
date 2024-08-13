@@ -48,6 +48,7 @@ globalToLocalVecHelper(double* ATH_RESTRICT P,
 {
   using namespace CxxUtils;
   using vec2 = CxxUtils::vec<double, 2>;
+  using vec4 = CxxUtils::vec<double, 4>;
   /* The calculation (original form)
       P[ 7]-=(s0*P[ 3]); P[ 8]-=(s0*P[ 4]); P[ 9]-=(s0*P[ 5]);
       P[10]-=(s0*P[42]); P[11]-=(s0*P[43]); P[12]-=(s0*P[44]);
@@ -62,80 +63,58 @@ globalToLocalVecHelper(double* ATH_RESTRICT P,
       */
   /*
    * The naming convention we follow is
-   * A_B -->SIMD vector of
-   * of size 2 containing
-   * {A,B}
+   * A_B_C_D -->SIMD vector {A,B , C, D}
    * For example :
-   * dZdTheta_dAxdTheta --> {dZ/dTheta, dAx/dTheta}
-   * --> {P[30],P[31]}
+   * dXdTheta_dYdTheta_dZdTheta_dAxdTheta --> {dX/dTheta, dY/dTheta, dZ/dTheta,
+   * dAx/dTheta}
+   * --> {P[28,P[29],P[30],P[31]}
    */
-  vec2 Pmult1 = { P[3], P[4] };
-  vec2 Pmult2 = { P[5], P[42] };
-  vec2 Pmult3 = { P[43], P[44] };
+  vec4 Pmult1_2 = {P[3], P[4], P[5], P[42]};
+  vec2 Pmult3 = {P[43], P[44]};
 
-  vec2 dXdL0_dYdL0;
-  vload(dXdL0_dYdL0, &P[7]);
-  vec2 dZdL0_dAxdL0;
-  vload(dZdL0_dAxdL0, &P[9]);
+  vec4 dXdL0_dYdL0_dZdL0_dAxdL0;
+  vload(dXdL0_dYdL0_dZdL0_dAxdL0, &P[7]);
   vec2 dAydL0_dAzdL0;
   vload(dAydL0_dAzdL0, &P[11]);
-  dXdL0_dYdL0 -= s0 * Pmult1;
-  dZdL0_dAxdL0 -= s0 * Pmult2;
+  dXdL0_dYdL0_dZdL0_dAxdL0 -= s0 * Pmult1_2;
   dAydL0_dAzdL0 -= s0 * Pmult3;
-  vstore(&P[7], dXdL0_dYdL0);
-  vstore(&P[9], dZdL0_dAxdL0);
+  vstore(&P[7], dXdL0_dYdL0_dZdL0_dAxdL0);
   vstore(&P[11], dAydL0_dAzdL0);
 
-  vec2 dXdL1_dYdL1;
-  vload(dXdL1_dYdL1, &P[14]);
-  vec2 dZdL1_dAxdL1;
-  vload(dZdL1_dAxdL1, &P[16]);
+  vec4 dXdL1_dYdL1_dZdL1_dAxdL1;
+  vload(dXdL1_dYdL1_dZdL1_dAxdL1, &P[14]);
   vec2 dAydL1_dAzdL1;
   vload(dAydL1_dAzdL1, &P[18]);
-  dXdL1_dYdL1 -= s1 * Pmult1;
-  dZdL1_dAxdL1 -= s1 * Pmult2;
+  dXdL1_dYdL1_dZdL1_dAxdL1 -= s1 * Pmult1_2;
   dAydL1_dAzdL1 -= s1 * Pmult3;
-  vstore(&P[14], dXdL1_dYdL1);
-  vstore(&P[16], dZdL1_dAxdL1);
+  vstore(&P[14], dXdL1_dYdL1_dZdL1_dAxdL1);
   vstore(&P[18], dAydL1_dAzdL1);
 
-  vec2 dXdPhi_dYdPhi;
-  vload(dXdPhi_dYdPhi, &P[21]);
-  vec2 dZdPhi_dAxdPhi;
-  vload(dZdPhi_dAxdPhi, &P[23]);
+  vec4 dXdPhi_dYdPhi_dZdPhi_dAxdPhi;
+  vload(dXdPhi_dYdPhi_dZdPhi_dAxdPhi, &P[21]);
   vec2 dAydPhi_dAzdPhi;
   vload(dAydPhi_dAzdPhi, &P[25]);
-  dXdPhi_dYdPhi -= s2 * Pmult1;
-  dZdPhi_dAxdPhi -= s2 * Pmult2;
+  dXdPhi_dYdPhi_dZdPhi_dAxdPhi -= s2 * Pmult1_2;
   dAydPhi_dAzdPhi -= s2 * Pmult3;
-  vstore(&P[21], dXdPhi_dYdPhi);
-  vstore(&P[23], dZdPhi_dAxdPhi);
+  vstore(&P[21], dXdPhi_dYdPhi_dZdPhi_dAxdPhi);
   vstore(&P[25], dAydPhi_dAzdPhi);
 
-  vec2 dXdTheta_dYdTheta;
-  vload(dXdTheta_dYdTheta, &P[28]);
-  vec2 dZdTheta_dAxdTheta;
-  vload(dZdTheta_dAxdTheta, &P[30]);
+  vec4 dXdTheta_dYdTheta_dZdTheta_dAxdTheta;
+  vload(dXdTheta_dYdTheta_dZdTheta_dAxdTheta, &P[28]);
   vec2 dAydTheta_dAzdTheta;
   vload(dAydTheta_dAzdTheta, &P[32]);
-  dXdTheta_dYdTheta -= s3 * Pmult1;
-  dZdTheta_dAxdTheta -= s3 * Pmult2;
+  dXdTheta_dYdTheta_dZdTheta_dAxdTheta -= s3 * Pmult1_2;
   dAydTheta_dAzdTheta -= s3 * Pmult3;
-  vstore(&P[28], dXdTheta_dYdTheta);
-  vstore(&P[30], dZdTheta_dAxdTheta);
+  vstore(&P[28], dXdTheta_dYdTheta_dZdTheta_dAxdTheta);
   vstore(&P[32], dAydTheta_dAzdTheta);
 
-  vec2 dXdCM_dYdCM;
-  vload(dXdCM_dYdCM, &P[35]);
-  vec2 dZdCM_dAxdCM;
-  vload(dZdCM_dAxdCM, &P[37]);
+  vec4 dXdCM_dYdCM_dZdCM_dAxdCM;
+  vload(dXdCM_dYdCM_dZdCM_dAxdCM, &P[35]);
   vec2 AydCM_dAzdCM;
   vload(AydCM_dAzdCM, &P[39]);
-  dXdCM_dYdCM -= s4 * Pmult1;
-  dZdCM_dAxdCM -= s4 * Pmult2;
+  dXdCM_dYdCM_dZdCM_dAxdCM -= s4 * Pmult1_2;
   AydCM_dAzdCM -= s4 * Pmult3;
-  vstore(&P[35], dXdCM_dYdCM);
-  vstore(&P[37], dZdCM_dAxdCM);
+  vstore(&P[35], dXdCM_dYdCM_dZdCM_dAxdCM);
   vstore(&P[39], AydCM_dAzdCM);
 }
 
