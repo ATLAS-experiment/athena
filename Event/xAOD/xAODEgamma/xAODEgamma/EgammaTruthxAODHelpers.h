@@ -22,22 +22,6 @@ namespace xAOD {
 
   namespace EgammaHelpers{
 
-    /// @brief Access to element link to object of type T stored in auxdata
-    template<class T>
-    const T* getLink(const xAOD::IParticle* particle, std::string name){
-      if (!particle) return nullptr;
-      typedef ElementLink< DataVector<T> > Link_t;
-
-      if (!particle->isAvailable< Link_t >(name) ) {
-	  return nullptr;
-	}
-      const Link_t link = particle->auxdata<Link_t>(name);
-      if (!link.isValid()) {
-	  return nullptr;
-	}
-      return *link;
-    }
-
     ///@brief return the reco electron associated to the given TruthParticle (if any)
     const xAOD::Electron* getRecoElectron(const xAOD::TruthParticle*);
 
