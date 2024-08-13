@@ -28,8 +28,8 @@ private:
   SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer> m_eFexEMTobKeyList{this,"eFexEMTobKeyList",{},"Array of eFEX EM ReadHandleKeys to fill histograms for"};
   SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer> m_eFexTauTobKeyList{this,"eFexTauTobKeyList",{},"Array of eFEX Tau ReadHandleKeys to fill histograms for"};
 
-  StatusCode fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et) const;
-  StatusCode fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const;
+  StatusCode fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et,const EventContext& ctx) const;
+  StatusCode fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et,const EventContext& ctx) const;
   
 };
 #endif

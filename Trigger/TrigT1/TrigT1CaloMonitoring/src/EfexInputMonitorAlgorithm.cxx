@@ -146,6 +146,10 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
   std::set<std::pair<std::pair<int,int>,int>> doneCounts; // only fill each count once (there are duplicates in DataTowers readout b.c. of module overlap)
 
     auto IsMonReady = Monitored::Scalar<bool>("IsMonReady",true); // used to fill into eta/phi map only certain types of error.
+    auto OnPed = Monitored::Scalar<double>("OnPedestal",0.);
+    auto AboveCut = Monitored::Scalar<bool>("AboveCut",false);
+    auto BelowCut = Monitored::Scalar<bool>("BelowCut",false);
+    auto binNumber = Monitored::Scalar<int>("binNumber",0);
 
   for(const xAOD::eFexTower* eTower : *eFexTowerContainer) {
     TowerId = eTower->id();
@@ -216,8 +220,17 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               }
           }
           // since lar invalid codes will be treated as a 0 energy, don't fill into plot
-          if (i==10 || TowerCount != 1022) {
-              fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount);
+          if ((!isLAr) || (TowerCount != 1022)) {
+              AboveCut = (TowerCount >= (isLAr ? 52:1)); // count of 52 ~= 500 MeV
+              BelowCut = (TowerCount < (isLAr ?  23:0) && TowerCount>0); // count of 22 ~= -500 MeV
+              if(AboveCut || BelowCut) {
+                  int etaIdx = TowerId/100000;
+                  if(etaIdx>0) etaIdx--; // so goes from -25 to 24
+                  int phiIdx = std::abs(TowerId % 100000)/1000;
+                  if(phiIdx>31) phiIdx -= 64; // so goes from -32 to 31
+                  binNumber = (phiIdx+32)*50 + 26 + etaIdx; // = 50*(y-1)+x as displayed in standard histogram
+                  fill((i<10) ? "ecal" : "hcal",lbn,Towereta,Towerphi,TowerCount,AboveCut,BelowCut,binNumber);
+              }
           }
       }
   }
