@@ -373,18 +373,18 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
       eventShape = rhRhoKey.cptr();
       if ( !rhRhoKey.isValid() ) {
         ATH_MSG_VERBOSE("  Event shape container not found.");
-        ATH_MSG_FATAL("Could not retrieve xAOD::EventShape DataHandle.");
+        ATH_MSG_FATAL("Could not retrieve the xAOD::EventShape container " << m_rhoKey.key() << " from the input file");
         return StatusCode::FAILURE;
       } else if ( !eventShape->getDensity( xAOD::EventShape::Density, rho ) ) {
         ATH_MSG_VERBOSE("  Event density not found in container.");
-        ATH_MSG_FATAL("Could not retrieve xAOD::EventShape::Density from xAOD::EventShape.");
+        ATH_MSG_FATAL("Could not retrieve the xAOD::EventShape::Density variable from " << m_rhoKey.key());
         return StatusCode::FAILURE;
       } else {
         ATH_MSG_VERBOSE("  Event density retrieved.");
       }
     } else if ( m_doJetArea && !rhRhoKey.isValid() ) {
       ATH_MSG_VERBOSE("  Rho container not found: " << m_rhoKey.key());
-      ATH_MSG_FATAL("Could not retrieve xAOD::EventShape DataHandle.");
+      ATH_MSG_FATAL("Could not retrieve xAOD::EventShape container " << m_rhoKey.key() << " from the input file");
       return StatusCode::FAILURE;
     }
     jetEventInfo.setRho(rho);
@@ -397,11 +397,11 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
       if (evtStore()->contains<xAOD::JetContainer>(m_nJetContainerName) ) {
         ATH_MSG_VERBOSE("  Found jet container " << m_nJetContainerName);
         if ( evtStore()->retrieve(jets, m_nJetContainerName).isFailure() || !jets ) {
-          ATH_MSG_FATAL("Could not retrieve xAOD::JetContainer from evtStore.");
+          ATH_MSG_FATAL("Could not retrieve xAOD::JetContainer " << m_nJetContainerName << " from evtStore");
           return StatusCode::FAILURE;
         }
       } else {
-        ATH_MSG_FATAL("Could not find jet container " << m_nJetContainerName);
+        ATH_MSG_FATAL("Could not find jet container " << m_nJetContainerName << " in the evtStore");
         return StatusCode::FAILURE;
       }
 
