@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgMessaging/MessageCheck.h>
@@ -185,6 +185,9 @@ int main(int argc, char* argv[])
   // the memory for each event
   xAOD::IParticleContainer particles;
 
+  static const SG::Decorator<char> tightDecor("Tight");
+  static const SG::Decorator<unsigned int> runNumberDecor("RandomRunNumber");
+
   // Loop over events!
   int nEventsProcessed(0);
   int nEventsPassed(0);
@@ -201,7 +204,7 @@ int main(int argc, char* argv[])
     }
 
     // just as an example for an EventInfo decor that one could set...
-    eventInfo->auxdecor<unsigned int>("RandomRunNumber") = 507;
+    runNumberDecor(*eventInfo) = 507;
 
     std::vector<float> lepPt = {lep1Pt, lep2Pt, lep3Pt};
     std::vector<float> lepEta = {lep1Eta, lep2Eta, lep3Eta};
@@ -285,7 +288,7 @@ int main(int argc, char* argv[])
         particle->makePrivateStore();
         particle->setP4(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i),0.511);
         particle->setCharge(lepCharge.at(i));
-        particle->auxdata<char>("Tight") = passesSignal;
+        tightDecor(*particle) = passesSignal;
         particles.push_back(static_cast<xAOD::IParticle*>(particle));
       }
       else if(lepType == xAOD::Type::Muon){
@@ -293,7 +296,7 @@ int main(int argc, char* argv[])
         particle->makePrivateStore();
         particle->setP4(lepPt.at(i)*convertToMeV,lepEta.at(i),lepPhi.at(i));
         particle->setCharge(lepCharge.at(i));
-        particle->auxdata<char>("Tight") = passesSignal;
+        tightDecor(*particle) = passesSignal;
         particles.push_back(static_cast<xAOD::IParticle*>(particle));
       }
       else{
