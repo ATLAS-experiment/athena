@@ -3,6 +3,7 @@
 */
 
 #include "GeneratorFilters/XtoVVDecayFilterExtended.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 XtoVVDecayFilterExtended::XtoVVDecayFilterExtended(const std::string& name, ISvcLocator* pSvcLocator)
@@ -10,7 +11,6 @@ XtoVVDecayFilterExtended::XtoVVDecayFilterExtended(const std::string& name, ISvc
 {
   declareProperty("PDGGrandParent", m_PDGGrandParent);
   declareProperty("PDGParent", m_PDGParent);
-  declareProperty("StatusParent", m_StatusParent);
   declareProperty("PDGChild1", m_PDGChild1);
   declareProperty("PDGChild2", m_PDGChild2);
 
@@ -23,7 +23,7 @@ XtoVVDecayFilterExtended::XtoVVDecayFilterExtended(const std::string& name, ISvc
 
 StatusCode XtoVVDecayFilterExtended::filterInitialize() {
   ATH_MSG_INFO("PDGGrandParent(H) = " << m_PDGGrandParent <<  " will scan all ancestors to find PDGGrandParent");
-  ATH_MSG_INFO("PDGParent(V)      = " << m_PDGParent << " " << "StatusParent(V)      = " << m_StatusParent);
+  ATH_MSG_INFO("PDGParent(V)      = " << m_PDGParent );
   if (m_PDGChild1.empty()) ATH_MSG_ERROR("PDGChild1[] not set ");
   if (m_PDGChild2.empty()) ATH_MSG_ERROR("PDGChild2[] not set ");
   for (size_t i = 0; i < m_PDGChild1.size(); ++i)
@@ -57,7 +57,7 @@ StatusCode XtoVVDecayFilterExtended::filterEvent() {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto&  pitr: *genEvt) {
-      if ( std::abs(pitr->pdg_id()) == m_PDGParent && pitr->status() == m_StatusParent) {
+      if ( std::abs(pitr->pdg_id()) == m_PDGParent && MC::isDecayed(pitr)) {
         bool isGrandParentOK = RunHistory(pitr);
 	ATH_MSG_DEBUG(" Grand Parent is OK? " << isGrandParentOK);
         if (!isGrandParentOK) continue;

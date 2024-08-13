@@ -3,13 +3,13 @@
 */
 
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 xAODXtoVVDecayFilterExtended::xAODXtoVVDecayFilterExtended(const std::string &name, ISvcLocator *pSvcLocator)
     : GenFilter(name, pSvcLocator)
 {
     declareProperty("PDGGrandParent", m_PDGGrandParent);
     declareProperty("PDGParent", m_PDGParent);
-    declareProperty("StatusParent", m_StatusParent);
     declareProperty("PDGChild1", m_PDGChild1);
     declareProperty("PDGChild2", m_PDGChild2);
 
@@ -21,8 +21,7 @@ xAODXtoVVDecayFilterExtended::xAODXtoVVDecayFilterExtended(const std::string &na
 StatusCode xAODXtoVVDecayFilterExtended::filterInitialize()
 {
     ATH_MSG_INFO("PDGGrandParent(H) = " << m_PDGGrandParent << " will scan all ancestors to find PDGGrandParent");
-    ATH_MSG_INFO("PDGParent(V)      = " << m_PDGParent << " "
-                                        << "StatusParent(V)      = " << m_StatusParent);
+    ATH_MSG_INFO("PDGParent(V)      = " << m_PDGParent );
     if (m_PDGChild1.empty())
         ATH_MSG_ERROR("PDGChild1[] not set ");
     if (m_PDGChild2.empty())
@@ -70,7 +69,7 @@ StatusCode xAODXtoVVDecayFilterExtended::filterEvent()
         for (unsigned int iPart = 0; iPart < nPart; ++iPart)
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
-            if (std::abs(pitr->pdgId()) == m_PDGParent && pitr->status() == m_StatusParent)
+            if (std::abs(pitr->pdgId()) == m_PDGParent && MC::isDecayed(pitr))
             {
                 bool isGrandParentOK = RunHistory(pitr);
                 ATH_MSG_DEBUG(" Grand Parent is OK? " << isGrandParentOK);
