@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 // System include(s):
@@ -161,6 +161,8 @@ main(int argc, char* argv[])
     xAOD::ElectronContainer::iterator el_it = elsCorr->begin();
     xAOD::ElectronContainer::iterator el_it_last = elsCorr->end();
 
+    static const SG::ConstAccessor<float> sfAcc("SF");
+
     unsigned int i = 0;
     double SF = 0;
     for (; el_it != el_it_last; ++el_it, ++i) {
@@ -194,7 +196,7 @@ main(int argc, char* argv[])
       }
 
       Info( APP_NAME, "===>>> Resulting SF (from get function) %f, (from apply function) %f",
-	    SF, el->auxdata< float >("SF"));
+	    SF, sfAcc(*el));
 
       SF_chargeID = SF_chargeID + SF;
 
