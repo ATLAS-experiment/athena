@@ -10,6 +10,7 @@
 #include "MuonDigitContainer/MdtDigitContainer.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuonCondData/MdtCondDbData.h"
+#include "MuonCablingData/TwinTubeMap.h" 
 
 namespace MuonR4{
     class MdtDigitizationTool final: public MuonDigitizationTool {
@@ -32,12 +33,17 @@ namespace MuonR4{
 
             SG::ReadCondHandleKey<MdtCondDbData> m_badTubeKey{this, "BadTubeKey", "MdtCondDbData", "Key of MdtCondDbData"};
 
+            SG::ReadCondHandleKey<Muon::TwinTubeMap> m_twinTubeKey{this, "TwinTubeKey", "MdtTwinTubeMap"};
+
             ToolHandle<IMDT_DigitizationTool> m_digiTool{this, "DigitizationTool", ""};
 
-            Gaudi::Property<double> m_timeResTDC{this, "ResolutionTDC", 0.5, "TDC time resolution"};
+            Gaudi::Property<double> m_timeResTDC{this, "ResolutionTDC", 0.5 * Gaudi::Units::ns, "TDC time resolution"};
             Gaudi::Property<double> m_timeResADC{this, "ResolutionADC", 0.5 * Gaudi::Units::ns, "ADC time resolution"};
             Gaudi::Property<double> m_deadTime{this, "DeadTime", 700., "MDT drift tube dead time"};
-
+            /** Properties to model the Twin tube signals */
+            Gaudi::Property<bool> m_useTwinTube{this, "useTwinTubes", false};
+            Gaudi::Property<double> m_resTwin{this, "ResolutionTwinTube", 1.05 * Gaudi::Units::ns, "Twin Tube resolution"};
+            
             using DigiCache = OutDigitCache_t<MdtDigitCollection>;
 
     };

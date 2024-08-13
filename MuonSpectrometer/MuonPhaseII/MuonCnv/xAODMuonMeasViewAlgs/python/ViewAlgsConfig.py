@@ -18,3 +18,19 @@ def RpcMeasViewAlgCfg(flags, name="RpcMeasViewAlg", **kwargs):
     the_alg = CompFactory.MuonR4.RpcMeasViewAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def MdtMeasViewAlgCfg(flags, name="MdtMeasViewAlg", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryMDT:
+        return result
+    the_alg = CompFactory.MuonR4.MdtMeasViewAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
+def xAODViewAlgsCfg(flags):
+    result = ComponentAccumulator()
+    result.merge(MdtMeasViewAlgCfg(flags))
+    result.merge(RpcMeasViewAlgCfg(flags))
+    result.merge(sTgcMeasViewAlgCfg(flags))
+    return result

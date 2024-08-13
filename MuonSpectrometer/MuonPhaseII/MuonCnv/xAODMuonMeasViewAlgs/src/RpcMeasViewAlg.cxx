@@ -9,10 +9,8 @@
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteHandle.h>
 #include <AthContainers/ConstDataVector.h>
+
 namespace MuonR4{
-    RpcMeasViewAlg::RpcMeasViewAlg(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name, pSvcLocator} {}
-    
     StatusCode RpcMeasViewAlg::initialize() {        
         ATH_CHECK(m_readKey1D.initialize());
         ATH_CHECK(m_readKeyBI.initialize());
@@ -37,9 +35,9 @@ namespace MuonR4{
 
     StatusCode RpcMeasViewAlg::execute(const EventContext& ctx) const {
         const xAOD::RpcStripContainer* legacyStrips{nullptr};
-        const xAOD::RpcStrip2DContainer* bilStrips{nullptr};        
+        const xAOD::RpcStrip2DContainer* bilStrips{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_readKey1D, legacyStrips));
-        ATH_CHECK(retrieveContainer(ctx, m_readKeyBI, bilStrips));        
+        ATH_CHECK(retrieveContainer(ctx, m_readKeyBI, bilStrips));
 
         ConstDataVector<xAOD::RpcMeasurementContainer> outContainer{SG::VIEW_ELEMENTS};
         if (legacyStrips) {
@@ -47,12 +45,7 @@ namespace MuonR4{
         }
         if (bilStrips) {
             outContainer.insert(outContainer.end(), bilStrips->begin(), bilStrips->end());
-        }       
-        std::sort(outContainer.begin(), outContainer.end(), 
-                  [](const xAOD::RpcMeasurement* a, const xAOD::RpcMeasurement* b){
-                    return a->identifier() < b->identifier();
-                  });
-        
+        }
         SG::WriteHandle<xAOD::RpcMeasurementContainer> writeHandle{m_writeKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::RpcMeasurementContainer>(*outContainer.asDataVector())));
         return StatusCode::SUCCESS;

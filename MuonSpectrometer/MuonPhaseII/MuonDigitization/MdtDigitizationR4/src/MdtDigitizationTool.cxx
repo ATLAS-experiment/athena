@@ -20,6 +20,7 @@ namespace MuonR4 {
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_calibDbKey.initialize());
         ATH_CHECK(m_badTubeKey.initialize());
+        ATH_CHECK(m_twinTubeKey.initialize(m_useTwinTube));
         return StatusCode::SUCCESS;
     }
     StatusCode MdtDigitizationTool::digitize(const EventContext& ctx,
@@ -29,15 +30,20 @@ namespace MuonR4 {
       
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
         // Prepare the temporary cache
-        DigiCache digitCache{};
+        
+        using DigitSDOPair = std::pair<std::unique_ptr<MdtDigit>, TimedHit>;
+        std::vector<std::vector<DigitSDOPair>> digitsInChamber{};
+        digitsInChamber.resize(idHelper.module_hash_max());
         /// Fetch the needed conditions 
         const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
         ATH_CHECK(retrieveConditions(ctx, m_calibDbKey, calibData));
         const MdtCondDbData* badTubes{nullptr};
         ATH_CHECK(retrieveConditions(ctx, m_badTubeKey, badTubes));
-
+        const Muon::TwinTubeMap* twinTubes{nullptr};
+        ATH_CHECK(retrieveConditions(ctx, m_twinTubeKey, twinTubes));
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
+        Identifier lastTube{};
         double deadTime{0.};
         for (const TimedHitPtr<xAOD::MuonSimHit>& simHit : hitsToDigit) {
             const Identifier hitId{simHit->identify()};
@@ -51,17 +57,15 @@ namespace MuonR4 {
 
 
             const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
-
             const double distRO = std::abs(0.5*readOutEle->getParameters().readoutSide*readOutEle->activeTubeLength(measHash) - locPos.z());
 
-            
             const MdtDigiToolInput digiInput(std::abs(locPos.perp()), distRO, 0., 0., 0., 0., hitId);
-
             const MdtDigiToolOutput digiOutput(m_digiTool->digitize(ctx, digiInput, rndEngine));
             if (!digiOutput.wasEfficient()) {
                 ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitId)<<" is rejected due to inefficiency modelling.");
                 continue;
             }
+            const double arrivalTime{simHit->globalTime()};
 
             const MuonCalib::MdtFullCalibData* tubeConstants = calibData->getCalibData(hitId, msgStream());
             const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
@@ -69,15 +73,15 @@ namespace MuonR4 {
             const double sigPropTime = tubeCalib.inversePropSpeed*distRO;
             /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
             /// and finally the constant t0 tube offset
-            const double totalTdcTime = digiOutput.driftTime() + simHit->globalTime() + sigPropTime + tubeCalib.t0;
-            
-            MdtDigitCollection* outColl = fetchCollection(hitId, digitCache);
-            if (outColl->empty() || outColl->back()->identify() != hitId || totalTdcTime > deadTime) {
+            const double totalTdcTime = digiOutput.driftTime() + arrivalTime + sigPropTime + tubeCalib.t0;
+            if (lastTube != hitId || deadTime < totalTdcTime) {
+                lastTube = hitId;
                 deadTime = totalTdcTime + m_deadTime;
-            } else if (totalTdcTime <= deadTime) {
-                ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitId)<<" is within dead time "<<deadTime<<" totalTdcTime: "<<totalTdcTime);
+            } else {
+                ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitId)<<" has been produced within dead time");
                 continue;
             }
+            /// Question: What happens if there're 2 digits such close by that their adc needs to be merged?
 
             const bool hasHPTdc = m_idHelperSvc->hasHPTDC(hitId);
             /// The HPTdc has 4 times higher clock frequency. Smear both 
@@ -85,8 +89,61 @@ namespace MuonR4 {
             const uint16_t adcCounts = (hasHPTdc ? 4 : 1) *CLHEP::RandGaussZiggurat::shoot(rndEngine, digiOutput.adc(), m_timeResADC);
 
             auto digit = std::make_unique<MdtDigit>(hitId, tdcCounts, adcCounts);
-            outColl->push_back(std::move(digit));
-            addSDO(simHit, sdoContainer);
+            ATH_MSG_VERBOSE("Add digit "<<m_idHelperSvc->toString(digit->identify())<<", tdc: "<<digit->tdc()<<", adc: "<<digit->adc());
+            digitsInChamber[m_idHelperSvc->moduleHash(hitId)].push_back(std::make_pair(std::move(digit), simHit));
+            /// Put also in the twin tube digit
+            if (!twinTubes || !twinTubes->isTwinTubeLayer(hitId)) {
+                continue;
+            }
+            const Identifier twinId{twinTubes->twinId(hitId)};
+            if (twinId == hitId) {
+                ATH_MSG_VERBOSE("The hit "<<m_idHelperSvc->toString(hitId)<<" has no twins.");
+                continue;
+            }
+            const IdentifierHash twinHash{readOutEle->measurementHash(twinId)};
+            /// The signal for the twin tube needs to travel to the HV side & then through the complete twin tube
+            const double twinDist = readOutEle->activeTubeLength(measHash) - distRO + 
+                                    readOutEle->activeTubeLength(twinHash);
+            
+            ATH_MSG_VERBOSE("Twin hit :"<<m_idHelperSvc->toString(twinId)<< ", local Z: "<<simHit->localPosition().z()
+                          <<", tube length: "<<readOutEle->activeTubeLength(measHash)<<", distRO: "<<distRO
+                          <<", twin length: "<<readOutEle->activeTubeLength(twinHash)
+                          <<", twin distance: "<<twinDist);
+            const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& twinCalib{*tubeConstants->tubeCalib->getCalib(twinId)};
+            
+            const double twinPropTime = tubeCalib.inversePropSpeed*twinDist;
+            /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
+            /// and finally the constant t0 tube offset
+            const double twinTdcTime = digiOutput.driftTime() + arrivalTime + twinPropTime 
+                                     + twinCalib.t0 + twinTubes->hvDelayTime(twinId);
+
+            const uint16_t twinTdcCounts = timeToTdcCnv*(hasHPTdc ? 4 : 1)*CLHEP::RandGaussZiggurat::shoot(rndEngine, twinTdcTime, m_resTwin);
+            const uint16_t twinAdcCoutns = (hasHPTdc ? 4 : 1) *CLHEP::RandGaussZiggurat::shoot(rndEngine, digiOutput.adc(), m_timeResADC);
+            digit = std::make_unique<MdtDigit>(twinId, twinTdcCounts, twinAdcCoutns);
+            ATH_MSG_VERBOSE("Add twin digit "<<m_idHelperSvc->toString(digit->identify())<<", tdc: "<<digit->tdc()
+                            <<", adc: "<<digit->adc()<<", local z: "<<simHit->localPosition().z());
+            digitsInChamber[m_idHelperSvc->moduleHash(twinId)].push_back(std::make_pair(std::move(digit), simHit));
+        }
+        /// The digitization might have produced digits which are overlapping in time, in particular if twin tubes are hit.
+        /// Filter tube digits which are produced within the dead time interval
+        DigiCache digitCache{};
+        for (std::vector<DigitSDOPair>& chamberDigits : digitsInChamber) {
+            std::ranges::sort(chamberDigits,[](const DigitSDOPair&a, const DigitSDOPair& b){
+                        if (a.first->identify() != b.first->identify()) {
+                           return a.first->identify() < b.first->identify();
+                        }
+                        return a.first->tdc() < b.first->tdc();
+                    });
+            for (std::vector<DigitSDOPair>::iterator saveMe = chamberDigits.begin(); saveMe != chamberDigits.end() ; ) {
+                addSDO(saveMe->second, sdoContainer);
+                const MdtDigit* saved = fetchCollection(saveMe->first->identify(), digitCache)->push_back(std::move(saveMe->first));
+                const uint16_t deadInterval = saved->tdc() + timeToTdcCnv*(m_idHelperSvc->hasHPTDC(saved->identify()) ?4 : 1)*m_deadTime;
+                /// Find the next digit which is either another tube or beyond the dead time
+                saveMe = std::find_if(saveMe +1, chamberDigits.end(),
+                                      [deadInterval, saved](const DigitSDOPair& digitized) {
+                                         return saved->identify() != digitized.first->identify() || deadInterval < saved->tdc();
+                                      });
+            }
         }
         /// Write everything at the end into the final digit container
         ATH_CHECK(writeDigitContainer(ctx, m_writeKey, std::move(digitCache), idHelper.module_hash_max()));

@@ -24,7 +24,7 @@
 namespace MuonR4 {
     class RpcMeasViewAlg : public AthReentrantAlgorithm {
         public:
-            RpcMeasViewAlg(const std::string& name, ISvcLocator* pSvcLocator);
+            using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
             ~RpcMeasViewAlg() = default;
 
@@ -41,7 +41,7 @@ namespace MuonR4 {
             SG::ReadHandleKey<xAOD::RpcStripContainer> m_readKey1D{this, "Strip1DKey", "xRpcStrips", 
                                                                        "Name of the xAOD::RpcStripContainer"};
 
-            SG::ReadHandleKey<xAOD::RpcStrip2DContainer> m_readKeyBI{this, "WireKey", "xRpcBILStrips", 
+            SG::ReadHandleKey<xAOD::RpcStrip2DContainer> m_readKeyBI{this, "Strip2DKey", "xRpcBILStrips", 
                                                                      "Name of the xAOD::RpcStrip2DContainer"};
 
             SG::WriteHandleKey<xAOD::RpcMeasurementContainer> m_writeKey{this, "WriteKey", "xRpcMeasurements"};
