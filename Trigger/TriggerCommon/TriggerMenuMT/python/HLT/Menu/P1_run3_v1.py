@@ -58,13 +58,10 @@ def addCommonP1Signatures(chains):
     chainsP1['Jet'] = [
 
         # ATR-21355 - cannot be moved to the calibSlice because they need to configure the photon/ sequence
-        ChainProp(name='HLT_j25_LArPEBHLT_L1J15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j25_LArPEBHLT_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j25f_LArPEBHLT_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
-        ChainProp(name='HLT_j40_LArPEBHLT_L1J20', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j40_LArPEBHLT_L1jJ50', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j75f_LArPEBHLT_L1jJ60p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
-        ChainProp(name='HLT_j140f_LArPEBHLT_L1J75p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportLegGroup),
         ChainProp(name='HLT_j140f_LArPEBHLT_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j165_LArPEBHLT_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=SingleJetGroup+SupportPhIGroup),
     ]
@@ -83,13 +80,10 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
 
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1J15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ40', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1J20', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ50', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ60p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1J75p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ160', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         #ATR-27253
@@ -238,8 +232,8 @@ def addCommonP1Signatures(chains):
 
         # L1 combined streamers
         ChainProp(name='HLT_noalg_L1Bkg',      l1SeedThresholds=['FSNOSEED'], stream=['Background'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_L1Standby',      l1SeedThresholds=['FSNOSEED'], stream=['Standby'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1Calo',      l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1Standby',      l1SeedThresholds=['FSNOSEED'], stream=['Standby'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1Calo',      l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1Calo_EMPTY',      l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=['RATE:SeededStreamers', 'BW:Other']+SupportPhIGroup),
 
         # muon streamers
@@ -250,7 +244,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_bkg_L1MU8VF_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Background'],groups=['BW:Other']),
 
         # L1 calo streamers
-        ChainProp(name='HLT_noalg_l1calo_L1J400', l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=JetStreamersGroup+['BW:Other']+SupportLegGroup),
         ChainProp(name='HLT_noalg_l1calo_L1gJ400p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=JetStreamersGroup+['BW:Other']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_l1calo_L1LArSaturation', l1SeedThresholds=['FSNOSEED'], stream=['L1Calo'], groups=JetStreamersGroup+['BW:Other']),
         # Cosmic calo stream
@@ -317,7 +310,6 @@ def addCommonP1Signatures(chains):
     ]
 
     chainsP1['Beamspot'] = [
-        ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
         ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1jJ40',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportPhIGroup),
     ]
 
@@ -416,10 +408,6 @@ def addHighMuP1Signatures(chains):
 
         # ATR-23061, ATR-26394
         # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
-        #ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_J15']+SupportLegGroup),
-        #ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_4J15']+SupportLegGroup),
-        # ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
-        #
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselcHT450_beamspotVtx_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_HT190-jJ40s5pETA21']+SupportPhIGroup+Topo3Group),
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_4jJ40']+SupportPhIGroup),
@@ -429,9 +417,6 @@ def addHighMuP1Signatures(chains):
     chainsP1['Jet'] = [
         # ATR-23061, ATR-26394
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
-        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
-        # ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
-        #
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselcHT450_BeamSpotPEB_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_HT190-jJ40s5pETA21']+SupportPhIGroup+Topo3Group),
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14jJ40', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4jJ40']+SupportPhIGroup),
@@ -456,7 +441,6 @@ def addLowMuP1Signatures(chains):
     chainsP1['Jet'] = [
         # ATR-23061, ATR-26394
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
-        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
     ]
 
@@ -488,12 +472,10 @@ def addLowMuP1Signatures(chains):
 
     chainsP1['Beamspot'] = [
         # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
-        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_J15']+SupportLegGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
     ]
     chainsP1['Jet'] = [
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
-        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
     ]
 

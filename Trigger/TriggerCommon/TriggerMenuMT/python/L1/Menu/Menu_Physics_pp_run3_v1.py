@@ -97,8 +97,7 @@ def defineMenu():
         'L1_eEM24L_3jJ50',
 
         # combined mu - jet 
-        'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',  
-        # L1_MU3V_J12 moved to MC ATR-28761
+        'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',  
 
         #ATR-13743 J,XE thershold change for ATR-19376 
         'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
@@ -106,11 +105,6 @@ def defineMenu():
         'L1_MU14FCH_jXE80',
         'L1_MU14FCH_EMPTY',
         'L1_MU14FCH_UNPAIRED_ISO',
-
-        # Single jet Legacy
-        'L1_J15','L1_J20','L1_J50','L1_J400','L1_J75p31ETA49', 
-        # Single jet legacy (forward)
-        'L1_J20p31ETA49', 'L1_J30p31ETA49', 'L1_J50p31ETA49', 'L1_J15p31ETA49',
 
         # jJ
         'L1_jJ30', 'L1_jJ30_BGRP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
@@ -169,18 +163,6 @@ def defineMenu():
 
         # LAr saturation
         'L1_LArSaturation',
-
-        # multi jet
-        'L1_J50_2J40p0ETA25_3J15p0ETA25',
-        
-        'L1_3J50', #'L1_4J15', 
-
-
-        # multi jet forward
-        'L1_J40p0ETA25_2J15p31ETA49',
-        
-        # multi jet central
-        'L1_3J25p0ETA23',
 
         # combined jet
         'L1_jJ80_jXE100',
