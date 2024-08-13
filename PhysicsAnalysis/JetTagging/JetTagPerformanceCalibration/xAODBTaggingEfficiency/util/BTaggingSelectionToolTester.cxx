@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgTools/StandaloneToolHandle.h>
@@ -47,6 +47,10 @@ int main(int argc, char* argv[]) {
   } else {
     EDMTaggerName = taggerName;
   }
+  const SG::ConstAccessor<float> pbAcc(EDMTaggerName + "_pb");
+  const SG::ConstAccessor<float> pcAcc(EDMTaggerName + "_pc");
+  const SG::ConstAccessor<float> puAcc(EDMTaggerName + "_pu");
+  const SG::ConstAccessor<float> ptauAcc(EDMTaggerName + "_ptau");
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool("BTaggingSelectionTool/BTagSelecTest");
   StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
@@ -99,12 +103,13 @@ int main(int argc, char* argv[]) {
 
       //if you have tagger weights, you can get the tagger weight this way
       const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
-
-      float jet_pb = btag->auxdata<float>(EDMTaggerName + "_pb");
-      float jet_pc = btag->auxdata<float>(EDMTaggerName + "_pc");
-      float jet_pu = btag->auxdata<float>(EDMTaggerName + "_pu");
+      float jet_pb = pbAcc(*btag);
+      float jet_pc = pcAcc(*btag);
+      float jet_pu = puAcc(*btag);
       float jet_ptau = 0.;
-      if (taggerName == "GN2v01") jet_ptau = btag->auxdata<float>(EDMTaggerName + "_ptau");
+      if (taggerName == "GN2v01"){
+        jet_ptau = ptauAcc(*btag);
+      }
 
       if( tool->getTaggerWeight(jet_pb,jet_pc,jet_pu, tagweight, jet_ptau) != CorrectionCode::Ok ){
         ANA_MSG_ERROR (" error retrieving tagger weight! " );
