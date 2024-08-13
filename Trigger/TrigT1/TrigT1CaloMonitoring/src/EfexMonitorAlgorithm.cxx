@@ -54,8 +54,8 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       fill(m_packageName, nEmTOBs_total,lbn);
       // Fill EM histograms for the low/high cuts
       const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
-      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_LowPtCut", emDataContPtr, m_lowPtCut));
-      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut));
+      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_LowPtCut", emDataContPtr, m_lowPtCut,ctx));
+      ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut,ctx));
       if(key.key().find("Sim") == std::string::npos) {
           for (const xAOD::eFexEMRoI *roi: *emDataContPtr) {
               locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
@@ -79,8 +79,8 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       fill(m_packageName, nTauTOBs_total,lbn);
       // Fill Tau histograms for the low/high cuts
       const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
-      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_LowPtCut", tauDataContPtr, m_lowPtCut));
-      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut));
+      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_LowPtCut", tauDataContPtr, m_lowPtCut,ctx));
+      ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut,ctx));
       if(key.key().find("Sim") == std::string::npos) {
           for (const xAOD::eFexTauRoI *roi: *tauDataContPtr) {
               locIdx = std::to_string(roi->iPhi() / 8) + ":" + std::to_string(roi->iEta());
@@ -94,11 +94,13 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
   return StatusCode::SUCCESS;
 }
 
-StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et) const {
+StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, const xAOD::eFexEMRoIContainer *emcont, const float &cut_et,const EventContext& ctx) const {
   
   ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillEMHistograms");
 
   // monitored variables for histograms
+  auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
+  auto binNumber = Monitored::Scalar<int>("binNumber",0);
   auto nEmTOBs_passcut = Monitored::Scalar<int>("nEMTOBs",0.0); // Number of ToBs passing the cut
   auto TOBeT = Monitored::Scalar<float>("TOBTransverseEnergy",0.0);
   auto TOBeta = Monitored::Scalar<float>("TOBEta",0.0);
@@ -146,6 +148,10 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, 
       fill(groupName, TOBRhad_threshold);
       TOBWstot_threshold = efexEmRoI->WstotThresholds();
       fill(groupName, TOBWstot_threshold);
+      int iPhi = efexEmRoI->iPhi();
+      if (iPhi>31) iPhi -= 64;
+      binNumber = (iPhi+32)*50 + 25 + efexEmRoI->iEta();
+      fill(groupName,binNumber,lbn);
     }
   }
   fill(groupName, nEmTOBs_passcut);
@@ -153,11 +159,13 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& groupName, 
   return StatusCode::SUCCESS;
 }
 
-StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const {
+StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et,const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillTauHistograms");
 
   // monitored variables for histograms
+  auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
+  auto binNumber = Monitored::Scalar<int>("binNumber",0);
   auto nTauTOBs_passcut = Monitored::Scalar<int>("nTauTOBs",0.0); // Number of ToBs passing the cut
   auto tauTOBeT = Monitored::Scalar<float>("tauTOBTransverseEnergy",0.0);
   auto tauTOBeta = Monitored::Scalar<float>("tauTOBEta",0.0);
@@ -202,6 +210,10 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName,
       fill(groupName, tauTOBRhad_threshold);
       tauTOBthree_threshold=efexTauRoI->tauThreeThresholds();
       fill(groupName, tauTOBthree_threshold);
+      int iPhi = efexTauRoI->iPhi();
+      if (iPhi>31) iPhi -= 64;
+      binNumber = (iPhi+32)*50 + 25 + efexTauRoI->iEta();
+      fill(groupName,binNumber,lbn);
     }
   }
   fill(groupName, nTauTOBs_passcut);
