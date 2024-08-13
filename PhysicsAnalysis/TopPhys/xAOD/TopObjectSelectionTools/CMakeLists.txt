@@ -3,9 +3,6 @@
 # Declare the name of this package.
 atlas_subdir( TopObjectSelectionTools )
 
-# External(s).
-find_package( Boost )
-
 # Component(s) in the package.
 atlas_add_library( TopObjectSelectionTools TopObjectSelectionTools/*.h Root/*.cxx
                    PUBLIC_HEADERS TopObjectSelectionTools
@@ -37,8 +34,7 @@ atlas_add_library( TopObjectSelectionTools TopObjectSelectionTools/*.h Root/*.cx
                                   TopEvent
                                   TopConfiguration
                                   TopSystematicObjectMaker
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES}
+                   PRIVATE_LINK_LIBRARIES 
                                           xAODEventInfo
                                           xAODMissingET
                                           AthContainers

@@ -5,7 +5,6 @@ atlas_subdir( InDetTrackPerfMon )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread EG )
-find_package( Boost COMPONENTS unit_test_framework )
 find_package( nlohmann_json )
 ## TODO - To be included in later MRs (if needed)
 #find_package( XercesC )
