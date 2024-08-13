@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -209,8 +209,7 @@ void LArWheelSolid::inner_solid_init(const G4String &bs_name)
     m_FanPhiAmplitude = 0.065; // internal technical constant, should not go in DB
     set_phi_size();
 
-    G4double zPlane[2], rInner[2], rOuter[2];
-    zPlane[0] = 0.;
+    std::array<G4double,2> zPlane{}, rInner{}, rOuter{};
     zPlane[1] = GetCalculator()->GetWheelThickness();
     G4double wheel_thickness = zPlane[1] - zPlane[0];
     GetCalculator()->GetWheelInnerRadius(rInner);
@@ -236,7 +235,7 @@ void LArWheelSolid::inner_solid_init(const G4String &bs_name)
     } else {
         m_BoundingShape = new G4Polycone(
             bs_name + "Polycone", m_MinPhi, m_MaxPhi - m_MinPhi,
-            2, zPlane, rInner, rOuter
+            2, zPlane.data(), rInner.data(), rOuter.data()
         );
     }
 #ifdef LARWHEELSOLID_USE_FANBOUND
@@ -278,8 +277,7 @@ void LArWheelSolid::outer_solid_init(const G4String &bs_name)
     m_FanPhiAmplitude = 0.02; // internal technical constant, should not go in DB
     set_phi_size();
 
-    G4double zPlane[3], rInner[3], rOuter[3];
-    zPlane[0] = 0.;
+    std::array<G4double,3> zPlane{}, rInner{}, rOuter{};
     zPlane[2] = GetCalculator()->GetWheelThickness();
     G4double wheel_thickness = zPlane[2] - zPlane[0];
     zPlane[1] = GetCalculator()->GetWheelInnerRadius(rInner);
@@ -322,7 +320,7 @@ void LArWheelSolid::outer_solid_init(const G4String &bs_name)
         m_Rmin = rInner[0]; m_Rmax = rOuter[2];
         m_BoundingShape = new G4Polycone(
             bs_name + "Polycone", m_MinPhi, m_MaxPhi - m_MinPhi,
-            3, zPlane, rInner, rOuter
+            3, zPlane.data(), rInner.data(), rOuter.data()
         );
         hasFrontSections = true;
         hasBackSections = true;

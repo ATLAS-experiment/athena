@@ -5,8 +5,7 @@
 #ifndef GEOSPECIALSHAPES_LARWHEELCALCULATOR_H
 #define GEOSPECIALSHAPES_LARWHEELCALCULATOR_H
 
-#include <array>
-#include <vector>
+
 
 // FMV and other checks
 #ifndef PORTABLE_LAR_SHAPE
@@ -29,6 +28,9 @@
     #include "vec_parametrized_sincos.h"
 #endif
 #include "GeoSpecialShapes/LArWheelCalculatorEnums.h"
+
+#include <array>
+#include <vector>
 
 #define LARWC_SINCOS_POLY 5
 #define LARWC_DTNF_NEW
@@ -102,8 +104,10 @@ class LArWheelCalculator
     bool GetisBarrette() const { return m_isBarrette; }
     bool GetisBarretteCalib() const { return m_isBarretteCalib; }
 
-    double GetWheelInnerRadius(double *) const;
-    void GetWheelOuterRadius(double *) const;
+    double GetWheelInnerRadius(std::array<double,2> & rInner) const;
+    double GetWheelInnerRadius(std::array<double,3> & rInner) const;
+    void GetWheelOuterRadius(std::array<double,2> & rOuter) const;
+    void GetWheelOuterRadius(std::array<double,3> & rOuter) const;
 
     double GetElecFocaltoWRP() const { return m_dElecFocaltoWRP; }
     // "set constant" method:
