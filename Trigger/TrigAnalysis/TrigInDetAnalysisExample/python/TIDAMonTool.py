@@ -168,14 +168,15 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "nsiHits",       path=mypath, type="TH1F", title="nsiHits",              xbins=41,    xmin=-0.5,   xmax=40.5  )
     defineHisto( monTool,  "nsiHits_rec",   path=mypath, type="TH1F", title="nsiHits_rec",          xbins=41,    xmin=-0.5,   xmax=40.5  )
     
-    defineHisto( monTool,  "ntrt",          path=mypath, type="TH1F", title="ntrt",                 xbins=91,     xmin=-0.5,   xmax=91.5  )
+    defineHisto( monTool,  "ntrt",          path=mypath, type="TH1F", title="ntrt",                 xbins=91,    xmin=-0.5,   xmax=91.5  )
     defineHisto( monTool,  "ntrt_rec",      path=mypath, type="TH1F", title="ntrt_rec",             xbins=91,    xmin=-0.5,   xmax=91.5  )
 
-    defineHisto( monTool,  "chi2dof",          path=mypath, type="TH1F", title="chi2dof",           xbins=75,    xmin=-0,   xmax=15  )
-    defineHisto( monTool,  "chi2dof_rec",      path=mypath, type="TH1F", title="chi2dof_rec",       xbins=75,    xmin=-0,   xmax=15  )
+    defineHisto( monTool,  "chi2dof",       path=mypath, type="TH1F", title="chi2dof",              xbins=75,    xmin=-0,   xmax=15  )
+    defineHisto( monTool,  "chi2dof_rec",   path=mypath, type="TH1F", title="chi2dof_rec",          xbins=75,    xmin=-0,   xmax=15  )
     
-    
-    defineHisto( monTool,  "Eff_overall",       path=mypath, type="TProfile", title="total efficiency",    xbins=1,    xmin=0.,   xmax=1.    )
+    defineHisto( monTool,  "mu",            path=mypath, type="TH1F", title="mu;#mu;Entries",       xbins=80,    xmin=0,    xmax=80  )
+        
+    defineHisto( monTool,  "Eff_overall",   path=mypath, type="TProfile", title="total efficiency", xbins=1,     xmin=0.,   xmax=1.    )
     
     defineHisto( monTool,  "Eff_pT",     path=mypath, type="TProfile", title="pT efficiency",       xbins=ptbins   )
     defineHisto( monTool,  "Eff_Eta",    path=mypath, type="TProfile", title="eta efficiency",      xbins=25,   xmin=-2.5,  xmax=2.5  )
@@ -221,6 +222,7 @@ def createMonTool( flags, slicetag, chain ) :
     defineHisto( monTool,  "Res_d0",    path=mypath, type="TProfile", title="d0 residual;#eta_{ref};Delta d0 [mm]",                      xbins=25,  xmin=-2.5,  xmax=2.5  )
     defineHisto( monTool,  "Res_z0",    path=mypath, type="TProfile", title="z0 residual;#eta_{ref};Delta z0 [mm]",                       xbins=25,  xmin=-2.5,  xmax=2.5  )
 
+    
     defineHisto( monTool,  "d0_vs_phi_prof",     path=mypath, type="TProfile", title="d0 vs phi_prof",      xbins=25,     xmin=-pi,  xmax=pi )
     defineHisto( monTool,  "d0_vs_phi_rec_prof", path=mypath, type="TProfile", title="d0 vs phi_rec_prof",  xbins=25,     xmin=-pi,  xmax=pi )
 

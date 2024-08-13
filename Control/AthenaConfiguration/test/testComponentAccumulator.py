@@ -11,6 +11,7 @@ from AthenaCommon.Configurable import Configurable # guinea pig algorithms
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG, INFO
 from AthenaConfiguration.TestDriveDummies import dummyService, dummyTool
+import pickle
 import unittest
 
 
@@ -19,8 +20,6 @@ TestAlgo = CompFactory.HelloAlg
 ComponentAccumulator.debugMode="trackCA trackCondAlgo trackPublicTool trackEventAlgo"
 class TestComponentAccumulator( unittest.TestCase ):
     def setUp(self):
-
-
         # trivial case without any nested sequences
 
         log.setLevel(DEBUG)
@@ -85,47 +84,41 @@ class TestComponentAccumulator( unittest.TestCase ):
         acc.printConfig(withDetails=True, summariseProps=True, prefix='CATest')
         self.acc = acc
 
+    def tearDown(self):
+        self.acc.wasMerged()
+
     def test_conflict_in_public_tools(self):
-        def _failingAdd():
+        with self.assertRaises(ValueError):
             self.acc.addPublicTool(CompFactory.HelloTool("TestPublicTool", MyMessage="I am different than the one above"))
-        self.assertRaises(ValueError, _failingAdd)
 
     def test_conflict_in_event_alg(self):
-        def _failingAdd():
+        with self.assertRaises(ValueError):
             self.acc.addEventAlgo(TestAlgo("Algo1", MyInt = 0)) # value 8 conflicts with earlier set value 12345
-        self.assertRaises(ValueError, _failingAdd)
 
     def test_conflict_in_cond_alg(self):
-        def _failingAdd():
+        with self.assertRaises(ValueError):
             self.acc.addCondAlgo(TestAlgo("Cond1", MyInt=8)) # value 8 conflicts with earlier set value 7
-        self.assertRaises(ValueError, _failingAdd)
 
     def test_conflict_in_svc(self):
-        def _failingAdd():
+        with self.assertRaises(ValueError):
             self.acc.addService(CompFactory.CoreDumpSvc("CD", Signals=[17])) # different setting [17] vs [15]
-        self.assertRaises(ValueError, _failingAdd)
 
     def test_conflict_in_auditors(self):
         with self.assertRaises(ValueError):
             self.acc.addAuditor(CompFactory.NameAuditor(EventTypes=["none"]))
 
     def test_conflict_in_merge(self):
-        def _failingAdd():
+        with self.assertRaises(ValueError):
             other = ComponentAccumulator()
             other.addCondAlgo(TestAlgo("Cond1", MyInt=8))
             other.addEventAlgo(TestAlgo("Algo1", MyInt = 0))
-
             self.acc.merge(other)
-        self.assertRaises(ValueError, _failingAdd)
-
 
     def test_conflict_in_private_tools(self):
-        def _failingAdd():
+        with self.assertRaises(ConfigurationError): # different error, private tools are never de-duplicated, they are simply not allowed to be added twice
             self.acc.setPrivateTools(CompFactory.HelloTool("TestPrivateTool1", MyMessage="A"))
             self.acc.setPrivateTools(CompFactory.HelloTool("TestPrivateTool1", MyMessage="A"))
-        self.assertRaises(ConfigurationError, _failingAdd) # different error, private tools are never de-duplicated, they are simply not allowed to be added twice
         self.acc.popPrivateTools()
-
 
     def test_algorithmsAreAdded( self ):
         self.assertEqual( findAlgorithm( self.acc.getSequence(), "Algo1", 1).name, "Algo1", "Algorithm not added to a top sequence" )
@@ -145,8 +138,7 @@ class TestComponentAccumulator( unittest.TestCase ):
 
 
     def test_readBackConfiguration( self ):
-        import pickle
-        with open('testFile.pkl', 'rb') as f: 
+        with open('testFile.pkl', 'rb') as f:
             s = pickle.load( f )
         self.assertIsNotNone( s, "The pickle has no content")
 
@@ -176,6 +168,7 @@ class TestGatherProps( unittest.TestCase ):
                                   MyInt=123,
                                   MyBool=True,
                                   ExtraOutputs={'Z', 'A'}))
+        acc.wasMerged()
         appPropsToSet, mspPropsToSet, bshPropsToSet = acc.gatherProps()
 
         self.assertIn(
@@ -204,9 +197,8 @@ class TestGatherProps( unittest.TestCase ):
 
 class TestHLTCF( unittest.TestCase ):
     def runTest( self ):
-        # replicate HLT issue, it occured because the sequnces were recorded in the order of storing in the dict and thus the
-        # some of them (in this case hltSteps) did not have properties recorded
-
+        # replicate HLT issue, it occured because the sequences were recorded in the order of storing
+        # in the dict and thus some of them (in this case hltSteps) did not have properties recorded.
 
         acc = ComponentAccumulator()
         acc.addSequence( seqOR("hltTop") )
@@ -217,23 +209,20 @@ class TestHLTCF( unittest.TestCase ):
         acc.addSequence( seqAND("L2CaloEgammaSeq"), "hltStep_1" )
         acc.addSequence( parOR("hltStep_2"), parentName="hltSteps" )
 
-        fout = open("testFile2.pkl", "wb")
-        acc.store(fout)
-        fout.close()
-        #import pickle
-        #f = open("testFile2.pkl", 'rb')
-        #s = pickle.load(f)
-        #f.close()
-        #TODO revisit after we settle on the pickle content
-        #self.assertNotEqual( s['hltSteps']['Members'], '[]', "Empty set of members in hltSteps, Sequences recording order metters" )
+        with open("testhltcf.pkl", "wb") as f:
+            acc.store(f)
 
+        with open("testhltcf.pkl", "rb") as f:
+            s = pickle.load(f)
+
+        self.assertTrue( len(s.getSequence('hltSteps').Members),
+                         "Empty set of members in hltSteps, Sequences recording order matters" )
 
 class MultipleParentsInSequences( unittest.TestCase ):
     def runTest( self ):
        # test if an algorithm (or sequence) can be controlled by more than one sequence
 
         accTop = ComponentAccumulator()
-
 
         acc1 = ComponentAccumulator()
         acc1.addSequence( seqAND("seq1") )
@@ -256,17 +245,16 @@ class MultipleParentsInSequences( unittest.TestCase ):
         self.assertEqual( len( s.Members ), 1, "Wrong number of algorithms in reco seq: %d " % len( s.Members ) )
         self.assertIs( findAlgorithm( accTop.getSequence( "seq1" ), "recoAlg" ), findAlgorithm( accTop.getSequence( "seq2" ), "recoAlg" ), "Algorithms are cloned" )
 
-        fout = open("dummy.pkl", "wb")
-        accTop.store( fout )
-        fout.close()
-        #import pickle
+        with open("dummy.pkl", "wb") as f:
+            accTop.store( f )
+
         # check if the recording did not harm the sequences
-        #with open("dummy.pkl", 'rb') as f:
-        #    s = pickle.load( f )
-            # TODO revisit once settle on pickle file constent
-            #self.assertEqual( s['seq1']["Members"], "['AthSequencer/seqReco']", "After pickling recoSeq missing in seq1 " + s['seq1']["Members"])
-            #self.assertEqual( s['seq2']["Members"], "['AthSequencer/seqReco']", "After pickling recoSeq missing in seq2 " + s['seq2']["Members"])
-            #self.assertEqual( s['seqReco']["Members"], "['HelloAlg/recoAlg']", "After pickling seqReco is corrupt " + s['seqReco']["Members"] )
+        with open("dummy.pkl", 'rb') as f:
+            acc = pickle.load( f )
+            self.assertEqual( acc.getSequence('seq1').Members[0].getName(), 'seqReco')
+            self.assertEqual( acc.getSequence('seq2').Members[0].getName(), 'seqReco')
+            self.assertEqual( acc.getSequence('seqReco').Members[0].getName(), 'recoAlg')
+
 
 class ForbidRecursiveSequences( unittest.TestCase ):
     def runTest( self ):
@@ -359,28 +347,26 @@ class FailedMerging( unittest.TestCase ):
         topCA = ComponentAccumulator()
         topCA.wasMerged()
 
-        hello = CompFactory.HelloAlg("hello", MyInt=7)
+        hello = TestAlgo("hello", MyInt=7)
         topCA.addEventAlgo(hello)
-        def badMerge1():
+        with self.assertRaises(TypeError):
             someCA = ComponentAccumulator()
             someCA.wasMerged() # to silence verbose deletion of unmerged CA
             topCA.merge(  (someCA, 1, "hello")  )
-        self.assertRaises(TypeError, badMerge1 )
 
-        def badMerge2():
+        with self.assertRaises(ValueError):
             someCA = ComponentAccumulator()
-            hello_mod = CompFactory.HelloAlg("hello", MyInt=8)
+            hello_mod = TestAlgo("hello", MyInt=8)
             someCA.addEventAlgo(hello_mod)
             someCA.wasMerged() # to silence verbose deletion of unmerged CA
             topCA.merge(someCA)
-        self.assertRaises(ValueError, badMerge2)
 
 
 class ErrorForUnmerged( unittest.TestCase ):
     def runTest( self ):
         topCA = ComponentAccumulator()
         with self.assertLogs(topCA._msg, level='ERROR') as cm:
-            topCA.addEventAlgo(CompFactory.HelloAlg())
+            topCA.addEventAlgo(TestAlgo())
             del topCA
         self.assertIn('ComponentAccumulator was never merged', cm.output[0])
 
@@ -413,21 +399,21 @@ class TestComponentAccumulatorAccessors( unittest.TestCase ):
         ca.addEventAlgo(TestAlgo("alg1"))
 
         self.assertEqual( len(ca.getEventAlgos()), 1 , "Found single alg")
-        from AthenaConfiguration.ComponentAccumulator import ConfigurationError
-        self.assertRaises(ConfigurationError, lambda: ca.getEventAlgo("alg2"))
+        with self.assertRaises(ConfigurationError):
+            ca.getEventAlgo("alg2")
 
         ca.addEventAlgo(TestAlgo("alg2"))
 
         self.assertIsNotNone( ca.getEventAlgo("alg2"), "Found single alg")
         self.assertEqual( len(ca.getEventAlgos()), 2 , "Found single alg")
-        self.assertRaises(ConfigurationError, lambda: ca.getEventAlgo()) # Single Alg API ambiguity
-
-
+        with self.assertRaises(ConfigurationError):
+            ca.getEventAlgo() # Single Alg API ambiguity
 
         ca.addPublicTool( dummyTool(name="tool1") )
         self.assertIsNotNone( ca.getPublicTool(), "Found single tool")
         ca.addPublicTool( dummyTool(name="tool2") )
-        self.assertRaises(ConfigurationError, lambda: ca.getPublicTool()) # Found single tool
+        with self.assertRaises(ConfigurationError):
+            ca.getPublicTool() # Found single tool
 
 class TestDeduplication( unittest.TestCase ):
     def runTest( self ):
@@ -487,18 +473,19 @@ class TestDeduplication( unittest.TestCase ):
       
       
         #Add the same service again, with a sightly differently configured private tool:
-        result3.addService(dummyService(AString="bla",
+        result3.addService(dummyService("dummyService",
+                                        AString="bla",
                                         AList=["l1","l3"],
                                         SomeTools=[dummyTool("tool1",BList=["lt3","lt4"]),],
                                     )
                        )
-        # TODO revistit how this can be tested in "python" service implementations
-        self.assertEqual(len(result3.getService("dummyService").SomeTools),1)
-        #self.assertEqual(set(result3.getService("dummyService").SomeTools[0].BList),set(["lt1","lt2","lt3","lt4"])) 
-        #self.assertEqual(set(result3.getService("dummyService").AList),set(["l1","l2","l3"]))
-        
-        #with  self.assertRaises(DeduplicationFailed):
-        #    result3.addService(dummyService("dummyService", AString="blaOther"))
+
+        self.assertEqual(len(result3.getService("dummyService").SomeTools), 1)
+        self.assertEqual(set(result3.getService("dummyService").SomeTools[0].BList), {"lt1","lt2","lt3","lt4"})
+        self.assertEqual(set(result3.getService("dummyService").AList), {"l1","l2","l3"})
+
+        with self.assertRaises(ValueError):
+            result3.addService(dummyService("dummyService", AString="blaOther"))
 
         [ ca.wasMerged() for ca in [result1, result2, result3]]
 
@@ -652,9 +639,9 @@ class TestDifferentSequencesMerging( unittest.TestCase ):
 
         ca = ComponentAccumulator()
         ca.merge(ca1)
-        def _merge():
+        with self.assertRaises(RuntimeError):
             ca.merge(ca2)
-        self.assertRaises(RuntimeError, _merge) # expect to raise issue
+
         ca.wasMerged()
 
 class TestAddingAlgorithms( unittest.TestCase ):
@@ -668,6 +655,7 @@ class TestAddingAlgorithms( unittest.TestCase ):
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
         cfg = MainServicesCfg(flags)
         cfg.addEventAlgo(TestAlgo("foo")) # This should end up in AthAlgSeq not AthMasterSeq
+        cfg.wasMerged()
 
         # Make sure the algorithm ended up in the right place
         self.assertIsNone(findAlgorithm(cfg.getSequence("AthMasterSeq"), "foo", 1), "foo is found in AthMasterSeq")
@@ -677,6 +665,7 @@ class TestAddingAlgorithms( unittest.TestCase ):
         # Set up a custom ComponentAccumulator
         acc = ComponentAccumulator(sequence = CompFactory.AthSequencer("MySeq"))
         acc.addEventAlgo(TestAlgo("foo")) # This should end up in MySeq since that's the sole sequence
+        acc.wasMerged()
 
         # Make sure the algorithm ended up in the right place
         self.assertIsNotNone(findAlgorithm(acc.getSequence("MySeq"), "foo", 1), "foo is not found in MySeq")
@@ -685,10 +674,10 @@ class TestAddingAlgorithms( unittest.TestCase ):
         # Set up a default ComponentAccumulator
         acc = ComponentAccumulator()
         acc.addEventAlgo(TestAlgo("foo")) # This should end up in AthAlgSeq
+        acc.wasMerged()
 
         # Make sure the algorithm ended up in the right place
         self.assertIsNotNone(findAlgorithm(acc.getSequence("AthAlgSeq"), "foo", 1), "foo is not found in AthAlgSeq")
-
 
 if __name__ == "__main__":
     unittest.main()

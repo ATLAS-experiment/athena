@@ -95,9 +95,9 @@ JetRestrictedSumPtVertexWeightCalculator::estimateSignalCompatibility(
     }
 
   }
-  ATH_MSG_VERBOSE("Counted " << n_selected_tracks << "/" << vertex.nTrackParticles()
+  ATH_MSG_DEBUG("Counted " << n_selected_tracks << "/" << vertex.nTrackParticles()
     << " towards vertex sumpt " << std::setprecision(3) << jet_only_pt << " (unrestricted sum: " << total_pt << ")");
-  return total_pt;
+  return jet_only_pt;
 }
 
 } /// End!!!

@@ -9,8 +9,11 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
+from TrigEDMConfig.TriggerEDMDefs import allowTruncation
+from CLIDComps.clidGenerator import clidGenerator
+import re
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
@@ -74,8 +77,11 @@ def _addExtraCollectionsToEDMList(edmList, extraList):
     for item in extraList:
         colname = (item[0].split("#")[1]).split(".")[0]
         if colname not in existing_collections:
-            # a new collection is added
-            edmList.append(item)
+            # a new collection and its Aux container are added to beginning of list so that 'allowTruncation' items remain at end.
+            if 'Aux' in colname:
+                edmList.insert(1,item)
+            else:
+                edmList.insert(0,item)
             log.info("added new item to Trigger EDM: {}".format(item))
         else:
             # Maybe extra dynamic variables or EDM targets are added
@@ -111,6 +117,9 @@ def _addExtraCollectionsToEDMList(edmList, extraList):
             else:
                 edmList.insert(existing_item_nr[0] , (combName, newTargets, signature))
             log.info("updated item in Trigger EDM: {}".format(edmList[existing_item_nr[0]]))
+
+    if testEDMList(edmList, error_on_edmdetails=False):
+        log.error("edmList contains inconsistencies!")
 
 def getRawTriggerEDMList(flags, runVersion=-1):
     """
@@ -689,3 +698,145 @@ def getL2Run2EquivalentList():
         t,k = _getTypeAndKey(item[1])
         l += [t+"#"+_keyToLabel(k)]
     return l
+
+def isCLIDDefined(cgen,typename):
+  """
+  Checks container type name is hashable
+  """
+  c = cgen.genClidFromName(typename)
+  return (cgen.getNameFromClid(c) is not None)
+
+def testEDMList(edm_list, error_on_edmdetails = True):
+    """
+    Checks EDM list entries for serialization and configuration compliance.
+    """
+
+    #xAOD types that don't expect accompanying Aux containers
+    _noAuxList = ["xAOD::" + contType for contType in ["TrigConfKeys", "BunchConfKey"]]
+
+    cgen = clidGenerator("", False)
+    return_code = 0
+    found_allow_truncation = False
+    serializable_names = []
+    serializable_names_no_label = []
+    serializable_names_no_properties = []
+
+    for i, edm in enumerate(edm_list):
+
+        #check has sufficient entries
+        if len(edm) < 3:
+            log.error("EDM entry too short for " + edm[0])
+            return_code = 1
+            continue
+
+        serializable_name = edm[0]
+        serializable_name_no_label = re.sub(r"\#.*", "", serializable_name)
+        serializable_name_no_properties = serializable_name.split('.')[0]
+
+        serializable_names.append(serializable_name)
+        serializable_names_no_label.append(serializable_name_no_label)
+        serializable_names_no_properties.append(serializable_name_no_properties)
+
+        #check container type name is hashable
+        if not isCLIDDefined(cgen,serializable_name_no_label):
+            log.error("no CLID for " + serializable_name)
+            return_code = 1
+
+        #check that no '.' in entries _not_ containing 'Aux'
+        if "Aux" not in serializable_name and "." in serializable_name:
+            log.error("A '.' found in non-Aux container name " + serializable_name)
+            return_code = 1
+
+        #check for Aux "."
+        if "Aux" in serializable_name and "Aux." not in serializable_name:
+            log.error("no final Aux. in label for " + serializable_name)
+            return_code = 1
+
+        #check contains exactly one #
+        if serializable_name.count("#") != 1:
+            log.error("Invalid naming structure for " + serializable_name)
+            return_code = 1
+        else: # only proceed if type and name can be separated
+            #check that every interface xAOD container directly followed by matching Aux container.
+            if serializable_name.startswith("xAOD") and "Aux" not in serializable_name:
+                cont_type,cont_name = serializable_name.split("#")
+                if cont_type not in _noAuxList:
+                    auxmismatch = False
+                    if len(edm_list) == i+1:
+                        auxmismatch = True
+                        cont_to_test = "nothing"
+                    else:
+                        cont_to_test = edm_list[i+1][0].split(".")[0]+"."
+                        cont_type_short = cont_type.replace("Container","")
+                        pattern = re.compile(cont_type_short+r".*Aux.*\#"+cont_name+"Aux.")
+                        if not pattern.match(cont_to_test):
+                          #test if shallow container type.
+                          shallow_pattern = re.compile("xAOD::ShallowAuxContainer#"+cont_name+"Aux.")
+                          if not shallow_pattern.match(cont_to_test):
+                            auxmismatch = True
+                    if auxmismatch:
+                        log.error("Expected relevant Aux container following interface container %s, but found %s instead.",serializable_name,cont_to_test)
+                        return_code = 1
+                    else:
+                        #check that targets of interface and aux container match
+                        targets = set(edm[1].split())
+                        if len(edm_list[i+1]) > 1 and cont_to_test.count("#") == 1:
+                            contname_to_test = cont_to_test.split("#")[1]
+                            targets_to_test = set(edm_list[i+1][1].split())
+                            if len(targets ^ targets_to_test) > 0:
+                                log.error("Targets of %s (%s) and %s (%s) do not match",cont_name,targets,contname_to_test,targets_to_test)
+                                return_code = 1
+
+        #check that Aux always follows non-Aux (our deserialiser relies on that)
+        if i>0 and "Aux" in serializable_name and "Aux" in edm_list[i-1][0]:
+            log.error(f"Aux container {serializable_name} needs to folow the "
+                      "associated interface container in the EDM list")
+            return_code = 1
+
+        #check target types are valid. Check that target lists containing higher level targets
+        #have required low level targets (ESD for AOD targets, AODFULL for SLIM targets).
+        file_types = edm[1].split() # might return empty list, this is fine - 0 output file types allowed for an EDM entry (in case of obsolete containers)
+        for file_type in file_types:
+          if file_type not in AllowedOutputFormats:
+              log.error("unknown file type " + file_type + " for " + serializable_name)
+              return_code = 1
+          for higher_level,required_lower_level in [('AOD','ESD'), ('SLIM','AODFULL')]:
+              if higher_level in file_type and required_lower_level not in file_types:
+                  log.error("Target list for %s containing '%s' must also contain lower level target '%s'.",serializable_name,file_type,required_lower_level)
+                  return_code = 1
+
+        # Check allowTuncation is only at the end
+        tags = edm[3] if len(edm) > 3 else None
+        allow_truncation_flag = False
+        if tags:
+            allow_truncation_flag = allowTruncation in tags
+            if allow_truncation_flag:
+                found_allow_truncation = True
+
+        if found_allow_truncation and not allow_truncation_flag:
+            log.error("All instances of 'allowTruncation' need to be at the END of the EDM serialisation list")
+            return_code = 1
+
+    #end of for loop over entries. Now do complete list checks.
+
+    #check for duplicates:
+    #check that no two EDM entries match after stripping out characters afer '.'
+    if not len(set(serializable_names_no_properties)) == len(serializable_names_no_properties):
+        log.error("Duplicates in EDM list! Duplicates found:")
+        import collections.abc
+        for item, count in collections.Counter(serializable_names_no_properties).items():
+            if count > 1:
+                log.error(str(count) + "x: " + str(item))
+        return_code = 1
+
+    #check EDMDetails
+    for EDMDetail in EDMDetailsRun3.keys():
+        if EDMDetail not in serializable_names_no_label:
+            msg = "EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList"
+            if error_on_edmdetails:
+                log.error(msg)
+                return_code = 1
+            else:
+                log.warning(msg)
+
+    return return_code

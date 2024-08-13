@@ -62,17 +62,32 @@ def JfexMonitoringConfig(flags):
         'ybins': 64, 'ymin': -TMath.Pi(), 'ymax': TMath.Pi()
     }
 
+    n_bins_total = len(eta_bins) * 64
+    n_bins_eta_2p5 = len(eta_phi_bins_central) * 64
+    n_bins_eta_2p3 = 46 * 64
+    # number of bins above |eta| = 3.2 that will never be filled with TOBs
+    # due to the low granularity and irregular structure of the FCAL
+    # (given by the length of the list of empty bin in JfexMapForwardEmptyBins.h)
+    n_empty_bins_fcal = 2036
+
+    # all bins should be filled with jets, except the always empty ones in FCAL
+    n_expected_filled_bins_jJ = n_bins_total - n_empty_bins_fcal
+    # taus are only produced for |eta| < 2.5
+    n_expected_filled_bins_jTAU = n_bins_eta_2p5
+    # forward electrons are produced for |eta| > 2.3
+    n_expected_filled_bins_jEM = n_bins_total - n_empty_bins_fcal - n_bins_eta_2p3
+
     helper.defineDQAlgorithm("Jfex_etaPhiMapFilled",
                              hanConfig={"libname":"libdqm_summaries.so","name":"Bins_LessThanAbs_Threshold","BinThreshold":"1"}, # counts bins with |value|<1
-                             thresholdConfig={"NBins":[0,len(eta_bins)*64-2789]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties, 2789)
+                             thresholdConfig={"NBins":[0,n_expected_filled_bins_jJ]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
                              )
     helper.defineDQAlgorithm("Jfex_etaPhiMapFilled_EM",
                              hanConfig={"libname":"libdqm_summaries.so","name":"Bins_LessThanAbs_Threshold","BinThreshold":"1"}, # counts bins with |value|<1
-                             thresholdConfig={"NBins":[0,len(eta_bins)*64-2789-50*64]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties, 2789 + central region)
+                             thresholdConfig={"NBins":[0,n_expected_filled_bins_jEM]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
                              )
     helper.defineDQAlgorithm("Jfex_etaPhiMapFilled_TAU",
                              hanConfig={"libname":"libdqm_summaries.so","name":"Bins_LessThanAbs_Threshold","BinThreshold":"1"}, # counts bins with |value|<1
-                             thresholdConfig={"NBins":[0,50*64]}, # 0 bins expected empty, warning above that, error if entirely empty
+                             thresholdConfig={"NBins":[0,n_expected_filled_bins_jTAU]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
                              )
 
     ######  jJ  ######
