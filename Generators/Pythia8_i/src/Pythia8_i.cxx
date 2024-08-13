@@ -683,7 +683,7 @@ StatusCode Pythia8_i::genFinalize(){
 
 ////////////////////////////////////////////////////////////////////////////////
 void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
-
+constexpr int LHESTATUS = 1003;
 #ifdef HEPMC3
   HepMC::GenEvent *procEvent = new HepMC::GenEvent();
 
@@ -693,7 +693,7 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
   m_pythiaToHepMC.fill_next_event(m_pythia->process, procEvent, evt->event_number(), &m_pythia->info, &m_pythia->settings);
 
   for(auto  p: *procEvent){
-    p->set_status(HepMC::PYTHIA8LHESTATUS);
+    p->set_status(LHESTATUS);
   }
 
   //This code and the HepMC2 version below assume a correct input, e.g. beams[0]->end_vertex() exists.
@@ -717,7 +717,7 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
 
   for(HepMC::GenEvent::particle_iterator p = procEvent->particles_begin();
       p != procEvent->particles_end(); ++p){
-    (*p)->set_status(HepMC::PYTHIA8LHESTATUS);
+    (*p)->set_status(LHESTATUS);
   }
 
   std::vector<HepMC::GenParticle*> beams;
