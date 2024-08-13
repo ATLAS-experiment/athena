@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/PhotonxAODHelpers.h"
@@ -1195,10 +1195,11 @@ namespace ZMassConstraint
             return eta_calo;
         }
         const xAOD::CaloCluster& cluster = *eg->caloCluster();
+        static const SG::ConstAccessor<float> etaCaloAcc("etaCalo");
         if (cluster.retrieveMoment(xAOD::CaloCluster::ETACALOFRAME,
                                    eta_calo)) { }
-        else if (cluster.isAvailable<float>("etaCalo")) {
-            eta_calo = cluster.auxdata<float>("etaCalo");
+        else if (etaCaloAcc.isAvailable(cluster)) {
+          eta_calo = etaCaloAcc(cluster);
         }
         else {
             ATH_MSG_ERROR("retrieve_eta_calo - etaCalo not available as auxilliary variable");

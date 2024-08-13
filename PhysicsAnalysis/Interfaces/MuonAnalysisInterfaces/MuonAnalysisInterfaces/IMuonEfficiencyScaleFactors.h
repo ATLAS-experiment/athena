@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IMUONEFFICIENCYSCALEFACTORS_H_
@@ -80,7 +80,8 @@
  *  // either (decorate the muon with the information)
  *
  *  CHECK(m_effi_corr.applyEfficiencyScaleFactor(*mu)); <br>
- *  float my_SF = mu->auxdata< float >( "EfficiencyScaleFactor" ); <br>
+ *  static const SG::ConstAccessor<float> sfAcc("EfficiencyScaleFactor"); <br>
+ *  float my_SF = sfAcc(*mu); <br>
  *
  *  // or (only obtain the SF, without decorating the muon):
  *
