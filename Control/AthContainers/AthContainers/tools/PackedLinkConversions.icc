@@ -1,0 +1,78 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/PackedLinkConversions.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jun, 2024
+ * @brief Conversions between PackedLink and ElementLink.
+ */
+
+
+namespace SG { namespace detail {
+
+
+/**
+ * @brief Constructor.
+ * @param dlinks Span over DataLinks.
+ */
+template <class CONT>
+inline
+PackedLinkConstConverter<CONT>::PackedLinkConstConverter
+  (const const_DataLink_span& dlinks)
+  : m_dlinks (dlinks)
+{
+}
+
+
+/**
+ * @brief Transform a PackedLink to an ElementLink.
+ * @param plink The link to transform.
+ */
+template <class CONT>
+inline
+auto PackedLinkConstConverter<CONT>::operator()
+  (const PackedLinkBase& plink) const -> const value_type
+{
+  unsigned int coll = plink.collection();
+  // We need to special-case this: if there were no non-null links,
+  // then the DataLink collection may not have been filled.
+  if (coll == 0) {
+    return value_type();
+  }
+#ifdef XAOD_STANDALONE
+  return value_type (m_dlinks.at(coll).key(), plink.index());
+#else
+  return value_type (m_dlinks.at(coll), plink.index());
+#endif
+}
+
+
+/**
+ * @brief Constructor.
+ * @param dlinks Span over DataLinks.
+ */
+template <class CONT>
+inline
+PackedLinkVectorConstConverter<CONT>::PackedLinkVectorConstConverter
+  (const const_DataLink_span& dlinks)
+  : m_dlinks (dlinks)
+{
+}
+
+
+/**
+ * @brief Transform a vector of PackedLinks to a span over ElementLinks.
+ * @param velt The vector to transform.
+ */
+template <class CONT>
+template <class VALLOC>
+inline
+auto PackedLinkVectorConstConverter<CONT>::operator()
+  (const std::vector<PackedLink<CONT>, VALLOC>& velt) const -> value_type
+{
+  return value_type (CxxUtils::make_span (velt), m_dlinks);
+}
+
+
+} } // namespace SG::detail

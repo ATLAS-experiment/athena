@@ -64,6 +64,7 @@ void test1()
   std::cout << SG::ExcAllocOwnership().what() << "\n";
   std::cout << SG::ExcBadVarName("foo asd").what() << "\n";
   std::cout << SG::ExcJaggedVecOverlappingCopy().what() << "\n";
+  std::cout << SG::ExcOutOfRange("foo", 10, 1).what() << "\n";
 }
 
 
