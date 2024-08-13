@@ -6,7 +6,7 @@
 
 #include "JetMomentTools/JetIsolationTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "JetUtils/JetDistances.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include <sstream>
 
 using std::string;
@@ -161,7 +161,7 @@ namespace jet {
       IsolationAreaBase(double p, const string &n) : m_parameter(p), m_name(n){}
       
       bool inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& part) const {
-        double dr2 = JetDistances::deltaR(j->eta(), j->phi(), part.x(), part.y());
+        double dr2 = xAOD::P4Helpers::deltaR2(j->eta(), j->phi(), part.x(), part.y());
         return dr2 < m_deltaRmax2;
       }
       
@@ -198,7 +198,7 @@ namespace jet {
     // For Iso6To8 we need to redefine inIsolationArea
     ISOAREA( Iso6To8, 0.8 ,  bool inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& constit)const ;  )  ;
     bool Iso6To8::inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& constit) const {
-      double dr2 = JetDistances::deltaR2(j->eta(), j->phi(), constit.x(), constit.y());
+      double dr2 = xAOD::P4Helpers::deltaR2(j->eta(), j->phi(), constit.x(), constit.y());
       return ( (dr2<0.8*0.8) && (dr2>0.6*0.6) );
     }
 

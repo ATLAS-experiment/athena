@@ -24,7 +24,7 @@
 #include <cmath>
 
 
-#include "JetUtils/JetDistances.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 
 namespace JetTiledMap {
 

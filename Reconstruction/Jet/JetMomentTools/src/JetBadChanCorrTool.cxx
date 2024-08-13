@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -19,9 +19,9 @@
 
 #include "JetMomentTools/JetBadChanCorrTool.h"
 #include "JetUtils/JetCellAccessor.h"
-#include "JetUtils/JetDistances.h"
 #include "AthenaKernel/Units.h"
 
+#include "FourMomUtils/xAODP4Helpers.h"
 
 using Athena::Units::GeV;
 
@@ -204,7 +204,7 @@ StatusCode JetBadChanCorrTool::correctionFromCellsInJet(const xAOD::JetContainer
           if(cell->provenance() & 0x0200)
             isOTX = true;
 
-        double dr = jet::JetDistances::deltaR(jet->eta(),jet->phi(),dde->eta(), dde->phi());
+        double dr = xAOD::P4Helpers::deltaR(jet->eta(),jet->phi(),dde->eta(), dde->phi());
         double frac_cell = getProfile(rawPt, dr, sampling, dde->eta(), dde->phi());
 
         double frac = frac_cell * cellWeight;
@@ -266,7 +266,7 @@ float JetBadChanCorrTool::correctionFromCellsInCone(const xAOD::Jet* jet, const 
 
     CaloCell_ID::CaloSample sampling = itr->sampling();
 
-    double dr = jet::JetDistances::deltaR(jeteta,jetphi   , cell_eta, cell_phi);
+    double dr = xAOD::P4Helpers::deltaR(jeteta, jetphi, cell_eta, cell_phi);
     double frac_cell = getProfile(rawPt, dr, sampling, cell_eta, cell_phi);
 
     corr_jet_cone += frac_cell;
