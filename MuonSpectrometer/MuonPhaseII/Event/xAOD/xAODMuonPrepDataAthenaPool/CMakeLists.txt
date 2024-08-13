@@ -9,6 +9,7 @@ find_package( ROOT COMPONENTS Core )
 # Component(s) in the package:
 atlas_add_poolcnv_library( xAODMuonPrepDataAthenaPoolCnv
    FILES xAODMuonPrepData/MdtDriftCircleContainer.h xAODMuonPrepData/MdtDriftCircleAuxContainer.h 
+         xAODMuonPrepData/MdtTwinDriftCircleContainer.h xAODMuonPrepData/MdtTwinDriftCircleAuxContainer.h 
          xAODMuonPrepData/RpcStripContainer.h xAODMuonPrepData/RpcStripAuxContainer.h 
          xAODMuonPrepData/RpcStrip2DContainer.h xAODMuonPrepData/RpcStrip2DAuxContainer.h 
          xAODMuonPrepData/TgcStripContainer.h xAODMuonPrepData/TgcStripAuxContainer.h 
@@ -17,6 +18,7 @@ atlas_add_poolcnv_library( xAODMuonPrepDataAthenaPoolCnv
          xAODMuonPrepData/sTgcWireContainer.h xAODMuonPrepData/sTgcWireAuxContainer.h 
          xAODMuonPrepData/MMClusterContainer.h xAODMuonPrepData/MMClusterAuxContainer.h         
    TYPES_WITH_NAMESPACE xAOD::MdtDriftCircleContainer xAOD::MdtDriftCircleAuxContainer 
+                        xAOD::MdtTwinDriftCircleContainer xAOD::MdtTwinDriftCircleAuxContainer 
                         xAOD::RpcStripContainer xAOD::RpcStripAuxContainer
                         xAOD::RpcStrip2DContainer xAOD::RpcStrip2DAuxContainer 
                         xAOD::TgcStripContainer xAOD::TgcStripAuxContainer 

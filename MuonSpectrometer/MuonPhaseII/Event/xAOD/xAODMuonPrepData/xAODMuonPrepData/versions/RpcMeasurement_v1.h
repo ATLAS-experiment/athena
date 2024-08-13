@@ -27,9 +27,12 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::RpcStripType;
     }
-    /** @brief: Returns the Athena identifier of the measurement
-     *          It's constructed from the measurementHash & passed to the associated readoutElement */
+    /** @brief: Returns the Athena identifier of the measurement It's constructed from the measurementHash
+     *          which is passed to the associated readoutElement */
     Identifier identify() const;
+    /** @brief Returns the local position of the measurement */
+    Amg::Vector3D localMeasurementPos() const;
+    
     /** @brief returns the associated strip number*/
     uint16_t stripNumber() const;
     /** @brief returns the associated gas gap */

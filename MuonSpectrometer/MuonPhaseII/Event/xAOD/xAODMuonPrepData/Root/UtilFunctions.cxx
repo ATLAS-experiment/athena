@@ -4,6 +4,7 @@
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "GeoModelHelpers/throwExcept.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/RpcStrip2D.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
@@ -12,19 +13,21 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/versions/AccessorMacros.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
+#include "TrkEventPrimitives/ParamDefs.h"
 
 namespace {
         template<class MeasType> Amg::Transform3D toChamberTransform(const ActsGeometryContext& gctx,
                                                                      const MeasType* unCalibMeas) {
         
         IdentifierHash hash{};
-        if constexpr(std::is_same<MeasType, xAOD::MdtDriftCircle>::value) {
+        if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle> ||
+                     std::is_same_v<MeasType, xAOD::MdtTwinDriftCircle>) {
             hash = unCalibMeas->measurementHash();
         } else {
             hash = unCalibMeas->layerHash();
         }
-        return unCalibMeas->readoutElement()->getChamber()->globalToLocalTrans(gctx) * 
-               unCalibMeas->readoutElement()->localToGlobalTrans(gctx, hash);
+        const MuonGMR4::MuonReadoutElement* reEle{unCalibMeas->readoutElement()};
+        return reEle->getChamber()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, hash);
     }
 }
 
@@ -67,28 +70,21 @@ namespace xAOD{
 
         if (meas->type() == UncalibMeasType::MdtDriftCircleType) {
             const MdtDriftCircle* dc = static_cast<const MdtDriftCircle*>(meas);
-            return toChamberTransform(gctx, dc).translation();
+            return toChamberTransform(gctx, dc) * dc->localCirclePosition();
         } else if (meas->type() == UncalibMeasType::RpcStripType) {
-            if (meas->numDimensions() == 1) {
-                const RpcStrip* strip = static_cast<const RpcStrip*>(meas);
-                return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
-            } else {
-                const RpcStrip2D* strip = static_cast<const RpcStrip2D*>(meas);
-                Amg::Vector3D locPos{Amg::Vector3D::Zero()};
-                locPos.block<2,1>(0,0) = toEigen(strip->localPosition<2>());
-                return toChamberTransform(gctx, strip) * locPos;
-            }
+            const RpcMeasurement* strip = static_cast<const RpcMeasurement*>(meas);
+            toChamberTransform(gctx, strip) * strip->localMeasurementPos();
         } else if (meas->type() == UncalibMeasType::TgcStripType) {
             const TgcStrip* strip = static_cast<const TgcStrip*>(meas);
-            return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+            return toChamberTransform(gctx, strip) *(strip->localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
         } else if (meas->type() == UncalibMeasType::MMClusterType) {
             const MMCluster* clust = static_cast<const MMCluster*>(meas);
-            return toChamberTransform(gctx, clust) *(clust->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+            return toChamberTransform(gctx, clust) *(clust->localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
         } else if (meas->type() == UncalibMeasType::sTgcStripType) {
             const sTgcMeasurement* sTgc = static_cast<const sTgcMeasurement*>(meas);
             if (sTgc->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip ||
                 sTgc->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
-                return toChamberTransform(gctx, sTgc) * (sTgc->localPosition<1>()[0] * Amg::Vector3D::UnitX());
+                return toChamberTransform(gctx, sTgc) * (sTgc->localPosition<1>()[Trk::locX] * Amg::Vector3D::UnitX());
             }
             Amg::Vector3D locPos{Amg::Vector3D::Zero()};
             locPos.block<2,1>(0,0) = toEigen(sTgc->localPosition<2>());
