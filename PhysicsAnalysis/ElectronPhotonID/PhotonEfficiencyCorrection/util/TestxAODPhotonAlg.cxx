@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -187,11 +187,13 @@ int main( int argc, char* argv[] ) {
     xAOD::PhotonContainer* phsCorr = photons_shallowCopy.first;
     xAOD::PhotonContainer::iterator ph_itr      = phsCorr->begin();
     xAOD::PhotonContainer::iterator ph_end      = phsCorr->end();
+
+    static const SG::ConstAccessor<float> sfAcc("SF");
 	
     unsigned int i = 0;
-	for( ; ph_itr != ph_end; ++ph_itr, ++i ) {
-	  xAOD::Photon* ph = *ph_itr;
-	  
+    for( ; ph_itr != ph_end; ++ph_itr, ++i ) {
+          xAOD::Photon* ph = *ph_itr;
+
 	  // skip photons with pt outsize the acceptance
 	  if(ph->pt()<10000.0) continue;
 	  const xAOD::CaloCluster* cluster  = ph->caloCluster();  
@@ -228,11 +230,11 @@ int main( int argc, char* argv[] ) {
 	   
 	   // decorate photon (for different name use photonSF_ID.setProperty("ResultName","ID_"); or photonSF_Iso.setProperty("ResultName","Iso_");)
 	   ANA_CHECK(photonSF_ID.applyEfficiencyScaleFactor(*ph));
-       Info( "applyEfficiencyScaleFactor()","===>>> new decoration: (xAOD::Photon*)ph->auxdata<float>(\"SF\")=%f",ph->auxdata<float>("SF"));
+	   Info( "applyEfficiencyScaleFactor()","===>>> new decoration: \"SF\"=%f", sfAcc(*ph));
 	   ANA_CHECK(photonSF_Iso.applyEfficiencyScaleFactor(*ph));
-       Info( "applyEfficiencyScaleFactor()","===>>> new decoration: (xAOD::Photon*)ph->auxdata<float>(\"SF\")=%f",ph->auxdata<float>("SF"));
+	   Info( "applyEfficiencyScaleFactor()","===>>> new decoration: \"SF\"=%f", sfAcc(*ph));
 	   ANA_CHECK(photonSF_Trig.applyEfficiencyScaleFactor(*ph));
-       Info( "applyEfficiencyScaleFactor()","===>>> new decoration: (xAOD::Photon*)ph->auxdata<float>(\"SF\")=%f",ph->auxdata<float>("SF"));
+	   Info( "applyEfficiencyScaleFactor()","===>>> new decoration: \"SF\"=%f", sfAcc(*ph));
 	   
 	   // get SF for all recommended systematic variations (nominal is also included):
 	   for (const auto& sSystematicSet: syst_PhotonID){

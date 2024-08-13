@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifdef XAOD_STANDALONE
@@ -199,8 +199,10 @@ xAOD::CaloCluster* EgammaFactory::create_cluster(float eta, float phi, float e0,
     ATH_MSG_DEBUG("setting phi cluster");
     cluster->setPhi(phi);
     ATH_MSG_DEBUG("decorate cluster for etaCalo, phiCalo");
-    cluster->auxdata<float>("etaCalo") = eta;
-    cluster->auxdata<float>("phiCalo") = phi;
+    static const SG::Decorator<float> etaCaloDecor("etaCalo");
+    static const SG::Decorator<float> phiCaloDecor("phiCalo");
+    etaCaloDecor(*cluster) = eta;
+    phiCaloDecor(*cluster) = phi;
     //         void insertMoment( MomentType type, double value );
     cluster->insertMoment(xAOD::CaloCluster::ETACALOFRAME, eta);
     cluster->insertMoment(xAOD::CaloCluster::PHICALOFRAME, phi);
@@ -259,8 +261,10 @@ xAOD::Photon* EgammaFactory::create_photon(float eta, float phi, float e0,
     vertex->setX(rconv);
     vertex->setY(0);
     // decorate with pt1, pt2
-    vertex->auxdata<float>("pt1") = e / cosh(eta) * 0.7;
-    vertex->auxdata<float>("pt2") = e / cosh(eta) * 0.3;
+    SG::Decorator<float> pt1Decor("pt1");
+    SG::Decorator<float> pt2Decor("pt2");
+    pt1Decor(*vertex) = e / cosh(eta) * 0.7;
+    pt2Decor(*vertex) = e / cosh(eta) * 0.3;
     m_vertexes->push_back(vertex);
   }
 

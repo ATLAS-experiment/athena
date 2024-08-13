@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -86,6 +86,9 @@ int main (int argc, char* argv[])
     ANA_CHECK(isoCorrToolStep.setProperty("Apply_etaEDPar_mc_correction", false));
     ANA_CHECK(isoCorrToolStep.setProperty("Apply_etaEDParPU_correction", true));
     ANA_CHECK(isoCorrToolStep.initialize());
+
+    static const SG::ConstAccessor<float> topoEtCone40OriginalAcc("topoetcone40_original");
+    static const SG::ConstAccessor<float> topoEtCone40Acc("topoetcone40");
     
     //loop over the events
     for (Long64_t entry = 0; entry < entries; entry++)
@@ -109,9 +112,9 @@ int main (int argc, char* argv[])
             ANA_CHECK(isoCorrToolFull.applyCorrection(*(photons_isocorr.first->at(idx))));
             ANA_CHECK(isoCorrToolStep.applyCorrection(*(photons_fudge.first->at(idx))));
             ANA_CHECK(fudgeTool.applyCorrection(*(photons_fudge.first->at(idx))));
-            ANA_MSG_INFO("topoetcone40 fudge before applyCorrection: " << photons_fudge.first->at(idx)->auxdata<float>("topoetcone40_original"));
-            ANA_MSG_INFO("topoetcone40 fudge after  applyCorrection : " << photons_fudge.first->at(idx)->auxdata<float>("topoetcone40"));
-            ANA_MSG_INFO("topoetcone40 with IsolationCorrectionTool : " << photons_isocorr.first->at(idx)->auxdata<float>("topoetcone40"));
+            ANA_MSG_INFO("topoetcone40 fudge before applyCorrection: " << topoEtCone40OriginalAcc(*photons_fudge.first->at(idx)));
+	    ANA_MSG_INFO("topoetcone40 fudge after  applyCorrection : " << topoEtCone40Acc(*photons_fudge.first->at(idx)));
+            ANA_MSG_INFO("topoetcone40 with IsolationCorrectionTool : " << topoEtCone40Acc(*photons_isocorr.first->at(idx)));
         } // loop over photon container
     } // loop over events
 

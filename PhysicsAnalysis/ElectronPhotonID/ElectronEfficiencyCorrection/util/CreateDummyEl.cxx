@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "CreateDummyEl.h"
@@ -57,8 +57,10 @@ fill_cluster(xAOD::CaloCluster* cluster, float eta, float phi, float e)
   cluster->setE(e);
   cluster->setEta(eta);
   cluster->setPhi(phi);
-  cluster->auxdata<float>("etaCalo") = eta;
-  cluster->auxdata<float>("phiCalo") = phi;
+  static const SG::Decorator<float> etaCaloDecor("etaCalo");
+  static const SG::Decorator<float> phiCaloDecor("phiCalo");
+  etaCaloDecor(*cluster) = eta;
+  phiCaloDecor(*cluster) = phi;
   cluster->insertMoment(xAOD::CaloCluster::ETACALOFRAME, eta);
   cluster->insertMoment(xAOD::CaloCluster::PHICALOFRAME, phi);
 }
