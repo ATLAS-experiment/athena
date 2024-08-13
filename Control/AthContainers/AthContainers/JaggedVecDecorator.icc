@@ -1,0 +1,379 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/JaggedVecDecorator.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Apr, 2024
+ * @brief Helper class to provide type-safe access to aux data,
+ *        specialized for @c JaggedVecElt.
+ */
+
+
+#include "AthContainers/AuxElement.h"
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/exceptions.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::Decorator (const std::string& name)
+  : Decorator (name, "", SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::Decorator (const std::string& name,
+                                                      const std::string& clsname)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::Decorator (const SG::auxid_t auxid)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  this->m_auxid = auxid;
+  r.checkAuxID<Elt_t, ALLOC> (this->m_auxid);
+  this->m_linkedAuxid = r.linkedVariable (this->m_auxid);
+  if (this->m_linkedAuxid == static_cast<uint32_t>(null_auxid)) {
+    throw SG::ExcNoLinkedVar (auxid, typeid (Payload_t));
+    // cppcheck-suppress missingReturn
+  }
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::Decorator
+  (const std::string& name,
+   const std::string& clsname,
+   const SG::AuxVarFlags flags)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  this->m_linkedAuxid = r.getAuxID<Payload_t, PayloadAlloc_t> (AuxTypeRegistry::linkedName (name),
+                                                               clsname,
+                                                               flags | AuxVarFlags::Linked);
+  this->m_auxid = r.getAuxID<Elt_t, ALLOC> (name, clsname, flags, m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a non-const reference.
+ * @param e The element for which to fetch the variable.
+ *
+ * Will return a proxy object, which will allow treating this
+ * jagged vector element as a vector.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <IsConstAuxElement ELT>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (const ELT& e) const
+  -> reference_type
+{
+  assert (e.container() != 0);
+  return (*this) (*e.container(), e.index());
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a non-const reference.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * Will return a proxy object, which will allow treating this
+ * jagged vector element as a vector.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator() (const AuxVectorData& container,
+                                                       size_t index) const
+  -> reference_type
+{
+  (void)this->getEltDecorArray (container); // const/locking checks
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE =
+    const_cast<AuxVectorData&> (container);
+  return JVecProxy (index,
+                    *container.getDataSpan (this->m_linkedAuxid),
+                    *container.getDataSpan (this->m_auxid),
+                    container_nc,
+                    this->m_auxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to fetch the variable.
+ * @param x The variable value to set.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <IsConstAuxElement ELT,
+          CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+inline
+void Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::set (const ELT& e,
+                                                     const RANGE& x) const
+{
+  set (*e.container(), e.index(), x);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ * @param x The variable value to set.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <CxxUtils::InputRangeOverT<PAYLOAD_T> RANGE>
+inline
+void Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::set (const AuxVectorData& container,
+                                                     size_t index,
+                                                     const RANGE& x) const
+{
+  (*this) (container, index) = x;
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of @c JaggedVecElt objects.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltArray (const AuxVectorData& container) const
+  -> const Elt_t*
+{
+  return reinterpret_cast<const Elt_t*>
+    (container.getDataArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the payload array.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadArray (const AuxVectorData& container) const
+  -> const Payload_t*
+{
+  return reinterpret_cast<const Payload_t*>
+    (container.getDataArray (m_linkedAuxid));
+}
+    
+
+/**
+ * @brief Get a pointer to the start of the array of @c JaggedVecElt objects,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltDecorArray (const AuxVectorData& container) const
+  -> Elt_t*
+{
+  return reinterpret_cast<Elt_t*>
+    (container.getDecorationArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the payload array,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadDecorArray (const AuxVectorData& container) const
+  -> Payload_t*
+{
+  return reinterpret_cast<Payload_t*>
+    (container.getDecorationArray (m_linkedAuxid));
+}
+    
+
+/**
+ * @brief Get a span over the array of @c JaggedVecElt objects.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltSpan (const AuxVectorData& container) const
+  -> const_Elt_span
+{
+  auto beg = reinterpret_cast<const Elt_t*>(container.getDataArray (m_auxid));
+  return const_Elt_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the payload vector.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadSpan (const AuxVectorData& container) const
+  -> const_Payload_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return const_Payload_span (reinterpret_cast<const Payload_t*>(sp->beg),
+                             sp->size);
+}
+
+
+/**
+ * @brief Get a span over spans representing the jagged vector.
+ * @param container The container from which to fetch the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDataSpan (const AuxVectorData& container) const
+  -> const_span
+{
+  return const_span (getEltSpan(container),
+                     ConstConverter_t (*container.getDataSpan (m_linkedAuxid)));
+}
+
+
+/**
+ * @brief Get a span over the array of @c JaggedVecElt objects,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltDecorSpan (const AuxVectorData& container) const
+  -> Elt_span
+{
+  auto beg = reinterpret_cast<Elt_t*>
+    (container.getDecorationArray (this->m_auxid));
+  return Elt_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the payload vector,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadDecorSpan (const AuxVectorData& container) const
+  -> Payload_span
+{
+  (void)container.getDecorationArray (this->m_linkedAuxid); // check for locking
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return Payload_span (reinterpret_cast<Payload_t*>(sp->beg), sp->size);
+}
+
+
+/**
+ * @brief Get a span over spans representing the jagged vector,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+auto
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDecorationSpan (const AuxVectorData& container) const
+  -> span
+{
+  Elt_span elt_span = getEltDecorSpan(container);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  return span (elt_span,
+               Converter_t (container_nc, this->auxid(), this->linkedAuxid()));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+template <IsConstAuxElement ELT>
+inline
+bool
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::isAvailableWritable (const ELT& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritableAsDecoration (m_auxid) &&
+    e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+} // namespace SG

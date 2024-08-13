@@ -22,6 +22,7 @@
 #include "AthContainers/tools/JaggedVecVectorFactory.h"
 #include "AthContainers/JaggedVecConstAccessor.h"
 #include "AthContainers/JaggedVecAccessor.h"
+#include "AthContainers/JaggedVecDecorator.h"
 
 
 #endif // not ATHCONTAINERS_JAGGEDVEC_H
