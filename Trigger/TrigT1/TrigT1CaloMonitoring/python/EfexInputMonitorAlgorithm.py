@@ -35,35 +35,44 @@ def EfexInputMonitoringConfig(flags):
                            xbins=50,xmin=-2.5,xmax=2.5,
                            ybins=64,ymin=-math.pi,ymax=math.pi)
 
-    helper.defineHistogram('TowerEta,TowerPhi,TowerCount;h_dataTowers_ecal_etaphiMap',title='DataTowers ECAL Average;#eta;#phi',
-                           path="Expert/Inputs/eFEX/detail",
-                           fillGroup="ecal",
-                           type='TProfile2D',
-                           xbins=50,xmin=-2.5,xmax=2.5,
-                           ybins=64,ymin=-math.pi,ymax=math.pi)
-    helper.defineHistogram('TowerEta,TowerPhi,TowerCount;h_dataTowers_hcal_etaphiMap',title='DataTowers HCAL Average;#eta;#phi',
-                           path="Expert/Inputs/eFEX/detail",
-                           fillGroup="hcal",
-                           type='TProfile2D',
-                           xbins=50,xmin=-2.5,xmax=2.5,
-                           ybins=64,ymin=-math.pi,ymax=math.pi)
+    for layer in ["ecal","hcal"]:
+        helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_hot_EtaPhiMap',title=f'{layer.upper()} SuperCells >= 500MeV;#eta;#phi',
+                               cutmask="AboveCut",
+                               path="Expert/Inputs/eFEX",
+                               hanConfig={"algorithm":"Histogram_Empty","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
+                               fillGroup=layer,
+                               type='TH2I',
+                               xbins=50,xmin=-2.5,xmax=2.5,
+                               ybins=64,ymin=-math.pi,ymax=math.pi)
 
-    helper.defineHistogram('LBN,TowerEta,TowerCount;h_dataTowers_ecal',title='DataTowers ECAL Average;LBN;Eta',
-                           path="Expert/Inputs/eFEX",
-                           hanConfig={"description":"Check for localized anomalies or asymmetries. Can try to use whole-run eta-phi map in detail folder to cross-reference location"},
-                           fillGroup="ecal",
-                           type='TProfile2D',
-                           xbins=1,xmin=0,xmax=1,
-                           ybins=50,ymin=-2.5,ymax=2.5,
+        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_hot_posVsLBN',title=f'{layer.upper()} SuperCells >= 500MeV;LB;50(y-1)+x',
+                           path="Expert/Inputs/eFEX/detail",
+                           cutmask="AboveCut",
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_hot_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           fillGroup=layer,
+                           type='TH2I',
+                           xbins=1,xmin=0,xmax=10,
+                           ybins=64*50,ymin=0.5,ymax=64*50+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
-    helper.defineHistogram('LBN,TowerEta,TowerCount;h_dataTowers_hcal',title='DataTowers HCAL Average;LBN;Eta',
-                           path="Expert/Inputs/eFEX",
-                           hanConfig={"description":"Check for localized anomalies or asymmetries. Can try to use whole-run eta-phi map in detail folder to cross-reference location"},
-                           fillGroup="hcal",
-                           type='TProfile2D',
-                           xbins=1,xmin=0,xmax=1,
-                           ybins=50,ymin=-2.5,ymax=2.5,
-                           opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
+        helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_cold_EtaPhiMap',title=f'{layer.upper()} SuperCells <= -500MeV;#eta;#phi',
+                               cutmask="BelowCut",
+                               path="Expert/Inputs/eFEX",
+                               hanConfig={"description":f"Check <a href='./detail/h_dataTowers_{layer}_cold_posVsLBN'>detail plot</a> to get timeseries for each location"},
+                               fillGroup=layer,
+                               type='TH2I',
+                               xbins=50,xmin=-2.5,xmax=2.5,
+                               ybins=64,ymin=-math.pi,ymax=math.pi)
+
+        helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_cold_posVsLBN',title=f'{layer.upper()} SuperCells <= -500MeV;LB;50(y-1)+x',
+                               path="Expert/Inputs/eFEX/detail",
+                               cutmask="BelowCut",
+                               hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='../h_dataTowers_{layer}_cold_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                               fillGroup=layer,
+                               type='TH2I',
+                               xbins=1,xmin=0,xmax=10,
+                               ybins=64*50,ymin=0.5,ymax=64*50+0.5,
+                               opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
+
     helper.defineTree('LBNString,Error,EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID,timeSince,timeUntil;errors',
                                            "lbnString/string:error/string:eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string:timeSince/I:timeUntil/I",
                                            title="errors tree;LBN;Error",fillGroup="errors")

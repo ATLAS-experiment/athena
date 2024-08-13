@@ -58,7 +58,7 @@ NswDcsDbData::setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsCon
         DcsModule& dcs_mod = dcsMap[array_idx];
         const unsigned int channel = idHelper.channel(chnlId)-1;
         if(dcs_mod.channels.empty())
-            dcs_mod.layer_id = idHelper.channelID(chnlId, idHelper.multilayer(chnlId), idHelper.gasGap(chnlId), 1);
+            dcs_mod.layer_id = m_idHelperSvc->gasGapId(chnlId);
         if(dcs_mod.channels.size() <= channel) dcs_mod.channels.resize(channel +1);
         if(dcs_mod.channels[channel]) {
             THROW_EXCEPTION("NswDcsDbData::setData() -- Cannot overwrite channel");
@@ -73,7 +73,7 @@ NswDcsDbData::setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsCon
         DcsModule& dcs_mod = dcsMap.at(array_idx);
         const unsigned int channel = idHelper.channel(chnlId)-1;
         if(dcs_mod.channels.empty()) {
-            dcs_mod.layer_id = idHelper.channelID(chnlId, idHelper.multilayer(chnlId), idHelper.gasGap(chnlId), idHelper.channelType(chnlId), 1);
+            dcs_mod.layer_id = m_idHelperSvc->layerId(chnlId);
         }
         if(dcs_mod.channels.size() <= channel) dcs_mod.channels.resize(channel +1);
         if(dcs_mod.channels[channel]) {

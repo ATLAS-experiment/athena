@@ -48,11 +48,9 @@ NswCalibDbThresholdData::getChannelIds(const std::string tech, const std::string
 	std::vector<Identifier> chnls;
 
 	for(unsigned int i=0; i<keys.size(); ++i){
-		bool isMM = m_idHelperSvc->isMM(keys[i]);
-		bool isSTGC = m_idHelperSvc->issTgc(keys[i]);
-		int eta = (isSTGC)? m_idHelperSvc->stgcIdHelper().stationEta(keys[i]) : m_idHelperSvc->stgcIdHelper().stationEta(keys[i]);
-		if(!isSTGC && tech == "STGC")  continue;
-		if(!isMM && tech == "MM") continue;
+		int eta = m_idHelperSvc->stationEta(keys[i]);
+		if(!m_idHelperSvc->issTgc(keys[i]) && tech == "STGC")  continue;
+		if(!m_idHelperSvc->isMM(keys[i]) && tech == "MM") continue;
 		if(eta<=0 && side == "A") continue;
 		if(eta>=0 && side == "C") continue;
 		chnls.push_back(keys[i]);

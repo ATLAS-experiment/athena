@@ -158,6 +158,24 @@ def defineMenu():
         "L1_5J15p0ETA25",
         'L1_J30p31ETA49_EMPTY',
 
+
+        # ATR-29303
+        'L1_J15',
+        'L1_J20',
+        'L1_J50',
+        'L1_J400',
+        'L1_J75p31ETA49',
+        'L1_J20p31ETA49',
+        'L1_J30p31ETA49',
+        'L1_J50p31ETA49',
+        'L1_J15p31ETA49',
+        'L1_MU3V_J15',
+        'L1_MU5VF_J40',
+        'L1_J50_2J40p0ETA25_3J15p0ETA25',
+        'L1_3J50',
+        'L1_J40p0ETA25_2J15p31ETA49',
+        'L1_3J25p0ETA23',
+
         # legacy L1Topo
         'L1_HT190-J15s5pETA21', 
         'L1_BPH-0M9-EM7-EM5_2MU3V',
