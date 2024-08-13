@@ -98,21 +98,21 @@ class ATLAS_NOT_THREAD_SAFE LArWheelSliceSolid : public G4VSolid
     static const G4double s_IterationPrecision2;
     static const unsigned int s_IterationsLimit;
 
-    pos_t m_Pos;
-    type_t m_Type;
-    const LArWheelCalculator *m_Calculator;
-    G4VSolid* m_BoundingShape;
+    pos_t m_Pos{};
+    type_t m_Type{};
+    const LArWheelCalculator *m_Calculator{};
+    G4VSolid* m_BoundingShape{};
 
-    G4double m_FanHalfThickness, m_FHTplusT, m_FHTminusT;
+    G4double m_FanHalfThickness{}, m_FHTplusT{}, m_FHTminusT{};
 
   // limits used in DTI
-    G4double m_Xmin, m_Xmax;
+    G4double m_Xmin{}, m_Xmax{};
 
   // Special limit, used in dto
-    G4double m_Ymin;
+    G4double m_Ymin{};
 
   // limits for use in service functions
-    G4double m_Zmin, m_Zmax, m_Rmin, m_Rmax;
+    G4double m_Zmin{}, m_Zmax{}, m_Rmin{}, m_Rmax{};
 
     void inner_solid_init(const G4String &, size_t slice);
     void outer_solid_init(const G4String &, size_t slice);

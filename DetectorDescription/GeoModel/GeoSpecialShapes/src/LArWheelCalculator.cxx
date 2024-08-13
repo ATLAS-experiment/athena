@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArWheelCalculator 19-Apr-2001 Bill Seligman
@@ -492,14 +492,21 @@ void LArWheelCalculator::module_init()
   for outer wheel - 3 elements { r_front, r_middle, r_back }
   return value - delta_z of middle point in case of outer wheel
 */
-double LArWheelCalculator::GetWheelInnerRadius(double *r) const
+double LArWheelCalculator::GetWheelInnerRadius(std::array<double,2> & r) const
 {
   double zMid = 0.;
   if(m_isInner){
     double tanThetaInner = 2. * exp(-m_eta_hi ) / (1. - exp(-2.*m_eta_hi ));
     r[0] = m_zWheelFrontFace * tanThetaInner;
     r[1] = m_zWheelBackFace  * tanThetaInner;
-  } else {
+  }
+  return zMid;
+}
+
+double LArWheelCalculator::GetWheelInnerRadius(std::array<double,3> & r) const
+{
+  double zMid = 0.;
+  if (not m_isInner){
     double tanThetaMid   = 2. * exp(-m_eta_mid) / (1. - exp(-2.*m_eta_mid));
     double inv_tanThetaOuter = (1. - exp(-2.*m_eta_low)) / (2. * exp(-m_eta_low));
     // Note that there is a 3mm gap between the outer surface of the
@@ -517,7 +524,7 @@ double LArWheelCalculator::GetWheelInnerRadius(double *r) const
   for inner wheel - 2 elements { r_front, r_back }
   for outer wheel - 3 elements { r_front, r_middle, r_back }
 */
-void LArWheelCalculator::GetWheelOuterRadius(double *r) const
+void LArWheelCalculator::GetWheelOuterRadius(std::array<double,2> & r) const
 {
   if(m_isInner){
     double tanThetaMid   = 2. * exp(-m_eta_mid) / (1. - exp(-2.*m_eta_mid));
@@ -525,7 +532,11 @@ void LArWheelCalculator::GetWheelOuterRadius(double *r) const
     // inner wheel and the inner surface of the outer wheel.
     r[0] = m_zWheelFrontFace * tanThetaMid - m_HalfGapBetweenWheels;
     r[1] = m_zWheelBackFace  * tanThetaMid - m_HalfGapBetweenWheels;
-  } else {
+  }
+}
+void LArWheelCalculator::GetWheelOuterRadius(std::array<double,3> & r) const
+{
+  if(not m_isInner){
     double tanThetaOuter = 2. * exp(-m_eta_low) / (1. - exp(-2.*m_eta_low));
     r[0] = m_zWheelFrontFace * tanThetaOuter;
     r[1] = m_rOuterCutoff;

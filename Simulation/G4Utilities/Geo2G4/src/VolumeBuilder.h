@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_VolumeBuilder_H
@@ -13,8 +13,8 @@
 #include "G4VPhysicalVolume.hh"
 
 #include <string>
-#include <iostream>
 #include <map>
+#include <functional> //std::less
 
 typedef std::map< const GeoOpticalPhysVol*, G4VPhysicalVolume*,std::less< const GeoOpticalPhysVol*> > OpticalVolumesMap;
 
@@ -27,7 +27,7 @@ class VolumeBuilder
   virtual ~VolumeBuilder()
   {}
 
-  std::string GetKey() const {return m_key;}
+  const std::string & GetKey() const {return m_key;}
 
   // flag controlling Parameterization to Parameterization translation
   void SetParam(bool flag){m_paramOn = flag;}

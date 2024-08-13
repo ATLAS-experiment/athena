@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -192,8 +192,7 @@ inline void LArWheelSliceSolid::check_slice(size_t size, size_t slice) const
 
 void LArWheelSliceSolid::inner_solid_init(const G4String &bs_name, size_t slice)
 {
-    G4double zPlane[2], rInner[2], rOuter[2];
-    zPlane[0] = 0.;
+    std::array<G4double,2> zPlane{}, rInner{}, rOuter{};
     zPlane[1] = GetCalculator()->GetWheelThickness();
     GetCalculator()->GetWheelInnerRadius(rInner);
     GetCalculator()->GetWheelOuterRadius(rOuter);
@@ -227,8 +226,7 @@ void LArWheelSliceSolid::inner_solid_init(const G4String &bs_name, size_t slice)
 
 void LArWheelSliceSolid::outer_solid_init(const G4String &bs_name, size_t slice)
 {
-    G4double zPlane[3], rInner[3], rOuter[3];
-    zPlane[0] = 0.;
+    std::array<G4double,3> zPlane{}, rInner{}, rOuter{};
     zPlane[1] = GetCalculator()->GetWheelInnerRadius(rInner);
     zPlane[2] = GetCalculator()->GetWheelThickness();
     GetCalculator()->GetWheelOuterRadius(rOuter);
