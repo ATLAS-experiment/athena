@@ -5,7 +5,7 @@
 #include "JetMonitoring/EfficiencyResponseHistos.h"
 
 #include "JetMonitoring/ToolHandleHistoHelper.h"
-#include "JetUtils/JetDistances.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "AthenaKernel/Units.h"
 
 #include "TH1.h"
@@ -74,7 +74,7 @@ int EfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer &
     std::list<const xAOD::Jet*>::iterator it=listJets.begin();
     std::list<const xAOD::Jet*>::iterator itmin=listJets.end();
     for( ; it != listJets.end(); ++it) {
-      double dr2 = jet::JetDistances::deltaR2(*(*it),*refjet);
+      double dr2 = xAOD::P4Helpers::deltaR2(*(*it),*refjet,false);
       if(dr2 < dr2min) { dr2min = dr2; itmin = it ;}
     }
     if (itmin == listJets.end()) break;

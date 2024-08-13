@@ -7,5 +7,5 @@ atlas_subdir( JetSimTools )
 atlas_add_component( JetSimTools
                      Root/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AsgTools xAODTruth JetUtils AtlasHepMCLib TruthUtils)
+                     LINK_LIBRARIES AsgTools xAODTruth JetUtils AtlasHepMCLib TruthUtils FourMomUtils)
 

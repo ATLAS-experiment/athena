@@ -14,7 +14,7 @@
 
 #include "xAODTruth/TruthVertex.h"
 
-#include "JetUtils/JetDistances.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -79,7 +79,7 @@ namespace {
         if( pdg_id == 22 && photonCone2>0)
           {
             for( const auto *lep: wzLeptons) {
-              double deltaR2 = jet::JetDistances::deltaR2(*p, *lep);
+              double deltaR2 = xAOD::P4Helpers::deltaR2(*p, *lep, false);
               if( deltaR2 < photonCone2 ) {
 		return true;
 	      }

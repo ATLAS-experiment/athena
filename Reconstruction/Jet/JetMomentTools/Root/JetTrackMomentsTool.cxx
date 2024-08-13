@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "JetMomentTools/JetTrackMomentsTool.h"
 #include <sstream>
-#include "JetUtils/JetDistances.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElement.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
@@ -229,7 +229,7 @@ JetTrackMomentsTool::TrackMomentStruct JetTrackMomentsTool::getTrackMoments(cons
           ++nkeep;
 
           // Calculate necessary info for the moments
-          const double deltaR = jet::JetDistances::deltaR(jetEta, jetPhi, track->eta(),  track->phi() );
+	  const double deltaR = xAOD::P4Helpers::deltaR(jetEta, jetPhi, track->eta(), track->phi() );
 
           // Adjust values as necessary for this track
           moments.numTrk     += 1;
