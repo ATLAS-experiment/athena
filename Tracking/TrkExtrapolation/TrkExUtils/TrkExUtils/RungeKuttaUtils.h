@@ -187,10 +187,10 @@ transformGlobalToCurvilinear(bool,
 // Jacobian of transformations from curvilinear to local system coordinates
 /////////////////////////////////////////////////////////////////////////////////
 void
-jacobianTransformCurvilinearToLocal(const Trk::TrackParameters&, double*);
+jacobianTransformCurvilinearToLocal(const Trk::TrackParameters&, double* ATH_RESTRICT);
 void
 jacobianTransformCurvilinearToLocal(const Trk::PatternTrackParameters&,
-                                    double*);
+                                    double* ATH_RESTRICT);
 void
 jacobianTransformCurvilinearToLocal(double* ATH_RESTRICT,
                                     const Trk::Surface*,
