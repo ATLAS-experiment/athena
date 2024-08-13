@@ -435,7 +435,6 @@ namespace FTAGValidation {
     double IP2D_pu = -1;
     double IP2D_pb = -1;
     double IP2D_pc = -1;
-//    double IP2D_LLR = bTaggingObject->IP2D_loglikelihoodratio();
     bTaggingObject->pu( "IP2D",IP2D_pu );
     bTaggingObject->pb( "IP2D",IP2D_pb );
     bTaggingObject->pc( "IP2D",IP2D_pc );
@@ -443,7 +442,6 @@ namespace FTAGValidation {
     ATH_CHECK( fillHistogram( chain+flavour+"IP2D_pu",IP2D_pu ) );
     ATH_CHECK( fillHistogram( chain+flavour+"IP2D_pb",IP2D_pb ) );
     ATH_CHECK( fillHistogram( chain+flavour+"IP2D_pc",IP2D_pc ) );
-//    ATH_CHECK( fillHistogram( chain+flavour+"IP2D_LLR",IP2D_LLR ) );
     ATH_MSG_DEBUG( "  ** IP2D [pu,pb,pc] = [" << IP2D_pu <<"," << IP2D_pb << "," << IP2D_pc << "]" );
 
 
@@ -452,10 +450,6 @@ namespace FTAGValidation {
     std::vector< float > IP2D_weightCOfTracks;
     std::vector< float > IP2D_weightUOfTracks;
     std::vector< int > IP2D_gradeOfTracks;
-//    std::vector< float > IP2D_valD0wrtPVOfTracks;
-//    std::vector< float > IP2D_sigD0wrtPVOfTracks;
-//    std::vector< float > IP2D_valZ0wrtPVOfTracks;
-//    std::vector< float > IP2D_sigZ0wrtPVOfTracks;
 
     bTaggingObject->variable< int >( "IP2D", "nTrks", IP2D_nTrks );
 
@@ -471,16 +465,6 @@ namespace FTAGValidation {
     static const SG::ConstAccessor< std::vector< int > > IP2D_gradeOfTracksAcc( "IP2D_gradeOfTracks" );
     IP2D_gradeOfTracks = IP2D_gradeOfTracksAcc.withDefault(*bTaggingObject, std::vector< int >());
 
-//    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_valD0wrtPVOfTracks" ) )
-//      IP2D_valD0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_valD0wrtPVOfTracks" );
-//    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_valZ0wrtPVOfTracks" ) )
-//      IP2D_valZ0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_valZ0wrtPVOfTracks" );
-
-//    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_sigD0wrtPVOfTracks" ) )
-//      IP2D_sigD0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_sigD0wrtPVOfTracks" );
-//    if ( bTaggingObject->isAvailable< std::vector< float > >( "IP2D_sigZ0wrtPVOfTracks" ) )
-//      IP2D_sigZ0wrtPVOfTracks = bTaggingObject->auxdata< std::vector< float > >( "IP2D_sigZ0wrtPVOfTracks" );
-
     ATH_CHECK( fillHistogram( chain+flavour+"IP2D_nTracks",IP2D_nTrks ) );
     for ( unsigned int i(0); i < IP2D_gradeOfTracks.size(); i++ )
       ATH_CHECK( fillHistogram( chain+flavour+"IP2D_gradeOfTracks", IP2D_gradeOfTracks.at(i) ) );
@@ -490,15 +474,6 @@ namespace FTAGValidation {
       ATH_CHECK( fillHistogram( chain+flavour+"IP2D_weightCOfTracks", IP2D_weightCOfTracks.at(i) ) );
     for ( unsigned int i(0); i < IP2D_weightUOfTracks.size(); i++ )
       ATH_CHECK( fillHistogram( chain+flavour+"IP2D_weightUOfTracks", IP2D_weightUOfTracks.at(i) ) );
-//    for ( unsigned int i(0); i < IP2D_valD0wrtPVOfTracks.size(); i++ )
-//      ATH_CHECK( fillHistogram( chain+flavour+"IP2D_valD0wrtPVOfTracks", IP2D_valD0wrtPVOfTracks.at(i) ) ); //value
-//    for ( unsigned int i(0); i < IP2D_sigD0wrtPVOfTracks.size(); i++ )
-//      ATH_CHECK( fillHistogram( chain+flavour+"IP2D_sigD0wrtPVOfTracks", IP2D_sigD0wrtPVOfTracks.at(i) ) ); //significance
-//    for ( unsigned int i(0); i < IP2D_valZ0wrtPVOfTracks.size(); i++ )
-//      ATH_CHECK( fillHistogram( chain+flavour+"IP2D_valZ0wrtPVOfTracks", IP2D_valZ0wrtPVOfTracks.at(i) ) ); //value
-//    for ( unsigned int i(0); i < IP2D_sigZ0wrtPVOfTracks.size(); i++ )
-//      ATH_CHECK( fillHistogram( chain+flavour+"IP2D_sigZ0wrtPVOfTracks", IP2D_sigZ0wrtPVOfTracks.at(i) ) ); //significance
-    
 
     // IP3D
     double IP3D_pu = -1;
@@ -574,7 +549,6 @@ namespace FTAGValidation {
     double SV1_pu = -1;
     double SV1_pb = -1;
     double SV1_pc = -1;
-//    double SV1_LLR = bTaggingObject->SV1_loglikelihoodratio();
 
     bTaggingObject->pu( "SV1",SV1_pu );
     bTaggingObject->pb( "SV1",SV1_pb );
@@ -583,7 +557,6 @@ namespace FTAGValidation {
     ATH_CHECK( fillHistogram( chain+flavour+"SV1_pu",SV1_pu ) );
     ATH_CHECK( fillHistogram( chain+flavour+"SV1_pb",SV1_pb ) );
     ATH_CHECK( fillHistogram( chain+flavour+"SV1_pc",SV1_pc ) );
-//    ATH_CHECK( fillHistogram( chain+flavour+"SV1_LLR",SV1_LLR ));
     ATH_MSG_DEBUG( "  ** SV1 [pu,pb,pc] = [" << SV1_pu <<"," << SV1_pb << "," << SV1_pc << "]" );
 
     float SV1_masssvx = -1;
@@ -652,16 +625,6 @@ namespace FTAGValidation {
     ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_energyFraction",JetFitter_energyFraction ) );
     ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_significance3d",JetFitter_significance3d ) );
     ATH_MSG_DEBUG( "  ** JetFitter [mass] = [" << JetFitter_mass <<"]" );
-
-//    double JetFitter_pu = bTaggingObject->JetFitter_pu();
-//    double JetFitter_pb = bTaggingObject->JetFitter_pb();
-//    double JetFitter_pc = bTaggingObject->JetFitter_pc();
-//    double JetFitter_LLR = bTaggingObject->JetFitter_loglikelihoodratio();
-
-//    ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_pu",JetFitter_pu ) );
-//    ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_pb",JetFitter_pb ) );
-//    ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_pc",JetFitter_pc ) );
-//    ATH_CHECK( fillHistogram( chain+flavour+"JetFitter_LLR",JetFitter_LLR ) );
       
     // RNNIP
     double RNNIP_pu = -1;
