@@ -14,6 +14,9 @@
 #include "AthContainers/DataVector.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/Accessor.h"
+#include "AthContainers/JaggedVec.h"
+#include <vector>
 #include <iostream>
 #include <cassert>
 
@@ -35,6 +38,12 @@ struct A
   { static const Accessor<std::vector<int> > acc ("xvint");  return acc(*this); }
   const std::vector<int>& xvint() const
   { static const Accessor<std::vector<int> > acc ("xvint");  return acc(*this); }
+
+  auto jvec()
+  {
+    static const Accessor<SG::JaggedVecElt<int> > acc("jvec");
+    return acc(*this);
+  }
 };
 
 
@@ -212,11 +221,30 @@ void test4()
   SGdebug::dump_aux_vars (dv[0]);
 }
 
+// Test dumping JaggedVecElt variables.
+void test5()
+{
+  std::cout << "test5\n";
+
+  DataVector<A> dv;
+  SG::AuxStoreInternal store;
+  dv.setStore (&store);
+
+  dv.push_back (new A);
+  dv.back()->jvec() = std::vector<int>{5, 4, 3, 2};
+  dv.push_back (new A);
+  dv.back()->jvec() = std::vector<int>{8, 10};
+
+  SGdebug::dump_aux_vars (store, 0);
+}
+
+
 int main()
 {
   test1();
   test2();
   test3();
   test4();
+  test5();
   return 0;
 }
