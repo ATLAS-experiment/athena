@@ -71,7 +71,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Resolution plots
   if( m_trkAnaDefSvc->plotResolutions() ) {
     m_plots_resolution = std::make_unique< ResolutionPlots >(
-        this, "Tracks/Resolutions", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+        this, "Tracks/Resolutions", m_anaTag, 
+        m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(),
+        m_trkAnaDefSvc->resolutionMethod() );
   }
 
   /// Fake Rate plots (only if reference is Truth)
@@ -160,6 +162,19 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       ATH_CHECK( m_plots_eff_vsTest->fillPlots( *particle, isMatched, weight ) );
     }
 
+    /// resolution plots
+    if( m_plots_resolution ) {
+      if( isMatched ) {
+        if( m_trkAnaDefSvc->isReferenceTruth() ) {
+	        ATH_CHECK( m_plots_resolution->fillPlots(
+            *particle, *(matches.getMatchedRefTruth( *particle )), weight ) );
+        } else {
+	        ATH_CHECK( m_plots_resolution->fillPlots(
+            *particle, *(matches.getMatchedRefTrack( *particle )), weight ) );
+        }
+      }
+    }
+
     /// fake rate plots
     if( m_plots_missingTruth ) {
       bool isUnlinked = isUnlinkedTruth( *particle );
@@ -215,19 +230,6 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     /// efficiency plots
     if( m_plots_eff_vsRef ) {
       ATH_CHECK( m_plots_eff_vsRef->fillPlots( *particle, isMatched, weight ) );
-    }
-
-    /// resolustion plots
-    if( m_plots_resolution ) {
-      if( isMatched ) {
-        if( m_trkAnaDefSvc->isTestTruth() ) {
-	        ATH_CHECK( m_plots_resolution->fillPlots(
-            *particle, *(matches.getBestMatchedTestTruth( *particle )), weight ) );
-        } else {
-	        ATH_CHECK( m_plots_resolution->fillPlots(
-            *particle, *(matches.getBestMatchedTestTrack( *particle )), weight ) );
-        }
-      }
     }
     
     /// offline electron plots (Offline is always either test or reference)

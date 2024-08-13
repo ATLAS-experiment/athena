@@ -169,21 +169,22 @@ def getPlotsDefList( flags ):
         plotsDefStrList_v2.append( newPlotDefStr )
 
     # Now expand the list to account for all required track types
-    trkLabels = [
-        getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ),
-        getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
-    ]
+    testLabel = getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType )
+    refLabel  = getLabel( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType )
+    trkLabels = [ testLabel, refLabel ]
 
     if flags.PhysVal.IDTPM.currentTrkAna.MatchingType == "EFTruthMatch":
         trkLabels.append( getLabel( flags, "Truth" ) )
 
     plotsDefStrList = []
     for plotsDefStr in plotsDefStrList_v2 :
+        plotsDefStr = plotsDefStr.replace( "$TESTTYPE", testLabel[0] ).replace( "$TESTTAG", testLabel[1] )
+        plotsDefStr = plotsDefStr.replace( "$REFTYPE", refLabel[0] ).replace( "$REFTAG", refLabel[1] )
         if ( "$TRKTAG" not in plotsDefStr ) and ( "$TRKTYPE" not in plotsDefStr ) :
             plotsDefStrList.append( plotsDefStr )
             continue
         for trkLabel in trkLabels :
-            newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[0] ).replace( "$TRKTAG",  trkLabel[1] )
+            newPlotsDefStr = plotsDefStr.replace( "$TRKTYPE", trkLabel[0] ).replace( "$TRKTAG", trkLabel[1] )
             plotsDefStrList.append( newPlotsDefStr )
 
     return plotsDefStrList

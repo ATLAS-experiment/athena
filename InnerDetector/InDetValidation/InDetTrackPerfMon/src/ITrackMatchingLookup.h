@@ -57,6 +57,9 @@ namespace IDTPM {
     /// Track -> Truth
     virtual const xAOD::TruthParticle* getMatchedRefTruth(
         const xAOD::TrackParticle& t ) const = 0;
+    /// Truth -> Truth // to avoid compilation errors
+    const xAOD::TruthParticle* getMatchedRefTruth(
+        const xAOD::TruthParticle& ) const { return nullptr; };
 
     /// get matched test vector (1 to 1+)
     /// vec Track <- Track
@@ -68,6 +71,9 @@ namespace IDTPM {
     /// vec Truth <- Track
     virtual const std::vector< const xAOD::TruthParticle* >& getMatchedTestTruths(
         const xAOD::TrackParticle& r ) const = 0;
+    /// vec Truth <- Truth // to avoid compilation errors
+    const std::vector< const xAOD::TruthParticle* >& getMatchedTestTruths(
+        const xAOD::TruthParticle& ) const { return m_nullTruthVec; }
 
     /// get best matched test,
     /// i.e. the one with the shortest dist parameter from the reference
@@ -96,7 +102,7 @@ namespace IDTPM {
       return vec.empty() ? nullptr : vec[0];
     }
     /// best Truth <- Truth // to avoid compilation errors
-    virtual const xAOD::TruthParticle* getBestMatchedTestTruth(
+    const xAOD::TruthParticle* getBestMatchedTestTruth(
         const xAOD::TruthParticle& ) const { return nullptr; };
 
     /// return true if test is matched

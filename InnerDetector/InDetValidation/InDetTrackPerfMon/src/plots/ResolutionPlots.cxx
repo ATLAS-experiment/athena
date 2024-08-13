@@ -14,17 +14,19 @@
 /// To be ultimately migrated to IDTPM, no need to duplicate in the meantime
 #include "InDetPhysValMonitoring/ResolutionHelper.h"
 
-/// Delta phi
-#include "FourMomUtils/xAODP4Helpers.h"
 
 /// -----------------------
 /// ----- Constructor -----
 /// -----------------------
 IDTPM::ResolutionPlots::ResolutionPlots(
-    PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType ) :
+    PlotMgr* pParent,
+    const std::string& dirName,
+    const std::string& anaTag,
+    const std::string& testType,
+    const std::string& refType,
+    unsigned int method ) :
         PlotMgr( dirName, anaTag, pParent ), 
-        m_trackType( trackType ) { }
+        m_testType( testType ), m_refType( refType ), m_method( method ) { }
 
 
 /// ---------------------------
@@ -43,36 +45,34 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
 {
   ATH_MSG_DEBUG( "Booking resolution plots in " << getDirectory() );
 
-  for(unsigned int i=0; i<NPARAMS; i++){
-    ATH_CHECK( retrieveAndBook( m_resHelperEta[i],
-				"resHelper_"+m_trackType+"_eta_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_reswidth_vs_eta[i],
-				"resolution_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_resmean_vs_eta[i],
-				"resmean_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
+  for( unsigned int i=0; i<NPARAMS; i++ ) {
 
-    ATH_CHECK( retrieveAndBook( m_pullHelperEta[i],
-				"pullHelper_"+m_trackType+"_eta_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_pullwidth_vs_eta[i],
-				"pullwidth_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_pullmean_vs_eta[i],
-				"pullmean_vs_"+m_trackType+"_eta_" + m_paramProp[i] ) );
+    ATH_CHECK( retrieveAndBook( m_pull[i], "pull_"+m_paramName[i] ) );
+    ATH_CHECK( retrieveAndBook( m_res[i], "res_"+m_paramName[i] ) );
+    ATH_CHECK( retrieveAndBook( m_sigma[i], "sigma_"+m_testType+"_"+m_paramName[i] ) );
+    ATH_CHECK( retrieveAndBook( m_corr[i], "corr_"+m_testType+"_vs_"+m_refType+"_"+m_paramName[i] ) );
 
-    ATH_CHECK( retrieveAndBook( m_resHelperPt[i],
-				"resHelper_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_reswidth_vs_pt[i],
-				"resolution_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_resmean_vs_pt[i],
-				"resmean_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook(m_corrHelper[i], 
-        "corr_"+m_trackType+"_"+m_paramProp[i]));
-    ATH_CHECK( retrieveAndBook( m_pullHelperPt[i],
-				"pullHelper_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_pullwidth_vs_pt[i],
-				"pullwidth_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-    ATH_CHECK( retrieveAndBook( m_pullmean_vs_pt[i],
-				"pullmean_vs_"+m_trackType+"_pt_" + m_paramProp[i] ) );
-  }
+    /// loop all vs variables
+    for( unsigned int j=0; j<NPARAMSOUT; j++ ) {
+
+      /// resolutions
+      ATH_CHECK( retrieveAndBook( m_resHelper[i][j],
+          "resHelper_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+      ATH_CHECK( retrieveAndBook( m_reswidth[i][j],
+          "resolution_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+      ATH_CHECK( retrieveAndBook( m_resmean[i][j],
+          "resmean_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+
+      /// pulls
+      ATH_CHECK( retrieveAndBook( m_pullHelper[i][j],
+          "pullHelper_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+      ATH_CHECK( retrieveAndBook( m_pullwidth[i][j],
+          "pullwidth_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+      ATH_CHECK( retrieveAndBook( m_pullmean[i][j],
+          "pullmean_"+m_paramName[i]+"_vs_"+m_refType+"_"+m_paramName[j] ) );
+
+    } // close NPARAMSOUT loop
+  } // close NPARAMS loop
 
   return StatusCode::SUCCESS;
 }
@@ -81,62 +81,44 @@ StatusCode IDTPM::ResolutionPlots::bookPlots()
 /// -----------------------------
 /// --- Dedicated fill method ---
 /// -----------------------------
-template< typename REF, typename TEST >
+template< typename TEST, typename REF >
 StatusCode IDTPM::ResolutionPlots::fillPlots(
-    const REF& particle_ref, const TEST& track_test, float weight )
+	  const TEST& ptest, const REF& pref, float weight )
 {
-  float refP[NPARAMS];
-  float testP[NPARAMS];
-  float testErrorP[NPARAMS];
+  float refP[ NPARAMS ];
+  float refErrorP[ NPARAMS ];
+  getTrackParameters( pref, refP, refErrorP );
 
-  refP[D0] = d0(particle_ref);
-  refP[Z0] = z0(particle_ref);
-  refP[QOVERP] = qOverP(particle_ref) * Gaudi::Units::GeV;
-  refP[QOVERPT] = qOverPT(particle_ref) * Gaudi::Units::GeV;
-  refP[THETA] = theta(particle_ref);
-  refP[PHI] = phi(particle_ref);
-  refP[PT] = pT(particle_ref) / Gaudi::Units::GeV;
-  refP[Z0SIN] = z0SinTheta(particle_ref);
+  float testP[ NPARAMS ];
+  float testErrorP[ NPARAMS ];
+  getTrackParameters( ptest, testP, testErrorP );
 
-  testP[D0] = d0(track_test);
-  testP[Z0] = z0(track_test);
-  testP[QOVERP] = qOverP(track_test) * Gaudi::Units::GeV;
-  testP[QOVERPT] = qOverPT(track_test) * Gaudi::Units::GeV;
-  testP[THETA] = theta(track_test);
-  testP[PHI] = phi(track_test);
-  testP[PT] = pT(track_test) / Gaudi::Units::GeV;
-  testP[Z0SIN] = z0SinTheta(track_test);
+  for( unsigned int i=0; i<NPARAMS; i++ ) {
 
-  testErrorP[D0] = trackParameterError(track_test, Trk::d0);
-  testErrorP[Z0] = trackParameterError(track_test, Trk::z0);
-  testErrorP[QOVERP] = trackParameterError(track_test, Trk::qOverP) * Gaudi::Units::GeV;
-  testErrorP[QOVERPT] = qOverPtError(track_test) * Gaudi::Units::GeV;
-  testErrorP[THETA] = trackParameterError(track_test, Trk::theta);
-  testErrorP[PHI] = trackParameterError(track_test, Trk::phi);
-  testErrorP[PT] = pTError(track_test) / Gaudi::Units::GeV;
-  testErrorP[Z0SIN] = z0SinThetaError(track_test);
+    float residual = testP[i] - refP[i];
+    if( i==PHI ) residual = deltaPhi( ptest, pref ); // angular difference
+    float pull = testErrorP[i] > 0. ? residual / testErrorP[i] : -9999.;
+    float sigma_test = testErrorP[i];
 
-  float eta_ref = eta(particle_ref);
-  float pt_ref = pT(particle_ref) / Gaudi::Units::GeV;
+    if( i==QOVERPT ) {
+      residual = testP[i] / refP[i] - 1.; // Relative q/pt resolution
+      sigma_test *= 1. / std::abs( testP[i] ); // relative q/pt error
+    }
 
-  for(unsigned int i=0; i<NPARAMS; i++){
-    float residual = testP[i]-refP[i];
-    if(i==PHI) residual = xAOD::P4Helpers::deltaPhi(testP[i], refP[i]);
-    float pull = residual / testErrorP[i];
+    ATH_CHECK( fill( m_pull[i], pull, weight ) );
+    ATH_CHECK( fill( m_res[i], residual, weight ) );
+    ATH_CHECK( fill( m_sigma[i], sigma_test, weight ) );
+    ATH_CHECK( fill( m_corr[i], refP[i], testP[i], weight ) );
 
-    // Relative q/pt resolution
-    if(i==QOVERPT) residual = testP[i]/refP[i] - 1.;
+    for( unsigned int j=0; j<NPARAMSOUT; j++ ) {
+      ATH_CHECK( fill( m_resHelper[i][j],  refP[j], residual, weight ) );
+      ATH_CHECK( fill( m_pullHelper[i][j], refP[j], pull,     weight ) );
+    }
 
-    ATH_CHECK( fill( m_resHelperEta[i], eta_ref, residual, weight ) );
-    ATH_CHECK( fill( m_resHelperPt[i], pt_ref, residual, weight ) );
-    ATH_CHECK( fill( m_pullHelperEta[i], eta_ref, pull, weight ) );
-    ATH_CHECK( fill( m_pullHelperPt[i], pt_ref, pull, weight ) );
-    ATH_CHECK( fill( m_corrHelper[i], refP[i], testP[i], weight) );
   }
   
   return StatusCode::SUCCESS;
 }
-
 
 template StatusCode IDTPM::ResolutionPlots::fillPlots< xAOD::TrackParticle, xAOD::TrackParticle >(
     const xAOD::TrackParticle&, const xAOD::TrackParticle&, float weight );
@@ -160,16 +142,50 @@ void IDTPM::ResolutionPlots::finalizePlots()
   ATH_MSG_DEBUG( "Finalising resolution plots" );
 
   IDPVM::ResolutionHelper resolutionHelper;
+  IDPVM::ResolutionHelper::methods thisMethod = IDPVM::ResolutionHelper::methods( m_method );
 
-  for (unsigned int i = 0; i < NPARAMS; i++) {
-    resolutionHelper.makeResolutions(m_resHelperEta[i],
-				     m_reswidth_vs_eta[i], m_resmean_vs_eta[i],
-				     nullptr, false,
-				     IDPVM::ResolutionHelper::iterRMS_convergence);
-    resolutionHelper.makeResolutions(m_resHelperPt[i],
-				     m_reswidth_vs_pt[i], m_resmean_vs_pt[i],
-				     nullptr, false,
-				     IDPVM::ResolutionHelper::iterRMS_convergence);
+  for( unsigned int i=0; i<NPARAMS; i++ ) {
+    for( unsigned int j=0; j<NPARAMSOUT; j++ ) {
+      resolutionHelper.makeResolutions( m_resHelper[i][j], m_reswidth[i][j], m_resmean[i][j], thisMethod );
+      resolutionHelper.makeResolutions( m_pullHelper[i][j], m_pullwidth[i][j], m_pullmean[i][j], thisMethod );
+    }
   }
 
 }
+
+
+/// --------------------------
+/// --- getTrackParameters ---
+/// --------------------------
+template< typename PARTICLE >
+void IDTPM::ResolutionPlots::getTrackParameters(
+	  const PARTICLE& p, float* params, float* errors )
+{
+  /// parameters
+  params[ D0 ] = d0( p );
+  params[ Z0 ] = z0( p );
+  params[ QOVERP ] = qOverP( p ) * Gaudi::Units::GeV;
+  params[ QOVERPT ] = qOverPT( p ) * Gaudi::Units::GeV;
+  params[ THETA ] = theta( p );
+  params[ PHI ] = phi( p );
+  params[ PT ] = pT( p ) / Gaudi::Units::GeV;
+  params[ Z0SIN ] = z0SinTheta( p );
+  params[ ETA ] = eta( p );
+
+  /// errors
+  errors[ D0 ] = error( p, Trk::d0 );
+  errors[ Z0 ] = error( p, Trk::z0 );
+  errors[ QOVERP ] = error( p, Trk::qOverP ) * Gaudi::Units::GeV;
+  errors[ QOVERPT ] = qOverPTError( p ) * Gaudi::Units::GeV;
+  errors[ THETA ] = error( p, Trk::theta );
+  errors[ PHI ] = error( p, Trk::phi );
+  errors[ PT ] = pTError( p ) / Gaudi::Units::GeV;
+  errors[ Z0SIN ] = z0SinThetaError( p );
+  errors[ ETA ] = etaError( p );
+}
+
+template void IDTPM::ResolutionPlots::getTrackParameters< xAOD::TrackParticle >(
+    const xAOD::TrackParticle&, float*, float* );
+
+template void IDTPM::ResolutionPlots::getTrackParameters< xAOD::TruthParticle >(
+    const xAOD::TruthParticle&, float*, float* );
