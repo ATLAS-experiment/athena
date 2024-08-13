@@ -14,6 +14,10 @@
 /// STL includes 
 #include <algorithm>
 #include <memory>
+#include <unordered_map>
+
+/// Athena includes
+#include "InDetPhysValMonitoring/ResolutionHelper.h"
 
 /// -------------------
 /// --- Constructor ---
@@ -110,4 +114,27 @@ std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
   return m_sortPlotsByChain.value() ?
          topDir + chain + subDir :
          topDir + subDir + chain;
+}
+
+/// ------------------------
+/// --- resolutionMethod ---
+/// ------------------------
+unsigned int TrackAnalysisDefinitionSvc::resolutionMethod() const
+{
+  /// Defining map
+  using methodMap_t = std::unordered_map<
+      std::string, IDPVM::ResolutionHelper::methods >;
+  methodMap_t methodMap = {
+    { "iterRMS"         , IDPVM::ResolutionHelper::iterRMS_convergence },
+    { "gaussFit"        , IDPVM::ResolutionHelper::Gauss_fit },
+    { "iterRMSgaussFit" , IDPVM::ResolutionHelper::fusion_iterRMS_Gaussfit }
+  };
+
+  methodMap_t::const_iterator mitr = methodMap.find( m_resolMethod.value() );
+  if( mitr == methodMap.end() ) {
+    ATH_MSG_DEBUG( "Method " << m_resolMethod.value() <<
+                   " not found. Using iterRMS by default." );
+    return IDPVM::ResolutionHelper::iterRMS_convergence;
+  }
+  return mitr->second;
 }

@@ -68,6 +68,7 @@ public:
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
+  virtual unsigned int resolutionMethod() const override;
 
 private:
 
@@ -82,7 +83,6 @@ private:
   bool m_useTrigger{}, m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
   bool m_isTestTrigger{}, m_isTestEFTrigger{}, m_isTestTruth{}, m_isTestOffline{};
   bool m_isRefTrigger{}, m_isRefEFTrigger{}, m_isRefTruth{}, m_isRefOffline{};
-
 
   StringProperty m_testTag { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
   StringProperty m_refTag { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 
@@ -99,6 +99,7 @@ private:
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
   BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
+  StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
  
 };
 

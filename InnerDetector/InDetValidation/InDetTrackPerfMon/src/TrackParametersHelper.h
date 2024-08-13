@@ -20,6 +20,7 @@
 #include "xAODTruth/TruthVertex.h"
 
 /// STD includes
+#include <vector>
 #include <cmath> // std::fabs, std::copysign
 
 
@@ -49,8 +50,15 @@ namespace IDTPM {
   inline float theta( const U& p ) { return getTheta( p ); }
 
   /// Accessor utility function for getting the value of phi
+  inline float getPhi( const xAOD::TrackParticle& p ) { return p.phi0(); }
+  inline float getPhi( const xAOD::TruthParticle& p ) {
+    static thread_local SG::ConstAccessor<float> phiAcc("phi");
+    return (phiAcc.isAvailable(p)) ? phiAcc(p) : -9999.;
+  }
   template< class U >
-  inline float phi( const U& p ) { return p.phi(); }
+  inline float phi( const U& p ) { return getPhi( p ); }
+  //template< class U >
+  //inline float phi( const U& p ) { return p.phi(); }
 
   /// Accessor utility function for getting the value of z0
   inline float getZ0( const xAOD::TrackParticle& p ) { return p.z0(); }
@@ -141,40 +149,78 @@ namespace IDTPM {
   template< class U >
   inline float ndof( const U& p ) { return getNdof(p); }
 
-  /// Accessor utilify function for track parameter uncertainty
-  inline float getTrackParameterError( const xAOD::TrackParticle& p, Trk::ParamDefs param ) {
-    return std::sqrt(p.definingParametersCovMatrix()(param, param));
+  /// Accessor utility function for getting the track parameters covariance
+  inline float getCov( const xAOD::TrackParticle& p, Trk::ParamDefs par1, Trk::ParamDefs par2 ) {
+    return p.definingParametersCovMatrix()( par1, par2 ); }
+  inline float getCov( const xAOD::TruthParticle&, Trk::ParamDefs, Trk::ParamDefs ) { return 0.; }
+  template< class U >
+  inline float cov( const U& p, Trk::ParamDefs par1, Trk::ParamDefs par2 ) {
+    return getCov( p, par1, par2 ); }
+
+  /// Accessor utility function for getting the track parameters error
+  inline float getError( const xAOD::TrackParticle& p, Trk::ParamDefs par ) {
+    return ( cov(p, par, par) < 0 ) ? 0. : std::sqrt( cov(p, par, par) ); }
+  inline float getError( const xAOD::TruthParticle&, Trk::ParamDefs ) { return 0.; }
+  template< class U >
+  inline float error( const U& p, Trk::ParamDefs par ) { return getError( p, par ); }
+
+  /// Accessor utility function for getting the track parameters covariance vector
+  inline std::vector< float > getCovVec( const xAOD::TrackParticle& p ) {
+    return p.definingParametersCovMatrixVec(); }
+  inline std::vector< float > getCovVec( const xAOD::TruthParticle& ) { return {}; }
+  template< class U >
+  inline std::vector< float > covVec( const U& p ) { return getCovVec( p ); }
+
+  /// Accessor utility function for getting the QOverPt error
+  inline float getQOverPTError( const xAOD::TrackParticle& p ) {
+    float invSinTheta = 1. / std::sin( theta(p) );
+    float cosTheta = std::cos( theta(p) );
+    float qOverPTerr2 =
+      std::pow( error(p, Trk::qOverP) * invSinTheta, 2 )
+      + std::pow( error(p, Trk::theta) * qOverP(p) * cosTheta * std::pow(invSinTheta, 2), 2 )
+      - 2 * qOverP(p) * cosTheta * cov(p, Trk::theta, Trk::qOverP) * std::pow(invSinTheta, 3);
+    return qOverPTerr2 > 0 ? std::sqrt( qOverPTerr2 ) : 0.;
   }
-  inline float getTrackParameterError( const xAOD::TruthParticle&, Trk::ParamDefs ) { return -9999; }
+  inline float getQOverPTError( const xAOD::TruthParticle& ) { return 0.; }
   template< class U >
-  inline float trackParameterError( const U& p, Trk::ParamDefs param ) { return getTrackParameterError(p, param); }
+  inline float qOverPTError( const U& p ) { return getQOverPTError(p); }
 
-  inline float getQOverPtError( const xAOD::TrackParticle& p ) {
-    float inverseSinTheta = 1./std::sin(p.theta());
-    float cosTheta = std::cos(p.theta());
-    float qOverPT_err2 =
-      std::pow(trackParameterError(p, Trk::qOverP) * inverseSinTheta, 2)
-      + std::pow(p.qOverP() * cosTheta * trackParameterError(p, Trk::theta) * std::pow(inverseSinTheta, 2), 2)
-      - 2 * p.qOverP() * cosTheta * p.definingParametersCovMatrix()(Trk::qOverP, Trk::theta) * std::pow(inverseSinTheta, 3);
-    return std::sqrt(qOverPT_err2);
+  /// Accessor utility function for getting the Pt error
+  inline float getPTError( const xAOD::TrackParticle& p ) {
+    std::vector< float > covs = covVec(p);
+    if( covs.size() < 15 ) {
+      throw std::runtime_error(
+        "TrackParticle without covariance matrix for defining parameters or the covariance matrix is wrong dimensionality.");
+      return 0.;
+    }
+    if( qOverP(p) <= 0. ) return 0.;
+    float diff_qp = - pT(p) / std::fabs( qOverP(p) );
+    float diff_theta = theta(p) == 0. ? 0. : pT(p) / std::tan( theta(p) );
+    float pTerr2 = diff_qp * (diff_qp * covs[14] + diff_theta * covs[13]) + diff_theta * diff_theta * covs[9];
+    return pTerr2 > 0. ? std::sqrt( pTerr2 ) : 0.;
   }
-  inline float getQOverPtError( const xAOD::TruthParticle& ) { return -9999; }
+  inline float getPTError( const xAOD::TruthParticle& ) { return 0.; }
   template< class U >
-  inline float qOverPtError( const U& p ) { return getQOverPtError(p); }
+  inline float pTError( const U& p ) { return getPTError(p); }
 
+  /// Accessor utility function for getting the Eta error
+  inline float getEtaError( const xAOD::TrackParticle& p ) {
+    float etaErr =
+      error(p, Trk::theta) / ( -2 * std::sin( theta(p) ) * std::cos( theta(p) ) );
+    return std::fabs( etaErr ); }
+  inline float getEtaError( const xAOD::TruthParticle& ) { return 0.; }
   template< class U >
-  inline float pTError( const U& p ) { return qOverPtError(p) * std::pow(pT(p), 2); }
+  inline float etaError( const U& p ) { return getEtaError(p); }
 
+  /// Accessor utility function for getting the z0SinTheta error
   inline float getZ0SinThetaError( const xAOD::TrackParticle& p ) {
-    float sinTheta = std::sin(p.theta());
-    float cosTheta = std::cos(p.theta());
-    float z0SinTheta_err2 =
-      std::pow(trackParameterError(p, Trk::z0) * sinTheta, 2)
-      + std::pow(p.z0() * cosTheta * trackParameterError(p, Trk::theta), 2)
-      + 2 * p.z0() * sinTheta * cosTheta * p.definingParametersCovMatrix()(Trk::z0, Trk::theta);
-    return std::sqrt(z0SinTheta_err2);
+    float z0sinErr2 =
+      std::pow( error(p, Trk::z0) * std::sin( theta(p) ), 2 )
+      + std::pow( z0(p) * error(p, Trk::theta) * std::cos( theta(p) ), 2)
+      + 2 * z0(p) * std::sin( theta(p) ) * std::cos( theta(p) ) * cov(p, Trk::z0, Trk::theta);
+    return z0sinErr2 > 0. ? std::sqrt( z0sinErr2 ) : 0.;
   }
-  inline float getZ0SinThetaError( const xAOD::TruthParticle& ) { return -9999; }
+  inline float getZ0SinThetaError( const xAOD::TruthParticle& ) { return 0.; }
   template< class U >
   inline float z0SinThetaError( const U& p ) { return getZ0SinThetaError(p); }
 
