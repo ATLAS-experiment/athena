@@ -1075,8 +1075,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   //-- to find initial and final state raiation and underline photons
   //-- SUSY
   if (numOfParents == 1 && (abs(motherPDG) < 7 || motherPDG == 21) &&
-      (numOfDaug != NumOfPht + NumOfPartons ||
-        (motherStatus != 62 && motherStatus != 52 && motherStatus != 21 && motherStatus != 22))) {
+      (numOfDaug != NumOfPht + NumOfPartons || !MC::Pythia8::isConditionA(mother))) {
     for (const auto& pout: partOriVert->particles_out()) {
       if (!pout) continue;
       if (motherPDG != pout->pdgId()) continue;
@@ -1205,7 +1204,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   // Pythia8 gamma+jet samples
-  if ((motherStatus == 62 || motherStatus == 52 || motherStatus == 21 || motherStatus == 22) && MC::isStable(thePriPart) && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons))  return PromptPhot;
+  if (MC::Pythia8::isConditionA(mother) && MC::isStable(thePriPart) && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons))  return PromptPhot;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
   if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringtVertex(mothOriVert)) isPrompt = true;

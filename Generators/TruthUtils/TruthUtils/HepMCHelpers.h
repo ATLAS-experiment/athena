@@ -17,6 +17,14 @@
 
 namespace MC
 {
+ namespace Pythia8
+ {
+   // To be undertood
+  template <class T> inline bool isConditionA(const T& p)  { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
+  
+  template <class T> inline bool isConditionB(const T& p)  { return p->status() == 23;}
+ }	
+	
 #include "AtlasPID.h"
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
