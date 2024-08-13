@@ -792,7 +792,7 @@ mergeFiles( const std::string & outFileName, const std::vector<std::string>& fil
   
   std::cout << "Writing file: " << outFileName << "\n";
   std::cout << "\nWarning messages from merging follow:\n\n";
-  
+  std::cout.flush(); 
   mergeDirectory( outfile.get(), tfiles, has_multiple_runs, &prefix_ignore );
   
   outfile->Close();
