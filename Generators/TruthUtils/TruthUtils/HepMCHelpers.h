@@ -145,20 +145,6 @@ namespace MC
     }
   }
 
-  /// @brief Function to get the parent B hadron.
-  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
-  template <class T>  T isHadronFromB(T p) {
-    if (!p) return nullptr;
-    int pid = abs(p->pdg_id());
-    if (isBottomHadron(pid) || pid == BQUARK) return p;
-    if (pid == CQUARK || isNucleus(pid) || isBSM(pid) || !p->production_vertex()) return nullptr;
-    auto incoming = p->production_vertex()->particles_in();
-    if (incoming.size() == 0) return nullptr;
-    /// AV: Strictly speaking, this is wrong and one has to check all the incoming particles.
-    /// However that is MCTruthCalssifier legacy that should be fixed later at some point.
-    return isHadronFromB(incoming.front());
-  }
-
   /// @brief Function to classify the vertex as hard scattering vertex.
   /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
