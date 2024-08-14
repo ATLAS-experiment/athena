@@ -465,9 +465,6 @@ namespace MuonCombined {
                         m_mstrack_truth_theta.push_back(-1);
                         m_mstrack_truth_qOverP.push_back(-1);
                     }
-                    // truth hit info
-                    // m_mstrack_truth_nprecLayers.push_back( (*truthLink)->isAvailable<uint8_t>("nprecLayers") ? -1 :
-                    // (*truthLink)->auxdata<uint8_t>("nprecLayers") );
                 } else {  // no truth link available
                     m_mstrack_has_truth.push_back(0);
                     m_mstrack_has_truth_par.push_back(0);
