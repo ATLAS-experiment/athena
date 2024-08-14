@@ -33,7 +33,7 @@ typedef class FasTrackConnector {
 
  public:
 
-  FasTrackConnector(std::ifstream&);
+  FasTrackConnector(std::ifstream&, bool LRTmode);
   ~FasTrackConnector();
 
   float m_etaBin;

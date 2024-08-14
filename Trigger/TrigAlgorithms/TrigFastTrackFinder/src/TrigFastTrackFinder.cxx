@@ -98,7 +98,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty( "zVertexResolution",       m_tcs.m_zvError = 10.0," Half-width (mm) in z of z region used to filter seeds when doFastZVertexSeeding enabled" );
   declareProperty( "zVertexResolutionEndcap", m_tcs.m_zvErrorEndcap = -1," Half-width (mm) in z of region used to filter seeds when doFastZVertexSeeding enabled, for endcap pixels; set to zVertexResolution value later if left negative" );
   declareProperty( "StoreZFinderVertices",    m_storeZFinderVertices = false ); //** NOT USED - to be implemented ATR-24242
-
+  
 
   /** SeedMaker */
   declareProperty("useNewLayerNumberScheme", m_useNewLayerNumberScheme = false,"Use LayerNumberTool for layer numbers");
@@ -122,6 +122,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty("pTmin",                    m_pTmin = 1000.0,"Triplet pT threshold is pTmin*Triplet_MinPtFrac" );
   declareProperty("Triplet_MinPtFrac",        m_tripletMinPtFrac = 0.3,"Triplet pT threshold is pTmin*Triplet_MinPtFrac");
   declareProperty("doSeedRedundancyCheck",    m_checkSeedRedundancy = false,"skip Triplets already used in a track");
+  declareProperty( "ConnectionFileName",      m_connectionFile = "binTables_ITK_RUN4.txt");
 
   /** settings for the ML-enhanced track seeding */
   declareProperty("UseTrigSeedML",              m_tcs.m_useTrigSeedML = 0,"set ML-based seed selection mode (0 disables)" );
@@ -283,15 +284,16 @@ StatusCode TrigFastTrackFinder::initialize() {
   }
   if (m_ITkMode) {
     //read data from layer connections file 
-    std::string conn_fileName = PathResolver::find_file("binTables_ITK_RUN4.txt", "DATAPATH");
-    if (conn_fileName.empty()) {
-      ATH_MSG_WARNING("Cannot find layer connections file " << conn_fileName);
+    ATH_MSG_INFO("Opening connection file" << m_connectionFile);
+    std::string conn_fileName = PathResolver::find_file(m_connectionFile, "DATAPATH");    if (conn_fileName.empty()) {
+      ATH_MSG_FATAL("Cannot find layer connections file " << conn_fileName);
+      return StatusCode::FAILURE;
     }
     else {
       ATH_MSG_INFO(conn_fileName);
       std::ifstream ifs(conn_fileName.c_str());
       
-      m_tcs.m_conn = new FASTRACK_CONNECTOR(ifs);
+      m_tcs.m_conn = new FASTRACK_CONNECTOR(ifs, m_LRTmode);
       m_tcs.m_useEtaBinning = m_useEtaBinning;
       ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
     }
@@ -361,6 +363,7 @@ StatusCode TrigFastTrackFinder::initialize() {
   ATH_MSG_DEBUG("	m_LRTmode                  : " <<  m_LRTmode           );
   ATH_MSG_DEBUG("	m_dodEdxTrk                : " <<  m_dodEdxTrk         );
   ATH_MSG_DEBUG("	m_ITkMode                  : " <<  m_ITkMode         );
+  ATH_MSG_DEBUG("	m_useTracklets             : " <<  m_useTracklets         );
 
   ATH_MSG_DEBUG(" Initialized successfully");
 
@@ -455,10 +458,12 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   ATH_MSG_DEBUG( "Input RoI " << roi );
 
   auto mnt_roi_nTracks = Monitored::Scalar<int>("roi_nTracks", 0);
+  std::vector<int> vec_seedSize;
+  auto mnt_seedSize = Monitored::Collection("trk_seedSize", vec_seedSize);
   auto mnt_roi_nSPs    = Monitored::Scalar<int>("roi_nSPs",    0);
   auto mnt_roi_nSPsPIX = Monitored::Scalar<int>("roi_nSPsPIX", 0);
   auto mnt_roi_nSPsSCT = Monitored::Scalar<int>("roi_nSPsSCT", 0);
-  auto monSP = Monitored::Group(m_monTool, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT);
+  auto monSP = Monitored::Group(m_monTool, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, mnt_seedSize);
 
   auto mnt_timer_Total                 = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
   auto mnt_timer_SpacePointConversion  = Monitored::Timer<std::chrono::milliseconds>("TIME_SpacePointConversion");
@@ -591,12 +596,17 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 	std::vector<GNN_TrigTracklet> vGNN_Tracks;
 
 	seedGen.getTracklets(tmpRoi.get(), tracklets, !m_useTracklets);
+	vec_seedSize.reserve(tracklets.size());
+	for(auto& track : tracklets) {
+		vec_seedSize.push_back(track.m_track.size());
+	}
 	if(!m_useTracklets) {
 	  for(auto& track : tracklets) {
 	    for(auto& seed : track.m_seeds) {
 	      triplets.emplace_back(seed);
 	    }
 	    ATH_MSG_DEBUG("GNN tracklet has " << track.m_track.size()<<" spacepoints");
+	    vec_seedSize.push_back(track.m_seeds.size());
 	  }
 	}
       }

@@ -152,6 +152,7 @@ namespace InDet{
       BooleanProperty m_seedsegmentsWrite{this, "SeedSegmentsWrite", false, "Call seed to track conversion"};
       BooleanProperty m_useTrigTrackFollowingTool{this, "useTrigTrackFollowingTool", false, "Option to use TrigInDetTrackFollowingTool instead of SiCombinatorialTrackFinder_xk"};
       BooleanProperty m_useTrigInDetRoadPredictorTool{this, "useTrigInDetRoadPredictorTool", false, "Option to use TrigInDetRoadPredictorTool instead of ISiDetElementsRoadMaker"};
+      BooleanProperty m_LRTmode{this, "LRTMode", false};
       DoubleProperty m_xi2max{this, "Xi2max", 15., "max Xi2 for updators"};
       DoubleProperty m_xi2maxNoAdd{this, "Xi2maxNoAdd", 35., "max Xi2 for clusters"};
       DoubleProperty m_xi2maxlink{this, "Xi2maxlink", 200., "max Xi2 for clusters"};
@@ -163,6 +164,7 @@ namespace InDet{
       IntegerProperty m_dholesmax{this, "nHolesGapMax", 2, "Max holes gap"};
       IntegerProperty m_nclusmin{this, "nClustersMin", 6,  "Min number clusters"};
       IntegerProperty m_nwclusmin{this, "nWeightedClustersMin", 6, "Min umber weighted clusters(pix=2 sct=1)"};
+      IntegerProperty m_trackletPoints{this, "trackletPoints", 1, "Select which tracklet points to use"};
       DoubleProperty m_phiWidth{this, "phiWidth", 0.3};
       DoubleProperty m_etaWidth{this, "etaWidth", 0.3};
       DoubleArrayProperty m_etabins{this, "etaBins", {}, "eta bins"};

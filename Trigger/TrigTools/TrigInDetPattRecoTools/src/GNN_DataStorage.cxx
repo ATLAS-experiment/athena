@@ -86,6 +86,12 @@ int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp, bool 
   if(binIndex == -1) {
     return -2;
   }
+  bool isStrip = sp.offlineSpacePoint()->clusterList().second != nullptr;
+ 
+  if(isStrip) {
+    m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_Node(sp));
+    return 0;
+  }
 
   bool isBarrel = (pL->m_layer.m_type == 0);
 

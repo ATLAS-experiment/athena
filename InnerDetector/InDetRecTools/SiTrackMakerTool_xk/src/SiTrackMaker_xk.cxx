@@ -863,11 +863,33 @@ std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlane
   /// we need at least three space points on the seed.
   if (theSeed.size() < 3) return nullptr;
 
+  std::vector<const Trk::SpacePoint*> SP;
+
   /// for tracklets we select first, middle, and last spacepoint of the seed to improve pT estimate
-  
-  unsigned int middleIdx = theSeed.size() == 3 ? 1 : theSeed.size()/2;
-  const std::vector<const Trk::SpacePoint*> SP = {theSeed.at(0), theSeed.at(middleIdx), theSeed.back()};
-  
+  if (m_trackletPoints == 1) {
+    unsigned int middleIdx = theSeed.size() == 3 ? 1 : theSeed.size()/2;
+    SP = {theSeed[0], theSeed[middleIdx], theSeed.back()};
+  }
+  // for tracklets we select last 3 spacepoints of the seed
+  else if (m_trackletPoints == 2) {
+    SP = {theSeed[theSeed.size() - 3], theSeed[theSeed.size() - 2], theSeed.back()};
+  }  
+  /// for tracklets we select middle, 3rd-quarter, and last spacepoint of the seed
+  else if (m_trackletPoints == 3) {
+    unsigned int middleIdx = theSeed.size() == 3 ? 0 : theSeed.size()/2;
+    unsigned int quarterIdx = theSeed.size() == 3 ? 1 : 3*theSeed.size()/4;
+    SP = {theSeed[middleIdx], theSeed[quarterIdx], theSeed.back()};
+  }  
+  /// for tracklets we select first, penultimate, and last spacepoint of the seed
+  else if (m_trackletPoints == 4) {
+    SP = {theSeed[0], theSeed[theSeed.size() - 2], theSeed.back()};
+  }
+  /// for tracklets we select first, second, and third spacepoint of the seed
+  else if (m_trackletPoints == 5) {
+    SP = {theSeed[0], theSeed[1], theSeed[2]};
+  }
+
+
   /// get the first cluster on the first hit
   const Trk::PrepRawData* cl  = SP[0]->clusterList().first;
   if (!cl) return nullptr;

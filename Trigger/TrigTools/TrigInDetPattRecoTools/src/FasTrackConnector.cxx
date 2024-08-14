@@ -14,7 +14,7 @@ FasTrackConnection::FasTrackConnection(unsigned int s, unsigned int d) : m_src(s
 
 }
 
-FasTrackConnector::FasTrackConnector(std::ifstream& inFile) {
+FasTrackConnector::FasTrackConnector(std::ifstream& inFile, bool LRTmode) {
 
   m_connMap.clear();
   m_layerGroups.clear();
@@ -39,18 +39,21 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile) {
       for(int j=0;j<width;j++) inFile >> dummy;//pC->m_binTable[j+i*width];
     }
 
-    int vol_id = src / 1000;
+    int srcvol_id = src / 1000;
+    int dstvol_id = src / 1000;
 
-    if(vol_id == 13 || vol_id == 12 || vol_id == 14) {
-      delete pC;
-      continue;
-    }
-
-    vol_id = dst / 1000;
-    
-    if(vol_id == 13 || vol_id == 12 || vol_id == 14) {
-      delete pC;
-      continue;
+    bool srcIsStrip = (srcvol_id == 13 || srcvol_id == 12 || srcvol_id == 14);
+    bool dstIsStrip = (dstvol_id == 13 || dstvol_id == 12 || dstvol_id == 14);
+    if (LRTmode) {
+      if ( !srcIsStrip || !dstIsStrip) {
+        delete pC;
+        continue;
+      }
+    } else {
+      if ( srcIsStrip || dstIsStrip) {
+        delete pC;
+        continue;
+      }
     }
 
     std::map<int, std::vector<FASTRACK_CONNECTION*> >::iterator it = m_connMap.find(stage);
