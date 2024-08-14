@@ -5,13 +5,11 @@ atlas_subdir(FPGATrackSimPrototrackFitter)
 
 # External dependencies:
 find_package(Acts COMPONENTS Core)
-find_package(Boost)
 
 atlas_add_component(FPGATrackSimPrototrackFitter
     src/*.cxx
     src/components/*.cxx
-    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-    LINK_LIBRARIES ${Boost_LIBRARIES} 
+    LINK_LIBRARIES 
 	ActsCore
 	ActsEventCnvLib
 	ActsToolInterfacesLib
