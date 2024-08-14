@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Muons
@@ -39,18 +39,17 @@
 namespace ST {
 
   const static SG::AuxElement::Decorator<char>      dec_passedHighPtCuts("passedHighPtCuts");
-  const static SG::AuxElement::ConstAccessor<char>  acc_passedHighPtCuts("passedHighPtCuts");
 
   const static SG::AuxElement::Decorator<char>      dec_passSignalID("passSignalID");
   const static SG::AuxElement::ConstAccessor<char>  acc_passSignalID("passSignalID");
 
   const static SG::AuxElement::Decorator<float>     dec_DFCommonJetDr("DFCommonJetDr");
+  const static SG::AuxElement::ConstAccessor<float> acc_DFCommonJetDr("DFCommonJetDr");
   const static SG::AuxElement::Decorator<float>     dec_dRJet("dRJet");
   const static SG::AuxElement::Decorator<float>     dec_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
-  const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
   const static SG::AuxElement::Decorator<char>      dec_isLRT("isLRT");
+  const static SG::AuxElement::Decorator<char>      dec_cosmic("cosmic");
 
 
 StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const{
@@ -76,7 +75,7 @@ StatusCode SUSYObjDef_xAOD::prepareLRTMuons(const xAOD::MuonContainer* inMuons, 
     const xAOD::TrackParticle* idtrack = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
 
     // Save muon if the id track passes the LRT filter
-    if ( idtrack->isAvailable<char>("passLRTFilter") )
+    if ( acc_lrtFilter.isAvailable(*idtrack) )
     {
       if ( static_cast<int>(acc_lrtFilter(*idtrack) ) ){ 
         std::unique_ptr<xAOD::Muon> copyMuon = std::make_unique<xAOD::Muon>(*muon);
@@ -217,7 +216,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
 
   if (m_muEffCorrForce1D) {
     dec_DFCommonJetDr(input) = -2.0;
-  } else if (!input.isAvailable<float>("DFCommonJetDr")) {
+  } else if (!acc_DFCommonJetDr.isAvailable(input)) {
     dec_dRJet(input) = -2.0;
   }
 
@@ -441,7 +440,6 @@ bool SUSYObjDef_xAOD::IsBadMuon(const xAOD::Muon& input, float qopcut) const
 
 bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d0cut) const
 {
-  const static SG::AuxElement::Decorator<char> dec_cosmic("cosmic");
   dec_cosmic(input) = false;
 
   const xAOD::TrackParticle* track(nullptr);

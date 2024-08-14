@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
@@ -1001,8 +1001,23 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
   const static SG::AuxElement::ConstAccessor<char> acc_passOR("passOR");
   const static SG::AuxElement::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
+  const static SG::AuxElement::ConstAccessor<char> acc_bjet("bjet");
+  const static SG::AuxElement::ConstAccessor<double> acc_btag_weight("btag_weight");
+  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pb("btag_dl1pb");
+  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pc("btag_dl1pc");
+  const static SG::AuxElement::ConstAccessor<float> acc_btag_dl1pu("btag_dl1pu");
+  const static SG::AuxElement::ConstAccessor<int> acc_wtagged("wtagged");
+  const static SG::AuxElement::ConstAccessor<int> acc_ztagged("ztagged");
+  const static SG::AuxElement::ConstAccessor<int> acc_toptagged("toptagged");
+  const static SG::AuxElement::ConstAccessor<char> acc_bad("bad");
   const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched");
+  const static SG::AuxElement::ConstAccessor<double> acc_effscalefact("effscalefact");
   const static SG::AuxElement::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
+  const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
+  const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
+  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
+  const static SG::AuxElement::ConstAccessor<char> acc_cosmic("cosmic");
+  const static SG::AuxElement::ConstAccessor<char> acc_passedHighPtCuts("passedHighPtCuts");
 
   // more decorations that are set externally
   const static SG::AuxElement::ConstAccessor<unsigned int> acc_OQ("OQ");
@@ -1014,6 +1029,15 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_passCrackVetoCleaning("DFCommonCrackVetoCleaning");
   const static SG::AuxElement::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
   const static SG::AuxElement::ConstAccessor<float> acc_DetEta("DetectorEta");
+  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone20_TTVA("ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000");
+  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000");
+  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone40("topoetcone40");
+  const static SG::AuxElement::ConstAccessor<float> acc_ptcone20("ptcone20");
+  const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
+  const static SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
+  const static SG::AuxElement::ConstAccessor<size_t> acc_TruthProng("TruthProng");
+  const static SG::AuxElement::ConstAccessor<int> acc_TruthCharge("TruthCharge");
 
 
 } // namespace ST

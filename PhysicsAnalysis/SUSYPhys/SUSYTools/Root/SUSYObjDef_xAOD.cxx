@@ -2979,7 +2979,7 @@ unsigned int SUSYObjDef_xAOD::GetRandomRunNumber(bool muDependentRRN) {
 StatusCode SUSYObjDef_xAOD::ApplyPRWTool(bool muDependentRRN) {
 
   const xAOD::EventInfo* evtInfo = GetEventInfo();
-  if(!evtInfo->isAvailable<unsigned int>("RandomRunNumber"))
+  if(!randomrunnumber.isAvailable(*evtInfo))
     ATH_CHECK( m_prwTool->apply( *evtInfo, muDependentRRN ) );
   return StatusCode::SUCCESS;
 }

@@ -25,7 +25,7 @@ bool SUSYObjDef_xAOD :: isPrompt(const xAOD::IParticle* part) const {
   const int type  = acc_truthType(*part);
   int origin      = acc_truthOrigin(*part);
   int originbkg   = 0;
-  if(part->isAvailable<int>("bkgTruthOrigin")){ //only in SUSY2,3,5 for the moment!
+  if(acc_bkgTruthOrigin.isAvailable(*part)){ //only in SUSY2,3,5 for the moment!
     originbkg = acc_bkgTruthOrigin(*part);
   }
   else{
