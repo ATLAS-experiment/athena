@@ -357,6 +357,7 @@ namespace TrigCompositeUtils {
    **/
   void recursiveFlagForThinning(NavGraph& node, 
     const bool keepOnlyFinalFeatures,
+    const bool removeEmptySteps,
     const std::vector<std::string>& nodesToDrop);
 
 
@@ -369,6 +370,7 @@ namespace TrigCompositeUtils {
     bool modeKeep,
     std::set<NavGraphNode*>& fullyExploredFrom,
     const bool keepOnlyFinalFeatures,
+    const bool removeEmptySteps,
     const std::vector<std::string>& nodesToDrop);
 
 
