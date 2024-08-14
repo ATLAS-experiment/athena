@@ -418,11 +418,12 @@ namespace TrigCompositeUtils {
 
   void recursiveFlagForThinning(NavGraph& graph, 
     const bool keepOnlyFinalFeatures,
+    const bool removeEmptySteps,
     const std::vector<std::string>& nodesToDrop)
   {
     std::set<NavGraphNode*> fullyExploredFrom;
     for (NavGraphNode* finalNode : graph.finalNodes()) {
-      recursiveFlagForThinningInternal(finalNode, /*modeKeep*/true, fullyExploredFrom, keepOnlyFinalFeatures, nodesToDrop);
+      recursiveFlagForThinningInternal(finalNode, /*modeKeep*/true, fullyExploredFrom, keepOnlyFinalFeatures, removeEmptySteps, nodesToDrop);
     }
   }
 
@@ -431,6 +432,7 @@ namespace TrigCompositeUtils {
     bool modeKeep,
     std::set<NavGraphNode*>& fullyExploredFrom,
     const bool keepOnlyFinalFeatures,
+    const bool removeEmptySteps,
     const std::vector<std::string>& nodesToDrop)
   {
 
@@ -444,22 +446,33 @@ namespace TrigCompositeUtils {
     if (keepOnlyFinalFeatures) {
       // Check if we have reached the first feature
       if ( modeKeep == true && node->node()->hasObjectLink(featureString()) ) {
-        // We keep this node, and its immidiate parents (InputMaker nodes) as these have the ROI link which we also want
+        // We keep this node, and its immediate parents (InputMaker nodes) as these have the ROI link which we also want
+
+        // Special BLS case: The bphys is attached exceptionally at the ComboHypo. Want to save two levels up in this case.
+        // (The two Hypo nodes at the level above, and the InputMakers at the level above that)
+        const bool specialBphysCase = (node->node()->name() == comboHypoAlgNodeName());
+        // We also want to override the ComboHypo potentially being listed in nodesToDrop node in the special case, so will make the keep explicit
+        if (specialBphysCase) node->keep();
+
         keep = true;
-        // TODO - these calls mean we bypass the nodesToDrop check here, any other way?
-        // TODO One solution here is to impliment a link-move option, move the ROI
-        // TODO from the InputMaker node down to the HypoAlg node
+
+        // TODO - these explicit keep calls here mean we bypass the nodesToDrop check for these, any other way?
+        // > One solution here is to implement a link-move option, move the ROI
+        // > from the InputMaker node down to the HypoAlg node?
         for (NavGraphNode* seed : node->seeds()) {
           seed->keep();
+          if (specialBphysCase) for (NavGraphNode* secondLevelSeed : seed->seeds()) secondLevelSeed->keep();
         }
+
         // We change the default behaviour to be modeKeep = false
         // such that by default we start to NOT flag all the parent nodes to be kept
         modeKeep = false;
       }
-      if (node->node()->name() == hltSeedingNodeName()) {
-        // We also keep the initial node from the HLTSeeding
-        keep = true;
-      }
+    }
+
+    // We always by default keep the initial node from the HLTSeeding, may be overriden by nodesToDrop
+    if (node->node()->name() == hltSeedingNodeName()) {
+      keep = true;
     }
 
     // Check also against NodesToDrop
@@ -470,6 +483,31 @@ namespace TrigCompositeUtils {
       }
     }
 
+    // Check against RemoveEmptySteps
+    // The signature we look for here is a InputMaker node connected directly to a ComboHypo node 
+    // The key thing to identify is NO intermediate Hypo node
+    // This structure is created in Steps where some chain legs are running reconstruction, but other legs are idle - either due to
+    // menu alignment, or due to the legs being of different length.
+    // For passed chains, there is little point keeping these CH and IM nodes on the idle legs. So we have the option of slimming them here.
+    // First for the ComboHypo ...
+    if (
+      removeEmptySteps &&
+      node->node()->name() == comboHypoAlgNodeName() && // If I am a ComboHypo node
+      node->seeds().size() >= 1 && // with at least one parent
+      node->seeds().at(0)->node()->name() == inputMakerNodeName() // which (first child) is an InputMaker node
+    ) {
+      keep = false; // Then don't save me
+    }
+    // ... and also for the InputMaker, with flipped logic.
+    if (
+      removeEmptySteps &&
+      node->node()->name() == inputMakerNodeName() && // If I am a InputMaker node
+      node->children().size() >= 1 && // with at least one child
+      node->children().at(0)->node()->name() == comboHypoAlgNodeName() // which (first child) is an ComboHypo node
+    ) {
+      keep = false; // Then don't save me
+    }
+
     // Inform the node that it should NOT be thinned away.
     if (keep) {
       node->keep();
@@ -477,13 +515,30 @@ namespace TrigCompositeUtils {
 
     for (NavGraphNode* seed : node->seeds()) {
 #if TRIGCOMPUTILS_ENABLE_EARLY_EXIT == 1
-      if (fullyExploredFrom.count(seed) == 1) {
+      // NOTE: This code block cuts short the recursive graph exploration for any node which has already been fully-explored-from.
+      // 
+      // If we are keeping final features, then processing each node exactly once is actually insufficient.
+      // This is because we may reach a node, X, with a feature which is penultimate/generally-non-final for some chain, A,
+      // but then later on we may follow Terminus->SummaryFilter->Hypothesis(X) for some chain, B, where this same
+      // feature from X _is_ the final-feature for chain B. Here we would not process node X again as we have already dealt with it.
+      // But we need to process it again as for chain B, modeKeep==true still and chain B wants to flag the node as keep().
+      //
+      // We only however need to force the exploration while we are in the mode where we are nominally keeping nodes (modeKeep == true).
+      // Once we have switched to dropping nodes by default, we should be OK to once again skip over nodes which we already processed.
+      // The only thing we should be keeping when modeKeep == false is the L1 node, any this is not dependent on path.
+      //
+      // See: ATR-28061
+      bool allowEarlyExit = true;
+      if (keepOnlyFinalFeatures) {
+        allowEarlyExit = (modeKeep == false);
+      }
+      if (allowEarlyExit && fullyExploredFrom.count(seed) == 1) {
         // We have fully explored this branch
         continue;
       }
 #endif
-      // Recursivly call all the way up the graph to the initial nodes from the HLTSeeding
-      recursiveFlagForThinningInternal(seed, modeKeep, fullyExploredFrom, keepOnlyFinalFeatures, nodesToDrop);
+      // Recursively call all the way up the graph to the initial nodes from the HLTSeeding
+      recursiveFlagForThinningInternal(seed, modeKeep, fullyExploredFrom, keepOnlyFinalFeatures, removeEmptySteps, nodesToDrop);
     }
 
     // Have fully explored down from this point
