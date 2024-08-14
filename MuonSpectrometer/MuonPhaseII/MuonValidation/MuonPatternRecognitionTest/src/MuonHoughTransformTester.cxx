@@ -22,6 +22,8 @@ namespace MuonValR4 {
         ATH_CHECK(m_inSimHitKeys.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
+        ATH_CHECK(m_truthSegmentKey.initialize());
+        ATH_CHECK(m_rh_truthSegmentSimHitLink.initialize());
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
         m_tree.addBranch(std::make_shared<MuonVal::EventInfoBranch>(m_tree,0));
         m_out_SP = std::make_shared<MuonValR4::SpacePointTesterModule>(m_tree, m_spacePointKey.key()); 
@@ -64,30 +66,33 @@ namespace MuonValR4 {
     }
 
    
-    void MuonHoughTransformTester::matchSeedToTruth(const MuonR4::SegmentSeed* seed, 
+    void MuonHoughTransformTester::matchSeedToTruth(const EventContext & ctx, const MuonR4::SegmentSeed* seed, 
                                                     chamberLevelObjects & objs ) const{
         double bestTruthFrac{0.}; 
-        HepMC::ConstGenParticlePtr bestMatch = nullptr; 
-        for (auto & [ genParticle, truthQuantities] : objs.truthMatching) {
+        const xAOD::MuonSegment* bestMatch = nullptr; 
+        SG::ReadDecorHandle<xAOD::MuonSegmentContainer,SimHitLinkVec> simHitsFromTruth(m_rh_truthSegmentSimHitLink, ctx);
+        SG::ConstAccessor<ElementLink<xAOD::MuonSimHitContainer>> simHitAcc("simHitLink"); 
+
+        for (auto & [ truthsegment, truthQuantities] : objs.truthMatching) {
             unsigned int nRecFound{0}; 
+            const SimHitLinkVec & simHitsForSegment = simHitsFromTruth(*truthsegment); 
+
             for (const MuonR4::HoughHitType& spacePoint : seed->getHitsInMax()) {
-                for (const xAOD::MuonSimHit* simHit : truthQuantities.detectorHits) {
-                    if(m_idHelperSvc->isMdt(simHit->identify()) &&
-                        spacePoint->identify() == simHit->identify()){
-                        ++nRecFound;
-                        break;
-                    } 
-                    //// Sim hits are expressed w.r.t to the gas gap Id. Check whether
-                    ///  the hit is in the same gas gap
-                    else if (m_idHelperSvc->gasGapId(spacePoint->identify()) == simHit->identify()) {
-                        ++nRecFound;
-                        // break; // should we... ? 
-                    }
+                if (!simHitAcc.isAvailable(*spacePoint->primaryMeasurement())) continue; 
+                auto simHitMatch = simHitAcc(*spacePoint->primaryMeasurement()); 
+                if (!simHitMatch.isValid() || *simHitMatch == nullptr){
+                    continue;
+                }
+                auto found = std::ranges::find_if( simHitsForSegment, [&simHitMatch](const ElementLink<xAOD::MuonSimHitContainer> & el){
+                    return (el == simHitMatch);
+                });
+                if (found != simHitsForSegment.end()){
+                    ++nRecFound; 
                 }
             }
             double truthFraction = (1.*nRecFound) / (1.*seed->getHitsInMax().size()); 
             if (truthFraction > bestTruthFrac) {
-                bestMatch = genParticle;
+                bestMatch = truthsegment;
                 bestTruthFrac = truthFraction; 
             }
         }
@@ -95,14 +100,14 @@ namespace MuonValR4 {
         /** Map the seed to the truth particle */
         chamberLevelObjects::SeedMatchQuantites& seedMatch = objs.seedMatching[seed];
         seedMatch.matchProb = bestTruthFrac;
-        seedMatch.truthParticle = bestMatch;
+        seedMatch.truthsegment = bestMatch;
         /** Back mapping of the best truth -> seed */
         objs.truthMatching[bestMatch].assocSeeds.push_back(seed);
     }
   
-    void MuonHoughTransformTester::matchSeedsToTruth(chamberLevelObjects & objs) const {        
+    void MuonHoughTransformTester::matchSeedsToTruth(const EventContext & ctx,chamberLevelObjects & objs) const {        
         for (auto & [ seed, matchObj] : objs.seedMatching) {
-            matchSeedToTruth(seed, objs);
+            matchSeedToTruth(ctx, seed, objs);
             ATH_MSG_VERBOSE("Truth matching probability "<<matchObj.matchProb);           
         }
     }
@@ -112,37 +117,42 @@ namespace MuonValR4 {
         m_out_stationEta = chamber->stationEta();
         m_out_stationPhi = chamber->stationPhi();
     }                
-    void MuonHoughTransformTester::fillTruthInfo(const HepMC::ConstGenParticlePtr genParticlePtr, const std::vector<const xAOD::MuonSimHit*> & hits,const ActsGeometryContext & gctx){
-        if (!genParticlePtr) return; 
+    void MuonHoughTransformTester::fillTruthInfo(const EventContext & ctx, const xAOD::MuonSegment* segment,const ActsGeometryContext & gctx){
+        if (!segment) return; 
         m_out_hasTruth = true; 
-        m_out_gen_Eta   = genParticlePtr->momentum().eta();
-        m_out_gen_Phi= genParticlePtr->momentum().phi();
-        m_out_gen_Pt= genParticlePtr->momentum().perp();
+        Amg::Vector3D segPos{
+            segment->x(),
+            segment->y(),
+            segment->z(),
+        }; 
+        Amg::Vector3D segDir{
+            segment->px(),
+            segment->py(),
+            segment->pz(),
+        };
+        // eta is interpreted as the eta-location 
+        m_out_gen_Eta   = segDir.eta();
+        m_out_gen_Phi= segDir.phi();
+        m_out_gen_Pt= segDir.perp();
+
+        SG::ReadDecorHandle<xAOD::MuonSegmentContainer,SimHitLinkVec> simHitsFromTruth(m_rh_truthSegmentSimHitLink, ctx);
+        const SimHitLinkVec & simHits = simHitsFromTruth(*segment);         
+        const xAOD::MuonSimHit* firstSimHit = *(simHits.front()); 
+        const Identifier ID = firstSimHit->identify();
+        const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID); 
+        //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
+        const MuonGMR4::MuonChamber* muonChamber = reElement->getChamber();
+        auto toChamber = muonChamber->globalToLocalTrans(gctx);
+        const Amg::Vector3D chamberPos{toChamber * segPos};
+        Amg::Vector3D chamberDir = toChamber.linear() * segDir;
         
-        const xAOD::MuonSimHit* simHit = hits.front(); 
-        const Identifier ID = simHit->identify();
-                
-        const Amg::Transform3D toChamber{toChamberTrf(gctx, ID)};
-        const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};
-        Amg::Vector3D chamberDir = toChamber.linear() * xAOD::toEigen(simHit->localDirection());
-        
-        /// Express the simulated hit in the center of the chamber
-        const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
-        Amg::Vector3D chamberPos = localPos + (*lambda)*chamberDir;
-        m_out_gen_nHits = hits.size(); 
-        unsigned int nMdt{0}, nRpc{0}, nTgc{0}, nMm{0}, nsTgc{0}; 
-        for (const xAOD::MuonSimHit* hit : hits){
-            nMdt += m_idHelperSvc->isMdt(hit->identify()); 
-            nRpc += m_idHelperSvc->isRpc(hit->identify()); 
-            nTgc += m_idHelperSvc->isTgc(hit->identify()); 
-            nMm  += m_idHelperSvc->isMM(hit->identify());
-            nsTgc += m_idHelperSvc->issTgc(hit->identify());
-        }
-        m_out_gen_nRPCHits = nRpc; 
-        m_out_gen_nMDTHits = nMdt; 
-        m_out_gen_nTGCHits = nTgc;
-        m_out_gen_nMMits = nMm;
-        m_out_gen_nsTGCHits = nsTgc;
+        m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
+       
+        m_out_gen_nMDTHits = (segment->technology() == Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
+        m_out_gen_nNswHits = (segment->technology() != Muon::MuonStationIndex::MDT ? segment->nPrecisionHits() : 0); 
+        m_out_gen_nTGCHits = (segment->chamberIndex() > Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
+        m_out_gen_nRPCHits = (segment->chamberIndex() <= Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
+
 
         m_out_gen_tantheta = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10); 
         m_out_gen_tanphi = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
@@ -239,6 +249,11 @@ namespace MuonValR4 {
         
         const MuonR4::SegmentContainer* readMuonSegments{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_inSegmentKey, readMuonSegments));
+        
+        const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
+        ATH_CHECK(retrieveContainer(ctx, m_truthSegmentKey, readTruthSegments));
+        
+        SG::ReadDecorHandle<xAOD::MuonSegmentContainer, SimHitLinkVec> readSimHits{m_rh_truthSegmentSimHitLink, ctx}; 
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
@@ -246,26 +261,18 @@ namespace MuonValR4 {
         // The fast digi should only generate one circle per tube. 
         std::map<const MuonGMR4::MuonChamber*, chamberLevelObjects> allObjectsPerChamber; 
 
-        for (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key : m_inSimHitKeys){
-            const xAOD::MuonSimHitContainer* collection{nullptr};
-            ATH_CHECK(retrieveContainer(ctx, key, collection));
-            for (const xAOD::MuonSimHit* simHit : *collection) {
-                const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(simHit->identify()); 
-                const MuonGMR4::MuonChamber* id{reElement->getChamber()};
-                chamberLevelObjects & theObjects  = allObjectsPerChamber[id];
-                auto genLink = simHit->genParticleLink();
-                HepMC::ConstGenParticlePtr genParticle = nullptr; 
-                if (genLink.isValid()){
-                    genParticle = genLink.cptr(); 
-                }
-                /// skip empty truth matches for now
-                if (!genParticle) continue;
-                theObjects.truthMatching[genParticle].detectorHits.push_back(simHit); 
-            }
+        for (const xAOD::MuonSegment* truthSegment : *readTruthSegments){
+            const SimHitLinkVec & simHits = readSimHits(*truthSegment); 
+            const Identifier simHitId = (*simHits.front())->identify();
+            const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(simHitId); 
+            const MuonGMR4::MuonChamber* id{reElement->getChamber()};
+            chamberLevelObjects & theObjects  = allObjectsPerChamber[id];
+            theObjects.truthMatching[truthSegment].truthsegment = truthSegment; 
         }
 
         // Populate the seeds first
         for (const MuonR4::SegmentSeed* max : *readSegmentSeeds) {
+            // use adventurous minion syntax to add a key with a default value
             allObjectsPerChamber[max->chamber()].seedMatching[max];
         }
         if (readMuonSegments) {
@@ -277,18 +284,18 @@ namespace MuonValR4 {
         }
 
         for (auto & [chamber, chamberLevelObjects] : allObjectsPerChamber){
-            matchSeedsToTruth(chamberLevelObjects);            
+            matchSeedsToTruth(ctx, chamberLevelObjects);            
             /// Step 1: Fill the matched pairs 
-            for (auto & [genParticlePtr, assocInfo] : chamberLevelObjects.truthMatching) {                
+            for (auto & [truthSegment, assocInfo] : chamberLevelObjects.truthMatching) {                
                 if (assocInfo.assocSeeds.empty()) {
                     fillChamberInfo(chamber); 
-                    fillTruthInfo(genParticlePtr, assocInfo.detectorHits, gctx);
+                    fillTruthInfo(ctx, truthSegment, gctx);
                     if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
                     continue;
                 }
                 for (const MuonR4::SegmentSeed* seed : assocInfo.assocSeeds) {
                     fillChamberInfo(chamber); 
-                    fillTruthInfo(genParticlePtr, assocInfo.detectorHits, gctx);
+                    fillTruthInfo(ctx, truthSegment, gctx);
                     auto& seedMatch = chamberLevelObjects.seedMatching[seed];
                     m_out_SP->push_back(*seed->parentBucket());
                     fillSeedInfo(seed, seedMatch.matchProb);
@@ -300,7 +307,7 @@ namespace MuonValR4 {
             }
             // also fill the reco not matched to any truth 
             for (auto & [ seed, assocInfo ] : chamberLevelObjects.seedMatching) {
-                if (assocInfo.truthParticle) continue;
+                if (assocInfo.truthsegment) continue;
                 fillChamberInfo(chamber);
                 m_out_SP->push_back(*seed->parentBucket());
                 fillSeedInfo(seed, 0.); 
