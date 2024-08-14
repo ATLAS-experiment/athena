@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionRegressionTF_h
@@ -22,8 +22,8 @@ public:
 private:
   std::vector<std::vector<double>> m_fWeightMatrix0to1;
   std::vector<std::vector<double>> m_fWeightMatrix1to2;
-  float m_rangeval;
-  float m_startval;
+  float m_rangeval{};
+  float m_startval{};
 
   ClassDef(TFCS1DFunctionRegressionTF, 1)
 };
