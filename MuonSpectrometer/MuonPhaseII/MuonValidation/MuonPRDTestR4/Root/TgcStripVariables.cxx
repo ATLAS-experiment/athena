@@ -20,7 +20,7 @@ namespace MuonValR4{
     bool TgcStripVariables::fill(const EventContext& ctx){
         const ActsGeometryContext& gctx{getGeoCtx(ctx)};
 
-        SG::ReadHandle<xAOD::TgcStripContainer> inContainer{m_key, ctx};
+        SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve "<<m_key.fullKey());
             return false;
@@ -67,7 +67,7 @@ namespace MuonValR4{
     void TgcStripVariables::dump(const ActsGeometryContext& gctx,
                                  const xAOD::TgcStrip& strip) {
         const MuonGMR4::TgcReadoutElement* re = strip.readoutElement();
-        const Identifier id{re->measurementId(strip.layerHash())};
+        const Identifier id{strip.identify()};
     
 
         ATH_MSG_VERBOSE("Filling information for "<<idHelperSvc()->toString(id));

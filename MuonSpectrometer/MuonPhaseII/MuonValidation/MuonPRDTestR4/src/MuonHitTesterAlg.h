@@ -82,8 +82,9 @@ namespace MuonValR4 {
             /**
              *  @brief Prd collection names
              */
-            Gaudi::Property<std::string> m_mdtPrdKey{this, "MdtPrdKey", "xAODMdtCircles"};
-            Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcStrips"};
+            Gaudi::Property<std::string> m_mdtPrdKey{this, "MdtPrdKey", "xMdtDriftCircles"};
+            Gaudi::Property<std::string> m_mdtTwinPrdKey{this, "MdtTwinPrdKey", "xMdtTwinDriftCircles"};
+            Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcMeasurements"};
             Gaudi::Property<std::string> m_tgcPrdKey{this, "TgcPrdKey", "xTgcStrips"};
             Gaudi::Property<std::string> m_mmPrdKey{this, "MmPrdKey", "xAODMMClusters"};
     };

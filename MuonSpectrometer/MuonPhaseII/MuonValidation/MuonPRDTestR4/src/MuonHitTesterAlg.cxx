@@ -13,6 +13,8 @@
 #include "MuonPRDTest/sTGCDigitVariables.h"
 
 #include "MuonPRDTestR4/MdtDriftCircleVariables.h"
+#include "MuonPRDTestR4/MdtTwinDriftCircleVariables.h"
+
 #include "MuonPRDTestR4/RpcMeasurementVariables.h"
 #include "MuonPRDTestR4/TgcStripVariables.h"
 #include "MuonPRDTestR4/MmClusterVariables.h"
@@ -94,6 +96,7 @@ namespace MuonValR4 {
         }
         if (m_writeMdtPrds) {
             m_tree.addBranch(std::make_shared<MdtDriftCircleVariables>(m_tree, m_mdtPrdKey, msgLevel()));
+            m_tree.addBranch(std::make_shared<MdtTwinDriftCircleVariables>(m_tree, m_mdtTwinPrdKey, msgLevel()));
         }
         if (m_writeRpcPrds) {
             m_tree.addBranch(std::make_shared<RpcMeasurementVariables>(m_tree, m_rpcPrdKey, msgLevel()));

@@ -39,7 +39,7 @@ namespace MuonValR4{
     bool SimHitTester::fill(const EventContext& ctx){
         const ActsGeometryContext& gctx{getGeoCtx(ctx)};
 
-        SG::ReadHandle<xAOD::MuonSimHitContainer> inContainer{m_key, ctx};
+        SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve "<<m_key.fullKey());
             return false;

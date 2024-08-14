@@ -2,22 +2,22 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonPRDTestR4/MdtDriftCircleVariables.h"
+#include "MuonPRDTestR4/MdtTwinDriftCircleVariables.h"
 #include "StoreGate/ReadHandle.h"
 namespace MuonValR4{
 
-    MdtDriftCircleVariables::MdtDriftCircleVariables(MuonTesterTree& tree,
-                                                     const std::string& inContainer,
-                                                     MSG::Level msgLvl,
-                                                     const std::string& collName):
+    MdtTwinDriftCircleVariables::MdtTwinDriftCircleVariables(MuonTesterTree& tree,
+                                                             const std::string& inContainer,
+                                                             MSG::Level msgLvl,
+                                                             const std::string& collName):
         TesterModuleBase{tree, inContainer + collName, msgLvl},
         m_key{inContainer},
         m_collName{collName}{
     }
-    bool MdtDriftCircleVariables::declare_keys() {
+    bool MdtTwinDriftCircleVariables::declare_keys() {
         return declare_dependency(m_key);
     }
-    bool MdtDriftCircleVariables::fill(const EventContext& ctx){
+    bool MdtTwinDriftCircleVariables::fill(const EventContext& ctx){
         const ActsGeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
@@ -26,11 +26,11 @@ namespace MuonValR4{
             return false;
         }
         /// First dump the prds parsed externally
-        for (const xAOD::MdtDriftCircle* dc : m_dumpedPRDS){
+        for (const xAOD::MdtTwinDriftCircle* dc : m_dumpedPRDS){
             dump(gctx, *dc);
         }
         /// Then parse the rest. If there's any
-        for (const xAOD::MdtDriftCircle* dc : *inContainer) {
+        for (const xAOD::MdtTwinDriftCircle* dc : *inContainer) {
             const MuonGMR4::MdtReadoutElement* re = dc->readoutElement();
             const Identifier id{re->measurementId(dc->measurementHash())};
             if ((m_applyFilter && !m_filteredChamb.count(idHelperSvc()->chamberId(id))) ||
@@ -46,14 +46,14 @@ namespace MuonValR4{
         m_dumpedPRDS.clear();
         return true;
     }
-    void MdtDriftCircleVariables::enableSeededDump() {
+    void MdtTwinDriftCircleVariables::enableSeededDump() {
         m_applyFilter = true;
     }
-    void MdtDriftCircleVariables::dumpAllHitsInChamber(const Identifier& chamberId){
+    void MdtTwinDriftCircleVariables::dumpAllHitsInChamber(const Identifier& chamberId){
         m_applyFilter = true;
         m_filteredChamb.insert(idHelperSvc()->chamberId(chamberId));
     }
-    unsigned int MdtDriftCircleVariables::push_back(const xAOD::MdtDriftCircle& dc){
+    unsigned int MdtTwinDriftCircleVariables::push_back(const xAOD::MdtTwinDriftCircle& dc){
         m_applyFilter = true;
         const MuonGMR4::MdtReadoutElement* re = dc.readoutElement();
         const Identifier id{re->measurementId(dc.measurementHash())};
@@ -64,8 +64,8 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void MdtDriftCircleVariables::dump(const ActsGeometryContext& gctx,
-                                    const xAOD::MdtDriftCircle& dc) {
+    void MdtTwinDriftCircleVariables::dump(const ActsGeometryContext& gctx,
+                                           const xAOD::MdtTwinDriftCircle& dc) {
         const MuonGMR4::MdtReadoutElement* re = dc.readoutElement();
         const Identifier id{re->measurementId(dc.measurementHash())};
     
@@ -78,8 +78,14 @@ namespace MuonValR4{
         m_globPos.push_back(tubePos);
         m_driftRadius.push_back(dc.driftRadius());
         m_driftRadiusUncert.push_back(dc.driftRadiusUncert());
+        m_twinLocZ.push_back(dc.posAlongWire());
+        m_twinUncertLocZ.push_back(dc.posAlongWireUncert());
         m_tdcCounts.push_back(dc.tdc());
         m_adcCounts.push_back(dc.adc());
-    }
 
+        m_twinTdcCounts.push_back(dc.twinTdc());
+        m_twinAdcCounts.push_back(dc.twinAdc());
+        m_twinTube.push_back(dc.twinTube());
+        m_twinLayer.push_back(dc.twinLayer());
+    }
 }
