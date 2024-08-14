@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-
 def L1LegacyTopoSimulationCfg(flags):
     
     acc = ComponentAccumulator()
@@ -78,6 +77,25 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
 
     controlHistSvc = CompFactory.LVL1.ControlHistSvc("ControlHistSvc")
     
+    decoderTools = []
+    maybeMissingRobs = []
+
+    IsData = True
+    if flags.Input.isMC:
+        IsData = False
+
+    from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoPhase1ByteStreamToolCfg
+    l1topoBSTool = acc.popToolsAndMerge(L1TopoPhase1ByteStreamToolCfg(flags, "L1TopoBSDecoderTool"))
+    decoderTools += [l1topoBSTool]
+    maybeMissingRobs += l1topoBSTool.ROBIDs
+
+    if IsData:
+        decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
+                                                         DecoderTools=decoderTools,
+                                                         MaybeMissingROBs=maybeMissingRobs)
+
+        acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
+
     if not flags.Trigger.enableL1CaloPhase1:
         emtauProvider.eFexEMRoIKey = ""
         emtauProvider.eFexTauRoIKey = ""
@@ -114,10 +132,12 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
     if doMonitoring:
         from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
         if name=="L1TopoSimulation":
-            acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions'))
+            acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoSimDecisions',
+                                                                        doHwMon=IsData,doComp=IsData, doMultComp=IsData))
         else:
             acc.addEventAlgo(TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/OnlineL1TopoSimDecisions',
-                                                                        toolName=name+"_Monitor"))
+                                                                        toolName=name+"_Monitor",
+                                                                        doHwMon=IsData,doComp=IsData, doMultComp=IsData))
 
     return acc
 
