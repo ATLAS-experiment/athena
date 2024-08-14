@@ -943,13 +943,17 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   m_jetCleanDFName = TString::Format("DFCommonJets_jetClean_%s", m_badJetCut.c_str());
   m_acc_jetClean = m_jetCleanDFName;
 
-  // the decorations are named like DFCommonElectronsLHTight or DFCommonElectronsDNNTight
+  // the decorations are named like DFCommonElectronsLHTight, DFCommonElectronsDNNTight or DFCommonElectronsDNNTightNoCF
   m_eleIdBaselineDFName = m_eleIdBaseline.find("DNN") == std::string::npos ? "DFCommonElectronsLH" : "DFCommonElectronsDNN";
-  m_eleIdBaselineDFName += TString(m_eleIdBaseline).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNN","").Data();
+  m_eleIdBaselineDFName += TString(m_eleIdBaseline).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNNnoCF","").ReplaceAll("DNN","").Data();
+  if (m_eleIdBaseline.find("noCF") != std::string::npos)
+    m_eleIdBaselineDFName += "NoCF";
   m_acc_eleIdBaseline = m_eleIdBaselineDFName;
 
   m_eleIdDFName = m_eleId.find("DNN") == std::string::npos ? "DFCommonElectronsLH" : "DFCommonElectronsDNN";
-  m_eleIdDFName += TString(m_eleId).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNN","").Data();
+  m_eleIdDFName += TString(m_eleId).ReplaceAll("LooseAndBLayer","LooseBL").ReplaceAll("LLH","").ReplaceAll("DNNnoCF","").ReplaceAll("DNN","").Data();
+  if (m_eleId.find("noCF") != std::string::npos)
+    m_eleIdDFName += "NoCF";
   m_acc_eleId = m_eleIdDFName;
 
   m_photonIdBaselineDFName = "DFCommonPhotonsIsEM";
@@ -1198,7 +1202,13 @@ bool SUSYObjDef_xAOD::check_isTighter(const std::string& wp1, const std::string&
 std::string SUSYObjDef_xAOD::EG_WP(const std::string& wp) const {
   //translate our electron wps to EGamma internal jargon
   //@ElectronPhotonSelectorTools/EGSelectorConfigurationMapping.h
-  return TString(wp).Copy().ReplaceAll("AndBLayer","BL").ReplaceAll("LLH","LHElectron").ReplaceAll("DNN", "DNNElectron").Data();
+  TString copy = TString(wp).Copy().ReplaceAll("AndBLayer","BL").ReplaceAll("LLH","LHElectron");
+  // the DNN WPs are labeled in the map as e.g. TightDNNnoCFElectron or TightDNNElectron
+  if (wp.find("DNNnoCF") != std::string::npos)
+    copy.ReplaceAll("DNNnoCF", "DNNnoCFElectron");
+  else if (wp.find("DNN") != std::string::npos)
+    copy.ReplaceAll("DNN", "DNNElectron");
+  return copy.Data();
 }
 
 std::vector<std::string> SUSYObjDef_xAOD::getElSFkeys(const std::string& mapFile) const {

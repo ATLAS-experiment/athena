@@ -1015,7 +1015,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       std::string eleId = TString(m_eleId).ReplaceAll("AndBLayer", "BLayer").ReplaceAll("LLH", "").Data();
 
       if (m_eleId.find("DNN") != std::string::npos) {
-        eleId = TString(eleId).ReplaceAll("DNNnoCF", "").ReplaceAll("DNN", "").Data();
+        eleId = TString(eleId).ReplaceAll("DNNnoCF", "").ReplaceAll("DNN", "").ReplaceAll("Loose", "LooseBLayer").Data();
         ATH_MSG_WARNING("Electron DNN ID working point " << m_eleId <<  " doesn't have SFs yet, fall back to " << eleId);
       }
 
