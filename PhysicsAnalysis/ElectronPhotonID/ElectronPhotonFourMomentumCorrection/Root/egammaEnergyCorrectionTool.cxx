@@ -25,7 +25,7 @@
 #include "TRandom3.h"
 #include "egammaUtils/eg_resolution.h"
 
-#include <boost/format.hpp>
+#include <format>
 #include <cassert>
 #include <exception>
 #include <iomanip>
@@ -1895,8 +1895,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
       resVar == egEnergyCorr::Resolution::None)
     return fullyCorrectedEnergy;
 
-  ATH_MSG_DEBUG("after sim fl = " << boost::format("%.2f") %
-                                         fullyCorrectedEnergy);
+  ATH_MSG_DEBUG(std::format("after sim fl = {:.2f}", fullyCorrectedEnergy));
 
   // main E-scale corrections
 
@@ -1918,8 +1917,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
             value_k * fullyCorrectedEnergy +
             value_b * GeV;  // value is stored in GeV in the histogram file
       }
-      ATH_MSG_DEBUG("after alpha = " << boost::format("%.2f") %
-                                            fullyCorrectedEnergy);
+      ATH_MSG_DEBUG(std::format("after alpha = {:.2f}", fullyCorrectedEnergy));
     }
 
   } else {  // ... MC
@@ -1934,8 +1932,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
       ATH_MSG_DEBUG("alpha sys " << variationName(scaleVar) << " = "
                                  << deltaAlpha);
       fullyCorrectedEnergy *= (1 + deltaAlpha);
-      ATH_MSG_DEBUG("after mc alpha = " << boost::format("%.2f") %
-                                               fullyCorrectedEnergy);
+      ATH_MSG_DEBUG(std::format("after mc alpha = {:.2f}", fullyCorrectedEnergy));
     }
 
     // AF2 systematics  (this will not be in the sum of all other NP in the 1 NP
@@ -1978,8 +1975,7 @@ double egammaEnergyCorrectionTool::getCorrectedEnergy(
           getSmearingCorrection(cl_eta, cl_etaCalo, fullyCorrectedEnergy,
                                 random_seed, ptype, dataType, resVar, resType);
 
-    ATH_MSG_DEBUG("after resolution correction = " << boost::format("%.2f") %
-                                                          fullyCorrectedEnergy);
+    ATH_MSG_DEBUG(std::format("after resolution correction = {:.2f}", fullyCorrectedEnergy));
   }
 
   return fullyCorrectedEnergy;
@@ -4669,8 +4665,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2down = -d2;
         sigma2 = d;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution Zsmearing: %.7f %.7f %.7f") % sigma2 %
-            sigma2up % sigma2down);
+            std::format("sys resolution Zsmearing: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics on intrinsic resolution
@@ -4689,8 +4684,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
                      resolution1 * resolution1 - deltaSigma2;
         sigma2 = 0.5 * (sigma2up - sigma2down);
         ATH_MSG_DEBUG(
-            boost::format("sys resolution intrinsic: %.7f %.7f %.7f") % sigma2 %
-            sigma2up % sigma2down);
+            std::format("sys resolution intrinsic: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from configA ID material
@@ -4701,9 +4695,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format(
-                "sys resolution configA ID material: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution configA ID material: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from material presampler-layer 1 in barrel (based on half
@@ -4718,8 +4710,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution presampler-layer1: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution presampler-layer1: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematic from material in barrel-endcap gap (using full config X for
@@ -4734,8 +4725,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution barrel-endcap gap: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution barrel-endcap gap: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from material in cryostat area (using half config EL,
@@ -4747,8 +4737,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution cryostat area: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution cryostat area: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from pileup noise  on total noise (200 MeV in quadrature,
@@ -4791,9 +4780,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2 = sigmaPileUp * sigmaPileUp - sigmaZ * sigmaZ;
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
-        ATH_MSG_DEBUG(
-            boost::format("sys resolution pileup noise: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+        ATH_MSG_DEBUG(std::format("sys resolution pileup noise: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from material in IBL+PP0 for barrel
@@ -4816,8 +4803,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution ibl material: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution ibl material: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       // systematics from material in IBL+PP0 for end-cap
@@ -4841,8 +4827,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = sigma2;
         sigma2down = -1. * sigma2;
         ATH_MSG_DEBUG(
-            boost::format("sys resolution pp0 material: %.7f %.7f %.7f") %
-            sigma2 % sigma2up % sigma2down);
+            std::format("sys resolution pp0 material: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
 
       }
 
@@ -4881,8 +4866,7 @@ void egammaEnergyCorrectionTool::getResolution_systematics(
         sigma2up = d1;
         sigma2down = -d2;
         sigma2 = d;
-        ATH_MSG_DEBUG(boost::format("sys resolution OFC unc.: %.7f %.7f %.7f") %
-                      sigma2 % sigma2up % sigma2down);
+        ATH_MSG_DEBUG(std::format("sys resolution OFC unc.: {:.7f} {:.7f} {:.7f}", sigma2, sigma2up, sigma2down));
       }
 
       //  old method to use max of up and down for All

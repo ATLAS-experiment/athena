@@ -3,7 +3,7 @@
 */
 
 #include <boost/algorithm/string/join.hpp>
-#include <boost/format.hpp>
+#include <format>
 
 #include <set>
 // EDM include(s):
@@ -154,12 +154,12 @@ StatusCode DumpAllSystematics::initialize()
   {
     std::string header = std::string(45, ' ');
     for (unsigned int i = 0; i != m_EgammaCalibrationAndSmearingTools.size(); ++i)  {
-      header += (boost::format(" [%d] ") % i).str();
+      header += std::format(" [{}] ", i);
     }
     ATH_MSG_INFO(header);
   }
   for (auto sysname : all_sys_names) {
-    std::string line = (boost::format("%45s") % sysname).str();
+    std::string line = std::format("{:>45}", sysname);
     for (const auto& sys_per_tool : all_sys_names_per_tool) {
       if (std::find(sys_per_tool.begin(), sys_per_tool.end(), sysname) != sys_per_tool.end()) line += "  X  ";
       else line += "     ";

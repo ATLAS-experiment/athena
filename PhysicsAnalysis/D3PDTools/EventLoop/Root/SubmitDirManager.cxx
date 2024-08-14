@@ -19,7 +19,7 @@
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 #include <TSystem.h>
-#include <boost/format.hpp>
+#include <format>
 #include <boost/functional/hash.hpp>
 #include <fcntl.h>
 #include <regex>
@@ -200,7 +200,7 @@ namespace EL
                 // directories, i.e. the latest results will be listed
                 // last.
                 submitDir = data.submitDir + timeString +
-                  (boost::format ("%04x") % hash16).str();
+                  std::format("{:04x}", hash16);
                 ANA_MSG_DEBUG ("unique submit-dir: " << submitDir);
               }
               break;

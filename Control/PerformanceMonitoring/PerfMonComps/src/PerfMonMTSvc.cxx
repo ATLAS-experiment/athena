@@ -23,10 +23,8 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-
-// Boost includes
 #include <filesystem>
-#include "boost/format.hpp"
+#include <format>
 
 // TBB
 #include "tbb/task_arena.h"
@@ -454,14 +452,13 @@ void PerfMonMTSvc::report2Log_Description() const {
  * Report component-level information to log
  */
 void PerfMonMTSvc::report2Log_ComponentLevel() {
-  using boost::format;
 
   ATH_MSG_INFO("=======================================================================================");
   ATH_MSG_INFO("                             Component Level Monitoring                                ");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(format("%1% %|15t|%2% %|25t|%3% %|40t|%4% %|55t|%5% %|75t|%6%") % "Step" % "Count" % "CPU Time [ms]" %
-               "Vmem [kB]" % "Malloc [kB]" % "Component");
+  ATH_MSG_INFO(std::format("{:<10} {:<15} {:<25} {:<40} {:<55} {:<75}","Step", "Count", "CPU Time [ms]", 
+               "Vmem [kB]", "Malloc [kB]", "Component"));
 
   ATH_MSG_INFO("---------------------------------------------------------------------------------------");
 
@@ -487,9 +484,9 @@ void PerfMonMTSvc::report2Log_ComponentLevel() {
       }
       counter++;
 
-      ATH_MSG_INFO(format("%1% %|15t|%2% %|25t|%3$.2f %|40t|%4$.0f %|55t|%5$.0f %|75t|%6%") % it.first.stepName %
-                   it.second->getCallCount() % it.second->getDeltaCPU() % it.second->getDeltaVmem() %
-                   it.second->getDeltaMalloc() % it.first.compName);
+      ATH_MSG_INFO(std::format("{:<10} {:<15} {:<25.2f} {:<40.0f} {:<55.0f} {:<75}",it.first.stepName,
+                   it.second->getCallCount(),it.second->getDeltaCPU(),it.second->getDeltaVmem(),
+                   it.second->getDeltaMalloc(),it.first.compName));
     }
     if(counter>0) {
       ATH_MSG_INFO("=======================================================================================");
@@ -518,15 +515,14 @@ void PerfMonMTSvc::report2Log_EventLevel_instant() const {
  * Report event-level information to log
  */
 void PerfMonMTSvc::report2Log_EventLevel() {
-  using boost::format;
 
   ATH_MSG_INFO("                                Event Level Monitoring                                 ");
   ATH_MSG_INFO("        (Only the first " << m_eventLoopMsgLimit.toString() <<
                " and the last measurements are explicitly printed)");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(format("%1% %|16t|%2% %|28t|%3% %|40t|%4% %|52t|%5% %|64t|%6% %|76t|%7%") % "Event" % "CPU [s]" %
-               "Wall [s]" % "Vmem [kB]" % "Rss [kB]" % "Pss [kB]" % "Swap [kB]");
+  ATH_MSG_INFO(std::format("{:<16} {:<12} {:<12} {:<12} {:<12} {:<12} {:<12}","Event", "CPU [s]", 
+               "Wall [s]", "Vmem [kB]", "Rss [kB]", "Pss [kB]", "Swap [kB]"));
 
   ATH_MSG_INFO("---------------------------------------------------------------------------------------");
 
@@ -537,11 +533,11 @@ void PerfMonMTSvc::report2Log_EventLevel() {
     // Print
     if(m_eventLoopMsgCounter < m_eventLoopMsgLimit || m_eventLoopMsgCounter == nMeasurements - 1) {
       if(m_eventLoopMsgCounter > m_eventLoopMsgLimit) {
-        ATH_MSG_INFO(format("%|=87|") % "...");
+        ATH_MSG_INFO(std::format("{:=<87}", "..."));
       }
-      ATH_MSG_INFO(format("%1% %|16t|%2$.2f %|28t|%3$.2f %|40t|%4% %|52t|%5% %|64t|%6% %|76t|%7%") % it.first %
-                   (it.second.cpu_time * 0.001) % (it.second.wall_time * 0.001) % it.second.mem_stats.at("vmem") %
-                   it.second.mem_stats.at("rss") % it.second.mem_stats.at("pss") % it.second.mem_stats.at("swap"));
+      ATH_MSG_INFO(std::format("{:<16} {:>12.2f} {:>12.2f} {:>12} {:>12} {:>12} {:>12}", it.first,
+                   it.second.cpu_time * 0.001,it.second.wall_time * 0.001,it.second.mem_stats.at("vmem"),
+                   it.second.mem_stats.at("rss"),it.second.mem_stats.at("pss"),it.second.mem_stats.at("swap")));
     }
     m_eventLoopMsgCounter++;
     // Add to leak estimate
@@ -557,45 +553,43 @@ void PerfMonMTSvc::report2Log_EventLevel() {
  * Report summary information to log
  */
 void PerfMonMTSvc::report2Log_Summary() {
-  using boost::format;
 
   ATH_MSG_INFO("                                Snapshots Summary                                      ");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(format("%1% %|13t|%2% %|25t|%3% %|37t|%4% %|44t|%5% %|55t|%6% %|66t|%7% %|77t|%8%") % "Step" %
-               "dCPU [s]" % "dWall [s]" % "<CPU>" % "dVmem [kB]" % "dRss [kB]" % "dPss [kB]" % "dSwap [kB]");
+  ATH_MSG_INFO(std::format("{:<13} {:<12} {:<12} {:<7} {:<11} {:<11} {:<11} {:<11}","Step",
+               "dCPU [s]","dWall [s]","<CPU>","dVmem [kB]","dRss [kB]","dPss [kB]","dSwap [kB]"));
 
   ATH_MSG_INFO("---------------------------------------------------------------------------------------");
 
   for (unsigned int idx = 0; idx < NSNAPSHOTS; idx++) {
-    ATH_MSG_INFO(format("%1% %|13t|%2% %|25t|%3% %|37t|%4$.2f %|44t|%5% %|55t|%6% %|66t|%7% %|77t|%8%") %
-                 m_snapshotStepNames[idx] % (m_snapshotData[idx].getDeltaCPU() * 0.001) %
-                 (m_snapshotData[idx].getDeltaWall() * 0.001) %
-                 (m_snapshotData[idx].getDeltaCPU() / m_snapshotData[idx].getDeltaWall()) %
-                 m_snapshotData[idx].getMemMonDeltaMap("vmem") % m_snapshotData[idx].getMemMonDeltaMap("rss") %
-                 m_snapshotData[idx].getMemMonDeltaMap("pss") % m_snapshotData[idx].getMemMonDeltaMap("swap"));
+    ATH_MSG_INFO(std::format("{:<13} {:<12.2f} {:<12.2f} {:<7.2f} {:<11} {:<11} {:<11} {:<11}",
+                 m_snapshotStepNames[idx], m_snapshotData[idx].getDeltaCPU() * 0.001,
+                 m_snapshotData[idx].getDeltaWall() * 0.001,
+                 m_snapshotData[idx].getDeltaCPU() / m_snapshotData[idx].getDeltaWall(),
+                 m_snapshotData[idx].getMemMonDeltaMap("vmem"),m_snapshotData[idx].getMemMonDeltaMap("rss"),
+                 m_snapshotData[idx].getMemMonDeltaMap("pss"),m_snapshotData[idx].getMemMonDeltaMap("swap")));
   }
 
   ATH_MSG_INFO("***************************************************************************************");
   const double cpu_exec_total = m_snapshotData[FIRSTEVENT].getDeltaCPU() + m_snapshotData[EXECUTE].getDeltaCPU();
   const double wall_exec_total = m_snapshotData[FIRSTEVENT].getDeltaWall() + m_snapshotData[EXECUTE].getDeltaWall();
 
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Number of events processed:" % m_eventCounter);
-  ATH_MSG_INFO(format("%1% %|35t|%2$.0f ") % "CPU usage per event [ms]:" %
-               (m_eventCounter > 0 ? cpu_exec_total / m_eventCounter : 0));
-  ATH_MSG_INFO(format("%1% %|35t|%2$.3f ") % "Events per second:" %
-               (wall_exec_total > 0 ? m_eventCounter / wall_exec_total * 1000. : 0));
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "CPU utilization efficiency [%]:" % getCpuEfficiency());
-
+  ATH_MSG_INFO(std::format("{:<35} {}", "Number of events processed:", static_cast<int>(m_eventCounter)));
+  ATH_MSG_INFO(std::format("{:<35} {:.0f}", "CPU usage per event [ms]:", 
+               (m_eventCounter > 0 ? cpu_exec_total / m_eventCounter : 0)));
+  ATH_MSG_INFO(std::format("{:<35} {:.3f}", "Events per second:", 
+               (wall_exec_total > 0 ? m_eventCounter / wall_exec_total * 1000. : 0)));
+  ATH_MSG_INFO(std::format("{:<35} {}", "CPU utilization efficiency [%]:", getCpuEfficiency()));
   if (m_doEventLoopMonitoring) {
     ATH_MSG_INFO("***************************************************************************************");
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Max Vmem: " % scaleMem(m_eventLevelData.getEventLevelMemoryMax("vmem")));
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Max Rss: " % scaleMem(m_eventLevelData.getEventLevelMemoryMax("rss")));
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Max Pss: " % scaleMem(m_eventLevelData.getEventLevelMemoryMax("pss")));
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Max Swap: " % scaleMem(m_eventLevelData.getEventLevelMemoryMax("swap")));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Max Vmem:", scaleMem(m_eventLevelData.getEventLevelMemoryMax("vmem"))));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Max Rss:", scaleMem(m_eventLevelData.getEventLevelMemoryMax("rss"))));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Max Pss:", scaleMem(m_eventLevelData.getEventLevelMemoryMax("pss"))));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Max Swap:", scaleMem(m_eventLevelData.getEventLevelMemoryMax("swap"))));
     ATH_MSG_INFO("***************************************************************************************");
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Leak estimate per event Vmem: " % scaleMem(m_fit_vmem.slope()));
-    ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Leak estimate per event Pss: " % scaleMem(m_fit_pss.slope()));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Leak estimate per event Vmem:", scaleMem(m_fit_vmem.slope())));
+    ATH_MSG_INFO(std::format("{:<35} {}", "Leak estimate per event Pss:", scaleMem(m_fit_pss.slope())));
     ATH_MSG_INFO("  >> Estimated using the last " << m_fit_vmem.nPoints()
                                                   << " measurements from the Event Level Monitoring");
     ATH_MSG_INFO("  >> Events prior to the first " << m_memFitLowerLimit.toString() << " are omitted...");
@@ -608,15 +602,13 @@ void PerfMonMTSvc::report2Log_Summary() {
  * Report CPU information to log
  */
 void PerfMonMTSvc::report2Log_CpuInfo() const {
-  using boost::format;
 
   ATH_MSG_INFO("                                  System Information                                   ");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(format("%1% %|34t|%2% ") % "CPU Model:" % get_cpu_model_info());
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Number of Available Cores:" % get_cpu_core_info());
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Total Memory:" % scaleMem(get_memory_info()));
-
+  ATH_MSG_INFO(std::format("{:<34} {}", "CPU Model:", get_cpu_model_info()));
+  ATH_MSG_INFO(std::format("{:<35} {}", "Number of Available Cores:", get_cpu_core_info()));
+  ATH_MSG_INFO(std::format("{:<35} {}", "Total Memory:", scaleMem(get_memory_info())));
   ATH_MSG_INFO("=======================================================================================");
 }
 
@@ -624,14 +616,12 @@ void PerfMonMTSvc::report2Log_CpuInfo() const {
  * Report run-time enviroment information
  */
 void PerfMonMTSvc::report2Log_EnvInfo() const {
-  using boost::format;
-  using std::filesystem::path;
 
   ATH_MSG_INFO("                               Environment Information                                 ");
   ATH_MSG_INFO("=======================================================================================");
 
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Malloc Library:" % path(PMonSD::symb2lib("malloc")).filename().string());
-  ATH_MSG_INFO(format("%1% %|35t|%2% ") % "Math Library:" % path(PMonSD::symb2lib("atan2")).filename().string());
+  ATH_MSG_INFO(std::format("{:<35} {}","Malloc Library:", std::filesystem::path(PMonSD::symb2lib("malloc")).filename().string()));
+  ATH_MSG_INFO(std::format("{:<35} {}","Math Library:", std::filesystem::path(PMonSD::symb2lib("atan2")).filename().string()));
 
   ATH_MSG_INFO("=======================================================================================");
 

@@ -46,7 +46,7 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "AthLinks/ElementLink.h"
 
-#include "boost/format.hpp"
+#include <format>
 #include "TVector3.h"
 #include <algorithm>
 #include <sstream>
@@ -193,12 +193,12 @@ namespace DerivationFramework {
   }
   
   std::string BVertexClosestTrackTool::CtItem::toString() const {
-    boost::format f1("dca: %10.6f %10.6f zca: %10.6f %10.6f nt: %10d");
-    f1 % dca % dcaErr % zca % zcaErr % nTrksChi2;
-    boost::format f2("%s\n  %s\n");
-    f2 % BPhysVertexTrackBase::BaseItem::toString();
-    f2 % f1.str();
-    std::string rstr = f2.str();
+    std::string f1 = std::format("dca: {:10.6f} {:10.6f} zca: {:10.6f} {:10.6f} nt: {:10d}",
+    dca, dcaErr, zca, zcaErr, nTrksChi2);
+    std::string f2 = std::format("{}\n  {}\n",
+    BPhysVertexTrackBase::BaseItem::toString(),
+    f1);
+    std::string rstr = f2;
     rstr += "per track: p(px, py, pz)\n";
     rstr += "           d(d0, z0, phi, theta, qoverp)\n";
     rstr += "           d0, d0Err, z0, z0Err, logChi2, dca, okFlag\n";
@@ -207,35 +207,32 @@ namespace DerivationFramework {
     // loop over tracks
     if (tracks.size() == vtap.size() && vtap.size() == selpat.size()) {
       for (unsigned int i=0; i<tracks.size(); ++i) {
-        boost::format f3("  %3d %2d ");
-        f3 % i % selpat[i];
-        std::string f3str = f3.str();
+        std::string f3str = std::format("  {:3d} {:2d} ", i, selpat[i]);
         // 0: d0, 1: d0Err, 2: z0, 3: z0Err, 4: logChi2, 5: dca, 6: okFlag
         // 7: vtxNDErr2, 8: trkNDErr2, 9: phi0Used
-        boost::format f4("%s\nd0: %10.4f %10.4f z0: %10.4f %10.4f "
+        std::string f4 = std::format("%s\nd0: %10.4f %10.4f z0: %10.4f %10.4f "
                          "lc2: %10.4f dca: %10.4f ok: %3f\n"
                          "vtxNDErr2: %10.4f trkNDErr2: %10.4f "
                          "phi0Used: %10.4f\n"
                          "vtxNDErr: %10.4f trkNDErr2 %10.4f "
-                         "logChi2Err2Sum: %10.4f");
-        f4 % trackToString(tracks[i]);
-        f4 % vtap[i][0] % vtap[i][1] % vtap[i][2] % vtap[i][3];
-        f4 % vtap[i][4] % vtap[i][5] % vtap[i][6];
-        f4 % vtap[i][7] % vtap[i][8] % vtap[i][9];
-        f4 % (vtap[i][7] < 0. ? -99. : sqrt(vtap[i][7]));
-        f4 % (vtap[i][8] < 0. ? -99. : sqrt(vtap[i][8]));
-        f4 % (vtap[i][7]+vtap[i][8] > 0. ?
-              log(vtap[i][5]*vtap[i][5]/(vtap[i][7]+vtap[i][8])) : -999.);
-        std::string tstr = wrapLines(f4.str(),
+                         "logChi2Err2Sum: %10.4f"
+        , trackToString(tracks[i])
+        , vtap[i][0] , vtap[i][1] , vtap[i][2] , vtap[i][3]
+        , vtap[i][4] , vtap[i][5] , vtap[i][6]
+        , vtap[i][7] , vtap[i][8] , vtap[i][9]
+        , (vtap[i][7] < 0. ? -99. : sqrt(vtap[i][7]))
+        , (vtap[i][8] < 0. ? -99. : sqrt(vtap[i][8]))
+        , (vtap[i][7]+vtap[i][8] > 0. ?
+              log(vtap[i][5]*vtap[i][5]/(vtap[i][7]+vtap[i][8])) : -999.));
+        std::string tstr = wrapLines(f4,
                                      std::string(f3str.length(), ' '));
         tstr.replace(0,f3str.length(),f3str);
         rstr.append(tstr+"\n");
       } // for i
     } else {
-      boost::format f5("Mismatch: nTracks: %d nVtap: %d nSelpat: %d\n");
+      std::string f5 = std::format("Mismatch: nTracks: {} nVtap: {} nSelpat: {}\n",tracks.size(), vtap.size(), selpat.size());
       // cppcheck-suppress ignoredReturnValue; false positive
-      f5 % tracks.size() % vtap.size() % selpat.size();
-      rstr.append(f5.str());
+      rstr.append(f5);
     } // if sizes
 
     rstr.erase(rstr.length()-1);
@@ -642,9 +639,7 @@ namespace DerivationFramework {
     }
 
     std::string str(">>>>> logCloseTracksDebugInfo:\n");
-    boost::format f("Run %d  Event %d  SV %d\n");
-    f % m_runNumber % m_evtNumber % m_svIdx;
-    str.append(f.str());
+    str.append(std::format("Run {}  Event {}  SV {}\n", m_runNumber, m_evtNumber, m_svIdx));
     
     unsigned int nTrackSels  = m_trackSelectionTools.size();
     unsigned int nPvAssocs   = m_pvAssocTypes.size();
@@ -655,9 +650,9 @@ namespace DerivationFramework {
       for (unsigned int ipv = 0; ipv < nPvAssocs; ++ipv) {
         for (unsigned int itt = 0; itt < nTrackTypes; ++itt) {
           for (unsigned int ics = 0; ics < nChi2Sets; ++ics) {
-            boost::format f1("its: %d ipv: %d itt: %d ics: %d\n");
-            f1 % its % ipv % itt % its;
-            str.append(f1.str()); 
+            std::string f1 =std::format("its: %d ipv: %d itt: %d ics: %d\n"
+            , its , ipv , itt , its);
+            str.append(f1); 
             CtItem result = m_results[its][ipv][itt][ics];
             str.append(result.toString()+"\n");
           } // for ics
