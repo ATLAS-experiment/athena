@@ -8,11 +8,13 @@
 // Framework includes
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 // EDM includes 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "xAODMuon/MuonSegmentContainer.h"
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 
@@ -60,7 +62,7 @@ namespace MuonValR4{
     struct chamberLevelObjects { 
         struct SeedMatchQuantites {
             /** @brief Best matched truth particle */
-            HepMC::ConstGenParticlePtr truthParticle{};
+            const xAOD::MuonSegment* truthsegment{nullptr};
             /** @brief Probability of which the segment is matched to it */
             double matchProb{0.};
             /** @brief Associated segment */
@@ -71,31 +73,35 @@ namespace MuonValR4{
 
         /** @brief Collection of the truth particle trajectory */
         struct TruthMatchQuantities{
-            std::vector<const xAOD::MuonSimHit*> detectorHits{};
+            const xAOD::MuonSegment* truthsegment{nullptr};
             std::vector<const MuonR4::SegmentSeed*> assocSeeds{};
         };
 
-        std::map<HepMC::ConstGenParticlePtr, TruthMatchQuantities> truthMatching{}; 
+        std::map<const xAOD::MuonSegment*, TruthMatchQuantities> truthMatching{}; 
     };
 
-    void matchSeedToTruth(const MuonR4::SegmentSeed* seed, chamberLevelObjects & objs ) const;                          
-    std::pair<HepMC::ConstGenParticlePtr, double> matchSegmentToTruth(const MuonR4::Segment* seed, chamberLevelObjects & objs ) const;                          
-    void matchSeedsToTruth(chamberLevelObjects & objs) const;          
-    void matchSegmentsToTruth(chamberLevelObjects & objs) const;          
+    void matchSeedToTruth(const EventContext & ctx, const MuonR4::SegmentSeed* seed, chamberLevelObjects & objs ) const;                          
+    std::pair<const xAOD::MuonSegment*, double> matchSegmentToTruth(const MuonR4::Segment* seed, chamberLevelObjects & objs ) const;                          
+    void matchSeedsToTruth(const EventContext & ctx,chamberLevelObjects & objs) const;          
     void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);                
-    void fillTruthInfo(const HepMC::ConstGenParticlePtr genParticlePtr, const std::vector<const xAOD::MuonSimHit*> & simHits, const ActsGeometryContext & gctx);     
+    void fillTruthInfo(const EventContext & ctx, const xAOD::MuonSegment* truthSegment,  const ActsGeometryContext & gctx);     
     void fillSeedInfo(const MuonR4::SegmentSeed* segmentSeed, double matchProb);            
     void fillSegmentInfo(const ActsGeometryContext& gctx,
                          const MuonR4::Segment* segment, double matchProb);            
     
     // MDT sim hits in xAOD format 
     SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","TruthSegmentsR4", "truth segment container"};
                                                           
     SG::ReadHandleKey<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKey{this, "SegmentSeedKey", "MuonHoughStationSegmentSeeds"};
     SG::ReadHandleKey<MuonR4::SegmentContainer> m_inSegmentKey{this, "SegmentKey", "R4MuonSegments"};
     SG::ReadHandleKey<MuonR4::SpacePointContainer> m_spacePointKey{this, "SpacePointKey", "MuonSpacePoints"};
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+
+    using SimHitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>; 
+
+    SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_rh_truthSegmentSimHitLink{this, "TruthSegmentSimHitLink", m_truthSegmentKey, "simHitLinks"};  
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
@@ -123,7 +129,7 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMDTHits{m_tree.newScalar<unsigned int>("genNMdtHits",0)};
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nTGCHits{m_tree.newScalar<unsigned int>("genNTgcHits",0)};
     MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nsTGCHits{m_tree.newScalar<unsigned int>("genNsTgcHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMMits{m_tree.newScalar<unsigned int>("genNMmHits",0)};
+    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nNswHits{m_tree.newScalar<unsigned int>("genNNswHits",0)};
     MuonVal::ScalarBranch<bool>&  m_out_hasMax {m_tree.newScalar<bool>("hasMax", false)}; 
     MuonVal::ScalarBranch<bool>&  m_out_max_hasPhiExtension {m_tree.newScalar<bool>("maxHasPhiExtension", false)}; 
     MuonVal::ScalarBranch<float>&  m_out_max_matchFraction {m_tree.newScalar<float>("maxMatchFraction", false)}; 

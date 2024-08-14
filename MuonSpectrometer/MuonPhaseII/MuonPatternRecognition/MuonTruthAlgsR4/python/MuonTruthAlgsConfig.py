@@ -17,6 +17,12 @@ def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
     if flags.Detector.EnableMM: containerNames+=["xMmSimHits"]
     if flags.Detector.EnablesTGC: containerNames+=["xStgcSimHits"] 
     kwargs.setdefault("SimHitKeys", containerNames)
+    PrdLinkInputs = []
+    if flags.Detector.EnableMDT: PrdLinkInputs+=[( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODMdtCircles.simHitLink' )]       
+    if flags.Detector.EnableRPC: PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xRpcMeasurements.simHitLink' )]
+    if flags.Detector.EnableTGC: PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xTgcStrips.simHitLink' )] 
+
+    kwargs.setdefault("ExtraInputs", PrdLinkInputs)
     the_alg = CompFactory.MuonR4.TruthSegmentMaker(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
