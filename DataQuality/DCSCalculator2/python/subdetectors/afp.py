@@ -30,6 +30,21 @@ class DCSC_Variable_With_Mapping(DCSC_Variable):
             result = map_channels(result, self.mapping, folder_name)
         return result
 
+class DCSC_Multi_Channel_Variable(DCSC_Variable_With_Mapping):
+    def make_good_iov(self, iov):
+        giov = []
+        for channel, goodness in self.evaluator(iov):
+            current = GoodIOV(iov.since, iov.until, channel, goodness)
+            current._orig_iov = iov
+            giov.append(current)
+        return giov
+    
+    def make_good_iovs(self, iovs):
+        results = []
+        for iov in iovs:
+            results.append(self.make_good_iov(iov))
+        return IOVSet(sum(zip(*results), ())) # Sort by channel first
+
 class DCSC_Merged_Variable(DCSC_Variable):
     def __init__(self, folders, evaluator, *, mapping={}, **kwargs):
         folder_merge = ','.join(folders)
@@ -349,9 +364,10 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         ),
 
         # AFP_(A|C)_FAR_TOF_NOT_OPERATIONAL_LV
-        DCSC_Variable_With_Mapping(
+        DCSC_Multi_Channel_Variable(
             'TOF_TDC_CURRENT',
-            lambda iov: TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc1_current, 0) and TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc2_current, 0),
+            lambda iov: [(iov.channel,     TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc1_current, 0)),
+                         (iov.channel + 1, TOF_LV_CURRENT_LOW <= remove_None(iov.hptdc2_current, 0))],
             mapping = {1: A_FAR_TOF_LV, 2: C_FAR_TOF_LV}
         ),
 
@@ -401,8 +417,8 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     dead_fraction_bad = 0.25 + equality_breaker
 
     mapping = mapTranslatorCounts({
-        1: [*GARAGE, TTC_RESTART, STOPLESSLY_REMOVED, *TOF_LV, *TOF_HV],
-        2: TOF_DISABLED,
+        1: [*GARAGE, TTC_RESTART, STOPLESSLY_REMOVED, *TOF_HV],
+        2: [*TOF_DISABLED, *TOF_LV],
         4: [*SIT_DISABLED, *SIT_LV, *SIT_HV],
     })
         

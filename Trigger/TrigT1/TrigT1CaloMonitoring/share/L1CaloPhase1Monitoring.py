@@ -257,8 +257,9 @@ if flags.DQ.doMonitoring:
     # do we need next lines??
     EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'] # default is just L1_eEMRoI
     EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
-    #  Adjust eFEX containers to be monitored to also monitor the sim RoI
-    for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + ("DAODSim" if flags.Input.Format == Format.POOL and flags.Trigger.enableL1CaloPhase1 else "Sim") for x in l ]
+    #  Adjust eFEX containers to be monitored to also monitor the sim RoI unless running on raw without simulation
+    if flags.Input.Format == Format.POOL or flags.Trigger.enableL1CaloPhase1:
+      for l in [EfexMonAlg.eFexEMTobKeyList,EfexMonAlg.eFexTauTobKeyList]: l += [x + ("DAODSim" if flags.Input.Format == Format.POOL and flags.Trigger.enableL1CaloPhase1 else "Sim") for x in l ]
     # monitoring of simulation vs hardware
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig

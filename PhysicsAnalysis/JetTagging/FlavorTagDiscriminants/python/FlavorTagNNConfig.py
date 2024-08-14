@@ -8,6 +8,7 @@ from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
 from os.path import commonpath
 from pathlib import PurePath
 from warnings import warn
+import re
 
 
 def addAndReturnSharingSvc(flags, ca):
@@ -310,6 +311,7 @@ def MultifoldGNNCfg(
                 nnSharingService=addAndReturnSharingSvc(flags, acc),
                 trackLinkType=trackLinkType,
                 defaultOutputValues=defaultOutputValues,
+                perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
             ),
             undeclaredReadDecorKeys=veto_list,
             **alg_args
@@ -317,3 +319,42 @@ def MultifoldGNNCfg(
     )
 
     return acc
+
+
+def _defaultsFromPaths(nn_paths):
+    # these are the values GN2v01 has with zero tracks, see discussion
+    # on AFT-726
+    gn2v01_fold_defaults = [
+        {
+            'GN2v01_pb':  0.008461162,
+            'GN2v01_pc':  0.013391991,
+            'GN2v01_pu':  0.266699642,
+            'GN2v01_ptau': 0.711447179,
+        },
+        {
+            'GN2v01_pb':  0.008416064,
+            'GN2v01_pc':  0.012780965,
+            'GN2v01_pu':  0.266321003,
+            'GN2v01_ptau': 0.712482035,
+        },
+        {
+            'GN2v01_pb':  0.008398464,
+            'GN2v01_pc':  0.013321628,
+            'GN2v01_pu':  0.265400767,
+            'GN2v01_ptau': 0.712879181,
+        },
+        {
+            'GN2v01_pb':  0.008461761,
+            'GN2v01_pc':  0.012895554,
+            'GN2v01_pu':  0.265607148,
+            'GN2v01_ptau': 0.713035464,
+        }
+    ]
+    defaults = {}
+    fold_re = re.compile('network_fold([0-9]+)')
+    for path in nn_paths:
+        if '/GN2v01/' in path:
+            fold = int(fold_re.search(path).group(1))
+            defaults[path] = gn2v01_fold_defaults[fold]
+    return defaults
+

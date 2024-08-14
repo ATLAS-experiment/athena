@@ -42,6 +42,9 @@ namespace FlavorTagDiscriminants {
   void GNNTool::decorateWithDefaults(const SG::AuxElement& jet) const {
     m_gnn->decorateWithDefaults(jet);
   }
+  void GNNTool::decorateWithDefaults(const xAOD::BTagging& btag) const {
+    m_gnn->decorateWithDefaults(btag);
+  }
 
   void GNNTool::decorate(const xAOD::Jet& jet, const SG::AuxElement& btag) const
   {

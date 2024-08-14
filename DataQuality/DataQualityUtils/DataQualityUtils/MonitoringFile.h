@@ -448,6 +448,9 @@ namespace dqutils {
     bool m_useRE {};
     static std::atomic<int> m_debugLevel;
     static std::atomic<int> m_fileCompressionLevel;
+    static bool m_doTiming;
+    static std::map<std::string,std::clock_t> m_cpuPerHistogram;
+
   public:
     static int mergeLBintervals(const std::string&, const std::string& debugLevel = "none");
     static int getDebugLevel();
@@ -456,7 +459,8 @@ namespace dqutils {
     static void setCompressionLevel(int level) {m_fileCompressionLevel = level;}
     bool setHistogramRegEx(const std::string& re);
     bool setDirectoryRegEx(const std::string& re);
-
+    void doTiming();
+    
     ClassDef(MonitoringFile, 0) // Provides functions to manipulate and analyze data-quality monitoring files
   };
 

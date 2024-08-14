@@ -61,8 +61,10 @@ namespace FlavorTagDiscriminants {
     getFold(jet).decorate(jet);
   }
   void MultifoldGNN::decorateWithDefaults(const SG::AuxElement& jet) const {
-    // note that the default values should be identical betwen all folds
-    m_folds.at(0)->decorateWithDefaults(jet);
+    getFold(jet).decorateWithDefaults(jet);
+  }
+  void MultifoldGNN::decorateWithDefaults(const xAOD::BTagging& btag) const {
+    getFold(**m_jetLink(btag)).decorateWithDefaults(btag);
   }
 
   // Dependencies
