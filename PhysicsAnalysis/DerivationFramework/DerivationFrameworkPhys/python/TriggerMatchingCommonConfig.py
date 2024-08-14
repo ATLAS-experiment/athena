@@ -48,6 +48,16 @@ def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
             }
         )
 
+def AddRun2L1JetRoIsToSlimmingHelper(**kwargs):
+    slimmingHelper = kwargs['SlimmingHelper']
+    slimmingHelper.AppendToDictionary.update(
+        {
+            "LVL1JetRoIs":"xAOD::JetRoIContainer",
+            "LVL1JetRoIsAux":"xAOD::JetRoIAuxContainer"
+        }
+    )
+    slimmingHelper.AllVariables += ["LVL1JetRoIs"]
+
 
 def TriggerMatchingCommonRun2Cfg(ConfigFlags, name, **kwargs):
     """Configure the common trigger matching for run 2 DAODs using the run 2 analysis formalism (matching happens during derivation)"""
