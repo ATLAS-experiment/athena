@@ -55,13 +55,7 @@ def JetBTagginglessAlgCfg(
 
         if '/GN2v01/' in dirname:
             args['tag_requirements'] = {'nonzeroTracks'}
-            args['defaultOutputValues'] = {
-                    'GN2v01_pu': 1.0,
-                    'GN2v01_pc': 0.0,
-                    'GN2v01_pb': 0.0,
-                    'GN2v01_ptau': 0.0,
-            }
 
-            acc.merge(MultifoldGNNCfg(**args))
+        acc.merge(MultifoldGNNCfg(**args))
 
         return acc
