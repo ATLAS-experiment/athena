@@ -51,12 +51,10 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_sfChIDEff("chargeIDEffiSF"); //tools' default
 
   const static SG::AuxElement::Decorator<float>     dec_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
-  const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
   const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
+  const static SG::AuxElement::ConstAccessor<char> acc_isLRT("isLRT");
 
-  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
   const static SG::AuxElement::ConstAccessor<char> acc_passECIDS("DFCommonElectronsECIDS"); // Loose 97% WP
 
 
@@ -65,13 +63,13 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
     if (electrons.empty()) return StatusCode::SUCCESS;
     for (const xAOD::Electron* electron: electrons) {
         if (ElectronsToRemove.find(electron) != ElectronsToRemove.end()){
-            ATH_MSG_DEBUG( "Removing electron from output collection (isLRT?) : ("<< static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "Removing electron from output collection (isLRT?) : ("<< static_cast<int>(acc_isLRT(*electron)) << ")" );
             ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             continue;
         // add electron into output 
         } else {
-            ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(acc_isLRT(*electron)) << ")" );
             ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             auto newElectron = new xAOD::Electron(*electron);
@@ -94,7 +92,7 @@ StatusCode SUSYObjDef_xAOD::prepareLRTElectrons(const xAOD::ElectronContainer* i
     const xAOD::TrackParticle* idtrack = electron->trackParticle();
     
     // Save electron if the id track passes the LRT filter
-    if (  idtrack->isAvailable<char>("passLRTFilter") )
+    if ( acc_lrtFilter.isAvailable(*idtrack) )
     {
       if ( static_cast<int>(acc_lrtFilter(*idtrack) ) ){
         std::unique_ptr<xAOD::Electron> copyElectron = std::make_unique<xAOD::Electron>(*electron);
@@ -495,7 +493,7 @@ float SUSYObjDef_xAOD::GetSignalElecSF(const xAOD::Electron& el,
     //check matching
     this->TrigMatch({&el}, trigMChains);
 
-    if(!el.isAvailable<char>("trigmatched") or !acc_trigmatched(el)){
+    if(!acc_trigmatched(el)){
       ATH_MSG_DEBUG( "Electron was not matched to trigger " << theExpr << " - scale factor does not apply (year " << this->treatAsYear() << ")  Returning 1." );
     }
     else{ //is trig-matched electron, go for it!

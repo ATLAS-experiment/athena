@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Jets
@@ -34,7 +34,6 @@
 namespace ST {
 
   const static SG::AuxElement::Decorator<char>     dec_bad("bad");
-  const static SG::AuxElement::ConstAccessor<char> acc_bad("bad");
 
   const static SG::AuxElement::Decorator<char>      dec_passJvt("passJvt");
   const static SG::AuxElement::ConstAccessor<char>  acc_passJvt("passJvt");
@@ -47,7 +46,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_fjvt("DFCommonJets_fJvt");
 
   const static SG::AuxElement::Decorator<char> dec_bjet("bjet");
-  const static SG::AuxElement::ConstAccessor<char> acc_bjet("bjet");
 
   const static SG::AuxElement::Decorator<char> dec_bjet_jetunc("bjet_jetunc"); //added for JetUncertainties usage
   const static SG::AuxElement::Decorator<char> dec_bjet_loose("bjet_loose");
@@ -383,6 +381,13 @@ namespace ST {
     ATH_MSG_VERBOSE( "Starting FillJet on jet with pt=" << input.pt() );
     ATH_MSG_VERBOSE(  "jet (pt,eta,phi) before calibration " << input.pt() << " " << input.eta() << " " << input.phi() );
 
+    static const SG::ConstAccessor<bool> acc_wValidKinRange(m_WDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<bool> acc_zValidKinRange(m_ZDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<bool> acc_topValidKinRange(m_TopDecorName+"_ValidKinRange");
+    static const SG::ConstAccessor<bool> acc_wtagged(m_WDecorName+"_Tagged");
+    static const SG::ConstAccessor<bool> acc_ztagged(m_ZDecorName+"_Tagged");
+    static const SG::ConstAccessor<bool> acc_toptagged(m_TopDecorName+"_Tagged");
+
     if (doCalib) {
       if(!isFat){
         //disable - obsoleted ATH_CHECK( m_jetCalibTool->applyCalibration(input) );
@@ -406,30 +411,30 @@ namespace ST {
           ATH_CHECK(m_ZTaggerTool->tag(input));
           ATH_CHECK(m_TopTaggerTool->tag(input));
 
-          // Retreive large-R tagging results for W/Z/top
+          // Retrieve large-R tagging results for W/Z/top
           if (!m_WtagConfig.empty()) {
             // Only tag jets if they are inside the kinematic range
-            if ( !input.auxdata<bool>(m_WDecorName+"_ValidKinRange") ) {
+            if ( !acc_wValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R W candidate jet outside of recommended tagging range. Will set score to 0.");
               dec_wtagged(input) = 0;
             }
-            else dec_wtagged(input) = input.auxdata<bool>(m_WDecorName+"_Tagged");
+            else dec_wtagged(input) = acc_wtagged(input);
           }
           if (!m_ZtagConfig.empty()) {
             // Only tag jets if they are inside the kinematic range
-            if ( !input.auxdata<bool>(m_ZDecorName+"_ValidKinRange") ) {
+            if ( !acc_zValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R Z candidate jet outside of recommended tagging range. Will set score to 0.");
               dec_ztagged(input) = 0;
             }
-            else dec_ztagged(input) = input.auxdata<bool>(m_ZDecorName+"_Tagged");
+            else dec_ztagged(input) = acc_ztagged(input);
           }
           if (!m_ToptagConfig.empty()) {
             // Only tag jets if they are inside the kinematic range
-            if ( !input.auxdata<bool>(m_TopDecorName+"_ValidKinRange") ) {
+            if ( !acc_topValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R Top candidate jet outside of recommended tagging range. Will set score to 0.");
               dec_toptagged(input) = 0;
             }
-            else dec_toptagged(input) = input.auxdata<bool>(m_TopDecorName+"_Tagged");
+            else dec_toptagged(input) = acc_toptagged(input);
           }
 
         }

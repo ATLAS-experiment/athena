@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -537,7 +537,8 @@ int main( int argc, char* argv[] ) {
     bool eventPassesTrigger(true);  // coming soon!
 
     if (!isData){
-      float PRW_weight = isPHYSLite? ei->auxdata< float >("PileupWeight_NOSYS"): objTool.GetPileupWeight();
+      static const SG::ConstAccessor<float> pileupWeightAcc("PileupWeight_NOSYS");
+      float PRW_weight = isPHYSLite? pileupWeightAcc(*ei): objTool.GetPileupWeight();
       ANA_MSG_DEBUG( "PRW Weight = " << PRW_weight);
     }
 
@@ -637,10 +638,10 @@ int main( int argc, char* argv[] ) {
         if (debug>0 && entry<10){
           ANA_MSG_DEBUG("--------------------------------------" );
           ANA_MSG_DEBUG("Muon pt = " << muon->pt()*0.001 << " , "
-                    << "baseline = " << (int)muon->auxdata<char>("baseline") << " ,"
-                    << "bad = " << (int)muon->auxdata<char>("bad") << " ,"
-                    << "IsHighPt(deco) = " << (int)muon->auxdata<char>("passedHighPtCuts") << " , "
-                    << "IsHighPt(only) = " << (int)objTool.IsHighPtMuon(*muon) );
+			<< "baseline = " << (int)ST::acc_baseline(*muon) << " ,"
+			<< "bad = " << (int)ST::acc_bad(*muon) << " ,"
+			<< "IsHighPt(deco) = " << (int)ST::acc_passedHighPtCuts(*muon) << " , "
+			<< "IsHighPt(only) = " << (int)objTool.IsHighPtMuon(*muon) );
         }
       }
     }
@@ -674,7 +675,7 @@ int main( int argc, char* argv[] ) {
         ANA_MSG_DEBUG( fatjets_nominal->size() << " large R jets");
         if (debug>0 && entry < 10) {
           for (const auto& fatjet : *fatjets_nominal) {
-            ANA_MSG_INFO( " FatJet pt = " << fatjet->pt()*0.001 << ", Wtag = " << fatjet->auxdata<int>("Wtag") << ", Ztag = " << fatjet->auxdata<int>("Ztag") );
+            ANA_MSG_INFO( " FatJet pt = " << fatjet->pt()*0.001 << ", Wtag = " << ST::acc_wtagged(*fatjet) << ", Ztag = " << ST::acc_ztagged(*fatjet) );
           }
         }
       } else {
@@ -909,10 +910,8 @@ int main( int argc, char* argv[] ) {
             int muonTruthOrigin = 0;
             const xAOD::TrackParticle* trackParticle = mu->primaryTrackParticle();
             if (trackParticle) {
-              static SG::AuxElement::Accessor<int> acc_truthType("truthType");
-              static SG::AuxElement::Accessor<int> acc_truthOrigin("truthOrigin");
-              if (acc_truthType.isAvailable(*trackParticle)  ) muonTruthType   = acc_truthType(*trackParticle);
-              if (acc_truthOrigin.isAvailable(*trackParticle)) muonTruthOrigin = acc_truthOrigin(*trackParticle);
+              if (ST::acc_truthType.isAvailable(*trackParticle)) muonTruthType = ST::acc_truthType(*trackParticle);
+              if (ST::acc_truthOrigin.isAvailable(*trackParticle)) muonTruthOrigin = ST::acc_truthOrigin(*trackParticle);
               const xAOD::TruthParticle* truthMu = xAOD::TruthHelpers::getTruthParticle(*trackParticle);
               if (truthMu) {
                 ANA_MSG_DEBUG( " Truth Muon pt " << truthMu->pt() << " eta " << truthMu->eta() );
@@ -935,11 +934,11 @@ int main( int argc, char* argv[] ) {
         for(const auto& tau : *taus){
           if (!isData){
             const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau) ;
-            if (tau->auxdata<char>("IsTruthMatched") || !truthTau){
+            if (ST::acc_IsTruthMatched(*tau) || !truthTau){
               ANA_MSG_DEBUG("Tau was matched to a truth tau, which has "
-                            << int(tau->auxdata<size_t>("TruthProng"))
+                            << int(ST::acc_TruthProng(*tau))
                             << " prongs and a charge of "
-                            << tau->auxdata<int>("TruthCharge"));
+                            << ST::acc_TruthCharge(*tau));
             } else { ANA_MSG_DEBUG( "Tau was not matched to truth" ); }
           }
         }
@@ -958,9 +957,9 @@ int main( int argc, char* argv[] ) {
         xAOD::JetInput::Type jetInputType = xAOD::JetInput::Uncategorized;
         ANA_MSG_DEBUG("GoodJets?");
         for (const auto& jet : *jets) {
-          if (jet->auxdata<char>("baseline") == 1  &&
-              jet->auxdata<char>("passOR") == 1  &&
-              jet->auxdata<char>("signal") == 1  &&
+          if (ST::acc_baseline(*jet) == 1  &&
+              ST::acc_passOR(*jet) == 1  &&
+              ST::acc_signal(*jet) == 1  &&
               jet->pt() > 20000.  && ( std::abs(jet->eta()) < 2.5) ) {
             goodJets->push_back(jet);
           }
@@ -1019,14 +1018,14 @@ int main( int argc, char* argv[] ) {
       if (slices["ele"]) {
         ANA_MSG_DEBUG( "Electron step - selection" );
         for (const auto& el : *electrons) {
-          if ( el->auxdata<char>("passOR") == 0  ) {
+          if ( ST::acc_passOR(*el) == 0  ) {
             el_idx[passOR]++;
             continue;
           }
-          if ( el->auxdata<char>("baseline") == 1  ) {
+          if ( ST::acc_baseline(*el) == 1  ) {
             el_idx[baseline]++;
           }
-          if ( el->auxdata<char>("signal") == 1  ) {
+          if ( ST::acc_signal(*el) == 1  ) {
             el_idx[signallep]++;
             if ( el->pt() > 20000. ) {
               el_idx[goodpt]++;
@@ -1039,7 +1038,9 @@ int main( int argc, char* argv[] ) {
                 el_idx[trgmatch]++;
 
               //check ChID BDT
-              //Info(APP_NAME, "electron passChID : %d ,  BDT : %.3f", el->auxdata<char>("passChID") , el->auxdata<double>("ecisBDT"));
+	      // static const SG::ConstAccessor<char> passChIDAcc("passChID");
+	      // static const SG::ConstAccessor<double> ecisBDTAcc("ecisBDT");
+              //Info(APP_NAME, "electron passChID : %d ,  BDT : %.3f", passChIDAcc(*el), ecisBDTAcc(*el));
             }
           }
         }
@@ -1067,21 +1068,21 @@ int main( int argc, char* argv[] ) {
       std::vector<std::string> muTrigs2016 = {"HLT_mu26_ivarmedium","HLT_mu50"};
       std::vector<std::string> muTrigs2017 = {"HLT_mu26_ivarmedium","HLT_mu50"};
       std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH"};
-
+      
       if (slices["mu"]) {
         ANA_MSG_DEBUG( "Muon step - selection" );
         for (const auto& mu : *muons) {
-          if ( mu->auxdata<char>("passOR") == 0  ) {
+          if ( ST::acc_passOR(*mu) == 0  ) {
             mu_idx[passOR]++;
             continue;
           }
-          if ( mu->auxdata<char>("baseline") == 1  ) {
+          if ( ST::acc_baseline(*mu) == 1  ) {
             mu_idx[baseline]++;
-            if ( mu->auxdata<char>("cosmic") == 1  ) {
+            if ( ST::acc_cosmic(*mu) == 1  ) {
               mu_idx[cosmic]++;
             }
           }
-          if ( mu->auxdata<char>("signal") == 1  ) {
+          if ( ST::acc_signal(*mu) == 1  ) {
             mu_idx[signallep]++;
             if ( mu->pt() > 20000. )  {
               mu_idx[goodpt]++;
@@ -1123,7 +1124,7 @@ int main( int argc, char* argv[] ) {
         ANA_MSG_DEBUG( "Photon step - selection" );
         int n_SignalPhotons = 0;
         for (const auto& y : *photons) {
-          if ( y->auxdata<char>("passOR") && y->auxdata<char>("signal")) {
+          if ( ST::acc_passOR(*y) && ST::acc_signal(*y)) {
             n_SignalPhotons++;
             ANA_MSG_DEBUG( "Photon pt = "<< y->pt()*1e-3
                           << ", idSF = "   << objTool.GetSignalPhotonSF(*y,true,false,false)
@@ -1227,18 +1228,18 @@ int main( int argc, char* argv[] ) {
       if (slices["jet"]) {
         ANA_MSG_DEBUG( "Jet step - selection" );
         for (const auto& jet : *goodJets) {
-          if ( jet->auxdata<char>("bad") == 1 )
+          if ( ST::acc_bad(*jet) == 1 )
             jet_idx[bad]++;
-          if ( jet->auxdata<char>("passOR") == 0 ) {
+          if ( ST::acc_passOR(*jet) == 0 ) {
             jet_idx[passOR]++;
             continue;
           }
-          if ( jet->auxdata<char>("baseline") == 1 ) {
+          if ( ST::acc_baseline(*jet) == 1 ) {
             jet_idx[baseline]++;
             if ( jet->pt() > 50000. )
               jet_idx[goodpt]++;
           }
-          if ( jet->auxdata<char>("bjet") == 1 )
+          if ( ST::acc_bjet(*jet) == 1 )
             jet_idx[btagged]++;
         }
       }

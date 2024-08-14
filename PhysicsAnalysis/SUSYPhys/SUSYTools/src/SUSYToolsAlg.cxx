@@ -41,6 +41,9 @@
 #include "EventInfo/EventStreamInfo.h"
 #endif
 
+// Common accessors
+#include "SUSYTools/SUSYObjDef_xAOD.h"
+
 // For output of histograms
 #include "TH1.h"
 #include "TH2.h"
@@ -548,14 +551,14 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["el"]["nom"] = electrons_nominal->size();
     for(auto el : *electrons_nominal) {
       el_n_flow_nominal->Fill(Cut::all);
-      if ( el->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*el) == 1 ){
         el_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(el,"el","bsl");
         m_obj_count["el"]["bsl"] += 1;
 
-        if ( el->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*el) == 1 ){
           el_n_flow_nominal->Fill(Cut::passOR);
-          if ( el->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*el) == 1 ){
             el_n_flow_nominal->Fill(Cut::signal);
             stdHistsForObj(el,"el","sig");
             m_obj_count["el"]["sig"] += 1;
@@ -595,13 +598,13 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["ph"]["nom"] = photons_nominal->size();
     for(auto ph : *photons_nominal) {
       ph_n_flow_nominal->Fill(Cut::all);
-      if ( ph->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*ph) == 1 ){
         ph_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(ph,"ph","bsl");
         m_obj_count["ph"]["bsl"] += 1;
-        if ( ph->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*ph) == 1 ){
           ph_n_flow_nominal->Fill(Cut::passOR);
-          if ( ph->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*ph) == 1 ){
             ph_n_flow_nominal->Fill(Cut::signal);
             stdHistsForObj(ph,"ph","sig");
             m_obj_count["ph"]["sig"] += 1;
@@ -640,13 +643,13 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["mu"]["nom"] = muons_nominal->size();
     for(auto mu : *muons_nominal) {
       mu_n_flow_nominal->Fill(Cut::all);
-      if ( mu->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*mu) == 1 ){
         mu_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(mu,"mu","bsl");
         m_obj_count["mu"]["bsl"] += 1;
-        if ( mu->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*mu) == 1 ){
           mu_n_flow_nominal->Fill(Cut::passOR);
-          if ( mu->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*mu) == 1 ){
             mu_n_flow_nominal->Fill(Cut::signal);
             stdHistsForObj(mu,"mu","sig");
             m_obj_count["mu"]["sig"] += 1;
@@ -687,10 +690,10 @@ StatusCode SUSYToolsAlg::execute() {
     ATH_MSG_DEBUG("Processing jets");
     jet_n_flow_nominal->Fill(Cut::all);
     bjet = false;
-    if ( jet->auxdata<char>("bjet") == 1  ) bjet = true;
+    if ( ST::acc_bjet(*jet) == 1  ) bjet = true;
     if (bjet) bjet_n_flow_nominal->Fill(Cut::all);
     //
-    if ( jet->auxdata<char>("baseline") == 1 ){
+    if ( ST::acc_baseline(*jet) == 1 ){
       jet_n_flow_nominal->Fill(Cut::baseline);
       if (bjet) {
          bjet_n_flow_nominal->Fill(Cut::baseline);
@@ -700,10 +703,10 @@ StatusCode SUSYToolsAlg::execute() {
       stdHistsForObj(jet,"jet","bsl");
       m_obj_count["jet"]["bsl"] += 1;
 
-      if ( jet->auxdata<char>("passOR") == 1 ){
+      if ( ST::acc_passOR(*jet) == 1 ){
         jet_n_flow_nominal->Fill(Cut::passOR);
         if (bjet) bjet_n_flow_nominal->Fill(Cut::passOR);
-        if ( jet->auxdata<char>("signal") == 1 ){
+        if ( ST::acc_signal(*jet) == 1 ){
           jet_n_flow_nominal->Fill(Cut::signal);
           jet_n_flow_nominal->Fill(Cut::trigmatch); //no trig matching for jets
           if (bjet) {
@@ -759,13 +762,13 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["fatjet"]["nom"] = fatjets_nominal->size();
     for(auto fatjet : *fatjets_nominal) {
       fatjet_n_flow_nominal->Fill(Cut::all);
-      if ( fatjet->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*fatjet) == 1 ){
         fatjet_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(fatjet,"fatjet","bsl",m_configDict);
         m_obj_count["fatjet"]["bsl"] += 1;
-        if ( fatjet->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*fatjet) == 1 ){
           fatjet_n_flow_nominal->Fill(Cut::passOR);
-          if ( fatjet->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*fatjet) == 1 ){
             fatjet_n_flow_nominal->Fill(Cut::signal);
             fatjet_n_flow_nominal->Fill(Cut::trigmatch); //no trig matching for jets
             stdHistsForObj(fatjet,"fatjet","sig",m_configDict);
@@ -788,13 +791,13 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["trkjet"]["nom"] = trkjets_nominal->size();
     for(auto trkjet : *trkjets_nominal) {
       trkjet_n_flow_nominal->Fill(Cut::all);
-      if ( trkjet->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*trkjet) == 1 ){
         trkjet_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(trkjet,"trkjet","bsl");
         m_obj_count["trkjet"]["bsl"] += 1;
-        if ( trkjet->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*trkjet) == 1 ){
           trkjet_n_flow_nominal->Fill(Cut::passOR);
-          if ( trkjet->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*trkjet) == 1 ){
             trkjet_n_flow_nominal->Fill(Cut::signal);
             trkjet_n_flow_nominal->Fill(Cut::trigmatch); //no trig matching for jets
             stdHistsForObj(trkjet,"trkjet","sig");
@@ -817,14 +820,14 @@ StatusCode SUSYToolsAlg::execute() {
     m_obj_count["tau"]["nom"] = taus_nominal->size();
     for(auto tau : *taus_nominal) {
       tau_n_flow_nominal->Fill(Cut::all);
-      if ( tau->auxdata<char>("baseline") == 1 ){
+      if ( ST::acc_baseline(*tau) == 1 ){
         tau_n_flow_nominal->Fill(Cut::baseline);
         stdHistsForObj(tau,"tau","bsl");
         m_obj_count["tau"]["bsl"] += 1;
-        if ( tau->auxdata<char>("passOR") == 1 ){
+        if ( ST::acc_passOR(*tau) == 1 ){
           tau_n_flow_nominal->Fill(Cut::passOR);
 
-          if ( tau->auxdata<char>("signal") == 1 ){
+          if ( ST::acc_signal(*tau) == 1 ){
             tau_n_flow_nominal->Fill(Cut::signal);
             tau_n_flow_nominal->Fill(Cut::trigmatch); //no trig matching for taus
             stdHistsForObj(tau,"tau","sig");
@@ -1029,7 +1032,6 @@ StatusCode SUSYToolsAlg::execute() {
     //--- Overlap Removal
     ATH_CHECK( m_SUSYTools->OverlapRemoval(electrons, muons, jets, photons, taus) );
 
-
     //--- Electrons
     if (m_slices["ele"]) {
       ATH_MSG_DEBUG("Working on electrons");
@@ -1037,16 +1039,16 @@ StatusCode SUSYToolsAlg::execute() {
       for ( const auto& el : *electrons ) {
         if( !isData ){
           if (isNominal || syst_affectsElectrons) {
-            if ((el->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
+            if ((ST::acc_signal(*el) == 1) && (isNominal || sysInfo.affectsWeights)) {
               //electrons_weight *= m_SUSYTools->GetSignalElecSF( *el ); // (*el, true, true, false, true) to switch off trigger SF
               electrons_weight *= m_SUSYTools->GetSignalElecSF(*el, true, true, false, true);
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Electron passing baseline selection? "  << static_cast<int>( el->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( "  Electron passing signal selection? "    << static_cast<int>( el->auxdata<char>("signal")));
-        if (el->auxdata< char >("signal") == 1)
-          ATH_MSG_VERBOSE( "  Electron weight " << el->auxdata<double>("effscalefact") );
+        ATH_MSG_VERBOSE( "  Electron passing baseline selection? "  << static_cast<int>( ST::acc_baseline(*el)));
+        ATH_MSG_VERBOSE( "  Electron passing signal selection? "    << static_cast<int>( ST::acc_signal(*el)));
+        if (ST::acc_signal(*el) == 1)
+          ATH_MSG_VERBOSE( "  Electron weight " << ST::acc_effscalefact(*el) );
 
       }
       if (isNominal) {
@@ -1072,15 +1074,15 @@ StatusCode SUSYToolsAlg::execute() {
       for ( const auto& ph : *photons ) {
         if( !isData ){
           if (isNominal || syst_affectsPhotons) {
-            if ((ph->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
+            if ((ST::acc_signal(*ph) == 1) && (isNominal || sysInfo.affectsWeights)) {
               photons_weight *= m_SUSYTools->GetSignalPhotonSF( *ph );
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Photon passing baseline selection? "  << static_cast<int>(ph->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( "  Photon passing signal selection? "    << static_cast<int>(ph->auxdata<char>("signal")));
-        if (ph->auxdata< char >("signal") == 1)
-          ATH_MSG_VERBOSE( "  Photon weight " << ph->auxdata<double>("effscalefact") );
+        ATH_MSG_VERBOSE( "  Photon passing baseline selection? "  << static_cast<int>(ST::acc_baseline(*ph)));
+        ATH_MSG_VERBOSE( "  Photon passing signal selection? "    << static_cast<int>(ST::acc_signal(*ph)));
+        if (ST::acc_signal(*ph) == 1)
+          ATH_MSG_VERBOSE( "  Photon weight " << ST::acc_effscalefact(*ph) );
       }
       if (isNominal) {
         photons_weight_nominal = photons_weight;
@@ -1105,16 +1107,16 @@ StatusCode SUSYToolsAlg::execute() {
       for ( const auto& mu : *muons ) {
         if( !isData ){
           if (isNominal || syst_affectsMuons) {
-            if ((mu->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
+            if ((ST::acc_signal(*mu) == 1) && (isNominal || sysInfo.affectsWeights)) {
               muons_weight *= m_SUSYTools->GetSignalMuonSF(*mu);;
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Muon passing baseline selection? "  << static_cast<int>(mu->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( "  Muon passing signal selection? "    << static_cast<int>(mu->auxdata<char>("signal")));
-        ATH_MSG_VERBOSE( "  Muon is a cosmic ray? "             << static_cast<int>(mu->auxdata<char>("cosmic")));
-        if (mu->auxdata< char >("signal") == 1)
-          ATH_MSG_VERBOSE( "  Muon weight " << mu->auxdata<double>("effscalefact") );
+        ATH_MSG_VERBOSE( "  Muon passing baseline selection? "  << static_cast<int>(ST::acc_baseline(*mu)));
+        ATH_MSG_VERBOSE( "  Muon passing signal selection? "    << static_cast<int>(ST::acc_signal(*mu)));
+        ATH_MSG_VERBOSE( "  Muon is a cosmic ray? "             << static_cast<int>(ST::acc_cosmic(*mu)));
+        if (ST::acc_signal(*mu) == 1)
+          ATH_MSG_VERBOSE( "  Muon weight " << ST::acc_effscalefact(*mu) );
       }
       if (isNominal) {
         muons_weight_nominal = muons_weight;
@@ -1136,14 +1138,14 @@ StatusCode SUSYToolsAlg::execute() {
     if (m_slices["jet"]) {
       ATH_MSG_DEBUG("Working on jets");
       for ( const auto& jet : *jets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(jet->auxdata<char>("bad")));
-        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(jet->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(jet->auxdata<char>("passOR")));
-        if (jet->auxdata<char>("passOR")) {
+        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(ST::acc_bad(*jet)));
+        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(ST::acc_baseline(*jet)));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(ST::acc_passOR(*jet)));
+        if (ST::acc_passOR(*jet)) {
           if (m_slices["bjet"] && (isNominal || syst_affectsJets || syst_affectsBTag)) {
             m_SUSYTools->IsBJet(*jet);
           }
-          ATH_MSG_VERBOSE( " Jet is bjet ? "    << static_cast<int>(jet->auxdata<char>("bjet")));
+          ATH_MSG_VERBOSE( " Jet is bjet ? "    << static_cast<int>(ST::acc_bjet(*jet)));
         }
       }
 
@@ -1195,9 +1197,9 @@ StatusCode SUSYToolsAlg::execute() {
     if( m_slices["fjet"] && doFatJets ) {
       ATH_MSG_DEBUG("Working on fat jets");
       for ( const auto& fatjet : *fatjets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? "       << static_cast<int>(fatjet->auxdata<char>("bad")));
-        ATH_MSG_VERBOSE( " Jet is baseline ? " << static_cast<int>(fatjet->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( " Jet passes OR ? "   << static_cast<int>(fatjet->auxdata<char>("passOR")));
+        ATH_MSG_VERBOSE( " Jet is bad? "       << static_cast<int>(ST::acc_bad(*fatjet)));
+        ATH_MSG_VERBOSE( " Jet is baseline ? " << static_cast<int>(ST::acc_baseline(*fatjet)));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "   << static_cast<int>(ST::acc_passOR(*fatjet)));
       }
 
       float fatjet_weight(1.);
@@ -1224,9 +1226,9 @@ StatusCode SUSYToolsAlg::execute() {
     if( m_slices["tjet"] && doTrkJets ) {
       ATH_MSG_DEBUG("Working on trk jets");
       for ( const auto& trkjet : *trkjets ) {
-        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(trkjet->auxdata<char>("bad")));
-        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(trkjet->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(trkjet->auxdata<char>("passOR")));
+        ATH_MSG_VERBOSE( " Jet is bad? "        << static_cast<int>(ST::acc_bad(*trkjet)));
+        ATH_MSG_VERBOSE( " Jet is baseline ? "  << static_cast<int>(ST::acc_baseline(*trkjet)));
+        ATH_MSG_VERBOSE( " Jet passes OR ? "    << static_cast<int>(ST::acc_passOR(*trkjet)));
       }
 
       float trkjet_weight(1.);
@@ -1255,15 +1257,15 @@ StatusCode SUSYToolsAlg::execute() {
       for ( const auto& ta : *taus ) {
         if( !isData ){
           if (isNominal || syst_affectsTaus) {
-            if ((ta->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
+            if ((ST::acc_signal(*ta) == 1) && (isNominal || sysInfo.affectsWeights)) {
               taus_weight *= m_SUSYTools->GetSignalTauSF(*ta, true, false); //true, "HLT_tau25_medium1_tracktwo");;
             }
           }
         }
-        ATH_MSG_VERBOSE( "  Tau passing baseline selection? " << static_cast<int>(ta->auxdata<char>("baseline")));
-        ATH_MSG_VERBOSE( "  Tau passing signal selection? "   << static_cast<int>(ta->auxdata<char>("signal")));
-        if (ta->auxdata< char >("signal") == 1)
-          ATH_MSG_VERBOSE( "  Tau weight " << ta->auxdata<double>("effscalefact") );
+        ATH_MSG_VERBOSE( "  Tau passing baseline selection? " << static_cast<int>(ST::acc_baseline(*ta)));
+        ATH_MSG_VERBOSE( "  Tau passing signal selection? "   << static_cast<int>(ST::acc_signal(*ta)));
+        if (ST::acc_signal(*ta) == 1)
+          ATH_MSG_VERBOSE( "  Tau weight " << ST::acc_effscalefact(*ta) );
       }
 
       if (isNominal) {
@@ -1471,31 +1473,31 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
    hist(dir+objtype+"_"+objlevel+"_mass")->Fill( obj->m()/1000. );
    //
    if (objtype=="el" || objtype=="mu" || objtype=="ph") {
-      hist(dir+objtype+"_"+objlevel+"_d0")->Fill( obj->auxdata<float>("d0sig") );
-      hist(dir+objtype+"_"+objlevel+"_z0")->Fill( obj->auxdata<float>("z0sinTheta") );
+      hist(dir+objtype+"_"+objlevel+"_d0")->Fill( ST::acc_d0sig(*obj) );
+      hist(dir+objtype+"_"+objlevel+"_z0")->Fill( ST::acc_z0sinTheta(*obj) );
       if (objtype=="el") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( obj->auxdata<float>("topoetcone20")/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( obj->auxdata<float>("ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000")/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( ST::acc_topoetcone20(*obj)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptvarcone20_TTVA(*obj)/obj->pt() );
       } else if (objtype=="mu") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( obj->auxdata<float>("topoetcone20")/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( obj->auxdata<float>("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000")/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( ST::acc_topoetcone20(*obj)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptvarcone30_TTVA(*obj)/obj->pt() );
       } else if (objtype=="ph") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( (obj->auxdata<float>("topoetcone40")-2450)/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( obj->auxdata<float>("ptcone20")/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( (ST::acc_topoetcone40(*obj)-2450)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptcone20(*obj)/obj->pt() );
       }
    }
    //
    if (objtype=="el" || objtype=="mu" || objtype=="ph" || objtype=="tau") {
       if ( objtype!="tau" ) {
-        ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << obj->auxdata<int>("truthType") << ", " << obj->auxdata<int>("truthOrigin"));
-        hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( obj->auxdata<int>("truthType") );
-        hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( obj->auxdata<int>("truthOrigin") );
+        ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << ST::acc_truthType(*obj) << ", " << ST::acc_truthOrigin(*obj));
+        hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( ST::acc_truthType(*obj) );
+        hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( ST::acc_truthOrigin(*obj) );
       } else {
         if(!m_isPHYSLITE){
-          bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
+          bool istruthmatched = (bool)ST::acc_IsTruthMatched(*obj);
           int pid(0),ppid(0);
-          if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
-            const auto *tp = *(obj->auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink"));
+          if (istruthmatched && ST::acc_truthParticleLink.isAvailable(*obj)) {
+            const auto *tp = *(ST::acc_truthParticleLink(*obj));
             if (tp) {
               pid = tp->pdgId();
               ppid = (tp->nParents()>0)?tp->parent(0)->pdgId():0;
@@ -1506,26 +1508,37 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
         }
       }
    }
+
    if (objtype=="tau") {
       hist(dir+objtype+"_"+objlevel+"_nTracks")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracks() );
       hist(dir+objtype+"_"+objlevel+"_nTracksCharged")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracksCharged() );
       hist(dir+objtype+"_"+objlevel+"_nTracksIsolation")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracksIsolation() );
-      hist(dir+objtype+"_"+objlevel+"_RNNJetScoreSigTrans")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->auxdata<float>("RNNJetScoreSigTrans") );
+      hist(dir+objtype+"_"+objlevel+"_RNNJetScoreSigTrans")->Fill( ST::acc_RNNJetScoreSigTrans(*obj) );
    }
    //
+
    if (objtype=="bjet") {
-      hist(dir+objtype+"_"+objlevel+"_bweight")->Fill( obj->auxdata<double>("btag_weight") );
-      hist(dir+objtype+"_"+objlevel+"_bweightpb")->Fill( obj->auxdata<float>("btag_dl1pb") );
-      hist(dir+objtype+"_"+objlevel+"_bweightpc")->Fill( obj->auxdata<float>("btag_dl1pc") );
-      hist(dir+objtype+"_"+objlevel+"_bweightpu")->Fill( obj->auxdata<float>("btag_dl1pu") );
+      hist(dir+objtype+"_"+objlevel+"_bweight")->Fill( ST::acc_btag_weight(*obj) );
+      hist(dir+objtype+"_"+objlevel+"_bweightpb")->Fill( ST::acc_btag_dl1pb(*obj) );
+      hist(dir+objtype+"_"+objlevel+"_bweightpc")->Fill( ST::acc_btag_dl1pc(*obj) );
+      hist(dir+objtype+"_"+objlevel+"_bweightpu")->Fill( ST::acc_btag_dl1pu(*obj) );
    }
+
    //
+   const static SG::AuxElement::ConstAccessor<bool> acc_topValidPtRangeLow(config["ToptaggerKey"]+"_ValidPtRangeLow");
+   const static SG::AuxElement::ConstAccessor<bool> acc_topValidPtRangeHigh(config["ToptaggerKey"]+"_ValidPtRangeHigh");
+   const static SG::AuxElement::ConstAccessor<bool> acc_topValidEtaRange(config["ToptaggerKey"]+"_ValidEtaRange");
+   const static SG::AuxElement::ConstAccessor<bool> acc_wtagged(config["WtaggerKey"]+"_Tagged");
+   const static SG::AuxElement::ConstAccessor<bool> acc_ztagged(config["ZtaggerKey"]+"_Tagged");
+   const static SG::AuxElement::ConstAccessor<bool> acc_toptagged(config["ToptaggerKey"]+"_Tagged");
+   const static SG::AuxElement::ConstAccessor<float> acc_topscore(config["ToptaggerKey"]+"_Score");
+
    if (objtype=="fatjet") {
-      bool kin = obj->auxdata<bool>(config["ToptaggerKey"]+"_ValidPtRangeLow") && obj->auxdata<bool>(config["ToptaggerKey"]+"_ValidPtRangeHigh") && obj->auxdata<bool>(config["ToptaggerKey"]+"_ValidEtaRange");
-      if (config.find("WtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_wtagged")  ->Fill( obj->isAvailable<bool>(config["WtaggerKey"]+"_Tagged")   ? kin && obj->auxdata<bool>(config["WtaggerKey"]+"_Tagged")   : -1);
-      if (config.find("ZtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_ztagged")  ->Fill( obj->isAvailable<bool>(config["ZtaggerKey"]+"_Tagged")   ? kin && obj->auxdata<bool>(config["ZtaggerKey"]+"_Tagged")   : -1);
-      if (config.find("ToptaggerKey")!=config.end()) hist(dir+objtype+"_"+objlevel+"_toptagged")->Fill( obj->isAvailable<bool>(config["ToptaggerKey"]+"_Tagged") ? kin && obj->auxdata<bool>(config["ToptaggerKey"]+"_Tagged") : -1);
-      if (config.find("ToptaggerKey")!=config.end()) hist(dir+objtype+"_"+objlevel+"_toptaggedscore")->Fill( obj->isAvailable<float>(config["ToptaggerKey"]+"_Score") ? obj->auxdata<float>(config["ToptaggerKey"]+"_Score") : -1);
+     bool kin = acc_topValidPtRangeLow(*obj) && acc_topValidPtRangeHigh(*obj) && acc_topValidEtaRange(*obj);
+     if (config.find("WtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_wtagged")  ->Fill( acc_wtagged.isAvailable(*obj) ? kin && acc_wtagged(*obj) : -1);
+     if (config.find("ZtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_ztagged")  ->Fill( acc_ztagged.isAvailable(*obj) ? kin && acc_ztagged(*obj) : -1);
+     if (config.find("ToptaggerKey")!=config.end()) hist(dir+objtype+"_"+objlevel+"_toptagged")->Fill( acc_toptagged.isAvailable(*obj) ? kin && acc_toptagged(*obj) : -1);
+     if (config.find("ToptaggerKey")!=config.end()) hist(dir+objtype+"_"+objlevel+"_toptaggedscore")->Fill( acc_topscore.isAvailable(*obj) ? acc_topscore(*obj) : -1);
    }
 }
 
