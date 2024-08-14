@@ -25,6 +25,7 @@ def getTrigNavSlimmingMTOnlineConfig(flags):
   onlineSlim.PrimaryInputCollection = "HLTNav_Summary"
   onlineSlim.KeepFailedBranched = True
   onlineSlim.KeepOnlyFinalFeatures = False
+  onlineSlim.RemoveEmptySteps = False
   onlineSlim.EdgesToDrop = []
   onlineSlim.NodesToDrop = []
   onlineSlim.ChainsFilter = []
@@ -72,6 +73,7 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
   daodSlim.AllOutputContainers = possible_keys
   daodSlim.KeepFailedBranched = False
   daodSlim.KeepOnlyFinalFeatures = True
+  daodSlim.RemoveEmptySteps = True
   daodSlim.RepackROIs = False # CAUTION: There may be an ROI memory management issue which needs solving in order to enable this functionality (ATLASG-1662).
   daodSlim.RepackROIsOutputCollection = "HLTNav_RepackedROIs"
   daodSlim.RepackMET = True # To check: Is there any analysis need to have online-MET(s) in DAOD?
@@ -79,8 +81,8 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
 
   daodSlim.RepackFeaturesOutputCollection_Particle = "HLTNav_RepackedFeatures_Particle"
   daodSlim.RepackFeaturesOutputCollection_MET = "HLTNav_RepackedFeatures_MET"
-  daodSlim.EdgesToDrop = ["view"]
-  daodSlim.NodesToDrop = ["F"]
+  daodSlim.EdgesToDrop = ["view"] # View element links, only useful online.
+  daodSlim.NodesToDrop = ["F", "CH"] # Filter nodes, only useful online. CH=ComboHypo nodes, not useful given we run here with KeepFailedBranched=False 
   daodSlim.ChainsFilter = chainsFilter
   ca.addEventAlgo(daodSlim)
 
@@ -162,6 +164,7 @@ def TrigNavSlimmingMTCfg(flags):
     esdSlim.AllOutputContainers = possible_keys
     esdSlim.KeepFailedBranched = True
     esdSlim.KeepOnlyFinalFeatures = False
+    esdSlim.RemoveEmptySteps = False
     esdSlim.RepackROIs = False
     esdSlim.RepackFeatures = False
     esdSlim.EdgesToDrop = ["view"]
@@ -181,6 +184,7 @@ def TrigNavSlimmingMTCfg(flags):
     aodSlim.OutputCollection = "HLTNav_Summary_AODSlimmed"
     aodSlim.PrimaryInputCollection = inputCollection
     aodSlim.AllOutputContainers = possible_keys
+    aodSlim.RemoveEmptySteps = False
     aodSlim.RepackROIs = False
     aodSlim.RepackFeatures = False
     aodSlim.EdgesToDrop = ["view"]

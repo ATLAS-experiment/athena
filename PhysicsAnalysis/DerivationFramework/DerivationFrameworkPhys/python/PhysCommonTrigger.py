@@ -60,8 +60,9 @@ trigger_names_notau = []
 trigger_names_tau = []
 
 if ConfigFlags.Trigger.EDMVersion == 3:
+   # These regular expressions should be replaced with a proper TriggerAPI for Run 3
    r_tau = re.compile("HLT_.*tau.*")
-   r_notau = re.compile("HLT_[1-9]*(e|mu|g).*") 
+   r_notau = re.compile("HLT_[1-9]*(e|mu|g|j).*") 
    for chain_name in GetFileMD(ConfigFlags.Input.Files)['TriggerMenu']['HLTChains']:
       result_tau = r_tau.match(chain_name)
       result_notau = r_notau.match(chain_name)

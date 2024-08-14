@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavSlimmingMTAlg.h"
@@ -49,8 +49,8 @@ StatusCode TrigNavSlimmingMTAlg::doRepack(TrigCompositeUtils::Decision* decision
   ElementLink<xAOD::ParticleContainer> remappedEL(**writeHandle, (**writeHandle).size()-1);
   decision->setObjectLink<xAOD::ParticleContainer>(edgeName, remappedEL); // Overwrite the existing link
 
-  ATH_MSG_DEBUG("Repacked from index:" << currentEL.index() << " from key:" << currentEL.dataID() 
-    << ", to index:" << remappedEL.index() << " to key:" << remappedEL.key());
+  ATH_MSG_VERBOSE("Repacked from index:" << currentEL.index() << " from key:" << currentEL.dataID() 
+    << ", to index:" << remappedEL.index() << " to key:" << remappedEL.dataID());
 
   return StatusCode::SUCCESS;
 }
@@ -161,7 +161,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
 
   std::set<const Decision*> fullyExploredFrom;
   // Note: We use the "internal" version of this call such that we maintain our own cache, 
-  // as we may need to call this more than once if keepFailedBranches is ture
+  // as we may need to call this more than once if keepFailedBranches is true
   TrigCompositeUtils::recursiveGetDecisionsInternal(terminusNode, 
     nullptr, // 'Coming from' is nullptr for the first call of the recursive function
     transientNavGraph, 
@@ -170,7 +170,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
     chainIDs, 
     /*enforce chainIDs on terminus node*/ true);
 
-  ATH_MSG_DEBUG("Collated nodes from passing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << "edges");
+  ATH_MSG_DEBUG("Collated nodes from passing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << " edges");
 
   // Stage 2. We can optionally include branches through the graph which were never accepted by any chain.
   TrigTimeStamp stage2;
@@ -193,13 +193,18 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
         chainIDs, 
         /*enforce chainIDs on terminus node*/ false);
     }
-    ATH_MSG_DEBUG("Collated nodes from failing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << "edges");
+    ATH_MSG_DEBUG("Collated nodes from failing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << " edges");
   }
 
   // Stage 3. Walk all paths through the graph. Flag for thinning.
   TrigTimeStamp stage3;
   // Final nodes includes the terminus node, plus any rejected nodes (if these were collated).
-  TrigCompositeUtils::recursiveFlagForThinning(transientNavGraph, m_keepOnlyFinalFeatures, m_nodesToDrop);
+  TrigCompositeUtils::recursiveFlagForThinning(transientNavGraph, m_keepOnlyFinalFeatures, m_removeEmptySteps, m_nodesToDrop);
+
+  if (msg().level() <= MSG::VERBOSE) {
+    ATH_MSG_VERBOSE("The navigation graph entering the slimming is:");
+    transientNavGraph.printAllPaths(msg(), MSG::VERBOSE);
+  }
 
   // Stage 4. Do the thinning. Re-wire removed nodes as we go.
   TrigTimeStamp stage4;
@@ -214,7 +219,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
     << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << " edges");
 
   if (msg().level() <= MSG::VERBOSE) {
-    ATH_MSG_VERBOSE("The navigation graph has been slimmed to the following paths");
+    ATH_MSG_VERBOSE("The navigation graph has been slimmed to the following paths:");
     transientNavGraph.printAllPaths(msg(), MSG::VERBOSE);
   }
 
@@ -223,23 +228,39 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   IOCacheMap cache; // Used to keep a one-to-one relationship between the const input Decision* and the mutable output Decision*
   // Do the terminus node first - such that it ends up at index 0 of the outputNavigation (fast to locate in the future)
   Decision* terminusNodeOut = nullptr;
-  ATH_CHECK(inputToOutput(terminusNode, terminusNodeOut, cache, outputContainers, chainIDs, ctx));
+  ATH_CHECK(inputToOutput(terminusNode, &terminusNodeOut, cache, outputContainers, chainIDs, ctx));
   if (expressTerminusNode) {
     // Do the express terminus node second - such that it ends up at index 1 of the outputNavigation (fast to locate in the future)
     Decision* expressTerminusNodeOut = nullptr;
-    ATH_CHECK(inputToOutput(expressTerminusNode, expressTerminusNodeOut, cache, outputContainers, chainIDs, ctx));
+    ATH_CHECK(inputToOutput(expressTerminusNode, &expressTerminusNodeOut, cache, outputContainers, chainIDs, ctx));
   }
   // Don't have to walk the graph here, just iterate through the set of (thinned) nodes.
   // We won't end up with two terminus nodes because of this (it checks that the node hasn't already been processed)
   const std::vector<NavGraphNode*> allNodes = transientNavGraph.allNodes();
   for (const NavGraphNode* inputNode : allNodes) {
     Decision* outputNode = nullptr;
-    ATH_CHECK(inputToOutput(inputNode->node(), outputNode, cache, outputContainers, chainIDs, ctx));
+    ATH_CHECK(inputToOutput(inputNode->node(), &outputNode, cache, outputContainers, chainIDs, ctx));
     // TODO - anything else to do here with outputNode? We cannot hook up its seeding yet, we may not yet have output nodes for all of its seeds.
   }
   // Now we have all of the new nodes in the output collection, can link them all up with their slimmed seeding relationships.
   for (const NavGraphNode* inputNode : allNodes) {
     ATH_CHECK(propagateSeedingRelation(inputNode, cache, ctx));
+  }
+
+  // We can perform an additional check on the output graph, we put a veto on the m_keepFailedBranches option as we are currently just exploring
+  // from the 'terminusNodeOut', more code would be needed to locate failing branches also in the output graph structure.
+  if (msg().level() <= MSG::VERBOSE && !m_keepFailedBranches) {
+    ATH_MSG_VERBOSE("The output navigation graph looks like this (output terminus node search only, converted back into a NavGraph one final time for printing)");
+    std::set<const Decision*> fullyExploredFromOut;
+    NavGraph transientNavGraphOut;
+    TrigCompositeUtils::recursiveGetDecisionsInternal(terminusNodeOut, 
+      nullptr, // 'Coming from' is nullptr for the first call of the recursive function
+      transientNavGraphOut, 
+      ctx,
+      fullyExploredFromOut, 
+      chainIDs, 
+      /*enforce chainIDs on terminus node*/ true);
+    transientNavGraphOut.printAllPaths(msg(), MSG::VERBOSE);
   }
 
   if (msg().level() <= MSG::DEBUG) {
@@ -265,6 +286,7 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) con
       const HLT::Identifier chainID( hltChain->chain_name() );
       chainIDs.insert( chainID.numeric() );
       const std::vector<size_t> legMultiplicites = hltChain->leg_multiplicities();
+      ATH_MSG_VERBOSE("Including " << chain << " and its " << legMultiplicites.size() << " legs in the trigger slimming output");
       if (legMultiplicites.size() == 0) {
         ATH_MSG_ERROR("chain " << chainID << " has invalid configuration, no multiplicity data.");
       } else if (legMultiplicites.size() > 1) {
@@ -283,7 +305,7 @@ StatusCode TrigNavSlimmingMTAlg::fillChainIDs(DecisionIDContainer& chainIDs) con
 
 StatusCode TrigNavSlimmingMTAlg::inputToOutput(
   const TrigCompositeUtils::Decision* input, 
-  TrigCompositeUtils::Decision* output,
+  TrigCompositeUtils::Decision** output,
   IOCacheMap& cache, 
   Outputs& outputContainers,
   const DecisionIDContainer& chainIDs,
@@ -291,13 +313,13 @@ StatusCode TrigNavSlimmingMTAlg::inputToOutput(
 {
   IOCacheMap::const_iterator it = cache.find(input);
   if (it != cache.end()) {
-    output = it->second;
+    *output = it->second;
   } else {
-    output = newDecisionIn(outputContainers.nav->ptr(), input, input->name(), ctx);
-    ATH_CHECK(propagateLinks(input, output));
-    ATH_CHECK(propagateDecisionIDs(input, output, chainIDs));
-    ATH_CHECK(repackLinks(output, outputContainers));
-    cache[input] = output;
+    *output = newDecisionIn(outputContainers.nav->ptr(), input, input->name(), ctx);
+    ATH_CHECK(propagateLinks(input, *output));
+    ATH_CHECK(propagateDecisionIDs(input, *output, chainIDs));
+    ATH_CHECK(repackLinks(*output, outputContainers));
+    cache[input] = *output;
   }
   return StatusCode::SUCCESS;
 }
@@ -412,6 +434,7 @@ void TrigNavSlimmingMTAlg::printIParticleRepackingDebug(const TrigCompositeUtils
       ATH_MSG_DEBUG("IParticle repacking debug. " << when << " : " 
         << "(pt:" << l.pt() << ",eta:" << l.eta() << ",phi:" << l.phi() << ",m:" << l.m() << ",e:" << l.e() << ")"
         << " from:" << link.dataID());
+      if (when == " After") ATH_MSG_DEBUG("--");
     }
   }
 }
@@ -436,7 +459,7 @@ StatusCode TrigNavSlimmingMTAlg::repackLinks(
     ATH_CHECK( doRepack<xAOD::ParticleContainer>(output, outputContainers.particles, featureString()) );
 
     // Debug printing. Look at the four-momentum of any feature after the repacking (the stored link is re-written)
-    printIParticleRepackingDebug(output, "After");
+    printIParticleRepackingDebug(output, " After");
   }
 
   // Some features do not support an IParticle interface. These need their own containers.

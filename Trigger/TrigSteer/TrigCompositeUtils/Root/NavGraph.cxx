@@ -6,6 +6,10 @@
 #include "TrigCompositeUtils/NavGraph.h"
 #include "CxxUtils/sgkey_t.h"
 
+#ifndef XAOD_STANDALONE // Athena or AthAnalysis
+#include "AthenaKernel/CLIDRegistry.h"
+#endif
+
 namespace TrigCompositeUtils {
 
   NavGraphNode::NavGraphNode(const Decision* me) : m_decisionObject(me), 
@@ -174,13 +178,21 @@ namespace TrigCompositeUtils {
     }
 
     ss << "|-> " << nodeEL.dataID() << " #" << nodeEL.index() << " Name(" << node->name() << ") Passing(" << node->decisions().size() << ")";
-    if (node->hasObjectLink("feaure")) {
+    if (nav.getKeep()) ss << " [KEEP]";
+    if (node->hasObjectLink(featureString())) {
       SG::sgkey_t key;
       uint32_t clid;
       uint16_t index;
-      node->typelessGetObjectLink("feature", key, clid, index);
-      ss << " feature(" << key << ")";
+      node->typelessGetObjectLink(featureString(), key, clid, index);
+#ifndef XAOD_STANDALONE // Athena or AthAnalysis
+      ss << " Feature(#" << index << ", " << CLIDRegistry::CLIDToTypeinfo(clid)->name() << ", " << key << ")"; 
+#else 
+      ss << " Feature(#" << index << ", " << key << ")";
+#endif
     }
+    if (node->hasObjectLink(viewString())) ss << " [View]";
+    if (node->hasObjectLink(roiString())) ss << " [RoI]";
+    if (node->hasObjectLink(initialRoIString())) ss << " [InitialRoI]";
     log << msgLevel << ss.str() << endmsg;
     for (const NavGraphNode* seed : nav.seeds()) {
       recursivePrintNavPath(*seed, level + 1, log, msgLevel);
