@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVSLIMMINGMT_TRIGNAVSLIMMINGMTALG_H
@@ -76,6 +76,10 @@ private:
     this, "KeepOnlyFinalFeatures", false,
     "Keeps only the final features which accepted a chain. Fine for analysis-use."};
 
+  Gaudi::Property<bool> m_removeEmptySteps{
+    this, "RemoveEmptySteps", false,
+    "Slim away ComboHypo->InputMaker empty step pairs which come from parallel chain alignment (special case: keep if C.H. adds a feature, e.g. BLS). Fine for analysis-use."};
+
   Gaudi::Property<bool> m_repackROIs{
     this, "RepackROIs", false,
     "Re-pack the target of all 'roi' and 'initialRoI' edges into a single container (WriteHandle defined above)"};
@@ -126,7 +130,7 @@ private:
    * @brief Map a const Decision object from an input collection to its equivalent in the output collection
    * Where a new Decision object is required in the output collection, the propagateLinks function is applied.
    * @param[in] input The const Decision object from a input collection.
-   * @param[out] output The Decision object in the output collection.
+   * @param[out] output Pointer to the Decision object ptr in the output collection.
    * @param[inout] cache Cached mapping of input->output objects. Cached output is returned if present.
    * @param[inout] outputContainers The write handles, contains the nav write handle which should own any new Decision objects which need to be created.
    * @param[in] chainIDs DecisionIDs which should propagate from input to output DecisionObjects.
@@ -134,7 +138,7 @@ private:
    **/
   StatusCode inputToOutput(
     const TrigCompositeUtils::Decision* input, 
-    TrigCompositeUtils::Decision* output,
+    TrigCompositeUtils::Decision** output,
     IOCacheMap& cache, 
     Outputs& outputContainers, 
     const TrigCompositeUtils::DecisionIDContainer& chainIDs, 

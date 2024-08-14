@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -444,11 +444,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << " ----------" << std::endl << " ---------- Thinning out '" << filterNodeName() << "' nodes." << std::endl << "----------" << std::endl;
 
   // First pass. Flagging the removing all the "Filter" nodes
-  recursiveFlagForThinning(graph_HLT_mufast_chain, /*keepOnlyFinalFeatures*/ false, {filterNodeName()});
-  recursiveFlagForThinning(graph_HLT_mu_chain, /*keepOnlyFinalFeatures*/ false, {filterNodeName()});
-  recursiveFlagForThinning(graph_HLT_mu_em_chain, /*keepOnlyFinalFeatures*/ false, {filterNodeName()});
-  recursiveFlagForThinning(graph_HLT_em_chain, /*keepOnlyFinalFeatures*/ false, {filterNodeName()});
-  recursiveFlagForThinning(graph_HLT_all, /*keepOnlyFinalFeatures*/ false, {filterNodeName()});
+  recursiveFlagForThinning(graph_HLT_mufast_chain, /*keepOnlyFinalFeatures*/ false, /*removeEmptySteps*/ false, {filterNodeName()});
+  recursiveFlagForThinning(graph_HLT_mu_chain, /*keepOnlyFinalFeatures*/ false, /*removeEmptySteps*/ false, {filterNodeName()});
+  recursiveFlagForThinning(graph_HLT_mu_em_chain, /*keepOnlyFinalFeatures*/ false, /*removeEmptySteps*/ false, {filterNodeName()});
+  recursiveFlagForThinning(graph_HLT_em_chain, /*keepOnlyFinalFeatures*/ false, /*removeEmptySteps*/ false, {filterNodeName()});
+  recursiveFlagForThinning(graph_HLT_all, /*keepOnlyFinalFeatures*/ false, /*removeEmptySteps*/ false, {filterNodeName()});
 
 
   // Collect statistics from before thinning
@@ -485,11 +485,11 @@ int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << " ----------" << std::endl << " ---------- Thinning with mode 'keepOnlyFinalFeatures'." << std::endl << " ----------" << std::endl;
 
   // Second pass. Flagging the removal of everything except for the final "feature" (and the preceding InputMaker)
-  recursiveFlagForThinning(graph_HLT_mufast_chain, /*keepOnlyFinalFeatures*/ true, {});
-  recursiveFlagForThinning(graph_HLT_mu_chain, /*keepOnlyFinalFeatures*/ true, {});
-  recursiveFlagForThinning(graph_HLT_mu_em_chain, /*keepOnlyFinalFeatures*/ true, {});
-  recursiveFlagForThinning(graph_HLT_em_chain, /*keepOnlyFinalFeatures*/ true, {});
-  recursiveFlagForThinning(graph_HLT_all, /*keepOnlyFinalFeatures*/ true, {});
+  recursiveFlagForThinning(graph_HLT_mufast_chain, /*keepOnlyFinalFeatures*/ true, /*removeEmptySteps*/ false, {});
+  recursiveFlagForThinning(graph_HLT_mu_chain, /*keepOnlyFinalFeatures*/ true, /*removeEmptySteps*/ false, {});
+  recursiveFlagForThinning(graph_HLT_mu_em_chain, /*keepOnlyFinalFeatures*/ true, /*removeEmptySteps*/ false, {});
+  recursiveFlagForThinning(graph_HLT_em_chain, /*keepOnlyFinalFeatures*/ true, /*removeEmptySteps*/ false, {});
+  recursiveFlagForThinning(graph_HLT_all, /*keepOnlyFinalFeatures*/ true, /*removeEmptySteps*/ false, {});
 
   // Collect statistics from before thinning
   muf_n = graph_HLT_mufast_chain.nodes();
@@ -532,7 +532,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   printFeatures(features_final_mu, "[Explicit Final Muon Features] HLT_mu_em_chain", log);
   printFeatures(features_final_em, "[Explicit Final Electron Features] HLT_mu_em_chain", log);  
 
-  // Check filtering on the collection name. Note sub-string matching, omitting the "My".
+  // Check filtering on the collection name. Note reg-ex matching, omitting the "My".
   std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_correctContainer   = recursiveGetFeaturesOfType<xAOD::ElectronContainer>(graph_HLT_mu_em_chain, ".*ElectronContainer.*");
   std::vector< LinkInfo<xAOD::ElectronContainer> > features_final_em_incorrectContainer = recursiveGetFeaturesOfType<xAOD::ElectronContainer>(graph_HLT_mu_em_chain, "WrongContainerName");
   VALUE ( features_final_em_correctContainer.size() ) EXPECTED ( features_final_em.size() );
