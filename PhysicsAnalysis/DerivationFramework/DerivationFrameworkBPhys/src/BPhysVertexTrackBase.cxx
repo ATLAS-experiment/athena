@@ -163,7 +163,7 @@
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
 #include "TVector3.h"
 #include "TString.h"
-#include "boost/format.hpp"
+#include <format>
 #include <algorithm>
 #include <sstream>
 #include <limits>
@@ -200,19 +200,18 @@ namespace DerivationFramework {
 
   std::string BPhysVertexTrackBase::BaseItem::buildName(const std::string& qualifier,
 							const std::string& suffix) const {
-    boost::format f("%s%s%s%s%s");
-    f % (prefix.length() > 0 ? prefix+"_" : "")
-      % (bname.length() > 0 ? bname+"_" : "")
-      % (qualifier.length() > 0 ? qualifier+"_" : "")
-      % name
-      % suffix;
-    return f.str();
+    std::string f = std::format("{}{}{}{}{}",
+    (prefix.length() > 0 ? prefix + "_" : ""),
+    (bname.length() > 0 ? bname + "_" : ""),
+    (qualifier.length() > 0 ? qualifier + "_" : ""),
+    name,
+    suffix);
+    return f;
   }
 
   std::string BPhysVertexTrackBase::BaseItem::toString() const {
-    boost::format f("nm: %s\nbn: %s");
-    f % name % bname;
-    return f.str();
+    std::string f = std::format("nm: {}\nbn: {}", name, bname);
+    return f;
   }
   //-------------------------------------------------------------------------
   //
@@ -230,13 +229,13 @@ namespace DerivationFramework {
                                                             const std::string &prefix,
                                                             const std::string &suffix,
                                                             uint64_t counts) {
-    boost::format f("%sT%010d_R%010d%s");
-    f % (prefix.length() > 0 ? prefix+"_" : "")
-      % atype
-      % m_parent.m_useTrackTypes[rtype]
-      % (suffix.length() > 0 ? "_"+suffix : "");
+    std::string f = std::format("{}T{:010d}_R{:010d}{}",
+      (prefix.length() > 0 ? prefix + "_" : ""),
+      atype,
+      m_parent.m_useTrackTypes[rtype],
+      (suffix.length() > 0 ? "_" + suffix : ""));
 
-    addToCounter(f.str(), atype, counts);
+    addToCounter(f, atype, counts);
   }
   
   void BPhysVertexTrackBase::TrackTypeCounter::addToCounter(const std::string &name,
@@ -255,9 +254,7 @@ namespace DerivationFramework {
   std::string BPhysVertexTrackBase::TrackTypeCounter::
   countsToString(uint indent) const {
 
-    boost::format f("%sCounters for %s:\n");
-    f % boost::io::group(std::setw(indent), " ") % name; 
-    std::string str = f.str();
+    std::string str = std::format("{}Counters for {}:\n", std::string(indent, ' '), name);
     
     int lmax(0);
     for (NameCountMap_t::const_iterator it = m_cnts.begin();
@@ -267,12 +264,12 @@ namespace DerivationFramework {
 
     for (NameCountMap_t::const_iterator it = m_cnts.begin();
          it != m_cnts.end(); ++it) {
-      boost::format f("%s%-s : %10lld %33s");
-      f % boost::io::group(std::setw(indent+4), " ")
-        % boost::io::group(std::setw(lmax), it->first)
-        % (it->second).first
-        % std::bitset<33>((it->second).second).to_string();
-      str += f.str() + "\n";
+      std::string f = std::format("{:>{}}{:<{}} : {:>10} {:>33}",
+      " ", indent + 4,
+      it->first, lmax,
+      (it->second).first,
+      std::bitset<33>((it->second).second).to_string());
+      str += f + "\n";
     }
     // clean up last newline
     str.erase(str.length()-1);
@@ -341,12 +338,11 @@ namespace DerivationFramework {
   BPhysVertexTrackBase::trackToString(const xAOD::TrackParticle* track) {
     std::string str;
     if (track != nullptr) {
-      boost::format f("p(%10.4f,%10.4f,%10.4f)\n"
-                      "d:(%10.5f,%10.5f,%10.5f,%10.5f,%10.6f)");
-      f % (track->p4()).Px() % (track->p4()).Py() % (track->p4()).Pz();
-      f % track->d0() % track->z0() % track->phi0() % track->theta();
-      f % track->qOverP();
-      str = f.str();
+    std::string str = std::format("p({:10.4f},{:10.4f},{:10.4f})\n"
+    "d:({:10.5f},{:10.5f},{:10.5f},{:10.5f},{:10.6f})",
+    (track->p4()).Px(), (track->p4()).Py(), (track->p4()).Pz(),
+    track->d0(), track->z0(), track->phi0(), track->theta(),
+    track->qOverP());
     } // if track
   return str;
   }
@@ -676,10 +672,9 @@ namespace DerivationFramework {
   BPhysVertexTrackBase::buildPvAssocCacheName(const xAOD::Vertex* vtx,
 					      const int ipv) const {
     xAOD::BPhysHelper cand(vtx);
-    boost::format f("SV_%p_RPV_%p");
-    f % cand.vtx() % cand.pv(m_pvAssocTypes[ipv]);
+    std::string f = std::format("SV_{:p}_RPV_{:p}", static_cast<const void*>(cand.vtx()), static_cast<const void*>(cand.pv(m_pvAssocTypes[ipv])));
     
-    return f.str();
+    return f;
   }
   //--------------------------------------------------------------------------  
   // getTrackCandPVLogChi2()
@@ -1329,14 +1324,13 @@ namespace DerivationFramework {
     if ( ipos != std::string::npos ) tsName = tsName.substr(ipos+1);
 
     // format it nicely
-    boost::format f("T%010d_%s_%s%s%s");
-    f % m_useTrackTypes[itt] % tsName % pvAssoc;
-    f % (preSuffix.length() > 0 ? "_"+preSuffix : "");
-    f % (m_branchSuffix.length() > 0 ? "_"+m_branchSuffix : "");
-    
-    ATH_MSG_DEBUG("BPhysVertexBaseTrackBase::buildBranchBaseName: " << f.str());
+    std::string f = std::format("T{:010d}_{}_{}{}{}",
+    m_useTrackTypes[itt], tsName, pvAssoc,
+    (preSuffix.length() > 0 ? "_" + preSuffix : ""),
+    (m_branchSuffix.length() > 0 ? "_" + m_branchSuffix : ""));
 
-    return f.str();
+    ATH_MSG_DEBUG("BPhysVertexBaseTrackBase::buildBranchBaseName: " << f);
+    return f;
   }
   //--------------------------------------------------------------------------
   //

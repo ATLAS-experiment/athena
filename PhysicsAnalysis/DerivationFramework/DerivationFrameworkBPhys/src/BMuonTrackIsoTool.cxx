@@ -38,7 +38,7 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "AthContainers/Decorator.h"
 
-#include "boost/format.hpp"
+#include <format>
 #include "TVector3.h"
 #include <algorithm>
 #include <sstream>
@@ -438,13 +438,13 @@ namespace DerivationFramework {
     int         doLogChi2  = m_isoDoTrkImpLogChi2Cut[ic];
 
     // format it nicely
-    boost::format f("%02d_LC%02dd%1d_%s");
-    f % (int)(coneSize*10.) % (int)(logChi2Max*10.) % doLogChi2
-      % buildBranchBaseName(its, ipv, itt);
+    std::string f = std::format("{:02d}_LC{:02d}d{}_{}",
+    static_cast<int>(coneSize * 10.), static_cast<int>(logChi2Max * 10.), doLogChi2,
+    buildBranchBaseName(its, ipv, itt));
     
-    ATH_MSG_DEBUG("BMuonTrackIsoTool::buildBranchName: " << f.str());
+    ATH_MSG_DEBUG("BMuonTrackIsoTool::buildBranchName: " << f);
 
-    return f.str();
+    return f;
   }
   //--------------------------------------------------------------------------
 }

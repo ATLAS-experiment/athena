@@ -21,7 +21,7 @@
 #include "dqm_core/Result.h"
 #include "dqm_algorithms/tools/AlgorithmHelper.h"
 #include "ers/ers.h"
-#include "boost/format.hpp"
+#include <format>
 
 static dqm_algorithms::MDTOverview MDTOverview_Global( "MDTOverview_Global" );
 static dqm_algorithms::MDTOverview MDTOverview_Station( "MDTOverview_Station" );
@@ -252,9 +252,8 @@ MDTOverview::execute( const std::string& name, const TObject& object, const dqm_
       std::string tag2="_number_of_ML_off";
       result->tags_["01-NEW_ML_OFF"] = count;
       for(int j=0; j<(int)new_empty_bins.size(); j++){
-        boost::format fmt("%02d");
-        fmt % new_empty_bins[j].first;
-	tag="01-"+tag1+fmt.str()+tag2;
+        std::string formatted = std::format("{:02d}", new_empty_bins[j].first);
+        tag = "01-" + tag1 + formatted + tag2;
 	result->tags_[tag] = new_empty_bins[j].second;
       };
     } 

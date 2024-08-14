@@ -16,7 +16,7 @@
 #include <RootCoreUtils/ThrowMsg.h>
 #include <TFile.h>
 #include <TSystem.h>
-#include <boost/format.hpp>
+#include <format>
 #include <boost/functional/hash.hpp>
 #include <chrono>
 #include <iostream>
@@ -66,7 +66,7 @@ namespace SH
       else
 	str << "/tmp";
       str << "/SH-XRD-" << m_path.substr (m_path.rfind ("/")+1)
-          << "-" << (boost::format ("%04x") % hash16).str();
+          << "-" << std::format("{:04x}", hash16);
       m_tmp = str.str();
       if (gSystem->AccessPathName (m_tmp.c_str()) != 0)
 	m_file.reset (TFile::Open (m_tmp.c_str(), "CREATE"));

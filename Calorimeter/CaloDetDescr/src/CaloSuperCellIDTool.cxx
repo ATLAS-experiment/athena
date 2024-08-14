@@ -14,7 +14,7 @@
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "AthenaKernel/errorcheck.h"
-#include "boost/format.hpp"
+#include <format>
 
 #include <iostream>
 
@@ -199,23 +199,21 @@ void CaloSuperCellIDTool::initIDMap ()
       Identifier cell_reg = m_cell_helper->region_id (elt.m_cell_reg);
       Identifier sc_reg = m_sc_helper->region_id (elt.m_sc_reg);
       msg(MSG::DEBUG) <<
-        boost::format
-          ("  %3d %d/%2d/%2d/%d %3d %d/%2d/%2d/%d %d %d %3d %3d %3d %3d %3d %3d\n") %
-        (int)elt.m_cell_reg %
-        m_cell_helper->sub_calo(cell_reg) %
-        posneg_or_section (m_cell_helper, cell_reg) %
-        sampling_or_side (m_cell_helper, cell_reg) %
-        m_cell_helper->region(cell_reg) %
-        (int)elt.m_sc_reg %
-        m_sc_helper->sub_calo(sc_reg) %
-        posneg_or_section (m_sc_helper, sc_reg) %
-        sampling_or_side (m_sc_helper, sc_reg) %
-        m_sc_helper->region(sc_reg) %
-
-        elt.m_etadiv % elt.m_phidiv %
-        elt.m_cell_ietamin % elt.m_cell_ietamax %
-        elt.m_sc_ietamin % elt.m_sc_ietamax %
-        elt.m_cell_ieta_adj % elt.m_sc_ieta_adj;
+        std::format("  {:3d} {}/{:2d}/{:2d}/{} {:3d} {}/{:2d}/{:2d}/{} {} {} {:3d} {:3d} {:3d} {:3d} {:3d} {:3d}\n",
+        static_cast<int>(elt.m_cell_reg),
+        m_cell_helper->sub_calo(cell_reg),
+        posneg_or_section(m_cell_helper, cell_reg),
+        sampling_or_side(m_cell_helper, cell_reg),
+        m_cell_helper->region(cell_reg),
+        static_cast<int>(elt.m_sc_reg),
+        m_sc_helper->sub_calo(sc_reg),
+        posneg_or_section(m_sc_helper, sc_reg),
+        sampling_or_side(m_sc_helper, sc_reg),
+        m_sc_helper->region(sc_reg),
+        elt.m_etadiv, elt.m_phidiv,
+        elt.m_cell_ietamin, elt.m_cell_ietamax,
+        elt.m_sc_ietamin, elt.m_sc_ietamax,
+        elt.m_cell_ieta_adj, elt.m_sc_ieta_adj);
     }
     msg(MSG::DEBUG) << endmsg;
   }    
@@ -292,14 +290,13 @@ void CaloSuperCellIDTool::initFCALIDMap ()
       IdentifierHash sc_hash = sfcal_helper->channel_hash( sc_id );
       std::vector<Identifier> cells = m_fcal_fromSuperCell[ sc_hash ];
       msg(MSG::DEBUG) <<
-	boost::format
-	("  %5d %2d/%2d/%2d/%2d ... %2d cells\n") % 
-	sc_hash %
-	sfcal_helper->pos_neg(sc_id) %
-	sfcal_helper->module(sc_id) %
-	sfcal_helper->eta(sc_id) %
-	sfcal_helper->phi(sc_id) %
-	(int)cells.size();
+	std::format("  {:5d} {:2d}/{:2d}/{:2d}/{:2d} ... {:2d} cells\n", 
+	static_cast<int>(sc_hash),
+	static_cast<int>(sfcal_helper->pos_neg(sc_id)),
+	static_cast<int>(sfcal_helper->module(sc_id)),
+	static_cast<int>(sfcal_helper->eta(sc_id)),
+	static_cast<int>(sfcal_helper->phi(sc_id)),
+	static_cast<int>(cells.size()));
     }
     msg(MSG::DEBUG) << endmsg;
   }

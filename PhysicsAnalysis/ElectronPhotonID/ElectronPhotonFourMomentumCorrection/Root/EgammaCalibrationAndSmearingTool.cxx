@@ -6,7 +6,7 @@
 #include <AsgTools/AsgToolConfig.h>
 
 #include <algorithm>
-#include <boost/format.hpp>
+#include <format>
 #include <memory>
 #include <string>
 #include <utility>
@@ -974,8 +974,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     } else {
       energy = input.e();
     }
-    ATH_MSG_DEBUG("energy after MVA calibration = " << boost::format("%.2f") %
-                                                           energy);
+    ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
   } else {
     energy = input.e();
   }
@@ -990,7 +989,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     energy *= m_rootTool->applyMCCalibration(input.caloCluster()->eta(),
                                              energy / cosh(etaden), ptype);
     ATH_MSG_DEBUG("energy after crack calibration es2011c = "
-                  << boost::format("%.2f") % energy);
+                  << std::format("{:.2f}", energy));
   }
 
   // apply uniformity correction
@@ -1011,7 +1010,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       energy =
           intermodule_correction(energy, input.caloCluster()->phi(), cl_eta);
       ATH_MSG_DEBUG("energy after intermodule correction = "
-                    << boost::format("%.2f") % energy);
+                    << std::format("{:.2f}", energy));
     }
 
     // Calo distortion
@@ -1032,14 +1031,14 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       energy *= m_caloDistPhiUnifCorr->GetBinContent(ieta, iphi);
       ATH_MSG_DEBUG(
           "energy after phi uniformity correction (for calo distortion) = "
-          << boost::format("%.2f") % energy);
+          << std::format("{:.2f}", energy));
     }
 
     // Phi
     if (m_usePhiUniformCorrection) {
       energy *= correction_phi_unif(etaCalo, phiCalo);
       ATH_MSG_DEBUG("energy after uniformity correction = "
-                    << boost::format("%.2f") % energy);
+                    << std::format("{:.2f}", energy));
     }
 
     // ADC
@@ -1049,7 +1048,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
           m_ADCLinearity_tool->getCorr(etaCalo, et, xAOD2ptype(input));
       energy *= corr;
       ATH_MSG_DEBUG("energy after ADC linearity correction = "
-                    << boost::format("%.2f") % energy);
+                    << std::format("{:.2f}", energy));
     }
 
     // Gain
@@ -1068,8 +1067,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
                                                      xAOD2ptype(input), true);
       energy /= (1 + corr);
     }
-    ATH_MSG_DEBUG("energy after gain correction = " << boost::format("%.2f") %
-                                                           energy);
+    ATH_MSG_DEBUG("energy after gain correction = " << std::format("{:.2f}", energy));
   }
 
   const double eraw = ((Es0Acc.isAvailable(*input.caloCluster())
@@ -1129,8 +1127,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       oldtool_resolution_flag_this_event(input, event_info), m_TResolutionType,
       m_varSF);
 
-  ATH_MSG_DEBUG("energy after scale/systematic correction = "
-                << boost::format("%.2f") % energy);
+  ATH_MSG_DEBUG("energy after scale/systematic correction = " << std::format("{:.2f}", energy));
 
   // TODO: this check should be done before systematics variations
   const double new_energy2 = energy * energy;

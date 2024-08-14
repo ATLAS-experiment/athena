@@ -10,7 +10,7 @@
 #include <stdexcept> 
 #include <cassert>
 #include <cstdlib> // rand
-#include <boost/format.hpp>
+#include <format>
 
 std::map<std::string,TH1*> 
 NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork) 
@@ -32,7 +32,7 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
   std::vector<TMatrixD*> weightMatrices=trainedNetwork->weightMatrices();
 
   //LayersInfo
-  std::string li_string = (boost::format("LayersInfo_%i") % rand()).str(); 
+  std::string li_string = std::format("LayersInfo_{}", rand());
   TH1D* histoLayersInfo=new TH1D(li_string.c_str(),
                                  "LayersInfo",
                                  nHidden+2,
@@ -63,12 +63,12 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
   //ThresholdInfo
   for (Int_t i=0;i<nHidden+1;++i)
   {
-    std::string threName = (boost::format("Layer%i_thresholds") % i).str();
+    std::string threName = std::format("Layer{}_thresholds", i);
    
     Int_t layerSize=(i<nHidden)?nHiddenLayerSize[i]:nOutput;
     Int_t previousLayerSize=(i==0)?nInput:nHiddenLayerSize[i-1];
 
-    std::string th_str = (boost::format("%s_%i") % threName % rand()).str(); 
+    std::string th_str = std::format("{}_{}", threName, rand());
 
     TH1D* histoThreshLayer=new TH1D(th_str.c_str(),
                                     threName.c_str(),
@@ -81,12 +81,11 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
       histoThreshLayer->SetBinContent(s+1,(*thresholdVectors[i])(s));
     }
 
-    std::string weightsName = (boost::format("Layer%i_weights") % i).str();
+    std::string weightsName = std::format("Layer{}_weights", i);
     
     outputHistos[threName] = histoThreshLayer;
 
-    std::string wt_str = (boost::format("%s_%i") % weightsName %
-			  rand()).str(); 
+    std::string wt_str = std::format("{}_{}", weightsName, rand()); 
     TH2D* histoWeightsLayer=new TH2D(wt_str.c_str(),
                                      weightsName.c_str(),
                                      previousLayerSize,
@@ -116,7 +115,7 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
   }
   assert(inputs.size() == nInput); 
 
-  std::string ii_str = (boost::format("InputsInfo_%i") % rand()).str(); 
+  std::string ii_str = std::format("InputsInfo_{}", rand());
   TH2D* histoInputs = new TH2D(ii_str.c_str(), "InputsInfo",
 			       nInput, 0, 1, 
 			       2, 0, 1); 
@@ -187,7 +186,7 @@ for (Int_t i=0;i<nHidden;++i)
   //Reconstruct thresholdInfo
   for (Int_t i=0;i<nHidden+1;++i)
   {
-    std::string threName = (boost::format("Layer%i_thresholds") % i).str();
+    std::string threName = std::format("Layer{}_thresholds", i);
 
     Int_t layerSize=(i<nHidden)?nHiddenLayerSize[i]:nOutput;
     Int_t previousLayerSize=(i==0)?nInput:nHiddenLayerSize[i-1];
@@ -199,12 +198,8 @@ for (Int_t i=0;i<nHidden;++i)
     if (!histoThreshLayer)
       throw std::runtime_error("could not find " + threName); 
 
-    std::string er_tpl = "inconsistency between LayersInfo and %s found: "
-      "LayersInfo reports %i layers, %s has %i bins"; 
-
     if (layerSize != histoThreshLayer->GetNbinsX()) { 
-      std::string err = (boost::format(er_tpl) % threName % layerSize % 
-			 threName % histoThreshLayer->GetNbinsX()).str(); 
+      std::string err = std::format("inconsistency between LayersInfo and {} found: LayersInfo reports {} layers, {} has {} bins", threName, layerSize, threName, histoThreshLayer->GetNbinsX());
       throw std::runtime_error(err); 
     }
 
@@ -213,7 +208,7 @@ for (Int_t i=0;i<nHidden;++i)
       (*thresholdVector)(s) = histoThreshLayer->GetBinContent(s+1);
     }
 
-    std::string weightsName = (boost::format("Layer%i_weights") % i).str();
+    std::string weightsName = std::format("Layer{}_weights", i);
 
     const TH1* histoWeightsLayer = getHist (weightsName);
     if (!histoWeightsLayer) { 
@@ -221,8 +216,7 @@ for (Int_t i=0;i<nHidden;++i)
     }
 
     if (layerSize != histoWeightsLayer->GetNbinsY()) { 
-      std::string err = (boost::format(er_tpl) % weightsName % layerSize % 
-			 weightsName % histoWeightsLayer->GetNbinsY()).str(); 
+      std::string err = std::format("inconsistency between LayersInfo and {} found: LayersInfo reports {} layers, {} has {} bins", weightsName, layerSize, weightsName, histoWeightsLayer->GetNbinsY());
       throw std::runtime_error(err); 
     }
 

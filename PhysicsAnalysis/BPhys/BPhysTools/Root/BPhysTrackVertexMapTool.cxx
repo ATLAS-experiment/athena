@@ -3,6 +3,7 @@
 */
 
 // system include:
+#include <format>
 #include "boost/format.hpp"
 #include "boost/tokenizer.hpp"
 
@@ -338,10 +339,8 @@ namespace xAOD {
   std::string BPhysTrackVertexMapTool::pvName(const xAOD::Vertex* vtx) {
     
     if ( m_pvNameMap.find(vtx) == m_pvNameMap.end() ) {
-      boost::format f("PV%03d");
-      // cppcheck-suppress ignoredReturnValue
-      f % m_pvNameMap.size();
-      m_pvNameMap[vtx] = f.str();
+      std::string f = std::format("PV{:03d}", m_pvNameMap.size());
+      m_pvNameMap[vtx] = f;
     }
     return m_pvNameMap[vtx];
   }
@@ -351,10 +350,8 @@ namespace xAOD {
   std::string BPhysTrackVertexMapTool::refPVName(const xAOD::Vertex* vtx) {
     
     if ( m_refPVNameMap.find(vtx) == m_refPVNameMap.end() ) {
-      boost::format f("RV%03d"); 
-      // cppcheck-suppress ignoredReturnValue
-      f % m_refPVNameMap.size();
-      m_refPVNameMap[vtx] = f.str();
+      std::string f = std::format("RV{:03d}", m_refPVNameMap.size());
+      m_refPVNameMap[vtx] = f;
     }
     return m_refPVNameMap[vtx];
   }
@@ -364,10 +361,8 @@ namespace xAOD {
   std::string BPhysTrackVertexMapTool::svName(const xAOD::Vertex* vtx) {
     
     if ( m_svNameMap.find(vtx) == m_svNameMap.end() ) {
-      boost::format f("SV%03d");
-      // cppcheck-suppress ignoredReturnValue
-      f % m_svNameMap.size();
-      m_svNameMap[vtx] = f.str();
+      std::string f = std::format("SV{:03d}", m_svNameMap.size());
+      m_svNameMap[vtx] = f;
     }
     return m_svNameMap[vtx];
   }
@@ -378,10 +373,8 @@ namespace xAOD {
   BPhysTrackVertexMapTool::idTrackName(const xAOD::TrackParticle* track) {
     
     if ( m_idTrackNameMap.find(track) == m_idTrackNameMap.end() ) {
-      boost::format f("T%04d");
-      // cppcheck-suppress ignoredReturnValue
-      f % m_idTrackNameMap.size();
-      m_idTrackNameMap[track] = f.str();
+      std::string f = std::format("T{:04d}", m_idTrackNameMap.size());
+      m_idTrackNameMap[track] = f;
     }
     return m_idTrackNameMap[track];
   }
@@ -395,10 +388,9 @@ namespace xAOD {
 					   bool withSV) {
     
     std::string sind(indent, ' ');
-    boost::format f1("%s %-5s %p (%10.4f, %10.4f, %10.4f) VL %p");
-    f1 % sind % idTrackName(track) % track 
-      % track->pt() % track->eta() % track->phi(); //% track->vertex(); REMOVE IN MIGRATION TO MAKER
-    std::string str = f1.str();
+    std::string str = std::format("{} {:<5} {} ({:10.4f}, {:10.4f}, {:10.4f}) VL ", 
+    sind, idTrackName(track), static_cast<const void*>(track), 
+    track->pt(),track->eta(), track->phi());
     if ( withPV ) {
       TrackToVertexMap_t::iterator it = m_idTrackToPVMap.find(track);
       if ( it != m_idTrackToPVMap.end() ) {
@@ -406,9 +398,8 @@ namespace xAOD {
 	  str += "\n" + pvToString(vtx, indent+2, false);
 	}
       } else {
-	boost::format f2("\n%s  %s");
-	f2 % sind % "NOPV";
-	str += f2.str();
+        std::string f = std::format("\n{}  {}", sind, "NOPV");
+        str += f;
 	    
       }
     }
@@ -419,9 +410,8 @@ namespace xAOD {
 	  str += "\n" + refPVToString(vtx, indent+2, false);
 	}
       } else {
-	boost::format f2("\n%s  %s");
-	f2 % sind % "NORV";
-	str += f2.str();
+        std::string f = std::format("\n{}  {}", sind, "NORV");
+        str += f;
       }
     }
     if ( withSV ) {
@@ -431,9 +421,8 @@ namespace xAOD {
 	  str += "\n" + svToString(vtx, indent+2, false);
 	}
       } else {
-	boost::format f2("\n%s  %s");
-	f2 % sind % "NOSV";
-	str += f2.str();
+        std::string f2 = std::format("\n{}  {}", sind, "NOSV");
+        str += f2;
       }
     }
     return str;
@@ -447,16 +436,14 @@ namespace xAOD {
 				      bool withTracks) {
 
     std::string sind(indent, ' ');
-    boost::format f1("%s %-5s %p (%10.4f, %10.4f, %10.4f) NT %4d VT %d");
-    f1 % sind % pvName(vtx) % vtx % vtx->x() % vtx->y() % vtx->z()
-      % vtx->nTrackParticles() % vtx->vertexType();
-    std::string str = f1.str();
+    std::string str = std::format("{} {:<5} {} ({:10.4f}, {:10.4f}, {:10.4f}) NT {:4d} VT {}",
+    sind, pvName(vtx), static_cast<const void*>(vtx), vtx->x(), vtx->y(), vtx->z(),
+    vtx->nTrackParticles(), static_cast<int>(vtx->vertexType()));
     if ( withTracks ) {
       for (size_t i=0; i < vtx->nTrackParticles(); ++i) {
-	boost::format f2("\n%s  %4d %s");
-	f2 % sind % i 
-	  % idTrackToString(vtx->trackParticle(i), 0, false, false);
-	str += f2.str();
+        std::string f2 = std::format("\n{}  {:4d} {}", 
+        sind, i, idTrackToString(vtx->trackParticle(i), 0, false, false));
+        str += f2;
       } // for
     }
 
@@ -471,16 +458,12 @@ namespace xAOD {
 					 bool withTracks) {
 
     std::string sind(indent, ' ');
-    boost::format f1("%s %-5s %p (%10.4f, %10.4f, %10.4f) NT %4d VT %d");
-    f1 % sind % refPVName(vtx) % vtx % vtx->x() % vtx->y() % vtx->z()
-      % vtx->nTrackParticles() % vtx->vertexType();
-    std::string str = f1.str();
+    std::string str = std::format("{} {:<5} {} ({:10.4f}, {:10.4f}, {:10.4f}) NT {:4d} VT {}",
+    sind,refPVName(vtx), static_cast<const void*>(vtx), vtx->x(), vtx->y(), vtx->z(),
+    vtx->nTrackParticles(), static_cast<int>(vtx->vertexType()));
     if ( withTracks ) {
       for (size_t i=0; i < vtx->nTrackParticles(); ++i) {
-	boost::format f2("\n%s  %4d %s");
-	f2 % sind % i 
-	  % idTrackToString(vtx->trackParticle(i), 0, false, false);
-	str += f2.str();
+        str += std::format("\n{}  {:4} {}", sind, i, idTrackToString(vtx->trackParticle(i), 0, false, false));
       } // for
     }
 
@@ -496,10 +479,9 @@ namespace xAOD {
 				      bool withMasses) {
     
     std::string sind(indent, ' ');
-    boost::format f1("%s %-5s %p (%10.4f, %10.4f, %10.4f) NT %4d VT %d");
-    f1 % sind % svName(vtx) % vtx % vtx->x() % vtx->y() % vtx->z()
-      % vtx->nTrackParticles() % vtx->vertexType();
-    std::string str = f1.str();
+    std::string str = std::format("{} {:<5} {} ({:10.4f}, {:10.4f}, {:10.4f}) NT {:4} VT {}",
+    sind, svName(vtx), static_cast<const void*>(vtx), vtx->x(), vtx->y(), vtx->z(),
+    vtx->nTrackParticles(), static_cast<int>(vtx->vertexType()));
     if ( withMasses && m_hypoName != "__NONE__" ) {
       // vector of possible hypo names
       std::vector<std::string> hypoNames = getTokens(m_hypoName, "|;/");
@@ -511,21 +493,16 @@ namespace xAOD {
 	float bMucMassErr = getFloat(hypoName+"_MUCALC_massErr", vtx);
 	if ( bMass > 0. || bMassErr > 0.
 	     || bMucMass > 0. || bMucMassErr > 0. ) {
-	  boost::format f3("\n%s  %-10s : mass     : (%15.4f +/- %15.4f) MeV");
-	  
-	  boost::format f4("\n%s  %-10s : m(MUCALC): (%15.4f +/- %15.4f) MeV");
-	  f3 % sind % hypoName % bMass    % bMassErr;
-	  f4 % sind % hypoName % bMucMass % bMucMassErr;
-	  str += f3.str() + f4.str();
+          str += std::format("\n{}  {:<10} : mass     : ({:15.4f} +/- {:15.4f}) MeV",
+          sind, hypoName, bMass, bMassErr);
+          str += std::format("\n{}  {:<10} : m(MUCALC): ({:15.4f} +/- {:15.4f}) MeV",
+          sind, hypoName, bMucMass, bMucMassErr);
 	} // if one > 0.
       } // for hypoNames
     } // if withMasses
     if ( withTracks ) {
       for (size_t i=0; i < vtx->nTrackParticles(); ++i) {
-	boost::format f2("\n%s  %4d %s");
-	f2 % sind % i 
-	  % idTrackToString(vtx->trackParticle(i), 0, false, false);
-	str += f2.str();
+        str += std::format("\n{}  {:4} {}", sind, i, idTrackToString(vtx->trackParticle(i), 0, false, false));
       } // for
     }
     return str;
@@ -622,10 +599,9 @@ namespace xAOD {
   //--------------------------------------------------------------------------
   std::string BPhysTrackVertexMapTool::summaryToString(std::string prefix) {
 
-    boost::format form("%s\n\nRun: %d  Event: %d\n\n");
-    form % name() % m_cachedRun % m_cachedEvent;
+    std::string form_str = std::format("{}\n\nRun: {}  Event: {}\n\n", name(), m_cachedRun, m_cachedEvent);
     std::string dstr = 
-      wrapLines("\n"+form.str() +
+      wrapLines("\n"+form_str +
 		pvsToString(m_pvtxContainer, 0, true) + "\n\n" +
 		refPVsToString(m_refPVContainer, 0, true) + "\n\n" +
 		svsToString(m_svtxContainer, 0, true, true) + "\n\n" +
