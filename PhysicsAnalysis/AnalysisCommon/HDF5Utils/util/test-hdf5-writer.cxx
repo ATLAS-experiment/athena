@@ -132,7 +132,7 @@ void fill(H5::Group& out_file, size_t iterations) {
     // store some specific value to make sure we have the indexing
     // right
     vals.at(1).at(2).at(3).at(4).stype = 86;
-    d4.fill(vals);
+    d4.fill(std::move(vals));
   }
 }
 

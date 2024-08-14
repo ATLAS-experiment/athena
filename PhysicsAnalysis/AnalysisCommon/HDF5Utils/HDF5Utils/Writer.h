@@ -29,7 +29,7 @@
 
 namespace H5Utils {
 
-  /// @brief internal clssses and code
+  /// @brief internal classes and code
   /// @{
 
   namespace internal {
