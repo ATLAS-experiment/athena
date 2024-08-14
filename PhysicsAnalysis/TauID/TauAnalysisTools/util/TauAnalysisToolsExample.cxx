@@ -218,6 +218,17 @@ int main( int argc, char* argv[] )
   T3MT.msg().setLevel( MSG::INFO );
   CHECK(T3MT.initialize());
 
+
+  static const SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+  static const SG::ConstAccessor<char> acc_IsHadronicTau("IsHadronicTau");
+  static const SG::ConstAccessor<size_t> acc_numCharged("numCharged");
+  static const SG::ConstAccessor<ElementLink< xAOD::JetContainer >> acc_truthJetLink("truthJetLink");
+  static const SG::ConstAccessor<double> acc_TauSFRecoHadTau("TauScaleFactorReconstructionHadTau");
+  static const SG::ConstAccessor<double> acc_TauSFJetIDHadTau("TauScaleFactorJetIDHadTau");
+  static const SG::ConstAccessor<double> acc_TauSFEleIDHadTau("TauScaleFactorEleIDHadTau");
+  static const SG::ConstAccessor<double> acc_TauSFEleIDEle("TauScaleFactorEleIDElectron");
+  static const SG::ConstAccessor<double> acc_TauSFTrigHadTau("TauScaleFactorTriggerHadTau");
+
   // Loop over the events:
   for( Long64_t iEntry = 0; iEntry < iEntries; ++iEntry )
   {
@@ -268,14 +279,14 @@ int main( int argc, char* argv[] )
       auto xTruthTau = T2MT.getTruth(*xTau);
       // if (xTau->pt() < 25*1000) continue;
 
-      if ((bool)xTau->auxdata<char>("IsTruthMatched"))
+      if ((bool)acc_IsTruthMatched(*xTau))
       {
         if (xTruthTau->isTau())
         {
-          if ((bool)xTruthTau->auxdata<char>("IsHadronicTau"))
+          if ((bool)acc_IsHadronicTau(*xTruthTau))
             Info( "TauAnalysisToolsExample",
                   "Tau was matched to a truth hadronic tau, which has %i prongs and a charge of %i",
-                  int(xTruthTau->auxdata<size_t>("numCharged")),
+                  int(acc_numCharged(*xTruthTau)),
                   int(xTruthTau->charge()));
           else
             Info( "TauAnalysisToolsExample",
@@ -292,7 +303,7 @@ int main( int argc, char* argv[] )
       else
         Info( "TauAnalysisToolsExample", "Tau was not matched to truth" );
 
-      auto xTruthJetLink = xTau->auxdata< ElementLink< xAOD::JetContainer > >("truthJetLink");
+      auto xTruthJetLink = acc_truthJetLink(*xTau);
       if (xTruthJetLink.isValid())
       {
         const xAOD::Jet* xTruthJet = *xTruthJetLink;
@@ -319,7 +330,7 @@ int main( int argc, char* argv[] )
         CHECK( TauSmeTool.applySystematicVariation(sSystematicSet)) ;
         CHECK( TauSmeTool.applyCorrection(*xTau) );
         //Skip TES uncertainty print out for non-had taus
-        if ((bool)xTau->auxdata<char>("IsTruthMatched") && xTruthTau->isTau() && (bool)xTruthTau->auxdata<char>("IsHadronicTau")){
+        if ((bool)acc_IsTruthMatched(*xTau) && xTruthTau->isTau() && (bool)acc_IsHadronicTau(*xTruthTau)){
         Info( "TauAnalysisToolsExample",
               "Smeared tau pt: %g for type %s ",
               xTau->pt(),
@@ -342,10 +353,10 @@ int main( int argc, char* argv[] )
         Info( "TauAnalysisToolsExample",
               "SystType %s: RecoSF: %g JetIDSF: %g EleOLRSFHadTau: %g EleRNNSFElectron: %g",
               sSystematicSet.name().c_str(),
-              xTau->auxdata< double >( "TauScaleFactorReconstructionHadTau" ),
-              xTau->auxdata< double >( "TauScaleFactorJetIDHadTau" ),
-              xTau->auxdata< double >( "TauScaleFactorEleIDHadTau" ),
-              xTau->auxdata< double >( "TauScaleFactorEleIDElectron" ));
+              acc_TauSFRecoHadTau(*xTau),
+              acc_TauSFJetIDHadTau(*xTau),
+              acc_TauSFEleIDHadTau(*xTau),
+              acc_TauSFEleIDEle(*xTau));
       }
 
       for (auto sSystematicSet: vEfficiencyCorrectionsTriggerSystematicSet)
@@ -355,7 +366,7 @@ int main( int argc, char* argv[] )
         Info( "TauAnalysisToolsExample",
               "SystType %s: Trigger: %g",
               sSystematicSet.name().c_str(),
-              xTau->auxdata< double >( "TauScaleFactorTriggerHadTau" ));
+              acc_TauSFTrigHadTau(*xTau));
       }
       // print some info about the selected tau:
       Info( "TauAnalysisToolsExample", "Selected tau: pt = %g MeV, eta = %g, phi = %g, prong = %i, charge = %i",
@@ -367,12 +378,16 @@ int main( int argc, char* argv[] )
       //   const TAUTRACKPARTICLE* xTrack = xTau->track(iTrack);
 
       //   CHECK(T3MT.classifyTrack(*xTrack));
-      //   if (xTrack->auxdata<char>("IsHadronicTrack"))
-      //     Info( "TauAnalysisToolsExample", "Track is matched to a hadronic tau decay, with decay depth %i",xTrack->auxdata<int>("IsHadronicTrackDecayDepth"));
+      //   static const SG::ConstAccessor<char> acc_IsHadronicTrack("IsHadronicTrack");
+      //   static const SG::ConstAccessor<int> acc_IsHadronicTrackDecayDepth("IsHadronicTrackDecayDepth");
+      //   static const SG::ConstAccessor<string> acc_DecayHistory("DecayHistory");
+      //   static const SG::ConstAccessor<int> acc_TrackType("TrackType");
+      //   if (acc_IsHadronicTrack(*xTrack))
+      //     Info( "TauAnalysisToolsExample", "Track is matched to a hadronic tau decay, with decay depth %i", acc_IsHadronicTrackDecayDepth(*xTrack));
       //   else
       //     Info( "TauAnalysisToolsExample", "Track is not matched to a hadronic tau decay");
-      //   Info ("TauAnalysisToolsExample", "The track decay history is: %s", (xTrack->auxdata<std::string>("DecayHistory")).c_str());
-      //   Info ("TauAnalysisToolsExample", "The spurious type is: %i", xTrack->auxdata<int>("TrackType") );
+      //   Info ("TauAnalysisToolsExample", "The track decay history is: %s", (acc_DecayHistory(*xTrack)).c_str());
+      //   Info ("TauAnalysisToolsExample", "The spurious type is: %i", acc_TrackType(*xTrack) );
       // }
     }
     if (xTauJetContainer->empty())
