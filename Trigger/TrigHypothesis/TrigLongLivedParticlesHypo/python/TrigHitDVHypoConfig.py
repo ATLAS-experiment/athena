@@ -56,7 +56,7 @@ def TrigHitDVHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccumula
 
     monTool.HistPath = 'HitDVHypoAlg'
     theHitDVHypo.MonTool = monTool
-    theHitDVHypo.RecJetRoI = "HLT_RecJETRoIs"
+    theHitDVHypo.jFexSRJetRoI = "L1_jFexSRJetRoI"
 
     useNewLayerNumberScheme = False
     from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigSpacePointConversionToolCfg
