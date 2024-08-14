@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
@@ -19,7 +19,7 @@
 #include "TMVA/Reader.h"
 
 #include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
-#include "TrigT1Interfaces/RecJetRoI.h"
+#include "xAODTrigger/jFexSRJetRoIContainer.h"
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -134,7 +134,7 @@ private:
    //bool m_doHitDV;
    bool m_doHitDV_Seeding = true;
 
-   SG::ReadHandleKey<DataVector<LVL1::RecJetRoI>> m_recJetRoiCollectionKey {this, "RecJetRoI", "", ""};
+   SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_jetRoiCollectionKey {this, "jFexSRJetRoI", "", ""};
    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
    StatusCode findSPSeeds( const EventContext& ctx,
