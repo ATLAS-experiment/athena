@@ -246,7 +246,18 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                                ybins=64, ymin=-32, ymax=32,
                                                xlabels=BinLabel_LATOME,
                                                pattern=[(part)])
-                
+
+
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc0_ped;Diff_ADC0_Ped_vs_LATOME_'+thisSel,
+                                               title='ADC[0] - Pedestal vs LATOME name '+selStrPart[thisSel]+'; ; ADC[0] - Pedestal',
+                                               type='TH2F',
+                                               cutmask='Digi_part_'+thisSel,
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=68, ymin=-34, ymax=34,
+                                               xlabels=BinLabel_LATOME,
+                                               pattern=[(part)])
+
                 partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc_ped_norm;Diff_ADC_Ped_Norm_vs_LATOME_'+thisSel,
                                                title='(ADC-ped)/fabs(ADC_max-ped) '+selStrPart[thisSel]+'; LATOME Name; (ADC - pedestal) / fabs(ADC_max - pedestal)',
                                                type='TH2F',

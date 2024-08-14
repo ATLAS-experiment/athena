@@ -257,107 +257,73 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
             result.merge(LVL1CaloRun2ReadBSCfg(flags))
 
-        # Phase 1 monitoring
+        # Phase 1 monitoring of inputs and sim-vs-hw
         if flags.Trigger.enableL1CaloPhase1 and flags.Input.Format is not Format.POOL:
-            #efex monitoring
-            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-            EfexMonitorCfg = EfexMonitoringConfig(flags)
-            result.merge(EfexMonitorCfg)
-
-            #  Need to pass the algorithm to the histogram booking
-            EfexMonAlg = result.getEventAlgo('EfexMonAlg')  
-            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
-            EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
-            result.merge(EfexMonitorHistCfg)
-
-            #gfex monitoring 
-            from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
-            result.merge(GfexMonitoringConfig(flags))
 
             # run the L1Calo simulation (causes conflicts with DAOD)
             from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
             result.merge(L1CaloFEXSimCfg(flags))
 
-            # monitoring of simulation vs hardware
-            from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
-            result.merge(EfexSimMonitoringConfig(flags))
+            #efex monitoring
+            if flags.Trigger.L1.doeFex:
+                from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
+                result.merge(EfexInputMonitoringConfig(flags))
 
-            from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
-            result.merge(EfexInputMonitoringConfig(flags))
+                # monitoring of simulation vs hardware
+                from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
+                result.merge(EfexSimMonitoringConfig(flags))
 
-            from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
-            result.merge(GfexSimMonitoringConfig(flags))
+            #gfex monitoring 
+            if flags.Trigger.L1.dogFex:
+                #gfex input monitoring 
+                from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
+                result.merge(GfexInputMonitoringConfig(flags))
 
-            #gfex input monitoring 
-            from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
-            result.merge(GfexInputMonitoringConfig(flags))
-            
-            #############################
-            #           jFEX
-            #############################
-            
-            #jfex monitoring for input data
-            maybeMissingRobs = []
-            decoderTools = []
-            
-            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
-            inputjFexTool = result.popToolsAndMerge(jFexInputByteStreamToolCfg(flags, 'jFexInputBSDecoderTool'))  
-                      
-            for module_id in inputjFexTool.ROBIDs:
-                maybeMissingRobs.append(module_id)
+                from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
+                result.merge(GfexSimMonitoringConfig(flags))
 
-            decoderTools += [inputjFexTool]
-            from AthenaConfiguration.ComponentFactory import CompFactory
-            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputjFexTool], MaybeMissingROBs=maybeMissingRobs)
-            result.addEventAlgo(decoderAlg)     
-                
-            from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
-            result.merge(L1CaloFEXSimCfg(flags))              
+            #jfex monitoring 
+            if flags.Trigger.L1.dojFex:
+                #jfex monitoring for input data
+                from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
+                result.merge(JfexInputMonitoringConfig(flags))
             
-            from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
-            result.merge(JfexInputMonitoringConfig(flags))
+                #jfex monitoring for Data Vs Simulation
+                from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
+                JfexSimMonitoring = JfexSimMonitoringConfig(flags)
+                result.merge(JfexSimMonitoring)
             
-            #jfex monitoring for Data Vs Simulation
-            from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
-            JfexSimMonitoring = JfexSimMonitoringConfig(flags)
-            result.merge(JfexSimMonitoring)
-            
-            #jfex monitoring for Data Tobs
+    # run FEX output monitoring if doing validation or running on data not @ tier0 or on AOD
+    if validation or (isData and flags.DQ.Environment not in ('tier0Raw', 'AOD')):
+
+        if validation:
+            # only run this monitoring if doing validation
+            from TrigT1CaloMonitoring.L1CaloLegacyEDMMonitorAlgorithm import L1CaloLegacyEDMMonitoringConfig
+            result.merge(L1CaloLegacyEDMMonitoringConfig(flags))
+        
+        #efex monitoring
+        if flags.Trigger.L1.doeFex:
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
+            result.merge(EfexMonitoringConfig(flags))
+            from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
+            result.merge(EfexMonitoringHistConfig(flags,result.getEventAlgo('EfexMonAlg')))
+
+        #gfex monitoring
+        if flags.Trigger.L1.dogFex:
+            from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
+            result.merge(GfexMonitoringConfig(flags))
+        
+        #jfex monitoring
+        if flags.Trigger.L1.dojFex:
             from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
-            JfexMonitoring = JfexMonitoringConfig(flags)
-            result.merge(JfexMonitoring)
-            
-            # jet monitoring
+            result.merge(JfexMonitoringConfig(flags))
+
+        # jet efficiency monitoring -- needs either gfex or jfex to be worth scheduling
+        if flags.Trigger.L1.dojFex or flags.Trigger.L1.dogFex:
             from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
             result.merge(JetEfficiencyMonitoringConfig(flags))
-            
-            result.printConfig( withDetails= True )
 
-
-    # algorithms for validation checks
-    if validation:
-        from TrigT1CaloMonitoring.L1CaloLegacyEDMMonitorAlgorithm import L1CaloLegacyEDMMonitoringConfig
-        result.merge(L1CaloLegacyEDMMonitoringConfig(flags))
-        # Phase 1 systems
-        from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-        EfexMonitorCfg = EfexMonitoringConfig(flags)
-        result.merge(EfexMonitorCfg)
-        # algorithm required for dynamic histogram booking
-        EfexMonAlg = result.getEventAlgo('EfexMonAlg')
-        EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI']
-        EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI'] 
-        from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
-        EfexMonitorHistCfg = EfexMonitoringHistConfig(flags,EfexMonAlg)
-        result.merge(EfexMonitorHistCfg)
-        #
-        from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
-        result.merge(GfexMonitoringConfig(flags))
-        from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
-        result.merge(JfexMonitoringConfig(flags))
-
-        from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
-        result.merge(JetEfficiencyMonitoringConfig(flags))
-
+    result.printConfig( withDetails= True )
 
     return result
 
