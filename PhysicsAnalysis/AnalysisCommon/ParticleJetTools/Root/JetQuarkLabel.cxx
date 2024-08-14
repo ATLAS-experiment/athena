@@ -130,7 +130,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	      }
 	      if ((**thisChild)->pdgId() == pdg) afterFSR = false;
 	    }
-	  } else if ( (!MC::isPhysical(*pitr) && m_noDoc) || ((*pitr)->status() == HepMC::SPECIALSTATUS) ) {
+	  } else if ( (!MC::isPhysical(*pitr) && m_noDoc) || MC::isDecayed(*pitr) ) {
 	    // do not label by documentary quark 
 	    // (New 27/06/2006, for PYTHIA, with new Shower and maybe dependant on MSTP(128). What a mess !)
 	    afterFSR = false;

@@ -342,10 +342,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
       p->set_momentum( child->momentum() );
       p->set_generated_mass( child->generated_mass() );
       p->set_pdg_id( child->pdg_id() );
-      if ( m_butKeepAllGeneratorStable && !isAccepted(child) && MC::isDecayed(child) ) 
-        p->set_status( HepMC::SPECIALSTATUS ) ;
-      else
-        p->set_status( child->status() );
+      p->set_status( child->status() );
       HepMC::set_flow(p, HepMC::flow(child) );
       HepMC::set_polarization(p, HepMC::polarization(child) );
       HepMC::suggest_barcode(p, HepMC::barcode(child) );
@@ -402,10 +399,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
       p->set_momentum( (*child)->momentum() );
       p->set_generated_mass( (*child)->generated_mass() );
       p->set_pdg_id( (*child)->pdg_id() );
-      if ( m_butKeepAllGeneratorStable && !isAccepted(*child) && MC::isDecayed(*child) ) 
-	p->set_status( HepMC::SPECIALSTATUS );
-      else
-	p->set_status( (*child)->status() );
+      p->set_status( (*child)->status() );
       p->set_flow( (*child)->flow() );
       p->set_polarization( (*child)->polarization() );
       p->suggest_barcode( (*child)->barcode() );

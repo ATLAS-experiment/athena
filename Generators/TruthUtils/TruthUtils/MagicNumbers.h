@@ -44,8 +44,6 @@ namespace HepMC {
   /// @brief Constant definiting the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
   constexpr int SIM_STATUS_THRESHOLD = 20000;
 
-  /// @brief Constant that the meaning of which is currently lost, to be recovered...
-  constexpr int SPECIALSTATUS = 902;
   /// @brief Special Forward transport Geant process for vertices
   constexpr int FORWARD_TRANSPORT_MODEL_PROCESS = 212;
 

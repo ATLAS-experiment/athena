@@ -200,10 +200,7 @@ namespace MC
       // should this really go into parton-level territory?
       // probably depends where BSM particles are being decayed
       fromBSM |= isBSM(parent);
-      // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
-      // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
-      // not at all clear why and unfortunately there's no documentation in the code
-      if (!isPhysical(parent) && HepMC::status(parent) != HepMC::SPECIALSTATUS)  return false;
+      if (!isPhysical(parent))  return false;
       fromTau |= isTau(parent);
       if (isHadron(parent)&&!isBeam(parent)) {
         if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
