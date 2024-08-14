@@ -66,8 +66,9 @@ Several data periods are supported, the LastRun of the latest data period is set
      * decorating mode: 
      
          CHECK( m_effi_corr.applyEfficiencyScaleFactor(mu) );
-         
-         double my_sf = my_muon.auxdata< float >( "EfficiencyScaleFactor" )
+
+         static const SG::ConstAccessor<float> sfAcc("EfficiencyScaleFactor");
+         double my_sf = sfAcc(*my_muon);
 
 5) Evaluating Uncertainties:
     Two nuisance parameters, MUON_EFF_STAT and MUON_EFF_SYS, are provided within the standard ASG systematics framework

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -482,8 +482,6 @@ namespace Analysis {
         if(electronsIn.size()>=2){
             for(outerItr=electronsIn.begin();outerItr<electronsIn.end();++outerItr){
                 for(innerItr=(outerItr+1);innerItr!=electronsIn.end();++innerItr){
-//                    if((*outerItr)->auxdata<int>("truthOrigin") == 26 && (*innerItr)->auxdata<int>("truthOrigin")==26) ATH_MSG_DEBUG("pair is from jpsi!");
-//                    else continue;
                     pair.el1 = *innerItr;
                     pair.el2 = *outerItr;
                     pair.pairType = ELEL;
@@ -611,8 +609,8 @@ namespace Analysis {
 
     bool JpsiFinder_ee::passesEgammaCuts(const xAOD::Electron* electron) const {
 
-      static const SG::AuxElement::Accessor<char> isLHVeryLoosenod0("DFCommonElectronsLHVeryLoosenod0");
-      static const SG::AuxElement::Accessor<char> isLHVeryLoose("DFCommonElectronsLHVeryLoose");
+      static const SG::AuxElement::ConstAccessor<char> isLHVeryLoosenod0("DFCommonElectronsLHVeryLoosenod0");
+      static const SG::AuxElement::ConstAccessor<char> isLHVeryLoose("DFCommonElectronsLHVeryLoose");
 
       bool passesSelection = false;
       bool passesLHVLoose = isLHVeryLoose(*electron);
