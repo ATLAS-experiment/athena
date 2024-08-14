@@ -12,6 +12,8 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
+from ZdcNtuple.ZdcNtupleConfig import ZdcNtupleCfg
+    
 # FIXME: removing for MC
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 # added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
@@ -180,7 +182,7 @@ def ZdcRecRun3Cfg(flags):
 
     return acc
 
-def ZdcNtupleCfg(flags):
+def ZdcNtupleLocalCfg(flags):
     
     acc = ComponentAccumulator()
     run = flags.GeoModel.Run
@@ -196,40 +198,41 @@ def ZdcNtupleCfg(flags):
 
     return acc
 
-def ZdcNtupleRun2Cfg(flags):
+def ZdcNtupleRun2Cfg(flags,**kwargs):
 
     acc = ComponentAccumulator()
-    zdcNtuple = CompFactory.ZdcNtuple("ZdcNtuple")
-    zdcNtuple.useGRL  = False
-    zdcNtuple.zdcOnly = True
-    zdcNtuple.enableTrigger = False
-    zdcNtuple.enableOutputSamples = True
-    zdcNtuple.enableOutputTree = True
-    zdcNtuple.writeOnlyTriggers = False
-    zdcNtuple.nsamplesZdc = 7
-    acc.addEventAlgo(zdcNtuple)
+    acc.merge(ZdcNtupleCfg(flags,
+       	useGRL = False,
+   	zdcOnly = True,
+	enableTrigger = False,
+	enableOutputSamples = True,
+	enableOutputTree = True,
+	writeOnlyTriggers = False,
+	nsamplesZdc = 7,
+	**kwargs))
+
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
-    acc.setAppProperty("HistogramPersistency","ROOT")
+#    acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
 
-def ZdcNtupleRun3Cfg(flags):
+def ZdcNtupleRun3Cfg(flags,**kwargs):
     
     acc = ComponentAccumulator()
-    zdcNtuple = CompFactory.ZdcNtuple("ZdcNtuple")
-    zdcNtuple.useGRL  = False
-    zdcNtuple.zdcOnly = True
-    zdcNtuple.lhcf2022 = False
-    zdcNtuple.lhcf2022zdc = False
-    zdcNtuple.lhcf2022afp = False
-    zdcNtuple.enableTrigger = False if flags.Input.isMC else True
-    zdcNtuple.isMC = True if flags.Input.isMC else False
-    zdcNtuple.enableOutputSamples = True
-    zdcNtuple.enableOutputTree = True
-    zdcNtuple.writeOnlyTriggers = False
-    zdcNtuple.enableRPD = True
-    zdcNtuple.enableCentroid = True
-    zdcNtuple.reprocZdc = False
-    acc.addEventAlgo(zdcNtuple)
+    acc.merge(ZdcNtupleCfg(flags,
+	useGRL = False,
+	zdcOnly = True,
+	lhcf2022 = False,
+	lhcf2022zdc = False,
+	lhcf2022afp = False,
+	enableTrigger = False if flags.Input.isMC else True,
+	enableOutputSamples = True,
+	enableOutputTree = True,
+	writeOnlyTriggers = False,
+	enableRPD = True,
+	enableCentroid = True,
+	reprocZdc = False,
+	**kwargs))
+
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
     #acc.setAppProperty("HistogramPersistency","ROOT")
     return acc
@@ -410,9 +413,9 @@ if __name__ == '__main__':
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
             acc.merge(ZdcMonitoringConfig(flags,'PbPb2023'))
         if (isCalib): # don't configure ntuple for typical reco jobs
-            acc.merge(ZdcNtupleCfg(flags))
+            acc.merge(ZdcNtupleLocalCfg(flags))
     else:
-        acc.merge(ZdcNtupleCfg(flags))
+        acc.merge(ZdcNtupleLocalCfg(flags))
 
     acc.printConfig(withDetails=True)
 

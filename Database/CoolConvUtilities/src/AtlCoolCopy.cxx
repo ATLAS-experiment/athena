@@ -1759,6 +1759,9 @@ bool AtlCoolCopy::rootAllocate(const cool::IFieldSpecification& spec,
   } else if (stype==cool::StorageType::String16M && !m_noclobroot) {
     sptr=static_cast<void*>(new char[67108864]);
     rootID='C';
+  } else if (stype==cool::StorageType::Blob64k && !m_noclobroot) {
+    sptr=static_cast<void*>(new char[65536]);
+    rootID='C';
   } else {
     std::cout << "rootAllocate: Unsupported storage type for attribute: " <<
       spec.name() << std::endl;
@@ -1838,6 +1841,14 @@ void AtlCoolCopy::rootWrite(void* sptr,const cool::IField& field) const {
       strcpy(static_cast<char*>(sptr),"NULL");
     } else {
       strcpy(static_cast<char*>(sptr),field.data<std::string>().c_str());
+    }
+  } else if (stype==cool::StorageType::Blob64k && !m_noclobroot) {
+    if (recnull) {
+      strcpy(static_cast<char*>(sptr),"NULL");
+    } else {
+      auto blob = field.data<coral::Blob>();
+      std::string blobStr((char*)blob.startingAddress(), blob.size());
+      strcpy(static_cast<char*>(sptr), blobStr.c_str());
     }
   } else {
     std::cout << "ERROR: Unknown storage type in rootWrite!" << std::endl;
