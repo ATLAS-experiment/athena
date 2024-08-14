@@ -291,6 +291,24 @@ def createITkFTFPassFlags():
 
     return icf
 
+def createITkFTFLargeD0PassFlags():
+    icf = createITkLargeD0FastTrackingPassFlags()
+    icf.addFlag("doHitDV"            , False)
+    icf.addFlag("doDisappearingTrk"  , False)
+    icf.addFlag("useTrigTrackFollowing", False)
+    icf.addFlag("useTrigRoadPredictor", False)
+    icf.addFlag("useTracklets", False)
+    icf.useSeedFilter         = False
+    icf.minPT              = lambda pcf : (
+        [1.0 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+
+    icf.maxPrimaryImpact   = [400.0 * Units.mm]
+    icf.maxPrimaryImpactSeed = 400.0 * Units.mm
+    icf.maxdImpactSSSSeeds = [400.0 * Units.mm]
+    
+
+    return icf
+
 
 ### ITk LRT mode ####################
 def createITkLargeD0TrackingPassFlags():

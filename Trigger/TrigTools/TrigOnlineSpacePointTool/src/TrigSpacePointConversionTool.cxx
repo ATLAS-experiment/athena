@@ -83,6 +83,7 @@ StatusCode TrigSpacePointConversionTool::initialize() {
   }
   if (!m_useSctSpacePoints) ATH_MSG_INFO("Only converting Pixel spacepoints => PPP seeds only");
   if (!m_usePixelSpacePoints) ATH_MSG_INFO("Only converting SCT spacepoints => SSS seeds only");
+  if (m_usePixelSpacePoints && m_useSctSpacePoints) ATH_MSG_INFO("Converting SCT and Pixel spacepoints");
   ATH_CHECK(m_pixelSpacePointsContainerKey.initialize(m_usePixelSpacePoints));
   ATH_CHECK(m_sctSpacePointsContainerKey.initialize(m_useSctSpacePoints));
 

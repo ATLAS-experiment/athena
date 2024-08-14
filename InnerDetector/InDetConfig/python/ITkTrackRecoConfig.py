@@ -78,7 +78,10 @@ def CombinedTrackingPassFlagSets(flags):
 
     # LRT
     if flags.Tracking.doLargeD0:
-        if flags.Tracking.doITkFastTracking:
+        if flags.Tracking.useITkFTF:
+            flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                             "Tracking.ITkFTFLargeD0Pass")
+        elif flags.Tracking.doITkFastTracking:
             flagsLRT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                              "Tracking.ITkLargeD0FastPass")
         else:

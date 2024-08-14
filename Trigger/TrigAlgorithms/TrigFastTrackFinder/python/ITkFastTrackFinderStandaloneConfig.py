@@ -13,7 +13,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     
     from InDetConfig.SiTrackMakerConfig import ITkSiTrackMaker_xkCfg
     ITkSiTrackMakerTool = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags))
-
+    
     ITkSiTrackMakerTool.CombinatorialTrackFinder.writeHolesFromPattern = False
     
     if flags.Tracking.ActiveConfig.useTrigTrackFollowing:
@@ -24,6 +24,8 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
         acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF", LayerNumberTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
         ITkSiTrackMakerTool.useTrigInDetRoadPredictorTool = True
         ITkSiTrackMakerTool.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF")
+    
+    ITkSiTrackMakerTool.trackletPoints = flags.Trigger.InDetTracking.trackletPoints
     
     acc.addPublicTool(ITkSiTrackMakerTool)
 
@@ -48,36 +50,40 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
 
         acc.addPublicTool(CompFactory.TrigITkAccelerationTool(name = "TrigITkAccelerationTool_FTF"))
     
-    acc.addPublicTool( CompFactory.TrigSpacePointConversionTool( "TrigSpacePointConversionTool",
+    isLRT=flags.Tracking.ActiveConfig.extension == "LargeD0"
+    acc.addPublicTool( CompFactory.TrigSpacePointConversionTool( "TrigSpacePointConversionTool"+flags.Tracking.ActiveConfig.extension,
                                                                     DoPhiFiltering    = True,
                                                                     UseBeamTilt       = False,
                                                                     UseNewLayerScheme = True,
                                                                     RegSelTool_Pixel  = pixRegSelTool,
                                                                     RegSelTool_SCT    = sctRegSelTool,
                                                                     PixelSP_ContainerName = "ITkPixelSpacePoints",
-                                                                    UseSctSpacePoints = False,
+                                                                    SCT_SP_ContainerName = "ITkStripSpacePoints",
+                                                                    UseSctSpacePoints = isLRT,
+                                                                    UsePixelSpacePoints = not isLRT,
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderMonitoringArg
     from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
     acc.merge(TriggerHistSvcConfig(flags))
-    monTool = TrigFastTrackFinderMonitoringArg(flags, name = "FullScan", doResMon=False)
+    monTool = TrigFastTrackFinderMonitoringArg(flags, name = "FullScanLRT" if isLRT else "FullScan", doResMon=False)
     
-    ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
+    ftf = CompFactory.TrigFastTrackFinder(  name = "TrigFastTrackFinder"+flags.Tracking.ActiveConfig.extension,
                                            LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
                                            TrigAccelerationTool     = acc.getPublicTool( "TrigITkAccelerationTool_FTF" ) if flags.Trigger.InDetTracking.doGPU else None,
                                            TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc") if flags.Trigger.InDetTracking.doGPU else None,
-                                           SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
+                                           SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"+flags.Tracking.ActiveConfig.extension),
                                            TrackSummaryTool         = ITkTrackSummaryTool,
                                            initialTrackMaker        = ITkSiTrackMakerTool,
                                            trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
                                            trigZFinder              = CompFactory.TrigZFinder(),
                                            doZFinder                = False,
                                            SeedRadBinWidth          = 10,
-                                           TrackInitialD0Max        = 20.0,
+                                           TrackInitialD0Max        = 300. if isLRT else 20.0,
                                            TracksName               = SiSPSeededTrackCollectionKey,
-                                           Triplet_D0Max            = 4,
-                                           Triplet_MaxBufferLength  = 1,
+                                           TrackZ0Max               = 500. if isLRT else 300.,
+                                           Triplet_D0Max            = 300. if isLRT else 4,
+                                           Triplet_MaxBufferLength  = 3    if isLRT else 1,
                                            Triplet_MinPtFrac        = 0.8,
                                            UseTrigSeedML            = 1,
                                            doResMon                 = False,
@@ -92,7 +98,11 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                            doTrackRefit             = False,
                                            FreeClustersCut          = 1,
                                            MonTool                  = monTool,
-                                           DoubletDR_Max            = 150.0)
+                                           DoubletDR_Max            = 150.0,
+                                           LRT_Mode                 = isLRT,
+                                           doDisappearingTrk        = False,
+                                           ConnectionFileName       = "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
+                                          
 
     acc.addEventAlgo( ftf, primary=True )
     

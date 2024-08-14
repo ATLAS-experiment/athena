@@ -486,7 +486,7 @@ def createTrackingConfigFlags():
         createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags,
         createITkConversionTrackingPassFlags,
         createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags,
-        createITkFTFPassFlags, createITkLowPtTrackingPassFlags,
+        createITkFTFPassFlags, createITkFTFLargeD0PassFlags, createITkLowPtTrackingPassFlags,
         createITkHeavyIonTrackingPassFlags)
 
     def itkPrimaryPass(flags):
@@ -516,6 +516,8 @@ def createTrackingConfigFlags():
                           createITkLargeD0FastTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkFTFPass",
                           createITkFTFPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkFTFLargeD0Pass",
+                          createITkFTFLargeD0PassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkHeavyIonPass",
                           createITkHeavyIonTrackingPassFlags, prefix=True)
 
