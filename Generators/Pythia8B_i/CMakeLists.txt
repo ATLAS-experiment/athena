@@ -4,7 +4,6 @@
 atlas_subdir( Pythia8B_i )
 
 # External dependencies:
-find_package( Boost COMPONENTS thread )
 find_package( CLHEP )
 find_package( Lhapdf )
 find_package( Pythia8 )

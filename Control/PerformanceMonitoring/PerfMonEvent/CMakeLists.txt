@@ -8,13 +8,6 @@ find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( nlohmann_json )
 
-# We don't have a direct dependency on boost from this package, but if we
-# pick up the dependency implicitly rather than explicitly, we include
-# root headers with -I rather than -isystem.
-# That exposes us to a warning found by gcc8 in mpl/assert.h.
-# [Fixed in boost 1.68; see https://github.com/boostorg/mpl/issues/31.]
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_library( PerfMonEvent
                    src/PyStore.cxx
