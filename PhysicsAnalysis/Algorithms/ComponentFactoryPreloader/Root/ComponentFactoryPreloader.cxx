@@ -144,6 +144,7 @@
 #include <TriggerAnalysisAlgorithms/TrigEventSelectionAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigGlobalEfficiencyAlg.h>
 #include <TriggerAnalysisAlgorithms/TrigPrescalesAlg.h>
+#include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
 #include <TriggerMatchingTool/DRScoringTool.h>
 #include <TriggerMatchingTool/MatchFromCompositeTool.h>
 #include <egammaMVACalib/egammaMVACalibTool.h>
@@ -258,6 +259,7 @@ namespace CP
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigEventSelectionAlg>("CP::TrigEventSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigGlobalEfficiencyAlg>("CP::TrigGlobalEfficiencyAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigPrescalesAlg>("CP::TrigPrescalesAlg"));
+    ANA_CHECK (asg::registerAlgorithmFactory<CP::TrigMatchingAlg>("CP::TrigMatchingAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VertexSelectionAlg>("CP::VertexSelectionAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::VGammaORAlg>("CP::VGammaORAlg"));
     ANA_CHECK (asg::registerAlgorithmFactory<CP::xAODWriterAlg>("CP::xAODWriterAlg"));

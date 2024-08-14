@@ -32,6 +32,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addDependency('Electrons', required=False)
         self.addDependency('Photons', required=False)
         self.addDependency('Muons', required=False)
+        self.addDependency('Taus', required=False)
         self.addDependency('OverlapRemoval', required=False)
 
         self.addOption ('triggerChainsPerYear', {}, type=None,
@@ -66,6 +67,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('photons', '', type=str,
             info="the input photon container, with a possible selection, in "
             "the format container or container.selection.")
+        self.addOption ('taus', '', type=str,
+            info="the input tau container, with a possible selection, in "
+            "the format container or container.selection.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -75,7 +79,11 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="disables the global trigger efficiency tool (including "
             "matching), which is only suited for electron/muon/photon "
             "trigger legs. The default is False.")
+        self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
+            info="a dictionary with key (string) the year and value (list of "
+            "strings) the trigger chains. The default is {} (empty dictionary).")
 
+    
 
     def makeTriggerDecisionTool(self, config: ConfigAccumulator):
         # Might have already been added in TriggerAnalysisBlock
@@ -175,6 +183,75 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         return
 
+    def makeTrigMatchingAlg(
+        self,
+        config: ConfigAccumulator,
+        matchingTool,
+        triggerSuffix: str = ''
+    ) -> None:
+        years = []
+        if config.campaign() is Campaign.MC20a:     years = ['2015', '2016']
+        elif config.campaign() is Campaign.MC20d:   years = ['2017']
+        elif config.campaign() is Campaign.MC20e:   years = ['2018']
+        elif config.campaign() in [Campaign.MC21a, Campaign.MC23a]: years = ['2022']
+        elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]: years = ['2023']
+
+        triggerMatchingChains = []
+        for year in years:
+            for trig in self.triggerChainsPerYear.get(year,[]):
+                trig = trig.replace(' || ', '_OR_')
+                triggerMatchingChains += trig.split('_OR_')
+
+        # Remove duplicates
+        triggerMatchingChains = list(set(triggerMatchingChains))
+
+        if self.electrons and any("HLT_e" in trig for trig in triggerMatchingChains):
+            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_ele' + triggerSuffix )
+            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
+            alg.trigSingleMatchingList =  list(triggerMatchingChains)
+            alg.particles, alg.particleSelection = config.readNameAndSelection(self.electrons)
+            for trig in  alg.trigSingleMatchingList:
+                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+                if "HLT_e" in trig:
+                    config.addOutputVar(self.electrons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
+
+        if self.muons and any("HLT_mu" in trig for trig in triggerMatchingChains):
+            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_mu' + triggerSuffix )
+            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
+            alg.trigSingleMatchingList =  list(triggerMatchingChains)
+            alg.particles, alg.particleSelection = config.readNameAndSelection(self.muons)
+            for trig in  alg.trigSingleMatchingList:
+                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+                if "HLT_mu" in trig:
+                    config.addOutputVar(self.muons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
+
+        if self.photons and any("HLT_g" in trig for trig in triggerMatchingChains):
+            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_ph' + triggerSuffix )
+            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
+            alg.trigSingleMatchingList =  list(triggerMatchingChains)
+            alg.particles, alg.particleSelection = config.readNameAndSelection(self.photons)
+            for trig in  alg.trigSingleMatchingList:
+                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+                if "HLT_g" in trig:
+                    config.addOutputVar(self.photons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
+
+        if self.taus and any("HLT_tau" in trig for trig in triggerMatchingChains):
+            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_tau' + triggerSuffix )
+            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
+            alg.trigSingleMatchingList =  list(triggerMatchingChains)
+            alg.particles, alg.particleSelection = config.readNameAndSelection(self.taus)
+            for trig in  alg.trigSingleMatchingList:
+                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+                if "HLT_tau" in trig:
+                    config.addOutputVar(self.taus,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
+
+
+        return
+
     def makeAlgs(self, config: ConfigAccumulator) -> None:
         if (
             self.multiTriggerChainsPerYear and
@@ -197,5 +274,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             for suffix, trigger_chains in self.multiTriggerChainsPerYear.items():
                 self.triggerChainsPerYear = trigger_chains
                 self.makeTriggerGlobalEffCorrAlg(config, matchingTool, self.noEffSF, suffix)
+                
+        # Save trigger matching information (currently only single leg trigger are supported)
+        if self.triggerMatchingChainsPerYear:
+            self.makeTrigMatchingAlg(config, matchingTool)
 
         return

@@ -1009,6 +1009,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
         configSeq.setOptionValue ('.photons', 'AnaPhotons' )
         configSeq.setOptionValue ('.muons', 'AnaMuons' )
+        configSeq.setOptionValue ('.taus', 'AnaTauJets' )
+        configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerChainsPerYear)
 
     if not forCompare:
         configSeq += config.makeConfig ('Bootstraps')
