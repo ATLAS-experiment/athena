@@ -33,8 +33,6 @@
 - PhysicsAnalysis/HiggsPhys/Run2/HZZ/Tools/ZMassConstraint
 - PhysicsAnalysis/JetPhys/SemileptonicCorr
 - PhysicsAnalysis/SUSYPhys/SUSYTools
-- PhysicsAnalysis/TopPhys/TopPhysUtils/.*
-- PhysicsAnalysis/TopPhys/xAOD/.*
 - Reconstruction/Jet/JetAnalysisTools/JetTileCorrection
 - Reconstruction/Jet/JetReclustering
 
