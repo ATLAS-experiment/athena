@@ -225,7 +225,7 @@ void TFCSEnergyAndHitGAN::GetBinning(
     }
     index++;
   }
-
+  xmlFreeDoc(doc);
   ATH_MSG_DEBUG("Done XML file");
 }
 

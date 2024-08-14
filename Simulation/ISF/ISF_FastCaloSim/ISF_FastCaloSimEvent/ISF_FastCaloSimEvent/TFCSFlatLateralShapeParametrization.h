@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSFlatLateralShapeParametrization_h
@@ -51,9 +51,9 @@ public:
 
 protected:
   /// Simulate hits flat in radius dR
-  float m_dR;
-  float m_nhits;
-  float m_scale;
+  float m_dR{};
+  float m_nhits{};
+  float m_scale{};
 
 private:
   ClassDefOverride(TFCSFlatLateralShapeParametrization,

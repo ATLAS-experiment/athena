@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -45,11 +45,11 @@ public:
 private:
   static bool ReadBooleanAttribute(const std::string &name, xmlNodePtr node);
 
-  bool m_symmetrisedAlpha;
+  bool m_symmetrisedAlpha{};
   Binning m_binning;
   std::vector<int> m_relevantlayers;
-  int m_ganVersion;
-  int m_latentDim;
+  int m_ganVersion{};
+  int m_latentDim{};
   std::string m_fastCaloGANInputFolderName;
 
   ClassDef(TFCSGANXMLParameters, 2) // TFCSGANXMLParameters

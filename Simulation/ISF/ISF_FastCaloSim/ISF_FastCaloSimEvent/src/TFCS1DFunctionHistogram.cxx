@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunctionHistogram.h"
 #include "TMath.h"
 #include "TFile.h"
 #include <iostream>
+
 using namespace std;
 
 //=============================================
@@ -20,12 +21,13 @@ void TFCS1DFunctionHistogram::Initialize(TH1 *hist, double cut_maxdev) {
   smart_rebin_loop(hist, cut_maxdev);
 }
 
-double *TFCS1DFunctionHistogram::histo_to_array(TH1 *hist) {
+std::unique_ptr<double[]>
+TFCS1DFunctionHistogram::histo_to_array(TH1 *hist) {
 
   TH1D *h_clone = (TH1D *)hist->Clone("h_clone");
   h_clone->Scale(1.0 / h_clone->Integral());
 
-  double *histoVals = new double[h_clone->GetNbinsX()];
+  auto histoVals = std::make_unique<double[]>(h_clone->GetNbinsX());
   histoVals[0] = h_clone->GetBinContent(1);
   for (int i = 1; i < h_clone->GetNbinsX(); i++) {
     histoVals[i] = histoVals[i - 1] + h_clone->GetBinContent(i + 1);
@@ -36,14 +38,13 @@ double *TFCS1DFunctionHistogram::histo_to_array(TH1 *hist) {
 
 double TFCS1DFunctionHistogram::sample_from_histo(TH1 *hist, double random) {
 
-  double *histoVals = histo_to_array(hist);
+  auto histoVals = histo_to_array(hist);
   double value = 0.0;
   int chosenBin =
-      (int)TMath::BinarySearch(hist->GetNbinsX(), histoVals, random);
+      (int)TMath::BinarySearch(hist->GetNbinsX(), histoVals.get(), random);
   value = hist->GetBinCenter(chosenBin + 2);
 
   // cleanup
-  delete[] histoVals;
 
   return value;
 }
@@ -53,9 +54,9 @@ double TFCS1DFunctionHistogram::sample_from_histovalues(double random) {
 
   TH1 *hist = vector_to_histo();
   hist->SetName("hist");
-  double *histoVals = histo_to_array(hist);
+  auto histoVals = histo_to_array(hist);
   int chosenBin =
-      (int)TMath::BinarySearch(hist->GetNbinsX(), histoVals, random);
+      (int)TMath::BinarySearch(hist->GetNbinsX(), histoVals.get(), random);
   value = hist->GetBinCenter(chosenBin + 2);
 
   return value;

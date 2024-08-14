@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSVoxelHistoLateralCovarianceFluctuations_h
@@ -41,7 +41,7 @@ public:
                const TFCSExtrapolationState *extrapol) override;
 
 protected:
-  ICaloGeometry *m_geo; //! do not persistify
+  ICaloGeometry *m_geo{}; //! do not persistify
 
   static const std::uint32_t
       s_layer_hash[CaloCell_ID_FCS::MaxSample]; //! do not persistify
@@ -53,8 +53,8 @@ protected:
   std::vector<std::vector<std::vector<TFCS1DFunction *>>> m_transform;
 
   // For a 5*5 cell grid, nDim should be 5
-  int m_nDim_x;
-  int m_nDim_y;
+  int m_nDim_x{};
+  int m_nDim_y{};
   std::vector<TH2 *> m_voxel_template;
   std::vector<TVectorD> m_parMeans;
   std::vector<TMatrixD> m_EigenVectors; // Eigen-vectors of covariance

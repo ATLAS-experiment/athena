@@ -8,6 +8,7 @@
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
 #include "TH1.h"
 #include <vector>
+#include <memory>
 
 class TFCS1DFunctionHistogram : public TFCS1DFunction {
 
@@ -29,7 +30,7 @@ public:
   void smart_rebin_loop(TH1 *hist, double);
   static double get_change(TH1 *);
   static TH1D *smart_rebin(TH1D *);
-  static double *histo_to_array(TH1 *);
+  static std::unique_ptr<double[]> histo_to_array(TH1 *);
   static double sample_from_histo(TH1 *hist, double);
   double sample_from_histovalues(double);
 

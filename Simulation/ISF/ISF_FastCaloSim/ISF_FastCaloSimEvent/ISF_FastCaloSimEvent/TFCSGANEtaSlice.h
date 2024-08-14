@@ -54,9 +54,9 @@ public:
   void Print() const;
 
 private:
-  int m_pid;
-  int m_etaMin;
-  int m_etaMax;
+  int m_pid{};
+  int m_etaMin{};
+  int m_etaMax{};
 
   std::string m_inputFolderName;
 
@@ -80,7 +80,7 @@ private:
   bool LoadGANNoRange(std::string inputFileName);
   bool LoadGANFromRange(std::string inputFileName, std::string energyRange);
 
-  TFCSGANXMLParameters m_param;
+  TFCSGANXMLParameters m_param{};
 
   ClassDef(TFCSGANEtaSlice, 5) // TFCSGANEtaSlice
 };
