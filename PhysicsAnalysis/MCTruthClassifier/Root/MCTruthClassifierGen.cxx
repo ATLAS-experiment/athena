@@ -98,8 +98,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
 
   ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
 
-  // status=HepMC::SPECIALSTATUS in Pythia?
-  if (!MC::isStable(thePart) && !MC::isDecayed(thePart) && thePart->status() != HepMC::SPECIALSTATUS) {
+  if (!MC::isStable(thePart) && !MC::isDecayed(thePart)) {
     return std::make_pair(GenParticle, partOrig);
   }
   bool isPartHadr = MC::isHadron(thePart)&&!MC::isBeam(thePart);
@@ -120,7 +119,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
 
   if (MC::isStable(thePart) && MC::isBSM(thePart)) return std::make_pair(OtherBSMParticle, partOrig);
 
-  if (thePart->status() == HepMC::SPECIALSTATUS &&
+  if (MC::isDecayed(thePart) &&
       (!MC::isElectron(thePart) && !MC::isMuon(thePart) &&
        !MC::isTau(thePart) && !MC::isPhoton(thePart)) &&
       !isPartHadr)
@@ -197,7 +196,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, M
     }
   }
 
-  if (motherPDG == thePart->pdg_id() &&  theMoth && theMoth->status() == 3 && thePart->status() == HepMC::SPECIALSTATUS) return std::make_pair(GenParticle, partOrig);
+  if (motherPDG == thePart->pdg_id() &&  theMoth && theMoth->status() == 3 && MC::isDecayed(thePart)) return std::make_pair(GenParticle, partOrig);
 
   if (MC::isElectron(thePart)) {
     bool isPrompt = false;
