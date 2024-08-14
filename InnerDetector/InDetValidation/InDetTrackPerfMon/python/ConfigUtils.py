@@ -132,8 +132,23 @@ def getPlotsDefList( flags ):
         with open( dataPath, "r" ) as input_json_file :
             plotsDefDict.update( json.load( input_json_file ) )
 
+    # Expand plots definitions for resolutions and pulls
+    # from corresponding TH2F Helpers
+    plotsDefDict = updateResolutionPlots( plotsDefDict )
+
     # Turn all histo definitions into a list of strings
     # each string has a flattened json format
+    def flatten_json( y ) :
+        out = {}
+        def flatten(x, name=''):
+            if type(x) is dict:
+                for a in x:
+                    flatten(x[a], name + a + '_')
+            else:
+                out[name[:-1]] = x
+        flatten(y)
+        return out
+
     plotsDefStrList_v1 = []
     for plotName, plotDict in plotsDefDict.items():
         newPlotDict = plotDict.copy()
@@ -214,13 +229,53 @@ def getTag( flags, key ) :
     return labels[1]
 
 
-def flatten_json( y ) :
-    out = {}
-    def flatten(x, name=''):
-        if type(x) is dict:
-            for a in x:
-                flatten(x[a], name + a + '_')
-        else:
-            out[name[:-1]] = x
-    flatten(y)
-    return out
+def updateResolutionPlots( myPlotsDefDict ) :
+    # initialize output dict to input
+    outDict = myPlotsDefDict.copy()
+
+    items = [ "res", "pull" ]
+    plist = [ "mean", "width" ]
+    iDict = {
+        "res" : {
+            "helper" : { "name" : "resHelper",  "yTitle" : "residual" },
+            "mean"   : { "name" : "resmean",    "yTitle" : "bias" },
+            "width"  : { "name" : "resolution", "yTitle" : "resolution" }
+        },
+        "pull" : {
+            "helper" : { "name" : "pullHelper", "yTitle" : "pull" },
+            "mean"   : { "name" : "pullmean",   "yTitle" : "pull mean" },
+            "width"  : { "name" : "pullwidth",  "yTitle" : "pull width" }
+        }
+    }
+
+    for plotName, plotDict in myPlotsDefDict.items() :
+        # processing resHelpers and pullHelpers
+        for i in items:
+            if iDict[i]["helper"]["name"] in plotName :
+                # processing mean and width plots
+                for p in plist :
+                    # Computing the derived plot (mean or width) name from helper
+                    pName = plotName.replace( iDict[i]["helper"]["name"], iDict[i][p]["name"] )
+
+                    pDict = {}
+                    if pName in outDict :
+                        # plot definition already exists. Grabbing the original
+                        pDict = outDict[ pName ]
+                    else :
+                        # plot definition doesn't exist.
+                        # Computing and setting yAxis title from helper's yAxis'
+                        # (e.g. "VAR residual [unit]" -> "VAR resolution [unit]")
+                        yTitle = plotDict["yAxis"]["title"]
+                        yTitle = yTitle.replace( iDict[i]["helper"]["yTitle"], iDict[i][p]["yTitle"] )
+                        pDict.update( { "yAxis" : { "title" : yTitle } } )
+
+                    # forcing x-axis to be the same as helper's (in all cases) and type = TH1F
+                    pDict.update( {
+                        "type" : "TH1F",
+                        "xAxis" : plotDict["xAxis"]
+                    } )
+
+                    # update outdict
+                    outDict.update( { pName : pDict } )
+
+    return outDict
