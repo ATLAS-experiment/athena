@@ -25,7 +25,8 @@ def SetupArgParser():
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--excludedChambers", default=["none"], nargs="+", help="Chambers to exclude. If string contains 'none', all chambers will be checked. Note: adding a chamber to --excludedChambers will overwrite it being in --chambers.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
-    parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
+    parser.add_argument("--nEvents", help="Number of events to run", type = int ,default = 1)
+    parser.add_argument("--skipEvents", help="Number of events to skip", type = int, default = 0)
     parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
     parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
     parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
@@ -104,6 +105,8 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads
+    flags.Exec.MaxEvents = args.nEvents
+    flags.Exec.SkipEvents = args.skipEvents
     flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     from os import path, system, listdir
     inFiles = [x for x in args.inputFile if not path.isdir(x)] + \
@@ -185,10 +188,10 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     return flags, cfg
 
-def executeTest(cfg, num_events = 1):
+def executeTest(cfg):
     
     cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run(num_events).isSuccess(): exit(1)
+    if not cfg.run().isSuccess(): exit(1)
 
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
@@ -208,7 +211,7 @@ if __name__=="__main__":
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml",
-                                     ExtraInputs=[#( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
+                                     ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' ),
                                                   #( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry' ) 
                                                 ]))
 
@@ -233,4 +236,4 @@ if __name__=="__main__":
                                              ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
                                              ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
     
-    executeTest(cfg, num_events = args.nEvents)
+    executeTest(cfg)
