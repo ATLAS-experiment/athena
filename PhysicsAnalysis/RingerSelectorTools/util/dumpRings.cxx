@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 // Print out the rings information and its metadata.
@@ -69,6 +69,8 @@ int main( int argc, char* argv[] ) {
   const xAOD::CaloRingsContainer *electronCaloRings(nullptr);
   const xAOD::ElectronContainer *electronCont(nullptr);
 
+  static const SG::ConstAccessor caloRingsLinksAcc("caloRingsLinks");
+
   // Run the files
   size_t nEntries = chain->GetEntries();
   for (size_t entry = 0; entry < nEntries; entry++) {
@@ -96,7 +98,7 @@ int main( int argc, char* argv[] ) {
               std::cout << "Retrieved invalid link!" << std::endl;
             }
           }
-          const xAOD::CaloRingsLinks vec = electron->auxdata< xAOD::CaloRingsLinks >("caloRingsLinks");
+          const xAOD::CaloRingsLinks vec = caloRingsLinksAcc(*electron);
           std::cout << "The vector size is : " << vec.size() << std::endl;
         }
         std::cout << "----------------- Testing cluster ------------------- " << std::endl;
