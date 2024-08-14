@@ -190,6 +190,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)
 
+    # L1 trigger objects
+    if flags.Derivation.Trigger.outputL1JetRoIs:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2L1JetRoIsToSlimmingHelper
+        AddRun2L1JetRoIsToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper)
+
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_"+name_tag, ItemList=PHYSItemList, AcceptAlgs=[name_tag+"Kernel"]))
