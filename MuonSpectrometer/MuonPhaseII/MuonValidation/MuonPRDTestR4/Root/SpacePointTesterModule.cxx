@@ -123,7 +123,7 @@ namespace MuonValR4{
     }
     bool SpacePointTesterModule::fill(const EventContext& ctx) {
         m_internalFill = true;
-        SG::ReadHandle<MuonR4::SpacePointContainer> container{m_key, ctx};
+        SG::ReadHandle container{m_key, ctx};
         if (!container.isPresent()) {
             ATH_MSG_FATAL("Failed to retrieve container "<<m_key.fullKey());
             return false;

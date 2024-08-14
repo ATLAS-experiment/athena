@@ -37,14 +37,6 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     kwargs.setdefault("dumpTgcPrds", flags.Detector.GeometryTGC)
     kwargs.setdefault("dumpMmPrds", flags.Detector.GeometryMM)
 
-    ###
-    from AthenaConfiguration.Enums import LHCPeriod
-    if flags.GeoModel.Run >= LHCPeriod.Run4 and \
-       kwargs["dumpPrds"] and kwargs["dumpRpcPrds"]:
-            from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
-            result.merge(RpcMeasViewAlgCfg(flags))
-            kwargs.setdefault("RpcPrdKey", "xRpcMeasurements")
-
     theAlg = CompFactory.MuonValR4.MuonHitTesterAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
@@ -59,5 +51,8 @@ if __name__=="__main__":
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    cfg.merge(MuonHitTesterCfg(flags,outFile=args.outRootFile))
+    from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+    cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    cfg.merge(MuonHitTesterCfg(flags,outFile=args.outRootFile, dumpPrds = False))
     executeTest(cfg)
+
