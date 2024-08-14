@@ -1,1 +1,0 @@
-/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/Data/p4910_special/DAOD_PHYS.data18.p4910_special.pool.root.1
