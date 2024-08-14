@@ -14,6 +14,7 @@ from AthenaConfiguration.Enums import LHCPeriod,Format
 from AthenaCommon import Constants
 import os,sys
 import ispy
+import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 
 flags = initConfigFlags()
@@ -107,21 +108,31 @@ if args.runNumber is not None:
     flags.Input.Files += glob(tryStr)
   print("Found",len(flags.Input.Files),"files")
 
+standalone = False
 # require at least 1 input file if running offline
 if not partition.isValid() and len(flags.Input.Files)==0:
   print("FATAL: Running in offline mode but no input files provided")
   sys.exit(1)
 elif partition.isValid():
   print("Running Online with Partition:",partition.name())
+  standalone = (partition.name()!="ATLAS")
+  if standalone : print("Using local menu because partition is not ATLAS")
 
 # if running on an input file, change the DQ environment, which will allow debug tree creation from monitoring algs
 if len(flags.Input.Files)>0:
   flags.DQ.Environment = "user"
   # triggerConfig should default to DB which is appropriate if running on data
-  if flags.Input.isMC: flags.Trigger.triggerConfig='FILE' # uses the generated L1Menu (see below)
+  # standalone if project tag is data_test of dataXX_calib
+  standalone = ((flags.Input.ProjectName == "data_test") or (re.match(r"data\d\d_calib", flags.Input.ProjectName)))
+  if standalone : print("Using local menu because project_name=",flags.Input.ProjectName)
+  if flags.Input.isMC : flags.Trigger.triggerConfig='FILE' # uses the generated L1Menu (see below)
   elif flags.Trigger.triggerConfig=='INFILE':
     # this happens with AOD data files, but this is incompatible with the setup of the LVL1ConfigSvc
     flags.Trigger.triggerConfig="DB" # so force onto DB usage
+
+if standalone :
+  flags.Trigger.triggerConfig='FILE' #Uses generated L1Menu In online on input files
+
 
 if flags.Exec.MaxEvents == 0:
   # in this mode, ensure all monitoring activated, so that generated han config is complete
@@ -189,11 +200,10 @@ cfg.merge(getDQTHistSvc(flags))
 
 # Create run3 L1 menu (needed for L1Calo EDMs)
 from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu, createL1PrescalesFileFromMenu,getL1MenuFileName
-if flags.Input.isMC:
+if flags.Trigger.triggerConfig=="FILE":
   # for MC we set the TriggerConfig to "FILE" above, so must generate a menu for it to load (will be the release's menu)
   generateL1Menu(flags)
   createL1PrescalesFileFromMenu(flags)
-if flags.Trigger.triggerConfig=="FILE":
   menuFilename = getL1MenuFileName(flags)
   if os.path.exists(menuFilename):
     print("Using L1Menu:",menuFilename)
