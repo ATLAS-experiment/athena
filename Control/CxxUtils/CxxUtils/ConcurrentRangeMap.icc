@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/ConcurrentRangeMap.icc
@@ -21,6 +21,7 @@ IRangeMapPayloadDeleter<T, CONTEXT>::IRangeMapPayloadDeleter
   (delete_function* delfcn)
     : m_delfcn (delfcn)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
