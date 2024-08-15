@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/tools/IndexHolder.h
  * @author scott snyder <snyder@bnl.gov>
@@ -48,6 +45,7 @@ public:
   void reset() { m_valid = false; m_index = T(); }
 
   /// Retrieve the index.
+  // cppcheck-suppress returnByReference
   operator const T&() const { return m_index; }
 
 
