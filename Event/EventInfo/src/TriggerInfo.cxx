@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -61,12 +61,12 @@ TriggerInfo::StreamTag::obeysLumiblock() const {
   return(m_obeysLumiblock);
 }
 
-const std::set<TriggerInfo::number_type>  
+const std::set<TriggerInfo::number_type>&
 TriggerInfo::StreamTag::robs() const {
   return(m_robs);
 }
 
-const std::set<TriggerInfo::number_type>  
+const std::set<TriggerInfo::number_type>&
 TriggerInfo::StreamTag::dets() const {
   return(m_dets);
 }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -118,7 +118,7 @@ TagInfo::getTags(NameTagPairVec& pairs) const {
   pairs = m_tags;
 }
 
-TagInfo::NameTagPairVec
+const TagInfo::NameTagPairVec&
 TagInfo::getTags() const {
   return m_tags;
 }
@@ -128,12 +128,12 @@ TagInfo::getInputTags(NameTagPairVec& pairs) const {
   pairs = m_inputTags;
 }
 
-TagInfo::NameTagPairVec
+const TagInfo::NameTagPairVec&
 TagInfo::getInputTags() const {
   return m_inputTags;
 }
 
-std::string
+const std::string&
 TagInfo::tagInfoTag() const {
   return(m_myTag);
 }

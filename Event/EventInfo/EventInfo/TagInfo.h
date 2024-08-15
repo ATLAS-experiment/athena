@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_TAGINFO_H
@@ -65,7 +65,7 @@ public:
   void getTags(NameTagPairVec& pairs) const;
   
   /// Return a vector with all current tags
-  NameTagPairVec getTags() const;
+  const NameTagPairVec& getTags() const;
 
   /// Find tag by its name - for input tags, return in the reference argument
   void findInputTag(const std::string& name, std::string& tag) const;
@@ -77,10 +77,10 @@ public:
   void getInputTags(NameTagPairVec& pairs) const;
   
   /// Return a vector with all current input tags
-  NameTagPairVec getInputTags() const;
+  const NameTagPairVec& getInputTags() const;
 
   /// The tag of the TagInfo object
-  std::string tagInfoTag() const;
+  const std::string& tagInfoTag() const;
   //@}
 
   /// Less than comparision needed to create e.g. set<TagInfo>
