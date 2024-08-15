@@ -66,7 +66,7 @@ public:
   std::string unit() const;
   std::string group() const;
 
-  std::set<std::string> getKeys() {return m_keys;}
+  const std::set<std::string>& getKeys() {return m_keys;}
 
 private:
 

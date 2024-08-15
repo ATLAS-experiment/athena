@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef UTILITIES_COLLECTION_CMDLINEARGS2
@@ -77,7 +77,7 @@ namespace pool
      bool 		valid() const {return m_argsfine;}
 
      /// identifier
-     std::string 	name() const {return m_id;}
+     const std::string&	name() const {return m_id;}
 
      /// 
      ArgQual& 		getArgQual(const std::string& a) {return m_quals[a];}

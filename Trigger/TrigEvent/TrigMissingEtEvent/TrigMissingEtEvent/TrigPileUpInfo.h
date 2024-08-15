@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,9 +34,9 @@ class TrigPileUpInfo{
   int getBJ(unsigned int index) const;
   int getPV(unsigned int index) const;
 
-  std::vector<int> getFJVec() const;
-  std::vector<int> getBJVec() const;
-  std::vector<int> getPVVec() const;
+  const std::vector<int>& getFJVec() const;
+  const std::vector<int>& getBJVec() const;
+  const std::vector<int>& getPVVec() const;
 
  private:
 
