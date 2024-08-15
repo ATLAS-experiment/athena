@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -149,6 +149,8 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.setProperty( "ConfigFile",   "SmoothedWZTaggers/SmoothedContainedWTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_MC15c_20161215.dat") );
   ANA_CHECK( m_Tagger.retrieve() );
 
+  static const SG::ConstAccessor<bool> acc_Tagged("Tagged");
+
   ////////////////////////////////////////////////////
   // Loop over the events
   ////////////////////////////////////////////////////
@@ -178,10 +180,10 @@ int main( int argc, char* argv[] ) {
       ANA_CHECK( m_Tagger->tag( *jet ) );
       if(verbose) {
         std::cout << "Testing W Tagger " << std::endl;
-        std::cout << "RunningTag : " << jet->auxdata<bool>("Tagged") << std::endl;
+        std::cout << "RunningTag : " << acc_Tagged(*jet) << std::endl;
       }
 
-      pass = jet->auxdata<bool>("Tagged");
+      pass = acc_Tagged(*jet);
 
       Tree->Fill();
     }

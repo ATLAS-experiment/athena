@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -168,6 +168,8 @@ int main( int argc, char* argv[] ) {
   float w_nQuarkTaggedANDisGluon = 0.;
   float eventweight = 0.;
 
+  static const SG::ConstAccessor<bool> acc_Tagged("Tagged");
+
   for( Long64_t entry = 0; entry < entries; ++entry ) {
 
     if( nevents!=-1 && entry > nevents ) break;
@@ -200,7 +202,7 @@ int main( int argc, char* argv[] ) {
       ANA_CHECK( m_Tagger->tag( *jet ) );
       if(verbose) {
         std::cout << "Testing QG BDT Tagger " << std::endl;
-        std::cout << "RunningTag : " << jet->auxdata<bool>("Tagged") << " jet truth label: " << truthlabel << std::endl;
+        std::cout << "RunningTag : " << acc_Tagged(*jet) << " jet truth label: " << truthlabel << std::endl;
       }
       
       //--------------------------------------------------------------------------------
@@ -212,7 +214,7 @@ int main( int argc, char* argv[] ) {
       case 3:
       case 4:
         w_nQuark += eventweight;
-        if(jet->auxdata<bool>("Tagged")==1){
+        if(acc_Tagged(*jet)==1){
           w_nQuarkTaggedANDisQuark += eventweight;
         }
         else{
@@ -223,7 +225,7 @@ int main( int argc, char* argv[] ) {
         break;
       case 21:
         w_nGluon += eventweight;
-        if(jet->auxdata<bool>("Tagged")==1){
+        if(acc_Tagged(*jet)==1){
           w_nQuarkTaggedANDisGluon += eventweight;
         }
         else{
@@ -235,7 +237,7 @@ int main( int argc, char* argv[] ) {
       }
       //--------------------------------------------------------------------------------
 
-      pass = jet->auxdata<bool>("Tagged");
+      pass = acc_Tagged(*jet);
 
       Tree->Fill();
     }

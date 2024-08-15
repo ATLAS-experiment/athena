@@ -217,6 +217,15 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.setProperty("IsMC", isMC) );
   ANA_CHECK( m_Tagger.retrieve() );
 
+  std::string tagger = "DNNTaggerTopQuarkContained80";
+  static const SG::ConstAccessor<bool> acc_Tagged(tagger+"_Tagged");
+  static const SG::ConstAccessor<float> acc_Score(tagger+"_Score");
+  static const SG::ConstAccessor<bool> acc_PassMass(tagger+"_PassMass");
+  static const SG::ConstAccessor<float> acc_SF(tagger+"_SF");
+  static const SG::ConstAccessor<float> acc_efficiency(tagger+"_efficiency");
+  static const SG::ConstAccessor<float> acc_effSF(tagger+"_effSF");
+
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
 
   std::cout << "Total Events in File : " << entries << std::endl;
 
@@ -254,19 +263,19 @@ int main( int argc, char* argv[] ) {
       if(verbose) {
         std::cout << "Testing top Tagger " << std::endl;
         std::cout << "jet pt              = " << jetSC->pt() << std::endl;
-        std::cout << "RunningTag : " << jetSC->auxdata<bool>("DNNTaggerTopQuarkContained80_Tagged") << std::endl;
-        std::cout << "Printing jet score : " << jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_Score") << std::endl;
-        std::cout << "result masspass     = " << jetSC->auxdata<bool>("DNNTaggerTopQuarkContained80_PassMass") << std::endl;
+        std::cout << "RunningTag : " << acc_Tagged(*jetSC) << std::endl;
+        std::cout << "Printing jet score : " << acc_Score(*jetSC) << std::endl;
+        std::cout << "result masspass     = " << acc_PassMass(*jetSC) << std::endl;
       }
-      truthLabel = jetSC->auxdata<int>("R10TruthLabel_R21Precision_2022v1");
+      truthLabel = acc_truthLabel(*jetSC);
 
-      pass = jetSC->getAttribute<bool>("DNNTaggerTopQuarkContained80_Tagged");
-      sf = jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_SF");
+      pass = acc_Tagged(*jetSC);
+      sf = acc_SF(*jetSC);
       pt = jetSC->pt();
       m  = jetSC->m();
       eta = jetSC->eta();
-      eff = jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_efficiency");
-      effSF = jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_effSF");
+      eff = acc_efficiency(*jetSC);
+      effSF = acc_effSF(*jetSC);
 
       Tree->Fill();
       idx++;
@@ -278,16 +287,16 @@ int main( int argc, char* argv[] ) {
 	    validForUncTool &= ( std::abs(eta) < 2 );
 	    std::cout << "Pass: " << pass << std::endl;
 	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb) " 
-		      <<  jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_effSF") 
+		      <<  acc_effSF(*jetSC)
 		      << " "
-		      <<  jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_efficiency") 
+		      <<  acc_efficiency(*jetSC)
 		      << std::endl;
 	    if( validForUncTool ){
 	      for ( const CP::SystematicSet& sysSet : jetUnc_sysSets ){
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );
 		ANA_CHECK( jetUncToolSF->applySystematicVariation(sysSet) );
 		ANA_CHECK( jetUncToolSF->applyCorrection(*jetSC) );
-		std::cout << sysSet.name() << " " << jetSC->auxdata<float>("DNNTaggerTopQuarkContained80_SF") << std::endl;
+		std::cout << sysSet.name() << " " << acc_SF(*jetSC) << std::endl;
 	      }
 	    }
           }
