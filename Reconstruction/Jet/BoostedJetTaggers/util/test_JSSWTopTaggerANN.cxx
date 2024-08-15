@@ -200,6 +200,10 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.setProperty("IsMC", m_isMC) );
   ANA_CHECK( m_Tagger.retrieve() );
 
+  static const SG::ConstAccessor<float> acc_ANNWContained80_PassScore("ANNWContained80_PassScore");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<float> acc_ANNWContained80_SF("ANNWContained80_SF");
+  static const SG::ConstAccessor<float> acc_ANNTagger_SF("ANNTagger_SF");
 
   std::cout << "Total Events in File : " << entries << std::endl;
 
@@ -238,13 +242,13 @@ int main( int argc, char* argv[] ) {
         std::cout << "Testing ANN Tagger " << std::endl;
         std::cout << "jet pt              = " << jetSC->pt() << std::endl;
         std::cout << "RunningTag : " << jetSC->getAttribute<bool>("ANNWContained80_Tagged") << std::endl;
-        std::cout << "Printing jet score : " << jetSC->auxdata<float>("ANNWContained80_PassScore") << std::endl;
+        std::cout << "Printing jet score : " << acc_ANNWContained80_PassScore(*jetSC) << std::endl;
         std::cout << "result masspass     = " << jetSC->getAttribute<bool>("ANNWContained80_PassMass") << std::endl;
       }
-      truthLabel = jetSC->auxdata<int>("R10TruthLabel_R21Precision_2022v1");
+      truthLabel = acc_truthLabel(*jetSC);
 
       pass = jetSC->getAttribute<bool>("ANNWContained80_Tagged");
-      sf = jetSC->auxdata<float>("ANNWContained80_SF");
+      sf = acc_ANNWContained80_SF(*jetSC);
       pt = jetSC->pt();
       m  = jetSC->m();
       eta = jetSC->eta();
@@ -264,7 +268,7 @@ int main( int argc, char* argv[] ) {
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );
 		ANA_CHECK( jetUncToolSF->applySystematicVariation(sysSet) );
 		ANA_CHECK( jetUncToolSF->applyCorrection(*jetSC) );
-		std::cout << sysSet.name() << " " << jetSC->auxdata<float>("ANNTagger_SF") << std::endl;
+		std::cout << sysSet.name() << " " << acc_ANNTagger_SF(*jetSC) << std::endl;
 	      }
 	    }
 	  }

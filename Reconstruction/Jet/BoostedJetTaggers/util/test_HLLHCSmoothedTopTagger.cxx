@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -276,7 +276,14 @@ int main( int argc, char* argv[] ) {
   std::string massPassDecor = decorationName + "_PassMass";
 
   std::string validJetDecor = decorationName + "_ValidJetContent";  
-  std::string validKinRangeDecor = decorationName + "_ValidKinRange"; 
+  std::string validKinRangeDecor = decorationName + "_ValidKinRange";
+
+  static const SG::ConstAccessor<float> acc_massDecor(massDecor);
+  static const SG::ConstAccessor<float> acc_sphericityDecor(sphericityDecor);
+  static const SG::ConstAccessor<bool> acc_sphericityPassDecor(sphericityPassDecor);
+  static const SG::ConstAccessor<bool> acc_massPassDecor(massPassDecor);
+  static const SG::ConstAccessor<bool> acc_validJetDecor(validJetDecor);
+  static const SG::ConstAccessor<bool> acc_validKinRangeDecor(validKinRangeDecor);
 
   for( Long64_t entry = 0; entry < entries; ++entry ) {
 
@@ -311,18 +318,18 @@ int main( int argc, char* argv[] ) {
       // get tagger results and store in tree variables
       // if (res) {pass = 1;} else {pass = 0;}
       // pass = (res) ? 1 : 0; // tagger pass result (evaluates to true if all TAccept attributes are true)
-      passMass = jet->auxdecor<bool>(massPassDecor);
-      passSphericity = jet->auxdecor<bool>(sphericityPassDecor);
-      massCut = jet->auxdecor<float>(massDecor);
-      sphericityCut = jet->auxdecor<float>(sphericityDecor);
+      passMass = acc_massPassDecor(*jet);
+      passSphericity = acc_sphericityPassDecor(*jet);
+      massCut = acc_massDecor(*jet);
+      sphericityCut = acc_sphericityDecor(*jet);
       jetEta = jet->eta();
       jetPhi = jet->phi();
       // store jet E, m, pT in GeV
       jetM = jet->m()*0.001;
       jetE = jet->e()*0.001;
       jetPt = jet->pt()*0.001;
-      validJet = jet->auxdata<bool>(validJetDecor);
-      validKinRange = jet->auxdata<bool>(validKinRangeDecor);
+      validJet = acc_validJetDecor(*jet);
+      validKinRange = acc_validKinRangeDecor(*jet);
       // ints implicitly converted to bool in this approach
       pass = validJet && passMass && passSphericity && validKinRange;
       if (!(jet->getAttribute("Sphericity",jetSphericity))) {

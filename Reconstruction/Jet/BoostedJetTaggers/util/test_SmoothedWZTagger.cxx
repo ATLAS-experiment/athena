@@ -220,6 +220,19 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.setProperty( "IsMC", isMC ) );
   ANA_CHECK( m_Tagger.retrieve() );
 
+  static const SG::ConstAccessor<int> acc_ParentJetNTrkPt500("ParentJetNTrkPt500");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+
+  std::string tagger = "SmoothWContained50";
+  static const SG::ConstAccessor<bool> acc_Tagged(tagger+"_Tagged");
+  static const SG::ConstAccessor<bool> acc_PassD2(tagger+"_PassD2");
+  static const SG::ConstAccessor<bool> acc_PassNtrk(tagger+"_PassNtrk");
+  static const SG::ConstAccessor<bool> acc_PassMass(tagger+"_PassMass");
+  static const SG::ConstAccessor<float> acc_SF(tagger+"_SF");
+  static const SG::ConstAccessor<float> acc_efficiency(tagger+"_efficiency");
+  static const SG::ConstAccessor<float> acc_effSF(tagger+"_effSF");
+  static const SG::ConstAccessor<float> acc_sigeffSF(tagger+"_sigeffSF");
+
   ////////////////////////////////////////////////////
   // Loop over the events
   ////////////////////////////////////////////////////
@@ -253,23 +266,23 @@ int main( int argc, char* argv[] ) {
       if(verbose) {
         std::cout << "Testing W Tagger " << std::endl;
         std::cout << "jet pt              = " << jetSC->pt() << std::endl;
-        std::cout << "jet ntrk            = " << jetSC->auxdata<int>("ParentJetNTrkPt500") << std::endl;
-        std::cout << "RunningTag : " << jetSC->auxdata<bool>("SmoothWContained50_Tagged") << std::endl;
-        std::cout << "result d2pass       = " << jetSC->auxdata<bool>("SmoothWContained50_PassD2") << std::endl;
-        std::cout << "result ntrkpass     = " << jetSC->auxdata<bool>("SmoothWContained50_PassNtrk") << std::endl;
-        std::cout << "result masspass     = " << jetSC->auxdata<bool>("SmoothWContained50_PassMass") << std::endl;
+        std::cout << "jet ntrk            = " << acc_ParentJetNTrkPt500(*jetSC) << std::endl;
+        std::cout << "RunningTag : " << acc_Tagged(*jetSC) << std::endl;
+        std::cout << "result d2pass       = " << acc_PassD2(*jetSC) << std::endl;
+        std::cout << "result ntrkpass     = " << acc_PassNtrk(*jetSC) << std::endl;
+        std::cout << "result masspass     = " << acc_PassMass(*jetSC) << std::endl;
       }
-      truthLabel = jetSC->auxdata<int>("R10TruthLabel_R21Precision_2022v1");
+      truthLabel = acc_truthLabel(*jetSC);
 
-      pass = jetSC->auxdata<bool>("SmoothWContained50_Tagged");
+      pass = acc_Tagged(*jetSC);
       pt = jetSC->pt();
       m  = jetSC->m();
       eta = jetSC->eta();
-      ntrk = jetSC->auxdata<int>("ParentJetNTrkPt500");
-      sf = jetSC->auxdata<float>("SmoothWContained50_SF");
-      eff = jetSC->auxdata<float>("SmoothWContained50_efficiency");
-      effSF = jetSC->auxdata<float>("SmoothWContained50_effSF");
-      sigeffSF = jetSC->auxdata<float>("SmoothWContained50_sigeffSF");
+      ntrk = acc_ParentJetNTrkPt500(*jetSC);
+      sf = acc_SF(*jetSC);
+      eff = acc_efficiency(*jetSC);
+      effSF = acc_effSF(*jetSC);
+      sigeffSF = acc_sigeffSF(*jetSC);
       std::cout << "pass " << pass
 		<< " truthLabel " << truthLabel
 		<< " sf " << sf
@@ -297,7 +310,7 @@ int main( int argc, char* argv[] ) {
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );
 		ANA_CHECK( jetUncToolSF->applySystematicVariation(sysSet) );
 		ANA_CHECK( jetUncToolSF->applyCorrection(*jetSC) );
-		std::cout << sysSet.name() << " " << jetSC->auxdata<float>("SmoothWContained50_SF") << std::endl;
+		std::cout << sysSet.name() << " " << acc_SF(*jetSC) << std::endl;
 	      }
 	    }
 	  }
