@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBALCHI2FITTER_H
@@ -242,7 +242,7 @@ namespace Trk {
 
       FitterStatusCode m_fittercode;
 
-      std::array<std::atomic<unsigned int>, __S_MAX_VALUE> m_fit_status {};
+      std::array<unsigned int, __S_MAX_VALUE> m_fit_status {};
       std::array<std::atomic<unsigned int>, __S_MAX_VALUE>  *m_fit_status_out = nullptr;
 
        Cache(const GlobalChi2Fitter *fitter):
