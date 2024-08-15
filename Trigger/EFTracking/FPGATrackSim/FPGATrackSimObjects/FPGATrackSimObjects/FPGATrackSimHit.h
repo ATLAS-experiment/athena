@@ -237,7 +237,7 @@ protected:
 
     int m_roadID = 0;
     
-    ClassDef(FPGATrackSimHit, 5);
+    ClassDef(FPGATrackSimHit, 6);
 };
 
 // Container of <FPGATrackSimHit const *>
