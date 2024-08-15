@@ -343,8 +343,9 @@ def ITkTrigSiTrackMaker_FTF_Cfg(flags, signature, layerNumberingTool) -> Compone
   trackMaker.TrigTrackFollowingTool = acc.getPublicTool("TrigTrackFollowingTool_FTF_"+signature)
 
   acc.addPublicTool( CompFactory.TrigInDetRoadPredictorTool( name = "TrigRoadPredictorTool_FTF"+signature, LayerNumberTool = layerNumberingTool ) )
-  trackMaker.useTrigInDetRoadPredictorTool = True
-  trackMaker.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF"+signature)
+  trackMaker.useTrigInDetRoadPredictorTool = (not flags.Tracking.ActiveConfig.isLRT)  # TrigInDetRoadPredictorTool does not work with Strip seeds
+  if trackMaker.useTrigInDetRoadPredictorTool:
+      trackMaker.TrigInDetRoadPredictorTool = acc.getPublicTool("TrigRoadPredictorTool_FTF"+signature)
 
   acc.addPublicTool(trackMaker)
   return acc
