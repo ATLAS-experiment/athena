@@ -61,7 +61,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_eff_vsTest = std::make_unique< EfficiencyPlots >(
         this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->testTag() );
     m_plots_eff_vsRef = std::make_unique< EfficiencyPlots >(
-        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag() );
+        this, "Tracks/Efficiencies", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
     if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
       m_plots_eff_vsTruth = std::make_unique< EfficiencyPlots >(
           this, "Tracks/Efficiencies", m_anaTag, "truth" );
@@ -107,6 +107,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
     TrackAnalysisCollections& trkAnaColls, float weight )
 {
+  float actualMu = trkAnaColls.eventInfo() ?
+                   trkAnaColls.eventInfo()->actualInteractionsPerCrossing() : 0.;
+  float truthMu = 0.; // TODO - do proper calculation
+
   /// Plots w.r.t. test tracks quantities
   if( m_trkAnaDefSvc->isTestTruth() ) {
     ATH_CHECK( fillPlotsTest(
@@ -122,11 +126,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
   if( m_trkAnaDefSvc->isReferenceTruth() ) {
     ATH_CHECK( fillPlotsReference(
         trkAnaColls.refTruthVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), weight ) );
+        trkAnaColls.matches(), truthMu, actualMu, weight ) );
   } else {
     ATH_CHECK( fillPlotsReference(
         trkAnaColls.refTrackVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), weight ) );
+        trkAnaColls.matches(), truthMu, actualMu, weight ) );
   } 
 
   /// Plots w.r.t. truth quantities (for EFTruthMatch only)
@@ -134,7 +138,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
     ATH_CHECK( fillPlotsTruth(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
         trkAnaColls.truthPartVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), weight ) );
+        trkAnaColls.matches(), truthMu, actualMu, weight ) );
   }
 
   return StatusCode::SUCCESS;
@@ -147,7 +151,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
 template< typename PARTICLE >
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     const std::vector< const PARTICLE* >& particles,
-    const ITrackMatchingLookup& matches, float weight )
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight )
 {
   for( const PARTICLE* particle : particles ) {
     /// track parameters plots
@@ -159,7 +164,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 
     /// efficiency plots
     if( m_plots_eff_vsTest ) {
-      ATH_CHECK( m_plots_eff_vsTest->fillPlots( *particle, isMatched, weight ) );
+      ATH_CHECK( m_plots_eff_vsTest->fillPlots(
+          *particle, isMatched, truthMu, actualMu, weight ) );
     }
 
     /// resolution plots
@@ -203,12 +209,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
 template StatusCode
 IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TrackParticle >(
     const std::vector< const xAOD::TrackParticle* >& particles,
-    const ITrackMatchingLookup& matches, float weight );
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight );
 
 template StatusCode
 IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TruthParticle >(
     const std::vector< const xAOD::TruthParticle* >& particles,
-    const ITrackMatchingLookup& matches, float weight );
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight );
 
 
 /// -----------------------------------
@@ -217,7 +225,8 @@ IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest< xAOD::TruthParticle >(
 template< typename PARTICLE >
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     const std::vector< const PARTICLE* >& particles,
-    const ITrackMatchingLookup& matches, float weight )
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight )
 {
   for( const PARTICLE* particle : particles ) {
     /// track parameters plots
@@ -229,7 +238,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
     /// efficiency plots
     if( m_plots_eff_vsRef ) {
-      ATH_CHECK( m_plots_eff_vsRef->fillPlots( *particle, isMatched, weight ) );
+      ATH_CHECK( m_plots_eff_vsRef->fillPlots(
+          *particle, isMatched, truthMu, actualMu, weight ) );
     }
     
     /// offline electron plots (Offline is always either test or reference)
@@ -250,12 +260,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 template StatusCode
 IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TrackParticle >(
     const std::vector< const xAOD::TrackParticle* >& particles,
-    const ITrackMatchingLookup& matches, float weight );
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight );
 
 template StatusCode
 IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle >(
     const std::vector< const xAOD::TruthParticle* >& particles,
-    const ITrackMatchingLookup& matches, float weight );
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight );
 
 
 /// ------------------------------
@@ -264,7 +276,8 @@ IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference< xAOD::TruthParticle >(
 StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
     const std::vector< const xAOD::TrackParticle* >& tracks,
     const std::vector< const xAOD::TruthParticle* >& truths,
-    const ITrackMatchingLookup& matches, float weight )
+    const ITrackMatchingLookup& matches,
+    float truthMu, float actualMu, float weight )
 {
   for( const xAOD::TruthParticle* thisTruth : truths ) {
 
@@ -285,7 +298,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
 
     /// efficiency plots (for EFTruthMatch only)
     if( m_plots_eff_vsTruth ) {
-      ATH_CHECK( m_plots_eff_vsTruth->fillPlots( *thisTruth, isMatched, weight ) );
+      ATH_CHECK( m_plots_eff_vsTruth->fillPlots(
+          *thisTruth, isMatched, truthMu, actualMu, weight ) );
     }
   } // close loop over truth particles
 

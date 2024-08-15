@@ -58,6 +58,26 @@ StatusCode IDTPM::TrackAnalysisCollections::initialize()
   return StatusCode::SUCCESS;
 }
 
+
+/// ---------------------------
+/// ----- Fill Event Info -----
+/// ---------------------------
+StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
+  const SG::ReadHandleKey<xAOD::EventInfo>& handleKey )
+{
+  SG::ReadHandle< xAOD::EventInfo > pie( handleKey );
+
+  if( not pie.isValid() ) {
+    ATH_MSG_WARNING( "Shouldn't happen. EventInfo is buggy" );
+    m_eventInfo = nullptr;
+  }
+
+  m_eventInfo = pie.ptr();
+
+  return StatusCode::SUCCESS;
+}
+
+
 /// ----------------------------
 /// --- Fill FULL containers ---
 /// ----------------------------

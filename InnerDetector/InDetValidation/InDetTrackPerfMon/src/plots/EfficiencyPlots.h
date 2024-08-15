@@ -25,7 +25,8 @@ namespace IDTPM {
         PlotMgr* pParent,
         const std::string& dirName,
         const std::string& anaTag,
-        const std::string& trackType );
+        const std::string& trackType,
+        bool doGlobalPlots = false );
 
     /// Destructor
     virtual ~EfficiencyPlots() = default;
@@ -34,7 +35,10 @@ namespace IDTPM {
     template< typename PARTICLE >
     StatusCode fillPlots(
         const PARTICLE& particle,
-        bool isMatched, float weight );
+        bool isMatched,
+        float truthMu,
+        float actualMu,
+        float weight );
 
     /// Book the histograms
     void initializePlots(); // needed to override PlotBase
@@ -46,6 +50,7 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
+    bool m_doGlobalPlots;
 
     TEfficiency* m_eff_vs_pt;
     TEfficiency* m_eff_vs_eta;
@@ -60,7 +65,10 @@ namespace IDTPM {
     TEfficiency* m_eff_vs_eta_vs_phi;
     TEfficiency* m_eff_vs_z0_vs_d0;
     TEfficiency* m_eff_vs_z0sin_vs_d0;
-    /// TODO - include more plots
+
+    /// Plots vs global quantities
+    TEfficiency* m_eff_vs_truthMu;
+    TEfficiency* m_eff_vs_actualMu;
 
   }; // class EfficiencyPlots
 
