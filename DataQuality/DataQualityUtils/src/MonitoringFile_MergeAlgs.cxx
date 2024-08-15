@@ -717,7 +717,7 @@ namespace dqutils {
     for (Int_t icell = 0; icell < ncells; ++icell) {
       if ((a.GetBinContent(icell) != b.GetBinContent(icell))
           || (a.GetBinError(icell) != b.GetBinError(icell))) {
-        std::cerr << "merge_identical \"" << a.GetName() << "\" and \"" << b.GetName() << "\" have different content";
+        std::cerr << "merge_identical \"" << a.GetName() << "\" and \"" << b.GetName() << "\" have different content\n";
         return;
       }
     }

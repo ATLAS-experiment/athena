@@ -11,6 +11,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "PathResolver/PathResolver.h"
+#include "xAODTrigger/jFexSRJetRoI.h"
 
 #include "TrigInDetPattRecoTools/TrigInDetUtils.h"
 #include "CxxUtils/phihelper.h"
@@ -77,7 +78,7 @@ StatusCode TrigHitDVHypoAlg::initialize()
    CHECK( m_hitDVKey.initialize());
    CHECK( m_tracksKey.initialize());
    CHECK( m_lumiDataKey.initialize(!m_isMC) );
-   ATH_CHECK( m_recJetRoiCollectionKey.initialize(m_doHitDV_Seeding) );
+   ATH_CHECK( m_jetRoiCollectionKey.initialize(m_doHitDV_Seeding) );
 
    if ( !m_monTool.empty() ) CHECK( m_monTool.retrieve() );
 
@@ -1338,32 +1339,23 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
    if( m_doHitDV_Seeding ) {
 
       // add L1 Jet seeds
-      const unsigned int L1JET_ET_CUT = 30;
+      const unsigned int L1JET_ET_CUT = 27; // Mapping from legacy J30, make configurable?
 
-      auto recJetRoiCollectionHandle = SG::makeHandle( m_recJetRoiCollectionKey, ctx );
-      const DataVector<LVL1::RecJetRoI> *recJetRoiCollection = recJetRoiCollectionHandle.cptr();
-      if (!recJetRoiCollectionHandle.isValid()){
-	 ATH_MSG_ERROR("ReadHandle for DataVector<LVL1::RecJetRoI> key:" << m_recJetRoiCollectionKey.key() << " isn't Valid");
-	 return StatusCode::FAILURE;
+      auto jetRoiCollectionHandle = SG::makeHandle( m_jetRoiCollectionKey, ctx );
+      const DataVector<xAOD::jFexSRJetRoI> *jetRoiCollection = jetRoiCollectionHandle.cptr();
+      if (!jetRoiCollectionHandle.isValid()){
+	      ATH_MSG_ERROR("ReadHandle for DataVector<xAOD::jFexSRJetRoI> key:" << m_jetRoiCollectionKey.key() << " isn't Valid");
+	      return StatusCode::FAILURE;
       }
-      for (size_t size=0; size<recJetRoiCollection->size(); ++size){
-	 const LVL1::RecJetRoI* recRoI = recJetRoiCollection->at(size);
-	 if( recRoI == nullptr ) continue;
-	 bool isSeed = false;
-	 for( const unsigned int thrMapping : recRoI->thresholdsPassed()) {
-	    double thrValue = recRoI->triggerThreshold(thrMapping) * Gaudi::Units::GeV;
-	    if( thrValue >= L1JET_ET_CUT ) {
-	       isSeed = true;
-	       break;
-	    }
-	 }
-	 if( ! isSeed ) continue;
-	 // Convert to ATLAS phi convention: see RoIResultToAOD.cxx
-	 float roiPhi = recRoI->phi();
-	 if( roiPhi > TMath::Pi() ) roiPhi -= 2 * TMath::Pi();
-	 v_seeds_eta.push_back(recRoI->eta());
-	 v_seeds_phi.push_back(roiPhi);
-	 v_seeds_type.push_back(0); // L1_J:0
+      for (size_t size=0; size<jetRoiCollection->size(); ++size){
+         const xAOD::jFexSRJetRoI* jetRoI = jetRoiCollection->at(size);
+         if( jetRoI == nullptr ) continue;
+         // Good seed
+         if( jetRoI->et() >= L1JET_ET_CUT ) {
+            v_seeds_eta.push_back(jetRoI->eta());
+            v_seeds_phi.push_back(jetRoI->phi());
+            v_seeds_type.push_back(0); // L1_J:0
+         }
       }
       ATH_MSG_DEBUG("Nr of L1_J" << L1JET_ET_CUT << " seeds = " << v_seeds_eta.size());
 
@@ -1373,9 +1365,9 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
       ATH_CHECK( findSPSeeds(ctx, v_sp_eta, v_sp_phi, v_sp_layer, v_sp_usedTrkId, v_spseeds_eta, v_spseeds_phi) );
       ATH_MSG_DEBUG("Nr of SP seeds = " << v_spseeds_eta.size());
       for(size_t idx=0; idx<v_spseeds_eta.size(); ++idx) {
-	 v_seeds_eta.push_back(v_spseeds_eta[idx]);
-	 v_seeds_phi.push_back(v_spseeds_phi[idx]);
-	 v_seeds_type.push_back(1); // SP: 1
+         v_seeds_eta.push_back(v_spseeds_eta[idx]);
+         v_seeds_phi.push_back(v_spseeds_phi[idx]);
+         v_seeds_type.push_back(1); // SP: 1
       }
       ATH_MSG_DEBUG("Nr of SP + L1_J" << L1JET_ET_CUT << " seeds = " << v_seeds_eta.size());
    }

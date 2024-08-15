@@ -558,8 +558,8 @@ InDet::InDetTestPixelLayerTool::getPixelLayerParameters(
   //// Cylinder bigger than the b-layer ////
   ATH_MSG_DEBUG("Trying to extrapolate to pixelLayer");
 
-  if(std::abs(trackpar->position().z())>10000.){
-    ATH_MSG_DEBUG("Pathological track parameter well outside of detector");
+  if(std::abs(trackpar->position().z())>5000.){
+    ATH_MSG_DEBUG("Pathological track parameter well outside of tracking detector");
     ATH_MSG_DEBUG("Propagator might have issue with this, discarding");
     ATH_MSG_VERBOSE("dumping track parameters " << *trackpar);
     return false;

@@ -581,8 +581,8 @@ Trk::GaussianSumFitter::makePerigee(
     pattern(0);
   pattern.set(Trk::TrackStateOnSurface::Perigee);
 
-  if(std::abs(combinedPerigee->position().z())>10000.) {
-    ATH_MSG_WARNING("Pathological perigee well outside of detector!! Returning {}");
+  if(std::abs(combinedPerigee->position().z())>5000.) {
+    ATH_MSG_WARNING("Pathological perigee well outside of tracking detector!! Returning {}");
     return {};
   }
 
