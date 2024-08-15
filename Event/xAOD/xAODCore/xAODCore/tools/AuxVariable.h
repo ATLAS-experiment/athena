@@ -100,7 +100,7 @@ LINKED initLinkedVar( AUXBASE* auxcont,
 {
   // Use the @c ConstAccessor specialization to get the variable
   // declared properly.
-  static SG::ConstAccessor<ELT> acc( NAME );
+  static const SG::ConstAccessor<ELT> acc( NAME );
   auxcont->regAuxVar( acc.linkedAuxid(), SG::AuxTypeRegistry::linkedName (NAME), linked );
   auxcont->regAuxVar( acc.auxid(), NAME, links );
   return xAOD::detail::initAuxVar1<LINKED>( auxcont );
