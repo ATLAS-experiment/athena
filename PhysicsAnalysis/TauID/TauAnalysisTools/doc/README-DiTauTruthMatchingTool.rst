@@ -89,7 +89,8 @@ Output
 Calling getTruth(xDiTau) adds a vector of element links to the truth lepton
 particle as decoration: ``truthParticleLink``. Those can be accessed via::
 
-  auto vElementLinks = xDiTau.auxdata<std::vector<ElementLink<xAOD::TruthParticleContainer>>>("truthParticleLinks");
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>> acc_truthParticleLinks("truthParticleLinks");
+  auto vElementLinks = acc_truthParticleLinks(xDiTau);
 
 In addition two variables of type char are decorated to the DiTauJet 
 
@@ -98,8 +99,10 @@ In addition two variables of type char are decorated to the DiTauJet
 
 After calling getTruth(xDiTau) those information can be retrieved via::
 
-  bool bMatched = (bool)xDiTau.auxdata<char>("IsTruthMatched")
-  bool bHadronic = (bool)xDiTau.auxdata<char>("IsTruthHadronic")
+  static const SG::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+  static const SG::ConstAccessor<char> acc_IsTruthHadronic("IsTruthHadronic");
+  bool bMatched = (bool)acc_IsTruthMatched(xDiTau);
+  bool bHadronic = (bool)acc_IsTruthHadronic(xDiTau);
 
 
 ----------

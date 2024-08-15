@@ -224,7 +224,8 @@ should contain decorations named ``classifierParticleType`` and
 example if you want to check if a truth particle is a prompt tau you can do the
 following::
 
-  if (xTruthTau->auxdata<unsigned int>("classifierParticleType") == MCTruthPartClassifier::IsoTau)
+  static const SG::ConstAccessor<unsigned int> acc_classifierParticleType("classifierParticleType");
+  if (acc_classifierParticleType(*xTruthTau) == MCTruthPartClassifier::IsoTau)
   {
     ...
   }
@@ -251,8 +252,9 @@ first need to check if it is a tau::
   }
 
 then check the decoration::
-  
-  if (xTruthParticle->auxdataConst<char>("IsHadronicTau"))
+
+  static const SG::ConstAccessor<char> acc_IsHadronicTau("IsHadronicTau");
+  if (acc_IsHadronicTau(*xTruthParticle))
   {
     ...
   }

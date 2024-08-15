@@ -147,10 +147,11 @@ This is minimal code example on how to extract scale factors (including systemat
   {
     ANA_CHECK( DiTauEffTool->applySystematicVariation(sSystematicSet));
     ANA_CHECK( DiTauEffTool->applyEfficiencyScaleFactor(*xDiTau) );
+    static const SG::ConstAccessor<double> acc_DiTauScaleFactorJetIDHadTau("DiTauScaleFactorJetIDHadTau");
     Info( "execute()",
           "SystType %s: JetIDSF: %g",
           sSystematicSet.name().c_str(),
-          xDiTau->auxdata< double >( "DiTauScaleFactorJetIDHadTau" ));
+          acc_DiTauScaleFactorJetIDHadTau(*xDiTau));
   }
 
 
