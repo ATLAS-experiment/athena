@@ -17,9 +17,10 @@
 /// -----------------------
 IDTPM::EfficiencyPlots::EfficiencyPlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType ) :
+    const std::string& anaTag, const std::string& trackType, bool doGlobalPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
-        m_trackType( trackType ) { }
+        m_trackType( trackType ),
+        m_doGlobalPlots( doGlobalPlots ) { }
 
 
 /// ---------------------------
@@ -51,6 +52,12 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_eff_vs_eta_vs_phi, "eff_vs_"+m_trackType+"_eta_vs_phi" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_z0_vs_d0, "eff_vs_"+m_trackType+"_z0_vs_d0" ) );
   ATH_CHECK( retrieveAndBook( m_eff_vs_z0sin_vs_d0, "eff_vs_"+m_trackType+"_z0sin_vs_d0" ) );
+
+  if( m_doGlobalPlots ) {
+    ATH_CHECK( retrieveAndBook( m_eff_vs_truthMu, "eff_vs_truthMu" ) );
+    ATH_CHECK( retrieveAndBook( m_eff_vs_actualMu, "eff_vs_actualMu" ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -60,7 +67,7 @@ StatusCode IDTPM::EfficiencyPlots::bookPlots()
 /// -----------------------------
 template< typename PARTICLE >
 StatusCode IDTPM::EfficiencyPlots::fillPlots(
-    const PARTICLE& particle, bool isMatched, float weight )
+    const PARTICLE& particle, bool isMatched, float truthMu, float actualMu, float weight )
 {
   /// Compute track parameters - TODO: add more...
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
@@ -89,15 +96,19 @@ StatusCode IDTPM::EfficiencyPlots::fillPlots(
   ATH_CHECK( fill( m_eff_vs_z0_vs_d0, pd0, pz0, isMatched, weight ) );
   ATH_CHECK( fill( m_eff_vs_z0sin_vs_d0, pz0*std::sin(ptheta), pd0, isMatched, weight ) );
 
+  if( m_doGlobalPlots ) {
+    ATH_CHECK( fill( m_eff_vs_truthMu, truthMu, isMatched, weight ) );
+    ATH_CHECK( fill( m_eff_vs_actualMu, actualMu, isMatched, weight ) );
+  }
 
   return StatusCode::SUCCESS;
 }
 
 template StatusCode IDTPM::EfficiencyPlots::fillPlots< xAOD::TrackParticle >(
-    const xAOD::TrackParticle&, bool isMatched, float weight );
+    const xAOD::TrackParticle&, bool isMatched, float truthMu, float actualMu, float weight );
 
 template StatusCode IDTPM::EfficiencyPlots::fillPlots< xAOD::TruthParticle >(
-    const xAOD::TruthParticle&, bool isMatched, float weight );
+    const xAOD::TruthParticle&, bool isMatched, float truthMu, float actualMu, float weight );
 
 
 /// -------------------------

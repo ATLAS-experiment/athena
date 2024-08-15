@@ -148,12 +148,11 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value() );
   ATH_CHECK( thisTrkAnaCollections.initialize() );
 
-  SG::ReadHandle<xAOD::EventInfo> pie = SG::ReadHandle<xAOD::EventInfo>( m_eventInfoContainerName );
-
   /// filling TrackAnalysisCollections
   ATH_CHECK( loadCollections( thisTrkAnaCollections ) );
 
-  ATH_MSG_DEBUG( "Processing event = " << pie->eventNumber() <<
+  ATH_MSG_DEBUG( "Processing event = " <<
+                 thisTrkAnaCollections.eventInfo()->eventNumber() <<
                  "\n==========================================" );
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
 
@@ -308,6 +307,7 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_INFO( "Loading collections" );
+  ATH_CHECK( trkAnaColls.fillEventInfo( m_eventInfoContainerName ) );
   ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
   ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );

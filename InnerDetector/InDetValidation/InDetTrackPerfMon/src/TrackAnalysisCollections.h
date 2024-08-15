@@ -22,6 +22,7 @@
 #include "StoreGate/ReadHandle.h"
 
 /// EDM includes
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
@@ -61,6 +62,10 @@ namespace IDTPM {
     StatusCode initialize();
 
     /// --- Setter methods ---
+
+    /// fill event info
+    StatusCode fillEventInfo(
+        const SG::ReadHandleKey<xAOD::EventInfo>& handleKey );
 
     /// fill FULL collections and vectors
     StatusCode fillTruthPartContainer(
@@ -122,6 +127,9 @@ namespace IDTPM {
     /// get TrackAnalysis tag
     const std::string& anaTag() { return m_anaTag; }
 
+    /// get event info
+    const xAOD::EventInfo* eventInfo() { return m_eventInfo; }
+
     /// get full TEST containers
     const xAOD::TruthParticleContainer* testTruthContainer();
     const xAOD::TrackParticleContainer* testTrackContainer();
@@ -170,6 +178,9 @@ namespace IDTPM {
     ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
 
     /// --- Collections class variables ---
+    /// EventInfo
+    const xAOD::EventInfo* m_eventInfo{nullptr};
+
     /// Full collections
     const xAOD::TruthParticleContainer* m_truthPartContainer{nullptr};
     const xAOD::TrackParticleContainer* m_offlTrackContainer{nullptr};

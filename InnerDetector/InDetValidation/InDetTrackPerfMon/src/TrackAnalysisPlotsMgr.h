@@ -67,20 +67,23 @@ namespace IDTPM {
     template< typename PARTICLE > 
     StatusCode fillPlotsTest(
         const std::vector< const PARTICLE* >& particles,
-        const ITrackMatchingLookup& matches, float weight=1.0 );
+        const ITrackMatchingLookup& matches,
+        float truthMu=0., float actualMu=0., float weight=1.0 );
 
     /// Fill all plots w.r.t. reference tracks quantities for a specific
     /// collection (trigger tracks, offline tracks, truth particles)
     template< typename PARTICLE > 
     StatusCode fillPlotsReference(
         const std::vector< const PARTICLE* >& particles,
-        const ITrackMatchingLookup& matches, float weight=1.0 );
+        const ITrackMatchingLookup& matches,
+        float truthMu=0., float actualMu=0., float weight=1.0 );
 
     /// Fill efficiency plots w.r.t. truth (for EFTruthMatch only)
     StatusCode fillPlotsTruth(
         const std::vector< const xAOD::TrackParticle* >& tracks,
         const std::vector< const xAOD::TruthParticle* >& truths,
-        const ITrackMatchingLookup& matches, float weight=1.0 );
+        const ITrackMatchingLookup& matches,
+        float truthMu=0., float actualMu=0., float weight=1.0 );
 
   private :
 

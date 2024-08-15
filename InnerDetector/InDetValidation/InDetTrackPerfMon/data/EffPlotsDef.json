@@ -44,6 +44,16 @@
         "xAxis" : { "title" : "$TRKTYPE prodZ", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
         "yAxis" : { "title" : "Efficiency" }
     },
+    "eff_vs_truthMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "100", "low" : "0", "high" : "100.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
+    "eff_vs_actualMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "100", "low" : "0", "high" : "100.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
     "eff_vs_$TRKTAG_eta_vs_pt" : {
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
