@@ -22,6 +22,34 @@ BOOST_AUTO_TEST_CASE(RangeConstructors){
   BOOST_CHECK_NO_THROW(Range r4(e));
 }
 
+BOOST_AUTO_TEST_CASE(RangeAssignment){
+  ExpandedIdentifier e;
+  Range r1(e);
+  Range r2;
+  Range r3;
+  BOOST_CHECK_NO_THROW(r2 = r1);
+  BOOST_CHECK_NO_THROW(r3 = std::move(r2));
+}
+
+BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
+  const std::string sctExample="-6:-1/1:6";//SCT barrel has eta indices -1->-5 and 1->6
+  Range r1;
+  BOOST_CHECK_NO_THROW(r1.build(sctExample));
+  const std::string wildCard="*";
+  BOOST_CHECK_NO_THROW(r1.build(wildCard));
+  const std::string lowerBound="-5:";
+  BOOST_CHECK_NO_THROW(r1.build(lowerBound));
+  const std::string upperBound=":5";
+  BOOST_CHECK_NO_THROW(r1.build(upperBound));
+  const std::string enumerated="1,2,3,4,10";
+  BOOST_CHECK_NO_THROW(r1.build(enumerated));
+  //I think it should throw if you feed it nonsense, but it doesn't; it fails silently
+  const std::string empty;
+  BOOST_CHECK_THROW(r1.build(empty), std::runtime_error);
+  const std::string nonsense="hgfclsdvoiwe";
+  BOOST_CHECK_THROW(r1.build(nonsense), std::runtime_error);
+}
+
 
 //Range::identifier_factory is a publicly accessible class defined in the Range class
 BOOST_AUTO_TEST_CASE(RangeIdentifier_factoryConstructors){
