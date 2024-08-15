@@ -104,8 +104,16 @@ public:
    */ 
   Range (const Range& other, size_type start); 
  
+  
+ 
   /** 
-   * Constructor with setup from a textual description. 
+   *   Construct from a simple ExpandedIdentifier. This implies that all fields 
+   *   will have their min=max=id[i] 
+   */ 
+  Range (const ExpandedIdentifier& root); 
+
+ /** 
+   * Build Range from a textual description. 
    * 
    *  The syntax is : 
    * 
@@ -120,17 +128,6 @@ public:
    *    | \<min\> ":" \<max\> 
    *    | \<value\> "," \<value\> "," ... "," \<value\> 
    * 
-   */ 
-//  explicit Range (const std::string& text); 
- 
-  /** 
-   *   Construct from a simple ExpandedIdentifier. This implies that all fields 
-   *   will have their min=max=id[i] 
-   */ 
-  Range (const ExpandedIdentifier& root); 
-
-  /** 
-   * Build a range from a textual description. 
    */ 
   void build (const std::string& text);
  
