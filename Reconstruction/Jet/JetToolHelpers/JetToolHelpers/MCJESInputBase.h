@@ -59,7 +59,7 @@ class MCJESInputBase :public asg::AsgTool, virtual public IVarTool
         /// This function fill the ntuples with calibration factors 
         bool readMCJESFromText();
         /// return MCJES calibration factor
-        double getJES(const double X, const double Y=0) const;
+        double getJES(const double X, const double Y=0, const double Emax=-1) const;
         /// return Eta correction
         double getEtaCorr(const double X, const double Y=0) const;
         /// return Emax

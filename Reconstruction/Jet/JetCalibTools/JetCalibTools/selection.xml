@@ -1,6 +1,7 @@
 <lcgdict>
 
   <class name="JetCalibrationTool" />
+  <class name="JetCalibTool" />
 
 <!-- <class name="JetCalibratorAthena" /> -->
 <!-- <class name="MCNumInversionResponse" /> -->

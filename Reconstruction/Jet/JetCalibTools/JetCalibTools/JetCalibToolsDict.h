@@ -15,5 +15,6 @@
 #endif
 
 #include "JetCalibTools/JetCalibrationTool.h"
+#include "JetCalibTools/JetCalibTool.h"
 
 #endif
