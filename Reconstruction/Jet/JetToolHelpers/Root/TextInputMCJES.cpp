@@ -47,7 +47,7 @@ float TextInputMCJES::getValue(const xAOD::Jet& jet, const JetContext& event) co
     float varValue2 {m_vartool2->getValue(jet,event)};
 
 
-    if(m_corrName == "JES" ) return getJES(varValue1, varValue2);
+    if(m_corrName == "JES" ) return getJES(varValue1, varValue2, event.getValue<float>("Emax"));
     if(m_corrName == "EtaCorr" ) return getEtaCorr(varValue1, varValue2);
     if(m_corrName == "EmaxJES") return getEmaxJES(varValue2);
     

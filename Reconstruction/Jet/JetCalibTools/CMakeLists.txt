@@ -11,11 +11,11 @@ find_package( onnxruntime )
 
 # Libraries in the package:
 atlas_add_library( JetCalibToolsLib
-   JetCalibTools/*.h Root/*.cxx
+   JetCalibTools/*.h Root/*.cxx src/*.cxx
    PUBLIC_HEADERS JetCalibTools
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo xAODEventShape
-   xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib
+   xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib AthOnnxInterfaces AsgServicesLib JetToolHelpersLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
 
 if( NOT XAOD_STANDALONE )

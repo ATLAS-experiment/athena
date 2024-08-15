@@ -15,6 +15,9 @@
 #include <cmath>
 #include <vector>
 #include <memory>
+#include "xAODTracking/Vertex.h"
+
+#define CHECK_THEN_ERROR( checkcode, message) if( checkcode ) { ATH_MSG_ERROR( message ) ; return StatusCode::FAILURE;}
 
 typedef std::vector<TString> StrV;
 typedef std::vector<double> VecD;
@@ -31,6 +34,15 @@ namespace JetCalibUtils {
   std::unique_ptr<const TH3> GetHisto3(TFile& file, const TString& hname);
 
   TTree *setTree(TTree *tree);
+
+  template<typename VXCONT>
+  int countNPV(const VXCONT& vxCont){
+      int eventNPV = 0;  
+      for(const xAOD::Vertex* vtx: vxCont){
+	if ( vtx->nTrackParticles() >= 2 ) ++eventNPV;    
+      }
+      return eventNPV;
+  }
 
 }
 

@@ -58,13 +58,24 @@ bool MCJESInputBase::readMCJESFromText()
     return true;
 }
 
-double MCJESInputBase::getJES(const double X, const double Y) const
+double MCJESInputBase::getJES(const double X, const double Y, const double Emax) const
 {
     double JES_R;
     int binEta = getEtaBin(Y);
     const double *factors = m_JESFactors[binEta];
 
-    double R = getLogPolN(factors,X);
+    double E;
+    if(Emax < 0){ // if Emax is negative, we're done, just use raw E
+        E = X;
+    } else { // Emax is positive, so compare to raw E
+        if (X > Emax){ // case where we do apply the frozen value
+            E = Emax;
+        } else { // no freezing necessary, use raw E
+            E = X;
+        }
+    }
+
+    double R = getLogPolN(factors,E);
 
     JES_R = 1/R;
 
