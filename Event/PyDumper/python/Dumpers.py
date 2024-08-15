@@ -5515,7 +5515,7 @@ class char_accessor:
         return
     def __call__ (self, x):
         return ord(self.ac(x))
-uchar_accessor_ = getattr (ROOT, 'SG::ConstAuxElement::ConstAccessor<unsigned char>')
+uchar_accessor_ = getattr (ROOT, 'SG::ConstAccessor<unsigned char>')
 class uchar_accessor:
     def __init__ (self, name):
         self.ac = uchar_accessor_ (name)
@@ -5538,7 +5538,7 @@ accessors = {
     'unsigned char' : uchar_accessor,
     }
 for t in tlist:
-    aname = 'SG::ConstAuxElement::ConstAccessor<' + t
+    aname = 'SG::ConstAccessor<' + t
     if t[-1] == '>': aname += ' '
     aname += '>'
     accessors[t] = getattr (ROOT, aname)
@@ -5555,6 +5555,9 @@ def format_obj (x, name=None):
     if isinstance(x, int):
         return format_int (x)
     tname = typename(type(x))
+    if tname.startswith ('CxxUtils::range_with_conv<'):
+        x = x.asVector()
+        tname = typename(type(x))
     if tname.startswith ('ROOT.'):
         tname = tname[5:]
     if tname.startswith ('ElementLink<'):
@@ -5637,6 +5640,12 @@ def dump_auxitem (x, auxid, f = sys.stdout):
         ac_cl = atomic_accessors.get (tname)
     else:
         ac_cl = accessors.get (tname)
+
+    if not ac_cl and tname.startswith ('SG::JaggedVecElt<'):
+        ac_cl = getattr (ROOT, 'SG::ConstAccessor<' + tname + ' >')
+        if ac_cl:
+            accessors[tname] = ac_cl
+
     #print x, auxid, reg.getName(auxid)
     if ac_cl:
         ac = ac_cl(reg.getName(auxid))
@@ -5665,6 +5674,7 @@ def dump_auxdata (x, exclude=None, f = sys.stdout):
     auxids.sort()
     for name, auxid in auxids:
         if exclude and name in exclude: continue
+        if name.endswith ('_linked'): continue
         fprint (f,  name + ': ')
         dump_auxitem (x, auxid, f)
         fprint (f, '\n    ')
