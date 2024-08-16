@@ -202,14 +202,14 @@ def ZdcNtupleRun2Cfg(flags,**kwargs):
 
     acc = ComponentAccumulator()
     acc.merge(ZdcNtupleCfg(flags,
-       	useGRL = False,
-   	zdcOnly = True,
-	enableTrigger = False,
-	enableOutputSamples = True,
-	enableOutputTree = True,
-	writeOnlyTriggers = False,
-	nsamplesZdc = 7,
-	**kwargs))
+                           useGRL = False,
+                           zdcOnly = True,
+                           enableTrigger = False,
+                           enableOutputSamples = True,
+                           enableOutputTree = True,
+                           writeOnlyTriggers = False,
+                           nsamplesZdc = 7,
+                           **kwargs))
 
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
 #    acc.setAppProperty("HistogramPersistency","ROOT")
@@ -219,19 +219,19 @@ def ZdcNtupleRun3Cfg(flags,**kwargs):
     
     acc = ComponentAccumulator()
     acc.merge(ZdcNtupleCfg(flags,
-	useGRL = False,
-	zdcOnly = True,
-	lhcf2022 = False,
-	lhcf2022zdc = False,
-	lhcf2022afp = False,
-	enableTrigger = False if flags.Input.isMC else True,
-	enableOutputSamples = True,
-	enableOutputTree = True,
-	writeOnlyTriggers = False,
-	enableRPD = True,
-	enableCentroid = True,
-	reprocZdc = False,
-	**kwargs))
+                           useGRL = False,
+                           zdcOnly = True,
+                           lhcf2022 = False,
+                           lhcf2022zdc = False,
+                           lhcf2022afp = False,
+                           enableTrigger = not flags.Input.isMC,
+                           enableOutputSamples = True,
+                           enableOutputTree = True,
+                           writeOnlyTriggers = False,
+                           enableRPD = True,
+                           enableCentroid = True,
+                           reprocZdc = False,
+                           **kwargs))
 
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
     #acc.setAppProperty("HistogramPersistency","ROOT")
