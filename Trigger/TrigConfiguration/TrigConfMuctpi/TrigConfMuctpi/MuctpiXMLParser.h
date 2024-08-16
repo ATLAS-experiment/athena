@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------
@@ -13,22 +13,22 @@
 #define MUCTPIXMLPARSER_HPP
 
 
-#include <iostream>
-#include <stdio.h>
-#include <vector>
-#include <string>
+
+#include "TrigConfBase/TrigConfMessaging.h"//inheritance
+
 
 // boost libraries
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
-#include "TrigConfBase/TrigConfMessaging.h"
-#include "TrigConfMuctpi/MioctTopoCellGeometry.h"
-#include "TrigConfMuctpi/MioctROIGeometry.h"
-#include "TrigConfMuctpi/MioctSectorGeometry.h"
-#include "TrigConfMuctpi/MioctGeometry.h"
-#include "TrigConfMuctpi/MuCTPiGeometry.h"
-#include "TrigConfMuctpi/MuctpiXMLHelper.h"
+#include "TrigConfMuctpi/MuCTPiGeometry.h"//member
+#include "TrigConfMuctpi/MuctpiXMLHelper.h"//member
+#include <string>
+
+class MioctGeometry;
+class MioctSectorGeometry;
+class MioctROIGeometry;
+class MioctTopoCellGeometry;
+class L1MuonPtEncoding;
 
 class MuctpiXMLParser : TrigConf::TrigConfMessaging
 {

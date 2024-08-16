@@ -1,20 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_MioctSectorGeometry
 #define TrigConf_MioctSectorGeometry
 
-#include <string>
-#include <vector>
+
 
 /*
    <MIOCT id="0" slot="4">
         <Sector connector="0" name="B30">
             <ROI eta="-0.934032" phi="-0.348145" etacode="0x2" phicode="0x0" etamin="-0.905571" etamax="-0.962493" phimin="-0.389923" phimax="-0.306366" roiid="21"/>
  */
-
-class MictROIGeometry;
+ //need type traits for vector member
+#include "TrigConfMuctpi/MioctROIGeometry.h"
+#include <string>
+#include <vector>
 
 class MioctSectorGeometry {
    public:
@@ -36,7 +37,7 @@ class MioctSectorGeometry {
     virtual void writeXML(std::ostream & xmlfile, int indentLevel=0, int indentWidth=2) const;
     
    private:
-    unsigned int  m_connector;
+    unsigned int  m_connector{};
     std::string   m_name;
     std::vector<MioctROIGeometry>   m_ROIs;
   
