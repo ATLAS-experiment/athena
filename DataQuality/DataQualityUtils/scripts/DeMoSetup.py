@@ -18,7 +18,7 @@ import argparse
 runListDir = "./YearStats-common"
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('-y','--year',dest='parser_year',default = "2023",help='Year [Default: 2023].',action='store')
+parser.add_argument('-y','--year',dest='parser_year',default = "2024",help='Year [Default: 2024].',action='store')
 parser.add_argument('-t','--tag',dest='parser_tag',help='DeMo tag',action='store')
 parser.add_argument('-s','--system',dest='parser_system',default="",help='System: LAr, CaloCP... [Default : all systems : LAr,Pixel,SCT,TRT,Tile,MDT,TGC,RPC,Trig_L1,Trig_HLT,Lumi,Global,ALFA,AFP,LUCID,ZDC,IDGlobal,BTag,CaloCP,MuonCP]',action='store')
 parser.add_argument('--description',dest='parser_description',default = "",help='Short description for DeMo plots',action='store')
@@ -68,6 +68,7 @@ if b_createDeMoConfig:
     elif (args.parser_year == "2018"): tmp_d = "DetStatus-v105-pro22-13"
     elif (args.parser_year == "2022"): tmp_d = "HEAD"
     elif (args.parser_year == "2023"): tmp_d = "HEAD"
+    elif (args.parser_year == "2024"): tmp_d = "HEAD"
     print("No defect tag provided. Default year tag used -> %s"%tmp_d)
   else:
     tmp_d = args.parser_defectTag    
@@ -77,6 +78,7 @@ if b_createDeMoConfig:
     if (args.parser_year == "2015" or args.parser_year == "2016" or args.parser_year == "2017" or args.parser_year == "2018"): tmp_d = "LARBadChannelsOflEventVeto-RUN2-UPD4-11"
     elif (args.parser_year == "2022"): tmp_d = "LARBadChannelsOflEventVeto-RUN2-UPD4-11"
     elif (args.parser_year == "2023"): tmp_d = "LARBadChannelsOflEventVeto-RUN2-UPD4-11"
+    elif (args.parser_year == "2024"): tmp_d = "LARBadChannelsOflEventVeto-RUN2-UPD4-13"
     print("No veto tag provided. Default year tag used -> %s"%tmp_d)
   else:
     tmp_d = args.parser_vetoTag    
@@ -89,6 +91,7 @@ if b_createDeMoConfig:
     elif (args.parser_year == "2018"): tmp_d = "OflLumi-13TeV-010"
     elif (args.parser_year == "2022"): tmp_d = "OflLumi-Run3-002"
     elif (args.parser_year == "2023"): tmp_d = "OflLumi-Run3-002"
+    elif (args.parser_year == "2024"): tmp_d = "OflPrefLumi-RUN3-UPD4-02"
     print("No oflLumi tag provided. Default year tag used -> %s"%tmp_d)
   else:
     tmp_d = args.parser_oflLumiTag    
@@ -98,6 +101,7 @@ if b_createDeMoConfig:
     if (args.parser_year == "2015" or args.parser_year == "2016" or args.parser_year == "2017" or args.parser_year == "2018"): tmp_d = "Unknown"
     elif (args.parser_year == "2022"): tmp_d = "OflLumiAcct-Run3-002"
     elif (args.parser_year == "2023"): tmp_d = "OflLumiAcct-Run3-002"
+    elif (args.parser_year == "2024"): tmp_d = "OflLumiAcct-Run3-005"
     print("No OflLumiAcct tag provided. Default year tag used -> %s"%tmp_d)
   else:
     tmp_d = args.parser_oflLumiAcctTag    

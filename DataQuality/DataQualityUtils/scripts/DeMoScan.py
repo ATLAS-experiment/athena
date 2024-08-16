@@ -267,6 +267,8 @@ for iYT in yearTagList:
           # If the runs filter is activated (i.e. runsFilter != 0), check if the runs must be filtered
           if (len(runsFilter) != 0 and runnumber not in runsFilter):
             continue
+          if runnumber == 451936:  # 29/6/2023: hack by B.Trocme to avoid a crash for a run w/o period assigned
+            continue
           # retrieve the total luminosity and the lost luminosity
           luminosity = int(read.group(2))
           lostLumi = float(read.group(3))
