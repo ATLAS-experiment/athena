@@ -56,10 +56,10 @@ void SetZAxis(TH2F *reshist0)
         for (int iy = 0; iy < reshist0->GetNbinsY(); iy++)
         {
             temp = reshist0->GetBinContent(ix, iy);
-            if (temp > zmax && temp != 0)
-                zmax = temp;
-            if (temp < zmin && temp != 0)
-                zmin = temp;
+            if (temp !=0){
+              zmax = std::max(temp,zmax);
+              zmin = std::min(temp,zmin);
+            }
         }
     }
     reshist0->GetZaxis()->SetRangeUser(zmin, zmax);
@@ -67,7 +67,6 @@ void SetZAxis(TH2F *reshist0)
 
 void ResizePalette(TH2 *hist)
 {
-
     TPaletteAxis *palette = (TPaletteAxis *)hist->GetListOfFunctions()->FindObject("palette");
     palette->SetX2NDC(0.92);
     palette->Paint();
@@ -76,20 +75,19 @@ void ResizePalette(TH2 *hist)
 
 string trim(string s)
 {
-    while (s.find_first_of(" ") == 0)
-        s = s.substr(1, s.size());
-    while (s.find_last_of(" ") == s.size() - 1)
-        s = s.substr(0, (s.size()) - 1);
+    const char * whitespace = " \n\r\t";
+    s.erase(s.find_last_not_of(whitespace)+1);//rtrim
+    s.erase(0,s.find_first_not_of(whitespace));//ltrim
     return s;
 }
 
 class TextPage : public TCanvas
 {
 public:
-    TextPage(string);
+    TextPage(const string&);
 };
 
-TextPage::TextPage(string text)
+TextPage::TextPage(const string & text)
 {
     this->cd();
     TPaveText *pt = new TPaveText(.1, .1, 0.9, 0.9);
@@ -562,15 +560,15 @@ class T0CalTypeXY
 {
 public:
     T0CalTypeXY(TNtuple *, int, float);
-    void Draw(string, bool);
-    TGraph* graph[7];
-    TEventList* elist[7];
+    void Draw(const string &, bool);
+    TGraph* graph[7]{};
+    TEventList* elist[7]{};
 };
 
 T0CalTypeXY::T0CalTypeXY(TNtuple *Levtuple, int detector, float markersize)
 {
 
-    float x, y, nt0, chp, brd, lay, mod, det;
+    float x{}, y{}, nt0{}, chp{}, brd{}, lay{}, mod{}, det{};
     int color[7] = {0, 46, 38, 8, 16, 1, 2};
 
     Levtuple->SetBranchAddress("x", &x);
@@ -616,7 +614,7 @@ T0CalTypeXY::T0CalTypeXY(TNtuple *Levtuple, int detector, float markersize)
     graph[0]->SetMarkerSize(0.1);
 }
 
-void T0CalTypeXY::Draw(string title, bool plotleg)
+void T0CalTypeXY::Draw(const string & title, bool plotleg)
 {
     graph[0]->GetHistogram()->GetXaxis()->SetLabelOffset(1000);
     graph[0]->GetHistogram()->GetYaxis()->SetLabelOffset(1000);
@@ -1799,12 +1797,12 @@ void BoardVariationsTRes::DrawLines()
 class DvGraph : public TGraph
 {
 public:
-    DvGraph(char *, string, string, int, int, bool);
+    DvGraph(char *, string, const string &, int, int, bool);
     // TH1F* hist;
     TGraph *rtgraph;
 };
 
-DvGraph::DvGraph(char *infile, string path, string folder, int det, int lay, bool isinverted)
+DvGraph::DvGraph(char *infile, string path, const string & folder, int det, int lay, bool isinverted)
 {
 
     this->SetName(Form("Dv_%i_%i", det, lay));
@@ -1813,10 +1811,12 @@ DvGraph::DvGraph(char *infile, string path, string folder, int det, int lay, boo
 
     while (true)
     {
-        if ((int)path.find(",") < 0)
+        if (const auto f = path.find(','); f==std::string::npos ){
             break;
-        levels.push_back(path.substr(0, path.find(",")));
-        path = path.substr(path.find(",") + 1, path.size());
+        } else {
+          levels.push_back(path.substr(0, f));
+          path.erase(f+1,std::string::npos);
+        }
     }
     levels.push_back(path.substr(0, path.find(",")));
     cout << " In DvGraph   folder: " << folder << " det " << det << " lay " << lay << endl;
@@ -1939,12 +1939,14 @@ DGraph::DGraph(char *infile, string path, string folder, int det, int lay, bool 
     vector<string> levels;
     while (true)
     {
-        if ((int)path.find(",") < 0)
+        if (const auto f = path.find(','); f==std::string::npos ){
             break;
-        levels.push_back(path.substr(0, path.find(",")));
-        path = path.substr(path.find(",") + 1, path.size());
+        } else {
+          levels.push_back(path.substr(0, f));
+          path.erase(f+1,std::string::npos);
+        }
     }
-    levels.push_back(path.substr(0, path.find(",")));
+    levels.push_back(path.substr(0, path.find(',')));
 
     TFile *file = new TFile(infile);
     file->cd();
@@ -2703,14 +2705,14 @@ XYMapsEC::XYMapsEC(char *infile, string variable, bool isAr = false)
 class RtColor : public TCanvas
 {
 public:
-    RtColor(char *, string, bool);
+    RtColor(char *,const string&, bool);
     TH2F *hist{};
     TGraphErrors *rtgraph{};
     TF1 *oldrtfunc{};
     TF1 *newRT{};
 };
 
-RtColor::RtColor(char *infile, string folder, bool isAr = false)
+RtColor::RtColor(char *infile, const string & folder, bool isAr = false)
 {
 
     map<string, string> titlemap;
@@ -3262,6 +3264,9 @@ class TBinnedRes : public TCanvas
 {
 public:
     TBinnedRes(TFile *, vector<TH1D *>);
+
+private:
+    TH1F *m_hist2{};
 };
 
 TBinnedRes::TBinnedRes(TFile* /*file*/, vector<TH1D *> reshists)
@@ -3290,13 +3295,13 @@ TBinnedRes::TBinnedRes(TFile* /*file*/, vector<TH1D *> reshists)
 class RtBinning : public TCanvas
 {
 public:
-    RtBinning(TDirectory *, string);
+    RtBinning(TDirectory *, const string&);
 
 private:
-  TH1F *m_hist2{nullptr};
+    TH1F *m_hist2{};
 };
 
-RtBinning::RtBinning(TDirectory *file, string detector)
+RtBinning::RtBinning(TDirectory *file, const string & detector)
 {
 
     TDirectory *binhist = (TDirectory *)(((TDirectory *)file->Get(detector.c_str()))->Get("binhist"));
@@ -3322,7 +3327,7 @@ RtBinning::RtBinning(TDirectory *file, string detector)
 class RresTbin : public TCanvas
 {
 public:
-    RresTbin(TFile *, string, int);
+    RresTbin(TFile *, const string &, int);
     vector<TH1D *> reshists;
     map<double, double> resmap;
 
@@ -3334,7 +3339,7 @@ private:
     std::vector<double> m_etdata;
 };
 
-RresTbin::RresTbin(TFile *file, string detname, int det)
+RresTbin::RresTbin(TFile *file, const string & detname, int det)
 {
 
     TF1 ff("fitfunc", "gaus");
@@ -3800,9 +3805,9 @@ SettingsInfo::SettingsInfo(char *filename)
                 }
             }
         }
-        for (map<string, string>::iterator is = set.begin(); is != set.end(); is++)
+        for (const auto & [txt1,txt2]:set)
         {
-            pt->AddText((string(is->first + " . . . . . . . . . . . . " + is->second)).c_str());
+            pt->AddText((string(txt1 + " . . . . . . . . . . . . " + txt2)).c_str());
         }
         myfile.close();
     }
@@ -6161,7 +6166,6 @@ int itersum (int argc, char *argv[])
             tbinnedres2->Print("itersum.ps");
     c1->Clear();
     if (do_expert)
-        if (binres3)
             binres3->Print("itersum.ps");
     c1->Clear();
     if (do_expert)
@@ -6169,7 +6173,6 @@ int itersum (int argc, char *argv[])
             tbinnedres3->Print("itersum.ps");
     c1->Clear();
     if (do_expert)
-        if (binres4)
             binres4->Print("itersum.ps");
     c1->Clear();
     if (do_expert)
@@ -6244,10 +6247,11 @@ int itersum (int argc, char *argv[])
         if (trt->FindKey("Detector_-2"))
             dgraph4 = new DGraph(argv[2], "-2,-1", "Detector_-2", 1, -1, isinverted);
 
-        dgraph0->GetXaxis()->SetRangeUser(-5, 45);
+        
         TLegend *leg = new TLegend(0.8, 0.8, 0.98, 0.95);
         if (dgraph0 != nullptr)
-        {
+        { 
+            dgraph0->GetXaxis()->SetRangeUser(-5, 45);
             cout << " found TRT_all" << endl;
             dgraph0->SetLineWidth(3);
             dgraph0->SetLineColor(1);
@@ -6354,10 +6358,11 @@ int itersum (int argc, char *argv[])
             if (trt->FindKey("Detector_-2"))
                 dvgraph4 = new DvGraph(argv[2], "-2,-1", "Detector_-2", 1, -1, isinverted);
 
-            dvgraph0->GetXaxis()->SetRangeUser(0, 2);
+            
             TLegend *leg = new TLegend(0.8, 0.8, 0.98, 0.95);
             if (dvgraph0 != nullptr)
             {
+                dvgraph0->GetXaxis()->SetRangeUser(0, 2);
                 cout << " do_expert: found -2-1" << endl;
                 dvgraph0->SetLineWidth(3);
                 dvgraph0->SetLineColor(1);

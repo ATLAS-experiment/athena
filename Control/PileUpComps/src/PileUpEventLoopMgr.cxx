@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -313,6 +313,9 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
     // Copy the eventInfo data from origStream event
     *pOverEvent = *inputEventInfo;
     pOverEvent->clearSubEvents();  // start clean without any subevents
+
+    // Need to copy this explicitly as it may be marked as a decoration.
+    pOverEvent->setMCEventWeights(inputEventInfo->mcEventWeights());
 
     // Propagate MC metadata
     if (pOverEvent->mcChannelNumber() == 0) {
