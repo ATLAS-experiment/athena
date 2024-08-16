@@ -28,11 +28,11 @@ echo "Date is ${date}"
 cd ${rundir}
 echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
-source $AtlasSetup/scripts/asetup.sh --stable 22.0,Athena,latest
+source $AtlasSetup/scripts/asetup.sh --stable 24.0,Athena,latest
 export ScriptPath=$rundir
 
 echo "First, looking for new runs..."
-cmd="python $ScriptPath/DeMoUpdate.py --runListUpdate -y ${year}"
+cmd="python3 $ScriptPath/DeMoUpdate.py --runListUpdate -y ${year}"
 echo "** ${cmd} **"
 eval "${cmd}"
 
@@ -54,7 +54,7 @@ do
     echo "====================================================================================="
     
     # Script for the weekly production
-    cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weeklyReport --onlineLumiNorm --vetoLumiEvol"
+    cmd="python3 $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weeklyReport --onlineLumiNorm --vetoLumiEvol"
     log="YearStats-${system}/${year}/${tag}/daemon-weekly.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
@@ -64,9 +64,9 @@ do
     # Script for updating the year stats
     if [ $option == "resetYS" ];
     then
-	cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --resetYearStats --updateYearStats"
+	cmd="python3 $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --resetYearStats --updateYearStats"
     else
-	cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
+	cmd="python3 $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
     fi
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
     echo "** ${cmd} **"
@@ -74,14 +74,14 @@ do
     eval "${cmd} &> ${log}"
 
     # Display of the year stats plots
-    cmd="python $ScriptPath/DeMoStatus.py -b -s ${system} -y ${year} -t ${tag} --yearStats --savePlots"
+    cmd="python3 $ScriptPath/DeMoStatus.py -b -s ${system} -y ${year} -t ${tag} --yearStats --savePlots"
     log="YearStats-${system}/${year}/${tag}/daemon-YSplots.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
     eval "${cmd} &> ${log}"
 
     # Producing the defect recap
-    cmd="python $ScriptPath/DeMoScan.py -b -y ${year} -t ${tag} -s ${system} --recapDefects"
+    cmd="python3 $ScriptPath/DeMoScan.py -b -y ${year} -t ${tag} -s ${system} --recapDefects"
     log="YearStats-${system}/${year}/${tag}/daemon-recapDefects.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
@@ -90,9 +90,9 @@ do
 done
 
 echo "Derive ATLAS data loss"
-cmd="python DeMoAtlasDataLoss.py -b -y ${year} -t ${tag}"
+cmd="python3 DeMoAtlasDataLoss.py -b -y ${year} -t ${tag}"
 eval ${cmd}
 
 echo "Generate webpage"
-cmd="python $ScriptPath/DeMoGenerateWWW.py"
+cmd="python3 $ScriptPath/DeMoGenerateWWW.py -y ${year}"
 eval ${cmd}

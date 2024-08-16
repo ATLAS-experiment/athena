@@ -12,15 +12,16 @@ import argparse
 
 from DeMoLib import retrieveYearTagProperties,returnPeriod
 
-maindir = "/afs/cern.ch/user/a/atlasdqm/www/DeMo"
+maindir = "/eos/project/a/atlas-dataquality/www/DeMo/"
 libdir = os.path.dirname(__file__)
 
-weeklyYear = "2023"
+weeklyYear = "2024"
 weeklyTag = "AtlasReady"
 
 global run3_yt
 run3_yt = {"2022":["AtlasReady_BestLumi_HEAD","AtlasReady_BestLumi","GRL_M"],
-           "2023":["AtlasReady"]}
+           "2023":["AtlasReady","GRL_summer"],
+           "2024":["AtlasReady"]}
 
 # run3_yt_description is retrieved from the DeMoConfig.dat files. See below
 global run3_yt_description
@@ -495,7 +496,7 @@ def createDefectRecapHighlights(year,tag):
 # Main script
 
 parser = argparse.ArgumentParser(description='')
-parser.add_argument('-y','--year',dest='parser_year',default = "2023",help='Year: Run2, 2022,2023...[Default: 2023].',action='store')
+parser.add_argument('-y','--year',dest='parser_year',default = "2024",help='Year: Run2, 2022,2023...[Default: 2024].',action='store')
 
 args = parser.parse_args()
 parser.print_help()
