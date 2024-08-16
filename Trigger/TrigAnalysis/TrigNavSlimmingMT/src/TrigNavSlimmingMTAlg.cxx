@@ -164,8 +164,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
   // as we may need to call this more than once if keepFailedBranches is true
   TrigCompositeUtils::recursiveGetDecisionsInternal(terminusNode, 
     nullptr, // 'Coming from' is nullptr for the first call of the recursive function
-    transientNavGraph, 
-    ctx,
+    transientNavGraph,
     fullyExploredFrom, 
     chainIDs, 
     /*enforce chainIDs on terminus node*/ true);
@@ -187,8 +186,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
       // node's seeds.
       TrigCompositeUtils::recursiveGetDecisionsInternal(rejectedNode, 
         nullptr, // 'Coming from' is nullptr for the first call of the recursive function
-        transientNavGraph, 
-        ctx,
+        transientNavGraph,
         fullyExploredFrom, 
         chainIDs, 
         /*enforce chainIDs on terminus node*/ false);
@@ -255,8 +253,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
     NavGraph transientNavGraphOut;
     TrigCompositeUtils::recursiveGetDecisionsInternal(terminusNodeOut, 
       nullptr, // 'Coming from' is nullptr for the first call of the recursive function
-      transientNavGraphOut, 
-      ctx,
+      transientNavGraphOut,
       fullyExploredFromOut, 
       chainIDs, 
       /*enforce chainIDs on terminus node*/ true);

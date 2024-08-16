@@ -19,7 +19,6 @@ namespace TrigCompositeUtils {
    **/
   class NavGraphNode {
     public:
-
       /**
        * @brief Construct a NavGraphNode shadowing a node in the full xAOD navigation graph
        * @param[in] me The Decision object node from the full xAOD navigation graph which this object is representing.
@@ -107,12 +106,11 @@ namespace TrigCompositeUtils {
       /**
        * @brief Add a new NavGraphNode which shadows the xAOD Decision object "node" from the full navigation graph
        * @param[in] node The xAOD Decision object which the new node will shadow. Will not cause duplication if node has already been added.
-       * @param[in] ctx The event context.
        * @param[in] comingFrom If not null, used to indicate which xAOD Decision object was the seed of "node". This is used to form an edge in the graph.
        * Alternately, if comingFrom is null then "node" is taken as a final node (one of the locations from which the graph should be explored) and hence is added
        * to the finalNodes vector. 
        **/
-      void addNode(const Decision* node, const EventContext& ctx, const Decision* comingFrom = nullptr);
+      void addNode(const Decision* node, const Decision* comingFrom = nullptr);
 
       /**
        * @brief Get all final nodes.
@@ -181,7 +179,7 @@ namespace TrigCompositeUtils {
        **/
       void recursivePrintNavPath(const NavGraphNode& nav, size_t level, MsgStream& log, MSG::Level msgLevel) const;
 
-      std::map<const ElementLink<TrigCompositeUtils::DecisionContainer>, NavGraphNode> m_nodes; //!< Map of nodes in the graph. Indexed on the underlying Decision object's ElementLink.
+      std::map<const Decision*, NavGraphNode> m_nodes; //!< Map of nodes in the graph. Indexed on the underlying Decision pointer.
       std::vector<NavGraphNode*> m_finalNodes; //!< Entry points into the navigation graph. When iterating over the graph, start from all of these places.
       size_t m_edges; //!< Statistics on the number of edges, connecting the nodes in the graph.
   };
