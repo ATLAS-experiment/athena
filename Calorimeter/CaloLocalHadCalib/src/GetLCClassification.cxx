@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -161,9 +161,14 @@ StatusCode GetLCClassification::initialize()
     ATH_MSG_FATAL( " Mandatory dimension log10E, log10rho or log10lambda missing ..." );
     return StatusCode::FAILURE;
   }
-  int nside = (iside>=0?m_dimensions[iside].bins():1);
-  int neta = (ieta>=0?m_dimensions[ieta].bins():1);
-  int nphi = (iphi>=0?m_dimensions[iphi].bins():1);
+  int nside = 1;
+  if (iside>=0) nside = m_dimensions[iside].bins();
+  //
+  int neta = 1;
+  if (ieta>=0) neta = m_dimensions[ieta].bins();
+  //
+  int nphi = 1;
+  if (iphi>=0) nphi = m_dimensions[iphi].bins();
   int nlogE = m_dimensions[ilogE].bins();
   m_hclus.resize(nside*neta*nphi*nlogE,nullptr);
   for ( int jside=0;jside<nside;jside++) {
