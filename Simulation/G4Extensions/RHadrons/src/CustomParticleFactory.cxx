@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -163,14 +163,15 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
       }
     } // End of the for loop
     if (mydecays.size()>0) { // Did I get any decays?
-      int ndec=mydecays.size();
+      const int ndec=std::ssize(mydecays);
       G4DecayTable* table = new G4DecayTable();
-      G4VDecayChannel** mode = new G4VDecayChannel*[ndec];
+      G4VDecayChannel** mode = new G4VDecayChannel*[ndec]{};
       for (int i=0;i!=ndec;i++) {
-        std::vector<std::string> thisdec=mydecays[i];
-        double branch = atof(thisdec[thisdec.size()-1].c_str()); // Reading branching ratio
+        std::vector<std::string> thisdec=mydecays[i];//deliberate copy
+        if (thisdec.empty()) continue;
+        const double branch = std::stod(thisdec.back()); // Reading branching ratio
         thisdec.pop_back(); // Removing the number from the vector
-        for (unsigned int j = 0;j!=thisdec.size();j++) G4cout<<thisdec[j]<<G4endl;
+        for (const auto & thisString:thisdec) G4cout<<thisString<<G4endl;
         if (thisdec.size()==3) {
           mode[i] = new G4PhaseSpaceDecayChannel(thisdec[0],branch,2,thisdec[1],thisdec[2]);
         } else if (thisdec.size()==4) {
