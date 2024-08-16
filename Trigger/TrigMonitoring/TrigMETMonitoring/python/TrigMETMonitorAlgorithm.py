@@ -109,11 +109,7 @@ def TrigMETMonConfig(inputFlags):
       TrigMETMonAlg.hlt_mhtpufit_em_key = 'HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_topocl'
 
     ### chain name selection
-    L1Chains = ["L1_XE50",
-                "L1_XE55",
-                "L1_jXE100",
-                "L1_gXENC100",
-                "L1_gXERHO100",
+    L1Chains = ["L1_jXE100",
                 "L1_gXEJWOJ100"]
     HLTChains = []
     HLTChainsVal = []
