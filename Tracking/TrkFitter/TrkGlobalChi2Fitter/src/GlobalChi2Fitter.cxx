@@ -4614,6 +4614,11 @@ namespace Trk {
       return nullptr;
     }
 
+    if(std::abs(per->position().z())>5000.) {
+      ATH_MSG_WARNING("Pathological perigee well outside of tracking detector!! Returning nullptr");
+      return nullptr;
+    }
+
     return per;
   }
 
