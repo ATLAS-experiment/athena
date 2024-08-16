@@ -1807,9 +1807,9 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
    std::string nErrLink_ECA_module_serial[n_disks][2][n_etaBinsEC][n_phiBinsECOuter];
    std::string nErrLink_ECC_module_serial[n_disks][2][n_etaBinsEC][n_phiBinsECOuter];
 
-   unsigned long long nErrs_Barrel_module[n_barrels][2][n_etaBins][n_phiBinsB3][15] = {{{{{0}}}}};
-   unsigned long long nErrs_ECA_module[n_disks][2][n_etaBinsEC][n_phiBinsECOuter][15] = {{{{{0}}}}};
-   unsigned long long nErrs_ECC_module[n_disks][2][n_etaBinsEC][n_phiBinsECOuter][15] = {{{{{0}}}}};
+   float nErrs_Barrel_module[n_barrels][2][n_etaBins][n_phiBinsB3][15]{};
+   float nErrs_ECA_module[n_disks][2][n_etaBinsEC][n_phiBinsECOuter][15]{};
+   float nErrs_ECC_module[n_disks][2][n_etaBinsEC][n_phiBinsECOuter][15]{};
 
    //--- ErrorList
    using IntStringMap = std::map<int, std::string>;
@@ -1902,12 +1902,20 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
                            return StatusCode::FAILURE;
                         }
 
-                        n_errors = static_cast<unsigned long long>(prof_tmp->GetBinContent(iEta+1, iPhi+1));
+                        float n_errors_float = prof_tmp->GetBinContent(iEta+1, iPhi+1);
+                        if (n_errors_float != 0){
+                           if (thisBec==ENDCAP_C) {
+                              nErrs_ECC_module[iDisk][iSide][iEta][iPhi][errItr->first] = n_errors_float;
+                           } else if (thisBec==ENDCAP_A) {
+                              nErrs_ECA_module[iDisk][iSide][iEta][iPhi][errItr->first] = n_errors_float;
+                           }
+                        }
+
+                        n_errors = static_cast<unsigned long long>(n_errors_float);
                         if (n_errors!=0) {
                            defecttype = m_pCalibWriteTool->addNumber(defecttype, errItr->first);
                            n_defect = m_pCalibWriteTool->addNumber(n_defect, n_errors);
                            errorProb = static_cast<float>(n_errors) / static_cast<float>(m_numberOfEvents);
-                           nErrs_ECC_module[iDisk][iSide][iEta][iPhi][errItr->first] = n_errors;
                            if (thisBec==ENDCAP_C) {
                               nErrLink_ECC_module[iDisk][iSide][iEta][iPhi]+=n_errors;
                            } else if (thisBec==ENDCAP_A) {
@@ -1979,12 +1987,17 @@ StatusCode SCTCalib::getBSErrors ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SCT
                         msg( MSG::ERROR ) << "Unable to get profile for BSErrorsDB : " << profname << endmsg;
                         return StatusCode::FAILURE;
                      }
-                     n_errors = static_cast<unsigned long long>(prof_tmp->GetBinContent(iEta+1, iPhi+1));
+
+                     float n_errors_float = prof_tmp->GetBinContent(iEta+1, iPhi+1);
+                     if (n_errors_float != 0){
+                        nErrs_Barrel_module[iLayer][iSide][iEta][iPhi][errItr->first] = n_errors_float;
+                     }
+
+                     n_errors = static_cast<unsigned long long>(n_errors_float);
                      if (n_errors!=0) {
                         defecttype = m_pCalibWriteTool->addNumber(defecttype, errItr->first);
                         n_defect = m_pCalibWriteTool->addNumber(n_defect, n_errors);
                         errorProb = static_cast<float>(n_errors) / static_cast<float>(m_numberOfEvents);
-                        nErrs_Barrel_module[iLayer][iSide][iEta][iPhi][errItr->first] = n_errors;
                         nErrLink_Barrel_module[iLayer][iSide][iEta][iPhi]+=n_errors;
 
                      }//end if (n_errors!=0)
