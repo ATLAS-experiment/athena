@@ -808,11 +808,11 @@ mergeFiles( const std::string & outFileName, const std::vector<std::string>& fil
 
   if (m_doTiming) {
     std::vector<std::pair<std::string,clock_t> > cpuPerHistVec;
-    std::cout << "CPU time for histogram merging:" << std::endl;
+    std::cout << "CPU time (seconds) for histogram merging:" << std::endl;
     for ( const auto& [name,time] : m_cpuPerHistogram) {
       cpuPerHistVec.emplace_back(name,time);
     }
-    auto ordering=[](std::pair<std::string,clock_t> a, std::pair<std::string,clock_t> b) {return a.second<b.second;};
+    auto ordering=[](const std::pair<std::string,clock_t>& a, const std::pair<std::string,clock_t>& b) {return a.second<b.second;};
     std::sort(cpuPerHistVec.begin(),cpuPerHistVec.end(),ordering);
 
     for (const auto& [name,time] : cpuPerHistVec) {
@@ -2324,7 +2324,7 @@ void MonitoringFile::doTiming() {m_doTiming=true;}
 std::atomic<int> MonitoringFile::m_fileCompressionLevel=1;
 std::atomic<int> MonitoringFile::m_debugLevel=0;
 bool MonitoringFile::m_doTiming=false;
-std::map<std::string,std::clock_t> MonitoringFile::m_cpuPerHistogram;
+std::unordered_map<std::string,std::clock_t> MonitoringFile::m_cpuPerHistogram;
 
 std::string MonitoringFile::getPath(TDirectory *dir){
   
