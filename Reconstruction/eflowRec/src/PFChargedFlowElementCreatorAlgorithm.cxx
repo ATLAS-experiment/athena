@@ -182,6 +182,8 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
       const static SG::AuxElement::Accessor<std::vector<float> > accDRPrimes("dRPrimes");
       accDRPrimes(*thisFE) = efRecTrack->getDRPrimes();
 
+      const static SG::AuxElement::Accessor<float > accPull15("Pull15");
+      accPull15(*thisFE) = efRecTrack->getpull15();
     }
 
   }//loop over eflowRecTracks
