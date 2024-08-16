@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfMuctpi/MuctpiXMLParser.h"
 #include "TrigConfMuctpi/MuCTPiGeometry.h"
 
 #include <iostream>
+#include <fstream>
 #include <string>
 
 using namespace std;

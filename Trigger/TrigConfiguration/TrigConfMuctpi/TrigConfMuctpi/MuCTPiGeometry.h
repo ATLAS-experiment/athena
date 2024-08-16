@@ -1,16 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_MuCTPiGeometry
 #define TrigConf_MuCTPiGeometry
 
-#include <string>
-#include <vector>
+
+//need type_traits for vector member
+#include "TrigConfMuctpi/MioctGeometry.h"
 
 #include "TrigConfMuctpi/L1MuonPtEncoding.h"
+#include <string>
+#include <vector>
+#include <iosfwd>
 
-class MioctGeometry;
 
 class MuCTPiGeometry{
    public:

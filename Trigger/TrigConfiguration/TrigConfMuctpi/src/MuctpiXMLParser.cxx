@@ -1,22 +1,24 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // libraries
+
 #include "TrigConfMuctpi/MioctTopoCellGeometry.h"
 #include "TrigConfMuctpi/MioctROIGeometry.h"
 #include "TrigConfMuctpi/MioctSectorGeometry.h"
 #include "TrigConfMuctpi/MioctGeometry.h"
 #include "TrigConfMuctpi/MuCTPiGeometry.h"
 #include "TrigConfMuctpi/MuctpiXMLParser.h"
+//
 
-
+//
+#include <boost/property_tree/xml_parser.hpp>
 // cpp libraries
 #include <iostream>
 #include <vector>
 #include <string>
 #include <stdlib.h>
-#include <boost/lexical_cast.hpp> 
 
 using namespace std;
 using boost::property_tree::ptree;
@@ -88,17 +90,19 @@ void MuctpiXMLParser::parseConfiguration()
 
 void MuctpiXMLParser::setPtEncoding(  boost::property_tree::ptree menuElement, L1MuonPtEncoding & ptEncoding)
 {
-   
    for(const auto & x : menuElement ) {
-
       if( x.first == "PtCodeElement" ) {
-
-         unsigned int idx = m_xmlHelper.getUIntAttribute(x.second, "pt") - 1;
+         unsigned int idxP1 = m_xmlHelper.getUIntAttribute(x.second, "pt");
+         if (idxP1 == 0 ){
+           TRG_MSG_WARNING("Avoided attempt to access array out-of-bounds");
+           continue;
+         }
+         unsigned int idx = idxP1 - 1;//unsigned version of -1 would be a very large number
          unsigned int ptCode = m_xmlHelper.getUIntAttribute(x.second, "code");
          unsigned int thresholdValue = m_xmlHelper.getUIntAttribute(x.second, "value");
-
+         //idx is used directly as an array index in this function call, so cannot be 
+         //negative or too large
          ptEncoding.setCodingInfo(idx, ptCode, thresholdValue);
-
       }
    }
 }

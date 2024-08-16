@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_MioctGeometry
 #define TrigConf_MioctGeometry
-
+//need type traits for vector members
+#include "TrigConfMuctpi/MioctSectorGeometry.h"
+#include "TrigConfMuctpi/MioctTopoCellGeometry.h"
 #include <string>
 #include <vector>
 
-
-class MioctSectorGeometry;
-class MioctTopoCellGeometry;
 
 class MioctGeometry {
    public:
@@ -33,8 +32,8 @@ class MioctGeometry {
     virtual void writeXML(std::ostream & xmlfile, int indentLevel=0, int indentWidth=2) const;
     
    private:
-     unsigned int  m_mioctid;
-     unsigned int  m_slot;
+     unsigned int  m_mioctid{};
+     unsigned int  m_slot{};
      std::vector<MioctSectorGeometry> m_Sectors;
      std::vector<MioctTopoCellGeometry> m_TopoCells;
 

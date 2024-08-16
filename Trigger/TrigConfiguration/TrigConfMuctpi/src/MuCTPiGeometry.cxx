@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "TrigConfMuctpi/MuCTPiGeometry.h"
 
 #include "TrigConfMuctpi/MioctTopoCellGeometry.h"
 #include "TrigConfMuctpi/MioctROIGeometry.h"
 #include "TrigConfMuctpi/MioctSectorGeometry.h"
-#include "TrigConfMuctpi/MioctGeometry.h"
-#include "TrigConfMuctpi/MuCTPiGeometry.h"
 #include <iostream>
 
 using namespace std;
