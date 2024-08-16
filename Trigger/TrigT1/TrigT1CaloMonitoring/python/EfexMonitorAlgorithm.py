@@ -131,7 +131,8 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
             helper.defineHistogram(f"TOBEta,TOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eEM '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                    fillGroup=fillGroup,
-                                   hanConfig={"description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
+                                   hanConfig={"display":"SetPalette(55)",
+                                       "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if more than 1 deadspot, but could just be low stats","algorithm":"Efex_eEM_etaThiMapFilled"},
                                     type='TH2F',
                                     path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else trigPath+pathFromKey(containerKey)+cut_name),
                                     xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
@@ -211,7 +212,8 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
 
             helper.defineHistogram(f"tauTOBEta,tauTOBPhi;h_{containerKey}_{cut_name}_EtaPhiMap", title='eTAU '+tobStr+' Count'+cut_title_addition+';#eta;#phi',
                                     fillGroup = fillGroup,
-                                   hanConfig={"description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
+                                   hanConfig={"display":"SetPalette(55)",
+                                              "description":f"Inspect for hot/cold spots - check help for list of known hot/coldspots, then check <a href='./detail/h_{containerKey}_{cut_name}_posVsLBN'>detail timeseries</a>. Warning if any deadspots/empty, but could just be low stats","algorithm":"Efex_eTAU_etaThiMapFilled"},
                                    type='TH2F',
                                    path=(("Expert/Outputs/"+pathFromKey(containerKey)) if "Sim" not in containerKey and "x" not in containerKey else (trigPath+pathFromKey(containerKey)+cut_name)),
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
