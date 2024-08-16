@@ -17,7 +17,6 @@ namespace TrigCompositeUtils {
   {
   }
 
-
   bool NavGraphNode::addIfNotDuplicate(std::vector<NavGraphNode*>& container, NavGraphNode* toAdd) {
     std::vector<NavGraphNode*>::iterator it = std::find(container.begin(), container.end(), toAdd);
     if (it == container.end()) {
@@ -76,17 +75,15 @@ namespace TrigCompositeUtils {
   }
 
 
-  void NavGraph::addNode(const Decision* node, const EventContext& ctx, const Decision* comingFrom) {
+  void NavGraph::addNode(const Decision* node, const Decision* comingFrom) {
 
-    const ElementLink<DecisionContainer> nodeEL = decisionToElementLink(node, ctx);
-    auto nodePairIt = m_nodes.insert( std::make_pair(nodeEL, NavGraphNode(node)) );
+    auto nodePairIt = m_nodes.insert( std::make_pair(node, NavGraphNode(node)) );
     NavGraphNode& nodeObj = nodePairIt.first->second;
     
     if (comingFrom == nullptr) { // Not coming from anywhere - hence a final node.
       m_finalNodes.push_back( &nodeObj );
     } else {
-      const ElementLink<DecisionContainer> comingFromEL = decisionToElementLink(comingFrom, ctx);
-      auto comingFromPairIt = m_nodes.insert( std::make_pair(comingFromEL, NavGraphNode(comingFrom)) );
+      auto comingFromPairIt = m_nodes.insert( std::make_pair(comingFrom, NavGraphNode(comingFrom)) );
       NavGraphNode& comingFromNodeObj = comingFromPairIt.first->second;
       const bool newEdge = comingFromNodeObj.linksTo( &nodeObj );
       if (newEdge) {
@@ -122,13 +119,13 @@ namespace TrigCompositeUtils {
 
   std::vector<const Decision*> NavGraph::thin() {
     std::vector<const Decision*> returnVec;
-    std::map<const ElementLink<TrigCompositeUtils::DecisionContainer>, NavGraphNode>::iterator it;
+    std::map<const Decision*, NavGraphNode>::iterator it;
     for (it = m_nodes.begin(); it != m_nodes.end(); /*noop*/) {
       if (it->second.getKeep()) {
         it->second.resetKeep();
         ++it;
       } else {
-        returnVec.push_back(*(it->first)); // Dereferencing ElementLink to element
+        returnVec.push_back(it->first);
         rewireNodeForRemoval(it->second);
         it = m_nodes.erase(it);
       }
@@ -200,3 +197,4 @@ namespace TrigCompositeUtils {
   }
 
 }
+

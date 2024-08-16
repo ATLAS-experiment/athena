@@ -85,7 +85,6 @@ class ComboHypo : public ::AthReentrantAlgorithm {
    * @param[out] objectRequestsNoMultiplicityCheck Flag indicating of the DecisionObject requested not be included in the multiplicity computation.
    *                         Triggers special behaviour allowing the DecisionObject to satisfy arbitrary multiplicities in an arbitrary number of legs.
    * @param[inout] priorFeaturesMap Data structure collating for a given feature (key) what the prior features were integrated over all previous steps (value set). 
-   * @param[in] ctx The event context
    **/
   StatusCode extractFeatureAndRoI(const HLT::Identifier& chainLegId,
     const ElementLink<TrigCompositeUtils::DecisionContainer>& EL,
@@ -95,8 +94,7 @@ class ComboHypo : public ::AthReentrantAlgorithm {
     uint16_t& roiIndex, 
     bool& roiFullscan, 
     bool& objectRequestsNoMultiplicityCheck,
-    SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap,
-    const EventContext& ctx) const; 
+    SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap) const; 
 
 
   /**
