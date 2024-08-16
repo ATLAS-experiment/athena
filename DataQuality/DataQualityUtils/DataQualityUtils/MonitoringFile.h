@@ -449,7 +449,7 @@ namespace dqutils {
     static std::atomic<int> m_debugLevel;
     static std::atomic<int> m_fileCompressionLevel;
     static bool m_doTiming;
-    static std::map<std::string,std::clock_t> m_cpuPerHistogram;
+    static std::unordered_map<std::string,std::clock_t> m_cpuPerHistogram;
 
   public:
     static int mergeLBintervals(const std::string&, const std::string& debugLevel = "none");
