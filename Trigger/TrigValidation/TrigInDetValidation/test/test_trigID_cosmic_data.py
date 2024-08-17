@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for cosmic_data
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
+# art-input: group.trig-hlt.data23_cos.00457007.physics_CosmicMuons.merge.RAW
+# art-input-nfiles: 4
+# art-pathena-flags-remove: "–respectLB"
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -41,9 +44,8 @@ preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Ty
                 "flags.Tracking.doForwardTracks=False",
                 "flags.Tracking.doLargeD0=False"]
 Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
-# don't use grid files, as ART submission doesn't allow multiple LBs to be processed in 1 job (ATR-26472)
-# once this is fixed, we can use the 3 files from group.trig-hlt.data23_cos.00448208.physics_CosmicMuons.merge.RAW
-GridFiles = False
+# the art-pathena-flags-remove flag allows multiple LBs to be processed in 1 job (ATR-26472)
+GridFiles = True
 # needed when processing multiple LBs in trigbs_extractStream.py
 MultipleLB = True
 
