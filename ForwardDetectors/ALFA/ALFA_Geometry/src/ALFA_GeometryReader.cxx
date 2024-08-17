@@ -134,47 +134,41 @@ void ALFA_GeometryReader::TransformFiberPositions(PFIBERPARAMS pFiberParams,eRPo
 
 void ALFA_GeometryReader::TransformFiberPositionsFCSCladding(PFIBERPARAMS pFiberParams,eRPotName eRPName, const eFiberType eType, const eGeoSourceType eSourceType)
 {
-	const double ALFA_stagger[10] = {0.0, 0.283, -0.141, 0.141, -0.283, 0.354, -0.071, 0.212, -0.212, 0.071};
-	const double OD_stagger[3] = {0.0, -0.167, -0.334};
-	const double fSCY=-126.3765+0.0045;
+	static constexpr std::array<double,10> ALFA_stagger{0.0, 0.283, -0.141, 0.141, -0.283, 0.354, -0.071, 0.212, -0.212, 0.071};
+	static constexpr std::array<double,3> OD_stagger{0.0, -0.167, -0.334};
+	static constexpr double fSCY=-126.3765+0.0045;
 	
-	const double fSCY_ODFiberU=-106.333;
-	const double fSCY_ODFiberV=-113.833;
+	static constexpr double fSCY_ODFiberU=-106.333;
+	static constexpr double fSCY_ODFiberV=-113.833;
 	
-	const double fSCX_ODFiber00=-23.00;
-	const double fSCX_ODFiber01=+23.00;
+	static constexpr double fSCX_ODFiber00=-23.00;
+	static constexpr double fSCX_ODFiber01=+23.00;
 
 	double fStagger=0.0;
 
-	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::TransformFiberPositions");
+	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::TransformFiberPositionsFCSCladding");
 
 	switch(eType)
 	{
-	case EFT_UFIBER:
-	case EFT_VFIBER:
-		if(pFiberParams->nPlateID<1 || pFiberParams->nPlateID>10)
-		{
-			LogStream<<MSG::ERROR<<"Wrong PlateID "<<pFiberParams->nPlateID<<" (RP no."<<eRPName<<")"<<endmsg;
-			return;
-		}
-		else
-		{
-			fStagger=ALFA_stagger[pFiberParams->nPlateID-1]*CLHEP::mm;
-		}
+    case EFT_UFIBER:
+    case EFT_VFIBER:
+      if(pFiberParams->nPlateID<1 || pFiberParams->nPlateID>10){
+        LogStream<<MSG::ERROR<<"(EFT_VFIBER): Wrong PlateID "<<pFiberParams->nPlateID<<" (RP no."<<eRPName<<")"<<endmsg;
+        return;
+      } else {
+        fStagger=ALFA_stagger[pFiberParams->nPlateID-1]*CLHEP::mm;
+      }
 		break;
 		case EFT_ODFIBERU0:
 		case EFT_ODFIBERU1:
 		case EFT_ODFIBERV0:
 		case EFT_ODFIBERV1:
-		if(pFiberParams->nPlateID<1 || pFiberParams->nPlateID>3)
-		{
-			LogStream<<MSG::ERROR<<"Wrong ODPlateID "<<pFiberParams->nPlateID<<" (RP no."<<eRPName<<")"<<endmsg;
-			return;
-		}
-		else
-		{
-			fStagger=OD_stagger[pFiberParams->nPlateID-1]*CLHEP::mm;
-		}
+      if(const auto i = pFiberParams->nPlateID; (i<1) || (i>3)){
+        LogStream<<MSG::ERROR<<"(EFT_ODFIBERV1): Wrong ODPlateID "<<i<<" (RP no."<<eRPName<<")"<<endmsg;
+        return;
+      } else {
+        fStagger=OD_stagger[i-1]*CLHEP::mm;
+      }
 		break;
 		default:
 		break;
@@ -276,13 +270,13 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 	ASPOSPARAMS ASPosParams;
 	GetRPPosParams(&RPPosParams, eRPName);
 	GetASPosParams(&ASPosParams, RPPosParams.eASName);
-
-	const double MD_stagger[10] = {0.0, 0.283, -0.141, 0.141, -0.283, 0.354, -0.071, 0.212, -0.212, 0.071};
-	const double OD_stagger[3] = {0.0, -0.167, -0.334};
-	const double fSCY=-126.3765+0.0045;
+    MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::TransformFiberPositionsFCSAtlas");
+	static constexpr std::array<double,10> MD_stagger{0.0, 0.283, -0.141, 0.141, -0.283, 0.354, -0.071, 0.212, -0.212, 0.071};
+	static constexpr std::array<double,3> OD_stagger{0.0, -0.167, -0.334};
+	static constexpr double fSCY=-126.3765+0.0045;
 	
-	const double fSCY_ODFiberU=-106.333;
-	const double fSCY_ODFiberV=-113.833;
+	static constexpr double fSCY_ODFiberU=-106.333;
+	static constexpr double fSCY_ODFiberV=-113.833;
 
 	double fCentrePos=0.0, fZOffset=0.0;
 	double fStagger=0.0;
@@ -310,7 +304,13 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 		break;
 		case EFT_ODFIBERV0:
 		case EFT_ODFIBERV1:
-		fStagger=OD_stagger[pFiberParams->nPlateID-1]*CLHEP::mm;
+      if(const auto i = pFiberParams->nPlateID; (i<1) || (i>3)){
+        LogStream<<MSG::ERROR<<"(EFT_ODFIBERV1): Wrong ODPlateID "<<i<<" (RP no."<<eRPName<<")"<<endmsg;
+        return;
+      } else {
+        fStagger=OD_stagger[i-1]*CLHEP::mm;
+      }
+		
 
 		if(eSourceType==EGST_IDEALGEOMETRY){
 			if(eType==EFT_ODFIBERV0){
@@ -328,11 +328,12 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 		break;
 		case EFT_ODFIBERU0:
 		case EFT_ODFIBERU1:{
-      const int idx = pFiberParams->nPlateID-1;
-      if (idx<0 or idx>=3){
-        throw std::out_of_range("Index out of range in ALFA_GeometryReader::TransformFiberPositionsFCSAtlas");
+      if(const auto i = pFiberParams->nPlateID; (i<1) || (i>3)){
+        LogStream<<MSG::ERROR<<"(EFT_ODFIBERU1): Wrong ODPlateID "<<i<<" (RP no."<<eRPName<<")"<<endmsg;
+        return;
+      } else {
+        fStagger=OD_stagger[i-1]*CLHEP::mm;
       }
-      fStagger=OD_stagger[idx]*CLHEP::mm;
   
       if(eSourceType==EGST_IDEALGEOMETRY){
         if(eType==EFT_ODFIBERU0){
