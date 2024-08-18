@@ -84,7 +84,7 @@ CommonSmearingTool::CommonSmearingTool(const std::string& sName)
   declareProperty("InputFilePath",           m_sInputFilePath           = "" );
   declareProperty("SkipTruthMatchCheck",     m_bSkipTruthMatchCheck     = false );
   declareProperty("ApplyFading",             m_bApplyFading             = true );
-  declareProperty("ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck = false );
+  declareProperty("MVATESQualityCheck",      m_bMVATESQualityCheck      = true );
   declareProperty("ApplyInsituCorrection",   m_bApplyInsituCorrection   = true );
 }
 
@@ -129,7 +129,7 @@ StatusCode CommonSmearingTool::initialize()
     return StatusCode::FAILURE;
 
   // TauCombinedTES tool must be set up when checking compatibility between calo TES and MVA TES
-  if (m_bApplyMVATESQualityCheck) 
+  if (m_bMVATESQualityCheck) 
   {
     ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tTauCombinedTES, TauCombinedTES));
     ATH_CHECK(m_tTauCombinedTES.setProperty("WeightFileName", "CombinedTES_R22_Round2.5_v2.root"));
@@ -152,22 +152,15 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
   // in practice this check mostly discards muons faking taus with large track momentum but little energy deposit in the calorimeter:
   // when enforcing calo-only pt, the muon will likely fail the tau pt cut applied by TauSelectionTool
 
-  // WARNING: overwriting ptFinalCalib would lead to irreproducibilities upon re-calibration (re-apply in-situ TES on already-calibrated PHYSLITE)
-  if (m_bApplyMVATESQualityCheck) {
-    bool useCaloPt = false;
+  if (m_bMVATESQualityCheck) {
+    bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
       const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
-      useCaloPt = combinedTEStool->getUseCaloPtFlag(xTau);	
-      if (useCaloPt) {
-	// only override pt, keep eta and phi from substructure as it has likely better angular resolution than calo-only
-	ATH_MSG_DEBUG("overriding MVA pt with calo pt");
-	xTau.setP4(xAOD::TauJetParameters::FinalCalib, xTau.ptTauEnergyScale(), xTau.eta(), xTau.phi(), xTau.m()); 
-	xTau.setP4(xTau.ptTauEnergyScale(), xTau.eta(), xTau.phi(), xTau.m()); 
-      }
+      compatibility = combinedTEStool->getTESCompatibility(xTau);	
     }
-    static const SG::Accessor<char> accUseCaloPt("useCaloPt");
-    accUseCaloPt(xTau) = char(useCaloPt);
+    static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
+    accTESCompatibility(xTau) = char(compatibility);
   }
 
   // step out here if we run on data
@@ -361,7 +354,7 @@ StatusCode CommonSmearingTool::applySystematicVariation ( const CP::SystematicSe
 /*
   Executed at the beginning of each event, checks if the tool is used on data or MC.
   This tool is mostly for MC (in-situ TES correction).
-  But the TES compatibility requirement is applied to both data and MC (when ApplyMVATESQualityCheck=true).
+  But the TES compatibility requirement is applied to both data and MC (when MVATESQualityCheck=true).
 */
 //______________________________________________________________________________
 StatusCode CommonSmearingTool::beginEvent()

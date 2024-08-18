@@ -182,7 +182,7 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
 
 
 
-bool TauCombinedTES::getUseCaloPtFlag(const xAOD::TauJet& tau) const {
+bool TauCombinedTES::getTESCompatibility(const xAOD::TauJet& tau) const {
   if (! isValid(tau)) return false;
 
   xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau);
@@ -193,14 +193,14 @@ bool TauCombinedTES::getUseCaloPtFlag(const xAOD::TauJet& tau) const {
   double caloSigma = tau.ptTauEnergyScale() * getCaloResolution(tau.ptTauEnergyScale(), decayModeIndex, etaIndex);
   double deltaEt = tau.ptFinalCalib() - tau.ptTauEnergyScale();
 
-  bool useCaloPt = false;
+  bool compatibility  = true;
 
   // FIXME: should we use combinedSigma here ??
   if (std::abs(deltaEt) > 5 * caloSigma) {
-    useCaloPt = true;
+    compatibility = false;
   }
 
-  return useCaloPt;
+  return compatibility;
 }
 
 

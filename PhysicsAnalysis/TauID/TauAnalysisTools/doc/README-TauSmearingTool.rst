@@ -108,10 +108,10 @@ The following table lists other properties for further configurations:
      - ``std::string``
      - ``"PoPy"("Sherpa")``
      - For ``2022-prerec``, toggle between smearing/uncertainties calculated from PowhegPythia or Sherpa 
-   * - ``ApplyMVATESQualityCheck``
+   * - ``MVATESQualityCheck``
      - ``bool``
-     - ``false``
-     - apply a compatibility check between calo TES and MVA TES. For taus that do not pass the test calo based TES is used. Not recommended for ``2022-prerec`` tag.
+     - ``true``
+     - apply a compatibility check between calo TES and MVA TES and decorate the tau with a boolean "TESCompatibility" with the check results.
 
 Release Specific Configuration
 ==============================
@@ -124,19 +124,19 @@ Release Specific Configuration
      - ``RecommendationTag``
      - ``Campaign``
      - ``Generator``
-     - ``ApplyMVATESQualityCheck``
+     - ``MVATESQualityCheck``
    * - ``>=22``
      - 2
      - ``"2022-prerec"``
      - ``"mc20"``
      - ``"PoPy"`` (default)
-     - ``false`` (default)
+     - ``true`` (default)
    * - ``>=22``
      - 3
      - ``"2022-prerec"``
      - ``"mc21"`` (default)
      - ``"PoPy"`` (default)
-     - ``false`` (default)
+     - ``true`` (default)
 
 ---
 FAQ

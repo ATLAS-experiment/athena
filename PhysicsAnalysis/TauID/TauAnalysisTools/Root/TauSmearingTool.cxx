@@ -25,7 +25,7 @@ TauSmearingTool::TauSmearingTool( const std::string& sName )
   declareProperty( "Generator",               m_sGenerator = "PoPy" );  
   declareProperty( "SkipTruthMatchCheck",     m_bSkipTruthMatchCheck = false );
   declareProperty( "ApplyFading",             m_bApplyFading = true );
-  declareProperty( "ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck = false );
+  declareProperty( "MVATESQualityCheck",      m_bMVATESQualityCheck = true );
   declareProperty( "ApplyInsituCorrection",   m_bApplyInsituCorrection = true );
   declareProperty( "useFastSim",              m_useFastSim = false );
 }
@@ -75,7 +75,7 @@ StatusCode TauSmearingTool::initialize()
   ATH_CHECK(m_tCommonSmearingTool.setProperty("InputFilePath", m_sInputFilePath));
   ATH_CHECK(m_tCommonSmearingTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
   ATH_CHECK(m_tCommonSmearingTool.setProperty("ApplyFading", m_bApplyFading));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck));
+  ATH_CHECK(m_tCommonSmearingTool.setProperty("MVATESQualityCheck", m_bMVATESQualityCheck));
   ATH_CHECK(m_tCommonSmearingTool.setProperty("ApplyInsituCorrection", m_bApplyInsituCorrection));
   ATH_CHECK(m_tCommonSmearingTool.setProperty("OutputLevel", this->msg().level()));
   ATH_CHECK(m_tCommonSmearingTool.initialize());
