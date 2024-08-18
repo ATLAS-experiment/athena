@@ -565,13 +565,16 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
                   locTrkRes ? isApprox(glb, glbTrk) : true};
       };
 
+
+      constexpr double envelope = 10.0 * Acts::UnitConstants::mm;
+
       std::array<bool,3> allOk{true,true,true};
       if(const auto* bounds = dynamic_cast<const Acts::PlanarBounds*>(&surface->bounds()); bounds) {
         ATH_MSG_VERBOSE("Planar bounds");
 
         const Acts::RectangleBounds& boundingBox = bounds->boundingBox();
-        Acts::Vector2 min = boundingBox.min().array() - 1*Acts::UnitConstants::mm;
-        Acts::Vector2 max = boundingBox.max().array() - 1*Acts::UnitConstants::mm;
+        Acts::Vector2 min = boundingBox.min().array() - envelope;
+        Acts::Vector2 max = boundingBox.max().array() + envelope;
         Acts::Vector2 diag = max - min;
 
         for(const auto& testPoint : localPoints) {
@@ -597,8 +600,8 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
           min = min.array().min(vtx.array());
           max = max.array().max(vtx.array());
         }
-        min.array() -= 1*Acts::UnitConstants::mm;
-        max.array() += 1*Acts::UnitConstants::mm;
+        min.array() -= envelope;
+        max.array() += envelope;
         Acts::Vector2 diag = max - min;
 
         for(const auto& testPoint : localPoints) {
