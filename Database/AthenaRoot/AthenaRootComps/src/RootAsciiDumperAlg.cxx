@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootAsciiDumperAlg.cxx 
@@ -167,8 +167,10 @@ StatusCode RootAsciiDumperAlg::execute()
        nevts,
        "el_n",
        *m_el_n);
-    write(m_ofd, buf, buf_sz);
-    free(buf);
+    if (buf_sz>=0){
+      write(m_ofd, buf, buf_sz);
+      free(buf);
+    }
   }
 
   if (*m_el_n > 0) {
@@ -198,8 +200,10 @@ StatusCode RootAsciiDumperAlg::execute()
          nevts,
          "el_eta",
          bufv.str().c_str());
-      write(m_ofd, buf, buf_sz);
-      free(buf);
+      if (buf_sz>=0){
+        write(m_ofd, buf, buf_sz);
+        free(buf);
+      }
     }
 
 
@@ -227,8 +231,10 @@ StatusCode RootAsciiDumperAlg::execute()
          nevts,
          "el_jetcone_dr",
          bufv.str().c_str());
-      write(m_ofd, buf, buf_sz);
-      free(buf);
+      if (buf_sz>=0){
+        write(m_ofd, buf, buf_sz);
+        free(buf);
+      }
     }
   }
 
