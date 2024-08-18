@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModelTPCnv/DataHeader_p3.h"
@@ -53,7 +53,7 @@ const std::string& DataHeaderElement_p3::token() const {
    return(m_token);
 }
 
-const std::vector<std::string> DataHeaderElement_p3::alias() const {
+const std::vector<std::string>& DataHeaderElement_p3::alias() const {
    return(m_alias);
 }
 

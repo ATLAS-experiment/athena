@@ -51,14 +51,14 @@ class RDBVersionAccessor
   void getChildTagData();
 
   /// @return node name
-  inline std::string getNodeName() const {return m_childNode;}
+  inline const std::string& getNodeName() const {return m_childNode;}
 
 
   /// @return tag name for the child node 
-  inline std::string getTagName() const {return m_tagName;}
+  inline const std::string& getTagName() const {return m_tagName;}
 
   /// @return stringified tag ID
-  inline std::string getTagID() const {return m_tagID;}
+  inline const std::string& getTagID() const {return m_tagID;}
 
   /// @return branch flag for the child node
   /// returns false if the data has not been fetched yet
