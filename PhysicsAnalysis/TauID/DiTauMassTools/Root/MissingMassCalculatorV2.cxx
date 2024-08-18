@@ -1104,11 +1104,15 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
                                             // leading jet, for MET scan
 
   //-------- end of Settings
-  if (preparedInput.m_tauTypes == TauTypes::ll) { // both tau's are leptonic
+  
+  // if m_nsigma_METscan was not set by user, set to default values
+  if(m_nsigma_METscan == -1){
+    if (preparedInput.m_tauTypes == TauTypes::ll) { // both tau's are leptonic
       m_nsigma_METscan = m_nsigma_METscan_lfv_ll;
-  } else if (preparedInput.m_tauTypes == TauTypes::lh) { // lep had
+    } else if (preparedInput.m_tauTypes == TauTypes::lh) { // lep had
       m_nsigma_METscan = m_nsigma_METscan_lfv_lh;
-  }
+    }
+  }  
 
   double N_METsigma = m_nsigma_METscan; // number of sigmas for MET scan
   double METresX_binSize = 2 * N_METsigma * METresX / NiterMET;
@@ -2395,15 +2399,18 @@ void MissingMassCalculatorV2::SpaceWalkerInit() {
     Prob->setParamRatio(2, preparedInput.m_type_visTau2);
   }
 
-  if (preparedInput.m_tauTypes == TauTypes::ll) // both tau's are leptonic
-  {
-    m_nsigma_METscan = m_nsigma_METscan_ll;
-  } else if (preparedInput.m_tauTypes == TauTypes::lh) // lep had
-  {
-    m_nsigma_METscan = m_nsigma_METscan_lh;
-  } else // hh
-  {
-    m_nsigma_METscan = m_nsigma_METscan_hh;
+  // if m_nsigma_METscan was not set by user, set to default values
+  if(m_nsigma_METscan == -1){
+    if (preparedInput.m_tauTypes == TauTypes::ll) // both tau's are leptonic
+    {
+      m_nsigma_METscan = m_nsigma_METscan_ll;
+    } else if (preparedInput.m_tauTypes == TauTypes::lh) // lep had
+    {
+      m_nsigma_METscan = m_nsigma_METscan_lh;
+    } else // hh
+    {
+      m_nsigma_METscan = m_nsigma_METscan_hh;
+    }
   }
 
   m_nsigma_METscan2 = std::pow(m_nsigma_METscan, 2);
