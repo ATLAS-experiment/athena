@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_CBNODE_H
@@ -71,7 +71,7 @@ public:
   constNodeVec children() const { return constNodeVec (m_children.begin(), m_children.end()); }
   constNodeVec parents() const { return constNodeVec (m_parents.begin(), m_parents.end()); }
 
-  std::string name() const { return m_name; }
+  const std::string& name() const { return m_name; }
   int level() const { return m_level; }
   void setLevel(int l) { m_level = l; }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -705,21 +705,21 @@ AtlasDetectorID::print_to_string        (Identifier id,
 }
 
 ///  Dictionary name
-std::vector<std::string>
+const std::vector<std::string>&
 AtlasDetectorID::dict_names         (void) const
 {
     return (m_dict_names);
 }
 
 ///  File name
-std::vector<std::string>
+const std::vector<std::string>&
 AtlasDetectorID::file_names         (void) const
 {
     return (m_file_names);
 }
 
 ///  Version tag for subdet dictionary
-std::vector<std::string>
+const std::vector<std::string>&
 AtlasDetectorID::dict_tags      (void) const
 {
     return (m_dict_tags);
