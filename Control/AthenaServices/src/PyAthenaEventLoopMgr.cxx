@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -102,7 +102,9 @@ PyObject* PyAthenaEventLoopMgr::setManager( PyObject* mgr )
    PyObject* pyelm = PyImport_AddModule( const_cast< char* >( "AthenaServices.PyAthenaEventLoopMgr" ) );
    if ( pyelm ) {
       Py_INCREF( mgr );
-      PyModule_AddObject( pyelm, const_cast< char* >( "EventLoopMgr" ), mgr );
+      if (PyModule_AddObject( pyelm, const_cast< char* >( "EventLoopMgr" ), mgr ) < 0) {
+        Py_DECREF( mgr );
+      }
    }
 
 // hand the python side its interfaces
