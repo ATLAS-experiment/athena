@@ -16,6 +16,7 @@
 #include "TestTools/expect_exception.h"
 #include <iostream>
 #include <cassert>
+#include <type_traits>
 
 
 #ifdef XAOD_STANDALONE
@@ -168,6 +169,7 @@ void test2()
   using Cont = std::vector<int>;
   using PLink = SG::PackedLink<Cont>;
   using DLink = DataLink<Cont>;
+  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
 
   SG::ConstAccessor<PLink> ptyp1 ("plink");
 
@@ -209,11 +211,11 @@ void test2()
   assert (span.back().key() == 124);
   assert (span.back().index() == 14);
 
-  std::vector<unsigned> idx;
+  std::vector<IdxType> idx;
   for (ElementLink<Cont> el : span) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<IdxType> {10, 11, 0, 13, 14}));
 }
 
 
@@ -226,6 +228,7 @@ void test3()
   using DLink = DataLink<Cont>;
   using PLink = SG::PackedLink<Cont>;
   using VElt = std::vector<PLink>;
+  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
 
   SG::ConstAccessor<VElt> vtyp1 ("vlink");
 
@@ -271,7 +274,7 @@ void test3()
   assert (vtyp1 (b)[2].index() == 11);
 
   {
-    std::vector<int> v;
+    std::vector<IdxType> v;
     for (const ElementLink<Cont>& el : vtyp1(b)) {
       if (el.isDefault()) {
         v.push_back (0);
@@ -281,7 +284,7 @@ void test3()
         v.push_back (el.index());
       }
     }
-    assert (v == (std::vector<int> {123, 10, 0, 123, 11}));
+    assert (v == (std::vector<IdxType> {123, 10, 0, 123, 11}));
   }
 
   std::vector<ElementLink<Cont> > elv = vtyp1 (b);
@@ -320,6 +323,7 @@ void test4()
   using PLink = SG::PackedLink<Cont>;
   using DLink = DataLink<Cont>;
   using VElt = std::vector<PLink>;
+  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
 
   SG::ConstAccessor<VElt> vtyp1 ("vlink");
 
@@ -364,13 +368,13 @@ void test4()
   assert (span.back().front().key() == 123);
   assert (span.back().front().index() == 13);
 
-  std::vector<unsigned> idx;
+  std::vector<IdxType> idx;
   for (auto s : span) {
     for (ElementLink<Cont> el : s) {
       idx.push_back (el.isDefault() ? 0 : el.index());
     }
   }
-  assert (idx == (std::vector<unsigned> {10, 0, 11, 12, 0, 13, 14}));
+  assert (idx == (std::vector<IdxType> {10, 0, 11, 12, 0, 13, 14}));
 }
 
 
@@ -379,7 +383,8 @@ int asmtest [[maybe_unused]] (const SG::AuxElement& e,
                               SG::ConstAccessor<std::vector<SG::PackedLink<std::vector<int >> > >& acc)
 {
   using Cont = std::vector<int>;
-  int out = 0;
+  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
+  IdxType out = 0;
   for (const ElementLink<Cont>& el : acc(e)) {
     out += el.key() + el.index();
   }

@@ -96,7 +96,7 @@ public:
 
 protected:
   /// Interface for the linked vector of DataLinks.
-  IAuxTypeVector* m_linkedVec;
+  IAuxTypeVector* m_linkedVec{};
 };
 
 
