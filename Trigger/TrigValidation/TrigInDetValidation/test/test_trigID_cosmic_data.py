@@ -7,7 +7,7 @@
 # art-include: 24.0/Athena
 # art-input: group.trig-hlt.data23_cos.00457007.physics_CosmicMuons.merge.RAW
 # art-input-nfiles: 4
-# art-pathena-flags-remove: "–respectLB"
+# art-pathena-flags-remove: "--respectLB"
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
