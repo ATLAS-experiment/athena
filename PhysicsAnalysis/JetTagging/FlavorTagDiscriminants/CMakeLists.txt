@@ -85,6 +85,11 @@ atlas_add_library( FlavorTagDiscriminants
   )
 
 
+# Suppress spurious warnings seen in the LTO build originating
+# in the boost parser code.
+set_target_properties( FlavorTagDiscriminants
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
+
 if (NOT XAOD_STANDALONE)
   atlas_add_component( FlavorTagDiscriminantsLib
     src/BTagDecoratorAlg.cxx
