@@ -1,9 +1,9 @@
 ATLAS Offline software
 ========================
 
-Welcome to [ATLAS](https://atlas.ch) Athena software!
+Welcome to [ATLAS](https://atlas.ch) Athena software! 
 
-To contribute to this project, follow our [git tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/). In particular, if you fork this project *please do not forget* to [add the ATLAS Robot as a developer](https://atlassoftwaredocs.web.cern.ch/gittutorial/gitlab-fork/).
+Please visit the [public documentation](https://atlassoftwaredocs.web.cern.ch) for this project. To contribute or to read about our development workflow, follow the [developers' instructions](https://atlassoftwaredocs.web.cern.ch/athena/developers/). 
 
 For ATLAS members, please see the [Atlas Computing Twiki](https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AtlasComputing) for even more information.
 
@@ -21,8 +21,8 @@ Links
 -----
 
 - The [ATLAS webpage](https://atlas.ch) will tell you all about the ATLAS experiment (for ATLAS members, the collaboration webpage is [here](https://atlas-collaboration.web.cern.ch/))
-- The [Twiki](https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AtlasComputing) is the main source of documentation, and has many links to sub-domains
-- The [software documentation](https://atlassoftwaredocs.web.cern.ch) page is the main entry point for tutorials, etc.
+- The [software documentation](https://atlassoftwaredocs.web.cern.ch) page is the main public entry point for this project
+- The [Twiki](https://twiki.cern.ch/twiki/bin/view/AtlasComputing/AtlasComputing) is the main source of internal documentation, and has many links to sub-domains
 - The git repository is [here](https://gitlab.cern.ch/atlas/athena)
 - The [ATLAS Nightlies and CI page](https://bigpanda.cern.ch/globalview/) shows the build status of all nightlies
 - The [Doxygen code documentation](https://atlas-sw-doxygen.web.cern.ch/atlas-sw-doxygen/atlas_main--Doxygen/docs/html/index.html) is available for the `main` branch
