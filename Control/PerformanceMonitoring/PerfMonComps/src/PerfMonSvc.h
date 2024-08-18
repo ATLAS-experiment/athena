@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonSvc.h 
@@ -14,8 +14,7 @@
 // Local includes
 #include "LinFitSglPass.h"
 
-// C includes
-#include <stdio.h>
+
 
 // STL includes
 #include <string>
