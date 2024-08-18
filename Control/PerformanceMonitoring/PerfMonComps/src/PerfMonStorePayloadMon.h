@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // StorePayloadMon.h 
@@ -11,8 +11,6 @@
 #ifndef PERFMONCOMPS_PERFMON_STOREPAYLOADMON_H
 #define PERFMONCOMPS_PERFMON_STOREPAYLOADMON_H 1
 
-// C includes
-#include <stdio.h>
 
 // STL includes
 #include <string>
@@ -70,13 +68,13 @@ class ATLAS_NOT_THREAD_SAFE StorePayloadMon
   IClassIDSvc_t m_clidsvc;
 
   /// payload-mon file descriptor
-  int m_stream;
+  int m_stream{};
 
   /// Name of the output file where the monitoring data will be stored
   std::string m_stream_name;
 
   /// display mallinfos after each event
-  bool m_displayMallinfos;
+  bool m_displayMallinfos{};
 }; 
 
 } //> end namespace PerfMon

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // StorePayloadMon.cxx 
@@ -224,6 +224,7 @@ StatusCode StorePayloadMon::execute()
        mon.b0, mon.b1, mon.b1 - mon.b0,
        clid.c_str(), 
        mon.proxy->name().c_str());
+    if (buf_sz < 0) continue;
     write(m_stream, buf, buf_sz);
     free(buf);
   }
@@ -234,9 +235,10 @@ StatusCode StorePayloadMon::execute()
      PMON_DP_FMT,
      b0, b1, b1 - b0,
      "StoreGateSvc", m_store.name().c_str());
-  write(m_stream, buf, buf_sz);
-  free(buf);
- 
+  if (buf_sz >=0) {
+    write(m_stream, buf, buf_sz);
+    free(buf);
+  }
 #undef PMON_DP_FMT
 
   const char* ftr = " ],\n";

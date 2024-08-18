@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PerfMonSvc.cxx
@@ -1266,8 +1266,10 @@ PerfMonSvc::comp_startAud(const std::string& stepName,
           << stream_name << "] !");
     }
   }
-  write(m_stream, buf, buf_sz);
-  free(buf);
+  if (buf_sz>0){
+    write(m_stream, buf, buf_sz);
+    free(buf);
+  }
 
   return;
 }
@@ -1398,8 +1400,10 @@ PerfMonSvc::comp_stopAud(const std::string& stepName,
        ((unsigned long)c.mem.nmall[1]),
        ((unsigned long)c.mem.nfree[1])
        );
-    write(m_stream, buf, buf_sz);
-    free(buf);
+       if(buf_sz>0){ 
+        write(m_stream, buf, buf_sz);
+        free(buf);
+       }
   }
 
   if (stepName == PerfMon::Steps[PerfMon::State::evt] &&
@@ -1450,8 +1454,11 @@ PerfMonSvc::do_io_mon()
        c.rr.user, c.rr.sys, c.rr.real, c.rr.rt_cpu,
        c.w.user,  c.w.sys,  c.w.real,  c.w.rt_cpu
        );
-    write(m_stream, buf, buf_sz);
-    free(buf);
+    if (buf_sz>0){
+      write(m_stream, buf, buf_sz);
+      free(buf);
+    }
+    
   } //> loop over io-containers
 
   PerfMon::IoContainer& c = m_ntuple.iocomp["io"]["PerfMonSliceIo"];
@@ -1470,8 +1477,10 @@ PerfMonSvc::do_io_mon()
        c.rr.user, c.rr.sys, c.rr.real, c.rr.rt_cpu,
        c.w.user,  c.w.sys,  c.w.real,  c.w.rt_cpu
        );
-    write(m_stream, buf, buf_sz);
-    free(buf);
+    if (buf_sz>0){
+      write(m_stream, buf, buf_sz);
+      free(buf);
+    }
   }
   return;
 }
