@@ -109,8 +109,6 @@ StatusCode DiTauDiscriminantTool::execute(const xAOD::DiTauJet& xDiTau){
   const static SG::AuxElement::Decorator<double> decBDTScore(m_sBDTScoreName);
   decBDTScore(xDiTau) = bdtScore;
 
-  std::cout << "Jet BDT score: " << bdtScore << std::endl;
-
   ATH_MSG_DEBUG("Jet BDT score: " << bdtScore);
   return StatusCode::SUCCESS;
 } 
