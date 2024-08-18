@@ -112,7 +112,7 @@ namespace MuonR4{
                 continue;
             }
             const double stripLocX = (*stripPos).x();
-            const double stripCovX = design.stripPitch() / std::sqrt(12.);
+            const double stripCovX = std::pow(design.stripPitch(), 2) / std::sqrt(12.);
 
             if (m_decode2DStrips && rdoPairs[0] && rdoPairs[1]) {
                 xAOD::RpcStrip2D* measurement = strip2DHandle->push_back(std::make_unique<xAOD::RpcStrip2D>());
@@ -124,7 +124,8 @@ namespace MuonR4{
                 lPos[1] = m_propagationVelocity *(rdoPairs[0]->time() - rdoPairs[1]->time());
                 lCov(0,0) = stripCovX;
                 lCov(1,1) = M_SQRT1_2 * m_propagationVelocity* m_stripTimeResolution;
-                measurement->setMeasurement<2>(offId.get_identifier32().get_compact(), lPos, lCov);
+                /// Hash is overwritten by the setMeasValues method
+                measurement->setMeasurement<2>(0, lPos, lCov);
                 // CheckVector2D stripPos
                 setMeasValues(measurement, rdoPairs[0], offId);
                 continue;
@@ -137,7 +138,8 @@ namespace MuonR4{
             lCov(0,0) = stripCovX;
 
             strip->setMeasuresPhi(idHelper.measuresPhi(offId));
-            strip->setMeasurement<1>(offId.get_identifier32().get_compact(), lPos, lCov);
+             /// Hash is overwritten by the setMeasValues method
+            strip->setMeasurement<1>(0, lPos, lCov);
             setMeasValues(strip, rdoPairs[0] ? rdoPairs[0] : rdoPairs[1], offId);
         }
         return StatusCode::SUCCESS;
