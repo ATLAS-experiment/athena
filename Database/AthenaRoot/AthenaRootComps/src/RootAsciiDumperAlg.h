@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootAsciiDumperAlg.h 
@@ -66,19 +66,19 @@ class RootAsciiDumperAlg
   std::string m_ofname;
 
   /// file handle to the ASCII output file
-  int m_ofd;
+  int m_ofd{-1};
   
   /// number of entries processed so-far
-  uint64_t m_nentries;
+  uint64_t m_nentries{};
 
   /// run number
-  const uint32_t* m_runnbr;
+  const uint32_t* m_runnbr{};
 
   /// event number
-  const uint32_t* m_evtnbr;
+  const uint32_t* m_evtnbr{};
 
   /// number of electrons
-  const int32_t* m_el_n;
+  const int32_t* m_el_n{};
 
   /// eta of electrons
   const std::vector<float> *m_el_eta;
