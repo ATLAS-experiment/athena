@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATLASDETDESCR_ATLASDETECTORID_H
@@ -256,11 +256,11 @@ public:
     /// @name  Dictionary versioning: provide access to dictionary names and versions. Note that a helper may correspond to one or more id dictionary
     //@{
     ///  Dictionary names
-    std::vector<std::string>  dict_names(void) const;
+    const std::vector<std::string>&  dict_names(void) const;
     ///  File names for subdet dictionaries
-    std::vector<std::string>  file_names(void) const;
+    const std::vector<std::string>&  file_names(void) const;
     ///  Version tags for subdet dictionaries
-    std::vector<std::string>  dict_tags (void) const;
+    const std::vector<std::string>&  dict_tags (void) const;
     //@}
 
     /// @name  Checks are performed by default in debug compilation and NOT in optimized compilation. One can switch or query this mode for any idHelper with the following methods:
