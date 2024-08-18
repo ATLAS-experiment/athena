@@ -71,7 +71,7 @@ private:
   bool m_useFastSim;
   bool m_bSkipTruthMatchCheck;
   bool m_bApplyFading;
-  bool m_bApplyMVATESQualityCheck;
+  bool m_bMVATESQualityCheck;
   bool m_bApplyInsituCorrection;
 
 }; // class TauSmearingTool

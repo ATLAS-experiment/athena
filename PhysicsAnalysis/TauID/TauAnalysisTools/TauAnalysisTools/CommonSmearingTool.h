@@ -103,7 +103,7 @@ protected:
   bool m_bIsConfigured;
   bool m_bSkipTruthMatchCheck;
   bool m_bApplyFading;
-  bool m_bApplyMVATESQualityCheck;
+  bool m_bMVATESQualityCheck;
   bool m_bApplyInsituCorrection;
 
   asg::AnaToolHandle<ITauToolBase> m_tTauCombinedTES;

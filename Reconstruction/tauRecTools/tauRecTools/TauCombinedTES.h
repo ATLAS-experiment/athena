@@ -26,8 +26,8 @@ public:
       
   virtual StatusCode execute(xAOD::TauJet& xTau) const override;
 
-  /** Whether to use calo pt, invoked by TauSmearing tool */
-  bool getUseCaloPtFlag(const xAOD::TauJet& tau) const;
+  /** Check if MVA TES and CaloTES are compatible, invoked by TauSmearing tool */
+  bool getTESCompatibility(const xAOD::TauJet& tau) const;
   
   /** Get MVA Et resolution, invoked by METSignificance */
   double getMvaEnergyResolution(const xAOD::TauJet& tau) const;
