@@ -202,8 +202,9 @@ bool AuxVectorData::setOption (const std::string& name,
  */
 const SG::auxid_set_t& AuxVectorData::getAuxIDs() const
 {
-  if (getConstStore())
-    return getConstStore()->getAuxIDs();
+  const SG::IConstAuxStore* store = getConstStore();
+  if (store)
+    return store->getAuxIDs();
   return s_emptySet;
 }
 
@@ -357,8 +358,9 @@ const void* AuxVectorData::getDataOol (SG::auxid_t auxid,
   // Fetch the pointer from the store, or raise an exception if we don't
   // have a const store.
   const void* ptr = 0;
-  if (getConstStore())
-    ptr = getConstStore()->getData (auxid);
+  const SG::IConstAuxStore* store = getConstStore();
+  if (store)
+    ptr = store->getData (auxid);
   else
     throw SG::ExcNoAuxStore (auxid);
 
@@ -458,8 +460,9 @@ AuxVectorData::getDataSpanOol (SG::auxid_t auxid, bool allowMissing) const
   // Fetch the pointer from the store, or raise an exception if we don't
   // have a const store.
   const IAuxTypeVector* v = 0;
-  if (getConstStore())
-    v = getConstStore()->getVector (auxid);
+  const SG::IConstAuxStore* store = getConstStore();
+  if (store)
+    v = store->getVector (auxid);
   else
     throw SG::ExcNoAuxStore (auxid);
 
@@ -691,6 +694,18 @@ void AuxVectorData::lockDecoration (SG::auxid_t auxid)
     this->clearDecorCache (auxid);
   }
 }
+
+
+/**
+ * @brief Same as getConstStore.
+ *  But out-of-line, as sometimes the debugger has problems calling
+ *  inline functions.
+ */
+const SG::IConstAuxStore* AuxVectorData::getConstStoreOol() const
+{
+  return getConstStore();
+}
+
 
 
 } // namespace SG

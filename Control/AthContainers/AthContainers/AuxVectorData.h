@@ -675,6 +675,14 @@ public:
   void lockDecoration (SG::auxid_t auxid);
 
 
+  /**
+   * @brief Same as getConstStore.
+   *  But out-of-line, as sometimes the debugger has problems calling
+   *  inline functions.
+   */
+  const SG::IConstAuxStore* getConstStoreOol() const;
+
+
 protected:
   /**
    * @brief Explicitly set a cache pointer.
