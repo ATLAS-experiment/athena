@@ -66,8 +66,7 @@ namespace CP
         {
           for (const std::string &chain : m_trigSingleMatchingList)
           {
-            float dR = 0.1;
-            if (chain.find("HLT_tau")) dR=0.2;
+            float dR = chain.starts_with("HLT_tau")? 0.2:0.1;
             (m_matchingDecorators.at(chain))(*particle) = m_trigMatchingTool->match(*particle, chain, dR, false);
           }
         }
