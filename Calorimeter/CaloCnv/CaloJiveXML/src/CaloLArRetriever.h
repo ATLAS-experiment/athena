@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_CALOLARRETRIEVER_H
 #define JIVEXML_CALOLARRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <cstddef>
-#include <map>
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -19,6 +15,10 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "JiveXML/DataType.h" //DataMap
+
+#include <string>
+#include <vector>
 
 class IToolSvc;
 
@@ -67,7 +67,7 @@ namespace JiveXML{
       StatusCode initialize();
 
     private:
-      const CaloCell_ID*   m_calocell_id;
+      const CaloCell_ID*   m_calocell_id{};
       SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
     
       SG::ReadCondHandleKey<LArADC2MeV> m_adc2mevKey
@@ -75,15 +75,15 @@ namespace JiveXML{
 
       /// for properties
       SG::ReadHandleKey<CaloCellContainer> m_sgKey{this, "StoreGateKey", "AllCalo", "Name of the CaloCellContainer"};
-      double m_cellThreshold;
-      int m_cellEnergyPrec;
-      int m_cellTimePrec;
-      bool m_lar;
-      bool m_doLArCellDetails;
-      bool m_cellConditionCut;
+      double m_cellThreshold{};
+      int m_cellEnergyPrec{};
+      int m_cellTimePrec{};
+      bool m_lar{};
+      bool m_doLArCellDetails{};
+      bool m_cellConditionCut{};
       std::vector<Identifier::value_type> m_LArChannelsToIgnoreM5;
-      bool m_doMaskLArChannelsM5;
-      bool m_doBadLAr;
+      bool m_doMaskLArChannelsM5{};
+      bool m_doBadLAr{};
   };
 }
 #endif
