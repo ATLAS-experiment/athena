@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestWrite.py
 # Author: snyder@bnl.gov
@@ -28,6 +28,7 @@ def xAODTestWriteCfg (flags):
     acc.addEventAlgo (DMTest.xAODTestWriteSymlinks ('xAODTestWriteSymlinks'))
     acc.addEventAlgo (DMTest.xAODTestWriteFwdLink1 ('xAODTestWriteFwdLink1'))
     acc.addEventAlgo (DMTest.xAODTestWriteFwdLink2 ('xAODTestWriteFwdLink2'))
+    acc.addEventAlgo (DMTest.xAODTestWriteJVec ('xAODTestWriteJVec'))
     acc.addEventAlgo (DMTest.MetaWriterAlg ('MetaWriterAlg'))
 
     itemList = ['DMTest::CVec#cvec',
@@ -46,7 +47,13 @@ def xAODTestWriteCfg (flags):
                 'DMTest::HView#hview',
                 'DMTest::S2#S2',
                 'DMTest::CVec#CVecFwdLink',
-                'DMTest::CAuxContainer#CVecFwdLinkAux.']
+                'DMTest::CAuxContainer#CVecFwdLinkAux.',
+
+                'DMTest::JVecContainer#jvecContainer',
+                'DMTest::JVecAuxContainer#jvecContainerAux.',
+                'DMTest::JVec#jvecInfo',
+                'DMTest::JVecAuxInfo#jvecInfoAux.',
+                ]
     metaItemList = [ 'DMTest::S1#MetaS1',
                      'DMTest::C#MetaC',
                      'DMTest::CInfoAuxContainer#MetaCAux.' ]
@@ -63,7 +70,13 @@ def xAODTestWriteCfg (flags):
                   'DMTest::H_v1',
                   'DataVector<DMTest::H_v1>',
                   'ViewVector<DataVector<DMTest::H_v1,DataModel_detail::NoBase> >',
-                  'DMTest::HAuxContainer_v1' ]
+                  'DMTest::HAuxContainer_v1',
+                  'DMTest::JVecContainer_v1',
+                  'DataVector<DMTest::JVec_v1>',
+                  'DMTest::JVecAuxContainer_v1',
+                  'DMTest::JVec_v1',
+                  'DMTest::JVecAuxInfo_v1',
+                 ]
     acc.merge (TestOutputCfg (flags, 'Stream1', itemList, typeNames,
                               metaItemList))
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestReadThinned.py
 # Author: snyder@bnl.gov
@@ -24,6 +24,8 @@ def xAODTestReadThinnedCfg (flags):
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec2',
                                                CVecKey = 'cvec2',
                                                Brief = True))
+    acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec',
+                                               JVecInfoKey = ''))
 
     return acc
 

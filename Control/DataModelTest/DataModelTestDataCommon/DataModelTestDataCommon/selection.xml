@@ -30,6 +30,14 @@
   <class name="DMTest::CLinksAOD" id="99D3AFCC-F13B-4A15-B2C8-800FB4B8EC92"/>
 
   <class name="DMTest::CView::Pers_t" id="CDB407A6-1B30-4214-BC29-47268D2F28F7"/>
+  
+  <class name="DMTest::JVec_v1" id="27CC6E50-0C8C-11EF-9541-E0C2649C5CE8"/>
+  <class name="DMTest::JVecContainer_v1" id="D80ED384-0C8C-11EF-A65E-E0C2649C5CE8"/>
+  <class name="DMTest::JVecAuxContainer_v1" id="C4E35F44-0C89-11EF-9321-E0C2649C5CE8"/>
+  <class name="DMTest::JVecAuxInfo_v1" id="BC23ACF4-11FE-11EF-B31F-E0C2649C5CE8"/>
+  <class name="std::vector<SG::JaggedVecElt<ElementLink<DMTest::CVec_v1> > >"/>
+  <class name="SG::JaggedVecElt<ElementLink<DMTest::CVec_v1> >"/>
+
   <class name="SG::ConstAccessor<ElementLink<DMTest::CVec_v1> >"/>
 
   <function name="DMTest::setPluginLibrary"/>

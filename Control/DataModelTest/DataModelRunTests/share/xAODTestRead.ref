@@ -1,22 +1,84 @@
+Thu May 16 11:32:17 EDT 2024
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Thu May 16 11:32:19 2024
+====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+ClassIDSvc           INFO getRegistryEntries: read 6322 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 8184 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
+ClassIDSvc           INFO getRegistryEntries: read 1069 CLIDRegistry entries for module ALL
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
+PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
+PoolSvc              INFO Frontier compression level set to 5
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO No specific match for domain found - use default fallback
+DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
+PoolSvc              INFO Successfully setup replica sorting algorithm
+PoolSvc              INFO Setting up APR FileCatalog and Streams
+PoolSvc              INFO POOL WriteCatalog is file:xAODTestRead_catalog.xml
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+ClassIDSvc           INFO getRegistryEntries: read 356 CLIDRegistry entries for module ALL
 MetaDataSvc          INFO Initializing MetaDataSvc
+MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
 EventSelector        INFO EventSelection with query 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-BF5CAC995112
+Domain[ROOT_All]     INFO                           xaoddata.root
+RootDatabase.open    INFO xaoddata.root File version:63004
+xaoddata.root        INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-BF5CAC995112
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-BF5CAC995112
+Domain[ROOT_All]     INFO                           xaoddata.root
+RootDatabase.open    INFO xaoddata.root File version:63004
+xaoddata.root        INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-BF5CAC995112
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] DAED7691-ED45-3F40-914E-3234D9FA9359
+Domain[ROOT_All]     INFO                           xaoddata.root
+RootDatabase.open    INFO xaoddata.root File version:63004
+StreamStream1        INFO Found HelperTools = PrivateToolHandleArray(['xAODMaker::EventFormatStreamHelperTool/Stream1_EventFormatStreamHelperTool','Athena::ThinningCacheTool/ThinningCacheTool_StreamStream1'])
 StreamStream1        INFO Data output: xaoddata2.root
-StreamStream1        INFO ../O reinitialization...
+StreamStream1        INFO I/O reinitialization...
+ClassIDSvc           INFO getRegistryEntries: read 274 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
+xaoddata.root        INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] DAED7691-ED45-3F40-914E-3234D9FA9359
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] DAED7691-ED45-3F40-914E-3234D9FA9359
+Domain[ROOT_All]     INFO                           xaoddata.root
+RootDatabase.open    INFO xaoddata.root File version:63004
 ApplicationMgr       INFO Application Manager Started successfully
+ClassIDSvc           INFO getRegistryEntries: read 19 CLIDRegistry entries for module ALL
+EventP...stencySvc   INFO Added successfully Conversion service:AthenaPoolCnvSvc
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=340 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=341 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
 xAODTestReadCVec     INFO  anInt1 201 aFloat: 400 pInt: 1001 pFloat: 0.02 anInt2: 601 dInt1: 801 dVar1: 901 dpInt1: 101 cEL: cvec[9]
   pvInt: []
   pvFloat: []
@@ -95,6 +157,7 @@ xAODTestRead         INFO cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
 xAODTestReadCView    INFO cview: 210 209 208 207 206 205 204 203 202 201
 xAODTestReadHVec     INFO hvec: 801.5 802.5 803.5 804.5 805.5 806.5 807.5 808.5 809.5 810.5 811.5 812.5 813.5 814.5 815.5 816.5 817.5 818.5 819.5 820.5
 xAODTestReadHVec     INFO hview: 820.5 819.5 818.5 817.5 816.5 815.5 814.5 813.5 812.5 811.5 810.5 809.5 808.5 807.5 806.5 805.5 804.5 803.5 802.5 801.5
+ClassIDSvc           INFO getRegistryEntries: read 112 CLIDRegistry entries for module ALL
 xAODTe...adFwdLink   INFO CVecFwdLink aux items: aFloat anInt pFloat pInt pvFloat pvInt 
 xAODTe...adFwdLink   INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...adFwdLink   INFO  anInt1 210 aFloat: 220.5 pInt: 0 pFloat: 0.00
@@ -137,6 +200,38 @@ xAODTe...adFwdLink   INFO  anInt1 219 aFloat: 229.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [200.5]  svec: ['str450' 'str451']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [300.5 301.5]
+xAODTestReadJVec     INFO   ivec: [101]  fvec: [201.5 202.5]  svec: ['str451' 'str452' 'str453']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [301.5 302.5 303.5]
+xAODTestReadJVec     INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [302.5 303.5 304.5 305.5]
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1101]  fvec: [1201.5 1202.5]  svec: ['str1451' 'str1452' 'str1453']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [404.5]
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     UPDATE    [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   CREATE    [ROOT_All] 581A6CD8-E320-6C40-BF5F-F407BEFA2457
+Domain[ROOT_All]     INFO                           xaoddata2.root
+RootDatabase.open    INFO xaoddata2.root File version:63004
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO DMTest::HAuxContainer_v2 [2BDBFB04-C1C2-4B14-A977-3A61B8054700]
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO xAOD::ShallowAuxInfo [BE505E75-8760-4F39-9331-689CB5443DB1]
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO xAOD::ShallowAuxContainer [C63C39D7-9501-49DC-B1B0-6AD98B1AEEFA]
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO xAOD::AuxContainerBase [C87C71B3-B03F-42FC-AF99-DF497F148397]
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7E8C84288]
+StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
+ClassIDSvc           INFO getRegistryEntries: read 27 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -261,6 +356,20 @@ xAODTe...adFwdLink   INFO  anInt1 319 aFloat: 329.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [101]  fvec: [201.5 202.5]  svec: ['str451' 'str452' 'str453']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [301.5 302.5 303.5]
+xAODTestReadJVec     INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [302.5 303.5 304.5 305.5]
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1102 1103]  fvec: [1202.5 1203.5 1204.5]  svec: ['str1452' 'str1453' 'str1454' 'str1455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [405.5 406.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -385,6 +494,20 @@ xAODTe...adFwdLink   INFO  anInt1 419 aFloat: 429.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [302.5 303.5 304.5 305.5]
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1103 1104 1105]  fvec: [1203.5 1204.5 1205.5 1206.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: [406.5 407.5 408.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -459,6 +582,20 @@ xAODTe...adFwdLink   INFO  anInt1 519 aFloat: 529.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(:inv)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(:inv) (:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(:inv) (:inv) (:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1104 1105 1106 1107]  fvec: []  svec: ['str1454']  lvec: [(:inv) (:inv)]
+xAODTestReadJVec     INFO   decorJVec: [407.5 408.5 409.5 410.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -583,6 +720,20 @@ xAODTe...adFwdLink   INFO  anInt1 619 aFloat: 629.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [304.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: []  fvec: [1205.5]  svec: ['str1455' 'str1456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: []
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -707,6 +858,20 @@ xAODTe...adFwdLink   INFO  anInt1 719 aFloat: 729.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [309.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1106]  fvec: [1206.5 1207.5]  svec: ['str1456' 'str1457' 'str1458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [409.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -831,6 +996,20 @@ xAODTe...adFwdLink   INFO  anInt1 819 aFloat: 829.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [309.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1107 1108]  fvec: [1207.5 1208.5 1209.5]  svec: ['str1457' 'str1458' 'str1459' 'str1460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [410.5 411.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -955,6 +1134,20 @@ xAODTe...adFwdLink   INFO  anInt1 919 aFloat: 929.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [309.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1108 1109 1110]  fvec: [1208.5 1209.5 1210.5 1211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: [411.5 412.5 413.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1079,6 +1272,20 @@ xAODTe...adFwdLink   INFO  anInt1 1019 aFloat: 1029.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [309.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1109 1110 1111 1112]  fvec: []  svec: ['str1459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [412.5 413.5 414.5 415.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1203,6 +1410,20 @@ xAODTe...adFwdLink   INFO  anInt1 1119 aFloat: 1129.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [309.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: []  fvec: [1210.5]  svec: ['str1460' 'str1461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: []
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1327,6 +1548,20 @@ xAODTe...adFwdLink   INFO  anInt1 1219 aFloat: 1229.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1111]  fvec: [1211.5 1212.5]  svec: ['str1461' 'str1462' 'str1463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [414.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1451,6 +1686,20 @@ xAODTe...adFwdLink   INFO  anInt1 1319 aFloat: 1329.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1112 1113]  fvec: [1212.5 1213.5 1214.5]  svec: ['str1462' 'str1463' 'str1464' 'str1465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [415.5 416.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1575,6 +1824,20 @@ xAODTe...adFwdLink   INFO  anInt1 1419 aFloat: 1429.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1113 1114 1115]  fvec: [1213.5 1214.5 1215.5 1216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: [416.5 417.5 418.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1699,6 +1962,20 @@ xAODTe...adFwdLink   INFO  anInt1 1519 aFloat: 1529.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1114 1115 1116 1117]  fvec: []  svec: ['str1464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [417.5 418.5 419.5 420.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1823,6 +2100,20 @@ xAODTe...adFwdLink   INFO  anInt1 1619 aFloat: 1629.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
+xAODTestReadJVec     INFO   decorJVec: [314.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: []  fvec: [1215.5]  svec: ['str1465' 'str1466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: []
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1947,6 +2238,20 @@ xAODTe...adFwdLink   INFO  anInt1 1719 aFloat: 1729.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
+xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1116]  fvec: [1216.5 1217.5]  svec: ['str1466' 'str1467' 'str1468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [419.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2071,6 +2376,20 @@ xAODTe...adFwdLink   INFO  anInt1 1819 aFloat: 1829.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
+xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1117 1118]  fvec: [1217.5 1218.5 1219.5]  svec: ['str1467' 'str1468' 'str1469' 'str1470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [420.5 421.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2195,6 +2514,20 @@ xAODTe...adFwdLink   INFO  anInt1 1919 aFloat: 1929.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO   ivec: [121]  fvec: [221.5 222.5]  svec: ['str471' 'str472' 'str473']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [321.5 322.5 323.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1118 1119 1120]  fvec: [1218.5 1219.5 1220.5 1221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: [421.5 422.5 423.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2319,6 +2652,20 @@ xAODTe...adFwdLink   INFO  anInt1 2019 aFloat: 2029.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO   ivec: [121]  fvec: [221.5 222.5]  svec: ['str471' 'str472' 'str473']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [321.5 322.5 323.5]
+xAODTestReadJVec     INFO   ivec: [122 123]  fvec: [222.5 223.5 224.5]  svec: ['str472' 'str473' 'str474' 'str475']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [322.5 323.5 324.5 325.5]
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: [1119 1120 1121 1122]  fvec: []  svec: ['str1469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [422.5 423.5 424.5 425.5]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2443,11 +2790,45 @@ xAODTe...adFwdLink   INFO  anInt1 2119 aFloat: 2129.5 pInt: 0 pFloat: 0.00
   pvInt: []
   pvFloat: []
 
+xAODTestReadJVec     INFO jvecContainer
+xAODTestReadJVec     INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
+xAODTestReadJVec     INFO   decorJVec: [319.5]
+xAODTestReadJVec     INFO   ivec: []  fvec: [220.5]  svec: ['str470' 'str471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
+xAODTestReadJVec     INFO   ivec: [121]  fvec: [221.5 222.5]  svec: ['str471' 'str472' 'str473']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
+xAODTestReadJVec     INFO   decorJVec: [321.5 322.5 323.5]
+xAODTestReadJVec     INFO   ivec: [122 123]  fvec: [222.5 223.5 224.5]  svec: ['str472' 'str473' 'str474' 'str475']  lvec: []
+xAODTestReadJVec     INFO   decorJVec: [322.5 323.5 324.5 325.5]
+xAODTestReadJVec     INFO   ivec: [123 124 125]  fvec: [223.5 224.5 225.5 226.5]  svec: []  lvec: [(cvec:3)]
+xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadJVec     INFO jvecInfo
+xAODTestReadJVec     INFO   ivec: []  fvec: [1220.5]  svec: ['str1470' 'str1471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
+xAODTestReadJVec     INFO   decorJVec: []
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
+ClassIDSvc           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
 StreamStream1        INFO Metadata records written: 21
+xaoddata.root        INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] DAED7691-ED45-3F40-914E-3234D9FA9359
+xaoddata2.root       INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] 581A6CD8-E320-6C40-BF5F-F407BEFA2457
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     UPDATE    [ROOT_All] 
 ApplicationMgr       INFO Application Manager Stopped successfully
+LoadReadDicts        INFO Finalizing LoadReadDicts...
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
+AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
+AthenaPoolCnvSvc     INFO PerfStats | fRep_ALL        |             293 ms |
+AthenaPoolCnvSvc     INFO PerfStats | commitOutput    |              68 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              82 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cRep_ALL        |              20 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             206 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cRepR_ALL       |              66 ms |
+AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthDictLoaderSvc     INFO in finalize...
+DecisionSvc          INFO Finalized successfully.
 ToolSvc              INFO Removing all tools created by ToolSvc
+PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 leaving with code 0: "successful run"

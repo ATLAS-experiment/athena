@@ -57,13 +57,19 @@ cel_cls=ROOT.ElementLink(cvec_cls)
 
 def format_int(x): return '%d'%x
 def format_float(x): return '%.1f'%x
-def format_el(x): return '%s[%d]' % (x.dataID(), x.index())
+def format_str(x): return f"'{x}'"
+def format_el(x): return '%s[%s]' % (x.dataID(), ('inv' if x.isDefaultIndex() else x.index()))
+def format_el_vec(v): return '[' + ', '.join([format_el(el) for el in v.asVector()]) + ']'
 def format_float_vec(v):
     l = [format_float(x) for x in v]
     return '[' + ','.join(l) + ']'
 def format_int_vec(v):
     l = [format_int(x) for x in v]
     return '[' + ','.join(l) + ']'
+def format_str_vec(v):
+    l = [format_str(x) for x in v]
+    return '[' + ','.join(l) + ']'
+CVec_type = ROOT.DataVector(ROOT.DMTest.C_v1)
 accessors = {
     'int'   :  (ROOT.SG.ConstAccessor(int), format_int),
     'unsigned int'   :  (getattr (ROOT, 'SG::ConstAccessor<unsigned int>'), format_int),
@@ -72,6 +78,21 @@ accessors = {
     'std::vector<int>' : (getattr (ROOT, 'SG::ConstAccessor<std::vector<int> >'), format_int_vec),
     'ElementLink<DataVector<DMTest::C_v1> >' :
                (ROOT.SG.ConstAccessor(cel_cls), format_el),
+    'SG::JaggedVecElt<int>' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.int)),
+     format_int_vec),
+    'SG::JaggedVecElt<float>' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.float)),
+     format_float_vec),
+    'SG::JaggedVecElt<double>' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.double)),
+     format_float_vec),
+    'SG::JaggedVecElt<std::string>' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.std.string)),
+     format_str_vec),
+    'SG::JaggedVecElt<ElementLink<DataVector<DMTest::C_v1> > >' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.ElementLink(CVec_type))),
+     format_el_vec),
     }
 
 def dump_auxitem (x, auxid, f = sys.stdout):
@@ -92,6 +113,7 @@ def dump_auxdata (x, exclude=[], f = sys.stdout):
     auxids.sort()
     for name, auxid in auxids:
         if name in exclude: continue
+        if reg.isLinked (auxid): continue
         print (name + ': ', file=f, end='')
         dump_auxitem (x, auxid, f)
     return
@@ -106,7 +128,7 @@ def dump_c (c, f=sys.stdout):
     return
 
 
-def dump_h (h, f=sys.stdout):
+def dump_xaodobj (h, f=sys.stdout):
     if hasattr(h, '__deref__'):
         h = h.__deref__()
     dump_auxdata (h)
@@ -187,7 +209,16 @@ class xAODTestRead:
         print (self.readPrefix + 'hvec')
         vec = getattr (tree, self.readPrefix + 'hvec')
         for h in vec:
-            dump_h (h)
+            dump_xaodobj (h)
+
+        print (self.readPrefix + 'jvecContainer')
+        vec = getattr (tree, self.readPrefix + 'jvecContainer')
+        for h in vec:
+            dump_xaodobj (h)
+
+        print (self.readPrefix + 'jvecInfo')
+        jvecInfo = getattr (tree, self.readPrefix + 'jvecInfo')
+        dump_xaodobj (jvecInfo)
 
         #vec = getattr (tree, self.readPrefix + 'hview')
         #print (self.readPrefix + 'hview')
@@ -210,6 +241,8 @@ class xAODTestCopy:
         CHECK (event.copy (self.readPrefix + 'cvecWD'))
         CHECK (event.copy (self.readPrefix + 'cview'))
         CHECK (event.copy (self.readPrefix + 'hvec'))
+        CHECK (event.copy (self.readPrefix + 'jvecContainer'))
+        CHECK (event.copy (self.readPrefix + 'jvecInfo'))
         #CHECK (event.copy (self.readPrefix + 'hview'))
 
         if self.writePrefix != None:
@@ -230,6 +263,12 @@ class xAODTestCopy:
             
             hvec = getattr (tree, self.readPrefix + 'hvec')
             copy_vec (event, hvec, self.writePrefix + 'hvec')
+
+            jvec = getattr (tree, self.readPrefix + 'jvecContainer')
+            copy_vec (event, jvec, self.writePrefix + 'jvecContainer')
+
+            jvecinfo = getattr (tree, self.readPrefix + 'jvecInfo')
+            copy_obj (event, jvecinfo, self.writePrefix + 'jvecInfo')
 
             #hview = getattr (tree, self.readPrefix + 'hview')
             #copy_view (event, hview, self.writePrefix + 'hview')

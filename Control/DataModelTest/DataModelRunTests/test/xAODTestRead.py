@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestRead.py
 # Author: snyder@bnl.gov
@@ -47,6 +47,8 @@ def xAODTestReadCfg (flags):
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadFwdLink',
                                            CVecKey = 'CVecFwdLink'))
 
+    acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
+
     itemList = ['DMTest::CVec#cvec',
                 'xAOD::AuxContainerBase!#cvecAux.',
                 'DMTest::CVecWithData#cvecWD',
@@ -86,13 +88,24 @@ def xAODTestReadCfg (flags):
                 'DMTest::C#scopy_cinfo',
                 'xAOD::ShallowAuxInfo#scopy_cinfoAux.',
                 'DMTest::HVec#scopy_hvec',
-                'xAOD::ShallowAuxContainer#scopy_hvecAux.' ]
+                'xAOD::ShallowAuxContainer#scopy_hvecAux.',
+                'DMTest::JVecContainer#jvecContainer',
+                'DMTest::JVecAuxContainer#jvecContainerAux.',
+                'DMTest::JVec#jvecInfo',
+                'DMTest::JVecAuxInfo#jvecInfoAux.',
+                ]
     typeNames = [ 'DataVector<DMTest::C_v1>',
                   'DMTest::CAuxContainer_v1',
                   'DMTest::CVecWithData_v1',
                   'DMTest::CTrigAuxContainer_v1',
                   'DMTest::C_v1',
-                  'DMTest::CInfoAuxContainer_v1' ]
+                  'DMTest::CInfoAuxContainer_v1',
+                  'DMTest::JVecContainer_v1',
+                  'DataVector<DMTest::JVec_v1>',
+                  'DMTest::JVecAuxContainer_v1',
+                  'DMTest::JVec_v1',
+                  'DMTest::JVecAuxInfo_v1',
+                 ]
     acc.merge (TestOutputCfg (flags, 'Stream1', itemList, typeNames ))
 
     return acc

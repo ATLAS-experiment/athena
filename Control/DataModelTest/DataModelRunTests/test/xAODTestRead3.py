@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestRead3.py
 # Author: snyder@bnl.gov
@@ -38,6 +38,8 @@ def xAODTestRead3Cfg (flags):
     acc.addEventAlgo (DMTest.xAODTestReadHVec ("xAODTestReadHVec_copy",
                                                HVecKey = "copy_hvec",
                                                HViewKey = "copy_hview"))
+
+    acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
 
     return acc
 
