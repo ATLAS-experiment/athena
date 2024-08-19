@@ -329,6 +329,7 @@ def IDTIDECfg(flags):
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "EventInfo": "xAOD::EventInfo", "EventInfoAux": "xAOD::EventAuxInfo",
+        "CombinedMuonTrackParticles": "xAOD::TrackParticleContainer", "CombinedMuonTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
         "Muons": "xAOD::MuonContainer", "MuonsAux": "xAOD::MuonAuxContainer",
         "Electrons": "xAOD::ElectronContainer",
         "ElectronsAux": "xAOD::ElectronAuxContainer",

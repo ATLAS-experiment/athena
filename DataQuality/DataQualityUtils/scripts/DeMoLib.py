@@ -802,8 +802,8 @@ def initializeMonitoredDefects(system,partitions,defects0,defectVeto,veto,signOf
                                  "MUE_pt15GeV":"[Muon] Pt15GeV",
                                  "MUE_pt20GeV":"[Muon] Pt20GeV",
                                  "CTP_wrong_BGK":"[CTP] Wrong bunch group key",
-                                 "CTP_CTPIN_MU":"[CTPIN] Cable problems for jets",
-                                 "CTP_CTPIN_JET2":"[CTPIN] Cable problems for muons",
+                                 "CTP_CTPIN_MU":"[CTPIN] Cable problems for muons",
+                                 "CTP_CTPIN_JET2":"[CTPIN] Cable problems for jets",
                                  "TOPO_misconf_electronics":"[CaloTopo] Electronics misconfiguration"}
 
     signOff["EXPR."] = ["TRIG_L1_CAL_UNCHECKED","TRIG_L1_CTP_UNCHECKED","TRIG_L1_MUB_UNCHECKED","TRIG_L1_MUE_UNCHECKED","TRIG_L1_TOPO_UNCHECKED"]

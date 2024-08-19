@@ -44,11 +44,11 @@ def JfexMonitoringConfig(flags):
     # C-side irregular region
     eta_bins = [-4.8 + 0.1*i for i in range(16)]
     # C-side coarse region
-    eta_bins += [-3.2,-3.1,-2.9,-2.7,-2.5]
+    eta_bins += [-3.2,-3.1,-2.9,-2.7]
     # central region
     eta_bins += [-2.5 + 0.1*i for i in range(51)]
     # A-side coarse region
-    eta_bins += [2.5,2.7,2.9,3.1,3.2]
+    eta_bins += [2.7,2.9,3.1,3.2]
     # A-side irregular region
     eta_bins += [3.3 + 0.1*i for i in range(16)]
 
@@ -121,7 +121,7 @@ def JfexMonitoringConfig(flags):
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled",
                                "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. Inspect for hot/cold spots - check help for list of known hot/coldspots",
-                               "display":"Draw=COL1Z"
+                               "display":"SetPalette(55),Draw=COL1Z"
                            },
                            weight="weight",opt=['kAlwaysCreate'],
                            **eta_phi_bins)
@@ -211,7 +211,8 @@ def JfexMonitoringConfig(flags):
                            fillGroup=groupName,
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled_TAU",
-                               "description": "Inspect for hot/cold spots - check help for list of known hot/coldspots"
+                               "description": "Inspect for hot/cold spots - check help for list of known hot/coldspots",
+                               "display": "SetPalette(87)"
                            },
                            type='TH2I',path=expertPath+'jTau/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
 
@@ -269,7 +270,7 @@ def JfexMonitoringConfig(flags):
                            hanConfig={
                                "algorithm":"Jfex_etaPhiMapFilled_EM",
                                "description": "Bins with negative number of entries (in the FCAL and central region) signify that no TOBs can be produced at that position. Inspect for hot/cold spots, note that there are no jEM TOBs for |eta| < 2.3 - check help for list of known hot/coldspots",
-                               "display":"Draw=COL1Z"
+                               "display":"SetPalette(87),Draw=COL1Z"
                            },
                            weight="weight",
                            type='TH2I',path=expertPath+'jEM/',opt=['kAlwaysCreate'],  **eta_phi_bins)

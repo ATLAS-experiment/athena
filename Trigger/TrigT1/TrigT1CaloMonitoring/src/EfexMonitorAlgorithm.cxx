@@ -212,7 +212,7 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& groupName,
       fill(groupName, tauTOBthree_threshold);
       int iPhi = efexTauRoI->iPhi();
       if (iPhi>31) iPhi -= 64;
-      binNumber = (iPhi+32)*50 + 25 + efexTauRoI->iEta();
+      binNumber = (iPhi+32)*50 + 26 + efexTauRoI->iEta();
       fill(groupName,binNumber,lbn);
     }
   }

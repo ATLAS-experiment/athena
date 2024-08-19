@@ -35,15 +35,24 @@ def EfexInputMonitoringConfig(flags):
                            xbins=50,xmin=-2.5,xmax=2.5,
                            ybins=64,ymin=-math.pi,ymax=math.pi)
 
+    helper.defineDQAlgorithm("Efex_ecal_hot_etaThiMapFilled",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
+                             thresholdConfig={"NBins":[0,64*50]}, # currently there is no known deadspot in ecal, so that is warning. Error if empty
+                             )
+    helper.defineDQAlgorithm("Efex_hcal_hot_etaThiMapFilled",
+                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0."},
+                             thresholdConfig={"NBins":[50,64*50]}, # currently there are disabled drawers (24 dead towers). Error if empty
+                             )
+
     for layer in ["ecal","hcal"]:
         helper.defineHistogram(f'TowerEta,TowerPhi;h_dataTowers_{layer}_hot_EtaPhiMap',title=f'{layer.upper()} SuperCells >= 500MeV;#eta;#phi',
                                cutmask="AboveCut",
                                path="Expert/Inputs/eFEX",
-                               hanConfig={"algorithm":"Histogram_Empty","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
+                               hanConfig={"algorithm":f"Efex_{layer}_hot_etaThiMapFilled","description":f"Check <a href='./detail/h_dataTowers_{layer}_hot_posVsLBN'>detail plot</a> to get timeseries for each location"},
                                fillGroup=layer,
                                type='TH2I',
                                xbins=50,xmin=-2.5,xmax=2.5,
-                               ybins=64,ymin=-math.pi,ymax=math.pi)
+                               ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
         helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_hot_posVsLBN',title=f'{layer.upper()} SuperCells >= 500MeV;LB;50(y-1)+x',
                            path="Expert/Inputs/eFEX/detail",
@@ -61,7 +70,7 @@ def EfexInputMonitoringConfig(flags):
                                fillGroup=layer,
                                type='TH2I',
                                xbins=50,xmin=-2.5,xmax=2.5,
-                               ybins=64,ymin=-math.pi,ymax=math.pi)
+                               ybins=64,ymin=-math.pi,ymax=math.pi,opt=['kAlwaysCreate'])
 
         helper.defineHistogram(f'LBN,binNumber;h_dataTowers_{layer}_cold_posVsLBN',title=f'{layer.upper()} SuperCells <= -500MeV;LB;50(y-1)+x',
                                path="Expert/Inputs/eFEX/detail",
