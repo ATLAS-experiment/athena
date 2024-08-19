@@ -24,40 +24,71 @@
         "xAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
         "yAxis" : { "title" : "Entries" }
     },
-    "$TRKTAG_R" : {
+    "$TRKTAG_z0sin" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE R", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "xAxis" : { "title" : "$TRKTYPE z_{0}sin#theta [mm]", "nBins" : "100", "low" : "-40.0", "high" : "40.0" },
         "yAxis" : { "title" : "Entries" }
     },
-    "$TRKTAG_Z" : {
+    "$TRKTAG_theta" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE Z", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "xAxis" : { "title" : "$TRKTYPE #theta", "nBins" : "100", "low" : "0.0", "high" : "$PI" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_qoverp" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE q/p [GeV^{-1}]", "nBins" : "100", "low" : "-5.0", "high" : "5.0" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_prodR" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE prodR", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "xAxis" : { "title" : "$TRKTYPE production vertex R [mm]", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_prodZ" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE prodZ", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "xAxis" : { "title" : "$TRKTYPE production vertex Z [mm]", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
         "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSiHits" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE Number of Silicon Hits", "nBins" : "40", "low" : "-0.5", "high" : "39.5" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_nSiHits_vs_eta" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "$TRKTYPE Number of Silicon Hits", "nBins" : "40", "low" : "-0.5", "high" : "39.5" },
+        "zAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_chi2" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE #chi^2", "nBins" : "100", "low" : "0", "high" : "150" },
+        "xAxis" : { "title" : "$TRKTYPE #chi^{2}", "nBins" : "100", "low" : "0", "high" : "150" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_ndof" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE Number of DoF", "nBins" : "100", "low" : "0", "high" : "100" },
+        "xAxis" : { "title" : "$TRKTYPE Number of DoF", "nBins" : "100", "low" : "0", "high" : "150" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_chi2OverNdof" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE #chi^2/DoF", "nBins" : "100", "low" : "0", "high" : "5" },
+        "xAxis" : { "title" : "$TRKTYPE #chi^i{2}/nDoF", "nBins" : "100", "low" : "0", "high" : "5" },
         "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_author" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE author", "nBins" : "52", "low" : "0", "high" : "52" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_time" : {
+        "type" : "TH1F",
+        "xAxis" : { "title" : "$TRKTYPE time [ns]", "nBins" : "160", "low" : "-0.4", "high" : "0.4" },
+        "yAxis" : { "title" : "Entries" }
+    },
+    "$TRKTAG_hasValidTime_eff_vs_eta" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "HasValidTime Efficiency" }
     },
     "$TRKTAG_eta_vs_pt" : {
         "type" : "TH2F",

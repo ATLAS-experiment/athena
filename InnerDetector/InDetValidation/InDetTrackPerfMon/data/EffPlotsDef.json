@@ -24,24 +24,14 @@
         "xAxis" : { "title" : "$TRKTYPE z_{0} [mm]", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
         "yAxis" : { "title" : "Efficiency" }
     },
-    "eff_vs_$TRKTAG_R" : {
-        "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE R", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
-        "yAxis" : { "title" : "Efficiency" }
-    },
-    "eff_vs_$TRKTAG_Z" : {
-        "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE Z", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
-        "yAxis" : { "title" : "Efficiency" }
-    },
     "eff_vs_$TRKTAG_prodR" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE prodR", "nBins" : "100", "low" : "0", "high" : "$RMAX" },
+        "xAxis" : { "title" : "$TRKTYPE production vertex R [mm]", "nBins" : "100", "low" : "0", "high" : "50.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_$TRKTAG_prodZ" : {
         "type" : "TEfficiency",
-        "xAxis" : { "title" : "$TRKTYPE prodZ", "nBins" : "100", "low" : "-$ZMAX", "high" : "$ZMAX" },
+        "xAxis" : { "title" : "$TRKTYPE production vertex Z [mm]", "nBins" : "100", "low" : "-350.0", "high" : "350.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
     "eff_vs_truthMu" : {

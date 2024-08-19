@@ -82,7 +82,7 @@ namespace IDTPM {
   inline float d0( const U& p ) { return getD0( p ); }
 
   /// Accessor utility function for getting the value of R
-  inline float getProdR( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getProdR( const xAOD::TrackParticle& ) { return -9999.; }
   inline float getProdR( const xAOD::TruthParticle& p ) {
     static thread_local SG::ConstAccessor<float> prodRAcc("prodR");
     return (prodRAcc.isAvailable(p)) ? prodRAcc(p) : -9999.;
@@ -91,7 +91,7 @@ namespace IDTPM {
   inline float prodR( const U& p ) { return getProdR( p ); }
 
   /// Accessor utility function for getting the value of Z
-  inline float getProdZ( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
+  inline float getProdZ( const xAOD::TrackParticle& ) { return -9999.; }
   inline float getProdZ( const xAOD::TruthParticle& p ) {
     static thread_local SG::ConstAccessor<float> prodZAcc("prodZ");
     return (prodZAcc.isAvailable(p)) ? prodZAcc(p) : -9999.;
@@ -99,23 +99,14 @@ namespace IDTPM {
   template< class U >
   inline float prodZ( const U& p ) { return getProdZ( p ); }
 
-  /// Accessor utility function for getting the value of prodR
-  inline float getR( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
-  inline float getR( const xAOD::TruthParticle& p ) {
-    return ( p.hasProdVtx() ) ?
-           (*p.prodVtx()).perp() : -9999.;
+  /// Accessor utility function for getting the value of nSiHits
+  inline float getNSiHits( const xAOD::TrackParticle& ) { return -9999.; }
+  inline float getNSiHits( const xAOD::TruthParticle& p ) {
+    static thread_local SG::ConstAccessor<float> prodNSiHits("nSilHits");
+    return (prodNSiHits.isAvailable(p)) ? prodNSiHits(p) : -9999.;
   }
   template< class U >
-  inline float R( const U& p ) { return getR( p ); }
-
-  /// Accessor utility function for getting the value of prodZ
-  inline float getZ( const xAOD::TrackParticle& ) { return -9999.; } //FIXME
-  inline float getZ( const xAOD::TruthParticle& p ) {
-    return ( p.hasProdVtx() ) ?
-           (*p.prodVtx()).z() : -9999.;
-  }
-  template< class U >
-  inline float Z( const U& p ) { return getZ( p ); }
+  inline float nSiHits( const U& p ) { return getNSiHits( p ); }
 
   /// Accessor utility function for getting the value of qOverP
   inline float getQoverP( const xAOD::TrackParticle& p ) { return p.qOverP(); }
@@ -148,6 +139,31 @@ namespace IDTPM {
   inline float getNdof( const xAOD::TruthParticle& ) { return -9999; }
   template< class U >
   inline float ndof( const U& p ) { return getNdof(p); }
+
+  /// Accessor utility function for getting the track author
+  inline std::vector< unsigned int > getAuthor( const xAOD::TrackParticle& p ) {
+    std::vector< unsigned int > authorVec;
+    std::bitset< xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo > patternInfo = p.patternRecoInfo();
+    for( unsigned int i = 0 ; i < xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo ; i++ ) {
+      if( patternInfo.test(i) ) authorVec.push_back(i);
+    }
+    return authorVec;
+  }
+  inline std::vector< unsigned int > getAuthor( const xAOD::TruthParticle& ) { return {}; }
+  template< class U >
+  inline std::vector< unsigned int > author( const U& p ) { return getAuthor(p); }
+
+  /// Accessor utility function for getting the track hasValidTime
+  inline uint8_t getHasValidTime( const xAOD::TrackParticle& p ) { return p.hasValidTime(); }
+  inline uint8_t getHasValidTime( const xAOD::TruthParticle& ) { return 0; }
+  template< class U >
+  inline uint8_t hasValidTime( const U& p ) { return getHasValidTime(p); }
+
+  /// Accessor utility function for getting the track time
+  inline float getTime( const xAOD::TrackParticle& p ) { return p.time(); }
+  inline float getTime( const xAOD::TruthParticle& ) { return -9999.; }
+  template< class U >
+  inline float time( const U& p ) { return getTime(p); }
 
   /// Accessor utility function for getting the track parameters covariance
   inline float getCov( const xAOD::TrackParticle& p, Trk::ParamDefs par1, Trk::ParamDefs par2 ) {
