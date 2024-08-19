@@ -35,7 +35,7 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-ckf-ambi" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
