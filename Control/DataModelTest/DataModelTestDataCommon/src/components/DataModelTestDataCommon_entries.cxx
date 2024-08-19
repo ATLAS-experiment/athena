@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModeltestDataCommon/src/components/DataModelTestDataCommon_entries.cxx
@@ -16,12 +16,15 @@
 #include "../xAODTestWriteCVec.h"
 #include "../xAODTestWriteCInfo.h"
 #include "../xAODTestThinCVec.h"
+#include "../xAODTestThinJVec.h"
 #include "../xAODTestWriteCLinks.h"
 #include "../xAODTestWriteFwdLink1.h"
 #include "../xAODTestWriteFwdLink2.h"
 #include "../xAODTestReadCVec.h"
 #include "../xAODTestReadCLinks.h"
 #include "../xAODTestShallowCopy.h"
+#include "../xAODTestWriteJVec.h"
+#include "../xAODTestReadJVec.h"
 #include "../CondWriterAlg.h"
 #include "../CondWriterExtAlg.h"
 #include "../CondReaderAlg.h"
@@ -39,12 +42,15 @@ DECLARE_COMPONENT( DMTest::xAODTestAlg )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCInfo )
 DECLARE_COMPONENT( DMTest::xAODTestThinCVec )
+DECLARE_COMPONENT( DMTest::xAODTestThinJVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCLinks )
 DECLARE_COMPONENT( DMTest::xAODTestWriteFwdLink1 )
 DECLARE_COMPONENT( DMTest::xAODTestWriteFwdLink2 )
 DECLARE_COMPONENT( DMTest::xAODTestReadCVec )
 DECLARE_COMPONENT( DMTest::xAODTestReadCLinks )
 DECLARE_COMPONENT( DMTest::xAODTestShallowCopy )
+DECLARE_COMPONENT( DMTest::xAODTestWriteJVec )
+DECLARE_COMPONENT( DMTest::xAODTestReadJVec )
 DECLARE_COMPONENT( DMTest::CondWriterAlg )
 DECLARE_COMPONENT( DMTest::CondWriterExtAlg )
 DECLARE_COMPONENT( DMTest::CondReaderAlg )

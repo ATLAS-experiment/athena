@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestTypelessRead.py
 # Author: snyder@bnl.gov
@@ -44,13 +44,24 @@ def xAODTestTypelessReadCfg (flags):
                  'DMTest::CInfoAuxContainer#copy_cinfoAux.',
                  'DMTest::HVec#copy_hvec',
                  'DMTest::HAuxContainer#copy_hvecAux.',
-                 'DMTest::HView#copy_hview' ]
+                 'DMTest::HView#copy_hview',
+                 'DMTest::JVecContainer#jvecContainer',
+                 'DMTest::JVecAuxContainer#jvecContainerAux.',
+                 'DMTest::JVec#jvecInfo',
+                 'DMTest::JVecAuxInfo#jvecInfoAux.',
+                ]
     typeNames = [ 'DataVector<DMTest::C_v1>',
                   'DMTest::CVecWithData_v1',
                   'DMTest::CAuxContainer_v1',
                   'DMTest::CTrigAuxContainer_v1',
                   'DMTest::C_v1',
-                  'DMTest::CInfoAuxContainer_v1' ]
+                  'DMTest::CInfoAuxContainer_v1',
+                  'DMTest::JVecContainer_v1',
+                  'DataVector<DMTest::JVec_v1>',
+                  'DMTest::JVecAuxContainer_v1',
+                  'DMTest::JVec_v1',
+                  'DMTest::JVecAuxInfo_v1',
+                 ]
 
     acc.merge (TestOutputCfg (flags, 'Stream1', itemList, typeNames ))
 

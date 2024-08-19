@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  src/xAODTestTypelessRead.cxx
  * @author snyder@bnl.gov
@@ -24,8 +22,13 @@
 #include "DataModelTestDataRead/HAuxContainer.h"
 #include "DataModelTestDataRead/HVec.h"
 #include "DataModelTestDataRead/HView.h"
+#include "DataModelTestDataCommon/JVecContainer.h"
+#include "DataModelTestDataCommon/JVec.h"
+#include "DataModelTestDataCommon/JVecAuxContainer.h"
+#include "DataModelTestDataCommon/JVecAuxInfo.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/JaggedVec.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/StrFormat.h"
@@ -63,38 +66,88 @@ StatusCode xAODTestTypelessRead::initialize()
 namespace {
 
 
+template <class CONT>
+std::string formEL (const ElementLink<CONT>& el)
+{
+  std::string index = el.isDefaultIndex() ?
+    "inv" :
+    std::to_string (el.index());
+
+  return el.dataID() + "[" + index + "]";
+}
+
+
+template <class T>
+std::string form_vec_elt (const T& x)
+{
+  std::ostringstream ss;
+  ss << x;
+  return ss.str();
+}
+  
+
+
+std::string form_vec_elt (const std::string& x)
+{
+  return "'" + x + "'";
+}
+  
+
+template <class CONT>
+std::string form_vec_elt (const ElementLink<CONT>& x)
+{
+  return formEL (x);
+}
+  
+
+template <class RANGE>
+std::string formJVec (const RANGE& r) {
+  std::ostringstream ss;
+  ss << "[";
+  std::string sep;
+  for (auto elt : r) {
+    ss << sep;
+    sep = " ";
+    ss << form_vec_elt (elt);
+  }
+  ss << "]";
+  return ss.str();
+}
+
+
 void dumpAuxItem (std::ostream& ost,
                   SG::auxid_t auxid,
                   const SG::AuxVectorData& c, size_t i)
 {
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  if (r.isLinked (auxid)) return;
   const std::type_info* ti = r.getType(auxid);
-  std::string head = r.getName(auxid) + ": ";
+  ost << "\n    " << r.getName(auxid) << ": ";
   if (ti == &typeid(int))
-    ost << head << c.getData<int> (auxid, i) << "; ";
+    ost << c.getData<int> (auxid, i) << "; ";
   else if (ti == &typeid(unsigned int))
-    ost << head << c.getData<unsigned int> (auxid, i) << "; ";
+    ost << c.getData<unsigned int> (auxid, i) << "; ";
   else if (ti == &typeid(float))
-    ost << head << CxxUtils::strformat ("%.3f", c.getData<float> (auxid, i)) << "; ";
+    ost << CxxUtils::strformat ("%.3f", c.getData<float> (auxid, i)) << "; ";
   else if (ti == &typeid(ElementLink<DMTest::CVec>)) {
     const ElementLink<DMTest::CVec>& el =
       c.getData<ElementLink<DMTest::CVec> > (auxid, i);
-    ost << head << el.dataID() << "[" << el.index() << "]; ";
+    ost << formEL (el) << "; ";
   }
 #if 0
   else if (ti == &typeid(SG::PackedElement<unsigned int>))
-    ost << head << c.getData<SG::PackedElement<unsigned int> > (auxid, i) << "; ";
+    ost << c.getData<SG::PackedElement<unsigned int> > (auxid, i) << "; ";
   else if (ti == &typeid(SG::PackedElement<float>))
-    ost << head << c.getData<SG::PackedElement<float> > (auxid, i) << "; ";
+    ost << c.getData<SG::PackedElement<float> > (auxid, i) << "; ";
 #endif
   else if (ti == &typeid(std::vector<unsigned int>)) {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<std::vector<unsigned int> > (auxid, i))
       ost << ii << " ";
     ost << "]; ";
   }
   else if (ti == &typeid(std::vector<int>)) {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<std::vector<int> > (auxid, i))
       ost << ii << " ";
     ost << "]; ";
@@ -102,33 +155,53 @@ void dumpAuxItem (std::ostream& ost,
   else if (ti == &typeid(std::vector<float>) ||
            strcmp (ti->name(), typeid(std::vector<float>).name()) == 0)
   {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<std::vector<float> > (auxid, i))
       ost << CxxUtils::strformat ("%.3f", ii) << " ";
     ost << "]; ";
   }
 #if 0
   else if (ti == &typeid(SG::PackedElement<std::vector<unsigned int> >)) {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<SG::PackedElement<std::vector<unsigned int> > > (auxid, i))
       ost << ii << " ";
     ost << "]; ";
   }
   else if (ti == &typeid(SG::PackedElement<std::vector<int> >)) {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<SG::PackedElement<std::vector<int> > > (auxid, i))
       ost << ii << " ";
     ost << "]; ";
   }
   else if (ti == &typeid(SG::PackedElement<std::vector<float> >)) {
-    ost << "\n    " << head << "[";
+    ost << "[";
     for (auto ii : c.getData<SG::PackedElement<std::vector<float> > > (auxid, i))
       ost << CxxUtils::strformat ("%.3f", ii) << " ";
     ost << "]; ";
   }
 #endif
+  else if (ti == &typeid(SG::JaggedVecElt<int>)) {
+    SG::ConstAccessor<SG::JaggedVecElt<int> > acc (r.getName (auxid));
+    ost << formJVec (acc (c, i)) << "; ";
+  }
+  else if (ti == &typeid(SG::JaggedVecElt<float>)) {
+    SG::ConstAccessor<SG::JaggedVecElt<float> > acc (r.getName (auxid));
+    ost << formJVec (acc (c, i)) << "; ";
+  }
+  else if (ti == &typeid(SG::JaggedVecElt<double>)) {
+    SG::ConstAccessor<SG::JaggedVecElt<double> > acc (r.getName (auxid));
+    ost << formJVec (acc (c, i)) << "; ";
+  }
+  else if (ti == &typeid(SG::JaggedVecElt<std::string>)) {
+    SG::ConstAccessor<SG::JaggedVecElt<std::string> > acc (r.getName (auxid));
+    ost << formJVec (acc (c, i)) << "; ";
+  }
+  else if (ti == &typeid(SG::JaggedVecElt<ElementLink<CVec> >)) {
+    SG::ConstAccessor<SG::JaggedVecElt<ElementLink<CVec> > > acc (r.getName (auxid));
+    ost << formJVec (acc (c, i)) << "; ";
+  }
   else
-    ost << head << "xxx " << ti->name() << "; ";
+    ost << "xxx " << ti->name() << "; ";
 }
 
 
@@ -198,10 +271,20 @@ void copy (DMTest::CVec& to, const DMTest::CVec& from)
 }
 
 
-void copy (DMTest::HVec& to, const DMTest::HVec& from)
+void dumpobj (std::ostream& ost,
+              const DMTest::JVec* obj,
+              const std::map<std::string, SG::auxid_t>& auxid_map)
+{
+  const SG::AuxVectorData* cont = obj->container();
+  dumpelt (ost, cont, 0, auxid_map);
+}
+
+
+template <class CONTAINER>
+void copy (CONTAINER& to, const CONTAINER& from)
 {
   for (size_t i = 0; i < from.size(); i++) {
-    to.push_back (new H);
+    to.push_back (new typename CONTAINER::base_value_type);
     *to.back() = *from[i];
   }
 }
@@ -216,6 +299,12 @@ void copy (DMTest::CVecWithData& to, const DMTest::CVecWithData& from)
 
 
 void copy (DMTest::C& to, const DMTest::C& from)
+{
+  to = from;
+}
+
+
+void copy (DMTest::JVec& to, const DMTest::JVec& from)
 {
   to = from;
 }
@@ -236,9 +325,12 @@ xAODTestTypelessRead::testit (const char* key)
   std::map<std::string, SG::auxid_t> auxid_map = get_map (obj);
   std::ostringstream ost1;
   ost1 << key << " types: ";
-  for (const auto& m : auxid_map)
-    ost1 << r.getName(m.second) << "/" 
-         << System::typeinfoName (*r.getType(m.second)) << " ";
+  for (const auto& m : auxid_map) {
+    if (!r.isLinked (m.second)) {
+      ost1 << r.getName(m.second) << "/" 
+           << System::typeinfoName (*r.getType(m.second)) << " ";
+    }
+  }
   ATH_MSG_INFO (ost1.str());
 
   std::ostringstream ost2;
@@ -298,6 +390,8 @@ StatusCode xAODTestTypelessRead::execute()
   CHECK(( testit_view<CView> ("cview") ));
   CHECK(( testit<HVec, HAuxContainer>     ("hvec") ));
   CHECK(( testit_view<HView> ("hview") ));
+  CHECK(( testit<JVecContainer, JVecAuxContainer> ("jvecContainer") ));
+  CHECK(( testit<JVec, JVecAuxInfo> ("jvecInfo") ));
 
   return StatusCode::SUCCESS;
 }

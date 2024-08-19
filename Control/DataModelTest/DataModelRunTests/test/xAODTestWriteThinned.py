@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/xAODTestWriteThinned.py
 # Author: snyder@bnl.gov
@@ -34,6 +34,11 @@ def xAODTestWriteThinnedCfg (flags):
                                                Mask = 6))
 
 
+    acc.addEventAlgo (DMTest.xAODTestWriteJVec ('xAODTestWriteJVec'))
+    acc.addEventAlgo (DMTest.xAODTestThinJVec ('xAODTestThinJVec',
+                                               Stream = 'StreamThinned1',
+                                               Mask = 5))
+
     itemList = [ 'DMTest::CVec#cvec',
                  'DMTest::CAuxContainer#cvecAux.-dVar2.-dtest',
                  'DMTest::CVec#cvec2',
@@ -44,7 +49,10 @@ def xAODTestWriteThinnedCfg (flags):
                  'DMTest::CLinksAuxContainer#clinksContainerAux.',
                  'DMTest::CLinksContainer#clinksContainer2',
                  'DMTest::CLinksAuxContainer#clinksContainer2Aux.',
-                 'DMTest::CLinksAOD#clinksAOD' ]
+                 'DMTest::CLinksAOD#clinksAOD',
+                 'DMTest::JVecContainer#jvecContainer',
+                 'DMTest::JVecAuxContainer#jvecContainerAux.',
+                ]
 
     typeNames = [ 'DataVector<DMTest::C_v1>',
                   'DMTest::CAuxContainer_v1',
@@ -52,7 +60,11 @@ def xAODTestWriteThinnedCfg (flags):
                   'DMTest::CLinks_v1',
                   'DataVector<DMTest::CLinks_v1>',
                   'DMTest::CLinksAuxInfo_v1',
-                  'DMTest::CLinksAuxContainer_v1' ]
+                  'DMTest::CLinksAuxContainer_v1',
+                  'DMTest::JVecContainer_v1',
+                  'DataVector<DMTest::JVec_v1>',
+                  'DMTest::JVecAuxContainer_v1',
+                 ]
 
     acc.merge (TestOutputCfg (flags, 'Thinned1', itemList, typeNames))
 
