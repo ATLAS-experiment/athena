@@ -279,7 +279,9 @@ class TrigBSExtr(ExecStep):
         self.type = 'other'
         self.executable = 'trigbs_extractStream.py'
         self.input = ''
-        self.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
+        # the HLT step may produce several BS files, if we exceed the 2 GB file size limit
+        # process all BS files in trigbs_extractStream.py (by default, find_file only keeps the last one)
+        self.args = '-s Main ' + '`find . -name "*_HLTMPPy_output.*.data"`'
 
 
 ##################################################
@@ -301,7 +303,7 @@ class TrigTZReco(ExecStep):
         self.max_events = -1
         self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
         self.args += ' --outputAODFile=AOD.pool.root'
-        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-15\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2023-05\' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
         self.args += ' --CA'
 

@@ -1,11 +1,5 @@
-#!/Usr/bin/env python
-
-# Slices = ['fsjet']
-# Events = 10
-# Threads = 1
-# Slots = 1
-# Input = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json   
-# TrackReference = 'Truth'
+#!/usr/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -140,9 +134,10 @@ filter_bs = TrigBSExtr()
 if MultipleLB:
     filter_bs.args += ' -l 0'
 
+
 tzreco = TrigTZReco()
-
-
+tzreco.threads = Threads
+tzreco.concurrent_events = Slots
 
 
 if 'ExtraAna' not in locals() :
