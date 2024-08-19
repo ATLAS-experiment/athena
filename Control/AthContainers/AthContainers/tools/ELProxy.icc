@@ -1,0 +1,496 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/ELProxy.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jan, 2024
+ * @brief Helpers for proxying ElementLink for PackedLink accessors.
+ */
+
+
+namespace SG { namespace detail {
+
+
+/**
+ * @brief Constructor.
+ * @param cnv Converter to copy.
+ */
+template <class CONT>
+inline
+ELProxyValBase<CONT>::ELProxyValBase (PackedLinkConverter<CONT>& cnv) :
+  m_cnv (cnv)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked DataLinks.
+ */
+template <class CONT>
+inline
+ELProxyValBase<CONT>::ELProxyValBase (AuxVectorData& container,
+                                      SG::auxid_t auxid,
+                                      SG::auxid_t linked_auxid)
+  : m_cnv (container, auxid, linked_auxid)
+{
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Constructor.
+ * @param cnv Converter to reference.
+ */
+template <class CONT>
+inline
+ELProxyRefBase<CONT>::ELProxyRefBase (PackedLinkConverter<CONT>& cnv)
+  : m_cnv (cnv)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param pl @c PackedLink object to proxy.
+ * @param cnv Converter to use.
+ */
+template <class BASE>
+inline
+ELProxyT<BASE>::ELProxyT (PLink_t& pl, PackedLinkConverter<Cont_t>& cnv)
+  : BASE (cnv),
+    m_pl (pl)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked DataLinks.
+ *
+ * This constructor can only be used if the converter is being
+ * held by value.
+ */
+template <class BASE>
+inline
+ELProxyT<BASE>::ELProxyT (PLink_t& pl, AuxVectorData& container,
+                          SG::auxid_t auxid,
+                          SG::auxid_t linked_auxid)
+  : BASE (container, auxid, linked_auxid),
+    m_pl (pl)
+{
+}
+
+
+/**
+ * @brief Convert the held @c PackedLink to an @c ElementLink.
+ */
+template <class BASE>
+inline
+ELProxyT<BASE>::operator const Link_t() const
+{
+  return this->m_cnv (m_pl);
+}
+
+
+/**
+ * @brief Update the held @c PackedLink from an @c ElementLink.
+ * @param link The @c ElementLink from which to update.
+ */
+template <class BASE>
+inline
+auto ELProxyT<BASE>::operator= (const Link_t& link) -> const Link_t
+{
+  this->m_cnv.set (m_pl, link);
+  return link;
+}
+
+
+/**
+ * @brief Equality comparison with ElementLink.
+ * @param l The link with which to compare.
+ *
+ * (Default conversions don't suffice to make this work.)
+ */
+template <class BASE>
+inline
+bool ELProxyT<BASE>::operator== (const Link_t& l) const
+{
+  return Link_t(*this) == l;
+}
+
+
+/**
+ * @brief Equality comparison with another proxy.
+ * @param l The proxy with which to compare.
+ *
+ * (Default conversions don't suffice to make this work.)
+ */
+template <class BASE>
+inline
+bool ELProxyT<BASE>::operator== (const ELProxyT& p) const
+{
+  return m_pl == p.m_pl;
+}
+
+
+//***************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param cnv Converter.  We'll make a copy of this.
+ */
+template <class PROXY>
+inline
+ELProxyConverter<PROXY>::ELProxyConverter (const Base& cnv)
+  : Base (cnv)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked DataLinks.
+ */
+template <class PROXY>
+inline
+ELProxyConverter<PROXY>::ELProxyConverter (AuxVectorData& container,
+                                           SG::auxid_t auxid,
+                                           SG::auxid_t linked_auxid)
+  : Base (container, auxid, linked_auxid)
+{
+}
+
+
+/**
+ * @brief Produce a proxy object for a given @c PackedLink.
+ * @param pl The @c PackedLink object to proxy.
+ */
+template <class PROXY>
+inline
+PROXY ELProxyConverter<PROXY>::operator() (PLink_t& pl)
+{
+  return PROXY (pl, *this);
+}
+
+
+//***************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param velt The vector of @c PackedLink that we proxy.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked DataLinks.
+ */
+template <class CONT, class PLINK_ALLOC>
+inline
+ELSpanProxy<CONT, PLINK_ALLOC>::ELSpanProxy (VElt_t& velt,
+                                             AuxVectorData& container,
+                                             SG::auxid_t auxid,
+                                             SG::auxid_t linked_auxid)
+  : Base (PackedLink_span (velt.data(), velt.size()), m_cnv),
+    m_velt (velt),
+    m_cnv (container, auxid, linked_auxid)
+{
+}
+
+
+/**
+ * @brief Assign from a range of @c ElementLink.
+ * @param r The range from which to assign.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <ElementLinkRange<CONT> RANGE>
+void ELSpanProxy<CONT, PLINK_ALLOC>::operator= (const RANGE& r)
+{
+  auto end = m_velt.end();
+
+  // Update @c m_velt.
+  m_cnv.set (m_velt, r);
+
+  // Update the range we're proxying if it has changed.
+  if (end != m_velt.end())
+  {
+    *static_cast<Base*> (this) =
+      Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+  }
+}
+
+
+/**
+ * @brief Convert to a vector of @c ElementLink.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <class VALLOC>
+ELSpanProxy<CONT, PLINK_ALLOC>::operator std::vector<Link_t, VALLOC>() const
+{
+  return std::vector<Link_t, VALLOC> (this->begin(), this->end());
+}
+
+
+/**
+ * @brief Convert to a vector of @c ElementLink.
+ */
+template <class CONT, class PLINK_ALLOC>
+auto ELSpanProxy<CONT, PLINK_ALLOC>::asVector() const
+  -> std::vector<Link_t>
+{
+  return std::vector<Link_t> (this->begin(), this->end());
+}
+
+
+/**
+ * @brief Equality testing.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <class VALLOC>
+bool ELSpanProxy<CONT, PLINK_ALLOC>::operator== (const std::vector<Link_t, VALLOC>& v) const
+{
+  return this->asVector() == v;
+}
+
+
+/**
+ * @brief Add a new link to this vector of links.
+ * @param l The new link to add.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::push_back (const Link_t& l)
+{
+  insert (this->end(), 1, l);
+}
+
+
+/**
+ * @brief Clear this vector of links.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::clear()
+{
+  m_velt.clear();
+  *static_cast<Base*> (this) =
+    Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+}
+
+
+/**
+ * @brief Resize this vector of links.
+ * @param n The desired new size.
+ * @param l Value with which to fill any new elements.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::resize (size_t n,
+                                             const Link_t& l /*= Link_t()*/)
+{
+  size_t sz = this->size();
+  if (n > sz) {
+    PLink_t plink;
+    m_cnv.set (plink, l);
+    m_velt.resize (n, plink);
+    *static_cast<Base*> (this) =
+      Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+  }
+  else if (n < sz) {
+    m_velt.resize (n);
+    *static_cast<Base*> (this) =
+      Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+  }
+}
+
+
+/**
+ * @brief Erase one element from this vector of links.
+ * @param pos The element to erase.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::erase (iterator pos)
+{
+  m_velt.erase (m_velt.begin() + (pos - this->begin()));
+  *static_cast<Base*> (this) =
+    Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+}
+
+
+/**
+ * @brief Erase a range of elements from this vector of links.
+ * @param first The first element to erase.
+ * @param last One past the last element to erase.
+ * @param pos The element to erase.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::erase (iterator first, iterator last)
+{
+  m_velt.erase (m_velt.begin() + (first - this->begin()),
+                m_velt.begin() + (last - this->begin()));
+  *static_cast<Base*> (this) =
+    Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+}
+
+
+/**
+ * @brief Insert a new link into this vector of links.
+ * @param pos The position at which to insert the link.
+ * @param l The link to insert.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::insert (iterator pos, const Link_t& l)
+{
+  insert (pos, 1, l);
+}
+
+
+/**
+ * @brief Insert copies of a new link into this vector of links.
+ * @param pos The position at which to insert the link.
+ * @param n Number of copies to insert.
+ * @param l The link(s) to insert.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::insert (iterator pos, size_t n, const Link_t& l)
+{
+  size_t i = pos - this->begin();
+  PLink_t plink;
+  m_cnv.set (plink, l);
+  m_velt.insert (m_velt.begin() + i, n, plink);
+  *static_cast<Base*> (this) =
+    Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+}
+
+
+/**
+ * @brief Insert a range of links into this vector of links.
+ * @param pos The position at which to insert the links.
+ * @param first The first element to insert.
+ * @param last One past the last element to insert.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <CxxUtils::detail::InputValIterator<ElementLink<CONT> > ITERATOR>
+void ELSpanProxy<CONT, PLINK_ALLOC>::insert (iterator pos,
+                                             ITERATOR first, ITERATOR last)
+{
+  insert_range (pos, std::ranges::subrange (first, last));
+}
+
+
+/**
+ * @brief Insert a range of links into this vector of links.
+ * @param pos The position at which to insert the links.
+ * @param range The range to insert.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <ElementLinkRange<CONT> RANGE>
+void ELSpanProxy<CONT, PLINK_ALLOC>::insert_range (iterator pos,
+                                                   const RANGE& range)
+{
+  m_cnv.insert (m_velt, pos - this->begin(), range);
+  *static_cast<Base*> (this) =
+    Base (PackedLink_span (m_velt.data(), m_velt.size()), m_cnv);
+}
+
+
+/**
+ * @brief Append a range of links to the end of this vector of links.
+ * @param range The range to append.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <ElementLinkRange<CONT> RANGE>
+void ELSpanProxy<CONT, PLINK_ALLOC>::append_range (const RANGE& range)
+{
+  insert_range (this->end(), range);
+}
+
+
+/**
+ * @brief Remove the last element in this vector of links.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::pop_back()
+{
+  erase (this->end()-1);
+}
+
+
+/**
+ * @brief Set this vector of links to copies of a new link.
+ * @param n Number of copies to insert.
+ * @param l The link(s) to insert.
+ */
+template <class CONT, class PLINK_ALLOC>
+void ELSpanProxy<CONT, PLINK_ALLOC>::assign (size_t n, const Link_t& l)
+{
+  clear();
+  insert (this->begin(), n, l);
+}
+
+
+/**
+ * @brief Set this vector of links to a range of links.
+ * @param first The first element to copy.
+ * @param last One past the last element to copy.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <CxxUtils::detail::InputValIterator<ElementLink<CONT> > ITERATOR>
+void ELSpanProxy<CONT, PLINK_ALLOC>::assign (ITERATOR first, ITERATOR last)
+{
+  assign_range (std::ranges::subrange (first, last));
+}
+
+
+/**
+ * @brief Set this vector of links to a range of links.
+ * @param range The range of links to copy.
+ * @param last One past the last element to copy.
+ */
+template <class CONT, class PLINK_ALLOC>
+template <ElementLinkRange<CONT> RANGE>
+void ELSpanProxy<CONT, PLINK_ALLOC>::assign_range (const RANGE& range)
+{
+  clear();
+  insert_range (this->begin(), range);
+}
+
+
+//***************************************************************************
+
+
+/***
+ * @brief Constructor.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked DataLinks.
+ */
+template <class CONT, class PLINK_ALLOC>
+ELSpanConverter<CONT, PLINK_ALLOC>::ELSpanConverter (AuxVectorData& container,
+                                                     auxid_t auxid,
+                                                     auxid_t linked_auxid)
+  : m_container (container),
+    m_auxid (auxid),
+    m_linkedAuxid (linked_auxid)
+{
+}
+
+
+/**
+ * @brief Convert from a @c PackedLink vector to a proxy for the span.
+ * @param velt The vector of @c PackedLink that we proxy.
+ */
+template <class CONT, class PLINK_ALLOC>
+auto ELSpanConverter<CONT, PLINK_ALLOC>::operator() (VElt_t& velt) const
+  -> value_type
+{
+  AuxVectorData& container ATLAS_THREAD_SAFE = m_container;
+  return value_type (velt, container, m_auxid, m_linkedAuxid);
+}
+
+
+}} // namespace SG::detail

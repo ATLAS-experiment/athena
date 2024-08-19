@@ -48,6 +48,9 @@ auto PackedLinkConstConverter<CONT>::operator()
 }
 
 
+//****************************************************************************
+
+
 /**
  * @brief Constructor.
  * @param dlinks Span over DataLinks.
@@ -72,6 +75,102 @@ auto PackedLinkVectorConstConverter<CONT>::operator()
   (const std::vector<PackedLink<CONT>, VALLOC>& velt) const -> value_type
 {
   return value_type (CxxUtils::make_span (velt), m_dlinks);
+}
+
+
+//****************************************************************************
+
+
+/**
+ * @brief Constructor.
+ * @param container Container holding the variables.
+ * @param auxid The ID of the PackedLink variable.
+ * @param linked_auxid The ID of the linked variable of DataLinks.
+ */
+template <class CONT>
+inline
+PackedLinkConverter<CONT>::PackedLinkConverter (AuxVectorData& container,
+                                                SG::auxid_t auxid,
+                                                SG::auxid_t linked_auxid)
+  : m_container (container),
+    m_linkedVec (container, auxid),
+    m_dlinks (*container.getDataSpan (linked_auxid))
+{
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Convert a PackedLink to an ElementLink.
+ * @param plink The link to transform.
+ */
+template <class CONT>
+auto PackedLinkConverter<CONT>::operator() (const PackedLinkBase& plink) const
+  -> const value_type
+{
+  unsigned int coll = plink.collection();
+  // We need to special-case this: if there were no non-null links,
+  // then the DataLink collection may not have been filled.
+  if (coll == 0) {
+    return value_type();
+  }
+#ifdef XAOD_STANDALONE
+  return value_type (m_dlinks.at(coll).key(), plink.index());
+#else
+  return value_type (static_cast<const DLink_t&>(m_dlinks.at(coll)), plink.index());
+#endif
+}
+
+
+/**
+ * @brief Convert an ElementLink to a PackedLink.
+ * @param pl The destination PackedLink.
+ * @param link The link to transform.
+ */
+template <class CONT>
+void PackedLinkConverter<CONT>::set (PackedLinkBase& pl, const value_type& link)
+{
+  pl.setIndex (link.isDefault() ? 0 : link.index());
+  auto [dlindex, cacheValid] = PLVH::findCollection (m_linkedVec,
+                                                     link.key(),
+                                                     m_dlinks,
+                                                     link.source());
+  pl.setCollection (dlindex);
+  if (!cacheValid) m_container.clearCache (m_linkedVec->auxid());
+}
+
+
+/**
+ * @brief Convert a range of ElementLinks to a vector of PackedLinks.
+ * @param plv The destination vector of PackedLinks.
+ * @param r The range of ElementLinks.
+ */
+template <class CONT>
+template <class VALLOC, ElementLinkRange<CONT> RANGE>
+void PackedLinkConverter<CONT>::set (std::vector<PLink_t, VALLOC>& plv,
+                                     const RANGE& r)
+{
+  if (!PLVH::template assignVElt (plv, *m_linkedVec, m_dlinks, r)) {
+    m_container.clearCache (m_linkedVec->auxid());
+  }
+}
+
+
+/**
+ * @brief Insert a range of ElementLinks into a vector of PackedLinks.
+ * @param plv The destination vector of PackedLinks.
+ * @param pos Position in the container at which to insert the range.
+ * @param r The range of ElementLinks.
+ */
+template <class CONT>
+template <class VALLOC, ElementLinkRange<CONT> RANGE>
+void PackedLinkConverter<CONT>::insert (std::vector<PLink_t, VALLOC>& plv,
+                                        size_t pos,
+                                        const RANGE& r)
+{
+  if (!PLVH::template insertVElt (plv, pos, *m_linkedVec, m_dlinks, r)) {
+    m_container.clearCache (m_linkedVec->auxid());
+  }
 }
 
 

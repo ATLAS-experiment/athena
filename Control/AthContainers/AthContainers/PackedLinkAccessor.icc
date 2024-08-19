@@ -1,0 +1,491 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/PackedLinkAccessor.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Oct, 2023
+ * @brief Helper class to provide type-safe access to aux data,
+ *        specialized for @c PackedLink.
+ */
+
+
+#include "AthContainers/AuxElement.h"
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/exceptions.h"
+#include "CxxUtils/checker_macros.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC>
+inline
+Accessor<PackedLink<CONT>, ALLOC>::Accessor (const std::string& name)
+  : Base (name)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC>
+inline
+Accessor<PackedLink<CONT>, ALLOC>::Accessor (const std::string& name,
+                                             const std::string& clsname)
+  : Base (name, clsname)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class CONT, class ALLOC>
+inline
+Accessor<PackedLink<CONT>, ALLOC>::Accessor (const SG::auxid_t auxid)
+  : Base (auxid)
+{
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param e The element for which to fetch the variable.
+ *
+ * Will return an @c ElementLink proxy, which may be converted to
+ * or assigned from an @c ElementLink.
+ */
+template <class CONT, class ALLOC>
+template <IsAuxElement ELT>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::operator() (ELT& e) const -> ELProxy
+{
+  assert (e.container() != 0);
+  return ELProxy (e.container()->template getData<PLink_t> (this->m_auxid, e.index()),
+                  *e.container(),
+                  this->m_auxid,
+                  this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * Will return an @c ElementLink proxy, which may be converted to
+ * or assigned from an @c ElementLink.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::operator() (AuxVectorData& container,
+                                               size_t index) const -> ELProxy
+{
+  return ELProxy (container.template getData<PLink_t> (this->m_auxid, index),
+                  container,
+                  this->m_auxid,
+                  this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to fetch the variable.
+ * @param l The @c ElementLink to set.
+ */
+template <class CONT, class ALLOC>
+inline
+void Accessor<PackedLink<CONT>, ALLOC>::set (AuxElement& e, const Link_t& l) const
+{
+  set (*e.container(), e.index(), l);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ * @param l The @c ElementLink to set.
+ */
+template <class CONT, class ALLOC>
+void Accessor<PackedLink<CONT>, ALLOC>::set (AuxVectorData& container,
+                                             size_t index,
+                                             const Link_t& x) const
+{
+  // Have to do this before creating the converter.
+  PLink_t& ll = container.template getData<PLink_t> (this->m_auxid, index);
+  detail::PackedLinkConverter<CONT> cnv (container,
+                                         this->m_auxid,
+                                         this->m_linkedAuxid);
+  cnv.set (ll, x);
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::getPackedLinkArray (AuxVectorData& container) const
+  -> PLink_t*
+{
+  return reinterpret_cast<PLink_t*> (container.getDataArray (this->m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::getDataLinkArray (AuxVectorData& container) const
+  -> DLink_t*
+{
+  return reinterpret_cast<DLink_t*>
+    (container.getDataArray (this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a span over the array of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::getPackedLinkSpan (AuxVectorData& container) const
+  -> PackedLink_span
+{
+  auto beg = reinterpret_cast<PLink_t*>(container.getDataArray (this->m_auxid));
+  return PackedLink_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::getDataLinkSpan (AuxVectorData& container) const
+  -> DataLink_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (this->m_linkedAuxid);
+  return DataLink_span (reinterpret_cast<DLink_t*>(sp->beg), sp->size);
+}
+
+
+
+/**
+ * @brief Get a span of @c ElementLink proxies.
+ * @param container The container from which to fetch the variable.
+ *
+ * The proxies may be converted to or assigned from @c ElementLink.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Accessor<PackedLink<CONT>, ALLOC>::getDataSpan (AuxVectorData& container) const
+  -> span
+{
+  return span (getPackedLinkSpan(container),
+               detail::PackedLinkConverter<CONT> (container,
+                                                  this->m_auxid,
+                                                  this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+bool
+Accessor<PackedLink<CONT>, ALLOC>::isAvailableWritable (AuxElement& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritable (this->m_auxid) &&
+    e.container()->isAvailableWritable (this->m_linkedAuxid);
+}
+
+
+//************************************************************************
+
+
+// To make the declarations a bit more readable.
+#define ACCESSOR Accessor<std::vector<PackedLink<CONT>, VALLOC>, ALLOC>
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+ACCESSOR::Accessor (const std::string& name)
+  : Base (name)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+ACCESSOR::Accessor (const std::string& name,
+                    const std::string& clsname)
+  : Base (name, clsname)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+ACCESSOR::Accessor (const SG::auxid_t auxid)
+  : Base (auxid)
+{
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param e The element for which to fetch the variable.
+ *
+ * This will return a range of @c ElementLink proxies.
+ * These proxies may be converted to or assigned from @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsAuxElement ELT>
+auto
+ACCESSOR::operator() (ELT& e) const -> elt_span
+{
+  assert (e.container() != 0);
+  VElt_t* veltArr = getPackedLinkVectorArray(*e.container());
+  return elt_span (veltArr[e.index()], *e.container(),
+                   this->m_auxid,
+                   this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element, as a non-const reference.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * This will return a range of @c ElementLink proxies.
+ * These proxies may be converted to or assigned from @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+auto
+ACCESSOR::operator() (AuxVectorData& container,
+                      size_t index) const -> elt_span
+{
+  VElt_t* veltArr = getPackedLinkVectorArray(container);
+  return elt_span (veltArr[index], container,
+                   this->m_auxid,
+                   this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to fetch the variable.
+ * @param r The variable value to set, as a range over @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <detail::ElementLinkRange<CONT> RANGE>
+void ACCESSOR::set (AuxElement& e, const RANGE& r) const
+{
+  set (*e.container(), e.index(), r);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container for which to set the variable.
+ * @param index The index of the desired element.
+ * @param r The variable value to set, as a range over @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <detail::ElementLinkRange<CONT> RANGE>
+void ACCESSOR::set (AuxVectorData& container,
+                    size_t index,
+                    const RANGE& r) const
+{
+  detail::PackedLinkConverter<CONT> cnv (container,
+                                         this->m_auxid,
+                                         this->m_linkedAuxid);
+  VElt_t& velt = container.template getData<VElt_t> (this->m_auxid, index);
+  cnv.set (velt, r);
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of vectors of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+ACCESSOR::getPackedLinkVectorArray (AuxVectorData& container) const
+  -> VElt_t*
+{
+  return reinterpret_cast<VElt_t*>
+    (container.getDataArray (this->m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+ACCESSOR::getDataLinkArray (AuxVectorData& container) const
+  -> DLink_t*
+{
+  return reinterpret_cast<DLink_t*>
+    (container.getDataArray (this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element.
+ * @param e The element for which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+ACCESSOR::getPackedLinkSpan (AuxElement& e) const
+  -> PackedLink_span
+{
+  auto elt = reinterpret_cast<VElt_t*>
+    (e.container()->getDataArray (this->m_auxid)) + e.index();
+  return PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+ACCESSOR::getPackedLinkSpan (AuxVectorData& container,
+                             size_t index) const
+  -> PackedLink_span
+{
+  auto elt = reinterpret_cast<VElt_t*>
+    (container.getDataArray (this->m_auxid)) + index;
+  return PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vectors of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+auto
+ACCESSOR::getPackedLinkVectorSpan (AuxVectorData& container) const
+  -> PackedLinkVector_span
+{
+  auto beg = reinterpret_cast<VElt_t*> (container.getDataArray (this->m_auxid));
+  return PackedLinkVector_span (beg, container.size_v());
+}
+
+/**
+ * @brief Get a span over the array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+auto
+ACCESSOR::getDataLinkSpan (AuxVectorData& container) const
+  -> DataLink_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (this->m_linkedAuxid);
+  return DataLink_span (reinterpret_cast<DLink_t*>(sp->beg), sp->size);
+}
+
+/**
+ * @brief Get a span over spans of @c ElementLink proxies.
+ * @param container The container from which to fetch the variable.
+ *
+ * The individual proxies may be converted to or assigned from @c ElementLink.
+ * Each element may also be assigned from a range of @c ElementLink,
+ * or converted to a vector of @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+ACCESSOR::getDataSpan (AuxVectorData& container) const
+  -> span
+{
+  return span (getPackedLinkVectorSpan(container),
+               ELSpanConverter (container, this->m_auxid, this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+bool
+ACCESSOR::isAvailableWritable (AuxElement& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritable (this->m_auxid) &&
+    e.container()->isAvailableWritable (this->m_linkedAuxid);
+}
+
+
+#undef ACCESSOR
+
+
+} // namespace SG
