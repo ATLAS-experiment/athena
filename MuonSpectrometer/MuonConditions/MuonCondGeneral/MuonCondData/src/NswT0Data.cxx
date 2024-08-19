@@ -6,7 +6,6 @@
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
-
 #include "MuonTesterTree/throwExcept.h"
 
 
