@@ -8,7 +8,7 @@
 
 // Local include(s):
 #include "xAODMuonPrepData/versions/MdtTwinDriftCircle_v1.h"
-
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 namespace {
     static const std::string preFixStr{"Mdt_"};    
 }

@@ -8,6 +8,7 @@
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "xAODMuonPrepData/versions/sTgcMeasurement_v1.h"
 
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "StoreGate/StoreGateSvc.h"

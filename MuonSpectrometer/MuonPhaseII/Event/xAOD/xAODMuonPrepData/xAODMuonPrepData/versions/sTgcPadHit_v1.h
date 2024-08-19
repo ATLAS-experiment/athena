@@ -23,8 +23,4 @@ class sTgcPadHit_v1 : public sTgcMeasurement_v1 {
 };
 
 }  // namespace xAOD
-
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::sTgcPadHit_v1, xAOD::sTgcMeasurement_v1);
-
 #endif

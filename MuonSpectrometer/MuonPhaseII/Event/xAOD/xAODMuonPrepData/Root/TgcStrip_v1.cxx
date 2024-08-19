@@ -9,6 +9,7 @@
 #include "xAODMuonPrepData/versions/TgcStrip_v1.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace {

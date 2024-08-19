@@ -5,7 +5,6 @@
 #define XAODMUONPREPDATA_VERSION_STGCMEASUREMENT_V1_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
-#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
 
@@ -13,6 +12,9 @@
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 
+namespace MuonGMR4{
+  class sTgcReadoutElement;
+}
 namespace xAOD {
 
 
@@ -88,6 +90,4 @@ class sTgcMeasurement_v1 : public UncalibratedMeasurement_v1 {
 
 }  // namespace xAOD
 
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::sTgcMeasurement_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

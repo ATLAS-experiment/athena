@@ -10,7 +10,10 @@
 #include "MuonPrepRawData/MdtDriftCircleStatus.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 #include "CxxUtils/CachedValue.h"
-#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+
+namespace MuonGMR4{
+    class MdtReadoutElement;
+}
 
 namespace xAOD {
 /// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
@@ -88,7 +91,4 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
 };
 
 }  // namespace xAOD
-
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::MdtDriftCircle_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

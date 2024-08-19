@@ -3,6 +3,13 @@
 */
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "GeoModelHelpers/throwExcept.h"
+
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"

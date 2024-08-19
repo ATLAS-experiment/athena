@@ -11,6 +11,8 @@
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "MdtRDO_Decoder.h"
 #include "MuonPrepRawData/MdtTwinPrepData.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"

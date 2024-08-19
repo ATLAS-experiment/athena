@@ -8,7 +8,10 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
+
+namespace MuonGMR4{
+    class RpcReadoutElement;
+}
 namespace xAOD {
 
 /** @brief RpcMeasurement_v1: Class storing the geneic 
@@ -99,6 +102,5 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
 
 }  // namespace xAOD
 
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::RpcMeasurement_v1, xAOD::UncalibratedMeasurement_v1);
+
 #endif

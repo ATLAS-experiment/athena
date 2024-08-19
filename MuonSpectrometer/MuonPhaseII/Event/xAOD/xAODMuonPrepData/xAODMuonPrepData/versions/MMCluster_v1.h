@@ -9,8 +9,12 @@
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 #include "CxxUtils/CachedValue.h"
-#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonPrepRawData/MMPrepData.h"
+
+namespace MuonGMR4{
+    class MmReadoutElement;
+}
+
 namespace xAOD {
 
 class MMCluster_v1 : public UncalibratedMeasurement_v1 {
@@ -124,6 +128,4 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
 
 }  // namespace xAOD
 
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::MMCluster_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

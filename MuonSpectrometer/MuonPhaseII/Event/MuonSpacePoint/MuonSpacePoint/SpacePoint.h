@@ -39,6 +39,8 @@ namespace MuonR4 {
             const Amg::Vector3D& directionInChamber() const;
             /*** @brief: Returns the vector pointing to the adjacent channel in the chamber */
             const Amg::Vector3D& normalInChamber() const;
+            /** @brief Returns the vector pointing out of the measurement plane */
+            Amg::Vector3D planeNormal() const;
             /*** @brief: Returns the measurement type of the primary measurement */
             xAOD::UncalibMeasType type() const;
             /** @brief: Does the space point contain a phi measurement */

@@ -22,14 +22,16 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 class MdtDigit;
 class MdtCalibHit;
 
 namespace MuonGM {
     class MdtReadoutElement;
+}
+namespace MuonGMR4 {
+    class MuonDetectorManager;
 }
 
 namespace Muon {

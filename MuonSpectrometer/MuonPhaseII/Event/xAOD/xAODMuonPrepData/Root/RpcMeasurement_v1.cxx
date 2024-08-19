@@ -9,6 +9,7 @@
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "xAODMuonPrepData/versions/RpcMeasurement_v1.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "StoreGate/StoreGateSvc.h"
 

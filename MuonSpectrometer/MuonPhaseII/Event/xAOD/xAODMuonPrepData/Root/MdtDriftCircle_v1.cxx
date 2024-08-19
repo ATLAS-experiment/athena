@@ -9,6 +9,7 @@
 #include "xAODMuonPrepData/versions/MdtDriftCircle_v1.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace {
