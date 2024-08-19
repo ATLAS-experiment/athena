@@ -88,7 +88,6 @@ def NCB1Cfg(flags):
     NCB1SlimmingHelper.IncludeJetTriggerContent = False
     NCB1SlimmingHelper.IncludeMuonTriggerContent = False
     NCB1SlimmingHelper.IncludeEGammaTriggerContent = False
-    NCB1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     NCB1SlimmingHelper.IncludeTauTriggerContent = False
     NCB1SlimmingHelper.IncludeEtMissTriggerContent = False
     NCB1SlimmingHelper.IncludeBJetTriggerContent = False

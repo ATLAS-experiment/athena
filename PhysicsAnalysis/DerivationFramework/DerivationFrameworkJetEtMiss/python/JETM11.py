@@ -91,7 +91,6 @@ def JETM11Cfg(flags):
     JETM11SlimmingHelper.IncludeJetTriggerContent = False
     JETM11SlimmingHelper.IncludeMuonTriggerContent = False
     JETM11SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM11SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM11SlimmingHelper.IncludeTauTriggerContent = False
     JETM11SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM11SlimmingHelper.IncludeBJetTriggerContent = False

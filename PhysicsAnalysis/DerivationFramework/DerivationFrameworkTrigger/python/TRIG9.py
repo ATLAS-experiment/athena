@@ -203,7 +203,6 @@ def TRIG9Cfg(flags):
     TRIG9SlimmingHelper.IncludeJetTriggerContent = False
     TRIG9SlimmingHelper.IncludeMuonTriggerContent = False
     TRIG9SlimmingHelper.IncludeEGammaTriggerContent = False
-    TRIG9SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     TRIG9SlimmingHelper.IncludeTauTriggerContent = False
     TRIG9SlimmingHelper.IncludeEtMissTriggerContent = False
     TRIG9SlimmingHelper.IncludeBJetTriggerContent = False

@@ -212,7 +212,6 @@ def TLA0Cfg(flags):
     TLA0SlimmingHelper.IncludeMuonTriggerContent = False
     TLA0SlimmingHelper.IncludeTrackingTriggerContent = True
     TLA0SlimmingHelper.IncludeEGammaTriggerContent = True
-    TLA0SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     TLA0SlimmingHelper.IncludeTauTriggerContent = False
     TLA0SlimmingHelper.IncludeEtMissTriggerContent = False
     TLA0SlimmingHelper.IncludeBJetTriggerContent = True

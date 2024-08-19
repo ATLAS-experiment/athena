@@ -218,7 +218,6 @@ def LLJ1Cfg(flags):
     LLJ1SlimmingHelper.IncludeJetTriggerContent = True
     LLJ1SlimmingHelper.IncludeMuonTriggerContent = False
     LLJ1SlimmingHelper.IncludeEGammaTriggerContent = False
-    LLJ1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     LLJ1SlimmingHelper.IncludeTauTriggerContent = False
     LLJ1SlimmingHelper.IncludeEtMissTriggerContent = False
     LLJ1SlimmingHelper.IncludeBJetTriggerContent = False

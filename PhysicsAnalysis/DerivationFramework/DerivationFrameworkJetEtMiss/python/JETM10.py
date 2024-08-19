@@ -106,7 +106,6 @@ def JETM10Cfg(flags):
     JETM10SlimmingHelper.IncludeJetTriggerContent = False
     JETM10SlimmingHelper.IncludeMuonTriggerContent = False
     JETM10SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM10SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM10SlimmingHelper.IncludeTauTriggerContent = False
     JETM10SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM10SlimmingHelper.IncludeBJetTriggerContent = False

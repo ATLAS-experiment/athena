@@ -239,7 +239,6 @@ def JETM7Cfg(flags):
     JETM7SlimmingHelper.IncludeJetTriggerContent = False
     JETM7SlimmingHelper.IncludeMuonTriggerContent = False
     JETM7SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM7SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM7SlimmingHelper.IncludeTauTriggerContent = False
     JETM7SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM7SlimmingHelper.IncludeBJetTriggerContent = False

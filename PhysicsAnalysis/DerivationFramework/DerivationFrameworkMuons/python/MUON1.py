@@ -385,7 +385,6 @@ def MUON1Cfg(flags):
     MUON1SlimmingHelper.IncludeJetTriggerContent = False
     MUON1SlimmingHelper.IncludeMuonTriggerContent = True
     MUON1SlimmingHelper.IncludeEGammaTriggerContent = False
-    MUON1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     MUON1SlimmingHelper.IncludeTauTriggerContent = False
     MUON1SlimmingHelper.IncludeEtMissTriggerContent = False
     MUON1SlimmingHelper.IncludeBJetTriggerContent = False

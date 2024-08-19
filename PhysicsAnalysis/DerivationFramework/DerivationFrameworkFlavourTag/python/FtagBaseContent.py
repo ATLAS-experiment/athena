@@ -106,7 +106,6 @@ def trigger_setup(SlimmingHelper, option=''):
     SlimmingHelper.IncludeJetTriggerContent = False
     SlimmingHelper.IncludeMuonTriggerContent = False
     SlimmingHelper.IncludeEGammaTriggerContent = False
-    SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     SlimmingHelper.IncludeTauTriggerContent = False
     SlimmingHelper.IncludeEtMissTriggerContent = False
     SlimmingHelper.IncludeBJetTriggerContent = False

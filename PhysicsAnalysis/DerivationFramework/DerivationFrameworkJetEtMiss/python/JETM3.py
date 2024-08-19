@@ -283,7 +283,6 @@ def JETM3Cfg(flags):
     JETM3SlimmingHelper.IncludeJetTriggerContent = True
     JETM3SlimmingHelper.IncludeMuonTriggerContent = True
     JETM3SlimmingHelper.IncludeEGammaTriggerContent = True
-    JETM3SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM3SlimmingHelper.IncludeTauTriggerContent = False
     JETM3SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM3SlimmingHelper.IncludeBJetTriggerContent = False

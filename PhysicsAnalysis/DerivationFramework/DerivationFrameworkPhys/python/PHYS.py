@@ -168,7 +168,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.IncludeJetTriggerContent = False
     PHYSSlimmingHelper.IncludeMuonTriggerContent = False
     PHYSSlimmingHelper.IncludeEGammaTriggerContent = False
-    PHYSSlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     PHYSSlimmingHelper.IncludeTauTriggerContent = False
     PHYSSlimmingHelper.IncludeEtMissTriggerContent = False
     PHYSSlimmingHelper.IncludeBJetTriggerContent = False

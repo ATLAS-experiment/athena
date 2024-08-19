@@ -90,7 +90,6 @@ def JETM14Cfg(flags):
     JETM14SlimmingHelper.IncludeJetTriggerContent = False
     JETM14SlimmingHelper.IncludeMuonTriggerContent = False
     JETM14SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM14SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM14SlimmingHelper.IncludeTauTriggerContent = False
     JETM14SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM14SlimmingHelper.IncludeBJetTriggerContent = False

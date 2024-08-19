@@ -842,7 +842,6 @@ def LLP1Cfg(flags):
     LLP1SlimmingHelper.IncludeJetTriggerContent = False
     LLP1SlimmingHelper.IncludeMuonTriggerContent = False
     LLP1SlimmingHelper.IncludeEGammaTriggerContent = False
-    LLP1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     LLP1SlimmingHelper.IncludeTauTriggerContent = False
     LLP1SlimmingHelper.IncludeEtMissTriggerContent = False
     LLP1SlimmingHelper.IncludeBJetTriggerContent = False

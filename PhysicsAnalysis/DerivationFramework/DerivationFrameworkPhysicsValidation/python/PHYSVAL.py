@@ -262,7 +262,6 @@ def PHYSVALCfg(flags):
     PHYSVALSlimmingHelper.IncludeJetTriggerContent          = True
     PHYSVALSlimmingHelper.IncludeMuonTriggerContent         = True
     PHYSVALSlimmingHelper.IncludeEGammaTriggerContent       = True
-    PHYSVALSlimmingHelper.IncludeJetTauEtMissTriggerContent = True
     PHYSVALSlimmingHelper.IncludeTauTriggerContent          = True
     PHYSVALSlimmingHelper.IncludeEtMissTriggerContent       = True
     PHYSVALSlimmingHelper.IncludeBJetTriggerContent         = True
