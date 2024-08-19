@@ -101,7 +101,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
 
     // Obtain navigation routes for objects which pass
     // Final parameter TRUE as the chain passed (has its ID in terminusNode)
-    TrigCompositeUtils::recursiveGetDecisions(terminusNode, navGraph, thisChainIDs, true);
+    TrigCompositeUtils::recursiveGetDecisions(terminusNode, navGraph, ctx, thisChainIDs, true);
 
     ATH_MSG_DEBUG("Added all passed navigation data for chain " << chainID
       << ", total nodes:" << navGraph.nodes() << " total edges:" << navGraph.edges() << " final nodes:" << navGraph.finalNodes().size());
@@ -116,7 +116,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::ChainGroup::feature
 
       for (const TrigCompositeUtils::Decision* rejectedNode : rejectedDecisionNodes) {
         // Final parameter FALSE as the chain failed here (its ID was removed from rejectedNode)
-        TrigCompositeUtils::recursiveGetDecisions(rejectedNode, navGraph, thisChainIDs, false);
+        TrigCompositeUtils::recursiveGetDecisions(rejectedNode, navGraph, ctx, thisChainIDs, false);
       }
 
       ATH_MSG_DEBUG("Added all failed navigation data for chain " << chainID

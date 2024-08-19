@@ -348,6 +348,7 @@ namespace TrigCompositeUtils {
    * @brief Search back in time from "node" and locate all paths back through Decision objects for a given chain.
    * @param[in] node The Decision object to start the search from. Typically this will be one of the terminus objects from the HLTNav_Summary.
    * @param[inout] navPaths Holds a sub-graph of the full navigation graph, filtered by DecisionID. An already partially populated graph may be provided as input.
+   * @param[in] ctx The event context.
    * @param[in] ids Optional DecisionIDContainer of Chains / Chain-Legs to trace through the navigation. If omitted, no chain requirement will be applied.
    * @param[in] enforceDecisionOnStartNode If the check of DecisionID should be carried out on the start node.
    * enforceDecisionOnStartNode should be true if navigating for a trigger which passed (e.g. starting from HLTPassRaw)
@@ -355,6 +356,7 @@ namespace TrigCompositeUtils {
    **/
   void recursiveGetDecisions(const Decision* node, 
     NavGraph& navGraph, 
+    const EventContext& ctx,
     const DecisionIDContainer& ids = {},
     const bool enforceDecisionOnStartNode = true);
 
@@ -368,6 +370,7 @@ namespace TrigCompositeUtils {
   void recursiveGetDecisionsInternal(const Decision* node, 
     const Decision* comingFrom,
     NavGraph& navGraph,
+    const EventContext& ctx,
     std::set<const Decision*>& fullyExploredFrom,
     const DecisionIDContainer& ids,
     const bool enforceDecisionOnNode);
