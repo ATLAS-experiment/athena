@@ -8,59 +8,43 @@
 
 namespace GlobalSim {
   
-  LArStripNeighborhood::LArStripNeighborhood(const std::vector<StripData>& d,
+  LArStripNeighborhood::LArStripNeighborhood(const StripDataVector& phi_low,
+					     const StripDataVector& phi_center,
+					     const StripDataVector& phi_high,
 					     const Coords& roi,
-					     const Coords& cell) :
-    m_data{d}, m_roiCoords{roi}, m_cellCoords{cell} {
-    auto phi_cmp = [](const auto& l, const auto& r) {
-      return l.m_phi < r.m_phi;
-    };
-
-    std::sort(m_data.begin(),
-	      m_data.end(),
-	      phi_cmp);
-  }
-
-
-  StructuredNeighborhood LArStripNeighborhood::neighborhood() const {
-
-    auto by_eta = [](const auto& l, const auto& r) {
-      return l.m_eta < r.m_eta;
-    };
-
-    auto nbhd = StructuredNeighborhood();
-    for (std::size_t i{0}; i < 3; ++i) {
-      
-      std::vector<StripData> sdVec(m_data.cbegin() + i*17,
-				   m_data.cbegin() + (i+1)*17);
-
-      std::sort(sdVec.begin(),
-		sdVec.end(),
-		by_eta
-		);
-
-      nbhd.push_back(sdVec);
-    }
-
-    return nbhd;
+					     const Coords& cell,
+					     std::size_t max_cell_pos) :
+    m_phi_low{std::move(phi_low)},
+    m_phi_center{std::move(phi_center)},
+    m_phi_high{std::move(phi_high)},
+    m_roiCoords{roi},
+    m_cellCoords{cell},
+    m_max_cell_pos{max_cell_pos}{
   }
 }
 
 std::ostream&
 operator<< (std::ostream& os, const GlobalSim::LArStripNeighborhood& n) {
-
-  auto neighborhood = n.neighborhood();
-
+  
   os << "LArStripNeighborhood: roi coords ("
      << n.m_roiCoords.first << ','  << n.m_roiCoords.second << ") cell coords ("
-     << n.m_cellCoords.first << ','  << n.m_cellCoords.second << ")\n";
-
-  unsigned int iphi{0};
-  for (const auto& eta_vec : neighborhood) {
-    os << "phi row: " << iphi++ << " [" << eta_vec.size() <<"]\n";
-    for(const auto& sd : eta_vec) { os << sd << '\n';}
-  }
+     << n.m_cellCoords.first << ','  << n.m_cellCoords.second
+     << ") max_cell_pos " << n.m_max_cell_pos << '\n';
   
+  os << "phi low: " << " [" << n.m_phi_low.size() <<"]\n";
+  for(const auto& sd : n.m_phi_low) { os << sd << '\n';}
+  
+  os << '\n';
+  
+  os << "phi center: " << " [" << n.m_phi_center.size() <<"]\n";
+  for(const auto& sd : n.m_phi_center) { os << sd << '\n';}
+
+  os << '\n';
+  
+  os << "phi high: " << " [" << n.m_phi_high.size() <<"]\n";
+  for(const auto& sd : n.m_phi_high) { os << sd << '\n';}
+  
+  os << '\n';
   return os;
 }
 
