@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloLArRetriever.h"
@@ -98,7 +98,7 @@ namespace JiveXML {
     ATH_MSG_DEBUG( "getLArData()"  );
     const EventContext& ctx = Gaudi::Hive::currentContext();
 
-    DataMap DataMap;
+    DataMap dataMap;
 
     DataVect phi; phi.reserve(cellContainer->size());
     DataVect eta; eta.reserve(cellContainer->size());
@@ -147,7 +147,7 @@ namespace JiveXML {
       const LArOnOffIdMapping* cabling{*cablingHdl};
       if(!cabling) {
          ATH_MSG_ERROR( "Do not have cabling mapping from key " << m_cablingKey.key() );
-         return DataMap;
+         return dataMap;
       }
      
 
@@ -175,63 +175,63 @@ namespace JiveXML {
 	  }
 	  energyGeV = (*it1)->energy()*(1./GeV);
 	  if (energyGeV == 0) energyGeV = 0.001; // 1 MeV due to LegoCut > 0.0 (couldn't be >= 0.0) 
-	  energy.push_back(DataType( gcvt( energyGeV, m_cellEnergyPrec, rndStr) ));
+	  energy.emplace_back( gcvt( energyGeV, m_cellEnergyPrec, rndStr) );
           energyAllLArBarrel += energyGeV;
 
-          idVec.push_back(DataType((Identifier::value_type)(*it1)->ID().get_compact() ));
-          phi.push_back(DataType((*it1)->phi()));
-          eta.push_back(DataType((*it1)->eta()));
-          channel.push_back(DataType(onlineId->channel(LArhwid))); 
-          feedThrough.push_back(DataType(onlineId->feedthrough(LArhwid))); 
-       	  slot.push_back(DataType(onlineId->slot(LArhwid))); 
+          idVec.emplace_back((Identifier::value_type)(*it1)->ID().get_compact() );
+          phi.emplace_back((*it1)->phi());
+          eta.emplace_back((*it1)->eta());
+          channel.emplace_back(onlineId->channel(LArhwid)); 
+          feedThrough.emplace_back(onlineId->feedthrough(LArhwid)); 
+       	  slot.emplace_back(onlineId->slot(LArhwid)); 
 
-	  if ( m_doLArCellDetails){
-	    cellTime = (*it1)->time();
-	    cellTimeVec.push_back(DataType( gcvt( cellTime, m_cellTimePrec, rndStr) ) );
-	    cellGain.push_back(DataType( (*it1)->gain() ) ); 
-      	
-	    int largain = (*it1)->gain();
-	    float pedestal=larPedestal->pedestal(LArhwid,largain);
-	    float pedvalue=0;
-	    if (pedestal >= (1.0+LArElecCalib::ERRORCODE)) pedvalue = pedestal;
-	    else pedvalue = 0;
-	    cellPedestal.push_back(DataType(pedvalue));
-
+          if ( m_doLArCellDetails){
+            cellTime = (*it1)->time();
+            cellTimeVec.emplace_back( gcvt( cellTime, m_cellTimePrec, rndStr)  );
+            cellGain.emplace_back( (*it1)->gain()  ); 
+              
+            int largain = (*it1)->gain();
+            float pedestal=larPedestal->pedestal(LArhwid,largain);
+            float pedvalue=0;
+            if (pedestal >= (1.0+LArElecCalib::ERRORCODE)) pedvalue = pedestal;
+            else pedvalue = 0;
+            cellPedestal.emplace_back(pedvalue);
             LArVectorProxy polynom_adc2mev = adc2mev->ADC2MEV(cellid,largain);
-            if (polynom_adc2mev.size()==0){ adc2Mev.push_back(DataType(-1)); }
-            else{ adc2Mev.push_back(DataType(polynom_adc2mev[1])); }
-	  }
+            if (polynom_adc2mev.size()==0){ adc2Mev.emplace_back(-1); }
+            else{ adc2Mev.emplace_back(polynom_adc2mev[1]); }
+          }
       }
 
     ATH_MSG_DEBUG( " Total energy in LAr barrel in GeV : " <<  energyAllLArBarrel  );
 
-    // write values into DataMap
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["energy"] = energy;
-    DataMap["id"] = idVec;
-    DataMap["channel"] = channel;
-    DataMap["feedThrough"] = feedThrough;
-    DataMap["slot"] = slot;
+    // write values into dataMap
+    const auto nEntries = phi.size() ;
+    dataMap["phi"] = std::move(phi);
+    dataMap["eta"] = std::move(eta);
+    dataMap["energy"] = std::move(energy);
+    dataMap["id"] = std::move(idVec);
+    dataMap["channel"] = std::move(channel);
+    dataMap["feedThrough"] = std::move(feedThrough);
+    dataMap["slot"] = std::move(slot);
 
     //Bad Cells
     if (m_doBadLAr==true) {
-      DataMap["BadCell"] = BadCell;
+      dataMap["BadCell"] = std::move(BadCell);
     }
 
    // adc counts
     if ( m_doLArCellDetails){
-       DataMap["cellTime"] = cellTimeVec;
-       DataMap["cellGain"] = cellGain;
-       DataMap["cellPedestal"] = cellPedestal;
-       DataMap["adc2Mev"] = adc2Mev;
+       dataMap["cellTime"] = std::move(cellTimeVec);
+       dataMap["cellGain"] = std::move(cellGain);
+       dataMap["cellPedestal"] = std::move(cellPedestal);
+       dataMap["adc2Mev"] = std::move(adc2Mev);
     }
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << " , collection: " << dataTypeName()
-                   << " retrieved with " << phi.size() << " entries" );
+                   << " retrieved with " << nEntries << " entries" );
 
     //All collections retrieved okay
-    return DataMap;
+    return dataMap;
 
   } // getLArData
 

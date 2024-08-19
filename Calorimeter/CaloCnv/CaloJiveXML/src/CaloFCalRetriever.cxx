@@ -227,7 +227,8 @@ namespace JiveXML {
     ATH_MSG_DEBUG( " Total energy in FCAL (LAr) in GeV : " <<  energyAllLArFcal  );
 
     // write values into DataMap
-    DataMap["x"] = x;
+    const auto nEntries = x.size();
+    DataMap["x"] = std::move(x);
     DataMap["y"] = std::move(y);
     DataMap["z"] = std::move(z);
     DataMap["dx"] = std::move(dx);
@@ -251,7 +252,7 @@ namespace JiveXML {
        DataMap["adc2Mev"] = std::move(adc2Mev);
     }
     //Be verbose
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << x.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << nEntries << " entries" );
 
     //All collections retrieved okay
     return DataMap;
