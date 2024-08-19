@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWCALIBDBTIMECHARGEDATA_H
@@ -12,10 +12,11 @@
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include "MuonCondData/Defs.h"
 
 
-class NswCalibDbTimeChargeData {  
+class NswCalibDbTimeChargeData: public AthMessaging {  
 
 public:
     enum class CalibDataType{
@@ -32,14 +33,14 @@ public:
     };
     
     NswCalibDbTimeChargeData(const Muon::IMuonIdHelperSvc* idHelperSvc);
-    virtual ~NswCalibDbTimeChargeData() = default;
+    ~NswCalibDbTimeChargeData() = default;
 
-	// setting functions
-	void setData(CalibDataType type, const Identifier& chnlId, CalibConstants constants);
-	void setZero(CalibDataType type, MuonCond::CalibTechType tech,  CalibConstants constants);
+    // setting functions
+    void setData(CalibDataType type, const Identifier& chnlId, CalibConstants constants);
+    void setZero(CalibDataType type, MuonCond::CalibTechType tech,  CalibConstants constants);
 
-	// retrieval functions
-	
+    // retrieval functions
+    
     //// Retrieves the list of all identifiers for which calibration channels are available
     std::vector<Identifier> getChannelIds(const CalibDataType type, const std::string& tech, const std::string& side) const;
     /// Retrieves the calibration constant for a particular readout channel. If there is no calibration constant available,
@@ -51,40 +52,28 @@ public:
 private:
     
     int identToModuleIdx(const Identifier& chan_id) const;
-    // Copied from https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonDetDescr/MuonReadoutGeometry/MuonReadoutGeometry/MuonDetectorManager.h
-    enum sTgcGMRanges {
-            NsTgStatEta = 6,      /// 3 x 2 sides (-3,-2,-1 and 1,2,3)
-            NsTgStEtaOffset = 3,  /// needed offest to map (-3,-2,-1,1,2,3) to (0,1,2,3,4,5)
-            NsTgStatPhi = 16,     // large and small sector together
-            NsTgcStatLay = 4,   // 4 wedges of stgcs
-            NsTgcChannelTypes =3, // Pads / Wires / Strips
-            NsTgChamberLayer = 2
-        };
-    enum mmGMRanges {
-            NMMcStatEta = 4,      /// 2 x 2 sides (-2,-1 and 1,2)
-            NMMcStEtaOffset = 2,  /// needed offest to map (-2,-1,1,2) to (0,1,2,3)
-            NMMcStatPhi = 16,     // large and small sector together
-            NMMcStatLay = 4, /// 4 wedges of micromegas
-            NMMcChamberLayer = 2
-        };
-    
-    static constexpr int s_NumMaxSTgcElemets = NsTgStatEta * NsTgStatPhi * NsTgChamberLayer *NsTgcStatLay * NsTgcChannelTypes;
-    static constexpr int s_NumMaxMMElements = NMMcStatEta * NMMcStatPhi * NMMcChamberLayer *NMMcStatLay;
-
-	// containers
-    struct CalibModule{
+    // ID helpers
+    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
+    /// Segmentation of the elements is per NSW gasGap. Each wedge has 4 gasgaps
+    const size_t m_nMmElements{m_idHelperSvc->hasMM() ?  
+                                   4* (m_idHelperSvc->mmIdHelper().detectorElement_hash_max() + 1) : 0};
+    /// Additionally reserve space for the 3 channel types
+    const size_t m_nStgcElements{m_idHelperSvc->hasSTGC() ? 
+                                  3*4 *(m_idHelperSvc->stgcIdHelper().detectorElement_hash_max() +1): 0};
+  
+    // containers
+    struct CalibModule {
         std::vector<std::unique_ptr<CalibConstants>> channels{};
         Identifier layer_id{0};
     };
-    using ChannelCalibMap = std::array<CalibModule, s_NumMaxSTgcElemets + s_NumMaxMMElements>;
+
+    using ChannelCalibMap = std::vector<CalibModule>; 
     ChannelCalibMap m_pdo_data{};
     ChannelCalibMap m_tdo_data{};
 
     using ZeroCalibMap = std::map<CalibDataType, CalibConstants>;
     std::map<MuonCond::CalibTechType, ZeroCalibMap> m_zero{};
 
-	// ID helpers
-    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
 };
 
 std::ostream& operator<<(std::ostream& ostr, const NswCalibDbTimeChargeData::CalibConstants& obj);
