@@ -31,7 +31,7 @@ echo "Date is ${date}"
 cd ${rundir}
 echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
-source $AtlasSetup/scripts/asetup.sh Athena,22.0.81
+source $AtlasSetup/scripts/asetup.sh --stable 24.0,Athena,latest
 
 systems='Pixel SCT TRT LAr Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA AFP LUCID ZDC IDGlobal BTag CaloCP MuonCP '
 

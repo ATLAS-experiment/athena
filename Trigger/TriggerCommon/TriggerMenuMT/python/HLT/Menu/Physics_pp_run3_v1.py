@@ -1314,7 +1314,7 @@ def setupMenu():
 
 
         # ATR-28563
-        ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group),
+        ChainProp(name='HLT_j20_calratiovar_roiftf_preselj20emf24_L1LLPDPHI-jXE40-jJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo2Group+['PS:NoHLTRepro']),
 
     ]
 
