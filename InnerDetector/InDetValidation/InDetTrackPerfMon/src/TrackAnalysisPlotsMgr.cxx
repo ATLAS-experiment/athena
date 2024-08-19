@@ -79,9 +79,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   /// Fake Rate plots (only if reference is Truth)
   if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
-        this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
     m_plots_missingTruth = std::make_unique< FakeRatePlots >(
-        this, "Tracks/Unlinked/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag() );
+        this, "Tracks/Unlinked/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
   }
 
   /// Offline electron plots
@@ -115,11 +115,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
   if( m_trkAnaDefSvc->isTestTruth() ) {
     ATH_CHECK( fillPlotsTest(
         trkAnaColls.testTruthVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), weight ) );
+        trkAnaColls.matches(), truthMu, actualMu, weight ) );
   } else {
     ATH_CHECK( fillPlotsTest(
         trkAnaColls.testTrackVec( TrackAnalysisCollections::InRoI ),
-        trkAnaColls.matches(), weight ) );
+        trkAnaColls.matches(), truthMu, actualMu, weight ) );
   } 
 
   /// Plots w.r.t. reference tracks quantities
@@ -184,10 +184,10 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     /// fake rate plots
     if( m_plots_missingTruth ) {
       bool isUnlinked = isUnlinkedTruth( *particle );
-      ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, weight ) );
+      ATH_CHECK( m_plots_missingTruth->fillPlots( *particle, isUnlinked, truthMu, actualMu, weight ) );
       if( not isUnlinked and m_plots_fakeRate ) {
         bool isFake = isFakeTruth( *particle, m_trkAnaDefSvc->truthProbCut() );
-        ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, weight ) );
+        ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFake, truthMu, actualMu, weight ) );
       }
     }
 

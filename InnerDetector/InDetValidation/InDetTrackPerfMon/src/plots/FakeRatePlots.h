@@ -25,7 +25,8 @@ namespace IDTPM {
         PlotMgr* pParent,
         const std::string& dirName,
         const std::string& anaTag,
-        const std::string& trackType );
+        const std::string& trackType,
+        bool doGlobalPlots = false );
 
     /// Destructor
     virtual ~FakeRatePlots() = default;
@@ -34,7 +35,10 @@ namespace IDTPM {
     template< typename PARTICLE >
     StatusCode fillPlots(
         const PARTICLE& particle,
-        bool isFake, float weight );
+        bool isFake,
+        float truthMu,
+        float actualMu,
+        float weight );
 
     /// Book the histograms
     void initializePlots(); // needed to override PlotBase
@@ -46,13 +50,15 @@ namespace IDTPM {
   private:
 
     std::string m_trackType;
+    bool m_doGlobalPlots;
 
     TEfficiency* m_fakerate_vs_pt;
     TEfficiency* m_fakerate_vs_eta;
     TEfficiency* m_fakerate_vs_phi;
     TEfficiency* m_fakerate_vs_d0;
     TEfficiency* m_fakerate_vs_z0;
-    /// TODO - include more plots
+    TEfficiency* m_fakerate_vs_truthMu;
+    TEfficiency* m_fakerate_vs_actualMu;
 
   }; // class FakeRatePlots
 

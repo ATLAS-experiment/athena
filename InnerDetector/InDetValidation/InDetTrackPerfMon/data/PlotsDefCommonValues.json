@@ -3,6 +3,6 @@
     "ETAMAX"  : [ "2.5",          "eta coverage of the tracker" ],
     "D0MAX"   : [ "20.0",           "d_{0} range"],
     "Z0MAX"   : [ "250.0",          "z_{0} range"],
-    "RMAX"    : [ "650",          "R range"],
-    "ZMAX"    : [ "300",          "Z range"] 
+    "RMAX"    : [ "300.0",          "R range"],
+    "ZMAX"    : [ "300.0",          "Z range"] 
 }

@@ -17,9 +17,10 @@
 /// -----------------------
 IDTPM::FakeRatePlots::FakeRatePlots(
     PlotMgr* pParent, const std::string& dirName, 
-    const std::string& anaTag, const std::string& trackType ) :
+    const std::string& anaTag, const std::string& trackType, bool doGlobalPlots ) :
         PlotMgr( dirName, anaTag, pParent ), 
-        m_trackType( trackType ) { }
+        m_trackType( trackType ),
+        m_doGlobalPlots( doGlobalPlots ) { }
 
 
 /// ---------------------------
@@ -43,6 +44,10 @@ StatusCode IDTPM::FakeRatePlots::bookPlots()
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_phi,  "fakerate_vs_"+m_trackType+"_phi" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_d0,   "fakerate_vs_"+m_trackType+"_d0" ) );
   ATH_CHECK( retrieveAndBook( m_fakerate_vs_z0,   "fakerate_vs_"+m_trackType+"_z0" ) );
+  if( m_doGlobalPlots ) {
+    ATH_CHECK( retrieveAndBook( m_fakerate_vs_truthMu, "fakerate_vs_truthMu" ) );
+    ATH_CHECK( retrieveAndBook( m_fakerate_vs_actualMu, "fakerate_vs_actualMu" ) );
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -52,9 +57,9 @@ StatusCode IDTPM::FakeRatePlots::bookPlots()
 /// -----------------------------
 template< typename PARTICLE >
 StatusCode IDTPM::FakeRatePlots::fillPlots(
-    const PARTICLE& particle, bool isFake, float weight )
+    const PARTICLE& particle, bool isFake, float truthMu, float actualMu, float weight )
 {
-  /// Compute track parameters - TODO: add more...
+  /// Compute track parameters
   float ppt    = pT( particle ) / Gaudi::Units::GeV;
   float peta   = eta( particle );
   float pphi   = phi( particle );
@@ -68,14 +73,19 @@ StatusCode IDTPM::FakeRatePlots::fillPlots(
   ATH_CHECK( fill( m_fakerate_vs_d0,  pd0,  isFake, weight ) );
   ATH_CHECK( fill( m_fakerate_vs_z0,  pz0,  isFake, weight ) );
 
+  if( m_doGlobalPlots ) {
+    ATH_CHECK( fill( m_fakerate_vs_truthMu, truthMu, isFake, weight ) );
+    ATH_CHECK( fill( m_fakerate_vs_actualMu, actualMu, isFake, weight ) );
+  }
+
   return StatusCode::SUCCESS;
 }
 
 template StatusCode IDTPM::FakeRatePlots::fillPlots< xAOD::TrackParticle >(
-    const xAOD::TrackParticle&, bool isFake, float weight );
+    const xAOD::TrackParticle&, bool isFake, float truthMu, float actualMu, float weight );
 
 template StatusCode IDTPM::FakeRatePlots::fillPlots< xAOD::TruthParticle >(
-    const xAOD::TruthParticle&, bool isFake, float weight );
+    const xAOD::TruthParticle&, bool isFake, float truthMu, float actualMu, float weight );
 
 
 /// -------------------------

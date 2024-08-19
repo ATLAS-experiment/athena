@@ -23,5 +23,15 @@
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "100", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
         "yAxis" : { "title" : "Fake rate" }
+    },
+    "fakerate_vs_truthMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "100", "low" : "0", "high" : "100.0" },
+        "yAxis" : { "title" : "Fake rate" }
+    },
+    "fakerate_vs_actualMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "100", "low" : "0", "high" : "100.0" },
+        "yAxis" : { "title" : "Fake rate" }
     }
 }
