@@ -91,7 +91,6 @@ class SlimmingHelper:
                 self.IncludeAdditionalTriggerContent = False
                 self.IncludeMuonTriggerContent = False
                 self.IncludeEGammaTriggerContent = False
-                self.IncludeJetTauEtMissTriggerContent = False
                 self.IncludeJetTriggerContent = False
                 self.IncludeTrackingTriggerContent = False
                 self.IncludeTauTriggerContent = False
@@ -283,13 +282,6 @@ class SlimmingHelper:
                 # Add compulsory items not covered by smart slimming (so no expansion)
                 for item in CompulsoryContent:
                         self.FinalItemList.append(item)
-
-                # Add trigger item (not covered by smart slimming so no expansion)
-                # Old, will be removed (kept just to not break some deriavtions)
-                if (self.IncludeJetTauEtMissTriggerContent is True):
-                        from DerivationFrameworkCore.JetTauEtMissTriggerContent import JetTauEtMissTriggerContent
-                        for item in JetTauEtMissTriggerContent:
-                                self.FinalItemList.append(item)
 
                 # non xAOD collections for MinBias
                 if (self.IncludeMinBiasTriggerContent is True):

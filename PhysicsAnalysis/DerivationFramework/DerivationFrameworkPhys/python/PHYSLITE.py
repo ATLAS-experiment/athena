@@ -318,7 +318,6 @@ def PHYSLITECfg(flags):
     PHYSLITESlimmingHelper.IncludeJetTriggerContent = False
     PHYSLITESlimmingHelper.IncludeMuonTriggerContent = False
     PHYSLITESlimmingHelper.IncludeEGammaTriggerContent = False
-    PHYSLITESlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     PHYSLITESlimmingHelper.IncludeTauTriggerContent = False
     PHYSLITESlimmingHelper.IncludeEtMissTriggerContent = False
     PHYSLITESlimmingHelper.IncludeBJetTriggerContent = False

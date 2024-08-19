@@ -325,7 +325,6 @@ def JETM12Cfg(flags):
     JETM12SlimmingHelper.IncludeJetTriggerContent = False
     JETM12SlimmingHelper.IncludeMuonTriggerContent = False
     JETM12SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM12SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM12SlimmingHelper.IncludeTauTriggerContent = False
     JETM12SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM12SlimmingHelper.IncludeBJetTriggerContent = False

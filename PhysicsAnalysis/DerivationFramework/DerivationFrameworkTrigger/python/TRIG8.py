@@ -343,7 +343,6 @@ def TRIG8Cfg(flags):
     TRIG8SlimmingHelper.IncludeJetTriggerContent = False
     TRIG8SlimmingHelper.IncludeMuonTriggerContent = False
     TRIG8SlimmingHelper.IncludeEGammaTriggerContent = False
-    TRIG8SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     TRIG8SlimmingHelper.IncludeTauTriggerContent = False
     TRIG8SlimmingHelper.IncludeEtMissTriggerContent = False
     TRIG8SlimmingHelper.IncludeBJetTriggerContent = False

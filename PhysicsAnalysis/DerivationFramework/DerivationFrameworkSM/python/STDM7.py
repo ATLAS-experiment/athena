@@ -185,7 +185,6 @@ def STDM7Cfg(flags):
     STDM7SlimmingHelper.IncludeJetTriggerContent = False
     STDM7SlimmingHelper.IncludeMuonTriggerContent = False
     STDM7SlimmingHelper.IncludeEGammaTriggerContent = False
-    STDM7SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     STDM7SlimmingHelper.IncludeTauTriggerContent = False
     STDM7SlimmingHelper.IncludeEtMissTriggerContent = False
     STDM7SlimmingHelper.IncludeBJetTriggerContent = False

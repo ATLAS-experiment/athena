@@ -157,7 +157,6 @@ def JETM5Cfg(flags):
     JETM5SlimmingHelper.IncludeJetTriggerContent = False
     JETM5SlimmingHelper.IncludeMuonTriggerContent = False
     JETM5SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM5SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM5SlimmingHelper.IncludeTauTriggerContent = False
     JETM5SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM5SlimmingHelper.IncludeBJetTriggerContent = False

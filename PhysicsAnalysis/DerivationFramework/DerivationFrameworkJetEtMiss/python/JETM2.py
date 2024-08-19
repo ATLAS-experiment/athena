@@ -203,7 +203,6 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeJetTriggerContent = False
     JETM2SlimmingHelper.IncludeMuonTriggerContent = False
     JETM2SlimmingHelper.IncludeEGammaTriggerContent = False
-    JETM2SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM2SlimmingHelper.IncludeTauTriggerContent = False
     JETM2SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM2SlimmingHelper.IncludeBJetTriggerContent = False

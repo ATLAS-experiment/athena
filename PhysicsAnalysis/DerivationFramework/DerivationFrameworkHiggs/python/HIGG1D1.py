@@ -232,7 +232,6 @@ def HIGG1D1Cfg(flags):
     HIGG1D1SlimmingHelper.IncludeJetTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeMuonTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeEGammaTriggerContent = False
-    HIGG1D1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeTauTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeEtMissTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeBJetTriggerContent = False
@@ -384,7 +383,6 @@ def HIGG1D1Cfg(flags):
     HIGG1D1SlimmingHelper.IncludeJetTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeMuonTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeEGammaTriggerContent = False
-    HIGG1D1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeTauTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeEtMissTriggerContent = False
     HIGG1D1SlimmingHelper.IncludeBJetTriggerContent = False

@@ -304,7 +304,6 @@ def JETM6Cfg(flags):
     JETM6SlimmingHelper.IncludeJetTriggerContent = True
     JETM6SlimmingHelper.IncludeMuonTriggerContent = True
     JETM6SlimmingHelper.IncludeEGammaTriggerContent = True
-    JETM6SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM6SlimmingHelper.IncludeTauTriggerContent = False
     JETM6SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM6SlimmingHelper.IncludeBJetTriggerContent = False

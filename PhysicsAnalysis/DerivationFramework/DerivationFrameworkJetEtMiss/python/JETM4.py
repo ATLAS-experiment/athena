@@ -211,7 +211,6 @@ def JETM4Cfg(flags):
     JETM4SlimmingHelper.IncludeJetTriggerContent = False
     JETM4SlimmingHelper.IncludeMuonTriggerContent = False
     JETM4SlimmingHelper.IncludeEGammaTriggerContent = True
-    JETM4SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     JETM4SlimmingHelper.IncludeTauTriggerContent = False
     JETM4SlimmingHelper.IncludeEtMissTriggerContent = False
     JETM4SlimmingHelper.IncludeBJetTriggerContent = False
