@@ -15,6 +15,7 @@
 
 
 #include "AthContainers/PackedLinkImpl.h"
+#include "AthContainers/AuxVectorData.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "AthContainers/tools/PackedLinkVectorHelper.h"
 #include "AthLinks/ElementLink.h"
@@ -108,6 +109,88 @@ public:
 private:
   /// Span over DataLinks.
   const_DataLink_span m_dlinks;
+};
+
+
+/**
+ * @brief Helper: Convert a PackedLink to an ElementLink and vice-versa.
+ */
+template <class CONT>
+class PackedLinkConverter
+{
+private:
+  /// Helper class for maintaining the DataLinks.
+  using PLVH = detail::PackedLinkVectorHelper<CONT>;
+
+
+public:
+  /// Resulting ElementLink type.
+  using value_type = typename PLVH::Link_t;
+
+  /// The PackedLink type.
+  using PLink_t = typename PLVH::PLink_t;
+
+  /// The linked DataLink type.
+  using DLink_t = typename PLVH::DLink_t;
+
+  /// Type of span over DataLinkBase's.
+  using DataLinkBase_span = typename PLVH::DataLinkBase_span;
+
+
+  /**
+   * @brief Constructor.
+   * @param container Container holding the variables.
+   * @param auxid The ID of the PackedLink variable.
+   * @param linked_auxid The ID of the linked variable of DataLinks.
+   */
+  PackedLinkConverter (AuxVectorData& container,
+                       SG::auxid_t auxid,
+                       SG::auxid_t linked_auxid);
+
+
+  /**
+   * @brief Convert a PackedLink to an ElementLink.
+   * @param plink The link to transform.
+   */
+  const value_type operator() (const PackedLinkBase& plink) const;
+
+
+  /**
+   * @brief Convert an ElementLink to a PackedLink.
+   * @param pl The destination PackedLink.
+   * @param link The link to transform.
+   */
+  void set (PackedLinkBase& pl, const value_type& link);
+
+
+  /**
+   * @brief Convert a range of ElementLinks to a vector of PackedLinks.
+   * @param plv The destination vector of PackedLinks.
+   * @param r The range of ElementLinks.
+   */
+  template <class VALLOC, ElementLinkRange<CONT> RANGE>
+  void set (std::vector<PLink_t, VALLOC>& plv, const RANGE& r);
+
+
+  /**
+   * @brief Insert a range of ElementLinks into a vector of PackedLinks.
+   * @param plv The destination vector of PackedLinks.
+   * @param pos Position in the container at which to insert the range.
+   * @param r The range of ElementLinks.
+   */
+  template <class VALLOC, ElementLinkRange<CONT> RANGE>
+  void insert (std::vector<PLink_t, VALLOC>& plv, size_t pos, const RANGE& r);
+
+
+private:
+  /// The container holding the variables.
+  AuxVectorData& m_container;
+
+  /// The vector of DataLinks.
+  PLVH::LinkedVector m_linkedVec;
+
+  /// Span over DataLinks.
+  DataLinkBase_span m_dlinks;
 };
 
 
