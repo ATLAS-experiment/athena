@@ -11,6 +11,16 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/Range.h"
 
+//ensure BOOST knows how to represent an ExpandedIdentifier
+namespace boost::test_tools::tt_detail {
+   template<>           
+   struct print_log_value<ExpandedIdentifier> {
+     void operator()( std::ostream& os, ExpandedIdentifier const& v){
+       os<<std::string(v);//ExpandedIdentifier has string conversion
+     }
+   };                                                          
+ }
+
 
 BOOST_AUTO_TEST_SUITE(RangeTest)
 BOOST_AUTO_TEST_CASE(RangeConstructors){
@@ -30,6 +40,7 @@ BOOST_AUTO_TEST_CASE(RangeAssignment){
   BOOST_CHECK_NO_THROW(r2 = r1);
   BOOST_CHECK_NO_THROW(r3 = std::move(r2));
 }
+
 
 BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
   const std::string sctExample="-6:-1/1:6";//SCT barrel has eta indices -1->-5 and 1->6

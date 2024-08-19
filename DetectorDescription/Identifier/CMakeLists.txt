@@ -10,6 +10,7 @@ find_package( Boost COMPONENTS container unit_test_framework)
 atlas_add_library( Identifier
    src/Identifier.cxx src/Identifier32.cxx
    src/ExpandedIdentifier.cxx src/Range.cxx src/IdentifierField.cxx
+   src/RangeParser.cxx
    src/Identifiable.cxx src/IdHelper.cxx src/IdContext.cxx
    PUBLIC_HEADERS Identifier
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -25,15 +26,23 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
 endif()
 
-atlas_add_test(range_test
-  SOURCES src/Range.cxx src/IdentifierField.cxx test/range_test.cxx
+atlas_add_test(RangeParser_test
+  SOURCES  test/RangeParser_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+atlas_add_test(range_test
+  SOURCES test/Range_test.cxx
+    src/ExpandedIdentifier.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
 atlas_add_test(IdentifierField_test
-  SOURCES src/IdentifierField.cxx test/IdentifierField_test.cxx
+  SOURCES  test/IdentifierField_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )

@@ -61,7 +61,7 @@ public:
     ExpandedIdentifier m_id; 
     ExpandedIdentifier m_min; 
     ExpandedIdentifier m_max; 
-    const Range* m_range; 
+    const Range* m_range{}; 
   }; 
  
   class const_identifier_factory 
