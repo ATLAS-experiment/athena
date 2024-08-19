@@ -7,20 +7,24 @@
 
 #include <ostream>
 
-/* Struct to carry et data for Strips in the neighbourhood of a RoI */
+/* Struct to carry et data for LAr strips consumned by various GlobalSim
+* Algorithms
+*/
 
 namespace GlobalSim {
 
   struct StripData{
     StripData() = default;
+    StripData(double eta, double phi, double e):
+      m_eta{eta}, m_phi{phi}, m_e{e}{}
     double m_eta{0.};
     double m_phi{0.};
-    double m_et{0.};
+    double m_e{0.};
   };
   
 }
 
-std::ostream & operator<<(std::ostream&, const GlobalSim::StripData&);
+std::ostream& operator<<(std::ostream&, const GlobalSim::StripData&);
 
 #endif
 
