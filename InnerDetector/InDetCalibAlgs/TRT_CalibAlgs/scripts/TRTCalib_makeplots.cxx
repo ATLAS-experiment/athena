@@ -3250,9 +3250,6 @@ class TBinnedRes : public TCanvas
 {
 public:
     TBinnedRes(TFile *, vector<TH1D *>);
-
-private:
-    TH1F *m_hist2{};
 };
 
 TBinnedRes::TBinnedRes(TFile* /*file*/, vector<TH1D *> reshists)
