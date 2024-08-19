@@ -27,6 +27,20 @@ def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
                            xlabels=["DataTowers","EmulatedTowers"],
                            ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+    trigPath='Developer/GfexSim/'
+    iLoc = []
+    for iPhi in range(0,32):
+        for iEta in range (0,36):
+            iLoc+= [str(iPhi) + ":" + str(iEta)]
+    for sig in ["gJ","gLJ"]:
+        helper.defineHistogram("LBN,locIdx;h_"+sig+"_mismatches_posLbnMap", title = "Mismatched " + sig + " [DataTower evts];LB;Position (iPhi:iEta);TOBs",
+                               fillGroup = "mismatches"+ sig,
+                               type="TH2I",
+                               path=trigPath,
+                               xbins=1,xmin=0,xmax=1, ylabels=iLoc, 
+                               opt=['kAddBinsDynamically','kAlwaysCreate'])
+
+
     helper.defineTree('LBNString,Signature,LBN,EventNumber,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
                       "lbnString/string:Signature/string:lbn/l:eventNumber/l:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN:EventNumber;Signature",fillGroup="mismatches")
