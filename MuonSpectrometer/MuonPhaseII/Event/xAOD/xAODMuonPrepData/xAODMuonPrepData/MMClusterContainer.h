@@ -5,14 +5,8 @@
 #ifndef XAODMUONPREPDATA_MMClusterCONTAINER_H
 #define XAODMUONPREPDATA_MMClusterCONTAINER_H
 
+#include "xAODMuonPrepData/MMClusterFwd.h"
 #include "xAODMuonPrepData/MMCluster.h"
-#include "xAODMuonPrepData/versions/MMClusterContainer_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-/// Define the version of the pixel cluster container
-typedef MMClusterContainer_v1 MMClusterContainer;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

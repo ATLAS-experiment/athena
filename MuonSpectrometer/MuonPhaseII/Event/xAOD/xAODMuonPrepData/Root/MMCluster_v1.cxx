@@ -8,14 +8,13 @@
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "xAODMuonPrepData/versions/MMCluster_v1.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace {
     static const std::string preFixStr{"Mm_"};
 }
-
-
 
 namespace xAOD {
 IdentifierHash MMCluster_v1::measurementHash() const {

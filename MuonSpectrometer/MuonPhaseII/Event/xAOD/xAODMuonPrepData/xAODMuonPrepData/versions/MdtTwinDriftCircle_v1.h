@@ -12,7 +12,6 @@ namespace xAOD {
 class MdtTwinDriftCircle_v1 : public MdtDriftCircle_v1 {
 
    public:
-    using MdtDriftCircleStatus = Muon::MdtDriftCircleStatus;
     /// Default constructor
     MdtTwinDriftCircle_v1() = default;
     /// Virtual destructor
@@ -47,8 +46,5 @@ class MdtTwinDriftCircle_v1 : public MdtDriftCircle_v1 {
 };
 
 }  // namespace xAOD
-
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::MdtTwinDriftCircle_v1, xAOD::MdtDriftCircle_v1);
 
 #endif

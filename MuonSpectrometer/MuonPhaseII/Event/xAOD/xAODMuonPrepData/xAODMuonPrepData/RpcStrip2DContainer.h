@@ -1,18 +1,12 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_RPCSTRIP2DCONTAINER_H
 #define XAODMUONPREPDATA_RPCSTRIP2DCONTAINER_H
 
+#include "xAODMuonPrepData/RpcStrip2DFwd.h"
 #include "xAODMuonPrepData/RpcStrip2D.h"
-#include "xAODMuonPrepData/versions/RpcStrip2DContainer_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-/// Define the version of the pixel cluster container
-typedef RpcStrip2DContainer_v1 RpcStrip2DContainer;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

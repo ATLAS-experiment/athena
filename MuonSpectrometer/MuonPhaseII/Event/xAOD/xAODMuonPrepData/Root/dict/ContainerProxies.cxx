@@ -6,17 +6,16 @@
 #include "xAODCore/AddDVProxy.h"
 
 // Local include(s):
-#include "xAODMuonPrepData/versions/MdtDriftCircleContainer_v1.h"
-#include "xAODMuonPrepData/versions/MdtTwinDriftCircleContainer_v1.h"
+#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
+#include "xAODMuonPrepData/RpcStrip2DContainer.h"
+#include "xAODMuonPrepData/RpcStripContainer.h"
 
-#include "xAODMuonPrepData/versions/RpcStrip2DContainer_v1.h"
-#include "xAODMuonPrepData/versions/RpcStripContainer_v1.h"
-
-#include "xAODMuonPrepData/versions/TgcStripContainer_v1.h"
-#include "xAODMuonPrepData/versions/MMClusterContainer_v1.h"
-#include "xAODMuonPrepData/versions/sTgcStripContainer_v1.h"
-#include "xAODMuonPrepData/versions/sTgcWireContainer_v1.h"
-#include "xAODMuonPrepData/versions/sTgcPadContainer_v1.h"
+#include "xAODMuonPrepData/TgcStripContainer.h"
+#include "xAODMuonPrepData/MMClusterContainer.h"
+#include "xAODMuonPrepData/sTgcStripContainer.h"
+#include "xAODMuonPrepData/sTgcWireContainer.h"
+#include "xAODMuonPrepData/sTgcPadContainer.h"
 
 // Set up the collection proxies:
 ADD_NS_DV_PROXY(xAOD, MdtDriftCircleContainer_v1);

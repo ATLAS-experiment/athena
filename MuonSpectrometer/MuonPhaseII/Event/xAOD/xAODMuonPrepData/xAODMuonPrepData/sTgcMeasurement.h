@@ -4,13 +4,8 @@
 #ifndef XAODMUONPREPDATA_STGCMEASUREMENT_H
 #define XAODMUONPREPDATA_STGCMEASUREMENT_H
 
+#include "xAODMuonPrepData/sTgcMeasurementFwd.h"
 #include "xAODMuonPrepData/versions/sTgcMeasurement_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-   /// Defined the version of the sTgcMeasurement
-   typedef sTgcMeasurement_v1 sTgcMeasurement;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

@@ -10,6 +10,7 @@
 #include "xAODMuonPrepData/sTgcWireAuxContainer.h"
 #include "xAODMuonPrepData/sTgcPadAuxContainer.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 using namespace MuonGM;
 using namespace Trk;

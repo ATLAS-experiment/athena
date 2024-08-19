@@ -4,13 +4,8 @@
 #ifndef XAODMUONPREPDATA_TGCSTRIPAUXCONTAINER_H
 #define XAODMUONPREPDATA_TGCSTRIPAUXCONTAINER_H
 
+#include "xAODMuonPrepData/TgcStripFwd.h"
 #include "xAODMuonPrepData/versions/TgcStripAuxContainer_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-/// Defined the version of the TgcStrip
-typedef TgcStripAuxContainer_v1 TgcStripAuxContainer;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

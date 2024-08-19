@@ -10,8 +10,8 @@ find_package( xAODUtilities )
 atlas_add_component( xAODMuonTrkPrepDataCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
-                                     MuonPrepRawData xAODMuonPrepData StoreGateLib)
+                     LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib MuonReadoutGeometryR4
+                                     MuonPrepRawData xAODMuonPrepData StoreGateLib MuonReadoutGeometry)
 
 atlas_install_python_modules( python/*.py)
 

@@ -8,8 +8,11 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "CxxUtils/CachedValue.h"
+
+namespace MuonGMR4{
+    class TgcReadoutElement;
+}
 
 namespace xAOD {
 
@@ -74,12 +77,8 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
     CxxUtils::CachedValue<const MuonGMR4::TgcReadoutElement*> m_readoutEle{};
 #endif
 
-
-
 };
 
 }  // namespace xAOD
 
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE(xAOD::TgcStrip_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

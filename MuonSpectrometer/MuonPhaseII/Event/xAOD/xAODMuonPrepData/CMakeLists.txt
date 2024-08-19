@@ -10,7 +10,8 @@ atlas_add_library( xAODMuonPrepData
     xAODMuonPrepData/*.h xAODMuonPrepData/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODMuonPrepData
     LINK_LIBRARIES xAODCore GeoPrimitives MuonPrepRawData 
-                   xAODMeasurementBase Identifier MuonReadoutGeometryR4)
+                   xAODMeasurementBase Identifier 
+    PRIVATE_LINK_LIBRARIES MuonReadoutGeometryR4)
 
 
     atlas_add_xaod_smart_pointer_dicts(

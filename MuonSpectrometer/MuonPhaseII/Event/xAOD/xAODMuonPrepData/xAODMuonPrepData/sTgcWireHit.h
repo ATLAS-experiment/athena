@@ -4,13 +4,8 @@
 #ifndef XAODMUONPREPDATA_STGCWIREHIT_H
 #define XAODMUONPREPDATA_STGCWIREHIT_H
 
+#include "xAODMuonPrepData/sTgcWireHitFwd.h"
 #include "xAODMuonPrepData/versions/sTgcWireHit_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-   /// Defined the version of the sTgcStrip
-   typedef sTgcWireHit_v1 sTgcWireHit;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

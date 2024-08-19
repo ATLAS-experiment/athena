@@ -3,14 +3,8 @@
 */
 #ifndef XAODMUONPREPDATA_RPCSTRIP2DAUXCONTAINER_H
 #define XAODMUONPREPDATA_RPCSTRIP2DAUXCONTAINER_H
-
+#include "xAODMuonPrepData/RpcStrip2DFwd.h"
 #include "xAODMuonPrepData/versions/RpcStrip2DAuxContainer_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-/// Defined the version of the RpcStrip
-typedef RpcStrip2DAuxContainer_v1 RpcStrip2DAuxContainer;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

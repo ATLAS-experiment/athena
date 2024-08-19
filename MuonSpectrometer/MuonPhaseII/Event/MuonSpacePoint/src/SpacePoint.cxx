@@ -4,6 +4,12 @@
 #include "MuonSpacePoint/SpacePoint.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/TgcStrip.h"
@@ -104,7 +110,10 @@ namespace MuonR4{
     } 
     const Amg::Vector3D& SpacePoint::normalInChamber() const {
         return m_normal;
-    }          
+    }
+    Amg::Vector3D SpacePoint::planeNormal() const {
+        return directionInChamber().cross(normalInChamber()).unit();
+    }
     xAOD::UncalibMeasType SpacePoint::type() const {
         return primaryMeasurement()->type();
     }

@@ -21,7 +21,10 @@
 #include "xAODMuonPrepData/sTgcStripContainer.h"
 #include "xAODMuonPrepData/sTgcWireContainer.h"
 #include "xAODMuonPrepData/sTgcPadContainer.h"
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+
+namespace MuonGMR4{
+  class MuonDetectorManager;
+}
 
 namespace Muon 
 {

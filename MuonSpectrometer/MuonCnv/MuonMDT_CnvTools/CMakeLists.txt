@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( MuonMDT_CnvTools )
@@ -17,7 +17,7 @@ atlas_add_component( MuonMDT_CnvTools
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamData GaudiKernel
-   AthenaBaseComps StoreGateLib AtlasDetDescr Identifier ByteStreamCnvSvcBaseLib
-   MdtCalibSvcLib MuonCalibEvent MuonReadoutGeometry MuonDigitContainer
-   MuonIdHelpersLib MuonRDO MuonPrepRawData MuonCablingData GeoModelUtilities
-   MuonCnvToolInterfacesLib MuonMDT_CnvToolsLib ByteStreamCnvSvcLib xAODMuonPrepData)
+                  AthenaBaseComps StoreGateLib AtlasDetDescr Identifier ByteStreamCnvSvcBaseLib
+                  MdtCalibSvcLib MuonCalibEvent MuonReadoutGeometry MuonDigitContainer ActsGeometryInterfacesLib
+                  MuonIdHelpersLib MuonRDO MuonPrepRawData MuonCablingData GeoModelUtilities MuonReadoutGeometryR4
+                  MuonCnvToolInterfacesLib MuonMDT_CnvToolsLib ByteStreamCnvSvcLib xAODMuonPrepData)

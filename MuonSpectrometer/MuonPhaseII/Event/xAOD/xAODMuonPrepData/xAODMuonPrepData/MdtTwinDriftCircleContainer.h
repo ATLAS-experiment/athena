@@ -5,14 +5,8 @@
 #ifndef XAODMUONPREPDATA_MDTTWINDRIFTCIRCLECONTAINER_H
 #define XAODMUONPREPDATA_MDTTWINDRIFTCIRCLECONTAINER_H
 
+#include "xAODMuonPrepData/MdtTwinDriftCircleFwd.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
-#include "xAODMuonPrepData/versions/MdtTwinDriftCircleContainer_v1.h"
-
-/// Namespace holding all the xAOD EDM classes
-namespace xAOD {
-/// Define the version of the MdtTwinDriftCirleContainer
-typedef MdtTwinDriftCircleContainer_v1 MdtTwinDriftCircleContainer;
-}  // namespace xAOD
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
