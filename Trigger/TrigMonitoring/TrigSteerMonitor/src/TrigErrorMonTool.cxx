@@ -41,7 +41,8 @@ std::unordered_map<std::string_view, StatusCode> TrigErrorMonTool::algExecErrors
   std::unordered_map<std::string_view, StatusCode> algErrors;
   bool wasTimeout = false;
   for (const auto& [key, state] : m_aess->algExecStates(eventContext)) {
-    if (!state.execStatus().isSuccess()) {
+    if (!state.execStatus().isSuccess() && state.state()!=AlgExecState::State::None) {
+      
       ATH_MSG_DEBUG("Algorithm " << key << " returned StatusCode " << state.execStatus().message()
                     << " in event " << eventContext.eventID());
       algErrors[key.str()] = state.execStatus();
