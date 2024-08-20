@@ -37,23 +37,7 @@ namespace InDet {
   SiTrackerSpacePointFinder::SiTrackerSpacePointFinder(const std::string& name,
       ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
-{ 
-  declareProperty("ProcessPixels", m_selectPixels=true);
-  declareProperty("ProcessSCTs", m_selectSCTs=true);
-  declareProperty("ProcessOverlaps", m_overlap=true, "process overlaps of SCT wafers.");
-  declareProperty("AllClusters", m_allClusters=false, "process all clusters without limits.");
-  declareProperty("OverlapLimitOpposite", m_overlapLimitOpposite=2.8, "overlap limit for opposite-neighbour.");
-  declareProperty("OverlapLimitPhi", m_overlapLimitPhi=5.64, "overlap limit for phi-neighbours.");
-  declareProperty("OverlapLimitEtaMin", m_overlapLimitEtaMin=1.68, "low overlap limit for eta-neighbours.");
-  declareProperty("OverlapLimitEtaMax", m_overlapLimitEtaMax=3.0, "high overlap limit for eta-neighbours.");
-  declareProperty("OverrideBeamSpot", m_overrideBS=false);
-  declareProperty("VertexX", m_xVertex=0.);
-  declareProperty("VertexY", m_yVertex=0.);
-  declareProperty("VertexZ", m_zVertex=0.);
-
-  declareProperty("SpacePointCacheSCT", m_SpacePointCache_SCTKey="");
-  declareProperty("SpacePointCachePix", m_SpacePointCache_PixKey="");
-}
+{ }
 
 //-----------------------------------------------------------------------
 StatusCode SiTrackerSpacePointFinder::initialize()
