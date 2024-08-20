@@ -57,7 +57,7 @@ namespace MuonR4 {
 
 
             const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
-            const double distRO = std::abs(0.5*readOutEle->getParameters().readoutSide*readOutEle->activeTubeLength(measHash) - locPos.z());
+            const double distRO = readOutEle->distanceToReadout(measHash, locPos);
 
             const MdtDigiToolInput digiInput(std::abs(locPos.perp()), distRO, 0., 0., 0., 0., hitId);
             const MdtDigiToolOutput digiOutput(m_digiTool->digitize(ctx, digiInput, rndEngine));
@@ -71,9 +71,10 @@ namespace MuonR4 {
             const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
             
             const double sigPropTime = tubeCalib.inversePropSpeed*distRO;
+            ATH_MSG_VERBOSE(m_idHelperSvc->toString(hitId)<<" "<<Amg::toString(locPos)<<" distance to readout: "<<distRO<<" --> "<<sigPropTime);
             /// Total tdc time is the sum of the drift time, the time of flight of the muon, the propgation along the wire
             /// and finally the constant t0 tube offset
-            const double totalTdcTime = digiOutput.driftTime() + arrivalTime + sigPropTime + tubeCalib.t0;
+            const double totalTdcTime = digiOutput.driftTime() + arrivalTime + tubeCalib.t0 + sigPropTime;
             if (lastTube != hitId || deadTime < totalTdcTime) {
                 lastTube = hitId;
                 deadTime = totalTdcTime + m_deadTime;

@@ -147,6 +147,8 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   // set propagation delay
   if (m_doProp) {   
     const double propagationDistance = calibIn.signalPropagationDistance(); 
+    ATH_MSG_VERBOSE("Calibration of "<<m_idHelperSvc->toString(id)<<", propagation distance: "<<propagationDistance<<" -> "
+                  <<(singleTubeData->inversePropSpeed * propagationDistance));
     calibResult.setPropagationTime(singleTubeData->inversePropSpeed * propagationDistance);
   }
   
