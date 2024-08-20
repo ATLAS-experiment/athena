@@ -177,11 +177,9 @@ if opts.CA:
       # Failure in ComponentAccumulator.run() is very likely an algorithm error
       exitcode = ExitCodes.EXE_ALG_FAILURE if e.code==1 else e.code
 
-   # FIXME: change the print to log (requires ref updates)
-   #from AthenaCommon import Logging
-   #Logging.log.info( 'leaving with code %d: "%s"',
-   #                  e.code, ExitCodes.what(e.code) )
-   print( 'leaving with code %d: "%s"' % (exitcode, ExitCodes.what(exitcode)) )
+   from AthenaCommon import Logging
+   Logging.log.info( 'leaving with code %d: "%s"',
+                     exitcode, ExitCodes.what(exitcode) )
    sys.exit( exitcode )
 
 ### Legacy mode
