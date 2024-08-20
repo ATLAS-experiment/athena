@@ -8,6 +8,7 @@ and executes several chains testing various types of Partial Event Building and 
 '''
 
 from TrigEDMConfig import DataScoutingInfo
+from TrigEDMConfig.TriggerEDM import AllowedOutputFormats
 from TriggerMenuMT.HLT.Menu import Dev_pp_run3_v1, EventBuildingInfo, StreamInfo
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
@@ -27,6 +28,9 @@ EventBuildingInfo._PartialEventBuildingIdentifiers |= {'TestPEBOne'       : Fals
 DataScoutingInfo._DataScoutingIdentifiers['ElectronDSTest'] = 3
 DataScoutingInfo._DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
 DataScoutingInfo.TruncationThresholds[3] = 5*(1024**2) # 5 MB
+
+# Hack/update AllowedOutputFormats for this test
+AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
 # Override the setupMenu function from Dev_pp_run3_v1
 def myMenu():
@@ -161,20 +165,20 @@ def run(flags):
     flags.Trigger.doLVL1 = True
     # Add ElectronDSTest ElectronDSPEBTest to a number of existing EDM entries in the Run 3 electron EDM 
     flags.Trigger.ExtraEDMList = [
-            ['xAOD::TrigElectronContainer#HLT_FastElectrons',                      'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'], 
-            ['xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',               'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_FTFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_IDTrig',           'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_IDTrigAux.',    'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleContainer#HLT_IDTrack_Electron_GSF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_GSFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',             'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',  'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::ElectronContainer#HLT_egamma_Electrons',                       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::ElectronAuxContainer#HLT_egamma_ElectronsAux.',                'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::ElectronContainer#HLT_egamma_Electrons_GSF',                   'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
-            ['xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'],
+            ('xAOD::TrigElectronContainer#HLT_FastElectrons',                      'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrigElectronAuxContainer#HLT_FastElectronsAux.',               'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_FTFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_IDTrig',           'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_IDTrigAux.',    'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_GSF',              'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_GSFAux.',       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',             'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',  'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::ElectronContainer#HLT_egamma_Electrons',                       'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::ElectronAuxContainer#HLT_egamma_ElectronsAux.',                'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::ElectronContainer#HLT_egamma_Electrons_GSF',                   'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
+            ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.',            'BS ESD AODFULL ElectronDSTest ElectronDSPEBTest', 'Egamma'),
         ]
     flags.lock()
     acc = runHLT.runHLTCfg(flags)

@@ -68,8 +68,8 @@ def main():
 
   updateList = [
     # Add new
-    ('xAOD::New#HLT_New',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
-    ('xAOD::NewAuxContainer#HLT_NewAux.',                'BS ESD AODFULL', 'Steer'),
+    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
     # Add decorations & target
     ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD', 'Steer'),
     ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
@@ -82,14 +82,14 @@ def main():
   _addExtraCollectionsToEDMList(dummyEDM, updateList) # Note: Function updates dummyEDM in-place
 
   expectedEDM = [
-    ('xAOD::New#HLT_New',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
-    ('xAOD::NewAuxContainer#HLT_NewAux.',                'BS ESD AODFULL', 'Steer'),
     ('xAOD::A#HLT_A',                                'BS ESD',         'Steer', [InViews('SomeView1')]),
     ('xAOD::AAuxContainer#HLT_AAux.DecTwo.DecThree', 'BS ESD',         'Steer'),
     ('xAOD::B#HLT_B',                                'BS ESD AODFULL', 'Steer'),
     ('xAOD::BAuxContainer#HLT_BAux.DecOne.DecFour',  'BS ESD AODFULL', 'Steer'),
     ('xAOD::C#HLT_C',                                'BS ESD', 'Steer'),
     ('xAOD::CAuxContainer#HLT_CAux.',                'BS ESD', 'Steer'),
+    ('xAOD::D#HLT_D',                                'BS ESD AODFULL', 'Steer', [InViews('SomeView2')]),
+    ('xAOD::DAuxContainer#HLT_DAux.',                'BS ESD AODFULL', 'Steer'),
     ('xAOD::E#HLT_E',                        'BS ESD', 'Steer', [allowTruncation]),
     ('xAOD::EAuxContainer#HLT_EAux.',        'BS ESD', 'Steer', [allowTruncation]),
   ]
