@@ -290,7 +290,7 @@ namespace Analysis {
         }
 
 	// Option for low-mu run processing: discard events with too many track candidates
-        if(m_maxNTracksInEvent > 0 && theIDTracksAfterSelection.size() > m_maxNTracksInEvent) return StatusCode::SUCCESS;;
+        if(m_maxNTracksInEvent > 0 && static_cast<int>(theIDTracksAfterSelection.size()) > m_maxNTracksInEvent) return StatusCode::SUCCESS;;
         
         // Select the muons
         MuonBag theMuonsAfterSelection;
