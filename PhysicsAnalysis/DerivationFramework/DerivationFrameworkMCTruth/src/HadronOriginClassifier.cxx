@@ -832,7 +832,7 @@ namespace DerivationFramework{
 
     const xAOD::TruthParticle* initpart = findInitial(part, looping);
 
-    return initpart->status()>30 && initpart->status()<40;
+    return MC::Pythia8::isConditionC(initpart);
 
   }
 

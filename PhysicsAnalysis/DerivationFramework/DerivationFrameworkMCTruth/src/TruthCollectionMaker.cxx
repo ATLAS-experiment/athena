@@ -192,30 +192,24 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
             
             if ((SherpaW || SherpaZ) && is_sherpa){
                 // Currently only handles un-ambiguous cases
-                std::vector<const xAOD::TruthParticle*> status20, status3;
+                std::vector<const xAOD::TruthParticle*>  status_nonPhysical;
                 for (unsigned int i=0; i<nParticles; ++i) {
                     // Nullptr check
                     if (!truthParticles->at(i)) continue;
                     // Only collect leptons
                     if (!MC::isSMLepton(truthParticles->at(i))) continue;
                     // Gather by status
-                    if (truthParticles->at(i)->status() == 20) status20.push_back( truthParticles->at(i) );
-                    if (truthParticles->at(i)->status() == 3) status3.push_back(  truthParticles->at(i) );
+                    if (!MC::isPhysical(truthParticles->at(i))) status_nonPhysical.push_back(  truthParticles->at(i) );
                 } // Done with loop over truth particles
-                // Make it so that we can exclusively use one vector
-                // Status 20 should have the priority -- it is the future
-                if (!status20.empty()){
-                    status3.swap(status20);
-                }
                 // Boson cases that we can actually deal with -- generically up to VVV
-                if ((status3.size()==2 || status3.size()==4 || status3.size()==6) && (SherpaZ || SherpaW)){
+                if ((status_nonPhysical.size()==2 || status_nonPhysical.size()==4 || status_nonPhysical.size()==6) && (SherpaZ || SherpaW)){
                     // Basic boson pairing...
                     int gens[3] = {0,0,0};
-                    for (size_t i=0;i<status3.size();++i){
-                        if (status3[i]->absPdgId()<13) gens[0]++;
-                        else if (status3[i]->absPdgId()<15) gens[1]++;
+                    for (size_t i=0;i<status_nonPhysical.size();++i){
+                        if (status_nonPhysical[i]->absPdgId()<13) gens[0]++;
+                        else if (status_nonPhysical[i]->absPdgId()<15) gens[1]++;
                         else gens[2]++;
-                    } // Loop over status3 particles
+                    } // Loop over status_nonPhysical particles
                     // Should only have even numbers per generation.  Any number greater than 2 or ==1 and we're dead
                     if (gens[0]>2 || gens[0]==1 || gens[1]>2 || gens[1]==1 || gens[2]>2 || gens[2]==1){
                         // In agreeing with Sherpa authors, these are Q-M ambiguous states.  Do not let users be evil.
@@ -223,10 +217,10 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                         return StatusCode::SUCCESS;
                     }
                     std::vector<const xAOD::TruthParticle*> boson;
-                    for (size_t i=0;i<status3.size();++i){
-                        if (status3[i]->absPdgId()<13) boson.push_back(status3[i]);
-                        else if (gens[0]==0 && status3[i]->absPdgId()<15) boson.push_back(status3[i]);
-                        else if (gens[0]==0 && gens[1]==0) boson.push_back(status3[i]);
+                    for (size_t i=0;i<status_nonPhysical.size();++i){
+                        if (status_nonPhysical[i]->absPdgId()<13) boson.push_back(status_nonPhysical[i]);
+                        else if (gens[0]==0 && status_nonPhysical[i]->absPdgId()<15) boson.push_back(status_nonPhysical[i]);
+                        else if (gens[0]==0 && gens[1]==0) boson.push_back(status_nonPhysical[i]);
                         if (boson.size()==2){
                             // Make a boson!  Just have to figure out _which_ boson!
                             int pdg_id=0;
@@ -278,8 +272,8 @@ StatusCode DerivationFramework::TruthCollectionMaker::addBranches() const
                         } // Done making a boson
                     } // Done looping over particles
                 }
-                if (status3.size()==1 || status3.size()==3 || status3.size()==5 || status3.size()>6){
-                    ATH_MSG_WARNING(status3.size() << " leptons found in the Sherpa event record.  Not sure how to deal with this.");
+                if (status_nonPhysical.size()==1 || status_nonPhysical.size()==3 || status_nonPhysical.size()==5 || status_nonPhysical.size()>6){
+                    ATH_MSG_WARNING(status_nonPhysical.size() << " leptons found in the Sherpa event record.  Not sure how to deal with this.");
                 }
                 return StatusCode::SUCCESS;
             }

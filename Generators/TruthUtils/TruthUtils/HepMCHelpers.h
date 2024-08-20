@@ -21,8 +21,10 @@ namespace MC
  {
    /// @brief  To be understood
   template <class T> inline bool isConditionA(const T& p)  { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
-   /// @brief  To be understood
+
   template <class T> inline bool isConditionB(const T& p)  { return p->status() == 23;}
+
+  template <class T> inline bool isConditionC(const T& p)  { return p->status() > 30 && p->status() < 40;}
  }
 
 #include "AtlasPID.h"
