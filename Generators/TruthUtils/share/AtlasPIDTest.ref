@@ -224,4 +224,6 @@
 5332 -1 -3 1 0 1 0 1 0 1 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 0 -3
 100221132 1 3 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 1 0 0 0 1 1 0 0 3
 100331122 -2 -6 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 1 0 0 0 1 1 0 0 -6
+60000 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0
+60001 0 2 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 1 0 0 0 0 1 0 0 2
 PDG_ID charge charge3 hasBottom hasCharm hasStrange hasTop isBaryon isBottom isBottomBaryon isBottomHadron isBottomMeson isBSM isCharged isCharm isCharmBaryon isCharmHadron isCharmMeson isChLepton isDiquark isDM isElectron isEMInteracting isGenSpecific isGluon isGraviton isHadron isHeavyBaryon isHeavyHadron isHeavyMeson isHiggs isLepton isLeptoQuark isLightBaryon isLightHadron isLightMeson isMeson isMuon isNeutral isNeutrino isNucleus isParton isPentaquark isPhoton isQuark isResonance isStrange isStrangeBaryon isStrangeHadron isStrangeMeson isStrongInteracting isSUSY isTau isTop isTransportable isValid isW isZ threeCharge

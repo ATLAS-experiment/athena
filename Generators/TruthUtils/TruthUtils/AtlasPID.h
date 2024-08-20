@@ -69,6 +69,13 @@ static const int HIGGSBOSON = 25;
 static const int GRAVITON = 39;
 static const int LEPTOQUARK = 42;
 
+/// PDG Ids for Mavtop madgraph UFO model found under DarkX. The 
+/// mavtop is a vector-like top partner with coupling to a dark photon.
+/// Theory paper: https://arxiv.org/abs/1904.05893
+/// Pheno paper: https://arxiv.org/pdf/2112.08425
+static const int DARKPHOTON = 60000;
+static const int MAVTOP = 60001;
+
 static const int PIPLUS = 211;
 static const int PIMINUS = -PIPLUS;
 static const int PI0 = 111;
@@ -111,7 +118,7 @@ static const int GEANTINO0 = 999;
 /// families by weak isospin.
 /// APID: the fourth generation quarks are quarks.
 template<class T> inline bool isQuark(const T& p) {return isQuark(p->pdg_id());}
-template<> inline bool isQuark(const int& p) { return p != 0 && std::abs(p) <= 8;}
+template<> inline bool isQuark(const int& p) { return p != 0 && (std::abs(p) <= 8 || std::abs(p) == MAVTOP);}
 template<> inline bool isQuark(const DecodedPID& p){ return isQuark(p.pid()); }
 
 template<class T> inline bool isStrange(const T& p) {return isStrange(p->pdg_id());}
@@ -178,7 +185,7 @@ template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 /// may or may not exist. More elaborate new scenarios should be constructed with n= 5 and nr = 9.
 /// APID: Only the 51-60 range is considered DM. The antiparticles are assumed to be existing.
 template<class T> inline bool isDM(const T& p){return isDM(p->pdg_id());}
-template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return sp >= 51 && sp <= 60; }
+template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return (sp >= 51 && sp <= 60) || sp == DARKPHOTON; }
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
@@ -387,7 +394,7 @@ template<> inline bool isNucleus(const DecodedPID& p){
 }
 /// APID: graviton and all Higgs extensions are BSM
 template<> inline bool isBSM(const DecodedPID& p){
-  if (p.pid() == GRAVITON) return true;
+  if (p.pid() == GRAVITON || std::abs(p.pid()) == MAVTOP || p.pid() == DARKPHOTON) return true;
   if (std::abs(p.pid()) > 16 && std::abs(p.pid()) < 19) return true;
   if (std::abs(p.pid()) > 31 && std::abs(p.pid()) < 38) return true;
   if (std::abs(p.pid()) > 39 && std::abs(p.pid()) < 81) return true;
@@ -408,7 +415,7 @@ template<> inline bool isTetraquark(const int& p){ auto value_digits = DecodedPI
 template<> inline bool isPentaquark(const int& p){ auto value_digits = DecodedPID(p); return isPentaquark(value_digits);}
 template<> inline bool isNucleus(const int& p){ auto value_digits = DecodedPID(p); return isNucleus(value_digits);}
 template<> inline bool isBSM(const int& p){
-  if (p == GRAVITON) return true;
+  if (p == GRAVITON || std::abs(p) == MAVTOP || p == DARKPHOTON) return true;
   if (std::abs(p) > 16 && std::abs(p) < 19) return true;
   if (std::abs(p) > 31 && std::abs(p) < 38) return true;
   if (std::abs(p) > 39 && std::abs(p) < 81) return true;
@@ -418,7 +425,7 @@ template<> inline bool isBSM(const int& p){
 
 template<> inline bool isHadron(const DecodedPID& p){ return isMeson(p)||isBaryon(p)||isTetraquark(p)||isPentaquark(p);}
 template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p); return isHadron(value_digits);}
-template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid());}
+template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid()) || p.pid() == DARKPHOTON;}
 template<> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
 /// Av: we implement here an ATLAS-sepcific convention: all particles which are 99xxxxx are fine.
 template<> inline bool isValid(const DecodedPID& p){ return isHadron(p) || isTrajectory(p.pid()) || isDiquark(p) || isBSM(p) || isNucleus(p) || (std::abs(p.pid()) < 42) || isGenSpecific(p.pid()) || isGeantino(p.pid()) || isPythia8Specific(p);}
@@ -504,6 +511,7 @@ template<> inline int charge3(const DecodedPID& p) {
   if (ap == K0) return 0;
   if (ap == GEANTINO0) return 0;
   if (ap == GEANTINOPLUS) return p.pid() > 0 ? 3 : -3;
+  if (ap == MAVTOP) return p.pid() > 0 ? 2 : -2;
   size_t nq = 0;
   int sign = 1;
   int signmult = 1;
@@ -533,7 +541,7 @@ template<> inline int charge3(const int& p){
 }
 
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
-template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0 );}
+template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0);}
 
 template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isLeptoQuark(p) || isHadron(p));}
