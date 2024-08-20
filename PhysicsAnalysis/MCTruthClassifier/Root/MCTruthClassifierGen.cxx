@@ -250,7 +250,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
@@ -275,7 +275,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
-      MotherParent = MC::getMother(mother);
+      MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
@@ -529,7 +529,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (MC::isSUSY(motherPDG)) return SUSY;
   if (MC::isBSM(motherPDG)) return OtherBSM;
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringtVertex(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
@@ -558,7 +558,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   int numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
@@ -576,7 +576,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       //
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
-      MotherParent = MC::getMother(mother);
+      MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
       mother_prdVtx = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
       mother_endVtx = mother->decayVtx();
@@ -765,7 +765,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringtVertex(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
 }
@@ -793,7 +793,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   int numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   if (info) info->setMotherProperties(mother);
   if (!mother) {
     return NonDefined;
@@ -804,7 +804,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   const xAOD::TruthParticle* MotherParent(nullptr);
 
   if (MC::isW(motherPDG) && mothOriVert != nullptr) {
-    MotherParent = MC::getMother(mother);
+    MotherParent = MC::findMother(mother);
     long pPDG(0);
 
     if (MotherParent) {//MotherParent checked here...
@@ -981,7 +981,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
 
 
-  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   if (info) info->setMotherProperties(mother);
   if (!mother) return NonDefined;
   int motherPDG = mother->pdgId();
@@ -1204,7 +1204,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (MC::Pythia8::isConditionA(mother) && MC::isStable(thePriPart) && NumOfPht == 1 && numOfDaug == (NumOfPht + NumOfPartons))  return PromptPhot;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringtVertex(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
@@ -1235,7 +1235,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::findMother(thePriPart);
   if (info) info->mother = mother;
   if (!mother) return NonDefined;
   int motherPDG = mother->pdgId();
@@ -1251,7 +1251,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
-      MotherParent = MC::getMother(mother);
+      MotherParent = MC::findMother(mother);
       // to prevent Sherpa loop
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
@@ -1462,7 +1462,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringtVertex(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatteringVertex(mothOriVert)) isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
 }

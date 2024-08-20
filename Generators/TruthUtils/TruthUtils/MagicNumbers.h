@@ -61,19 +61,17 @@ namespace HepMC {
   // TODO The definitions of is_smart_ptr and remove_smart_pointer
   // below are probably too generic for this header, but putting them
   // here initially.
-  template<typename T> struct is_smart_ptr : std::false_type {};
-  template<typename T> struct is_smart_ptr<std::shared_ptr<T>> : std::true_type {};
-  template<typename T> struct is_smart_ptr<std::unique_ptr<T>> : std::true_type {};
-  template<typename T> struct is_smart_ptr<std::weak_ptr<T>> : std::true_type {};
-  template< class T >
-  inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
+  template <typename T> struct is_smart_ptr : std::false_type {};
+  template <typename T> struct is_smart_ptr<std::shared_ptr<T>> : std::true_type {};
+  template <typename T> struct is_smart_ptr<std::unique_ptr<T>> : std::true_type {};
+  template <typename T> struct is_smart_ptr<std::weak_ptr<T>> : std::true_type {};
+  template <class T> inline constexpr bool is_smart_ptr_v = is_smart_ptr<T>::value;
 
-  template<class T> struct remove_smart_pointer { typedef T type; };
-  template<class T> struct remove_smart_pointer<std::shared_ptr<T>> { typedef T type; };
-  template<class T> struct remove_smart_pointer<std::unique_ptr<T>> { typedef T type; };
-  template<class T> struct remove_smart_pointer<std::weak_ptr<T>> { typedef T type; };
-  template< class T >
-  using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;
+  template <class T> struct remove_smart_pointer { typedef T type; };
+  template <class T> struct remove_smart_pointer<std::shared_ptr<T>> { typedef T type; };
+  template <class T> struct remove_smart_pointer<std::unique_ptr<T>> { typedef T type; };
+  template <class T> struct remove_smart_pointer<std::weak_ptr<T>> { typedef T type; };
+  template <class T> using remove_smart_pointer_t = typename remove_smart_pointer<T>::type;
 
 #if defined(XAOD_STANDALONE)
   // Needed as we can't pick up the helper functions from AtlasHepMC in this case
@@ -89,8 +87,7 @@ namespace HepMC {
 #endif
   // Temporarily specialize uniqueID for xAOD::Truth classes ahead of the barcode migration - TODO remove this
 #if defined(HEPMC3)
-  template <typename T>
-  inline int uniqueID(const T&  p) {
+  template <typename T> inline int uniqueID(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
     }
@@ -111,8 +108,7 @@ namespace HepMC {
     }
   }
 #else
-  template <typename T>
-  inline int uniqueID(const T&  p) {
+  template <typename T> inline int uniqueID(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
     }
@@ -128,8 +124,7 @@ namespace HepMC {
   }
 #endif
  // Temporarily specialize status for xAOD::Truth classes ahead of the barcode migration - TODO remove this
-  template <typename T>
-  inline int status(const T&  p) {
+  template <typename T> inline int status(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
     }
@@ -155,7 +150,7 @@ namespace HepMC {
 #endif
 
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {
+  template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, const int direction = 0) {
     if (direction < 0) {
       if (p->status()>SIM_STATUS_INCREMENT) {
         auto pv = p->production_vertex();
@@ -163,7 +158,7 @@ namespace HepMC {
           for (auto pa: pv->particles_in()) {
             if (pa->pdg_id() != p->pdg_id()) continue;
             out.push_front(uniqueID(p));
-            get_particle_history(pa,out,-1);
+            get_particle_history(pa, out, -1);
             break;
           }
         }
@@ -176,7 +171,7 @@ namespace HepMC {
           for (auto pa: pv->particles_out()) {
             if (pa->pdg_id() != p->pdg_id()) continue;
             out.push_back(uniqueID(p));
-            get_particle_history(pa,out,1);
+            get_particle_history(pa, out, 1);
             break;
           }
         }
@@ -184,7 +179,7 @@ namespace HepMC {
     }
   }
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
+  template <class T>  inline std::deque<int> simulation_history(const T& p, const int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up
@@ -209,12 +204,10 @@ namespace HepMC {
     template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-    template <class T1,class T2>
-    inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
+    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-    template <class T1,class T2>
-    inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
+    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
   }
 
   namespace StatusBased {
@@ -267,8 +260,7 @@ namespace HepMC {
     template <class T>  inline bool is_simulation_vertex(const T& v){ return (status(v)>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-    template <class T1,class T2>
-    inline bool is_same_generator_particle(const T1& p1,const T2& p2) {
+    template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) {
       const int id1 = uniqueID(p1);
       const int id2 = uniqueID(p2);
       if (id1 == id2) { return true;} // simplest case
@@ -291,8 +283,7 @@ namespace HepMC {
     }
 
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-    template <class T1,class T2>
-    inline bool is_sim_descendant(const T1& p1,const T2& p2) {
+    template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) {
       const int id1 = uniqueID(p1);
       const int id2 = uniqueID(p2);
       if (id1 == id2) { return true;} // simplest case
@@ -348,12 +339,10 @@ namespace HepMC {
   template <class T>  inline bool is_simulation_vertex(const T& v){ return BarcodeBased::is_simulation_vertex(v);}
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
-  template <class T1,class T2>
-  inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_generator_particle(p1, p2); }
+  template <class T1,class T2>  inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_generator_particle(p1, p2); }
 
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-  template <class T1,class T2>
-  inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
+  template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
 
   /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
   template <class T> void old_to_new_simulation_scheme(T& evt) {
@@ -384,25 +373,32 @@ namespace HepMC {
 #endif
   }
 
-  /// @brief Functions for converting between the old and new barcode/status schemes
-  inline int new_particle_status_from_old(int oldStatus, int barcode) {
+  /// @brief Get particle status in the new scheme from the barcode and status in the old scheme
+  inline int new_particle_status_from_old(const int oldStatus,const  int barcode) {
     int generations_barcode_based = (barcode/SIM_REGENERATION_INCREMENT);
     bool is_sim_secondary_barcode_based = (barcode%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD);
-    return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0); }
-  inline int old_particle_status_from_new(int newStatus) { return newStatus%SIM_STATUS_THRESHOLD; }
+    return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0); 
+  }
+  
+  /// @brief Get particle status in the old scheme from the status in the new scheme
+  inline int old_particle_status_from_new(const int newStatus) { return newStatus%SIM_STATUS_THRESHOLD; }
 
-  inline int new_vertex_status_from_old(int oldStatus, int barcode) {
+  /// @brief Get vertex status in the new scheme from the barcode and status in the old scheme
+  inline int new_vertex_status_from_old(const int oldStatus,const  int barcode) {
     bool is_simulation_vertex_barcode_based =  (barcode<-SIM_BARCODE_THRESHOLD);
     return (is_simulation_vertex_barcode_based? SIM_STATUS_THRESHOLD : 0) + oldStatus;
   }
-  inline int old_vertex_status_from_new(int newStatus) {
+
+  /// @brief Get vertex status in the old scheme from the status in the new scheme
+  inline int old_vertex_status_from_new(const int newStatus) {
     bool is_simulation_vertex_status_based = (newStatus>SIM_STATUS_THRESHOLD);
     return ( is_simulation_vertex_status_based ? -SIM_STATUS_THRESHOLD : 0) + newStatus; }
 }
 #if !defined(XAOD_STANDALONE)
 namespace HepMC {
+/// @brief Get the maximal value of barcode of particle present in the event
 inline int  maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) {
-  int maxBarcode=0;
+  int maxBarcode = 0;
 #ifdef HEPMC3
   auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
   for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
@@ -417,6 +413,7 @@ inline int  maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) {
   return maxBarcode;
 }
 
+/// @brief Get the maximal absolute value of barcode of vertex present in the event. Returns a negative number.
 inline int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) {
   int maxBarcode=0;
 #ifdef HEPMC3

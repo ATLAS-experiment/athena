@@ -242,7 +242,7 @@ ParticleOutCome defOutComeOfTau(T thePart) {
   auto EndVert = MC::findSimulatedEndVertex(thePart);
   if (EndVert == nullptr) return NonInteract;
   int NumOfTauDaug = EndVert->nOutgoingParticles();
-  auto tauFinalStatePart = MC::findFinalStatePart(EndVert);
+  auto tauFinalStatePart = MC::findFinalStateParticles(EndVert);
   auto PD = DecayProducts(tauFinalStatePart);
   int NumOfElec = PD.apd(11);
   int NumOfMuon = PD.apd(13);
