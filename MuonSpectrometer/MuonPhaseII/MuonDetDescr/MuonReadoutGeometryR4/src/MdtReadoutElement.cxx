@@ -191,15 +191,17 @@ double MdtReadoutElement::wireLength(const IdentifierHash& hash) const {
 double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
                                             const IdentifierHash& measHash,
                                             const Amg::Vector3D& globPoint) const {
-    const Amg::Vector3D locPoint = globalToLocalTrans(ctx, measHash) * globPoint;
+    return distanceToReadout(measHash, globalToLocalTrans(ctx, measHash) * globPoint);
+
+}
+double MdtReadoutElement::distanceToReadout(const IdentifierHash& measHash,
+                                            const Amg::Vector3D& localPoint) const {
     /// The position of the readout chip is at the negative tube side
     const unsigned int layer = layerNumber(measHash);
     const unsigned int tube = tubeNumber(measHash);
     const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
-    const Amg::Vector3D readOutPos = m_pars.readoutSide * 
-                                     zeroT.tubeHalfLength(tube) *
-                                     Amg::Vector3D::UnitZ();
-    return readOutPos.z() - locPoint.z();
+    const double readOutPos = m_pars.readoutSide * zeroT.tubeHalfLength(tube);
+    return std::abs(readOutPos - localPoint.z());
 }
 
 void MdtReadoutElement::setComplementaryReadoutEle(const MdtReadoutElement* other) {

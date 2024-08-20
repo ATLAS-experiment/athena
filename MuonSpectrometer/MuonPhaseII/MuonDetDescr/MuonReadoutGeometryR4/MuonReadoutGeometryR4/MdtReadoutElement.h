@@ -165,6 +165,14 @@ class MdtReadoutElement : public MuonReadoutElement {
                              const IdentifierHash& measHash,
                              const Amg::Vector3D& globPoint) const;
     
+    /** @brief Returns the distance to the readout assuming that the parsed point is expressed 
+     *         in the local coordinate system of the tube. I.e. the wire points along the z-axis
+     * @param measHash: IdentifierHash of the tube
+     * @param localPoint: External local point inside the tube (No check is made whether that's the case). 
+     * */
+    double distanceToReadout(const IdentifierHash& measHash,
+                             const Amg::Vector3D& localPoint) const;
+
     double activeTubeLength(const IdentifierHash& hash) const;
         
     double tubeLength(const IdentifierHash& hash) const;
