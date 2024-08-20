@@ -385,7 +385,7 @@ StoreGateSvc::keys(const CLID& id, std::vector<std::string>& vkeys,
 
 std::string 
 StoreGateSvc::dump() const {
-  std::string nullS;
+  std::string nullS = "\n>>>>>>>NO CURRENT STORE<<<<<<<\n";
   _SGXCALL(dump, (), nullS);  
 }
 

@@ -2,10 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#undef DEBUG_SGIMPL
+
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 #include <iostream>
 #include <functional>
+#include <format>
 #include <string>
 #include <unordered_map>
 
@@ -47,7 +51,6 @@
 #include "StoreGate/tools/SGImplSvc.h"
 #include "SGTools/DataStore.h"
 
-using std::ostringstream;
 using std::setw;
 using std::hex;
 using std::dec;
@@ -60,6 +63,16 @@ using std::vector;
 using SG::DataProxy;
 using SG::DataStore;
 using SG::TransientAddress;
+
+// Helpers for debug formatting
+// std::print implementation to be replaced when C++ 23 is available
+namespace dbg {
+template <class... Args> void print(std::FILE* stream, std::format_string<Args...> fmt, Args&&... args) {
+  std::fputs(std::format(fmt, std::forward<Args>(args)...), stream);
+}
+
+template <class T> void* ptr(T* p) { return static_cast<void*>(p); }
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Remapping implementation.
@@ -259,7 +272,13 @@ StatusCode SGImplSvc::loadEventProxies() {
   if (0 != m_pPPS && !m_storeLoaded) {
     m_storeLoaded = true;
     sc=m_pPPS->loadProxies(*m_pStore);
-  } 
+#ifdef DEBUG_SGIMPL
+    dbg::print(stderr, "SGImplSvc::loadEventProxies() LOADED PROXIES on {}\n", name());
+  }
+  else {
+    dbg::print(stderr, "SGImplSvc::loadEventProxies() PROXIES ALREADY LOADED on {}\n", name());
+#endif
+  }
   return sc;
 }
 
@@ -267,15 +286,15 @@ StatusCode SGImplSvc::loadEventProxies() {
 // Create a key for a type (used if the client has not specified a key)
 string SGImplSvc::createKey(const CLID& id)
 {
-  ostringstream o;
-  o << m_pStore->typeCount(id)+1 << std::ends;
-  string ret(o.str());
-  return ret;
+  return std::to_string(m_pStore->typeCount(id) + 1);
 }
 //////////////////////////////////////////////////////////////
 // clear store
 StatusCode SGImplSvc::clearStore(bool forceRemove)
 {
+#ifdef DEBUG_SGIMPL
+  dbg::print(stderr, "SGImplSvc::clearStore(forceRemove={}) on {}\n", forceRemove, name());
+#endif
   {
     if (m_DumpArena) {
       std::ostringstream s;
@@ -569,43 +588,40 @@ SGImplSvc::regFcn( const std::string& toolName,
 string SGImplSvc::dump() const
 { 
   lock_t lock (m_mutex);
-  ostringstream ost;
-  ost << "<<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> \n";
-  ost << "SGImplSvc(" + name() + ")::dump():\n";
+  auto out_buffer = std::string{};
+  auto out = std::back_inserter(out_buffer);
+  const std::string me = name();
+  std::format_to(out, "{}: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> \n", me);
+  std::format_to(out, "{}: SGImplSvc()::dump() which is {} \n", me, m_storeLoaded ? "LOADED" : "NOT LOADED");
 
   DataStore::ConstStoreIterator s_iter, s_end;
   store()->tRange(s_iter, s_end).ignore();
 
   for (; s_iter != s_end; ++s_iter) 
-    {
+  {
 
-      CLID id = s_iter->first;
-      int nProxy = store()->typeCount(id);
-      string tname;
-      m_pCLIDSvc->getTypeNameOfID(id, tname).ignore();
-      ost << "Found " << nProxy << ((nProxy == 1) ? " proxy" : " proxies") 
-          << " for ClassID " << id <<" ("<< tname << "): \n";
+    CLID id = s_iter->first;
+    int nProxy = store()->typeCount(id);
+    std::string tname;
+    m_pCLIDSvc->getTypeNameOfID(id, tname).ignore();
+    std::format_to(out, "{}: Found {} {} for ClassID {} ({}): \n", me, nProxy, ((nProxy == 1) ? "proxy" : "proxies"), id, tname);
 
-      // loop over each type:
-      SG::ConstProxyIterator p_iter = (s_iter->second).begin();
-      SG::ConstProxyIterator p_end =  (s_iter->second).end();
-  
-      while (p_iter != p_end) {
-        const DataProxy& dp(*p_iter->second);
-        //      ost << " proxy@" << &dp;
-        ost << " flags: (" 
-            << setw(7) << (dp.isValid() ? "valid" : "INVALID") << ", "
-            << setw(8) << (dp.isConst() ? "locked" : "UNLOCKED") << ", "
-            << setw(6) << (dp.isResetOnly() ? "reset" : "DELETE")
-            << ") --- data: " << hex << setw(10) << dp.object() << dec
-            << " --- key: " << p_iter->first << '\n';
-        ++p_iter;
-      }
+    // loop over each type:
+    SG::ConstProxyIterator p_iter = (s_iter->second).begin();
+    SG::ConstProxyIterator p_end =  (s_iter->second).end();
+
+    while (p_iter != p_end) {
+      const DataProxy& dp(*p_iter->second);
+	    std::format_to(out, "{}: flags: ({:7s}, {:8s}, {:6s}) --- data: {:10p} --- key: {}\n", me,
+                           (dp.isValid() ? "valid" : "INVALID"),
+                           (dp.isConst() ? "locked" : "UNLOCKED"),
+                           (dp.isResetOnly() ? "reset" : "DELETE"),
+                           dbg::ptr(dp.object()), p_iter->first);
+      ++p_iter;
     }
-  ost << "<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> \n";
-  string ret(ost.str());
-  return ret;
-
+  }
+  std::format_to(out, "{}: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> \n", me);
+  return out_buffer;
 }
  
 DataStore* 
@@ -816,14 +832,22 @@ SGImplSvc::proxy(const CLID& id, const string& key, bool checkValid) const
   {
     lock_t lock (m_mutex);
     dp = m_pStore->proxy(id, key);
+#ifdef DEBUG_SGIMPL
+    if (!dp) dbg::print(stderr, "::SGImplSvc::proxy(name={}, key={}): data proxy is null, m_pPPS is {}\n", this->name(), key, m_pPPS == 0 ? "NULL" : "NOT NULL");
+#endif
     if (0 == dp && 0 != m_pPPS) {
       SG::DataStore* pStore ATLAS_THREAD_SAFE = m_pStore;
       dp = m_pPPS->retrieveProxy(id, key, *pStore);
+#ifdef DEBUG_SGIMPL
+      if (!dp) dbg::print(stderr, "::SGImplSvc::proxy(name={}, key={}): data proxy is still null\n", this->name(), key);
+#endif
     }
   }
   // Be sure to release the lock before this.
   // isValid() may call back to the store, so we could otherwise deadlock..
-  if (checkValid && 0 != dp && !(dp->isValid())) dp = 0;
+  if (checkValid && 0 != dp && !(dp->isValid())) {
+	dp = 0;
+  }
   return dp;
 }
 
