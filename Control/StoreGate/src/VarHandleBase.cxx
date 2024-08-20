@@ -15,6 +15,7 @@
 #include "StoreGate/VarHandleBase.h"
 
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/tools/SGImplSvc.h"
 #include "StoreGate/exceptions.h"
 
 #include "AthenaKernel/DataBucketBase.h"
@@ -29,8 +30,33 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 
 #include <algorithm>
-#include <sstream>
+#include <cstdio>
+#include <format>
 
+#ifdef DEBUG_VHB
+#include <boost/core/demangle.hpp>
+
+// Helpers for debug formatting
+// std::print implementation to be replaced when C++ 23 is available
+namespace dbg {
+template <class... Args> void print(std::FILE* stream, std::format_string<Args...> fmt, Args&&... args)
+{
+  std::fputs(std::format(fmt, std::forward<Args>(args)...), stream);
+}
+
+template <class T> void* ptr(T* p) { return static_cast<void*>(p); }
+
+std::string proxy(SG::DataProxy* proxy)
+{
+  return !proxy ? std::string("PROXY(null)") : std::format("PROXY({}, isValid={}, isConst={})", dbg::ptr(proxy), proxy->isValid(), proxy->isConst());
+}
+
+std::string store(IProxyDict* store)
+{
+  return !store ? std::string("null_store") : store->name();
+}
+}
+#endif
 
 namespace errorcheck {
 
@@ -43,14 +69,8 @@ namespace errorcheck {
    */
   std::string context_name (const SG::VarHandleBase* context)
   {
-    std::ostringstream ss;
-    ss << "VarHandle(" 
-       << context->storeHandle().name() << "+" << context->key()
-       << "[" << context->clid() << "]"
-       << ")";
-    return ss.str();
+  return std::format("VarHandle({}+{}[{}])", context->storeHandle().name(), context->key(), context->clid());
   }
-
 
 } // namespace errorcheck
 
@@ -101,7 +121,7 @@ namespace SG {
   {
     m_ownedKey->setOwningHandle (this);
 #ifdef DEBUG_VHB
-    std::cerr << "VarHandleBase() " << this << std::endl;
+    dbg::print(stderr, "VarHandleBase() {}\n", dbg::ptr(this));
 #endif
   }
 
@@ -202,11 +222,7 @@ namespace SG {
       m_key = rhs.m_key;
     }
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::copy constr from " << &rhs
-              << " to " << this << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << std::endl;
+    dbg::print(stderr, "::VHB::copy constr from {} to {} with proxy={} => {}, key={}, store={}\n", dbg::ptr(&rhs), dbg::ptr(this), dbg::proxy(this->m_proxy), dbg::proxy(rhs.m_proxy), this->key(), dbg::store(this->m_store));
 #endif
 
     setProxy (rhs.m_proxy);
@@ -239,11 +255,7 @@ namespace SG {
       rhs.m_proxy=0; //no release: this has the ref now
     }
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB:: move constr from " << &rhs
-              << "to " << this << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << std::endl;
+    dbg::print(stderr, "::VHB::move constr from {} to {} with proxy={}, key={}, store={}\n", dbg::ptr(&rhs), dbg::ptr(this), dbg::proxy(this->m_proxy), this->key(), dbg::store(this->m_store));
 #endif
   }
 
@@ -271,11 +283,7 @@ namespace SG {
       setProxy (rhs.m_proxy);
     }
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::assignment from " << &rhs
-              << " to " << this << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << std::endl;
+    dbg::print(stderr, "::VHB::assignment from {} to {} with proxy={}, key={}, store={}\n", dbg::ptr(&rhs), dbg::ptr(this), dbg::proxy(this->m_proxy), this->key(), dbg::store(this->m_store));
 #endif
     return *this;
   }
@@ -311,11 +319,7 @@ namespace SG {
       }
     }
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB:: move assign from " << &rhs
-              << " to " << this << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << std::endl;
+    dbg::print(stderr, "::VHB:: move assign from {} to {} with proxy={}, key={}, store={}\n", dbg::ptr(&rhs), dbg::ptr(this), dbg::proxy(this->m_proxy), this->key(), dbg::store(this->m_store));
 #endif
     return *this;
   }
@@ -327,14 +331,7 @@ namespace SG {
   VarHandleBase::~VarHandleBase()
   {
 #ifdef DEBUG_VHB
-    std::cerr << "~VarHandleBase(" << this
-              << ",ptr=" << this->m_ptr 
-              << ",proxy=" << this->m_proxy << ", ";
-    if (m_proxy) {
-      std::cerr << " -- isValid: " << m_proxy->isValid()
-                << " -- isConst: " << m_proxy->isConst();
-    }
-    std::cerr << ", key=" <<this->key() << ")...\n";
+    dbg::print(stderr, "::VHB:: DESTROY {} with ptr={}, proxy={}, key={}, store={}\n", dbg::ptr(this), dbg::ptr(this->m_ptr), dbg::proxy(this->m_proxy), this->key(), dbg::store(this->m_store));
 #endif
 
     if (m_ownedKey) {
@@ -409,9 +406,7 @@ namespace SG {
   VarHandleBase::isInitialized() const
   {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::isInitialized(" 
-              << this
-              << ", proxy" << m_proxy << ") const\n";
+    dbg::print(stderr, "::VHB::isInitialized({}, proxy={}) const\n", dbg::ptr(this), dbg::proxy(m_proxy));
 #endif
     return (0 != m_proxy);
   }
@@ -437,15 +432,7 @@ namespace SG {
   VarHandleBase::isConst() const
   {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::isConst(" 
-              << this
-              << ", proxy" << m_proxy; 
-    if (m_proxy) {
-      std::cerr
-        << " -- isValid: " << m_proxy->isValid()
-        << " -- isConst: " << m_proxy->isConst();
-    }
-    std::cerr << ") const\n";
+    dbg::print(stderr, "::VHB::isConst({}, proxy={}) const\n", dbg::ptr(this), dbg::proxy(m_proxy));
 #endif
     return 0 != m_proxy 
       ? m_proxy->isConst() 
@@ -505,9 +492,39 @@ namespace SG {
       if (store) m_store = store;
     }
 
+#ifdef DEBUG_VHB
+    dbg::print(stderr, "::VHB:: setState() on {} with key={} ({}) and store={} (CLID: {})\n", dbg::ptr(this), this->key(), m_key->hashedKey(), dbg::store(m_store), this->clid());
+#endif
+
     SG::DataProxy* proxy = m_store->proxy_exact (m_key->hashedKey());
     if (!proxy) {
+#ifdef DEBUG_VHB
+      dbg::print(stderr, "::VHB:: setState() on {} ==> null proxy!\n", dbg::ptr(this));
+#endif
       proxy = m_store->proxy(this->clid(), this->key());
+    }
+
+    if (!proxy) {
+#ifdef DEBUG_VHB
+      dbg::print(stderr, "::VHB:: setState() on {} ==> STILL null proxy!\n", dbg::ptr(this));
+#endif
+    }
+    else if (!proxy->isValid()) {
+#ifdef DEBUG_VHB
+      dbg::print(stderr, "::VHB:: setState() on {} ==> proxy not valid! Dumping Store\n", dbg::ptr(this));
+      if (!m_store) {
+        dbg::print(stderr, "::VHB:: setState() on {} ==> m_store is a nullptr\n", dbg::ptr(this));
+      }
+      else {
+        SGImplSvc* stor = dynamic_cast<SGImplSvc*>(m_store);
+        if (!stor) {
+          dbg::print(stderr, "::VHB:: setState() on {} ==> m_store points not to an SGImplSvc but to a {}\n", dbg::ptr(this), boost::core::demangle(typeid(*m_store).name()));
+        }
+        else {
+          dbg::print(stderr, "\n{}\n", stor->dump());
+        }
+      }
+#endif
     }
     StatusCode sc = this->setState(proxy);
 
@@ -552,12 +569,7 @@ namespace SG {
   void 
   VarHandleBase::reset (bool hard) {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::reset("
-              << "ptr=" << this->m_ptr << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << ")..." 
-              << std::endl;
+    dbg::print(stderr, "::VHB::reset {} with proxy={}, key={}, store={} (hard={})\n", dbg::ptr(this), dbg::proxy(m_proxy), this->key(), dbg::store(this->m_store), hard);
 #endif
     m_ptr = 0; 
 
@@ -582,12 +594,7 @@ namespace SG {
    */
   void VarHandleBase::finalReset() {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::finalReset("
-              << "ptr=" << this->m_ptr << ", "
-              << "proxy=" << this->m_proxy << ", "
-              << "key=" <<this->key()
-              << ")..." 
-              << std::endl;
+    dbg::print(stderr, "::VHB::finalReset {} with proxy={}, key={}, store={}\n", dbg::ptr(this), dbg::proxy(m_proxy), this->key(), dbg::store(this->m_store));
 #endif
     reset (true);
   }
@@ -653,13 +660,7 @@ namespace SG {
   VarHandleBase::setState(SG::DataProxy* proxy)
   {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::setState(" 
-              << proxy;
-    if (0 != proxy) {
-      std::cerr << " -- isValid: " << proxy->isValid()
-                << " -- isConst: " << proxy->isConst();
-    }
-    std::cerr << ") const\n";
+	  dbg::print(stderr, "::VHB::setState({}, proxy={}) const\n", dbg::ptr(this), dbg::proxy(proxy));
 #endif
     if (0 == proxy || !proxy->isValid()) {
       return StatusCode::FAILURE;
@@ -688,10 +689,7 @@ namespace SG {
       return StatusCode::FAILURE;
     }
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::setState(" 
-              << store->name() << ", "
-              << key
-              << ") const\n";
+    dbg::print(stderr, "::VHB::setState({}, store={}, key={}) const\n", dbg::ptr(this), dbg::store(store), key);
 #endif
     CLID cid = this->clid();
     SG::DataProxy* proxy = store->proxy(cid, key);
@@ -826,15 +824,7 @@ namespace SG {
   VarHandleBase::typeless_dataPointer_impl (bool quiet)
   {
 #ifdef DEBUG_VHB
-    std::cerr << "::VHB::typeless_dataPointer_impl("
-              << this
-              << ",ptr=" << this->m_ptr 
-              << ",proxy=" << this->m_proxy << ", ";
-    if (m_proxy) {
-      std::cerr << " -- isValid: " << m_proxy->isValid()
-                << " -- isConst: " << m_proxy->isConst();
-    }
-    std::cerr << ", key=" <<this->key() << ")...\n";
+    dbg::print(stderr, "::VHB::typeless_dataPointer_impl({}, ptr={}, proxy={}, key={}, store={})\n", dbg::ptr(this), dbg::ptr(this->m_ptr), dbg::proxy(this->m_proxy), this->key(), dbg::store(this->m_store));
 #endif
 
     // First check for cached pointer.
