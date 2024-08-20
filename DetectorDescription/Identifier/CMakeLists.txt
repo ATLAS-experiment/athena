@@ -26,6 +26,21 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
 endif()
 
+atlas_add_test(Identifier32_test
+  SOURCES  test/Identifier32_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+
+atlas_add_test(ExpandedIdentifier_test
+  SOURCES  test/ExpandedIdentifier_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
 atlas_add_test(RangeParser_test
   SOURCES  test/RangeParser_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -35,7 +50,6 @@ atlas_add_test(RangeParser_test
 
 atlas_add_test(range_test
   SOURCES test/Range_test.cxx
-    src/ExpandedIdentifier.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
