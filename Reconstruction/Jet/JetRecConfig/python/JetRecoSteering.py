@@ -47,6 +47,10 @@ def addJetsToOutputCfg(flags,jetdefs, toAOD=True, toESD=True):
     # Store event shapes when jets are being stored to output
     jetList += ["xAOD::EventShape#Kt4EMPFlowEventShape",
                 "xAOD::EventShapeAuxInfo#Kt4EMPFlowEventShapeAux.",
+                "xAOD::EventShape#Kt4EMPFlowNeutEventShape",
+                "xAOD::EventShapeAuxInfo#Kt4EMPFlowNeutEventShapeAux.",
+                "xAOD::EventShape#Kt4EMPFlowPUSBEventShape",
+                "xAOD::EventShapeAuxInfo#Kt4EMPFlowPUSBEventShapeAux.",
                 "xAOD::EventShape#Kt4EMTopoOriginEventShape",
                 "xAOD::EventShapeAuxInfo#Kt4EMTopoOriginEventShapeAux.",
                 "xAOD::EventShape#Kt4LCTopoOriginEventShape",
