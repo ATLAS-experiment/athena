@@ -370,7 +370,7 @@ InDetPerfPlot_Resolution::getPlotParameters() {
   if (not saneQoverPt){
     m_resP[QOVERPT] = undefinedValue;
   } else {
-      m_resP[QOVERPT] = (m_trkP[QOVERPT] - m_truetrkP[QOVERPT]) * (1 / m_truetrkP[QOVERPT]);  // relative q/pt resolution
+    m_resP[QOVERPT] = (m_trkP[QOVERPT] - m_truetrkP[QOVERPT]) * (1 / m_truetrkP[QOVERPT]);  // relative q/pt resolution
   }
   bool saneQoverPtrec = std::abs(m_trkP[QOVERPT]) > smallestAllowableQoverPt;
   if (not saneQoverPtrec){
@@ -452,7 +452,7 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TruthParticle& truthprt
   if ((qOverP != undefinedValue) and (m_truetrkP[THETA] != undefinedValue)){
     const float sinTheta =std::sin(m_truetrkP[THETA]);
     if (std::abs(sinTheta) > smallestAllowableSin){
-      m_truetrkP[QOVERPT] = qOverP /sinTheta;
+      m_truetrkP[QOVERPT] = qOverP / sinTheta * Gaudi::Units::GeV;
     } else {
       m_truetrkP[QOVERPT] = undefinedValue;
     }

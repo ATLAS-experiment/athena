@@ -25,6 +25,5 @@ private:
   // container keys including steering parameter and description
   SG::ReadHandleKey<xAOD::gFexTowerContainer> m_gFexTowerContainerKey{this, "gFexTowerContainer","L1_gFexDataTowers","SG key of the input gFex Tower container"};
 
-
 };
 #endif

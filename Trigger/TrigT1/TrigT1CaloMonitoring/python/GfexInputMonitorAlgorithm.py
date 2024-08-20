@@ -30,40 +30,32 @@ def GfexInputMonitoringConfig(flags):
 
 
     # histograms of gFex tower variables
-    helper.defineHistogram('NGfexTowers;h_nGfexTowers', title='Number of gFex towers',
-                            fillGroup = groupName, type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=5000)
+    helper.defineHistogram('NGfexTowers;h_nGfexTowers', title='Number of gFex towers in each event with Et > 10 GeV; gTowers per event',
+                                   fillGroup = "highEtgTowers", type='TH1I', path=trigPath, xbins=100,xmin=0,xmax=100)
 
-    helper.defineHistogram('TowerEta;h_TowerEta', title='gFex Tower Eta',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=100,xmin=-5.0,xmax=5.0)
+    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_TowerHeatMap', title='gFex Tower Average Et Distribution (gTowerEt > 10 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
+                            fillGroup = "highEtgTowers",type='TProfile2D',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
 
-    helper.defineHistogram('TowerPhi;h_TowerPhi', title='gFex Tower Phi',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=66,xmin=-math.pi,xmax=math.pi)
 
-    helper.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='gFex Tower Eta vs Phi',
-                            fillGroup = groupName, type='TH2F',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
+    helper.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='gFex Tower Eta vs Phi with gTower Et < 10 GeV ;#eta;#phi',
+                            fillGroup = "lowEtgTowers", type='TH2F',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
 
-    helper.defineHistogram('TowerEtaindex;h_TowerEtaindex', title='gFex Tower Eta Index',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=50,xmin=0.0,xmax=35.0)
-
-    helper.defineHistogram('TowerPhiindex;h_TowerPhiindex', title='gFex Tower Phi Index',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=64,xmin=0.0,xmax=32.0)
-
-    helper.defineHistogram('TowerEtaindex,TowerPhiindex;h_TowerEtaPhiMapindex', title='gFex Tower Eta vs Phi index',
-                            fillGroup = groupName, type='TH2F',path=trigPath, xbins=50,xmin=0.0,xmax=35.0,ybins=64,ymin=0,ymax=32.0)
-
-    helper.defineHistogram('TowerFpga;h_TowerFpga', title='gFex Tower FPGA Number',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
-
-    helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=1000,xmin=0,xmax=1000.0)
-
-    helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
-                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=2,xmin=0,xmax=2.0)
     
+    helper.defineHistogram('TowerFpga;h_TowerFpga', title='gFex Tower (gTowerEt > 10 GeV ) FPGA Number;Number of FPGA',
+                            fillGroup = "highEtgTowes", type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
+
+    helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et ; Et (count x 50 MeV)',
+                            fillGroup = "gTowers", type='TH1I', path=trigPath, xbins= 1000, xmin=-500.0, xmax=500.0)
+
+    helper.defineHistogram('MaxEt;h_MaxTowerEt', title='gFex Max Tower Et for saturation=true; Et (count x 50 MeV)',
+                            fillGroup = "gTowers", type='TH1F', path=trigPath, xbins=350,xmin=-50.0,xmax=300.0)
+    
+    helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
+                            fillGroup = "gTowers", type='TH1F', path=trigPath, xbins=3,xmin=0,xmax=3.0)
+
     acc = helper.result()
     result.merge(acc)
     return result
-
 
 if __name__=='__main__':
     # set input file and config options
