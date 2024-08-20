@@ -16,8 +16,13 @@
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 
+#include "GaudiKernel/PhysicalConstants.h"
+
 #include <unordered_map>
 
+namespace{
+    constexpr double c_inv = 1./Gaudi::Units::c_light;
+}
 
 namespace MuonR4{
     template <class ContainerType>
@@ -37,8 +42,13 @@ namespace MuonR4{
     StatusCode TruthSegmentMaker::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKeys.initialize());
+        if (m_readKeys.empty()){
+            ATH_MSG_ERROR("No simulated hit containers have been parsed to build the segments from ");
+            return StatusCode::FAILURE;
+        }
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_eleLinkKey.initialize());
+        ATH_CHECK(m_ptKey.initialize());
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
@@ -83,6 +93,7 @@ namespace MuonR4{
                                      std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> ptDecor{m_ptKey, ctx};
         for (auto& [chamber, collectedParts] : hitCollector) {
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
             
@@ -101,12 +112,11 @@ namespace MuonR4{
                 const Amg::Vector3D chamberDir = inChamb.linear() * xAOD::toEigen(simHit->localDirection());
 
                 /// Express the simulated hit in the center of the chamber
-                const std::optional<double> lambda = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.);
-                const Amg::Vector3D chamberPos = localPos + lambda.value_or(0.)*chamberDir;
+                const double distance = Amg::intersect<3>(localPos, chamberDir, Amg::Vector3D::UnitZ(), 0.).value_or(0.);
+                const Amg::Vector3D chamberPos = localPos + distance*chamberDir;
                 
                 const Amg::Vector3D globPos = locToGlob * chamberPos;
                 const Amg::Vector3D globDir = locToGlob.linear() * chamberDir;
-                
                 HitLinkVec associatedHits{};
                 unsigned int nMdt{0}, nRpcEta{0}, nRpcPhi{0}, nTgcEta{0}, nTgcPhi{0};
                 unsigned int nMm{0}, nStgcEta{0}, nStgcPhi{0};
@@ -138,8 +148,8 @@ namespace MuonR4{
                         default:
                             ATH_MSG_WARNING("Csc are not defined "<<m_idHelperSvc->toString(simHit->identify()));
                     }
-                    ElementLink<xAOD::MuonSimHitContainer> link{*static_cast<const xAOD::MuonSimHitContainer*>(simHit->container()), 
-                                                                simHit->index()};
+                    ElementLink<xAOD::MuonSimHitContainer> link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), 
+                                                                assocMe->index()};
                     associatedHits.push_back(std::move(link));
                 }
                 int nPrecisionHits = nMdt + nMm + nStgcEta;
@@ -148,9 +158,10 @@ namespace MuonR4{
                 if (nPrecisionHits < 3) continue;
 
                 xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
+                ptDecor(*truthSegment) = particle->momentum().pt();
                 truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
                 truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
-                truthSegment->setT0Error(simHit->globalTime(), 0.);
+                truthSegment->setT0Error(simHit->globalTime() + distance *c_inv /simHit->beta(), 0.);
                 
                 truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
                 truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 

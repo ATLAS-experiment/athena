@@ -56,6 +56,8 @@ namespace MuonR4{
           /** @brief Decoration key of the associated sim hit links */
           using HitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_eleLinkKey{this, "SimHitLink", m_segmentKey, "simHitLinks"};
+          /** @brief Decoration key of the associated particle pt */
+          SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_ptKey{this, "PtKey", m_segmentKey, "pt"};
           /** @brief Pointer to the muon readout geometry */
           const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
   };
