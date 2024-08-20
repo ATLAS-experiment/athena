@@ -9,5 +9,10 @@
 #include "xAODMuonPrepData/sTgcPadHit.h"
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
+namespace xAOD{
+   using sTgcPadContainer_v1 = DataVector<sTgcPadHit_v1>;
+   using sTgcPadContainer = sTgcPadContainer_v1;
+}
+
 CLASS_DEF( xAOD::sTgcPadContainer , 1310723933 , 1 )
 #endif

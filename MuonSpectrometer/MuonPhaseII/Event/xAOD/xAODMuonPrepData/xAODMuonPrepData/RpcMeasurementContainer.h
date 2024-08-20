@@ -8,6 +8,10 @@
 #include "xAODMuonPrepData/RpcMeasurementFwd.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
 
+namespace xAOD{
+   using RpcMeasurementContainer_v1 = DataVector<RpcMeasurement_v1>;
+   using RpcMeasurementContainer = RpcMeasurementContainer_v1;
+}
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
 CLASS_DEF( xAOD::RpcMeasurementContainer , 1183064885 , 1 )

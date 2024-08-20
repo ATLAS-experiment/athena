@@ -7,8 +7,13 @@
 
 #include "xAODMuonPrepData/sTgcStripClusterFwd.h"
 #include "xAODMuonPrepData/sTgcStripCluster.h"
-// Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
+
+namespace xAOD{
+   using sTgcStripContainer_v1 = DataVector<sTgcStripCluster_v1>;
+   using sTgcStripContainer = sTgcStripContainer_v1;
+}
+// Set up a CLID for the class:
 CLASS_DEF( xAOD::sTgcStripContainer , 1114862428 , 1 )
 
 #endif
