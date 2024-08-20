@@ -62,6 +62,12 @@ namespace GlobalSim {
       false,
       "flag to enable dumps"};
 
+    Gaudi::Property<bool> m_dumpTerse {
+      this,
+      "dumpTerse",
+      false,
+      "flag to enable terse dumps"};
+
     SG::WriteHandleKey<LArStripNeighborhoodContainer>
     m_neighKey {
       this,
@@ -83,6 +89,16 @@ namespace GlobalSim {
     findClosestCellToRoI(const xAOD::eFexEMRoI*,
 			 const std::vector<const CaloCell*>&,
 			 const CaloCell*&) const;
+
+    StatusCode
+    dump(const xAOD::EventInfo& eventInfo,
+	 const LArStripNeighborhoodContainer&) const;
+    
+    StatusCode
+    dumpTerse(const xAOD::EventInfo& eventInfo,
+	      const LArStripNeighborhoodContainer&) const;
+
+		    
    
   };
 

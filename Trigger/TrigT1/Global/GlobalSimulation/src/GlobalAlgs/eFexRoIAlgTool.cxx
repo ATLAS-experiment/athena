@@ -47,12 +47,11 @@ namespace GlobalSim {
      */
     
  
-    auto roiSelector = [etMin=m_etMin.value()](const auto& roi) {
-      constexpr double strip_deta{0.031};
+    auto roiSelector = [etMin=m_etMin](const auto& roi) {
 
       // fiducial cut values
-      constexpr double eta_out_fid{1.4-strip_deta};
-      constexpr double eta_in_fid{0.03};
+      constexpr double eta_out_fid{1.4};
+      constexpr double eta_in_fid{0.2};
       
       auto abs_eta = abs(roi->eta());
       return (eta_in_fid <= abs_eta) and
@@ -63,7 +62,7 @@ namespace GlobalSim {
     std::copy_if((*eFexEMRoIContainer).begin(),
 		 (*eFexEMRoIContainer).end(),
 		 std::back_inserter(selectedRoIs),
-		 std::move(roiSelector));
+		 roiSelector);
     
     return StatusCode::SUCCESS;
   }
