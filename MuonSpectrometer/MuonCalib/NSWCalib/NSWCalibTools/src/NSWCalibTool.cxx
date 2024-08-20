@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibTool.h"
@@ -55,14 +55,10 @@ StatusCode Muon::NSWCalibTool::initialize()
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_condTdoPdoKey.initialize());
   ATH_CHECK(m_condT0Key.initialize(m_applyMmT0Calib || m_applysTgcT0Calib));
-  ATH_CHECK(m_fieldCondObjInputKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
-  ATH_CHECK(m_muDetMgrKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
-
-  if ( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ) {
-    ATH_CHECK(initializeGasProperties());
-  } else {
-    ATH_MSG_INFO("MM or STGC not part of initialized detector layout, skipping initialization");
-  }
+  ATH_CHECK(m_fieldCondObjInputKey.initialize());
+  ATH_CHECK(m_muDetMgrKey.initialize());
+  ATH_CHECK(initializeGasProperties());
+  
   ATH_CHECK(initializeGasProperties());
   return StatusCode::SUCCESS;
 }
