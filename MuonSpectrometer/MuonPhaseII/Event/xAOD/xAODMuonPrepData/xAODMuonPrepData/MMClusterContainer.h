@@ -8,6 +8,11 @@
 #include "xAODMuonPrepData/MMClusterFwd.h"
 #include "xAODMuonPrepData/MMCluster.h"
 
+
+namespace xAOD{
+   using MMClusterContainer_v1 = DataVector<MMCluster_v1>;
+   using MMClusterContainer = MMClusterContainer_v1;
+}
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
 CLASS_DEF(xAOD::MMClusterContainer, 1171576513, 1)

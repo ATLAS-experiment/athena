@@ -5,7 +5,10 @@
 #define XAODMUONPREPDATA_RPCSTRIP2D_H
 
 #include "xAODMuonPrepData/RpcStrip2DFwd.h"
+#include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/versions/RpcStrip2D_v1.h"
+
+DATAVECTOR_BASE(xAOD::RpcStrip2D_v1, xAOD::RpcMeasurement_v1);
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"

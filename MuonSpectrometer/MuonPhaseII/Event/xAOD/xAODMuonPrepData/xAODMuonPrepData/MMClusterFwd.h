@@ -3,7 +3,6 @@
 */
 #ifndef XAODMUONPREPDATA_MMClusterFWD_H
 #define XAODMUONPREPDATA_MMClusterFWD_H
-#include "AthContainers/DataVector.h"
 
 /** @brief Forward declaration of the xAOD::MMCluster */
 namespace xAOD{
@@ -13,12 +12,5 @@ namespace xAOD{
 
    class MMClusterAuxContainer_v1;
    using MMClusterAuxContainer = MMClusterAuxContainer_v1;
-}
-
-DATAVECTOR_BASE(xAOD::MMCluster_v1, xAOD::UncalibratedMeasurement_v1);
-
-namespace xAOD{
-   using MMClusterContainer_v1 = DataVector<MMCluster_v1>;
-   using MMClusterContainer = MMClusterContainer_v1;
 }
 #endif

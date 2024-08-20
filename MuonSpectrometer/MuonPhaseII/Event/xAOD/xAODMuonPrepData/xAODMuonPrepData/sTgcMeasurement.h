@@ -6,7 +6,8 @@
 
 #include "xAODMuonPrepData/sTgcMeasurementFwd.h"
 #include "xAODMuonPrepData/versions/sTgcMeasurement_v1.h"
-
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE(xAOD::sTgcMeasurement_v1, xAOD::UncalibratedMeasurement_v1);
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
 CLASS_DEF( xAOD::sTgcMeasurement , 72401404 , 1 )
