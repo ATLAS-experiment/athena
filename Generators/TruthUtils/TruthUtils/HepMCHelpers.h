@@ -19,12 +19,12 @@ namespace MC
 {
  namespace Pythia8
  {
-   // To be undertood
+   /// @brief  To be understood
   template <class T> inline bool isConditionA(const T& p)  { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
-  
+   /// @brief  To be understood
   template <class T> inline bool isConditionB(const T& p)  { return p->status() == 23;}
- }	
-	
+ }
+
 #include "AtlasPID.h"
 
   /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
@@ -33,12 +33,20 @@ namespace MC
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
   template <class T> inline  bool isChargedNonShowering(const T& p) { return (isMuon<T>(p) || isSUSY<T>(p)); }
 
+  /// @brief Identify if the particle is beam particle
   template <class T> inline bool isBeam(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 4;}
+
+  /// @brief Identify if the particle decayed
   template <class T> inline bool isDecayed(const T& p)  { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 2;}
+
+  /// @brief Identify if the particle is stable, i.e. has not decayed
   template <class T> inline bool isStable(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1;}
+
+  /// @brief Identify if the particle is final state particle
   template <class T> inline bool isFinalState(const T& p)   { return HepMC::status(p)%HepMC::SIM_STATUS_THRESHOLD == 1 && !p->end_vertex();}
+
+  /// @brief Identify if the particle is physical, i.e. is stable or decayed 
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
-  template <class T> inline bool isPhysicalHadron(const T& p) { return isHadron<T>(p) && isPhysical<T>(p);}
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
   template <class T> inline bool isGenStable(const T& p) { return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);}
@@ -59,9 +67,11 @@ namespace MC
 
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
-  
+
+  /// @brief Identify a single particle
   template <class T> inline bool isSingleParticle(const T&  p) { return HepMC::barcode(p) == HepMC::SINGLE_PARTICLE_BARCODE;} // FIXME barcode-based
 
+  /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());
     if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
@@ -73,7 +83,7 @@ namespace MC
 
   /// @brief Function to get a mother of particle. MCTruthClassifier legacy.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T> T getMother(T thePart) {
+  template <class T> T findMother(T thePart) {
     auto partOriVert = thePart->production_vertex();
     if (!partOriVert) return nullptr;
 
@@ -104,15 +114,13 @@ namespace MC
     return theMoth;
   }
 
-
-
   /// @brief Function to find a particle in container
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class C, class T>  T findMatching(C TruthContainer, T input) {
+  template <class C, class T>  T findMatching(C TruthContainer, T p) {
     T ptrPart = nullptr;
-    if (!input) return ptrPart;
+    if (!p) return ptrPart;
     for (T truthParticle : *TruthContainer) {
-      if (HepMC::is_sim_descendant(input,truthParticle)) {
+      if (HepMC::is_sim_descendant(p,truthParticle)) {
         ptrPart = truthParticle;
         break;
       }
@@ -149,7 +157,7 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T>  bool isHardScatteringtVertex(T pVert) {
+  template <class T>  bool isHardScatteringVertex(T pVert) {
     if (pVert == nullptr) return false;
     T pV = pVert;
     int numOfPartIn(0);
@@ -175,7 +183,7 @@ namespace MC
   /// AV: This is MCtruthClassifier legacy.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
-  template <class T> bool isFromHadron(T p, T hadptr, bool &fromTau, bool &fromBSM) {
+  template <class T> bool isFromHadron(T p, T hadron, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
     if (!vtx)  return false;
@@ -189,10 +197,10 @@ namespace MC
       if (!isPhysical(parent))  return false;
       fromTau |= isTau(parent);
       if (isHadron(parent)&&!isBeam(parent)) {
-        if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
+        if (!hadron)  hadron = parent; // assumes linear hadron parentage
         return true;
       }
-      fromHad |= isFromHadron(parent, hadptr, fromTau, fromBSM);
+      fromHad |= isFromHadron(parent, hadron, fromTau, fromBSM);
     }
     return fromHad;
   }
@@ -228,18 +236,18 @@ namespace MC
 
   /// @brief Function to find the stable particle descendants of the given vertex..
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/  
-  template <class V> auto findFinalStatePart(V EndVert) -> decltype(EndVert->particles_out()) {
-    if (!EndVert) return {};
-    decltype(EndVert->particles_out()) finalStatePart;
-    auto outgoing = EndVert->particles_out();
+  template <class V> auto findFinalStateParticles(V theVert) -> decltype(theVert->particles_out()) {
+    if (!theVert) return {};
+    decltype(theVert->particles_out()) finalStatePart;
+    auto outgoing = theVert->particles_out();
     for (const auto& thePart: outgoing) {
       if (!thePart) continue;
       finalStatePart.push_back(thePart);
       if (isStable(thePart)) continue;
       V pVert = findSimulatedEndVertex(thePart);
-      if (pVert == EndVert) break; // to prevent Sherpa  loop
+      if (pVert == theVert) break; // to prevent Sherpa  loop
       if (pVert != nullptr) {
-          auto  vecPart = findFinalStatePart<V>(pVert);
+          auto  vecPart = findFinalStateParticles<V>(pVert);
           finalStatePart.insert(finalStatePart.end(),vecPart.begin(),vecPart.end());
       }
     }
