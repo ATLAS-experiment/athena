@@ -1,19 +1,17 @@
 #!/bin/bash
-# art-description: Run 4 configuration, ITK only recontruction, 100 GeV Muons, no pileup
-# art-input: mc15_14TeV:mc15_14TeV.900040.PG_singlemu_Pt100_etaFlatnp0_43.evgen.EVNT.e8185
-# art-input-nfiles: 1
-# art-type: grid
-# art-include: main/Athena
-# art-output: *.root
-# art-output: *.xml
-# art-output: dcube*
-# art-html: dcube_last
+#
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#
+# Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated
+
+ArtInFile=$1
+dcubeRef=$2
 
 lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
-ref_21p9=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/900040_mu100_ITk_21p9_v1.IDPVM.root  # Ref release = 21.9.25
 
 geometry=ATLAS-P2-RUN4-03-00-00
+condition=OFLCOND-MC15c-SDR-14-05
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -40,7 +38,7 @@ run () {
 run "Simulation" \
     Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
+    --conditionsTag 'default:${condition}' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
@@ -54,7 +52,7 @@ run "Simulation" \
 run "Digitization"\
     Digi_tf.py \
     --CA \
-    --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+    --conditionsTag 'default:${condition}' \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion "default:${geometry}" \
     --inputHITSFile HITS.root \
@@ -92,7 +90,7 @@ run "dcube-21p9" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_21p9 \
     -c ${dcubeXmlAbsPath} \
-    -r ${ref_21p9} \
+    -r ${dcubeRef} \
     idpvm.root
 
 run "dcube-last" \
