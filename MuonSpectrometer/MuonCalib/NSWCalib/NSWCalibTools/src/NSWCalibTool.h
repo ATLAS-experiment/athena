@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef NSWCalibTool_h
 #define NSWCalibTool_h
 
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/MMPrepData.h"
@@ -18,12 +17,6 @@
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
 #include "MuonCondData/NswT0Data.h"
 
-#include "TRandom3.h"
-#include "TTree.h"
-#include "TF1.h"
-
-#include <string>
-#include <vector>
 
 namespace Muon {
 
