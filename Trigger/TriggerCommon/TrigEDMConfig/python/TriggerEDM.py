@@ -9,7 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from CLIDComps.clidGenerator import clidGenerator
@@ -74,14 +74,15 @@ def _addExtraCollectionsToEDMList(edmList, extraList):
     The format of extraList is the same as those of TriggerHLTListRun3.
     """
     existing_collections = [(c[0].split("#")[1]).split(".")[0] for c in edmList]
+    insert_idx = getSafeEDMInsertPosition(edmList)
     for item in extraList:
         colname = (item[0].split("#")[1]).split(".")[0]
         if colname not in existing_collections:
-            # a new collection and its Aux container are added to beginning of list so that 'allowTruncation' items remain at end.
+            # a new collection and its Aux container are inserted in front of 'allowTruncation' items.
             if 'Aux' in colname:
-                edmList.insert(1,item)
+                edmList.insert(insert_idx+1,item)
             else:
-                edmList.insert(0,item)
+                edmList.insert(insert_idx,item)
             log.info("added new item to Trigger EDM: {}".format(item))
         else:
             # Maybe extra dynamic variables or EDM targets are added
