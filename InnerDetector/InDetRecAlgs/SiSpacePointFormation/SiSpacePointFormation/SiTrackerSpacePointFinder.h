@@ -172,8 +172,10 @@ namespace InDet {
      * @name Caches for HLT using SG::UpdateHandleKey
      */
     //@{
-    SG::UpdateHandleKey<SpacePointCache> m_SpacePointCache_SCTKey;
-    SG::UpdateHandleKey<SpacePointCache> m_SpacePointCache_PixKey;
+    SG::UpdateHandleKey<SpacePointCache> m_SpacePointCache_SCTKey
+      {this, "SpacePointCacheSCT", ""};
+    SG::UpdateHandleKey<SpacePointCache> m_SpacePointCache_PixKey
+      {this, "SpacePointCachePix", ""};
     //@}
 
     /**
@@ -196,13 +198,15 @@ namespace InDet {
      * @name Configuration flags
      */
     //@{
-    bool m_selectPixels;
-    bool m_selectSCTs;
-    bool m_overlap; //!< process all overlapping SCT pairs if true.
-    bool m_allClusters; //!< process all clusters without limits if true.
+    BooleanProperty m_selectPixels{this, "ProcessPixels", true};
+    BooleanProperty m_selectSCTs{this, "ProcessSCTs", true};
+    BooleanProperty m_overlap
+      {this, "ProcessOverlaps", true, "process overlaps of SCT wafers"};
+    BooleanProperty m_allClusters
+      {this, "AllClusters", false, "process all clusters without limits"};
     bool m_cachemode{false}; //!< used for online MT counters
-    Gaudi::Property<bool> m_useDataPoolWithCache{
-        this, "useDataPoolWithCache", false, "use DataPool With Cache"};
+    BooleanProperty m_useDataPoolWithCache
+      {this, "useDataPoolWithCache", false, "use DataPool With Cache"};
     //@}
 
     /**
@@ -213,20 +217,24 @@ namespace InDet {
      * Phi clusters must lie in region of each wafer separately.
      */
     //@{
-    float m_overlapLimitOpposite;  //!< overlap limit for opposite-neighbours.
-    float m_overlapLimitPhi;       //!< overlap limit for phi-neighbours.
-    float m_overlapLimitEtaMin;    //!< low overlap limit for eta-neighbours.
-    float m_overlapLimitEtaMax;    //!< high overlap limit for eta-neighbours.
+    FloatProperty m_overlapLimitOpposite
+      {this, "OverlapLimitOpposite", 2.8, "overlap limit for opposite-neighbour"};
+    FloatProperty m_overlapLimitPhi
+      {this, "OverlapLimitPhi", 5.64, "overlap limit for phi-neighbours"};
+    FloatProperty m_overlapLimitEtaMin
+      {this, "OverlapLimitEtaMin", 1.68, "low overlap limit for eta-neighbours"};
+    FloatProperty m_overlapLimitEtaMax
+      {this, "OverlapLimitEtaMax", 3.0, "high overlap limit for eta-neighbours"};
     //@}
 
     /**
      * @name Beam spot override
      */
     //@{
-    bool m_overrideBS;
-    float m_xVertex;
-    float m_yVertex;
-    float m_zVertex;
+    BooleanProperty m_overrideBS{this, "OverrideBeamSpot", false};
+    FloatProperty m_xVertex{this, "VertexX", 0.};
+    FloatProperty m_yVertex{this, "VertexY", 0.};
+    FloatProperty m_zVertex{this, "VertexZ", 0.};
     //@}
 
     /**
