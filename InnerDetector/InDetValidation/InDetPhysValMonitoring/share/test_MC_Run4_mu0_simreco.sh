@@ -38,7 +38,7 @@ run () {
 run "Simulation" \
     Sim_tf.py \
     --CA \
-    --conditionsTag 'default:${condition}' \
+    --conditionsTag "default:${condition}" \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
@@ -52,7 +52,7 @@ run "Simulation" \
 run "Digitization"\
     Digi_tf.py \
     --CA \
-    --conditionsTag 'default:${condition}' \
+    --conditionsTag "default:${condition}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion "default:${geometry}" \
     --inputHITSFile HITS.root \
