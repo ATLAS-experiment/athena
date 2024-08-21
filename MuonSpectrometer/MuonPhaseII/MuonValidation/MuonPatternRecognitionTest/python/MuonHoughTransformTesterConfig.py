@@ -32,7 +32,7 @@ if __name__=="__main__":
     #parser.set_defaults(condTag="CONDBR2-BLKPA-2023-02")
     parser.set_defaults(inputFile=[
                                     #"/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"
-                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"
+                                    "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"
                                     ])
     parser.set_defaults(eventPrintoutLevel = 500)
    
