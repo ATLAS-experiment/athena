@@ -523,7 +523,8 @@ MissingMassProb::MissingMassProb(MMCCalibrationSetV2::e aset, const std::string&
   s_ter_sigma_par[1][9][0]=0.301673;
   s_ter_sigma_par[1][9][1]=0.0145606;
   s_ter_sigma_par[1][9][2]=0.514022;
-  
+
+  
 }
 
 // Default Destructor
@@ -1038,6 +1039,7 @@ double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput
   if(tau_type==8) tau_code = 0;
   else if(tau_type>=0 && tau_type<=2) tau_code = 1;
   else if(tau_type>=3 && tau_type<=5) tau_code = 2;
+  else if(tau_type==6) return prob;
   else
     {
       Warning("DiTauMassTools", "---- WARNING in MissingMassCalculator::dTheta3d_probabilityFast() ----");
