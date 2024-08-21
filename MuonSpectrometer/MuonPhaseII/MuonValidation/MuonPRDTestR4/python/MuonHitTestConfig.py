@@ -45,7 +45,7 @@ if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
-    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
     parser.set_defaults(eventPrintoutLevel = 500)
 
