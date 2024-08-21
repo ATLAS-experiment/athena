@@ -317,6 +317,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
         self.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
 
+        # jet reclustering
+        from JetAnalysisAlgorithms.JetReclusteringConfig import JetReclusteringBlock
+        self.addAlgConfigBlock(algName="JetReclustering", alg=JetReclusteringBlock)
+
         # event selection
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
         self.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
@@ -337,10 +341,6 @@ class ConfigFactory():
         # per-event unified lepton scale factor calculation
         from AsgAnalysisAlgorithms.LeptonSFCalculatorConfig import LeptonSFCalculatorBlock
         self.addAlgConfigBlock(algName='LeptonSF', alg=LeptonSFCalculatorBlock)
-
-        # jet reclustering
-        from JetAnalysisAlgorithms.JetReclusteringConfig import JetReclusteringBlock
-        self.addAlgConfigBlock(algName="JetReclustering", alg=JetReclusteringBlock)
 
         # thinning
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
