@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_SUITE(Identifier32Test)
 BOOST_AUTO_TEST_CASE(Identifier32Constructors){
   BOOST_CHECK_NO_THROW(Identifier32());
   Identifier32 e;
-  BOOST_CHECK_NO_THROW(Identifier32 f(e));
+  BOOST_CHECK_NO_THROW([[maybe_unused]] Identifier32 f(e));
   BOOST_CHECK_NO_THROW(Identifier32(std::move(e)));
   Identifier32 g(324242);
   BOOST_CHECK_NO_THROW([[maybe_unused]] Identifier32 h = g);
@@ -69,6 +69,13 @@ BOOST_AUTO_TEST_CASE(Identifier32Representation){
     g.show();
   }
   BOOST_CHECK( output.is_equal( "0xf1234" ) );
+  //new methods, Aug 2024
+  BOOST_TEST(std::string(g)  == "0xf1234");
+  {//scoped redirect of cout
+    cout_redirect guard( output.rdbuf( ) );
+    std::cout<<g; //stream insertion operator
+  }
+  BOOST_TEST( output.is_equal( "0xf1234" ), "Stream insertion operator" );
 }
 
 BOOST_AUTO_TEST_CASE(Identifier32Comparison){

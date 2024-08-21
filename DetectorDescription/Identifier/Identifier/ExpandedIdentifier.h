@@ -6,6 +6,7 @@
 #define IDENTIFIER_EXPANDEDIDENTIFIER_H
 
 #include <string>
+#include <algorithm>//for lexicographical_compare in the .icc file
 #include <boost/container/small_vector.hpp>
 
 //-----------------------------------------------
@@ -104,14 +105,9 @@
 //    }
 //
 //-----------------------------------------------
-class ExpandedIdentifier
-{
+class ExpandedIdentifier{
 public:
 
-
-  //----------------------------------------------------------------
-  // Define public typedefs
-  //----------------------------------------------------------------
   typedef ExpandedIdentifier 		id_type;
   typedef int  				element_type;
   typedef boost::container::small_vector<element_type,12> element_vector;
@@ -122,102 +118,55 @@ public:
   typedef boost::container::small_vector<element_type,12>::size_type size_type;
 #endif
 
-  typedef enum
-    {
-      max_value = 0x3FFFFFFF
-    } max_value_type;
+  static constexpr element_type max_value = 0x3FFFFFFF;
 
-    //----------------------------------------------------------------
-    // Defaulted members
-    //----------------------------------------------------------------
   ExpandedIdentifier() = default;
-  ExpandedIdentifier(const ExpandedIdentifier& other) = default;
-  ExpandedIdentifier(ExpandedIdentifier&& other) = default;
-  ExpandedIdentifier& operator=(const ExpandedIdentifier& other) = default;
-  ExpandedIdentifier& operator=(ExpandedIdentifier&& other) = default;
-  ~ExpandedIdentifier() = default;
 
-    //----------------------------------------------------------------
-    // Constructor from a subset of another ExpandedIdentifier
-    //----------------------------------------------------------------
+  /// Constructor from a subset of another ExpandedIdentifier
   ExpandedIdentifier (const ExpandedIdentifier& other, size_type start);
 
-    //----------------------------------------------------------------
-    // Constructor from a textual description
-    //----------------------------------------------------------------
+  /// Constructor from a textual description
   ExpandedIdentifier (const std::string& text);
 
-    //----------------------------------------------------------------
-    // Modifications
-    //----------------------------------------------------------------
-
-    //----------------------------------------------------------------
-    // Append a value into a new field.
-    //----------------------------------------------------------------
+  /// Append a value into a new field.
   void add (element_type value);
   ExpandedIdentifier& operator << (element_type value);
   element_type& operator [] (size_type index);
 
-    //----------------------------------------------------------------
-    // build from a textual description
-    //----------------------------------------------------------------
+  /// build from a textual description
   void set (const std::string& text);
 
-    //----------------------------------------------------------------
-    // Erase all fields.
-    // All previously stored data is lost.
-    //----------------------------------------------------------------
+  /// Erase all fields.
   void clear ();
 
-    //----------------------------------------------------------------
-    // Accessors
-    //----------------------------------------------------------------
-
-    //----------------------------------------------------------------
-    // Get the value stored into the specified field.
-    //----------------------------------------------------------------
+  /// Get the value stored into the specified field.
   element_type operator [] (size_type index) const;
 
-    //----------------------------------------------------------------
-    // Count the number of fields.
-    //----------------------------------------------------------------
+  // Size of the fields vector.
   size_type fields () const;
 
-    //----------------------------------------------------------------
-    // Comparison operators
-    //----------------------------------------------------------------
-  
-  int operator == (const ExpandedIdentifier& other) const;
-  int operator != (const ExpandedIdentifier& other) const;
-  int operator < (const ExpandedIdentifier& other) const;
-  int operator > (const ExpandedIdentifier& other) const;
-  int prefix_less (const ExpandedIdentifier& other) const;
+  /// Comparison operators
+  auto operator <=>( const ExpandedIdentifier& other) const;
 
+  bool operator == (const ExpandedIdentifier& other) const;
+  
+  bool prefix_less (const ExpandedIdentifier& other) const;
+  
   /**
    *    Test if the shorter of two ids is identical
    *    to the equivalent sub-id extracted from the longer
    */
-  int match (const ExpandedIdentifier& other) const;
+  bool match (const ExpandedIdentifier& other) const;
 
-    //----------------------------------------------------------------
-    // Utilities
-    //----------------------------------------------------------------
-
-    //----------------------------------------------------------------
-    // Send a textual representation of the identifier using the input format
-    //----------------------------------------------------------------
+  /// String representation of the identifier using the input format
   operator std::string () const;
-
+  /// Send to std::cout
   void show () const;
 
 private:
 
-    //----------------------------------------------------------------
-    // The actual identifier data.
-    //----------------------------------------------------------------
   element_vector m_fields;
 };
-//-----------------------------------------------
 
 
 #include "Identifier/ExpandedIdentifier.icc"
