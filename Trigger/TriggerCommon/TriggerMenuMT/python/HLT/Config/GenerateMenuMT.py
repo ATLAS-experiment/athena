@@ -562,9 +562,7 @@ def generateMenuMT(flags):
     checkCPSGroups(HLTMenuConfig.dictsList())
 
     # Cleanup menu singletons to allow garbage collection (ATR-28855)
-    GenerateMenuMT.clear()
-    from TriggerMenuMT.HLT.Config import MenuComponents
-    MenuComponents._ComboHypoPool.clear()
+    GenerateMenuMT.clear() 
 
     return menuAcc
     
