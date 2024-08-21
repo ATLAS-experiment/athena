@@ -4,11 +4,11 @@
 
 #include "MuonAlignmentData/MuonAlignmentErrorData.h"
 
-void MuonAlignmentErrorData::setDeviations(std::vector<Deviation> vec) {
+void MuonAlignmentErrorData::setAlignmentErrorRules(std::vector<MuonAlignmentErrorRule>&& vec) {
     m_deviations = std::move(vec);
 }
 
-const std::vector<MuonAlignmentErrorData::Deviation>& MuonAlignmentErrorData::getDeviations() const {
+const std::vector<MuonAlignmentErrorData::MuonAlignmentErrorRule>& MuonAlignmentErrorData::getAlignmentErrorRules() const {
     return m_deviations;
 }
 
@@ -24,5 +24,12 @@ void MuonAlignmentErrorData::setHasNswHits(bool val) {
 }
 bool MuonAlignmentErrorData::hasNswHits() const {
     return m_hasNswHits;
+}
+void MuonAlignmentErrorData::setMuonAlignmentErrorRuleCache(std::vector<MuonAlignmentErrorRuleCache>&& vec_new) {
+    m_deviations_new = std::move(vec_new);
+}
+
+const std::vector<MuonAlignmentErrorData::MuonAlignmentErrorRuleCache>& MuonAlignmentErrorData::getMuonAlignmentErrorRuleCache() const {
+    return m_deviations_new;
 }
 

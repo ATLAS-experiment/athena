@@ -13,7 +13,8 @@
 
 #include <boost/regex.hpp>
 #include <vector>
-
+#include <unordered_map>
+#include <Identifier/Identifier.h>
 
 // Struct for per-Station Deviations Information
 
@@ -21,18 +22,28 @@ class MuonAlignmentErrorData {
     friend class MuonAlignmentErrorDbAlg;
 
 public:
-    struct Deviation {
+    struct MuonAlignmentErrorRule {
         boost::regex stationName {""};
         boost::regex multilayer {""};
         double translation {0.0};
         double rotation {0.0};
     };
+    using MuonAlignmentErrorRuleIndex = size_t;
+    struct MuonAlignmentErrorRuleCache {
+        /**
+         * For each multilayer identifier, cache the indices of the affecting rules
+         */
+        std::unordered_multimap<Identifier, MuonAlignmentErrorRuleIndex> id_rule_map{};
+    };
 
     MuonAlignmentErrorData() = default;
     virtual ~MuonAlignmentErrorData() = default;
 
-    void setDeviations(std::vector<Deviation> vec);
-    [[nodiscard]] const std::vector<Deviation>& getDeviations() const;
+    void setAlignmentErrorRules(std::vector<MuonAlignmentErrorRule>&& vec);
+    [[nodiscard]] const std::vector<MuonAlignmentErrorRule>& getAlignmentErrorRules() const;
+
+    void setMuonAlignmentErrorRuleCache(std::vector<MuonAlignmentErrorRuleCache>&& vec_new);
+    [[nodiscard]] const std::vector<MuonAlignmentErrorRuleCache>& getMuonAlignmentErrorRuleCache() const;
 
     void setClobVersion(std::string clobVersion);
     [[nodiscard]] const std::string& getClobVersion() const;
@@ -41,9 +52,10 @@ public:
     [[nodiscard]] bool hasNswHits() const;
 
 private:
-    std::vector<Deviation> m_deviations {};
+    std::vector<MuonAlignmentErrorRule> m_deviations {};
     std::string m_clobVersion {"0.1"};
     bool m_hasNswHits {false};
+    std::vector<MuonAlignmentErrorRuleCache> m_deviations_new {};
 };
 
 #include "AthenaKernel/CLASS_DEF.h"

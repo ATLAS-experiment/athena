@@ -12,6 +12,7 @@
 #include <boost/functional/hash.hpp>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -48,7 +49,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         ATH_MSG_ERROR("nullptr to the read conditions object");
         return;
     }
-    const auto& deviationVec = readCdo->getDeviations();
+    const auto& deviationVec = readCdo->getAlignmentErrorRules();
     std::vector<deviationSummary_t> devSumVec;
     devSumVec.reserve(deviationVec.size());
     deviationSummary_t aDevSumm;
@@ -59,6 +60,9 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         aDevSumm.multilayer = i.multilayer;
         devSumVec.emplace_back(std::move(aDevSumm));
     }
+
+    const auto& MuonAlignmentErrorRuleCacheVec = readCdo->getMuonAlignmentErrorRuleCache();
+    const auto& map_struct = MuonAlignmentErrorRuleCacheVec[0];
 
     typedef Trk::TrackStates tsosc_t;
     const tsosc_t* tsosc = track.trackStateOnSurfaces();
@@ -106,19 +110,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         MuonCalib::MuonFixedLongId calibId = m_idTool->idToFixedLongId(channelId);
         if (!calibId.isValid()) continue;
 
-        // GATHERING INFORMATION TO PUT TOGETHER THE STATION NAME //
-        std::string alignStationName = hardwareName(calibId);
-        int multilayer = 1;
-        if (calibId.is_mdt()) {
-            multilayer = calibId.mdtMultilayer();
-        } else if (calibId.is_mmg()) {
-            multilayer = calibId.mmgMultilayer();
-        } else if (calibId.is_stg()) {
-            multilayer = calibId.stgMultilayer();
-        }
-        std::string multilayerName = std::to_string(multilayer);
-
-        ATH_MSG_DEBUG("Hit is in station " << alignStationName << " multilayer " << multilayerName);
+        ATH_MSG_DEBUG("Hit is in station " << calibId << " (MuonFixedLongId)");
         ++nPrecisionHits;
 
         // Compute deviationSummary_t building blocks
@@ -142,23 +134,48 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         // FOR CROSS-CHECK
         bool is_matched = false;
 
-        // LOOP ON STATION DEVIATIONS EXTRACTED FROM INPUT FILE //
-        for (auto & iDev : devSumVec) {
-            // try to regexp-match the station name and the multilayer name
-            if (!boost::regex_match(alignStationName, iDev.stationName)) {
-                continue;
-            }
-            if (!boost::regex_match(multilayerName, iDev.multilayer)) {
-                continue;
-            }
+        // Construct detector element identifier from channelId, remaining only chamber name and multilayer information
+        int multilayer = 1;
+        if (calibId.is_mdt()) {
+            multilayer = calibId.mdtMultilayer();
+        } else if (calibId.is_mmg()) {
+            multilayer = calibId.mmgMultilayer();
+        } else if (calibId.is_stg()) {
+            multilayer = calibId.stgMultilayer();
+        }
+
+        Identifier key_id{};
+        if (m_idHelperSvc->isMdt(channelId)){
+            key_id = m_idHelperSvc->mdtIdHelper().channelID(channelId, multilayer, 1, 1);
+        }
+        if (m_idHelperSvc->isRpc(channelId)){
+            key_id = m_idHelperSvc->rpcIdHelper().elementID(channelId);
+        }
+        if (m_idHelperSvc->isMM(channelId)){
+            key_id = m_idHelperSvc->mmIdHelper().channelID(channelId, multilayer, 1, 1);
+        }
+        if (m_idHelperSvc->issTgc(channelId)){
+            key_id = m_idHelperSvc->stgcIdHelper().channelID(channelId, multilayer, 1, 0, 1);
+        }
+        if (m_idHelperSvc->isCsc(channelId)){
+            key_id = m_idHelperSvc->cscIdHelper().elementID(channelId);
+        }
+        if (m_idHelperSvc->isTgc(channelId)){
+            key_id = m_idHelperSvc->tgcIdHelper().elementID(channelId);
+        }
+
+        // Find deviation (pointer) for current detector element
+        auto range = map_struct.id_rule_map.equal_range(key_id);
+        for (auto i = range.first; i != range.second; ++i){
+            MuonAlignmentErrorData::MuonAlignmentErrorRuleIndex rule_idx = i->second;
 
             // ASSOCIATE EACH NUISANCE TO A LIST OF HITS
-            iDev.hits.push_back(rot);
+            devSumVec[rule_idx].hits.push_back(rot);
 
-            iDev.sumW2 += w2;
-            iDev.sumP += w2 * hitP;
-            iDev.sumU += w2 * hitU;
-            iDev.sumV += w2 * hitV;
+            devSumVec[rule_idx].sumW2 += w2;
+            devSumVec[rule_idx].sumP += w2 * hitP;
+            devSumVec[rule_idx].sumU += w2 * hitU;
+            devSumVec[rule_idx].sumV += w2 * hitV;
 
             // FOR CROSS-CHECK
             is_matched = true;
@@ -167,7 +184,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         }  // LOOP ON DEVIATIONS
 
         if (!is_matched) {
-            ATH_MSG_WARNING("The hits in the station " << alignStationName << ", multilayer " << multilayerName
+            ATH_MSG_WARNING("The hits in the station " << calibId << " (MuonFixedLongId)" 
                             << " couldn't be matched to any deviation regexp in the list.");
         }
 
@@ -286,127 +303,6 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     ATH_MSG_DEBUG("FINAL CHECKUP");
     ATH_MSG_DEBUG("Found " << deviations.size() << " nuisances after duplicates merging");
     ATH_MSG_DEBUG("******************************");
-}
-
-////////////////////////////
-// RECOGNIZE STATION NAME //
-////////////////////////////
-
-inline std::string AlignmentErrorTool::hardwareName(MuonCalib::MuonFixedLongId calibId) const {
-    using StationName = MuonCalib::MuonFixedLongId::StationName;
-
-    // The only exception that cannot be caught by hardwareEta() above
-    if (sector(calibId)==13) {
-        if (calibId.eta()== 7 && calibId.stationName()==StationName::BOL) return "BOE1A13"; // BOE1A13 not BOL7A13
-        if (calibId.eta()==-7 && calibId.stationName()==StationName::BOL) return "BOE1C13"; // BOE1C13 not BOL7C13
-        if (calibId.eta()== 8 && calibId.stationName()==StationName::BOL) return "BOE2A13"; // BOE2A13 not BOL8A13
-        if (calibId.eta()==-8 && calibId.stationName()==StationName::BOL) return "BOE2C13"; // BOE2C13 not BOL8C13
-    }
-
-    std::string ret { calibId.stationNameString() };
-    ret.push_back(static_cast<char>('0'+std::abs(hardwareEta(calibId))));
-    ret.append(side(calibId)).append(sectorString(calibId));
-
-    return ret;
-}
-
-inline std::string_view AlignmentErrorTool::side(MuonCalib::MuonFixedLongId calibId) {
-    return calibId.eta()>0 ? "A" : calibId.eta()<0 ? "C" : "B";
-}
-
-inline std::string AlignmentErrorTool::sectorString(MuonCalib::MuonFixedLongId calibId) const {
-    int sec = sector(calibId);
-    if (sec<0 || sec > 99) {
-        throw std::runtime_error("Unhandled sector number");
-    }
-    std::string ret = "00";
-    ret[0] += (sec/10);
-    ret[1] += (sec%10);
-    return ret;
-}
-
-inline int AlignmentErrorTool::sector(MuonCalib::MuonFixedLongId calibId) const {
-    if (calibId.is_tgc()) {
-        // TGC sector convention is special
-        return calibId.phi();
-    } else {
-        return isSmallSector(calibId) ? 2*calibId.phi() : 2*calibId.phi()-1;
-    }
-}
-
-inline bool AlignmentErrorTool::isSmallSector(MuonCalib::MuonFixedLongId calibId) {
-    using StationName = MuonCalib::MuonFixedLongId::StationName;
-    switch (calibId.stationName()) {
-        case StationName::BIS:
-        case StationName::BMS:
-        case StationName::BOS:
-        case StationName::BEE:
-        case StationName::BMF:
-        case StationName::BOF:
-        case StationName::BOG:
-        case StationName::EES:
-        case StationName::EMS:
-        case StationName::EOS:
-        case StationName::EIS:
-        case StationName::CSS:
-        case StationName::BMG:
-        case StationName::MMS:
-        case StationName::STS:
-            return true;
-        default:
-            return false;
-    }
-}
-
-inline int AlignmentErrorTool::hardwareEta(MuonCalib::MuonFixedLongId calibId) const {
-    using StationName = MuonCalib::MuonFixedLongId::StationName;
-    switch (calibId.stationName()) {
-        case StationName::BML:
-            {
-                if (sector(calibId)==13) {
-                    switch (calibId.eta()) {
-                        case 4: return 5;
-                        case 5: return 6;
-                        case 6: return 7;
-                        case -4: return -5;
-                        case -5: return -6;
-                        case -6: return -7;
-                    }
-                }
-                return calibId.eta();
-            }
-        case StationName::BOL:
-            {
-                if (sector(calibId)==13) {
-                    if (calibId.eta()== 7) return 1; // BOE1A13 not BOL7A13
-                    if (calibId.eta()==-7) return -1; // BOE1C13 not BOL7C13
-                }
-                return calibId.eta();
-            }
-        case StationName::BOF:
-            return calibId.eta()>0 ? calibId.eta()*2-1 : calibId.eta()*2+1;
-        case StationName::BOG:
-            return calibId.eta()*2;
-        case StationName::EIL:
-            {
-                if ((sector(calibId) == 1) || (sector(calibId) == 9)) {
-                    switch (calibId.eta()) {
-                        case 4: return 5;
-                        case 5: return 4;
-                        case -4: return -5;
-                        case -5: return -4;
-                    }
-                }
-                return calibId.eta();
-            }
-        case StationName::EEL:
-            {
-                if ((sector(calibId) == 5) && (calibId.eta() == 1)) return 2;
-                if ((sector(calibId) == 5) && (calibId.eta() == -1)) return -2;
-                return calibId.eta();
-            }
-        default: return calibId.eta();
-    }
 }
 
 }  // namespace MuonAlign
