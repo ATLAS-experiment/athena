@@ -143,7 +143,7 @@ namespace InDet {
      * @name Input data using SG::ReadHandleKey
      */
     //@{
-    SG::ReadHandleKey<SCT_ClusterContainer>  m_Sct_clcontainerKey{this, "SCT_ClustersName", "SCT clContainer"};
+    SG::ReadHandleKey<SCT_ClusterContainer>  m_Sct_clcontainerKey{this, "SCT_ClustersName", "SCT_Clusters", "SCT clContainer"};
     SG::ReadHandleKey<PixelClusterContainer> m_Pixel_clcontainerKey{this, "PixelsClustersName", "PixelClusters", "Pixel clContainer"};
     //@}
 
