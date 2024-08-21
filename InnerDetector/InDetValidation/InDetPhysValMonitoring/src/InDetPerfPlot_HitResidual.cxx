@@ -12,9 +12,7 @@
 
 using namespace TMath;
 
-InDetPerfPlot_HitResidual::InDetPerfPlot_HitResidual(InDetPlotBase* pParent, const std::string& sDir)  : InDetPlotBase(
-    pParent, sDir) {
-//
+InDetPerfPlot_HitResidual::InDetPerfPlot_HitResidual(InDetPlotBase* pParent, const std::string& sDir, bool isITk)  : InDetPlotBase(pParent, sDir), m_isITk{isITk} {
 }
 
 void
@@ -33,7 +31,7 @@ InDetPerfPlot_HitResidual::initializePlots() {
   book(m_residualx_1hit.at(SCT).at(BARREL), "residualx_sct_barrel_1hit");
   book(m_residualx_2ormorehits.at(SCT).at(BARREL), "residualx_sct_barrel_2ormorehits");
   //
-  book(m_residualx.at(TRT).at(BARREL), "residualx_trt_barrel");
+  if(!m_isITk) book(m_residualx.at(TRT).at(BARREL), "residualx_trt_barrel");
   // ..now endcaps
   book(m_residualx.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap");
   book(m_residualx_1hit.at(PIXEL).at(ENDCAP), "residualx_pixel_endcap_1hit");
@@ -43,7 +41,7 @@ InDetPerfPlot_HitResidual::initializePlots() {
   book(m_residualx_1hit.at(SCT).at(ENDCAP), "residualx_sct_endcap_1hit");
   book(m_residualx_2ormorehits.at(SCT).at(ENDCAP), "residualx_sct_endcap_2ormorehits");
   //
-  book(m_residualx.at(TRT).at(ENDCAP), "residualx_trt_endcap");
+  if(!m_isITk) book(m_residualx.at(TRT).at(ENDCAP), "residualx_trt_endcap");
   //
 
   // y residuals
@@ -67,11 +65,11 @@ InDetPerfPlot_HitResidual::initializePlots() {
   book(m_pullx.at(L0PIXBARR).at(BARREL), "pullx_l0pix_barrel");
   book(m_pullx.at(PIXEL).at(BARREL), "pullx_pixel_barrel");
   book(m_pullx.at(SCT).at(BARREL), "pullx_sct_barrel");
-  book(m_pullx.at(TRT).at(BARREL), "pullx_trt_barrel");
+  if(!m_isITk) book(m_pullx.at(TRT).at(BARREL), "pullx_trt_barrel");
   //
   book(m_pullx.at(PIXEL).at(ENDCAP), "pullx_pixel_endcap");
   book(m_pullx.at(SCT).at(ENDCAP), "pullx_sct_endcap");
-  book(m_pullx.at(TRT).at(ENDCAP), "pullx_trt_endcap");
+  if(!m_isITk) book(m_pullx.at(TRT).at(ENDCAP), "pullx_trt_endcap");
   //
   // barrel
   book(m_pully.at(L0PIXBARR).at(BARREL), "pully_l0pix_barrel");
