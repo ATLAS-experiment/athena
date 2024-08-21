@@ -58,9 +58,9 @@ StatusCode JetPileupLabelingTool::decorate(const xAOD::JetContainer& jets) const
       bool isPU = true;
       for (const xAOD::Jet *truthJet : *truthHSJets) {
           float dr = jet->p4().DeltaR(truthJet->p4());
-          if (dr < m_hsMaxDR && jet->pt() > m_hsMinPt)
+          if (dr < m_hsMaxDR && truthJet->pt() > m_hsMinPt)
               isHS = true;
-          if (dr < m_puMinDR && jet->pt() > m_puMinPt)
+          if (dr < m_puMinDR && truthJet->pt() > m_puMinPt)
               isPU = false;
           if (isHS && !isPU)
               break;
