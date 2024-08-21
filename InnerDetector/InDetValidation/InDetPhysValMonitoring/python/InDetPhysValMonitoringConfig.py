@@ -215,6 +215,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     if flags.Detector.GeometryITk:
         # Disable vertex container for now
         kwargs.setdefault("doTRTExtensionPlots", False)
+        kwargs.setdefault("isITk", True)
 
     if flags.PhysVal.IDPVM.doTechnicalEfficiency:
         kwargs.setdefault("fillTechnicalEfficiency", True)

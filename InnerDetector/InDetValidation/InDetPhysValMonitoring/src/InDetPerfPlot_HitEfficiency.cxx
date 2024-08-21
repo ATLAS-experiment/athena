@@ -19,7 +19,8 @@
 
 
 
-InDetPerfPlot_HitEfficiency::InDetPerfPlot_HitEfficiency(InDetPlotBase* pParent, const std::string& sDir)  : InDetPlotBase(pParent,                                                                                                          sDir), m_HitEfficiencyVsEta{},  m_debug{false} {
+InDetPerfPlot_HitEfficiency::InDetPerfPlot_HitEfficiency(InDetPlotBase* pParent, const std::string& sDir, bool isITk)  :
+  InDetPlotBase(pParent, sDir), m_isITk{isITk}, m_HitEfficiencyVsEta{}, m_debug{false} {
   //
 }
 
@@ -28,25 +29,14 @@ InDetPerfPlot_HitEfficiency::initializePlots() {
   // const bool prependDirectory(false);
   // eff plots for L0PIXBARR, PIXEL, SCT, TRT
   // Barrel
-  /**
-  book(m_eff_hit_vs_eta[L0PIXBARR][BARREL], "eff_hit_vs_eta_l0pix_barrel");
-  book(m_eff_hit_vs_eta[PIXEL][BARREL], "eff_hit_vs_eta_pix_barrel");
-  book(m_eff_hit_vs_eta[SCT][BARREL], "eff_hit_vs_eta_sct_barrel");
-  book(m_eff_hit_vs_eta[TRT][BARREL], "eff_hit_vs_eta_trt_barrel");
-
-  book(m_eff_hit_vs_eta[PIXEL][ENDCAP], "eff_hit_vs_eta_pix_endcap");
-  book(m_eff_hit_vs_eta[SCT][ENDCAP], "eff_hit_vs_eta_sct_endcap");
-  book(m_eff_hit_vs_eta[TRT][ENDCAP], "eff_hit_vs_eta_trt_endcap");
-  **/
-  //
   book(m_HitEfficiencyVsEta[L0PIXBARR][BARREL], "eff_hit_vs_eta_l0pix_barrel");
   book(m_HitEfficiencyVsEta[PIXEL][BARREL], "eff_hit_vs_eta_pix_barrel");
   book(m_HitEfficiencyVsEta[SCT][BARREL], "eff_hit_vs_eta_sct_barrel");
-  book(m_HitEfficiencyVsEta[TRT][BARREL], "eff_hit_vs_eta_trt_barrel");
+  if(!m_isITk) book(m_HitEfficiencyVsEta[TRT][BARREL], "eff_hit_vs_eta_trt_barrel");
 
   book(m_HitEfficiencyVsEta[PIXEL][ENDCAP], "eff_hit_vs_eta_pix_endcap");
   book(m_HitEfficiencyVsEta[SCT][ENDCAP], "eff_hit_vs_eta_sct_endcap");
-  book(m_HitEfficiencyVsEta[TRT][ENDCAP], "eff_hit_vs_eta_trt_endcap");
+  if(!m_isITk) book(m_HitEfficiencyVsEta[TRT][ENDCAP], "eff_hit_vs_eta_trt_endcap");
 }
 
 void
@@ -81,9 +71,4 @@ InDetPerfPlot_HitEfficiency::fill(const xAOD::TrackParticle& trkprt, float weigh
       }
     }
   }
-  /** for testing
-  const float binValue = std::rand() % 75;
-  const bool passed = (binValue - 5 + (std::rand() % 10)) > 30;
-  fillHisto(m_testEff, passed, binValue);
-  **/
 }

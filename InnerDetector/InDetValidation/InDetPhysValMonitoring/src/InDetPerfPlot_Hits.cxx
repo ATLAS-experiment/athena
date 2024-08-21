@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,14 +11,12 @@
 
 #include "InDetPerfPlot_Hits.h"
 
-InDetPerfPlot_Hits::InDetPerfPlot_Hits(InDetPlotBase* pParent, const std::string& sDir) : InDetPlotBase(pParent, sDir){
+InDetPerfPlot_Hits::InDetPerfPlot_Hits(InDetPlotBase* pParent, const std::string& sDir, bool isITk) : InDetPlotBase(pParent, sDir), m_isITk{isITk}{
   //Nop
 }
 
 void
 InDetPerfPlot_Hits::initializePlots() {
-
-  ATH_MSG_WARNING("book histos");
 
   book(m_nInnerMostPixelHits, "nInnerMostPixelHits");
   book(m_nInnerMostPixelEndcapHits, "nInnerMostPixelEndcapHits");
@@ -26,38 +24,46 @@ InDetPerfPlot_Hits::initializePlots() {
   book(m_nNextToInnerMostPixelEndcapHits, "nNextToInnerMostPixelEndcapHits");
   book(m_nPixelHits, "nPixelHits");
   book(m_nSCTHits, "nSCTHits");
-  book(m_nTRTHits, "nTRTHits");
-  book(m_nTRTHitsXe, "nTRTHitsXe");
-  book(m_nTRTHitsAr, "nTRTHitsAr");
+  if(!m_isITk){
+    book(m_nTRTHits, "nTRTHits");
+    book(m_nTRTHitsXe, "nTRTHitsXe");
+    book(m_nTRTHitsAr, "nTRTHitsAr");
+  }
   book(m_nPixelHoles, "nPixelHoles");
   book(m_nSCTHoles, "nSCTHoles");
-  book(m_nTRTHighThresholdHits, "nTRTHighThresholdHits");
-  book(m_nTRTHighThresholdHitsXe, "nTRTHighThresholdHitsXe");
-  book(m_nTRTHighThresholdHitsAr, "nTRTHighThresholdHitsAr");
+  if(!m_isITk){
+    book(m_nTRTHighThresholdHits, "nTRTHighThresholdHits");
+    book(m_nTRTHighThresholdHitsXe, "nTRTHighThresholdHitsXe");
+    book(m_nTRTHighThresholdHitsAr, "nTRTHighThresholdHitsAr");
+  }
   book(m_nInnerMostPixelHits_vs_eta, "nInnerMostPixelHits_vs_eta");
   book(m_nInnerMostPixelEndcapHits_vs_eta, "nInnerMostPixelEndcapHits_vs_eta");
   book(m_nNextToInnerMostPixelHits_vs_eta, "nNextToInnerMostPixelHits_vs_eta");
   book(m_nNextToInnerMostPixelEndcapHits_vs_eta, "nNextToInnerMostPixelEndcapHits_vs_eta");
   book(m_nPixelHits_vs_eta, "nPixelHits_vs_eta");
   book(m_nSCTHits_vs_eta, "nSCTHits_vs_eta");
-  book(m_nTRTHits_vs_eta, "nTRTHits_vs_eta");
-  book(m_nTRTHitsXe_vs_eta, "nTRTHitsXe_vs_eta");
-  book(m_nTRTHitsAr_vs_eta, "nTRTHitsAr_vs_eta");
+  if(!m_isITk){
+    book(m_nTRTHits_vs_eta, "nTRTHits_vs_eta");
+    book(m_nTRTHitsXe_vs_eta, "nTRTHitsXe_vs_eta");
+    book(m_nTRTHitsAr_vs_eta, "nTRTHitsAr_vs_eta");
+  }
   book(m_nPixelHoles_vs_eta, "nPixelHoles_vs_eta");
   book(m_nSCTHoles_vs_eta, "nSCTHoles_vs_eta");
-  book(m_nTRTHighThresholdHits_vs_eta, "nTRTHighThresholdHits_vs_eta");
-  book(m_nTRTHighThresholdHitsXe_vs_eta, "nTRTHighThresholdHitsXe_vs_eta");
-  book(m_nTRTHighThresholdHitsAr_vs_eta, "nTRTHighThresholdHitsAr_vs_eta");
+  if(!m_isITk){
+    book(m_nTRTHighThresholdHits_vs_eta, "nTRTHighThresholdHits_vs_eta");
+    book(m_nTRTHighThresholdHitsXe_vs_eta, "nTRTHighThresholdHitsXe_vs_eta");
+    book(m_nTRTHighThresholdHitsAr_vs_eta, "nTRTHighThresholdHitsAr_vs_eta");
+  }
   book(m_nInnerMostPixelHits_vs_phi, "nInnerMostPixelHits_vs_phi");
   book(m_nInnerMostPixelEndcapHits_vs_phi, "nInnerMostPixelEndcapHits_vs_phi");
   book(m_nNextToInnerMostPixelHits_vs_phi, "nNextToInnerMostPixelHits_vs_phi");
   book(m_nNextToInnerMostPixelEndcapHits_vs_phi, "nNextToInnerMostPixelEndcapHits_vs_phi");
   book(m_nPixelHits_vs_phi, "nPixelHits_vs_phi");
   book(m_nSCTHits_vs_phi, "nSCTHits_vs_phi");
-  book(m_nTRTHits_vs_phi, "nTRTHits_vs_phi");
+  if(!m_isITk) book(m_nTRTHits_vs_phi, "nTRTHits_vs_phi");
   book(m_nPixelHoles_vs_phi, "nPixelHoles_vs_phi");
   book(m_nSCTHoles_vs_phi, "nSCTHoles_vs_phi");
-  book(m_nTRTHighThresholdHits_vs_phi, "nTRTHighThresholdHits_vs_phi");
+  if(!m_isITk) book(m_nTRTHighThresholdHits_vs_phi, "nTRTHighThresholdHits_vs_phi");
 
   book(m_nInnerMostPixelSharedHits, "nInnerMostPixelSharedHits");
   book(m_nInnerMostPixelSharedEndcapHits, "nInnerMostPixelSharedEndcapHits");
@@ -97,8 +103,10 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nPixelGangedHitsFlaggedFakes, "nPixelGangedHitsFlaggedFakes");
     book(m_nSCTOutliers, "nSCTOutliers");
     book(m_nSCTDoubleHoles, "nSCTDoubleHoles");
-    book(m_nTRTOutliers, "nTRTOutliers");
-    book(m_nTRTHighThresholdOutliers, "nTRTHighThresholdOutliers");
+    if(!m_isITk){
+      book(m_nTRTOutliers, "nTRTOutliers");
+      book(m_nTRTHighThresholdOutliers, "nTRTHighThresholdOutliers");
+    }
     book(m_nPixelDeadSensors, "nPixelDeadSensors");
     book(m_nSCTDeadSensors, "nSCTDeadSensors");
   
@@ -115,8 +123,10 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nPixelGangedHitsFlaggedFakes_vs_eta, "nPixelGangedHitsFlaggedFakes_vs_eta");
     book(m_nSCTOutliers_vs_eta, "nSCTOutliers_vs_eta");
     book(m_nSCTDoubleHoles_vs_eta, "nSCTDoubleHoles_vs_eta");
-    book(m_nTRTOutliers_vs_eta, "nTRTOutliers_vs_eta");
-    book(m_nTRTHighThresholdOutliers_vs_eta, "nTRTHighThresholdOutliers_vs_eta");
+    if(!m_isITk){
+      book(m_nTRTOutliers_vs_eta, "nTRTOutliers_vs_eta");
+      book(m_nTRTHighThresholdOutliers_vs_eta, "nTRTHighThresholdOutliers_vs_eta");
+    }
     book(m_nPixelDeadSensors_vs_eta, "nPixelDeadSensors_vs_eta");
     book(m_nSCTDeadSensors_vs_eta, "nSCTDeadSensors_vs_eta");
 
@@ -133,8 +143,10 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nPixelGangedHitsFlaggedFakes_vs_phi, "nPixelGangedHitsFlaggedFakes_vs_phi");
     book(m_nSCTOutliers_vs_phi, "nSCTOutliers_vs_phi");
     book(m_nSCTDoubleHoles_vs_phi, "nSCTDoubleHoles_vs_phi");
-    book(m_nTRTOutliers_vs_phi, "nTRTOutliers_vs_phi");
-    book(m_nTRTHighThresholdOutliers_vs_phi, "nTRTHighThresholdOutliers_vs_phi");
+    if(!m_isITk){
+      book(m_nTRTOutliers_vs_phi, "nTRTOutliers_vs_phi");
+      book(m_nTRTHighThresholdOutliers_vs_phi, "nTRTHighThresholdOutliers_vs_phi");
+    }
     book(m_nPixelDeadSensors_vs_phi, "nPixelDeadSensors_vs_phi");
     book(m_nSCTDeadSensors_vs_phi, "nSCTDeadSensors_vs_phi");
 
@@ -150,22 +162,26 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nNextToInnerMostPixelEndcapHits_vs_mu, "nNextToInnerMostPixelEndcapHits_vs_mu");
     book(m_nPixelHits_vs_mu, "nPixelHits_vs_mu");
     book(m_nSCTHits_vs_mu, "nSCTHits_vs_mu");
-    book(m_nTRTHits_vs_mu, "nTRTHits_vs_mu");
-    book(m_nTRTHitsXe_vs_mu_central, "nTRTHitsXe_vs_mu_central");
-    book(m_nTRTHitsXe_vs_mu_ECsideA, "nTRTHitsXe_vs_mu_ECsideA");
-    book(m_nTRTHitsXe_vs_mu_ECsideC, "nTRTHitsXe_vs_mu_ECsideC");
-    book(m_nTRTHitsAr_vs_mu_central, "nTRTHitsAr_vs_mu_central");
-    book(m_nTRTHitsAr_vs_mu_ECsideA, "nTRTHitsAr_vs_mu_ECsideA");
-    book(m_nTRTHitsAr_vs_mu_ECsideC, "nTRTHitsAr_vs_mu_ECsideC");
+    if(!m_isITk){
+      book(m_nTRTHits_vs_mu, "nTRTHits_vs_mu");
+      book(m_nTRTHitsXe_vs_mu_central, "nTRTHitsXe_vs_mu_central");
+      book(m_nTRTHitsXe_vs_mu_ECsideA, "nTRTHitsXe_vs_mu_ECsideA");
+      book(m_nTRTHitsXe_vs_mu_ECsideC, "nTRTHitsXe_vs_mu_ECsideC");
+      book(m_nTRTHitsAr_vs_mu_central, "nTRTHitsAr_vs_mu_central");
+      book(m_nTRTHitsAr_vs_mu_ECsideA, "nTRTHitsAr_vs_mu_ECsideA");
+      book(m_nTRTHitsAr_vs_mu_ECsideC, "nTRTHitsAr_vs_mu_ECsideC");
+    }
     book(m_nPixelHoles_vs_mu, "nPixelHoles_vs_mu");
     book(m_nSCTHoles_vs_mu, "nSCTHoles_vs_mu");
-    book(m_nTRTHighThresholdHits_vs_mu, "nTRTHighThresholdHits_vs_mu");
-    book(m_nTRTHighThresholdHitsXe_vs_mu_central, "nTRTHighThresholdHitsXe_vs_mu_central");
-    book(m_nTRTHighThresholdHitsXe_vs_mu_ECsideA, "nTRTHighThresholdHitsXe_vs_mu_ECsideA");
-    book(m_nTRTHighThresholdHitsXe_vs_mu_ECsideC, "nTRTHighThresholdHitsXe_vs_mu_ECsideC");
-    book(m_nTRTHighThresholdHitsAr_vs_mu_central, "nTRTHighThresholdHitsAr_vs_mu_central");
-    book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideA, "nTRTHighThresholdHitsAr_vs_mu_ECsideA");
-    book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideC, "nTRTHighThresholdHitsAr_vs_mu_ECsideC");
+    if(!m_isITk){
+      book(m_nTRTHighThresholdHits_vs_mu, "nTRTHighThresholdHits_vs_mu");
+      book(m_nTRTHighThresholdHitsXe_vs_mu_central, "nTRTHighThresholdHitsXe_vs_mu_central");
+      book(m_nTRTHighThresholdHitsXe_vs_mu_ECsideA, "nTRTHighThresholdHitsXe_vs_mu_ECsideA");
+      book(m_nTRTHighThresholdHitsXe_vs_mu_ECsideC, "nTRTHighThresholdHitsXe_vs_mu_ECsideC");
+      book(m_nTRTHighThresholdHitsAr_vs_mu_central, "nTRTHighThresholdHitsAr_vs_mu_central");
+      book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideA, "nTRTHighThresholdHitsAr_vs_mu_ECsideA");
+      book(m_nTRTHighThresholdHitsAr_vs_mu_ECsideC, "nTRTHighThresholdHitsAr_vs_mu_ECsideC");
+    }
     book(m_nInnerMostPixelSharedHits_vs_mu, "nInnerMostPixelSharedHits_vs_mu");
     book(m_nInnerMostPixelSharedEndcapHits_vs_mu, "nInnerMostPixelSharedEndcapHits_vs_mu");
     book(m_nPixelSharedHits_vs_mu, "nPixelSharedHits_vs_mu");
@@ -183,8 +199,10 @@ InDetPerfPlot_Hits::initializePlots() {
     book(m_nPixelGangedHitsFlaggedFakes_vs_mu, "nPixelGangedHitsFlaggedFakes_vs_mu");
     book(m_nSCTOutliers_vs_mu, "nSCTOutliers_vs_mu");
     book(m_nSCTDoubleHoles_vs_mu, "nSCTDoubleHoles_vs_mu");
-    book(m_nTRTOutliers_vs_mu, "nTRTOutliers_vs_mu");
-    book(m_nTRTHighThresholdOutliers_vs_mu, "nTRTHighThresholdOutliers_vs_mu");
+    if(!m_isITk){
+      book(m_nTRTOutliers_vs_mu, "nTRTOutliers_vs_mu");
+      book(m_nTRTHighThresholdOutliers_vs_mu, "nTRTHighThresholdOutliers_vs_mu");
+    }
     book(m_nPixelDeadSensors_vs_mu, "nPixelDeadSensors_vs_mu");
     book(m_nSCTDeadSensors_vs_mu, "nSCTDeadSensors_vs_mu");
 
@@ -246,7 +264,7 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nSCTHits_vs_etaphi, eta, phi, iSctHits, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nSCTHits_vs_mu, mu, iSctHits, weight);
   }
-  if (track.summaryValue(iTrtHits, xAOD::numberOfTRTHits)) {
+  if (!m_isITk && track.summaryValue(iTrtHits, xAOD::numberOfTRTHits)) {
     fillHisto(m_nTRTHits, iTrtHits, weight);
     fillHisto(m_nTRTHits_vs_eta, eta, iTrtHits, weight);
     fillHisto(m_nTRTHits_vs_phi, phi, iTrtHits, weight);
@@ -286,7 +304,7 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nSCTHoles_vs_etaphi, eta, phi, iSCTHoles, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nSCTHoles_vs_mu, mu, iSCTHoles, weight);
   }
-  if (track.summaryValue(iTrtHTHits, xAOD::numberOfTRTHighThresholdHitsTotal)) {
+  if (!m_isITk && track.summaryValue(iTrtHTHits, xAOD::numberOfTRTHighThresholdHitsTotal)) {
     fillHisto(m_nTRTHighThresholdHits, iTrtHTHits, weight);
     fillHisto(m_nTRTHighThresholdHits_vs_eta, eta, iTrtHTHits, weight);
     fillHisto(m_nTRTHighThresholdHits_vs_phi, phi, iTrtHTHits, weight);
@@ -430,13 +448,13 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
       fillHisto(m_nSCTDoubleHoles_vs_etaphi, eta,phi, iSCTDoubleHoles, weight);
       fillHisto(m_nSCTDoubleHoles_vs_mu, mu, iSCTDoubleHoles, weight);
     }
-    if (track.summaryValue(iTRTOutliers, xAOD::numberOfTRTOutliers)) {
+    if (!m_isITk && track.summaryValue(iTRTOutliers, xAOD::numberOfTRTOutliers)) {
       fillHisto(m_nTRTOutliers, iTRTOutliers, weight);
       fillHisto(m_nTRTOutliers_vs_eta, eta, iTRTOutliers, weight);
       fillHisto(m_nTRTOutliers_vs_phi, phi, iTRTOutliers, weight);
       fillHisto(m_nTRTOutliers_vs_mu, mu, iTRTOutliers, weight);
     }
-    if (track.summaryValue(iTRTHTOutliers, xAOD::numberOfTRTHighThresholdOutliers)) {
+    if (!m_isITk && track.summaryValue(iTRTHTOutliers, xAOD::numberOfTRTHighThresholdOutliers)) {
       fillHisto(m_nTRTHighThresholdOutliers, iTRTHTOutliers, weight);
       fillHisto(m_nTRTHighThresholdOutliers_vs_eta, eta, iTRTHTOutliers, weight);
       fillHisto(m_nTRTHighThresholdOutliers_vs_phi, phi, iTRTHTOutliers, weight);

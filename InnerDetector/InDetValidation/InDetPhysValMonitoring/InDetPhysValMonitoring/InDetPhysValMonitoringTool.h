@@ -192,22 +192,15 @@ private:
     StringProperty m_pileupSwitch {this, "PileupSwitch", "HardScatter", "Pileup truth strategy to use. May be \"All\", \"HardScatter\", or \"PileUp\""}; 
     FloatProperty m_lowProb{this,"LowProb",0.5,"Truth match prob. cutoff for efficiency (lower bound) and fake (upper bound) classification."}; 
     FloatProperty m_highProb{this,"HighProb",0.8,"Truth match prob. cutoff - currently unused"}; 
-    Gaudi::Property<std::vector<double> > m_etaBins{this, "EtaBins", {}};
-    Gaudi::Property<std::vector<int> > m_minHits{this, "MinNumberClusters", {}};
+    DoubleArrayProperty m_etaBins{this, "EtaBins", {}};
+    IntegerArrayProperty m_minHits{this, "MinNumberClusters", {}};
 
-    Gaudi::Property<float> m_jetAbsEtaMin
-    {this, "JetAbsEtaMin", 0.f,
-     "Minimum Eta value for jet selection"}; 
-    Gaudi::Property<float> m_jetAbsEtaMax
-    {this, "JetAbsEtaMax", 2.5f,
-     "Maximum Eta value for jet selection"};
-    Gaudi::Property<float> m_jetPtMin
-    {this, "JetPtMin", 100.0f,
-     "Minimum Jet pT for jet selection in GeV"};
-    Gaudi::Property<float> m_jetPtMax
-    {this, "JetPtMax", 5000.0f,
-     "Maximum Jet pT for jet selection in GeV"};
+    FloatProperty m_jetAbsEtaMin{this, "JetAbsEtaMin", 0.f, "Minimum Eta value for jet selection"};
+    FloatProperty m_jetAbsEtaMax{this, "JetAbsEtaMax", 2.5f, "Maximum Eta value for jet selection"};
+    FloatProperty m_jetPtMin{this, "JetPtMin", 100.0f, "Minimum Jet pT for jet selection in GeV"};
+    FloatProperty m_jetPtMax{this, "JetPtMax", 5000.0f, "Maximum Jet pT for jet selection in GeV"};
 
+    BooleanProperty m_isITk{this, "isITk", false, "Whether config is set for ITk, to enable/disable some plots"};
   
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", "Track selection tool to use"};
     ToolHandle<IInDetVertexTruthMatchTool> m_vtxValidTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/VtxTruthMatchTool", "Vertex truth matching tool to use"};
