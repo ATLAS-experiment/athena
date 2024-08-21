@@ -385,7 +385,7 @@ def MmDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/MDT/MM/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"MDT_OFL", className="CondAttrListCollection")
+        acc.merge(addFolders(flags, kwargs["ReadKey"]),"MDT_OFL", className="CondAttrListCollection", tag="MMEffMap_2024DataTillEndOfJuly")
 
     alg = CompFactory.MmDigitEffiCondAlg("MmDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
@@ -399,7 +399,7 @@ def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
         kwargs["ReadKey"] = ""
     else:
         kwargs.setdefault("ReadKey","/TGC/NSW/EFFMAP")
-        acc.merge(addFolders(flags, kwargs["ReadKey"]),"TGC_OFL", className="CondAttrListCollection")
+        acc.merge(addFolders(flags, kwargs["ReadKey"]),"TGC_OFL", className="CondAttrListCollection",tag="sTGCEffMap_2024DataTillEndOfJuly")
 
     alg = CompFactory.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
