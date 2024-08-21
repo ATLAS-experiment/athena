@@ -1183,6 +1183,29 @@ def tpMap():
         l[tr] = persistent(tr)
     return l
 
+# Fn added as simply appending new HLT Nav entries to start of list
+# during runtime appears to cause Deserialisation issues (ATR-29945).
+# Appending new entries towards end is safer.
+def getSafeEDMInsertPosition(edm_list):
+  """
+  Need to avoid inserting new runtime EDM entries at end of list
+  as 'allowTruncation' items need to be at end of list for correct
+  serialisation.
+  Function returns one position before
+  first 'allowTruncation' EDM item. If there is no 'allowTruncation'
+  EDM item, the position returned is the length of the list, i.e. the next
+  index in the list.
+  """
+
+  insert_idx = len(edm_list)
+
+  # start at end of list
+  for i,entry in enumerate(reversed(edm_list)):
+      if len(entry) < 4 or allowTruncation not in entry[3]:
+          insert_idx -= i
+          return insert_idx
+  return insert_idx
+
 
 def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
     """
@@ -1191,6 +1214,8 @@ def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
 
     # HLTNav_* object list is built dynamically during job configuration, here we only define its output targets
     HLTNavEDMTargets = ''
+
+    insert_idx = getSafeEDMInsertPosition(edmList)
 
     if not flags.Trigger.doOnlineNavigationCompactification:
         # If we are not compacting the online EDM, then we must write out all of the individual collections
@@ -1213,9 +1238,9 @@ def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
         if decisionCollection.startswith("HLTNav_FStep") or decisionCollection == "HLTNav_Summary" or decisionCollection.startswith("HLTNav_L1"):
             thisCollectionHLTNavEDMTargets += ' CostMonDS'
 
-        edmList.extend([
+        edmList[insert_idx:insert_idx] = [
             (typeName,    thisCollectionHLTNavEDMTargets, 'Steer'),
-            (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')])
+            (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')]
 
 
 
