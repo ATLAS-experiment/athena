@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
+import GaudiConfig2
 from collections import OrderedDict, defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -106,6 +107,7 @@ def collectHLTSeedingDecisionObjects(hltSeeding):
     from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
     decisionObjects.add( mapThresholdToL1DecisionCollection("FSNOSEED") ) # Include also Full Scan
     decisionObjects.discard('') # Unpackers which do not use the PROBE container have an empty string for their WriteHandleKey
+    decisionObjects.discard('StoreGateSvc+') # Unpackers which do not use the PROBE container have an empty string for their WriteHandleKey
     __log.info("Collecting %i decision objects from HLTSeeding instance", len(decisionObjects))
     return decisionObjects
 
@@ -115,7 +117,7 @@ def collectHypoDecisionObjects(hypos, inputs = True, outputs = True):
         for hypoAlg in stepHypos:
             __log.debug( "Hypo %s with input %s and output %s ",
                          hypoAlg.getName(), hypoAlg.HypoInputDecisions, hypoAlg.HypoOutputDecisions )
-            if isinstance( hypoAlg.HypoInputDecisions, list):
+            if isinstance( hypoAlg.HypoInputDecisions, GaudiConfig2.semantics._ListHelper):
                 if inputs:
                     [ decisionObjects.add( str(d) ) for d in hypoAlg.HypoInputDecisions ]
                 if outputs:
