@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -81,68 +81,74 @@ protected:
   ///////////////////////////////////////////////////////////////////
   /* Protected data                                                */
   ///////////////////////////////////////////////////////////////////
-  bool m_doRefit;     /** Do final careful refit of tracks */
-  bool m_doExtension; /** Find the TRT extension of the Si track segment */
-  bool m_rejectShortExten; /** use extension only if better than original track */
-  bool m_doStat;        /** Statistics of final tracks */
-  bool m_saveTRT;       /** Output stand-alone TRT segments */
-  int m_MaxSegNum;      /** Maximum number of segments to be handled */
-  unsigned int m_minTRTonSegment; /** Minimum number of TRT hits on segment */
-  unsigned int m_minTRTonly;      /** Minimum number of TRT hits on TRT only */
+  BooleanProperty m_doRefit
+    {this, "FinalRefit", false, "Do a final careful refit of tracks"};
+  BooleanProperty m_doExtension
+    {this, "TrtExtension", false, "Find the TRT extension of the track"};
+  BooleanProperty m_rejectShortExten
+    {this, "RejectShortExtension", false, "Reject short extensions"};
+  BooleanProperty m_doStat
+    {this, "FinalStatistics", false, "Statistics of final tracks"};
+  BooleanProperty m_saveTRT
+    {this, "OutputSegments", true, "Save stand-alone TRT segments"};
+  IntegerProperty m_MaxSegNum
+    {this, "MaxNumberSegments", 5000,
+     "Maximum number of segments to be handled"};
+  UnsignedIntegerProperty m_minTRTonSegment
+    {this, "MinTRTonSegment", 10, "Minimum Number of TRT Hits on segment"};
+  UnsignedIntegerProperty m_minTRTonly
+    {this, "MinTRTonly", 15, "Minimum number of TRT hits on TRT only"};
 
-  ToolHandle<ITRT_SeededTrackFinder> m_trackmaker; /** Track maker tool */
-  ToolHandle<Trk::ITrackFitter> m_fitterTool;      /** Refitting tool */
-  ToolHandle<ITRT_TrackExtensionTool> m_trtExtension{
-    this,
-    "TrackExtensionTool",
-    "InDet::TRT_TrackExtensionTool_xk",
-    "TRT track extension tool "
-  };
+  ToolHandle<ITRT_SeededTrackFinder> m_trackmaker
+    {this, "TrackTool", "InDet::TRT_SeededTrackFinderTool",
+     "Back tracking tool"};
+  ToolHandle<Trk::ITrackFitter> m_fitterTool
+    {this, "RefitterTool", "Trk::GlobalChi2Fitter/InDetTrackFitter",
+     "Track refit tool"};
+  ToolHandle<ITRT_TrackExtensionTool> m_trtExtension
+    {this, "TrackExtensionTool", "InDet::TRT_TrackExtensionTool_xk",
+     "TRT track extension tool "};
 
-  SG::ReadHandleKey<Trk::SegmentCollection>
-    m_SegmentsKey; /** TRT segments to use */
-  SG::WriteHandleKey<TrackCollection> m_outTracksKey;
+  SG::ReadHandleKey<Trk::SegmentCollection> m_SegmentsKey
+    {this, "InputSegmentsLocation", "TRTSegments", "TRT segments to use"};
+  SG::WriteHandleKey<TrackCollection> m_outTracksKey
+    {this, "OutputTracksLocation", "TRTSeededTracks",
+     "Output track collection"};
 
-  SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{ this,
-                                                         "PRDtoTrackMap",
-                                                         "" };
-  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{
-    this,
-    "TrackSummaryTool",
-    "InDetTrackSummaryToolNoHoleSearch"
-  };
+  SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap
+    {this, "PRDtoTrackMap", "" };
+  ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool
+    {this, "TrackSummaryTool", "InDetTrackSummaryToolNoHoleSearch"};
 
-  ToolHandle<Trk::IExtrapolator> m_extrapolator; //!< the extrapoator
-  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{
-    this,
-    "BeamSpotKey",
-    "BeamSpotData",
-    "SG key for beam spot"
-  };
-  bool m_SiExtensionCuts; //!< enable cuts after Si segment finding
-  double m_minPt;         //!< minimal Pt cut
-  double m_maxEta;        //!< maximal Eta cut
-  double m_maxRPhiImp;    //!< maximal RPhi impact parameter cut
-  double m_maxZImp;       //!< maximal z impact parameter cut
+  ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator", ""};
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey
+    {this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
-  bool m_caloSeededRoI;
-  SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{
-    this,
-    "EMROIPhiRZContainer",
-    "",
-    "Name of the calo cluster ROIs in Phi,R,Z parameterization"
-  };
+  BooleanProperty m_SiExtensionCuts
+    {this, "SiExtensionCuts", false, "enable cuts after Si segment finding"};
+  DoubleProperty m_minPt{this, "minPt", 500., "minimal Pt cut"};
+  DoubleProperty m_maxEta{this, "maxEta", 2.7, "maximal Eta cut"};
+  DoubleProperty m_maxRPhiImp
+    {this, "maxRPhiImp", 10., "maximal RPhi impact parameter cut"};
+  DoubleProperty m_maxZImp
+    {this, "maxZImp", 250., "maximal z impact parameter cut"};
 
-  ToolHandle<IRegSelTool> m_regionSelector{
-    this,
-    "RegSelTool",
-    "RegSelTool/RegSel_SCT",
-    "Region selector service instance"
-  };
+  BooleanProperty m_caloSeededRoI{this, "CaloSeededRoI", false};
+  SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey
+    {this, "EMROIPhiRZContainer", "",
+     "Name of the calo cluster ROIs in Phi,R,Z parameterization"};
 
-  float m_deltaEta;  //!< delta Eta used for RoI creation
-  float m_deltaPhi;  //!< delta Phi used for RoI creation
-  float m_deltaZ;    //!< delta Z used for RoI creation
+  ToolHandle<IRegSelTool> m_regionSelector
+    {this, "RegSelTool", "RegSelTool/RegSel_SCT",
+     "Region selector service instance"};
+
+  FloatProperty m_deltaEta
+    {this, "dEtaCaloRoI", 0.1, "delta Eta used for RoI creation"};
+  FloatProperty m_deltaPhi
+    {this, "dPhiCaloRoI", 0.25, "delta Phi used for RoI creation"};
+  FloatProperty m_deltaZ
+    {this, "dZCaloRoI", 300., "delta Z used for RoI creation"};
+
   /** Global Counters for final algorithm statistics */
   struct Stat_t
   {

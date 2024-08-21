@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,6 +31,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
+#include "GaudiKernel/SystemOfUnits.h"
+using Gaudi::Units::GeV;
 
 namespace InDet {
 
@@ -76,9 +78,15 @@ namespace InDet {
       ///////////////////////////////////////////////////////////////////
      
 
-      int    m_minNumDriftCircles ;  //!< Minimum number of drift circles for TRT segment tracks
-      double m_minPt              ;  //!< Minimum pt cut for TRT only (used in preselection * 0.9)
-      bool   m_oldLogic           ;  //!< use old transition region hit logic 
+      IntegerProperty m_minNumDriftCircles
+        {this, "MinNumDriftCircles", 15,
+	  "Minimum number of drift circles for TRT segment tracks"};
+      DoubleProperty m_minPt
+        {this, "MinPt", 1.0 * GeV,
+	 "Minimum pt cut for TRT only (used in preselection * 0.9)"};
+      BooleanProperty m_oldLogic
+        {this, "OldTransitionLogic", true,
+	 "use old transition region hit logic "};
 
       ToolHandle< ITRT_SegmentToTrackTool >      m_segToTrackTool
          {this,"TRT_SegToTrackTool","InDet::TRT_SegmentToTrackTool"}; //!< Segment to track tool

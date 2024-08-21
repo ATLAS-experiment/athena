@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,43 +37,8 @@ using namespace std;
 
 InDet::TRT_SeededTrackFinder::TRT_SeededTrackFinder
 (const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator),
-    m_trackmaker("InDet::TRT_SeededTrackFinderTool"),
-    m_fitterTool("Trk::GlobalChi2Fitter/InDetTrackFitter"),
-    m_SegmentsKey("TRTSegments"),
-    m_outTracksKey("TRTSeededTracks")
-{
-  m_doRefit          = false                                ;       //Do a final careful refit of tracks
-  m_doExtension      = false                                ;       //Find the track TRT extension
-  m_rejectShortExten = false                                ;
-  m_doStat           = false                                ;       //Statistics of final tracks
-  m_saveTRT          = true                                 ;       //Save stand-alone TRT segments
-  m_MaxSegNum        = 5000                                 ;
-
-  declareProperty("TrackTool"                  ,m_trackmaker       ); //Back tracking tool
-  declareProperty("RefitterTool"               ,m_fitterTool       ); //Track refit tool
-  declareProperty("InputSegmentsLocation"      ,m_SegmentsKey      ); //Input track collection
-  declareProperty("OutputTracksLocation"       ,m_outTracksKey     ); //Output track collection
-  declareProperty("FinalRefit"                 ,m_doRefit          ); //Do a final careful refit of tracks
-  declareProperty("TrtExtension"               ,m_doExtension      ); //Find the TRT extension of the track
-  declareProperty("RejectShortExtension"       ,m_rejectShortExten ); //Reject short extensions
-  declareProperty("FinalStatistics"            ,m_doStat           ); //Statistics of final tracks
-  declareProperty("OutputSegments"             ,m_saveTRT          ); //Save stand-alone TRT segments
-  declareProperty("MaxNumberSegments"          ,m_MaxSegNum        ); //Maximum Number of segments to be handled
-  declareProperty("MinTRTonSegment"            ,m_minTRTonSegment = 10); //Minimum Number of Hits on segment
-  declareProperty("MinTRTonly"                 ,m_minTRTonly      = 15); //Minimum Number of Hits on TRT only
-  // --- selection cuts after SI extension
-  declareProperty("SiExtensionCuts",   m_SiExtensionCuts    = false);
-  declareProperty("minPt"             ,m_minPt              = 500. );
-  declareProperty("maxEta"            ,m_maxEta             = 2.7  );
-  declareProperty("maxRPhiImp"        ,m_maxRPhiImp         = 10.  );
-  declareProperty("maxZImp"           ,m_maxZImp            = 250. );
-  declareProperty("Extrapolator"      ,m_extrapolator              );
-  declareProperty("CaloSeededRoI"     ,m_caloSeededRoI=false       );
-  declareProperty("dEtaCaloRoI"       ,m_deltaEta=0.1              );
-  declareProperty("dPhiCaloRoI"       ,m_deltaPhi=0.25             );
-  declareProperty("dZCaloRoI"         ,m_deltaZ=300                );
-}
+  : AthReentrantAlgorithm(name, pSvcLocator)
+{ }
 
 ///////////////////////////////////////////////////////////////////
 // Initialisation
