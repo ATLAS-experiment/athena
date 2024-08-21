@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetAssociationTools/InDetPRDtoTrackMapToolGangedPixels.h"
@@ -20,10 +20,7 @@ InDet::InDetPRDtoTrackMapToolGangedPixels::InDetPRDtoTrackMapToolGangedPixels(co
                                                                               const std::string& n,
                                                                               const IInterface*  p)
   : base_class(t,n,p)
-{
-  declareProperty( "PixelClusterAmbiguitiesMapName", m_pixelClusterAmbiguitiesMapName = "PixelClusterAmbiguitiesMap" );
-  declareProperty( "addTRToutliers", m_addTRToutliers = false);
-}
+{ }
 
 InDet::InDetPRDtoTrackMapToolGangedPixels::~InDetPRDtoTrackMapToolGangedPixels()
 = default;

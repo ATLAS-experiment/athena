@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetAssociationTools/InDetPRD_AssociationToolGangedPixels.h"
@@ -13,14 +13,9 @@
 
 #include <vector>
 
-InDet::InDetPRD_AssociationToolGangedPixels::InDetPRD_AssociationToolGangedPixels(const std::string& t,
-										  const std::string& n,
-										  const IInterface*  p ) :
+InDet::InDetPRD_AssociationToolGangedPixels::InDetPRD_AssociationToolGangedPixels(const std::string& t, const std::string& n, const IInterface*  p ) :
   base_class(t,n,p)
-{
-  declareProperty( "PixelClusterAmbiguitiesMapName", m_pixelClusterAmbiguitiesMapName = "PixelClusterAmbiguitiesMap" );
-  declareProperty( "addTRToutliers", m_addTRToutliers = false);
-}
+{ }
 
 InDet::InDetPRD_AssociationToolGangedPixels::~InDetPRD_AssociationToolGangedPixels()
 = default;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,20 +27,10 @@ InDet::InDetPRD_Provider::InDetPRD_Provider(const std::string& t, const std::str
   AthAlgTool(t,n,p),
   m_idHelper(nullptr),
   m_pixIdHelper(nullptr),
-  m_pixClusterContainerName(""),
-  m_pixClusterContainer(nullptr),  
   m_sctIdHelper(nullptr),
-  m_sctClusterContainerName(""),
-  m_sctClusterContainer(nullptr), 
-  m_trtIdHelper(nullptr),
-  m_trtDriftCircleContainerName(""),
-  m_trtDriftCircleContainer(nullptr)
+  m_trtIdHelper(nullptr)
 {
     declareInterface<Trk::IPRD_Provider>(this);
-    // PRD container name
-    declareProperty("PixelClusterContainer",         m_pixClusterContainerName);
-    declareProperty("SCT_ClusterContainer",          m_sctClusterContainerName);
-    declareProperty("TRT_DriftCircleContainer",      m_trtDriftCircleContainerName);
 }
 
 
@@ -56,6 +46,13 @@ StatusCode InDet::InDetPRD_Provider::initialize()
      // Get TRT helpers
      ATH_CHECK(detStore()->retrieve(m_trtIdHelper, "TRT_ID"));
 
+     ATH_CHECK(m_pixClusterContainerKey.initialize
+	       (!m_pixClusterContainerKey.key().empty()));
+     ATH_CHECK(m_sctClusterContainerKey.initialize
+	       (!m_sctClusterContainerKey.key().empty()));
+     ATH_CHECK(m_trtDriftCircleContainerKey.initialize
+	       (!m_trtDriftCircleContainerKey.key().empty()));
+
      ATH_CHECK(m_pixelDetEleCollKey.initialize());
      ATH_CHECK(m_SCTDetEleCollKey.initialize());
 
@@ -66,22 +63,8 @@ StatusCode InDet::InDetPRD_Provider::finalize()
 {
      ATH_MSG_VERBOSE("Finalizing ...");
      return StatusCode::SUCCESS;
-}       
-       
-StatusCode InDet::InDetPRD_Provider::retrieveCollection() {
-  if (not m_pixClusterContainerName.empty()){
-    ATH_CHECK(evtStore()->retrieve(m_pixClusterContainer,m_pixClusterContainerName));
-  }
-  if (not m_sctClusterContainerName.empty()){
-    ATH_CHECK(evtStore()->retrieve(m_sctClusterContainer,m_sctClusterContainerName));
-  }
-  if (not m_trtDriftCircleContainerName.empty()){
-    ATH_CHECK(evtStore()->retrieve(m_trtDriftCircleContainer,m_trtDriftCircleContainerName));
-  }
-  return StatusCode::SUCCESS; 
 }
-       
-       
+
 /** return the Prd given the Identifier - make a HashId out of the Id and return the associated PRD */
 const Trk::PrepRawData* InDet::InDetPRD_Provider::prdFromIdentifier(const Identifier& ide, size_t& ndof ) const {
 
@@ -90,34 +73,48 @@ const Trk::PrepRawData* InDet::InDetPRD_Provider::prdFromIdentifier(const Identi
         ATH_MSG_VERBOSE("The identifier is not valid ! Return 0.");
         return nullptr;
     }
+
     // is pixel case 
-    if ( m_idHelper->is_pixel(ide) &&  m_pixClusterContainer ){
+    if ( m_idHelper->is_pixel(ide) && !m_pixClusterContainerKey.key().empty() ){
+
+        SG::ReadHandle<PixelClusterContainer> pixClusterContainer(m_pixClusterContainerKey);
+        if(!pixClusterContainer.isValid())
+          ATH_MSG_ERROR("Invalid PixelClusterContainer");
+
         ndof = 2;
         // get the Identifier Hash
         Identifier idewafer =  m_pixIdHelper->wafer_id(ide);
         IdentifierHash ideHash = m_pixIdHelper->wafer_hash(idewafer);
         ATH_MSG_VERBOSE("Pixel Identifier found as transformed to hash identifier " << (unsigned int)ideHash );
-	    if (!ideHash.is_valid()){
-		    ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
-		    return nullptr;
-	    }
-        return prdFromIdentifierContainer<InDet::PixelCluster>(*m_pixClusterContainer,ide,ideHash);
+        if (!ideHash.is_valid()){
+          ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
+          return nullptr;
+        }
+        return prdFromIdentifierContainer<InDet::PixelCluster>(*pixClusterContainer,ide,ideHash);
     }
 
-    if ( m_idHelper->is_sct(ide) &&  m_sctClusterContainer ){
+    if ( m_idHelper->is_sct(ide) && !m_sctClusterContainerKey.key().empty() ){
+        SG::ReadHandle<SCT_ClusterContainer> sctClusterContainer(m_sctClusterContainerKey);
+        if(!sctClusterContainer.isValid())
+          ATH_MSG_ERROR("Invalid SCT_ClusterContainer");
+
         // get the Identifier Hash
         ndof = 1;
         Identifier idewafer =  m_sctIdHelper->wafer_id(ide);
         IdentifierHash ideHash = m_sctIdHelper->wafer_hash(idewafer);
         ATH_MSG_VERBOSE("SCT Identifier found as transformed to hash identifier " << (unsigned int)ideHash );
         if (!ideHash.is_valid()){
-		    ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
-		    return nullptr;
-	    }
-        return prdFromIdentifierContainer<InDet::SCT_Cluster>(*m_sctClusterContainer,ide,ideHash);
+          ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
+          return nullptr;
+        }
+        return prdFromIdentifierContainer<InDet::SCT_Cluster>(*sctClusterContainer,ide,ideHash);
     }
 
-    if ( m_idHelper->is_trt(ide) &&  m_trtDriftCircleContainer ){
+    if ( m_idHelper->is_trt(ide) && !m_trtDriftCircleContainerKey.key().empty() ){
+        SG::ReadHandle<TRT_DriftCircleContainer> trtDriftCircleContainer(m_trtDriftCircleContainerKey);
+        if(!trtDriftCircleContainer.isValid())
+          ATH_MSG_ERROR("Invalid TRT_DriftCircleContainer");
+
         // get the Identifier Hash
         ndof = 1;
         Identifier idestrawlayer  = m_trtIdHelper->layer_id(m_trtIdHelper->barrel_ec(ide),
@@ -127,10 +124,10 @@ const Trk::PrepRawData* InDet::InDetPRD_Provider::prdFromIdentifier(const Identi
         IdentifierHash ideHash = m_trtIdHelper->straw_layer_hash(idestrawlayer); 
         ATH_MSG_VERBOSE("TRT Identifier found as transformed to hash identifier " << (unsigned int)ideHash );
         if (!ideHash.is_valid()){
-		    ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
-		    return nullptr;
-	    }
-        return prdFromIdentifierContainer<InDet::TRT_DriftCircle>(*m_trtDriftCircleContainer,ide,ideHash);
+          ATH_MSG_VERBOSE("The hash identifier is not valid ! Return 0.");
+          return nullptr;
+        }
+        return prdFromIdentifierContainer<InDet::TRT_DriftCircle>(*trtDriftCircleContainer,ide,ideHash);
     }
     return nullptr;
 }

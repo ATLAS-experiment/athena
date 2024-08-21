@@ -9,8 +9,6 @@
 // package include
 #include "PRD_TruthTrajectoryBuilder.h"
 // Trk
-#include "TrkToolInterfaces/IPRD_Provider.h"
-#include "TrkTruthTrackInterfaces/IPRD_TruthTrajectoryManipulator.h"
 #include "TrkEventUtils/PrepRawDataComparisonFunction.h"
 // DetectorDescription
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -75,15 +73,6 @@ StatusCode Trk::PRD_TruthTrajectoryBuilder::refreshEvent()  {
        ATH_MSG_INFO("Added " << pmtCollNameIter << " to collection list for truth track creation.");
        m_prdMultiTruthCollections.push_back(curColl.cptr());
      }
-   }
-   // retrieve collection call to the PRD_Providers
-   if (!m_idPrdProvider.empty() && m_idPrdProvider->retrieveCollection().isFailure()){
-       ATH_MSG_ERROR ("Failure in collection retrieval of " << m_idPrdProvider << ". Arborting ..." );
-       return StatusCode::FAILURE; 
-   }
-   if (!m_msPrdProvider.empty() && m_msPrdProvider->retrieveCollection().isFailure()){
-       ATH_MSG_ERROR ("Failure in collection retrieval of " << m_msPrdProvider << ". Arborting ..." );
-       return StatusCode::FAILURE; 
    }
    // all good
    return StatusCode::SUCCESS;

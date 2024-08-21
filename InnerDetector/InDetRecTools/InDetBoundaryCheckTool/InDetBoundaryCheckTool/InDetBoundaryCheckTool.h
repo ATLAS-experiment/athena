@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ATHENA_INNERDETECTOR_TOOLS_BOUNDARYCHECKTOOL
@@ -58,7 +58,8 @@ namespace InDet {
 
             SG::ReadHandle<InDet::SiDetectorElementStatus> getSCTDetElStatus(const EventContext& ctx) const;
 
-            ServiceHandle<IGeoModelSvc> m_geoModelSvc;
+            ServiceHandle<IGeoModelSvc> m_geoModelSvc
+	      {this, "GeoModelSvc", "GeoModelSvc"};
 
             ToolHandle<IInDetConditionsTool> m_sctCondSummaryTool{
                 this,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_PRD_ASSOCIATIONTOOL_H
@@ -18,7 +18,7 @@ namespace InDet {
 
   /** Concrete Implementation of the IPRD_AssociationTool interface.*/
   class InDetPRD_AssociationToolGangedPixels : public extends<AthAlgTool, Trk::IPRD_AssociationTool>
-{
+  {
 
   public:
     typedef Trk::IPRD_AssociationTool::Maps Maps;
@@ -107,10 +107,10 @@ namespace InDet {
   private:
     Maps m_maps;
 
-    SG::ReadHandleKey<PixelGangedClusterAmbiguities> m_pixelClusterAmbiguitiesMapName;
+    SG::ReadHandleKey<PixelGangedClusterAmbiguities> m_pixelClusterAmbiguitiesMapName{this, "PixelClusterAmbiguitiesMapName", "PixelClusterAmbiguitiesMap"};
 
     /** add TRT outliers in the addTrack method to avoid splits due to rejected extensions */
-    bool m_addTRToutliers;
+    BooleanProperty m_addTRToutliers{this, "addTRToutliers", false};
 
 };
 
