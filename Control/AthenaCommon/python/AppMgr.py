@@ -5,7 +5,8 @@
 
 """Application manager and other global Gaudi components."""
 
-import sys, os
+import os
+import sys
 from AthenaCommon import ExitCodes
 
 from AthenaCommon import AlgSequence, Configurable, Logging
@@ -390,8 +391,6 @@ class AthAppMgr( AppMgr ):
    def setup( self, recursive = False ):
       if not recursive and (self._opts and (self._opts.drop_reload or self._opts.config_only)):
        # store configuration on disk
-         import os, sys
-
          if self._opts.config_only is True:  # config-only but not storing to file
             fn = None
          elif self._opts.config_only:
@@ -736,8 +735,8 @@ class AthAppMgr( AppMgr ):
              import shutil
              shutil.copy2("MP_PoolFileCatalog.xml", "PoolFileCatalog.xml")
 
- # exit includes leaving python
    def exit( self, code = None ):
+      """Terminate AppMgr and exit python"""
       try:
          if self.state() > AthAppMgr.State.CONFIGURED:
             sc1 = self.finalize()
@@ -755,9 +754,17 @@ class AthAppMgr( AppMgr ):
          from AthenaCommon.Debugging import dumpPythonProfile
          dumpPythonProfile(self._opts.profile_python)
 
-      Logging.log.info( 'leaving with code %d: "%s"',
-                        self._exitstate, ExitCodes.what( self._exitstate ) )
-      sys.exit( code is None and self._exitstate or code )
+      if code is None:
+         code = self._exitstate
+
+      # In interactive mode, where this functions is called within an atexit handler,
+      # we cannot call sys.exit as this raises SystemExit, which is not allowed in
+      # exit handlers. Unfortunately, this also means we cannot set an exit code.
+      # See also: https://bugs.python.org/issue27035
+      #           https://github.com/python/cpython/issues/103512
+      if not os.environ.get('PYTHONINSPECT', ''):
+         Logging.log.info( 'leaving with code %d: "%s"', code, ExitCodes.what( code ) )
+         sys.exit( code )
 
 
 ### global objects for export ------------------------------------------------
