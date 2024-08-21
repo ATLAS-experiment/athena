@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -43,26 +43,9 @@ namespace InDet {
                                                        const std::string& name,
                                                        const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_minInitR(70.)
-    , m_minInitR_noBLay(120.)
-    , m_singleThreshold(0.1)
-    , m_maxBLhits(0)
-  // m_maxPhiVtxTrk(0.2)
   {
     declareInterface<SingleTrackConversionTool>(this);
-    declareProperty("MinInitialHitRadius"        , m_minInitR);
-    declareProperty("MinInitialHitRadius_noBlay" , m_minInitR_noBLay);
-    declareProperty("MinRatioOfHLhits"           , m_singleThreshold);
-    //declareProperty("MaxPhiVtxTrk"               , m_maxPhiVtxTrk);
-    declareProperty("MaxBLayerHits"              , m_maxBLhits);
-    declareProperty("PIDonlyForXe"               , m_PIDonlyForXe = false,
-      "Only check TRT PID if all hits are Xe hits");
   }
-
-  // -------------------------------------------------------
-  // destructor
-  // -------------------------------------------------------
-  SingleTrackConversionTool::~SingleTrackConversionTool() = default;
 
   // -------------------------------------------------------
   // not sure what this is about (Markus) ????

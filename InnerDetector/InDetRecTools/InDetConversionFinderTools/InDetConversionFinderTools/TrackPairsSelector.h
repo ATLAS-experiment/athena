@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_TRACKPAIRSSELECTOR_H
@@ -41,7 +41,7 @@ public:
                      const std::string& name,
                      const IInterface* parent);
 
-  virtual ~TrackPairsSelector();
+  virtual ~TrackPairsSelector() = default;
 
   static const InterfaceID& interfaceID();
 
@@ -78,17 +78,21 @@ private:
   };
   /** Properties for track selection: all cuts are ANDed */
 
-  /** Maximum initial hit radius in order to apply the impact point cut*/
-  double m_maxR;
-  /** Minimum allowed angle between decay tracks. Used only in V0
-   * reconstruction. */
-  double m_MinTrkAngle;
-  /** Maximum allowed distance of minimum approach */
-  std::vector<double> m_maxDist;
-  /** Maximum eta difference between tracks in pair. */
-  std::vector<double> m_etaCut;
-  /** Maximum distance difference between initial  hits of tracks in pair. */
-  std::vector<double> m_initCut;
+  DoubleProperty m_maxR
+    {this, "MaxFirstHitRadius", 500.,
+     "Maximum initial hit radius in order to apply the impact point cut"};
+  DoubleProperty m_MinTrkAngle
+    {this, "MinTrackAngle", 0.,
+     "Minimum allowed angle between decay tracks. Used only in V0 reconstruction."};
+  DoubleArrayProperty m_maxDist
+    {this, "MaxDistBetweenTracks", {8., 80., 45.},
+     "Maximum allowed distance of minimum approach"};
+  DoubleArrayProperty m_etaCut
+    {this, "MaxEta", {0.8, 1.2, 1.2},
+     "Maximum eta difference between tracks in pair"};
+  DoubleArrayProperty m_initCut
+    {this, "MaxInitDistance", {10000., 10000., 10000.},
+     "Maximum distance difference between initial  hits of tracks in pair"};
 };
 }
 #endif // INDETCONVERSIONFINDERTOOLS_TRACKPAIRSSELECTOR_H

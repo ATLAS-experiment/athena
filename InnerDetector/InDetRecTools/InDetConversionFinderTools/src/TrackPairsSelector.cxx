@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -41,31 +41,9 @@ namespace InDet {
                                          const std::string& name,
                                          const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_maxR(500.)
-    , m_MinTrkAngle(0.)
   {
-    m_etaCut.push_back(0.8);
-    m_etaCut.push_back(1.2);
-    m_etaCut.push_back(1.2);
-
-    m_initCut.push_back(10000.);
-    m_initCut.push_back(10000.);
-    m_initCut.push_back(10000.);
-
-    m_maxDist.push_back(8.);
-    m_maxDist.push_back(80.);
-    m_maxDist.push_back(45.);
-
     declareInterface<TrackPairsSelector>(this);
-    declareProperty("MaxFirstHitRadius"         , m_maxR);
-    declareProperty("MaxDistBetweenTracks"      , m_maxDist);
-    declareProperty("MaxEta"                    , m_etaCut   );
-    declareProperty("MaxInitDistance"           , m_initCut  );
-    declareProperty("MinTrackAngle"             , m_MinTrkAngle);
   }
-
-  // -------------------------------------------------------------
-  TrackPairsSelector::~TrackPairsSelector() = default;
 
   // -------------------------------------------------------------
   const InterfaceID& TrackPairsSelector::interfaceID() {

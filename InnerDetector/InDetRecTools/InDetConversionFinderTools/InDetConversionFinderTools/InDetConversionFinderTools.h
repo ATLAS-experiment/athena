@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -58,12 +58,12 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  //!< Remove standalone TRT tracks
-  bool m_removeTrt{};
-  //!< Conversions or V0s
-  bool m_isConversion{};
-  //!< Decorate vertices with values used for vertex selection
-  bool m_decorateVertices;
+  BooleanProperty m_removeTrt
+    {this, "RemoveTrtTracks", false, "Remove standalone TRT tracks"};
+  BooleanProperty m_isConversion
+    {this, "IsConversion", true, "Conversions or V0s"};
+  BooleanProperty m_decorateVertices
+    {this, "DecorateVertices", true, "Decorate vertices with values used for vertex selection"};
 
   using IVertexFinder::findVertex;
   //!< Conversion candidate reconstruction for Trk::Tracks.
@@ -130,18 +130,14 @@ protected:
                         std::map<std::string, float>& intersectionDecors) const;
 
   /** Cuts.  */
-  //!< Minimum allwoed radial distance beteeen guess vertex and closest 1st hit
-  //!< of participating track.
-  double m_mindR;
-  //!< Maximum allowed radial distance beteeen guess vertex and closest 1st hit
-  //!< of participating track.
-  double m_maxdR;
-  //!< Minimum allowed radial position for initial guess vertex. Used only in V0
-  //!< reconstruction.
-  double m_MinInitVtxR;
-  //!< Minimum allowed angular difference between V0 and children direction.
-  //!< Used only in V0 reconstruction.
-  double m_MinFlightAngle;
+  DoubleProperty m_mindR{this, "MinDistVtxHit", -350.,
+    "Minimum allowed radial distance beteeen guess vertex and closest 1st hit of participating track"};
+  DoubleProperty m_maxdR{this, "MaxDistVtxHit", 250.,
+    "Maximum allowed radial distance between guess vertex and closest 1st hit of participating track"};
+  DoubleProperty m_MinInitVtxR{this, "MinInitVtxR", 0.,
+    "Minimum allowed radial position for initial guess vertex. Used only in V0 reconstruction."};
+  DoubleProperty m_MinFlightAngle{this, "MinFlightAngle", 0.,
+    "Minimum allowed angular difference between V0 and children direction. Used only in V0 reconstruction."};
 };
 
 }

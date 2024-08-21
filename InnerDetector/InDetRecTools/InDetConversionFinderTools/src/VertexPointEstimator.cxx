@@ -23,61 +23,10 @@ namespace InDet {
 
   // ----------------------------------
   VertexPointEstimator::VertexPointEstimator(const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type, name, parent),
-    m_returnOnError(true)
+    AthAlgTool(type, name, parent)
   {
     declareInterface<VertexPointEstimator>(this);
-    /// Cuts for selecting track pairs
-    m_maxDR.push_back(10000.)	 ;
-    m_maxDR.push_back(10000.)        ;
-    m_maxDR.push_back(10000.)        ;
-    
-    m_maxDZ.push_back(10000.)        ;
-    m_maxDZ.push_back(10000.)        ;
-    m_maxDZ.push_back(10000.)        ;
-    
-    m_maxR.push_back(10000.)         ;
-    m_maxR.push_back(10000.)         ;
-    m_maxR.push_back(10000.)         ;
-
-    m_minArcLength.push_back(-10000.);
-    m_minArcLength.push_back(-10000.);
-    m_minArcLength.push_back(-10000.);
-    m_maxArcLength.push_back(10000.) ;
-    m_maxArcLength.push_back(10000.) ;
-    m_maxArcLength.push_back(10000.) ;
-    
-    m_minDr.push_back(-5.)           ;
-    m_minDr.push_back(-25.)          ;
-    m_minDr.push_back(-50.)          ;
-    
-    m_maxDr.push_back(5.)            ;
-    m_maxDr.push_back(10.)           ;
-    m_maxDr.push_back(10.)           ;
-
-    m_maxHl.push_back(10000.)        ;
-    m_maxHl.push_back(10000.)        ;
-    m_maxHl.push_back(10000.)        ;
-			
-    m_maxPhi.push_back(0.05)         ;
-    m_maxPhi.push_back(0.1)          ;
-    m_maxPhi.push_back(0.1)          ;
-
-    //some properties
-    declareProperty("MaxTrkXYDiffAtVtx",      m_maxDR);
-    declareProperty("MaxTrkZDiffAtVtx",       m_maxDZ);
-    declareProperty("MaxTrkXYValue",          m_maxR);
-    declareProperty("MinArcLength",           m_minArcLength);
-    declareProperty("MaxArcLength",           m_maxArcLength);
-    declareProperty("MinDeltaR",              m_minDr);
-    declareProperty("MaxDeltaR",              m_maxDr);
-    declareProperty("MaxHl",                  m_maxHl);
-    declareProperty("MaxPhi",                 m_maxPhi);
-    declareProperty("ReturnOnError",          m_returnOnError);
   }
-
-  // ----------------------------------
-  VertexPointEstimator::~VertexPointEstimator() = default;
 
   // ----------------------------------
   const InterfaceID& VertexPointEstimator::interfaceID() {
