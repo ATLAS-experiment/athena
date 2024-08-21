@@ -4,12 +4,12 @@
 
 #include "TrkVertexWeightCalculators/JetRestrictedSumPtVertexWeightCalculator.h"
 #include "TrkParameters/TrackParameters.h"
-#include "VxVertex/VxTrackAtVertex.h"
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODJet/Jet.h"
 
+#include <memory>
 #include <vector>
 #include <set>
 #include <iomanip>
@@ -19,8 +19,18 @@ namespace Trk {
 StatusCode
 JetRestrictedSumPtVertexWeightCalculator::initialize()
 {
-  ATH_CHECK(m_jetContKey.initialize(!m_jetContKey.empty()));
+  // We definitely need a jet collection for the track selection
+  if(m_jetContKey.empty()) {
+    ATH_MSG_ERROR("No jet collection provided for selecting tracks!");
+    return StatusCode::FAILURE;
+  } else {
+    ATH_CHECK(m_jetContKey.initialize());
+  }
   ATH_CHECK(m_tracksInCone.retrieve());
+
+  if(!m_plainSumPtKey.empty()) {
+    m_decPlainSumPt = std::make_unique<SG::AuxElement::Decorator<float> >(m_plainSumPtKey);
+  }
   
   return StatusCode::SUCCESS;
 } // end of initialize method
@@ -97,6 +107,15 @@ JetRestrictedSumPtVertexWeightCalculator::estimateSignalCompatibility(
   }
   ATH_MSG_DEBUG("Counted " << n_selected_tracks << "/" << vertex.nTrackParticles()
     << " towards vertex sumpt " << std::setprecision(3) << jet_only_pt << " (unrestricted sum: " << total_pt << ")");
+
+  if(m_decPlainSumPt!=nullptr) {
+    (*m_decPlainSumPt)(vertex) = total_pt;
+  }
+
+  if(jetCont->empty()){
+    ATH_MSG_DEBUG("No jets found in this event, fall back to unrestricted sum");
+    jet_only_pt = total_pt;
+  }
   return jet_only_pt;
 }
 
