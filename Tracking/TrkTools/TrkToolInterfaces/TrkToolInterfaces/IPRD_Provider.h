@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -41,9 +41,6 @@ namespace Trk {
 
        /** return the Prd given the Identifier - returns the number of degrees of freedom */
        virtual const Trk::PrepRawData* prdFromIdentifier(const Identifier& ide, size_t& ndof ) const = 0;
-       
-       /** call to retrieve the collections (can't be Incident) */
-       virtual StatusCode retrieveCollection() = 0;
 
   };
 

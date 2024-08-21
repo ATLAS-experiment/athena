@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _InDet_InDetPRDtoTrackMapToolGangedPixels_h_
@@ -56,10 +56,10 @@ namespace InDet {
 
     void ensureType(Trk::PRDtoTrackMap &virt_prd_to_track_map) const;
 
-    SG::ReadHandleKey<PixelGangedClusterAmbiguities> m_pixelClusterAmbiguitiesMapName;
+    SG::ReadHandleKey<PixelGangedClusterAmbiguities> m_pixelClusterAmbiguitiesMapName{this, "PixelClusterAmbiguitiesMapName", "PixelClusterAmbiguitiesMap"};
 
     /** add TRT outliers in the addTrack method to avoid splits due to rejected extensions */
-    bool m_addTRToutliers;
+    BooleanProperty m_addTRToutliers{this, "addTRToutliers", false};
 
     class PRDtoTrackMap : public Trk::PRDtoTrackMap
     {

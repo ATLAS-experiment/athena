@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,6 +22,8 @@
 #include "TrkPrepRawData/PrepRawDataCollection.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
  
 class AtlasDetectorID;
@@ -51,9 +53,6 @@ namespace InDet {
        
        /** finalize */
        StatusCode  finalize();
-
-       /** retrieve the PRD collection from StoreGate */
-       StatusCode retrieveCollection();
 
        /** return the Prd given the Identifier - make a HashId out of the Id and return the associated PRD */
        const Trk::PrepRawData* prdFromIdentifier(const Identifier& ide, size_t& ndof ) const;
@@ -88,20 +87,20 @@ namespace InDet {
         const AtlasDetectorID*                      m_idHelper;                     //! Helper to detect type of sub-detector from PRD->identify().
                                                     
         const PixelID*                              m_pixIdHelper;
-        std::string                                 m_pixClusterContainerName;          
-        const PixelClusterContainer*                m_pixClusterContainer;
+        SG::ReadHandleKey<PixelClusterContainer>    m_pixClusterContainerKey
+	  {this, "PixelClusterContainer", ""};
         // For P->T converter of Pixel Clusters
         SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
         
-        const SCT_ID*                               m_sctIdHelper;                      
-        std::string                                 m_sctClusterContainerName;          
-        const SCT_ClusterContainer*                 m_sctClusterContainer;
+        const SCT_ID*                               m_sctIdHelper;
+        SG::ReadHandleKey<SCT_ClusterContainer>     m_sctClusterContainerKey
+	  {this, "SCT_ClusterContainer", ""};
         // For P->T converter of SCT_Clusters
         SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
         
-        const TRT_ID*                               m_trtIdHelper;                      
-        std::string                                 m_trtDriftCircleContainerName;      
-        const TRT_DriftCircleContainer*             m_trtDriftCircleContainer;
+        const TRT_ID*                               m_trtIdHelper;
+        SG::ReadHandleKey<TRT_DriftCircleContainer> m_trtDriftCircleContainerKey
+	  {this, "TRT_DriftCircleContainer", ""};
 
   };
 
