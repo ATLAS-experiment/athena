@@ -121,8 +121,21 @@ def JETM42CoreCfg(flags, name, StreamName, TriggerListsHelper, TauJets_EleRM_in_
 
     JETM42SlimmingHelper = SlimmingHelper(name+"SlimmingHelper", flags=flags, NamesAndTypes = flags.Input.TypedCollections)
 
-    JETM42SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloTopoClusters422", "CaloCalAllTopoTowers"
+    JETM42SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloTopoClusters422", "CaloCalAllTopoTowers",
+                                         "EMTopoClusters422","EMTopoClusters422SK","TopoTowers","TopoTowersSK",
                                       ]
+
+    JETM42SlimmingHelper.AppendToDictionary.update({'EMTopoClusters422': 'xAOD::CaloClusterContainer',
+                                                   'EMTopoClusters422Aux': 'xAOD::ShallowAuxContainer',
+                                                   'EMTopoClusters422SK': 'xAOD::CaloClusterContainer',
+                                                   'EMTopoClusters422SKAux': 'xAOD::ShallowAuxContainer',
+                                                   'TopoTowers': 'xAOD::CaloClusterContainer',
+                                                   'TopoTowersAux': 'xAOD::ShallowAuxContainer',
+                                                   'TopoTowersSK': 'xAOD::CaloClusterContainer',
+                                                   'TopoTowersSKAux': 'xAOD::ShallowAuxContainer',
+                                                   })
+
+
     jetOutputList = ["AntiKt4EMTopo422Jets","AntiKt4EMTopo422SKJets","AntiKt4TopoTowerJets","AntiKt4TopoTowerSKJets"] 
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM42SlimmingHelper, jetOutputList, JETM42SlimmingHelper.SmartCollections)
