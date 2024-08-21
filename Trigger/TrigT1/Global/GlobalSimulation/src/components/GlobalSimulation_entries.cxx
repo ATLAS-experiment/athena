@@ -16,6 +16,9 @@
 #include "../L1TopoAlgs/cTauInputAlgTool.h"
 #include "../L1TopoAlgs/jXEInputAlgTool.h"
 
+#include "../GlobalAlgs/Egamma1_LArStrip_Fex.h"
+#include "../GlobalAlgs/EMB1CellsFromCaloCells.h"
+#include "../GlobalAlgs/eFexRoIAlgTool.h"
 
 DECLARE_COMPONENT(GlobalSim::GlobalL1TopoSimulation)
 
@@ -31,5 +34,6 @@ DECLARE_COMPONENT(GlobalSim::eEmInputAlgTool)
 DECLARE_COMPONENT(GlobalSim::cTauInputAlgTool)
 DECLARE_COMPONENT(GlobalSim::jXEInputAlgTool)
 
-
-
+DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
+DECLARE_COMPONENT(GlobalSim::EMB1CellsFromCaloCells)
+DECLARE_COMPONENT(GlobalSim::eFexRoIAlgTool)
