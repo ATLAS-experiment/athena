@@ -68,7 +68,7 @@ TruthCaloShowerDecorator::addBranches() const
   // create truth clusters
   ATH_MSG_DEBUG("Creating truth clusters");
   if (!m_calibhitToCaloCellTool
-         ->processCalibHitsFromParticle(HepMC::SINGLE_PARTICLE_BARCODE)
+         ->processCalibHitsFromParticle()
          .isSuccess()) {
     ATH_MSG_FATAL("Tool " << m_calibhitToCaloCellTool << " failed.");
     return StatusCode::FAILURE;

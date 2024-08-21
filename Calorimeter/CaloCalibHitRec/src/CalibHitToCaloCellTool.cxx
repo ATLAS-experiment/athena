@@ -134,7 +134,6 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   int unknown_nchan = 0 ;
   
   std::vector<Identifier> ID;
-  if (barcode<0) barcode = HepMC::SINGLE_PARTICLE_BARCODE; // if no barcode is specified for this event, use the default
 
 
   std::vector<CaloCell*> CellsEtot;
@@ -146,7 +145,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
     for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
-      if ((int)calibhit->particleID()!=barcode) continue;
+      if ( (barcode>0 && (int)calibhit->particleID()!=barcode) || (barcode<0 && !MC::isSingleParticle((int)calibhit->particleID()))  ) continue;
 
       double Etot   = calibhit->energyTotal();
       double Eem    = calibhit->energy(0);

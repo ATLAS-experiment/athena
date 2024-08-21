@@ -52,8 +52,6 @@ namespace HepMC {
 
   constexpr int INVALID_PARTICLE_BARCODE = -1;
 
-  constexpr int SINGLE_PARTICLE_BARCODE = 10001;
-
   constexpr int UNDEFINED_ID = 0;
   constexpr int INVALID_PARTICLE_ID = -1;
   constexpr int INVALID_VERTEX_ID = 1;

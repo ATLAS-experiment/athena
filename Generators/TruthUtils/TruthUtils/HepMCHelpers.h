@@ -70,8 +70,14 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
-  /// @brief Identify a single particle
-  template <class T> inline bool isSingleParticle(const T&  p) { return HepMC::barcode(p) == HepMC::SINGLE_PARTICLE_BARCODE;} // FIXME barcode-based
+  /// @brief Identify a particlegun particle
+  template <class T> inline bool isSingleParticle(const T&  p) { 
+#if defined(HEPMC3)  
+    return HepMC::barcode(p)  == 3;
+#else
+    return HepMC::barcode(p)  == 10001;
+#endif
+  }
 
   /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
