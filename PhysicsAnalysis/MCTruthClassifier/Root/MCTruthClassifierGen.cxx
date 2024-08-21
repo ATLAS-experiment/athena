@@ -359,9 +359,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (!theMother) continue;
       if (!info) continue;
       info->photonMother = theMother;
-      info->photonMotherStatus = theMother->status();
-      info->photonMotherBarcode = HepMC::barcode(theMother);
-      info->photonMotherPDG = theMother->pdgId();
     }
   }
 
@@ -962,9 +959,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (info) {
     info->resetMotherProperties();
     info->photonMother = nullptr;
-    info->photonMotherBarcode = 0;
-    info->photonMotherPDG = 0;
-    info->photonMotherStatus = 0;
   }
 
   const xAOD::TruthParticle* thePriPart = MC::findMatching(mcTruthTES, thePart);
