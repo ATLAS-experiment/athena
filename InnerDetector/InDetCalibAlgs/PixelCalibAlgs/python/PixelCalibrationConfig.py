@@ -52,7 +52,7 @@ if __name__=="__main__":
     
     print("Creating Reference file..")
     # Downloads the last IOV
-    command = 'MakeReferenceFile %s' % (args.tag)
+    command = 'MakeReferenceFile tagName=%s' % (args.tag)
     print("Command: %s\n" % command)
     (subprocess.Popen(command, shell=True)).communicate()
     print("Done\n")
@@ -71,7 +71,7 @@ if __name__=="__main__":
     # Plots the old vs. new charge for all FE (includes IBL)
     # Meant to be used for pixel, but can be used for IBL in standalone (reading central DB using MakeReferenceFile.cxx step)
     from PixelCalibAlgs.EvoMonitoring import setupRunEvo
-    setupRunEvo("FINAL_calibration_candidate.txt", args.tag+".log" )
+    setupRunEvo("PIX_FINAL_calibration_candidate.txt", args.tag+".log" )
     print("Done\n")
     
     
