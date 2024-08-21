@@ -46,11 +46,9 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
     if "TrackTool" not in kwargs:
         from InDetConfig.TRT_SeededTrackFinderToolConfig import (
             TRT_SeededTrackFinder_ATLCfg)
-        InDetTRT_SeededTrackTool = acc.popToolsAndMerge(
-            TRT_SeededTrackFinder_ATLCfg(flags,
-                                         InputCollections=InputCollections))
-        acc.addPublicTool(InDetTRT_SeededTrackTool)
-        kwargs.setdefault("TrackTool", InDetTRT_SeededTrackTool)
+        kwargs.setdefault("TrackTool", acc.popToolsAndMerge(
+            TRT_SeededTrackFinder_ATLCfg(
+                flags, InputCollections=InputCollections)))
 
     kwargs.setdefault("PRDtoTrackMap",
                       'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")

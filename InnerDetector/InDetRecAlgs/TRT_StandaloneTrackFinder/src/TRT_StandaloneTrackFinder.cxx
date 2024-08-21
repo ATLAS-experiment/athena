@@ -20,9 +20,6 @@
 ///Track events
 #include "TrkSegment/TrackSegment.h"
 
-#include "GaudiKernel/SystemOfUnits.h"
-using Gaudi::Units::GeV;
-
 ///////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////
@@ -30,15 +27,7 @@ using Gaudi::Units::GeV;
 InDet::TRT_StandaloneTrackFinder::TRT_StandaloneTrackFinder
 (const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
-{
-  
-  m_minNumDriftCircles = 15                                   ;       //Minimum number of drift circles for TRT segment tracks
-  m_minPt              = 1.0 * GeV                            ;       //pt cut    
-
-  declareProperty("MinNumDriftCircles"         ,m_minNumDriftCircles); //Minimum number of drift circles for TRT segment tracks
-  declareProperty("MinPt"                      ,m_minPt             ); //Minimum Pt in preselection
-  declareProperty("OldTransitionLogic"         ,m_oldLogic = true   ); //use old transition logic for hits 
-}
+{ }
 
 InDet::TRT_StandaloneTrackFinder::~TRT_StandaloneTrackFinder()
 = default;
