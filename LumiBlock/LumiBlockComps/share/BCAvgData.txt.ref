@@ -1,0 +1,4 @@
+
+Timestamp:1 ns:0
+channel 0 GetBeam1Intensity 1.5 GetBeam2Intensity 1.5 GetBeam1IntensityAll 1.5 GetBeam2IntensityAll 1.5 GetBeam1IntensitySTD 1.5 GetBeam2IntensitySTD 1.5 GetBeam1IntensityAllSTD 1.5 GetBeam2IntensityAllSTD 1.5
+channel 1 GetBeam1Intensity 3 GetBeam2Intensity 3 GetBeam1IntensityAll 3 GetBeam2IntensityAll 3 GetBeam1IntensitySTD 3 GetBeam2IntensitySTD 3 GetBeam1IntensityAllSTD 3 GetBeam2IntensityAllSTD 3
