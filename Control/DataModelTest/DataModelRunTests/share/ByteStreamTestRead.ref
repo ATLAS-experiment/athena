@@ -1928,4 +1928,4 @@ ToolSv...adataTool   INFO in finalize()
 ToolSv...erializer   INFO ToolSvc.TrigTSerializer no problems encountered
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-leaving with code 0: "successful run"
+Py:Athena            INFO leaving with code 0: "successful run"

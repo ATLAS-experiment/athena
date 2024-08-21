@@ -3018,4 +3018,4 @@ AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
-leaving with code 0: "successful run"
+Py:Athena            INFO leaving with code 0: "successful run"

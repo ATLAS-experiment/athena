@@ -115,4 +115,4 @@ ApplicationMgr                    INFO Application Manager Stopped successfully
 ToolSvc                           INFO Removing all tools created by ToolSvc
 ApplicationMgr                    INFO Application Manager Finalized successfully
 ApplicationMgr                    INFO Application Manager Terminated successfully
-leaving with code 0: "successful run"
+Py:Athena            INFO leaving with code 0: "successful run"
