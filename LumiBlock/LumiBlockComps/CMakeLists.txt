@@ -78,4 +78,16 @@ if( NOT XAOD_ANALYSIS )
    atlas_add_test( BunchCrossingCondAlg
                    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/BunchCrossingCondAlgTest.py
                    POST_EXEC_SCRIPT "/usr/bin/diff -u0 BCData.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/BCData.txt.ref" )
+
+
+   atlas_add_test( BunchCrossingIntensityCondAlg
+                   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/BunchCrossingIntensityCondAlgTest.py
+                   POST_EXEC_SCRIPT " /usr/bin/diff BCIntData.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/BCIntData.txt.ref > BCInt_diff.log " )
+
+   atlas_add_test( BunchCrossingAverageCondAlg
+                   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/BunchCrossingAverageCondAlgTest.py
+                   POST_EXEC_SCRIPT " /usr/bin/diff BCAvgData.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/BCAvgData.txt.ref > BCAvg_diff.log " )
+
+
+
 endif()
