@@ -2,9 +2,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def geoModelFileDefault():
+def geoModelFileDefault(useR4Layout = False):
     # If this is changed, remember to also test with other dependent tests 
     # e.g. run ctest with ActsEventCnv
+    if useR4Layout: 
+        return  "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db"
     return "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v3.db"
 
 def SetupArgParser():

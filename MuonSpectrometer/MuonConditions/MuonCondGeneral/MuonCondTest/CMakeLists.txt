@@ -43,6 +43,18 @@ atlas_add_test( RpcCabling_Run3MC
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+
+atlas_add_test( RpcCabling_Run4MC
+                SCRIPT python -m MuonCondDump.dumpR4ToyCablings --setupRun4 && python -m MuonCondTest.RpcCablingTesterR4  --setupRun4 --JSONFile RpcCabling.json
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+atlas_add_test( RpcCabling_Run4MC_COOL
+                SCRIPT python -m MuonCondTest.RpcCablingTesterR4  --setupRun4  
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
 atlas_add_test( NSWCondTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWCondAlg.sh 
                 PRIVATE_WORKING_DIRECTORY
