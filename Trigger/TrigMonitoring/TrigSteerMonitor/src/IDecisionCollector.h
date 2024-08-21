@@ -15,7 +15,7 @@ class IDecisionCollector : virtual public IAlgTool {
 public: 
   DeclareInterfaceID(IDecisionCollector, 1, 0);
   
-  virtual void getDecisions( std::vector<TrigCompositeUtils::DecisionID>& ) const = 0;
+  virtual void getDecisions( std::vector<TrigCompositeUtils::DecisionID>&, const EventContext& ) const = 0;
   
   virtual ~IDecisionCollector() override {}
 }; 
