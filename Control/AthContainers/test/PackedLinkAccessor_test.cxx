@@ -191,6 +191,7 @@ void test2()
   using Cont = std::vector<int>;
   using PLink = SG::PackedLink<Cont>;
   using DLink = DataLink<Cont>;
+  using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
 
   SG::Accessor<PLink> ptyp1 ("plink");
 
@@ -237,17 +238,17 @@ void test2()
   assert (cspan.back().key() == 124);
   assert (cspan.back().index() == 14);
 
-  std::vector<unsigned> idx;
+  std::vector<IdxType> idx;
   for (ElementLink<Cont> el : span) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<IdxType> {10, 11, 0, 13, 14}));
 
   idx.clear();
   for (ElementLink<Cont> el : cspan) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {10, 11, 0, 13, 14}));
+  assert (idx == (std::vector<IdxType> {10, 11, 0, 13, 14}));
 
   span[1] = ElementLink<Cont> (125, 21);
   assert (span[1].key() == 125);
@@ -280,7 +281,7 @@ void test2()
   for (ElementLink<Cont> el : cspan) {
     idx.push_back (el.isDefault() ? 0 : el.index());
   }
-  assert (idx == (std::vector<unsigned> {0, 22, 0, 14, 23}));
+  assert (idx == (std::vector<IdxType> {0, 22, 0, 14, 23}));
 }
 
 
