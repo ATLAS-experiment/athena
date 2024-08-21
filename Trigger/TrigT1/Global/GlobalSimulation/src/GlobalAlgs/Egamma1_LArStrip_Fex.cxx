@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -262,13 +262,11 @@ namespace GlobalSim {
     auto max_neigh_cell_pos{std::distance(std::begin(neigh_cells[1]),
 					  max_neigh_cell_it)};
 
-    auto toStripData = [](const auto& cells){
-
+    auto toStripData = [](const auto& fromCells){
       auto stripdata = std::vector<StripData>();
-      stripdata.reserve(cells.size());
-      
-      std::transform(std::begin(cells),
-		     std::end(cells),
+      stripdata.reserve(fromCells.size());
+      std::transform(std::begin(fromCells),
+		     std::end(fromCells),
 		     back_inserter(stripdata),
 		     [](const auto& c) {
 		       return StripData(c->eta(),
@@ -331,7 +329,7 @@ namespace GlobalSim {
     }
     os << '\n';
       
-    for(const auto sd : sdv) {
+    for(const auto & sd : sdv) {
       os << sd.m_e << ' ';
     }
     os << '\n';
