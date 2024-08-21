@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoring.DQConfigFlags import DQDataType
 
 import functools
-import math
 
 class TrigTauMonAlgBuilder:
   # Configuration flags
@@ -304,7 +303,7 @@ class TrigTauMonAlgBuilder:
 
 
   def configureAlgorithmL1(self):
-    has_xtob_etau_rois = 'L1_eTauxRoI' in self.helper.flags.Input.Collections
+    has_xtob_etau_rois = 'L1_eTauxRoI' in self.helper.flags.Input.Collections or self.helper.flags.DQ.Environment == "tier0"
 
     self.mon_alg_L1 = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1')
     self.mon_alg_L1.TriggerList = self.L1_items
@@ -657,7 +656,7 @@ class TrigTauMonAlgBuilder:
 
     coarse_binning = self.getCustomPtBinning(trigger)
 
-    defineEachStepHistograms('tauPt', 'p_{T} [GeV]', 60, 0.0, 300)
+    defineEachStepHistograms('tauPt', 'p_{T} [GeV]', 60, 0, 300)
     defineEachStepHistograms('tauPt', 'p_{T} [GeV]', coarse_binning, coarse_binning[0], coarse_binning[-1], coarse=True)
     defineEachStepHistograms('tauEta', '#eta', 13, -2.6, 2.6)
     defineEachStepHistograms('tauPhi', '#phi', 16, -3.2, 3.2)
@@ -672,17 +671,17 @@ class TrigTauMonAlgBuilder:
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
 
     mon_group.defineHistogram('L1RoIEt,L1RoIEta', type='TH2F', title='L1 RoI E_{T} vs #eta; E_{T} [GeV]; #eta',
-                              xbins=100, xmin=0, xmax=100, 
-                              ybins=60, ymin=-2.5, ymax=2.5,  opt='kAlwaysCreate')
+                              xbins=60, xmin=0, xmax=300, 
+                              ybins=60, ymin=-2.6, ymax=2.6,  opt='kAlwaysCreate')
     mon_group.defineHistogram('L1RoIEt,L1RoIPhi', type='TH2F', title='L1 RoI E_{T} vs #phi; E_{T} [GeV]; #phi',
-                              xbins=100, xmin=0, xmax=100, 
-                              ybins=100, ymin=-math.pi, ymax=math.pi,  opt='kAlwaysCreate')
+                              xbins=60, xmin=0, xmax=300, 
+                              ybins=60, ymin=-3.2, ymax=3.2,  opt='kAlwaysCreate')
     mon_group.defineHistogram('L1RoIEta,L1RoIPhi', type='TH2F', title='L1 RoI #eta vs #phi; #eta; #phi',
-                              xbins=60, xmin=-2.5, xmax=2.5, 
-                              ybins=100, ymin=-math.pi, ymax=math.pi,  opt='kAlwaysCreate')
-    mon_group.defineHistogram('L1RoIEta', title='L1 RoI #eta; #eta; RoIs', xbins=60, xmin=-2.5, xmax=2.5, opt='kAlwaysCreate')
-    mon_group.defineHistogram('L1RoIPhi', title='L1 RoI #phi; #phi; RoIs', xbins=100, xmin=-math.pi, xmax=math.pi, opt='kAlwaysCreate')
-    mon_group.defineHistogram('L1RoIEt', title='L1 RoI E_{T}; E_{T} [GeV]; RoIs', xbins=30, xmin=0, xmax=150, opt='kAlwaysCreate')
+                              xbins=60, xmin=-2.6, xmax=2.6, 
+                              ybins=60, ymin=-3.2, ymax=3.2,  opt='kAlwaysCreate')
+    mon_group.defineHistogram('L1RoIEta', title='L1 RoI #eta; #eta; RoIs', xbins=60, xmin=-2.6, xmax=2.6, opt='kAlwaysCreate')
+    mon_group.defineHistogram('L1RoIPhi', title='L1 RoI #phi; #phi; RoIs', xbins=60, xmin=-3.2, xmax=3.2, opt='kAlwaysCreate')
+    mon_group.defineHistogram('L1RoIEt', title='L1 RoI E_{T}; E_{T} [GeV]; RoIs', xbins=60, xmin=0, xmax=300, opt='kAlwaysCreate')
 
     if 'eTAU' in trigger:
         mon_group.defineHistogram('L1eFexRoIRCore', title='L1 eTAU RoI rCore Isolation; rCore Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
