@@ -83,7 +83,7 @@ StatusCode CalibHitToCaloCellTool::initialize()
 
 
 /////////////////   EXECUTE   //////////////////////
-StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) const
+StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
 {
   ATH_MSG_DEBUG("in calibHitToCaloCellTool");
 
@@ -145,7 +145,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
     for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
-      if ( (barcode>0 && (int)calibhit->particleID()!=barcode) || (barcode<0 && !MC::isSingleParticle((int)calibhit->particleID()))  ) continue;
+      if (!MC::isSingleParticle((int)calibhit->particleID())) continue;
 
       double Etot   = calibhit->energyTotal();
       double Eem    = calibhit->energy(0);

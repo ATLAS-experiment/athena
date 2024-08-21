@@ -41,7 +41,7 @@ class CalibHitToCaloCellTool: virtual public AthAlgTool {
   CalibHitToCaloCellTool(const std::string& t, const std::string& n, const IInterface*  p);
   ~CalibHitToCaloCellTool();
   StatusCode initialize() override;
-  StatusCode processCalibHitsFromParticle(int barcode=-1) const;
+  StatusCode processCalibHitsFromParticle() const;
   StatusCode finalize() override;
   
   static const InterfaceID& interfaceID() { return IID_CalibHitToCaloCellTool;}
