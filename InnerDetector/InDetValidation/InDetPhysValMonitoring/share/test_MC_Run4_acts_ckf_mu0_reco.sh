@@ -97,8 +97,7 @@ run "IDPVM" \
     --outputFile idpvm.ambi.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --doExpertPlots \
-    --HSFlag All
+    --doExpertPlots
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then

@@ -58,7 +58,6 @@ run "IDPVM" \
     --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --HSFlag All \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
