@@ -9,7 +9,7 @@
 # art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ambi_last
+# art-html: dcube_ckf_last
 
 lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml

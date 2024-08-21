@@ -8,7 +8,7 @@
 # art-output: last_results/art_download_AtlasBuildStamp
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_ambi_last
+# art-html: dcube_ckf_last
 # art-athena-mt: 4
 
 lastref_dir=last_results
