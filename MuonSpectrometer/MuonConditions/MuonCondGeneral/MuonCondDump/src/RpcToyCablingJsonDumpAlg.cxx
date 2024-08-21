@@ -52,7 +52,9 @@ StatusCode RpcToyCablingJsonDumpAlg::execute() {
       for (unsigned int gasGap =1 ; gasGap <= reEle->nGasGaps(); ++gasGap){
         for (int doubletPhi = reEle->doubletPhi(); doubletPhi <= reEle->doubletPhiMax(); ++doubletPhi) {
             for (bool measPhi: {false, true}) {
-              const unsigned int nStrips = (measPhi ? reEle->nPhiStrips() : reEle->nEtaStrips())+1;
+              const IdentifierHash layHash = reEle->createHash(1,gasGap,doubletPhi,measPhi);
+              if (!reEle->nStrips(layHash)) continue;
+              const unsigned int nStrips = reEle->nStrips(layHash)+1;
               const unsigned int nTdcStrips = (nStrips % nStripsPerTdc ? 1 : 0) + 
                                               (nStrips - (nStrips % nStripsPerTdc)) / nStripsPerTdc;  
                 for (bool side : {false, true}) {
