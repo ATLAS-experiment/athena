@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __Identifier32_h__
@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <string>
+#include <iosfwd>
 
 /**
  **-----------------------------------------------
@@ -15,211 +16,69 @@
  **  Identifier32 relies on other classes - IdHelpers - to encode and
  **  decode its information.
  **  
- **  The default constructor created an Identifier32 an invalid state
- **  which can be check with the "is_valid" method to allow some error
+ **  The default constructor creates an Identifier32 in an invalid state
+ **  which can be used to check with the "is_valid" method to allow some error
  **  checking.
  **  
  **-----------------------------------------------
  */
-class Identifier32
-{
+class Identifier32{
 public:
-
-
-    ///----------------------------------------------------------------
-    /// Define public typedefs
-    ///----------------------------------------------------------------
     typedef Identifier32                id_type;
     typedef unsigned int                value_type;
     typedef unsigned int                size_type;
 
-    ///----------------------------------------------------------------
-    /// Constructors
-    ///----------------------------------------------------------------
+    Identifier32 () = default;
 
-    /// Default constructor
-    Identifier32 ();
-
-    /// Constructor from value_type
-    explicit Identifier32 (value_type value);
-
-    /// Copy constructor
-    Identifier32 (const Identifier32& other) = default;
-
-    /// Assignment.
-    Identifier32& operator= (const Identifier32& other) = default;
-
-    ///----------------------------------------------------------------
-    /// Modifications
-    ///----------------------------------------------------------------
-
-    /// Assignment operator
-    Identifier32& operator = (value_type value);
+    /// Constructor from value_type (unsigned int)
+    inline explicit Identifier32 (value_type value):m_id(value){}
 
     /// Bitwise operations 
     Identifier32& operator |= (value_type value);
     Identifier32& operator &= (value_type value);
 
     /// Reset to invalid state
-    void clear ();
-
-    ///----------------------------------------------------------------
-    /// Accessors
-    ///----------------------------------------------------------------
+    inline void clear () {m_id = m_maxValue;}
 
     /// Get the compact id
-    value_type  get_compact  (void) const;
-
-    ///----------------------------------------------------------------
-    /// Comparison operators
-    ///----------------------------------------------------------------
-  
-    bool operator ==    (const Identifier32& other) const;
-    bool operator !=    (const Identifier32& other) const;
-    bool operator <     (const Identifier32& other) const;
-    bool operator >     (const Identifier32& other) const;
-    bool operator <=    (const Identifier32& other) const;
-    bool operator >=    (const Identifier32& other) const;
-
-    ///----------------------------------------------------------------
-    /// Error management
-    ///----------------------------------------------------------------
-
+    inline value_type  get_compact  () const{ return m_id;}
+    
+    //All comparisons, since C++20
+    auto operator<=>(const Identifier32&) const = default;
+   
     /// Check if id is in a valid state
-    bool is_valid () const;
-
-    ///----------------------------------------------------------------
-    /// Utilities
-    ///----------------------------------------------------------------
+    inline bool is_valid () const {return m_id != m_maxValue;}
 
     /// Provide a string form of the identifier - hexadecimal
     std::string  getString() const;
 
     /// Print out in hex form
     void show () const;
+    
+    //convert to string representation
+    explicit operator std::string() const {return getString();}
 
 private:
-
-    typedef enum {
-        max_value = 0xFFFFFFFF
-    } max_value_type;
-
-    //----------------------------------------------------------------
-    // The compact identifier data.
-    //----------------------------------------------------------------
-    value_type m_id;
-
+    static constexpr value_type m_maxValue{0xFFFFFFFF};
+    value_type m_id{m_maxValue};
 };
-//-----------------------------------------------
 
-
-
-
-
-
-
-
-
-
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-
-
-// Constructors
-//-----------------------------------------------
-inline Identifier32::Identifier32 ()
-    : m_id(max_value)
-{}
-
-
-//-----------------------------------------------
-inline Identifier32::Identifier32 (value_type value)
-    : m_id(value)
-{}
-
-// Modifications
-//-----------------------------------------------
-
-inline Identifier32&
-Identifier32::operator = (value_type value)
-{
-    m_id = value;
-    return (*this);
-}
 
 inline Identifier32&                                   
-Identifier32::operator |= (unsigned int value)
-{
+Identifier32::operator |= (unsigned int value){
     m_id |= value;
     return (*this);
 }
 
 inline Identifier32& 
-Identifier32::operator &= (unsigned int value)
-{
+Identifier32::operator &= (unsigned int value){
     m_id &= value;
     return (*this);
 }
 
-inline void 
-Identifier32::clear () 
-{
-    m_id = max_value;
-}
+//stream insertion
+std::ostream & operator << (std::ostream &out, const Identifier32 &c);
 
-// Accessors
 
-inline Identifier32::value_type  Identifier32::get_compact  (void) const
-{
-    return (m_id);
-}
-
-// Comparison operators
-//----------------------------------------------------------------
-inline bool 
-Identifier32::operator == (const Identifier32& other) const
-{
-    return (m_id == other.m_id);
-}
-
-//----------------------------------------------------------------
-inline bool 
-Identifier32::operator != (const Identifier32& other) const
-{
-    return (m_id != other.m_id);
-}
-
-//-----------------------------------------------
-inline bool 
-Identifier32::operator < (const Identifier32& other) const
-{
-    return (m_id < other.m_id);
-}
-
-//-----------------------------------------------
-inline bool 
-Identifier32::operator > (const Identifier32& other) const
-{
-    return (m_id > other.m_id);
-}
-
-//-----------------------------------------------
-inline bool 
-Identifier32::operator <= (const Identifier32& other) const
-{
-    return (m_id <= other.m_id);
-}
-
-//-----------------------------------------------
-inline bool 
-Identifier32::operator >= (const Identifier32& other) const
-{
-    return (m_id >= other.m_id);
-}
-
-inline bool 
-Identifier32::is_valid () const
-{
-    return (!(max_value == m_id));
-}
 
 #endif
