@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -30,46 +30,9 @@ namespace InDet {
   ConversionPostSelector::ConversionPostSelector(const std::string& type,
                                                  const std::string& name,
                                                  const IInterface* parent)
-      : AthAlgTool(type, name, parent),
-        m_minPt{0},
-        m_maxdR{-10000.},
-        m_maxPhiVtxTrk{0.2},
-        m_decorateVertices{true},
-        m_massK0{497.672},
-        m_sigmaK0{8.5},
-        m_massLambda{1115.683},
-        m_sigmaLambda{3.5},
-        m_nsig{5} {
-
-    m_maxChi2.push_back(35.);
-    m_maxChi2.push_back(25.);
-    m_maxChi2.push_back(20.);
-
-    m_invMassCut.push_back(10000.);
-    m_invMassCut.push_back(10000.);
-    m_invMassCut.push_back(10000.);
-
-    m_fitMomentum.push_back(0.);
-    m_fitMomentum.push_back(0.);
-    m_fitMomentum.push_back(0.);
-
-    m_minRadius.push_back(-10000.);
-    m_minRadius.push_back(-10000.);
-    m_minRadius.push_back(-10000.);
-
+      : AthAlgTool(type, name, parent) {
     declareInterface<ConversionPostSelector>(this);
-    declareProperty("MaxChi2Vtx", m_maxChi2);
-    declareProperty("MaxInvariantMass", m_invMassCut);
-    declareProperty("MinFitMomentum", m_fitMomentum);
-    declareProperty("MinRadius", m_minRadius);
-    declareProperty("MinPt", m_minPt);
-    declareProperty("MaxdR", m_maxdR);
-    declareProperty("MaxPhiVtxTrk", m_maxPhiVtxTrk);
-    declareProperty("NSigma", m_nsig);
-    declareProperty("DecorateVertices", m_decorateVertices);
   }
-
-  ConversionPostSelector::~ConversionPostSelector() = default;
   
   const InterfaceID& ConversionPostSelector::interfaceID() {
     return IID_IConversionPostSelector;

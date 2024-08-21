@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_CONVERSIONPOSTSELECTOR_H
@@ -29,7 +29,7 @@ namespace InDet {
 
   public:
     ConversionPostSelector (const std::string& type,const std::string& name, const IInterface* parent);
-    virtual ~ConversionPostSelector();
+    virtual ~ConversionPostSelector() = default;
 
     static const InterfaceID& interfaceID();
     virtual StatusCode initialize() override;
@@ -56,22 +56,32 @@ namespace InDet {
   private:
     /** Properties for track selection:
 	all cuts are ANDed */
-    std::vector<double> m_maxChi2;     /** Chi2 cut.  */
-    std::vector<double> m_invMassCut;  /** Invariant mass cut.  */
-    std::vector<double> m_fitMomentum; /** Converted photon reconstructed momentum at vertex cut.  */
-    std::vector<double> m_minRadius;   /** Converted photon reconstructed vertex radial position cut.  */
-    double              m_minPt;       /** Pt of the two participating tracks at the vertex. */
-    double              m_maxdR;       /** Distance of first track hit- reconstructed vertex radial position.  */
-    double              m_maxPhiVtxTrk;/** Maximum difference in phi between reconstructed vertex and track at vertex. */
-    bool                m_decorateVertices;/** Decorate vertices with values used for vertex selection */
+    DoubleArrayProperty m_maxChi2
+      {this, "MaxChi2Vtx", {35., 25., 20.}, "Chi2 cut"};
+    DoubleArrayProperty m_invMassCut
+      {this, "MaxInvariantMass", {10000., 10000., 10000.}, "Invariant mass cut"};
+    DoubleArrayProperty m_fitMomentum
+      {this, "MinFitMomentum", {0., 0., 0.},
+       "Converted photon reconstructed momentum at vertex cut"};
+    DoubleArrayProperty m_minRadius
+      {this, "MinRadius", {-10000., -10000., -10000.},
+       "Converted photon reconstructed vertex radial position cut"};
+    DoubleProperty m_minPt {this, "MinPt", 0.,
+      "Pt of the two participating tracks at the vertex"};
+    DoubleProperty m_maxdR {this, "MaxdR", -10000.,
+      "Distance of first track hit- reconstructed vertex radial position"};
+    DoubleProperty m_maxPhiVtxTrk{this, "MaxPhiVtxTrk", 0.2,
+      "Maximum difference in phi between reconstructed vertex and track at vertex"};
+    BooleanProperty m_decorateVertices{this, "DecorateVertices", true,
+      "Decorate vertices with values used for vertex selection"};
 
 
     /** Masses and mass ranges for different V0 hypotheses */
-    double m_massK0      ;
-    double m_sigmaK0     ;
-    double m_massLambda  ;
-    double m_sigmaLambda ;
-    int    m_nsig        ;
+    static constexpr double m_massK0 = 497.672;
+    static constexpr double m_sigmaK0 = 8.5;
+    static constexpr double m_massLambda = 1115.683;
+    static constexpr double m_sigmaLambda = 3.5;
+    IntegerProperty m_nsig{this, "NSigma", 5};
 
 
     /** Compute the four-momentum of a particle according to a mass hypothesis.  */

@@ -26,23 +26,9 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
                                                        const std::string& n,
                                                        const IInterface* p)
   : AthAlgTool(t, n, p)
-  , m_mindR{ -350. }
-  , m_maxdR{ 250. }
-  , m_MinInitVtxR{ 0 }
-  , m_MinFlightAngle{ 0 }
 {
   declareInterface<IVertexFinder>(this);
-  // Remove standalone TRT tracks
-  declareProperty("RemoveTrtTracks", m_removeTrt);
-  // Conversion or V0s
-  declareProperty("IsConversion", m_isConversion); 
-   // Decorate vertices with values used for vertex selection
-  declareProperty("DecorateVertices", m_decorateVertices = true);
-  declareProperty("MinDistVtxHit", m_mindR);
-  declareProperty("MaxDistVtxHit", m_maxdR);
-  declareProperty("MinInitVtxR", m_MinInitVtxR);
-  declareProperty("MinFlightAngle", m_MinFlightAngle);
-  }
+}
   
   InDetConversionFinderTools::~InDetConversionFinderTools()= default;
   

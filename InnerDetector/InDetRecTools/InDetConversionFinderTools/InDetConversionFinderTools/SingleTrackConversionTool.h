@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_SINGLETRACKCONVERSION_H
@@ -33,7 +33,7 @@ public:
   SingleTrackConversionTool(const std::string& type,
                             const std::string& name,
                             const IInterface* parent);
-  virtual ~SingleTrackConversionTool();
+  virtual ~SingleTrackConversionTool() = default;
 
   static const InterfaceID& interfaceID();
   virtual StatusCode initialize() override;
@@ -47,15 +47,19 @@ public:
   bool selectSingleTrackParticleConversion(const xAOD::TrackParticle*) const;
 
 protected:
-  double m_minInitR; /** Minimum initial hit radius in order to consider track
-                        as coming from photon conversion */
-  double m_minInitR_noBLay; /** Minimum initial hit radius in order to consider
-                               track as coming from photon conversion */
-  double m_singleThreshold; /** Minimum ratio of HL hits for a track to be
-                               labeled as electron */
-  int m_maxBLhits;          /** Maximum number of blayer hits */
-  // double m_maxPhiVtxTrk;    /** maximum difference in pointing */
-  bool m_PIDonlyForXe; /** Only check TRT PID if all hits are Xe hits */
+  DoubleProperty m_minInitR
+    {this, "MinInitialHitRadius", 70.,
+     "Minimum initial hit radius in order to consider track as coming from photon conversion"};
+  DoubleProperty m_minInitR_noBLay
+    {this, "MinInitialHitRadius_noBlay", 120.,
+     "Minimum initial hit radius in order to consider track as coming from photon conversion"};
+  DoubleProperty m_singleThreshold
+    {this, "MinRatioOfHLhits", 0.1,
+     "Minimum ratio of HL hits for a track to be labeled as electron"};
+  IntegerProperty m_maxBLhits
+    {this, "MaxBLayerHits", 0, "Maximum number of blayer hits"};
+  BooleanProperty m_PIDonlyForXe
+    {this, "PIDonlyForXe", false, "Only check TRT PID if all hits are Xe hits"};
 };
 
 }

@@ -22,7 +22,7 @@ namespace InDet {
   public:
     VertexPointEstimator (const std::string& type,const std::string& name, const IInterface* parent);
     
-    virtual ~VertexPointEstimator();
+    virtual ~VertexPointEstimator() = default;
     
     static const InterfaceID& interfaceID();
 
@@ -76,16 +76,33 @@ namespace InDet {
     static double areaTriangle(double, double, double, double, double, double) ;
     
     static const double s_bmagnt;
-    std::vector<double> m_maxDR;         /**maximum XY separation, non-intersecting circles*/
-    std::vector<double> m_maxDZ;         /**maximum allowed track Z separation at the vertex */
-    std::vector<double> m_maxR;          /** maximum allowed vertex radius */
-    std::vector<double> m_minArcLength;  /**minimum permitted arc length, track to vertex, depends on the posion of the first measurement*/
-    std::vector<double> m_maxArcLength;  /**maximum permitted arc length, track to vertex, depends on the posion of the first measurement*/
-    std::vector<double> m_minDr;         /**minimum difference between helix centers*/
-    std::vector<double> m_maxDr;         /**maximum difference between helix centers*/
-    std::vector<double> m_maxHl;         /**maximum ratio H/l */
-    std::vector<double> m_maxPhi;        /**maximum DPhi at the estimated vertex position */
-    bool m_returnOnError;
+    DoubleArrayProperty m_maxDR
+      {this, "MaxTrkXYDiffAtVtx", {10000., 10000., 10000.},
+       "maximum XY separation, non-intersecting circles"};
+    DoubleArrayProperty m_maxDZ
+      {this, "MaxTrkZDiffAtVtx", {10000., 10000., 10000.},
+       "maximum allowed track Z separation at the vertex"};
+    DoubleArrayProperty m_maxR
+      {this, "MaxTrkXYValue", {10000., 10000., 10000.},
+       "maximum allowed vertex radius"};
+    DoubleArrayProperty m_minArcLength
+      {this, "MinArcLength", {-10000., -10000., -10000.},
+       "minimum permitted arc length, track to vertex, depends on the posion of the first measurement"};
+    DoubleArrayProperty m_maxArcLength
+      {this, "MaxArcLength", {10000., 10000., 10000.},
+       "maximum permitted arc length, track to vertex, depends on the posion of the first measurement"};
+    DoubleArrayProperty m_minDr
+      {this, "MinDeltaR", {-5., -25., -50.},
+       "minimum difference between helix centers"};
+    DoubleArrayProperty m_maxDr
+      {this, "MaxDeltaR", {5., 10., 10.},
+       "maximum difference between helix centers"};
+    DoubleArrayProperty m_maxHl
+      {this, "MaxHl", {10000., 10000., 10000.}, "maximum ratio H/l"};
+    DoubleArrayProperty m_maxPhi
+      {this, "MaxPhi", {0.05, 0.1, 0.1},
+       "maximum DPhi at the estimated vertex position"};
+    BooleanProperty m_returnOnError{this, "ReturnOnError", true};
   };
   
 }
