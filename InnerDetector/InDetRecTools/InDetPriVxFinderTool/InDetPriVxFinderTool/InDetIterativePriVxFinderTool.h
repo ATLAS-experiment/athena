@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -154,19 +154,22 @@ private:
     "SG key for beam spot"
   };
 
-  bool m_useBeamConstraint;
-  double m_significanceCutSeeding;
-  double m_maximumChi2cutForSeeding;
-  double m_maxVertices;
+  BooleanProperty m_useBeamConstraint{this, "useBeamConstraint", false};
+  DoubleProperty m_significanceCutSeeding
+    {this, "significanceCutSeeding", 10.};
+  DoubleProperty m_maximumChi2cutForSeeding
+    {this, "maximumChi2cutForSeeding", 36.};
+  IntegerProperty m_maxVertices{this, "maxVertices", 25};
 
-  bool m_createSplitVertices;
-  int m_splitVerticesTrkInvFraction; ///< Integer: 1./fraction of tracks to be
-                                     ///< assigned to the tag split vertex
+  BooleanProperty m_createSplitVertices{this, "createSplitVertices", false};
+  IntegerProperty m_splitVerticesTrkInvFraction
+    {this, "splitVerticesTrkInvFraction", 2, "inverse fraction to split tracks (1:N)"};
 
-  bool m_reassignTracksAfterFirstFit;
+  BooleanProperty m_reassignTracksAfterFirstFit
+    {this, "reassignTracksAfterFirstFit", false};
 
-  bool m_doMaxTracksCut;
-  unsigned int m_maxTracks;
+  BooleanProperty m_doMaxTracksCut{this, "doMaxTracksCut", false};
+  UnsignedIntegerProperty m_maxTracks{this, "MaxTracks", 5000};
 
   void SGError(const std::string& errService);
 

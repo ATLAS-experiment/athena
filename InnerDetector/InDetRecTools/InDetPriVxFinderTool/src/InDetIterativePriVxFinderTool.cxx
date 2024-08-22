@@ -49,28 +49,8 @@ InDetIterativePriVxFinderTool::InDetIterativePriVxFinderTool(
   const std::string& n,
   const IInterface* p)
   : AthAlgTool(t, n, p)
-  , m_useBeamConstraint(false)
-  , m_significanceCutSeeding(10)
-  , m_maximumChi2cutForSeeding(6. * 6.)
-  , m_maxVertices(25)
-  , m_createSplitVertices(false)
-  , m_splitVerticesTrkInvFraction(2)
-  , m_reassignTracksAfterFirstFit(false)
-  , m_doMaxTracksCut(false)
-  , m_maxTracks(5000)
 {
   declareInterface<IVertexFinder>(this);
-  declareProperty("useBeamConstraint", m_useBeamConstraint);
-  declareProperty("significanceCutSeeding", m_significanceCutSeeding);
-  declareProperty("maximumChi2cutForSeeding", m_maximumChi2cutForSeeding);
-  declareProperty("maxVertices", m_maxVertices);
-  declareProperty("createSplitVertices", m_createSplitVertices);
-  declareProperty("splitVerticesTrkInvFraction",
-                  m_splitVerticesTrkInvFraction,
-                  "inverse fraction to split tracks (1:N)");
-  declareProperty("reassignTracksAfterFirstFit", m_reassignTracksAfterFirstFit);
-  declareProperty("doMaxTracksCut", m_doMaxTracksCut);
-  declareProperty("MaxTracks", m_maxTracks);
 }
 
 InDetIterativePriVxFinderTool::~InDetIterativePriVxFinderTool() = default;
