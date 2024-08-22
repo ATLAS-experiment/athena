@@ -75,12 +75,25 @@ StatusCode PixelDetectorTool::create()
     manager->addChannel(topFolder +"/PIXB2",  0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXB3",  0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXB4",  0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXB5",  0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEA1", 0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEA2", 0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEA3", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA4", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA5", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA6", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA7", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA8", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEA9", 0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEC1", 0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEC2", 0, InDetDD::local);
     manager->addChannel(topFolder +"/PIXEC3", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC4", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC5", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC6", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC7", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC8", 0, InDetDD::local);
+    manager->addChannel(topFolder +"/PIXEC9", 0, InDetDD::local);
   }
   InDetDD::ITk::PixelGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 
