@@ -26,6 +26,20 @@ namespace TrigCompositeUtils {
       NavGraphNode(const Decision* me);
 
       /**
+       * @brief Destruct a NavGraphNode, default
+       **/
+      ~NavGraphNode() = default;
+
+      /**
+       * @brief Prevent copies of a NavGraphNode
+       **/
+      NavGraphNode(const NavGraphNode& obj) = delete;
+
+      /**
+       * @brief Prevent move of a NavGraphNode
+       **/
+      NavGraphNode(NavGraphNode&& obj) = delete;
+      /**
        * @brief Form an edge in the graph from this node to another one.
        * @param[in] to The "parent" or "seed" Decision object from the perspective of this Node's shadowed Decision object. Mutable to allow two-way linking.
        * @return True if a new edge was added. False if this was a duplicated call to add this edge.
@@ -104,6 +118,21 @@ namespace TrigCompositeUtils {
       NavGraph();
 
       /**
+       * @brief Destruct a NavGraph, default
+       **/
+      ~NavGraph() = default;
+
+      /**
+       * @brief Prevent copy of a NavGraphNode
+       **/
+      NavGraph(const NavGraph& obj) = delete;
+
+      /**
+       * @brief Prevent move of a NavGraphNode
+       **/
+      NavGraph(NavGraph&& obj) = delete;
+
+      /**
        * @brief Add a new NavGraphNode which shadows the xAOD Decision object "node" from the full navigation graph
        * @param[in] node The xAOD Decision object which the new node will shadow. Will not cause duplication if node has already been added.
        * @param[in] comingFrom If not null, used to indicate which xAOD Decision object was the seed of "node". This is used to form an edge in the graph.
@@ -179,7 +208,8 @@ namespace TrigCompositeUtils {
        **/
       void recursivePrintNavPath(const NavGraphNode& nav, size_t level, MsgStream& log, MSG::Level msgLevel) const;
 
-      std::map<const Decision*, NavGraphNode> m_nodes; //!< Map of nodes in the graph. Indexed on the underlying Decision pointer.
+      std::map<const Decision*, size_t> m_nodePositionMap; //!< Map of Decision pointer and index of the node(that contains the Decision) in m_nodes.
+      std::vector<std::unique_ptr<NavGraphNode>> m_nodes; //!< Vector of unique pointers to nodes in the graph.
       std::vector<NavGraphNode*> m_finalNodes; //!< Entry points into the navigation graph. When iterating over the graph, start from all of these places.
       size_t m_edges; //!< Statistics on the number of edges, connecting the nodes in the graph.
   };
