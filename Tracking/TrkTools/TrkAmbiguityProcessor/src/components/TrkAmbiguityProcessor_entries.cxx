@@ -1,6 +1,5 @@
 #include "../SimpleAmbiguityProcessorTool.h"
 #include "../TrackSelectionProcessorTool.h"
-#include "../TrackScoringTool.h"
 #include "../DenseEnvironmentsAmbiguityProcessorTool.h"
 #include "../DenseEnvironmentsAmbiguityScoreProcessorTool.h"
 
@@ -9,5 +8,4 @@ DECLARE_COMPONENT( DenseEnvironmentsAmbiguityProcessorTool )
 DECLARE_COMPONENT( DenseEnvironmentsAmbiguityScoreProcessorTool )
 DECLARE_COMPONENT( SimpleAmbiguityProcessorTool )
 DECLARE_COMPONENT( TrackSelectionProcessorTool )
-DECLARE_COMPONENT( TrackScoringTool )
 

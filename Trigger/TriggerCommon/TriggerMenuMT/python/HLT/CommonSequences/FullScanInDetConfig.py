@@ -44,6 +44,7 @@ def commonInDetFullScanCfg(flags: AthConfigFlags) -> ComponentAccumulator:
             flags,
             JetContainer='HLT_AntiKt4EMTopoJets_subjesIS',
             TrackParticleLocation=flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
+            PlainSumPtDecor='UnrestrictedSumPt'
         )
         jetcalc = jetcalccfg.popPrivateTools()
         acc.merge(jetcalccfg)
@@ -51,9 +52,18 @@ def commonInDetFullScanCfg(flags: AthConfigFlags) -> ComponentAccumulator:
             flags,
             VertexWeightCalculator=jetcalc
         )
-        vxsort = vxsortcfg.popPrivateTools()
-        acc.merge(vxsortcfg)
+        vxsort = acc.popToolsAndMerge(vxsortcfg)
         vxkwargs["VertexCollectionSortingTool"] = vxsort
+
+        from TrkConfig.TrkVertexToolsConfig import SumPt2VertexCollectionSortingToolCfg
+        default_sumpt_vxsort = SumPt2VertexCollectionSortingToolCfg(flags)
+        from InDetPriVxFinder.ResortVerticesConfig import ResortVerticesCfg
+        acc.merge(ResortVerticesCfg(
+            flags,
+            flagsWithTrk.Tracking.ActiveConfig.vertex_jet,
+            "HLT_IDVertex_FS_origsumpt",
+            default_sumpt_vxsort,
+        ))
 
     acc.merge(
         InDetTrigPriVxFinderCfg(

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackScoringTools/InDetCosmicScoringTool.h"
@@ -23,7 +23,7 @@ InDet::InDetCosmicScoringTool::InDetCosmicScoringTool(const std::string& t,
   declareProperty("minTRTHits",           m_minTRTHits = 0);
 }
 
-Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track ) const
+Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track, bool /*checkBasicSel*/ ) const
 {
   if (!track.trackSummary()) {
      ATH_MSG_FATAL("Track without a summary");

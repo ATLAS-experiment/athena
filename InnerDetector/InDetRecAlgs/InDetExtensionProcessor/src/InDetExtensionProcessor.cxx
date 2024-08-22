@@ -280,13 +280,18 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           newTracks->push_back(std::move(ntrk));
         }
       } else {
-        if (m_trackSummaryTool.isEnabled()) {
-          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, m_suppressHoleSearch);
-        }
         // score old and new tool and decide which one to push back
         Trk::TrackScore oldScore = m_scoringTool->score(*thisTrack);
         ATH_MSG_DEBUG("original track has score : " << oldScore);
-        Trk::TrackScore newScore = m_scoringTool->score(*newtrack);
+        Trk::TrackScore newScore = Trk::TrackScore(0);
+        bool passBasicSelections = m_scoringTool->passBasicSelections(*newtrack);
+        if(passBasicSelections){
+          if (m_trackSummaryTool.isEnabled()) {
+            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, m_suppressHoleSearch);
+          }
+          bool recheckBasicSel = false;
+          newScore = m_scoringTool->score(*newtrack, recheckBasicSel);
+        }
         ATH_MSG_DEBUG("new track has score      : " << newScore);
         // do we need to recover with a brem fit
         if (newScore < oldScore && m_tryBremFit &&
@@ -305,7 +310,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           }
           if (newBremTrack) {
             // score again
-            // @TODO should score newBremTrack
+            // @TODO should score newBremTrack + only replace summary if passBasicSelection
             if (m_trackSummaryTool.isEnabled()) {
               m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newBremTrack, m_suppressHoleSearch);
             }

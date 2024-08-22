@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSCORINGTOOL_H
@@ -28,9 +28,11 @@ namespace Muon {
         MuonTrackScoringTool(const std::string&, const std::string&, const IInterface*);
         virtual ~MuonTrackScoringTool() = default;
         virtual StatusCode initialize() override;
+        /** check track selections independent from TrackSummary */
+        virtual bool passBasicSelections( const Trk::Track& ) const override {return true;}
 
         /** create a score based on how good the passed track is*/
-        virtual Trk::TrackScore score(const Trk::Track& track) const override;
+        virtual Trk::TrackScore score(const Trk::Track& track, bool checkBasicSel) const override;
 
         /** create a score based on how good the passed TrackSummary is*/
         virtual Trk::TrackScore simpleScore(const Trk::Track& track, const Trk::TrackSummary& trackSummary) const override;

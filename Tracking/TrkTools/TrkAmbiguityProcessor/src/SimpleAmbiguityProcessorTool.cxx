@@ -3,7 +3,6 @@
 */
 
 #include "SimpleAmbiguityProcessorTool.h"
-#include "TrackScoringTool.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkToolInterfaces/IPRD_AssociationTool.h"

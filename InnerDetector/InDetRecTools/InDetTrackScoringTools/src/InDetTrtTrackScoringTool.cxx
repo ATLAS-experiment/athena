@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackScoringTools/InDetTrtTrackScoringTool.h"
@@ -82,10 +82,47 @@ InDet::InDetTrtTrackScoringTool::initialize()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+bool InDet::InDetTrtTrackScoringTool::passBasicSelections( const Trk::Track& track ) const
+{
+ // get parameters without error - this is faster
+  const Trk::TrackParameters* input = track.trackParameters()->front();
+
+  /// Reject track below the pT cut
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCacheCondObjInputKey, ctx };
+  const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
+  if (fieldCondObj == nullptr) {
+    ATH_MSG_ERROR("simpleScore: Failed to retrieve AtlasFieldCacheCondObj with key "
+                  << m_fieldCacheCondObjInputKey.key());
+    return false;
+  }
+  MagField::AtlasFieldCache fieldCache;
+  fieldCondObj->getInitializedCache(fieldCache);
+
+  if (fieldCache.solenoidOn()) { // B field
+    if (input->pT() < m_ptmin) {
+      ATH_MSG_DEBUG("Reject track below Pt cut !");
+      return false;
+    }
+  }
+
+  if (std::abs(input->eta()) > m_maxEta) {
+    return false;
+  }
+
+  return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 
 Trk::TrackScore
-InDet::InDetTrtTrackScoringTool::score(const Trk::Track& track) const
+InDet::InDetTrtTrackScoringTool::score(const Trk::Track& track, bool checkBasicSel) const
 {
+  if(checkBasicSel && !passBasicSelections(track)){
+    ATH_MSG_VERBOSE ("Track fail basic selections");
+    return Trk::TrackScore(0);
+  }
   if (!track.trackSummary()) {
     ATH_MSG_FATAL("Track without a summary");
   }
@@ -122,32 +159,6 @@ InDet::InDetTrtTrackScoringTool::simpleScore(const Trk::Track& track, const Trk:
     return Trk::TrackScore(0);
   }
 
-  // get parameters without error - this is faster
-  const Trk::TrackParameters* input = track.trackParameters()->front();
-
-  /// Reject track below the pT cut
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCacheCondObjInputKey, ctx };
-  const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
-  if (fieldCondObj == nullptr) {
-    ATH_MSG_ERROR("simpleScore: Failed to retrieve AtlasFieldCacheCondObj with key "
-                  << m_fieldCacheCondObjInputKey.key());
-    return Trk::TrackScore(0);
-  }
-  MagField::AtlasFieldCache fieldCache;
-  fieldCondObj->getInitializedCache(fieldCache);
-
-  if (fieldCache.solenoidOn()) { // B field
-    if (input->pT() < m_ptmin) {
-      ATH_MSG_DEBUG("Reject track below Pt cut !");
-      return Trk::TrackScore(0);
-    }
-  }
-
-  if (fabs(input->eta()) > m_maxEta) {
-    return Trk::TrackScore(0);
-  }
   //
   // --- Now Start Scoring
   //
@@ -195,7 +206,7 @@ InDet::InDetTrtTrackScoringTool::TRT_ambigScore(const Trk::Track& track, const T
   // --- start with bonus for high pt tracks
   //
   // double prob = 1.;
-  double pt = fabs(track.trackParameters()->front()->pT());
+  double pt = std::abs(track.trackParameters()->front()->pT());
   double prob = log10(pt) - 1.; // 100 MeV is min and gets score 1
 
   //
@@ -438,7 +449,7 @@ InDet::InDetTrtTrackScoringTool::getEtaBin(const Trk::Perigee& perigee) const
   // Find the correct bin for applying eta-dependent cuts
 
   double tanThetaOver2 = std::tan(perigee.parameters()[Trk::theta] / 2.);
-  double abs_eta = (tanThetaOver2 == 0) ? 999.0 : std::fabs(std::log(tanThetaOver2));
+  double abs_eta = (tanThetaOver2 == 0) ? 999.0 : std::abs(std::log(tanThetaOver2));
 
   for (unsigned int i = 0; i < m_TRTTrksEtaBins.size(); ++i) {
     if (abs_eta < m_TRTTrksEtaBins[i]) {
