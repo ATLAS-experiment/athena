@@ -43,9 +43,7 @@ set_property( TEST RngComps_AtDSFMT_test_ctest APPEND PROPERTY
               ENVIRONMENT "ATLAS_REFERENCE_TAG=${RNGCOMPS_REFERENCE_TAG}" )
 
 atlas_add_test( TestSeedRunEvent
-   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/share/TestSeedRunEvent.py
-   ENVIRONMENT "ATLAS_REFERENCE_TAG=${RNGCOMPS_REFERENCE_TAG}"
-   PROPERTIES TIMEOUT 500 )
+   SCRIPT test/SeedRunEvent_test.py )
 
 atlas_add_test( RNGWrapper_test
    SOURCES test/RNGWrapper_test.cxx
@@ -61,7 +59,7 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
  endif()
 
 atlas_add_test( RandomServices_test
-                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RandomServices_test.py
+                SCRIPT test/RandomServices_test.py
                 POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
