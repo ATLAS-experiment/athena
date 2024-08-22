@@ -6,7 +6,7 @@
 #   newCalib file has the structure of the MakeReferenceFile (It is on IOV from the central DB)
 #
 
-from PixelCalibAlgs.Recovery import ReadDbFile
+from PixelCalibAlgs.Recovery import ReadDbFile, ReadNewCalib
 from PathResolver import PathResolver
 import array as ar
 import numpy as np
@@ -20,7 +20,7 @@ def arrayCharge(parameters, layer):
         # Range [3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42] (includes the ToT tuning point: 18)
         m_array = [charge(parameters, 3*(1+i)) for i in range(14)]
     else:
-        # Range [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] (includes the ToT tuning point: 30)
+        # Range [5, 10, 15, 20, 25, 30, 35, 40] (includes the ToT tuning point: 30)
         m_array = [charge(parameters, 5*(1+i)) for i in range(8)]
         
     return ar.array('d',m_array)
@@ -58,12 +58,10 @@ def failsCheckTuning(parameters, layer):
         return True, [charge(parameters, tot), abs(charge(parameters, tot)-expected_charge)/expected_charge*100,expected_charge]
     return False, [0,0,0] 
  
-
 def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
     
     save = 1
     log_info = {}
-    plot_range = np.array([0,75000])
     
     slopes = []
     information = {"Total_mods": 0, 
@@ -81,7 +79,7 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
         mod_str = mapping[str(mod)]
         mod_layer = ""
         print( "%-18s - %4i" % (mod_str, mod), end='\r')
-        
+        plot_range = np.array([0,75000])
         # Skipping modules that have not been calibrated
         if str(mod) not in new_calib:
             continue
@@ -118,13 +116,14 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
                 oldCal_normal_pix = old_calib[str(mod)][fe][12:15]
                 boolTOT, realQ = failsCheckTuning(newCal_normal_pix, mod_layer)
             
-                # We just fet the first point since we loose linearity afterwards
+                # We just fit the first point since we loose linearity afterwards
                 newQ = arrayCharge(newCal_normal_pix,mod_layer)
                 oldQ = arrayCharge(oldCal_normal_pix,mod_layer)
             else:
                 # For IBL we dont need to convert TOT into charge, DB already in charge
                 newQ = new_calib[str(mod)][fe][4:20]
                 oldQ = old_calib[str(mod)][fe][4:20]
+                
                 plot_range = np.array([0,35000])
                 boolTOT, realQ = failsCheckTuning(newQ, mod_layer)
                 
@@ -187,42 +186,22 @@ def EvoMon(old_calib, new_calib, mapping, old_iov, new_iov):
     
     if(save):
         fig = Figure(figsize=(13,10))
-        fig.suptitle("All modules")
+        fig.suptitle("Fit slopes for all modules")
         axs = fig.add_subplot(1,1,1)
-        axs.hist(np.clip(slopes, -1, 1.49), bins=100)
+        axs.hist(np.clip(slopes, -1, 2), bins=100)
         axs.set_xlabel("Fit slope")
         axs.set_ylabel("Counts")
-        FigureCanvasAgg(fig).print_figure("plots/slopes.png", dpi=150)
+        # add text box for the statistics
+        stats = (f'$\\mu$ = {np.mean(np.clip(slopes, -1, 2)):.3f}\n'
+                 f'$\\sigma$ = {np.std(np.clip(slopes, -1, 2)):.3f}')
+        bbox = dict(boxstyle='round', fc='blanchedalmond', ec='orange', alpha=0.5)
+        axs.text(0.95, 0.07, stats, fontsize=9, bbox=bbox, transform=axs.transAxes)        
         
+        FigureCanvasAgg(fig).print_figure("plots/FitSlopes.png", dpi=150)
+
+    return information, log_info
+
     
-    print("-"*20+" SUMMARY "+"-"*20 )
-    print("%-20s: %5i"   % ("Total mods in det.", information["Total_mods"]))
-    print("%-20s: %5i"   % ("Total FE in det."  , information["Total_FE"]  ))
-    print("%-20s: %5i"   % ("Total FE IBL"      , information["IBL"]["ok"]   +information["IBL"]["bad"]   ))
-    print("%-20s: %5i"   % ("Total FE Blayer"   , information["Blayer"]["ok"]+information["Blayer"]["bad"]))
-    print("%-20s: %5i"   % ("Total FE L1"       , information["L1"]["ok"]    +information["L1"]["bad"]    ))
-    print("%-20s: %5i"   % ("Total FE L2"       , information["L2"]["ok"]    +information["L2"]["bad"]    ))
-    print("%-20s: %5i\n" % ("Total FE Disk"     , information["Disk"]["ok"]  +information["Disk"]["bad"]  ))
-    
-    
-    print('FrontEnds deviating more than 5% of TOT vs charge gradient between new and previous calibration:')
-    print("%-11s: %-4i (%6.2f%%)"   % ("IBL FEs"   , information["IBL"]["bad"]   , percent(information["IBL"]["bad"]   ,information["IBL"]["ok"])   ))    
-    print("%-11s: %-4i (%6.2f%%)"   % ("Blayer FEs", information["Blayer"]["bad"], percent(information["Blayer"]["bad"],information["Blayer"]["ok"])))    
-    print("%-11s: %-4i (%6.2f%%)"   % ("L1 FEs"    , information["L1"]["bad"]    , percent(information["L1"]["bad"]    ,information["L1"]["ok"])    ))    
-    print("%-11s: %-4i (%6.2f%%)"   % ("L2 FEs"    , information["L2"]["bad"]    , percent(information["L2"]["bad"]    ,information["L2"]["ok"])    ))    
-    print("%-11s: %-4i (%6.2f%%)\n" % ("Disk FEs"  , information["Disk"]["bad"]  , percent(information["Disk"]["bad"]  ,information["Disk"]["ok"])  ))    
-    
-    
-    print("+"*20+" List of bad FE "+"+"*20 )
-    print("Expected TOT vs. charge for the different layers:")
-    print("%-10s: TOT@%2i = %2ike"   % ("IBL"       , 10, 16))
-    print("%-10s: TOT@%2i = %2ike"   % ("Blayer"    , 18, 20))
-    print("%-10s: TOT@%2i = %2ike\n" % ("L1/L2/Disk", 30, 20))
-    for key, val in log_info.items():
-        print(key)
-        print(val)
-    
-        
 def ReadCSV():
     mydict = {}
     with open(PathResolver.FindCalibFile("PixelCalibAlgs/mapping.csv")) as fp:
@@ -257,8 +236,14 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     print("Files chosen for the comparison:")
     
     print("New calibration: '%s'" % path_newCalib)
-    new_calib, new_iov = ReadCalibOutput(path_newCalib)
-
+    new_calib, new_iov = "", ""
+    if "PIX_FINAL_calibration_candidate.txt" in path_newCalib:
+        new_calib, new_iov = ReadCalibOutput(path_newCalib)
+    elif "ChagreCalib_" in path_newCalib:
+        new_calib, new_iov = ReadCalibOutput(path_newCalib)
+    else:
+        new_calib, read_report = ReadNewCalib(path_newCalib)
+    
     print("Old calibration: '%s'" % path_oldCalib)
     old_calib, old_iov = ReadDbFile(path_oldCalib)
 
@@ -271,8 +256,48 @@ def setupRunEvo(path_newCalib, path_oldCalib):
     os.makedirs("plots/Disk"  , exist_ok=True)
     os.makedirs("plots/IBL"   , exist_ok=True)    
     
-    EvoMon(old_calib, new_calib, mapping, old_iov, new_iov )    
+    information, log_info = EvoMon(old_calib, new_calib, mapping, old_iov, new_iov )    
 
+    # writing log files
+    fout = open("EvoMonitoring_log.txt", "w")
+    
+    fout.write("_______________ LOG _______________\n\n" )
+    fout.write("Files chosen for the comparison:\n" )
+    fout.write("New calibration: '%s'\n" % (path_newCalib) )
+    fout.write("Old calibration: '%s'\n" % (path_oldCalib) )
+    fout.write("Data base IOV:   %s\n\n" % (old_iov) )
+    
+    fout.write("-"*20+" SUMMARY "+"-"*20+"\n" )
+    fout.write("%-20s: %5i\n"   % ("Total mods in det.", information["Total_mods"]))
+    fout.write("%-20s: %5i\n"   % ("Total FE in det."  , information["Total_FE"]  ))
+    fout.write("%-20s: %5i\n"   % ("Total FE IBL"      , information["IBL"]["ok"]   +information["IBL"]["bad"]   ))
+    fout.write("%-20s: %5i\n"   % ("Total FE Blayer"   , information["Blayer"]["ok"]+information["Blayer"]["bad"]))
+    fout.write("%-20s: %5i\n"   % ("Total FE L1"       , information["L1"]["ok"]    +information["L1"]["bad"]    ))
+    fout.write("%-20s: %5i\n"   % ("Total FE L2"       , information["L2"]["ok"]    +information["L2"]["bad"]    ))
+    fout.write("%-20s: %5i\n\n" % ("Total FE Disk"     , information["Disk"]["ok"]  +information["Disk"]["bad"]  ))
+    
+    fout.write('FrontEnds deviating more than 5% of TOT vs charge gradient between new and previous calibration:\n')
+    fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("IBL FEs"   , information["IBL"]["bad"]   , percent(information["IBL"]["bad"]   ,information["IBL"]["ok"])   ))    
+    fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("Blayer FEs", information["Blayer"]["bad"], percent(information["Blayer"]["bad"],information["Blayer"]["ok"])))    
+    fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("L1 FEs"    , information["L1"]["bad"]    , percent(information["L1"]["bad"]    ,information["L1"]["ok"])    ))    
+    fout.write("%-11s: %-4i (%6.2f%%)\n"   % ("L2 FEs"    , information["L2"]["bad"]    , percent(information["L2"]["bad"]    ,information["L2"]["ok"])    ))    
+    fout.write("%-11s: %-4i (%6.2f%%)\n\n" % ("Disk FEs"  , information["Disk"]["bad"]  , percent(information["Disk"]["bad"]  ,information["Disk"]["ok"])  ))    
+    
+    fout.write("+"*20+" List of bad FE "+"+"*20+"\n" )
+    fout.write("Expected TOT vs. charge for the different layers:\n")
+    fout.write("%-10s: TOT@%2i = %2ike\n"   % ("IBL"       , 10, 16))
+    fout.write("%-10s: TOT@%2i = %2ike\n"   % ("Blayer"    , 18, 20))
+    fout.write("%-10s: TOT@%2i = %2ike\n\n" % ("L1/L2/Disk", 30, 20))
+    
+    for key, val in log_info.items():
+        fout.write(key+"\n")
+        fout.write(val+"\n")
+        
+    fout.close()
+        
+    #open and read the file for terminal print:
+    fin = open("EvoMonitoring_log.txt", "r")
+    print(fin.read())
 
 
 if __name__ == "__main__":
@@ -282,7 +307,7 @@ if __name__ == "__main__":
                             description="""Compares two IOV and plots the results.\n\n
                             Example: python -m PixelCalibAlgs.EvoMonitoring --new "path/to/file" --old "path/to/file" """)
     
-    parser.add_argument('--new', default="FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
+    parser.add_argument('--new', default="PIX_FINAL_calibration_candidate.txt", help="New calibration file (output format from the Recovery.py)")
     parser.add_argument('--old', default="PixelChargeCalibration-DATA-RUN2-UPD4-27.log", help="Old DB IOV calibration")
     
     args = parser.parse_args()

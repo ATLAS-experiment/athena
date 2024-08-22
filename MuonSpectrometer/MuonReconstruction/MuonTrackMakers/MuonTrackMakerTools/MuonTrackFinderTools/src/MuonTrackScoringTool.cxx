@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackScoringTool.h"
@@ -54,7 +54,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    Trk::TrackScore MuonTrackScoringTool::score(const Trk::Track& track) const {
+    Trk::TrackScore MuonTrackScoringTool::score(const Trk::Track& track, bool /*checkBasicSel*/) const {
         Trk::TrackScore score;
         const Trk::TrackSummary* summary = track.trackSummary();
         if (summary) {

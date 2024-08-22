@@ -5,6 +5,8 @@
 #ifndef TrkVertexWeightCalculator_JetRestrictedSumPtVertexWeightCalculator_H
 #define TrkVertexWeightCalculator_JetRestrictedSumPtVertexWeightCalculator_H
 
+#include <memory>
+#include "AthContainers/AuxElement.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkVertexFitterInterfaces/IVertexWeightCalculator.h"
@@ -12,22 +14,15 @@
 #include "ParticlesInConeTools/ITrackParticlesInConeTool.h"
 
 // xAOD include
-#include "xAODTracking/TrackParticleFwd.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/VertexFwd.h"
 #include "xAODJet/JetContainer.h"
 
 /**
  * @class Trk::JetRestrictedSumPtVertexWeightCalculator
  *
- * @author Johanna Bronner, November 2009
+ * @author Teng Jian Khoo, July 2024
  *
  * ---------------------------------------------------
- * Changes:
- *
- * David Shope <david.richard.shope@cern.ch> (2016-06-01)
- *
- *   EDM Migration to xAOD - remove method using VxCandidate
  *
  */
 
@@ -70,6 +65,8 @@ private:
   Gaudi::Property<float> m_jet_ptmin{ this, "JetMinPt", 20e3 };
   ToolHandle<xAOD::ITrackParticlesInConeTool> m_tracksInCone{ this, "TracksInConeTool", "xAOD::TrackParticlesInConeTool/TrackParticlesInConeTool" };
   SG::ReadHandleKey<xAOD::JetContainer> m_jetContKey{ this, "JetContainer", "AntiKt4EMTopoJets", "Name of the jet container" };
+  Gaudi::Property<std::string> m_plainSumPtKey{ this, "PlainSumPtDecor", "", "Optional decoration name holding the unrestricted vertex sumpt" };
+  std::unique_ptr<SG::AuxElement::Decorator<float> > m_decPlainSumPt;
 
 }; // end of class description
 } // end of namespace definition

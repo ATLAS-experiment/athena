@@ -13,7 +13,7 @@ def CalculateTOT(Q,params):
         return 0
     return params[0]*(num/den)
 
-def CheckThresholds(calib):
+def CheckThresholds(calib,iov,_file):
     
     import os
     os.makedirs("plots/parameters", exist_ok=True)
@@ -74,9 +74,9 @@ def CheckThresholds(calib):
                 bool1, str1 = ValThreshold(mod_layer,"normal",fe[0],5)
                 bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[2],5)
                 if bool1:
-                    report[key] += ("FE%02u: "% ife) + str1
+                    report[key] += ("\tFE%02u: "% ife) + str1
                 if bool2:
-                    report[key] += ("FE%02u: "% ife) + str2 
+                    report[key] += ("\tFE%02u: "% ife) + str2 
                 
                 CalibThreshold[mod_layer]["normal"].append(fe[0])
                 CalibThreshold[mod_layer]["long"].append(fe[2]) 
@@ -89,11 +89,11 @@ def CheckThresholds(calib):
                 bool2, str2 = ValThreshold(mod_layer,"long"  ,fe[4],5)
                 bool3, str3 = ValThreshold(mod_layer,"ganged",fe[8],5)
                 if bool1:
-                    report[key] += ("FE%02u: "% ife) + str1
+                    report[key] += ("\tFE%02u: "% ife) + str1
                 if bool2:
-                    report[key] += ("FE%02u: "% ife) + str2                 
+                    report[key] += ("\tFE%02u: "% ife) + str2                 
                 if bool3:
-                    report[key] += ("FE%02u: "% ife) + str3                 
+                    report[key] += ("\tFE%02u: "% ife) + str3                 
                 
                 totint_nor = CalculateTOT(fe[3],fe[12:15])
                 totint_lon = CalculateTOT(fe[7],fe[15:18])
@@ -118,26 +118,33 @@ def CheckThresholds(calib):
                 CalibIntime[mod_layer]["normal"].append(fe[3])
                 CalibIntime[mod_layer]["long"].append(fe[7])
                 CalibIntime[mod_layer]["ganged"].append(fe[11])
+                
+    # writing log files
+    fout = open("CheckValues_log.txt", "w") 
+    
+    fout.write("_______________ LOG _______________\n\n" )
+    fout.write("File chosen:\n" )
+    fout.write("Calibration  : '%s'\n" % (_file) )
+    fout.write("Data base IOV: %s\n\n" % (iov) )   
         
-    print("\n Threshold FE values validation:")
-    print("-"*40)
+    fout.write("\n Threshold FE values validation:\n")
+    fout.write("-"*40+"\n")
     for key, val in report.items():
         if val == "":
             continue
-        print(key)
-        print(val)
-    print("-"*40)
+        fout.write(key+"\n")
+        fout.write(val)
+    fout.write("-"*40)
     
-    print("\n\n\n\n Threshold MEAN values validation:")
-    print("-"*40)
+    fout.write("\n\n\n\n Threshold MEAN values validation:\n")
+    fout.write("-"*40+"\n")
     for i in ["IBL","Blayer","L1","L2","Disk"]:
-    # for i in ["IBL"]:
         
         for j in CalibThreshold[i]:
             if len(CalibThreshold[i][j]) == 0:
                 continue 
             _bool_, _str_ = ValThreshold(i,j,np.average(CalibThreshold[i][j]))
-            print(_str_, end="")
+            fout.write("\t"+_str_)
             
         if i == "IBL":
             figurIBL(i,CalibThreshold, "Threshold","CalibThreshold_"+i+".png")
@@ -149,7 +156,49 @@ def CheckThresholds(calib):
             figur(i,CalibNoise    , "Noise"    ,"CalibNoise_"+i+".png")
             figur(i,CalibIntime   , "Intime"   ,"CalibIntime_"+i+".png")
         
-    print("-"*40,"\n")
+    fout.write("-"*40+"\n\n")
+    
+    totalFE = 0
+    totalParams = 0
+    fe_indiv     = {"IBL":0,"Blayer":0,"L1":0,"L2":0,"Disk":0}
+    params_indiv = {"IBL":0,"Blayer":0,"L1":0,"L2":0,"Disk":0}
+    for key, FEs in calib.items():
+        
+        mod_name = mapping[str(key)]
+        mod_layer = ""
+        if mod_name.startswith("L0"): 
+            mod_layer = "Blayer"
+        elif mod_name.startswith("L1"): 
+            mod_layer = "L1"
+        elif mod_name.startswith("L2"): 
+            mod_layer = "L2"
+        elif mod_name.startswith("D"): 
+            mod_layer = "Disk"
+        else:
+            mod_layer = "IBL"  
+        
+        totalFE += len(FEs)
+        fe_indiv[mod_layer] += len(FEs)
+        for fe in FEs:
+            totalParams += len(fe)
+            params_indiv[mod_layer] += len(fe)
+        
+    
+    fout.write("Modules checked   : %6u\n" % (len(calib)))
+    fout.write("FrontEnds checked : %6u\n" % (totalFE))
+    for key, value in fe_indiv.items():
+        fout.write("  - %-6s:%6u \n" % (key,value))
+    fout.write("Parameters checked: %6u\n" % (totalParams))
+    for key, value in params_indiv.items():
+        fout.write("  - %-6s:%6u \n" % (key,value))
+    
+    
+    fout.close()
+
+    #open and read the file for terminal print:
+    fin = open("CheckValues_log.txt", "r")
+    print(fin.read())    
+    
 
 def ValThreshold (layer, pix, listavg, perc=1):
     
@@ -165,7 +214,7 @@ def ValThreshold (layer, pix, listavg, perc=1):
     if perc != 1 and status == "OK":
         return False, "OK"
     
-    _str_ = "\t%-25s: %6.1fe (exp.: %4ue), dev.: %6.2f%% - status (>%i%%): %s\n" % (layer+" avg. thr. ["+pix+"]", listavg, realThresholds[layer], dev, perc, status)
+    _str_ = "%-25s: %6.1fe (exp.: %4ue), dev.: %6.2f%% - status (>%i%%): %s\n" % (layer+" avg. thr. ["+pix+"]", listavg, realThresholds[layer], dev, perc, status)
     return True, _str_
 
 def figurIBL(title,hist,xlabel,namef):
@@ -217,4 +266,4 @@ if __name__ == "__main__":
         from PixelCalibAlgs.EvoMonitoring import ReadCalibOutput
         new_calib, new_iov = ReadCalibOutput(args.f)
     
-    CheckThresholds(new_calib)
+    CheckThresholds(new_calib,new_iov,args.f)

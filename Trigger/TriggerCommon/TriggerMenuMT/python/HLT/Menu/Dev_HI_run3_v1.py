@@ -152,6 +152,7 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp_nototpix20_q2_L1VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_sptrk_nototpix20_q2_L1VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_mb_pixsptrk_nototpix20_q2_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryPhIGroup),
 
         #----------- mbts
         ChainProp(name="HLT_mb_mbts_L1MBTS_2_2", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:NoHLTRepro']),

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of TrkAmbiguityProcessor
 # The ambiguity processor drives the ambiguity resolution step that
@@ -27,22 +27,17 @@ def SimpleAmbiguityProcessorToolCfg(flags,
     if "ScoringTool" not in kwargs:
         if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetCosmicsScoringToolCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetCosmicsScoringToolCfg(flags))
+                InDetCosmicsScoringToolCfg as InDetScoringToolCfg)
         elif (flags.Tracking.ActiveConfig.extension == "R3LargeD0" and
               flags.Tracking.nnCutLargeD0Threshold > 0):
             # Set up NN config
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetNNScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetNNScoringToolSiCfg(flags))
+                InDetNNScoringToolSiCfg as InDetScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetAmbiScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetAmbiScoringToolSiCfg(flags))
-        kwargs.setdefault("ScoringTool", InDetAmbiScoringTool)
+                InDetAmbiScoringToolSiCfg as InDetScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetScoringToolCfg(flags)))
 
     if "Fitter" not in kwargs:
         if flags.Tracking.ActiveConfig.isLowPt:
@@ -121,15 +116,12 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
     if "ScoringTool" not in kwargs:
         if flags.Beam.Type is BeamType.Cosmics:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetCosmicScoringTool_TRTCfg)
-            InDetTRT_SeededScoringTool = acc.popToolsAndMerge(
-                InDetCosmicScoringTool_TRTCfg(flags))
+                InDetCosmicScoringTool_TRTCfg as InDetScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetTRT_SeededScoringToolCfg)
-            InDetTRT_SeededScoringTool = acc.popToolsAndMerge(
-                InDetTRT_SeededScoringToolCfg(flags))
-        kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
+                InDetTRT_SeededScoringToolCfg as InDetScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetScoringToolCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
@@ -152,7 +144,6 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
     kwargs.setdefault("SuppressTrackFit", (
         not flags.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit))
     kwargs.setdefault("SuppressHoleSearch", False)
-    kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
     kwargs.setdefault("MatEffects", flags.Tracking.materialInteractionsType
                       if flags.Tracking.materialInteractions else 0)
 
@@ -236,21 +227,16 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
     if "ScoringTool" not in kwargs:
         if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetCosmicsScoringToolCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetCosmicsScoringToolCfg(flags))
+                InDetCosmicsScoringToolCfg as InDetScoringToolCfg)
         elif (flags.Tracking.ActiveConfig.extension == "R3LargeD0" and
               flags.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetNNScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetNNScoringToolSiCfg(flags))
+                InDetNNScoringToolSiCfg as InDetScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetAmbiScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetAmbiScoringToolSiCfg(flags))
-        kwargs.setdefault("ScoringTool", InDetAmbiScoringTool)
+                InDetAmbiScoringToolSiCfg as InDetScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import (
@@ -318,15 +304,12 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
     if "ScoringTool" not in kwargs:
         if flags.Beam.Type is BeamType.Cosmics:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                ITkCosmicsScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(
-                ITkCosmicsScoringToolCfg(flags))
+                ITkCosmicsScoringToolCfg as ITkScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                ITkAmbiScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(
-                ITkAmbiScoringToolCfg(flags))
-        kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
+                ITkAmbiScoringToolCfg as ITkScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            ITkScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import (
@@ -381,21 +364,16 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     if "ScoringTool" not in kwargs:
         if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetCosmicsScoringToolCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetCosmicsScoringToolCfg(flags))
+                InDetCosmicsScoringToolCfg as InDetScoringToolCfg)
         elif (flags.Tracking.ActiveConfig.extension == "R3LargeD0" and
               flags.Tracking.nnCutLargeD0Threshold > 0):
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetNNScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetNNScoringToolSiCfg(flags))
+                InDetNNScoringToolSiCfg as InDetScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                InDetAmbiScoringToolSiCfg)
-            InDetAmbiScoringTool = acc.popToolsAndMerge(
-                InDetAmbiScoringToolSiCfg(flags))
-        kwargs.setdefault("ScoringTool", InDetAmbiScoringTool)
+                InDetAmbiScoringToolSiCfg as InDetScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetScoringToolCfg(flags)))
 
     if "Fitter" not in kwargs:
         fitter_list = []
@@ -489,15 +467,12 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     if "ScoringTool" not in kwargs:
         if flags.Beam.Type is BeamType.Cosmics:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                ITkCosmicsScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(
-                ITkCosmicsScoringToolCfg(flags))
+                ITkCosmicsScoringToolCfg as ITkScoringToolCfg)
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
-                ITkAmbiScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(
-                ITkAmbiScoringToolCfg(flags))
-        kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
+                ITkAmbiScoringToolCfg as ITkScoringToolCfg)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            ITkScoringToolCfg(flags)))
 
     if "Fitter" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import (

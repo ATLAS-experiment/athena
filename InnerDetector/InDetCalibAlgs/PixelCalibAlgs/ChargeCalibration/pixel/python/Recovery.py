@@ -187,7 +187,7 @@ def UpdateAndSave(new_calib, ref_calib):
     # Commented out since it could be used for comparison - Experts only
     # Fprint(new_calib    , "final_new_calib.txt")
     # Fprint(ref_calib    , "final_ref_calib.txt")
-    Fprint(updated_calib, "FINAL_calibration_candidate.txt")
+    Fprint(updated_calib, "PIX_FINAL_calibration_candidate.txt")
 
     return updated_calib
 
@@ -231,7 +231,7 @@ def UpdateCalib(tag):
     
     print(str)
     print("More information in: log_recovery.txt")
-    print("NEW CALIBRATION file to update the DB: FINAL_calibration_candidate.txt")
+    print("NEW CALIBRATION file to update the DB: PIX_FINAL_calibration_candidate.txt")
     
     str += """Positions of single 0's:
     0: normal_threshold,  1: normal_RMS,  2: normal_noise,  3: normal_intime
@@ -254,7 +254,7 @@ def UpdateCalib(tag):
 # Just used for testing - Experts only                
 if __name__ == "__main__":
     
-    UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-26")
+    UpdateCalib("PixelChargeCalibration-DATA-RUN2-UPD4-27")
     exit(0)    
 
 
