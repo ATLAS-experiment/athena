@@ -114,4 +114,4 @@ Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run 
 ApplicationMgr                    INFO Application Manager Stopped successfully
 ApplicationMgr                    INFO Application Manager Finalized successfully
 ApplicationMgr                    INFO Application Manager Terminated successfully
-leaving with code 0: "successful run"
+Py:Athena            INFO leaving with code 0: "successful run"
