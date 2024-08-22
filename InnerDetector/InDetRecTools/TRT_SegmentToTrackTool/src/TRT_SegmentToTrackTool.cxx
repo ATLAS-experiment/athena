@@ -847,13 +847,16 @@ namespace InDet {
   void TRT_SegmentToTrackTool::addNewTrack(Trk::Track* trk, ITRT_SegmentToTrackTool::EventData &event_data) const {
     // @TODO avoid non const member m_trackScoreTrackMap
     ATH_MSG_DEBUG ("Add track to the scoring multimap...");
-    if (m_trackSummaryTool.isEnabled()) {
-       m_trackSummaryTool->computeAndReplaceTrackSummary(*trk,
-                                                         m_suppressHoleSearch);
-    }
-
     //Score the track under investigation
-    Trk::TrackScore score = m_scoringTool->score(*trk);
+    Trk::TrackScore score = Trk::TrackScore(0);
+    bool passBasicSelections = m_scoringTool->passBasicSelections(*trk);
+    if(passBasicSelections){
+      if (m_trackSummaryTool.isEnabled()) {
+	m_trackSummaryTool->computeAndReplaceTrackSummary(*trk,
+							  m_suppressHoleSearch);
+      }
+      score = m_scoringTool->score(*trk);
+    }
     ATH_MSG_DEBUG ("TRT-only: score is " << score);
 
     if (score==0) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityProcessorBase.h"
@@ -153,18 +153,25 @@ void AmbiguityProcessorBase::addTrack(
     Trk::Track* in_track, const bool fitted, TrackScoreMap& trackScoreTrackMap,
     std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
     Counter& stat, int parentTrackId) const {
+
   std::unique_ptr<Trk::Track> atrack(in_track);
   // compute score
-  TrackScore score;
+  TrackScore score = Trk::TrackScore(0);;
   bool suppressHoleSearch = fitted ? m_suppressHoleSearch : true;
-  if (m_trackSummaryTool.isEnabled()) {
-    m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,
-                                                      suppressHoleSearch);
+  bool passBasicSelections = m_scoringTool->passBasicSelections(*atrack);
+  if(passBasicSelections){
+    if (m_trackSummaryTool.isEnabled()) {
+      m_trackSummaryTool->computeAndReplaceTrackSummary(*atrack,
+							suppressHoleSearch);
+    }
+    bool recheckBasicSel = false;
+    score = m_scoringTool->score(*atrack, recheckBasicSel);
   }
-  score = m_scoringTool->score(*atrack);
+  
   if (m_observerTool.isEnabled()) {
     m_observerTool->updateScore(parentTrackId, static_cast<double>(score));
   }
+  
   // do we accept the track ?
   if (score != 0) {
     ATH_MSG_DEBUG("Track  (" << atrack.get() << ") has score " << score);
@@ -208,11 +215,16 @@ void AmbiguityProcessorBase::addTrack(
       // statistic
       stat.incrementCounterByRegion(CounterIndex::kNgoodFits, bremTrack.get());
       // rerun score
-      if (m_trackSummaryTool.isEnabled()) {
-        m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack,
-                                                          suppressHoleSearch);
+      score = Trk::TrackScore(0);
+      passBasicSelections = m_scoringTool->passBasicSelections(*bremTrack);
+      if(passBasicSelections){
+        if (m_trackSummaryTool.isEnabled()) {
+          m_trackSummaryTool->computeAndReplaceTrackSummary(*bremTrack,
+                                                            suppressHoleSearch);
+        }
+        bool recheckBasicSel = false;
+        score = m_scoringTool->score(*bremTrack, recheckBasicSel);
       }
-      score = m_scoringTool->score(*bremTrack);
       if (m_observerTool.isEnabled()) {
         m_observerTool->updateScore(newTrackId, static_cast<double>(score));
       }

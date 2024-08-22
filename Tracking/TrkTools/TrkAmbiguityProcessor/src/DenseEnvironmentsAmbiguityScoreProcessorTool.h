@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DenseEnvironmentsAmbiguityScoreProcessorTool_H
@@ -9,6 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "TrkToolInterfaces/ITrackAmbiguityScoreProcessorTool.h"
+#include "TrkToolInterfaces/ITrackScoringTool.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
@@ -34,8 +35,6 @@ namespace InDet{
 }
 
 namespace Trk {
-
-  class ITrackScoringTool;
 
   class DenseEnvironmentsAmbiguityScoreProcessorTool final
       : public AthAlgTool,

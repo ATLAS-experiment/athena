@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -27,7 +27,8 @@ namespace Trk {
   /** create a score based on how good the passed track is
       @param track must be a valid reference (i.e. the track must exist)
       @return the returned TrackScore should be non-zero for a valid track.*/
-      virtual TrackScore score( const Track& track ) const = 0;
+      virtual bool passBasicSelections( const Track& track ) const = 0;
+      virtual TrackScore score( const Track& track, bool checkBasicSel = true ) const = 0;
       virtual TrackScore simpleScore( const Track& track, const TrackSummary& summary ) const = 0;
   };
 

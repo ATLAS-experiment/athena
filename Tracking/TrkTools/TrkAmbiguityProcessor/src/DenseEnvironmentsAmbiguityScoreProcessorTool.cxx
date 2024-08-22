@@ -3,7 +3,6 @@
 */
 
 #include "DenseEnvironmentsAmbiguityScoreProcessorTool.h"
-#include "TrackScoringTool.h"
 #include "TrkToolInterfaces/IPRD_AssociationTool.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkParameters/TrackParameters.h"
