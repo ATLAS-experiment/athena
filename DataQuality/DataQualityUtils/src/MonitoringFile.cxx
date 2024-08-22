@@ -905,8 +905,11 @@ mergeFiles( const std::string & outFileName, const std::string & listFileName )
   */
   mergeFiles(outFileName, tmpIntermediateFiles);
   for (const auto& tmpFile : tmpIntermediateFiles) {
-    std::remove(tmpFile.c_str());
+    const bool deleteSuccessful = (std::remove(tmpFile.c_str()) == 0);
+    if (not deleteSuccessful){
+      std::cerr<<"Temporary file "<<tmpFile<<" could not be deleted.";
     }
+  }
 }
 
 
