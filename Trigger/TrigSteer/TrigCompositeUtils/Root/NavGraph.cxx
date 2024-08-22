@@ -71,20 +71,24 @@ namespace TrigCompositeUtils {
   // #################################################
 
 
-  NavGraph::NavGraph() : m_nodes(), m_finalNodes(), m_edges(0) {
+  NavGraph::NavGraph() : m_nodePositionMap(), m_nodes(), m_finalNodes(), m_edges(0) {
   }
 
 
   void NavGraph::addNode(const Decision* node, const Decision* comingFrom) {
+    // m_node is a vector to preserve iteration ordering for stable output.
+    // m_nodePositionMap assures that there is no duplicated NavGraphNode
+    // with the same Decision pointer.
+    auto nodePairIt = m_nodePositionMap.insert(std::make_pair(node, m_nodes.size()));
+    if (nodePairIt.second) m_nodes.push_back( std::unique_ptr<NavGraphNode>(new NavGraphNode(node)) );
+    NavGraphNode& nodeObj = *m_nodes[nodePairIt.first->second];
 
-    auto nodePairIt = m_nodes.insert( std::make_pair(node, NavGraphNode(node)) );
-    NavGraphNode& nodeObj = nodePairIt.first->second;
-    
     if (comingFrom == nullptr) { // Not coming from anywhere - hence a final node.
       m_finalNodes.push_back( &nodeObj );
     } else {
-      auto comingFromPairIt = m_nodes.insert( std::make_pair(comingFrom, NavGraphNode(comingFrom)) );
-      NavGraphNode& comingFromNodeObj = comingFromPairIt.first->second;
+      auto comingFromPairIt = m_nodePositionMap.insert( std::make_pair(comingFrom, m_nodes.size()) );
+      if (comingFromPairIt.second) m_nodes.push_back( std::unique_ptr<NavGraphNode>(new NavGraphNode(comingFrom)) );
+      NavGraphNode& comingFromNodeObj = *m_nodes[comingFromPairIt.first->second];
       const bool newEdge = comingFromNodeObj.linksTo( &nodeObj );
       if (newEdge) {
         ++m_edges;
@@ -100,9 +104,9 @@ namespace TrigCompositeUtils {
   std::vector<NavGraphNode*> NavGraph::allNodes() {
     std::vector<NavGraphNode*> returnVec;
     returnVec.reserve(m_nodes.size());
-    for (auto& entry : m_nodes) {
-      NavGraphNode& n = entry.second;
-      returnVec.push_back( &n );
+    for (std::unique_ptr<NavGraphNode>& entry : m_nodes) {
+      NavGraphNode& nodeObj = *entry;
+      returnVec.push_back( &nodeObj );
     }
     return returnVec;
   }
@@ -119,14 +123,14 @@ namespace TrigCompositeUtils {
 
   std::vector<const Decision*> NavGraph::thin() {
     std::vector<const Decision*> returnVec;
-    std::map<const Decision*, NavGraphNode>::iterator it;
+    std::vector<std::unique_ptr<NavGraphNode>>::iterator it;
     for (it = m_nodes.begin(); it != m_nodes.end(); /*noop*/) {
-      if (it->second.getKeep()) {
-        it->second.resetKeep();
+      if ((*it)->getKeep()) {
+        (*it)->resetKeep();
         ++it;
       } else {
-        returnVec.push_back(it->first);
-        rewireNodeForRemoval(it->second);
+        returnVec.push_back((*it)->node());
+        rewireNodeForRemoval(*(*it));
         it = m_nodes.erase(it);
       }
     }
