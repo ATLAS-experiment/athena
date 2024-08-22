@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanOutput.h"
@@ -324,15 +324,19 @@ namespace dqi
         }
       }
 
-
-
-      resultList = dynamic_cast<TSeqCollection*>(resultList->FindObject("Results"));
-
-      if (resultList == 0)
+      
+      if (resultList)//ensure resultList is not null before dereference
+      {
+        resultList = dynamic_cast<TSeqCollection*>(resultList->FindObject("Results"));
+      }
+      //check dynamic cast
+      if (resultList == nullptr)
       {
         std::cerr << "Warning: no result list found associated with '" << name << "'\n";
         continue;
       }
+
+      
       resultList->Add(newTObjArray("Status", new TObjString(StatusToStr(result.status_).c_str()), 1));
 
       // iterate through the tags
