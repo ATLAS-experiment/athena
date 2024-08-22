@@ -32,7 +32,18 @@ atlas_add_test(Identifier32_test
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
-
+atlas_add_test(Identifier_test
+  SOURCES  test/Identifier_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+atlas_add_test(IdentifierHash_test
+  SOURCES  test/IdentifierHash_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
 
 atlas_add_test(ExpandedIdentifier_test
   SOURCES  test/ExpandedIdentifier_test.cxx 
@@ -40,6 +51,14 @@ atlas_add_test(ExpandedIdentifier_test
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
+
+atlas_add_test(IdContext_test
+  SOURCES  test/IdContext_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
 
 atlas_add_test(RangeParser_test
   SOURCES  test/RangeParser_test.cxx 
