@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GeneratorPhysValEventInfoo_GeneratorEventInfo_H
+#ifndef GeneratorPhysValEventInfo_GeneratorEventInfo_H
 #define GeneratorPhysValEventInfo_GeneratorEventInfo_H
 
 #include "TrkValHistUtils/PlotBase.h"
