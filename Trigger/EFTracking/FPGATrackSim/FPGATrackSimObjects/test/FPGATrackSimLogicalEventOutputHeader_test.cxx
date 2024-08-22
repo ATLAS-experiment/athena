@@ -28,15 +28,15 @@ int main(int, char**)
 
   FPGATrackSimRoad road;
   road.setRoadID(roadid);
-  std::vector<FPGATrackSimRoad*> roadvec;
-  roadvec.push_back(&road);
+  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadvec;
+  roadvec.emplace_back(std::make_shared<FPGATrackSimRoad>(road));
 
   header.addFPGATrackSimTracks_1st(trackvec);
   header.addFPGATrackSimRoads_1st(roadvec);
   std::cout << "q/pt = " << header.getFPGATrackSimTracks_1st()[0].getQOverPt()  << " and chi2 = " << 
     header.getFPGATrackSimTracks_1st()[0].getChi2() << std::endl;
 
-  std::vector<FPGATrackSimRoad*> roads_1st;
+  std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st;
   header.getFPGATrackSimRoads_1st(roads_1st);
   std::cout << "Road ID = " << roads_1st[0]->getRoadID() << std::endl;
 

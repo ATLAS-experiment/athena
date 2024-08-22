@@ -30,14 +30,14 @@ StatusCode FPGATrackSimNNTrackTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimNNTrackTool::getTracks(std::vector<FPGATrackSimRoad *> &roads,
+StatusCode FPGATrackSimNNTrackTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
                                      std::vector<FPGATrackSimTrack> &tracks,
                                      const FPGATrackSimNNMap *nnMap) {
 
   int n_track = 0;
 
   // Loop over roads
-  for (auto iroad : roads) {
+  for (auto const &iroad : roads) {
 
     double y = iroad->getY();
 

@@ -93,7 +93,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
 
 
 
-StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoad*> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks)
+StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks)
 {
   m_tracknumber = 0;
   ResetVectors();
@@ -159,7 +159,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(std::vector<FPGATrackSimRoa
   // that can be used to map to the above
   for (size_t iroad = 0; iroad < roads.size(); iroad++) {
     m_roadnumber = iroad;
-    FPGATrackSimRoad *road = roads[iroad];
+    std::shared_ptr<const FPGATrackSimRoad> road = roads[iroad];
     if (road == nullptr) continue; // Not Hough roads
 
     std::vector<std::vector<int>> combs = ::getComboIndices(road->getNHits_layer());

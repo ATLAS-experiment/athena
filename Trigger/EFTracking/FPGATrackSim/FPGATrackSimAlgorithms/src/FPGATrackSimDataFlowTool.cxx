@@ -42,8 +42,8 @@ StatusCode FPGATrackSimDataFlowTool::initialize()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo* info, FPGATrackSimLogicalEventInputHeader const * header_1st,
                                               std::vector<FPGATrackSimCluster> const & clusters_1st,
-                                              std::vector<FPGATrackSimRoad*> const & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                              std::vector<FPGATrackSimRoad*> const & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd)
+                                              const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
+                                              const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd)
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
     for (FPGATrackSimHit const & hit : header_1st->towers().at(0).hits()) {
@@ -58,7 +58,7 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
     }
 
     info->nRoads_1st_total = roads_1st.size();
-    for (FPGATrackSimRoad const * r : roads_1st) {
+    for (const auto & r : roads_1st) {
         if (CxxUtils::count_ones(r->getHitLayers()) == m_nLayers_1st - 1) info->nRoads_1st_7hits++;
         if (CxxUtils::count_ones(r->getHitLayers()) == m_nLayers_1st)     info->nRoads_1st_8hits++;
     }

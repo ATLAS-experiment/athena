@@ -236,29 +236,22 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
     m_h_trackQoP_okRegion->Fill(track.getQOverPt());
     
     //For the Hough constants, find the Hough roads
-    std::vector<FPGATrackSimRoad*> houghRoads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
     if (m_doHoughConstants){
       
       std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-      std::vector<FPGATrackSimRoad*> roads;
       
       for (const FPGATrackSimHit& hit : sector_hits) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
       
-      StatusCode sc = m_roadFinderTool->getRoads(phits, roads);
+      StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
       if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
-      
-      if (!roads.empty()){
-        for (FPGATrackSimRoad* hr : roads){
-          houghRoads.push_back(hr);
-        }
-      }
       
       if (!houghRoads.empty()){
 	double y = 0.0;
 	double x = 0.0;
 	
 	//For each Hough road, make the accumulator
-	for (FPGATrackSimRoad* hr : houghRoads){
+	for (auto const &hr : houghRoads){
 	  y = hr->getY();
 	  x = hr->getX();
 	  

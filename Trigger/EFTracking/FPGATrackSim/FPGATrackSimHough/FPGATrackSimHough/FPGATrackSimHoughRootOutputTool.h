@@ -41,7 +41,7 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         FPGATrackSimHoughRootOutputTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
-        StatusCode fillTree(std::vector<FPGATrackSimRoad*> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks);
+        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks);
 
     private:
 
