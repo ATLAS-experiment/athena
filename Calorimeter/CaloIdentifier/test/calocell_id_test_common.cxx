@@ -638,7 +638,7 @@ void test_regions (const CaloCell_Base_ID& calo_id)
     assert (regId1 == regId);
 
     int subcalo = calo_id.sub_calo(regId);
-
+    if (subcalo == CaloIDHelper::NOT_VALID) std::abort();
     IdentifierHash min=0, max=0;
     calo_id.calo_reg_hash_range(regId, min, max);
     IdentifierHash min2=0, max2=0;
