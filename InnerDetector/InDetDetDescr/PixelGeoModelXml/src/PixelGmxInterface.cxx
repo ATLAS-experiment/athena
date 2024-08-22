@@ -373,7 +373,7 @@ std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double ph
   std::shared_ptr<const PixelDiodeMatrix> fullChipRow_E{};
   if (circuitsEta == 1) {
     // special case of just one circuit in eta direction (no long cells, just end)
-    fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_NE, cell_NN, diodeColPerCirc - 2*nEtaEnd, cell_NE);
+    fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_NE, std::move(cell_NN) , diodeColPerCirc - 2*nEtaEnd, cell_NE);
     if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_LE, std::move(cell_LN), diodeColPerCirc - 2*nEtaEnd, cell_LE);}
     if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, cell_EE, std::move(cell_EN), diodeColPerCirc - 2*nEtaEnd, cell_EE);}
   } else {
@@ -404,12 +404,12 @@ std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double ph
     if (circuitsEta == 2) {
       // special case of no middle chips in eta (just lower and upper)
       fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_NL), std::move(singleChipRow_NU), 1, nullptr);
-      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_LL), singleChipRow_LU, 1, nullptr);}
+      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_LL), std::move(singleChipRow_LU), 1, nullptr);}
       if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_EL), std::move(singleChipRow_EU), 1, nullptr);}
     } else {
-      fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, singleChipRow_NL, std::move(singleChipRow_NM), circuitsEta-2, singleChipRow_NU);
-      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, singleChipRow_LL, std::move(singleChipRow_LM), circuitsEta-2, std::move(singleChipRow_LU));}
-      if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, singleChipRow_EL, std::move(singleChipRow_EM), circuitsEta-2, singleChipRow_EU);}
+      fullChipRow_N = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_NL), std::move(singleChipRow_NM), circuitsEta-2, std::move(singleChipRow_NU) );
+      if (cell_LN) {fullChipRow_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_LL) , std::move(singleChipRow_LM), circuitsEta-2, std::move(singleChipRow_LU));}
+      if (cell_EN) {fullChipRow_E = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir, std::move(singleChipRow_EL), std::move(singleChipRow_EM), circuitsEta-2, std::move(singleChipRow_EU));}
     }
   }
 
@@ -422,14 +422,14 @@ std::shared_ptr<const PixelDiodeMatrix> PixelGmxInterface::buildMatrix(double ph
     // columns of individual chips
     auto singleChipCol_L = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, fullChipRow_E, fullChipRow_N, diodeRowPerCirc -nPhiEnd  -nPhiLong, fullChipRow_L);
     auto singleChipCol_M = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, fullChipRow_L, fullChipRow_N, diodeRowPerCirc -nPhiLong -nPhiLong, fullChipRow_L);
-    auto singleChipCol_U = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(fullChipRow_L), fullChipRow_N, diodeRowPerCirc -nPhiLong -nPhiEnd,  std::move(fullChipRow_E));
+    auto singleChipCol_U = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(fullChipRow_L), std::move(fullChipRow_N) , diodeRowPerCirc -nPhiLong -nPhiEnd,  std::move(fullChipRow_E));
 
     // putting together the single chip rows
     if (circuitsPhi == 2) {
       // special case of no middle chips in phi (just lower and upper)
-      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(singleChipCol_L), singleChipCol_U, 1, nullptr);
+      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, std::move(singleChipCol_L), std::move(singleChipCol_U), 1, nullptr);
     } else {
-      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir, singleChipCol_L, std::move(singleChipCol_M), circuitsPhi-2, std::move(singleChipCol_U));
+      fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,  std::move(singleChipCol_L), std::move(singleChipCol_M), circuitsPhi-2, std::move(singleChipCol_U));
     }
   }
 
