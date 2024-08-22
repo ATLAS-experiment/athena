@@ -21,8 +21,8 @@ public:
   DecisionCollectorTool(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~DecisionCollectorTool() override;
     
-  void getDecisions( std::vector<TrigCompositeUtils::DecisionID>& ) const override;
-  void getSequencesPerEvent( std::set<std::string>& ) const;
+  void getDecisions( std::vector<TrigCompositeUtils::DecisionID>&, const EventContext& ) const override;
+  void getSequencesPerEvent( std::set<std::string>&, const EventContext& ) const;
   void getSequencesNames( std::set<std::string>& ) const;
   
   virtual StatusCode initialize() override;

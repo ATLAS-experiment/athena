@@ -337,8 +337,8 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
   for ( auto& ctool: m_decisionCollectorTools ) {
     std::vector<TrigCompositeUtils::DecisionID> stepSum;
     std::set<std::string> stepSequences;
-    ctool->getDecisions( stepSum );
-    ctool->getSequencesPerEvent( stepSequences );
+    ctool->getDecisions( stepSum, context );
+    ctool->getSequencesPerEvent( stepSequences, context );
     ATH_MSG_DEBUG( " Step " << step << " decisions (for decisions): " << stepSum.size() );
     TrigCompositeUtils::DecisionIDContainer stepUniqueSum( stepSum.begin(), stepSum.end() );
     ATH_CHECK( fillPassEvents( stepUniqueSum, 3+step ) );
@@ -350,7 +350,7 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
   for ( auto& ctool: m_featureCollectorTools ) {
     std::vector<TrigCompositeUtils::DecisionID> stepSum;
     std::set<std::string> stepSequences;
-    ctool->getDecisions( stepSum );
+    ctool->getDecisions( stepSum, context );
     ATH_MSG_DEBUG( " Step " << step << " decisions (for features): " << stepSum.size() );
     TrigCompositeUtils::DecisionIDContainer stepUniqueSum( stepSum.begin(), stepSum.end() );
     ATH_CHECK( fillDecisionCount( stepSum, 3+step ) );
