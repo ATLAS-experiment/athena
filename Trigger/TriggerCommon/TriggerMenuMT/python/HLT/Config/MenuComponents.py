@@ -21,6 +21,9 @@ import re
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
+# Pool of mutable ComboHypo instances (FIXME: ATR-29181)
+_ComboHypoPool = dict()
+
 
 class Node(object):
     """base class representing one Alg + inputs + outputs, to be used to Draw dot diagrams and connect objects"""
@@ -680,11 +683,8 @@ class ChainStep(object):
         """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
         for seq in self.sequenceFunctions:                        
-            self.sequences.append(seq()) # create the sequences 
-        self.combo = None
-        if self.comboFunction is not None:
-            self.combo = self.comboFunction()       
-        
+            self.sequences.append(seq()) # create the sequences        
+
     def relabelLegIdsForJets(self):
         has_jets = False
         leg_counter = []    
@@ -761,12 +761,15 @@ class ChainStep(object):
         self.comboToolConfs.append(tool)
 
     def makeCombo(self):
-        """ Configure the Combo Hypo Alg and generate the corresponding function, without instantiation which is done in createSequences() """
-        self.comboFunction = None 
+        self.combo = None 
         if self.isEmpty or self.comboHypoCfg is None:
             return        
         comboName = CFNaming.comboHypoName(self.name)
-        self.comboFunction = functools.partial(ComboMaker, comboName, self.comboHypoCfg)                
+        key = hash((comboName, self.comboHypoCfg))
+        if key not in _ComboHypoPool:            
+            _ComboHypoPool[key] = ComboMaker(comboName, self.comboHypoCfg)
+        self.combo = _ComboHypoPool[key]
+                
 
     def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)
