@@ -244,7 +244,9 @@ def addTopoInfo(theChainConfig, mainChainDict, listOfChainDefs, lengthOfChainCon
 
             thestep.name = thestep.name+'_combo_'+topoExpr 
             thestep.addComboHypoTools(topoCfg)
+    
             thestep.makeCombo()
+            log.debug("[addTopoInfo] new combo hypo name: %s",thestep.combo.name)
 
             if bonus_debug:
                 log.debug("[addTopoInfo] new theChainConfig %s", theChainConfig)
