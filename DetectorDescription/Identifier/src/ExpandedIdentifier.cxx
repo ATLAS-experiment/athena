@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <charconv>
 
 static void 
 show_vector (const ExpandedIdentifier::element_vector& v){
@@ -33,15 +34,15 @@ void
 ExpandedIdentifier::set (const std::string& text){
   clear ();
   if (text.empty()) return;
-  const char* ctext = text.c_str ();
-  for (;;){
-    const char* sep;
-    sep = strchr (ctext, '/');
-    int value = 0;
-    sscanf (ctext, "%80d", &value);
-    add ((element_type) value);
-    if (sep == nullptr) break;
-    ctext = sep + 1;
+  const char *start = text.c_str();
+  const char *last = start+text.size();
+  static constexpr auto ok=std::errc{};
+  int v{};
+  for (const char * p=start;p<last;++p){
+    auto [ptr,ec] = std::from_chars(p, last,v);
+    p=ptr;
+    if (ec !=  ok) continue;
+    add ((element_type) v);
   }
 }
 

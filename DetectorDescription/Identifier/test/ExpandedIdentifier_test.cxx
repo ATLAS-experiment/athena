@@ -41,7 +41,7 @@ namespace boost::test_tools::tt_detail {
  
  
 //example of initialiser string
-const std::string initialiserString{"-3/-2/-1/1/2/3"};
+const std::string initialiserString{"-3/-2/-1/1/+2/3"};
 
 
 BOOST_AUTO_TEST_SUITE(ExpandedIdentifierTest)
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
   ExpandedIdentifier g(initialiserString);
   BOOST_TEST(std::string(g) == "-3/-2/-1/1/2/3");
   ExpandedIdentifier nonsense("piggy back");
-  BOOST_TEST(std::string(nonsense) == "0");
+  BOOST_TEST(std::string(nonsense) == "");
   //
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
