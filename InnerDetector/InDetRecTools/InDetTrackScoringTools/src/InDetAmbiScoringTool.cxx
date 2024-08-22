@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////
@@ -140,9 +140,89 @@ StatusCode InDet::InDetAmbiScoringTool::initialize()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-
-Trk::TrackScore InDet::InDetAmbiScoringTool::score( const Trk::Track& track ) const
+bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track ) const
 {
+  //
+  // --- kinematic selection (done as well on input ?)
+  //
+  // --- beam spot position
+  Amg::Vector3D beamSpotPosition(0,0,0);
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+  if (beamSpotHandle.isValid()) beamSpotPosition = beamSpotHandle->beamVtx().position();
+  // --- create surface
+  Trk::PerigeeSurface perigeeSurface(beamSpotPosition);
+
+  const Trk::TrackParameters* input = track.trackParameters()->front();
+  double trackEta = input->eta();
+
+  // cuts on parameters
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
+  const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
+  if (fieldCondObj == nullptr) {
+      ATH_MSG_ERROR("simpleScore: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
+      return false;
+  }
+  MagField::AtlasFieldCache fieldCache;
+  fieldCondObj->getInitializedCache (fieldCache);
+
+  if (fieldCache.solenoidOn()){
+    double minPt = m_etaDependentCutsSvc.name().empty() ?
+      m_minPt : m_etaDependentCutsSvc->getMinPtAtEta(trackEta);
+    if (std::abs(input->pT()) < minPt) {
+      ATH_MSG_DEBUG ("Track pt < "<<m_minPt<<", reject it");
+      return false;
+    }
+  }
+  double maxEta = m_etaDependentCutsSvc.name().empty() ?
+    m_maxEta : m_etaDependentCutsSvc->getMaxEta();
+  if (std::abs(input->eta()) > maxEta) {
+    ATH_MSG_DEBUG ("Track eta > "<<maxEta<<", reject it");
+    return false;
+  }
+
+  // uses perigee on track or extrapolates, no material in any case, we cut on impacts
+  // add back extrapolation without errors
+  std::unique_ptr<const Trk::TrackParameters> parm( m_extrapolator->extrapolateDirectly(ctx,*input, perigeeSurface) );
+
+  const Trk::Perigee*extrapolatedPerigee = dynamic_cast<const Trk::Perigee*> (parm.get());
+  if (!extrapolatedPerigee) {
+     ATH_MSG_WARNING( "Extrapolation of perigee failed, this should never happen" );
+     return false;
+  }
+
+  ATH_MSG_VERBOSE ("extrapolated perigee: "<<*extrapolatedPerigee);
+  double maxZ0 = m_etaDependentCutsSvc.name().empty() ?
+    m_maxZImp : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
+  if (std::abs(extrapolatedPerigee->parameters()[Trk::z0]) > maxZ0) {
+    ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
+    return false;
+  }
+
+  double maxD0 = m_etaDependentCutsSvc.name().empty() ?
+    m_maxRPhiImp : m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(trackEta);
+  if(m_useEmClusSeed) {
+     if (isEmCaloCompatible( track, ctx ) ) {
+       maxD0 = m_maxRPhiImpEM;
+     }
+  }
+  if (std::abs(extrapolatedPerigee->parameters()[Trk::d0]) > maxD0) {
+    ATH_MSG_DEBUG ("Track Rphi impact > "<<maxD0<<", reject it");
+    return false;
+  }
+
+  return true;
+}
+
+
+//---------------------------------------------------------------------------------------------------------------------
+
+Trk::TrackScore InDet::InDetAmbiScoringTool::score( const Trk::Track& track, bool checkBasicSel ) const
+{
+   if(checkBasicSel && !passBasicSelections(track)){
+     ATH_MSG_VERBOSE ("Track fail basic selections");
+     return Trk::TrackScore(0);
+   }
    if (!track.trackSummary()) {
       ATH_MSG_FATAL("Track without a summary");
    }
@@ -255,74 +335,6 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
       }
     }
   }
-  //
-  // --- kinematic selection (done as well on input ?)
-  //
-  // --- beam spot position 
-  Amg::Vector3D beamSpotPosition(0,0,0);
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  if (beamSpotHandle.isValid()) beamSpotPosition = beamSpotHandle->beamVtx().position();
-  // --- create surface
-  Trk::PerigeeSurface perigeeSurface(beamSpotPosition);
-
-  const Trk::TrackParameters* input = track.trackParameters()->front();
-  double trackEta = input->eta();
-
-  // cuts on parameters
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
-  const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
-  if (fieldCondObj == nullptr) {
-      ATH_MSG_ERROR("simpleScore: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
-      return Trk::TrackScore(0);
-  }
-  MagField::AtlasFieldCache fieldCache;
-  fieldCondObj->getInitializedCache (fieldCache);
-
-  if (fieldCache.solenoidOn()){ 
-    double minPt = m_etaDependentCutsSvc.name().empty() ?
-      m_minPt : m_etaDependentCutsSvc->getMinPtAtEta(trackEta);
-    if (std::abs(input->pT()) < minPt) {
-      ATH_MSG_DEBUG ("Track pt < "<<m_minPt<<", reject it");
-      return Trk::TrackScore(0);
-    } 
-  }
-  double maxEta = m_etaDependentCutsSvc.name().empty() ?
-    m_maxEta : m_etaDependentCutsSvc->getMaxEta();
-  if (std::abs(input->eta()) > maxEta) {
-    ATH_MSG_DEBUG ("Track eta > "<<maxEta<<", reject it");
-    return Trk::TrackScore(0);
-  }
-
-  // uses perigee on track or extrapolates, no material in any case, we cut on impacts
-  // add back extrapolation without errors
-  std::unique_ptr<const Trk::TrackParameters> parm( m_extrapolator->extrapolateDirectly(ctx,*input, perigeeSurface) );
-
-  const Trk::Perigee*extrapolatedPerigee = dynamic_cast<const Trk::Perigee*> (parm.get());
-  if (!extrapolatedPerigee) {
-     ATH_MSG_WARNING( "Extrapolation of perigee failed, this should never happen" );
-     return Trk::TrackScore(0);
-  }
-
-  ATH_MSG_VERBOSE ("extrapolated perigee: "<<*extrapolatedPerigee);
-  double maxZ0 = m_etaDependentCutsSvc.name().empty() ?
-    m_maxZImp : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
-  if (std::abs(extrapolatedPerigee->parameters()[Trk::z0]) > maxZ0) {
-    ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
-    return Trk::TrackScore(0);
-  }
-
-  double maxD0 = m_etaDependentCutsSvc.name().empty() ?
-    m_maxRPhiImp : m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(trackEta);
-  if(m_useEmClusSeed) {
-     if (isEmCaloCompatible( track, ctx ) ) {
-       maxD0 = m_maxRPhiImpEM;
-     }
-  }
-  if (std::abs(extrapolatedPerigee->parameters()[Trk::d0]) > maxD0) {
-    ATH_MSG_DEBUG ("Track Rphi impact > "<<maxD0<<", reject it");
-    return Trk::TrackScore(0);
-  }
 
   //
   // --- now start scoring
@@ -374,7 +386,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
   // --- start with bonus for high pt tracks
   //
   // double prob = 1.;
-  double pt = fabs(track.trackParameters()->front()->pT());
+  double pt = std::abs(track.trackParameters()->front()->pT());
   double prob = log10( pt ) - 1.; // 100 MeV is min and gets score 1
   ATH_MSG_DEBUG ("Modifier for pt = " << pt / 1000. << " GeV is: "<< prob);
 
@@ -501,7 +513,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
       assert( m_selectortool.isEnabled() );
       nTrtExpected = m_selectortool->minNumberDCs(track.trackParameters()->front());
       ATH_MSG_DEBUG ("Expected number of TRT hits: " << nTrtExpected << " for eta: "
-       << fabs(track.trackParameters()->front()->eta()));
+       << std::abs(track.trackParameters()->front()->eta()));
       double ratio = (nTrtExpected != 0) ? iTRT_Hits / nTrtExpected : 0;
       if (ratio > m_boundsTrtRatio[m_maxTrtRatio]) ratio = m_boundsTrtRatio[m_maxTrtRatio];
       for (int i=0; i<m_maxTrtRatio; ++i) {

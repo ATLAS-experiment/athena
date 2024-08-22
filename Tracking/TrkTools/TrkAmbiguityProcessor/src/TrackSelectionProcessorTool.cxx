@@ -3,8 +3,6 @@
 */
 
 #include "TrackSelectionProcessorTool.h"
-#include "TrackScoringTool.h"
-#include "TrkToolInterfaces/IPRD_AssociationTool.h"
 #include "TrkTrack/TrackCollection.h"
 #include "AthContainers/ConstDataVector.h"
 #include "GaudiKernel/MsgStream.h"
@@ -16,12 +14,10 @@ Trk::TrackSelectionProcessorTool::TrackSelectionProcessorTool(const std::string&
                 const IInterface*  p )
   :
   AthAlgTool(t,n,p),
-  m_scoringTool("Trk::TrackScoringTool/TrackScoringTool"), 
   m_selectionTool("InDet::InDetAmbiTrackSelectionTool/InDetAmbiTrackSelectionTool")
 {
   declareInterface<ITrackAmbiguityProcessorTool>(this);
   declareProperty("DropDouble"           , m_dropDouble         = true);
-  declareProperty("ScoringTool"          , m_scoringTool);
   declareProperty("SelectionTool"        , m_selectionTool);
   declareProperty("DisableSorting"       , m_disableSorting     = false);
 }

@@ -10,12 +10,12 @@
 //
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/ITrackAmbiguityProcessorTool.h"
+#include "TrkToolInterfaces/ITrackScoringTool.h"
 #include "TrkValInterfaces/ITrkObserverTool.h"
 //
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrackPtr.h"
-#include "TrackScoringTool.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkEventUtils/ClusterSplitProbabilityContainer.h"
 //

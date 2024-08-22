@@ -11,6 +11,7 @@
 #include "TrkEventPrimitives/TrackScore.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkToolInterfaces/IAmbiTrackSelectionTool.h"
+#include "TrkToolInterfaces/ITrackScoringTool.h"
 #include "AthContainers/ConstDataVector.h"
 
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
@@ -28,9 +29,6 @@
 
 
 namespace Trk {
-
-  class ITrackScoringTool;
-  class IPRD_AssociationTool;
 
   class TrackSelectionProcessorTool final
       : public AthAlgTool,
@@ -106,7 +104,8 @@ namespace Trk {
     /**Scoring tool
  This tool is used to 'score' the tracks, i.e. to quantify what a good track is.
  @todo The actual tool that is used should be configured through job options*/
-    ToolHandle<ITrackScoringTool> m_scoringTool;
+    ToolHandle<ITrackScoringTool> m_scoringTool
+      {this, "ScoringTool", "Muon::MuonAmbiTrackSelectionTool/MuonAmbiSelectionTool"};
 
     /** selection tool - here the decision which hits remain on a track and
   which are removed are made
