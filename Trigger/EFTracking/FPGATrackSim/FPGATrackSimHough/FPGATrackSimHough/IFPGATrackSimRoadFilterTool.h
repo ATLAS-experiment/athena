@@ -33,7 +33,7 @@ class IFPGATrackSimRoadFilterTool : virtual public IAlgTool
 {
     public:
         DeclareInterfaceID(IFPGATrackSimRoadFilterTool, 1, 0);
-        virtual StatusCode filterRoads(const std::vector<FPGATrackSimRoad*> & prefilter_roads, std::vector<FPGATrackSimRoad*> & postfilter_roads) = 0;
+        virtual StatusCode filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) = 0;
 };
 
 

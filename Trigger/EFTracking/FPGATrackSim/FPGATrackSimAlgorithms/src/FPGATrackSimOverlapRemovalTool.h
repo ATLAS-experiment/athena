@@ -37,7 +37,7 @@ public:
 
   StatusCode initialize() override;
 
-  StatusCode runOverlapRemoval(std::vector<FPGATrackSimRoad*>& roads);
+  StatusCode runOverlapRemoval(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads);
 
   // Original Overlap Removal function
   // Compare chi2 and common number of hits

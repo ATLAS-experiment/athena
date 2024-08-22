@@ -135,11 +135,11 @@ StatusCode FPGATrackSimEtaPatternFilterTool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(const std::vector<FPGATrackSimRoad*> & prefilter_roads, std::vector<FPGATrackSimRoad*> & postfilter_roads)
+StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads)
 {
     m_postfilter_roads.clear();
     postfilter_roads.clear();
-    for (auto & road : prefilter_roads)
+    for (const auto & road : prefilter_roads)
     {
         // reset all maps
         resetCounters();
@@ -196,7 +196,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::filterRoads(const std::vector<FPGAT
     // copy roads to outputs
     postfilter_roads.reserve(m_postfilter_roads.size());
     for (FPGATrackSimRoad & r : m_postfilter_roads)
-        postfilter_roads.push_back(&r);
+        postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
     return StatusCode::SUCCESS;
 }
 
@@ -210,7 +210,7 @@ void FPGATrackSimEtaPatternFilterTool::resetCounters()
             entry.second.reset();
 }
 
-void FPGATrackSimEtaPatternFilterTool::addHitsToMap(FPGATrackSimRoad* r)
+void FPGATrackSimEtaPatternFilterTool::addHitsToMap(const std::shared_ptr<const FPGATrackSimRoad> &r)
 {
     for (unsigned lyr = 0; lyr < m_nLayers; lyr++)
         for (auto & hit : r->getHits(lyr))
@@ -263,7 +263,7 @@ void FPGATrackSimEtaPatternFilterTool::addRedundantPatterns(std::set<EtaPattern>
     }
 }
 
-FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, FPGATrackSimRoad* origr, int etaPatternID) const
+FPGATrackSimRoad FPGATrackSimEtaPatternFilterTool::buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, std::shared_ptr<const FPGATrackSimRoad> origr, int etaPatternID) const
 {
     // All roads are now Hough roads.
     FPGATrackSimRoad r(*origr);

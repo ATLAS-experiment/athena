@@ -40,7 +40,7 @@ class IFPGATrackSimRoadFinderTool : virtual public IAlgTool
 {
     public:
         DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 1, 0);
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad*> & roads) = 0;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
 };
 
 

@@ -160,11 +160,11 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
                                  SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints_1st);
 
         StatusCode secondStageProcessing(std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                         std::vector<FPGATrackSimRoad*> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd);
+                                         std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd);
 
 
-        StatusCode writeOutputData(std::vector<FPGATrackSimRoad*> const & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                   std::vector<FPGATrackSimRoad*> const & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd,
+        StatusCode writeOutputData(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
+                                   const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd,
                                    FPGATrackSimDataFlowInfo const * dataFlowInfo);
 
         void printHitSubregions(std::vector<FPGATrackSimHit> const & hits);

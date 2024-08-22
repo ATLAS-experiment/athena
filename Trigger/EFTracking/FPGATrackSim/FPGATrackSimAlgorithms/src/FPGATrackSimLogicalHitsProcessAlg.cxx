@@ -239,8 +239,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     TIME(m_tprocess);
 
     // Get roads
-    std::vector<FPGATrackSimRoad*> prefilter_roads;
-    std::vector<FPGATrackSimRoad*>& roads_1st = prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> prefilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_1st = prefilter_roads;
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_1st;
 
     // If and when we set up code to run over more than one region/tower at a time this will need to be updated
@@ -258,7 +258,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
 
 ;
-    for (const FPGATrackSimRoad *road:roads_1st){
+    for (auto const &road:roads_1st){
         std::vector<FPGATrackSimHit> road_hits;
         ATH_MSG_DEBUG("Hough Road X Y: " << road->getX() << " " << road->getY());
         for (size_t l = 0; l < road->getNLayers(); ++l) {
@@ -271,7 +271,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
-    for (FPGATrackSimRoad *road : roads_1st) {
+    for (auto const &road : roads_1st) {
       unsigned bitmask = road->getHitLayers();
       for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); l++) {
         if (bitmask & (1 << l)) {
@@ -284,7 +284,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     
     TIME(m_troads);
     // Standard road Filter
-    std::vector<FPGATrackSimRoad*> postfilter_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter_roads;
     if (m_filterRoads)
     {
         ATH_CHECK(m_roadFilterTool->filterRoads(roads_1st, postfilter_roads));
@@ -292,13 +292,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(roads_1st));
     // Road Filter2
-    std::vector<FPGATrackSimRoad*> postfilter2_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter2_roads;
     if (m_filterRoads2) {
         ATH_CHECK(m_roadFilterTool2->filterRoads(roads_1st, postfilter2_roads));
         roads_1st = postfilter2_roads;
     }
     // Spacepoint road filter tool. Needed when fitting to spacepoints.
-    std::vector<FPGATrackSimRoad*> postfilter3_roads;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> postfilter3_roads;
     if (m_doSpacepoints) {
         ATH_CHECK(m_spRoadFilterTool->filterRoads(roads_1st, postfilter3_roads));
         roads_1st = postfilter3_roads;
@@ -392,7 +392,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Now, we may want to do large-radius tracking on the hits not used by the first stage tracking.
     // This follows overlap removal.
-    std::vector<FPGATrackSimRoad*> roadsLRT;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roadsLRT;
     std::vector<FPGATrackSimTrack> tracksLRT; // currently empty
     if (m_doLRT) {
         // Filter out hits that are on successful first-stage tracks
@@ -419,7 +419,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto dataFlowInfo = std::make_unique<FPGATrackSimDataFlowInfo>();
 
     // Second stage fitting
-    std::vector<FPGATrackSimRoad*> roads_2nd;
+    std::vector<std::shared_ptr<const FPGATrackSimRoad>> roads_2nd;
     std::vector<FPGATrackSimTrack> tracks_2nd;
     if (m_runSecondStage) {
         ATH_CHECK(secondStageProcessing(tracks_1st, roads_2nd, tracks_2nd));
@@ -619,7 +619,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs(SG::WriteHandle<FPGA
 
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::secondStageProcessing(std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                                           std::vector<FPGATrackSimRoad*> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd)
+                                                           std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd)
 {
     m_clusters_2nd.clear();
     m_spacepoints_2nd.clear();
@@ -678,9 +678,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::secondStageProcessing(std::vector<
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(std::vector<FPGATrackSimRoad*> const & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                                     std::vector<FPGATrackSimRoad*> const & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd,
-                                                     FPGATrackSimDataFlowInfo const * dataFlowInfo)
+StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads_1st,
+                                                                std::vector<FPGATrackSimTrack> const& tracks_1st,
+                                                                const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads_2nd,
+                                                                std::vector<FPGATrackSimTrack> const& tracks_2nd,
+                                                                FPGATrackSimDataFlowInfo const* dataFlowInfo)
 {
   m_logicEventOutputHeader->reset();
   

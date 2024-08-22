@@ -43,7 +43,7 @@ class FPGATrackSimNNTrackTool : public AthAlgTool
         FPGATrackSimNNTrackTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
-	StatusCode getTracks(std::vector<FPGATrackSimRoad*> &roads, std::vector<FPGATrackSimTrack> &tracks, 
+	StatusCode getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, std::vector<FPGATrackSimTrack> &tracks, 
 			     const FPGATrackSimNNMap *nnMap);
 
         static float getXScale() { return 1015;};

@@ -62,7 +62,7 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::finalize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(const std::vector<FPGATrackSimRoad*> & prefilter_roads, std::vector<FPGATrackSimRoad*> & postfilter_roads) {
+StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) {
     // Record the number of input roads and roads with problems.
     int badRoads = 0;
     bool isSecondStage = false;
@@ -95,8 +95,10 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(const std::vector<F
     // every layer in each created road contains *only* spacepoints or hits, but
     // not both. Then we can match each new road unambiguously to a single set of
     // spacepoint-dependent fit constants.
-    for (auto& road : prefilter_roads) {
-        bool success = splitRoad(road);
+    for (auto & road : prefilter_roads) {
+        std::shared_ptr<FPGATrackSimRoad> nonConstRoad = std::const_pointer_cast<FPGATrackSimRoad>(road);
+        bool success = splitRoad(nonConstRoad.get());
+        road = nonConstRoad;
         if (!success) {
             badRoads += 1;
         }
@@ -110,7 +112,7 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::filterRoads(const std::vector<F
     // copy roads to outputs - borrowed from the eta pattern filter.
     postfilter_roads.reserve((isSecondStage) ? m_postfilter_roads_2nd.size() : m_postfilter_roads.size());
     for (FPGATrackSimRoad & r : (isSecondStage ? m_postfilter_roads_2nd : m_postfilter_roads))
-        postfilter_roads.push_back(&r);
+        postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
 
     return StatusCode::SUCCESS;
 }

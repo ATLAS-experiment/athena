@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimOverlapRemovalTool.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -50,8 +50,8 @@ StatusCode FPGATrackSimOverlapRemovalTool::initialize()
 
 bool isLocalMax(vector2D<FPGATrackSimRoad*> const & acc, unsigned x, unsigned y, int localMaxWindowSize)
 {
+    if (!localMaxWindowSize) return true;
     if (!acc(y, x)) return false;
-
     for (int j = -localMaxWindowSize; j <= localMaxWindowSize; j++)
         for (int i = -localMaxWindowSize; i <= localMaxWindowSize; i++)
         {
@@ -71,7 +71,7 @@ bool isLocalMax(vector2D<FPGATrackSimRoad*> const & acc, unsigned x, unsigned y,
     return true;
 }
 
-StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATrackSimRoad*>& roads)
+StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads)
 {
     if (roads.empty()) return StatusCode::SUCCESS;
 
@@ -82,27 +82,26 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<FPGATra
     vector2D<FPGATrackSimRoad*> acc(m_imageSize_y, m_imageSize_x);
 
     // Slice-wise duplicate removal: accept only one road (with most hits) per bin
-    for (FPGATrackSimRoad* r: roads)
+    for (auto &r: roads)
     {
         FPGATrackSimRoad* & old = acc(r->getYBin(), r->getXBin());
-        if (!old) old = r;
-        else if (r->getNHitLayers() > old->getNHitLayers()) old = r;
-        else if (r->getNHitLayers() == old->getNHitLayers() && r->getNHits() > old->getNHits()) old = r;
+        if (!old) *old = *r.get();
+        else if (r->getNHitLayers() > old->getNHitLayers()) *old = *r.get();
+        else if (r->getNHitLayers() == old->getNHitLayers() && r->getNHits() > old->getNHits()) *old = *r.get();
     }
-
-    // All-slices local max
-    if (m_localMaxWindowSize)
-        for (unsigned y = 0; y < m_imageSize_y; y++)
-            for (unsigned x = 0; x < m_imageSize_x; x++)
-                if (!isLocalMax(acc, x, y, m_localMaxWindowSize))
-                    acc(y, x) = nullptr;
 
     // Reformat to vector
     roads.clear();
     for (unsigned y = 0; y < m_imageSize_y; y++)
-        for (unsigned x = 0; x < m_imageSize_x; x++)
-            if (acc(y, x))
-                roads.push_back(acc(y, x));
+      for (unsigned x = 0; x < m_imageSize_x; x++)
+        if (FPGATrackSimRoad *tempPtr = acc(y, x); tempPtr && isLocalMax(acc, x, y, m_localMaxWindowSize)/*All-slices local max*/) {
+          roads.emplace_back(std::shared_ptr<const FPGATrackSimRoad>(tempPtr));
+          acc(y, x) = nullptr;
+        }
+        else {
+          delete acc(y,x);
+          acc(y,x) = nullptr;
+        }
 
     ATH_MSG_DEBUG("Input: " << in << " Output: " << roads.size());
     return StatusCode::SUCCESS;

@@ -53,9 +53,9 @@ void TrackFitter::resetCounters()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vector<FPGATrackSimTrack>& tracks) {
+int TrackFitter::fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
     resetCounters();
-    for (auto cur_road : roads) {
+    for (const std::shared_ptr<const FPGATrackSimRoad>& cur_road : roads) {
       std::vector<FPGATrackSimTrack> t;
       int isOK = fitTracks(cur_road, t);
       if (isOK != FITTRACKS_OK) return isOK;
@@ -71,7 +71,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vec
  * Takes all combinations of hits in the road to create track candidates,
  * fits them using the constant bank, and filters them based on the chi2 of the fit.
  */
- int TrackFitter::fitTracks(FPGATrackSimRoad *road, std::vector<FPGATrackSimTrack>& tracks)
+ int TrackFitter::fitTracks(const std::shared_ptr<const FPGATrackSimRoad> &road, std::vector<FPGATrackSimTrack>& tracks)
 {   
     if (not road){
       ATH_MSG_WARNING("road pointer is null in TrackFitter::fitTracks");

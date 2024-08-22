@@ -34,8 +34,8 @@ class FPGATrackSimDataFlowTool: public AthAlgTool
 
         StatusCode calculateDataFlow(FPGATrackSimDataFlowInfo* info, FPGATrackSimLogicalEventInputHeader const * header_1st,
                                      std::vector<FPGATrackSimCluster> const & clusters_1st,
-                                     std::vector<FPGATrackSimRoad*> const & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
-                                     std::vector<FPGATrackSimRoad*> const & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd);
+                                     const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_1st, std::vector<FPGATrackSimTrack> const & tracks_1st,
+                                     const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> const & tracks_2nd);
 
         StatusCode getDataFlowInfo(FPGATrackSimDataFlowInfo const & info);
 

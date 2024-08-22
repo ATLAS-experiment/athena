@@ -50,7 +50,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::initialize()
 ///////////////////////////////////////////////////////////////////////////////
 // Main Algorithm
 
-StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrackSimRoad*> & prefilter_roads, std::vector<FPGATrackSimRoad*> & postfilter_roads) 
+StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) 
 {
     ATH_MSG_DEBUG("Start Phi Road Filter"); 
     
@@ -58,7 +58,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
     postfilter_roads.clear();
 
     // Filter roads
-    for (auto & road : prefilter_roads) {
+    for (auto const & road : prefilter_roads) {
       FPGATrackSimRoad newroad = buildRoad(road);
       unsigned hit_layers = newroad.getHitLayers();
       
@@ -75,7 +75,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
 
     // copy roads to outputs
     postfilter_roads.reserve(m_postfilter_roads.size());
-    for (FPGATrackSimRoad & r : m_postfilter_roads) postfilter_roads.push_back(&r);
+    for (FPGATrackSimRoad & r : m_postfilter_roads) postfilter_roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
     
     ATH_MSG_DEBUG("Event Done");
     
@@ -83,7 +83,7 @@ StatusCode FPGATrackSimPhiRoadFilterTool::filterRoads(const std::vector<FPGATrac
     return StatusCode::SUCCESS;
 }
 
-FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(FPGATrackSimRoad* origr) const
+FPGATrackSimRoad FPGATrackSimPhiRoadFilterTool::buildRoad(std::shared_ptr<const FPGATrackSimRoad> origr) const
 {
   ATH_MSG_DEBUG("PhiRoad Build Road");
   float phi = origr->getX();

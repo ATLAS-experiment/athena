@@ -79,7 +79,7 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode FPGATrackSimTrackFitterTool::getTracks(const std::vector<FPGATrackSimRoad*>& roads, std::vector<FPGATrackSimTrack>& tracks) {
+StatusCode FPGATrackSimTrackFitterTool::getTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks) {
     // elaborate the next event
 
     int status = m_tfpobj->fitTracks(roads,tracks);
