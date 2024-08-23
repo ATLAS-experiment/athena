@@ -69,7 +69,7 @@ public:
   double getExpectedVariance() const;
   double getClusterEnergy() const ;
 
-  void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
+  void simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
   const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing);
 
 private:
