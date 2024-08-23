@@ -32,7 +32,6 @@ protected:
     ///
     bool m_BMGpresent{false};
     int m_BMG_station_name{-1};
-    int m_BIS_station_name{-1};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::WriteHandleKey<MdtCsmContainer> m_csmContainerKey{this, "OutputObjectName", "MDTCSM", "WriteHandleKey for Output MdtCsmContainer"};
     SG::ReadHandleKey<MdtDigitContainer> m_digitContainerKey{this, "InputObjectName", "MDT_DIGITS",
@@ -40,7 +39,6 @@ protected:
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "CablingKey", "MuonMDT_CablingMap", "Key of MuonMDT_CablingMap"};
     SG::ReadCondHandleKey<MdtCondDbData> m_condKey{this, "ConditionsKey", "MdtCondDbData", "Key of MDT condition data"};
 
-    Gaudi::Property<bool> m_isPhaseII{this, "isPhaseII", false, "Switch to set the phase II geometry. Allows for cabling failures"};
 };
 
 #endif

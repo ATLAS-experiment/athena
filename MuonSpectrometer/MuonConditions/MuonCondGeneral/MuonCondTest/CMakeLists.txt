@@ -86,3 +86,10 @@ atlas_add_test( TgcDigiJitterTest
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+
+atlas_add_test( MdtCalibDbR4Test
+                SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)

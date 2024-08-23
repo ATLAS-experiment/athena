@@ -118,7 +118,6 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
                flags.GeoModel.Run >= LHCPeriod.Run4: 
                 dbTagMezz = "MDTMezMapSchemaJSON_RUN4_FantasyCabling_1"
                 dbTagSchema = "MDTCablingMapSchemaJSON_RUN4_FantasyCabling_1"
-            
             elif flags.GeoModel.Run >= LHCPeriod.Run4:
                 dbTagSchema = "MDTOflCablingMapSchema_RUN124_MC15_02"
                 dbTagMezz = "MDTOflCablingMezzanineSchema_RUN124_MC15_02"

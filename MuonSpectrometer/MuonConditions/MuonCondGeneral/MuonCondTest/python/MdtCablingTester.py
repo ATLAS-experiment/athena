@@ -38,10 +38,12 @@ def MdtCablingTestAlgCfg(flags,
                         cablingJSON = "", ### External JSON file containing the channel mapping
                         dumpFile="", ### Dump the cabling into
                         ):
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    result = setupServicesCfg(flags)
+
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
     result.merge(MdtCondDbAlgCfg(flags))
     result.merge(MDTCablingConfigCfg(flags, MezzanineJSON=mezzJSON, CablingJSON=cablingJSON))
     event_algo = CompFactory.MdtCablingTestAlg(name, DumpMap=dumpFile)
@@ -61,11 +63,12 @@ if __name__ == "__main__":
     if not flags.Input.isMC:
         flags.IOVDb.GlobalTag = args.conditionsTag
     flags.lock()
-    
-    cfg = MdtCablingTestAlgCfg(flags,
+
+    cfg = setupServicesCfg(flags)
+    cfg.merge(MdtCablingTestAlgCfg(flags,
                                mezzJSON=args.mezzMap,
                                cablingJSON=args.cablingMap,
-                               dumpFile=args.output)
+                               dumpFile=args.output))
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
    

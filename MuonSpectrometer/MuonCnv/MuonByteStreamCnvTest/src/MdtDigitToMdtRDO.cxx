@@ -33,9 +33,7 @@ MdtDigitToMdtRDO::MdtDigitToMdtRDO(const std::string& name, ISvcLocator* pSvcLoc
 StatusCode MdtDigitToMdtRDO::initialize() {
     ATH_MSG_DEBUG(" in initialize()");
     ATH_CHECK(m_csmContainerKey.initialize());
-    ATH_MSG_VERBOSE("Initialized WriteHandleKey: " << m_csmContainerKey);
     ATH_CHECK(m_digitContainerKey.initialize());
-    ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_digitContainerKey);
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_cablingKey.initialize());
     ATH_CHECK(m_condKey.initialize());
@@ -44,8 +42,9 @@ StatusCode MdtDigitToMdtRDO::initialize() {
 
     m_BMG_station_name = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG");
     m_BMGpresent = m_BMG_station_name != -1;
-    if (m_BMGpresent) { ATH_MSG_INFO("Processing configuration for layouts with BME chambers (stationID: " << m_BMG_station_name << ")."); }
-    m_BIS_station_name = m_idHelperSvc->mdtIdHelper().stationNameIndex("BIS");
+    if (m_BMGpresent) { 
+        ATH_MSG_DEBUG("Processing configuration for layouts with BME chambers (stationID: " << m_BMG_station_name << ")."); 
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -57,14 +56,14 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
     // create an empty pad container and record it
     SG::WriteHandle<MdtCsmContainer> csmContainer(m_csmContainerKey, ctx);
     ATH_CHECK(csmContainer.record(std::make_unique<MdtCsmContainer>()));
-    ATH_MSG_DEBUG("Recorded MdtCsmContainer called " << csmContainer.name() << " in store " << csmContainer.store());
+    ATH_MSG_DEBUG("Recorded MdtCsmContainer called " << csmContainer.fullKey());
 
     SG::ReadHandle<MdtDigitContainer> container(m_digitContainerKey, ctx);
     if (!container.isValid()) {
-        ATH_MSG_ERROR("Could not find MdtDigitContainer called " << container.name() << " in store " << container.store());
+        ATH_MSG_ERROR("Could not find MdtDigitContainer called " << container.fullKey());
         return StatusCode::SUCCESS;
     }
-    ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << " in store " << container.store());
+    ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.fullKey());
 
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle_Cabling{m_cablingKey, ctx};
     const MuonMDT_CablingMap* cabling_ptr{*readHandle_Cabling};
@@ -80,11 +79,9 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
-    auto& msg = msgStream();
-
     /// Internal map to cache all the CSMs
-    using csmMap = std::map<IdentifierHash, std::unique_ptr<MdtCsm>>;
-    csmMap csm_cache{};
+    std::vector<std::unique_ptr<MdtCsm>> csm_cache{};
+    csm_cache.resize(id_helper.detectorElement_hash_max());
     // Iterate on the collections
     for (const MdtDigitCollection* mdtCollection : *container) {
         const Identifier chid1 = mdtCollection->identify();
@@ -107,7 +104,7 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
             }
 
             /// Get the online Id of the channel
-            bool cabling = cabling_ptr->getOnlineId(cabling_data, msg);
+            bool cabling = cabling_ptr->getOnlineId(cabling_data, msgStream());
 
             if (!cabling) {
                 if (cabling_data.stationIndex == m_BMG_station_name) {
@@ -120,19 +117,12 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
                     }
                     continue;
                 }
-                /// For the moment remove the BIS stations from the geometry
-                if (m_isPhaseII && id_helper.stationName(channelId) == m_BIS_station_name && m_idHelperSvc->issMdt(channelId)) {
-                    ATH_MSG_DEBUG("Found BIS sMDT which cannot be mapped " << cabling_data
-                                                                           << ". This should only happen in the Phase-II geometry.");
-                    continue;
-                }
                 ATH_MSG_ERROR("MDTcabling can't return an online ID for the channel : " << cabling_data);
                 return StatusCode::FAILURE;
             }
 
             // Create the new AMT hit
-            std::unique_ptr<MdtAmtHit> amtHit =
-                std::make_unique<MdtAmtHit>(cabling_data.tdcId, cabling_data.channelId, mdtDigit->is_masked());
+            auto amtHit = std::make_unique<MdtAmtHit>(cabling_data.tdcId, cabling_data.channelId, mdtDigit->is_masked());
             // Get coarse time and fine time
             int tdc_counts = mdtDigit->tdc();
 
@@ -149,24 +139,32 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
             IdentifierHash csm_hash{0};
             Identifier csmId{0};
             /// Copy the online information take the 0-th channel and the 0-th tdc
-            if (!cabling_ptr->getMultiLayerCode(cabling_data, csmId, csm_hash, msg)) {
+            if (!cabling_ptr->getMultiLayerCode(cabling_data, csmId, csm_hash, msgStream())) {
                 ATH_MSG_ERROR("Hash generation failed for " << cabling_data);
                 return StatusCode::FAILURE;
             }
 
             /// Find the proper csm card otherwise create a new one
-            csmMap::iterator csm_itr = csm_cache.find(csm_hash);
-            if (csm_itr == csm_cache.end()) {
+            std::unique_ptr<MdtCsm>& mdtCsm = csm_cache[csm_hash];
+            if (!mdtCsm) {
                 ATH_MSG_DEBUG("Insert new CSM module using " << cabling_data << " " << m_idHelperSvc->toString(csmId));
-                std::unique_ptr<MdtCsm> csm =
-                    std::make_unique<MdtCsm>(csmId, csm_hash, cabling_data.subdetectorId, cabling_data.mrod, cabling_data.csm);
-                csm_itr = csm_cache.insert(std::make_pair(csm_hash, std::move(csm))).first;
+                mdtCsm = std::make_unique<MdtCsm>(csmId, csm_hash, cabling_data.subdetectorId, cabling_data.mrod, cabling_data.csm);
             }
-            std::unique_ptr<MdtCsm>& mdtCsm = csm_itr->second;
             // Check that the CSM is correct
-            if (cabling_data.csm != mdtCsm->CsmId() || cabling_data.subdetectorId != mdtCsm->SubDetId() ||
-                cabling_data.mrod != mdtCsm->MrodId()) {
-                ATH_MSG_FATAL("Cannot create AmtHit " << cabling_data);
+            if (cabling_data.csm != mdtCsm->CsmId() || cabling_data.subdetectorId != mdtCsm->SubDetId() || cabling_data.mrod != mdtCsm->MrodId()) {
+                MdtCablingData wrongCsm{};
+                wrongCsm.csm = mdtCsm->CsmId();
+                wrongCsm.mrod = mdtCsm->MrodId();
+                wrongCsm.subdetectorId = mdtCsm->SubDetId();
+                wrongCsm.channelId =0;
+                wrongCsm.tdcId =0;
+
+                cabling_ptr->getOfflineId(wrongCsm, msgStream());
+                Identifier wrongId{};
+                cabling_ptr->convert(wrongCsm,wrongId);
+
+                ATH_MSG_FATAL("CSM collection "<<static_cast<const MdtCablingOnData&>(wrongCsm) <<" ("<<m_idHelperSvc->toStringDetEl(wrongId)
+                            <<") does not match with " <<static_cast<const MdtCablingOnData&>(cabling_data)<<" ("<<m_idHelperSvc->toStringDetEl(chid1)<<")");
                 return StatusCode::FAILURE;
             }
             // Add the digit to the CSM
@@ -174,9 +172,9 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
         }
     }
     /// Add the CSM to the CsmContainer
-    for (auto& csm_coll : csm_cache) {
-        ATH_MSG_DEBUG("Add CSM container " << csm_coll.first << "  " << csm_coll.first);
-        ATH_CHECK(csmContainer->addCollection(csm_coll.second.release(), csm_coll.first));
+    for (unsigned int hash= 0; hash < csm_cache.size(); ++hash) {
+        if (!csm_cache[hash]) continue;
+        ATH_CHECK(csmContainer->addCollection(csm_cache[hash].release(), hash));
     }
     return StatusCode::SUCCESS;
 }
