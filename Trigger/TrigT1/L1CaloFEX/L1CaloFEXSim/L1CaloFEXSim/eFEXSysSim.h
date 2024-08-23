@@ -51,14 +51,8 @@ namespace LVL1 {
 
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode finalize  () override;
 
     virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection) override ;
-
-    virtual void init() override ;
-
-    virtual void cleanup() override;
 
     virtual int calcTowerID(int eta, int phi, int mod) const override;
 
@@ -97,13 +91,6 @@ namespace LVL1 {
 		 SG::WriteHandleKey< xAOD::eFexTauRoIContainer >& eFexTauOutKey);
 
     // EM TOBs and xTOBS
-    std::unique_ptr< xAOD::eFexEMRoIContainer > m_eContainer;
-    std::unique_ptr< xAOD::eFexEMRoIAuxContainer > m_eAuxContainer;
-    std::unique_ptr< xAOD::eFexEMRoIContainer > m_xeContainer;
-    std::unique_ptr< xAOD::eFexEMRoIAuxContainer > m_xeAuxContainer;
-
-    std::vector<eFEXSim*>  m_eFEXCollection;
-    
     ToolHandle<IeFEXSim> m_eFEXSimTool {this, "eFEXSimTool",    "LVL1::eFEXSim",    "Tool that creates the eFEX Simulation"};
 
     ToolHandle<IeFEXFillEDM> m_eFEXFillEDMTool {this, "eFEXFillEDMTool", "LVL1::eFEXFillEDM", "Tool to fille eFEX EDMs"};
@@ -121,11 +108,6 @@ namespace LVL1 {
     ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 
     //std::map<int,eTower> m_eTowersColl;
-
-    std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> > m_allEmTobObjects;
-
-    std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> > m_allTauHeuristicTobObjects;
-    std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> > m_allTauBDTTobObjects;
 
   };
   
