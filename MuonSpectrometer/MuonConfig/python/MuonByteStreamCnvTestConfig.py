@@ -143,10 +143,7 @@ def MM_RdoToDigitCfg(flags, name="MM_RdoToDigitAlg", **kwargs):
 def MdtDigitToMdtRDOCfg(flags, name="MdtDigitToMdtRDO", **kwargs):
     """Return ComponentAccumulator with configured MdtDigitToMdtRDO algorithm"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)).name)
-    ### Disable failures due to improper cabling maps
-    from AthenaConfiguration.Enums import LHCPeriod
-    kwargs.setdefault("isPhaseII", flags.GeoModel.Run >= LHCPeriod.Run4)
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}MDTCSM")
     else:

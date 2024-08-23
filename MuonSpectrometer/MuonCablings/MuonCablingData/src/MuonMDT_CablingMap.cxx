@@ -11,7 +11,7 @@
 #include "CxxUtils/ArrayHelper.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "Identifier/Identifier.h"
-
+#include "GeoModelHelpers/throwExcept.h"
 
 namespace {
 /// Four mezzanine channels explicitly break the cabling schema in the legacy
@@ -29,11 +29,11 @@ MuonMDT_CablingMap::MuonMDT_CablingMap() {
     StoreGateSvc* detStore = nullptr;
     StatusCode sc = svcLocator->service("DetectorStore", detStore);
     if (sc != StatusCode::SUCCESS) {
-        throw std::runtime_error("Could not find the detctor store");
+        THROW_EXCEPTION("Could not find the detctor store");
     }
     sc = detStore->retrieve(m_mdtIdHelper, "MDTIDHELPER");
     if (sc != StatusCode::SUCCESS) {
-        throw std::runtime_error("Could not retrieve the MdtIdHelper");
+        THROW_EXCEPTION("Could not retrieve the MdtIdHelper");
     }
     m_2CSM_cham = m_mdtIdHelper->stationNameIndex("BME") != -1;
 }
@@ -194,26 +194,37 @@ bool MuonMDT_CablingMap::addMezzanine(CablingData map_data, DataSource source,
             << "Mezzanine Type: " << static_cast<int>(map_data.mezzanine_type)
             << " not found in the list !" << endmsg;
         return false;
-    } else if (source == DataSource::LegacyCOOL &&
-               !mezzaType->checkConsistency(log))
+    } else if (source == DataSource::LegacyCOOL && !mezzaType->checkConsistency(log)){
         return false;
-
-    std::unique_ptr<MdtTdcMap> newTdc =
-        std::make_unique<MdtTdcMap>(mezzaType, map_data);
+    }
+    auto newTdc = std::make_unique<MdtTdcMap>(mezzaType, map_data);
     if (debug) {
-        log << MSG::VERBOSE << " Added new readout channel " << map_data
-            << endmsg;
+        log << MSG::VERBOSE << " Added new readout channel " << map_data<< endmsg;
     }
     MdtOffChModule& offModule = m_toOnlineConv[map_data];
     offModule.cards.emplace(newTdc.get());
-    if (!offModule.csm[0])
+    if (!offModule.csm[0]) {
         offModule.csm[0] = map_data;
-    else if (offModule.csm[0] != map_data) {
+        if (debug){
+            log<< MSG::VERBOSE<<"Assign first CSM "<<map_data<<endmsg;
+        }
+        /// If the card is mounted on ML1 check that the first CSM on the second ML is the same
+        if (map_data.multilayer == 1) {
+            CablingData secondMl = map_data;
+            secondMl.multilayer = 2;
+            MdtOffChModule& secondModule{m_toOnlineConv[secondMl]};
+            if (!secondModule.csm[0]){
+                secondModule.csm[0] = map_data;
+            } else if (secondModule.csm[0] != map_data && !secondModule.csm[1]) {
+                secondModule.csm[1] = map_data;
+                std::swap(secondModule.csm[1], secondModule.csm[0]);
+            }
+        }
+    } else if (offModule.csm[0] != map_data) {
         if (!offModule.csm[1]) {
             offModule.csm[1] = map_data;
             if (debug) {
-                log << MSG::VERBOSE << " Add second CSM for " << map_data
-                    << endmsg;
+                log << MSG::VERBOSE << " Add second CSM for " << map_data << endmsg;
             }
         } else if (offModule.csm[1] != map_data) {
             log << MSG::ERROR << "The mulit layer " << map_data
@@ -348,13 +359,12 @@ bool MuonMDT_CablingMap::addChamberToROBMap(const CablingData& map_data,
     IdentifierHash chamberId, multiLayerId{0};
     Identifier ml{0};
     if (!getStationCode(map_data, chamberId, log)) {
-        log << MSG::ERROR << "Could not found hashId for station: " << map_data
+        log << MSG::ERROR << "Could not find hashId for station: " << map_data
             << endmsg;
         return false;
     }
     if (!getMultiLayerCode(map_data, ml, multiLayerId, log)) {
-        log << MSG::ERROR
-            << "Could not found hashId for multi layer: " << map_data << endmsg;
+        log << MSG::ERROR << "Could not find hashId for multi layer: " << map_data << endmsg;
         return false;
     }
     int sub = map_data.subdetectorId;
