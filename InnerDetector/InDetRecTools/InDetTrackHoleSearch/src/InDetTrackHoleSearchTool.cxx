@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,14 +34,8 @@ InDet::InDetTrackHoleSearchTool::InDetTrackHoleSearchTool(const std::string& t,
                                                           const IInterface*  p) :
   AthAlgTool(t,n,p),
   m_atlasId(nullptr),
-  m_extendedListOfHoles(false),
-  m_cosmic(false),
   m_warning(0) {
   declareInterface<ITrackHoleSearchTool>(this);
-  declareProperty("ExtendedListOfHoles"  , m_extendedListOfHoles = false);
-  declareProperty("Cosmics"              , m_cosmic);
-  declareProperty("minSiHits"            , m_minSiHits = 3);
-  declareProperty("CountDeadModulesAfterLastHit", m_countDeadModulesAfterLastHit = true);
 }
 
 //================ Destructor =================================================

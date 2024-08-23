@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 // -*- c++ -*-
@@ -107,10 +107,11 @@ namespace InDet {
     /// Object used to store the last decision
     asg::AcceptInfo m_acceptInfo; //!< Object that stores detailed selection information
     
-    Double_t m_minD0 = -1.; //!< Minimum |d0| of tracks
-
-    Int_t m_NPixel0TRT = -1 ; //! < Minimum number of Pixel hits when TRT has no hit
-    Int_t m_minInDetHits = -1 ; //  Minimum number of total InDet hits
+    DoubleProperty m_minD0{this, "minD0", -1., "Minimum |d0| of tracks"};
+    IntegerProperty m_NPixel0TRT
+      {this, "minNPixelHitsAtZeroTRT", -1, "Minimum number of Pixel hit upon zero TRT hit"};
+    IntegerProperty m_minInDetHits
+      {this, "minTotalHits", -1, "Minimum number of Pixel + SCT + TRT hits"};
 
 //    ToolHandle< InDet::IInDetTrackSelectionTool > m_trkFilter ;
 #ifndef XAOD_ANALYSIS

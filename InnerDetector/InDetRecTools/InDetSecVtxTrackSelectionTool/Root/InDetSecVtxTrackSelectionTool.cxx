@@ -25,10 +25,6 @@ InDet::InDetSecVtxTrackSelectionTool::InDetSecVtxTrackSelectionTool(const std::s
   declareInterface<IInDetTrackSelectionTool>(this);
 #endif
 
-  declareProperty("minD0", m_minD0, "Minimum transverse separation");
-  declareProperty("minNPixelHitsAtZeroTRT", m_NPixel0TRT , "Minimum number of Pixel hit upon zero TRT hit" ) ;
-  declareProperty("minTotalHits", m_minInDetHits , "Minimum number of Pixel + Sct + TRT hits" ) ;
-
 }
 
 // we must define the destructor in order to use forward-declaration with unique_ptr
