@@ -1,13 +1,10 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file    AthenaPython/python/tests/PyTHistTestsLib.py
 # @purpose Test read and write histograms and trees via the @c ITHistSvc
 # @author  Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
-
 __doc__ = """Test read and write histograms and trees via ITHistSvc"""
-__version__ = "$Revision: 1.4 $"
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
 from AthenaPython import PyAthena
@@ -50,14 +47,9 @@ class PyHistReader(PyAthena.Alg):
         o = self.hsvc.load('/read2/profile', oid_type='hist')
         print_properties(o)
 
-        ## FIXME: 'THistSvc::getTrees' (always) segfaults
-        ## https://savannah.cern.ch/bugs/index.php?36379
-        try:
-            o = self.hsvc.load('/read2/trees/stuff/tree1', oid_type='tree')
-            _info(' -%-20s: %i', o.GetName(), o.GetEntries())
-        except KeyError as err:
-            self.msg.error(err)
-            self.msg.error('bug #36379 still not fixed...')
+        o = self.hsvc.load('/read2/trees/stuff/tree1', oid_type='tree')
+        _info(' -%-20s: %i', o.GetName(), o.GetEntries())
+
         return StatusCode.Success
 
     def execute(self):
@@ -106,9 +98,6 @@ class PyHistWriter(PyAthena.Alg):
         self.hsvc['/temp/h1']        = th1('h1', 'Temporary hist 1')
         self.hsvc['/temp/other/h1a'] = th1('h1a', 'Temporary hist 1a')
 
-        # write to stream 'new'
-        self.hsvc['/new/hists/h1'] = th1('h1', 'Persistent hist 1')
-
         # update to stream 'upd', dir '/xxx'
         self.hsvc['/upd/xxx/gauss1d'] = TH1F('gauss1d', '1D gaussian',
                                              100,-50.,50.)
@@ -133,7 +122,6 @@ class PyHistWriter(PyAthena.Alg):
         hsvc = self.hsvc
         hsvc['/temp/h1'].Fill(x)
         for _ in range(2): hsvc['/temp/other/h1a'].Fill(x)
-        for _ in range(3): hsvc['/new/hists/h1'].Fill(x)
         _fill = hsvc['/upd/xxx/gauss1d'].Fill
         for _ in range(1000): _fill(gauss(mu=0.,sigma=15.),1.)
         _fill = hsvc['/rec/gauss2d'].Fill
@@ -163,8 +151,7 @@ class PyHistWriter(PyAthena.Alg):
     def finalize(self):
         _info = self.msg.info
         _info('==> finalize...')
-        for n in ('/temp/h1', '/temp/other/h1a',
-                  '/new/hists/h1'):
+        for n in ('/temp/h1', '/temp/other/h1a'):
             _info('='*20)
             _info(' - histo [%r]', n)
             h = self.hsvc[n]

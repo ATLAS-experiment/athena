@@ -4,8 +4,6 @@
 # @purpose: a set of Python classes for PyAthena
 # @author: Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
-
 __doc__     = """Module containing a set of Python base classes for PyAthena"""
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
