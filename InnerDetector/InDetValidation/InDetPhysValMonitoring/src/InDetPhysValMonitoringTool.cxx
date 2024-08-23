@@ -387,8 +387,8 @@ InDetPhysValMonitoringTool::fillHistograms() {
 	ATH_CHECK(m_vtxValidTool->matchVertices(*vertices));
 	ATH_MSG_DEBUG("Hard scatter classification type: " << InDetVertexTruthMatchUtils::classifyHardScatter(*vertices) << ", vertex container size = " << vertices->size());
       }
-      m_monPlots->fill(*vertices, primaryvertex, truthHSVertices, truthPUVertices, beamSpotWeight);
-
+      m_monPlots->fill(*vertices, primaryvertex, truthHSVertices, truthPUVertices, actualMu,  beamSpotWeight);
+      
       ATH_MSG_DEBUG("Filling vertex/event info monitoring plots");
       //Filling vertexing plots for the reconstructed hard-scatter as a function of mu
       m_monPlots->fill(*vertices, truthMu, actualMu, beamSpotWeight);

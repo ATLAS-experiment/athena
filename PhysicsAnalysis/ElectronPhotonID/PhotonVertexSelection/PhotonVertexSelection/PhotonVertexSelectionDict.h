@@ -10,6 +10,7 @@
 
 #include "PhotonVertexSelection/IPhotonPointingTool.h"
 #include "PhotonVertexSelection/PhotonPointingTool.h"
+#include "PhotonVertexSelection/DecoratePhotonPointingAlg.h"
 
 #include "PhotonVertexSelection/PhotonVertexHelpers.h"
 

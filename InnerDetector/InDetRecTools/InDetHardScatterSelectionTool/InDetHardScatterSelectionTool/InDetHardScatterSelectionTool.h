@@ -60,7 +60,8 @@ namespace InDet {
     enum Mode {
       SumPt2 = 0,
       SumPt  = 1,
-      SumPtw = 2
+      SumPtw = 2,
+      HSGN2 = 3,
     };
 
     /// @}
@@ -145,6 +146,9 @@ namespace InDet {
  
     /// The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "VertexScatterKey", "" , "Overwrriten in the configuration step by the <HardScatterLinkDeco> property"};
+
+    /// xAOD::EventInfo ReadDecorHandleKey
+    SG::ReadDecorHandleKey<xAOD::VertexContainer> m_gnnScoreKey {this, "GNNKey", "PrimaryVertices.HSGN2_phsvertex", "Name of the hard-scatter GNN decoration"};
 
     /// @}
 
