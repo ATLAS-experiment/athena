@@ -10,7 +10,7 @@
 #include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Propagator/EigenStepper.hpp"
+#include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
@@ -56,7 +56,7 @@ namespace ActsTrk::detail {
 
   /// Adapted from Acts Examples/Algorithms/TrackFinding/src/TrackFindingAlgorithmFunction.cpp
 
-  using Stepper = Acts::EigenStepper<>;
+  using Stepper = Acts::SympyStepper;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
   using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackContainer>;
