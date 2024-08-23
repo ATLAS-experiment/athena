@@ -76,55 +76,72 @@ class InDetNNScoringTool : virtual public Trk::ITrackScoringTool,
   
   
   //these are used for ScoreModifiers 
-  int m_maxDblHoles, m_maxPixHoles, m_maxSCT_Holes,  m_maxHits, m_maxSigmaChi2, m_maxTrtRatio, m_maxTrtFittedRatio,
-    m_maxB_LayerHits, m_maxPixelHits, m_maxPixLay,  m_maxGangedFakes;
+  int m_maxDblHoles = -1, m_maxPixHoles = -1, m_maxSCT_Holes = -1,
+    m_maxHits = -1, m_maxSigmaChi2 = -1, m_maxTrtRatio = -1,
+    m_maxTrtFittedRatio = -1, m_maxB_LayerHits = -1, m_maxPixelHits = -1,
+    m_maxPixLay = -1,  m_maxGangedFakes = -1;
   std::vector<double> m_factorDblHoles, m_factorPixHoles, m_factorSCT_Holes,  m_factorHits,
     m_factorSigmaChi2, m_factorB_LayerHits, m_factorPixelHits, m_factorPixLay, m_factorGangedFakes;
   std::vector<double> m_boundsSigmaChi2,
     m_boundsTrtRatio, m_factorTrtRatio, m_boundsTrtFittedRatio, m_factorTrtFittedRatio;
 
   /** Returns minimum number of expected TRT drift circles depending on eta. */
-  ToolHandle<ITrtDriftCircleCutTool>          m_selectortool;
+  ToolHandle<ITrtDriftCircleCutTool> m_selectortool
+    {this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};
   
   /**holds the scores assigned to each Trk::SummaryType from the track's Trk::TrackSummary*/
   std::vector<Trk::TrackScore>           m_summaryTypeScore;
   
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   
-  ToolHandle<Trk::IExtrapolator>         m_extrapolator;
+  ToolHandle<Trk::IExtrapolator> m_extrapolator
+    {this, "Extrapolator", "Trk::Extrapolator"};
 
   // Read handle for conditions object to get the field cache
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
   
   /** use the scoring tuned to Ambiguity processing or not */
-  bool m_useAmbigFcn;
-  bool m_useTRT_AmbigFcn;
-  bool m_useSigmaChi2;
-  std::string m_nnCutConfig;
-  double m_nnCutThreshold;
+  BooleanProperty m_useAmbigFcn{this, "useAmbigFcn", true};
+  BooleanProperty m_useTRT_AmbigFcn{this, "useTRT_AmbigFcn", false};
+  BooleanProperty m_useSigmaChi2{this, "useSigmaChi2", false};
+
+  StringProperty m_nnCutConfig{this, "nnCutConfig", ""};
+  DoubleProperty m_nnCutThreshold{this, "nnCutThreshold", -0.1};
   
-  bool m_usePixel;
-  bool m_useSCT;
+  BooleanProperty m_usePixel{this, "usePixel", true};
+  BooleanProperty m_useSCT{this, "useSCT", true};
 
   /** cuts for selecting good tracks*/
-  double m_minPt;         //!< minimal Pt cut
-  double m_maxEta;        //!< maximal Eta cut
-  double m_maxRPhiImp;    //!< maximal RPhi impact parameter cut
-  double m_maxZImp;       //!< maximal z impact parameter cut
-  int    m_minSiClusters; //!< minimal number of Si clusters
-  int    m_maxDoubleHoles;//|< maximum number of SCT double holes
-  int    m_maxSiHoles;    //!< maximal number of holes (Pixel+SCT)
-  int    m_maxPixelHoles; //!< maximal number of Pixel holes
-  int    m_maxSctHoles;   //!< maximal number of SCT holes
-  int    m_minTRTonTrk;   //!< minimum number of TRT hits
-  double m_minTRTprecision;   //!< minimum fraction of TRT precision hits
-  int    m_minPixel;      //!< minimum number of pixel clusters
-  double m_maxRPhiImpEM;    //!< maximal RPhi impact parameter cut track that match EM clusters
+  DoubleProperty m_minPt{this, "minPt", 500., "minimal Pt cut"};
+  DoubleProperty m_maxEta{this, "maxEta", 2.7, "maximal Eta cut"};
+  DoubleProperty m_maxRPhiImp
+    {this, "maxRPhiImp", 10., "maximal RPhi impact parameter cut"};
+  DoubleProperty m_maxZImp
+    {this, "maxZImp", 250., "maximal z impact parameter cut"};
 
-  bool  m_useEmClusSeed;
-  float m_phiWidthEm;
-  float m_etaWidthEm;
+  IntegerProperty m_minSiClusters
+    {this, "minSiClusters", 7, "minimal number of Si clusters"};
+  IntegerProperty m_maxDoubleHoles
+    {this, "maxDoubleHoles", 2, "maximum number of SCT double holes"};
+  IntegerProperty m_maxSiHoles
+    {this, "maxSiHoles", 5, "max number of Silicon (Pixel+SCT) holes"};
+  IntegerProperty m_maxPixelHoles
+    {this, "maxPixelHoles", 5, "max number of Pixel holes"};
+  IntegerProperty m_maxSctHoles
+    {this, "maxSCTHoles", 5, "max number of SCT holes"};
+  IntegerProperty m_minTRTonTrk
+    {this, "minTRTonTrk", 9, "minimum number of TRT hits"};
+  DoubleProperty m_minTRTprecision
+    {this, "minTRTPrecisionFraction", 0.5, "minimum fraction of TRT precision hits"};
+  IntegerProperty m_minPixel
+    {this, "minPixel", 0, "minimum number of pixel clusters"};
+
+  DoubleProperty m_maxRPhiImpEM
+    {this, "maxRPhiImpEM", 50., "maximal RPhi impact parameter cut track that match EM clusters"};
+  BooleanProperty m_useEmClusSeed{this, "doEmCaloSeed", true};
+  FloatProperty m_phiWidthEm{this, "phiWidthEM", 0.075};
+  FloatProperty m_etaWidthEm{this, "etaWidthEM", 0.05};
 
   SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey
      {this, "EMROIPhiRZContainer", "", "Name of the calo cluster ROIs in Phi,R,Z parameterization"};

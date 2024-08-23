@@ -23,60 +23,9 @@ InDet::InDetAmbiScoringTool::InDetAmbiScoringTool(const std::string& t,
               const std::string& n,
               const IInterface*  p ) :
   AthAlgTool(t,n,p),
-  // Initialization of ScoreModifiers variables
-  m_maxDblHoles(-1),
-  m_maxPixHoles(-1),
-  m_maxSCT_Holes(-1),
-  m_maxHits(-1),
-  m_maxSigmaChi2(-1),
-  m_maxTrtRatio(-1),
-  m_maxTrtFittedRatio(-1),
-  m_maxB_LayerHits(-1),
-  m_maxPixelHits(-1),
-  m_maxPixLay(-1),
-  m_maxGangedFakes(-1),
-  m_selectortool("InDet::InDetTrtDriftCircleCutTool", this),
-  m_summaryTypeScore(Trk::numberOfTrackSummaryTypes),
-  m_extrapolator("Trk::Extrapolator", this)
+  m_summaryTypeScore(Trk::numberOfTrackSummaryTypes)
 {
   declareInterface<Trk::ITrackScoringTool>(this);
-  
-  // declare properties
-  declareProperty("minPt",             m_minPt              = 500.);
-  declareProperty("maxEta",            m_maxEta             = 2.7);
-  declareProperty("maxRPhiImp",        m_maxRPhiImp         = 10.);
-  declareProperty("maxZImp",           m_maxZImp            = 250.);
-
-  // changed cuts on the selction of tracks
-  declareProperty("minSiClusters",     m_minSiClusters         = 7);
-  declareProperty("maxDoubleHoles",    m_maxDoubleHoles        = 2);
-  declareProperty("maxSiHoles",        m_maxSiHoles            = 5, "max number of Silicon (Pixel+SCT) holes");
-  declareProperty("maxPixelHoles",     m_maxPixelHoles         = 5, "max number of Pixel holes");
-  declareProperty("maxSCTHoles",       m_maxSctHoles           = 5, "max number of SCT holes");
-  declareProperty("minTRTonTrk",       m_minTRTonTrk           = 9);
-  declareProperty("minTRTPrecisionFraction", m_minTRTprecision = 0.5);
-  declareProperty("minPixel",          m_minPixel              = 0);
-
-  // which detectors to use
-  declareProperty("usePixel",          m_usePixel           = true);
-  declareProperty("useSCT",            m_useSCT             = true);
-
-  // switches and tools
-  declareProperty("useAmbigFcn",       m_useAmbigFcn        = true);
-  declareProperty("useTRT_AmbigFcn",   m_useTRT_AmbigFcn    = false);
-  declareProperty("useSigmaChi2",      m_useSigmaChi2       = false);
-
-  // tools
-  declareProperty("Extrapolator",      m_extrapolator);
-  declareProperty("DriftCircleCutTool",m_selectortool );
-
-  declareProperty("maxRPhiImpEM",      m_maxRPhiImpEM  = 50.  );
-  declareProperty("doEmCaloSeed",      m_useEmClusSeed = true );
-  declareProperty("phiWidthEM",        m_phiWidthEm   = 0.075 );
-  declareProperty("etaWidthEM",        m_etaWidthEm   = 0.05  );
-
-  declareProperty("useITkAmbigFcn",    m_useITkAmbigFcn = false);
-
 
   //set values for scores
   m_summaryTypeScore[Trk::numberOfPixelHits]            =  20;
@@ -168,14 +117,14 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
 
   if (fieldCache.solenoidOn()){
     double minPt = m_etaDependentCutsSvc.name().empty() ?
-      m_minPt : m_etaDependentCutsSvc->getMinPtAtEta(trackEta);
+      m_minPt.value() : m_etaDependentCutsSvc->getMinPtAtEta(trackEta);
     if (std::abs(input->pT()) < minPt) {
       ATH_MSG_DEBUG ("Track pt < "<<m_minPt<<", reject it");
       return false;
     }
   }
   double maxEta = m_etaDependentCutsSvc.name().empty() ?
-    m_maxEta : m_etaDependentCutsSvc->getMaxEta();
+    m_maxEta.value() : m_etaDependentCutsSvc->getMaxEta();
   if (std::abs(input->eta()) > maxEta) {
     ATH_MSG_DEBUG ("Track eta > "<<maxEta<<", reject it");
     return false;
@@ -193,14 +142,14 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
 
   ATH_MSG_VERBOSE ("extrapolated perigee: "<<*extrapolatedPerigee);
   double maxZ0 = m_etaDependentCutsSvc.name().empty() ?
-    m_maxZImp : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
+    m_maxZImp.value() : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
   if (std::abs(extrapolatedPerigee->parameters()[Trk::z0]) > maxZ0) {
     ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
     return false;
   }
 
   double maxD0 = m_etaDependentCutsSvc.name().empty() ?
-    m_maxRPhiImp : m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(trackEta);
+    m_maxRPhiImp.value() : m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(trackEta);
   if(m_useEmClusSeed) {
      if (isEmCaloCompatible( track, ctx ) ) {
        maxD0 = m_maxRPhiImpEM;
@@ -273,7 +222,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of double Holes
     if (numSCTDoubleHoles>=0) {
       int maxDoubleHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxDoubleHoles :  m_etaDependentCutsSvc->getMaxDoubleHolesAtEta(trackEta);
+	m_maxDoubleHoles.value() :  m_etaDependentCutsSvc->getMaxDoubleHolesAtEta(trackEta);
       if (numSCTDoubleHoles > maxDoubleHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numSCTDoubleHoles <<" double holes, reject it!");
         return Trk::TrackScore(0);
@@ -282,7 +231,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of Si (Pixel+SCT) Holes
     if (numSCTHoles>=0 && numPixelHoles>=0) {
       int maxSiHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxSiHoles :  m_etaDependentCutsSvc->getMaxSiHolesAtEta(trackEta);
+	m_maxSiHoles.value() :  m_etaDependentCutsSvc->getMaxSiHolesAtEta(trackEta);
       if (numPixelHoles+numSCTHoles > maxSiHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numPixelHoles <<" Pixel and " << numSCTHoles << " SCT holes, reject it!");
         return Trk::TrackScore(0);
@@ -291,7 +240,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of Pixel Holes
     if ( numPixelHoles>=0 ) {
       int maxPixelHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxPixelHoles : m_etaDependentCutsSvc->getMaxPixelHolesAtEta(trackEta);
+	m_maxPixelHoles.value() : m_etaDependentCutsSvc->getMaxPixelHolesAtEta(trackEta);
       if (numPixelHoles > maxPixelHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numPixelHoles <<" Pixel  holes, reject it!");
         return Trk::TrackScore(0);
@@ -300,7 +249,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of SCT Holes
     if ( numSCTHoles>=0 ) {
       int maxSctHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxSctHoles : m_etaDependentCutsSvc->getMaxSctHolesAtEta(trackEta);
+	m_maxSctHoles.value() : m_etaDependentCutsSvc->getMaxSctHolesAtEta(trackEta);
       if ( numSCTHoles > maxSctHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numSCTHoles << " SCT holes, reject it!");
         return Trk::TrackScore(0);
@@ -319,7 +268,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of Si Clusters
     if ( numSCT>=0 && numPixel>=0) {
       int minSiClusters = m_etaDependentCutsSvc.name().empty() ?
-	m_minSiClusters : m_etaDependentCutsSvc->getMinSiHitsAtEta(trackEta);
+	m_minSiClusters.value() : m_etaDependentCutsSvc->getMinSiHitsAtEta(trackEta);
       if (numPixel+numSCT+numPixelDead+numSCTDead < minSiClusters) {
         ATH_MSG_DEBUG ("Track has " << numPixel+numSCT << " Si clusters and " << numPixelDead+numSCTDead << " dead sensors, reject it");
         return Trk::TrackScore(0);
@@ -328,7 +277,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of pixel clusters
     if (numPixel>=0) {
       int minPixel = m_etaDependentCutsSvc.name().empty() ?
-	m_minPixel : m_etaDependentCutsSvc->getMinPixelHitsAtEta(trackEta);
+	m_minPixel.value() : m_etaDependentCutsSvc->getMinPixelHitsAtEta(trackEta);
       if(numPixel < minPixel) {
 	ATH_MSG_DEBUG ("Track has " << numPixel << " pixel hits, reject it");
 	return Trk::TrackScore(0);

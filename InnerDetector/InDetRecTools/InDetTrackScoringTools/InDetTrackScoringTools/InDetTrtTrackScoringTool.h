@@ -72,7 +72,7 @@ private:
   const TRT_ID* m_trtId;
 
   // these are used for ScoreModifiers
-  int m_maxSigmaChi2, m_maxTrtRatio, m_maxTrtFittedRatio;
+  int m_maxSigmaChi2 = -1, m_maxTrtRatio = -1, m_maxTrtFittedRatio = -1;
 
   std::vector<double> m_factorSigmaChi2, m_factorTrtRatio,
     m_factorTrtFittedRatio;
@@ -81,15 +81,16 @@ private:
     m_boundsTrtFittedRatio;
 
   /** use the scoring tuned to Ambiguity processing or not */
-  bool m_useAmbigFcn;
-  bool m_useSigmaChi2;
+  BooleanProperty m_useAmbigFcn{this, "useAmbigFcn", true};
+  BooleanProperty m_useSigmaChi2{this, "useSigmaChi2", false};
 
   /**holds the scores assigned to each Trk::SummaryType from the track's
    * Trk::TrackSummary*/
   std::vector<Trk::TrackScore> m_summaryTypeScore;
 
   /** Returns minimum number of expected TRT drift circles depending on eta. */
-  ToolHandle<ITrtDriftCircleCutTool> m_selectortool;
+  ToolHandle<ITrtDriftCircleCutTool> m_selectortool
+    {this, "DriftCircleCutTool", "InDet::InDetTrtDriftCircleCutTool"};
 
   // Read handle for conditions object to get the field cache
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey{
@@ -107,21 +108,29 @@ private:
   };
 
   /** cuts for selecting good tracks*/
-  int m_minTRTonTrk; //!< minimum number of TRT hits
-  double m_maxEta;   //!< maximal Eta cut
-  double m_ptmin;    //!< Minimum Pt
-  bool
-    m_parameterization; //!< use parameterization to cut instead of custom cut
-  bool m_oldLogic;      //!< use old transition hit logic
-  double m_minTRTprecision; //!< minimum fraction of TRT precision hits
+  IntegerProperty m_minTRTonTrk
+    {this, "minTRTonTrk", 15, "minimum number of TRT hits"};
+  DoubleProperty m_maxEta{this, "maxEta", 2.1, "maximal Eta cut"};
+  DoubleProperty m_ptmin{this, "PtMin", 1.0, "Minimum Pt"};
+  BooleanProperty m_parameterization
+    {this, "UseParameterization", true, "use parameterization to cut instead of custom cut"};
+  BooleanProperty m_oldLogic
+    {this, "OldTransitionLogic", false, "use old transition hit logic"};
+  DoubleProperty m_minTRTprecision
+    {this, "minTRTPrecisionFraction", 0.5, "minimum fraction of TRT precision hits"};
 
-  std::vector<double>
-    m_TRTTrksEtaBins; //!< Eta bins (10 expected) for TRT-only track cuts
-  std::vector<double>
-    m_TRTTrksMinTRTHitsThresholds; //!< Eta-binned nTRT cut for TRT-only cuts
-  std::vector<double>
-    m_TRTTrksMinTRTHitsMuDependencies; //!< Eta-bined Mu-dependent component for
-                                       //!< nTRT cut
+  DoubleArrayProperty m_TRTTrksEtaBins
+    {this, "TRTTrksEtaBins",
+     {999., 999., 999., 999., 999., 999., 999., 999., 999., 999.},
+     "Eta bins (10 expected) for TRT-only track cuts"};
+  DoubleArrayProperty m_TRTTrksMinTRTHitsThresholds
+    {this, "TRTTrksMinTRTHitsThresholds",
+     {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.},
+     "Eta-binned nTRT cut for TRT-only cuts"};
+  DoubleArrayProperty m_TRTTrksMinTRTHitsMuDependencies
+    {this, "TRTTrksMinTRTHitsMuDependencies",
+     {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.},
+     "Eta-bined Mu-dependent component for nTRT cut"};
 };
 
 }

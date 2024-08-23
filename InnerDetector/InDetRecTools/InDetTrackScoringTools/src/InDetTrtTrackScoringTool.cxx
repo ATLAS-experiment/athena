@@ -20,41 +20,11 @@ InDet::InDetTrtTrackScoringTool::InDetTrtTrackScoringTool(const std::string& t,
                                                           const IInterface* p)
   : AthAlgTool(t, n, p)
   , m_trtId(nullptr)
-  , m_maxSigmaChi2(-1)
-  , m_maxTrtRatio(-1)
-  , m_maxTrtFittedRatio(-1)
   , m_summaryTypeScore(Trk::numberOfTrackSummaryTypes)
-  , m_selectortool("InDet::InDetTrtDriftCircleCutTool")
 {
   declareInterface<Trk::ITrackScoringTool>(this);
 
-  // cuts for tracks
-
-  // There is room for 10 bins, for future development.
-  // The default below represents one eta bin between 0 and 999
-  // and no cuts applied.
-  m_TRTTrksEtaBins.clear();
-  m_TRTTrksMinTRTHitsThresholds.clear();
-  m_TRTTrksMinTRTHitsMuDependencies.clear();
-  for (unsigned int i = 0; i < 10; ++i) {
-    m_TRTTrksEtaBins.push_back(999);
-    m_TRTTrksMinTRTHitsThresholds.push_back(0);
-    m_TRTTrksMinTRTHitsMuDependencies.push_back(0);
-  }
-
   // declare properties
-  declareProperty("DriftCircleCutTool", m_selectortool);
-  declareProperty("useAmbigFcn", m_useAmbigFcn = true);
-  declareProperty("useSigmaChi2", m_useSigmaChi2 = false);
-  declareProperty("minTRTonTrk", m_minTRTonTrk = 15);
-  declareProperty("maxEta", m_maxEta = 2.1);
-  declareProperty("PtMin", m_ptmin = 1.0); // pt min cut
-  declareProperty("UseParameterization", m_parameterization = true);
-  declareProperty("OldTransitionLogic", m_oldLogic = false);
-  declareProperty("minTRTPrecisionFraction", m_minTRTprecision = 0.5);
-  declareProperty("TRTTrksEtaBins", m_TRTTrksEtaBins); /* expects 10 eta bins (set unused bins to e.g. 999) */
-  declareProperty("TRTTrksMinTRTHitsThresholds", m_TRTTrksMinTRTHitsThresholds);         /* expects 10 values */
-  declareProperty("TRTTrksMinTRTHitsMuDependencies", m_TRTTrksMinTRTHitsMuDependencies); /* expects 10 values */
   m_summaryTypeScore[Trk::numberOfTRTHits] = 1;                                          // 10 straws ~ 1 SCT
   m_summaryTypeScore[Trk::numberOfTRTHighThresholdHits] = 0;                             // addition for being TR
 }

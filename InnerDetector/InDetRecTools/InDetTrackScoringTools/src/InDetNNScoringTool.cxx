@@ -26,58 +26,9 @@ InDet::InDetNNScoringTool::InDetNNScoringTool(const std::string& t,
               const IInterface*  p ) :
   AthAlgTool(t,n,p),
   // Initialization of ScoreModifiers variables
-  m_maxDblHoles(-1),
-  m_maxPixHoles(-1),
-  m_maxSCT_Holes(-1),
-  m_maxHits(-1),
-  m_maxSigmaChi2(-1),
-  m_maxTrtRatio(-1),
-  m_maxTrtFittedRatio(-1),
-  m_maxB_LayerHits(-1),
-  m_maxPixelHits(-1),
-  m_maxPixLay(-1),
-  m_maxGangedFakes(-1),
-  m_selectortool("InDet::InDetTrtDriftCircleCutTool", this),
-  m_summaryTypeScore(Trk::numberOfTrackSummaryTypes),
-  m_extrapolator("Trk::Extrapolator", this)
+  m_summaryTypeScore(Trk::numberOfTrackSummaryTypes)
 {
   declareInterface<Trk::ITrackScoringTool>(this);
-  
-  // declare properties
-  declareProperty("minPt",             m_minPt              = 500.);
-  declareProperty("maxEta",            m_maxEta             = 2.7);
-  declareProperty("maxRPhiImp",        m_maxRPhiImp         = 10.);
-  declareProperty("maxZImp",           m_maxZImp            = 250.);
-
-  // changed cuts on the selction of tracks
-  declareProperty("minSiClusters",     m_minSiClusters         = 7);
-  declareProperty("maxDoubleHoles",    m_maxDoubleHoles        = 2);
-  declareProperty("maxSiHoles",        m_maxSiHoles            = 5, "max number of Silicon (Pixel+SCT) holes");
-  declareProperty("maxPixelHoles",     m_maxPixelHoles         = 5, "max number of Pixel holes");
-  declareProperty("maxSCTHoles",       m_maxSctHoles           = 5, "max number of SCT holes");
-  declareProperty("minTRTonTrk",       m_minTRTonTrk           = 9);
-  declareProperty("minTRTPrecisionFraction", m_minTRTprecision = 0.5);
-  declareProperty("minPixel",          m_minPixel              = 0);
-  declareProperty("nnCutConfig",       m_nnCutConfig           = "");
-  declareProperty("nnCutThreshold",    m_nnCutThreshold        = -0.1);
-
-  // which detectors to use
-  declareProperty("usePixel",          m_usePixel           = true);
-  declareProperty("useSCT",            m_useSCT             = true);
-
-  // switches and tools
-  declareProperty("useAmbigFcn",       m_useAmbigFcn        = true);
-  declareProperty("useTRT_AmbigFcn",   m_useTRT_AmbigFcn    = false);
-  declareProperty("useSigmaChi2",      m_useSigmaChi2       = false);
-
-  // tools
-  declareProperty("Extrapolator",      m_extrapolator);
-  declareProperty("DriftCircleCutTool",m_selectortool );
-
-  declareProperty("maxRPhiImpEM",      m_maxRPhiImpEM  = 50.  );
-  declareProperty("doEmCaloSeed",      m_useEmClusSeed = true );
-  declareProperty("phiWidthEM",        m_phiWidthEm   = 0.075 );
-  declareProperty("etaWidthEM",        m_etaWidthEm   = 0.05  );
 
   //set values for scores
   m_summaryTypeScore[Trk::numberOfPixelHits]            =  20;
@@ -100,7 +51,6 @@ InDet::InDetNNScoringTool::InDetNNScoringTool(const std::string& t,
   m_summaryTypeScore[Trk::numberOfCscEtaHits] = 0;
   m_summaryTypeScore[Trk::numberOfRpcPhiHits] = 0;
   m_summaryTypeScore[Trk::numberOfRpcEtaHits] = 0;
-  
 }
 
 //---------------------------------------------------------------------------------------------------------------------

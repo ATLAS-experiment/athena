@@ -45,8 +45,8 @@ public:
   
  private:
 
-  int m_nWeightedClustersMin; 
-  int m_minTRTHits;
+  IntegerProperty m_nWeightedClustersMin{this, "nWeightedClustersMin", 0};
+  IntegerProperty m_minTRTHits{this, "minTRTHits", 0};
 
 };
 
