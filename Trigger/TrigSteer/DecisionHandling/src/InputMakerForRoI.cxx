@@ -54,8 +54,10 @@ StatusCode  InputMakerForRoI::execute( const EventContext& context ) const {
 
   // Prepare Outputs
   std::unique_ptr<TrigRoiDescriptorCollection> outputRoIColl = std::make_unique<TrigRoiDescriptorCollection>();
+  outputRoIColl->reserve(outputHandle->size());
 
   std::vector <ElementLink<TrigRoiDescriptorCollection> > RoIsFromDecision;  // used to check for duplicate RoIs 
+  RoIsFromDecision.reserve(outputHandle->size());
 
   // loop over output decisions in container of outputHandle, collect RoIs to process
   for (const Decision* outputDecision : *outputHandle) { 
