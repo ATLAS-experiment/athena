@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -124,13 +124,15 @@ namespace InDet
       };
 
       /** Configure outwards hole search */
-      bool m_extendedListOfHoles,m_cosmic;
+      BooleanProperty m_extendedListOfHoles{this, "ExtendedListOfHoles", false};
+      BooleanProperty m_cosmic{this, "Cosmics", false};
 
       /** Min number of hits **/
-      int m_minSiHits;
+      IntegerProperty m_minSiHits{this, "minSiHits", 3};
 
       /* searching for dead modules after the last measurement (needed for robustness of SW)*/
-      bool m_countDeadModulesAfterLastHit;
+      BooleanProperty m_countDeadModulesAfterLastHit
+	{this, "CountDeadModulesAfterLastHit", true};
 
       /** number of warnings printed when no track parameters available **/
       mutable std::atomic_int m_warning;

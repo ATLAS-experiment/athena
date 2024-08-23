@@ -146,13 +146,13 @@ private:
   /**ID pixel helper*/
   const PixelID* m_pixelId;
 
-  bool m_checkActiveAreas;
-  bool m_checkDeadRegions;
-  bool m_checkDisabledFEs;
-  double m_phiRegionSize;
-  double m_etaRegionSize;
-  double m_goodFracCut;
-  double m_outerRadius;
+  BooleanProperty m_checkActiveAreas{this, "CheckActiveAreas", false};
+  BooleanProperty m_checkDeadRegions{this, "CheckDeadRegions", false};
+  BooleanProperty m_checkDisabledFEs{this, "CheckDisabledFEs", false};
+  DoubleProperty m_phiRegionSize{this, "PhiRegionSize", 3.};
+  DoubleProperty m_etaRegionSize{this, "EtaRegionSize", 3.};
+  DoubleProperty m_goodFracCut{this, "GoodFracCut", 0.5};
+  DoubleProperty m_outerRadius{this, "OuterRadius", 230.};
 };
 
 

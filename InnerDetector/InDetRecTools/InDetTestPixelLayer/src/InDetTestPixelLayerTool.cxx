@@ -35,13 +35,6 @@ InDetTestPixelLayerTool::InDetTestPixelLayerTool(const std::string& name,
   , m_pixelId(nullptr)
 {
   declareInterface<IInDetTestPixelLayerTool>(this);
-  declareProperty("CheckActiveAreas", m_checkActiveAreas = false);
-  declareProperty("CheckDeadRegions", m_checkDeadRegions = false);
-  declareProperty("CheckDisabledFEs", m_checkDisabledFEs = false);
-  declareProperty("PhiRegionSize", m_phiRegionSize = 3.);
-  declareProperty("EtaRegionSize", m_etaRegionSize = 3.);
-  declareProperty("GoodFracCut", m_goodFracCut = 0.5);
-  declareProperty("OuterRadius", m_outerRadius = 230.);
 }
 
 StatusCode
