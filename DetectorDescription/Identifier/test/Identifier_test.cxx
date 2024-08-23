@@ -92,6 +92,7 @@ BOOST_AUTO_TEST_CASE(IdentifierModifiers){
   BOOST_CHECK_NO_THROW(e.set("0x4F292"));
   BOOST_TEST(e.get_compact() ==  0x4F292);
   BOOST_CHECK_NO_THROW(e.set_literal(9));
+  BOOST_CHECK_THROW(e.set("hghghgh"), std::runtime_error);
   BOOST_TEST(e.get_compact() ==  9);
   BOOST_CHECK_NO_THROW(e.clear());
   BOOST_TEST(e.is_valid() == false);
