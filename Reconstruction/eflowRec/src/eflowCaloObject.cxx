@@ -61,7 +61,7 @@ double eflowCaloObject::getClusterEnergy() const {
   return clusterEnergy;
 }
 
-void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction,
+void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
 const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
 
   for (auto *thisEfRecTrack : m_eflowRecTracks) {
@@ -132,7 +132,7 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
     //If the looked up expected energy deposit was 0.0, then pull_015 is NAN. In that case we should not try to apply the 2D cut described below.
     if (!std::isnan(pull_015)){
       //We use a 2D cut in the pull_015 and log10 of track pt plane to define a dense environment - if too dense then we disable the charged shower subtraction
-      if (pull_015 > 0.0 + (log10(40000)-log10(trackPt))*33.2 && 0.0 != expectedEnergySigma && bestClusters_015 && bestClusters_02 && useUpdated2015ChargedShowerSubtraction){
+      if (pull_015 > 0.0 + (log10(40000)-log10(trackPt))*33.2 && 0.0 != expectedEnergySigma && bestClusters_015 && bestClusters_02){
         thisEfRecTrack->setSubtracted(); //this tricks eflowRec into thinking this track was subtracted, and hence no further subtraction will be done
         thisEfRecTrack->setIsInDenseEnvironment();
         //recalculate the LHED and the ordering  and find the new  expected E + sigma of expected E (the new LHED can change the latter two values we find in the look up tables)

@@ -355,7 +355,6 @@ if __name__=="__main__":
     cfgFlags.addFlag("eflowRec.CalClusterColl","CaloCalTopoClustersNew")
 
     #PF flags
-    cfgFlags.PF.useUpdated2015ChargedShowerSubtraction = True
     cfgFlags.PF.addClusterMoments = False
     cfgFlags.PF.useClusterMoments = False
     
