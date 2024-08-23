@@ -38,6 +38,7 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
     m_vx_hs_sel_eff_vs_nReco(nullptr),
     m_vx_hs_reco_sel_eff(nullptr),
     m_vx_hs_sel_eff_dist(nullptr),
+    m_vx_hs_sel_eff_mu(nullptr),
     m_vx_hs_sel_eff_dist_vs_nReco(nullptr),
     m_vx_hs_reco_eff_vs_ntruth(nullptr),
     m_vx_hs_sel_eff_vs_ntruth(nullptr),
@@ -233,6 +234,7 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
         book(m_vx_hs_sel_eff_vs_nReco,"vx_hs_sel_eff_vs_nReco");
         book(m_vx_hs_reco_sel_eff,"vx_hs_reco_sel_eff");
         book(m_vx_hs_sel_eff_dist,"vx_hs_sel_eff_dist");
+        book(m_vx_hs_sel_eff_mu,"vx_hs_sel_eff_mu");
         book(m_vx_hs_sel_eff_dist_vs_nReco,"vx_hs_sel_eff_dist_vs_nReco");
         book(m_vx_hs_reco_eff_vs_ntruth,"vx_hs_reco_eff_vs_ntruth");
         book(m_vx_hs_sel_eff_vs_ntruth,"vx_hs_sel_eff_vs_ntruth");
@@ -600,7 +602,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const x
 
 } // void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex) {
 
-void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter,const xAOD::VertexContainer& vertexContainer, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight) {
+void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter,const xAOD::VertexContainer& vertexContainer, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float actualMu, float weight) {
 
     if (m_detailLevel >= 200) {
         // Fill our histograms
@@ -622,6 +624,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             ATH_MSG_INFO("No recoHardScatter vertex - not filling vertex truth matching.");
             return;
         }
+
 
         // Get the truth HS vertex
         const xAOD::TruthVertex* truthHSVtx = nullptr;
@@ -651,6 +654,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
             return;
         }
 
+        fillHisto(m_vx_hs_sel_eff_mu, actualMu, (recoHardScatter == bestRecoHSVtx_truth), weight);
         fillHisto(m_vx_hs_sel_eff, localPUDensity, (recoHardScatter == bestRecoHSVtx_truth), weight);
         fillHisto(m_vx_hs_sel_eff_vs_nReco, nRecoVertices, (recoHardScatter == bestRecoHSVtx_truth), weight);
         fillHisto(m_vx_hs_sel_eff_vs_ntruth, nTruthVertices, (recoHardScatter == bestRecoHSVtx_truth), weight);

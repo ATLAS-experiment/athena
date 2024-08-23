@@ -45,5 +45,9 @@ if (NOT SIMULATIONBASE)
         SCRIPT python -m InDetConfig.InDetPriVxFinderConfig FastIterativeFinding
 	POST_EXEC_SCRIPT noerror.sh)
 
+    atlas_add_test( InDetGNNHardScatterSelection_test
+        SCRIPT python -m InDetConfig.InDetGNNHardScatterSelectionConfig
+        POST_EXEC_SCRIPT noerror.sh)
+
 
 endif()

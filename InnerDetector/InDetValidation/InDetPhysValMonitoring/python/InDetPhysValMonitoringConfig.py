@@ -108,17 +108,26 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     acc.merge(HistogramDefinitionSvcCfg(flags))
 
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
-    if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
+    if flags.PhysVal.IDPVM.hardScatterStrategy in [2, 3]:
 
         from InDetPhysValMonitoring.addRecoJetsConfig import (
             AddRecoJetsIfNotExistingCfg)
         acc.merge(AddRecoJetsIfNotExistingCfg(
             flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
-    # if we are running with the HGam hard scatter selection, we need to schedule the NN
+    # if we are running with the GNN hard scatter selection, we need to schedule the dependencies
     if flags.PhysVal.IDPVM.hardScatterStrategy == 3:
+        from InDetConfig.InDetGNNHardScatterSelectionConfig import (
+            GNNSequenceCfg)
+        acc.merge(GNNSequenceCfg(flags))
+
+    # if we are running with the HGam hard scatter selection, we need to schedule the NN
+    if flags.PhysVal.IDPVM.hardScatterStrategy == 4:
         from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiPhotonVertexCfg
         acc.merge(DiPhotonVertexCfg(flags))
+
+
+
 
     if flags.PhysVal.IDPVM.GRL:
         kwargs.setdefault("useGRL", True)
@@ -131,7 +140,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
                 InDetRttTruthSelectionToolCfg(flags)))
 
-        doHyyHSSelection = flags.PhysVal.IDPVM.hardScatterStrategy == 3
+        doHyyHSSelection = flags.PhysVal.IDPVM.hardScatterStrategy == 4
         if 'hardScatterSelectionTool' not in kwargs:
             from InDetConfig.InDetHardScatterSelectionToolConfig import (
                 InDetHardScatterSelectionToolCfg)

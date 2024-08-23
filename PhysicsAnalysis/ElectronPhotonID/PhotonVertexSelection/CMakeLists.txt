@@ -11,9 +11,9 @@ atlas_add_library( PhotonVertexSelectionLib
    PhotonVertexSelection/*.h Root/*.cxx
    PUBLIC_HEADERS PhotonVertexSelection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools xAODEgamma xAODEventInfo xAODMetaData
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools xAODEgamma xAODEventInfo xAODMetaData AnaAlgorithmLib PATCoreLib
    xAODTracking
-   PRIVATE_LINK_LIBRARIES PathResolver egammaUtils)
+   PRIVATE_LINK_LIBRARIES PathResolver egammaUtils CxxUtils)
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( PhotonVertexSelection
