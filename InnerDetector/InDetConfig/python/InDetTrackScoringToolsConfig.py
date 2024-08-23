@@ -244,10 +244,8 @@ def InDetTRT_StandaloneScoringToolCfg(flags, name='InDetTRT_StandaloneScoringToo
     if "DriftCircleCutTool" not in kwargs:
         from InDetConfig.InDetTrackSelectorToolConfig import (
             InDetTRTDriftCircleCutToolCfg)
-        InDetTRTDriftCircleCut = acc.popToolsAndMerge(
-            InDetTRTDriftCircleCutToolCfg(flags))
-        acc.addPublicTool(InDetTRTDriftCircleCut)
-        kwargs.setdefault("DriftCircleCutTool", InDetTRTDriftCircleCut)
+        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
+            InDetTRTDriftCircleCutToolCfg(flags)))
 
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useSigmaChi2", False)
