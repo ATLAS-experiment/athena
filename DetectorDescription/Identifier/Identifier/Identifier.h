@@ -1,70 +1,46 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_IDENTIFIER_H
 #define IDENTIFIER_IDENTIFIER_H
 
-
 #define IDENTIFIER_TYPE unsigned long long
-#define IDENTIFIER_DIFF_TYPE long long
-#define IDENTIFIER_PCODE "ll"
 
 #include "GaudiKernel/MsgStream.h"
 #include "Identifier/Identifier32.h"
 #include <string>
-#include <boost/io/ios_state.hpp>
 
-/**
- **-----------------------------------------------
- **
- **  Identifier is a simple type-safe 64 bit unsigned integer. An
- **  Identifier relies on other classes - IdHelpers - to encode and
- **  decode its information.
- **  
- **  The default constructor created an Identifier an invalid state
- **  which can be check with the "is_valid" method to allow some error
- **  checking.
- **  
- **-----------------------------------------------
+/*
+ *
+ *  @brief Identifier is a simple type-safe 64 bit unsigned integer. An
+ *  Identifier relies on other classes - IdHelpers - to encode and
+ *  decode its information.
+ *  
+ *  The default constructor created an Identifier an invalid state
+ *  which can be check with the "is_valid" method to allow some error
+ *  checking.
+ *  
  */
-class Identifier
-{
+class Identifier{
 public:
 
-    ///----------------------------------------------------------------
-    /// Define public typedefs
-    ///----------------------------------------------------------------
     typedef Identifier                  id_type;
     typedef IDENTIFIER_TYPE             value_type;
-    typedef IDENTIFIER_DIFF_TYPE        diff_type;
+    typedef long long                   diff_type;
     typedef IDENTIFIER_TYPE             size_type;
 
-    typedef enum
-    {
+    enum bit_defs{
         NBITS = sizeof(value_type) * 8, // bits per byte
         MAX_BIT = (static_cast<value_type>(1) << (NBITS - 1)),
         ALL_BITS = ~(static_cast<value_type>(0))
-    } bit_defs;
-
-    ///----------------------------------------------------------------
-    /// Constructors
-    ///----------------------------------------------------------------
+    };
 
     /// Default constructor
     Identifier() = default;
-    /// Default Copy constructor
-    Identifier(const Identifier& other) = default;
-    /// Default Move constructor
-    Identifier(Identifier&& other) = default;
-    /// Default Assignment operators
-    Identifier& operator=(const Identifier& old) = default;
-    ///  Default Move Assignment operator
-    Identifier& operator=(Identifier&& old) = default;
-    /// Default dtor
-    ~Identifier() = default;
 
-    ///Additional ctors
+    /// @{
+    /// Additional ctors
     /// Constructor from value_type
     explicit Identifier (value_type value);
 
@@ -75,12 +51,7 @@ public:
     /// (to avoid common implicit conversions)
     explicit Identifier (Identifier32::value_type value);
     explicit Identifier (int value);
-
- 
-
-    ///----------------------------------------------------------------
-    /// Modifications
-    ///----------------------------------------------------------------
+    ///@}
    
     /// Assignment operators overloads
     Identifier& operator = (const Identifier32& old);
@@ -105,61 +76,34 @@ public:
     /// Set literal value
     Identifier& set_literal(value_type value);
 
-    ///----------------------------------------------------------------
-    /// Accessors
-    ///----------------------------------------------------------------
-
     /// Get the 32-bit version Identifier, will be invalid if >32 bits
     /// needed
-    Identifier32 get_identifier32  (void) const;
+    Identifier32 get_identifier32() const;
 
     /// Get the compact id
-    value_type   get_compact  (void) const;
+    value_type   get_compact() const;
 
     /// A get_compact functional for use in STL algorithms
-    class get_compact_func
-    {
-    public:
-        value_type operator() (const Identifier& id)
-            {
-                return id.get_compact();
-            }
+    struct get_compact_func{
+      value_type operator() (const Identifier& id){
+        return id.get_compact();
+      }
     };
-
-    ///----------------------------------------------------------------
-    /// Comparison operators
-    ///----------------------------------------------------------------
-  
-    bool operator ==    (const Identifier& other) const;
-    bool operator !=    (const Identifier& other) const;
-    bool operator <     (const Identifier& other) const;
-    bool operator >     (const Identifier& other) const;
-    bool operator <=    (const Identifier& other) const;
-    bool operator >=    (const Identifier& other) const;
-
+   
+    bool operator == (const Identifier& other) const = default;
+    inline auto operator <=> (const Identifier & other) const {return m_id <=> other.m_id;}
     /// Comparison operators with value_type.
     /// This is a hack, only because GeoAdaptors/GeoMuonHits wants to
     /// to compare explicitly with 0 as a test of whether the identifier
     /// has been constructed properly.  But is_valid() here compares
     /// with max_value, not 0, since presumably it is possible to have
     /// a zero value - just not in muons.
-    bool operator ==    (value_type other) const;
-    bool operator !=    (value_type other) const;
-    bool operator ==    (Identifier32::value_type other) const;
-    bool operator ==    (int other) const;
-    bool operator !=    (Identifier32::value_type other) const;
-    bool operator !=    (int other) const;
-
-    ///----------------------------------------------------------------
-    /// Error management
-    ///----------------------------------------------------------------
-
+    bool operator ==  (value_type other) const;
+    bool operator ==  (Identifier32::value_type other) const;
+    bool operator ==  (int other) const;
+  
     /// Check if id is in a valid state
     bool is_valid () const;
-
-    ///----------------------------------------------------------------
-    /// Utilities
-    ///----------------------------------------------------------------
 
     /// Provide a string form of the identifier - hexadecimal
     std::string  getString() const;
@@ -168,7 +112,6 @@ public:
     void show () const;
 
 private:
-
     /// extract field from identifier (shift first, then mask)
     value_type extract(size_type shift, size_type mask) const;
 
@@ -184,31 +127,22 @@ private:
     friend class AtlasDetectorID;
     friend class PixelID;
     
-    typedef enum {
-        //max_value = 0xFFFFFFFFFFFFFFFFULL
-        max_value = ~(static_cast<value_type>(0))
-    } max_value_type;
-
-    //----------------------------------------------------------------
-    // The compact identifier data.
-    //----------------------------------------------------------------
+    enum max_value_type{
+      max_value = ~(static_cast<value_type>(0))
+    };
+    ///The only data member
     value_type m_id = max_value;
-
 };
-//-----------------------------------------------
 
 
-// Define a hash functional
-
+/// Define a hash functional
 namespace std {
-template<>
-struct hash<Identifier>
-{
-  size_t operator()(const Identifier& id) const
-  {
-    return static_cast<size_t>(id.get_compact());
-  }
-};
+  template<>
+  struct hash<Identifier>{
+    size_t operator()(const Identifier& id) const{
+      return static_cast<size_t>(id.get_compact());
+    }
+  };
 }
 
 #include "Identifier/Identifier.icc"

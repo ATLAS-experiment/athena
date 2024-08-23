@@ -1,40 +1,33 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "Identifier/Identifier.h"
-#include <algorithm>
-#include <cstdarg>
-#include <cstdio>
-
+#include <charconv>
 #include <iostream>
-#include <iomanip>
+#include <format>
 
 
-
-
-//-----------------------------------------------
-void Identifier::set (const std::string& id)
-{
-  sscanf (id.c_str(), "0x%" IDENTIFIER_PCODE "x", &m_id);
+void Identifier::set (const std::string& id){
+  const auto start = id.data();
+  const auto end = start + id.size();
+  static constexpr int base = 16;
+  //add 2 to start to get past the Ox prefix.
+  const auto [p,ec] = std::from_chars(start+2, end, m_id, base);
+  if (ec != std::errc()){
+    throw std::runtime_error("Number was not parsed in Identifier::set");
+  }
 }
 
 
-//-----------------------------------------------
-std::string Identifier::getString() const
-{
-  std::string result;
-  char temp[20];
-
-  sprintf (temp, "0x%" IDENTIFIER_PCODE "x", (Identifier::value_type)m_id);
-  result += temp;
-  return (result);
+std::string 
+Identifier::getString() const{
+  return std::format("0x{:0x}", m_id);
 }
 
-//-----------------------------------------------
-void Identifier::show () const
-{
+void 
+Identifier::show () const{
     static_assert(std::is_trivially_destructible<Identifier>::value);
     static_assert(std::is_trivially_copy_constructible<Identifier>::value);
     const Identifier& me = *this;
