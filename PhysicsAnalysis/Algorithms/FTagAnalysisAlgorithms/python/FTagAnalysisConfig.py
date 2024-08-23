@@ -2,28 +2,10 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from PathResolver import PathResolver
 from FTagAnalysisAlgorithms.FTagHelpers import getRecommendedBTagCalib
 from CalibrationDataInterface.CDIHelpers import check_CDI_campaign
-
-def parseTDPdatabase(tdpFile, dsid):
-    """function to parse the TopDataPreparation database
-    'tdpFile' and extract the FTAG showering algorithm
-    corresponding to 'dsid'
-    """
-    result = None
-    with open(PathResolver.FindCalibFile(tdpFile), 'r') as _f:
-        for line in _f:
-            if not line.strip() or line.startswith('#'):
-                continue
-            columns = line.split()
-            if columns[0].isdigit() and int(columns[0]) == dsid:
-                result = columns[3].strip()
-                break
-    return result
-
+from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
 
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
@@ -87,98 +69,6 @@ class FTagConfig (ConfigBlock):
             info="[Expert mode] additional variables to save from the b-tagging object associated "
             "to each jet. E.g. ['pb','pc','pu', 'ptau'] to replicate 'saveScores=All'.")
 
-    def resolveMCMCgenerator(self, config, generatorDict):
-        """use either the metadata (generatorDict) or TopDataPreparation
-        to figure out the appropriate generator settings for MC-MC corrections"""
-        result = None
-
-        if config.dataType() is DataType.Data:
-            return "default"
-
-        # First, try using the Metadata
-        if generatorDict is not None:
-            generators = list(generatorDict.keys())
-            if "Pythia8" in generators:
-                if "aMcAtNlo" in generators:
-                    result = "amcAtNLOPythia"
-                else:
-                    result = "default"
-            elif "Herwig7" in generators:
-                if "aMcAtNlo" in generators:
-                    result = "amcAtNLOHerwig"
-                else:
-                    version = generatorDict["Herwig7"]
-                    if version is not None:
-                        if "7.1.3" in version:
-                            result = "Herwig713"
-                        elif "7.2.1" in version:
-                            result = "Herwig721"
-                        elif "7.2.3" in version:
-                            result = "Herwig721"
-            elif "Sherpa" in generators:
-                version = generatorDict["Sherpa"]
-                if version is not None:
-                    if "2.2.10" in version:
-                        result = "Sherpa2210"
-                    # Sherpa versions between 2.2.11 and 2.2.16 are supposed to have same properties
-                    # There are MC/MC efficiency maps for Sherpa 2.2.12 available,
-                    # so map the Sherpa versions with no MC/MC efficiency maps to Sherpa 2.2.12 for Run2.
-                    # For Run3, MC/MC efficiency maps for Sherpa 2.2.14 will be available in the future, 
-                    # so map Sherpa versions 2.2.11 and 2.2.14 to Sherpa 2.2.14
-                    elif "2.2.11" in version or "2.2.14" in version:
-                        if config.geometry() is LHCPeriod.Run2:
-                            result = "Sherpa2212"
-                        elif config.geometry() is LHCPeriod.Run3:
-                            result = "Sherpa2214"
-                    elif "2.2.12" in version:
-                        result = "Sherpa2212"
-                    elif "2.2.1" in version:
-                        result = "Sherpa221"
-
-        # If 'result' is still None, the above didn't succeed:
-        # now try with TopDataPreparation
-        if result is None:
-            dsid = config.dsid()
-            # we need to loop up the DSID
-            if dsid is None or dsid == 0:
-                raise ValueError(
-                    f"The value of the DSID for this sample is {dsid}! "
-                    "Your metadata may be broken, or something else"
-                    " has gone wrong!")
-            else:
-                if config.geometry() is LHCPeriod.Run2:
-                    tdpFile = 'dev/AnalysisTop/TopDataPreparation/XSection-MC16-13TeV_JESinfo.data'
-                elif config.geometry() is LHCPeriod.Run3:
-                    tdpFile = 'dev/AnalysisTop/TopDataPreparation/XSection-MC21-13p6TeV.data'
-                else:
-                    # only support Run2 and Run3 so far
-                    raise ValueError("Unrecognised geometry "+str(config.geometry())+" for FTAG MC-MC corrections, aborting.")
-                result = parseTDPdatabase(tdpFile, dsid)
-                # need to translate from TopDataPreparation notation to FTAG notation
-                tdpTranslation = {
-                    'herwig': 'Herwig7',
-                    'herwigpp': 'Herwig7',
-                    'pythia': 'default',
-                    'pythia8': 'default',
-                    'sherpa': 'Sherpa221',
-                    'sherpa21': 'Sherpa221',
-                    'amcatnlopythia8': 'amcAtNLOPythia',
-                    'herwigpp713': 'Herwig713',
-                    'sherpa228': 'Sherpa228',
-                    'sherpa2210': 'Sherpa2210',
-                    'sherpa2211': 'Sherpa2212',
-                    'sherpa2212': 'Sherpa2212',
-                    'sherpa2214': 'Sherpa2214',
-                    'herwigpp721': 'Herwig721',
-                }
-                try:
-                    result = tdpTranslation[result]
-                except KeyError:
-                    raise Exception(f"Unrecognised FTAG MC-to-MC generator setup {result}, aborting.")
-
-        # At this point we either have a valid string for 'result' or we've already crashed
-        return result
-
     def makeAlgs (self, config) :
 
         jetCollection = config.originalName (self.containerName)
@@ -191,49 +81,18 @@ class FTagConfig (ConfigBlock):
         if postfix != "" and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        # MC/MC scale factors defined only for Run 2 and Run 3
-        if config.geometry() in [LHCPeriod.Run2, LHCPeriod.Run3]:
-            # special setting: allow for on-the-fly look up of the generator information
-            if self.generator == "autoconfig":
-                self.generator = self.resolveMCMCgenerator(config, generatorDict=config.generatorInfo())
-
-            if config.geometry() is LHCPeriod.Run2:
-                if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
-                    raise ValueError ("invalid generator type: " + self.generator)
-            elif config.geometry() is LHCPeriod.Run3:
-                if self.generator not in ["default", "Pythia8", "Sherpa2212", "Sherpa2214", "Herwig713"]:
-                    raise ValueError ("invalid generator type: " + self.generator)
-
-        # MC/MC scale factors configuration
-        DSID = "default"
-        if self.generator == "Sherpa221":
-            DSID = "410250"
-        elif self.generator == "Sherpa2210":
-            DSID = "700122"
-        elif self.generator == "Sherpa2212":
-            DSID = "700660"
-        # 700660 is DSID for Sherpa 2212, but shower properties should be the same for Sherpa 2214
-        # Until MC/MC efficiency maps are available for Sherpa 2214, map it to DSID for Sherpa 2212
-        elif self.generator == "Sherpa2214":
-            DSID = "700660"
-        elif self.generator == "Herwig713":
-            DSID = "411233"
-        elif self.generator == "Herwig721":
-            DSID = "600666"
-        elif self.generator == "amcAtNLOPythia":
-            DSID = "410464"
-        elif self.generator == "amcAtNLOHerwig":
-            DSID = "412116"
-
         # CDI file
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
             bTagCalibFile = getRecommendedBTagCalib(config.geometry())
 
-        # Check if the right CDI is used for the MC campaign
+        DSID = "default"
         if config.dataType() is not DataType.Data:
+            # Check if the right CDI is used for the MC campaign
             check_CDI_campaign(config.campaign(), bTagCalibFile)
+            # MC/MC efficiency map for the generator 
+            DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator)
 
         # Set up the ftag selection algorithm(s):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )

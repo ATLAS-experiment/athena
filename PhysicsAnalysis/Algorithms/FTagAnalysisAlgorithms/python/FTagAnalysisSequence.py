@@ -2,6 +2,8 @@
 
 # AnaAlgorithm import(s):
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
+from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
+from AthenaConfiguration.Enums import LHCPeriod
 
 def makeFTagAnalysisSequence( seq, dataType, jetCollection,
                               btagWP = "FixedCutBEff_77",
@@ -53,20 +55,8 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
 
     # MC/MC scale factors configuration
     DSID = "default"
-    if generator == "Sherpa221":
-        DSID = "410250"
-    elif generator == "Sherpa2210":
-        DSID = "700122"
-    elif generator == "Sherpa2212":
-        DSID = "700660"
-    elif generator == "Herwig713":
-        DSID = "411233"
-    elif generator == "Herwig721":
-        DSID = "600666"
-    elif generator == "amcAtNLOPythia":
-        DSID = "410464"
-    elif generator == "amcAtNLOHerwig":
-        DSID = "412116"
+    if dataType != "data":
+        DSID = MCMC_dsid_map(geometry=LHCPeriod.Run2, selfDefineGenerator=generator)
 
     # CDI file
     bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
