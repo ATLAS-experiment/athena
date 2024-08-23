@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Package filtering rules for the DetCommon project build.
 #
@@ -7,7 +7,7 @@
 + AtlasTest/TestTools
 + Control/CxxUtils
 + Database/ConnectionManagement/AtlasAuthentication
-
++ DataQuality/dqm_algorithms
 + MuonSpectrometer/MuonCnv/MuonNSWCommonDecode
 
 + Trigger/TrigConfiguration/TrigConfBase
