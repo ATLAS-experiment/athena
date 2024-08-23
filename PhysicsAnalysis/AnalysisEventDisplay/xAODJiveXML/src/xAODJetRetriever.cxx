@@ -7,14 +7,9 @@
 #include "xAODJet/JetContainer.h" 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODTracking/TrackParticle.h"
-#include "xAODBTagging/BTagging.h"
-#include "xAODBTagging/BTaggingUtilities.h"
 #include "xAODJet/JetAttributes.h"
-
-#include "TrkTrack/Track.h"
-#include "TrkTrack/TrackCollection.h"
-#include "CaloEvent/CaloCellContainer.h"
-
+#include "xAODPFlow/PFO.h"
+#include "xAODPFlow/FlowElement.h"
 
 #include "AthenaKernel/Units.h"
 using Athena::Units::GeV;
@@ -36,26 +31,35 @@ namespace JiveXML {
    *
    **/
   xAODJetRetriever::xAODJetRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("Jet"){
+    AthAlgTool(type,name,parent){
 
       //Only declare the interface
       declareInterface<IDataRetriever>(this);
 
-      //In xAOD 25Mar14: 
-      //  AntiKt4LCTopoJets, CamKt12LCTopoJets, AntiKt4EMTopoJets, AntiKt4TruthWZJets
-      //  Kt4EMTopoJets, AntiKt10TruthWZJets, Kt4LCTopoJets, AntiKt4TruthJets
-      //  CamKt12TruthJets, AntiKt10TruthJets, CamKt12TruthWZJets, AntiKt10LCTopoJets
-
-      declareProperty("StoreGateKey", m_sgKey  = "AntiKt4EMTopoJets", 
-          "Collection to be first in output, shown in Atlantis without switching");
-      declareProperty("FavouriteJetCollection" ,m_sgKeyFavourite = "AntiKt4TopoEMJets" ,
-          "Collection to be first in output, shown in Atlantis without switching");
-      declareProperty("OtherJetCollections" ,m_otherKeys,
-          "Other collections to be retrieved. If list left empty, all available retrieved");
-      declareProperty("DoWriteHLT", m_doWriteHLT = false,"Ignore HLTAutokey object by default."); // ignore HLTAutoKey objects
-      declareProperty("WriteJetQuality", m_writeJetQuality = false,"Don't write extended jet quality details by default.");
-      declareProperty("TracksName", m_tracksName="InDetTrackParticles_xAOD");
     }
+
+  StatusCode xAODJetRetriever::initialize() {
+    if (m_bTaggerNames.size()!=m_CDIPaths.size()){
+      ATH_MSG_WARNING("Number of btaggers and CDI files do not match. Will not retrieve b-tagging information.");
+      return StatusCode::SUCCESS;
+    } else {
+      m_nTaggers = m_bTaggerNames.size();
+    }
+    for (unsigned int i=0; i<m_nTaggers; i++){
+      std::string taggerName = m_bTaggerNames[i];
+      asg::AnaToolHandle<IBTaggingSelectionTool> btagSelTool;
+      btagSelTool.setTypeAndName("BTaggingSelectionTool/btagSelTool_"+taggerName);
+      ATH_CHECK(btagSelTool.setProperty("TaggerName", taggerName));
+      ATH_CHECK(btagSelTool.setProperty("JetAuthor", "AntiKt4EMPFlowJets")); // only AntiKt4EMPFlowJets is supported
+      ATH_CHECK(btagSelTool.setProperty("OperatingPoint", "FixedCutBEff_70")); // the working point doesn't matter because we don't cut on the tagger discriminant, but it must exist in CDI.
+      ATH_CHECK(btagSelTool.setProperty("FlvTagCutDefinitionsFileName", m_CDIPaths[i]));
+      ATH_CHECK(btagSelTool.setProperty( "MinPt", 0.0));
+      ATH_CHECK(btagSelTool.initialize());
+      m_btagSelTools.emplace(taggerName, btagSelTool);
+    }
+
+    return StatusCode::SUCCESS;
+  }
 
   /**
    * For each jet collections retrieve basic parameters.
@@ -74,7 +78,7 @@ namespace JiveXML {
     if (sc.isFailure() ) {
       ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
     }else{
-      DataMap data = getData(Jets);
+      DataMap data = getData(Jets, m_sgKeyFavourite);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_xAOD", &data).isFailure()){
         ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
       }else{
@@ -86,7 +90,7 @@ namespace JiveXML {
       //obtain all other collections from StoreGate
       if (( evtStore()->retrieve(iterator, end)).isFailure()){
         ATH_MSG_WARNING( "Unable to retrieve iterator for Jet collection" );
-        //        return false;
+        return StatusCode::SUCCESS;
       }
 
       for (; iterator!=end; ++iterator) {
@@ -96,7 +100,7 @@ namespace JiveXML {
         if ( position != 0 ){  // SG key doesn't contain HLTAutoKey
           if (iterator.key()!=m_sgKeyFavourite) {
             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
-            DataMap data = getData(&(*iterator));
+            DataMap data = getData(&(*iterator), iterator.key());
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
               ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
             }else{
@@ -107,17 +111,17 @@ namespace JiveXML {
       }
     }else {
       //obtain all collections with the given keys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-        if ( !evtStore()->contains<xAOD::JetContainer>( (*keyIter) ) ){ continue; } // skip if not in SG
-        StatusCode sc = evtStore()->retrieve( Jets, (*keyIter) );
+      for (auto jetkey : m_otherKeys) {
+        if (jetkey==m_sgKeyFavourite) { continue; } // skip if already retrieved
+        if ( !evtStore()->contains<xAOD::JetContainer>(jetkey)){ continue; } // skip if not in SG
+        StatusCode sc = evtStore()->retrieve( Jets, jetkey );
         if (!sc.isFailure()) {
-          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" );
-          DataMap data = getData(Jets);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter)+"_xAOD", &data).isFailure()){
-            ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG " );
+          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << jetkey << ")" );
+          DataMap data = getData(Jets, jetkey);
+          if ( FormatTool->AddToEvent(dataTypeName(), jetkey+"_xAOD", &data).isFailure()){
+            ATH_MSG_WARNING( "Collection " << jetkey << " not found in SG " );
           }else{
-            ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved" );
+            ATH_MSG_DEBUG( dataTypeName() << " (" << jetkey << ") retrieved" );
           }
         }
       }
@@ -131,7 +135,7 @@ namespace JiveXML {
    * Retrieve basic parameters, mainly four-vectors, for each collection.
    * Also association with clusters and tracks (ElementLink).
    */
-  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont) {
+  const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont, std::string jetkey) {
 
     ATH_MSG_DEBUG( "in getData()" );
 
@@ -144,18 +148,15 @@ namespace JiveXML {
     DataVect energy; energy.reserve(jetCont->size());
     DataVect bTagName; bTagName.reserve(jetCont->size());
     DataVect bTagValue; bTagValue.reserve(jetCont->size());
-    //DataVect charge; energy.reserve(jetCont->size());
+    DataVect charge; energy.reserve(jetCont->size());
     DataVect idVec; idVec.reserve(jetCont->size());
     DataVect px; px.reserve(jetCont->size());
     DataVect py; py.reserve(jetCont->size());
     DataVect pz; pz.reserve(jetCont->size());
     DataVect jvf; jvf.reserve(jetCont->size());
-    DataVect isGood; isGood.reserve(jetCont->size());
-    DataVect isBad; isBad.reserve(jetCont->size());
-    DataVect isUgly; isUgly.reserve(jetCont->size());
+    DataVect jvt; jvt.reserve(jetCont->size());
     DataVect emfrac; emfrac.reserve(jetCont->size());
 
-    DataVect clusterKey; clusterKey.reserve(jetCont->size());
     DataVect trackKey; trackKey.reserve(jetCont->size());
     DataVect trackContKey; trackContKey.reserve(jetCont->size());
     DataVect trackLinkCount; trackLinkCount.reserve(jetCont->size());
@@ -166,183 +167,168 @@ namespace JiveXML {
 
     int id = 0;
 
-    xAOD::JetContainer::const_iterator jetItr  = jetCont->begin();
-    xAOD::JetContainer::const_iterator jetItrE = jetCont->end();
-
     int counter = 0;
-    double btag1 = 0.;
-    double btag2 = 0.;
-    double btag3 = 0.;
-    for (; jetItr != jetItrE; ++jetItr) {
-      bool isCalo = false;
-      ATH_MSG_DEBUG( "  Jet #" << counter++ << " : eta = "  << (*jetItr)->eta() << ", phi = " << (*jetItr)->phi() << ", pt = " << (*jetItr)->pt() );
+    for (const auto jet : *jetCont) {
+      ATH_MSG_DEBUG( "  Jet #" << counter++ << " : eta = "  << jet->eta() << ", phi = " << jet->phi() << ", pt = " << jet->pt() );
 
-      //if rawConstituent are CaloClusters, get associated tracks, and mark jet as isCalo
+      /* retrieve associated tracks and calo clusters */
 
+      size_t numConstit = jet->numConstituents();
       std::vector<std::string> tempCellID;
-      std::vector<float> clusterKey;
-      std::vector<int> tempTrackKey;
-      std::vector<std::string> tempTrackContKey;
+      size_t trackcounter = 0;
+      if (numConstit > 0) {
 
-      for( size_t j = 0; j < ( *jetItr )->numConstituents(); ++j ) {
-        const xAOD::CaloCluster* cluster =
-          dynamic_cast< const xAOD::CaloCluster* >(
-              ( *jetItr )->rawConstituent( j ) );
-        if( ! cluster ) {
-          ATH_MSG_VERBOSE( "  Associated cluster: n/a" );
-        } else {
+        xAOD::Type::ObjectType ctype = jet->rawConstituent(0)->type();
 
-          isCalo=true;
-          //	  const xAOD::CaloClusterContainer* container = dynamic_cast< const xAOD::CaloClusterContainer* >( cluster);
-          clusterID.push_back(DataType(cluster->index()));
-
-
-          for (const auto cc : *(cluster->getCellLinks())) {
-            if (std::find(tempCellID.begin(), tempCellID.end(), std::to_string(cc->caloDDE()->identify().get_compact()))!=tempCellID.end()){
-              continue;}
-            else{
-              cellID.push_back(DataType(cc->caloDDE()->identify().get_compact()));
-              tempCellID.push_back(std::to_string(cc->caloDDE()->identify().get_compact()));}
+        // PFlow and Flow jets from athena/Reconstruction/Jet/JetMomentTools/Root/JetTrackMomentsTool.cxx
+        if (ctype == xAOD::Type::ParticleFlow) {
+          // This jet is either a PFlow jet (constituent type: xAOD::FlowElement::PFlow) or UFO jets
+          for (size_t i = 0; i < numConstit; i++) {
+            const xAOD::PFO *constit =
+                dynamic_cast<const xAOD::PFO *>(jet->rawConstituent(i));
+            if (constit->isCharged()) {
+              const xAOD::TrackParticle *thisTrack = constit->track(0); // by construction xAOD::PFO can only have one track, in eflowRec usage
+              trackKey.push_back(DataType(thisTrack->index()));
+              trackContKey.push_back(m_tracksName.value());
+              trackcounter++;
+            } // We have a charged PFO
+          } // Loop on jet constituents
+        } else if (ctype == xAOD::Type::FlowElement) {
+          // This jet is made from xAOD::FlowElement, so we calculate the pflow moments if they're PFOs
+          size_t numConstit = jet->numConstituents();
+          for (size_t i = 0; i < numConstit; i++) {
+            const xAOD::FlowElement *constit = dynamic_cast<const xAOD::FlowElement *>(jet->rawConstituent(i));
+            // UFO jet constituents have signalType xAOD::FlowElement::Charged or xAOD::FlowElement::Neutral
+            // PFlow jet constituents have signalType xAOD::FlowElement::ChargedPFlow or xAOD::FlowElement::NeutralPFlow
+            if (constit != nullptr && ((constit->signalType() & xAOD::FlowElement::PFlow) || constit->signalType() == xAOD::FlowElement::Charged)) {
+              if (constit->isCharged()) {
+                const xAOD::TrackParticle *thisTrack = dynamic_cast<const xAOD::TrackParticle *>( constit->chargedObject( 0)); // PFO should have only 1 track
+                if (thisTrack != nullptr) {
+                  trackKey.push_back(DataType(thisTrack->index()));
+                  trackContKey.push_back(m_tracksName.value());
+                  trackcounter++;
+                }
+                else
+                  ATH_MSG_WARNING( "Charged PFO had no associated TrackParticle");
+              } // We have a charged PFO
+            }   // The FlowElement is a PFO
+          }     // Loop on jet constituents
+        } else if (ctype == xAOD::Type::CaloCluster) {
+          // get associated cluster
+          for (size_t j = 0; j < numConstit; ++j) {
+            const xAOD::CaloCluster *cluster = dynamic_cast<const xAOD::CaloCluster *>(jet->rawConstituent(j));
+            clusterID.push_back(DataType(cluster->index()));
+            for (const auto cc : *(cluster->getCellLinks())) {
+              if (std::find(tempCellID.begin(), tempCellID.end(), std::to_string( cc->caloDDE()->identify().get_compact())) != tempCellID.end()) {
+                continue;
+              } else {
+                cellID.push_back( DataType(cc->caloDDE()->identify().get_compact()));
+                tempCellID.push_back( std::to_string(cc->caloDDE()->identify().get_compact()));
+              }
+            }
+            ATH_MSG_VERBOSE("  Associated cluster: eta = " << cluster->eta() << ", phi = " << cluster->phi());
           }
 
+          // get ghost associated tracks
+          std::vector<const xAOD::TrackParticle *> ghosttracks = jet->getAssociatedObjects<xAOD::TrackParticle>( xAOD::JetAttribute::GhostTrack);
+          if (ghosttracks.empty()) {
+            ATH_MSG_VERBOSE("  Associated track: ERROR");
+          } else {
+            for (size_t i = 0; i < ghosttracks.size(); i++) {
 
-          ATH_MSG_VERBOSE( "  Associated cluster: eta = " << cluster->eta() << ", phi = " << cluster->phi() );
-        }
-      }
+              // can access the base track class, should be able to get tracker hits ?
+              // const Trk::Track* baseTrack = dynamic_cast< const Trk::Track* >( ghosttracks[i]->track());
 
+              trackKey.push_back(DataType(ghosttracks[i]->index()));
+              trackContKey.push_back(m_tracksName.value());
 
-      numCells.push_back(DataType(tempCellID.size() ) );
-
-      //if a calo jet try and get the ghost tracks
-      if (isCalo){
-
-        std::vector<const xAOD::TrackParticle*> ghosttracks = (*jetItr)->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
-
-        if( ghosttracks.empty() ) {
-          ATH_MSG_VERBOSE( "  Associated track: ERROR" );
-	  trackLinkCount.push_back(DataType(0.));
-        }
-        else {
-          for (size_t i=0; i< ghosttracks.size(); i++) {
-
-            //can access the base track class, should be able to get tracker hits?
-            //	  const Trk::Track* baseTrack = dynamic_cast< const Trk::Track* >( ghosttracks[i]->track());
-
-            trackKey.push_back(DataType(ghosttracks[i]->index()));
-            trackContKey.push_back(m_tracksName);
-
-            ATH_MSG_VERBOSE( "  Associated track: d0 = "
-              << ghosttracks[i]->d0() << ", pt = "
-                << ghosttracks[i]->pt() );
+              ATH_MSG_VERBOSE("  Associated track: d0 = " << ghosttracks[i]->d0() << ", pt = " << ghosttracks[i]->pt());
+            }
+            trackcounter = ghosttracks.size();
           }
-          trackLinkCount.push_back(DataType(ghosttracks.size()));
-        }
-      }
-
-
-      // If rawConstituents are tracks then fill those as associated tracks
-      int trackcounter =0;
-      for( size_t j = 0; j < ( *jetItr )->numConstituents(); ++j ) {
-        const xAOD::TrackParticle* track = dynamic_cast< const xAOD::TrackParticle* >( ( *jetItr )->rawConstituent( j ) );
-        if( ! track ) {
-          ATH_MSG_VERBOSE( "  Associated track: ERROR" );
-        }
-        else{
-          if(!isCalo){
-            trackKey.push_back(DataType(track->index()));
-            trackContKey.push_back(m_tracksName);
-	    //trackLinkCount.push_back(DataType(
-            trackcounter++;
-	    ATH_MSG_VERBOSE( "  Associated track: d0 = " << track->d0() << ", pt = " << track->pt() );
+        } else if (ctype == xAOD::Type::TrackParticle) {
+          for (size_t j = 0; j < numConstit; ++j) {
+            const xAOD::TrackParticle *track =
+                dynamic_cast<const xAOD::TrackParticle *>(jet->rawConstituent(j));
+            if (!track) {
+              ATH_MSG_VERBOSE("  Associated track: ERROR");
+            } else {
+              trackKey.push_back(DataType(track->index()));
+              trackContKey.push_back(m_tracksName.value());
+              trackcounter++;
+              ATH_MSG_VERBOSE("  Associated track: d0 = " << track->d0() << ", pt = " << track->pt());
+            }
           }
         }
-      }
-      if(!isCalo){trackLinkCount.push_back(DataType(trackcounter));}
+          }
+      trackLinkCount.push_back(DataType(trackcounter));
+      numCells.push_back(DataType(tempCellID.size()));
 
-      phi.push_back(DataType((*jetItr)->phi()));
-      eta.push_back(DataType((*jetItr)->eta()));
-      et.push_back(DataType((*jetItr)->pt()/GeV)); // hack ! no et in xAOD_Jet_v1 currently
+
+      phi.push_back(DataType(jet->phi()));
+      eta.push_back(DataType(jet->eta()));
+      et.push_back(DataType(jet->pt()/GeV)); // hack ! no et in xAOD_Jet_v1 currently
       idVec.push_back( DataType( ++id ));
 
-      mass.push_back(DataType((*jetItr)->m()/GeV));
-      energy.push_back( DataType((*jetItr)->e()/GeV ) );
+      mass.push_back(DataType(jet->m()/GeV));
+      energy.push_back( DataType(jet->e()/GeV ) );
 
-      px.push_back(DataType((*jetItr)->px()/GeV));
-      py.push_back(DataType((*jetItr)->py()/GeV));
-      pz.push_back(DataType((*jetItr)->pz()/GeV));
+      px.push_back(DataType(jet->px()/GeV));
+      py.push_back(DataType(jet->py()/GeV));
+      pz.push_back(DataType(jet->pz()/GeV));
 
       // bjet tagger values
-      const xAOD::BTagging *bTagJet = xAOD::BTaggingUtilities::getBTagging( **jetItr );
-
-
-      bTagName.push_back( DataType( "default" ));
-      if (bTagJet){
-        bTagJet->MVx_discriminant("MV2c10",btag1); 
+      if (jetkey!="AntiKt4EMPFlowJets" || (m_nTaggers==0)){
+        bTagName.push_back(DataType("None"));
+        bTagValue.push_back(DataType(0.));
+      }else{
+        double btagValue;
+        for (auto taggerName : m_bTaggerNames) {
+          CP::CorrectionCode code = m_btagSelTools[taggerName]->getTaggerWeight(*jet, btagValue);
+          if (code != CP::CorrectionCode::Ok) {
+            ATH_MSG_DEBUG("Failed to get btagging weight for tagger " << taggerName);
+            btagValue = 0;
+          }
+          bTagName.push_back(DataType(taggerName));
+          bTagValue.push_back(DataType(btagValue));
+        }
       }
-      else{
-        btag1=0;}
-      //    bTagJet->MVx_discriminant("MV2c10",btag1); 
-      //     bTagJet->MVx_discriminant("MV2c10"); 
-      bTagValue.push_back( btag1 );
-      bTagName.push_back(DataType( "MV2c10"));
-      bTagValue.push_back(btag1);
-      bTagName.push_back( DataType( "IP3D" ));
-      btag2 = (bTagJet) ? bTagJet->IP3D_loglikelihoodratio() : 0;
-      bTagValue.push_back( btag2 );
-      bTagName.push_back( DataType( "SV1" ));
-      btag3 = 0;
-      bTagValue.push_back( btag3 );
 
-      ATH_MSG_VERBOSE( " Jet #" << counter << "; BTagging: MV2c10: " << btag1 << ", IP3D: " << btag2 << ", SV1: " << btag3 );
-
-      // from AnalysisJiveXML:
-      //   bTagName.push_back( DataType( "JetFitterTagNN" ));
-      //   bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("JetFitterTagNN") ));
-      //
-      // code from PaulT, 16Oct14
-      /*
-         const xAOD::BTagging *btag = (*jetItr)->btagging();
-         std::cout << "btag " << btag << std::endl;
-         double mv1 = (btag) ? btag->MV1_discriminant() : 0;
-         std::cout <<"mv1 "<< mv1 << std::endl;
-         double ip3d = (btag) ? btag->IP3D_loglikelihoodratio() : 0;
-         std::cout <<"ip3d "<< ip3d << std::endl;
-         double sv1 = (btag) ? btag->SV1_loglikelihoodratio() : 0;
-         std::cout <<"sv1 "<< sv1 << std::endl;
-         */
-      //charge.push_back( DataType( (*jetItr)->charge() )); // charge not directly accessible. placeholder.
+      float chargeread;
+      if (!jet->getAttribute<float>(xAOD::JetAttribute::Charge, chargeread)) {
+        ATH_MSG_DEBUG("Jet charge unavailable!");
+        charge.push_back( DataType( 0. ));
+      }else{
+        charge.push_back( DataType( chargeread ));
+      }
 
       // updated for data15
       // from: Reconstruction/MET/METReconstruction/Root/METJetFilterTool.cxx
       std::vector<float> jvfread;
-      (*jetItr)->getAttribute<std::vector<float> >(xAOD::JetAttribute::JVF,jvfread);
-      if(!(*jetItr)->getAttribute<std::vector<float> >(xAOD::JetAttribute::JVF,jvfread)) {
-        ATH_MSG_WARNING("Jet JVF unavailable!");
+      if(!jet->getAttribute<std::vector<float> >(xAOD::JetAttribute::JVF,jvfread)) {
+        ATH_MSG_DEBUG("Jet JVF unavailable!");
         jvf.push_back( DataType( 1. ));
       }else{
-        //ATH_MSG_VERBOSE("Jet JVF = " << jvfread[0]);
         jvf.push_back( DataType(  jvfread[0] ));
       }
 
-      isGood.push_back( DataType( -1111. )); // not anymore defined ? 
-      //// this is defined in xAOD-JetAttribute, but doesn't work with data15:
-      //      isBad.push_back( DataType( (*jetItr)->auxdata<float>("isBadMedium") ));
-      //      isUgly.push_back( DataType( (*jetItr)->auxdata<float>("isUgly") ));
-      isBad.push_back( DataType( -1111. ));
-      isUgly.push_back( DataType( -1111. ));
-      if (isCalo){
-        float emfracread = 0;
-        if(!(*jetItr)->getAttribute(xAOD::JetAttribute::EMFrac,emfracread)) {
-           ATH_MSG_WARNING("Jet EMFrac unavailable!");
-           emfrac.push_back( DataType( 0. ));
-        }else{
-           emfrac.push_back( DataType( emfracread ));
-        }
-      }
-      else { emfrac.push_back( DataType( 0. ));
+      float jvtread;
+      if(!jet->getAttribute<float>(xAOD::JetAttribute::Jvt,jvtread)) {
+        ATH_MSG_DEBUG("Jet JVT unavailable!");
+        jvt.push_back(DataType(0.));
+      } else {
+        jvt.push_back(DataType(jvtread));
       }
 
-    } // end JetIterator 
+      float emfracread = 0;
+      if(!jet->getAttribute(xAOD::JetAttribute::EMFrac,emfracread)) {
+         ATH_MSG_DEBUG("Jet EMFrac unavailable!");
+         emfrac.push_back( DataType( 0. ));
+      }else{
+         emfrac.push_back( DataType( emfracread ));
+      }
+
+    } // end loop
 
     // four-vectors
     DataMap["phi"] = phi;
@@ -350,18 +336,16 @@ namespace JiveXML {
     DataMap["et"] = et;
     DataMap["energy"] = energy;
     DataMap["mass"] = mass;
-    DataMap["bTagName multiple=\"4\""] = bTagName; // assigned by hand !
-    DataMap["bTagValue multiple=\"4\""] = bTagValue;
-    //    DataMap["charge"] = charge;
+    std::string str_nTaggers = m_nTaggers>0 ? std::to_string(m_nTaggers) : "1"; // default to 1 if no btaggers so that atlantis can process the jets properly
+    DataMap["bTagName multiple=\""+str_nTaggers+"\""] = bTagName; // assigned by hand !
+    DataMap["bTagValue multiple=\""+str_nTaggers+"\""] = bTagValue;
+    DataMap["charge"] = charge;
     DataMap["id"] = idVec;
     DataMap["px"] = px;
     DataMap["py"] = py;
     DataMap["pz"] = pz;
-
     DataMap["jvf"] = jvf;
-    DataMap["isGood"] = isGood;
-    DataMap["isBad"] = isBad;
-    DataMap["isUgly"] = isUgly;
+    DataMap["jvt"] = jvt;
     DataMap["emfrac"] = emfrac;
 
     if ((trackKey.size()) != 0){
