@@ -168,7 +168,7 @@ int main( int argc, char* argv[] ) {
 
   // Fill a validation true with the tag return value
   std::unique_ptr<TFile> outputFile(TFile::Open("output_SmoothedWZTagger.root", "recreate"));
-  int pass,truthLabel,ntrk;
+  int pass,truthLabel;
   float sf,pt,eta,m,eff,effSF,sigeffSF;
   TTree* Tree = new TTree( "tree", "test_tree" );
   Tree->Branch( "pass", &pass, "pass/I" );
@@ -176,7 +176,6 @@ int main( int argc, char* argv[] ) {
   Tree->Branch( "pt", &pt, "pt/F" );
   Tree->Branch( "m", &m, "m/F" );
   Tree->Branch( "eta", &eta, "eta/F" );
-  Tree->Branch( "ntrk", &ntrk, "ntrk/I" );
   Tree->Branch( "eff", &eff, "eff/F" );
   Tree->Branch( "effSF", &effSF, "effSF/F" );  
   Tree->Branch( "sigeffSF", &sigeffSF, "sigeffSF/F" );  
@@ -220,7 +219,6 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.setProperty( "IsMC", isMC ) );
   ANA_CHECK( m_Tagger.retrieve() );
 
-  static const SG::ConstAccessor<int> acc_ParentJetNTrkPt500("ParentJetNTrkPt500");
   static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
 
   std::string tagger = "SmoothWContained50";
@@ -266,7 +264,6 @@ int main( int argc, char* argv[] ) {
       if(verbose) {
         std::cout << "Testing W Tagger " << std::endl;
         std::cout << "jet pt              = " << jetSC->pt() << std::endl;
-        std::cout << "jet ntrk            = " << acc_ParentJetNTrkPt500(*jetSC) << std::endl;
         std::cout << "RunningTag : " << acc_Tagged(*jetSC) << std::endl;
         std::cout << "result d2pass       = " << acc_PassD2(*jetSC) << std::endl;
         std::cout << "result ntrkpass     = " << acc_PassNtrk(*jetSC) << std::endl;
@@ -278,7 +275,6 @@ int main( int argc, char* argv[] ) {
       pt = jetSC->pt();
       m  = jetSC->m();
       eta = jetSC->eta();
-      ntrk = acc_ParentJetNTrkPt500(*jetSC);
       sf = acc_SF(*jetSC);
       eff = acc_efficiency(*jetSC);
       effSF = acc_effSF(*jetSC);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -63,9 +63,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     /// Object that stores the results for a jet
     asg::AcceptInfo m_acceptInfo;
-
-    // Wro
-    SG::ReadHandleKey<xAOD::JetContainer> m_jetContainer_key{this, "JetContainer", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets", "SG key for input jet container"};
 
     /// WriteDecorHandle keys for tagging bools
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_decTaggedKey{this, "TaggedName", "Tagged", "SG key for Tagged"};
@@ -183,8 +180,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG212Key{this, "ECFG212Name", "ECFG_2_1_2", "SG key for ECFG_2_1_2"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500NameOut", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
 
     bool m_suppressOutputDependence;
 
@@ -255,12 +250,13 @@ class JSSTaggerBase :   public asg::AsgTool ,
     /// Calculate JSS moment ratios in case they are not already saved
     /// TODO: Remove this once JSSMomentTools is modified to take const jets
     int calculateJSSRatios( const xAOD::Jet &jet ) const;
+    void decorateJSSRatios( const xAOD::JetContainer& jets ) const;
 
     /// Find the PV (to be used for Ntrk)
     int findPV() const;
 
     /// Retrieve Ntrk variable from the ungroomed parent jet
-    StatusCode GetUnGroomTracks( const xAOD::Jet &jet , int indexPV) const;
+    int GetUnGroomTracks(const xAOD::Jet &jet , int indexPV) const;
 
     /// Get SF weight
     StatusCode getWeight( const xAOD::Jet& jet, bool passSel, asg::AcceptData &acceptData ) const;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
@@ -19,9 +19,6 @@ StatusCode JSSWTopTaggerANN::initialize() {
 
   ATH_MSG_INFO( "Initializing JSSWTopTaggerANN tool" );
 
-
-
-  ATH_CHECK(m_jetContainer_key.initialize());
   /// Pt values are defined in GeV
   m_ptGeV = true;
 
@@ -216,7 +213,9 @@ StatusCode JSSWTopTaggerANN::initialize() {
 }
 
 /////////// AthAnalysis
-StatusCode JSSWTopTaggerANN::decorate(  const xAOD::JetContainer& jetCont  ) const {
+StatusCode JSSWTopTaggerANN::decorate( const xAOD::JetContainer& jets ) const {
+
+  decorateJSSRatios(jets);
 
   ATH_MSG_DEBUG("Using AthAnalysis code. ANN code.");
   SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeHigh(m_decValidPtRangeHighKey);
@@ -237,24 +236,8 @@ StatusCode JSSWTopTaggerANN::decorate(  const xAOD::JetContainer& jetCont  ) con
   SG::WriteDecorHandle<xAOD::JetContainer, float> decEffSF(m_decEffSFKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decSigeffSF(m_decSigeffSFKey);
 
-  // Get input jet collection
-  auto jetContainer = SG::makeHandle (m_jetContainer_key);
-  if (!jetContainer.isValid()){
-    ATH_MSG_ERROR("Invalid JetContainer datahandle: " << m_jetContainer_key.key());
-    return StatusCode::FAILURE;
-  }
 
-  auto jets = jetContainer.cptr();
-
-  ATH_MSG_DEBUG("Successfully retrieved JetContainer: " << m_jetContainer_key.key());
-
-  if (jets->size() == 0 ) {
-    ATH_MSG_WARNING("There are no jets in the container. Nothing to be done.");
-  }
-
-
-
-  for(const xAOD::Jet* jet : jetCont){
+  for(const xAOD::Jet* jet : jets){
 
     asg::AcceptData acceptData( &m_acceptInfo );
     /// Reset the AcceptData cut results
@@ -421,6 +404,9 @@ StatusCode JSSWTopTaggerANN::tag( const xAOD::Jet& jet ) const {
   float jet_pt   = jet.pt()/1000.;
   float jet_mass = jet.m()/1000.;
 
+  /// Calculate NSubjettiness and ECF ratios
+  calculateJSSRatios(jet);
+
   /// Get ANN score for the jet
   float jet_score = getScore(jet);
 
@@ -525,9 +511,6 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
   std::map< std::string, std::map<std::string, double> > ANN_inputs;
   std::map< std::string, double > ANN_inputValues;
 
-  /// Calculate NSubjettiness and ECF ratios
-  calculateJSSRatios(jet);
-
   ATH_MSG_DEBUG( "Loading variables for common ANN tagger" );
 
   /// Create common read decor handles
@@ -566,12 +549,8 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     int pv_location = findPV();
 
     if(pv_location != -1){
-      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
-
-	SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-
-        ANN_inputValues["Ntrk500"] = readNtrk500(jet);
-      }
+      int jet_ntrk = GetUnGroomTracks(jet, pv_location);
+      if(jet_ntrk>=0) ANN_inputValues["Ntrk500"] = jet_ntrk;
       else{
 	ATH_MSG_ERROR("Either the ungroomed parent jet doesn't have 'NumTrkPt500' as an attribute or the parent link is broken");
 	ANN_inputValues["Ntrk500"] = -999;
