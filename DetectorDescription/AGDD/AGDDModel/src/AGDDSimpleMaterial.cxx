@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDModel/AGDDSimpleMaterial.h"
@@ -20,7 +20,7 @@ void AGDDSimpleMaterial::RegisterToStore(AGDDMaterialStore& ms,
 	ms.RegisterMaterial(e);
 }
 
-std::string AGDDSimpleMaterial::GetName() const
+const std::string& AGDDSimpleMaterial::GetName() const
 {
 	return m_name;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDColor_H
@@ -20,7 +20,7 @@ public:
 	double Red() const {return m_red;}
 	double Green() const {return m_green;}
 	double Blue() const {return m_blue;}
-	std::string GetName() const {return m_name;}
+	const std::string& GetName() const {return m_name;}
 private:
 	std::string m_name;
 	void RegisterToStore(AGDDColorStore& cs);

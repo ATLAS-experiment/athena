@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDSimpleMaterial_H
@@ -23,7 +23,7 @@ public:
 	}
 	virtual ~AGDDSimpleMaterial() {}
 	void RegisterToStore(AGDDMaterialStore& ms, AGDDSimpleMaterial*);
-	std::string GetName() const;
+	const std::string& GetName() const;
 	double GetDensity() const {return m_density;}
 	material_type GetMaterialType() const {return m_mType;}
 	void Created(bool b) {m_created=b;}
