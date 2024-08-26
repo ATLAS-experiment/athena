@@ -5,7 +5,6 @@
 Plot trigger and reconstruction efficiencies over entire data-periods.
 """
 
-import pandas as pd
 import ROOT as R
 import python_tools as pt
 import ZLumiScripts.tools.zlumi_mc_cf as dq_cf
@@ -14,29 +13,24 @@ from array import array
 import argparse
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
+parser.add_argument('--year', type=str, help='A year number (15-24) or run3 for full Run3')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
-parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
-parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args = parser.parse_args()
 year = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
-dir_2022 = args.dir_2022
-dir_2023 = args.dir_2023
 
 if year == "run3": 
-    years = ["22", "23"]
-    out_tag = "_run3"
+    years = ["22", "23", "24"]
+    out_tag = "run3"
     time_format = "%m/%y"
     ymin, ymax = 0.5, 1.1
     xtitle = 'Month / Year'
     date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
-    norm_type = "Run3"
     if channel is not None: 
         xval = 0.30
         yval = 0.33
@@ -46,12 +40,11 @@ if year == "run3":
     set_size = 1
 else: 
     years = [year]
-    out_tag = year
+    out_tag = "data"+year
     time_format = "%d/%m"
     ymin, ymax = 0.5, 1.1
     xtitle = 'Date in 20' + year
     date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
-    norm_type = "year"
     xval = 0.235
     yval = 0.86
     set_size = 0
@@ -61,18 +54,9 @@ def main():
 
 def plot_efficiency_comb(channel, years):
 
-    c1 = R.TCanvas()
+    all_graphs = []
 
-    if channel == "Zee":
-        
-        leg = R.TLegend(0.645, 0.7, 0.805, 0.9)
-
-    elif channel == "Zmumu":
-        
-        leg = R.TLegend(0.645, 0.7, 0.805, 0.9)
-    
     for year in years:
-
         dict_comb = {}
         dict_comb_err = {}
         dict_mu = {}    
@@ -81,38 +65,18 @@ def plot_efficiency_comb(channel, years):
         vec_comb_err = array('d')
         vec_mu = array('d')
 
-        print("year = ", year)
         grl = pt.get_grl(year)
 
-        if year == "23":
-
-            maindir = args.indir + dir_2023
-            print("2023 grl = ", grl)
-
-        elif year == "22":
-
-            maindir = args.indir + dir_2022
-            print("2022 grl = ", grl)
-
         for run in grl:
+            livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
 
-            print('Begin Run ', run, 'processing')
+            # Cut out short runs
+            if livetime < pt.livetimecut:
+                if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
+                continue
 
-            dfz = pd.read_csv(maindir + "run_" + run + ".csv")
-            dfz_small = dfz
-            dfz_small['ZLumi']    = dfz_small[channel + 'Lumi']
-            dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
             dfz_small['CombEff'] = dfz_small[channel + 'EffComb']
             dfz_small['CombErr'] = dfz_small[channel + 'ErrComb']
-            dfz_small['LBLive'] = dfz_small['LBLive']
-            dfz_small['OffMu'] = dfz_small['OffMu']
-            dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
-
-            #Cut out all runs shorter than 40 minutes
-            if dfz_small['LBLive'].sum()/60 < 40:
-                print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
-                continue
 
             # Scale event-level efficiency with FMC
             campaign = "mc23a"
@@ -143,63 +107,44 @@ def plot_efficiency_comb(channel, years):
             
             vec_mu.append(pileup)
 
-        if channel == "Zee":
-            channel_string = "Z #rightarrow ee"
-            ymin, ymax = 0.52, 0.74
-            xmin, xmax = 0, 80
-        elif channel == "Zmumu":
-            channel_string = "Z #rightarrow #mu#mu"
-            ymin, ymax = 0.74, 0.84
-            xmin, xmax = 0, 80
+        all_graphs.append((year, R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)))
 
-        if year == "22":
-            
-            comb_graph_22 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
-            comb_graph_22.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
-            comb_graph_22.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
-            comb_graph_22.GetHistogram().GetXaxis().SetLimits(xmin, xmax)
-            comb_graph_22.SetMarkerSize(1)
-            comb_graph_22.GetHistogram().SetXTitle("Pileup (#mu)")
-            comb_graph_22.Draw("ap")
-            leg.SetBorderSize(0)
-            leg.SetTextSize(0.07)
-            leg.AddEntry(comb_graph_22, "Data 20"+year, "ep")
+    # now draw all
+    c1 = R.TCanvas()
+    leg = R.TLegend(0.645, 0.7, 0.805, 0.9)
+    if channel == "Zee":
+        ymin, ymax = 0.52, 0.74
+    elif channel == "Zmumu":
+        ymin, ymax = 0.74, 0.84
+    xmin, xmax = 0, 80
 
-
-        if year == "23":
-            
-            comb_graph_23 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
-            comb_graph_23.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
-            comb_graph_23.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
-            comb_graph_23.GetHistogram().GetXaxis().SetLimits(xmin, xmax)
-            comb_graph_23.SetMarkerSize(1)
-            comb_graph_23.Draw("samep")
-            comb_graph_23.SetMarkerColor(R.kRed)
-            leg.SetBorderSize(0)
-            leg.SetTextSize(0.07)
-            leg.AddEntry(comb_graph_23, "Data 20"+year, "ep")
+    for igraph in range(len(all_graphs)):
+        comb_graph = all_graphs[igraph][1]
+        comb_graph.SetMarkerSize(1)
+        comb_graph.SetMarkerColor(R.kBlack+igraph)
+        comb_graph.SetMarkerStyle(R.kFullCircle+igraph)
+        if igraph == 0:
+            comb_graph.Draw("ap")
+            comb_graph.GetHistogram().SetYTitle("#varepsilon_{event}^{"+pt.plotlabel[channel]+"}#times F^{MC}")
+            comb_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
+            comb_graph.GetHistogram().GetXaxis().SetLimits(xmin, xmax)
+            comb_graph.GetHistogram().SetXTitle("Pileup (#mu)")
+        else:
+            comb_graph.Draw("p same")
+        leg.SetBorderSize(0)
+        leg.SetTextSize(0.07)
+        leg.AddEntry(comb_graph, "Data 20"+all_graphs[igraph][0], "ep")
+    leg.Draw()
 
     if channel == "Zee":
-
         pt.drawAtlasLabel(0.6, ymax-0.46, "Internal")
-        if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.46, date_tag)
-        else:
-            pt.drawText(0.2, ymax-0.46, date_tag)
-        pt.drawText(0.2, ymax-0.52, channel_string + " counting")
-
+        pt.drawText(0.2, ymax-0.46, date_tag)
+        pt.drawText(0.2, ymax-0.52, pt.plotlabel[channel] + " counting")
     elif channel == "Zmumu":
-
         pt.drawAtlasLabel(0.6, ymax-0.56, "Internal")
-        if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.56, date_tag)
-        else:
-            pt.drawText(0.2, ymax-0.56, date_tag)
-        pt.drawText(0.2, ymax-0.62, channel_string + " counting")
-
-    leg.Draw()
-    c1.SaveAs(outdir + "event_eff_v_mu_"+channel+"_data"+out_tag+"_"+".eps")
-    c1.SaveAs(outdir + "event_eff_v_mu_"+channel+"_data"+out_tag+"_"+".pdf")
+        pt.drawText(0.2, ymax-0.62, pt.plotlabel[channel] + " counting")
+        
+    c1.SaveAs(outdir + channel + "_eventeff_vs_mu_"+out_tag+".pdf")
 
 if __name__ == "__main__":
     pt.setAtlasStyle()
