@@ -24,6 +24,7 @@ class JSSWTopTaggerDNN :
 
       /// Decorate single jet with tagging info
       virtual StatusCode tag( const xAOD::Jet& jet ) const override;
+      virtual StatusCode decorate(  const xAOD::JetContainer& jets  ) const override;
 
     private:
 

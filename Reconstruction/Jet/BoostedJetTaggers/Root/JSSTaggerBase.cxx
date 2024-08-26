@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -92,8 +92,6 @@ StatusCode JSSTaggerBase::initialize() {
   /// Initialize decorators
   ATH_MSG_INFO( "Decorators that will be attached to jet :" );
 
-  ATH_CHECK( m_jetContainer_key.initialize() );
-
   m_decTaggedKey = m_containerName + "." + m_decorationName + "_" + m_decTaggedKey.key();
   m_decValidPtRangeHighKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeHighKey.key();
   m_decValidPtRangeLowKey = m_containerName + "." + m_decorationName + "_" + m_decValidPtRangeLowKey.key();
@@ -171,12 +169,6 @@ StatusCode JSSTaggerBase::initialize() {
   m_readParentKey = m_containerName + "." + m_readParentKey.key();
   ATH_CHECK( m_readParentKey.initialize() );
 
-  m_decNtrk500Key = m_containerName + "." + m_decNtrk500Key.key();
-  ATH_CHECK( m_decNtrk500Key.initialize() );
-
-  m_readNtrk500Key = m_containerName + "." + m_readNtrk500Key.key();
-  ATH_CHECK( m_readNtrk500Key.initialize() );
-
   ATH_CHECK( m_decTaggedKey.initialize() );
   ATH_CHECK( m_decValidPtRangeHighKey.initialize() );
   ATH_CHECK( m_decValidPtRangeLowKey.initialize() );
@@ -249,7 +241,6 @@ StatusCode JSSTaggerBase::initialize() {
     renounce(m_decE3Key);
     renounce(m_decL2Key);
     renounce(m_decL3Key);
-    renounce(m_decNtrk500Key);
   }
 #endif
 
@@ -526,6 +517,117 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
 
 }
 
+
+void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
+
+  /// Create write decor handles
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decTau21WTA(m_decTau21WTAKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decTau32WTA(m_decTau32WTAKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decTau42WTA(m_decTau42WTAKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decC2(m_decC2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decD2(m_decD2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decE3(m_decE3Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decL2(m_decL2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decL3(m_decL3Key);
+
+  /// Create read decor handles
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1WTA(m_readTau1WTAKey);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2WTA(m_readTau2WTAKey);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3WTA(m_readTau3WTAKey);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau4WTA(m_readTau4WTAKey);
+
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECF1(m_readECF1Key);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECF2(m_readECF2Key);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECF3(m_readECF3Key);
+
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG331(m_readECFG331Key);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
+
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readL2(m_readL2Key);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readL3(m_readL3Key);
+
+  for(const xAOD::Jet* jet : jets){
+
+    /// WTA N-subjettiness ratios
+    float tau21_wta = -999.0;
+    float tau32_wta = -999.0;
+    float tau42_wta = -999.0;
+
+    float tau1_wta = readTau1WTA(*jet);
+    float tau2_wta = readTau2WTA(*jet);
+    float tau3_wta = readTau3WTA(*jet);
+    float tau4_wta = -999.0;
+    if(readTau4WTA.isAvailable()){
+      tau4_wta = readTau4WTA(*jet);
+    }
+
+    if ( tau1_wta > 1e-8 ) {
+      tau21_wta = tau2_wta / tau1_wta;
+    }
+
+    if ( tau2_wta > 1e-8 ) {
+      tau32_wta = tau3_wta / tau2_wta;
+      if(readTau4WTA.isAvailable()){
+	tau42_wta = tau4_wta / tau2_wta;
+      }
+    }
+
+    decTau21WTA(*jet) = tau21_wta;
+    decTau32WTA(*jet) = tau32_wta;
+    decTau42WTA(*jet) = tau42_wta;
+
+    /// ECF ratios
+    float C2 = -999.0;
+    float D2 = -999.0;
+    float e3 = -999.0;
+
+    float ECF1 = readECF1(*jet);
+    float ECF2 = readECF2(*jet);
+    float ECF3 = readECF3(*jet);
+
+    if ( ECF2 > 1e-8 ) {
+      C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
+      D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
+    }
+
+    e3 = ECF3 / std::pow( ECF1, 3.0 );
+
+    decC2(*jet) = C2;
+    decD2(*jet) = D2;
+    decE3(*jet) = e3;
+
+    // L-series for UFO top taggers
+    float L2 = -999.0;
+    float L3 = -999.0;
+
+    if(!readL2.isAvailable()){
+      if(readECFG331.isAvailable() && readECFG212.isAvailable()){
+	if(readECFG212(*jet) > 1e-8){
+	  L2 = readECFG331(*jet) / pow(readECFG212(*jet), (3.0/2.0));
+	}
+      }
+      decL2(*jet) = L2;
+    }
+
+    if(!readL3.isAvailable()){
+      if(readECFG331.isAvailable() && readECFG311.isAvailable()){
+	if(readECFG331(*jet) > 1e-8){
+	  L3 = readECFG311(*jet) / pow(readECFG331(*jet), (1.0/3.0));
+	}
+      }
+      decL3(*jet) = L3;
+    }
+
+    // TODO: Add ECFG for ANN tagger whenever it is defined
+
+  }
+
+  return;
+
+}
+
+
 int JSSTaggerBase::findPV() const{
 
   int indexPV = -1;
@@ -550,9 +652,7 @@ int JSSTaggerBase::findPV() const{
 }
 
 /// Retrieve the Ntrk variable from the ungroomed parent jet
-StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) const {
-
-  SG::WriteDecorHandle<xAOD::JetContainer, int> decNtrk500(m_decNtrk500Key);
+int JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) const {
 
   SG::ReadDecorHandle<xAOD::JetContainer, ElementLink<xAOD::JetContainer> > readParent(m_readParentKey);
 
@@ -569,25 +669,22 @@ StatusCode JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) 
 	const std::vector<int>& NTrkPt500 = acc_Ntrk(*ungroomedJet);
 
 	int jet_ntrk = NTrkPt500.at(indexPV);
-	decNtrk500(jet) = jet_ntrk;
+	return jet_ntrk;
 
       }
       else {
 	ATH_MSG_ERROR("WARNING: Unable to retrieve Ntrk of the ungroomed parent jet. Please make sure this variable is in your derivations!!!");
-	return StatusCode::FAILURE;
       }
     }
     else {
       ATH_MSG_ERROR("WARNING: Unable to retrieve the parent ungroomed jet. Please make sure this variable is in your derivations!!!");
-      return StatusCode::FAILURE;
     }
   }
   else {
     ATH_MSG_ERROR("WARNING: Unable to retrieve the link to the parent ungroomed jet. Please make sure this variable is in your derivations!!!");
-    return StatusCode::FAILURE;
   }
 
-  return StatusCode::SUCCESS;
+  return -999;
 
 }
 

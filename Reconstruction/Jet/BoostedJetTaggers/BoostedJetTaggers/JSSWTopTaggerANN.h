@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JSSWTOPTAGGERANN_H_
@@ -26,7 +26,7 @@ class JSSWTopTaggerANN :
 
       /// Decorate single jet with tagging info
       virtual StatusCode tag(const xAOD::Jet& jet) const override;
-      virtual StatusCode decorate(  const xAOD::JetContainer& jets  ) const override;
+      virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
     private:
 

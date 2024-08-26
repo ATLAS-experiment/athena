@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
@@ -205,6 +205,179 @@ StatusCode JSSWTopTaggerDNN::initialize() {
 
 }
 
+
+/////////// AthAnalysis
+StatusCode JSSWTopTaggerDNN::decorate( const xAOD::JetContainer& jets ) const {
+
+  decorateJSSRatios(jets);
+  
+  ATH_MSG_DEBUG("Using AthAnalysis code. DNN code.");
+  /// Create write decor handles
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeHigh(m_decValidPtRangeHighKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidPtRangeLow(m_decValidPtRangeLowKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEtaRange(m_decValidEtaRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidKinRange(m_decValidKinRangeKey);
+
+
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassScore(m_decPassScoreKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMLow(m_decCutMLowKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decCutMHigh(m_decCutMHighKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decScoreCut(m_decScoreCutKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decScoreValue(m_decScoreValueKey);
+
+  /// Create write decor handles
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decWeight(m_decWeightKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decEfficiency(m_decEfficiencyKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decEffSF(m_decEffSFKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decSigeffSF(m_decSigeffSFKey);
+
+  for(const xAOD::Jet* jet : jets){
+    asg::AcceptData acceptData( &m_acceptInfo );
+    /// Reset the AcceptData cut results
+    ATH_CHECK( resetCuts( acceptData ) );
+
+    // resetCuts
+    float scale = m_ptGeV ? 1.e3 : 1.0;
+
+    bool passKinRange = true;
+    /// Check each kinematic constraint
+    /// Print warnings using counters
+    if ( std::abs(jet->eta()) > m_jetEtaMax ) {
+      ATH_MSG_VERBOSE( "Jet does not pass basic kinematic selection (|eta| < " << m_jetEtaMax << "). Jet eta = " << jet->eta() );
+      acceptData.setCutResult( "ValidEtaRange", false );
+      passKinRange = false;
+    }
+
+    if ( jet->pt() < m_jetPtMin * scale ) {
+      ATH_MSG_VERBOSE( "Jet does not pass basic kinematic selection (pT > " << m_jetPtMin * scale / 1.e3 << "). Jet pT = " << jet->pt() / 1.e3 << " GeV" );
+      acceptData.setCutResult( "ValidPtRangeLow", false );
+      passKinRange = false;
+    }
+
+    if ( jet->pt() > m_jetPtMax * scale ) {
+      ATH_MSG_VERBOSE( "Jet does not pass basic kinematic selection (pT < " << m_jetPtMax * scale / 1.e3 << "). Jet pT = " << jet->pt() / 1.e3 << " GeV" );
+      acceptData.setCutResult( "ValidPtRangeHigh", false );
+      passKinRange = false;
+    }
+    /// Decorate kinematic pass information
+    decValidPtRangeHigh(*jet) = acceptData.getCutResult( "ValidPtRangeHigh" );
+    decValidPtRangeLow(*jet) = acceptData.getCutResult( "ValidPtRangeLow" );
+    decValidEtaRange(*jet) = acceptData.getCutResult( "ValidEtaRange" );
+    decValidKinRange(*jet) = passKinRange;
+
+
+    float jet_pt   = jet->pt()/1000.;
+    float jet_mass = jet->m()/1000.;
+
+    /// Get score
+    float jet_score = getScore(*jet);
+
+    /// Evaluate the values of the upper and lower mass bounds and the d2 cut
+    float cut_mass_low  = m_funcMassCutLow ->Eval(jet_pt);
+    float cut_mass_high = m_funcMassCutHigh->Eval(jet_pt);
+    float cut_score     = m_funcScoreCut   ->Eval(jet_pt);
+
+    /// Print cut criteria and jet values
+    ATH_MSG_VERBOSE( "Cut values : Mass window = [" << cut_mass_low << "," << cut_mass_high << "], score cut = " << cut_score );
+    ATH_MSG_VERBOSE( "Jet values : Mass = " << jet_mass << ", score = " << jet_score );
+
+    /// Get SF weight
+
+    float weight = 1.0;
+    float effSF = 1.0;
+    float sigeffSF = 1.0;
+    float efficiency = 1.0;
+
+    if ( m_isMC && m_calcSF ) {
+
+      std::string truthLabelStr = getTruthLabelStr( *jet, acceptData );
+      std::tie(effSF, efficiency) = getSF( *jet, truthLabelStr );
+
+      // calculate signal efficiency SF
+      if ( m_weightHistograms.count("t_qqb") ) {
+        sigeffSF = getSF(*jet, "t_qqb").first;
+      } else if ( m_weightHistograms.count("V_qq") ) {
+        sigeffSF = getSF(*jet, "V_qq").first;
+      } else if ( m_weightHistograms.count("t") ){
+        sigeffSF = getSF(*jet, "t").first;
+      } else {
+        sigeffSF = 1.0;
+      }
+
+      /// Inefficiency SF is directly used
+      if ( m_weightFlavors.find("fail") != std::string::npos ) {
+        weight = effSF;
+      }
+
+      else {
+
+        /// Efficiency SF
+        if ( jet_score > cut_score ) {
+          weight = effSF;
+        }
+
+        /// Calculate inefficiency SF
+        else {
+          /// If inefficiency SF is not available, SF is always 1.0
+          if (  !m_efficiencyHistogramName.empty() && efficiency < 1.0 ) {
+            weight = ( 1. - effSF * efficiency ) / ( 1. - efficiency );
+          }
+
+        }
+      }
+
+    }
+
+    decWeight(*jet) = weight;
+    decEfficiency(*jet) = efficiency;
+    decEffSF(*jet) = effSF;
+    decSigeffSF(*jet) = sigeffSF;
+
+    /// Decorate cut information if needed
+    ATH_MSG_DEBUG( "Decorating with score" );
+
+
+
+    /// Decorate values
+    decCutMLow(*jet) = cut_mass_low;
+    decCutMHigh(*jet) = cut_mass_high;
+    decScoreCut(*jet) = cut_score;
+    decScoreValue(*jet) = jet_score;
+
+    /// Cut summary
+    bool passCuts = true;
+
+    /// Set the AcceptData depending on whether it is a W/Z or a top tagger
+    if ( m_tagClass == TAGCLASS::WBoson || m_tagClass == TAGCLASS::ZBoson ) {
+      ATH_MSG_VERBOSE( "Determining WZ tag return" );
+      if ( jet_mass > cut_mass_low ) acceptData.setCutResult( "PassMassLow", true );
+      if ( jet_mass < cut_mass_high ) acceptData.setCutResult( "PassMassHigh", true );
+      if ( jet_score > cut_score ) acceptData.setCutResult( "PassScore", true );
+      decPassMass(*jet) = acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
+      passCuts = passCuts && acceptData.getCutResult( "PassMassLow" ) && acceptData.getCutResult( "PassMassHigh" );
+    }
+    else if ( m_tagClass == TAGCLASS::TopQuark ) {
+      ATH_MSG_VERBOSE( "Determining TopQuark tag return" );
+      if ( jet_mass > cut_mass_low ) acceptData.setCutResult( "PassMassLow", true );
+      if ( jet_score > cut_score ) acceptData.setCutResult( "PassScore", true );
+      decPassMass(*jet) = acceptData.getCutResult( "PassMassLow" );
+      passCuts = passCuts && acceptData.getCutResult( "PassMassLow" );
+    }
+
+    decPassScore(*jet) = acceptData.getCutResult( "PassScore" );
+
+    passCuts = passCuts && acceptData.getCutResult( "PassScore" );
+
+    decTagged(*jet) = passCuts;
+
+  }
+  return StatusCode::SUCCESS;
+
+}
+
+/////////// AnalysisBase
 StatusCode JSSWTopTaggerDNN::tag( const xAOD::Jet& jet ) const {
 
   ATH_MSG_DEBUG( "Obtaining DNN result" );
@@ -367,11 +540,8 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
     int pv_location = findPV();
 
     if(pv_location != -1){
-      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
-        SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-
-        DNN_inputValues["Ntrk500"] = readNtrk500(jet);
-      }
+      int jet_ntrk = GetUnGroomTracks(jet, pv_location);
+      if(jet_ntrk>=0) DNN_inputValues["Ntrk500"] = jet_ntrk;
       else{
         ATH_MSG_ERROR("Either the ungroomed parent jet doesn't have 'NumTrkPt500' as an attribute or the parent link is broken");
         DNN_inputValues["Ntrk500"] = -999;

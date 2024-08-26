@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
@@ -259,17 +259,11 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
     int pv_location = findPV();
 
     if(pv_location != -1){
-
-      if( GetUnGroomTracks(jet, pv_location).isSuccess()){
-
-	SG::ReadDecorHandle<xAOD::JetContainer, int> readNtrk500(m_readNtrk500Key);
-
-	int jet_ntrk = readNtrk500(jet);
-
+      int jet_ntrk = GetUnGroomTracks(jet, pv_location);
+      if(jet_ntrk>=0){
 	if ( jet_ntrk < cut_ntrk ) acceptData.setCutResult( "PassNtrk", true );
 	decPassNtrk(jet) = acceptData.getCutResult( "PassNtrk" );
 	passCuts = passCuts && acceptData.getCutResult( "PassNtrk" );
-
       }
       else{
 	acceptData.setCutResult( "ValidJetContent", false );
