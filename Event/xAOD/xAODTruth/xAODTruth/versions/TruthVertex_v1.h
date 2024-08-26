@@ -1,10 +1,9 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TruthVertex_v1.h 624338 2014-10-27 15:08:55Z krasznaa $
 #ifndef XAODTRUTH_VERSIONS_TRUTHVERTEX_V1_H
 #define XAODTRUTH_VERSIONS_TRUTHVERTEX_V1_H
 
@@ -34,9 +33,6 @@ namespace xAOD {
    /// connected to one or more incoming, and one or more outgoing particles.
    ///
    /// @author Andy Buckley <Andy.Buckley@cern.ch>
-   ///
-   /// $Revision: 624338 $
-   /// $Date: 2014-10-27 16:08:55 +0100 (Mon, 27 Oct 2014) $
    ///
    class TruthVertex_v1 : public SG::AuxElement {
 

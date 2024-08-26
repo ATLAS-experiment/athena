@@ -57,7 +57,7 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
   for (const auto *const entry : *truthParticleLinkVecReadHandle) {
     if (entry->first.isValid() && entry->second.isValid() && HepMC::uniqueID(entry->first) == theUID) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
-        // if the barcode/pdg id / status of the pair does not match return default
+        // if the pair does not match return default
       if (!theGenPart || !truthParticle ||
           theGenPart->pdg_id() != truthParticle->pdgId() ||
           theGenPart->status() != truthParticle->status() ||
@@ -266,8 +266,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   }
 
   // to resolve Sherpa loop
-  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert))
-    samePart = true;
+  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert)) samePart = true;
   //
 
   if ((abs(motherPDG) == 13 || abs(motherPDG) == 15 || abs(motherPDG) == 24) && mothOriVert != nullptr && !samePart) {

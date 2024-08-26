@@ -299,9 +299,9 @@ namespace Muon {
                 ntrigEtaLayers = etaLayers.size();
                 nprecLayers = precLayers.size();
                 ATH_MSG_DEBUG(" total counts: precision " << static_cast<int>(nprecLayers) << " phi layers " << static_cast<int>(nphiLayers)
-                                                          << " eta trig layers " << static_cast<int>(ntrigEtaLayers)
-                                                          << " associated reco muon " << index << " barcode " << HepMC::barcode(*truthLink) // FIXME barcode-based
-                                                          << " truthLink " << truthLink);
+                              << " eta trig layers " << static_cast<int>(ntrigEtaLayers)
+                              << " associated reco muon " << index << " barcode " << HepMC::barcode(*truthLink) // FIXME barcode-based
+                              << " truthLink " << truthLink);
                 xAOD::MuonSegment* segment = new xAOD::MuonSegment();
                 segmentContainer->push_back(segment);
                 segment->setNHits(nprecLayers, nphiLayers, ntrigEtaLayers);
@@ -387,7 +387,7 @@ namespace Muon {
 
             // loop over collection and find particle with the same bar code
             for (const auto& particle : *col) {
-                if (!HepMC::is_sim_descendant(&particle,&truthParticle)) continue;
+              if (!HepMC::is_sim_descendant(&particle,&truthParticle)) continue;
                 CLHEP::Hep3Vector pos = particle.GetPosition();
                 CLHEP::Hep3Vector mom = particle.GetMomentum();
                 ATH_MSG_VERBOSE("Found associated  " << r_name << " pt " << mom.perp() << " position: r " << pos.perp() << " z " << pos.z());
@@ -507,7 +507,7 @@ namespace Muon {
             }
             // loop over trajectories
             for (const auto& trajectory : *col) {
-                // check if gen particle same as input
+              // check if gen particle same as input
               if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(), HepMC::barcode(trajectory.second)) == truthParticleHistory.end()) continue; // FIXME barcode-based - TrackRecords read in from existing inputs will not have valid id values.
 
                 const Identifier& id = trajectory.first;

@@ -49,8 +49,8 @@ bool isSeparatorGenEvent(const HepMC::GenEvent *genEvt) {
 using namespace std;
 
 namespace xAODMaker {
-    
-    
+
+
     xAODTruthCnvAlg::xAODTruthCnvAlg( const string& name, ISvcLocator* svcLoc )
       : AthReentrantAlgorithm( name, svcLoc )
       , m_metaStore( "MetaDataStore", name )
@@ -60,8 +60,8 @@ namespace xAODMaker {
         declareProperty( "MetaObjectName", m_metaName = "TruthMetaData" );
         declareProperty( "MetaDataStore", m_metaStore );
     }
-    
-    
+
+
     StatusCode xAODTruthCnvAlg::initialize() {
         if (m_doAllPileUp && m_doInTimePileUp) {
             ATH_MSG_FATAL( "Contradictory xAOD truth pile-up setting: all pile-up AND in-time alone requested simultaneously. Check settings." );
@@ -71,7 +71,7 @@ namespace xAODMaker {
         if (m_writeMetaData) {
             ATH_CHECK( m_meta.initialize (m_metaStore, m_metaName) );
         }
-        
+
         // initialize handles
         ATH_CHECK(m_truthLinkContainerKey.initialize());
 
@@ -100,13 +100,13 @@ namespace xAODMaker {
 
         return StatusCode::SUCCESS;
     }
-    
-    
+
+
     StatusCode xAODTruthCnvAlg::execute (const EventContext& ctx) const {
-        
+
         SG::WriteHandle<xAODTruthParticleLinkVector> truthLinkVec(m_truthLinkContainerKey, ctx);
         ATH_CHECK(truthLinkVec.record(std::make_unique<xAODTruthParticleLinkVector>()));
-        
+
         // Retrieve the HepMC truth:
         SG::ReadHandle<McEventCollection> mcColl(m_aodContainerKey, ctx);
         // validity check is only really needed for serial running. Remove when MT is only way.
@@ -145,7 +145,7 @@ namespace xAODMaker {
         ATH_CHECK(xTruthVertexContainer.record(std::make_unique<xAOD::TruthVertexContainer>(),
                                                std::make_unique<xAOD::TruthVertexAuxContainer>()));
         ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
-             
+
         // ***********************************************************************************
         // Create the xAOD objects
         // This consists of three parts:
@@ -175,7 +175,7 @@ namespace xAODMaker {
         //
         // Comment lines below follow this recipe
         // ************************************************************************************
-            
+
         // (1) Build TruthEvents
         ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
 #ifdef HEPMC3
@@ -242,11 +242,11 @@ namespace xAODMaker {
               }
 #endif
           }
-                
+
           xAOD::TruthEvent* xTruthEvent = new xAOD::TruthEvent();
           xAOD::TruthPileupEvent* xTruthPileupEvent = new xAOD::TruthPileupEvent();
-                
-                
+
+
           if (isSignalProcess) {
             xTruthEventContainer->push_back( xTruthEvent );
             // Cross-section
@@ -258,7 +258,7 @@ namespace xAODMaker {
             xTruthEvent->setCrossSection(crossSection ? (float)crossSection->cross_section() : -1);
             xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->cross_section_error() : -1);
 #endif
-                    
+
             if (m_writeMetaData) {
               //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
               uint32_t mcChannelNumber = 0;
@@ -277,10 +277,10 @@ namespace xAODMaker {
             // Event weights
             vector<float> weights;
             for (const double& w : genEvt->weights()) weights.push_back((float)(w));
-            //AV This to be decided. It is always a good idea to have a default weight 1.0. 
-            //if (weights.empty()) weights.push_back(1.0); 
+            //AV This to be decided. It is always a good idea to have a default weight 1.0.
+            //if (weights.empty()) weights.push_back(1.0);
             xTruthEvent->setWeights(weights);
-                    
+
             // Heavy ion info
             auto const hiInfo = genEvt->heavy_ion();
             if (hiInfo) {
@@ -317,7 +317,7 @@ namespace xAODMaker {
               // This doesn't yet exist in our version of HepMC
               // xTruthEvent->setHeavyIonParameter(hiInfo->centrality(),xAOD::TruthEvent::CENTRALITY);
             }
-                    
+
             // Parton density info
             // This will exist 99% of the time, except for e.g. cosmic or particle gun simulation
             auto const pdfInfo = genEvt->pdf_info();
@@ -327,7 +327,7 @@ namespace xAODMaker {
               xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[1], xAOD::TruthEvent::PDGID2);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID1);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID2);
-                        
+
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[0], xAOD::TruthEvent::X1);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[1], xAOD::TruthEvent::X2);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->scale, xAOD::TruthEvent::Q);
@@ -338,7 +338,7 @@ namespace xAODMaker {
               xTruthEvent->setPdfInfoParameter(pdfInfo->id2(), xAOD::TruthEvent::PDGID2);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id1(), xAOD::TruthEvent::PDFID1);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id2(), xAOD::TruthEvent::PDFID2);
-                        
+
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->x1(), xAOD::TruthEvent::X1);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->x2(), xAOD::TruthEvent::X2);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->scalePDF(), xAOD::TruthEvent::Q);
@@ -349,7 +349,7 @@ namespace xAODMaker {
           }else{//not isSignalProcess
       xTruthPileupEventContainer->push_back( xTruthPileupEvent );
     }
-                
+
           // (2) Build particles and vertices
           // Map for building associations between particles and vertices
           // The pair in the map is the (incomingParticles . outgoingParticles) of the given vertex
@@ -357,7 +357,7 @@ namespace xAODMaker {
           VertexMap vertexMap;
           VertexMap::iterator mapItr;
           vector<HepMC::ConstGenVertexPtr> vertices;
-                
+
           // Check signal process vertex
           // If this is a disconnected vertex, add it manually or won't be added from the loop over particles below.
            auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
@@ -369,7 +369,7 @@ namespace xAODMaker {
           } else {
             ATH_MSG_WARNING("Signal process vertex pointer not valid in HepMC Collection for GenEvent #" << cntr << " / " << mcColl->size());
           }
-                
+
           // Get the beam particles
           pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
           bool genEvt_valid_beam_particles=false;
@@ -435,9 +435,9 @@ namespace xAODMaker {
               parts.incomingEL.push_back(eltp);
               parts.incoming.push_back(xTruthParticle);
             }
-                    
+
           } // end of loop over particles
-                
+
           // (3) Loop over the map
           auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
     xTruthVertexContainer->reserve(vertices.size());
@@ -463,20 +463,20 @@ namespace xAODMaker {
             // (h) Set Particle<->Vertex links for incoming particles
             for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
           } //end of loop over vertices
-                
+
           // Delete the event that wasn't used
           if (isSignalProcess) delete xTruthPileupEvent;
           if (!isSignalProcess) delete xTruthEvent;
-                
+
         } // end of loop over McEventCollection
-            
-                
+
+
         std::stable_sort(truthLinkVec->begin(), truthLinkVec->end(), SortTruthParticleLink());
         ATH_MSG_VERBOSE("Summarizing truth link size: " << truthLinkVec->size() );
-        
+
         return StatusCode::SUCCESS;
     }
-    
+
         void xAODTruthCnvAlg::handle(const Incident& incident) {
           if (m_firstBeginRun && incident.type()==IncidentType::BeginRun) {
             m_firstBeginRun = false;
@@ -536,20 +536,20 @@ namespace xAODMaker {
       tv->setZ(gv->position().z());
       tv->setT(gv->position().t());
     }
-    
-    
+
+
     // A helper to set up a TruthParticle (without filling the ELs)
     void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, const HepMC::ConstGenParticlePtr& gp) {
         tp->setPdgId(gp->pdg_id());
         tp->setBarcode(HepMC::barcode(gp)); // FIXME barcode-based
         tp->setStatus(HepMC::old_particle_status_from_new(HepMC::status(gp))); // For now convert the status back to the old scheme
-        
+
         auto pol = HepMC::polarization(gp);
         if (pol.is_defined()) {
             tp->setPolarizationParameter(pol.theta(), xAOD::TruthParticle::polarizationTheta);
             tp->setPolarizationParameter(pol.phi(), xAOD::TruthParticle::polarizationPhi);
         }
-        
+
         tp->setM(gp->generated_mass());
         tp->setPx(gp->momentum().px());
         tp->setPy(gp->momentum().py());
@@ -569,7 +569,7 @@ namespace xAODMaker {
 
       auto aux = std::make_unique<xAOD::TruthMetaDataAuxContainer>();
       md->setStore( aux.get() );
-            
+
       // Record the trigger configuration metadata into it:
       CHECK( metaStore->record( std::move (aux), metaName + "Aux." ) );
       CHECK( metaStore->record( std::move (md),  metaName ) );
@@ -584,13 +584,13 @@ namespace xAODMaker {
     {
       // This bit needs to be serialized.
       lock_t lock (m_mutex);
-      
+
       //Inserting in a (unordered_)set returns an <iterator, boolean> pair, where the boolean
       //is used to check if the key already exists (returns false in the case it exists)
       if( m_existingMetaDataChan.insert(mcChannelNumber).second ) {
         m_tmd->push_back (std::make_unique <xAOD::TruthMetaData>());
         xAOD::TruthMetaData* md = m_tmd->back();
-        
+
 #ifdef HEPMC3
         ///Here comes the fix. Note that HepMC2.06.11 also contains the fix
         md->setMcChannelNumber(mcChannelNumber);
@@ -606,7 +606,7 @@ namespace xAODMaker {
           }
         }
         md->setWeightNames(orderedWeightNameVec);
-#else 
+#else
         // FIXME: class member protection violation here.
         // This appears to be because WeightContainer has no public methods
         // to get information about the weight names.
@@ -616,12 +616,12 @@ namespace xAODMaker {
         for (const auto& entry: weightNameMap) {
           orderedWeightNameVec.push_back(entry.first);
         }
-                            
+
         //The map from the HepMC record pairs the weight names with a corresponding index,
         //it is not guaranteed that the indices are ascending when iterating over the map
         std::sort(orderedWeightNameVec.begin(), orderedWeightNameVec.end(),
                   [&](const std::string& i, const std::string& j){return weightNameMap.at(i) < weightNameMap.at(j);});
-                            
+
         md->setMcChannelNumber(mcChannelNumber);
         md->setWeightNames( orderedWeightNameVec );
 #endif
@@ -649,6 +649,6 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
     }
 
-    
-    
+
+
 } // namespace xAODMaker
