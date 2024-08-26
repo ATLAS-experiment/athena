@@ -79,6 +79,7 @@
 
 #include "LArGeoEndcap/EMECConstruction.h"
 #include "LArGeoEndcap/EMECSupportConstruction.h"
+#include "LArGeoEndcap/EMECAccordionConstruction.h"
 #include "GeoModelKernel/GeoUnidentifiedShape.h"
 
 
@@ -406,11 +407,23 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         if(!status.isSuccess()){
             throw std::runtime_error(bPos? "Cannot store EMEC_INNER_WHEEL_POS": "Cannot store EMEC_INNER_WHEEL_NEG");
         }
-
-        place_custom_solids(
-            fullPV, absorbers, electrodes, multilayered_absorbers,
-            innerAbsorberMaterial, electrodeMaterial, Glue, Lead
-        );
+        
+        if (geoModelSvc->isEmecStandard()){
+          bool makeSlices;
+	  ATH_MSG_INFO( "EMECConstruction build NewInnerWheel with standard Geant4 shapes: G4GenericTrap ");
+	  EMECAccordionConstruction emecAccordionConstructor;
+          emecAccordionConstructor.setWheelParameters();
+          emecAccordionConstructor.setInnerWheel(fullPV);
+	  emecAccordionConstructor.setMaterial("LiquidArgon", LAr);
+	  emecAccordionConstructor.setMaterial("Steel", innerAbsorberMaterial);
+	  emecAccordionConstructor.setMaterial("Glue", Glue);
+	  emecAccordionConstructor.setMaterial("Lead", Lead);
+	  emecAccordionConstructor.setMaterial("Kapton", electrodeMaterial);
+          emecAccordionConstructor.constructInnerWheelStructure(makeSlices = true);
+        }
+        else {
+          place_custom_solids(fullPV, absorbers, electrodes, multilayered_absorbers,innerAbsorberMaterial, electrodeMaterial, Glue, Lead);
+       }
     } // if(m_hasInnerWheel)
 
     if(m_hasOuterWheel){
@@ -474,11 +487,24 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         if(!status.isSuccess()){
             throw std::runtime_error(bPos? "Cannot store EMEC_OUTER_WHEEL_POS": "Cannot store EMEC_OUTER_WHEEL_NEG");
         }
-
-        place_custom_solids(
-            fullPV, absorbers, electrodes, multilayered_absorbers,
+        if (geoModelSvc->isEmecStandard()){
+          bool makeSlices;
+	  ATH_MSG_INFO( "EMECConstruction build NewOuterWheel with standard Geant4 shapes: G4GenericTrap ");
+	  EMECAccordionConstruction emecAccordionConstructor;
+          emecAccordionConstructor.setWheelParameters();
+	  emecAccordionConstructor.setOuterWheel(fullPV);
+	  emecAccordionConstructor.setMaterial("LiquidArgon", LAr);
+	  emecAccordionConstructor.setMaterial("Steel", outerAbsorberMaterial);
+	  emecAccordionConstructor.setMaterial("Glue", Glue);
+	  emecAccordionConstructor.setMaterial("Lead", Lead);
+	  emecAccordionConstructor.setMaterial("Kapton", electrodeMaterial);
+          emecAccordionConstructor.constructOuterWheelStructure(makeSlices = true);
+        
+        } else {
+           place_custom_solids(fullPV, absorbers, electrodes, multilayered_absorbers,
             outerAbsorberMaterial, electrodeMaterial, Glue, Lead
-        );
+           );
+        }
 
     } // if(m_hasOuterWheel)
 

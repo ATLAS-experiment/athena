@@ -51,6 +51,8 @@ public:
 
     // Release GeoModel tree from memory
     virtual StatusCode clear() = 0;
+
+    virtual const  bool & isEmecStandard()       const=0;
 };
 
 inline
