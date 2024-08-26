@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,6 +42,9 @@
 #include "AthenaKernel/errorcheck.h"
 
 #include "GaudiKernel/IChronoStatSvc.h"
+
+#include "StoreGate/WriteDecorHandle.h"
+#include "xAODTrigCalo/CaloClusterTrigAuxContainer.h"
 
 //###############################################################################
 CaloClusterMaker::CaloClusterMaker(const std::string& name, 
@@ -119,6 +122,11 @@ StatusCode CaloClusterMaker::initialize()
   }
   ATH_CHECK( m_clusterCellLinkOutput.initialize() );
 
+  if (m_writeTriggerSpecificInfo) {
+    m_mDecor_ncells = m_clusterOutput.key() + "." + m_mDecor_ncells.key();
+  }
+  ATH_CHECK(m_mDecor_ncells.initialize(m_writeTriggerSpecificInfo));
+  
   return StatusCode::SUCCESS;
 }
 
@@ -135,8 +143,15 @@ StatusCode CaloClusterMaker::execute (const EventContext& ctx) const
 
   // make a Cluster Container 
   SG::WriteHandle<xAOD::CaloClusterContainer> clusColl (m_clusterOutput, ctx);
-  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(clusColl));
-  
+
+  if (m_writeTriggerSpecificInfo) {
+      ATH_CHECK( clusColl.record(std::make_unique<xAOD::CaloClusterContainer>(),
+				 std::make_unique<xAOD::CaloClusterTrigAuxContainer>()) );
+  }
+  else {
+    ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(clusColl));
+  }
+    
   ToolHandleArray<CaloClusterCollectionProcessor>::const_iterator toolIt, toolIt_e; //Iterators over Tool handles
   toolIt=m_clusterMakerTools.begin();
   toolIt_e=m_clusterMakerTools.end();
@@ -176,6 +191,20 @@ StatusCode CaloClusterMaker::execute (const EventContext& ctx) const
     ATH_CHECK((*toolIt)->execute(ctx, clusColl.ptr()));
     if (m_chronoTools) m_chrono->chronoStop(chronoName);
   }//End loop over correction tools
+
+  if (m_writeTriggerSpecificInfo) {
+    SG::WriteDecorHandle<xAOD::CaloClusterContainer, int> decor_handle(m_mDecor_ncells, ctx);
+
+    for (const xAOD::CaloCluster * cl : *clusColl) {
+      const CaloClusterCellLink * cell_links = cl->getCellLinks();
+      if (!cell_links) {
+        decor_handle(*cl) = 0;
+      }
+      else {
+        decor_handle(*cl) = cell_links->size();
+      }
+    }
+  }
 
   ATH_MSG_DEBUG("Created cluster container with " << clusColl->size() << " clusters");
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_clusterCellLinkOutput, ctx);
