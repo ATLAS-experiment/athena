@@ -37,6 +37,7 @@ PEBInfoWriterAlg::~PEBInfoWriterAlg() {}
 StatusCode PEBInfoWriterAlg::initialize() {
   ATH_MSG_DEBUG("Initialising " << name());
   ATH_CHECK(m_hypoTools.retrieve());
+  ATH_CHECK(m_eventInfoKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -71,6 +72,10 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
   // Prepare new decision and hypo tool inputs
   // ---------------------------------------------------------------------------
   std::vector<PEBInfoWriterToolBase::Input> toolInputs;
+  
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, eventContext);
+  const uint8_t tt = (uint8_t) eventInfo->level1TriggerType();
+
   size_t counter = 0;
   for (const Decision* previousDecision: *previousDecisionsHandle) {
     // Get RoI
@@ -86,7 +91,7 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
     ATH_CHECK(newd->setDetail(PEBInfoWriterToolBase::subDetListKey(), std::vector<uint32_t>()));
 
     // Push_back to toolInput
-    toolInputs.emplace_back(newd, eventContext, roiEL, previousDecision);
+    toolInputs.emplace_back(newd, eventContext, roiEL, previousDecision, tt);
 
     // Link to feature. Dummy link here
     ElementLink<DecisionContainer> dummyLink(*decisions, decisions->size()-1, eventContext);
@@ -98,6 +103,7 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
     ATH_MSG_DEBUG("RoI eta/phi = " << (*roiEL)->eta() << "/" << (*roiEL)->phi());
     ATH_MSG_DEBUG("Added RoI, previous decision and dummy feature to new decision " << counter);
     ++counter;
+
   }
 
   // ---------------------------------------------------------------------------
