@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDTechnology_H
@@ -20,7 +20,7 @@ public:
 	AGDDTechnology(const std::string& s,
                        AGDDDetectorStore& ds);
 	virtual ~AGDDTechnology();
-	std::string GetName() const;
+	const std::string& GetName() const;
 };
 //} // namespace AGDDModel
 

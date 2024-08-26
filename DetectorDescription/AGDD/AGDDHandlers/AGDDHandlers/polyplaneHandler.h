@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef polyplaneHandler_H
@@ -15,7 +15,7 @@ public:
                          AGDDController& c);
 	virtual void ElementHandle(AGDDController& c,
                                    xercesc::DOMNode *t) override;
-	Polyplane CurrentPolyplane() {return m_pPlane;}
+	const Polyplane& CurrentPolyplane() {return m_pPlane;}
 private:
 	Polyplane m_pPlane;
 };

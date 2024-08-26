@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDPositioner_H
@@ -22,7 +22,7 @@ public:
                    const std::string& n,
                    const GeoTrf::Transform3D& t);
     virtual ~AGDDPositioner()=default;
-    std::string Volume();
+    const std::string& Volume();
     AGDDVolume *GetVolume();
     const GeoTrf::Transform3D& Transform() const;
     bool IsSensitiveDetector() const {return m_isSensitiveDetector;}
