@@ -204,7 +204,7 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
           xTruthParticle->setBarcode(motherBarcode); // FIXME barcode-based
           originDecorator(*xTruthParticle) = motherPDGid;
           typeDecorator(*xTruthParticle) = motherBarcode; // FIXME barcode-based
-	      typeDecoratorMass(*xTruthParticle) = mothermass;
+          typeDecoratorMass(*xTruthParticle) = mothermass;
 	      
 	      //Check for tau decays
 	      if (abs(theParticle->pdgId()) == 15 && theParticle->hasDecayVtx()){

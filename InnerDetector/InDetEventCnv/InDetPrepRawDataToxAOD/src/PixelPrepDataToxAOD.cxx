@@ -613,10 +613,10 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     {
     auto bc = HepMC::barcode(siHit->particleLink());
     for ( const auto& barcodeSDOColl : trkBCs ) {
-           if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
-           multiMatchingHits.push_back(siHit);
-           break;   
-    }
+        if (std::find(barcodeSDOColl.begin(),barcodeSDOColl.end(),bc) == barcodeSDOColl.end() ) continue;
+        multiMatchingHits.push_back(siHit);
+        break;
+      }
     }
   }
   //Now we will now make 1 SiHit for each true particle if the SiHits "touch" other 

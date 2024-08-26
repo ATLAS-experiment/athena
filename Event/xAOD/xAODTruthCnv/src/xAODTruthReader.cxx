@@ -91,7 +91,7 @@ namespace xAODReader {
     //   for (const xAOD::TruthPileupEvent* evt : *xTruthPUEventContainer) {
     //     cout << endl << endl;
     //     printEvent(evt, m_do4momPtEtaPhi);
-    //   } 
+    //   }
     // }
 
     return StatusCode::SUCCESS;
@@ -117,7 +117,7 @@ namespace xAODReader {
   // Print method for vertex - mimics the HepMC dump.
   // Particle print method called within here
   void xAODTruthReader::printVertex(const xAOD::TruthVertex* vertex, bool do4momPtEtaPhi) {
-    std::ios::fmtflags f( cout.flags() ); 
+    std::ios::fmtflags f( cout.flags() );
     if (vertex) {
       cout << "TruthVertex:";
       if (HepMC::uniqueID(vertex) != HepMC::UNDEFINED_ID) {
@@ -210,13 +210,13 @@ namespace xAODReader {
         printParticle(vertex->outgoingParticle(iPOut), do4momPtEtaPhi);
       }
     }
-    cout.flags(f); 
+    cout.flags(f);
   }
 
 
   // Print method for particle - mimics the HepMC dump.
   void xAODTruthReader::printParticle(const xAOD::TruthParticle* particle, bool do4momPtEtaPhi) {
-    std::ios::fmtflags f( cout.flags() ); 
+    std::ios::fmtflags f( cout.flags() );
     if (particle) {
       cout << " ";
       cout.width(9);
@@ -228,7 +228,7 @@ namespace xAODReader {
       cout.setf(ios::scientific, ios::floatfield);
       cout.setf(ios_base::showpos);
       if (do4momPtEtaPhi) cout << particle->pt() << ",";
-      else                cout << particle->px() << ",";    
+      else                cout << particle->px() << ",";
       cout.width(9);
       cout.precision(2);
       if (do4momPtEtaPhi) cout << particle->eta() << ",";
@@ -255,7 +255,7 @@ namespace xAODReader {
       }
     }
     cout << endl;
-    cout.flags(f); 
+    cout.flags(f);
   }
 
 

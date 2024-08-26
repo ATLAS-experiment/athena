@@ -1,10 +1,9 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TruthParticle_v1.h 624338 2014-10-27 15:08:55Z krasznaa $
 #ifndef XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
 #define XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
 
@@ -34,9 +33,6 @@ namespace xAOD {
    ///
    /// @author Andy Buckley <Andy.Buckley@cern.ch>
    /// @author Jovan Mitrevski <Jovan.Mitrevski@cern.ch>
-   ///
-   /// $Revision: 624338 $
-   /// $Date: 2014-10-27 16:08:55 +0100 (Mon, 27 Oct 2014) $
    ///
    class TruthParticle_v1 : public IParticle {
 
@@ -311,7 +307,7 @@ namespace xAOD {
       bool isBSM() const;
       /// Check if this is generator stable particle
       bool isGenStable() const;
-      
+
       /// @}
 
       /// @name Polarization properties (optional)

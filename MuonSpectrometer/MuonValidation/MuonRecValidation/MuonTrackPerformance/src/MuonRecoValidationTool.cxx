@@ -162,7 +162,7 @@ namespace Muon {
       }
 
       // pick the most frequent
-      int barcode = -1;
+      int barcode = HepMC::INVALID_PARTICLE_ID;
       int max = -1;
       for (std::map<int, int>::iterator it = counters.begin(); it != counters.end(); ++it) {
         if (it->second > max) {
@@ -201,10 +201,10 @@ namespace Muon {
                                     stauHit.error, stauHit.propagationTime, stauHit.e, tof, 0., stauHit.shift, 1000 * m_candidateCounter);
 
             // barcode + pdg
-            int barcode = -1, pdg = 0;
+            int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
             if (m_isMC) {
-                barcode = m_truthSummaryTool->getBarcode(id);
-                pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+              barcode = m_truthSummaryTool->getBarcode(id); // FIXME barcode-based
+              pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
             }
             m_ntuple.timeBlock.truth.fill(pdg, barcode);
         }
@@ -224,10 +224,10 @@ namespace Muon {
         m_ntuple.timeBlock.fill(2, m_idHelperSvc->gasGapId(id).get_identifier32().get_compact(), gpos.perp(), gpos.z(), time, errorTime);
 
         // barcode + pdg
-        int barcode = -1, pdg = 0;
+        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
             barcode = m_truthSummaryTool->getBarcode(id);
-            pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
         }
         m_ntuple.timeBlock.truth.fill(pdg, barcode);
 
@@ -255,7 +255,7 @@ namespace Muon {
             extract(*seg, ids, clusters);
             int barcode = getBarcode(ids);
             int pdg = 0;
-            if (m_isMC) pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            if (m_isMC) pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
             m_ntuple.timeBlock.truth.fill(pdg, barcode);
 
             return true;
@@ -272,7 +272,7 @@ namespace Muon {
             int barcode = -1, pdg = 0;
             if (m_isMC) {
                 barcode = m_truthSummaryTool->getBarcode(id);
-                pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+                pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
             }
             m_ntuple.timeBlock.truth.fill(pdg, barcode);
 
@@ -353,7 +353,7 @@ namespace Muon {
         // barcode + pdg
         int barcode = getBarcode(ids);
         int pdg = 0;
-        if (m_isMC) pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+        if (m_isMC) pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
         m_ntuple.segmentBlock.truth.fill(pdg, barcode);
 
         m_ntuple.segmentBlock.track.fill(getIndex(intersection));
@@ -427,10 +427,10 @@ namespace Muon {
                 ids.insert((*hit)->prd->identify());
             }
         }
-        int barcode = -1, pdg = 0;
+        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
             barcode = getBarcode(ids);
-            pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
         }
         m_ntuple.houghBlock.truth.fill(pdg, barcode);
 
@@ -445,10 +445,10 @@ namespace Muon {
         m_ntuple.hitBlock.id.fill(m_idHelperSvc->sector(id), m_idHelperSvc->chamberIndex(id));
         m_ntuple.hitBlock.track.fill(getIndex(intersection));
 
-        int barcode = -1, pdg = 0;
+        int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
         if (m_isMC) {
             barcode = m_truthSummaryTool->getBarcode(id);
-            pdg = barcode != -1 ? m_truthSummaryTool->getPdgId(barcode) : 0;
+            pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
         }
         m_ntuple.hitBlock.truth.fill(pdg, barcode);
 

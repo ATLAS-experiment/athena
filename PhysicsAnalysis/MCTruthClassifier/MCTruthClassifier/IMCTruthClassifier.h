@@ -64,7 +64,7 @@ namespace MCTruthPartClassifier {
       mother = from;
       if (!from) return;
     }
-    inline void resetMotherProperties() { mother = nullptr;  } // FIXME barcode-based
+    inline void resetMotherProperties() { mother = nullptr;  }
 
     const xAOD::TruthParticle* PhotonMother() const { return photonMother;}
     const xAOD::TruthParticle* photonMother = nullptr;

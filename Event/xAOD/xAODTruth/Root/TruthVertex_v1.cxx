@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TruthVertex_v1.cxx 624338 2014-10-27 15:08:55Z krasznaa $
 
 // System include(s):
 #include <cmath>
@@ -47,7 +45,7 @@ namespace xAOD {
       incomingParticleLinksAcc( "incomingParticleLinks" );
 
    size_t TruthVertex_v1::nIncomingParticles() const {
-   
+
       // Check if the variable is available:
       if( ! incomingParticleLinksAcc.isAvailable( *this ) ) {
          // If not, just tell the user that there aren't any incoming particles:
@@ -60,12 +58,12 @@ namespace xAOD {
 
    std::vector<const TruthParticle*> TruthVertex_v1::particles_in() const {
      std::vector<const TruthParticle*> res;
-     for (size_t i=0; i<nIncomingParticles();i++) res.push_back(incomingParticle(i)); 
+     for (size_t i=0; i<nIncomingParticles();i++) res.push_back(incomingParticle(i));
      return res;
    }
    std::vector<const TruthParticle*> TruthVertex_v1::particles_out() const {
      std::vector<const TruthParticle*> res;
-     for (size_t i=0; i<nOutgoingParticles();i++) res.push_back(outgoingParticle(i)); 
+     for (size_t i=0; i<nOutgoingParticles();i++) res.push_back(outgoingParticle(i));
      return res;
    }
    const TruthParticle* TruthVertex_v1::incomingParticle( size_t index ) const {
@@ -131,7 +129,7 @@ namespace xAOD {
       if( ! opl.isValid() ) {
          return nullptr;
       }
-      
+
       // Finally, de-reference the link:
       return *opl;
    }

@@ -29,15 +29,6 @@ StatusCode xAODtoHepMCTool ::finalize()
   ATH_MSG_INFO("==============================================================");
   ATH_MSG_INFO("==========    xAOD -> HepMC Tool :: Run Summary     ==========");
   ATH_MSG_INFO("==============================================================");
-  if (m_badSuggest)
-  {
-    ATH_MSG_INFO("Number of suggest_barcode failures = " << m_badSuggest);
-    ATH_MSG_INFO(" ... check input particle/vertex barcodes.");
-  }
-  else
-  {
-    ATH_MSG_INFO("No suggest_barcode failures");
-  }
   if (m_noProdVtx)
   {
     ATH_MSG_INFO("Number of events that have a missing production vertex = " << m_noProdVtx);
@@ -162,7 +153,6 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
   std::map<const xAOD::TruthVertex *, HepMC::GenVertexPtr> vertexMap;
 
   // Loop over all of the particles in the event, call particle builder
-  // Call suggest_barcode only after insertion!
   for (auto tlink : xEvt->truthParticleLinks()) {
     if (!tlink.isValid()) { continue; }
     const xAOD::TruthParticle *xPart = *tlink;
@@ -291,7 +281,6 @@ HepMC::GenVertexPtr xAODtoHepMCTool::vertexHelper(const xAOD::TruthVertex *xaodV
 }
 
 // Create the HepMC GenParticle
-// Call suggest_barcode after insertion!
 HepMC::GenParticlePtr xAODtoHepMCTool::createHepMCParticle(const xAOD::TruthParticle *particle) const
 {
   ATH_MSG_VERBOSE("Creating GenParticle for uniqueID " << HepMC::uniqueID(particle));
@@ -302,7 +291,6 @@ HepMC::GenParticlePtr xAODtoHepMCTool::createHepMCParticle(const xAOD::TruthPart
 }
 
 // Create the HepMC GenVertex
-// Call suggest_barcode after insertion!
 HepMC::GenVertexPtr xAODtoHepMCTool::createHepMCVertex(const xAOD::TruthVertex *vertex) const
 {
   ATH_MSG_VERBOSE("Creating GenVertex for uniqueID " << HepMC::uniqueID(vertex));

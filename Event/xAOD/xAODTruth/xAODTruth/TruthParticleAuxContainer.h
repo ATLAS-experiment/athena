@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TruthParticleAuxContainer.h 622193 2014-10-16 16:08:34Z krasznaa $
 #ifndef XAODTRUTH_TRUTHPARTICLEAUXCONTAINER_H
 #define XAODTRUTH_TRUTHPARTICLEAUXCONTAINER_H
 
