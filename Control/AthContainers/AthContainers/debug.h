@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/debug.h
  * @author scott snyder <snyder@bnl.gov>
@@ -108,6 +105,16 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p);
 
 /**
  * @brief Dump aux variables from a store for a single element.
+ * @param os The stream to which to write.
+ * @param store The store from which to dump.
+ * @param i The index of the element to dump.
+ */
+void dump_aux_vars (std::ostream& os,
+                    const SG::IConstAuxStore& store, size_t i);
+
+
+/**
+ * @brief Dump aux variables from a store for a single element (to cout).
  * @param store The store from which to dump.
  * @param i The index of the element to dump.
  */

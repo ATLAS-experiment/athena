@@ -16,9 +16,18 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/Accessor.h"
 #include "AthContainers/JaggedVec.h"
+#include "AthContainers/PackedLink.h"
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <cassert>
+
+
+#ifndef XAOD_STANDALONE
+#include "SGTools/TestStore.h"
+#include "AthenaKernel/CLASS_DEF.h"
+CLASS_DEF( std::vector<int>, 12345, 0 )
+#endif
 
 
 struct A
@@ -44,6 +53,24 @@ struct A
     static const Accessor<SG::JaggedVecElt<int> > acc("jvec");
     return acc(*this);
   }
+
+#ifndef XAOD_STANDALONE
+  using Cont_t = std::vector<int>;
+  using Link_t = ElementLink<Cont_t>;
+  using PLink_t = SG::PackedLink<Cont_t>;
+
+  auto plink()
+  {
+    static const Accessor<PLink_t> acc("plink");
+    return acc(*this);
+  }
+
+  auto pvlink()
+  {
+    static const Accessor<std::vector<PLink_t> > acc("pvlink");
+    return acc(*this);
+  }
+#endif
 };
 
 
@@ -221,6 +248,7 @@ void test4()
   SGdebug::dump_aux_vars (dv[0]);
 }
 
+
 // Test dumping JaggedVecElt variables.
 void test5()
 {
@@ -239,6 +267,41 @@ void test5()
 }
 
 
+// Test dumping PackedLink/DataLink variables.
+void test6()
+{
+  std::cout << "test6\n";
+
+#ifndef XAOD_STANDALONE
+  std::unique_ptr<SGTest::TestStore> testStore = SGTest::getTestStore();
+  SG::CurrentEventStore::setStore (testStore.get());
+  {
+    auto vi = std::make_unique<std::vector<int> >();
+    vi->assign ({ 1, 2, 3, 4, 5});
+    testStore->record (std::move (vi), "vi");
+  }
+  DataVector<A> dv;
+  SG::AuxStoreInternal store;
+  dv.setStore (&store);
+
+  dv.push_back (new A);
+
+  dv.back()->plink() = A::Link_t ("vi", 3);
+  dv.back()->pvlink().push_back (A::Link_t ("vi", 2));
+  dv.back()->pvlink().push_back (A::Link_t ());
+  dv.back()->pvlink().push_back (A::Link_t ("vi", 1));
+
+  std::ostringstream ss;
+  SGdebug::dump_aux_vars (ss, store, 0);
+  assert (ss.str() == "::plink PackedLink[1/3]\n"
+          "  linked: ::plink_linked [DataLink[0/], DataLink[12345/vi]]\n"
+          "::pvlink [PackedLink[1/2], PackedLink[0/0], PackedLink[1/1]]\n"
+          "  linked: ::pvlink_linked [DataLink[0/], DataLink[12345/vi]]\n");
+
+#endif
+}
+
+
 int main()
 {
   test1();
@@ -246,5 +309,6 @@ int main()
   test3();
   test4();
   test5();
+  test6();
   return 0;
 }
