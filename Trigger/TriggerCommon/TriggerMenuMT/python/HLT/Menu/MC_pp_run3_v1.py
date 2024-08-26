@@ -1231,6 +1231,13 @@ def getMCSignatures():
         ChainProp(name='HLT_g40_loose_mu40_msonly_L1MU14FCH', l1SeedThresholds=['EM20VH','MU14FCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
         ChainProp(name='HLT_g40_loose_mu40_msonly_L1MU18VFCH', l1SeedThresholds=['EM20VH','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup),
 
+        #---------- support 2m + 1g + ZRad triggers
+        ChainProp(name='HLT_2mu14_g20_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_2mu14_g22_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_2mu14_g25_medium_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_2mu14_g35_medium_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
+        ChainProp(name='HLT_2mu14_g50_loose_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
+
         # ATR-24698-28783: muon + bjet chains for calibrations Legacy moved
         ChainProp(name='HLT_mu4_j45_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['bJetMon:shifter','muonMon:online','bJetMon:online'], stream=[PhysicsStream,'express']),
         ChainProp(name='HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_J40', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['bJetMon:t0','muonMon:online','bJetMon:online'], stream=[PhysicsStream,'express']),
