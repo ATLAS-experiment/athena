@@ -67,7 +67,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doRotCorrection', True)
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
-    actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection, 2=new hole/outlier cuts
+    actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection (chi2<25,25), 2=Athena chi2 cut (chi2<9,25)
     actscf.addFlag('Acts.trackFindingMaxHoles', []) # add eta-dependent cut for branch stopper
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
 
@@ -80,6 +80,6 @@ def createActsConfigFlags():
 
     actscf.addFlag("Acts.useActsGsfInEgamma", False)
 
-    actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False)
+    actscf.addFlag('Acts.useDefaultActsMeasurementSelector', False) # if True, uses no outlier chi2 cut as before (chi2<25,inf)
 
     return actscf
