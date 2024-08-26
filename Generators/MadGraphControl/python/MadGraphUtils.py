@@ -2492,6 +2492,54 @@ def run_card_consistency_check(isNLO=False,process_dir='.'):
             mglog.warning('No python seed set in run_card -- adding one with same value as iseed')
             modify_run_card(process_dir=process_dir,settings={'python_seed':mydict['iseed']},skipBaseFragment=True)
 
+    # consistency check of 4/5 flavour shceme settings
+    FS_updates={}
+    with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
+        content = file.readlines()
+        for line in content:
+            if line.startswith("define p") or line.startswith("define j"):
+                if "b" in line and "b~" in line:
+                    FS_updates['asrwgtflavor'] = 5
+                else:
+                    FS_updates['asrwgtflavor'] = 4
+    if len(FS_updates)==0:
+        mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
+
+    if 'asrwgtflavor' in mydict or 'maxjetflavor' in mydict or 'pdgs_for_merging_cut' in mydict:
+        if FS_updates['asrwgtflavor'] == 5:
+            # Process card says we are in the five-flavor scheme
+            if ('asrwgtflavor' in mydict and int(mydict['asrwgtflavor']) != 5) or ('maxjetflavor' in mydict and int(mydict['maxjetflavor']) != 5) or ('pdgs_for_merging_cut' in mydict and '5' not in mydict['pdgs_for_merging_cut']):
+                # Inconsistent setting detected; warn the users and correct the settings
+                mglog.warning('b and b~ included in p and j for 5-flavor scheme but run card settings are inconsistent; adjusting run card')
+                run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
+                modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
+                modify_param_card(process_dir=process_dir, params={'MASS': {'5': '0.000000e+00'}})
+            else:
+                mglog.debug('Consistent 5-flavor scheme setup detected.')
+        if FS_updates['asrwgtflavor'] == 4:
+            # Process card says we are in the four-flavor scheme
+            if ('asrwgtflavor' in mydict and int(mydict['asrwgtflavor']) != 4) or ('maxjetflavor' in mydict and int(mydict['maxjetflavor']) != 4) or ('pdgs_for_merging_cut' in mydict and '5' in mydict['pdgs_for_merging_cut']):
+                # Inconsistent setting detected; warn the users and correct the settings
+                mglog.warning('b and b~ not included in p and j (4-flavor scheme) but run card settings are inconsistent; adjusting run card')
+                run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
+                modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
+                modify_param_card(process_dir=process_dir, params={'MASS': {'5': '4.700000e+00'}})
+            else:
+                mglog.debug('Consistent 4-flavor scheme setup detected.')
+    else:
+        # Flavor scheme setup is missing, adding by hand
+        if FS_updates['asrwgtflavor'] == 4:
+            # Warn the users and add the settings according to process card
+            mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ not included in p and j, 4-flavor scheme setup will be used; adjusting run card.')
+            run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
+            modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
+            modify_param_card(process_dir=process_dir, params={'MASS': {'5': '4.700000e+00'}})
+        elif FS_updates['asrwgtflavor'] == 5:
+            mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ included in p and j, 5-flavor scheme setup will be used; adjusting run card.')
+            run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
+            modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)        
+            modify_param_card(process_dir=process_dir, params={'MASS': {'5': '0.000000e+00'}})
+
     mglog.info('Finished checking run card - All OK!')
 
 def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LOCATION):
