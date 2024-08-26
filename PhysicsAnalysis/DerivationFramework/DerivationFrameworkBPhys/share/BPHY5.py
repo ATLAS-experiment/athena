@@ -254,7 +254,7 @@ BPHY5BplKplSelectAndWrite = DerivationFramework__Reco_dimuTrk(name				     	= "B
 															  Jpsi1PlusTrackName	    =  BPHY5BplJpsiKpl,
 															  OutputVtxContainerName 	= "BPHY5BpmJpsiKpmCandidates",
                                                               PVContainerName           = "PrimaryVertices",
-                                                              RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
+                                                              RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",
                                                               RefitPV                   = True,
                                                               MaxPVrefit                = 10000 )
 ToolSvc += BPHY5BplKplSelectAndWrite
@@ -366,6 +366,71 @@ BPHY5_Select_B2JpsipipiX = DerivationFramework__Select_onia2mumu(
 ToolSvc += BPHY5_Select_B2JpsipipiX
 print      BPHY5_Select_B2JpsipipiX
 
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__ReVertex
+BPHY5_Revertex_Bs_NoMassConst  = DerivationFramework__ReVertex(
+    name                       = "BPHY5_Revertex_Bs_NoMassConst",
+    InputVtxContainerName      = "BPHY5BsJpsiKKCandidates",
+    TrackIndices               = [ 0, 1, 2, 3 ],
+    RefitPV                    = False,
+    UseMassConstraint          = False,
+    TrkVertexFitterTool        = BsKKVertexFit,
+    OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint")
+
+ToolSvc += BPHY5_Revertex_Bs_NoMassConst
+print      BPHY5_Revertex_Bs_NoMassConst
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__ReVertex
+BPHY5_Revertex_Bd_NoMassConst  = DerivationFramework__ReVertex(
+    name                       = "BPHY5_Revertex_Bd_NoMassConst",
+    InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
+    TrackIndices               = [ 0, 1, 2, 3 ],
+    RefitPV                    = False,
+    UseMassConstraint          = False,
+    TrkVertexFitterTool        = BsKKVertexFit,
+    OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint")
+
+ToolSvc += BPHY5_Revertex_Bd_NoMassConst
+print      BPHY5_Revertex_Bd_NoMassConst
+
+BPHY5_Select_Bs2JpsiKKNoConstraint = DerivationFramework__Select_onia2mumu(
+  name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
+  HypothesisName             = "Bs",
+  InputVtxContainerName      = "BPHY5BsJpsiKKCandidatesNoConstraint",
+  TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
+  VtxMassHypo                = 5366.3,
+  MassMin                    = 5000.0,
+  MassMax                    = 5800.0, Do3d = False,
+  Chi2Max                    = 200)
+
+ToolSvc += BPHY5_Select_Bs2JpsiKKNoConstraint
+print      BPHY5_Select_Bs2JpsiKKNoConstraint
+
+BPHY5_Select_BdBar2JpsiKpiNoConstraint = DerivationFramework__Select_onia2mumu(
+  name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
+  HypothesisName             = "BdBar",
+  InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+  TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
+  VtxMassHypo                = 5279.6,
+  MassMin                    = 100.0,      #no mass cuts here
+  MassMax                    = 100000.0,   #no mass cuts here
+  Chi2Max                    = 200)
+
+ToolSvc += BPHY5_Select_BdBar2JpsiKpiNoConstraint
+print      BPHY5_Select_BdBar2JpsiKpiNoConstraint
+
+BPHY5_Select_Bd2JpsiKpiNoConstraint = DerivationFramework__Select_onia2mumu(
+  name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
+  HypothesisName             = "Bd",
+  InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+  TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
+  VtxMassHypo                = 5279.6,
+  MassMin                    = 100.0,      #no mass cuts here
+  MassMax                    = 100000.0,   #no mass cuts here
+  Chi2Max                    = 200)
+
+ToolSvc += BPHY5_Select_Bd2JpsiKpiNoConstraint
+print      BPHY5_Select_Bd2JpsiKpiNoConstraint
+
 #expression = "count(BPHY5BpmJpsiKpmCandidates.passed_Bplus) > 0"
 #from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
 #BPHY5_SelectEvent = DerivationFramework__xAODStringSkimmingTool(name = "BPHY5_SelectEvent",
@@ -471,16 +536,17 @@ DerivationFrameworkJob += bphy5Seq
 # The name of the kernel (BPHY5Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 bphy5Seq += CfgMgr.DerivationFramework__DerivationKernel("BPHY5Kernel",
-                                                                       AugmentationTools = [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu,
-                                                                                            BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK,
-                                                                                            BPHY5BplKplSelectAndWrite, BPHY5BpipiXSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi, BPHY5_Select_B2JpsipipiX,
-                                                                                            BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar,
-                                                                                            BPHY5_AugOriginalCounts],
-                                                                       #Only skim if not MC
-                                                                       SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
-                                                                       ThinningTools     = thiningCollection
-                                                                       
-                                                                       )
+                     AugmentationTools = [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu,
+                                          BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK,
+                                          BPHY5BplKplSelectAndWrite, BPHY5BpipiXSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi, BPHY5_Select_B2JpsipipiX,
+                                          BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar,
+                                          BPHY5_Revertex_Bs_NoMassConst, BPHY5_Revertex_Bd_NoMassConst, BPHY5_Select_Bs2JpsiKKNoConstraint,
+                                          BPHY5_Select_BdBar2JpsiKpiNoConstraint, BPHY5_Select_Bd2JpsiKpiNoConstraint,
+                                          BPHY5_AugOriginalCounts],
+                     #Only skim if not MC
+                     SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
+                     ThinningTools     = thiningCollection
+                                                          )
 
 #====================================================================
 # SET UP STREAM   
@@ -553,6 +619,12 @@ StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5Bpipi
 
 StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
 StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
+
+StaticContent += ["xAOD::VertexContainer#%sNoConstraint"        %                 BPHY5BsKKSelectAndWrite.OutputVtxContainerName]
+StaticContent += ["xAOD::VertexAuxContainer#%sNoConstraintAux.-vxTrackAtVertex" % BPHY5BsKKSelectAndWrite.OutputVtxContainerName]
+
+StaticContent += ["xAOD::VertexContainer#%sNoConstraint"        %                 BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
+StaticContent += ["xAOD::VertexAuxContainer#%sNoConstraintAux.-vxTrackAtVertex" % BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
 
 # Tagging information (in addition to that already requested by usual algorithms)
 #AllVariables += ["Electrons"] 
