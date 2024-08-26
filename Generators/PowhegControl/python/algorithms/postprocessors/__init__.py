@@ -11,6 +11,7 @@ from .mu2tau import mu2tau
 from .mu2e import mu2e
 from .e2mu import e2mu
 from .e2tau import e2tau
+from .gg4l_emu2all import gg4l_emu2all
 from .nnlo_reweighter import NNLO_reweighter
 from .output_file_renamer import output_file_renamer
 from .output_tarball_preparer import output_tarball_preparer

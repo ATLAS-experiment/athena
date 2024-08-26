@@ -36,6 +36,7 @@ class Scheduler(object):
         "mu2e",
         "e2tau",
         "e2mu",
+        "gg4l_emu2all",
         "MadSpin",
         "integration grid tester",
         "cross section calculator",
@@ -77,6 +78,7 @@ class Scheduler(object):
         "mu2e": partial(postprocessors.mu2e, powheg_LHE_output=powheg_LHE_output),
         "e2tau": partial(postprocessors.e2tau, powheg_LHE_output=powheg_LHE_output),
         "e2mu": partial(postprocessors.e2mu, powheg_LHE_output=powheg_LHE_output),
+        "gg4l_emu2all": partial(postprocessors.gg4l_emu2all, powheg_LHE_output=powheg_LHE_output),
         "LHE file cleaner": partial(postprocessors.lhe_cleaner, powheg_LHE_output=powheg_LHE_output),
         "LHE file nominal weight updater": partial(postprocessors.lhe_nominal_weight_updater, powheg_LHE_output=powheg_LHE_output),
     }
