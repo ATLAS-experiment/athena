@@ -236,7 +236,11 @@ class FTagConfig (ConfigBlock):
             check_CDI_campaign(config.campaign(), bTagCalibFile)
 
         # Set up the ftag selection algorithm(s):
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
+        if 'Continuous' in self.btagWP:
+            alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
+        else:
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + postfix )
+
         config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
         alg.selectionTool.TaggerName = self.btagger
         alg.selectionTool.OperatingPoint = self.btagWP
@@ -244,23 +248,15 @@ class FTagConfig (ConfigBlock):
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
         alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
         alg.preselection = config.getPreselection (self.containerName, selectionName)
-        alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
-        alg.particles = config.readName (self.containerName)
-        if self.btagWP != 'Continuous':
-            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
 
-        if self.btagWP == 'Continuous':
-            alg = config.createAlgorithm( 'CP::BTaggingInformationDecoratorAlg', 'FTagInfoAlg' + postfix )
-            config.addPrivateTool( 'selectionTool', 'BTaggingSelectionTool' )
-            alg.selectionTool.TaggerName = self.btagger
-            alg.selectionTool.OperatingPoint = self.btagWP
-            alg.selectionTool.JetAuthor = jetCollection
-            alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
-            alg.selectionTool.MinPt = 0.  # user in charge of imposing kinematic cuts for jets
-            alg.preselection = config.getPreselection (self.containerName, selectionName)
+        if 'Continuous' in self.btagWP:
             alg.quantileDecoration = 'ftag_quantile_' + selectionName
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True)
+        else:
+            alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
+            alg.particles = config.readName (self.containerName)
+            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
 
         if not self.noEffSF and config.dataType() is not DataType.Data:
             # Set up the efficiency calculation algorithm:
@@ -290,7 +286,7 @@ class FTagConfig (ConfigBlock):
                 alg.efficiencyTool.EfficiencyLightCalibrations = DSID
             alg.scaleFactorDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
-            alg.onlyEfficiency = self.btagWP == 'Continuous'
+            alg.onlyEfficiency = 'Continuous' in self.btagWP
             alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
             alg.outOfValidityDeco = 'no_ftag_' + selectionName + ',as_char'
             alg.preselection = config.getPreselection (self.containerName, selectionName)
