@@ -70,6 +70,29 @@ def GNNToolCfg(flags, NNFile, **options):
     mkey = 'variableRemapping'
     options[mkey] = remap | options.get(mkey,{})
 
+    # Due to AFT-726 some trigger configurations need custom default
+    # values for the zero track cases. We're keeping this
+    # conservative: zero track tags are considered light jets.
+    #
+    # Trigger GN1
+    if '20220813trig' in NNFile:
+        defout = {
+            'GN120220813_pu': 1.0,
+            'GN120220813_pb': 0.0,
+            'GN120220813_pc': 0.0,
+        }
+    # trigger GN2
+    elif '20240122trig' in NNFile:
+        defout = {
+            'pu': 1.0,
+            'pb': 0.0,
+            'pc': 0.0,
+        }
+    else:
+        defout = {}
+    defkey = 'defaultOutputValues'
+    options[defkey] = defout | options.get(defkey, {})
+
     gnntool = CompFactory.FlavorTagDiscriminants.GNNTool(
         name='decorator',
         nnFile=NNFile,

@@ -155,6 +155,6 @@ def createBTaggingConfigFlags():
     # they have at least this many tracks. See AFT-726 for more details.
     #
     # Todo: remove this once we're sure it's working
-    btagcf.addFlag("BTagging.vetoZeroTrackForAFT276", vetoZeroTracks)
+    btagcf.addFlag("BTagging.vetoZeroTrackForAFT276", True)
 
     return btagcf
