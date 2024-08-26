@@ -35,9 +35,6 @@ class gg4l(PowhegRES):
         self.link_external_powheg_libraries("/External/cln*/cln_lib/lib")
         self.link_external_powheg_libraries("/External/ginac*/ginac_lib/lib/")
         self.link_external_powheg_libraries("/External/chaplin*/lib")
-        self.link_external_powheg_libraries("/External/INSTALL/cln*/cln_lib/lib")
-        self.link_external_powheg_libraries("/External/INSTALL/ginac*/ginac_lib/lib/")
-        self.link_external_powheg_libraries("/External/INSTALL/chaplin*/lib")
         self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/amplitudes/obj-gnu/")
         self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/ggvvamp*/obj-gnu")
         self.link_external_powheg_libraries("/POWHEG-BOX-RES/gg4l/QCDLoop*/ff/obj-gnu/")
@@ -244,6 +241,9 @@ class gg4l(PowhegRES):
             elif(self.vdecaymodeV1 == 13 and self.vdecaymodeV2 == 15) or (self.vdecaymodeV1 == 15 and self.vdecaymodeV2 == 13):
                 logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have 2mu2tau final states - make sure to validate!")
                 self.add_algorithm("e2tau")
+            elif(self.vdecaymodeV1 == 'll' and self.vdecaymodeV2 == 'll'):
+                logger.warning("Ask to generate 2e2mu decays and hack the LHE files to have inclusive 4l decays - make sure to validate!")
+                self.add_algorithm("gg4l_emu2all")
             
             self.vdecaymodeV1 = 11
             self.vdecaymodeV2 = 13

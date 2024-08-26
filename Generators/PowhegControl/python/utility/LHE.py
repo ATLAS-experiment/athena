@@ -11,6 +11,7 @@ from AthenaCommon import Logging
 from xml.etree import ElementTree
 import gzip
 import io
+import numpy as np
 
 
 def _open_file(filename):
@@ -308,6 +309,59 @@ def e2mu(input_event):
         event_lines += output_line if output_line is not None else input_line
     return (is_event_changed, event_lines)
 
+
+def gg4l_emu2all(input_event):
+    """!
+    Algorithm specific to gg4l Powheg process, to obtain an inclusive
+    sample starting from the only supported decay mode for ZZ production, 2e2mu.
+    """
+    is_event_changed = False
+    event_lines = ""
+
+    channels_pdgIds = {}
+    channels_pdgIds["2e2mu"]   = [11,13]
+    channels_pdgIds["2e2tau"]  = [11,15]
+    channels_pdgIds["2mu2tau"] = [13,15]
+    channels_pdgIds["4e"]      = [11,11]
+    channels_pdgIds["4mu"]     = [13,13]
+    channels_pdgIds["4tau"]    = [15,15]
+    
+    channels = ["2e2mu", "2e2tau", "2mu2tau", "4e", "4mu", "4tau"]    
+    #probs = [xsec 2l2l', .., .., xsec 4l, .., ..]
+    probs = np.array([2/9, 2/9, 2/9, 1/9, 1/9, 1/9])
+    cumulative=np.cumsum(probs)
+        
+    for input_line in input_event.splitlines(True):
+        output_line = None
+        try:  # interpret line as a particle
+            tokens = re.split(r"(\s+)", input_line)
+            if len(tokens) < 25: raise ValueError
+            IDUP = int(tokens[2])
+
+            if abs(IDUP) == 11: #this is the electron part
+                if not is_event_changed:
+                    idx = np.searchsorted(cumulative, np.random.uniform())
+                    is_event_changed = True
+                if IDUP > 0:
+                    IDUP = channels_pdgIds[channels[idx]][0]
+                else:
+                    IDUP = -channels_pdgIds[channels[idx]][0]
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))            
+                
+            if abs(IDUP) == 13: #this is the muon part
+                if not is_event_changed:
+                    idx = np.searchsorted(cumulative, np.random.uniform())
+                    is_event_changed = True
+                if IDUP > 0:
+                    IDUP = channels_pdgIds[channels[idx]][1]
+                else:
+                    IDUP = -channels_pdgIds[channels[idx]][1]
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))
+        except ValueError:  # this is not a particle line
+            pass
+        event_lines += output_line if output_line is not None else input_line
+    return (is_event_changed, event_lines)
+    
 
 def update_XWGTUP_with_reweighted_nominal(input_event, wgtid_for_old_XWGTUP_value = None):
     """! Ensure that XWGTUP is equal to the reweighted nominal."""
