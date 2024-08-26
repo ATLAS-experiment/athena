@@ -72,15 +72,18 @@ def ActsMainTrackFindingAlgCfg(flags,
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    if flags.Acts.useDefaultActsMeasurementSelector or flags.Acts.doTrackFindingTrackSelector != 2:
+    if flags.Acts.useDefaultActsMeasurementSelector or flags.Acts.doTrackFindingTrackSelector == 0:
         # Only a single chi2 cut-off exists for the default Acts measurement selector.
-        # We keep this setting by default, even with the new MeasurementSelector, until the new hole/outlier cuts can be optimised.
         kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
-    else :
+    elif flags.Acts.doTrackFindingTrackSelector == 2:
         # clusters with chi2 above this value will be treated as outliers
         kwargs.setdefault("chi2CutOff", tolist(flags.Tracking.ActiveConfig.Xi2max))
         # clusters with chi2 above this value will be discarded.
         kwargs.setdefault("chi2OutlierCutOff", tolist(flags.Tracking.ActiveConfig.Xi2maxNoAdd))
+    else:
+        # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
+        kwargs.setdefault("chi2CutOff", [25])
+        kwargs.setdefault("chi2OutlierCutOff", [25])
     kwargs.setdefault("numMeasurementsCutOff", [1])
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
@@ -92,7 +95,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMin", [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
         kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
         kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
-        if flags.Acts.doTrackFindingTrackSelector != 2:
+        if flags.Acts.useDefaultActsMeasurementSelector:
             # Acts default measurement selector counts most holes as outliers, so use the same cut for maxOutliers
             kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxHoles))
         else:
