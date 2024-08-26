@@ -238,8 +238,13 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
             "onnx": CompFactory.FlavorTagDiscriminants.GNNTool
         }
         tag_flags = {pass_flag}
+
         if nnAlgoext == 'onnx':
             tag_flags.add(nonzero_tracks)
+            extra = dict(defaultOutputValues=_triggerDefaultsFromPath(nnFile))
+        else:
+            extra = {}
+
         ca.addEventAlgo(
             CompFactory.FlavorTagDiscriminants.JetTagConditionalDecoratorAlg(
                 name='_'.join([
@@ -262,7 +267,8 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     # note that the tracks are associated to the jet as
                     # and IParticle container.
                     trackLinkType='IPARTICLE',
-                    defaultOutputValue=0
+                    defaultOutputValue=0,
+                    **extra,
                 ),
             )
         )
@@ -323,3 +329,48 @@ def OnlineBeamspotIpAugmenterCfg(cfgFlags, tracks, vertices='',
         )
     )
     return ca
+
+def _triggerDefaultsFromPath(nn_path):
+    """Special overrides for AFT-726
+
+    In more recent ONNX versions we can't run a lot of versions of GN2
+    on zero track jets. The workaround here is to hardcode the values
+    we'd normally get out of the GNN in this case.
+    """
+
+    if '20230331trig' in nn_path:
+        # pflow GN1
+        return {
+            'GN120230331_pu': 1.0,
+        }
+    elif '20240122trig' in nn_path:
+        # pflow and emtopo GN2
+        return {
+            'pb': 0.0973031148314476,
+            'pc': 0.21328286826610565,
+            'pu': 0.6894140243530273,
+        }
+    elif '20230327trig' in nn_path:
+        # emtopo GN1
+        return {
+            'GN120230327_pu': 1.0
+        }
+    elif '20230331trig' in nn_path:
+        # emtopo GN1, with input vertex
+        return {
+            'GN120230331_pu': 1.0
+        }
+    elif '20240216trig' in nn_path:
+        # emtopo GNtau
+        return {
+            'GN2_ptau': 0.18229439854621887,
+            'GN2_pu': 0.8177056312561035,
+        }
+    elif '20230705/gn2xv01' in nn_path:
+        # GN2X
+        return {
+            'GN2Xv01_phbb': 0.524639487266540527, 
+            'GN2Xv01_ptop': 0.24834538996219635, 
+            'GN2Xv01_pqcd': 0.101029679179191589,
+        }
+    return {}
