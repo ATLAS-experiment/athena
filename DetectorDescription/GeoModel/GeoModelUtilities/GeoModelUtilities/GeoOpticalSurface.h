@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GeoOpticalSurface_h
@@ -53,7 +53,7 @@ class GeoOpticalSurface : public RCBase
   ~GeoOpticalSurface() = default;
 
   // accessor methods
-  std::string GetName() const {return m_name;}
+  const std::string& GetName() const {return m_name;}
   GeoSurfaceType GetType() const {return m_type;};
   GeoOpticalSurfaceFinish GetFinish() const {return m_finish;};
   GeoOpticalSurfaceModel GetModel() const {return m_model;};

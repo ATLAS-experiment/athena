@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2019-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -1862,7 +1862,7 @@ void getProxyPath();
 /**
  * This method returns the full CrestApi version.
  */
-    std::string getClientVersion();
+    const std::string& getClientVersion();
 
 /**
  * This is an auxillary method to extract a major version number from 
