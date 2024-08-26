@@ -8,7 +8,6 @@
 #define CALORECGPU_CALOGPUTIMED_H
 
 #include <vector>
-#include <mutex>
 #include <shared_mutex>
 #include <string>
 #include <fstream>
@@ -62,25 +61,24 @@ class CaloGPUTimed
 
  private:
 
-  inline void record_times_helper(size_t) const
+  inline void record_times_helper(const size_t) const
   {
     //Do nothing
   }
 
-
-  inline void record_times_helper(size_t index, size_t t) const
+  template <class Arg>
+  inline void record_times_helper(const size_t index, Arg && arg) const
   {
     // coverity[missing_lock]
-    m_times[index] = t;
+    m_times[index] = std::forward<Arg>(arg);
     
     //This is called within a function that holds the lock itself.
   }
 
   template <class ... Args>
-  inline void record_times_helper(size_t index, size_t t, Args && ... args) const
+  inline void record_times_helper(size_t index, Args && ... args) const
   {
-    record_times_helper(index, t);
-    record_times_helper(index + 1, std::forward<Args>(args)...);
+    (record_times_helper(index++, std::forward<Args>(args)), ...);
   }
 
  protected:
@@ -88,14 +86,12 @@ class CaloGPUTimed
   inline void record_times(const size_t event_num, const std::vector<size_t> & times) const
   {
     size_t old_size;
-    
     {
       std::unique_lock<std::shared_mutex> lock(m_timeMutex);
       old_size = m_times.size();
       m_times.resize(old_size + times.size());
       m_eventNumbers.push_back(event_num);
     }
-    
     {
       std::shared_lock<std::shared_mutex> lock(m_timeMutex);
       for (size_t i = 0; i < times.size(); ++i)
@@ -118,7 +114,6 @@ class CaloGPUTimed
       m_times.resize(old_size + time_size);
       m_eventNumbers.push_back(event_num);
     }
-
     {
       std::shared_lock<std::shared_mutex> lock(m_timeMutex);
       record_times_helper(old_size, value);
@@ -133,12 +128,11 @@ class CaloGPUTimed
     size_t old_size;
 
     {
-      std::lock_guard<std::shared_mutex> lock_guard(m_timeMutex);
+      std::unique_lock<std::shared_mutex> lock(m_timeMutex);
       old_size = m_times.size();
       m_times.resize(old_size + time_size);
       m_eventNumbers.push_back(event_num);
     }
-
     {
       std::shared_lock<std::shared_mutex> lock(m_timeMutex);
       record_times_helper(old_size, value, std::forward<Args>(args)...);
@@ -148,19 +142,15 @@ class CaloGPUTimed
 
   inline void print_times(const std::string & header, const size_t time_size) const
   {
-    std::unique_lock<std::shared_mutex> lock(m_timeMutex);
-    //In principle, the lock wouldn't be needed
-    //since this is meant to be called during the finalize.
-    //Since we are not particularly concerned with performance here,
-    //we will lock just to be sure.
+    std::shared_lock<std::shared_mutex> lock(m_timeMutex);
     
-      
     if (m_timeFileName.size() == 0)
       {
         return;
       }
     
-    std::vector<size_t> indices(m_eventNumbers.size());    
+    std::vector<size_t> indices(m_eventNumbers.size());
+    
     std::iota(indices.begin(), indices.end(), 0);
     std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b)
     {

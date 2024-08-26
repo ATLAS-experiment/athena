@@ -852,8 +852,13 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True
     flags.CaloRecGPU.ActiveConfig.MissingCellsToFill = [186986, 187352]
     
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
-    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
+    
+    from AthenaConfiguration.Enums import LHCPeriod
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA if flags.GeoModel.Run is LHCPeriod.Run3 and not flags.Input.isMC else defaultConditionsTags.autoconfigure(flags)
+    #TODO: This is because autoconfigure errors out for run 3 data right now,
+    #      and we want to test with the trigEB files...
+    
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.autoconfigure(flags)
     
     return (flags, testoptions)
