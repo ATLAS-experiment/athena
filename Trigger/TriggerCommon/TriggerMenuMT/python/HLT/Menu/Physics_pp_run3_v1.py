@@ -1864,11 +1864,6 @@ def setupMenu():
         ChainProp(name='HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         
         #---------- support 2m + 1g + ZRad triggers
-        ChainProp(name='HLT_2mu14_g20_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g22_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g25_medium_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g35_medium_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
-        ChainProp(name='HLT_2mu14_g50_loose_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM20VH'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g22_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g25_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g35_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
