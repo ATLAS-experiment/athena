@@ -793,28 +793,6 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p,
   for (int i=0; i<level; i++) std::cout << "    ";
   std::cout << pdgName(p,m_printHepMCHighlighted,barcodeList);
   auto v = p->end_vertex();
-#ifdef HEPMC3
-  if (v) {
-    if (v->particles_in().size() > 1)
-      std::cout << " [interaction: " << v->particles_in().size() << " particles, vertex " << v << "]    -->   ";
-    else
-      std::cout << "   -->   ";
-    if (visited.insert(v).second) {
-      for (auto itp: v->particles_out()) {
-        std::cout << pdgName(itp,m_printHepMCHighlighted,barcodeList) << "   ";
-      }
-      std::cout << std::endl;
-      for (auto itp: v->particles_out()) {
-        if (itp->end_vertex())
-          nParticlesVisited += printTree(itp, visited, level+1, barcodeList);
-        else
-          nParticlesVisited++;
-      }
-    } else
-      std:: cout << "see above" << std::endl;
-  } else
-    std::cout << "   no decay vertex\n" << std::endl;
-#else
   if (v) {
     if (v->particles_in_size() > 1)
       std::cout << " [interaction: " << v->particles_in_size() << " particles, vertex " << v << "]    -->   ";
@@ -839,7 +817,6 @@ unsigned int EvtInclusiveDecay::printTree(HepMC::GenParticlePtr p,
       std:: cout << "see above" << std::endl;
   } else
     std::cout << "   no decay vertex\n" << std::endl;
-#endif
   return nParticlesVisited;
 }
 #endif
