@@ -4,7 +4,6 @@
 
 // ISF_Algs includes
 #include "TruthPreselectionTool.h"
-// McEventCollection
 #include "AtlasHepMC/HeavyIon.h"
 
 ///////////////////////////////////////////////////////////////////
@@ -113,17 +112,11 @@ bool ISF::TruthPreselectionTool::isPostQuasiStableParticleVertex(HepMC::ConstGen
 bool ISF::TruthPreselectionTool::isPostQuasiStableParticleVertex(HepMC::ConstGenVertexPtr vtx) const
 {
   // Recursively loop over ancestral particles looking for a quasi-stable particle
-#ifdef HEPMC3
-  for ( auto ancestor: vtx->particles_in() ) {
-    // Check ancestor particle for Attribute
-    if ( ancestor->attribute<HepMC3::IntAttribute>("ShadowParticleId") ) { return true; }
-#else
   auto  firstParent = vtx->particles_in_const_begin();
   auto lastParent  = vtx->particles_in_const_end();
   for (auto  pitr = firstParent; pitr != lastParent; ++pitr ) {
     HepMC::ConstGenParticlePtr ancestor = *pitr;
     if (identifiedQuasiStableParticleForSim(ancestor)) { return true; }
-#endif
     if (hasQuasiStableAncestorParticle(ancestor)) { return true; }
   }
   return false;
