@@ -181,3 +181,4 @@ test4
 test5
 ::jvec [0,4]
   linked: ::jvec_linked [5, 4, 3, 2, 8, 10]
+test6

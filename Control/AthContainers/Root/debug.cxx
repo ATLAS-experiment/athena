@@ -3,7 +3,7 @@
 */
 
 /**
- * @file AthContainers/src/debug.cxx
+ * @file AthContainers/Root/debug.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Oct, 2015
  * @brief Helper functions intended to be called from the debugger.
@@ -13,8 +13,10 @@
 #include "AthContainers/debug.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/JaggedVecImpl.h"
+#include "AthContainers/PackedLinkImpl.h"
 #include "AthContainers/tools/error.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
+#include "AthLinks/DataLinkBase.h"
 #include "CxxUtils/StrFormat.h"
 #include <format>
 #include <vector>
@@ -172,6 +174,22 @@ void convert (std::ostream& os, const SG::JaggedVecEltBase& x)
 }
 
 
+void convert (std::ostream& os, const DataLinkBase& x)
+{
+#ifdef XAOD_STANDALONE
+  os << std::format ("DataLink[{}]", x.persKey());
+#else
+  os << std::format ("DataLink[{}/{}]", x.proxy() ? x.proxy()->clID() : CLID_NULL, x.dataID());
+#endif
+}
+
+
+void convert (std::ostream& os, const SG::PackedLinkBase& x)
+{
+  os << std::format ("PackedLink[{}/{}]", x.collection(), x.index());
+}
+
+
 template <class T>
 void convert (std::ostream& os, const std::vector<T>& x)
 {
@@ -248,6 +266,15 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
     if (tiname.starts_with ("SG::JaggedVecElt<")) {
       convert (os, *reinterpret_cast<const SG::JaggedVecEltBase*>(p));
     }
+    else if (tiname.starts_with ("DataLink<")) {
+      convert (os, *reinterpret_cast<const DataLinkBase*>(p));
+    }
+    else if (tiname.starts_with ("SG::PackedLink<")) {
+      convert (os, *reinterpret_cast<const SG::PackedLinkBase*>(p));
+    }
+    else if (tiname.starts_with ("std::vector<SG::PackedLink<")) {
+      convert (os, *reinterpret_cast<const std::vector<SG::PackedLinkBase>*>(p));
+    }
     else {
       os << "<??? " << tiname << ">";
     }
@@ -258,10 +285,11 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
 
 /**
  * @brief Dump aux variables from a store for a single element.
+ * @param os The stream to which to write.
  * @param store The store from which to dump.
  * @param i The index of the element to dump.
  */
-void dump_aux_vars (const SG::IConstAuxStore& store, size_t i)
+void dump_aux_vars (std::ostream& os, const SG::IConstAuxStore& store, size_t i)
 {
   if (i >= store.size()) return;
   SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
@@ -273,31 +301,42 @@ void dump_aux_vars (const SG::IConstAuxStore& store, size_t i)
     const void* pbeg = store.getData (v.id);
     size_t eltsz = reg.getEltSize (v.id);
     const char* p = reinterpret_cast<const char*>(pbeg) + eltsz*i;
-    std::cout << v.name << " " << aux_var_as_string (v.id, p) << "\n";
+    os << v.name << " " << aux_var_as_string (v.id, p) << "\n";
     SG::auxid_t linked_id = reg.linkedVariable (v.id);
     if (linked_id != SG::null_auxid) {
-      std::cout << "  linked: " << aux_var_name (linked_id) << " ";
+      os << "  linked: " << aux_var_name (linked_id) << " ";
       const SG::IAuxTypeVector* lv = store.linkedVector (v.id);
       if (!lv) {
-        std::cout << "(missing linkedVector)\n";
+        os << "(missing linkedVector)\n";
         continue;
       }
       size_t sz = lv->size();
       const char* lbeg = reinterpret_cast<const char*>(lv->toPtr());
       size_t leltsz = reg.getEltSize (linked_id);
-      std::cout << "[";
+      os << "[";
       bool first = true;
       for (size_t j = 0; j < sz; j++) {
         if (first)
           first = false;
         else
-          std::cout << ", ";
+          os << ", ";
         const char* p = reinterpret_cast<const char*>(lbeg) + leltsz*j;
-        std::cout << aux_var_as_string (linked_id, p);
+        os << aux_var_as_string (linked_id, p);
       }
-      std::cout << "]\n";
+      os << "]\n";
     }
   }
+}
+
+
+/**
+ * @brief Dump aux variables from a store for a single element (to cout).
+ * @param store The store from which to dump.
+ * @param i The index of the element to dump.
+ */
+void dump_aux_vars (const SG::IConstAuxStore& store, size_t i)
+{
+  dump_aux_vars (std::cout, store, i);
 }
 
 
