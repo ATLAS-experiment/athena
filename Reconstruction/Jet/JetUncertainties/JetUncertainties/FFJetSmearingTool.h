@@ -61,6 +61,7 @@ namespace JetTools{
         Calo,     ///Calorimeter
         TA,       ///Track Assisted
         Comb,     ///Combined
+        UFO,      ///UFO
     };
     inline StatusCode stringToEnum(const TString& name, FFJetAllowedMassDefEnum& result)
     {
@@ -76,6 +77,10 @@ namespace JetTools{
             result = FFJetAllowedMassDefEnum::Comb;
             return StatusCode::SUCCESS;
         }
+        if (name.EqualTo("UFO",TString::kIgnoreCase)){
+            result = FFJetAllowedMassDefEnum::UFO;
+            return StatusCode::SUCCESS;
+        }
         return StatusCode::FAILURE;
     }
     inline TString enumToString(const FFJetAllowedMassDefEnum type)
@@ -85,6 +90,7 @@ namespace JetTools{
             case FFJetAllowedMassDefEnum::Calo:         return "Calo";
             case FFJetAllowedMassDefEnum::TA:           return "TA";
             case FFJetAllowedMassDefEnum::Comb:         return "Comb";
+            case FFJetAllowedMassDefEnum::UFO:          return "UFO";
             default:           return "";
         }
     } 
@@ -145,26 +151,31 @@ namespace CP {
             double Read3DHistogram(const TH3* histo, double x, double y, double z) const;
             double Interpolate2D(const TH2* histo, double x, double y) const;
 
+            void replaceAllOccurrences(std::string& str, const std::string& to_find, const std::string& to_replace);
 
             // Private members
             bool m_isInit{};
             std::string m_release;
             std::string m_truth_jetColl;
             std::string m_truthlabelaccessor;
+            std::string m_supportedmctypes;
             float m_EtaRange{};
             float m_MaxMass{};
             float m_MaxPt{};
             std::string m_calibArea;
             std::string m_histFileName;
             std::string m_MassDef_string;
+            std::string m_MCType_string;
             JetTools::FFJetAllowedMassDefEnum m_MassDef{};
             std::string m_configFile;
             std::string m_path;
             std::string m_HistogramsFilePath;
 
             //Response matrix
+            bool m_doGaussianSmearing;
             std::unique_ptr<TH2> m_CALO_ResponseMap;
             std::unique_ptr<TH2> m_TA_ResponseMap;
+            std::unique_ptr<TH2> m_UFO_ResponseMap;
 
             //Two histograms to extract the Calo and TA weights in the Combined mass of the jet
             std::unique_ptr<TH3F> m_caloMassWeight;
@@ -179,9 +190,12 @@ namespace CP {
             std::map<std::string,std::string> m_Syst_TopologyAffected_map;
             std::map<std::string,std::string> m_Syst_HistPath_map;
             std::map<std::string,std::unique_ptr<TH2>> m_Syst_Hist_map;
+            std::map<std::string,std::unique_ptr<TH3F>> m_Syst_Hist_map3d;
             std::map<std::string,std::string> m_Syst_HistTAPath_map;
             std::map<std::string,std::unique_ptr<TH2>> m_Syst_HistTA_map;
+            std::map<std::string,std::unique_ptr<TH3F>> m_Syst_HistTA_map3d;
             std::map<std::string,std::string> m_Syst_Affects_JMSorJMR;
+            std::map<std::string,std::string> m_Syst_uncertparam;
 
             //The current systematic configuration
             struct SysData final
