@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -28,6 +28,8 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
+
+#include "StoreGate/WriteDecorHandleKey.h"
 
 class CaloClusterCellLinkContainer;
 class IChronoStatSvc;
@@ -94,6 +96,14 @@ class CaloClusterMaker : public AthReentrantAlgorithm
   ///Use ChronotStatSvc to monitor each tool
   bool m_chronoTools;
 
+  
+  /** @brief If @p true, writes some trigger-specific decorations.
+    */
+  Gaudi::Property<bool> m_writeTriggerSpecificInfo{this, "WriteTriggerSpecificInfo", false, "Write some trigger-specific decorations and use the trigger auxiliary container."};
+
+  /** @brief Key to the handle for writing the number of cells as a decoration.
+    */
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_mDecor_ncells {this, "Decor_ncells", "nCells", "Decorator containing the number of cells associated to a cluster"};
 };
 #endif // CALOREC_CALOCLUSTERMAKER_H
 
