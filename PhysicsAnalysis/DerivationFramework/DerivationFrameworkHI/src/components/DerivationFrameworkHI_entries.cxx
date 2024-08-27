@@ -3,7 +3,13 @@
 */
 
 #include "DerivationFrameworkHI/HITrackQualityAugmentationTool.h"
+#include "../HITrackParticleThinningTool.h"
+#include "../HIGlobalAugmentationTool.h"
+#include "../HICentralityDecorationTool.h"
 
 using namespace DerivationFramework;
 
 DECLARE_COMPONENT( HITrackQualityAugmentationTool )
+DECLARE_COMPONENT( HITrackParticleThinningTool )
+DECLARE_COMPONENT( HIGlobalAugmentationTool )
+DECLARE_COMPONENT( HICentralityDecorationTool )

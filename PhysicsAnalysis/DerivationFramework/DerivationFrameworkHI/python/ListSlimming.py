@@ -340,3 +340,196 @@ def HION12Extra():
     variables += ['Muons.MuonSpectrometerPt'] 
     
     return variables
+
+#################################################################################
+#HION14
+def HION14SmartCollections():
+    variables  =  []
+    variables += ["PrimaryVertices"]
+
+    return variables
+
+def HION14AllVariablesGeneral():
+    variables  =  []
+    variables += ["CaloSums"]
+    variables += ["EventInfo"]
+
+    return variables
+
+def HION14ContentTracks():
+    variables = []
+    variables += ["InDetTrackParticles.qOverP"]
+    variables += ["InDetTrackParticles.theta"]
+    variables += ["InDetTrackParticles.phi"]
+    variables += ["InDetTrackParticles.d0"]
+    variables += ["InDetTrackParticles.z0"]
+    variables += ["InDetTrackParticles.TrackQuality"]
+    variables += ["InDetTrackParticles.HITight"]
+
+    return variables
+
+def HION14ContentMuons():
+    variables = []
+    variables += ["Muons.pt"]
+    variables += ["Muons.eta"]
+    variables += ["Muons.phi"]
+    variables += ["Muons.truthType"]
+    variables += ["Muons.truthOrigin"]
+    variables += ["Muons.author"]
+    variables += ["Muons.muonType"]
+    variables += ["Muons.quality"]
+    variables += ["Muons.inDetTrackParticleLink"]
+    variables += ["Muons.muonSpectrometerTrackParticleLink"]
+    variables += ["Muons.combinedTrackParticleLink"]
+    variables += ["Muons.InnerDetectorPt"]
+    variables += ["Muons.MuonSpectrometerPt"]
+    variables += ["Muons.DFCommonGoodMuon"]
+    variables += ["Muons.ptcone20"]
+    variables += ["Muons.ptcone30"]
+    variables += ["Muons.ptcone40"]
+    variables += ["Muons.ptvarcone20"]
+    variables += ["Muons.ptvarcone30"]
+    variables += ["Muons.ptvarcone40"]
+    variables += ["Muons.topoetcone20"]
+    variables += ["Muons.topoetcone30"]
+    variables += ["Muons.topoetcone40"]
+    variables += ["Muons.truthParticleLink"]
+    variables += ["Muons.charge"]
+    variables += ["Muons.extrapolatedMuonSpectrometerTrackParticleLink"]
+    variables += ["Muons.allAuthors"]
+    variables += ["Muons.ptcone20_TightTTVA_pt1000"]
+    variables += ["Muons.ptcone20_TightTTVA_pt500"]
+    variables += ["Muons.ptvarcone30_TightTTVA_pt1000"]
+    variables += ["Muons.ptvarcone30_TightTTVA_pt500"]
+    variables += ["Muons.numberOfPrecisionLayers"]
+    variables += ["Muons.combinedTrackOutBoundsPrecisionHits"]
+    variables += ["Muons.numberOfPrecisionLayers"]
+    variables += ["Muons.numberOfPrecisionHoleLayers"]
+    variables += ["Muons.numberOfGoodPrecisionLayers"]
+    variables += ["Muons.innerSmallHits"]
+    variables += ["Muons.innerLargeHits"]
+    variables += ["Muons.middleSmallHits"]
+    variables += ["Muons.middleLargeHits"]
+    variables += ["Muons.outerSmallHits"]
+    variables += ["Muons.outerLargeHits"]
+    variables += ["Muons.extendedSmallHits"]
+    variables += ["Muons.extendedLargeHits"]
+    variables += ["Muons.extendedSmallHoles"]
+    variables += ["Muons.isSmallGoodSectors"]
+    variables += ["Muons.cscUnspoiledEtaHits"]
+    variables += ["Muons.EnergyLoss"]
+    variables += ["Muons.energyLossType"]
+    variables += ["Muons.momentumBalanceSignificance"]
+    variables += ["Muons.scatteringCurvatureSignificance"]
+    variables += ["Muons.scatteringNeighbourSignificance"]
+
+    return variables
+
+def HION14ContentCombinedMuonTrackParticles():
+    variables = []
+    variables += ["CombinedMuonTrackParticles.qOverP"]
+    variables += ["CombinedMuonTrackParticles.d0"]
+    variables += ["CombinedMuonTrackParticles.z0"]
+    variables += ["CombinedMuonTrackParticles.vz"]
+    variables += ["CombinedMuonTrackParticles.phi"]
+    variables += ["CombinedMuonTrackParticles.theta"]
+    variables += ["CombinedMuonTrackParticles.definingParametersCovMatrix"]
+    variables += ["CombinedMuonTrackParticles.numberOfPixelDeadSensors"]
+    variables += ["CombinedMuonTrackParticles.numberOfPixelHits"]
+    variables += ["CombinedMuonTrackParticles.numberOfPixelHoles"]
+    variables += ["CombinedMuonTrackParticles.numberOfSCTDeadSensors"]
+    variables += ["CombinedMuonTrackParticles.numberOfSCTHits"]
+    variables += ["CombinedMuonTrackParticles.numberOfSCTHoles"]
+    variables += ["CombinedMuonTrackParticles.numberOfTRTHits"]
+    variables += ["CombinedMuonTrackParticles.numberOfTRTOutliers"]
+    variables += ["CombinedMuonTrackParticles.chiSquared"]
+    variables += ["CombinedMuonTrackParticles.numberDoF"]
+
+    return variables
+
+def HION14ExtraCombinedMuonTrackParticlesTruth():
+    variables = []
+    variables += ["CombinedMuonTrackParticles.truthOrigin"]
+    variables += ["CombinedMuonTrackParticles.truthType"]
+
+    return variables
+
+def HION14ContentExtrapolatedMuonTrackParticles():
+    variables = []
+    variables += ["ExtrapolatedMuonTrackParticles.d0"]
+    variables += ["ExtrapolatedMuonTrackParticles.z0"]
+    variables += ["ExtrapolatedMuonTrackParticles.vz"]
+    variables += ["ExtrapolatedMuonTrackParticles.definingParametersCovMatrix"]
+    variables += ["ExtrapolatedMuonTrackParticles.truthOrigin"]
+    variables += ["ExtrapolatedMuonTrackParticles.truthType"]
+    variables += ["ExtrapolatedMuonTrackParticles.qOverP"]
+    variables += ["ExtrapolatedMuonTrackParticles.theta"]
+    variables += ["ExtrapolatedMuonTrackParticles.phi"]
+
+    return variables
+
+def HION14ExtraExtrapolatedMuonTrackParticlesTruth():
+    variables = []
+    variables += ["ExtrapolatedMuonTrackParticles.truthOrigin"]
+    variables += ["ExtrapolatedMuonTrackParticles.truthType"]
+
+    return variables
+
+def HION14ContentMuonSpectrometerTrackParticles():
+    variables = []
+    variables += ["MuonSpectrometerTrackParticles.phi"]
+    variables += ["MuonSpectrometerTrackParticles.d0"]
+    variables += ["MuonSpectrometerTrackParticles.z0"]
+    variables += ["MuonSpectrometerTrackParticles.vz"]
+    variables += ["MuonSpectrometerTrackParticles.definingParametersCovMatrix"]
+    variables += ["MuonSpectrometerTrackParticles.vertexLink"]
+    variables += ["MuonSpectrometerTrackParticles.theta"]
+    variables += ["MuonSpectrometerTrackParticles.qOverP"]
+    variables += ["MuonSpectrometerTrackParticles.truthParticleLink"]
+
+    return variables
+
+def HION14ExtraMuonSpectrometerTrackParticlesTruth():
+    variables = []
+    variables += ["MuonSpectrometerTrackParticles.truthParticleLink"]
+    
+    return variables
+
+def HION14TruthVariablesGeneral():
+    variables = []
+    variables += ["TruthEvents"]
+
+    return variables
+
+def HION14ContentTruthParticles():
+    variables = []
+    variables += ["TruthParticles.pdgId"]
+    variables += ["TruthParticles.barcode"]
+    variables += ["TruthParticles.m"]
+    variables += ["TruthParticles.e"]
+    variables += ["TruthParticles.py"]
+    variables += ["TruthParticles.px"]
+    variables += ["TruthParticles.pz"]
+
+    return variables
+
+def HION14ExtraContentAll():
+    variables  = []
+    variables += HION14ContentTracks()
+    variables += HION14ContentMuons()
+    variables += HION14ContentCombinedMuonTrackParticles()
+    variables += HION14ContentExtrapolatedMuonTrackParticles()
+    variables += HION14ContentMuonSpectrometerTrackParticles()
+    variables += HION14ContentTracks()
+
+    return variables
+
+def HION14ExtraContentAllTruth():
+    variables  = []
+    variables += HION4ExtraMuonsTruth()
+    variables += HION14ExtraCombinedMuonTrackParticlesTruth()
+    variables += HION14ExtraExtrapolatedMuonTrackParticlesTruth()
+    variables += HION14ExtraMuonSpectrometerTrackParticlesTruth()
+    variables += HION14ContentTruthParticles()
+
+    return variables

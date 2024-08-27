@@ -63,7 +63,12 @@ def InDetTrackSelectionTool_TightPrimary_Cfg(
 def InDetTrackSelectionTool_HILoose_Cfg(
         flags, name="InDetTrackSelectionTool_HILoose", **kwargs):
     kwargs.setdefault("CutLevel", "HILoose")
-    return InDetTrackSelectionToolCfg(flags, name, **kwargs)    
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)   
+
+def InDetTrackSelectionTool_HITight_Cfg(
+        flags, name="InDetTrackSelectionTool_HITight", **kwargs):
+    kwargs.setdefault("CutLevel", "HITight")
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)
 
 def InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
         flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
