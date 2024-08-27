@@ -181,23 +181,13 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_data(std::size_t& readPointer, int
 
 Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::decode_data_header_v3(
     std::size_t& readPointer, int version) {
-   
+  
+
   if (version != 3){
   	throw std::invalid_argument("decode_data_header_v3 version should be exactly 3"); 
   }
 
-  auto PADDING_BITS_END = std::size_t{16};
   size_t felix_word_size =  WORD_SIZE_DOUBLE;
-  auto endOfData = m_wordCountFlx * felix_word_size - Muon::nsw::STGTPL1A::size_trailer_CRC - PADDING_BITS_END;
-
-  auto SIZE_DATA_HEADER = STGTPL1A::size_stream_head_nbits;
-  SIZE_DATA_HEADER += STGTPL1A::size_stream_head_nwords;
-  SIZE_DATA_HEADER += STGTPL1A::size_stream_head_fifo_size;
-  SIZE_DATA_HEADER += STGTPL1A::size_stream_head_streamID;
-  if (readPointer + SIZE_DATA_HEADER > endOfData) {
-      throw std::length_error( Muon::nsw::format("Read pointer ({}) would excede memory dedicated to data chunks ({}) while parsing the header (size: {})",readPointer, endOfData, SIZE_DATA_HEADER));
-    }   
- 
   const auto stream_head_nbits = decode(readPointer, STGTPL1A::size_stream_head_nbits);
   const auto stream_head_nwords = decode(readPointer, STGTPL1A::size_stream_head_nwords);
   const auto current_stream_head_fifo_size = decode(readPointer, STGTPL1A::size_stream_head_fifo_size);
@@ -220,18 +210,10 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
         default:
            break;
   }
-  if (current_stream_head_nbits == 0 )
-  {
-      throw std::runtime_error( "Corrupted message");
-  } 
   
-  if (readPointer + SIZE_DATA_HEADER + total_expected_size > endOfData)
-  {
-     throw std::runtime_error("Corrupted message");
-  }  
-
   current_stream_head_nwords = total_expected_size / current_stream_head_nbits;
   size_t data_size = std::ceil(total_expected_size / felix_word_size);
+
   // in version 3 nbits correspond to either 16 or 32 bits. There is a stable packet size that we use and 
   // we extract it from the code. The 16 or 32 bits is a consequence of an optimization in the firmware that 
   // results in big gains wrt routing and resources
@@ -240,6 +222,7 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
   m_stream_head_fifo_size.push_back(current_stream_head_fifo_size);
   m_stream_head_streamID.push_back(current_stream_head_streamID);
 
+   
 
   ERS_DEBUG(2, Muon::nsw::format("stream_head_nbits: {}", current_stream_head_nbits));
   ERS_DEBUG(2, Muon::nsw::format("stream_head_nwords: {}", current_stream_head_nwords));
@@ -248,6 +231,7 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
   ERS_DEBUG(2, Muon::nsw::format("total_expected_size: {}", total_expected_size));
   ERS_DEBUG(2, Muon::nsw::format("m_wordCountFlx: {}, ceil(readPointer/{}): {}", m_wordCountFlx,felix_word_size,
                            ceil(readPointer / felix_word_size)));
+
 
   return {current_stream_head_nbits, current_stream_head_nwords, current_stream_head_fifo_size,
           current_stream_head_streamID,        total_expected_size,        data_size};
