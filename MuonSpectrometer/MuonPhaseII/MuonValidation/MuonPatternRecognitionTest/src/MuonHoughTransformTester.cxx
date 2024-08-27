@@ -10,20 +10,153 @@
 #include "MuonPatternEvent/MuonHoughDefs.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "GaudiKernel/PhysicalConstants.h"
 
+namespace {
+    constexpr double c_inv = 1. /Gaudi::Units::c_light;
+}
 namespace MuonValR4 {
-    MuonHoughTransformTester::MuonHoughTransformTester(const std::string& name,
-                                ISvcLocator* pSvcLocator)
-        : AthHistogramAlgorithm(name, pSvcLocator) {}
+    using namespace MuonR4;
+    using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
+    unsigned int countMatched(const TruthHitCol& truthHits,
+                              const TruthHitCol& recoHits) {
+        unsigned int matched{0};
+        for (const xAOD::MuonSimHit* reco : recoHits) {
+            matched += truthHits.count(reco);
+        }
+        return matched;
+    }
+    std::vector<MuonHoughTransformTester::ObjectMatching> 
+            MuonHoughTransformTester::matchWithTruth(const xAOD::MuonSegmentContainer* truthSegments,
+                                                     const SegmentSeedContainer* seedContainer,
+                                                     const SegmentContainer* segmentContainer) const {
+        std::vector<ObjectMatching> assocObj{};
+        std::unordered_set<const SegmentSeed*> usedSeeds{};
+        std::unordered_set<const Segment*> usedSegs{};
+        std::vector<TruthHitCol> truthHitsVec{}, seedHitsVec{}, segmentHitsVec{};
+
+        if (truthSegments) {
+            for (const SegmentSeed* seed: *seedContainer) {
+                seedHitsVec.emplace_back(getTruthMatchedHits(*seed));
+            }
+            for (const Segment* segment: *segmentContainer){
+                segmentHitsVec.emplace_back(getTruthMatchedHits(*segment));
+            }
+
+            for (const xAOD::MuonSegment* truth: *truthSegments) {
+                const TruthHitCol& truthHits{truthHitsVec.emplace_back(getTruthMatchedHits(*truth))};
+                ObjectMatching match{};
+                match.truthSegment = truth;
+                match.chamber = m_r4DetMgr->getChamber((*truthHits.begin())->identify());
+                int seedIdx{-1};
+                for (const SegmentSeed* seed : *seedContainer){
+                    ++seedIdx;
+                    if (seed->chamber() != match.chamber) {
+                        continue;
+                    }
+                    const TruthHitCol& seedHits{seedHitsVec[seedIdx]};
+                    unsigned int matchedHits = countMatched(truthHits, seedHits);
+                    if (!matchedHits) {
+                        continue;
+                    }
+                    double matchFracion{1.*matchedHits / (1.*seed->getHitsInMax().size())};
+                    if (matchFracion > match.matchFracSeed) {
+                        match.matchFracSeed = matchFracion;
+                        match.matchedSeed = seed;
+                        match.nTruthMatchedMax = matchedHits;
+                    } 
+                }
+                int segmentIdx{-1};
+                /** Match segments */
+                for (const Segment* segment : *segmentContainer) {
+                    ++segmentIdx;
+                    if (segment->chamber() != match.chamber) {
+                        continue;
+                    }
+                    const TruthHitCol& segmentHits{segmentHitsVec[segmentIdx]};
+                    unsigned int matchedHits = countMatched(truthHits, segmentHits);
+                    if (!matchedHits) {
+                        continue;
+                    }
+
+                    double matchFracion{1.*matchedHits / (1.*truthHits.size())};
+                    if (matchFracion > match.matchFracSegment) {
+                        match.matchFracSegment = matchFracion;
+                        match.matchedSegment = segment;
+                        match.nTruthMatchedSeg = matchedHits;
+                    }
+                }
+                usedSeeds.insert(match.matchedSeed);
+                usedSegs.insert(match.matchedSegment);
+                assocObj.push_back(match);
+            }
+        }
+        int segIdx{-1};
+        for (const Segment* seg: *segmentContainer) {
+            ++segIdx;
+            if (usedSegs.count(seg)) {
+                continue;
+            }
+            ObjectMatching match{};
+            match.chamber = seg->chamber();
+            match.matchedSegment = seg;
+            match.matchedSeed = seg->parent();
+            for (unsigned int truthIdx = 0 ; truthIdx < truthHitsVec.size(); ++truthIdx){
+                if (assocObj[truthIdx].chamber != match.chamber) {
+                    continue;
+                }
+                unsigned int matches = countMatched(truthHitsVec[truthIdx], segmentHitsVec[segIdx]);
+                if (!matches) continue;
+                match.bestTruthMatch = false;
+                const double matchFrac = 1. * matches / (1. *seg->measurements().size());
+                if (matchFrac > match.matchFracSegment) {
+                    match.matchFracSeed = matchFrac;
+                    match.truthSegment = truthSegments->at(truthIdx);
+                    match.nTruthMatchedSeg = matches;
+                }
+            }
+            usedSeeds.insert(match.matchedSeed);
+            assocObj.push_back(match);
+        }
+        int seedIdx{-1};
+        for (const SegmentSeed* seed: *seedContainer) {
+            ++seedIdx;
+            if (usedSeeds.count(seed)) {
+                continue;
+            }
+            ObjectMatching match{};
+            match.chamber = seed->chamber();
+            match.matchedSeed = seed;
+            for (unsigned int truthIdx = 0 ; truthIdx < truthHitsVec.size(); ++truthIdx){
+                if (assocObj[truthIdx].chamber != match.chamber) {
+                    continue;
+                }
+                unsigned int matches = countMatched(truthHitsVec[truthIdx], seedHitsVec[seedIdx]);
+                if (!matches) continue;
+                match.bestTruthMatch = false;
+                const double matchFrac = 1. * matches / (1. *seed->getHitsInMax().size());
+                if (matchFrac > match.matchFracSeed) {
+                    match.matchFracSeed = matchFrac;
+                    match.truthSegment = truthSegments->at(truthIdx);
+                    match.nTruthMatchedMax = matches;
+                }
+            }
+            assocObj.push_back(match);
+        }
+        return assocObj;
+    }
+
+
+    MuonHoughTransformTester::MuonHoughTransformTester(const std::string& name, ISvcLocator* pSvcLocator): 
+        AthHistogramAlgorithm(name, pSvcLocator) {}
 
 
     StatusCode MuonHoughTransformTester::initialize() {
         ATH_CHECK(m_geoCtxKey.initialize());
-        ATH_CHECK(m_inSimHitKeys.initialize());
         ATH_CHECK(m_spacePointKey.initialize());
         ATH_CHECK(m_inHoughSegmentSeedKey.initialize());
-        ATH_CHECK(m_truthSegmentKey.initialize());
-        ATH_CHECK(m_rh_truthSegmentSimHitLink.initialize());
+        ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));
         ATH_CHECK(m_inSegmentKey.initialize(!m_inSegmentKey.empty()));
         m_tree.addBranch(std::make_shared<MuonVal::EventInfoBranch>(m_tree,0));
         m_out_SP = std::make_shared<MuonValR4::SpacePointTesterModule>(m_tree, m_spacePointKey.key()); 
@@ -64,84 +197,26 @@ namespace MuonValR4 {
                                        reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
         return muonChamber->globalToLocalTrans(gctx) * reElement->localToGlobalTrans(gctx, trfHash);
     }
-
-   
-    void MuonHoughTransformTester::matchSeedToTruth(const EventContext & ctx, const MuonR4::SegmentSeed* seed, 
-                                                    chamberLevelObjects & objs ) const{
-        double bestTruthFrac{0.}; 
-        const xAOD::MuonSegment* bestMatch = nullptr; 
-        SG::ReadDecorHandle<xAOD::MuonSegmentContainer,SimHitLinkVec> simHitsFromTruth(m_rh_truthSegmentSimHitLink, ctx);
-        SG::ConstAccessor<ElementLink<xAOD::MuonSimHitContainer>> simHitAcc("simHitLink"); 
-
-        for (auto & [ truthsegment, truthQuantities] : objs.truthMatching) {
-            unsigned int nRecFound{0}; 
-            const SimHitLinkVec & simHitsForSegment = simHitsFromTruth(*truthsegment); 
-
-            for (const MuonR4::HoughHitType& spacePoint : seed->getHitsInMax()) {
-                if (!simHitAcc.isAvailable(*spacePoint->primaryMeasurement())) continue; 
-                auto simHitMatch = simHitAcc(*spacePoint->primaryMeasurement()); 
-                if (!simHitMatch.isValid() || *simHitMatch == nullptr){
-                    continue;
-                }
-                auto found = std::ranges::find_if( simHitsForSegment, [&simHitMatch](const ElementLink<xAOD::MuonSimHitContainer> & el){
-                    return (el == simHitMatch);
-                });
-                if (found != simHitsForSegment.end()){
-                    ++nRecFound; 
-                }
-            }
-            double truthFraction = (1.*nRecFound) / (1.*seed->getHitsInMax().size()); 
-            if (truthFraction > bestTruthFrac) {
-                bestMatch = truthsegment;
-                bestTruthFrac = truthFraction; 
-            }
-        }
-        if (!bestMatch) return;
-        /** Map the seed to the truth particle */
-        chamberLevelObjects::SeedMatchQuantites& seedMatch = objs.seedMatching[seed];
-        seedMatch.matchProb = bestTruthFrac;
-        seedMatch.truthsegment = bestMatch;
-        /** Back mapping of the best truth -> seed */
-        objs.truthMatching[bestMatch].assocSeeds.push_back(seed);
-    }
-  
-    void MuonHoughTransformTester::matchSeedsToTruth(const EventContext & ctx,chamberLevelObjects & objs) const {        
-        for (auto & [ seed, matchObj] : objs.seedMatching) {
-            matchSeedToTruth(ctx, seed, objs);
-            ATH_MSG_VERBOSE("Truth matching probability "<<matchObj.matchProb);           
-        }
-    }
           
     void MuonHoughTransformTester::fillChamberInfo(const MuonGMR4::MuonChamber* chamber){
         m_out_stationName = chamber->stationName();
         m_out_stationEta = chamber->stationEta();
         m_out_stationPhi = chamber->stationPhi();
     }                
-    void MuonHoughTransformTester::fillTruthInfo(const EventContext & ctx, const xAOD::MuonSegment* segment,const ActsGeometryContext & gctx){
+    void MuonHoughTransformTester:: fillTruthInfo(const ActsGeometryContext& gctx,
+                                                  const MuonGMR4::MuonChamber* muonChamber, 
+                                                  const xAOD::MuonSegment* segment) {
         if (!segment) return; 
         m_out_hasTruth = true; 
-        Amg::Vector3D segPos{
-            segment->x(),
-            segment->y(),
-            segment->z(),
-        }; 
-        Amg::Vector3D segDir{
-            segment->px(),
-            segment->py(),
-            segment->pz(),
-        };
+        Amg::Vector3D segPos{segment->position()}; 
+        Amg::Vector3D segDir{segment->direction()};
+        static const SG::Accessor<float> acc_pt{"pt"};
         // eta is interpreted as the eta-location 
-        m_out_gen_Eta   = segDir.eta();
-        m_out_gen_Phi= segDir.phi();
-        m_out_gen_Pt= segDir.perp();
+        m_out_gen_Eta = segDir.eta();
+        m_out_gen_Phi = segDir.phi();
+        m_out_gen_Pt  = acc_pt(*segment);
 
-        SG::ReadDecorHandle<xAOD::MuonSegmentContainer,SimHitLinkVec> simHitsFromTruth(m_rh_truthSegmentSimHitLink, ctx);
-        const SimHitLinkVec & simHits = simHitsFromTruth(*segment);         
-        const xAOD::MuonSimHit* firstSimHit = *(simHits.front()); 
-        const Identifier ID = firstSimHit->identify();
-        const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID); 
         //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
-        const MuonGMR4::MuonChamber* muonChamber = reElement->getChamber();
         auto toChamber = muonChamber->globalToLocalTrans(gctx);
         const Amg::Vector3D chamberPos{toChamber * segPos};
         Amg::Vector3D chamberDir = toChamber.linear() * segDir;
@@ -155,17 +230,18 @@ namespace MuonValR4 {
 
 
         m_out_gen_tantheta = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10); 
-        m_out_gen_tanphi = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
+        m_out_gen_tanphi   = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
+        m_out_gen_time = segment->t0();
         ATH_MSG_DEBUG("A true max on "<<m_out_stationName.getVariable()<<" eta "<<m_out_stationEta.getVariable()<<" phi "<<m_out_stationPhi.getVariable()<<" with "<<m_out_gen_nMDTHits.getVariable()<<" MDT and "<<m_out_gen_nRPCHits.getVariable()+m_out_gen_nTGCHits.getVariable()<< " trigger hits is at "<<m_out_gen_tantheta.getVariable()<<" and "<<m_out_gen_y0.getVariable()); 
     }
-    void MuonHoughTransformTester::fillSeedInfo(const MuonR4::SegmentSeed* foundMax, 
-                                                double matchProb) {
+    void MuonHoughTransformTester::fillSeedInfo(const ObjectMatching& obj) {
+        const SegmentSeed* foundMax = obj.matchedSeed;
         if (!foundMax) return; 
         m_out_hasMax = true; 
         m_out_max_hasPhiExtension = foundMax->hasPhiExtension();
-        m_out_max_matchFraction = matchProb; 
+        m_out_max_matchFraction = obj.nTruthMatchedMax; 
         m_out_max_tantheta = foundMax->tanTheta();
         m_out_max_y0 = foundMax->interceptY();
         if (m_out_max_hasPhiExtension.getVariable()){
@@ -174,22 +250,23 @@ namespace MuonValR4 {
         }
         m_out_max_nHits = foundMax->getHitsInMax().size(); 
         m_out_max_nEtaHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,
-                                             [](int i, const MuonR4::HoughHitType & h){i += h->measuresEta();return i;}); 
+                                             [](int i, const HoughHitType & h){i += h->measuresEta();return i;}); 
         m_out_max_nPhiHits = std::accumulate(foundMax->getHitsInMax().begin(), foundMax->getHitsInMax().end(),0,
-                                            [](int i, const MuonR4::HoughHitType & h){i += h->measuresPhi();return i;}); 
+                                            [](int i, const HoughHitType & h){i += h->measuresPhi();return i;}); 
         unsigned int nMdtMax{0}, nRpcMax{0}, nTgcMax{0}, nMmMax{0}, nsTgcMax{0}; 
-        for (const MuonR4::HoughHitType & houghSP: foundMax->getHitsInMax()){
-            m_sacePointOnSeed[m_out_SP->push_back(*houghSP)] = true; 
-            const xAOD::UncalibratedMeasurement* meas = houghSP->primaryMeasurement();
-            switch (meas->type()) {
+        for (const HoughHitType & houghSP: foundMax->getHitsInMax()){
+            m_spacePointOnSeed[m_out_SP->push_back(*houghSP)] = true; 
+            switch (houghSP->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: 
-                        ++nMdtMax;
+                    ++nMdtMax;
                     break;
                 case xAOD::UncalibMeasType::RpcStripType:
-                    ++nRpcMax;
+                    nRpcMax+=houghSP->measuresEta();
+                    nRpcMax+=houghSP->measuresPhi();
                     break;
                 case xAOD::UncalibMeasType::TgcStripType:
-                    ++nTgcMax;
+                    nTgcMax+=houghSP->measuresEta();
+                    nTgcMax+=houghSP->measuresPhi();
                     break;
                 case xAOD::UncalibMeasType::sTgcStripType:
                     ++nsTgcMax;
@@ -207,33 +284,67 @@ namespace MuonValR4 {
         m_out_max_nTgc = nTgcMax;
         m_out_max_nsTgc = nsTgcMax;
         m_out_max_nMm = nMmMax;
-
     }
     
     void MuonHoughTransformTester::fillSegmentInfo(const ActsGeometryContext& gctx,
-                                                   const MuonR4::Segment* segment, double matchProb){
-        using namespace MuonR4::SegmentFit;
+                                                   const ObjectMatching& obj){
+        
+        const Segment* segment = obj.matchedSegment;
+        using namespace SegmentFit;
         if (!segment) return; 
         m_out_hasSegment = true; 
-        m_out_segment_matchFraction = matchProb; 
+        m_out_segment_hasPhi = std::ranges::find_if(segment->measurements(), [](const auto& meas){  return meas->measuresPhi();}) 
+                            !=segment->measurements().end();
+        m_out_segment_fitIter = segment->nFitIterations();
+        m_out_segment_matchFraction = obj.matchFracSegment; 
+        m_out_segment_truthMatchedHits = obj.nTruthMatchedSeg;
         m_out_segment_chi2 = segment->chi2();
         m_out_segment_nDoF = segment->nDoF();
+        m_out_segment_hasTimeFit = segment->hasTimeFit();
 
-        m_out_segment_err_x0 = segment->covariance()[toInt(AxisDefs::x0)];
-        m_out_segment_err_y0 = segment->covariance()[toInt(AxisDefs::y0)];
-        m_out_segment_err_tantheta= segment->covariance()[toInt(AxisDefs::tanTheta)];
-        m_out_segment_err_tanphi = segment->covariance()[toInt(AxisDefs::tanPhi)];
-
+        m_out_segment_err_x0 = segment->covariance()(toInt(AxisDefs::x0), toInt(AxisDefs::x0));
+        m_out_segment_err_y0 = segment->covariance()(toInt(AxisDefs::y0), toInt(AxisDefs::y0));
+        m_out_segment_err_tantheta = segment->covariance()(toInt(AxisDefs::tanTheta), toInt(AxisDefs::tanTheta));
+        m_out_segment_err_tanphi   = segment->covariance()(toInt(AxisDefs::tanPhi), toInt(AxisDefs::tanPhi));
+        m_out_segment_err_time = segment->covariance()(toInt(AxisDefs::time), toInt(AxisDefs::time));
         const Amg::Transform3D trf{segment->chamber()->globalToLocalTrans(gctx)};
         for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 
         }
         const Amg::Vector3D locPos = trf * segment->position();
         const Amg::Vector3D locDir = trf.linear()* segment->direction();
-        m_out_segment_tanphi = locDir.x() / locDir.z();
+        m_out_segment_tanphi   = locDir.x() / locDir.z();
         m_out_segment_tantheta = locDir.y() / locDir.z();
         m_out_segment_y0 = locPos.y();
         m_out_segment_x0 = locPos.x();
+        m_out_segment_time = segment->segementT0() + segment->position().mag() * c_inv;
+
+        unsigned int nMdtHits{0}, nRpcEtaHits{0}, nRpcPhiHits{0}, nTgcEtaHits{0}, nTgcPhiHits{0};
+        for (const auto & meas : segment->measurements()){
+            switch (meas->type()) {
+                case xAOD::UncalibMeasType::MdtDriftCircleType:
+                    m_spacePointOnSegment[m_out_SP->push_back(*meas->spacePoint())] = true;
+                    ++nMdtHits;
+                    break;
+                case xAOD::UncalibMeasType::RpcStripType:
+                    m_spacePointOnSegment[m_out_SP->push_back(*meas->spacePoint())] = true;
+                    nRpcEtaHits += meas->measuresEta();
+                    nRpcPhiHits += meas->measuresPhi();
+                    break;
+                case xAOD::UncalibMeasType::TgcStripType:
+                    m_spacePointOnSegment[m_out_SP->push_back(*meas->spacePoint())] = true;
+                    nTgcEtaHits += meas->measuresEta();
+                    nTgcPhiHits += meas->measuresPhi();
+                    break;
+                default:
+                    break;
+            }
+        }
+        m_out_segment_nMdtHits = nMdtHits;
+        m_out_segment_nRpcEtaHits= nRpcEtaHits;
+        m_out_segment_nRpcPhiHits= nRpcPhiHits;
+        m_out_segment_nTgcEtaHits= nTgcEtaHits;
+        m_out_segment_nTgcPhiHits= nTgcPhiHits;
     }
     StatusCode MuonHoughTransformTester::execute()  {
         
@@ -244,79 +355,27 @@ namespace MuonValR4 {
 
         // retrieve the two input collections
         
-        const MuonR4::SegmentSeedContainer* readSegmentSeeds{nullptr};
+        const SegmentSeedContainer* readSegmentSeeds{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_inHoughSegmentSeedKey, readSegmentSeeds));
         
-        const MuonR4::SegmentContainer* readMuonSegments{nullptr};
+        const SegmentContainer* readMuonSegments{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_inSegmentKey, readMuonSegments));
         
         const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_truthSegmentKey, readTruthSegments));
         
-        SG::ReadDecorHandle<xAOD::MuonSegmentContainer, SimHitLinkVec> readSimHits{m_rh_truthSegmentSimHitLink, ctx}; 
 
         ATH_MSG_DEBUG("Succesfully retrieved input collections");
 
-        // map the drift circles to identifiers. 
-        // The fast digi should only generate one circle per tube. 
-        std::map<const MuonGMR4::MuonChamber*, chamberLevelObjects> allObjectsPerChamber; 
-
-        for (const xAOD::MuonSegment* truthSegment : *readTruthSegments){
-            const SimHitLinkVec & simHits = readSimHits(*truthSegment); 
-            const Identifier simHitId = (*simHits.front())->identify();
-            const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(simHitId); 
-            const MuonGMR4::MuonChamber* id{reElement->getChamber()};
-            chamberLevelObjects & theObjects  = allObjectsPerChamber[id];
-            theObjects.truthMatching[truthSegment].truthsegment = truthSegment; 
+        std::vector<ObjectMatching> objects = matchWithTruth(readTruthSegments, readSegmentSeeds, readMuonSegments);
+        for (const ObjectMatching& obj : objects) {
+            fillChamberInfo(obj.chamber);
+            m_out_gen_bestMatch = obj.bestTruthMatch;
+            fillTruthInfo(gctx, obj.chamber, obj.truthSegment);
+            fillSeedInfo(obj);
+            fillSegmentInfo(gctx, obj);
+            ATH_CHECK(m_tree.fill(ctx));
         }
-
-        // Populate the seeds first
-        for (const MuonR4::SegmentSeed* max : *readSegmentSeeds) {
-            // use adventurous minion syntax to add a key with a default value
-            allObjectsPerChamber[max->chamber()].seedMatching[max];
-        }
-        if (readMuonSegments) {
-            for (const MuonR4::Segment* segment : *readMuonSegments){
-                chamberLevelObjects&  thechamber = allObjectsPerChamber[segment->chamber()];
-                chamberLevelObjects::SeedMatchMap& recoOnChamber = thechamber.seedMatching;
-                recoOnChamber[segment->parent()].segment = segment; 
-            }
-        }
-
-        for (auto & [chamber, chamberLevelObjects] : allObjectsPerChamber){
-            matchSeedsToTruth(ctx, chamberLevelObjects);            
-            /// Step 1: Fill the matched pairs 
-            for (auto & [truthSegment, assocInfo] : chamberLevelObjects.truthMatching) {                
-                if (assocInfo.assocSeeds.empty()) {
-                    fillChamberInfo(chamber); 
-                    fillTruthInfo(ctx, truthSegment, gctx);
-                    if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
-                    continue;
-                }
-                for (const MuonR4::SegmentSeed* seed : assocInfo.assocSeeds) {
-                    fillChamberInfo(chamber); 
-                    fillTruthInfo(ctx, truthSegment, gctx);
-                    auto& seedMatch = chamberLevelObjects.seedMatching[seed];
-                    m_out_SP->push_back(*seed->parentBucket());
-                    fillSeedInfo(seed, seedMatch.matchProb);
-                    if (seedMatch.segment) {
-                        fillSegmentInfo(gctx, seedMatch.segment, seedMatch.matchProb);
-                    }
-                    if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
-                }
-            }
-            // also fill the reco not matched to any truth 
-            for (auto & [ seed, assocInfo ] : chamberLevelObjects.seedMatching) {
-                if (assocInfo.truthsegment) continue;
-                fillChamberInfo(chamber);
-                m_out_SP->push_back(*seed->parentBucket());
-                fillSeedInfo(seed, 0.); 
-                if (assocInfo.segment) {
-                    fillSegmentInfo(gctx, assocInfo.segment, 0.);
-                }
-                if (!m_tree.fill(ctx)) return StatusCode::FAILURE; 
-            }
-        } // end loop over chambers
 
         return StatusCode::SUCCESS;
     }

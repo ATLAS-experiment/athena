@@ -46,7 +46,8 @@ namespace MuonValR4{
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
-
+    
+    using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
   private:
     
     /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
@@ -59,38 +60,33 @@ namespace MuonValR4{
                                   const Identifier& hitId) const;
 
 
-    struct chamberLevelObjects { 
-        struct SeedMatchQuantites {
-            /** @brief Best matched truth particle */
-            const xAOD::MuonSegment* truthsegment{nullptr};
-            /** @brief Probability of which the segment is matched to it */
-            double matchProb{0.};
-            /** @brief Associated segment */
-            const MuonR4::Segment* segment{nullptr};
-        };
-        using SeedMatchMap = std::map<const MuonR4::SegmentSeed*, SeedMatchQuantites>;
-        SeedMatchMap seedMatching{};
+    struct ObjectMatching{
+        const MuonGMR4::MuonChamber* chamber{nullptr};
+        const xAOD::MuonSegment* truthSegment{nullptr};
+        const MuonR4::SegmentSeed* matchedSeed{nullptr};
+        const MuonR4::Segment* matchedSegment{nullptr};
+        double matchFracSeed{0.};
+        double matchFracSegment{0.};
+        bool bestTruthMatch{true};
+        unsigned int nTruthMatchedSeg{0};
+        unsigned int nTruthMatchedMax{0};
 
-        /** @brief Collection of the truth particle trajectory */
-        struct TruthMatchQuantities{
-            const xAOD::MuonSegment* truthsegment{nullptr};
-            std::vector<const MuonR4::SegmentSeed*> assocSeeds{};
-        };
-
-        std::map<const xAOD::MuonSegment*, TruthMatchQuantities> truthMatching{}; 
     };
 
-    void matchSeedToTruth(const EventContext & ctx, const MuonR4::SegmentSeed* seed, chamberLevelObjects & objs ) const;                          
-    std::pair<const xAOD::MuonSegment*, double> matchSegmentToTruth(const MuonR4::Segment* seed, chamberLevelObjects & objs ) const;                          
-    void matchSeedsToTruth(const EventContext & ctx,chamberLevelObjects & objs) const;          
-    void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);                
-    void fillTruthInfo(const EventContext & ctx, const xAOD::MuonSegment* truthSegment,  const ActsGeometryContext & gctx);     
-    void fillSeedInfo(const MuonR4::SegmentSeed* segmentSeed, double matchProb);            
-    void fillSegmentInfo(const ActsGeometryContext& gctx,
-                         const MuonR4::Segment* segment, double matchProb);            
+    std::vector<ObjectMatching> matchWithTruth(const xAOD::MuonSegmentContainer* truthSegments,
+                                               const MuonR4::SegmentSeedContainer* seedContainer,
+                                               const MuonR4::SegmentContainer* segmentContainer) const;
+
+    void fillChamberInfo(const MuonGMR4::MuonChamber* chamber);
+
+    void fillTruthInfo(const ActsGeometryContext& gctx,
+                       const MuonGMR4::MuonChamber* chamber, 
+                       const xAOD::MuonSegment* truthSegment);
+    
+    void fillSeedInfo(const ObjectMatching& obj);            
+    void fillSegmentInfo(const ActsGeometryContext& gctx, const ObjectMatching& obj);  
     
     // MDT sim hits in xAOD format 
-    SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_inSimHitKeys {this, "SimHitKeys",{}, "xAOD  SimHit collections"};
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","TruthSegmentsR4", "truth segment container"};
                                                           
     SG::ReadHandleKey<MuonR4::SegmentSeedContainer> m_inHoughSegmentSeedKey{this, "SegmentSeedKey", "MuonHoughStationSegmentSeeds"};
@@ -99,40 +95,39 @@ namespace MuonValR4{
     
     SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-    using SimHitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>; 
-
-    SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_rh_truthSegmentSimHitLink{this, "TruthSegmentSimHitLink", m_truthSegmentKey, "simHitLinks"};  
-
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
 
     // // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
     
-    MuonVal::ScalarBranch<int>&            m_out_stationName{m_tree.newScalar<int>("stationName")};
-    MuonVal::ScalarBranch<int>&            m_out_stationEta{m_tree.newScalar<int>( "stationEta")};
-    MuonVal::ScalarBranch<int>&            m_out_stationPhi{m_tree.newScalar<int>( "stationPhi")};
+    MuonVal::ScalarBranch<int>& m_out_stationName{m_tree.newScalar<int>("stationName")};
+    MuonVal::ScalarBranch<int>& m_out_stationEta{m_tree.newScalar<int>("stationEta")};
+    MuonVal::ScalarBranch<int>& m_out_stationPhi{m_tree.newScalar<int>("stationPhi")};
 
-    MuonVal::ScalarBranch<bool> &          m_out_hasTruth{m_tree.newScalar<bool>("hasTruth",false)}; 
-
-    MuonVal::ScalarBranch<float>&          m_out_gen_Eta{m_tree.newScalar<float>("genEta",-10.)};
-    MuonVal::ScalarBranch<float>&          m_out_gen_Phi{m_tree.newScalar<float>("genPhi",-10.)};
-    MuonVal::ScalarBranch<float>&          m_out_gen_Pt{m_tree.newScalar<float>("genPt",-10.)};
+    MuonVal::ScalarBranch<bool> & m_out_hasTruth{m_tree.newScalar<bool>("hasTruth",false)};
     
-    MuonVal::ScalarBranch<float>&           m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
-    MuonVal::ScalarBranch<float>&           m_out_gen_y0{m_tree.newScalar<float>("genY0", 0.0)}; 
-    MuonVal::ScalarBranch<float>&           m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
-    MuonVal::ScalarBranch<float>&           m_out_gen_x0{m_tree.newScalar<float>("genX0", 0.0)}; 
+    MuonVal::ScalarBranch<bool> & m_out_gen_bestMatch{m_tree.newScalar<bool>("bestMatch",true)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Eta{m_tree.newScalar<float>("genEta",-10.)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Phi{m_tree.newScalar<float>("genPhi",-10.)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Pt{m_tree.newScalar<float>("genPt",-10.)};    
+    MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_y0{m_tree.newScalar<float>("genY0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("genX0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("genTime", 0.0)}; 
 
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nHits{m_tree.newScalar<unsigned int>("genNHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nRPCHits{m_tree.newScalar<unsigned int>("genNRpcHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nMDTHits{m_tree.newScalar<unsigned int>("genNMdtHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nTGCHits{m_tree.newScalar<unsigned int>("genNTgcHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nsTGCHits{m_tree.newScalar<unsigned int>("genNsTgcHits",0)};
-    MuonVal::ScalarBranch<unsigned int>&   m_out_gen_nNswHits{m_tree.newScalar<unsigned int>("genNNswHits",0)};
+
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nHits{m_tree.newScalar<unsigned short>("genNHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nRPCHits{m_tree.newScalar<unsigned short>("genNRpcHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMDTHits{m_tree.newScalar<unsigned short>("genNMdtHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTGCHits{m_tree.newScalar<unsigned short>("genNTgcHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nsTGCHits{m_tree.newScalar<unsigned short>("genNsTgcHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nNswHits{m_tree.newScalar<unsigned short>("genNNswHits",0)};
+
     MuonVal::ScalarBranch<bool>&  m_out_hasMax {m_tree.newScalar<bool>("hasMax", false)}; 
     MuonVal::ScalarBranch<bool>&  m_out_max_hasPhiExtension {m_tree.newScalar<bool>("maxHasPhiExtension", false)}; 
-    MuonVal::ScalarBranch<float>&  m_out_max_matchFraction {m_tree.newScalar<float>("maxMatchFraction", false)}; 
+    MuonVal::ScalarBranch<float>& m_out_max_matchFraction {m_tree.newScalar<float>("maxMatchFraction", false)}; 
 
     MuonVal::ScalarBranch<float>& m_out_max_y0{m_tree.newScalar<float>("maxY0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_max_x0{m_tree.newScalar<float>("maxX0", 0.0)}; 
@@ -141,36 +136,51 @@ namespace MuonValR4{
     
     /** space point teste module */
     std::shared_ptr<MuonValR4::SpacePointTesterModule>      m_out_SP{nullptr}; 
-    MuonVal::VectorBranch<unsigned char>& m_sacePointOnSeed{m_tree.newVector<unsigned char>("spacePoint_onSegmentSeed")};
-    MuonVal::VectorBranch<unsigned char>& m_sacePointOnSegment{m_tree.newVector<unsigned char>("spacePoint_onSegment")};
+    MuonVal::VectorBranch<unsigned char>& m_spacePointOnSeed{m_tree.newVector<unsigned char>("spacePoint_onSegmentSeed")};
+    MuonVal::VectorBranch<unsigned char>& m_spacePointOnSegment{m_tree.newVector<unsigned char>("spacePoint_onSegment")};
     
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nHits{m_tree.newScalar<unsigned int>("maxNHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nEtaHits{m_tree.newScalar<unsigned int>("maxNEtaHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nPhiHits{m_tree.newScalar<unsigned int>("maxNPhiHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nMdt{m_tree.newScalar<unsigned int>("maxNMdtHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nRpc{m_tree.newScalar<unsigned int>("maxNRpcHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nTgc{m_tree.newScalar<unsigned int>("maxNTgcHits", 0)}; 
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nsTgc{m_tree.newScalar<unsigned int>("maxNsTgcHits", 0)};
-    MuonVal::ScalarBranch<unsigned int>& m_out_max_nMm{m_tree.newScalar<unsigned int>("maxNMmHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nHits{m_tree.newScalar<unsigned short>("maxNHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nEtaHits{m_tree.newScalar<unsigned short>("maxNEtaHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nPhiHits{m_tree.newScalar<unsigned short>("maxNPhiHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nMdt{m_tree.newScalar<unsigned short>("maxNMdtHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nRpc{m_tree.newScalar<unsigned short>("maxNRpcHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nTgc{m_tree.newScalar<unsigned short>("maxNTgcHits", 0)}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nsTgc{m_tree.newScalar<unsigned short>("maxNsTgcHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_max_nMm{m_tree.newScalar<unsigned short>("maxNMmHits", 0)};
 
     
-    MuonVal::ScalarBranch<bool>&  m_out_hasSegment {m_tree.newScalar<bool>("hasSegment", false)}; 
-    MuonVal::ScalarBranch<float>&  m_out_segment_matchFraction {m_tree.newScalar<float>("segmentMatchFraction", false)}; 
+    MuonVal::ScalarBranch<bool>&  m_out_hasSegment{m_tree.newScalar<bool>("hasSegment", false)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_matchFraction{m_tree.newScalar<float>("segmentMatchFraction", false)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_chi2{m_tree.newScalar<float>("segmentChi2", -1.)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nDoF{m_tree.newScalar<unsigned short>("segmentNdoF", 0)};
+    MuonVal::ScalarBranch<uint16_t>& m_out_segment_nDoF{m_tree.newScalar<uint16_t>("segmentNdoF", 0)};
+    MuonVal::ScalarBranch<bool>&  m_out_segment_hasPhi {m_tree.newScalar<bool>("segmentHasPhiHits", false)}; 
+    MuonVal::ScalarBranch<bool>&  m_out_segment_hasTimeFit {m_tree.newScalar<bool>("segmentHasTimeFit", false)}; 
+    
+    MuonVal::ScalarBranch<uint16_t>&  m_out_segment_fitIter {m_tree.newScalar<uint16_t>("segmentFitIterations", 0)};
+
+
      
     MuonVal::ScalarBranch<float>& m_out_segment_y0{m_tree.newScalar<float>("segmentY0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_x0{m_tree.newScalar<float>("segmentX0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_tantheta{m_tree.newScalar<float>("segmentTanTheta", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_segment_tanphi{m_tree.newScalar<float>("segmentTanPhi", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_tanphi{m_tree.newScalar<float>("segmentTanPhi", 0.0)};
+    MuonVal::ScalarBranch<float>& m_out_segment_time{m_tree.newScalar<float>("segmentTime", 0.)};
+     
 
     MuonVal::ScalarBranch<float>& m_out_segment_err_y0{m_tree.newScalar<float>("segmentErrY0", -1.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_err_x0{m_tree.newScalar<float>("segmentErrX0", -1.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_err_tantheta{m_tree.newScalar<float>("segmentErrTanTheta", -1.0)}; 
     MuonVal::ScalarBranch<float>& m_out_segment_err_tanphi{m_tree.newScalar<float>("segmentErrTanPhi", -1.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_segment_err_time{m_tree.newScalar<float>("segmentErrTime", -1.0)};
 
-    MuonVal::VectorBranch<double>& m_out_segment_chi2_measurement{m_tree.newVector<double>("segmentChi2Measurements")}; 
-
+    MuonVal::VectorBranch<float>& m_out_segment_chi2_measurement{m_tree.newVector<float>("segmentChi2Measurements")}; 
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_truthMatchedHits{m_tree.newScalar<unsigned short>("segmentTruthMatchedHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nMdtHits{m_tree.newScalar<unsigned short>("segmentNMdtHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nRpcEtaHits{m_tree.newScalar<unsigned short>("segmentNRpcEtaHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nRpcPhiHits{m_tree.newScalar<unsigned short>("segmentNRpcPhiHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nTgcEtaHits{m_tree.newScalar<unsigned short>("segmentNTgcEtaHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_segment_nTgcPhiHits{m_tree.newScalar<unsigned short>("segmentNTgcPhiHits", 0)};
+    
   };
 }
 

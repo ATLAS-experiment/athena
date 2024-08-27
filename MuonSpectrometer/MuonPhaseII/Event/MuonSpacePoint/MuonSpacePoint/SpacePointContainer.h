@@ -1,7 +1,6 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
 #define MUONSPACEPOINT_MUONSPACEPOINTCONTAINER_H
 

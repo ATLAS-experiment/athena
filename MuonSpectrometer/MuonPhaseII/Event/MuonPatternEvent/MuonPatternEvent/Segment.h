@@ -42,17 +42,6 @@ namespace MuonR4{
                 m_chi2{chi2}, 
                 m_nDoF{nDoF}{}
 
-
-            void setChi2PerMeasurement(std::vector<double> && chi2vals){
-                m_chi2PerMeasurement = chi2vals; 
-            }
-            void setCallsToConverge(unsigned int nCalls) {
-                m_nCalls = nCalls;
-            }
-            void setParUncertainties(SegmentFit::Covariance&& cov){
-                m_cov = std::move(cov);
-            }
-
             /** @brief Returns the associated chamber */
             const MuonGMR4::MuonChamber* chamber() const { return m_chamber; }
             /** @brief Returns the global segment position */
@@ -64,20 +53,38 @@ namespace MuonR4{
             /** @brief Returns the number of degrees of freedom */
             unsigned int nDoF() const { return m_nDoF; }
             /** @brief Returns the associated measurements */
-            const MeasVec& measurements() const {
-                return m_measurements;
-            }
+            const MeasVec& measurements() const { return m_measurements; }
             /** @brief Returns the seed out of which the segment was built */
             const SegmentSeed* parent() const { return m_parent; }
             /** @brief Returns the uncertainties of the defining parameters */
             const SegmentFit::Covariance& covariance() const { return m_cov; }
-
-            const std::vector<double>& chi2PerMeasurement() const{
-                return m_chi2PerMeasurement;
-            } 
-            void setSegmentT0(double t0) {
-                m_t0 = t0;             
+            /** @brief Returns the chi2 per measurement vector */
+            const std::vector<double>& chi2PerMeasurement() const { return m_chi2PerMeasurement; }
+            /** @brief Returns how many iterations the fitter needed to make the segment converge */ 
+            unsigned int nFitIterations() const { return m_nCalls; }
+            /** @brief has the time been fitted */
+            bool hasTimeFit() const { return m_t0 != std::nullopt; }
+            /** @brief Returns the fitted segment time, if there's any */
+            double segementT0() const {
+                return m_t0.value_or(0);
             }
+            /** @brief Sets the fitted segment time */
+            void setSegmentT0(double t0) {
+                m_t0 = std::make_optional<double>(t0);             
+            }
+            /** @brief Set the chi2 per measurement */
+            void setChi2PerMeasurement(std::vector<double> && chi2vals){
+                m_chi2PerMeasurement = chi2vals; 
+            }
+            /** @brief Set how many iteration the fitter needed to reach convergence */
+            void setCallsToConverge(unsigned int nCalls) {
+                m_nCalls = nCalls;
+            }
+            /** @brief Set the uncertainties from the fit */
+            void setParUncertainties(SegmentFit::Covariance&& cov){
+                m_cov = std::move(cov);
+            }
+
 
         private: 
             Amg::Vector3D m_globPos{Amg::Vector3D::Zero()};
@@ -87,12 +94,12 @@ namespace MuonR4{
             double m_chi2{0.};
             unsigned int m_nDoF{0};
 
-            double m_t0{0.};
+            std::optional<double> m_t0{std::nullopt};
 
             const MuonGMR4::MuonChamber* m_chamber{m_parent->chamber()};
             std::vector<double> m_chi2PerMeasurement{};
             unsigned int m_nCalls{0};
-            SegmentFit::Covariance m_cov{};
+            SegmentFit::Covariance m_cov{SegmentFit::Covariance::Identity()};
     };
     // placeholder - later will be xAOD EDM 
 }

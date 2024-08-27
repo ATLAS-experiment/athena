@@ -5,6 +5,8 @@
 #ifndef MUONR4_MUONPATTERNEVENT_MUONHOUGHDEFS__H 
 #define MUONR4_MUONPATTERNEVENT_MUONHOUGHDEFS__H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "MuonPatternEvent/HoughMaximum.h"
 /// This header ties the generic definitions in this package 
@@ -35,8 +37,8 @@ namespace MuonR4{
         constexpr int toInt(const AxisDefs p) {
             return static_cast<int>(p);
         }
-        using Parameters = std::array<double, toInt(AxisDefs::nPars)>;
-        using Covariance = std::array<double, toInt(AxisDefs::nPars)>;
+        using Parameters = AmgVector(toInt(AxisDefs::nPars));
+        using Covariance = AmgSymMatrix(toInt(AxisDefs::nPars));
   }
 
 }

@@ -26,10 +26,34 @@ namespace MuonR4{
         }
         std::string toString(const Parameters& pars) {
             std::stringstream sstr{};
-            sstr<<"x0="<<pars[toInt(AxisDefs::x0)]<<", y0="<<pars[toInt(AxisDefs::y0)];
-            sstr<<", tanTheta="<<pars[toInt(AxisDefs::tanTheta)]<<", tanPhi="<<pars[toInt(AxisDefs::tanPhi)];
-            sstr<<", time="<<pars[toInt(AxisDefs::time)];
+            for (int p = 0; p < toInt(AxisDefs::nPars); ++p) {
+                const AxisDefs pe = static_cast<AxisDefs>(p);
+                sstr<<toString(pe)<<"="<<pars[toInt(pe)]<<", ";
+            }
             return sstr.str();
         }
+        std::string toString(const AxisDefs a) {
+            switch (a){
+                case AxisDefs::x0:{
+                    return "x0";
+                    break;
+                } case AxisDefs::y0: {
+                    return "y0";
+                    break;
+                } case AxisDefs::tanTheta: {
+                    return "tanTheta";
+                    break;
+                } case AxisDefs::tanPhi: {
+                    return "tanPhi";
+                    break;
+                } case AxisDefs::time: {
+                    return "time";
+                    break;
+                } case AxisDefs::nPars:
+                    break;
+            }
+            return "";
+        }
+       
     }
 }

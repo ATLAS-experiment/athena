@@ -33,13 +33,28 @@ namespace MuonR4{
                                          const SpacePoint* spacePoint,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
-                                         const double timeOfArrival) const override final;
+                                         const double timeDelay) const override final;
+            
+            CalibSpacePointPtr calibrate(const EventContext& ctx,
+                                         const CalibratedSpacePoint& spacePoint,
+                                         const Amg::Vector3D& seedPosInChamb,
+                                         const Amg::Vector3D& seedDirInChamb,
+                                         const double timeDelay) const override final;
+            
             
             CalibSpacePointVec calibrate(const EventContext& ctx,
                                          const std::vector<const SpacePoint*>& spacePoints,
                                          const Amg::Vector3D& seedPosInChamb,
                                          const Amg::Vector3D& seedDirInChamb,
-                                         const double timeOfArrival) const override final;
+                                         const double timeDelay) const override final;
+
+            CalibSpacePointVec calibrate(const EventContext& ctx,
+                                         CalibSpacePointVec&& spacePoints,
+                                         const Amg::Vector3D& seedPosInChamb,
+                                         const Amg::Vector3D& seedDirInChamb,
+                                         const double timeDelay) const override final;
+
+
         private:
             /// access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"}; 
@@ -61,6 +76,8 @@ namespace MuonR4{
             /*** Resolution of the rpc time measurement  */
             Gaudi::Property<double> m_rpcTimeResolution{this, "rpcTimeResolution", 0.6 * Gaudi::Units::nanosecond,
                                                           "Estimated time resolution of the strip readout"};
+
+            Gaudi::Property<double> m_mdtErrorScale{this, "mdtErrorScaleFactor", 1.0, "Scaling to apply to MDT errors for the pattern"}; 
 
 
     };

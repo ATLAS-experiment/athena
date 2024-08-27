@@ -54,10 +54,15 @@ namespace MuonR4{
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "TruthSegmentsR4"};
           /** @brief Decoration key of the associated sim hit links */
-          using HitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_eleLinkKey{this, "SimHitLink", m_segmentKey, "simHitLinks"};
           /** @brief Decoration key of the associated particle pt */
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_ptKey{this, "PtKey", m_segmentKey, "pt"};
+          /** @brief Decoration key of the local parameters */
+          SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_locParKey{this, "LocParKey", m_segmentKey,"localSegPars"};
+          /** @brief Decoration key of the muon charge  */
+          SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_qKey{this, "qKey", m_segmentKey, "charge"};
+          /** @brief Build segments from muon hits only */
+          Gaudi::Property<bool> m_useOnlyMuonHits{this, "useOnlyMuonHits", true};
           /** @brief Pointer to the muon readout geometry */
           const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
   };

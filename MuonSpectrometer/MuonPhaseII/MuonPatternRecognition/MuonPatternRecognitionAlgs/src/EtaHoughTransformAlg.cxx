@@ -84,7 +84,7 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
         }
         data.maxima.clear();
     }
-    std::sort(writeMaxima->begin(), writeMaxima->end(), 
+    std::stable_sort(writeMaxima->begin(), writeMaxima->end(), 
               [](const HoughMaximum* a, const HoughMaximum* b){                
                 return (*a->parentBucket()) < (*b->parentBucket());
               });
@@ -95,38 +95,38 @@ StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
                                             HoughEventData& data) const {
 
     ATH_MSG_DEBUG("Load " << spacePoints.size() << " space point buckets");
-    for (const SpacePointBucket* sp : spacePoints) {
-        std::vector<HoughSetupForBucket>& buckets = data.houghSetups[sp->front()->chamber()];
-        buckets.push_back(HoughSetupForBucket{sp});
-        HoughSetupForBucket& hs = buckets.back();
-        Amg::Vector3D leftSide = hs.bucket->chamber()->globalToLocalTrans(gctx).translation() -
-                                (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
-        Amg::Vector3D rightSide = hs.bucket->chamber()->globalToLocalTrans(gctx).translation() -
-                                 (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
+    for (const SpacePointBucket* bucket : spacePoints) {
+        std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->chamber()];        
+        HoughSetupForBucket& hs{buckets.emplace_back(bucket)};
+        const Amg::Transform3D globToLoc{hs.bucket->chamber()->globalToLocalTrans(gctx)};
+        Amg::Vector3D leftSide  = globToLoc.translation() - (hs.bucket->coveredMin() * Amg::Vector3D::UnitY());
+        Amg::Vector3D rightSide = globToLoc.translation() - (hs.bucket->coveredMax() * Amg::Vector3D::UnitY());
 
         // get the average z of our hits and use it to correct our angle estimate
-        double z = std::accumulate(sp->begin(), sp->end(), 0., [](double val, const  std::shared_ptr<MuonR4::SpacePoint> & sp){
-            return val + sp->positionInChamber().z(); 
-        }); 
-        z /= static_cast<double>(sp->size()); 
+        double zmin{1.e9}, zmax{-1.e9};
+        for (const std::shared_ptr<MuonR4::SpacePoint> & sp : *bucket) {
+            zmin = std::min(zmin, sp->positionInChamber().z());
+            zmax = std::max(zmax, sp->positionInChamber().z());
+        }
+        const double z = 0.5*(zmin + zmax);
 
         // estimate the angle, adding extra tolerance based on our target resolution
-        const double tanThetaLeft = (leftSide.y() -  m_targetResoIntercept) / (leftSide.z() - z) - m_targetResoTanTheta;
-        const double tanThetaRight = (rightSide.y() + m_targetResoIntercept) /( rightSide.z() - z) + m_targetResoTanTheta;
+        const double tanThetaLeft  = (leftSide.y()  - m_targetResoIntercept) / (leftSide.z()  - z) - m_targetResoTanTheta;
+        const double tanThetaRight = (rightSide.y() + m_targetResoIntercept) / (rightSide.z() - z) + m_targetResoTanTheta;
         hs.searchWindowTanAngle = {tanThetaLeft, tanThetaRight};
-        double y1=1e9,y2=-1e9; 
+        double ymin{1e9}, ymax{-1e9}; 
 
         /// Project the hits onto the center (z=0) axis of the chamber, using 
         /// our guesstimate of tan(theta) 
-        for (auto & hit : *sp){
+        for (const std::shared_ptr<MuonR4::SpacePoint> & hit : *bucket){
             // two estimates: For the two extrema of tan(theta) resulting from the guesstimate
-            double y0l = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaLeft - m_targetResoIntercept;
-            double y0r = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaRight+ m_targetResoIntercept;
+            double y0l = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaLeft;
+            double y0r = hit->positionInChamber().y() - hit->positionInChamber().z() * tanThetaRight;
             // pick the widest envelope
-            y1=std::min(y1, std::min(y0l, y0r)); 
-            y2=std::max(y2, std::max(y0l, y0r)); 
+            ymin=std::min(ymin, std::min(y0l, y0r) - m_targetResoIntercept); 
+            ymax=std::max(ymax, std::max(y0l, y0r) + m_targetResoIntercept); 
         }
-        hs.searchWindowIntercept = {y1, y2};
+        hs.searchWindowIntercept = {ymin, ymax};
     }
     return StatusCode::SUCCESS;
 }
@@ -136,9 +136,9 @@ StatusCode EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     cfg.nBinsX = m_nBinsTanTheta;
     cfg.nBinsY = m_nBinsIntercept;
     ActsPeakFinderForMuonCfg peakFinderCfg;
-    peakFinderCfg.fractionCutoff = 0.6;
-    peakFinderCfg.threshold = 2.5;
-    peakFinderCfg.minSpacingBetweenPeaks = {0., 30.};
+    peakFinderCfg.fractionCutoff = m_peakFractionCutOff;
+    peakFinderCfg.threshold = m_peakThreshold;
+    peakFinderCfg.minSpacingBetweenPeaks = {m_minMaxDistTheta, m_minMaxDistIntercept};
     data.houghPlane = std::make_unique<HoughPlane>(cfg);
     data.peakFinder = std::make_unique<ActsPeakFinderForMuon>(peakFinderCfg);
 
@@ -153,10 +153,8 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
                                   bucket.searchWindowIntercept.second);
     // build a symmetric window around the (geometric) chamber center so that
     // the bin width is equivalent to our target resolution
-    double searchStart =
-        chamberCenter - 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
-    double searchEnd =
-        chamberCenter + 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
+    double searchStart = chamberCenter - 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
+    double searchEnd = chamberCenter + 0.5 * data.houghPlane->nBinsY() * m_targetResoIntercept;
     // Protection for very wide buckets - if the search space does not cover all
     // of the bucket, widen the bin size so that we cover everything
     searchStart = std::min(searchStart, bucket.searchWindowIntercept.first -

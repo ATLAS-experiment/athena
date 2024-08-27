@@ -16,6 +16,8 @@
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/MuonChamber.h"
 
+#include "MuonPatternEvent/MuonHoughDefs.h"
+
 #include "GaudiKernel/PhysicalConstants.h"
 
 #include <unordered_map>
@@ -25,6 +27,7 @@ namespace{
 }
 
 namespace MuonR4{
+    using namespace SegmentFit;
     template <class ContainerType>
         StatusCode TruthSegmentMaker::retrieveContainer(const EventContext& ctx, 
                                                         const SG::ReadHandleKey<ContainerType>& key,
@@ -49,6 +52,10 @@ namespace MuonR4{
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_eleLinkKey.initialize());
         ATH_CHECK(m_ptKey.initialize());
+
+        ATH_CHECK(m_locParKey.initialize());
+        ATH_CHECK(m_qKey.initialize());
+
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         return StatusCode::SUCCESS;
@@ -83,7 +90,9 @@ namespace MuonR4{
                     genParticle = genLink.cptr(); 
                 }
                 /// skip empty truth matches for now
-                if (!genParticle) continue;
+                if (!genParticle || (m_useOnlyMuonHits && std::abs(simHit->pdgId()) != 13)) {
+                    continue;
+                }
                 hitCollector[id][genParticle].push_back(simHit); 
             }
         } 
@@ -92,8 +101,12 @@ namespace MuonR4{
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSegmentContainer>(),
                                      std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         
+        using HitLinkVec = std::vector<ElementLink<xAOD::MuonSimHitContainer>>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> ptDecor{m_ptKey, ctx};
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> qDecor{m_qKey, ctx};
+        using SegPars = xAOD::MeasVector<toInt(AxisDefs::nPars)>;
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars> parDecor{m_locParKey, ctx};
         for (auto& [chamber, collectedParts] : hitCollector) {
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
             
@@ -159,9 +172,16 @@ namespace MuonR4{
 
                 xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
                 ptDecor(*truthSegment) = particle->momentum().pt();
+                qDecor(*truthSegment) = particle->pid() > 0 ? -1 : 1;
+                SegPars& locPars{parDecor(*truthSegment)};
+                locPars[toInt(AxisDefs::x0)] = chamberPos.x();
+                locPars[toInt(AxisDefs::y0)] = chamberPos.y();
+                locPars[toInt(AxisDefs::time)] = simHit->globalTime() + distance *c_inv /simHit->beta();
+                locPars[toInt(AxisDefs::tanTheta)] = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10);
+                locPars[toInt(AxisDefs::tanPhi)]   = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10);
                 truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
                 truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
-                truthSegment->setT0Error(simHit->globalTime() + distance *c_inv /simHit->beta(), 0.);
+                truthSegment->setT0Error(locPars[toInt(AxisDefs::time)], 0.);
                 
                 truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
                 truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 
