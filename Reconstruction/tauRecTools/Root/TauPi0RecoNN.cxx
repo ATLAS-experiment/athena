@@ -4,22 +4,14 @@
 
 /*
  This assumes that TauDecayModeNNClassifier.cxx has been called before and that therefore the decay modes are decorated to the taus
- That is necessary, because we have three separete regression NNs, one for 1p1n, one or 1pXn and one for 3pXn (and none for the 0n decay modes)
-*/
-/*
-* TO DO
-* make sure when I do the if statements on the decay mode I include something that catches if that information is missing and produces an error informing the user, that the decay mode is missing, and that it's TauDecayModeNNClassifer.cxx who predicts those and decorates them onto the taus.
-*/
-
-
-/*
-* As a start this is a copy paste of TauDecayModeNNClassifier.cxx that I'll modify
+ That is necessary, because we have three separete regression NNs, one for 1p1n, one or 1pXn and one for 3pXn (and of course none for the 0n decay modes)
+ E, eta, and phi are set to 0 for 1p0n and 3p0n decay modes.
 */
 
 /*
 * TO DO
 * create the TauPi0RecoNN.h File
-* I only changed this line
+* I so far only changed this line
 */
 // local include(s)
 #include "tauRecTools/TauPi0RecoNN.h"
@@ -33,6 +25,11 @@
 #include <algorithm>
 #include <fstream>
 
+/*
+* TO DO
+* these are doubles, where I later use floats. Is that an issue?
+* I guess I should change the names of things like TauDecayModeNNVariable and TauDecayModeNNHelper
+*/
 using PFOPtr = const xAOD::PFO *;
 using TrkPtr = const xAOD::TauTrack *;
 using PFOAttributes = xAOD::PFODetails::PFOAttributes;
@@ -46,12 +43,8 @@ using InputSequenceMap = std::map<std::string, VectorMap>;
 TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
     : TauRecToolBase(name)
 {
-    /*
-    * TO DO
-    * adapt to TauPi0Reco, I think this is done, unless I need to also declare the decay mode as a property?
-    */
-  declareProperty("OutputName", m_outputName = "TauPi0FourVec");
-  // declareProperty("ProbPrefix", m_probPrefix = "NNDecayModeProb_");
+  // declareProperty("OutputName", m_outputName = "TauPi0FourVec"); // not needed, since we decorate three individual values, instead of one vector, so there's not just 1 Output
+  declareProperty("OutputPrefix", m_OutputPrefix = "pi0_NN_");
   declareProperty("WeightFile_1p1n", m_weightFile_1p1n = "");
   declareProperty("WeightFile_1pXn", m_weightFile_1pXn = "");
   declareProperty("WeightFile_3pXn", m_weightFile_3pXn = "");
@@ -60,8 +53,7 @@ TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
   declareProperty("MaxShotPFOs", m_maxShotPFOs = 6);
   declareProperty("MaxConvTracks", m_maxConvTracks = 4);
   declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
-  // declareProperty("EnsureTrackConsistency", m_ensureTrackConsistency = true);
-  // declareProperty("DecorateProb", m_decorateProb = true);
+  declareProperty("DecayModeName", m_DecayModeName = "NNDecayMode"); // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
 }
 
 TauPi0RecoNN::~TauPi0RecoNN()
@@ -70,11 +62,6 @@ TauPi0RecoNN::~TauPi0RecoNN()
 
 StatusCode TauPi0RecoNN::initialize()
 {
-    /*
-    * TO DO
-    * adapt to TauPi0Reco - DONE(?)
-    * read in three weight files, instead of one - DONE(?)
-    */
   ATH_MSG_INFO("Initializing TauPi0RecoNN");
 
   // find input JSON files
@@ -171,12 +158,14 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
 {
     /*
     * TO DO
-    * adapt to TauPi0Reco
-    * that is gonna require a few else if statements to get the decay mode of the tau and thereby use the correct network
-    * also a final else that decorates zeros onto 1p0n and 3p0n taus (do I want eta and phi to be 0 or should those be null? Probably 0?)
-    * maybe I can just initialize the output with zeros and then overwrite those or 1n and Xn cases?
-    * on the other hand it might be good to have a consistency check of only writing in zeros for 0n cases and throw and error if there's a different decay mode than the five expected ones?
+    * Do I need checks, if the decay mode is actually on the tau (and has one of the allowed values)? Or is it enough, that the accessor will throw errors, when it tries to get to the decayMode and that doesn't exist?
     */
+
+  // Read the previously classified decay mode of the tau
+  // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
+  // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
+  const static SG::AuxElement::Accessor<int> accDecayMode(m_DecayModeName); // This can probably also be a ConstAccessor?
+  int decayMode = accDecayMode(xTau);
 
   // inputs
   // ------
@@ -196,57 +185,81 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
 
   // inference
   // ---------
-  try
+  if (decayMode == 1) // 1p1n
   {
-    outputs = m_lwtGraph->compute(inputMapDummy, inputSeqMap);
+    try
+    {
+      outputs = m_lwtGraph_1p1n->compute(inputMapDummy, inputSeqMap);
+    }
+    catch (const std::exception &e)
+    {
+      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+      return StatusCode::FAILURE;
+    }
   }
-  catch (const std::exception &e)
+  else if (decayMode == 2) // 1pXn
   {
-    ATH_MSG_ERROR("Error evaluating the network: " << e.what());
-    return StatusCode::FAILURE;
+    try
+    {
+      outputs = m_lwtGraph_1pXn->compute(inputMapDummy, inputSeqMap);
+    }
+    catch (const std::exception &e)
+    {
+      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+      return StatusCode::FAILURE;
+    }
   }
+  else if (decayMode == 4) // 3pXn
+  {
+    try
+    {
+      outputs = m_lwtGraph_3pXn->compute(inputMapDummy, inputSeqMap);
+    }
+    catch (const std::exception &e)
+    {
+      ATH_MSG_ERROR("Error evaluating the network: " << e.what());
+      return StatusCode::FAILURE;
+    }
+  }
+  /*
+  * This should also work, but I think it's more convoluted. To fill the outputs map to then read it to the pi0fourVec std:array
+  * Instead I'll just initialise the array with 0s in all entries and only fill it with the content of the output map, if the decay mode is not a 0n one.
+  */
+  // else // 1p0n or 3p0n
+  // {
+  //   for (int i = 0; i < 3; i++)
+  //   {
+  //     outputs[DMVar::sFourVecDimNames[i]] = 0;
+  //   }
+  // }
+
 
   // Results
   // -------
   /*
   * TO DO
-  * check if that is the case. I'm writing this while Lukas is still working on the networks, so I'm basically just guessing the order of the three variables
-  * also, I think initally we were predicting E, not p (though p is of course better, because we don't want the NN to have to learn the pion mass), so I'll need to double check we changed that by the time we merge this.
+  *  I think, we're currently predicting p not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
+  *  I'm currently just guessing, that the names of the output are going to be c_E, c_eta, and c_phi. E, eta, and phi make sense to me (though they might be like E_pi0 or something?), the c_ prefix I copy pasted from the DecayModeClassifier tool, because I assume that's a convention for these kind of json files or something. Gonna have to check that with Lukas' code (but that will of course also show up in testing)
   */
-  // Outputs are p, eta, and phi
+  // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
   //
-  std::array<float, 3> pi0fourVec; // is it fine to hard code the dimension here? I don't see what other variable might ever get added that should be part of this vector instead of possible getting decorated on separately?
-  for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
+  std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
+  if (decayMode != 0 && decayMode != 3) // not 1p0n or 1p3n
   {
-    // pi0fourVec[i] = outputs.at(prefix + DMVar::sModeNames[i]);
-    /*
-    * TO DO
-    * that syntax with the prefix is copy pasted from the decay mode classifier, because that wants to decorate strings onto the objects. I obviously just wanna put the floats themselves there, so I gotta check how to do that. Basically I gotta find out, what form the outputs objects has.
-    * Can I just skip this step and use outputs as the thing I decorate onto the tau objects?
-    * Right now there is this value map thing that maps numbers onto strings. I think I can fully cut all of that and without any mapping just get the output from the network
-    */
+    // the prefix to match to output name in the json weight file
+    std::string prefix = "c_";
+    for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
+    {
+      pi0fourVec[i] = outputs.at(prefix + DMVar::sFourVecDimNames[i]);
+    }
   }
 
-
-
-
-
-    /*
-    * TO DO
-    * Figure out, how exactly these AuxElement things work to decorate stuff onto the tau object. I just don't know athena well enough to fully understand these lines of code (copy pasted from the classifier), I only understand (I think :D) that this is where they decorate the string onto the tau.
-    */
-  const SG::AuxElement::Accessor<int> accDecayMode(m_outputName);
-  accDecayMode(xTau) = std::distance(probs.cbegin(), itMax);
-
-  if (m_decorateProb)
+  for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
   {
-    for (std::size_t i = 0; i < probs.size(); ++i)
-    {
-      const std::string probName = m_probPrefix + DMVar::sModeNames[i];
-      const SG::AuxElement::Accessor<float> accProb(probName);
-      accProb(xTau) = probs[i];
-    }
+    const std::string fourVecDimName = m_OutputPrefix + DMVar::sFourVecDimNames[i];
+    const SG::AuxElement::Accessor<float> accPi0(fourVecDimName);
+    accPi0(xTau) = pi0fourVec[i];
   }
 
   return StatusCode::SUCCESS;
@@ -254,11 +267,6 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
 
 StatusCode TauPi0RecoNN::getInputs(const xAOD::TauJet &xTau, InputSequenceMap &inputSeqMap) const
 {
-    /*
-    * TO DO
-    * adapt to TauPi0Reco
-    * Which might be nothing? The one input we need that TauDecayModeNNClassifier.cxx doesn't need, which is the output of that, the decay modes decorated to the tau, but those are just used for if statements to use the right (if any) weight file, not as input to those NNs, so I gotta check if I need to add that here to the inputs or if that's gonna be read somewhere else.
-    */
   std::vector<TrkPtr> vTauTracks;
   std::vector<PFOPtr> vNeutralPFOs;
   std::vector<PFOPtr> vShotPFOs;
@@ -432,10 +440,6 @@ StatusCode TauPi0RecoNN::getInputs(const xAOD::TauJet &xTau, InputSequenceMap &i
 // Helper functions
 namespace tauRecTools
 {
-    /*
-    * TO DO
-    * Adapt to TauPi0Reco
-    */
   const std::set<std::string> TauDecayModeNNVariable::sCommonP4Vars = {
       "dphiECal", "detaECal", "dphi", "deta", "pt_log", "jetpt_log"};
 
@@ -448,8 +452,8 @@ namespace tauRecTools
       "firstEtaWRTClusterPosition_EM1", "firstEtaWRTClusterPosition_EM2", 
       "secondEtaWRTClusterPosition_EM1_log", "secondEtaWRTClusterPosition_EM2_log"};
 
-  const std::array<std::string, TauDecayModeNNVariable::nClasses> TauDecayModeNNVariable::sModeNames = {
-      "1p0n", "1p1n", "1pXn", "3p0n", "3pXn"};
+  const std::array<std::string, 3> TauDecayModeNNVariable::sFourVecDimNames = {
+      "E", "eta", "phi"};
 
   float TauDecayModeNNVariable::deltaPhi(const TLorentzVector &p4, const TLorentzVector &p4_tau)
   {
