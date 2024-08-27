@@ -19,8 +19,6 @@ InDet::InDetCosmicScoringTool::InDetCosmicScoringTool(const std::string& t,
   AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ITrackScoringTool>(this);
-  declareProperty("nWeightedClustersMin", m_nWeightedClustersMin = 0); 
-  declareProperty("minTRTHits",           m_minTRTHits = 0);
 }
 
 Trk::TrackScore InDet::InDetCosmicScoringTool::score( const Trk::Track& track, bool /*checkBasicSel*/ ) const
