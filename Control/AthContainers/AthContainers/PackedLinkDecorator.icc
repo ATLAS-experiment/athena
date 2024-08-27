@@ -1,0 +1,836 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file PackedLinkDecorator.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Nov, 2023
+ * @brief Helper class to provide type-safe access to aux data,
+ *        specialized for @c PackedLink.
+ */
+
+#include "AthContainers/AuxElement.h"
+#include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/exceptions.h"
+
+
+namespace SG {
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC>
+inline
+Decorator<PackedLink<CONT>, ALLOC>::Decorator (const std::string& name)
+  : Decorator (name, "", SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC>
+inline
+Decorator<PackedLink<CONT>, ALLOC>::Decorator (const std::string& name,
+                                               const std::string& clsname)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class CONT, class ALLOC>
+inline
+Decorator<PackedLink<CONT>, ALLOC>::Decorator (const SG::auxid_t auxid)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  m_auxid = auxid;
+  r.checkAuxID<PLink_t, ALLOC> (m_auxid);
+  m_linkedAuxid = r.linkedVariable (m_auxid);
+  if (m_linkedAuxid == static_cast<uint32_t>(null_auxid)) {
+    throw SG::ExcNoLinkedVar (auxid, typeid (CONT));
+    // cppcheck-suppress missingReturn; false positive
+  }
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC>
+inline
+Decorator<PackedLink<CONT>, ALLOC>::Decorator
+  (const std::string& name,
+   const std::string& clsname,
+   const SG::AuxVarFlags flags)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  m_linkedAuxid = r.getAuxID<DLink_t, DLinkAlloc_t> (AuxTypeRegistry::linkedName (name),
+                                                     clsname,
+                                                     flags | AuxVarFlags::Linked);
+  m_auxid = r.getAuxID<PLink_t, ALLOC> (name, clsname, flags, m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param e The element for which to fetch the variable.
+ *
+ * Will return an @c ElementLink proxy, which may be converted to
+ * or assigned from an @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+template <IsConstAuxElement ELT>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::operator() (const ELT& e) const -> ELProxy
+{
+  assert (e.container() != 0);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (*e.container());
+  return ELProxy (e.container()->template getDecoration<PLink_t> (this->m_auxid, e.index()),
+                  container_nc,
+                  this->m_auxid,
+                  this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * Will return an @c ElementLink proxy, which may be converted to
+ * or assigned from an @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::operator() (const AuxVectorData& container,
+                                                size_t index) const
+  -> ELProxy
+{
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  return ELProxy (container.template getDecoration<PLink_t> (this->m_auxid, index),
+                  container_nc, this->m_auxid, this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to set the variable.
+ * @param l The @c ElementLink to set.
+ */
+template <class CONT, class ALLOC>
+template <IsConstAuxElement ELT>
+inline
+void Decorator<PackedLink<CONT>, ALLOC>::set (const ELT& e,
+                                              const Link_t& l) const
+{
+  set (*e.container(), e.index(), l);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container for which to set the variable.
+ * @param index The index of the desired element.
+ * @param l The @c ElementLink to set.
+ */
+template <class CONT, class ALLOC>
+inline
+void Decorator<PackedLink<CONT>, ALLOC>::set (const AuxVectorData& container,
+                                              size_t index,
+                                              const Link_t& l) const
+{
+  // Have to do this before creating the converter.
+  PLink_t& ll = container.template getDecoration<PLink_t> (this->m_auxid, index);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  detail::PackedLinkConverter<CONT> cnv (container_nc,
+                                         this->m_auxid,
+                                         this->m_linkedAuxid);
+  cnv.set (ll, l);
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getPackedLinkArray (const AuxVectorData& container) const
+  -> const PLink_t*
+{
+  return reinterpret_cast<const PLink_t*> (container.getDataArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDataLinkArray (const AuxVectorData& container) const
+  -> const DLink_t*
+{
+  return reinterpret_cast<const DLink_t*>
+    (container.getDataArray (m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of @c PackedLinks,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getPackedLinkDecorArray (const AuxVectorData& container) const
+  -> PLink_t*
+{
+  return reinterpret_cast<PLink_t*> (container.getDecorationArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDataLinkDecorArray (const AuxVectorData& container) const
+  -> DLink_t*
+{
+  return reinterpret_cast<DLink_t*> (container.getDecorationArray (m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a span over the array of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getPackedLinkSpan (const AuxVectorData& container) const
+  -> const_PackedLink_span
+{
+  auto beg = reinterpret_cast<const PLink_t*>(container.getDataArray (m_auxid));
+  return const_PackedLink_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDataLinkSpan (const AuxVectorData& container) const
+  -> const_DataLink_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return const_DataLink_span (reinterpret_cast<const DLink_t*>(sp->beg),
+                              sp->size);
+}
+
+
+/**
+ * @brief Get a span of @c ElementLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDataSpan (const AuxVectorData& container) const
+  -> const_span
+{
+  return const_span (getPackedLinkSpan(container),
+                     ConstConverter_t (*container.getDataSpan (m_linkedAuxid)));
+}
+
+
+/**
+ * @brief Get a span over the array of @c PackedLinks, as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getPackedLinkDecorSpan (const AuxVectorData& container) const
+  -> PackedLink_span
+{
+  auto beg = reinterpret_cast<PLink_t*>
+    (container.getDecorationArray (this->m_auxid));
+  return PackedLink_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the array of @c DataLinks, as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDataLinkDecorSpan (const AuxVectorData& container) const
+  -> DataLink_span
+{
+  (void)container.getDecorationArray (this->m_linkedAuxid); // check for locking
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return DataLink_span (reinterpret_cast<DLink_t*>(sp->beg), sp->size);
+}
+
+
+/**
+ * @brief Get a span of @c ElementLink proxies, as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * The proxies may be converted to or assigned from @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC>
+inline
+auto
+Decorator<PackedLink<CONT>, ALLOC>::getDecorationSpan (const AuxVectorData& container) const
+  -> span
+{
+  PackedLink_span pspan = getPackedLinkDecorSpan(container);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  return span (pspan,
+               detail::PackedLinkConverter<CONT> (container_nc,
+                                                  this->m_auxid,
+                                                  this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class CONT, class ALLOC>
+template <IsConstAuxElement ELT>
+inline
+bool
+Decorator<PackedLink<CONT>, ALLOC>::isAvailableWritable (const ELT& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritableAsDecoration (m_auxid) &&
+    e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+//************************************************************************
+
+
+// To make the declarations a bit more readable.
+#define DECORATOR Decorator<std::vector<PackedLink<CONT>, VALLOC>, ALLOC>
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+DECORATOR::Decorator (const std::string& name)
+  : Decorator (name, "", SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+DECORATOR::Decorator (const std::string& name,
+                      const std::string& clsname)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
+{
+}
+
+
+/**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+DECORATOR::Decorator (const SG::auxid_t auxid)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  m_auxid = auxid;
+  r.checkAuxID<VElt_t, ALLOC> (m_auxid);
+  m_linkedAuxid = r.linkedVariable (m_auxid);
+  if (m_linkedAuxid == static_cast<uint32_t>(null_auxid)) {
+    throw SG::ExcNoLinkedVar (auxid, typeid (CONT));
+  }
+}
+/**
+ * @brief Constructor.
+ * @param name Name of this aux variable.
+ * @param clsname The name of its associated class.  May be blank.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ *
+ * The name -> auxid lookup is done here.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+DECORATOR::Decorator (const std::string& name,
+                      const std::string& clsname,
+                      const SG::AuxVarFlags flags)
+{
+  AuxTypeRegistry& r = AuxTypeRegistry::instance();
+  m_linkedAuxid = r.getAuxID<DLink_t, DLinkAlloc_t> (AuxTypeRegistry::linkedName (name),
+                                                     clsname,
+                                                     flags | AuxVarFlags::Linked);
+  m_auxid = r.getAuxID<VElt_t, ALLOC> (name, clsname, flags, m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param e The element for which to fetch the variable.
+ *
+ * This will return a range of @c ElementLink proxies.
+ * These proxies may be converted to or assigned from @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsConstAuxElement ELT>
+auto
+DECORATOR::operator() (const ELT& e) const
+  -> elt_span
+{
+  assert (e.container() != 0);
+  // This has be to called before making the ELSpanProxyHelper.
+  VElt_t* veltArr = getPackedLinkVectorDecorArray(*e.container());
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = *const_cast<AuxVectorData*>(e.container());
+  return elt_span (veltArr[e.index()], container_nc,
+                   this->m_auxid,
+                   this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Fetch the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * This allows retrieving aux data by container / index.
+ *
+ * This will return a range of @c ElementLink proxies.
+ * These proxies may be converted to or assigned from @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+auto
+DECORATOR::operator() (const AuxVectorData& container,
+                       size_t index) const
+  -> elt_span
+{
+  // This has be to called before making the ELSpanProxyHelper.
+  VElt_t* veltArr = getPackedLinkVectorDecorArray(container);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&>(container);
+  return elt_span (veltArr[index], container_nc,
+                   this->m_auxid,
+                   this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param e The element for which to set the variable.
+ * @param r The variable value to set, as a range over @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsConstAuxElement ELT, detail::ElementLinkRange<CONT> RANGE>
+void DECORATOR::set (const ELT& e, const RANGE& r) const
+{
+  set (*e.container(), e.index(), r);
+}
+
+
+/**
+ * @brief Set the variable for one element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ * @param r The variable value to set, as a range over @c ElementLink.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <detail::ElementLinkRange<CONT> RANGE>
+void DECORATOR::set (const AuxVectorData& container,
+                     size_t index,
+                     const RANGE& r) const
+{
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  detail::PackedLinkConverter<CONT> cnv (container_nc,
+                                         this->m_auxid,
+                                         this->m_linkedAuxid);
+  VElt_t& velt = container.template getDecoration<VElt_t> (this->m_auxid, index);
+  cnv.set (velt, r);
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of vectors of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkVectorArray (const AuxVectorData& container) const
+  -> const VElt_t*
+{
+  return reinterpret_cast<const VElt_t*>
+    (container.getDataArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDataLinkArray (const AuxVectorData& container) const
+  -> const DLink_t*
+{
+  return reinterpret_cast<const DLink_t*>
+    (container.getDataArray (m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the array of vectors of @c PackedLinks,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkVectorDecorArray (const AuxVectorData& container) const
+  -> VElt_t*
+{
+  return reinterpret_cast<VElt_t*> (container.getDecorationArray (m_auxid));
+}
+
+
+/**
+ * @brief Get a pointer to the start of the linked array of @c DataLinks,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDataLinkDecorArray (const AuxVectorData& container) const
+  -> DLink_t*
+{
+  return reinterpret_cast<DLink_t*> (container.getDecorationArray (m_linkedAuxid));
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element.
+ * @param e The element for which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsConstAuxElement ELT>
+inline
+auto
+DECORATOR::getPackedLinkSpan (const ELT& e) const
+  -> const_PackedLink_span
+{
+  auto elt = reinterpret_cast<const VElt_t*>
+    (e.container()->getDataArray (this->m_auxid)) + e.index();
+  return const_PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkSpan (const AuxVectorData& container, size_t index) const
+  -> const_PackedLink_span
+{
+  auto elt = reinterpret_cast<const VElt_t*>
+    (container.getDataArray (this->m_auxid)) + index;
+  return const_PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkSpan (AuxVectorData& container, size_t index) const
+  -> PackedLink_span
+{
+  auto elt = reinterpret_cast<VElt_t*>
+    (container.getDataArray (this->m_auxid)) + index;
+  return PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vectors of @c PackedLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkVectorSpan (const AuxVectorData& container) const
+  -> const_PackedLinkVector_span
+{
+  auto beg = reinterpret_cast<const VElt_t*>
+    (container.getDataArray (m_auxid));
+  return const_PackedLinkVector_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the array of @c DataLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDataLinkSpan (const AuxVectorData& container) const
+  -> const_DataLink_span
+{
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return const_DataLink_span (reinterpret_cast<const DLink_t*>(sp->beg),
+                              sp->size);
+}
+
+
+/**
+ * @brief Get a span over spans of @c ElementLinks.
+ * @param container The container from which to fetch the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDataSpan (const AuxVectorData& container) const
+  -> const_span
+{
+  const_PackedLinkVector_span pvspan = getPackedLinkVectorSpan(container);
+  return const_span (pvspan,
+                     ConstVectorTransform_t (*container.getDataSpan (m_linkedAuxid)));
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element,
+ *        as a decoration.
+ * @param e The element for which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsConstAuxElement ELT>
+inline
+auto
+DECORATOR::getPackedLinkDecorSpan (const ELT& e) const
+  -> PackedLink_span
+{
+  auto elt = reinterpret_cast<VElt_t*>
+    (e.container()->getDecorationArray (this->m_auxid)) + e.index();
+  return PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vector of @c PackedLinks for a given element,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ * @param index The index of the desired element.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkDecorSpan (const AuxVectorData& container, size_t index) const
+  -> PackedLink_span
+{
+  auto elt = reinterpret_cast<VElt_t*>
+    (container.getDecorationArray (this->m_auxid)) + index;
+  return PackedLink_span (elt->data(), elt->size());
+}
+
+
+/**
+ * @brief Get a span over the vectors of @c PackedLinks,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getPackedLinkVectorDecorSpan (const AuxVectorData& container) const
+  -> PackedLinkVector_span
+{
+  auto beg = reinterpret_cast<VElt_t*>
+    (container.getDecorationArray (m_auxid));
+  return PackedLinkVector_span (beg, container.size_v());
+}
+
+
+/**
+ * @brief Get a span over the array of @c DataLinks, as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDataLinkDecorSpan (const AuxVectorData& container) const
+  -> DataLink_span
+{
+  (void)container.getDecorationArray (this->m_linkedAuxid); // check for locking
+  const AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
+  return DataLink_span (reinterpret_cast<DLink_t*>(sp->beg), sp->size);
+}
+
+
+/**
+ * @brief Get a span over spans of @c ElementLink proxies,
+ *        as a decoration.
+ * @param container The container from which to fetch the variable.
+ *
+ * The individual proxies may be converted to or assigned from @c ElementLink.
+ * Each element may also be assigned from a range of @c ElementLink,
+ * or converted to a vector of @c ElementLink.
+ *
+ * If the container is locked, this will allow fetching only variables
+ * that do not yet exist (in which case they will be marked as decorations)
+ * or variables already marked as decorations.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+auto
+DECORATOR::getDecorationSpan (const AuxVectorData& container) const
+  -> span
+{
+  PackedLinkVector_span pvspan = getPackedLinkVectorDecorSpan(container);
+  AuxVectorData& container_nc ATLAS_THREAD_SAFE = const_cast<AuxVectorData&> (container);
+  return span (pvspan,
+               ELSpanConverter (container_nc,
+                                this->m_auxid,
+                                this->m_linkedAuxid));
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param e An element of the container which to test the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+template <IsConstAuxElement ELT>
+inline
+bool
+DECORATOR::isAvailableWritable (const ELT& e) const
+{
+  return e.container() &&
+    e.container()->isAvailableWritableAsDecoration (m_auxid) &&
+    e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+#undef DECORATOR
+
+
+} // namespace SG
