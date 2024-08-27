@@ -41,13 +41,43 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
   }
 
   Muon::nsw::NSWTriggerCommonDecoder nsw_trigger_decoder (fragment, "STGL1A");
+
+  if (nsw_trigger_decoder.has_error()) {
+    ATH_MSG_DEBUG("NSW sTGC TP Common Decoder found exceptions while reading this STGL1A fragment from " + std::to_string(fragment.rob_source_id()) + ". Skipping. Error id: "+std::to_string(nsw_trigger_decoder.error_id()));
+    return StatusCode::SUCCESS;
+  }
+
+  if (nsw_trigger_decoder.get_elinks().size()==1) {
+    if (std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(nsw_trigger_decoder.get_elinks()[0])->l1a_versionID() >= 3){
+      ATH_MSG_DEBUG("NSW sTGC TP Common Decoder found only one elink in output but incosistent L1A version: something off with this fragment. Skipping.");
+      return StatusCode::SUCCESS;
+    }
+  } else if (nsw_trigger_decoder.get_elinks().size()!=3 && nsw_trigger_decoder.get_elinks().size()!=5) {
+    // this is a severe requirement: a single elink missing would imply the whole event is problematic 
+    ATH_MSG_DEBUG("NSW sTGC TP Common Decoder didn't give 3 or 5 elinks in output for: something off with this fragment. Skipping.");
+    return StatusCode::SUCCESS;
+  }
+
+  bool consistent = true;
+  const auto l0 = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(nsw_trigger_decoder.get_elinks()[0]);
+  for(const auto& baseLink: nsw_trigger_decoder.get_elinks()) {
+    const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
+    if (l0->head_sectID() != l->head_sectID()) {consistent = false; break;}
+    if (l0->L1ID() != l->L1ID()) {consistent = false; break;}
+    if (l0->l1a_versionID() != l->l1a_versionID()) {consistent = false; break;}
+    if (l0->l1a_req_BCID() != l->l1a_req_BCID()) {consistent = false; break;}
+  }
+  if (!consistent) {
+    ATH_MSG_WARNING("NSW sTGC TP Common Decoder found inconsistent header parameters in the elinks: something off with this fragment. Skipping.");
+    return StatusCode::SUCCESS;
+  }
+
+  xAOD::NSWTPRDO* rdo = new xAOD::NSWTPRDO();
+  rdoContainer.push_back(rdo);
  
   for(const auto& baseLink: nsw_trigger_decoder.get_elinks()){
     /// Create the new trigger processor RDO
-    xAOD::NSWTPRDO* rdo = new xAOD::NSWTPRDO();
-    rdoContainer.push_back(rdo);
     const auto link = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerSTGL1AElink>(baseLink);
-
     const std::shared_ptr<Muon::nsw::NSWResourceId>& elinkID =  link->elinkId ();
 
     uint32_t moduleID{0};
@@ -70,14 +100,7 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
     rdo->set_config_l1a_request_bcid_offset(link->l1a_req_BCID_offset());
     rdo->set_config_window_close_bcid_offset(link->l1a_close_BCID_offset());
 
-
-
-    
-
-
-
     // now we are filling all the pad segment variables 
-
     const std::vector<STGTPPadPacket>& pad_packets = link->pad_packets();
     for(uint i_packetIndex = 0; i_packetIndex<pad_packets.size(); i_packetIndex++){
       const STGTPPadPacket& pad_packet = pad_packets.at(i_packetIndex);
@@ -130,8 +153,9 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
     if (link->l1a_versionID() < 3){
        return StatusCode::SUCCESS;
     }
+
     const std::vector<STGTPMMPacket>& mm_packets =  link->mm_packet();
-    for(uint i_packetIndex = 0; i_packetIndex<segment_packets.size(); i_packetIndex++){
+    for(uint i_packetIndex = 0; i_packetIndex<mm_packets.size(); i_packetIndex++){
       const STGTPMMPacket& mm_packet = mm_packets.at(i_packetIndex);
        for (const STGTPMMPacket::MMSegmentData& payload : mm_packet.Segments()){
         // we have at most 8 candidates in the output
@@ -153,8 +177,8 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       rdo->NSWTP_mm_BCID().push_back(mm_packet.BCID());
     }
 
-    }
-    return StatusCode::SUCCESS;
+  }
+  return StatusCode::SUCCESS;
   
 }
 }  // namespace Muon

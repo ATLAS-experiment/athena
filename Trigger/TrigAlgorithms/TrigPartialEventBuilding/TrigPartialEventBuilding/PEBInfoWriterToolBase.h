@@ -26,15 +26,19 @@ public:
     Input(TrigCompositeUtils::Decision* d,
           const EventContext& ctx,
           const ElementLink<TrigRoiDescriptorCollection>& r,
-          const TrigCompositeUtils::Decision* pd)
+          const TrigCompositeUtils::Decision* pd,
+          const uint8_t tt)
     : decision(d),
       eventContext(ctx),
       roiEL(r),
-      previousDecisionIDs(TrigCompositeUtils::decisionIDs(pd).begin(), TrigCompositeUtils::decisionIDs(pd).end()) {}
+      previousDecisionIDs(TrigCompositeUtils::decisionIDs(pd).begin(), TrigCompositeUtils::decisionIDs(pd).end()),
+      tt(tt) 
+      {}
     TrigCompositeUtils::Decision* decision;
     const EventContext& eventContext;
     const ElementLink<TrigRoiDescriptorCollection> roiEL;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
+    const uint8_t tt;
   };
   /// Structure holding the list of ROBs and SubDets
   struct PEBInfo {
@@ -64,6 +68,10 @@ protected:
   /// MaxRoIs property
   Gaudi::Property<int> m_maxRoIs {
     this, "MaxRoIs", -1, "Create PEB list only for the first N RoIs from input decisions (<0 means no limit)"
+  };
+
+  Gaudi::Property<std::vector<unsigned int>> m_matchTriggerType {
+    this, "MatchTriggerType", {}, "L1 trigger type to match"
   };
 
 private:

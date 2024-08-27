@@ -80,9 +80,12 @@ private:
 
     Gaudi::Property<int>  m_supportedGeometry{this,"SupportedGeometry",0,"Supported geometry flag is set in jobOpt and is equal to major release version"};
     Gaudi::Property<bool> m_ignoreTagSupport{this,"IgnoreTagSupport",false,"Skip checking if the geometry tag is supported/obsolete"};
-
+    
+    Gaudi::Property<bool> m_emecStandard{this,"EMECStandard",false,"Activate the EMEC construction from standard Geant4 Shapes: G4GenericTrap"};
+    
     Gaudi::Property<bool> m_sqliteDb{this,"SQLiteDB",false,"Activate GeoModel initialization from SQLite"};
     Gaudi::Property<std::string> m_sqliteDbFullPath{this,"SQLiteDBFullPath","","Explicit setting of full path to SQLiteDB. For testing purposes only"};
+
 
     std::unique_ptr<GeoModelIO::ReadGeoModel> m_sqliteReader{};
     std::unique_ptr<GMDBManager>              m_sqliteDbManager{};
@@ -114,6 +117,8 @@ private:
 
     virtual GeoModel::GeoConfig geoConfig() const override {return m_geoDbTagSvc->geoConfig();}
 
+    virtual const bool &  isEmecStandard()                  const override {return m_emecStandard;}
+    
     StatusCode geoInit();
     StatusCode fillTagInfo() const;
 };

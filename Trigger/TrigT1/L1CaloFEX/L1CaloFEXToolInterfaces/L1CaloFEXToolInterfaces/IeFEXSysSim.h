@@ -30,10 +30,6 @@ Interface definition for eFEXSysSim
     
     virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection) = 0;
 
-    virtual void init() = 0;
-
-    virtual void cleanup() = 0;
-
     virtual int calcTowerID(int eta, int phi, int mod) const = 0 ;
 
   private:

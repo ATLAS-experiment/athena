@@ -593,6 +593,10 @@ namespace MuonGM {
         m_nswAsBuilt = nswAsBuiltData;
     }
 
+    void MuonDetectorManager::setsTGCAsBuilt2(const sTGCAsBuiltData2* stgcAsBuilt2) {
+        m_stgcAsBuildData2 = stgcAsBuilt2;
+    }
+
     const MdtReadoutElement* MuonDetectorManager::getMdtReadoutElement(const IdentifierHash& id) const {
 #ifndef NDEBUG
         if (id >= m_idHelperSvc->mdtIdHelper().detectorElement_hash_max()) {           

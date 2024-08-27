@@ -35,6 +35,16 @@ StatusCode PEBInfoWriterToolBase::decide(std::vector<Input>& inputs) const {
       ATH_MSG_DEBUG("Skipping chain because previous step didn't pass");
       continue;
     }
+    
+    if (!m_matchTriggerType.empty()) {
+      if (std::none_of(
+        m_matchTriggerType.begin(),
+        m_matchTriggerType.end(),
+        [&input](uint8_t test_tt) { return (test_tt & input.tt) == test_tt; }
+      )){
+      continue;
+      }
+    }
 
     // Count unique RoIs
     bool isUnique = uniqueRoIs.insert(input.roiEL).second;

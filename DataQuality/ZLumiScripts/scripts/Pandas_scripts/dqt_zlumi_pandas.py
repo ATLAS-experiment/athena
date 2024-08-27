@@ -33,15 +33,12 @@ parser.add_argument('--useofficial', action='store_true', help='Use official lum
 parser.add_argument('--lumifolder', type=str, help='Lumi folder', default='/TRIGGER/OFLLUMI/OflPrefLumi')
 parser.add_argument('--lumitag', type=str, help='Lumi tag', default='OflLumi-Run3-003')
 parser.add_argument('--outdir', type=str, help='Directory to dump plots', default='plots')
-parser.add_argument('--update', type=str, help='On = Update current plots, Off = Only create plots from new runs', default = 'off')
 parser.add_argument('--dblivetime', action='store_true', help='Look up livetime from DB')
 parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21, mc23a')
 
 args     = parser.parse_args()
 campaign = args.campaign
-update = args.update
 
-BINWIDTH      = 10
 ZPURITYFACTOR = 0.9935
 if args.campaign in ["mc21", "mc23a"]:
     ZXSEC = 2.0675
@@ -62,19 +59,18 @@ for key in fin.GetListOfKeys():
         runnumber = runname.replace('run_','')
         break
 
+if not runname:
+    logging.critical("Can't find run_* directory in input file %s", args.infile)
+    sys.exit(1)
+
 print("Starting HIST to CSV conversion for Run ", runnumber)
-exit_string = "CSV file already exists for Run " + runnumber + ". Moving to next run..."
 
 if args.outdir: 
     out_dir = args.outdir
     os.system("mkdir -p " + out_dir)
     out_dir += "/" + runname + ".csv"
-    if os.path.exists(out_dir) and update == "off":
-        sys.exit(exit_string)
 else: 
     out_dir = runname + ".csv"
-    if os.path.exists(out_dir) and update == "off":
-        sys.exit(exit_string)
 
 if args.campaign in ["mc21", "mc23a"]:
     lb_length_name = '%s/GLOBAL/DQTGlobalWZFinder/duration_vs_LB' % runname
@@ -93,11 +89,6 @@ else:
     #grl_file = doZLumi.makeGRL(int(runnumber), 'PHYS_StandardGRL_All_Good', grlname)
     grl = None
 
-if not runname:
-    logging.critical("Can't find run_* directory in input file %s", args.infile)
-    sys.exit(1)
-
-#lb_length_old = fin.Get('%s/GLOBAL/DQTGlobalWZFinder/duration_vs_LB' % runname)
 lb_length_old = fin.Get(lb_length_name)
 lbmin, lbmax = lb_length_old.FindFirstBinAbove(0, 1, 0, -1), lb_length_old.FindLastBinAbove(0, 1, 0, -1)
 lb_length = ROOT.TProfile('lb_length', 'LB length', int(lbmax-lbmin), lbmin, lbmax)
@@ -111,7 +102,6 @@ if args.dblivetime:
     logging.info('Starting livetime lookup ... (remove when we have a proper in-file implementation ...)')
     livetime = ROOT.TProfile('livetime', 'Livetime', int(lbmax-lbmin), lbmin, lbmax)
 else:
-    #livetime = fin.Get('%s/GLOBAL/DQTGlobalWZFinder/avgLiveFrac_vs_LB' % runname)
     livetime = fin.Get(livetime_name)
 
 official_lum_zero = ROOT.TProfile('official_lum_zero', 'official inst luminosity', int(lbmax-lbmin), lbmin, lbmax)
@@ -161,17 +151,17 @@ divisor.Multiply(px)
 # container_efficiency
 hto = fin.Get('%s/GLOBAL/DQTGlobalWZFinder/m_ele_template_os' % (runname))
 hts = fin.Get('%s/GLOBAL/DQTGlobalWZFinder/m_ele_template_ss' % (runname))
-hphotontotal = fin.Get("%s/GLOBAL/DQTGlobalWZFinder/m_elContainertp_nomatch" % (runname))
-hphotontotal.GetXaxis().SetRangeUser(66000, 250000)
 
 # ==== Set signal region == 0, then fit ====
-h_fit = hphotontotal.Clone()
-for xbin in range(1, h_fit.GetNbinsX()+1): 
-    mass = h_fit.GetBinLowEdge(xbin)
-    if mass > 75000 and mass < 100000: 
-        h_fit.SetBinContent(xbin, 0)
-        h_fit.SetBinError(xbin, 0)
-h_fit.Fit("pol2", "q")
+# hphotontotal = fin.Get("%s/GLOBAL/DQTGlobalWZFinder/m_elContainertp_nomatch" % (runname))
+# hphotontotal.GetXaxis().SetRangeUser(66000, 250000)
+# h_fit = hphotontotal.Clone()
+# for xbin in range(1, h_fit.GetNbinsX()+1): 
+#     mass = h_fit.GetBinLowEdge(xbin)
+#     if mass > 75000 and mass < 100000: 
+#         h_fit.SetBinContent(xbin, 0)
+#         h_fit.SetBinError(xbin, 0)
+# h_fit.Fit("pol2", "q")
 
 
 o_recoeff_fit = {}
@@ -229,7 +219,6 @@ elif len(o_recoeff_fit) == 2:
 elif len(o_recoeff_fit) > 2:
     fit_type = "pol2"
 
-print("Fit type", fit_type, "pileup bins", len(o_recoeff_fit))
 tg_fit.Fit(fit_type, "q")
 
 csvfile = open(out_dir, 'w')
@@ -247,6 +236,8 @@ lb_minus_one_trig_eff = {}
 lb_minus_one_trig_eff["Zee"]   = [1.0, 1.0, 1]
 lb_minus_one_trig_eff["Zmumu"] = [1.0, 1.0, 1]
 
+bad_database = False
+
 for ibin in range(1, int(lbmax-lbmin)+1):
     out_dict = {}
     out_dict["Zee"] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -257,7 +248,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
     try:
         this_fill = lb_lhcfill[this_lb]
     except KeyError: 
-        print("Fill not set. NA.")
+        bad_database = True
         this_fill = "NA"
 
     passgrl = 1
@@ -444,4 +435,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
 print("Missing LBs in Zee channel: ", zee_missing_lbs)
 print("Missing LBs in Zmumu channel: ", zmumu_missing_lbs)
 
+if bad_database:
+    print("WARNING: There was an error retrieving information from the lumi database, likely need to update the tags.")
+    
 csvfile.close()

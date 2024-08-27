@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCondAlg/CscCondDbAlg.h"
 #include "MuonCondAlg/MdtCalibDbAlg.h"
@@ -22,6 +22,7 @@
 #include "MuonCondAlg/CscILinesCondAlg.h"
 #include "MuonCondAlg/sTgcDigitEffiCondAlg.h"
 #include "MuonCondAlg/MmDigitEffiCondAlg.h"
+#include "MuonCondAlg/sTGCAsBuiltCondAlg2.h"
 
 DECLARE_COMPONENT(CscCondDbAlg)
 DECLARE_COMPONENT(MdtCondDbAlg)
@@ -44,3 +45,4 @@ DECLARE_COMPONENT(CscILinesCondAlg)
 DECLARE_COMPONENT(NswUncertDbAlg)
 DECLARE_COMPONENT(MmDigitEffiCondAlg)
 DECLARE_COMPONENT(sTgcDigitEffiCondAlg)
+DECLARE_COMPONENT(sTGCAsBuiltCondAlg2)

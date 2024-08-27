@@ -10,25 +10,20 @@ import argparse
 pd.set_option('display.max_rows', None)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
-parser.add_argument('--channel', type=str, help='Zee or Zmumu')
+parser.add_argument('--year', type=str, help='15,16,17,18,22,23,24 or run2,run3')
+parser.add_argument('--channel', type=str, help='Zee or Zmumu or Zll')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--indir', type=str, help='Input CSV file directory')
 parser.add_argument('--outdir', type=str, help='Output plot directory')
-parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
-parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
 channel = args.channel
+
 comp = args.comp
 indir = args.indir
 outdir = args.outdir
-dir_2022 = args.dir_2022
-dir_2023 = args.dir_2023
-print("------------------------------------------")
 print("Begin Yearwise Lumi vs Mu")
-print("------------------------------------------")
     
 if year == "15":
     xmin = 0.2
@@ -51,83 +46,47 @@ elif year == "run3":
 else:
     xmin = 0.2
     bins = np.concatenate((np.array([0, 26]), np.linspace(27, 61, 35), np.array([62, 80])))
-print("year = ", year)
+
 if year == "run2":
     date_string = "Run 2, #sqrt{s} = 13 TeV"
     grl = pt.get_grl("15")
     grl.extend(pt.get_grl("16"))
     grl.extend(pt.get_grl("17"))
     grl.extend(pt.get_grl("18"))
-    outfile = "ZeeZmm_counting_data_ratio_v_mu_run2.pdf"
+    out_tag = "run2"
 elif year == "run3":  
-    out_tag = "_run3"
-
+    date_string = "Run 3, #sqrt{s} = 13.6 TeV"
     grl = pt.get_grl("22")
     grl.extend(pt.get_grl("23"))
-
-    date_string = "Run 3, #sqrt{s} = 13.6 TeV"
-    outfile = "ZeeZmm_counting_data_ratio_v_mu_run3.pdf"
-elif year == "22":
-    out_tag = year
-    date_string = "Data 20"+year+", #sqrt{s} = 13.6 TeV"
-    grl = pt.get_grl(year)
-    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
-elif year == "23":
-    out_tag = year
-    date_string = "Data 20"+year+", #sqrt{s} = 13.6 TeV"
-    grl = pt.get_grl(year)
-
-    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
+    grl.extend(pt.get_grl("24"))
+    out_tag = "run3"
 else:
-    out_tag = year
+    out_tag = "data"+year
     date_string = "Data 20"+year+", #sqrt{s} = 13 TeV"
     grl = pt.get_grl(year)
-    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
+    if int(year) >= 22: date_string.replace("13 TeV", "13.6 TeV")
+
+outfile = "ZeeZmm_ratio_vs_mu_"+out_tag+".pdf"
 
 ymin, ymax = 0.94, 1.06
 
 def main():
-    df = pd.DataFrame()
+    dflist = []
     for run in grl: 
-        run = run.replace('.csv', '')
-        run = run.replace('run_', '')
-        if int(run) < 450000:
-            indir = args.indir + dir_2022
-        else:
-            indir = args.indir + dir_2023
-        dfz = pd.read_csv(indir + "run_" + run + ".csv")
-        dfz_small = dfz
-        if comp: 
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small.ZeeLumi == 0) | (dfz_small.ZmumuLumi == 0)].index)
-            dfz_small['ZeeLumi']    *= dfz_small['LBLive']
-            dfz_small['ZeeLumiErr'] *= dfz_small['LBLive']
-            dfz_small['ZeeLumiErr'] *= dfz_small['ZeeLumiErr']
-            dfz_small['ZmumuLumi']    *= dfz_small['LBLive']
-            dfz_small['ZmumuLumiErr'] *= dfz_small['LBLive']
-            dfz_small['ZmumuLumiErr'] *= dfz_small['ZmumuLumiErr']
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
-        else:
-            dfz_small['ZLumi'] = dfz_small[channel + 'Lumi']
-            dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
-            dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
-            dfz_small['OffLumi']  *= dfz_small['LBLive']
-            dfz_small['ZLumi']    *= dfz_small['LBLive']
-            dfz_small['ZLumiErr'] *= dfz_small['LBLive']
-            dfz_small['ZLumiErr'] *= dfz_small['ZLumiErr']
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
+        livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
 
-        # Cut out all runs shorter than 40 minutes
-        if dfz_small['LBLive'].sum()/60 < 40:
-            print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
+        # Cut out short runs
+        if livetime < pt.livetimecut:
+            if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
             continue
             
         # Cut out early 2016 runs with "strange" bunch structure
         if (year == "16" and dfz_small['LBStart'].iloc[0] < 1463184000) or run == "310247": 
             continue
         
-        df = df.append(dfz_small)
+        dflist.append(dfz_small)
    
-
+    df = pd.concat(dflist)
     df['OffMu'] = df['OffMu'].round(0)
     df = df.groupby(pd.cut(df.OffMu, bins, right=False)).sum()
     df.reset_index(drop=True, inplace=True)
@@ -144,7 +103,6 @@ def main():
         df['Ratio']    = df['ZLumi'] / df['OffLumi'] / norm
         df['RatioErr'] = df['ZLumiErr'] / df['OffLumi'] / norm
 
-    print("Creating Histogram...")
     h_total = R.TH1F("h_total", "", len(bins)-1, bins)
 
     nan_list = df[df['Ratio'].isnull()].index.tolist()
@@ -174,7 +132,7 @@ def main():
     R.gStyle.SetErrorX()
     
     if comp: 
-        h_total.Fit('pol0', '0')
+        h_total.Fit('pol0', 'q0')
         h_total.GetFunction('pol0').SetLineColor(R.kRed)
         h_total.GetFunction('pol0').Draw("same l")
         h_total.GetYaxis().SetRangeUser(ymin, ymax)
@@ -190,27 +148,22 @@ def main():
         leg = R.TLegend(0.20, 0.18, 0.45, 0.35)
         mean = 1.0
 
-    print("Year =", year, "channel =", channel, "Stdev =", round(stdev, 4), "mean =", mean)
+    print(f"Year = {year} channel = {channel}: Pol0 fit mean +- 68% percentile = {mean:.3f} +- {stdev:.3f}")
+
     line1 = pt.make_bands(bins, stdev, mean)
     line1.Draw("same 3")
+    if comp: h_total.GetFunction('pol0').Draw("same l")
+    h_total.Draw('same E0')
     
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
-    if channel == "Zee": 
-        h_total.GetYaxis().SetTitle("L_{Z #rightarrow ee} / L_{ATLAS}")
-        leg.AddEntry(h_total, "L_{Z #rightarrow ee}^{year-normalised}/L_{ATLAS}", "ep")
-        zstring = "Z #rightarrow ee counting"
-    elif channel == "Zmumu": 
-        h_total.GetYaxis().SetTitle("L_{Z #rightarrow #mu#mu} / L_{ATLAS}")
-        leg.AddEntry(h_total, "L_{Z #rightarrow #mu#mu}^{year-normalised}/L_{ATLAS}", "ep")
-        zstring = "Z #rightarrow #mu#mu counting"
-    elif channel == "Zll": 
-        h_total.GetYaxis().SetTitle("L_{Z #rightarrow ll} / L_{ATLAS}")
-        leg.AddEntry(h_total, "L_{Z #rightarrow ll}^{year-normalised}/L_{ATLAS}", "ep")
-        zstring = "Z #rightarrow ll counting"
-    elif comp: 
+    if comp: 
         h_total.GetYaxis().SetTitle("L_{Z #rightarrow ee} / L_{Z #rightarrow #mu#mu}")
         zstring = ""
+    else:
+        h_total.GetYaxis().SetTitle("L_{"+pt.plotlabel[channel]+"} / L_{ATLAS}")
+        leg.AddEntry(h_total, "L_{"+pt.plotlabel[channel]+"}^{year-normalised}/L_{ATLAS}", "ep")
+        zstring = pt.plotlabel[channel]+" counting"
 
     if comp:
         pt.drawAtlasLabel(0.2, 0.88, "Internal")
@@ -220,7 +173,7 @@ def main():
         pt.drawAtlasLabel(xmin, 0.88, "Internal")
         pt.drawText(xmin, 0.82, date_string)
         pt.drawText(xmin, 0.76, zstring)
-        pt.drawText(xmin, 0.68, "OflLumi-Run3-003")
+        pt.drawText(xmin, 0.68, "OflLumi-Run3-004")
         
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
@@ -228,7 +181,7 @@ def main():
     if comp:
         c1.SaveAs(outdir + outfile)
     else: 
-        c1.SaveAs(outdir + channel + "_counting_data_ratio_v_mu"+out_tag+".pdf")
+        c1.SaveAs(outdir + channel + "ATLAS_ratio_vs_mu_"+out_tag+".pdf")
 
 if __name__ == "__main__":
     pt.setAtlasStyle()

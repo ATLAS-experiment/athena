@@ -80,6 +80,8 @@ def createGeoModelConfigFlags(analysis=False):
                 lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Pixel']['IBLlayout'],
                 help='IBL layer layout in {"planar", "3D", "noIBL"}')
 
+    gcf.addFlag('GeoModel.EMECStandard',False, help='Flag for activating the EMEC description with standard Geant4 shapes: G4GenericTrap')
+
     gcf.addFlag('GeoModel.SQLiteDB',False, help='Flag for activating GeoModel initialization from SQLite Geometry DB')
 
     gcf.addFlag('GeoModel.SQLiteDBFullPath','', help='Override default location of the SQLite Geometry DB')

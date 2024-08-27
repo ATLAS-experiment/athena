@@ -269,6 +269,7 @@ def TrigConfigSvcCfg( flags ):
     acc.merge( HLTPrescaleCondAlgCfg( flags ) )
     return acc
 
+@AccumulatorCache
 def L1PrescaleCondAlgCfg( flags ):
     log.info("Setting up L1PrescaleCondAlg")
     acc = ComponentAccumulator()
@@ -298,6 +299,7 @@ def L1PrescaleCondAlgCfg( flags ):
     acc.addCondAlgo(l1PrescaleCondAlg)
     return acc
 
+@AccumulatorCache
 def BunchGroupCondAlgCfg( flags ):
     log.info("Setting up BunchGroupCondAlg")
     acc = ComponentAccumulator()
@@ -323,7 +325,7 @@ def BunchGroupCondAlgCfg( flags ):
     acc.addCondAlgo(bunchGroupCondAlg)
     return acc
 
-
+@AccumulatorCache
 def HLTPrescaleCondAlgCfg( flags ):
     log.info("Setting up HLTPrescaleCondAlg")
     acc = ComponentAccumulator()

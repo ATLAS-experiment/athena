@@ -164,11 +164,6 @@ StatusCode BunchCrossingIntensityCondAlg::execute (const EventContext& ctx) cons
           
         }
 
-        int num_bc = 0;
-        for (unsigned int i=0; i<nbcids; i++) {
-          if(instBeam1[i]!=0 && instBeam2[i] !=0)num_bc++;
-        }
-
         bccd->setBeam1IntensityPerBCIDVector(std::move(instBeam1),0);
         bccd->setBeam2IntensityPerBCIDVector(std::move(instBeam2),0);
         //
@@ -197,10 +192,6 @@ StatusCode BunchCrossingIntensityCondAlg::execute (const EventContext& ctx) cons
           // Can't use assignment directly because source may be misaligned.
           instBeam2_fBCT[i] = CxxUtils::get_unaligned_float (pchar2_fBCT);
           
-        }
-        int num_bc_fBCT = 0;
-        for (unsigned int i=0; i<nbcids_fBCT; i++) {
-          if(instBeam1_fBCT[i]!=0 && instBeam2_fBCT[i] !=0)num_bc_fBCT++;
         }
 
         bccd->setBeam1IntensityPerBCIDVector(std::move(instBeam1_fBCT),1);
