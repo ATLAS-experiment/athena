@@ -139,6 +139,16 @@ StatusCode BTaggingSelectionTool::initialize() {
    else{
      ATH_MSG_ERROR("Tagger fraction_c in Continuous2D WP not available");
    }
+   //now the tau-fraction if the tagger is GN2*:
+   if ( m_taggerName == "GN2v01" ){
+     fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau";
+     fraction_data = (TVector*) m_inf->Get(fraction_data_name);
+     if(fraction_data!=nullptr){
+       m_tagger.fraction_tau = fraction_data[0](0);
+     }else{
+       ATH_MSG_ERROR("Tagger fraction_tau in Continuous2D WP not available");
+     }
+   }
  } //Continuous2D
  else if ("Continuous"==cutname(0,10)){ // For continuous tagging load all flat-cut WPs
       if(m_useCTag)
