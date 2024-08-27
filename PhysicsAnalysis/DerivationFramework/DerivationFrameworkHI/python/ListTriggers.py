@@ -512,3 +512,12 @@ def HION12nJetCuts2018():
     nJetCuts += ["(count(AntiKt10LCTopoJets.pt > 7.0*GeV) > 0)"]
     
     return nJetCuts
+
+def HION14SkimmingTriggersOpenData():
+    triggers = []
+    
+    # Eliminate UCC peak
+    triggers += ['HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50']
+    triggers += ['HLT_noalg_mb_L1TE50']
+
+    return triggers
