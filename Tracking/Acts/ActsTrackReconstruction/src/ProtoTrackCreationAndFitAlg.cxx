@@ -18,10 +18,9 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_StripClusters.initialize()); 
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
-  ATH_CHECK(m_patternBuilder.retrieve()); 
-  ATH_CHECK(m_detEleCollKeys.initialize());
+  ATH_CHECK(m_patternBuilder.retrieve());
+  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
 
   return StatusCode::SUCCESS;
@@ -65,41 +64,10 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
 
-  std::vector<const InDetDD::SiDetectorElementCollection *> detEleColl;
-  detEleColl.reserve(m_detEleCollKeys.size());
-  for (const auto &detEleCollKey : m_detEleCollKeys)
-  {
-    ATH_MSG_DEBUG("Reading input condition data with key " << detEleCollKey.key());
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleCollHandle(detEleCollKey, ctx);
-    ATH_CHECK(detEleCollHandle.isValid());
-    detEleColl.push_back(detEleCollHandle.retrieve());
-    if (detEleColl.back() == nullptr)
-    {
-      ATH_MSG_FATAL(detEleCollKey.fullKey() << " is not available.");
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
-  }
+  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
+  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-  TrackingSurfaceHelper trackingSurfaceHelper;
-  for (auto & coll : detEleColl)
-  {
-    for (const auto *det_el : *coll){
-      const Acts::Surface &surface =
-          m_ATLASConverterTool->trkSurfaceToActsSurface(det_el->surface());
-      xAOD::UncalibMeasType type = xAOD::UncalibMeasType::Other;
-      if (det_el->isPixel()) type = xAOD::UncalibMeasType::PixelClusterType;
-      else if (det_el->isSCT()) type = xAOD::UncalibMeasType::StripClusterType;
-      trackingSurfaceHelper.actsSurfaces(type).push_back(&surface);
-    }
-  }
-  for (const auto & coll : detEleColl)
-  {
-    xAOD::UncalibMeasType measType = xAOD::UncalibMeasType::Other;
-    if (coll->front()->isPixel()) measType = xAOD::UncalibMeasType::PixelClusterType;
-    else measType = xAOD::UncalibMeasType::StripClusterType;
-    trackingSurfaceHelper.setSiDetectorElements(measType, coll);
-  }
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   // CalibrationContext converter not implemented yet.
@@ -111,11 +79,11 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
 
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
-    auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters, 
-											           m_trackingGeometryTool->getGeometryContext(ctx).context(),
+    auto res = m_actsFitter->fit(ctx, proto.measurements,*proto.parameters,
+                                 m_trackingGeometryTool->getGeometryContext(ctx).context(),
                                  m_extrapolationTool->getMagneticFieldContext(ctx),
                                  Acts::CalibrationContext(),
-                                 trackingSurfaceHelper);
+                                 **detectorElementToGeometryIdMap);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

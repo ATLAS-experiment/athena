@@ -9,6 +9,7 @@
 #include <GaudiKernel/ToolHandle.h>
 
 #include "MeasurementCalibrator.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 namespace ActsTrk {
 
@@ -37,13 +38,13 @@ public:
     StripCalibrator strip_calibrator;
 
     static OnTrackCalibrator
-    NoCalibration(const ActsTrk::IActsToTrkConverterTool &converter_tool,
-		  const TrackingSurfaceHelper &surface_helper);
+    NoCalibration(const Acts::TrackingGeometry &trackingGeometry,
+                  const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId);
 
-    OnTrackCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool,
-		      const TrackingSurfaceHelper &surface_helper,
-		      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &pixelTool,
-		      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool);
+    OnTrackCalibrator(const Acts::TrackingGeometry &trackingGeometry,
+                      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
+                      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &pixelTool,
+                      const ToolHandle<IOnTrackCalibratorTool<traj_t>> &stripTool);
 
     void calibrate(const Acts::GeometryContext& geoctx,
 		   const Acts::CalibrationContext& cctx,
@@ -61,7 +62,8 @@ private:
 		const TrackStateProxy& state) const;
 
     // Helper to locate surfaces
-    const TrackingSurfaceHelper *m_surfaceHelper;
+    const Acts::TrackingGeometry *m_trackingGeometry;
+    const ActsTrk::DetectorElementToActsGeometryIdMap *m_detectorElementToGeoId;
 };
 
 } // namespace ActsTrk

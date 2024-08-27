@@ -4,7 +4,7 @@
 
 #include <vector>
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/TrackingSurfaceHelper.h"
+#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "Acts/Definitions/Algebra.hpp"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 
@@ -31,9 +31,7 @@ StatusCode SeedToTrackCnvAlg::initialize()
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsTrackParamsKey.initialize());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_ATLASConverterTool.retrieve());
-  ATH_CHECK(m_detPixEleCollKey.initialize());
-  ATH_CHECK(m_detStripEleCollKey.initialize());
+  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -41,38 +39,19 @@ StatusCode SeedToTrackCnvAlg::initialize()
 
 StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
 {
-  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detPixEleHandle(m_detPixEleCollKey, context);
-  SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detStripEleHandle(m_detStripEleCollKey, context);
-
-
-  ATH_CHECK(detPixEleHandle.isValid());
-  ATH_CHECK(detStripEleHandle.isValid());
-  
-  const InDetDD::SiDetectorElementCollection* detPixEle = detPixEleHandle.retrieve();
-  const InDetDD::SiDetectorElementCollection* detStripEle = detStripEleHandle.retrieve();
-  ATH_CHECK(detPixEle != nullptr);
-  ATH_CHECK(detStripEle != nullptr);
-
-  auto retrievePixSurface = [this, &detPixEle](const xAOD::DetectorIDHashType hashId) -> const Acts::Surface& {
-    const InDetDD::SiDetectorElement* element = detPixEle->getDetectorElement(hashId);
-    const Trk::Surface& atlas_surface = element->surface();
-    return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
-  };
-
-
-  auto retrieveStripSurface = [this, &detStripEle](const xAOD::DetectorIDHashType hashId) -> const Acts::Surface& {
-    const InDetDD::SiDetectorElement* element = detStripEle->getDetectorElement(hashId);
-    const Trk::Surface& atlas_surface = element->surface();
-    return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
-  };
-
   ActsTrk::MutableTrackContainer tracksContainer;
-  TrackingSurfaceHelper tracking_surface_helper;
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(context).context();
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+  ATH_CHECK(trackingGeometry.get() != nullptr);
+
   SG::ReadHandle<ActsTrk::SeedContainer> seedsHandle = SG::makeHandle(m_seedContainerKey, context);
   SG::ReadHandle<ActsTrk::BoundTrackParametersContainer> parameterHandle = SG::makeHandle(m_actsTrackParamsKey, context);
+
+  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, context};
+  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
+
   ATH_CHECK(seedsHandle.isValid());
   ATH_CHECK(parameterHandle.isValid());
   for (std::size_t seedIndex = 0 ;  seedIndex < seedsHandle->size() ;++seedIndex){
@@ -90,10 +69,10 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
       const auto& measurements = spacepoint->measurements();
       for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
             ActsTrk::ATLASUncalibSourceLink el(makeATLASUncalibSourceLink(umeas));
-            const Acts::Surface& surf = umeas->type() == xAOD::UncalibMeasType::PixelClusterType ? retrievePixSurface(umeas->identifierHash()) : retrieveStripSurface(umeas->identifierHash());
-            ATH_CHECK(surf.getSharedPtr().get() != nullptr);
+            const Acts::Surface *surf = ActsTrk::getSurfaceOfMeasurement(*trackingGeometry,**detectorElementToGeometryIdMap,*umeas);
+            ATH_CHECK( surf && surf->getSharedPtr().get() != nullptr);
             auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
-            actsTSOS.setReferenceSurface(surf.getSharedPtr());
+            actsTSOS.setReferenceSurface(surf->getSharedPtr());
             actsTSOS.setUncalibratedSourceLink(Acts::SourceLink(el));
             actsTrack.tipIndex() = actsTSOS.index();
             tsosPreviousIndex = actsTrack.tipIndex();

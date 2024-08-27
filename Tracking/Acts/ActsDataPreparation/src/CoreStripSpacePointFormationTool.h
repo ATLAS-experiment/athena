@@ -5,7 +5,6 @@
 #ifndef ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 #define ACTSTRK_DATAPREPARATION_CORESTRIPSPACEPOINTFORMATIONTOOL_H
 
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -19,6 +18,7 @@
 #include "Acts/SpacePointFormation/SpacePointBuilder.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include <string>
 
@@ -99,8 +99,11 @@ namespace ActsTrk {
     const SCT_ID* m_stripId{};
 
     ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "", "Tool to retreive Lorentz angle of SCT"};
-    ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ConverterTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+
+    SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
+       {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
+       "Map which associates detector elements to Acts Geometry IDs"};
 
     Gaudi::Property<bool> m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
     Gaudi::Property<float> m_overlapLimitOpposite{this, "OverlapLimitOpposite", 2.8, "Overlap limit for opposite-neighbour."};

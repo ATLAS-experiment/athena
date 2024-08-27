@@ -459,6 +459,9 @@ def ActsSeedToTrackCnvAlgCfg(flags,
                              name: str = 'ActsSeedToTrackCnvAlg',
                              **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
     kwargs.setdefault('SeedContainerKey', f'{flags.Tracking.ActiveConfig.extension}PixelSeeds')
     kwargs.setdefault('EstimatedTrackParametersKey',f'{flags.Tracking.ActiveConfig.extension}PixelEstimatedTrackParams')
@@ -467,12 +470,6 @@ def ActsSeedToTrackCnvAlgCfg(flags,
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
-    kwargs.setdefault('PixelDetectorElements', 'ITkPixelDetectorElementCollection')
-    kwargs.setdefault('StripDetectorElements', 'ITkStripDetectorElementCollection')
-
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedToTrackCnvAlg(name, **kwargs), primary=True)
     return acc

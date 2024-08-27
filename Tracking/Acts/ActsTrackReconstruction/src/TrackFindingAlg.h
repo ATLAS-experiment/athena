@@ -25,17 +25,14 @@
 #include "ActsEvent/Seed.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "IMeasurementSelector.h"
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/EventContext.h"
@@ -75,7 +72,6 @@ namespace ActsTrk
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
     ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{
@@ -89,7 +85,9 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<ActsTrk::BoundTrackParametersContainer> m_estimatedTrackParametersKeys{this, "EstimatedTrackParametersKeys", {}, "containers of estimated track parameters from seeding"};
     // Measurement collections. These 2 vectors must match element for element.
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
-    SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementCollectionKeys", {}, "input SiDetectorElementCollection"};
+    SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
+       {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
+        "Map which associates detector elements to Acts Geometry IDs"};
 
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
     ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
@@ -167,6 +165,8 @@ namespace ActsTrk
      */
     StatusCode
     findTracks(const EventContext &ctx,
+               const Acts::TrackingGeometry &trackingGeometry,
+               const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                const detail::TrackFindingMeasurements &measurements,
                detail::DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,

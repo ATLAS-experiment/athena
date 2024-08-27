@@ -21,10 +21,7 @@
 #include <Eigen/Core>
 
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IOnBoundStateCalibratorTool.h"
-
-#include "ActsGeometry/TrackingSurfaceHelper.h"
 
 #include <stdexcept>
 #include <string>

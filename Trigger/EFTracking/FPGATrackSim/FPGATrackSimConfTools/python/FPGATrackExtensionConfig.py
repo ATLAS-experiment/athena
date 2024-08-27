@@ -6,6 +6,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def FPGATrackExtensionAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
+    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
+
     kwargs.setdefault("PixelClusterContainer", "ITkPixelClusters")
     kwargs.setdefault("ACTSTracksLocation", "ExtendedFPGATracks")
     if "ExtrapolationTool" not in kwargs:
@@ -14,9 +18,6 @@ def FPGATrackExtensionAlgCfg(flags, **kwargs):
             "ExtrapolationTool",
             acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=100)),
         )
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs["ATLASConverterTool"] = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
 
     if "TrackingGeometryTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg

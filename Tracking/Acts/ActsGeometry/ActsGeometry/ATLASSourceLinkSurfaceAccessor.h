@@ -5,7 +5,9 @@
 #define ATLASSOURCELINKSURFACEACCESSOR_H
 
 #include "ATLASSourceLink.h"
-#include "TrackingSurfaceHelper.h"
+#include "DetectorElementToActsGeometryIdMap.h"
+#include "SurfaceOfMeasurementUtil.h"
+
 
 namespace Acts {
    class TrackingGeometry;
@@ -21,11 +23,16 @@ struct ATLASSourceLinkSurfaceAccessor {
   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
-struct ATLASUncalibSourceLinkSurfaceAccessor {
-  const ActsTrk::IActsToTrkConverterTool *m_converterTool = nullptr;
-  const TrackingSurfaceHelper *m_surfaceHelper = nullptr;
-
-  const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
+class ATLASUncalibSourceLinkSurfaceAccessor {
+  const Acts::TrackingGeometry *m_actsTrackingGeometry = nullptr;
+  const DetectorElementToActsGeometryIdMap *m_detectorElementToGeometryIdMap = nullptr;
+public:
+   ATLASUncalibSourceLinkSurfaceAccessor(const Acts::TrackingGeometry &actsTrackingGeometry,
+                                         const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap)
+      : m_actsTrackingGeometry(&actsTrackingGeometry),
+        m_detectorElementToGeometryIdMap(&detectorElementToGeometryIdMap)
+   {}
+   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 }
 
@@ -36,8 +43,9 @@ namespace ActsTrk {
 inline const Acts::Surface* ATLASUncalibSourceLinkSurfaceAccessor::operator()(const Acts::SourceLink& sourceLink) const {
    const auto atlas_uncalib_source_link = sourceLink.get<ATLASUncalibSourceLink>();
    const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(atlas_uncalib_source_link);
+   return ActsTrk::getSurfaceOfMeasurement(*m_actsTrackingGeometry, *m_detectorElementToGeometryIdMap,
+                                           uncalibMeas );
 
-   return &this->m_converterTool->trkSurfaceToActsSurface(m_surfaceHelper->associatedSurface( uncalibMeas ));
 }
 
 // surface accessor implementation for ATLASSourceLink i.e. Trk::MeasurementBase

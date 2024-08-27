@@ -19,12 +19,11 @@
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ProtoTrackCollection.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 // Athena
 #include "xAODTruth/TruthParticleContainer.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "GaudiKernel/EventContext.h"
 
@@ -65,12 +64,10 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
-  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{
-      this, "ATLASConverterTool", ""};
-  SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection>
-      m_pixelDetEleCollKey{this, "PixelDetEleCollKey",
-                           "ITkPixelDetectorElementCollection",
-                           "Key of SiDetectorElementCollection for Pixel"};
+  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
+      {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
+       "Map which associates detector elements to Acts Geometry IDs"};
+
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
@@ -88,7 +85,8 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   std::unique_ptr<const Acts::Logger> m_logger;
 
   detail::TrackFindingMeasurements collectMeasurements(
-      const EventContext& context) const;
+      const EventContext& context,
+      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const;
 
   Acts::CalibrationContext
       m_calibrationContext;  // this will change in future to be updatable event

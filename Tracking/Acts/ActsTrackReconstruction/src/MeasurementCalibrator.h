@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MEASUREMENTCALIBRATOR_H
@@ -22,8 +22,6 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
-
-#include "ActsGeometry/TrackingSurfaceHelper.h"
 
 #include <stdexcept>
 #include <string>
@@ -76,12 +74,11 @@ protected:
    std::array<Acts::ProjectorBitset,2> m_stripProjector; // strip projector for normal and annulus bounds
    Acts::ProjectorBitset               m_pixelProjector;
 
-   const ActsTrk::IActsToTrkConverterTool *m_converterTool;
 public:
-   MeasurementCalibratorBase(const ActsTrk::IActsToTrkConverterTool &converter_tool)
+   MeasurementCalibratorBase()
       : m_stripProjector( makeStripProjectorArray()),
-        m_pixelProjector( makePixelProjector() ),
-        m_converterTool(&converter_tool) { assert(m_converterTool); }
+        m_pixelProjector( makePixelProjector() )
+   {}
 
    template <typename state_t>
    inline void setProjectorBitSet(xAOD::UncalibMeasType measType,
@@ -178,7 +175,7 @@ public:
    };
 
    TrkMeasurementCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool)
-      : MeasurementCalibratorBase(converter_tool) {}
+      : m_converterTool(&converter_tool) {}
 
    template <typename trajectory_t>
    void calibrate([[maybe_unused]] const Acts::GeometryContext &gctx,
@@ -193,6 +190,8 @@ public:
                                     surface.bounds().type(),
                                     trackState);
    }
+private:
+   const ActsTrk::IActsToTrkConverterTool *m_converterTool;
 };
 }
 #endif

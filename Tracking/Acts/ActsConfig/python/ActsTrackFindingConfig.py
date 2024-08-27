@@ -32,13 +32,6 @@ def ActsTrackStatePrinterCfg(flags,
             acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
         )
 
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault(
-            "ATLASConverterTool",
-            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-        )
-
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
     return acc
 
@@ -52,13 +45,16 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     acc = ComponentAccumulator()
 
+    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
+
     # Seed labels and collections. These 3 lists must match element for element.
     kwargs.setdefault("SeedLabels", isdet(flags, pixel=["PPP"], strip=["SSS"]))
     kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
     kwargs.setdefault("SeedContainerKeys", isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
-    # Measurement collections. These 2 lists must match element for element.
+
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"]))
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
@@ -118,13 +114,6 @@ def ActsMainTrackFindingAlgCfg(flags,
             acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
         )
         
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault(
-            "ATLASConverterTool",
-            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-        )
-
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
