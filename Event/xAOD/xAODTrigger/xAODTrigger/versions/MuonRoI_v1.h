@@ -142,16 +142,19 @@ namespace xAOD {
       /// @}
 
 
-   private:
+   public:
     /// constants to decode RoI word for Run 4+
     static constexpr uint32_t ETA_MASK = 0x3fff;
     static constexpr uint32_t PHI_MASK = 0x1ff;
     static constexpr uint32_t PT_MASK = 0xff;
 
+   private:
     static constexpr uint32_t ETA_SHIFT = 0;
     static constexpr uint32_t PHI_SHIFT = 14;
     static constexpr uint32_t CHARGE_SHIFT = 23;
     static constexpr uint32_t PT_SHIFT = 24;
+
+    static constexpr float PT_WIDTH = 0.5;
 
   }; // class MuonRoI_v1
 
