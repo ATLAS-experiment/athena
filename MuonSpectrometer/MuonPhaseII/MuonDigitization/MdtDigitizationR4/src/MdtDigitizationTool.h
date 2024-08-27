@@ -40,9 +40,11 @@ namespace MuonR4{
             Gaudi::Property<double> m_timeResTDC{this, "ResolutionTDC", 0.5 * Gaudi::Units::ns, "TDC time resolution"};
             Gaudi::Property<double> m_timeResADC{this, "ResolutionADC", 0.5 * Gaudi::Units::ns, "ADC time resolution"};
             Gaudi::Property<double> m_deadTime{this, "DeadTime", 700., "MDT drift tube dead time"};
+            Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false, "If set to true hit with pdgId != 13 are skipped"};
             /** Properties to model the Twin tube signals */
             Gaudi::Property<bool> m_useTwinTube{this, "useTwinTubes", false};
             Gaudi::Property<double> m_resTwin{this, "ResolutionTwinTube", 1.05 * Gaudi::Units::ns, "Twin Tube resolution"};
+            
             
             using DigiCache = OutDigitCache_t<MdtDigitCollection>;
 

@@ -13,7 +13,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 
-
+#include "xAODMuon/MuonSegmentContainer.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -48,33 +48,23 @@ namespace MuonR4{
             using HitVec = SegmentFitResult::HitVec;
 
         private:
+            using Parameters = SegmentFit::Parameters;
             /// Helper method to fetch data from StoreGate. If the key is empty, a nullptr is assigned to the container ptr
             /// Failure is returned in cases, of non-empty keys and failed retrieval
             template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
                                                                         const SG::ReadHandleKey<ContainerType>& key,
                                                                         const ContainerType* & contToPush) const;
-
-
-            CalibSegmentChi2Minimizer 
-                  defineChi2Functor(const EventContext& ctx,
-                                    const ActsGeometryContext& gctx,
-                                    const SegmentFitResult::Parameters& initialPars,
-                                    const std::vector<HoughHitType>& spacePoints) const;
             
+            SegmentFitResult fitSegmentHits(const EventContext& ctx,
+                                            const ActsGeometryContext& gctx,
+                                            const Parameters& startPars,
+                                            const std::vector<HoughHitType>& unCalibHits) const;
             
-            /** @brief Configures the Minuit minimizer in terms of parameter fit range && also whether the
-             *         phi & time parameters are floating parameters.
-             * @param data: Prepared fitter data with the calibrated hits
-             * @param minimizer: Reference to the minuit minimizer which needs to be configured */
-            void configureMinimizer(const SegmentFitResult& data,
-                                    ROOT::Math::Minimizer& minimizer) const;
-
+            SegmentFitResult fitSegmentHits(const EventContext& ctx,
+                                            const ActsGeometryContext& gctx,
+                                            const Parameters& startPars,
+                                            SegmentFitResult::HitVec&& calibHits) const;
             
-            void harvestParameters(const ROOT::Math::Minimizer& minimizer,
-                                   CalibSegmentChi2Minimizer& chiSqFunc,
-                                   SegmentFitResult& data) const;
-            
-            /** @brief */
             std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
                                                                  const ActsGeometryContext& gctx,
                                                                  const SegmentSeed* seed) const;             
@@ -100,6 +90,10 @@ namespace MuonR4{
                            const ActsGeometryContext& gctx,
                            const SegmentSeed& seed,
                            SegmentFitResult& toRecover) const;
+            /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes which cannot be crossed
+             *         by the segment. 
+             *  @param candidate: Reference of the segment candidate to prune. */
+            void eraseWrongHits(const ActsGeometryContext& gctx, SegmentFitResult& candidate) const;            
             
             void resolveAmbiguities(const ActsGeometryContext& gctx,
                                     std::vector<std::unique_ptr<Segment>>& segmentCandidates) const;
@@ -112,6 +106,9 @@ namespace MuonR4{
 
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
+            /// ReadHandle for the truth segments (For validation purposes)
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegKey", "TruthSegmentsR4"};
+            
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "MuonSegmentContainer", "R4MuonSegments"};
 
@@ -123,10 +120,12 @@ namespace MuonR4{
 
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
             
+            /// Toggle the fitter
+            Gaudi::Property<bool> m_useMinuit{this, "useMinuit", false};
+
             Gaudi::Property<bool> m_doT0Fit{this, "fitSegmentT0", true};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
-
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
             Gaudi::Property<double> m_beamSpotL{this, "BeamSpotLength", 20. * Gaudi::Units::m};
 
@@ -135,19 +134,16 @@ namespace MuonR4{
             Gaudi::Property<double> m_seedTanThetaReso{this, "ResoSeedTanTheta", 250. * Gaudi::Units::mrad};
             Gaudi::Property<double> m_seedY0Reso{this, "ResoSeedY0", 500.*Gaudi::Units::micrometer};
             Gaudi::Property<double> m_seedHitChi2{this, "ResoSeedHitAssoc", 5. };
-
-
-            
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
-            Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 3.};
+            Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
 
 
             std::unique_ptr<TCanvas> m_allCan{};
             Gaudi::Property<std::string> m_allCanName{this, "AllCanName", "AllSegmentFits"};
             mutable std::atomic<unsigned int> m_canvCounter ATLAS_THREAD_SAFE{0};
             /// Draw maximally 5000 segment fit visualizations
-            Gaudi::Property<unsigned int> m_nDrawCanvases{this, "MaxCanvases", 100};
+            Gaudi::Property<unsigned int> m_nDrawCanvases{this, "MaxCanvases", 5000};
     };
 }
 

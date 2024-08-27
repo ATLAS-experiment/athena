@@ -11,7 +11,7 @@ find_package( ROOT COMPONENTS Gpad Graf Core Tree MathCore Hist RIO pthread Math
 atlas_add_component( MuonPatternRecognitionTest
                      src/components/*.cxx src/*.cxx 
                      INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib MuonPRDTestLib FourMomUtils
+                     LINK_LIBRARIES AthenaKernel StoreGateLib MuonTesterTreeLib MuonPRDTestLib FourMomUtils MuonTruthHelpers
                                     xAODMuonSimHit xAODMuonPrepData MuonPatternEvent MuonPatternHelpers MuonReadoutGeometryR4 MuonPRDTestR4Lib ${ROOT_LIBRARIES} )
 
 # Install files from the package:

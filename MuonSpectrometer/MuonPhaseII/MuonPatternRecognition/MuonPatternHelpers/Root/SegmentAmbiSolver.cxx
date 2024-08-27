@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternHelpers/SegmentAmbiSolver.h>
+#include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
 
 namespace MuonR4 {
     using MeasByLayerMap = SegmentAmbiSolver::MeasByLayerMap;
@@ -12,7 +13,17 @@ namespace MuonR4 {
 
     
     SegmentVec SegmentAmbiSolver::resolveAmbiguity(const ActsGeometryContext& gctx,
-                                                    SegmentVec&& toResolve) const {
+                                                   SegmentVec&& toResolve) const {
+        
+        std::ranges::stable_sort(toResolve,[](const std::unique_ptr<Segment>& a,
+                                              const std::unique_ptr<Segment>&b){
+            const double redChi2A = a->chi2() / a->nDoF();
+            const double redChi2B = b->chi2() / b->nDoF();
+            if (redChi2A < 5. && redChi2B < 5.){
+                return a->nDoF() > b->nDoF();
+            }
+            return redChi2A < redChi2B;
+        });
         SegmentVec resolved{};
         /// Mark the first object as resolved
         resolved.push_back(std::move(toResolve[0]));
@@ -27,6 +38,7 @@ namespace MuonR4 {
             for (std::unique_ptr<Segment>& reference : resolved) {
                 MeasByLayerMap& refPrds{resolvedPrds[prdPointer++]};
                 std::vector<const SpacePoint*> overlaps{};
+                overlaps.reserve(testPrds.size());
                 for (auto& [layerId, spacePoint] : testPrds) {
                     MeasByLayerMap::const_iterator ref_itr = refPrds.find(layerId);
                     if (ref_itr == refPrds.end() || ref_itr->second != spacePoint){
@@ -45,7 +57,7 @@ namespace MuonR4 {
                     diffSites += signRef[sIdx] != signTest[sIdx];
                 }
                 ATH_MSG_VERBOSE("Signs reference: "<<signRef<<", signs test: "<<signTest);
-                if (signRef.size() - diffSites <= 1) {
+                if (signRef.size() - diffSites <= 1 && testPrds.size() == refPrds.size()) {
                     ATH_MSG_VERBOSE("Both segments are describing different solutions.");
                     continue;
                 }
@@ -73,17 +85,16 @@ namespace MuonR4 {
         MeasByLayerMap prds{};
         const Muon::IMuonIdHelperSvc* idHelperSvc = segment.chamber()->idHelperSvc();
         for (const Segment::MeasType& meas : segment.measurements()) {
-            // Skip the auxillary beamspot constraint
-            const SpacePoint* sp = meas->spacePoint();
-            if (!sp) {
+            if(meas->fitState() != CalibratedSpacePoint::State::Valid ||
+               !meas->spacePoint()) {
                 continue;
             }
-            const Identifier layerId = idHelperSvc->layerId(sp->identify());
-            auto insert_itr = prds.insert(std::make_pair(layerId, sp));
+            const Identifier layerId = idHelperSvc->layerId(meas->spacePoint()->identify());
+            auto insert_itr = prds.insert(std::make_pair(layerId, meas->spacePoint()));
             if (!insert_itr.second) {
                 ATH_MSG_WARNING("Layer "<<idHelperSvc->toString(layerId)
                              <<" has already meaasurement "<<idHelperSvc->toString(insert_itr.first->second->identify())
-                             <<". Cannot add "<<idHelperSvc->toString(sp->identify())<<" for ambiguity resolution.");
+                             <<". Cannot add "<<idHelperSvc->toString(meas->spacePoint()->identify())<<" for ambiguity resolution.");
             }
         }
         return prds;
@@ -92,28 +103,9 @@ namespace MuonR4 {
     std::vector<int> SegmentAmbiSolver::driftSigns(const ActsGeometryContext& gctx,
                                                    const Segment& segment,
                                                    const std::vector<const SpacePoint*>& measurements) const {
-        std::vector<int> signs{};
-        signs.reserve(measurements.size());
         
         const Amg::Transform3D globToLoc{segment.chamber()->globalToLocalTrans(gctx)};
-        /** Direction of the segment */
-        const Amg::Vector3D segPos{globToLoc*segment.position()};
-        const Amg::Vector3D segDir{globToLoc.linear()* segment.direction()};
-
-        const Muon::IMuonIdHelperSvc* idHelperSvc{segment.chamber()->idHelperSvc()};
-
-        for (const SpacePoint* sp : measurements) {
-            if (sp->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
-                continue;
-            }
-            const Amg::Vector3D deltaPos{segPos - sp->positionInChamber()};
-            const double signedDist = deltaPos.y()*segDir.z() - segDir.y() * deltaPos.z(); 
-            ATH_MSG_VERBOSE("Hit "<<idHelperSvc->toString(sp->identify())<<" drift radius "<<sp->driftRadius()
-                           <<", signed distance: "<<signedDist<<", unsigned distance: "<<
-                           Amg::lineDistance<3>(segPos, segDir, sp->positionInChamber(), sp->directionInChamber()));
-
-            signs.push_back(signedDist > 0 ? 1 : -1);
-        }
-        return signs;
+        return SegmentFitHelpers::driftSigns(globToLoc*segment.position(), 
+                                             globToLoc.linear() * segment.direction(), measurements, msg());
     }
 }

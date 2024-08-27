@@ -9,4 +9,6 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library( MuonPatternHelpers
         Root/*.cxx
     PUBLIC_HEADERS MuonPatternHelpers
-    LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase MuonSpacePoint MuonPatternEvent MuonStationIndexLib)
+    LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase MuonSpacePoint 
+                   MuonPatternEvent MuonStationIndexLib
+    PRIVATE_LINK_LIBRARIES MuonSpacePointCalibratorLib )

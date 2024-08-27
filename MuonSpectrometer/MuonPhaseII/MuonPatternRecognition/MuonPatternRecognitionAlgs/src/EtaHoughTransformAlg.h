@@ -80,13 +80,22 @@ namespace MuonR4{
             // target resolution in the angle
             DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.03};
             // target resolution in the y intercept
-            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 10.};
+            DoubleProperty m_targetResoIntercept{this, "ResolutionTargetIntercept", 15.};
             // minimum search window half width, tan(theta) 
             // - in multiples of the target resolution
             DoubleProperty m_minSigmasSearchTanTheta{this, "minSigmasSearchTanTheta", 1.0};
             // minimum search window half width, intercept 
             // - in multiples of the target resolution
             DoubleProperty m_minSigmasSearchIntercept{this, "minSigmasSearchIntercept", 1.0};
+            // Cut on the number of weighted hits on the maximum
+            DoubleProperty m_peakThreshold{this, "peakThreshold", 2.5};
+            // Minimum distance in tanTheta between two maxima
+            DoubleProperty m_minMaxDistTheta{this, "MaximumSeparationTheta", 0.};
+            // Minimum distance in the intercept between two maxima
+            DoubleProperty m_minMaxDistIntercept{this, "MaximumSeparationIntercept", 15.};
+            // Fraction of weighted counts around the peak to be associated to the maximum
+            DoubleProperty m_peakFractionCutOff{this, "PeakFractionCutOff", 0.6};
+            
             // number of accumulator bins for the angle 
             IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 5};
             // number of accumulator bins for the intercept 

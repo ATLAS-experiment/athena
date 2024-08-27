@@ -4,7 +4,12 @@
 #include "MuonPatternHelpers/CalibSegmentChi2Minimizer.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
+#include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
 
+#include "GaudiKernel/PhysicalConstants.h"
+namespace {
+    constexpr double c_inv{1./ Gaudi::Units::c_light};
+}
 
 
 namespace MuonR4{
@@ -13,31 +18,41 @@ namespace MuonR4{
     using namespace SegmentFit;
 
     CalibSegmentChi2Minimizer::CalibSegmentChi2Minimizer(const std::string& name,
+                                                        const EventContext& ctx,
+                                                         const Amg::Transform3D& locToGlobTrf,
                                                          HitVec&& hits,
-                                                         CalibratorFunc calibrator,
+                                                         const ISpacePointCalibrator* calibrator,
                                                          bool doT0Fit):
             AthMessaging{name},
             m_name{name},
+             m_ctx{ctx},
+            m_locToGlob{locToGlobTrf},
             m_hits{std::move(hits)},
             m_calibrator{calibrator},
             m_doT0Fit{doT0Fit} {
         
+        
         for (const HitType& hit : m_hits) {
+            if (hit->fitState() != CalibratedSpacePoint::State::Valid){
+                continue;
+            }
             /// Beam spot constraint
-            if (!hit->spacePoint()) {
+            if (hit->type() == xAOD::UncalibMeasType::Other) {
                 m_nMeas +=2;
+                m_hasPhi = true;
                 continue;
             }
             m_nMeas += hit->spacePoint()->measuresEta();
             m_nMeas += hit->spacePoint()->measuresPhi();
             m_hasPhi |= hit->spacePoint()->measuresPhi();
-            if (m_doT0Fit) {
-                if (hit->type() == xAOD::UncalibMeasType::RpcStripType) {
-                    ++m_nMeas;
-                }
+            if (m_doT0Fit && hit->measuresTime() && hit->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
+                ++m_nMeas;
             }
         }
-        std::sort(m_hits.begin(), m_hits.end(), 
+        if (m_nMeas - 2 - (m_hasPhi ? 2 : 0) <= 1) {
+            m_doT0Fit = false;
+        }
+        std::ranges::sort(m_hits, 
                   [](const HitType& a, const HitType& b) { 
                     return a->positionInChamber().z() < b->positionInChamber().z();
                   });
@@ -48,12 +63,17 @@ namespace MuonR4{
         for (const HitType& copyMe : m_hits) {
             copyHits.emplace_back(std::make_unique<CalibratedSpacePoint>(*copyMe));
         }
-        return new CalibSegmentChi2Minimizer(m_name, std::move(copyHits), m_calibrator, m_doT0Fit);
+        return new CalibSegmentChi2Minimizer(m_name, m_ctx, m_locToGlob, std::move(copyHits), m_calibrator, m_doT0Fit);
+    }
+    const Amg::Transform3D& CalibSegmentChi2Minimizer::localToGlobTrans() const {
+        return m_locToGlob;
     }
     unsigned int CalibSegmentChi2Minimizer::NDim() const {
         return toInt(AxisDefs::nPars);
     }
-
+    bool CalibSegmentChi2Minimizer::doTimeFit() const {
+        return m_doT0Fit;
+    }
     int CalibSegmentChi2Minimizer::nDoF() const {
         return m_nMeas - 2 - (m_hasPhi ? 2 : 0) - m_doT0Fit;
     }
@@ -64,27 +84,14 @@ namespace MuonR4{
         return m_hits;
     }
     HitVec CalibSegmentChi2Minimizer::release(const double* pars) {
-        HitVec released{};
-        std::vector<const SpacePoint*> uncalibSP{};
-        for(HitType& hit : m_hits) {
-            /// Beam spot constraint does not have a space point
-            if (!hit->spacePoint()) {
-                released.push_back(std::move(hit));
-            } else {
-                uncalibSP.push_back(hit->spacePoint());
-            }        
-        }
         const Amg::Vector3D segPos{pars[toInt(AxisDefs::x0)],
                                    pars[toInt(AxisDefs::y0)], 0.};
 
         const Amg::Vector3D segDir = Amg::Vector3D(pars[toInt(AxisDefs::tanPhi)],
                                                    pars[toInt(AxisDefs::tanTheta)], 1.).unit();
         
-        const double segT0 = pars[toInt(AxisDefs::time)];
-        HitVec reCalibSP = m_calibrator(uncalibSP, segPos, segDir, segT0);
-        released.insert(released.end(),
-                        std::make_move_iterator(reCalibSP.begin()),
-                        std::make_move_iterator(reCalibSP.end()));
+        const double timeDelay = pars[toInt(AxisDefs::time)];
+        HitVec released = m_calibrator->calibrate(m_ctx, std::move(m_hits), segPos, segDir, timeDelay);
         m_hits.clear();
         return released;
     }
@@ -97,36 +104,21 @@ namespace MuonR4{
         const Amg::Vector3D segDir = Amg::Vector3D(pars[toInt(AxisDefs::tanPhi)],
                                                    pars[toInt(AxisDefs::tanTheta)], 1.).unit();
         
-        const double segT0 = pars[toInt(AxisDefs::time)];
+        const double timeDelay = pars[toInt(AxisDefs::time)];
         ATH_MSG_VERBOSE("Starting parameters  position: "<<Amg::toString(segPos)<<", direction: "<<Amg::toString(segDir)
-                       <<", t0: "<<segT0<<".");
-
-        
-        std::vector<const SpacePoint*> uncalibSP{};
-        uncalibSP.reserve(m_hits.size());
-        std::vector<const CalibratedSpacePoint*> calibHits{};
-        for(const HitType& hit : m_hits) {
-            /// Beam spot constraint does not have a space point
-            if (!hit->spacePoint()) {
-                calibHits.push_back(hit.get());
-                continue;
-            }
-            uncalibSP.push_back(hit->spacePoint());        
-        }
-        HitVec garbage = m_calibrator(uncalibSP, segPos, segDir, segT0);
-        for (const HitType& hit: garbage) {
-            calibHits.push_back(hit.get());
-        }
+                       <<", timeDelay: "<<timeDelay<<".");
+   
+        m_hits = m_calibrator->calibrate(m_ctx, std::move(m_hits), segPos, segDir, timeDelay);
+     
         double chi2{0.};
-        std::optional<double> t = m_doT0Fit ? std::make_optional<double>(segT0) : std::nullopt;
-
-        for (const CalibratedSpacePoint* hit : calibHits) {
-            chi2 += SegmentFitHelpers::chiSqTerm(segPos,segDir, t, *hit, msg());
+        std::optional<double> arrivalTime = std::nullopt;
+        if (m_doT0Fit) {
+            arrivalTime = std::make_optional<double>( (m_locToGlob *segPos).mag() * c_inv / timeDelay);
+        }
+        for (const HitType& hit : m_hits) {            
+            chi2 += SegmentFitHelpers::chiSqTerm(segPos,segDir, timeDelay, arrivalTime, *hit, msg());
         }
         ATH_MSG_VERBOSE("Final chi2: "<<chi2);
         return chi2;
     }
-
-
-
 }

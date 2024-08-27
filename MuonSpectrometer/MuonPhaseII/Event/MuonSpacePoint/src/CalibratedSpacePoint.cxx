@@ -4,12 +4,16 @@
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 
 namespace MuonR4{
+
+    using Covariance_t = CalibratedSpacePoint::Covariance_t;
     CalibratedSpacePoint::CalibratedSpacePoint(const SpacePoint* uncalibSpacePoint,
                                                Amg::Vector3D&& posInChamber,
-                                               Amg::Vector3D&& dirInChamber):
+                                               Amg::Vector3D&& dirInChamber,
+                                               State st):
         m_parent{uncalibSpacePoint},
         m_posInChamber{posInChamber},
-        m_dirInChamber{dirInChamber} {
+        m_dirInChamber{dirInChamber},
+        m_state{st} {
     }
     const SpacePoint* CalibratedSpacePoint::spacePoint() const{
         return m_parent;
@@ -26,11 +30,8 @@ namespace MuonR4{
     void CalibratedSpacePoint::setDriftRadius(const double r) {
         m_driftRadius = r;
     }    
-    const AmgSymMatrix(2)& CalibratedSpacePoint::covariance() const {
+    const Covariance_t& CalibratedSpacePoint::covariance() const {
         return m_cov;
-    }
-    void CalibratedSpacePoint::setCovariance(AmgSymMatrix(2)&& cov) {
-        m_cov = std::move(cov);
     }
     xAOD::UncalibMeasType CalibratedSpacePoint::type() const {
         return m_parent ? m_parent->type() : xAOD::UncalibMeasType::Other;
@@ -38,12 +39,24 @@ namespace MuonR4{
     double CalibratedSpacePoint::time() const {
         return m_time;
     }
-    double CalibratedSpacePoint::timeCovariance() const {
-        return m_timeCov;
-    }
-    void CalibratedSpacePoint::setTimeMeasurement(double t, double errT) {
+    void CalibratedSpacePoint::setTimeMeasurement(double t) {
         m_time = t;
-        m_timeCov = errT;
+        m_measuresTime = true;
+    }               
+    bool CalibratedSpacePoint::measuresTime() const {
+        return m_measuresTime;
+    }
+    bool CalibratedSpacePoint::measuresPhi() const {
+        return !m_parent || m_parent->measuresPhi();
+    }
+    bool CalibratedSpacePoint::measuresEta() const {
+        return !m_parent || m_parent->measuresEta();
+    }
+    CalibratedSpacePoint::State CalibratedSpacePoint::fitState() const {
+        return m_state;
+    }
+    void CalibratedSpacePoint::setFitState(State st) {
+        m_state = st;
     }
 
 }

@@ -16,21 +16,19 @@
 #include <Math/Minimizer.h>
 
 namespace MuonR4{
- 
-    class CalibSegmentChi2Minimizer: public ROOT::Math::IMultiGenFunction,
-                                            AthMessaging {
+    class ISpacePointCalibrator;
+    class CalibSegmentChi2Minimizer: public ROOT::Math::IMultiGenFunction, AthMessaging {
       public:
           
           using HitType = std::unique_ptr<CalibratedSpacePoint>;
           using HitVec = std::vector<HitType>;
-          using CalibratorFunc = std::function<HitVec(std::vector<const SpacePoint*>& spacePoints,
-                                                      const Amg::Vector3D& segmentIsect,
-                                                      const Amg::Vector3D& segmentDir,
-                                                      const double timeOfArrival)>;
+          
           /** Constructor taking the input hits to fit */
           CalibSegmentChi2Minimizer(const std::string& name,
+                                    const EventContext& ctx,
+                                    const Amg::Transform3D& locToGlobTrf,
                                     HitVec&& hits,
-                                    CalibratorFunc calibrator,
+                                    const ISpacePointCalibrator* calibrator,
                                     bool doT0Fit);
       
           /** @brief Evaluate the chi2 for the given set of parameters */
@@ -41,6 +39,8 @@ namespace MuonR4{
           unsigned int NDim() const override final;
           /** @brief Are phi measurements in the collection */
           bool hasPhiMeas() const;
+          /** @brief Does the fit include the time */
+          bool doTimeFit() const;
           /** @brief  Returns the degrees of freedom from the measurements & beamspot constraint */
           int nDoF() const;
           /** @brief Returns the used measurements */
@@ -48,13 +48,17 @@ namespace MuonR4{
 
           /** @brief Returns the contribution of each measurement to the chi2 */
           std::vector<double> chi2Terms(const double* pars) const;
-
+          /** @brief Releases all measurements */
           HitVec release(const double* pars);
+          /** @brief Returns the local to global transformation */
+          const Amg::Transform3D& localToGlobTrans() const;
          
       private:
           std::string m_name{};
-          HitVec m_hits{};
-          CalibratorFunc m_calibrator;
+          const EventContext& m_ctx;
+          Amg::Transform3D m_locToGlob{Amg::Transform3D::Identity()};
+          mutable HitVec m_hits ATLAS_THREAD_SAFE{};
+          const ISpacePointCalibrator* m_calibrator{};
           bool m_doT0Fit{false};
 
           double segmentChi2TermStrip(const CalibratedSpacePoint& hit,  

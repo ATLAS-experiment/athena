@@ -19,6 +19,7 @@ namespace MuonR4{
 
         std::string makeLabel(const Parameters& pars);
         std::string toString(const Parameters& pars);
+        std::string toString(const AxisDefs a);
     }
 
 
@@ -31,12 +32,14 @@ namespace MuonR4{
         using HitType = std::unique_ptr<CalibratedSpacePoint>;
         using HitVec = std::vector<HitType>;
         
+        /** @brief Was the time fitted */
+        bool timeFit{false};
         /** @brief Does the candidate have phi measurements */
         bool hasPhi{false};
         /** @brief Final segment parameters */
-        Parameters segmentPars{};
+        Parameters segmentPars{Parameters::Zero()};
         /** @brief Uncertainties on the segment parameters */
-        Covariance segmentParErrs{};
+        Covariance segmentParErrs{Covariance::Identity()};
         /** @brief Calibrated measurements used in the fit */
         HitVec calibMeasurements{};
         /** @brief Chis per measurement to identify outliers */
@@ -45,6 +48,10 @@ namespace MuonR4{
         double chi2{0.};
         /** @brief degrees of freedom */
         int nDoF{0};
+        /** @brief How many phi measurements */
+        unsigned int nPhiMeas{0};
+        /** @brief How many measurements give time constaint */
+        unsigned int nTimeMeas{0};
         /** @brief Is the fit converged */
         bool converged{false};
         /** @brief Number of iterations called to reach the minimum */

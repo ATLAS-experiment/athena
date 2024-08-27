@@ -54,7 +54,10 @@ namespace MuonR4 {
             }
             const MuonGMR4::MdtReadoutElement* readOutEle = m_detMgr->getMdtReadoutElement(hitId);
             const IdentifierHash measHash{readOutEle->measurementHash(hitId)};
-
+            if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+                ATH_MSG_VERBOSE("Hit is not from a muon");
+                continue;
+            }
 
             const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
             const double distRO = readOutEle->distanceToReadout(measHash, locPos);

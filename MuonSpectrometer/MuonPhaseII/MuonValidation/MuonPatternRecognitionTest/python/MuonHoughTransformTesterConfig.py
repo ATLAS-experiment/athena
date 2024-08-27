@@ -6,17 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
     result = ComponentAccumulator()
-    containerNames = []
-    ## If the tester runs on MC add the truth information
-    if flags.Input.isMC:
-        if flags.Detector.EnableMDT: containerNames+=["xMdtSimHits"]
-        if flags.Detector.EnableMM: containerNames+=["xMmSimHits"]
-        if flags.Detector.EnableRPC: containerNames+=["xRpcSimHits"]
-        if flags.Detector.EnableTGC: containerNames+=["xTgcSimHits"]
-        if flags.Detector.EnablesTGC: containerNames+=["xStgcSimHits"] 
-    kwargs.setdefault("SimHitKeys", containerNames)
-    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs)    
-
+    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
     result.addEventAlgo(theAlg, primary=True)
     return result
 
