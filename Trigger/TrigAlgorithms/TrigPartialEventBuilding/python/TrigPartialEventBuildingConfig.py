@@ -68,6 +68,8 @@ def RoIPEBInfoWriterToolCfg(flags, name='RoIPEBInfoWriterTool',
     acc = ComponentAccumulator()
     acc_regsel = getRegSelTools(flags, regSelDets)
 
+    kwargs.setdefault("MatchTriggerType", [])
+
     tool = CompFactory.RoIPEBInfoWriterTool(
         name,
         RegionSelectorTools = acc_regsel.popPrivateTools(),
@@ -87,6 +89,9 @@ def StaticPEBInfoWriterToolCfg(flags, name='StaticPEBInfoWriterTool',
     """Configure the StaticPEBInfoWriterTool"""
 
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("MatchTriggerType", [])
+
     tool = CompFactory.StaticPEBInfoWriterTool(
         name,
         ROBList = [int(robid) for robid in ROBs],

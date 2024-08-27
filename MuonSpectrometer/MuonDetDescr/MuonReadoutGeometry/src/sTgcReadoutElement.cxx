@@ -827,8 +827,12 @@ namespace MuonGM {
         //*********************
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
-        const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();
-        if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
+        const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();        
+        if(manager()->getsTGCAsBuilt2() && design->type == MuonChannelDesign::ChannelType::etaStrip){
+            manager()->getsTGCAsBuilt2()->correctPosition(layerId, pos.head(2));
+
+        } else if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
+
             Amg::Vector2D lpos(locXpos, locYpos);
             
             // express the local position w.r.t. the nearest active strip

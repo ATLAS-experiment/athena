@@ -73,30 +73,12 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-  //---------------- Finalisation -------------------------------------------------
-
-  StatusCode eFEXSysSim::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
-
-  
-  void eFEXSysSim::init()  {
-
-  }
-
-  void eFEXSysSim::cleanup()  {
-
-    m_eFEXCollection.clear();
-  }
-
-
   int eFEXSysSim::calcTowerID(int eta, int phi, int mod) const {
 
     return ((64*eta) + phi + mod);
   }
 
-  StatusCode eFEXSysSim::execute(eFEXOutputCollection* inputOutputCollection)  {    
+  StatusCode eFEXSysSim::execute(eFEXOutputCollection* inputOutputCollection) {
 
     SG::ReadHandle<LVL1::eTowerContainer> this_eTowerContainer(m_eTowerContainerSGKey/*,ctx*/);
     if(!this_eTowerContainer.isValid()){
@@ -105,9 +87,9 @@ namespace LVL1 {
     }
 
     // remove TOBs of the previous events from the map
-    m_allEmTobObjects.clear();
-    m_allTauHeuristicTobObjects.clear();
-    m_allTauBDTTobObjects.clear();
+    std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >  allEmTobObjects;
+    std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> > allTauHeuristicTobObjects;
+    std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> > allTauBDTTobObjects;
 
     // do mapping with preloaded csv file if it is available
     if (m_eFEXFPGATowerIdProviderTool->ifhaveinputfile()) {
@@ -117,9 +99,9 @@ namespace LVL1 {
           m_eFEXSimTool->init(i_efex);
           ATH_CHECK(m_eFEXSimTool->NewExecute(tmp_eTowersIDs_subset_eFEX, inputOutputCollection));
           // Get TOBs from this eFEX
-          m_allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(i_efex, m_eFEXSimTool->getEmTOBs() ));
-          m_allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(i_efex, m_eFEXSimTool->getTauHeuristicTOBs() ));
-          m_allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(i_efex, m_eFEXSimTool->getTauBDTTOBs() ));
+          allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(i_efex, m_eFEXSimTool->getEmTOBs() ));
+          allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(i_efex, m_eFEXSimTool->getTauHeuristicTOBs() ));
+          allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(i_efex, m_eFEXSimTool->getTauBDTTOBs() ));
           m_eFEXSimTool->reset();
       }
     } else {
@@ -226,9 +208,9 @@ namespace LVL1 {
 
       m_eFEXSimTool->init(thisEFEX);
       ATH_CHECK(m_eFEXSimTool->NewExecute(tmp_eTowersIDs_subset, inputOutputCollection));
-      m_allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
-      m_allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
-      m_allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
+      allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
+      allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
+      allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
       m_eFEXSimTool->reset();
 
       fexcounter++;
@@ -296,9 +278,9 @@ namespace LVL1 {
       //tool use instead
       m_eFEXSimTool->init(thisEFEX);
       ATH_CHECK(m_eFEXSimTool->NewExecute(tmp_eTowersIDs_subset, inputOutputCollection));
-      m_allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
-      m_allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
-      m_allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
+      allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
+      allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
+      allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
       m_eFEXSimTool->reset();
 
       fexcounter++;
@@ -378,9 +360,9 @@ namespace LVL1 {
       //tool use instead
       m_eFEXSimTool->init(thisEFEX);
       ATH_CHECK(m_eFEXSimTool->NewExecute(tmp_eTowersIDs_subset, inputOutputCollection));
-      m_allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
-      m_allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
-      m_allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
+      allEmTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getEmTOBs() ) ));
+      allTauHeuristicTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauHeuristicTOBs() ) ));
+      allTauBDTTobObjects.insert( std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >::value_type(thisEFEX, (m_eFEXSimTool->getTauBDTTOBs() ) ));
       m_eFEXSimTool->reset();
 
       fexcounter++;
@@ -391,19 +373,19 @@ namespace LVL1 {
     // EM TOBs and xTOBs
 
     // TOB Containers
-    m_eContainer = std::make_unique<xAOD::eFexEMRoIContainer> ();
-    m_eAuxContainer = std::make_unique<xAOD::eFexEMRoIAuxContainer> ();
-    m_eContainer->setStore(m_eAuxContainer.get());
+    auto eContainer = std::make_unique<xAOD::eFexEMRoIContainer> ();
+    auto eAuxContainer = std::make_unique<xAOD::eFexEMRoIAuxContainer> ();
+    eContainer->setStore(eAuxContainer.get());
 
     // xTOB Containers
-    m_xeContainer = std::make_unique<xAOD::eFexEMRoIContainer> ();
-    m_xeAuxContainer = std::make_unique<xAOD::eFexEMRoIAuxContainer> ();
-    m_xeContainer->setStore(m_xeAuxContainer.get());
+    auto xeContainer = std::make_unique<xAOD::eFexEMRoIContainer> ();
+    auto xeAuxContainer = std::make_unique<xAOD::eFexEMRoIAuxContainer> ();
+    xeContainer->setStore(xeAuxContainer.get());
 
     // iterate over all Em Tobs and fill xTOB EDM with them
-    for( auto const& [efex, tobObjects] : m_allEmTobObjects ){
+    for( auto const& [efex, tobObjects] : allEmTobObjects ){
       for(auto &tobObject : tobObjects){
-        m_eFEXFillEDMTool->fillEmEDM(m_xeContainer, efex, tobObject, true);
+        m_eFEXFillEDMTool->fillEmEDM(xeContainer, efex, tobObject, true);
       }
     }
 
@@ -412,8 +394,8 @@ namespace LVL1 {
     // Note that this step means moving TOBs from the all objects vector, which is why we do it last
     std::vector<std::unique_ptr<eFEXegTOB>> emTOBs;
     // Loop through eFEXes and sort TOBs from each
-    auto iter = m_allEmTobObjects.begin();
-    while (iter != m_allEmTobObjects.end()) {
+    auto iter = allEmTobObjects.begin();
+    while (iter != allEmTobObjects.end()) {
         std::vector<std::unique_ptr<eFEXegTOB>> tobsSort = std::move(iter->second);
         // sort tobs by their et (last 12 bits of the 32 bit tob word)
         std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<eFEXegTOB>>, std::placeholders::_1, std::placeholders::_2, false));
@@ -428,20 +410,20 @@ namespace LVL1 {
     // iterate over sorted eFEX EM TOBs and fill TOB EDM with them
     for(auto &tobObject : emTOBs){
         int efex = tobObject->geteFEXID();
-        m_eFEXFillEDMTool->fillEmEDM(m_eContainer, efex, tobObject);
+        m_eFEXFillEDMTool->fillEmEDM(eContainer, efex, tobObject);
     }
 
     // Match xTOBs to TOBs and set isTOB flags if matched
-    matchTOBs(m_eContainer, m_xeContainer);
+    matchTOBs(eContainer, xeContainer);
    
     // Record EDMs in StoreGate   
     SG::WriteHandle<xAOD::eFexEMRoIContainer> outputeFexEMxTOBHandle(m_eFexEMxTOBOutKey/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << outputeFexEMxTOBHandle.key() << " = " << "..." );
-    ATH_CHECK(outputeFexEMxTOBHandle.record(std::move(m_xeContainer),std::move(m_xeAuxContainer)));
+    ATH_CHECK(outputeFexEMxTOBHandle.record(std::move(xeContainer),std::move(xeAuxContainer)));
 
     SG::WriteHandle<xAOD::eFexEMRoIContainer> outputeFexHandle(m_eFexOutKey/*, ctx*/);
     ATH_MSG_DEBUG("  write: " << outputeFexHandle.key() << " = " << "..." );
-    ATH_CHECK(outputeFexHandle.record(std::move(m_eContainer),std::move(m_eAuxContainer)));
+    ATH_CHECK(outputeFexHandle.record(std::move(eContainer),std::move(eAuxContainer)));
 
     SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
     ATH_CHECK(l1Menu.isValid());
@@ -452,14 +434,14 @@ namespace LVL1 {
 
     // Repeat for Tau TOBs and xTOBs
     if (activeAlgo == xAOD::eFexTauRoI_v1::Heuristic) {
-        ATH_CHECK(StoreTauTOBs(m_allTauHeuristicTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
+        ATH_CHECK(StoreTauTOBs(allTauHeuristicTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
         if (!omitAltTauContainer) {
-            ATH_CHECK(StoreTauTOBs(m_allTauBDTTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
+            ATH_CHECK(StoreTauTOBs(allTauBDTTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
         }
     } else if (activeAlgo == xAOD::eFexTauRoI_v1::BDT) {
-        ATH_CHECK(StoreTauTOBs(m_allTauBDTTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
+        ATH_CHECK(StoreTauTOBs(allTauBDTTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
         if (!omitAltTauContainer) {
-            ATH_CHECK(StoreTauTOBs(m_allTauHeuristicTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
+            ATH_CHECK(StoreTauTOBs(allTauHeuristicTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
         }
     }
 

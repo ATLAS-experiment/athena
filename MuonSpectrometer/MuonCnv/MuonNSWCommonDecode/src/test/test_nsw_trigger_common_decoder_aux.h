@@ -20,11 +20,14 @@ struct Params
 struct Statistics
 {
   uint32_t nevents {0};                  //total in input
-  uint32_t nevents_not_readable {0};
-  uint32_t nevents_not_decoded {0};      //not decoded e.g. for problems
-  uint32_t nevents_sus_felix_stat {0};   //felix status flag not null; could still be decoded anyway
+  uint32_t nfrags_not_readable {0};      //any fragment, not just the ones we are interested in (unfornately we can't know the type, before checking)
+  uint32_t nfrags_not_decoded {0};       //problems during decoding of the relevant ROBs
+  uint32_t nfrags_sus_rob_stat {0};      //(request) rob status flag not null; could still be decoded anyway potentially
+  uint32_t nlinks_sus_felix_stat {0};    //felix status flag not null; could still be decoded anyway potentially
   double   total_decoding_time {0};      //time spent by the decoder, not by the TTree fill, etc. (events with decoding failures also count)
   double   avg_decoding_time {0};        //avg time spent by the decoder
+  double   avg_robs_per_event {0};       //avg number of requested ROBs per event
+  double   avg_robs_wErrors {0};         //avg number of requested ROBs with errors
 };
 
 
@@ -34,7 +37,7 @@ struct outBranches
   //each event has multple ROBs (e.g. multiple sectors)
   //each ROB then has multiple elinks
   //MML1A - comtemplating multiple elinks,
-  //so the vector is on elinks
+  //so the vector is on elinks for all the sectors
   std::vector<uint32_t> b_MML1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_MML1A_ROD_moduleID = {} ;
@@ -82,7 +85,7 @@ struct outBranches
   std::vector<uint32_t> b_MML1A_trailer_CRC = {} ;
   std::vector<bool> b_MML1A_CRC_ok = {} ;
   //MMMon - comtemplating multiple elinks (even if only one possible in current design)
-  //so the vector is on elinks
+  //so the vector is on elinks for all the sectors
   std::vector<uint32_t> b_MMMon_ROD_sourceID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_subdetID = {} ;
   std::vector<uint32_t> b_MMMon_ROD_moduleID = {} ;
@@ -130,7 +133,7 @@ struct outBranches
   std::vector<uint32_t> b_MMMon_trailer_CRC = {} ;
   std::vector<bool> b_MMMon_CRC_ok = {} ;
   //PadL1A - comtemplating multiple elinks
-  //so the vector is on elinks
+  //so the vector is on elinks for all the sectors
   std::vector<uint32_t> b_PadL1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_PadL1A_ROD_moduleID = {} ;
@@ -164,7 +167,7 @@ struct outBranches
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_status = {} ;
   std::vector<std::vector<uint32_t>> b_PadL1A_bcid_multzero = {} ;
   //STGL1A - comtemplating multiple elinks
-  //so the vector is on elinks
+  //so the vector is on elinks for all the sectors
   std::vector<uint32_t> b_STGL1A_ROD_sourceID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_subdetID = {} ;
   std::vector<uint32_t> b_STGL1A_ROD_moduleID = {} ;

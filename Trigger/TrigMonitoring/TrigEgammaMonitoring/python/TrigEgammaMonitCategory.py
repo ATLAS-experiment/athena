@@ -11,41 +11,49 @@ def mongroupsCfg(moniAccess, data_type):
         shifter_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["shifter_tp"])
         shifter_topo = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["shifter_topo"])
 
-        monitoring_electron = list(filter(lambda x: ('HLT_e' in x), shifter_eg)) # etcut chains
+        monitoring_electron = list(filter(lambda x: ('HLT_e' in x and 'L1eEM28' not in x), shifter_eg)) # etcut chains
         monitoring_tags = []
-        monitoringTP_electron = shifter_tp
+        monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
         
-        monitoring_photon = list(filter(lambda x: ('HLT_g' in x), shifter_eg))
+        monitoring_ph = list(filter(lambda x: ('HLT_g' in x and 'ringer' not in x), shifter_eg))
+        monitoring_ph_ringer = ['HLT_g20_tight_ringer_L1eEM18M', 'HLT_g25_loose_ringer_L1eEM24L','HLT_g22_tight_ringer_L1eEM18M','HLT_g25_medium_ringer_L1eEM24L','HLT_g35_medium_ringer_L1eEM24L','HLT_g50_loose_ringer_L1eEM24L','HLT_g140_loose_ringer_L1eEM26M']
+        monitoring_photon = monitoring_ph + monitoring_ph_ringer + ['HLT_g140_loose_L1eEM26M','HLT_g300_etcut_L1eEM26M']
         monitoring_bootstrap = {
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
                 'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L',
+                'HLT_g22_tight_ringer_L1eEM18M'  : 'HLT_g20_tight_ringer_L1eEM18M',
+                'HLT_g25_medium_ringer_L1eEM24L' : 'HLT_g25_loose_ringer_L1eEM24L',
+                'HLT_g35_medium_ringer_L1eEM24L' : 'HLT_g25_loose_ringer_L1eEM24L',
+                'HLT_g50_loose_ringer_L1eEM24L'  : 'HLT_g25_loose_ringer_L1eEM24L'
         }
 
         t0_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["t0_tp"])
-        validationTP_electron_eEM = list(filter(lambda x: ('L1eEM' in x), t0_tp ))
-        validation_electron = ['HLT_e25_etcut_L1eEM18M','HLT_e60_etcut_L1eEM26M','HLT_e100_etcut_L1eEM26M']
+
+        validationTP_electron_DNN = list(filter(lambda x: ('_dnn' in x), t0_tp ))
+        validation_electron = ['HLT_e25_etcut_L1eEM18M','HLT_e60_etcut_L1eEM26M']
         validation_jpsi = list(filter(lambda x: ('_L1JPSI' in x), shifter_topo ))
         validationTP_jpsiee = ['HLT_e10_lhvloose_L1eEM9']
 
         monitoring_topo = []
         mongroups = { 
                 'monitoring_electron'           : monitoring_electron,
-                'monitoring_photon'             : monitoring_photon + ['HLT_g140_loose_L1eEM26M','HLT_g300_etcut_L1eEM26M'],
+                'monitoring_photon'             : monitoring_photon ,
                 'monitoring_bootstrap'          : monitoring_bootstrap,
-                'monitoringTP_electron'         : monitoringTP_electron + ['HLT_e26_lhtight_L1eEM26M','HLT_e28_lhtight_L1eEM26M','HLT_e30_lhvloose_L1eEM26M','HLT_e60_lhvloose_L1eEM26M'],
+                'monitoringTP_electron'         : monitoringTP_electron + ['HLT_e26_lhtight_L1eEM26M'],
                 'monitoring_tags'               : monitoring_tags,
                 'monitoring_topo'               : monitoring_topo,
-                'validationTP_electron_eEM'     : validationTP_electron_eEM,
         }
 
         if data_type is DQDataType.MC:
                 
                 mongroups['validation_electron']        = validation_electron
-                mongroups['validation_photon']          = monitoring_photon
+                mongroups['validation_photon']          = monitoring_photon 
                 mongroups['validation_jpsi']            = validation_jpsi
                 mongroups['validationTP_jpsiee']        = validationTP_jpsiee
+                mongroups['validationTP_electron_DNN']  = validationTP_electron_DNN
+
 
         elif data_type is DQDataType.HeavyIon:
                 monitoring_electron_hi=['HLT_e13_etcut_ion_L1eEM12L','HLT_e15_lhmedium_nogsf_ion_L1eEM15']

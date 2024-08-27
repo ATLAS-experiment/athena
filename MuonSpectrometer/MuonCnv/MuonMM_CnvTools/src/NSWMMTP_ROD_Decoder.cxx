@@ -40,12 +40,29 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   const Muon::nsw::NSWTriggerCommonDecoder decoder{fragment, "MML1A"};
 
   if (decoder.has_error()) {
-    ATH_MSG_DEBUG("NSW MMTP Common Decoder found exceptions while reading this MML1A fragment. Skipping. Error id: "+std::to_string(decoder.error_id()));
+    ATH_MSG_DEBUG("NSW MMTP Common Decoder found exceptions while reading this MML1A fragment from " + std::to_string(fragment.rob_source_id()) + ". Skipping. Error id: "+std::to_string(decoder.error_id()));
     return StatusCode::SUCCESS;
   }
 
-  if (decoder.get_elinks().size()!=3) {
-    ATH_MSG_DEBUG("NSW MMTP Common Decoder didn't give 3 elinks in output: something off with this fragment. Skipping.");
+  if (decoder.get_elinks().size()!=3 && decoder.get_elinks().size()!=5) {
+    // this is a severe requirement: a single elink missing would imply the whole event is problematic 
+    ATH_MSG_DEBUG("NSW MMTP Common Decoder didn't give 3 or 5 elinks in output: something off with this fragment. Skipping.");
+    return StatusCode::SUCCESS;
+  }
+
+  //for all the 3/5 elinks expected, the MMTP header parameters should be the same by design
+  //checking consistency of a fraction of the header
+  bool consistent = true;
+  const auto l0 = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(decoder.get_elinks()[0]);
+  for(const auto& baseLink: decoder.get_elinks()) {
+    const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(baseLink);
+    if (l0->head_sectID() != l->head_sectID()) {consistent = false; break;}
+    if (l0->L1ID() != l->L1ID()) {consistent = false; break;}
+    if (l0->l1a_versionID() != l->l1a_versionID()) {consistent = false; break;}
+    if (l0->l1a_req_BCID() != l->l1a_req_BCID()) {consistent = false; break;}
+  }
+  if (!consistent) {
+    ATH_MSG_DEBUG("NSW MMTP Common Decoder found inconsistent header parameters in the elinks: something off with this fragment. Skipping.");
     return StatusCode::SUCCESS;
   }
 
@@ -54,15 +71,11 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   xAOD::NSWMMTPRDO* rdo = new xAOD::NSWMMTPRDO();
   rdoContainer.push_back(rdo);
 
-  //for all the 3 elinks expected, the MMTP header parameters should be the same by design; in case one could add a check on the differences
-  const auto l0 = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(decoder.get_elinks()[0]);
-
   //this info is redundant with elinkID in the decoded packet! Wanna add a check in the future?
   uint32_t sid = fragment.rob_source_id ();
   eformat::helper::SourceIdentifier source_id (sid);
   //eformat::SubDetector s = source_id.subdetector_id ();
   uint16_t m = source_id.module_id ();
-
 
   //ROD info                  
   rdo->set_sourceID(sid);
@@ -97,9 +110,9 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
 
     for (const auto& a: l->art_packets()) {
       for (const auto& c: a->channels()) {
-	rdo->art_BCID().push_back(a->art_BCID());
-	rdo->art_layer().push_back(c.first);
-	rdo->art_channel().push_back(c.second);
+        rdo->art_BCID().push_back(a->art_BCID());
+	      rdo->art_layer().push_back(c.first);
+	      rdo->art_channel().push_back(c.second);
       }
     }
     for (const auto& t: l->trig_packets()) {

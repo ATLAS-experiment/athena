@@ -130,7 +130,7 @@ def DFTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("StoreSCT", flags.InDet.DAODStoreSCT)
     kwargs.setdefault("StoreTRT", flags.InDet.DAODStoreTRT)
     # never decorate EventInfo with TRTPhase, doubt this is useful for IDTIDE
-    kwargs.setdefault("AddExtraEventInfo", flags.InDet.DAODStoreExtra)
+    kwargs.setdefault("AddExtraEventInfo", flags.InDet.DAODStoreExtra and flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "")
     kwargs.setdefault("OutputLevel", INFO)
@@ -349,6 +349,7 @@ def ITkGSFTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("SctMsosName", "GSF_ITkStrip_MSOSs")
     kwargs.setdefault("TrtMsosName", "")
     kwargs.setdefault("PRDtoTrackMap", "")
+    kwargs.setdefault("AddExtraEventInfo", flags.Beam.Type is BeamType.Cosmics)
     return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
 def ITkGSFTSOS_CommonKernelCfg(flags, name="ITkGSFTSOS_CommonKernel"):

@@ -44,8 +44,6 @@ StatusCode eFEXDriver::finalize()
 
   StatusCode eFEXDriver::execute(/*const EventContext& ctx*/) //const
 {
-  // STEP 1 - Set up the eFEXSysSim
-  m_eFEXSysSimTool->init();
 
   // STEP 2 - Do some monitoring
   eFEXOutputCollection* my_eFEXOutputCollection = new eFEXOutputCollection();
@@ -53,9 +51,6 @@ StatusCode eFEXDriver::finalize()
 
   // STEP 3 - Run THE eFEXSysSim
   ATH_CHECK(m_eFEXSysSimTool->execute(my_eFEXOutputCollection));
-
-  // STEP 4 - Close and clean the event  
-  m_eFEXSysSimTool->cleanup();
 
   // STEP 5 - Write the completed eFEXOutputCollection into StoreGate (move the local copy in memory)
   std::unique_ptr<eFEXOutputCollection> local_eFEXOutputCollection = std::unique_ptr<eFEXOutputCollection>(my_eFEXOutputCollection);

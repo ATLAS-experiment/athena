@@ -31,6 +31,7 @@ def BunchCrossingCondAlgCfg(flags):
                 from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
                 flagsWithFile = flags.clone()
                 flagsWithFile.Trigger.triggerConfig = 'FILE'
+                flagsWithFile.lock()
                 result.merge(BunchGroupCondAlgCfg(flagsWithFile))
                 bgkey = 'L1BunchGroup'
             else:  # trust that we can use the in-file metadata
