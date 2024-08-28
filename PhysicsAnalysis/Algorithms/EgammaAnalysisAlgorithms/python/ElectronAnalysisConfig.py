@@ -243,12 +243,15 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             "VarRad, TightTrackOnly_FixedRad, NonIso.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points")
-        self.addOption ('recomputeLikelihood', False, type=bool,
-            info="whether to rerun the LH. The default is False, i.e. to use "
+        self.addOption ('recomputeID', False, type=bool,
+            info="whether to rerun the ID LH/DNN. The default is False, i.e. to use "
             "derivation flags.")
         self.addOption ('chargeIDSelectionRun2', False, type=bool,
             info="whether to run the ECIDS tool. Only available for run 2. "
             "The default is False.")
+        self.addOption ('recomputeChargeID', False, type=bool,
+            info="whether to rerun the ECIDS. The default is False, i.e. to use "
+            "derivation flags.")
         self.addOption ('doFSRSelection', False, type=bool,
             info="whether to accept additional electrons close to muons for "
             "the purpose of FSR corrections to these muons. Expert feature "
@@ -318,7 +321,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # It is safe to do this before calibration, as the cluster E is used
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
             alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_bits'
-            if self.recomputeLikelihood:
+            if self.recomputeID:
                 # Rerun the likelihood ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
                 alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
@@ -372,7 +375,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
             alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_bits'
-            if self.recomputeLikelihood:
+            if self.recomputeID:
                 # Rerun the DNN ID
                 config.addPrivateTool( 'selectionTool', 'AsgElectronSelectorTool' )
                 # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
@@ -424,12 +427,19 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                           'ElectronChargeIDSelectionAlg' + postfix )
             alg.selectionDecoration = 'chargeID' + selectionPostfix + ',as_bits'
-            config.addPrivateTool( 'selectionTool',
-                                   'AsgElectronChargeIDSelectorTool' )
-            alg.selectionTool.TrainingFile = \
-                'ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root'
-            alg.selectionTool.WorkingPoint = 'Loose'
-            alg.selectionTool.CutOnBDT = -0.337671 # Loose 97%
+            if self.recomputeChargeID:
+                # Rerun the ECIDS BDT
+                config.addPrivateTool( 'selectionTool',
+                                       'AsgElectronChargeIDSelectorTool' )
+                alg.selectionTool.TrainingFile = \
+                    'ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root'
+                alg.selectionTool.WorkingPoint = 'Loose'
+                alg.selectionTool.CutOnBDT = -0.337671 # Loose 97%
+            else:
+                # Select from Derivation Framework flags
+                config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
+                alg.selectionTool.selectionFlags = ["DFCommonElectronsECIDS"]
+
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
@@ -569,8 +579,9 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     selectionName,
-                                    recomputeLikelihood = None,
+                                    recomputeID = None,
                                     chargeIDSelectionRun2 = None,
+                                    recomputeChargeID = None,
                                     noEffSF = None,
                                     forceFullSimConfig = None):
     """Create electron analysis configuration blocks
@@ -581,8 +592,9 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
-      recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
+      recomputeID -- Whether to rerun the LH/DNN ID. If not, use derivation flags
       chargeIDSelectionRun2 -- Whether or not to perform charge ID/flip selection
+      recomputeChargeID -- Whether to rerun the ECIDS. If not, use derivation flags
       noEffSF -- Disables the calculation of efficiencies and scale factors
       forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
@@ -595,8 +607,9 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
             raise ValueError ('working point should be of format "likelihood.isolation", not ' + workingPoint)
         config.setOptionValue ('identificationWP', splitWP[0])
         config.setOptionValue ('isolationWP', splitWP[1])
-    config.setOptionValue ('recomputeLikelihood', recomputeLikelihood)
+    config.setOptionValue ('recomputeID', recomputeID)
     config.setOptionValue ('chargeIDSelectionRun2', chargeIDSelectionRun2)
+    config.setOptionValue ('recomputeChargeID', recomputeChargeID)
     config.setOptionValue ('noEffSF', noEffSF)
     config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)

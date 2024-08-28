@@ -30,7 +30,6 @@ Electrons:
       - selectionName: 'loose'
         identificationWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
-        recomputeLikelihood: False
     PtEtaSelection:
         minPt: 10000.0
 

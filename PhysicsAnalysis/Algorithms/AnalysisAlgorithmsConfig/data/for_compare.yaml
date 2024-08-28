@@ -30,7 +30,6 @@ Electrons:
         noEffSF: True
         identificationWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
-        recomputeLikelihood: False
         writeTrackD0Z0: True
 
     PtEtaSelection:
