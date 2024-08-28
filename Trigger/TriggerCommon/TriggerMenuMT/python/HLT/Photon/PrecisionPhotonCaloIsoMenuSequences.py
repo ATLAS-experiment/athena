@@ -33,4 +33,4 @@ def precisionPhotonCaloIsoSequenceGenCfg(flags, name, ion=False, is_probe_leg=Fa
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonCaloIsoHypoTool import createTrigEgammaPrecisionPhotonCaloIsoHypoAlg, TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict
     sequenceOut = TrigEgammaKeys.precisionPhotonIsoContainer
     selAcc.addHypoAlgo(createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name+tag(ion) +"Hypo", sequenceOut, TrigEgammaKeys.precisionPhotonContainer)) 
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict)

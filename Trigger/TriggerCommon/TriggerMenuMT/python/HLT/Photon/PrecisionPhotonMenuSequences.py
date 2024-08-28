@@ -41,4 +41,4 @@ def precisionPhotonSequenceGenCfg(flags, ion=False, is_probe_leg=False):
 
     selAcc.mergeHypo(TrigEgammaPrecisionPhotonHypoAlgCfg(flags, "Photon"+tag(ion)+"Hypo"+probeInfo, sequenceOut))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionPhotonHypoToolFromDict, isProbe=is_probe_leg)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionPhotonHypoToolFromDict)

@@ -31,7 +31,7 @@ def precisionElectronSequenceGenCfg(flags, ion=False, variant='',is_probe_leg = 
 
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg_noGSF"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict, isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict)
 
 def precisionElectron_LRTSequenceGenCfg(flags, is_probe_leg=False):
     # This is to call precisionElectronMenuSequence for the _LRT variant
