@@ -107,7 +107,8 @@ namespace FlavorTagDiscriminants {
           {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
           {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"leptonID"_r, ConstituentsEDMType::CHAR}
+          {"leptonID"_r, ConstituentsEDMType::CHAR},
+          {"(pT_wrtJet|pZ_wrtJet|EFrac_wrtJet).*"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       // We have a number of special naming conventions to sort and
       // filter tracks. The track nodes should be named according to

@@ -75,6 +75,12 @@ namespace FlavorTagDiscriminants {
     WDHK m_dec_muon_origin_label {
       this, "dec_ftagTruthMuonOriginLabel", "ftagTruthMuonOriginLabel", 
         "Exclusive origin label of the muon"};
+    WDHK m_dec_isDstar {
+      this, "dec_isDstar", "truthFromDstar", 
+        "Boolean indicator of tracks from Dstar mesons"};
+    WDHK m_dec_is_slowpion {
+      this, "dec_is_slowpion", "truthSlowPion", 
+        "Boolean indicator of slow pions from Dstar mesons"};
 
     // Truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {

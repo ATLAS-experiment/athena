@@ -52,6 +52,8 @@ namespace FlavorTagDiscriminants {
     m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
     m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
+    m_dec_isDstar = m_TrackContainerKey.key() + "." + m_dec_isDstar.key();
+    m_dec_is_slowpion = m_TrackContainerKey.key() + "." + m_dec_is_slowpion.key();
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_source_label.initialize() );
@@ -59,6 +61,8 @@ namespace FlavorTagDiscriminants {
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
     CHECK( m_dec_muon_origin_label.initialize() );
+    CHECK( m_dec_isDstar.initialize() );
+    CHECK( m_dec_is_slowpion.initialize() );
 
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
@@ -97,6 +101,8 @@ namespace FlavorTagDiscriminants {
     WDH dec_barcode(m_dec_barcode, ctx);
     WDH dec_parent_barcode(m_dec_parent_barcode, ctx);
     WDH dec_muon_origin_label(m_dec_muon_origin_label, ctx);
+    WDH dec_isDstar(m_dec_isDstar, ctx);
+    WDH dec_is_slowpion(m_dec_is_slowpion, ctx);
 
     // decorate loop
     std::vector<const xAOD::TrackParticle*> tracks_vector(tracks->begin(), tracks->end());
@@ -114,7 +120,14 @@ namespace FlavorTagDiscriminants {
       dec_source_label(*track) = truth ? acc_source_label(*truth) : TruthDecoratorHelpers::TruthSource::Label::NoTruth;
       dec_vertex_index(*track) = truth ? acc_vertex_index(*truth) : -2;
       dec_muon_origin_label(*track) = -2;
+      dec_isDstar(*track) = false;
+      dec_is_slowpion(*track) = false;
 
+      if (truth && truth->nParents() == 1 && truth->parent(0)){
+        bool fromDstar = truth->parent(0)->absPdgId() == 413;
+        dec_isDstar(*track) = fromDstar;
+        dec_is_slowpion(*track) = (fromDstar && truth->absPdgId() == 211);
+      }
     }
     if ( !m_truthLeptonTool.empty() ) {
 
