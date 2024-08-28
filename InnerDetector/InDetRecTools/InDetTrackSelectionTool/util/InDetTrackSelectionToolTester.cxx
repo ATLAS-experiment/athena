@@ -116,7 +116,8 @@ int main( int argc, char* argv[] ) {
    std::map<string, unique_ptr<TrkSelTool> > selToolMap;
    std::map<string, unique_ptr<HistFamily> > histFamilyMap;
    for (const auto& cut : cutNames) {
-     selToolMap[cut] = unique_ptr<TrkSelTool>(new TrkSelTool( (cut+"TrackSelection"), cut ));
+     selToolMap[cut] = unique_ptr<TrkSelTool>(new TrkSelTool( (cut+"TrackSelection") ));
+     CHECK( selToolMap[cut]->setProperty( "CutLevel", cut) );
      CHECK( selToolMap[cut]->initialize() );
      histFamilyMap[cut] = unique_ptr<HistFamily>(new HistFamily(cut));
    }

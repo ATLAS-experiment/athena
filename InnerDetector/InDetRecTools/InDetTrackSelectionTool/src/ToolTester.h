@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSELECTIONTOOL_TOOLTESTER_H
@@ -37,14 +37,17 @@ namespace InDet {
       virtual StatusCode execute(const EventContext &ctx) const;
 
    private:
-      /// StoreGate key for the track container to investigate
-      SG::ReadHandleKey<xAOD::TrackParticleContainer> m_sgKey;
+     /// StoreGate key for the track container to investigate
+     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_sgKey
+     {this, "SGKey", "InDetTrackParticles"};
 
      SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey { this, "VertexContainer", "PrimaryVertices", 
 	                                                    "reconstructed vertex container" };
 
-      /// Connection to the selection tool
-      ToolHandle< IInDetTrackSelectionTool > m_selTool;
+     /// Connection to the selection tool
+     ToolHandle< IInDetTrackSelectionTool > m_selTool
+       {this, "TrackSelectionTool",
+	"InDet::InDetTrackSelectionTool/TrackSelectionTool"};
 
    }; // class ToolTester
 
