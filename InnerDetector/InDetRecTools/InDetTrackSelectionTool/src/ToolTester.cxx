@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes:
 #include "ToolTester.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleAuxContainer.h"
 #include "PATCore/AcceptInfo.h"
 #include "PATCore/AcceptData.h"
 #ifndef XAOD_ANALYSIS
@@ -17,15 +14,8 @@
 #endif
 
 InDet::ToolTester::ToolTester( const std::string& name, ISvcLocator* svcLoc )
-  : AthReentrantAlgorithm( name, svcLoc ),
-    m_sgKey("InDetTrackParticles"),
-    m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
-{
-    
-  declareProperty( "SGKey", m_sgKey);
-
-  declareProperty( "TrackSelectionTool", m_selTool );
-}
+  : AthReentrantAlgorithm( name, svcLoc )
+{ }
 
 StatusCode InDet::ToolTester::initialize() {
 

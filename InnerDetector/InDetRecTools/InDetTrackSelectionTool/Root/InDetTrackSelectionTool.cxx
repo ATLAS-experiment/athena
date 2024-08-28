@@ -72,13 +72,10 @@ namespace {
    }
 }
 
-InDet::InDetTrackSelectionTool::InDetTrackSelectionTool(const std::string& name, const std::string& cutLevel)
+InDet::InDetTrackSelectionTool::InDetTrackSelectionTool(const std::string& name)
   : asg::AsgTool(name)
   , m_acceptInfo( "InDetTrackSelection" )
-  , m_cutLevel(cutLevel)
 #ifndef XAOD_ANALYSIS
-  , m_trackSumTool("Trk::TrackSummaryTool/TrackSummaryTool", this)
-  , m_extrapolator("Trk::Extrapolator/Extrapolator", this)
 #endif // XAOD_ANALYSIS
 {
 
@@ -87,141 +84,6 @@ InDet::InDetTrackSelectionTool::InDetTrackSelectionTool(const std::string& name,
 
 #ifndef XAOD_STANDALONE
   declareInterface<IInDetTrackSelectionTool>(this);
-#endif
-
-  declareProperty("CutLevel", m_cutLevel);
-
-  declareProperty("minPt", m_minPt, "Minimum transverse momentum");
-  declareProperty("minP", m_minP, "Minimum momentum");
-  declareProperty("maxAbsEta", m_maxAbsEta, "Maximum magnitude of pseudorapidity");
-  declareProperty("maxD0", m_maxD0, "Maximum transverse separation");
-  declareProperty("maxZ0", m_maxZ0, "Maximum longitudinal separation");
-  declareProperty("maxZ0SinTheta", m_maxZ0SinTheta, "Maximum |z0|*sin(theta)");
-  declareProperty("maxSigmaD0", m_maxSigmaD0, "Maximum error on d0");
-  declareProperty("maxSigmaZ0", m_maxSigmaZ0, "Maximum error on z0");
-  declareProperty("maxSigmaZ0SinTheta", m_maxSigmaZ0SinTheta, "Maximum error on z0*sin(theta)");
-  declareProperty("maxD0overSigmaD0", m_maxD0overSigmaD0, "Significance cut on |d0|");
-  declareProperty("maxZ0overSigmaZ0", m_maxZ0overSigmaZ0, "Significance cut on |z0|");
-  declareProperty("maxZ0SinThetaoverSigmaZ0SinTheta",
-		  m_maxZ0SinThetaoverSigmaZ0SinTheta,
-		  "Significance cut on |z0*sin(theta)|");
-  declareProperty("minNInnermostLayerHits", m_minNInnermostLayerHits,
-		  "Required hits on the innermost pixel layer");
-  declareProperty("minNNextToInnermostLayerHits", m_minNNextToInnermostLayerHits,
-		  "Required hits on the next to innermost pixel layer");
-  declareProperty("minNBothInnermostLayersHits", m_minNBothInnermostLayersHits,
-		  "Required hits on two innermost pixel layers");
-  declareProperty("maxNInnermostLayerSharedHits", m_maxNInnermostLayerSharedHits,
-		  "Maximum shared hits in innermost pixel layer");
-  declareProperty("useMinBiasInnermostLayersCut", m_useMinBiasInnermostLayersCut,
-		  "IBL hit if expected, otherwise next layer hit if expected");
-  declareProperty("minNSiHits", m_minNSiHits, "Minimum silicon (pixel + SCT) hits");
-  declareProperty("maxNSiSharedHits", m_maxNSiSharedHits,
-		  "Maximum silicon (pixel + SCT) sensors shared with other track");
-  declareProperty("minNSiHitsIfSiSharedHits", m_minNSiHitsIfSiSharedHits,
-		  "Minimum number of silicon hits if there are any shared silicon hits");
-  declareProperty("maxNSiHoles", m_maxNSiHoles, "Maximum silicon (pixel + SCT) holes");
-  declareProperty("minNPixelHits", m_minNPixelHits, "Required pixel hits");
-  declareProperty("maxNPixelSharedHits", m_maxNPixelSharedHits,
-		  "Maximum pixels shared with other tracks");
-  declareProperty("maxNPixelHoles", m_maxNPixelHoles,
-		  "Maximum number of missed layers in pixel");
-  declareProperty("minEtaForStrictNSiHitsCut", m_minEtaForStrictNSiHitsCut,
-		  "Eta cutoff for strict silicon hits cut");
-  declareProperty("minNSiHitsAboveEtaCutoff", m_minNSiHitsAboveEtaCutoff,
-		  "Minimum silicon hits at large pseudorapidity");
-  declareProperty("maxOneSharedModule", m_maxOneSharedModule,
-		  "Allow only 1 shared pixel hit or 2 shared SCT hits, not both");
-  declareProperty("useEtaDependentMaxChiSq", m_useEtaDependentMaxChiSq,
-		  "Whether or not to use the eta-dependent chi squared per degree of freedom cut");
-  declareProperty("minNSiHitsPhysical", m_minNSiHitsPhysical,
-		  "Minimum physical silicon hits (i.e. dead sensors do not count)");
-  declareProperty("minNPixelHitsPhysical", m_minNPixelHitsPhysical,
-		  "Minimum physical pixel hits");
-  declareProperty("minNSctHitsPhysical", m_minNSctHitsPhysical,
-		  "Minimum physical SCT hits");
-  declareProperty("minNSctHits", m_minNSctHits, "Minimum SCT hits");
-  declareProperty("maxNSctSharedHits", m_maxNSctSharedHits, "Maximum SCT hits shared with other track");
-  declareProperty("maxNSctHoles", m_maxNSctHoles, "Maximum SCT holes");
-  declareProperty("maxNSctDoubleHoles", m_maxNSctDoubleHoles, "Maximum SCT double holes");
-  declareProperty("maxTrtEtaAcceptance", m_maxTrtEtaAcceptance,
-		  "Maximum eta that ignores TRT hit cuts");
-  declareProperty("maxEtaForTrtHitCuts", m_maxEtaForTrtHitCuts, "Eta above which TRT hit cuts are not applied.");
-  declareProperty("minNTrtHits", m_minNTrtHits, "Minimum TRT hits");
-  declareProperty("minNTrtHitsPlusOutliers", m_minNTrtHitsPlusOutliers,
-		  "Minimum TRT hits including outliers");
-  declareProperty("minNTrtHighThresholdHits", m_minNTrtHighThresholdHits,
-		  "Minimum high E TRT hits");
-  declareProperty("minNTrtHighThresholdHitsPlusOutliers",
-		  m_minNTrtHighThresholdHitsPlusOutliers,
-		  "Minimum high E TRT hits including outliers");
-  declareProperty("maxTrtHighEFraction", m_maxTrtHighEFraction,
-		  "Maximum TRT hits that are above high energy threshold");
-  declareProperty("maxTrtHighEFractionWithOutliers", m_maxTrtHighEFractionWithOutliers,
-		  "Maximum TRT hits that are above high energy threshold including outliers");
-  declareProperty("maxTrtOutlierFraction", m_maxTrtOutlierFraction,
-		  "Maximum fraction of TRT outliers over TRT hits plus outliers");
-  declareProperty("maxChiSq", m_maxChiSq, "Maximum chi squared");
-  declareProperty("minProb", m_minProb, "Minimum p(chi^2, Ndof)");
-  declareProperty("maxChiSqperNdf", m_maxChiSqperNdf,
-		  "Maximum chi squared per degree of freedom");
-  declareProperty("minPtForProbCut", m_minPtForProbCut,
-		  "Minimum pt for chi-sq probability cut");
-  declareProperty("minProbAbovePtCutoff", m_minProbAbovePtCutoff,
-		  "Minimum chi-sq probability above a pt cutoff");
-  declareProperty("minNUsedHitsdEdx", m_minNUsedHitsdEdx,
-		  "Minimum hits used for dEdx");
-  declareProperty("minNOverflowHitsdEdx", m_minNOverflowHitsdEdx,
-		  "Minimum overflow hits in IBL for dEdx");
-  declareProperty("minEProbabilityHT", m_minEProbabilityHT,
-		  "Minimum High Threshold electron probability");
-  declareProperty("eProbHTonlyForXe", m_eProbHTonlyForXe,
-		  "Flag whether to apply the eProbabilityHT cut only when all TRT hits are Xenon");
-
-  declareProperty("vecEtaCutoffsForSiHitsCut", m_vecEtaCutoffsForSiHitsCut,
-		  "Minimum eta cutoffs for each Silicon hit cut");
-  declareProperty("vecMinNSiHitsAboveEta", m_vecMinNSiHitsAboveEta, "Minimum Silicon hits above each eta cutoff");
-  declareProperty("vecEtaCutoffsForPtCut", m_vecEtaCutoffsForPtCut,
-                  "Minimum eta cutoffs for each pT cut");
-  declareProperty("vecMinPtAboveEta", m_vecMinPtAboveEta, "Minimum transverse momentum above each eta cutoff");
-
-  declareProperty("vecPtCutoffsForSctHitsCut", m_vecPtCutoffsForSctHitsCut,
-		  "Minimum pt cutoffs for each SCT hits");
-  declareProperty("vecMinNSctHitsAbovePt", m_vecMinNSctHitsAbovePt, "Minimum SCT hits above each pt cutoff");
-
-  declareProperty("vecEtaCutoffsForZ0SinThetaCut", m_vecEtaCutoffsForZ0SinThetaCut,
-                  "Minimum eta cutoffs for each Z0SinTheta value");
-  declareProperty("vecPtCutoffsForZ0SinThetaCut", m_vecPtCutoffsForZ0SinThetaCut,
-                  "Minimum pt cutoffs for each Z0SinTheta value");
-  declareProperty("vecvecMaxZ0SinThetaAboveEtaPt", m_vecvecMaxZ0SinThetaAboveEtaPt, "Maximum Z0SinTheta value above each eta and pT cutoff");
-
-  declareProperty("vecEtaCutoffsForD0Cut", m_vecEtaCutoffsForD0Cut,
-                  "Minimum eta cutoffs for each D0 value");
-  declareProperty("vecPtCutoffsForD0Cut", m_vecPtCutoffsForD0Cut,
-                  "Minimum pt cutoffs for each D0 value");
-  declareProperty("vecvecMaxD0AboveEtaPt", m_vecvecMaxD0AboveEtaPt, "Maximum D0 value above each eta and pT cutoff");
-
-  declareProperty("vecEtaCutoffsForSctHolesCut", m_vecEtaCutoffsForSctHolesCut,
-                  "Minimum eta cutoffs for each SctHoles value");
-  declareProperty("vecPtCutoffsForSctHolesCut", m_vecPtCutoffsForSctHolesCut,
-                  "Minimum pt cutoffs for each SctHoles value");
-  declareProperty("vecvecMaxSctHolesAboveEtaPt", m_vecvecMaxSctHolesAboveEtaPt, "Maximum SctHoles value above each eta and pT cutoff");
-  
-  declareProperty("vecEtaCutoffsForSctHitsPlusDeadCut", m_vecEtaCutoffsForSctHitsPlusDeadCut,
-                  "Minimum eta cutoffs for each SctHitsPlusDead value");
-  declareProperty("vecPtCutoffsForSctHitsPlusDeadCut", m_vecPtCutoffsForSctHitsPlusDeadCut,
-                  "Minimum pt cutoffs for each SctHitsPlusDead value");
-  declareProperty("vecvecMinSctHitsPlusDeadAboveEtaPt", m_vecvecMinSctHitsPlusDeadAboveEtaPt, "Minimum SctHitsPlusDead value above each eta and pT cutoff");
-  
-  declareProperty("useExperimentalInnermostLayersCut", m_useExperimentalInnermostLayersCut, "Use the experimental cut on pixel holes");
-#ifndef XAOD_ANALYSIS
-  declareProperty("minNSiHitsMod", m_minNSiHitsMod);
-  declareProperty("minNSiHitsModTop", m_minNSiHitsModTop);
-  declareProperty("minNSiHitsModBottom", m_minNSiHitsModBottom);  
-
-  declareProperty("UseTrkTrackTools", m_initTrkTools);
-  declareProperty("TrackSummaryTool", m_trackSumTool);
-  declareProperty("Extrapolator", m_extrapolator);
 #endif
 
 }
@@ -345,20 +207,20 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
   }
   if (maxDoubleIsSet(m_maxSigmaD0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum uncertainty on d0: " << m_maxSigmaD0 << " mm" );
-    trackCuts["D0"].push_back([maxSigmaD0Squared = sqr(m_maxSigmaD0)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["D0"].push_back([maxSigmaD0Squared = sqr(m_maxSigmaD0.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        return getDefiningParametersCov(helper,msgHelper, InDetAccessor::d0,InDetAccessor::d0) <= maxSigmaD0Squared;
     });
   }
   if (maxDoubleIsSet(m_maxSigmaZ0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum uncertainty on z0: " << m_maxSigmaZ0 << " mm" );
-    trackCuts["Z0"].push_back([maxSigmaZ0Squared = sqr(m_maxSigmaZ0)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["Z0"].push_back([maxSigmaZ0Squared = sqr(m_maxSigmaZ0.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        return getDefiningParametersCov(helper,msgHelper, InDetAccessor::z0,InDetAccessor::z0) <= maxSigmaZ0Squared;
     });
   }
   if (maxDoubleIsSet(m_maxSigmaZ0SinTheta)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum uncertainty on z0*sin(theta): "
                                  << m_maxSigmaZ0SinTheta << " mm" );
-    trackCuts["Z0SinTheta"].push_back([maxSigmaZ0SinThetaSquared = sqr(m_maxSigmaZ0SinTheta)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["Z0SinTheta"].push_back([maxSigmaZ0SinThetaSquared = sqr(m_maxSigmaZ0SinTheta.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double theta =    helper.theta(msgHelper);
        double sinTheta = std::sin(theta);
        double cosTheta = std::cos(theta);
@@ -371,20 +233,20 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
   }
   if (maxDoubleIsSet(m_maxD0overSigmaD0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum significance on d0: " << m_maxD0overSigmaD0 );
-    trackCuts["D0"].push_back([maxD0overSigmaD0Squared = sqr(m_maxD0overSigmaD0)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["D0"].push_back([maxD0overSigmaD0Squared = sqr(m_maxD0overSigmaD0.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        return sqr(helper.d0(msgHelper)) <= maxD0overSigmaD0Squared * getDefiningParametersCov(helper,msgHelper, InDetAccessor::d0,InDetAccessor::d0);
     });
   }
   if (maxDoubleIsSet(m_maxZ0overSigmaZ0)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum significance on z0: " << m_maxZ0overSigmaZ0 );
-    trackCuts["Z0"].push_back([maxZ0overSigmaZ0Squared = sqr(m_maxZ0overSigmaZ0)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) -> bool {
+    trackCuts["Z0"].push_back([maxZ0overSigmaZ0Squared = sqr(m_maxZ0overSigmaZ0.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) -> bool {
        return sqr(helper.z0(msgHelper)) <= maxZ0overSigmaZ0Squared * getDefiningParametersCov(helper,msgHelper, InDetAccessor::z0,InDetAccessor::z0);
     });
   }
   if (maxDoubleIsSet(m_maxZ0SinThetaoverSigmaZ0SinTheta)) {
     if constexpr(VERBOSE>0) ATH_MSG_INFO( "  Maximum significance on z0*sin(theta): "
                                  << m_maxZ0SinThetaoverSigmaZ0SinTheta );
-    trackCuts["Z0SinTheta"].push_back([maxZ0SinThetaoverSigmaZ0SinThetaSquared = sqr(m_maxZ0SinThetaoverSigmaZ0SinTheta)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["Z0SinTheta"].push_back([maxZ0SinThetaoverSigmaZ0SinThetaSquared = sqr(m_maxZ0SinThetaoverSigmaZ0SinTheta.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
 
        double theta =    helper.theta(msgHelper);
        double sinTheta = std::sin(theta);
@@ -737,20 +599,20 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
     if constexpr(VERBOSE>0) {
        for (size_t i_cut=0; i_cut<cutSize-1; ++i_cut) {
-          ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSiHitsCut.at(i_cut)
-                        << " < eta < " << m_vecEtaCutoffsForSiHitsCut.at(i_cut+1)
-                        << " ,Silicon hits  >= " << m_vecMinNSiHitsAboveEta.at(i_cut) );
+          ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForSiHitsCut[i_cut]
+                        << " < eta < " << m_vecEtaCutoffsForSiHitsCut[i_cut+1]
+                        << " ,Silicon hits  >= " << m_vecMinNSiHitsAboveEta[i_cut] );
        }
     }
-    if (!checkOrder(m_vecEtaCutoffsForSiHitsCut)) {
+    if (!checkOrder(m_vecEtaCutoffsForSiHitsCut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for eta > " << m_vecEtaCutoffsForSiHitsCut.at(cutSize-1)
-                               << " ,Silicon hits >= " << m_vecMinNSiHitsAboveEta.at(cutSize-1) );
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for eta > " << m_vecEtaCutoffsForSiHitsCut[cutSize-1]
+					  << " ,Silicon hits >= " << m_vecMinNSiHitsAboveEta[cutSize-1] );
 
-    trackCuts["SiHits"].push_back([p_vecEtaCutoffsForSiHitsCut = &std::as_const(m_vecEtaCutoffsForSiHitsCut),
-                                   p_vecMinNSiHitsAboveEta     = &std::as_const(m_vecMinNSiHitsAboveEta)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["SiHits"].push_back([p_vecEtaCutoffsForSiHitsCut = &std::as_const(m_vecEtaCutoffsForSiHitsCut.value()),
+                                   p_vecMinNSiHitsAboveEta     = &std::as_const(m_vecMinNSiHitsAboveEta.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double abs_eta = std::abs(helper.eta(msgHelper));
        unsigned int bin_i = findBin(*p_vecEtaCutoffsForSiHitsCut, abs_eta);
        return    bin_i >= p_vecMinNSiHitsAboveEta->size()
@@ -770,19 +632,19 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
     if constexpr(VERBOSE>0) {
        for (size_t i_cut=0; i_cut<cutSize-1; ++i_cut) {
-          ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForPtCut.at(i_cut)
-                        << " < eta < " << m_vecEtaCutoffsForPtCut.at(i_cut+1)
-                        << " ,transverse momentum >= " << m_vecMinPtAboveEta.at(i_cut) );
+          ATH_MSG_INFO( "  for " << m_vecEtaCutoffsForPtCut[i_cut]
+                        << " < eta < " << m_vecEtaCutoffsForPtCut[i_cut+1]
+                        << " ,transverse momentum >= " << m_vecMinPtAboveEta[i_cut] );
        }
     }
-    if (!checkOrder(m_vecEtaCutoffsForPtCut)) {
+    if (!checkOrder(m_vecEtaCutoffsForPtCut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for eta > " << m_vecEtaCutoffsForPtCut.at(cutSize-1)
-                               << " ,transverse momentum >= " << m_vecMinPtAboveEta.at(cutSize-1) );
-    trackCuts["Pt"].push_back([p_vecEtaCutoffsForPtCut = &std::as_const(m_vecEtaCutoffsForPtCut),
-                               p_vecMinPtAboveEta = &std::as_const(m_vecMinPtAboveEta)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for eta > " << m_vecEtaCutoffsForPtCut[cutSize-1]
+                               << " ,transverse momentum >= " << m_vecMinPtAboveEta[cutSize-1] );
+    trackCuts["Pt"].push_back([p_vecEtaCutoffsForPtCut = &std::as_const(m_vecEtaCutoffsForPtCut.value()),
+                               p_vecMinPtAboveEta = &std::as_const(m_vecMinPtAboveEta.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double abs_eta = std::abs(helper.eta(msgHelper));
        unsigned int bin_i = findBin(*p_vecEtaCutoffsForPtCut, abs_eta);
        return  bin_i >= p_vecMinPtAboveEta->size() || abs_eta > 5.0 || helper.pt(msgHelper)  >= (*p_vecMinPtAboveEta)[bin_i];
@@ -797,19 +659,19 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
     if constexpr(VERBOSE>0) {
        for (size_t i_cut=0; i_cut<cutSize-1; ++i_cut) {
-          ATH_MSG_INFO( "  for " << m_vecPtCutoffsForSctHitsCut.at(i_cut)
-                        << " < pt < " << m_vecPtCutoffsForSctHitsCut.at(i_cut+1)
-                        << " MeV,\tSCT hits >= " << m_vecMinNSctHitsAbovePt.at(i_cut) );
+          ATH_MSG_INFO( "  for " << m_vecPtCutoffsForSctHitsCut[i_cut]
+                        << " < pt < " << m_vecPtCutoffsForSctHitsCut[i_cut+1]
+                        << " MeV,\tSCT hits >= " << m_vecMinNSctHitsAbovePt[i_cut] );
        }
     }
-    if (!checkOrder(m_vecPtCutoffsForSctHitsCut)) {
+    if (!checkOrder(m_vecPtCutoffsForSctHitsCut.value())) {
        ATH_MSG_ERROR( "Pt values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for pt > " << m_vecPtCutoffsForSctHitsCut.at(cutSize-1)
-                               << " MeV,\t\tSCT hits >= " << m_vecMinNSctHitsAbovePt.at(cutSize-1) );
-    trackCuts["SctHits"].push_back([p_vecPtCutoffsForSctHitsCut = &std::as_const(m_vecPtCutoffsForSctHitsCut),
-                                    p_vecMinNSctHitsAbovePt     = &std::as_const(m_vecMinNSctHitsAbovePt)](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  for pt > " << m_vecPtCutoffsForSctHitsCut[cutSize-1]
+                               << " MeV,\t\tSCT hits >= " << m_vecMinNSctHitsAbovePt[cutSize-1] );
+    trackCuts["SctHits"].push_back([p_vecPtCutoffsForSctHitsCut = &std::as_const(m_vecPtCutoffsForSctHitsCut.value()),
+                                    p_vecMinNSctHitsAbovePt     = &std::as_const(m_vecMinNSctHitsAbovePt.value())](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double pt = helper.pt(msgHelper);
        unsigned int bin_i = findBin(*p_vecPtCutoffsForSctHitsCut, pt);
        return     bin_i >= p_vecPtCutoffsForSctHitsCut->size()
@@ -828,7 +690,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       return StatusCode::FAILURE;
     }
     for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
-      if (ptSize != m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_size).size()) {
+      if (ptSize != m_vecvecMaxZ0SinThetaAboveEtaPt[i_size].size()) {
         ATH_MSG_ERROR( "Pt cutoffs and Z0SinTheta cuts must be vectors of the same length." );
         return StatusCode::FAILURE;
       }
@@ -841,29 +703,29 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
-      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta) << " < |#eta| < ";
-      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForZ0SinThetaCut.at(i_cut_eta+1);
+      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForZ0SinThetaCut[i_cut_eta] << " < |#eta| < ";
+      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForZ0SinThetaCut[i_cut_eta+1];
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxZ0SinThetaAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
-    if (!checkOrder(m_vecEtaCutoffsForZ0SinThetaCut)) {
+    if (!checkOrder(m_vecEtaCutoffsForZ0SinThetaCut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if (!checkOrder(m_vecPtCutoffsForZ0SinThetaCut)) {
+    if (!checkOrder(m_vecPtCutoffsForZ0SinThetaCut.value())) {
        ATH_MSG_ERROR( "Pt values not in ascending order." );
        return StatusCode::FAILURE;
     }
 
-    trackCuts["Z0SinTheta"].push_back([p_vecEtaCutoffsForZ0SinThetaCut = &std::as_const(m_vecEtaCutoffsForZ0SinThetaCut),
-                                       p_vecPtCutoffsForZ0SinThetaCut = &std::as_const(m_vecPtCutoffsForZ0SinThetaCut),
-                                       p_vecvecMaxZ0SinThetaAboveEtaPt = &std::as_const(m_vecvecMaxZ0SinThetaAboveEtaPt)] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["Z0SinTheta"].push_back([p_vecEtaCutoffsForZ0SinThetaCut = &std::as_const(m_vecEtaCutoffsForZ0SinThetaCut.value()),
+                                       p_vecPtCutoffsForZ0SinThetaCut = &std::as_const(m_vecPtCutoffsForZ0SinThetaCut.value()),
+                                       p_vecvecMaxZ0SinThetaAboveEtaPt = &std::as_const(m_vecvecMaxZ0SinThetaAboveEtaPt.value())] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double eta = helper.eta(msgHelper);
        unsigned int bin_eta = findBin(*p_vecEtaCutoffsForZ0SinThetaCut, std::fabs(eta));
        double pt = helper.pt(msgHelper);
@@ -884,7 +746,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       return StatusCode::FAILURE;
     }
     for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
-      if (ptSize != m_vecvecMaxD0AboveEtaPt.at(i_size).size()) {
+      if (ptSize != m_vecvecMaxD0AboveEtaPt[i_size].size()) {
         ATH_MSG_ERROR( "Pt cutoffs and D0 cuts must be vectors of the same length." );
         return StatusCode::FAILURE;
       }
@@ -897,29 +759,29 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
-      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForD0Cut.at(i_cut_eta) << " < |#eta| < ";
-      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForD0Cut.at(i_cut_eta+1);
+      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForD0Cut[i_cut_eta] << " < |#eta| < ";
+      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForD0Cut[i_cut_eta+1];
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxD0AboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxD0AboveEtaPt[i_cut_eta].begin(), m_vecvecMaxD0AboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
-    if (!checkOrder(m_vecEtaCutoffsForD0Cut)) {
+    if (!checkOrder(m_vecEtaCutoffsForD0Cut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if (!checkOrder(m_vecPtCutoffsForD0Cut)) {
+    if (!checkOrder(m_vecPtCutoffsForD0Cut.value())) {
        ATH_MSG_ERROR( "Pt values not in ascending order." );
        return StatusCode::FAILURE;
     }
 
-    trackCuts["D0"].push_back([p_vecEtaCutoffsForD0Cut = &std::as_const(m_vecEtaCutoffsForD0Cut),
-                               p_vecPtCutoffsForD0Cut = &std::as_const(m_vecPtCutoffsForD0Cut),
-                               p_vecvecMaxD0AboveEtaPt = &std::as_const(m_vecvecMaxD0AboveEtaPt)] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["D0"].push_back([p_vecEtaCutoffsForD0Cut = &std::as_const(m_vecEtaCutoffsForD0Cut.value()),
+                               p_vecPtCutoffsForD0Cut = &std::as_const(m_vecPtCutoffsForD0Cut.value()),
+                               p_vecvecMaxD0AboveEtaPt = &std::as_const(m_vecvecMaxD0AboveEtaPt.value())] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double eta = helper.eta(msgHelper);
        unsigned int bin_eta = findBin(*p_vecEtaCutoffsForD0Cut, std::fabs(eta));
        double pt = helper.pt(msgHelper);
@@ -940,7 +802,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       return StatusCode::FAILURE;
     }
     for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
-      if (ptSize != m_vecvecMaxSctHolesAboveEtaPt.at(i_size).size()) {
+      if (ptSize != m_vecvecMaxSctHolesAboveEtaPt[i_size].size()) {
         ATH_MSG_ERROR( "Pt cutoffs and SctHoles cuts must be vectors of the same length." );
         return StatusCode::FAILURE;
       }
@@ -953,29 +815,29 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
-      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta) << " < |#eta| < ";
-      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHolesCut.at(i_cut_eta+1);
+      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHolesCut[i_cut_eta] << " < |#eta| < ";
+      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHolesCut[i_cut_eta+1];
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMaxSctHolesAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
-    if (!checkOrder(m_vecEtaCutoffsForSctHolesCut)) {
+    if (!checkOrder(m_vecEtaCutoffsForSctHolesCut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if (!checkOrder(m_vecPtCutoffsForSctHolesCut)) {
+    if (!checkOrder(m_vecPtCutoffsForSctHolesCut.value())) {
        ATH_MSG_ERROR( "Pt values not in ascending order." );
        return StatusCode::FAILURE;
     }
 
-    trackCuts["SctHits"].push_back([p_vecEtaCutoffsForSctHolesCut = &std::as_const(m_vecEtaCutoffsForSctHolesCut),
-                                    p_vecPtCutoffsForSctHolesCut = &std::as_const(m_vecPtCutoffsForSctHolesCut),
-                                    p_vecvecMaxSctHolesAboveEtaPt = &std::as_const(m_vecvecMaxSctHolesAboveEtaPt)] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["SctHits"].push_back([p_vecEtaCutoffsForSctHolesCut = &std::as_const(m_vecEtaCutoffsForSctHolesCut.value()),
+                                    p_vecPtCutoffsForSctHolesCut = &std::as_const(m_vecPtCutoffsForSctHolesCut.value()),
+                                    p_vecvecMaxSctHolesAboveEtaPt = &std::as_const(m_vecvecMaxSctHolesAboveEtaPt.value())] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double eta = helper.eta(msgHelper);
        unsigned int bin_eta = findBin(*p_vecEtaCutoffsForSctHolesCut, std::fabs(eta));
        double pt = helper.pt(msgHelper);
@@ -996,7 +858,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       return StatusCode::FAILURE;
     }
     for (size_t i_size=0; i_size<etaSize-1; ++i_size) {
-      if (ptSize != m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_size).size()) {
+      if (ptSize != m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_size].size()) {
         ATH_MSG_ERROR( "Pt cutoffs and SctHitsPlusDead cuts must be vectors of the same length." );
         return StatusCode::FAILURE;
       }
@@ -1009,29 +871,29 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
     {
       std::stringstream etaRangeBuffer;
-      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta) << " < |#eta| < ";
-      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHitsPlusDeadCut.at(i_cut_eta+1);
+      etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHitsPlusDeadCut[i_cut_eta] << " < |#eta| < ";
+      if(i_cut_eta!=etaSize-1) etaRangeBuffer << std::setprecision(2) << std::fixed << m_vecEtaCutoffsForSctHitsPlusDeadCut[i_cut_eta+1];
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).begin(), m_vecvecMinSctHitsPlusDeadAboveEtaPt.at(i_cut_eta).end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].begin(), m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
     }
 
-    if (!checkOrder(m_vecEtaCutoffsForSctHitsPlusDeadCut)) {
+    if (!checkOrder(m_vecEtaCutoffsForSctHitsPlusDeadCut.value())) {
        ATH_MSG_ERROR( "Eta values not in ascending order." );
        return StatusCode::FAILURE;
     }
-    if (!checkOrder(m_vecPtCutoffsForSctHitsPlusDeadCut)) {
+    if (!checkOrder(m_vecPtCutoffsForSctHitsPlusDeadCut.value())) {
        ATH_MSG_ERROR( "Pt values not in ascending order." );
        return StatusCode::FAILURE;
     }
 
-    trackCuts["SctHits"].push_back([p_vecEtaCutoffsForSctHitsPlusDeadCut = &std::as_const(m_vecEtaCutoffsForSctHitsPlusDeadCut),
-                                    p_vecPtCutoffsForSctHitsPlusDeadCut = &std::as_const(m_vecPtCutoffsForSctHitsPlusDeadCut),
-                                    p_vecvecMinSctHitsPlusDeadAboveEtaPt = &std::as_const(m_vecvecMinSctHitsPlusDeadAboveEtaPt)] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+    trackCuts["SctHits"].push_back([p_vecEtaCutoffsForSctHitsPlusDeadCut = &std::as_const(m_vecEtaCutoffsForSctHitsPlusDeadCut.value()),
+                                    p_vecPtCutoffsForSctHitsPlusDeadCut = &std::as_const(m_vecPtCutoffsForSctHitsPlusDeadCut.value()),
+                                    p_vecvecMinSctHitsPlusDeadAboveEtaPt = &std::as_const(m_vecvecMinSctHitsPlusDeadAboveEtaPt.value())] (Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
        double eta = helper.eta(msgHelper);
        unsigned int bin_eta = findBin(*p_vecEtaCutoffsForSctHitsPlusDeadCut, std::fabs(eta));
        double pt = helper.pt(msgHelper);
@@ -1373,24 +1235,24 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
       m_minNSiHitsModTop = -1;
       m_minNSiHitsModBottom = -1;
 #endif
-      m_vecEtaCutoffsForSiHitsCut.clear();
-      m_vecMinNSiHitsAboveEta.clear();
-      m_vecEtaCutoffsForPtCut.clear();
-      m_vecMinPtAboveEta.clear();
-      m_vecPtCutoffsForSctHitsCut.clear();
-      m_vecMinNSctHitsAbovePt.clear();
-      m_vecEtaCutoffsForZ0SinThetaCut.clear();
-      m_vecPtCutoffsForZ0SinThetaCut.clear();
-      m_vecvecMaxZ0SinThetaAboveEtaPt.clear();
-      m_vecEtaCutoffsForD0Cut.clear();
-      m_vecPtCutoffsForD0Cut.clear();
-      m_vecvecMaxD0AboveEtaPt.clear();
-      m_vecEtaCutoffsForSctHolesCut.clear();
-      m_vecPtCutoffsForSctHolesCut.clear();
-      m_vecvecMaxSctHolesAboveEtaPt.clear();
-      m_vecEtaCutoffsForSctHitsPlusDeadCut.clear();
-      m_vecPtCutoffsForSctHitsPlusDeadCut.clear();
-      m_vecvecMinSctHitsPlusDeadAboveEtaPt.clear();
+      m_vecEtaCutoffsForSiHitsCut = std::vector<double>();
+      m_vecMinNSiHitsAboveEta = std::vector<int>();
+      m_vecEtaCutoffsForPtCut = std::vector<double>();
+      m_vecMinPtAboveEta = std::vector<double>();
+      m_vecPtCutoffsForSctHitsCut = std::vector<double>();
+      m_vecMinNSctHitsAbovePt = std::vector<int>();
+      m_vecEtaCutoffsForZ0SinThetaCut = std::vector<double>();
+      m_vecPtCutoffsForZ0SinThetaCut = std::vector<double>();
+      m_vecvecMaxZ0SinThetaAboveEtaPt = std::vector<std::vector<double>>();
+      m_vecEtaCutoffsForD0Cut = std::vector<double>();
+      m_vecPtCutoffsForD0Cut = std::vector<double>();
+      m_vecvecMaxD0AboveEtaPt = std::vector<std::vector<double>>();
+      m_vecEtaCutoffsForSctHolesCut = std::vector<double>();
+      m_vecPtCutoffsForSctHolesCut = std::vector<double>();
+      m_vecvecMaxSctHolesAboveEtaPt = std::vector<std::vector<double>>();
+      m_vecEtaCutoffsForSctHitsPlusDeadCut = std::vector<double>();
+      m_vecPtCutoffsForSctHitsPlusDeadCut = std::vector<double>();
+      m_vecvecMinSctHitsPlusDeadAboveEtaPt = std::vector<std::vector<double>>();
     }
     break;
   case CutLevel::Loose :
@@ -1467,8 +1329,8 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
     if (overwrite || m_minNPixelHits < 0) m_minNPixelHits = 1;
     if (overwrite || (m_vecPtCutoffsForSctHitsCut.empty()
 		      && m_vecMinNSctHitsAbovePt.empty())) {
-      m_vecPtCutoffsForSctHitsCut = {0.0, 300.0, 400.0};
-      m_vecMinNSctHitsAbovePt = {2, 4, 6};
+      m_vecPtCutoffsForSctHitsCut = std::vector<double>({0.0, 300.0, 400.0});
+      m_vecMinNSctHitsAbovePt = std::vector<int>({2, 4, 6});
     }
     if (overwrite || m_maxD0 >= LOCAL_MAX_DOUBLE) m_maxD0 = 1.5;
     if (overwrite || m_maxZ0SinTheta >= LOCAL_MAX_DOUBLE) m_maxZ0SinTheta = 1.5;
@@ -1482,8 +1344,8 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
     if (overwrite || m_minNPixelHits < 0) m_minNPixelHits = 2;
     if (overwrite || (m_vecPtCutoffsForSctHitsCut.empty()
 		      && m_vecMinNSctHitsAbovePt.empty())) {
-      m_vecPtCutoffsForSctHitsCut = {0.0, 300.0, 400.0};
-      m_vecMinNSctHitsAbovePt = {4, 6, 8};
+      m_vecPtCutoffsForSctHitsCut = std::vector<double>({0.0, 300.0, 400.0});
+      m_vecMinNSctHitsAbovePt = std::vector<int>({4, 6, 8});
     }
     if (overwrite || m_maxD0 >= LOCAL_MAX_DOUBLE) m_maxD0 = 1.0;
     if (overwrite || m_maxZ0SinTheta >= LOCAL_MAX_DOUBLE) m_maxZ0SinTheta = 1.0;
@@ -1497,24 +1359,28 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
     if (overwrite || (m_vecEtaCutoffsForZ0SinThetaCut.empty() &&
                       m_vecPtCutoffsForZ0SinThetaCut.empty()  &&
                       m_vecvecMaxZ0SinThetaAboveEtaPt.empty())){
-      m_vecEtaCutoffsForZ0SinThetaCut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForZ0SinThetaCut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                         2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMaxZ0SinThetaAboveEtaPt = {{2.10, 2.15, 6.00, 5.00, 3.10, 2.00, 1.75, 1.60, 1.43, 1.40, 1.05, 0.65, 0.60},
-                                         {1.44, 1.47, 1.50, 1.55, 1.62, 1.45, 1.45, 1.78, 1.73, 1.50, 1.20, 0.97, 0.53},
-                                         {1.40, 1.45, 1.50, 1.46, 1.41, 1.37, 1.25, 1.50, 1.50, 1.36, 1.10, 0.85, 0.52},
-                                         {1.51, 1.70, 1.70, 1.71, 1.71, 1.53, 1.54, 1.49, 1.36, 1.20, 0.95, 0.60, 0.55}};
+      m_vecEtaCutoffsForZ0SinThetaCut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForZ0SinThetaCut  =
+	std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	    2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMaxZ0SinThetaAboveEtaPt =
+	std::vector<std::vector<double>>({{2.10, 2.15, 6.00, 5.00, 3.10, 2.00, 1.75, 1.60, 1.43, 1.40, 1.05, 0.65, 0.60},
+					  {1.44, 1.47, 1.50, 1.55, 1.62, 1.45, 1.45, 1.78, 1.73, 1.50, 1.20, 0.97, 0.53},
+					  {1.40, 1.45, 1.50, 1.46, 1.41, 1.37, 1.25, 1.50, 1.50, 1.36, 1.10, 0.85, 0.52},
+					  {1.51, 1.70, 1.70, 1.71, 1.71, 1.53, 1.54, 1.49, 1.36, 1.20, 0.95, 0.60, 0.55}});
     }
     if (overwrite || (m_vecEtaCutoffsForD0Cut.empty() &&
                       m_vecPtCutoffsForD0Cut.empty()  &&
                       m_vecvecMaxD0AboveEtaPt.empty())){
-      m_vecEtaCutoffsForD0Cut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForD0Cut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                 2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMaxD0AboveEtaPt = {{0.81, 0.90, 0.94, 0.92, 0.90, 0.75, 0.65, 0.63, 0.62, 0.60, 0.63, 0.50, 0.55},
-                                 {1.00, 0.98, 0.98, 0.92, 0.90, 0.69, 0.67, 0.86, 0.88, 0.88, 0.88, 0.87, 1.06},
-                                 {1.19, 1.15, 1.10, 1.08, 1.03, 0.94, 0.85, 0.97, 0.97, 0.96, 0.95, 0.92, 1.04},
-                                 {1.33, 1.23, 1.21, 1.15, 1.15, 1.07, 0.94, 0.97, 0.97, 0.97, 0.98, 1.10, 1.10}};
+      m_vecEtaCutoffsForD0Cut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForD0Cut  =
+	std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	    2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMaxD0AboveEtaPt =
+	std::vector<std::vector<double>>({{0.81, 0.90, 0.94, 0.92, 0.90, 0.75, 0.65, 0.63, 0.62, 0.60, 0.63, 0.50, 0.55},
+					  {1.00, 0.98, 0.98, 0.92, 0.90, 0.69, 0.67, 0.86, 0.88, 0.88, 0.88, 0.87, 1.06},
+					  {1.19, 1.15, 1.10, 1.08, 1.03, 0.94, 0.85, 0.97, 0.97, 0.96, 0.95, 0.92, 1.04},
+					  {1.33, 1.23, 1.21, 1.15, 1.15, 1.07, 0.94, 0.97, 0.97, 0.97, 0.98, 1.10, 1.10}});
     }
     break;
   case CutLevel::HITightOptimized:
@@ -1525,46 +1391,50 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
     if (overwrite || (m_vecEtaCutoffsForZ0SinThetaCut.empty() &&
                       m_vecPtCutoffsForZ0SinThetaCut.empty()  &&
                       m_vecvecMaxZ0SinThetaAboveEtaPt.empty())){
-      m_vecEtaCutoffsForZ0SinThetaCut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForZ0SinThetaCut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                         2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMaxZ0SinThetaAboveEtaPt = {{0.62, 0.70, 0.82, 0.87, 0.74, 0.61, 0.50, 0.48, 0.46, 0.45, 0.30, 0.24, 0.23},
-                                         {0.51, 0.53, 0.53, 0.53, 0.52, 0.43, 0.28, 0.27, 0.28, 0.30, 0.24, 0.22, 0.13},
-                                         {0.91, 0.89, 0.87, 0.55, 0.59, 0.37, 0.39, 0.31, 0.34, 0.35, 0.30, 0.30, 0.20},
-                                         {0.76, 0.71, 0.69, 0.48, 0.48, 0.47, 0.46, 0.42, 0.38, 0.32, 0.28, 0.20, 0.15}};
+      m_vecEtaCutoffsForZ0SinThetaCut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForZ0SinThetaCut  = std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	  2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMaxZ0SinThetaAboveEtaPt =
+	std::vector<std::vector<double>>({{0.62, 0.70, 0.82, 0.87, 0.74, 0.61, 0.50, 0.48, 0.46, 0.45, 0.30, 0.24, 0.23},
+					  {0.51, 0.53, 0.53, 0.53, 0.52, 0.43, 0.28, 0.27, 0.28, 0.30, 0.24, 0.22, 0.13},
+					  {0.91, 0.89, 0.87, 0.55, 0.59, 0.37, 0.39, 0.31, 0.34, 0.35, 0.30, 0.30, 0.20},
+					  {0.76, 0.71, 0.69, 0.48, 0.48, 0.47, 0.46, 0.42, 0.38, 0.32, 0.28, 0.20, 0.15}});
     }
     if (overwrite || (m_vecEtaCutoffsForD0Cut.empty() &&
                       m_vecPtCutoffsForD0Cut.empty()  &&
                       m_vecvecMaxD0AboveEtaPt.empty())){
-      m_vecEtaCutoffsForD0Cut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForD0Cut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                 2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMaxD0AboveEtaPt = {{0.34, 0.39, 0.47, 0.49, 0.55, 0.47, 0.44, 0.21, 0.19, 0.17, 0.12, 0.14, 0.15},
-                                 {0.32, 0.32, 0.33, 0.33, 0.33, 0.27, 0.16, 0.15, 0.13, 0.15, 0.13, 0.16, 0.20},
-                                 {0.95, 0.91, 0.88, 0.35, 0.37, 0.24, 0.26, 0.22, 0.23, 0.24, 0.19, 0.19, 0.23},
-                                 {0.68, 0.67, 0.65, 0.42, 0.42, 0.36, 0.35, 0.31, 0.27, 0.26, 0.27, 0.28, 0.30}};
+      m_vecEtaCutoffsForD0Cut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForD0Cut  = std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	  2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMaxD0AboveEtaPt =
+	std::vector<std::vector<double>>({{0.34, 0.39, 0.47, 0.49, 0.55, 0.47, 0.44, 0.21, 0.19, 0.17, 0.12, 0.14, 0.15},
+					  {0.32, 0.32, 0.33, 0.33, 0.33, 0.27, 0.16, 0.15, 0.13, 0.15, 0.13, 0.16, 0.20},
+					  {0.95, 0.91, 0.88, 0.35, 0.37, 0.24, 0.26, 0.22, 0.23, 0.24, 0.19, 0.19, 0.23},
+					  {0.68, 0.67, 0.65, 0.42, 0.42, 0.36, 0.35, 0.31, 0.27, 0.26, 0.27, 0.28, 0.30}});
     }
     if (overwrite || (m_vecEtaCutoffsForSctHolesCut.empty() &&
                       m_vecPtCutoffsForSctHolesCut.empty()  &&
                       m_vecvecMaxSctHolesAboveEtaPt.empty())){
-      m_vecEtaCutoffsForSctHolesCut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForSctHolesCut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                       2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMaxSctHolesAboveEtaPt = {{0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
-                                       {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1},
-                                       {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                       {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}};
+      m_vecEtaCutoffsForSctHolesCut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForSctHolesCut  = std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	  2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMaxSctHolesAboveEtaPt =
+	std::vector<std::vector<double>>({{0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1},
+					  {0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1},
+					  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+					  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}});
     }
     if (overwrite || (m_vecEtaCutoffsForSctHitsPlusDeadCut.empty() &&
                       m_vecPtCutoffsForSctHitsPlusDeadCut.empty()  &&
                       m_vecvecMinSctHitsPlusDeadAboveEtaPt.empty())){
-      m_vecEtaCutoffsForSctHitsPlusDeadCut = {0.0, 1.1, 1.6, 2.0};
-      m_vecPtCutoffsForSctHitsPlusDeadCut  = {500,  600,  700,  800,  900,  1000,  1500,
-                                              2000, 2500, 3000, 5000, 8000, 12000};
-      m_vecvecMinSctHitsPlusDeadAboveEtaPt = {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                              {0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0},
-                                              {8, 8, 8, 7, 7, 6, 6, 6, 6, 6, 0, 0, 0},
-                                              {7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+      m_vecEtaCutoffsForSctHitsPlusDeadCut = std::vector<double>({0.0, 1.1, 1.6, 2.0});
+      m_vecPtCutoffsForSctHitsPlusDeadCut  = std::vector<double>({500,  600,  700,  800,  900,  1000,  1500,
+	  2000, 2500, 3000, 5000, 8000, 12000});
+      m_vecvecMinSctHitsPlusDeadAboveEtaPt =
+	std::vector<std::vector<double>>({{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+					  {0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 0, 0, 0},
+					  {8, 8, 8, 7, 7, 6, 6, 6, 6, 6, 0, 0, 0},
+					  {7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}});
     }
     break;
   default:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // A unit test for the track selection tool. Currently this compares the pre-defined cut levels
@@ -89,13 +89,14 @@ int main( int argc, char* argv[] ) {
      const auto& cutLevel = cutLevelPair.first;
      string toolName = "TrackSel";
      toolName += cutLevel;
-     selTools[cutLevel] = tool_ptr( new InDetTrackSelectionTool(toolName, cutLevel) );
+     selTools[cutLevel] = tool_ptr( new InDetTrackSelectionTool(toolName) );
+     CHECK( selTools[cutLevel]->setProperty( "CutLevel", cutLevel) );
      CHECK( selTools[cutLevel]->initialize() );
    }
    // handle the experimental one differently: add the map entry after initializing the others because it is not a selection level
    cutFuncs["ExpPix"] = passExpPix;
    selTools["ExpPix"] = tool_ptr( new InDetTrackSelectionTool("TrackSelExpPix") );
-   CHECK( selTools["ExpPix"]->setProperty( "useExperimentalInnermostLayersCut", 1 ) );
+   CHECK( selTools["ExpPix"]->setProperty( "useExperimentalInnermostLayersCut", true ) );
    CHECK( selTools["ExpPix"]->initialize() );
 
    // Open the input file:
