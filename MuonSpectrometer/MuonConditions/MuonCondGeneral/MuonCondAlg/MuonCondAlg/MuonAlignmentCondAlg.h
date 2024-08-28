@@ -28,9 +28,12 @@ public:
 
 private:
     /** Attaches the dependencies of the Alignment keys onto the A & Bline container*/
-    StatusCode attachDependencies(const EventContext& ctx,
-                              SG::WriteCondHandle<ALineContainer>& alines,
-                              SG::WriteCondHandle<BLineContainer>& blines ) const;
+    
+    template <class ContType>
+        StatusCode writeContainer(const EventContext& ctx,
+                                  const SG::WriteCondHandleKey<ContType>& writeKey,
+                                  std::unique_ptr<ContType>&& container) const;
+    
     /**
      *  Load the Alignment data from the legacy format where the channels are parsed line wise 
      *  The data is then transferred into a modern JSON blob
@@ -68,6 +71,9 @@ private:
     
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
+    
+    Gaudi::Property<bool> m_loadALines{this, "LoadALines", true, "Setup whether Alines shall be written"};
+    Gaudi::Property<bool> m_loadBLines{this, "LoadBLines", true, "Setup whether BLines shall be written"};
     // new folder format 2020
     Gaudi::Property<bool> m_newFormat2020 {this, "NewFormat2020", false, 
                           "The database folders are given in the new JSON format"};

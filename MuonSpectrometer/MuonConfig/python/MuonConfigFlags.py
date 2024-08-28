@@ -32,7 +32,7 @@ def _muonAlignMode(flags):
     problematic_tags = ['COMCOND-HLT[A-C]-00[01]-00', 'COMCOND-ES1C-00[01]-00', 'COMCOND-REPC-001', 'COMCOND-SIM-01-00']
     if any(re.match(tag,flags.IOVDb.DatabaseInstance) for tag in problematic_tags):
         return False
-    elif flags.Input.isMC:
+    elif flags.Input.isMC or not flags.Muon.enableAlignment:
         return False
     else:
         return True
@@ -73,9 +73,6 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.segmentOrigin", "Muon") # Can be 'Muon','TruthTracking'
     # reconstructionMode - I think this is a complete duplication of global.BeamType. Dropping.
     mcf.addFlag("Muon.strategy", []) # CutSeedsOnTracks, CombineSegInStation, DynamicSeeding, PreferOutsideIn, AllowOneSharedHit, DoRefinement, DoAmbiSolving
-    mcf.addFlag("Muon.trackBuilder", "Moore") # Allowed: 'Moore','TruthTracking','None'
-    mcf.addFlag("Muon.refinementTool", "Moore") # Allowed: Moore TODO surely we can drop this if there is only one option?
-    mcf.addFlag("Muon.patternsOnly", False) # TODO probably can be dropped? Just disable later steps.
     mcf.addFlag("Muon.straightLineFitMomentum", 2000.0 ) 
     #mcf.addFlag("Muon.doSegmentsOnly", True) # Also in MuonRecFlags ... redundant in both?
     mcf.addFlag("Muon.Chi2NDofCut", 20.0 )  # chi-squared per degree of freedom cut in fitter.
@@ -129,10 +126,12 @@ def createMuonConfigFlags():
     # Muon Align flags
     
     mcf.addFlag("Muon.Align.UseALines", lambda prevFlags: (_muonAlignMode(prevFlags)))
-    mcf.addFlag("Muon.Align.UseBLines", lambda prevFlags: 'all' if _muonAlignMode(prevFlags) else 'none') # Can be ['none','all','barrel','endcaps']
-    mcf.addFlag("Muon.Align.UseILines", lambda prevFlags: (_muonAlignMode(prevFlags)))
-    mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)))
-    mcf.addFlag("Muon.Align.UsesTGCAsBuild2",False)
+    mcf.addFlag("Muon.Align.UseBLines", lambda prevFlags: prevFlags.Muon.Align.UseALines)
+    mcf.addFlag("Muon.Align.UseILines", lambda prevFlags: (_muonAlignMode(prevFlags))  and  \
+                                                          prevFlags.Detector.GeometryCSC and 'HLT' not in prevFlags.IOVDb.GlobalTag)
+    mcf.addFlag("Muon.Align.UseAsBuilt", lambda prevFlags: (_muonAlignMode(prevFlags)) and not \
+                                                           (prevFlags.IOVDb.DatabaseInstance == 'COMP200' or \
+                                                            'HLT' in prevFlags.IOVDb.GlobalTag or prevFlags.Common.isOnline) )
 
     # Muon Trigger Flags
     mcf.addFlag("Muon.MuonTrigger", False) 
