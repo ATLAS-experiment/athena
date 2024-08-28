@@ -222,7 +222,7 @@ namespace MuonR4{
                     <<", Y0: "<<solCandidate.Y0<<"+-"<<solCandidate.dY0);
         /// Check whether the seed has been seen before
         if (std::find_if(m_seenSolutions.begin(), m_seenSolutions.end(),
-                        [this, &solCandidate] (const SeedSolution& seen) {
+                        [&solCandidate] (const SeedSolution& seen) {
                             return std::abs(seen.Y0 - solCandidate.Y0) < std::hypot(seen.dY0, solCandidate.dY0) &&
                                    std::abs(seen.tanTheta - solCandidate.tanTheta) < std::hypot(seen.dTanTheta, solCandidate.dTanTheta);
                         }) != m_seenSolutions.end()){
@@ -288,13 +288,12 @@ namespace MuonR4{
             /** Last check wheather another seed with the same left-right combination hasn't already been found */
             for (unsigned int a = 1; a< m_seenSolutions.size() ;++a) { 
                 const SeedSolution& accepted = m_seenSolutions[a];
-                unsigned int nOverlap{0}, nAccepted{0};
+                unsigned int nOverlap{0};
                 std::vector<int> corridor = driftSigns(linePos, lineDir, accepted.seedHits,  msg());                
                 ATH_MSG_VERBOSE("Test seed against accepted solution Y0: "<<accepted.Y0<<", tanTheta: "<<accepted.tanTheta
                               <<", initial circle signs: "<<accepted.solutionSigns<<", updated signs: "<<corridor);
                 /// All seed hits are of the same size
                 for (unsigned int l = 0; l < accepted.seedHits.size(); ++l){
-                    nAccepted += corridor[l] !=0;
                     nOverlap  += corridor[l] == accepted.solutionSigns[l];
                 }
                 /// Including the places where no seed hit was assigned. Both solutions match in terms of 

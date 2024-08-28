@@ -27,7 +27,7 @@ namespace DerivationFramework {
     // Athena algtool's Hooks
     StatusCode  initialize() override final;
 
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches() const override;
 
   private:
     Gaudi::Property<std::string> m_centralityDefinitionFile{this, "centralityDefinitionFile", "HIEventUtils/HeavyIonAnalysis2015_centrality_cuts_Gv32_proposed.txt", "File for centrality definitions"};
