@@ -98,8 +98,8 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
                                 )
 
     noiseType = "totalNoise"
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg(noisetype=noiseType)
+    #from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
+    #CaloNoiseCondAlg(noisetype=noiseType)
 
     cellD3PDObject.defineBlock (3, 'Detail3',
                                 D3PD.CaloCellDetailsFillerTool,
@@ -156,8 +156,8 @@ def makeCaloCellSlimmedD3PDObject (maker, prefix, object_name) :
 
 
     noiseType = "totalNoise"
-    from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-    CaloNoiseCondAlg(noisetype=noiseType)
+    #from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
+    #CaloNoiseCondAlg(noisetype=noiseType)
 
     cellD3PDObject.defineBlock (1, 'Detail1',
                                 D3PD.CaloCellDetailsFillerTool,
