@@ -805,9 +805,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
 
   // Set and test projector
   Acts::ActsMatrix<eBoundSize, eBoundSize> proj;
-  proj.setZero();
-  proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
-  proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
+  proj.setIdentity();
   ts.setProjector(proj);
 
   BOOST_CHECK_EQUAL(ts.effectiveProjector(), proj);
