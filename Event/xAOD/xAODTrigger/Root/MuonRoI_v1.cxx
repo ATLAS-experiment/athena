@@ -340,7 +340,7 @@ namespace xAOD{
    /// the transverse momentum of the muon candidate, which can be calculated from roiWord
    /// valid for Run-4+ only
    float MuonRoI_v1::pt() const {
-     if (isRun4()) return ((roiWord() >> PT_SHIFT) & PT_MASK);
+     if (isRun4()) return static_cast<float>((roiWord() >> PT_SHIFT) & PT_MASK) * PT_WIDTH;
      else return 0.;
    }
 

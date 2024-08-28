@@ -62,6 +62,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
     #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
     alg = CompFactory.L1TopoOnlineMonitor(toolName,
                                           doHwMon = doHwMon,
+                                          doHwErrorMon = False,
                                           doSimMon = doSimMon,
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp,
