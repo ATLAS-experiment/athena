@@ -99,7 +99,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (noEffSF=True)
     config.setOptions (identificationWP='LooseBLayerLH')
     config.setOptions (isolationWP='Loose_VarRad')
-    config.setOptions (recomputeLikelihood=False)
     config.setOptions (writeTrackD0Z0=True)
     # Electrons.PtEtaSelection
     config.addBlock ('Electrons.PtEtaSelection')

@@ -268,7 +268,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, fo
     else :
         input = 'Electrons'
     likelihood = True
-    recomputeLikelihood=False
+    recomputeLikelihood = False
     if likelihood:
         workingpoint = 'LooseBLayerLHElectron.Loose_VarRad'
     else:
@@ -779,7 +779,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     # Include, and then set up the electron analysis algorithm sequence:
     likelihood = True
-    recomputeLikelihood=False
     configSeq += config.makeConfig ('Electrons',
         containerName='AnaElectrons' )
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
@@ -798,7 +797,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     else:
         configSeq.setOptionValue ('.identificationWP', 'LooseDNN')
     configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
-    configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
 
     configSeq += config.makeConfig ('Electrons.PtEtaSelection',
