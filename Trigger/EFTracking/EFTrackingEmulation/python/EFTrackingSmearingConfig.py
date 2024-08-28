@@ -12,30 +12,19 @@ def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
     result = ComponentAccumulator()    
     result.addService(histSvc) 
 
-    alg = CompFactory.EFTrackingSmearingAlg ( name=name,
-      OutputLevel = kwargs['OutputLevel'],      
-      SmearedTrackEfficiency = kwargs['trackEfficiency'],
-      ParameterizedTrackEfficiency = kwargs['parameterizeEfficiency'],
-      SmearingScaleFactor = kwargs['smearFactor'],
-      SmearTruthParticle = kwargs['smearTruthParticle'],
-      OutputTracksPtCutGeV = kwargs['trkpTCut'],
-      EnableMonitoring = kwargs['EnableMonitoring'],
-      RootStreamName = name,
-      RootDirName = "/EFTSmearing/"
-      )
+    alg = CompFactory.EFTrackingSmearingAlg(
+        name = name,
+        RootStreamName = name,
+        RootDirName = "/EFTSmearing/",
+        **kwargs
+    )
 
-    if 'parameterizedTrackEfficiency_LRT' in kwargs:
-       alg.ParameterizedTrackEfficiency_LRT = kwargs['parameterizedTrackEfficiency_LRT']
-       alg.SmearedTrackEfficiency_d0low_LRT = kwargs['smearedTrackEfficiency_d0low_LRT'] 
-       alg.SmearedTrackEfficiency_d0high_LRT= kwargs['smearedTrackEfficiency_d0high_LRT']  
-    
-    if kwargs['smearTruthParticle']:       
-      alg.OutputTruthParticleContainer = "TruthParticle_smeared_SF"+str(kwargs['smearFactor'])
-      alg.InputTruthParticleContainer = kwargs['InputTruthParticle']
+    sf_str=str(kwargs['SmearingScaleFactor']).replace(".","p")
+    if kwargs['SmearTruthParticle']:
+        alg.OutputTruthParticleContainer = "TruthParticle_smeared_SF"+sf_str
     else:
-      alg.OutputTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(kwargs['smearFactor'])
-      alg.InputTrackParticleContainer = kwargs['InputTrackParticle']     
-    
+        alg.OutputTrackParticleContainer = "InDetTrackParticles_smeared_SF"+sf_str
+        
     result.addEventAlgo(alg)
     return result
 
@@ -46,7 +35,7 @@ if __name__ == "__main__":
     
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaCommon.Constants import INFO
+    from AthenaCommon.Constants import INFO, DEBUG
     flags = initConfigFlags()    
     flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
     flags.Input.isMC=True
@@ -68,29 +57,46 @@ if __name__ == "__main__":
     TestsmearFactor = 2
     TestEfficiencyFactor=1
     # example to smear the track particles 
-    smearerTrack = EFTrackingSmearingCfg(flags, name="testTrack", trkpTCut=1, smearFactor=TestsmearFactor, InputTrackParticle="InDetTrackParticles",
-                                    trackEfficiency=TestEfficiencyFactor, parameterizeEfficiency=False, smearTruthParticle=False,
-                                    EnableMonitoring=True, OutputLevel=INFO)
+    smearerTrack = EFTrackingSmearingCfg(
+        flags,
+        name = "testTrack",
+        InputTrackParticleContainer = "InDetTrackParticles",
+        OutputTracksPtCutGeV = 1,
+        SmearingScaleFactor = TestsmearFactor,
+        SmearedTrackEfficiency = TestEfficiencyFactor,
+        ParameterizedTrackEfficiency = False,
+        SmearTruthParticle = False,
+        EnableMonitoring = True,
+        OutputLevel = INFO)
     acc.merge(smearerTrack)
     
     
     # example to smear the truth particles 
-    smearerTruth = EFTrackingSmearingCfg(flags, name="testTruth", trkpTCut=1, smearFactor=TestsmearFactor, InputTruthParticle="TruthParticles",
-                                    trackEfficiency=TestEfficiencyFactor, parameterizeEfficiency=False, 
-                                    parameterizedTrackEfficiency_LRT = True, smearTruthParticle=True,
-                                    smearedTrackEfficiency_d0low_LRT=.001, smearedTrackEfficiency_d0high_LRT=400.,
-                                    EnableMonitoring=True, OutputLevel=2)
+    smearerTruth = EFTrackingSmearingCfg(
+        flags,
+        name = "testTruth",
+        InputTruthParticleContainer = "TruthParticles",
+        OutputTracksPtCutGeV = 1,
+        SmearingScaleFactor = TestsmearFactor,
+        SmearedTrackEfficiency = TestEfficiencyFactor,
+        ParameterizedTrackEfficiency = False,
+        SmearTruthParticle = True,
+        ParameterizedTrackEfficiency_LRT = True,
+        SmearedTrackEfficiency_d0low_LRT = .001,
+        SmearedTrackEfficiency_d0high_LRT = 400.,
+        EnableMonitoring = True,
+        OutputLevel = DEBUG)
     acc.merge(smearerTruth)
     
     
     # validation of the smeared tracks and truth particles
-    validationAlg = CompFactory.EFTrackingSmearMonAlg ( name="EFTrakingSmearMonAlg",
-      OutputLevel = INFO, 
-      InputTrackParticleContainer = "InDetTrackParticles",
-      InputTruthParticleContainer = "TruthParticles",
-      SmearedTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(TestsmearFactor),
-      SmearedTruthParticleContainer = "TruthParticle_smeared_SF"+str(TestsmearFactor),
-      )
+    validationAlg = CompFactory.EFTrackingSmearMonAlg(
+        name = "EFTrakingSmearMonAlg",
+        OutputLevel = INFO,
+        InputTrackParticleContainer = "InDetTrackParticles",
+        InputTruthParticleContainer = "TruthParticles",
+        SmearedTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(TestsmearFactor),
+        SmearedTruthParticleContainer = "TruthParticle_smeared_SF"+str(TestsmearFactor),)
     acc.addEventAlgo(validationAlg)
     
     acc.wasMerged()
