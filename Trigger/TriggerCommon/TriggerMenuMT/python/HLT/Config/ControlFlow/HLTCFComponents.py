@@ -93,11 +93,33 @@ class CFSequence(object):
     A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
     """
     def __init__(self, ChainStep, FilterAlg):
+        log.debug(" *** Create CFSequence %s with Filter %s", ChainStep.name, FilterAlg.Alg.getName()) 
         self.filterNode = FilterAlg
         self.step = ChainStep
+
+        self.ca = ComponentAccumulator()
+        #empty step: add the PassSequence, one instance only is appended to the tree
+        seqAndWithFilter = FilterAlg.Alg if ChainStep.isEmpty else seqAND(ChainStep.name)        
+        self.ca.addSequence(seqAndWithFilter)
+        self.seq = seqAndWithFilter
+        if not ChainStep.isEmpty: 
+            self.ca.addEventAlgo(FilterAlg.Alg, sequenceName=seqAndWithFilter.getName())
+            self.stepReco = parOR(ChainStep.name + CFNaming.RECO_POSTFIX)  
+            # all reco algorithms from all the sequences in a parallel sequence                            
+            self.ca.addSequence(self.stepReco, parentName=seqAndWithFilter.getName())
+            log.debug("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
+            self.mergeStepSequences(ChainStep)
+            # merge the Hypoalg (before the Combo)
+            for menuseq in ChainStep.sequences:
+                if not isinstance(menuseq, EmptyMenuSequence):
+                    self.ca.merge(menuseq.hypoAcc, sequenceName=seqAndWithFilter.getName())   
+
         self.connectCombo()
-        self.setDecisions()              
+        self.setDecisions()        
+        if self.step.combo is not None:   
+            self.ca.merge(self.step.combo.acc, sequenceName=seqAndWithFilter.getName())   
         log.debug("CFSequence.__init: created %s ",self)    
+
 
     def setDecisions(self):
         """ Set the output decision of this CFSequence as the hypo outputdecision; In case of combo, takes the Combo outputs"""
@@ -127,41 +149,6 @@ class CFSequence(object):
             self.step.combo.addOutput(combo_output)
             log.debug("CFSequence.connectCombo: adding output to  %s: %s",  self.step.combo.Alg.getName(), combo_output)
     
-        
-    def __repr__(self):
-        return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
-                    self.filterNode.Alg.name, self.decisions, self.step)
-
-
-class CFSequenceCA(CFSequence):
-    """Class to describe the flow of decisions through ChainStep + filter with their connections (input, output)
-    A Filter can have more than one input/output if used in different chains, so this class stores and manages all of them (when doing the connect)
-    """
-    def __init__(self, chainStep, filterAlg):
-        log.debug(" *** Create CFSequenceCA %s with Filter %s", chainStep.name, filterAlg.Alg.getName())        
-        self.ca = ComponentAccumulator()
-        #empty step: add the PassSequence, one instance only is appended to the tree
-        seqAndWithFilter = filterAlg.Alg if chainStep.isEmpty else seqAND(chainStep.name)        
-        self.ca.addSequence(seqAndWithFilter)
-        self.seq = seqAndWithFilter
-        if not chainStep.isEmpty: 
-            self.ca.addEventAlgo(filterAlg.Alg, sequenceName=seqAndWithFilter.getName())
-            self.stepReco = parOR(chainStep.name + CFNaming.RECO_POSTFIX)  # all reco algorithms from all the sequences in a parallel sequence                            
-            self.ca.addSequence(self.stepReco, parentName=seqAndWithFilter.getName())
-            log.debug("created parOR %s inside seqAND %s  ", self.stepReco.getName(), seqAndWithFilter.getName())
-            self.mergeStepSequences(chainStep)
-            
-            
-        CFSequence.__init__(self, chainStep, filterAlg)
-        if not chainStep.isEmpty: 
-        # merge the Hypoalg (before the Combo)
-            for menuseq in chainStep.sequences:
-                if not isinstance(menuseq, EmptyMenuSequence):
-                    self.ca.merge(menuseq.hypoAcc, sequenceName=seqAndWithFilter.getName())   
-
-        if self.step.combo is not None:   
-            self.ca.merge(self.step.combo.acc, sequenceName=seqAndWithFilter.getName())          
-
     def mergeStepSequences(self, chainStep):
         for menuseq in chainStep.sequences:
             try:
@@ -176,6 +163,11 @@ class CFSequenceCA(CFSequence):
     def findComboHypoAlg(self):
         return findAlgorithmByPredicate(self.seq, lambda alg: alg.name == self.step.Alg.name and isComboHypoAlg(alg))
 
+    def __repr__(self):
+        return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
+                    self.filterNode.Alg.name, self.decisions, self.step)
+
+
 
 
 class CFGroup(object):
@@ -185,13 +177,13 @@ class CFGroup(object):
         self.multiplicity = []
         self.chains = []
         self.comboToolConfs = []
-        self.createCFSequenceCA(ChainStep, FilterAlg)
+        self.createCFSequence(ChainStep, FilterAlg)
         log.debug("CFGroup.__init: created for %s ",ChainStep.name)
     
-    def createCFSequenceCA(self, ChainStep, FilterAlg):
-        '''This creates the CAs for the menu sequences, if fastMenu style, and the CFSequenceCA'''
-        log.debug("CFGroup.creating CFSEquenceCA")
-        self.sequenceCA = CFSequenceCA(ChainStep, FilterAlg)
+    def createCFSequence(self, ChainStep, FilterAlg):
+        '''This creates the CAs for the menu sequences, if fastMenu style, and the CFSequence'''
+        log.debug("CFGroup.creating CFSEquence")
+        self.sequenceCA = CFSequence(ChainStep, FilterAlg)
         return self.sequenceCA
     
     def addStepLeg(self, newstep, chainName):

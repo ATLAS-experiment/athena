@@ -41,5 +41,5 @@ def fastCalo_FWDSequenceGenCfg(flags,name,doRinger=True, is_probe_leg=False):
    theFastCaloHypo = CompFactory.TrigEgammaForwardFastCaloHypoAlgMT(name+"EgammaFastCaloFWDHypo")
    selAcc.addHypoAlgo(theFastCaloHypo)
 
-   return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaForwardFastCaloHypoToolFromDict,isProbe=is_probe_leg)
+   return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaForwardFastCaloHypoToolFromDict)
 

@@ -62,5 +62,5 @@ def TRTHitGeneratorSequenceGenCfg(flags, is_probe_leg = False):
     trtHTHhypo = CompFactory.TrigTRTHTHhypoAlg(name="TrigTRTHTHhypo", RNNOutputName=TrigEgammaKeys.TrigTRTHTCountsContainer)
     selAcc.addHypoAlgo(trtHTHhypo)
     from TrigTRTHighTHitCounter.TrigTRTHTHhypoTool import TrigTRTHTHhypoToolFromDict
-    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict, isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict)
 

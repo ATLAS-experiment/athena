@@ -42,4 +42,4 @@ def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False):
     selAcc.addHypoAlgo(theFastCaloHypo)
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)

@@ -46,7 +46,7 @@ def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
     selAcc.addHypoAlgo(fastElectronHypoAlg)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 
 
 def fastTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):
