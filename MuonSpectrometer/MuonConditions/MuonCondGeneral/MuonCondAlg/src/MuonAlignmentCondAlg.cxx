@@ -24,14 +24,17 @@ MuonAlignmentCondAlg::MuonAlignmentCondAlg(const std::string& name, ISvcLocator*
 }
 
 StatusCode MuonAlignmentCondAlg::initialize() {
-    ATH_MSG_INFO("Initilalizing");
+    ATH_MSG_DEBUG("Initilalizing");
+    if (!m_loadALines && !m_loadBLines) {
+        ATH_MSG_ERROR("There's no point in setting up this algorithm if neither A or B Lines shall be processed");
+        return StatusCode::FAILURE;
+    }
     ATH_MSG_INFO("In initialize ---- # of folders registered is " << m_alignKeys.size());
     // Read Handles Keys
     ATH_CHECK(m_alignKeys.initialize(m_readFromJSON.value().empty()));
-   
     // Write Handles
-    ATH_CHECK(m_writeALineKey.initialize());
-    ATH_CHECK(m_writeBLineKey.initialize());   
+    ATH_CHECK(m_writeALineKey.initialize(m_loadALines));
+    ATH_CHECK(m_writeBLineKey.initialize(m_loadBLines));
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
@@ -39,26 +42,28 @@ StatusCode MuonAlignmentCondAlg::initialize() {
 StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
 
-    SG::WriteCondHandle<ALineContainer> writeALineHandle{m_writeALineKey, ctx};
-    if (writeALineHandle.isValid()) {
-        ATH_MSG_DEBUG("CondHandle " << writeALineHandle.fullKey() << " is already valid."
-                                    << ". In theory this should not be called, but may happen"
-                                    << " if multiple concurrent events are being processed out of order.");
-        return StatusCode::SUCCESS;
+    if (m_loadALines) {
+        SG::WriteCondHandle<ALineContainer> writeALineHandle{m_writeALineKey, ctx};
+        if (writeALineHandle.isValid()) {
+            ATH_MSG_DEBUG("CondHandle " << writeALineHandle.fullKey() << " is already valid."
+                                        << ". In theory this should not be called, but may happen"
+                                        << " if multiple concurrent events are being processed out of order.");
+            return StatusCode::SUCCESS;
+        }
     }
     ///
     // =======================
     // Write BLine Cond Handle
     // =======================
-    SG::WriteCondHandle<BLineContainer> writeBLineHandle{m_writeBLineKey, ctx};
-    if (writeBLineHandle.isValid()) {
-        ATH_MSG_DEBUG("CondHandle " << writeBLineHandle.fullKey() << " is already valid."
-                                    << ". In theory this should not be called, but may happen"
-                                    << " if multiple concurrent events are being processed out of order.");
-        return StatusCode::SUCCESS;
+    if (m_loadBLines) {
+        SG::WriteCondHandle<BLineContainer> writeBLineHandle{m_writeBLineKey, ctx};
+        if (writeBLineHandle.isValid()) {
+            ATH_MSG_DEBUG("CondHandle " << writeBLineHandle.fullKey() << " is already valid."
+                                        << ". In theory this should not be called, but may happen"
+                                        << " if multiple concurrent events are being processed out of order.");
+            return StatusCode::SUCCESS;
+        }
     }
-    /// Declare the dependencies on the alignment constant data
-    ATH_CHECK(attachDependencies(ctx, writeALineHandle, writeBLineHandle));
     /// Create the containers
     std::unique_ptr<ALineContainer> writeALineCdo{std::make_unique<ALineContainer>()};
     std::unique_ptr<BLineContainer> writeBLineCdo{std::make_unique<BLineContainer>()};
@@ -76,27 +81,32 @@ StatusCode MuonAlignmentCondAlg::execute(const EventContext& ctx) const {
         inStream >> lines;
         ATH_CHECK(parseDataFromJSON(lines, *writeALineCdo, *writeBLineCdo));        
     }
-    ATH_CHECK(writeALineHandle.record(std::move(writeALineCdo)));
-    ATH_CHECK(writeBLineHandle.record(std::move(writeBLineCdo)));
+    ATH_CHECK(writeContainer(ctx, m_writeALineKey, std::move(writeALineCdo)));
+    ATH_CHECK(writeContainer(ctx, m_writeBLineKey, std::move(writeBLineCdo)));
 
     return StatusCode::SUCCESS;
 }
-StatusCode MuonAlignmentCondAlg::attachDependencies(const EventContext& ctx,
-                                  SG::WriteCondHandle<ALineContainer>& alines,
-                                  SG::WriteCondHandle<BLineContainer>& blines ) const {
-    alines.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    blines.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    /// Loop over all input folder and attach their IOVs to the output conditions
+template <class ContType>
+    StatusCode MuonAlignmentCondAlg::writeContainer(const EventContext& ctx,
+                                                    const SG::WriteCondHandleKey<ContType>& writeKey,
+                                                    std::unique_ptr<ContType>&& container) const {
+    if (writeKey.empty()) {
+        ATH_MSG_DEBUG("The key of type "<<typeid(ContType).name()<<" is not set. Assume that nothing shall be written.");
+        return StatusCode::SUCCESS;
+    }
+    SG::WriteCondHandle<ContType> writeHandle{writeKey, ctx};
+    writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
+     /// Loop over all input folder and attach their IOVs to the output conditions
     for (const SG::ReadCondHandleKey<CondAttrListCollection>& key : m_alignKeys) {
         SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
         if (!readHandle.isValid()){
             ATH_MSG_FATAL("Failed to load alignment folder "<<key.fullKey());
             return StatusCode::FAILURE;
         }
-        ATH_MSG_INFO("Attach new dependency from <"<<readHandle.key()<<"> to the A & B lines. IOV: "<<readHandle.getRange());
-        alines.addDependency(readHandle);
-        blines.addDependency(readHandle);
+        ATH_MSG_INFO("Attach new dependency from <"<<readHandle.key()<<"> to the "<<typeid(ContType).name()<<". IOV: "<<readHandle.getRange());
+        writeHandle.addDependency(readHandle);
     }
+    ATH_CHECK(writeHandle.record(std::move(container)));
     return StatusCode::SUCCESS;
 }
 StatusCode MuonAlignmentCondAlg::loadCoolFolder(const EventContext& ctx,

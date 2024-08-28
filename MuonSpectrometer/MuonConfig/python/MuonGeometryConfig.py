@@ -99,41 +99,30 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
 
 def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     acc = ComponentAccumulator()
-    from IOVDbSvc.IOVDbSvcConfig import addFolders    
-    if (flags.Common.isOnline and not flags.Input.isMC):
-        acc.merge(addFolders( flags, ['/MUONALIGN/Onl/MDT/BARREL'], 'MUONALIGN', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/Onl/MDT/ENDCAP/SIDEA'], 'MUONALIGN', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/Onl/MDT/ENDCAP/SIDEC'], 'MUONALIGN', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/Onl/TGC/SIDEA'], 'MUONALIGN', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/Onl/TGC/SIDEC'], 'MUONALIGN', className='CondAttrListCollection'))
-    else:
-        acc.merge(addFolders( flags, ['/MUONALIGN/MDT/BARREL'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/MDT/ENDCAP/SIDEA'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/MDT/ENDCAP/SIDEC'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/TGC/SIDEA'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-        acc.merge(addFolders( flags, ['/MUONALIGN/TGC/SIDEC'], 'MUONALIGN_OFL', className='CondAttrListCollection'))
-
-
-    ParlineFolders = ["/MUONALIGN/MDT/BARREL",
-                      "/MUONALIGN/MDT/ENDCAP/SIDEA",
-                      "/MUONALIGN/MDT/ENDCAP/SIDEC",
-                      "/MUONALIGN/TGC/SIDEA",
-                      "/MUONALIGN/TGC/SIDEC"]
-
     # here define if I-lines (CSC internal alignment) are enabled
     acc.merge(CscILineCondAlgCfg(flags))
     # here define if As-Built (MDT chamber alignment) are enabled
     if flags.Muon.Align.UseAsBuilt:
-        if flags.IOVDb.DatabaseInstance == 'COMP200' or \
-                'HLT' in flags.IOVDb.GlobalTag or flags.Common.isOnline :           
-            pass
-        else :            
-            acc.merge(MdtAsBuiltCondAlgCfg(flags))
-            if(flags.Muon.Align.UsesTGCAsBuild2):
-                acc.merge(sTGCAsBuiltCondAlg2Cfg(flags))
-                acc.merge(NswAsBuiltCondAlgCfg(flags,sTgcJSON="",ReadSTgcAsBuiltParamsKey="")) # make sure regular sTGC as built is disabled
-            else:
-                acc.merge(NswAsBuiltCondAlgCfg(flags))
+        acc.merge(MdtAsBuiltCondAlgCfg(flags))
+        acc.merge(NswAsBuiltCondAlgCfg(flags))
+
+    if not flags.Muon.Align.UseALines and not flags.Muon.Align.UseBLines:
+        return acc
+    from IOVDbSvc.IOVDbSvcConfig import addFolders    
+    
+    onl = "/Onl" if flags.Common.isOnline and not flags.Input.isMC else ""
+    ParlineFolders = [f"/MUONALIGN{onl}/MDT/BARREL", 
+                      f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEA",
+                      f"/MUONALIGN{onl}/MDT/ENDCAP/SIDEC", 
+                      f"/MUONALIGN{onl}/TGC/SIDEA",
+                      f"/MUONALIGN{onl}/TGC/SIDEC"]
+    acc.merge(addFolders( flags, ParlineFolders, 'MUONALIGN' if len(onl) else 'MUONALIGN_OFL',  className='CondAttrListCollection'))
+ 
+    if len(onl):
+        ParlineFolders = [ x[ :x.find(onl)] + x[x.find(onl) + len(onl): ] for x in ParlineFolders]
+
+    kwargs.setdefault("LoadALines",flags.Muon.Align.UseALines)
+    kwargs.setdefault("LoadBLines",flags.Muon.Align.UseBLines)
     
     kwargs.setdefault("ParlineFolders", ParlineFolders)
     MuonAlign = CompFactory.MuonAlignmentCondAlg(name, **kwargs)
@@ -199,7 +188,7 @@ def MdtAsBuiltCondAlgCfg(flags, name="MdtAsBuiltCondAlg", **kwargs):
 
 def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
     result = ComponentAccumulator()
-    if not flags.Muon.Align.UseILines or not flags.Detector.GeometryCSC or 'HLT' in flags.IOVDb.GlobalTag: 
+    if not flags.Muon.Align.UseILines: 
         return result
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     if (flags.Common.isOnline and not flags.Input.isMC):
@@ -224,9 +213,9 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
         result.merge(NswPassivationDbAlgCfg(flags))
     if flags.Muon.enableAlignment:
         result.merge(MuonAlignmentCondAlgCfg(flags))
-    kwargs.setdefault("applyALines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
-    kwargs.setdefault("applyBLines", len([alg for alg in result.getCondAlgos() if alg.name == "MuonAlignmentCondAlg"])>0)
-    kwargs.setdefault("applyILines", len([alg for alg in result.getCondAlgos() if alg.name == "CscILinesCondAlg"])>0)
+    kwargs.setdefault("applyALines", flags.Muon.Align.UseALines)
+    kwargs.setdefault("applyBLines", flags.Muon.Align.UseBLines)
+    kwargs.setdefault("applyILines", flags.Muon.Align.UseILines)
     kwargs.setdefault("applyNswAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "NswAsBuiltCondAlg"])>0)
     kwargs.setdefault("applysTGCAsBuilt2", len([alg for alg in result.getCondAlgos() if alg.name == "sTGCAsBuiltCondAlg2"])>0)
     kwargs.setdefault("applyMdtAsBuilt", len([alg for alg in result.getCondAlgos() if alg.name == "MdtAsBuiltCondAlg"])>0)
