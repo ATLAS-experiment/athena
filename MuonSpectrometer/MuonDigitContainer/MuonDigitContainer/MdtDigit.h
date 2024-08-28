@@ -17,43 +17,30 @@
 #include "MuonIdHelpers/MdtIdHelper.h"
 
 class MdtDigit : public MuonDigit {
+    public:
+        // Default constructor.
+        MdtDigit() = default;
+        // Full constructor for combined measurement mode tdc+adc
+        MdtDigit(const Identifier& id, int16_t tdc, int16_t adc, bool isMasked);
+        // Return the TDC.
+        int16_t tdc() const { return m_tdc; }
+        // Return the ADC
+        int16_t adc() const { return m_adc; } 
+        /// Return whether the digit is masked or not
+        bool isMasked() const { return m_isMasked; }
+        /// Overwrites a new tdc value
+        void setTdc(const int16_t tdc);
+        /// Overwrites a new adc value
+        void setAdc(const int16_t adc);
 
-private:  // data
+    private:
+        // TDC value.
+        int16_t m_tdc{0};
+        // ADC value for combined measurement mode
+        int16_t m_adc{0};
+        /// Masked lag
+        bool m_isMasked{false};
 
-// TDC value.
-  int m_tdc{0};
-
-  // ADC value for combined measurement mode
-  int m_adc{0};
-
-  // Masked digit flag
-  bool m_isMasked{false};
-
-public:  // functions
-
-  // Default constructor.
-  MdtDigit() = default;
-
-  // Full constructor --- From Identifier.
-  MdtDigit(const Identifier& id, int tdc);
-
-  // Full constructor for combined measurement mode tdc+adc
-  MdtDigit(const Identifier& id, int tdc, int adc);
-
-  // Full constructor for masked digits
-  MdtDigit(const Identifier& id, int tdc, int adc, bool isMasked);
-  
-  // Is this a valid digit?
-  bool is_valid(const MdtIdHelper * mdtHelper) const;
-
-  // Return the TDC.
-  int tdc() const { return m_tdc; }
-
-  // Return the ADC
-  int adc() const { return m_adc; } 
-
-  // Return the isMasked flag
-  bool is_masked() const {return m_isMasked;}
 
 };
 

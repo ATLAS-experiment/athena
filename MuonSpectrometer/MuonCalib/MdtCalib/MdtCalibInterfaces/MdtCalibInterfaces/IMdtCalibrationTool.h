@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTCALIBSVC_IMDTCALIBRATIONTOOL_H
@@ -7,7 +7,7 @@
 
 #include <bitset>
 #include <GaudiKernel/IAlgTool.h>
-
+#include <GaudiKernel/EventContext.h>
 #include <MdtCalibInterfaces/MdtCalibInput.h>
 #include <MdtCalibInterfaces/MdtCalibOutput.h>
 #include <MdtCalibInterfaces/MdtCalibTwinOutput.h>
@@ -73,8 +73,8 @@ public:
   /** Convert the raw MDT times of two twin hits into a Twin position (coordinate along tube)
       It returns whether the conversion was successful. */
   virtual MdtCalibTwinOutput calibrateTwinTubes(const EventContext& ctx,
-                                                const MdtCalibInput& primHit, 
-                                                const MdtCalibInput& twinHit) const = 0;
+                                                MdtCalibInput&& primHit, 
+                                                MdtCalibInput&& twinHit) const = 0;
   
   virtual double getResolutionFromRt(const EventContext& ctx,
                                      const Identifier& module,

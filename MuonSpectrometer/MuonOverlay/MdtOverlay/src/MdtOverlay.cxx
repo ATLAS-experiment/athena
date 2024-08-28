@@ -38,12 +38,12 @@ namespace Overlay
 
     /** signal masks the background - no correction to the ADC
         FIXME: Probably should return the masked hit as well */
-    if ( abs(sig_tdc - bkg_tdc) > parent->adcIntegrationWindow() && sig_tdc < bkg_tdc ) {
+    if (std::abs(sig_tdc - bkg_tdc) > parent->adcIntegrationWindow() && sig_tdc < bkg_tdc ) {
       // do nothing - keep baseDigit.
     }
     /** Physics hit masks the background hit - no correct to the AOD
         FIXME: Probably should return the masked hit as well */
-    else if ( abs(sig_tdc - bkg_tdc) > parent->adcIntegrationWindow() && sig_tdc > bkg_tdc ) {
+    else if (std::abs(sig_tdc - bkg_tdc) > parent->adcIntegrationWindow() && sig_tdc > bkg_tdc ) {
       // Use the background digit as the final answer
       signalDigit = bkgDigit;
     }
@@ -51,10 +51,10 @@ namespace Overlay
         the ADC will add partially
         the TDC is from the first hit that crosses the threshold
         FIXME: how to add partially for correct - for now just add the ADD total */
-    else if ( abs(sig_tdc - bkg_tdc) < parent->adcIntegrationWindow() )  {
+    else if (std::abs(sig_tdc - bkg_tdc) < parent->adcIntegrationWindow() )  {
       int tdc = std::min( signalDigit.tdc(), bkgDigit.tdc() );
       int adc = signalDigit.adc() + bkgDigit.adc();
-      signalDigit = MdtDigit(signalDigit.identify(), tdc, adc);
+      signalDigit = MdtDigit(signalDigit.identify(), tdc, adc, false);
     }
   }
 } // namespace Overlay

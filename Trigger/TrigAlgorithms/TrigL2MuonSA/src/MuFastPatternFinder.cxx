@@ -56,9 +56,10 @@ void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(TrigL2MuonSA::MdtHitDat
    double X    = (isEndcap)? R*std::cos(track_phi): R*InCo*std::cos(track_phi);
    double Y    = (isEndcap)? R*std::sin(track_phi): R*InCo*std::sin(track_phi);
    double Z    = mdtHit.Z;
-   const Amg::Vector3D point(X,Y,Z);
+   const Amg::Vector3D point{X,Y,Z};
    
-   MdtCalibInput calHit{id, adcCounts,tdcCounts, point};
+   MdtCalibInput calHit(id, adcCounts,tdcCounts, mdtHit.readEle);
+   calHit.setClosestApproach(point);
    ATH_MSG_DEBUG("... MDT hit raw digit tdcCounts/adcCounts=" << tdcCounts << "/" << adcCounts);
 
    ATH_MSG_DEBUG("... MDT hit position X/Y/Z/track_phi/Multilayer/Layer/Tube="

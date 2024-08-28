@@ -11,7 +11,6 @@ class MdtDigit;
 class MdtAmtHit;
 class Identifier;
 
-static const InterfaceID IID_IMDT_RDO_Decoder("Muon::IMDT_RDO_Decoder", 1, 0);
 
 namespace Muon {
 
@@ -19,16 +18,16 @@ namespace Muon {
     public:
         /** AlgTool InterfaceID
          */
-        static const InterfaceID& interfaceID();
+        DeclareInterfaceID(Muon::IMDT_RDO_Decoder , 1, 0);
+        
+        virtual std::unique_ptr<MdtDigit> getDigit(const EventContext& ctx,
+                                                   const MdtAmtHit& amtHit, 
+                                                   uint16_t subdetId, 
+                                                   uint16_t mrodId, 
+                                                   uint16_t csmId) const = 0;
 
-        virtual MdtDigit* getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId) const = 0;
-
-        virtual Identifier getOfflineData(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, int& tdc,
-                                          int& width) const = 0;
     };
 
 }  // namespace Muon
-
-inline const InterfaceID& Muon::IMDT_RDO_Decoder::interfaceID() { return IID_IMDT_RDO_Decoder; }
 
 #endif

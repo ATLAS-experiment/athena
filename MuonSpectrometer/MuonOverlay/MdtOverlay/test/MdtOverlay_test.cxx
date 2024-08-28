@@ -200,7 +200,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit1!=nullptr );
     ASSERT_TRUE( outputDigit1->tdc()==sigTDC );
     ASSERT_TRUE( outputDigit1->adc()==sigADC );
-    ASSERT_TRUE( outputDigit1->is_masked()==false );
+    ASSERT_TRUE( outputDigit1->isMasked()==false );
   }
 
   TEST_F(MdtOverlay_test, containers_with_different_collections_one_digit_each) {
@@ -249,7 +249,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit1!=nullptr );
     ASSERT_TRUE( outputDigit1->tdc()==sigTDC );
     ASSERT_TRUE( outputDigit1->adc()==sigADC );
-    ASSERT_TRUE( outputDigit1->is_masked()==false );
+    ASSERT_TRUE( outputDigit1->isMasked()==false );
     const MdtDigitCollection *outputCollection2 = outputDataHandle->indexFindPtr(bkgElementHash);
     ASSERT_TRUE( outputCollection2!=nullptr );
     ASSERT_TRUE( outputCollection2->size()==1 );
@@ -257,7 +257,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit2!=nullptr );
     ASSERT_TRUE( outputDigit2->tdc()==bkgTDC );
     ASSERT_TRUE( outputDigit2->adc()==bkgADC );
-    ASSERT_TRUE( outputDigit2->is_masked()==false );
+    ASSERT_TRUE( outputDigit2->isMasked()==false );
   }
 
   TEST_F(MdtOverlay_test, containers_with_matching_collections_one_different_digit_each) {
@@ -306,12 +306,12 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit1!=nullptr );
     ASSERT_TRUE( outputDigit1->tdc()==sigTDC );
     ASSERT_TRUE( outputDigit1->adc()==sigADC );
-    ASSERT_TRUE( outputDigit1->is_masked()==false );
+    ASSERT_TRUE( outputDigit1->isMasked()==false );
     const MdtDigit* outputDigit2 = outputCollection->at(1);
     ASSERT_TRUE( outputDigit2!=nullptr );
     ASSERT_TRUE( outputDigit2->tdc()==sigTDC );
     ASSERT_TRUE( outputDigit2->adc()==sigADC );
-    ASSERT_TRUE( outputDigit2->is_masked()==false );
+    ASSERT_TRUE( outputDigit2->isMasked()==false );
   }
 
   TEST_F(MdtOverlay_test, containers_with_matching_collections_one_matching_digit_each) {
@@ -360,7 +360,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit!=nullptr );
     ASSERT_TRUE( outputDigit->tdc()==sigTDC ); // TDC values were the same for both digits
     ASSERT_TRUE( outputDigit->adc()==sigADC+bkgADC ); // Adds up the ADC values on matching digits
-    ASSERT_TRUE( outputDigit->is_masked()==false );
+    ASSERT_TRUE( outputDigit->isMasked()==false );
   }
 
   TEST_F(MdtOverlay_test, two_digits_with_matching_id_signal_first) {
@@ -409,7 +409,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit!=nullptr );
     ASSERT_TRUE( outputDigit->tdc()==sigTDC ); // Use lowest TDC value
     ASSERT_TRUE( outputDigit->adc()==sigADC+bkgADC ); // Adds up the ADC values on matching digits
-    ASSERT_TRUE( outputDigit->is_masked()==false );
+    ASSERT_TRUE( outputDigit->isMasked()==false );
   }
 
   TEST_F(MdtOverlay_test, two_digits_with_matching_id_bkg_first) {
@@ -458,7 +458,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDigit!=nullptr );
     ASSERT_TRUE( outputDigit->tdc()==bkgTDC ); // Use lowest TDC value
     ASSERT_TRUE( outputDigit->adc()==sigADC+bkgADC ); // Adds up the ADC values on matching digits
-    ASSERT_TRUE( outputDigit->is_masked()==false );
+    ASSERT_TRUE( outputDigit->isMasked()==false );
   }
 
 } // <-- namespace OverlayTesting
