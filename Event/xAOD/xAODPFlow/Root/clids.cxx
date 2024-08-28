@@ -7,5 +7,8 @@
 // place properly.
 
 #include "xAODPFlow/FlowElementContainer.h"
+#include "xAODPFlow/FlowElementAuxContainer.h"
 #include "xAODPFlow/PFOContainer.h"
+#include "xAODPFlow/PFOAuxContainer.h"
 #include "xAODPFlow/TrackCaloClusterContainer.h"
+#include "xAODPFlow/TrackCaloClusterAuxContainer.h"
