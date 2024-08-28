@@ -14,28 +14,25 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 if __name__ == '__main__':
 
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'TRTCalibAccu',
-                                   skeletonCA='TRT_CalibAlgs.TRTCalib_accu_Skeleton', inData = ['RAW'], outData = ['TAR']))
+    executorSet.add(athenaExecutor(name = 'TRTCalibLast',
+                                   skeletonCA='TRT_CalibAlgs.TRTCalib_last_Skeleton', inData = ['TAR'], outData = ['TAR_MERGED']))
     
     trf = transform(executor = executorSet)  
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
 
     # Use arggroup to get these arguments in their own sub-section (of --help)
-    trf.parser.defineArgGroup('TRTCalib_tf', 'TRT r-t calibration transform')
+    trf.parser.defineArgGroup('TRTCalib_last_tf', 'TRT r-t calibration transform')
     
-    # Input file! Always must be RAW data 
-    trf.parser.add_argument('--inputRAWFile', nargs='+',
-                            type=trfArgClasses.argFactory(trfArgClasses.argBSFile, io='input'),
-                            help='Input bytestream file name. RAW data', group='TRTCalib_tf')
+    # Input file! 
+    trf.parser.add_argument('--inputTARFile', nargs='+',
+                            type=trfArgClasses.argFactory(trfArgClasses.argBZ2File, io='input'),
+                            help='Compressed input files', group='TRTCalib_last_tf')
     
     # OutputFile name
-    trf.parser.add_argument('--outputTARFile',
+    trf.parser.add_argument('--outputTAR_MERGEDFile',
                             type=trfArgClasses.argFactory(trfArgClasses.argBZ2File, io='output'),
-                            help='Output TRT calib file name.', group='TRTCalib_tf')
-    
-    trf.parser.add_argument('--calibconstants', type=trfArgClasses.argFactory(trfArgClasses.argString), 
-                            help='Calibration constants file.',default=trfArgClasses.argString('') ,group='TRTCalib_tf')
+                            help='Compressed output file', group='TRTCalib_last_tf')
     
     trf.parseCmdLineArgs(sys.argv[1:])
     
