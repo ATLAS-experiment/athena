@@ -332,18 +332,20 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector
     return StatusCode::FAILURE;
   }
 
-  // Error monitoring ---------------------------------------------------------
-  enum class MonFunction : uint8_t {doRODct, doRODpc, doRODhc, doRODpe, doRODlm, doRODhm, doRODpt};
-  std::vector<uint8_t> rodErrors;
-  if (l1topoResult->getROD(0)->ct() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODct)); }
-  if (l1topoResult->getROD(0)->pc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpc)); }
-  if (l1topoResult->getROD(0)->hc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhc)); }
-  if (l1topoResult->getROD(0)->pe() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpe)); }
-  if (l1topoResult->getROD(0)->lm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODlm)); }
-  if (l1topoResult->getROD(0)->hm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhm)); }
-  if (l1topoResult->getROD(0)->pt() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpt)); }
-  auto monErrorsROD = Monitored::Collection("ROD_Errors", rodErrors);
-  Monitored::Group(m_monTool, monErrorsROD);
+  if (m_doHwErrorMon){
+    // Error monitoring ---------------------------------------------------------
+    enum class MonFunction : uint8_t {doRODct, doRODpc, doRODhc, doRODpe, doRODlm, doRODhm, doRODpt};
+    std::vector<uint8_t> rodErrors;
+    if (l1topoResult->getROD(0)->ct() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODct)); }
+    if (l1topoResult->getROD(0)->pc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpc)); }
+    if (l1topoResult->getROD(0)->hc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhc)); }
+    if (l1topoResult->getROD(0)->pe() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpe)); }
+    if (l1topoResult->getROD(0)->lm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODlm)); }
+    if (l1topoResult->getROD(0)->hm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhm)); }
+    if (l1topoResult->getROD(0)->pt() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpt)); }
+    auto monErrorsROD = Monitored::Collection("ROD_Errors", rodErrors);
+    Monitored::Group(m_monTool, monErrorsROD);
+  }
 
   for (unsigned i=0;i<l1topoResult->getFPGASize();i++) {
     unsigned topoNumber = l1topoResult->getFPGA(i)->topoNumber();
