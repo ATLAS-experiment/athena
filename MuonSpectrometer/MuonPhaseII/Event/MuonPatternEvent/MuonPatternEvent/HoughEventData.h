@@ -5,6 +5,8 @@
 #ifndef MUONR4_MUONPATTERNRECOGNITIONEVENT_MUONHOUGHEVENTDATA__H 
 #define MUONR4_MUONPATTERNRECOGNITIONEVENT_MUONHOUGHEVENTDATA__H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+////
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"

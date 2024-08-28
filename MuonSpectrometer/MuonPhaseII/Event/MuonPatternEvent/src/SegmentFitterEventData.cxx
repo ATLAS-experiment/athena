@@ -3,9 +3,6 @@
 */
 #include <MuonPatternEvent/SegmentFitterEventData.h>
 
-
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
-
 #include <vector>
 #include <array>
 #include <sstream>

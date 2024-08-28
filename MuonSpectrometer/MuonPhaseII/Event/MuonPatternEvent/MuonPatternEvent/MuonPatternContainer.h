@@ -9,7 +9,6 @@
 #include "MuonPatternEvent/HoughMaximum.h"
 #include "MuonPatternEvent/Segment.h"
 #include "AthContainers/DataVector.h"
-#include <set> 
 #include "AthenaKernel/CLASS_DEF.h"
 namespace MuonR4{
     using EtaHoughMaxContainer = DataVector<HoughMaximum>; 
