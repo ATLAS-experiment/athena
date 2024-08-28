@@ -3,7 +3,8 @@
 */
 #ifndef MUONR4__MUONPATTERNHELPERS_CALIBSEGMENTCHI2MINIMZER_H
 #define MUONR4__MUONPATTERNHELPERS_CALIBSEGMENTCHI2MINIMZER_H
-
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"

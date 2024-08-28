@@ -6,6 +6,7 @@
 #define MUONR4_MUONPATTERNEVENT_SEGMENTFITEVENTDATA__H
 
 #include <GeoPrimitives/GeoPrimitives.h>
+///
 #include <MuonPatternEvent/MuonHoughDefs.h>
 
 
