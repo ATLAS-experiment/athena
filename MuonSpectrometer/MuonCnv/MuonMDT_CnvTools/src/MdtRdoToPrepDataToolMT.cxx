@@ -271,11 +271,10 @@ namespace Muon {
     std::unique_ptr<MdtPrepData> MdtRdoToPrepDataToolMT::createPrepData(const MdtCalibInput& calibInput,
                                                                         const MdtCalibOutput& calibOutput,
                                                                         ConvCache& cache) const {
-        if (calibInput.isMasked() || calibInput.adc() < m_adcCut ||
+        if (calibInput.adc() < m_adcCut ||
             calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined) {
-            ATH_MSG_VERBOSE("Do not create calib hit for "<<m_idHelperSvc->toString(calibInput.identify())<<
-                            " because it's masked "<<(calibInput.isMasked() ? "si" : "no") <<", "
-                          <<"adc: "<<calibInput.adc()<<" vs. "<<m_adcCut<<", calibration bailed out "
+            ATH_MSG_VERBOSE("Do not create calib hit for "<<m_idHelperSvc->toString(calibInput.identify())
+                            <<", adc: "<<calibInput.adc()<<" vs. "<<m_adcCut<<", calibration bailed out "
                           <<(calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined? "si": "no"));
             return nullptr;
         }
@@ -343,7 +342,7 @@ namespace Muon {
 
             // FIXME: Still use the digit class.
             ATH_MSG_VERBOSE("Amt Hit n. " << mc << " tdcId = " << amtHit->tdcId());
-            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId)};
+            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(ctx, *amtHit, subdetId, mrodId, csmId)};
             if (!newDigit) {
                 ATH_MSG_WARNING("Found issue MDT RDO decoder for subdetId/mrodId/csmId "
                                 << subdetId << "/" << mrodId << "/" << csmId << " amtHit channelId/tdcId =" << amtHit->channelId() << "/"
@@ -352,8 +351,9 @@ namespace Muon {
             }
             // Do something with it
             Identifier channelId = newDigit->identify();
-            if (m_DeadChannels.count(channelId)) continue;
-
+            if (newDigit->isMasked() || m_DeadChannels.count(channelId)) {
+                continue;
+            }
             // Retrieve the proper PRD container. Note that there are cases where one CSM is either split into 2 chambers (BEE / BIS78
             // legacy) or 2 CSMs are split into one chamber
             MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId);
@@ -371,12 +371,8 @@ namespace Muon {
             // Rescale ADC/TDC of chambers using HPTDC digitization chip
             // Must create a new digit from the old one, because MdtDigit has no methods to set ADC/TDC
             if (m_idHelperSvc->hasHPTDC(channelId)) {
-                int adc = newDigit->adc() / 4;
-                int tdc = newDigit->tdc() / 4;
-                int mask = newDigit->is_masked();
-                newDigit = std::make_unique<MdtDigit>(channelId, tdc, adc, mask);
-                ATH_MSG_DEBUG("Change HPTDC ADC/TDC " << m_idHelperSvc->toString(channelId) << " Old ADC/TDC=" << adc * 4 << " " << tdc * 4
-                                                      << " New=" << adc << " " << tdc);
+                newDigit->setAdc(newDigit->adc() / 4);
+                newDigit->setTdc(newDigit->tdc() / 4);
             }
             const MdtCalibInput calibIn = m_useNewGeo ? MdtCalibInput{*newDigit, *m_detMgrR4, *cache.gctx}: 
                                                         MdtCalibInput{*newDigit, *cache.legacyDetMgr};
@@ -413,10 +409,10 @@ namespace Muon {
         std::map<int, twin_digit> mdtDigitColl;
 
         for (const MdtAmtHit* amtHit : *rdoColl) {
-            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId)};
+            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(ctx, *amtHit, subdetId, mrodId, csmId)};
 
             if (!newDigit) {
-                ATH_MSG_WARNING("Error in MDT RDO decoder for subdetId/mrodId/csmId "
+                ATH_MSG_DEBUG("Error in MDT RDO decoder for subdetId/mrodId/csmId "
                                 << subdetId << "/" << mrodId << "/" << csmId << " amtHit channelId/tdcId =" << amtHit->channelId() << "/"
                                 << amtHit->tdcId());
                 continue;
@@ -480,6 +476,9 @@ namespace Muon {
                 ATH_MSG_FATAL("nullptr to a digit ");
                 return StatusCode::FAILURE;
             }
+            if (digit->isMasked() || (second_digit&& second_digit->isMasked())){
+                continue;
+            }
 
             // Do something with it
             Identifier channelId = digit->identify();
@@ -515,9 +514,6 @@ namespace Muon {
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " " << mdtCalibOut);
                     continue;
                 }
-                if (digit->is_masked() || second_digit->is_masked()) {
-                    continue;
-                }
                 MdtCalibInput mdtCalib1st = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}
                                                         : MdtCalibInput{*digit, *cache.legacyDetMgr};
                 
@@ -527,7 +523,7 @@ namespace Muon {
                 updateClosestApproachTwin(mdtCalib1st);
                 updateClosestApproachTwin(mdtCalib2nd);
 
-                const MdtCalibTwinOutput twinCalib = m_calibrationTool->calibrateTwinTubes(ctx, mdtCalib1st, mdtCalib2nd);
+                const MdtCalibTwinOutput twinCalib = m_calibrationTool->calibrateTwinTubes(ctx, std::move(mdtCalib1st), std::move(mdtCalib2nd));
 
                 Amg::Vector2D hitPos{twinCalib.primaryDriftR(), twinCalib.locZ()};
                 Amg::MatrixX cov(2, 2);

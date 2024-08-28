@@ -23,6 +23,7 @@
 #include "MagFieldElements/AtlasFieldCache.h"
 #include "MuonCalibEvent/MdtCalibHit.h"
 
+#include "GeoModelHelpers/throwExcept.h"
 namespace {
   static double const twoBySqrt12 = 2/std::sqrt(12);
 }
@@ -107,8 +108,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   /// Get the calibration constatns from the conditions store
   SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> readCondHandle{m_calibDbKey, ctx};
   if (!readCondHandle.isValid()){
-       ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
-       throw std::runtime_error("No calibration constants could be retrieved");
+       THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
 
   const Identifier& id{calibIn.identify()};
@@ -181,8 +181,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
 
         SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
         if (!readHandle.isValid()) {
-          ATH_MSG_FATAL("calibrate: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
-          throw std::runtime_error("No magnetic field could be retrieved");
+          THROW_EXCEPTION("calibrate: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
         }
         readHandle->getInitializedCache(fieldCache);
  
@@ -297,24 +296,31 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
 }  //end MdtCalibrationTool::calibrate
 
 MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ctx,
-                                                          const MdtCalibInput& primHit, 
-                                                          const MdtCalibInput& twinHit) const {
+                                                          MdtCalibInput&& primHit, 
+                                                          MdtCalibInput&& twinHit) const {
   
   MdtCalibOutput primResult = calibrate(ctx, primHit);
   MdtCalibOutput twinResult = calibrate(ctx, twinHit);
 
   // get Identifier and MdtReadOutElement for twin tubes
-  const Identifier& primId = primHit.identify();
-  const Identifier& twinId = twinHit.identify();
   // get 'raw' drifttimes of twin pair; we don't use timeofFlight or propagationTime cause they are irrelevant for twin coordinate
   double primdriftTime = primHit.tdc()*tdcBinSize - primResult.tubeT0();
   double twinDriftTime = twinHit.tdc()*tdcBinSize - twinResult.tubeT0();
+  /// The primary hit has a smaller tdc...
+  if (primdriftTime >= twinDriftTime) {
+     ATH_MSG_VERBOSE("Swap "<<m_idHelperSvc->toString(primHit.identify())<<" & "<<m_idHelperSvc->toString(twinHit.identify())
+                    <<" primDriftTime: "<<primdriftTime<<", secondTime: "<<twinDriftTime);
+     std::swap(primdriftTime, twinDriftTime);
+     std::swap(primResult, twinResult);
+     std::swap(primHit, twinHit);
+  }
+  const Identifier& primId = primHit.identify();
+  const Identifier& twinId = twinHit.identify();
 
   /// Get the calibration constatns from the conditions store
   SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibDataContainer{m_calibDbKey, ctx};
   if (!calibDataContainer.isValid()){
-       ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
-       throw std::runtime_error("No calibration constants could be retrieved");
+       THROW_EXCEPTION(" Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
   // get calibration constants from DbTool
   const MuonCalib::MdtFullCalibData* data1st = calibDataContainer->getCalibData(primId, msgStream());
@@ -332,90 +338,24 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
     return MdtCalibTwinOutput{};
   }
 
-  const double invPropSpeed1st{calibSingleTube1st->inversePropSpeed}; 
-  const double invPropSpeed2nd{calibSingleTube2nd->inversePropSpeed};
-
-  // define twin position and error
-  double zTwin{0.}, errZTwin{0.}, twin_timedif{0.};
-  // find out which tube was the prompt
-  // (= actually hit by the muon; not hit by the muon = twinhit_)
-  // in the formula for z_hit_from_twin we take as convention that
-  // twindif = twin_time - prompt_time
-  int prompthit_tdc{0}, twinhit_tdc{0};
-  bool firstIsPrompt{true};
-  if ( primdriftTime < twinDriftTime) {
-    twin_timedif = twinDriftTime - primdriftTime;
-  } else {
-    twin_timedif = primdriftTime - twinDriftTime;
-    firstIsPrompt = false;
-  }
-
   // get tubelength and set HV-delay (~6ns)
-  const MdtCalibInput& primaryHit{(firstIsPrompt ? primHit : twinHit)};
-  const double tubelength = primaryHit.tubeLength();
   constexpr double HVdelay = 6.;
 
-  // twin_timedif must be between min and max of possible time-difference
-  // between prompt and twin signals
-  // accounting for 5 std.dev. of twin time resolution
-  if ( twin_timedif < (HVdelay - 5.*m_resTwin) || 
-       twin_timedif > (tubelength*(invPropSpeed1st + invPropSpeed2nd)
-                       + HVdelay + 5.*m_resTwin)){
-      ATH_MSG_DEBUG( " TIME DIFFERENCE OF TWIN PAIR OUT OF RANGE("
-             << (HVdelay - 5.*m_resTwin)<< "-"
-             << (tubelength*(invPropSpeed1st + invPropSpeed2nd) + HVdelay + 5.*m_resTwin)
-             << ")   time difference = " << twin_timedif );
-    
-  }
+  /// Propagation time difference inside the primary tube
+  double twin_timedif =  twinDriftTime - primdriftTime - calibSingleTube2nd->inversePropSpeed * twinHit.tubeLength() - HVdelay;
+  ///  HVPropTime - ROPropTime =  invPropSpeed*(twinZ - HVPos) - (ROPos - twinZ) 
+  ///                          =  2*invPropSpeed*twinZ - (HVPos + ROPos)
+  
+  const double tubeHalfLength = 0.5*primHit.tubeLength();
+  const double zTwin = std::clamp(0.5* primHit.readOutSide()* twin_timedif / calibSingleTube1st->inversePropSpeed, 
+                                  -tubeHalfLength, tubeHalfLength);
+  const double errZTwin = m_resTwin / calibSingleTube1st->inversePropSpeed;
 
-  // Make ONLY a twin PrepData if twin time difference is physical (within tubelength)
-  if (twin_timedif < (tubelength* (invPropSpeed1st + invPropSpeed2nd)
-                     + HVdelay + 10.*m_resTwin)){
-
-    //calculate local(!) z of the hit from twin tubes information
-    double z_hit_sign_from_twin = ( 1 / (invPropSpeed2nd *2.)) * 
-                                  (tubelength*invPropSpeed2nd - 
-                                   twin_timedif + HVdelay) ;
-    /// Put twin hit always inside acceptance
-    if (z_hit_sign_from_twin < -tubelength/2.) {
-      ATH_MSG_DEBUG( " TWIN HIT outside acceptance with time difference "
-                    <<  twin_timedif
-                    << " Z local hit " <<  z_hit_sign_from_twin
-                    << " Z local minimum " <<  -tubelength/2 );
-      z_hit_sign_from_twin = - tubelength/2.;
-    }
-    // do sign management just like in MdtDigitizationTool.cxx
-    const double z_hit_geo_from_twin = primaryHit.readOutSide() *z_hit_sign_from_twin;
-
-    zTwin = z_hit_geo_from_twin;
-    errZTwin = m_resTwin*invPropSpeed1st;
-
-    ATH_MSG_VERBOSE( " TWIN TUBE "
-                     << " tube: " << m_idHelperSvc->toString(primId)
-                     << " twintube: " << m_idHelperSvc->toString(twinId)<<endmsg
-                     << " prompthit tdc = " << prompthit_tdc//*TDCbinsize
-                     << "  twinhit tdc = " << twinhit_tdc// *TDCbinsize
-                     << "  tube driftTime = " << primResult
-                     << "  second tube driftTime = " << twinResult
-                     << " TWIN PAIR time difference = " << twin_timedif << endmsg
-                     << " z_hit_sign_from_twin = " << z_hit_sign_from_twin
-                     << " z_hit_geo_from_twin = " << z_hit_geo_from_twin);    
-
-  } // end  if(twin_timedif < (tubelength*inversePropSpeed + tubelength*inversePropSpeedSecond + HVdelay + 10.*m_resTwin)){
-  else {
-    ATH_MSG_VERBOSE( " TIME DIFFERENCE OF TWIN PAIR UNPHYSICAL OUT OF RANGE("
-                  << (HVdelay - 5*m_resTwin) << "-"
-                  << (2*tubelength*invPropSpeed1st + HVdelay + 5*m_resTwin)
-                  << ")   time difference = "
-                  << twin_timedif );
-    zTwin = 0.;
-    errZTwin = tubelength/2.;
-  }
-
-  MdtCalibTwinOutput calibResult{(firstIsPrompt ? primHit : twinHit),
-                                 (firstIsPrompt ? twinHit : primHit),
-                                 (firstIsPrompt ? primResult : twinResult),
-                                 (firstIsPrompt ? twinResult : primResult)};    
+  ATH_MSG_VERBOSE( "Twin calibration -  tube: " << m_idHelperSvc->toString(primId)<< " twintube: " << m_idHelperSvc->toString(twinId)<<endmsg
+               << " prompthit tdc = " << primHit.tdc() << "  twinhit tdc = " << twinHit.tdc()
+               << " tube driftTime = " << primResult<< "  second tube driftTime = " << twinResult<<endmsg
+               << " Time difference =" << twin_timedif  << " zTwin=" << zTwin<<", errorZ="<<errZTwin);
+  MdtCalibTwinOutput calibResult{primHit,twinHit,primResult, twinResult};     
 
  
   calibResult.setLocZ(zTwin, errZTwin);
@@ -446,18 +386,15 @@ double MdtCalibrationTool::getResolutionFromRt(const EventContext& ctx, const Id
   
   SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey, ctx};
   if (!calibConstants.isValid()) {
-      ATH_MSG_FATAL("Failed to retrieve the calibration constants "<<m_calibDbKey.fullKey());
-      throw std::runtime_error("Where are my Mdt calibration constants");
+      THROW_EXCEPTION("Failed to retrieve the calibration constants "<<m_calibDbKey.fullKey());
   }
   const MuonCalib::MdtFullCalibData* moduleConstants = calibConstants->getCalibData(moduleID, msgStream());
   if (!moduleConstants){
-      ATH_MSG_FATAL("Failed to retrieve set of calibration constants for "<<m_idHelperSvc->toString(moduleID));
-      throw std::runtime_error("No constants for calib container");
+      THROW_EXCEPTION("Failed to retrieve set of calibration constants for "<<m_idHelperSvc->toString(moduleID));
   }
   const RtRelationPtr& rtRel{moduleConstants->rtRelation};
   if (!rtRel) {
-    ATH_MSG_FATAL("No rt-relation found for "<<m_idHelperSvc->toString(moduleID));
-    throw std::runtime_error("No rt relation ");
+    THROW_EXCEPTION("No rt-relation found for "<<m_idHelperSvc->toString(moduleID));
   }
   const double t = std::min(std::max(time, rtRel->rt()->tLower()), rtRel->rt()->tUpper());
   return rtRel->rtRes()->resolution(t);

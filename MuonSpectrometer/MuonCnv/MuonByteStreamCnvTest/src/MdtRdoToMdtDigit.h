@@ -21,8 +21,8 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-    using DigitCollection = std::unordered_map<IdentifierHash, std::unique_ptr<MdtDigitCollection>>;
-    StatusCode decodeMdt(const MdtCsm& rdoCollection, DigitCollection& digitContainer) const;
+    using DigitCollection = std::vector<std::unique_ptr<MdtDigitCollection>>;
+    StatusCode decodeMdt(const EventContext& ctx, const MdtCsm& rdoCollection, DigitCollection& digitContainer) const;
 
     ToolHandle<Muon::IMDT_RDO_Decoder> m_mdtRdoDecoderTool{this, "mdtRdoDecoderTool", "Muon::MdtRDO_Decoder", ""};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

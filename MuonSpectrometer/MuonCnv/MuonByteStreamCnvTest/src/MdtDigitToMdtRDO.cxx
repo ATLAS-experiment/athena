@@ -122,7 +122,7 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
             }
 
             // Create the new AMT hit
-            auto amtHit = std::make_unique<MdtAmtHit>(cabling_data.tdcId, cabling_data.channelId, mdtDigit->is_masked());
+            auto amtHit = std::make_unique<MdtAmtHit>(cabling_data.tdcId, cabling_data.channelId, mdtDigit->isMasked());
             // Get coarse time and fine time
             int tdc_counts = mdtDigit->tdc();
 

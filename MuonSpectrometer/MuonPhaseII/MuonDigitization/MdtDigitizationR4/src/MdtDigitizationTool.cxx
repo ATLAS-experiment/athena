@@ -92,7 +92,7 @@ namespace MuonR4 {
             const uint16_t tdcCounts = timeToTdcCnv*(hasHPTdc ? 4 : 1)*CLHEP::RandGaussZiggurat::shoot(rndEngine, totalTdcTime, m_timeResTDC);
             const uint16_t adcCounts = (hasHPTdc ? 4 : 1) *CLHEP::RandGaussZiggurat::shoot(rndEngine, digiOutput.adc(), m_timeResADC);
 
-            auto digit = std::make_unique<MdtDigit>(hitId, tdcCounts, adcCounts);
+            auto digit = std::make_unique<MdtDigit>(hitId, tdcCounts, adcCounts, false);
             ATH_MSG_VERBOSE("Add digit "<<m_idHelperSvc->toString(digit->identify())<<", tdc: "<<digit->tdc()<<", adc: "<<digit->adc());
             digitsInChamber[m_idHelperSvc->moduleHash(hitId)].push_back(std::make_pair(std::move(digit), simHit));
             /// Put also in the twin tube digit
@@ -123,7 +123,7 @@ namespace MuonR4 {
 
             const uint16_t twinTdcCounts = timeToTdcCnv*(hasHPTdc ? 4 : 1)*CLHEP::RandGaussZiggurat::shoot(rndEngine, twinTdcTime, m_resTwin);
             const uint16_t twinAdcCoutns = (hasHPTdc ? 4 : 1) *CLHEP::RandGaussZiggurat::shoot(rndEngine, digiOutput.adc(), m_timeResADC);
-            digit = std::make_unique<MdtDigit>(twinId, twinTdcCounts, twinAdcCoutns);
+            digit = std::make_unique<MdtDigit>(twinId, twinTdcCounts, twinAdcCoutns, false);
             ATH_MSG_VERBOSE("Add twin digit "<<m_idHelperSvc->toString(digit->identify())<<", tdc: "<<digit->tdc()
                             <<", adc: "<<digit->adc()<<", local z: "<<simHit->localPosition().z());
             digitsInChamber[m_idHelperSvc->moduleHash(twinId)].push_back(std::make_pair(std::move(digit), simHit));

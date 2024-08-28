@@ -9,7 +9,6 @@
 #include "xAODMuonPrepData/MdtDriftCircle.h"
 #include "xAODMuonPrepData/MdtTwinDriftCircle.h"
 #include "xAODMuonPrepData/RpcMeasurement.h"
-#include "MuonDigitContainer/MdtDigit.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "MuonSpacePoint/UtilFunctions.h"
 #include "GaudiKernel/PhysicalConstants.h"
@@ -122,8 +121,7 @@ namespace MuonR4{
                     calibInput.setClosestApproach(closestApproach);
                     calibInput.setTimeOfFlight(timeOfArrival);
 
-                    MdtDigit digit{dc->twinIdentify(), dc->twinTdc(), dc->twinAdc()};
-                    MdtCalibInput twinInput{digit, *m_detMgr, *gctx};
+                    MdtCalibInput twinInput{dc->twinIdentify(), dc->twinAdc(),  dc->twinTdc(), dc->readoutElement(), *gctx};
                     twinInput.setClosestApproach(closestApproach);
                     twinInput.setTimeOfFlight(timeOfArrival);
 

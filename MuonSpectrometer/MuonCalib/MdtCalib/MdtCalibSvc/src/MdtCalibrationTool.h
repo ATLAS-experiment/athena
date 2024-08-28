@@ -84,8 +84,8 @@ public:
   /** Convert the raw MDT times of two twin hits into a Twin position (coordinate along tube)
       It returns whether the conversion was successful. */
   virtual MdtCalibTwinOutput calibrateTwinTubes(const EventContext& ctx,
-                                                const MdtCalibInput& hit, 
-                                                const MdtCalibInput& twinHit) const override final;
+                                                MdtCalibInput&& hit, 
+                                                MdtCalibInput&& twinHit) const override final;
 
   virtual double getResolutionFromRt(const EventContext& ctx,
                                      const Identifier& module,
