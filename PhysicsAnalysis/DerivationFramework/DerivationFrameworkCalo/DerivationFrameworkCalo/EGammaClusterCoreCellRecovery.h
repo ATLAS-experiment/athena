@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,9 +19,9 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODEgamma/EgammaContainer.h"
+#include "CaloEvent/CaloCellContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "egammaInterfaces/IegammaCellRecoveryTool.h"
-
 
 namespace DerivationFramework {
 
@@ -44,6 +44,9 @@ namespace DerivationFramework {
     
     SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_electrons
       { this, "SGKey_electrons", "Electrons", "SG key of electron container" };
+
+    SG::ReadHandleKey<CaloCellContainer> m_SGKey_CaloCells
+      { this, "SGKey_CaloCells", "AllCalo", "SG key of calo cell container" };
 
     SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
       m_SGKey_photons_decorations{

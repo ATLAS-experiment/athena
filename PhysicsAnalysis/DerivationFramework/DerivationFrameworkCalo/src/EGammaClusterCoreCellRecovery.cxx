@@ -62,6 +62,9 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
     }
   }
 
+  // This tool needs the calo cells linked to the clusters...
+  ATH_CHECK(m_SGKey_CaloCells.initialize());
+
   if (!m_SGKey_photons.key().empty()) {
     ATH_MSG_DEBUG("Using " << m_SGKey_photons << " for photons");
     ATH_CHECK(m_SGKey_photons.initialize());
@@ -184,6 +187,21 @@ DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
   const CaloClusterCellLink* cellLinks = clus->getCellLinks();
   if (!cellLinks) {
     ATH_MSG_WARNING("No cell link for cluster. Do nothing");
+    return StatusCode::FAILURE;
+  }
+
+  // First check :
+  // if we run in MT, this would be nullptr without initializing a ReadHandleKey
+  const CaloCellContainer *caloCells = cellLinks->getCellContainer();
+  if (!caloCells) {
+    ATH_MSG_WARNING("No cells for cluster. Do nothing");
+    return StatusCode::FAILURE;
+  }
+
+  // Second check :
+  // one might have used a custom cell container for the linked cells
+  if (cellLinks->getCellContainerLink().dataID() != m_SGKey_CaloCells.key()) {
+    ATH_MSG_ERROR("Wrong key for the calo cells");
     return StatusCode::FAILURE;
   }
 
