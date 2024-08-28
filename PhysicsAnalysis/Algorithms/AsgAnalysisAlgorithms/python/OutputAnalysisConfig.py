@@ -75,7 +75,11 @@ class OutputAnalysisConfig (ConfigBlock):
                 keys_message = [repr(key) for key in overlapping_keys]
                 raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
 
+            # move items in self.containersOnlyForMC to self.containers
             self.containers.update(self.containersOnlyForMC)
+            # clear the dictionary to avoid overlapping key error during the second pass
+            self.containersOnlyForMC.clear()
+
         # now filter the containers depending on DSIDs
         for container,dsid_filters in self.containersOnlyForDSIDs.items():
             if container not in self.containers:
