@@ -52,8 +52,11 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import (
     MuonTauGroup,
     MuonJetGroup,
     TauJetGroup,
-    TauBJetGroup,
+    TauBJetGroup
 )
+
+# For NGT-related studies
+NGTGroup = ["NGT"]
 
 def addMCSignatures(chains):
     from AthenaCommon.Logging import logging
@@ -210,6 +213,32 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j240f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='HLT_j260f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
 
+        ChainProp(
+          name='HLT_j350_pf_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleJetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j350_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleJetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j300_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleJetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j100_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleJetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j50_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleJetGroup+NGTGroup
+        ),
+
         ChainProp(name='HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'],groups=SingleJetGroup+PrimaryPhIGroup, monGroups=['jetMon:shifter','jetMon:online']),
         ChainProp(name='HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1SC111-CjJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo3Group),
         ChainProp(name='HLT_j460_a10t_lcw_jes_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup, monGroups=['jetMon:t0']),
@@ -222,6 +251,32 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1SC111-CjJ40', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+PrimaryPhIGroup+Topo3Group, monGroups=['jetMon:t0']),
         ChainProp(name='HLT_j420_35smcINF_a10t_lcw_jes_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup, monGroups=['jetMon:shifter']),
         ChainProp(name='HLT_j420_35smcINF_a10t_lcw_jes_L1SC111-CjJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup+Topo3Group),
+
+        ChainProp(
+          name='HLT_j400_a10sd_cssk_pf_jes_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=SingleJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j300_a10sd_cssk_pf_jes_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=SingleJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j100_a10sd_cssk_pf_jes_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=SingleJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j200_a10sd_cssk_pf_jes_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=SingleJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j100_a10sd_cssk_pf_jes_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=SingleJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
 
         # HT chains
         ChainProp(name='HLT_j0_HT940_pf_ftf_preselj180_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
@@ -242,6 +297,66 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_6j65_pf_ftf_presel6j40_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup + PrimaryPhIGroup), 
         ChainProp(name='HLT_7j45_pf_ftf_presel7j30_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup + PrimaryPhIGroup),
         ChainProp(name='HLT_10j35_pf_ftf_presel7j30_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup + PrimaryPhIGroup), 
+
+        # - Three jets
+        ChainProp(
+          name='HLT_3j160_pf_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_3j160_pf_ftf_L13jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_3j160_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_3j100_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        # - Four jets
+        ChainProp(
+          name='HLT_4j100_pf_ftf_L13jJ90',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_4j100_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_4j50_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_4j100_pf_ftf_L13jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        # - Five jets
+        ChainProp(
+          name='HLT_5j50_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_5j50_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup+NGTGroup
+        ),
+        # - Six jets
+        ChainProp(
+          name='HLT_6j40c_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=MultiJetGroup+PrimaryPhIGroup
+        ),
 
         # multijet large R with mass cut
         ChainProp(name='HLT_2j330_35smcINF_a10sd_cssk_pf_jes_ftf_presel2j225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+PrimaryPhIGroup, monGroups=['jetMon:t0']),
@@ -282,6 +397,28 @@ def addMCSignatures(chains):
         ChainProp(name="HLT_j210_0eta290_020jvt_bgn270_pf_ftf_preselj180_L1jJ160", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup, monGroups=['bJetMon:online']),
         ChainProp(name="HLT_j280_0eta290_020jvt_bgn277_pf_ftf_preselj225_L1jJ160", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
         ChainProp(name="HLT_j340_0eta290_020jvt_bgn285_pf_ftf_preselj225_L1jJ160", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
+
+        ChainProp(
+          name='HLT_j180_0eta290_020jvt_bgn270_pf_ftf_L1jJ140',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j180_020jvt_bgn270_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j100_0eta290_020jvt_bgn270_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j100_020jvt_bgn270_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED'],
+          groups=PrimaryPhIGroup+SingleBjetGroup+NGTGroup
+        ),
+
         # loose b-tagging
         ChainProp(name="HLT_j225_0eta290_020jvt_bgn277_pf_ftf_preselj180_L1jJ160", l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleBjetGroup),
         ChainProp(name='HLT_j275_0eta290_020jvt_bgn285_pf_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleBjetGroup),
@@ -311,6 +448,17 @@ def addMCSignatures(chains):
         ChainProp(name="HLT_j50_0eta290_020jvt_bgn270_2j45f_pf_ftf_preselj45XX2f40_L1jJ55p0ETA23_2jJ40p30ETA49", l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+MultiBjetGroup),
         ChainProp(name='HLT_j65a_j45a_2j35a_SHARED_2j35_0eta290_020jvt_bgn270_j0_DJMASS1000j50_pf_ftf_presela60XXa40XX2a25_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup+Topo3Group),
 
+        ChainProp(
+          name='HLT_j55c_j50_j40f_SHARED_2j40_0eta290_020jvt_bgn260_pf_ftf_L1jJ80p0ETA25_2jJ55_jJ50p30ETA49',
+          l1SeedThresholds=['FSNOSEED']*4,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j55c_j50_j40f_SHARED_2j40_0eta290_020jvt_bgn260_pf_ftf_L1jJ40',
+          l1SeedThresholds=['FSNOSEED']*4,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+
         # HH4b primary triggers
         # 3b asymmetric b-jet pt for Physics_Main
         ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_presel2c20XX2c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*5, groups=PrimaryPhIGroup+MultiBjetGroup),
@@ -321,7 +469,33 @@ def addMCSignatures(chains):
         # Candidates for allhad ttbar delayed stream
         ChainProp(name='HLT_5j35c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup),
         ChainProp(name='HLT_5j45c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40', l1SeedThresholds=['FSNOSEED']*3, groups=PrimaryPhIGroup+MultiBjetGroup),
-    
+ 
+        ChainProp(
+          name='HLT_j55c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25',
+          l1SeedThresholds=['FSNOSEED']*5,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j65c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED']*5,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j65c_j50c_j25c_j20c_SHARED_3j20c_bgn282_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED']*5,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j65_020jvt_j50_020jvt_j25_020jvt_j20_020jvt_SHARED_3j20_020jvt_bgn282_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED']*5,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+        ChainProp(
+          name='HLT_j50c_020jvt_j40c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_L14jJ40',
+          l1SeedThresholds=['FSNOSEED']*5,
+          groups=PrimaryPhIGroup+MultiBjetGroup+NGTGroup
+        ),
+
         # Phase-II single b-jet
         ChainProp(name='HLT_j180_0eta290_020jvt_bgn285_pf_ftf_preselj140_L1jJ140', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup, monGroups=['bJetMon:online']),
         # Phase-II multi b-jet
