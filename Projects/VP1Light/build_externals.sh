@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="VP1LightExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=106
-                        -DLCG_VERSION_POSTFIX="_ATLAS_3"
+                        -DLCG_VERSION_POSTFIX="_ATLAS_9"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.3.0/GeoModel-6.3.0.tar.bz2;URL_MD5;4e42239acfd362ac33b31a6d563c128e")
 ATLAS_EXTRA_MAKE_ARGS=()
 
