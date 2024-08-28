@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,6 +9,7 @@
 #define JET_ANALYSIS_ALGORITHMS__JET_ANALYSIS_ALGORITHMS_DICT_H
 
 #include <JetAnalysisAlgorithms/JetCalibrationAlg.h>
+#include <JetAnalysisAlgorithms/BJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <JetAnalysisAlgorithms/JetGhostMergingAlg.h>
 #include <JetAnalysisAlgorithms/JetModifierAlg.h>

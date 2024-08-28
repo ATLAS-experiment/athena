@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JETCALIBTOOLSDICT_H
@@ -16,5 +16,7 @@
 
 #include "JetCalibTools/JetCalibrationTool.h"
 #include "JetCalibTools/JetCalibTool.h"
+#include "JetCalibTools/MuonInJetCorrectionTool.h"
+#include "JetCalibTools/BJetCorrectionTool.h"
 
 #endif
