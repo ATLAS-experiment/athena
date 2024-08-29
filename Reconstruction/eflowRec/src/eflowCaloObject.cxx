@@ -132,6 +132,10 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
     //If the looked up expected energy deposit was 0.0, then pull_015 is NAN. In that case we should not try to apply the 2D cut described below.
     if (!std::isnan(pull_015)){
       //We use a 2D cut in the pull_015 and log10 of track pt plane to define a dense environment - if too dense then we disable the charged shower subtraction
+      //The cut values are such that above a track pt of 40 GeV we are very agrressive about disabling the cell by cell charged shower subtraction.
+      //The specific cut values were found by optimising the jet resolutions in the run 2 data taking environment.
+      //Further details can be found in these slides from C. Young:
+      //https://indico.cern.ch/event/396923/contributions/949333/attachments/795878/1090871/Presentation.pdf
       if (pull_015 > 0.0 + (log10(40000)-log10(trackPt))*33.2 && 0.0 != expectedEnergySigma && bestClusters_015 && bestClusters_02){
         thisEfRecTrack->setSubtracted(); //this tricks eflowRec into thinking this track was subtracted, and hence no further subtraction will be done
         thisEfRecTrack->setIsInDenseEnvironment();
