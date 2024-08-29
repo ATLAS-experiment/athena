@@ -5501,6 +5501,11 @@ def dump_xAODTruthParticleLink (p, f):
 def format_int(x): return '%d'%x
 def format_float(x): return '%.1f'%x
 def format_float_vector(v): return ''.join ([format_float(x) for x in v])
+def format_dl(x):
+    key = x.dataID()
+    if not key:
+        key = '(%d)' % x.key()
+    return f'DataLink({key})'
 def format_el(x):
     if x.isDefaultIndex():
         return '(null)'
@@ -5562,6 +5567,8 @@ def format_obj (x, name=None):
         tname = tname[5:]
     if tname.startswith ('ElementLink<'):
         return format_el (x)
+    if tname.startswith ('DataLink<'):
+        return format_dl (x)
     if tname.startswith ('std::vector<') or tname.startswith ('vector<'):
         ipos = tname.find('<')
         tname2 = tname[ipos+1:]
@@ -5642,6 +5649,11 @@ def dump_auxitem (x, auxid, f = sys.stdout):
         ac_cl = accessors.get (tname)
 
     if not ac_cl and tname.startswith ('SG::JaggedVecElt<'):
+        ac_cl = getattr (ROOT, 'SG::ConstAccessor<' + tname + ' >')
+        if ac_cl:
+            accessors[tname] = ac_cl
+
+    if not ac_cl and tname.startswith ('SG::PackedLink<') or tname.startswith ('std::vector<SG::PackedLink<'):
         ac_cl = getattr (ROOT, 'SG::ConstAccessor<' + tname + ' >')
         if ac_cl:
             accessors[tname] = ac_cl
