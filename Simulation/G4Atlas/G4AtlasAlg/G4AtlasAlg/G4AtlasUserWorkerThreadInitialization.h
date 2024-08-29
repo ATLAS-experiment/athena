@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4ATLASUSERWORKERTHREADINITIALIZATION_H
@@ -42,9 +42,15 @@ public:
     m_fastSimToolName = typeAndName;
   }
 
+  /// Configure the QuietMode option
+  void SetQuietMode(bool quietMode) {
+    m_quietMode = quietMode;
+  }
+
 private:
   std::string m_detGeoSvcName{"DetectorGeometrySvc"};
   std::string m_fastSimToolName{"FastSimulationMasterTool"};
+  bool m_quietMode{false};
 
 }; // class G4AtlasUserWorkerThreadInitialization
 

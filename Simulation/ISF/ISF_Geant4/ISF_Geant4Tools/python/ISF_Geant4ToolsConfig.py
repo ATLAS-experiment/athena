@@ -41,6 +41,8 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
 
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)
 
+    kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
+
     kwargs.setdefault("MultiThreading", flags.Concurrency.NumThreads > 0)
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)

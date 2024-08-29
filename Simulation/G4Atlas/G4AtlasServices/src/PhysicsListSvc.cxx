@@ -11,6 +11,7 @@
 #include "G4UImanager.hh"
 #include "G4PhysListFactory.hh"
 #include "G4AntiNeutron.hh"
+#include "G4HadronicProcessStore.hh"
 
 #include "CLHEP/Units/PhysicalConstants.h"
 
@@ -48,7 +49,12 @@ void PhysicsListSvc::CreatePhysicsList()
   ATH_MSG_DEBUG("PhysicsListSvc::CreatePhysicsList()");
   if (m_physicsListName.value() != ""){
     G4PhysListFactory factory;
+    if (m_quietMode) { factory.SetVerbose(0); } // HACK
     AtlasPhysListFactory Atlasfactory;
+    if (m_quietMode) {
+      Atlasfactory.SetVerbose(0); // HACK
+      G4HadronicProcessStore::Instance()->SetVerbose(0);
+    }
     if (factory.IsReferencePhysList(m_physicsListName.value()))
     {
       ATH_MSG_INFO("Creating Geant4 PhysicsList: " << m_physicsListName.value());

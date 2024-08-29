@@ -16,6 +16,7 @@
 #include "G4TransportationManager.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "G4UImanager.hh"
+#include "G4HadronicProcessStore.hh"
 
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -52,6 +53,7 @@ void G4AtlasWorkerRunManager::Initialize()
   std::lock_guard<std::mutex> lock(workerInitMutex);
 
   // Setup geometry and physics via the base class
+  G4HadronicProcessStore::Instance()->SetVerbose(0);
   G4RunManager::Initialize();
 
   /*
@@ -87,6 +89,7 @@ void G4AtlasWorkerRunManager::Initialize()
   ConstructScoringWorlds();
   // Run initialization in G4RunManager.
   // Normally done in BeamOn.
+  if (m_quietMode) { SetVerboseLevel(0); } // HACK
   RunInitialization();
 }
 

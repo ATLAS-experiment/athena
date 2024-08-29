@@ -123,6 +123,7 @@ void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
   m_pRunMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
   m_pRunMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
   m_pRunMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
+  m_pRunMgr->SetQuietMode( m_quietMode );
   std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
     std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
   m_pRunMgr->SetUserInitialization(actionInitialization.release());

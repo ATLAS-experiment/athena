@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4AtlasRunManager_h
@@ -59,10 +59,14 @@ public:
 
   void SetRecordFlux(bool b, std::unique_ptr<IFluxRecorder> f) { m_recordFlux = b; m_fluxRecorder=std::move(f);}
   void SetLogLevel(int) { /* Not implemented */ }
-  /// @}
 
   void SetVolumeSmartlessLevel(const std::map<std::string,double>& nameAndValue){
     m_volumeSmartlessLevel = nameAndValue;
+  }
+
+  /// Configure the QuietMode option
+  void SetQuietMode(bool quietMode) {
+    m_quietMode = quietMode;
   }
 
 protected:
@@ -95,6 +99,9 @@ private:
   //Property to allow an arbitrary volume (named by string) to have its
   //"smartless" value set
   std::map<std::string, double> m_volumeSmartlessLevel;
+
+  /// Quiet Mode for production
+  bool m_quietMode{true};
 
 };
 

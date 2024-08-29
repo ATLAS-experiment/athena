@@ -48,6 +48,7 @@ void G4AtlasMTRunManager::Initialize()
   ConstructScoringWorlds();
   // Run initialization in G4RunManager.
   // Normally done in BeamOn.
+  if (m_quietMode) { SetVerboseLevel(0); } // HACK
   RunInitialization();
   // Setup physics decay channels.
   // Normally done in InitializeEventLoop, from DoEventLoop, from BeamOn.

@@ -127,6 +127,7 @@ namespace iGeant4
     Gaudi::Property<std::string> m_fieldMap{this, "FieldMap", "", ""};
     Gaudi::Property<bool> m_releaseGeoModel{this, "ReleaseGeoModel", true, ""};
     Gaudi::Property<bool> m_recordFlux{this, "RecordFlux", false, ""};
+    Gaudi::Property<bool> m_quietMode{this, "QuietMode", false, ""};
     /// Commands to send to the G4 UI
     Gaudi::Property<std::vector<std::string> > m_g4commands{this, "G4Commands", {}, "Commands to send to the G4UI"};
     /// Activate multi-threading configuration

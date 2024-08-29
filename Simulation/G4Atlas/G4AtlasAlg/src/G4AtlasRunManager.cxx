@@ -43,6 +43,7 @@ void G4AtlasRunManager::Initialize()
   // ADA 11/28.2018: switch initialization order to meet ISF requirements
   // Call the base class Initialize method. This will call
   // InitializeGeometry and InitializePhysics.
+  if (m_quietMode) { SetVerboseLevel(0); } // HACK
   G4RunManager::Initialize();
 }
 

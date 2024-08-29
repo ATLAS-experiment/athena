@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -119,11 +119,13 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
+    runMgr->SetQuietMode( m_quietMode );
     // Worker Thread initialization used to create worker run manager on demand.
     std::unique_ptr<G4AtlasUserWorkerThreadInitialization> workerInit =
       std::make_unique<G4AtlasUserWorkerThreadInitialization>();
     workerInit->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     workerInit->SetFastSimMasterTool( m_fastSimTool.typeAndName() );
+    workerInit->SetQuietMode( m_quietMode );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
@@ -141,6 +143,7 @@ void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
+    runMgr->SetQuietMode( m_quietMode );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(&*m_userActionSvc);
     runMgr->SetUserInitialization(actionInitialization.release());
