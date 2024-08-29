@@ -26,6 +26,10 @@
 #include "DataModelTestDataCommon/JVec.h"
 #include "DataModelTestDataCommon/JVecAuxContainer.h"
 #include "DataModelTestDataCommon/JVecAuxInfo.h"
+#include "DataModelTestDataCommon/PLinksContainer.h"
+#include "DataModelTestDataCommon/PLinks.h"
+#include "DataModelTestDataCommon/PLinksAuxContainer.h"
+#include "DataModelTestDataCommon/PLinksAuxInfo.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/JaggedVec.h"
@@ -200,6 +204,19 @@ void dumpAuxItem (std::ostream& ost,
     SG::ConstAccessor<SG::JaggedVecElt<ElementLink<CVec> > > acc (r.getName (auxid));
     ost << formJVec (acc (c, i)) << "; ";
   }
+  else if (ti == &typeid(SG::PackedLink<CVec>)) {
+    SG::ConstAccessor<SG::PackedLink<CVec> > acc (r.getName (auxid));
+    ElementLink<CVec> el = acc (c, i);
+    ost << formEL (el) << "; ";
+  }
+  else if (ti == &typeid(std::vector<SG::PackedLink<CVec> >)) {
+    SG::ConstAccessor<std::vector<SG::PackedLink<CVec> > > acc (r.getName (auxid));
+    ost << "[";
+    for (ElementLink<CVec> el : acc (c, i)) {
+      ost << formEL (el) << "; ";
+    }
+    ost << "]; ";
+  }
   else
     ost << "xxx " << ti->name() << "; ";
 }
@@ -262,12 +279,12 @@ void dumpobj (std::ostream& ost,
 }
 
 
-void copy (DMTest::CVec& to, const DMTest::CVec& from)
+void dumpobj (std::ostream& ost,
+              const DMTest::PLinks* obj,
+              const std::map<std::string, SG::auxid_t>& auxid_map)
 {
-  for (size_t i = 0; i < from.size(); i++) {
-    to.push_back (new C);
-    *to.back() = *from[i];
-  }
+  const SG::AuxVectorData* cont = obj->container();
+  dumpelt (ost, cont, 0, auxid_map);
 }
 
 
@@ -305,6 +322,12 @@ void copy (DMTest::C& to, const DMTest::C& from)
 
 
 void copy (DMTest::JVec& to, const DMTest::JVec& from)
+{
+  to = from;
+}
+
+
+void copy (DMTest::PLinks& to, const DMTest::PLinks& from)
 {
   to = from;
 }
@@ -392,6 +415,8 @@ StatusCode xAODTestTypelessRead::execute()
   CHECK(( testit_view<HView> ("hview") ));
   CHECK(( testit<JVecContainer, JVecAuxContainer> ("jvecContainer") ));
   CHECK(( testit<JVec, JVecAuxInfo> ("jvecInfo") ));
+  CHECK(( testit<PLinksContainer, PLinksAuxContainer> ("plinksContainer") ));
+  CHECK(( testit<PLinks, PLinksAuxInfo> ("plinksInfo") ));
 
   return StatusCode::SUCCESS;
 }

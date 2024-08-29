@@ -75,6 +75,14 @@ decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [cvec
 decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
 jvecInfo
 decorJVec: [404.5]; fvec: [1201.5,1202.5]; ivec: [1101]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1451','str1452','str1453']; 
+plinksContainer
+decorLink: cvec[0]; decorVLinks: [ctrig[4], [inv], cvec[6]]; plink: cvec[0]; vlinks: []; 
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+plinksInfo
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
 copy_cvec
   anInt1: 201; aFloat: 400.0; anInt: 201; anInt2: 601; cEL: cvec[9]; dInt1: 801; dVar1: 901; dpInt1: 101; dpvFloat: []; pFloat: 0.0; pInt: 1001; pvFloat: []; pvInt: []; 
   anInt1: 202; aFloat: 400.1; anInt: 202; anInt2: 602; cEL: cvec[8]; dInt1: 802; dVar1: 902; dpInt1: 102; dpvFloat: [0.1]; pFloat: 1.0; pInt: 1002; pvFloat: [-0.5]; pvInt: [-290]; 
@@ -148,6 +156,14 @@ decorJVec: []; fvec: [203.5,204.5,205.5,206.5]; ivec: [103,104,105]; lvec: [cvec
 decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]]; svec: ['str454']; 
 copy_jvecInfo
 decorJVec: [404.5]; fvec: [1201.5,1202.5]; ivec: [1101]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1451','str1452','str1453']; 
+copy_plinksContainer
+decorLink: cvec[0]; decorVLinks: [ctrig[4], [inv], cvec[6]]; plink: cvec[0]; vlinks: []; 
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+copy_plinksInfo
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
 ---> Event 1
 cvec
   anInt1: 301; aFloat: 600.0; anInt: 301; anInt2: 901; cEL: cvec[9]; dInt1: 1201; dVar1: 1351; dint2: 901; dpInt1: 151; dpvFloat: []; pFloat: 0.0; pInt: 1501; pvFloat: []; pvInt: []; 
@@ -222,6 +238,14 @@ decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]];
 decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
 jvecInfo
 decorJVec: [405.5,406.5]; fvec: [1202.5,1203.5,1204.5]; ivec: [1102,1103]; lvec: []; svec: ['str1452','str1453','str1454','str1455']; 
+plinksContainer
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
 copy_cvec
   anInt1: 301; aFloat: 600.0; anInt: 301; anInt2: 901; cEL: cvec[9]; dInt1: 1201; dVar1: 1351; dpInt1: 151; dpvFloat: []; pFloat: 0.0; pInt: 1501; pvFloat: []; pvInt: []; 
   anInt1: 302; aFloat: 600.1; anInt: 302; anInt2: 902; cEL: cvec[8]; dInt1: 1202; dVar1: 1352; dpInt1: 152; dpvFloat: [0.1]; pFloat: 1.0; pInt: 1502; pvFloat: [-0.5]; pvInt: [-190]; 
@@ -295,6 +319,14 @@ decorJVec: [304.5]; fvec: []; ivec: [104,105,106,107]; lvec: [cvec[4], cvec[5]];
 decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str455','str456']; 
 copy_jvecInfo
 decorJVec: [405.5,406.5]; fvec: [1202.5,1203.5,1204.5]; ivec: [1102,1103]; lvec: []; svec: ['str1452','str1453','str1454','str1455']; 
+copy_plinksContainer
+decorLink: ctrig[1]; decorVLinks: [[inv], cvec[6], ctrig[7], [inv]]; plink: ctrig[1]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
 ---> Event 2
 cvec
   anInt1: 401; aFloat: 800.0; anInt: 401; anInt2: 1201; cEL: cvec[9]; dInt1: 1601; dVar1: 1801; dint2: 1001; dpInt1: 201; dpvFloat: []; pFloat: 0.0; pInt: 2001; pvFloat: []; pvInt: []; 
@@ -369,6 +401,14 @@ decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec
 decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
 jvecInfo
 decorJVec: [406.5,407.5,408.5]; fvec: [1203.5,1204.5,1205.5,1206.5]; ivec: [1103,1104,1105]; lvec: [cvec[3]]; svec: []; 
+plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+plinksInfo
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: [inv]; vlinks: []; 
 copy_cvec
   anInt1: 401; aFloat: 800.0; anInt: 401; anInt2: 1201; cEL: cvec[9]; dInt1: 1601; dVar1: 1801; dpInt1: 201; dpvFloat: []; pFloat: 0.0; pInt: 2001; pvFloat: []; pvInt: []; 
   anInt1: 402; aFloat: 800.1; anInt: 402; anInt2: 1202; cEL: cvec[8]; dInt1: 1602; dVar1: 1802; dpInt1: 202; dpvFloat: [0.1]; pFloat: 1.0; pInt: 2002; pvFloat: [-0.5]; pvInt: [-90]; 
@@ -442,6 +482,14 @@ decorJVec: [305.5,306.5]; fvec: [205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec
 decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str456','str457','str458']; 
 copy_jvecInfo
 decorJVec: [406.5,407.5,408.5]; fvec: [1203.5,1204.5,1205.5,1206.5]; ivec: [1103,1104,1105]; lvec: [cvec[3]]; svec: []; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[3], ctrig[4]]; 
+decorLink: cvec[3]; decorVLinks: [ctrig[7]]; plink: cvec[3]; vlinks: [ctrig[4], [inv], cvec[6]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+copy_plinksInfo
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: [inv]; vlinks: []; 
 ---> Event 3
 cvec
 cinfo
@@ -496,6 +544,14 @@ decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [[inv], 
 decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
 jvecInfo
 decorJVec: [407.5,408.5,409.5,410.5]; fvec: []; ivec: [1104,1105,1106,1107]; lvec: [[inv], [inv]]; svec: ['str1454']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [ctrig[7]]; plink: [inv]; vlinks: [ctrig[4], [inv], [inv]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], [inv]]; plink: ctrig[4]; vlinks: [[inv], [inv], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [[inv], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [ctrig[2], [inv], [inv], ctrig[5]]; plink: [inv]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], [inv]]; 
+plinksInfo
+decorLink: ctrig[7]; decorVLinks: []; plink: [inv]; vlinks: [ctrig[7]]; 
 copy_cvec
 copy_cinfo
   anInt1: 5000; aFloat: 0.5; anInt: 5000; anInt2: 10000; cEL: [inv]; dInt1: 15000; dInt1Base: 15001; 
@@ -549,6 +605,14 @@ decorJVec: [306.5,307.5,308.5]; fvec: [206.5,207.5]; ivec: [106]; lvec: [[inv], 
 decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]; lvec: []; svec: ['str457','str458','str459','str460']; 
 copy_jvecInfo
 decorJVec: [407.5,408.5,409.5,410.5]; fvec: []; ivec: [1104,1105,1106,1107]; lvec: [[inv], [inv]]; svec: ['str1454']; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: [ctrig[7]]; plink: [inv]; vlinks: [ctrig[4], [inv], [inv]]; 
+decorLink: ctrig[4]; decorVLinks: [[inv], [inv]]; plink: ctrig[4]; vlinks: [[inv], [inv], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [[inv], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [ctrig[2], [inv], [inv], ctrig[5]]; plink: [inv]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], [inv]]; 
+copy_plinksInfo
+decorLink: ctrig[7]; decorVLinks: []; plink: [inv]; vlinks: [ctrig[7]]; 
 ---> Event 4
 cvec
   anInt1: 601; aFloat: 1200.0; anInt: 601; anInt2: 1801; cEL: cvec[9]; dInt1: 2401; dVar1: 2701; dint2: 1201; dpInt1: 301; dpvFloat: []; pFloat: 0.1; pInt: 3001; pvFloat: []; pvInt: []; 
@@ -623,6 +687,14 @@ decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]
 decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
 jvecInfo
 decorJVec: []; fvec: [1205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1455','str1456']; 
+plinksContainer
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
 copy_cvec
   anInt1: 601; aFloat: 1200.0; anInt: 601; anInt2: 1801; cEL: cvec[9]; dInt1: 2401; dVar1: 2701; dpInt1: 301; dpvFloat: []; pFloat: 0.1; pInt: 3001; pvFloat: []; pvInt: []; 
   anInt1: 602; aFloat: 1200.1; anInt: 602; anInt2: 1802; cEL: cvec[8]; dInt1: 2402; dVar1: 2702; dpInt1: 302; dpvFloat: [0.2]; pFloat: 1.1; pInt: 3002; pvFloat: [-0.5]; pvInt: [110]; 
@@ -696,6 +768,14 @@ decorJVec: [307.5,308.5,309.5,310.5]; fvec: [207.5,208.5,209.5]; ivec: [107,108]
 decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec[8]]; svec: []; 
 copy_jvecInfo
 decorJVec: []; fvec: [1205.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1455','str1456']; 
+copy_plinksContainer
+decorLink: ctrig[4]; decorVLinks: [[inv], cvec[9]]; plink: ctrig[4]; vlinks: [[inv], cvec[6], ctrig[7], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
 ---> Event 5
 cvec
   anInt1: 701; aFloat: 1400.0; anInt: 701; anInt2: 2101; cEL: cvec[9]; dInt1: 2801; dVar1: 3151; dint2: 1301; dpInt1: 351; dpvFloat: []; pFloat: 0.1; pInt: 3501; pvFloat: []; pvInt: []; 
@@ -770,6 +850,14 @@ decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec
 decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
 jvecInfo
 decorJVec: [409.5]; fvec: [1206.5,1207.5]; ivec: [1106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1456','str1457','str1458']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+plinksInfo
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
 copy_cvec
   anInt1: 701; aFloat: 1400.0; anInt: 701; anInt2: 2101; cEL: cvec[9]; dInt1: 2801; dVar1: 3151; dpInt1: 351; dpvFloat: []; pFloat: 0.1; pInt: 3501; pvFloat: []; pvInt: []; 
   anInt1: 702; aFloat: 1400.1; anInt: 702; anInt2: 2102; cEL: cvec[8]; dInt1: 2802; dVar1: 3152; dpInt1: 352; dpvFloat: [0.2]; pFloat: 1.1; pInt: 3502; pvFloat: [-0.5]; pvInt: [210]; 
@@ -843,6 +931,14 @@ decorJVec: []; fvec: [208.5,209.5,210.5,211.5]; ivec: [108,109,110]; lvec: [cvec
 decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]]; svec: ['str459']; 
 copy_jvecInfo
 decorJVec: [409.5]; fvec: [1206.5,1207.5]; ivec: [1106]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1456','str1457','str1458']; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[9], ctrig[2], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+copy_plinksInfo
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
 ---> Event 6
 cvec
   anInt1: 801; aFloat: 1600.0; anInt: 801; anInt2: 2401; cEL: cvec[9]; dInt1: 3201; dVar1: 3601; dint2: 1401; dpInt1: 401; dpvFloat: []; pFloat: 0.1; pInt: 4001; pvFloat: []; pvInt: []; 
@@ -917,6 +1013,14 @@ decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]];
 decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
 jvecInfo
 decorJVec: [410.5,411.5]; fvec: [1207.5,1208.5,1209.5]; ivec: [1107,1108]; lvec: []; svec: ['str1457','str1458','str1459','str1460']; 
+plinksContainer
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+plinksInfo
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
 copy_cvec
   anInt1: 801; aFloat: 1600.0; anInt: 801; anInt2: 2401; cEL: cvec[9]; dInt1: 3201; dVar1: 3601; dpInt1: 401; dpvFloat: []; pFloat: 0.1; pInt: 4001; pvFloat: []; pvInt: []; 
   anInt1: 802; aFloat: 1600.1; anInt: 802; anInt2: 2402; cEL: cvec[8]; dInt1: 3202; dVar1: 3602; dpInt1: 402; dpvFloat: [0.2]; pFloat: 1.1; pInt: 4002; pvFloat: [-0.5]; pvInt: [310]; 
@@ -990,6 +1094,14 @@ decorJVec: [309.5]; fvec: []; ivec: [109,110,111,112]; lvec: [cvec[9], cvec[0]];
 decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str460','str461']; 
 copy_jvecInfo
 decorJVec: [410.5,411.5]; fvec: [1207.5,1208.5,1209.5]; ivec: [1107,1108]; lvec: []; svec: ['str1457','str1458','str1459','str1460']; 
+copy_plinksContainer
+decorLink: cvec[6]; decorVLinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; plink: cvec[6]; vlinks: [ctrig[7]]; 
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+copy_plinksInfo
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
 ---> Event 7
 cvec
   anInt1: 901; aFloat: 1800.0; anInt: 901; anInt2: 2701; cEL: cvec[9]; dInt1: 3601; dVar1: 4051; dint2: 1501; dpInt1: 451; dpvFloat: []; pFloat: 0.1; pInt: 4501; pvFloat: []; pvInt: []; 
@@ -1064,6 +1176,14 @@ decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec
 decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
 jvecInfo
 decorJVec: [411.5,412.5,413.5]; fvec: [1208.5,1209.5,1210.5,1211.5]; ivec: [1108,1109,1110]; lvec: [cvec[8]]; svec: []; 
+plinksContainer
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: ctrig[2]; vlinks: []; 
 copy_cvec
   anInt1: 901; aFloat: 1800.0; anInt: 901; anInt2: 2701; cEL: cvec[9]; dInt1: 3601; dVar1: 4051; dpInt1: 451; dpvFloat: []; pFloat: 0.1; pInt: 4501; pvFloat: []; pvInt: []; 
   anInt1: 902; aFloat: 1800.1; anInt: 902; anInt2: 2702; cEL: cvec[8]; dInt1: 3602; dVar1: 4052; dpInt1: 452; dpvFloat: [0.2]; pFloat: 1.1; pInt: 4502; pvFloat: [-0.5]; pvInt: [410]; 
@@ -1137,6 +1257,14 @@ decorJVec: [310.5,311.5]; fvec: [210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec
 decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str461','str462','str463']; 
 copy_jvecInfo
 decorJVec: [411.5,412.5,413.5]; fvec: [1208.5,1209.5,1210.5,1211.5]; ivec: [1108,1109,1110]; lvec: [cvec[8]]; svec: []; 
+copy_plinksContainer
+decorLink: ctrig[7]; decorVLinks: []; plink: ctrig[7]; vlinks: [[inv], cvec[9]]; 
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: ctrig[2]; vlinks: []; 
 ---> Event 8
 cvec
   anInt1: 1001; aFloat: 2000.0; anInt: 1001; anInt2: 3001; cEL: cvec[9]; dInt1: 4001; dVar1: 4501; dint2: 1601; dpInt1: 501; dpvFloat: []; pFloat: 0.1; pInt: 5001; pvFloat: []; pvInt: []; 
@@ -1211,6 +1339,14 @@ decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1]
 decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
 jvecInfo
 decorJVec: [412.5,413.5,414.5,415.5]; fvec: []; ivec: [1109,1110,1111,1112]; lvec: [cvec[9], cvec[0]]; svec: ['str1459']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+plinksInfo
+decorLink: cvec[2]; decorVLinks: []; plink: [inv]; vlinks: [cvec[2]]; 
 copy_cvec
   anInt1: 1001; aFloat: 2000.0; anInt: 1001; anInt2: 3001; cEL: cvec[9]; dInt1: 4001; dVar1: 4501; dpInt1: 501; dpvFloat: []; pFloat: 0.1; pInt: 5001; pvFloat: []; pvInt: []; 
   anInt1: 1002; aFloat: 2000.1; anInt: 1002; anInt2: 3002; cEL: cvec[8]; dInt1: 4002; dVar1: 4502; dpInt1: 502; dpvFloat: [0.2]; pFloat: 1.1; pInt: 5002; pvFloat: [-0.5]; pvInt: [510]; 
@@ -1284,6 +1420,14 @@ decorJVec: [311.5,312.5,313.5]; fvec: [211.5,212.5]; ivec: [111]; lvec: [cvec[1]
 decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]; lvec: []; svec: ['str462','str463','str464','str465']; 
 copy_jvecInfo
 decorJVec: [412.5,413.5,414.5,415.5]; fvec: []; ivec: [1109,1110,1111,1112]; lvec: [cvec[9], cvec[0]]; svec: ['str1459']; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[2]]; plink: [inv]; vlinks: [cvec[9], ctrig[2], [inv]]; 
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+copy_plinksInfo
+decorLink: cvec[2]; decorVLinks: []; plink: [inv]; vlinks: [cvec[2]]; 
 ---> Event 9
 cvec
   anInt1: 1101; aFloat: 2200.0; anInt: 1101; anInt2: 3301; cEL: cvec[9]; dInt1: 4401; dVar1: 4951; dint2: 1701; dpInt1: 551; dpvFloat: []; pFloat: 0.1; pInt: 5501; pvFloat: []; pvInt: []; 
@@ -1358,6 +1502,14 @@ decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]
 decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
 jvecInfo
 decorJVec: []; fvec: [1210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1460','str1461']; 
+plinksContainer
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+plinksInfo
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
 copy_cvec
   anInt1: 1101; aFloat: 2200.0; anInt: 1101; anInt2: 3301; cEL: cvec[9]; dInt1: 4401; dVar1: 4951; dpInt1: 551; dpvFloat: []; pFloat: 0.1; pInt: 5501; pvFloat: []; pvInt: []; 
   anInt1: 1102; aFloat: 2200.1; anInt: 1102; anInt2: 3302; cEL: cvec[8]; dInt1: 4402; dVar1: 4952; dpInt1: 552; dpvFloat: [0.2]; pFloat: 1.1; pInt: 5502; pvFloat: [-0.5]; pvInt: [610]; 
@@ -1431,6 +1583,14 @@ decorJVec: [312.5,313.5,314.5,315.5]; fvec: [212.5,213.5,214.5]; ivec: [112,113]
 decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec[3]]; svec: []; 
 copy_jvecInfo
 decorJVec: []; fvec: [1210.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1460','str1461']; 
+copy_plinksContainer
+decorLink: cvec[9]; decorVLinks: [ctrig[5], [inv]]; plink: cvec[9]; vlinks: [ctrig[2], [inv], cvec[2], ctrig[5]]; 
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+copy_plinksInfo
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
 ---> Event 10
 cvec
   anInt1: 1201; aFloat: 2400.0; anInt: 1201; anInt2: 3601; cEL: cvec[9]; dInt1: 4801; dVar1: 5401; dint2: 1801; dpInt1: 601; dpvFloat: []; pFloat: 0.1; pInt: 6001; pvFloat: []; pvInt: []; 
@@ -1505,6 +1665,14 @@ decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec
 decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
 jvecInfo
 decorJVec: [414.5]; fvec: [1211.5,1212.5]; ivec: [1111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1461','str1462','str1463']; 
+plinksContainer
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
 copy_cvec
   anInt1: 1201; aFloat: 2400.0; anInt: 1201; anInt2: 3601; cEL: cvec[9]; dInt1: 4801; dVar1: 5401; dpInt1: 601; dpvFloat: []; pFloat: 0.1; pInt: 6001; pvFloat: []; pvInt: []; 
   anInt1: 1202; aFloat: 2400.1; anInt: 1202; anInt2: 3602; cEL: cvec[8]; dInt1: 4802; dVar1: 5402; dpInt1: 602; dpvFloat: [0.2]; pFloat: 1.1; pInt: 6002; pvFloat: [-0.5]; pvInt: [710]; 
@@ -1578,6 +1746,14 @@ decorJVec: []; fvec: [213.5,214.5,215.5,216.5]; ivec: [113,114,115]; lvec: [cvec
 decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]]; svec: ['str464']; 
 copy_jvecInfo
 decorJVec: [414.5]; fvec: [1211.5,1212.5]; ivec: [1111]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str1461','str1462','str1463']; 
+copy_plinksContainer
+decorLink: ctrig[2]; decorVLinks: [[inv], cvec[5], ctrig[0]]; plink: ctrig[2]; vlinks: []; 
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
 ---> Event 11
 cvec
   anInt1: 1301; aFloat: 2600.0; anInt: 1301; anInt2: 3901; cEL: cvec[9]; dInt1: 5201; dVar1: 5851; dint2: 1901; dpInt1: 651; dpvFloat: []; pFloat: 0.1; pInt: 6501; pvFloat: []; pvInt: []; 
@@ -1652,6 +1828,14 @@ decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]];
 decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
 jvecInfo
 decorJVec: [415.5,416.5]; fvec: [1212.5,1213.5,1214.5]; ivec: [1112,1113]; lvec: []; svec: ['str1462','str1463','str1464','str1465']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+plinksInfo
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
 copy_cvec
   anInt1: 1301; aFloat: 2600.0; anInt: 1301; anInt2: 3901; cEL: cvec[9]; dInt1: 5201; dVar1: 5851; dpInt1: 651; dpvFloat: []; pFloat: 0.1; pInt: 6501; pvFloat: []; pvInt: []; 
   anInt1: 1302; aFloat: 2600.1; anInt: 1302; anInt2: 3902; cEL: cvec[8]; dInt1: 5202; dVar1: 5852; dpInt1: 652; dpvFloat: [0.2]; pFloat: 1.1; pInt: 6502; pvFloat: [-0.5]; pvInt: [810]; 
@@ -1725,6 +1909,14 @@ decorJVec: [314.5]; fvec: []; ivec: [114,115,116,117]; lvec: [cvec[4], cvec[5]];
 decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str465','str466']; 
 copy_jvecInfo
 decorJVec: [415.5,416.5]; fvec: [1212.5,1213.5,1214.5]; ivec: [1112,1113]; lvec: []; svec: ['str1462','str1463','str1464','str1465']; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[5], ctrig[0], [inv], cvec[8]]; plink: [inv]; vlinks: [cvec[2]]; 
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+copy_plinksInfo
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
 ---> Event 12
 cvec
   anInt1: 1401; aFloat: 2800.0; anInt: 1401; anInt2: 4201; cEL: cvec[9]; dInt1: 5601; dVar1: 6301; dint2: 2001; dpInt1: 701; dpvFloat: []; pFloat: 0.1; pInt: 7001; pvFloat: []; pvInt: []; 
@@ -1799,6 +1991,14 @@ decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec
 decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
 jvecInfo
 decorJVec: [416.5,417.5,418.5]; fvec: [1213.5,1214.5,1215.5,1216.5]; ivec: [1113,1114,1115]; lvec: [cvec[3]]; svec: []; 
+plinksContainer
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+plinksInfo
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: cvec[5]; vlinks: []; 
 copy_cvec
   anInt1: 1401; aFloat: 2800.0; anInt: 1401; anInt2: 4201; cEL: cvec[9]; dInt1: 5601; dVar1: 6301; dpInt1: 701; dpvFloat: []; pFloat: 0.1; pInt: 7001; pvFloat: []; pvInt: []; 
   anInt1: 1402; aFloat: 2800.1; anInt: 1402; anInt2: 4202; cEL: cvec[8]; dInt1: 5602; dVar1: 6302; dpInt1: 702; dpvFloat: [0.2]; pFloat: 1.1; pInt: 7002; pvFloat: [-0.5]; pvInt: [910]; 
@@ -1872,6 +2072,14 @@ decorJVec: [315.5,316.5]; fvec: [215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec
 decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str466','str467','str468']; 
 copy_jvecInfo
 decorJVec: [416.5,417.5,418.5]; fvec: [1213.5,1214.5,1215.5,1216.5]; ivec: [1113,1114,1115]; lvec: [cvec[3]]; svec: []; 
+copy_plinksContainer
+decorLink: cvec[2]; decorVLinks: []; plink: cvec[2]; vlinks: [ctrig[5], [inv]]; 
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+copy_plinksInfo
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: cvec[5]; vlinks: []; 
 ---> Event 13
 cvec
   anInt1: 1501; aFloat: 3000.0; anInt: 1501; anInt2: 4501; cEL: cvec[9]; dInt1: 6001; dVar1: 6751; dint2: 2101; dpInt1: 751; dpvFloat: []; pFloat: 0.1; pInt: 7501; pvFloat: []; pvInt: []; 
@@ -1946,6 +2154,14 @@ decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6]
 decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
 jvecInfo
 decorJVec: [417.5,418.5,419.5,420.5]; fvec: []; ivec: [1114,1115,1116,1117]; lvec: [cvec[4], cvec[5]]; svec: ['str1464']; 
+plinksContainer
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: []; plink: ctrig[0]; vlinks: [[inv]]; 
 copy_cvec
   anInt1: 1501; aFloat: 3000.0; anInt: 1501; anInt2: 4501; cEL: cvec[9]; dInt1: 6001; dVar1: 6751; dpInt1: 751; dpvFloat: []; pFloat: 0.1; pInt: 7501; pvFloat: []; pvInt: []; 
   anInt1: 1502; aFloat: 3000.1; anInt: 1502; anInt2: 4502; cEL: cvec[8]; dInt1: 6002; dVar1: 6752; dpInt1: 752; dpvFloat: [0.2]; pFloat: 1.1; pInt: 7502; pvFloat: [-0.5]; pvInt: [1010]; 
@@ -2019,6 +2235,14 @@ decorJVec: [316.5,317.5,318.5]; fvec: [216.5,217.5]; ivec: [116]; lvec: [cvec[6]
 decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]; lvec: []; svec: ['str467','str468','str469','str470']; 
 copy_jvecInfo
 decorJVec: [417.5,418.5,419.5,420.5]; fvec: []; ivec: [1114,1115,1116,1117]; lvec: [cvec[4], cvec[5]]; svec: ['str1464']; 
+copy_plinksContainer
+decorLink: ctrig[5]; decorVLinks: [[inv]]; plink: ctrig[5]; vlinks: [[inv], cvec[5], ctrig[0]]; 
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: []; plink: ctrig[0]; vlinks: [[inv]]; 
 ---> Event 14
 cvec
   anInt1: 1601; aFloat: 3200.0; anInt: 1601; anInt2: 4801; cEL: cvec[9]; dInt1: 6401; dVar1: 7201; dint2: 2201; dpInt1: 801; dpvFloat: []; pFloat: 0.2; pInt: 8001; pvFloat: []; pvInt: []; 
@@ -2093,6 +2317,14 @@ decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]
 decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
 jvecInfo
 decorJVec: []; fvec: [1215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1465','str1466']; 
+plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+plinksInfo
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
 copy_cvec
   anInt1: 1601; aFloat: 3200.0; anInt: 1601; anInt2: 4801; cEL: cvec[9]; dInt1: 6401; dVar1: 7201; dpInt1: 801; dpvFloat: []; pFloat: 0.2; pInt: 8001; pvFloat: []; pvInt: []; 
   anInt1: 1602; aFloat: 3200.1; anInt: 1602; anInt2: 4802; cEL: cvec[8]; dInt1: 6402; dVar1: 7202; dpInt1: 802; dpvFloat: [0.3]; pFloat: 1.2; pInt: 8002; pvFloat: [-0.5]; pvInt: [1110]; 
@@ -2166,6 +2398,14 @@ decorJVec: [317.5,318.5,319.5,320.5]; fvec: [217.5,218.5,219.5]; ivec: [117,118]
 decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec[8]]; svec: []; 
 copy_jvecInfo
 decorJVec: []; fvec: [1215.5]; ivec: []; lvec: [cvec[5], cvec[6], cvec[7]]; svec: ['str1465','str1466']; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: [cvec[8], ctrig[3]]; plink: [inv]; vlinks: [cvec[5], ctrig[0], [inv], cvec[8]]; 
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+copy_plinksInfo
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
 ---> Event 15
 cvec
   anInt1: 1701; aFloat: 3400.0; anInt: 1701; anInt2: 5101; cEL: cvec[9]; dInt1: 6801; dVar1: 7651; dint2: 2301; dpInt1: 851; dpvFloat: []; pFloat: 0.2; pInt: 8501; pvFloat: []; pvInt: []; 
@@ -2240,6 +2480,14 @@ decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec
 decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
 jvecInfo
 decorJVec: [419.5]; fvec: [1216.5,1217.5]; ivec: [1116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1466','str1467','str1468']; 
+plinksContainer
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+plinksInfo
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
 copy_cvec
   anInt1: 1701; aFloat: 3400.0; anInt: 1701; anInt2: 5101; cEL: cvec[9]; dInt1: 6801; dVar1: 7651; dpInt1: 851; dpvFloat: []; pFloat: 0.2; pInt: 8501; pvFloat: []; pvInt: []; 
   anInt1: 1702; aFloat: 3400.1; anInt: 1702; anInt2: 5102; cEL: cvec[8]; dInt1: 6802; dVar1: 7652; dpInt1: 852; dpvFloat: [0.3]; pFloat: 1.2; pInt: 8502; pvFloat: [-0.5]; pvInt: [1210]; 
@@ -2313,6 +2561,14 @@ decorJVec: []; fvec: [218.5,219.5,220.5,221.5]; ivec: [118,119,120]; lvec: [cvec
 decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]]; svec: ['str469']; 
 copy_jvecInfo
 decorJVec: [419.5]; fvec: [1216.5,1217.5]; ivec: [1116]; lvec: [cvec[6], cvec[7], cvec[8], cvec[9]]; svec: ['str1466','str1467','str1468']; 
+copy_plinksContainer
+decorLink: cvec[5]; decorVLinks: [ctrig[3], [inv], cvec[1]]; plink: cvec[5]; vlinks: []; 
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+copy_plinksInfo
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
 ---> Event 16
 cvec
   anInt1: 1801; aFloat: 3600.0; anInt: 1801; anInt2: 5401; cEL: cvec[9]; dInt1: 7201; dVar1: 8101; dint2: 2401; dpInt1: 901; dpvFloat: []; pFloat: 0.2; pInt: 9001; pvFloat: []; pvInt: []; 
@@ -2387,6 +2643,14 @@ decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]];
 decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
 jvecInfo
 decorJVec: [420.5,421.5]; fvec: [1217.5,1218.5,1219.5]; ivec: [1117,1118]; lvec: []; svec: ['str1467','str1468','str1469','str1470']; 
+plinksContainer
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
 copy_cvec
   anInt1: 1801; aFloat: 3600.0; anInt: 1801; anInt2: 5401; cEL: cvec[9]; dInt1: 7201; dVar1: 8101; dpInt1: 901; dpvFloat: []; pFloat: 0.2; pInt: 9001; pvFloat: []; pvInt: []; 
   anInt1: 1802; aFloat: 3600.1; anInt: 1802; anInt2: 5402; cEL: cvec[8]; dInt1: 7202; dVar1: 8102; dpInt1: 902; dpvFloat: [0.3]; pFloat: 1.2; pInt: 9002; pvFloat: [-0.5]; pvInt: [1310]; 
@@ -2460,6 +2724,14 @@ decorJVec: [319.5]; fvec: []; ivec: [119,120,121,122]; lvec: [cvec[9], cvec[0]];
 decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str470','str471']; 
 copy_jvecInfo
 decorJVec: [420.5,421.5]; fvec: [1217.5,1218.5,1219.5]; ivec: [1117,1118]; lvec: []; svec: ['str1467','str1468','str1469','str1470']; 
+copy_plinksContainer
+decorLink: ctrig[0]; decorVLinks: [[inv], cvec[1], ctrig[6], [inv]]; plink: ctrig[0]; vlinks: [[inv]]; 
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
 ---> Event 17
 cvec
   anInt1: 1901; aFloat: 3800.0; anInt: 1901; anInt2: 5701; cEL: cvec[9]; dInt1: 7601; dVar1: 8551; dint2: 2501; dpInt1: 951; dpvFloat: []; pFloat: 0.2; pInt: 9501; pvFloat: []; pvInt: []; 
@@ -2534,6 +2806,14 @@ decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec
 decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str471','str472','str473']; 
 jvecInfo
 decorJVec: [421.5,422.5,423.5]; fvec: [1218.5,1219.5,1220.5,1221.5]; ivec: [1118,1119,1120]; lvec: [cvec[8]]; svec: []; 
+plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+plinksInfo
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: [inv]; vlinks: []; 
 copy_cvec
   anInt1: 1901; aFloat: 3800.0; anInt: 1901; anInt2: 5701; cEL: cvec[9]; dInt1: 7601; dVar1: 8551; dpInt1: 951; dpvFloat: []; pFloat: 0.2; pInt: 9501; pvFloat: []; pvInt: []; 
   anInt1: 1902; aFloat: 3800.1; anInt: 1902; anInt2: 5702; cEL: cvec[8]; dInt1: 7602; dVar1: 8552; dpInt1: 952; dpvFloat: [0.3]; pFloat: 1.2; pInt: 9502; pvFloat: [-0.5]; pvInt: [1410]; 
@@ -2607,6 +2887,14 @@ decorJVec: [320.5,321.5]; fvec: [220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec
 decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1], cvec[2], cvec[3], cvec[4]]; svec: ['str471','str472','str473']; 
 copy_jvecInfo
 decorJVec: [421.5,422.5,423.5]; fvec: [1218.5,1219.5,1220.5,1221.5]; ivec: [1118,1119,1120]; lvec: [cvec[8]]; svec: []; 
+copy_plinksContainer
+decorLink: [inv]; decorVLinks: []; plink: [inv]; vlinks: [cvec[8], ctrig[3]]; 
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+copy_plinksInfo
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: [inv]; vlinks: []; 
 ---> Event 18
 cvec
   anInt1: 2001; aFloat: 4000.0; anInt: 2001; anInt2: 6001; cEL: cvec[9]; dInt1: 8001; dVar1: 9001; dint2: 2601; dpInt1: 1001; dpvFloat: []; pFloat: 0.2; pInt: 10001; pvFloat: []; pvInt: []; 
@@ -2681,6 +2969,14 @@ decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1]
 decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]; lvec: []; svec: ['str472','str473','str474','str475']; 
 jvecInfo
 decorJVec: [422.5,423.5,424.5,425.5]; fvec: []; ivec: [1119,1120,1121,1122]; lvec: [cvec[9], cvec[0]]; svec: ['str1469']; 
+plinksContainer
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+plinksInfo
+decorLink: ctrig[6]; decorVLinks: []; plink: cvec[1]; vlinks: [ctrig[6]]; 
 copy_cvec
   anInt1: 2001; aFloat: 4000.0; anInt: 2001; anInt2: 6001; cEL: cvec[9]; dInt1: 8001; dVar1: 9001; dpInt1: 1001; dpvFloat: []; pFloat: 0.2; pInt: 10001; pvFloat: []; pvInt: []; 
   anInt1: 2002; aFloat: 4000.1; anInt: 2002; anInt2: 6002; cEL: cvec[8]; dInt1: 8002; dVar1: 9002; dpInt1: 1002; dpvFloat: [0.3]; pFloat: 1.2; pInt: 10002; pvFloat: [-0.5]; pvInt: [1510]; 
@@ -2754,6 +3050,14 @@ decorJVec: [321.5,322.5,323.5]; fvec: [221.5,222.5]; ivec: [121]; lvec: [cvec[1]
 decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]; lvec: []; svec: ['str472','str473','str474','str475']; 
 copy_jvecInfo
 decorJVec: [422.5,423.5,424.5,425.5]; fvec: []; ivec: [1119,1120,1121,1122]; lvec: [cvec[9], cvec[0]]; svec: ['str1469']; 
+copy_plinksContainer
+decorLink: cvec[8]; decorVLinks: [ctrig[6]]; plink: cvec[8]; vlinks: [ctrig[3], [inv], cvec[1]]; 
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+copy_plinksInfo
+decorLink: ctrig[6]; decorVLinks: []; plink: cvec[1]; vlinks: [ctrig[6]]; 
 ---> Event 19
 cvec
   anInt1: 2101; aFloat: 4200.0; anInt: 2101; anInt2: 6301; cEL: cvec[9]; dInt1: 8401; dVar1: 9451; dint2: 2701; dpInt1: 1051; dpvFloat: []; pFloat: 0.2; pInt: 10501; pvFloat: []; pvInt: []; 
@@ -2828,6 +3132,14 @@ decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]
 decorJVec: []; fvec: [223.5,224.5,225.5,226.5]; ivec: [123,124,125]; lvec: [cvec[3]]; svec: []; 
 jvecInfo
 decorJVec: []; fvec: [1220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1470','str1471']; 
+plinksContainer
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: [inv]; vlinks: [cvec[4], ctrig[1], [inv]]; 
+plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
 copy_cvec
   anInt1: 2101; aFloat: 4200.0; anInt: 2101; anInt2: 6301; cEL: cvec[9]; dInt1: 8401; dVar1: 9451; dpInt1: 1051; dpvFloat: []; pFloat: 0.2; pInt: 10501; pvFloat: []; pvInt: []; 
   anInt1: 2102; aFloat: 4200.1; anInt: 2102; anInt2: 6302; cEL: cvec[8]; dInt1: 8402; dVar1: 9452; dpInt1: 1052; dpvFloat: [0.3]; pFloat: 1.2; pInt: 10502; pvFloat: [-0.5]; pvInt: [1610]; 
@@ -2901,3 +3213,11 @@ decorJVec: [322.5,323.5,324.5,325.5]; fvec: [222.5,223.5,224.5]; ivec: [122,123]
 decorJVec: []; fvec: [223.5,224.5,225.5,226.5]; ivec: [123,124,125]; lvec: [cvec[3]]; svec: []; 
 copy_jvecInfo
 decorJVec: []; fvec: [1220.5]; ivec: []; lvec: [cvec[0], cvec[1], cvec[2]]; svec: ['str1470','str1471']; 
+copy_plinksContainer
+decorLink: ctrig[3]; decorVLinks: [[inv], cvec[4]]; plink: ctrig[3]; vlinks: [[inv], cvec[1], ctrig[6], [inv]]; 
+decorLink: [inv]; decorVLinks: [cvec[4], ctrig[1], [inv]]; plink: [inv]; vlinks: []; 
+decorLink: cvec[1]; decorVLinks: [ctrig[1], [inv], cvec[7], ctrig[4]]; plink: cvec[1]; vlinks: [ctrig[6]]; 
+decorLink: ctrig[6]; decorVLinks: []; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: [inv]; vlinks: [cvec[4], ctrig[1], [inv]]; 
+copy_plinksInfo
+decorLink: [inv]; decorVLinks: [cvec[7]]; plink: ctrig[6]; vlinks: [[inv], cvec[4]]; 

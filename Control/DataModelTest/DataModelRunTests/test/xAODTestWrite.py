@@ -29,6 +29,7 @@ def xAODTestWriteCfg (flags):
     acc.addEventAlgo (DMTest.xAODTestWriteFwdLink1 ('xAODTestWriteFwdLink1'))
     acc.addEventAlgo (DMTest.xAODTestWriteFwdLink2 ('xAODTestWriteFwdLink2'))
     acc.addEventAlgo (DMTest.xAODTestWriteJVec ('xAODTestWriteJVec'))
+    acc.addEventAlgo (DMTest.xAODTestWritePLinks ('xAODTestWritePLinks'))
     acc.addEventAlgo (DMTest.MetaWriterAlg ('MetaWriterAlg'))
 
     itemList = ['DMTest::CVec#cvec',
@@ -53,7 +54,12 @@ def xAODTestWriteCfg (flags):
                 'DMTest::JVecAuxContainer#jvecContainerAux.',
                 'DMTest::JVec#jvecInfo',
                 'DMTest::JVecAuxInfo#jvecInfoAux.',
+                'DMTest::PLinksContainer#plinksContainer',
+                'DMTest::PLinksAuxContainer#plinksContainerAux.',
+                'DMTest::PLinks#plinksInfo',
+                'DMTest::PLinksAuxInfo#plinksInfoAux.',
                 ]
+
     metaItemList = [ 'DMTest::S1#MetaS1',
                      'DMTest::C#MetaC',
                      'DMTest::CInfoAuxContainer#MetaCAux.' ]
@@ -76,6 +82,11 @@ def xAODTestWriteCfg (flags):
                   'DMTest::JVecAuxContainer_v1',
                   'DMTest::JVec_v1',
                   'DMTest::JVecAuxInfo_v1',
+                  'DMTest::PLinksContainer_v1',
+                  'DataVector<DMTest::PLinks_v1>',
+                  'DMTest::PLinksAuxContainer_v1',
+                  'DMTest::PLinks_v1',
+                  'DMTest::PLinksAuxInfo_v1',
                  ]
     acc.merge (TestOutputCfg (flags, 'Stream1', itemList, typeNames,
                               metaItemList))

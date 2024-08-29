@@ -232,6 +232,22 @@ StorageSvc           INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7
 StorageSvc           INFO Building shape according to reflection information using shape ID for:
 StorageSvc           INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
 ClassIDSvc           INFO getRegistryEntries: read 27 CLIDRegistry entries for module ALL
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:0)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:0) decorVLinks: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   link: (ctrig:1)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:1) decorVLinks: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -370,6 +386,22 @@ xAODTestReadJVec     INFO   decorJVec: [305.5 306.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1102 1103]  fvec: [1202.5 1203.5 1204.5]  svec: ['str1452' 'str1453' 'str1454' 'str1455']  lvec: []
 xAODTestReadJVec     INFO   decorJVec: [405.5 406.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:1)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:1) decorVLinks: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -508,6 +540,22 @@ xAODTestReadJVec     INFO   decorJVec: [306.5 307.5 308.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1103 1104 1105]  fvec: [1203.5 1204.5 1205.5 1206.5]  svec: []  lvec: [(cvec:3)]
 xAODTestReadJVec     INFO   decorJVec: [406.5 407.5 408.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -596,6 +644,22 @@ xAODTestReadJVec     INFO   decorJVec: [307.5 308.5 309.5 310.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1104 1105 1106 1107]  fvec: []  svec: ['str1454']  lvec: [(:inv) (:inv)]
 xAODTestReadJVec     INFO   decorJVec: [407.5 408.5 409.5 410.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:4) (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:7)
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (:inv) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:2) (:inv) (:inv) (ctrig:5)
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -734,6 +798,22 @@ xAODTestReadJVec     INFO   decorJVec: []
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: []  fvec: [1205.5]  svec: ['str1455' 'str1456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
 xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -872,6 +952,22 @@ xAODTestReadJVec     INFO   decorJVec: [309.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1106]  fvec: [1206.5 1207.5]  svec: ['str1456' 'str1457' 'str1458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
 xAODTestReadJVec     INFO   decorJVec: [409.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1010,6 +1106,22 @@ xAODTestReadJVec     INFO   decorJVec: [310.5 311.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1107 1108]  fvec: [1207.5 1208.5 1209.5]  svec: ['str1457' 'str1458' 'str1459' 'str1460']  lvec: []
 xAODTestReadJVec     INFO   decorJVec: [410.5 411.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks   INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1148,6 +1260,22 @@ xAODTestReadJVec     INFO   decorJVec: [311.5 312.5 313.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1108 1109 1110]  fvec: [1208.5 1209.5 1210.5 1211.5]  svec: []  lvec: [(cvec:8)]
 xAODTestReadJVec     INFO   decorJVec: [411.5 412.5 413.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1286,6 +1414,22 @@ xAODTestReadJVec     INFO   decorJVec: [312.5 313.5 314.5 315.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1109 1110 1111 1112]  fvec: []  svec: ['str1459']  lvec: [(cvec:9) (cvec:0)]
 xAODTestReadJVec     INFO   decorJVec: [412.5 413.5 414.5 415.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1424,6 +1568,22 @@ xAODTestReadJVec     INFO   decorJVec: []
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: []  fvec: [1210.5]  svec: ['str1460' 'str1461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
 xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks   INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1562,6 +1722,22 @@ xAODTestReadJVec     INFO   decorJVec: [314.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1111]  fvec: [1211.5 1212.5]  svec: ['str1461' 'str1462' 'str1463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
 xAODTestReadJVec     INFO   decorJVec: [414.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1700,6 +1876,22 @@ xAODTestReadJVec     INFO   decorJVec: [315.5 316.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1112 1113]  fvec: [1212.5 1213.5 1214.5]  svec: ['str1462' 'str1463' 'str1464' 'str1465']  lvec: []
 xAODTestReadJVec     INFO   decorJVec: [415.5 416.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1838,6 +2030,22 @@ xAODTestReadJVec     INFO   decorJVec: [316.5 317.5 318.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1113 1114 1115]  fvec: [1213.5 1214.5 1215.5 1216.5]  svec: []  lvec: [(cvec:3)]
 xAODTestReadJVec     INFO   decorJVec: [416.5 417.5 418.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1976,6 +2184,22 @@ xAODTestReadJVec     INFO   decorJVec: [317.5 318.5 319.5 320.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1114 1115 1116 1117]  fvec: []  svec: ['str1464']  lvec: [(cvec:4) (cvec:5)]
 xAODTestReadJVec     INFO   decorJVec: [417.5 418.5 419.5 420.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2114,6 +2338,22 @@ xAODTestReadJVec     INFO   decorJVec: []
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: []  fvec: [1215.5]  svec: ['str1465' 'str1466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
 xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2252,6 +2492,22 @@ xAODTestReadJVec     INFO   decorJVec: [319.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1116]  fvec: [1216.5 1217.5]  svec: ['str1466' 'str1467' 'str1468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
 xAODTestReadJVec     INFO   decorJVec: [419.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:5)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2390,6 +2646,22 @@ xAODTestReadJVec     INFO   decorJVec: [320.5 321.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1117 1118]  fvec: [1217.5 1218.5 1219.5]  svec: ['str1467' 'str1468' 'str1469' 'str1470']  lvec: []
 xAODTestReadJVec     INFO   decorJVec: [420.5 421.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2528,6 +2800,22 @@ xAODTestReadJVec     INFO   decorJVec: [321.5 322.5 323.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1118 1119 1120]  fvec: [1218.5 1219.5 1220.5 1221.5]  svec: []  lvec: [(cvec:8)]
 xAODTestReadJVec     INFO   decorJVec: [421.5 422.5 423.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2666,6 +2954,22 @@ xAODTestReadJVec     INFO   decorJVec: [322.5 323.5 324.5 325.5]
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: [1119 1120 1121 1122]  fvec: []  svec: ['str1469']  lvec: [(cvec:9) (cvec:0)]
 xAODTestReadJVec     INFO   decorJVec: [422.5 423.5 424.5 425.5]
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks   INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks   INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks:
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2804,6 +3108,22 @@ xAODTestReadJVec     INFO   decorJVec: []
 xAODTestReadJVec     INFO jvecInfo
 xAODTestReadJVec     INFO   ivec: []  fvec: [1220.5]  svec: ['str1470' 'str1471']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
 xAODTestReadJVec     INFO   decorJVec: []
+xAODTestReadPLinks   INFO plinksContainer
+xAODTestReadPLinks   INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   link: (:inv)  links:
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   decorLink: (ctrig:6) decorVLinks:
+xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:7)
+xAODTestReadPLinks   INFO plinksInfo
+xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:7)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ClassIDSvc           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
 StreamStream1        INFO Metadata records written: 21

@@ -601,6 +601,40 @@ StorageSvc           INFO Building shape according to reflection information usi
 StorageSvc           INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7E8C84288]
 StorageSvc           INFO Building shape according to reflection information using shape ID for:
 StorageSvc           INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[0]; 
+    decorVLinks: [ctrig[4]; [inv]; cvec[6]; ]; 
+    plink: cvec[0]; 
+    vlinks: []; 
+  
+    decorLink: ctrig[1]; 
+    decorVLinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+    plink: ctrig[1]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[3]; ctrig[4]; ]; 
+  
+    decorLink: cvec[3]; 
+    decorVLinks: [ctrig[7]; ]; 
+    plink: cvec[3]; 
+    vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
+  
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; cvec[9]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; cvec[9]; ]; 
+    plink: cvec[3]; 
+    vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
+
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 xAODTe...elessRead   INFO 2
@@ -1114,6 +1148,39 @@ xAODTe...elessRead   INFO
     ivec: [1102 1103]; 
     lvec: []; 
     svec: ['str1452' 'str1453' 'str1454' 'str1455']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[1]; 
+    decorVLinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+    plink: ctrig[1]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[3]; ctrig[4]; ]; 
+  
+    decorLink: cvec[3]; 
+    decorVLinks: [ctrig[7]; ]; 
+    plink: cvec[3]; 
+    vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
+  
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; cvec[9]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
@@ -1628,6 +1695,39 @@ xAODTe...elessRead   INFO
     ivec: [1103 1104 1105]; 
     lvec: [cvec[3]]; 
     svec: []; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[3]; ctrig[4]; ]; 
+  
+    decorLink: cvec[3]; 
+    decorVLinks: [ctrig[7]; ]; 
+    plink: cvec[3]; 
+    vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
+  
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; cvec[9]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[6]; 
+    decorVLinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+    plink: cvec[6]; 
+    vlinks: [ctrig[7]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[6]; 
+    decorVLinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
@@ -1880,6 +1980,39 @@ xAODTe...elessRead   INFO
     ivec: [1104 1105 1106 1107]; 
     lvec: [[inv] [inv]]; 
     svec: ['str1454']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: [ctrig[7]; ]; 
+    plink: [inv]; 
+    vlinks: [ctrig[4]; [inv]; [inv]; ]; 
+  
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; [inv]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; [inv]; ctrig[7]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [[inv]; ctrig[2]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [ctrig[2]; [inv]; [inv]; ctrig[5]; ]; 
+    plink: [inv]; 
+    vlinks: [ctrig[7]; ]; 
+  
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [ctrig[7]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
@@ -2394,6 +2527,39 @@ xAODTe...elessRead   INFO
     ivec: []; 
     lvec: [cvec[5] cvec[6] cvec[7]]; 
     svec: ['str1455' 'str1456']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[4]; 
+    decorVLinks: [[inv]; cvec[9]; ]; 
+    plink: ctrig[4]; 
+    vlinks: [[inv]; cvec[6]; ctrig[7]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[6]; 
+    decorVLinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+    plink: cvec[6]; 
+    vlinks: [ctrig[7]; ]; 
+  
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; cvec[9]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; cvec[9]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
@@ -2908,6 +3074,39 @@ xAODTe...elessRead   INFO
     ivec: [1106]; 
     lvec: [cvec[6] cvec[7] cvec[8] cvec[9]]; 
     svec: ['str1456' 'str1457' 'str1458']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[6]; 
+    decorVLinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+    plink: cvec[6]; 
+    vlinks: [ctrig[7]; ]; 
+  
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; cvec[9]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+  
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
@@ -3422,6 +3621,39 @@ xAODTe...elessRead   INFO
     ivec: [1107 1108]; 
     lvec: []; 
     svec: ['str1457' 'str1458' 'str1459' 'str1460']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[6]; 
+    decorVLinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+    plink: cvec[6]; 
+    vlinks: [ctrig[7]; ]; 
+  
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; cvec[9]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+  
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+  
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
@@ -3936,6 +4168,39 @@ xAODTe...elessRead   INFO
     ivec: [1108 1109 1110]; 
     lvec: [cvec[8]]; 
     svec: []; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[7]; 
+    decorVLinks: []; 
+    plink: ctrig[7]; 
+    vlinks: [[inv]; cvec[9]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+  
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+  
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
@@ -4450,6 +4715,39 @@ xAODTe...elessRead   INFO
     ivec: [1109 1110 1111 1112]; 
     lvec: [cvec[9] cvec[0]]; 
     svec: ['str1459']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: [cvec[2]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[9]; ctrig[2]; [inv]; ]; 
+  
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+  
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
+  
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
@@ -4964,6 +5262,39 @@ xAODTe...elessRead   INFO
     ivec: []; 
     lvec: [cvec[0] cvec[1] cvec[2]]; 
     svec: ['str1460' 'str1461']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[9]; 
+    decorVLinks: [ctrig[5]; [inv]; ]; 
+    plink: cvec[9]; 
+    vlinks: [ctrig[2]; [inv]; cvec[2]; ctrig[5]; ]; 
+  
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
+  
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
+  
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
@@ -5478,6 +5809,39 @@ xAODTe...elessRead   INFO
     ivec: [1111]; 
     lvec: [cvec[1] cvec[2] cvec[3] cvec[4]]; 
     svec: ['str1461' 'str1462' 'str1463']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[2]; 
+    decorVLinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+    plink: ctrig[2]; 
+    vlinks: []; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
+  
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
+  
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
@@ -5992,6 +6356,39 @@ xAODTe...elessRead   INFO
     ivec: [1112 1113]; 
     lvec: []; 
     svec: ['str1462' 'str1463' 'str1464' 'str1465']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[2]; ]; 
+  
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
+  
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+  
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
@@ -6506,6 +6903,39 @@ xAODTe...elessRead   INFO
     ivec: [1113 1114 1115]; 
     lvec: [cvec[3]]; 
     svec: []; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[2]; 
+    decorVLinks: []; 
+    plink: cvec[2]; 
+    vlinks: [ctrig[5]; [inv]; ]; 
+  
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+  
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
+  
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
@@ -7020,6 +7450,39 @@ xAODTe...elessRead   INFO
     ivec: [1114 1115 1116 1117]; 
     lvec: [cvec[4] cvec[5]]; 
     svec: ['str1464']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[5]; 
+    decorVLinks: [[inv]; ]; 
+    plink: ctrig[5]; 
+    vlinks: [[inv]; cvec[5]; ctrig[0]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+  
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
+  
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
@@ -7534,6 +7997,39 @@ xAODTe...elessRead   INFO
     ivec: []; 
     lvec: [cvec[5] cvec[6] cvec[7]]; 
     svec: ['str1465' 'str1466']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: [cvec[8]; ctrig[3]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[5]; ctrig[0]; [inv]; cvec[8]; ]; 
+  
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
+  
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
+  
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
@@ -8048,6 +8544,39 @@ xAODTe...elessRead   INFO
     ivec: [1116]; 
     lvec: [cvec[6] cvec[7] cvec[8] cvec[9]]; 
     svec: ['str1466' 'str1467' 'str1468']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[5]; 
+    decorVLinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+    plink: cvec[5]; 
+    vlinks: []; 
+  
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
+  
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+  
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
@@ -8562,6 +9091,39 @@ xAODTe...elessRead   INFO
     ivec: [1117 1118]; 
     lvec: []; 
     svec: ['str1467' 'str1468' 'str1469' 'str1470']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[0]; 
+    decorVLinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+    plink: ctrig[0]; 
+    vlinks: [[inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
+  
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+  
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
@@ -9076,6 +9638,39 @@ xAODTe...elessRead   INFO
     ivec: [1118 1119 1120]; 
     lvec: [cvec[8]]; 
     svec: []; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: [inv]; 
+    decorVLinks: []; 
+    plink: [inv]; 
+    vlinks: [cvec[8]; ctrig[3]; ]; 
+  
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+  
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[1]; 
+    decorVLinks: [ctrig[1]; [inv]; cvec[7]; ctrig[4]; ]; 
+    plink: cvec[1]; 
+    vlinks: [ctrig[6]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: cvec[1]; 
+    decorVLinks: [ctrig[1]; [inv]; cvec[7]; ctrig[4]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
@@ -9590,6 +10185,39 @@ xAODTe...elessRead   INFO
     ivec: [1119 1120 1121 1122]; 
     lvec: [cvec[9] cvec[0]]; 
     svec: ['str1469']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: cvec[8]; 
+    decorVLinks: [ctrig[6]; ]; 
+    plink: cvec[8]; 
+    vlinks: [ctrig[3]; [inv]; cvec[1]; ]; 
+  
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[1]; 
+    decorVLinks: [ctrig[1]; [inv]; cvec[7]; ctrig[4]; ]; 
+    plink: cvec[1]; 
+    vlinks: [ctrig[6]; ]; 
+  
+    decorLink: ctrig[6]; 
+    decorVLinks: []; 
+    plink: ctrig[6]; 
+    vlinks: [[inv]; cvec[4]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: ctrig[6]; 
+    decorVLinks: []; 
+    plink: cvec[1]; 
+    vlinks: [ctrig[6]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
@@ -10104,6 +10732,39 @@ xAODTe...elessRead   INFO
     ivec: []; 
     lvec: [cvec[0] cvec[1] cvec[2]]; 
     svec: ['str1470' 'str1471']; 
+xAODTe...elessRead   INFO plinksContainer types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO   
+    decorLink: ctrig[3]; 
+    decorVLinks: [[inv]; cvec[4]; ]; 
+    plink: ctrig[3]; 
+    vlinks: [[inv]; cvec[1]; ctrig[6]; [inv]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+    plink: [inv]; 
+    vlinks: []; 
+  
+    decorLink: cvec[1]; 
+    decorVLinks: [ctrig[1]; [inv]; cvec[7]; ctrig[4]; ]; 
+    plink: cvec[1]; 
+    vlinks: [ctrig[6]; ]; 
+  
+    decorLink: ctrig[6]; 
+    decorVLinks: []; 
+    plink: ctrig[6]; 
+    vlinks: [[inv]; cvec[4]; ]; 
+  
+    decorLink: [inv]; 
+    decorVLinks: [cvec[7]; ]; 
+    plink: [inv]; 
+    vlinks: [cvec[4]; ctrig[1]; [inv]; ]; 
+
+xAODTe...elessRead   INFO plinksInfo types: decorLink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > decorVLinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > plink/SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > vlinks/std::vector<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >,std::allocator<SG::PackedLink<DataVector<DMTest::C_v1,DataModel_detail::NoBase> > > > 
+xAODTe...elessRead   INFO 
+    decorLink: [inv]; 
+    decorVLinks: [cvec[7]; ]; 
+    plink: ctrig[6]; 
+    vlinks: [[inv]; cvec[4]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 ClassIDSvc           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL

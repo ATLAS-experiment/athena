@@ -93,6 +93,12 @@ accessors = {
     'SG::JaggedVecElt<ElementLink<DataVector<DMTest::C_v1> > >' :
     (ROOT.SG.ConstAccessor(ROOT.SG.JaggedVecElt(ROOT.ElementLink(CVec_type))),
      format_el_vec),
+    'SG::PackedLink<DataVector<DMTest::C_v1> >' :
+    (ROOT.SG.ConstAccessor(ROOT.SG.PackedLink(ROOT.DataVector(ROOT.DMTest.C_v1))),
+     format_el),
+    'std::vector<SG::PackedLink<DataVector<DMTest::C_v1> > >' :
+    (ROOT.SG.ConstAccessor(ROOT.std.vector(ROOT.SG.PackedLink(ROOT.DataVector(ROOT.DMTest.C_v1)))),
+     format_el_vec),
     }
 
 def dump_auxitem (x, auxid, f = sys.stdout):
@@ -132,6 +138,14 @@ def dump_xaodobj (h, f=sys.stdout):
     if hasattr(h, '__deref__'):
         h = h.__deref__()
     dump_auxdata (h)
+    print ('')
+    return
+
+
+def dump_plinks (p, f=sys.stdout):
+    if hasattr(p, '__deref__'):
+        p = p.__deref__()
+    dump_auxdata (p)
     print ('')
     return
 
@@ -220,6 +234,15 @@ class xAODTestRead:
         jvecInfo = getattr (tree, self.readPrefix + 'jvecInfo')
         dump_xaodobj (jvecInfo)
 
+        print (self.readPrefix + 'plinksContainer')
+        vec = getattr (tree, self.readPrefix + 'plinksContainer')
+        for h in vec:
+            dump_plinks (h)
+
+        print (self.readPrefix + 'plinksInfo')
+        plinksInfo = getattr (tree, self.readPrefix + 'plinksInfo')
+        dump_plinks (plinksInfo)
+
         #vec = getattr (tree, self.readPrefix + 'hview')
         #print (self.readPrefix + 'hview')
         #for h in vec:
@@ -243,6 +266,8 @@ class xAODTestCopy:
         CHECK (event.copy (self.readPrefix + 'hvec'))
         CHECK (event.copy (self.readPrefix + 'jvecContainer'))
         CHECK (event.copy (self.readPrefix + 'jvecInfo'))
+        CHECK (event.copy (self.readPrefix + 'plinksContainer'))
+        CHECK (event.copy (self.readPrefix + 'plinksInfo'))
         #CHECK (event.copy (self.readPrefix + 'hview'))
 
         if self.writePrefix != None:
@@ -269,6 +294,12 @@ class xAODTestCopy:
 
             jvecinfo = getattr (tree, self.readPrefix + 'jvecInfo')
             copy_obj (event, jvecinfo, self.writePrefix + 'jvecInfo')
+
+            plinks = getattr (tree, self.readPrefix + 'plinksContainer')
+            copy_vec (event, plinks, self.writePrefix + 'plinksContainer')
+
+            plinksinfo = getattr (tree, self.readPrefix + 'plinksInfo')
+            copy_obj (event, plinksinfo, self.writePrefix + 'plinksInfo')
 
             #hview = getattr (tree, self.readPrefix + 'hview')
             #copy_view (event, hview, self.writePrefix + 'hview')

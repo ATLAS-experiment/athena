@@ -1,21 +1,21 @@
-Mon Jul 29 12:32:39 EDT 2024
+Mon Jul 29 16:15:53 EDT 2024
 Preloading libexcabort.so
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Mon Jul 29 12:32:42 2024
+                                          running on karma on Mon Jul 29 16:15:55 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 CoreDumpSvc                       INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 Athena...ntLoopMgr                INFO Initializing AthenaHiveEventLoopMgr
-ClassIDSvc                        INFO getRegistryEntries: read 3210 CLIDRegistry entries for module ALL
-ClassIDSvc                   0    INFO getRegistryEntries: read 4033 CLIDRegistry entries for module ALL
-ClassIDSvc                   0    INFO getRegistryEntries: read 7923 CLIDRegistry entries for module ALL
+ClassIDSvc                        INFO getRegistryEntries: read 3212 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 4236 CLIDRegistry entries for module ALL
+ClassIDSvc                   0    INFO getRegistryEntries: read 7927 CLIDRegistry entries for module ALL
 PyComponentMgr               0    INFO Initializing PyComponentMgr...
 LoadReadDicts                0    INFO Initializing LoadReadDicts...
 ThreadPoolSvc                0    INFO no thread init tools attached
 Avalan...edulerSvc           0    INFO Activating scheduler in a separate thread
-Avalan...edulerSvc           0    INFO Found 19 algorithms
+Avalan...edulerSvc           0    INFO Found 20 algorithms
 Avalan...edulerSvc           0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
 Avalan...edulerSvc           0    INFO    o  ( 'DMTest::C' , 'StoreGateSvc+cinfo' )     required by Algorithm: 
 Avalan...edulerSvc           0    INFO        * xAODTestReadCInfo
@@ -51,8 +51,20 @@ Avalan...edulerSvc           0    INFO    o  ( 'DMTest::JVecContainer' , 'StoreG
 Avalan...edulerSvc           0    INFO        * xAODTestReadJVec
 Avalan...edulerSvc           0    INFO    o  ( 'DMTest::JVecContainer' , 'StoreGateSvc+jvecContainer.decorJVec' )     required by Algorithm: 
 Avalan...edulerSvc           0    INFO        * xAODTestReadJVec
+Avalan...edulerSvc           0    INFO    o  ( 'DMTest::PLinks' , 'StoreGateSvc+plinksInfo' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
+Avalan...edulerSvc           0    INFO    o  ( 'DMTest::PLinksContainer' , 'StoreGateSvc+plinksContainer' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
+Avalan...edulerSvc           0    INFO    o  ( 'DMTest::PLinksContainer' , 'StoreGateSvc+plinksContainer.decorLink' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
+Avalan...edulerSvc           0    INFO    o  ( 'DMTest::PLinksContainer' , 'StoreGateSvc+plinksContainer.decorVLinks' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
 Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+jvecInfo.decorJVec' )     required by Algorithm: 
 Avalan...edulerSvc           0    INFO        * xAODTestReadJVec
+Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+plinksInfo.decorLink' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
+Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+plinksInfo.decorVLinks' )     required by Algorithm: 
+Avalan...edulerSvc           0    INFO        * xAODTestReadPLinks
 PrecedenceSvc                0    INFO Assembling CF and DF task precedence rules
 PrecedenceSvc                0    INFO PrecedenceSvc initialized successfully
 Avalan...edulerSvc           0    INFO Concurrency level information:
@@ -92,22 +104,22 @@ Domain[ROOT_All]             0    INFO ->  Deaccess DbDatabase   READ      [ROOT
 Domain[ROOT_All]             0    INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] 130D334E-D58E-3542-99BD-62EBF795DE66
+Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] BEBE855A-E24A-674D-8BFF-AFA72C351A90
 Domain[ROOT_All]             0    INFO                           xaoddata3.root
 RootDatabase.open            0    INFO xaoddata3.root File version:63202
 Athena...ntLoopMgr           0    INFO Setup EventSelector service EventSelector
 ApplicationMgr               0    INFO Application Manager Initialized successfully
 xaoddata3.root               0    INFO Database being retired...
-Domain[ROOT_All]             0    INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 130D334E-D58E-3542-99BD-62EBF795DE66
+Domain[ROOT_All]             0    INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BEBE855A-E24A-674D-8BFF-AFA72C351A90
 Domain[ROOT_All]             0    INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 DbSession                    0    INFO     Open     DbSession    
 Domain[ROOT_All]             0    INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] 130D334E-D58E-3542-99BD-62EBF795DE66
+Domain[ROOT_All]             0    INFO ->  Access   DbDatabase   READ      [ROOT_All] BEBE855A-E24A-674D-8BFF-AFA72C351A90
 Domain[ROOT_All]             0    INFO                           xaoddata3.root
 RootDatabase.open            0    INFO xaoddata3.root File version:63202
 ApplicationMgr               0    INFO Application Manager Started successfully
 Athena...ntLoopMgr           0    INFO Starting loop on events
-ClassIDSvc             0     0    INFO getRegistryEntries: read 755 CLIDRegistry entries for module ALL
+ClassIDSvc             0     0    INFO getRegistryEntries: read 764 CLIDRegistry entries for module ALL
 EventP...stencySvc     0     0    INFO Added successfully Conversion service:AthenaPoolCnvSvc
 TBranc...DynReader     0     0    INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 Athena...ntLoopMgr     0     0    INFO   ===>>>  start of run 0    <<<===
@@ -168,20 +180,35 @@ xAODTestReadCVec       0     0    INFO  anInt1 210 aFloat: 400.9 pInt: 1010 pFlo
   pvFloat: [-0.408 -0.308 -0.208 -0.108 -0.008 0.092 0.192 0.292 0.392 ]
   dpvFloat: [0.920 0.921 0.922 0.923 0.924 0.925 0.926 0.927 0.928 ]
 
-xAODTestReadCInfo      0     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      0     0    INFO cinfo  anInt1 2000 aFloat: 0.2 anInt2: 4000 dInt1: 6000 cEL: cvec[2]
-xAODTestReadCView      0     0    INFO cview: 210 209 208 207 206 205 204 203 202 201
-xAODTestRead_copy      0     0    INFO 1
-xAODTestRead_copy      0     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      0     0    INFO  anInt1 1001 aFloat: 1200 anInt2: 1401 dInt1: 961
-xAODTestRead_copy      0     0    INFO  anInt1 1002 aFloat: 1200.1 anInt2: 1402 dInt1: 962
-xAODTestRead_copy      0     0    INFO  anInt1 1003 aFloat: 1200.2 anInt2: 1403 dInt1: 963
-xAODTestRead_copy      0     0    INFO  anInt1 1004 aFloat: 1200.3 anInt2: 1404 dInt1: 964
-xAODTestRead_copy      0     0    INFO  anInt1 1005 aFloat: 1200.4 anInt2: 1405 dInt1: 965
-xAODTestRead_copy      0     0    INFO  anInt1 1006 aFloat: 1200.5 anInt2: 1406 dInt1: 966
-xAODTestRead_copy      0     0    INFO  anInt1 1007 aFloat: 1200.6 anInt2: 1407 dInt1: 967
-xAODTestRead_copy      0     0    INFO  anInt1 1008 aFloat: 1200.7 anInt2: 1408 dInt1: 968
-xAODTestRead_copy      0     0    INFO copy_cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
+xAODTestRead           0     0    INFO 1
+xAODTestRead           0     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           0     0    INFO  anInt1 1001 aFloat: 1200 anInt2: 1401 dInt1: 961
+xAODTestRead           0     0    INFO  anInt1 1002 aFloat: 1200.1 anInt2: 1402 dInt1: 962
+xAODTestRead           0     0    INFO  anInt1 1003 aFloat: 1200.2 anInt2: 1403 dInt1: 963
+xAODTestRead           0     0    INFO  anInt1 1004 aFloat: 1200.3 anInt2: 1404 dInt1: 964
+xAODTestRead           0     0    INFO  anInt1 1005 aFloat: 1200.4 anInt2: 1405 dInt1: 965
+xAODTestRead           0     0    INFO  anInt1 1006 aFloat: 1200.5 anInt2: 1406 dInt1: 966
+xAODTestRead           0     0    INFO  anInt1 1007 aFloat: 1200.6 anInt2: 1407 dInt1: 967
+xAODTestRead           0     0    INFO  anInt1 1008 aFloat: 1200.7 anInt2: 1408 dInt1: 968
+xAODTestRead           0     0    INFO cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
+xAODTe...Info_copy     0     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     0     0    INFO cinfo  anInt1 2000 aFloat: 0.2 anInt2: 4000 dInt1: 6000 cEL: cvec[2]
+xAODTestReadPLinks     0     0    INFO plinksContainer
+xAODTestReadPLinks     0     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     0     0    INFO   link: (cvec:0)  links:
+xAODTestReadPLinks     0     0    INFO   decorLink: (cvec:0) decorVLinks: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks     0     0    INFO   link: (ctrig:1)  links: (:inv)
+xAODTestReadPLinks     0     0    INFO   decorLink: (ctrig:1) decorVLinks: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     0     0    INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks     0     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks     0     0    INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks     0     0    INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks     0     0    INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     0     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks     0     0    INFO plinksInfo
+xAODTestReadPLinks     0     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks     0     0    INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks     0     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
 xAODTestReadJVec       0     0    INFO jvecContainer
 xAODTestReadJVec       0     0    INFO   ivec: []  fvec: [200.5]  svec: ['str450' 'str451']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
 xAODTestReadJVec       0     0    INFO   decorJVec: [300.5 301.5]
@@ -199,8 +226,17 @@ xAODTestReadJVec       0     0    INFO   decorJVec: [404.5]
 xAODTe...HVec_copy     0     0    INFO copy_hvec: 801.5 802.5 803.5 804.5 805.5 806.5 807.5 808.5 809.5 810.5 811.5 812.5 813.5 814.5 815.5 816.5 817.5 818.5 819.5 820.5
 xAODTe...HVec_copy     0     0    INFO copy_hview: 820.5 819.5 818.5 817.5 816.5 815.5 814.5 813.5 812.5 811.5 810.5 809.5 808.5 807.5 806.5 805.5 804.5 803.5 802.5 801.5
 xAODTe...View_copy     0     0    INFO copy_cview: 210 209 208 207 206 205 204 203 202 201
-xAODTe...Info_copy     0     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     0     0    INFO cinfo  anInt1 2000 aFloat: 0.2 anInt2: 4000 dInt1: 6000 cEL: cvec[2]
+xAODTestRead_copy      0     0    INFO 1
+xAODTestRead_copy      0     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      0     0    INFO  anInt1 1001 aFloat: 1200 anInt2: 1401 dInt1: 961
+xAODTestRead_copy      0     0    INFO  anInt1 1002 aFloat: 1200.1 anInt2: 1402 dInt1: 962
+xAODTestRead_copy      0     0    INFO  anInt1 1003 aFloat: 1200.2 anInt2: 1403 dInt1: 963
+xAODTestRead_copy      0     0    INFO  anInt1 1004 aFloat: 1200.3 anInt2: 1404 dInt1: 964
+xAODTestRead_copy      0     0    INFO  anInt1 1005 aFloat: 1200.4 anInt2: 1405 dInt1: 965
+xAODTestRead_copy      0     0    INFO  anInt1 1006 aFloat: 1200.5 anInt2: 1406 dInt1: 966
+xAODTestRead_copy      0     0    INFO  anInt1 1007 aFloat: 1200.6 anInt2: 1407 dInt1: 967
+xAODTestRead_copy      0     0    INFO  anInt1 1008 aFloat: 1200.7 anInt2: 1408 dInt1: 968
+xAODTestRead_copy      0     0    INFO copy_cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
 xAODTe...CVec_copy     0     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     0     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 TBranc...DynReader     0     0    INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
@@ -256,19 +292,11 @@ xAODTe...CVec_copy     0     0    INFO  anInt1 210 aFloat: 400.9 pInt: 1010 pFlo
 
 xAODTestReadHVec       0     0    INFO hvec: 801.5 802.5 803.5 804.5 805.5 806.5 807.5 808.5 809.5 810.5 811.5 812.5 813.5 814.5 815.5 816.5 817.5 818.5 819.5 820.5
 xAODTestReadHVec       0     0    INFO hview: 820.5 819.5 818.5 817.5 816.5 815.5 814.5 813.5 812.5 811.5 810.5 809.5 808.5 807.5 806.5 805.5 804.5 803.5 802.5 801.5
-xAODTestRead           0     0    INFO 1
-xAODTestRead           0     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           0     0    INFO  anInt1 1001 aFloat: 1200 anInt2: 1401 dInt1: 961
-xAODTestRead           0     0    INFO  anInt1 1002 aFloat: 1200.1 anInt2: 1402 dInt1: 962
-xAODTestRead           0     0    INFO  anInt1 1003 aFloat: 1200.2 anInt2: 1403 dInt1: 963
-xAODTestRead           0     0    INFO  anInt1 1004 aFloat: 1200.3 anInt2: 1404 dInt1: 964
-xAODTestRead           0     0    INFO  anInt1 1005 aFloat: 1200.4 anInt2: 1405 dInt1: 965
-xAODTestRead           0     0    INFO  anInt1 1006 aFloat: 1200.5 anInt2: 1406 dInt1: 966
-xAODTestRead           0     0    INFO  anInt1 1007 aFloat: 1200.6 anInt2: 1407 dInt1: 967
-xAODTestRead           0     0    INFO  anInt1 1008 aFloat: 1200.7 anInt2: 1408 dInt1: 968
-xAODTestRead           0     0    INFO cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
+xAODTestReadCView      0     0    INFO cview: 210 209 208 207 206 205 204 203 202 201
+xAODTestReadCInfo      0     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      0     0    INFO cinfo  anInt1 2000 aFloat: 0.2 anInt2: 4000 dInt1: 6000 cEL: cvec[2]
 Athena...ntLoopMgr     0     0    INFO   ===>>>  done processing event #1, run #0 on slot 0,  1 events processed so far  <<<===
-ClassIDSvc             1     0    INFO getRegistryEntries: read 66 CLIDRegistry entries for module ALL
+ClassIDSvc             1     0    INFO getRegistryEntries: read 70 CLIDRegistry entries for module ALL
 Athena...ntLoopMgr     1     0    INFO   ===>>>  start processing event #2, run #0 on slot 0,  1 events processed so far  <<<===
 xAODTestReadCVec       1     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTestReadCVec       1     0    INFO Type of aux store: DMTest::CAuxContainer_v1
@@ -322,20 +350,35 @@ xAODTestReadCVec       1     0    INFO  anInt1 310 aFloat: 600.9 pInt: 1510 pFlo
   pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 0.393 ]
   dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 0.938 ]
 
-xAODTestReadCInfo      1     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      1     0    INFO cinfo  anInt1 3000 aFloat: 0.3 anInt2: 6000 dInt1: 9000 cEL: cvec[3]
-xAODTestReadCView      1     0    INFO cview: 310 309 308 307 306 305 304 303 302 301
-xAODTestRead_copy      1     0    INFO 2
-xAODTestRead_copy      1     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      1     0    INFO  anInt1 1501 aFloat: 1800 anInt2: 2101 dInt1: 1441
-xAODTestRead_copy      1     0    INFO  anInt1 1502 aFloat: 1800.1 anInt2: 2102 dInt1: 1442
-xAODTestRead_copy      1     0    INFO  anInt1 1503 aFloat: 1800.2 anInt2: 2103 dInt1: 1443
-xAODTestRead_copy      1     0    INFO  anInt1 1504 aFloat: 1800.3 anInt2: 2104 dInt1: 1444
-xAODTestRead_copy      1     0    INFO  anInt1 1505 aFloat: 1800.4 anInt2: 2105 dInt1: 1445
-xAODTestRead_copy      1     0    INFO  anInt1 1506 aFloat: 1800.5 anInt2: 2106 dInt1: 1446
-xAODTestRead_copy      1     0    INFO  anInt1 1507 aFloat: 1800.6 anInt2: 2107 dInt1: 1447
-xAODTestRead_copy      1     0    INFO  anInt1 1508 aFloat: 1800.7 anInt2: 2108 dInt1: 1448
-xAODTestRead_copy      1     0    INFO copy_cvecWD 1003: 601 602 603 604 605 606 607 608 609 610
+xAODTestRead           1     0    INFO 2
+xAODTestRead           1     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           1     0    INFO  anInt1 1501 aFloat: 1800 anInt2: 2101 dInt1: 1441
+xAODTestRead           1     0    INFO  anInt1 1502 aFloat: 1800.1 anInt2: 2102 dInt1: 1442
+xAODTestRead           1     0    INFO  anInt1 1503 aFloat: 1800.2 anInt2: 2103 dInt1: 1443
+xAODTestRead           1     0    INFO  anInt1 1504 aFloat: 1800.3 anInt2: 2104 dInt1: 1444
+xAODTestRead           1     0    INFO  anInt1 1505 aFloat: 1800.4 anInt2: 2105 dInt1: 1445
+xAODTestRead           1     0    INFO  anInt1 1506 aFloat: 1800.5 anInt2: 2106 dInt1: 1446
+xAODTestRead           1     0    INFO  anInt1 1507 aFloat: 1800.6 anInt2: 2107 dInt1: 1447
+xAODTestRead           1     0    INFO  anInt1 1508 aFloat: 1800.7 anInt2: 2108 dInt1: 1448
+xAODTestRead           1     0    INFO cvecWD 1003: 601 602 603 604 605 606 607 608 609 610
+xAODTe...Info_copy     1     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     1     0    INFO cinfo  anInt1 3000 aFloat: 0.3 anInt2: 6000 dInt1: 9000 cEL: cvec[3]
+xAODTestReadPLinks     1     0    INFO plinksContainer
+xAODTestReadPLinks     1     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks     1     0    INFO   link: (ctrig:1)  links: (:inv)
+xAODTestReadPLinks     1     0    INFO   decorLink: (ctrig:1) decorVLinks: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     1     0    INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks     1     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks     1     0    INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks     1     0    INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks     1     0    INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     1     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks     1     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     1     0    INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     1     0    INFO plinksInfo
+xAODTestReadPLinks     1     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks     1     0    INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     1     0    INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
 xAODTestReadJVec       1     0    INFO jvecContainer
 xAODTestReadJVec       1     0    INFO   ivec: [101]  fvec: [201.5 202.5]  svec: ['str451' 'str452' 'str453']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
 xAODTestReadJVec       1     0    INFO   decorJVec: [301.5 302.5 303.5]
@@ -353,8 +396,17 @@ xAODTestReadJVec       1     0    INFO   decorJVec: [405.5 406.5]
 xAODTe...HVec_copy     1     0    INFO copy_hvec: 1201.5 1202.5 1203.5 1204.5 1205.5 1206.5 1207.5 1208.5 1209.5 1210.5 1211.5 1212.5 1213.5 1214.5 1215.5 1216.5 1217.5 1218.5 1219.5 1220.5
 xAODTe...HVec_copy     1     0    INFO copy_hview: 1220.5 1219.5 1218.5 1217.5 1216.5 1215.5 1214.5 1213.5 1212.5 1211.5 1210.5 1209.5 1208.5 1207.5 1206.5 1205.5 1204.5 1203.5 1202.5 1201.5
 xAODTe...View_copy     1     0    INFO copy_cview: 310 309 308 307 306 305 304 303 302 301
-xAODTe...Info_copy     1     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     1     0    INFO cinfo  anInt1 3000 aFloat: 0.3 anInt2: 6000 dInt1: 9000 cEL: cvec[3]
+xAODTestRead_copy      1     0    INFO 2
+xAODTestRead_copy      1     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      1     0    INFO  anInt1 1501 aFloat: 1800 anInt2: 2101 dInt1: 1441
+xAODTestRead_copy      1     0    INFO  anInt1 1502 aFloat: 1800.1 anInt2: 2102 dInt1: 1442
+xAODTestRead_copy      1     0    INFO  anInt1 1503 aFloat: 1800.2 anInt2: 2103 dInt1: 1443
+xAODTestRead_copy      1     0    INFO  anInt1 1504 aFloat: 1800.3 anInt2: 2104 dInt1: 1444
+xAODTestRead_copy      1     0    INFO  anInt1 1505 aFloat: 1800.4 anInt2: 2105 dInt1: 1445
+xAODTestRead_copy      1     0    INFO  anInt1 1506 aFloat: 1800.5 anInt2: 2106 dInt1: 1446
+xAODTestRead_copy      1     0    INFO  anInt1 1507 aFloat: 1800.6 anInt2: 2107 dInt1: 1447
+xAODTestRead_copy      1     0    INFO  anInt1 1508 aFloat: 1800.7 anInt2: 2108 dInt1: 1448
+xAODTestRead_copy      1     0    INFO copy_cvecWD 1003: 601 602 603 604 605 606 607 608 609 610
 xAODTe...CVec_copy     1     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     1     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     1     0    INFO  anInt1 301 aFloat: 600 pInt: 1501 pFloat: 0.03 anInt2: 901 dInt1: 1201 dVar1: 1351 dpInt1: 151 cEL: cvec[9]
@@ -409,17 +461,9 @@ xAODTe...CVec_copy     1     0    INFO  anInt1 310 aFloat: 600.9 pInt: 1510 pFlo
 
 xAODTestReadHVec       1     0    INFO hvec: 1201.5 1202.5 1203.5 1204.5 1205.5 1206.5 1207.5 1208.5 1209.5 1210.5 1211.5 1212.5 1213.5 1214.5 1215.5 1216.5 1217.5 1218.5 1219.5 1220.5
 xAODTestReadHVec       1     0    INFO hview: 1220.5 1219.5 1218.5 1217.5 1216.5 1215.5 1214.5 1213.5 1212.5 1211.5 1210.5 1209.5 1208.5 1207.5 1206.5 1205.5 1204.5 1203.5 1202.5 1201.5
-xAODTestRead           1     0    INFO 2
-xAODTestRead           1     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           1     0    INFO  anInt1 1501 aFloat: 1800 anInt2: 2101 dInt1: 1441
-xAODTestRead           1     0    INFO  anInt1 1502 aFloat: 1800.1 anInt2: 2102 dInt1: 1442
-xAODTestRead           1     0    INFO  anInt1 1503 aFloat: 1800.2 anInt2: 2103 dInt1: 1443
-xAODTestRead           1     0    INFO  anInt1 1504 aFloat: 1800.3 anInt2: 2104 dInt1: 1444
-xAODTestRead           1     0    INFO  anInt1 1505 aFloat: 1800.4 anInt2: 2105 dInt1: 1445
-xAODTestRead           1     0    INFO  anInt1 1506 aFloat: 1800.5 anInt2: 2106 dInt1: 1446
-xAODTestRead           1     0    INFO  anInt1 1507 aFloat: 1800.6 anInt2: 2107 dInt1: 1447
-xAODTestRead           1     0    INFO  anInt1 1508 aFloat: 1800.7 anInt2: 2108 dInt1: 1448
-xAODTestRead           1     0    INFO cvecWD 1003: 601 602 603 604 605 606 607 608 609 610
+xAODTestReadCView      1     0    INFO cview: 310 309 308 307 306 305 304 303 302 301
+xAODTestReadCInfo      1     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      1     0    INFO cinfo  anInt1 3000 aFloat: 0.3 anInt2: 6000 dInt1: 9000 cEL: cvec[3]
 Athena...ntLoopMgr     1     0    INFO   ===>>>  done processing event #2, run #0 on slot 0,  2 events processed so far  <<<===
 Athena...ntLoopMgr     2     0    INFO   ===>>>  start processing event #3, run #0 on slot 0,  2 events processed so far  <<<===
 xAODTestReadCVec       2     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -474,19 +518,36 @@ xAODTestReadCVec       2     0    INFO  anInt1 410 aFloat: 800.9 pInt: 2010 pFlo
   pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 0.394 ]
   dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 0.948 ]
 
-xAODTestRead           2     0    INFO 3
-xAODTestRead           2     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           2     0    INFO  anInt1 2001 aFloat: 2400 anInt2: 2801 dInt1: 1921
-xAODTestRead           2     0    INFO  anInt1 2002 aFloat: 2400.1 anInt2: 2802 dInt1: 1922
-xAODTestRead           2     0    INFO  anInt1 2003 aFloat: 2400.2 anInt2: 2803 dInt1: 1923
-xAODTestRead           2     0    INFO  anInt1 2004 aFloat: 2400.3 anInt2: 2804 dInt1: 1924
-xAODTestRead           2     0    INFO  anInt1 2005 aFloat: 2400.4 anInt2: 2805 dInt1: 1925
-xAODTestRead           2     0    INFO  anInt1 2006 aFloat: 2400.5 anInt2: 2806 dInt1: 1926
-xAODTestRead           2     0    INFO  anInt1 2007 aFloat: 2400.6 anInt2: 2807 dInt1: 1927
-xAODTestRead           2     0    INFO  anInt1 2008 aFloat: 2400.7 anInt2: 2808 dInt1: 1928
-xAODTestRead           2     0    INFO cvecWD 1004: 801 802 803 804 805 806 807 808 809 810
-xAODTe...Info_copy     2     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     2     0    INFO cinfo  anInt1 4000 aFloat: 0.4 anInt2: 8000 dInt1: 12000 cEL: cvec[4]
+xAODTestReadCInfo      2     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      2     0    INFO cinfo  anInt1 4000 aFloat: 0.4 anInt2: 8000 dInt1: 12000 cEL: cvec[4]
+xAODTestReadCView      2     0    INFO cview: 410 409 408 407 406 405 404 403 402 401
+xAODTestRead_copy      2     0    INFO 3
+xAODTestRead_copy      2     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      2     0    INFO  anInt1 2001 aFloat: 2400 anInt2: 2801 dInt1: 1921
+xAODTestRead_copy      2     0    INFO  anInt1 2002 aFloat: 2400.1 anInt2: 2802 dInt1: 1922
+xAODTestRead_copy      2     0    INFO  anInt1 2003 aFloat: 2400.2 anInt2: 2803 dInt1: 1923
+xAODTestRead_copy      2     0    INFO  anInt1 2004 aFloat: 2400.3 anInt2: 2804 dInt1: 1924
+xAODTestRead_copy      2     0    INFO  anInt1 2005 aFloat: 2400.4 anInt2: 2805 dInt1: 1925
+xAODTestRead_copy      2     0    INFO  anInt1 2006 aFloat: 2400.5 anInt2: 2806 dInt1: 1926
+xAODTestRead_copy      2     0    INFO  anInt1 2007 aFloat: 2400.6 anInt2: 2807 dInt1: 1927
+xAODTestRead_copy      2     0    INFO  anInt1 2008 aFloat: 2400.7 anInt2: 2808 dInt1: 1928
+xAODTestRead_copy      2     0    INFO copy_cvecWD 1004: 801 802 803 804 805 806 807 808 809 810
+xAODTestReadPLinks     2     0    INFO plinksContainer
+xAODTestReadPLinks     2     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     2     0    INFO   link: (:inv)  links: (cvec:3) (ctrig:4)
+xAODTestReadPLinks     2     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks     2     0    INFO   link: (cvec:3)  links: (ctrig:4) (:inv) (cvec:6)
+xAODTestReadPLinks     2     0    INFO   decorLink: (cvec:3) decorVLinks: (ctrig:7)
+xAODTestReadPLinks     2     0    INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     2     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks     2     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     2     0    INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     2     0    INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks     2     0    INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     2     0    INFO plinksInfo
+xAODTestReadPLinks     2     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks     2     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     2     0    INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
 xAODTestReadJVec       2     0    INFO jvecContainer
 xAODTestReadJVec       2     0    INFO   ivec: [102 103]  fvec: [202.5 203.5 204.5]  svec: ['str452' 'str453' 'str454' 'str455']  lvec: []
 xAODTestReadJVec       2     0    INFO   decorJVec: [302.5 303.5 304.5 305.5]
@@ -504,17 +565,8 @@ xAODTestReadJVec       2     0    INFO   decorJVec: [406.5 407.5 408.5]
 xAODTe...HVec_copy     2     0    INFO copy_hvec: 1601.5 1602.5 1603.5 1604.5 1605.5 1606.5 1607.5 1608.5 1609.5 1610.5 1611.5 1612.5 1613.5 1614.5 1615.5 1616.5 1617.5 1618.5 1619.5 1620.5
 xAODTe...HVec_copy     2     0    INFO copy_hview: 1620.5 1619.5 1618.5 1617.5 1616.5 1615.5 1614.5 1613.5 1612.5 1611.5 1610.5 1609.5 1608.5 1607.5 1606.5 1605.5 1604.5 1603.5 1602.5 1601.5
 xAODTe...View_copy     2     0    INFO copy_cview: 410 409 408 407 406 405 404 403 402 401
-xAODTestRead_copy      2     0    INFO 3
-xAODTestRead_copy      2     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      2     0    INFO  anInt1 2001 aFloat: 2400 anInt2: 2801 dInt1: 1921
-xAODTestRead_copy      2     0    INFO  anInt1 2002 aFloat: 2400.1 anInt2: 2802 dInt1: 1922
-xAODTestRead_copy      2     0    INFO  anInt1 2003 aFloat: 2400.2 anInt2: 2803 dInt1: 1923
-xAODTestRead_copy      2     0    INFO  anInt1 2004 aFloat: 2400.3 anInt2: 2804 dInt1: 1924
-xAODTestRead_copy      2     0    INFO  anInt1 2005 aFloat: 2400.4 anInt2: 2805 dInt1: 1925
-xAODTestRead_copy      2     0    INFO  anInt1 2006 aFloat: 2400.5 anInt2: 2806 dInt1: 1926
-xAODTestRead_copy      2     0    INFO  anInt1 2007 aFloat: 2400.6 anInt2: 2807 dInt1: 1927
-xAODTestRead_copy      2     0    INFO  anInt1 2008 aFloat: 2400.7 anInt2: 2808 dInt1: 1928
-xAODTestRead_copy      2     0    INFO copy_cvecWD 1004: 801 802 803 804 805 806 807 808 809 810
+xAODTe...Info_copy     2     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     2     0    INFO cinfo  anInt1 4000 aFloat: 0.4 anInt2: 8000 dInt1: 12000 cEL: cvec[4]
 xAODTe...CVec_copy     2     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     2     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     2     0    INFO  anInt1 401 aFloat: 800 pInt: 2001 pFloat: 0.04 anInt2: 1201 dInt1: 1601 dVar1: 1801 dpInt1: 201 cEL: cvec[9]
@@ -569,26 +621,51 @@ xAODTe...CVec_copy     2     0    INFO  anInt1 410 aFloat: 800.9 pInt: 2010 pFlo
 
 xAODTestReadHVec       2     0    INFO hvec: 1601.5 1602.5 1603.5 1604.5 1605.5 1606.5 1607.5 1608.5 1609.5 1610.5 1611.5 1612.5 1613.5 1614.5 1615.5 1616.5 1617.5 1618.5 1619.5 1620.5
 xAODTestReadHVec       2     0    INFO hview: 1620.5 1619.5 1618.5 1617.5 1616.5 1615.5 1614.5 1613.5 1612.5 1611.5 1610.5 1609.5 1608.5 1607.5 1606.5 1605.5 1604.5 1603.5 1602.5 1601.5
-xAODTestReadCView      2     0    INFO cview: 410 409 408 407 406 405 404 403 402 401
-xAODTestReadCInfo      2     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      2     0    INFO cinfo  anInt1 4000 aFloat: 0.4 anInt2: 8000 dInt1: 12000 cEL: cvec[4]
+xAODTestRead           2     0    INFO 3
+xAODTestRead           2     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           2     0    INFO  anInt1 2001 aFloat: 2400 anInt2: 2801 dInt1: 1921
+xAODTestRead           2     0    INFO  anInt1 2002 aFloat: 2400.1 anInt2: 2802 dInt1: 1922
+xAODTestRead           2     0    INFO  anInt1 2003 aFloat: 2400.2 anInt2: 2803 dInt1: 1923
+xAODTestRead           2     0    INFO  anInt1 2004 aFloat: 2400.3 anInt2: 2804 dInt1: 1924
+xAODTestRead           2     0    INFO  anInt1 2005 aFloat: 2400.4 anInt2: 2805 dInt1: 1925
+xAODTestRead           2     0    INFO  anInt1 2006 aFloat: 2400.5 anInt2: 2806 dInt1: 1926
+xAODTestRead           2     0    INFO  anInt1 2007 aFloat: 2400.6 anInt2: 2807 dInt1: 1927
+xAODTestRead           2     0    INFO  anInt1 2008 aFloat: 2400.7 anInt2: 2808 dInt1: 1928
+xAODTestRead           2     0    INFO cvecWD 1004: 801 802 803 804 805 806 807 808 809 810
 Athena...ntLoopMgr     2     0    INFO   ===>>>  done processing event #3, run #0 on slot 0,  3 events processed so far  <<<===
 Athena...ntLoopMgr     3     0    INFO   ===>>>  start processing event #4, run #0 on slot 0,  3 events processed so far  <<<===
 xAODTestReadCVec       3     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTestReadCVec       3     0    INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestRead           3     0    INFO 4
-xAODTestRead           3     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           3     0    INFO  anInt1 2501 aFloat: 3000 anInt2: 3501 dInt1: 2401
-xAODTestRead           3     0    INFO  anInt1 2502 aFloat: 3000.1 anInt2: 3502 dInt1: 2402
-xAODTestRead           3     0    INFO  anInt1 2503 aFloat: 3000.2 anInt2: 3503 dInt1: 2403
-xAODTestRead           3     0    INFO  anInt1 2504 aFloat: 3000.3 anInt2: 3504 dInt1: 2404
-xAODTestRead           3     0    INFO  anInt1 2505 aFloat: 3000.4 anInt2: 3505 dInt1: 2405
-xAODTestRead           3     0    INFO  anInt1 2506 aFloat: 3000.5 anInt2: 3506 dInt1: 2406
-xAODTestRead           3     0    INFO  anInt1 2507 aFloat: 3000.6 anInt2: 3507 dInt1: 2407
-xAODTestRead           3     0    INFO  anInt1 2508 aFloat: 3000.7 anInt2: 3508 dInt1: 2408
-xAODTestRead           3     0    INFO cvecWD 1005: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010
-xAODTe...Info_copy     3     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     3     0    INFO cinfo  anInt1 5000 aFloat: 0.5 anInt2: 10000 dInt1: 15000 cEL: [18446744073709551615]
+xAODTestReadCInfo      3     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      3     0    INFO cinfo  anInt1 5000 aFloat: 0.5 anInt2: 10000 dInt1: 15000 cEL: [18446744073709551615]
+xAODTestReadCView      3     0    INFO cview:
+xAODTestRead_copy      3     0    INFO 4
+xAODTestRead_copy      3     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      3     0    INFO  anInt1 2501 aFloat: 3000 anInt2: 3501 dInt1: 2401
+xAODTestRead_copy      3     0    INFO  anInt1 2502 aFloat: 3000.1 anInt2: 3502 dInt1: 2402
+xAODTestRead_copy      3     0    INFO  anInt1 2503 aFloat: 3000.2 anInt2: 3503 dInt1: 2403
+xAODTestRead_copy      3     0    INFO  anInt1 2504 aFloat: 3000.3 anInt2: 3504 dInt1: 2404
+xAODTestRead_copy      3     0    INFO  anInt1 2505 aFloat: 3000.4 anInt2: 3505 dInt1: 2405
+xAODTestRead_copy      3     0    INFO  anInt1 2506 aFloat: 3000.5 anInt2: 3506 dInt1: 2406
+xAODTestRead_copy      3     0    INFO  anInt1 2507 aFloat: 3000.6 anInt2: 3507 dInt1: 2407
+xAODTestRead_copy      3     0    INFO  anInt1 2508 aFloat: 3000.7 anInt2: 3508 dInt1: 2408
+xAODTestRead_copy      3     0    INFO copy_cvecWD 1005: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010
+xAODTestReadPLinks     3     0    INFO plinksContainer
+xAODTestReadPLinks     3     0    INFO   plink_DLinks: () (ctrig) 
+xAODTestReadPLinks     3     0    INFO   link: (:inv)  links: (ctrig:4) (:inv) (:inv)
+xAODTestReadPLinks     3     0    INFO   decorLink: (:inv) decorVLinks: (ctrig:7)
+xAODTestReadPLinks     3     0    INFO   link: (ctrig:4)  links: (:inv) (:inv) (ctrig:7) (:inv)
+xAODTestReadPLinks     3     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (:inv)
+xAODTestReadPLinks     3     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     3     0    INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:2) (:inv)
+xAODTestReadPLinks     3     0    INFO   link: (:inv)  links: (ctrig:7)
+xAODTestReadPLinks     3     0    INFO   decorLink: (:inv) decorVLinks: (ctrig:2) (:inv) (:inv) (ctrig:5)
+xAODTestReadPLinks     3     0    INFO   link: (ctrig:7)  links: (:inv) (:inv)
+xAODTestReadPLinks     3     0    INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks     3     0    INFO plinksInfo
+xAODTestReadPLinks     3     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks     3     0    INFO   link: (:inv)  links: (ctrig:7)
+xAODTestReadPLinks     3     0    INFO   decorLink: (ctrig:7) decorVLinks:
 xAODTestReadJVec       3     0    INFO jvecContainer
 xAODTestReadJVec       3     0    INFO   ivec: [103 104 105]  fvec: [203.5 204.5 205.5 206.5]  svec: []  lvec: [(:inv)]
 xAODTestReadJVec       3     0    INFO   decorJVec: []
@@ -606,24 +683,23 @@ xAODTestReadJVec       3     0    INFO   decorJVec: [407.5 408.5 409.5 410.5]
 xAODTe...HVec_copy     3     0    INFO copy_hvec: 2001.5 2002.5 2003.5 2004.5 2005.5 2006.5 2007.5 2008.5 2009.5 2010.5 2011.5 2012.5 2013.5 2014.5 2015.5 2016.5 2017.5 2018.5 2019.5 2020.5
 xAODTe...HVec_copy     3     0    INFO copy_hview: 2020.5 2019.5 2018.5 2017.5 2016.5 2015.5 2014.5 2013.5 2012.5 2011.5 2010.5 2009.5 2008.5 2007.5 2006.5 2005.5 2004.5 2003.5 2002.5 2001.5
 xAODTe...View_copy     3     0    INFO copy_cview:
-xAODTestRead_copy      3     0    INFO 4
-xAODTestRead_copy      3     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      3     0    INFO  anInt1 2501 aFloat: 3000 anInt2: 3501 dInt1: 2401
-xAODTestRead_copy      3     0    INFO  anInt1 2502 aFloat: 3000.1 anInt2: 3502 dInt1: 2402
-xAODTestRead_copy      3     0    INFO  anInt1 2503 aFloat: 3000.2 anInt2: 3503 dInt1: 2403
-xAODTestRead_copy      3     0    INFO  anInt1 2504 aFloat: 3000.3 anInt2: 3504 dInt1: 2404
-xAODTestRead_copy      3     0    INFO  anInt1 2505 aFloat: 3000.4 anInt2: 3505 dInt1: 2405
-xAODTestRead_copy      3     0    INFO  anInt1 2506 aFloat: 3000.5 anInt2: 3506 dInt1: 2406
-xAODTestRead_copy      3     0    INFO  anInt1 2507 aFloat: 3000.6 anInt2: 3507 dInt1: 2407
-xAODTestRead_copy      3     0    INFO  anInt1 2508 aFloat: 3000.7 anInt2: 3508 dInt1: 2408
-xAODTestRead_copy      3     0    INFO copy_cvecWD 1005: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010
+xAODTe...Info_copy     3     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     3     0    INFO cinfo  anInt1 5000 aFloat: 0.5 anInt2: 10000 dInt1: 15000 cEL: [18446744073709551615]
 xAODTe...CVec_copy     3     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     3     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadHVec       3     0    INFO hvec: 2001.5 2002.5 2003.5 2004.5 2005.5 2006.5 2007.5 2008.5 2009.5 2010.5 2011.5 2012.5 2013.5 2014.5 2015.5 2016.5 2017.5 2018.5 2019.5 2020.5
 xAODTestReadHVec       3     0    INFO hview: 2020.5 2019.5 2018.5 2017.5 2016.5 2015.5 2014.5 2013.5 2012.5 2011.5 2010.5 2009.5 2008.5 2007.5 2006.5 2005.5 2004.5 2003.5 2002.5 2001.5
-xAODTestReadCView      3     0    INFO cview:
-xAODTestReadCInfo      3     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      3     0    INFO cinfo  anInt1 5000 aFloat: 0.5 anInt2: 10000 dInt1: 15000 cEL: [18446744073709551615]
+xAODTestRead           3     0    INFO 4
+xAODTestRead           3     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           3     0    INFO  anInt1 2501 aFloat: 3000 anInt2: 3501 dInt1: 2401
+xAODTestRead           3     0    INFO  anInt1 2502 aFloat: 3000.1 anInt2: 3502 dInt1: 2402
+xAODTestRead           3     0    INFO  anInt1 2503 aFloat: 3000.2 anInt2: 3503 dInt1: 2403
+xAODTestRead           3     0    INFO  anInt1 2504 aFloat: 3000.3 anInt2: 3504 dInt1: 2404
+xAODTestRead           3     0    INFO  anInt1 2505 aFloat: 3000.4 anInt2: 3505 dInt1: 2405
+xAODTestRead           3     0    INFO  anInt1 2506 aFloat: 3000.5 anInt2: 3506 dInt1: 2406
+xAODTestRead           3     0    INFO  anInt1 2507 aFloat: 3000.6 anInt2: 3507 dInt1: 2407
+xAODTestRead           3     0    INFO  anInt1 2508 aFloat: 3000.7 anInt2: 3508 dInt1: 2408
+xAODTestRead           3     0    INFO cvecWD 1005: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010
 Athena...ntLoopMgr     3     0    INFO   ===>>>  done processing event #4, run #0 on slot 0,  4 events processed so far  <<<===
 Athena...ntLoopMgr     4     0    INFO   ===>>>  start processing event #5, run #0 on slot 0,  4 events processed so far  <<<===
 xAODTestReadCVec       4     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -678,19 +754,36 @@ xAODTestReadCVec       4     0    INFO  anInt1 610 aFloat: 1200.9 pInt: 3010 pFl
   pvFloat: [-0.404 -0.304 -0.204 -0.104 -0.004 0.096 0.196 0.296 0.396 ]
   dpvFloat: [0.960 0.961 0.962 0.963 0.964 0.965 0.966 0.967 0.968 ]
 
-xAODTestRead           4     0    INFO 5
-xAODTestRead           4     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           4     0    INFO  anInt1 3001 aFloat: 3600 anInt2: 4201 dInt1: 2881
-xAODTestRead           4     0    INFO  anInt1 3002 aFloat: 3600.1 anInt2: 4202 dInt1: 2882
-xAODTestRead           4     0    INFO  anInt1 3003 aFloat: 3600.2 anInt2: 4203 dInt1: 2883
-xAODTestRead           4     0    INFO  anInt1 3004 aFloat: 3600.3 anInt2: 4204 dInt1: 2884
-xAODTestRead           4     0    INFO  anInt1 3005 aFloat: 3600.4 anInt2: 4205 dInt1: 2885
-xAODTestRead           4     0    INFO  anInt1 3006 aFloat: 3600.5 anInt2: 4206 dInt1: 2886
-xAODTestRead           4     0    INFO  anInt1 3007 aFloat: 3600.6 anInt2: 4207 dInt1: 2887
-xAODTestRead           4     0    INFO  anInt1 3008 aFloat: 3600.7 anInt2: 4208 dInt1: 2888
-xAODTestRead           4     0    INFO cvecWD 1006: 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210
-xAODTe...Info_copy     4     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     4     0    INFO cinfo  anInt1 6000 aFloat: 0.6 anInt2: 12000 dInt1: 18000 cEL: cvec[6]
+xAODTestReadCInfo      4     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      4     0    INFO cinfo  anInt1 6000 aFloat: 0.6 anInt2: 12000 dInt1: 18000 cEL: cvec[6]
+xAODTestReadCView      4     0    INFO cview: 610 609 608 607 606 605 604 603 602 601
+xAODTestRead_copy      4     0    INFO 5
+xAODTestRead_copy      4     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      4     0    INFO  anInt1 3001 aFloat: 3600 anInt2: 4201 dInt1: 2881
+xAODTestRead_copy      4     0    INFO  anInt1 3002 aFloat: 3600.1 anInt2: 4202 dInt1: 2882
+xAODTestRead_copy      4     0    INFO  anInt1 3003 aFloat: 3600.2 anInt2: 4203 dInt1: 2883
+xAODTestRead_copy      4     0    INFO  anInt1 3004 aFloat: 3600.3 anInt2: 4204 dInt1: 2884
+xAODTestRead_copy      4     0    INFO  anInt1 3005 aFloat: 3600.4 anInt2: 4205 dInt1: 2885
+xAODTestRead_copy      4     0    INFO  anInt1 3006 aFloat: 3600.5 anInt2: 4206 dInt1: 2886
+xAODTestRead_copy      4     0    INFO  anInt1 3007 aFloat: 3600.6 anInt2: 4207 dInt1: 2887
+xAODTestRead_copy      4     0    INFO  anInt1 3008 aFloat: 3600.7 anInt2: 4208 dInt1: 2888
+xAODTestRead_copy      4     0    INFO copy_cvecWD 1006: 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210
+xAODTestReadPLinks     4     0    INFO plinksContainer
+xAODTestReadPLinks     4     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks     4     0    INFO   link: (ctrig:4)  links: (:inv) (cvec:6) (ctrig:7) (:inv)
+xAODTestReadPLinks     4     0    INFO   decorLink: (ctrig:4) decorVLinks: (:inv) (cvec:9)
+xAODTestReadPLinks     4     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     4     0    INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     4     0    INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks     4     0    INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     4     0    INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks     4     0    INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks     4     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     4     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks     4     0    INFO plinksInfo
+xAODTestReadPLinks     4     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks     4     0    INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks     4     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
 xAODTestReadJVec       4     0    INFO jvecContainer
 xAODTestReadJVec       4     0    INFO   ivec: [104 105 106 107]  fvec: []  svec: ['str454']  lvec: [(cvec:4) (cvec:5)]
 xAODTestReadJVec       4     0    INFO   decorJVec: [304.5]
@@ -708,17 +801,8 @@ xAODTestReadJVec       4     0    INFO   decorJVec: []
 xAODTe...HVec_copy     4     0    INFO copy_hvec: 2401.5 2402.5 2403.5 2404.5 2405.5 2406.5 2407.5 2408.5 2409.5 2410.5 2411.5 2412.5 2413.5 2414.5 2415.5 2416.5 2417.5 2418.5 2419.5 2420.5
 xAODTe...HVec_copy     4     0    INFO copy_hview: 2420.5 2419.5 2418.5 2417.5 2416.5 2415.5 2414.5 2413.5 2412.5 2411.5 2410.5 2409.5 2408.5 2407.5 2406.5 2405.5 2404.5 2403.5 2402.5 2401.5
 xAODTe...View_copy     4     0    INFO copy_cview: 610 609 608 607 606 605 604 603 602 601
-xAODTestRead_copy      4     0    INFO 5
-xAODTestRead_copy      4     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      4     0    INFO  anInt1 3001 aFloat: 3600 anInt2: 4201 dInt1: 2881
-xAODTestRead_copy      4     0    INFO  anInt1 3002 aFloat: 3600.1 anInt2: 4202 dInt1: 2882
-xAODTestRead_copy      4     0    INFO  anInt1 3003 aFloat: 3600.2 anInt2: 4203 dInt1: 2883
-xAODTestRead_copy      4     0    INFO  anInt1 3004 aFloat: 3600.3 anInt2: 4204 dInt1: 2884
-xAODTestRead_copy      4     0    INFO  anInt1 3005 aFloat: 3600.4 anInt2: 4205 dInt1: 2885
-xAODTestRead_copy      4     0    INFO  anInt1 3006 aFloat: 3600.5 anInt2: 4206 dInt1: 2886
-xAODTestRead_copy      4     0    INFO  anInt1 3007 aFloat: 3600.6 anInt2: 4207 dInt1: 2887
-xAODTestRead_copy      4     0    INFO  anInt1 3008 aFloat: 3600.7 anInt2: 4208 dInt1: 2888
-xAODTestRead_copy      4     0    INFO copy_cvecWD 1006: 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210
+xAODTe...Info_copy     4     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     4     0    INFO cinfo  anInt1 6000 aFloat: 0.6 anInt2: 12000 dInt1: 18000 cEL: cvec[6]
 xAODTe...CVec_copy     4     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     4     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     4     0    INFO  anInt1 601 aFloat: 1200 pInt: 3001 pFloat: 0.06 anInt2: 1801 dInt1: 2401 dVar1: 2701 dpInt1: 301 cEL: cvec[9]
@@ -773,9 +857,17 @@ xAODTe...CVec_copy     4     0    INFO  anInt1 610 aFloat: 1200.9 pInt: 3010 pFl
 
 xAODTestReadHVec       4     0    INFO hvec: 2401.5 2402.5 2403.5 2404.5 2405.5 2406.5 2407.5 2408.5 2409.5 2410.5 2411.5 2412.5 2413.5 2414.5 2415.5 2416.5 2417.5 2418.5 2419.5 2420.5
 xAODTestReadHVec       4     0    INFO hview: 2420.5 2419.5 2418.5 2417.5 2416.5 2415.5 2414.5 2413.5 2412.5 2411.5 2410.5 2409.5 2408.5 2407.5 2406.5 2405.5 2404.5 2403.5 2402.5 2401.5
-xAODTestReadCView      4     0    INFO cview: 610 609 608 607 606 605 604 603 602 601
-xAODTestReadCInfo      4     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      4     0    INFO cinfo  anInt1 6000 aFloat: 0.6 anInt2: 12000 dInt1: 18000 cEL: cvec[6]
+xAODTestRead           4     0    INFO 5
+xAODTestRead           4     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           4     0    INFO  anInt1 3001 aFloat: 3600 anInt2: 4201 dInt1: 2881
+xAODTestRead           4     0    INFO  anInt1 3002 aFloat: 3600.1 anInt2: 4202 dInt1: 2882
+xAODTestRead           4     0    INFO  anInt1 3003 aFloat: 3600.2 anInt2: 4203 dInt1: 2883
+xAODTestRead           4     0    INFO  anInt1 3004 aFloat: 3600.3 anInt2: 4204 dInt1: 2884
+xAODTestRead           4     0    INFO  anInt1 3005 aFloat: 3600.4 anInt2: 4205 dInt1: 2885
+xAODTestRead           4     0    INFO  anInt1 3006 aFloat: 3600.5 anInt2: 4206 dInt1: 2886
+xAODTestRead           4     0    INFO  anInt1 3007 aFloat: 3600.6 anInt2: 4207 dInt1: 2887
+xAODTestRead           4     0    INFO  anInt1 3008 aFloat: 3600.7 anInt2: 4208 dInt1: 2888
+xAODTestRead           4     0    INFO cvecWD 1006: 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210
 Athena...ntLoopMgr     4     0    INFO   ===>>>  done processing event #5, run #0 on slot 0,  5 events processed so far  <<<===
 Athena...ntLoopMgr     5     0    INFO   ===>>>  start processing event #6, run #0 on slot 0,  5 events processed so far  <<<===
 xAODTestReadCVec       5     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -830,19 +922,36 @@ xAODTestReadCVec       5     0    INFO  anInt1 710 aFloat: 1400.9 pInt: 3510 pFl
   pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 0.397 ]
   dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 0.978 ]
 
-xAODTestRead           5     0    INFO 6
-xAODTestRead           5     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           5     0    INFO  anInt1 3501 aFloat: 4200 anInt2: 4901 dInt1: 3361
-xAODTestRead           5     0    INFO  anInt1 3502 aFloat: 4200.1 anInt2: 4902 dInt1: 3362
-xAODTestRead           5     0    INFO  anInt1 3503 aFloat: 4200.2 anInt2: 4903 dInt1: 3363
-xAODTestRead           5     0    INFO  anInt1 3504 aFloat: 4200.3 anInt2: 4904 dInt1: 3364
-xAODTestRead           5     0    INFO  anInt1 3505 aFloat: 4200.4 anInt2: 4905 dInt1: 3365
-xAODTestRead           5     0    INFO  anInt1 3506 aFloat: 4200.5 anInt2: 4906 dInt1: 3366
-xAODTestRead           5     0    INFO  anInt1 3507 aFloat: 4200.6 anInt2: 4907 dInt1: 3367
-xAODTestRead           5     0    INFO  anInt1 3508 aFloat: 4200.7 anInt2: 4908 dInt1: 3368
-xAODTestRead           5     0    INFO cvecWD 1007: 1401 1402 1403 1404 1405 1406 1407 1408 1409 1410
-xAODTe...Info_copy     5     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     5     0    INFO cinfo  anInt1 7000 aFloat: 0.7 anInt2: 14000 dInt1: 21000 cEL: cvec[7]
+xAODTestReadCInfo      5     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      5     0    INFO cinfo  anInt1 7000 aFloat: 0.7 anInt2: 14000 dInt1: 21000 cEL: cvec[7]
+xAODTestReadCView      5     0    INFO cview: 710 709 708 707 706 705 704 703 702 701
+xAODTestRead_copy      5     0    INFO 6
+xAODTestRead_copy      5     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      5     0    INFO  anInt1 3501 aFloat: 4200 anInt2: 4901 dInt1: 3361
+xAODTestRead_copy      5     0    INFO  anInt1 3502 aFloat: 4200.1 anInt2: 4902 dInt1: 3362
+xAODTestRead_copy      5     0    INFO  anInt1 3503 aFloat: 4200.2 anInt2: 4903 dInt1: 3363
+xAODTestRead_copy      5     0    INFO  anInt1 3504 aFloat: 4200.3 anInt2: 4904 dInt1: 3364
+xAODTestRead_copy      5     0    INFO  anInt1 3505 aFloat: 4200.4 anInt2: 4905 dInt1: 3365
+xAODTestRead_copy      5     0    INFO  anInt1 3506 aFloat: 4200.5 anInt2: 4906 dInt1: 3366
+xAODTestRead_copy      5     0    INFO  anInt1 3507 aFloat: 4200.6 anInt2: 4907 dInt1: 3367
+xAODTestRead_copy      5     0    INFO  anInt1 3508 aFloat: 4200.7 anInt2: 4908 dInt1: 3368
+xAODTestRead_copy      5     0    INFO copy_cvecWD 1007: 1401 1402 1403 1404 1405 1406 1407 1408 1409 1410
+xAODTestReadPLinks     5     0    INFO plinksContainer
+xAODTestReadPLinks     5     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     5     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks     5     0    INFO   decorLink: (:inv) decorVLinks: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     5     0    INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks     5     0    INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     5     0    INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks     5     0    INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks     5     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     5     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks     5     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     5     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks     5     0    INFO plinksInfo
+xAODTestReadPLinks     5     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks     5     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     5     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
 xAODTestReadJVec       5     0    INFO jvecContainer
 xAODTestReadJVec       5     0    INFO   ivec: []  fvec: [205.5]  svec: ['str455' 'str456']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
 xAODTestReadJVec       5     0    INFO   decorJVec: [305.5 306.5]
@@ -860,17 +969,8 @@ xAODTestReadJVec       5     0    INFO   decorJVec: [409.5]
 xAODTe...HVec_copy     5     0    INFO copy_hvec: 2801.5 2802.5 2803.5 2804.5 2805.5 2806.5 2807.5 2808.5 2809.5 2810.5 2811.5 2812.5 2813.5 2814.5 2815.5 2816.5 2817.5 2818.5 2819.5 2820.5
 xAODTe...HVec_copy     5     0    INFO copy_hview: 2820.5 2819.5 2818.5 2817.5 2816.5 2815.5 2814.5 2813.5 2812.5 2811.5 2810.5 2809.5 2808.5 2807.5 2806.5 2805.5 2804.5 2803.5 2802.5 2801.5
 xAODTe...View_copy     5     0    INFO copy_cview: 710 709 708 707 706 705 704 703 702 701
-xAODTestRead_copy      5     0    INFO 6
-xAODTestRead_copy      5     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      5     0    INFO  anInt1 3501 aFloat: 4200 anInt2: 4901 dInt1: 3361
-xAODTestRead_copy      5     0    INFO  anInt1 3502 aFloat: 4200.1 anInt2: 4902 dInt1: 3362
-xAODTestRead_copy      5     0    INFO  anInt1 3503 aFloat: 4200.2 anInt2: 4903 dInt1: 3363
-xAODTestRead_copy      5     0    INFO  anInt1 3504 aFloat: 4200.3 anInt2: 4904 dInt1: 3364
-xAODTestRead_copy      5     0    INFO  anInt1 3505 aFloat: 4200.4 anInt2: 4905 dInt1: 3365
-xAODTestRead_copy      5     0    INFO  anInt1 3506 aFloat: 4200.5 anInt2: 4906 dInt1: 3366
-xAODTestRead_copy      5     0    INFO  anInt1 3507 aFloat: 4200.6 anInt2: 4907 dInt1: 3367
-xAODTestRead_copy      5     0    INFO  anInt1 3508 aFloat: 4200.7 anInt2: 4908 dInt1: 3368
-xAODTestRead_copy      5     0    INFO copy_cvecWD 1007: 1401 1402 1403 1404 1405 1406 1407 1408 1409 1410
+xAODTe...Info_copy     5     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     5     0    INFO cinfo  anInt1 7000 aFloat: 0.7 anInt2: 14000 dInt1: 21000 cEL: cvec[7]
 xAODTe...CVec_copy     5     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     5     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     5     0    INFO  anInt1 701 aFloat: 1400 pInt: 3501 pFloat: 0.07 anInt2: 2101 dInt1: 2801 dVar1: 3151 dpInt1: 351 cEL: cvec[9]
@@ -925,9 +1025,17 @@ xAODTe...CVec_copy     5     0    INFO  anInt1 710 aFloat: 1400.9 pInt: 3510 pFl
 
 xAODTestReadHVec       5     0    INFO hvec: 2801.5 2802.5 2803.5 2804.5 2805.5 2806.5 2807.5 2808.5 2809.5 2810.5 2811.5 2812.5 2813.5 2814.5 2815.5 2816.5 2817.5 2818.5 2819.5 2820.5
 xAODTestReadHVec       5     0    INFO hview: 2820.5 2819.5 2818.5 2817.5 2816.5 2815.5 2814.5 2813.5 2812.5 2811.5 2810.5 2809.5 2808.5 2807.5 2806.5 2805.5 2804.5 2803.5 2802.5 2801.5
-xAODTestReadCView      5     0    INFO cview: 710 709 708 707 706 705 704 703 702 701
-xAODTestReadCInfo      5     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      5     0    INFO cinfo  anInt1 7000 aFloat: 0.7 anInt2: 14000 dInt1: 21000 cEL: cvec[7]
+xAODTestRead           5     0    INFO 6
+xAODTestRead           5     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           5     0    INFO  anInt1 3501 aFloat: 4200 anInt2: 4901 dInt1: 3361
+xAODTestRead           5     0    INFO  anInt1 3502 aFloat: 4200.1 anInt2: 4902 dInt1: 3362
+xAODTestRead           5     0    INFO  anInt1 3503 aFloat: 4200.2 anInt2: 4903 dInt1: 3363
+xAODTestRead           5     0    INFO  anInt1 3504 aFloat: 4200.3 anInt2: 4904 dInt1: 3364
+xAODTestRead           5     0    INFO  anInt1 3505 aFloat: 4200.4 anInt2: 4905 dInt1: 3365
+xAODTestRead           5     0    INFO  anInt1 3506 aFloat: 4200.5 anInt2: 4906 dInt1: 3366
+xAODTestRead           5     0    INFO  anInt1 3507 aFloat: 4200.6 anInt2: 4907 dInt1: 3367
+xAODTestRead           5     0    INFO  anInt1 3508 aFloat: 4200.7 anInt2: 4908 dInt1: 3368
+xAODTestRead           5     0    INFO cvecWD 1007: 1401 1402 1403 1404 1405 1406 1407 1408 1409 1410
 Athena...ntLoopMgr     5     0    INFO   ===>>>  done processing event #6, run #0 on slot 0,  6 events processed so far  <<<===
 Athena...ntLoopMgr     6     0    INFO   ===>>>  start processing event #7, run #0 on slot 0,  6 events processed so far  <<<===
 xAODTestReadCVec       6     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -982,19 +1090,36 @@ xAODTestReadCVec       6     0    INFO  anInt1 810 aFloat: 1600.9 pInt: 4010 pFl
   pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 0.398 ]
   dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 0.988 ]
 
-xAODTestRead           6     0    INFO 7
-xAODTestRead           6     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           6     0    INFO  anInt1 4001 aFloat: 4800 anInt2: 5601 dInt1: 3841
-xAODTestRead           6     0    INFO  anInt1 4002 aFloat: 4800.1 anInt2: 5602 dInt1: 3842
-xAODTestRead           6     0    INFO  anInt1 4003 aFloat: 4800.2 anInt2: 5603 dInt1: 3843
-xAODTestRead           6     0    INFO  anInt1 4004 aFloat: 4800.3 anInt2: 5604 dInt1: 3844
-xAODTestRead           6     0    INFO  anInt1 4005 aFloat: 4800.4 anInt2: 5605 dInt1: 3845
-xAODTestRead           6     0    INFO  anInt1 4006 aFloat: 4800.5 anInt2: 5606 dInt1: 3846
-xAODTestRead           6     0    INFO  anInt1 4007 aFloat: 4800.6 anInt2: 5607 dInt1: 3847
-xAODTestRead           6     0    INFO  anInt1 4008 aFloat: 4800.7 anInt2: 5608 dInt1: 3848
-xAODTestRead           6     0    INFO cvecWD 1008: 1601 1602 1603 1604 1605 1606 1607 1608 1609 1610
-xAODTe...Info_copy     6     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     6     0    INFO cinfo  anInt1 8000 aFloat: 0.8 anInt2: 16000 dInt1: 24000 cEL: cvec[8]
+xAODTestReadCInfo      6     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      6     0    INFO cinfo  anInt1 8000 aFloat: 0.8 anInt2: 16000 dInt1: 24000 cEL: cvec[8]
+xAODTestReadCView      6     0    INFO cview: 810 809 808 807 806 805 804 803 802 801
+xAODTestRead_copy      6     0    INFO 7
+xAODTestRead_copy      6     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      6     0    INFO  anInt1 4001 aFloat: 4800 anInt2: 5601 dInt1: 3841
+xAODTestRead_copy      6     0    INFO  anInt1 4002 aFloat: 4800.1 anInt2: 5602 dInt1: 3842
+xAODTestRead_copy      6     0    INFO  anInt1 4003 aFloat: 4800.2 anInt2: 5603 dInt1: 3843
+xAODTestRead_copy      6     0    INFO  anInt1 4004 aFloat: 4800.3 anInt2: 5604 dInt1: 3844
+xAODTestRead_copy      6     0    INFO  anInt1 4005 aFloat: 4800.4 anInt2: 5605 dInt1: 3845
+xAODTestRead_copy      6     0    INFO  anInt1 4006 aFloat: 4800.5 anInt2: 5606 dInt1: 3846
+xAODTestRead_copy      6     0    INFO  anInt1 4007 aFloat: 4800.6 anInt2: 5607 dInt1: 3847
+xAODTestRead_copy      6     0    INFO  anInt1 4008 aFloat: 4800.7 anInt2: 5608 dInt1: 3848
+xAODTestRead_copy      6     0    INFO copy_cvecWD 1008: 1601 1602 1603 1604 1605 1606 1607 1608 1609 1610
+xAODTestReadPLinks     6     0    INFO plinksContainer
+xAODTestReadPLinks     6     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     6     0    INFO   link: (cvec:6)  links: (ctrig:7)
+xAODTestReadPLinks     6     0    INFO   decorLink: (cvec:6) decorVLinks: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     6     0    INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks     6     0    INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks     6     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     6     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks     6     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     6     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks     6     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks     6     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks     6     0    INFO plinksInfo
+xAODTestReadPLinks     6     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks     6     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     6     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
 xAODTestReadJVec       6     0    INFO jvecContainer
 xAODTestReadJVec       6     0    INFO   ivec: [106]  fvec: [206.5 207.5]  svec: ['str456' 'str457' 'str458']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
 xAODTestReadJVec       6     0    INFO   decorJVec: [306.5 307.5 308.5]
@@ -1012,17 +1137,8 @@ xAODTestReadJVec       6     0    INFO   decorJVec: [410.5 411.5]
 xAODTe...HVec_copy     6     0    INFO copy_hvec: 3201.5 3202.5 3203.5 3204.5 3205.5 3206.5 3207.5 3208.5 3209.5 3210.5 3211.5 3212.5 3213.5 3214.5 3215.5 3216.5 3217.5 3218.5 3219.5 3220.5
 xAODTe...HVec_copy     6     0    INFO copy_hview: 3220.5 3219.5 3218.5 3217.5 3216.5 3215.5 3214.5 3213.5 3212.5 3211.5 3210.5 3209.5 3208.5 3207.5 3206.5 3205.5 3204.5 3203.5 3202.5 3201.5
 xAODTe...View_copy     6     0    INFO copy_cview: 810 809 808 807 806 805 804 803 802 801
-xAODTestRead_copy      6     0    INFO 7
-xAODTestRead_copy      6     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      6     0    INFO  anInt1 4001 aFloat: 4800 anInt2: 5601 dInt1: 3841
-xAODTestRead_copy      6     0    INFO  anInt1 4002 aFloat: 4800.1 anInt2: 5602 dInt1: 3842
-xAODTestRead_copy      6     0    INFO  anInt1 4003 aFloat: 4800.2 anInt2: 5603 dInt1: 3843
-xAODTestRead_copy      6     0    INFO  anInt1 4004 aFloat: 4800.3 anInt2: 5604 dInt1: 3844
-xAODTestRead_copy      6     0    INFO  anInt1 4005 aFloat: 4800.4 anInt2: 5605 dInt1: 3845
-xAODTestRead_copy      6     0    INFO  anInt1 4006 aFloat: 4800.5 anInt2: 5606 dInt1: 3846
-xAODTestRead_copy      6     0    INFO  anInt1 4007 aFloat: 4800.6 anInt2: 5607 dInt1: 3847
-xAODTestRead_copy      6     0    INFO  anInt1 4008 aFloat: 4800.7 anInt2: 5608 dInt1: 3848
-xAODTestRead_copy      6     0    INFO copy_cvecWD 1008: 1601 1602 1603 1604 1605 1606 1607 1608 1609 1610
+xAODTe...Info_copy     6     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     6     0    INFO cinfo  anInt1 8000 aFloat: 0.8 anInt2: 16000 dInt1: 24000 cEL: cvec[8]
 xAODTe...CVec_copy     6     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     6     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     6     0    INFO  anInt1 801 aFloat: 1600 pInt: 4001 pFloat: 0.08 anInt2: 2401 dInt1: 3201 dVar1: 3601 dpInt1: 401 cEL: cvec[9]
@@ -1077,9 +1193,17 @@ xAODTe...CVec_copy     6     0    INFO  anInt1 810 aFloat: 1600.9 pInt: 4010 pFl
 
 xAODTestReadHVec       6     0    INFO hvec: 3201.5 3202.5 3203.5 3204.5 3205.5 3206.5 3207.5 3208.5 3209.5 3210.5 3211.5 3212.5 3213.5 3214.5 3215.5 3216.5 3217.5 3218.5 3219.5 3220.5
 xAODTestReadHVec       6     0    INFO hview: 3220.5 3219.5 3218.5 3217.5 3216.5 3215.5 3214.5 3213.5 3212.5 3211.5 3210.5 3209.5 3208.5 3207.5 3206.5 3205.5 3204.5 3203.5 3202.5 3201.5
-xAODTestReadCView      6     0    INFO cview: 810 809 808 807 806 805 804 803 802 801
-xAODTestReadCInfo      6     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      6     0    INFO cinfo  anInt1 8000 aFloat: 0.8 anInt2: 16000 dInt1: 24000 cEL: cvec[8]
+xAODTestRead           6     0    INFO 7
+xAODTestRead           6     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           6     0    INFO  anInt1 4001 aFloat: 4800 anInt2: 5601 dInt1: 3841
+xAODTestRead           6     0    INFO  anInt1 4002 aFloat: 4800.1 anInt2: 5602 dInt1: 3842
+xAODTestRead           6     0    INFO  anInt1 4003 aFloat: 4800.2 anInt2: 5603 dInt1: 3843
+xAODTestRead           6     0    INFO  anInt1 4004 aFloat: 4800.3 anInt2: 5604 dInt1: 3844
+xAODTestRead           6     0    INFO  anInt1 4005 aFloat: 4800.4 anInt2: 5605 dInt1: 3845
+xAODTestRead           6     0    INFO  anInt1 4006 aFloat: 4800.5 anInt2: 5606 dInt1: 3846
+xAODTestRead           6     0    INFO  anInt1 4007 aFloat: 4800.6 anInt2: 5607 dInt1: 3847
+xAODTestRead           6     0    INFO  anInt1 4008 aFloat: 4800.7 anInt2: 5608 dInt1: 3848
+xAODTestRead           6     0    INFO cvecWD 1008: 1601 1602 1603 1604 1605 1606 1607 1608 1609 1610
 Athena...ntLoopMgr     6     0    INFO   ===>>>  done processing event #7, run #0 on slot 0,  7 events processed so far  <<<===
 Athena...ntLoopMgr     7     0    INFO   ===>>>  start processing event #8, run #0 on slot 0,  7 events processed so far  <<<===
 xAODTestReadCVec       7     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1134,19 +1258,36 @@ xAODTestReadCVec       7     0    INFO  anInt1 910 aFloat: 1800.9 pInt: 4510 pFl
   pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 0.399 ]
   dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 0.998 ]
 
-xAODTestRead           7     0    INFO 8
-xAODTestRead           7     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           7     0    INFO  anInt1 4501 aFloat: 5400 anInt2: 6301 dInt1: 4321
-xAODTestRead           7     0    INFO  anInt1 4502 aFloat: 5400.1 anInt2: 6302 dInt1: 4322
-xAODTestRead           7     0    INFO  anInt1 4503 aFloat: 5400.2 anInt2: 6303 dInt1: 4323
-xAODTestRead           7     0    INFO  anInt1 4504 aFloat: 5400.3 anInt2: 6304 dInt1: 4324
-xAODTestRead           7     0    INFO  anInt1 4505 aFloat: 5400.4 anInt2: 6305 dInt1: 4325
-xAODTestRead           7     0    INFO  anInt1 4506 aFloat: 5400.5 anInt2: 6306 dInt1: 4326
-xAODTestRead           7     0    INFO  anInt1 4507 aFloat: 5400.6 anInt2: 6307 dInt1: 4327
-xAODTestRead           7     0    INFO  anInt1 4508 aFloat: 5400.7 anInt2: 6308 dInt1: 4328
-xAODTestRead           7     0    INFO cvecWD 1009: 1801 1802 1803 1804 1805 1806 1807 1808 1809 1810
-xAODTe...Info_copy     7     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     7     0    INFO cinfo  anInt1 9000 aFloat: 0.9 anInt2: 18000 dInt1: 27000 cEL: cvec[9]
+xAODTestReadCInfo      7     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      7     0    INFO cinfo  anInt1 9000 aFloat: 0.9 anInt2: 18000 dInt1: 27000 cEL: cvec[9]
+xAODTestReadCView      7     0    INFO cview: 910 909 908 907 906 905 904 903 902 901
+xAODTestRead_copy      7     0    INFO 8
+xAODTestRead_copy      7     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      7     0    INFO  anInt1 4501 aFloat: 5400 anInt2: 6301 dInt1: 4321
+xAODTestRead_copy      7     0    INFO  anInt1 4502 aFloat: 5400.1 anInt2: 6302 dInt1: 4322
+xAODTestRead_copy      7     0    INFO  anInt1 4503 aFloat: 5400.2 anInt2: 6303 dInt1: 4323
+xAODTestRead_copy      7     0    INFO  anInt1 4504 aFloat: 5400.3 anInt2: 6304 dInt1: 4324
+xAODTestRead_copy      7     0    INFO  anInt1 4505 aFloat: 5400.4 anInt2: 6305 dInt1: 4325
+xAODTestRead_copy      7     0    INFO  anInt1 4506 aFloat: 5400.5 anInt2: 6306 dInt1: 4326
+xAODTestRead_copy      7     0    INFO  anInt1 4507 aFloat: 5400.6 anInt2: 6307 dInt1: 4327
+xAODTestRead_copy      7     0    INFO  anInt1 4508 aFloat: 5400.7 anInt2: 6308 dInt1: 4328
+xAODTestRead_copy      7     0    INFO copy_cvecWD 1009: 1801 1802 1803 1804 1805 1806 1807 1808 1809 1810
+xAODTestReadPLinks     7     0    INFO plinksContainer
+xAODTestReadPLinks     7     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks     7     0    INFO   link: (ctrig:7)  links: (:inv) (cvec:9)
+xAODTestReadPLinks     7     0    INFO   decorLink: (ctrig:7) decorVLinks:
+xAODTestReadPLinks     7     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     7     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks     7     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     7     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks     7     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks     7     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks     7     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks     7     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks     7     0    INFO plinksInfo
+xAODTestReadPLinks     7     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks     7     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks     7     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
 xAODTestReadJVec       7     0    INFO jvecContainer
 xAODTestReadJVec       7     0    INFO   ivec: [107 108]  fvec: [207.5 208.5 209.5]  svec: ['str457' 'str458' 'str459' 'str460']  lvec: []
 xAODTestReadJVec       7     0    INFO   decorJVec: [307.5 308.5 309.5 310.5]
@@ -1164,17 +1305,8 @@ xAODTestReadJVec       7     0    INFO   decorJVec: [411.5 412.5 413.5]
 xAODTe...HVec_copy     7     0    INFO copy_hvec: 3601.5 3602.5 3603.5 3604.5 3605.5 3606.5 3607.5 3608.5 3609.5 3610.5 3611.5 3612.5 3613.5 3614.5 3615.5 3616.5 3617.5 3618.5 3619.5 3620.5
 xAODTe...HVec_copy     7     0    INFO copy_hview: 3620.5 3619.5 3618.5 3617.5 3616.5 3615.5 3614.5 3613.5 3612.5 3611.5 3610.5 3609.5 3608.5 3607.5 3606.5 3605.5 3604.5 3603.5 3602.5 3601.5
 xAODTe...View_copy     7     0    INFO copy_cview: 910 909 908 907 906 905 904 903 902 901
-xAODTestRead_copy      7     0    INFO 8
-xAODTestRead_copy      7     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      7     0    INFO  anInt1 4501 aFloat: 5400 anInt2: 6301 dInt1: 4321
-xAODTestRead_copy      7     0    INFO  anInt1 4502 aFloat: 5400.1 anInt2: 6302 dInt1: 4322
-xAODTestRead_copy      7     0    INFO  anInt1 4503 aFloat: 5400.2 anInt2: 6303 dInt1: 4323
-xAODTestRead_copy      7     0    INFO  anInt1 4504 aFloat: 5400.3 anInt2: 6304 dInt1: 4324
-xAODTestRead_copy      7     0    INFO  anInt1 4505 aFloat: 5400.4 anInt2: 6305 dInt1: 4325
-xAODTestRead_copy      7     0    INFO  anInt1 4506 aFloat: 5400.5 anInt2: 6306 dInt1: 4326
-xAODTestRead_copy      7     0    INFO  anInt1 4507 aFloat: 5400.6 anInt2: 6307 dInt1: 4327
-xAODTestRead_copy      7     0    INFO  anInt1 4508 aFloat: 5400.7 anInt2: 6308 dInt1: 4328
-xAODTestRead_copy      7     0    INFO copy_cvecWD 1009: 1801 1802 1803 1804 1805 1806 1807 1808 1809 1810
+xAODTe...Info_copy     7     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     7     0    INFO cinfo  anInt1 9000 aFloat: 0.9 anInt2: 18000 dInt1: 27000 cEL: cvec[9]
 xAODTe...CVec_copy     7     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     7     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     7     0    INFO  anInt1 901 aFloat: 1800 pInt: 4501 pFloat: 0.09 anInt2: 2701 dInt1: 3601 dVar1: 4051 dpInt1: 451 cEL: cvec[9]
@@ -1229,9 +1361,17 @@ xAODTe...CVec_copy     7     0    INFO  anInt1 910 aFloat: 1800.9 pInt: 4510 pFl
 
 xAODTestReadHVec       7     0    INFO hvec: 3601.5 3602.5 3603.5 3604.5 3605.5 3606.5 3607.5 3608.5 3609.5 3610.5 3611.5 3612.5 3613.5 3614.5 3615.5 3616.5 3617.5 3618.5 3619.5 3620.5
 xAODTestReadHVec       7     0    INFO hview: 3620.5 3619.5 3618.5 3617.5 3616.5 3615.5 3614.5 3613.5 3612.5 3611.5 3610.5 3609.5 3608.5 3607.5 3606.5 3605.5 3604.5 3603.5 3602.5 3601.5
-xAODTestReadCView      7     0    INFO cview: 910 909 908 907 906 905 904 903 902 901
-xAODTestReadCInfo      7     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      7     0    INFO cinfo  anInt1 9000 aFloat: 0.9 anInt2: 18000 dInt1: 27000 cEL: cvec[9]
+xAODTestRead           7     0    INFO 8
+xAODTestRead           7     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           7     0    INFO  anInt1 4501 aFloat: 5400 anInt2: 6301 dInt1: 4321
+xAODTestRead           7     0    INFO  anInt1 4502 aFloat: 5400.1 anInt2: 6302 dInt1: 4322
+xAODTestRead           7     0    INFO  anInt1 4503 aFloat: 5400.2 anInt2: 6303 dInt1: 4323
+xAODTestRead           7     0    INFO  anInt1 4504 aFloat: 5400.3 anInt2: 6304 dInt1: 4324
+xAODTestRead           7     0    INFO  anInt1 4505 aFloat: 5400.4 anInt2: 6305 dInt1: 4325
+xAODTestRead           7     0    INFO  anInt1 4506 aFloat: 5400.5 anInt2: 6306 dInt1: 4326
+xAODTestRead           7     0    INFO  anInt1 4507 aFloat: 5400.6 anInt2: 6307 dInt1: 4327
+xAODTestRead           7     0    INFO  anInt1 4508 aFloat: 5400.7 anInt2: 6308 dInt1: 4328
+xAODTestRead           7     0    INFO cvecWD 1009: 1801 1802 1803 1804 1805 1806 1807 1808 1809 1810
 Athena...ntLoopMgr     7     0    INFO   ===>>>  done processing event #8, run #0 on slot 0,  8 events processed so far  <<<===
 Athena...ntLoopMgr     8     0    INFO   ===>>>  start processing event #9, run #0 on slot 0,  8 events processed so far  <<<===
 xAODTestReadCVec       8     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1286,19 +1426,36 @@ xAODTestReadCVec       8     0    INFO  anInt1 1010 aFloat: 2000.9 pInt: 5010 pF
   pvFloat: [-0.400 -0.300 -0.200 -0.100 0.000 0.100 0.200 0.300 0.400 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead           8     0    INFO 9
-xAODTestRead           8     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead           8     0    INFO  anInt1 5001 aFloat: 6000 anInt2: 7001 dInt1: 4801
-xAODTestRead           8     0    INFO  anInt1 5002 aFloat: 6000.1 anInt2: 7002 dInt1: 4802
-xAODTestRead           8     0    INFO  anInt1 5003 aFloat: 6000.2 anInt2: 7003 dInt1: 4803
-xAODTestRead           8     0    INFO  anInt1 5004 aFloat: 6000.3 anInt2: 7004 dInt1: 4804
-xAODTestRead           8     0    INFO  anInt1 5005 aFloat: 6000.4 anInt2: 7005 dInt1: 4805
-xAODTestRead           8     0    INFO  anInt1 5006 aFloat: 6000.5 anInt2: 7006 dInt1: 4806
-xAODTestRead           8     0    INFO  anInt1 5007 aFloat: 6000.6 anInt2: 7007 dInt1: 4807
-xAODTestRead           8     0    INFO  anInt1 5008 aFloat: 6000.7 anInt2: 7008 dInt1: 4808
-xAODTestRead           8     0    INFO cvecWD 1010: 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010
-xAODTe...Info_copy     8     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy     8     0    INFO cinfo  anInt1 10000 aFloat: 1 anInt2: 20000 dInt1: 30000 cEL: cvec[0]
+xAODTestReadCInfo      8     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo      8     0    INFO cinfo  anInt1 10000 aFloat: 1 anInt2: 20000 dInt1: 30000 cEL: cvec[0]
+xAODTestReadCView      8     0    INFO cview: 1010 1009 1008 1007 1006 1005 1004 1003 1002 1001
+xAODTestRead_copy      8     0    INFO 9
+xAODTestRead_copy      8     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy      8     0    INFO  anInt1 5001 aFloat: 6000 anInt2: 7001 dInt1: 4801
+xAODTestRead_copy      8     0    INFO  anInt1 5002 aFloat: 6000.1 anInt2: 7002 dInt1: 4802
+xAODTestRead_copy      8     0    INFO  anInt1 5003 aFloat: 6000.2 anInt2: 7003 dInt1: 4803
+xAODTestRead_copy      8     0    INFO  anInt1 5004 aFloat: 6000.3 anInt2: 7004 dInt1: 4804
+xAODTestRead_copy      8     0    INFO  anInt1 5005 aFloat: 6000.4 anInt2: 7005 dInt1: 4805
+xAODTestRead_copy      8     0    INFO  anInt1 5006 aFloat: 6000.5 anInt2: 7006 dInt1: 4806
+xAODTestRead_copy      8     0    INFO  anInt1 5007 aFloat: 6000.6 anInt2: 7007 dInt1: 4807
+xAODTestRead_copy      8     0    INFO  anInt1 5008 aFloat: 6000.7 anInt2: 7008 dInt1: 4808
+xAODTestRead_copy      8     0    INFO copy_cvecWD 1010: 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010
+xAODTestReadPLinks     8     0    INFO plinksContainer
+xAODTestReadPLinks     8     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     8     0    INFO   link: (:inv)  links: (cvec:9) (ctrig:2) (:inv)
+xAODTestReadPLinks     8     0    INFO   decorLink: (:inv) decorVLinks: (cvec:2)
+xAODTestReadPLinks     8     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     8     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks     8     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks     8     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks     8     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks     8     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks     8     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks     8     0    INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks     8     0    INFO plinksInfo
+xAODTestReadPLinks     8     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks     8     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks     8     0    INFO   decorLink: (cvec:2) decorVLinks:
 xAODTestReadJVec       8     0    INFO jvecContainer
 xAODTestReadJVec       8     0    INFO   ivec: [108 109 110]  fvec: [208.5 209.5 210.5 211.5]  svec: []  lvec: [(cvec:8)]
 xAODTestReadJVec       8     0    INFO   decorJVec: []
@@ -1316,17 +1473,8 @@ xAODTestReadJVec       8     0    INFO   decorJVec: [412.5 413.5 414.5 415.5]
 xAODTe...HVec_copy     8     0    INFO copy_hvec: 4001.5 4002.5 4003.5 4004.5 4005.5 4006.5 4007.5 4008.5 4009.5 4010.5 4011.5 4012.5 4013.5 4014.5 4015.5 4016.5 4017.5 4018.5 4019.5 4020.5
 xAODTe...HVec_copy     8     0    INFO copy_hview: 4020.5 4019.5 4018.5 4017.5 4016.5 4015.5 4014.5 4013.5 4012.5 4011.5 4010.5 4009.5 4008.5 4007.5 4006.5 4005.5 4004.5 4003.5 4002.5 4001.5
 xAODTe...View_copy     8     0    INFO copy_cview: 1010 1009 1008 1007 1006 1005 1004 1003 1002 1001
-xAODTestRead_copy      8     0    INFO 9
-xAODTestRead_copy      8     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy      8     0    INFO  anInt1 5001 aFloat: 6000 anInt2: 7001 dInt1: 4801
-xAODTestRead_copy      8     0    INFO  anInt1 5002 aFloat: 6000.1 anInt2: 7002 dInt1: 4802
-xAODTestRead_copy      8     0    INFO  anInt1 5003 aFloat: 6000.2 anInt2: 7003 dInt1: 4803
-xAODTestRead_copy      8     0    INFO  anInt1 5004 aFloat: 6000.3 anInt2: 7004 dInt1: 4804
-xAODTestRead_copy      8     0    INFO  anInt1 5005 aFloat: 6000.4 anInt2: 7005 dInt1: 4805
-xAODTestRead_copy      8     0    INFO  anInt1 5006 aFloat: 6000.5 anInt2: 7006 dInt1: 4806
-xAODTestRead_copy      8     0    INFO  anInt1 5007 aFloat: 6000.6 anInt2: 7007 dInt1: 4807
-xAODTestRead_copy      8     0    INFO  anInt1 5008 aFloat: 6000.7 anInt2: 7008 dInt1: 4808
-xAODTestRead_copy      8     0    INFO copy_cvecWD 1010: 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010
+xAODTe...Info_copy     8     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy     8     0    INFO cinfo  anInt1 10000 aFloat: 1 anInt2: 20000 dInt1: 30000 cEL: cvec[0]
 xAODTe...CVec_copy     8     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy     8     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy     8     0    INFO  anInt1 1001 aFloat: 2000 pInt: 5001 pFloat: 0.10 anInt2: 3001 dInt1: 4001 dVar1: 4501 dpInt1: 501 cEL: cvec[9]
@@ -1381,9 +1529,17 @@ xAODTe...CVec_copy     8     0    INFO  anInt1 1010 aFloat: 2000.9 pInt: 5010 pF
 
 xAODTestReadHVec       8     0    INFO hvec: 4001.5 4002.5 4003.5 4004.5 4005.5 4006.5 4007.5 4008.5 4009.5 4010.5 4011.5 4012.5 4013.5 4014.5 4015.5 4016.5 4017.5 4018.5 4019.5 4020.5
 xAODTestReadHVec       8     0    INFO hview: 4020.5 4019.5 4018.5 4017.5 4016.5 4015.5 4014.5 4013.5 4012.5 4011.5 4010.5 4009.5 4008.5 4007.5 4006.5 4005.5 4004.5 4003.5 4002.5 4001.5
-xAODTestReadCView      8     0    INFO cview: 1010 1009 1008 1007 1006 1005 1004 1003 1002 1001
-xAODTestReadCInfo      8     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo      8     0    INFO cinfo  anInt1 10000 aFloat: 1 anInt2: 20000 dInt1: 30000 cEL: cvec[0]
+xAODTestRead           8     0    INFO 9
+xAODTestRead           8     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead           8     0    INFO  anInt1 5001 aFloat: 6000 anInt2: 7001 dInt1: 4801
+xAODTestRead           8     0    INFO  anInt1 5002 aFloat: 6000.1 anInt2: 7002 dInt1: 4802
+xAODTestRead           8     0    INFO  anInt1 5003 aFloat: 6000.2 anInt2: 7003 dInt1: 4803
+xAODTestRead           8     0    INFO  anInt1 5004 aFloat: 6000.3 anInt2: 7004 dInt1: 4804
+xAODTestRead           8     0    INFO  anInt1 5005 aFloat: 6000.4 anInt2: 7005 dInt1: 4805
+xAODTestRead           8     0    INFO  anInt1 5006 aFloat: 6000.5 anInt2: 7006 dInt1: 4806
+xAODTestRead           8     0    INFO  anInt1 5007 aFloat: 6000.6 anInt2: 7007 dInt1: 4807
+xAODTestRead           8     0    INFO  anInt1 5008 aFloat: 6000.7 anInt2: 7008 dInt1: 4808
+xAODTestRead           8     0    INFO cvecWD 1010: 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010
 Athena...ntLoopMgr     8     0    INFO   ===>>>  done processing event #9, run #0 on slot 0,  9 events processed so far  <<<===
 Athena...ntLoopMgr     9     0    INFO   ===>>>  start processing event #10, run #0 on slot 0,  9 events processed so far  <<<===
 xAODTestReadCVec       9     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -1451,6 +1607,22 @@ xAODTestRead           9     0    INFO  anInt1 5508 aFloat: 6600.7 anInt2: 7708 
 xAODTestRead           9     0    INFO cvecWD 1011: 2201 2202 2203 2204 2205 2206 2207 2208 2209 2210
 xAODTe...Info_copy     9     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
 xAODTe...Info_copy     9     0    INFO cinfo  anInt1 11000 aFloat: 1.1 anInt2: 22000 dInt1: 33000 cEL: cvec[1]
+xAODTestReadPLinks     9     0    INFO plinksContainer
+xAODTestReadPLinks     9     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks     9     0    INFO   link: (cvec:9)  links: (ctrig:2) (:inv) (cvec:2) (ctrig:5)
+xAODTestReadPLinks     9     0    INFO   decorLink: (cvec:9) decorVLinks: (ctrig:5) (:inv)
+xAODTestReadPLinks     9     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks     9     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks     9     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks     9     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks     9     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks     9     0    INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks     9     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks     9     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks     9     0    INFO plinksInfo
+xAODTestReadPLinks     9     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks     9     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks     9     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
 xAODTestReadJVec       9     0    INFO jvecContainer
 xAODTestReadJVec       9     0    INFO   ivec: [109 110 111 112]  fvec: []  svec: ['str459']  lvec: [(cvec:9) (cvec:0)]
 xAODTestReadJVec       9     0    INFO   decorJVec: [309.5]
@@ -1604,6 +1776,22 @@ xAODTestRead_copy     10     0    INFO  anInt1 6006 aFloat: 7200.5 anInt2: 8406 
 xAODTestRead_copy     10     0    INFO  anInt1 6007 aFloat: 7200.6 anInt2: 8407 dInt1: 5767
 xAODTestRead_copy     10     0    INFO  anInt1 6008 aFloat: 7200.7 anInt2: 8408 dInt1: 5768
 xAODTestRead_copy     10     0    INFO copy_cvecWD 1012: 2401 2402 2403 2404 2405 2406 2407 2408 2409 2410
+xAODTestReadPLinks    10     0    INFO plinksContainer
+xAODTestReadPLinks    10     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks    10     0    INFO   link: (ctrig:2)  links:
+xAODTestReadPLinks    10     0    INFO   decorLink: (ctrig:2) decorVLinks: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    10     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks    10     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    10     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks    10     0    INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks    10     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    10     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks    10     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    10     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    10     0    INFO plinksInfo
+xAODTestReadPLinks    10     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks    10     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    10     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
 xAODTestReadJVec      10     0    INFO jvecContainer
 xAODTestReadJVec      10     0    INFO   ivec: []  fvec: [210.5]  svec: ['str460' 'str461']  lvec: [(cvec:0) (cvec:1) (cvec:2)]
 xAODTestReadJVec      10     0    INFO   decorJVec: [310.5 311.5]
@@ -1756,6 +1944,22 @@ xAODTestRead_copy     11     0    INFO  anInt1 6506 aFloat: 7800.5 anInt2: 9106 
 xAODTestRead_copy     11     0    INFO  anInt1 6507 aFloat: 7800.6 anInt2: 9107 dInt1: 6247
 xAODTestRead_copy     11     0    INFO  anInt1 6508 aFloat: 7800.7 anInt2: 9108 dInt1: 6248
 xAODTestRead_copy     11     0    INFO copy_cvecWD 1013: 2601 2602 2603 2604 2605 2606 2607 2608 2609 2610
+xAODTestReadPLinks    11     0    INFO plinksContainer
+xAODTestReadPLinks    11     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    11     0    INFO   link: (:inv)  links: (cvec:2)
+xAODTestReadPLinks    11     0    INFO   decorLink: (:inv) decorVLinks: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    11     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks    11     0    INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks    11     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    11     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks    11     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    11     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    11     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    11     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    11     0    INFO plinksInfo
+xAODTestReadPLinks    11     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks    11     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    11     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
 xAODTestReadJVec      11     0    INFO jvecContainer
 xAODTestReadJVec      11     0    INFO   ivec: [111]  fvec: [211.5 212.5]  svec: ['str461' 'str462' 'str463']  lvec: [(cvec:1) (cvec:2) (cvec:3) (cvec:4)]
 xAODTestReadJVec      11     0    INFO   decorJVec: [311.5 312.5 313.5]
@@ -1894,19 +2098,36 @@ xAODTestReadCVec      12     0    INFO  anInt1 1410 aFloat: 2800.9 pInt: 7010 pF
   pvFloat: [-0.396 -0.296 -0.196 -0.096 0.004 0.104 0.204 0.304 0.404 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          12     0    INFO 13
-xAODTestRead          12     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          12     0    INFO  anInt1 7001 aFloat: 8400 anInt2: 9801 dInt1: 6721
-xAODTestRead          12     0    INFO  anInt1 7002 aFloat: 8400.1 anInt2: 9802 dInt1: 6722
-xAODTestRead          12     0    INFO  anInt1 7003 aFloat: 8400.2 anInt2: 9803 dInt1: 6723
-xAODTestRead          12     0    INFO  anInt1 7004 aFloat: 8400.3 anInt2: 9804 dInt1: 6724
-xAODTestRead          12     0    INFO  anInt1 7005 aFloat: 8400.4 anInt2: 9805 dInt1: 6725
-xAODTestRead          12     0    INFO  anInt1 7006 aFloat: 8400.5 anInt2: 9806 dInt1: 6726
-xAODTestRead          12     0    INFO  anInt1 7007 aFloat: 8400.6 anInt2: 9807 dInt1: 6727
-xAODTestRead          12     0    INFO  anInt1 7008 aFloat: 8400.7 anInt2: 9808 dInt1: 6728
-xAODTestRead          12     0    INFO cvecWD 1014: 2801 2802 2803 2804 2805 2806 2807 2808 2809 2810
-xAODTe...Info_copy    12     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    12     0    INFO cinfo  anInt1 14000 aFloat: 1.4 anInt2: 28000 dInt1: 42000 cEL: cvec[4]
+xAODTestReadCInfo     12     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     12     0    INFO cinfo  anInt1 14000 aFloat: 1.4 anInt2: 28000 dInt1: 42000 cEL: cvec[4]
+xAODTestReadCView     12     0    INFO cview: 1410 1409 1408 1407 1406 1405 1404 1403 1402 1401
+xAODTestRead_copy     12     0    INFO 13
+xAODTestRead_copy     12     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     12     0    INFO  anInt1 7001 aFloat: 8400 anInt2: 9801 dInt1: 6721
+xAODTestRead_copy     12     0    INFO  anInt1 7002 aFloat: 8400.1 anInt2: 9802 dInt1: 6722
+xAODTestRead_copy     12     0    INFO  anInt1 7003 aFloat: 8400.2 anInt2: 9803 dInt1: 6723
+xAODTestRead_copy     12     0    INFO  anInt1 7004 aFloat: 8400.3 anInt2: 9804 dInt1: 6724
+xAODTestRead_copy     12     0    INFO  anInt1 7005 aFloat: 8400.4 anInt2: 9805 dInt1: 6725
+xAODTestRead_copy     12     0    INFO  anInt1 7006 aFloat: 8400.5 anInt2: 9806 dInt1: 6726
+xAODTestRead_copy     12     0    INFO  anInt1 7007 aFloat: 8400.6 anInt2: 9807 dInt1: 6727
+xAODTestRead_copy     12     0    INFO  anInt1 7008 aFloat: 8400.7 anInt2: 9808 dInt1: 6728
+xAODTestRead_copy     12     0    INFO copy_cvecWD 1014: 2801 2802 2803 2804 2805 2806 2807 2808 2809 2810
+xAODTestReadPLinks    12     0    INFO plinksContainer
+xAODTestReadPLinks    12     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    12     0    INFO   link: (cvec:2)  links: (ctrig:5) (:inv)
+xAODTestReadPLinks    12     0    INFO   decorLink: (cvec:2) decorVLinks:
+xAODTestReadPLinks    12     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    12     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks    12     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    12     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    12     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    12     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    12     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    12     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    12     0    INFO plinksInfo
+xAODTestReadPLinks    12     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks    12     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    12     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
 xAODTestReadJVec      12     0    INFO jvecContainer
 xAODTestReadJVec      12     0    INFO   ivec: [112 113]  fvec: [212.5 213.5 214.5]  svec: ['str462' 'str463' 'str464' 'str465']  lvec: []
 xAODTestReadJVec      12     0    INFO   decorJVec: [312.5 313.5 314.5 315.5]
@@ -1924,17 +2145,8 @@ xAODTestReadJVec      12     0    INFO   decorJVec: [416.5 417.5 418.5]
 xAODTe...HVec_copy    12     0    INFO copy_hvec: 5601.5 5602.5 5603.5 5604.5 5605.5 5606.5 5607.5 5608.5 5609.5 5610.5 5611.5 5612.5 5613.5 5614.5 5615.5 5616.5 5617.5 5618.5 5619.5 5620.5
 xAODTe...HVec_copy    12     0    INFO copy_hview: 5620.5 5619.5 5618.5 5617.5 5616.5 5615.5 5614.5 5613.5 5612.5 5611.5 5610.5 5609.5 5608.5 5607.5 5606.5 5605.5 5604.5 5603.5 5602.5 5601.5
 xAODTe...View_copy    12     0    INFO copy_cview: 1410 1409 1408 1407 1406 1405 1404 1403 1402 1401
-xAODTestRead_copy     12     0    INFO 13
-xAODTestRead_copy     12     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     12     0    INFO  anInt1 7001 aFloat: 8400 anInt2: 9801 dInt1: 6721
-xAODTestRead_copy     12     0    INFO  anInt1 7002 aFloat: 8400.1 anInt2: 9802 dInt1: 6722
-xAODTestRead_copy     12     0    INFO  anInt1 7003 aFloat: 8400.2 anInt2: 9803 dInt1: 6723
-xAODTestRead_copy     12     0    INFO  anInt1 7004 aFloat: 8400.3 anInt2: 9804 dInt1: 6724
-xAODTestRead_copy     12     0    INFO  anInt1 7005 aFloat: 8400.4 anInt2: 9805 dInt1: 6725
-xAODTestRead_copy     12     0    INFO  anInt1 7006 aFloat: 8400.5 anInt2: 9806 dInt1: 6726
-xAODTestRead_copy     12     0    INFO  anInt1 7007 aFloat: 8400.6 anInt2: 9807 dInt1: 6727
-xAODTestRead_copy     12     0    INFO  anInt1 7008 aFloat: 8400.7 anInt2: 9808 dInt1: 6728
-xAODTestRead_copy     12     0    INFO copy_cvecWD 1014: 2801 2802 2803 2804 2805 2806 2807 2808 2809 2810
+xAODTe...Info_copy    12     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    12     0    INFO cinfo  anInt1 14000 aFloat: 1.4 anInt2: 28000 dInt1: 42000 cEL: cvec[4]
 xAODTe...CVec_copy    12     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    12     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    12     0    INFO  anInt1 1401 aFloat: 2800 pInt: 7001 pFloat: 0.14 anInt2: 4201 dInt1: 5601 dVar1: 6301 dpInt1: 701 cEL: cvec[9]
@@ -1989,9 +2201,17 @@ xAODTe...CVec_copy    12     0    INFO  anInt1 1410 aFloat: 2800.9 pInt: 7010 pF
 
 xAODTestReadHVec      12     0    INFO hvec: 5601.5 5602.5 5603.5 5604.5 5605.5 5606.5 5607.5 5608.5 5609.5 5610.5 5611.5 5612.5 5613.5 5614.5 5615.5 5616.5 5617.5 5618.5 5619.5 5620.5
 xAODTestReadHVec      12     0    INFO hview: 5620.5 5619.5 5618.5 5617.5 5616.5 5615.5 5614.5 5613.5 5612.5 5611.5 5610.5 5609.5 5608.5 5607.5 5606.5 5605.5 5604.5 5603.5 5602.5 5601.5
-xAODTestReadCView     12     0    INFO cview: 1410 1409 1408 1407 1406 1405 1404 1403 1402 1401
-xAODTestReadCInfo     12     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     12     0    INFO cinfo  anInt1 14000 aFloat: 1.4 anInt2: 28000 dInt1: 42000 cEL: cvec[4]
+xAODTestRead          12     0    INFO 13
+xAODTestRead          12     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          12     0    INFO  anInt1 7001 aFloat: 8400 anInt2: 9801 dInt1: 6721
+xAODTestRead          12     0    INFO  anInt1 7002 aFloat: 8400.1 anInt2: 9802 dInt1: 6722
+xAODTestRead          12     0    INFO  anInt1 7003 aFloat: 8400.2 anInt2: 9803 dInt1: 6723
+xAODTestRead          12     0    INFO  anInt1 7004 aFloat: 8400.3 anInt2: 9804 dInt1: 6724
+xAODTestRead          12     0    INFO  anInt1 7005 aFloat: 8400.4 anInt2: 9805 dInt1: 6725
+xAODTestRead          12     0    INFO  anInt1 7006 aFloat: 8400.5 anInt2: 9806 dInt1: 6726
+xAODTestRead          12     0    INFO  anInt1 7007 aFloat: 8400.6 anInt2: 9807 dInt1: 6727
+xAODTestRead          12     0    INFO  anInt1 7008 aFloat: 8400.7 anInt2: 9808 dInt1: 6728
+xAODTestRead          12     0    INFO cvecWD 1014: 2801 2802 2803 2804 2805 2806 2807 2808 2809 2810
 Athena...ntLoopMgr    12     0    INFO   ===>>>  done processing event #13, run #0 on slot 0,  13 events processed so far  <<<===
 Athena...ntLoopMgr    13     0    INFO   ===>>>  start processing event #14, run #0 on slot 0,  13 events processed so far  <<<===
 xAODTestReadCVec      13     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2046,19 +2266,36 @@ xAODTestReadCVec      13     0    INFO  anInt1 1510 aFloat: 3000.9 pInt: 7510 pF
   pvFloat: [-0.395 -0.295 -0.195 -0.095 0.005 0.105 0.205 0.305 0.405 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          13     0    INFO 14
-xAODTestRead          13     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          13     0    INFO  anInt1 7501 aFloat: 9000 anInt2: 10501 dInt1: 7201
-xAODTestRead          13     0    INFO  anInt1 7502 aFloat: 9000.1 anInt2: 10502 dInt1: 7202
-xAODTestRead          13     0    INFO  anInt1 7503 aFloat: 9000.2 anInt2: 10503 dInt1: 7203
-xAODTestRead          13     0    INFO  anInt1 7504 aFloat: 9000.3 anInt2: 10504 dInt1: 7204
-xAODTestRead          13     0    INFO  anInt1 7505 aFloat: 9000.4 anInt2: 10505 dInt1: 7205
-xAODTestRead          13     0    INFO  anInt1 7506 aFloat: 9000.5 anInt2: 10506 dInt1: 7206
-xAODTestRead          13     0    INFO  anInt1 7507 aFloat: 9000.6 anInt2: 10507 dInt1: 7207
-xAODTestRead          13     0    INFO  anInt1 7508 aFloat: 9000.7 anInt2: 10508 dInt1: 7208
-xAODTestRead          13     0    INFO cvecWD 1015: 3001 3002 3003 3004 3005 3006 3007 3008 3009 3010
-xAODTe...Info_copy    13     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    13     0    INFO cinfo  anInt1 15000 aFloat: 1.5 anInt2: 30000 dInt1: 45000 cEL: cvec[5]
+xAODTestReadCInfo     13     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     13     0    INFO cinfo  anInt1 15000 aFloat: 1.5 anInt2: 30000 dInt1: 45000 cEL: cvec[5]
+xAODTestReadCView     13     0    INFO cview: 1510 1509 1508 1507 1506 1505 1504 1503 1502 1501
+xAODTestRead_copy     13     0    INFO 14
+xAODTestRead_copy     13     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     13     0    INFO  anInt1 7501 aFloat: 9000 anInt2: 10501 dInt1: 7201
+xAODTestRead_copy     13     0    INFO  anInt1 7502 aFloat: 9000.1 anInt2: 10502 dInt1: 7202
+xAODTestRead_copy     13     0    INFO  anInt1 7503 aFloat: 9000.2 anInt2: 10503 dInt1: 7203
+xAODTestRead_copy     13     0    INFO  anInt1 7504 aFloat: 9000.3 anInt2: 10504 dInt1: 7204
+xAODTestRead_copy     13     0    INFO  anInt1 7505 aFloat: 9000.4 anInt2: 10505 dInt1: 7205
+xAODTestRead_copy     13     0    INFO  anInt1 7506 aFloat: 9000.5 anInt2: 10506 dInt1: 7206
+xAODTestRead_copy     13     0    INFO  anInt1 7507 aFloat: 9000.6 anInt2: 10507 dInt1: 7207
+xAODTestRead_copy     13     0    INFO  anInt1 7508 aFloat: 9000.7 anInt2: 10508 dInt1: 7208
+xAODTestRead_copy     13     0    INFO copy_cvecWD 1015: 3001 3002 3003 3004 3005 3006 3007 3008 3009 3010
+xAODTestReadPLinks    13     0    INFO plinksContainer
+xAODTestReadPLinks    13     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks    13     0    INFO   link: (ctrig:5)  links: (:inv) (cvec:5) (ctrig:0)
+xAODTestReadPLinks    13     0    INFO   decorLink: (ctrig:5) decorVLinks: (:inv)
+xAODTestReadPLinks    13     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    13     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    13     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    13     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    13     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    13     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    13     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    13     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks    13     0    INFO plinksInfo
+xAODTestReadPLinks    13     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks    13     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    13     0    INFO   decorLink: (:inv) decorVLinks:
 xAODTestReadJVec      13     0    INFO jvecContainer
 xAODTestReadJVec      13     0    INFO   ivec: [113 114 115]  fvec: [213.5 214.5 215.5 216.5]  svec: []  lvec: [(cvec:3)]
 xAODTestReadJVec      13     0    INFO   decorJVec: []
@@ -2076,17 +2313,8 @@ xAODTestReadJVec      13     0    INFO   decorJVec: [417.5 418.5 419.5 420.5]
 xAODTe...HVec_copy    13     0    INFO copy_hvec: 6001.5 6002.5 6003.5 6004.5 6005.5 6006.5 6007.5 6008.5 6009.5 6010.5 6011.5 6012.5 6013.5 6014.5 6015.5 6016.5 6017.5 6018.5 6019.5 6020.5
 xAODTe...HVec_copy    13     0    INFO copy_hview: 6020.5 6019.5 6018.5 6017.5 6016.5 6015.5 6014.5 6013.5 6012.5 6011.5 6010.5 6009.5 6008.5 6007.5 6006.5 6005.5 6004.5 6003.5 6002.5 6001.5
 xAODTe...View_copy    13     0    INFO copy_cview: 1510 1509 1508 1507 1506 1505 1504 1503 1502 1501
-xAODTestRead_copy     13     0    INFO 14
-xAODTestRead_copy     13     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     13     0    INFO  anInt1 7501 aFloat: 9000 anInt2: 10501 dInt1: 7201
-xAODTestRead_copy     13     0    INFO  anInt1 7502 aFloat: 9000.1 anInt2: 10502 dInt1: 7202
-xAODTestRead_copy     13     0    INFO  anInt1 7503 aFloat: 9000.2 anInt2: 10503 dInt1: 7203
-xAODTestRead_copy     13     0    INFO  anInt1 7504 aFloat: 9000.3 anInt2: 10504 dInt1: 7204
-xAODTestRead_copy     13     0    INFO  anInt1 7505 aFloat: 9000.4 anInt2: 10505 dInt1: 7205
-xAODTestRead_copy     13     0    INFO  anInt1 7506 aFloat: 9000.5 anInt2: 10506 dInt1: 7206
-xAODTestRead_copy     13     0    INFO  anInt1 7507 aFloat: 9000.6 anInt2: 10507 dInt1: 7207
-xAODTestRead_copy     13     0    INFO  anInt1 7508 aFloat: 9000.7 anInt2: 10508 dInt1: 7208
-xAODTestRead_copy     13     0    INFO copy_cvecWD 1015: 3001 3002 3003 3004 3005 3006 3007 3008 3009 3010
+xAODTe...Info_copy    13     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    13     0    INFO cinfo  anInt1 15000 aFloat: 1.5 anInt2: 30000 dInt1: 45000 cEL: cvec[5]
 xAODTe...CVec_copy    13     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    13     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    13     0    INFO  anInt1 1501 aFloat: 3000 pInt: 7501 pFloat: 0.15 anInt2: 4501 dInt1: 6001 dVar1: 6751 dpInt1: 751 cEL: cvec[9]
@@ -2141,9 +2369,17 @@ xAODTe...CVec_copy    13     0    INFO  anInt1 1510 aFloat: 3000.9 pInt: 7510 pF
 
 xAODTestReadHVec      13     0    INFO hvec: 6001.5 6002.5 6003.5 6004.5 6005.5 6006.5 6007.5 6008.5 6009.5 6010.5 6011.5 6012.5 6013.5 6014.5 6015.5 6016.5 6017.5 6018.5 6019.5 6020.5
 xAODTestReadHVec      13     0    INFO hview: 6020.5 6019.5 6018.5 6017.5 6016.5 6015.5 6014.5 6013.5 6012.5 6011.5 6010.5 6009.5 6008.5 6007.5 6006.5 6005.5 6004.5 6003.5 6002.5 6001.5
-xAODTestReadCView     13     0    INFO cview: 1510 1509 1508 1507 1506 1505 1504 1503 1502 1501
-xAODTestReadCInfo     13     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     13     0    INFO cinfo  anInt1 15000 aFloat: 1.5 anInt2: 30000 dInt1: 45000 cEL: cvec[5]
+xAODTestRead          13     0    INFO 14
+xAODTestRead          13     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          13     0    INFO  anInt1 7501 aFloat: 9000 anInt2: 10501 dInt1: 7201
+xAODTestRead          13     0    INFO  anInt1 7502 aFloat: 9000.1 anInt2: 10502 dInt1: 7202
+xAODTestRead          13     0    INFO  anInt1 7503 aFloat: 9000.2 anInt2: 10503 dInt1: 7203
+xAODTestRead          13     0    INFO  anInt1 7504 aFloat: 9000.3 anInt2: 10504 dInt1: 7204
+xAODTestRead          13     0    INFO  anInt1 7505 aFloat: 9000.4 anInt2: 10505 dInt1: 7205
+xAODTestRead          13     0    INFO  anInt1 7506 aFloat: 9000.5 anInt2: 10506 dInt1: 7206
+xAODTestRead          13     0    INFO  anInt1 7507 aFloat: 9000.6 anInt2: 10507 dInt1: 7207
+xAODTestRead          13     0    INFO  anInt1 7508 aFloat: 9000.7 anInt2: 10508 dInt1: 7208
+xAODTestRead          13     0    INFO cvecWD 1015: 3001 3002 3003 3004 3005 3006 3007 3008 3009 3010
 Athena...ntLoopMgr    13     0    INFO   ===>>>  done processing event #14, run #0 on slot 0,  14 events processed so far  <<<===
 Athena...ntLoopMgr    14     0    INFO   ===>>>  start processing event #15, run #0 on slot 0,  14 events processed so far  <<<===
 xAODTestReadCVec      14     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2198,19 +2434,36 @@ xAODTestReadCVec      14     0    INFO  anInt1 1610 aFloat: 3200.9 pInt: 8010 pF
   pvFloat: [-0.394 -0.294 -0.194 -0.094 0.006 0.106 0.206 0.306 0.406 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          14     0    INFO 15
-xAODTestRead          14     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          14     0    INFO  anInt1 8001 aFloat: 9600 anInt2: 11201 dInt1: 7681
-xAODTestRead          14     0    INFO  anInt1 8002 aFloat: 9600.1 anInt2: 11202 dInt1: 7682
-xAODTestRead          14     0    INFO  anInt1 8003 aFloat: 9600.2 anInt2: 11203 dInt1: 7683
-xAODTestRead          14     0    INFO  anInt1 8004 aFloat: 9600.3 anInt2: 11204 dInt1: 7684
-xAODTestRead          14     0    INFO  anInt1 8005 aFloat: 9600.4 anInt2: 11205 dInt1: 7685
-xAODTestRead          14     0    INFO  anInt1 8006 aFloat: 9600.5 anInt2: 11206 dInt1: 7686
-xAODTestRead          14     0    INFO  anInt1 8007 aFloat: 9600.6 anInt2: 11207 dInt1: 7687
-xAODTestRead          14     0    INFO  anInt1 8008 aFloat: 9600.7 anInt2: 11208 dInt1: 7688
-xAODTestRead          14     0    INFO cvecWD 1016: 3201 3202 3203 3204 3205 3206 3207 3208 3209 3210
-xAODTe...Info_copy    14     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    14     0    INFO cinfo  anInt1 16000 aFloat: 1.6 anInt2: 32000 dInt1: 48000 cEL: cvec[6]
+xAODTestReadCInfo     14     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     14     0    INFO cinfo  anInt1 16000 aFloat: 1.6 anInt2: 32000 dInt1: 48000 cEL: cvec[6]
+xAODTestReadCView     14     0    INFO cview: 1610 1609 1608 1607 1606 1605 1604 1603 1602 1601
+xAODTestRead_copy     14     0    INFO 15
+xAODTestRead_copy     14     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     14     0    INFO  anInt1 8001 aFloat: 9600 anInt2: 11201 dInt1: 7681
+xAODTestRead_copy     14     0    INFO  anInt1 8002 aFloat: 9600.1 anInt2: 11202 dInt1: 7682
+xAODTestRead_copy     14     0    INFO  anInt1 8003 aFloat: 9600.2 anInt2: 11203 dInt1: 7683
+xAODTestRead_copy     14     0    INFO  anInt1 8004 aFloat: 9600.3 anInt2: 11204 dInt1: 7684
+xAODTestRead_copy     14     0    INFO  anInt1 8005 aFloat: 9600.4 anInt2: 11205 dInt1: 7685
+xAODTestRead_copy     14     0    INFO  anInt1 8006 aFloat: 9600.5 anInt2: 11206 dInt1: 7686
+xAODTestRead_copy     14     0    INFO  anInt1 8007 aFloat: 9600.6 anInt2: 11207 dInt1: 7687
+xAODTestRead_copy     14     0    INFO  anInt1 8008 aFloat: 9600.7 anInt2: 11208 dInt1: 7688
+xAODTestRead_copy     14     0    INFO copy_cvecWD 1016: 3201 3202 3203 3204 3205 3206 3207 3208 3209 3210
+xAODTestReadPLinks    14     0    INFO plinksContainer
+xAODTestReadPLinks    14     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    14     0    INFO   link: (:inv)  links: (cvec:5) (ctrig:0) (:inv) (cvec:8)
+xAODTestReadPLinks    14     0    INFO   decorLink: (:inv) decorVLinks: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    14     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    14     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    14     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    14     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    14     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    14     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks    14     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    14     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks    14     0    INFO plinksInfo
+xAODTestReadPLinks    14     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks    14     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    14     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
 xAODTestReadJVec      14     0    INFO jvecContainer
 xAODTestReadJVec      14     0    INFO   ivec: [114 115 116 117]  fvec: []  svec: ['str464']  lvec: [(cvec:4) (cvec:5)]
 xAODTestReadJVec      14     0    INFO   decorJVec: [314.5]
@@ -2228,17 +2481,8 @@ xAODTestReadJVec      14     0    INFO   decorJVec: []
 xAODTe...HVec_copy    14     0    INFO copy_hvec: 6401.5 6402.5 6403.5 6404.5 6405.5 6406.5 6407.5 6408.5 6409.5 6410.5 6411.5 6412.5 6413.5 6414.5 6415.5 6416.5 6417.5 6418.5 6419.5 6420.5
 xAODTe...HVec_copy    14     0    INFO copy_hview: 6420.5 6419.5 6418.5 6417.5 6416.5 6415.5 6414.5 6413.5 6412.5 6411.5 6410.5 6409.5 6408.5 6407.5 6406.5 6405.5 6404.5 6403.5 6402.5 6401.5
 xAODTe...View_copy    14     0    INFO copy_cview: 1610 1609 1608 1607 1606 1605 1604 1603 1602 1601
-xAODTestRead_copy     14     0    INFO 15
-xAODTestRead_copy     14     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     14     0    INFO  anInt1 8001 aFloat: 9600 anInt2: 11201 dInt1: 7681
-xAODTestRead_copy     14     0    INFO  anInt1 8002 aFloat: 9600.1 anInt2: 11202 dInt1: 7682
-xAODTestRead_copy     14     0    INFO  anInt1 8003 aFloat: 9600.2 anInt2: 11203 dInt1: 7683
-xAODTestRead_copy     14     0    INFO  anInt1 8004 aFloat: 9600.3 anInt2: 11204 dInt1: 7684
-xAODTestRead_copy     14     0    INFO  anInt1 8005 aFloat: 9600.4 anInt2: 11205 dInt1: 7685
-xAODTestRead_copy     14     0    INFO  anInt1 8006 aFloat: 9600.5 anInt2: 11206 dInt1: 7686
-xAODTestRead_copy     14     0    INFO  anInt1 8007 aFloat: 9600.6 anInt2: 11207 dInt1: 7687
-xAODTestRead_copy     14     0    INFO  anInt1 8008 aFloat: 9600.7 anInt2: 11208 dInt1: 7688
-xAODTestRead_copy     14     0    INFO copy_cvecWD 1016: 3201 3202 3203 3204 3205 3206 3207 3208 3209 3210
+xAODTe...Info_copy    14     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    14     0    INFO cinfo  anInt1 16000 aFloat: 1.6 anInt2: 32000 dInt1: 48000 cEL: cvec[6]
 xAODTe...CVec_copy    14     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    14     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    14     0    INFO  anInt1 1601 aFloat: 3200 pInt: 8001 pFloat: 0.16 anInt2: 4801 dInt1: 6401 dVar1: 7201 dpInt1: 801 cEL: cvec[9]
@@ -2293,9 +2537,17 @@ xAODTe...CVec_copy    14     0    INFO  anInt1 1610 aFloat: 3200.9 pInt: 8010 pF
 
 xAODTestReadHVec      14     0    INFO hvec: 6401.5 6402.5 6403.5 6404.5 6405.5 6406.5 6407.5 6408.5 6409.5 6410.5 6411.5 6412.5 6413.5 6414.5 6415.5 6416.5 6417.5 6418.5 6419.5 6420.5
 xAODTestReadHVec      14     0    INFO hview: 6420.5 6419.5 6418.5 6417.5 6416.5 6415.5 6414.5 6413.5 6412.5 6411.5 6410.5 6409.5 6408.5 6407.5 6406.5 6405.5 6404.5 6403.5 6402.5 6401.5
-xAODTestReadCView     14     0    INFO cview: 1610 1609 1608 1607 1606 1605 1604 1603 1602 1601
-xAODTestReadCInfo     14     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     14     0    INFO cinfo  anInt1 16000 aFloat: 1.6 anInt2: 32000 dInt1: 48000 cEL: cvec[6]
+xAODTestRead          14     0    INFO 15
+xAODTestRead          14     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          14     0    INFO  anInt1 8001 aFloat: 9600 anInt2: 11201 dInt1: 7681
+xAODTestRead          14     0    INFO  anInt1 8002 aFloat: 9600.1 anInt2: 11202 dInt1: 7682
+xAODTestRead          14     0    INFO  anInt1 8003 aFloat: 9600.2 anInt2: 11203 dInt1: 7683
+xAODTestRead          14     0    INFO  anInt1 8004 aFloat: 9600.3 anInt2: 11204 dInt1: 7684
+xAODTestRead          14     0    INFO  anInt1 8005 aFloat: 9600.4 anInt2: 11205 dInt1: 7685
+xAODTestRead          14     0    INFO  anInt1 8006 aFloat: 9600.5 anInt2: 11206 dInt1: 7686
+xAODTestRead          14     0    INFO  anInt1 8007 aFloat: 9600.6 anInt2: 11207 dInt1: 7687
+xAODTestRead          14     0    INFO  anInt1 8008 aFloat: 9600.7 anInt2: 11208 dInt1: 7688
+xAODTestRead          14     0    INFO cvecWD 1016: 3201 3202 3203 3204 3205 3206 3207 3208 3209 3210
 Athena...ntLoopMgr    14     0    INFO   ===>>>  done processing event #15, run #0 on slot 0,  15 events processed so far  <<<===
 Athena...ntLoopMgr    15     0    INFO   ===>>>  start processing event #16, run #0 on slot 0,  15 events processed so far  <<<===
 xAODTestReadCVec      15     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2364,6 +2616,22 @@ xAODTestRead_copy     15     0    INFO  anInt1 8506 aFloat: 10200.5 anInt2: 1190
 xAODTestRead_copy     15     0    INFO  anInt1 8507 aFloat: 10200.6 anInt2: 11907 dInt1: 8167
 xAODTestRead_copy     15     0    INFO  anInt1 8508 aFloat: 10200.7 anInt2: 11908 dInt1: 8168
 xAODTestRead_copy     15     0    INFO copy_cvecWD 1017: 3401 3402 3403 3404 3405 3406 3407 3408 3409 3410
+xAODTestReadPLinks    15     0    INFO plinksContainer
+xAODTestReadPLinks    15     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    15     0    INFO   link: (cvec:5)  links:
+xAODTestReadPLinks    15     0    INFO   decorLink: (cvec:5) decorVLinks: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    15     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    15     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    15     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    15     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks    15     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    15     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks    15     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    15     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks    15     0    INFO plinksInfo
+xAODTestReadPLinks    15     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks    15     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    15     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
 xAODTestReadJVec      15     0    INFO jvecContainer
 xAODTestReadJVec      15     0    INFO   ivec: []  fvec: [215.5]  svec: ['str465' 'str466']  lvec: [(cvec:5) (cvec:6) (cvec:7)]
 xAODTestReadJVec      15     0    INFO   decorJVec: [315.5 316.5]
@@ -2502,19 +2770,36 @@ xAODTestReadCVec      16     0    INFO  anInt1 1810 aFloat: 3600.9 pInt: 9010 pF
   pvFloat: [-0.392 -0.292 -0.192 -0.092 0.008 0.108 0.208 0.308 0.408 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          16     0    INFO 17
-xAODTestRead          16     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          16     0    INFO  anInt1 9001 aFloat: 10800 anInt2: 12601 dInt1: 8641
-xAODTestRead          16     0    INFO  anInt1 9002 aFloat: 10800.1 anInt2: 12602 dInt1: 8642
-xAODTestRead          16     0    INFO  anInt1 9003 aFloat: 10800.2 anInt2: 12603 dInt1: 8643
-xAODTestRead          16     0    INFO  anInt1 9004 aFloat: 10800.3 anInt2: 12604 dInt1: 8644
-xAODTestRead          16     0    INFO  anInt1 9005 aFloat: 10800.4 anInt2: 12605 dInt1: 8645
-xAODTestRead          16     0    INFO  anInt1 9006 aFloat: 10800.5 anInt2: 12606 dInt1: 8646
-xAODTestRead          16     0    INFO  anInt1 9007 aFloat: 10800.6 anInt2: 12607 dInt1: 8647
-xAODTestRead          16     0    INFO  anInt1 9008 aFloat: 10800.7 anInt2: 12608 dInt1: 8648
-xAODTestRead          16     0    INFO cvecWD 1018: 3601 3602 3603 3604 3605 3606 3607 3608 3609 3610
-xAODTe...Info_copy    16     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    16     0    INFO cinfo  anInt1 18000 aFloat: 1.8 anInt2: 36000 dInt1: 54000 cEL: cvec[8]
+xAODTestReadCInfo     16     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     16     0    INFO cinfo  anInt1 18000 aFloat: 1.8 anInt2: 36000 dInt1: 54000 cEL: cvec[8]
+xAODTestReadCView     16     0    INFO cview: 1810 1809 1808 1807 1806 1805 1804 1803 1802 1801
+xAODTestRead_copy     16     0    INFO 17
+xAODTestRead_copy     16     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     16     0    INFO  anInt1 9001 aFloat: 10800 anInt2: 12601 dInt1: 8641
+xAODTestRead_copy     16     0    INFO  anInt1 9002 aFloat: 10800.1 anInt2: 12602 dInt1: 8642
+xAODTestRead_copy     16     0    INFO  anInt1 9003 aFloat: 10800.2 anInt2: 12603 dInt1: 8643
+xAODTestRead_copy     16     0    INFO  anInt1 9004 aFloat: 10800.3 anInt2: 12604 dInt1: 8644
+xAODTestRead_copy     16     0    INFO  anInt1 9005 aFloat: 10800.4 anInt2: 12605 dInt1: 8645
+xAODTestRead_copy     16     0    INFO  anInt1 9006 aFloat: 10800.5 anInt2: 12606 dInt1: 8646
+xAODTestRead_copy     16     0    INFO  anInt1 9007 aFloat: 10800.6 anInt2: 12607 dInt1: 8647
+xAODTestRead_copy     16     0    INFO  anInt1 9008 aFloat: 10800.7 anInt2: 12608 dInt1: 8648
+xAODTestRead_copy     16     0    INFO copy_cvecWD 1018: 3601 3602 3603 3604 3605 3606 3607 3608 3609 3610
+xAODTestReadPLinks    16     0    INFO plinksContainer
+xAODTestReadPLinks    16     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks    16     0    INFO   link: (ctrig:0)  links: (:inv)
+xAODTestReadPLinks    16     0    INFO   decorLink: (ctrig:0) decorVLinks: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    16     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    16     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks    16     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    16     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks    16     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    16     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks    16     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks    16     0    INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks    16     0    INFO plinksInfo
+xAODTestReadPLinks    16     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks    16     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    16     0    INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
 xAODTestReadJVec      16     0    INFO jvecContainer
 xAODTestReadJVec      16     0    INFO   ivec: [116]  fvec: [216.5 217.5]  svec: ['str466' 'str467' 'str468']  lvec: [(cvec:6) (cvec:7) (cvec:8) (cvec:9)]
 xAODTestReadJVec      16     0    INFO   decorJVec: [316.5 317.5 318.5]
@@ -2532,17 +2817,8 @@ xAODTestReadJVec      16     0    INFO   decorJVec: [420.5 421.5]
 xAODTe...HVec_copy    16     0    INFO copy_hvec: 7201.5 7202.5 7203.5 7204.5 7205.5 7206.5 7207.5 7208.5 7209.5 7210.5 7211.5 7212.5 7213.5 7214.5 7215.5 7216.5 7217.5 7218.5 7219.5 7220.5
 xAODTe...HVec_copy    16     0    INFO copy_hview: 7220.5 7219.5 7218.5 7217.5 7216.5 7215.5 7214.5 7213.5 7212.5 7211.5 7210.5 7209.5 7208.5 7207.5 7206.5 7205.5 7204.5 7203.5 7202.5 7201.5
 xAODTe...View_copy    16     0    INFO copy_cview: 1810 1809 1808 1807 1806 1805 1804 1803 1802 1801
-xAODTestRead_copy     16     0    INFO 17
-xAODTestRead_copy     16     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     16     0    INFO  anInt1 9001 aFloat: 10800 anInt2: 12601 dInt1: 8641
-xAODTestRead_copy     16     0    INFO  anInt1 9002 aFloat: 10800.1 anInt2: 12602 dInt1: 8642
-xAODTestRead_copy     16     0    INFO  anInt1 9003 aFloat: 10800.2 anInt2: 12603 dInt1: 8643
-xAODTestRead_copy     16     0    INFO  anInt1 9004 aFloat: 10800.3 anInt2: 12604 dInt1: 8644
-xAODTestRead_copy     16     0    INFO  anInt1 9005 aFloat: 10800.4 anInt2: 12605 dInt1: 8645
-xAODTestRead_copy     16     0    INFO  anInt1 9006 aFloat: 10800.5 anInt2: 12606 dInt1: 8646
-xAODTestRead_copy     16     0    INFO  anInt1 9007 aFloat: 10800.6 anInt2: 12607 dInt1: 8647
-xAODTestRead_copy     16     0    INFO  anInt1 9008 aFloat: 10800.7 anInt2: 12608 dInt1: 8648
-xAODTestRead_copy     16     0    INFO copy_cvecWD 1018: 3601 3602 3603 3604 3605 3606 3607 3608 3609 3610
+xAODTe...Info_copy    16     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    16     0    INFO cinfo  anInt1 18000 aFloat: 1.8 anInt2: 36000 dInt1: 54000 cEL: cvec[8]
 xAODTe...CVec_copy    16     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    16     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    16     0    INFO  anInt1 1801 aFloat: 3600 pInt: 9001 pFloat: 0.18 anInt2: 5401 dInt1: 7201 dVar1: 8101 dpInt1: 901 cEL: cvec[9]
@@ -2597,9 +2873,17 @@ xAODTe...CVec_copy    16     0    INFO  anInt1 1810 aFloat: 3600.9 pInt: 9010 pF
 
 xAODTestReadHVec      16     0    INFO hvec: 7201.5 7202.5 7203.5 7204.5 7205.5 7206.5 7207.5 7208.5 7209.5 7210.5 7211.5 7212.5 7213.5 7214.5 7215.5 7216.5 7217.5 7218.5 7219.5 7220.5
 xAODTestReadHVec      16     0    INFO hview: 7220.5 7219.5 7218.5 7217.5 7216.5 7215.5 7214.5 7213.5 7212.5 7211.5 7210.5 7209.5 7208.5 7207.5 7206.5 7205.5 7204.5 7203.5 7202.5 7201.5
-xAODTestReadCView     16     0    INFO cview: 1810 1809 1808 1807 1806 1805 1804 1803 1802 1801
-xAODTestReadCInfo     16     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     16     0    INFO cinfo  anInt1 18000 aFloat: 1.8 anInt2: 36000 dInt1: 54000 cEL: cvec[8]
+xAODTestRead          16     0    INFO 17
+xAODTestRead          16     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          16     0    INFO  anInt1 9001 aFloat: 10800 anInt2: 12601 dInt1: 8641
+xAODTestRead          16     0    INFO  anInt1 9002 aFloat: 10800.1 anInt2: 12602 dInt1: 8642
+xAODTestRead          16     0    INFO  anInt1 9003 aFloat: 10800.2 anInt2: 12603 dInt1: 8643
+xAODTestRead          16     0    INFO  anInt1 9004 aFloat: 10800.3 anInt2: 12604 dInt1: 8644
+xAODTestRead          16     0    INFO  anInt1 9005 aFloat: 10800.4 anInt2: 12605 dInt1: 8645
+xAODTestRead          16     0    INFO  anInt1 9006 aFloat: 10800.5 anInt2: 12606 dInt1: 8646
+xAODTestRead          16     0    INFO  anInt1 9007 aFloat: 10800.6 anInt2: 12607 dInt1: 8647
+xAODTestRead          16     0    INFO  anInt1 9008 aFloat: 10800.7 anInt2: 12608 dInt1: 8648
+xAODTestRead          16     0    INFO cvecWD 1018: 3601 3602 3603 3604 3605 3606 3607 3608 3609 3610
 Athena...ntLoopMgr    16     0    INFO   ===>>>  done processing event #17, run #0 on slot 0,  17 events processed so far  <<<===
 Athena...ntLoopMgr    17     0    INFO   ===>>>  start processing event #18, run #0 on slot 0,  17 events processed so far  <<<===
 xAODTestReadCVec      17     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2654,19 +2938,36 @@ xAODTestReadCVec      17     0    INFO  anInt1 1910 aFloat: 3800.9 pInt: 9510 pF
   pvFloat: [-0.391 -0.291 -0.191 -0.091 0.009 0.109 0.209 0.309 0.409 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          17     0    INFO 18
-xAODTestRead          17     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          17     0    INFO  anInt1 9501 aFloat: 11400 anInt2: 13301 dInt1: 9121
-xAODTestRead          17     0    INFO  anInt1 9502 aFloat: 11400.1 anInt2: 13302 dInt1: 9122
-xAODTestRead          17     0    INFO  anInt1 9503 aFloat: 11400.2 anInt2: 13303 dInt1: 9123
-xAODTestRead          17     0    INFO  anInt1 9504 aFloat: 11400.3 anInt2: 13304 dInt1: 9124
-xAODTestRead          17     0    INFO  anInt1 9505 aFloat: 11400.4 anInt2: 13305 dInt1: 9125
-xAODTestRead          17     0    INFO  anInt1 9506 aFloat: 11400.5 anInt2: 13306 dInt1: 9126
-xAODTestRead          17     0    INFO  anInt1 9507 aFloat: 11400.6 anInt2: 13307 dInt1: 9127
-xAODTestRead          17     0    INFO  anInt1 9508 aFloat: 11400.7 anInt2: 13308 dInt1: 9128
-xAODTestRead          17     0    INFO cvecWD 1019: 3801 3802 3803 3804 3805 3806 3807 3808 3809 3810
-xAODTe...Info_copy    17     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    17     0    INFO cinfo  anInt1 19000 aFloat: 1.9 anInt2: 38000 dInt1: 57000 cEL: cvec[9]
+xAODTestReadCInfo     17     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     17     0    INFO cinfo  anInt1 19000 aFloat: 1.9 anInt2: 38000 dInt1: 57000 cEL: cvec[9]
+xAODTestReadCView     17     0    INFO cview: 1910 1909 1908 1907 1906 1905 1904 1903 1902 1901
+xAODTestRead_copy     17     0    INFO 18
+xAODTestRead_copy     17     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     17     0    INFO  anInt1 9501 aFloat: 11400 anInt2: 13301 dInt1: 9121
+xAODTestRead_copy     17     0    INFO  anInt1 9502 aFloat: 11400.1 anInt2: 13302 dInt1: 9122
+xAODTestRead_copy     17     0    INFO  anInt1 9503 aFloat: 11400.2 anInt2: 13303 dInt1: 9123
+xAODTestRead_copy     17     0    INFO  anInt1 9504 aFloat: 11400.3 anInt2: 13304 dInt1: 9124
+xAODTestRead_copy     17     0    INFO  anInt1 9505 aFloat: 11400.4 anInt2: 13305 dInt1: 9125
+xAODTestRead_copy     17     0    INFO  anInt1 9506 aFloat: 11400.5 anInt2: 13306 dInt1: 9126
+xAODTestRead_copy     17     0    INFO  anInt1 9507 aFloat: 11400.6 anInt2: 13307 dInt1: 9127
+xAODTestRead_copy     17     0    INFO  anInt1 9508 aFloat: 11400.7 anInt2: 13308 dInt1: 9128
+xAODTestRead_copy     17     0    INFO copy_cvecWD 1019: 3801 3802 3803 3804 3805 3806 3807 3808 3809 3810
+xAODTestReadPLinks    17     0    INFO plinksContainer
+xAODTestReadPLinks    17     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    17     0    INFO   link: (:inv)  links: (cvec:8) (ctrig:3)
+xAODTestReadPLinks    17     0    INFO   decorLink: (:inv) decorVLinks:
+xAODTestReadPLinks    17     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    17     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks    17     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    17     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks    17     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks    17     0    INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks    17     0    INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks    17     0    INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks    17     0    INFO plinksInfo
+xAODTestReadPLinks    17     0    INFO   plinkInfo_DLinks: 
+xAODTestReadPLinks    17     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks    17     0    INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
 xAODTestReadJVec      17     0    INFO jvecContainer
 xAODTestReadJVec      17     0    INFO   ivec: [117 118]  fvec: [217.5 218.5 219.5]  svec: ['str467' 'str468' 'str469' 'str470']  lvec: []
 xAODTestReadJVec      17     0    INFO   decorJVec: [317.5 318.5 319.5 320.5]
@@ -2684,17 +2985,8 @@ xAODTestReadJVec      17     0    INFO   decorJVec: [421.5 422.5 423.5]
 xAODTe...HVec_copy    17     0    INFO copy_hvec: 7601.5 7602.5 7603.5 7604.5 7605.5 7606.5 7607.5 7608.5 7609.5 7610.5 7611.5 7612.5 7613.5 7614.5 7615.5 7616.5 7617.5 7618.5 7619.5 7620.5
 xAODTe...HVec_copy    17     0    INFO copy_hview: 7620.5 7619.5 7618.5 7617.5 7616.5 7615.5 7614.5 7613.5 7612.5 7611.5 7610.5 7609.5 7608.5 7607.5 7606.5 7605.5 7604.5 7603.5 7602.5 7601.5
 xAODTe...View_copy    17     0    INFO copy_cview: 1910 1909 1908 1907 1906 1905 1904 1903 1902 1901
-xAODTestRead_copy     17     0    INFO 18
-xAODTestRead_copy     17     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     17     0    INFO  anInt1 9501 aFloat: 11400 anInt2: 13301 dInt1: 9121
-xAODTestRead_copy     17     0    INFO  anInt1 9502 aFloat: 11400.1 anInt2: 13302 dInt1: 9122
-xAODTestRead_copy     17     0    INFO  anInt1 9503 aFloat: 11400.2 anInt2: 13303 dInt1: 9123
-xAODTestRead_copy     17     0    INFO  anInt1 9504 aFloat: 11400.3 anInt2: 13304 dInt1: 9124
-xAODTestRead_copy     17     0    INFO  anInt1 9505 aFloat: 11400.4 anInt2: 13305 dInt1: 9125
-xAODTestRead_copy     17     0    INFO  anInt1 9506 aFloat: 11400.5 anInt2: 13306 dInt1: 9126
-xAODTestRead_copy     17     0    INFO  anInt1 9507 aFloat: 11400.6 anInt2: 13307 dInt1: 9127
-xAODTestRead_copy     17     0    INFO  anInt1 9508 aFloat: 11400.7 anInt2: 13308 dInt1: 9128
-xAODTestRead_copy     17     0    INFO copy_cvecWD 1019: 3801 3802 3803 3804 3805 3806 3807 3808 3809 3810
+xAODTe...Info_copy    17     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    17     0    INFO cinfo  anInt1 19000 aFloat: 1.9 anInt2: 38000 dInt1: 57000 cEL: cvec[9]
 xAODTe...CVec_copy    17     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    17     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    17     0    INFO  anInt1 1901 aFloat: 3800 pInt: 9501 pFloat: 0.19 anInt2: 5701 dInt1: 7601 dVar1: 8551 dpInt1: 951 cEL: cvec[9]
@@ -2749,9 +3041,17 @@ xAODTe...CVec_copy    17     0    INFO  anInt1 1910 aFloat: 3800.9 pInt: 9510 pF
 
 xAODTestReadHVec      17     0    INFO hvec: 7601.5 7602.5 7603.5 7604.5 7605.5 7606.5 7607.5 7608.5 7609.5 7610.5 7611.5 7612.5 7613.5 7614.5 7615.5 7616.5 7617.5 7618.5 7619.5 7620.5
 xAODTestReadHVec      17     0    INFO hview: 7620.5 7619.5 7618.5 7617.5 7616.5 7615.5 7614.5 7613.5 7612.5 7611.5 7610.5 7609.5 7608.5 7607.5 7606.5 7605.5 7604.5 7603.5 7602.5 7601.5
-xAODTestReadCView     17     0    INFO cview: 1910 1909 1908 1907 1906 1905 1904 1903 1902 1901
-xAODTestReadCInfo     17     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     17     0    INFO cinfo  anInt1 19000 aFloat: 1.9 anInt2: 38000 dInt1: 57000 cEL: cvec[9]
+xAODTestRead          17     0    INFO 18
+xAODTestRead          17     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          17     0    INFO  anInt1 9501 aFloat: 11400 anInt2: 13301 dInt1: 9121
+xAODTestRead          17     0    INFO  anInt1 9502 aFloat: 11400.1 anInt2: 13302 dInt1: 9122
+xAODTestRead          17     0    INFO  anInt1 9503 aFloat: 11400.2 anInt2: 13303 dInt1: 9123
+xAODTestRead          17     0    INFO  anInt1 9504 aFloat: 11400.3 anInt2: 13304 dInt1: 9124
+xAODTestRead          17     0    INFO  anInt1 9505 aFloat: 11400.4 anInt2: 13305 dInt1: 9125
+xAODTestRead          17     0    INFO  anInt1 9506 aFloat: 11400.5 anInt2: 13306 dInt1: 9126
+xAODTestRead          17     0    INFO  anInt1 9507 aFloat: 11400.6 anInt2: 13307 dInt1: 9127
+xAODTestRead          17     0    INFO  anInt1 9508 aFloat: 11400.7 anInt2: 13308 dInt1: 9128
+xAODTestRead          17     0    INFO cvecWD 1019: 3801 3802 3803 3804 3805 3806 3807 3808 3809 3810
 Athena...ntLoopMgr    17     0    INFO   ===>>>  done processing event #18, run #0 on slot 0,  18 events processed so far  <<<===
 Athena...ntLoopMgr    18     0    INFO   ===>>>  start processing event #19, run #0 on slot 0,  18 events processed so far  <<<===
 xAODTestReadCVec      18     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2806,19 +3106,36 @@ xAODTestReadCVec      18     0    INFO  anInt1 2010 aFloat: 4000.9 pInt: 10010 p
   pvFloat: [-0.390 -0.290 -0.190 -0.090 0.010 0.110 0.210 0.310 0.410 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestRead          18     0    INFO 19
-xAODTestRead          18     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead          18     0    INFO  anInt1 10001 aFloat: 12000 anInt2: 14001 dInt1: 9601
-xAODTestRead          18     0    INFO  anInt1 10002 aFloat: 12000.1 anInt2: 14002 dInt1: 9602
-xAODTestRead          18     0    INFO  anInt1 10003 aFloat: 12000.2 anInt2: 14003 dInt1: 9603
-xAODTestRead          18     0    INFO  anInt1 10004 aFloat: 12000.3 anInt2: 14004 dInt1: 9604
-xAODTestRead          18     0    INFO  anInt1 10005 aFloat: 12000.4 anInt2: 14005 dInt1: 9605
-xAODTestRead          18     0    INFO  anInt1 10006 aFloat: 12000.5 anInt2: 14006 dInt1: 9606
-xAODTestRead          18     0    INFO  anInt1 10007 aFloat: 12000.6 anInt2: 14007 dInt1: 9607
-xAODTestRead          18     0    INFO  anInt1 10008 aFloat: 12000.7 anInt2: 14008 dInt1: 9608
-xAODTestRead          18     0    INFO cvecWD 1020: 4001 4002 4003 4004 4005 4006 4007 4008 4009 4010
-xAODTe...Info_copy    18     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    18     0    INFO cinfo  anInt1 20000 aFloat: 2 anInt2: 40000 dInt1: 60000 cEL: cvec[0]
+xAODTestReadCInfo     18     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     18     0    INFO cinfo  anInt1 20000 aFloat: 2 anInt2: 40000 dInt1: 60000 cEL: cvec[0]
+xAODTestReadCView     18     0    INFO cview: 2010 2009 2008 2007 2006 2005 2004 2003 2002 2001
+xAODTestRead_copy     18     0    INFO 19
+xAODTestRead_copy     18     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead_copy     18     0    INFO  anInt1 10001 aFloat: 12000 anInt2: 14001 dInt1: 9601
+xAODTestRead_copy     18     0    INFO  anInt1 10002 aFloat: 12000.1 anInt2: 14002 dInt1: 9602
+xAODTestRead_copy     18     0    INFO  anInt1 10003 aFloat: 12000.2 anInt2: 14003 dInt1: 9603
+xAODTestRead_copy     18     0    INFO  anInt1 10004 aFloat: 12000.3 anInt2: 14004 dInt1: 9604
+xAODTestRead_copy     18     0    INFO  anInt1 10005 aFloat: 12000.4 anInt2: 14005 dInt1: 9605
+xAODTestRead_copy     18     0    INFO  anInt1 10006 aFloat: 12000.5 anInt2: 14006 dInt1: 9606
+xAODTestRead_copy     18     0    INFO  anInt1 10007 aFloat: 12000.6 anInt2: 14007 dInt1: 9607
+xAODTestRead_copy     18     0    INFO  anInt1 10008 aFloat: 12000.7 anInt2: 14008 dInt1: 9608
+xAODTestRead_copy     18     0    INFO copy_cvecWD 1020: 4001 4002 4003 4004 4005 4006 4007 4008 4009 4010
+xAODTestReadPLinks    18     0    INFO plinksContainer
+xAODTestReadPLinks    18     0    INFO   plink_DLinks: () (cvec) (ctrig) 
+xAODTestReadPLinks    18     0    INFO   link: (cvec:8)  links: (ctrig:3) (:inv) (cvec:1)
+xAODTestReadPLinks    18     0    INFO   decorLink: (cvec:8) decorVLinks: (ctrig:6)
+xAODTestReadPLinks    18     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    18     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks    18     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks    18     0    INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks    18     0    INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks    18     0    INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks    18     0    INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks    18     0    INFO   decorLink: (ctrig:6) decorVLinks:
+xAODTestReadPLinks    18     0    INFO plinksInfo
+xAODTestReadPLinks    18     0    INFO   plinkInfo_DLinks: () (cvec) 
+xAODTestReadPLinks    18     0    INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks    18     0    INFO   decorLink: (ctrig:6) decorVLinks:
 xAODTestReadJVec      18     0    INFO jvecContainer
 xAODTestReadJVec      18     0    INFO   ivec: [118 119 120]  fvec: [218.5 219.5 220.5 221.5]  svec: []  lvec: [(cvec:8)]
 xAODTestReadJVec      18     0    INFO   decorJVec: []
@@ -2836,17 +3153,8 @@ xAODTestReadJVec      18     0    INFO   decorJVec: [422.5 423.5 424.5 425.5]
 xAODTe...HVec_copy    18     0    INFO copy_hvec: 8001.5 8002.5 8003.5 8004.5 8005.5 8006.5 8007.5 8008.5 8009.5 8010.5 8011.5 8012.5 8013.5 8014.5 8015.5 8016.5 8017.5 8018.5 8019.5 8020.5
 xAODTe...HVec_copy    18     0    INFO copy_hview: 8020.5 8019.5 8018.5 8017.5 8016.5 8015.5 8014.5 8013.5 8012.5 8011.5 8010.5 8009.5 8008.5 8007.5 8006.5 8005.5 8004.5 8003.5 8002.5 8001.5
 xAODTe...View_copy    18     0    INFO copy_cview: 2010 2009 2008 2007 2006 2005 2004 2003 2002 2001
-xAODTestRead_copy     18     0    INFO 19
-xAODTestRead_copy     18     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
-xAODTestRead_copy     18     0    INFO  anInt1 10001 aFloat: 12000 anInt2: 14001 dInt1: 9601
-xAODTestRead_copy     18     0    INFO  anInt1 10002 aFloat: 12000.1 anInt2: 14002 dInt1: 9602
-xAODTestRead_copy     18     0    INFO  anInt1 10003 aFloat: 12000.2 anInt2: 14003 dInt1: 9603
-xAODTestRead_copy     18     0    INFO  anInt1 10004 aFloat: 12000.3 anInt2: 14004 dInt1: 9604
-xAODTestRead_copy     18     0    INFO  anInt1 10005 aFloat: 12000.4 anInt2: 14005 dInt1: 9605
-xAODTestRead_copy     18     0    INFO  anInt1 10006 aFloat: 12000.5 anInt2: 14006 dInt1: 9606
-xAODTestRead_copy     18     0    INFO  anInt1 10007 aFloat: 12000.6 anInt2: 14007 dInt1: 9607
-xAODTestRead_copy     18     0    INFO  anInt1 10008 aFloat: 12000.7 anInt2: 14008 dInt1: 9608
-xAODTestRead_copy     18     0    INFO copy_cvecWD 1020: 4001 4002 4003 4004 4005 4006 4007 4008 4009 4010
+xAODTe...Info_copy    18     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    18     0    INFO cinfo  anInt1 20000 aFloat: 2 anInt2: 40000 dInt1: 60000 cEL: cvec[0]
 xAODTe...CVec_copy    18     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    18     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    18     0    INFO  anInt1 2001 aFloat: 4000 pInt: 10001 pFloat: 0.20 anInt2: 6001 dInt1: 8001 dVar1: 9001 dpInt1: 1001 cEL: cvec[9]
@@ -2901,9 +3209,17 @@ xAODTe...CVec_copy    18     0    INFO  anInt1 2010 aFloat: 4000.9 pInt: 10010 p
 
 xAODTestReadHVec      18     0    INFO hvec: 8001.5 8002.5 8003.5 8004.5 8005.5 8006.5 8007.5 8008.5 8009.5 8010.5 8011.5 8012.5 8013.5 8014.5 8015.5 8016.5 8017.5 8018.5 8019.5 8020.5
 xAODTestReadHVec      18     0    INFO hview: 8020.5 8019.5 8018.5 8017.5 8016.5 8015.5 8014.5 8013.5 8012.5 8011.5 8010.5 8009.5 8008.5 8007.5 8006.5 8005.5 8004.5 8003.5 8002.5 8001.5
-xAODTestReadCView     18     0    INFO cview: 2010 2009 2008 2007 2006 2005 2004 2003 2002 2001
-xAODTestReadCInfo     18     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     18     0    INFO cinfo  anInt1 20000 aFloat: 2 anInt2: 40000 dInt1: 60000 cEL: cvec[0]
+xAODTestRead          18     0    INFO 19
+xAODTestRead          18     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
+xAODTestRead          18     0    INFO  anInt1 10001 aFloat: 12000 anInt2: 14001 dInt1: 9601
+xAODTestRead          18     0    INFO  anInt1 10002 aFloat: 12000.1 anInt2: 14002 dInt1: 9602
+xAODTestRead          18     0    INFO  anInt1 10003 aFloat: 12000.2 anInt2: 14003 dInt1: 9603
+xAODTestRead          18     0    INFO  anInt1 10004 aFloat: 12000.3 anInt2: 14004 dInt1: 9604
+xAODTestRead          18     0    INFO  anInt1 10005 aFloat: 12000.4 anInt2: 14005 dInt1: 9605
+xAODTestRead          18     0    INFO  anInt1 10006 aFloat: 12000.5 anInt2: 14006 dInt1: 9606
+xAODTestRead          18     0    INFO  anInt1 10007 aFloat: 12000.6 anInt2: 14007 dInt1: 9607
+xAODTestRead          18     0    INFO  anInt1 10008 aFloat: 12000.7 anInt2: 14008 dInt1: 9608
+xAODTestRead          18     0    INFO cvecWD 1020: 4001 4002 4003 4004 4005 4006 4007 4008 4009 4010
 Athena...ntLoopMgr    18     0    INFO   ===>>>  done processing event #19, run #0 on slot 0,  19 events processed so far  <<<===
 Athena...ntLoopMgr    19     0    INFO   ===>>>  start processing event #20, run #0 on slot 0,  19 events processed so far  <<<===
 xAODTestReadCVec      19     0    INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
@@ -2958,6 +3274,8 @@ xAODTestReadCVec      19     0    INFO  anInt1 2110 aFloat: 4200.9 pInt: 10510 p
   pvFloat: [-0.389 -0.289 -0.189 -0.089 0.011 0.111 0.211 0.311 0.411 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
+xAODTestReadCInfo     19     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo     19     0    INFO cinfo  anInt1 21000 aFloat: 2.1 anInt2: 42000 dInt1: 63000 cEL: cvec[1]
 xAODTestRead          19     0    INFO 20
 xAODTestRead          19     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
 xAODTestRead          19     0    INFO  anInt1 10501 aFloat: 12600 anInt2: 14701 dInt1: 10081
@@ -2969,8 +3287,25 @@ xAODTestRead          19     0    INFO  anInt1 10506 aFloat: 12600.5 anInt2: 147
 xAODTestRead          19     0    INFO  anInt1 10507 aFloat: 12600.6 anInt2: 14707 dInt1: 10087
 xAODTestRead          19     0    INFO  anInt1 10508 aFloat: 12600.7 anInt2: 14708 dInt1: 10088
 xAODTestRead          19     0    INFO cvecWD 1021: 4201 4202 4203 4204 4205 4206 4207 4208 4209 4210
-xAODTe...Info_copy    19     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTe...Info_copy    19     0    INFO cinfo  anInt1 21000 aFloat: 2.1 anInt2: 42000 dInt1: 63000 cEL: cvec[1]
+xAODTestReadHVec      19     0    INFO hvec: 8401.5 8402.5 8403.5 8404.5 8405.5 8406.5 8407.5 8408.5 8409.5 8410.5 8411.5 8412.5 8413.5 8414.5 8415.5 8416.5 8417.5 8418.5 8419.5 8420.5
+xAODTestReadHVec      19     0    INFO hview: 8420.5 8419.5 8418.5 8417.5 8416.5 8415.5 8414.5 8413.5 8412.5 8411.5 8410.5 8409.5 8408.5 8407.5 8406.5 8405.5 8404.5 8403.5 8402.5 8401.5
+xAODTe...View_copy    19     0    INFO copy_cview: 2110 2109 2108 2107 2106 2105 2104 2103 2102 2101
+xAODTestReadPLinks    19     0    INFO plinksContainer
+xAODTestReadPLinks    19     0    INFO   plink_DLinks: () (ctrig) (cvec) 
+xAODTestReadPLinks    19     0    INFO   link: (ctrig:3)  links: (:inv) (cvec:1) (ctrig:6) (:inv)
+xAODTestReadPLinks    19     0    INFO   decorLink: (ctrig:3) decorVLinks: (:inv) (cvec:4)
+xAODTestReadPLinks    19     0    INFO   link: (:inv)  links:
+xAODTestReadPLinks    19     0    INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks    19     0    INFO   link: (cvec:1)  links: (ctrig:6)
+xAODTestReadPLinks    19     0    INFO   decorLink: (cvec:1) decorVLinks: (ctrig:1) (:inv) (cvec:7) (ctrig:4)
+xAODTestReadPLinks    19     0    INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks    19     0    INFO   decorLink: (ctrig:6) decorVLinks:
+xAODTestReadPLinks    19     0    INFO   link: (:inv)  links: (cvec:4) (ctrig:1) (:inv)
+xAODTestReadPLinks    19     0    INFO   decorLink: (:inv) decorVLinks: (cvec:7)
+xAODTestReadPLinks    19     0    INFO plinksInfo
+xAODTestReadPLinks    19     0    INFO   plinkInfo_DLinks: () (ctrig) 
+xAODTestReadPLinks    19     0    INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
+xAODTestReadPLinks    19     0    INFO   decorLink: (:inv) decorVLinks: (cvec:7)
 xAODTestReadJVec      19     0    INFO jvecContainer
 xAODTestReadJVec      19     0    INFO   ivec: [119 120 121 122]  fvec: []  svec: ['str469']  lvec: [(cvec:9) (cvec:0)]
 xAODTestReadJVec      19     0    INFO   decorJVec: [319.5]
@@ -2987,7 +3322,6 @@ xAODTestReadJVec      19     0    INFO   ivec: []  fvec: [1220.5]  svec: ['str14
 xAODTestReadJVec      19     0    INFO   decorJVec: []
 xAODTe...HVec_copy    19     0    INFO copy_hvec: 8401.5 8402.5 8403.5 8404.5 8405.5 8406.5 8407.5 8408.5 8409.5 8410.5 8411.5 8412.5 8413.5 8414.5 8415.5 8416.5 8417.5 8418.5 8419.5 8420.5
 xAODTe...HVec_copy    19     0    INFO copy_hview: 8420.5 8419.5 8418.5 8417.5 8416.5 8415.5 8414.5 8413.5 8412.5 8411.5 8410.5 8409.5 8408.5 8407.5 8406.5 8405.5 8404.5 8403.5 8402.5 8401.5
-xAODTe...View_copy    19     0    INFO copy_cview: 2110 2109 2108 2107 2106 2105 2104 2103 2102 2101
 xAODTestRead_copy     19     0    INFO 20
 xAODTestRead_copy     19     0    INFO ctrig aux items: aFloat anInt anInt2 dInt1 
 xAODTestRead_copy     19     0    INFO  anInt1 10501 aFloat: 12600 anInt2: 14701 dInt1: 10081
@@ -2999,6 +3333,8 @@ xAODTestRead_copy     19     0    INFO  anInt1 10506 aFloat: 12600.5 anInt2: 147
 xAODTestRead_copy     19     0    INFO  anInt1 10507 aFloat: 12600.6 anInt2: 14707 dInt1: 10087
 xAODTestRead_copy     19     0    INFO  anInt1 10508 aFloat: 12600.7 anInt2: 14708 dInt1: 10088
 xAODTestRead_copy     19     0    INFO copy_cvecWD 1021: 4201 4202 4203 4204 4205 4206 4207 4208 4209 4210
+xAODTe...Info_copy    19     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTe...Info_copy    19     0    INFO cinfo  anInt1 21000 aFloat: 2.1 anInt2: 42000 dInt1: 63000 cEL: cvec[1]
 xAODTe...CVec_copy    19     0    INFO copy_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
 xAODTe...CVec_copy    19     0    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTe...CVec_copy    19     0    INFO  anInt1 2101 aFloat: 4200 pInt: 10501 pFloat: 0.21 anInt2: 6301 dInt1: 8401 dVar1: 9451 dpInt1: 1051 cEL: cvec[9]
@@ -3051,15 +3387,11 @@ xAODTe...CVec_copy    19     0    INFO  anInt1 2110 aFloat: 4200.9 pInt: 10510 p
   pvFloat: [-0.389 -0.289 -0.189 -0.089 0.011 0.111 0.211 0.311 0.411 ]
   dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
 
-xAODTestReadHVec      19     0    INFO hvec: 8401.5 8402.5 8403.5 8404.5 8405.5 8406.5 8407.5 8408.5 8409.5 8410.5 8411.5 8412.5 8413.5 8414.5 8415.5 8416.5 8417.5 8418.5 8419.5 8420.5
-xAODTestReadHVec      19     0    INFO hview: 8420.5 8419.5 8418.5 8417.5 8416.5 8415.5 8414.5 8413.5 8412.5 8411.5 8410.5 8409.5 8408.5 8407.5 8406.5 8405.5 8404.5 8403.5 8402.5 8401.5
 xAODTestReadCView     19     0    INFO cview: 2110 2109 2108 2107 2106 2105 2104 2103 2102 2101
-xAODTestReadCInfo     19     0    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
-xAODTestReadCInfo     19     0    INFO cinfo  anInt1 21000 aFloat: 2.1 anInt2: 42000 dInt1: 63000 cEL: cvec[1]
 Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run #0 on slot 0,  20 events processed so far  <<<===
-Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.494066
+Athena...ntLoopMgr    19     0    INFO ---> Loop Finished (seconds): 0.554794
 xaoddata3.root                    INFO Database being retired...
-Domain[ROOT_All]                  INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 130D334E-D58E-3542-99BD-62EBF795DE66
+Domain[ROOT_All]                  INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BEBE855A-E24A-674D-8BFF-AFA72C351A90
 ApplicationMgr                    INFO Application Manager Stopped successfully
 SGInputLoader                     INFO Finalizing SGInputLoader...
 LoadReadDicts                     INFO Finalizing LoadReadDicts...
@@ -3067,8 +3399,8 @@ Domain[ROOT_All]                  INFO >   Deaccess DbDomain     READ      [ROOT
 AthenaPoolCnvSvc                  INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc                  INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc                  INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc                  INFO PerfStats | cObjR_ALL       |             132 ms |
-AthenaPoolCnvSvc                  INFO PerfStats | cObj_ALL        |             289 ms |
+AthenaPoolCnvSvc                  INFO PerfStats | cObjR_ALL       |             140 ms |
+AthenaPoolCnvSvc                  INFO PerfStats | cObj_ALL        |             319 ms |
 AthenaPoolCnvSvc                  INFO PerfStats ----------------------------------------
 Avalan...edulerSvc                INFO Joining Scheduler thread
 PyComponentMgr                    INFO Finalizing PyComponentMgr...

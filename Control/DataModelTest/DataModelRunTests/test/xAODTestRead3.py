@@ -40,6 +40,7 @@ def xAODTestRead3Cfg (flags):
                                                HViewKey = "copy_hview"))
 
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
+    acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks'))
 
     return acc
 
