@@ -94,6 +94,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     # FIXME GaudiConfig2 seems to fail to distinguish an empty dict {} from None
     verbosities=dict(foo="bar")
     kwargs.setdefault("Verbosities", verbosities)
+    kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)

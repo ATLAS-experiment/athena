@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4ATLASMTRUNMANAGER_H
@@ -69,6 +69,12 @@ public:
     m_physListSvc.setTypeAndName(typeAndName);
   }
 
+  /// Configure the QuietMode option
+  void SetQuietMode(bool quietMode) {
+    m_quietMode = quietMode;
+  }
+  /// @}
+
  protected:
 
   /// Initialize the G4 geometry on the master
@@ -99,6 +105,9 @@ private:
   /// Handle to the fast sim tool.
   /// Not ideal, because we can't configure this.
   ToolHandle<IFastSimulationMasterTool> m_fastSimTool;
+
+  /// Quiet Mode for production
+  bool m_quietMode{true};
 
 }; // class G4AtlasMTRunManager
 

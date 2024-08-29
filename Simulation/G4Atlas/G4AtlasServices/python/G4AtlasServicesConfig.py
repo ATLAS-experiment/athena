@@ -45,6 +45,7 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
         kwargs.setdefault("NeutronTimeCut", flags.Sim.NeutronTimeCut)
     kwargs.setdefault("NeutronEnergyCut", flags.Sim.NeutronEnergyCut)
     kwargs.setdefault("ApplyEMCuts", flags.Sim.ApplyEMCuts)
+    kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
     ## from AthenaCommon.SystemOfUnits import eV, TeV
     ## kwargs.setdefault("EMMaxEnergy"     , 7*TeV)
     ## kwargs.setdefault("EMMinEnergy"     , 100*eV)

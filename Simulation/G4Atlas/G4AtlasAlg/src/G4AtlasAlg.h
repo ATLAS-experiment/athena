@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4AtlasAlg_H
@@ -122,6 +122,7 @@ private:
   Gaudi::Property<std::string> m_rndmGen{this, "RandomGenerator", "athena", ""};
   Gaudi::Property<bool> m_releaseGeoModel{this, "ReleaseGeoModel", true, ""};
   Gaudi::Property<bool> m_recordFlux{this, "RecordFlux", false, ""};
+  Gaudi::Property<bool> m_quietMode{this, "QuietMode", false, ""};
   /// Commands to send to the G4 UI
   Gaudi::Property<std::vector<std::string> > m_g4commands{this, "G4Commands", {}, "Commands to send to the G4UI"};
   /// Activate multi-threading configuration

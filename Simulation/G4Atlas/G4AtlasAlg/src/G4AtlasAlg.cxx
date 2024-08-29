@@ -151,11 +151,13 @@ void G4AtlasAlg::initializeOnce()
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
+    runMgr->SetQuietMode( m_quietMode );
     // Worker Thread initialization used to create worker run manager on demand.
     std::unique_ptr<G4AtlasUserWorkerThreadInitialization> workerInit =
       std::make_unique<G4AtlasUserWorkerThreadInitialization>();
     workerInit->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     workerInit->SetFastSimMasterTool( m_fastSimTool.typeAndName() );
+    workerInit->SetQuietMode( m_quietMode );
     runMgr->SetUserInitialization( workerInit.release() );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
@@ -174,6 +176,7 @@ void G4AtlasAlg::initializeOnce()
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
     runMgr->SetPhysListSvc(m_physListSvc.typeAndName() );
+    runMgr->SetQuietMode( m_quietMode );
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());

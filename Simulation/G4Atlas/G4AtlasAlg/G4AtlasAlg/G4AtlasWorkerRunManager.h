@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4ATLASWORKERRUNMANAGER_H
@@ -49,6 +49,11 @@ public:
   void SetFastSimMasterTool(const std::string& typeAndName) {
     m_fastSimTool.setTypeAndName(typeAndName);
   }
+
+  /// Configure the QuietMode option
+  void SetQuietMode(bool quietMode) {
+    m_quietMode = quietMode;
+  }
   /// @}
 
 protected:
@@ -74,6 +79,9 @@ private:
 
   /// Handle to the FastSim tool
   ToolHandle<IFastSimulationMasterTool> m_fastSimTool;
+
+  /// Quiet Mode for production
+  bool m_quietMode{true};
 
 };
 

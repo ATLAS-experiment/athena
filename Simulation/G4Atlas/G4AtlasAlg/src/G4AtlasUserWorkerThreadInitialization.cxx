@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Hide multi-threading classes from builds without G4MT
@@ -16,6 +16,7 @@ CreateWorkerRunManager() const
   auto* workerRunManager = G4AtlasWorkerRunManager::GetG4AtlasWorkerRunManager();
   workerRunManager->SetDetGeoSvc(m_detGeoSvcName);
   workerRunManager->SetFastSimMasterTool(m_fastSimToolName);
+  workerRunManager->SetQuietMode(m_quietMode);
   return workerRunManager;
 }
 
