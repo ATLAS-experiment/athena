@@ -20,9 +20,9 @@ using namespace SCT_ConditionsData;
 // Utility functions
 namespace {
   float coerceToFloatRange(const double value) {
-    const float maxfloat{std::numeric_limits<float>::max()};
-    if (value>maxfloat) return maxfloat;
-    else return static_cast<float>(value);
+    const double maxfloat{std::numeric_limits<float>::max()};
+    const double minfloat{std::numeric_limits<float>::min()};
+    return static_cast<float>(std::clamp(value,minfloat,maxfloat));
   } 
 }
 
