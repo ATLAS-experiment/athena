@@ -373,24 +373,24 @@ class TestStore
 {
 public:
   TestStore()  {}
-  virtual const void* getData (SG::auxid_t) const { std::abort(); }
-  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { std::abort(); }
-  virtual void* getDecoration (SG::auxid_t, size_t, size_t) { std::abort(); }
-  virtual const SG::auxid_set_t& getAuxIDs() const { std::abort(); }
-  virtual const SG::auxid_set_t& getDecorIDs() const { std::abort(); }
-  virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
-  virtual void lock() { std::abort(); }
-  virtual void lockDecoration (SG::auxid_t) { std::abort(); }
-  virtual bool clearDecorations() { std::abort(); }
-  virtual size_t size() const { std::abort(); }
-  virtual void* getData (SG::auxid_t, size_t, size_t) { std::abort(); }
-  virtual const SG::auxid_set_t& getWritableAuxIDs() const { std::abort(); }
-  virtual bool resize (size_t) { std::abort(); }
-  virtual void reserve (size_t) { std::abort(); }
-  virtual void shift (size_t, ptrdiff_t) { std::abort(); }
-  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) { std::abort(); }
+  virtual const void* getData (SG::auxid_t) const override { std::abort(); }
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const override { std::abort(); }
+  virtual void* getDecoration (SG::auxid_t, size_t, size_t) override { std::abort(); }
+  virtual const SG::auxid_set_t& getAuxIDs() const override { std::abort(); }
+  virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
+  virtual void lock() override { std::abort(); }
+  virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
+  virtual bool clearDecorations() override { std::abort(); }
+  virtual size_t size() const override { std::abort(); }
+  virtual void* getData (SG::auxid_t, size_t, size_t) override { std::abort(); }
+  virtual const SG::auxid_set_t& getWritableAuxIDs() const override { std::abort(); }
+  virtual bool resize (size_t) override { std::abort(); }
+  virtual void reserve (size_t) override { std::abort(); }
+  virtual void shift (size_t, ptrdiff_t) override { std::abort(); }
+  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
 
-  virtual bool setOption (SG::auxid_t auxid, const SG::AuxDataOption&  option)
+  virtual bool setOption (SG::auxid_t auxid, const SG::AuxDataOption&  option) override
   {
     lastid = auxid;
     lastopt = option;

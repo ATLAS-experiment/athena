@@ -74,16 +74,16 @@ class ConstAuxStoreTest
   : public SG::IConstAuxStore
 {
 public:
-  virtual const void* getData (SG::auxid_t auxid) const;
-  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { std::abort(); }
-  virtual const SG::auxid_set_t& getAuxIDs() const { return m_set; }
-  virtual const SG::auxid_set_t& getDecorIDs() const { return m_decors; }
-  virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
-  virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) { std::abort(); }
-  virtual void lock() { std::abort(); }
-  virtual bool clearDecorations() { std::abort(); }
-  virtual size_t size() const { std::abort(); }
-  virtual void lockDecoration (SG::auxid_t) { std::abort(); }
+  virtual const void* getData (SG::auxid_t auxid) const override;
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const override { std::abort(); }
+  virtual const SG::auxid_set_t& getAuxIDs() const override { return m_set; }
+  virtual const SG::auxid_set_t& getDecorIDs() const override { return m_decors; }
+  virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
+  virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { std::abort(); }
+  virtual void lock() override { std::abort(); }
+  virtual bool clearDecorations() override { std::abort(); }
+  virtual size_t size() const override { std::abort(); }
+  virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
 
   void add (SG::auxid_t auxid, std::unique_ptr<std::vector<float> > vec);
 

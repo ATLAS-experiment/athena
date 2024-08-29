@@ -754,22 +754,22 @@ class TestEmptyStore
   : public SG::IAuxStore
 {
 public:
-  virtual const void* getData (SG::auxid_t) const { return 0;}
-  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const { return 0;}
-  virtual void* getDecoration (SG::auxid_t, size_t, size_t) { return 0; }
-  virtual const SG::auxid_set_t& getAuxIDs() const { return m_auxids; }
-  virtual const SG::auxid_set_t& getDecorIDs() const { std::abort(); }
-  virtual bool isDecoration(SG::auxid_t /*auxid*/) const { std::abort(); }
-  virtual void lock() { }
-  virtual void lockDecoration (SG::auxid_t) { }
-  virtual bool clearDecorations() { return false; }
-  virtual size_t size() const { return 0; }
-  virtual void* getData (SG::auxid_t, size_t, size_t) { return 0; }
-  virtual const SG::auxid_set_t& getWritableAuxIDs() const { return m_auxids; }
-  virtual bool resize (size_t) { return false; }
-  virtual void reserve (size_t) { }
-  virtual void shift (size_t, ptrdiff_t) { }
-  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) { return false; }
+  virtual const void* getData (SG::auxid_t) const override { return 0;}
+  virtual const SG::IAuxTypeVector* getVector (SG::auxid_t) const override { return 0;}
+  virtual void* getDecoration (SG::auxid_t, size_t, size_t) override { return 0; }
+  virtual const SG::auxid_set_t& getAuxIDs() const override { return m_auxids; }
+  virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
+  virtual void lock() override { }
+  virtual void lockDecoration (SG::auxid_t) override { }
+  virtual bool clearDecorations() override { return false; }
+  virtual size_t size() const override { return 0; }
+  virtual void* getData (SG::auxid_t, size_t, size_t) override { return 0; }
+  virtual const SG::auxid_set_t& getWritableAuxIDs() const override { return m_auxids; }
+  virtual bool resize (size_t) override { return false; }
+  virtual void reserve (size_t) override { }
+  virtual void shift (size_t, ptrdiff_t) override { }
+  virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { return false; }
 
   SG::auxid_set_t m_auxids;
 };
