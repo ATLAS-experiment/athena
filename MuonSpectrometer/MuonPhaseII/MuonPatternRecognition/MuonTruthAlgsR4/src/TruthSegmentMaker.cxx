@@ -171,8 +171,8 @@ namespace MuonR4{
                 if (nPrecisionHits < 3) continue;
 
                 xAOD::MuonSegment* truthSegment = writeHandle->push_back(std::make_unique<xAOD::MuonSegment>());
-                ptDecor(*truthSegment) = particle->momentum().pt();
-                qDecor(*truthSegment) = particle->pid() > 0 ? -1 : 1;
+                ptDecor(*truthSegment) = particle->momentum().perp();
+                qDecor(*truthSegment) = particle->pdg_id() > 0 ? -1 : 1;
                 SegPars& locPars{parDecor(*truthSegment)};
                 locPars[toInt(AxisDefs::x0)] = chamberPos.x();
                 locPars[toInt(AxisDefs::y0)] = chamberPos.y();
