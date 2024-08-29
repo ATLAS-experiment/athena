@@ -12,6 +12,7 @@ class FTagConfig (ConfigBlock):
 
     def __init__ (self, containerName='', selectionName='') :
         super (FTagConfig, self).__init__ ()
+        self.setBlockName('FTag')
         self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -23,7 +24,7 @@ class FTagConfig (ConfigBlock):
         self.addOption ('btagWP', "FixedCutBEff_77", type=str,
             info="the flavour tagging WP. The default is FixedCutBEff_77.")
         self.addOption ('btagger', "DL1r", type=str,
-            info="the flavour tagging algorithm: DL1dv01, GN2v00. The default "
+            info="the flavour tagging algorithm: DL1dv01, GN2v01. The default "
             "is DL1r.")
         self.addOption ('generator', "autoconfig", type=str,
             info="MC generator setup, for MC/MC SFs. The default is 'autoconfig'"
@@ -116,6 +117,7 @@ class FTagConfig (ConfigBlock):
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
             alg.particles = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
+            config.addSelection (self.containerName, selectionName, alg.selectionDecoration)
 
         if not self.noEffSF and config.dataType() is not DataType.Data:
             # Set up the efficiency calculation algorithm:
