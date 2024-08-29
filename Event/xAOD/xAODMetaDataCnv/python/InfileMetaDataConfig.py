@@ -107,6 +107,8 @@ def createTruthMetaData(tools, result, flags):
 @metadata_creator
 def createIOVMetaData(tools, result, flags):
     tools.mdItems += ["IOVMetaDataContainer#*"]
+    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+    result.merge(IOVDbSvcCfg(flags))
 
 
 def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
@@ -207,6 +209,8 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
     elif category == MetadataCategory.IOVMetaData:
         if "IOVMetaDataContainer" in flags.Input.MetadataItems.values():
             tools.mdItems += ["IOVMetaDataContainer#*"]
+            from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+            result.merge(IOVDbSvcCfg(flags))
 
     else:
         log.warning(f"Requested metadata category: {category} could not be configured")

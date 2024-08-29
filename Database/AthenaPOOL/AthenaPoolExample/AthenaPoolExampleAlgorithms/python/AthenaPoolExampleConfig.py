@@ -12,7 +12,7 @@ def AthenaPoolExampleReadCfg(flags, readCatalogs = [] ):
     acc.getService("PoolSvc").ReadCatalog += readCatalogs
     
     # ---------------- Configure basic metadata
-    from xAODMetaDataCnv.InfileMetaDataConfig import createIOVMetaData, propagateMetaData, MetaDataHelperLists
+    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
     from AthenaConfiguration.Enums import MetadataCategory
     mdLists = MetaDataHelperLists()
     for mdCategory in ( MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo ):
@@ -20,9 +20,6 @@ def AthenaPoolExampleReadCfg(flags, readCatalogs = [] ):
         mdLists += lists
         acc.merge(caConfig)
     
-    iovList, _ = createIOVMetaData(flags)
-    mdLists += iovList
-
     # Configure the MetaDataSvc and pass the relevant tools
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
     acc.merge( MetaDataSvcCfg( flags, tools = mdLists.mdTools, toolNames = mdLists.mdToolNames ) )
@@ -58,7 +55,7 @@ def AthenaPoolExampleWriteCfg(flags, outputStreamName, writeCatalog = None, disa
         acc.getService("PoolSvc").WriteCatalog = writeCatalog
     
     # ---------------- Configure basic metadata
-    from xAODMetaDataCnv.InfileMetaDataConfig import createIOVMetaData, propagateMetaData, MetaDataHelperLists
+    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
     from AthenaConfiguration.Enums import MetadataCategory
     mdLists = MetaDataHelperLists()
     for mdCategory in ( MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo ):
@@ -66,8 +63,7 @@ def AthenaPoolExampleWriteCfg(flags, outputStreamName, writeCatalog = None, disa
         mdLists += lists
         acc.merge(caConfig)
 
-    iovList, _ = createIOVMetaData(flags)
-    mdLists += iovList
+    mdLists.mdItems += ["IOVMetaDataContainer#*"]
 
     # add metadata items and tools to the output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

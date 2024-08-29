@@ -6,8 +6,6 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def PreTrackingCfg(flags):
    acc = MainServicesCfg(flags)
-   from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-   acc.merge(IOVDbSvcCfg(flags))
 
    # ----------------------------------------------------------------
    # Pool input
