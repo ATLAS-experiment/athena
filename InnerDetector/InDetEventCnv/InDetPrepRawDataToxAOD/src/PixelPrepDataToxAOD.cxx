@@ -481,7 +481,7 @@ std::vector< std::vector< int > > PixelPrepDataToxAOD::addSDOInformation( xAOD::
     auto pos = sdoCollection.find(hitIdentifier);
     if( pos == sdoCollection.end() ) continue;
     sdo_word.push_back( pos->second.word() ) ;
-    std::vector<int> sdoDepBC(pos->second.getdeposits().size(), -1);
+    std::vector<int> sdoDepBC(pos->second.getdeposits().size(), HepMC::INVALID_PARTICLE_ID);
     std::vector<float> sdoDepEnergy(pos->second.getdeposits().size());
     unsigned int nDepos{0};
     for (auto& deposit: pos->second.getdeposits()) {
