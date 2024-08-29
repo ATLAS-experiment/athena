@@ -42,7 +42,7 @@ public:
   /** Default Destructor */
   ~EMAPMatrixAxis() {};  
 		
-  std::vector<double> getBinningInformation() const {return m_vecBins; };
+  const std::vector<double>& getBinningInformation() const {return m_vecBins; };
 
   /** Return number of bins*/
   unsigned int getNumberOfBins() const;
@@ -59,7 +59,7 @@ public:
 //   /** set name of axis*/
 //   void     setName(std::string name);
 //   /** return name of axis*/
-  std::string   getName() const {return m_name; };
+  const std::string&   getName() const {return m_name; };
 	
 private:
   std::string m_name;
@@ -168,7 +168,7 @@ public:
   EMAPMatrixAxis  getAxis(unsigned int i) const	{	return m_axis[i];}
 				
   /** return the std::vector<T> which contains all content information of the matrix. Note that the binning and dimensions is not coded inside*/
-  std::vector<T> getValues() const 	{	return m_matrix;}
+  const std::vector<T>& getValues() const 	{	return m_matrix;}
 
 		
   // Clearing functions
@@ -183,7 +183,7 @@ public:
   /** The user can add a Description of what this matrix contains and how it was produced, e.g. cuts*/
   void setTextDescription(const std::string& text);
   /** The user can add a Description of what this matrix contains and how it was produced, e.g. cuts*/
-  std::string getTextDescription() const;
+  const std::string& getTextDescription() const;
 		
 protected:	
 

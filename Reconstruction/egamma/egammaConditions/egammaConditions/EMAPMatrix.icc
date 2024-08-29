@@ -419,7 +419,7 @@ void EMAPMatrix<T>::setTextDescription(const std::string& text)
 }
 
 template <class T>
-std::string EMAPMatrix<T>::getTextDescription() const
+const std::string& EMAPMatrix<T>::getTextDescription() const
 {
   return m_textDescription;
 }

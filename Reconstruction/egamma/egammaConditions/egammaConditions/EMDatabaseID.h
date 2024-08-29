@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -141,7 +141,7 @@ public:
   std::string getTreeName() const { return type(); };
   std::string getBranchName() const { return tag(); };
 
-  EMDatabaseIDDescriptor getIDDescriptor() const {return m_idDes;}
+  const EMDatabaseIDDescriptor& getIDDescriptor() const {return m_idDes;}
 
 private:
   /** deletes characters '_',' ','/' and '\\' out of the string*/
