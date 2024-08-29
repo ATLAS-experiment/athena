@@ -26,6 +26,7 @@ if __name__=='__main__':
    parser.add_argument('--poolcat', dest='poolcat', default="PoolFileCatalog.xml", help='Catalog of POOL files', type=str)
    parser.add_argument('-p','--ofcphasesqlite', dest='ofcphsql', default="/afs/cern.ch/user/p/pavol/w0/public/DB_update_22/fillDB/SCOFCPhase.db", help='Input sqlite file for OFC phases', type=str)
    parser.add_argument('-u','--ofcphasetag', dest='ofcphtag', default="LARElecCalibOflSCOFCBinPhysShift-08", help='Tag for OFC phases', type=str)
+   parser.add_argument('--Ncoll',dest='Ncoll', default=60, help='Number of MinBias collision assumed for OFCs folder', type=int)
    parser.add_argument('--isCalib', dest='caliofc', action='store_true', default=False, help='is caliOFCs ?')
 
    args = parser.parse_args()
@@ -64,7 +65,7 @@ if __name__=='__main__':
       flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
    # pileup normalisation
-   flags.LArCalib.OFC.Ncoll = 60
+   flags.LArCalib.OFC.Ncoll = args.Ncoll
 
    # others flags settings
    flags.LArCalib.isSC = args.supercells

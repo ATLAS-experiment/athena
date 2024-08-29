@@ -154,11 +154,16 @@ if __name__=="__main__":
    
     try:
        import importlib
-       mypath=os.getcwd()
        from pathlib import Path
-       path=Path(mypath)
+       to_import = args.infold
+       if "/" not in args.infold:
+           mypath=os.getcwd()
+           path=Path(mypath)
+       else:
+           path=Path(args.infold)
+           to_import = path.name
        sys.path.append(str(path.parent))
-       module = importlib.import_module('.'+args.infold, package=str(path.name))
+       module = importlib.import_module(to_import)#, package=str(path.name))
     except Exception as e:
        print(e)
        sys.exit(-1)
