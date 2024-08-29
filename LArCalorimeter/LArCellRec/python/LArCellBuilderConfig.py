@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -62,6 +62,24 @@ def LArHVCellContCorrCfg(configFlags):
     LArCellContHVCorrTool=CompFactory.LArCellContHVCorrTool
     theLArCellHVCorrTool = LArCellContHVCorrTool()
     acc.setPrivateTools(theLArCellHVCorrTool)
+    return acc
+
+def LArDeadOTXCorrCfg(configFlags):
+    acc=ComponentAccumulator()
+    acc.merge(LArBadFebCfg(configFlags))
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    acc.merge(LArOnOffIdMappingSCCfg(configFlags))
+    from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+    runinfo=getLArDTInfoForRun(configFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+    SCInput="SC_ET"
+    for i in range(0,len(runinfo.streamTypes())):
+       if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+          SCInput="SC_ET_ID"
+
+    deadOTXTool=CompFactory.LArCelldeadOTXTool("LArCelldeadOTXTool",keyMF="LArBadFeb",
+                                   keyCabling="LArOnOffIdMap", keySCCabling="LArOnOffIdMapSC",
+                                   keySC=SCInput)
+    acc.setPrivateTools(deadOTXTool)
     return acc
 
 

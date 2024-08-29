@@ -53,7 +53,7 @@ def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False, variant=''
     
     from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict, isProbe=is_probe_leg)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict)
 
 
 def precisionCalo_LRTSequenceGenCfg(flags, ion=False, is_probe_leg=False):

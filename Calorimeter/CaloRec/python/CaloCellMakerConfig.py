@@ -1,5 +1,6 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -46,6 +47,11 @@ def CaloCellMakerCfg(flags):
     if flags.Calo.Cell.doTimeCorr:
         theCaloTimeCorr=CaloCellTimeCorrCfg(flags)
         cellMakerTools.append(result.popToolsAndMerge(theCaloTimeCorr))
+
+    if flags.LAr.doDeadOTCCorr:
+        from LArCellRec.LArCellBuilderConfig import LArDeadOTXCorrCfg
+        theLArDeadOTXCorr=LArDeadOTXCorrCfg(flags)
+        cellMakerTools.append(result.popToolsAndMerge(theLArDeadOTXCorr))
 
     cellAlgo = CompFactory.CaloCellMaker(CaloCellMakerToolNames=cellMakerTools,
                                          CaloCellsOutputName="AllCalo",

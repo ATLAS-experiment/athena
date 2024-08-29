@@ -56,6 +56,9 @@ _string_prop ('RawClustersSGKeySuffix',      '_D3PDRawClusters')
 _string_prop ('RawClustersAssocSGKeySuffix', '_D3PDRawClustersAssoc')
 _string_prop ('LArCollisionTimeSGKey',       'LArCollisionTime')
 
+#############################################################################
+
+_string_prop ('OutputFile',                   'd3pd.root')
 
 ##############################################################################
 # Trigger name pattern properties.

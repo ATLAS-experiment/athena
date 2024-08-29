@@ -14,6 +14,7 @@
 #include "../LArCellContHVCorrTool.h"
 #include "../LArHVFraction.h"
 #include "../LArRAWtoSuperCell.h"
+#include "../LArCelldeadOTXTool.h"
 
 DECLARE_COMPONENT( LArNoisyROAlg )
 DECLARE_COMPONENT( LArNonLinearity )
@@ -31,3 +32,4 @@ DECLARE_COMPONENT( LArTimeVetoAlg )
 DECLARE_COMPONENT( LArCellContHVCorrTool )
 DECLARE_COMPONENT( LArHVFraction )
 DECLARE_COMPONENT( LArRAWtoSuperCell )
+DECLARE_COMPONENT( LArCelldeadOTXTool )

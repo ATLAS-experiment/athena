@@ -1,16 +1,33 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import sys, os, glob, subprocess, tarfile
+import sys, glob, subprocess, tarfile
+
+def nextstep(text):
+    print("\n"+"#"*100)
+    print("#")
+    print("#    %s" % (text))
+    print("#")
+    print("#"*100,"\n")
+    
+def tryError(command, error):
+    try:
+        print(" Running: %s\n" % (command))
+        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        print("OUTPUT: \n%s" % (stdout.decode('ascii')))
+        print("ERRORS: %s" % ("NONE" if stderr.decode('ascii')=='' else "\n"+stderr.decode('ascii')))
+        if stderr:
+            exit(1)        
+    except OSError as e:
+        print(error,e)
+        sys.exit(e.errno)
 
 def fromRunArgs(runArgs):
     
     ##################################################################################################
-    #
-    #       UNTAR files
-    #
+    nextstep("UNTAR files")
     ##################################################################################################
     
-    print("\nUncompressing files:")
+    print("Uncompressing files:")
     try:
         for file in runArgs.inputTARFile:
             print("\t-",file)
@@ -20,60 +37,35 @@ def fromRunArgs(runArgs):
         sys.exit(e.errno)    
     
     ##################################################################################################
-    #
-    #       Generating the tracktuple and StrawStatus file
-    #
+    nextstep("Generating the tracktuple and StrawStatus file")
     ##################################################################################################
     
-    try:
-        command = 'TRTCalib_bhadd merged_histo.root %s' % ("".join(("%s.basic.root " % str(file)) for file in runArgs.inputTARFile ))
-        print("\n Running: %s\n" % (command))
-        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        # Renaming the output of TRTCalib_bhadd
-        os.rename("merged_histo.root.part0","%s.basic.root" % (runArgs.outputTAR_MERGEDFile))
-        print("OUTPUT:\n%s" % (stdout.decode('ascii')))
-        print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))
-    except OSError as e:
-        print("ERROR: Failed in process TRTCalib_bhadd\n",e)
-        sys.exit(e.errno)
+    command  = 'TRTCalib_bhadd merged_histo.root %s' % ("".join(("%s.basic.root " % str(file)) for file in runArgs.inputTARFile ))
+    tryError(command,"ERROR: Failed in process TRTCalib_bhadd\n")
+    
+    ##################################################################################################
+    nextstep("Renaming Binary output file")
+    ##################################################################################################
+    
+    command = 'mv -v merged_histo.root.part0 %s.basic.root' % (runArgs.outputTAR_MERGEDFile)
+    tryError(command,"ERROR: Renaming binary file \"merged_histo.root.part0\"\n")
 
     ##################################################################################################
-    #
-    #       Merging *.tracktuple.root files
-    #
+    nextstep("Merging *.tracktuple.root files")
     ##################################################################################################
     
-    try:
-        command = 'hadd -f %s.tracktuple.root %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.tracktuple.root " % str(file)) for file in runArgs.inputTARFile ))
-        print("\n Running: %s \n" % (command))
-        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        print("OUTPUT:\n%s" % (stdout.decode('ascii')))
-        print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))        
-    except OSError as e:
-        print("ERROR: Failed in process merging *.tracktuple.root files\n",e)
-        sys.exit(e.errno)
+    command = 'hadd -f %s.tracktuple.root %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.tracktuple.root " % str(file)) for file in runArgs.inputTARFile ))
+    tryError(command,"ERROR: Failed in process merging *.tracktuple.root files\n")
 
     ##################################################################################################
-    #
-    #       Merging *.straw.txt files
-    #
+    nextstep("Merging *.straw.txt files")
     ##################################################################################################
     
-    try:
-        command = 'TRTCalib_StrawStatus_merge %s.merged.straw.txt %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.straw.txt " % str(file)) for file in runArgs.inputTARFile ))
-        print("\n Running: %s\n" % (command))
-        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-        print("OUTPUT:\n%s" % (stdout.decode('ascii')))
-        print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))
-    except OSError as e:
-        print("ERROR: Failed in process merging *.straw.txt files\n",e)
-        sys.exit(e.errno)
+    command = 'TRTCalib_StrawStatus_merge %s.merged.straw.txt %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.straw.txt " % str(file)) for file in runArgs.inputTARFile ))
+    tryError(command,"ERROR: Failed in process merging *.straw.txt files\n")
     
-        
     ##################################################################################################
-    #
-    #       Compressing outputs in a tar file!
-    #
+    nextstep("TAR'ing files")
     ################################################################################################## 
        
     try:

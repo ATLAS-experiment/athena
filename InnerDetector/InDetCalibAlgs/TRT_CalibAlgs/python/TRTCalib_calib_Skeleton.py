@@ -1,11 +1,30 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import sys, os, tarfile, glob, random
+import sys, tarfile, glob, random, subprocess
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from TRT_CalibAlgs.TRTCalibrationMgrConfig import CalibConfig, TRT_CalibrationMgrCfg, TRT_StrawStatusCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
+def nextstep(text):
+    print("\n"+"#"*100)
+    print("#")
+    print("#    %s" % (text))
+    print("#")
+    print("#"*100,"\n")
+
+def tryError(command, error):
+    try:
+        print(" Running: %s\n" % (command))
+        stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        print("OUTPUT: \n%s" % (stdout.decode('ascii')))
+        print("ERRORS: %s" % ("NONE" if stderr.decode('ascii')=='' else "\n"+stderr.decode('ascii')))
+        if stderr:
+            exit(1)        
+    except OSError as e:
+        print(error,e)
+        sys.exit(e.errno)
 
 def fromRunArgs(runArgs):
     
@@ -13,12 +32,10 @@ def fromRunArgs(runArgs):
     outputFile = runArgs.outputTAR_CALIBFile
     
     ##################################################################################################
-    #
-    #       UNTAR input file
-    #
+    nextstep("UNTAR input file")
     ##################################################################################################   
     
-    print("\nUncompressing files:")
+    print("Uncompressing files:")
     try:
         print("\t-",inputFile)
         tarfile.open(inputFile).extractall(".") 
@@ -27,26 +44,16 @@ def fromRunArgs(runArgs):
         sys.exit(e.errno)  
     
     ##################################################################################################
-    #
-    #       Renaming some files for the final output
-    #
+    nextstep("Renaming *straw.txt and *tracktuple.root files for the final output")
     ##################################################################################################   
     
-    print("\nUncompressing files:")
-    try:
-        print("\tRunning: mv %s.merged.straw.txt %s.merged.straw.txt" % (inputFile,outputFile))
-        os.rename(inputFile+'.merged.straw.txt' , outputFile+'.merged.straw.txt') 
-        print("\tRunning: mv %s.tracktuple.root %s.tracktuple.root" % (inputFile,outputFile))
-        os.rename(inputFile+'.tracktuple.root' , outputFile+'.tracktuple.root') 
-    except OSError as e:
-        print("ERROR: Failed uncompressing TAR file\n",e)
-        sys.exit(e.errno)  
+    command  = "mv -v %s.merged.straw.txt %s.merged.straw.txt; " % (inputFile,outputFile)
+    command += "mv -v %s.tracktuple.root %s.tracktuple.root; " % (inputFile,outputFile)
     
+    tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
     
     ##################################################################################################
-    #
-    #       Calculating constants
-    #
+    nextstep("Calculating constants ATHENA")
     ##################################################################################################    
     
     myFile = []
@@ -125,34 +132,25 @@ def fromRunArgs(runArgs):
          sys.exit(not sc.isSuccess())
     
     ##################################################################################################
-    #
-    #       Renaming outputs from Calibrator
-    #
-    ##################################################################################################    
-    try:
-        print("\tRunning: mv calibout.root %s.calibout.root" % outputFile)
-        os.rename('calibout.root'          , outputFile+'.calibout.root')
-        print("\tRunning: mv calibout_rt.txt %s.calibout_rt.txt" % outputFile)
-        os.rename('calibout_rt.txt'        , outputFile+'.calibout_rt.txt')
-        print("\tRunning: mv calibout_t0.txt %s.calibout_t0.txt" % outputFile)
-        os.rename('calibout_t0.txt'        , outputFile+'.calibout_t0.txt')
-        print("\tRunning: mv calib_constants_out.txt %s.calib_constants_out.txt" % outputFile)
-        os.rename('calib_constants_out.txt', outputFile+'.calib_constants_out.txt')
-    except OSError as e:
-        print("ERROR: Failed renaming files in TRT calib step\n",e)
-        sys.exit(e.errno) 
+    nextstep("Renaming outputs from Calibrator")
+    ##################################################################################################   
+    
+    command  =  "mv -v calibout.root %s.calibout.root ; " % (outputFile)
+    command +=  "mv -v calibout_rt.txt %s.calibout_rt.txt; " % (outputFile)
+    command +=  "mv -v calibout_t0.txt %s.calibout_t0.txt; " % (outputFile)
+    command +=  "mv -v calib_constants_out.txt %s.calib_constants_out.txt; " % (outputFile)
+    
+    tryError(command, "ERROR: Failed renaming files in TRT calib step\n")
            
     ##################################################################################################
-    #
-    #       Compressing outputs in a tar file!
-    #
+    nextstep("TAR'ing files")
     ################################################################################################## 
     try:
         # Getting list of files to be compressed
         files_list=glob.glob(outputFile+".*")
         # Compressing
         tar = tarfile.open(outputFile, "w:gz")
-        print("\nCompressing files in %s output file:" % outputFile)
+        print("Compressing files in %s output file:" % outputFile)
         for file in files_list:
             print("\t-",file)
             tar.add(file)

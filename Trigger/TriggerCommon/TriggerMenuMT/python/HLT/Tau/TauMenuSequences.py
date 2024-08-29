@@ -46,7 +46,7 @@ def _caloSeq(flags, is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict,isProbe=is_probe_leg)   
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)   
     return (selAcc , menuCA)
 
 
@@ -122,7 +122,7 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
                                                  trackcollection       = flags.Tracking.ActiveConfig.trkTracks_FTF )
     selAcc.addHypoAlgo(hypoAlg)
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict, isProbe=is_probe_leg)
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -173,7 +173,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict, isProbe=is_probe_leg)
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -223,7 +223,7 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict, isProbe=is_probe_leg)
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -276,7 +276,7 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict, isProbe=is_probe_leg)
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
     return (selAcc , menuCA)
 
 
