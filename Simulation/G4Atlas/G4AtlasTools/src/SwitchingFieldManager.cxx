@@ -6,6 +6,7 @@
 #include "G4Field.hh"
 
 #include "SwitchingFieldManager.h"
+#include "G4FieldManagerHelper.h"
 #include "G4ChordFinder.hh"
 
 #include "G4Track.hh"
@@ -56,8 +57,7 @@ G4FieldManager* SwitchingFieldManager::Clone() const
    G4Field* cloneField = m_savedField->Clone();
    auto clone= new SwitchingFieldManager( cloneField );
 
-   clone->SetMinimumEpsilonStep( this->GetMinimumEpsilonStep() );
-   clone->SetMaximumEpsilonStep( this->GetMaximumEpsilonStep() );
+   G4FieldManagerHelper::SetMinAndMaxEpsilonStep( clone, this->GetMinimumEpsilonStep(), this->GetMaximumEpsilonStep() );
    clone->SetDeltaOneStep(       this->GetDeltaOneStep() ); 
    clone->SetDeltaIntersection(  this->GetDeltaIntersection()  );
 
