@@ -136,7 +136,7 @@ public:
 		     float weight);
   
   ///fill reco-vertex related plots
-  void fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight=1.0); 
+  void fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, const float actualMu, float weight=1.0); 
   ///fill reco-vertex related plots that need EventInfo
   void fill(const xAOD::VertexContainer& vertexContainer, const unsigned int truthMu, const float actualMu, const float weight=1.0);
 

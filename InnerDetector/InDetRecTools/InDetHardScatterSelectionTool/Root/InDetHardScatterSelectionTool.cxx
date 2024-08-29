@@ -86,6 +86,9 @@ StatusCode InDet::InDetHardScatterSelectionTool::initialize()
         m_sum = std::make_unique<::SumPtw>();
         break;
       }
+      case InDet::InDetHardScatterSelectionTool::Mode::HSGN2: {
+        break;
+      }
       default: {
         ATH_MSG_ERROR("Unknown running mode  : "  << m_mode);
         return StatusCode::FAILURE;
@@ -118,6 +121,9 @@ StatusCode InDet::InDetHardScatterSelectionTool::initialize()
 
   // Initialize our jet container read if it is non empty
   ATH_CHECK(m_jetContKey.initialize(!m_jetContKey.empty()));
+
+  // Initialize the GNN score handle if relevant mode is selected
+  ATH_CHECK(m_gnnScoreKey.initialize(m_mode == InDet::InDetHardScatterSelectionTool::Mode::HSGN2));
 
   return StatusCode::SUCCESS;
 }
@@ -166,6 +172,7 @@ const xAOD::Vertex* InDet::InDetHardScatterSelectionTool::getHardScatter(const x
   }
 
   float maxsum = -999.0;
+  float max_gnn_score = -999.0;
   const xAOD::Vertex* hardscatter = nullptr;
   for (const auto *const vtx : *vtxCont) {
     float sum = 0.;
@@ -196,6 +203,14 @@ const xAOD::Vertex* InDet::InDetHardScatterSelectionTool::getHardScatter(const x
           hardscatter = vtx;
         }
       }  
+      else if ( m_mode == InDet::InDetHardScatterSelectionTool::Mode::HSGN2 ) {
+        SG::ReadDecorHandle<xAOD::VertexContainer, float> acc_gnn(m_gnnScoreKey, ctx);
+        float gnn_score = acc_gnn(*vtx);
+        if (gnn_score > max_gnn_score) {
+          max_gnn_score = gnn_score;
+          hardscatter = vtx;
+        }
+      }
       //::keeping Matt's (old) method for sumpt & sumpt2
       else {
         for (const auto& trkLink : vtx->trackParticleLinks()) {
