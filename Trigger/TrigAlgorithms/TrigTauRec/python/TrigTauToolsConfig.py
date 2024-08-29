@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,59 +25,37 @@ def trigTauVertexFinderCfg(flags,name=''):
 def trigTauTrackFinderCfg(flags,name='',TrackParticlesContainer=''):
     acc = ComponentAccumulator()
 
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    from TrkConfig.TrkVertexFitterUtilsConfig import (
+        AtlasTrackToVertexIPEstimatorCfg)
+    AtlasTrackToVertexIPEstimator = acc.popToolsAndMerge(
+        AtlasTrackToVertexIPEstimatorCfg(flags))
+
     from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
+    TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags))
+
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+    ParticleCaloExtensionTool = acc.popToolsAndMerge(
+        ParticleCaloExtensionToolCfg(flags))
 
-    from TrkConfig.TrkVertexFitterUtilsConfig import AtlasFullLinearizedTrackFactoryCfg,AtlasTrackToVertexIPEstimatorCfg
-
-    TrigTauExtrapolatorTool           = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags,'TrigTau_theAtlasExtrapolator'))
-    acc.addPublicTool(TrigTauExtrapolatorTool)
-    TrigTauTrackToVertexTool          = acc.popToolsAndMerge(TrackToVertexCfg(flags,'TrigTau_TrackToVertexTool',Extrapolator=TrigTauExtrapolatorTool))
-    acc.addPublicTool(TrigTauTrackToVertexTool )
-    TrigTauParticleCaloExtensionTool  = acc.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags,'TrigTau_ParticleCaloExtensionTool',Extrapolator=TrigTauExtrapolatorTool))
-    acc.addPublicTool(TrigTauParticleCaloExtensionTool)
-    TrigTauFullLinearizedTrackFactory = acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags,'TrigTau_TauFullLinearizedTrackFactory',Extrapolator=TrigTauExtrapolatorTool))
-    acc.addPublicTool(TrigTauFullLinearizedTrackFactory)
-    TrigTauTrackToVertexIPEstimator   = acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags,'TrigTau_TauTrackToVertexIPEstimator',Extrapolator=TrigTauExtrapolatorTool,LinearizedTrackFactory=TrigTauFullLinearizedTrackFactory))
-    acc.addPublicTool(TrigTauTrackToVertexIPEstimator)
-
-    from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
-    from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
-
-    TrigTauInDetTrackSelectorTool     = acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags,'TrigTau_InDetTrackSelectorTool',
-                                                                                       TrtDCCutTool       = None if not flags.Tracking.ActiveConfig.doTRT else acc.popToolsAndMerge(InDetTrigTRTDriftCircleCutToolCfg(flags,'InDetTrigTRTDriftCircleCut')),
-                                                                                       Extrapolator       = TrigTauExtrapolatorTool,
-                                                                                       pTMin              = 1000.0,
-                                                                                       IPd0Max            = 2.,
-                                                                                       IPz0Max            = 9999.,
-                                                                                       nHitBLayer         = 0,
-                                                                                       nHitBLayerPlusPix  = 0,
-                                                                                       nHitPix            = 2, # PixelHits + PixelDeadSensors
-                                                                                       nHitSct            = 0, # SCTHits + SCTDeadSensors
-                                                                                       nHitSi             = 7, # PixelHits + SCTHits + PixelDeadSensors + SCTDeadSensors
-                                                                                       nHitTrt            = 0,
-                                                                                       fitChi2OnNdfMax    = 99999,
-                                                                                       useTrackSummaryInfo= True,
-                                                                                       useSharedHitInfo   = False,
-                                                                                       useTrackQualityInfo= True,
-                                                                                       TrackSummaryTool   = ""))
-    acc.addPublicTool(TrigTauInDetTrackSelectorTool)
+    from InDetConfig.InDetTrackSelectorToolConfig import (
+        TrigTauInDetTrackSelectorToolCfg)
+    TrigTauInDetTrackSelectorTool = acc.popToolsAndMerge(
+        TrigTauInDetTrackSelectorToolCfg(flags))
 
 
     TauTrackFinder = CompFactory.TauTrackFinder(name=name,
                                     MaxJetDrTau                     = 0.2,
                                     MaxJetDrWide                    = 0.4,
                                     TrackSelectorToolTau            = TrigTauInDetTrackSelectorTool,
-                                    TrackToVertexTool               = TrigTauTrackToVertexTool,
+                                    TrackToVertexTool               = TrackToVertexTool,
                                     Key_trackPartInputContainer     = TrackParticlesContainer,
                                     maxDeltaZ0wrtLeadTrk            = 0.75*mm, #in mm
                                     removeTracksOutsideZ0wrtLeadTrk = True,
-                                    ParticleCaloExtensionTool       = TrigTauParticleCaloExtensionTool,
+                                    ParticleCaloExtensionTool       = ParticleCaloExtensionTool,
                                     BypassSelector                  = False,
                                     BypassExtrapolator              = True,
                                     tauParticleCache                = "",
-                                    TrackToVertexIPEstimator        = TrigTauTrackToVertexIPEstimator,
+                                    TrackToVertexIPEstimator        = AtlasTrackToVertexIPEstimator,
                                     )
 
                                     
@@ -87,37 +65,18 @@ def trigTauTrackFinderCfg(flags,name='',TrackParticlesContainer=''):
 def tauVertexVariablesCfg(flags,name=''):
     acc = ComponentAccumulator()
 
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    from TrkConfig.TrkVertexFittersConfig import TauAdaptiveVertexFitterCfg,SequentialVertexSmootherCfg
-    from TrkConfig.TrkVertexSeedFinderToolsConfig import CrossDistancesSeedFinderCfg
-    from TrkConfig.TrkVertexSeedFinderUtilsConfig import SeedNewtonTrkDistanceFinderCfg
-    from TrkConfig.TrkVertexFitterUtilsConfig import AtlasImpactPoint3dEstimatorCfg,TauDetAnnealingMakerCfg,AtlasFullLinearizedTrackFactoryCfg
+    from TrkConfig.TrkVertexFittersConfig import TauAdaptiveVertexFitterCfg
+    TauAdaptiveVertexFitter = acc.popToolsAndMerge(
+        TauAdaptiveVertexFitterCfg(flags))
 
-    TrigTauExtrapolatorTool           = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags,'TrigTau_theAtlasExtrapolator'))
-    TrigTauSeedNewtonTrkDistanceFinder = acc.popToolsAndMerge(SeedNewtonTrkDistanceFinderCfg(flags,'TrigTau_TauSeedNewtonTrkDistanceFinder'))
-    acc.addPublicTool(TrigTauSeedNewtonTrkDistanceFinder)
-    TrigTauCrossDistancesSeedFinder = acc.popToolsAndMerge(CrossDistancesSeedFinderCfg(flags,'TauCrossDistancesSeedFinder',TrkDistanceFinder=TrigTauSeedNewtonTrkDistanceFinder))
-    acc.addPublicTool(TrigTauCrossDistancesSeedFinder)
-    TrigTauFullLinearizedTrackFactory = acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags,'TrigTau_TauFullLinearizedTrackFactory',Extrapolator=TrigTauExtrapolatorTool))
-    acc.addPublicTool(TrigTauFullLinearizedTrackFactory)
-    TrigTauImpactPoint3dEstimator = acc.popToolsAndMerge(AtlasImpactPoint3dEstimatorCfg(flags,'TrigTau_TauTrkImpactPoint3dEstimator'))
-    acc.addPublicTool(TrigTauImpactPoint3dEstimator)
-    TrigTauAnnealingMaker = acc.popToolsAndMerge(TauDetAnnealingMakerCfg(flags,'TrigTau_TauDetAnnealingMaker'))
-    acc.addPublicTool(TrigTauAnnealingMaker)
-    TrigTauVertexSmoother = acc.popToolsAndMerge(SequentialVertexSmootherCfg(flags,'TrigTau_TauSequentialVertexSmoother'))
-    acc.addPublicTool(TrigTauVertexSmoother)
-
-    TrigTauAdaptiveVertexFitter = acc.popToolsAndMerge(TauAdaptiveVertexFitterCfg(flags,'TrigTau_TauAdaptiveVertexFitter',
-                                                                                        SeedFinder = TrigTauCrossDistancesSeedFinder,
-                                                                                        LinearizedTrackFactory=TrigTauFullLinearizedTrackFactory,
-                                                                                        ImpactPoint3dEstimator=TrigTauImpactPoint3dEstimator,
-                                                                                        AnnealingMaker=TrigTauAnnealingMaker,
-                                                                                        VertexSmoother=TrigTauVertexSmoother))
-    acc.addPublicTool(TrigTauAdaptiveVertexFitter)
+    from TrkConfig.TrkVertexSeedFinderToolsConfig import (
+        CrossDistancesSeedFinderCfg)
+    CrossDistancesSeedFinder = acc.popToolsAndMerge(
+        CrossDistancesSeedFinderCfg(flags))
 
     TauVertexVariables = CompFactory.TauVertexVariables(name=name,
-                                                        VertexFitter =  TrigTauAdaptiveVertexFitter ,
-                                                        SeedFinder =    TrigTauCrossDistancesSeedFinder  )
+                                                        VertexFitter =  TauAdaptiveVertexFitter ,
+                                                        SeedFinder =    CrossDistancesSeedFinder  )
     acc.setPrivateTools(TauVertexVariables)
     return acc
     
