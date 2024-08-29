@@ -1,4 +1,6 @@
 #!/bin/python3
+# TO FIX: cali OFCs in final db are same as phys
+# Step which makes picked phase root files puts same value in OFC_1ns and OFC_1ns_mu trees when Ncoll > 0
 
 import os, sys, errno, glob, subprocess, pathlib, getpass, datetime
 import argparse
@@ -8,11 +10,11 @@ import subprocess
 # Dictionary with folder info used for LArCompleteToFlat
 folderInfo = {}
 folderInfo["/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/4samples1phase"] = {"key":"LArOFC", "classtype":"LArOFCComplete"}
+folderInfo["/LAR/ElecCalibOflSC/OFC/CaliWave1phase"] = {"key":"LArOFC", "classtype":"LArOFCComplete"}
 folderInfo["/LAR/ElecCalibOflSC/Shape/RTM/4samples1phase"] = {"key":"LArShape", "classtype": "LArShapeComplete"}
 folderInfo["/LAR/ElecCalibOflSC/Pedestals/Pedestal"] = {"key":"LArPedestal", "classtype": "LArPedestalComplete"}
 folderInfo["/LAR/ElecCalibOflSC/Ramps/RampLinea"] = {"key":"LArRamp", "classtype": "LArRampComplete"}
 folderInfo["/LAR/ElecCalibOflSC/MphysOverMcal/RTM"] = {"key":"LArMphysOverMcal", "classtype": "LArMphysOverMcalComplete"}
-
 
 
 if "Athena_DIR" not in os.environ:
@@ -153,6 +155,7 @@ def printAndRun(cmd, outlogpath=None, runNow=True):
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out,err = process.communicate()        
         retcode = process.returncode
+        print("**** Return code:", retcode, "*"*10)
         log = None
         if outlogpath is not None:
             print(f"See log: {outlogpath}")
@@ -181,28 +184,28 @@ def run_merge(insqlite, inkeys, outsqlite, outpool, Ncoll=0, poolcat="mergedPool
     cmd = f"python -m LArCalibProcessing.LArNewCalib_MergeDB --insqlite {insqlite} --inkeys {inkeys} --outsqlite {outsqlite} --poolfile {outpool} --isSC --poolcat {poolcat} --Ncoll {Ncoll}"
     printAndRun(cmd,outlogpath, runNow=runNow)
 
-def run_fillofcphase(phases_txt, outkey="LArSCOFCPhase", default_phase=22, folder="/LAR/ElecCalibOflSC/OFCBin/PhysShift", tag="LARElecCalibOflSCOFCBinPhysShift-10", outsql="SCOFCPhase.db", outpool="SC_OFC_Phase_10.pool.root",outlogpath=None, runNow=True):
+def run_fillofcphase(phases_txt, outkey="LArSCOFCPhase", default_phase=22, folder="/LAR/ElecCalibOflSC/OFCBin/PhysShift", tag="LARElecCalibOflSCOFCBinPhysShift-10", outsql="SCOFCPhase.db", outpool="SC_OFC_Phase_10.pool.root", poolcat="mergedPoolCat.xml", outlogpath=None, runNow=True):
     ''' Step 2 *if needed* - make an sql file from picked OFC phase txt file '''
-    cmd = f"LArNewCalib_FillOFCPhase.py --infile {phases_txt} --outkey {outkey} --isSC --hasid --default {default_phase} --folder {folder} --tag {tag} --outsql {outsql} --outp {outpool}"
+    cmd = f"LArNewCalib_FillOFCPhase.py --infile {phases_txt} --outkey {outkey} --isSC --hasid --default {default_phase} --folder {folder} --tag {tag} --outsql {outsql} --outp {outpool} --poolcat {poolcat}"
     printAndRun(cmd,outlogpath, runNow=runNow)
-    # OIOIOI run command
 
-def run_ofcpick(insqlite, outsqlite, phase_sql, run, BCsnapshotDB, outpdir="./", outrdir="./", outname="Picked_phase24052024", tag="LARElecCalibOflSCOFCBinPhysShift-09", poolcat="mergedPoolCat.xml", outlogpath=None, runNow=True):  # insqlite  mergeSC.db, outssqlite mergeSCOnl_1.5_phase24052024.db , subdet Picked_phase24052024, phase_sql SCOFCPhase.d)
+
+def run_ofcpick(insqlite, outsqlite, phase_sql, run, BCsnapshotDB, outpdir="./", outrdir="./", outname="Picked_phase24052024", tag="LARElecCalibOflSCOFCBinPhysShift-10", Ncoll=0, poolcat="mergedPoolCat.xml", isPhys=True, outlogpath=None, runNow=True):  # insqlite  mergeSC.db, outssqlite mergeSCOnl_1.5_phase24052024.db , subdet Picked_phase24052024, phase_sql SCOFCPhase.d)
     ''' Step 3, picking the phase in the DB '''
-    # OIOIOI here the Ncoll needs to be added in the athena part as well
-    cmd=f"LArNewCalib_PhysOFCPhasePicker.py --run {run} -b {BCsnapshotDB} --insqlite {insqlite} --poolcat {poolcat} --outsqlite {outsqlite} --isSC --outpdir {outpdir} --outrdir {outrdir} --subdet {outname} --ofcphasetag {tag} --ofcphasesqlite {phase_sql}"
+    cmd=f"LArNewCalib_PhysOFCPhasePicker.py --run {run} -b {BCsnapshotDB} --insqlite {insqlite} --poolcat {poolcat} --outsqlite {outsqlite} --isSC --outpdir {outpdir} --outrdir {outrdir} --subdet {outname} --ofcphasetag {tag} --ofcphasesqlite {phase_sql} --Ncoll {Ncoll}" 
+    if not isPhys:
+        cmd += " --isCalib --outprefix LArOFCCaliOnePhase"
+        
     printAndRun(cmd,outlogpath, runNow=runNow)
-    # OIOIOI run command
+
 
 def run_toCoolInline(mergedDB, outDB, infolders="ConvertToInlineSC", globalTag="LARCALIB-RUN2-00", poolcat="mergedPoolCat.xml", outlogpath=None, runNow=True):# outDB freshConstantsOnl_1.5.db
     ''' Step 4: flattening the DB '''
     #  connecting all folder level tags to some new global tag..... In calibration processing it is used to be able to define some calib. global tag in sqlite file, and then job do not need to know all individual folder level tags, athena automaticaly uses the one connected to defined global tag...
     cmd=f"/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py {mergedDB} {globalTag}"
     printAndRun(cmd,outlogpath, runNow=runNow)
-    # OIOIO run command
     cmd=f"LArCalib_ToCoolInlineConfig.py --insqlite {mergedDB} --infolders {infolders} --poolcat {poolcat} --outsqlite {outDB} --isSC"
     printAndRun(cmd,outlogpath, runNow=runNow)
-    #OIOIOI run command
 
 
 def poolCatalog(poolDir, catalog=None, runNow=True):
@@ -245,7 +248,10 @@ def folderNamesTags(sql, mustr="mu-60", dbname="CONDBR2", verbose=False):
             thetag = ""
             if len(taglist) > 0:
                 taglist = [ str(t) for t in taglist ]
-                posstag = [ t for t in taglist if mustr in t ] 
+                if mustr != "":
+                    posstag = [ t for t in taglist if mustr in t ]
+                else:
+                    posstag = [ t for t in taglist if "mu-" not in t ]
                 if len(posstag) == 1:
                     thetag = posstag[0]
                 else:
@@ -268,7 +274,7 @@ if __name__ == "__main__":
     # parser.add_argument('--online', dest="onlineFolders", nargs='+', default=["Pedestal", "MphysOverMcal", "Ramp"], help="List of folders to merge in a separate db 'mergeSCOnl.db'. Default %(default)s.")
     parser.add_argument('--folders', dest="folders", nargs='+', default=["Pedestal", "MphysOverMcal", "Ramp","AutoCorr", "OFCCali", "LArOFCPhys4samples", "LArOFCPhys4samplesMu", "PhysWave", "PhysAutoCorr", "CaliPulseParams", "DetCellParams", "CaliWave", "LArShape4samples"], help="List of folders to merge in a separate db 'mergeSC.db'. Default %(default)s.")
     parser.add_argument('-o','--outdir', dest='outdir', default=f'/tmp/{getpass.getuser()}', help="Output directory for running and producing merged files. Default %(default)s.")
-    parser.add_argument('-Ncoll', dest='Ncoll', type=int, default=0, help="Pileup setting. If 0, both are made. Default %(default)s.")
+    parser.add_argument('-Ncoll', dest='Ncoll', type=int, default=0, help="Pileup setting. Default %(default)s.")
     parser.add_argument('-phase_txt', dest="phase_txt", type=str, default=None, help="Full path to .txt file which contains picked phases. Provide either this or a .db version")
     parser.add_argument('-phase_db', dest="phase_db", type=str, default=None, help="Full path to .db file which contains picked phases. Provide either this or a .txt version")
     parser.add_argument('-t','--tag', dest="out_tag", type=str, default=None, help="A tag to add to the name of output files, to help keep track of what was used. e.g. could use 'Onl' or 'Ofl' to separate blobs for different uploads. Default is empty, but the current date will be added.")
@@ -277,18 +283,11 @@ if __name__ == "__main__":
 
     runNow = not args.dryRun
     
-    #insqlite=None  # comma separated list, no spaces
-    #inkeys = None  # matching comma separated list
-    #outsqlite=None
-    #poolfile=None
-    #poolcat=None
-    #Ncoll=0   
-
-    outtag = datetime.datetime.now().strftime("%y%m%d")
+    outtag = f"mu{args.Ncoll}_{datetime.datetime.now().strftime('%y%m%d')}"
     if args.out_tag is not None:
-        outtag = args.out_tag+"_"+outtag
+        outtag = f"{args.out_tag}_{outtag}"
+       
         
-    
     if not args.inputLog.endswith(".log"):
         args.inputLog += ".log"
 
@@ -323,6 +322,7 @@ if __name__ == "__main__":
 
     # Make an output directory to run in
     args.outdir = f"{args.outdir}/{theLog.name}"
+    args.outdir += f"_{outtag}"
     outdir_root = f"{args.outdir}/rootFiles"
     outdir_pool = f"{args.outdir}/poolFiles"
     outdir_logs = f"{args.outdir}/logs"    
@@ -350,21 +350,31 @@ if __name__ == "__main__":
         if args.phase_txt is not None:
             # Step 2 (if needed) - make the picked phase sql file
             args.phase_db = f"{args.outdir}/{phaseDBname}"
-            run_fillofcphase(phases_txt=args.phase_txt, outkey="LArSCOFCPhase", default_phase=22, folder="/LAR/ElecCalibOflSC/OFCBin/PhysShift", tag="LARElecCalibOflSCOFCBinPhysShift-10", outsql=args.phase_db, outpool=phase_pool, outlogpath=f"{outdir_logs}/run_fillofcphase.txt", runNow=runNow)
-
+            run_fillofcphase(phases_txt=args.phase_txt, outkey="LArSCOFCPhase", default_phase=22, folder="/LAR/ElecCalibOflSC/OFCBin/PhysShift", tag="LARElecCalibOflSCOFCBinPhysShift-10", outsql=args.phase_db, outpool=phase_pool, outlogpath=f"{outdir_logs}/run_fillofcphase.txt", runNow=runNow, poolcat=poolcat)
+            # Add new pool file to catalogue
+            poolCatalog(outdir_pool, poolcat, runNow=runNow)
+            
         # Step 3, apply the picking to the merged db file
-        # run_ofcpick(insqlite=mergedDB_topick, outsqlite=mergedDB_picked, phase_sql=args.phase_db, run=args.run, BCsnapshotDB=bcsnapshots[0], outpdir=outdir_pool, outrdir=outdir_root, outname=f"Picked_phase_{outtag}", tag="LARElecCalibOflSCOFCBinPhysShift-09", poolcat=poolcat, outlogpath=f"{outdir_logs}/run_ofcpick.txt", runNow=runNow)
-        run_ofcpick(insqlite=mergedDB, outsqlite=mergedDB, phase_sql=args.phase_db, run=args.run, BCsnapshotDB=bcsnapshots[0], outpdir=outdir_pool, outrdir=outdir_root, outname=f"Picked_phase_{outtag}", tag="LARElecCalibOflSCOFCBinPhysShift-09", poolcat=poolcat, outlogpath=f"{outdir_logs}/run_ofcpick.txt", runNow=runNow)
+        run_ofcpick(insqlite=mergedDB, outsqlite=mergedDB, phase_sql=args.phase_db, run=args.run, BCsnapshotDB=bcsnapshots[0], outpdir=outdir_pool, outrdir=outdir_root, outname=f"Picked_phase_{outtag}", tag="LARElecCalibOflSCOFCBinPhysShift-10", Ncoll=args.Ncoll, poolcat=poolcat, outlogpath=f"{outdir_logs}/run_ofcpick.txt", runNow=runNow, isPhys=True)
+        # Also for cali OFCs
+        run_ofcpick(insqlite=mergedDB, outsqlite=mergedDB, phase_sql=args.phase_db, run=args.run, BCsnapshotDB=bcsnapshots[0], outpdir=outdir_pool, outrdir=outdir_root, outname=f"Picked_phase_{outtag}", tag="LARElecCalibOflSCOFCBinPhysShift-10", Ncoll=args.Ncoll, poolcat=poolcat, outlogpath=f"{outdir_logs}/run_ofccalipick.txt", runNow=runNow, isPhys=False)
+        
     else:
         print("**** NOTE: NO OFC PICKING WAS DONE, DUE TO LACK OF PICKING INPUT ****")
 
-    # oioi get list of folders, for ones with tags add the last word to the folder list
-    foldersTags = folderNamesTags(mergedDB, mustr="mu-60") # oOIOIOIOI set mu in options
+    if args.Ncoll == 0 :
+        foldersTags = folderNamesTags(mergedDB, mustr="", verbose=True) 
+    else: # get list of folders, for ones with tags add the last word to the folder list
+        foldersTags = folderNamesTags(mergedDB, mustr=f"mu-{args.Ncoll}", verbose=True) 
 
-    print(foldersTags)
+    print("-"*30)
+    print("Folders and tags to be used for flattening:")
+    for k in foldersTags.keys():
+        print(k, ":", foldersTags[k])
+    print("-"*30)
 
-    # folderScript = f"{args.outdir}/ConvertToInlineSC" # OIOIOI has to be local for now
-    folderScript = f"ConvertToInlineSC"
+    folderScript = f"{args.outdir}/ConvertToInlineSC" # OIOIOI has to be local for now
+    #folderScript = f"ConvertToInlineSC"
     print(f"Writing folder info to {folderScript}.py")
     with open(f"{folderScript}.py", "w") as ffile:
         lines = ["inputFolders=[]"]

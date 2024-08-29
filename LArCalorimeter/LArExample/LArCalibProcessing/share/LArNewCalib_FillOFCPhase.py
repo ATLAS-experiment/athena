@@ -24,7 +24,7 @@ if __name__=='__main__':
   parser.add_argument('-t','--tag', dest='tag', default="LArOFCPhase-01", help='folder tag', type=str)
   parser.add_argument('-o','--outsql', dest='outsql', default="OFCPhase.db", help='output sqlite filename', type=str)
   parser.add_argument('-p','--outp', dest='outpool', default="ofc_phase.pool.root", help='output pool filename', type=str)
-
+  parser.add_argument('--poolcat', dest='poolcat', default="PoolFileCatalog.xml", help='Catalog of POOL files', type=str)
 
 
   args = parser.parse_args()
@@ -109,6 +109,8 @@ if __name__=='__main__':
 
   cfg.getService("IOVDbSvc").DBInstance="CONDBR2"
   cfg.getService("MessageSvc").defaultLimit=9999999
+  cfg.getService("PoolSvc").WriteCatalog="xmlcatalog_file:%s"%args.poolcat
+     
   print("Start running...")
   cfg.run(1)
 
