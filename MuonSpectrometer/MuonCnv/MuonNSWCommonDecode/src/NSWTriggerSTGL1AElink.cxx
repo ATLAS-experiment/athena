@@ -210,7 +210,11 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
         default:
            break;
   }
-  
+ 
+  // this is a temporary hack to work around FPE errors due to data corruption in the byte stream  
+  if(current_stream_head_nwords==0){
+  	throw std::runtime_error("found corrupted data in sTGC TP byte stream");
+  }
   current_stream_head_nwords = total_expected_size / current_stream_head_nbits;
   size_t data_size = std::ceil(total_expected_size / felix_word_size);
 
