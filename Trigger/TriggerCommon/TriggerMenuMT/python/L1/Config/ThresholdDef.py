@@ -367,6 +367,11 @@ class ThresholdDef:
         NimThreshold('ZDC_0',   'ZDC')
         NimThreshold('ZDC_1',   'ZDC')
         NimThreshold('ZDC_2',   'ZDC')
+        #ATR-28719
+        NimThreshold('ZDC_ALT_0',   'ZDC')
+        NimThreshold('ZDC_ALT_1',   'ZDC')
+        NimThreshold('ZDC_ALT_2',   'ZDC')
+
 
 
         ## BCM
