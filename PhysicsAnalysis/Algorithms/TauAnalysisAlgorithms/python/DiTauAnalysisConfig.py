@@ -26,7 +26,7 @@ class DiTauCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
         alg.taus = config.readName (self.containerName, "DiTauJets")
         alg.tausOut = config.copyName (self.containerName)
-        alg.preselection = config.getSelection (self.containerName, '')
+        alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
@@ -35,7 +35,7 @@ class DiTauCalibrationConfig (ConfigBlock):
             config.addPrivateTool( 'matchingTool',
                             'TauAnalysisTools::DiTauTruthMatchingTool' )
             alg.taus = self.readName (self.containerName)
-            alg.preselection = config.getSelection (self.containerName, '')
+            alg.preselection = config.getPreselection (self.containerName, '')
 
 
 
@@ -86,7 +86,7 @@ class DiTauWorkingPointConfig (ConfigBlock) :
             # alg.outOfValidity = 2 #silent
             # alg.outOfValidityDeco = "bad_eff"
             alg.taus = config.readName (self.containerName)
-            alg.preselection = config.getSelection (self.containerName, self.selectionName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
 
 
 
