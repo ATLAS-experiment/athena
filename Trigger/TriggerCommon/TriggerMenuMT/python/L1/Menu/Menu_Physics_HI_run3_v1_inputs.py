@@ -66,7 +66,8 @@ def defineInputsMenu():
                 'NIMTGC',     # TGC
                 'NIMRPC',     # RPC
                 'NIMTRT',     # TRT
-                'AFP_NSC', 'AFP_FSC', 'AFP_FSC_TOF_T0', 'AFP_FSC_TOF_T1', 'AFP_FSC_TOF_T2', 'AFP_FSC_TOF_T3'   # 2xAFP
+                'AFP_NSC', 'AFP_FSC', 'AFP_FSC_TOF_T0', 'AFP_FSC_TOF_T1', 'AFP_FSC_TOF_T2', 'AFP_FSC_TOF_T3',   # 2xAFP
+                'ZDC_ALT_0', 'ZDC_ALT_1', 'ZDC_ALT_2' # 3xZDC alternative LUCROD
             ]
         }
     ]
