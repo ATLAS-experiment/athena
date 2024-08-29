@@ -80,9 +80,9 @@ def JetEfficiencyMonitoringConfig(flags):
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
-    single_triggers = ['L1_J20', 'L1_J50', 'L1_J100',  'L1_J400']
+    single_triggers = ['L1_J20', 'L1_J50',  'L1_J400']
     multijet_triggers = [ 'L1_3J50', 'L1_4J15']
-    LR_triggers = ['L1_SC111-CJ15']
+    LR_triggers = []
     
     gfex_SR_triggers = ['L1_gJ20p0ETA25', 'L1_gJ50p0ETA25', 'L1_gJ100p0ETA25', 'L1_gJ400p0ETA25' ]
     gfex_LR_triggers = ['L1_gLJ80p0ETA25', 'L1_gLJ100p0ETA25', 'L1_gLJ140p0ETA25', 'L1_gLJ160p0ETA25']
@@ -103,7 +103,7 @@ def JetEfficiencyMonitoringConfig(flags):
                         "No": '', 
                         "Bootstrap": ' wrt bootstrap trigger ' + bootstrap_trigger}
     reference_paths = {"Muon" : muonRefPath, "RandomHLT": randomRefPath, "No": noRefPath,  "Bootstrap":  bsRefPath}
-    references = list(reference_titles.keys())
+    references = ["Muon",  "No", "Bootstrap"] #"RandomHLT"
 
 
     trigger_group_list = {"single_triggers" : single_triggers,
@@ -128,37 +128,58 @@ def JetEfficiencyMonitoringConfig(flags):
     nbins = {"SRpt": 200, "SReta" :32, "LRpt": 200, "LReta" :32}
     binmin = {"SRpt": -50, "SReta" :-3.3, "LRpt": -50, "LReta" :-3.3}
     binmax = {"SRpt": 1400*GeV, "SReta" :3.3, "LRpt": 1400*GeV, "LReta" :3.3}
-    properties = list(title_for_prop.keys())
+    properties = ["SRpt","LRpt"] 
 
     ######### turn off plotting distrubiton histograms so they dont show up on web dispaly 
     plotDistrubutions = False
     if plotDistrubutions: 
-        helper.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',  fillGroup=groupName,  path=trigPath + distributionPath,xbins=nbins["SRpt"],xmin=binmin["SRpt"], xmax=binmax["SRpt"])
+        helper.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',  fillGroup=groupName,  path=trigPath + distributionPath, xbins=nbins["SRpt"], xmin=binmin["SRpt"], xmax=binmax["SRpt"])
 
-        helper.defineHistogram('raw_eta',  title='Eta Distribution for all leading offline jets (with no trigger requirments);#eta; Count', fillGroup=groupName, path=trigPath + distributionPath,xbins=nbins["SReta"],xmin=binmin["SReta"], xmax=binmax["SReta"])
+        helper.defineHistogram('raw_eta',  title='Eta Distribution for all leading offline jets (with no trigger requirments);#eta; Count', fillGroup=groupName, path=trigPath + distributionPath, xbins=nbins["SReta"], xmin=binmin["SReta"], xmax=binmax["SReta"])
+    
+    plateau_dict = {} #in case there are low stats for some of the triggers, we could modify the threshold ranges for some triggers
+    #gives warning if we dont reach platau by first value, gives error if we dont reach it by second value
+    threshold_dict = {"L1_J20": [40e3,60e3], #hits 50% around 38 for a good run, 100% around 75
+                      "L1_J50" : [90e3,120e3], #hits 50% at 86 for a good run, 100% around 140
+                      "L1_J400" : [560e3,620e3], #hits 50% at 550 for a good run, 100% around 720
+                      "L1_gJ20p0ETA25" : [55e3, 100e3], #hits 50% at 50 for a good run, 100% around 75
+                      "L1_gJ50p0ETA25" : [100e3, 140e3], #hits 50% at 90 for a good run, 100% around 180
+                      "L1_gJ100p0ETA25" : [185e3, 220e3],#hits 50% at 175 for a good run, 100% around 300
+                      "L1_gLJ80p0ETA25" : [110e3, 135e3],#hits 50% at 102 for a good run, 100% around 200
+                      "L1_gLJ100p0ETA25" : [150e3, 180e3],#hits 50% at 137 for a good run, 100% around 240
+                      "L1_gLJ140p0ETA25" : [210e3, 230e3],#hits 50% at 197 for a good run, 100% around 315
+                      "L1_gLJ160p0ETA25" : [240e3, 260e3],#hits 50% at 225 for a good run, 100% around 350
+                      "L1_jJ30" : [38e3, 45e3],#hits 50% at 33 for a good run, 100% around 85
+                      "L1_jJ40" : [40e3, 50e3],#hits 50% at 34 for a good run, 100% around 90
+                      "L1_jJ50" : [43e3, 55e3],#hits 50% at 37 for a good run, 100% around 100
+                      "L1_jJ80" : [80e3, 95e3],#hits 50% at 72 for a good run, 100% around 155
+                      "L1_jJ90" : [100e3, 115e3],#hits 50% at 94 for a good run, 100% around 190
+                      "L1_jJ125" : [140e3, 155e3],#hits 50% at 133 for a good run, 100% around 230
+                      "L1_jJ140" : [160e3, 175e3],#hits 50% at 150 for a good run, 100% around 255
+                      "L1_jJ160" : [180e3, 195e3],#hits 50% at 170 for a good run, 100% around 260
+                      "L1_jJ180" : [235e3, 250e3],#hits 50% at 223 for a good run, 100% around 320
+    }
     
     ######### define all the histograms 
     for tgroup in trigger_groups: #iterate through the trigger groups
-        for t in trigger_group_list[tgroup]: #pull out trigger of interest
-            if "_g" in t:
-                pathAdd = "gFEX/"
-            elif "_j" in t:
-                pathAdd = "jFEX/"
-            else:
-                pathAdd = "Legacy/"
+        for t in trigger_group_list[tgroup]: #iterate through the triggers within subgroups 
+            if "g" in t: pathAdd = "gFEX/"
+            elif "j" in t: pathAdd = "jFEX/"
+            else: pathAdd = "Legacy/"
             #add algorithm that flags if the efficiency is not reaching 100% 
-            #later we can add if the efficiency is not turning on at a good time by adding to thresholdConfig={"Plateau":[0.99,0.95],  "Threshold": [A,B]} 
+            # assemble thresholdConfig dict
+            thresholdConfig = {"Plateau":plateau_dict.get(t,[0.99,0.95])}
+            if t in threshold_dict: thresholdConfig["Threshold"] = threshold_dict[t]
             helper.defineDQAlgorithm("JetEfficiency_"+t, 
                                     hanConfig={"libname":"libdqm_algorithms.so","name":"Simple_fermi_Fit_TEff"}, # this line is always the same
-                                    thresholdConfig={"Plateau":[0.99,0.95]} #can change the threshold values for stoplights
+                                    thresholdConfig=thresholdConfig
                                 )
             for p in properties: 
                 for r in references: #iteratate through the refernce trigger options
                     eff_plot_title = title_for_prop[p] + ' Efficiency of ' + trigger_title_modifiers[tgroup] + ' for trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
 
-                    #this is a long line to define the histogram -> with an if else 
-                    # for now only put the No reference selection plots into expert and with the DQ flags - once we have a sense of stats we can choose to prefer the muon ones 
-                    if r == "No" and p in ["SRpt", "LRpt"]:
+                    #Using the muon reference trigger selection, as our least biased trigger selection inside the web displkay. Others still exist in the HIST file for now
+                    if r == "Muon" and p in ["SRpt", "LRpt"]:
                         helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=ExpertTrigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p], hanConfig={"algorithm":"JetEfficiency_"+t})  
                     else:
                         helper.defineHistogram(f"bool_{r}_{t}, val_{p};{p}_{t}", type='TEfficiency',  title=eff_plot_title, fillGroup=groupName, path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
