@@ -49,6 +49,10 @@ def xAODTestTypelessReadCfg (flags):
                  'DMTest::JVecAuxContainer#jvecContainerAux.',
                  'DMTest::JVec#jvecInfo',
                  'DMTest::JVecAuxInfo#jvecInfoAux.',
+                 'DMTest::PLinksContainer#plinksContainer',
+                 'DMTest::PLinksAuxContainer#plinksContainerAux.',
+                 'DMTest::PLinks#plinksInfo',
+                 'DMTest::PLinksAuxInfo#plinksInfoAux.',
                 ]
     typeNames = [ 'DataVector<DMTest::C_v1>',
                   'DMTest::CVecWithData_v1',
@@ -61,6 +65,11 @@ def xAODTestTypelessReadCfg (flags):
                   'DMTest::JVecAuxContainer_v1',
                   'DMTest::JVec_v1',
                   'DMTest::JVecAuxInfo_v1',
+                  'DMTest::PLinksContainer_v1',
+                  'DataVector<DMTest::PLinks_v1>',
+                  'DMTest::PLinksAuxContainer_v1',
+                  'DMTest::PLinks_v1',
+                  'DMTest::PLinksAuxInfo_v1',
                  ]
 
     acc.merge (TestOutputCfg (flags, 'Stream1', itemList, typeNames ))

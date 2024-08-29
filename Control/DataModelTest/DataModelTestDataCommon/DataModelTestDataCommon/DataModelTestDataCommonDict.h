@@ -38,6 +38,10 @@
 #include "DataModelTestDataCommon/JVecContainer.h"
 #include "DataModelTestDataCommon/JVecAuxContainer.h"
 #include "DataModelTestDataCommon/JVecAuxInfo.h"
+#include "DataModelTestDataCommon/PLinks.h"
+#include "DataModelTestDataCommon/PLinksContainer.h"
+#include "DataModelTestDataCommon/PLinksAuxContainer.h"
+#include "DataModelTestDataCommon/PLinksAuxInfo.h"
 #include "DataModelTestDataCommon/setConverterLibrary.h"
 #include "AthLinks/ElementLink.h"
 
@@ -50,5 +54,6 @@ DMTest::CView::Pers_t xb;
 }
 
 template class SG::ConstAccessor<ElementLink<DMTest::CVec> >;
+template class SG::ConstAccessor<std::vector<SG::PackedLink<DMTest::CVec_v1> > >;
 
 #endif // not DATAMODELTESTDATACOMMONDICT_H

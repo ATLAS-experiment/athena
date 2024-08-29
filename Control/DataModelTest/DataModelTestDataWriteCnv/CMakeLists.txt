@@ -23,6 +23,7 @@ FILES
    DataModelTestDataCommon/CLinks.h DataModelTestDataCommon/CLinksContainer.h DataModelTestDataCommon/CLinksAuxInfo.h DataModelTestDataCommon/CLinksAuxContainer.h DataModelTestDataCommon/CLinksAOD.h
    DataModelTestDataWrite/AllocTestContainer.h DataModelTestDataWrite/AllocTestAuxContainer.h
    DataModelTestDataCommon/JVec.h DataModelTestDataCommon/JVecContainer.h DataModelTestDataCommon/JVecAuxContainer.h DataModelTestDataCommon/JVecAuxInfo.h
+   DataModelTestDataCommon/PLinks.h DataModelTestDataCommon/PLinksContainer.h DataModelTestDataCommon/PLinksAuxContainer.h DataModelTestDataCommon/PLinksAuxInfo.h
 TYPES_WITH_NAMESPACE
    DMTest::BVec DMTest::BDer
    DMTest::DVec DMTest::DDer
@@ -34,6 +35,7 @@ TYPES_WITH_NAMESPACE
    DMTest::CLinks DMTest::CLinksContainer DMTest::CLinksAuxInfo DMTest::CLinksAuxContainer DMTest::CLinksAOD
    DMTest::AllocTestContainer DMTest::AllocTestAuxContainer
    DMTest::JVec DMTest::JVecContainer DMTest::JVecAuxContainer DMTest::JVecAuxInfo
+   DMTest::PLinks DMTest::PLinksContainer DMTest::PLinksAuxContainer DMTest::PLinksAuxInfo
 LINK_LIBRARIES
    AthenaPoolUtilities DataModelTestDataCommonLib DataModelTestDataWriteLib AthenaPoolCnvSvcLib DataModelTestDataWriteCnv )
 

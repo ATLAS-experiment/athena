@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestReadCLinks.cxx
@@ -14,10 +14,10 @@
 #include <sstream>
 
 
-namespace DMTest {
+namespace {
 
 
-typedef ElementLink<CVec> EL;
+typedef ElementLink<DMTest::CVec> EL;
 
 
 /** 
@@ -36,6 +36,12 @@ std::string formEL (const EL& el)
   ss << ")";
   return ss.str();
 }
+
+
+} // anonymous namespace
+
+
+namespace DMTest {
 
 
 /**

@@ -50,6 +50,7 @@ def xAODTestRead2Cfg (flags):
                                                HViewKey = ""))
 
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec'))
+    acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks'))
 
     itemList = [ 'DMTest::CVec#cvec',
                  'xAOD::AuxContainerBase#cvecAux.' ]

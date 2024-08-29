@@ -26,6 +26,8 @@ def xAODTestReadThinnedCfg (flags):
                                                Brief = True))
     acc.addEventAlgo (DMTest.xAODTestReadJVec ('xAODTestReadJVec',
                                                JVecInfoKey = ''))
+    acc.addEventAlgo (DMTest.xAODTestReadPLinks ('xAODTestReadPLinks',
+                                                 PLinksInfoKey = ''))
 
     return acc
 

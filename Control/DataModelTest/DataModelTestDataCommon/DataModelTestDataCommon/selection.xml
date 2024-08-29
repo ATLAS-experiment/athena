@@ -1,6 +1,4 @@
 <!--
-  $Id: selection.xml,v 1.2 2005-12-01 19:07:55 ssnyder Exp $
-
   File: DataModelTestDataCommon/selection.xml
   Author: snyder@bnl.gov
   Date: Nov 2005
@@ -39,6 +37,15 @@
   <class name="SG::JaggedVecElt<ElementLink<DMTest::CVec_v1> >"/>
 
   <class name="SG::ConstAccessor<ElementLink<DMTest::CVec_v1> >"/>
+
+  <class name="DMTest::PLinks_v1" id="C3646B0E-337D-48B5-9D08-5A2C96A6CFC9"/>
+  <class name="DMTest::PLinksContainer_v1" id="85B77C8E-8491-41EB-8185-B5D982CBA3C1"/>
+  <class name="DMTest::PLinksAuxContainer_v1" id="FE190B54-D9E7-4E92-8972-002CFD49E7B1"/>
+  <class name="DMTest::PLinksAuxInfo_v1" id="C5100E70-68F9-495F-A79A-42CA11DEEEEB"/>
+  <class name="SG::PackedLink<DMTest::CVec_v1>"/>
+  <class name="std::vector<SG::PackedLink<DMTest::CVec_v1> >"/>
+  <class name="std::vector<std::vector<SG::PackedLink<DMTest::CVec_v1> > >"/>
+  <class name="SG::ConstAccessor<std::vector<SG::PackedLink<DMTest::CVec_v1> > >"/>
 
   <function name="DMTest::setPluginLibrary"/>
   <function name="DMTest::setConverterLibrary"/>

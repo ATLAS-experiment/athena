@@ -33,11 +33,16 @@ def xAODTestWriteThinnedCfg (flags):
                                                CVecKey = 'cvec2',
                                                Mask = 6))
 
-
     acc.addEventAlgo (DMTest.xAODTestWriteJVec ('xAODTestWriteJVec'))
     acc.addEventAlgo (DMTest.xAODTestThinJVec ('xAODTestThinJVec',
                                                Stream = 'StreamThinned1',
                                                Mask = 5))
+
+    acc.addEventAlgo (DMTest.xAODTestWriteCVec ('xAODTestWriteCTrig',
+                                                CVecKey = 'ctrig'))
+    acc.addEventAlgo (DMTest.xAODTestWritePLinks ('xAODTestWritePLinks'))
+    acc.addEventAlgo (DMTest.xAODTestThinPLinks ('xAODTestThinPLinks',
+                                                 Stream = 'StreamThinned1'))
 
     itemList = [ 'DMTest::CVec#cvec',
                  'DMTest::CAuxContainer#cvecAux.-dVar2.-dtest',
@@ -52,6 +57,10 @@ def xAODTestWriteThinnedCfg (flags):
                  'DMTest::CLinksAOD#clinksAOD',
                  'DMTest::JVecContainer#jvecContainer',
                  'DMTest::JVecAuxContainer#jvecContainerAux.',
+                 'DMTest::CVec#ctrig',
+                 'DMTest::CAuxContainer#ctrigAux.',
+                 'DMTest::PLinksContainer#plinksContainer',
+                 'DMTest::PLinksAuxContainer#plinksContainerAux.',
                 ]
 
     typeNames = [ 'DataVector<DMTest::C_v1>',
@@ -64,6 +73,9 @@ def xAODTestWriteThinnedCfg (flags):
                   'DMTest::JVecContainer_v1',
                   'DataVector<DMTest::JVec_v1>',
                   'DMTest::JVecAuxContainer_v1',
+                  'DMTest::PLinksContainer_v1',
+                  'DataVector<DMTest::PLinks_v1>',
+                  'DMTest::PLinksAuxContainer_v1',
                  ]
 
     acc.merge (TestOutputCfg (flags, 'Thinned1', itemList, typeNames))
