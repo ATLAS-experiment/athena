@@ -73,7 +73,7 @@ namespace MC
   /// @brief Identify a particlegun particle
   template <class T> inline bool isSingleParticle(const T&  p) { 
 #if defined(HEPMC3)  
-    return HepMC::barcode(p)  == 3;
+    return HepMC::barcode(p)  == 3 ||  HepMC::barcode(p)  == 10001;
 #else
     return HepMC::barcode(p)  == 10001;
 #endif
