@@ -33,7 +33,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     lumi_block_max = 2000
     bcid_max = 3564
     l1TriggerType_max = 256
-    adc_sum_max = 8192.0
+    adc_sum_max = 12288.0
     max_adc_max = 4096.0
     nsamples_max = 25.0
     time_max = 75.0
