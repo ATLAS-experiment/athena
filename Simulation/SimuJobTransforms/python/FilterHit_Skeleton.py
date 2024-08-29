@@ -132,10 +132,6 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    # Ensure proper metadata propagation
-    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-    cfg.merge(IOVDbSvcCfg(flags))
-
     # Identifiers
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
     cfg.merge(DetDescrCnvSvcCfg(flags))
