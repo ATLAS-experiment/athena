@@ -1255,6 +1255,10 @@
   <x title="Placeholder" n="80" lo="0.0" hi="80.0"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
 </h>
+<h id="vx_hs_sel_eff_mu" type="TEfficiency" title="HS vertex selection efficiency">
+  <x title="#mu"  n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="HS vertex selection efficiency" lo="0.0" hi="1.2"/>
+</h>
 <h id="vx_hs_sel_eff_dist_vs_nReco" type="TEfficiency" title="HS vertex selection efficiency (distance based)">
   <x title="N reco vertices" n="80" lo="0.0" hi="80.0"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>

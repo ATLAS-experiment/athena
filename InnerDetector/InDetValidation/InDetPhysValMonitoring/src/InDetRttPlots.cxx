@@ -301,7 +301,7 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake,
 //Fill Vertexing Plots
 //
 void
-InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight) {
+InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Vertex* recoHardScatter, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, const float actualMu, float weight) {
   // fill vertex-specific properties, for all vertices and for hard-scattering vertex
 
   for (const auto& vtx : vertexContainer.stdcont()) {
@@ -322,7 +322,7 @@ InDetRttPlots::fill(const xAOD::VertexContainer& vertexContainer, const xAOD::Ve
     ATH_MSG_DEBUG("IN InDetRttPlots::fill, filling for all HS vertex");
   }
 
-  if(m_vertexTruthMatchingPlots) m_vertexTruthMatchingPlots->fill(recoHardScatter, vertexContainer, truthHSVertices, truthPUVertices, weight);
+  if(m_vertexTruthMatchingPlots) m_vertexTruthMatchingPlots->fill(recoHardScatter, vertexContainer, truthHSVertices, truthPUVertices,actualMu, weight);
 }
 
 

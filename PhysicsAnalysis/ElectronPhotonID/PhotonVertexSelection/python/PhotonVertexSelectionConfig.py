@@ -11,7 +11,8 @@ def PhotonPointingToolCfg(flags, name="PhotonPointingTool", **kwargs):
     return acc
 
 
-def PhotonVertexSelectionToolCfg(flags, name="PhotonVertexSelectionTool", **kwargs):
+def PhotonVertexSelectionToolCfg(
+        flags, name="PhotonVertexSelectionTool", **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.CP.PhotonVertexSelectionTool(**kwargs))
     return acc
