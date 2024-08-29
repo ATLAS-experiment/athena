@@ -5,6 +5,9 @@
 // Primary include
 #include "G4AtlasTools/G4FieldManagerToolBase.h"
 
+// Local includes
+#include "G4FieldManagerHelper.h"
+
 // CLHEP includes
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -240,8 +243,10 @@ setFieldParameters(G4FieldManager* fieldMgr) const
     if (m_deltaChord>0) fieldMgr->GetChordFinder()->SetDeltaChord(m_deltaChord);
     if (m_deltaOneStep>0) fieldMgr->SetDeltaOneStep(m_deltaOneStep);
     if (m_deltaIntersection>0) fieldMgr->SetDeltaIntersection(m_deltaIntersection);
-    if (m_minEps>0) fieldMgr->SetMinimumEpsilonStep(m_minEps);
-    if (m_maxEps>0) fieldMgr->SetMaximumEpsilonStep(m_maxEps);
+
+    auto minEps_actual = m_minEps > 0 ? m_minEps.value() : fieldMgr->GetMinimumEpsilonStep();
+    auto maxEps_actual = m_maxEps > 0 ? m_maxEps.value() : fieldMgr->GetMaximumEpsilonStep();
+    G4FieldManagerHelper::SetMinAndMaxEpsilonStep(fieldMgr, minEps_actual, maxEps_actual);
   }
   else {
     ATH_MSG_ERROR("setFieldParameters received NULL field mgr!");

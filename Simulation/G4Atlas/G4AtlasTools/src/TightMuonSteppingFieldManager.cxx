@@ -3,6 +3,7 @@
 */
 
 #include "TightMuonSteppingFieldManager.h"
+#include "G4FieldManagerHelper.h"
 #include "G4Track.hh"
 #include "G4ChordFinder.hh"
 #include "G4MuonPlus.hh"
@@ -49,14 +50,12 @@ void TightMuonSteppingFieldManager::ConfigureForTrack(const G4Track * track)
     GetChordFinder()->SetDeltaChord(0.00000002);
     SetDeltaOneStep(0.000001);
     SetDeltaIntersection(0.00000002);
-    SetMinimumEpsilonStep(0.0000009);
-    SetMaximumEpsilonStep(0.000001);
+    G4FieldManagerHelper::SetMinAndMaxEpsilonStep(this, 0.0000009, 0.000001);
   } else {
     GetChordFinder()->SetDeltaChord(m_globalDeltaChord);
     SetDeltaOneStep(m_globalDeltaOneStep);
     SetDeltaIntersection(m_globalDeltaIntersection);
-    SetMinimumEpsilonStep(m_globalMinEps);
-    SetMaximumEpsilonStep(m_globalMaxEps);
+    G4FieldManagerHelper::SetMinAndMaxEpsilonStep(this, m_globalMinEps, m_globalMaxEps);
   }
 
 }
