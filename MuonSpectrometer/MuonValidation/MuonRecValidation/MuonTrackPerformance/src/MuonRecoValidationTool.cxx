@@ -110,7 +110,7 @@ namespace Muon {
         m_ntuple.trackParticleBlock.eta->push_back(indetTrackParticle.eta());
         m_ntuple.trackParticleBlock.phi->push_back(indetTrackParticle.phi());
         int pdg = 0;
-        int barcode = -1; // FIXME barcode-based
+        int barcode = HepMC::INVALID_PARTICLE_ID; // FIXME barcode-based
         float beta = 1.;
         // set truth
         typedef ElementLink<xAOD::TruthParticleContainer> ElementTruthLink_t;
@@ -158,7 +158,7 @@ namespace Muon {
       std::map<int, int> counters;
       for (std::set<Identifier>::const_iterator it = ids.begin(); it != ids.end(); ++it) {
         const int bc = m_truthSummaryTool->getBarcode(*it); // FIXME barcode-based
-        if (bc != -1) ++counters[bc];
+        if (bc != HepMC::INVALID_PARTICLE_ID) ++counters[bc];
       }
 
       // pick the most frequent
@@ -269,7 +269,7 @@ namespace Muon {
             m_ntuple.timeBlock.id.fill(m_idHelperSvc->sector(id), m_idHelperSvc->chamberIndex(id));
 
             // barcode + pdg
-            int barcode = -1, pdg = 0;
+            int barcode = HepMC::INVALID_PARTICLE_ID, pdg = 0;
             if (m_isMC) {
                 barcode = m_truthSummaryTool->getBarcode(id);
                 pdg = barcode != HepMC::INVALID_PARTICLE_ID ? m_truthSummaryTool->getPdgId(barcode) : 0;
