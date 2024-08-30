@@ -173,7 +173,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st","FPGAClusters_2nd"},"FPGATrackSim Clusters key"};
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterFilteredKey{this, "FPGATrackSimClusterFilteredKey","FPGAClustersFiltered_1st","FPGATrackSim Filtered Clusters key"};
-        SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_1st"},"FPGATrackSim SpacePoints key"};
+        SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey",{"FPGASpacePoints_1st","FPGASpacePoints_2nd"},"FPGATrackSim SpacePoints key"};
         SG::WriteHandleKeyArray<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey",{"FPGAHits_1st","FPGAHits_2nd"},"FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};

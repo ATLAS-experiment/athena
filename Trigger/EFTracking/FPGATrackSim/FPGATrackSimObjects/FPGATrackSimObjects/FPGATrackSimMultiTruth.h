@@ -100,7 +100,7 @@ private:
   };
 
   struct TruthMapWeightLt {
-    unsigned long int bad = -1; /// Use value of -1 here
+    unsigned long int bad = std::numeric_limits<unsigned long>::max();
     bool operator()(const TruthMap::value_type& a, const TruthMap::value_type& b) const {
       const bool a_info = (a.first.first != bad) && (a.first.second != bad);
       const bool b_info = (b.first.first != bad) && (b.first.second != bad);

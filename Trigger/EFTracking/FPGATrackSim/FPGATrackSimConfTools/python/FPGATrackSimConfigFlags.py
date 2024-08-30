@@ -5,6 +5,8 @@ def createFPGATrackSimConfigFlags():
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
+    cf.addFlag('wrapperFileName2', [])
+    cf.addFlag('secondInputToolN', 0)
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
