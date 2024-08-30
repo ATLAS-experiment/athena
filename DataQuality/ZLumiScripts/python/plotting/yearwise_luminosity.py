@@ -22,7 +22,7 @@ parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?'
 parser.add_argument('--absolute', action='store_true', help='Compare absolute luminosity')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
-parser.add_argument('--outcsv', action='store_false', help='Create short CSV with plot content')
+parser.add_argument('--outcsv', action='store_true', help='Create short CSV with plot content')
 
 args    = parser.parse_args()
 year    = args.year
@@ -102,8 +102,7 @@ def channel_comparison(years):
             date  = dict_zlumi["Zee", key][2]
         
             if ratio < ymin or ratio > ymax:
-                print("Run", key, "has ratio", ratio)
-                print("Outside of y-axis range")
+                print("WARNING: Run", key, "has Zee/Zmumu ratio", ratio, ", outside of y-axis range")
             else:
                 vec_times.append(date)
                 vec_ratio.append(ratio)
@@ -204,7 +203,11 @@ def zcounting_vs_atlas(channel, years):
             if livetime < pt.livetimecut:
                 if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                 continue
-           
+
+            prelratio = zlumi/olumi
+            if prelratio < ymin or prelratio > ymax:
+                print("WARNING: Run", run, "has", channel, "/ATLAS ratio", prelratio, ", outside of y-axis range")
+            
             # If plotting vs. date simply fill the arrays here
             arr_date.append(timestamp)
             arr_olumi.append(olumi)
@@ -233,10 +236,11 @@ def zcounting_vs_atlas(channel, years):
         normalisation = 1.0
     else:
         normalisation = np.sum(arr_zlumi) / np.sum(arr_olumi)
+
     # do normalisation to period integral
     arr_zlumi /= normalisation
     arr_zerr  /= normalisation
-    
+
     # calculate ratio to ATLAS preferred lumi
     arr_zlumi_ratio = arr_zlumi/arr_olumi
     arr_zerr_ratio  = arr_zerr/arr_olumi
@@ -270,7 +274,7 @@ def zcounting_vs_atlas(channel, years):
     print("median", np.median(arr_zlumi_ratio)) 
     print("mean", np.mean(arr_zlumi_ratio)) 
     
-    line1 = pt.make_bands(arr_date, stdev, mean)
+    line1 = pt.make_bands(arr_date, stdev, np.median(arr_zlumi_ratio))
     line1.Draw("same 3")
     tg.Draw('same ep')
 
@@ -285,12 +289,12 @@ def zcounting_vs_atlas(channel, years):
         pt.drawAtlasLabel(xval, yval-0.47, "Internal")       
         pt.drawText(xval, yval-0.53, date_tag, set_size)
         pt.drawText(xval, yval-0.59, zstring, set_size)
-        pt.drawText(xval, yval-0.65, "OflLumi-Run3-004", set_size)
+        pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", set_size)
     else:
         pt.drawAtlasLabel(xval, yval-0.47, "Internal")
         pt.drawText(xval, yval-0.53, date_tag, set_size)
         pt.drawText(xval, yval-0.59, zstring, set_size)
-        pt.drawText(xval, yval-0.65, "OflLumi-Run3-004", set_size)
+        pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", set_size)
         pt.drawText(xval, yval-0.02, total_zlumi_string, set_size)
 
     pt.drawText(xval-0.12, 0.95, plot_title, set_size)
@@ -313,7 +317,10 @@ def zcounting_vs_atlas(channel, years):
         c1.SaveAs(filename+".pdf")
 
     if outcsv:
-        csvfile = open(filename+".csv", 'w')
+        if args.absolute:
+            csvfile = open(filename+"_abs.csv", 'w')
+        else:
+            csvfile = open(filename+".csv", 'w')
         csvwriter = csv.writer(csvfile, delimiter=',')
         csvwriter.writerow(['FillNum','RunNum','Time','OffLumi','ZLumi','ZLumiErr','OffZlumi','OffZlumiErr'])
         for i in range(len(run_num)):

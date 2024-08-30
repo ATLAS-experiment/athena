@@ -21,7 +21,7 @@ for year in ${yearlist[@]}; do
     
     for channel in Zee Zmumu Zll; do
         # Yearwise L_Z / L_ATLAS comparison vs. time and pileup
-        python -u ../../python/plotting/yearwise_luminosity.py --channel $channel --year $year --indir $indir --outdir $outdir
+        python -u ../../python/plotting/yearwise_luminosity.py --channel $channel --year $year --indir $indir --outdir $outdir --outcsv
         python -u ../../python/plotting/yearwise_luminosity.py --channel $channel --year $year --absolute --indir $indir --outdir $outdir --outcsv
 
 	python -u ../../python/plotting/yearwise_luminosity_vs_mu.py --channel $channel --year $year --indir $indir --outdir $outdir

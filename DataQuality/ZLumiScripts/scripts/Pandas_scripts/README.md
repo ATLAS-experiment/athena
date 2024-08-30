@@ -37,8 +37,8 @@ The Run 3 intermediate and processed files are in the following directories:
 # Semi-automatic full-chain running to update CVSs and Plots with latest runs
 
 Loging to LXPLUS as several inputs and outputs are from EOS.  A more-or-less
-recent version of Athena (e.g. 23.0.56) needs to be setup for the
-scripts to be found and work. As the rel 23 were built for Centos7, but LXPLUS now runs ALMA9, you need to setup a container, the prompt and directories look a bit strange then...
+recent version of Athena (e.g. 24.0.58) needs to be setup for the
+scripts to be found and work. As of rel 24 releases work directly on LXPLUS ALMA9.
 
 ## First time only
 
