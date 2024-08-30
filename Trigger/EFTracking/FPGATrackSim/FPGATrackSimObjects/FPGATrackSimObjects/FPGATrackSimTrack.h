@@ -147,7 +147,7 @@ class FPGATrackSimTrack : public TObject {
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
   signed long m_eventindex = -1; // matched particle event index
-  unsigned long m_barcode = -1; // matched geant particle barcode
+  unsigned long m_barcode = std::numeric_limits<unsigned long>::max(); // matched geant particle barcode
   float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
   // geant particle, corresponding to the
   // particle with m_barcode

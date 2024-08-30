@@ -350,6 +350,12 @@ def FPGATrackSimReadInputCfg(flags):
     result.addPublicTool(InputTool, primary=True)
     return result
 
+def FPGATrackSimReadInput2Cfg(flags):
+    result=ComponentAccumulator()
+    InputTool2 = CompFactory.FPGATrackSimReadRawRandomHitsTool(name="FPGATrackSimReadInput2", InFileName = flags.Trigger.FPGATrackSim.wrapperFileName2)
+    result.addPublicTool(InputTool2, primary=True)
+    return result
+
 def prepareFlagsForFPGATrackSimLogicalHistProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
@@ -383,7 +389,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
     theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
     theFPGATrackSimLogicalHistProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
-    theFPGATrackSimLogicalHistProcessAlg.DoHoughRootOutput = False
+    theFPGATrackSimLogicalHistProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
     theFPGATrackSimLogicalHistProcessAlg.DoNNTrack = False
     theFPGATrackSimLogicalHistProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.runOnRDO = True if not flags.Trigger.FPGATrackSim.wrapperFileName else False
@@ -404,7 +410,9 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 
     if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
-        theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
+        if flags.Trigger.FPGATrackSim.wrapperFileName2 != [] and flags.Trigger.FPGATrackSim.wrapperFileName2 is not None:
+            theFPGATrackSimLogicalHistProcessAlg.InputTool2 = result.getPrimaryAndMerge(FPGATrackSimReadInput2Cfg(flags))
+            theFPGATrackSimLogicalHistProcessAlg.SecondInputToolN = flags.Trigger.FPGATrackSim.secondInputToolN
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = ""
     else:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
@@ -466,11 +474,6 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
           SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
         theFPGATrackSimLogicalHistProcessAlg.SPRoadFilterTool = SPRoadFilter
         theFPGATrackSimLogicalHistProcessAlg.Spacepoints = True
-
-    if flags.Trigger.FPGATrackSim.ActiveConfig.secondStage:
-        FPGATrackSimExtrapolatorTool = CompFactory.FPGATrackSimExtrapolator()
-        FPGATrackSimExtrapolatorTool.Ncombinations = 16
-        theFPGATrackSimLogicalHistProcessAlg.Extrapolator = FPGATrackSimExtrapolatorTool
 
 
     if flags.Trigger.FPGATrackSim.ActiveConfig.lrt:
@@ -605,6 +608,7 @@ if __name__ == "__main__":
 
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
 
     
     if not flags.Trigger.FPGATrackSim.wrapperFileName:

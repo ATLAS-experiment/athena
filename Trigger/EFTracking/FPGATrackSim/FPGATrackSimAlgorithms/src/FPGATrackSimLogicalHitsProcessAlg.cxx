@@ -429,11 +429,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Calculate data flow quantities
     if (m_writeOutputData)  {
       ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo.get(), m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
-    }
-    
-    // Write the output and reset
-    ATH_CHECK(writeOutputData(roads_1st, tracks_1st, roads_2nd, tracks_2nd, dataFlowInfo.get()));
+      // Write the output and reset
+      ATH_CHECK(writeOutputData(roads_1st, tracks_1st, roads_2nd, tracks_2nd, dataFlowInfo.get()));
 
+   }
+    
     if (m_doHoughRootOutput) {
       ATH_CHECK(m_houghRootOutputTool->fillTree(roads_1st, m_logicEventHeader_1st->optional().getTruthTracks(), m_logicEventHeader_1st->optional().getOfflineTracks()));
     }
