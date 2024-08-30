@@ -15,6 +15,8 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('runEventCleaning', False, type=bool,
             info="whether to run event cleaning (sets up an instance of "
             "CP::EventFlagSelectionAlg). The default is False.")
+        self.addOption ('runGRL', True, type=bool,
+            info="whether to run GRL decoration/selection. The default is True.")
         self.addOption ('userGRLFiles', [], type=None,
             info="a list of GRL files (list of strings) to select data from. "
             "The default is [] (empty list).")
@@ -31,6 +33,9 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('GRLDict', {}, type=None)
         self.addOption ('noFilter', False, type=bool,
             info="do apply event decoration, but do not filter. The default is False, i.e. 'We decorate events but do not filter' ")
+
+        if self.runGRL and self.userGRLFiles:
+            raise ValueError("No userGRLFiles should be specified if runGRL=False")
 
     def getDefaultGRLs (self, data_year) :
         """ returns a reasonable set of GRLs that should be suited for most analyses """
@@ -51,11 +56,11 @@ class EventCleaningBlock (ConfigBlock):
             raise ValueError (f"Data year {data_year} is not recognised for automatic GRL retrieval!")
 
     def makeAlgs (self, config) :
-
-        if config.dataType() is DataType.Data:
+        
+        # Apply GRL
+        if self.runGRL and config.dataType() is DataType.Data:
             if self.noFilter:
-                """ here we only decorate the PHYSLITE events with a boolean and don't do any cleaning"""
-
+                # here we only decorate the PHYSLITE events with a boolean and don't do any cleaning
                 # Set up the GRL Decoration
                 for GRLDecoratorName,GRLFile in (self.GRLDict).items():
                     alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
@@ -99,6 +104,7 @@ class EventCleaningBlock (ConfigBlock):
 def makeEventCleaningConfig( seq,
                              runPrimaryVertexSelection = None,
                              runEventCleaning = None,
+                             runGRL = None,
                              userGRLFiles = None,
                              GRLDict = None,
                              noFilter = None,
@@ -107,15 +113,17 @@ def makeEventCleaningConfig( seq,
 
     Keyword arguments:
       runPrimaryVertexSelection -- whether to run primary vertex selection
-      runEventCleaning -- wether to run event cleaning
+      runEventCleaning -- whether to run event cleaning
+      runGRL -- whether to run GRL selection
       userGRLFiles -- a list of GRL files to select data from
       GRLDict -- a dictionary of GRL files to determine decoration names
-      noFilter -- wether to apply event decoration or not
+      noFilter -- whether to apply event decoration or not
     """
 
     config = EventCleaningBlock ()
     config.setOptionValue ('runPrimaryVertexSelection', runPrimaryVertexSelection)
     config.setOptionValue ('runEventCleaning', runEventCleaning)
+    config.setOptionValue ('runGRL', runGRL)
     config.setOptionValue ('userGRLFiles', userGRLFiles)
     config.setOptionValue ('GRLDict', GRLDict)
     config.setOptionValue ('noFilter', noFilter)
