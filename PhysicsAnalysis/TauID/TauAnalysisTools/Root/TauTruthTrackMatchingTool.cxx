@@ -92,13 +92,14 @@ StatusCode TauTruthTrackMatchingTool::checkTrackType(const xAOD::TauTrack& xTrac
     decTruthType(xTrackParticle) = TauAnalysisTools::TauTrack;
     return StatusCode::SUCCESS;
   }
-
-  const int iBarcode = HepMC::barcode(xTruthParticle); // FIXME barcode-based - comparison against a specific value
-  if (iBarcode > 0 && iBarcode < 10000)            decTruthType(xTrackParticle) = TauAnalysisTools::UnderlyingEventTrack;
-  else if (iBarcode >= 10000 && iBarcode < 200000) decTruthType(xTrackParticle) = TauAnalysisTools::PileupTrack;
-  else if (iBarcode == 0)                          decTruthType(xTrackParticle) = TauAnalysisTools::FakeTrack;
-  else if (iBarcode >= 200000)                     ATH_CHECK(classifyConversion(xTrackParticle, *xTruthParticle));
-  else ATH_MSG_WARNING("No truth classification possible for barcode "<<iBarcode);
+  
+// AV: The old code had TauAnalysisTools::UnderlyingEventTrack, TauAnalysisTools::PileupTrack, TauAnalysisTools::FakeTrack.
+// Based on https://its.cern.ch/jira/browse/ATLTAU-482 one can speculate the code was designed to distinguish between 
+// TauAnalysisTools::UnderlyingEventTrack and TauAnalysisTools::PileupTrack.
+// But such distinction has never been implemented, so the new code has just TauAnalysisTools::UnderlyingEventTrack and TauAnalysisTools::FakeTrack
+  if (HepMC::no_truth_link(xTruthParticle))                decTruthType(xTrackParticle) = TauAnalysisTools::FakeTrack;
+  else if (HepMC::is_simulation_particle(xTruthParticle))  ATH_CHECK(classifyConversion(xTrackParticle, *xTruthParticle));
+  else decTruthType(xTrackParticle) = TauAnalysisTools::UnderlyingEventTrack;
 
   return StatusCode::SUCCESS;
 }
