@@ -60,9 +60,6 @@ namespace DerivationFramework{
 
     bool passHadronSelection(const xAOD::TruthParticle* part) const;
 
-
-    bool isQuarkFromHadron(const xAOD::TruthParticle* part) const;
-
     bool isCHadronFromB(const xAOD::TruthParticle* part) const;
 
 
