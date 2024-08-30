@@ -397,7 +397,7 @@ def ITkTrackSeedsFinalCfg(flags):
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeTrackSeeds) ]
+        if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) ]
 
     for extension in listOfExtensionsRequesting:
         TrackContainer = "SiSPSeedSegments"+extension
@@ -425,13 +425,13 @@ def ITkTrackSeedsFinalCfg(flags):
 def ITkSiSPSeededTracksFinalCfg(flags):
     result = ComponentAccumulator()
 
-    primaryPassExtension = flags.Tracking.__getattr__(f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass").extension
+    primaryPassExtension = flags.Tracking[f"{flags.Tracking.ITkPrimaryPassConfig.value}Pass"].extension
 
     # get list of extensions requesting track candidates.
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e=='' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
+        if (e=='' or flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedITkTracks"
@@ -503,7 +503,7 @@ def ITkExtendedPRDInfoCfg(flags):
     if flags.Tracking.doStoreSiSPSeededTracks:
         listOfExtensionsRequesting = [
             e for e in _extensions_list if (e=='') or
-            flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks ]
+            flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks ]
         from DerivationFrameworkInDet.InDetToolsConfig import (
             ITkSiSPTSOS_CommonKernelCfg)
         result.merge(ITkSiSPTSOS_CommonKernelCfg(flags, listOfExtensions = listOfExtensionsRequesting))
@@ -511,8 +511,8 @@ def ITkExtendedPRDInfoCfg(flags):
     if flags.Input.isMC:
         listOfExtensionsRequesting = [
             e for e in _extensions_list if (e=='') or
-            (flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks and
-             flags.Tracking.__getattr__(f"ITk{e}Pass").storeSeparateContainer) ]
+            (flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks and
+             flags.Tracking[f"ITk{e}Pass"].storeSeparateContainer) ]
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
             ITkPhysHitDecoratorAlgCfg)
         for extension in listOfExtensionsRequesting:
