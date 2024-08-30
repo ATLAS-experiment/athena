@@ -232,7 +232,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
         uint16_t featureIndex = 0, roiIndex = 0; // The container index of the DecisionObject's most-recent feature, and its initial ROI
         bool roiIsFullscan = false; // Will be set to true if the DecisionObject's initial ROI is flagged as FullScan
         bool objectRequestsNoMultiplicityCheck = false; // Will be set to true if the object has been flagged as independently satisfying all requirements on a leg
-        ATH_CHECK( extractFeatureAndRoI(it->first, dEL, featureKey, featureIndex, roiKey, roiIndex, roiIsFullscan, objectRequestsNoMultiplicityCheck, priorFeaturesMap, context) );
+        ATH_CHECK( extractFeatureAndRoI(it->first, dEL, featureKey, featureIndex, roiKey, roiIndex, roiIsFullscan, objectRequestsNoMultiplicityCheck, priorFeaturesMap) );
         const bool theFeatureIsTheROI = (SG::sgkeyEqual (featureKey, roiKey) and featureIndex == roiIndex); // The user explicitly set the feature === the RoI
         const bool thereIsNoFeatureYet = (featureKey == 0 and roiKey != 0); // The leg has not yet started to process
         if (objectRequestsNoMultiplicityCheck or (roiIsFullscan and (theFeatureIsTheROI or thereIsNoFeatureYet))) {
@@ -386,8 +386,7 @@ StatusCode ComboHypo::extractFeatureAndRoI(const HLT::Identifier& chainLegId,
   uint16_t& roiIndex,
   bool& roiIsFullscan,
   bool& objectRequestsNoMultiplicityCheck,
-  SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap,
-  const EventContext& ctx) const 
+  SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap) const 
 {
   // Return collections for the findLinks call. 
   // While we will be focusing on the most recent feature, for tag-and-probe we need to keep a record of the features from the prior steps too.
@@ -395,7 +394,7 @@ StatusCode ComboHypo::extractFeatureAndRoI(const HLT::Identifier& chainLegId,
   // Construct a sub-graph following just this leg back through the nav
   DecisionIDContainer chainLegIdSet = {chainLegId.numeric()};
   TrigCompositeUtils::NavGraph subGraph;
-  recursiveGetDecisions((*dEL), subGraph, ctx, chainLegIdSet, /*enforceDecisionOnStartNode =*/ true);
+  recursiveGetDecisions((*dEL), subGraph, chainLegIdSet, /*enforceDecisionOnStartNode =*/ true);
 
   if (subGraph.finalNodes().size() != 1) {
     ATH_MSG_ERROR("We are only expecting to search from a single navigation node in extractFeatureAndRoI");

@@ -19,13 +19,26 @@ namespace TrigCompositeUtils {
    **/
   class NavGraphNode {
     public:
-
       /**
        * @brief Construct a NavGraphNode shadowing a node in the full xAOD navigation graph
        * @param[in] me The Decision object node from the full xAOD navigation graph which this object is representing.
        **/
       NavGraphNode(const Decision* me);
 
+      /**
+       * @brief Destruct a NavGraphNode, default
+       **/
+      ~NavGraphNode() = default;
+
+      /**
+       * @brief Prevent copies of a NavGraphNode
+       **/
+      NavGraphNode(const NavGraphNode& obj) = delete;
+
+      /**
+       * @brief Prevent move of a NavGraphNode
+       **/
+      NavGraphNode(NavGraphNode&& obj) = delete;
       /**
        * @brief Form an edge in the graph from this node to another one.
        * @param[in] to The "parent" or "seed" Decision object from the perspective of this Node's shadowed Decision object. Mutable to allow two-way linking.
@@ -105,14 +118,28 @@ namespace TrigCompositeUtils {
       NavGraph();
 
       /**
+       * @brief Destruct a NavGraph, default
+       **/
+      ~NavGraph() = default;
+
+      /**
+       * @brief Prevent copy of a NavGraphNode
+       **/
+      NavGraph(const NavGraph& obj) = delete;
+
+      /**
+       * @brief Prevent move of a NavGraphNode
+       **/
+      NavGraph(NavGraph&& obj) = delete;
+
+      /**
        * @brief Add a new NavGraphNode which shadows the xAOD Decision object "node" from the full navigation graph
        * @param[in] node The xAOD Decision object which the new node will shadow. Will not cause duplication if node has already been added.
-       * @param[in] ctx The event context.
        * @param[in] comingFrom If not null, used to indicate which xAOD Decision object was the seed of "node". This is used to form an edge in the graph.
        * Alternately, if comingFrom is null then "node" is taken as a final node (one of the locations from which the graph should be explored) and hence is added
        * to the finalNodes vector. 
        **/
-      void addNode(const Decision* node, const EventContext& ctx, const Decision* comingFrom = nullptr);
+      void addNode(const Decision* node, const Decision* comingFrom = nullptr);
 
       /**
        * @brief Get all final nodes.
@@ -181,7 +208,8 @@ namespace TrigCompositeUtils {
        **/
       void recursivePrintNavPath(const NavGraphNode& nav, size_t level, MsgStream& log, MSG::Level msgLevel) const;
 
-      std::map<const ElementLink<TrigCompositeUtils::DecisionContainer>, NavGraphNode> m_nodes; //!< Map of nodes in the graph. Indexed on the underlying Decision object's ElementLink.
+      std::map<const Decision*, size_t> m_nodePositionMap; //!< Map of Decision pointer and index of the node(that contains the Decision) in m_nodes.
+      std::vector<std::unique_ptr<NavGraphNode>> m_nodes; //!< Vector of unique pointers to nodes in the graph.
       std::vector<NavGraphNode*> m_finalNodes; //!< Entry points into the navigation graph. When iterating over the graph, start from all of these places.
       size_t m_edges; //!< Statistics on the number of edges, connecting the nodes in the graph.
   };
