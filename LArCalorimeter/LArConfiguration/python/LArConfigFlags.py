@@ -22,6 +22,7 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.doCellNoiseMasking",True)
     lcf.addFlag("LAr.doCellSporadicNoiseMasking",True)
     lcf.addFlag("LAr.doBadFebMasking",lambda prevFlags : not prevFlags.Input.isMC)
+    lcf.addFlag("LAr.doDeadOTCCorr",False)
 
     # Include MC shape folder
     lcf.addFlag("LAr.UseMCShape", True)

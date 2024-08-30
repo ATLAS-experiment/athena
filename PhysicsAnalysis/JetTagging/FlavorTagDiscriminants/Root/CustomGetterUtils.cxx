@@ -239,23 +239,6 @@ namespace {
         return std::log(p.pt());
       });
     }
-    if (name == "EFrac_wrtJet") {
-      return CustomSeqGetter<T>([](const T& p, const Jet& j) {
-        return p.e() / j.e();
-      });
-    }
-    if (name == "pZ_wrtJet") {
-      return CustomSeqGetter<T>([](const T& p, const Jet& j) {
-        return p.p4().Vect().Dot(j.p4().Vect().Unit());
-      });
-    }
-    if (name == "pT_wrtJet") {
-      return CustomSeqGetter<T>([](const T& p, const Jet& j) {
-        double pZ = p.p4().Vect().Dot(j.p4().Vect().Unit());
-        return  std::sqrt(p.p4().P()*p.p4().P() - pZ*pZ);
-  
-      });
-    }
     if (name == "ptfrac") {
       return CustomSeqGetter<T>([](const T& p, const Jet& j) {
         return p.pt() / j.pt();

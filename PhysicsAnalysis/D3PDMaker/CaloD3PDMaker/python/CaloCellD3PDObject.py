@@ -120,7 +120,6 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
 
     cellD3PDObject.defineHook  ( hookForCaloNoiseCondAlg )
     noiseType = "totalNoise"
-
     
     cellD3PDObject.defineBlock (3, 'Detail3',
                                 D3PD.CaloCellDetailsFillerTool,

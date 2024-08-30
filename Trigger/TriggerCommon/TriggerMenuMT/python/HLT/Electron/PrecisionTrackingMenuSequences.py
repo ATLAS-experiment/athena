@@ -42,7 +42,7 @@ def precisionTrackingSequenceGenCfg(flags, ion=False, variant='', is_probe_leg =
     selAcc.addHypoAlgo(precisionElectronHypoAlg)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 
 
 def precisionTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):

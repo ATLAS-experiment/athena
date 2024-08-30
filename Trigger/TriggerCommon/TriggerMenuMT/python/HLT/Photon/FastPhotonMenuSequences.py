@@ -39,4 +39,4 @@ def fastPhotonSequenceGenCfg(flags,is_probe_leg=False):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(thePhotonHypo)
 
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict)

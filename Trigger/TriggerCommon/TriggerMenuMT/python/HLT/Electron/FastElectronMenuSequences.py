@@ -37,7 +37,7 @@ def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_
     selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
     selAcc.addHypoAlgo(theFastElectronHypo)
 
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict,isProbe=is_probe_leg)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)
 
 
 def fastElectron_LRTSequenceGenCfg(flags, name='FastElectron', is_probe_leg=False):
