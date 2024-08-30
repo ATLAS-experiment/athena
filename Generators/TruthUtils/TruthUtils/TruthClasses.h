@@ -184,7 +184,7 @@
       "WZMSSM",
       "WBosonLRSM",
       "NuREle",
-      "NuRMu ",
+      "NuRMu",
       "NuRTau",
       "LQ",
       "SUSY",
