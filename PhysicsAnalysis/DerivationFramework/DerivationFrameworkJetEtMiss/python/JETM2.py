@@ -182,11 +182,7 @@ def JETM2Cfg(flags):
         addTruth3ContentToSlimmerTool(JETM2SlimmingHelper)
 
         JETM2SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
-                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
-                                                       'AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets': 'xAOD::JetContainer',
-                                                       'AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux': 'xAOD::JetAuxContainer',
-                                                       'AntiKt10TruthDressedWZJets': 'xAOD::JetContainer',
-                                                       'AntiKt10TruthDressedWZJetsAux': 'xAOD::JetAuxContainer'})
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
         JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets",
