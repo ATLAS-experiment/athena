@@ -203,7 +203,7 @@ def FlavorTagNNCfg(
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
-    name = '_'.join([nn_name.lower(), BTaggingCollection])
+    name = '_'.join(['FtagNN', nn_name.lower(), BTaggingCollection])
 
     # Ensure different names for standard and flip taggers
     if FlipConfig != "STANDARD":
@@ -243,7 +243,12 @@ def MultifoldGNNCfg(
         raise ValueError('nnFilePaths must be specified')
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
-    algname = f'{nn_name}_{FlipConfig}'
+    algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}'.format(
+        jc=JetCollection,
+        tc=TrackCollection,
+        nn=nn_name,
+        fc=FlipConfig,
+    )
 
     if TrackCollection is None:
         raise ValueError('TrackCollection must be specified')
