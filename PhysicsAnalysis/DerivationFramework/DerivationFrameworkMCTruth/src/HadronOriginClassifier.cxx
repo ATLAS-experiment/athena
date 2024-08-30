@@ -415,24 +415,6 @@ namespace DerivationFramework{
   ------------------------------------------------------------ Particle Type ------------------------------------------------------------
   ---------------------------------------------------------------------------------------------------------------------------------------
   */
-
-  bool HadronOriginClassifier::isQuarkFromHadron(const xAOD::TruthParticle* part) const{
-
-    for(unsigned int i=0; i<part->nParents(); ++i){
-      const xAOD::TruthParticle* parent = part->parent(i);
-      if(!parent) continue;
-      if( HepMC::barcode(part) < HepMC::barcode(parent) ) continue; /// protection for sherpa FIXME barcode-based
-      int mothertype = std::abs(MC::leadingQuark(parent));
-      if( 4 == mothertype || 5 == mothertype ){
-        return true;
-      }
-      if(isQuarkFromHadron(parent))return true;
-    }
-
-    return false;
-
-  }
-
   bool HadronOriginClassifier::isCHadronFromB(const xAOD::TruthParticle* part) const{
 
     if(!MC::isCharmHadron(part)) return false;
