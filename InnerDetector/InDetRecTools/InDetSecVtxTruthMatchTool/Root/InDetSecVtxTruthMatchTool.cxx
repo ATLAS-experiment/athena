@@ -116,17 +116,17 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       if (truthPartLink.isValid()  && prob > m_trkMatchProb) {
         const xAOD::TruthParticle & truthPart = **truthPartLink;
 
-        const int truthVertexUniqueID =  checkProduction(truthPart, truthVerticesToMatch);
+        const int ancestorVertexUniqueID =  checkProduction(truthPart, truthVerticesToMatch);
 
         //check if the truth particle is "good"
-        if ( truthVertexUniqueID != HepMC::INVALID_VERTEX_ID ) {
+        if ( ancestorVertexUniqueID != HepMC::INVALID_VERTEX_ID ) {
           //track in vertex is linked to LLP descendant
           //create link to truth vertex and add to matchInfo
           auto it = std::find_if(truthVerticesToMatch.begin(), truthVerticesToMatch.end(),
-                                 [&](const auto& ele){ return HepMC::uniqueID(ele) == truthVertexUniqueID;} );
+                                 [&](const auto& ele){ return HepMC::uniqueID(ele) == ancestorVertexUniqueID;} );
 
           if(it == truthVerticesToMatch.end()) {
-            ATH_MSG_WARNING("Truth vertex with unique ID " << truthVertexUniqueID << " not found!");
+            ATH_MSG_WARNING("Truth vertex with unique ID " << ancestorVertexUniqueID << " not found!");
           }
           else {
             ElementLink<xAOD::TruthVertexContainer> elLink;
