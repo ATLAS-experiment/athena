@@ -8,6 +8,7 @@
 #include "../MdtCondJsonDumpAlg.h"
 #include "../RpcToyCablingJsonDumpAlg.h"
 #include "../MdtToyCablingJsonDumpAlg.h"
+#include "../MdtToyTwinCablingDumpAlg.h"
 
 
 DECLARE_COMPONENT(MdtCablingJsonDumpAlg)
@@ -16,3 +17,4 @@ DECLARE_COMPONENT(MdtAsBuiltJsonDumpAlg)
 DECLARE_COMPONENT(MdtCondJsonDumpAlg)
 DECLARE_COMPONENT(RpcToyCablingJsonDumpAlg)
 DECLARE_COMPONENT(MdtToyCablingJsonDumpAlg)
+DECLARE_COMPONENT(MdtToyTwinCablingDumpAlg)

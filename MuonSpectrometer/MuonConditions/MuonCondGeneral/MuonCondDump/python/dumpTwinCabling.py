@@ -1,39 +1,37 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-def writeTwinTubeMap(mapName = "TwinTubeMap.json"):
-    stName = "BOL"
-    stPhi = 7
-    ml = 1
-    twinList = []
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-    for stEta in [-4, 4]:
-        for layer in range (1,4):
-            for tube in range (1, 73, 4):
-                twinDict = {
-                    "station" : stName,
-                    "eta" : stEta,
-                    "phi": stPhi,
-                    "ml" : ml,
-                    "layer": layer,
-                    "tube": tube,
-                    "layerTwin": layer,
-                    "tubeTwin": tube + 2,
-                }
-                twinList+=[twinDict]
-                twinDict = {
-                    "station" : stName,
-                    "eta" : stEta,
-                    "phi": stPhi,
-                    "ml" : ml,
-                    "layer": layer,
-                    "tube": tube+1,
-                    "layerTwin": layer,
-                    "tubeTwin": tube + 3,
-                }
-                twinList+=[twinDict]
+def MdtToyTwinCablingDumpAlgCfg(flags, name="MdtToyTwinCablingDumpAlg",**kwargs):
+    result = ComponentAccumulator() 
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
 
-    import json
-    with open(mapName, "w") as js:
-        json.dump(twinList, js, indent=4)
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    kwargs.setdefault("MuonIdHelperSvc", result.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
+    kwargs.setdefault("stationsToTwin",["BOL"])
+    
+    the_alg = CompFactory.MdtToyTwinCablingDumpAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 
 if __name__ == "__main__":
-    writeTwinTubeMap()
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, geoModelFileDefault
+    parser = SetupArgParser()
+    parser.set_defaults(nEvents = 1)
+    parser.set_defaults(noMM=True)
+    parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noTgc=True)
+    parser.add_argument("--setupRun4", default=False, action="store_true")
+    parser.add_argument("--cablingMap", default="twinMap.json", help="External JSON file containing the cabling map of each channel")
+    parser.add_argument("--stationsToTwin",nargs='+', help="Specify the station names for which you want twin tubes")
+
+    args = parser.parse_args()
+    args.geoModelFile = geoModelFileDefault(args.setupRun4)
+    flags, cfg = setupGeoR4TestCfg(args)
+    cfg.merge(MdtToyTwinCablingDumpAlgCfg(flags, stationsToTwin = args.stationsToTwin, OutCablingJSON = args.cablingMap))
+    
+    executeTest(cfg)
+
+
