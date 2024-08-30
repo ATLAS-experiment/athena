@@ -602,6 +602,7 @@ namespace ST {
     std::string m_commonPRWFileMC23a;
     std::string m_commonPRWFileMC23c;
     std::string m_commonPRWFileMC23d;
+    std::string m_commonPRWFileMC23e;
 
     std::vector<std::string> m_prwConfFiles;
     std::vector<std::string> m_prwLcalcFiles;
@@ -609,6 +610,7 @@ namespace ST {
     std::string m_prwActualMu2018File;
     std::string m_prwActualMu2022File;
     std::string m_prwActualMu2023File;
+    std::string m_prwActualMu2024File;
 
     double m_prwDataSF;
     double m_prwDataSF_UP;
