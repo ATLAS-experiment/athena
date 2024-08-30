@@ -107,7 +107,7 @@ template<typename element,typename list,int index> struct get_strictly_feat{
 template<class T, class EDMLIST = TypeInfo_EDM> struct known{
   typedef typename master_search<typename EDMLIST::map,
 				 get_strictly_feat,T>::result::search_result search_result;
-  static const bool value = !boost::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
+  static const bool value = !std::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
 };
 
 

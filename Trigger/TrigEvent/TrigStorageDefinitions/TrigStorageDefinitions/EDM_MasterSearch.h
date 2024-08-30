@@ -70,7 +70,7 @@ struct my_functor{
   
   typedef HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<typename arg::type> unknown_object;
  
-  static const bool query = !boost::is_same<unknown_object,result_type>::value;
+  static const bool query = !std::is_same<unknown_object,result_type>::value;
   typedef typename last_result::list::template add<value_type<bool,query> >::go::done added;
 
   //if we did not find the result we just keep our current result and do not replace it

@@ -22,7 +22,6 @@
 #include <string>
 #include <set>
 #include <type_traits>
-#include "boost/type_traits/is_same.hpp"
 
 #include "TrigDecisionTool/Conditions.h"
 #include "TrigDecisionTool/TDTUtilities.h"
@@ -95,7 +94,7 @@ namespace Trig {
 
 
     template<typename STORED>
-    std::shared_ptr<const STORED> filter_if(boost::mpl::bool_<true> is_same, std::shared_ptr<const STORED>& original,const TrigPassBits* bits){ 
+    std::shared_ptr<const STORED> filter_if(std::true_type is_same, std::shared_ptr<const STORED>& original,const TrigPassBits* bits){ 
       (void)is_same;
 
 
@@ -120,7 +119,7 @@ namespace Trig {
     }
 
     template<typename STORED>
-    std::shared_ptr<const STORED> filter_if(boost::mpl::bool_<false> /*is_same*/, std::shared_ptr<const STORED>& original,const TrigPassBits* /*bits*/){
+    std::shared_ptr<const STORED> filter_if(std::false_type /*is_same*/, std::shared_ptr<const STORED>& original,const TrigPassBits* /*bits*/){
       //nothing
       return original;
     }
@@ -144,7 +143,7 @@ namespace Trig {
 	  continue;
 	}
 
-	if(boost::is_same<STORED,CONTAINER>::value){
+	if(std::is_same<STORED, CONTAINER>::value){
 	  //take ownership because typedholder.get created VIEW container with 'new'
 	  std::shared_ptr<const STORED> owned(dest);
       
@@ -157,7 +156,7 @@ namespace Trig {
 	    if(typedBits.get(bits,passbitsFeatureAccessHelper.getIndex()).isFailure()){
 	      std::cerr << "WARNING: couldn't get passbits from Holder" << std::endl;
 	    }
-	    owned = filter_if(boost::is_same<STORED,CONTAINER>(),owned,bits);
+	    owned = filter_if(std::is_same<STORED, CONTAINER>(),owned,bits);
 #endif
 	  }
 	  //if REQUESTED != STORED we assume REQUESTED is element type

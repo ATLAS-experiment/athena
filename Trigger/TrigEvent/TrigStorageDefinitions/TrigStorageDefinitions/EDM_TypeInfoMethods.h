@@ -4,17 +4,16 @@
 
 #ifndef TRIGSTORAGEDEF_TYPEINFO_METHODS
 #define TRIGSTORAGEDEF_TYPEINFO_METHODS
-//#include "TrigStorageDefinitions/EDM_MergePackages.h"
 struct TypeInfo_EDM;
 
 #include "TrigStorageDefinitions/EDM_MasterSearch.h"
-#include <boost/mpl/assert.hpp>
+#include <type_traits>
 
 template<class T, class EDMLIST = TypeInfo_EDM> struct IsKnownFeature{
   typedef typename master_search<typename EDMLIST::map,
     HLT::TypeInformation::get_feat,T>::result::search_result search_result;
-  static const bool value = !boost::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
-  BOOST_MPL_ASSERT_MSG(value,the_following_class_is_not_a_valid_feature_contact_trigger_core_sw_experts_thanks, (T));
+  static const bool value = !std::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
+  static_assert(value,"The following class is not a valid feature. Contact Trigger Core SW experts. Thanks.");
 };
 
 template<class CONTAINER, class EDMLIST = TypeInfo_EDM> struct Container2Object{
@@ -70,7 +69,7 @@ template <class CONTAINER> struct lnk_helper<CONTAINER,true>{
 };
 
 template<class REQUESTED,class CONTAINER> struct Features2LinkHelper{
-  static const bool isCont = boost::is_same<REQUESTED,CONTAINER>::value;
+  static const bool isCont = std::is_same<REQUESTED,CONTAINER>::value;
   typedef typename lnk_helper<CONTAINER,isCont>::type type;
 };
 
