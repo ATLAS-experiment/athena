@@ -243,59 +243,108 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
 
     if (flags.Tracking.writeExtendedSi_PRDInfo or
         flags.Tracking.writeExtendedTRT_PRDInfo):
-        toAOD += [
-            "xAOD::TrackMeasurementValidationContainer#PixelClusters",
-            "xAOD::TrackMeasurementValidationAuxContainer#PixelClustersAux.",
-            "xAOD::TrackMeasurementValidationContainer#SCT_Clusters",
-            "xAOD::TrackMeasurementValidationAuxContainer#SCT_ClustersAux.",
-            "xAOD::TrackMeasurementValidationContainer#TRT_DriftCircles",
-            "xAOD::TrackMeasurementValidationAuxContainer#TRT_DriftCirclesAux."
-        ]
+        if (flags.Tracking.writeExtendedSi_PRDInfo):
+            toAOD += [
+                "xAOD::TrackMeasurementValidationContainer#PixelClusters",
+                "xAOD::TrackMeasurementValidationAuxContainer#PixelClustersAux.",
+                "xAOD::TrackMeasurementValidationContainer#SCT_Clusters",
+                "xAOD::TrackMeasurementValidationAuxContainer#SCT_ClustersAux."
+            ]
+        if (flags.Tracking.writeExtendedTRT_PRDInfo):
+            toAOD += [
+                "xAOD::TrackMeasurementValidationContainer#TRT_DriftCircles",
+                "xAOD::TrackMeasurementValidationAuxContainer#TRT_DriftCirclesAux."
+            ]
         # get list of extensions requesting track seeds. Add always the Primary Pass.
         listOfExtensionsRequesting = [
             e for e in extensions_list
             if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
-            toAOD += [
-                f"xAOD::TrackStateValidationContainer#{extension}Pixel_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}Pixel_MSOSsAux.",
-                f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux.",
-                f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
-            ]
+            if (flags.Tracking.writeExtendedSi_PRDInfo):
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#{extension}PixelMSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}PixelMSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux."
+                ]
+            if (flags.Tracking.writeExtendedTRT_PRDInfo):
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
+                ]
+            if flags.Tracking.doStoreTrackSeeds:
+                if (flags.Tracking.writeExtendedSi_PRDInfo):
+                    toAOD += [
+                        f"xAOD::TrackStateValidationContainer#SiSPSeedSegments{extension}_PixelMSOSs",
+                        f"xAOD::TrackStateValidationAuxContainer#SiSPSeedSegments{extension}_PixelMSOSsAux.",
+                        f"xAOD::TrackStateValidationContainer#SiSPSeedSegments{extension}_SCT_MSOSs",
+                        f"xAOD::TrackStateValidationAuxContainer#SiSPSeedSegments{extension}_SCT_MSOSsAux."
+                    ]
 
-        if flags.Tracking.doTIDE_AmbiTrackMonitoring:
-            toAOD += [
-                "xAOD::TrackStateValidationContainer#ObservedTrack_Pixel_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_Pixel_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#ObservedTrack_SCT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_SCT_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#ObservedTrack_TRT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_TRT_MSOSsAux."
-            ]
-        if flags.Tracking.doPseudoTracking:
-            toAOD += [
-                "xAOD::TrackStateValidationContainer#Pseudo_Pixel_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#Pseudo_Pixel_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#Pseudo_SCT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#Pseudo_SCT_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#Pseudo_TRT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#Pseudo_TRT_MSOSsAux."
-            ]
+        # same logic as above, but now for track candidates (SiSPSeededTracks)
+        # get list of extensions requesting track candidates. Always add the primary pass
         if flags.Tracking.doStoreSiSPSeededTracks:
-            # get list of extensions requesting track seeds. Add always the Primary Pass.
             listOfExtensionsRequesting = [
                 e for e in extensions_list
-                if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+                if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
             for extension in listOfExtensionsRequesting:
+                if (flags.Tracking.writeExtendedSi_PRDInfo):
+                    toAOD += [
+                        f"xAOD::TrackStateValidationContainer#SiSP{extension}_PixelMSOSs",
+                        f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_PixelMSOSsAux.",
+                        f"xAOD::TrackStateValidationContainer#SiSP{extension}_SCT_MSOSs",
+                        f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_SCT_MSOSsAux."
+                    ]
+                if (flags.Tracking.writeExtendedTRT_PRDInfo):
+                    toAOD += [
+                        f"xAOD::TrackStateValidationContainer#SiSP{extension}_TRT_MSOSs",
+                        f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_TRT_MSOSsAux."
+                    ]
+        
+        # for final tracks, only require that output requested to be stored in separate container
+        listOfExtensionsRequesting = [
+            e for e in extensions_list
+            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        for extension in listOfExtensionsRequesting:
+            if (flags.Tracking.writeExtendedSi_PRDInfo):
                 toAOD += [
-                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_Pixel_MSOSs",
-                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_Pixel_MSOSsAux.",
-                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_SCT_MSOSs",
-                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_SCT_MSOSsAux.",
-                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_TRT_MSOSs",
-                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_TRT_MSOSsAux."
+                    f"xAOD::TrackStateValidationContainer#{extension}PixelMSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}PixelMSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux."
+                ]
+            if (flags.Tracking.writeExtendedTRT_PRDInfo):
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
+                ]
+
+        if flags.Tracking.doTIDE_AmbiTrackMonitoring:
+            if (flags.Tracking.writeExtendedSi_PRDInfo):
+                toAOD += [
+                    "xAOD::TrackStateValidationContainer#ObservedTrack_PixelMSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#ObservedTrack_PixelMSOSsAux.",
+                    "xAOD::TrackStateValidationContainer#ObservedTrack_SCT_MSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#ObservedTrack_SCT_MSOSsAux."
+                ]
+            if (flags.Tracking.writeExtendedTRT_PRDInfo):
+                toAOD += [
+                    "xAOD::TrackStateValidationContainer#ObservedTrack_TRT_MSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#ObservedTrack_TRT_MSOSsAux."
+                ]
+
+        if flags.Tracking.doPseudoTracking:
+            if (flags.Tracking.writeExtendedSi_PRDInfo):
+                toAOD += [
+                    "xAOD::TrackStateValidationContainer#Pseudo_PixelMSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#Pseudo_PixelMSOSsAux.",
+                    "xAOD::TrackStateValidationContainer#Pseudo_SCT_MSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#Pseudo_SCT_MSOSsAux."
+                ]
+            if (flags.Tracking.writeExtendedTRT_PRDInfo):
+                toAOD += [
+                    "xAOD::TrackStateValidationContainer#Pseudo_TRT_MSOSs",
+                    "xAOD::TrackStateValidationAuxContainer#Pseudo_TRT_MSOSsAux."
                 ]
 
     if flags.Tracking.doV0Finder:
