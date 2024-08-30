@@ -1,4 +1,4 @@
-#! athena.py
+#!/usr/bin/env athena.py
 
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -13,7 +13,6 @@ def ResortVerticesCfg(flags,vxin,vxout,vxsortercfg,algname="ResortVx"):
         VerticesIn=vxin,
         VerticesOut=vxout,
         VertexCollectionSortingTool=vxsorter,
-        OutputLevel=1,
     )
     cfg.addEventAlgo(resortvxalg)
     return cfg
