@@ -128,7 +128,7 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
     if ttype == ThrType.jTE:
         return getConfig_jTE()
     if ttype == ThrType.gXE:
-        return getConfig_gXE()
+        return getConfig_gXE(do_HI_tob_thresholds)
     if ttype == ThrType.gTE:
         return getConfig_gTE()
     if ttype == ThrType.EM:
@@ -672,11 +672,11 @@ def getConfig_jTE():
     confObj["resolutionMeV"] = 200
     return confObj
 
-def getConfig_gXE():
+def getConfig_gXE(do_HI_tob_thresholds):
     confObj = odict()
-    confObj["seedThrA"] = 16 
-    confObj["seedThrB"] = 16 
-    confObj["seedThrC"] = 16 
+    confObj["seedThrA"] = 1 if do_HI_tob_thresholds else 16
+    confObj["seedThrB"] = 1 if do_HI_tob_thresholds else 16
+    confObj["seedThrC"] = 1 if do_HI_tob_thresholds else 16
     confObj["XERHO_sigmaPosA"] = 3 
     confObj["XERHO_sigmaPosB"] = 3 
     confObj["XERHO_sigmaPosC"] = 3 
@@ -692,7 +692,7 @@ def getConfig_gXE():
     confObj["XEJWOJ_c_A"] = 0 
     confObj["XEJWOJ_c_B"] = 0 
     confObj["XEJWOJ_c_C"] = 0 
-    confObj["resolutionMeV"] = 200
+    confObj["resolutionMeV"] = 800 if do_HI_tob_thresholds else 200
     return confObj
 
 def getConfig_gTE():

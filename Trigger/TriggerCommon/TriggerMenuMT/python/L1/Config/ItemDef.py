@@ -989,6 +989,9 @@ class ItemDef:
         MenuItem('L1_jJ80_jXE120' ).setLogic( d.jJ80 & d.jXE120 & physcond).setTriggerType(TT.calo)
 
         # phase1 TE
+        MenuItem('L1_gTE3'     ).setLogic( d.gTE3 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gTE5'     ).setLogic( d.gTE5 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gTE10'     ).setLogic( d.gTE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gTE200'     ).setLogic( d.gTE200 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jTE200'     ).setLogic( d.jTE200 & physcond).setTriggerType(TT.calo)

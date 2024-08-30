@@ -68,7 +68,8 @@ def defineMenu():
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
 
         # gJ - ATR-28029
-        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200",
+        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25",
+        "L1_gTE3","L1_gTE5","L1_gTE10","L1_gTE200",
 
          # LAr saturation
         'L1_LArSaturation',
