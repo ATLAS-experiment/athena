@@ -730,20 +730,6 @@ namespace ActsTrk
 
                 Acts::calculateTrackQuantities(secondTrack);
 
-                auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
-                    secondTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
-                    extrapolationStrategy, logger());
-                if (!extrapolationResult.ok()) {
-                  ATH_MSG_WARNING("Extrapolation for seed "
-                            << iseed << " and second track " << secondTrack.index()
-                            << " failed with error " << extrapolationResult.error());
-
-                  // restore first track
-                  (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
-
-                  continue;
-                }
-
                 addTrack(secondTrack);
 
                 // restore first track
