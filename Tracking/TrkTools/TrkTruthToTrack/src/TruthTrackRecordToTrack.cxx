@@ -18,6 +18,7 @@
 #include "HepPDT/ParticleDataTable.hh"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrackRecord/TrackRecord.h"
+#include "TruthUtils/MagicNumbers.h"
 
 
 //================================================================
@@ -80,10 +81,9 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (trackRecordCollection->empty()) ATH_MSG_WARNING ("action required but TrackRecordCollection size is 0");
 
-  const int barcodepart = HepMC::barcode(part);
   for (const auto & trackRecord : *trackRecordCollection){
 
-    if ( HepMC::barcode(trackRecord) != barcodepart ) continue; // FIXME barcode-based - currently TrackRecords read in from input files will have invalid ID values, so stick with barcodes
+    if ( !HepMC::is_same_particle(trackRecord,part) ) continue;
 
       id = trackRecord.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
@@ -151,7 +151,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   for (const auto & trackRecord : *trackRecordCollection){
 
-    if ( HepMC::barcode(trackRecord) == HepMC::barcode(part) ) { // FIXME barcode-based - currently TrackRecords read in from input files will have invalid ID values and xAOD::TruthParticle only supports barcodes, so stick with barcodes
+    if ( HepMC::is_same_particle(trackRecord,part) ) {
 
       id = trackRecord.GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));

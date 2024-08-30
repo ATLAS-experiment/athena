@@ -61,7 +61,7 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
       if (!theGenPart || !truthParticle ||
           theGenPart->pdg_id() != truthParticle->pdgId() ||
           theGenPart->status() != truthParticle->status() ||
-          HepMC::barcode(theGenPart) != HepMC::uniqueID(truthParticle)) { // FIXME barcode-based have to use GenParticle barcode as uniqueID returns barcode when called on xAOD::TruthParticle
+          HepMC::is_same_particle(theGenPart,truthParticle)) {
         ATH_MSG_DEBUG(
             "HepMC::GenParticle and xAOD::TruthParticle do not match");
         return std::make_pair(partType, partOrig);

@@ -333,7 +333,7 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
 
       if(truthPartLink.isValid() && matchProb > m_trkMatchProb) {
         const xAOD::TruthParticle& tmpPart = **truthPartLink;
-        if( HepMC::barcode(tmpPart) == HepMC::barcode(truthPart) ) { // FIXME barcode-based - comparing GenParticles and xAOD::TruthParticles so use barcode
+        if( HepMC::is_same_particle(tmpPart,truthPart) ) {
           if(trackPass.isAvailable( *trkPart )) {
             if(trackPass( *trkPart )) {
               ATH_MSG_DEBUG("Particle has a track that passes track selection.");

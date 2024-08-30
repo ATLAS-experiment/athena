@@ -204,6 +204,9 @@ namespace HepMC {
     /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
     template <class T1, class T2> inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
 
+    /// @brief Method to establish if two particles/vertices in the GenEvent actually represent the same generated particle
+    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1 == b2; }
+
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
     template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
   }
@@ -280,6 +283,14 @@ namespace HepMC {
       return true;
     }
 
+    /// @brief Method to establish if two particles/vertices in the GenEvent actually represent the same particle
+    template <class T1, class T2> inline bool is_same_object(const T1& p1,const T2& p2) {
+      const int id1 = uniqueID(p1);
+      const int id2 = uniqueID(p2);
+      return (id1 == id2);
+    }
+
+
     /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
     template <class T1, class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) {
       const int id1 = uniqueID(p1);
@@ -338,6 +349,12 @@ namespace HepMC {
 
   /// @brief Method to establish if two particles in the GenEvent actually represent the same generated particle
   template <class T1,class T2>  inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_generator_particle(p1, p2); }
+
+  /// @brief Method to establish if two particles in the GenEvent actually represent the same  particle
+  template <class T1,class T2>  inline bool is_same_particle(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
+
+  /// @brief Method to establish if two particles in the GenEvent actually represent the same  vertex
+  template <class T1,class T2>  inline bool is_same_vertex(const T1& p1,const T2& p2) { return BarcodeBased::is_same_object(p1, p2); }
 
   /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
   template <class T1,class T2> inline bool is_sim_descendant(const T1& p1,const T2& p2) { return BarcodeBased::is_sim_descendant(p1, p2);}
