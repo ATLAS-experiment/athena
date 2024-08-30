@@ -285,7 +285,7 @@ class ThresholdDef:
             XEThreshold('gMHT%i' % thrV, 'gXE').setXE(thrV)
         
         # gTE
-        for thrV in [200]:
+        for thrV in [3,5,10,200]:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
 
         # jXE
@@ -294,8 +294,8 @@ class ThresholdDef:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
         # ENERGY SPARES
-        # decrement jXE spares for addtional heavy ion jTE thresholds
-        for thrV in range(1, 9):
+        # decrement jXE spares for addtional heavy ion jTE/gTE thresholds
+        for thrV in range(1, 6):
             XEThreshold('jXESPARE%i' % thrV, 'jXE').setXE(thrVal_SPAREXE)
 
         jXE_cuts = [100]
