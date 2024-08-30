@@ -3,7 +3,6 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
 
-
 class PrimaryPassConfig(FlagEnum):
     VtxLumi = 'VtxLumi'
     VtxBeamSpot = 'VtxBeamSpot'
@@ -163,6 +162,24 @@ def createTrackingConfigFlags():
     # Save xAOD TrackMeasurementValidation + TrackStateValidation containers
     icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
     icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
+
+    # Only keep entries in xAOD TrackMeasurementValidation + TrackStateValidation containers for tracks passing user cut
+    # Indicate detector technology from which clusters should be thinned
+    icf.addFlag("Tracking.thinPixelClustersOnTrack", False)
+    icf.addFlag("Tracking.thinSCTClustersOnTrack", False)
+    icf.addFlag("Tracking.thinTRTClustersOnTrack", False)
+    icf.addFlag("Tracking.thinInDetClustersOnTrack",
+                lambda prevFlags: (
+                    prevFlags.Tracking.thinPixelClustersOnTrack or
+                    prevFlags.Tracking.thinSCTClustersOnTrack or
+                    prevFlags.Tracking.thinTRTClustersOnTrack ))
+
+    # For cluster thinning (if enabled): list of containers and selection strings used in ThinInDetClustersAlg
+    icf.addFlag("Tracking.thinInDetClustersTrackContainers", ["InDetTrackParticles"])
+    icf.addFlag("Tracking.thinInDetClustersPixelMSOSContainers", ["PixelMSOSs"])
+    icf.addFlag("Tracking.thinInDetClustersSCTMSOSContainers", ["SCT_MSOSs"])
+    icf.addFlag("Tracking.thinInDetClustersTRTMSOSContainers", ["TRT_MSOSs"])
+    icf.addFlag("Tracking.thinInDetClustersSelectionStrings", ["InDetTrackParticles.pt > (1*GeV)"])
 
     # Toggle track slimming
     icf.addFlag("Tracking.doSlimming", lambda prevFlags:

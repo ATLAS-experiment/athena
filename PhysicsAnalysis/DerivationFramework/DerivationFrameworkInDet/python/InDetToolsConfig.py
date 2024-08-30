@@ -110,11 +110,14 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
 
     listOfAugmTools = []
     for extension in listOfExtensions:
+        # Fix inconsistency in naming convention for R3LargeD0
+        if extension == "R3LargeD0": 
+            extension = "LargeD0"
         TrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
             TrackStateOnSurfaceDecoratorCfg(
                 flags, name = f"{extension}TrackStateOnSurfaceDecorator",
                 ContainerName = f"InDet{extension}TrackParticles",
-                PixelMsosName = f"{extension}Pixel_MSOSs",
+                PixelMsosName = f"{extension}PixelMSOSs",
                 SctMsosName = f"{extension}SCT_MSOSs",
                 TrtMsosName = f"{extension}TRT_MSOSs"))
         TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
@@ -193,11 +196,41 @@ def PseudoTSOS_CommonKernelCfg(flags, name="PseudoTSOS_CommonKernel"):
         name, AugmentationTools=[PseudoTrackStateOnSurfaceDecorator]))
     return acc
 
+def SiSPSeedsTrackStateOnSurfaceDecoratorCfg(
+        flags, name="SiSPSeedsTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("ContainerName", "SiSPSeedSegmentsTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "Reco_")
+    kwargs.setdefault("PixelMsosName", "SiSPSeedSegments_PixelMSOSs")
+    kwargs.setdefault("SctMsosName", "SiSPSeedSegments_SCT_MSOSs")
+    kwargs.setdefault("TrtMsosName", "SiSPSeedSegments_TRT_MSOSs")
+    kwargs.setdefault("AddPRD", True)
+    kwargs.setdefault("StoreHoles", False)
+    return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
+def SiSPSeedsTSOS_CommonKernelCfg(flags, name="SiSPSeedsTSOS_CommonKernel",
+                             listOfExtensions=[]):
+    acc = ComponentAccumulator()
+
+    listOfAugmTools = []
+    for extension in listOfExtensions:
+        SiSPSeedsTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+            SiSPSeedsTrackStateOnSurfaceDecoratorCfg(
+                flags, name = f"SiSPSeeds{extension}TrackStateOnSurfaceDecorator",
+                ContainerName = f"SiSPSeedSegments{extension}TrackParticles",
+                PixelMsosName = f"SiSPSeedSegments{extension}_PixelMSOSs",
+                SctMsosName = f"SiSPSeedSegments{extension}_SCT_MSOSs",
+                TrtMsosName = f"SiSPSeedSegments{extension}_TRT_MSOSs"))
+        listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name, AugmentationTools=listOfAugmTools))
+    return acc
+
 def SiSPTrackStateOnSurfaceDecoratorCfg(
         flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
     kwargs.setdefault("ContainerName", "SiSPSeededTracksTrackParticles")
-    kwargs.setdefault("DecorationPrefix", "SiSP_")
-    kwargs.setdefault("PixelMsosName", "SiSP_Pixel_MSOSs")
+    kwargs.setdefault("DecorationPrefix", "Reco_")
+    kwargs.setdefault("PixelMsosName", "SiSP_PixelMSOSs")
     kwargs.setdefault("SctMsosName", "SiSP_SCT_MSOSs")
     kwargs.setdefault("TrtMsosName", "SiSP_TRT_MSOSs")
     kwargs.setdefault("AddPRD", True)
@@ -214,7 +247,7 @@ def SiSPTSOS_CommonKernelCfg(flags, name="SiSPTSOS_CommonKernel",
             SiSPTrackStateOnSurfaceDecoratorCfg(
                 flags, name = f"SiSP{extension}TrackStateOnSurfaceDecorator",
                 ContainerName = f"SiSPSeededTracks{extension}TrackParticles",
-                PixelMsosName = f"SiSP{extension}_Pixel_MSOSs",
+                PixelMsosName = f"SiSP{extension}_PixelMSOSs",
                 SctMsosName = f"SiSP{extension}_SCT_MSOSs",
                 TrtMsosName = f"SiSP{extension}_TRT_MSOSs"))
         listOfAugmTools.append(SiSPTrackStateOnSurfaceDecorator)
