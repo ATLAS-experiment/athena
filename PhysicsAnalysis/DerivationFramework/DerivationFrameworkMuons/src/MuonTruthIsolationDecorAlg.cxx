@@ -103,7 +103,7 @@ StatusCode MuonTruthIsolationDecorAlg::execute(const EventContext& ctx) const {
             const std::vector<const xAOD::TruthParticle*>& calo_container = truth_map_calo[sector];
             /// Update the topo et cones
             for (const xAOD::TruthParticle* calo_part : calo_container) {
-              if (calo_part == truthLink || (truthLink && HepMC::barcode(truthLink) == HepMC::uniqueID(calo_part))) continue; // FIXME barcode-based because HepMC::uniqueID for xAOD::TruthParticle returns the barcode value
+              if (calo_part == truthLink || (truthLink && HepMC::is_same_particle(truthLink,calo_part))) continue;
                 const float dR = xAOD::P4Helpers::deltaR(calo_part, part, false);
                 if (dR < 0.05 || dR > 0.2) continue;
                 new_topoetcone20 += calo_part->pt();
@@ -111,7 +111,7 @@ StatusCode MuonTruthIsolationDecorAlg::execute(const EventContext& ctx) const {
 
             const std::vector<const xAOD::TruthParticle*>& truth_container = truth_map_track[sector];
             for (const xAOD::TruthParticle* trk_part : truth_container) {
-                if (trk_part == truthLink || (truthLink && HepMC::barcode(truthLink) == HepMC::uniqueID(trk_part))) continue; // FIXME barcode-based because HepMC::uniqueID for xAOD::TruthParticle returns the barcode value
+                if (trk_part == truthLink || (truthLink && HepMC::is_same_particle(truthLink,trk_part))) continue;
                 const float dR = xAOD::P4Helpers::deltaR(trk_part, part, false);
                 const float pt = trk_part->pt();
                 if (dR > 0.3) continue;

@@ -84,7 +84,7 @@ HGTD::ClusterTruthInfo HGTD::ClusterTruthTool::classifyCluster(
                           gen_part->momentum().pz(), gen_part->momentum().e());
         // if the barcode is identical and spacial matching passes, then this
         // deposit came from the tested truth particle
-        if (barcode == HepMC::barcode(tp) && tp->p4().DeltaR(l4) < 0.05) { // FIXME barcode-based comparing GenParticle and xAOD::TruthParticle unique IDs - using barcodes for now
+        if (HepMC::is_same_particle(barcode,tp) && tp->p4().DeltaR(l4) < 0.05) { // FIXME barcode-based comparing GenParticle and xAOD::TruthParticle unique IDs - using barcodes for now
           sorted_deposits.emplace(deposit.second,
                                   HGTD::ClusterTruthOrigin::TRUTH_PARTICLE);
           // if given, the parent event can be checked
