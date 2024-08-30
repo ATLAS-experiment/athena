@@ -98,9 +98,9 @@ def ContainersOnTheFly(flags=None):
         ["AntiKt4UFOCSSKJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt4UFOCSSKLowPtJets","xAOD::JetContainer"],
         ["AntiKt4UFOCSSKLowPtJetsAux","xAOD::JetAuxContainer"],
+
         ["AntiKt10PV0TrackJets","xAOD::JetContainer"],
         ["AntiKt10PV0TrackJetsAux","xAOD::JetAuxContainer"],
-
         ["AntiKt10LCTopoJets","xAOD::JetContainer"],
         ["AntiKt10LCTopoJetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","xAOD::JetContainer"],
@@ -117,6 +117,10 @@ def ContainersOnTheFly(flags=None):
         ["AntiKt10TruthSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
         ["AntiKt10TruthJets","xAOD::JetContainer"],
         ["AntiKt10TruthJetsAux","xAOD::JetAuxContainer"],
+        ["AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets","xAOD::JetContainer"],
+        ["AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
+        ["AntiKt10TruthDressedWZJets","xAOD::JetContainer"],
+        ["AntiKt10TruthDressedWZJetsAux","xAOD::JetAuxContainer"],
 
         ["Kt4EMPFlowEventShape","xAOD::EventShape"],
         ["Kt4EMPFlowEventShapeAux","xAOD::EventShapeAuxInfo"],
