@@ -139,7 +139,11 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                           'PhotonShowerShapeFudgeAlg' + postfix )
             config.addPrivateTool( 'showerShapeFudgeTool',
                                     'ElectronPhotonVariableCorrectionTool' )
-            alg.showerShapeFudgeTool.ConfigFile = \
+            if config.geometry is LHCPeriod.Run2: 
+                alg.showerShapeFudgeTool.ConfigFile = \
+              'EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf'
+            if config.geometry is LHCPeriod.Run3:
+                alg.showerShapeFudgeTool.ConfigFile = \
               'EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf'
             alg.photons = config.readName (self.containerName)
             alg.photonsOut = config.copyName (self.containerName)
@@ -316,10 +320,20 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             # Rerun the cut-based ID
             config.addPrivateTool( 'selectionTool', 'AsgPhotonIsEMSelector' )
             alg.selectionTool.isEMMask = quality
-            if self.qualityWP == 'Tight':
-                alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf'
-            elif self.qualityWP == 'Loose':
-                alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMLooseSelectorCutDefs.conf'
+            if config.geometry() is LHCPeriod.Run2:
+                if self.qualityWP == 'Tight':
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf'
+                elif self.qualityWP == 'Loose':
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMLooseSelectorCutDefs.conf'
+                elif self.qualityWP == 'Medium':
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMMediumSelectorCutDefs_pTdep_smooth.conf'
+            if config.geometry() is LHCPeriod.Run3:
+                if self.qualityWP == 'Tight':
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf'
+                elif self.qualityWP == 'Loose':
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMLooseSelectorCutDefs.conf'
+                elif self.qualityWP == 'Medium':
+                    raise ValueError('No Medium menu available for Run-3. Please get in contact with egamma')
         else:
             # Select from Derivation Framework flags
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
@@ -365,8 +379,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
+            if config.geometry() >= LHCPeriod.Run2:
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
@@ -388,8 +402,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt'
+            if config.geometry() >= LHCPeriod.Run2:
+                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
