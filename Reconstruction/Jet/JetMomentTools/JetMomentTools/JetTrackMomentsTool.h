@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrackMomentsTool.h
@@ -24,7 +24,7 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
-#include "JetInterface/IJetTrackSelector.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "JetInterface/IJetDecorator.h"
 #include "JetEDM/TrackVertexAssociation.h"
 #include "AsgDataHandles/ReadHandleKey.h"
@@ -62,8 +62,8 @@ private:
   Gaudi::Property<std::vector<float> > m_minTrackPt{this, "TrackMinPtCuts", {}, "Vector of track pt cuts"};
   Gaudi::Property<bool> m_doPFlowMoments{this, "DoPFlowMoments", false, "Calculate PFlow Object track moments?"};
 
-  ToolHandle<IJetTrackSelector> m_htsel{this, "TrackSelector", "", "Track selector tool"};
-
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_htsel{this, "TrackSelector", "", "track selection tool"};
+  
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "", "SG key for vertex container"};
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_tva_key{this, "TrackVertexAssociation", "", "SG key for track-vertex association"};
 

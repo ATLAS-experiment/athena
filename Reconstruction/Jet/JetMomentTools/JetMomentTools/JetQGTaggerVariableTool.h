@@ -32,7 +32,6 @@
 
 #include "xAODTruth/TruthParticle.h"
 
-#include "JetInterface/IJetTrackSelector.h"
 #include "JetInterface/IJetDecorator.h"
 #include "JetEDM/TrackVertexAssociation.h"
 
@@ -63,7 +62,7 @@ private:  // data
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "SG key for input vertex container"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "SG key for input EventInfo"};
 
-  ToolHandle<IJetTrackSelector> m_trkSelectionTool{this, "TrackSelector", "", "Track selector"};
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_trkSelectionTool{this, "TrackSelector", "", "Track selector"};
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_tva_key{this, "TrackVertexAssociation", "", "Track vertex association key"};
 
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_nTrkKey{this, "NTrksDecorName", "DFCommonJets_QGTagger_NTracks", "SG key for output NTracks decoration"};

@@ -225,7 +225,7 @@ JetTrackMomentsTool::TrackMomentStruct JetTrackMomentsTool::getTrackMoments(cons
         if( vertex == nullptr || vertex != tva->associatedVertex(track) ) continue ;
 
         // Check track passes track selection, otherwise mark as skipped
-        if ( notsel || m_htsel->keep(*track) ) {
+        if ( notsel || m_htsel->accept(*track) ) {
           ++nkeep;
 
           // Calculate necessary info for the moments

@@ -23,8 +23,8 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "JetInterface/IJetDecorator.h"
-#include "JetInterface/IJetTrackSelector.h"
 #include "JetEDM/TrackVertexAssociation.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
@@ -69,7 +69,7 @@ private:
   Gaudi::Property<std::string> m_assocTracksName{this, "AssociatedTracks", "", "SG key for associated tracks container"};
   Gaudi::Property<bool> m_requireTrackPV{this, "RequireTrackPV", true, "Require track to be from the primary vertex?"};
   Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
-  ToolHandle<IJetTrackSelector> m_htsel{this, "TrackSelector", "", "Track selector"};
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_htsel{this, "TrackSelector", "", "Track selector"};
   Gaudi::Property<bool> m_useOriginVertex = {this, "UseOriginVertex", false, "use origin vertex for each jet"};
 
   SG::ReadHandleKey< xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "", "Vertex container key"};

@@ -141,7 +141,7 @@ std::pair<float,float> JetTrackSumMomentsTool::getJetTrackSums(const xAOD::Verte
   xAOD::TrackParticle::FourMom_t tracksum(0,0,0,0);
   for (size_t iTrack = 0; iTrack < tracks.size(); ++iTrack) {
     const xAOD::TrackParticle* track = tracks.at(iTrack);
-    if ( notsel || m_htsel->keep(*track) ) {
+    if ( notsel || m_htsel->accept(*track) ) {
       const xAOD::Vertex* ptvtx = tva->associatedVertex(track);
       if (!m_requireTrackPV || ptvtx != nullptr ) { // Track has vertex assigned
 	// Add to sums

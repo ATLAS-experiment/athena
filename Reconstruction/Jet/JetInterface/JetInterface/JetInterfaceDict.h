@@ -17,7 +17,6 @@
 #include "JetInterface/IJetModifier.h"
 #include "JetInterface/IJetPseudojetRetriever.h"
 #include "JetInterface/IJetSelector.h"
-#include "JetInterface/IJetTrackSelector.h"
 #include "JetInterface/IJetUncertaintiesTool.h"
 #include "JetInterface/IJetUpdateJvt.h"
 #include "JetInterface/IPseudoJetGetter.h"
