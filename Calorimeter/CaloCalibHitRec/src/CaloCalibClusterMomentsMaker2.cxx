@@ -811,12 +811,12 @@ void CaloCalibClusterMomentsMaker2::get_calib_frac(const std::map<unsigned int,i
   for (const std::pair<const int, MyClusInfo::ClusCalibEnergy>& p : clusInfo.engCalibParticle) {
     unsigned int barcode = p.first; // FIXME barcode-based
     int pdg_id = 0;
-    try { pdg_id = truthBarcodeToPdgCodeMap.at(barcode); } // FIXME barcode-based
-    catch (const std::out_of_range& e){
+    if ( auto it = truthBarcodeToPdgCodeMap.find(barcode); it != truthBarcodeToPdgCodeMap.end()) { // FIXME barcode-based 
+       pdg_id = it->second;
+    } else {   
       ATH_MSG_WARNING("truthBarcodeToPdgCodeMap cannot find an entry with barcode " << barcode);
       continue;
     }
-
     if( abs(pdg_id) == 211) {
       engFrac[kCalibFracHAD] += p.second.engTot;
     }else if( pdg_id == 111 || pdg_id == 22 || abs(pdg_id)==11) {
