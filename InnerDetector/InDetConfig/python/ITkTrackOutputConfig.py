@@ -49,21 +49,10 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
             "TrackTruthCollection#CombinedITkTracksTrackTruthCollection",
             "DetailedTrackTruthCollection#CombinedITkTracksDetailedTrackTruth"]
 
-    if flags.Tracking.doStoreSiSPSeededTracks:
-        # get list of extensions requesting track candidates. Add always the Primary Pass.
-        listOfExtensionsRequesting = [
-            e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeSiSPSeededTracks) ]
-
-        for extension in listOfExtensionsRequesting:
-            toAOD += [
-                f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles",
-                f"xAOD::TrackParticleAuxContainer#SiSPSeededTracks{extension}TrackParticlesAux.{excludedAuxData}"]
-
     if flags.Tracking.doStoreTrackSeeds:
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(f"ITk{e}Pass").storeTrackSeeds) ]
+            if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) ]
 
         for extension in listOfExtensionsRequesting:
             toESD += ["TrackCollection#SiSPSeedSegments"+extension]
@@ -110,6 +99,27 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
             f"xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.{excludedAuxData}"
         ]
 
+    if flags.Tracking.doStoreSiSPSeededTracks:
+        # get list of extensions requesting track candidates. Add always the Primary Pass.
+        listOfExtensionsRequesting = [
+            e for e in extensions_list
+            if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeSiSPSeededTracks) ]
+
+        for extension in listOfExtensionsRequesting:
+            toAOD += [
+                f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles",
+                f"xAOD::TrackParticleAuxContainer#SiSPSeededTracks{extension}TrackParticlesAux.{excludedAuxData}"]
+
+    if flags.Tracking.doStoreTrackSeeds:
+        # get list of extensions requesting track seeds. Add always the Primary Pass.
+        listOfExtensionsRequesting = [
+            e for e in extensions_list
+            if (e == '' or flags.Tracking[f"ITk{e}Pass"].storeTrackSeeds) ]
+        for extension in listOfExtensionsRequesting:
+            toAOD += [
+                f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
+                f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}TrackParticlesAux."
+            ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toAOD+toESD))
