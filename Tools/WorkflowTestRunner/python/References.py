@@ -31,12 +31,12 @@ references_map = {
     # Derivations
     "data_PHYS_Run2": "v30",
     "data_PHYSLITE_Run2": "v16",
-    "data_PHYS_Run3": "v28",
-    "data_PHYSLITE_Run3": "v15",
+    "data_PHYS_Run3": "v29",
+    "data_PHYSLITE_Run3": "v16",
     "mc_PHYS_Run2": "v39",
     "mc_PHYSLITE_Run2": "v17",
-    "mc_PHYS_Run3": "v38",
-    "mc_PHYSLITE_Run3": "v18",
-    "af3_PHYS_Run3": "v19",
-    "af3_PHYSLITE_Run3": "v19",
+    "mc_PHYS_Run3": "v39",
+    "mc_PHYSLITE_Run3": "v19",
+    "af3_PHYS_Run3": "v20",
+    "af3_PHYSLITE_Run3": "v20",
 }
