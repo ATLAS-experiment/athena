@@ -93,7 +93,7 @@ namespace InDetDD {
 
     /** Get and set information about digitization version ------------------------*/
     unsigned int digitizationVersion() const;                                      //
-    std::string digitizationVersionName() const;                                   //
+    const std::string& digitizationVersionName() const;                            //
     void setDigitizationVersion(const unsigned int &, const std::string& name );   //
     //-----------------------------------------------------------------------------//
 

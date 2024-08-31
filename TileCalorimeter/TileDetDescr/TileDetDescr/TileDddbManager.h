@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -174,7 +174,7 @@ public:
       @param CutsYpos  Y Position
   */
 
-  int SetCurrentCuts(std::string input);
+  int SetCurrentCuts(const std::string& input);
   bool BoolCuts();
   std::string CutsName() const;
   double CutsDX1() const;
