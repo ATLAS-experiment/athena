@@ -127,8 +127,12 @@ void test1()
   v.setStore (&store);
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
-  elt[0] = Elt (0, 2);
-  elt[5] = Elt (2, 5);
+  elt[0] = Elt (2);
+  elt[1] = Elt (2);
+  elt[2] = Elt (2);
+  elt[3] = Elt (2);
+  elt[4] = Elt (2);
+  elt[5] = Elt (5);
   std::ranges::copy (std::vector<float> {1.5, 2.5, 3.5, 4.5, 5.5}, payload);
 
   assert (jtyp1.isAvailable(b));
@@ -181,7 +185,7 @@ void test2()
 
   // [1.1 1.2] [1.3] [1.4 1.5] [] [1.6]
   std::vector<float> vpayload  {1.1, 1.2, 1.3, 1.4, 1.5, 1.6};
-  std::ranges::copy (std::vector<Elt> {{0, 2}, {2, 3}, {3, 5}, {5, 5}, {5, 6}}, elt);
+  std::ranges::copy (std::vector<Elt> {{2}, {3}, {5}, {5}, {6}}, elt);
   std::ranges::copy (vpayload, payload);
 
   v.setStore (static_cast<SG::IAuxStore*>(nullptr));
@@ -189,8 +193,8 @@ void test2()
   auto elt_span = jtyp1.getEltSpan (v);
   auto payload_span = jtyp1.getPayloadSpan (v);
   assert (elt_span.size() == 5);
-  assert (elt_span[1] == Elt(2, 3));
-  assert (elt_span[2] == Elt(3, 5));
+  assert (elt_span[1] == Elt(3));
+  assert (elt_span[2] == Elt(5));
   assert (payload_span.size() == 6);
   assert (floatEQ (payload_span[1], 1.2));
   assert (floatEQ (payload_span[3], 1.4));

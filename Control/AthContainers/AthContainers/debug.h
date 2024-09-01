@@ -99,8 +99,9 @@ void print_aux_vars (const SG::AuxElement* elt);
  * @brief Convert an aux variable to a string.
  * @param auxid The id of the variable.
  * @param p Pointer to the location of the variable.
+ * @param i Index of the element being dumped.
  */
-std::string aux_var_as_string (SG::auxid_t auxid, const void* p);
+std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i);
 
 
 /**

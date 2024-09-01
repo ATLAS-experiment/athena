@@ -53,7 +53,7 @@ bool JaggedVecVectorHolder<T, ALLOC>::resize (size_t sz)
   }
   else if (vec.size() > 0) {
     size_t payload_sz = vec.back().end();
-    zero = Elt (payload_sz, payload_sz);
+    zero = Elt (payload_sz);
   }
   const void* orig = vec.data();
   vec.resize (sz, zero);
@@ -94,8 +94,8 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
   vector_type& vec = this->vec();
   if (offs < 0) {
     if (-offs > static_cast<ptrdiff_t>(pos)) offs = -pos;
-    size_t ppos = pos < vec.size() ? vec[pos].begin() : m_linkedVec->size();
-    ptrdiff_t poffs = - (ppos - vec[pos+offs].begin());
+    size_t ppos = pos < vec.size() ? vec[pos].begin(pos) : m_linkedVec->size();
+    ptrdiff_t poffs = - (ppos - vec[pos+offs].begin(pos+offs));
     m_linkedVec->shift (ppos, poffs);
     vec.erase (vec.begin() + pos+offs, vec.begin() + pos);
     std::for_each (vec.begin() + pos+offs, vec.end(), Shift (poffs));
@@ -108,7 +108,7 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
     Elt zero;
     if (!vec.empty()) {
       index_type end = vec.back().end();
-      zero = Elt (end, end);
+      zero = Elt (end);
     }
     // Add to the end, zero-filled.
     vec.resize (vec.size() + offs, zero);
@@ -119,11 +119,11 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
                  vec.rbegin() + (offs+oldsz-pos),
                  vec.rbegin());
       if (pos == 0) {
-        zero = Elt (0, 0);
+        zero = Elt (0);
       }
       else {
         index_type end = vec[pos-1].end();
-        zero = Elt (end, end);
+        zero = Elt (end);
       }
       std::fill_n (vec.begin() + pos, offs, zero);
     }
@@ -160,27 +160,27 @@ template <class T, class ALLOC>
 bool JaggedVecVectorHolder<T, ALLOC>::insertMove
   (size_t pos, void* src, size_t src_pos, size_t src_n, IAuxStore& srcStore)
 {
+  if (src_n <= 0) return true;
   element_type* srcp = reinterpret_cast<element_type*> (src);
   element_type* beg = srcp + src_pos;
   element_type* end = beg + src_n;
-  ptrdiff_t nelt = end - beg;
-  if (nelt <= 0) return true;
 
   vector_type& vec = this->vec();
   const element_type* orig = vec.data();
   vec.insert (vec.begin() + pos, beg, end);
-  size_t npayload = vec[pos+nelt-1].end() - vec[pos].begin();
-  size_t ppos = pos > 0 ? vec[pos-1].end() : 0;
+  size_t begidx = srcp[src_pos].begin(src_pos);
+  size_t npayload = beg[src_n-1].end() - begidx;
+  size_t ppos = vec[pos].begin(pos);
   IAuxTypeVector* srcPayloadVec = srcStore.linkedVector (this->auxid());
   T* srcPayload = reinterpret_cast<T*> (srcPayloadVec->toPtr());
   bool pflag = m_linkedVec->insertMove (ppos,
                                         srcPayload,
-                                        vec[pos].begin(),
-                                        vec[pos+nelt-1].end() - vec[pos].begin(),
+                                        begidx,
+                                        npayload,
                                         srcStore);
-  std::for_each (vec.begin() + pos, vec.begin() + pos + nelt,
-                 Shift (ppos - vec[pos].begin()));
-  std::for_each (vec.begin() + pos + nelt, vec.end(),
+  std::for_each (vec.begin() + pos, vec.begin() + pos + src_n,
+                 Shift (ppos - begidx));
+  std::for_each (vec.begin() + pos + src_n, vec.end(),
                  Shift (npayload));
   this->storeDataSpan();
   return pflag && (vec.data() == orig);

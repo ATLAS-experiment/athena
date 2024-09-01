@@ -14,12 +14,15 @@ namespace SG { namespace detail {
 
 /**
  * @brief Constructor.
+ * @param elts Start of the element vector.
  * @param payload Span over the payload vector.
  */
 template <class PAYLOAD_T>
 inline
-JaggedVecConstConverter<PAYLOAD_T>::JaggedVecConstConverter (const_Payload_span payload)
-  : m_payload (payload)
+JaggedVecConstConverter<PAYLOAD_T>::JaggedVecConstConverter (const JaggedVecEltBase* elts,
+                                                             const_Payload_span payload)
+  : m_elts (elts),
+    m_payload (payload)
 {
 }
 
@@ -33,11 +36,13 @@ inline
 auto JaggedVecConstConverter<PAYLOAD_T>::operator() (const JaggedVecEltBase& elt) const
   -> const element_type
 {
-  if (elt.begin() > elt.end() || elt.end() > m_payload.size()) {
+  size_t beg = elt.begin(&elt - m_elts);
+  size_t end = elt.end();
+  if (beg > end || end > m_payload.size()) {
     throw std::out_of_range ("JaggedVecConstConverter");
   }
   const Payload_t* payload = m_payload.data();
-  return element_type (payload + elt.begin(), payload + elt.end());
+  return element_type (payload + beg, payload + end);
 }
 
 
@@ -162,7 +167,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 size_t JaggedVecProxyT<PAYLOAD_T, BASE>::size() const noexcept
 {
-  return elt().size();
+  return elt_end() - elt_begin();
 }
 
 
@@ -186,7 +191,7 @@ inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::operator[] (size_t i) noexcept
   -> reference
 {
-  return m_payload[elt().begin()+i];
+  return m_payload[elt_begin()+i];
 }
 
 
@@ -199,7 +204,7 @@ inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::operator[] (size_t i) const noexcept
   -> const_reference
 {
-  return m_payload[elt().begin()+i];
+  return m_payload[elt_begin()+i];
 }
 
 
@@ -211,9 +216,10 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) -> reference
 {
-  Elt_t e = elt();
-  if (i >= e.size()) throw std::out_of_range ("JaggedVecProxyT");
-  return m_payload[i+e.begin()];
+  size_t beg = this->elt_begin();
+  size_t end = this->elt_end();
+  if (i >= (end-beg)) throw std::out_of_range ("JaggedVecProxyT");
+  return m_payload[i+beg];
 }
 
 
@@ -225,9 +231,10 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) const -> const_reference
 {
-  Elt_t e = elt();
-  if (i >= e.size()) throw std::out_of_range ("JaggedVecProxyT");
-  return m_payload[i+e.begin()];
+  size_t beg = this->elt_begin();
+  size_t end = this->elt_end();
+  if (i >= (end-beg)) throw std::out_of_range ("JaggedVecProxyT");
+  return m_payload[i+beg];
 }
 
 
@@ -238,7 +245,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::front() noexcept -> reference
 {
-  return m_payload[elt().begin()];
+  return m_payload[this->elt_begin()];
 }
 
 
@@ -249,7 +256,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::front() const noexcept -> const_reference
 {
-  return m_payload[elt().begin()];
+  return m_payload[this->elt_begin()];
 }
 
 
@@ -260,7 +267,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::back() noexcept -> reference
 {
-  return m_payload[elt().end()-1];
+  return m_payload[this->elt_end()-1];
 }
 
 
@@ -271,7 +278,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::back() const noexcept -> const_reference
 {
-  return m_payload[elt().end()-1];
+  return m_payload[this->elt_end()-1];
 }
 
 
@@ -282,7 +289,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::begin() noexcept -> iterator
 {
-  return m_payload.data() + elt().begin();
+  return m_payload.data() + this->elt_begin();
 }
 
 
@@ -293,7 +300,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::end() noexcept -> iterator
 {
-  return m_payload.data() + elt().end();
+  return m_payload.data() + this->elt_end();
 }
 
 
@@ -304,7 +311,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::begin() const noexcept -> const_iterator
 {
-  return m_payload.data() + elt().begin();
+  return m_payload.data() + this->elt_begin();
 }
 
 
@@ -315,7 +322,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::end() const noexcept -> const_iterator
 {
-  return m_payload.data() + elt().end();
+  return m_payload.data() + this->elt_end();
 }
 
 
@@ -326,7 +333,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::cbegin() const noexcept -> const_iterator
 {
-  return m_payload.data() + elt().begin();
+  return m_payload.data() + this->elt_begin();
 }
 
 
@@ -337,7 +344,7 @@ template <class PAYLOAD_T, class BASE>
 inline
 auto JaggedVecProxyT<PAYLOAD_T, BASE>::cend() const noexcept -> const_iterator
 {
-  return m_payload.data() + elt().end();
+  return m_payload.data() + this->elt_end();
 }
 
 
@@ -750,6 +757,31 @@ auto JaggedVecProxyT<PAYLOAD_T, BASE>::elt() const noexcept -> const Elt_t&
 }
 
 
+/**
+ * @brief Return the begin payload index of this proxy's element.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+size_t JaggedVecProxyT<PAYLOAD_T, BASE>::elt_begin() const noexcept
+{
+  if (m_index == 0) return 0;
+  const JaggedVecProxyBase& base = this->m_base;
+  return base.elt (m_index-1).end();
+}
+
+
+/**
+ * @brief Return the end payload index of this proxy's element.
+ */
+template <class PAYLOAD_T, class BASE>
+inline
+size_t JaggedVecProxyT<PAYLOAD_T, BASE>::elt_end() const noexcept
+{
+  const JaggedVecProxyBase& base = this->m_base;
+  return base.elt (m_index).end();
+}
+
+
 //****************************************************************************
 
 
@@ -779,11 +811,14 @@ inline
 auto JaggedVecConverter<PAYLOAD_T>::operator() (const SG::JaggedVecEltBase& elt) const
   -> const element_type
 {
-  if (elt.begin() > elt.end() || elt.end() > m_payload.size()) {
+  size_t idx = &elt - &m_base.elt(0);
+  size_t beg = elt.begin(idx);
+  size_t end = elt.end();
+  if (beg > end || end > m_payload.size()) {
     throw std::out_of_range ("JaggedVecConverter");
   }
   const Payload_t* payload = m_payload.data();
-  return element_type (payload + elt.begin(), payload + elt.end());
+  return element_type (payload + beg, payload + end);
 }
 
 

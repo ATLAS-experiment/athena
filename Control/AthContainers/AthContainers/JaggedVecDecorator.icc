@@ -291,8 +291,10 @@ auto
 Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDataSpan (const AuxVectorData& container) const
   -> const_span
 {
-  return const_span (getEltSpan(container),
-                     ConstConverter_t (*container.getDataSpan (m_linkedAuxid)));
+  const_Elt_span elt_span = getEltSpan (container);
+  return const_span (elt_span,
+                     ConstConverter_t (elt_span.data(),
+                                       *container.getDataSpan (m_linkedAuxid)));
 }
 
 
