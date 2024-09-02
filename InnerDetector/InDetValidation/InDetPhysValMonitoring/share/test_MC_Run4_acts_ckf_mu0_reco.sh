@@ -65,6 +65,7 @@ run "IDPVM" \
     --HSFlag All \
     --doTechnicalEfficiency \
     --doExpertPlots \
+    --OnlyTrackingPreInclude \
     --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
 
 reco_rc=$?

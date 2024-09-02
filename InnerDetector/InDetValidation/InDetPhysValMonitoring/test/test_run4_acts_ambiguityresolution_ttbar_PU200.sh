@@ -60,6 +60,7 @@ fi
 
 run "IDPVM-athena" \
     runIDPVM.py \
+    --OnlyTrackingPreInclude \
     --filesInput AOD.athena.root \
     --outputFile idpvm.athena.root
 
@@ -90,6 +91,7 @@ fi
 
 run "IDPVM-acts" \
     runIDPVM.py \
+    --OnlyTrackingPreInclude \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root
 

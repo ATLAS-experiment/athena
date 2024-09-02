@@ -56,6 +56,7 @@ run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
+    --OnlyTrackingPreInclude \
     --PrimaryVertexContainer ActsPrimaryVertices
 
 reco_rc=$?
@@ -78,6 +79,7 @@ fi
 run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
+    --OnlyTrackingPreInclude \
     --outputFile idpvm.athena.root
 
 reco_rc=$?

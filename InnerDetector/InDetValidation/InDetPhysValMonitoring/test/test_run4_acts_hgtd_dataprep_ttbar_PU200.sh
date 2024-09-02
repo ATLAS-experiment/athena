@@ -60,6 +60,7 @@ run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
     --outputFile idpvm.athena.root \
+    --OnlyTrackingPreInclude \
     --doActs --doHGTD
 
 reco_rc=$?
@@ -88,6 +89,7 @@ run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
+    --OnlyTrackingPreInclude \
     --doActs --doHGTD
 
 reco_rc=$?

@@ -64,6 +64,7 @@ run "IDPVM-athena" \
     --outputFile idpvm.athena.root \
     --doExpertPlots \
     --doTechnicalEfficiency \
+    --OnlyTrackingPreInclude \
     --validateExtraTrackCollections "SiSPSeedSegmentsTrackParticles"
 
 reco_rc=$?
@@ -95,6 +96,7 @@ run "IDPVM-acts" \
     --outputFile idpvm.acts.root \
     --doExpertPlots \
     --doTechnicalEfficiency \
+    --OnlyTrackingPreInclude \
     --validateExtraTrackCollections "SiSPSeedSegmentsTrackParticles"
 
 reco_rc=$?

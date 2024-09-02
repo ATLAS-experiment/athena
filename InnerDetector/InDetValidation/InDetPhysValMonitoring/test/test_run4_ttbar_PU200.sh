@@ -43,6 +43,7 @@ run "IDPVM" \
     --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
+    --OnlyTrackingPreInclude \
     --HSFlag All
 
 reco_rc=$?

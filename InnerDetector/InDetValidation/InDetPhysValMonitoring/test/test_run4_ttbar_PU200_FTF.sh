@@ -46,6 +46,7 @@ run "IDPVM" \
     --outputFile idpvm.root \
     --doHitLevelPlots \
     --doExpertPlots \
+    --OnlyTrackingPreInclude \
     --truthMinPt=1000 \
     --doMuonMatchedTracks
 

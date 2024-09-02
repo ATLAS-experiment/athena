@@ -75,6 +75,7 @@ run "IDPVM" \
     --filesInput AOD.root \
     --outputFile idpvm.root \
     --doTightPrimary \
+    --OnlyTrackingPreInclude \
     --doHitLevelPlots
 
 reco_rc=$?

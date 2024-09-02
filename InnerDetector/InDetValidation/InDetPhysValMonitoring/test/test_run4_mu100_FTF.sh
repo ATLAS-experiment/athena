@@ -76,6 +76,7 @@ run "IDPVM" \
     --outputFile idpvm.root \
     --doTightPrimary \
     --doHitLevelPlots \
+    --OnlyTrackingPreInclude \
     --truthMinPt=1000
 
 reco_rc=$?
