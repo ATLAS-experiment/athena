@@ -81,7 +81,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
     if flags.Tracking.doStoreTrackSeeds:
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+            if (e == '' or flags.Tracking[f"{e}Pass"].storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             toESD += ["TrackCollection#SiSPSeedSegments"+extension]
 
@@ -223,7 +223,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         listOfExtensionsRequesting = [
             e for e in extensions_list
             if (e == '' or
-                flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+                flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks) ]
         for extension in listOfExtensionsRequesting:
             toAOD += [
                 f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles",
@@ -234,7 +234,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         # get list of extensions requesting track seeds. Add always the Primary Pass.
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+            if (e == '' or flags.Tracking[f"{e}Pass"].storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             toAOD += [
                 f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
@@ -258,7 +258,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         # get list of extensions requesting track seeds. Add always the Primary Pass.
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+            if (e == '' or flags.Tracking[f"{e}Pass"].storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             if (flags.Tracking.writeExtendedSi_PRDInfo):
                 toAOD += [
@@ -286,7 +286,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         if flags.Tracking.doStoreSiSPSeededTracks:
             listOfExtensionsRequesting = [
                 e for e in extensions_list
-                if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+                if (e == '' or flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks) ]
             for extension in listOfExtensionsRequesting:
                 if (flags.Tracking.writeExtendedSi_PRDInfo):
                     toAOD += [
@@ -304,7 +304,7 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         # for final tracks, only require that output requested to be stored in separate container
         listOfExtensionsRequesting = [
             e for e in extensions_list
-            if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+            if (e == '' or flags.Tracking[f"{e}Pass"].storeSeparateContainer) ]
         for extension in listOfExtensionsRequesting:
             if (flags.Tracking.writeExtendedSi_PRDInfo):
                 toAOD += [
