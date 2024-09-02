@@ -57,6 +57,7 @@ inline
 Accessor<T, ALLOC>::Accessor (const SG::auxid_t auxid)
   : ConstAccessor<T, ALLOC> (auxid)
 {
+  // cppcheck-suppress missingReturn
 }
 
 

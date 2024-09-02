@@ -27,6 +27,7 @@ inline
 Decorator<T, ALLOC>::Decorator (const std::string& name)
   : Decorator (name, "", SG::AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn
 }
 
 
@@ -57,6 +58,7 @@ inline
 Decorator<T, ALLOC>::Decorator (const SG::auxid_t auxid)
   : Decorator (auxid, SG::AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 

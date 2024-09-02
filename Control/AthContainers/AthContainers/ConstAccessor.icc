@@ -27,6 +27,7 @@ inline
 ConstAccessor<T, ALLOC>::ConstAccessor (const std::string& name)
   : ConstAccessor (name, "", SG::AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn
 }
 
 
@@ -58,6 +59,7 @@ inline
 ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid)
   : ConstAccessor (auxid, SG::AuxVarFlags::None)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
