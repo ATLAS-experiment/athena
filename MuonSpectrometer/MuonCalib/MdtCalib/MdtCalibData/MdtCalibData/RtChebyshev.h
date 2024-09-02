@@ -79,6 +79,9 @@ namespace MuonCalib {
         double radius(double t) const;
         //!< get the radius corresponding to the drift time t;
         //!< if t is not within [t_low, t_up] an unphysical radius of 99999 is returned
+        
+        //method for getting drdt
+        double drdt(double t) const;
 
         //!< get the drift velocity
         double driftvelocity(double t) const;

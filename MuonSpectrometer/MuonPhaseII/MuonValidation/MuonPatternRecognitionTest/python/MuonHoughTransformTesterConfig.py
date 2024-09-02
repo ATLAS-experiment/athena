@@ -10,6 +10,12 @@ def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwar
     result.addEventAlgo(theAlg, primary=True)
     return result
 
+def MdtCalibDbAlgTestCfg(flags, name = "MdtCalibDbAlgTest", **kwargs):
+    result = ComponentAccumulator()
+    theAlg = CompFactory.MuonValR4.MdtCalibDbAlgTest(name, **kwargs)    
+    result.addEventAlgo(theAlg, primary=True)
+    return result
+
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
@@ -59,8 +65,7 @@ if __name__=="__main__":
         testerArgs["SegmentKey"] = ""
     else: 
         cfg.merge(MuonSegmentFittingAlgCfg(flags))
-    cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))
-    
+    cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))    
     
     executeTest(cfg)
     

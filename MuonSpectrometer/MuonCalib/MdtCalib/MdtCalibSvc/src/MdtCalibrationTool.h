@@ -90,6 +90,10 @@ public:
   virtual double getResolutionFromRt(const EventContext& ctx,
                                      const Identifier& module,
                                      const double time) const override final;
+
+  virtual double getdRdtFromRt(const EventContext& ctx,
+                                const Identifier& module,
+                                const double time) const override final;
   virtual ToolSettings getSettings() const override final;
 private:
   Muon::MdtDriftCircleStatus driftTimeStatus(double driftTime, 

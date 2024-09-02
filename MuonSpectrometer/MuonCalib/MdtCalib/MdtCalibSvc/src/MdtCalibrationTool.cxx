@@ -399,3 +399,23 @@ double MdtCalibrationTool::getResolutionFromRt(const EventContext& ctx, const Id
   const double t = std::min(std::max(time, rtRel->rt()->tLower()), rtRel->rt()->tUpper());
   return rtRel->rtRes()->resolution(t);
 }
+
+double MdtCalibrationTool::getdRdtFromRt(const EventContext& ctx, const Identifier& moduleID, const double time) const {
+  SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey, ctx};
+  if (!calibConstants.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve the calibration constants "<<m_calibDbKey.fullKey());
+      throw std::runtime_error("No Mdt calibration constants" );
+  }
+  const MuonCalib::MdtFullCalibData* moduleConstants = calibConstants->getCalibData(moduleID, msgStream());
+  if (!moduleConstants){
+      ATH_MSG_FATAL("Failed to retrieve set of calibration constants for "<<m_idHelperSvc->toString(moduleID));
+      throw std::runtime_error("No constants for calib container");
+  }
+  const RtRelationPtr& rtRel{moduleConstants->rtRelation};
+  if (!rtRel) {
+    ATH_MSG_FATAL("No rt-relation found for "<<m_idHelperSvc->toString(moduleID));
+    throw std::runtime_error("No rt relation ");
+  }
+  const double t = std::min(std::max(time, rtRel->rt()->tLower()), rtRel->rt()->tUpper());
+  return rtRel->rt()->drdt(t);
+}
