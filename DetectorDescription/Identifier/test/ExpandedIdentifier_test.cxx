@@ -91,13 +91,16 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierComparison){
   BOOST_TEST(g != i);
   BOOST_TEST(i < h);
   BOOST_TEST(j > h);
-  BOOST_TEST(j.prefix_less(h) == 0);
+  BOOST_TEST(j.prefix_less(h) == false);
   //
   BOOST_TEST(k != i);
   BOOST_TEST(j > k);
-  BOOST_TEST(k.prefix_less(h) == 0);
+  BOOST_TEST(k.prefix_less(h) == false);
   ExpandedIdentifier m("-3/-2/-1/0");
-  BOOST_TEST(m.prefix_less(k) == 1);
+  BOOST_TEST(m.prefix_less(k) == true);
+  //Is the shorter sequence at the beginning of the longer sequence?
+  BOOST_TEST(k.match(j) == true);
+  BOOST_TEST(k.match(i) == false);
 }
 
 BOOST_AUTO_TEST_CASE(ExpandedIdentifierModifiers){

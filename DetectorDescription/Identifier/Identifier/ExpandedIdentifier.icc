@@ -63,14 +63,8 @@ inline auto ExpandedIdentifier::operator <=>( const ExpandedIdentifier& other) c
 
 inline bool
 ExpandedIdentifier::match(const ExpandedIdentifier& other) const{
-  const ExpandedIdentifier& me = *this;
-  const size_type my_fields = fields();
-  const size_type other_fields = other.fields();
-  const size_type fs = (my_fields < other_fields) ? my_fields : other_fields;
-  for (size_type field = 0; field < fs; ++field) {
-    if (me[field] != other[field])
-      return false;
-  }
-  return true;
+  const auto &[vsmall, vbig] = std::minmax(m_fields, other.m_fields, 
+    [](const auto & a1, const auto& a2){return a1.size()<a2.size();});
+  return std::equal(vsmall.begin(), vsmall.end(), vbig.begin());
 }
 
