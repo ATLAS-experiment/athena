@@ -10,6 +10,7 @@
 # art-output: dcube*
 # art-html: dcube_acts_last
 
+lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_VERTEX_ITk.xml
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 n_events=100
@@ -48,6 +49,10 @@ run "Reconstruction-acts" \
     --maxEvents ${n_events}
 
 reco_rc=$?
+
+# Rename log
+mv log.RAWtoALL log.RAWtoALL.acts
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
@@ -71,6 +76,10 @@ run "Reconstruction-athena" \
     --maxEvents ${n_events}
 
 reco_rc=$?
+
+# Rename log
+mv log.RAWtoALL log.RAWtoALL.athena
+
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
