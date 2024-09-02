@@ -8,6 +8,7 @@ import filecmp
 
 __author__ = 'Giancarlo Panizzo <giancarlo.panizzo@cern.ch>'
 
+
 class Pythia8Util(EvgenAlg):
     """
     A python-only algorithm to monitor Pythia8 behaviour / settings
@@ -133,4 +134,5 @@ class Pythia8Util(EvgenAlg):
         self.cmpsettings(requestedsettings) 
         self.cmpparticledata(joparticles,requestedparticledata)
         return StatusCode.Success
+    
 
