@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Technology_H
@@ -20,7 +20,7 @@ namespace MuonGM {
         double thickness{0.};
         Technology(MYSQL& mysql, std::string s);
         virtual ~Technology() = default;
-        std::string GetName()const;
+        const std::string& GetName()const;
     };
 } // namespace MuonGM
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Station_H
@@ -76,7 +76,7 @@ namespace MuonGM {
                                                 const AlignPos &ap, const Position &p) const;
 
         friend std::ostream &operator<<(std::ostream &os, const Station &s);
-        std::string GetName() const;
+        const std::string& GetName() const;
         double GetThickness(const MYSQL& mysql) const;
         double GetExtraBottomThickness() const;
         double GetExtraTopThickness() const;

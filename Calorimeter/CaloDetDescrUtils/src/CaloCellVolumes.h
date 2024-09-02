@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALODETDESCRUTILS_CALOCELLVOLUMES_H
@@ -29,7 +29,7 @@ class CaloCellVolumes
   ~CaloCellVolumes();
 
   double CellVolume(Identifier cell_id);
-  inline std::string layout() { return m_geometryLayout; }
+  inline const std::string& layout() { return m_geometryLayout; }
 
   // For FCAL cell volumes which are calculated on the fly
   double getFcalTubeSpacing(int sampling);
