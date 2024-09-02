@@ -16,12 +16,12 @@ atlas_add_library( MuonCondAlgR4Lib
                    PRIVATE_INCLUDE_DIRS 
                    LINK_LIBRARIES  AthenaBaseComps AthenaKernel Identifier GaudiKernel  
                                    StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver 
-                                   nlohmann_json::nlohmann_json MuonReadoutGeometryR4
+                                   nlohmann_json::nlohmann_json MuonReadoutGeometryR4 MdtCalibR4 MdtCalibData
                    PRIVATE_LINK_LIBRARIES EventInfo )
 
 atlas_add_component( MuonCondAlgR4
                      src/components/*.cxx
-                     LINK_LIBRARIES GaudiKernel MuonCondAlgR4Lib )
+                     LINK_LIBRARIES GaudiKernel MuonCondAlgR4Lib MdtCalibR4 MdtCalibData)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

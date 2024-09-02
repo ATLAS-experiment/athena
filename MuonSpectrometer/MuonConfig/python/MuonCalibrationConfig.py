@@ -101,9 +101,12 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     result = ComponentAccumulator()
     result.merge(MuonGeoModelCfg(flags))    
+    if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
+        alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name)
+        result.addCondAlgo (alg, primary = True)
+        return result
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
     result.merge(MdtCondDbAlgCfg(flags))
-    
 
     # setup COOL folders
     acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
@@ -135,7 +138,6 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     
     kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
-
     result.addCondAlgo (alg, primary = True)
     return result
 

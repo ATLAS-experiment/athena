@@ -79,6 +79,10 @@ public:
   virtual double getResolutionFromRt(const EventContext& ctx,
                                      const Identifier& module,
                                      const double time) const  = 0;
+
+  virtual double getdRdtFromRt(const EventContext& ctx,
+                               const Identifier& module,
+                               const double time) const  = 0;
   struct ToolSettings {
       enum class Property {
         TofCorrection = 0,

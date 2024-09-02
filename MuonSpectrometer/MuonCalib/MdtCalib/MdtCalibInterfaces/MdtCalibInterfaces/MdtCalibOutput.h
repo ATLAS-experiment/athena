@@ -66,6 +66,7 @@ public:
     void setStatus(const MdtDriftCircleStatus stat);
 private:
     double m_driftR{0.};
+    double m_dRdt{0.};
     double m_driftUncert{0.};
     double m_tubeT0{0.};
     double m_sigPropTime{0.};

@@ -46,6 +46,8 @@ namespace MuonCalib {
 
         /** returns drift velocity for a given time */
         double driftvelocity(double t) const;
+        /** returns a dummy value for drdt */
+        double drdt(double /*t*/) const { return 0; }
 
         /** return rt range */
         inline double tLower(void) const;

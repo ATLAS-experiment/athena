@@ -77,6 +77,36 @@ double RtChebyshev::radius(double t) const {
     return rad >= 0 ? rad : 0;
 }
 
+double RtChebyshev::drdt(double t) const {
+    // Set derivative to 0 outside of the bounds
+    if (t < parameters()[0]) return 0.0;
+    if (t > parameters()[1]) return 0.0;
+
+    // Argument of the Chebyshev polynomials
+    double x = 2 * (t - 0.5 * (parameters()[1] + parameters()[0])) / (parameters()[1] - parameters()[0]);
+    // Chain rule
+    double dx_dt = 2 / (parameters()[1] - parameters()[0]);
+    double drdt = 0.0;
+
+    // Compute U_{k-1}(x) using recurrence relation
+    double U_k_minus_2 = 1.0;  // U_0(x)
+    double U_k_minus_1 = 2 * x;  // U_1(x)
+    double U_k;
+
+    for (unsigned int k = 1; k < nPar() - 2; ++k) {
+        if (k == 1) {
+            U_k = U_k_minus_1;
+        } else {
+            //recurrence relation is U_{k}(x) = 2*x*U_{k-1}(x) - U_{k-2}(x)
+            U_k = 2 * x * U_k_minus_1 - U_k_minus_2;
+            U_k_minus_2 = U_k_minus_1;
+            U_k_minus_1 = U_k;
+        }
+        // Calculate the contribution to dr/dt using k * U_{k-1}(x) * dx/dt
+        drdt += parameters()[k + 2] * k * U_k_minus_1 * dx_dt;
+    }
+    return drdt;
+}
 //*****************************************************************************
 
 //////////////////////////

@@ -20,6 +20,7 @@ namespace MuonCalib {
         /** returns drift radius for a given time */
         virtual double radius(double t) const = 0;
         virtual double driftvelocity(double t) const = 0;
+        virtual double drdt(double t) const = 0;
         virtual double tLower(void) const = 0;
         virtual double tUpper(void) const = 0;
 

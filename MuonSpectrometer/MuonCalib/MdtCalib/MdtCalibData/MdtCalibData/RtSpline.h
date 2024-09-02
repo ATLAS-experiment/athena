@@ -78,6 +78,9 @@ namespace MuonCalib {
         double driftvelocity(double t) const;
         //!< get the drift velocity
 
+        //dummy method for drdt
+        double drdt(double /*t*/) const { return 0.0; }
+
         // get-methods specific to the RtSpline class //
         double tLower(void) const;
         //!< get the lower drift-time bound
