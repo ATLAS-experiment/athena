@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
  
- * @author Mirko Casolino
+ * @author Mirko Casolino, version w/o barcodes by Andrii Verbytskyi 2024
  * @date June 2015
  * @brief tool to compute oring of hadron to flag ttbar+HF
- 
+ * 
  */
 
 #ifndef  DerivationFrameworkMCTruth_HadronOriginClassifier_H
@@ -58,16 +58,14 @@ namespace DerivationFramework{
     void buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
                                  std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
 
-    bool passHadronSelection(const xAOD::TruthParticle* part) const;
-
-    bool isCHadronFromB(const xAOD::TruthParticle* part) const;
+    bool isCHadronFromB(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
 
 
-    /// init_part needed to detect looping graphs (sherpa) and to switch on using barcode to resolve it without affecting pythia8
+    /// init_part needed to detect looping graphs (sherpa)
     /// up to know only seen at parton level
-    bool isLooping(const xAOD::TruthParticle* part, std::set<const xAOD::TruthParticle*> init_part = std::set<const xAOD::TruthParticle*>()) const;
+    bool isLooping(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
     
-    const xAOD::TruthParticle* findInitial(const xAOD::TruthParticle* part, bool looping) const;
+    const xAOD::TruthParticle* findInitial(const xAOD::TruthParticle* part, bool looping, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;
     
     bool isFromTop(const xAOD::TruthParticle* part, bool looping) const;
     static bool isDirectlyFromTop(const xAOD::TruthParticle* part, bool looping) ;
