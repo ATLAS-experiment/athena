@@ -9,7 +9,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
-#include "boost/algorithm/string.hpp"
+#include <regex>
 
 
 /**
@@ -188,9 +188,9 @@ unsigned int HepMCWeightSvc::loadWeights (unsigned long chanNum)
     //replacements will interfere with those too!
     //so use a versioning system now
     if(version==1) {
-      boost::replace_all(weightNames, "{'", "{\"");
-      boost::replace_all(weightNames, "':", "\":");
-      boost::replace_all(weightNames, ", '", ", \"");
+      weightNames = std::regex_replace(weightNames, std::regex(R"(\{')"), "{\"");
+      weightNames = std::regex_replace(weightNames, std::regex(R"(':)"), "\":");
+      weightNames = std::regex_replace(weightNames, std::regex(R"(, ')"), ", \"");
     }
    
     ATH_MSG_DEBUG("Loading weightnames: " << weightNames);
