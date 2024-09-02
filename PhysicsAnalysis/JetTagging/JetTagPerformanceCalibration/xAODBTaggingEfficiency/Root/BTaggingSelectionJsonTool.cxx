@@ -58,12 +58,13 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   m_OPCutValues.clear();
   m_pTbins.clear();
   m_massbins.clear();
-  m_pTbins = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"]["pTbins"].get<std::vector<float>>();;
-  for (const auto& item : m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"].items()) {
+  auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
+  m_pTbins = pT_mass_2d_cutvalue["pTbins"].get<std::vector<float>>();;
+  for (const auto& item : pT_mass_2d_cutvalue.items()) {
     std::string pT_key = item.key();
     if ( pT_key == "pTbins" ) continue;
-    std::vector<float> mass_values = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"][pT_key]["mass"].get<std::vector<float>>();
-    std::vector<float> cut_values = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"][pT_key]["cutvalues"].get<std::vector<float>>();
+    std::vector<float> mass_values = pT_mass_2d_cutvalue[pT_key]["mass"].get<std::vector<float>>();
+    std::vector<float> cut_values = pT_mass_2d_cutvalue[pT_key]["cutvalues"].get<std::vector<float>>();
     m_massbins.push_back(mass_values);
     m_OPCutValues.push_back(cut_values);
   }   
@@ -89,11 +90,15 @@ double BTaggingSelectionJsonTool::getTaggerDiscriminant ( const xAOD::Jet& jet) 
   return tagger_discriminant;
 }
 
-int BTaggingSelectionJsonTool::accept( const xAOD::Jet& jet) const {
+int BTaggingSelectionJsonTool::accept( const xAOD::Jet& jet ) const {
   ///////////////////////////////////////////////
   // Cheatsheet:
   // For fix cut WP, return 0 for not tagged, 1 for tagged
   ////////////////////////////////////////////////
+  return accept( jet.pt(), jet.eta(), jet.m(), getTaggerDiscriminant(jet) );
+}
+
+int BTaggingSelectionJsonTool::accept( double pt, double eta, double mass, double tagger_discriminant ) const {
 
   if ( !m_initialised ) {
     throw std::runtime_error("BTaggingSelectionJsonTool has not been initialised.");
@@ -101,17 +106,16 @@ int BTaggingSelectionJsonTool::accept( const xAOD::Jet& jet) const {
 
   int index = 0;
 
-  if ( std::abs(jet.eta()) > m_maxEta || jet.pt() < m_minPt ) {
+  if ( std::abs(eta) > m_maxEta || pt < m_minPt ) {
     return index;
   }
 
-  double tagger_discriminant = getTaggerDiscriminant(jet);
-  int pt_bin_index = findBin(m_pTbins, jet.pt()/1000.);
+  int pt_bin_index = findBin(m_pTbins, pt/1000.);
   if (pt_bin_index == -1) {
     return index;
   }
 
-  int mass_bin_index = findBin(m_massbins[pt_bin_index], jet.m()/1000.);
+  int mass_bin_index = findBin(m_massbins[pt_bin_index], mass/1000.);
   if (mass_bin_index == -1) {
     return index;
   }
