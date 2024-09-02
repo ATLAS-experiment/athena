@@ -380,7 +380,10 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
    
     result=ComponentAccumulator()
-   
+    if not flags.Trigger.FPGATrackSim.wrapperFileName:
+        from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
+        result.merge(AthenaTrkClusterizationCfg(flags))
+
     theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
@@ -581,7 +584,8 @@ if __name__ == "__main__":
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
     flags.Acts.doRotCorrection = False
 
     # IDPVM flags
@@ -595,6 +599,7 @@ if __name__ == "__main__":
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True
+    flags.Scheduler.CheckDependencies=True
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
@@ -626,7 +631,7 @@ if __name__ == "__main__":
             from CaloRec.CaloRecoConfig import CaloRecoCfg
             acc.merge(CaloRecoCfg(flags))
 
-        if not flags.Reco.EnableTrackOverlay:
+        if flags.Tracking.recoChain:
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
 
@@ -640,9 +645,9 @@ if __name__ == "__main__":
         from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
         acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
         acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-        # TODO enable once debugged
-        from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
-        acc.merge(FPGATrackExtensionAlgCfg(flags, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
+        if not flags.Trigger.FPGATrackSim.wrapperFileName:
+            from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
+            acc.merge(FPGATrackExtensionAlgCfg(flags, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
 
         if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(WriteToAOD(flags, stage = '_1st'))
         if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
@@ -659,6 +664,6 @@ if __name__ == "__main__":
         acc.merge(InDetPhysValMonitoringCfg(flags))
     
     acc.store(open('AnalysisConfig.pkl','wb'))
-    
+
     statusCode = acc.run(flags.Exec.MaxEvents)
     assert statusCode.isSuccess() is True, "Application execution did not succeed"

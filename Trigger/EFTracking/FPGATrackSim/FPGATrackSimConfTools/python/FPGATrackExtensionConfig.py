@@ -22,8 +22,12 @@ def FPGATrackExtensionAlgCfg(flags, **kwargs):
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs["TrackingGeometryTool"] = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
 
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterCfg
+    printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags))
+    kwargs["TrackStatePrinter"] = printerTool 
+
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
-
+    
     acc.addEventAlgo(CompFactory.ActsTrk.TrackExtensionAlg(**kwargs))
     return acc
