@@ -40,6 +40,7 @@
 #include "src/OnTrackCalibrator.h"
 
 // STL
+#include <initializer_list>
 #include <sstream>
 #include <functional>
 #include <tuple>
@@ -54,7 +55,7 @@ namespace ActsTrk{
       : AthReentrantAlgorithm(name, pSvcLocator) {}
 
   StatusCode TrackExtensionAlg::initialize() {
-    ATH_CHECK(m_PixelClusters.initialize());
+    ATH_CHECK(m_pixelClusters.initialize());
     ATH_CHECK(m_protoTrackCollectionKey.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
@@ -65,6 +66,8 @@ namespace ActsTrk{
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
+    ATH_CHECK(m_truthParticlesKey.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
 
     m_logger = makeActsAthenaLogger(this, name());
 
@@ -105,8 +108,6 @@ namespace ActsTrk{
         trackSelectorCfg};
 
     m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
-
-
     return StatusCode::SUCCESS;
   }
 
@@ -152,15 +153,29 @@ namespace ActsTrk{
        m_pixelCalibTool,
        m_stripCalibTool);
     options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
+    if ( not m_truthParticlesKey.empty() ) {
+      auto truthHandle = SG::ReadHandle(m_truthParticlesKey, context);
+      for ( auto truthParticle: *truthHandle ) {
+        ATH_MSG_DEBUG("truth: eta: " << truthParticle->eta() << " phi: " << truthParticle->phi() << " pt: " << truthParticle->pt());
+      }
+    }
 
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
+      ATH_MSG_DEBUG("proto track: eta: " <<  -1 * log(tan( protoTrack.parameters->theta() * 0.5)) << " phi: " << protoTrack.parameters->phi() << " pt:" << abs(1./protoTrack.parameters->qOverP() * sin(protoTrack.parameters->theta())));
       ATH_MSG_DEBUG("Extending proto track of " << protoTrack.measurements.size() << " measurements");
       auto result = m_ckfConfig->ckf.findTracks(*protoTrack.parameters, options,
                                                        tracksContainerTemp);
       ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
       for (detail::RecoTrackContainer::TrackProxy tempTrackProxy : tracksContainerTemp) {
         ActsTrk::MutableTrackContainer::TrackProxy destTrackProxy = trackContainer.makeTrack();
-        ATH_MSG_DEBUG("This track has now " << tempTrackProxy.nMeasurements() << " measurements ");
+        ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
+        for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
+          auto state = trackStateBackend.getTrackState(stateIndex);
+          m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
+        }
+        ATH_MSG_DEBUG("Track has: " << tempTrackProxy.nMeasurements() << " measurements ");
+        ATH_MSG_DEBUG("track: eta: " <<  -1 * log(tan( tempTrackProxy.theta() * 0.5)) << " phi: " << tempTrackProxy.phi() << " pt:" << abs(1./tempTrackProxy.qOverP() * sin(protoTrack.parameters->theta())));
+
         destTrackProxy.copyFrom(tempTrackProxy);
       }
     }
@@ -178,7 +193,7 @@ namespace ActsTrk{
 
 
   detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(const EventContext& context) const {
-    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_PixelClusters, context);
+    SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, context);
 
     detail::TrackFindingMeasurements measurements(pixelClustersHandle->size());

@@ -13,9 +13,9 @@ def FPGATrackSimSGInputToolCfg(flags):
 
     from TrkConfig.TrkTruthCreatorToolsConfig import TruthToTrackToolCfg
     truthToTrackTool = acc.popToolsAndMerge(TruthToTrackToolCfg(flags))
-
+    from TrkConfig.TrkConfigFlags import TrackingComponent
     FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=3.2, minPt=0.8 * GeV,
-        Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool)
+        Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool, ReadOfflineTracks=TrackingComponent.AthenaChain in flags.Tracking.recoChain)
     acc.setPrivateTools(FPGATrackSimSGInputTool)
 
     return acc

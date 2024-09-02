@@ -23,6 +23,7 @@
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 
 // Athena
+#include "xAODTruth/TruthParticleContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "GaudiKernel/EventContext.h"
@@ -35,6 +36,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "TrackFindingData.h"
+#include "src/TrackStatePrinter.h"
 
 
 /**
@@ -53,10 +55,12 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       ActsTrk::UncalibSourceLinkAccessor::Iterator, detail::RecoTrackContainer>;
 
  private:
-  SG::ReadHandleKey<xAOD::PixelClusterContainer> m_PixelClusters{
+  SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClusters{
       this, "PixelClusterContainer", "", "the pix clusters"};
   SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{
       this, "ProtoTracksLocation", "", "Input proto tracks"};
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey{
+    this, "TruthLocation", "", "Truth container (to be enabled only for debugging)"};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
@@ -77,6 +81,8 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_stripCalibTool{this, "StripCalibrator", "",
                        "Opt. strip measurement calibrator"};
+  ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{
+     this, "TrackStatePrinter", "", "optional track state printer"};
 
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
