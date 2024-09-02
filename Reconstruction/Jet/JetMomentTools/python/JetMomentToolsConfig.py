@@ -23,17 +23,9 @@ from xAODBase.xAODType import xAODType
 
 def idTrackSelToolFromJetCtx(trkOpt,trkProperties):
     """returns a InDetTrackSelectionTool configured with the jet context corresponding to trkOpt
-      (technically wrapped inside a JetTrackSelectionTool) 
     """
-    # JetTrackSelectionTool is still used by trk moment tools.
-    # it should be deprecated in favor of simply the InDet tool
     from JetRecTools.JetRecToolsConfig import getIDTrackSelectionTool #
-
-    return  CompFactory.JetTrackSelectionTool(
-        f"tracsel{trkOpt}",
-        Selector        = getIDTrackSelectionTool(f"trackSel{trkOpt}", **trkProperties["trackSelOptions"])
-    )
-
+    return getIDTrackSelectionTool(f"trackSel{trkOpt}", **trkProperties["trackSelOptions"])
 
 
 def getEMScaleMomTool(jetdef, modspec=""):

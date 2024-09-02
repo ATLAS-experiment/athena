@@ -43,7 +43,8 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-#include "JetInterface/IJetTrackSelector.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+
 #include "JetInterface/IJetDecorator.h"
 #include "JetEDM/TrackVertexAssociation.h"
 
@@ -90,8 +91,7 @@ private:  // data
   Gaudi::Property<float> m_PUtrkptcut{this, "PUTrkPtCut", 30000., "Pileup track pt cut (MeV)"};
   Gaudi::Property<bool> m_suppressInputDeps{this, "SuppressInputDependence", false, "Will SumPtTrk be created in the same algorithm that uses this tool?"};
 
-  ToolHandle<IJetTrackSelector> m_htsel{this, "TrackSelector", "", "Track selector tool"};
-
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_htsel {this, "TrackSelector", "", "Track selector tool"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "", "Input vertex container"};
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_tva_key{this, "TrackVertexAssociation", "", "Input track-vertex association"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksCont_key{this, "TrackParticleContainer", "", "Input track container"};

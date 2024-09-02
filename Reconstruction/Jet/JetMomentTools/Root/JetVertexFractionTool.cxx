@@ -249,7 +249,7 @@ std::pair<float,float> JetVertexFractionTool::getJetVertexTrackSums(const xAOD::
     unsigned int nskip = 0;
     for (size_t iTrack = 0; iTrack < tracks.size(); ++iTrack) {
       const xAOD::TrackParticle* track = tracks.at(iTrack);
-      if ( notsel || m_htsel->keep(*track) ) {
+      if ( notsel || m_htsel->accept(*track) ) {
         sumTrackAll += track->pt();
 
         const xAOD::Vertex* ptvtx = tva->associatedVertex(track);
@@ -284,7 +284,7 @@ int JetVertexFractionTool::getPileupTrackCount(const xAOD::Vertex* vertex,
     for(size_t iTrack = 0; iTrack < tracksCont->size(); ++iTrack)
       {
 	const xAOD::TrackParticle * track = tracksCont->at(iTrack);
-	if ( notsel || m_htsel->keep(*track) ) {
+	if ( notsel || m_htsel->accept(*track) ) {
 	  const xAOD::Vertex* ptvtx = tva->associatedVertex(track);
 	  // Count track as PU if associated with non-primary vertex and within pT cut.
 	  // N.B. tracks with no vertex associated may be added to PV track sums, but not PU sums, nor the PU vertex counting.

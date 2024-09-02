@@ -135,7 +135,7 @@ StatusCode JetQGTaggerVariableTool::decorate(const xAOD::JetContainer& jetCont) 
       // 3) associated to primary vertex OR within 3mm of the primary vertex                                                                                                                            
 
       bool accept = (trk->pt()>500 &&
-		     m_trkSelectionTool->keep(*trk) &&
+		     m_trkSelectionTool->accept(*trk) &&
 		     (HSvertex == tva->associatedVertex(trk) || (HSvertex != tva->associatedVertex(trk) && std::abs((trk->z0()+trk->vz()-HSvertex->z())*sin(trk->theta()))<3.))
 		     );
 
