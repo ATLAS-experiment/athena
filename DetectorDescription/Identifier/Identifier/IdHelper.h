@@ -4,8 +4,8 @@
 
 ///@author fledroit
 
-#ifndef IDENTIFIER_IDCONVERSIONSTRATEGY_H
-# define IDENTIFIER_IDCONVERSIONSTRATEGY_H
+#ifndef IDENTIFIER_IDHELPER_H
+#define IDENTIFIER_IDHELPER_H
 
 #include <string>                                   
 

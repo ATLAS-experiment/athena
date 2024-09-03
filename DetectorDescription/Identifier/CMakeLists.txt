@@ -38,12 +38,26 @@ atlas_add_test(Identifier_test
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
+atlas_add_test(HWIdentifier_test
+  SOURCES  test/HWIdentifier_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
 atlas_add_test(IdentifierHash_test
   SOURCES  test/IdentifierHash_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
+atlas_add_test(Identifiable_test
+  SOURCES  test/Identifiable_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+
 
 atlas_add_test(ExpandedIdentifier_test
   SOURCES  test/ExpandedIdentifier_test.cxx 
@@ -54,6 +68,12 @@ atlas_add_test(ExpandedIdentifier_test
 
 atlas_add_test(IdContext_test
   SOURCES  test/IdContext_test.cxx 
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+atlas_add_test(IdHelper_test
+  SOURCES  test/IdHelper_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 

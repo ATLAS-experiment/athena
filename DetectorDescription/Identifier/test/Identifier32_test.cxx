@@ -12,6 +12,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "Identifier/Identifier32.h"
 #include <iostream>
 #include <stdexcept>
+#include <type_traits>
 
 
 //redirect cout buffer for test
@@ -43,6 +44,10 @@ namespace boost::test_tools::tt_detail {
 BOOST_AUTO_TEST_SUITE(Identifier32Test)
 
 BOOST_AUTO_TEST_CASE(Identifier32Constructors){
+  //compile time test
+  static_assert(std::is_trivially_destructible<Identifier32>::value);
+  static_assert(std::is_trivially_copy_constructible<Identifier32>::value);
+  //
   BOOST_CHECK_NO_THROW(Identifier32());
   Identifier32 e;
   BOOST_CHECK_NO_THROW([[maybe_unused]] Identifier32 f(e));

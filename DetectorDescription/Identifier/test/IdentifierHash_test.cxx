@@ -10,16 +10,21 @@ namespace utf = boost::unit_test;
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/IdentifierHash.h"
+#include <type_traits>
 
 
 BOOST_AUTO_TEST_SUITE(IdentifierHashTest)
 
 BOOST_AUTO_TEST_CASE(IdentifierHashConstructors){
+  //compile time tests
+  static_assert(std::is_trivially_destructible<IdentifierHash>::value);
+  static_assert(std::is_trivially_copy_constructible<IdentifierHash>::value);
+  //
   BOOST_CHECK_NO_THROW(IdentifierHash());
   IdentifierHash e;
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdentifierHash f(e));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdentifierHash g(std::move(e)));
-  IdentifierHash g(std::move(e));
+  IdentifierHash g;
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdentifierHash h = g);
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdentifierHash i = std::move(g));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdentifierHash j(352));
