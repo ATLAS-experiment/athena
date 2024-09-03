@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MDTCALIBINTEFACES_MDTCALIBOUTPUT_H
 #define MDTCALIBINTEFACES_MDTCALIBOUTPUT_H
@@ -66,7 +66,6 @@ public:
     void setStatus(const MdtDriftCircleStatus stat);
 private:
     double m_driftR{0.};
-    double m_dRdt{0.};
     double m_driftUncert{0.};
     double m_tubeT0{0.};
     double m_sigPropTime{0.};
