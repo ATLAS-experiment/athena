@@ -377,6 +377,7 @@ JetChainParts = {
                       'Z134XX5c20',
                       # 'MULT' hypoScenario applies a cut on the number of jets
                       # in the input container after filtering on pt, eta.
+                      'MULT0mult11XX10ptXX0eta490', # Heavy Ions
                       'MULT0mult11XX15ptXX0eta490', # Heavy Ions
                       ],
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
