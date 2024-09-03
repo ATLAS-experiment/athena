@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
@@ -621,7 +621,7 @@ def TrackSeedsFinalCfg(flags):
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+        if (e == '' or flags.Tracking[f"{e}Pass"].storeTrackSeeds) ]
 
     for extension in listOfExtensionsRequesting:
         TrackContainer = "SiSPSeedSegments"+extension
@@ -649,13 +649,13 @@ def TrackSeedsFinalCfg(flags):
 def SiSPSeededTracksFinalCfg(flags):
     result = ComponentAccumulator()
 
-    primaryPassExtension = flags.Tracking.__getattr__(f"{flags.Tracking.PrimaryPassConfig.value}Pass").extension
+    primaryPassExtension = flags.Tracking[f"{flags.Tracking.PrimaryPassConfig.value}Pass"].extension
 
     # get list of extensions requesting track candidates.
     # Add always the Primary Pass.
     listOfExtensionsRequesting = [
         e for e in _extensions_list
-        if (e=='' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+        if (e=='' or flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks) ]
 
     for extension in listOfExtensionsRequesting:
         AssociationMapNameKey="PRDtoTrackMapMerge_CombinedInDetTracks"
@@ -725,11 +725,15 @@ def ExtendedPRDInfoCfg(flags):
         result.merge(TRT_PrepDataToxAODCfg(flags))
 
     from DerivationFrameworkInDet.InDetToolsConfig import TSOS_CommonKernelCfg
-    # Setup one algorithm for each output tracking container
+    # Set up one algorithm for each output tracking container    
+    # Always done for default pass
+    # Done for other passes if pass requests to store track seeds OR track candidates OR requests separate container 
+    # Input handling/configuration of algorithm for specific cases is done in TSOS_CommonKernelCfg
     listOfExtensionsRequesting = [
-        e for e in _extensions_list if (e == '') or
-        (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and
-         flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        e for e in _extensions_list if (e == '')
+        or (flags.Tracking[f"{e}Pass"].storeTrackSeeds) # Store Si track seeds
+        or (flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks) # Store Si candidate tracks
+        or (flags.Tracking[f"{e}Pass"].storeSeparateContainer) ] # Particular tracking pass requesting separate container from main pass
     result.merge(TSOS_CommonKernelCfg(
         flags, listOfExtensions = listOfExtensionsRequesting))
 
@@ -743,13 +747,23 @@ def ExtendedPRDInfoCfg(flags):
             PseudoTSOS_CommonKernelCfg)
         result.merge(PseudoTSOS_CommonKernelCfg(flags))
 
+    if flags.Tracking.doStoreTrackSeeds:
+        from DerivationFrameworkInDet.InDetToolsConfig import (
+            SiSPSeedsTSOS_CommonKernelCfg)
+        # Setup one algorithm for each output tracking container
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e == '') or
+            flags.Tracking[f"{e}Pass"].storeTrackSeeds ]
+        result.merge(SiSPSeedsTSOS_CommonKernelCfg(
+            flags, listOfExtensions = listOfExtensionsRequesting))
+
     if flags.Tracking.doStoreSiSPSeededTracks:
         from DerivationFrameworkInDet.InDetToolsConfig import (
             SiSPTSOS_CommonKernelCfg)
         # Setup one algorithm for each output tracking container
         listOfExtensionsRequesting = [
             e for e in _extensions_list if (e == '') or
-            flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks ]
+            flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks ]
         result.merge(SiSPTSOS_CommonKernelCfg(
             flags, listOfExtensions = listOfExtensionsRequesting))
 
@@ -757,8 +771,8 @@ def ExtendedPRDInfoCfg(flags):
         #check if we want to add it for other passes
         listOfExtensionsRequesting = [
             e for e in _extensions_list if (e == '') or
-            (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and
-             flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+            (flags.Tracking[f"{e}Pass"].storeSiSPSeededTracks and
+             flags.Tracking[f"{e}Pass"].storeSeparateContainer) ]
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
             InDetPhysHitDecoratorAlgCfg)
         for extension in listOfExtensionsRequesting:

@@ -47,6 +47,7 @@ Available_Runs=()
 # this uses the following /eos dir as master source for (new) runs - not the best in long term?
 # (silently) reject dirs that are not integers and that are in the manually excluded run list
 # keep origin info of old log file
+rm -f $newlogfile
 for dir in `find $eoshistdir -mindepth 1 -maxdepth 1 -name "*" -print`; do
     run_num=${dir: -6}
     if [[ $run_num =~ ^[0-9]+$ ]] && ! grep -q $run_num $skipruns; then
@@ -80,7 +81,7 @@ for run in ${Available_Runs[@]}; do
 	# our small HIST file for this run is not in eos yet
 	# first we look on Tier0 /eos for the HIST file, then we try rucio
 	userucio=false
-	histfile=`echo ${eoshistdir}00${run}/${dataset}.00${run}.physics_Main.merge.HIST.f*_h*/${dataset}.00${run}.physics_Main.merge.HIST.f*_h*._0001.1`
+	histfile=`echo ${eoshistdir}00${run}/${dataset}.00${run}.physics_Main.merge.HIST.f*_h*/${dataset}.00${run}.physics_Main.merge.HIST.f*_h*._0001.?`
 	if [[ -f $histfile ]]; then
 	    echo "Using file $histfile as source of Z couting histograms for run $run"
 	else
@@ -97,8 +98,8 @@ for run in ${Available_Runs[@]}; do
 		sed -i "/${run}/d" $newlogfile # remove run again from log file
 		continue
             elif [[ $nrucioset -gt 1 ]]; then 
-		echo "HIST for run $run not yet saved to eos, but have multiple rucio datasets, will take first! " $rucioset
-		rucioset=${rucioset%% *}
+		echo "HIST for run $run not yet saved to eos, but have multiple rucio datasets, will take last! " $rucioset
+		rucioset=`echo ${rucioset} | awk '{print $NF;}'`
 		rucio get $rucioset --dir=$tmpdir >& /dev/null
             else
 		echo "HIST for run $run not found, downloading from " $rucioset
@@ -109,7 +110,7 @@ for run in ${Available_Runs[@]}; do
 		sed -i "/${run}/d" $newlogfile # remove run again from log file
 		continue
             fi
-            histfile=${tmpdir}/${rucioset}/${rucioset}._0001.1
+            histfile=`echo ${tmpdir}/${rucioset}/${rucioset}._0001.?`
 	fi
 
 	python copySelective.py $histfile ${indir}/${run}.HIST.root >& /dev/null

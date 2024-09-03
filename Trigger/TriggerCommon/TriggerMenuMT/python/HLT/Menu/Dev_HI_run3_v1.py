@@ -193,6 +193,9 @@ def getDevHISignatures():
         ChainProp(name='HLT_noalg_L1VTE5',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1MBTS_1_VTE5',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_mb_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1gTE3',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1gTE5',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1gTE10',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream]   , groups=['PS:NoBulkMCProd']+SupportPhIGroup),
 
         ChainProp(name='HLT_noalg_L1eTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTAU1',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
@@ -200,6 +203,12 @@ def getDevHISignatures():
         ChainProp(name='HLT_noalg_L1jTE50_OVERLAY',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTE1500_OVERLAY',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTE4000_OVERLAY',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        #new ZDC streamers
+        ChainProp(name='HLT_noalg_L1ZDC_EhLT15_jTE4000',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_EhLT20_jTE4000',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_EhLT25_jTE4000',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_EhLT35_jTE4000',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_EhLT50_jTE4000',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:NoBulkMCProd']+SupportPhIGroup),
     ]
 
 

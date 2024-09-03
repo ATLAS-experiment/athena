@@ -124,35 +124,34 @@ def main():
 
     arr_ratio = np.array(arr_ratio)
 
-    stdev    = np.percentile(abs(arr_ratio - np.median(arr_ratio)), 68)
+    median = np.median(arr_ratio)
+    stdev = np.percentile(abs(arr_ratio - median), 68)
     
     c1 = R.TCanvas()
     h_total.GetXaxis().SetTitle("<#mu>")
     h_total.Draw("E0")
     R.gStyle.SetErrorX()
+    line = R.TLine(h_total.GetXaxis().GetXmin(), median, h_total.GetXaxis().GetXmax(), median)
+    line.SetLineColor(R.kRed)
+    line.Draw()
     
     if comp: 
-        h_total.Fit('pol0', 'q0')
-        h_total.GetFunction('pol0').SetLineColor(R.kRed)
-        h_total.GetFunction('pol0').Draw("same l")
         h_total.GetYaxis().SetRangeUser(ymin, ymax)
         if year != "run2":
             leg = R.TLegend(0.645, 0.72, 0.805, 0.91)
         else: 
             leg = R.TLegend(0.2, 0.2, 0.45, 0.43)
         leg.AddEntry(h_total, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
-        leg.AddEntry(h_total.GetFunction('pol0'), "Mean = " + str(round(h_total.GetFunction('pol0').GetParameter(0), 3)), "l")
-        mean = h_total.GetFunction('pol0').GetParameter(0)
+        leg.AddEntry(line, f"Median #pm 68% band = {median:.3f} #pm {stdev:.3f}", "l")
     else: 
         h_total.GetYaxis().SetRangeUser(0.95, 1.05)
         leg = R.TLegend(0.20, 0.18, 0.45, 0.35)
-        mean = 1.0
 
-    print(f"Year = {year} channel = {channel}: Pol0 fit mean +- 68% percentile = {mean:.3f} +- {stdev:.3f}")
+    print(f"Year = {year} channel = {channel}: median +- 68% percentile = {median:.3f} +- {stdev:.3f}")
 
-    line1 = pt.make_bands(bins, stdev, mean)
+    line1 = pt.make_bands(bins, stdev, median)
     line1.Draw("same 3")
-    if comp: h_total.GetFunction('pol0').Draw("same l")
+    if comp: line.Draw()
     h_total.Draw('same E0')
     
     leg.SetBorderSize(0)
@@ -173,7 +172,7 @@ def main():
         pt.drawAtlasLabel(xmin, 0.88, "Internal")
         pt.drawText(xmin, 0.82, date_string)
         pt.drawText(xmin, 0.76, zstring)
-        pt.drawText(xmin, 0.68, "OflLumi-Run3-004")
+        pt.drawText(xmin, 0.68, "OflLumi-Run3-005")
         
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()

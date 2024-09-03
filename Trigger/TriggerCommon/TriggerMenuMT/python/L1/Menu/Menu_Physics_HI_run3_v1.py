@@ -68,7 +68,8 @@ def defineMenu():
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
 
         # gJ - ATR-28029
-        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200",
+        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25",
+        "L1_gTE3","L1_gTE5","L1_gTE10","L1_gTE200",
 
          # LAr saturation
         'L1_LArSaturation',
@@ -168,7 +169,10 @@ def defineMenu():
         'L1_ZDC_XOR4_VjTE200_GAP_AANDC',
         'L1_1ZDC_A_1ZDC_C_VjTE200_GAP_AANDC', 'L1_VZDC_A_VZDC_C_VjTE200_GAP_AANDC',
         'L1_ZDC_OR_VjTE200_UNPAIRED_ISO', 'L1_MBTS_1_ZDC_OR_VjTE200_UNPAIRED_ISO',
-        
+
+        #ZDC ucc
+        'L1_ZDC_EhLT15_jTE4000', 'L1_ZDC_EhLT20_jTE4000', 'L1_ZDC_EhLT25_jTE4000',
+        'L1_ZDC_EhLT35_jTE4000', 'L1_ZDC_EhLT50_jTE4000',
 
 
         # VDM

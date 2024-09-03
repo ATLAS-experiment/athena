@@ -114,3 +114,16 @@ def TRTPIDNNCondAlgCfg(flags, name="TRTPIDNNCondAlg", **kwargs):
     kwargs.setdefault("TRTPIDNNWriteKey", "TRTPIDNN")
     acc.addCondAlgo(CompFactory.TRTPIDNNCondAlg(name, **kwargs))
     return acc
+
+
+def TRTCondWriteCfg(flags, name="TRTCondWriteAlg", **kwargs):
+    
+    # This needs more implementations. Skeleton for now - @serodrig
+    if "CalibInputFile" not in kwargs:
+        kwargs.setdefault("CalibInputFile", "dummy.txt")
+    
+    acc = ComponentAccumulator()
+    acc.addCondAlgo(CompFactory.TRTCondWrite(name, **kwargs))
+    return acc
+    
+    

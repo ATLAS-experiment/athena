@@ -312,6 +312,11 @@ def RecoPostProcessingCfg(flags):
         acc.merge(ThinGeantTruthCfg(flags))
         pass
 
+    if flags.Tracking.thinInDetClustersOnTrack:
+        from ThinningUtils.ThinInDetClustersConfig import (
+            ThinInDetClustersCfg)
+        acc.merge(ThinInDetClustersCfg(flags))
+
     if flags.Output.doWriteAOD and flags.Reco.HIMode in [HIMode.UPC, HIMode.HIP]:
         from HIGlobal.RecordExtraInfoConfig import addMBTS, addSpacePoints
         acc.merge(addMBTS(flags))

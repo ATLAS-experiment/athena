@@ -166,6 +166,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("maxSctHoles"             , [2])
     icf.addFlag("maxDoubleHoles"          , [1])
     icf.addFlag("maxPrimaryImpact"        , [2.0 * Units.mm, 2.0 * Units.mm, 10.0 * Units.mm])
+    icf.addFlag("maxEMImpact"             , [50.0 * Units.mm])
     icf.addFlag("maxZImpact"              , [200.0 * Units.mm])
 
     # --- general pattern cuts for NewTracking

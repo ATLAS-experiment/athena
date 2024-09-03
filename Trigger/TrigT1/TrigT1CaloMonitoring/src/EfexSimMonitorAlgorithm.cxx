@@ -108,10 +108,13 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
             fill("mismatches",signature,tobMismatched,evtType);
         }
     }
+
+    auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
+    auto simReady = Monitored::Scalar<bool>("SimulationReady",fexReadout==1); // used to control if filling plot that is actually monitored in DQM
     if (mismatches) {
         // record all tobs to the debug tree .. one entry in the tree = 1 tobType for 1 event
         auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
-        auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
+
         auto lbnString = Monitored::Scalar<std::string>("LBNString","");
         auto& firstEvents = (fexReadout==1) ? m_firstEvents_DataTowers : m_firstEvents_EmulatedTowers;
         {
@@ -133,7 +136,6 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         auto stobEtas = Monitored::Collection("simEtas", setas);
         auto stobPhis = Monitored::Collection("simPhis", sphis);
         auto stobWord0s = Monitored::Collection("simWord0s", sword0s);
-        auto simReady = Monitored::Scalar<bool>("SimulationReady",fexReadout==1); // used to control if filling plot that is actually monitored in DQM
         fillVectors(key2,ctx,detas,dphis,dword0s);
         fillVectors(key1,ctx,setas,sphis,sword0s);
 
@@ -146,21 +148,24 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
         auto locIdx = Monitored::Scalar<std::string>("locIdx","");
         for(size_t i = 0; i < tobs1->size();i++) {
             if(word0s2.find(tobs1->at(i)->word0())==word0s2.end()) {
-                locIdx = std::to_string(tobs1->at(i)->iPhi()/8) + ":" + std::to_string(tobs1->at(i)->iEta());
+                locIdx = std::to_string(tobs1->at(i)->shelfNumber()*12+tobs1->at(i)->eFexNumber()) + ":" + std::to_string(tobs1->at(i)->fpga()) + ":" +
+                        std::to_string(tobs1->at(i)->iEta()) + ":" + std::to_string(tobs1->at(i)->iPhi());
                 fill(signa + "_mismatches",lbn,locIdx,simReady);
             }
         }
         for(size_t i = 0; i < tobs2->size();i++) {
             if(word0s1.find(tobs2->at(i)->word0())==word0s1.end()) {
-                locIdx = std::to_string(tobs2->at(i)->iPhi()/8) + ":" + std::to_string(tobs2->at(i)->iEta());
+                locIdx = std::to_string(tobs2->at(i)->shelfNumber()*12+tobs2->at(i)->eFexNumber()) + ":" + std::to_string(tobs2->at(i)->fpga()) + ":" +
+                        std::to_string(tobs2->at(i)->iEta()) + ":" + std::to_string(tobs2->at(i)->iPhi());
                 fill(signa + "_mismatches",lbn,locIdx,simReady);
             }
         }
 
-
-        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
-
-
+        tobMismatched=100;
+        fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
+    } else {
+        tobMismatched=0;
+        fill("mismatches",tobMismatched,lbn,signature,simReady);
     }
 
 

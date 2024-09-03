@@ -133,9 +133,9 @@ thresholds th_AnyBinIsError {
 
         # note: this method will replace any existing alg definition
 
-        thresNum = len(self.hanThresholdConfigs)
+        #thresNum = len(self.hanThresholdConfigs)
         if thresholdConfig is not None:
-            hanConfig["thresholds"] = f"L1CaloThreshold{thresNum}"
+            hanConfig["thresholds"] = f"{name}Thresholds"
             threshDict = {}
             for parName,limVals in thresholdConfig.items():
                 if len(limVals) != 2:

@@ -68,7 +68,8 @@ def defineInputsMenu():
                 'NIMTGC',     # TGC
                 'NIMRPC',     # RPC
                 'NIMTRT',     # TRT
-                'AFP_NSC', 'AFP_FSC', 'AFP_FSC_TOF_T0', 'AFP_FSC_TOF_T1', 'AFP_FSC_TOF_T2', 'AFP_FSC_TOF_T3'   # 2xAFP
+                'AFP_NSC', 'AFP_FSC', 'AFP_FSC_TOF_T0', 'AFP_FSC_TOF_T1', 'AFP_FSC_TOF_T2', 'AFP_FSC_TOF_T3',   # 2xAFP
+                'ZDC_ALT_0', 'ZDC_ALT_1', 'ZDC_ALT_2' # 3xZDC alternative LUCROD
             ]
         }
     ]
@@ -234,7 +235,7 @@ def defineInputsMenu():
             ('gXENC70',1), ('gXENC100',1),
             ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
-            ('gTE200',1),
+            ('gTE3',1), ('gTE5',1), ('gTE10',1), ('gTE200',1),
 
             # MHT
             ('gMHT500',1),
@@ -248,10 +249,11 @@ def defineInputsMenu():
             ('jTEFWDA1',1), ('jTEFWDC1',1), ('jTEFWDA5',1), ('jTEFWDC5',1),
 
             # spare energy thresholds for commissioning
-            ('jXESPARE1',1), ('jXESPARE2',1), ('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1),
+            ('jXESPARE1',1), ('jXESPARE2',1),
 
             # production
             # decrement jXESPARE for additional heavy ion jTE thresholds
+            #('jXESPARE3',1), ('jXESPARE4',1), ('jXESPARE5',1),
             # ('jXESPARE6',1), ('jXESPARE7',1), ('jXESPARE8',1),('jXESPARE9',1), ('jXESPARE10',1), ('jXESPARE11',1),
             # ('jXESPARE12',1), ('jXESPARE13',1), ('jXESPARE14',1),
 

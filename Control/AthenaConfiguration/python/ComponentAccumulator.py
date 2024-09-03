@@ -18,7 +18,7 @@ from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentConte
 
 import atexit
 from collections.abc import Sequence
-import sys
+import sys,os
 
 class ConfigurationError(RuntimeError):
     pass
@@ -1157,6 +1157,8 @@ class ComponentAccumulator(AccumulatorCachable):
 
         #At this point, we don't need the internal structures of this CA any more, clean them up
         self._cleanup()
+        
+        self._msg.info(f"Athena job with pid {os.getpid()}")
 
         if (self._debugStage.value == "init"):
             hookDebugger()

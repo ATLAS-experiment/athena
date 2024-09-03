@@ -189,7 +189,7 @@ def TrigSiSpacePointsSeedMakerCfg(flags, **kwargs):
     # elif flags.Tracking.ActiveConfig.isLowPt:
     #     return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
     else:
-        kwargs.setdefault("maxdImpact", flags.Tracking.ActiveConfig.maxRPhiImpact)
+        kwargs.setdefault("maxdImpact", flags.Tracking.ActiveConfig.maxPrimaryImpact)
         kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
         kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
                               

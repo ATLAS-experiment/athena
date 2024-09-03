@@ -2,6 +2,7 @@
 #include "../ThinNegativeEnergyCaloClustersAlg.h"
 #include "../ThinNegativeEnergyNeutralPFOsAlg.h"
 #include "../ThinInDetForwardTrackParticlesAlg.h"
+#include "../ThinInDetClustersAlg.h"
 // AthAnalysisBase doesn't know about Trk::Tracks
 #ifndef XAOD_ANALYSIS
 #include "../ThinTrkTrackAlg.h"
@@ -9,6 +10,7 @@
 #include "../ThinTRTStandaloneTrackAlg.h"
 
 DECLARE_COMPONENT( ThinInDetForwardTrackParticlesAlg )
+DECLARE_COMPONENT( ThinInDetClustersAlg )
 DECLARE_COMPONENT( ThinGeantTruthAlg )
 DECLARE_COMPONENT( ThinNegativeEnergyCaloClustersAlg )
 DECLARE_COMPONENT( ThinNegativeEnergyNeutralPFOsAlg )
