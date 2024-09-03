@@ -5,6 +5,9 @@
 
 from . import Herwig7Utils as hw7Utils
 
+# Helper for resetting process number
+from MCJobOptionUtils.JOsupport import check_reset_proc_number
+
 # import Athena modules
 from AthenaCommon import Logging
 athMsgLog = Logging.logging.getLogger('Herwig7Config')
@@ -15,6 +18,8 @@ class Hw7Config(object):
   ## Constructor
   def __init__(self, genSeq, runArgs, run_name="Herwig"):
 
+    # Force Herwig7 to run in single-core mode
+    check_reset_proc_number(runArgs)
 
     self.genSeq   = genSeq
     self.runArgs  = runArgs
