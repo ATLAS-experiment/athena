@@ -340,6 +340,7 @@ class ItemDef:
         MenuItem('L1_jTE5_VjTE200'         ).setLogic( d.jTE5  & Not(d.jTE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_jTE5_VjTE200_GAP_A'         ).setLogic( d.jTE5  & Not(d.jTE200) & GAPA  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_jTE5_VjTE200_GAP_C'         ).setLogic( d.jTE5  & Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_gTE5_VjTE200'         ).setLogic( d.gTE5  & Not(d.jTE200) & physcond).setTriggerType( TT.calo )
 
         # NSW Monitoring
         MenuItem('L1_NSW_MONITOR').setLogic(d.NSWMon & physcond ).setTriggerType(TT.nsw)
@@ -1435,6 +1436,7 @@ class ItemDef:
         MenuItem('L1_VZDC_A_ZDC_C_TE3_VTE200' ).setLogic( PHYS_VZDC_A_ZDC_C & d.TE3 & Not(d.TE200)   & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE3_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE3 &  Not(d.jTE200) & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE3_VjTE200_GAP_A' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE3 &  Not(d.jTE200) & GAPA  & physcond)
+        MenuItem('L1_VZDC_A_ZDC_C_gTE3_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.gTE3 &  Not(d.jTE200) & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_TE3_VTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.TE3 &  Not(d.TE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 &  Not(d.jTE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_A' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 &  Not(d.jTE200) & GAPA  & physcond)
@@ -1444,12 +1446,14 @@ class ItemDef:
         MenuItem('L1_ZDC_A_VZDC_C_TE3_VTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.TE3 & Not(d.TE200)   & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE3_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE3 & Not(d.jTE200)  & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE3_VjTE200_GAP_C' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
+        MenuItem('L1_ZDC_A_VZDC_C_gTE3_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.gTE3 & Not(d.jTE200)  & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE3_VjTE200_GAP_C' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
         MenuItem('L1_ZDC_1XOR5_jTE3_VjTE200_GAP_C' ).setLogic(  PHYS_ZDC_1TO4XOR5 & d.jTE3 & Not(d.jTE200) & GAPC  & physcond)
 
         MenuItem('L1_VZDC_A_ZDC_C_TE5_VTE200' ).setLogic( PHYS_VZDC_A_ZDC_C & d.TE5 & Not(d.TE200)   & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE5_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE5 &  Not(d.jTE200)  & physcond)
         MenuItem('L1_VZDC_A_ZDC_C_jTE5_VjTE200_GAP_A' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.jTE5 &  Not(d.jTE200) & GAPA  & physcond)
+        MenuItem('L1_VZDC_A_ZDC_C_gTE5_VjTE200' ).setLogic(  PHYS_VZDC_A_ZDC_C &d.gTE5 &  Not(d.jTE200)  & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_TE5_VTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.TE5 &  Not(d.TE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE5_VjTE200' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE5 &  Not(d.jTE200)   & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_A' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE5 &  Not(d.jTE200) & GAPA  & physcond)
@@ -1459,6 +1463,7 @@ class ItemDef:
         MenuItem('L1_ZDC_A_VZDC_C_TE5_VTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.TE5 & Not(d.TE200)   & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE5_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE5 & Not(d.jTE200)  & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_jTE5_VjTE200_GAP_C' ).setLogic( PHYS_ZDC_A_VZDC_C & d.jTE5 & Not(d.jTE200) & GAPC  & physcond)
+        MenuItem('L1_ZDC_A_VZDC_C_gTE5_VjTE200' ).setLogic( PHYS_ZDC_A_VZDC_C & d.gTE5 & Not(d.jTE200)  & physcond)
         MenuItem('L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_C' ).setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & d.jTE5 & Not(d.jTE200) & GAPC  & physcond)
         MenuItem('L1_ZDC_1XOR5_jTE5_VjTE200_GAP_C' ).setLogic(  PHYS_ZDC_1TO4XOR5 & d.jTE5 & Not(d.jTE200) & GAPC  & physcond)
 
