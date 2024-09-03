@@ -208,6 +208,14 @@ def defineMenu():
         #'L1_ZDC_OR_UNPAIRED_ISO',
         #'L1_ZDC_OR_LHCF',
 
+        #ZDC pp (ATR-29027)
+        'L1_ZDC_pp_A','L1_ZDC_pp_C','L1_ZDC_pp_OR','L1_ZDC_pp_A_C',
+        'L1_ZDC_pp_A2','L1_ZDC_pp_C2','L1_ZDC_pp_OR2',
+        'L1_ZDC_pp_A_EMPTY','L1_ZDC_pp_C_EMPTY',
+        'L1_ZDC_pp_A2_EMPTY','L1_ZDC_pp_C2_EMPTY',
+        'L1_ZDC_pp_A_UNPAIRED_NONISO','L1_ZDC_pp_C_UNPAIRED_NONISO',
+        'L1_ZDC_pp_A2_UNPAIRED_NONISO','L1_ZDC_pp_C2_UNPAIRED_NONISO',
+
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
 
