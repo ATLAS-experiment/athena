@@ -77,6 +77,7 @@ _all_streams = [
     StreamInfo('L1TopoMismatches', 'calibration', False, True),
     StreamInfo('ZDCCalib', 'calibration', False, False),
     StreamInfo('ZDCLEDCalib', 'calibration', False, False),
+    StreamInfo('ZDCInjCalib', 'calibration', False, False),
     StreamInfo('IDCalib', 'calibration', True, False),
     StreamInfo('AFPCalib', 'calibration', False, False),
     StreamInfo('PixelBeam', 'calibration', True, False),

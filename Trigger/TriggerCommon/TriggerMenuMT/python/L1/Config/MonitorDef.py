@@ -282,6 +282,8 @@ class MonitorDef:
                 "L1_ZDC_E1_AND_E2ORE3",
                 "L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_NONISO",
                 "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
+                "L1_ZDC_pp_A", "L1_ZDC_pp_C", "L1_ZDC_pp_OR", "L1_ZDC_pp_A_C",
+                "L1_ZDC_pp_A2", "L1_ZDC_pp_C2", "L1_ZDC_pp_OR2",
                 # LHCF
                 "L1_LHCF",
                 # MBTS
