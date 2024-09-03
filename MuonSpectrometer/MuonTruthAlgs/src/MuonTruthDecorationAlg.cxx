@@ -338,12 +338,12 @@ namespace Muon {
             parameters.emplace_back(Amg::Vector3D{vertex->x(), vertex->y(), vertex->z()},
                                     Amg::Vector3D{truthParticle.px(), truthParticle.py(), truthParticle.pz()});
         }
-        for (SG::ReadHandle<TrackRecordCollection>& col : m_trackRecordCollectionNames.makeHandles(ctx)) {
-            if (!col.isPresent()) {
-                ATH_MSG_FATAL("Failed to retrieve "<<col.key());
+        for (SG::ReadHandle<TrackRecordCollection>& trackRecordCollection : m_trackRecordCollectionNames.makeHandles(ctx)) {
+            if (!trackRecordCollection.isPresent()) {
+                ATH_MSG_FATAL("Failed to retrieve "<<trackRecordCollection.key());
                 return StatusCode::FAILURE;
             }
-            const std::string r_name = col.key();
+            const std::string r_name = trackRecordCollection.key();
 
             SG::Accessor<float> xAcc (r_name + "_x");
             SG::Accessor<float> yAcc (r_name + "_y");
@@ -385,11 +385,11 @@ namespace Muon {
             eisAcc(truthParticle) = false;
             ex = ey = ez = epx = epy = epz = dummy_val;
 
-            // loop over collection and find particle with the same bar code
-            for (const auto& particle : *col) {
-              if (!HepMC::is_sim_descendant(&particle,&truthParticle)) continue;
-                CLHEP::Hep3Vector pos = particle.GetPosition();
-                CLHEP::Hep3Vector mom = particle.GetMomentum();
+            // loop over collection and find trackRecord with the same bar code
+            for (const auto& trackRecord : *trackRecordCollection) {
+              if (!HepMC::is_sim_descendant(&trackRecord,&truthParticle)) continue;
+                CLHEP::Hep3Vector pos = trackRecord.GetPosition();
+                CLHEP::Hep3Vector mom = trackRecord.GetMomentum();
                 ATH_MSG_VERBOSE("Found associated  " << r_name << " pt " << mom.perp() << " position: r " << pos.perp() << " z " << pos.z());
                 x = pos.x(); y = pos.y(); z = pos.z();
                 px = mom.x(); py = mom.y(); pz = mom.z();

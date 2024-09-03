@@ -633,11 +633,10 @@ std::vector<SiHit> PixelPrepDataToxAOD::findAllHitsCompatibleWithCluster( const 
     ajoiningHits.push_back( *siHitIter );
     
     siHitIter2 = siHitIter+1;    
-    auto bc = HepMC::barcode((*siHitIter)->particleLink());
     while ( siHitIter2 != multiMatchingHits.end() ) {
       // Need to come from the same truth particle 
             
-      if( bc != HepMC::barcode((*siHitIter2)->particleLink()) ){
+      if( !HepMC::is_same_particle((*siHitIter)->particleLink(),(*siHitIter2)->particleLink()) ){
         ++siHitIter2;
         continue;
       }

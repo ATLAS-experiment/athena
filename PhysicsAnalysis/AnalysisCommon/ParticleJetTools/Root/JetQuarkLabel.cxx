@@ -111,7 +111,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	if (pt > m_ptCut) {
 	  // Herwig ! Do not use quark from Hadron decay !
 	  //bool fromHadron = false; // put this back in later
-	  ATH_MSG_VERBOSE( "MCTruth: part " << HepMC::barcode(*pitr) << " PDG= " << pdg
+	  ATH_MSG_VERBOSE( "MCTruth: part " << *pitr
 			   << " pT= "  <<part_momentum_lv.Pt()
 			   << " eta= " <<part_momentum_lv.Eta()
 			   << " phi= " <<part_momentum_lv.Phi()
@@ -146,7 +146,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
       if (std::abs(pdg) == 15) {
 	double pt = part_momentum_lv.Pt();
 	if (pt > m_ptCut) {
-	  ATH_MSG_VERBOSE( "MCTruth: part " << HepMC::barcode(*pitr) << " PDG= " << pdg
+	  ATH_MSG_VERBOSE( "MCTruth: part " << *pitr
 			   << " pT= "  <<part_momentum_lv.Pt()
 			   << " eta= " <<part_momentum_lv.Eta()
 			   << " phi= " <<part_momentum_lv.Phi()
