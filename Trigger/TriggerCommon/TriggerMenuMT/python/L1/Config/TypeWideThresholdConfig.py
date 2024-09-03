@@ -692,7 +692,7 @@ def getConfig_gXE(do_HI_tob_thresholds):
     confObj["XEJWOJ_c_A"] = 0 
     confObj["XEJWOJ_c_B"] = 0 
     confObj["XEJWOJ_c_C"] = 0 
-    confObj["resolutionMeV"] = 800 if do_HI_tob_thresholds else 200
+    confObj["resolutionMeV"] = 200
     return confObj
 
 def getConfig_gTE():
