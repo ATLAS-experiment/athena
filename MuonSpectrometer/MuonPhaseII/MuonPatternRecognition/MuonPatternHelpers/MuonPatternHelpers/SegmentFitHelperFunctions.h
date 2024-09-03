@@ -5,8 +5,9 @@
 #ifndef MUONR4__MuonSegmentFitHelperFunctions__H
 #define MUONR4__MuonSegmentFitHelperFunctions__H
 
-#include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "MuonPatternEvent/MuonHoughDefs.h"
+#include "Acts/Seeding/HoughTransformUtils.hpp"
+
 
 class MsgStream;
 

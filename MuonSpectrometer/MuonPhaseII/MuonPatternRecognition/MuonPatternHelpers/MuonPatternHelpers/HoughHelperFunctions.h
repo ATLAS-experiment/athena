@@ -5,11 +5,12 @@
 #ifndef MUONR4__HoughHelperFunctions__H
 #define MUONR4__HoughHelperFunctions__H
 
+#include "MuonPatternEvent/MuonHoughDefs.h"
 #include "Acts/Seeding/HoughTransformUtils.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
-#include "MuonPatternEvent/MuonHoughDefs.h"
+
 
 namespace MuonR4{
     namespace HoughHelpers{
