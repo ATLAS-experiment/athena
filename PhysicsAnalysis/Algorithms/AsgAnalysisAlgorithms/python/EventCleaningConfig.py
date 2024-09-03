@@ -66,6 +66,7 @@ class EventCleaningBlock (ConfigBlock):
                     alg = config.createAlgorithm( 'GRLSelectorAlg', GRLDecoratorName )
                     config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
                     alg.Tool.GoodRunsListVec = GRLFile
+                    alg.noFilter = True
                     alg.grlKey = "EventInfo." + GRLDecoratorName
                     # Using WriteDecorHandle thus no need for addOutputVar
             else:
