@@ -411,7 +411,10 @@ if __name__ == '__main__':
             acc.merge(ZdcLEDMonitoringConfig(flags,'PbPb2023'))
         else:
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-            acc.merge(ZdcMonitoringConfig(flags,'PbPb2023'))
+            zdcMonitorAcc = ZdcMonitoringConfig(flags, 'PbPb2023')
+            acc.merge(zdcMonitorAcc)
+            # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # turn on DEBUG messages
+
         if (isCalib): # don't configure ntuple for typical reco jobs
             acc.merge(ZdcNtupleLocalCfg(flags))
     else:
