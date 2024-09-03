@@ -34,6 +34,14 @@ if __name__ == '__main__':
                             type=trfArgClasses.argFactory(trfArgClasses.argBZ2File, io='output'),
                             help='Compressed output file', group='TRTCalib_last_tf')
     
+    # Directory for the attrtcal account web display
+    trf.parser.add_argument('--attrtcal_dir',
+                            type=trfArgClasses.argFactory(trfArgClasses.argString),
+                            # Temporary LOCAL path - @serodrig 
+                            help='Saving output for web display', default=trfArgClasses.argString('.') , group='TRTCalib_last_tf')
+                            # Commented for now... path should be changed to the official one 
+                            # help='Saving output for web display', default=trfArgClasses.argString('/afs/cern.ch/user/a/attrtcal/Tier0') , group='TRTCalib_last_tf')
+    
     trf.parseCmdLineArgs(sys.argv[1:])
     
     trf.execute()
