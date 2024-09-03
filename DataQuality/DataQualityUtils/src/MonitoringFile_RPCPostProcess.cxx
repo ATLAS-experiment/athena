@@ -36,9 +36,6 @@ namespace {
   float
   getBinContentIfValid(TH1F* pH, int binIdx) {
     float result = -9999;
-
-    ;
-
     if (pH) result = pH->GetBinContent(binIdx);
     return result;
   }
@@ -46,11 +43,24 @@ namespace {
   float
   getBinErrorIfValid(TH1F* pH, int binIdx) {
     float result = -1;
-
-    ;
-
     if (pH) result = pH->GetBinError(binIdx);
     return result;
+  }
+  bool
+  panelOk(const TH1F* pPanel, int ib){
+    bool result = true;
+    if (pPanel and (pPanel->GetBinContent(ib + 1) == 0) ){
+      result =  false;
+    }
+    return result;
+  }
+  void
+  writeToFile(TDirectory* pDir, TH1F* pH1, TH1F* pH2, TH1F* pH3 = nullptr){
+    if (not pDir) return; //do nothing
+    pDir->cd();
+    writeIfValid(pH1);
+    writeIfValid(pH2);
+    writeIfValid(pH3);
   }
 }
 
@@ -376,8 +386,7 @@ namespace dqutils {
           LyPrj_name = dir_glob_track + "Track_Projected_on_Layer";
           LyEff_name = dir_glob_track + "Layer_Efficiency";
 
-          if (RPCCheckHistogram(f,
-                                LyHit_name.c_str()) &&
+          if (RPCCheckHistogram(f, LyHit_name.c_str()) &&
               RPCCheckHistogram(f, LyPrj_name.c_str()) && RPCCheckHistogram(f, LyEff_name.c_str())) {
             TH1I* hist_LyHit = (TH1I*) (f->Get(LyHit_name.c_str()));
             TH1I* hist_LyPrj = (TH1I*) (f->Get(LyPrj_name.c_str()));
@@ -728,12 +737,7 @@ namespace dqutils {
             // efficiency
             if (h_TrackProj && h_HitOnTrack && h_Eff) {
               for (int ib = 0; ib != h_TrackProj->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
-
+                if (not panelOk(h_PanelId, ib)) continue;
                 n_hit_f = h_HitOnTrack->GetBinContent(ib + 1);
                 n_tr_p = h_TrackProj->GetBinContent(ib + 1);
 
@@ -762,11 +766,7 @@ namespace dqutils {
               }
               // write out histogram
               TDirectory* dir = f->GetDirectory(dir_sum_track.c_str());
-              if (dir != 0) {
-                dir->cd();
-                h_Eff->Write("", TObject::kOverwrite);
-                writeIfValid(h_EffSecDist);
-              }
+              writeToFile(dir, h_Eff, h_EffSecDist);
             }
 
             // gap efficiency
@@ -779,11 +779,8 @@ namespace dqutils {
               int bmin = 0;
               bmin = int( h_GapEff->GetXaxis()->GetXmin());
               for (int ib = 0; ib != h_TrackProj->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
+               
                 if ((bmin + ib) % 2 != 0) continue;                                                  // Phi panel
                 sign = std::copysign(1, (bmin + ib));
 
@@ -811,11 +808,7 @@ namespace dqutils {
                 }
               }
               TDirectory* dir = f->GetDirectory(dir_sum_track.c_str());
-              if (dir != 0) {
-                dir->cd();
-                h_GapEff->Write("", TObject::kOverwrite);
-                if (h_GapEffSecDist) h_GapEffSecDist->Write("", TObject::kOverwrite);
-              }
+              writeToFile(dir, h_GapEff, h_GapEffSecDist);
             }
 
 
@@ -826,11 +819,7 @@ namespace dqutils {
 
             if (h_Res_CS1 && h_Res_CS1_s && h_Res_CS1_square && h_Res_CS1_entries) {
               for (int ib = 0; ib != h_Res_CS1->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 if ((h_Res_CS1_entries->GetBinContent(ib + 1)) != 0) {
                   res_mean = (h_Res_CS1_s->GetBinContent(ib + 1)) / (h_Res_CS1_entries->GetBinContent(ib + 1));
                   res2_mean = (h_Res_CS1_square->GetBinContent(ib + 1)) / (h_Res_CS1_entries->GetBinContent(ib + 1));
@@ -850,12 +839,7 @@ namespace dqutils {
                 }
               } // end for bins
               TDirectory* dirRes1 = f->GetDirectory(dir_sum_track.c_str());
-              if (dirRes1 != 0) {
-                dirRes1->cd();
-                h_Res_CS1->Write("", TObject::kOverwrite);
-                writeIfValid(h_Res_CS1SecDist);
-                writeIfValid(h_Res_CS1_rmsSecDist);
-              }
+              writeToFile(dirRes1, h_Res_CS1, h_Res_CS1SecDist, h_Res_CS1_rmsSecDist);
             }
 
             //residuals CS = 2
@@ -864,11 +848,7 @@ namespace dqutils {
             res_RMS = 0;
             if (h_Res_CS2 && h_Res_CS2_s && h_Res_CS2_square && h_Res_CS2_entries) {
               for (int ib = 0; ib != h_Res_CS2->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 if ((h_Res_CS2_entries->GetBinContent(ib + 1)) != 0) {
                   res_mean = (h_Res_CS2_s->GetBinContent(ib + 1)) / (h_Res_CS2_entries->GetBinContent(ib + 1));
                   res2_mean = (h_Res_CS2_square->GetBinContent(ib + 1)) / (h_Res_CS2_entries->GetBinContent(ib + 1));
@@ -888,12 +868,7 @@ namespace dqutils {
                 }
               }
               TDirectory* dirRes2 = f->GetDirectory(dir_sum_track.c_str());
-              if (dirRes2 != 0) {
-                dirRes2->cd();
-                h_Res_CS2->Write("", TObject::kOverwrite);
-                writeIfValid(h_Res_CS2SecDist);
-                writeIfValid(h_Res_CS2_rmsSecDist);
-              }
+              writeToFile(dirRes2, h_Res_CS2, h_Res_CS2SecDist, h_Res_CS2_rmsSecDist);
             }
 
             //residuals CS > 2
@@ -902,11 +877,7 @@ namespace dqutils {
             res_RMS = 0;
             if (h_Res_CSmore2 && h_Res_CSmore2_s && h_Res_CSmore2_square && h_Res_CSmore2_entries) {
               for (int ib = 0; ib != h_Res_CSmore2->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 if ((h_Res_CSmore2_entries->GetBinContent(ib + 1)) != 0) {
                   res_mean = (h_Res_CSmore2_s->GetBinContent(ib + 1)) / (h_Res_CSmore2_entries->GetBinContent(ib + 1));
                   res2_mean = (h_Res_CSmore2_square->GetBinContent(ib + 1)) /
@@ -928,22 +899,13 @@ namespace dqutils {
                 }
               }
               TDirectory* dirResp2 = f->GetDirectory(dir_sum_track.c_str());
-              if (dirResp2 != 0) {
-                dirResp2->cd();
-                h_Res_CSmore2->Write("", TObject::kOverwrite);
-                writeIfValid(h_Res_CSmore2SecDist);
-                writeIfValid(h_Res_CSmore2_rmsSecDist);
-              }
+              writeToFile(dirResp2, h_Res_CSmore2, h_Res_CSmore2SecDist, h_Res_CSmore2_rmsSecDist);
             }
 
             // occupancy
             if ((rpc_eventstotal > 0) && h_Occupancy && h_Occupancy_s) {
               for (int ib = 0; ib != h_Occupancy->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 panel_occ = h_Occupancy_s->GetBinContent(ib + 1);
                 panel_occ = panel_occ / float(rpc_eventstotal);
 
@@ -964,22 +926,14 @@ namespace dqutils {
               }
               // write occupancy histograms
               TDirectory* dirOcc = f->GetDirectory(dir_sum_track.c_str());
-              if (dirOcc != 0) {
-                dirOcc->cd();
-                h_Occupancy->Write("", TObject::kOverwrite);
-                h_OccupancySecDist->Write("", TObject::kOverwrite);
-              }
+              writeToFile(dirOcc, h_Occupancy, h_OccupancySecDist);
             }
 
 
             // CS
             if (h_CS && h_CS_s && h_CS_square && h_CS_entries) {
               for (int ib = 0; ib != h_CS->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 panelCS_entries = h_CS_entries->GetBinContent(ib + 1);
                 panelCS = h_CS_s->GetBinContent(ib + 1);
                 panelCS2 = h_CS_square->GetBinContent(ib + 1);
@@ -1001,21 +955,13 @@ namespace dqutils {
               }
               // write CS histograms
               TDirectory* dirCS = f->GetDirectory(dir_sum_track.c_str());
-              if (dirCS != 0) {
-                dirCS->cd();
-                h_CS->Write("", TObject::kOverwrite);
-                writeIfValid(h_CSSecDist);
-              }
+              writeToFile(dirCS, h_CS, h_CSSecDist);
             }
 
             // time
             if (h_Time && h_Time_s && h_Time_square && h_CS_entries) {
               for (int ib = 0; ib != h_Time->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 if (h_CS_entries->GetBinContent(ib + 1) != 0) {
                   Time_mean = (h_Time_s->GetBinContent(ib + 1)) / (h_CS_entries->GetBinContent(ib + 1));
                   Time2_mean = (h_Time_square->GetBinContent(ib + 1)) / (h_CS_entries->GetBinContent(ib + 1));
@@ -1034,22 +980,14 @@ namespace dqutils {
               }
               // write time histograms
               TDirectory* dirTime = f->GetDirectory(dir_sum_track.c_str());
-              if (dirTime != 0) {
-                dirTime->cd();
-                h_Time->Write("", TObject::kOverwrite);
-                writeIfValid(h_TimeSecDist);
-              }
+              writeToFile(dirTime, h_Time, h_TimeSecDist);
             }
             // noise
             noiseErrNorm = 18257.42;
             if ((rpc_eventstotal > 0) && h_NoiseCorr && h_NoiseCorr_s && h_NoiseTot && h_NoiseTot_s && h_CS_entries) {
               //std::cout << " Taglio Eventi " << std::endl;
               for (int ib = 0; ib != h_NoiseCorr->GetNbinsX(); ib++) {
-                if (h_PanelId) {
-                  if ((h_PanelId->GetBinContent(ib + 1)) == 0) {
-                    continue;
-                  }
-                }
+                if (not panelOk(h_PanelId, ib)) continue;
                 if (h_CS_entries->GetBinContent(ib + 1) == 0) continue;
                 noiseCorr = h_NoiseCorr_s->GetBinContent(ib + 1);
                 noiseCorrErr = sqrt(noiseCorr) * noiseErrNorm / float(rpc_eventstotal);
@@ -1079,7 +1017,6 @@ namespace dqutils {
                 dirNoise->cd();
                 h_NoiseCorr->Write("", TObject::kOverwrite);
                 h_NoiseTot->Write("", TObject::kOverwrite);
-
                 writeIfValid(h_NoiseCorrSecDist);
                 writeIfValid(h_NoiseTotSecDist);
               }
@@ -1351,6 +1288,18 @@ namespace dqutils {
               int NumberLayerStrip = 0;
               int PanelStripId = 0;
               int StripProfileContenent = 0;
+              
+              auto stripValue=[](float occ){
+                int stripVal = 0;
+                if (occ == 0){
+                  stripVal = 0;
+                } else if (occ > 0 && occ < 0.9) {
+                  stripVal = 5;
+                } else  if (occ > 0.9){
+                  stripVal = 9;
+                } 
+                return stripVal;
+              };
 
               for (std::vector<std::string>::const_iterator iter = layerList.begin(); iter != layerList.end(); ++iter) {
                 for (int i_dblPhi = 0; i_dblPhi != 2 * 1 + 1; ++i_dblPhi) {
@@ -1381,9 +1330,7 @@ namespace dqutils {
                       PanelStripId = (int) h_stripId->GetBinContent(Nstrips);
                       StripProfileContenent = (int) h_stripProfile->GetBinContent(Nstrips);
                       float StripOccupancy = (float) (StripProfileContenent) / rpc_eventstotal;
-                      if (StripOccupancy == 0) SingleStripsValue = 0;
-                      if (StripOccupancy > 0 && StripOccupancy < 0.9) SingleStripsValue = 5;
-                      if (StripOccupancy > 0.9) SingleStripsValue = 9;
+                      SingleStripsValue = stripValue(StripOccupancy);
 
                       if (h_stripId->GetBinCenter(Nstrips) > 0) {
                         sprintf(SingleStripsStatus, "%d 000.0 0.000|", SingleStripsValue);
