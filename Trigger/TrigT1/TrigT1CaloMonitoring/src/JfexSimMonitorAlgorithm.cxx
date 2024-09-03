@@ -142,10 +142,10 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
         }
     }
 
+    auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
     if(mismatches) {
         // fill the debugging tree with all the words for this signature
         auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
-        auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
         auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
         {
             std::scoped_lock lock(m_firstEventsMutex);
@@ -175,7 +175,11 @@ template <typename T> bool JfexSimMonitorAlgorithm::compareRoI(const std::string
             for (const auto w: sword0s) std::cout << w << " ";
             std::cout << std::endl << std::dec;
         }
-        fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady);
+        tobMismatched=100;
+        fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,eventType,IsDataTowers,IsEmulatedTowers,simReady);
+    } else {
+        tobMismatched=0;
+        fill("mismatches",lbn,Signature,tobMismatched,simReady);
     }
 
     return !mismatches;
