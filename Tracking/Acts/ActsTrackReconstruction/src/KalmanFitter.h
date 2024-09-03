@@ -134,7 +134,7 @@ public:
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper,
+      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
       const Acts::Surface* targetSurface = nullptr  // optional target surface - defaults to perigee in global origin
       ) const override;
 
@@ -163,7 +163,7 @@ public:
 	const Acts::GeometryContext& tgContext,
 	const Acts::MagneticFieldContext& mfContext,
 	const Acts::CalibrationContext& calContext,
-	const TrackingSurfaceHelper &tracking_surface_helper) const override;
+	const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -187,7 +187,6 @@ private:
                                                            "BoundaryCheckTool", 
                                                            "",
                                                            "Boundary checking tool for detector sensitivities"};
-
     // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };

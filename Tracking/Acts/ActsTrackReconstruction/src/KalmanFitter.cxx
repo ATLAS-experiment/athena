@@ -444,13 +444,13 @@ KalmanFitter::fit(const EventContext& ctx,
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-KalmanFitter::fit(const EventContext& ,
+KalmanFitter::fit(const EventContext&,
       const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper,
+      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
       const Acts::Surface* targetSurface) const{
   ATH_MSG_DEBUG("--> entering KalmanFitter::fit(xAODMeasure...things,TP,)");
        
@@ -459,19 +459,25 @@ KalmanFitter::fit(const EventContext& ,
 
   std::vector<const Acts::Surface*> surfaces;
   surfaces.reserve(clusterList.size());
-   
+
+  const Acts::TrackingGeometry *
+     actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
+  if (!actsTrackingGeometry) {
+     throw std::runtime_error("No Acts tracking geometry.");
+  }
+
   for (const ActsTrk::ATLASUncalibSourceLink& el : clusterList) {
     sourceLinks.emplace_back( el );
-    surfaces.push_back(&tracking_surface_helper.associatedActsSurface( getUncalibratedMeasurement(el) ));
+    surfaces.push_back(ActsTrk::getSurfaceOfMeasurement(*actsTrackingGeometry, detectorElementToGeometryIdMap, getUncalibratedMeasurement(el) ));
   }
- 
+
   Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
-  
-  ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
+
+  ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor( *actsTrackingGeometry, detectorElementToGeometryIdMap);
   kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
-      ::NoCalibration(*m_ATLASConverterTool, tracking_surface_helper);
+      ::NoCalibration(*actsTrackingGeometry, detectorElementToGeometryIdMap);
 
   kfExtensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
    
@@ -877,8 +883,14 @@ KalmanFitter::fit(const EventContext& ctx,
 		  const Acts::GeometryContext& tgContext,
 		  const Acts::MagneticFieldContext& mfContext,
 		  const Acts::CalibrationContext& calContext,
-		  const TrackingSurfaceHelper &tracking_surface_helper) const 
+		  const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const
 {
+  const Acts::TrackingGeometry *
+     actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
+  if (!actsTrackingGeometry) {
+     throw std::runtime_error("No Acts tracking geometry.");
+  }
+
   std::vector<ActsTrk::ATLASUncalibSourceLink> sourceLinks;
   sourceLinks.reserve(6);
 
@@ -891,10 +903,10 @@ KalmanFitter::fit(const EventContext& ctx,
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {
       ActsTrk::ATLASUncalibSourceLink el(makeATLASUncalibSourceLink(umeas));
       sourceLinks.emplace_back( el );
-      surfaces.push_back(&tracking_surface_helper.associatedActsSurface(*umeas));
+      surfaces.push_back(ActsTrk::getSurfaceOfMeasurement(*actsTrackingGeometry, detectorElementToGeometryIdMap, *umeas));
     }
   }
-  return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext, tracking_surface_helper, surfaces.front()); 
+  return fit(ctx, sourceLinks, initialParams, tgContext, mfContext, calContext, detectorElementToGeometryIdMap, surfaces.front());
 }
   
 }

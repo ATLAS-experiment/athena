@@ -8,8 +8,9 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
-#include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/Seed.h"
 
@@ -33,7 +34,7 @@ namespace ActsTrk {
 	  const Acts::GeometryContext& tgContext,
 	  const Acts::MagneticFieldContext& mfContext,
 	  const Acts::CalibrationContext& calContext,
-	  const TrackingSurfaceHelper &tracking_surface_helper) const = 0;
+	  const DetectorElementToActsGeometryIdMap &detector_element_to_geoid) const = 0;
 
     /// @brief development interface for EF tracking usage. 
     virtual    
@@ -44,7 +45,7 @@ namespace ActsTrk {
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
       const Acts::CalibrationContext& calContext,
-      const TrackingSurfaceHelper &tracking_surface_helper,
+      const DetectorElementToActsGeometryIdMap &detector_element_to_geoid,
       const Acts::Surface* targetSurface = nullptr) const = 0;
   };
 

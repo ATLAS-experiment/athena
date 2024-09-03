@@ -15,19 +15,6 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
-namespace {
-   void gatherActsSurfaces(const ActsTrk::IActsToTrkConverterTool &converter_tool,
-                     const InDetDD::SiDetectorElementCollection &detectorElements,
-                     std::vector<const Acts::Surface *> &acts_surfaces) {
-      acts_surfaces.reserve(detectorElements.size());
-      for (const auto *det_el :  detectorElements) {
-         const Acts::Surface &surface =
-            converter_tool.trkSurfaceToActsSurface(det_el->surface());
-         acts_surfaces.push_back( &surface );
-      }
-   }
-}
-
 #include "StoreGate/WriteHandle.h"
 namespace ActsTrk
 {
@@ -43,7 +30,7 @@ namespace ActsTrk
     ATH_CHECK(detStore()->retrieve(m_stripId, "SCT_ID"));
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
     return StatusCode::SUCCESS;
   }
 
@@ -101,11 +88,13 @@ namespace ActsTrk
     /// via the ContainerAccessor.
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
-    TrackingSurfaceHelper tracking_surface_helper;
-    gatherActsSurfaces(*m_ATLASConverterTool, elements, tracking_surface_helper.actsSurfaces(xAOD::UncalibMeasType::StripClusterType));
-    tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::StripClusterType, &elements);
+    const Acts::TrackingGeometry *acts_tracking_geometry=m_trackingGeometryTool->trackingGeometry().get();
+    ATH_CHECK(acts_tracking_geometry != nullptr);
+    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
+    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
+    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ *acts_tracking_geometry, **detectorElementToGeometryIdMap };
 
     spBuilderConfig->slSurfaceAccessor
       .connect<&ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);

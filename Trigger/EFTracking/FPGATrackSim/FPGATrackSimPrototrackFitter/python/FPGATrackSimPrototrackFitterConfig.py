@@ -6,9 +6,11 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def FPGAPrototrackFitAlgCfg(flags,
                             name: str = "ActsProtoTrackCreationAndFitAlg",
                             **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator() 
-    from ActsConfig.ActsTrackFindingConfig import isdet  
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
+    acc = ComponentAccumulator()
+
+    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
@@ -30,13 +32,6 @@ def FPGAPrototrackFitAlgCfg(flags,
             "ExtrapolationTool",
             acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
         )  # PrivateToolHandle
-
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault(
-            "ATLASConverterTool",
-            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-        )
 
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg

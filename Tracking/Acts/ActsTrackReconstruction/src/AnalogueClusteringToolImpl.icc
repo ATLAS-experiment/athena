@@ -8,6 +8,7 @@
 #include <limits>
 
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 namespace ActsTrk {
 

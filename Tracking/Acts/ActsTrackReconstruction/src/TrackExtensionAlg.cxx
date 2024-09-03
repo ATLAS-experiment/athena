@@ -33,7 +33,6 @@
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
 #include "AtlasMeasurementSelector.h"
@@ -60,9 +59,8 @@ namespace ActsTrk{
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
         ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
@@ -126,11 +124,18 @@ namespace ActsTrk{
 
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(context).context();
     Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(context);
-    detail::TrackFindingMeasurements measurements = collectMeasurements(context);
 
+    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, context};
+    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-    ActsTrk::UncalibSourceLinkAccessor slAccessor(measurements.orderedGeoIds(),
-                                                  measurements.measurementRanges());
+    const Acts::TrackingGeometry *
+       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+    ATH_CHECK( acts_tracking_geometry != nullptr);
+
+    detail::TrackFindingMeasurements measurements = collectMeasurements(context, **detectorElementToGeometryIdMap);
+
+    ActsTrk::UncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<ActsTrk::UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
 
@@ -148,8 +153,8 @@ namespace ActsTrk{
                       perigeeSurface.get());
 
     auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(
-       *m_ATLASConverterTool,
-       measurements.trackingSurfaceHelper(),
+       *acts_tracking_geometry,
+       **detectorElementToGeometryIdMap,
        m_pixelCalibTool,
        m_stripCalibTool);
     options.extensions.calibrator.connect<&OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
@@ -192,16 +197,15 @@ namespace ActsTrk{
   }
 
 
-  detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(const EventContext& context) const {
+  detail::TrackFindingMeasurements TrackExtensionAlg::collectMeasurements(
+       const EventContext& context,
+       const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const {
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle(m_pixelClusters, context);
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, context);
 
-    detail::TrackFindingMeasurements measurements(pixelClustersHandle->size());
+    detail::TrackFindingMeasurements measurements(1u /* only one measurement collection: pixel clusters*/);
     ATH_MSG_DEBUG("Measurements (pixels only) size: " << pixelClustersHandle->size());
-    measurements.addDetectorElements(xAOD::UncalibMeasType::PixelClusterType, **pixelDetEleHandle, m_ATLASConverterTool);
     // potential TODO: filtering only certain layers
-    measurements.addMeasurements(0, *pixelClustersHandle, **pixelDetEleHandle,
-                                 m_ATLASConverterTool);
+    measurements.addMeasurements(0, *pixelClustersHandle, detectorElementToGeometryIdMap);
     return measurements;
   }
 } // EOF namespace

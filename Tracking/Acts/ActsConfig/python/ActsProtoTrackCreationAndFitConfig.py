@@ -14,9 +14,11 @@ def ActsTruthGuidedProtoTrackCreatorToolCfg(flags,
 def ActsProtoTackCreationAndFitAlgCfg(flags,
                                       name: str = "ActsProtoTrackCreationAndFitAlg",
                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator() 
-    from ActsConfig.ActsTrackFindingConfig import isdet  
-    kwargs.setdefault("DetectorElementCollectionKeys", isdet(flags, pixel=["ITkPixelDetectorElementCollection"], strip=["ITkStripDetectorElementCollection"]))
+    acc = ComponentAccumulator()
+
+    from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
+    acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
@@ -42,13 +44,6 @@ def ActsProtoTackCreationAndFitAlgCfg(flags,
             acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
         )  # PrivateToolHandle
 
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault(
-            "ATLASConverterTool",
-            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-        )
-
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
@@ -65,7 +60,7 @@ def ActsProtoTackCreationAndFitAlgCfg(flags,
 def ActsProtoTrackReportingAlgCfg(flags,
                                   name: str = "ActsProtoTrackReportingAlg",
                                   **kwargs) -> ComponentAccumulator: 
-    acc = ComponentAccumulator() 
+    acc = ComponentAccumulator()
     kwargs.setdefault("ProtoTracksLocation", "ProtoTracksCollection")
     kwargs.setdefault("copyParametersFromFit", True)
     acc.addEventAlgo(CompFactory.ActsTrk.ProtoTrackReportingAlg(name,**kwargs),

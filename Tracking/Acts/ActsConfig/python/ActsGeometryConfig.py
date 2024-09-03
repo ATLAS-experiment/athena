@@ -252,3 +252,15 @@ def ActsMaterialMappingCfg(flags,
       
     acc.addEventAlgo(CompFactory.ActsMaterialMapping(name, **kwargs))
     return acc
+
+def ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags,
+                           name: str = "ActsDetectorElementToActsGeometryIdMappingAlg",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if 'TrackingGeometryTool' not in kwargs :
+      kwargs.setdefault('TrackingGeometryTool',
+                        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
+
+    acc.addCondAlgo(CompFactory.ActsTrk.DetectorElementToActsGeometryIdMappingAlg(name, **kwargs))
+    return acc

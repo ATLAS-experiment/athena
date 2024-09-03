@@ -10,6 +10,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "PixelConditionsData/ITkPixelOfflineCalibData.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "InDetCondTools/ISiLorentzAngleTool.h"
 
 #include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 #include "OnTrackCalibrator.h"

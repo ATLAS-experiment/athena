@@ -21,16 +21,11 @@
 #include "Acts/Surfaces/Surface.hpp"
 
 // Athena
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
 
 // ActsTrk
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsGeometry/TrackingSurfaceHelper.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 #include "src/TrackStatePrinter.h"
 
 // STL
@@ -184,108 +179,79 @@ namespace ActsTrk::detail {
   };
 
   // === TrackFindingMeasurements ============================================
-
   // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
   class TrackFindingMeasurements {
   public:
-    TrackFindingMeasurements(std::size_t measTotal) {
-      m_orderedGeoIds.reserve(measTotal);
-      m_measurementOffsets.reserve(2);  // pixels+strips
+    TrackFindingMeasurements(std::size_t n_measurement_container_max) {
+      m_measurementOffsets.reserve(n_measurement_container_max);
     }
 
     TrackFindingMeasurements() = delete;
     TrackFindingMeasurements(const TrackFindingMeasurements &) = default;
     TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
-    void addDetectorElements(xAOD::UncalibMeasType measType,
-                             const InDetDD::SiDetectorElementCollection &detElems,
-                             const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool) {
-      assert (m_sorted == false);  // should not call this again after addMeasurements()
-
-      if (!(static_cast<std::size_t>(measType) < TrackingSurfaceHelper::s_NMeasTypes)) {
-        std::stringstream msg;
-        msg << "Measurements of type " << static_cast<std::size_t>(measType) << " larger than " << TrackingSurfaceHelper::s_NMeasTypes - 1;
-        throw std::runtime_error(msg.str());
-      }
-
-      if (measType != xAOD::UncalibMeasType::Other) {
-        m_trackingSurfaceHelper.setSiDetectorElements(measType, &detElems);
-      }
-
-      auto &actsSurfaces = m_trackingSurfaceHelper.actsSurfaces(measType);
-      actsSurfaces.reserve(actsSurfaces.size() + detElems.size());  // may extend previous data, but usually starts from empty
-      for (const auto *det_el : detElems)
-      {
-        const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(det_el->surface());
-        m_orderedGeoIds.push_back(surface.geometryId());
-        actsSurfaces.push_back(&surface);
-      }
-      m_sorted = false;
-    }
-
     // NB. all addDetectorElements() must have been done before calling first addMeasurements().
     void addMeasurements(size_t typeIndex,
                          const xAOD::UncalibratedMeasurementContainer &clusterContainer,
-                         const InDetDD::SiDetectorElementCollection &detElems,
-                         const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool) {
-      if (!m_sorted) {
-        std::sort(m_orderedGeoIds.begin(), m_orderedGeoIds.end());
-        m_sorted = true;
-        m_measurementRanges.resize(m_orderedGeoIds.size());
-      }
+                         const DetectorElementToActsGeometryIdMap &detector_element_to_geoid) {
+       if (m_measurementRanges.empty()) {
+          // try to reserve needed space,
+          // this however will reserve more than necessary not just the space needed for the surfaces of
+          // all the measurements that are going to be added (e.g. pixel+strips).
+          m_measurementRanges.reserve(detector_element_to_geoid.size());
+       }
 
       // m_measurementOffsets only needed for TrackStatePrinter, but it is trivial overhead to save it for each event
-      if (!(typeIndex < m_measurementOffsets.size()))
+      if (!(typeIndex < m_measurementOffsets.size())) {
         m_measurementOffsets.resize(typeIndex + 1);
+      }
       m_measurementOffsets[typeIndex] = m_measurementsTotal;
 
       m_measurementRanges.setContainer(typeIndex, &clusterContainer);
 
       xAOD::UncalibMeasType last_measurement_type = xAOD::UncalibMeasType::Other;
       xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
-      unsigned int range_idx = m_measurementRanges.size();
-      std::size_t sl_idx = 0;
-      for (auto *measurement : clusterContainer)
-      {
-        const InDetDD::SiDetectorElement *elem =
-            detElems.getDetectorElement(measurement->identifierHash());
-        if (!elem)
-        {
-          throw std::domain_error("No detector element for measurement");
-        }
+      MeasurementRange *current_range=nullptr;
 
+      std::size_t n_elements = clusterContainer.size();;
+      std::size_t sl_idx = 0;
+      for( ; sl_idx < n_elements; ++sl_idx) {
+        const auto *measurement  = clusterContainer[sl_idx];
         if (measurement->identifierHash() != last_id_hash || measurement->type() != last_measurement_type)
         {
-          const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(elem->surface());
-          std::vector<Acts::GeometryIdentifier>::const_iterator
-              geo_iter = std::lower_bound(m_orderedGeoIds.begin(), m_orderedGeoIds.end(), surface.geometryId());
-          if (geo_iter == m_orderedGeoIds.end() || *geo_iter != surface.geometryId())
-          {
-            std::stringstream msg;
-            msg << "Measurement with unexpected Acts geometryId: " << surface.geometryId()
-                << " type = " << static_cast<unsigned int>(measurement->type())
-                << " idHash=" << measurement->identifierHash()
-                << (geo_iter == m_orderedGeoIds.end() ? " not" :"") << " found GeoId in orderedGeoIds, that are of size " << m_orderedGeoIds.size();
-            throw std::runtime_error(msg.str());
+          if (current_range) {
+             current_range->updateEnd(typeIndex, sl_idx);
           }
-          range_idx = geo_iter - m_orderedGeoIds.begin();
-          if (m_measurementRanges[range_idx].first != std::numeric_limits<unsigned int>::max())
-          {
-            std::stringstream msg;
-            msg << "Measurement not clustered by identifierHash / geometryId. New measurement "
-                << sl_idx << " with geo Id " << surface.geometryId()
-                << " type = " << static_cast<unsigned int>(measurement->type())
-                << " idHash=" << measurement->identifierHash()
-                << " but already recorded for this geo ID the range : " << m_measurementRanges[range_idx].first
-                << " .. " << m_measurementRanges[range_idx].second;
-            throw std::runtime_error(msg.str());
-          }
-          m_measurementRanges[range_idx].setRangeBegin(typeIndex, sl_idx);
           last_id_hash = measurement->identifierHash();
           last_measurement_type = measurement->type();
+
+          Acts::GeometryIdentifier measurement_surface_id = ActsTrk::getSurfaceGeometryIdOfMeasurement(detector_element_to_geoid,
+                                                                                                       *measurement);
+          if (measurement_surface_id.value() == 0u) {
+             // @TODO improve error message.
+             throw std::domain_error("No Acts surface associated to measurement");
+          }
+
+          // start with en empty range which is updated later.
+          auto ret = m_measurementRanges.insert( std::make_pair( measurement_surface_id.value(),
+                                                                 MeasurementRange( typeIndex, sl_idx, sl_idx) ));
+          if (!ret.second) {
+             std::stringstream msg;
+             msg << "Measurement not clustered by identifierHash / geometryId. New measurement "
+                 << sl_idx << " with geo Id " << measurement_surface_id
+                 << " type = " << static_cast<unsigned int>(measurement->type())
+                 << " idHash=" << measurement->identifierHash()
+                 << " but already recorded for this geo ID the range : [" << ret.first->second.containerIndex() << "]"
+                 << ret.first->second.elementBeginIndex()
+                 << " .. " << ret.first->second.elementEndIndex()
+                 << (ret.first->second.isConsistentRange() ? "" : " !Container index inconsistent or not in increasing order!");
+             throw std::runtime_error(msg.str());
+          }
+          current_range = &ret.first->second;
         }
-        m_measurementRanges[range_idx].setRangeEnd(typeIndex, sl_idx + 1);
-        ++sl_idx;
+      }
+      if (current_range) {
+         current_range->updateEnd(typeIndex, sl_idx);
       }
       m_measurementsTotal += clusterContainer.size();
     }
@@ -310,18 +276,13 @@ namespace ActsTrk::detail {
 
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffsets.size() ? m_measurementOffsets[typeIndex] : 0u; }
     const std::vector<size_t>& measurementOffsets() const { return m_measurementOffsets; }
-    const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return m_orderedGeoIds; }
     const ActsTrk::MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
-    const TrackingSurfaceHelper &trackingSurfaceHelper() const { return m_trackingSurfaceHelper; }
 
   private:
 
     std::vector<size_t> m_measurementOffsets;
-    std::vector<Acts::GeometryIdentifier> m_orderedGeoIds;
-    TrackingSurfaceHelper m_trackingSurfaceHelper;
     ActsTrk::MeasurementRangeList m_measurementRanges;
     std::size_t m_measurementsTotal = 0;
-    bool m_sorted = false;
   };
 }
 #endif

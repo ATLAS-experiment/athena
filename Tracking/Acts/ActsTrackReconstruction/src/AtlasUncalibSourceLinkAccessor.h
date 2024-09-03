@@ -14,6 +14,7 @@
 #include "MeasurementContainerWithDimension.h"
 #include <variant>
 #include <vector>
+#include <unordered_map>
 #include <utility>
 
 namespace ActsTrk {
@@ -21,46 +22,58 @@ namespace ActsTrk {
 // the range provides the measurement collection index and  element index range (begin, end)
   struct MeasurementRange : public std::pair<unsigned int, unsigned int>
   {
-    MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
     static constexpr unsigned int CONTAINER_IDX_SHIFT = 28;
     static constexpr unsigned int CONTAINER_IDX_MASK = (1u << 31) | (1u << 30) | (1u << 29) | (1u << 28);
     static constexpr unsigned int ELEMENT_IDX_MASK = ~CONTAINER_IDX_MASK;
-    static unsigned int createRangeValue(unsigned int container_idx, unsigned int index)
+    static constexpr unsigned int createRangeValue(unsigned int container_idx, unsigned int index)
     {
       assert(container_idx < (1u << (32 - CONTAINER_IDX_SHIFT)));
       assert((index & CONTAINER_IDX_MASK) == 0u);
       return (container_idx << CONTAINER_IDX_SHIFT) | index;
     }
-    void setRangeBegin(std::size_t container_idx, unsigned int element_idx)
-    {
-      assert(container_idx < (1u << (32 - CONTAINER_IDX_SHIFT)));
-      this->first = MeasurementRange::createRangeValue(container_idx, element_idx);
+    static constexpr unsigned int extractContainerIndex(unsigned int value) {
+       return (value & CONTAINER_IDX_MASK) >> CONTAINER_IDX_SHIFT;
     }
-    void setRangeEnd(std::size_t container_idx, unsigned int element_idx)
-    {
-      this->second = MeasurementRange::createRangeValue(container_idx, element_idx);
+    static constexpr unsigned int extractElementIndex(unsigned int value) {
+      return value & ELEMENT_IDX_MASK;
     }
+    bool isConsistentRange() const {
+       return    extractContainerIndex(this->first)  == extractContainerIndex(this->second)
+              && extractElementIndex(this->first) <= extractElementIndex(this->second);
+    }
+
+    MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
+    MeasurementRange(unsigned int container_idx, unsigned int start_element_idx, unsigned int end_element_idx)
+       : std::pair<unsigned int, unsigned int>( createRangeValue(container_idx, start_element_idx),
+                                                createRangeValue(container_idx, end_element_idx) ) {
+    }
+
+    void updateEnd(std::size_t container_idx, unsigned int end_element_idx) {
+       assert( extractContainerIndex(this->first) == container_idx);
+       this->second = createRangeValue(container_idx, end_element_idx);
+    }
+
     unsigned int containerIndex() const
     {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return (this->first & CONTAINER_IDX_MASK) >> CONTAINER_IDX_SHIFT;
+      assert(isConsistentRange());
+      return extractContainerIndex(this->first);
     }
     unsigned int elementBeginIndex() const
     {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return this->first & ELEMENT_IDX_MASK;
+      assert(isConsistentRange());
+      return extractElementIndex(this->first);
     }
     unsigned int elementEndIndex() const
     {
-      assert((this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK));
-      return this->second & ELEMENT_IDX_MASK;
+      assert(isConsistentRange());
+      return extractElementIndex(this->second);
     }
-    bool empty() const { return this->first == this->second; }
+    bool empty() const { assert(isConsistentRange()); return this->first == this->second; }
   };
 
    // List of measurement ranges and the measurement container targeted by the ranges.
    template <typename T_MeasurementContainerList >
-   class GenMeasurementRangeList : public std::vector<MeasurementRange>
+   class GenMeasurementRangeList : public std::unordered_map<std::size_t, MeasurementRange>
    {
    public:
       using MeasurementContainer = typename T_MeasurementContainerList::measurement_container_variant_t;
@@ -91,7 +104,6 @@ namespace ActsTrk {
   class GenUncalibSourceLinkAccessor
   {
   private:
-    const std::vector<Acts::GeometryIdentifier> *m_orderedGeoIds;
     const T_MeasurementRangeList *m_measurementRanges;
 
   public:
@@ -141,30 +153,23 @@ namespace ActsTrk {
     };
 
     using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
-    GenUncalibSourceLinkAccessor(const std::vector<Acts::GeometryIdentifier> &ordered_geoIds,
-                              const T_MeasurementRangeList &measurement_ranges)
-        : m_orderedGeoIds(&ordered_geoIds),
-          m_measurementRanges(&measurement_ranges)
+    GenUncalibSourceLinkAccessor(const T_MeasurementRangeList &measurement_ranges)
+        : m_measurementRanges(&measurement_ranges)
     {
     }
     // get the range of elements with requested geoId
     std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
     {
-      std::vector<Acts::GeometryIdentifier>::const_iterator
-          geo_iter = std::lower_bound(m_orderedGeoIds->begin(), m_orderedGeoIds->end(), surface.geometryId());
-      if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId() || (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin()).empty())
+      typename T_MeasurementRangeList::const_iterator
+         range_iter = m_measurementRanges->find(surface.geometryId().value());
+      if (range_iter == m_measurementRanges->end())
       {
         return {Iterator(BaseIterator(nullptr, 0u, 0u)),
                 Iterator(BaseIterator(nullptr, 0u, 0u))};
       }
 
-      assert(static_cast<std::size_t>(geo_iter - m_orderedGeoIds->begin()) < m_measurementRanges->size());
-      const MeasurementRange &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
-      // const xAOD::UncalibratedMeasurementContainer *container
-      //    = std::visit( [](const auto &a) -> const xAOD::UncalibratedMeasurementContainer * { return a},
-      //                  m_measurementRanges->container(range.containerIndex()));
-      return {Iterator(BaseIterator(&measurementContainerList(), range.containerIndex(), range.elementBeginIndex())),
-              Iterator(BaseIterator(&measurementContainerList(), range.containerIndex(), range.elementEndIndex()))};
+      return {Iterator(BaseIterator(&measurementContainerList(), range_iter->second.containerIndex(), range_iter->second.elementBeginIndex())),
+              Iterator(BaseIterator(&measurementContainerList(), range_iter->second.containerIndex(), range_iter->second.elementEndIndex()))};
     }
     const MeasurementContainer &container(unsigned index) const { return m_measurementRanges->container(index); }
     const std::vector< MeasurementContainer > &measurementContainerList() const { return  m_measurementRanges->measurementContainerList(); }

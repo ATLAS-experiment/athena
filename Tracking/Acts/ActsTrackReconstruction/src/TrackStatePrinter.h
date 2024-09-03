@@ -27,7 +27,8 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
+
+#include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 // Other
 #include <vector>
@@ -38,11 +39,6 @@
 namespace Acts
 {
   class Surface;
-}
-
-namespace InDetDD
-{
-  class SiDetectorElementCollection;
 }
 
 namespace ActsTrk
@@ -60,7 +56,7 @@ namespace ActsTrk
     void
     printMeasurements(const EventContext &ctx,
                       const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-                      const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
+                      const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
                       const std::vector<size_t> &offsets) const;
 
     void
@@ -95,7 +91,6 @@ namespace ActsTrk
 
     // Tools
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 
     // Configuration
     Gaudi::Property<bool> m_compareMeasurementTransforms{this, "compareMeasurementTransforms", false, "compare measurement coordinates transformed with Athena or ACTS"};
@@ -113,9 +108,10 @@ namespace ActsTrk
 
     void
     printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
+                                         const Acts::TrackingGeometry &tracking_geometry,
+                                         const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
                                          const xAOD::UncalibratedMeasurement *measurement,
                                          const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
-                                         const InDetDD::SiDetectorElementCollection *detectorElements,
                                          size_t offset) const;
 
     // static member functions used by TrackStatePrinter.icc

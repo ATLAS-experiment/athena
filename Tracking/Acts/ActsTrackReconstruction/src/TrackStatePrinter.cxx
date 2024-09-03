@@ -6,7 +6,7 @@
 
 // Athena
 #include "TrkParameters/TrackParameters.h"
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 // ACTS
@@ -23,6 +23,8 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsInterop/Logger.h"
+
+#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // Other
 #include <vector>
@@ -93,20 +95,29 @@ namespace ActsTrk
   }
 
   static std::string
-  atlasSurfaceName(const InDetDD::SiDetectorElement &detElem)
+  atlasSurfaceName(const Acts::Surface *measurement_surface)
   {
-    if (auto idHelper = detElem.getIdHelper())
-    {
-      auto name = idHelper->show_to_string(detElem.identify());
-      if (name.size() >= 2 && name[0] == '[' && name[name.size() - 1] == ']')
-      {
-        return name.substr(1, name.size() - 2);
-      }
-      else
-      {
-        return name;
-      }
-    }
+     if (measurement_surface) {
+        const ActsDetectorElement *
+           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->associatedDetectorElement());
+        if (acts_detector_element) {
+           const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
+           if (detElem) {
+              if (auto idHelper = detElem->getIdHelper())
+                 {
+                    auto name = idHelper->show_to_string(detElem->identify());
+                    if (name.size() >= 2 && name[0] == '[' && name[name.size() - 1] == ']')
+                       {
+                          return name.substr(1, name.size() - 2);
+                       }
+                    else
+                       {
+                          return name;
+                       }
+                 }
+           }
+        }
+     }
     return {};
   }
 
@@ -217,7 +228,6 @@ namespace ActsTrk
   static void
   printMeasurement(const Acts::GeometryContext &tgContext,
                    const Acts::Surface *surface,
-                   const InDetDD::SiDetectorElement *detElem,
                    const std::tuple<Acts::Vector2, Amg::Vector2D, int, int> &locData,
                    bool compareMeasurementTransforms = false)
   {
@@ -242,26 +252,33 @@ namespace ActsTrk
 
       if (compareMeasurementTransforms)
       {
-        // if measInd=1: won't match because comparing x,y and R,phi, but at least not phi,R.
-        // This is still useful for debugging because the next test also fails.
-        printVec2(locTrk, (measInd == 1 ? loc.reverse() : loc), estimated_flags.at(flagTrk));
+        const ActsDetectorElement *
+            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->associatedDetectorElement());
+        if (acts_detector_element) {
+           const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 
-        if (detElem)
-        {
-          auto globTrk = detElem->surface().localToGlobal(locTrk);
-          printVec3(globTrk, glob);
+           // if measInd=1: won't match because comparing x,y and R,phi, but at least not phi,R.
+           // This is still useful for debugging because the next test also fails.
+           printVec2(locTrk, (measInd == 1 ? loc.reverse() : loc), estimated_flags.at(flagTrk));
 
-          auto res = surface->globalToLocal(tgContext, globTrk, Acts::Vector3::Zero());
-          if (!res.ok())
-          {
-            std::cout << " ** " << res.error() << " **";
-          }
-          else
-          {
-            printVec2(res.value(), loc);
-          }
+           if (detElem)
+              {
+                 auto globTrk = detElem->surface().localToGlobal(locTrk);
+                 printVec3(globTrk, glob);
+
+                 auto res = surface->globalToLocal(tgContext, globTrk, Acts::Vector3::Zero());
+                 if (!res.ok())
+                    {
+                       std::cout << " ** " << res.error() << " **";
+                    }
+                 else
+                    {
+                       printVec2(res.value(), loc);
+                    }
+              }
         }
       }
+
     }
     std::cout << std::defaultfloat << std::setprecision(-1);
   }
@@ -322,44 +339,43 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
+                                                          const Acts::TrackingGeometry &tracking_geometry,
+                                                          const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
                                                           const xAOD::UncalibratedMeasurement *measurement,
-                                                          const std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>> &measToSp,
-                                                          const InDetDD::SiDetectorElementCollection *detectorElements,
+                                                          const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
                                                           size_t offset) const
   {
-    if (!measurement || !detectorElements)
+    if (!measurement)
       return;
 
     std::cout << std::setw(5) << (measurement->index() + offset) << ' '
               << std::setw(3) << measurement->numDimensions() << "D ";
 
-    const InDetDD::SiDetectorElement *detElem = detectorElements->getDetectorElement(measurement->identifierHash());
-    const Acts::Surface *surface_ptr = nullptr;
-    if (!detElem)
+    const Acts::Surface *surface_ptr = ActsTrk::getSurfaceOfMeasurement( tracking_geometry, detectorElementToGeometryIdMap, *measurement);
+    if (!surface_ptr)
     {
-      std::cout << std::setw(20 + 22 + 20 + 2) << "** no DetElem **";
+      std::cout << std::setw(20 + 22 + 20 + 2) << "** no surface for measurement **";
     }
     else
     {
-      surface_ptr = &m_ATLASConverterTool->trkSurfaceToActsSurface(detElem->surface());
       std::cout << std::left;
       std::cout << std::setw(21) << actsSurfaceName(*surface_ptr) << ' '
                 << std::setw(22) << to_string(surface_ptr->geometryId()) << ' ';
-      std::cout << std::setw(20) << atlasSurfaceName(*detElem);
+      std::cout << std::setw(20) << atlasSurfaceName(surface_ptr);
       std::cout << std::right;
     }
 
     if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType)
     {
       const auto loc = measurement->localPosition<2>().cast<double>();
-      printMeasurement(tgContext, surface_ptr, detElem, {loc, loc, -1, -1}, m_compareMeasurementTransforms);
+      printMeasurement(tgContext, surface_ptr, {loc, loc, -1, -1}, m_compareMeasurementTransforms);
     }
     else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType)
     {
       const small_vector<const xAOD::SpacePoint *> &spvec = measToSp.at(measurement->index());
       if (spvec.empty())
       {
-        printMeasurement(tgContext, surface_ptr, detElem,
+        printMeasurement(tgContext, surface_ptr,
                          localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr),
                          m_compareMeasurementTransforms);
       }
@@ -375,7 +391,7 @@ namespace ActsTrk
                       << std::setw(76) << to_string("** Spacepoint ", isp, " **")
                       << std::right;
           }
-          printMeasurement(tgContext, surface_ptr, detElem,
+          printMeasurement(tgContext, surface_ptr,
                            localPositionStrip2D(tgContext, *measurement, surface_ptr, sp),
                            m_compareMeasurementTransforms);
         }
@@ -466,10 +482,15 @@ namespace ActsTrk
   void
   TrackStatePrinter::printMeasurements(const EventContext &ctx,
                                        const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
-                                       const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
+                                       const DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap,
                                        const std::vector<size_t> &offsets) const
   {
-    auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
+    const Acts::TrackingGeometry *
+       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+    if (!acts_tracking_geometry) {
+       ATH_MSG_WARNING("No Acts tracking geometry.");
+       return;
+    }
     Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
 
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
@@ -481,7 +502,12 @@ namespace ActsTrk
     {
       for (const auto *measurement : *clusterContainers[icontainer])
       {
-        printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp[icontainer], detectorElementCollections[icontainer], offsets[icontainer]);
+         printMeasurementAssociatedSpacePoint(tgContext,
+                                              *acts_tracking_geometry,
+                                              detectorElementToGeometryIdMap,
+                                              measurement,
+                                              measToSp[icontainer],
+                                              offsets[icontainer]);
       }
     }
     std::cout << std::flush;

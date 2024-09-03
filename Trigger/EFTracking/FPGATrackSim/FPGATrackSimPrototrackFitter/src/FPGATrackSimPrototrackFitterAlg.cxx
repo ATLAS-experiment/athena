@@ -12,11 +12,10 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
-  ATH_CHECK(m_detEleCollKeys.initialize());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ProtoTrackCollectionFromFPGAKey.initialize());
+  ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -43,42 +42,10 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
   /// The block is borrowed from the ACTS TrackFindingAlg and 
   /// should eventually be retired when this is no longer needed / 
   /// automated. 
+  SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+     detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
+  ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
-  std::vector<const InDetDD::SiDetectorElementCollection *> detEleColl;
-  detEleColl.reserve(m_detEleCollKeys.size());
-  for (const auto &detEleCollKey : m_detEleCollKeys)
-  {
-    ATH_MSG_DEBUG("Reading input condition data with key " << detEleCollKey.key());
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleCollHandle(detEleCollKey, ctx);
-    ATH_CHECK(detEleCollHandle.isValid());
-    detEleColl.push_back(detEleCollHandle.retrieve());
-    if (detEleColl.back() == nullptr)
-    {
-      ATH_MSG_FATAL(detEleCollKey.fullKey() << " is not available.");
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
-  }
-
-  TrackingSurfaceHelper trackingSurfaceHelper;
-  for (auto & coll : detEleColl)
-  {
-    for (const auto *det_el : *coll){
-      const Acts::Surface &surface =
-          m_ATLASConverterTool->trkSurfaceToActsSurface(det_el->surface());
-      xAOD::UncalibMeasType type = xAOD::UncalibMeasType::Other;
-      if (det_el->isPixel()) type = xAOD::UncalibMeasType::PixelClusterType;
-      else if (det_el->isSCT()) type = xAOD::UncalibMeasType::StripClusterType;
-      trackingSurfaceHelper.actsSurfaces(type).push_back(&surface);
-    }
-  }
-  for (const auto & coll : detEleColl)
-  {
-    xAOD::UncalibMeasType measType = xAOD::UncalibMeasType::Other;
-    if (coll->front()->isPixel()) measType = xAOD::UncalibMeasType::PixelClusterType;
-    else measType = xAOD::UncalibMeasType::StripClusterType;
-    trackingSurfaceHelper.setSiDetectorElements(measType, coll);
-  }
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
   // CalibrationContext converter not implemented yet.
@@ -94,7 +61,7 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
       m_trackingGeometryTool->getGeometryContext(ctx).context(),
       m_extrapolationTool->getMagneticFieldContext(ctx),
       Acts::CalibrationContext(),
-      trackingSurfaceHelper);
+      **detectorElementToGeometryIdMap);
 
     if(!res) continue;
     if (res->size() == 0 ) continue;

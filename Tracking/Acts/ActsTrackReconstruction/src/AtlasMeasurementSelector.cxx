@@ -25,8 +25,6 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 
-#include "ActsEventCnv/IActsToTrkConverterTool.h"
-
 #include "AtlasUncalibSourceLinkAccessor.h"
 #include "IMeasurementSelector.h"
 #include "CalibratorRegistry.h"
@@ -325,14 +323,13 @@ namespace {
 
 namespace ActsTrk {
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector([[maybe_unused]] const ActsTrk::IActsToTrkConverterTool &ATLASConverterTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
                                                                        const std::vector<size_t> &numMeasurementsCutOff) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool); // *m_ATLASConverterTool,
+    ActsTrk::MeasurementCalibrator2 atl_measurement_calibrator(onTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
     using AtlMeasurementSelector = AtlasActsMeasurmentSelector<ActsTrk::UncalibSourceLinkAccessor::Iterator, RecoTrackContainer>;

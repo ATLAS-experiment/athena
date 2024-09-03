@@ -31,8 +31,6 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
-#include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
 #include "AtlasMeasurementSelector.h"
@@ -99,7 +97,7 @@ namespace ActsTrk
     // Read and Write handles
     ATH_CHECK(m_seedContainerKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
-    ATH_CHECK(m_detEleCollKeys.initialize());
+    ATH_CHECK(m_detectorElementToGeometryIdMapKey.initialize());
     ATH_CHECK(m_estimatedTrackParametersKeys.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
@@ -116,16 +114,9 @@ namespace ActsTrk
       return StatusCode::FAILURE;
     }
 
-    if (m_detEleCollKeys.size() != m_uncalibratedMeasurementContainerKeys.size())
-    {
-      ATH_MSG_FATAL("There are " << m_uncalibratedMeasurementContainerKeys.size() << " UncalibratedMeasurementContainerKeys, but " << m_detEleCollKeys.size() << " DetEleCollKeys");
-      return StatusCode::FAILURE;
-    }
-
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
@@ -284,7 +275,6 @@ namespace ActsTrk
     // MEASUREMENTS
     std::vector<const xAOD::UncalibratedMeasurementContainer *> uncalibratedMeasurementContainers;
     uncalibratedMeasurementContainers.reserve(m_uncalibratedMeasurementContainerKeys.size());
-    std::size_t measTotal = 0;
     for (const auto &uncalibratedMeasurementContainerKey : m_uncalibratedMeasurementContainerKeys)
     {
       ATH_MSG_DEBUG("Reading input collection with key " << uncalibratedMeasurementContainerKey.key());
@@ -292,24 +282,11 @@ namespace ActsTrk
       ATH_CHECK(uncalibratedMeasurementContainerHandle.isValid());
       uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
       ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
-      measTotal += uncalibratedMeasurementContainers.back()->size();
     }
 
-    std::vector<const InDetDD::SiDetectorElementCollection *> detEleColl;
-    detEleColl.reserve(m_detEleCollKeys.size());
-    for (const auto &detEleCollKey : m_detEleCollKeys)
-    {
-      ATH_MSG_DEBUG("Reading input condition data with key " << detEleCollKey.key());
-      SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleCollHandle(detEleCollKey, ctx);
-      ATH_CHECK(detEleCollHandle.isValid());
-      detEleColl.push_back(detEleCollHandle.retrieve());
-      if (detEleColl.back() == nullptr)
-      {
-        ATH_MSG_FATAL(detEleCollKey.fullKey() << " is not available.");
-        return StatusCode::FAILURE;
-      }
-      ATH_MSG_DEBUG("Retrieved " << detEleColl.back()->size() << " input condition elements from key " << detEleCollKey.key());
-    }
+    SG::ReadCondHandle<ActsTrk::DetectorElementToActsGeometryIdMap>
+       detectorElementToGeometryIdMap{m_detectorElementToGeometryIdMapKey, ctx};
+    ATH_CHECK(detectorElementToGeometryIdMap.isValid());
 
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds, m_skipDuplicateSeeds);
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
@@ -319,24 +296,20 @@ namespace ActsTrk
       duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer]);
     }
 
-    detail::TrackFindingMeasurements measurements(measTotal);
+    detail::TrackFindingMeasurements measurements(uncalibratedMeasurementContainers.size() /* number of measurement containers*/);
+    const Acts::TrackingGeometry *
+       acts_tracking_geometry = m_trackingGeometryTool->trackingGeometry().get();
+    ATH_CHECK(acts_tracking_geometry != nullptr);
 
-    // @TODO make this condition data
-    for (std::size_t icontainer = 0; icontainer < detEleColl.size(); ++icontainer) {
-      xAOD::UncalibMeasType measType =
-          !uncalibratedMeasurementContainers[icontainer]->empty() ? uncalibratedMeasurementContainers[icontainer]->at(0)->type()
-                                                                  : xAOD::UncalibMeasType::Other;
-      measurements.addDetectorElements(measType, *detEleColl[icontainer], m_ATLASConverterTool);
-    }
-
-    // NB. must complete all addDetectorElements() before addMeasurements(), so don't combine these loops!
     for (std::size_t icontainer = 0; icontainer < uncalibratedMeasurementContainers.size(); ++icontainer) {
       ATH_MSG_DEBUG("Create " << uncalibratedMeasurementContainers[icontainer]->size() << " source links from measurements in " << m_uncalibratedMeasurementContainerKeys[icontainer].key());
-      measurements.addMeasurements(icontainer, *uncalibratedMeasurementContainers[icontainer], *detEleColl[icontainer], m_ATLASConverterTool);
+      measurements.addMeasurements(icontainer,
+                                   *uncalibratedMeasurementContainers[icontainer],
+                                   **detectorElementToGeometryIdMap);
     }
 
     if (!m_trackStatePrinter.empty()) {
-      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, detEleColl, measurements.measurementOffsets());
+      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, **detectorElementToGeometryIdMap, measurements.measurementOffsets());
     }
 
 
@@ -356,6 +329,8 @@ namespace ActsTrk
       if (estimatedTrackParametersContainers[icontainer]->empty())
         continue;
       ATH_CHECK(findTracks(ctx,
+                           *acts_tracking_geometry,
+                           **detectorElementToGeometryIdMap,
                            measurements,
                            duplicateSeedDetector,
                            *estimatedTrackParametersContainers[icontainer],
@@ -394,6 +369,8 @@ namespace ActsTrk
 
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
+                              const Acts::TrackingGeometry &trackingGeometry,
+                              const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeoId,
                               const detail::TrackFindingMeasurements &measurements,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
@@ -421,8 +398,7 @@ namespace ActsTrk
 
     using AtlUncalibSourceLinkAccessor = UncalibSourceLinkAccessor;
 
-    AtlUncalibSourceLinkAccessor slAccessor(measurements.orderedGeoIds(),
-                                            measurements.measurementRanges());
+    AtlUncalibSourceLinkAccessor slAccessor(measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
@@ -470,11 +446,10 @@ namespace ActsTrk
     // N.B. OnTrackCalibrator expects disabled tool handles when no calibration is requested.
     // Therefore, passing them without checking if they are enabled is safe.
 
-    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(
-       *m_ATLASConverterTool,
-       measurements.trackingSurfaceHelper(),
-       m_pixelCalibTool,
-       m_stripCalibTool);
+    auto calibrator = OnTrackCalibrator<detail::RecoTrackStateContainer>(trackingGeometry,
+                                                                         detectorElementToGeoId,
+                                                                         m_pixelCalibTool,
+                                                                         m_stripCalibTool);
 
     if (m_useDefaultMeasurementSelector.value()) {
        // for default measurement selector need connect calibrator
@@ -609,7 +584,7 @@ namespace ActsTrk
         // Perform KF before CKF
         const auto fittedSeedCollection = m_fitterTool->fit(ctx, *(*seeds)[iseed], *initialParameters,
                                                             tgContext, mfContext, calContext,
-                                                            measurements.trackingSurfaceHelper());
+                                                            detectorElementToGeoId);
         if (not fittedSeedCollection)
         {
           ATH_MSG_WARNING("KF Fitted Track is nullptr");
@@ -1064,8 +1039,7 @@ namespace ActsTrk
       etaBinsf.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
     }
 
-    m_measurementSelector = ActsTrk::getMeasurementSelector(*m_ATLASConverterTool,
-                                                            m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+    m_measurementSelector = ActsTrk::getMeasurementSelector(m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
                                                             etaBinsf,
                                                             chi2CutOffOutlier,
                                                             m_numMeasurementsCutOff.value());
