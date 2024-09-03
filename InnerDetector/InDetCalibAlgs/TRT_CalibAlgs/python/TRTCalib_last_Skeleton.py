@@ -167,20 +167,75 @@ def fromRunArgs(runArgs):
     nextstep("converting ps to pdf")
     ##################################################################################################
     
-    command  = "ps2pdf itersum.ps %s.itersum.pdf" %(outputFile)
+    command  = "ps2pdf itersum.ps %s.itersum.pdf" % (outputFile)
     
     tryError(command,"ERROR: Failed in creating itersum.pdf from itersum.ps)\n")
+
+    ##################################################################################################
+    nextstep("Straw status Report")
+    ##################################################################################################
     
+    command  = "mkdir -p -v output/ ; TRTCalib_StrawStatusReport %d" % (runNumber)
     
+    tryError(command,"ERROR: Failed running TRTCalib_StrawStatusReport.cxx\n")
+ 
+    ##################################################################################################
+    nextstep("Straw status plots (root macro)")
+    ##################################################################################################
+       
+    from ROOT import PathResolver
+    command  = "root -l -b -q %s" % (PathResolver.FindCalibFile("TRT_CalibAlgs/TRTCalib_StrawStatusReport.C"))
     
+    tryError(command,"ERROR: Failed running root macro TRTCalib_StrawStatusReport.C\n")
+ 
+    ##################################################################################################
+    nextstep("TAR'ing files")
+    ##################################################################################################
+       
+    try:
+        # Getting list of files to be compressed
+        files_list=glob.glob(outputFile+".*")
+        # Compressing
+        tar = tarfile.open(outputFile, "w:gz")
+        print("\nCompressing files in %s output file:" % outputFile)
+        for file in files_list:
+            print("\t-",file)
+            tar.add(file)
+        tar.close()
+    except OSError as e:
+        print("ERROR: Failed compressing the output files\n",e)
+        sys.exit(e.errno)   
+
+ 
+    ##################################################################################################
+    nextstep("Copying files to AFS Directory")
+    ################################################################################################## 
     
+    outDIR = "%s/run_%d" % (runArgs.attrtcal_dir, runNumber)
     
-    # WORK IN PROGRESS! - FUTURE MR
+    # Extracting iteration from Tier0 and for emails
+    outputFile_split = outputFile.split('.')
+    itera = '9999' # default iteration for testing only
+    if len(outputFile_split) > 5:
+        if "iter" in outputFile_split[5]:
+            itera = (outputFile_split[5])[-1:]    # e.g. data14_cos.00247236.express_express.trtcal.TXT.iter1 --> '1'
+    
+    command  = "mkdir -p -v %s ; " % (outDIR)
+    command += "cp -v %s.merge.root %s/trtcalib_0%s_histograms.root ; " % (outputFile, outDIR, itera)
+    command += "cp -v %s.calibout.txt %s/calibout.%d.NoShifted.txt ; " % (outputFile, outDIR, runNumber)
+    command += "cp -v %s.itersum.pdf %s/Plots.%d.pdf ; " % (outputFile, outDIR, runNumber)
+    command += "cp -v %s.dbconst.txt %s/dbconst.%d.txt ; " % (outputFile, outDIR, runNumber)
+    command += "cp -v %s.dbconst.txt %s/calibout.%d.txt ; " % (outputFile, outDIR, runNumber)
+    command += "cp -v straws.%d.txt %s/straws.%d.txt; " % (runNumber, outDIR, runNumber)
+    command += "cp -v TRT_StrawStatusReport.txt %s/TRT_StrawStatusReport.%d.txt; " % (outDIR, runNumber)
+    command += "cp -v allPlots.pdf %s/TRT_StrawStatusReport.%d.pdf; " % (outDIR, runNumber)
+    
+    tryError(command,"ERROR: Files cannot be copied to the chosen directory\n")
+    
+    # WORK IN PROGRESS! -> Email notification to the mailing list! - FUTURE MR
     
     ##################################################################################################
-    #
-    #       Merging *.tracktuple.root files
-    #
+    # nextstep("e-mail notification")
     ##################################################################################################
     
     # try:
@@ -193,44 +248,7 @@ def fromRunArgs(runArgs):
     #     print("ERROR: Failed in process merging *.tracktuple.root files\n",e)
     #     sys.exit(e.errno)
 
-    ##################################################################################################
-    #
-    #       Merging *.straw.txt files
-    #
-    ##################################################################################################
-    
-    # try:
-    #     command = 'TRTCalib_StrawStatus_merge %s.merged.straw.txt %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.straw.txt " % str(file)) for file in runArgs.inputTARFile ))
-    #     print("\n Running: %s\n" % (command))
-    #     stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    #     print("OUTPUT:\n%s" % (stdout.decode('ascii')))
-    #     print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))
-    # except OSError as e:
-    #     print("ERROR: Failed in process merging *.straw.txt files\n",e)
-    #     sys.exit(e.errno)
-    
-        
-    ##################################################################################################
-    #
-    #       Compressing outputs in a tar file!
-    #
-    ################################################################################################## 
-       
-    # try:
-    #     # Getting list of files to be compressed
-    #     files_list=glob.glob(runArgs.outputTAR_MERGEDFile+".*")
-    #     # Compressing
-    #     tar = tarfile.open(runArgs.outputTAR_MERGEDFile, "w:gz")
-    #     print("\nCompressing files in %s output file:" % runArgs.outputTAR_MERGEDFile)
-    #     for file in files_list:
-    #         print("\t-",file)
-    #         tar.add(file)
-    #     tar.close()
-    # except OSError as e:
-    #     print("ERROR: Failed compressing the output files\n",e)
-    #     sys.exit(e.errno)        
-            
-    
+
     # Prints all types of txt files present in a Path
     # print("\nListing files:")
     # for file in sorted(glob.glob("./*", recursive=True)):

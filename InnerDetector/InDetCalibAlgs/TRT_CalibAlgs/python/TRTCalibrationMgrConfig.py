@@ -43,10 +43,10 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='', Hit
         
     
     # if a text file is in the arguments, use the constants in that instead of the DB
-    if not calibconstants=="":
+    if not calibconstants:
 
         from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
-        acc.merge(TRTCondWriteCfg(flags,calibconstants))
+        acc.merge(TRTCondWriteCfg(flags,CalibInputFile=calibconstants))
 
     # add this algorithm to the configuration accumulator                       
     acc.addEventAlgo(CompFactory.TRTCalibrationMgr(name, **kwargs))

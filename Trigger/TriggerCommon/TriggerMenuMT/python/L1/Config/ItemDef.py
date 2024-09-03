@@ -151,6 +151,32 @@ class ItemDef:
         ZDC_OR = Not(ZDC_VETO)
         ZDC_A_AND_C = d.ZDC_2 | (d.ZDC_1 & d.ZDC_0)
 
+        #new ZDC items defiition, ATR-29719
+        ZDC_alt_comb0 = Not(d.ZDC_ALT_2) & Not(d.ZDC_ALT_1) & Not(d.ZDC_ALT_0) # this means no signal!
+        ZDC_alt_comb1 = Not(d.ZDC_ALT_2) & Not(d.ZDC_ALT_1) & d.ZDC_ALT_0
+        ZDC_alt_comb2 = Not(d.ZDC_ALT_2) & d.ZDC_ALT_1      & Not(d.ZDC_ALT_0)
+        ZDC_alt_comb3 = Not(d.ZDC_ALT_2) & d.ZDC_ALT_1      & d.ZDC_ALT_0
+        ZDC_alt_comb4 = d.ZDC_ALT_2      & Not(d.ZDC_ALT_1) & Not(d.ZDC_ALT_0)
+        ZDC_alt_comb5 = d.ZDC_ALT_2      & Not(d.ZDC_ALT_1) & d.ZDC_ALT_0
+        ZDC_alt_comb6 = d.ZDC_ALT_2      & d.ZDC_ALT_1      & Not(d.ZDC_ALT_0)
+        ZDC_alt_comb7 = d.ZDC_ALT_2      & d.ZDC_ALT_1      & d.ZDC_ALT_0
+
+        #new ZDC items in HI running
+        ZDC_EhLT15 = ZDC_alt_comb1 #hadronic energy sum < 15 TeV
+        ZDC_EhLT20 = ZDC_alt_comb2 #hadronic energy sum < 20 TeV
+        ZDC_EhLT25 = ZDC_alt_comb3 #hadronic energy sum < 25 TeV
+        ZDC_EhLT35 = ZDC_alt_comb4 #hadronic energy sum < 35 TeV
+        ZDC_EhLT50 = ZDC_alt_comb5 #hadronic energy sum < 50 TeV – supporting only
+        ZDC_EhLT100 = ZDC_alt_comb6 #hadronic energy sum < 100 TeV - for PU rejection
+
+        #new ZDC items in pp running
+        ZDC_pp_C = ZDC_alt_comb1
+        ZDC_pp_A = ZDC_alt_comb2
+        ZDC_pp_OR = ZDC_pp_A | ZDC_pp_C
+        ZDC_pp_A_C = ZDC_pp_A & ZDC_pp_C
+        ZDC_pp_C2 = ZDC_alt_comb5
+        ZDC_pp_A2 = ZDC_alt_comb6
+        ZDC_pp_OR2 = ZDC_pp_C2 | ZDC_pp_A2
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -963,6 +989,9 @@ class ItemDef:
         MenuItem('L1_jJ80_jXE120' ).setLogic( d.jJ80 & d.jXE120 & physcond).setTriggerType(TT.calo)
 
         # phase1 TE
+        MenuItem('L1_gTE3'     ).setLogic( d.gTE3 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gTE5'     ).setLogic( d.gTE5 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gTE10'     ).setLogic( d.gTE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gTE200'     ).setLogic( d.gTE200 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jTE200'     ).setLogic( d.jTE200 & physcond).setTriggerType(TT.calo)
@@ -1540,6 +1569,13 @@ class ItemDef:
         MenuItem('L1_ZDC_XOR4_VTE200' ).setLogic( PHYS_ZDC_XOR4 & Not(d.TE200)  & physcond)
         MenuItem('L1_ZDC_XOR4_VjTE200_GAP_AANDC' ).setLogic( PHYS_ZDC_XOR4 & Not(d.jTE200) & GAPAC  & physcond)
         MenuItem('L1_VZDC_A_VZDC_C_VjTE200_GAP_AANDC' ).setLogic(  PHYS_VZDC_A_VZDC_C  &  Not(d.jTE200) & GAPAC  & physcond)
+
+        #ATR-30020
+        MenuItem('L1_ZDC_EhLT15_jTE4000').setLogic( ZDC_EhLT15 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_EhLT20_jTE4000').setLogic( ZDC_EhLT20 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_EhLT25_jTE4000').setLogic( ZDC_EhLT25 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_EhLT35_jTE4000').setLogic( ZDC_EhLT35 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_EhLT50_jTE4000').setLogic( ZDC_EhLT50 & d.jTE4000 & physcond )
 
         # ATR-14967
         # MenuItem('L1_EM3_VZDC_A'           ).setLogic( d.EM3 & Not(ZDC_A) & physcond)

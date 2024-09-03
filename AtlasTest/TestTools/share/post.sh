@@ -88,7 +88,7 @@ PP="$PP"'| Machine: .* System and Processor Info'
 PP="$PP"'| Jobname = .* Machine ='
 # ignore slug pid printout
 PP="$PP"'|Atlas Detector Simulation, Reconstruction and Analysis Running on'
-PP="$PP"'|Program:  Slug-Dice-Arecon .+ pid +[[:digit:]]+'
+PP="$PP"'|Athena job with pid +[[:digit:]]+'
 #ignore DllClassManager DEBUG messages
 PP="$PP"'|DllClassManager     DEBUG'
 # ignore slug Library printout

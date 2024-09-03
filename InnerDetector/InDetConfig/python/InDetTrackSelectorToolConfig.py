@@ -294,3 +294,34 @@ def TRT_InDetDetailedTrackSelectorToolCfg(
     acc.setPrivateTools(acc.popToolsAndMerge(
         InDetTrackSelectorToolCfg(flags, name, **kwargs)))
     return acc
+
+def TrigTauInDetTrackSelectorToolCfg(
+        flags, name="TrigTau_InDetTrackSelectorTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    if flags.Tracking.ActiveConfig.doTRT and "TrtDCCutTool" not in kwargs:
+        kwargs.setdefault("TrtDCCutTool", acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags)))
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
+
+    kwargs.setdefault("pTMin", 1000.)
+    kwargs.setdefault("IPd0Max", 2.)
+    kwargs.setdefault("IPz0Max", 9999.)
+    kwargs.setdefault("nHitBLayer", 0)
+    kwargs.setdefault("nHitPix", 2) # PixelHits + PixelDeadSensors
+    kwargs.setdefault("nHitSct", 0) # SCTHits + SCTDeadSensors
+    kwargs.setdefault("nHitSi", 7) # PixelHits + SCTHits + PixelDeadSensors + SCTDeadSensors
+    kwargs.setdefault("nHitTrt", 0)
+    kwargs.setdefault("fitChi2OnNdfMax", 99999.)
+
+    kwargs.setdefault("useTrackSummaryInfo", True)
+    kwargs.setdefault("useSharedHitInfo", False)
+    kwargs.setdefault("useTrackQualityInfo", True)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetTrackSelectorToolCfg(flags, name, **kwargs)))
+    return acc

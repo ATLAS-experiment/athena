@@ -1864,6 +1864,7 @@ def setupMenu():
         ChainProp(name='HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         
         #---------- support 2m + 1g + ZRad triggers
+        ChainProp(name='HLT_2mu14_g20_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g22_tight_probe_L1eEM18M_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM18M'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g25_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g35_medium_probe_L1eEM24L_L12MU8F', l1SeedThresholds=['MU8F','PROBEeEM24L'],groups=TagAndProbePhIGroup+EgammaMuonGroup),
@@ -2193,7 +2194,7 @@ def setupMenu():
 
 
         # jet + tau tag and probe (ATR-24031)
-        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_L1RD0_FILLED', l1SeedThresholds=['PROBEeTAU12'], groups=TagAndProbePhIGroup+TauJetGroup+['RATE:CPS_RD0_FILLED']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_L1RD0_FILLED', l1SeedThresholds=['eTAU12'], groups=SupportPhIGroup+TauJetGroup+['RATE:CPS_RD0_FILLED']),
         # Commented for now because the corresponding jet trigger is out due to fluctuating counts
         #   ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j15_pf_ftf_03dRAB_L1RD0_FILLED', l1SeedThresholds=['PROBEeTAU12', 'FSNOSEED'], groups=TagAndProbePhIGroup+TauJetGroup+['RATE:CPS_RD0_FILLED']),
         ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j25_pf_ftf_03dRAB_L1RD0_FILLED', l1SeedThresholds=['PROBEeTAU12', 'FSNOSEED'], groups=SupportPhIGroup+TauJetGroup+['RATE:CPS_RD0_FILLED']),

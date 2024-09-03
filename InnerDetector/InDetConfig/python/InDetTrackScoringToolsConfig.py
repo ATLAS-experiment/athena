@@ -128,7 +128,7 @@ def InDetTrigAmbiScoringToolCfg(
         kwargs.setdefault("useAmbigFcn", True)
         kwargs.setdefault("useTRT_AmbigFcn", False)
         kwargs.setdefault("maxZImp", flags.Tracking.ActiveConfig.maxZImpact)
-        kwargs.setdefault("maxRPhiImp", flags.Tracking.ActiveConfig.maxRPhiImpact)
+        kwargs.setdefault("maxRPhiImp", flags.Tracking.ActiveConfig.maxPrimaryImpact)
         kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("maxSCTHoles", flags.Tracking.ActiveConfig.maxSCTHoles)
         kwargs.setdefault("maxSiHoles", flags.Tracking.ActiveConfig.maxSiHoles)
