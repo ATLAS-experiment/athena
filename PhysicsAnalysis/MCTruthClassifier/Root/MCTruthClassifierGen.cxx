@@ -57,7 +57,6 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
   for (const auto *const entry : *truthParticleLinkVecReadHandle) {
     if (entry->first.isValid() && entry->second.isValid() && HepMC::uniqueID(entry->first) == theUID) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
-        // if the pair does not match return default
       if (!theGenPart || !truthParticle ||
           theGenPart->pdg_id() != truthParticle->pdgId() ||
           theGenPart->status() != truthParticle->status() ||
