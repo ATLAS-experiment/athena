@@ -67,6 +67,7 @@ run "IDPVM-ckf" \
     runIDPVM.py \
     --filesInput AOD.ckf.root \
     --outputFile idpvm.ckf.root \
+    --OnlyTrackingPreInclude \
     --doTightPrimary \
     --doHitLevelPlots \
     --doTechnicalEfficiency \
@@ -103,6 +104,7 @@ run "IDPVM-ambi" \
     runIDPVM.py \
     --filesInput AOD.ambi.root \
     --outputFile idpvm.ambi.root \
+    --OnlyTrackingPreInclude \
     --doTightPrimary \
     --doHitLevelPlots \
     --doExpertPlots

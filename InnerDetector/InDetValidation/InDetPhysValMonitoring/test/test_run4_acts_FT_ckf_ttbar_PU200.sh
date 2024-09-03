@@ -58,7 +58,6 @@ run "Reconstruction-ckf" \
     --outputAODFile AOD.root \
     --maxEvents ${n_events} \
     --multithreaded
-    # --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=True' 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
 
 reco_rc=$?
 
@@ -75,9 +74,8 @@ run "IDPVM-ckf" \
     --doTightPrimary \
     --doHitLevelPlots \
     --HSFlag All \
-    --doExpertPlots
-    # --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
-    # --doTechnicalEfficiency \
+    --doExpertPlots \
+    --OnlyTrackingPreInclude
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
