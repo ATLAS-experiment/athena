@@ -176,10 +176,10 @@ StatusCode T2CaloEgammaReFastAlgo::execute(const EventContext& context) const
      float et_calib = -999.0;
      float et_uncalib = ptrigEmCluster->et();
      if ( m_doCalibWithRings ){
-        ATH_CHECK(m_calibWRingsTool->checkRings(context));
-        et_calib = m_calibWRingsTool->makeCalibWRings(context);
-        ptrigEmCluster->setEt(et_calib);
-
+       if (m_calibWRingsTool->checkRings(context)){
+          et_calib = m_calibWRingsTool->makeCalibWRings(context);
+          ptrigEmCluster->setEt(et_calib);
+        }
      }
 
 

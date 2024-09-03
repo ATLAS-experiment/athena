@@ -34,7 +34,7 @@ class TrigFastCalibWithRings: public asg::AsgTool
         float makeCalibWRings(const EventContext& ctx) const;
         StatusCode setupBDTFastCalo(const std::string& fileName); 
         static const TString& getString(TObject* obj);
-        StatusCode checkRings(const EventContext& ctx ) const;
+        bool checkRings(const EventContext& ctx ) const;
 
 
     private:
