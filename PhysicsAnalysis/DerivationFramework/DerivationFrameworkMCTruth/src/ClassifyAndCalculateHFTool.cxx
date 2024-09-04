@@ -12,6 +12,7 @@
 
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFTool.h"
 #include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
 
@@ -50,59 +51,6 @@ namespace DerivationFramework {
 
   StatusCode ClassifyAndCalculateHFTool::finalize(){
     return StatusCode::SUCCESS;
-  }
-
-  /*
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  ------------------------------------------------------------- Hadron Type -------------------------------------------------------------
-  ---------------------------------------------------------------------------------------------------------------------------------------
-  */
-
-  // Define the function isBHadron that determines if an hadron is a B-type.
-
-  bool ClassifyAndCalculateHFTool::isBHadron(int pdgId) const{
-
-    // Check if the pdgId is too large to protect against some ions that could pass the test below.
-
-    if(pdgId>1e9) return false;  
-
-    // Determine if the pdgId corresponds to a B-hadron.
-    // The PDG Id of quark composite states has 7-digits.
-    // The 3rd and 4th digits of the PDG Id starting from the end correspond to the largest PDG Id of the quarks.
-
-    int rest1(std::abs(pdgId)%1000);  // Three last digits of the PDG Id.
-    int rest2(std::abs(pdgId)%10000); // Four last digits of the PDF Id.
-
-    // If the 3rd digit or 4th one is 5, then the hadron has a b-quark.
-
-    if((rest2 >= 5000 && rest2 < 6000) || (rest1 >= 500 && rest1 < 600)) return true;
-
-    return false;
-
-  }
-
-  // Define the function isCHadron that determines if an hadron is a C-type.
-
-  bool ClassifyAndCalculateHFTool::isCHadron(int pdgId) const{
-    
-    // Check if the pdgId is too large to protect against some ions that could pass the test below
-    
-    if(pdgId>1e9) return false;  
-
-    // Determine if the pdgId corresponds to a C-hadron.
-    // The PDG Id of quark composite states has 7-digits.
-    // The 3rd and 4th digits of the PDG Id starting from the end correspond to the largest PDG Id of the quarks.
-
-    int rest1(std::abs(pdgId)%1000);  // Three last digits of the PDG Id.
-    int rest2(std::abs(pdgId)%10000); // Four last digits of the PDF Id.
-
-    // If the 3rd digit or 4th one is 4, then the hadron has a c-quark.
-    // The function does not consider if the case where the hadron has also a b-quark.
-    // Hence, the function isCHadron should only be called if the function isBHadron returns a false.
-
-    if((rest2 >= 4000 && rest2 < 5000) || (rest1 >= 400 && rest1 < 500)) return true;
-
-    return false;
   }
 
   /*
@@ -188,9 +136,9 @@ namespace DerivationFramework {
           // Determine if the hadron is a B-hadron or a C-hadron.
 
           int hftype = 0;
-        
-          if(ClassifyAndCalculateHFTool::isCHadron(pdgId)) hftype=4; // B-hadron
-          if(ClassifyAndCalculateHFTool::isBHadron(pdgId)) hftype=5; // C-hadron.
+          
+          if(MC::isCharmHadron(pdgId)) hftype=4; // B-hadron
+          if(MC::isBottomHadron(pdgId)) hftype=5; // C-hadron.
         
           // Check if hftype is 4 or 5.
 

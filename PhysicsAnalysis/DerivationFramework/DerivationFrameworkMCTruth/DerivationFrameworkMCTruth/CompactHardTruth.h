@@ -61,20 +61,10 @@ class CompactHardTruth
   /// Destructor: 
   virtual ~CompactHardTruth(); 
 
-  // Assignment operator: 
-  //CompactHardTruth &operator=(const CompactHardTruth &alg); 
-
   // Athena algorithm Hooks
   virtual StatusCode  initialize();
   virtual StatusCode  execute();
   virtual StatusCode  finalize();
-
-
-  // Parton is quark or gluon
-  virtual bool isParton( HepMC::ConstGenParticlePtr );
-
-  // Final parton is quark or gluon ending in vertex giving !isParton
-  virtual bool isFinalParton( HepMC::ConstGenParticlePtr );
 
   // Total in/out FourVector for vertex
   virtual HepMC::FourVector vtxInMom(HepMC::ConstGenVertexPtr);

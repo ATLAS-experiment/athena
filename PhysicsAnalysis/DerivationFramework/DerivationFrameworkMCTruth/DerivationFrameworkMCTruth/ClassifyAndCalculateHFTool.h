@@ -75,8 +75,6 @@ namespace DerivationFramework {
       //  -flagJets:                Computes the necessary variables for the classifier using information from jets and add the information in three vectors.
       //  -computeHFClassification: Compute the classifier.
       //  -getSimpleClassification: Compute a simpler classifier. 
-      //  -isBHadron:               Determine if an hadron is a B-type.
-      //  -isCHadron:               Determine if an hadron is a C-type.
 
       void flagJets(const xAOD::JetContainer* jets,
                     const std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>>& particleMatch,
@@ -84,8 +82,6 @@ namespace DerivationFramework {
                     const std::string& hfDecorationName) const;
       int computeHFClassification(const xAOD::JetContainer* jets, const std::string& hfDecorationName) const;
       int getSimpleClassification(int hfclassif) const;
-      bool isBHadron(int pdgId) const;
-      bool isCHadron(int pdgId) const;
 
     /*
     -------------------------------------------------------------------------------------------------------------------------------------
