@@ -21,7 +21,7 @@ class BTaggingSelectionJsonTool: public asg::AsgTool,
 
   virtual int accept(const xAOD::Jet& jet) const override;
   // the following funciton is only for Xbb calibration team, for physics analyses, please use the one above.
-  virtual int accept(double pt, double eta, double mass, double tagger_discriminant) const;
+  virtual int accept(double pt, double eta, double mass, double tagger_discriminant) const override;
 
   virtual double getTaggerDiscriminant( const xAOD::Jet& jet ) const override;
 
