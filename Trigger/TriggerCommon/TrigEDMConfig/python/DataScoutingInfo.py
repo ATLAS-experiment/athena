@@ -38,7 +38,7 @@ _DataScoutingStreams = {
 
 # Truncation thresholds (in bytes) for each HLT result type
 TruncationThresholds = {
-    0: 5*(1024**2),  # Main: 5 MB
+    0: 7*(1024**2),  # Main: 7 MB (increased from 5MB after ATR-29142)
     1: 2*(1024**2),  # CostMonDS: 2 MB
     5: 1*(1024**2),  # PhysicsTLA: 1 MB
     6: 1*(1024**2),  # DarkJetPEBTLA: 1 MB
