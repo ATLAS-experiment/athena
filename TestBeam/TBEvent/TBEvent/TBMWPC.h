@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBMWPC_H
@@ -62,20 +62,20 @@ class TBMWPC : public TBBeamDetector
 
 
   // access signals ///////////////////////////////////////////////////////
-  inline std::vector<float> getCPos() const { return m_cPos; }
+  inline const std::vector<float>& getCPos() const { return m_cPos; }
   
-  inline std::vector<float> getCErr() const { return  m_cErr; }
+  inline const std::vector<float>& getCErr() const { return  m_cErr; }
 
   inline bool isX() const {return m_isX;}
   
   
   
   /** Get cluster size for c-direction */
-  inline std::vector<float> getClusterSizeC() const{ return m_clusterSize_c;}
+  inline const std::vector<float>& getClusterSizeC() const{ return m_clusterSize_c;}
 
 
   // access overflow for each variable  //////////////////////////////////
-  inline std::vector<bool> isCPosOverflow() const { return m_cPosOverflow; }
+  inline const std::vector<bool>& isCPosOverflow() const { return m_cPosOverflow; }
 
 
  private:

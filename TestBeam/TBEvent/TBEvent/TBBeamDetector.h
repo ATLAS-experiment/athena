@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBBEAMDETECTOR_H
@@ -58,7 +58,7 @@ class TBBeamDetector
   // Getters //
   ////////////
 
- std::string getDetectorName() const
+const  std::string& getDetectorName() const
     { return m_tbDetectorName; }
 
   bool isOverflow() const

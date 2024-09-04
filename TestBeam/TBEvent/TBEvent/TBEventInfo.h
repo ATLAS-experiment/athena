@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBEVENTINFO_H
@@ -66,7 +66,7 @@ class TBEventInfo
   int getEventType() const {return m_ev_type;}
   unsigned int getRunNum() const {return m_run_num;}
   float getBeamMomentum() const {return m_beam_moment;}
-  std::string getBeamParticle() const {return m_beam_part;}
+  const std::string& getBeamParticle() const {return m_beam_part;}
   float getCryoX() const {return m_cryoX;}
   float getCryoAngle() const {return m_cryoAngle;}
   float getTableY() const {return m_tableY;}
