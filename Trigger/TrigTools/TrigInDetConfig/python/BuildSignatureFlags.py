@@ -181,6 +181,7 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "cosmics"      : cosmics,
     "bmumux"       : bmumux,
     "minBias"      : minBias,
+    "minBiasPixel" : minBiasPixel,
     
     "electronLRT"  : electronLRT,
     "muonLRT"      : muonLRT,
@@ -392,7 +393,35 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.roadWidth           = 20
   flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
   return flags
+
+
+@signatureActions
+def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+
+  flags.input_name = instanceName
+  flags.name     = "minBiasPixel"
+  flags.suffix   = "MinBiasPixel"
+  flags.roi      = "HLT_Roi_MinBias"
+  flags.doFullScan      = True
+  flags.pTmin    = 0.1*Units.GeV # TODO: double check
+  flags.minPT    = tsetter(flags.minPT, flags.pTmin)
+
+  flags.doTRT           = False
+  flags.etaHalfWidth    = 3
+  flags.phiHalfWidth    = math.pi
+  flags.doZFinder       = True
+  flags.doZFinderOnly   = True
   
+  flags.nClustersMin        = 5
+  flags.useSeedFilter       = True
+  flags.maxPrimaryImpact    = 10.*Units.mm
+  flags.maxZImpact          = 150.*Units.mm
+  flags.roadWidth           = 20
+  flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
+  return flags
+
+
+
 @signatureActions
 def beamSpot(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
@@ -722,6 +751,8 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   flags.trkTracks_FTF     = f'HLT_IDTrkTrack_{flags.suffix}_FTF'
   flags.trkTracks_IDTrig  = f'HLT_IDTrkTrack_{flags.suffix}_IDTrig'
   flags.tracks_FTF    = collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF')
+  # ToDo: shouldn't be setting flags using this if type structures, the flags should be
+  #       actually set somewhere in appropriate config functions
   flags.tracks_IDTrig = \
     collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
 
@@ -744,12 +775,14 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
 
 
 def collToRecordable(flags,name):
+  # ToDo: should just be a flag set per signature in the per signature config
+  #       and not setting parameters using tests on the signature name
   ret = name
   signature = flags.input_name
   firstStage = True if "FTF" in name else False
   record = True
   if firstStage:
-    if signature in ["minBias","bjetLRT",
+    if signature in ["minBias","minBiasPixel","bjetLRT",
                      "beamSpot","BeamSpot"]:
       record = False
   else:
