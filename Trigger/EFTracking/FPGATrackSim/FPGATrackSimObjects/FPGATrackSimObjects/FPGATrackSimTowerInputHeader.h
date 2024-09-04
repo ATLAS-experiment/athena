@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimOBJECT_FPGATrackSimTOWERINPUTHEADER_H
@@ -45,7 +45,7 @@ public:
   //  handling hits
   const std::vector<FPGATrackSimHit>& hits()  const { return m_Hits; }
   int nHits() const { return m_Hits.size(); }
-  void addHit(FPGATrackSimHit s) { m_Hits.push_back(s); }
+  void addHit(const FPGATrackSimHit& s) { m_Hits.push_back(s); }
   void clearHits() { m_Hits.clear(); }
   void reserveHits(size_t size) { m_Hits.reserve(size); }
 
