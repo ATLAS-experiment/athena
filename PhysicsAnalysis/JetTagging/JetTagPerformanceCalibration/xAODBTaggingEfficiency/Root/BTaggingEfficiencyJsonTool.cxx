@@ -1,0 +1,167 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
+#include <fstream>
+
+BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name ) :
+  asg::AsgTool ( name )
+{
+  m_initialised = false;
+  declareProperty( "MaxEta", m_maxEta = 2.5 );
+  declareProperty( "MinPt", m_minPt = -1 /*MeV*/);
+  declareProperty( "TaggerName",                    m_taggerName="",       "tagging algorithm name");
+  declareProperty( "JetAuthor",                     m_jetAuthor="",        "jet collection");
+  declareProperty( "OperatingPoint",                m_OP="",               "operating point");
+  declareProperty( "JsonConfigFile",                m_json_config_path="", "Path to JSON config file");
+}
+
+BTaggingEfficiencyJsonTool::~BTaggingEfficiencyJsonTool() {
+}
+
+StatusCode BTaggingEfficiencyJsonTool::initialize()
+{
+  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_json_config_path);
+
+  std::ifstream jsonFile(m_json_config_path);
+  if (!jsonFile.is_open()) {
+    ATH_MSG_ERROR( "JSON file " + m_json_config_path + " do not exist. Please put the correct path of the file." );
+    return StatusCode::FAILURE;
+  }
+  m_json_config = json::parse(jsonFile);
+  jsonFile.close();
+
+  if (m_taggerName.empty() || !m_json_config.contains(m_taggerName)){
+    ATH_MSG_ERROR( " Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
+    return StatusCode::FAILURE;
+  }
+
+  if (m_jetAuthor.empty() || !m_json_config[m_taggerName].contains(m_jetAuthor)){
+    ATH_MSG_ERROR( "Tagger: " +m_taggerName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
+    return StatusCode::FAILURE;
+  }
+
+  if (m_OP.empty() || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
+    ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_taggerName+ " tagger.");
+    return StatusCode::FAILURE;
+  }
+
+  m_truthlabel = m_json_config[m_taggerName][m_jetAuthor]["meta"]["TruthLabel"];
+
+  // map truth labels to categories
+  for (auto& el : m_json_config[m_taggerName][m_jetAuthor]["meta"]["labelMapping"].items()) {
+    std::string label = el.key();
+    for (const auto& num : el.value()) {
+      int key = num; 
+      m_labelMap[key] = label;
+    }
+  }
+
+  // preload pt bins, systematics and SFs for each category
+  for (auto& label : m_labelMap) {
+    std::string labelString = label.second;
+    m_ptMap[labelString] = m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["pt"].get<std::vector<float>>();
+    m_sfMap[labelString] = m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["nominal"].get<std::vector<float>>();
+    for (auto& [systematicName, values] : m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["systematics"].items()){
+      m_sysMap[labelString][systematicName] = values.get<std::vector<float>>();
+    }
+  }
+
+  m_currentSys = nullptr;
+  m_sysCache.initialize(affectingSystematics(),
+                   [this](const CP::SystematicSet& systConfig, sysData& sys) 
+                   {return calcSystematicVariation(systConfig, sys);});
+  ANA_CHECK (applySystematicVariation (CP::SystematicSet()));
+
+  m_initialised = true;
+  return StatusCode::SUCCESS;
+}
+
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf ) const 
+{
+  if (! m_initialised) {
+    throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
+  }
+
+  sf = 1.0;
+
+  SG::AuxElement::ConstAccessor<int> truthLabelAccessor( m_truthlabel );
+  int truthLabel = truthLabelAccessor( jet );
+  std::string labelString;
+  auto it = m_labelMap.find(truthLabel);
+  if (it != m_labelMap.end()) {
+    labelString = it->second;
+  } else {
+    ATH_MSG_WARNING("No calibration on jet with truthLabel: " << truthLabel << ". Returning scale factor of 1.");
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
+  const auto& pts = m_ptMap.at(labelString);
+  size_t bin_index = pts.size();
+  for (size_t i = 1; i < pts.size(); i++) {
+    if (jet.pt()/1000. < pts[i]) {
+      bin_index = i-1;
+      break;
+    }
+  }
+
+  const auto& SFs = m_sfMap.at(labelString);
+  if (bin_index < SFs.size()) {
+    sf = SFs[bin_index];
+  } else {
+    ATH_MSG_WARNING("No calibration for jet with pt: " << jet.pt()/1000. << ". Returning scale factor of 1.");
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+
+  if (m_currentSys->xbb_syst != 0) {
+    sf = sf + m_currentSys->xbb_syst * getSFSys(labelString, bin_index);
+  }
+
+  return CP::CorrectionCode::Ok;
+}
+
+float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
+{
+  float result = 0.0;
+  const auto& systematics = m_sysMap.at(labelString);
+  for (auto& [systematicName, values] : systematics){
+    float sys_value = values.at(bin_index);
+    result += sys_value*sys_value;
+  }
+  return std::sqrt(result);
+}
+
+StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
+{
+  CP::SystematicVariation syst = systConfig.getSystematicByBaseName("BTagging_Xbb_SYST");
+  sys.xbb_syst = syst.parameter();
+
+  return StatusCode::SUCCESS;
+}
+
+bool BTaggingEfficiencyJsonTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
+{
+  CP::SystematicSet sys = affectingSystematics();
+  return sys.find( systematic) != sys.end();
+}
+
+CP::SystematicSet BTaggingEfficiencyJsonTool::affectingSystematics() const
+{
+  CP::SystematicSet affectingSystematics;
+  affectingSystematics.insert(CP::SystematicVariation("BTagging_Xbb_SYST", 1));
+  affectingSystematics.insert(CP::SystematicVariation("BTagging_Xbb_SYST", -1));
+
+  return affectingSystematics;
+}
+
+CP::SystematicSet BTaggingEfficiencyJsonTool::recommendedSystematics() const
+{
+    return affectingSystematics();
+}
+
+StatusCode BTaggingEfficiencyJsonTool::applySystematicVariation ( const CP::SystematicSet& sysSet )
+{
+  return m_sysCache.get(sysSet, m_currentSys);
+}
+

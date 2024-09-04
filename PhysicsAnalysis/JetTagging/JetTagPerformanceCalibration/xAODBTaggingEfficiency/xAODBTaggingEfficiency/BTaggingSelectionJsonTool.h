@@ -13,6 +13,8 @@ using json = nlohmann::json;
 class BTaggingSelectionJsonTool: public asg::AsgTool,
 			     public virtual IBTaggingSelectionJsonTool {
 
+  ASG_TOOL_CLASS( BTaggingSelectionJsonTool, IBTaggingSelectionJsonTool )
+
   public:
   BTaggingSelectionJsonTool( const std::string& name );
   StatusCode initialize() override;

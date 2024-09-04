@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,5 +16,7 @@
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingTruthTaggingTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingEigenVectorRecompositionTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
 
 #endif // FTAGANALYSISINTERFACES_FTAGANALYSISINTERFACESDICT_H
