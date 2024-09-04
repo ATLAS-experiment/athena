@@ -8,8 +8,6 @@
 #include "FsrUtils/FsrPhotonTool.h"
 #include "IsolationSelection/IsolationSelectionTool.h"
 #include "IsolationCorrections/IsolationCorrectionTool.h"
-#include "IsolationSelection/IsolationCloseByCorrectionTool.h"
-#include "IsolationSelection/IIsolationCloseByCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODRootAccess/tools/ReturnCheck.h"
@@ -22,26 +20,10 @@ namespace FSR {
     FsrPhotonTool::FsrPhotonTool( const std::string& name )
         : asg::AsgTool( name ),
           m_fsr_type(FsrCandidate::FsrUnknown),
+          m_isoSelTool("", this),
           m_isoCorrTool("", this),
-          m_isoCloseByCorrTool("", this),
           m_energyRescaler("", this)
-    {
-
-        declareProperty( "high_et_min", m_high_et_min = 3500. );
-        declareProperty( "overlap_el_ph", m_overlap_el_ph = 0.01 );
-        declareProperty( "overlap_el_mu", m_overlap_el_mu = 0.001 );
-        declareProperty( "far_fsr_drcut", m_far_fsr_drcut = 0.15 );
-        declareProperty( "far_fsr_etcut", m_far_fsr_etcut = 10000.0 );
-        declareProperty( "far_fsr_isoWorkingPoint", m_far_fsr_isoWorkingPoint = "FixedCutLoose");
-        declareProperty( "drcut", m_drcut = 0.15 );
-        declareProperty( "etcut", m_etcut = 1000.0 );
-        declareProperty( "f1cut", m_f1cut =  0.1 );
-        declareProperty( "topo_drcut", m_topo_drcut =  0.08 );
-        declareProperty( "topo_f1cut", m_topo_f1cut = 0.2 );
-        declareProperty( "egCalibToolName", m_energyRescalerName );
-        declareProperty("AFII_corr", m_AFII_corr = false);
-        declareProperty("IsMC",      m_is_mc     = true);
-    }
+    {}
 
     FsrPhotonTool::~FsrPhotonTool() 
     {}
@@ -78,18 +60,21 @@ namespace FSR {
         ATH_MSG_INFO("initialize - IsolationCorrectionTool initialized " << m_isoCorrTool->name());
 
         
-        // Create IsolationCloseByCorrectionTool with IsolationSelectionTool as a private tool,
-        // assigning it the photon working point
+        // Create IsolationSelectionTool for far fsr selection. 
+        // Will use the closeBy corrected isolation variables if DoCloseByCorrection is set to true, which is default.
+        asg::AsgToolConfig config2 ("CP::IsolationSelectionTool/isolationSelectionTool");
+        RETURN_CHECK("initialize", config2.setProperty( "PhotonWP", m_far_fsr_isoWorkingPoint));
 
-        asg::AsgToolConfig config2 ("CP::IsolationCloseByCorrectionTool/isoCloseByCorrTool");
-        RETURN_CHECK("initialize", config2.createPrivateTool("IsolationSelectionTool", "CP::IsolationSelectionTool"));
-        RETURN_CHECK("initialize", config2.setProperty( "IsolationSelectionTool.PhotonWP", m_far_fsr_isoWorkingPoint));
-        if (msg().level() <= MSG::DEBUG) {
-            RETURN_CHECK( "initialize", config2.setProperty( "OutputLevel", MSG::DEBUG) );
+        if (m_doCloseByIso) {
+            RETURN_CHECK("initialize", config2.setProperty("IsoDecSuffix", "CloseByCorr")); 
+            if (msg().level() <= MSG::DEBUG) {
+                RETURN_CHECK( "initialize", config2.setProperty( "OutputLevel", MSG::DEBUG) );
+            }
         }
-        RETURN_CHECK("initialize", config2.makePrivateTool (m_isoCloseByCorrTool));  
-        ATH_MSG_INFO("initialize - photon IsolationCloseByCorrectionTool initialized " << m_isoCloseByCorrTool->name());
-        RETURN_CHECK("initialize", m_isoCloseByCorrTool.retrieve());
+        RETURN_CHECK("initialize", config2.makePrivateTool (m_isoSelTool));  
+        ATH_MSG_INFO("initialize - photon IsolationSelectionTool initialized " << m_isoSelTool->name());
+
+        RETURN_CHECK("initialize", m_isoSelTool.retrieve());
         RETURN_CHECK("initialize", m_isoCorrTool.retrieve());
 
         // get egamma calibration tool - needed to recalibrate electron as a photon
@@ -230,7 +215,8 @@ namespace FSR {
 
                 ATH_MSG_VERBOSE( "Far Fsr ph aft : pt   " << ph->pt() << " topoetcone20 = " << topoetcone20(*ph));
 
-                bool farPhIsoOK         = (bool)m_isoCloseByCorrTool->acceptCorrected(*ph, *parts.asDataVector());
+                // apply isolation selection
+                bool farPhIsoOK = (bool) m_isoSelTool->accept(*ph);
 
                 ATH_MSG_VERBOSE( "Far Fsr ph aft1: pt   " << ph->pt() << " topoetcone20 = " << topoetcone20(*ph));
 
