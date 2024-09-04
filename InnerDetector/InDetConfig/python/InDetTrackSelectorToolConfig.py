@@ -126,7 +126,6 @@ def MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name="MuonCombinedInDet
     if flags.Beam.Type is BeamType.Collisions:
         kwargs.setdefault("pTMin",             2000)
         kwargs.setdefault("nHitBLayer",        0)
-        kwargs.setdefault("nHitBLayerPlusPix", 0)
         kwargs.setdefault("nHitTrt",           0)
         kwargs.setdefault("useTrackQualityInfo", False)
         if flags.Muon.MuonTrigger:
@@ -163,7 +162,6 @@ def MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg(flags, name='MuonCombinedI
     kwargs.setdefault("z0Max",      1.e4)
     kwargs.setdefault("nHitBLayer", 0)
     kwargs.setdefault("nHitPix",    0)
-    kwargs.setdefault("nHitBLayerPlusPix", 0)
     kwargs.setdefault("nHitSct",    4)
     kwargs.setdefault("nHitSi",     4)
     kwargs.setdefault("nHitTrt",    0)
@@ -233,7 +231,6 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags, name='BPHY_InDetDetailedTrackS
     kwargs.setdefault("useTrackSummaryInfo"  , True)
     kwargs.setdefault("nHitBLayer"           , 0)
     kwargs.setdefault("nHitPix"              , 1)
-    kwargs.setdefault("nHitBLayerPlusPix"    , 1)
     kwargs.setdefault("nHitSct"              , 2)
     kwargs.setdefault("nHitSi"               , 3)
     kwargs.setdefault("nHitTrt"              , 0)
@@ -280,7 +277,6 @@ def TRT_InDetDetailedTrackSelectorToolCfg(
     kwargs.setdefault("etaMax",2.1)
     kwargs.setdefault("nHitBLayer",0)
     kwargs.setdefault("nHitPix",2)
-    kwargs.setdefault("nHitBLayerPlusPix",0)
     kwargs.setdefault("nHitSct",0)
     kwargs.setdefault("nHitSi",7)
     kwargs.setdefault("nHitTrt",20)

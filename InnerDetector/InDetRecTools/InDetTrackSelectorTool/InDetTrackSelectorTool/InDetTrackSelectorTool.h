@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetTrackSelectorTool_InDetTrackSelectorTool_H
@@ -10,6 +10,10 @@
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"//enum, do not fwd declare
 #include "TrkParameters/TrackParameters.h" //typedef
+
+#include "CLHEP/Units/SystemOfUnits.h"
+
+using CLHEP::mm;
 
 /**
  * @file InDetTrackSelectorTool.h
@@ -42,38 +46,43 @@ namespace InDet
   class InDetTrackSelectorTool : virtual public Trk::ITrackSelectorTool, public AthAlgTool
   {
 
-    public:
+  public:
 
-      virtual StatusCode initialize() override;
+    virtual StatusCode initialize() override;
 
-      InDetTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p);
+    InDetTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p);
 
-      ~InDetTrackSelectorTool();
+    ~InDetTrackSelectorTool();
 
-      virtual bool decision(const Trk::Track& track,const Trk::Vertex* vertex) const override;
+    virtual bool decision(const Trk::Track& track,const Trk::Vertex* vertex) const override;
 
-      virtual bool decision(const Trk::TrackParticleBase& track,const Trk::Vertex* vertex) const override;
+    virtual bool decision(const Trk::TrackParticleBase& track,const Trk::Vertex* vertex) const override;
 
-      virtual bool decision(const xAOD::TrackParticle&,const xAOD::Vertex*) const override {
-	ATH_MSG_WARNING("xAOD::TrackParticle selection not implemented yet");
-	return false;
-      }
+    virtual bool decision(const xAOD::TrackParticle&,const xAOD::Vertex*) const override {
+      ATH_MSG_WARNING("xAOD::TrackParticle selection not implemented yet");
+      return false;
+    }
 
-    private:
+  private:
 
-      bool decision(const Trk::TrackParameters* track, const Trk::Vertex* vertex, const Trk::ParticleHypothesis) const;
+    bool decision(const Trk::TrackParameters* track, const Trk::Vertex* vertex, const Trk::ParticleHypothesis) const;
 
-      double m_minPt; //!< Minimum Pt of tracks
-      double m_IPz0Max; //!< max. z0: |z0*sin(theta)| < z0Max
-      double m_maxZ0; //!< Maximum z0 of tracks
-      double m_maxD0; //!< Maximum d0 of tracks
-      double m_maxD0overSigmaD0; //!< Maximum d0/sigmad0 of tracks
-      int  m_numberOfPixelHits; //!< Check for silicon hits ?
-      int  m_numberOfBLayerHits;
-      ToolHandle<Trk::ITrackSummaryTool> m_trackSumTool; //<! Track summary tool
-      bool m_trackSumToolAvailable;
+    DoubleProperty m_minPt{this, "minPt", 500., "Minimum Pt of tracks"};
+    DoubleProperty m_IPz0Max
+      {this, "IPz0Max", 10.*mm, "max. z0: |z0*sin(theta)| < z0Max"};
+    DoubleProperty m_maxZ0{this, "maxZ0", 99999., "Maximum z0 of tracks"};
+    DoubleProperty m_maxD0{this, "maxD0", 2.*mm, "Maximum d0 of tracks"};
+    DoubleProperty m_maxD0overSigmaD0
+      {this, "maxD0overSigmaD0", 3., "Maximum d0/sigmad0 of tracks"};
+    IntegerProperty m_numberOfPixelHits{this, "numberOfPixelHits",2};
+    IntegerProperty m_numberOfInLayerHits
+      {this, "numberOfInnermostPixelLayerHits", 1};
+    ToolHandle<Trk::ITrackSummaryTool> m_trackSumTool
+      {this, "TrackSummaryTool", "TrackSummaryTool"};
+    bool m_trackSumToolAvailable = false;
 
-      ToolHandle<Trk::IExtrapolator> m_extrapolator; //<! Extrapolator tool
+    ToolHandle<Trk::IExtrapolator> m_extrapolator
+      {this, "Extrapolator", "Trk::Extrapolator"};
 
   }; //end of class definitions
 } //end of namespace definitions

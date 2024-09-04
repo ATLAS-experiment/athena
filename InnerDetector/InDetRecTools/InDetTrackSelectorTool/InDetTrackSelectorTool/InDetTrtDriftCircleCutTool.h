@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetTrackSelectorTool_InDetTrtDriftCircleCutTool_H
@@ -37,11 +37,17 @@ namespace InDet{
       
     private:
       
-      SG::ReadCondHandleKey<TRTCond::ActiveFraction> m_strawReadKey{this,"ActiveReadKey","ActiveFraction","ActiveFraction in-key"};
+      SG::ReadCondHandleKey<TRTCond::ActiveFraction> m_strawReadKey
+      {this,"ActiveReadKey","ActiveFraction","ActiveFraction in-key"};
       /** Properties for track selection:all cuts are ANDed */
-      int  m_minOffset;  //!< Minimum number of TRT drit circles required
-      bool m_param;      //!< Use the new or the old parameterization
-      bool m_useTRT;     //!< Use the TRT active fraction services to correct for dead straws
+      IntegerProperty m_minOffset
+	{this, "MinOffsetDCs", 0, "Minimum number of TRT drit circles required"};
+      BooleanProperty m_param
+	{this, "UseNewParameterization", false,
+	 "Use the new or the old parameterization"};
+      BooleanProperty m_useTRT
+	{this, "UseActiveFractionSvc", true,
+	 "Use the TRT active fraction services to correct for dead straws"};
 
     }; //end of class definitions
 } //end of namespace

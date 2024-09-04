@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetCosmicTrackSelectorTool.h"
 
 // forward declares
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "VxVertex/Vertex.h"
 #include "TrkTrack/Track.h"
 #include "TrkParticleBase/TrackParticleBase.h"
@@ -22,20 +21,9 @@ namespace InDet
 {
   //----------------------------------------------------------------------------
   InDetCosmicTrackSelectorTool::InDetCosmicTrackSelectorTool(const std::string& t, const std::string& n, const IInterface* p)
-    : AthAlgTool(t,n,p), 
-    m_trackSumToolAvailable(false)
+    : AthAlgTool(t,n,p)
   {
     declareInterface<ITrackSelectorTool>(this);
-    declareProperty("maxZ0",                     m_maxZ0 = 150.);
-    declareProperty("maxD0",                     m_maxD0 = 2.5);
-    declareProperty("minPt",                     m_minPt = 0.);
-    declareProperty("numberOfPixelHits",         m_numberOfPixelHits = 0);
-    declareProperty("numberOfSCTHits",           m_numberOfSCTHits = 0);
-    declareProperty("numberOfTRTHits",           m_numberOfTRTHits = 15);
-    declareProperty("numberOfSiliconHits",       m_numberOfSiHits = 8);
-    declareProperty("numberOfSiliconHitsTop",    m_numberOfSiHitsTop = -1);
-    declareProperty("numberOfSiliconHitsBottom", m_numberOfSiHitsBottom = -1);
-    declareProperty("TrackSummaryTool",          m_trackSumTool);
   }
 
   //----------------------------------------------------------------------------
