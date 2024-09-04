@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/ConcurrentHashmapImpl.h
@@ -10,6 +10,7 @@
 
 
 #include <cassert>
+#include <bit>
 
 
 namespace CxxUtils {
@@ -887,21 +888,12 @@ bool CHMIMPL::grow (const Lock_t& /*lock*/,
 
 /**
  * @brief Round up to a power of 2.
- * https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
  */
 T_CHMIMPL
 uint64_t CHMIMPL::round_up (uint64_t x)
 {
   if (x <= 64) return 64;
-  --x;
-  x |= (x>>1);
-  x |= (x>>2);
-  x |= (x>>4);
-  x |= (x>>8);
-  x |= (x>>16);
-  x |= (x>>32);
-  ++x;
-  return x;
+  return std::bit_ceil (x);
 }
 
 
