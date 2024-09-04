@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,7 +37,7 @@ public:
   /// Set manufacturer
   bool setManufacturer(const std::string& manufacturer);
   /// Get manufacturer
-  std::string getManufacturer() const;
+  const std::string& getManufacturer() const;
 
   /// Set depletion voltage
   bool setDepletionVoltage(const unsigned int sensor, const float depletionVoltage);

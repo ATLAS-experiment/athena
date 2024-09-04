@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //----------------------------------------------------------------------
@@ -42,7 +42,7 @@ bool SCT_SensorCondData::setManufacturer(const std::string& manufacturer)
 
 //----------------------------------------------------------------------
 // Get manufacturer
-std::string SCT_SensorCondData::getManufacturer() const
+const std::string& SCT_SensorCondData::getManufacturer() const
 {
   return m_manufacturer;
 }
