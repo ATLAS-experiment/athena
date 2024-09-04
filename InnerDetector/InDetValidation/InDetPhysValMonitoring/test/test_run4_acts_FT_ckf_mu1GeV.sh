@@ -2,9 +2,7 @@
 # art-description: Run 4 configuration, ITK only recontruction with Fast Tracking, Single muon 1GeV, acts activated
 # art-type: grid
 # art-include: main/Athena
-# art-output: idpvm*.root
-# art-output: last_results/idpvm*.root
-# art-output: last_results/art_download_AtlasBuildStamp
+# art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_ckf_last
