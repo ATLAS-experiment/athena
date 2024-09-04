@@ -379,7 +379,7 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.pTmin    = 0.1*Units.GeV # TODO: double check
   flags.minPT = tsetter(flags.minPT, flags.pTmin)
 
-  flags.doTRT           = False      #backward compatibility with EFIDTracking.py:makeInDetPatternRecognition
+  flags.doTRT           = False
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
   flags.doZFinder       = True
@@ -474,9 +474,7 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Triplet_D0_PPS_Max  = 1000.0
   flags.TrackInitialD0Max   = 1000.
   flags.TrackZ0Max          = 1000.
-  flags.doTRT           = False      #no real reason except of backward compatibility with
-                                     #EFIDTracking.py:makeInDetPatternRecognition
-                                     #2023fix
+  flags.doTRT           = False      
   flags.doFullScan      = True
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
