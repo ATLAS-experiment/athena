@@ -127,6 +127,10 @@ namespace FlavorTagDiscriminants {
               if (tp->pt() <= 0.5e3) return false;
               if (std::abs(aug.d0(*tp)) >= 3.5) return false;
               if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              const xAOD::ParametersCovMatrix_t cov = tp->definingParametersCovMatrix();
+              if (std::sqrt(cov(2, 2)) > 65504) return false;
+              if (std::sqrt(cov(3, 3)) > 65504) return false;
+              if (std::sqrt(cov(4, 4)) > 65504) return false;
               return true;
             }, data_deps
           };
