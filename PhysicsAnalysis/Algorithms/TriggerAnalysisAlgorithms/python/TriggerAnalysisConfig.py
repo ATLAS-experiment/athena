@@ -51,9 +51,9 @@ class TriggerAnalysisBlock (ConfigBlock):
         decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' )
         decisionTool.ConfigTool = '%s/%s' % \
             ( xAODConfTool.getType(), xAODConfTool.getName() )
+        decisionTool.HLTSummary = config.hltSummary()
         if config.geometry() is LHCPeriod.Run3:
             decisionTool.NavigationFormat = 'TrigComposite' # Read Run 3 navigation (options are "TrigComposite" for R3 or "TriggElement" for R2, R2 navigation is not kept in most DAODs)
-            decisionTool.HLTSummary = 'HLTNav_Summary_DAODSlimmed' # Name of R3 navigation container (if reading from AOD, then "HLTNav_Summary_AODSlimmed" instead)
 
         return decisionTool
 

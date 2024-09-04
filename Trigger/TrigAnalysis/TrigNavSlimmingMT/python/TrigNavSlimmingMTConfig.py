@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -60,7 +60,8 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     return ComponentAccumulator()
 
-  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput, possible_keys
+  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+  from TrigDecisionTool.TrigDecisionToolHelpers import possible_keys
   ca = TrigDecisionToolCfg(flags)
   tdt = ca.getPrimary()
 
@@ -150,7 +151,8 @@ def TrigNavSlimmingMTCfg(flags):
   doESD = flags.Output.doWriteESD
   doAOD = flags.Output.doWriteAOD
 
-  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput, possible_keys
+  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+  from TrigDecisionTool.TrigDecisionToolHelpers import possible_keys
 
   # NOTE: Derivations currently have a different configuration hook, see TrigNavSlimmingMTDerivationCfg above.
 
