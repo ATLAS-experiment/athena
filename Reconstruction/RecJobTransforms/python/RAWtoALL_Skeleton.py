@@ -116,6 +116,13 @@ def fromRunArgs(runArgs):
         flags.Output.doWriteDAOD = True
         flags.addFlag('Output.doWriteDESDM_MCP', True)
         log.info("---------- Configured DESDM_MCP output")
+
+    if hasattr(runArgs, 'outputDESDM_EXOTHIPFile'):
+        flagString = 'Output.DESDM_EXOTHIPFileName'
+        flags.addFlag(flagString, runArgs.outputDESDM_EXOTHIPFile)
+        flags.Output.doWriteDAOD = True
+        flags.addFlag('Output.doWriteDESDM_EXOTHIP', True)
+        log.info("---------- Configured DESDM_EXOTHIP output")
     
     if hasattr(runArgs, 'outputDRAW_ZMUMUFile'):
         flagString = 'Output.DRAW_ZmumuFileName'
@@ -241,6 +248,12 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DESDM_MCP import DESDM_MCPCfg
         cfg.merge(DESDM_MCPCfg(flags))
         log.info("---------- Configured DESDM_MCP perfDPD")
+        
+    # DESDM_EXOTHIP
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DESDM_EXOTHIPFileName" in key)]:
+        from PrimaryDPDMaker.DESDM_EXOTHIP import DESDM_EXOTHIPCfg
+        cfg.merge(DESDM_EXOTHIPCfg(flags))
+        log.info("---------- Configured DESDM_EXOTHIP perfDPD")
 
     # DRAW ZMUMU
     for flag in [key for key in flags._flagdict.keys() if ("Output.DRAW_ZmumuFileName" in key)]:
