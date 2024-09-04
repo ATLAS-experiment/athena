@@ -294,7 +294,7 @@ class SlimmingHelper:
                         for item in CompulsoryTriggerNavigation:
                                 self.FinalItemList.append(item)
                         # Run3
-                        from TrigDecisionTool.TrigDecisionToolConfig import possible_keys
+                        from TrigDecisionTool.TrigDecisionToolHelpers import possible_keys
                         for item in possible_keys:
                                 if item == "HLTNav_Summary": # This is not a compact navigation summary collection, unlike the others in this list
                                         continue

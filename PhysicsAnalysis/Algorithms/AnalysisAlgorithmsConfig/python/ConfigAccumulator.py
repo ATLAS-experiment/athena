@@ -131,6 +131,9 @@ class ConfigAccumulator :
             if dataYear == 0:
                 dataYear = autoconfigFromFlags.Input.DataYear
             generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
+            from TrigDecisionTool.TrigDecisionToolHelpers import (
+                getRun3NavigationContainerFromInput_forAnalysisBase)
+            hltSummary = getRun3NavigationContainerFromInput_forAnalysisBase(autoconfigFromFlags)
         else:
             # legacy mappings of string arguments
             if isinstance(dataType, str):
@@ -141,6 +144,7 @@ class ConfigAccumulator :
                 else:
                     dataType = DataType(dataType)
             generatorInfo = None
+            hltSummary = 'HLTNav_Summary_DAODSlimmed'
             if runNumber is None:
                 runNumber = 284500
         # allow possible string argument for `geometry` and convert it to enum
@@ -168,6 +172,7 @@ class ConfigAccumulator :
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
         self._muonCalibMode = -1
+        self._hltSummary = hltSummary
 
         # If we are in an Athena environment with ComponentAccumulator configuration
         # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
@@ -221,6 +226,10 @@ class ConfigAccumulator :
     def generatorInfo(self) :
         """the dictionary of MC generators and their versions for the sample we run on"""
         return self._generatorInfo
+
+    def hltSummary(self) :
+        """the HLTSummary configuration to be used for the trigger decision tool"""
+        return self._hltSummary
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
