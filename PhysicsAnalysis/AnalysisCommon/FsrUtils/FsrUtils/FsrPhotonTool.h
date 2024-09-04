@@ -8,6 +8,8 @@
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+#include <AsgTools/PropertyWrapper.h>
+
 
 // Local include(s):
 #include "FsrUtils/IFsrPhotonTool.h"
@@ -16,7 +18,6 @@ namespace CP
 {
     class IIsolationSelectionTool;
     class IIsolationCorrectionTool;
-    class IIsolationCloseByCorrectionTool;
     class IEgammaCalibrationAndSmearingTool;
 }
 
@@ -81,30 +82,31 @@ namespace FSR {
         double deltaPhi(float phi1, float phi2) const;
         static bool compareEt(const FsrCandidate& c1, const FsrCandidate& c2) { return (c1.Et > c2.Et); }
 
-
-        double m_high_et_min;
-        double m_overlap_el_ph;
-        double m_overlap_el_mu;
-
-        double m_far_fsr_drcut;
-        double m_far_fsr_etcut;
-        std::string m_far_fsr_isoWorkingPoint;
-
-        double m_drcut;
-        double m_etcut;
-        double m_f1cut;
-        double m_topo_drcut;
-        double m_topo_f1cut;
-
-        bool m_is_mc;
-        bool m_AFII_corr;
+        // Note: selecion originally had separate cuts for sliding window clusters and topo clusters
+        //       where the min Et threshold for SW clusters was higher than for topoclusters
+        // TODO: remove this distinction since there are only topo clusters in the reconstruction since 2017
+        Gaudi::Property<double> m_high_et_min  {this, "high_et_min", 3500. , "Minimum Et cut for higg Et photons" };
+        Gaudi::Property<double> m_overlap_el_ph{this, "overlap_el_ph", 0.01 , "Overlap dR for electrons and photons" };
+        Gaudi::Property<double> m_overlap_el_mu{this, "overlap_el_mu", 0.001 , "Overlap dR for electrons and muons" };
+        Gaudi::Property<double> m_far_fsr_drcut{this, "far_fsr_drcut", 0.15 , "Minimum dR cut for far fsr" };
+        Gaudi::Property<double> m_far_fsr_etcut{this, "far_fsr_etcut", 10000.0 , "Minimum et cut for far fsr" };
+        Gaudi::Property<double> m_drcut     {this, "drcut", 0.15 , "Maximun dR cut to be near fsr" };
+        Gaudi::Property<double> m_etcut     {this, "etcut", 1000.0 , "Minimum Et cut for near fsr" };
+        Gaudi::Property<double> m_f1cut     {this, "f1cut",  0.1 , "f1 cut for high Et clusters" };
+        Gaudi::Property<double> m_topo_drcut{this, "topo_drcut",  0.08 , "Maximum dR cut for low Et clusters" };
+        Gaudi::Property<double> m_topo_f1cut{this, "topo_f1cut", 0.2 , "Minimum f1 cut for low Et clusters" };
+        Gaudi::Property<std::string> m_far_fsr_isoWorkingPoint{this, "far_fsr_isoWorkingPoint", "FixedCutLoose", "Far fsr isolation working point" };
+        Gaudi::Property<std::string> m_energyRescalerName{this, "egCalibToolName", "" , "EnergyRescale tool to calibrate photons as electrons" };
+        Gaudi::Property<bool> m_AFII_corr{this, "AFII_corr", false , "Is AFII for isolation correction" };
+        Gaudi::Property<bool> m_is_mc{this, "IsMC", true , "Is MC" };
+        //Flag to use isolation variables with 'CloseByCorr' suffix which have been corrected for close-by leptons and photons. If false, the uncorrected variables are used 
+        Gaudi::Property<bool> m_doCloseByIso{this, "DoCloseByCorrection", true , "flag to use isolation variables with 'CloseByCorr' suffix " };
 
         std::vector<FsrCandidate> m_fsrPhotons;
         FsrCandidate::FsrType     m_fsr_type;
 
+        ToolHandle<CP::IIsolationSelectionTool>           m_isoSelTool;
         ToolHandle<CP::IIsolationCorrectionTool>          m_isoCorrTool;
-        ToolHandle<CP::IIsolationCloseByCorrectionTool>   m_isoCloseByCorrTool;
-        std::string                                       m_energyRescalerName;
         ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_energyRescaler;
 
     }; // class FsrPhotonTool
