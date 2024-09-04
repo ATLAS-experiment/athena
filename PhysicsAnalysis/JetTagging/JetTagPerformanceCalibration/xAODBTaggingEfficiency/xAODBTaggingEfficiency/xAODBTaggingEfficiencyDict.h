@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODBTAGGINGEFFICIENCY_XAODBTAGGINGEFFICIENCYDICT_H
@@ -11,6 +11,7 @@
 #endif
 
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
+#include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
 #include "xAODBTaggingEfficiency/BTaggingTruthTaggingTool.h"

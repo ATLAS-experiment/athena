@@ -4,4 +4,5 @@
   <class name="BTaggingTruthTaggingTool" />
   <class name="BTaggingEigenVectorRecompositionTool" />
   <class name="BTaggingSelectionJsonTool" />
+  <class name="BTaggingEfficiencyJsonTool" />
 </lcgdict>
