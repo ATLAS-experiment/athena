@@ -162,9 +162,9 @@ StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
             if (m_preserveDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredUniqueIDs,true);
             encounteredUniqueIDs.clear();
             if (m_preserveGeneratorDescendants) decayHelper.descendants(particle,partMask,vertMask,encounteredUniqueIDs,false);
-            encounteredUniqueIDs.clear();			
+            encounteredUniqueIDs.clear();
 	    if (m_preserveAncestors) decayHelper.ancestors(particle,partMask,vertMask,encounteredUniqueIDs);
-	    encounteredUniqueIDs.clear();	
+	    encounteredUniqueIDs.clear();
         }
     }
     //for (unsigned int i=0; i<nVertices; ++i) {

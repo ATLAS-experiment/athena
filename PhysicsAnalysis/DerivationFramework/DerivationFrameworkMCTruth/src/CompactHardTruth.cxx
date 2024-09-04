@@ -220,10 +220,10 @@ StatusCode CompactHardTruth::execute() {
     bool isHadVtx = true;
     bool isHadOut = false;
     for (const auto& inp:  hadv->particles_in() ) {
-      if (!isParton(inp)) { isHadVtx = false; break;}
+      if (!(MC::isParton(inp)|| MC::isDiquark(inp))  ) { isHadVtx = false; break;}
     }
     for (const auto& vp:  hadv->particles_out()) {
-      if (isParton(vp)) isHadVtx = false;
+      if (MC::isParton(vp)|| MC::isDiquark(vp)) isHadVtx = false;
       if (MC::isHadron(vp)) isHadOut = true;
     }
     isHadVtx = isHadVtx && isHadOut;
@@ -248,12 +248,12 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenVertex::particles_in_const_iterator inp = (*hadv)->particles_in_const_begin();
     HepMC::GenVertex::particles_in_const_iterator inpE = (*hadv)->particles_in_const_end();
     for (; inp != inpE; ++inp) {
-      if (!isParton(*inp)) { isHadVtx = false; break;}
+      if (!(MC::isParton(vp)|| MC::isDiquark(vp))) { isHadVtx = false; break;}
     }
     HepMC::GenVertex::particles_out_const_iterator vp = (*hadv)->particles_out_const_begin();
     HepMC::GenVertex::particles_out_const_iterator vpE = (*hadv)->particles_out_const_end();
     for (; vp != vpE; ++vp) {
-      if (isParton(*vp)) isHadVtx = false;
+      if (MC::isParton(*vp)|| MC::isDiquark(*vp)) isHadVtx = false;
       if (MC::isHadron(*vp)) isHadOut = true;
     }
     isHadVtx = isHadVtx && isHadOut;
@@ -478,7 +478,7 @@ StatusCode CompactHardTruth::execute() {
     // Find final partons
     for (auto fp: thinEvt->particles() ) {
       int iCase = 0;
-      if (!isFinalParton(fp)) continue;
+      if (!((MC::isParton(fp)|| MC::isDiquark(fp)) && fp->end_vertex() == nullptr)) continue;
       if (doDebug) ATH_MSG_DEBUG("Starting final parton " << fp);
       // Production/end vertices
       HepMC::GenVertexPtr pvtx = fp->production_vertex();
@@ -569,12 +569,12 @@ StatusCode CompactHardTruth::execute() {
         HepMC::GenParticlePtr pout2 = pvtx->particles_out().back();
         // Require two final partons and avoid duplication
         if (fp == pout1) {
-          if (!isFinalParton(pout2)) {
+          if (!((MC::isParton(pout2)|| MC::isDiquark(pout2)) && pout2->end_vertex() == nullptr)) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << pout2);
             continue;
           }
         } else if (fp == pout2) {
-          if (!isFinalParton(pout1)) {
+          if (!((MC::isParton(pout1)|| MC::isDiquark(pout1)) && pout1->end_vertex() == nullptr)) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << pout1);
             continue;
           }
@@ -654,7 +654,7 @@ StatusCode CompactHardTruth::execute() {
       int iCase = 0;
 
       HepMC::GenParticle* fp = *finp;
-      if (!isFinalParton(fp)) continue;
+      if (!((MC::isParton(fp)|| MC::isDiquark(fp)) && fp->end_vertex() == nullptr)) continue;
       if (doDebug) ATH_MSG_DEBUG("Starting final parton " << HepMC::uniqueID(fp));
 
       // Production/end vertices
@@ -766,12 +766,12 @@ StatusCode CompactHardTruth::execute() {
 
         // Require two final partons and avoid duplication
         if (fp == pout1) {
-          if (!isFinalParton(pout2)) {
+          if (!((MC::isParton(pout2)|| MC::isDiquark(pout2)) && pout2->end_vertex() == nullptr))) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout2));
             continue;
           }
         } else if (fp == pout2) {
-          if (!isFinalParton(pout1)) {
+          if (!((MC::isParton(pout1)|| MC::isDiquark(pout1)) && pout1->end_vertex() == nullptr))) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout1));
             continue;
           }
@@ -1380,23 +1380,6 @@ StatusCode CompactHardTruth::execute() {
 ///////////////////////////////////////////////////////////////////
 // Const methods:
 ///////////////////////////////////////////////////////////////////
-
-// Parton is quark or gluon
-bool CompactHardTruth::isParton(HepMC::ConstGenParticlePtr p) {
-  int ida = std::abs(p->pdg_id());
-  if (ida == 21 || (ida > 0 && ida < 10)) return true;
-  // Diquarks too -- xx0x
-  if (ida > 1000 && ida < 10000 && (ida / 10) % 10 == 0) return true;
-  return false;
-}
-
-// Final parton is quark or gluon with no decay vertex.
-// It should have been detached from hadronization vertex.
-bool CompactHardTruth::isFinalParton(HepMC::ConstGenParticlePtr p) {
-  if (!isParton(p)) return false;
-  auto endp = p->end_vertex();
-  return endp == nullptr;
-}
 
 // Total cluster FourVectors
 
