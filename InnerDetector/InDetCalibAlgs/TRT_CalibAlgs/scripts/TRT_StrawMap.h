@@ -176,7 +176,6 @@ int strawMap::TTCgroup() {
 		}
 		
 		assert(count==104);
-		assert(0); // should never come this far
 		return -1;
 		
 	} else if (fabs(m_side)==2) { // end-caps
@@ -195,11 +194,13 @@ int strawMap::TTCgroup() {
 };
 
 int strawMap::HVpad() {
-	
 	if (fabs(m_side)==1) return m_strawToHVpad_barrel[m_straw];
-	
 	assert( fabs(m_side)==2 ); // end-caps	
-	return ( (this->DTMROC()) * 2 + (this->ASDBLR()) );	
+	auto asdblr =  this->ASDBLR();
+	if (asdblr < 0){
+	  throw std::runtime_error("asdblr is less than zero");
+	}
+	return ( (this->DTMROC()) * 2 + (asdblr) );	
 };
 
 void strawMap::initialize() {
@@ -241,8 +242,9 @@ void strawMap::initialize() {
 	if (!f) {
 		printf("TRT_StrawMap::initialize() ERROR: failed to open the mapping file %s \n", filename);
 		printf("TRT_StrawMap::initialize() ERROR: you need to fix the file name / link, WILL CRASH THE CODE NOW\n");
-		assert(0);			
+		std::abort();			
 	}
+	//what are these numbers, what are valid ranges?
 	while(fscanf(f, "%d %d %d %d %d %d %d %d\n", index, index+1, index+2, index+3, index+4, index+5, index+6, index+7)==8) {
 		assert(index[0]>=0 && index[0]<5482);
 		m_strawToLayer[index[0]] = index[1];
@@ -330,8 +332,10 @@ int strawMap::ec_chip(int side, int phi, int /*layerNumber*/, int strawLayerNumb
 	int *map = 0;
 	if (side==2) map = nominal_reversed ? map_A8 : map_A0;
 	if (side==-2) map = nominal_reversed ? map_C8 : map_C0;
+	if (not map) {
+	  throw std::runtime_error("map pointer is null in TRT_StrawMap.h");
+	}
 	chip = map[chip];		
-	
 	return chip;
 }		
 
