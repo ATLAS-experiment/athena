@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetConversionTrackSelectorTool.h"
@@ -19,52 +19,9 @@ namespace InDet
 {
 
  InDetConversionTrackSelectorTool::InDetConversionTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p)
- :AthAlgTool(t,n,p),
-  m_maxSiD0   (35.),
-  m_maxTrtD0 (100.),
-  m_maxSiZ0  (200.),
-  m_maxTrtZ0 (1200),
-  m_minPt    (500.),
-  m_trRatio1  (0.5), /** eProbHT cut for Si trks, ntrt<=15 **/
-  m_trRatio2  (0.1), /** eProbHT cut for Si trks, ntrt >15 **/
-  m_trRatio3 (0.05), /** eProbHT cut for Si trks, ntrt >25 **/
-  m_trRatioTRT(0.1), /** eProbHT cut for all TRT tracks **/
-  m_trRatioV0  (1.),
-  m_sD0_Si     (2.),
-  m_sD0_Trt   (0.5),
-  m_sZ0_Trt    (3.),
-  m_isConv(true)
+ :AthAlgTool(t,n,p)
  {
-   // There is room for 10 bins, for future development.
-   // The default below represents one eta bin between 0 and 999
-   // and no cuts applied.
-   m_TRTTrksEtaBins.clear();
-   m_TRTTrksBinnedRatioTRT.clear();
-   for (unsigned int i=0;i<10;++i) {
-     m_TRTTrksEtaBins.push_back(999);
-     m_TRTTrksBinnedRatioTRT.push_back(0);
-   }
-
    declareInterface<ITrackSelectorTool>(this);
-   declareProperty("maxSiD0",              m_maxSiD0);
-   declareProperty("maxTrtD0",             m_maxTrtD0);
-   declareProperty("maxSiZ0",              m_maxSiZ0);
-   declareProperty("maxTrtZ0",             m_maxTrtZ0);
-   declareProperty("minPt",                m_minPt);
-   declareProperty("RatioCut1",            m_trRatio1); /** eProbHT cut for Si trks, ntrt<=15 **/
-   declareProperty("RatioCut2",            m_trRatio2); /** eProbHT cut for Si trks, ntrt >15 **/
-   declareProperty("RatioCut3",            m_trRatio3); /** eProbHT cut for Si trks, ntrt >25 **/
-   declareProperty("RatioTRT",             m_trRatioTRT); /** eProbHT cut for all TRT tracks **/
-   // See InDet Trt Track Scoring Tool for nTRT cut on TRT-only tracks
-   declareProperty("TRTTrksEtaBins"       , m_TRTTrksEtaBins); /* expects 10 eta bins (set unused bins to e.g. 999) */
-   declareProperty("TRTTrksBinnedRatioTRT"          , m_TRTTrksBinnedRatioTRT); /* expects 10 values */
-   declareProperty("RatioV0",              m_trRatioV0);
-   declareProperty("significanceD0_Si",    m_sD0_Si);
-   declareProperty("significanceD0_Trt",   m_sD0_Trt);
-   declareProperty("significanceZ0_Trt",   m_sZ0_Trt);
-   declareProperty("IsConversion",         m_isConv);
-   declareProperty("PIDonlyForXe",         m_PIDonlyForXe = false,
-     "Only check TRT PID if all hits are Xe hits");
  }
 
 
@@ -206,7 +163,7 @@ namespace InDet
            unsigned int eta_bin = getEtaBin(*perigee);
            // TRT-only Tracks: eProbabilityHT cut below
            // See InDet Trt Track Scoring Tool for nTRT cut on TRT-only tracks
-           double trRatioTRT = std::max( m_trRatioTRT, m_TRTTrksBinnedRatioTRT[eta_bin] );
+           double trRatioTRT = std::max( m_trRatioTRT.value(), m_TRTTrksBinnedRatioTRT[eta_bin] );
 
            if ( ratioTrk >= trRatioTRT ) pass = true; // TRT Track cuts
          }
@@ -321,7 +278,7 @@ namespace InDet
            unsigned int eta_bin = getEtaBin(*perigee);
            // TRT-only Tracks: eProbabilityHT cuts below
            // See InDet Trt Track Scoring Tool for nTRT cut on TRT-only tracks
-           double trRatioTRT = std::max( m_trRatioTRT, m_TRTTrksBinnedRatioTRT[eta_bin] );
+           double trRatioTRT = std::max( m_trRatioTRT.value(), m_TRTTrksBinnedRatioTRT[eta_bin] );
 
            if ( ratioTrk >= trRatioTRT ) pass = true; // TRT Track cuts
          }
@@ -431,7 +388,7 @@ namespace InDet
          unsigned int eta_bin = getEtaBin(perigee);
          // TRT-only Tracks: eProbabilityHT cuts below
          // See InDet Trt Track Scoring Tool for nTRT cut on TRT-only tracks
-         double trRatioTRT = std::max( m_trRatioTRT, m_TRTTrksBinnedRatioTRT[eta_bin] );
+         double trRatioTRT = std::max( m_trRatioTRT.value(), m_TRTTrksBinnedRatioTRT[eta_bin] );
 
          if ( ratioTrk >= trRatioTRT ) pass = true; // TRT Track cuts
        }

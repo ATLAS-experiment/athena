@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetIsoTrackSelectorTool.h"
@@ -9,33 +9,12 @@
 #include "TrkTrack/Track.h"
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkSurfaces/StraightLineSurface.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-
-using CLHEP::mm;
 
 //_______________________________________________________________________________
 InDet::InDetIsoTrackSelectorTool::InDetIsoTrackSelectorTool(const std::string & t, const std::string & n, const IInterface * p)
-  : AthAlgTool(t,n,p), 
-    m_robustCuts(true),
-    m_applySinThetaCorrection(true),
-    m_d0max(1.5*mm),
-    m_z0stMax(1.5*mm),
-    m_d0Significance(3),
-    m_z0Significance(3),
-    m_extrapolator("Trk::Extrapolator/InDetExtrapolator"),
-    m_trackSelector("")
+  : AthAlgTool(t,n,p)
 {
   declareInterface<Trk::IIsoTrackSelectorTool>(this);
-  // properties via python binding
-  declareProperty("RobustCuts",               m_robustCuts);
-  declareProperty("SinThetaCorrection",       m_applySinThetaCorrection);
-  declareProperty("maxD0",                    m_d0max);
-  declareProperty("maxZ0",                    m_z0stMax);
-  declareProperty("maxD0overSigmaD0",         m_d0Significance);
-  declareProperty("maxZ0overSigmaZ0",         m_z0Significance);
-  // tools
-  declareProperty("Extrapolator",             m_extrapolator);
-  declareProperty("TrackSelector",            m_trackSelector);
 }
 
 //_______________________________________________________________________________

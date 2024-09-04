@@ -5,7 +5,6 @@
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
 // forward declares
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
-#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "VxVertex/Vertex.h"
 #include "VxVertex/RecVertex.h"
@@ -13,7 +12,6 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrackSummary/TrackSummary.h"
 #include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
-#include "InDetRecToolInterfaces/IInDetTestPixelLayerTool.h"
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
@@ -21,14 +19,11 @@
 
 // normal includes
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
-#include "CLHEP/Units/SystemOfUnits.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include <cmath>
 
-using CLHEP::GeV;
-using CLHEP::mm;
 
 namespace InDet
 {
@@ -36,87 +31,8 @@ namespace InDet
   // ---------------------------------------------------------------------
   InDetDetailedTrackSelectorTool::InDetDetailedTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p)
     : AthAlgTool(t,n,p)
-    , m_trackSumTool("Trk::TrackSummaryTool", this)
-    , m_particleCreator("", this)
-    , m_extrapolator("Trk::Extrapolator", this)
-    , m_trtDCTool("InDet::InDetTrtDriftCircleCutTool", this)
-    , m_inDetTestPixelLayerTool("", this)
-    , m_trackSumToolAvailable(true)
-    , m_partCreatorToolAvailable(false)
-    , m_usePtDependentCuts(false)
-    , m_useEventInfoBs(false)
-
-
   {
     declareInterface<ITrackSelectorTool>(this);
-    declareProperty("pTMin"            , m_pTMin             = 1.*GeV);
-    declareProperty("pMin"             , m_pMin              = 0.);
-    declareProperty("IPd0Max"          , m_IPd0Max           = 2.*mm);
-    declareProperty("IPz0Max"          , m_IPz0Max           = 1.5*mm);
-    declareProperty("z0Max"            , m_z0Max             = 9999.*mm);
-    declareProperty("sigIPd0Max"       , m_sigIPd0Max        = 999.*mm);
-    declareProperty("sigIPz0Max"       , m_sigIPz0Max        = 999.*mm);
-    declareProperty("d0significanceMax", m_d0significanceMax = -1.);
-    declareProperty("z0significanceMax", m_z0significanceMax = -1.);
-    declareProperty("etaMax"           , m_etaMax            = 9999.);
-    
-    declareProperty("useTrackSummaryInfo", m_useTrackSummaryInfo = true);
-    
-    declareProperty("nHitBLayer"       , m_nHitBLayer        = 1);
-    declareProperty("nHitPix"          , m_nHitPix           = 2);
-    declareProperty("nHitBLayerPlusPix", m_nHitBLayerPlusPix = 0);
-    declareProperty("nHitSct"          , m_nHitSct           = 0);
-    declareProperty("nHitSi"           , m_nHitSi            = 7);
-    
-    declareProperty("nHitPixPhysical", m_nHitPixPhysical = 0);
-    declareProperty("nHitSiPhysical",  m_nHitSiPhysical  = 3);
-    
-    declareProperty("nHitTrt"                            , m_nHitTrt                          = 0);
-    declareProperty("nHitTrtPlusOutliers"                , m_nHitTrtPlusOutliers              = 0);
-    declareProperty("nHitTrtHighE"                       , m_nHitTrtHighE                     = 0);
-    declareProperty("nHitTrtPlusOutliersHighE"           , m_nHitTrtPlusOutliersHighE         = 0);
-    declareProperty("nHitTrtHighEFractionMax"            , m_nHitTrtHighEFraction             = 999);
-    declareProperty("nHitTrtHighEFractionWithOutliersMax", m_nHitTrtHighEFractionWithOutliers = 999);
-    
-    declareProperty("useSharedHitInfo", m_useSharedHitInfo = false);
-    declareProperty("nSharedBLayer"   , m_nSharedBLayer    = 0);
-    declareProperty("nSharedPix"      , m_nSharedPix       = 0);
-    declareProperty("nSharedSct"      , m_nSharedSct       = 1);
-    declareProperty("nSharedSi"       , m_nSharedSi        = 999);
-    
-    declareProperty("nHoles"      , m_nHoles       = 999);
-    declareProperty("nDoubleHoles", m_nDoubleHoles = 999);
-    declareProperty("nHolesPixel" , m_nHolesPix    = 999);
-    declareProperty("nHolesSct"   , m_nHolesSct    = 999);
-    
-    declareProperty("useTrackQualityInfo", m_useTrackQualityInfo = true);
-    declareProperty("fitChi2"            , m_fitChi2             = 99999.);
-    declareProperty("fitProb"            , m_fitProb             = -1.);
-    declareProperty("fitChi2OnNdfMax"    , m_fitChi2OnNdfMax     = 999.);
-    declareProperty("TrtMaxEtaAcceptance", m_TrtMaxEtaAcceptance = 999.);
-    
-    declareProperty("usePreselectionCuts", m_usePreselectionCuts = false);
-    declareProperty("d0MaxPreselection"  , m_d0MaxPreselection   = 10.);
-    
-    declareProperty("useEtaDepententMinHitTrt", m_useEtaDepententMinHitTrt = false);
-    declareProperty("scaleMinHitTrt"          , m_scaleMinHitTrt           = 1.);
-    declareProperty("addToMinHitTrt"          , m_addToMinHitTrt           = 0);
-    
-    declareProperty("useEtaDepententMinHitTrtWithOutliers", m_useEtaDepententMinHitTrtWithOutliers = false);
-    declareProperty("scaleMinHitTrtWithOutliers"          , m_scaleMinHitTrtWithOutliers           = 1.);
-    declareProperty("addToMinHitTrtWithOutliers"          , m_addToMinHitTrtWithOutliers           = 0);
-    
-    declareProperty("TrackSummaryTool"   , m_trackSumTool);
-    declareProperty("TrackParticleCreatorTool", m_particleCreator);
-    declareProperty("Extrapolator"       , m_extrapolator);
-    declareProperty("TrtDCCutTool"       , m_trtDCTool);
-    declareProperty("InDetTestPixelLayerTool", m_inDetTestPixelLayerTool);
-    
-   
-    declareProperty("UsePtDependentCuts", m_usePtDependentCuts = false);  
-    declareProperty("PtBenchmarks"      , m_ptBenchmarks);  
-    declareProperty("SCTCutValues"      , m_nSCTValues);
-    declareProperty("UseEventInfoBS"    , m_useEventInfoBs);
   }
 
   Trk::Vertex* InDetDetailedTrackSelectorTool::getBeamSpot(const EventContext& ctx) const
@@ -602,11 +518,6 @@ namespace InDet
         ATH_MSG_DEBUG("Track rejected because of nHitSiPhysical "<<np+ns<<" < "<<m_nHitSiPhysical);
         return false;
       }
-    
-      if (nb+np+npd< m_nHitBLayerPlusPix){
-	ATH_MSG_DEBUG("Track rejected because of nHitBLayerPlusPix "<<nb+np+npd<<" < "<<m_nHitBLayerPlusPix);
-	return false;
-      }
 
       // Cuts on number of Holes
       if (nhp+nhs > m_nHoles){
@@ -1025,12 +936,6 @@ namespace InDet
     if((np+ns) < m_nHitSiPhysical) 
       {
 	ATH_MSG_DEBUG("Track rejected because of nHitSiPhysical "<<np+ns<<" < "<<m_nHitSiPhysical);
-	return false;
-      }
-    
-    if ((nb+np+npd)< m_nHitBLayerPlusPix) 
-      {
-	ATH_MSG_DEBUG("Track rejected because of nHitBLayerPlusPix "<<nb+np+npd<<" < "<<m_nHitBLayerPlusPix);
 	return false;
       }
 

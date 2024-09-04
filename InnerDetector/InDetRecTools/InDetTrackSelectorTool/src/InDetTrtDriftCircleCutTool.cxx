@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetTrtDriftCircleCutTool.h"
@@ -14,15 +14,9 @@ StatusCode  InDet::InDetTrtDriftCircleCutTool::initialize()
 }
     
 InDet::InDetTrtDriftCircleCutTool::InDetTrtDriftCircleCutTool(const std::string& t, const std::string& n, const IInterface*  p)
-  :AthAlgTool(t,n,p),
-   m_minOffset(0),
-   m_param(false),
-   m_useTRT(true)
+  :AthAlgTool(t,n,p)
 {
   declareInterface<ITrtDriftCircleCutTool>(this);
-  declareProperty("MinOffsetDCs",           m_minOffset );
-  declareProperty("UseNewParameterization", m_param     );
-  declareProperty("UseActiveFractionSvc",   m_useTRT    );
 }
 
 InDet::InDetTrtDriftCircleCutTool::~InDetTrtDriftCircleCutTool()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetIsoTrackSelectorTool_InDetIsoTrackSelectorTool_H
@@ -9,6 +9,10 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkToolInterfaces/IIsoTrackSelectorTool.h"
 #include "TrkParameters/TrackParameters.h"
+
+#include "CLHEP/Units/SystemOfUnits.h"
+
+using CLHEP::mm;
 
 /**
  * @file InDetIsoTrackSelectorTool.h
@@ -33,41 +37,41 @@ namespace InDet
   class InDetIsoTrackSelectorTool : virtual public Trk::IIsoTrackSelectorTool, public AthAlgTool
   {
 
-    public:
-      /** Athena AlgTool methods */
-      virtual StatusCode initialize() override;
+  public:
+    /** Athena AlgTool methods */
+    virtual StatusCode initialize() override;
 
-      /** Constructor / Destructor */
-      InDetIsoTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p);
-      ~InDetIsoTrackSelectorTool();
+    /** Constructor / Destructor */
+    InDetIsoTrackSelectorTool(const std::string& t, const std::string& n, const IInterface*  p);
+    ~InDetIsoTrackSelectorTool();
 
-      /** ESD type interface */
-      virtual bool decision(const Trk::AtaStraightLine&, const Trk::Track& track) const override;
-      
-      /** AOD type interface */
-      virtual bool decision(const Trk::AtaStraightLine&, const Trk::TrackParticleBase& trackParticle) const override;
-      
-      /** Work-horse interface - will ignore TrackSelector */
-      virtual bool decision(const Trk::AtaStraightLine&, const Trk::TrackParameters& trackPars) const override;
+    /** ESD type interface */
+    virtual bool decision(const Trk::AtaStraightLine&, const Trk::Track& track) const override;
 
-    private:
-      /** Robust cut window setting */
-      bool                                  m_robustCuts;
-      bool                                  m_applySinThetaCorrection;
-      double                                m_d0max;
-      double                                m_z0stMax;
-      /** Sophisticated cut window setting : d0/z0 significance - only when robustCuts off*/
-      double                                m_d0Significance;
-      double                                m_z0Significance;
-      double                                m_d0Significance2 = 0.0;
-      double                                m_z0Significance2 = 0.0;
+    /** AOD type interface */
+    virtual bool decision(const Trk::AtaStraightLine&, const Trk::TrackParticleBase& trackParticle) const override;
 
-      ToolHandle<Trk::IExtrapolator>        m_extrapolator;      //<! Extrapolator tool
-      /** Extra checks on hits & holes */
-      ToolHandle<Trk::ITrackSelectorTool>   m_trackSelector;     //!< track selector tool
-      
+    /** Work-horse interface - will ignore TrackSelector */
+    virtual bool decision(const Trk::AtaStraightLine&, const Trk::TrackParameters& trackPars) const override;
+
+  private:
+    /** Robust cut window setting */
+    BooleanProperty m_robustCuts{this, "RobustCuts", true};
+    BooleanProperty m_applySinThetaCorrection{this, "SinThetaCorrection", true};
+    DoubleProperty m_d0max{this, "maxD0", 1.5*mm};
+    DoubleProperty m_z0stMax{this, "maxZ0", 1.5*mm};
+    /** Sophisticated cut window setting : d0/z0 significance - only when robustCuts off*/
+    DoubleProperty m_d0Significance{this, "maxD0overSigmaD0", 3.};
+    DoubleProperty m_z0Significance{this, "maxZ0overSigmaZ0", 3.};
+    double m_d0Significance2 = 0.0;
+    double m_z0Significance2 = 0.0;
+
+    ToolHandle<Trk::IExtrapolator> m_extrapolator
+      {this, "Extrapolator", "Trk::Extrapolator/InDetExtrapolator"};
+    /** Extra checks on hits & holes */
+    ToolHandle<Trk::ITrackSelectorTool> m_trackSelector{this, "TrackSelector", ""};
 
   }; //end of class definitions
 } //end of namespace definitions
 
-#endif //TrkMultipleVertexSeedFinders_PVFindingTrackSelectoTool_H
+#endif //InDetIsoTrackSelectorTool_InDetIsoTrackSelectorTool_H

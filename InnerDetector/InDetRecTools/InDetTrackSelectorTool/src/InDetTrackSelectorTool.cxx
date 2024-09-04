@@ -12,9 +12,6 @@
 // normal includes
 #include "TrkTrackSummary/TrackSummary.h"
 #include "CLHEP/Matrix/Vector.h"
-#include "CLHEP/Units/SystemOfUnits.h"
-
-using CLHEP::mm;
 
 namespace InDet
 {
@@ -22,26 +19,8 @@ namespace InDet
 //_______________________________________________________________________________
 InDetTrackSelectorTool::InDetTrackSelectorTool(const std::string & t, const std::string & n, const IInterface * p)
   : AthAlgTool(t,n,p)
-  , m_minPt(500.)
-  , m_IPz0Max(10.*mm)
-  , m_maxZ0(99999.)
-  , m_maxD0(2.*mm)
-  , m_maxD0overSigmaD0(3.)
-  , m_numberOfPixelHits(2)
-  , m_numberOfBLayerHits(1)
-  , m_trackSumToolAvailable(false) 
-  , m_extrapolator("Trk::Extrapolator")
 {
   declareInterface<ITrackSelectorTool>(this);
-  declareProperty("minPt",                    m_minPt);
-  declareProperty("IPz0Max",                  m_IPz0Max); // cut on |z|*sin(theta)
-  declareProperty("maxZ0",                    m_maxZ0);
-  declareProperty("maxD0",                    m_maxD0);
-  declareProperty("maxD0overSigmaD0",         m_maxD0overSigmaD0);
-  declareProperty("numberOfPixelHits",        m_numberOfPixelHits);
-  declareProperty("numberOfInnermostPixelLayerHits",       m_numberOfBLayerHits);
-  declareProperty("TrackSummaryTool",         m_trackSumTool);
-  declareProperty("Extrapolator",             m_extrapolator);
 }
 
 //_______________________________________________________________________________
@@ -98,9 +77,9 @@ bool InDetTrackSelectorTool::decision(const Trk::Track & track, const Trk::Verte
   if (nPixelDead<0)
     nPixelDead=0;
 
-  int nBLayerHits = summary->get(Trk::numberOfInnermostPixelLayerHits);
+  int nInLayerHits = summary->get(Trk::numberOfInnermostPixelLayerHits);
 
-  if(nPixelHits+nPixelDead<m_numberOfPixelHits || nBLayerHits<m_numberOfBLayerHits )
+  if(nPixelHits+nPixelDead<m_numberOfPixelHits || nInLayerHits<m_numberOfInLayerHits )
     return false;
 
   // all ok
@@ -123,9 +102,9 @@ bool InDetTrackSelectorTool::decision(const Trk::TrackParticleBase & track, cons
   if (nPixelDead<0)
     nPixelDead=0;
 
-  int nBLayerHits =  summary->get(Trk::numberOfInnermostPixelLayerHits);
+  int nInLayerHits =  summary->get(Trk::numberOfInnermostPixelLayerHits);
 
-  return nPixelHits+nPixelDead>=m_numberOfPixelHits && nBLayerHits>=m_numberOfBLayerHits;
+  return nPixelHits+nPixelDead>=m_numberOfPixelHits && nInLayerHits>=m_numberOfInLayerHits;
 }
 
 //_______________________________________________________________________________
@@ -165,12 +144,12 @@ bool InDetTrackSelectorTool::decision(const Trk::TrackParameters * track, const 
 
   // d0 and z0 cuts
   double d0 = trackParameters[Trk::d0];
-  if(fabs(d0) > m_maxD0) { if(vertex != nullptr) { delete perigee; } return false; }
+  if(std::abs(d0) > m_maxD0) { if(vertex != nullptr) { delete perigee; } return false; }
 
   double z0 = trackParameters[Trk::z0];
-  if (fabs(z0)*sin(trackParameters[Trk::theta]) > m_IPz0Max)
+  if (std::abs(z0)*sin(trackParameters[Trk::theta]) > m_IPz0Max)
   { if(vertex != nullptr) { delete perigee; } return false; }
-  if (fabs(z0) > m_maxZ0)
+  if (std::abs(z0) > m_maxZ0)
   { if(vertex != nullptr) { delete perigee; } return false; }
 
   // transverse momentum
@@ -178,7 +157,7 @@ bool InDetTrackSelectorTool::decision(const Trk::TrackParameters * track, const 
   if(pt<m_minPt) { if(vertex != nullptr) { delete perigee; } return false; }
 
   // d0 significance
-  double d0Significance=fabs(trackParameters[Trk::d0]/sqrt( (*perigee->covariance())(Trk::d0,Trk::d0) ));
+  double d0Significance=std::abs(trackParameters[Trk::d0]/sqrt( (*perigee->covariance())(Trk::d0,Trk::d0) ));
   if (d0Significance>m_maxD0overSigmaD0)
   { if(vertex != nullptr) { delete perigee; } return false; }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetTrackSelectorTool_InDetConversionTrackSelectorTool_H
@@ -83,23 +83,43 @@ private:
   Gaudi::Property<bool> m_useEventInfoBs{this,"UseEventInfoBS",false};
   Trk::Vertex* getBeamSpot(const EventContext& ctx) const;
   /** Properties for track selection:all cuts are ANDed */
-  double m_maxSiD0;    //!< Maximal d0 at (0,0,0) for tracks with Si hits
-  double m_maxTrtD0;   //!< Maximal d0 at (0,0,0) for standalone TRT tracks
-  double m_maxSiZ0;    //!< Maximal z0 at (0,0,0)
-  double m_maxTrtZ0;   //!< Maximal z0 at (0,0,0) for standalone TRT tracks
-  double m_minPt;      //!< Minimum Pt of tracks
-  double m_trRatio1;   //!< TR ratio for tracks with 15-20 TRT hits
-  double m_trRatio2;   //!< TR ratio for tracks with 20-25 TRT hits
-  double m_trRatio3;   //!< TR ratio for tracks with >25 TRT hits
-  double m_trRatioTRT; //!< TR ratio for TRT only tracks
-  std::vector<double> m_TRTTrksEtaBins; //!< Eta bins (10 expected) for TRT-only track cuts
-  std::vector<double> m_TRTTrksBinnedRatioTRT; //!< Eta-binned eProbabilityHT for TRT-only track cuts
-  double m_trRatioV0;  //!< TR ratio for pion selection during V0 reconstruction
-  double m_sD0_Si;     //!< Cut on D0 significance of Si tracks
-  double m_sD0_Trt;    //!< Cut on D0 significance of TRT tracks
-  double m_sZ0_Trt;    //!< Cut on Z0 significance of TRT tracks
-  bool m_isConv;       //!< Conversion flag
-  bool m_PIDonlyForXe; //!< Only check TRT PID if all hits are Xe hits
+  DoubleProperty m_maxSiD0
+    {this, "maxSiD0", 35., "Maximal d0 at (0,0,0) for tracks with Si hits"};
+  DoubleProperty m_maxTrtD0
+    {this, "maxTrtD0", 100., "Maximal d0 at (0,0,0) for standalone TRT tracks"};
+  DoubleProperty m_maxSiZ0{this, "maxSiZ0", 200., "Maximal z0 at (0,0,0)"};
+  DoubleProperty m_maxTrtZ0
+    {this, "maxTrtZ0", 1200., "Maximal z0 at (0,0,0) for standalone TRT tracks"};
+  DoubleProperty m_minPt{this, "minPt", 500., "Minimum Pt of tracks"};
+  DoubleProperty m_trRatio1
+    {this, "RatioCut1", 0.5, "TR ratio for tracks with 15 or less TRT hits"};
+  DoubleProperty m_trRatio2
+    {this, "RatioCut2", 0.1, "TR ratio for tracks with 16 to 25 TRT hits"};
+  DoubleProperty m_trRatio3
+    {this, "RatioCut3", 0.05, "TR ratio for tracks with 26 or more TRT hits"};
+  DoubleProperty m_trRatioTRT
+    {this, "RatioTRT", 0.1, "TR ratio for all TRT only tracks"};
+
+  DoubleArrayProperty m_TRTTrksEtaBins
+    {this, "TRTTrksEtaBins",
+     {999., 999., 999., 999., 999., 999., 999., 999., 999., 999.},
+     "Eta bins (10 expected) for TRT-only track cuts"};
+  DoubleArrayProperty m_TRTTrksBinnedRatioTRT
+    {this, "TRTTrksBinnedRatioTRT", {0., 0., 0., 0., 0., 0., 0., 0., 0., 0.},
+     "Eta-binned eProbabilityHT for TRT-only track cuts"};
+
+  DoubleProperty m_trRatioV0
+    {this, "RatioV0", 1., "TR ratio for pion selection during V0 reconstruction"};
+  DoubleProperty m_sD0_Si
+    {this, "significanceD0_Si", 2., "Cut on D0 significance of Si tracks"};
+  DoubleProperty m_sD0_Trt
+    {this, "significanceD0_Trt", 0.5, "Cut on D0 significance of TRT tracks"};
+  DoubleProperty m_sZ0_Trt
+    {this, "significanceZ0_Trt", 3., "Cut on Z0 significance of TRT tracks"};
+
+  BooleanProperty m_isConv{this, "IsConversion", true, "Conversion flag"};
+  BooleanProperty m_PIDonlyForXe
+    {this, "PIDonlyForXe", false, "Only check TRT PID if all hits are Xe hits"};
 
 }; // end of class definitions
 } // end of namespace definitions
