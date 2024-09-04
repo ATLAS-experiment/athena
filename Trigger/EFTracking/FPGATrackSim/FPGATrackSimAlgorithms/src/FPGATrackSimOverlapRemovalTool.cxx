@@ -85,7 +85,7 @@ StatusCode FPGATrackSimOverlapRemovalTool::runOverlapRemoval(std::vector<std::sh
     for (auto &r: roads)
     {
         FPGATrackSimRoad* & old = acc(r->getYBin(), r->getXBin());
-        if (!old) *old = *r.get();
+        if (!old) old = new FPGATrackSimRoad (*r.get());
         else if (r->getNHitLayers() > old->getNHitLayers()) *old = *r.get();
         else if (r->getNHitLayers() == old->getNHitLayers() && r->getNHits() > old->getNHits()) *old = *r.get();
     }
