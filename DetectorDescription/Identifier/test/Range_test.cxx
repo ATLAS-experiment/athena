@@ -10,6 +10,7 @@ namespace utf = boost::unit_test;
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/Range.h"
+#include "Identifier/ExpandedIdentifier.h"
 
 //ensure BOOST knows how to represent an ExpandedIdentifier
 namespace boost::test_tools::tt_detail {
@@ -59,6 +60,19 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
   BOOST_CHECK_THROW(r1.build(empty), std::runtime_error);
   const std::string nonsense="hgfclsdvoiwe";
   BOOST_CHECK_THROW(r1.build(nonsense), std::runtime_error);
+  const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
+  BOOST_CHECK_NO_THROW(r1.build(larExample));
+}
+BOOST_AUTO_TEST_CASE(RangeMatch){
+  Range r1, r2;
+  const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
+  BOOST_CHECK_NO_THROW(r1.build(larExample));
+  ExpandedIdentifier id{"4/1/1/3/0/0/26"};
+  BOOST_TEST(r1.match(id) == true);
+  //4/1/-1,1/3/0/0:9/0:63
+  const std::string larExample2="4/1/-1,1/3/0/0:9/0:63";
+  BOOST_CHECK_NO_THROW(r2.build(larExample2));
+  BOOST_TEST(r2.match(id) == true);
 }
 
 
@@ -81,6 +95,8 @@ BOOST_AUTO_TEST_CASE(RangeConst_identifier_factoryConstructors){
   Range r1;
   BOOST_CHECK_NO_THROW(Range::const_identifier_factory f3(r1));
 }
+
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

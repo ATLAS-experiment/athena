@@ -5,8 +5,6 @@
 #ifndef IDENTIFIER_IDENTIFIER_H
 #define IDENTIFIER_IDENTIFIER_H
 
-#define IDENTIFIER_TYPE unsigned long long
-
 #include "GaudiKernel/MsgStream.h"
 #include "Identifier/Identifier32.h"
 #include <string>
@@ -25,10 +23,10 @@
 class Identifier{
 public:
 
-    typedef Identifier                  id_type;
-    typedef IDENTIFIER_TYPE             value_type;
-    typedef long long                   diff_type;
-    typedef IDENTIFIER_TYPE             size_type;
+    typedef Identifier id_type;
+    typedef unsigned long long value_type;
+    typedef long long diff_type;
+    typedef unsigned long long size_type;
 
     enum bit_defs{
         NBITS = sizeof(value_type) * 8, // bits per byte
