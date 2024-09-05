@@ -181,7 +181,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "cosmics"      : cosmics,
     "bmumux"       : bmumux,
     "minBias"      : minBias,
-    "minBiasPixel" : minBiasPixel,
+
+    # don't wllow this at the moment 
+    # "minBiasPixel" : minBiasPixel,
     
     "electronLRT"  : electronLRT,
     "muonLRT"      : muonLRT,
