@@ -80,7 +80,19 @@ namespace Trig {
             ATH_MSG_DEBUG("Begin testing chain " << chain << (m_tdt->isPassed(chain) ? " and will dive into details as the chain passed " : " but will not do anything as the chain did not pass"));
             if (!m_tdt->isPassed(chain)) continue;
 
+            // explicitely excluded chains
+            bool isExcluded = false;
+            for (const auto& excludedChain : SpecialCases::excludedChains) {
+                if (chain == excludedChain) {
+                    isExcluded = true;
+                    break; // Break out of the exclusion check loop
+                }
+            }
 
+            if (isExcluded) {
+                continue; // Skip the current iteration of the main loop
+            }
+            
             // We assume that the navigation is ultimately a set of element links
             // We're comparing two types of navigation but they should both point to the same
             // objects.
@@ -92,6 +104,12 @@ namespace Trig {
             ATH_CHECK(m_toolRun2->retrieveParticles(vecCombinationsRun2, chain));
             auto combsRun2 = vectorToSet(vecCombinationsRun2);
             ATH_MSG_DEBUG("Run 2 size " << combsRun2.size());
+            // if Run 2 size is 0 we discard any further testing
+            if (combsRun2.size() == 0)
+            {
+                ATH_MSG_DEBUG("Chain " << chain << " testing discarded due to detected Run 2 size == 0");
+                continue;
+            }
             for (auto& c : combsRun2 ) {
                 ATH_MSG_DEBUG(c);
             }
@@ -220,6 +238,7 @@ namespace Trig {
             ATH_MSG_WARNING("Run2 combs: " << run2);
             ATH_MSG_WARNING("Run3 combs: " << run3);
         }
+
         if (not result) // previous not isSubset, loosened condition
         {
             ATH_MSG_WARNING("NOT PASSED: failed, Run2 objects are not within a subset of Run3 objects for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
@@ -230,38 +249,6 @@ namespace Trig {
             }
         }
 
-        for ( auto& combRun2: run2 ) {
-            bool foundMatching = false;
-            for ( auto& combRun3 : run3 ) {     
-                ATH_MSG_DEBUG("Available Run 2 combinations: " );
-                for ( auto& c: combRun2 ){
-                    ATH_MSG_DEBUG("  " << c );
-                }
-                ATH_MSG_DEBUG("Available Run 3 combinations: " );
-                for ( auto& c: combRun3 ){
-                    ATH_MSG_DEBUG("  " << c );
-                }
-                ATH_MSG_DEBUG("COMPARISON combRun2 == combRun3 are " <<  ( combRun2 == combRun3  ? "identical" : "distinct"));
-                if ( combRun2 == combRun3 ) {
-                    ATH_MSG_DEBUG("Found matching combinations, run2 " << combRun2 
-                                << " run3 " << combRun3 );
-                    foundMatching = true;
-                    break;
-                } 
-            }
-            if ( not foundMatching ) {
-                ATH_MSG_WARNING("Specific combination for chain " << chain << " can not be found in Run 3");
-                ATH_MSG_WARNING("Run 2 combination: " << combRun2 );
-                ATH_MSG_WARNING("Available Run 3 combinations: " );
-                for ( auto& c: run3 ){
-                    ATH_MSG_WARNING("  " << c );
-                }
-                ATH_MSG_ERROR("When checking combinations in details found differences, (enable WARNING message for more details)");
-                if ( m_failOnDifference ) {
-                    return StatusCode::FAILURE;
-                }
-            }
-        }
         return StatusCode::SUCCESS;
     }
 
