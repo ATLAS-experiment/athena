@@ -53,10 +53,13 @@ namespace {
    constexpr std::size_t maxType();
 
    template <> constexpr std::size_t maxType<ActsTrk::DetectorType>() { return to_underlying(ActsTrk::DetectorType::UnDefined); }
+   template <> constexpr std::size_t maxType<xAOD::UncalibMeasType>() { return to_underlying(xAOD::UncalibMeasType::nTypes); }
 
    template <typename T_EnumClass>
    constexpr unsigned char toChar(T_EnumClass value) {
-      assert( to_underlying(value) < std::numeric_limits<unsigned char>::max() && to_underlying(value) < maxType<T_EnumClass>() );
+      assert( sizeof(T_EnumClass) <= sizeof(std::size_t));
+      assert(    static_cast<std::size_t>(to_underlying(value)) < static_cast<std::size_t>(std::numeric_limits<unsigned char>::max())
+              && static_cast<std::size_t>(to_underlying(value)) <= maxType<T_EnumClass>() );
       return static_cast<unsigned char>(to_underlying(value));
    }
 
