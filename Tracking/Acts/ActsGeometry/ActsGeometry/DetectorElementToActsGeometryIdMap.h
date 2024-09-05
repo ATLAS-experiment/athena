@@ -3,7 +3,6 @@
   */
 #ifndef ACTSTRK_DETECTORELEMENTTOACTSGEOMETRYIDMAP_H
 #define ACTSTRK_DETECTORELEMENTTOACTSGEOMETRYIDMAP_H
-
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include <unordered_map>
@@ -22,7 +21,8 @@ namespace ActsTrk {
    constexpr unsigned int DETELEMENT_HASH_MASK = ~(1<<31|1<<30|1<<29|1<<28);
    inline
    DetectorElementKey makeDetectorElementKey(xAOD::UncalibMeasType meas_type, unsigned int identifier_hash) {
-      assert( (to_underlying(meas_type)&((~DETELEMENT_HASH_MASK)>>DETELEMENT_TYPE_SHIFT)) == meas_type);
+      assert( sizeof(xAOD::UncalibMeasType) <= sizeof(std::size_t) );
+      assert( static_cast<std::size_t>( to_underlying(meas_type)&((~DETELEMENT_HASH_MASK)>>DETELEMENT_TYPE_SHIFT)) == static_cast<std::size_t>(meas_type));
       assert( (identifier_hash & DETELEMENT_HASH_MASK) == identifier_hash);
       return (to_underlying(meas_type) << DETELEMENT_TYPE_SHIFT) | (identifier_hash & DETELEMENT_HASH_MASK);
    }
