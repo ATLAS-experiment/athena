@@ -28,7 +28,7 @@ void initializeDeadStrawsList();                   // initialize deadStraws, rea
 void simpleAnalysis(std::string filename);         // identify problematic straws
 void printAthena(int run);                         // print athena format
 void printAthenaBoardsOnly(int run);               // print athena format but only for entire boards
-void reportResults(std::string filename, int run); // print for root plots
+void reportResults(const std::string & filename, int run); // print for root plots
 
 bool checkNoisy_HT = false;
 bool checkLoEff_HT = false;
@@ -135,7 +135,7 @@ void initializeDeadStrawsList()
     {
         std::cout << "TRT_StrawStatusReport::initializePermanentlyDead() ERROR: failed to open the input file " << filename << std::endl;
         std::cout << "TRT_StrawStatusReport::initializePermanentlyDead() ERROR: you need to fix the file name / link, WILL CRASH THE CODE NOW" << std::endl;
-        assert(0);
+        std::abort();
     }
     while (fscanf(f, "%d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5) == 6)
     {
@@ -170,6 +170,7 @@ void simpleAnalysis(std::string filename)
             nevents = tmp[8];
             continue;
         }
+        if (nevents == 0) continue;
         countlines++;
 
         double occupancy = 1. * tmp[3] / nevents;
@@ -335,7 +336,7 @@ void printAthenaBoardsOnly(int run)
                 // and make a vector of dead straws on a given board
                 // if the vector lengths match then the board is dead
                 // and we can use the straw list in the vector to mask them
-
+                if (board <0) continue;
                 allStrawsOnBoard[board].push_back(k);
                 if (deadStraws[i][j][k] > 0)
                     deadStrawsOnBoard[board].push_back(k);
@@ -376,7 +377,7 @@ void printAthenaBoardsOnly(int run)
     return;
 }
 
-void reportResults(std::string filename, int run)
+void reportResults(const std::string & filename, int run)
 {
     // creates TRT_StrawStatusReport.txt
     // this file used to make histograms via TRT_StrawStatusReport.C
@@ -386,7 +387,7 @@ void reportResults(std::string filename, int run)
     int count(0), nevents(0), tmp[9];
     FILE *fout = fopen("TRT_StrawStatusReport.txt", "w");
     fprintf(fout, "%d %d %d %d %d %lf %lf %lf %2d\n", 0, 0, 0, 0, run, 0., 0., 0., 0);
-
+    //what do these numbers mean, what are valid ranges for them?
     while (fscanf(f, "%d %d %d %d %d %d %d %d %d\n", tmp, tmp + 1, tmp + 2, tmp + 3, tmp + 4, tmp + 5, tmp + 6, tmp + 7, tmp + 8) == 9)
     {
 
@@ -395,6 +396,7 @@ void reportResults(std::string filename, int run)
             nevents = tmp[8];
             continue;
         }
+        if (nevents == 0) continue;
         count++;
 
         double occupancy = 1. * tmp[3] / nevents;

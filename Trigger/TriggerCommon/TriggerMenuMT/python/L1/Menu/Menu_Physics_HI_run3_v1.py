@@ -117,7 +117,7 @@ def defineMenu():
         'L1_eEM1_TRT_VjTE100', 'L1_eTAU1_TRT_VjTE100', 'L1_jTAU1_TRT_VjTE100',
         'L1_eEM1_TRT_VjTE100_GAP_AANDC', 'L1_eTAU1_TRT_VjTE100_GAP_AANDC', 'L1_jTAU1_TRT_VjTE100_GAP_AANDC',
          #UPC, calo only, phase-1
-         'L1_jTE5_VjTE200',
+         'L1_jTE5_VjTE200', 'L1_gTE5_VjTE200',
 
         
         #LUCID
@@ -155,6 +155,10 @@ def defineMenu():
         'L1_VZDC_A_ZDC_C_jTE5_VjTE200_GAP_A', 'L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_A',
         'L1_ZDC_1XOR5_jTE5_VjTE200_GAP_A', 'L1_ZDC_A_VZDC_C_jTE5_VjTE200_GAP_C',
         'L1_1ZDC_A_1ZDC_C_jTE5_VjTE200_GAP_C', 'L1_ZDC_1XOR5_jTE5_VjTE200_GAP_C',
+        'L1_VZDC_A_ZDC_C_jTE3_VjTE200', 'L1_ZDC_A_VZDC_C_jTE3_VjTE200',
+        'L1_VZDC_A_ZDC_C_jTE5_VjTE200', 'L1_ZDC_A_VZDC_C_jTE5_VjTE200',
+        'L1_VZDC_A_ZDC_C_gTE3_VjTE200', 'L1_ZDC_A_VZDC_C_gTE3_VjTE200',
+        'L1_VZDC_A_ZDC_C_gTE5_VjTE200', 'L1_ZDC_A_VZDC_C_gTE5_VjTE200',
         'L1_MBTS_1_ZDC_XOR_VjTE200',
         'L1_VZDC_A_ZDC_C_VjTE200', 'L1_ZDC_A_VZDC_C_VjTE200',
 
@@ -207,6 +211,14 @@ def defineMenu():
         'L1_ZDC_A_AND_C_EMPTY', 'L1_ZDC_A_AND_C_UNPAIRED_NONISO',
         #'L1_ZDC_OR_UNPAIRED_ISO',
         #'L1_ZDC_OR_LHCF',
+
+        #ZDC pp (ATR-29027)
+        'L1_ZDC_pp_A','L1_ZDC_pp_C','L1_ZDC_pp_OR','L1_ZDC_pp_A_C',
+        'L1_ZDC_pp_A2','L1_ZDC_pp_C2','L1_ZDC_pp_OR2',
+        'L1_ZDC_pp_A_EMPTY','L1_ZDC_pp_C_EMPTY',
+        'L1_ZDC_pp_A2_EMPTY','L1_ZDC_pp_C2_EMPTY',
+        'L1_ZDC_pp_A_UNPAIRED_NONISO','L1_ZDC_pp_C_UNPAIRED_NONISO',
+        'L1_ZDC_pp_A2_UNPAIRED_NONISO','L1_ZDC_pp_C2_UNPAIRED_NONISO',
 
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',

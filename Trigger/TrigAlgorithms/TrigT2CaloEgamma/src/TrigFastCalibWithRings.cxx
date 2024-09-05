@@ -28,18 +28,19 @@ StatusCode TrigFastCalibWithRings::execute() const {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigFastCalibWithRings::checkRings(const EventContext& ctx ) const {
+bool TrigFastCalibWithRings::checkRings(const EventContext& ctx ) const {
    SG::ReadHandle<xAOD::TrigRingerRingsContainer> rgCont( m_ringerKey, ctx);
-   ATH_CHECK(rgCont.isValid());
+   if (rgCont.isValid()){
+    ATH_MSG_DEBUG("No valid Ringer Container");
+    return false;
+   }
    const xAOD::TrigRingerRings_v2 *ring=rgCont->at(0);
-
-
     if(!ring->emCluster()){
-      ATH_MSG_WARNING("There is no link to emCluster.");
-      return StatusCode::FAILURE;
+      ATH_MSG_DEBUG("There is no link to emCluster.");
+      return false;
     }
     
-    return StatusCode::SUCCESS;
+    return true;
 
 }
 

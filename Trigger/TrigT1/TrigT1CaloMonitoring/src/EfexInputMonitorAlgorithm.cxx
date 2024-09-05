@@ -158,12 +158,14 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     Toweremstatus=eTower->em_status();
     Towerhadstatus=eTower->had_status();
     if(eTower->em_status()) {
-        Decision="BadEMStatus:" + std::to_string(TowerId);
-        fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+        Decision="BadEMStatus";
+        ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+        fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
     }
       if(eTower->had_status()) {
-          Decision="BadHadStatus:" + std::to_string(TowerId);
-          fill("errors",Decision,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
+          Decision="BadHadStatus";
+          ErrorAndLocation = std::string("#splitline{") + Decision + "}{" + std::to_string(TowerId) + "}";
+          fill("errors",Decision,ErrorAndLocation,timeSince,timeUntil,evtNumber,lbn,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,SlotSCID,IsMonReady);
       }
       std::vector<uint16_t> counts=eTower->et_count();
       std::vector<uint16_t> refcounts;
