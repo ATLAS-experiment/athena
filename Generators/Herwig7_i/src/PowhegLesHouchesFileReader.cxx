@@ -721,6 +721,7 @@ bool powhegLesHouchesFileReader::doReadEvent() {
       std::string weightName = m_optionalWeightsLabel[IdLabel];
       std::string value=hs;
       erase_substr(value, "<wgtid='"+IdLabel+"'>");
+      erase_substr(value, "<wgtid=\""+IdLabel+"\">");
       erase_substr(value, "</wgt>");
       erase_substr(value, "\n");
       weightValue=std::stod(value);
