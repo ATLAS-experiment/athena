@@ -10,7 +10,6 @@
 
 #include "FPGATrackSimRoadUnionTool.h"
 //one of the includes are needed below or all of them dont know for sure
-//TODO WW
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
@@ -54,7 +53,7 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
 {
     
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    //find and make vector of hists associated with layer
+    //makes a vector of slices that have a vector of hits assiociated with that slice
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> sliceHits(m_tools.size());
 
     const FPGATrackSimPlaneMap *pmap = nullptr;
@@ -65,9 +64,10 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
         auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
         for (auto & iHit:hits)
         {
-            //if (tool->getSubRegion() >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(tool->getSubRegion(), *iHit)) continue;
-
+            
             std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
+            ATH_MSG_INFO("tn:" << m_tools.size() << "mapped?:"<<hitCopy->isMapped());
+ 
             pmap->map(*hitCopy);
             if (hitCopy->getLayer()>=0)
             {
@@ -75,7 +75,6 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
                     sliceHits[toolNum].push_back(hitCopy);
                 }
             }
-            //TODO mabye add a delete/reset
 
         }   
         toolNum++;  
@@ -88,7 +87,6 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
         std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
 //        std::cout<<"slice"<<tool->getSubRegion()<<" hitNum:"<<sliceHits[tool->getSubRegion()].size()<<"\n";
         ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r));
-        //ATH_CHECK(tool->getRoads(hits, r));
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
     }
 

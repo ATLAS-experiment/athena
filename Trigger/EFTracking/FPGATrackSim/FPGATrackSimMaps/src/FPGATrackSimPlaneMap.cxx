@@ -23,7 +23,6 @@ using namespace std;
 // Constructor/Desctructor
 ///////////////////////////////////////////////////////////////////////////////
 
-//  TODO BROKE THIS RESORE TO WHAT IT WAs
 FPGATrackSimPlaneMap::FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage, std::vector<int> layerOverrides) :
     m_map(static_cast<int>(SiliconTech::nTechs),
           vector<vector<LayerSection>>(static_cast<int>(DetectorZone::nZones))
@@ -259,7 +258,6 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 // Interface Functions
 ///////////////////////////////////////////////////////////////////////////////
 
-// TODO WW HERE
 
 void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 {

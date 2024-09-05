@@ -22,11 +22,11 @@ StatusCode FPGATrackSimOverlapRemovalTool::initialize()
   // Check if this is 2nd stage
   if(m_do2ndStage)
   {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers();;
+    m_totLayers = m_FPGATrackSimMapping->PlaneMap_2nd()->getNLogiLayers();
   }
   else
   {
-    m_totLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();;
+    m_totLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();
   }
   ATH_MSG_DEBUG("Total number of layer: " << m_totLayers);
 

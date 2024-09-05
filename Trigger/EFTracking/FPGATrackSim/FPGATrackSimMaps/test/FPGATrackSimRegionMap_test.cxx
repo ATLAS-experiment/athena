@@ -48,7 +48,6 @@ int main(int, char**)
     string pmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/step3_01eta03_03phi05.pmap";
     string rmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-23-00-01.rmap";
 
-    //FPGATrackSimPlaneMap pmap(pmap_path, 0, 1);
     std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  test_pmaps;
     test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(pmap_path, 0, 1))); 
     FPGATrackSimRegionMap rmap(test_pmaps, rmap_path);

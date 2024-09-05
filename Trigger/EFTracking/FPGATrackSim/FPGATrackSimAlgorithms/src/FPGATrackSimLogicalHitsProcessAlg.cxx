@@ -367,6 +367,170 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 //                  INPUT PASSING, READING AND PROCESSING                    //
 ///////////////////////////////////////////////////////////////////////////////
 
+<<<<<<< HEAD
+=======
+StatusCode FPGATrackSimLogicalHitsProcessAlg::readInputs(bool & done)
+{
+
+    if ( !m_hitSGInputTool.empty()) {
+        ATH_CHECK(m_hitSGInputTool->readData(&m_eventHeader, Gaudi::Hive::currentContext()));
+        ATH_MSG_DEBUG("Loaded " << m_eventHeader.nHits() << " hits in event header from SG");
+
+        return StatusCode::SUCCESS;
+    }
+
+    if (m_ev % m_firstInputToolN == 0)
+    {
+        // Read primary input
+        ATH_CHECK(m_hitInputTool->readData(&m_firstInputHeader, done));
+        if (done)
+        {
+            ATH_MSG_INFO("Cannot read more events from file, returning");
+            return StatusCode::SUCCESS; // end of loop over events
+        }
+    }
+
+    m_eventHeader = m_firstInputHeader;
+
+    // Read secondary input
+    for (int i = 0; i < m_secondInputToolN; i++)
+    {
+        ATH_CHECK(m_hitInputTool2->readData(&m_eventHeader, done, false));
+        if (done)
+        {
+            ATH_MSG_INFO("Cannot read more events from file, returning");
+            return StatusCode::SUCCESS;
+        }
+    }
+
+    m_ev++;
+
+    return StatusCode::SUCCESS;
+}
+
+// TODO only the first plain is passed and uesed, all the pmaps need to be used then passed to the filter 
+// Applies clustering, mapping, hit filtering, and space points
+StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClusters_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGAClustersFiltered_1st,
+                                                            SG::WriteHandle<FPGATrackSimClusterCollection> &FPGASpacePoints_1st)
+{
+    m_clusters_1st.clear();
+    m_spacepoints_1st.clear();
+    m_hits_1st_miss.clear();
+
+    // Map hits
+    ATH_MSG_DEBUG("Running hits conversion");
+    m_logicEventHeader_1st->reset();
+    ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader_1st));
+    if (!m_runSecondStage) m_eventHeader.clearHits();
+
+
+    ATH_MSG_DEBUG("Hits conversion done");
+    // Random removal of hits
+    if (m_doHitFiltering) {
+        ATH_MSG_DEBUG("Running hits filtering");
+        ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader_1st, true));
+    }
+
+    // Clustering
+    if (m_clustering)
+    {
+        ATH_MSG_DEBUG("Running clustering");
+        ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader_1st, m_clusters_1st));
+        m_clusters_1st_original = m_clusters_1st;
+
+        // I think I also want to pass m_clusters to random removal (but won't work currently)
+        if (m_doHitFiltering) ATH_CHECK(m_hitFilteringTool->DoRandomRemoval(*m_logicEventHeader_1st, false));
+        for (const FPGATrackSimCluster& cluster : m_clusters_1st_original) FPGAClusters_1st->push_back(cluster); 
+
+    }
+
+    // Filter hits/clusters (untested for hits, ie with m_clustering = false)
+    if (m_doHitFiltering)
+    {
+        // get the sets of layers that we want to filter hits from
+        std::vector<int> filter_pixel_physLayers, filter_strip_physLayers;
+        //TODO only the first plain is passed and uesed, all the pmaps need to be used then passed to the filter 
+        const FPGATrackSimPlaneMap *planeMap_1st = m_FPGATrackSimMapping->PlaneMap_1st(0);
+        ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap_1st, filter_strip_physLayers));
+        m_clusters_1st.clear();
+        ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader_1st, filter_pixel_physLayers, filter_strip_physLayers, m_clusters_1st));
+        for (const FPGATrackSimCluster &cluster : m_clusters_1st) FPGAClustersFiltered_1st->push_back(cluster); 
+ 
+    }
+
+    // Space points
+    if (m_doSpacepoints) {
+        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader_1st, m_spacepoints_1st));
+        for (const FPGATrackSimCluster& cluster : m_spacepoints_1st) FPGASpacePoints_1st->push_back(cluster); 
+    }
+
+    return StatusCode::SUCCESS;
+}
+
+
+StatusCode FPGATrackSimLogicalHitsProcessAlg::secondStageProcessing(std::vector<FPGATrackSimTrack> const & tracks_1st,
+                                                           std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads_2nd, std::vector<FPGATrackSimTrack> & tracks_2nd)
+{
+    m_clusters_2nd.clear();
+    m_spacepoints_2nd.clear();
+    m_hits_2nd_miss.clear();
+
+
+    const EventContext& ctx = getContext();
+
+    // Map hits
+    m_logicEventHeader_2nd->reset();
+    ATH_CHECK(m_hitMapTool->convert(2, m_eventHeader, *m_logicEventHeader_2nd));
+    m_eventHeader.clearHits();
+
+    if (m_clustering) ATH_CHECK(m_clusteringTool->DoClustering(*m_logicEventHeader_2nd, m_clusters_2nd));
+
+    SG::WriteHandle<FPGATrackSimClusterCollection> FPGAClusters_2nd (m_FPGAClusterKey.at(1), ctx);
+    ATH_CHECK( FPGAClusters_2nd.record (std::make_unique<FPGATrackSimClusterCollection>()));
+    for (const FPGATrackSimCluster& cluster : m_clusters_2nd) FPGAClusters_2nd->push_back(cluster); 
+
+    // Space points
+    if (m_doSpacepoints) {
+        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_logicEventHeader_2nd, m_spacepoints_2nd));
+
+        SG::WriteHandle<FPGATrackSimClusterCollection> FPGASpacePoints_2nd (m_FPGASpacePointsKey.at(1), ctx);
+        ATH_CHECK( FPGASpacePoints_2nd.record (std::make_unique<FPGATrackSimClusterCollection>()));
+        for (const FPGATrackSimCluster& cluster : m_spacepoints_2nd) FPGASpacePoints_2nd->push_back(cluster); 
+    }
+
+    std::vector<FPGATrackSimHit> const & hits_2nd = m_logicEventHeader_2nd->towers().at(0).hits();
+
+    ATH_MSG_DEBUG("Number of second stage hits = " << hits_2nd.size());
+
+    std::vector<const FPGATrackSimHit*> phits_2nd;
+    for (FPGATrackSimHit const & h : hits_2nd) phits_2nd.push_back(&h);
+
+    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey.at(1), ctx);
+    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
+    for (const FPGATrackSimHit* Hit : phits_2nd) FPGAHits_2nd->push_back(*Hit); 
+
+    // Get the first stage tracks after OR
+    std::vector<FPGATrackSimTrack> tracks_1st_OR;
+    for (auto track : tracks_1st) {
+        if (track.passedOR() == 1) tracks_1st_OR.push_back(track);
+    }
+
+    ATH_MSG_DEBUG("Number of roads for second stage fitting " << roads_2nd.size());
+
+    // Get second stage tracks
+    if (m_doTracking) ATH_CHECK(m_trackFitterTool_2nd->getTracks(roads_2nd, tracks_2nd));
+
+    ATH_MSG_DEBUG("Number of tracks from the second stage fitting = " << tracks_2nd.size() << " and truth tracks = " << m_logicEventHeader_1st->optional().getTruthTracks().size());
+
+    // Overlap removal
+    ATH_CHECK(m_overlapRemovalTool_2nd->runOverlapRemoval(tracks_2nd));
+
+    return StatusCode::SUCCESS;
+}
+
+>>>>>>> 60da1b96404 (comments cleaned up an improved)
 StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(  const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads_1st,
                                                                 std::vector<FPGATrackSimTrack> const& tracks_1st,
                                                                 FPGATrackSimDataFlowInfo const* dataFlowInfo)

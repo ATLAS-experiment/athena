@@ -82,7 +82,6 @@ StatusCode FPGATrackSimMatrixGenAlgo::initialize()
       ATH_MSG_INFO("Hough constants method needs idealized geometry > 0, aborting.");
       return StatusCode::FAILURE;
     }
-    //TODO WW
     m_pmap = m_FPGATrackSimMapping->PlaneMap_1st(0);
     // Get detector configurations
     m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st(0)->getNLogiLayers();

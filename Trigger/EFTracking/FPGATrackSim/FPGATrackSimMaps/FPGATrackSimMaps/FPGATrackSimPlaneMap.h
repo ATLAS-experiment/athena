@@ -66,7 +66,7 @@ class FPGATrackSimPlaneMap
         ///////////////////////////////////////////////////////////////////////
         
         // See doc on m_layerOverrides for info on argument layerOverrides
-        //TODO KILL OLD METHOD 
+        //TODO KILL OLD METHOD AFTER 2nd Stage is fully converted  
         FPGATrackSimPlaneMap(const std::string & filepath, unsigned region, unsigned stage,
                 std::vector<int> layerOverrides = std::vector<int>());
 

@@ -175,10 +175,6 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
       if (m_subRegion >= 0) {
         // NOTE: uncomment middle piece if we port over 2nd stage functionality.
         auto* subrmap = /*(m_2ndStage) ? m_FPGATrackSimMapping->SubRegionMap_2nd() :*/ m_FPGATrackSimMapping->SubRegionMap();
-        //if (!(subrmap->isInRegion(m_subRegion, *hit))) {
-        //  continue;
-        //}
-        //NOTE WW REGION CHECK REMOVED
       }
 
       // This scans over y (pT) because that is more efficient in memory, in C.
@@ -490,13 +486,11 @@ void FPGATrackSimHoughTransformTool::addRoad(const std::unordered_set<std::share
 // Use this version of addRoad when hit tracing is turned off
 void FPGATrackSimHoughTransformTool::addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, unsigned x, unsigned y)
 {
-    std::cout<<"ROAD B"<<'\n';
   // Get the road hits
   std::vector<std::shared_ptr<const FPGATrackSimHit>> road_hits;
   layer_bitmask_t hitLayers = 0;
   for (const auto & hit : hits)
     {
-      //if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
       // Find the min/max y bins (after scaling)
       unsigned int y_bin_min = (y / m_binScale[hit->getLayer()]) * m_binScale[hit->getLayer()];
       unsigned int y_bin_max = y_bin_min + m_binScale[hit->getLayer()];

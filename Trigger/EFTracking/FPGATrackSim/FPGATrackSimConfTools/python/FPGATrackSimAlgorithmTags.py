@@ -323,7 +323,6 @@ FPGATrackSimAlgorithmTags = {
             'lrt_straighttrack_convSize_x': 0,
             'lrt_straighttrack_convSize_y': 0,
             'lrt_straighttrack_hitExtend_x': [2,1,0,0,0,0,0,0],
-            #'lrt_straighttrack_hitExtend_x': [0,0,0,0,0],
             'lrt_straighttrack_stereo': False,
             'lrt_straighttrack_localMaxWindowSize': 0,
             # For monitoring (not totally implemented)

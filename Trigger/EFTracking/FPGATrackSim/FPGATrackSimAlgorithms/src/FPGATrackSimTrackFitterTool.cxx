@@ -27,7 +27,6 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 
     const FPGATrackSimFitConstantBank* nominalbank;
     std::vector<const FPGATrackSimFitConstantBank*> bankvec;
-    //TODO WW
     if(!m_do2ndStage){
       nominalbank = m_FPGATrackSimBank->FitConstantBank_1st();
       if (!m_guessHits) {
