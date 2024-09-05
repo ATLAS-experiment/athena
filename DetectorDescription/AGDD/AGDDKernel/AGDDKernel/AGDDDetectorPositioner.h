@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDDetectorPositioner_H
@@ -54,8 +54,8 @@ public:
 	
 	// accessors
 	
-	std::string GetDetectorType() {return ID.detectorType;}
-	std::string GetDetectorAddress() {return ID.detectorAddress;}
+	const std::string& GetDetectorType() {return ID.detectorType;}
+	const std::string& GetDetectorAddress() {return ID.detectorAddress;}
 	double GetZPosition()	{return position.Zposition;}
 	double GetRadius() {return position.Radius;}
 	double GetPhi()	{return position.Phi;}
