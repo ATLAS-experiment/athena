@@ -52,31 +52,31 @@ namespace InDet{
      double Pt = sin(ThetaVert)/std::abs(PInvVert);
      //- Track quality
 
-     double pT_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinPtAtEta(eta) : m_cutPt;
+     double pT_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinPtAtEta(eta) : m_cutPt.value();
      if(Pt               < pT_cut) 		return StatusCode::FAILURE;
 
      if(!m_multiWithPrimary){           //Must not be used for primary vertex search
-       double z0_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxZImpactAtEta(eta) : m_cutZVrt;
+       double z0_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxZImpactAtEta(eta) : m_cutZVrt.value();
        // Eta-dependent cuts with z0*sin(theta)
        if(m_useEtaDependentCuts && std::abs(ZVert*sin(ThetaVert)) > z0_cut) return StatusCode::FAILURE;
        //Otherwise cuts with z0
        else if(!m_useEtaDependentCuts && std::abs(ZVert) > z0_cut)	    return StatusCode::FAILURE;
      }
 
-     double chi2_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxChi2AtEta(eta) : m_cutChi2;
+     double chi2_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxChi2AtEta(eta) : m_cutChi2.value();
      if(Chi2 	         > chi2_cut) 		return StatusCode::FAILURE;
 
-     double d0_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(eta) : m_cutA0;
+     double d0_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxPrimaryImpactAtEta(eta) : m_cutA0.value();
      if(std::abs(A0Vert)     > d0_cut) 		return StatusCode::FAILURE;
 
-     int pix_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinPixelHitsAtEta(eta) : m_cutPixelHits;
+     int pix_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinPixelHitsAtEta(eta) : m_cutPixelHits.value();
      if(!m_useEtaDependentCuts && std::abs(eta)>2.){
        if(badHits && PixelHits<=3) return StatusCode::FAILURE;
        PixelHits--;
      }
      if(PixelHits	    < pix_cut) 		return StatusCode::FAILURE;
 
-     int strip_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinStripHitsAtEta(eta) : m_cutSctHits;
+     int strip_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinStripHitsAtEta(eta) : m_cutSctHits.value();
      if(!m_useEtaDependentCuts){
        if(SctHits<3) return StatusCode::FAILURE;
        if(std::abs(eta)>2. && m_existIBL) SctHits--;
@@ -84,13 +84,13 @@ namespace InDet{
      }
      if(SctHits		    < strip_cut) 	return StatusCode::FAILURE;
 
-     int si_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinSiHitsAtEta(eta) : m_cutSiHits;
+     int si_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinSiHitsAtEta(eta) : m_cutSiHits.value();
      if((PixelHits+SctHits) < si_cut) 		return StatusCode::FAILURE;
 
-     int inpix_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinInnermostPixelHitsAtEta(eta) : m_cutBLayHits;
+     int inpix_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMinInnermostPixelHitsAtEta(eta) : m_cutBLayHits.value();
      if(BLayHits	    < inpix_cut) 	return StatusCode::FAILURE;
 
-     int shared_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxSharedAtEta(eta) : m_cutSharedHits;
+     int shared_cut = m_useEtaDependentCuts ? m_etaDependentCutsSvc->getMaxSharedAtEta(eta) : m_cutSharedHits.value();
      if(SharedHits          > shared_cut)       return StatusCode::FAILURE;
 
      return StatusCode::SUCCESS;

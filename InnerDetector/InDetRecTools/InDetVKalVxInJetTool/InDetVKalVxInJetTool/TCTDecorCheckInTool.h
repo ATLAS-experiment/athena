@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 // TCTDecorCheck.h - Description
@@ -53,7 +53,8 @@ class TLorentzVector;
    private:
 
       // get handle to TCT Tool
-      ToolHandle<InDet::IInDetTrkInJetType>    m_trackClassificationTool;
+    ToolHandle<InDet::IInDetTrkInJetType> m_trackClassificationTool
+    {this, "TrackClassificationTool", "InDet::InDetTrkInJetType"};
 
       // ReadHandle for the jets
       SG::ReadHandleKey<xAOD::JetContainer> m_jetsKey{this,"JetContainer","AntiKt4EMPFlowJets","ReadHandleKey for Jet Container"};
@@ -73,8 +74,7 @@ class TLorentzVector;
       SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetReadDecorKeyTrackLink{this,"jetDecorKeyJetLink",
       "AntiKt4EMPFlowJets.TCTTrackLink","ReadDecorHandleKey for adding TrackParticleLink to Jets"};
 
-      std::string m_decoratorMethod{};
-      std::string m_jetCollection{};
+      StringProperty m_decoratorMethod{this, "decoratorMethod", "decorateTrack"};
 
  };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -11,10 +11,6 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
-// EDM include(s):
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/VertexContainer.h"
-
 // STL include(s):
 #include <algorithm>
 #include <numeric>
@@ -23,18 +19,8 @@
 
 // Constructor
 InDet::InDetUsedInFitTrackDecoratorTool::InDetUsedInFitTrackDecoratorTool(const std::string& name) :
-  asg::AsgTool(name),
-  m_vtxDecoName("TTVA_AMVFVertices"),
-  m_wgtDecoName("TTVA_AMVFWeights"),
-  m_trkContKey("InDetTrackParticles"),
-  m_vtxContKey("PrimaryVertices")
-{
-  // Property declarations
-  declareProperty("AMVFVerticesDecoName", m_vtxDecoName, "Name of the per-track AMVF vertices decoration");
-  declareProperty("AMVFWeightsDecoName",  m_wgtDecoName, "Name of the per-track AMVF weights decoration");
-  declareProperty("TrackContainer",       m_trkContKey,  "Name of the track particle container");
-  declareProperty("VertexContainer",      m_vtxContKey,  "Name of the primary vertex container");
-}
+  asg::AsgTool(name)
+{ }
 
 // Destructor
 InDet::InDetUsedInFitTrackDecoratorTool::~InDetUsedInFitTrackDecoratorTool()

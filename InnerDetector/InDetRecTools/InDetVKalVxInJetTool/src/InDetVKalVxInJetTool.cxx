@@ -30,106 +30,9 @@ const int InDetVKalVxInJetTool::DevTuple::maxNTrk;
 InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
                                            const std::string& name,
                                            const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_cutSctHits(4),
-    m_cutPixelHits(1),
-    m_cutSiHits(7),
-    m_cutBLayHits(0),
-    m_cutSharedHits(1000), // Dummy configurable cut
-    m_cutPt(700.),
-    m_cutZVrt(15.),
-    m_cutA0(5.),
-    m_cutChi2(5.),
-    m_secTrkChi2Cut(10.),
-    m_coneForTag(0.4),
-    m_sel2VrtChi2Cut(10.0),
-    m_sel2VrtSigCut(4.0),
-    m_trkSigCut(2.0),
-    m_a0TrkErrorCut(1.0),
-    m_zTrkErrorCut(5.0),
-    m_cutBVrtScore(0.015),
-    m_vrt2TrMassLimit(4000.),
-    m_useFrozenVersion(false),
-    m_fillHist(false),
-    m_existIBL(true),
-    m_RobustFit(1),
-    m_beampipeR (0.),  //Correct values are filled     
-    m_rLayerB   (0.),  // in initialize()
-    m_rLayer1   (0.),
-    m_rLayer2   (0.),
-    m_rLayer3   (0.),
-    m_useVertexCleaningPix(false),
-    m_useVertexCleaningFMP(false),
-    m_rejectBadVertices(false),
-    m_multiVertex(false),
-    m_multiWithPrimary(false),
-    m_getNegativeTail(false),
-    m_getNegativeTag(false),
-    m_multiWithOneTrkVrt(true),
-    m_vertexMergeCut(3.),
-    m_trackDetachCut(6.),
-    m_fitterSvc("Trk::TrkVKalVrtFitter/VertexFitterTool",this),
-    m_trackClassificator("InDet::InDetTrkInJetType",this),
-    m_useITkMaterialRejection(false),
-    m_beamPipeMgr(nullptr),
-    m_pixelManager(nullptr)
+    AthAlgTool(type,name,parent)
    {
-//
-// Declare additional interface
-//
     declareInterface< ISecVertexInJetFinder >(this);
-// Properties
-//
-//
-    declareProperty("CutSctHits",    m_cutSctHits ,  "Remove track is it has less SCT hits" );
-    declareProperty("CutPixelHits",  m_cutPixelHits, "Remove track is it has less Pixel hits");
-    declareProperty("CutSiHits",     m_cutSiHits,    "Remove track is it has less Pixel+SCT hits"  );
-    declareProperty("CutBLayHits",   m_cutBLayHits,  "Remove track is it has less B-layer hits"   );
-    declareProperty("CutSharedHits", m_cutSharedHits,"Reject final 2tr vertices if tracks have shared hits" );
-
-    declareProperty("CutPt",         m_cutPt,     "Track Pt selection cut"  );
-    declareProperty("CutA0",         m_cutA0,     "Track A0 selection cut"  );
-    declareProperty("CutZVrt",       m_cutZVrt,   "Track Z impact selection cut");
-    declareProperty("ConeForTag",    m_coneForTag,"Cone around jet direction for track selection");
-    declareProperty("CutChi2",       m_cutChi2,   "Track Chi2 selection cut" );
-    declareProperty("TrkSigCut",     m_trkSigCut, "Track 3D impact significance w/r primary vertex" );
-    declareProperty("SecTrkChi2Cut", m_secTrkChi2Cut,"Track - common secondary vertex association cut. Single Vertex Finder only");
-
-    declareProperty("A0TrkErrorCut",  m_a0TrkErrorCut, "Track A0 error cut" );
-    declareProperty("ZTrkErrorCut",   m_zTrkErrorCut,  "Track Z impact error cut" );
-    declareProperty("CutBVrtScore",   m_cutBVrtScore,  "B vertex selection cut on 2track vertex score (probability-like) based on track classification" );
-    declareProperty("Vrt2TrMassLimit",m_vrt2TrMassLimit,  "Maximal allowed mass for 2-track vertices" );
-
-    declareProperty("Sel2VrtChi2Cut",    m_sel2VrtChi2Cut, "Cut on Chi2 of 2-track vertex for initial selection"  );
-    declareProperty("Sel2VrtSigCut",     m_sel2VrtSigCut,  "Cut on significance of 3D distance between initial 2-track vertex and PV"  );
-
-    declareProperty("UseFrozenVersion",   m_useFrozenVersion," Switch from default frozen version to the development/improved one" );
-    declareProperty("FillHist",   m_fillHist, "Fill technical histograms"  );
-    declareProperty("ExistIBL",   m_existIBL, "Inform whether 3-layer or 4-layer detector is used "  );
-
-    declareProperty("RobustFit",  m_RobustFit, "Use vertex fit with RobustFit functional(VKalVrt) for common secondary vertex fit" );
-
-    declareProperty("useVertexCleaningPix", m_useVertexCleaningPix, "Clean vertices requiring track pixel hit patterns according to vertex position" );
-    declareProperty("useVertexCleaningFMP", m_useVertexCleaningFMP, "Clean vertices requiring track F(irst) M(easured) P(oints) matching to vertex position" );
-    declareProperty("rejectBadVertices", m_rejectBadVertices, "Reject V0s after checking 3D PV impact" );
-    
-
-    declareProperty("MultiVertex",        m_multiVertex,       "Run Multiple Secondary Vertices in jet finder"  );
-    declareProperty("MultiWithPrimary",   m_multiWithPrimary,  "Find Multiple Secondary Vertices + primary vertex in jet. MultiVertex Finder only!"  );
-    declareProperty("MultiWithOneTrkVrt", m_multiWithOneTrkVrt,"Allow one-track-vertex addition to already found secondary vertices. MultiVertex Finder only! ");
-    declareProperty("getNegativeTail", m_getNegativeTail, "Allow secondary vertex behind the primary one (negative) w/r jet direction (not for multivertex!)" );
-    declareProperty("getNegativeTag",  m_getNegativeTag,  "Return ONLY negative secondary vertices (not for multivertex!)"   );
-
-    declareProperty("VertexMergeCut",	  m_vertexMergeCut, "To allow vertex merging for MultiVertex Finder" );
-    declareProperty("TrackDetachCut",	  m_trackDetachCut, "To allow track from vertex detachment for MultiVertex Finder" );
-
-    declareProperty("VertexFitterTool",  m_fitterSvc);
-    declareProperty("TrackClassTool",  m_trackClassificator);
-
-    declareProperty("useITkMaterialRejection", m_useITkMaterialRejection, "Reject vertices from hadronic interactions in detector material using ITk layout");
-
-    m_instanceName=name;
-
    }
 
 //Destructor---------------------------------------------------------------
@@ -154,13 +57,13 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
        ATH_MSG_DEBUG("Using individual inclusive track selections from config");
      }
 
-     if (m_fitterSvc.retrieve().isFailure()) {
+     if (m_fitter.retrieve().isFailure()) {
         if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG) << "Could not find Trk::TrkVKalVrtFitter" << endmsg;
         return StatusCode::SUCCESS;
      } else {
         if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG) << "InDetVKalVxInJetTool TrkVKalVrtFitter found" << endmsg;
      }
-     m_fitSvc = dynamic_cast<Trk::TrkVKalVrtFitter*>(&(*m_fitterSvc));
+     m_fitSvc = dynamic_cast<Trk::TrkVKalVrtFitter*>(&(*m_fitter));
      if(!m_fitSvc){
         if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<" No implemented Trk::ITrkVKalVrtFitter interface" << endmsg;
         return StatusCode::SUCCESS;
@@ -195,8 +98,8 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
        ATH_MSG_DEBUG( "InDetVKalVxInJetTool Histograms found" );
 
        std::string histDir;
-       if(m_multiVertex) histDir="/file1/stat/MSVrtInJet"+m_instanceName+"/";
-       else              histDir="/file1/stat/SVrtInJet"+m_instanceName+"/";
+       if(m_multiVertex) histDir="/file1/stat/MSVrtInJet"+name()+"/";
+       else              histDir="/file1/stat/SVrtInJet"+name()+"/";
        m_h = std::make_unique<Hists>();
        ATH_CHECK( m_h->book (*hist_root, histDir) );
 
