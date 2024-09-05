@@ -24,7 +24,7 @@ class IMessageSvc;
 class  IdHelper{
 public:
     
-    virtual ~IdHelper();
+    virtual ~IdHelper() = default;
 
     // Create compact id from hash id (return == 0 for OK)
     virtual int         get_id          (const IdentifierHash& hash_id,

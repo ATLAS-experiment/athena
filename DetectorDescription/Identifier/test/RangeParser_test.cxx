@@ -133,6 +133,10 @@ BOOST_AUTO_TEST_CASE(RangeParser_parse_list){
   BOOST_TEST(rpf.parse_list(f, enumerated, pos) == true);
   BOOST_TEST(f.get_maximum() == 0);//dangerous
   BOOST_TEST(pos == 18);
+  const std::string exampleLar("-1,0,1,3,19,255");
+  pos=0;
+  BOOST_TEST(rpf.parse_list(f, exampleLar, pos) == true);
+  BOOST_TEST(pos == std::string::npos);//??
 }
 
 

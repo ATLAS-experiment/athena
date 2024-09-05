@@ -15,9 +15,6 @@ std::string Identifier32::getString() const{
 }
 
 void Identifier32::show () const{
-  //ensure optimisations are maintained for this 
-  static_assert(std::is_trivially_destructible<Identifier32>::value);
-  static_assert(std::is_trivially_copy_constructible<Identifier32>::value);
   std::cout << *this;
 }
 

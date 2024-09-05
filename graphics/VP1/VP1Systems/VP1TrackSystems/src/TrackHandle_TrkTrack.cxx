@@ -24,6 +24,7 @@
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkSurfaces/Surface.h"
+#include "Identifier/Identifier.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -401,8 +402,8 @@ const Trk::FitQuality* TrackHandle_TrkTrack::getFitQuality() const {
 bool TrackHandle_TrkTrack::containsDetElement(const QString &id) const
 {
   VP1Msg::messageVerbose("TrackHandle_TrkTrack::containsDetElement looking for " + id);
-  IDENTIFIER_TYPE tmpInt = id.toLong(nullptr,10);
-  IDENTIFIER_TYPE tmpInt2 = id.toLong(nullptr,16);
+  Identifier::value_type tmpInt = id.toLong(nullptr,10);//base 10
+  Identifier::value_type tmpInt2 = id.toLong(nullptr,16);//base 16...why?
 
   VP1Msg::messageVerbose("TrackHandle_TrkTrack::looping over TSOS ");
 

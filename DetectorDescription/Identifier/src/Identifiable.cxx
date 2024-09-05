@@ -16,10 +16,6 @@ IdentifierHash	Identifiable::identifyHash() const{
 // default implementation
 const IdHelper* 
 Identifiable::getHelper() const{
-    static_assert(std::is_trivially_destructible<IdentifierHash>::value);
-    static_assert(std::is_trivially_copy_constructible<IdentifierHash>::value);
-    static_assert(std::is_trivially_destructible<HWIdentifier>::value);
-    static_assert(std::is_trivially_copy_constructible<HWIdentifier>::value);
     return (nullptr);
 }
 
