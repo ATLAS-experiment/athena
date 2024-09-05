@@ -116,8 +116,8 @@ StatusCode IDTPM::TruthHitDecoratorAlg::execute(
   } // close if sctClusters and pixelClusters isValid
 
   if( float_decor.empty() ) {
-    ATH_MSG_ERROR( "Failed to book Truth particles Hit decorations" );
-    return StatusCode::FAILURE;
+    ATH_MSG_WARNING( "Failed to book Truth particles Hit decorations" );
+    return StatusCode::SUCCESS;
   }
 
   /// Retrieving BeamSpot info
