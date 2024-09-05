@@ -34,61 +34,23 @@ for path in MyArgs.inputFileNames.split( ',' ):
 
 ## Outputs
 flags.PhysVal.OutputFileName = MyArgs.outputFilePrefix + '.HIST.root'
-flags.addFlag( 'Output.doWriteAOD_IDTPM', MyArgs.writeAOD_IDTPM )
-flags.addFlag( 'Output.AOD_IDTPMFileName',
-               MyArgs.outputFilePrefix + '.AOD_IDTPM.pool.root' )
 
 ## Set output log level
 if MyArgs.debug:
     from AthenaCommon.Constants import DEBUG
     flags.Exec.OutputLevel = DEBUG
 
-## General config flag category for IDTPM tool job configuration
-from InDetTrackPerfMon.InDetTrackPerfMonFlags import createIDTPMConfigFlags
-flags.addFlagsCategory( "PhysVal.IDTPM", 
-                        createIDTPMConfigFlags, 
-                        prefix=True )
-
+from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
+flags = initializeIDTPMConfigFlags(flags)
 flags.PhysVal.IDTPM.DirName = MyArgs.dirName
 flags.PhysVal.IDTPM.plotsDefFormat = MyArgs.plotsDefFormat
 flags.PhysVal.IDTPM.plotsDefFileList = MyArgs.plotsDefFileList
 flags.PhysVal.IDTPM.plotsCommonValuesFile = MyArgs.plotsCommonValuesFile
 flags.PhysVal.IDTPM.sortPlotsByChain = MyArgs.sortPlotsByChain
-
-## Create flags category and corresponding set of flags
-## (read from trkAnaCfgFile.json) for each TrkAnalysis
-from InDetTrackPerfMon.InDetTrackPerfMonFlags import createIDTPMTrkAnaConfigFlags
-
- 
-## Filling TrkAnalyses setup dictionary
-from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
-analysesDict = getTrkAnaDicts( flags, MyArgs.trkAnaCfgFile, MyArgs.unpackTrigChains )
-
-trkAnaNames = []
-
-if analysesDict:
-    for trkAnaName, trkAnaDict in analysesDict.items():
-        # Append TrkAnalysisName to list
-        trkAnaNames.append( trkAnaName )
-
-        # separate flag category for each TrkAnalysis
-        flags.addFlagsCategory( "PhysVal.IDTPM."+trkAnaName, 
-                                createIDTPMTrkAnaConfigFlags, 
-                                prefix=True )
-
-        # set flags from values in trkAnaDict
-        for fname, fvalue in trkAnaDict.items():
-            setattr( flags.PhysVal.IDTPM, 
-                     trkAnaName+"."+fname, fvalue )
-
-if trkAnaNames:
-    flags.PhysVal.IDTPM.trkAnaNames = trkAnaNames
-
-# Default TrackAnalysis configuration flags category
-if not trkAnaNames:
-    flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
-                            createIDTPMTrkAnaConfigFlags, 
-                            prefix=True )
+flags.PhysVal.IDTPM.trkAnaCfgFile = MyArgs.trkAnaCfgFile
+flags.Output.doWriteAOD_IDTPM = MyArgs.writeAOD_IDTPM
+flags.PhysVal.IDTPM.unpackTrigChains = MyArgs.unpackTrigChains
+flags = initializeIDTPMTrkAnaConfigFlags(flags)
 
 flags.lock()
 flags.dump()

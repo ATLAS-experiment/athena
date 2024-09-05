@@ -3,7 +3,7 @@
 #from AthenaConfiguration.Enums import LHCPeriod
 
 ### IDTPM whole job properties
-def createIDTPMConfigFlags():
+def __createIDTPMConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
@@ -14,12 +14,15 @@ def createIDTPMConfigFlags():
     icf.addFlag( "plotsCommonValuesFile", "InDetTrackPerfMon/IDTPMPlotCommonValues.json" )
     icf.addFlag( "sortPlotsByChain", False )
     
+    icf.addFlag( "trkAnaCfgFile", '' )
+    icf.addFlag( 'Output.outputFilePrefix','myIDTPM_out')
+    icf.addFlag( 'unpackTrigChains', False )
     return icf
 
 
 ### IDTPM individual TrkAnalysis properties
 ### to be read from trkAnaCfgFile in JSON format
-def createIDTPMTrkAnaConfigFlags():
+def __createIDTPMTrkAnaConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
@@ -66,3 +69,45 @@ def createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "ResolutionMethod"     , "iterRMS" )
     
     return icf
+
+### General config flag category for IDTPM tool job configuration
+def initializeIDTPMConfigFlags(flags):
+    flags.addFlagsCategory( "PhysVal.IDTPM",
+                           __createIDTPMConfigFlags , prefix=True )
+    
+    flags.addFlag( 'Output.doWriteAOD_IDTPM', False )
+    flags.addFlag( 'Output.AOD_IDTPMFileName', flags.PhysVal.IDTPM.Output.outputFilePrefix+'.AOD_IDTPM.pool.root')
+    # flags.dump()
+    return flags
+
+
+### Create flags category and corresponding set of flags
+def initializeIDTPMTrkAnaConfigFlags(flags):
+    # Default TrackAnalysis configuration flags category
+    flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
+                            __createIDTPMTrkAnaConfigFlags, 
+                            prefix=True )
+    
+    from InDetTrackPerfMon.ConfigUtils import getTrkAnaDicts
+    analysesDict = getTrkAnaDicts( flags )
+    trkAnaNames = []
+    print (str(analysesDict))
+
+    if analysesDict:
+        for trkAnaName, trkAnaDict in analysesDict.items():
+            # Append TrkAnalysisName to list
+            trkAnaNames.append( trkAnaName )
+
+            # separate flag category for each TrkAnalysis
+            flags.addFlagsCategory( "PhysVal.IDTPM."+trkAnaName, 
+                                    __createIDTPMTrkAnaConfigFlags, 
+                                    prefix=True )
+
+            # set flags from values in trkAnaDict
+            for fname, fvalue in trkAnaDict.items():
+                setattr( flags.PhysVal.IDTPM, 
+                        trkAnaName+"."+fname, fvalue )
+
+    if trkAnaNames:
+        flags.PhysVal.IDTPM.trkAnaNames = trkAnaNames
+    return flags

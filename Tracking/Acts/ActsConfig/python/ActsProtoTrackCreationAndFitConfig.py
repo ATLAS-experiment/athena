@@ -96,22 +96,27 @@ if __name__ == "__main__":
     flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
 
     flags.Acts.doRotCorrection = False
-    # IDPVM flags
-    flags.PhysVal.IDPVM.doExpertOutput   = True
-    flags.PhysVal.IDPVM.doPhysValOutput  = False
-    flags.PhysVal.IDPVM.doHitLevelPlots = True
-    flags.PhysVal.IDPVM.runDecoration = True
-    flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
-    # @TODO the technical efficiency can only be computed if the xAOD clusters provide
-    #    information about the contributing truth particles (truth_index).
-    #    Currently, this information is only provided by the PixelPrepDataToxAOD and
-    #    SCT_PrepDataToxAOD but not the ClusterConversionUtilities used in this test.
-    #    Therefore doTechnicalEfficiency = False
-    flags.PhysVal.IDPVM.doTechnicalEfficiency = False
-    flags.PhysVal.OutputFileName = "IDPVM.root"
+    
+    # IDTPM flags
+    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
+    flags = initializeIDTPMConfigFlags(flags)
+    
+    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt"
+    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json"
+    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.Output.outputFilePrefix + '.HIST.root'
+    flags.Output.doWriteAOD_IDTPM = True
+    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
+    flags = initializeIDTPMTrkAnaConfigFlags(flags)
+    ## override respective configurations from trkAnaCfgFile
+    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
+    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
+    
+    
     flags.fillFromArgs()
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
         flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
+        
+    flags.Debug.DumpEvtStore = True
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     
@@ -167,10 +172,10 @@ if __name__ == "__main__":
     # Add the truth decorators
     from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
     top_acc.merge(AddDecoratorCfg(flags))
-
-    # IDPVM running
-    from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
-    top_acc.merge(InDetPhysValMonitoringCfg(flags))
+    
+    # IDTPM running
+    from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
+    top_acc.merge( InDetTrackPerfMonCfg(flags) )
 
     top_acc.printConfig(withDetails=True, summariseProps=True)
     flags.dump()

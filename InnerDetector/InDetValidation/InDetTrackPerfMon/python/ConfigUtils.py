@@ -4,13 +4,15 @@ import json
 from AthenaCommon.Utils.unixtools import find_datafile
 from AthenaCommon.Logging import logging
 
-def getTrkAnaDicts( flags, input_file, unpackChains=False ):
+def getTrkAnaDicts( flags ):
     '''
     utility function to retrieve the flag dictionary
     for every TrackAnalysis from an input JSON file
     '''
     analysesDict = {}
 
+    input_file = flags.PhysVal.IDTPM.trkAnaCfgFile
+    
     ## Default: use trkAnalysis config flags
     if input_file == "Default":
         return analysesDict
@@ -44,7 +46,7 @@ def getTrkAnaDicts( flags, input_file, unpackChains=False ):
                 fullChainList = getChainList( flags, analysesDict[trkAnaName]["ChainNames"] )
                 analysesDict[trkAnaName]["ChainNames"] = fullChainList
 
-    return unpackTrkAnaDicts( analysesDict ) if unpackChains else analysesDict
+    return unpackTrkAnaDicts( analysesDict ) if flags.PhysVal.IDTPM.unpackTrigChains else analysesDict
 
 
 def unpackTrkAnaDicts( analysesDictIn ):
