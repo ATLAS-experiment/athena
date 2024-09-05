@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Photospp_i )
@@ -18,11 +18,10 @@ atlas_disable_as_needed()
 atlas_add_library( Photospp_iLib
    Photospp_i/Photospp_i.h src/Photospp_i.cxx
    PUBLIC_HEADERS Photospp_i
-   INCLUDE_DIRS ${PHOTOSPP_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${PHOTOSPP_LIBRARIES} AthenaBaseComps
-   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaKernel GaudiKernel
+   INCLUDE_DIRS ${PHOTOSPP_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   DEFINITIONS ${CLHEP_DEFINITIONS}
+   LINK_LIBRARIES ${PHOTOSPP_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps
+   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel
    GeneratorObjects )
 
 atlas_add_component( Photospp_i
@@ -35,5 +34,3 @@ atlas_install_joboptions( share/common/*.py )
 set( PhotosppEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of PhotosppEnvironment.cmake" )
 find_package( PhotosppEnvironment )
-
-
