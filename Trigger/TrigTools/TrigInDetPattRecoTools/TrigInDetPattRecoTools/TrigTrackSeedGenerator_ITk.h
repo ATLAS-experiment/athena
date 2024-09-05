@@ -50,7 +50,7 @@ private:
   float m_phiSliceWidth;
   float m_minDeltaRadius, m_maxDeltaRadius;
 
-  float m_minR_squ, m_maxCurv;
+  float m_maxCurv;
 
   std::vector<TrigInDetTriplet> m_triplets;
 
