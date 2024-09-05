@@ -54,7 +54,11 @@ namespace InDetDD{
                                 std::map<std::string, int> &index,
                                 GeoVFullPhysVol *fpv,
                                 GeoAlignableTransform *transform) override final;
-
+      virtual void addSplitAlignable(int level,
+                                std::map<std::string, int> &index,
+                                std::pair<std::string, int> &extraIndex,
+                                GeoVFullPhysVol *fpv,
+                                GeoAlignableTransform *transform) override final;
        void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
     private:
