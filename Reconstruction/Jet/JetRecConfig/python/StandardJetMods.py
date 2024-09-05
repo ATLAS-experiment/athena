@@ -23,7 +23,6 @@ The JetModifier config class is defined in JetDefinition.py
 """
 from .JetDefinition import JetModifier
 from .Utilities import ldict
-from AthenaConfiguration.ComponentFactory import CompFactory
 from .StandardJetConstits import inputsFromContext
 
 stdJetModifiers = ldict()
@@ -198,12 +197,6 @@ stdJetModifiers.update(
                                     prereqs=["ghost:Partons"]),
 
     # More complex cases here
-    TruthPartonDR =    JetModifier("Analysis::JetConeLabeling","truthpartondr",
-                                   filterfn=isMC,
-                                   JetTruthMatchTool = lambda *l : CompFactory.getComp("Analysis::JetQuarkLabel")("jetquarklabel", McEventCollection='TruthEvents'),
-                                   ),
-
-                                    
     JetDeltaRLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabeler_jetptmin",
                                    createfn=ParticleJetToolsConfig.getJetDeltaRLabelTool,
                                    prereqs=["ghost:BHadronsFinal",

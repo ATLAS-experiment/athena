@@ -84,21 +84,6 @@ def getCopyTruthJetParticles(modspec, cflags):
         truthpartcopy.ChargedParticlesOnly=True
     return truthpartcopy
 
-def getJetQuarkLabel():
-    jetquarklabel = CompFactory.Analysis.JetQuarkLabel(
-        "jetquarklabel",
-        McEventCollection = "TruthEvents"
-        )
-    return jetquarklabel
-
-def getJetConeLabeling():
-    jetquarklabel = getJetQuarkLabel()
-    truthpartonlabel = CompFactory.Analysis.JetConeLabeling(
-        "truthpartondr",
-        JetTruthMatchTool = jetquarklabel
-        )
-    return truthpartonlabel
-
 
 def _getCommonLabelNames(prefix):
     """Internal unlity to name labels

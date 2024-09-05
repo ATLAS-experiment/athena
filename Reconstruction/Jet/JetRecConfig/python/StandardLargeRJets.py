@@ -34,7 +34,7 @@ standardrecomods = (
 ufo_dnn_moments = ("CaloEnergiesLargeR","ConstitFrac","groomMRatio")
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
-truthmods        = ("PartonTruthLabel","TruthPartonDR",)
+truthmods        = ("PartonTruthLabel",)
 pflowmods        = ()
 
 truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R21Consolidated","JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1","JetTaggingTruthLabel:R10TruthLabel_R22v1")
