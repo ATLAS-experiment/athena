@@ -370,7 +370,7 @@ namespace CP {
             ATH_MSG_WARNING("Using standard BadMuonVeto SF for LRT muons");
             return resolve_file_location("BadMuonVeto_HighPt_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::Reco) {
-            return resolve_file_location(Form("Reco_%sNoID_Z.root", m_wp.c_str()));
+            return resolve_file_location(Form("Reco_%sLRT_Z.root", m_wp.c_str()));
         }
         ATH_MSG_ERROR("What?");
         return "";
