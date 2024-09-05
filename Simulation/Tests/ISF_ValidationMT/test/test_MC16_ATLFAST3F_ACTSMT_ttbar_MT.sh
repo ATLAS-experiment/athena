@@ -4,15 +4,19 @@
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
+# art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
 # art-memory: 5999
-# art-output: test.CA.HITS.pool.root
+# art-output: test.MT.CA.HITS.pool.root
 # art-output: Config*
 
 # RUN2 setup
 # ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
+
+export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
     --CA \
+    --multithreaded \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'ATLFAST3F_ACTSMT' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
@@ -22,7 +26,7 @@ Sim_tf.py \
     --DataRunNumber 284500 \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
-    --outputHITSFile "test.CA.HITS.pool.root" \
+    --outputHITSFile "test.MT.CA.HITS.pool.root" \
     --maxEvents 3 \
     --imf False
 
