@@ -171,7 +171,7 @@ class bblvlv_Beta(PowhegBeta):
         self.add_keyword("verytinypars")
         self.add_keyword("virtonly")
         self.add_keyword("whichpwhgevent")
-        self.add_keyword("widthCorrection")
+        self.add_keyword("width_correction")
         self.add_keyword("withbtilde")
         self.add_keyword("withdamp", 1)
         self.add_keyword("withnegweights")

@@ -43,7 +43,8 @@ def lhe_nominal_weight_updater(powheg_LHE_output):
         # first modify the header, to add the additional weight
         header_old_str = LHE.header_block(powheg_LHE_output)
         header_new = LHE.add_weight_to_header(header_old_str, weightgroup_name_for_old_XWGTUP_value, weight_name_for_old_XWGTUP_value, wgtid_for_old_XWGTUP_value)
-        header_new_str = str(ElementTree.tostring(header_new)).replace("\"", "\'").strip() + "\n"
+        header_new_str_bytestr = ElementTree.tostring(header_new)
+        header_new_str = header_new_str_bytestr.decode('utf-8').replace("\"", "\'").strip() + "\n"
         # some complicated loop to restore order of original lines
         header_lines = []
         for l in header_new_str.splitlines():

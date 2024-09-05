@@ -50,7 +50,7 @@ def reweighter(process, weight_groups, powheg_LHE_output):
     non_weight_attributes = ["parameter_names", "combination_method", "keywords"]
 
     ## Dictionary of available keywords for faster XML-reweighting: from rwl_setup_param_weights.f
-    xml_kwds = {"renscfact": "renscfact", "facscfact": "facscfact", "lhans1": "lhapdf", "lhans2": "lhapdf"}
+    xml_kwds = {"renscfact": "renscfact", "facscfact": "facscfact", "lhans1": "lhapdf", "lhans2": "lhapdf", "width_correction" : "width_correction"}
 
     # Initial values for scale, PDF and other weight groups
     _idx_scale_start, _idx_PDF_start, _idx_other_start = 1001, 2001, 3001
