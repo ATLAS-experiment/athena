@@ -219,7 +219,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
 
     # optionally avoid cases with zero tracks
     nonzero_tracks = 'nonzeroTracks'
-    min_links = 1 if flags.BTagging.vetoZeroTrackForAFT276 else 0
+    min_links = 1
     ca.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.CountIParticleAlg(
             f'CountTrackParticleAlg{jet_name}',
