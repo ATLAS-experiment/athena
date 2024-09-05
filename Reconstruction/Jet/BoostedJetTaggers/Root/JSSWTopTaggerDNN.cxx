@@ -396,6 +396,9 @@ StatusCode JSSWTopTaggerDNN::tag( const xAOD::Jet& jet ) const {
   float jet_pt   = jet.pt()/1000.0;
   float jet_mass = jet.m()/1000.0;
 
+  /// Calculate NSubjettiness and ECF ratios
+  calculateJSSRatios(jet);
+
   /// Get DNN score for the jet
   float jet_score = getScore(jet);
 
@@ -498,9 +501,6 @@ std::map<std::string,double> JSSWTopTaggerDNN::getJetProperties( const xAOD::Jet
 
   /// Map to store inputs
   std::map<std::string,double> DNN_inputValues;
-
-  /// Calculate NSubjettiness and ECF ratios
-  calculateJSSRatios(jet);
 
   ATH_MSG_DEBUG( "Loading variables for common DNN tagger" );
 
