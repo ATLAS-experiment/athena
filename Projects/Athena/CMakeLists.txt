@@ -143,13 +143,6 @@ find_package( libffi )
 find_package( gl2ps )
 find_package( autopep8 )
 
-# Look for CLHEP with its own configuration. This is necessary in case Gaudi
-# was not found. (Which would itself also look for CLHEP.) Because AtlasLCG's
-# FindCLHEP.cmake should not run before CLHEP's own configuration would've been
-# read. And since Geant4 also uses CLHEP's own configuration down the line,
-# we need to do this hack here.
-find_package( CLHEP CONFIG QUIET )
-
 # Set up the correct runtime environment for OpenBLAS.
 set( OpenBlasEnvironment_DIR "${CMAKE_SOURCE_DIR}/cmake"
    CACHE PATH "Directory holding OpenBlasEnvironmentConfig.cmake" )
