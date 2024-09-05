@@ -70,8 +70,8 @@ def ActsTrackingGeometrySvcCfg(flags,
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 **kwargs)
-  if flags.Detector.GeometryITk:
-    if flags.Acts.TrackingGeometry.MaterialSource == "Default":
+  if flags.Acts.TrackingGeometry.MaterialSource == "Default":
+    if flags.Detector.GeometryITk:
       extension = "ITk"
       if flags.Detector.GeometryHGTD:
         extension += "-HGTD"
@@ -79,10 +79,11 @@ def ActsTrackingGeometrySvcCfg(flags,
       actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
       actsTrackingGeometrySvc.MaterialMapInputFile = \
         "material-maps-" + flags.GeoModel.AtlasVersion + "-" + extension + ".json"
-    elif flags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:
-      actsTrackingGeometrySvc.UseMaterialMap = True
-      actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
-      actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource
+
+  elif flags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:
+    actsTrackingGeometrySvc.UseMaterialMap = True
+    actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
+    actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource
 
   acc.addService(actsTrackingGeometrySvc, primary = True)
   return acc
