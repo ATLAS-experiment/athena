@@ -667,6 +667,62 @@ void StripGmxInterface::addAlignable(int level,
   m_detectorManager->addAlignableTransform(level, id, transform, fpv);
 }
 
+void StripGmxInterface::addSplitAlignable(int level,
+                                     std::map<std::string, int> &index,
+                                     std::pair<std::string, int> &extraIndex,
+                                     GeoVFullPhysVol *fpv,
+                                     GeoAlignableTransform *transform)
+{
+  ATH_MSG_DEBUG("addSplitAlignable called");
+  //
+  // Get the offline-id appropriate to the level (0 = wafer, 1 = module, 2 = wheel/cylinder, 3 = part, i.e barrel or an endcap)
+  //
+  std::map<std::string, int> updatedIndex;
+  splitSensorId(index,extraIndex,updatedIndex);
+
+  const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  if (not sctIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to SCT_ID in StripGmxInterface::addSplitAlignable");
+    return;
+  }
+  Identifier id;
+  switch (level) {
+    case 0:
+      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
+                                 updatedIndex["layer_wheel"],
+                                 updatedIndex["phi_module"],
+                                 updatedIndex["eta_module"],
+                                 updatedIndex["side"]);
+      break;
+    case 1:
+      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
+                                 updatedIndex["layer_wheel"],
+                                 updatedIndex["phi_module"],
+                                 updatedIndex["eta_module"],
+                                 0);
+      break;
+    case 2:
+      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
+                                 updatedIndex["layer_wheel"],
+                                 0,
+                                 0,
+                                 0);
+      break;
+    case 3:
+      id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
+                                 0,
+                                 0,
+                                 0,
+                                 0);
+      break;
+    default:
+      throw GaudiException("Unknown level " + std::to_string(level) + " for alignment in addSplitAlignable",
+                           "StripGmxInterface::addSplitAlignable", StatusCode::FAILURE);
+      break;
+  }
+  m_detectorManager->addAlignableTransform(level, id, transform, fpv);
+}
+
 void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc,GeoModelIO::ReadGeoModel* sqlreader){
 
     IRDBRecordset_ptr stereoAnnulus = rdbAccessSvc->getRecordsetPtr("StereoAnnulus","");
