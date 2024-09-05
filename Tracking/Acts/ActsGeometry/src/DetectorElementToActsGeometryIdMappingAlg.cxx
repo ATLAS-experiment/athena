@@ -53,7 +53,7 @@ namespace {
    constexpr std::size_t maxType();
 
    template <> constexpr std::size_t maxType<ActsTrk::DetectorType>() { return to_underlying(ActsTrk::DetectorType::UnDefined); }
-   template <> constexpr std::size_t maxType<xAOD::UncalibMeasType>() { return to_underlying(xAOD::UncalibMeasType::nTypes); }
+   template <> [[maybe_unused]] constexpr std::size_t maxType<xAOD::UncalibMeasType>() { return to_underlying(xAOD::UncalibMeasType::nTypes); }
 
    template <typename T_EnumClass>
    constexpr unsigned char toChar(T_EnumClass value) {
