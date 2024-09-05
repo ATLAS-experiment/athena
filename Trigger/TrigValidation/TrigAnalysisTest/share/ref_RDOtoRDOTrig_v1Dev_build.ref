@@ -3650,14 +3650,6 @@ HLT_7j45_pf_ftf_presel7j30_L14jJ40:
   stepFeatures:
     0: 4
     1: 65
-HLT_dispvtx0_loose_L1XE50:
-  eventCount: 0
-  stepCounts:
-    0: 8
-    1: 8
-  stepFeatures:
-    0: 8
-    1: 8
 HLT_distrk20_medium_L1XE50:
   eventCount: 0
   stepCounts:
