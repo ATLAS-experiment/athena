@@ -178,7 +178,7 @@ def FlavorTagNNCfg(
     acc = ComponentAccumulator()
 
     NNFile_extension = NNFile.split(".")[-1]
-    min_links = 1 if flags.BTagging.vetoZeroTrackForAFT276 else 0
+    min_links = 1
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
@@ -268,7 +268,7 @@ def MultifoldGNNCfg(
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
     tag_flag = NONZERO_TRACKS
-    min_links = 1 if flags.BTagging.vetoZeroTrackForAFT276 else 0
+    min_links = 1
 
     FTD = CompFactory.FlavorTagDiscriminants
 
