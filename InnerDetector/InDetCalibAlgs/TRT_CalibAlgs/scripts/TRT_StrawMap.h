@@ -96,7 +96,7 @@ strawMap::strawMap(int side, int phi, int straw) : m_side(side), m_phi(phi), m_s
 	m_instance_count++;
 	
 	assert( straw>=0 && straw<5482 );
-	assert( fabs(side)==1 || fabs(side)==2 );
+	assert( std::abs(side)==1 || std::abs(side)==2 );
 	assert( phi>=0 && phi<32 );
 };
 
@@ -105,10 +105,10 @@ strawMap::strawMap(int side, int phi, int layer, int strawLayer, int strawWithin
 	if (m_strawToDTMROC_barrel==0) initialize();
 	m_instance_count++;
 	
-	m_straw = (fabs(side)==1) ? barrelStrawNumber(strawWithinStrawLayer, strawLayer, layer) : endcapStrawNumber(strawWithinStrawLayer, strawLayer, layer);
+	m_straw = (std::abs(side)==1) ? barrelStrawNumber(strawWithinStrawLayer, strawLayer, layer) : endcapStrawNumber(strawWithinStrawLayer, strawLayer, layer);
 	
 	assert( m_straw>=0 && m_straw<5482 );
-	assert( fabs(side)==1 || fabs(side)==2 );
+	assert( std::abs(side)==1 || std::abs(side)==2 );
 	assert( phi>=0 && phi<32 );
 };
 
@@ -119,9 +119,9 @@ strawMap::~strawMap() {
 
 int strawMap::DTMROC() {
 	
-	if (fabs(m_side)==1) return m_strawToDTMROC_barrel[m_straw];
+	if (std::abs(m_side)==1) return m_strawToDTMROC_barrel[m_straw];
 	
-	assert( fabs(m_side)==2 ); // end-caps
+	assert( std::abs(m_side)==2 ); // end-caps
 	int layerNumber = this->layer();
 	int strawLayerNumber = this->strawLayer();
 	int strawNumber = this->strawWithinLayer();
@@ -137,7 +137,7 @@ int strawMap::ASDBLR() {
 	if (m_side==1) return m_strawToASDBLR_barrelSideA[m_straw];
 	else if (m_side==-1) return m_strawToASDBLR_barrelSideC[m_straw];
 	
-	assert(fabs(m_side)==2);
+	assert(std::abs(m_side)==2);
 	
 	int strawNumber = this->strawWithinLayer();
 	int strawLayerNumber = this->strawLayer();
@@ -152,7 +152,7 @@ int strawMap::ASDBLR() {
 
 int strawMap::TTCgroup() {
 	
-	if (fabs(m_side)==1) { // barrel
+	if (std::abs(m_side)==1) { // barrel
 		
 		// return logical board index:
 		// 0 for Board 1S (has 10 chips)  0 -  9
@@ -178,7 +178,7 @@ int strawMap::TTCgroup() {
 		assert(count==104);
 		return -1;
 		
-	} else if (fabs(m_side)==2) { // end-caps
+	} else if (std::abs(m_side)==2) { // end-caps
 		
 		int straw = m_straw - 1642;
 		int board = 9;
@@ -194,8 +194,8 @@ int strawMap::TTCgroup() {
 };
 
 int strawMap::HVpad() {
-	if (fabs(m_side)==1) return m_strawToHVpad_barrel[m_straw];
-	assert( fabs(m_side)==2 ); // end-caps	
+	if (std::abs(m_side)==1) return m_strawToHVpad_barrel[m_straw];
+	assert( std::abs(m_side)==2 ); // end-caps	
 	auto asdblr =  this->ASDBLR();
 	if (asdblr < 0){
 	  throw std::runtime_error("asdblr is less than zero");
@@ -237,7 +237,7 @@ void strawMap::initialize() {
 	
 	int index[15];
 	int count(0);			
-	char filename[1000]; sprintf(filename, PathResolver::find_file("TRT_CalibAlgs/TRT_StrawMap.txt", "DATAPATH").c_str());
+	char filename[1000]; sprintf(filename, "%s", PathResolver::find_file("TRT_CalibAlgs/TRT_StrawMap.txt", "DATAPATH").c_str());
 	FILE *f = fopen(filename, "r"); 
 	if (!f) {
 		printf("TRT_StrawMap::initialize() ERROR: failed to open the mapping file %s \n", filename);
@@ -307,7 +307,7 @@ int strawMap::endcapStrawNumber(int strawNumber, int strawLayerNumber, int layer
 int strawMap::ec_chip(int side, int phi, int /*layerNumber*/, int strawLayerNumber, int strawNumber) {
 	// endcap only, return 0-12
 	
-	assert( fabs(side)==2 );
+	assert( std::abs(side)==2 );
 	
 	static int count = 0;
 	static int *map_A0 = new int[12];
