@@ -11,7 +11,7 @@ FastChain_tf.py \
     --maxEvents 2 \
     --skipEvents 0 \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09'  \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12'  \
     --preInclude 'Campaigns.MC20a' 'Campaigns.MC16SimulationNoIoV' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False
