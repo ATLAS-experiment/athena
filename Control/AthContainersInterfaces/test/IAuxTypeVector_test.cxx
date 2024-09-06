@@ -31,7 +31,7 @@ public:
   virtual bool resize (size_t) { std::abort(); }
   virtual void reserve (size_t){ std::abort(); }
   virtual bool shift (size_t, ptrdiff_t){ std::abort(); }
-  virtual bool insertMove (size_t, void*, void*,
+  virtual bool insertMove (size_t, void*, size_t, size_t,
                            SG::IAuxStore&){ std::abort(); }
   virtual SG::AuxDataSpanBase getDataSpanImpl() const
   { ++xx; return SG::AuxDataSpanBase (&xx, 1); }

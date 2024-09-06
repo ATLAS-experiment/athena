@@ -42,7 +42,7 @@ void test1()
     ptr_int[i] = i;
 
   std::vector<int> v2_int { 10, 11, 12, 13, 14 };
-  vec_int.insertMove (3, v2_int.data(), v2_int.data() + 5, store);
+  vec_int.insertMove (3, v2_int.data(), 0, 5, store);
   assert (vec_int.size() == 10);
   ptr_int = reinterpret_cast<int*> (vec_int.toPtr());
   for (int i=0; i < 3; i++)
@@ -55,7 +55,7 @@ void test1()
   assert (vec_int.getDataSpan().size == 10);
 
   std::vector<int> v3_int { 20, 21, 22, 23, 24 };
-  vec_int.insertMove (10, v3_int.data(), v3_int.data() + 5, store);
+  vec_int.insertMove (10, v3_int.data(), 0, 5, store);
   assert (vec_int.size() == 15);
   ptr_int = reinterpret_cast<int*> (vec_int.toPtr());
   for (int i=0; i < 3; i++)
@@ -82,7 +82,7 @@ void test1()
     ptr_str[i] = str(i);
 
   std::vector<std::string> v2_str { str(10), str(11), str(12), str(13), str(14) };
-  vec_str.insertMove (3, v2_str.data(), v2_str.data() + 5, store);
+  vec_str.insertMove (3, v2_str.data(), 0, 5, store);
   assert (vec_str.size() == 10);
   ptr_str = reinterpret_cast<std::string*> (vec_str.toPtr());
   for (int i=0; i < 3; i++)
@@ -93,7 +93,7 @@ void test1()
     assert (ptr_str[5+i] == str(i));
 
   std::vector<std::string> v3_str { str(20), str(21), str(22), str(23), str(24) };
-  vec_str.insertMove (10, v3_str.data(), v3_str.data() + 5, store);
+  vec_str.insertMove (10, v3_str.data(), 0, 5, store);
   assert (vec_str.size() == 15);
   ptr_str = reinterpret_cast<std::string*> (vec_str.toPtr());
   for (int i=0; i < 3; i++)

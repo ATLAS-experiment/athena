@@ -94,7 +94,7 @@ void test1()
   lv2->emplace_back (125);
   lv2->emplace_back (126);
 
-  assert (!vh.insertMove (0, v2.data()+2, v2.data()+5, store2));
+  assert (!vh.insertMove (0, v2.data(), 2, 3, store2));
   assert (v.size() == 3);
   assert (lv->size() == 3);
   assert (v[0] == SG::PackedLink<Container> (1, 103));
@@ -104,7 +104,7 @@ void test1()
   assert (lv->at(1) == DataLink<Container>(124));
   assert (lv->at(2) == DataLink<Container>(123));
 
-  vh.insertMove (2, v2.data()+6, v2.data()+9, store2);
+  vh.insertMove (2, v2.data(), 6, 3, store2);
   assert (v.size() == 6);
   assert (lv->size() == 4);
   assert (v[0] == SG::PackedLink<Container> (1, 103));
@@ -199,7 +199,7 @@ void test3()
   lv2->emplace_back (125);
   lv2->emplace_back (126);
 
-  assert (!vh.insertMove (0, v2.data()+1, v2.data()+3, store2));
+  assert (!vh.insertMove (0, v2.data(), 1, 2, store2));
   assert (v.size() == 2);
   assert (lv->size() == 4);
   assert (v[0] == (std::vector<PLink_t>{{0,   0}, {1, 105}, {2, 106}}));
@@ -211,7 +211,7 @@ void test3()
   assert (lv->at(2) == DataLink<Container>(125));
   assert (lv->at(3) == DataLink<Container>(126));
 
-  vh.insertMove (1, v2.data()+3, v2.data()+4, store2);
+  vh.insertMove (1, v2.data(), 3, 1, store2);
   assert (v.size() == 3);
   assert (lv->size() == 5);
   assert (v[0] == (std::vector<PLink_t>{{0,   0}, {1, 105}, {2, 106}}));

@@ -273,7 +273,7 @@ void test_vector4 (bool isPOD)
   for (int i=0; i<5; i++)
     ptr2[i] = makeT<T>(i+10);
 
-  assert (v1.insertMove (3, ptr2, ptr2+5, store));
+  assert (v1.insertMove (3, ptr2, 0, 5, store));
   assert (v1.size() == 15);
   for (int i=0; i<3; i++)
     assert (ptr1[i] == makeT<T>(i));
@@ -290,7 +290,7 @@ void test_vector4 (bool isPOD)
   for (int i=0; i<5; i++)
     assert (isPOD || !wasMoved (ptr2[i]));
 
-  assert (v1.insertMove (15, ptr2, ptr2+5, store));
+  assert (v1.insertMove (15, ptr2, 0, 5, store));
   assert (v1.size() == 20);
   for (int i=0; i<3; i++)
     assert (ptr1[i] == makeT<T>(i));
@@ -306,7 +306,7 @@ void test_vector4 (bool isPOD)
 
   SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 1000, 1000, false);
   T* ptr3 = reinterpret_cast<T*> (v3.toPtr());
-  assert ( ! v1.insertMove (20, ptr3, ptr3 + v3.size(), store) );
+  assert ( ! v1.insertMove (20, ptr3, 0, v3.size(), store) );
 }
 
 

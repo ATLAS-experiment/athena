@@ -136,7 +136,7 @@ void test1()
   assert (vec2->getDataSpan().size == 9);
 
   std::vector<int> vec3 { 20, 21, 22, 23, 24 };
-  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5, store));
+  assert (vec->insertMove (3, vec3.data(), 0, 5, store));
   assert (vec->size() == 14);
   assert (ptr[0] == 1);
   assert (ptr[1] == 2);
@@ -156,7 +156,7 @@ void test1()
   assert (vec->getDataSpan().size == 14);
 
   std::vector<int> vec4 { 30, 31, 32, 33, 34 };
-  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5, store));
+  assert (vec->insertMove (14, vec4.data(), 0, 5, store));
   assert (vec->size() == 19);
   assert (ptr[0] == 1);
   assert (ptr[1] == 2);
@@ -244,7 +244,7 @@ void test2()
   assert (ptr[8] == str(10));
 
   std::vector<std::string> vec3 { str(20), str(21), str(22), str(23), str(24) };
-  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5, store));
+  assert (vec->insertMove (3, vec3.data(), 0, 5, store));
   assert (vec->size() == 14);
   assert (ptr[0] == str(1));
   assert (ptr[1] == str(2));
@@ -262,7 +262,7 @@ void test2()
   assert (ptr[13] == str(10));
 
   std::vector<std::string> vec4 { str(30), str(31), str(32), str(33), str(34) };
-  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5, store));
+  assert (vec->insertMove (14, vec4.data(), 0, 5, store));
   assert (vec->size() == 19);
   assert (ptr[0] == str(1));
   assert (ptr[1] == str(2));

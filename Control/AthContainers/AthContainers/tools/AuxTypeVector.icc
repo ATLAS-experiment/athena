@@ -398,8 +398,9 @@ void AuxTypeVectorHolder<T, CONT>::insertMove1
 /**
  * @brief Insert elements into the vector via move semantics.
  * @param pos The starting index of the insertion.
- * @param beg Start of the range of elements to insert.
- * @param end End of the range of elements to insert.
+ * @param src Start of the vector containing the range of elements to insert.
+ * @param src_pos Position of the first element to insert.
+ * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
@@ -409,7 +410,7 @@ void AuxTypeVectorHolder<T, CONT>::insertMove1
  * The size of the container will be increased by @c len, with the elements
  * starting at @c pos copied to @c pos+len.
  *
- * The contents of the @c beg:end range will then be moved to our vector
+ * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
  * otherwise, it will be done with a copy.
  *
@@ -417,13 +418,15 @@ void AuxTypeVectorHolder<T, CONT>::insertMove1
  * false otherwise.
  */
 template <class T, class CONT>
-bool AuxTypeVectorHolder<T, CONT>::insertMove (size_t pos, void* beg, void* end,
+bool AuxTypeVectorHolder<T, CONT>::insertMove (size_t pos,
+                                               void* src, size_t src_pos, size_t src_n,
                                                IAuxStore& /*srcStore*/)
 {
   const void* orig = m_vecPtr->data();
+  element_type* srcp = reinterpret_cast<element_type*> (src);
   insertMove1 (m_vecPtr->begin() + pos*SCALE,
-               reinterpret_cast<element_type*> (beg),
-               reinterpret_cast<element_type*> (end),
+               srcp + src_pos*SCALE,
+               srcp + (src_pos + src_n)*SCALE,
                typename std::conjunction<std::is_standard_layout<element_type>,
                                          std::is_trivial<element_type> >::type());
   this->storeDataSpan();

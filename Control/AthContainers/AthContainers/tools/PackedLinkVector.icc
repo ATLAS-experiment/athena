@@ -34,8 +34,9 @@ PackedLinkVectorHolder<CONT, ALLOC>::PackedLinkVectorHolder
 /**
  * @brief Insert elements into the vector via move semantics.
  * @param pos The starting index of the insertion.
- * @param beg Start of the range of elements to insert.
- * @param end End of the range of elements to insert.
+ * @param src Start of the vector containing the range of elements to insert.
+ * @param src_pos Position of the first element to insert.
+ * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
@@ -45,7 +46,7 @@ PackedLinkVectorHolder<CONT, ALLOC>::PackedLinkVectorHolder
  * The size of the container will be increased by @c len, with the elements
  * starting at @c pos copied to @c pos+len.
  *
- * The contents of the @c beg:end range will then be moved to our vector
+ * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
  * otherwise, it will be done with a copy.
  *
@@ -54,12 +55,13 @@ PackedLinkVectorHolder<CONT, ALLOC>::PackedLinkVectorHolder
  */
 template <class CONT, class ALLOC>
 bool PackedLinkVectorHolder<CONT, ALLOC>::insertMove
-   (size_t pos, void* beg, void* end,
+   (size_t pos, void* src, size_t src_pos, size_t src_n,
     IAuxStore& srcStore)
 {
-  bool ret = Base::insertMove (pos, beg, end, srcStore);
-  auto begp = reinterpret_cast<element_type*> (beg);
-  auto endp = reinterpret_cast<element_type*> (end);
+  bool ret = Base::insertMove (pos, src, src_pos, src_n, srcStore);
+  auto srcp = reinterpret_cast<element_type*> (src);
+  auto begp = srcp + src_pos;
+  auto endp = begp + src_n;
   size_t n = std::distance (begp, endp);
   vector_type& vec = this->vec();
 
@@ -96,8 +98,9 @@ PackedLinkVVectorHolder<CONT, VALLOC, VELT, ALLOC>::PackedLinkVVectorHolder
 /**
  * @brief Insert elements into the vector via move semantics.
  * @param pos The starting index of the insertion.
- * @param beg Start of the range of elements to insert.
- * @param end End of the range of elements to insert.
+ * @param src Start of the vector containing the range of elements to insert.
+ * @param src_pos Position of the first element to insert.
+ * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
@@ -107,7 +110,7 @@ PackedLinkVVectorHolder<CONT, VALLOC, VELT, ALLOC>::PackedLinkVVectorHolder
  * The size of the container will be increased by @c len, with the elements
  * starting at @c pos copied to @c pos+len.
  *
- * The contents of the @c beg:end range will then be moved to our vector
+ * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
  * otherwise, it will be done with a copy.
  *
@@ -116,12 +119,13 @@ PackedLinkVVectorHolder<CONT, VALLOC, VELT, ALLOC>::PackedLinkVVectorHolder
  */
 template <class CONT, class VALLOC, class VELT, class ALLOC>
 bool PackedLinkVVectorHolder<CONT, VALLOC, VELT, ALLOC>::insertMove
-   (size_t pos, void* beg, void* end,
+   (size_t pos, void* src, size_t src_pos, size_t src_n,
     IAuxStore& srcStore)
 {
-  bool ret = Base::insertMove (pos, beg, end, srcStore);
-  auto begp = reinterpret_cast<element_type*> (beg);
-  auto endp = reinterpret_cast<element_type*> (end);
+  bool ret = Base::insertMove (pos, src, src_pos, src_n, srcStore);
+  auto srcp = reinterpret_cast<element_type*> (src);
+  auto begp = srcp + src_pos;
+  auto endp = begp + src_n;
   size_t n = std::distance (begp, endp);
   vector_type& vec = this->vec();
   const IAuxTypeVector* srcLv = srcStore.linkedVector (this->auxid());
