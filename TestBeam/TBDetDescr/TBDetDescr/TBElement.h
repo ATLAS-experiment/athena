@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //==============================================
@@ -31,7 +31,7 @@ public:
 
   // accessor  
   TBElementID::TBElementID  id()        const  { return m_id; }
-  std::string               name()      const  { return m_name; }
+  const std::string&        name()      const  { return m_name; }
   Amg::Vector3D             position()  const  { return m_position; }
   Amg::RotationMatrix3D     rotation()  const  { return m_rotation; }
   

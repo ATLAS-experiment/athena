@@ -241,7 +241,7 @@ StatusCode LArBadChannel2Ascii::execute() {
 }
 
 
-void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned> nChans) const  {
+void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs, const std::vector<unsigned>& nChans) const  {
   
   const unsigned nTot=std::accumulate(nChans.begin(),nChans.end(),0);
   const unsigned nTotProb=std::accumulate(probs.begin(),probs.end(),0);
