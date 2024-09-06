@@ -185,7 +185,7 @@ def getNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputNam
     if(inputFlags.PF.EOverPMode):
         FlowElementNeutralCreatorAlgorithm.FlowElementOutputName="EOverPNeutralParticleFlowObjects"
     if(inputFlags.PF.useCalibHitTruthClusterMoments and inputFlags.PF.addClusterMoments):
-        FlowElementNeutralCreatorAlgorithm.useCalibHitTruth=True
+        FlowElementNeutralCreatorAlgorithm.UseCalibHitTruth=True
     if inputFlags.PF.addCPData:
         FlowElementNeutralCreatorAlgorithm.addCPData = True
 
