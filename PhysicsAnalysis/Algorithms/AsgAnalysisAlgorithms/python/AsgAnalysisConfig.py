@@ -119,6 +119,12 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('userPileupConfigsPerCampaign', None, type=None,
             info="user-provided PRW files (dictionary of list of strings, with "
             "MC campaigns as the keys)")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed unless several instances of PileupReweighting are scheduled.")
+        self.addOption ('alternativeConfig', False, type=bool,
+            info="whether this is used as an additional alternative config for PileupReweighting. "
+            "Will only store the alternative pile up weight in that case.")
 
 
     def makeAlgs (self, config) :
@@ -131,7 +137,7 @@ class PileupReweightingBlock (ConfigBlock):
             import logging
         log = logging.getLogger('makePileupAnalysisSequence')
 
-        if config.isPhyslite():
+        if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
             log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
             config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
@@ -232,23 +238,30 @@ class PileupReweightingBlock (ConfigBlock):
             log.info('Data needs no lumicalc and PRW configuration files')
 
         # Set up the only algorithm of the sequence:
-        alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
+        alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
+                                      'PileupReweightingAlg'+self.postfix )
         config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
         alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
         if not toolConfigFiles and config.dataType() is not DataType.Data:
             log.info("No PRW config files provided. Disabling reweighting")
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
+        else:
+            alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
         alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
-        config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
-        config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
 
-        if config.dataType() is not DataType.Data:
-            config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
-            if toolConfigFiles:
-                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
-            if config.geometry() is LHCPeriod.Run2:
-                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+        if not self.alternativeConfig:
+            config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
+            config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
+
+            if config.dataType() is not DataType.Data:
+                config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
+                if config.geometry() is LHCPeriod.Run2:
+                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+
+        if config.dataType() is not DataType.Data and toolConfigFiles:
+            config.addOutputVar ('EventInfo', 'PileupWeight' + self.postfix + '_%SYS%',
+                                 'weight_pileup'+self.postfix)
 
 
 class GeneratorAnalysisBlock (ConfigBlock):
