@@ -13,9 +13,10 @@
 # art-html: dcube_shifter_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/SiHitValid_piplus5GeV_simreco_2024-05-20T2101.root
-dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/RDOAnalysis_piplus_5GeV_simreco_r24.root
-dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/physval_test_piplus5GeV_simreco_r24.0.49.root
+relname="r24.0.61"
+dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/SiHitValid_piplus5GeV_simreco.root
+dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_piplus_5GeV_simreco.root
+dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_piplus5GeV_simreco.root
 
 script=test_MC_mu0_simreco.sh
 

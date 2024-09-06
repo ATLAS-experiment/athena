@@ -16,8 +16,10 @@
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
 
+relname="r24.0.61"
+
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_mu100GeV_reco_2024-06-01T2101.root
+dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu100GeV_reco.root
 
 script=test_MC_mu0_reco.sh
 

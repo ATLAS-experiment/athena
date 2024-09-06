@@ -12,9 +12,11 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
+relname="r24.0.61"
+
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 inputBS=${artdata}/RecJobTransformTests/data16_13TeV.00310809.physics_Main.daq.RAW._lb1219._SFO-2._0001.data 
-dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-06-01T2101/physval_data16_13TeV_1000evt_2024-06-01T2101.root
+dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_data16_13TeV_1000evt.root 
 lastref_dir=last_results
 
 
