@@ -12,14 +12,17 @@ def AthenaPoolExampleReadCfg(flags, readCatalogs = [] ):
     acc.getService("PoolSvc").ReadCatalog += readCatalogs
     
     # ---------------- Configure basic metadata
-    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
+    from xAODMetaDataCnv.InfileMetaDataConfig import createEventStreamInfo, propagateMetaData, MetaDataHelperLists
     from AthenaConfiguration.Enums import MetadataCategory
     mdLists = MetaDataHelperLists()
-    for mdCategory in ( MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo ):
-        lists, caConfig = propagateMetaData( flags, "", mdCategory )
-        mdLists += lists
-        acc.merge(caConfig)
+
+    lists, caConfig = propagateMetaData( flags, "", MetadataCategory.FileMetaData )
+    mdLists += lists
+    acc.merge(caConfig)
     
+    esiList, _ = createEventStreamInfo(flags)
+    mdLists += esiList
+
     # Configure the MetaDataSvc and pass the relevant tools
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
     acc.merge( MetaDataSvcCfg( flags, tools = mdLists.mdTools, toolNames = mdLists.mdToolNames ) )
@@ -55,15 +58,18 @@ def AthenaPoolExampleWriteCfg(flags, outputStreamName, writeCatalog = None, disa
         acc.getService("PoolSvc").WriteCatalog = writeCatalog
     
     # ---------------- Configure basic metadata
-    from xAODMetaDataCnv.InfileMetaDataConfig import propagateMetaData, MetaDataHelperLists
+    from xAODMetaDataCnv.InfileMetaDataConfig import createEventStreamInfo, propagateMetaData, MetaDataHelperLists
     from AthenaConfiguration.Enums import MetadataCategory
     mdLists = MetaDataHelperLists()
-    for mdCategory in ( MetadataCategory.FileMetaData, MetadataCategory.EventStreamInfo ):
-        lists, caConfig = propagateMetaData( flags, outputStreamName, mdCategory )
-        mdLists += lists
-        acc.merge(caConfig)
+
+    lists, caConfig = propagateMetaData( flags, outputStreamName, MetadataCategory.FileMetaData )
+    mdLists += lists
+    acc.merge(caConfig)
 
     mdLists.mdItems += ["IOVMetaDataContainer#*"]
+
+    esiList, _ = createEventStreamInfo(flags, streamName=outputStreamName)
+    mdLists += esiList
 
     # add metadata items and tools to the output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

@@ -323,7 +323,6 @@ class MetaDataSvc : public extends<::AthService,
   bool m_allowMetaDataStop;
   bool m_outputPrepared;
   std::map<std::string, CLID> m_persToClid;
-  std::map<CLID, std::string> m_toolForClid;
 
   std::set<CLID>        m_handledClasses;
   /// marker string for embedding stream name in MetaData object keys for SharedWriter server

@@ -61,8 +61,7 @@ MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : ba
 	m_clearedOutputDataStore(false),
 	m_allowMetaDataStop(false),
         m_outputPrepared(false),
-	m_persToClid(),
-	m_toolForClid() {
+	m_persToClid() {
    // declare properties
    declareProperty("MetaDataContainer", m_metaDataCont = "");
    declareProperty("MetaDataTools", m_metaDataTools);
@@ -92,15 +91,6 @@ MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : ba
    m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TruthMetaDataContainer_v1", 1188015687));
    m_persToClid.insert(std::pair<std::string, CLID>("DataVector<xAOD::TruthMetaData_v1>", 1188015687));
    m_persToClid.insert(std::pair<std::string, CLID>("xAOD::TruthMetaDataAuxContainer_v1", 1094306618));
-   // some classes need to have new/different tools added for metadata propagation
-   m_toolForClid.insert(std::pair<CLID, std::string>(167728019, "CopyEventStreamInfo"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(243004407, "xAODMaker::EventFormatMetaDataTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(1234982351, "BookkeeperTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(1107011239, "xAODMaker::TriggerMenuMetaDataTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(1221262614, "xAODMaker::TriggerMenuMetaDataTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(1115934851, "LumiBlockMetaDataTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(178309087, "xAODMaker::FileMetaDataTool"));
-   m_toolForClid.insert(std::pair<CLID, std::string>(1188015687, "xAODMaker::TruthMetaDataTool"));
 }
 //__________________________________________________________________________
 MetaDataSvc::~MetaDataSvc() {
@@ -493,32 +483,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
          }
       }
    }
-   const std::string toolName = m_toolForClid[clid];
-   if (!toolName.empty()) {
-      std::string toolInstName;
-      std::size_t pos = toolName.find("::");
-      if (pos != std::string::npos) {
-         toolInstName = toolName.substr(pos + 2);
-      } else {
-         toolInstName = toolName;
-      }
-      bool foundTool = false;
-      for (auto iter = m_metaDataTools.begin(), iterEnd = m_metaDataTools.end(); iter != iterEnd; iter++) {
-         if ((*iter)->name() == "ToolSvc." + toolInstName) foundTool = true;
-      }
-      if (!foundTool) {
-         if (toolInstName != toolName) {
-            toolInstName = toolName + "/" + toolInstName;
-         }
-         ToolHandle<IMetaDataTool> metadataTool(toolInstName);
-         m_metaDataTools.push_back(metadataTool);
-         ATH_MSG_DEBUG("Added new MetaDataTool: " << metadataTool->name());
-         if (!metadataTool.retrieve().isSuccess()) {
-            ATH_MSG_FATAL("Cannot get " << toolInstName);
-            return(StatusCode::FAILURE);
-         }
-      }
-   }
+
    // make stream-unique keys for infile metadata objects
    // AthenaOutputStream will use this to distribute objects to the right stream (and restore the original key)
    if( clid == 178309087 ) {  // FileMetaData
