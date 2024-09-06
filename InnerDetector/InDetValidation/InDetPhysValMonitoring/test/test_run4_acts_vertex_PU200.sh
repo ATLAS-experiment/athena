@@ -58,8 +58,7 @@ run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
-    --OnlyTrackingPreInclude \
-    --PrimaryVertexContainer ActsPrimaryVertices
+    --OnlyTrackingPreInclude
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
