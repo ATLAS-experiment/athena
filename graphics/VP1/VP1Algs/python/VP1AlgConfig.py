@@ -311,6 +311,10 @@ def SetupVP1():
             AtlasExtrapolationEngine = cfg.getPrimaryAndMerge(AtlasExtrapolationEngineCfg(flags))
             cfg.addPublicTool(AtlasExtrapolationEngine)
 
+            from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
+            cfg.merge(TrkEventCnvSuperToolCfg(flags))
+
+
         if flags.Input.isMC and "xAOD::TruthEventContainer#TruthEvents" not in flags.Input.TypedCollections:
             # AOD2xAOD Truth conversion
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
