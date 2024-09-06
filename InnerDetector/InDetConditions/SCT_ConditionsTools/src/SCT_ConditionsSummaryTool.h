@@ -54,16 +54,18 @@ public:
 
   virtual bool isGood(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const override;
   virtual bool isGood(const IdentifierHash& elementHash, const EventContext& ctx) const override;
-  virtual bool isGood(const IdentifierHash& elementHash, const Identifier& elementId, const EventContext& ctx) const override;
+  virtual bool isGood(const IdentifierHash& elementHash, const Identifier& elementId, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override;
   virtual double goodFraction(const IdentifierHash& elementHash, const Identifier& idStart, const Identifier& idEnd, const EventContext& ctx) const override;
   virtual std::unique_ptr<InDet::SiDetectorElementStatus>
   getDetectorElementStatus(const EventContext& ctx,
                            SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
 
-  virtual bool hasBSError(const IdentifierHash& elementHash, const EventContext& ctx) const override;
-  virtual bool hasBSError(const IdentifierHash& elementHash, Identifier elementId, const EventContext& ctx) const override;
-  virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx) const  override;
-  virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx) const  override;
+  virtual bool hasBSError(const IdentifierHash& elementHash, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override;
+  virtual bool hasBSError(const IdentifierHash& elementHash, Identifier elementId, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override;
+  virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const  override;
+
+  virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const  override;
+  virtual IDCCacheEntry* getCacheEntryOut(const EventContext& ctx) const override;
   //@}
 private:
   std::unique_ptr<InDet::SiDetectorElementStatus>
