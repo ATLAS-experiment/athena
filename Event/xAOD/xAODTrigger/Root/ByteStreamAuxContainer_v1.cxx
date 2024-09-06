@@ -370,7 +370,6 @@ namespace xAOD {
          throw SG::ExcStoreLocked( "insertMove" );
       }
 
-      const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
       bool nomove = true;
       size_t other_size = other.size();
 
@@ -388,8 +387,7 @@ namespace xAOD {
           if (other.getData (id)) {
             void* src_ptr = other.getData (id, other_size, other_size);
             if (src_ptr) {
-              if (!v_dst->insertMove (pos, src_ptr,
-                                      reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+              if (!v_dst->insertMove (pos, src_ptr, 0, other_size,
                                       other))
                 nomove = false;
             }
@@ -414,7 +412,7 @@ namespace xAOD {
               size_t sz = size_noLock();
               getVector1 (id, sz, sz, true, false);
               m_dynamicVecs[id]->resize (sz - other_size);
-              m_dynamicVecs[id]->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+              m_dynamicVecs[id]->insertMove (pos, src_ptr, 0, other_size,
                                              other);
               nomove = false;
             }

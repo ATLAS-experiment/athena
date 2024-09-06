@@ -137,8 +137,9 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
 /**
  * @brief Insert elements into the vector via move semantics.
  * @param pos The starting index of the insertion.
- * @param beg Start of the range of elements to insert.
- * @param end End of the range of elements to insert.
+ * @param src Start of the vector containing the range of elements to insert.
+ * @param src_pos Position of the first element to insert.
+ * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
@@ -148,7 +149,7 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
  * The size of the container will be increased by @c len, with the elements
  * starting at @c pos copied to @c pos+len.
  *
- * The contents of the @c beg:end range will then be moved to our vector
+ * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
  * otherwise, it will be done with a copy.
  *
@@ -157,10 +158,11 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
  */
 template <class T, class ALLOC>
 bool JaggedVecVectorHolder<T, ALLOC>::insertMove
-  (size_t pos, void* vbeg, void* vend, IAuxStore& srcStore)
+  (size_t pos, void* src, size_t src_pos, size_t src_n, IAuxStore& srcStore)
 {
-  element_type* beg = reinterpret_cast<element_type*> (vbeg);
-  element_type* end = reinterpret_cast<element_type*> (vend);
+  element_type* srcp = reinterpret_cast<element_type*> (src);
+  element_type* beg = srcp + src_pos;
+  element_type* end = beg + src_n;
   ptrdiff_t nelt = end - beg;
   if (nelt <= 0) return true;
 
@@ -172,8 +174,9 @@ bool JaggedVecVectorHolder<T, ALLOC>::insertMove
   IAuxTypeVector* srcPayloadVec = srcStore.linkedVector (this->auxid());
   T* srcPayload = reinterpret_cast<T*> (srcPayloadVec->toPtr());
   bool pflag = m_linkedVec->insertMove (ppos,
-                                        srcPayload + vec[pos].begin(),
-                                        srcPayload + vec[pos+nelt-1].end(),
+                                        srcPayload,
+                                        vec[pos].begin(),
+                                        vec[pos+nelt-1].end() - vec[pos].begin(),
                                         srcStore);
   std::for_each (vec.begin() + pos, vec.begin() + pos + nelt,
                  Shift (ppos - vec[pos].begin()));

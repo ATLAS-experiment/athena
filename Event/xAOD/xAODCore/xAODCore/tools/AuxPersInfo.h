@@ -72,7 +72,8 @@ namespace xAOD {
          throw std::runtime_error( "Calling shift on a non-vector" );
       }
 
-      virtual bool insertMove (size_t /*pos*/, void* /*beg*/, void* /*end*/,
+      virtual bool insertMove (size_t /*pos*/,
+                               void* /*src*/, size_t /*src_pos*/, size_t /*src_n*/,
                                SG::IAuxStore& /*srcStore*/) override
       {
         throw std::runtime_error( "Calling insertMove on a non-vector" );

@@ -282,8 +282,9 @@ bool RootAuxVector::shift (size_t pos, ptrdiff_t offs)
 /**
  * @brief Insert elements into the vector via move semantics.
  * @param pos The starting index of the insertion.
- * @param beg Start of the range of elements to insert.
- * @param end End of the range of elements to insert.
+ * @param src Start of the vector containing the range of elements to insert.
+ * @param src_pos Position of the first element to insert.
+ * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
@@ -293,30 +294,30 @@ bool RootAuxVector::shift (size_t pos, ptrdiff_t offs)
  * The size of the container will be increased by @c len, with the elements
  * starting at @c pos copied to @c pos+len.
  *
- * The contents of the @c beg:end range will then be moved to our vector
+ * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
  * otherwise, it will be done with a copy.
  *
  * Returns true if it is known that the vector's memory did not move,
  * false otherwise.
  */
-bool RootAuxVector::insertMove (size_t pos, void* beg, void* end,
+bool RootAuxVector::insertMove (size_t pos, 
+                                void* src, size_t src_pos, size_t src_n,
                                 SG::IAuxStore& /*srcStore*/)
 {
   size_t eltsz = m_proxy->GetIncrement();
   const void* orig = this->getDataSpan().beg;
   const RootUtils::Type& rootType = m_factory->rootType();
 
-  char* begp = reinterpret_cast<char*> (beg);
-  char* endp = reinterpret_cast<char*> (end);
-  size_t nelt = (endp-begp) / eltsz;
+  char* srcp = reinterpret_cast<char*> (src);
+  char* begp = srcp + src_pos*eltsz;
 
-  shift (pos, nelt);
+  shift (pos, src_n);
   // FIXME: want move, not copy.
   // But i don't seem to be able to call move operations through cling,
   // so just use copy for now.
   rootType.copyRange (reinterpret_cast<char*>(this->toPtr()) + pos*eltsz,
-                      beg, nelt);
+                      begp, src_n);
   this->storeDataSpan();
   return this->getDataSpan().beg == orig;
 }

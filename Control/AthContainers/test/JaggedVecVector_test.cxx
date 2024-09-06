@@ -136,7 +136,7 @@ void test1a (const std::string& name)
     lv2->push_back (makeT<T> (i+100));
   }
 
-  vh.insertMove (2, v2.data()+1, v2.data()+3, store2);
+  vh.insertMove (2, v2.data(), 1, 2, store2);
   assert (v.size() == 7);
   assert (lv->size() == 10);
   assert (v[0] == Elt (0, 3));  // [0, 1, 2]
@@ -148,8 +148,8 @@ void test1a (const std::string& name)
   assert (v[6] == Elt (8, 10));  // [7, 8]
   assert (*lv == makeTVec<T> ({0, 1, 2, 102, 103, 104, 5, 6, 7, 8}));
 
-  vh.insertMove (0, v2.data(), v2.data(), store2);
-  vh.insertMove (0, v2.data(), v2.data()+1, store2);
+  vh.insertMove (0, v2.data(), 0, 0, store2);
+  vh.insertMove (0, v2.data(), 0, 1, store2);
   assert (v.size() == 8);
   assert (lv->size() == 12);
   assert (v[0] == Elt (0, 2));  // [100, 101]

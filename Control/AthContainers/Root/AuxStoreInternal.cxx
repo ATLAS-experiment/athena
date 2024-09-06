@@ -351,7 +351,7 @@ bool AuxStoreInternal::insertMove (size_t pos,
       if (other.getData (id)) {
         void* src_ptr = other.getData (id, other_size, other_size);
         if (src_ptr) {
-          if (!v_dst->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+          if (!v_dst->insertMove (pos, src_ptr, 0, other_size,
                                   other))
             nomove = false;
         }
@@ -377,7 +377,7 @@ bool AuxStoreInternal::insertMove (size_t pos,
           if (sz < other_size) sz = other_size + pos;
           IAuxTypeVector* v = getVectorInternal_noLock (id, sz, sz, false);
           v->resize (sz - other_size);
-          v->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+          v->insertMove (pos, src_ptr, 0, other_size,
                          other);
           nomove = false;
         }

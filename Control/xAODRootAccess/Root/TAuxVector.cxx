@@ -203,23 +203,23 @@ namespace xAOD {
       return true;
    }
 
-   bool TAuxVector::insertMove (size_t pos, void* beg, void* end,
+   bool TAuxVector::insertMove (size_t pos,
+                                void* src, size_t src_pos, size_t src_n,
                                 SG::IAuxStore& /*srcStore*/)
    {
      size_t eltsz = m_proxy->GetIncrement();
      const void* orig = this->getDataSpan().beg;
 
-     char* begp = reinterpret_cast<char*> (beg);
-     char* endp = reinterpret_cast<char*> (end);
-     size_t nelt = (endp-begp) / eltsz;
+     char* srcp = reinterpret_cast<char*> (src);
+     char* begp = srcp + src_pos*eltsz;
 
-     shift (pos, nelt);
+     shift (pos, src_n);
      // FIXME: want move, not copy.
      // But i don't seem to be able to call move operations through cling,
      // so just use copy for now.
-     copyRange (beg,
+     copyRange (begp,
                 reinterpret_cast<char*>(this->toPtr()) + pos*eltsz,
-                nelt);
+                src_n);
      this->storeDataSpan(); 
      return this->getDataSpan().beg == orig;
    }
