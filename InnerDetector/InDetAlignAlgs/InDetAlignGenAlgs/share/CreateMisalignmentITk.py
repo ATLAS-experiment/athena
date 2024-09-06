@@ -39,7 +39,7 @@ def getFlags(**kwargs):
 
     flags.Input.Files = []
     
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     flags.GeoModel.Align.Dynamic = False
     
@@ -60,7 +60,7 @@ def getFlags(**kwargs):
         MisalignMode=int(kwargs.get('MisalignMode',11))
     databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
-    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 
     # This should run serially for the moment.
     flags.Concurrency.NumThreads = 1

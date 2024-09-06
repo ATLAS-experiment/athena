@@ -22,7 +22,7 @@ flags.Input.isMC             = True
 
 flags.Input.Files = []
 
-from AthenaConfiguration.TestDefaults import defaultGeometryTags
+from AthenaConfiguration.TestDefaults import defaultGeometryTags,defaultConditionsTags
 flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
 
 #Toggle this to use a local geometry input
@@ -41,7 +41,7 @@ if flags.ITk.Geometry.AllLocal:
   flags.TrackingGeometry.MaterialSource = "Input"
   flags.Detector.GeometryHGTD = False
 
-flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.GeoModel.Align.Dynamic = False
 if(MisalignMode!=-1):
   tag=""
