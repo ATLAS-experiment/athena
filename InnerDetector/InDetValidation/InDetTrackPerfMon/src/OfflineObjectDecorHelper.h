@@ -83,6 +83,9 @@ namespace IDTPM {
   bool isFakeTruth( const xAOD::TrackParticle& track, const float truthProbCut=0. );
   inline bool isFakeTruth( const xAOD::TruthParticle&, const float ) { return false; }; // dummy - to avoid compilation errors
 
+  bool isReconstructable( const xAOD::TruthParticle& truth, const std::vector<unsigned int>& minSilHits, const std::vector<float>& etaBins);
+  inline bool isReconstructable( const xAOD::TrackParticle&, const std::vector<unsigned int>& , const std::vector<float>& ) { return false; }; // dummy - to avoid compilation errors
+
 } // namespace IDTPM
 
 #endif // > ! INDETTRACKPERFMON_OFFLINEOBJECTDECORHELPER_H

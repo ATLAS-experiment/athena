@@ -98,11 +98,14 @@ namespace IDTPM {
     /// plots w.r.t. test tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsTest;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTest;
+    std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTest;
     /// plots w.r.t. reference tracks parameters
     std::unique_ptr< TrackParametersPlots >  m_plots_trkParam_vsRef;
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsRef;
+    std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsRef;
     /// plots w.r.t. efficiency plots w.r.t. truth (for EFTruthMatch only)
     std::unique_ptr< EfficiencyPlots >       m_plots_eff_vsTruth;
+    std::unique_ptr< EfficiencyPlots >       m_plots_tech_eff_vsTruth;
     /// resolution plots
     std::unique_ptr< ResolutionPlots >       m_plots_resolution;
     /// fake rate plots (only when reference=truth)
