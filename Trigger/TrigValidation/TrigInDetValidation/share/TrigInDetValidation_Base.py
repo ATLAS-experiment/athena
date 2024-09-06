@@ -119,10 +119,12 @@ if GridFiles:
        rdo2aod.args += ' --inputRDOFile=$ArtInFile '
 
 # temporary conditions override: force MC23e global tag by default and Run4 global tag for Run4 inputs, until input RDOs are updated
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+
 if "conditionsOverride" not in locals():
-    rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-05"'
+    rdo2aod.args += f' --conditionsTag "default:{defaultConditionsTags.RUN3_MC}"'
 elif conditionsOverride == "Run4":
-    rdo2aod.args += ' --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-02"'
+    rdo2aod.args += f' --conditionsTag "default:{defaultConditionsTags.RUN4_MC}"'
 
 
 if (Malloc):
