@@ -307,18 +307,14 @@ template<int N> double lineDistance(const AmgVector(N)& posA,
 
     const double dirDots = dirA.dot(dirB);
     const double divisor = (1. - dirDots * dirDots);
+    const AmgVector(N) AminusB = posA - posB;
     if (std::abs(divisor) < std::numeric_limits<double>::epsilon()) {
-        const AmgVector(N) d = posA + dirA.dot(posA - posB)*dirA;
+        const AmgVector(N) d = posA + dirA.dot(AminusB)*dirA;
         return std::sqrt(d.dot(d));
     }
-    const AmgVector(N) AminusB = posA - posB;
-    const double AmBdotA = AminusB.dot(dirA);
-    const double AmBdotB = AminusB.dot(dirB);
-
-    const double lineA = -(AmBdotA - AmBdotB * dirDots) / divisor;
-    const double lineB =  (AmBdotB - AmBdotA * dirDots) / divisor;
-    const AmgVector(N) lineDiff = AminusB + lineA * dirA - lineB * dirB;
-    return std::sqrt(lineDiff.dot(lineDiff));
+    const AmgVector(N) lineTravel = AminusB.dot(dirA) * dirA -
+                                    AminusB.dot(dirB) * dirB;
+    return std::sqrt(std::max(0., AminusB.dot(AminusB) - lineTravel.dot(lineTravel)) / divisor);
 }
 /// Calculates the point of closest approach of two lines. 
 ///    posA: offset point of line A
