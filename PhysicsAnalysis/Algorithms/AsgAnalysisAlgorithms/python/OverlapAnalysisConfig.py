@@ -190,11 +190,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             alg.particles = electrons
             alg.selectionDecoration = inputLabel + ',as_char'
             # if  OR added to all selections, don't need standalone selection flag
-            if self.selectionName != '':
-                config.addOutputVar (self.electrons.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.electrons.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -206,11 +206,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = inputLabel + ',as_char'
-            if self.selectionName != '':
-                config.addOutputVar (self.photons.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.photons.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -222,11 +222,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = inputLabel + ',as_char'
-            if self.selectionName != '':
-                config.addOutputVar (self.muons.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.muons.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -238,11 +238,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = inputLabel + ',as_char'
-            if self.selectionName != '':
-                config.addOutputVar (self.taus.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.taus.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -254,11 +254,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = inputLabel + ',as_char'
-            if self.selectionName != '':
-                config.addOutputVar (self.jets.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.jets.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -270,11 +270,11 @@ class OverlapAnalysisConfig (ConfigBlock):
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = inputLabel + ',as_char'
-            if self.selectionName != '':
-                config.addOutputVar (self.fatJets.split('.')[0],
-                                     outputLabel + '_%SYS%',
-                                     select_or_decoration,
-                                     noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+            config.addOutputVar (self.fatJets.split('.')[0],
+                                 outputLabel + '_%SYS%',
+                                 select_or_decoration,
+                                 noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection,
+                                 enabled=(selectionName != ''))
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
