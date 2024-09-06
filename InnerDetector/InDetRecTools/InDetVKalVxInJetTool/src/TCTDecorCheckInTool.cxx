@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetVKalVxInJetTool/TCTDecorCheckInTool.h"
@@ -14,17 +14,8 @@
 //Constructor-------------------------------------------------------------- 
 TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
                             ISvcLocator* pSvcLocator):
-  AthAlgorithm( name, pSvcLocator ),
-  m_trackClassificationTool("InDet::InDetTrkInJetType",this),
-  m_decoratorMethod("decorateTrack"),
-  m_jetCollection("") //AntiKt4EMPFlowJets
-  {
-    declareProperty("TrackClassificationTool",  m_trackClassificationTool);
-    declareProperty("decoratorMethod", m_decoratorMethod);
-    declareProperty("JetCollection",m_jetCollection, "Type of JetContainer which should be decorated with TCT scores and TrackLinks");
-    
-
-  }
+  AthAlgorithm( name, pSvcLocator )
+  { }
 
 //Destructor---------------------------------------------------------------
   TCTDecorCheckInTool::~TCTDecorCheckInTool(){
@@ -39,21 +30,18 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
     ATH_CHECK( m_verticesKey.initialize() );
     ATH_CHECK( m_jetsKey.initialize() );
 
-    if(!m_jetCollection.empty())
-    {
-      //from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Event/xAOD/xAODTrackingCnv/src/TrackParticleCnvAlg.cxx
-      m_trackReadDecorKeyTCTScore = "InDetTrackParticles.TCTScore_"+m_jetCollection;
-      m_trackReadDecorKeyJetLink = "InDetTrackParticles.TCTJetLink_"+m_jetCollection;
+    //from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Event/xAOD/xAODTrackingCnv/src/TrackParticleCnvAlg.cxx
+    m_trackReadDecorKeyTCTScore = "InDetTrackParticles.TCTScore_"+m_jetsKey.key();
+    m_trackReadDecorKeyJetLink = "InDetTrackParticles.TCTJetLink_"+m_jetsKey.key();
 
-      m_jetReadDecorKeyTCTScore = m_jetCollection+ ".TCTScore";
-      m_jetReadDecorKeyTrackLink = m_jetCollection +".TCTTrackLink";
+    m_jetReadDecorKeyTCTScore = m_jetsKey.key()+ ".TCTScore";
+    m_jetReadDecorKeyTrackLink = m_jetsKey.key() +".TCTTrackLink";
 
-      ATH_CHECK( m_trackReadDecorKeyTCTScore.initialize());
-      ATH_CHECK( m_trackReadDecorKeyJetLink.initialize());
+    ATH_CHECK( m_trackReadDecorKeyTCTScore.initialize());
+    ATH_CHECK( m_trackReadDecorKeyJetLink.initialize());
 
-      ATH_CHECK( m_jetReadDecorKeyTCTScore.initialize());
-      ATH_CHECK( m_jetReadDecorKeyTrackLink.initialize());
-    }
+    ATH_CHECK( m_jetReadDecorKeyTCTScore.initialize());
+    ATH_CHECK( m_jetReadDecorKeyTrackLink.initialize());
     
      //-------
      //check that the TrackClassificationTool can be accessed
@@ -76,14 +64,12 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
    StatusCode TCTDecorCheckInTool::execute() 
    {  
       ATH_MSG_DEBUG( "Executing..." );
-      if(m_jetCollection.empty()){ ATH_MSG_FATAL("No JetCollection selected! ");}
       SG::ReadDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackReadDecorHandleTCTScore (m_trackReadDecorKeyTCTScore);
       SG::ReadDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackReadDecorHandleJetLink (m_trackReadDecorKeyJetLink);
 
       //JetRead handles
       SG::ReadDecorHandle< xAOD::JetContainer, std::vector<std::vector<float>> > jetReadDecorHandleTCTScore (m_jetReadDecorKeyTCTScore);
       SG::ReadDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>> > jetReadDecorHandleTrackLink (m_jetReadDecorKeyTrackLink);
-
 
       // Retrieve the track particles:
       SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_particlesKey);

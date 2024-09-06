@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -173,76 +173,106 @@ namespace InDet {
       };
       std::unique_ptr<Hists> m_h;
 
-      long int m_cutSctHits{};
-      long int m_cutPixelHits{};
-      long int m_cutSiHits{};
-      long int m_cutBLayHits{};
-      long int m_cutSharedHits{};
-      double m_cutPt{};
-      double m_cutZVrt{};
-      double m_cutA0{};
-      double m_cutChi2{};
-      double m_secTrkChi2Cut{};
-      double m_coneForTag{};
-      double m_sel2VrtChi2Cut{};
-      double m_sel2VrtSigCut{};
-      double m_trkSigCut{};
-      double m_a0TrkErrorCut{};
-      double m_zTrkErrorCut{};
-      double m_cutBVrtScore{};
-      double m_vrt2TrMassLimit{};
+    IntegerProperty m_cutSctHits{this, "CutSctHits", 4,
+      "Remove track is it has less SCT hits"};
+    IntegerProperty m_cutPixelHits{this, "CutPixelHits", 1,
+      "Remove track is it has less Pixel hits"};
+    IntegerProperty m_cutSiHits{this, "CutSiHits", 7,
+      "Remove track is it has less Pixel+SCT hits"};
+    IntegerProperty m_cutBLayHits{this, "CutBLayHits", 0,
+      "Remove track is it has less B-layer hits"};
+    IntegerProperty m_cutSharedHits{this, "CutSharedHits", 1000,
+      "Reject final 2tr vertices if tracks have shared hits"};
+    DoubleProperty m_cutPt{this, "CutPt", 700., "Track Pt selection cut"};
+    DoubleProperty m_cutZVrt{this, "CutZVrt", 15., "Track Z impact selection cut"};
+    DoubleProperty m_cutA0{this, "CutA0", 5., "Track A0 selection cut"};
+    DoubleProperty m_cutChi2{this, "CutChi2", 5., "Track Chi2 selection cut"};
+    DoubleProperty m_secTrkChi2Cut{this, "SecTrkChi2Cut", 10.,
+      "Track - common secondary vertex association cut. Single Vertex Finder only"};
+    DoubleProperty m_coneForTag{this, "ConeForTag", 0.4,
+      "Cone around jet direction for track selection"};
+    DoubleProperty m_sel2VrtChi2Cut{this, "Sel2VrtChi2Cut", 10.,
+      "Cut on Chi2 of 2-track vertex for initial selection"};
+    DoubleProperty m_sel2VrtSigCut{this, "Sel2VrtSigCut", 4.,
+      "Cut on significance of 3D distance between initial 2-track vertex and PV"};
+    DoubleProperty m_trkSigCut{this, "TrkSigCut", 2.,
+      "Track 3D impact significance w/r primary vertex"};
+    DoubleProperty m_a0TrkErrorCut{this, "A0TrkErrorCut", 1.,
+      "Track A0 error cut"};
+    DoubleProperty m_zTrkErrorCut{this, "ZTrkErrorCut", 5.,
+      "Track Z impact error cut"};
+    DoubleProperty m_cutBVrtScore{this, "CutBVrtScore", 0.015,
+      "B vertex selection cut on 2track vertex score (probability-like) based on track classification"};
+    DoubleProperty m_vrt2TrMassLimit{this, "Vrt2TrMassLimit", 4000.,
+      "Maximal allowed mass for 2-track vertices"};
 
-      bool m_useFrozenVersion{};
-      bool m_fillHist{};
+    BooleanProperty m_useFrozenVersion{this, "UseFrozenVersion", false,
+      "Switch from default frozen version to the development/improved one"};
+    BooleanProperty m_fillHist{this, "FillHist", false,
+      "Fill technical histograms"};
+    BooleanProperty m_existIBL{this, "ExistIBL", true,
+      "Inform whether 3-layer or 4-layer detector is used"};
 
-      bool m_existIBL{};
+    IntegerProperty m_RobustFit{this, "RobustFit", 1,
+      "Use vertex fit with RobustFit functional(VKalVrt) for common secondary vertex fit"};
 
-      long int m_RobustFit{};
+    double m_beampipeR = 0.;
+    double m_rLayerB = 0.;
+    double m_rLayer1 = 0.;
+    double m_rLayer2 = 0.;
+    double m_rLayer3 = 0.;
 
-      double m_beampipeR{};
-      double m_rLayerB{};
-      double m_rLayer1{};
-      double m_rLayer2{};
-      double m_rLayer3{};
+    BooleanProperty m_useVertexCleaningPix{this, "useVertexCleaningPix", false,
+      "Clean vertices requiring track pixel hit patterns according to vertex position"};
+    BooleanProperty m_useVertexCleaningFMP{this, "useVertexCleaningFMP", false,
+      "Clean vertices requiring track F(irst) M(easured) P(oints) matching to vertex position"};
+    BooleanProperty m_rejectBadVertices{this, "rejectBadVertices", false,
+      "Reject V0s after checking 3D PV impact"};
+    BooleanProperty m_multiVertex{this, "MultiVertex", false,
+      "Run Multiple Secondary Vertices in jet finder"};
+    BooleanProperty m_multiWithPrimary{this, "MultiWithPrimary", false,
+      "Find Multiple Secondary Vertices + primary vertex in jet. MultiVertex Finder only!"};
+    BooleanProperty m_getNegativeTail{this, "getNegativeTail", false,
+      "Allow secondary vertex behind the primary one (negative) w/r jet direction (not for multivertex!)"};
+    BooleanProperty m_getNegativeTag{this, "getNegativeTag", false,
+      "Return ONLY negative secondary vertices (not for multivertex!)"};
+    BooleanProperty m_multiWithOneTrkVrt{this, "MultiWithOneTrkVrt", true,
+      "Allow one-track-vertex addition to already found secondary vertices. MultiVertex Finder only!"};
 
-      bool     m_useVertexCleaningPix{};
-      bool     m_useVertexCleaningFMP{};
-      bool     m_rejectBadVertices{};
-      bool     m_multiVertex{};
-      bool     m_multiWithPrimary{};
-      bool     m_getNegativeTail{};
-      bool     m_getNegativeTag{};
-      bool     m_multiWithOneTrkVrt{};
+    DoubleProperty m_vertexMergeCut{this, "VertexMergeCut", 3.,
+      "To allow vertex merging for MultiVertex Finder"};
+    DoubleProperty m_trackDetachCut{this, "TrackDetachCut", 6.,
+      "To allow track from vertex detachment for MultiVertex Finder"};
 
-      double    m_vertexMergeCut{};
-      double    m_trackDetachCut{};
+    ToolHandle < Trk::IVertexFitter > m_fitter
+      {this, "VertexFitterTool", "Trk::TrkVKalVrtFitter/VertexFitterTool"};
+    Trk::TrkVKalVrtFitter* m_fitSvc{};
+    IChronoStatSvc * m_timingProfile{};
 
+    bool m_useTrackClassificator = true;
+    ToolHandle < IInDetTrkInJetType >  m_trackClassificator
+      {this, "TrackClassTool", "InDet::InDetTrkInJetType"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+      {this, "EventInfoName", "EventInfo"};
 
-      ToolHandle < Trk::IVertexFitter >       m_fitterSvc;
-      Trk::TrkVKalVrtFitter*   m_fitSvc{};
-      IChronoStatSvc * m_timingProfile{}; 
+    bool m_useEtaDependentCuts = false;
+    /** service to get cut values depending on different variable */
+    ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc
+      {this, "InDetEtaDependentCutsSvc", ""};
 
-      bool m_useTrackClassificator = true;
-      ToolHandle < IInDetTrkInJetType >  m_trackClassificator;
-      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this,"EventInfoName", "EventInfo"};
+    BooleanProperty m_useITkMaterialRejection
+      {this, "useITkMaterialRejection", false,
+       "Reject vertices from hadronic interactions in detector material using ITk layout"};
+    const BeamPipeDetectorManager*       m_beamPipeMgr = nullptr;
+    const InDetDD::PixelDetectorManager* m_pixelManager = nullptr;
+    std::unique_ptr<TH2D> m_ITkPixMaterialMap;
 
-      bool m_useEtaDependentCuts = false;
-      /** service to get cut values depending on different variable */
-      ServiceHandle<InDet::IInDetEtaDependentCutsSvc> m_etaDependentCutsSvc{this, "InDetEtaDependentCutsSvc", ""};
-
-      bool m_useITkMaterialRejection;
-      const BeamPipeDetectorManager*       m_beamPipeMgr;
-      const InDetDD::PixelDetectorManager* m_pixelManager;
-      std::unique_ptr<TH2D> m_ITkPixMaterialMap;
-
-      const double m_massPi  = 139.5702 ;
-      const double m_massP   = 938.272  ;
-      const double m_massE   =   0.511  ;
-      const double m_massK0  = 497.648  ;
-      const double m_massLam =1115.683  ;
-      const double m_massB   =5279.400  ;
-
-      std::string m_instanceName;
+    const double m_massPi  = 139.5702 ;
+    const double m_massP   = 938.272  ;
+    const double m_massE   =   0.511  ;
+    const double m_massK0  = 497.648  ;
+    const double m_massLam =1115.683  ;
+    const double m_massB   =5279.400  ;
 
 //-------------------------------------------
 //For ntuples (only for development/tuning!)

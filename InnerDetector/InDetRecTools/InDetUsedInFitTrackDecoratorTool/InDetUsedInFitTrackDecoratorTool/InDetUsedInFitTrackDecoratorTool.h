@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETUSEDINFITTRACKDECORATORTOOL_INDETUSEDINFITTRACKDECORATORTOOL_H
@@ -11,8 +11,8 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 
 // EDM include(s):
-#include "xAODTracking/TrackParticleContainerFwd.h"
-#include "xAODTracking/VertexContainerFwd.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 // Tool include(s)
 #include "InDetRecToolInterfaces/IInDetUsedInFitTrackDecoratorTool.h"
@@ -80,16 +80,24 @@ namespace InDet {
     /// @{
 
     /// Name of the per-track decoration for the AMVF fit vertices
-    std::string m_vtxDecoName;
+    StringProperty m_vtxDecoName
+      {this, "AMVFVerticesDecoName", "TTVA_AMVFVertices",
+	"Name of the per-track AMVF vertices decoration"};
 
     /// Name of the per-track decoration for the AMVF fit weights
-    std::string m_wgtDecoName;
+    StringProperty m_wgtDecoName
+      {this, "AMVFWeightsDecoName", "TTVA_AMVFWeights",
+	"Name of the per-track AMVF weights decoration"};
 
     /// Name of the track particle container (needed for container-less function calls)
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkContKey;
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trkContKey
+      {this, "TrackContainer", "InDetTrackParticles",
+       "Name of the track particle container"};
 
     /// Name of the primary vertex container (needed for container-less function calls)
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey
+      {this, "VertexContainer", "PrimaryVertices",
+       "Name of the primary vertex container"};
 
     /// @}
 

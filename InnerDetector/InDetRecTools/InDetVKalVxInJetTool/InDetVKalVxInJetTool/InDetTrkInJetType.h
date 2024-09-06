@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 // InDetTrkInJetType.h - Description
@@ -96,22 +96,30 @@ namespace InDet {
    private:
 
     std::vector<std::unique_ptr<MVAUtils::BDT>> m_vTrkClassBDT{};
-    IChronoStatSvc* m_timingProfile{}; 
+    IChronoStatSvc* m_timingProfile = nullptr;
    
-    int m_trkSctHitsCut{};
-    int m_trkPixelHitsCut{};
-    float m_trkChi2Cut{};
-    float m_trkMinPtCut{};
-    float m_jetMaxPtCut{};
-    float m_jetMinPtCut{};
-    float m_d0_limLow{};
-    float m_d0_limUpp{};
-    float m_Z0_limLow{};
-    float m_Z0_limUpp{};
-    std::string m_calibFileName;
-    std::string m_calibFileNameFivePtJetBin;
-    std::string m_jetCollection;
-    bool m_useFivePtJetBinVersion;
+    IntegerProperty m_trkSctHitsCut
+      {this, "trkSctHits", 4, "Cut on track SCT hits number"};
+    IntegerProperty m_trkPixelHitsCut
+      {this, "trkPixelHits", 1, "Cut on track Pixel hits number"};
+    FloatProperty m_trkChi2Cut{this, "trkChi2", 5., "Cut on track Chi2/Ndf"};
+    FloatProperty m_trkMinPtCut{this, "trkMinPt", 700., "Minimal track Pt cut"};
+    FloatProperty m_jetMaxPtCut
+      {this, "jetMaxPt", 3500000., "Maximal jet Pt cut"};
+    FloatProperty m_jetMinPtCut
+      {this, "jetMinPt", 35000., "Minimal jet Pt cut from training"};
+    FloatProperty m_d0_limLow{this, "d0_limLow", -5., "Low d0 impact cut"};
+    FloatProperty m_d0_limUpp{this, "d0_limUpp", 5., "Upper d0 impact cut"};
+    FloatProperty m_Z0_limLow{this, "Z0_limLow", -15., "Low Z0 impact cut"};
+    FloatProperty m_Z0_limUpp{this, "Z0_limUpp", 15., "Upper Z0 impact cut"};
+    const std::string m_calibFileName = "TrackClassif_3cl.v03.root";
+    const std::string m_calibFileNameFivePtJetBin = "TrackClassif_3cl.v04.root";
+    StringProperty m_jetCollection
+      {this, "JetCollection", "",
+       "Type of JetContainer which should be decorated with TCT scores and TrackLinks"};
+    BooleanProperty m_useFivePtJetBinVersion
+      {this, "useFivePtJetBinVersion", false,
+       "Use five ptjet bin BDT model of TCT"};
     ToolHandle < Trk::IVertexFitter >  m_fitterSvc
        {this, "VertexFitterTool", "Trk::TrkVKalVrtFitter/VertexFitterTool",""};
     Trk::TrkVKalVrtFitter*   m_fitSvc{};
