@@ -58,11 +58,12 @@ def createIDTPMTrkAnaConfigFlags():
     # Truth particles selection properties
     # ...
     # Histogram properties
-    icf.addFlag( "plotTrackParameters"  , True )
-    icf.addFlag( "plotEfficiencies"     , True )
-    icf.addFlag( "plotResolutions"      , True )
-    icf.addFlag( "plotFakeRates"        , True )
-    icf.addFlag( "plotOfflineElectrons" , False )
-    icf.addFlag( "ResolutionMethod"     , "iterRMS" )
+    icf.addFlag( "plotTrackParameters"      , True )
+    icf.addFlag( "plotEfficiencies"         , True )
+    icf.addFlag( "plotTechnicalEfficiencies", False )
+    icf.addFlag( "plotResolutions"          , True )
+    icf.addFlag( "plotFakeRates"            , True )
+    icf.addFlag( "plotOfflineElectrons"     , False )
+    icf.addFlag( "ResolutionMethod"         , "iterRMS" )
     
     return icf

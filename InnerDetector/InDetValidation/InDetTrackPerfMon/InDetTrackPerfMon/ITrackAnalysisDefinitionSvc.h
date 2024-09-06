@@ -59,10 +59,14 @@ public:
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
   virtual bool plotEfficiencies() const = 0;
+  virtual bool plotTechnicalEfficiencies() const = 0;
   virtual bool plotResolutions() const = 0;
   virtual bool plotFakeRates() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   virtual unsigned int resolutionMethod() const = 0;
+
+  virtual const std::vector<float>& etaBins() const = 0;
+  virtual const std::vector<unsigned int>& minSilHits() const = 0;
   
 };
 

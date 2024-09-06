@@ -68,6 +68,18 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     }
   }
 
+  /// Technical efficiency plots
+  if( m_trkAnaDefSvc->plotTechnicalEfficiencies()) {
+    m_plots_tech_eff_vsTest = std::make_unique< EfficiencyPlots >(
+        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->testTag());
+    m_plots_tech_eff_vsRef = std::make_unique< EfficiencyPlots >(
+        this, "Tracks/Efficiencies/Technical", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
+    if( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
+      m_plots_tech_eff_vsTruth = std::make_unique< EfficiencyPlots >(
+          this, "Tracks/Efficiencies/Technical", m_anaTag, "truth" );
+    }
+  }
+
   /// Resolution plots
   if( m_trkAnaDefSvc->plotResolutions() ) {
     m_plots_resolution = std::make_unique< ResolutionPlots >(
@@ -81,7 +93,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
         this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
     m_plots_missingTruth = std::make_unique< FakeRatePlots >(
-        this, "Tracks/Unlinked/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(), true );
+        this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(), true );
   }
 
   /// Offline electron plots
@@ -154,6 +166,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     const ITrackMatchingLookup& matches,
     float truthMu, float actualMu, float weight )
 {
+
   for( const PARTICLE* particle : particles ) {
     /// track parameters plots
     if( m_plots_trkParam_vsTest ) {
@@ -166,6 +179,29 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     if( m_plots_eff_vsTest ) {
       ATH_CHECK( m_plots_eff_vsTest->fillPlots(
           *particle, isMatched, truthMu, actualMu, weight ) );
+    }
+
+    /// technical efficiency plots 
+    if( m_plots_tech_eff_vsTest ) {
+      if (  m_trkAnaDefSvc->isTestTruth() and 
+            isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+        ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
+            *particle, isMatched, truthMu, actualMu, weight ) );
+      }
+      else if (  m_trkAnaDefSvc->isReferenceTruth() ) { 
+        bool isTechMatched = isMatched ? 
+            isReconstructable( *(matches.getMatchedRefTruth( *particle )), m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+        ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
+            *particle, isTechMatched, truthMu, actualMu, weight ) );
+      }
+      else if ( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
+        const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
+          *particle, m_trkAnaDefSvc->truthProbCut() );
+        bool isTechMatched = isMatched ? 
+            isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+        ATH_CHECK( m_plots_tech_eff_vsTest->fillPlots(
+            *particle, isTechMatched, truthMu, actualMu, weight ) );
+      }
     }
 
     /// resolution plots
@@ -228,7 +264,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     const ITrackMatchingLookup& matches,
     float truthMu, float actualMu, float weight )
 {
+
   for( const PARTICLE* particle : particles ) {
+
     /// track parameters plots
     if( m_plots_trkParam_vsRef ) {
       ATH_CHECK( m_plots_trkParam_vsRef->fillPlots( *particle, weight ) );
@@ -240,6 +278,40 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     if( m_plots_eff_vsRef ) {
       ATH_CHECK( m_plots_eff_vsRef->fillPlots(
           *particle, isMatched, truthMu, actualMu, weight ) );
+    }
+
+    /// technical efficiency plots 
+    if( m_plots_tech_eff_vsRef ) {
+      if (  m_trkAnaDefSvc->isReferenceTruth() and 
+            isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+        ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
+            *particle, isMatched, truthMu, actualMu, weight ) );
+      }
+      else if (  m_trkAnaDefSvc->isTestTruth() ) { 
+
+        bool isTechMatched = false;
+
+        if (isMatched) {
+          for ( const xAOD::TruthParticle *thisTruth : (matches.getMatchedTestTruths( *particle ))) {
+            if ( isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) ) {
+              isTechMatched = true;
+              break;
+            }
+          }
+        }
+        ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
+            *particle, isTechMatched, truthMu, actualMu, weight ) );
+      }
+
+      else if ( m_trkAnaDefSvc->matchingType() == "EFTruthMatch" ) {
+        const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
+          *particle, m_trkAnaDefSvc->truthProbCut() );
+        bool isTechMatched = isMatched ? 
+            isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
+        ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
+            *particle, isTechMatched, truthMu, actualMu, weight ) );
+
+      }
     }
     
     /// offline electron plots (Offline is always either test or reference)
@@ -279,6 +351,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
     const ITrackMatchingLookup& matches,
     float truthMu, float actualMu, float weight )
 {
+
   for( const xAOD::TruthParticle* thisTruth : truths ) {
 
     /// Loop over tracks to find if truth is matched
@@ -300,6 +373,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
     if( m_plots_eff_vsTruth ) {
       ATH_CHECK( m_plots_eff_vsTruth->fillPlots(
           *thisTruth, isMatched, truthMu, actualMu, weight ) );
+    }
+
+    /// technical efficiency plots (for EFTruthMatch only)
+    if( m_plots_tech_eff_vsTruth ) {
+      if (isReconstructable( *thisTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+          ATH_CHECK( m_plots_tech_eff_vsTruth->fillPlots(
+          *thisTruth, isMatched , truthMu, actualMu, weight ) );
+      }
     }
   } // close loop over truth particles
 

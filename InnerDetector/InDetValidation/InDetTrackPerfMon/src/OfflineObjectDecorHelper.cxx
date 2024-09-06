@@ -10,7 +10,7 @@
 /// local includes
 #include "OfflineObjectDecorHelper.h"
 #include "AthContainers/ConstAccessor.h"
-
+#include "TrackParametersHelper.h"
 
 namespace IDTPM {
 
@@ -55,7 +55,6 @@ namespace IDTPM {
     return truthMatchProbabilityAcc.withDefault( track, -1 );
   }
 
-
   /// getLinkedTruth
   const xAOD::TruthParticle* getLinkedTruth( const xAOD::TrackParticle& track,
                                              const float truthProbCut ) {
@@ -74,6 +73,17 @@ namespace IDTPM {
     /// returns true if truthMatchProbability deco isn't available or
     /// if the truth matching probability is below theshold
     return ( prob < truthProbCut );
+  }
+
+  /// isReconstructable
+  bool isReconstructable( const xAOD::TruthParticle& truth, const std::vector<unsigned int>& minSilHits, const std::vector<float>& etaBins)
+  {
+    // Get eta bin
+    float absEta = std::abs(truth.eta());
+    absEta = std::clamp(absEta, etaBins.front(), etaBins.back());
+    const auto pVal =  std::lower_bound(etaBins.begin(), etaBins.end(), absEta);
+    const unsigned int bin = std::distance(etaBins.begin(), pVal) - 1;
+    return ( nSiHits(truth) >= minSilHits.at( bin ) );
   }
 
 } // namespace IDTPM

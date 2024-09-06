@@ -65,10 +65,14 @@ public:
 
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotEfficiencies() const override { return m_plotEfficiencies.value(); };
+  virtual bool plotTechnicalEfficiencies() const override { return m_plotTechnicalEfficiencies.value(); };
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
   virtual unsigned int resolutionMethod() const override;
+
+  virtual const std::vector<float>& etaBins() const override { return m_etaBins; };
+  virtual const std::vector<unsigned int>& minSilHits() const override { return m_minSilHits; };
 
 private:
 
@@ -95,12 +99,15 @@ private:
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };
   BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
-  BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track parameters histograms" };
+  BooleanProperty m_plotEfficiencies { this, "plotEfficiencies", true, "Book/fill track efficiencies histograms" };
+  BooleanProperty m_plotTechnicalEfficiencies { this, "plotTechnicalEfficiencies", true, "Book/fill track technical efficiencies histograms" };
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
   BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
   StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
- 
+
+  FloatArrayProperty m_etaBins { this, "EtaBins", {}, "Eta bins for determination of reconstructable particle" };
+  UnsignedIntegerArrayProperty m_minSilHits { this, "MinSilHits", {}, "Minimum number of Si hits for determination of reconstructable particle" };
 };
 
 #endif // > !INDETTRACKPERFMON_TRACKANALYSISDEFINITIONSVC_H
