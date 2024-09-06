@@ -18,7 +18,8 @@ if "__main__" == __name__:
     flags.GeoModel.SQLiteDB = True
     CommonGeoDB.SetupLocalSqliteGeometryDb(geoModelFileDefault(), flags.GeoModel.AtlasVersion)
 
-    flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 

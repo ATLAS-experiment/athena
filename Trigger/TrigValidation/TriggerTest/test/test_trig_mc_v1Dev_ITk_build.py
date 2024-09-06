@@ -16,12 +16,14 @@ run.type = 'athena'
 run.threads = 1
 run.input = 'Single_mu_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
+
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
-             'IOVDb.GlobalTag="OFLCOND-MC21-SDR-RUN4-01"'
+            f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}'
              ]
 
 # The full test configuration
