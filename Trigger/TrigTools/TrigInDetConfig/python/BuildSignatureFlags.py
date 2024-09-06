@@ -67,9 +67,6 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   #the following settings are incorrect but this is what is being used in the production running
   #at the moment. Setting them explicitly here will prevent trigger count differences in
   #https://gitlab.cern.ch/atlas/athena/-/merge_requests/56607
-  flags.maxPrimaryImpact = 10.
-  flags.maxEMImpact      = 50.
-  flags.maxZImpact       = 250.
   flags.maxEta           = 2.7
   flags.addFlag("minSiClusters", 7)
   flags.addFlag("maxSiHoles", 5)
@@ -111,6 +108,11 @@ def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
   flags.roadWidth           =10.
       
   flags.useNewParameterizationTRT = True
+
+  flags.maxPrimaryImpact = 10.
+  flags.maxEMImpact      = 50.
+  flags.maxZImpact       = 250.
+
   flags.minTRTonTrk          =9
 
   #TODO - simple ambiguitues
@@ -388,8 +390,8 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   
   flags.nClustersMin        = 5
   flags.useSeedFilter       = True
-  flags.maxPrimaryImpact    = 10.*Units.mm
-  flags.maxZImpact          = 150.*Units.mm
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 10.*Units.mm)
+  flags.maxZImpact          = tsetter(flags.maxZImpact, 150.*Units.mm)
   flags.roadWidth           = 20
   flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
   return flags
@@ -517,7 +519,7 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.maxSiHoles          = 3
   flags.maxSCTHoles         = 3
   flags.maxPixelHoles       = tsetter(flags.maxPixelHoles,3)
-  flags.maxPrimaryImpact    = 1000.
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 1000.*Units.mm)
 
   flags.Xi2max         = tsetter(flags.Xi2max,        60.)
   flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)
@@ -527,7 +529,7 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.useSeedFilter       = True
   flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
   flags.roadWidth =        75.
-  flags.maxZImpact=        tsetter(flags.maxZImpact,    10000.)
+  flags.maxZImpact=        tsetter(flags.maxZImpact,    10000.*Units.mm)
   if recoMode=="InDet":
     flags.minTRTonTrk         = 20
 
@@ -568,8 +570,8 @@ def electronLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
   return flags
@@ -595,8 +597,8 @@ def muonLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.doResMon            = True
   flags.DoPhiFiltering      = False
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
 
@@ -624,8 +626,8 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
   if recoMode=="InDet":
@@ -650,8 +652,8 @@ def bjetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin        = 8
   flags.isLRT               = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact         = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
 
@@ -679,8 +681,8 @@ def fullScanLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
   
@@ -709,8 +711,8 @@ def DJetLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
   
@@ -738,8 +740,8 @@ def DVtxLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin          = 8
   flags.isLRT                 = True
   #pt config
-  flags.maxPrimaryImpact  = 300.
-  flags.maxEMImpact       = 300.
+  flags.maxPrimaryImpact      = tsetter(flags.maxPrimaryImpact, 300.*Units.mm)
+  flags.maxEMImpact           = tsetter(flags.maxEMImpact, 300.*Units.mm)
   flags.maxEta            = 2.7
   flags.doEmCaloSeed      = False
 
