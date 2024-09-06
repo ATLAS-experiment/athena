@@ -24,4 +24,10 @@ def PPTestCfg(flags):
     # Tile
     # TODO: Tile sampling fraction
 
+    # TGC
+    # TODO: /TGC/DIGIT/* folders are available only in OFLP200 (not in CONDBR2).
+    acc.merge(addOverride(flags, "/TGC/DIGIT/ASDPOS", tag="TgcDigitAsdPos-00-01", db="COOLOFL_TGC/OFLP200"))
+    acc.merge(addOverride(flags, "/TGC/DIGIT/TOFFSET", tag="TgcDigitTimeOffset-00-01", db="COOLOFL_TGC/OFLP200"))
+    acc.merge(addOverride(flags, "/TGC/DIGIT/XTALK", tag="TgcDigitXTalk-00-01", db="COOLOFL_TGC/OFLP200"))
+
     return acc

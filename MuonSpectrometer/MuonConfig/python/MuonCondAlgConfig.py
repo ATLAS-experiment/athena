@@ -156,24 +156,21 @@ def TgcDigitJitterCondAlgCfg(flags, name = "TgcDigitJitterCondAlg", **kwargs):
 
 def TgcDigitASDposCondAlgCfg(flags, name="TgcDigitASDposCondAlg", **kwargs):
     result = ComponentAccumulator()
-    if flags.Digitization.UseUpdatedTGCConditions:
-        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-    else:
-        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], tag='TgcDigitAsdPos-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
     the_alg = CompFactory.TgcDigitASDposCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitTimeOffsetCondAlgCfg(flags, name = "TgcDigitTimeOffsetCondAlg", **kwargs):
     result = ComponentAccumulator()
-    result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], tag='TgcDigitTimeOffset-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
     the_alg = CompFactory.TgcDigitTimeOffsetCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 
 def TgcDigitCrosstalkCondAlgCfg(flags, name = "TgcDigitCrosstalkCondAlg", **kwargs):
     result = ComponentAccumulator()
-    result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], tag='TgcDigitXTalk-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
     the_alg = CompFactory.TgcDigitCrosstalkCondAlg(name = name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

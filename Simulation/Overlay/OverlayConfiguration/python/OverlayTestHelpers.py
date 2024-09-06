@@ -68,19 +68,19 @@ def overlayTestFlags(flags, args):
         if args.run is LHCPeriod.Run2:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
-            flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
+            flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-12"
             from Campaigns import MC20e
             MC20e(flags)
         elif args.run is LHCPeriod.Run3:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
-            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-09"
             from Campaigns import MC21a
             MC21a(flags)
         elif args.run is LHCPeriod.Run4:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
-            flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
             from Campaigns import PhaseIIPileUp200
             PhaseIIPileUp200(flags)
         else:
