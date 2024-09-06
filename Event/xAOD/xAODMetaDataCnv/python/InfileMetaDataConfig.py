@@ -49,7 +49,7 @@ def metadata_creator(func):
 
 
 @metadata_creator
-def createCutFlowMetaData(tools, result, flags):
+def createCutFlowMetaData(tools, result, flags, **kwargs):
     from EventBookkeeperTools.EventBookkeeperToolsConfig import (
         CutFlowOutputList,
         CutFlowSvcCfg,
@@ -60,7 +60,7 @@ def createCutFlowMetaData(tools, result, flags):
 
 
 @metadata_creator
-def createByteStreamMetaData(tools, result, flags):
+def createByteStreamMetaData(tools, result, flags, **kwargs):
     tools.mdItems += ["ByteStreamMetadataContainer#*"]
     if flags.Input.Format == Format.BS and not flags.Common.isOnline:
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
@@ -69,7 +69,7 @@ def createByteStreamMetaData(tools, result, flags):
 
 
 @metadata_creator
-def createLumiBlockMetaData(tools, result, flags):
+def createLumiBlockMetaData(tools, result, flags, **kwargs):
     if flags.Input.Format == Format.BS and not flags.Common.isOnline:
         from LumiBlockComps.CreateLumiBlockCollectionFromFileConfig import (
             CreateLumiBlockCollectionFromFileCfg,
@@ -83,7 +83,7 @@ def createLumiBlockMetaData(tools, result, flags):
 
 
 @metadata_creator
-def createTriggerMenuMetaData(tools, result, flags):
+def createTriggerMenuMetaData(tools, result, flags, **kwargs):
     tools.mdTools.append(
         CompFactory.xAODMaker.TriggerMenuMetaDataTool("TriggerMenuMetaDataTool")
     )
@@ -96,7 +96,7 @@ def createTriggerMenuMetaData(tools, result, flags):
 
 
 @metadata_creator
-def createTruthMetaData(tools, result, flags):
+def createTruthMetaData(tools, result, flags, **kwargs):
     tools.mdItems += [
         "xAOD::TruthMetaDataContainer#TruthMetaData",
         "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux.",
@@ -105,13 +105,29 @@ def createTruthMetaData(tools, result, flags):
 
 
 @metadata_creator
-def createIOVMetaData(tools, result, flags):
+def createIOVMetaData(tools, result, flags, **kwargs):
     tools.mdItems += ["IOVMetaDataContainer#*"]
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
     result.merge(IOVDbSvcCfg(flags))
 
 
-def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
+@metadata_creator
+def createEventStreamInfo(tools, result, flags, **kwargs):
+        esiTool = CompFactory.MakeEventStreamInfo(
+            f"{outputStreamName(kwargs.get('streamName', ''))}_MakeEventStreamInfo",
+            Key=outputStreamName(kwargs.get('streamName', '')),
+            DataHeaderKey=outputStreamName(kwargs.get('streamName', '')),
+            EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
+            if flags.Common.ProductionStep
+            in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
+            else "EventInfo",
+        )
+        tools.mdItems += [
+            f"EventStreamInfo#{outputStreamName(kwargs.get('streamName', ''))}",
+        ]
+        tools.helperTools.append(esiTool)
+
+def propagateMetaData(flags, streamName="", category=None):
     """
     Returns the tuple of MetaDataHelperLists and ComponentAccumulator.
     The former combines the lists needed to setup given metadata category
@@ -136,27 +152,12 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             )
         )
     elif category == MetadataCategory.EventStreamInfo:
-        esiTool = CompFactory.MakeEventStreamInfo(
-            f"{outputStreamName(streamName)}_MakeEventStreamInfo",
-            Key=outputStreamName(streamName),
-            DataHeaderKey=outputStreamName(streamName),
-            EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
-            if flags.Common.ProductionStep
-            in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]
-            else "EventInfo",
-        )
-        tools.mdItems += [
-            f"EventStreamInfo#{outputStreamName(streamName)}",
+        tools.mdTools += [
+            CompFactory.CopyEventStreamInfo(
+                f"{outputStreamName(streamName)}_CopyEventStreamInfo",
+                Keys=[outputStreamName(streamName)],
+            ),
         ]
-        tools.helperTools.append(esiTool)
-
-        # copy EventStreamInfo for merging jobs
-        if kwargs.get("mergeJob", False):
-            tools.mdTools += [
-                CompFactory.CopyEventStreamInfo(
-                    f"{outputStreamName(streamName)}_CopyEventStreamInfo"
-                ),
-            ]
 
     elif category == MetadataCategory.EventFormat:
         efTool = CompFactory.xAODMaker.EventFormatStreamHelperTool(
@@ -245,17 +246,24 @@ def SetupMetaDataForStreamCfg(
         AcceptAlgs = []
     if createMetadata is None:
         createMetadata = []
+    createMetadata += [MetadataCategory.EventStreamInfo]
+
+    disablePropagationOf = []
+    # the following is needed to avoid propagation of EventStreamInfo metadata in merge jobs
+    inputStream = flags.Input.ProcessingTags[0].removeprefix('Stream') if flags.Input.ProcessingTags else None
+    if inputStream == streamName:
+        disablePropagationOf += [MetadataCategory.EventStreamInfo]
 
     helperLists = MetaDataHelperLists()
 
     if propagateMetadataFromInput:
         for mdCategory in MetadataCategory:
+            if mdCategory in disablePropagationOf:
+                continue
             lists, caConfig = propagateMetaData(
                 flags,
                 streamName,
                 mdCategory,
-                *args,
-                **kwargs,
             )
             helperLists += lists
             result.merge(caConfig)
@@ -264,6 +272,7 @@ def SetupMetaDataForStreamCfg(
         try:
             lists, caConfig = globals()[f"create{md.name}"](
                 flags,
+                streamName=streamName,
             )
         except KeyError:
             log.warning(
