@@ -61,17 +61,20 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
 
     virtual bool isGood(const Identifier& elementId, const InDetConditions::Hierarchy h, const EventContext& ctx) const override final;
     virtual bool isGood(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
-    virtual bool isGood(const IdentifierHash& moduleHash, const Identifier& elementId, const EventContext& ctx) const override final;
+    virtual bool isGood(const IdentifierHash& moduleHash, const Identifier& elementId, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override final;
     virtual double goodFraction(const IdentifierHash & moduleHash, const Identifier & idStart, const Identifier & idEnd, const EventContext& ctx) const override final;
 
     virtual std::unique_ptr<InDet::SiDetectorElementStatus>
     getDetectorElementStatus(const EventContext& ctx,
                              SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
 
-    virtual bool hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
-    virtual bool hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx) const override final;
-    virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx) const override final;
-    virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx) const override final;
+    virtual bool hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override final;
+    virtual bool hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override final;
+    virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override final;
+    virtual uint64_t getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx, const IDCCacheEntry* cacheEntry=nullptr) const override final;
+
+    // public version of getCacheEntry
+    virtual IDCCacheEntry* getCacheEntryOut(const EventContext& ctx) const override final;
 
     bool checkChipStatus(IdentifierHash moduleHash, Identifier pixid, const EventContext& ctx) const;
 
@@ -127,7 +130,7 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
 
     mutable SG::SlotSpecificObj<std::mutex> m_cacheMutex ATLAS_THREAD_SAFE;
 
-    struct IDCCacheEntry {
+    /*struct IDCCacheEntry {
       EventContext::ContextEvt_t eventId = EventContext::INVALID_CONTEXT_EVT; // invalid event ID for the start
       const IDCInDetBSErrContainer_Cache* IDCCache = nullptr;
 
@@ -140,7 +143,7 @@ class PixelConditionsSummaryTool: public AthAlgTool, virtual public IDetectorEle
         return eventId != ctx.evt() or eventId == EventContext::INVALID_CONTEXT_EVT;
       }
 
-    };
+    };*/
     mutable SG::SlotSpecificObj<IDCCacheEntry> m_eventCache ATLAS_THREAD_SAFE; // Guarded by m_cacheMutex
 
     /**
