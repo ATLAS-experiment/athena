@@ -26,6 +26,7 @@
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // ActsTrk
 #include "ActsEvent/TrackContainer.h"
@@ -682,7 +683,7 @@ namespace ActsTrk
       for (auto &firstTrack : tracksForSeed) {
         std::size_t nsecond = 0;
 
-        auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger());
+        auto smoothingResult = Acts::smoothTrack(tgContext, firstTrack, logger(), Acts::MbfSmoother());
         if (!smoothingResult.ok()) {
           ATH_MSG_DEBUG("Smoothing for seed "
                      << iseed << " and first track " << firstTrack.index()
