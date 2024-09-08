@@ -33,6 +33,11 @@ atlas_add_dictionary( xAODBTaggingEfficiencyDict
 
 # Executable(s) in the package (to be built only under AthAnalysis or in stand-alone mode):
 if( XAOD_ANALYSIS )
+   atlas_add_executable( BTaggingToolsTester
+     util/BTaggingToolsTester.cxx 
+     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+     LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib )
+
    atlas_add_executable( BTaggingEfficiencyToolTester
       util/BTaggingEfficiencyToolTester.cxx
       LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
@@ -55,6 +60,8 @@ if( XAOD_ANALYSIS )
       LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib )
 
    if( XAOD_STANDALONE )
+      target_link_libraries( BTaggingToolsTester 
+         PRIVATE xAODRootAccess )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE xAODRootAccess )
       target_link_libraries( BTaggingEfficiencyJsonToolTester
@@ -62,6 +69,8 @@ if( XAOD_ANALYSIS )
       target_link_libraries( SystematicStrategyComparison 
          PRIVATE xAODRootAccess )
    else()
+      target_link_libraries( BTaggingToolsTester 
+         PRIVATE POOLRootAccessLib )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE POOLRootAccessLib )
        target_link_libraries( BTaggingEfficiencyJsonToolTester
@@ -76,6 +85,9 @@ if( XAOD_ANALYSIS )
 endif()
 
 if( XAOD_STANDALONE )
+   atlas_add_test( ut_BTaggingToolsTest
+     SCRIPT BTaggingToolsTester
+   ) 
    atlas_add_test( ut_BTaggingSelectionTool_fixedcut
       SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 
    )
