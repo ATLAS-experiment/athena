@@ -5,7 +5,7 @@
 #include "AthContainers/ConstAccessor.h"
 
 template<class T>
-const T* xAOD::TauHelpers::getLink(const xAOD::IParticle* particle, std::string name, bool debug)
+const T* xAOD::TauHelpers::getLink(const xAOD::IParticle* particle, const std::string& name, bool debug)
 {
   if (!particle) return 0;
   typedef ElementLink< DataVector<T> > Link_t;
