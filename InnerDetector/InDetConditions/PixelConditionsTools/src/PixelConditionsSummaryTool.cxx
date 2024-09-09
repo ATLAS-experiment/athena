@@ -85,13 +85,17 @@ StatusCode PixelConditionsSummaryTool::initialize(){
 }
 
 const IDCInDetBSErrContainer* PixelConditionsSummaryTool::getContainer(const EventContext& ctx) const {
+  bool useByteStream = (m_useByteStreamFEI4 || m_useByteStreamFEI3 || m_useByteStreamRD53);
+  if (!useByteStream || m_BSErrContReadKey.empty() ) {
+    return nullptr;
+  }
   SG::ReadHandle<IDCInDetBSErrContainer> idcErrCont(m_BSErrContReadKey, ctx);
   if (not idcErrCont.isValid()) { return nullptr; }
   ATH_MSG_VERBOSE("PixelConditionsSummaryTool IDC Container fetched " << m_BSErrContReadKey.key());
   return idcErrCont.cptr();
 }
 
-PixelConditionsSummaryTool::IDCCacheEntry* PixelConditionsSummaryTool::getCacheEntry(const EventContext& ctx) const {
+IInDetConditionsTool::IDCCacheEntry* PixelConditionsSummaryTool::getCacheEntry(const EventContext& ctx) const {
   IDCCacheEntry* cacheEntry = m_eventCache.get(ctx);
   if (cacheEntry->needsUpdate(ctx)) {
     const auto *idcErrContPtr = getContainer(ctx);
@@ -106,11 +110,17 @@ PixelConditionsSummaryTool::IDCCacheEntry* PixelConditionsSummaryTool::getCacheE
   return cacheEntry;
 }
 
-uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx) const {
-  return getBSErrorWord(moduleHash, moduleHash, ctx);
+IInDetConditionsTool::IDCCacheEntry* PixelConditionsSummaryTool::getCacheEntryOut(const EventContext& ctx) const{
+  std::scoped_lock<std::mutex> lock{*m_cacheMutex.get(ctx)};
+  IDCCacheEntry* cacheEntry = getCacheEntry(ctx);
+  return cacheEntry;
 }
 
-uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx) const {
+uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
+  return getBSErrorWord(moduleHash, moduleHash, ctx, cacheEntry);
+}
+
+uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
 
   if (moduleHash>=m_pixelID->wafer_hash_max()) {
     ATH_MSG_WARNING("invalid moduleHash : " << moduleHash << " exceed maximum hash id: " << m_pixelID->wafer_hash_max());
@@ -130,8 +140,11 @@ uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& module
   if (!m_useByteStreamFEI3 && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3) { return 0; }
   if (!m_useByteStreamRD53 && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) { return 0; }
 
-  std::scoped_lock<std::mutex> lock{*m_cacheMutex.get(ctx)};
-  const auto *idcCachePtr = getCacheEntry(ctx)->IDCCache;
+  if (cacheEntry == nullptr){
+    std::scoped_lock<std::mutex> lock{*m_cacheMutex.get(ctx)};
+    cacheEntry=getCacheEntry(ctx);
+  }
+  const auto *idcCachePtr = cacheEntry->IDCCache;
   if (idcCachePtr==nullptr) {
     ATH_MSG_ERROR("PixelConditionsSummaryTool No cache! " );
     return 0;
@@ -140,8 +153,8 @@ uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& module
   return word<m_missingErrorInfo ? word : 0;
 }
 
-bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx) const {
-  uint64_t word = getBSErrorWord(moduleHash,ctx);
+bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
+  uint64_t word = getBSErrorWord(moduleHash,ctx,cacheEntry);
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TruncatedROB))      { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MaskedROB))         { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Preamble))          { return true; }
@@ -157,8 +170,8 @@ bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, co
   return false;
 }
 
-bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx) const {
-  if (hasBSError(moduleHash, ctx)) { return true; }
+bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
+  if (hasBSError(moduleHash, ctx, cacheEntry)) { return true; }
 
   int maxHash = m_pixelID->wafer_hash_max();
   Identifier moduleID = m_pixelID->wafer_id(pixid);
@@ -166,7 +179,7 @@ bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Id
   if (m_pixelReadout->getModuleType(moduleID)==InDetDD::PixelModuleType::IBL_3D) { chFE=0; }
 
   int indexFE = (1+chFE)*maxHash+static_cast<int>(moduleHash);    // (FE_channel+1)*2048 + moduleHash
-  uint64_t word = getBSErrorWord(moduleHash,indexFE,ctx);
+  uint64_t word = getBSErrorWord(moduleHash,indexFE,ctx,cacheEntry);
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Preamble))          { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TimeOut))           { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::LVL1ID))            { return true; }
@@ -488,9 +501,9 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash& moduleHash, const 
   return true;
 }
 
-bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const Identifier &elementId, const EventContext& ctx) const {
+bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const Identifier &elementId, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
 
-  if (hasBSError(moduleHash, ctx)) { return false; }
+  if (hasBSError(moduleHash, ctx, cacheEntry)) { return false; }
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey, ctx);
   bool isDCSActive = false;
@@ -512,7 +525,7 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const
 
   if (!checkChipStatus(moduleHash, elementId, ctx)) { return false; }
 
-  if (hasBSError(moduleHash, elementId, ctx)) { return false; }
+  if (hasBSError(moduleHash, elementId, ctx, cacheEntry)) { return false; }
 
   return true;
 }
@@ -532,13 +545,13 @@ double PixelConditionsSummaryTool::goodFraction(const IdentifierHash & moduleHas
   double nTotal = (std::abs(phiStart-phiEnd)+1.0)*(std::abs(etaStart-etaEnd)+1.0);
 
   double nGood = 0.0;
+  IInDetConditionsTool::IDCCacheEntry* cacheEntry = getCacheEntry(ctx);
   for (int i=std::min(phiStart,phiEnd); i<=std::max(phiStart,phiEnd); i++) {
     for (int j=std::min(etaStart,etaEnd); j<=std::max(etaStart,etaEnd); j++) {
       if (checkChipStatus(moduleHash, m_pixelID->pixel_id(moduleID,i,j), ctx)) { 
-        if (!hasBSError(moduleHash, m_pixelID->pixel_id(moduleID,i,j), ctx)) { nGood++; }
+        if (!hasBSError(moduleHash, m_pixelID->pixel_id(moduleID,i,j), ctx, cacheEntry)) { nGood++; }
       }
     }
   }
   return nGood/nTotal;
 }
-

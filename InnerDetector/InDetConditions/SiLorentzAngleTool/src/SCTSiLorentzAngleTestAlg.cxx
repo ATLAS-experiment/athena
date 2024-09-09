@@ -31,14 +31,14 @@ StatusCode SCTSiLorentzAngleTestAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode SCTSiLorentzAngleTestAlg::execute(const EventContext& /*ctx*/) const
+StatusCode SCTSiLorentzAngleTestAlg::execute(const EventContext& ctx) const
 {
   unsigned int maxHash{static_cast<unsigned int>(m_id->wafer_hash_max())};
   for (unsigned int hash{0}; hash<maxHash; hash++) {
     const IdentifierHash elementHash{hash};
-    const double lorentzShift{m_tool->getLorentzShift(elementHash)};
+    const double lorentzShift{m_tool->getLorentzShift(elementHash, ctx)};
     const double lorentzShiftEta{m_tool->getLorentzShiftEta(elementHash)};
-    const double tanLorentzAngle{m_tool->getTanLorentzAngle(elementHash)};
+    const double tanLorentzAngle{m_tool->getTanLorentzAngle(elementHash, ctx)};
     const double tanLorentzAngleEta{m_tool->getTanLorentzAngleEta(elementHash)};
     const double biasVoltage{m_tool->getBiasVoltage(elementHash)};
     const double depletionVoltage{m_tool->getDepletionVoltage(elementHash)};

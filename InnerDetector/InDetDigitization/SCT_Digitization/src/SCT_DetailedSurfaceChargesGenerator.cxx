@@ -281,7 +281,7 @@ void SCT_DetailedSurfaceChargesGenerator::processSiHit(const SiDetectorElement* 
 
   //get sensor thickness and tg lorentz from SiDetectorDesign
   const double sensorThickness{p_design->thickness()};
-  const double tanLorentz{m_lorentzAngleTool->getTanLorentzAngle(hashId)};
+  const double tanLorentz{m_lorentzAngleTool->getTanLorentzAngle(hashId,ctx)};
 
   const CLHEP::Hep3Vector pos{phit.localStartPosition()};
   const double xEta{pos[SiHit::xEta]};

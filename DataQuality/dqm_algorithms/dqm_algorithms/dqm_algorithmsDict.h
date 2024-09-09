@@ -61,6 +61,8 @@
 #include "dqm_algorithms/Bins_NotEqual_Threshold.h"
 #include "dqm_algorithms/BlackBin.h"
 #include "dqm_algorithms/BlackBin1D.h"
+#include "dqm_algorithms/CheckBinSpike.h"
+#include "dqm_algorithms/CheckBinSpike_1D.h"
 #include "dqm_algorithms/CheckHisto_Mean.h"
 #include "dqm_algorithms/CheckHisto_RMS.h"
 #include "dqm_algorithms/CheckMean.h"

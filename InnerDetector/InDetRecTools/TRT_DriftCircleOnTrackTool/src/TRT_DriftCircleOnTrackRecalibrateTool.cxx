@@ -81,7 +81,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackRecalibrateTool::finalize()
 ///////////////////////////////////////////////////////////////////
 
 Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
-(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
+(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP,const EventContext& ctx) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);
   if(!DC) return nullptr;
@@ -109,7 +109,7 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
 
     //tube hit
     //
-    rot=m_riontrackTube->correct(rio,TP);
+    rot=m_riontrackTube->correct(rio,TP,ctx);
   }
   else {
     // precision hit
@@ -135,7 +135,6 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
     Amg::MatrixX cov(DC->localCovariance()*escale2);
 
     if (!m_trtErrorScalingKey.key().empty()) {
-      const EventContext& ctx = Gaudi::Hive::currentContext();
       double mu=0.;
       if (!m_lumiDataKey.empty()) {
           SG::ReadCondHandle<LuminosityCondData> lumiData (m_lumiDataKey,ctx);

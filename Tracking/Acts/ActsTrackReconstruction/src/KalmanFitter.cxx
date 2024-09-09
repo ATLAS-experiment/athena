@@ -93,10 +93,10 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
         *slsurf
        );
       if(broadRotCreator){
-        rot = broadRotCreator->correct(*prd, atasl); 
+        rot = broadRotCreator->correct(*prd, atasl,Gaudi::Hive::currentContext()); 
         }
       else{
-        rot = rotCreator->correct(*prd, atasl); 
+        rot = rotCreator->correct(*prd, atasl,Gaudi::Hive::currentContext()); 
         }
      } else if (plsurf != nullptr) {
       if ((trkParam.get())->covariance() != nullptr) { 
@@ -108,7 +108,7 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
           *plsurf,
           AmgSymMatrix(5)(*trkParam.get()->covariance()) 
         );
-        rot = rotCreator->correct(*prd, atapl);
+        rot = rotCreator->correct(*prd, atapl,Gaudi::Hive::currentContext());
       } else {
         Trk::AtaPlane atapl(
           plsurf->center(), 
@@ -117,7 +117,7 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
           trackState.predicted()[Trk::qOverP], 
           *plsurf
         );
-        rot = rotCreator->correct(*prd, atapl); 
+        rot = rotCreator->correct(*prd, atapl,Gaudi::Hive::currentContext()); 
       }
     } // End of RIO_OnTrack creation from the PrepRawData
 

@@ -293,7 +293,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
   ATH_MSG_VERBOSE("omega =  " << omegax << " " << omegay);
 
 // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash());
+  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), Gaudi::Hive::currentContext());
   Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
 // find global position of element
   const Amg::Transform3D& T = element->surface().transform();
@@ -509,7 +509,7 @@ ClusterMakerTool::sctCluster(const Identifier& clusterID,
 {
 
   double shift =
-    m_sctLorentzAngleTool->getLorentzShift(element->identifyHash());
+    m_sctLorentzAngleTool->getLorentzShift(element->identifyHash(), Gaudi::Hive::currentContext());
   Amg::Vector2D locpos(localPos[Trk::locX] + shift, localPos[Trk::locY]);
 
   // error matrix

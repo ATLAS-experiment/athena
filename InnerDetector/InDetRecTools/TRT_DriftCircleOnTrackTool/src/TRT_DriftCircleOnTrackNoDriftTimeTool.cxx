@@ -57,7 +57,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackNoDriftTimeTool::finalize()
 ///////////////////////////////////////////////////////////////////
   
 InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackNoDriftTimeTool::correct
-(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
+(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP, const EventContext& /*ctx*/) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);
   if(!DC) return nullptr;

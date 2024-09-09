@@ -17,11 +17,12 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
+relname="r24.0.61"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeXml_lrt=IDPVMPlots_lrt.xml
-dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
+dcubeXml_lrt=IDPVMPlots_lrt.xml                                                                                                                                                
+dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_lrt_ttbarPU40_reco.root
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)

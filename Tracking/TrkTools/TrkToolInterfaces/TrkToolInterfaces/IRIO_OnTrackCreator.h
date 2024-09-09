@@ -14,6 +14,7 @@
 #define TRKTOOLS_IROTCREATOR_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkParameters/TrackParameters.h" // typedef
 
 namespace Trk {
@@ -46,7 +47,8 @@ namespace Trk {
      */
     virtual RIO_OnTrack* correct(
         const PrepRawData& hit,
-        const TrackParameters& trk) const = 0;  // pure virtual
+        const TrackParameters& trk,
+        const EventContext& ctx) const = 0;  // pure virtual
   };
 } // end of namespace
 

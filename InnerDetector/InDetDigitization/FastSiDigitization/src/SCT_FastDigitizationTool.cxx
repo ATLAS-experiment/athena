@@ -372,11 +372,11 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
 
           // apply the lorentz correction
           const IdentifierHash detElHash = hitSiDetElement->identifyHash();
-          const double tanLorAng     = m_sctTanLorentzAngleScalor*m_lorentzAngleTool->getTanLorentzAngle(detElHash);
+          const double tanLorAng     = m_sctTanLorentzAngleScalor*m_lorentzAngleTool->getTanLorentzAngle(detElHash, ctx);
           const int lorentzDirection = tanLorAng > 0. ? 1 : -1;
           const bool useLorentzDrift = std::abs(tanLorAng) > 0.01;
           // shift parameters
-          const double shift = m_lorentzAngleTool->getLorentzShift(detElHash);
+          const double shift = m_lorentzAngleTool->getLorentzShift(detElHash, ctx);
           // lorenz angle effects : offset goes against the lorentzAngle
           const double xLoffset  = -lorentzDirection*thickness*tanLorAng;
 

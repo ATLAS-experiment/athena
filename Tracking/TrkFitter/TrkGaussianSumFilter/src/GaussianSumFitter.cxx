@@ -769,7 +769,7 @@ Trk::GaussianSumFitter::stepForwardFit(
     }
     // Create a new MeasurementBase object from PrepRawData
     measurement.reset(
-      m_rioOnTrackCreator->correct(*originalPrepRawData, *combinedState));
+      m_rioOnTrackCreator->correct(*originalPrepRawData, *combinedState, ctx));
     combinedState.reset();
   }
   if (!measurement) {

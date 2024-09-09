@@ -54,8 +54,8 @@ StatusCode SiLorentzAngleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getLorentzShift(elementHash);
   }
@@ -63,13 +63,13 @@ double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash) co
 }
 
 double SiLorentzAngleTool::getLorentzShift(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getLorentzShift(elementHash);
+  if (m_ignoreLocalPos) return getLorentzShift(elementHash, Gaudi::Hive::currentContext());
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
   return getValue(elementHash, locPos, LorentzShift);
 }
 
 double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getLorentzShiftEta(elementHash);
   }
@@ -82,8 +82,8 @@ double SiLorentzAngleTool::getLorentzShiftEta(const IdentifierHash& elementHash,
   return getValue(elementHash, locPos, LorentzShiftEta);
 }
 
-double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash, const EventContext& ctx) const {
+  const SiLorentzAngleCondData* condData{getCondData(ctx)};
   if (condData) {
     return condData->getTanLorentzAngle(elementHash);
   }
@@ -91,13 +91,13 @@ double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash)
 }
 
 double SiLorentzAngleTool::getTanLorentzAngle(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const {
-  if (m_ignoreLocalPos) return getTanLorentzAngle(elementHash);
+  if (m_ignoreLocalPos) return getTanLorentzAngle(elementHash, Gaudi::Hive::currentContext());
   // The cache is used to store the results. The cache is therefore invalidated if we specify a position.
   return getValue(elementHash, locPos, TanLorentzAngle);
 }
 
 double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getTanLorentzAngleEta(elementHash);
   }
@@ -111,7 +111,7 @@ double SiLorentzAngleTool::getTanLorentzAngleEta(const IdentifierHash& elementHa
 }
 
 double SiLorentzAngleTool::getBiasVoltage(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getBiasVoltage(elementHash);
   }
@@ -119,7 +119,7 @@ double SiLorentzAngleTool::getBiasVoltage(const IdentifierHash& elementHash) con
 }
 
 double SiLorentzAngleTool::getTemperature(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getTemperature(elementHash);
   }
@@ -127,7 +127,7 @@ double SiLorentzAngleTool::getTemperature(const IdentifierHash& elementHash) con
 }
 
 double SiLorentzAngleTool::getDepletionVoltage(const IdentifierHash& elementHash) const {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getDepletionVoltage(elementHash);
   }
@@ -200,7 +200,7 @@ double SiLorentzAngleTool::getValue(const IdentifierHash& elementHash, const Amg
 
 double SiLorentzAngleTool::getCorrectionFactor() const
 {
-  const SiLorentzAngleCondData* condData{getCondData()};
+  const SiLorentzAngleCondData* condData{getCondData(Gaudi::Hive::currentContext())};
   if (condData) {
     return condData->getCorrectionFactor();
   }
@@ -236,8 +236,8 @@ Amg::Vector3D SiLorentzAngleTool::getMagneticField(const Amg::Vector3D& pointvec
   }
 }
 
-const SiLorentzAngleCondData* SiLorentzAngleTool::getCondData() const {
-  SG::ReadCondHandle<SiLorentzAngleCondData> handle{m_condData};
+const SiLorentzAngleCondData* SiLorentzAngleTool::getCondData(const EventContext& ctx) const {
+  SG::ReadCondHandle<SiLorentzAngleCondData> handle{m_condData, ctx};
   if (handle.isValid()) {
     const SiLorentzAngleCondData* data{*handle};
     return data;

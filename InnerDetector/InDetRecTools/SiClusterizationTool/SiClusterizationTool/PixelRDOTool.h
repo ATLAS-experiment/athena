@@ -76,7 +76,8 @@ public:
      bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		    const IdentifierHash& moduleHash,
 		    const Identifier& rdoID,
-        const EventContext& ctx) const;
+                    const EventContext& ctx,
+                    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
 
     // Method to check if an RDO is duplicated.
     // If it is, update lvl1 value.
