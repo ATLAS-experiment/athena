@@ -91,7 +91,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::anglesOfIncidence(const InDetD
 
     
     // Subtract the Lorentz angle effect
-    float angleShift = m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash());
+    float angleShift = m_lorentzAngleTool->getTanLorentzAngle(element.identifyHash(), Gaudi::Hive::currentContext());
     anglePhi = std::atan(std::tan(anglePhi) - element.design().readoutSide() * angleShift);
 
     return std::make_pair(anglePhi, angleEta);
@@ -136,7 +136,7 @@ AnalogueClusteringToolImpl<calib_data_t, traj_t>::getCentroid(
 
     InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
 
-    double shift = m_lorentzAngleTool->getLorentzShift(element.identifyHash());
+    double shift = m_lorentzAngleTool->getLorentzShift(element.identifyHash(), Gaudi::Hive::currentContext());
 
     return std::make_pair(centroid.xPhi() + shift, centroid.xEta());
 }

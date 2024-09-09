@@ -266,7 +266,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, co
 
   //TODO: understand if shift is needed
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash);
+    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -338,7 +338,7 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   //TODO: understand if shift is needed
 
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash);
+    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -431,7 +431,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tStrip length: " << stripLength );
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash);
+    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
@@ -522,7 +522,7 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimHit& h, cons
   ATH_MSG_DEBUG("\t\tlocal position before shift: " << localPos.x() << " phi: " << localPos.y());
 
   if (m_doShift) {
-    double shift =  m_lorentzAngleTool->getLorentzShift(hash);
+    double shift =  m_lorentzAngleTool->getLorentzShift(hash,Gaudi::Hive::currentContext());
     Amg::Vector2D localPosShift(localPos[Trk::locX]+shift,localPos[Trk::locY]); 
     localPos = localPosShift;
   }
