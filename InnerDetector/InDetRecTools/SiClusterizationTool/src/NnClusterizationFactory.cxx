@@ -706,7 +706,7 @@ namespace InDet {
       ATH_MSG_VERBOSE("PitchY: " << pitchY << " pitchX " << pitchX );
       InDetDD::SiLocalPosition siLocalPositionAdd(pitchY*(posYid-(double)posYid_int),
                                                   pitchX*(posXid-(double)posXid_int));
-      double lorentzShift=m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash());
+      double lorentzShift=m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), Gaudi::Hive::currentContext());
       if (input.ClusterPixBarrelEC == 0){
         if (not input.useTrackInfo){
           lorentzShift+=m_correctLorShiftBarrelWithoutTracks;
@@ -938,7 +938,7 @@ namespace InDet {
     float trknormcomp = my_track.dot(my_normal);
     double bowphi = std::atan2(trkphicomp,trknormcomp);
     double boweta = std::atan2(trketacomp,trknormcomp);
-    tanl = m_pixelLorentzAngleTool->getTanLorentzAngle(element->identifyHash());
+    tanl = m_pixelLorentzAngleTool->getTanLorentzAngle(element->identifyHash(), Gaudi::Hive::currentContext());
     if(bowphi > M_PI_2) bowphi -= M_PI;
     if(bowphi < -M_PI_2) bowphi += M_PI;
     int readoutside = design->readoutSide();

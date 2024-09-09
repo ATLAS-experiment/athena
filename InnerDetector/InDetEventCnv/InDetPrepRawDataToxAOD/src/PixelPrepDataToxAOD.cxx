@@ -319,7 +319,7 @@ StatusCode PixelPrepDataToxAOD::execute()
         AUXDATA(xprd,float,Temperature) = dcsTemp->getTemperature(moduleHash);
         AUXDATA(xprd,float,DepletionVoltage) = deplVoltage;
 
-        AUXDATA(xprd,float,LorentzShift) = (float)m_lorentzAngleTool->getLorentzShift(moduleHash);
+        AUXDATA(xprd,float,LorentzShift) = (float)m_lorentzAngleTool->getLorentzShift(moduleHash,ctx);
 
         assert (calibData);
         addRdoInformation(xprd,  prd, calibData);
@@ -891,7 +891,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
   float trknormcomp = trackDir.dot(module_normal);
   double bowphi     = atan2(trkphicomp,trknormcomp);
   double boweta     = atan2(trketacomp,trknormcomp);
-  double tanl = m_lorentzAngleTool->getTanLorentzAngle(de->identifyHash());
+  double tanl = m_lorentzAngleTool->getTanLorentzAngle(de->identifyHash(),Gaudi::Hive::currentContext());
   if(bowphi > TMath::Pi()/2) bowphi -= TMath::Pi();
   if(bowphi < -TMath::Pi()/2) bowphi += TMath::Pi();
   int readoutside = design->readoutSide();
@@ -989,7 +989,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
 		return;
 	}
   // lorentz shift correction    
-  double shift = m_lorentzAngleTool->getLorentzShift(de->identifyHash());
+  double shift = m_lorentzAngleTool->getLorentzShift(de->identifyHash(),Gaudi::Hive::currentContext());
   unsigned hitNumber(0);
   for( const auto& siHit : matchingHits ){
     
@@ -1073,7 +1073,7 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
     //Truth Track incident angle theta
     theta[hitNumber] = std::atan2(diffPositions.z() ,diffPositions.x());
     //Truth track incident angle phi -- correct for lorentz angle
-    float tanlorentz = m_lorentzAngleTool->getTanLorentzAngle(de->identifyHash());
+    float tanlorentz = m_lorentzAngleTool->getTanLorentzAngle(de->identifyHash(),Gaudi::Hive::currentContext());
   
     int readoutside = design->readoutSide();
     phi[hitNumber] = std::atan(std::tan(bowphi)-readoutside*tanlorentz);

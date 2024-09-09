@@ -5,6 +5,7 @@
 #ifndef MUON_IMUONCLUSTERONTRACKCREATOR_H
 #define MUON_IMUONCLUSTERONTRACKCREATOR_H
 
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -55,7 +56,7 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override = 0;
+        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP, const EventContext& ctx) const override = 0;
 
         virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
     };

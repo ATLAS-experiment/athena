@@ -117,7 +117,7 @@ PixelClusterOnTrackTool::initialize() {
 
 InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correct
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& /*ctx*/) const {
 
   if (not m_applyNNcorrection){
     return correctDefault(rio, trackPar);
@@ -203,7 +203,7 @@ PixelClusterOnTrackTool::correctDefault
     double bowphi = std::atan2(trkphicomp, trknormcomp);
     double boweta = std::atan2(trketacomp, trknormcomp);
 
-    float tanl = m_lorentzAngleTool->getTanLorentzAngle(iH);
+    float tanl = m_lorentzAngleTool->getTanLorentzAngle(iH, Gaudi::Hive::currentContext());
     int readoutside = element->design().readoutSide();
 
     // map the angles of inward-going tracks onto [-PI/2, PI/2]
@@ -272,7 +272,7 @@ PixelClusterOnTrackTool::correctDefault
       design->positionFromColumnRow(colmax, rowmax);
 
     InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
-    double shift = m_lorentzAngleTool->getLorentzShift(iH);
+    double shift = m_lorentzAngleTool->getLorentzShift(iH, Gaudi::Hive::currentContext());
     int nrows = rowmax - rowmin + 1;
     int ncol = colmax - colmin + 1;
 

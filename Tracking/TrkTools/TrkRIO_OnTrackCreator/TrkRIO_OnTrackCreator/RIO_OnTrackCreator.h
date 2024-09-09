@@ -15,6 +15,7 @@
 #define TRKTOOLS_RIOONTRACKCREATOR_H
 
 // Athena
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 // Trk
@@ -67,7 +68,8 @@ namespace Trk {
 
     //! the master method for going from RIO to ROT.
     RIO_OnTrack* correct(const PrepRawData&,
-                         const TrackParameters&) const override;
+                         const TrackParameters&,
+                         const EventContext& ctx) const override;
 
    private:
     ///////////////////////////////////////////////////////////////////

@@ -321,7 +321,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double tanLorentz(0);
   double coLorentz(0);
   if (m_radiationDamageSimulationType != RadiationDamageSimulationType::TEMPLATE_CORRECTION) {
-    tanLorentz = m_lorentzAngleTool->getTanLorentzAngle(Module.identifyHash());
+    tanLorentz = m_lorentzAngleTool->getTanLorentzAngle(Module.identifyHash(), ctx);
     coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
   }
 

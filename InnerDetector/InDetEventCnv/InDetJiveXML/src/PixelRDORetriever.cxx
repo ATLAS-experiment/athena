@@ -80,7 +80,7 @@ namespace JiveXML {
 
         //Get the global position from the local position
         Amg::Vector2D localPos = element->rawLocalPositionOfCell(id);
-        localPos[Trk::distPhi] += m_lorentzAngleTool->getLorentzShift(element->identifyHash());
+        localPos[Trk::distPhi] += m_lorentzAngleTool->getLorentzShift(element->identifyHash(), Gaudi::Hive::currentContext());
 	      Amg::Vector3D globalPos = element->globalPosition(localPos);
 
         //Fill in all the data in our data vectors

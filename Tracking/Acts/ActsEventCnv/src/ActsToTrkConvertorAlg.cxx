@@ -312,7 +312,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("use Trk::RIO_OnTrackCreator::correct to create corrected Trk::RIO_OnTrack");
     assert(!m_RotCreatorTool.empty());
     assert(rio != nullptr);
-    return std::unique_ptr<Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm));
+    return std::unique_ptr<Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm, Gaudi::Hive::currentContext()));
   }
 
 }

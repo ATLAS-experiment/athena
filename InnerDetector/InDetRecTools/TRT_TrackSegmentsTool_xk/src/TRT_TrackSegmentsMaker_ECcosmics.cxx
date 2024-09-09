@@ -1445,12 +1445,12 @@ void InDet::TRT_TrackSegmentsMaker_ECcosmics::create_segment(std::vector<const I
 
     if(useDrift){
       ATH_MSG_VERBOSE("RIO using drift time!");
-      rio.push_back(m_riomakerD->correct(*(*vit),Tp));
+      rio.push_back(m_riomakerD->correct(*(*vit),Tp, Gaudi::Hive::currentContext()));
     }else{
       ATH_MSG_VERBOSE("RIO without using drift time!");
       chi2+=(fitted_r/1.15)*(fitted_r/1.15); // no drift time used
       ATH_MSG_VERBOSE(count<<"\t\t chi2 contribution: "<<(fitted_r/1.15)*(fitted_r/1.15));
-      rio.push_back(m_riomakerN->correct(*(*vit),Tp));
+      rio.push_back(m_riomakerN->correct(*(*vit),Tp, Gaudi::Hive::currentContext()));
     }
 
     count++;

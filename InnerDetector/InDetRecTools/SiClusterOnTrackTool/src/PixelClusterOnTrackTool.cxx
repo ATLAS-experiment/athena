@@ -157,11 +157,11 @@ return StatusCode::SUCCESS;
 
 InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correct
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx) const {
 
   const auto *element= dynamic_cast<const InDetDD::SiDetectorElement *>(rio.detectorElement());
   if ((not m_applyNNcorrection) or (element and element->isBlayer() and (not m_NNIBLcorrection) and (not m_IBLAbsent))){
-        return correctDefault(rio, trackPar);
+        return correctDefault(rio, trackPar, ctx);
   }else {
     if (m_errorStrategy == 0 || m_errorStrategy == 1) {
       // version from Giacinto
@@ -178,12 +178,12 @@ InDet::PixelClusterOnTrackTool::correct
       }
       const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &splitProb = getClusterSplittingProbability(pix);
       if (splitProb.isSplit()) {
-        return correctNN(rio, trackPar);
+        return correctNN(rio, trackPar, ctx);
       } else {
-        return correctDefault(rio, trackPar);
+        return correctDefault(rio, trackPar, ctx);
       }
     } else {
-      return correctNN(rio, trackPar);
+      return correctNN(rio, trackPar, ctx);
     }
   }
 }
@@ -195,7 +195,7 @@ InDet::PixelClusterOnTrackTool::correct
  */
 InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correctDefault
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx) const {
   using CLHEP::micrometer;
 
   const double TOPHAT_SIGMA = 1. / std::sqrt(12.);
@@ -246,7 +246,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
     double boweta = std::atan2(trketacomp, trknormcomp);
     float etatrack = trackPar.eta();
 
-    float tanl = m_lorentzAngleTool->getTanLorentzAngle(iH);
+    float tanl = m_lorentzAngleTool->getTanLorentzAngle(iH, ctx);
     int readoutside = element->design().readoutSide();
 
     // map the angles of inward-going tracks onto [-PI/2, PI/2]
@@ -304,14 +304,14 @@ InDet::PixelClusterOnTrackTool::correctDefault
       design->positionFromColumnRow(colmax, rowmax);
 
     InDetDD::SiLocalPosition centroid = 0.25 * (pos1 + pos2 + pos3 + pos4);
-    double shift = m_lorentzAngleTool->getLorentzShift(iH);
+    double shift = m_lorentzAngleTool->getLorentzShift(iH, ctx);
     int nrows = rowmax - rowmin + 1;
     int ncol = colmax - colmin + 1;
     double ang = 999.;
 
     // TOT interpolation for collision data
     // Force IBL to use digital clustering and broad errors.
-    SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_clusterErrorKey);
+    SG::ReadCondHandle<PixelCalib::PixelOfflineCalibData> offlineCalibData(m_clusterErrorKey, ctx);
     if (m_positionStrategy > 0 && omegaphi > -0.5 && omegaeta > -0.5) {
       localphi = centroid.xPhi() + shift;
       localeta = centroid.xEta();
@@ -519,7 +519,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
 
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
-    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey );
+    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey , ctx);
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), *m_pixelid,
                                     element->identify());
@@ -565,7 +565,8 @@ InDet::PixelClusterOnTrackTool::correct
 InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correctNN
   (const Trk::PrepRawData &rio,
-   const Trk::TrackParameters &trackPar) const {
+   const Trk::TrackParameters &trackPar,
+   const EventContext& ctx) const {
 
   const InDet::PixelCluster *pixelPrepCluster = nullptr;
   if (rio.type(Trk::PrepRawDataType::PixelCluster)) {
@@ -617,11 +618,11 @@ InDet::PixelClusterOnTrackTool::correctNN
 
   if (m_usingTIDE_Ambi) {
     if (!getErrorsTIDE_Ambi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix)) {
-      return correctDefault(rio, trackPar);
+      return correctDefault(rio, trackPar, ctx);
     }
   }else {
     if (!getErrorsDefaultAmbi(pixelPrepCluster, trackPar, finalposition, finalerrormatrix)) {
-      return correctDefault(rio, trackPar);
+      return correctDefault(rio, trackPar, ctx);
     }
   }
 
@@ -652,7 +653,7 @@ InDet::PixelClusterOnTrackTool::correctNN
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(
-        m_pixelErrorScalingKey);
+        m_pixelErrorScalingKey, ctx);
     cov = Trk::ErrorScalingCast<PixelRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), *m_pixelid,
                                     element->identify());

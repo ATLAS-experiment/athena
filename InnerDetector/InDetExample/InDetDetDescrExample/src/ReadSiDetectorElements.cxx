@@ -177,8 +177,8 @@ void ReadSiDetectorElements::printAllElements(const bool accessDuringInitializat
         
 
 	  ATH_MSG_ALWAYS(" Lorentz correction (mm), tanLorentzPhi = "
-			 << m_siLorentzAngleTool->getLorentzShift(hashId)/CLHEP::mm << " "
-			 << m_siLorentzAngleTool->getTanLorentzAngle(hashId));
+			 << m_siLorentzAngleTool->getLorentzShift(hashId, ctx)/CLHEP::mm << " "
+			 << m_siLorentzAngleTool->getTanLorentzAngle(hashId, ctx));
 
 	}
 

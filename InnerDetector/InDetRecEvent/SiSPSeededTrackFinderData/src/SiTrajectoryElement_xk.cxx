@@ -927,10 +927,10 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
     0);
 
   if (m_cluster) {
-    ro.reset(m_riotool->correct(*m_cluster, *tp));
+    ro.reset(m_riotool->correct(*m_cluster, *tp, Gaudi::Hive::currentContext()));
     pat.set(Trk::TrackStateOnSurface::Measurement);
   } else {
-    ro.reset(m_riotool->correct(*m_clusterNoAdd, *tp));
+    ro.reset(m_riotool->correct(*m_clusterNoAdd, *tp, Gaudi::Hive::currentContext()));
     pat.set(Trk::TrackStateOnSurface::Outlier);
   }
   auto sa = Trk::ScatteringAngles(
@@ -961,7 +961,7 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
       }
       auto fqn = Trk::FitQualityOnSurface(m_linkBackward[i].xi2(),m_ndf);
       std::unique_ptr<Trk::MeasurementBase> ron(m_riotool->correct(
-        *m_linkBackward[i].cluster(), *(sos->trackParameters())) );
+        *m_linkBackward[i].cluster(), *(sos->trackParameters()), Gaudi::Hive::currentContext()) );
       m_tsos[m_ntsos] = new Trk::TrackStateOnSurface(
         fqn, std::move(ron), std::move(tpn), meTemplate->uniqueClone(), pat);
       m_utsos[m_ntsos] = false;
@@ -2385,7 +2385,7 @@ void  InDet::SiTrajectoryElement_xk::precisePosCov(Trk::PatternTrackParameters& 
   if(colRow.x()==1. && colRow.y()==1.) return;
 
   std::unique_ptr<Trk::TrackParameters> tr = Tc.convert(true);
-  std::unique_ptr<const Trk::RIO_OnTrack> ri(m_riotool->correct(*m_cluster, *tr));
+  std::unique_ptr<const Trk::RIO_OnTrack> ri(m_riotool->correct(*m_cluster, *tr, Gaudi::Hive::currentContext()));
 
   m_position   = ri->localParameters();
   m_covariance = ri->localCovariance();

@@ -68,7 +68,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackTool::finalize()
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
-(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
+(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP,const EventContext& ctx) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);
   if(!DC) return nullptr;
@@ -106,7 +106,6 @@ InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
   //
   Amg::MatrixX cov = DC->localCovariance();
   if (!m_trtErrorScalingKey.key().empty()) {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     double mu=0.;
     if (!m_lumiDataKey.empty()) {
        SG::ReadCondHandle<LuminosityCondData> lumiData (m_lumiDataKey,ctx);
@@ -115,7 +114,7 @@ InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 
     bool endcap = false;
     if(dynamic_cast<const InDetDD::TRT_EndcapElement*>(pE)) endcap = true;
-    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey );
+    SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_trtErrorScalingKey, ctx );
     cov = Trk::ErrorScalingCast<TRTRIO_OnTrackErrorScaling>(*error_scaling)
               ->getScaledCovariance(std::move(cov), endcap, mu);
   }

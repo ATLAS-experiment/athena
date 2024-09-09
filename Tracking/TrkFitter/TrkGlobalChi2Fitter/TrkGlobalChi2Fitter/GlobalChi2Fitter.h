@@ -649,7 +649,8 @@ namespace Trk {
     void updatePixelROTs(
       GXFTrajectory &,
       Amg::SymMatrixX &,
-      Amg::VectorX &
+      Amg::VectorX &,
+      const EventContext& evtctx
     ) const;
 
 
@@ -674,7 +675,8 @@ namespace Trk {
       Amg::SymMatrixX &,
       Amg::VectorX &,
       Amg::SymMatrixX &,
-      bool, bool, int
+      bool, bool, int,
+      const EventContext& ctx
     ) const;
 
     /**

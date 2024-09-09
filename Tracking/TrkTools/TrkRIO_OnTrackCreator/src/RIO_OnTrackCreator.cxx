@@ -95,7 +95,8 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
 // The sub-detector brancher algorithm
 Trk::RIO_OnTrack* 
 Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
-                                 const TrackParameters& trk) const
+                                 const TrackParameters& trk,
+                                 const EventContext& ctx) const
 {
 
   Identifier id;
@@ -111,7 +112,7 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
           "No tool to correct the current Pixel hit! return nullptr");
       return nullptr;
     }
-    return m_pixClusCor->correct(rio, trk);
+    return m_pixClusCor->correct(rio, trk, ctx);
   }
 
   if (m_doSCT && m_idHelper->is_sct(id)) {
@@ -120,7 +121,7 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
           "No tool to correct the current SCT hit! - Giving back nullptr.");
       return nullptr;
     }
-    return m_sctClusCor->correct(rio, trk);
+    return m_sctClusCor->correct(rio, trk, ctx);
   }
 
   if (m_doTRT && m_idHelper->is_trt(id)) {
@@ -129,7 +130,7 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
           "No tool to correct a TRT DriftCircle! - Giving back nullptr.");
       return nullptr;
     }
-    return m_trt_Cor->correct(rio, trk);
+    return m_trt_Cor->correct(rio, trk, ctx);
   }
 
   if (m_idHelper->is_mdt(id)) {
@@ -138,7 +139,7 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
           "No tool to correct a MDT DriftCircle! - Giving back nullptr.");
       return nullptr;
     }
-    return m_muonDriftCircleCor->correct(rio, trk);
+    return m_muonDriftCircleCor->correct(rio, trk, ctx);
   }
 
   if ((m_idHelper->is_csc(id)) || (m_idHelper->is_rpc(id)) ||
@@ -148,7 +149,7 @@ Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
       ATH_MSG_WARNING("No tool to correct a CSC/RPC/TGC/MM/sTGC hit! - Giving back nullptr.");
       return nullptr;
     }
-    return m_muonClusterCor->correct(rio, trk);
+    return m_muonClusterCor->correct(rio, trk, ctx);
   }
 
   ATH_MSG_WARNING("idHelper could not identify sub-detector for: "

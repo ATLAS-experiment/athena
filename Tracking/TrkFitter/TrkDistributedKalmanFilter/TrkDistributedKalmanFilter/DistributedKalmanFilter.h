@@ -138,7 +138,7 @@ private:
   static void runSmoother(PVPTrackStates& pvpTrackStates) ;
   static int findOutliers(PVPNodes& pvpNodes, double) ;
   static void calculateLRsolution(PVPNodes& pvpNodes) ;
-  TrackStateOnSurface* createTrackStateOnSurface(TrkBaseNode*) const;
+  TrackStateOnSurface* createTrackStateOnSurface(TrkBaseNode*, const EventContext& ctx) const;
   void report();
   void report(char fileName[]);
   void getMagneticField(double[3],
