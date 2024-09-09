@@ -33,10 +33,14 @@ def HGTDHitAnalysis(flags):
 def IDHitAnalysis(flags): 
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from HitAnalysis.HitAnalysisConfig import PixelHitAnalysisCfg, SCTHitAnalysisCfg
+    from HitAnalysis.HitAnalysisConfig import PixelHitAnalysisCfg, SCTHitAnalysisCfg, TRTHitAnalysisCfg
     result = ComponentAccumulator()
-    result.merge(PixelHitAnalysisCfg(flags))
-    result.merge(SCTHitAnalysisCfg(flags))
+    if flags.Detector.EnablePixel:
+        result.merge(PixelHitAnalysisCfg(flags))
+    if flags.Detector.EnableSCT:
+        result.merge(SCTHitAnalysisCfg(flags))
+    if flags.Detector.EnableTRT:
+        result.merge(TRTHitAnalysisCfg(flags))
  
     result.getService("THistSvc").Output = ["SiHitAnalysis DATAFILE='SiHitValid.root' OPT='RECREATE'"]
  
