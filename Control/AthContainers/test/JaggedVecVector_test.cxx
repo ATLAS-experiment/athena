@@ -72,12 +72,12 @@ void test1a (const std::string& name)
 
   SG::JaggedVecVectorHolder<T> vh (foo_id, &v, payloadVec.get(), false);
 
-  v.emplace_back (0, 3); // 3
-  v.emplace_back (3, 5); // 2
-  v.emplace_back (5, 5); // 0
-  v.emplace_back (5, 7); // 2
-  v.emplace_back (7, 9); // 2
-  v.emplace_back (9, 10); // 1
+  v.emplace_back (3); // 3
+  v.emplace_back (5); // 2
+  v.emplace_back (5); // 0
+  v.emplace_back (7); // 2
+  v.emplace_back (9); // 2
+  v.emplace_back (10); // 1
 
   for (size_t i = 0; i < 10; i++) {
     lv->push_back (makeT<T> (i));
@@ -92,33 +92,33 @@ void test1a (const std::string& name)
   assert (vh.resize (8) == true);
   assert (ptr1 == v.data());
   assert (v.size() == 8);
-  assert (v[5] == Elt (9, 10));
-  assert (v[6] == Elt (10, 10));
-  assert (v[7] == Elt (10, 10));
+  assert (v[5] == Elt (10));
+  assert (v[6] == Elt (10));
+  assert (v[7] == Elt (10));
 
   assert (vh.resize (5));
   assert (v.size() == 5);
-  assert (v.back() == Elt (7, 9));
+  assert (v.back() == Elt (9));
   assert (payloadVec->size() == 9);
 
   vh.shift (4, 1);
   assert (v.size() == 6);
   assert (payloadVec->size() == 9);
-  assert (v[0] == Elt (0, 3));
-  assert (v[1] == Elt (3, 5));
-  assert (v[2] == Elt (5, 5));
-  assert (v[3] == Elt (5, 7));
-  assert (v[4] == Elt (7, 7));
-  assert (v[5] == Elt (7, 9));
+  assert (v[0] == Elt (3));
+  assert (v[1] == Elt (5));
+  assert (v[2] == Elt (5));
+  assert (v[3] == Elt (7));
+  assert (v[4] == Elt (7));
+  assert (v[5] == Elt (9));
 
   vh.shift (2, -1);
   assert (v.size() == 5);
   assert (payloadVec->size() == 7);
-  assert (v[0] == Elt (0, 3));  // [0, 1, 2]
-  assert (v[1] == Elt (3, 3));  // []
-  assert (v[2] == Elt (3, 5));  // [5, 6]
-  assert (v[3] == Elt (5, 5));  // []
-  assert (v[4] == Elt (5, 7));  // [7, 8]
+  assert (v[0] == Elt (3));  // [0, 1, 2]
+  assert (v[1] == Elt (3));  // []
+  assert (v[2] == Elt (5));  // [5, 6]
+  assert (v[3] == Elt (5));  // []
+  assert (v[4] == Elt (7));  // [7, 8]
   assert (*lv == makeTVec<T> ({0, 1, 2, 5, 6, 7, 8}));
 
   AuxStoreInternalTest store2;
@@ -129,9 +129,9 @@ void test1a (const std::string& name)
   store2.addVector (std::move (vh2), false);
   store2.addVector (std::move (payloadVec2), false);
 
-  v2.emplace_back (0, 2); // 2
-  v2.emplace_back (2, 3); // 1
-  v2.emplace_back (3, 5); // 2
+  v2.emplace_back (2); // 2
+  v2.emplace_back (3); // 1
+  v2.emplace_back (5); // 2
   for (size_t i = 0; i < 5; i++) {
     lv2->push_back (makeT<T> (i+100));
   }
@@ -139,27 +139,27 @@ void test1a (const std::string& name)
   vh.insertMove (2, v2.data(), 1, 2, store2);
   assert (v.size() == 7);
   assert (lv->size() == 10);
-  assert (v[0] == Elt (0, 3));  // [0, 1, 2]
-  assert (v[1] == Elt (3, 3));  // []
-  assert (v[2] == Elt (3, 4));  // [102]
-  assert (v[3] == Elt (4, 6));  // [103, 104]
-  assert (v[4] == Elt (6, 8));  // [5, 6]
-  assert (v[5] == Elt (8, 8));  // []
-  assert (v[6] == Elt (8, 10));  // [7, 8]
+  assert (v[0] == Elt (3));  // [0, 1, 2]
+  assert (v[1] == Elt (3));  // []
+  assert (v[2] == Elt (4));  // [102]
+  assert (v[3] == Elt (6));  // [103, 104]
+  assert (v[4] == Elt (8));  // [5, 6]
+  assert (v[5] == Elt (8));  // []
+  assert (v[6] == Elt (10));  // [7, 8]
   assert (*lv == makeTVec<T> ({0, 1, 2, 102, 103, 104, 5, 6, 7, 8}));
 
   vh.insertMove (0, v2.data(), 0, 0, store2);
   vh.insertMove (0, v2.data(), 0, 1, store2);
   assert (v.size() == 8);
   assert (lv->size() == 12);
-  assert (v[0] == Elt (0, 2));  // [100, 101]
-  assert (v[1] == Elt (2, 5));  // [0, 1, 2]
-  assert (v[2] == Elt (5, 5));  // []
-  assert (v[3] == Elt (5, 6));  // [102]
-  assert (v[4] == Elt (6, 8));  // [103, 104]
-  assert (v[5] == Elt (8, 10));  // [5, 6]
-  assert (v[6] == Elt (10, 10));  // []
-  assert (v[7] == Elt (10, 12));  // [7, 8]
+  assert (v[0] == Elt (2));  // [100, 101]
+  assert (v[1] == Elt (5));  // [0, 1, 2]
+  assert (v[2] == Elt (5));  // []
+  assert (v[3] == Elt (6));  // [102]
+  assert (v[4] == Elt (8));  // [103, 104]
+  assert (v[5] == Elt (10));  // [5, 6]
+  assert (v[6] == Elt (10));  // []
+  assert (v[7] == Elt (12));  // [7, 8]
   assert (lv->at(0) == 100);
   assert (lv->at(1) == 101);
   assert (*lv == makeTVec<T>({100, 101, 0, 1, 2, 102, 103, 104, 5, 6, 7, 8}));

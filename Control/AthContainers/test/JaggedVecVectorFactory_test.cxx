@@ -35,7 +35,7 @@ namespace SG {
 template <class T>
 std::ostream& operator<< (std::ostream& s, const JaggedVecElt<T>& e)
 {
-  s << "(" << e.begin() << ", " << e.end() << ")";
+  s << e.end();
   return s;
 }
 } // namespace SG
@@ -72,7 +72,7 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
       std::abort();
     }
   }
-  SG::JaggedVecElt<T> tail (v.back().end(), v.back().end());
+  SG::JaggedVecElt<T> tail (v.back().end());
   for (size_t i = v.size(); i  < n; ++i) {
     assert (ptr[i] == tail);
   }
@@ -181,16 +181,16 @@ void test_vector (const std::string& name)
 
   // [0, 1, 2] [3] [4, 5]
   Elt* ptr = reinterpret_cast<Elt*> (v->toPtr());
-  copyRange (std::vector<Elt>{{0, 3}, {3, 4}, {4, 6}}, ptr);
-  std::fill_n (ptr+3, 7, Elt{6, 6});
+  copyRange (std::vector<Elt>{{3}, {4}, {6}}, ptr);
+  std::fill_n (ptr+3, 7, Elt{6});
   lv->resize(6);
   T* lptr = reinterpret_cast<T*> (lv->toPtr());
   copyRange (std::vector<int>{0, 1, 2, 3, 4, 5}, lptr);
 
   // [100, 101] [102, 103, 104] [105, 106]
   Elt* ptr2 = reinterpret_cast<Elt*> (v2->toPtr());
-  copyRange (std::vector<Elt>{{0, 2}, {2, 5}, {5, 7}}, ptr2);
-  std::fill_n (ptr2+3, 7, Elt{7, 7});
+  copyRange (std::vector<Elt>{{2}, {5}, {7}}, ptr2);
+  std::fill_n (ptr2+3, 7, Elt{7});
   lv2->resize(7);
   T* lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   copyRange (std::vector<int>{100, 101, 102, 103, 104, 105, 106}, lptr2);
@@ -200,13 +200,13 @@ void test_vector (const std::string& name)
 
   // [102, 103, 104] [105, 106], [4, 5]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 3}, {3, 5}, {5, 7}});
+  compareElts (ptr, 10, {{3}, {5}, {7}});
   assert (lv->size() == 7);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {102, 103, 104, 105, 106, 4, 5});
   // [100, 101] [0, 1, 2] [3]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 5}, {5, 6}});
+  compareElts (ptr2, 10, {{2}, {5}, {6}});
   assert (lv2->size() == 6);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {100, 101, 0, 1, 2, 3});
@@ -215,13 +215,13 @@ void test_vector (const std::string& name)
 
   // [3] [105, 106], [4, 5]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 1}, {1, 3}, {3, 5}});
+  compareElts (ptr, 10, {{1}, {3}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {3, 105, 106, 4, 5});
   // [100, 101] [0, 1, 2] [102, 103, 104]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 5}, {5, 8}});
+  compareElts (ptr2, 10, {{2}, {5}, {8}});
   assert (lv2->size() == 8);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {100, 101, 0, 1, 2, 102, 103, 104});
@@ -230,13 +230,13 @@ void test_vector (const std::string& name)
 
   // 1: [3] [105, 106], [100, 101]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 1}, {1, 3}, {3, 5}});
+  compareElts (ptr, 10, {{1}, {3}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {3, 105, 106, 100, 101});
   // 2: [4, 5] [0, 1, 2] [102, 103, 104]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 5}, {5, 8}});
+  compareElts (ptr2, 10, {{2}, {5}, {8}});
   assert (lv2->size() == 8);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {4, 5, 0, 1, 2, 102, 103, 104});
@@ -244,7 +244,7 @@ void test_vector (const std::string& name)
   fac.swap (foo_id, avd2, 0, avd2, 2, 1);
   // 2: [102, 103, 104] [0, 1, 2] [4, 5]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 3}, {3, 6}, {6, 8}});
+  compareElts (ptr2, 10, {{3}, {6}, {8}});
   assert (lv2->size() == 8);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {102, 103, 104, 0, 1, 2, 4, 5});
@@ -252,7 +252,7 @@ void test_vector (const std::string& name)
   fac.swap (foo_id, avd1, 2, avd1, 0, 1);
   // 1: [100, 101] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 2}, {2, 4}, {4, 5}});
+  compareElts (ptr, 10, {{2}, {4}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {100, 101, 105, 106, 3});
@@ -260,7 +260,7 @@ void test_vector (const std::string& name)
   fac.swap (foo_id, avd2, 0, avd2, 1, 1);
   // 2: [0, 1, 2] [102, 103, 104] [4, 5]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 3}, {3, 6}, {6, 8}});
+  compareElts (ptr2, 10, {{3}, {6}, {8}});
   assert (lv2->size() == 8);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {0, 1, 2, 102, 103, 104, 4, 5});
@@ -269,13 +269,13 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd2, 0, avd1, 1, 2);   // Making smaller
   // 1: [100, 101] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 2}, {2, 4}, {4, 5}});
+  compareElts (ptr, 10, {{2}, {4}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {100, 101, 105, 106, 3});
   // 2: [105, 106] [3] [4, 5]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 3}, {3, 5}});
+  compareElts (ptr2, 10, {{2}, {3}, {5}});
   assert (lv2->size() == 5);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {105, 106, 3, 4, 5});
@@ -283,13 +283,13 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd2, 1, avd1, 0, 1);   // Making larger
   // 1: [100, 101] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 2}, {2, 4}, {4, 5}});
+  compareElts (ptr, 10, {{2}, {4}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {100, 101, 105, 106, 3});
   // 2: [105, 106] [100, 101] [4, 5]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 4}, {4, 6}});
+  compareElts (ptr2, 10, {{2}, {4}, {6}});
   assert (lv2->size() == 6);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {105, 106, 100, 101, 4, 5});
@@ -297,13 +297,13 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd2, 2, avd1, 1, 1);   // Same size
   // 1: [100, 101] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 2}, {2, 4}, {4, 5}});
+  compareElts (ptr, 10, {{2}, {4}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {100, 101, 105, 106, 3});
   // 2: [105, 106] [100, 101] [105, 106]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 4}, {4, 6}});
+  compareElts (ptr2, 10, {{2}, {4}, {6}});
   assert (lv2->size() == 6);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {105, 106, 100, 101, 105, 106});
@@ -311,7 +311,7 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd1, 0, avd1, 2, 1);   // Self-copy, making smaller
   // 1: [3] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 1}, {1, 3}, {3, 4}});
+  compareElts (ptr, 10, {{1}, {3}, {4}});
   assert (lv->size() == 4);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {3, 105, 106, 3});
@@ -319,7 +319,7 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd1, 0, avd1, 1, 1);   // Self-copy, making larger
   // 1: [105, 106] [105, 106], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 2}, {2, 4}, {4, 5}});
+  compareElts (ptr, 10, {{2}, {4}, {5}});
   assert (lv->size() == 5);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {105, 106, 105, 106, 3});
@@ -327,7 +327,7 @@ void test_vector (const std::string& name)
   fac.copy (foo_id, avd2, 2, avd2, 1, 1);   // Self-copy, same size
   // 2: [105, 106] [100, 101] [100, 101]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 4}, {4, 6}});
+  compareElts (ptr2, 10, {{2}, {4}, {6}});
   assert (lv2->size() == 6);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {105, 106, 100, 101, 100, 101});
@@ -343,7 +343,7 @@ void test_vector (const std::string& name)
   fac.clear (foo_id, avd2, 1, 1);
   // 2: [105, 106] [] [100, 101]
   assert (v2->size() == 10);
-  compareElts (ptr2, 10, {{0, 2}, {2, 2}, {2, 4}});
+  compareElts (ptr2, 10, {{2}, {2}, {4}});
   assert (lv2->size() == 4);
   lptr2 = reinterpret_cast<T*> (lv2->toPtr());
   comparePayload (lptr2, {105, 106, 100, 101});
@@ -351,14 +351,14 @@ void test_vector (const std::string& name)
   fac.clear (foo_id, avd1, 0, 2);
   // 1: [] [], [3]
   assert (v->size() == 10);
-  compareElts (ptr, 10, {{0, 0}, {0, 0}, {0, 1}});
+  compareElts (ptr, 10, {{0}, {0}, {1}});
   assert (lv->size() == 1);
   lptr = reinterpret_cast<T*> (lv->toPtr());
   comparePayload (lptr, {3});
 
   vector_type* vec3 = new vector_type;
-  vec3->push_back (Elt (0, 3));
-  vec3->push_back (Elt (3, 5));
+  vec3->push_back (Elt (3));
+  vec3->push_back (Elt (5));
   SG::AuxTypeVector<T, ALLOC<T> > lv3 (foo_payload_id, 5, 5, true);
   T* lptr3 = reinterpret_cast<T*> (lv3.toPtr());
   copyRange (std::vector<int>{51, 52, 53, 54, 55}, lptr3);
@@ -369,8 +369,8 @@ void test_vector (const std::string& name)
   assert (v3->size() == 2);
   assert (!v3->isLinked());
   Elt* ptr3 = reinterpret_cast<Elt*> (v3->toPtr());
-  assert (ptr3[0] == Elt (0, 3));
-  assert (ptr3[1] == Elt (3, 5));
+  assert (ptr3[0] == Elt (3));
+  assert (ptr3[1] == Elt (5));
 }
 
 
@@ -433,8 +433,8 @@ void test2()
   store1.addVector (std::move(lvup1), false);
 
   // [(123,5) (123,6) (123,7)] [(124,8) (124,9)] [(125,10)]
-  copyRange (std::vector<Elt>{{0, 3}, {3, 5}, {5, 6}}, ptr1);
-  std::fill_n (ptr1+3, 7, Elt{6, 6});
+  copyRange (std::vector<Elt>{{3}, {5}, {6}}, ptr1);
+  std::fill_n (ptr1+3, 7, Elt{6});
   lv1->resize(6);
   EL* lptr1 = reinterpret_cast<EL*> (lv1->toPtr());
   copyRange (std::vector<EL>{{123,5}, {123,6}, {123,7},
@@ -453,7 +453,7 @@ void test2()
 
   fac.copyForOutput (el_id, avd2, 0, avd1, 1, 2);
   // [(124,8) (124,9)] [(125,10)]
-  compareElts (ptr2, 10, {{0, 2}, {2, 3}});
+  compareElts (ptr2, 10, {{2}, {3}});
   assert (lv2->size() == 3);
   EL* lptr2 = reinterpret_cast<EL*> (lv2->toPtr());
   comparePayload (lptr2, {{124,8}, {124,9}, {125,10}});
@@ -463,7 +463,7 @@ void test2()
 
   fac.copyForOutput (el_id, avd2, 1, avd1, 0, 3);
   // [(124,8) (124,9)] [(123,5) (456,60) (123,7)] [(124,8) (457,90)] [(125,10)]
-  compareElts (ptr2, 10, {{0, 2}, {2, 5}, {5, 7}, {7, 8}});
+  compareElts (ptr2, 10, {{2}, {5}, {7}, {8}});
   assert (lv2->size() == 8);
   lptr2 = reinterpret_cast<EL*> (lv2->toPtr());
   comparePayload (lptr2, {{124,8}, {124,9}, {123,5}, {456,60}, {123,7},

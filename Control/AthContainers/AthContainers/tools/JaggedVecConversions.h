@@ -60,9 +60,11 @@ public:
 
   /**
    * @brief Constructor.
+   * @param elts Start of the element vector.
    * @param payload Span over the payload vector.
    */
-  JaggedVecConstConverter (const_Payload_span payload);
+  JaggedVecConstConverter (const JaggedVecEltBase* elts,
+                           const_Payload_span payload);
 
 
   /**
@@ -73,6 +75,9 @@ public:
 
 
 private:
+  /// The vector of elements.
+  const JaggedVecEltBase* m_elts;
+
   /// The span over the payload vector.
   const_Payload_span m_payload;
 };
@@ -649,6 +654,18 @@ private:
    * @brief Return a (const) reference to this proxy's element.
    */
   const Elt_t& elt() const noexcept;
+
+
+  /**
+   * @brief Return the begin payload index of this proxy's element.
+   */
+  size_t elt_begin() const noexcept;
+
+
+  /**
+   * @brief Return the end payload index of this proxy's element.
+   */
+  size_t elt_end() const noexcept;
 
 
   /// Index of the element we're proxying.

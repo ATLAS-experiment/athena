@@ -119,8 +119,8 @@ void JaggedVecVectorFactory<T, ALLOC>::copyImpl (SG::auxid_t auxid,
   const AuxTypeRegistry& r = AuxTypeRegistry::instance();
   const IAuxTypeVectorFactory* payload_fac = r.getFactory (payload_auxid);
 
-  const size_t dst_first = v_dst[dst_index].begin();
-  size_t src_first = v_src[src_index].begin();
+  const size_t dst_first = v_dst[dst_index].begin(dst_index);
+  size_t src_first = v_src[src_index].begin(src_index);
   const size_t src_first_orig = src_first;
   const size_t n_dst = v_dst[dst_index+n-1].end() - dst_first;
   const size_t n_src = v_src[src_index+n-1].end() - src_first;
@@ -227,8 +227,8 @@ void JaggedVecVectorFactory<T, ALLOC>::swap (SG::auxid_t auxid,
   const AuxTypeRegistry& r = AuxTypeRegistry::instance();
   const IAuxTypeVectorFactory* payload_fac = r.getFactory (payload_auxid);
 
-  size_t a_first = v_a[aindex].begin();
-  size_t b_first = v_b[bindex].begin();
+  size_t a_first = v_a[aindex].begin(aindex);
+  size_t b_first = v_b[bindex].begin(bindex);
   const size_t a_first_orig = a_first;
   const size_t b_first_orig = b_first;
   const size_t n_a = v_a[aindex+n-1].end() - a_first;
@@ -331,7 +331,7 @@ void JaggedVecVectorFactory<T, ALLOC>::clear (SG::auxid_t auxid,
 
   vector_value_type* v = reinterpret_cast<vector_value_type*> (dst.getDataArray (auxid));
   IAuxTypeVector* lv = dst.getStore()->linkedVector (auxid);
-  size_t begin = v[dst_index].begin();
+  size_t begin = v[dst_index].begin(dst_index);
   size_t end = v[dst_index+n-1].end();
   size_t n_payload = end - begin;
 
@@ -339,7 +339,7 @@ void JaggedVecVectorFactory<T, ALLOC>::clear (SG::auxid_t auxid,
   lv->shift (end, - n_payload);
 
   // Clear out the given range.
-  Elt zero = Elt (begin, begin);
+  Elt zero = Elt (begin);
   std::fill_n (v+dst_index, n, zero);
 
   // Adjust indices for following elements.

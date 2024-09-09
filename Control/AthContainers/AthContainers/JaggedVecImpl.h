@@ -18,6 +18,7 @@
 #define ATHCONTAINERS_JAGGEDVECIMPL_H
 
 
+#include <cstddef>
 #include <cstdint>
 
 
@@ -27,17 +28,25 @@ namespace SG {
 /**
  * @brief Describe one element of a jagged vector (base class).
  *
- * Each jagged vector element consists of begin and end indices
- * into the linked payload vector.
+ * Each jagged vector element holds its end index into the linked payload
+ * vector.  The begin index is given by the end index of the previous element.
+ * Thus, these elements must be allocated as a contiguous vector.  Further,
+ * in order to get the begin index, we need to know the index of this
+ * element object within its vector --- because we have to special-case
+ * the first element.
  *
- * Using two indices per element is redundant, but we need to do that in order
- * to be consistent with the basic xAOD requirements: a variable is stored
- * as a contiguous array of objects, in one-to-one correspondence
- * with the elements of the @c DataVector.
+ * For example, if we have a jagged vector with three elements of sizes 3, 1, 2,
+ * then what we would store is {3, 4, 6}.
  *
- * This non-templated base class holds the actual packed value.  However,
- * users should use the @c PackedLink<STORABLE> derived types, to allow
- * specifying the target of the links.
+ * This implies that one cannot interpret a @c JaggedVecElt in isolation
+ * (or a range of them); we need to know where they are stored in the
+ * xAOD variable vector.  Fortunately, that's not something that is typically
+ * done, since jagged vectors are accessed via the specialized @c Accessor
+ * classes.
+ *
+ * This non-templated base class holds the actual data.  However,
+ * users should use the @c JaggedVecElt<PAYLOAD> derived types, to allow
+ * specifying the payload type.
  */
 class JaggedVecEltBase
 {
@@ -58,13 +67,14 @@ public:
    * @param beg Index of the start of the range.
    * @param end Index of the end of the range.
    */
-  JaggedVecEltBase (index_type beg, index_type end);
+  JaggedVecEltBase (index_type end);
 
 
   /**
-   * @brief Return the index of the start of the range.
+   * @brief Return the index of the beginning of the range.
+   * @param elt_ndx The index of this element in its container.
    */
-  index_type begin() const;
+  index_type begin (size_t elt_ndx) const;
 
 
   /**
@@ -74,9 +84,10 @@ public:
 
 
   /**
-   * @brief Return the number of payload items in this jagged vector element.
+   * @brief Return the number of items in this range.
+   * @param elt_ndx The index of this element in its container.
    */
-  index_type size() const;
+  size_t size (size_t elt_ndx) const;
 
 
   /**
@@ -87,7 +98,7 @@ public:
 
 
   /**
-   * @brief Helper to shift both begin and end indices by the same amount.
+   * @brief Helper to shift indices.
    */
   struct Shift
   {
@@ -106,9 +117,6 @@ public:
 
 private:
   friend struct Shift;
-
-  /// Begin index.
-  index_type m_beg = 0;
 
   /// End index.
   index_type m_end = 0;

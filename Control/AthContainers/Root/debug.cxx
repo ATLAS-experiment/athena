@@ -168,9 +168,9 @@ void convert (std::ostream& os, const double x)
 }
 
 
-void convert (std::ostream& os, const SG::JaggedVecEltBase& x)
+void convert (std::ostream& os, const SG::JaggedVecEltBase& x, size_t i)
 {
-  os << std::format ("[{},{}]", x.begin(), x.end());
+  os << std::format ("[{},{}]", x.begin(i), x.end());
 }
 
 
@@ -233,8 +233,9 @@ bool operator< (const AuxVarSort& a, const AuxVarSort& b )
  * @brief Convert an aux variable to a string.
  * @param auxid The id of the variable.
  * @param p Pointer to the location of the variable.
+ * @param i Index of the element being dumped.
  */
-std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
+std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i)
 {
   if (!p) {
     return "(null)";
@@ -264,7 +265,7 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p)
   {
     std::string tiname = AthContainers_detail::typeinfoName(*ti);
     if (tiname.starts_with ("SG::JaggedVecElt<")) {
-      convert (os, *reinterpret_cast<const SG::JaggedVecEltBase*>(p));
+      convert (os, *reinterpret_cast<const SG::JaggedVecEltBase*>(p), i);
     }
     else if (tiname.starts_with ("DataLink<")) {
       convert (os, *reinterpret_cast<const DataLinkBase*>(p));
@@ -301,7 +302,7 @@ void dump_aux_vars (std::ostream& os, const SG::IConstAuxStore& store, size_t i)
     const void* pbeg = store.getData (v.id);
     size_t eltsz = reg.getEltSize (v.id);
     const char* p = reinterpret_cast<const char*>(pbeg) + eltsz*i;
-    os << v.name << " " << aux_var_as_string (v.id, p) << "\n";
+    os << v.name << " " << aux_var_as_string (v.id, p, i) << "\n";
     SG::auxid_t linked_id = reg.linkedVariable (v.id);
     if (linked_id != SG::null_auxid) {
       os << "  linked: " << aux_var_name (linked_id) << " ";
@@ -321,7 +322,7 @@ void dump_aux_vars (std::ostream& os, const SG::IConstAuxStore& store, size_t i)
         else
           os << ", ";
         const char* p = reinterpret_cast<const char*>(lbeg) + leltsz*j;
-        os << aux_var_as_string (linked_id, p);
+        os << aux_var_as_string (linked_id, p, i);
       }
       os << "]\n";
     }

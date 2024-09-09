@@ -24,7 +24,7 @@ namespace SG { namespace detail {
  */
 void JaggedVecProxyBase::resize1 (size_t elt_index, index_type n_new)
 {
-  int n_old = elt (elt_index).size();
+  int n_old = elt (elt_index).size (elt_index);
   adjust1 (elt_index, n_old, static_cast<int>(n_new) - n_old);
 }
 
@@ -58,17 +58,19 @@ void JaggedVecProxyBase::adjust1 (size_t elt_index, index_type index, int n_add)
     m_linkedVec = linkedVec;
   }
 
-  // The element that we're modifying.
+  // Indices from the element that we're modifying.
   Elt_t& e = elt(elt_index);
+  size_t beg = e.begin(elt_index);
+  size_t end = e.end();
 
   // Shift the payload items.
-  if (!linkedVec->shift (e.begin()+index, n_add)) {
+  if (!linkedVec->shift (beg+index, n_add)) {
     m_container.clearCache (linkedVec->auxid());
   }
 
   // Adjust the indices in the jagged vector elements.
   // First the element that we're modifying...
-  e = JaggedVecEltBase (e.begin(), e.end() + n_add);
+  e = JaggedVecEltBase (end + n_add);
   // .. then all the remaining elements.
   std::ranges::for_each (m_elts | std::views::drop (elt_index+1),
                          JaggedVecEltBase::Shift (n_add));

@@ -137,7 +137,7 @@ ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::operator()
   const Elt_t& jelt = container.template getData<Elt_t> (m_auxid, index);
   if (jelt.end() == 0) return element_type();
   const Payload_t* payload = this->getPayloadArray (container);
-  return element_type (payload+jelt.begin(), payload+jelt.end());
+  return element_type (payload+jelt.begin (index), payload+jelt.end());
 }
 
 
@@ -211,8 +211,10 @@ auto
 ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDataSpan (const AuxVectorData& container) const
   -> const_span
 {
-  return const_span (getEltSpan(container),
-                     ConstConverter_t (*container.getDataSpan (m_linkedAuxid)));
+  const_Elt_span elt_span = getEltSpan (container);
+  return const_span (elt_span,
+                     ConstConverter_t (elt_span.data(),
+                                       *container.getDataSpan (m_linkedAuxid)));
 }
 
 

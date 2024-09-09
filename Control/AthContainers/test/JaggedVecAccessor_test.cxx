@@ -27,7 +27,7 @@ namespace SG {
 template <class T>
 std::ostream& operator<< (std::ostream& s, const JaggedVecElt<T>& e)
 {
-  s << "(" << e.begin() << ", " << e.end() << ")";
+  s << e.end();
   return s;
 }
 } // namespace SG
@@ -53,7 +53,7 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
       std::abort();
     }
   }
-  SG::JaggedVecElt<T> tail (v.back().end(), v.back().end());
+  SG::JaggedVecElt<T> tail (v.back().end());
   for (size_t i = v.size(); i  < n; ++i) {
     assert (ptr[i] == tail);
   }
@@ -172,8 +172,8 @@ void test1()
   v.setStore (&store);
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
-  std::ranges::copy (std::vector<Elt>{{0, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 5}}, elt);
-  std::fill_n (elt+6, 4, Elt{5, 5});
+  std::ranges::copy (std::vector<Elt>{{2}, {2}, {2}, {2}, {2}, {5}}, elt);
+  std::fill_n (elt+6, 4, Elt{5});
   std::ranges::copy (std::vector<float> {1.5, 2.5, 3.5, 4.5, 5.5}, payload);
   SG::IAuxTypeVector* linkedVec = store.linkedVector (jvec_id);
   // [1.5 2.5] [] [] [] [] [3.5, 4.5, 5.5]
@@ -186,7 +186,7 @@ void test1()
   jtyp1.set (b4, std::vector<float> {10.1, 10.2});
   assert (linkedVec->size() == 7);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 4}, {4, 7}});
+  compareElts (elt, 10, {{2}, {2}, {2}, {2}, {4}, {7}});
   comparePayload (payload, {1.5, 2.5, 10.1, 10.2, 3.5, 4.5, 5.5});
 
   assert (jtyp1 (b5).size() == 3);
@@ -218,7 +218,7 @@ void test1()
   jtyp1 (b4) = std::vector<float> {20.3, 20.4, 20.5};
   assert (linkedVec->size() == 7);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 5}, {5, 7}});
+  compareElts (elt, 10, {{2}, {2}, {2}, {2}, {5}, {7}});
   comparePayload (payload, {1.5, 2.5, 20.3, 20.4, 20.5, 20.5, 21.5});
   // [1.5 2.5] [] [] [] [20.3 20.4 20.5] [20.5 21.5]
 
@@ -228,28 +228,28 @@ void test1()
   jtyp1(v, 0).push_back (3.5);
   assert (linkedVec->size() == 8);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 3}, {3, 3}, {3, 3}, {3, 3}, {3, 6}, {6, 8}});
+  compareElts (elt, 10, {{3}, {3}, {3}, {3}, {6}, {8}});
   comparePayload (payload, {1.5, 2.5, 3.5, 20.3, 20.4, 20.5, 20.5, 21.5});
   // [1.5 2.5 3.5] [] [] [] [20.3 20.4 20.5] [20.5 21.5]
 
   jtyp1(v, 0).clear();
   assert (linkedVec->size() == 5);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 3}, {3, 5}});
+  compareElts (elt, 10, {{0}, {0}, {0}, {0}, {3}, {5}});
   comparePayload (payload, {20.3, 20.4, 20.5, 20.5, 21.5});
   // [] [] [] [] [20.3 20.4 20.5] [20.5 21.5]
 
   jtyp1(v, 1).resize(3, 4.4);
   assert (linkedVec->size() == 8);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 6}, {6, 8}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {6}, {8}});
   comparePayload (payload, {4.4, 4.4, 4.4, 20.3, 20.4, 20.5, 20.5, 21.5});
   // [] [4.4 4.4 4.4] [] [] [20.3 20.4 20.5] [20.5 21.5]
 
   jtyp1(v, 1).resize(1);
   assert (linkedVec->size() == 6);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 1}, {1, 1}, {1, 1}, {1, 4}, {4, 6}});
+  compareElts (elt, 10, {{0}, {1}, {1}, {1}, {4}, {6}});
   comparePayload (payload, {4.4, 20.3, 20.4, 20.5, 20.5, 21.5});
   // [] [4.4] [] [] [20.3 20.4 20.5] [20.5 21.5]
 
@@ -259,7 +259,7 @@ void test1()
   }
   assert (linkedVec->size() == 5);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 1}, {1, 1}, {1, 1}, {1, 3}, {3, 5}});
+  compareElts (elt, 10, {{0}, {1}, {1}, {1}, {3}, {5}});
   comparePayload (payload, {4.4, 20.3, 20.5, 20.5, 21.5});
   // [] [4.4] [] [] [20.3 20.5] [20.5 21.5]
 
@@ -269,7 +269,7 @@ void test1()
   }
   assert (linkedVec->size() == 6);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 1}, {1, 1}, {1, 1}, {1, 3}, {3, 6}});
+  compareElts (elt, 10, {{0}, {1}, {1}, {1}, {3}, {6}});
   comparePayload (payload, {4.4, 20.3, 20.5, 20.5, 30.2, 21.5});
   // [] [4.4] [] [] [20.3 20.5] [20.5 30.2 21.5]
 
@@ -279,7 +279,7 @@ void test1()
   }
   assert (linkedVec->size() == 4);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 1}, {1, 1}, {1, 1}, {1, 3}, {3, 4}});
+  compareElts (elt, 10, {{0}, {1}, {1}, {1}, {3}, {4}});
   comparePayload (payload, {4.4, 20.3, 20.5, 21.5});
   // [] [4.4] [] [] [20.3 20.5] [21.5]
 
@@ -289,7 +289,7 @@ void test1()
   }
   assert (linkedVec->size() == 7);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 1}, {1, 1}, {1, 1}, {1, 6}, {6, 7}});
+  compareElts (elt, 10, {{0}, {1}, {1}, {1}, {6}, {7}});
   comparePayload (payload, {4.4, 20.3, 30.5, 30.5, 30.5, 20.5, 21.5});
   // [] [4.4] [] [] [20.3 30.5 30.5 30.5 20.5] [21.5]
 
@@ -300,14 +300,14 @@ void test1()
   }
   assert (linkedVec->size() == 9);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 8}, {8, 9}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {8}, {9}});
   comparePayload (payload, {40.1, 40.2, 4.4, 20.3, 30.5, 30.5, 30.5, 20.5, 21.5});
   // [] [40.1 40.2 4.4] [] [] [20.3 30.5 30.5 30.5 20.5] [21.5]
 
   jtyp1(v, 4).pop_back();
   assert (linkedVec->size() == 8);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 7}, {7, 8}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {7}, {8}});
   comparePayload (payload, {40.1, 40.2, 4.4, 20.3, 30.5, 30.5, 30.5, 21.5});
   // [] [40.1 40.2 4.4] [] [] [20.3 30.5 30.5 30.5] [21.5]
 
@@ -317,21 +317,21 @@ void test1()
   }
   assert (linkedVec->size() == 10);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 5}, {5, 5}, {5, 5}, {5, 9}, {9, 10}});
+  compareElts (elt, 10, {{0}, {5}, {5}, {5}, {9}, {10}});
   comparePayload (payload, {40.1, 40.2, 50.1, 50.2, 4.4, 20.3, 30.5, 30.5, 30.5, 21.5});
   // [] [40.1 40.2 50.1 50.2 4.4] [] [] [20.3 30.5 30.5 30.5] [21.5]
 
   jtyp1(v, 5).append_range (std::vector<float> {60.4, 60.5});
   assert (linkedVec->size() == 12);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 5}, {5, 5}, {5, 5}, {5, 9}, {9, 12}});
+  compareElts (elt, 10, {{0}, {5}, {5}, {5}, {9}, {12}});
   comparePayload (payload, {40.1, 40.2, 50.1, 50.2, 4.4, 20.3, 30.5, 30.5, 30.5, 21.5, 60.4, 60.5});
   // [] [40.1 40.2 50.1 50.2 4.4] [] [] [20.3 30.5 30.5 30.5] [21.5 60.4 60.5]
 
   jtyp1(v, 1).assign (3, 60.3);
   assert (linkedVec->size() == 10);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 7}, {7, 10}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {7}, {10}});
   comparePayload (payload, {60.3, 60.3, 60.3, 20.3, 30.5, 30.5, 30.5, 21.5, 60.4, 60.5});
   // [] [60.3 60.3 60.3] [] [] [20.3 30.5 30.5 30.5] [21.5 60.4 60.5]
 
@@ -341,14 +341,14 @@ void test1()
   }
   assert (linkedVec->size() == 8);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 5}, {5, 8}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {5}, {8}});
   comparePayload (payload, {60.3, 60.3, 60.3, 70.4, 71.5, 21.5, 60.4, 60.5});
   // [] [60.3 60.3 60.3] [] [] [70.4 71.5] [21.5 60.4 60.5]
 
   jtyp1(v, 5).assign_range (std::vector<float> {72.6, 73.7});
   assert (linkedVec->size() == 7);
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 0}, {0, 3}, {3, 3}, {3, 3}, {3, 5}, {5, 7}});
+  compareElts (elt, 10, {{0}, {3}, {3}, {3}, {5}, {7}});
   comparePayload (payload, {60.3, 60.3, 60.3, 70.4, 71.5, 72.6, 73.7});
   // [] [60.3 60.3 60.3] [] [] [70.4 71.5] [72.6 73.7]
 
@@ -393,8 +393,8 @@ void test2()
   v.setStore (&store);
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
-  std::ranges::copy (std::vector<Elt>{{0, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 5}}, elt);
-  std::fill_n (elt+6, 4, Elt{5, 5});
+  std::ranges::copy (std::vector<Elt>{{2}, {2}, {2}, {2}, {2}, {5}}, elt);
+  std::fill_n (elt+6, 4, Elt{5});
   std::ranges::copy (std::vector<float> {1.5, 2.5, 3.5, 4.5, 5.5}, payload);
   SG::IAuxTypeVector* linkedVec = store.linkedVector (jvec_id);
   // [1.5 2.5] [] [] [] [] [3.5, 4.5, 5.5]
@@ -402,8 +402,8 @@ void test2()
   auto elt_span = jtyp1.getEltSpan (v);
   auto payload_span = jtyp1.getPayloadSpan (v);
   assert (elt_span.size() == 10);
-  assert (elt_span[1] == Elt(2, 2));
-  assert (elt_span[5] == Elt(2, 5));
+  assert (elt_span[1] == Elt(2));
+  assert (elt_span[5] == Elt(5));
   assert (payload_span.size() == 5);
   assert (floatEQ (payload_span[1], 2.5));
   assert (floatEQ (payload_span[3], 4.5));
@@ -422,12 +422,12 @@ void test2()
 
   span[0][1] = 9.5;
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 5}});
+  compareElts (elt, 10, {{2}, {2}, {2}, {2}, {2}, {5}});
   comparePayload (payload, {1.5, 9.5, 3.5, 4.5, 5.5});
 
   span[1] = std::vector<float> {20.5, 21.5, 22.5};
   payload = reinterpret_cast<Payload*> (linkedVec->toPtr());
-  compareElts (elt, 10, {{0, 2}, {2, 5}, {5, 5}, {5, 5}, {5, 5}, {5, 8}});
+  compareElts (elt, 10, {{2}, {5}, {5}, {5}, {5}, {8}});
   comparePayload (payload, {1.5, 9.5, 20.5, 21.5, 22.5, 3.5, 4.5, 5.5});
 
   std::vector<float> pvec;

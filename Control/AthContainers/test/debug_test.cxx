@@ -143,7 +143,7 @@ template <class T>
 void test3_one (const char* name, const T& val)
 {
   SG::auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
-  std::cout << name << " " << SGdebug::aux_var_as_string (id, &val) << "\n";
+  std::cout << name << " " << SGdebug::aux_var_as_string (id, &val, 0) << "\n";
 }
 
 
