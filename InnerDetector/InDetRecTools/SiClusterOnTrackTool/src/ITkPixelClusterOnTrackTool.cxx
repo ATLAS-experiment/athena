@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -58,22 +58,9 @@ namespace ITk
 
 PixelClusterOnTrackTool::PixelClusterOnTrackTool
   (const std::string &t, const std::string &n, const IInterface *p) :
-  ::AthAlgTool(t, n, p),
-  m_pixelid(nullptr),
-  m_NnClusterizationFactory("InDet::NnClusterizationFactory/NnClusterizationFactory", this),
-  m_doNotRecalibrateNN(false),
-  m_noNNandBroadErrors(false),
-  m_usingTIDE_Ambi(false),
-  m_splitClusterMapKey("")
-  {
+  ::AthAlgTool(t, n, p)
+{
   declareInterface<IRIO_OnTrackCreator>(this);
-
-  declareProperty("PositionStrategy", m_positionStrategy = 1, "Which calibration of cluster positions");
-  declareProperty("NnClusterizationFactory", m_NnClusterizationFactory);
-  declareProperty("SplitClusterAmbiguityMap", m_splitClusterMapKey);//Remove Later
-  declareProperty("doNotRecalibrateNN", m_doNotRecalibrateNN);
-  declareProperty("m_noNNandBroadErrors", m_noNNandBroadErrors);
-  declareProperty("RunningTIDE_Ambi", m_usingTIDE_Ambi);
 }
 
 

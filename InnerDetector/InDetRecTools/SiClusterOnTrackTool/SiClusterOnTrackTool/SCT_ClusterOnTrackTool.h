@@ -91,19 +91,23 @@ public:
   // Private data:
   ///////////////////////////////////////////////////////////////////
 
-   //! toolhandle for central error scaling
-  //   SG::ReadCondHandleKey<SCTRIO_OnTrackErrorScaling> m_sctErrorScalingKey
-  //     {this,"SCTErrorScalingKey", "/Indet/TrkErrorScalingSCT", "Key for SCT error scaling conditions data."};
-   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_sctErrorScalingKey
-     {this,"SCTErrorScalingKey", "/Indet/TrkErrorScalingSCT", "Key for SCT error scaling conditions data."};
+  //! toolhandle for central error scaling
+  SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_sctErrorScalingKey
+  {this,"SCTErrorScalingKey", "/Indet/TrkErrorScalingSCT", "Key for SCT error scaling conditions data."};
 
-   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retreive Lorentz angle"};
-   //! flag storing if errors need scaling or should be kept nominal
+  ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool
+    {this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retrieve Lorentz angle"};
 
-   //! job options
-   bool                               m_option_make2dimBarrelClusters;
-   int                                m_option_errorStrategy;
-   int                                m_option_correctionStrategy;
+  //! job options
+  BooleanProperty m_option_make2dimBarrelClusters
+    {this, "MakeTwoDimBarrelClusters", false,
+     "flag if strip length should be part of the measurement"};
+  IntegerProperty m_option_errorStrategy
+    {this, "ErrorStrategy", -1,
+     "if ErrorStrategy < 0, keep previous errors else recompute"};
+  IntegerProperty m_option_correctionStrategy
+    {this, "CorrectionStrategy", -1,
+     "if CorrectionStrategy >= 0, apply a correction to the cluster position"};
 };
 
 } // end of namespace InDet

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITkPixelClusterOnTrackTool_H
@@ -133,9 +133,11 @@ private:
 
   //! toolhandle for central error scaling
   //! flag storing if errors need scaling or should be kept nominal
-  int                                m_positionStrategy;
+  IntegerProperty m_positionStrategy{this, "PositionStrategy", 1,
+      "Which calibration of cluster positions"};
   mutable std::atomic_int            m_errorStrategy{2};
-  IntegerProperty                    m_errorStrategyProperty{this, "ErrorStrategy", 2, "Which calibration of cluster position errors"};
+  IntegerProperty m_errorStrategyProperty{this, "ErrorStrategy", 2,
+      "Which calibration of cluster position errors"};
   
   
   /** @brief Flag controlling how module distortions are taken into account:
@@ -151,22 +153,26 @@ private:
   case 4 -----> Read curvatures and twists from database (not ready yet);
   */
   //! identifier-helper
-  const PixelID*                     m_pixelid;
+  const PixelID*                     m_pixelid = nullptr;
   
   /** Enable NN based calibration (do only if NN calibration is applied) **/
   bool                              m_applyNNcorrection{false};
   BooleanProperty                   m_applyNNcorrectionProperty{this, "applyNNcorrection", false};
   
   /** NN clusterizationi factory for NN based positions and errors **/
-  ToolHandle<InDet::NnClusterizationFactory>                   m_NnClusterizationFactory;
+  ToolHandle<InDet::NnClusterizationFactory> m_NnClusterizationFactory
+    {this, "NnClusterizationFactory",
+	"InDet::NnClusterizationFactory/NnClusterizationFactory"};
 
-  bool                                                  m_doNotRecalibrateNN;
-  bool                                                  m_noNNandBroadErrors;
-       /** Enable different treatment of  cluster errors based on NN information (do only if TIDE ambi is run) **/
-  bool                      m_usingTIDE_Ambi;
-  SG::ReadHandleKey<InDet::PixelGangedClusterAmbiguities>    m_splitClusterMapKey;
+  BooleanProperty m_doNotRecalibrateNN{this, "doNotRecalibrateNN", false};
+  BooleanProperty m_noNNandBroadErrors{this, "noNNandBroadErrors", false};
+  /** Enable different treatment of  cluster errors based on NN information (do only if TIDE ambi is run) **/
+  BooleanProperty m_usingTIDE_Ambi{this, "RunningTIDE_Ambi", false};
+  SG::ReadHandleKey<InDet::PixelGangedClusterAmbiguities> m_splitClusterMapKey
+    {this, "SplitClusterAmbiguityMap", ""};
 
-  SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer>   m_clusterSplitProbContainer{this, "ClusterSplitProbabilityName", "",""};
+  SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer> m_clusterSplitProbContainer
+    {this, "ClusterSplitProbabilityName", "",""};
 
 };
 

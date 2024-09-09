@@ -29,19 +29,8 @@ using CLHEP::deg;
 
 InDet::SCT_ClusterOnTrackTool::SCT_ClusterOnTrackTool
   (const std::string &t, const std::string &n, const IInterface *p) :
-  AthAlgTool(t, n, p),
-  m_option_make2dimBarrelClusters(false),
-  m_option_errorStrategy(-1),
-  m_option_correctionStrategy(-1) {
-  // declareInterface<SCT_ClusterOnTrackTool>(this);
+    AthAlgTool(t, n, p) {
   declareInterface<IRIO_OnTrackCreator>(this);
-
-  declareProperty("MakeTwoDimBarrelClusters", m_option_make2dimBarrelClusters,
-                  "flag if strip length should be part of the measurement");
-  declareProperty("ErrorStrategy", m_option_errorStrategy,
-                  "if ErrorStrategy < 0, keep previous errors else recompute");
-  declareProperty("CorrectionStrategy", m_option_correctionStrategy,
-                  "if CorrectionStrategy >= 0, apply a correction to the cluster position");
 }
 
 ///////////////////////////////////////////////////////////////////
