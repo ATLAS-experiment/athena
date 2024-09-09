@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_NavGraph_h
@@ -146,7 +146,7 @@ namespace TrigCompositeUtils {
        * @return Vector of final nodes. These are the nodes which were added without any "comingFrom". 
        * To explore the NavGraph fully, one should explore recursively all paths originating from each of the final nodes.
        **/
-      std::vector<NavGraphNode*> finalNodes() const;
+      const std::vector<NavGraphNode*>& finalNodes() const;
 
       /**
        * @brief Get all nodes.

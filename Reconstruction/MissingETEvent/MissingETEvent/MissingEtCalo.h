@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MISSINGETEVENT_MISSINGETCALO_H
@@ -71,7 +71,7 @@ class MissingEtCalo : public MissingET
   double eyCalo(CaloIndex aCalo) const;
   double etSumCalo(CaloIndex aCalo) const;
   unsigned int ncellCalo(CaloIndex aCalo) const;
-  std::string calibType() const;
+  const std::string& calibType() const;
 
   const std::vector<double>& exCaloVec() const;
   const std::vector<double>& eyCaloVec() const;
