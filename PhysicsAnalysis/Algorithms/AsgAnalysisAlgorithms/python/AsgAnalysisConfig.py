@@ -281,6 +281,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             "False or True to override.")
         self.addOption ('histPattern', None, type=str,
             info="the histogram name pattern for the cut-bookkeeper histogram names")
+        self.addOption ('streamName', 'ANALYSIS', type=str,
+            info="name of the output stream to save the cut bookkeeper in. "
+            "The default is ANALYSIS.")
 
     def makeAlgs (self, config) :
 
@@ -297,6 +300,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
+            alg.RootStreamName = self.streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics:
                 alg.enableSystematics = self.cutBookkeepersSystematics
