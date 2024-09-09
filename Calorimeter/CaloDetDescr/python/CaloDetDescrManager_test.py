@@ -57,6 +57,8 @@ class CaloDetDescrManagerAlg (Alg):
                     print("CaloDD: z_raw:{:.2f}, z:{:.2f}, dz:{:.2f}".
                           format(dd.z_raw(), dd.z(), dd.dz()))
             print()
+        import sys
+        sys.stdout.flush()
 
         return StatusCode.Success
 
