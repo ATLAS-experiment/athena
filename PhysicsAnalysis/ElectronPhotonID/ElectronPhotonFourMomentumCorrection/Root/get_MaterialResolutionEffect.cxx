@@ -111,8 +111,14 @@ double get_MaterialResolutionEffect::getDelta(int particle_type, double energy, 
       double et2=et;
       if (et<5.) et2=5.1;
       if (et>2000) et2=1999.;
+      if (aeta>=2.5) aeta=2.49;
       if (particle_type==3) particle_type=2;
-      return 0.01*m_hsyst_IBL_PP0.at(particle_type)->GetBinContent(m_hsyst_IBL_PP0.at(particle_type)->GetXaxis()->FindBin(aeta),m_hsyst_IBL_PP0.at(particle_type)->GetYaxis()->FindBin(et2));
+      int ieta = m_hsyst_IBL_PP0.at(particle_type)->GetXaxis()->FindBin(aeta);
+      int iet = m_hsyst_IBL_PP0.at(particle_type)->GetYaxis()->FindBin(et2);
+      if (m_interpolate) {
+         return 0.01*interpolateTH1(m_hsyst_IBL_PP0_ProjectionY[particle_type][ieta - 1].get(), et2, true);
+      }
+      else return 0.01*m_hsyst_IBL_PP0.at(particle_type)->GetBinContent(ieta, iet);
    }
 
 
@@ -137,12 +143,58 @@ double get_MaterialResolutionEffect::getDelta(int particle_type, double energy, 
 
    //cout << " in getDelta  isyst: " << isyst << " ieta " << ieta << " " << " particle_type " << particle_type << endl;
    //cout << " m_hSystResol " << m_hSystResol[isyst][ieta][particle_type] << endl;
-
-   if (response_type==0) {
-      return 0.01*m_hSystPeak.at(isyst).at(ieta).at(particle_type)->GetBinContent(ibinEt+1);
+   auto& hist = response_type==0 ? m_hSystPeak : m_hSystResol;
+   if (m_interpolate) {
+      return 0.01*interpolateTH1(hist.at(isyst).at(ieta).at(particle_type).get(), et, true);
    }
-   else {
-      return 0.01*m_hSystResol.at(isyst).at(ieta).at(particle_type)->GetBinContent(ibinEt+1);
-   }
+   else return 0.01*hist.at(isyst).at(ieta).at(particle_type)->GetBinContent(ibinEt+1);
 
 }
+
+//=========================================================================
+void get_MaterialResolutionEffect::store_IBL_PP0_YProjections()
+{
+   for (size_t i = 0; i < m_hsyst_IBL_PP0.size(); i++) {
+      if (m_hsyst_IBL_PP0[i]) {
+            int nEtaBins = m_hsyst_IBL_PP0[i]->GetNbinsX();
+            // // Resize the inner vector to match the size of TH2 x-axis bins
+            m_hsyst_IBL_PP0_ProjectionY[i].resize(nEtaBins);
+            for (int ieta = 1; ieta <= nEtaBins; ieta++) {
+               std::string histName = "h1d_IBL_PP0_ptype" + std::to_string(i) + "_EtaBin_" + std::to_string(ieta);
+               m_hsyst_IBL_PP0_ProjectionY[i][ieta - 1].reset( dynamic_cast<TH1*>(m_hsyst_IBL_PP0[i]->ProjectionY(histName.c_str(), ieta, ieta)) );
+               m_hsyst_IBL_PP0_ProjectionY[i][ieta - 1]->SetDirectory( nullptr );
+            }
+      }      
+   }
+}
+
+//=========================================================================
+double get_MaterialResolutionEffect::interpolateTH1(TH1 *hist, double x, bool abs_bins) const
+{
+   if (!hist) return 0.;
+   int nbins = hist->GetNbinsX();
+
+   if(x<=hist->GetBinCenter(1)) {
+      return abs_bins? std::abs(hist->GetBinContent(1)) : hist->GetBinContent(1);
+   } 
+   else if(x>=hist->GetBinCenter(nbins)) {
+      return abs_bins? std::abs(hist->GetBinContent(nbins)) : hist->GetBinContent(nbins);
+   } 
+   else {
+      int xbin = hist->FindBin(x);
+      int xbin0, xbin1;
+      if(x<=hist->GetBinCenter(xbin)) {
+         xbin0 = xbin - 1;
+         xbin1 = xbin;
+      } 
+      else {
+         xbin0 = xbin;
+         xbin1 = xbin + 1;
+      }
+      double y0 = abs_bins? std::abs(hist->GetBinContent(xbin0)) : hist->GetBinContent(xbin0);
+      double x0 = hist->GetBinCenter(xbin0);
+      double y1 = abs_bins? std::abs(hist->GetBinContent(xbin1)) : hist->GetBinContent(xbin1);
+      double x1 = hist->GetBinCenter(xbin1);
+      return y0 + (x-x0)*((y1-y0)/(x1-x0));
+   }
+} 

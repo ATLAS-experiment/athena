@@ -147,6 +147,9 @@ namespace AtlasRoot {
 
     //`:if (!m_getMaterialDelta)
     m_getMaterialDelta.reset(new get_MaterialResolutionEffect());
+    if ( m_esmodel==egEnergyCorr::es2022_R21_Precision_lowmu ) {
+      m_getMaterialDelta->setInterpolate(true);
+    }
 
 
     // Energy corrections and systematic uncertainties
