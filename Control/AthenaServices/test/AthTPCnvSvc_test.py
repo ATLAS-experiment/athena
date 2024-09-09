@@ -1,10 +1,9 @@
+#!/usr/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Unit test for AthTPCnvSvc
 
-from AthenaCommon.AppMgr import theApp
 from AthenaPython import PyAthena
 
-theApp.EvtMax = 1
-theApp.initialize()
 tpsvc=PyAthena.py_svc('AthTPCnvSvc',True,'ITPCnvSvc')
 
 clidsvc=PyAthena.py_svc('ClassIDSvc',True,'IClassIDSvc')
