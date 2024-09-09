@@ -64,7 +64,7 @@ namespace Muon {
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override;
+        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP, const EventContext& /*ctx*/) const override;
 
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a prediction of the global position and direction.

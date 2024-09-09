@@ -909,11 +909,11 @@ namespace Rec {
 
                 std::unique_ptr<Trk::RIO_OnTrack> updatedRot;
                 if (!m_cscRotCreator.empty() && m_idHelperSvc->isCsc(id)) {
-                    updatedRot.reset(m_cscRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
+                    updatedRot.reset(m_cscRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters(), ctx));
                 } else if (!m_mdtRotCreator.empty() && m_idHelperSvc->isMdt(id)) {
-                    updatedRot.reset(m_mdtRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
+                    updatedRot.reset(m_mdtRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters(), ctx));
                 } else if (!m_muClusterRotCreator.empty() && (m_idHelperSvc->isMM(id) || m_idHelperSvc->issTgc(id))) {
-                    updatedRot.reset(m_muClusterRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
+                    updatedRot.reset(m_muClusterRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters(), ctx));
                 }
 
                 if (updatedRot) {

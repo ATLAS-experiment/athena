@@ -292,7 +292,7 @@ namespace Muon {
     }
 
     //================================================================================
-    MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP, const EventContext& /*ctx*/ ) const {
         return correct(RIO, TP.position(), TP.momentum().unit());
     }
 

@@ -326,7 +326,7 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
 
   const double thickness{design->thickness()};
   const IdentifierHash hashId{element->identifyHash()};
-  const double tanLorentz{m_lorentzAngleTool->getTanLorentzAngle(hashId)};
+  const double tanLorentz{m_lorentzAngleTool->getTanLorentzAngle(hashId, ctx)};
 
   // ---**************************************
   //  Time of Flight Calculation - separate method?

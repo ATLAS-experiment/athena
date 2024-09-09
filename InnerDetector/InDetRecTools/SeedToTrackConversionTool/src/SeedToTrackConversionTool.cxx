@@ -121,7 +121,7 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
       if (thispar) {
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
-        std::unique_ptr<Trk::RIO_OnTrack> rot(m_rotcreator->correct(*prd, *thispar));
+        std::unique_ptr<Trk::RIO_OnTrack> rot(m_rotcreator->correct(*prd, *thispar, ctx));
         if (rot) {
           const Trk::TrackStateOnSurface* tsos = new Trk::TrackStateOnSurface(std::move(rot), thispar->uniqueClone(), nullptr, typePattern);
           traj->push_back(tsos);

@@ -167,7 +167,7 @@ namespace InDet {
       bool isBarrel = element->isBarrel();
 
       double shift = not isBarrel
-	? m_lorentzAngleTool->getLorentzShift(hashId)
+	? m_lorentzAngleTool->getLorentzShift(hashId, ctx)
 	: 0.;
       
       std::unique_ptr<InDet::SCT_ClusterCollection> collection = std::make_unique<InDet::SCT_ClusterCollection>(hashId);

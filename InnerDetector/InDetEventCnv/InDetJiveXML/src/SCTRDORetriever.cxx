@@ -105,7 +105,7 @@ namespace JiveXML {
 
         //Get the local position and store it
         Amg::Vector2D localPos = element->rawLocalPositionOfCell(id);
-        localPos[Trk::distPhi] += m_lorentzAngleTool->getLorentzShift(waferHash);
+        localPos[Trk::distPhi] += m_lorentzAngleTool->getLorentzShift(waferHash, Gaudi::Hive::currentContext());
         const std::pair<Amg::Vector3D, Amg::Vector3D> endsOfStrip = element->endsOfStrip(localPos);
         ident.push_back(DataType( id.get_compact() ));
         x0.push_back(DataType( endsOfStrip.first.x()*CLHEP::mm/CLHEP::cm));

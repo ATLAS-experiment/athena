@@ -13,6 +13,7 @@
 #define TRT_DriftCircleOnTrackRecalibrateTool_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "InDetRIO_OnTrack/TRTRIO_OnTrackErrorScaling.h"
@@ -45,7 +46,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize  () override;
   virtual Trk::RIO_OnTrack* correct
-    (const Trk::PrepRawData&,const Trk::TrackParameters&) const override; 
+    (const Trk::PrepRawData&,const Trk::TrackParameters&,const EventContext& ctx = Gaudi::Hive::currentContext()) const override; 
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:

@@ -6,6 +6,7 @@
 #define ITkPixelClusterOnTrackTool_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -79,7 +80,7 @@ public:
       of the intersecting track.
   */
   virtual InDet::PixelClusterOnTrack* correct(
-      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
+      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:

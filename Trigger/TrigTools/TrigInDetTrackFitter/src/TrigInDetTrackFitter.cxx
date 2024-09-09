@@ -579,7 +579,7 @@ void TrigInDetTrackFitter::fit(const TrackCollection& inputTracks, TrackCollecti
   for(auto trIt = inputTracks.begin(); trIt != inputTracks.end(); ++trIt) {
                 Trk::Track* fittedTrack    = nullptr;
                 Trk::Track* fittedTrackwTP = nullptr;
-		std::tie(fittedTrack,fittedTrackwTP) = fitTrack(**trIt, fieldCache, matEffects, addTPtoTSoS);
+		std::tie(fittedTrack,fittedTrackwTP) = fitTrack(**trIt, fieldCache, ctx, matEffects, addTPtoTSoS);
 		if (fittedTrack!=nullptr) {
 			fittedTracks.push_back(fittedTrack);
 		}
@@ -589,7 +589,7 @@ void TrigInDetTrackFitter::fit(const TrackCollection& inputTracks, TrackCollecti
 	}
 }
 
-std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Track& recoTrack, MagField::AtlasFieldCache& fieldCache, const Trk::ParticleHypothesis& matEffects, const bool addTPtoTSoS) const {
+std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Track& recoTrack, MagField::AtlasFieldCache& fieldCache, const EventContext& ctx, const Trk::ParticleHypothesis& matEffects, const bool addTPtoTSoS) const {
 
 	const Trk::TrackParameters* trackPars = recoTrack.perigeeParameters();
 	if(trackPars==nullptr) {
@@ -749,9 +749,9 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
         }
         for (auto pnIt = vpTrkNodes.begin(); pnIt != vpTrkNodes.end(); ++pnIt) {
           if((*pnIt)->isValidated()) {
-            Trk::TrackStateOnSurface* pTSS    = createTrackStateOnSurface(*pnIt,false);
+            Trk::TrackStateOnSurface* pTSS    = createTrackStateOnSurface(*pnIt,false, ctx);
             Trk::TrackStateOnSurface* pTSSwTP = nullptr;
-            if( addTPtoTSoS ) pTSSwTP = createTrackStateOnSurface(*pnIt,true);
+            if( addTPtoTSoS ) pTSSwTP = createTrackStateOnSurface(*pnIt,true,ctx);
             if(pTSS!=nullptr) {
               pParVec->push_back(pTSS);
             }
@@ -808,7 +808,7 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
 	return std::make_pair(fittedTrack,fittedTrackwTP);
 }
 
-Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::TrkBaseNode* pN, const bool addTPtoTSoS) const
+Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::TrkBaseNode* pN, const bool addTPtoTSoS, const EventContext& ctx) const
 {
   Trk::TrackStateOnSurface* pTSS=nullptr;
   char type=pN->getNodeType();
@@ -858,7 +858,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
         std::move(pM));
   }
   if(pTP==nullptr) return nullptr;
-  std::unique_ptr<Trk::RIO_OnTrack> pRIO{m_ROTcreator->correct(*pPRD,*pTP)};
+  std::unique_ptr<Trk::RIO_OnTrack> pRIO{m_ROTcreator->correct(*pPRD,*pTP,ctx)};
   if(pRIO==nullptr) {
     return nullptr;
   }

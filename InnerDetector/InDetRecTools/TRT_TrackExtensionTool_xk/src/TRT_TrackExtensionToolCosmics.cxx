@@ -339,7 +339,7 @@ void InDet::TRT_TrackExtensionToolCosmics::analyze_tpars(const std::vector<const
         lastz=(**parameterIter).position().z();
         const Trk::StraightLineSurface *slsurf=dynamic_cast<const Trk::StraightLineSurface *>(&circ->detectorElement()->surface(circ->identify())); if(!slsurf) continue;
         Trk::AtaStraightLine atasl((**parameterIter).position(),(**parameterIter).parameters()[Trk::phi],(**parameterIter).parameters()[Trk::theta],(**parameterIter).parameters()[Trk::qOverP],*slsurf);
-        const Trk::MeasurementBase *newmeas=m_riontrackN->correct(*circ,atasl); 
+        const Trk::MeasurementBase *newmeas=m_riontrackN->correct(*circ,atasl,Gaudi::Hive::currentContext()); 
 	event_data.m_measurement.push_back(newmeas);
 
       }	  

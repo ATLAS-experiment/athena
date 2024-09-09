@@ -778,7 +778,7 @@ int Trk::DistributedKalmanFilter::findOutliers(PVPNodes& pvpNodes, double cut) {
   return nOutl;
 }
 
-Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurface(Trk::TrkBaseNode* pN) const {
+Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurface(Trk::TrkBaseNode* pN, const EventContext& ctx) const {
   TrackStateOnSurface* pTSS = nullptr;
   char type = pN->getNodeType();
 
@@ -828,7 +828,7 @@ Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurfac
   }
   if (pTP == nullptr) return nullptr;
 
-  auto pRIO = std::unique_ptr<Trk::RIO_OnTrack>(m_ROTcreator->correct(*pPRD, *pTP));
+  auto pRIO = std::unique_ptr<Trk::RIO_OnTrack>(m_ROTcreator->correct(*pPRD, *pTP, ctx));
   if (pRIO == nullptr) {
     return nullptr;
   }
@@ -1135,7 +1135,7 @@ Trk::DistributedKalmanFilter::fit(
 
       for (std::unique_ptr<TrkBaseNode>& node : pvpNodes) {
         if (node->isValidated()) {
-          TrackStateOnSurface* pTSS = createTrackStateOnSurface(node.get());
+          TrackStateOnSurface* pTSS = createTrackStateOnSurface(node.get(),ctx);
           if (pTSS != nullptr) {
             pvTS->push_back(pTSS);
             chi2 += node->getChi2();

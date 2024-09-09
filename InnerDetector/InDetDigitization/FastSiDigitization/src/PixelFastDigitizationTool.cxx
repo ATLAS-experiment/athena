@@ -946,7 +946,7 @@ Trk::DigitizationModule* PixelFastDigitizationTool::buildDetectorModule(const In
 
   const bool useLorentzAngle{true};
   const IdentifierHash detElHash = hitSiDetElement->identifyHash();
-  float lorentzAngle   = useLorentzAngle ? hitSiDetElement->hitDepthDirection()*hitSiDetElement->hitPhiDirection()*std::atan(m_lorentzAngleTool->getTanLorentzAngle(detElHash)) : 0.;
+  float lorentzAngle   = useLorentzAngle ? hitSiDetElement->hitDepthDirection()*hitSiDetElement->hitPhiDirection()*std::atan(m_lorentzAngleTool->getTanLorentzAngle(detElHash, Gaudi::Hive::currentContext())) : 0.;
 
   // added for degugging
 

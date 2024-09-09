@@ -183,7 +183,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
         if (ispixel) params[Trk::loc2]=clusters[i]->localPosition().y();
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
-        std::unique_ptr<Trk::RIO_OnTrack> rot{m_rotcreator->correct(*clusters[i],*thispar)};        
+        std::unique_ptr<Trk::RIO_OnTrack> rot{m_rotcreator->correct(*clusters[i],*thispar,ctx)};        
         if (!rot) {
           continue;
         }
@@ -229,7 +229,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
        const Trk::Surface *surf=&clusters[i]->detectorElement()->surface(clusters[i]->identify());
        std::unique_ptr<const Trk::TrackParameters> thispar(m_extrapolator->extrapolate(ctx,*prevpar,*surf,Trk::alongMomentum,false,Trk::nonInteracting));
        if (!thispar) break;
-       Trk::RIO_OnTrack *rot=m_rotcreatorbroad->correct(*clusters[i],*thispar);
+       Trk::RIO_OnTrack *rot=m_rotcreatorbroad->correct(*clusters[i],*thispar,ctx);
 
        if (rot) {
          meassetOwn.emplace_back(rot);

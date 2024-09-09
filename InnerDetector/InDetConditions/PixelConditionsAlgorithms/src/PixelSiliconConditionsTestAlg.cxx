@@ -38,7 +38,7 @@ StatusCode PixelSiliconConditionsTestAlg::execute(){
     ATH_MSG_INFO("Module " << i << " "
                  << hv->getBiasVoltage(i) << " " 
                  << temp->getTemperature(i) << " " 
-                 << m_lorentzAngleTool->getLorentzShift(IdentifierHash(i)));
+                 << m_lorentzAngleTool->getLorentzShift(IdentifierHash(i), Gaudi::Hive::currentContext()));
     for (int j=0; j<16; j++) {
       try {
         // ignore invalid FEs

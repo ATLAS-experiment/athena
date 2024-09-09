@@ -80,7 +80,7 @@ ITk::StripClusterOnTrackTool::initialize() {
 
 InDet::SCT_ClusterOnTrack *
 ITk::StripClusterOnTrackTool::correct
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx ) const {
   const InDet::SCT_Cluster *cluster = nullptr;
 
   if (!(cluster = dynamic_cast<const InDet::SCT_Cluster *> (&rio))) {
@@ -236,7 +236,7 @@ ITk::StripClusterOnTrackTool::correct
     covariance(0, 0) = prevCov(0, 0);
     // scaling errors if required
     if (!m_stripErrorScalingKey.key().empty()) {
-      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_stripErrorScalingKey );
+      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_stripErrorScalingKey,ctx );
       covariance = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
                      ->getScaledCovariance(std::move(covariance), false, 0.0);
     }
@@ -244,7 +244,7 @@ ITk::StripClusterOnTrackTool::correct
     localParameters = Trk::LocalParameters(cluster->localPosition());
     // scaling errors if required
     if (!m_stripErrorScalingKey.key().empty()) {
-      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_stripErrorScalingKey);
+      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling(m_stripErrorScalingKey,ctx);
       covariance = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
                      ->getScaledCovariance(std::move(covariance), true,
                                            detectorElement->sinStereoLocal(cluster->localPosition()));

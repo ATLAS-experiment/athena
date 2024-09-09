@@ -144,7 +144,7 @@ class MdtDriftCircleOnTrackCreator: public AthAlgTool, public IMdtDriftCircleOnT
     
     /** @brief Base class method for correct. */
     virtual  Trk::RIO_OnTrack* correct(const Trk::PrepRawData& prd, 
-                                       const Trk::TrackParameters& tp) const override;
+                                       const Trk::TrackParameters& tp, const EventContext& /*ctx*/) const override;
 
     /** @brief Returns calibrated MdtDriftCircleOnTrack.
     Implementation of IRIO_OnTrackCreator method

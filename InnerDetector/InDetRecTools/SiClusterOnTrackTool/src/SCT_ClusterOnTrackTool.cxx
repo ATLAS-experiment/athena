@@ -114,7 +114,7 @@ InDet::SCT_ClusterOnTrackTool::finalize() {
 
 InDet::SCT_ClusterOnTrack *
 InDet::SCT_ClusterOnTrackTool::correct
-  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
+  (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar,const EventContext& ctx) const {
 
   if (not rio.type(Trk::PrepRawDataType::SCT_Cluster)) {
     return nullptr;
@@ -143,7 +143,7 @@ InDet::SCT_ClusterOnTrackTool::correct
   if (m_option_errorStrategy == 2 || m_option_correctionStrategy == 0) {
     double pNormal = trackPar.momentum().dot(EL->normal());
     double pPhi = trackPar.momentum().dot(Amg::AngleAxis3D(asin(-sinAlpha), Amg::Vector3D::UnitZ()) * EL->phiAxis());
-    dphi = std::atan(pPhi / pNormal) - std::atan(m_lorentzAngleTool->getTanLorentzAngle(iH));
+    dphi = std::atan(pPhi / pNormal) - std::atan(m_lorentzAngleTool->getTanLorentzAngle(iH, ctx));
   }
   Amg::Vector3D localstripdir(-sinAlpha, cosAlpha, 0.);
   Amg::Vector3D globalstripdir = trackPar.associatedSurface().transform().linear() * localstripdir;
@@ -234,14 +234,14 @@ InDet::SCT_ClusterOnTrackTool::correct
 
     if (!m_sctErrorScalingKey.key().empty()) {
       //SG::ReadCondHandle<SCTRIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
-      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
+      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey, ctx );
       cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
                 ->getScaledCovariance(std::move(cov), false, 0.0);
     }
   }else {                                           // endcap
     locpar = Trk::LocalParameters(SC->localPosition());
     if (!m_sctErrorScalingKey.key().empty()) {
-      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey );
+      SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_sctErrorScalingKey, ctx );
       cov = Trk::ErrorScalingCast<SCTRIO_OnTrackErrorScaling>(*error_scaling)
                 ->getScaledCovariance(std::move(cov), true,
                                       EL->sinStereoLocal(SC->localPosition()));

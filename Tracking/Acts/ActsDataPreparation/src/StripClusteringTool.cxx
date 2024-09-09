@@ -159,7 +159,7 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
     container.insert(container.end(), toAddCollection.begin(), toAddCollection.end());
 
     double lorentzShift
-	= m_lorentzAngleTool->getLorentzShift(element->identifyHash());
+	= m_lorentzAngleTool->getLorentzShift(element->identifyHash(), ctx);
 
     for (std::size_t i(0); i<clusters.size(); ++i) {
       Cluster& cl = clusters[i];
