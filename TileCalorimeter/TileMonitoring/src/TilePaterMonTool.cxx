@@ -156,10 +156,10 @@ StatusCode TilePaterMonTool:: initialize()
 /*---------------------------------------------------------*/
 // Method booking 1D Histograms and storing them in THistSvc
 // The method return the pointer to the new histogram
-TH1D * TilePaterMonTool::book1D(std::string subdir, std::string nam, std::string tit,
+TH1D * TilePaterMonTool::book1D(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, double xmin, double xmax,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1D* hist = new TH1D(TString(nam), TString(tit), nx, xmin, xmax);
@@ -167,10 +167,10 @@ TH1D * TilePaterMonTool::book1D(std::string subdir, std::string nam, std::string
   return hist;
 }
 
-TH1F * TilePaterMonTool::book1F(std::string subdir, std::string nam, std::string tit,
+TH1F * TilePaterMonTool::book1F(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, double xmin, double xmax,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1F* hist = new TH1F(TString(nam), TString(tit), nx, xmin, xmax);
@@ -178,10 +178,10 @@ TH1F * TilePaterMonTool::book1F(std::string subdir, std::string nam, std::string
   return hist;
 }
 
-TH1C* TilePaterMonTool::book1C(std::string subdir, std::string nam, std::string tit,
+TH1C* TilePaterMonTool::book1C(const std::string & subdir, const std::string & nam, const std::string & tit,
                                  int nx, double xmin, double xmax,
                                  Interval_t interval, MgmtAttr_t attribute,
-                                 std::string trigChain, std::string mergeAlgo)
+                                 const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1C* hist = new TH1C(TString(nam), TString(tit), nx, xmin, xmax);
@@ -189,10 +189,10 @@ TH1C* TilePaterMonTool::book1C(std::string subdir, std::string nam, std::string 
   return hist;
 }
 
-TH1S * TilePaterMonTool::book1S(std::string subdir, std::string nam, std::string tit,
+TH1S * TilePaterMonTool::book1S(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, double xmin, double xmax,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1S* hist = new TH1S(TString(nam), TString(tit), nx, xmin, xmax);
@@ -200,10 +200,10 @@ TH1S * TilePaterMonTool::book1S(std::string subdir, std::string nam, std::string
   return hist;
 }
 
-TH1S * TilePaterMonTool::book1Sx(std::string subdir, std::string nam, std::string tit,
+TH1S * TilePaterMonTool::book1Sx(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, const Double_t *xlgbins,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1S* hist = new TH1S(TString(nam), TString(tit), nx, xlgbins);
@@ -211,10 +211,10 @@ TH1S * TilePaterMonTool::book1Sx(std::string subdir, std::string nam, std::strin
   return hist;
 }
 
-TH1I* TilePaterMonTool::book1I(std::string subdir, std::string nam, std::string tit,
+TH1I* TilePaterMonTool::book1I(const std::string & subdir, const std::string & nam, const std::string & tit,
                                  int nx, double xmin, double xmax,
                                  Interval_t interval, MgmtAttr_t attribute,
-                                 std::string trigChain, std::string mergeAlgo)
+                                 const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TH1I* hist = new TH1I(TString(nam), TString(tit), nx, xmin, xmax);
@@ -225,33 +225,33 @@ TH1I* TilePaterMonTool::book1I(std::string subdir, std::string nam, std::string 
 /*---------------------------------------------------------*/
 // Method booking 2D Histograms and storing them in THistSvc
 // The method return the pointer to the new histogram
-TH2D* TilePaterMonTool::book2D(std::string subdir, std::string nam, std::string tit,
+TH2D* TilePaterMonTool::book2D(const std::string & subdir, const std::string & nam, const std::string & tit,
                                  int nx, double xmin, double xmax,
                                  int ny, double ymin, double ymax,
                                  Interval_t interval, MgmtAttr_t attribute,
-                                 std::string trigChain, std::string mergeAlgo)
+                                 const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2D* hist = new TH2D(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TH2F* TilePaterMonTool::book2F(std::string subdir, std::string nam, std::string tit,
+TH2F* TilePaterMonTool::book2F(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, double xmin, double xmax,
                                 int ny, double ymin, double ymax,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2F* hist = new TH2F(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TH2F* TilePaterMonTool::book2F(std::string subdir, std::string nam, std::string tit,
+TH2F* TilePaterMonTool::book2F(const std::string & subdir, const std::string & nam, const std::string & tit,
                                  int nx, double xmin, double xmax,
                                  int ny, const double* ybins,
                                  Interval_t interval, MgmtAttr_t attribute,
-                                 std::string trigChain, std::string mergeAlgo)
+                                 const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2F* hist = new TH2F(TString(nam), TString(tit), nx, xmin, xmax, ny, ybins);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
@@ -259,11 +259,11 @@ TH2F* TilePaterMonTool::book2F(std::string subdir, std::string nam, std::string 
 }
 
 
-TH2I* TilePaterMonTool::book2I(std::string subdir, std::string nam, std::string tit,
+TH2I* TilePaterMonTool::book2I(const std::string & subdir, const std::string & nam, const std::string & tit,
                                  int nx, double xmin, double xmax,
                                  int ny, double ymin, double ymax,
                                  Interval_t interval, MgmtAttr_t attribute,
-                                 std::string trigChain, std::string mergeAlgo)
+                                 const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2I* hist = new TH2I(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
@@ -271,65 +271,65 @@ TH2I* TilePaterMonTool::book2I(std::string subdir, std::string nam, std::string 
 }
 
 
-TH2S * TilePaterMonTool::book2S(std::string subdir, std::string nam, std::string tit,
+TH2S * TilePaterMonTool::book2S(const std::string & subdir, const std::string & nam, const std::string & tit,
                                   int nx, double xmin, double xmax,
                                   int ny, double ymin, double ymax,
                                   Interval_t interval, MgmtAttr_t attribute,
-                                  std::string trigChain, std::string mergeAlgo)
+                                  const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2S *hist = new TH2S(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TH2C* TilePaterMonTool::book2C(std::string subdir, std::string nam, std::string tit,
+TH2C* TilePaterMonTool::book2C(const std::string & subdir, const std::string & nam, const std::string & tit,
                                 int nx, double xmin, double xmax,
                                 int ny, double ymin, double ymax,
                                 Interval_t interval, MgmtAttr_t attribute,
-                                std::string trigChain, std::string mergeAlgo)
+                                const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TH2C* hist = new TH2C(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TProfile* TilePaterMonTool::bookProfile(std::string subdir, std::string nam, std::string tit,
+TProfile* TilePaterMonTool::bookProfile(const std::string & subdir, const std::string & nam, const std::string & tit,
                                           int nx, double xmin, double xmax,
                                           Interval_t interval, MgmtAttr_t attribute,
-                                          std::string trigChain, std::string mergeAlgo)
+                                          const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TProfile* hist = new TProfile(TString(nam), TString(tit), nx, xmin, xmax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TProfile* TilePaterMonTool::bookProfile(std::string subdir, std::string nam, std::string tit,
+TProfile* TilePaterMonTool::bookProfile(const std::string & subdir, const std::string & nam, const std::string & tit,
                                           int nx, double xmin, double xmax,
                                           double ymin, double ymax,
                                           Interval_t interval, MgmtAttr_t attribute,
-                                          std::string trigChain, std::string mergeAlgo)
+                                          const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TProfile* hist = new TProfile(TString(nam), TString(tit), nx, xmin, xmax, ymin, ymax);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TProfile* TilePaterMonTool::bookProfile(std::string subdir, std::string nam, std::string tit,
+TProfile* TilePaterMonTool::bookProfile(const std::string & subdir, const std::string & nam, const std::string & tit,
                                           int nx, const float* xbins,
                                           Interval_t interval, MgmtAttr_t attribute,
-                                          std::string trigChain, std::string mergeAlgo)
+                                          const std::string & trigChain, const std::string  & mergeAlgo)
 {
   TProfile* hist = new TProfile(TString(nam), TString(tit), nx, xbins);
   regHist(subdir, hist, interval, attribute, trigChain, mergeAlgo);
   return hist;
 }
 
-TProfile2D* TilePaterMonTool::bookProfile2D(std::string subdir, std::string nam, std::string tit,
+TProfile2D* TilePaterMonTool::bookProfile2D(const std::string & subdir, const std::string & nam, const std::string & tit,
                                              int nx, double xmin, double xmax,
                                              int ny, double ymin, double ymax,
                                              double zmin, double zmax,
                                              Interval_t interval, MgmtAttr_t attribute,
-                                             std::string trigChain, std::string mergeAlgo)
+                                             const std::string & trigChain, const std::string  & mergeAlgo)
 {
 
   TProfile2D* hist = new TProfile2D(TString(nam), TString(tit), nx, xmin, xmax, ny, ymin, ymax, zmin, zmax);
@@ -343,7 +343,7 @@ TProfile2D* TilePaterMonTool::bookProfile2D(std::string subdir, std::string nam,
 // The method return the pointer to the new histogram
 
 /*
-TTree* TilePaterMonTool::bookTree(std::string subdir, std::string nam, std::string tit) {
+TTree* TilePaterMonTool::bookTree(const std::string & subdir, const std::string & nam, std::string tit) {
   TTree* hist = new TTree(TString(nam), TString(tit));
   if (m_THistSvc_streamname.size() > 0) {
     if (m_THistSvc->regTree(m_stem + subdir + "/" + nam, hist).isFailure()) {

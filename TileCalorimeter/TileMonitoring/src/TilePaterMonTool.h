@@ -77,98 +77,98 @@ protected:
     return book2D(m_path, nam, tit, nx, xmin, xmax, ny, ymin, ymax);
  }
 
-  TH1D* book1D(std::string dir, std::string nam, std::string tit, 
+  TH1D* book1D(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH1F* book1F(std::string dir, std::string nam, std::string tit, 
+  TH1F* book1F(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH1I* book1I(std::string dir, std::string nam, std::string tit, 
+  TH1I* book1I(const std::string & dir, const  std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH1S* book1S(std::string dir, std::string nam, std::string tit, 
+  TH1S* book1S(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH1S* book1Sx(std::string dir, std::string nam, std::string tit,
+  TH1S* book1Sx(const std::string & dir, const std::string & nam, const std::string & tit,
                int nx, const Double_t *xlgbins,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH1C* book1C(std::string dir, std::string nam, std::string tit, 
+  TH1C* book1C(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH2D* book2D(std::string dir, std::string nam, std::string tit, 
+  TH2D* book2D(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax, 
                int ny, double ymin, double ymax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH2F* book2F(std::string dir, std::string nam, std::string tit, 
+  TH2F* book2F(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax, 
                int ny, double ymin, double ymax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH2F* book2F(std::string dir, std::string nam, std::string tit, 
+  TH2F* book2F(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax, 
                int ny, const double* ybins, 
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH2I* book2I(std::string dir, std::string nam, std::string tit,
+  TH2I* book2I(const std::string & dir, const std::string & nam, const std::string & tit,
                int nx, double xmin, double xmax,
                int ny, double ymin, double ymax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
 
 
-  TH2S* book2S(std::string dir, std::string nam, std::string tit, 
+  TH2S* book2S(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax, 
                int ny, double ymin, double ymax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TH2C* book2C(std::string dir, std::string nam, std::string tit, 
+  TH2C* book2C(const std::string & dir, const std::string & nam, const std::string & tit, 
                int nx, double xmin, double xmax, 
                int ny, double ymin, double ymax,
                Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-               std::string trigChain = "", std::string mergeAlgo = "");
+               const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
 
-  TProfile* bookProfile(std::string dir, std::string nam, std::string tit, 
+  TProfile* bookProfile(const std::string & dir, const std::string & nam, const std::string & tit, 
                         int nx, double xmin, double xmax, 
                         Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                        std::string trigChain = "", std::string mergeAlgo = "");
+                        const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TProfile* bookProfile(std::string dir, std::string nam, std::string tit, 
+  TProfile* bookProfile(const std::string & dir, const std::string & nam, const std::string & tit, 
                         int nx, double xmin, double xmax, 
                         double ymin, double ymax,
                         Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                        std::string trigChain = "", std::string mergeAlgo = "");
+                        const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
-  TProfile* bookProfile(std::string dir, std::string nam, std::string tit, 
+  TProfile* bookProfile(const std::string & dir, const std::string & nam, const std::string & tit, 
                         int nx, const float* xbins, 
                         Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                        std::string trigChain = "", std::string mergeAlgo = "");
-  TProfile2D* bookProfile2D(std::string dir, std::string nam, std::string tit, 
+                        const std::string & trigChain = "", const std::string & mergeAlgo = "");
+  TProfile2D* bookProfile2D(const std::string & dir, const std::string & nam, const std::string & tit, 
                             int nx, double xmin, double xmax,
                             int ny, double ymin, double ymax,
                             double zmin, double zmax,
                             Interval_t interval = run, MgmtAttr_t attribute = ATTRIB_MANAGED,
-                            std::string trigChain = "", std::string mergeAlgo = "");
+                            const std::string & trigChain = "", const std::string & mergeAlgo = "");
 
- // TTree* bookTree  (std::string dir, std::string nam, std::string tit);
+ // TTree* bookTree  (const std::string & dir, const std::string & nam, std::string tit);
 
   TGraph* bookGraph (const std::string& dir, const std::string& nam, const std::string& tit, int N, float* X, float* Y);
 

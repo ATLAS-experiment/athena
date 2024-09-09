@@ -37,6 +37,7 @@
 #include <iomanip>
 #include <cmath>
 #include <algorithm>
+#include <array>
 
 
 /*---------------------------------------------------------*/
@@ -178,7 +179,7 @@ StatusCode TileRawChannelMonTool::bookHists()
 void TileRawChannelMonTool::bookHists(int ros, int drawer)
 /*---------------------------------------------------------*/
 {
-  const char *gain[6] = { "_lo", "_hi", "", " low gain", " high gain", "" };
+  const std::array<std::string, 6> gain{ "_lo", "_hi", "", " low gain", " high gain", "" };
 
   std::ostringstream sStr;
   std::string moduleName = TileCalibUtils::getDrawerString(ros, drawer);
@@ -214,6 +215,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
           histName = sStr.str();
 
           sStr.str("");
+          if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookHists");
           sStr << moduleName << " CH " << ch << gain[3 + gn] << HistTitle[type];
           histTitle = sStr.str();
 
@@ -247,6 +249,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
             histName = sStr.str();
 
             sStr.str("");
+            if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookHists");
             sStr << moduleName << " CH " << ch << gain[3 + gn] << Hist2DTitle[type];
             histTitle = sStr.str();
 
@@ -281,6 +284,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
         histName = sStr.str();
 
         sStr.str("");
+        if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookHists");
         sStr << moduleName << " CH " << ch << gain[3 + gn] << " amp";
         histTitle = sStr.str();
 
@@ -334,6 +338,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
         histName = sStr.str();
 
         sStr.str("");
+        if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookHists");
         sStr << moduleName << " CH " << ch << gain[3 + gn] << " time";
         histTitle = sStr.str();
 
@@ -360,7 +365,7 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
 void TileRawChannelMonTool::bookDsp(int ros, int drawer)
 /*---------------------------------------------------------*/
 {
-  const char *gain[6] = { "_lo", "_hi", "", " low gain", " high gain", "" };
+  const std::array<std::string, 6> gain{ "_lo", "_hi", "", " low gain", " high gain", "" };
 
 
   std::ostringstream sStr;
@@ -383,6 +388,7 @@ void TileRawChannelMonTool::bookDsp(int ros, int drawer)
     std::string finalhistName = sStr.str();
 
     sStr.str("");
+    if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookDsp");
     sStr << moduleName << gain[3 + gn] << " Summary chi2 versus amp";
     std::string finalhistTitle = sStr.str();
 
@@ -420,6 +426,7 @@ void TileRawChannelMonTool::bookDsp(int ros, int drawer)
       histName = sStr.str();
 
       sStr.str("");
+      if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookDsp");
       sStr << moduleName << " CH " << ch << gain[3 + gn] << " Dsp Amp";
       histTitle = sStr.str();
 
@@ -903,7 +910,7 @@ void TileRawChannelMonTool::bookSummaryHistograms(int ros, int drawer)
 {
 
 
-  const char *gain[6] = { "_lo", "_hi", "", " low gain", " high gain", "" };
+  const std::array<std::string, 6> gain = { "_lo", "_hi", "", " low gain", " high gain", "" };
 
   // for bigain run book 2 histograms per channel
   // for monogain run book just one histogram per channel
@@ -931,6 +938,7 @@ void TileRawChannelMonTool::bookSummaryHistograms(int ros, int drawer)
           sStr << moduleName << gain[gn] << HistName[type] << CapName[cap];
           histName = sStr.str();
           sStr.str("");
+          if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookSummaryHistograms");
           sStr << moduleName << gain[3 + gn] << HistName[3 + type] << CapName[2 + cap];
           histTitle = sStr.str();
           m_data->m_finalHist1[ros][drawer][adc][cap].push_back(book1F(subDir, histName, histTitle, 48, 0, 48));
@@ -958,7 +966,7 @@ void TileRawChannelMonTool::bookSummaryHistograms(int ros, int drawer)
         sStr << moduleName << gain[gn] << HistName[type];
         histName = sStr.str();
         sStr.str("");
-        //sStr << moduleName << gain[3+gn] << HistName[4+type];
+        if (gn+3 >= std::ssize(gain)) throw std::out_of_range("Index out of range in TileRawChannelMonTool::bookSummaryHistograms");
         sStr << moduleName << gain[3 + gn] << HistName[5 + type];	//Lukas
         histTitle = sStr.str();
         m_data->m_finalHist1[ros][drawer][adc][0].push_back(book1F(subDir, histName, histTitle, 48, 0.0, 48.0));
