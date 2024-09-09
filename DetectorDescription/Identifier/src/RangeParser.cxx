@@ -10,7 +10,7 @@ namespace Identifier{
   RangeParser::run(Range& range, const std::string& text) { 
     range.clear (); 
     size_type pos = 0; 
-    return (parse (range, text, pos)); 
+    return parse(range, text, pos); 
   } 
 
   bool 

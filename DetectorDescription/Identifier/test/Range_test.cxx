@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
   const std::string empty;
   BOOST_CHECK_THROW(r1.build(empty), std::runtime_error);
   const std::string nonsense="hgfclsdvoiwe";
-  BOOST_CHECK_THROW(r1.build(nonsense), std::runtime_error);
+  BOOST_CHECK_THROW(r1.build(nonsense), std::invalid_argument);
   const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
   BOOST_CHECK_NO_THROW(r1.build(larExample));
 }

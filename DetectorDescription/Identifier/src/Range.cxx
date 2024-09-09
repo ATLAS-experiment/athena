@@ -21,7 +21,7 @@
 #include <iostream> 
 #include <iomanip> 
 #include <set>
-
+#include <stdexcept>
 #include <cassert> 
 
 using Identifier::RangeParser;
@@ -663,7 +663,11 @@ Range::identifier_factory::identifier_factory (const Range& range) : m_range (&r
           m_min << minimum; 
           m_max << maximum; 
           break; 
+        default:
+         throw std::runtime_error("Mode not recognised in Range::identifier_factory::identifier_factory.");
+         break;
         } 
+        
     } 
 } 
  
@@ -844,7 +848,10 @@ Range::const_identifier_factory::const_identifier_factory (const Range& range) :
           m_id << minimum; 
           m_min << minimum; 
           m_max << maximum; 
-          break; 
+          break;
+        default:
+          throw std::runtime_error("Mode not recognised in Range::const_identifier_factory::const_identifier_factory");
+          break;
         } 
     } 
 } 

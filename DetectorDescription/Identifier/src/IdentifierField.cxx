@@ -3,11 +3,16 @@
 */
 
 #include "Identifier/IdentifierField.h"
+#include "src/IdentifierFieldParser.h"
 #include <limits>
 #include <algorithm>
 #include <iostream>
 #include <bit>
+#include <array>
+#include <cctype> //std::isspace
+#include <format>
 
+using namespace Identifier;
 
 
 //------------------------------------------------------------------
@@ -85,13 +90,13 @@ IdentifierField::IdentifierField (element_type minimum, element_type maximum)
 //----------------------------------------------- 
 bool 
 IdentifierField::get_previous (element_type current, element_type& previous) const{
-  switch (m_mode) 
-    { 
-    case unbounded: 
+  switch (m_mode) { 
+    case unbounded: {
       previous = current - 1; 
       return (current != std::numeric_limits<element_type>::min());
       break; 
-    case low_bounded: 
+    }
+    case low_bounded: {
       if (current == m_minimum) {
         previous = current;
         return (false);
@@ -99,11 +104,13 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
       previous = current - 1; 
       return (true); 
       break; 
-    case high_bounded: 
+    }
+    case high_bounded: {
       previous = current - 1; 
       return (current != std::numeric_limits<element_type>::min());
-      break; 
-    case both_bounded: 
+      break;
+    }
+    case both_bounded: {
       if (current == m_minimum) {
         if (has_wrap_around == m_continuation_mode) {
             previous = m_maximum;
@@ -119,7 +126,8 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
       previous = current - 1; 
       return (true); 
       break; 
-    case enumerated: 
+    }
+    case enumerated: {
       size_type index = get_value_index(current);
       if (index == 0) {
         if (has_wrap_around == m_continuation_mode && !m_values.empty()) {
@@ -136,8 +144,12 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
       --index;
       previous = m_values[index];
       return (true);
-      break; 
-    } 
+      break;
+    }
+    //
+    default:
+      throw std::runtime_error("Unidentified mode value in IdentifierField::get_previous");
+  } 
   return (false); 
 }
 
@@ -145,17 +157,18 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
 //----------------------------------------------- 
 bool 
 IdentifierField::get_next(element_type current, element_type& next) const{
-  switch (m_mode) 
-    { 
-    case unbounded: 
+  switch (m_mode) { 
+    case unbounded: {
       next = current + 1; 
       return (current != std::numeric_limits<element_type>::max());
       break; 
-    case low_bounded: 
+    }
+    case low_bounded: {
       next = current + 1; 
       return (current != std::numeric_limits<element_type>::max());
       break; 
-    case high_bounded: 
+    }
+    case high_bounded: {
       if (current == m_maximum) {
         next = current;
         return (false);
@@ -163,7 +176,8 @@ IdentifierField::get_next(element_type current, element_type& next) const{
       next = current + 1; 
       return (true); 
       break; 
-    case both_bounded: 
+    }
+    case both_bounded: {
       if (current == m_maximum) {
         if (has_wrap_around == m_continuation_mode) {
             next = m_minimum;
@@ -179,7 +193,8 @@ IdentifierField::get_next(element_type current, element_type& next) const{
       next = current + 1; 
       return (true); 
       break; 
-    case enumerated: 
+    }
+    case enumerated: {
       size_type index = get_value_index(current);
       if ((index == m_values.size() - 1) || (index == 0 && current != m_values.front())) {
         if (has_wrap_around == m_continuation_mode) {
@@ -196,8 +211,12 @@ IdentifierField::get_next(element_type current, element_type& next) const{
       ++index;
       next = m_values[index];
       return (true);
-      break; 
+      break;
+    }
+    default:
+      throw std::runtime_error("Unidentified mode value in IdentifierField::get_next");
     } 
+    
  
   return (false); 
 }
@@ -542,38 +561,28 @@ IdentifierField::operator |= (const IdentifierField& other) {
 //----------------------------------------------- 
 IdentifierField::operator std::string () const { 
   std::string result; 
-  char temp[20]; 
 
   if (!is_valued ()) { 
-      result += "*"; 
+      result = "*"; 
     }  else  { 
       element_type minimum = get_minimum (); 
       element_type maximum = get_maximum (); 
  
       if (!has_maximum ()) { 
-          sprintf (temp, "%d", minimum); 
-          result += temp; 
-          result += ":"; 
+          result = std::format("{}:",minimum);
         }  else if (!has_minimum ())  { 
-          sprintf (temp, "%d", maximum); 
-          result += ":"; 
-          result += temp; 
+          result = std::format(":{}", maximum); 
         } else if (minimum == maximum)  { 
-          sprintf (temp, "%d", minimum); 
-          result += temp; 
+          result =  std::to_string(minimum);
         }  else  { 
           if (get_mode () == IdentifierField::enumerated)  { 
+              std::string prefix;
               for (size_type i = 0; i < get_indices (); ++i)  { 
-                  if (i > 0) result += ","; 
-                  sprintf (temp, "%d", get_value_at (i)); 
-                  result += temp; 
+                  result += prefix+std::to_string(get_value_at (i));
+                  prefix = ",";
                 } 
             } else  { 
-              sprintf (temp, "%d", minimum); 
-              result += temp; 
-              sprintf (temp, "%d", maximum); 
-              result += ":"; 
-                  result += temp; 
+              result = std::format("{}:{}", minimum, maximum);
             } 
         } 
     } 
@@ -632,6 +641,9 @@ IdentifierField::show() const {
   case IdentifierField::enumerated: 
       std::cout << "enumerated  ";
       break; 
+  default:
+      std::cout << "unknown  ";
+      break;
   } 
 
   std::cout << "cont mode  ";
@@ -725,3 +737,51 @@ IdentifierField::create_index_table() {
     }
   }
 }
+
+std::ostream & 
+operator << (std::ostream &out, const IdentifierField &c){
+  out<<std::string(c);
+  return out;
+}
+
+//stream extraction allows to read from text (e.g. text file)
+std::istream & 
+operator >> (std::istream &is, IdentifierField &idf){
+  idf.clear();
+  while (std::isspace(is.peek())){is.ignore();}
+  char c = is.peek();
+  if (c =='*'){
+    is.ignore();
+    //do nothing; the 'clear' set idf to unbounded
+  } else if (c==':'){ //upper bound
+    is.ignore();
+    idf.set_maximum(parseStreamDigits(is));
+  } else if (isDigit(c)){
+    if (c =='+') is.ignore();
+    int v = parseStreamDigits(is);//i is incremented
+    c = is.peek();
+    //possible: lowerbound, bound, list
+    if (c == ','){ //found comma, so definitely list
+      is.ignore();
+      std::vector<int> vec(1,v);
+      const auto  & restOfList = parseStreamList(is);
+      vec.insert(vec.end(), restOfList.begin(), restOfList.end());
+      idf.set(vec);
+    } else if (c == ':'){ //bounded, or lower bound
+      is.ignore();
+      c=is.peek(); //peek char after the colon
+      if (isDigit(c)){ //bounded
+        int v1 = parseStreamDigits(is);
+        idf.set(v,v1);
+      } else { //lower bound
+        idf.set_minimum(v);
+      }
+    } else { //remaining alternative: single number
+      idf.add_value(v);
+    }
+  } else {
+    throw std::invalid_argument("Invalid argument to stream extraction for IdentifierField");
+  }
+  return is;
+}
+  

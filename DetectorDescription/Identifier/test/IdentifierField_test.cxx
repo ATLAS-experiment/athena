@@ -11,6 +11,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/IdentifierField.h"
 #include "Identifier/ExpandedIdentifier.h"
+#include <sstream>
 
 
 BOOST_AUTO_TEST_SUITE(IdentifierFieldTest)
@@ -245,6 +246,10 @@ BOOST_AUTO_TEST_CASE(RangeFieldOperators){
   BOOST_CHECK(f2 != f3);
   //conversion to string, with conversion operator
   BOOST_TEST(std::string(f2) == std::string("0,1,2,3,4,5"));
+  //using stream insertion
+  std::ostringstream os;
+  os<<f2;
+  BOOST_TEST(os.str() == std::string("0,1,2,3,4,5"));
 }
 BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
   //Field 'or' is the method for combining range fields, giving a superset of valid indices
@@ -397,6 +402,35 @@ BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
   BOOST_TEST(enumField.get_maximum() == 20);
   BOOST_TEST(enumField.get_minimum() == 0);
   
+}
+BOOST_AUTO_TEST_CASE(RangeFieldStreamExtraction){
+  IdentifierField f;
+  std::istringstream asterisk("  *");
+  BOOST_CHECK_NO_THROW(asterisk>>f);
+  BOOST_TEST(std::string(f) == "*");
+  f.clear();
+  std::istringstream upperBound("  :999 ");
+  BOOST_CHECK_NO_THROW(upperBound>>f);
+  BOOST_TEST(std::string(f) == ":999");
+  f.clear();
+  std::istringstream lowerBound("  -10: ");
+  BOOST_CHECK_NO_THROW(lowerBound>>f);
+  BOOST_TEST(std::string(f) == "-10:");
+  f.clear();
+  std::istringstream bound("  -10:100 ");
+  BOOST_CHECK_NO_THROW(bound>>f);
+  BOOST_TEST(std::string(f) == "-10:100");
+  f.clear();
+  std::istringstream singleValue("  5 ");
+  BOOST_CHECK_NO_THROW(singleValue>>f);
+  BOOST_TEST(std::string(f) == "5");
+  f.clear();
+  std::istringstream list("  1, 2, 3,5 ");
+  BOOST_CHECK_NO_THROW(list>>f);
+  BOOST_TEST(std::string(f) == "1,2,3,5");
+  f.clear();
+  std::istringstream nonsense("ghghghgh");
+  BOOST_CHECK_THROW(nonsense>>f, std::invalid_argument);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -8,10 +8,7 @@ find_package( Boost COMPONENTS container unit_test_framework)
 
 # Component(s) in the package:
 atlas_add_library( Identifier
-   src/Identifier.cxx src/Identifier32.cxx
-   src/ExpandedIdentifier.cxx src/Range.cxx src/IdentifierField.cxx
-   src/RangeParser.cxx
-   src/Identifiable.cxx src/IdHelper.cxx src/IdContext.cxx
+   src/*.cxx
    PUBLIC_HEADERS Identifier
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel )
