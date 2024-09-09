@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,6 +38,7 @@
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"
 
+#include "TrkExInterfaces/IPropagator.h"
 
 #include <atomic>
 #include <mutex>
@@ -46,11 +47,6 @@
 #include <iosfwd>
 
 class MsgStream;
-
-namespace Trk {
-
-  class IPropagator       ;
-}
 
 namespace InDet {
 
@@ -106,12 +102,15 @@ class TRT_DetElementsRoadMaker_xk final:
       SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this,"AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"}; // Necessary only for dumpConditions method
 
-      ToolHandle<Trk::IPropagator>          m_proptool ;  // Propagator     tool
+      PublicToolHandle<Trk::IPropagator> m_proptool{this, "PropagatorTool",
+        "Trk::RungeKuttaPropagator/InDetPropagator"};
 
-      float                                m_width{}    ;  // Width of the roadInnerDetector/InDetRecTools/
-      double                               m_step{}     ;  // Max step allowed
+      FloatProperty m_width{this, "RoadWidth", 10.,
+	"Width of the roadInnerDetector/InDetRecTools/"};
+      DoubleProperty m_step{this, "MaxStep", 20., "Max step allowed"};
 
-      std::string                          m_fieldmode;  // Mode of magnetic field
+      StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+	"Mode of magnetic field"};
       Trk::MagneticFieldMode               m_fieldModeEnum{Trk::FullField};
 
       ///////////////////////////////////////////////////////////////////

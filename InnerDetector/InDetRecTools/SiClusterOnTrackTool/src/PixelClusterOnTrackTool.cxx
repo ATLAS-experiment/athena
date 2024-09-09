@@ -56,27 +56,8 @@ namespace
 
 InDet::PixelClusterOnTrackTool::PixelClusterOnTrackTool
   (const std::string &t, const std::string &n, const IInterface *p) :
-  ::AthAlgTool(t, n, p),
-  m_disableDistortions(false),
-  m_pixelid(nullptr),
-  m_NNIBLcorrection(false),
-  m_IBLAbsent(true),
-  m_NnClusterizationFactory("InDet::NnClusterizationFactory/NnClusterizationFactory", this),
-  m_IBLParameterSvc("IBLParameterSvc", n),
-  m_doNotRecalibrateNN(false),
-  m_noNNandBroadErrors(false),
-  m_usingTIDE_Ambi(false),
-  m_splitClusterMapKey("") {
+    ::AthAlgTool(t, n, p) {
   declareInterface<IRIO_OnTrackCreator>(this);
-
-  declareProperty("PositionStrategy", m_positionStrategy = 1, "Which calibration of cluster positions");
-  declareProperty("DisableDistortions", m_disableDistortions, "Disable simulation of module distortions");
-  declareProperty("NNIBLcorrection", m_NNIBLcorrection);
-  declareProperty("NnClusterizationFactory", m_NnClusterizationFactory);
-  declareProperty("SplitClusterAmbiguityMap", m_splitClusterMapKey);//Remove Later
-  declareProperty("doNotRecalibrateNN", m_doNotRecalibrateNN);
-  declareProperty("m_noNNandBroadErrors", m_noNNandBroadErrors);
-  declareProperty("RunningTIDE_Ambi", m_usingTIDE_Ambi);
 }
 
 ///////////////////////////////////////////////////////////////////

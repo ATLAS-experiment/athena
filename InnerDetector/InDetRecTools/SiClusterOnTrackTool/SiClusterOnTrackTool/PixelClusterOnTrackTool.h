@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelClusterOnTrackTool_H
@@ -126,18 +126,23 @@ private:
   SG::ReadCondHandleKey<PixelDistortionData> m_distortionKey
   {this, "PixelDistortionData", "PixelDistortionData", "Output readout distortion data"};
 
-  ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retreive Lorentz angle"};
+  ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool
+    {this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retrieve Lorentz angle"};
 
-  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_clusterErrorKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Output key of pixel cluster"};
+  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_clusterErrorKey
+    {this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Output key of pixel cluster"};
   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_pixelErrorScalingKey
     {this,"PixelErrorScalingKey", "/Indet/TrkErrorScalingPixel", "Key for pixel error scaling conditions data."};
 
   //! toolhandle for central error scaling
   //! flag storing if errors need scaling or should be kept nominal
-  bool                               m_disableDistortions;
-  int                                m_positionStrategy  ;
-  mutable std::atomic_int            m_errorStrategy{2};
-  IntegerProperty                    m_errorStrategyProperty{this, "ErrorStrategy", 2, "Which calibration of cluster position errors"};
+  BooleanProperty m_disableDistortions{this, "DisableDistortions", false,
+    "Disable simulation of module distortions"};
+  IntegerProperty m_positionStrategy{this, "PositionStrategy", 1,
+    "Which calibration of cluster positions"};
+  mutable std::atomic_int m_errorStrategy{2};
+  IntegerProperty  m_errorStrategyProperty
+    {this, "ErrorStrategy", 2, "Which calibration of cluster position errors"};
   
   
   /** @brief Flag controlling how module distortions are taken into account:
@@ -153,26 +158,30 @@ private:
   case 4 -----> Read curvatures and twists from database (not ready yet);
   */
   //! identifier-helper
-  const PixelID*                     m_pixelid;
+  const PixelID* m_pixelid = nullptr;
   
   /** Enable NN based calibration (do only if NN calibration is applied) **/
-  bool                              m_applyNNcorrection{false};
-  BooleanProperty                   m_applyNNcorrectionProperty{this, "applyNNcorrection", false};
-  bool                              m_NNIBLcorrection;
-  bool                              m_IBLAbsent;
+  BooleanProperty m_applyNNcorrectionProperty{this, "applyNNcorrection", false};
+  bool m_applyNNcorrection = false; // Updated depending on other configs
+  BooleanProperty m_NNIBLcorrection{this, "NNIBLcorrection", false};
+  bool m_IBLAbsent = true;
   
   /** NN clusterizationi factory for NN based positions and errors **/
-  ToolHandle<NnClusterizationFactory>                   m_NnClusterizationFactory;
-  ServiceHandle<IIBLParameterSvc>                       m_IBLParameterSvc;
+  ToolHandle<NnClusterizationFactory> m_NnClusterizationFactory
+    {this, "NnClusterizationFactory",
+     "InDet::NnClusterizationFactory/NnClusterizationFactory"};
+  ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc
+    {this, "IBLParameterSvc", "IBLParameterSvc"};
 
-  bool                                                  m_doNotRecalibrateNN;
-  bool                                                  m_noNNandBroadErrors;
-       /** Enable different treatment of  cluster errors based on NN information (do only if TIDE ambi is run) **/
-  bool                      m_usingTIDE_Ambi;
-  SG::ReadHandleKey<InDet::PixelGangedClusterAmbiguities>    m_splitClusterMapKey;
+  BooleanProperty m_doNotRecalibrateNN{this, "doNotRecalibrateNN", false};
+  BooleanProperty m_noNNandBroadErrors{this, "noNNandBroadErrors", false};
+  /** Enable different treatment of  cluster errors based on NN information (do only if TIDE ambi is run) **/
+  BooleanProperty m_usingTIDE_Ambi{this, "RunningTIDE_Ambi", false};
+  SG::ReadHandleKey<InDet::PixelGangedClusterAmbiguities> m_splitClusterMapKey
+    {this, "SplitClusterAmbiguityMap", ""};
 
-  SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer>   m_clusterSplitProbContainer
-     {this, "ClusterSplitProbabilityName", "",""};
+  SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer> m_clusterSplitProbContainer
+    {this, "ClusterSplitProbabilityName", "",""};
 
   //moved from static to member variable
   static constexpr int s_nbinphi=9;

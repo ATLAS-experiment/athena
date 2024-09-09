@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,7 +22,6 @@
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
 
-#include "TrkExInterfaces/IPropagator.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
@@ -41,17 +40,9 @@
 
 InDet::TRT_DetElementsRoadMaker_xk::TRT_DetElementsRoadMaker_xk
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p)                                          ,
-    m_proptool   ("Trk::RungeKuttaPropagator/InDetPropagator" ),
-    m_width (10.),
-    m_step (20.),
-    m_fieldmode ("MapSolenoid")
+  : AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_DetElementsRoadMaker>(this);
-  declareProperty("RoadWidth"            ,m_width      );
-  declareProperty("MaxStep"              ,m_step       );
-  declareProperty("PropagatorTool"       ,m_proptool   );
-  declareProperty("MagneticFieldMode"    ,m_fieldmode  );
 }
 
 ///////////////////////////////////////////////////////////////////
