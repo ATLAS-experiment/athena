@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <iosfwd>
 
 
 /** 
@@ -28,7 +29,8 @@ class IdentifierField
     low_bounded, 
     high_bounded, 
     both_bounded, 
-    enumerated 
+    enumerated,
+    nModes
   } ; 
 
   enum continuation_mode{ 
@@ -156,4 +158,9 @@ IdentifierField::get_value_at(size_type index) const {
   }
   return (0); 
 } 
+
+std::ostream & 
+operator << (std::ostream &out, const IdentifierField &c);
+std::istream & 
+operator >> (std::istream &in, IdentifierField &c);
 #endif

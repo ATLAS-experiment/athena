@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <iostream>
 #include <charconv>
+#include <stdexcept>
 
 static void 
 show_vector (const ExpandedIdentifier::element_vector& v){
@@ -38,11 +39,17 @@ ExpandedIdentifier::set (const std::string& text){
   const char *last = start+text.size();
   static constexpr auto ok=std::errc{};
   int v{};
+  bool foundNumber{};
   for (const char * p=start;p<last;++p){
     auto [ptr,ec] = std::from_chars(p, last,v);
     p=ptr;
     if (ec !=  ok) continue;
     add ((element_type) v);
+    foundNumber = true;
+  }
+  if (not foundNumber){
+    const std::string msg = "ExpandedIdentifier::set: '"+ text + "' is not a valid input string.";
+    throw std::invalid_argument(msg);
   }
 }
 

@@ -46,13 +46,13 @@ const std::string initialiserString{"-3/-2/-1/1/+2/3"};
 
 BOOST_AUTO_TEST_SUITE(ExpandedIdentifierTest)
 
-BOOST_AUTO_TEST_CASE(ExpandedIdentifierConstructors,  * utf::expected_failures(1)){
+BOOST_AUTO_TEST_CASE(ExpandedIdentifierConstructors){
   BOOST_CHECK_NO_THROW(ExpandedIdentifier());
   ExpandedIdentifier e;
   BOOST_CHECK_NO_THROW(ExpandedIdentifier f(e));
   BOOST_CHECK_NO_THROW(ExpandedIdentifier(std::move(e)));
   BOOST_CHECK_NO_THROW(ExpandedIdentifier k{initialiserString});
-  BOOST_CHECK_THROW(ExpandedIdentifier nonsense("piggy back"), std::runtime_error);
+  BOOST_CHECK_THROW(ExpandedIdentifier nonsense("piggy back"), std::invalid_argument);
   ExpandedIdentifier g(initialiserString);
   BOOST_CHECK_NO_THROW(ExpandedIdentifier h(g,3));
   BOOST_CHECK_NO_THROW(ExpandedIdentifier h = g);
@@ -62,8 +62,6 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierConstructors,  * utf::expected_failures(1
 BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
   ExpandedIdentifier g(initialiserString);
   BOOST_TEST(std::string(g) == "-3/-2/-1/1/2/3");
-  ExpandedIdentifier nonsense("piggy back");
-  BOOST_TEST(std::string(nonsense) == "");
   //
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
@@ -105,6 +103,7 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierComparison){
 
 BOOST_AUTO_TEST_CASE(ExpandedIdentifierModifiers){
   ExpandedIdentifier k;
+  BOOST_CHECK_THROW(k.set("nonsense"), std::invalid_argument);
   k.set("-3/-2/-1/1/2/3");
   BOOST_TEST(std::string(k) == "-3/-2/-1/1/2/3");
   BOOST_CHECK_NO_THROW(k.clear());
