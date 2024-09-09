@@ -21,8 +21,8 @@ class AthDictLoaderTestAlg (PyAthena.Alg):
              'std::vector<std::string>',
              'std::vector<std::basic_string<char> >',
              'std::vector<double>',
-             #'egamma',      # not enough karma (AtlasEvent)
-             #'egamma_p1',   # not enough karma (AtlasEvent)
+             'egamma',
+             'egamma_p1',
              'std::vector<std::string,std::allocator<std::string> >',
              'std::map<int,int>',
              'std::map<std::string,std::string>',
@@ -36,25 +36,14 @@ class AthDictLoaderTestAlg (PyAthena.Alg):
              'std::set<std::string>',
              'std::set<std::basic_string<char> >',
              'std::set<unsigned int>',
-             #'DataVector<TruthParticle>',      # not enough karma (AtlasEvent)
-             #'INavigable4Momentum',            # not enough karma (AtlasEvent)
-             #'INavigable4MomentumCollection',  # not enough karma (AtlasEvent)
-             #'IParticleContainer',             # not enough karma (AtlasEvent)
-             #'DataVector<egamma>',             # not enough karma (AtlasEvent) 
+             'DataVector<TruthParticle>',
+             'INavigable4Momentum',
+             'INavigable4MomentumCollection',
+             'IParticleContainer',
+             'DataVector<egamma>',
              'ElementLinkInt_p1',
              'ElementLink_p1<unsigned int>',
-             # FIXME: we should allow this kind of user-friendlyness...
-             #'ElementLink<INavigable4MomentumCollection>',
              ))
-        import os
-        if os.environ.get('AtlasProject','') == 'ManaCore':
-            # disable these tests as ElementLinkxyz are not in Mana
-            t = []
-            for ii in self.dict_tests:
-                if not (ii in ('ElementLinkInt_p1',
-                               'ElementLink_p1<unsigned int>')):
-                    t.append(ii)
-            self.dict_tests = tuple(t)
         # handle to AthDictLoaderSvc
         self.dict_svc = None
         return
@@ -93,6 +82,4 @@ class AthDictLoaderTestAlg (PyAthena.Alg):
 
 from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
-job += AthDictLoaderTestAlg (OutputLevel = Lvl.INFO)
-
-theApp.EvtMax = 1
+job += AthDictLoaderTestAlg()

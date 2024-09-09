@@ -74,12 +74,12 @@ atlas_add_test( MetaDataSvc_test
    POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( AthTPCnvSvc
-   SCRIPT athena.py AthenaServices/AthTPCnvSvc_test.py
+   SCRIPT test/AthTPCnvSvc_test.py
    LOG_IGNORE_PATTERN "^ApplicationMgr +INFO|ERROR Cannot set CLID.*AthenaServicesTestConverters"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( AthDictLoaderSvc
-   SCRIPT athena.py AthenaServices/AthDictLoaderSvc_test.py
+   SCRIPT athena.py --evtMax 1 AthenaServices/AthDictLoaderSvc_test.py
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest
@@ -90,7 +90,7 @@ atlas_add_test( ItemListSemanticsTest
 atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_install_joboptions( share/AthTPCnvSvc_test.py
+atlas_install_joboptions(
    share/AthDictLoaderSvc_test.py
    share/ReadAthenaPoolSeek_jobOptions.py
    share/AthenaOutputStream_test.txt

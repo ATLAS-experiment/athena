@@ -47,6 +47,12 @@ Py:AthDictLoaderTestAlg    INFO ----------------------------------------
 Py:AthDictLoaderTestAlg    INFO --> [std::vector<double>]
 Py:AthDictLoaderTestAlg    INFO <-- [vector<double>]
 Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [egamma]
+Py:AthDictLoaderTestAlg    INFO <-- [egamma]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [egamma_p1]
+Py:AthDictLoaderTestAlg    INFO <-- [egamma_p1]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
 Py:AthDictLoaderTestAlg    INFO --> [std::vector<std::string,std::allocator<std::string> >]
 Py:AthDictLoaderTestAlg    INFO <-- [vector<string>]
 Py:AthDictLoaderTestAlg    INFO ----------------------------------------
@@ -85,6 +91,21 @@ Py:AthDictLoaderTestAlg    INFO <-- [set<string>]
 Py:AthDictLoaderTestAlg    INFO ----------------------------------------
 Py:AthDictLoaderTestAlg    INFO --> [std::set<unsigned int>]
 Py:AthDictLoaderTestAlg    INFO <-- [set<unsigned int>]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [DataVector<TruthParticle>]
+Py:AthDictLoaderTestAlg    INFO <-- [DataVector<TruthParticle>]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [INavigable4Momentum]
+Py:AthDictLoaderTestAlg    INFO <-- [INavigable4Momentum]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [INavigable4MomentumCollection]
+Py:AthDictLoaderTestAlg    INFO <-- [INavigable4MomentumCollection]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [IParticleContainer]
+Py:AthDictLoaderTestAlg    INFO <-- [IParticleContainer]
+Py:AthDictLoaderTestAlg    INFO ----------------------------------------
+Py:AthDictLoaderTestAlg    INFO --> [DataVector<egamma>]
+Py:AthDictLoaderTestAlg    INFO <-- [DataVector<egamma>]
 Py:AthDictLoaderTestAlg    INFO ----------------------------------------
 Py:AthDictLoaderTestAlg    INFO --> [ElementLinkInt_p1]
 Py:AthDictLoaderTestAlg    INFO <-- [ElementLink_p1<unsigned int>]
