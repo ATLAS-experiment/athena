@@ -631,7 +631,23 @@ namespace ActsTrk
       size_t ntracks = 0;
 
       // lambda to collect together all the things we do with a viable track.
-      auto addTrack = [&](const detail::RecoTrackContainerProxy &track) {
+      auto addTrack = [&](detail::RecoTrackContainerProxy &track) {
+        // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
+        // the track has no reference surface and the extrapolation to the perigee has not been done
+        // yet.
+        if (!track.hasReferenceSurface()) {
+           auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
+                   track, *pSurface, trackFinder().extrapolator, extrapolationOptions,
+                   extrapolationStrategy, logger());
+           if (!extrapolationResult.ok()) {
+              ATH_MSG_WARNING("Extrapolation for seed "
+                              << iseed << " and " << track.index()
+                              << " failed with error " << extrapolationResult.error()
+                              << " dropping track candidate.");
+              return;
+           }
+        }
+
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
@@ -720,16 +736,6 @@ namespace ActsTrk
           if (m_doTwoWay) {
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
             ++event_stat[category_i][kNoSecond];
-          }
-
-          auto extrapolationResult = Acts::extrapolateTrackToReferenceSurface(
-              firstTrack, *pSurface, trackFinder().extrapolator, extrapolationOptions,
-              extrapolationStrategy, logger());
-          if (!extrapolationResult.ok()) {
-            ATH_MSG_WARNING("Extrapolation for seed "
-                      << iseed << " and first " << firstTrack.index()
-                      << " failed with error " << extrapolationResult.error());
-            continue;
           }
 
           addTrack(firstTrack);
@@ -829,7 +835,7 @@ namespace ActsTrk
                                           std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
                                           std::make_pair(kNStoppedTracksMinPt, "Stopped tracks below pT cut"),
-                                          std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta"),
+                                          std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta")
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
