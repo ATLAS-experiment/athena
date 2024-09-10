@@ -87,6 +87,11 @@ namespace DerivationFramework {
     // keep all muons pt cut
     recordPropertyD("KeepAllMuonsPtCut", -1.);
 
+    // Record Detailed Electron Information (for Fake Studies)
+    recordPropertyD("KeepAllElectronsPtCut", -1);
+    // Relevant if KeepAllElectronsPtCut >= 0.
+    recordPropertyB("ThinGSFTrackParticles", true); 
+
     // muon calibration and smearing tool configuration
     recordPropertyS("McstYear"                 , "Data16");
     recordPropertyS("McstRelease"              , "_NONE_");

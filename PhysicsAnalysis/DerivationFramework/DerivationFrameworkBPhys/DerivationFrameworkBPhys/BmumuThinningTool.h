@@ -241,6 +241,20 @@ namespace DerivationFramework {
     ///
 
     ///
+    /// @brief Apply thinning mask to ElectronContainer
+    ///
+    /// @param[in] muCont  pointer to ElectronContainer
+    /// @param[in] muMask  vector with mask per electron
+    /// @param[in] doAnd   use AND instead of OR for mask combinations
+    /// @param[in] name    name of ElectronContainer
+    /// @returns   StatusCode
+    ///
+    StatusCode applyThinMask(const xAOD::ElectronContainer* elCont,
+			     const std::vector<bool>& elMask,
+			     bool doAnd, std::string name) const;
+    /// @}
+
+    ///
     /// @brief Mark muons matched to secondary vertices
     ///
     /// @param[in]     muCont      pointer to MuonContainer
@@ -344,6 +358,61 @@ namespace DerivationFramework {
     ///
 
     ///
+    /// @brief Mark electrons above pt threshold
+    ///
+    /// @param[in,out] elCont        pointer to ElectronContainer
+    /// @param[in]     elMask        mask for electrons
+    /// @param[in]     elThresholdPt minimum pt for electrons to be kept
+    /// @param[in]     counterName   base name for counters
+    /// @returns       StatusCode
+    ///
+    StatusCode markElectronsByPtThreshold(const xAOD::ElectronContainer* elCont,
+                                      std::vector<bool>& elMask,
+                                      double elThresholdPt,
+                                      std::string counterName) const;
+    /// @}
+    ///
+    ///
+    /// @brief Mark ID track particles associated with marked electrons
+    ///
+    /// @param[in,out] gsfCont       pointer to IDTrackParticleContainer
+    /// @param[in]     gsfMask       mask for ID track particles
+    /// @param[in,out] elCont        pointer to ElectronContainer
+    /// @param[in]     elMask        mask for electrons
+    /// @param[in]     counterName   base name for counters
+    /// @returns       StatusCode
+    ///
+    StatusCode markIDTrackParticlesByAssociatedElectrons(
+                          const xAOD::TrackParticleContainer* idCont,
+                                      std::vector<bool>& idMask,
+                                      const xAOD::ElectronContainer* elCont,
+                                      std::vector<bool>& elMask,
+                                      std::string counterName) const;
+    /// @}
+    ///
+    /// @}
+    ///
+    ///
+    /// @brief Mark GSF track particles associated with marked electrons
+    ///
+    /// @param[in,out] gsfCont       pointer to GSFTrackParticleContainer
+    /// @param[in]     gsfMask       mask for GSF track particles
+    /// @param[in,out] elCont        pointer to ElectronContainer
+    /// @param[in]     elMask        mask for electrons
+    /// @param[in]     counterName   base name for counters
+    /// @returns       StatusCode
+    ///
+    StatusCode markGSFTrackParticlesByAssociatedElectrons(
+                          const xAOD::TrackParticleContainer* gsfCont,
+                                      std::vector<bool>& gsfMask,
+                                      const xAOD::ElectronContainer* elCont,
+                                      std::vector<bool>& elMask,
+                                      std::string counterName) const;
+    /// @}
+    ///
+
+
+    ///
     /// @brief Obtain all auxillary elements matching a certain pattern.
     ///
     /// Helper to filter all names of auxillary elements of an aux container
@@ -432,11 +501,14 @@ namespace DerivationFramework {
     std::vector<std::string>    m_vtxPassFlags;
     std::string                 m_PVContName;
     std::vector<std::string>    m_refPVContNames;
+    std::string                 m_elContName;
+    std::string                 m_gsfContName;
     std::string                 m_muonContName;
     std::string                 m_calMuonContName;
     std::string                 m_ctBranchBaseName;
     std::vector<std::string>    m_ctBranchPrefixes;
     double                      m_muonThresholdPt;
+    double                      m_electronThresholdPt;
     double                      m_calMuonThresholdPt;
     bool                        m_alignPassToVertexList;
     bool                        m_keepPVTracks;
@@ -456,6 +528,8 @@ namespace DerivationFramework {
     bool                        m_thinRefPVs;
     bool                        m_thinTracks;
     bool                        m_thinMuons;
+    bool                        m_thinElectrons;
+    bool                        m_thinGSFTrackParticles;
     bool                        m_vertexAnd;
     bool                        m_trackAnd;
     bool                        m_muonAnd;

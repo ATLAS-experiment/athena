@@ -16,6 +16,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 
 #include <string>
 #include <sstream>
@@ -79,6 +80,10 @@ namespace DerivationFramework {
     // This list must be of same length and order as the m_vtxContNames list
     // (or empty => no thinning of refitted primary vertex containers)
     declareProperty("RefPVContainerNames"     , m_refPVContNames);
+    // name of the used electron container
+    declareProperty("ElectronContainerName"   , m_elContName = "");
+    // name of the used GSF track particle container
+    declareProperty("GSFTrackParticleContainerName", m_gsfContName = "");
     // name of the used muon container
     declareProperty("MuonContainerName"       , m_muonContName = "");
     // name of the calibrated muons container
@@ -134,6 +139,12 @@ namespace DerivationFramework {
     declareProperty("ThinTracks"              , m_thinTracks = true);
     // thin muon collections
     declareProperty("ThinMuons"               , m_thinMuons = true);
+    // thin electron collections
+    declareProperty("ThinElectrons"           , m_thinElectrons = false);
+    // electron threshold pt (for ThinElectrons)
+    declareProperty("ElectronThresholdPt"     , m_electronThresholdPt = -1);
+    // thin GSF Track Particle collections
+    declareProperty("ThinGSFTrackParticles"   , m_thinGSFTrackParticles = false);
   }
   //--------------------------------------------------------------------------
   // Destructor
@@ -228,6 +239,28 @@ namespace DerivationFramework {
                        << " as a source collection for refitted PVs.");
         }
         m_doRefPVs = true;
+      }
+    }
+
+    // check electron container name
+    if ( m_thinElectrons ){
+      if ( m_elContName == "" ) {
+        ATH_MSG_INFO("No electron collection provided for thinning.");
+        m_thinElectrons = false;
+      } else {
+        ATH_MSG_INFO("Using " << m_elContName
+                     << " as a source collection for electrons.");
+      }
+    }
+    // check GSF track-particle container name
+    if ( m_thinElectrons && m_thinGSFTrackParticles ){
+      if ( m_gsfContName == "" ) {
+        ATH_MSG_INFO(
+          "No GSF TrackParticle collection provided for thinning.");
+        m_thinGSFTrackParticles = false;
+      } else {
+        ATH_MSG_INFO("Using " << m_gsfContName
+                     << " as a source collection for GSF TrackParticles.");
       }
     }
 
@@ -393,7 +426,38 @@ namespace DerivationFramework {
       CHECK( markMuonsByPtThreshold(muonCont, muonMask, m_muonThresholdPt,
                                     "addMuonsByThresholdPt") );
     }
-    
+
+    // retrieve container of electrons & GSF track particles
+    const xAOD::ElectronContainer* elCont = nullptr;
+    const xAOD::TrackParticleContainer* gsfCont = nullptr;
+    std::vector<bool> elMask;
+    std::vector<bool> gsfMask;
+    if ( m_thinElectrons ) {
+      CHECK( evtStore()->retrieve(elCont, m_elContName ) );
+      elMask.assign(elCont->size(), false);
+    }
+    if ( m_thinElectrons && m_thinGSFTrackParticles  ) {
+      CHECK( evtStore()->retrieve(gsfCont, m_gsfContName ) );
+      gsfMask.assign(gsfCont->size(), false);
+    }
+
+    // keep all electrons (above certain pt threshold)
+    if ( m_thinElectrons ) {
+      CHECK( markElectronsByPtThreshold(elCont, elMask, m_electronThresholdPt,
+                                    "addElectronsByThresholdPt") );
+    }
+    // keep all GSF track particles associated with kept electrons
+    if ( m_thinElectrons && m_thinGSFTrackParticles ) {
+      CHECK( markGSFTrackParticlesByAssociatedElectrons( gsfCont, gsfMask, 
+      elCont, elMask, "addGSFTracksByAssociatedElectrons" ) );
+    }
+    // keep all InDet tracks for selected electrons
+    if ( m_thinTracks && m_doTracks && m_thinElectrons ) {
+       CHECK( markIDTrackParticlesByAssociatedElectrons(
+                                   trkPartCont, trkMask, elCont, elMask,
+                                  "addIDTracksByAssociatedElectrons") );
+    }
+
     // retrieve container of calibrated muons
     const xAOD::MuonContainer* calMuonCont = nullptr;
     std::vector<bool> calMuonMask;
@@ -770,7 +834,23 @@ namespace DerivationFramework {
                              m_vertexAnd, m_refPVContNames[irpv]) );
       } // for irpv
     } // if m_doRefPVs
-    
+
+    // Apply the thinning service for Electrons based on elMask
+    if ( m_thinElectrons ) {
+      addToCounter(m_elContName+"_allElectrons", elCont->size());
+      addToCounter(m_elContName+"_passedElectrons",
+                   std::accumulate(elMask.begin(), elMask.end(), 0));      
+      CHECK( applyThinMask(elCont, elMask, true,
+                           m_elContName) );
+    }
+    // Apply the thinning service for GSFTrackParticles based on gsfMask
+    if ( m_thinElectrons && m_thinGSFTrackParticles ) {
+      addToCounter(m_gsfContName+"_allGSFTrackParticles", gsfCont->size());
+      addToCounter(m_gsfContName+"_passedGSFTrackParticles",
+                   std::accumulate(gsfMask.begin(), gsfMask.end(), 0));      
+      CHECK( applyThinMask(gsfCont, gsfMask, true,
+                           m_gsfContName) );
+    }
     // Apply the thinning service for (original) Muons based on muonMask
     addToCounter(m_muonContName+"_allMuons", muonCont->size());
     if ( m_thinMuons && m_doMuons ) {
@@ -845,7 +925,34 @@ namespace DerivationFramework {
       }
     }
     return StatusCode::SUCCESS;
-  }					      
+  }		
+  //--------------------------------------------------------------------------
+  // Helper to apply thinning service mask -- for Electrons
+  //--------------------------------------------------------------------------
+  StatusCode
+  BmumuThinningTool::applyThinMask(const xAOD::ElectronContainer* elCont,
+                                   const std::vector<bool>& elMask,
+                                   bool doAnd, std::string name) const {
+    
+    if (doAnd) {
+      ATH_MSG_DEBUG("doThinning(): apply thinning (AND) for " << name);
+      if ( m_thinningSvc->filter(*elCont, elMask,
+                                 IThinningSvc::Operator::And).isFailure() ) {
+        ATH_MSG_ERROR("Application of thinning service for "<< name
+                      << " failed!");
+        return StatusCode::FAILURE;
+      }
+    } else {
+      ATH_MSG_DEBUG("doThinning(): apply thinning (OR) for " << name);
+      if ( m_thinningSvc->filter(*elCont, elMask,
+                                 IThinningSvc::Operator::Or).isFailure() ) {
+        ATH_MSG_ERROR("Application of thinning service for "<< name
+                      << " failed!");
+        return StatusCode::FAILURE;
+      }
+    }
+    return StatusCode::SUCCESS;
+  }				  
   //--------------------------------------------------------------------------
   // Helper to apply thinning service mask -- for Muons
   //--------------------------------------------------------------------------
@@ -1201,6 +1308,83 @@ namespace DerivationFramework {
       muMask.assign(muCont->size(), true);
       addToCounter(counterName, muCont->size());
     }
+    return StatusCode::SUCCESS;
+  }
+
+  //--------------------------------------------------------------------------
+  // Mark electrons above pt threshold
+  //--------------------------------------------------------------------------
+  StatusCode
+  BmumuThinningTool::markElectronsByPtThreshold(const xAOD::ElectronContainer* elCont,
+                                            std::vector<bool>& elMask,
+                                            double elThresholdPt,
+                                            std::string counterName) const {
+
+    if ( elThresholdPt > 0. ) {
+      for (size_t iEl=0; iEl < elCont->size(); ++iEl) {
+        const xAOD::Electron* electron = elCont->at(iEl);
+        if ( electron == nullptr ) continue;
+        const xAOD::TrackParticle* elInDetTP = xAOD::EgammaHelpers::getOriginalTrackParticle( electron ); 
+        if ( std::abs(elInDetTP->pt()) < elThresholdPt ) continue;
+        elMask[iEl] = true;
+        addToCounter(counterName);
+      } // for iEl
+    } else {
+      // mark all electrons in container for keeping
+      elMask.assign(elCont->size(), true);
+      addToCounter(counterName, elCont->size());
+    }
+    return StatusCode::SUCCESS;
+  }
+
+  //--------------------------------------------------------------------------
+  // Mark GSF Track Particles Associated w/ Marked Electrons
+  //--------------------------------------------------------------------------
+  StatusCode
+  BmumuThinningTool::markGSFTrackParticlesByAssociatedElectrons(const xAOD::TrackParticleContainer* gsfCont,
+                                            std::vector<bool>& gsfMask,
+                                            const xAOD::ElectronContainer* elCont,
+                                            std::vector<bool>& elMask,
+                                            std::string counterName) const {
+      for (size_t iEl=0; iEl < elCont->size(); ++iEl) {
+        if ( !elMask[ iEl ] ) continue;
+        const xAOD::Electron* electron = elCont->at(iEl);
+        if ( electron == nullptr ) continue;
+        const xAOD::TrackParticle* elGSFTP = electron->trackParticle(0);
+        if ( elGSFTP == nullptr ) continue;
+        for (size_t iGSF=0; iGSF < gsfCont->size(); ++iGSF){
+          if ( elGSFTP != gsfCont->at( iGSF ) ) continue;
+          gsfMask[iGSF] = true;
+          addToCounter(counterName);
+          break;
+        }
+      }
+    return StatusCode::SUCCESS;
+  }
+
+  //--------------------------------------------------------------------------
+  // Mark ID Track Particles Associated w/ Marked Electrons
+  //--------------------------------------------------------------------------
+  StatusCode
+  BmumuThinningTool::markIDTrackParticlesByAssociatedElectrons(
+                              const xAOD::TrackParticleContainer* idCont,
+                                            std::vector<bool>& idMask,
+                                            const xAOD::ElectronContainer* elCont,
+                                            std::vector<bool>& elMask,
+                                            std::string counterName) const {
+      for (size_t iEl=0; iEl < elCont->size(); ++iEl) {
+        if ( !elMask[ iEl ] ) continue;
+        const xAOD::Electron* electron = elCont->at(iEl);
+        if ( electron == nullptr ) continue;
+        const xAOD::TrackParticle* elIDTP  = xAOD::EgammaHelpers::getOriginalTrackParticle( electron );
+        for (size_t iID=0; iID < idCont->size(); ++iID){
+          if ( idCont->at( iID ) == nullptr ) continue;
+          if ( elIDTP != idCont->at( iID ) ) continue;
+          idMask[iID] = true;
+          addToCounter(counterName);
+          break;
+        }
+      }
     return StatusCode::SUCCESS;
   }
 

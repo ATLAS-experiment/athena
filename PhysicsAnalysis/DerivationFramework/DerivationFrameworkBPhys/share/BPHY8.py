@@ -190,6 +190,9 @@ BPHY8cf.MuonCollection = "Muons"
 # picked up from the environment ('BPHY8_KeepAllMuonsPtCut') if available
 # (for use in --preExec statements)
 BPHY8cf.KeepAllMuonsPtCut = vars().get('BPHY8_KeepAllMuonsPtCut', -1.)
+BPHY8cf.KeepAllElectronsPtCut = vars().get('BPHY8_KeepAllElectronsPtCut', -1 )
+BPHY8cf.ThinGSFTrackParticles = vars().get('BPHY8_ThinGSFTrackParticles', False )
+
 #
 # Apply MCP calibration to muons? (only for MC)
 #
@@ -1956,6 +1959,8 @@ if BPHY8cf.thinLevel > 1:
         # RefPVContainerNames        = BPHY8cf.RefPVContNames,
         AlignPassToVertexList      = True,
         PVContainerName            = BPHY8cf.PVContName,
+        ElectronContainerName      = "Electrons",
+        GSFTrackParticleContainerName = "GSFTrackParticles",
         MuonContainerName          = BPHY8cf.MuonCollection,
         CalibMuonContainerName     = BPHY8cf.CalMuonCollection,
         MatchCalibratedMuons       = (BPHY8cf.useCalibratedMuons > 2),
@@ -1969,6 +1974,10 @@ if BPHY8cf.thinLevel > 1:
         KeepMuonsForTracks         = True,
         KeepCalMuonsForTracks      = True,
         KeepCloseTracks            = True,
+        ThinElectrons              = BPHY8cf.KeepAllElectronsPtCut >= 0.,
+        ThinGSFTrackParticles      = BPHY8cf.ThinGSFTrackParticles
+                                    and ( BPHY8cf.KeepAllElectronsPtCut >= 0. ), 
+        ElectronThresholdPt        = BPHY8cf.KeepAllElectronsPtCut,
         KeepMuons                  = (BPHY8cf.KeepAllMuonsPtCut >= 0.),
         KeepCalMuons               = (BPHY8cf.KeepAllMuonsPtCut >= 0.),
         MuonThresholdPt            = BPHY8cf.KeepAllMuonsPtCut,
@@ -2038,6 +2047,7 @@ BPHY8_ExtraVariables   = []
 # Needed for trigger objects
 BPHY8SlimmingHelper.IncludeMuonTriggerContent  = BPHY8cf.doTriggerInfo
 BPHY8SlimmingHelper.IncludeBPhysTriggerContent = BPHY8cf.doTriggerInfo
+BPHY8SlimmingHelper.IncludeEGammaTriggerContent = (BPHY8cf.KeepAllElectronsPtCut >= 0.)
 
 # primary vertices
 BPHY8_SmartCollections += [BPHY8cf.PVContName]
@@ -2089,6 +2099,14 @@ BPHY8_ExtraVariables   += ["%s.etcone30.etcone40" % BPHY8cf.MuonCollection
 # ID track particles
 BPHY8_SmartCollections += [BPHY8cf.TrkPartContName]
 BPHY8_ExtraVariables += ["%s.vx.vy" % BPHY8cf.TrkPartContName]
+
+# Electrons (for Fake Studies)
+if BPHY8cf.KeepAllElectronsPtCut >= 0:
+    BPHY8_SmartCollections += [ "Electrons" ]
+    BPHY8_ExtraVariables   += [
+        "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0",
+        "HLT_xAOD__ElectronContainer_egamma_ElectronsAuxDyn.charge" 
+    ]
 
 # decay candidates 
 # we have to disable vxTrackAtVertex branch since it is not xAOD compatible
@@ -2172,6 +2190,13 @@ BPHY8SlimmingHelper.AllVariables     = BPHY8_AllVariables
 BPHY8SlimmingHelper.SmartCollections = BPHY8_SmartCollections
 BPHY8SlimmingHelper.StaticContent    = BPHY8_StaticContent
 BPHY8SlimmingHelper.ExtraVariables   = BPHY8_ExtraVariables
+
+# Electrons CP Information (for Fake Studies)
+if BPHY8cf.KeepAllElectronsPtCut >= 0:
+    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import *
+    BPHY8SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
+    BPHY8SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+
 BPHY8SlimmingHelper.AppendContentToStream(BPHY8Stream)
 
 #====================================================================
