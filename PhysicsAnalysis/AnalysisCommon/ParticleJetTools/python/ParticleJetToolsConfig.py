@@ -178,6 +178,9 @@ def getJetTruthLabelTool(jetdef, modspec):
 
     return jetTruthLabelTool
 
+def getJetTruthLabelToolPrereqs(jetdef, modspec):
+    return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"] if modspec == "R10WZTruthLabel_R22v1" else []
+
 def getJetPileupLabelTool(jetdef, modspec):
 
     jetPileupLabelTool = CompFactory.JetPileupLabelingTool('pileuplabeler',
