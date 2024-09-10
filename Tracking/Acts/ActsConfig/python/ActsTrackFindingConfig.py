@@ -279,6 +279,12 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
     kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
+
+    if flags.Acts.storeTrackStateInfo:
+        from ActsConfig.ActsObjectDecorationConfig import ActsMeasurementToTrackParticleDecorationCfg
+
+        acc.merge(ActsMeasurementToTrackParticleDecorationCfg(flags))
+
     return acc
 
 

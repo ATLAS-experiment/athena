@@ -55,6 +55,7 @@ def createActsConfigFlags():
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+    actscf.addFlag('Acts.storeTrackStateInfo', False)
 
     # SpacePoint
     actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy

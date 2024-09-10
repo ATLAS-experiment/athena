@@ -384,6 +384,69 @@
  ========================================================
 -->
 <!-- hitResidual plots -->
+<!-- y residuals -->
+<!-- barrel -->
+<h id="residualy_l0pix_barrel" type="TH1F" title="Residual: &L0PixBarr; Y">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_l0pix_barrel_1hit" type="TH1F" title="Residual: &L0PixBarr; Y 1 hit">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_l0pix_barrel_2ormorehits" type="TH1F" title="Residual: &L0PixBarr; Y &gt;=2 hits">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_pixel_barrel_1hit" type="TH1F" title="Residual: Pixel Barrel Y 1 hit">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_pixel_barrel_2ormorehits" type="TH1F" title="Residual: Pixel Barrel Y &gt;=2 hits">
+  <x title="x residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_pixel_barrel" type="TH1F" title="Residual: Pixel Barrel Y">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+
+<!-- endcaps -->
+<h id="residualy_pixel_endcap" type="TH1F" title="Residual: Pixel Endcap Y">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_pixel_endcap_1hit" type="TH1F" title="Residual: Pixel Endcap Y 1 hit">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<h id="residualy_pixel_endcap_2ormorehits" type="TH1F" title="Residual: Pixel Endcap Y &gt;=2 hits">
+  <x title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <y title="Entries"/>
+</h>
+<!-- as a function of eta -->
+<h id="residualy_l0pix_barrel_eta" type="TH2F" title="Residual: &L0PixBarr; Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <z title="Entries"/>
+</h>
+
+<h id="residualy_pixel_barrel_eta" type="TH2F" title="Residual: Pixel Barrel Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <z title="Entries"/>
+</h>
+
+<!-- as a function of eta -->
+<h id="residualy_pixel_endcap_eta" type="TH2F" title="Residual: Pixel Endcap Y - Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="y residual(#mum)" n="100" lo="-200.0" hi="200.0"/>
+  <z title="Entries"/>
+</h>
+
+
+
+
 <!-- cluster width vs eta plots -->
 
 <!--
