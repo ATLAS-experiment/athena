@@ -160,7 +160,7 @@ class ttj(PowhegV2):
         self.add_keyword("ubsigmadetails")
         self.add_keyword("use-old-grid")
         self.add_keyword("use-old-ubound")
-        self.add_keyword("use-OLP-interface")
+        self.add_keyword("use_OLP_Interface",1)
         self.add_keyword("withdamp")
         self.add_keyword("withnegweights")
         self.add_keyword("withsubtr")

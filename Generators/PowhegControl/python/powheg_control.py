@@ -11,8 +11,6 @@ from .utility import HeartbeatTimer
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
 
-
-
 def _format_QCD_scale_text(factor):
     '''
     Helper function to format QCD scale value
@@ -133,7 +131,7 @@ class PowhegControl(object):
         # Print executable being used
         logger.info("Configured for event generation with: {}".format(self.process.executable))
 
-    def generate(self, create_run_card_only=False, save_integration_grids=True, use_external_run_card=False, remove_oldStyle_rwt_comments=False):
+    def generate(self, create_run_card_only=False, save_integration_grids=True, use_external_run_card=False, remove_oldStyle_rwt_comments=False, is_bb4l_semilep=False):
         """! Run normal event generation.
 
         @param create_run_card_only         Only generate the run card.
@@ -156,7 +154,7 @@ class PowhegControl(object):
         else:
             logger.warning("Using native Powheg run card (must be located at './powheg.input' in order for Powheg to find it!) to configure event generation, instead of PowhegControl configuration interface")
         if not create_run_card_only:
-            self._generate_events()
+            self._generate_events(is_bb4l_semilep)
 
     def _generate_run_card(self):
         """! Initialise runcard with appropriate options."""
@@ -281,7 +279,7 @@ class PowhegControl(object):
             self.scheduler.add("reweighter", self.process, self.__event_weight_groups)
 
     @timed("Powheg LHE event generation")
-    def _generate_events(self):
+    def _generate_events(self,is_bb4l_semilep=False):
         """! Generate events according to the scheduler."""
         # Setup heartbeat thread
         heartbeat = HeartbeatTimer(600., "{}/eventLoopHeartBeat.txt".format(self.__run_directory))
@@ -315,7 +313,8 @@ class PowhegControl(object):
         self.scheduler.print_structure()
 
         # Run pre-processing
-        self.scheduler.run_preprocessors()
+        if not is_bb4l_semilep:
+            self.scheduler.run_preprocessors()
 
         # Run event generation
         self.scheduler.run_generators()

@@ -134,17 +134,20 @@ def __multicore_multistage_stage_4(generation_fn):
     """
     FileParser("powheg.input").text_replace("parallelstage.*", "parallelstage 4")
     shutil.copy("powheg.input", "multistage_inputs/powheg.input.parallelstage{ps}".format(ps=4))
-    generation_fn()
+    generation_fn(parallel_stage=4)
 
-def multicore_untimed(process):
+def multicore_untimed(process, parallel_stage=-1):
     """! Run multiple Powheg processes, each in its own thread.
 
     @param process  PowhegBox process.
 
     @author James Robinson  <james.robinson@cern.ch>
     """
+
     if not os.path.isfile(process.executable):
         raise OSError("Powheg executable {} not found!".format(process.executable))
+    # if "pwhg_semileptonic" in process.executable and parallel_stage == 4:
+    #     process.executable = "echo PowhegOTF._1.events | " + process.executable
     threads = [SingleProcessThread(process.executable, seed_index=idx,
                                    warning_output=(process.warning_output if hasattr(process,"warning_output") else None),
                                    info_output=(process.info_output if hasattr(process,"info_output") else None),

@@ -161,8 +161,8 @@ class bblvlv_Beta_modified(PowhegBeta):
         self.add_keyword("testsuda")
         self.add_keyword("tmass_phsp")
         self.add_keyword("tmass")
-        self.add_keyword("twidth",-1)
-        self.add_keyword("twidth_phsp",-1)
+        self.add_keyword("twidth")
+        self.add_keyword("twidth_phsp")
         self.add_keyword("ubexcess_correct")
         self.add_keyword("ubsigmadetails", -1)  # disable cross-section output to avoid Fortran crash
         self.add_keyword("use-old-grid")
@@ -171,6 +171,7 @@ class bblvlv_Beta_modified(PowhegBeta):
         self.add_keyword("verytinypars")
         self.add_keyword("virtonly")
         self.add_keyword("whichpwhgevent")
+        self.add_keyword("whichW")
         self.add_keyword("widthCorrection")
         self.add_keyword("withbtilde")
         self.add_keyword("withdamp", 1)

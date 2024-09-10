@@ -190,7 +190,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("ubsigmadetails")
         self.add_keyword("use-old-grid")
         self.add_keyword("use-old-ubound")
-        self.add_keyword("use-OLP-interface")
+        self.add_keyword("use_OLP_Interface",1)
         self.add_keyword("whichscale", 4) # set scale of overall two powers of alphas if fixedscale=0
         self.add_keyword("withdamp")
         self.add_keyword("withnegweights")
