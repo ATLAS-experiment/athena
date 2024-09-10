@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: art job for InDetPhysValMonitoring, Single piplus 1GeV
 # art-type: grid
-# art-input: user.keli:user.keli.mc16_13TeV.422047.ParticleGun_single_piplus_Pt1.merge.EVNT.e7967_e5984_tid20255138_00
+# art-input: mc23_13p6TeV:mc23_13p6TeV.902082.PG_singlepi_Pt1_etaFlat0_2p5.merge.EVNT.e8582_e8528
 # art-input-nfiles: 1
 # art-include: main/Athena
 # art-include: 24.0/Athena
