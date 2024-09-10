@@ -27,6 +27,33 @@ namespace DerivationFramework {
 
   using Analysis::JpsiUpsilonCommon;
 
+  JpsiXPlusDisplaced::MesonCandidateVector::MesonCandidateVector(size_t num, bool orderByPt = true) {
+    m_num = num;
+    m_orderByPt = orderByPt;
+  }
+
+  void JpsiXPlusDisplaced::MesonCandidateVector::push_back(const MesonCandidate& etac) {
+    if(m_num>0 && m_vector.size()>=m_num) {
+      if(m_orderByPt && etac.pt<=m_vector.back().pt) return;
+      else if(!m_orderByPt && etac.chi2NDF>=m_vector.back().chi2NDF) return;
+    }
+    auto pos = m_vector.cend();
+    for(auto iter=m_vector.cbegin(); iter!=m_vector.cend(); iter++) {
+      if(m_orderByPt) {
+        if(etac.pt>iter->pt) { pos = iter; break; }
+      }
+      else {
+        if(etac.chi2NDF<iter->chi2NDF) { pos = iter; break; }
+      }
+    }
+    m_vector.insert(pos, etac);
+    if(m_num>0 && m_vector.size()>m_num) m_vector.pop_back();
+  }
+
+  const std::vector<JpsiXPlusDisplaced::MesonCandidate>& JpsiXPlusDisplaced::MesonCandidateVector::vector() const {
+    return m_vector;
+  }
+
   JpsiXPlusDisplaced::JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent) : AthAlgTool(type,name,parent),
     m_vertexJXContainerKey("InputJXVertices"),
     m_vertexV0ContainerKey(""),
@@ -52,6 +79,8 @@ namespace DerivationFramework {
     m_DisplacedMassLower(0.0),
     m_DisplacedMassUpper(30000.0),
     m_lxyDisV_cut(-999.0),
+    m_lxyDpm_cut(-999.0),
+    m_lxyD0_cut(-999.0),
     m_MassLower(0.0),
     m_MassUpper(31000.0),
     m_jxDaug_num(4),
@@ -59,26 +88,53 @@ namespace DerivationFramework {
     m_jxDaug2MassHypo(-1),
     m_jxDaug3MassHypo(-1),
     m_jxDaug4MassHypo(-1),
+    m_jxPtOrdering(false),
     m_disVDaug_num(3),
     m_disVDaug3MassHypo(-1),
-    m_extraTrkMassHypo(-1),
-    m_extraTrkMinPt(450),
+    m_disVDaug3MinPt(480),
+    m_extraTrk1MassHypo(-1),
+    m_extraTrk1MinPt(480),
+    m_extraTrk2MassHypo(-1),
+    m_extraTrk2MinPt(480),
+    m_extraTrk3MassHypo(-1),
+    m_extraTrk3MinPt(480),
+    m_V0ExtraMassLower(0.0),
+    m_V0ExtraMassUpper(30000.0),
+    m_DpmMassLower(0.0),
+    m_DpmMassUpper(30000.0),
+    m_D0MassLower(0.0),
+    m_D0MassUpper(30000.0),
+    m_DstpmMassLower(0.0),
+    m_DstpmMassUpper(30000.0),
+    m_maxMesonCandidates(400),
+    m_MesonPtOrdering(true),
     m_massJX(-1),
     m_massJpsi(-1),
     m_massX(-1),
     m_massDisV(-1),
     m_massV0(-1),
+    m_massV0Extra(-1),
+    m_mass_Dpm(-1),
+    m_mass_D0(-1),
+    m_mass_Dstpm(-1),
     m_massMainV(-1),
     m_constrJX(false),
     m_constrJpsi(false),
     m_constrX(false),
     m_constrDisV(false),
     m_constrV0(false),
+    m_constrV0Extra(false),
+    m_constrDpm(false),
+    m_constrD0(false),
+    m_constrDstpm(false),
     m_constrMainV(false),
     m_JXSubVtx(false),
     m_chi2cut_JX(-1.0),
     m_chi2cut_V0(-1.0),
     m_chi2cut_DisV(-1.0),
+    m_chi2cut_V0Extra(-1.0),
+    m_chi2cut_JXDpm(-1.0),
+    m_chi2cut_JXDstpm(-1.0),
     m_chi2cut(-1.0),
     m_useTRT(false),
     m_ptTRT(450),
@@ -99,82 +155,111 @@ namespace DerivationFramework {
     m_vertexEstimator("InDet::VertexPointEstimator"),
     m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
   {
-    declareProperty("JXVertices",               m_vertexJXContainerKey);
-    declareProperty("V0Vertices",               m_vertexV0ContainerKey);
-    declareProperty("JXVtxHypoNames",           m_vertexJXHypoNames);
-    declareProperty("CascadeVertexCollections", m_cascadeOutputKeys); // size is 3 or 4 only
-    declareProperty("OutoutV0VtxCollection",    m_v0VtxOutputKey);
-    declareProperty("TrackParticleCollection",  m_TrkParticleCollection);
-    declareProperty("VxPrimaryCandidateName",   m_VxPrimaryCandidateName);
-    declareProperty("RefPVContainerName",       m_refPVContainerName);
-    declareProperty("EventInfoKey",             m_eventInfo_key);
-    declareProperty("RelinkTracks",             m_RelinkContainers);
-    declareProperty("JXMassLowerCut",           m_jxMassLower); // only effective when m_jxDaug_num>2
-    declareProperty("JXMassUpperCut",           m_jxMassUpper); // only effective when m_jxDaug_num>2
-    declareProperty("JpsiMassLowerCut",         m_jpsiMassLower);
-    declareProperty("JpsiMassUpperCut",         m_jpsiMassUpper);
-    declareProperty("DiTrackMassLower",         m_diTrackMassLower); // only effective when m_jxDaug_num=4
-    declareProperty("DiTrackMassUpper",         m_diTrackMassUpper); // only effective when m_jxDaug_num=4
-    declareProperty("V0Hypothesis",             m_V0Hypothesis); // "Ks" or "Lambda"
-    declareProperty("V0MassLowerCut",           m_V0MassLower);
-    declareProperty("V0MassUpperCut",           m_V0MassUpper);
-    declareProperty("LxyV0Cut",                 m_lxyV0_cut);
-    declareProperty("MassCutGamma",             m_minMass_gamma);
-    declareProperty("Chi2CutGamma",             m_chi2cut_gamma);
-    declareProperty("DisplacedMassLowerCut",    m_DisplacedMassLower); // only effective when m_disVDaug_num=3
-    declareProperty("DisplacedMassUpperCut",    m_DisplacedMassUpper); // only effective when m_disVDaug_num=3
-    declareProperty("LxyDisVtxCut",             m_lxyDisV_cut); // only effective when m_disVDaug_num=3
-    declareProperty("MassLowerCut",             m_MassLower);
-    declareProperty("MassUpperCut",             m_MassUpper);
-    declareProperty("HypothesisName",           m_hypoName = "TQ");
-    declareProperty("NumberOfJXDaughters",      m_jxDaug_num); // 2, or 3, or 4 only
-    declareProperty("JXDaug1MassHypo",          m_jxDaug1MassHypo);
-    declareProperty("JXDaug2MassHypo",          m_jxDaug2MassHypo);
-    declareProperty("JXDaug3MassHypo",          m_jxDaug3MassHypo);
-    declareProperty("JXDaug4MassHypo",          m_jxDaug4MassHypo);
-    declareProperty("NumberOfDisVDaughters",    m_disVDaug_num); // 2 or 3 only
-    declareProperty("DisVDaug3MassHypo",        m_disVDaug3MassHypo); // only effective when m_disVDaug_num=3
-    declareProperty("ExtraTrackMassHypo",       m_extraTrkMassHypo); // for decays like B- -> J/psi Lambda pbar, the extra track is pbar (for m_disVDaug_num=2 only now)
-    declareProperty("ExtraTrackMinPt",          m_extraTrkMinPt); // only effective if m_extraTrkMassHypo>0
-    declareProperty("JXMass",                   m_massJX); // only effective when m_jxDaug_num>2
-    declareProperty("JpsiMass",                 m_massJpsi);
-    declareProperty("XMass",                    m_massX); // only effective when m_jxDaug_num=4
-    declareProperty("DisVtxMass",               m_massDisV); // only effective when m_disVDaug_num=3
-    declareProperty("V0Mass",                   m_massV0);
-    declareProperty("MainVtxMass",              m_massMainV);
-    declareProperty("ApplyJXMassConstraint",    m_constrJX); // only effective when m_jxDaug_num>2
-    declareProperty("ApplyJpsiMassConstraint",  m_constrJpsi);
-    declareProperty("ApplyXMassConstraint",     m_constrX); // only effective when m_jxDaug_num=4
-    declareProperty("ApplyDisVMassConstraint",  m_constrDisV); // only effective when m_disVDaug_num=3
-    declareProperty("ApplyV0MassConstraint",    m_constrV0);
-    declareProperty("ApplyMainVMassConstraint", m_constrMainV);
-    declareProperty("HasJXSubVertex",           m_JXSubVtx);
-    declareProperty("Chi2CutJX",                m_chi2cut_JX);
-    declareProperty("Chi2CutV0",                m_chi2cut_V0);
-    declareProperty("Chi2CutDisV",              m_chi2cut_DisV); // only effective when m_disVDaug_num=3
-    declareProperty("Chi2Cut",                  m_chi2cut);
-    declareProperty("UseTRT",                   m_useTRT);
-    declareProperty("PtTRT",                    m_ptTRT);
-    declareProperty("Trackd0Cut",               m_d0_cut);
-    declareProperty("MaxJXCandidates",          m_maxJXCandidates);
-    declareProperty("MaxV0Candidates",          m_maxV0Candidates);
-    declareProperty("MaxDisVCandidates",        m_maxDisVCandidates); // only effective when m_disVDaug_num=3
-    declareProperty("MaxMainVCandidates",       m_maxMainVCandidates);
-    declareProperty("RefitPV",                  m_refitPV         = true);
-    declareProperty("MaxnPV",                   m_PV_max          = 1000);
-    declareProperty("MinNTracksInPV",           m_PV_minNTracks   = 0);
-    declareProperty("DoVertexType",             m_DoVertexType    = 7);
-    declareProperty("TrkVertexFitterTool",      m_iVertexFitter);
-    declareProperty("V0VertexFitterTool",       m_iV0Fitter);
-    declareProperty("GammaFitterTool",          m_iGammaFitter);
-    declareProperty("PVRefitter",               m_pvRefitter);
-    declareProperty("V0Tools",                  m_V0Tools);
-    declareProperty("TrackToVertexTool",        m_trackToVertexTool);
-    declareProperty("TrackSelectorTool",        m_trkSelector);
-    declareProperty("V0TrackSelectorTool",      m_v0TrkSelector);
-    declareProperty("CascadeTools",             m_CascadeTools);
-    declareProperty("VertexPointEstimator",     m_vertexEstimator);
-    declareProperty("Extrapolator",             m_extrapolator);
+    declareProperty("JXVertices",                 m_vertexJXContainerKey);
+    declareProperty("V0Vertices",                 m_vertexV0ContainerKey);
+    declareProperty("JXVtxHypoNames",             m_vertexJXHypoNames);
+    declareProperty("CascadeVertexCollections",   m_cascadeOutputKeys); // size is 3 or 4 only
+    declareProperty("OutoutV0VtxCollection",      m_v0VtxOutputKey);
+    declareProperty("TrackParticleCollection",    m_TrkParticleCollection);
+    declareProperty("VxPrimaryCandidateName",     m_VxPrimaryCandidateName);
+    declareProperty("RefPVContainerName",         m_refPVContainerName);
+    declareProperty("EventInfoKey",               m_eventInfo_key);
+    declareProperty("RelinkTracks",               m_RelinkContainers);
+    declareProperty("JXMassLowerCut",             m_jxMassLower); // only effective when m_jxDaug_num>2
+    declareProperty("JXMassUpperCut",             m_jxMassUpper); // only effective when m_jxDaug_num>2
+    declareProperty("JpsiMassLowerCut",           m_jpsiMassLower);
+    declareProperty("JpsiMassUpperCut",           m_jpsiMassUpper);
+    declareProperty("DiTrackMassLower",           m_diTrackMassLower); // only effective when m_jxDaug_num=4
+    declareProperty("DiTrackMassUpper",           m_diTrackMassUpper); // only effective when m_jxDaug_num=4
+    declareProperty("V0Hypothesis",               m_V0Hypothesis); // "Ks" or "Lambda"
+    declareProperty("V0MassLowerCut",             m_V0MassLower);
+    declareProperty("V0MassUpperCut",             m_V0MassUpper);
+    declareProperty("LxyV0Cut",                   m_lxyV0_cut);
+    declareProperty("MassCutGamma",               m_minMass_gamma);
+    declareProperty("Chi2CutGamma",               m_chi2cut_gamma);
+    declareProperty("DisplacedMassLowerCut",      m_DisplacedMassLower); // only effective when m_disVDaug_num=3
+    declareProperty("DisplacedMassUpperCut",      m_DisplacedMassUpper); // only effective when m_disVDaug_num=3
+    declareProperty("LxyDisVtxCut",               m_lxyDisV_cut); // only effective when m_disVDaug_num=3
+    declareProperty("LxyDpmCut",                  m_lxyDpm_cut); // only effective for D0
+    declareProperty("LxyD0Cut",                   m_lxyD0_cut); // only effective for D*+/-
+    declareProperty("MassLowerCut",               m_MassLower);
+    declareProperty("MassUpperCut",               m_MassUpper);
+    declareProperty("HypothesisName",             m_hypoName = "TQ");
+    declareProperty("NumberOfJXDaughters",        m_jxDaug_num); // 2, or 3, or 4 only
+    declareProperty("JXDaug1MassHypo",            m_jxDaug1MassHypo);
+    declareProperty("JXDaug2MassHypo",            m_jxDaug2MassHypo);
+    declareProperty("JXDaug3MassHypo",            m_jxDaug3MassHypo);
+    declareProperty("JXDaug4MassHypo",            m_jxDaug4MassHypo);
+    declareProperty("JXPtOrdering",               m_jxPtOrdering);
+    declareProperty("NumberOfDisVDaughters",      m_disVDaug_num); // 2 or 3 only
+    declareProperty("DisVDaug3MassHypo",          m_disVDaug3MassHypo); // only effective when m_disVDaug_num=3
+    declareProperty("DisVDaug3MinPt",             m_disVDaug3MinPt); // only effective when m_disVDaug_num=3
+    declareProperty("ExtraTrack1MassHypo",        m_extraTrk1MassHypo); // for decays like B- -> J/psi Lambda pbar, the extra track is pbar (for m_disVDaug_num=2 only now)
+    declareProperty("ExtraTrack1MinPt",           m_extraTrk1MinPt); // only effective if m_extraTrk1MassHypo>0
+    declareProperty("ExtraTrack2MassHypo",        m_extraTrk2MassHypo); // for decays like eta_c -> Ks K+ pi- (for m_disVDaug_num=2 only now)
+    declareProperty("ExtraTrack2MinPt",           m_extraTrk2MinPt); // only effective if m_extraTrk2MassHypo>0
+    declareProperty("ExtraTrack3MassHypo",        m_extraTrk3MassHypo); // for decays like Bc+ -> Jpsi D+ Ks (for m_disVDaug_num=2 only now)
+    declareProperty("ExtraTrack3MinPt",           m_extraTrk3MinPt); // only effective if m_extraTrk3MassHypo>0
+    declareProperty("V0ExtraMassLowerCut",        m_V0ExtraMassLower); // only for two extra tracks
+    declareProperty("V0ExtraMassUpperCut",        m_V0ExtraMassUpper); // only for two extra tracks
+    declareProperty("DpmMassLowerCut",            m_DpmMassLower); // only for D+/-
+    declareProperty("DpmMassUpperCut",            m_DpmMassUpper); // only for D+/-
+    declareProperty("D0MassLowerCut",             m_D0MassLower); // only for D0
+    declareProperty("D0MassUpperCut",             m_D0MassUpper); // only for D0
+    declareProperty("DstarpmMassLowerCut",        m_DstpmMassLower); // only for D*+/-
+    declareProperty("DstarpmMassUpperCut",        m_DstpmMassUpper); // only for D*+/-
+    declareProperty("MaxMesonCandidates",         m_maxMesonCandidates); // only for 2/3 extra tracks
+    declareProperty("MesonPtOrdering",            m_MesonPtOrdering); // only for 2/3 extra tracks
+    declareProperty("JXMass",                     m_massJX); // only effective when m_jxDaug_num>2
+    declareProperty("JpsiMass",                   m_massJpsi);
+    declareProperty("XMass",                      m_massX); // only effective when m_jxDaug_num=4
+    declareProperty("DisVtxMass",                 m_massDisV); // only effective when m_disVDaug_num=3
+    declareProperty("V0Mass",                     m_massV0);
+    declareProperty("V0ExtraMass",                m_massV0Extra); // only for two extra tracks
+    declareProperty("DpmMass",                    m_mass_Dpm);
+    declareProperty("D0Mass",                     m_mass_D0);
+    declareProperty("DstarpmMass",                m_mass_Dstpm);
+    declareProperty("MainVtxMass",                m_massMainV);
+    declareProperty("ApplyJXMassConstraint",      m_constrJX); // only effective when m_jxDaug_num>2
+    declareProperty("ApplyJpsiMassConstraint",    m_constrJpsi);
+    declareProperty("ApplyXMassConstraint",       m_constrX); // only effective when m_jxDaug_num=4
+    declareProperty("ApplyDisVMassConstraint",    m_constrDisV); // only effective when m_disVDaug_num=3
+    declareProperty("ApplyV0MassConstraint",      m_constrV0);
+    declareProperty("ApplyV0ExtraMassConstraint", m_constrV0Extra); // only for two extra tracks
+    declareProperty("ApplyDpmMassConstraint",     m_constrDpm); // only for D+/-
+    declareProperty("ApplyD0MassConstraint",      m_constrD0); // only for D0
+    declareProperty("ApplyDstarpmMassConstraint", m_constrDstpm); // only for D*+/-
+    declareProperty("ApplyMainVMassConstraint",   m_constrMainV);
+    declareProperty("HasJXSubVertex",             m_JXSubVtx);
+    declareProperty("Chi2CutJX",                  m_chi2cut_JX);
+    declareProperty("Chi2CutV0",                  m_chi2cut_V0);
+    declareProperty("Chi2CutDisV",                m_chi2cut_DisV); // only effective when m_disVDaug_num=3
+    declareProperty("Chi2CutV0Extra",             m_chi2cut_V0Extra); // only for two extra tracks
+    declareProperty("Chi2CutJXDpm",               m_chi2cut_JXDpm); // only for JX + D+/-
+    declareProperty("Chi2CutJXDstarpm",           m_chi2cut_JXDstpm); // only for JX + D*+/-
+    declareProperty("Chi2Cut",                    m_chi2cut);
+    declareProperty("UseTRT",                     m_useTRT);
+    declareProperty("PtTRT",                      m_ptTRT);
+    declareProperty("Trackd0Cut",                 m_d0_cut);
+    declareProperty("MaxJXCandidates",            m_maxJXCandidates);
+    declareProperty("MaxV0Candidates",            m_maxV0Candidates);
+    declareProperty("MaxDisVCandidates",          m_maxDisVCandidates); // only effective when m_disVDaug_num=3
+    declareProperty("MaxMainVCandidates",         m_maxMainVCandidates);
+    declareProperty("RefitPV",                    m_refitPV         = true);
+    declareProperty("MaxnPV",                     m_PV_max          = 1000);
+    declareProperty("MinNTracksInPV",             m_PV_minNTracks   = 0);
+    declareProperty("DoVertexType",               m_DoVertexType    = 7);
+    declareProperty("TrkVertexFitterTool",        m_iVertexFitter);
+    declareProperty("V0VertexFitterTool",         m_iV0Fitter);
+    declareProperty("GammaFitterTool",            m_iGammaFitter);
+    declareProperty("PVRefitter",                 m_pvRefitter);
+    declareProperty("V0Tools",                    m_V0Tools);
+    declareProperty("TrackToVertexTool",          m_trackToVertexTool);
+    declareProperty("TrackSelectorTool",          m_trkSelector);
+    declareProperty("V0TrackSelectorTool",        m_v0TrkSelector);
+    declareProperty("CascadeTools",               m_CascadeTools);
+    declareProperty("VertexPointEstimator",       m_vertexEstimator);
+    declareProperty("Extrapolator",               m_extrapolator);
   }
 
   StatusCode JpsiXPlusDisplaced::initialize() {
@@ -302,8 +387,9 @@ namespace DerivationFramework {
     if(m_disVDaug_num==3) {
       for(size_t it=0; it<selectedV0Candidates.size(); ++it) {
 	std::pair<const xAOD::Vertex*,V0Enum> elem = selectedV0Candidates[it];
-	for(auto trkItr=tracksDisplaced.cbegin(); trkItr!=tracksDisplaced.cend(); ++trkItr) {
-	  auto disVtx = getXiCandidate(elem.first,elem.second,*trkItr);
+	for(const xAOD::TrackParticle* TP : tracksDisplaced) {
+	  if(TP->pt() < m_disVDaug3MinPt) continue;
+	  auto disVtx = getXiCandidate(elem.first,elem.second,TP);
 	  if(disVtx.V0vtx && disVtx.track) disVtxContainer.push_back(disVtx);
 	}
       }
@@ -317,9 +403,8 @@ namespace DerivationFramework {
 
     // Select the JX candidates before calling cascade fit
     std::vector<const xAOD::Vertex*> selectedJXCandidates;
-    for(auto vxcItr=jxContainer.ptr()->begin(); vxcItr!=jxContainer.ptr()->end(); ++vxcItr) {
+    for(const xAOD::Vertex* vtx : *jxContainer.cptr()) {
       // Check the passed flag first
-      const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(auto name : m_vertexJXHypoNames) {
 	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+name);
@@ -361,27 +446,42 @@ namespace DerivationFramework {
     }
     if(selectedJXCandidates.size()==0) return StatusCode::SUCCESS;
 
-    std::sort( selectedJXCandidates.begin(), selectedJXCandidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
+    if(m_jxPtOrdering) {
+      std::sort( selectedJXCandidates.begin(), selectedJXCandidates.end(), [massesJX](const xAOD::Vertex* a, const xAOD::Vertex* b) {
+	TLorentzVector p4_a, p4_b, tmp;
+	for(size_t it=0; it<a->nTrackParticles(); it++) {
+	  tmp.SetPtEtaPhiM(a->trackParticle(it)->pt(), a->trackParticle(it)->eta(), a->trackParticle(it)->phi(), massesJX[it]);
+	  p4_a += tmp;
+	}
+	for(size_t it=0; it<b->nTrackParticles(); it++) {
+	  tmp.SetPtEtaPhiM(b->trackParticle(it)->pt(), b->trackParticle(it)->eta(), b->trackParticle(it)->phi(), massesJX[it]);
+	  p4_b += tmp;
+	}
+	return p4_a.Pt() > p4_b.Pt();
+      } );
+    }
+    else {
+      std::sort( selectedJXCandidates.begin(), selectedJXCandidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
+    }
     if(m_maxJXCandidates>0 && selectedJXCandidates.size()>m_maxJXCandidates) {
       selectedJXCandidates.erase(selectedJXCandidates.begin()+m_maxJXCandidates, selectedJXCandidates.end());
     }
 
     // Select JX+DisV candidates
     // Iterate over JX vertices
-    for(auto jxItr=selectedJXCandidates.begin(); jxItr!=selectedJXCandidates.end(); ++jxItr) {
+    for(const xAOD::Vertex* jxVtx : selectedJXCandidates) {
       // Iterate over displaced vertices
       if(m_disVDaug_num==2) {
-	for(auto V0Itr=selectedV0Candidates.begin(); V0Itr!=selectedV0Candidates.end(); ++V0Itr) {
-	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(*jxItr, massesJX, V0Itr->first, V0Itr->second, trackContainer.cptr(), trackCols);
+	for(auto&& V0Candidate : selectedV0Candidates) {
+	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols);
 	  for(auto cascade_info : result) {
 	    if(cascade_info) cascadeinfoContainer.push_back(cascade_info);
 	  }
 	}
       } // m_disVDaug_num==2
       else if(m_disVDaug_num==3) {
-	for(auto disVItr=disVtxContainer.begin(); disVItr!=disVtxContainer.end(); ++disVItr) {
-	  XiCandidate disVtx = *disVItr;
-	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(*jxItr, massesJX, disVtx, trackContainer.cptr(), trackCols);
+	for(auto&& disVtx : disVtxContainer) {
+	  std::vector<Trk::VxCascadeInfo*> result = fitMainVtx(jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols);
 	  for(auto cascade_info : result) {
 	    if(cascade_info) cascadeinfoContainer.push_back(cascade_info);
 	  }
@@ -395,6 +495,7 @@ namespace DerivationFramework {
   StatusCode JpsiXPlusDisplaced::addBranches() const {
     size_t topoN = (m_disVDaug_num==2 ? 3 : 4);
     if(!m_JXSubVtx) topoN--;
+    if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0) topoN = 3;
 
     if(m_cascadeOutputKeys.size() != topoN) {
       ATH_MSG_FATAL("Incorrect number of output cascade vertices");
@@ -450,8 +551,7 @@ namespace DerivationFramework {
 
     // Select the displaced tracks
     std::vector<const xAOD::TrackParticle*> tracksDisplaced;
-    for(auto tpIt=trackContainer.cptr()->begin(); tpIt!=trackContainer.cptr()->end(); ++tpIt) {
-      const xAOD::TrackParticle* TP = (*tpIt);
+    for(const xAOD::TrackParticle* TP : *trackContainer.cptr()) {
       // V0 track selection (https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetRecTools/InDetTrackSelectorTool/src/InDetConversionTrackSelectorTool.cxx)
       if(m_v0TrkSelector->decision(*TP, primaryVertex)) {
         uint8_t temp(0);
@@ -485,8 +585,7 @@ namespace DerivationFramework {
       V0Container = SG::ReadHandle<xAOD::VertexContainer>(m_vertexV0ContainerKey);
       ATH_CHECK( V0Container.isValid() );
 
-      for(auto vxcItr=V0Container.ptr()->begin(); vxcItr!=V0Container.ptr()->end(); ++vxcItr) {
-        const xAOD::Vertex* vtx = *vxcItr;
+      for(const xAOD::Vertex* vtx : *V0Container.cptr()) {
 	std::string type_V0Vtx;
 	if(mAcc_type.isAvailable(*vtx)) type_V0Vtx = mAcc_type(*vtx);
 
@@ -522,8 +621,7 @@ namespace DerivationFramework {
       // fit V0 vertices
       fitV0Container(V0OutputContainer.ptr(), tracksDisplaced, trackCols);
 
-      for(auto vxcItr=V0OutputContainer.ptr()->begin(); vxcItr!=V0OutputContainer.ptr()->end(); ++vxcItr) {
-        const xAOD::Vertex* vtx = *vxcItr;
+      for(const xAOD::Vertex* vtx : *V0OutputContainer.cptr()) {
 	std::string type_V0Vtx;
 	if(mAcc_type.isAvailable(*vtx)) type_V0Vtx = mAcc_type(*vtx);
 
@@ -627,6 +725,7 @@ namespace DerivationFramework {
 
       // Identify the input JX
       int ijx = m_JXSubVtx ? topoN-2 : topoN-1;
+      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0) ijx = topoN-1;
       const xAOD::Vertex* jxVtx(nullptr);
       if(m_jxDaug_num==4) jxVtx = FindVertex<4>(jxContainer.ptr(), cascadeVertices[ijx]);
       else if(m_jxDaug_num==3) jxVtx = FindVertex<3>(jxContainer.ptr(), cascadeVertices[ijx]);
@@ -679,8 +778,16 @@ namespace DerivationFramework {
 	a0zErr_SV1_decor(*cascadeVertices[1])  = m_CascadeTools->a0xyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
       }
 
+      if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0) {
+	lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
+	lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
+	a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
+	a0zErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->a0zError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
+	a0xy_SV2_decor(*cascadeVertices[1])    = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
+	a0xyErr_SV2_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
+      }
       // decorate the newly fitted JX vertex
-      if(m_JXSubVtx) {
+      else if(m_JXSubVtx) {
 	lxy_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->lxy(moms[ijx],cascadeVertices[ijx],mainVertex);
 	lxyErr_SV2_decor(*cascadeVertices[ijx])  = m_CascadeTools->lxyError(moms[ijx],cascade_info->getCovariance()[ijx],cascadeVertices[ijx],mainVertex);
 	a0z_SV2_decor(*cascadeVertices[ijx])     = m_CascadeTools->a0z(moms[ijx],cascadeVertices[ijx],mainVertex);
@@ -739,22 +846,28 @@ namespace DerivationFramework {
 
   JpsiXPlusDisplaced::XiCandidate JpsiXPlusDisplaced::getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const {
     XiCandidate disVtx;
-
     // Check overlap
     std::vector<const xAOD::TrackParticle*> tracksV0;
+    tracksV0.reserve(V0vtx->nTrackParticles());
     for(size_t i=0; i<V0vtx->nTrackParticles(); i++) tracksV0.push_back(V0vtx->trackParticle(i));
     if(std::find(tracksV0.cbegin(), tracksV0.cend(), track3) != tracksV0.cend()) return disVtx;
 
     std::vector<double> massesV0;
-    if(V0==LAMBDA)         massesV0 = m_massesV0_ppi;
-    else if(V0==LAMBDABAR) massesV0 = m_massesV0_pip;
-    else if(V0==KS)        massesV0 = m_massesV0_pipi;
+    if(V0==LAMBDA) {
+      massesV0 = m_massesV0_ppi;
+    }
+    else if(V0==LAMBDABAR) {
+      massesV0 = m_massesV0_pip;
+    }
+    else if(V0==KS) {
+      massesV0 = m_massesV0_pipi;
+    }
     xAOD::BPhysHelper V0_helper(V0vtx);
     TLorentzVector p4_v0, tmp;
     for(int i=0; i<V0_helper.nRefTrks(); i++) p4_v0 += V0_helper.refTrk(i,massesV0[i]);
     tmp.SetPtEtaPhiM(track3->pt(),track3->eta(),track3->phi(),m_disVDaug3MassHypo);
     // A rough mass window cut, as V0 and the track are not from a common vertex
-    if ((p4_v0+tmp).M() < m_DisplacedMassLower-100. || (p4_v0+tmp).M() > m_DisplacedMassUpper+100.) return disVtx;
+    if((p4_v0+tmp).M() < m_DisplacedMassLower-120. || (p4_v0+tmp).M() > m_DisplacedMassUpper+120.) return disVtx;
 
     std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
     int robustness = 0;
@@ -776,7 +889,7 @@ namespace DerivationFramework {
 	const std::vector<std::vector<TLorentzVector> > &moms = cascade_info->getParticleMoms();
 	const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
 	double lxy_SV1_sub = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
-	if(lxy_SV1_sub>m_lxyV0_cut) {
+	if(lxy_SV1_sub > m_lxyV0_cut) {
 	  TLorentzVector totalMom;
 	  for(size_t it=0; it<moms[1].size(); it++) totalMom += moms[1][it];
 	  if(totalMom.M()>m_DisplacedMassLower && totalMom.M()<m_DisplacedMassUpper) {
@@ -790,10 +903,166 @@ namespace DerivationFramework {
     return disVtx;
   }
 
-  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getEtacCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const {
+    MesonCandidate etac;
+    // Check overlap
+    std::vector<const xAOD::TrackParticle*> tracksV0;
+    tracksV0.reserve(V0vtx->nTrackParticles());
+    for(size_t i=0; i<V0vtx->nTrackParticles(); i++) tracksV0.push_back(V0vtx->trackParticle(i));
+    if(std::find(tracksV0.cbegin(), tracksV0.cend(), extraTrk1) != tracksV0.cend()) return etac;
+    if(std::find(tracksV0.cbegin(), tracksV0.cend(), extraTrk2) != tracksV0.cend()) return etac;
+
+    std::vector<double> massesV0;
+    if(V0==LAMBDA) {
+      massesV0 = m_massesV0_ppi;
+    }
+    else if(V0==LAMBDABAR) {
+      massesV0 = m_massesV0_pip;
+    }
+    else if(V0==KS) {
+      massesV0 = m_massesV0_pipi;
+    }
+    xAOD::BPhysHelper V0_helper(V0vtx);
+    TLorentzVector p4_v0, tmp1, tmp2;
+    for(int i=0; i<V0_helper.nRefTrks(); i++) p4_v0 += V0_helper.refTrk(i,massesV0[i]);
+    tmp1.SetPtEtaPhiM(extraTrk1->pt(),extraTrk1->eta(),extraTrk1->phi(),m_extraTrk1MassHypo);
+    tmp2.SetPtEtaPhiM(extraTrk2->pt(),extraTrk2->eta(),extraTrk2->phi(),m_extraTrk2MassHypo);
+    if((p4_v0+tmp1+tmp2).M() < m_V0ExtraMassLower || (p4_v0+tmp1+tmp2).M() > m_V0ExtraMassUpper) return etac;
+
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    int robustness = 0;
+    m_iVertexFitter->setRobustness(robustness, *state);
+    std::vector<Trk::VertexID> vrtList;
+    // V0 vertex
+    Trk::VertexID vID = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+    vrtList.push_back(vID);
+    // Mother vertex
+    std::vector<const xAOD::TrackParticle*> extraTracks{extraTrk1, extraTrk2};
+    std::vector<double> extraMasses{m_extraTrk1MassHypo, m_extraTrk2MassHypo};
+    m_iVertexFitter->nextVertex(extraTracks,extraMasses,vrtList,*state);
+    // Do the work
+    std::unique_ptr<Trk::VxCascadeInfo> cascade_info = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+    if(cascade_info) {
+      cascade_info->setSVOwnership(true);
+      double chi2NDF = cascade_info->fitChi2()/cascade_info->nDoF();
+      if(m_chi2cut_V0Extra<=0 || chi2NDF < m_chi2cut_V0Extra) {
+	const std::vector<std::vector<TLorentzVector> > &moms = cascade_info->getParticleMoms();
+	const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
+	double lxy = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	if(lxy > m_lxyV0_cut) {
+	  TLorentzVector totalMom;
+	  for(size_t it=0; it<moms[1].size(); it++) totalMom += moms[1][it];
+	  etac.V0vtx = V0vtx; etac.V0type = V0;
+	  etac.extraTrack1 = extraTrk1; etac.extraTrack2 = extraTrk2;
+	  etac.chi2NDF = chi2NDF; etac.pt = totalMom.Pt();
+	}
+      }
+    }
+    return etac;
+  }
+
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDpmCandidate(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
+    MesonCandidate Dpm;
+    // Check overlap
+    std::vector<const xAOD::TrackParticle*> tracksJX;
+    tracksJX.reserve(JXvtx->nTrackParticles());
+    for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk1) != tracksJX.cend()) return Dpm;
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk2) != tracksJX.cend()) return Dpm;
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk3) != tracksJX.cend()) return Dpm;
+
+    TLorentzVector tmp1, tmp2, tmp3;
+    tmp1.SetPtEtaPhiM(extraTrk1->pt(),extraTrk1->eta(),extraTrk1->phi(),m_extraTrk1MassHypo);
+    tmp2.SetPtEtaPhiM(extraTrk2->pt(),extraTrk2->eta(),extraTrk2->phi(),m_extraTrk2MassHypo);
+    tmp3.SetPtEtaPhiM(extraTrk3->pt(),extraTrk3->eta(),extraTrk3->phi(),m_extraTrk3MassHypo);
+    if((tmp1+tmp2+tmp3).M() < m_DpmMassLower || (tmp1+tmp2+tmp3).M() > m_DpmMassUpper) return Dpm;
+
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    int robustness = 0;
+    m_iVertexFitter->setRobustness(robustness, *state);
+    std::vector<Trk::VertexID> vrtList;
+    // Dpm vertex
+    std::vector<const xAOD::TrackParticle*> extraTracks{extraTrk1, extraTrk2, extraTrk3};
+    std::vector<double> extraMasses{m_extraTrk1MassHypo, m_extraTrk2MassHypo, m_extraTrk3MassHypo};
+    Trk::VertexID vID = m_iVertexFitter->startVertex(extraTracks,extraMasses,*state);
+    vrtList.push_back(vID);
+    // Mother vertex
+    m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
+    // Do the work
+    std::unique_ptr<Trk::VxCascadeInfo> cascade_info = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+    if(cascade_info) {
+      cascade_info->setSVOwnership(true);
+      double chi2NDF = cascade_info->fitChi2()/cascade_info->nDoF();
+      if(m_chi2cut_JXDpm<=0 || chi2NDF < m_chi2cut_JXDpm) {
+	const std::vector<std::vector<TLorentzVector> > &moms = cascade_info->getParticleMoms();
+	const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
+	double lxy = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	if(lxy > m_lxyDpm_cut) {
+	  Dpm.extraTrack1 = extraTrk1; Dpm.extraTrack2 = extraTrk2; Dpm.extraTrack3 = extraTrk3;
+	  Dpm.chi2NDF = chi2NDF; Dpm.pt = moms[1][tracksJX.size()].Pt();
+	}
+      }
+    }
+    return Dpm;
+  }
+
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDstpmCandidate(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
+    MesonCandidate Dstpm;
+    // Check overlap
+    std::vector<const xAOD::TrackParticle*> tracksJX;
+    tracksJX.reserve(JXvtx->nTrackParticles());
+    for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk1) != tracksJX.cend()) return Dstpm;
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk2) != tracksJX.cend()) return Dstpm;
+    if(std::find(tracksJX.cbegin(), tracksJX.cend(), extraTrk3) != tracksJX.cend()) return Dstpm;
+
+    TLorentzVector tmp1, tmp2, tmp3;
+    tmp1.SetPtEtaPhiM(extraTrk1->pt(),extraTrk1->eta(),extraTrk1->phi(),m_extraTrk1MassHypo);
+    tmp2.SetPtEtaPhiM(extraTrk2->pt(),extraTrk2->eta(),extraTrk2->phi(),m_extraTrk2MassHypo);
+    tmp3.SetPtEtaPhiM(extraTrk3->pt(),extraTrk3->eta(),extraTrk3->phi(),m_extraTrk3MassHypo);
+    if((tmp1+tmp2).M() < m_D0MassLower || (tmp1+tmp2).M() > m_D0MassUpper) return Dstpm;
+    if((tmp1+tmp2+tmp3).M()-(tmp1+tmp2).M()+m_mass_D0 < m_DstpmMassLower || (tmp1+tmp2+tmp3).M()-(tmp1+tmp2).M()+m_mass_D0 > m_DstpmMassUpper) return Dstpm;
+
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    int robustness = 0;
+    m_iVertexFitter->setRobustness(robustness, *state);
+    std::vector<Trk::VertexID> vrtList;
+    // D0 vertex
+    std::vector<const xAOD::TrackParticle*> extraTracks{extraTrk1, extraTrk2};
+    std::vector<double> extraMasses{m_extraTrk1MassHypo, m_extraTrk2MassHypo};
+    Trk::VertexID vID = m_iVertexFitter->startVertex(extraTracks,extraMasses,*state);
+    vrtList.push_back(vID);
+    // Mother vertex
+    std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
+    tracksJXExtra.push_back(extraTrk3);
+    std::vector<double> massesJXExtra = massesJX;
+    massesJXExtra.push_back(m_extraTrk3MassHypo);
+    m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList,*state);
+    // Do the work
+    std::unique_ptr<Trk::VxCascadeInfo> cascade_info = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+    if(cascade_info) {
+      cascade_info->setSVOwnership(true);
+      double chi2NDF = cascade_info->fitChi2()/cascade_info->nDoF();
+      if(m_chi2cut_JXDstpm<=0 || chi2NDF < m_chi2cut_JXDstpm) {
+	const std::vector<std::vector<TLorentzVector> > &moms = cascade_info->getParticleMoms();
+	const std::vector<xAOD::Vertex*> &cascadeVertices = cascade_info->vertices();
+	double lxy = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+	if(lxy > m_lxyD0_cut) {
+	  TLorentzVector totalMom;
+	  for(size_t it=tracksJX.size(); it<moms[1].size(); it++) totalMom += moms[1][it];
+	  Dstpm.extraTrack1 = extraTrk1; Dstpm.extraTrack2 = extraTrk2; Dstpm.extraTrack3 = extraTrk3;
+	  Dstpm.chi2NDF = chi2NDF; Dstpm.pt = totalMom.Pt();
+	}
+      }
+    }
+    return Dstpm;
+  }
+
+  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
     std::vector<Trk::VxCascadeInfo*> result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
+    tracksJX.reserve(JXvtx->nTrackParticles());
     for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
     if (tracksJX.size() != massesJX.size()) {
       ATH_MSG_ERROR("Problems with JX input: number of tracks or track mass inputs is not correct!");
@@ -803,6 +1072,7 @@ namespace DerivationFramework {
     if(std::find(tracksJX.cbegin(), tracksJX.cend(), V0vtx->trackParticle(0)) != tracksJX.cend()) return result;
     if(std::find(tracksJX.cbegin(), tracksJX.cend(), V0vtx->trackParticle(1)) != tracksJX.cend()) return result;
     std::vector<const xAOD::TrackParticle*> tracksV0;
+    tracksV0.reserve(V0vtx->nTrackParticles());
     for(size_t j=0; j<V0vtx->nTrackParticles(); j++) tracksV0.push_back(V0vtx->trackParticle(j));
 
     std::vector<const xAOD::TrackParticle*> tracksJpsi{tracksJX[0], tracksJX[1]};
@@ -811,11 +1081,17 @@ namespace DerivationFramework {
     if(m_jxDaug_num==4) tracksX.push_back(tracksJX[3]);
 
     std::vector<double> massesV0;
-    if(V0==LAMBDA)         massesV0 = m_massesV0_ppi;
-    else if(V0==LAMBDABAR) massesV0 = m_massesV0_pip;
-    else if(V0==KS)        massesV0 = m_massesV0_pipi;
+    if(V0==LAMBDA) {
+      massesV0 = m_massesV0_ppi;
+    }
+    else if(V0==LAMBDABAR) {
+      massesV0 = m_massesV0_pip;
+    }
+    else if(V0==KS) {
+      massesV0 = m_massesV0_pipi;
+    }
 
-    TLorentzVector p4_moth, tmp;
+    TLorentzVector p4_moth, p4_v0, tmp;
     for(size_t it=0; it<JXvtx->nTrackParticles(); it++) {
       tmp.SetPtEtaPhiM(JXvtx->trackParticle(it)->pt(), JXvtx->trackParticle(it)->eta(), JXvtx->trackParticle(it)->phi(), massesJX[it]);
       p4_moth += tmp;
@@ -823,6 +1099,7 @@ namespace DerivationFramework {
     xAOD::BPhysHelper V0_helper(V0vtx);
     for(int it=0; it<V0_helper.nRefTrks(); it++) {
       p4_moth += V0_helper.refTrk(it,massesV0[it]);
+      p4_v0 += V0_helper.refTrk(it,massesV0[it]);
     }
 
     SG::AuxElement::Decorator<float>       chi2_V1_decor("ChiSquared_V1");
@@ -850,7 +1127,7 @@ namespace DerivationFramework {
     std::vector<float> trk_py;
     std::vector<float> trk_pz;
 
-    if(m_extraTrkMassHypo<=0) {
+    if(m_extraTrk1MassHypo<=0) {
       if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
@@ -941,9 +1218,15 @@ namespace DerivationFramework {
 	if(chi2CutPassed && lxy_SV1>m_lxyV0_cut) {
 	  chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
 	  ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
-	  if(V0==LAMBDA)         type_V1_decor(*cascadeVertices[0]) = "Lambda";
-	  else if(V0==LAMBDABAR) type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
-	  else if(V0==KS)        type_V1_decor(*cascadeVertices[0]) = "Ks";
+	  if(V0==LAMBDA) {
+	    type_V1_decor(*cascadeVertices[0]) = "Lambda";
+	  }
+	  else if(V0==LAMBDABAR) {
+	    type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
+	  }
+	  else if(V0==KS) {
+	    type_V1_decor(*cascadeVertices[0]) = "Ks";
+	  }
 	  mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*V0vtx) ? mAcc_gfit(*V0vtx) : 0;
 	  mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*V0vtx) ? mAcc_gmass(*V0vtx) : -1;
 	  mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*V0vtx) ? mAcc_gmasserr(*V0vtx) : -1;
@@ -951,10 +1234,13 @@ namespace DerivationFramework {
 	  mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*V0vtx) ? mAcc_gndof(*V0vtx) : 0;
 	  mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*V0vtx) ? mAcc_gprob(*V0vtx) : -1;
 	  trk_px.clear(); trk_py.clear(); trk_pz.clear();
-	  for(int it=0; it<V0_helper.nRefTrks(); it++) {
-	    trk_px.push_back( V0_helper.refTrk(it).Px() );
-	    trk_py.push_back( V0_helper.refTrk(it).Py() );
-	    trk_pz.push_back( V0_helper.refTrk(it).Pz() );
+	  trk_px.reserve(V0_helper.nRefTrks());
+	  trk_py.reserve(V0_helper.nRefTrks());
+	  trk_pz.reserve(V0_helper.nRefTrks());
+	  for(auto&& vec3 : V0_helper.refTrks()) {
+	    trk_px.push_back( vec3.Px() );
+	    trk_py.push_back( vec3.Py() );
+	    trk_pz.push_back( vec3.Pz() );
 	  }
 	  trk_pxDeco(*cascadeVertices[0]) = trk_px;
 	  trk_pyDeco(*cascadeVertices[0]) = trk_py;
@@ -963,22 +1249,21 @@ namespace DerivationFramework {
 	  result.push_back( fit_result.release() );
 	}
       }
-    } // m_extraTrkMassHypo<=0
-    else { // m_extraTrkMassHypo>0
+    } // m_extraTrk1MassHypo<=0
+    else if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo<=0) {
       std::vector<double> massesJXExtra = massesJX;
-      massesJXExtra.push_back(m_extraTrkMassHypo);
+      massesJXExtra.push_back(m_extraTrk1MassHypo);
 
-      for(auto tpIter=trackContainer->cbegin(); tpIter!=trackContainer->cend(); ++tpIter) {
-	const xAOD::TrackParticle* tpExtra = (*tpIter);
-	if ( tpExtra->pt()<m_extraTrkMinPt ) continue;
-	if ( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
+      for(const xAOD::TrackParticle* tpExtra : *trackContainer) {
+	if( tpExtra->pt()<m_extraTrk1MinPt ) continue;
+	if( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
 	// Check identical tracks in input
 	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
 	if(std::find(tracksV0.cbegin(),tracksV0.cend(),tpExtra) != tracksV0.cend()) continue;
 
 	TLorentzVector tmp;
-	tmp.SetPtEtaPhiM(tpExtra->pt(),tpExtra->eta(),tpExtra->phi(),m_extraTrkMassHypo);
-	if ((p4_moth+tmp).M() < m_MassLower || (p4_moth+tmp).M() > m_MassUpper) continue;
+	tmp.SetPtEtaPhiM(tpExtra->pt(),tpExtra->eta(),tpExtra->phi(),m_extraTrk1MassHypo);
+	if((p4_moth+tmp).M() < m_MassLower || (p4_moth+tmp).M() > m_MassUpper) continue;
 
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
 	tracksJXExtra.push_back(tpExtra);
@@ -1066,9 +1351,15 @@ namespace DerivationFramework {
 	  if(chi2CutPassed && lxy_SV1>m_lxyV0_cut) {
 	    chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
 	    ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
-	    if(V0==LAMBDA)         type_V1_decor(*cascadeVertices[0]) = "Lambda";
-	    else if(V0==LAMBDABAR) type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
-	    else if(V0==KS)        type_V1_decor(*cascadeVertices[0]) = "Ks";
+	    if(V0==LAMBDA) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambda";
+	    }
+	    else if(V0==LAMBDABAR) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
+	    }
+	    else if(V0==KS) {
+	      type_V1_decor(*cascadeVertices[0]) = "Ks";
+	    }
 	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*V0vtx) ? mAcc_gfit(*V0vtx) : 0;
 	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*V0vtx) ? mAcc_gmass(*V0vtx) : -1;
 	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*V0vtx) ? mAcc_gmasserr(*V0vtx) : -1;
@@ -1076,10 +1367,13 @@ namespace DerivationFramework {
 	    mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*V0vtx) ? mAcc_gndof(*V0vtx) : 0;
 	    mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*V0vtx) ? mAcc_gprob(*V0vtx) : -1;
 	    trk_px.clear(); trk_py.clear(); trk_pz.clear();
-	    for(int it=0; it<V0_helper.nRefTrks(); it++) {
-	      trk_px.push_back( V0_helper.refTrk(it).Px() );
-	      trk_py.push_back( V0_helper.refTrk(it).Py() );
-	      trk_pz.push_back( V0_helper.refTrk(it).Pz() );
+	    trk_px.reserve(V0_helper.nRefTrks());
+	    trk_py.reserve(V0_helper.nRefTrks());
+	    trk_pz.reserve(V0_helper.nRefTrks());
+	    for(auto&& vec3 : V0_helper.refTrks()) {
+	      trk_px.push_back( vec3.Px() );
+	      trk_py.push_back( vec3.Py() );
+	      trk_pz.push_back( vec3.Pz() );
 	    }
 	    trk_pxDeco(*cascadeVertices[0]) = trk_px;
 	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
@@ -1089,15 +1383,482 @@ namespace DerivationFramework {
 	  }
 	}
       } // loop over trackContainer
-    } // m_extraTrkMassHypo>0
+    } // m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo<=0
+    else if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo<=0) {
+      std::vector<const xAOD::TrackParticle*> tracksPlus;
+      std::vector<const xAOD::TrackParticle*> tracksMinus;
+      for(const xAOD::TrackParticle* tpExtra : *trackContainer) {
+	if( tpExtra->pt() < std::fmin(m_extraTrk1MinPt,m_extraTrk2MinPt) ) continue;
+	if( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
+	// Check identical tracks in input
+	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
+	if(std::find(tracksV0.cbegin(),tracksV0.cend(),tpExtra) != tracksV0.cend()) continue;
+	if(tpExtra->charge()>0) {
+	  tracksPlus.push_back(tpExtra);
+	}
+        else {
+	  tracksMinus.push_back(tpExtra);
+	}
+      }
+
+      MesonCandidateVector etacCandidates(m_maxMesonCandidates, m_MesonPtOrdering);
+      TLorentzVector p4_ExtraTrk1, p4_ExtraTrk2;
+      for(const xAOD::TrackParticle* tp1 : tracksPlus) {
+	if( tp1->pt() < m_extraTrk1MinPt ) continue;
+	for(const xAOD::TrackParticle* tp2 : tracksMinus) {
+	  if( tp2->pt() < m_extraTrk2MinPt ) continue;
+	  p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	  p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	  if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() > m_MassUpper) continue;
+	  auto etac = getEtacCandidate(V0vtx,V0,tp1,tp2);
+	  if(etac.V0vtx) etacCandidates.push_back(etac);
+	}
+      }
+
+      std::vector<double> massesJXExtra = massesJX;
+      massesJXExtra.push_back(m_extraTrk1MassHypo);
+      massesJXExtra.push_back(m_extraTrk2MassHypo);
+      
+      for(auto&& etac : etacCandidates.vector()) {
+	std::vector<const xAOD::TrackParticle*> tracksExtra{etac.extraTrack1, etac.extraTrack2};
+	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
+	tracksJXExtra.push_back(etac.extraTrack1);
+	tracksJXExtra.push_back(etac.extraTrack2);
+
+	// Apply the user's settings to the fitter
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	// Robustness: http://cdsweb.cern.ch/record/685551
+	int robustness = 0;
+	m_iVertexFitter->setRobustness(robustness, *state);
+	// Build up the topology
+	// Vertex list
+	std::vector<Trk::VertexID> vrtList;
+	// https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+	// V0 vertex
+	Trk::VertexID vID1;
+	if (m_constrV0) {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
+	} else {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+	}
+	vrtList.push_back(vID1);
+	Trk::VertexID vID2;
+	if(m_JXSubVtx) {
+	  // JXExtra vertex
+	  vID2 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,*state);     
+	  vrtList.push_back(vID2);
+	  // Mother vertex includes two subvertices: V0, JX+extra tracks
+	  std::vector<const xAOD::TrackParticle*> tp;
+	  std::vector<double> tp_masses;
+	  if(m_constrMainV) {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList,*state,m_massMainV);
+	  } else {
+	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList,*state);
+	  }
+	}
+	else { // m_JXSubVtx=false
+	  // Mother vertex includes one subvertex (V0) and JX tracks + extra track
+	  if(m_constrMainV) {
+	    vID2 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList,*state,m_massMainV);
+	  } else {
+	    vID2 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList,*state);
+	  }
+	}
+	if (m_constrJX && m_jxDaug_num>2) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	  }
+	}
+	if (m_constrJpsi) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	  }
+	}
+	if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for X failed");
+	  }
+	}
+	if (m_constrV0Extra && m_massV0Extra>0) {
+	  std::vector<Trk::VertexID> cnstV{vID1};
+	  if ( !m_iVertexFitter->addMassConstraint(vID2,tracksExtra,cnstV,*state,m_massV0Extra).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for V0+extraTracks failed");
+	  }
+	}
+	// Do the work
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+
+	if (fit_result) {
+	  for(auto& v : fit_result->vertices()) {
+	    if(v->nTrackParticles()==0) {
+	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	      v->setTrackParticleLinks(nullLinkVector);
+	    }
+	  }
+	  // reset links to original tracks
+	  BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
+
+	  // necessary to prevent memory leak
+	  fit_result->setSVOwnership(true);
+
+	  // Chi2/DOF cut
+	  double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
+	  bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+	  const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
+	  const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
+	  size_t iMoth = cascadeVertices.size()-1;
+	  double lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[iMoth]);
+	  if(chi2CutPassed && lxy_SV1>m_lxyV0_cut) {
+	    chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
+	    ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
+	    if(V0==LAMBDA) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambda";
+	    }
+	    else if(V0==LAMBDABAR) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
+	    }
+	    else if(V0==KS) {
+	      type_V1_decor(*cascadeVertices[0]) = "Ks";
+	    }
+	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*V0vtx) ? mAcc_gfit(*V0vtx) : 0;
+	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*V0vtx) ? mAcc_gmass(*V0vtx) : -1;
+	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*V0vtx) ? mAcc_gmasserr(*V0vtx) : -1;
+	    mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*V0vtx) ? mAcc_gchisq(*V0vtx) : 999999;
+	    mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*V0vtx) ? mAcc_gndof(*V0vtx) : 0;
+	    mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*V0vtx) ? mAcc_gprob(*V0vtx) : -1;
+	    trk_px.clear(); trk_py.clear(); trk_pz.clear();
+	    trk_px.reserve(V0_helper.nRefTrks());
+	    trk_py.reserve(V0_helper.nRefTrks());
+	    trk_pz.reserve(V0_helper.nRefTrks());
+	    for(auto&& vec3 : V0_helper.refTrks()) {
+	      trk_px.push_back( vec3.Px() );
+	      trk_py.push_back( vec3.Py() );
+	      trk_pz.push_back( vec3.Pz() );
+	    }
+	    trk_pxDeco(*cascadeVertices[0]) = trk_px;
+	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
+	    trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+
+	    result.push_back( fit_result.release() );
+	  }
+	}
+      } // loop over etacCandidates
+    } // m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo<=0
+    else if(m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0) {
+      std::vector<const xAOD::TrackParticle*> tracksPlus;
+      std::vector<const xAOD::TrackParticle*> tracksMinus;
+      double minTrkPt = std::fmin(std::fmin(m_extraTrk1MinPt,m_extraTrk2MinPt),m_extraTrk3MinPt);
+      for(const xAOD::TrackParticle* tpExtra : *trackContainer) {
+	if( tpExtra->pt() < minTrkPt ) continue;
+	if( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
+	// Check identical tracks in input
+	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
+	if(std::find(tracksV0.cbegin(),tracksV0.cend(),tpExtra) != tracksV0.cend()) continue;
+	if(tpExtra->charge()>0) {
+	  tracksPlus.push_back(tpExtra);
+	}
+        else {
+	  tracksMinus.push_back(tpExtra);
+	}
+      }
+
+      MesonCandidateVector DpmCandidates(m_maxMesonCandidates, m_MesonPtOrdering);
+      MesonCandidateVector DstpmCandidates(m_maxMesonCandidates, m_MesonPtOrdering);
+      TLorentzVector p4_ExtraTrk1, p4_ExtraTrk2, p4_ExtraTrk3;
+      // +,-,- combination (D*-/D- -> K+ pi- pi-)
+      for(const xAOD::TrackParticle* tp1 : tracksPlus) {
+	if( tp1->pt() < m_extraTrk1MinPt ) continue;
+	for(auto tp2Itr=tracksMinus.cbegin(); tp2Itr!=tracksMinus.cend(); ++tp2Itr) {
+	  const xAOD::TrackParticle* tp2 = *tp2Itr;
+	  if( tp2->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
+	  for(auto tp3Itr=tp2Itr+1; tp3Itr!=tracksMinus.cend(); ++tp3Itr) {
+	    const xAOD::TrackParticle* tp3 = *tp3Itr;
+	    if( tp3->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
+	    p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	    p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	    p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
+	    if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
+	    auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	    if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
+	    auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	    if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	  }
+	}
+      }
+      // -,+,+ combination (D*+/D+ -> K- pi+ pi+)
+      for(const xAOD::TrackParticle* tp1 : tracksMinus) {
+	if( tp1->pt() < m_extraTrk1MinPt ) continue;
+	for(auto tp2Itr=tracksPlus.cbegin(); tp2Itr!=tracksPlus.cend(); ++tp2Itr) {
+	  const xAOD::TrackParticle* tp2 = *tp2Itr;
+	  if( tp2->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
+	  for(auto tp3Itr=tp2Itr+1; tp3Itr!=tracksPlus.cend(); ++tp3Itr) {
+	    const xAOD::TrackParticle* tp3 = *tp3Itr;
+	    if( tp3->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
+	    p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	    p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	    p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
+	    if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
+	    auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	    if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
+	    auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	    if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	  }
+	}
+      }
+
+      std::vector<double> massesExtra{m_extraTrk1MassHypo,m_extraTrk2MassHypo,m_extraTrk3MassHypo};
+
+      for(auto&& Dpm : DpmCandidates.vector()) {
+	std::vector<const xAOD::TrackParticle*> tracksExtra{Dpm.extraTrack1,Dpm.extraTrack2,Dpm.extraTrack3};
+
+	// Apply the user's settings to the fitter
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	// Robustness: http://cdsweb.cern.ch/record/685551
+	int robustness = 0;
+	m_iVertexFitter->setRobustness(robustness, *state);
+	// Build up the topology
+	// Vertex list
+	std::vector<Trk::VertexID> vrtList;
+	// https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+	// V0 vertex
+	Trk::VertexID vID1;
+	if (m_constrV0) {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
+	} else {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+	}
+	vrtList.push_back(vID1);
+	// Dpm vertex
+	Trk::VertexID vID2;
+	if (m_constrDpm && m_mass_Dpm>0) {
+	  vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state,m_mass_Dpm);
+	} else {
+	  vID2 = m_iVertexFitter->nextVertex(tracksExtra,massesExtra,*state);
+	}
+	vrtList.push_back(vID2);
+	// Mother vertex includes two subvertices: V0, Dpm and JX tracks
+	Trk::VertexID vID3;
+	if(m_constrMainV) {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state,m_massMainV);
+	} else {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJX,massesJX,vrtList,*state);
+	}
+	if (m_constrJX && m_jxDaug_num>2) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	  }
+	}
+	if (m_constrJpsi) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	  }
+	}
+	if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for X failed");
+	  }
+	}
+	// Do the work
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+
+	if (fit_result) {
+	  for(auto& v : fit_result->vertices()) {
+	    if(v->nTrackParticles()==0) {
+	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	      v->setTrackParticleLinks(nullLinkVector);
+	    }
+	  }
+	  // reset links to original tracks
+	  BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
+
+	  // necessary to prevent memory leak
+	  fit_result->setSVOwnership(true);
+
+	  // Chi2/DOF cut
+	  double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
+	  bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+	  const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
+	  const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
+	  size_t iMoth = cascadeVertices.size()-1;
+	  double lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[iMoth]);
+	  double lxy_SV2 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+	  if(chi2CutPassed && lxy_SV1>m_lxyV0_cut && lxy_SV2>m_lxyDpm_cut) {
+	    chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
+	    ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
+	    if(V0==LAMBDA) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambda";
+	    }
+	    else if(V0==LAMBDABAR) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
+	    }
+	    else if(V0==KS) {
+	      type_V1_decor(*cascadeVertices[0]) = "Ks";
+	    }
+	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*V0vtx) ? mAcc_gfit(*V0vtx) : 0;
+	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*V0vtx) ? mAcc_gmass(*V0vtx) : -1;
+	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*V0vtx) ? mAcc_gmasserr(*V0vtx) : -1;
+	    mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*V0vtx) ? mAcc_gchisq(*V0vtx) : 999999;
+	    mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*V0vtx) ? mAcc_gndof(*V0vtx) : 0;
+	    mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*V0vtx) ? mAcc_gprob(*V0vtx) : -1;
+	    trk_px.clear(); trk_py.clear(); trk_pz.clear();
+	    trk_px.reserve(V0_helper.nRefTrks());
+	    trk_py.reserve(V0_helper.nRefTrks());
+	    trk_pz.reserve(V0_helper.nRefTrks());
+	    for(auto&& vec3 : V0_helper.refTrks()) {
+	      trk_px.push_back( vec3.Px() );
+	      trk_py.push_back( vec3.Py() );
+	      trk_pz.push_back( vec3.Pz() );
+	    }
+	    trk_pxDeco(*cascadeVertices[0]) = trk_px;
+	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
+	    trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+
+	    result.push_back( fit_result.release() );
+	  }
+	}
+      } // loop over DpmCandidates
+
+      std::vector<double> massesJXExtra = massesJX;
+      massesJXExtra.push_back(m_extraTrk3MassHypo);
+      std::vector<double> massesExtra12{m_extraTrk1MassHypo,m_extraTrk2MassHypo};
+
+      for(auto&& Dstpm : DstpmCandidates.vector()) {
+	std::vector<const xAOD::TrackParticle*> tracksExtra12{Dstpm.extraTrack1,Dstpm.extraTrack2};
+	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
+	tracksJXExtra.push_back(Dstpm.extraTrack3);
+
+	// Apply the user's settings to the fitter
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	// Robustness: http://cdsweb.cern.ch/record/685551
+	int robustness = 0;
+	m_iVertexFitter->setRobustness(robustness, *state);
+	// Build up the topology
+	// Vertex list
+	std::vector<Trk::VertexID> vrtList;
+	// https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+	// V0 vertex
+	Trk::VertexID vID1;
+	if (m_constrV0) {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state,m_massV0);
+	} else {
+	  vID1 = m_iVertexFitter->startVertex(tracksV0,massesV0,*state);
+	}
+	vrtList.push_back(vID1);
+	// D0 vertex
+	Trk::VertexID vID2;
+	if (m_constrD0 && m_mass_D0>0) {
+	  vID2 = m_iVertexFitter->nextVertex(tracksExtra12,massesExtra12,*state,m_mass_D0);
+	} else {
+	  vID2 = m_iVertexFitter->nextVertex(tracksExtra12,massesExtra12,*state);
+	}
+	vrtList.push_back(vID2);
+	// Mother vertex includes two subvertices: V0, D0 and JX+extraTrk3 tracks
+	Trk::VertexID vID3;
+	if(m_constrMainV) {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList,*state,m_massMainV);
+	} else {
+	  vID3 = m_iVertexFitter->nextVertex(tracksJXExtra,massesJXExtra,vrtList,*state);
+	}
+	if (m_constrJX && m_jxDaug_num>2) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJX,cnstV,*state,m_massJX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for JX failed");
+	  }
+	}
+	if (m_constrJpsi) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksJpsi,cnstV,*state,m_massJpsi).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+	  }
+	}
+	if (m_constrX && m_jxDaug_num==4 && m_massX>0) {
+	  std::vector<Trk::VertexID> cnstV;
+	  if ( !m_iVertexFitter->addMassConstraint(vID3,tracksX,cnstV,*state,m_massX).isSuccess() ) {
+	    ATH_MSG_WARNING("addMassConstraint for X failed");
+	  }
+	}
+	if (m_constrDstpm && m_mass_Dstpm>0) {
+          std::vector<Trk::VertexID> cnstV{vID2};
+	  std::vector<const xAOD::TrackParticle*> tracksExtra3{Dstpm.extraTrack3};
+          if ( !m_iVertexFitter->addMassConstraint(vID3,tracksExtra3,cnstV,*state,m_mass_Dstpm).isSuccess() ) {
+            ATH_MSG_WARNING("addMassConstraint for V0+extraTracks failed");
+          }
+        }
+	// Do the work
+	std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+
+	if (fit_result) {
+	  for(auto& v : fit_result->vertices()) {
+	    if(v->nTrackParticles()==0) {
+	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	      v->setTrackParticleLinks(nullLinkVector);
+	    }
+	  }
+	  // reset links to original tracks
+	  BPhysPVCascadeTools::PrepareVertexLinks(fit_result.get(), trackCols);
+
+	  // necessary to prevent memory leak
+	  fit_result->setSVOwnership(true);
+
+	  // Chi2/DOF cut
+	  double chi2DOF = fit_result->fitChi2()/fit_result->nDoF();
+	  bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+	  const std::vector<std::vector<TLorentzVector> > &moms = fit_result->getParticleMoms();
+	  const std::vector<xAOD::Vertex*> &cascadeVertices = fit_result->vertices();
+	  size_t iMoth = cascadeVertices.size()-1;
+	  double lxy_SV1 = m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[iMoth]);
+	  double lxy_SV2 = m_CascadeTools->lxy(moms[1],cascadeVertices[1],cascadeVertices[iMoth]);
+	  if(chi2CutPassed && lxy_SV1>m_lxyV0_cut && lxy_SV2>m_lxyD0_cut) {
+	    chi2_V1_decor(*cascadeVertices[0]) = V0vtx->chiSquared();
+	    ndof_V1_decor(*cascadeVertices[0]) = V0vtx->numberDoF();
+	    if(V0==LAMBDA) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambda";
+	    }
+	    else if(V0==LAMBDABAR) {
+	      type_V1_decor(*cascadeVertices[0]) = "Lambdabar";
+	    }
+	    else if(V0==KS) {
+	      type_V1_decor(*cascadeVertices[0]) = "Ks";
+	    }
+	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*V0vtx) ? mAcc_gfit(*V0vtx) : 0;
+	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*V0vtx) ? mAcc_gmass(*V0vtx) : -1;
+	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*V0vtx) ? mAcc_gmasserr(*V0vtx) : -1;
+	    mDec_gchisq(*cascadeVertices[0])   = mAcc_gchisq.isAvailable(*V0vtx) ? mAcc_gchisq(*V0vtx) : 999999;
+	    mDec_gndof(*cascadeVertices[0])    = mAcc_gndof.isAvailable(*V0vtx) ? mAcc_gndof(*V0vtx) : 0;
+	    mDec_gprob(*cascadeVertices[0])    = mAcc_gprob.isAvailable(*V0vtx) ? mAcc_gprob(*V0vtx) : -1;
+	    trk_px.clear(); trk_py.clear(); trk_pz.clear();
+	    trk_px.reserve(V0_helper.nRefTrks());
+	    trk_py.reserve(V0_helper.nRefTrks());
+	    trk_pz.reserve(V0_helper.nRefTrks());
+	    for(auto&& vec3 : V0_helper.refTrks()) {
+	      trk_px.push_back( vec3.Px() );
+	      trk_py.push_back( vec3.Py() );
+	      trk_pz.push_back( vec3.Pz() );
+	    }
+	    trk_pxDeco(*cascadeVertices[0]) = trk_px;
+	    trk_pyDeco(*cascadeVertices[0]) = trk_py;
+	    trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+
+	    result.push_back( fit_result.release() );
+	  }
+	}
+      } // loop over DstpmCandidates
+    } // m_extraTrk1MassHypo>0 && m_extraTrk2MassHypo>0 && m_extraTrk3MassHypo>0
 
     return result;
   }
 
-  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+  std::vector<Trk::VxCascadeInfo*> JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
     std::vector<Trk::VxCascadeInfo*> result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
+    tracksJX.reserve(JXvtx->nTrackParticles());
     for(size_t i=0; i<JXvtx->nTrackParticles(); i++) tracksJX.push_back(JXvtx->trackParticle(i));
     if (tracksJX.size() != massesJX.size()) {
       ATH_MSG_ERROR("Problems with JX input: number of tracks or track mass inputs is not correct!");
@@ -1107,6 +1868,7 @@ namespace DerivationFramework {
     if(std::find(tracksJX.cbegin(), tracksJX.cend(), disVtx.V0vtx->trackParticle(0)) != tracksJX.cend()) return result;
     if(std::find(tracksJX.cbegin(), tracksJX.cend(), disVtx.V0vtx->trackParticle(1)) != tracksJX.cend()) return result;
     std::vector<const xAOD::TrackParticle*> tracksV0;
+    tracksV0.reserve(disVtx.V0vtx->nTrackParticles());
     for(size_t j=0; j<disVtx.V0vtx->nTrackParticles(); j++) tracksV0.push_back(disVtx.V0vtx->trackParticle(j));
 
     if(std::find(tracksJX.cbegin(), tracksJX.cend(), disVtx.track) != tracksJX.cend()) return result;
@@ -1119,9 +1881,15 @@ namespace DerivationFramework {
     if(m_jxDaug_num==4) tracksX.push_back(tracksJX[3]);
 
     std::vector<double> massesV0;
-    if(disVtx.V0type==LAMBDA)         massesV0 = m_massesV0_ppi;
-    else if(disVtx.V0type==LAMBDABAR) massesV0 = m_massesV0_pip;
-    else if(disVtx.V0type==KS)        massesV0 = m_massesV0_pipi;
+    if(disVtx.V0type==LAMBDA) {
+      massesV0 = m_massesV0_ppi;
+    }
+    else if(disVtx.V0type==LAMBDABAR) {
+      massesV0 = m_massesV0_pip;
+    }
+    else if(disVtx.V0type==KS) {
+      massesV0 = m_massesV0_pipi;
+    }
 
     std::vector<double> massesDisV = massesV0;
     massesDisV.push_back(m_disVDaug3MassHypo);
@@ -1161,7 +1929,7 @@ namespace DerivationFramework {
     std::vector<float> trk_py;
     std::vector<float> trk_pz;
 
-    if(m_extraTrkMassHypo<=0) {
+    if(m_extraTrk1MassHypo<=0) {
       if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
@@ -1263,9 +2031,15 @@ namespace DerivationFramework {
 	if(chi2CutPassed && lxy_SV1>m_lxyDisV_cut && lxy_SV1_sub>m_lxyV0_cut) {
 	  chi2_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->chiSquared();
 	  ndof_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->numberDoF();
-	  if(disVtx.V0type==LAMBDA)         type_V0_decor(*cascadeVertices[0]) = "Lambda";
-	  else if(disVtx.V0type==LAMBDABAR) type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
-	  else if(disVtx.V0type==KS)        type_V0_decor(*cascadeVertices[0]) = "Ks";
+	  if(disVtx.V0type==LAMBDA) {
+	    type_V0_decor(*cascadeVertices[0]) = "Lambda";
+	  }
+	  else if(disVtx.V0type==LAMBDABAR) {
+	    type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
+	  }
+	  else if(disVtx.V0type==KS) {
+	    type_V0_decor(*cascadeVertices[0]) = "Ks";
+	  }
 	  mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*disVtx.V0vtx) ? mAcc_gfit(*disVtx.V0vtx) : 0;
 	  mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*disVtx.V0vtx) ? mAcc_gmass(*disVtx.V0vtx) : -1;
 	  mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*disVtx.V0vtx) ? mAcc_gmasserr(*disVtx.V0vtx) : -1;
@@ -1286,14 +2060,13 @@ namespace DerivationFramework {
 	  result.push_back( fit_result.release() );
 	}
       }
-    } // m_extraTrkMassHypo<=0
-    else { // m_extraTrkMassHypo>0
+    } // m_extraTrk1MassHypo<=0
+    else { // m_extraTrk1MassHypo>0
       std::vector<double> massesJXExtra = massesJX;
-      massesJXExtra.push_back(m_extraTrkMassHypo);
+      massesJXExtra.push_back(m_extraTrk1MassHypo);
 
-      for(auto tpIter=trackContainer->cbegin(); tpIter!=trackContainer->cend(); ++tpIter) {
-	const xAOD::TrackParticle* tpExtra = (*tpIter);
-	if ( tpExtra->pt()<m_extraTrkMinPt ) continue;
+      for(const xAOD::TrackParticle* tpExtra : *trackContainer) {
+	if ( tpExtra->pt()<m_extraTrk1MinPt ) continue;
 	if ( !m_trkSelector->decision(*tpExtra, nullptr) ) continue;
 	// Check identical tracks in input
 	if(std::find(tracksJX.cbegin(),tracksJX.cend(),tpExtra) != tracksJX.cend()) continue;
@@ -1301,7 +2074,7 @@ namespace DerivationFramework {
 	if(tpExtra == disVtx.track) continue;
 
 	TLorentzVector tmp;
-	tmp.SetPtEtaPhiM(tpExtra->pt(),tpExtra->eta(),tpExtra->phi(),m_extraTrkMassHypo);
+	tmp.SetPtEtaPhiM(tpExtra->pt(),tpExtra->eta(),tpExtra->phi(),m_extraTrk1MassHypo);
 	if ((p4_moth+tmp).M() < m_MassLower || (p4_moth+tmp).M() > m_MassUpper) continue;
 
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX;
@@ -1402,9 +2175,15 @@ namespace DerivationFramework {
 	  if(chi2CutPassed && lxy_SV1>m_lxyDisV_cut && lxy_SV1_sub>m_lxyV0_cut) {
 	    chi2_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->chiSquared();
 	    ndof_V0_decor(*cascadeVertices[0]) = disVtx.V0vtx->numberDoF();
-	    if(disVtx.V0type==LAMBDA)         type_V0_decor(*cascadeVertices[0]) = "Lambda";
-	    else if(disVtx.V0type==LAMBDABAR) type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
-	    else if(disVtx.V0type==KS)        type_V0_decor(*cascadeVertices[0]) = "Ks";
+	    if(disVtx.V0type==LAMBDA) {
+	      type_V0_decor(*cascadeVertices[0]) = "Lambda";
+	    }
+	    else if(disVtx.V0type==LAMBDABAR) {
+	      type_V0_decor(*cascadeVertices[0]) = "Lambdabar";
+	    }
+	    else if(disVtx.V0type==KS) {
+	      type_V0_decor(*cascadeVertices[0]) = "Ks";
+	    }
 	    mDec_gfit(*cascadeVertices[0])     = mAcc_gfit.isAvailable(*disVtx.V0vtx) ? mAcc_gfit(*disVtx.V0vtx) : 0;
 	    mDec_gmass(*cascadeVertices[0])    = mAcc_gmass.isAvailable(*disVtx.V0vtx) ? mAcc_gmass(*disVtx.V0vtx) : -1;
 	    mDec_gmasserr(*cascadeVertices[0]) = mAcc_gmasserr.isAvailable(*disVtx.V0vtx) ? mAcc_gmasserr(*disVtx.V0vtx) : -1;
@@ -1426,7 +2205,7 @@ namespace DerivationFramework {
 	  }
 	}
       } // loop over trackContainer
-    } // m_extraTrkMassHypo>0
+    } // m_extraTrk1MassHypo>0
 
     return result;
   }
@@ -1444,17 +2223,14 @@ namespace DerivationFramework {
 
     std::vector<const xAOD::TrackParticle*> posTracks;
     std::vector<const xAOD::TrackParticle*> negTracks;
-    for(auto tpIt=selectedTracks.begin(); tpIt!=selectedTracks.end(); ++tpIt) {
-      const xAOD::TrackParticle* TP = (*tpIt);
+    for(const xAOD::TrackParticle* TP : selectedTracks) {
       if(TP->charge()>0) posTracks.push_back(TP);
       else negTracks.push_back(TP);
     }
 
-    for(auto tpIt1 = posTracks.begin(); tpIt1 != posTracks.end(); ++tpIt1) {
-      const xAOD::TrackParticle* TP1 = (*tpIt1);
+    for(const xAOD::TrackParticle* TP1 : posTracks) {
       const Trk::Perigee& aPerigee1 = TP1->perigeeParameters();
-      for(auto tpIt2 = negTracks.begin(); tpIt2 != negTracks.end(); ++tpIt2) {
-	const xAOD::TrackParticle* TP2 = (*tpIt2);
+      for(const xAOD::TrackParticle* TP2 : negTracks) {
 	const Trk::Perigee& aPerigee2 = TP2->perigeeParameters();
 	int sflag(0), errorcode(0);
 	Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
