@@ -1,7 +1,7 @@
 #!/bin/bash
-# art-description: art job for InDetPhysValMonitoring, Single mu 100GeV 
+# art-description: art job for InDetPhysValMonitoring, Single mu 10GeV 
 # art-type: grid
-# art-input: mc23_13p6TeV:mc23_13p6TeV.902075.PG_singlemuon_Pt100_etaFlat0_2p7.merge.EVNT.e8582_e8528
+# art-input: mc23_13p6TeV:mc23_13p6TeV.902073.PG_singlemuon_Pt10_etaFlat0_2p7.merge.EVNT.e8582_e8528
 # art-input-nfiles: 1
 # art-include: main/Athena
 # art-include: 24.0/Athena

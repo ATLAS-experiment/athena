@@ -1,6 +1,6 @@
 #!/bin/bash
 # art-description: Standard test for MC23a zprime for IDTIDE
-# art-input: user.keli:user.keli.mc23a_13TeV.801271.Py8EG_A14NNPDF23LO_flatpT_Zprime.merge.HITS.e8514_s4100_s4101_tid32652444_00
+# art-input: mc23_13p6TeV:mc23_13p6TeV.801271.Py8EG_A14NNPDF23LO_flatpT_Zprime.merge.HITS.e8514_e8528_s4159_s4114
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
@@ -9,9 +9,6 @@
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_idtide_last
-
-#RDO is made at rel 22.0.73
-#reference plots are made at rel 22.0.73
 
 # Fix ordering of output in logfile
 exec 2>&1
