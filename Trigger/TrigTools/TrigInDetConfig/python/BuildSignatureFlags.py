@@ -108,7 +108,6 @@ def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
   flags.nWeightedClustersMin= 6
   flags.roadWidth           =10.
       
-  flags.useNewParameterizationTRT = True
 
   flags.maxPrimaryImpact = 10.
   flags.maxEMImpact      = 50.
