@@ -96,48 +96,43 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
 
     return 0
 
-def checkNTuplePageWise(ntuple):
-    """Check each page column by column.
+def checkNTupleFieldWise(ntuple):
+    """Bulk read each top level field cluster by cluster.
     """
+    from array import array
 
     try:
-        pageSource = ntuple.MakePageSource()
-        pageSource.Attach()
+        reader=RNTupleReader.Open(ntuple)
     except Exception as err:
-        msg.warning(f'Could not make page source for ntuple {ntuple!r}: {err}')
+        msg.warning('Could not open ntuple %r: %r', ntuple, err)
         return 1
 
-    msg.debug(f'Checking pages of ntuple {pageSource.GetNTupleName()!r}')
-    descriptor=pageSource.GetSharedDescriptorGuard().GetRef()
-    for columnDesc in descriptor.GetColumnIterable():
-        columnPhysicalId = columnDesc.GetPhysicalId()
-        msg.debug(f"  Checking column {columnPhysicalId} ...")
-        for cluster in descriptor.GetClusterIterable():
-            if not cluster.ContainsColumn(columnPhysicalId):
-                msg.debug(f"    Not in cluster {cluster.GetId()}")
-                continue
-            nElements = cluster.GetColumnRange(columnPhysicalId).fNElements.fValue
-            idxInCluster = 0
-            for (pageNo, pageInfo) in enumerate(cluster.GetPageRange(columnPhysicalId).fPageInfos):
-                msg.debug(f"    Page {pageNo}, {pageInfo.fNElements} elements in cluster {cluster.GetId()}")
-                buffer = bytearray(pageInfo.fLocator.fBytesOnStorage)
-                sealedPage = ROOT.Experimental.Detail.RPageStorage.RSealedPage(buffer,\
-                                                                               pageInfo.fLocator.fBytesOnStorage,\
-                                                                               pageInfo.fNElements)
-                try:
-                    pageSource.LoadSealedPage(columnPhysicalId,\
-                                              ROOT.Experimental.RClusterIndex(cluster.GetId(), idxInCluster),\
-                                              sealedPage)
-                except Exception as err:
-                    msg.warning(f'Could not load SealedPage {sealedPage!r} for page {pageNo} in cluster {cluster.GetId()}'
-                                f' of ntuple {pageSource.GetNTupleName()!r}: {err}')
-                    return 1
-                idxInCluster += pageInfo.fNElements
-            if idxInCluster == nElements:
-                msg.debug(f"    {nElements} elements in cluster {cluster.GetId()}")
-            else:
-                msg.warning(f"NTuple {descriptor.GetName()!r}, cluster {cluster.GetId()}, column {cluster.GetColumnRange(columnPhysicalId).fPhysicalColumnId}: inconsistent meta-data")
-                return 1
+    try:
+        descriptor = reader.GetDescriptor()
+        msg.debug(f"ntupleName={descriptor.GetName()}")
+
+        model = reader.GetModel()
+        fieldZero = model.GetFieldZero()
+        subFields = fieldZero.GetSubFields()
+        msg.debug(f"Top level fields number {subFields.size()}")
+        for field in subFields:
+            msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
+            bulk = model.CreateBulk(field.GetFieldName())
+
+            for clusterDescriptor in descriptor.GetClusterIterable():
+                clusterIndex = ROOT.Experimental.RClusterIndex(clusterDescriptor.GetId(), 0)
+                size = int(clusterDescriptor.GetNEntries())
+                maskReq = array('b', (True for i in range(size)))
+                msg.debug(f"    cluster #{clusterIndex.GetClusterId()}"
+                          f" firstEntryIndex={clusterDescriptor.GetFirstEntryIndex()}"
+                          f" nEntries={size}")
+                values = bulk.ReadBulk(clusterIndex, maskReq, size)
+                msg.debug(f"        values array at {values}")
+
+    except ROOT.Experimental.RException as err:
+        from traceback import format_exception
+        msg.error("Exception reading ntuple %r\n%s", ntuple, "".join(format_exception(err)))
+        return 1
 
     return 0
 
@@ -210,7 +205,7 @@ def checkDirectory(directory, the_type, requireTree, depth):
                 if checkNTupleEventWise(the_object)==1:
                     return 1
             elif the_type=='basket':
-                if checkNTuplePageWise(the_object)==1:
+                if checkNTupleFieldWise(the_object)==1:
                     return 1
 
             msg.debug('NTuple of key %s looks ok.', key.GetName())
