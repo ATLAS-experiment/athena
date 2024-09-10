@@ -400,8 +400,10 @@ namespace CP {
     std::string MuonEfficiencyScaleFactors::filename_LRTLowPt()const {
 
         if (!m_custom_file_LRTLowPt.empty()) return resolve_file_location(m_custom_file_LRTLowPt);
-        // for LRT muons, we currently use the existing Z SF also for the low pt regime
-        else return filename_LRTCentral();
+        // we use the Z SF for the low pt regime for Run-3
+        else if (m_Type != CP::MuonEfficiencyType::Reco || m_lowpt_threshold < 0 || m_calibration_version.find("run3") != std::string::npos) {
+            return filename_LRTCentral();
+        } else return resolve_file_location(Form("Reco_%sLRT_JPsi.root", m_wp.c_str()));
     }
     std::string MuonEfficiencyScaleFactors::filename_LowPtCalo() const{
 
