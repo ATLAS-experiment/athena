@@ -41,7 +41,7 @@ namespace LVL1 {
     virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;
     virtual unsigned int getTTowerET(unsigned int TTID ) const override;
     virtual void buildSeeds() override; 
-    virtual bool isSeedLocalMaxima() override; 
+    virtual bool isSeedLocalMaxima(int seedThreshold) override; 
     virtual unsigned int getSmallClusterET() const override;
     virtual unsigned int getSmallETRing() const override;
     virtual unsigned int getTTIDcentre() const override;

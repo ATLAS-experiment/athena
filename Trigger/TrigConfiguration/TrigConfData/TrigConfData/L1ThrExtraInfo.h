@@ -409,6 +409,14 @@ namespace TrigConf {
           if(module=="3C" || module=="3A") return m_ptMinxTOBMeV3;
           throw std::runtime_error("L1ThrExtraInfo: Module" + module + " not recongnised for jJ ptMinxTOB");
       }
+      float seedThreshold(const std::string& module) const { return seedThresholdMeV(module)/ 1000.0; }
+      unsigned int seedThresholdCounts(const std::string& module) const { return energyInCounts(seedThresholdMeV(module), 25 /*jFEX internal resolution!*/); }
+      unsigned int seedThresholdMeV(const std::string& module) const {
+          if(module=="1C" || module=="1A") return m_seedThresholdMeV1;
+          if(module=="2C" || module=="2A") return m_seedThresholdMeV1;
+          if(module=="3C" || module=="3A") return m_seedThresholdMeV1;
+          throw std::runtime_error("L1ThrExtraInfo: Module" + module + " not recongnised for jJ seedThreshold");
+      }
    private:
       /** Update the internal members */
       void load();
@@ -419,6 +427,9 @@ namespace TrigConf {
       unsigned int m_ptMinxTOBMeV1{0};
       unsigned int m_ptMinxTOBMeV2{0};
       unsigned int m_ptMinxTOBMeV3{0};
+      int m_seedThresholdMeV1{-1}; //signed to allow effectively turning off seed thresholding via negative values
+      int m_seedThresholdMeV2{-1};
+      int m_seedThresholdMeV3{-1};
    };
 
    class L1ThrExtraInfo_jLJ final : public L1ThrExtraInfoBase {

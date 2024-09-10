@@ -99,7 +99,7 @@ int LVL1::jFEXForwardJetsAlgo::getEt(unsigned int TTID) {
     return itr->second[0];
 }
 
-std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJetsTowerIDLists() {
+std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJetsTowerIDLists(int seedThreshold) {
     
     std::unordered_map<int, jFEXForwardJetsInfo> FCALJetTowerIDLists;
 
@@ -175,6 +175,11 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     bool_isLMabove = isLMabove(myTTIDKey);
                     bool_condCorr = condCorr(myTTIDKey);
                     iAmJet = (bool_isLM and bool_condCorr2) or (bool_isLMabove and bool_condCorr);                   
+                }
+                
+                //veto seeds below seed threshold
+                if (SumEtSeed(myTTIDKey) <= seedThreshold){
+                  iAmJet = false;
                 }
                 
                 if(iAmJet){
@@ -407,9 +412,9 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
     
 }
 
-std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculateJetETs() {
+std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculateJetETs(int seedThreshold) {
 
-    std::unordered_map<int, jFEXForwardJetsInfo> localMaximas = FcalJetsTowerIDLists();
+    std::unordered_map<int, jFEXForwardJetsInfo> localMaximas = FcalJetsTowerIDLists(seedThreshold);
     return localMaximas;
 }
 

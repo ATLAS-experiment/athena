@@ -245,7 +245,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
 
     //-----------jFEXSmallRJet & Large R Jet Algo-----------------
     ATH_MSG_DEBUG("================ Central Algorithms ================");
-
+    
+    int srJet_seedThresholdMeV = thr_jJ.seedThresholdMeV(m_jfex_string[m_jfexid]); //jFEX internal granularity, i.e., 25 MeV/count
+    
     //Central region algorithms
     if(m_jfexid > 0 && m_jfexid < 5) {
         m_jFEXSmallRJetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
@@ -296,7 +298,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
                 m_jFEXLargeRJetAlgoTool->setupCluster(largeRCluster_IDs);
                 m_jFEXSmallRJetAlgoTool->buildSeeds();
                 
-                bool is_Jet_LM = m_jFEXSmallRJetAlgoTool->isSeedLocalMaxima();
+                bool is_Jet_LM = m_jFEXSmallRJetAlgoTool->isSeedLocalMaxima(srJet_seedThresholdMeV);
                 
                 if(is_Jet_LM) {
                     
@@ -362,7 +364,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
         m_jFEXForwardJetsAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXForwardJetsAlgoTool->setup(m_jTowersIDs_Wide,m_jfexid);
 
-        m_FCALJets =  m_jFEXForwardJetsAlgoTool->calculateJetETs();
+        m_FCALJets =  m_jFEXForwardJetsAlgoTool->calculateJetETs(srJet_seedThresholdMeV);
         for(std::unordered_map<int, jFEXForwardJetsInfo>::iterator it = m_FCALJets.begin(); it!=(m_FCALJets.end()); ++it) {
 
             uint32_t TTID = it->first;
