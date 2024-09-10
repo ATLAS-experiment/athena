@@ -263,24 +263,26 @@ def super_process(fname, options):
             rv = ROOT.dqi.HanApp().Analyze( hanhcfg, haninput, hanoutput )
             if rv != 0:
                 raise Exception('failure in han')
-            print('====> Dumping web display output')
-            from DataQualityUtils import handimod
-            handimod.handiWithComparisons( options.title,
-                                           hanoutput,
-                                           options.outdir,
-                                           '', False, False, 
-                                           'https://atlasdqm.web.cern.ch/atlasdqm/js/',
-                                           3 if options.jsRoot else 1)
-##            print '====> Copying to', hantargetdir
-##            hantargetfile = os.path.join(hantargetdir, 'out_han.root')
-##            if not os.access(hantargetdir, os.W_OK):
-##                try:
-##                    os.makedirs(hantargetdir)
-##                except Exception, e:
-##                    print 'Unable to create %s for some reason: %s' % (hantargetdir, e)
-##                    raise Exception('Error during execute')
-##            shutil.copy2(hanoutput, os.getcwd())
-##            print '====> Cleaning up'
+            if not options.hanonly:
+                print('====> Dumping web display output')
+                from DataQualityUtils import handimod
+                handimod.handiWithComparisons( options.title,
+                                            hanoutput,
+                                            options.outdir,
+                                            '', False, False, 
+                                            'https://atlasdqm.web.cern.ch/atlasdqm/js/',
+                                            3 if options.jsRoot else 1)
+            if options.hanoutput:
+                from pathlib import Path
+                print('====> Copying han output to', options.hanoutput)
+                target = Path(options.hanoutput)
+                try:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                except Exception as e:
+                    print('Unable to create %s for some reason: %s' % (target.parent, e))
+                    raise Exception('Error during execute') from e
+                shutil.copy2(hanoutput, options.hanoutput)
+            print('====> Cleaning up')
             os.unlink(hanoutput)
         except Exception as e:
             print(e)
@@ -309,6 +311,10 @@ if __name__=="__main__":
                       help='Reference files to use. Must have same structure as inputfile.  Format: tag1:reffile1.root,tag2:reffile2.root,...')
     parser.add_option('--outdir', default='./handi',
                       help='Directory for web ouptut')
+    parser.add_option('--hanoutput', default=None,
+                      help='Filename to save han output to (will not save if not set)')
+    parser.add_option('--hanonly', action='store_true',
+                      help='Only save han output file, do not write HTML/PNG')
     parser.add_option('--normalize', default=False, action='store_true',
                       help='Normalize reference histograms for display')
     parser.add_option('--title', default='Summary',
