@@ -642,22 +642,18 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     if (m_layer_recalibration_tool) {
       m_layer_recalibration_tool->msg().setLevel(this->msg().level());
       m_layer_recalibration_tool->fixForMissingCells(m_fixForMissingCells);
-    }
-    // disable PS if required
-    if (!m_usePSCorrection && m_layer_recalibration_tool) {
-      ATH_MSG_INFO("PS corrections disabled!");
-      m_layer_recalibration_tool->disable_PSCorrections();
-    }
-
-    // disable S12 if required
-    if (!m_useS12Correction && m_layer_recalibration_tool) {
-      ATH_MSG_INFO("S12 corrections disabled!");
-      m_layer_recalibration_tool->disable_S12Corrections();
-    }
-
-    // disable Sacc if required
-    if (!m_useSaccCorrection && m_layer_recalibration_tool) {
-      ATH_MSG_INFO("Sacc corrections disabled!");
+      if (!m_usePSCorrection) {
+	ATH_MSG_INFO("PS corrections disabled!");
+	m_layer_recalibration_tool->disable_PSCorrections();
+      }
+      if (!m_useS12Correction) {
+	ATH_MSG_INFO("S12 corrections disabled!");
+	m_layer_recalibration_tool->disable_S12Corrections();
+      }
+      if (!m_useSaccCorrection) {
+	ATH_MSG_INFO("Sacc corrections disabled!");
+	m_layer_recalibration_tool->disable_SaccCorrections();
+      }
     }
   }
 
@@ -891,14 +887,6 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 
 CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     xAOD::Egamma& input, const xAOD::EventInfo& event_info) const {
-  /*
-   * Here we check for each event the kind of data DATA vs FullSim
-   * The m_simulation flavour has already been configured
-   */
-  PATCore::ParticleDataType::DataType dataType =
-      (event_info.eventType(xAOD::EventInfo::IS_SIMULATION))
-          ? m_simulation
-          : PATCore::ParticleDataType::Data;
 
   // only used in simulation (for the smearing)
   RandomNumber seed = m_set_seed_function(*this, input, event_info);
@@ -908,9 +896,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   static const SG::ConstAccessor<double> Es2Acc("correctedcl_Es2");
   static const SG::ConstAccessor<double> Es3Acc("correctedcl_Es3");
 
-  if (dataType == PATCore::ParticleDataType::Data and
-      m_layer_recalibration_tool) {
-    // if data apply energy recalibration
+  if (m_layer_recalibration_tool) {
     ATH_MSG_DEBUG("applying energy recalibration before E0|E1|E2|E3 = "
                   << input.caloCluster()->energyBE(0) << "|"
                   << input.caloCluster()->energyBE(1) << "|"
@@ -937,29 +923,6 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
         ATH_MSG_WARNING("all layer energies are zero");
       }
     }
-  } else {
-    static const SG::AuxElement::Decorator<double> deco_E2("correctedcl_Es2");
-    static const SG::AuxElement::Decorator<double> deco_E3("correctedcl_Es3");
-    double addE2 = 0, addE3 = 0;
-    if (m_fixForMissingCells &&
-        event_info.runNumber() > m_Run2Run3runNumberTransition) {
-      unsigned short status =
-          xAOD::EgammaHelpers::energyInMissingCells(input, addE2, addE3);
-      if (status) {
-        ATH_MSG_WARNING(
-            "Fix for missing cells required"
-            " but some layer info is not available,"
-            " from L2 : "
-            << status % 2 << " from L3 : " << status / 2);
-      }
-    }
-    // We do it all the time... otherwise :
-    // imagine you have a job with two tools, one which fixes, the other not.
-    // The one that fixes will create the decoration,
-    // that will be used all the time but the one that does not fix
-    // would have 0 as decoration without those lines...
-    deco_E2(*input.caloCluster()) = input.caloCluster()->energyBE(2) + addE2;
-    deco_E3(*input.caloCluster()) = input.caloCluster()->energyBE(3) + addE3;
   }
 
   double energy = 0.;
@@ -992,9 +955,22 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
                   << std::format("{:.2f}", energy));
   }
 
-  // apply uniformity correction
-  if (dataType == PATCore::ParticleDataType::Data) {
+  /*
+   * Here we check for each event the kind of data DATA vs FullSim
+   * The m_simulation flavour has already been configured
+   */
+  PATCore::ParticleDataType::DataType dataType =
+      (event_info.eventType(xAOD::EventInfo::IS_SIMULATION))
+          ? m_simulation
+          : PATCore::ParticleDataType::Data;
 
+  unsigned int runNumber_for_tool = 0;
+
+  // apply uniformity corrections to data
+  if (dataType == PATCore::ParticleDataType::Data) {
+    // Get run number
+    runNumber_for_tool = event_info.runNumber();
+    // Get etaCalo, phiCalo
     const auto cl_eta = input.caloCluster()->eta();
     double etaCalo = 0, phiCalo = 0;
     if (m_ADCLinearity_tool || m_gain_tool_run2 || m_usePhiUniformCorrection) {
@@ -1068,25 +1044,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       energy /= (1 + corr);
     }
     ATH_MSG_DEBUG("energy after gain correction = " << std::format("{:.2f}", energy));
-  }
-
-  const double eraw = ((Es0Acc.isAvailable(*input.caloCluster())
-                            ? Es0Acc(*input.caloCluster())
-                            : input.caloCluster()->energyBE(0)) +
-                       (Es1Acc.isAvailable(*input.caloCluster())
-                            ? Es1Acc(*input.caloCluster())
-                            : input.caloCluster()->energyBE(1)) +
-                       (Es2Acc.isAvailable(*input.caloCluster())
-                            ? Es2Acc(*input.caloCluster())
-                            : input.caloCluster()->energyBE(2)) +
-                       (Es3Acc.isAvailable(*input.caloCluster())
-                            ? Es3Acc(*input.caloCluster())
-                            : input.caloCluster()->energyBE(3)));
-
-  unsigned int runNumber_for_tool = 0;
-  if (dataType == PATCore::ParticleDataType::Data)
-    runNumber_for_tool = event_info.runNumber();
-  else {
+  } else {
     if (m_user_random_run_number == 0) {
       static const SG::AuxElement::Accessor<unsigned int>
           randomrunnumber_getter("RandomRunNumber");
@@ -1107,6 +1065,20 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       runNumber_for_tool = m_user_random_run_number;
     }
   }
+
+  const double eraw = ((Es0Acc.isAvailable(*input.caloCluster())
+                            ? Es0Acc(*input.caloCluster())
+                            : input.caloCluster()->energyBE(0)) +
+                       (Es1Acc.isAvailable(*input.caloCluster())
+                            ? Es1Acc(*input.caloCluster())
+                            : input.caloCluster()->energyBE(1)) +
+                       (Es2Acc.isAvailable(*input.caloCluster())
+                            ? Es2Acc(*input.caloCluster())
+                            : input.caloCluster()->energyBE(2)) +
+                       (Es3Acc.isAvailable(*input.caloCluster())
+                            ? Es3Acc(*input.caloCluster())
+                            : input.caloCluster()->energyBE(3)));
+
 
   if (dataType == PATCore::ParticleDataType::Fast)
     ATH_MSG_DEBUG("is fast");

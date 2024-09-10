@@ -956,8 +956,11 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     return CP::CorrectionCode::Error;
   }
 
+  std::string fixT = "";
   double addE2 = 0, addE3 = 0;
-  if (m_aodFixMissingCells && event_info.runNumber() > m_Run2Run3runNumberTransition) {
+  if (m_aodFixMissingCells &&
+      event_info.runNumber() > m_Run2Run3runNumberTransition) {
+    fixT = "_egFixForTopoTimingCut";
     unsigned short stat =
       xAOD::EgammaHelpers::energyInMissingCells(particle,addE2,addE3);
     if (stat) {
@@ -979,7 +982,8 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     eta_calo = accEtaCalo(*cluster);
   }
   else{
-    ATH_MSG_ERROR("etaCalo not available as auxilliary variable, using cluster eta as eta calo!");
+    ATH_MSG_ERROR("etaCalo not available as auxilliary variable,"
+		  " using cluster eta as eta calo!");
     eta_calo=cluster->eta();
   }
 
@@ -994,35 +998,44 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
       cluster->energyBE(3) + addE3,
       eta_calo };
 
-  const CP::CorrectionCode status = scale_inputs(inputs);
+  bool isData = !event_info.eventType(xAOD::EventInfo::IS_SIMULATION);
+  CP::CorrectionCode status = CP::CorrectionCode::Ok;
+  if (isData || m_scaleMC)
+    status = scale_inputs(inputs);
 
   static const SG::AuxElement::Decorator<double> deco_E0("correctedcl_Es0");
   static const SG::AuxElement::Decorator<double> deco_E1("correctedcl_Es1");
   static const SG::AuxElement::Decorator<double> deco_E2("correctedcl_Es2");
   static const SG::AuxElement::Decorator<double> deco_E3("correctedcl_Es3");
-  static const SG::AuxElement::Decorator<std::string> deco_layer_correction("layer_correction");
+  static const SG::AuxElement::Decorator<std::string>
+    deco_layer_correction("layer_correction");
 
   if (status == CP::CorrectionCode::Ok) {
     ATH_MSG_DEBUG("decorating cluster with corrected layer energies");
-    deco_E0(*cluster) = m_doPSCorrections  ? inputs.E0raw : cluster->energyBE(0);
-    deco_E1(*cluster) = m_doS12Corrections ? inputs.E1raw : cluster->energyBE(1) ;
-    deco_E2(*cluster) = m_doS12Corrections ? inputs.E2raw : cluster->energyBE(2) ;
-    deco_E3(*cluster) = inputs.E3raw;
-    deco_layer_correction(*cluster) = m_tune;
+    deco_E0(*cluster) = m_doPSCorrections  ?
+      inputs.E0raw : cluster->energyBE(0);
+    deco_E1(*cluster) = m_doS12Corrections or m_doSaccCorrections ?
+      inputs.E1raw : cluster->energyBE(1);
+    deco_E2(*cluster) = m_doS12Corrections or m_doSaccCorrections ?
+      inputs.E2raw : cluster->energyBE(2) + addE2;
+    deco_E3(*cluster) = m_doSaccCorrections ?
+      inputs.E3raw : cluster->energyBE(3) + addE3;
+    deco_layer_correction(*cluster) = isData ? m_tune+fixT : fixT;
     return status;
   }
 
-    ATH_MSG_DEBUG("cannot correct layer energies: decorating particle with non-corrected layer energies");
-    // this is done for safety, since when a particle is decorated
-    // all the particle in the container are decorated
-    // it is not possible to distinguish between decorated / non-decorated
-    // since all are decorated
-    deco_E0(*cluster) = cluster->energyBE(0);
-    deco_E1(*cluster) = cluster->energyBE(1);
-    deco_E2(*cluster) = cluster->energyBE(2);
-    deco_E3(*cluster) = cluster->energyBE(3);
-    deco_layer_correction(*cluster) = m_tune;
-    return status;
+  ATH_MSG_DEBUG("cannot correct layer energies:"
+		" decorating particle with non-corrected layer energies");
+  // this is done for safety, since when a particle is decorated
+  // all the particle in the container are decorated
+  // it is not possible to distinguish between decorated / non-decorated
+  // since all are decorated
+  deco_E0(*cluster) = cluster->energyBE(0);
+  deco_E1(*cluster) = cluster->energyBE(1);
+  deco_E2(*cluster) = cluster->energyBE(2) + addE2;
+  deco_E3(*cluster) = cluster->energyBE(3) + addE3;
+  deco_layer_correction(*cluster) = isData ? m_tune + "_Err" + fixT : fixT;
+  return status;
 
 }
 
