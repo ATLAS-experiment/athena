@@ -141,6 +141,7 @@ from DerivationFrameworkMuons.MUON5 import MUON5Cfg
 # TLA derivations
 from DerivationFrameworkTLA.TLA0 import TLA0Cfg
 from DerivationFrameworkTLA.TLA1 import TLA1Cfg
+from DerivationFrameworkTLA.TLA2 import TLA2Cfg
 
 #Heavy Ion group derivations
 from DerivationFrameworkHI.HION2 import HION2Cfg
@@ -176,7 +177,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg', 'JETM42Cfg',
            'TRIG8Cfg',"TRIG9Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
-           'TLA0Cfg', 'TLA1Cfg',
+           'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
            'HION2Cfg','HION4Cfg','HION7Cfg','HION12Cfg','HION14Cfg',
            'NCB1Cfg'
            ]
