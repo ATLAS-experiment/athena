@@ -29,35 +29,17 @@ public:
   };
 
   TrigFTF_GNN_Node(const TrigSiSpacePointBase&, float, float);
-  ~TrigFTF_GNN_Node();
   
-
- inline void addIn(int i) {
+  inline void addIn(int i) {
     if(m_in.size()<MAX_SEG_PER_NODE) {
       m_in.push_back(i);
     }
   }
-
-  inline void addOut(int i) {
-    if(m_out.size()<MAX_SEG_PER_NODE) {
-      m_out.push_back(i);
-    }
-  }
   
-  inline bool isConnector() const {
-    if(m_in.empty() || m_out.empty()) return false;
-    return true;
-  }
-
-  inline bool isFull() const {
-    if(m_in.size()==MAX_SEG_PER_NODE && m_out.size()==MAX_SEG_PER_NODE) return true;
-    else return false;
-  }
-
   const TrigSiSpacePointBase& m_sp;
   
   std::vector<unsigned int> m_in;//indices of the edges in the edge storage
-  std::vector<unsigned int> m_out;
+
   float m_minCutOnTau, m_maxCutOnTau;
 
 };
@@ -87,7 +69,6 @@ public:
 
   int addSpacePoint(const TrigSiSpacePointBase&, bool);
   unsigned int numberOfNodes() const;
-  void getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>&);
   void sortByPhi();
   void generatePhiIndexing(float);
 
@@ -115,11 +96,10 @@ public:
     }
   };
 
- TrigFTF_GNN_Edge(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2, float p1, float p2, float p3, float p4) : m_n1(n1), m_n2(n2), m_level(1), m_next(1), m_nNei(0) {
+ TrigFTF_GNN_Edge(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2, float p1, float p2, float p3) : m_n1(n1), m_n2(n2), m_level(1), m_next(1), m_nNei(0) {
     m_p[0] = p1;
     m_p[1] = p2;
     m_p[2] = p3;
-    m_p[3] = p4;
   }
 
  TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
@@ -130,7 +110,7 @@ public:
   signed char m_level{-1}, m_next{-1};
 
   unsigned char m_nNei{0};
-  float m_p[4]{};
+  float m_p[3]{};
   
   unsigned int m_vNei[N_SEG_CONNS]{};//global indices of the connected edges
 

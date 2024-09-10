@@ -86,7 +86,8 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
   //1. loop over stages
 
   int currentStage = 0;
-
+  unsigned int nConnections = 0;
+  
   const FASTRACK_CONNECTOR& conn = *(m_settings.m_conn);
 
   std::vector<TrigFTF_GNN_Edge> edgeStorage;
@@ -178,10 +179,9 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		if(phi2 > maxPhi) break;
 		
 		TrigFTF_GNN_Node* n2 = B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
-	      
-		if(n2->m_out.size() >= MAX_SEG_PER_NODE) continue;
-		if(n2->isFull()) continue;
-	      
+		
+		if(n2->m_in.size() >= MAX_SEG_PER_NODE) continue;
+		
 		float r2 = n2->m_sp.r();
 		float dr = r2 - r1;
 	      
@@ -257,11 +257,47 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		
 		if(nEdges < MaxEdges) {
 
-		  edgeStorage.emplace_back(n1, n2, exp_eta, curv, phi1 + dPhi1, phi2 + dPhi2);
+		  edgeStorage.emplace_back(n1, n2, exp_eta, curv, phi1 + dPhi1);
 		  
 		  n1->addIn(nEdges);
-		  n2->addOut(nEdges);
+		  
+                  int outEdgeIdx = nEdges;
 
+		  float uat_2  = 1/exp_eta;
+                  float Phi2  = phi2 + dPhi2;
+                  float curv2 = curv;
+		  
+                  for(const auto& inEdgeIdx : n2->m_in) {//looking for neighbours of the new edge
+
+                    TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
+
+                    if(pS->m_nNei >= N_SEG_CONNS) continue;
+                    
+		    float tau_ratio = pS->m_p[0]*uat_2 - 1.0f;
+                    
+                    if(std::abs(tau_ratio) > cut_tau_ratio_max){//bad match
+                      continue;
+                    }
+                    
+                    float dPhi =  Phi2 - pS->m_p[2];
+        
+                    if(dPhi<-M_PI) dPhi += 2*M_PI;
+                    else if(dPhi>M_PI) dPhi -= 2*M_PI;
+        
+                    if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
+                      continue;
+                    }
+                    
+                    float dcurv = curv2 - pS->m_p[1];
+                
+                    if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
+                      continue;
+                    }
+                
+                    pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
+		    nConnections++;
+		    
+                  }
 		  nEdges++;		
 		}
 	      } //loop over n2 (outer) nodes
@@ -272,98 +308,13 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
     } //loop over dst layers
   } //loop over the stages of doublet making
 
-  std::vector<const TrigFTF_GNN_Node*> vNodes;
-
-  m_storage->getConnectingNodes(vNodes);
-
-  if(vNodes.empty()) return;
-
-  int nNodes = vNodes.size();
-
-  for(int nodeIdx=0;nodeIdx<nNodes;nodeIdx++) {
-      
-    const TrigFTF_GNN_Node* pN = vNodes.at(nodeIdx);
-
-    std::vector<std::pair<float, int > > in_sort, out_sort;
-    in_sort.resize(pN->m_in.size());
-    out_sort.resize(pN->m_out.size());
-
-    for(int inIdx = 0;inIdx<static_cast<int>(pN->m_in.size());inIdx++) {
-      int inEdgeIdx = pN->m_in.at(inIdx);
-      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
-      in_sort[inIdx].second  = inEdgeIdx;
-      in_sort[inIdx].first = pS->m_p[0];
-    }
-    for(int outIdx = 0;outIdx<static_cast<int>(pN->m_out.size());outIdx++) {
-      int outEdgeIdx = pN->m_out.at(outIdx);
-      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(outEdgeIdx));
-      out_sort[outIdx].second  = outEdgeIdx;
-      out_sort[outIdx].first = pS->m_p[0];
-    }
-
-    std::sort(in_sort.begin(), in_sort.end());
-    std::sort(out_sort.begin(), out_sort.end());
-
-    unsigned int last_out = 0;
-
-    for(unsigned int in_idx=0;in_idx<in_sort.size();in_idx++) {//loop over incoming edges
-
-      int inEdgeIdx = in_sort[in_idx].second;
-
-      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
-
-      pS->m_nNei  = 0;
-      float tau1  = pS->m_p[0];
-      float uat_1 = 1.0f/tau1;
-      float curv1 = pS->m_p[1];
-      float Phi1  = pS->m_p[2];
-
-      for(unsigned int out_idx = last_out;out_idx<out_sort.size();out_idx++) {
-
-	int outEdgeIdx = out_sort[out_idx].second;
-
-	TrigFTF_GNN_Edge* pNS = &(edgeStorage.at(outEdgeIdx));
-	
-	
-	float tau2 = pNS->m_p[0];
-	float tau_ratio = tau2*uat_1 - 1.0f;
-	
-	if(tau_ratio < -cut_tau_ratio_max) {
-	  last_out = out_idx;
-	  continue;
-	}
-	if(tau_ratio > cut_tau_ratio_max) break;
-
-
-	float dPhi =  pNS->m_p[3] - Phi1;
-        
-	if(dPhi<-M_PI) dPhi += 2*M_PI;
-	else if(dPhi>M_PI) dPhi -= 2*M_PI;
-	
-	if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
-	  continue;
-	}
-	
-	float curv2 = pNS->m_p[1];
-	float dcurv = curv2-curv1;
-        	
-	if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
-	  continue;
-	}
-		
-	pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
-	if(pS->m_nNei >= N_SEG_CONNS) break;
-      }
-    }
-  }
-  
+  if(nConnections == 0) return;
 
   const int maxIter = 15;
 
   int maxLevel = 0;
 
   int iter = 0;
-
   
   std::vector<TrigFTF_GNN_Edge*> v_old;
   
@@ -375,7 +326,6 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
   }
 
   for(;iter<maxIter;iter++) {
-
 
     //generate proposals
     std::vector<TrigFTF_GNN_Edge*> v_new;
