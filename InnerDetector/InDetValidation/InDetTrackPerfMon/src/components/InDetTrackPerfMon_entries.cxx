@@ -8,7 +8,6 @@
 #include "../TruthQualitySelectionTool.h"
 #include "../RoiSelectionTool.h"
 #include "../TrackRoiSelectionTool.h"
-#include "../TruthHitDecoratorAlg.h"
 #include "../OfflineElectronDecoratorAlg.h"
 #include "../OfflineMuonDecoratorAlg.h"
 #include "../OfflineTauDecoratorAlg.h"
@@ -30,7 +29,6 @@ DECLARE_COMPONENT( IDTPM::TrackQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::TruthQualitySelectionTool )
 DECLARE_COMPONENT( IDTPM::RoiSelectionTool )
 DECLARE_COMPONENT( IDTPM::TrackRoiSelectionTool )
-DECLARE_COMPONENT( IDTPM::TruthHitDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineElectronDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineMuonDecoratorAlg )
 DECLARE_COMPONENT( IDTPM::OfflineTauDecoratorAlg )
