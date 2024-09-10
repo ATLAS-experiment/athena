@@ -14,12 +14,8 @@
 
 TrigFTF_GNN_Node::TrigFTF_GNN_Node(const TrigSiSpacePointBase& p, float minT = -100.0, float maxT = 100.0)  : m_sp(p), m_minCutOnTau(minT), m_maxCutOnTau(maxT) {
   m_in.clear();
-  m_out.clear();
 }
 
-TrigFTF_GNN_Node::~TrigFTF_GNN_Node() {
-
-}
 
 TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin() {
   m_vn.clear();
@@ -138,17 +134,3 @@ void TrigFTF_GNN_DataStorage::generatePhiIndexing(float dphi) {
   for(auto& b : m_etaBins) b.generatePhiIndexing(dphi);
 }
 
-
-void TrigFTF_GNN_DataStorage::getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>& vn) {
-  
-  vn.clear();
-  vn.reserve(numberOfNodes());
-  
-  for(const auto& b : m_etaBins) {
-    for(std::vector<TrigFTF_GNN_Node*>::const_iterator nIt = b.m_vn.begin();nIt!=b.m_vn.end();++nIt) {
-      if((*nIt)->m_in.empty()) continue;
-      if((*nIt)->m_out.empty()) continue;
-      vn.push_back(*nIt);
-    }
-  }
-}
