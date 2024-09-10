@@ -245,7 +245,7 @@ namespace DerivationFramework {
       }
     }
 
-    RhoCandidateVector rhos(m_maxCandidates, m_ptOrdering);
+    RhoCandidateVector rhos(m_maxRhoCandidates, m_ptOrdering);
     for(auto iter1=tracksPlus.cbegin(); iter1!=tracksPlus.cend(); ++iter1) {
       for(auto iter2=tracksMinus.cbegin(); iter2!=tracksMinus.cend(); ++iter2) {
 	p4_track1.SetPtEtaPhiM((*iter1)->pt(), (*iter1)->eta(), (*iter1)->phi(), m_vtx1Daug1MassHypo);
@@ -298,7 +298,7 @@ namespace DerivationFramework {
       }
     }
 
-    EtacCandidateVector candidates(m_maxCandidates, m_ptOrdering);
+    EtacCandidateVector candidates(m_maxEtacCandidates, m_ptOrdering);
     if(m_etacDaug_num==4) {
       for(auto iter1=rhos.GetVector().cbegin(); iter1!=rhos.GetVector().cend(); ++iter1) {
 	tracksRho1.clear();
