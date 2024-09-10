@@ -42,7 +42,7 @@ namespace ActsTrk {
 
         virtual StatusCode initialize() override;
         virtual StatusCode execute(const EventContext& ctx) const override;
-        virtual StatusCode finalize() { return StatusCode::SUCCESS;};
+        virtual StatusCode finalize() override { return StatusCode::SUCCESS;};
 
         enum Subdetector {
             INVALID_DETECTOR=-1, INNERMOST_PIXEL, PIXEL, STRIP, N_SUBDETECTORS
