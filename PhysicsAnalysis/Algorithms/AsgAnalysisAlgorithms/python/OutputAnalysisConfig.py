@@ -38,6 +38,9 @@ class OutputAnalysisConfig (ConfigBlock):
             "This works like 'onlyForDSIDs': pass a list of DSIDs or regexps.")
         self.addOption ('treeName', 'analysis', type=str,
             info="name of the output TTree to save. The default is analysis.")
+        self.addOption ('streamName', 'ANALYSIS', type=str,
+            info="name of the output stream to save the tree in. "
+            "The default is ANALYSIS.")
         self.addOption ('metTermName', 'Final', type=str,
             info="the name (string) of the MET term to save, turning the MET "
             "container into a single object. The default is 'Final'.")
@@ -156,12 +159,14 @@ class OutputAnalysisConfig (ConfigBlock):
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' + postfix )
         treeMaker.TreeName = self.treeName
+        treeMaker.RootStreamName = self.streamName
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
         if len (self.vars) + len (autoVars) :
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
+            ntupleMaker.RootStreamName = self.streamName
             branchList = list(self.vars | set(autoVars))
             branchList.sort()
             branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
@@ -172,6 +177,7 @@ class OutputAnalysisConfig (ConfigBlock):
         if len (self.metVars) + len (autoMetVars) > 0:
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
+            ntupleMaker.RootStreamName = self.streamName
             branchList = self.metVars + autoMetVars
             branchList.sort()
             branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
@@ -182,6 +188,8 @@ class OutputAnalysisConfig (ConfigBlock):
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
         treeFiller.TreeName = self.treeName
+        treeFiller.RootStreamName = self.streamName
+
 
 
     def createSelectionFlagBranches(self, config):
