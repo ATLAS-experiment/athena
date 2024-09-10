@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 AntiKt4EMPFlowByVertexJetsCPContent = [
 "Kt4EMPFlowEventShape",
@@ -14,7 +14,7 @@ AntiKt4EMPFlowByVertexJetsCPContent = [
 "AntiKt4EMPFlowByVertexJetsCPContentAux.GhostTrack.Jvt.JVFCorr.JvtRpt.GhostMuonSegmentCount.DFCommonJets_fJvt",
 "AntiKt4EMPFlowByVertexJetsCPContentAux.NNJvt.NNJvtRpt.NNJvtPass",
 "AntiKt4EMPFlowByVertexJetsCPContentAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
-"AntiKt4EMPFlowByVertexJetsCPContentAux.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4EMPFlowByVertexJetsCPContentAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "AntiKt4EMPFlowByVertexJetsCPContentAux.OriginVertex",
 "PrimaryVertices",
 "PrimaryVerticesAux.vertexType" 

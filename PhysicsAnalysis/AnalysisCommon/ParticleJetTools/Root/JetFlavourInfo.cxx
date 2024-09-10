@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/JetFlavourInfo.h"
@@ -59,18 +59,6 @@ xAOD::GAFinalPartonFlavourLabel (const xAOD::Jet* jet) {
 }
 
 int
-xAOD::ConeFinalPartonFlavourLabel (const xAOD::Jet* jet) {
-  // default label means "invalid"
-  int label = -1;
-
-  // First try the new naming scheme
-  if (jet->getAttribute("ConeTruthLabelID",label)) return label;
-  // If that fails, revert to the old scheme. In this case, further testing is not very useful
-  jet->getAttribute("TruthLabelID", label);
-  return label;
-}
-
-int
 xAOD::ExclusiveConeHadronFlavourLabel (const xAOD::Jet* jet) {
   // default label means "invalid"
   int label = -1;
@@ -96,7 +84,6 @@ int xAOD::jetFlavourLabel (const xAOD::Jet* jet, JetFlavourLabelType t) {
   case GAFinalHadron:   return GAFinalHadronFlavourLabel (jet);   break;
   case GAInitialHadron: return GAInitialHadronFlavourLabel (jet); break;
   case GAFinalParton:   return GAFinalPartonFlavourLabel (jet);   break;
-  case ExclConeHadron:  return ExclusiveConeHadronFlavourLabel (jet);
-  case ConeFinalParton: default: return ConeFinalPartonFlavourLabel (jet);
+  case ExclConeHadron: default: return ExclusiveConeHadronFlavourLabel (jet);
   }
 }

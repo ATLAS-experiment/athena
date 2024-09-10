@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJet/Jet.h"
@@ -25,11 +25,10 @@ namespace xAOD {
   // (safer because it uses hadrons, and becauses it uses an exclusive labelling -- it will associate
   // a HF hadron only with a single jet)
 
-  int ConeFinalPartonFlavourLabel (const xAOD::Jet* jet);
   int ExclusiveConeHadronFlavourLabel (const xAOD::Jet* jet);
   int ExclusiveConeDoubleHadronFlavourLabel (const xAOD::Jet* jet);
 
-  enum JetFlavourLabelType { GAFinalHadron, GAInitialHadron, GAFinalParton, ConeFinalParton, ExclConeHadron, ExclConeDoubleHadron };
+  enum JetFlavourLabelType { GAFinalHadron, GAInitialHadron, GAFinalParton, ExclConeHadron, ExclConeDoubleHadron };
 
   // Provide a unified interface to all methods
   int jetFlavourLabel (const xAOD::Jet* jet, JetFlavourLabelType = ExclConeHadron);

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 AntiKt4EMTopoLowPtJetsCPContent = [
 "Kt4EMTopoOriginEventShape",
@@ -9,7 +9,7 @@ AntiKt4EMTopoLowPtJetsCPContent = [
 "AntiKt4EMTopoLowPtJetsAux.NumTrkPt500.SumPtTrkPt500.NumTrkPt1000.TrackWidthPt1000",
 "AntiKt4EMTopoLowPtJetsAux.GhostTrack.Jvt.JVFCorr.JvtRpt.GhostMuonSegmentCount",
 "AntiKt4EMTopoLowPtJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing",
-"AntiKt4EMTopoLowPtJetsAux.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4EMTopoLowPtJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "AntiKt4EMTopoLowPtJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
 "MET_Track",
 "MET_TrackAux.name.mpx.mpy",

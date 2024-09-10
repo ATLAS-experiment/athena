@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 AntiKt4UFOCSSKJetsCPContent = [
 "AntiKt4UFOCSSKJets",
@@ -8,7 +8,7 @@ AntiKt4UFOCSSKJetsCPContent = [
 "AntiKt4UFOCSSKJetsAux.GhostTrack.Jvt.JVFCorr.JvtRpt.GhostMuonSegmentCount.DFCommonJets_fJvt",
 "AntiKt4UFOCSSKJetsAux.NNJvt.NNJvtRpt.NNJvtPass",
 "AntiKt4UFOCSSKJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
-"AntiKt4UFOCSSKJetsAux.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4UFOCSSKJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "PrimaryVertices",
 "PrimaryVerticesAux.vertexType" 
 ]

@@ -1,5 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 ///////////////////////////////////////////////////////////////////
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 // BTaggingTruthTaggingTool.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 /**
@@ -198,7 +199,6 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   int jetFlavourLabel (const xAOD::Jet& jet);
 
   int GAFinalHadronFlavourLabel(const xAOD::Jet& jet);
-  int ConeFinalPartonFlavourLabel (const xAOD::Jet& jet);
   int ExclusiveConeHadronFlavourLabel (const xAOD::Jet& jet);
   std::vector<std::string> split(const std::string& str, char token);
   //*********************************//
@@ -247,8 +247,6 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   bool m_useDevFile;
   /// if true, use cone-based labelling (as opposed to ghost association)
   bool m_coneFlavourLabel;
-  /// when using cone-based labelling (see above), if true, use the "traditional" (parton-based) labelling instead of the current default (hadron-based, exclusive)
-  bool m_oldConeFlavourLabel;
   /// in case of continuous WP you can choose to ignore some of the eigenvectors
   std::string m_excludeEV;
   ///possibility to compute the direct tagging SFs map directly from the TruthTaggingTool

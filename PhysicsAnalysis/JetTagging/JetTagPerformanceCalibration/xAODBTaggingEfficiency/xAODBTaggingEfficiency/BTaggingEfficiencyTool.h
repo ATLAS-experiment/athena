@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPBTAGGINGEFFICIENCYTOOL_H
@@ -361,8 +361,6 @@ private:
   bool m_coneFlavourLabel;
   /// if true, use an 'extended' labelling (allowing for multiple HF hadrons -or perhaps partons- in the jet)
   bool m_extFlavourLabel;
-  /// when using cone-based labelling (see above), if true, use the "traditional" (parton-based) labelling instead of the current default (hadron-based, exclusive)
-  bool m_oldConeFlavourLabel;
   // bool m_excludeJESFromEV;
   /// if true, extract pre-set lists of uncertainties to be recommended from the EV decomposition (in addition to user specified ones)
   bool m_useRecommendedEVExclusions;

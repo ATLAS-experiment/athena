@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 AntiKt4EMPFlowLowPtJetsCPContent = [
 "Kt4EMPFlowEventShape",
@@ -16,7 +16,7 @@ AntiKt4EMPFlowLowPtJetsCPContent = [
 "AntiKt4EMPFlowLowPtJetsAux.AverageLArQF.BchCorrCell.HECQuality.LArQuality.NegativeE.EMFrac.HECFrac.PSFrac",
 "AntiKt4EMPFlowLowPtJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
 "AntiKt4EMPFlowLowPtJetsAux.OotFracClusters5.OotFracClusters10",
-"AntiKt4EMPFlowLowPtJetsAux.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4EMPFlowLowPtJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "PrimaryVertices",
 "PrimaryVerticesAux.vertexType" 
 ]

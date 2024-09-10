@@ -316,54 +316,42 @@ namespace Analysis
       if (m_runModus=="reference") {
         if (jetpt >= m_pTjetmin && std::abs(jeteta) <= 2.5) {
           int label = xAOD::jetFlavourLabel(&jetToTag);
-          double deltaRtoClosestB = 999.;//, deltaRtoClosestC = 999.;
-          if (jetToTag.getAttribute("TruthLabelDeltaR_B",deltaRtoClosestB)) {
-            ATH_MSG_VERBOSE("#BTAG# label found : " << label);
-            // for purification: require no b or c quark closer than dR=m_purificationDeltaR
-            double deltaRtoClosestC;
-            jetToTag.getAttribute("TruthLabelDeltaR_C", deltaRtoClosestC);//mcTrueInfo->deltaRMinTo("C");
-            double deltaRmin = deltaRtoClosestB < deltaRtoClosestC ? deltaRtoClosestB : deltaRtoClosestC;
+	  if ( (    "B"==m_refType &&   5==label ) ||  // b-jets
+	       ( "UDSG"==m_refType &&   0==label ) ||  // light jets
+	       (  "ALL"==m_refType && // all jets: b + purified light jets
+		  ( 5==label || 4==label || 0==label ) )
+	       ) {
+	    if (5==label) {
+	      pref = m_hypotheses[0];
+	      m_nbjet++;
+	    } else if (0==label) {
+	      pref = m_hypotheses[1];
+	      m_nljet++;
+	    } else if (4==label && m_useCHypo) {
+	      pref = m_hypotheses[2];
+	      m_ncjet++;
+	    }
+	  }
 
-            if ( (    "B"==m_refType &&   5==label ) ||  // b-jets
-                 ( "UDSG"==m_refType &&   0==label ) ||  // light jets
-                 (  "ALL"==m_refType && // all jets: b + purified light jets
-                    ( 5==label || 4==label || ( 0==label && deltaRmin > m_purificationDeltaR ) ) )
-              ) {
-              if (5==label) {
-                pref = m_hypotheses[0];
-                m_nbjet++;
-              } else if (0==label) {
-                pref = m_hypotheses[1];
-                m_nljet++;
-              } else if (4==label && m_useCHypo) {
-                pref = m_hypotheses[2];
-                m_ncjet++;
-              }
-            }
-
-            if (pref == "B" || pref == "C" || pref == "U") {
-              std::string hDir = "/RefFile/"+m_SVmode+"/"+author+"/"+pref+"/";
-              if (m_SVmode == "SV1") m_histoHelper->fillHisto(hDir+"N2TNormSV1",(float)NSVPair);
-              if (m_SVmode == "SV2") m_histoHelper->fillHisto(hDir+"N2TNormSV2",(float)NSVPair);
-              if (NSVPair > 0 && ambtot > 0.) {
-                if (xratiop == 1.) xratiop = 0.999999;  //This is not an overflow...
-                if (m_SVmode == "SV1") {
-                  m_histoHelper->fillHisto(hDir+"N2T",(float)NSVPair);
-                  m_histoHelper->fillHisto(hDir+"N2TEffSV1",(float)NSVPair);
-                  m_histoHelper->fillHisto(hDir+"BidimME",ambtotp,xratiop);
-                  m_histoHelper->fillHisto(hDir+"DRJPVSV",(float)drJPVSV);
-                }
-                if (m_SVmode == "SV2") {
-                  m_histoHelper->fillHisto(hDir+"N2TEffSV2",(float)NSVPair);
-                  if(m_usePtSV2) m_histoHelper->fillHisto(hDir+"TridimMENPt",ambtotp,xratiop,trfJetPt);
-                  else           m_histoHelper->fillHisto(hDir+"TridimMEN2T",ambtotp,xratiop,log((float)NSVPair));
-                }
-              }
-            }
-          } else {
-            ATH_MSG_ERROR("#BTAG# No TruthInfo ! Cannot run in reference mode !");
-            return StatusCode::FAILURE;
-          }
+	  if (pref == "B" || pref == "C" || pref == "U") {
+	    std::string hDir = "/RefFile/"+m_SVmode+"/"+author+"/"+pref+"/";
+	    if (m_SVmode == "SV1") m_histoHelper->fillHisto(hDir+"N2TNormSV1",(float)NSVPair);
+	    if (m_SVmode == "SV2") m_histoHelper->fillHisto(hDir+"N2TNormSV2",(float)NSVPair);
+	    if (NSVPair > 0 && ambtot > 0.) {
+	      if (xratiop == 1.) xratiop = 0.999999;  //This is not an overflow...
+	      if (m_SVmode == "SV1") {
+		m_histoHelper->fillHisto(hDir+"N2T",(float)NSVPair);
+		m_histoHelper->fillHisto(hDir+"N2TEffSV1",(float)NSVPair);
+		m_histoHelper->fillHisto(hDir+"BidimME",ambtotp,xratiop);
+		m_histoHelper->fillHisto(hDir+"DRJPVSV",(float)drJPVSV);
+	      }
+	      if (m_SVmode == "SV2") {
+		m_histoHelper->fillHisto(hDir+"N2TEffSV2",(float)NSVPair);
+		if(m_usePtSV2) m_histoHelper->fillHisto(hDir+"TridimMENPt",ambtotp,xratiop,trfJetPt);
+		else           m_histoHelper->fillHisto(hDir+"TridimMEN2T",ambtotp,xratiop,log((float)NSVPair));
+	      }
+	    }
+	  }
         }
       } else if (m_runModus=="analysis" && m_save_probabilities) {
         std::vector<double> probi;
