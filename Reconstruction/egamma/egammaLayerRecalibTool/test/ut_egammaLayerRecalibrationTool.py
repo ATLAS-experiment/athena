@@ -275,6 +275,7 @@ class TestLayerxAOD(unittest.TestCase):
     def test_decoration(self):
         tune = "2012_alt_with_layer2"
         tool = ROOT.egammaLayerRecalibTool(tune)
+        tool.scaleMC()
         ROOT.CP.CorrectionCode.enableFailure()
 
         N = 200

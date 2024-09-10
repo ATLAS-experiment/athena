@@ -354,8 +354,10 @@ public:
   void clear_corrections();
 
   void fixForMissingCells(bool fix = true) { m_aodFixMissingCells = fix; }
-  void disable_PSCorrections(){m_doPSCorrections=false;}
-  void disable_S12Corrections(){m_doS12Corrections=false;}
+  void scaleMC(bool scaleMC = true) { m_scaleMC = scaleMC; }
+  void disable_PSCorrections() {m_doPSCorrections=false;}
+  void disable_S12Corrections() {m_doS12Corrections=false;}
+  void disable_SaccCorrections() {m_doSaccCorrections=false;}
 
 private:
 
@@ -372,6 +374,7 @@ private:
   corr_pileupShift* m_pileup_tool = nullptr;
 
   bool m_aodFixMissingCells = false;
+  bool m_scaleMC = false;
 };
 
 #endif // EGAMMA_LAYER_RECALIB_TOOL
