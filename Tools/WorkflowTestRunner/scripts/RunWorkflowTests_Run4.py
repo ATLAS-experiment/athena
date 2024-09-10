@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
@@ -34,7 +34,7 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion ATLAS-P2-RUN4-03-00-00 --conditionsTag default:OFLCOND-MC15c-SDR-14-05"))
+            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion ATLAS-P2-RUN4-03-00-00 --conditionsTag default:OFLCOND-MC21-SDR-RUN4-01"))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
