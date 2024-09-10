@@ -74,7 +74,8 @@ namespace DerivationFramework {
     bool m_same_mass13; // if vtx1 masses are equal to vtx3 masses
     bool m_same_mass23; // if vtx2 masses are equal to vtx3 masses
     bool m_same_mass123; // if vtx1, vtx2 and vtx3 masses are equal to each other
-    Gaudi::Property<size_t> m_maxCandidates{this, "MaxCandidates", 1000, "Maximum number of eta_c candidates"};
+    Gaudi::Property<size_t> m_maxRhoCandidates{this, "MaxRhoCandidates", 100, "Maximum number of rho candidates"};
+    Gaudi::Property<size_t> m_maxEtacCandidates{this, "MaxEtacCandidates", 1000, "Maximum number of eta_c candidates"};
     Gaudi::Property<bool> m_ptOrdering{this, "PtOrdering", true, "Order TQ candidates by pt"};
     Gaudi::Property<double> m_maxDR{this, "MaxDR", 0.6, "Maximum DeltaR between Jpsi and tracks from eta_c"};
     Gaudi::Property<double> m_mass_jpsi{this, "JpsiMass", -1., "mass of Jpsi"};

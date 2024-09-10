@@ -314,8 +314,16 @@ namespace DerivationFramework {
 	p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),track->eta(),track->phi())<m_maxDR) {
-	  passDR = true; break;
+	if(m_tracks_num<4) {
+	  if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),track->eta(),track->phi())<m_maxDR) {
+	    passDR = true; break;
+	  }
+	}
+	else {
+	  if(DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),track->eta(),track->phi())<m_maxDR ||
+	     DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),track->eta(),track->phi())<m_maxDR) {
+	    passDR = true; break;
+	  }
 	}
       }
       if(passDR) {
@@ -324,7 +332,7 @@ namespace DerivationFramework {
       }
     }
 
-    RhoCandidateVector rhos(m_maxCandidates, m_ptOrdering);
+    RhoCandidateVector rhos(m_maxRhoCandidates, m_ptOrdering);
     if(m_tracks_num>=2) {
       for(auto iter1=tracksPlus.cbegin(); iter1!=tracksPlus.cend(); ++iter1) {
 	for(auto iter2=tracksMinus.cbegin(); iter2!=tracksMinus.cend(); ++iter2) {
@@ -359,9 +367,17 @@ namespace DerivationFramework {
 	      p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	      p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	      p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	      if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter1)->eta(),(*iter1)->phi())<m_maxDR &&
-		 DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter2)->eta(),(*iter2)->phi())<m_maxDR) {
-		passDR = true; break;
+	      if(m_tracks_num<4) {
+		if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter1)->eta(),(*iter1)->phi())<m_maxDR &&
+		   DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),(*iter2)->eta(),(*iter2)->phi())<m_maxDR) {
+		  passDR = true; break;
+		}
+	      }
+	      else {
+		if((DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),(*iter1)->eta(),(*iter1)->phi())<m_maxDR && DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),(*iter2)->eta(),(*iter2)->phi())<m_maxDR) ||
+		   (DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),(*iter1)->eta(),(*iter1)->phi())<m_maxDR && DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),(*iter2)->eta(),(*iter2)->phi())<m_maxDR)) {
+		  passDR = true; break;
+		}
 	      }
 	    }
 	    if(passDR) {
@@ -386,7 +402,7 @@ namespace DerivationFramework {
       }
     }
 
-    EtacCandidateVector candidates(m_maxCandidates, m_ptOrdering);
+    EtacCandidateVector candidates(m_maxEtacCandidates, m_ptOrdering);
     if(m_tracks_num==1) {
       std::vector<const xAOD::TrackParticle*> tracksSelected;
       tracksSelected.insert(tracksSelected.begin(), tracksPlus.begin(), tracksPlus.end());
@@ -401,8 +417,8 @@ namespace DerivationFramework {
       	p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	for(auto iter=tracksSelected.cbegin(); iter!=tracksSelected.cend(); ++iter) {
-	  const xAOD::TrackParticle* track = *iter;
+	for(auto iter1=tracksSelected.cbegin(); iter1!=tracksSelected.cend(); ++iter1) {
+	  const xAOD::TrackParticle* track = *iter1;
 	  if(std::find(tracksJpsis.cbegin(), tracksJpsis.cend(), track) != tracksJpsis.cend())
 	    continue;
 	  if ( track->pt()<m_trkMinPt1 )
@@ -632,25 +648,40 @@ namespace DerivationFramework {
 
 	if(m_tracks_num==1) {
 	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1).M()>m_MassUpper) continue;
+	  if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),inputTracks[4]->eta(),inputTracks[4]->phi())>m_maxDR) continue;
 	}
 	else if(m_tracks_num==2) {
 	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2).M()>m_MassUpper) continue;
+	  bool passDR = true;
+	  for(int i=4; i<=5; i++) {
+	    if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR = false; break; }
+	  }
+	  if(!passDR) continue;
 	}
 	else if(m_tracks_num==4) {
 	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2+p4_track3+p4_track4).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2+p4_track3+p4_track4).M()>m_MassUpper) continue;
+	  bool passDR1 = true;
+	  for(int i=4; i<=7; i++) {
+	    if(DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR1 = false; break; }
+	  }
+	  bool passDR2 = true;
+	  for(int i=4; i<=7; i++) {
+	    if(DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR2 = false; break; }
+	  }
+	  if(!passDR1 && !passDR2) continue;
 	}
 	else {
 	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2+p4_track3+p4_track4+p4_track5+p4_track6).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_track1+p4_track2+p4_track3+p4_track4+p4_track5+p4_track6).M()>m_MassUpper) continue;
+	  bool passDR1 = true;
+	  for(int i=4; i<=9; i++) {
+	    if(DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR1 = false; break; }
+	  }
+	  bool passDR2 = true;
+	  for(int i=4; i<=9; i++) {
+	    if(DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR2 = false; break; }
+	  }
+	  if(!passDR1 && !passDR2) continue;
 	}
-	bool passDR = true;
-	int j = 4;
-	if(m_tracks_num==2)      j = 5;
-	else if(m_tracks_num==4) j = 7;
-	else if(m_tracks_num==6) j = 9;
-	for(int i=4; i<=j; i++) {
-	  if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),inputTracks[i]->eta(),inputTracks[i]->phi())>m_maxDR) { passDR = false; break; }
-	}
-	if(!passDR) continue;
 
 	// start the fit
 	m_iVertexFitter->setDefault();
@@ -798,10 +829,15 @@ namespace DerivationFramework {
 	  p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	  p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	  p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	  if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR) {
+	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_trk1+p4_trk2+p4_trk3+p4_trk4).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_trk1+p4_trk2+p4_trk3+p4_trk4).M()>m_MassUpper) continue;
+	  if((DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR) ||
+	     (DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR)) {
 	    passDR = true; break;
 	  }
 	}
@@ -858,12 +894,19 @@ namespace DerivationFramework {
 	  p4_mu2.SetPtEtaPhiM(tracksJpsis[1]->pt(), tracksJpsis[1]->eta(), tracksJpsis[1]->phi(), m_vtx0Daug2MassHypo);
 	  p4_mu3.SetPtEtaPhiM(tracksJpsis[2]->pt(), tracksJpsis[2]->eta(), tracksJpsis[2]->phi(), m_vtx0Daug3MassHypo);
 	  p4_mu4.SetPtEtaPhiM(tracksJpsis[3]->pt(), tracksJpsis[3]->eta(), tracksJpsis[3]->phi(), m_vtx0Daug4MassHypo);
-	  if(DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho3.trackParticle1->eta(),rho3.trackParticle1->phi())<m_maxDR &&
-	     DR((p4_mu1+p4_mu2+p4_mu3+p4_mu4).Eta(),(p4_mu1+p4_mu2+p4_mu3+p4_mu4).Phi(),rho3.trackParticle2->eta(),rho3.trackParticle2->phi())<m_maxDR) {
+	  if((p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_trk1+p4_trk2+p4_trk3+p4_trk4+p4_trk5+p4_trk6).M()<m_MassLower || (p4_mu1+p4_mu2+p4_mu3+p4_mu4+p4_trk1+p4_trk2+p4_trk3+p4_trk4+p4_trk5+p4_trk6).M()>m_MassUpper) continue;
+	  if((DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho3.trackParticle1->eta(),rho3.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu1+p4_mu2).Eta(),(p4_mu1+p4_mu2).Phi(),rho3.trackParticle2->eta(),rho3.trackParticle2->phi())<m_maxDR) ||
+	     (DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho1.trackParticle1->eta(),rho1.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho1.trackParticle2->eta(),rho1.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho2.trackParticle1->eta(),rho2.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho2.trackParticle2->eta(),rho2.trackParticle2->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho3.trackParticle1->eta(),rho3.trackParticle1->phi())<m_maxDR &&
+	      DR((p4_mu3+p4_mu4).Eta(),(p4_mu3+p4_mu4).Phi(),rho3.trackParticle2->eta(),rho3.trackParticle2->phi())<m_maxDR)) {
 	    passDR = true; break;
 	  }
 	}
