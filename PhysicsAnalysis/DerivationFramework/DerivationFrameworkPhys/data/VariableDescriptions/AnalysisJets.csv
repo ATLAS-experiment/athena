@@ -27,14 +27,13 @@ LineNumber,VariableName,Type,Description
 26,HadronConeExclTruthLabelID,vector<int>,"Truth labels (5=B, 4=C, 15=tau), used by flavour tagging group"
 27,HadronConeExclExtendedTruthLabelID,vector<int>,"Extended truth label (additional states, e.g. BB, allowed) used by flavour tagging group"
 28,PartonTruthLabelID,vector<int>,PDG (Particle Data Group) identification of the highest-energy ghost-associated parton
-29,ConeTruthLabelID,vector<int>,"Truth labels (5=B, 4=C, 15=tau), used by flavour tagging group"
-30,GhostMuonSegmentCount,vector<int>,Number of ghost-associated muon segments
-31,DFCommonJets_QGTagger_NTracks,vector<int>,Number of tracks (input to quark-gluon tagger)
-32,DFCommonJets_QGTagger_TracksWidth,vector<float>,Width (radial moment) of tracks associated to jet (input to quark-gluon tagger)
-33,DFCommonJets_QGTagger_TracksC1,vector<float>,C1 (energy moment) of tracks associated to jet (input to quark-gluon tagger)
-34,NNJvtPass,vector<char>,Flag indicating whether jet passes NNJvt
-35,GhostTrack,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from jets to ghost-associated tracks
-36,btaggingLink,vector<ElementLink<DataVector<xAOD::BTagging_v1> > >,Links from jets to b-tagging variables
-37,isJvtHS,vector<char>,Flag to indicate if a jet originates from the hard-scatter (HS) event or not
-38,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
-39,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds
+29,GhostMuonSegmentCount,vector<int>,Number of ghost-associated muon segments
+30,DFCommonJets_QGTagger_NTracks,vector<int>,Number of tracks (input to quark-gluon tagger)
+31,DFCommonJets_QGTagger_TracksWidth,vector<float>,Width (radial moment) of tracks associated to jet (input to quark-gluon tagger)
+32,DFCommonJets_QGTagger_TracksC1,vector<float>,C1 (energy moment) of tracks associated to jet (input to quark-gluon tagger)
+33,NNJvtPass,vector<char>,Flag indicating whether jet passes NNJvt
+34,GhostTrack,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from jets to ghost-associated tracks
+35,btaggingLink,vector<ElementLink<DataVector<xAOD::BTagging_v1> > >,Links from jets to b-tagging variables
+36,isJvtHS,vector<char>,Flag to indicate if a jet originates from the hard-scatter (HS) event or not
+37,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
+38,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds

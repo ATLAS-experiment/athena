@@ -349,22 +349,10 @@ namespace Analysis {
       // here we require a jet selection:
       if( jetToTag.pt()>m_jetPtMinRef && fabs(jetToTag.eta())<2.5 ) {
 	label = xAOD::jetFlavourLabel(&jetToTag);
-	double deltaRtoClosestB = 999., deltaRtoClosestC = 999., deltaRtoClosestT = 999.;
-    	double deltaRmin(0.);
-        if (jetToTag.getAttribute("TruthLabelDeltaR_B",deltaRtoClosestB)) {
-    	  // for purification: require no b or c quark closer than dR=m_purificationDeltaR
-	  jetToTag.getAttribute("TruthLabelDeltaR_C",deltaRtoClosestC);
-	  jetToTag.getAttribute("TruthLabelDeltaR_T",deltaRtoClosestT);
-    	  deltaRmin = deltaRtoClosestB < deltaRtoClosestC ? deltaRtoClosestB : deltaRtoClosestC;
-          deltaRmin = deltaRtoClosestT < deltaRmin ? deltaRtoClosestT : deltaRmin;
-        } else {
-          ATH_MSG_ERROR("#BTAG# No TruthInfo ! Cannot run in reference mode !");
-          return StatusCode::FAILURE;
-        }
     	if ( (    "B"==m_referenceType &&   5==label ) ||  // b-jets    
     	     ( "UDSG"==m_referenceType &&   0==label ) ||  // light jets
     	     (  "ALL"==m_referenceType && // all jets: b + purified light jets
-    		( 5==label || 4==label || ( 0==label && deltaRmin > m_purificationDeltaR ) ) )
+		( 5==label || 4==label || 0==label ) )
     	     ) {
           if (5==label) {
             pref = m_hypotheses[0];

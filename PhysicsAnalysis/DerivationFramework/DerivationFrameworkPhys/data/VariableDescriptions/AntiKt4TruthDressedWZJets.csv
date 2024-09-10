@@ -3,5 +3,4 @@ LineNumber,VariableName,Type,Description
 2,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
 3,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
 4,PartonTruthLabelID,vector<int>,PDG identification of the highest-energy ghost-associated parton
-5,ConeTruthLabelID,vector<int>,"Truth labels (5=B, 4=C, 15=tau), used by flavour tagging group"
-6,TrueFlavor,vector<int>,Attempt to merge Parton and Hadron truth labels into a single variable
+5,TrueFlavor,vector<int>,Attempt to merge Parton and Hadron truth labels into a single variable

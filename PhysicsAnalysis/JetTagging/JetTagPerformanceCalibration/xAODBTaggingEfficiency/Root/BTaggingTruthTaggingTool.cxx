@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "xAODBTaggingEfficiency/BTaggingTruthTaggingTool.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
 #include "xAODBTagging/BTagging.h"
@@ -73,7 +77,6 @@ BTaggingTruthTaggingTool::BTaggingTruthTaggingTool( const std::string & name)
   declareProperty("ExcludeFromEigenVectorTreatment", m_excludeFromEV = "",       "(semicolon-separated) names of uncertainties to be excluded from eigenvector decomposition (if used)");
   declareProperty("SystematicsStrategy",             m_systStrategy = "SFEigen", "name of systematics model; presently choose between 'SFEigen' and 'Envelope'");
   declareProperty("ConeFlavourLabel",                m_coneFlavourLabel = true, "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling");
-  declareProperty("OldConeFlavourLabel",             m_oldConeFlavourLabel = false, "when using cone-based flavour labelling, specify whether or not to use the (deprecated) Run-1 legacy labelling");
   declareProperty("CutBenchmark",                    m_cutBenchmark = "1,2", "if you want to run in continuous you need to fix a benchmark - it does something only if running in Continuous OP");
   declareProperty("ExcludeSpecificEigens",           m_excludeEV = "" ,    "(semicolon-separated) names of Eigens you want to exclude. in case of continuous some eigenvectors can be ignored to make the computation faster");
   declareProperty("StoreOnlyUpVariations",           m_doOnlyUpVariations = false ,    "If set to true it processes only the __1up b-tagging variations. It speeds up the computation in case of symmetric variations.");
@@ -153,7 +156,6 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   ANA_CHECK(m_effTool.setProperty("ExcludeFromEigenVectorTreatment", m_excludeFromEV ));
   ANA_CHECK(m_effTool.setProperty("SystematicsStrategy",             m_systStrategy ));
   ANA_CHECK(m_effTool.setProperty("ConeFlavourLabel",                m_coneFlavourLabel ));
-  ANA_CHECK(m_effTool.setProperty("OldConeFlavourLabel",             m_oldConeFlavourLabel ));
   ANA_CHECK(m_effTool.setProperty("pathToONNX",                      m_pathToONNX ));
 
   ANA_CHECK(m_effTool.initialize());
@@ -1105,7 +1107,7 @@ BTaggingTruthTaggingTool::~BTaggingTruthTaggingTool(){
 
 int BTaggingTruthTaggingTool::jetFlavourLabel (const xAOD::Jet& jet){
   if (m_coneFlavourLabel)
-    return (m_oldConeFlavourLabel) ? ConeFinalPartonFlavourLabel(jet) : ExclusiveConeHadronFlavourLabel(jet);
+    return ExclusiveConeHadronFlavourLabel(jet);
   else
     return GAFinalHadronFlavourLabel(jet);
 }
@@ -1125,16 +1127,6 @@ int BTaggingTruthTaggingTool::GAFinalHadronFlavourLabel (const xAOD::Jet& jet) {
 
 
   return 0;
-}
-
-int BTaggingTruthTaggingTool::ConeFinalPartonFlavourLabel (const xAOD::Jet& jet){
-  // default label means "invalid"
-  int label = -1;
-  // First try the new naming scheme
-  if (jet.getAttribute("ConeTruthLabelID",label)) return label;
-  // If that fails, revert to the old scheme. In this case, further testing is not very useful
-  jet.getAttribute("TruthLabelID", label);
-  return label;
 }
 
 int BTaggingTruthTaggingTool::ExclusiveConeHadronFlavourLabel (const xAOD::Jet& jet){

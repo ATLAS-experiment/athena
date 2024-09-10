@@ -15,7 +15,7 @@ AntiKt4EMPFlowJetsCPContent = [
 "AntiKt4EMPFlowJetsAux.NNJvt.NNJvtRpt.NNJvtPass",
 "AntiKt4EMPFlowJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
 "AntiKt4EMPFlowJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
-"AntiKt4EMPFlowJetsAux.PartonTruthLabelID.ConeTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
+"AntiKt4EMPFlowJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "PrimaryVertices",
 "PrimaryVerticesAux.vertexType" 
 ]

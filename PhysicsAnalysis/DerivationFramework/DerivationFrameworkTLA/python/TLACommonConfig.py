@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # TLACommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -117,8 +117,6 @@ def addTLATruth3ContentToSlimmerTool(slimmer):
         "TruthBottom",
         "TruthTop",
         "TruthBoson",
-        # "TruthForwardProtons",
-        # "BornLeptons",
         "TruthBosonsWithDecayParticles",
         "TruthBosonsWithDecayVertices",
         "TruthBSMWithDecayParticles",
@@ -127,5 +125,5 @@ def addTLATruth3ContentToSlimmerTool(slimmer):
         "HardScatterVertices",
     ]
     slimmer.ExtraVariables += [
-        "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.ConeTruthLabelID.PartonTruthLabelID.TrueFlavor",
+        "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.TrueFlavor",
         "TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection"]

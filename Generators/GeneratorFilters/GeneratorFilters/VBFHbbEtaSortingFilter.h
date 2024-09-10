@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -35,7 +35,7 @@ class VBFHbbEtaSortingFilter:public GenFilter {
   double m_MinJetPt;  // minimum pT for jet selection in MeV
   double m_MaxJetEta;  // maximum eta for Jets (4.9 by default)
   std::string m_TruthJetContainerName;  // Name of the truth jet container
-  std::string m_JetTruthLabelName;  // Name of truth label "ConeTruthLabelID" or "PartonTruthLabelID" default "PartonTruthLabelID"
+  std::string m_JetTruthLabelName;  // Name of truth label default "PartonTruthLabelID"
 	
   long m_total;    // Total number of events tested
   long m_passed_multiplicity;   // Number of events passing cuts
