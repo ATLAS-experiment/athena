@@ -8,7 +8,7 @@ include("EvgenProdTools/StdJOSetup.py")
 evgenLog = logging.getLogger("Evgen")
 
 ## Needed to set IS_SIMULATION metadata
-include("AthenaCommon/Atlas_Gen.UnixStandardJob.py")
+import AthenaCommon.AtlasUnixGeneratorJob
 
 ## Provide a bit of compatibility with Generate_trf JOs via dummy
 ## evgenConfig and StreamEVGEN objects
