@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @file AtlasUnixStandardJob.py
 ## @brief py-module to configure the Athena AppMgr for standard (UNIX) jobs
@@ -28,6 +28,7 @@ def _setupAtlasUnixStandardJob():
     # make the message service available
     # from GaudiCoreSvc.GaudiCoreSvcConf import MessageSvc
     svcMgr.MessageSvc = theApp.service( "MessageSvc" )     # already instantiated
+    svcMgr.MessageSvc.enableSuppression = True
 
     # StoreGate services configuration
     import StoreGate.StoreGateConf as StoreGateConf
