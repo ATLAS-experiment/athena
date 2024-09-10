@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from .JetDefinition import  JetDefinition
 from .JetGrooming import  JetTrimming, JetSoftDrop
+from JetRecConfig.JetRecConfig import registerAsInputConstit
 
 # needed to ensure the smallR VR jets are defined
 import JetRecConfig.StandardSmallRJets # noqa: F401
@@ -190,6 +191,9 @@ AntiKt10TruthDressedWZSoftDrop = JetSoftDrop(AntiKt10TruthDressedWZ,
                                              modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                              Beta = 1., ZCut= 0.1,
 )
+
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(AntiKt10TruthDressedWZSoftDrop)
 
 AntiKt10TruthGEN = JetDefinition("AntiKt",1.0, cst.TruthGEN,
                                 ptmin = 5000, 

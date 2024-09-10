@@ -190,7 +190,7 @@ def getJetGroomAlgs(flags, groomdef, returnConfiguredDef=False, monTool=None):
         reqType, reqKey = prereq.split(':')
         if reqType=='ghost':
             groomdef_i.ungroomeddef.ghostdefs.append(reqKey)
-        elif reqType.endswith('input:') : # can be extinput or input
+        elif reqType.endswith('input') : # can be extinput or input
             groomdef_i.ungroomeddef.extrainputs.append(reqKey)
 
     jetlog.info("Scheduling parent alg {} for {} ".format(groomdef.ungroomeddef.fullname(), groomdef.fullname()))

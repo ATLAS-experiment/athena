@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 This module defines the standard JetModifier tools used in jet reco
 
@@ -216,6 +216,7 @@ stdJetModifiers.update(
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,
                                        createfn=ParticleJetToolsConfig.getJetTruthLabelTool,
+                                       prereqs=lambda modspec,jetdef: ParticleJetToolsConfig.getJetTruthLabelToolPrereqs(jetdef, modspec),
                                       ),
 
     JetPileupLabel = JetModifier("JetPileupLabel", "pileuplabeler_{mods}",
