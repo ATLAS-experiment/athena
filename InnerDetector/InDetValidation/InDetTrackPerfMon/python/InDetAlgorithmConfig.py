@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def TruthHitDecoratorAlgCfg( flags, name="TruthHitDecoratorAlg", **kwargs ):
+def TruthHitDecoratorAlgCfg( flags, name="InDetPhysValTruthDecoratorAlg", **kwargs ):
     '''
     create decoration algorithm which decorates
     truth particles with track parameters at the perigee.
@@ -20,11 +20,19 @@ def TruthHitDecoratorAlgCfg( flags, name="TruthHitDecoratorAlg", **kwargs ):
     acc = ComponentAccumulator()
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    extrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg(flags) )
+    extrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg( flags ) )
     acc.addPublicTool( extrapolator )
     kwargs.setdefault( "Extrapolator", extrapolator )
 
-    acc.addEventAlgo( CompFactory.IDTPM.TruthHitDecoratorAlg( name, **kwargs ) )
+    if flags.Detector.GeometryITk :
+        kwargs.setdefault( "PixelClusterContainerName", "ITkPixelClusters" )
+        kwargs.setdefault( "SCTClusterContainerName",   "ITkStripClusters" )
+
+    kwargs.setdefault( 'TruthParticleIndexDecoration', '' ) # FIXME - tech effs
+    #                   'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '' )
+
+    ## To be eventually migrated to IDTPM if need be
+    acc.addEventAlgo( CompFactory.InDetPhysValTruthDecoratorAlg( name, **kwargs ) )
     return acc
 
 

@@ -148,16 +148,25 @@ def InDetTrackPerfMonToolCfg( flags, name="InDetTrackPerfMonTool", **kwargs ):
     acc.merge( PlotsDefinitionSvcCfg( flags,
                     name="PlotsDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) )
 
+    ## Decorator algorithms
+    ## Truth-Hit decorator
+    if ( ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) or
+         ( "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) ):
+        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
+        acc.merge( TruthHitDecoratorAlgCfg( flags ) )
+
+    ## Offline track-object decorator
+    if ( ( flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject ) and
+         ( "Truth" not in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject ) ):
+        from InDetTrackPerfMon.InDetAlgorithmConfig import OfflineObjectDecoratorAlgCfg
+        acc.merge( OfflineObjectDecoratorAlgCfg( flags ) )
+
     ## now the sub-tools    
     if "TrackQualitySelectionTool" not in kwargs:
         from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
         kwargs.setdefault( "TrackQualitySelectionTool", acc.popToolsAndMerge(
             TrackQualitySelectionToolCfg( flags,
                 name="TrackQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
-
-    if "Truth" in flags.PhysVal.IDTPM.currentTrkAna.RefType or "Truth" in flags.PhysVal.IDTPM.currentTrkAna.TestType:
-        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
-        acc.merge( TruthHitDecoratorAlgCfg(flags) )
 
     if ( ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.TestType ) or
          ( "Trigger" in flags.PhysVal.IDTPM.currentTrkAna.RefType ) ):
@@ -200,22 +209,6 @@ def InDetTrackPerfMonCfg( flags ):
     '''
     log = logging.getLogger( "InDetTrackPerfMonCfg" )
     acc = ComponentAccumulator()
-
-    ## Offline track-object decorator
-    useOfflineObject = False
-    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
-        obj = getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" )
-        if ( not obj or "Truth" in obj ) :
-            # Do not schedule algorithm
-            # if SelectOfflineObject id empty or
-            # for Truth-match offline selection
-            continue
-        useOfflineObject = True
-        break
-
-    if useOfflineObject:
-        from InDetTrackPerfMon.InDetAlgorithmConfig import OfflineObjectDecoratorAlgCfg
-        acc.merge( OfflineObjectDecoratorAlgCfg(flags) )
 
     ## IDTPM tool instances
     tools = []
