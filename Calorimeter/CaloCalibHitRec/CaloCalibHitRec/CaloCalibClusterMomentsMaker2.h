@@ -55,19 +55,10 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   /**
    * @brief Class to store cluster number and weight for calorimeter cells
    */
-  class MyCellInfo {
+  class MyCellInfo : public std::vector<std::pair<int, double> > {
     public:
-      MyCellInfo(int iClus, double w)
-      {
-        m_ClusWeights.emplace_back(iClus, w);
-      }
-      void Add(const MyCellInfo& other)
-      {
-        for (const std::pair<int, double>& p : other.m_ClusWeights) {
-          m_ClusWeights.push_back( p );
-        }
-      }
-      std::vector<std::pair<int, double> > m_ClusWeights;
+      MyCellInfo(int iClus, double w) { this->emplace_back(iClus, w); }
+      void Add(const MyCellInfo& other) { this->insert(this->end(),other.begin(), other.end()); }
   };
 
   typedef std::map<Identifier, MyCellInfo> CellInfoSet_t;
@@ -79,9 +70,8 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
     public:
       class ClusCalibEnergy {
         public:
-          double engTot;
-          std::vector<double > engSmp;
-          ClusCalibEnergy() : engTot(0) { engSmp.resize(CaloSampling::Unknown+1, 0.0); }
+          double engTot = 0.0;
+          std::array<double,CaloSampling::Unknown+1> engSmp;
           void Add(double eng, int nsmp)
           {
             engTot += eng;
@@ -89,29 +79,17 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
           }
       };
 
-      MyClusInfo() : engCalibOut(0), engCalibDead(0) {
-        engCalibDeadInArea.resize(CaloDmDescrArea::DMA_MAX,0.0);
-        engCalibParticle.clear();
-      }
-
       void Add(double eng, int nsmp, int pid = 0)
       {
         engCalibIn.Add(eng, nsmp);
-        std::map<int, ClusCalibEnergy>::iterator pos = engCalibParticle.find(pid);
-        if(pos != engCalibParticle.end()) {
-          pos->second.Add(eng, nsmp);
-        }else{
-          ClusCalibEnergy tmp;
-          tmp.Add(eng, nsmp);
-          engCalibParticle[pid] = tmp;
-        }
+        engCalibParticle[pid].Add(eng, nsmp);
       }
 
       ClusCalibEnergy engCalibIn;
-      double engCalibOut;
-      double engCalibDead;
-      std::vector<double > engCalibDeadInArea;
-      std::map<int, ClusCalibEnergy > engCalibParticle;
+      double engCalibOut  = 0.0;
+      double engCalibDead = 0.0;
+      std::array<double,CaloDmDescrArea::DMA_MAX> engCalibDeadInArea{};
+      std::map<int, ClusCalibEnergy > engCalibParticle{};
   };
   typedef std::vector<MyClusInfo> ClusInfo_t;
 
@@ -237,8 +215,6 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   int m_MatchDmType;
 
   static double angle_mollier_factor(double x) ;
-  void get_calib_frac(const std::map<unsigned int,int>& truthBarcodeToPdgCodeMap,
-                      const MyClusInfo& clusInfo, std::vector<double> &engFrac) const;
 };
 
 #endif // CALOCALIBCLUSTERMOMENTSMAKER2_H

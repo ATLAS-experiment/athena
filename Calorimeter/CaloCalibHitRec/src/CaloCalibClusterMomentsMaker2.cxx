@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -376,7 +376,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
       if(pos != cellInfo.end() ) {
         // i.e. given hit id belongs to one or more clusters
         CaloSampling::CaloSample nsmp = CaloSampling::CaloSample(m_calo_id->calo_sample(myId));
-        for ( const std::pair<int, double>& p : pos->second.m_ClusWeights) {
+        for ( const std::pair<int, double>& p : pos->second) {
           int iClus = p.first;
           double weight = p.second;
           if(m_useParticleID){
@@ -506,7 +506,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                       MyClusInfo& clusInfo = clusInfoVec[iClus];
                       // getting access to calibration energy inside cluster caused by same particleID (barcode)
                       // as given OOC hit
-                      std::map<int, MyClusInfo::ClusCalibEnergy>::iterator pos = clusInfo.engCalibParticle.find(pid);
+                      auto pos = clusInfo.engCalibParticle.find(pid);
                       if(pos!=clusInfo.engCalibParticle.end()) {
                         // given cluster have some energy inside caused by same particle as given OOC hitClusEffEnergy
                         // so the hit will be assigned to this cluster with some weight
@@ -580,7 +580,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                 MyClusInfo& clusInfo = clusInfoVec[iClus];
                 // getting access to calibration energy inside cluster caused by same particleID (barcode)
                 // as given OOC hit
-                std::map<int, MyClusInfo::ClusCalibEnergy>::iterator pos = clusInfo.engCalibParticle.find(pid); // FIXME barcode-based
+                auto pos = clusInfo.engCalibParticle.find(pid); // FIXME barcode-based
                 if(pos!=clusInfo.engCalibParticle.end()) {
                   double engClusPidCalib = pos->second.engTot;
 
@@ -694,7 +694,30 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
           - eng_calib_dead_leakage;
 
     if(doCalibFrac){
-      get_calib_frac(truthBarcodeToPdgCodeMap, clusInfo, engCalibFrac);
+/*****************************************************************************
+Calculation of energy fraction caused by particles of different types
+*****************************************************************************/
+      engCalibFrac.assign(kCalibFracMax, 0.0);
+      if(clusInfo.engCalibIn.engTot > 0.0) {
+        // each MyClusInfo has a map of particle's barcode and particle calibration deposits in given cluster
+        for (const auto& p : clusInfo.engCalibParticle) {
+          int pdg_id = 0;
+          if ( auto it = truthBarcodeToPdgCodeMap.find(p.first); it != truthBarcodeToPdgCodeMap.end()) { // FIXME barcode-based 
+            pdg_id = it->second;
+          } else {   
+            ATH_MSG_WARNING("truthBarcodeToPdgCodeMap cannot find an entry with barcode " << p.first);
+            continue;
+          }
+          if( std::abs(pdg_id) == 211) {
+            engCalibFrac[kCalibFracHAD] += p.second.engTot;
+          } else if( pdg_id == 111 || pdg_id == 22 || std::abs(pdg_id)==11) {
+            engCalibFrac[kCalibFracEM] += p.second.engTot;
+          } else {
+            engCalibFrac[kCalibFracREST] += p.second.engTot;
+          }
+        }
+        for(size_t i=0; i<engCalibFrac.size(); i++) engCalibFrac[i] = engCalibFrac[i]/clusInfo.engCalibIn.engTot;
+      }
     }
 
     if ( !m_momentsNames.empty() ) {
@@ -795,36 +818,5 @@ double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x)
     ff = atan(5.0*0.95/(505./tanh(eta)));
   }
   return ff*(1./atan(5.0*1.7/200.0));
-}
-
-
-
-/* ****************************************************************************
-Calculation of energy fraction caused by particles of different types
-**************************************************************************** */
-void CaloCalibClusterMomentsMaker2::get_calib_frac(const std::map<unsigned int,int>& truthBarcodeToPdgCodeMap,
-                                                   const MyClusInfo& clusInfo, std::vector<double> &engFrac) const
-{
-  engFrac.assign(kCalibFracMax, 0.0);
-  if(clusInfo.engCalibIn.engTot <= 0.0) return;
-  // each MyClusInfo has a map of particle's barcode and particle calibration deposits in given cluster
-  for (const std::pair<const int, MyClusInfo::ClusCalibEnergy>& p : clusInfo.engCalibParticle) {
-    unsigned int barcode = p.first; // FIXME barcode-based
-    int pdg_id = 0;
-    if ( auto it = truthBarcodeToPdgCodeMap.find(barcode); it != truthBarcodeToPdgCodeMap.end()) { // FIXME barcode-based 
-       pdg_id = it->second;
-    } else {   
-      ATH_MSG_WARNING("truthBarcodeToPdgCodeMap cannot find an entry with barcode " << barcode);
-      continue;
-    }
-    if( abs(pdg_id) == 211) {
-      engFrac[kCalibFracHAD] += p.second.engTot;
-    }else if( pdg_id == 111 || pdg_id == 22 || abs(pdg_id)==11) {
-      engFrac[kCalibFracEM] += p.second.engTot;
-    }else{
-      engFrac[kCalibFracREST] += p.second.engTot;
-    }
-  }
-  for(unsigned int i=0; i<engFrac.size(); i++) engFrac[i] = engFrac[i]/clusInfo.engCalibIn.engTot;
 }
 
