@@ -19,6 +19,3 @@ job += FortranAlgorithm(LUN=42, fileName="FortranAlgorithmInput.data")
 
 # Number of events to be processed (default is 10)
 theApp.EvtMax = 1
-MessageSvc.OutputLevel = INFO
-
-
