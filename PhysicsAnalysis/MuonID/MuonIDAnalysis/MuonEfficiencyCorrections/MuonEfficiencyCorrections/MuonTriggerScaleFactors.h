@@ -133,6 +133,9 @@ namespace CP {
             int m_nReplicas;
             int m_ReplicaRandomSeed ;
 
+            //// Map connecting run and year:
+            static const std::map<unsigned int,int> m_runNumber_year;
+
     };
 
 }
