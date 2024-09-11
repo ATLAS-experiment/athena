@@ -160,6 +160,8 @@ class TextConfig(ConfigFactory):
         # make sure all blocks in yaml file are added (otherwise they would be ignored)
         for blockName in self._config:
             if blockName not in self._order[self.ROOTNAME]:
+                if not blockName:
+                    blockName = list(self._config[blockName].keys())[0]
                 raise ValueError(f"Unkown block {blockName} in yaml file")
 
         # configure blocks
