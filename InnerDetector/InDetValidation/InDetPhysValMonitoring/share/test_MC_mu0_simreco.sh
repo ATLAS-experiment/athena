@@ -25,7 +25,7 @@ dcube_rec_expert_lastref="dcube_expert_last"
 hits=physval.HITS.root
 rdo=physval.RDO.root
 aod=physval.AOD.root
-dcubemon_sim=SiHitValid.root
+dcubemon_sim=HitValid.root
 dcubemon_rec=physval.ntuple.root
 dcubemon_rdo=RDOAnalysis.root
 
@@ -57,6 +57,8 @@ sim_tf_exit_code=$?
 echo "art-result: $sim_tf_exit_code sim"
 
 if [ $sim_tf_exit_code -eq 0 ]  ;then
+
+ hadd ${dcubemon_sim} SiHitValid.root TRTHitValid.root
 
  echo "download latest result"
  run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
