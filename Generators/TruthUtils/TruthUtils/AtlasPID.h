@@ -210,6 +210,7 @@ template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->
 template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
 template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
+template<class T> inline bool isQBall(const T& p){return isQBall(p->pdg_id());}
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
 template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
@@ -276,6 +277,12 @@ template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); re
 /// constituents charged or not under this, 4900022 is the γv of a non-confining field, and 4900 nqv1 nqv2 nJ a Hidden Valley meson.
 template<> inline bool isHiddenValley(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 && isValid(p.shift(2)));}
 template<> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
+
+/// In addition, there is a need to identify ”Q-ball” and similar very exotic particles which
+/// may have large, non-integer charge. As of HepPDT 3.04.01, these particles are assigned
+/// the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
+template<> inline bool isQBall(const DecodedPID& p){return (p.ndigits() == 8 && p(0) == 1 && p(1) == 0 && p(2) == 0 && p(7) == 0);}
+template<> inline bool isQBall(const int& p){ auto value_digits = DecodedPID(p); return isQBall(value_digits);}
 
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
@@ -404,6 +411,7 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (isExcited(p)) return true;
   if (isKK(p)) return true;
   if (isHiddenValley(p)) return true;
+  if (isQBall(p)) return true;
   return false;
 }
 
@@ -498,7 +506,13 @@ template<class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p) 
 
 
 template<class T> inline int charge3( const T& p){return charge3(p->pdg_id());}
-template<class T> inline double charge( const T& p){ return 1.0*charge3(p)/3.0;}
+template<class T> inline double fractionalCharge(const T& p){return fractionalCharge(p->pdg_id());}
+template<class T> inline double charge( const T& p){
+  if (isQBall(p)) // BSM QBalls might have a fractional charge that's not a multiple of 1/3
+    return fractionalCharge(p);
+  else 
+    return 1.0*charge3(p)/3.0; 
+}
 template<class T> inline double threeCharge( const T& p){ return charge3(p);}
 template<class T> inline bool isCharged( const T& p){ return charge3(p) != 0;}
 template<class T> inline bool isNeutral( const T& p){ return charge3(p) == 0;}
@@ -527,6 +541,11 @@ template<> inline int charge3(const DecodedPID& p) {
       auto pp = p.shift(1); if (pp.ndigits() > 2) pp = pp.shift(1);
       return charge3(pp);
   }
+  if (!classified && isQBall(p)) { 
+    double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // QBall PDG ID is +/-100XXXY0, where the charge is XXX.Y
+    int abs_threecharge = static_cast<int>(std::round(abs_charge * 3.)); // the QBalls might have a fractional charge that's not a multiple of 1/3, in that case round to the closest multiple of 1/3 for charge3 and threecharge
+    return p.pid() > 0 ? abs_threecharge : -1 * abs_threecharge;
+  }
   for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
       result += triple_charge.at(*r)*sign;
       sign*=signmult;
@@ -539,6 +558,13 @@ template<> inline int charge3(const int& p){
   auto value_digits = DecodedPID(p);
   return charge3(value_digits);
 }
+
+template<> inline double fractionalCharge(const DecodedPID& p) {
+  if(!isQBall(p)) return 1.0*charge3(p)/3.0; // this method is written for QBalls, still make sure other cases are handled properly
+  double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // QBall PDG ID is +/-100XXXY0, where the charge is XXX.Y
+  return p.pid() > 0 ? abs_charge : -1 * abs_charge;
+}
+template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
 
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
 template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0);}
