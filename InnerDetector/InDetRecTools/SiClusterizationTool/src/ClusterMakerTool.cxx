@@ -211,6 +211,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
                          double splitProb2,
                          const PixelChargeCalibCondData *calibData,
                          const PixelOfflineCalibData *offlineCalibData,
+                         const EventContext& ctx,
                          xAOD::PixelCluster* cluster) const{
 
   ATH_MSG_VERBOSE("ClusterMakerTool called, number ");
@@ -293,7 +294,7 @@ ClusterType ClusterMakerTool::makePixelCluster(
   ATH_MSG_VERBOSE("omega =  " << omegax << " " << omegay);
 
 // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), Gaudi::Hive::currentContext());
+  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), ctx);
   Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
 // find global position of element
   const Amg::Transform3D& T = element->surface().transform();
@@ -428,7 +429,8 @@ PixelCluster ClusterMakerTool::pixelCluster(
     double splitProb1,
     double splitProb2,
     const PixelChargeCalibCondData *calibData,
-    const PixelOfflineCalibData *offlineCalibData) const
+    const PixelOfflineCalibData *offlineCalibData,
+    const EventContext& ctx) const
 {
   return makePixelCluster<PixelCluster>(
       clusterID,
@@ -445,7 +447,8 @@ PixelCluster ClusterMakerTool::pixelCluster(
       splitProb1,
       splitProb2,
       calibData,
-      offlineCalibData);
+      offlineCalibData,
+      ctx);
 }
 
 xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
@@ -463,7 +466,8 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
     double splitProb1,
     double splitProb2,
     const PixelChargeCalibCondData *calibData,
-    const PixelOfflineCalibData *offlineCalibData) const
+    const PixelOfflineCalibData *offlineCalibData,
+    const EventContext& ctx) const
 {
     return makePixelCluster<xAOD::PixelCluster*>(
 	Identifier(),
@@ -481,6 +485,7 @@ xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
 	splitProb2,
 	calibData,
 	offlineCalibData,
+  ctx,
   &cluster);
 }
 
