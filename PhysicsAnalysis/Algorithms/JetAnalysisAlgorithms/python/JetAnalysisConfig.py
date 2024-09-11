@@ -7,6 +7,7 @@ from __future__ import print_function
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaCommon.Logging import logging
 import re
@@ -346,7 +347,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             # fJVT WPs depend on the MET WP
             # see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EtmissRecommendationsRel21p2#fJVT_and_MET
             alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
-            alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
+            alg.modifierTool.ForwardMaxPt = 120*GeV #Max Pt to define fwdJets for JVT
             alg.modifierTool.RenounceOutputs = True
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
@@ -359,7 +360,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
             alg.selectionTool.JetContainer = config.readName(self.containerName)
             alg.selectionTool.WorkingPoint = self.jvtWP
-            alg.selectionTool.MaxPtForJvt = 60e3
+            alg.selectionTool.MaxPtForJvt = 60*GeV
             alg.selectionDecoration = "jvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
 
@@ -367,7 +368,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+self.containerName )
                 config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
-                alg.efficiencyTool.MaxPtForJvt = 60e3
+                alg.efficiencyTool.MaxPtForJvt = 60*GeV
                 alg.efficiencyTool.WorkingPoint = self.jvtWP
                 if config.geometry() is LHCPeriod.Run2:
                     alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root"

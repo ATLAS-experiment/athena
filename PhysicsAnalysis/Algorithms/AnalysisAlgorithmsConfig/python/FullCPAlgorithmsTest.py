@@ -8,6 +8,7 @@ from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator, DataType
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaCommon.SystemOfUnits	import GeV
 
 # Config:
 triggerChainsPerYear = {
@@ -54,9 +55,9 @@ SAVE
 """
 }
 
-electronMinPt = 10e3
+electronMinPt = 10*GeV
 electronMaxEta = None
-photonMinPt = 10e3
+photonMinPt = 10*GeV
 photonMaxEta = None
 muonMinPt = None
 muonMaxEta = None
@@ -1084,15 +1085,15 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare,
     # benchmarking
     if hardCuts :
         global electronMinPt
-        electronMinPt = 27e3
+        electronMinPt = 27*GeV
         global photonMinPt
-        photonMinPt = 27e3
+        photonMinPt = 27*GeV
         global muonMinPt
-        muonMinPt = 27e3
+        muonMinPt = 27*GeV
         global tauMinPt
-        tauMinPt = 27e3
+        tauMinPt = 27*GeV
         global jetMinPt
-        jetMinPt = 45e3
+        jetMinPt = 45*GeV
 
     algSeq = AlgSequence('AnalysisSequence')
 

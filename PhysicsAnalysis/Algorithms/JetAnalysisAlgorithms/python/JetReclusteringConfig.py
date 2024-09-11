@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaCommon.SystemOfUnits import GeV
 
 class JetReclusteringBlock(ConfigBlock):
     """ConfigBlock for the jet reclustering algorithm:
@@ -21,7 +22,7 @@ class JetReclusteringBlock(ConfigBlock):
                         info='algorithm to use to recluster the jets: `AntiKt`, `Kt`, `CamKt`.')
         self.addOption ('reclusteredJetsRadius', 1.0, type=float,
                         info='radius parameter of the reclustering algorithm. The default is 1.0.')
-        self.addOption ('minPt', 200000, type=float,
+        self.addOption ('minPt', 200*GeV, type=float,
                         info='minimum pT requirement (in MeV) on the reclustered jets, creating the selection `passed_pt`. The default is 20 GeV.')
 
     def makeAlgs(self, config):

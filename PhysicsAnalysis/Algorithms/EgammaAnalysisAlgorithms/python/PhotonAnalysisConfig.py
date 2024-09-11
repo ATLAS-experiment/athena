@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaCommon.Logging import logging
@@ -48,7 +49,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
-        self.addOption ('minPt', 10e3, type=float,
+        self.addOption ('minPt', 10*GeV, type=float,
             info="the minimum pT cut to apply to calibrated photons. "
             "The default is 10 GeV.")
         self.addOption ('forceFullSimConfig', False, type=bool,

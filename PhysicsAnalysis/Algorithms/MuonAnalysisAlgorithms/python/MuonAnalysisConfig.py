@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaCommon.SystemOfUnits	import GeV
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict
@@ -21,7 +22,7 @@ class MuonCalibrationConfig (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
             "all muons.")
-        self.addOption ('minPt', 3.0e3, type=float,
+        self.addOption ('minPt', 3.0*GeV, type=float,
             info="pT cut to apply to calibrated muons, in MeV. "
             "The default is 3.0 GeV.")
         self.addOption ('recalibratePhyslite', True, type=bool,

@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict, MapKeysDict
@@ -42,7 +43,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::EgammaCalibrationAndSmearingAlg on "
             "PHYSLITE derivations. The default is True.")
-        self.addOption ('minPt', 4.5e3, type=float,
+        self.addOption ('minPt', 4.5*GeV, type=float,
             info="the minimum pT cut to apply to calibrated electrons. "
             "The default is 4.5 GeV.")
         self.addOption ('forceFullSimConfig', False, type=bool,
