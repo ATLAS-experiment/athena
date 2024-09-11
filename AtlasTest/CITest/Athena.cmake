@@ -294,6 +294,9 @@ atlas_add_citest( ACTS_ActsBenchmarkWithSpot
 atlas_add_citest( TriggerMC
    SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_build.py )
 
+atlas_add_citest( TriggerMC_HI
+   SCRIPT test_trig_mc_v1DevHI_build.py )
+
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
