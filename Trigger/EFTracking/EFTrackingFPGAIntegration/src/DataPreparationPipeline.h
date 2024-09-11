@@ -34,7 +34,7 @@ class DataPreparationPipeline : public IntegrationBase {
  public:
   using IntegrationBase::IntegrationBase;
   StatusCode initialize() override final;
-  StatusCode execute() override final;
+  StatusCode execute(const EventContext &ctx) const override final;
 
   /**
    * @brief Convert the strip cluster from xAOD container to simple std::vector
@@ -45,7 +45,7 @@ class DataPreparationPipeline : public IntegrationBase {
   StatusCode getInputClusterData(
       const xAOD::StripClusterContainer *sc,
       std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-      long unsigned int N);
+      long unsigned int N) const;
 
   /**
    * @brief Convert the pixel cluster from xAOD container to simple std::vector
@@ -56,7 +56,7 @@ class DataPreparationPipeline : public IntegrationBase {
   StatusCode getInputClusterData(
       const xAOD::PixelClusterContainer *pc,
       std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
-      long unsigned int N);
+      long unsigned int N) const;
 
   /**
    * @brief Run the software version of the transfer kernel. This doesn't
@@ -65,7 +65,7 @@ class DataPreparationPipeline : public IntegrationBase {
   StatusCode runSW(
       const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
       const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
-      const EventContext &ctx);
+      const EventContext &ctx) const;
 
   /**
    * @brief Run the hardware version of the transfer kernel. This requires the
@@ -74,7 +74,7 @@ class DataPreparationPipeline : public IntegrationBase {
    */
   StatusCode runHW(
       const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-      const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc);
+      const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc) const;
 
   /**
    * @brief Software version of the transfer kernel. The purse of this function
@@ -98,7 +98,7 @@ class DataPreparationPipeline : public IntegrationBase {
       int *pcTotalToT, float *pcChargeList, float *pcTotalCharge,
       float *pcEnergyLoss, char *pcIsSplit, float *pcSplitProbability1,
       float *pcSplitProbability2, int *pcLvl1a,
-      EFTrackingDataFormats::Metadata *metadata);  // mimic the tranfser kernel
+      EFTrackingDataFormats::Metadata *metadata) const;  // mimic the tranfser kernel
 
  private:
   // At this stage of development we need xAOD::Strip/PixelClusterContainer as
@@ -123,7 +123,6 @@ class DataPreparationPipeline : public IntegrationBase {
       this, "ClusterMaker", "ClusterContainerMaker",
       "tool to make cluster"};  //!< Tool handle for ClusterContainerMaker
 
-  std::unique_ptr<EFTrackingDataFormats::Metadata> m_metadata;
 };
 
 #endif  // EFTRACKING_FPGA_INTEGRATION_DATAPREPARATIONPIPELINE_H

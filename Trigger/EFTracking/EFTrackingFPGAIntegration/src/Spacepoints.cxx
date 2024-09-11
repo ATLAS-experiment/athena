@@ -20,9 +20,9 @@ StatusCode Spacepoints::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode Spacepoints::execute()
+StatusCode Spacepoints::execute(const EventContext &ctx) const
 {
-    ATH_MSG_DEBUG("In execute()");
+    ATH_MSG_DEBUG("In execute(), event slot: "<<ctx.slot());
 
     int MAX_DATA_SIZE = 46219;
 

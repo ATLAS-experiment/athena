@@ -72,9 +72,9 @@ StatusCode IntegrationBase::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode IntegrationBase::execute()
+StatusCode IntegrationBase::execute(const EventContext &ctx) const
 {
-    ATH_MSG_DEBUG("In execute()");
+    ATH_MSG_DEBUG("In execute(), event slot: "<<ctx.slot());
 
     return StatusCode::SUCCESS;
 }
