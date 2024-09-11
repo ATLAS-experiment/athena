@@ -29,6 +29,16 @@
 
 namespace CP {
     static const double muon_barrel_endcap_boundary = 1.05;
+
+    const std::map<unsigned int,int> MuonTriggerScaleFactors::m_runNumber_year = {
+        {284484,2015},
+        {311481,2016},
+        {340453,2017},
+        {364292,2018},
+        {440613,2022},
+        {456749,2023}
+    };
+
     MuonTriggerScaleFactors::MuonTriggerScaleFactors(const std::string& name) :
         asg::AsgTool(name),
         m_systFilter(),
@@ -212,7 +222,7 @@ namespace CP {
             m_replicaSet.insert(trigToy);
 
         ATH_MSG_INFO("MuonTriggerScaleFactors::initialize");
-        static const int years_to_run[6] = {2015, 2016, 2017, 2018, 2022, 2023};
+        constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023});
         for (const int &year: years_to_run) {
             ATH_CHECK(LoadTriggerMap(year));
         }
@@ -711,15 +721,15 @@ namespace CP {
 
     unsigned int MuonTriggerScaleFactors::getYear(unsigned int run) const {
       if(m_forceYear != -1){
-	return m_forceYear;
+	    return m_forceYear;
       }
-      if (run <= 284484) return 2015;
-      else if (run <= 311481) return 2016;
-      else if (run <= 340453) return 2017;
-      else if (run <= 364292) return 2018;
-      else if (run <= 440613) return 2022;
-      else if (run <= 456749) return 2023;
-      else return 2024;
+
+      int year=2050;
+      auto lower = m_runNumber_year.lower_bound(run);
+      if (lower != m_runNumber_year.end()){
+        year=lower->second;
+      }
+      return year;
     }
   
     std::string MuonTriggerScaleFactors::getDataPeriod() const {
