@@ -87,7 +87,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
 
  run RunRDOAnalysis.py \
    -i $rdo \
-   Pixel SCT 
+   Pixel SCT TRT
  echo "art-result: $? RDOAnalysis"
 
  # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
