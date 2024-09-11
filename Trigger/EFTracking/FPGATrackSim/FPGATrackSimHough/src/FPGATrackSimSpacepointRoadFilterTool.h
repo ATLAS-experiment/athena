@@ -67,6 +67,7 @@ class FPGATrackSimSpacepointRoadFilterTool : public extends<AthAlgTool, IFPGATra
         Gaudi::Property <unsigned> m_minSpacePlusPixel {this, "minSpacePlusPixel", 0, "Minimum number of '2D' hits to accept as a road"};
         Gaudi::Property <unsigned> m_minSpacePlusPixel2 {this, "minSpacePlusPixel2", 0, "Minimum number of '2D' hits to accept as a road for 2nd stage"};
         Gaudi::Property <bool> m_filtering {this, "filtering", 0, "Filter out unpaired strip hits"};
+        Gaudi::Property <bool> m_setSectors {this, "setSectors", true, "Should the bank service be used to set sectors."};
 
         ///////////////////////////////////////////////////////////////////////
         // Event Storage
