@@ -54,7 +54,7 @@ StatusCode FPGATrackSimHough1DShiftTool::initialize()
     ATH_MSG_INFO("threshold " << m_threshold.value());
     
     // Retrieve info
-    ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
+    if (m_idealGeoRoads || m_useSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
 

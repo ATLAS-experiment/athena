@@ -45,7 +45,7 @@ StatusCode FPGATrackSimEtaPatternFilterTool::initialize()
 {
     // Retrieve info
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
+    if (m_doEtaPatternConsts) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
     m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
 
     // Check inputs

@@ -57,7 +57,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
   ATH_MSG_INFO("Hit Extend: " << to_string(const_cast<std::vector<unsigned>&>(m_hitExtend_x.value())));
 
   // Retrieve info
-  ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
+  if (m_idealGeoRoads || m_useSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   m_nLayers = m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers();
 

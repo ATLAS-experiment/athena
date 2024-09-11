@@ -145,7 +145,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
         HoughTransform.traceHits = True
-        HoughTransform.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
+        HoughTransform.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
         HoughTransform.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
 
         tools.append(HoughTransform)
@@ -186,7 +186,7 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
             tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
             tool.FPGATrackSimBankSvc = result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
             tool.FPGATrackSimMappingSvc = FPGATrackSimMapping
-            tool.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
+            tool.IdealGeoRoads = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
             tool.useSpacePoints = flags.Trigger.FPGATrackSim.spacePoints
 
             tools.append(tool)
@@ -400,8 +400,9 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
-    result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
-
+    # If tracking is set to False, don't configure the bank service
+    if flags.Trigger.FPGATrackSim.tracking:
+        result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
       theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
@@ -475,6 +476,8 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
           SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
         else:
           SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
+        SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
+
         theFPGATrackSimLogicalHistProcessAlg.SPRoadFilterTool = SPRoadFilter
         theFPGATrackSimLogicalHistProcessAlg.Spacepoints = True
 

@@ -41,7 +41,7 @@ StatusCode FPGATrackSimSpacepointRoadFilterTool::initialize()
 {
     // Retrieve info
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
+    if (m_setSectors) ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
 
     // This should be done properly through the monitors, later.
     m_inputRoads = new TH1I("srft_input_roads", "srft_input_roads", 1000, -0.5, 1000-0.5);
@@ -344,10 +344,12 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::setSector(FPGATrackSimRoad& road)
     }
 
     unsigned numSpacePlusPixel = (num_spacepoints/2) + num_pixel;
-    const FPGATrackSimSectorBank* sectorbank = /*!(road.isSecondStage()) ?*/ m_FPGATrackSimBankSvc->SectorBank_1st(); //: m_FPGATrackSimBankSvc->SectorBank_2nd();
-    // Written a bit unintuitively, but the "default" should be that it's not second stage
-    // NOTE fix this when we add second stage roads back.
-    road.setSector(sectorbank->findSector(modules));
+    if (m_setSectors) {
+        const FPGATrackSimSectorBank* sectorbank = /*!(road.isSecondStage()) ?*/ m_FPGATrackSimBankSvc->SectorBank_1st(); //: m_FPGATrackSimBankSvc->SectorBank_2nd();
+        // Written a bit unintuitively, but the "default" should be that it's not second stage
+        // NOTE fix this when we add second stage roads back.
+        road.setSector(sectorbank->findSector(modules));
+    }
     return numSpacePlusPixel;
 }
 
