@@ -216,6 +216,7 @@ def FPGATrackSimDataFlowToolCfg(flags):
     DataFlowTool = CompFactory.FPGATrackSimDataFlowTool()
     DataFlowTool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
     DataFlowTool.FPGATrackSimMappingSvc =  result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
+    DataFlowTool.Chi2ndofCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     DataFlowTool.THistSvc = CompFactory.THistSvc()
     result.setPrivateTools(DataFlowTool)
     return result
@@ -310,6 +311,7 @@ def FPGATrackSimOverlapRemovalToolCfg(flags):
     OR_1st.doFastOR =flags.Trigger.FPGATrackSim.ActiveConfig.doFastOR
     OR_1st.NumOfHitPerGrouping = 5
     OR_1st.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
+    OR_1st.MinChi2 = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
     if flags.Trigger.FPGATrackSim.ActiveConfig.hough:
         OR_1st.nBins_x = flags.Trigger.FPGATrackSim.ActiveConfig.xBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.xBufferBins
         OR_1st.nBins_y = flags.Trigger.FPGATrackSim.ActiveConfig.yBins + 2 * flags.Trigger.FPGATrackSim.ActiveConfig.yBufferBins

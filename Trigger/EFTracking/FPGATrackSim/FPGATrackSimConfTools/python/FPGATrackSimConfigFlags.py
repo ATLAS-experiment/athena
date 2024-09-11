@@ -118,6 +118,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('doMissingHitsChecks', False)
     cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
+    cf.addFlag('chi2cut', 40)
 
     # second stage fitting
     cf.addFlag('secondStage', False)
