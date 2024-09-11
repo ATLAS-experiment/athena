@@ -90,7 +90,7 @@ public:
   ///////////////////////////////////////////////////////////////////
 
 protected:
-  void correctBow(const Identifier&, Amg::Vector2D& locpos, const double tanphi, const double taneta) const;
+  void correctBow(const Identifier&, Amg::Vector2D& locpos, const double tanphi, const double taneta, const EventContext& ctx) const;
 
   InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
                                              const Trk::TrackParameters&,
