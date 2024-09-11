@@ -163,9 +163,6 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
   G4VSolid* solidB(nullptr);
   // ------- Variables for Pcon and Pgon
   int nPlanes;
-  double* zPlane(nullptr);
-  double* rInner(nullptr);
-  double* rOuter(nullptr);
 
   std::string n = std::move(name);
 
@@ -255,9 +252,10 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
       if (nullptr==thePcon) throw std::runtime_error("TypeID did not match cast for pcon");
       if (n.empty()) n="G4Polycone";
       nPlanes = static_cast<int>(thePcon->getNPlanes());
-      zPlane = new double[nPlanes];
-      rInner = new double[nPlanes];
-      rOuter = new double[nPlanes];
+      // NB G4Polycone copies the contents of these arrays rather than taking ownership.
+      auto zPlane = std::make_unique<double[]>(nPlanes);
+      auto rInner = std::make_unique<double[]>(nPlanes);
+      auto rOuter = std::make_unique<double[]>(nPlanes);
       for (unsigned int index=0; index<static_cast<unsigned int>(nPlanes); index++)
         {
           zPlane[index] = thePcon->getZPlane(index);
@@ -274,9 +272,9 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
                                 thePcon->getSPhi(),
                                 thePcon->getDPhi(),
                                 nPlanes,
-                                zPlane,
-                                rInner,
-                                rOuter);
+                                zPlane.get(),
+                                rInner.get(),
+                                rOuter.get());
     }
   //
   // GeoCons
@@ -330,9 +328,10 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
       if (nullptr==thePgon) throw std::runtime_error("TypeID did not match cast for pgon");
       if (n.empty()) n="G4Polyhedra";
       nPlanes = static_cast<int>(thePgon->getNPlanes());
-      zPlane = new double[nPlanes];
-      rInner = new double[nPlanes];
-      rOuter = new double[nPlanes];
+      // NB G4Polyhedra copies the contents of these arrays rather than taking ownership.
+      auto zPlane = std::make_unique<double[]>(nPlanes);
+      auto rInner = std::make_unique<double[]>(nPlanes);
+      auto rOuter = std::make_unique<double[]>(nPlanes);
       double alpha = thePgon->getDPhi()/(2*thePgon->getNSides());  // 1/2 openning angle
       for (unsigned int index=0; index<static_cast<unsigned int>(nPlanes); index++)
         {
@@ -351,9 +350,9 @@ G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoSh
                                  thePgon->getDPhi(),
                                  thePgon->getNSides(),
                                  nPlanes,
-                                 zPlane,
-                                 rInner,
-                                 rOuter);
+                                 zPlane.get(),
+                                 rInner.get(),
+                                 rOuter.get());
     }
   //
   // GeoTrap
