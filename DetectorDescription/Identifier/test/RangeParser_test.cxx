@@ -26,7 +26,6 @@ class RangeParserFriend{
     bool parse_maximum (Range::field& field, const std::string& text, size_type& pos){ return m_rp.parse_maximum(field, text, pos);}
     bool parse_list (Range::field& field, const std::string& text, size_type& pos){return m_rp.parse_list(field, text, pos);}
     bool parse_field (Range::field& field, const std::string& text, size_type& pos){return m_rp.parse_field(field, text, pos);}
-    bool parse (Range& range, const std::string& text, size_type& pos){return m_rp.parse(range, text, pos);}
   private:
     RangeParser m_rp;
   }; 
@@ -137,6 +136,16 @@ BOOST_AUTO_TEST_CASE(RangeParser_parse_list){
   pos=0;
   BOOST_TEST(rpf.parse_list(f, exampleLar, pos) == true);
   BOOST_TEST(pos == std::string::npos);//??
+}
+
+BOOST_AUTO_TEST_CASE(RangeParser_run){
+  const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
+  Range r;
+  RangeParserFriend rpf;
+  BOOST_TEST(rpf.run(r, larExample) == true);
+  BOOST_TEST(r[2].get_mode() = Range::field::mode::enumerated);
+  BOOST_TEST(r[5].get_mode() = Range::field::mode::both_bounded);
+  BOOST_TEST(r.fields() = 7);
 }
 
 

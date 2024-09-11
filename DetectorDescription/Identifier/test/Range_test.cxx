@@ -96,6 +96,14 @@ BOOST_AUTO_TEST_CASE(RangeConst_identifier_factoryConstructors){
   BOOST_CHECK_NO_THROW(Range::const_identifier_factory f3(r1));
 }
 
+BOOST_AUTO_TEST_CASE(RangeStreamExtraction){
+  Range r;
+  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
+  std::istringstream in(larExample);
+  BOOST_CHECK_NO_THROW(in>>r);
+  BOOST_TEST(larExample == std::string(r));
+}
+
 
 
 BOOST_AUTO_TEST_SUITE_END()

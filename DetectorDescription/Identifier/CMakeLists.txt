@@ -84,15 +84,17 @@ atlas_add_test(RangeParser_test
   POST_EXEC_SCRIPT nopost.sh 
 )
 
-atlas_add_test(range_test
-  SOURCES test/Range_test.cxx
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
-  POST_EXEC_SCRIPT nopost.sh 
-)
 atlas_add_test(IdentifierField_test
   SOURCES  test/IdentifierField_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
   POST_EXEC_SCRIPT nopost.sh 
 )
+
+atlas_add_test(Range_test
+  SOURCES test/Range_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+

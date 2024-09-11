@@ -421,16 +421,26 @@ BOOST_AUTO_TEST_CASE(RangeFieldStreamExtraction){
   BOOST_CHECK_NO_THROW(bound>>f);
   BOOST_TEST(std::string(f) == "-10:100");
   f.clear();
-  std::istringstream singleValue("  5 ");
+  std::istringstream singleValue("  -5 ");
   BOOST_CHECK_NO_THROW(singleValue>>f);
-  BOOST_TEST(std::string(f) == "5");
+  BOOST_TEST(std::string(f) == "-5");
   f.clear();
-  std::istringstream list("  1, 2, 3,5 ");
+  std::istringstream list("  -1, 2, 3,5 ");
   BOOST_CHECK_NO_THROW(list>>f);
-  BOOST_TEST(std::string(f) == "1,2,3,5");
+  BOOST_TEST(std::string(f) == "-1,2,3,5");
+  f.clear();
+  std::istringstream list2("-1,2,3,5");
+  BOOST_CHECK_NO_THROW(list2>>f);
+  BOOST_TEST(std::string(f) == "-1,2,3,5");
   f.clear();
   std::istringstream nonsense("ghghghgh");
   BOOST_CHECK_THROW(nonsense>>f, std::invalid_argument);
+  f.clear();
+  std::istringstream fullString("4/1/-1,1/3/0/0:19/0:255");
+  BOOST_CHECK_NO_THROW(fullString>>f);//should parse the first field
+  BOOST_TEST(std::string(f) == "4"); //..and then the string has '4' popped
+  //BOOST_TEST(fullString.str() == "/1/-1,1/3/0/0:19/0:255");
+  
 }
 
 BOOST_AUTO_TEST_SUITE_END()
