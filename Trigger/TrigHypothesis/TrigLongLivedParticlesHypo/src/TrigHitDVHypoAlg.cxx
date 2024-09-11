@@ -211,7 +211,7 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
    float averageMu = 0;
    if( m_isMC ) {
       if( m_lumiBlockMuTool ) {
-	 averageMu = static_cast<float>(m_lumiBlockMuTool->averageInteractionsPerCrossing());
+	 averageMu = static_cast<float>(m_lumiBlockMuTool->averageInteractionsPerCrossing(context));
 	 ATH_MSG_DEBUG( "offline averageMu = " << averageMu );
       }
    }

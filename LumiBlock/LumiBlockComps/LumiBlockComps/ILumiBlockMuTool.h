@@ -13,6 +13,7 @@
 #define LUMIBLOCKCOMPS_ILumiBlockMuTool_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
 class ILumiBlockMuTool: virtual public IAlgTool {
 
@@ -20,8 +21,8 @@ class ILumiBlockMuTool: virtual public IAlgTool {
   DeclareInterfaceID(ILumiBlockMuTool, 1, 0);
 
   // Interface
-  virtual float averageInteractionsPerCrossing() const = 0;
-  virtual float actualInteractionsPerCrossing() const = 0;
+  virtual float averageInteractionsPerCrossing(const EventContext& ctx) const = 0;
+  virtual float actualInteractionsPerCrossing(const EventContext& ctx) const = 0;
 
  private:
 };

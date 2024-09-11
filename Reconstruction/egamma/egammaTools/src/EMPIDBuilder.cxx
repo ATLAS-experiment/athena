@@ -123,8 +123,8 @@ EMPIDBuilder::execute(const EventContext& ctx, xAOD::Egamma* eg) const
   double mu = -99.;
   double avg_mu = -99.;
   if (m_UselumiBlockMuTool) { //
-    mu = m_lumiBlockMuTool->actualInteractionsPerCrossing();
-    avg_mu = m_lumiBlockMuTool->averageInteractionsPerCrossing();
+    mu = m_lumiBlockMuTool->actualInteractionsPerCrossing(ctx);
+    avg_mu = m_lumiBlockMuTool->averageInteractionsPerCrossing(ctx);
     ATH_MSG_DEBUG("REGTEST: Retrieved Mu Value : " << mu);
     ATH_MSG_DEBUG("REGTEST: Average Mu Value   : " << avg_mu);
   }
