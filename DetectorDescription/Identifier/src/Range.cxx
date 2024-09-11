@@ -1818,3 +1818,23 @@ MultiRange::operator std::string () const
  
   return (result); 
 } 
+
+std::ostream & 
+operator << (std::ostream &out, const Range &r){
+  out<<std::string(r);
+  return out;
+}
+
+std::istream & 
+operator >> (std::istream &in, Range &r){
+  r.clear ();
+  for (int c{}; c!=EOF;c=in.peek()){
+    Range::field field; 
+    in>>field;
+    r.add(field);
+    if (int c = in.peek();(c == '/') or (c ==' ')){  
+      in.ignore();
+    }
+  }
+  return in;
+}

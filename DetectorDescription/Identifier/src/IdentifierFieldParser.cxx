@@ -23,7 +23,7 @@ namespace Identifier{
     char buffer[20]{};
     int i{};
     IdentifierField::element_type v{};
-    for(char c{};isDigit(is.peek()) and i<20;++i ){
+    for(int c{};isDigit(is.peek()) and i<20;++i ){
       if (c == '+') is.ignore();
       c=is.get();
       buffer[i] = c;
@@ -36,7 +36,7 @@ namespace Identifier{
   IdentifierField::element_vector
   parseStreamList(std::istream & is){
     IdentifierField::element_vector result;
-    for (char c{};(not is.eof());c=is.peek()){
+    for (int c{};(not is.eof());c=is.peek()){
       while (std::isspace(is.peek())){is.ignore();}
       if (isDigit(c)){
         if (c =='+') is.ignore();
@@ -44,6 +44,8 @@ namespace Identifier{
         result.push_back(v);
       } else if (c == ','){
         is.ignore();
+      } else if (c == '/' ){ 
+        break;
       }
     }
     return result;

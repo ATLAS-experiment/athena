@@ -46,7 +46,6 @@ namespace Identifier{
     bool parse_maximum (Range::field& field, const std::string& text, size_type& pos); 
     bool parse_list (Range::field& field, const std::string& text, size_type& pos);
     bool parse_field (Range::field& field, const std::string& text, size_type& pos);
-    bool parse (Range& range, const std::string& text, size_type& pos);
   }; 
 }
 

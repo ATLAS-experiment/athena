@@ -11,6 +11,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <bit>
+#include <iosfwd>
  
 /** 
  *    A Range describes the possible ranges for the field values of an ExpandedIdentifier 
@@ -426,6 +427,12 @@ inline Range::size_type Range::cardinalityUpTo (const int* id) const
   }
   return result;
 } 
+
+std::ostream & 
+operator << (std::ostream &out, const Range &r);
+
+std::istream & 
+operator >> (std::istream &in, Range &r);
 
 
 #endif 

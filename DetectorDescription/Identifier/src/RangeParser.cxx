@@ -5,13 +5,7 @@
 #include "src/RangeParser.h"
 #include <cstdio> //sscanf
 
-namespace Identifier{
-  bool 
-  RangeParser::run(Range& range, const std::string& text) { 
-    range.clear (); 
-    size_type pos = 0; 
-    return parse(range, text, pos); 
-  } 
+namespace Identifier{  
 
   bool 
   RangeParser::skip_spaces(const std::string& text, size_type& pos){ 
@@ -174,7 +168,9 @@ namespace Identifier{
   } 
      
   bool 
-  RangeParser::parse(Range& range, const std::string& text, size_type& pos){ 
+  RangeParser::run(Range& range, const std::string& text){
+    size_type pos = 0;
+    range.clear (); 
     bool result = true; 
     bool finished = false; 
     if (!skip_spaces (text, pos)) return (true); 
