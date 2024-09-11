@@ -39,9 +39,7 @@ StatusCode DataPreparationPipeline::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DataPreparationPipeline::execute() {
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
 
   // Retrieve the strip and pixel cluster container from the event store
   SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusters(
@@ -78,7 +76,7 @@ StatusCode DataPreparationPipeline::execute() {
     }
 
     const SG::auxid_set_t &auxid_set_pixel = inputPixelClusters->getAuxIDs();
-    for (auto id : auxid_set) {
+    for (auto id : auxid_set_pixel) {
       ATH_MSG_DEBUG("PixelClusterContainer" << SGdebug::aux_var_name(id)
                                             << " has AuxId: " << id);
     }
@@ -128,7 +126,7 @@ StatusCode DataPreparationPipeline::execute() {
 StatusCode DataPreparationPipeline::getInputClusterData(
     const xAOD::StripClusterContainer *sc,
     std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-    long unsigned int N) {
+    long unsigned int N) const{
   if (N > sc->size()) {
     ATH_MSG_ERROR("You want to get the "
                   << N << "th strip cluster, but there are only " << sc->size()
@@ -165,7 +163,7 @@ StatusCode DataPreparationPipeline::getInputClusterData(
 StatusCode DataPreparationPipeline::getInputClusterData(
     const xAOD::PixelClusterContainer *pc,
     std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
-    long unsigned int N) {
+    long unsigned int N) const {
   if (N > pc->size()) {
     ATH_MSG_ERROR("You want to get the "
                   << N << "th pixel cluster, but there are only " << pc->size()
@@ -227,11 +225,10 @@ StatusCode DataPreparationPipeline::getInputClusterData(
 StatusCode DataPreparationPipeline::runSW(
     const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
     const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
-    const EventContext &ctx) {
+    const EventContext &ctx) const {
   ATH_MSG_DEBUG("Running the software version of the kernel");
 
-  m_metadata = std::make_unique<EFTrackingDataFormats::Metadata>();
-
+  std::unique_ptr<EFTrackingDataFormats::Metadata> metadata = std::make_unique<EFTrackingDataFormats::Metadata>();
   std::vector<float> scLocalPosition(MAX_CLUSTER_NUM);
   std::vector<float> scLocalCovariance(MAX_CLUSTER_NUM);
   std::vector<unsigned int> scIdHash(MAX_CLUSTER_NUM);
@@ -272,40 +269,40 @@ StatusCode DataPreparationPipeline::runSW(
       pcOmegaY.data(), pcTotList.data(), pcTotalToT.data(), pcChargeList.data(),
       pcTotalCharge.data(), pcEnergyLoss.data(), pcIsSplit.data(),
       pcSplitProbability1.data(), pcSplitProbability2.data(), pcLvl1a.data(),
-      m_metadata.get()));
+      metadata.get()));
 
   // resize the vector to be the length of the cluster
-  scLocalPosition.resize(m_metadata->numOfStripClusters);
-  scLocalCovariance.resize(m_metadata->numOfStripClusters);
-  scIdHash.resize(m_metadata->numOfStripClusters);
-  scId.resize(m_metadata->numOfStripClusters);
-  scGlobalPosition.resize(m_metadata->numOfStripClusters * 3);
-  scRdoList.resize(m_metadata->scRdoIndexSize);
-  scChannelsInPhi.resize(m_metadata->numOfStripClusters);
+  scLocalPosition.resize(metadata->numOfStripClusters);
+  scLocalCovariance.resize(metadata->numOfStripClusters);
+  scIdHash.resize(metadata->numOfStripClusters);
+  scId.resize(metadata->numOfStripClusters);
+  scGlobalPosition.resize(metadata->numOfStripClusters * 3);
+  scRdoList.resize(metadata->scRdoIndexSize);
+  scChannelsInPhi.resize(metadata->numOfStripClusters);
 
-  pcLocalPosition.resize(m_metadata->numOfPixelClusters * 2);
-  pcLocalCovariance.resize(m_metadata->numOfPixelClusters * 2);
-  pcIdHash.resize(m_metadata->numOfPixelClusters);
-  pcId.resize(m_metadata->numOfPixelClusters);
-  pcGlobalPosition.resize(m_metadata->numOfPixelClusters * 3);
-  pcRdoList.resize(m_metadata->pcRdoIndexSize);
-  pcChannelsInPhi.resize(m_metadata->numOfPixelClusters);
-  pcChannelsInEta.resize(m_metadata->numOfPixelClusters);
-  pcWidthInEta.resize(m_metadata->numOfPixelClusters);
-  pcOmegaX.resize(m_metadata->numOfPixelClusters);
-  pcOmegaY.resize(m_metadata->numOfPixelClusters);
-  pcTotList.resize(m_metadata->pcTotIndexSize);
-  pcTotalToT.resize(m_metadata->numOfPixelClusters);
-  pcChargeList.resize(m_metadata->pcChargeIndexSize);
-  pcTotalCharge.resize(m_metadata->numOfPixelClusters);
-  pcEnergyLoss.resize(m_metadata->numOfPixelClusters);
-  pcIsSplit.resize(m_metadata->numOfPixelClusters);
-  pcSplitProbability1.resize(m_metadata->numOfPixelClusters);
-  pcSplitProbability2.resize(m_metadata->numOfPixelClusters);
-  pcLvl1a.resize(m_metadata->numOfPixelClusters);
+  pcLocalPosition.resize(metadata->numOfPixelClusters * 2);
+  pcLocalCovariance.resize(metadata->numOfPixelClusters * 2);
+  pcIdHash.resize(metadata->numOfPixelClusters);
+  pcId.resize(metadata->numOfPixelClusters);
+  pcGlobalPosition.resize(metadata->numOfPixelClusters * 3);
+  pcRdoList.resize(metadata->pcRdoIndexSize);
+  pcChannelsInPhi.resize(metadata->numOfPixelClusters);
+  pcChannelsInEta.resize(metadata->numOfPixelClusters);
+  pcWidthInEta.resize(metadata->numOfPixelClusters);
+  pcOmegaX.resize(metadata->numOfPixelClusters);
+  pcOmegaY.resize(metadata->numOfPixelClusters);
+  pcTotList.resize(metadata->pcTotIndexSize);
+  pcTotalToT.resize(metadata->numOfPixelClusters);
+  pcChargeList.resize(metadata->pcChargeIndexSize);
+  pcTotalCharge.resize(metadata->numOfPixelClusters);
+  pcEnergyLoss.resize(metadata->numOfPixelClusters);
+  pcIsSplit.resize(metadata->numOfPixelClusters);
+  pcSplitProbability1.resize(metadata->numOfPixelClusters);
+  pcSplitProbability2.resize(metadata->numOfPixelClusters);
+  pcLvl1a.resize(metadata->numOfPixelClusters);
 
   // print all strip clusters
-  for (unsigned i = 0; i < m_metadata->numOfStripClusters; i++) {
+  for (unsigned i = 0; i < metadata->numOfStripClusters; i++) {
     ATH_MSG_DEBUG("scLocalPosition[" << i << "] = " << scLocalPosition[i]);
     ATH_MSG_DEBUG("scLocalCovariance[" << i << "] = " << scLocalCovariance[i]);
     ATH_MSG_DEBUG("scIdHash[" << i << "] = " << scIdHash[i]);
@@ -318,7 +315,7 @@ StatusCode DataPreparationPipeline::runSW(
   }
 
   // print all pixel clusters
-  for (unsigned i = 0; i < m_metadata->numOfPixelClusters; i++) {
+  for (unsigned i = 0; i < metadata->numOfPixelClusters; i++) {
 
     ATH_MSG_DEBUG("pcLocalPosition[" << i << "] = " << pcLocalPosition[i * 2]
                                      << ", " << pcLocalPosition[i * 2 + 1]);
@@ -360,7 +357,7 @@ StatusCode DataPreparationPipeline::runSW(
   scAux.channelsInPhi = scChannelsInPhi;
 
   ATH_CHECK(m_clusterContainerMaker->makeStripClusterContainer(
-      ef_sc.size(), scAux, m_metadata.get(), ctx));
+      ef_sc.size(), scAux, metadata.get(), ctx));
 
   // Group data to make the pixel cluster container
   EFTrackingDataFormats::PixelClusterAuxInput pxAux;
@@ -386,13 +383,13 @@ StatusCode DataPreparationPipeline::runSW(
   pxAux.lvl1a = pcLvl1a;
 
   ATH_CHECK(m_clusterContainerMaker->makePixelClusterContainer(
-      ef_pc.size(), pxAux, m_metadata.get(), ctx));
+      ef_pc.size(), pxAux, metadata.get(), ctx));
 
   // validate output container
   SG::ReadHandle<xAOD::StripClusterContainer> outputStripClusters(
       "ITkStripClusters");
   // print the local position
-  for (unsigned i = 0; i < m_metadata->numOfStripClusters; i++) {
+  for (unsigned i = 0; i < metadata->numOfStripClusters; i++) {
     ATH_MSG_DEBUG("outputStripClusters["
                   << i << "]->localPosition<1>()(0, 0) = "
                   << outputStripClusters->at(i)->localPosition<1>());
@@ -401,7 +398,7 @@ StatusCode DataPreparationPipeline::runSW(
   SG::ReadHandle<xAOD::PixelClusterContainer> outputPixelClusters(
       "ITkPixelClusters");
   // print the local position
-  for (unsigned i = 0; i < m_metadata->numOfPixelClusters; i++) {
+  for (unsigned i = 0; i < metadata->numOfPixelClusters; i++) {
     ATH_MSG_DEBUG("outputPixelClusters["
                   << i << "]->localPosition<2>()(0, 0) = "
                   << outputPixelClusters->at(i)->localPosition<2>()(0, 0));
@@ -413,7 +410,7 @@ StatusCode DataPreparationPipeline::runSW(
 // This function is still in protoype and should be further discussed
 StatusCode DataPreparationPipeline::runHW(
     const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-    const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc) {
+    const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc) const {
   ATH_MSG_DEBUG("Running on the hardware");
 
   // Prepare host pointers for kernel output
@@ -723,7 +720,7 @@ StatusCode DataPreparationPipeline::transferSW(
     int *pcTotalToT, float *pcChargeList, float *pcTotalCharge,
     float *pcEnergyLoss, char *pcIsSplit, float *pcSplitProbability1,
     float *pcSplitProbability2, int *pcLvl1a,
-    EFTrackingDataFormats::Metadata *metadata) {
+    EFTrackingDataFormats::Metadata *metadata) const {
   // return input
   int rdoIndex_counter = 0;
 

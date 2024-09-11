@@ -23,7 +23,7 @@ class Spacepoints : public IntegrationBase
 public:
     using IntegrationBase::IntegrationBase;
     StatusCode initialize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext &ctx) const override;
 
 private:
     Gaudi::Property<std::string> m_xclbin{this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file

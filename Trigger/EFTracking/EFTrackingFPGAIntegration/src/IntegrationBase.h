@@ -13,7 +13,8 @@
 #define EFTRACKING_FPGA_INTEGRATION_INTEGRATION_BASE_H
 
 // Athena include
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+
 
 // OpenCL settings and include for Xilinx U250 accelerator card
 #define CL_HPP_CL_1_2_DEFAULT_BUILD
@@ -32,12 +33,11 @@
  * @brief The base class for the EFTracking FPGA integration development. 
  * 
  * This class contains the basic and common OpenCL setups. 
- * The base class can be changed to AthReentrantAlgorithm if needed.
  */
-class IntegrationBase : public AthAlgorithm
+class IntegrationBase : public AthReentrantAlgorithm
 {
 public:
-    using AthAlgorithm::AthAlgorithm;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /**
      * @brief Detect the OpenCL devices and prepare OpenCL context. 
@@ -49,7 +49,7 @@ public:
     /**
      * @brief Should be overriden by derived classes to perform meaningful work
     */
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext &ctx) const;
 
     /**
      * @brief Find the xclbin file and load it into the OpenCL program object
