@@ -593,16 +593,26 @@ if __name__ == "__main__":
     flags.Tracking.recoChain = [TrackingComponent.ActsChain] # another viable option is TrackingComponent.AthenaChain
     flags.Acts.doRotCorrection = False
 
-    # IDPVM flags
-    flags.PhysVal.IDPVM.doExpertOutput   = True
-    flags.PhysVal.IDPVM.doPhysValOutput  = True
-    flags.PhysVal.IDPVM.doHitLevelPlots = True
-    flags.PhysVal.IDPVM.runDecoration = True
-    flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
-    flags.PhysVal.IDPVM.doTechnicalEfficiency = False # should figure out if 'True' is needed and what's missing to enable it
-    flags.PhysVal.OutputFileName = "IDPVM.root"
+    # IDTPM flags
+    from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
+    flags = initializeIDTPMConfigFlags(flags)
+    
+    flags.PhysVal.IDTPM.Output.outputFilePrefix = "myIDTPM_CA"
+    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt"
+    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json"
+    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.Output.outputFilePrefix + '.HIST.root'
+    flags.Output.doWriteAOD_IDTPM = True
+    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.Output.outputFilePrefix + '.AOD_IDTPM.pool.root'
+    flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
+    
+    flags = initializeIDTPMTrkAnaConfigFlags(flags)
+    ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
+    flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
+    flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
+    
     ############################################
-    flags.Concurrency.NumThreads=1
+    flags.Concurrency.NumThreads=0
+    flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
@@ -659,14 +669,10 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
         #if flags.Trigger.FPGATrackSim.Hough.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = 'SpacePoints_1st')) # TODO
-
-        # Add the truth decorators
-        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
-        acc.merge(AddDecoratorCfg(flags))
-
-        # # IDPVM running
-        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
-        acc.merge(InDetPhysValMonitoringCfg(flags))
+        
+        # IDTPM running
+        from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
+        acc.merge( InDetTrackPerfMonCfg(flags) )
     
     acc.store(open('AnalysisConfig.pkl','wb'))
 
