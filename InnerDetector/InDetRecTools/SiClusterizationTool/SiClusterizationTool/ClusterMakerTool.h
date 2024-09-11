@@ -103,7 +103,8 @@ public:
                              double splitProb1,
                              double splitProb2,
                              const PixelChargeCalibCondData *calibData,
-                             const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
+                             const PixelCalib::PixelOfflineCalibData *offlineCalibData,
+                             const EventContext& ctx) const;
 
   xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelCluster& cluster,
 				       const Amg::Vector2D& localPos,
@@ -119,7 +120,8 @@ public:
                double splitProb1,
                double splitProb2,
                const PixelChargeCalibCondData *calibData,
-               const PixelCalib::PixelOfflineCalibData *offlineCalibData) const;
+               const PixelCalib::PixelOfflineCalibData *offlineCalibData,
+               const EventContext& ctx) const;
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
@@ -159,6 +161,7 @@ private:
              double splitProb2,
              const PixelChargeCalibCondData *calibData,
              const PixelCalib::PixelOfflineCalibData *offlineCalibData,
+             const EventContext& ctx,
              xAOD::PixelCluster* cluster = nullptr) const;
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout

@@ -128,7 +128,8 @@ PixelClusteringTool::makeCluster(const PixelClusteringTool::Cluster &cluster,
       0.0,
       0.0,
       calibData,
-      offlineCalibData
+      offlineCalibData,
+      Gaudi::Hive::currentContext()
 	    );
 
     return (cl != nullptr) ? StatusCode::SUCCESS : StatusCode::FAILURE;
