@@ -179,11 +179,12 @@ StatusCode TRT_RodDecoder::finalize() {
 StatusCode TRT_RodDecoder::fillCollection(
     const ROBFragment* robFrag, TRT_RDO_Container* rdoIdc,
     TRT_BSErrContainer* bsErr, DataPool<TRT_LoLumRawData>* dataItemsPool,
+    const EventContext& ctx,
     const std::vector<IdentifierHash>* vecHash) const {
   // update compression tables
   StatusCode sc;
   if (m_loadCompressTableDB)
-    sc = update();
+    sc = update(ctx);
 
   int RodBlockVersion = (robFrag->rod_version() & 0xff);
 
@@ -207,8 +208,7 @@ StatusCode TRT_RodDecoder::fillCollection(
        * This is a hack to only print once per event.
        */
 
-      const EventContext& ctx{Gaudi::Hive::currentContext()};
-      std::atomic<EventContext::ContextEvt_t>* evt = m_lastPrint.get();
+      std::atomic<EventContext::ContextEvt_t>* evt = m_lastPrint.get(ctx);
       EventContext::ContextEvt_t lastEvt = *evt;
 
       while (lastEvt != ctx.evt() &&
@@ -1446,12 +1446,12 @@ StatusCode TRT_RodDecoder::ReadCompressTableFile(const std::string&
 /*
  * Read Compression Table from DB on IOV change
  */
-StatusCode TRT_RodDecoder::update() const {
+StatusCode TRT_RodDecoder::update(const EventContext& ctx) const {
   /*
    * function to update compression table when condDB data changes:
    */
 
-  SG::ReadCondHandle<CondAttrListCollection> rst(m_CompressKey);
+  SG::ReadCondHandle<CondAttrListCollection> rst(m_CompressKey, ctx);
   const CondAttrListCollection* catrlist = *rst;
   if (!catrlist) {
     ATH_MSG_ERROR("No Compression Table found in condDB ");
