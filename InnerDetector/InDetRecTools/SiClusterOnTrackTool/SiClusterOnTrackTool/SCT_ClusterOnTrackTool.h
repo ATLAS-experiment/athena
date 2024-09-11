@@ -16,6 +16,7 @@
 #define SCT_ClusterOnTrackTool_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
@@ -60,7 +61,7 @@ public:
      of management/deletion of the  SCT_ClusterOnTrack.
  */
   virtual InDet::SCT_ClusterOnTrack* correct(
-      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
+      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
 
   /** @brief Returns a correction to be applied to the SCT cluster local x
      position in simulated events to remove a position bias introduced by the

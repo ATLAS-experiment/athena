@@ -673,7 +673,7 @@ namespace Muon {
                         ATH_MSG_WARNING(" Measurement with MDT identifier that is not a MdtDriftCircleOnTrack ");
                         continue;
                     }
-                    std::unique_ptr<Trk::RIO_OnTrack> newMdt(m_mdtRotCreator->correct(*mdt->prepRawData(), *pars));
+                    std::unique_ptr<Trk::RIO_OnTrack> newMdt(m_mdtRotCreator->correct(*mdt->prepRawData(), *pars, ctx));
                     if (!newMdt) {
                         ATH_MSG_WARNING(" Failed to recalibrate MDT ");
                         continue;

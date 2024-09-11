@@ -36,7 +36,7 @@ class TrigInDetTrackFitter: public AthAlgTool, virtual public ITrigInDetTrackFit
   TrigInDetTrackFitter( const std::string&, const std::string&, const IInterface* );
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-std::pair<Trk::Track*,Trk::Track*> fitTrack(const Trk::Track&, MagField::AtlasFieldCache&, const Trk::ParticleHypothesis& matEffects = Trk::pion, const bool addTPtoTSoS=false) const;
+std::pair<Trk::Track*,Trk::Track*> fitTrack(const Trk::Track&, MagField::AtlasFieldCache&, const EventContext& ctx, const Trk::ParticleHypothesis& matEffects = Trk::pion, const bool addTPtoTSoS=false) const;
   void fit(const TrackCollection&, TrackCollection&, const EventContext&, const Trk::ParticleHypothesis& matEffects = Trk::pion) const;
   void fit(const TrackCollection&, TrackCollection&, TrackCollection&, const EventContext&, const Trk::ParticleHypothesis& matEffects = Trk::pion, const bool addTPtoTSoS=false) const;
   StatusCode getUnbiasedResiduals(const Trk::Track&, std::vector<TrigL2HitResidual>&, const EventContext&) const;
@@ -51,7 +51,7 @@ private:
 
   void correctScale(Trk::TrkTrackState*) const;
 
-  Trk::TrackStateOnSurface* createTrackStateOnSurface(Trk::TrkBaseNode* pN, const bool) const;
+  Trk::TrackStateOnSurface* createTrackStateOnSurface(Trk::TrkBaseNode* pN, const bool, const EventContext& ctx) const;
 
   //counters
   mutable std::atomic<size_t> m_nTracksTotal;

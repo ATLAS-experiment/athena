@@ -68,7 +68,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackUniversalTool::finalize()
 ///////////////////////////////////////////////////////////////////
 
 Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackUniversalTool::correct
-(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
+(const Trk::PrepRawData& rio,const Trk::TrackParameters& TP,const EventContext& ctx) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);
   if(!DC) return nullptr;
@@ -84,10 +84,10 @@ Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackUniversalTool::correct
 
   if(distance2 > error2){
     //tube hit
-    rot=m_riontrackTube->correct(rio,TP);
+    rot=m_riontrackTube->correct(rio,TP,ctx);
   }else               {
     //precision hit
-    rot=m_riontrackDrift->correct(rio,TP);
+    rot=m_riontrackDrift->correct(rio,TP,ctx);
   }
 
   return rot;

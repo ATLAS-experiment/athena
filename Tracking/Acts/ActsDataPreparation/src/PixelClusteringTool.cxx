@@ -162,7 +162,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   InDet::SiWidth siWidth(Amg::Vector2D(rowWidth,colWidth), Amg::Vector2D(phiWidth,etaWidth));
 
   // ask for Lorentz correction, get global position
-  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash());
+  double shift = m_pixelLorentzAngleTool->getLorentzShift(element->identifyHash(), ctx);
   const Amg::Vector2D localPos = pos_acc;
   Amg::Vector2D locpos(localPos[Trk::locX]+shift, localPos[Trk::locY]);
   // find global position of element

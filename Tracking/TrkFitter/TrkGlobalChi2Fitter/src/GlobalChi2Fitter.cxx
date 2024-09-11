@@ -2248,7 +2248,7 @@ namespace Trk {
       }
 
       if (!m_broadROTcreator.empty() && (slsurf != nullptr)) {
-        rot = m_broadROTcreator->correct(*prd, param);
+        rot = m_broadROTcreator->correct(*prd, param, ctx);
       } else if (slsurf != nullptr) {
         AtaStraightLine atasl(
           slsurf->center(),
@@ -2257,7 +2257,7 @@ namespace Trk {
           param.parameters()[Trk::qOverP],
           *slsurf
         );
-        rot = m_ROTcreator->correct(*prd, atasl);
+        rot = m_ROTcreator->correct(*prd, atasl, ctx);
       } else if (plsurf != nullptr) {
         if (param.covariance() != nullptr) {
           AtaPlane atapl(
@@ -2268,7 +2268,7 @@ namespace Trk {
             *plsurf,
             AmgSymMatrix(5)(*param.covariance())
           );
-          rot = m_ROTcreator->correct(*prd, atapl);
+          rot = m_ROTcreator->correct(*prd, atapl, ctx);
         } else {
           AtaPlane atapl(
             plsurf->center(),
@@ -2277,7 +2277,7 @@ namespace Trk {
             param.parameters()[Trk::qOverP],
             *plsurf
           );
-          rot = m_ROTcreator->correct(*prd, atapl);
+          rot = m_ROTcreator->correct(*prd, atapl, ctx);
         }
       }
 
@@ -2423,9 +2423,9 @@ namespace Trk {
       const RIO_OnTrack *rot = nullptr;
 
       if (!m_broadROTcreator.empty() && prdsurf.type() == Trk::SurfaceType::Line) {
-        rot = m_broadROTcreator->correct(*prd, *hitparam);
+        rot = m_broadROTcreator->correct(*prd, *hitparam, ctx);
       } else {
-        rot = m_ROTcreator->correct(*prd, *trackparForCorrect);
+        rot = m_ROTcreator->correct(*prd, *trackparForCorrect, ctx);
       }
 
       if (rot != nullptr) {
@@ -5005,7 +5005,7 @@ namespace Trk {
 
 
         if( nsihits > 0 && it > 0 && it < m_maxitPixelROT )
-          updatePixelROTs( trajectory, a, b );
+          updatePixelROTs( trajectory, a, b, ctx);
 
         if (
           it > 0 &&
@@ -5019,7 +5019,7 @@ namespace Trk {
         ) {
           if (it != 1 || nsihits != 0 || trajectory.nDOF() <= 0 || trajectory.chi2() / trajectory.nDOF() <= 3) {
             ATH_MSG_DEBUG("Running TRT cleaner");
-            runTrackCleanerTRT(cache, trajectory, a, b, lu, runOutlier, m_trtrecal, it);
+            runTrackCleanerTRT(cache, trajectory, a, b, lu, runOutlier, m_trtrecal, it, ctx);
             if (cache.m_fittercode != FitterStatusCode::Success) {
               ATH_MSG_DEBUG("TRT cleaner failed, returning null...");
               cache.m_miniter = tmpminiter;
@@ -6031,7 +6031,8 @@ namespace Trk {
   void GlobalChi2Fitter::updatePixelROTs(
     GXFTrajectory & trajectory,
     Amg::SymMatrixX & a,
-    Amg::VectorX & b
+    Amg::VectorX & b,
+    const EventContext& evtctx
   ) const{
     if ( trajectory.numberOfSiliconHits() == 0) {
       return;
@@ -6040,8 +6041,6 @@ namespace Trk {
     if ( m_clusterSplitProbContainer.empty() ){
       return;
     }
-
-    const EventContext &evtctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(m_clusterSplitProbContainer, evtctx);
     if (!splitProbContainer.isValid()) {
@@ -6099,7 +6098,7 @@ namespace Trk {
       double newerror[5] = {-1,-1,-1,-1,-1};
       double newres[2] = {-1,-1};
 
-      newrot.reset(m_ROTcreator->correct(*prd, *trackpars));
+      newrot.reset(m_ROTcreator->correct(*prd, *trackpars, evtctx));
 
       if(!newrot)
         continue;
@@ -6157,7 +6156,8 @@ namespace Trk {
     Amg::SymMatrixX & lu_m,
     bool runOutlier,
     bool trtrecal,
-    int it
+    int it,
+    const EventContext& ctx
   ) const {
     double scalefactor = m_scalefactor;
 
@@ -6239,9 +6239,9 @@ namespace Trk {
               double distance = std::abs(std::abs(trackradius) - dcradius);
 
               if (distance < scalefactor * dcerror && (olderror > 1. || trackradius * oldradius < 0)) {
-                newrot.reset(m_ROTcreator->correct(*oldrot->prepRawData(), *state->trackParameters()));
+                newrot.reset(m_ROTcreator->correct(*oldrot->prepRawData(), *state->trackParameters(), ctx));
               } else if (distance > scalefactor * dcerror && olderror < 1.) {
-                newrot.reset(m_broadROTcreator->correct(*oldrot->prepRawData(), *state->trackParameters()));
+                newrot.reset(m_broadROTcreator->correct(*oldrot->prepRawData(), *state->trackParameters(), ctx));
               }
 
               if (newrot != nullptr) {
@@ -6480,7 +6480,7 @@ namespace Trk {
           oldtrajectory->chi2() / trajectory.nDOF() > .3 * m_chi2cut &&
           cache.m_sirecal
         ) {
-          broadrot.reset(m_broadROTcreator->correct(*prd, *trackparForCorrect));
+          broadrot.reset(m_broadROTcreator->correct(*prd, *trackparForCorrect, ctx));
         }
 
         if (broadrot) {

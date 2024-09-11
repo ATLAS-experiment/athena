@@ -18,16 +18,16 @@ references_map = {
     "s4008": "v1",
     "a913": "v10",
     # Digi
-    "d1920": "v4",
+    "d1920": "v5",
     # Overlay
-    "d1726": "v11",
-    "d1759": "v17",
+    "d1726": "v12",
+    "d1759": "v18",
     "d1912": "v6",
     # Reco
     "q442": "v61",
     "q449": "v96",
-    "q452": "v20",
-    "q454": "v30",
+    "q452": "v21",
+    "q454": "v31",
     # Derivations
     "data_PHYS_Run2": "v30",
     "data_PHYSLITE_Run2": "v16",

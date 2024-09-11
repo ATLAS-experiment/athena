@@ -16,6 +16,7 @@
 #define TRT_DriftCircleOnTrackTool_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
@@ -46,7 +47,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize  () override;
   virtual InDet::TRT_DriftCircleOnTrack* correct
-    (const Trk::PrepRawData&,const Trk::TrackParameters&) const override; 
+    (const Trk::PrepRawData&,const Trk::TrackParameters&,const EventContext& ctx = Gaudi::Hive::currentContext()) const override; 
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:

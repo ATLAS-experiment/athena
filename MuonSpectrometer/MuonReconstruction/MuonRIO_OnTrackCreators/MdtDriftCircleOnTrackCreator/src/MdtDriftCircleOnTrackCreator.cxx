@@ -406,7 +406,8 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::correct(const MdtPrepData& prd,
 }
 
 Trk::RIO_OnTrack* MdtDriftCircleOnTrackCreator::correct(const Trk::PrepRawData& prd,
-                                                        const Trk::TrackParameters& tp) const {
+                                                        const Trk::TrackParameters& tp,
+                                                        const EventContext& /*ctx*/) const {
     if (!prd.type(Trk::PrepRawDataType::MdtPrepData)){
         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Incorrect hit type: "
                       <<" Trk::PrepRawData not a MdtPrepData!! No rot created ");

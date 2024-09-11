@@ -171,7 +171,7 @@ double SCTHitEffMonAlg::getResidual(const Identifier& surfaceID,
       }
       if (surfaceID == m_sctId->wafer_id(cluster->detectorElement()->identify())) {
         const Trk::PrepRawData* rioo{dynamic_cast<const Trk::PrepRawData *>(cluster)};
-        std::unique_ptr<const Trk::RIO_OnTrack> rio{m_rotcreator->correct(*rioo, *trkParam)};
+        std::unique_ptr<const Trk::RIO_OnTrack> rio{m_rotcreator->correct(*rioo, *trkParam, Gaudi::Hive::currentContext())};
         if (not m_residualPullCalculator.empty()) {
           std::optional<Trk::ResidualPull> residualPull{m_residualPullCalculator->residualPull(rio.get(), trkParam,
                                                                                                Trk::ResidualPull::Unbiased)};

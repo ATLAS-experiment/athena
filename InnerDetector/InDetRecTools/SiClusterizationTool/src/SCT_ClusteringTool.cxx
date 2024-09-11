@@ -656,7 +656,7 @@ namespace InDet {
     // when this is the case here, and set hitsInThirdTimeBin to zero later on
     //
     double iphipitch  = 1./element->phiPitch();
-    double shift = m_lorentzAngleTool->getLorentzShift(idHash);
+    double shift = m_lorentzAngleTool->getLorentzShift(idHash,ctx);
     double stripPitch = design->stripPitch();
     bool badStripInClusterOnThisModuleSide = (cache.idGroups.size() != cache.tbinGroups.size());
     bool rotate = (element->design().shape() == InDetDD::Trapezoid || element->design().shape() == InDetDD::Annulus);

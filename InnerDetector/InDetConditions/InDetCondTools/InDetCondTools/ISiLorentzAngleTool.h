@@ -34,7 +34,7 @@ public:
 
   /** Get the Lorentz angle shift in the local x (phiDist) direction
       Assumes the center of the detector and is generally cached. */
-  virtual double getLorentzShift(const IdentifierHash& elementHash) const = 0;
+  virtual double getLorentzShift(const IdentifierHash& elementHash, const EventContext& ctx) const = 0;
 
   /** As above, but provide the local position. 
       More accurate but slower */
@@ -50,7 +50,7 @@ public:
 
   /** Get tan af the Lorentz angle in the local x (phiDist) direction
       Assumes the center of the detector and is generally cached. */
-  virtual double getTanLorentzAngle(const IdentifierHash& elementHash) const = 0;
+  virtual double getTanLorentzAngle(const IdentifierHash& elementHash, const EventContext& ctx) const = 0;
 
   /** As above, but provide the local position. 
       More accurate but slower. */

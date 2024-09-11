@@ -141,13 +141,18 @@ SCT_ConditionsSummaryTool::getDetectorElementStatus(const EventContext& ctx,
 }
 
 bool 
-SCT_ConditionsSummaryTool::isGood(const IdentifierHash& /*elementHash*/, const Identifier& elementId, const EventContext& ctx) const {
+SCT_ConditionsSummaryTool::isGood(const IdentifierHash& /*elementHash*/, const Identifier& elementId, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* /*cacheEntry*/) const {
   if (not m_noReports) {
     for (const ToolHandle<ISCT_ConditionsTool>& tool: m_toolHandles) {
       if (tool->canReportAbout(InDetConditions::SCT_STRIP) and (not tool->isGood(elementId, ctx))) return false;
     } 
   }
   return true;
+}
+
+IInDetConditionsTool::IDCCacheEntry* SCT_ConditionsSummaryTool::getCacheEntryOut(const EventContext& /*ctx*/) const{
+  IDCCacheEntry* vector{nullptr};
+  return vector;
 }
 
 double 
@@ -158,26 +163,27 @@ SCT_ConditionsSummaryTool::goodFraction(const IdentifierHash& /*elementHash*/, c
 }
 
 bool
-SCT_ConditionsSummaryTool::hasBSError(const IdentifierHash& /*elementHash*/, const EventContext& /*ctx*/) const {
+SCT_ConditionsSummaryTool::hasBSError(const IdentifierHash& /*elementHash*/, const EventContext& /*ctx*/, const IInDetConditionsTool::IDCCacheEntry* /*cacheEntry*/) const {
   ATH_MSG_WARNING("hasBSError() is not implemented for SCT_ConditionsSummaryTool");
   return true;
 }
 
 bool
-SCT_ConditionsSummaryTool::hasBSError(const IdentifierHash& /*elementHash*/, Identifier /*elementId*/, const EventContext& /*ctx*/) const {
+SCT_ConditionsSummaryTool::hasBSError(const IdentifierHash& /*elementHash*/, Identifier /*elementId*/, const EventContext& /*ctx*/, const IInDetConditionsTool::IDCCacheEntry* /*cacheEntry*/) const {
   ATH_MSG_WARNING("hasBSError() is not implemented for SCT_ConditionsSummaryTool");
   return true;
 }
 
 uint64_t
-SCT_ConditionsSummaryTool::getBSErrorWord(const IdentifierHash& /*moduleHash*/, const EventContext& /*ctx*/) const {
+SCT_ConditionsSummaryTool::getBSErrorWord(const IdentifierHash& /*moduleHash*/, const EventContext& /*ctx*/, const IInDetConditionsTool::IDCCacheEntry* /*cacheEntry*/) const {
   ATH_MSG_WARNING("getBSErrorWord() is not implemented for SCT_ConditionsSummaryTool");
   return 0;
 }
 
 uint64_t
-SCT_ConditionsSummaryTool::getBSErrorWord(const IdentifierHash& /*moduleHash*/, const int /*index*/, const EventContext& /*ctx*/) const {
+SCT_ConditionsSummaryTool::getBSErrorWord(const IdentifierHash& /*moduleHash*/, const int /*index*/, const EventContext& /*ctx*/, const IInDetConditionsTool::IDCCacheEntry* /*cacheEntry*/) const {
   ATH_MSG_WARNING("getBSErrorWord() is not implemented for SCT_ConditionsSummaryTool");
   return 0;
 }
+
 

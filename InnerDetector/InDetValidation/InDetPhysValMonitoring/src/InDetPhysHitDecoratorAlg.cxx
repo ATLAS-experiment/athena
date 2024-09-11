@@ -314,7 +314,7 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
                             double bowphi = atan2(trkphicomp,trknormcomp);
                             double boweta = atan2(trketacomp,trknormcomp);
 
-                            float tanl = m_lorentzAngleTool->getTanLorentzAngle(element->identifyHash());
+                            float tanl = m_lorentzAngleTool->getTanLorentzAngle(element->identifyHash(), Gaudi::Hive::currentContext());
                             int readoutside = element->design().readoutSide();
 
                             // map the angles of inward-going tracks onto [-PI/2, PI/2]
