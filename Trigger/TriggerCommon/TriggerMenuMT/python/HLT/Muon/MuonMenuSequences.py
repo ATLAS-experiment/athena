@@ -163,7 +163,7 @@ def mul2mtSAOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 ### ************* Step2  ************* ###
 #-----------------------------------------------------#
 
-def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
+def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False, trackingMode = "FTF"):
     ### set the EVCreator ###
     ### get ID tracking and muComb reco sequences ###
     from .MuonRecoSequences  import muFastRecoSequenceCfg, muCombRecoSequenceCfg, muonIDFastTrackingSequenceCfg, muonIDCosmicTrackingSequenceCfg, isCosmic
@@ -196,7 +196,7 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
     if isCosmic(flags):
         recoCB.mergeReco(muonIDCosmicTrackingSequenceCfg( flags, viewName+"RoIs" , "cosmics", extraLoads, extraLoads ))
     else:
-        recoCB.mergeReco(muonIDFastTrackingSequenceCfg(flags, viewName+"RoIs", "muon", extraLoads, extraLoads ))
+        recoCB.mergeReco(muonIDFastTrackingSequenceCfg(flags, viewName+"RoIs", "muon", extraLoads, extraLoads, trackingMode = trackingMode ))
 
     # for nominal muComb
     seql2cb = seqAND("l2muCombFilterSequence{}".format("_probe" if is_probe_leg else ""))
@@ -256,14 +256,15 @@ def muCombAlgSequenceCfg(flags, selCAName="", is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombSequenceGenCfg(flags, is_probe_leg=False):
+def muCombSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"):
 
-    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
+    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg, trackingMode = trackingMode)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlgCfg, TrigmuCombHypoToolFromDict
     l2cbHypo = TrigmuCombHypoAlgCfg( flags,
                                      name = 'TrigL2MuCBHypoAlg',
-                                     MuonL2CBInfoFromMuCombAlg = sequenceOut)
+                                     MuonL2CBInfoFromMuCombAlg = sequenceOut,
+                                     )
 
     selAcc.addHypoAlgo(l2cbHypo)
     
@@ -275,15 +276,16 @@ def muCombSequenceGenCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def mul2IOOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
+def mul2IOOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"):
 
 
-    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "IO", is_probe_leg)
+    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "IO", is_probe_leg, trackingMode = trackingMode)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlgCfg, Trigl2IOHypoToolwORFromDict
     l2cbHypo = TrigmuCombHypoAlgCfg( flags,
                                      name = 'TrigL2MuCBIOHypoAlg',
-                                     MuonL2CBInfoFromMuCombAlg = sequenceOut+"IOmode")
+                                     MuonL2CBInfoFromMuCombAlg = sequenceOut+"IOmode",
+                                     )
 
     selAcc.addHypoAlgo(l2cbHypo)
     
@@ -328,7 +330,7 @@ def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombLRTSequenceGenCfg(flags, is_probe_leg=False):
+def muCombLRTSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"):
 
     (selAcc, sequenceOut) = muCombLRTAlgSequenceCfg(flags, is_probe_leg)
 
@@ -336,7 +338,8 @@ def muCombLRTSequenceGenCfg(flags, is_probe_leg=False):
     l2cbHypo = TrigmuCombHypoAlgCfg( flags,
                                      name = 'TrigL2MuCBLRTHypoAlg',
                                      MuonL2CBInfoFromMuCombAlg = sequenceOut,
-                                     RoILinkName = "l2lrtroi")
+                                     RoILinkName = "l2lrtroi",
+                                     )
 
     selAcc.addHypoAlgo(l2cbHypo)
     
@@ -348,14 +351,15 @@ def muCombLRTSequenceGenCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muCombOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
+def muCombOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"):
 
-    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg)
+    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "", is_probe_leg, trackingMode = trackingMode)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlgCfg, TrigmuCombHypoToolwORFromDict
     l2cbHypo = TrigmuCombHypoAlgCfg( flags,
                                      name = 'TrigL2MuCBHypoAlg',
-                                     MuonL2CBInfoFromMuCombAlg = sequenceOut)
+                                     MuonL2CBInfoFromMuCombAlg = sequenceOut,
+                                     )
 
     selAcc.addHypoAlgo(l2cbHypo)
     
@@ -366,14 +370,15 @@ def muCombOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
  
 
 @AccumulatorCache
-def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
+def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"):
 
-    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "mt", is_probe_leg)
+    (selAcc, sequenceOut) = muCombAlgSequenceCfg(flags, "mt", is_probe_leg, trackingMode = trackingMode)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigmuCombHypoAlgCfg, Trigl2mtCBHypoToolwORFromDict
     l2cbHypo = TrigmuCombHypoAlgCfg( flags,
                                      name = 'TrigL2mtMuCBHypoAlg',
-                                     MuonL2CBInfoFromMuCombAlg = sequenceOut+"l2mtmode")
+                                     MuonL2CBInfoFromMuCombAlg = sequenceOut+"l2mtmode",
+                                    )
 
     selAcc.addHypoAlgo(l2cbHypo)
     
