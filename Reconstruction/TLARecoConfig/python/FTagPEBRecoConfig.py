@@ -26,7 +26,7 @@ def FTagPEBJetTagConfig(
         )
     )
 
-    trainingMap = GetTaggerTrainingMap(flags, 'AntiKt4EMPFlow')
+    trainingMap = GetTaggerTrainingMap(flags, jet_collection)
 
     ca.merge(
         BTagAlgsCfg(
