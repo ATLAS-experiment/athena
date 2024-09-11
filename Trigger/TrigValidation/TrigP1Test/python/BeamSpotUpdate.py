@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Module to test beamspot updates using a local sqlite file. Two steps are necessary:
@@ -194,3 +194,5 @@ if __name__ == '__main__':
          break
       newevt = modify(event)
       output.write(newevt)
+
+   del output  # explicitly close file (ADHI-4985)
