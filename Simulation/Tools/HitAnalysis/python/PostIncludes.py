@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Adding SiHitValidation for whichever parts of ITk are running
 def ITkHitAnalysis(flags):
@@ -41,7 +41,13 @@ def IDHitAnalysis(flags):
         result.merge(SCTHitAnalysisCfg(flags))
     if flags.Detector.EnableTRT:
         result.merge(TRTHitAnalysisCfg(flags))
- 
-    result.getService("THistSvc").Output = ["SiHitAnalysis DATAFILE='SiHitValid.root' OPT='RECREATE'"]
+
+    result.getService("THistSvc").Output = []
+    if flags.Detector.EnablePixel or flags.Detector.EnableSCT:
+        result.getService("THistSvc").Output += [
+            "SiHitAnalysis DATAFILE='SiHitValid.root' OPT='RECREATE'"]
+    if flags.Detector.EnableTRT:
+        result.getService("THistSvc").Output += [
+            "TRTHitAnalysis DATAFILE='TRTHitValid.root' OPT='RECREATE'"]
  
     return result
