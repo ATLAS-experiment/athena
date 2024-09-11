@@ -305,3 +305,7 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
+
+atlas_add_citest( TriggerConfigFlags
+   SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
+   POST_EXEC_SCRIPT nopost.sh )
