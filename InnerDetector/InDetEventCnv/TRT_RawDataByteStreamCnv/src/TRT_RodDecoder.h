@@ -74,6 +74,7 @@ public:
 				      TRT_RDO_Container* rdoIdc,
 				      TRT_BSErrContainer* bserr,
               DataPool<TRT_LoLumRawData>* dataItemsPool,
+              const EventContext& ctx,
 				      const std::vector<IdentifierHash>* vecHash = 0) const override;
 
 
@@ -136,7 +137,7 @@ public:
 
    // This replaces the IOVCALLBACK
    SG::ReadCondHandleKey<CondAttrListCollection> m_CompressKey{this,"keyName","/TRT/Onl/ROD/Compress","in-key"};
-   StatusCode update() const;
+   StatusCode update(const EventContext& ctx) const;
 
    //! private methods
 private:

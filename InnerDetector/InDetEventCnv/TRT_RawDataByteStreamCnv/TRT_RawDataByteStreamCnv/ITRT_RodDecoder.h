@@ -30,6 +30,7 @@ public:
 				      TRT_RDO_Container* rdoIdc,
 				      TRT_BSErrContainer* bsErr,
               DataPool<TRT_LoLumRawData>* dataItemsPool,
+              const EventContext& ctx,
 				      const std::vector<IdentifierHash>* vecHash = 0 ) const = 0;
 
 
