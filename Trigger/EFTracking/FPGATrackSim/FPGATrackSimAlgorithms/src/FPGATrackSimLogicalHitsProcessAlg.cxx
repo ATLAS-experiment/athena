@@ -318,16 +318,16 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st, nnMap));
         }
         else {
-	  ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
-	  float bestchi2 = 1.e15;
-	  for (const FPGATrackSimTrack& track : tracks_1st) {
-	    float chi2 = track.getChi2ndof();
-	    if (chi2 < bestchi2) bestchi2 = chi2;
-	    auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all",chi2);
-	    Monitored::Group(m_monTool,mon_chi2_1st);	    
-	  }
-	  auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st",bestchi2);
-	  Monitored::Group(m_monTool,mon_best_chi2_1st);
+            ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+            float bestchi2 = 1.e15;
+            for (const FPGATrackSimTrack& track : tracks_1st) {
+                float chi2 = track.getChi2ndof();
+                if (chi2 < bestchi2) bestchi2 = chi2;
+                auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all", chi2);
+                Monitored::Group(m_monTool, mon_chi2_1st);
+            }
+            auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st",bestchi2);
+            Monitored::Group(m_monTool,mon_best_chi2_1st);
         }
     }
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
@@ -339,13 +339,19 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
     for (auto track : tracks_1st) {
+        // This threshold probably shouldn't be hardcoded?
         if (track.getChi2ndof() < 10) {
             m_nTracksChi2Tot++;
-	    if (track.passedOR()) {
-	        ntrackOLRChi2++;
-	        m_nTracksChi2OLRTot++;
-	    }
-	}
+            if (track.passedOR()) {
+                ntrackOLRChi2++;
+                m_nTracksChi2OLRTot++;
+
+                // For tracks passing overlap removal-- record the chi2 so we can figure out the right cut.
+                float chi2olr = track.getChi2ndof();
+                auto mon_chi2_1st_or = Monitored::Scalar<float>("chi2_1st_afterOLR", chi2olr);
+                Monitored::Group(m_monTool, mon_chi2_1st_or);
+            }
+        }
     }
     auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLRChi2);
     Monitored::Group(m_monTool,mon_ntracks_1st_olr);

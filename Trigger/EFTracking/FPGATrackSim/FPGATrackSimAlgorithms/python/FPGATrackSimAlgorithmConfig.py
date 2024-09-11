@@ -264,6 +264,7 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     monTool.defineHistogram('nroads_1st_postfilter', path='EXPERT', type='TH1I', title='nroads_1st_postfilter', xbins=nbin, xmin=low, xmax=high)    
     monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=20, xmin=-0.5, xmax = 19.5)
     monTool.defineHistogram('chi2_1st_all', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('chi2_1st_afterOLR', path='EXPERT', type='TH1F', title='chi2_1st_afterOLR', xbins=nbin, xmin=0, xmax=10.0)
     monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
     monTool.defineHistogram('ntrack_1st_afterOLR', path='EXPERT', type='TH1F', title='ntrack_1st_afterOLR', xbins=nbin, xmin=low, xmax=high)
