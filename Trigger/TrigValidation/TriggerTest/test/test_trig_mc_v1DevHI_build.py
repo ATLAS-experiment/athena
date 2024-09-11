@@ -32,8 +32,7 @@ refcomp = CheckSteps.ChainCompStep("CountRefComp")
 refcomp.input_file = 'ref_mc_v1DevHI_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TriggerTest/share
-# TODO: put back to True when we'll start preparing for HI data (and put back this test in the CI)
-refcomp.required = False # Final exit code depends on this step
+refcomp.required = True # Final exit code depends on this step
 CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
 
 import sys
