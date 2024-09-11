@@ -73,7 +73,7 @@ StatusCode TrigEventInfoRecorderAlg::decorateWithEventInfo(const EventContext& c
     // in StoreGate, then decorate the TrigComposite Object passed down from the execute
 
     // Average Interactions per bunch crossing
-    float avgmu = m_lumiBlockMuTool->averageInteractionsPerCrossing();
+    float avgmu = m_lumiBlockMuTool->averageInteractionsPerCrossing(context);
     
     double rho=0, rho_EMT = 0;
     const xAOD::EventShape * eventShape = 0;

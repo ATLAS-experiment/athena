@@ -137,7 +137,7 @@ StatusCode TrigEgammaFastElectronHypoAlg::execute( const EventContext& context )
       ITrigEgammaFastElectronHypoTool::ElectronInfo info(d, el, cl, rings, clusterDecisionIDs);
 
 
-      float avgmu = m_lumiBlockMuTool->averageInteractionsPerCrossing();
+      float avgmu = m_lumiBlockMuTool->averageInteractionsPerCrossing(context);
       info.valueDecorator["avgmu"] = avgmu;
 
       // Decorate the info object with NN ringer decision

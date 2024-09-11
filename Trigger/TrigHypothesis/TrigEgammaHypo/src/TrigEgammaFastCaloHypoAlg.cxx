@@ -98,7 +98,7 @@ StatusCode TrigEgammaFastCaloHypoAlg::execute( const EventContext& context ) con
 
     ITrigEgammaFastCaloHypoTool::FastClusterInfo info(d, roi, emCluster, ringsCluster , previousDecision);
 
-    float avgmu   = m_lumiBlockMuTool->averageInteractionsPerCrossing();
+    float avgmu   = m_lumiBlockMuTool->averageInteractionsPerCrossing(context);
     info.valueDecorator["avgmu"] = avgmu;
     
     // Decorate the info object with NN ringer decision. if rings size is zero, this object is a dummy and

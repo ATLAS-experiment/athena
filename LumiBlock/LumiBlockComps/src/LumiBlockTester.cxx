@@ -65,8 +65,8 @@ LumiBlockTester::execute (const EventContext& ctx)  const
 
   ATH_MSG_INFO( "LB: " << lumiblock << " BCID: " << bcid << " <mu>: " << avgmu << " mu: " << instmu << " livefraction: " << live << " lumiavg livefraction: " << lumilive );
 
-  avgmu = m_muTool->averageInteractionsPerCrossing();
-  instmu = m_muTool->actualInteractionsPerCrossing();
+  avgmu = m_muTool->averageInteractionsPerCrossing(ctx);
+  instmu = m_muTool->actualInteractionsPerCrossing(ctx);
   ATH_MSG_INFO( "From muTool - <mu>: " << avgmu << " mu: " << instmu);
 
   instmu = eventInfo->actualInteractionsPerCrossing();
