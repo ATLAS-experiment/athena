@@ -31,8 +31,6 @@ theApp.TopAlg = ["PythiaB" , "EvtLbPolDecay",  "LambdabFilter"]
 theApp.EvtMax = 1000
 EventSelector.RunNumber   = 1
 EventSelector.FirstEvent  = 1
-# Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
-MessageSvc.OutputLevel               = 3
 #--------------------------------------------------------------                                                                                                                     #              PARAMETERS  SPECIFIC  TO   PYTHIAB
 #--------------------------------------------------------------
 include( "EvtGen_i/StopPytWeakBdecays.py" )

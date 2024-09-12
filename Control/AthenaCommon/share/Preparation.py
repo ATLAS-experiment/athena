@@ -25,7 +25,8 @@ import AthenaCommon.SystemOfUnits as Units
 
 ### Athena configuration -----------------------------------------------------
 from AthenaCommon import CfgMgr
-from AthenaCommon.AppMgr import theApp
+from AthenaCommon.AppMgr import ( athAlgSeq, theApp, ToolSvc, theAuditorSvc,
+                                  ServiceMgr, ServiceMgr as svcMgr )
 from AthenaCommon.Logging import log
 
 # load all entries so far into the workspace of include()
@@ -34,7 +35,6 @@ if opts.interactive:                                 # i.e. interactive
    theApp.EventLoop = "PyAthenaEventLoopMgr"         # from AthenaServices
 
 ## create the application manager and start in a non-initialised state
-from AthenaCommon.AppMgr import ToolSvc, ServiceMgr, theAuditorSvc
 theApp.setOutputLevel( globals()[opts.loglevel] )
 theApp._opts = opts                                     # FIXME
 
@@ -43,8 +43,7 @@ if not "POOL_OUTMSG_LEVEL" in os.environ:
    os.environ[ "POOL_OUTMSG_LEVEL" ] = str(globals()[opts.loglevel])
 
 ## basic job configuration
-include( "AthenaCommon/Atlas.UnixStandardJob.py" )
-include.block( "AthenaCommon/Atlas.UnixStandardJob.py" )
+import AthenaCommon.AtlasUnixStandardJob
 
 from PyUtils.Helpers import ROOT6Setup
 ROOT6Setup(batch=not opts.interactive)

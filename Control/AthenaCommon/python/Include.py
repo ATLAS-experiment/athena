@@ -42,8 +42,7 @@ excludeTracePattern = [
    ]
 
 # unless they are explicitly included here:
-includeTracePattern = [ '*/AthenaCommon/Bootstrap.py',
-   '*/AthenaCommon/Atlas.UnixStandardJob.py' ]
+includeTracePattern = [ '*/AthenaCommon/Bootstrap.py' ]
 
 
 ### logging and messages -----------------------------------------------------
