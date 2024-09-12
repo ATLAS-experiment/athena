@@ -50,7 +50,7 @@ def overlayTestFlags(flags, args):
     if args.disableTruth:
         flags.Digitization.EnableTruth = False
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Overlay
     if args.data:
@@ -58,7 +58,7 @@ def overlayTestFlags(flags, args):
         flags.Input.Files = defaultTestFiles.HITS_DATA_OVERLAY
         flags.Input.SecondaryFiles = defaultTestFiles.RAW_BKG
         flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
-        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-10"
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
         flags.IOVDb.DatabaseInstance = "CONDBR2"
         flags.Overlay.DataOverlay = True
         from Campaigns import DataOverlayPPTest
@@ -68,19 +68,19 @@ def overlayTestFlags(flags, args):
         if args.run is LHCPeriod.Run2:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
-            flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-12"
+            flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
             from Campaigns import MC20e
             MC20e(flags)
         elif args.run is LHCPeriod.Run3:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
-            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-09"
+            flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
             from Campaigns import MC21a
             MC21a(flags)
         elif args.run is LHCPeriod.Run4:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
-            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN4-01"
+            flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
             from Campaigns import PhaseIIPileUp200
             PhaseIIPileUp200(flags)
         else:
