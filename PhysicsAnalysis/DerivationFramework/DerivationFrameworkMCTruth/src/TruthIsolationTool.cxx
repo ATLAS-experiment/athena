@@ -125,7 +125,7 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
         // Do not include non-interacting particles, and this particle is non-interacting
         continue;
       }
-      if (HepMC::uniqueID(cand_part) != HepMC::uniqueID(particle)) {
+      if (!HepMC::is_same_particle(cand_part,particle)) {
         //iteration over sorted cone sizes
         for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
           const float dr2 = calculateDeltaR2(cand_part, part_eta, part_phi);

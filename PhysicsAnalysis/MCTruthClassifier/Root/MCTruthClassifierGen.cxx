@@ -53,9 +53,8 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr theGenPart
     ATH_MSG_WARNING( " Invalid ReadHandle for xAODTruthParticleLinkVector with key: " << truthParticleLinkVecReadHandle.key());
     return std::make_pair(partType, partOrig);
   }
-  const int theUID = HepMC::uniqueID(theGenPart);
   for (const auto *const entry : *truthParticleLinkVecReadHandle) {
-    if (entry->first.isValid() && entry->second.isValid() && HepMC::uniqueID(entry->first) == theUID) {
+    if (entry->first.isValid() && entry->second.isValid() && HepMC::is_same_particle(entry->first,theGenPart)) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
       if (!theGenPart || !truthParticle ||
           theGenPart->pdg_id() != truthParticle->pdgId() ||
@@ -265,7 +264,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   }
 
   // to resolve Sherpa loop
-  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert)) samePart = true;
+  if (mothOriVert && HepMC::is_same_vertex(mothOriVert,partOriVert)) samePart = true;
   //
 
   if ((abs(motherPDG) == 13 || abs(motherPDG) == 15 || abs(motherPDG) == 24) && mothOriVert != nullptr && !samePart) {
@@ -487,7 +486,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (HepMC::uniqueID(pout) != HepMC::uniqueID(pin)) continue;
+        if (!HepMC::is_same_particle(pout,pin)) continue;
         if (MC::isElectron(pout)) NumOfEleLoop++;
         if (std::abs(pin->pdgId()) == 12) NumOfEleNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -730,7 +729,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       for (const auto & pin: partOriVert->particles_in()) {
         if (!pout) continue;
         if (!pin) continue;
-        if (HepMC::uniqueID(pout) == HepMC::uniqueID(pin)) {
+        if (HepMC::is_same_particle(pout,pin)) {
           if (std::abs(pout->pdg_id()) == 13) NumOfMuLoop++;
           if (std::abs(pout->pdg_id()) == 14) NumOfMuNeuLoop++;
           if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -917,7 +916,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (HepMC::uniqueID(pout) != HepMC::uniqueID(pin)) continue;
+        if (!HepMC::is_same_particle(pout,pin)) continue;
         if (std::abs(pout->pdgId()) == 15) NumOfTauLoop++;
         if (std::abs(pout->pdgId()) == 16) NumOfTauNeuLoop++;
         if (MC::isSMLepton(pout)) NumOfLepLoop++;
@@ -1178,7 +1177,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (HepMC::uniqueID(pout) == HepMC::uniqueID(pin) && MC::isPhoton(pout)) NumOfPhtLoop++;
+        if (HepMC::is_same_particle(pout,pin) && MC::isPhoton(pout)) NumOfPhtLoop++;
         if (NumOfPhtLoop == 1) return SinglePhot;
       }
     }
@@ -1235,7 +1234,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 
   // to resolve Sherpa loop
   bool samePart = false;
-  if (mothOriVert && HepMC::uniqueID(mothOriVert) == HepMC::uniqueID(partOriVert)) samePart = true;
+  if (mothOriVert && HepMC::is_same_vertex(mothOriVert,partOriVert)) samePart = true;
   //
   if ((abs(motherPDG) == nuFlav || abs(motherPDG) == 15 || MC::isW(motherPDG)) && mothOriVert != nullptr &&
       !samePart) {
@@ -1422,7 +1421,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       if (!pout) continue;
       for (const auto *const pin: partOriVert->particles_in()) {
         if (!pin) continue;
-        if (HepMC::uniqueID(pin) == HepMC::uniqueID(pout)) continue;
+        if (HepMC::is_same_particle(pin,pout)) continue;
         int apdgid = abs(pout->pdgId());
         if (apdgid == 12 || apdgid == 14 || apdgid == 16) NumOfNeuLoop++;
         if (apdgid == 11 || apdgid == 13 || apdgid == 15) NumOfLepLoop++;

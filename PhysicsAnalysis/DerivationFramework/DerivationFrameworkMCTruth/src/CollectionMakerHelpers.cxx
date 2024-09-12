@@ -60,7 +60,7 @@ int DerivationFramework::CollectionMakerHelpers::addTruthParticle( const xAOD::T
       for (size_t p=0;p<partCont->size();++p){
         // Was it a hit?
         const xAOD::TruthParticle *theParticle = (*partCont)[p];
-        if (HepMC::uniqueID(theParticle) == HepMC::uniqueID(&oldPart)) return p;
+        if (HepMC::is_same_particle(theParticle,&oldPart)) return p;
       } // Look through the old container
     } // Found it in the old container
     // Now we have seen it

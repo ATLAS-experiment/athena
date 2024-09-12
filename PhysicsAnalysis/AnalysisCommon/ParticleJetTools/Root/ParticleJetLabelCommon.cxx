@@ -31,20 +31,15 @@ namespace ParticleJetTools {
   // minimal modification
   // --------------------------------------------------------------
 
-  // TODO
-  // can we do better by only looking at hadrons?
-  inline bool isChild
-  ( const xAOD::TruthParticle* p
-    , const xAOD::TruthParticle* c
-    ) {
+  inline bool isChild( const xAOD::TruthParticle* p, const xAOD::TruthParticle* c) {
 
-    if ( HepMC::uniqueID(p) == HepMC::uniqueID(c) ) { return false; }
+    if ( HepMC::is_same_particle(p,c) ) { return false; }
 
     for (size_t iC = 0; iC < p->nChildren(); iC++) {
       const xAOD::TruthParticle* cc = p->child(iC);
       if (!cc) { continue; }
 
-      if ( HepMC::uniqueID(cc) == HepMC::uniqueID(c) ) { return true; }
+      if ( HepMC::is_same_particle(cc,c) ) { return true; }
 
       if (isChild(cc, c)) { return true; }
     }

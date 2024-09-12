@@ -41,7 +41,7 @@ xAOD::TruthParticle* getEgammaTruthParticle(
     return nullptr;
   }
   for (auto egammaTruth : egammaTruthContainer) {
-    if (HepMC::uniqueID(truth) == HepMC::uniqueID(*egammaTruth)) {
+    if (HepMC::is_same_particle(truth,*egammaTruth)) {
       return egammaTruth;
     }
   }

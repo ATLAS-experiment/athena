@@ -87,7 +87,7 @@ int DerivationFramework::TruthLinkRepointTool::find_match(const xAOD::TruthParti
   if (!p) return -1;
   // Look through the mini-collection
   for (int i=0;i<int(c->size());++i){
-    if (c->at(i) && HepMC::uniqueID(p) == HepMC::uniqueID(c->at(i))) return i;
+    if (c->at(i) && HepMC::is_same_particle(p,c->at(i))) return i;
   }
   // Note: just fine if it wasn't in the mini-collection
   return -1;

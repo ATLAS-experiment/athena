@@ -107,7 +107,7 @@ bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle) con
     for (HepMC::GenVertex::particle_iterator it = particle.production_vertex()->particles_begin(HepMC::parents);
                                              it != particle.production_vertex()->particles_end(HepMC::parents); ++it){
       // Loop breaker
-      if ( HepMC::uniqueID(*it) == HepMC::uniqueID(particle) ) continue;
+      if ( HepMC::is_same_particle(*it,particle) ) continue;
       // Check this particle
       vertices.clear();
       bool parent_all_clear = pass( **it , vertices );
