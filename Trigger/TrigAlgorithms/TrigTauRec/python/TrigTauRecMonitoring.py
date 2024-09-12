@@ -1,150 +1,114 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def tauMonitoringCaloOnlyMVA(flags):
-   monTool = GenericMonitoringTool(flags, 'MonTool')
-  
-   monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title="CaloMVA Track Errors; nRoIs; nEntries", xbins=2, xmin=-0.5, xmax=1.5) 
-   monTool.defineHistogram('calo_errors', path='EXPERT', type='TH1F', title="CaloMVA Calo Errors; nRoIs; nEntries", xbins=10, xmin=-0.5, xmax=9.5)
-   monTool.defineHistogram('mEflowApprox', path="EXPERT", type='TH1F', title="CaloMVA RNN scalar mEflowApprox; Log10(max(mEflowApprox 140.); nEntries", xbins=50, xmin=0., xmax=5.)
-   monTool.defineHistogram('ptRatioEflowApprox', path="EXPERT", type='TH1F', title="CaloMVA RNN scalar ptRatioEflowApprox; min(ptRatioEflowApprox 4.); nEntries", xbins=50, xmin=0., xmax=4.)
-   monTool.defineHistogram('ptDetectorAxis', path='EXPERT', type='TH1F', title="CaloMVA RNN ptDetectorAxis; ptDetectorAxis; nEntries", xbins=50, xmin=1., xmax=1000.)
-   monTool.defineHistogram('ptDetectorAxis_log', path='EXPERT', type='TH1F', title=" CaloMVA RNN ptDetectorAxis log; ptDetectorAxis_log; nEntries", xbins=50, xmin=0., xmax=5.)
-   monTool.defineHistogram('pt_jetseed_log', path='EXPERT', type='TH1F', title="CaloMVA RNN scalar pt_jetseed_log; Log10(tau.ptJetSeed); nEntries", xbins=50, xmin=3.5, xmax=7.)
-   monTool.defineHistogram('RNN_clusternumber', path='EXPERT', type='TH1F', title="CaloMVA RNN cluster number; nRNN_Clusters; nEntries", xbins=15, xmin=0., xmax=15.)
-   monTool.defineHistogram('cluster_et_log', path="EXPERT", type='TH1F', title="CaloMVA RNN cluster et_log; Log10(cluster E_{T}); nEntries", xbins=50, xmin=1., xmax=7.) 
-   monTool.defineHistogram('cluster_dEta', path="EXPERT", type='TH1F', title="CaloMVA RNN cluster eta - L1 RoI eta; Deta(CaloMVA cluster, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('cluster_dPhi', path="EXPERT", type='TH1F', title="CaloMVA RNN cluster phi - L1 RoI phi; Dphi(CaloMVA cluster, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('cluster_log_SECOND_R', path="EXPERT",type='TH1F', title='cluster_SECOND_R_log10; cluster_SECOND_R_log10; nEntries',xbins=50,xmin=-3,xmax=7)
-   monTool.defineHistogram('cluster_SECOND_LAMBDA', path="EXPERT",type='TH1F', title='cluster_SECOND_LAMBDA_log10; cluster_SECOND_LAMBDA_log10; nEntries',xbins=50,xmin=-3,xmax=7)
-   monTool.defineHistogram('cluster_CENTER_LAMBDA', path="EXPERT",type='TH1F', title='cluster_CENTER_LAMBDA_log10; cluster_CENTER_LAMBDA_log10; nEntries',xbins=50,xmin=-2,xmax=5)
-   monTool.defineHistogram('RNN_tracknumber', path='EXPERT', type='TH1F', title=" CaloMVA RNN track number; nRNN_Tracks; nEntries", xbins=20, xmin=0., xmax=20.)
-   monTool.defineHistogram('nRoI_EFTauCells', path='EXPERT', type='TH1F', title="CaloMVA nRoI_Cells; nCells; nEntries", xbins=100, xmin=0., xmax=6000.)
-   monTool.defineHistogram('EtFinal', path='EXPERT', type='TH1F', title="Et Final; Et Final; nEntries", xbins=100, xmin=0, xmax=1000)
-   monTool.defineHistogram('dPhiEFTau_RoI', path='EXPERT', type='TH1F', title="CaloMVA RoI phi - L1 RoI phi; Dphi(CaloMVA RoI, L1 RoI); nEntries", xbins=100, xmin=-0.15, xmax=0.15)
-   monTool.defineHistogram('dEtaEFTau_RoI', path='EXPERT', type='TH1F', title="CaloMVA RoI eta - L1 RoI eta; Deta(CaloMVA RoI, L1 RoI); nEntries", xbins=100, xmin=-0.4, xmax=0.4)
-   monTool.defineHistogram('dEtaEFTau_RoI, dPhiEFTau_RoI', path='EXPERT', type='TH2F', title="Dphi(CaloMVA RoI, L1 tau) vs Deta(CaloMVA RoI, L1 RoI) in TrigTauRec FEX; Deta(CaloMVA RoI, L1 RoI); Dphi(CaloMVA RoI, L1 RoI)",
-                                                           xbins=100 , xmin=-0.4, xmax=0.4,
-                                                           ybins=100 , ymin=-0.15, ymax=0.15)
-   monTool.defineHistogram('EMRadius', path='EXPERT', type='TH1F', title="CaloMVA EMRadius; EM radius; nEntries", xbins=50, xmin=-0.1, xmax=1.)
-   monTool.defineHistogram('HadRadius', path='EXPERT', type='TH1F', title="CaloMVA HadRadius; Had radius; nEntries", xbins=50, xmin=-0.1, xmax=1.)
-   monTool.defineHistogram('EtHad, EtEm', path='EXPERT', type='TH2F', title="CaloMVA Et EM vs Et Had in TrigTauRecMerged FEX; Et Had (at EM scale) [GeV]; Et EM (at EM scale) [GeV]",
-                                                xbins=30, xmin=0., xmax=150.,
-                                                ybins=30, ymin=0., ymax=150.)
-   monTool.defineHistogram('EMFrac', path='EXPERT', type='TH1F', title="EM Fraction; EM Fraction; nEntries", xbins=70, xmin=-0.1, xmax=1.3)
-   monTool.defineHistogram('IsoFrac', path='EXPERT', type='TH1F', title="Isolation Fraction; Isolation Fraction; nEntries", xbins=80, xmin=-0.4, xmax=1.2)
-   monTool.defineHistogram('centFrac', path='EXPERT', type='TH1F', title="CaloMVA central Fraction; central Fraction; nEntries", xbins=80, xmin=-0.4, xmax=1.2)
-   monTool.defineHistogram('nCand', path='EXPERT', type='TH1F', title="Number of tau candidates; Number of tau candidates; nEntries", xbins=10, xmin=-1.0, xmax=9.)
-   monTool.defineHistogram('EtaL1', path='EXPERT', type='TH1F', title="L1 RoI eta; L1 RoI eta; nEntries", xbins=100, xmin=-2.6, xmax=2.6)
-   monTool.defineHistogram('PhiL1', path='EXPERT', type='TH1F', title="L1 RoI phi; L1 RoI phi; nEntries", xbins=100, xmin=-3.2, xmax=3.2)
-   monTool.defineHistogram('EtaL1, PhiL1', path='EXPERT', type='TH2F', title="L1 RoI phi vs eta in TrigTauRecMerged FEX; eta; phi",
-                                           xbins=100, xmin=-2.6, xmax=2.6,
-                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('EtaEF', path='EXPERT', type='TH1F', title="CaloMVA RoI eta; CaloMVA RoI eta; nEntries", xbins=100, xmin=-2.6, xmax=2.6)
-   monTool.defineHistogram('PhiEF', path='EXPERT', type='TH1F', title="CaloMVA RoI phi; CaloMVA RoI phi; nEntries", xbins=100, xmin=-3.2, xmax=3.2)
-   monTool.defineHistogram('EtaEF, PhiEF', path='EXPERT', type='TH2F', title="CaloMVA RoI phi vs CaloMVA RoI eta in TrigTauRecMerged FEX; eta; phi",
-                                           xbins=100, xmin=-2.6, xmax=2.6,
-                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('EtFinal, EtaEF', path='EXPERT', type='TH2F', title="CaloMVA RoI eta vs Et Final; Et Final; CaloMVA RoI eta",
-                                                           xbins=100 , xmin=0, xmax=1000,
-                                                           ybins=100, ymin=-2.6, ymax=2.6)
-   monTool.defineHistogram('EtFinal, PhiEF', path='EXPERT', type='TH2F', title="CaloMVA RoI phi vs Et Final; Et Final; CaloMVA RoI phi",
-                                                           xbins=100 , xmin=0, xmax=1000,
-                                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('clustersMeanCenterLambda', path='EXPERT', type='TH1F', title='clustersMeanCenterLambda;clustersMeanCenterLambda;nEntries',xbins=40, xmin=0., xmax=2500.)
-   monTool.defineHistogram('clustersMeanFirstEngDens', path='EXPERT', type='TH1F', title='clustersMeanFirstEngDens;clustersMeanFirstEngDens;nEntries',xbins=40, xmin=-8.7, xmax=-5.5)
-   monTool.defineHistogram('clustersMeanSecondLambda', path='EXPERT', type='TH1F', title='clustersMeanSecondLambda;clustersMeanSecondLambda;nEntries',xbins=20, xmin=0., xmax=6e5)
-   monTool.defineHistogram('clustersMeanPresamplerFrac', path='EXPERT', type='TH1F', title='clustersMeanPresamplerFrac;clustersMeanPresamplerFrac;nEntries',xbins=20, xmin=0., xmax=0.2)
-   monTool.defineHistogram('clustersMeanEMProbability', path='EXPERT', type='TH1F', title='clustersMeanEMProbability;clustersMeanEMProbability;nEntries',xbins=20, xmin=0., xmax=1.)
-   monTool.defineHistogram('etaDetectorAxis', path='EXPERT', type='TH1F', title="CaloMVA RNN etaDetectorAxis; etaDetectorAxis", xbins=100, xmin=-2.6, xmax=2.6)
+def tauMonitoringCaloOnlyMVA(flags, name: str = 'CaloMVA', RoI_name: str = 'L1'):
+    monTool = GenericMonitoringTool(flags, 'MonTool')
 
-   return monTool
+    # In the 2024-2025 YETS we are updating the names of the histograms themselves to more correct and current conventions (EF -> HLT, L1 -> RoI, EtFinal -> Et, etc...)
 
-def tauMonitoringPrecisionMVA(flags):
-   monTool = GenericMonitoringTool(flags, 'MonTool')
+    monTool.defineHistogram('nCand', path='EXPERT', type='TH1F', title=name+' Tau candidates; N Tau; Entries', xbins=10, xmin=-1.0, xmax=9)
 
-   monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title="Precision Track Errors; nRoIs; nEntries", xbins=2, xmin=-0.5, xmax=1.5)
-   monTool.defineHistogram('calo_errors', path='EXPERT', type='TH1F', title="Precision Calo Errors; nRoIs; nEntries", xbins=10, xmin=-0.5, xmax=9.5)
-   monTool.defineHistogram('mEflowApprox', path="EXPERT", type='TH1F', title="Precision RNN scalar mEflowApprox; Log10(max(mEflowApprox 140.); nEntries", xbins=50, xmin=0., xmax=5.)
-   monTool.defineHistogram('ptRatioEflowApprox', path="EXPERT", type='TH1F', title="Precision RNN scalar ptRatioEflowApprox; min(ptRatioEflowApprox 4.); nEntries", xbins=50, xmin=0., xmax=4.)
-   monTool.defineHistogram('pt_jetseed_log', path='EXPERT', type='TH1F', title="Precision RNN scalar pt_jetseed_log; Log10(tau.ptJetSeed); nEntries", xbins=50, xmin=3.5, xmax=7.)
-   monTool.defineHistogram('ptDetectorAxis', path='EXPERT', type='TH1F', title="Precision RNN ptDetectorAxis; ptDetectorAxis; nEntries", xbins=50, xmin=1., xmax=1000.)
-   monTool.defineHistogram('ptDetectorAxis_log', path='EXPERT', type='TH1F', title="Precision RNN ptDetectorAxis log; ptDetectorAxis_log; nEntries", xbins=50, xmin=0., xmax=5.)
-   monTool.defineHistogram('RNN_clusternumber', path='EXPERT', type='TH1F', title="Precision RNN cluster number; nRNN_Clusters; nEntries", xbins=20, xmin=0., xmax=20.)
-   monTool.defineHistogram('cluster_et_log', path="EXPERT", type='TH1F', title="Precision RNN cluster et_log; Log10(cluster E_{T}); nEntries", xbins=50, xmin=1., xmax=7.)
-   monTool.defineHistogram('cluster_dEta', path="EXPERT", type='TH1F', title="Precision RNN cluster eta - L1 RoI eta; Deta(Precision cluster, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('cluster_dPhi', path="EXPERT", type='TH1F', title="Precision RNN cluster phi - L1 RoI phi; Dphi(Precision cluster, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('cluster_log_SECOND_R', path="EXPERT",type='TH1F',title='cluster_SECOND_R_log10; cluster_SECOND_R_log10; nEntries',xbins=50,xmin=-3,xmax=7)
-   monTool.defineHistogram('cluster_SECOND_LAMBDA', path="EXPERT",type='TH1F',title='cluster_SECOND_LAMBDA_log10; cluster_SECOND_LAMBDA_log10; nEntries',xbins=50,xmin=-3,xmax=7)
-   monTool.defineHistogram('cluster_CENTER_LAMBDA', path="EXPERT",type='TH1F',title='cluster_CENTER_LAMBDA_log10; cluster_CENTER_LAMBDA_log10; nEntries',xbins=50,xmin=-2,xmax=5)
-   monTool.defineHistogram('RNN_tracknumber', path='EXPERT', type='TH1F', title="Precision RNN track number; nRNN_Tracks; nEntries", xbins=20, xmin=0., xmax=20.)
-   monTool.defineHistogram('track_pt_log', path='EXPERT', type='TH1F', title="Precision RNN track pt_log; Log10(track p_{T}); nEntries", xbins=50, xmin=2.7, xmax=7.)
-   monTool.defineHistogram('track_dEta', path='EXPERT', type='TH1F', title="Precision RNN track eta - L1 RoI eta; Deta(Precision track, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('track_dPhi', path='EXPERT', type='TH1F', title="Precision RNN track phi - L1 RoI phi; Dphi(Precision track, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
-   monTool.defineHistogram('track_d0_abs_log', path='EXPERT',type='TH1F', title="Precision RNN track d0_abs_log; Log10(Abs(track.d0()) + 1e-6); nEntries", xbins=50, xmin=-6.1, xmax=2.)
-   monTool.defineHistogram('track_z0sinthetaTJVA_abs_log', path='EXPERT', type='TH1F', title="Precision RNN track z0sinthetaTJVA_abs_log; Log10(Abs(track.z0sinthetaTJVA(tau)) + 1e-6); nEntries", xbins=50, xmin=-6.1, xmax=4.)
-   monTool.defineHistogram('track_nPixelHitsPlusDeadSensors', path='EXPERT', type='TH1F', title="Precision RNN track nPixelHitsPlusDeadSensors; nPixelHits; nEntries", xbins=11, xmin=0., xmax=11.)
-   monTool.defineHistogram('track_nSCTHitsPlusDeadSensors', path='EXPERT', type='TH1F', title="Precision RNN track nSCTHitsPlusDeadSensors; nSCTHits; nEntries", xbins=20, xmin=0., xmax=20.)
-   monTool.defineHistogram('nRoI_EFTauCells', path='EXPERT', type='TH1F', title="Precision nRoI_Cells; nCells; nEntries", xbins=100, xmin=0., xmax=6000.)
-   monTool.defineHistogram('nRoI_EFTauTracks', path='EXPERT', type='TH1F', title="Precision nRoI_Tracks; NTracks; nEntries", xbins=17, xmin=-2.0, xmax=15.)
-   monTool.defineHistogram('EtFinal', path='EXPERT', type='TH1F', title="Et Final; Et Final; nEntries", xbins=100, xmin=0, xmax=1000)
-   monTool.defineHistogram('dPhiEFTau_RoI', path='EXPERT', type='TH1F', title="Precision RoI phi - L1 RoI phi; Dphi(Precision RoI, L1 RoI); nEntries", xbins=100, xmin=-0.15, xmax=0.15)
-   monTool.defineHistogram('dEtaEFTau_RoI', path='EXPERT', type='TH1F', title="Precision RoI eta - L1 RoI eta; Deta(Precision RoI, L1 RoI); nEntries", xbins=100, xmin=-0.4, xmax=0.4)
-   monTool.defineHistogram('dEtaEFTau_RoI, dPhiEFTau_RoI', path='EXPERT', type='TH2F', title="Dphi(Precision RoI, L1 RoI) vs Deta(Precision RoI, L1 RoI) in TrigTauRec FEX; Deta(Precision RoI, L1 RoI); Dphi(Precision RoI, L1 RoI)",
-                                                           xbins=100 , xmin=-0.4, xmax=0.4,
-                                                           ybins=100 , ymin=-0.15, ymax=0.15)
-   monTool.defineHistogram('EMRadius', path='EXPERT', type='TH1F', title="Precision EMRadius; EM radius; nEntries", xbins=50, xmin=-0.1, xmax=1.)
-   monTool.defineHistogram('HadRadius', path='EXPERT', type='TH1F', title="Precision HadRadius; Had radius; nEntries", xbins=50, xmin=-0.1, xmax=1.)
-   monTool.defineHistogram('EtHad, EtEm', path='EXPERT', type='TH2F', title="Precision Et EM vs Et Had in TrigTauRecMerged FEX; Et Had (at EM scale) [GeV]; Et EM (at EM scale) [GeV]",
-                                                xbins=30, xmin=0., xmax=150.,
-                                                ybins=30, ymin=0., ymax=150.)
-   monTool.defineHistogram('EMFrac', path='EXPERT', type='TH1F', title="EM Fraction; EM Fraction; nEntries", xbins=70, xmin=-0.1, xmax=1.3)
-   monTool.defineHistogram('IsoFrac', path='EXPERT', type='TH1F', title="Isolation Fraction; Isolation Fraction; nEntries", xbins=80, xmin=-0.4, xmax=1.2)
-   monTool.defineHistogram('centFrac', path='EXPERT', type='TH1F', title="Precision central Fraction; central Fraction; nEntries", xbins=80, xmin=-0.4, xmax=1.2)
-   monTool.defineHistogram('nWideTrk', path='EXPERT', type='TH1F', title="Precision  nWide_Tracks; nWide_Tracks; nEntries", xbins=17, xmin=-2.0, xmax=15.)
-   monTool.defineHistogram('ipSigLeadTrk', path='EXPERT', type='TH1F', title="Precision IPsig Leading Track; IPsig Leading Track; nEntries", xbins=100, xmin=-50., xmax=50)
-   monTool.defineHistogram('trFlightPathSig', path='EXPERT', type='TH1F', title="Precision Flightpath sig Track; Flightpath sig Track; nEntries", xbins=100, xmin=-20., xmax=40)
-   monTool.defineHistogram('massTrkSys', path='EXPERT', type='TH1F', title="Precision Mass Trk Sys; Mass Trk Sys [GeV]; nEntries", xbins=100, xmin=0., xmax=50.)
-   monTool.defineHistogram('dRmax', path='EXPERT', type='TH1F', title="Precision dR max; dR max; nEntries", xbins=50, xmin=-0., xmax=0.25)
-   monTool.defineHistogram('NTrk', path='EXPERT', type='TH1F', title="Number of tracks; Number of tracks; nEntries", xbins=17, xmin=-2.0, xmax=15.)
-   monTool.defineHistogram('TrkAvgDist', path='EXPERT', type='TH1F', title="Track Average Distance; TrkAvgDist; nEntries", xbins=41, xmin=-0.01, xmax=0.4)
-   monTool.defineHistogram('EtovPtLead', path='EXPERT', type='TH1F', title="Et over lead track Pt; EtovPtLead; nEntries", xbins=41, xmin=-0.5, xmax=20.0)
-   monTool.defineHistogram('PSSFraction', path='EXPERT', type='TH1F', title="Precision Presampler strip energy fraction; PSS energy fraction; nEntries", xbins=50, xmin=-0.5, xmax=1.)
-   monTool.defineHistogram('EMPOverTrkSysP', path='EXPERT', type='TH1F', title="Precision EMP over TrkSysP; EMP over TrkSysP; nEntries", xbins=41, xmin=-0.5, xmax=20.0)
-   monTool.defineHistogram('ChPiEMEOverCaloEME', path='EXPERT', type='TH1F', title="Precision EM energy of charged pions over calorimetric EM energy; ChPiEME over CaloEME; nEntries", xbins=40, xmin=-20., xmax=20.)
-   monTool.defineHistogram('innerTrkAvgDist', path='EXPERT', type='TH1F', title="Precision inner track average distance; innerTrkAvgDist; nEntries", xbins=40, xmin=-0.05, xmax=0.5)
-   monTool.defineHistogram('nCand', path='EXPERT', type='TH1F', title="Number of tau candidates; Number of tau candidates; nEntries", xbins=10, xmin=-1.0, xmax=9.)
-   monTool.defineHistogram('EtaL1', path='EXPERT', type='TH1F', title="L1 RoI eta; L1 RoI eta; nEntries", xbins=100, xmin=-2.6, xmax=2.6)
-   monTool.defineHistogram('PhiL1', path='EXPERT', type='TH1F', title="L1 RoI phi; L1 RoI phi; nEntries", xbins=100, xmin=-3.2, xmax=3.2)
-   monTool.defineHistogram('EtaL1, PhiL1', path='EXPERT', type='TH2F', title="L1 RoI phi vs L1 RoI eta in TrigTauRecMerged FEX; eta; phi",
-                                           xbins=100, xmin=-2.6, xmax=2.6,
-                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('EtaEF', path='EXPERT', type='TH1F', title="Precision RoI eta; Precision RoI eta; nEntries", xbins=100, xmin=-2.6, xmax=2.6)
-   monTool.defineHistogram('PhiEF', path='EXPERT', type='TH1F', title="Precision RoI phi; Precision RoI phi; nEntries", xbins=100, xmin=-3.2, xmax=3.2)
-   monTool.defineHistogram('EtaEF, PhiEF', path='EXPERT', type='TH2F', title="Precision RoI phi vs Precision RoI eta in TrigTauRecMerged FEX; eta; phi",
-                                           xbins=100, xmin=-2.6, xmax=2.6,
-                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('vertex_x', path='EXPERT', type='TH1F', title="Precision RoI Vertex x; Vertex x; nEntries", xbins=100, xmin=-1, xmax=1)
-   monTool.defineHistogram('vertex_y', path='EXPERT', type='TH1F', title="Precision RoI Vertex y; Vertex y; nEntries", xbins=100, xmin=-2, xmax=0)
-   monTool.defineHistogram('vertex_z', path='EXPERT', type='TH1F', title="Precision RoI Vertex z; Vertex z; nEntries", xbins=120, xmin=-120, xmax=120)
-   monTool.defineHistogram('RNNJetScore_0p', path='EXPERT', type='TH1F', title="Precision RNN score for 0 prong taus; RNN score; nEntries", xbins=40, xmin=0, xmax=1) 
-   monTool.defineHistogram('RNNJetScoreSigTrans_0p', path='EXPERT', type='TH1F', title="Precision RNN score for 0 prong taus; RNN score sig trans; nEntries", xbins=40, xmin=0, xmax=1)
-   monTool.defineHistogram('RNNJetScore_1p', path='EXPERT', type='TH1F', title="Precision RNN score for 1 prong taus; RNN score; nEntries", xbins=40, xmin=0, xmax=1)
-   monTool.defineHistogram('RNNJetScoreSigTrans_1p', path='EXPERT', type='TH1F', title="Precision RNN score for 1 prong taus; RNN score sig trans; nEntries", xbins=40, xmin=0, xmax=1)
-   monTool.defineHistogram('RNNJetScore_mp', path='EXPERT', type='TH1F', title="Precision RNN score for multi prong taus; RNN score; nEntries", xbins=40, xmin=0, xmax=1)
-   monTool.defineHistogram('RNNJetScoreSigTrans_mp', path='EXPERT', type='TH1F', title="Precision RNN score for multi prong taus; RNN score sig trans; nEntries", xbins=40, xmin=0, xmax=1)
-   monTool.defineHistogram('EtFinal, EtaEF', path='EXPERT', type='TH2F', title="Precision RoI eta vs Et Final; Et Final; Precision RoI eta",
-                                                           xbins=100 , xmin=0, xmax=1000,
-                                                           ybins=100, ymin=-2.6, ymax=2.6)
-   monTool.defineHistogram('EtFinal, PhiEF', path='EXPERT', type='TH2F', title="Precision RoI phi vs Et Final; Et Final; Precision RoI phi",
-                                                           xbins=100 , xmin=0, xmax=1000,
-                                                           ybins=100, ymin=-3.2, ymax=3.2)
-   monTool.defineHistogram('clustersMeanCenterLambda', path='EXPERT', type='TH1F', title='clustersMeanCenterLambda;clustersMeanCenterLambda;nEntries',xbins=40, xmin=0., xmax=2500.)
-   monTool.defineHistogram('clustersMeanFirstEngDens', path='EXPERT', type='TH1F', title='clustersMeanFirstEngDens;clustersMeanFirstEngDens;nEntries',xbins=40, xmin=-8.7, xmax=-5.5)
-   monTool.defineHistogram('clustersMeanSecondLambda', path='EXPERT', type='TH1F', title='clustersMeanSecondLambda;clustersMeanSecondLambda;nEntries',xbins=20, xmin=0., xmax=6e5)
-   monTool.defineHistogram('clustersMeanPresamplerFrac', path='EXPERT', type='TH1F', title='clustersMeanPresamplerFrac;clustersMeanPresamplerFrac;nEntries',xbins=20, xmin=0., xmax=0.2)
-   monTool.defineHistogram('clustersMeanEMProbability', path='EXPERT', type='TH1F', title='clustersMeanEMProbability;clustersMeanEMProbability;nEntries',xbins=20, xmin=0., xmax=1.)
-   monTool.defineHistogram('etaDetectorAxis', path='EXPERT', type='TH1F', title="Precision RNN etaDetectorAxis; etaDetectorAxis", xbins=100, xmin=-2.6, xmax=2.6)
+    # Tau kinematics (from TauJet)
+    monTool.defineHistogram('EtFinal', path='EXPERT', type='TH1F', title=name+' Tau E_{T}; E_{T} [GeV]; Entries', xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram('EtaEF', path='EXPERT', type='TH1F', title=name+' Tau #eta; #eta; Entries', xbins=100, xmin=-2.6, xmax=2.6)
+    monTool.defineHistogram('PhiEF', path='EXPERT', type='TH1F', title=name+' Tau #phi; #phi; Entries', xbins=100, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('EtaEF, PhiEF', path='EXPERT', type='TH2F', title=name+' Tau #eta vs #phi; #eta; #phi', xbins=100, xmin=-2.6, xmax=2.6, ybins=100, ymin=-3.2, ymax=3.2)
+    monTool.defineHistogram('EtFinal, EtaEF', path='EXPERT', type='TH2F', title=name+' Tau E_{T} vs #eta; E_{T} [GeV]; #eta', xbins=100 , xmin=0, xmax=1000, ybins=100, ymin=-2.6, ymax=2.6)
+    monTool.defineHistogram('EtFinal, PhiEF', path='EXPERT', type='TH2F', title=name+' Tau E_{T} vs #phi; E_{T} [GeV]; #phi', xbins=100 , xmin=0, xmax=1000, ybins=100, ymin=-3.2, ymax=3.2)
 
-   return monTool
+    # RoI kinematics (from the step RoI)
+    monTool.defineHistogram('EtaL1', path='EXPERT', type='TH1F', title=RoI_name+' RoI #eta; #eta; Entries', xbins=100, xmin=-2.6, xmax=2.6)
+    monTool.defineHistogram('PhiL1', path='EXPERT', type='TH1F', title=RoI_name+' RoI #phi; #phi; Entries', xbins=100, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('EtaL1, PhiL1', path='EXPERT', type='TH2F', title=RoI_name+' RoI #eta vs #phi; #eta; #phi', xbins=100, xmin=-2.6, xmax=2.6, ybins=100, ymin=-3.2, ymax=3.2)
+
+    monTool.defineHistogram('dEtaEFTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.4, xmax=0.4)
+    monTool.defineHistogram('dPhiEFTau_RoI', path='EXPERT', type='TH1F', title=name+' #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI); Entries', xbins=100, xmin=-0.15, xmax=0.15)
+    monTool.defineHistogram('dEtaEFTau_RoI, dPhiEFTau_RoI', path='EXPERT', type='TH2F', title=name+' #Delta#eta(Tau, '+RoI_name+' RoI) vs #Delta#phi(Tau, '+RoI_name+' RoI); #Delta#eta(Tau, '+RoI_name+' RoI); #Delta#phi(Tau, '+RoI_name+' RoI)',
+                                                            xbins=100 , xmin=-0.4, xmax=0.4,
+                                                            ybins=100 , ymin=-0.15, ymax=0.15)
+
+    # TauJet reconstruction variables
+    monTool.defineHistogram('mEflowApprox', path='EXPERT', type='TH1F', title=name+' TauJet Log10(max(mEflowApprox, 140)); Log10(max(mEflowApprox, 140)); Entries', xbins=50, xmin=0, xmax=5)
+    monTool.defineHistogram('ptRatioEflowApprox', path='EXPERT', type='TH1F', title=name+' TauJet min(ptRatioEflowApprox, 4); min(ptRatioEflowApprox, 4); Entries', xbins=50, xmin=0, xmax=4)
+    monTool.defineHistogram('pt_jetseed_log', path='EXPERT', type='TH1F', title=name+' TauJet Log10(ptJetSeed); Log10(ptJetSeed); Entries', xbins=50, xmin=3.5, xmax=7)
+    monTool.defineHistogram('etaDetectorAxis', path='EXPERT', type='TH1F', title=name+' TauJet etaDetectorAxis; etaDetectorAxis', xbins=100, xmin=-2.6, xmax=2.6)
+    monTool.defineHistogram('ptDetectorAxis', path='EXPERT', type='TH1F', title=name+' TauJet ptDetectorAxis; ptDetectorAxis; Entries', xbins=50, xmin=1, xmax=1000)
+    monTool.defineHistogram('ptDetectorAxis_log', path='EXPERT', type='TH1F', title=name+' TauJet Log10(ptDetectorAxis); Log10(ptDetectorAxis); Entries', xbins=50, xmin=0, xmax=5)
+
+    # TauJet low-level Calorimeter variables
+    monTool.defineHistogram('nRoI_EFTauCells', path='EXPERT', type='TH1F', title=name+' TauJet calorimeter cells; N Cells; Entries', xbins=100, xmin=0, xmax=6000)
+    monTool.defineHistogram('EMRadius', path='EXPERT', type='TH1F', title=name+' TauJet EM radius; EM radius; Entries', xbins=50, xmin=-0.1, xmax=1)
+    monTool.defineHistogram('HadRadius', path='EXPERT', type='TH1F', title=name+' TauJet Had radius; Had radius; Entries', xbins=50, xmin=-0.1, xmax=1)
+    monTool.defineHistogram('EtHad, EtEm', path='EXPERT', type='TH2F', title=name+' TauJet E_{T}^{Had} vs E_{T}^{EM}; E_{T}^{Had} (at EM scale) [GeV]; E_{T}^{EM} (at EM scale) [GeV]',
+                                                 xbins=30, xmin=0, xmax=150,
+                                                 ybins=30, ymin=0, ymax=150)
+    monTool.defineHistogram('EMFrac', path='EXPERT', type='TH1F', title=name+' TauJet EM fraction; E_{T}^{EM} / (E_{T}^{EM} + E_{T}^{Had}) (at EM scale); Entries', xbins=70, xmin=-0.1, xmax=1.3)
+    monTool.defineHistogram('IsoFrac', path='EXPERT', type='TH1F', title=name+' TauJet Isolation fraction; Isolation fraction; Entries', xbins=80, xmin=-0.4, xmax=1.2)
+    monTool.defineHistogram('centFrac', path='EXPERT', type='TH1F', title=name+' TauJet Central fraction; Central fraction; Entries', xbins=80, xmin=-0.4, xmax=1.2)
+
+    # TauJet clusters mean variables
+    monTool.defineHistogram('clustersMeanCenterLambda', path='EXPERT', type='TH1F', title=name+' TauJet clustersMeanCenterLambda; clustersMeanCenterLambda; Entries', xbins=40, xmin=0, xmax=2500)
+    monTool.defineHistogram('clustersMeanFirstEngDens', path='EXPERT', type='TH1F', title=name+' TauJet clustersMeanFirstEngDens; clustersMeanFirstEngDens; Entries', xbins=40, xmin=-8.7, xmax=-5.5)
+    monTool.defineHistogram('clustersMeanSecondLambda', path='EXPERT', type='TH1F', title=name+' TauJet clustersMeanSecondLambda; clustersMeanSecondLambda; Entries', xbins=20, xmin=0, xmax=6e5)
+    monTool.defineHistogram('clustersMeanPresamplerFrac', path='EXPERT', type='TH1F', title=name+' TauJet clustersMeanPresamplerFrac; clustersMeanPresamplerFrac; Entries', xbins=20, xmin=0, xmax=0.2)
+    monTool.defineHistogram('clustersMeanEMProbability', path='EXPERT', type='TH1F', title=name+' TauJet clustersMeanEMProbability; clustersMeanEMProbability; Entries', xbins=20, xmin=0, xmax=1)
+
+    # Cluster variables
+    monTool.defineHistogram('RNN_clusternumber', path='EXPERT', type='TH1F', title=name+' TauJet calorimeter clusters; N Clusters; Entries', xbins=15, xmin=0, xmax=15)
+    monTool.defineHistogram('cluster_et_log', path='EXPERT', type='TH1F', title=name+' TauJet Log10(Cluster E_{T}); Log10(Cluster E_{T}); Entries', xbins=50, xmin=1, xmax=7) 
+    monTool.defineHistogram('cluster_dEta', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#eta(Cluster, Tau); #Delta#eta(Cluster, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
+    monTool.defineHistogram('cluster_dPhi', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#phi(Cluster, Tau); #Delta#phi(Cluster, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
+    monTool.defineHistogram('cluster_log_SECOND_R', path='EXPERT',type='TH1F', title=name+' TauJet Log10(cluster_SECOND_R); Log10(cluster_SECOND_R); Entries', xbins=50, xmin=-3, xmax=7)
+    monTool.defineHistogram('cluster_SECOND_LAMBDA', path='EXPERT',type='TH1F', title=name+' TauJet Log10(cluster_SECOND_LAMBDA); Log10(cluster_SECOND_LAMBDA); Entries', xbins=50, xmin=-3, xmax=7)
+    monTool.defineHistogram('cluster_CENTER_LAMBDA', path='EXPERT',type='TH1F', title=name+' TauJet Log10(cluster_CENTER_LAMBDA); Log10(cluster_CENTER_LAMBDA); Entries', xbins=50, xmin=-2, xmax=5)
+
+    labels = ['NoROIDescr', 'NoCellCont', 'EmptyCellCont', 'NoClustCont', 'NoClustKey', 'EmptyClustCont', 'NoJetAttach', 'NoHLTtauAttach', 'NoHLTtauDetAttach', 'NoHLTtauXdetAttach']
+    monTool.defineHistogram('calo_errors', path='EXPERT', type='TH1F', title=name+' TauJet Calo Reco Errors; Error; Entries', xbins=10, xmin=-0.5, xmax=9.5, xlabels=labels)
+
+    return monTool
+
+def tauMonitoringPrecisionMVA(flags, name: str = 'Precision', RoI_name: str = 'tauIso'):
+    monTool = tauMonitoringCaloOnlyMVA(flags, name, RoI_name)
+
+    # TauJet track variables
+    monTool.defineHistogram('NTrk', path='EXPERT', type='TH1F', title=name+' TauJet core tracks; N Tracks; Entries', xbins=17, xmin=-2.0, xmax=15)
+    monTool.defineHistogram('nWideTrk', path='EXPERT', type='TH1F', title=name+' TauJet wide tracks; N Tracks; Entries', xbins=17, xmin=-2.0, xmax=15)
+
+    monTool.defineHistogram('ipSigLeadTrk', path='EXPERT', type='TH1F', title=name+' TauJet leading track IPsig; Leading Track IPsig; Entries', xbins=100, xmin=-50, xmax=50)
+    monTool.defineHistogram('trFlightPathSig', path='EXPERT', type='TH1F', title=name+' TauJet track FlightPath sig.; Track FlightPath sig.; Entries', xbins=100, xmin=-20, xmax=40)
+    monTool.defineHistogram('massTrkSys', path='EXPERT', type='TH1F', title=name+' TauJet track system mass; m_{trk} [GeV]; Entries', xbins=100, xmin=0, xmax=50)
+    monTool.defineHistogram('dRmax', path='EXPERT', type='TH1F', title=name+' TauJet Max #DeltaR(Tau, Track); Max #DeltaR(Tau, Track); Entries', xbins=50, xmin=0, xmax=0.25)
+    monTool.defineHistogram('TrkAvgDist', path='EXPERT', type='TH1F', title=name+' TauJet avg. #DeltaR(Tau, Track) (p_{T} weighted); Avg. #DeltaR(Tau, Track) (p_{T} weighted); Entries', xbins=41, xmin=-0.01, xmax=0.4)
+    monTool.defineHistogram('innerTrkAvgDist', path='EXPERT', type='TH1F', title=name+' TauJet avg. #DeltaR(Tau, Core Track) (p_{T} weighted); Avg. #DeltaR(Tau, Core Track) (p_{T} weighted); Entries', xbins=40, xmin=-0.05, xmax=0.5)
+    monTool.defineHistogram('EtovPtLead', path='EXPERT', type='TH1F', title=name+' TauJet (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; Entries', xbins=41, xmin=-0.5, xmax=20.0)
+    monTool.defineHistogram('PSSFraction', path='EXPERT', type='TH1F', title=name+' TauJet PreSampler Strip E_{T} / E_{T}; E_{T}^{presampler strip} / E_{T}; Entries', xbins=50, xmin=-0.5, xmax=1)
+    monTool.defineHistogram('EMPOverTrkSysP', path='EXPERT', type='TH1F', title=name+' TauJet E_{T}^{EM} over Track system p_{T}; E_{T}^{EM} / p_{T}^{trk sys}; Entries', xbins=41, xmin=-0.5, xmax=20.0)
+    monTool.defineHistogram('ChPiEMEOverCaloEME', path='EXPERT', type='TH1F', title=name+' TauJet E_{T} of #pi^{#pm} over E_{T}^{EM}; (p_{T}^{trk sys} - E_{T}^{Had}) / E_{T}^{EM}; Entries', xbins=40, xmin=-20, xmax=20)
+
+    monTool.defineHistogram('vertex_x', path='EXPERT', type='TH1F', title=name+' TauJet Vertex x; Vertex x; Entries', xbins=100, xmin=-1, xmax=1)
+    monTool.defineHistogram('vertex_y', path='EXPERT', type='TH1F', title=name+' TauJet Vertex y; Vertex y; Entries', xbins=100, xmin=-2, xmax=0)
+    monTool.defineHistogram('vertex_z', path='EXPERT', type='TH1F', title=name+' TauJet Vertex z; Vertex z; Entries', xbins=120, xmin=-120, xmax=120)
+
+    # TauJet Track variables
+    monTool.defineHistogram('RNN_tracknumber', path='EXPERT', type='TH1F', title=name+' TauJet total tracks; N Tracks; Entries', xbins=20, xmin=0, xmax=20)
+    monTool.defineHistogram('track_pt_log', path='EXPERT', type='TH1F', title=name+' TauJet Log10(Track p_{T}); Log10(Track p_{T}); Entries', xbins=50, xmin=2.7, xmax=7)
+    monTool.defineHistogram('track_dEta', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#eta(Track, Tau); #Delta#eta(Track, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
+    monTool.defineHistogram('track_dPhi', path='EXPERT', type='TH1F', title=name+' TauJet #Delta#phi(Track, Tau); #Delta#phi(Track, Tau); Entries', xbins=50, xmin=-0.5, xmax=0.5)
+    monTool.defineHistogram('track_d0_abs_log', path='EXPERT',type='TH1F', title=name+' TauJet Log10(|Track d_{0}| + 1e-6); Log10(|Track d_{0}| + 1e-6); Entries', xbins=50, xmin=-6.1, xmax=2)
+    monTool.defineHistogram('track_z0sinthetaTJVA_abs_log', path='EXPERT', type='TH1F', title=name+' TauJet Track Log10(|z_{0}^{TJVA} sin(#theta)| + 1e-6); Log10(|z_{0}^{TJVA} sin(#theta)| + 1e-6); Entries', xbins=50, xmin=-6.1, xmax=4)
+    monTool.defineHistogram('track_nPixelHitsPlusDeadSensors', path='EXPERT', type='TH1F', title=name+' TauJet Track Pixel hits + Pixel dead sensors; N Pixel hits + N Pixel dead sensors; Entries', xbins=11, xmin=0, xmax=11)
+    monTool.defineHistogram('track_nSCTHitsPlusDeadSensors', path='EXPERT', type='TH1F', title=name+' TauJet Track SCT hits + SCT dead sensors; N SCT hits + N SCT dead sensors; Entries', xbins=20, xmin=0, xmax=20)
+
+    labels = ['NoTrkCont', 'NoVtxCont']
+    monTool.defineHistogram('track_errors', path='EXPERT', type='TH1F', title=name+' TauJet Tracking Errors; Error; Entries', xbins=2, xmin=-0.5, xmax=1.5, xlabels=labels)
+
+    # ID score variables (raw and signal-transformed/flattened):
+    monTool.defineHistogram('RNNJetScore_0p', path='EXPERT', type='TH1F', title=name+' TauJet ID score for 0 prong taus; ID score; Entries', xbins=40, xmin=0, xmax=1) 
+    monTool.defineHistogram('RNNJetScoreSigTrans_0p', path='EXPERT', type='TH1F', title=name+' TauJet ID score for 0 prong taus; ID score sig. transformed; Entries', xbins=40, xmin=0, xmax=1)
+    monTool.defineHistogram('RNNJetScore_1p', path='EXPERT', type='TH1F', title=name+' TauJet ID score for 1 prong taus; ID score; Entries', xbins=40, xmin=0, xmax=1)
+    monTool.defineHistogram('RNNJetScoreSigTrans_1p', path='EXPERT', type='TH1F', title=name+' TauJet ID score for 1 prong taus; ID score sig. transformed; Entries', xbins=40, xmin=0, xmax=1)
+    monTool.defineHistogram('RNNJetScore_mp', path='EXPERT', type='TH1F', title=name+' TauJet ID score for multi prong taus; ID score; Entries', xbins=40, xmin=0, xmax=1)
+    monTool.defineHistogram('RNNJetScoreSigTrans_mp', path='EXPERT', type='TH1F', title=name+' TauJet ID score for multi prong taus; ID score sig. transformed; Entries', xbins=40, xmin=0, xmax=1)
+
+    return monTool
