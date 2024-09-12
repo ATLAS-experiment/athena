@@ -63,11 +63,11 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
                                 RoisWriteHandleKey = recordable(flags.Tracking.ActiveConfig.roi),
                                 InViewRoIs = 'UpdatedCaloRoI')
 
-    if 'LRT' in name:
-       newRoITool.doResize                 = True
-       newRoITool.RoIEtaWidth              = flags.Tracking.ActiveConfig.etaHalfWidth
-       newRoITool.RoIPhiWidth              = flags.Tracking.ActiveConfig.phiHalfWidth
-       newRoITool.RoIZedWidth              = flags.Tracking.ActiveConfig.zedHalfWidth
+    # Resize the RoI before running the tracking to either 'tauCore' or 'tauIso'
+    newRoITool.doResize = True
+    newRoITool.RoIEtaWidth = flags.Tracking.ActiveConfig.etaHalfWidth
+    newRoITool.RoIPhiWidth = flags.Tracking.ActiveConfig.phiHalfWidth
+    newRoITool.RoIZedWidth = flags.Tracking.ActiveConfig.zedHalfWidth
                                                                                                 
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si

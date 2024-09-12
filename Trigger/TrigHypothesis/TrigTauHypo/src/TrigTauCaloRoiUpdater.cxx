@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauCaloRoiUpdater.h"
@@ -13,121 +13,118 @@
 
 #include "TLorentzVector.h"
 
-TrigTauCaloRoiUpdater::TrigTauCaloRoiUpdater(const std::string & name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator) {}
+TrigTauCaloRoiUpdater::TrigTauCaloRoiUpdater(const std::string & name, ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+{
 
-StatusCode TrigTauCaloRoiUpdater::initialize() {
-
-  ATH_MSG_DEBUG( "Initializing " << name() );
-  ATH_MSG_DEBUG( "z0HalfWidth  " << m_z0HalfWidth );
-  if(m_z0HalfWidth <= 0.) {
-    ATH_MSG_DEBUG( "z0HalfWidth <= 0:  will use the original RoIInput z0HalfWidth" );
-  }
-  ATH_MSG_DEBUG( "etaHalfWidth " << m_etaHalfWidth );
-  ATH_MSG_DEBUG( "phiHalfWidth " << m_phiHalfWidth );
-  ATH_MSG_DEBUG( "dRForCenter  " << m_dRForCenter );
-
-  ATH_MSG_DEBUG( "Initialising HandleKeys" );
-  CHECK( m_roIInputKey.initialize()        );
-  CHECK( m_clustersKey.initialize() );
-  CHECK( m_roIOutputKey.initialize()  );  
-
-  return StatusCode::SUCCESS;
 }
 
 
+StatusCode TrigTauCaloRoiUpdater::initialize()
+{
+    ATH_MSG_DEBUG("Initializing " << name());
+    ATH_MSG_DEBUG("dRForCenter: " << m_dRForCenter);
 
-StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("Initialising HandleKeys");
+    ATH_CHECK(m_roIInputKey.initialize());
+    ATH_CHECK(m_clustersKey.initialize());
+    ATH_CHECK(m_roIOutputKey.initialize());  
 
-  ATH_MSG_DEBUG( "Running "<< name() <<" ... " );
+    return StatusCode::SUCCESS;
+}
 
-  // Prepare Outputs
-  std::unique_ptr< TrigRoiDescriptorCollection > roICollection( new TrigRoiDescriptorCollection() );
 
-  // Retrieve Input CaloClusterContainer
-  SG::ReadHandle< xAOD::CaloClusterContainer > CCContainerHandle = SG::makeHandle( m_clustersKey,ctx );
-  CHECK( CCContainerHandle.isValid() );
-  const xAOD::CaloClusterContainer *RoICaloClusterContainer = CCContainerHandle.get();
+StatusCode TrigTauCaloRoiUpdater::execute(const EventContext& ctx) const
+{
+    ATH_MSG_DEBUG("Running " << name());
 
-  if(RoICaloClusterContainer != nullptr) {
-    ATH_MSG_DEBUG( "Size of vector CaloCluster container is " << RoICaloClusterContainer->size());
-    if(RoICaloClusterContainer->empty()) {
-      ATH_MSG_DEBUG( "CaloCluster container is empty");
+    //---------------------------------------------------------------
+    // Prepare I/O
+    //---------------------------------------------------------------
+    
+    // Prepare output RoI container
+    std::unique_ptr<TrigRoiDescriptorCollection> roiCollection = std::make_unique<TrigRoiDescriptorCollection>();
+    SG::WriteHandle<TrigRoiDescriptorCollection> outputRoIHandle = SG::makeHandle(m_roIOutputKey, ctx);
+    ATH_CHECK(outputRoIHandle.record(std::move(roiCollection)));
+
+
+    // Retrieve input RoI descriptor
+    SG::ReadHandle<TrigRoiDescriptorCollection> roisHandle = SG::makeHandle(m_roIInputKey, ctx);
+    ATH_MSG_DEBUG("Size of roisHandle: " << roisHandle->size());
+    const TrigRoiDescriptor* roiDescriptor = roisHandle->at(0); // We only have one RoI in the handle
+
+
+    // Fill local variables for RoI reference position
+    float eta = roiDescriptor->eta();
+    float phi = roiDescriptor->phi();
+    
+    const float dEta = (roiDescriptor->etaPlus() - roiDescriptor->etaMinus()) / 2;
+    const float dPhi = CxxUtils::deltaPhi(roiDescriptor->phiPlus(), roiDescriptor->phiMinus()) / 2;
+
+    ATH_MSG_DEBUG("RoI ID: " << roiDescriptor->roiId() << ", eta: " << eta << ", phi: " << phi);
+
+
+    
+    //---------------------------------------------------------------
+    // Find detector tau axis
+    //---------------------------------------------------------------
+        
+    // Retrieve Input CaloClusterContainer
+    SG::ReadHandle<xAOD::CaloClusterContainer> CCContainerHandle = SG::makeHandle(m_clustersKey, ctx);
+    ATH_CHECK(CCContainerHandle.isValid());
+    const xAOD::CaloClusterContainer *RoICaloClusterContainer = CCContainerHandle.get();
+
+    if(!RoICaloClusterContainer) {
+        ATH_MSG_ERROR("No CaloCluster container found");
+        return StatusCode::FAILURE;
     }
-  }else {
-    ATH_MSG_ERROR( "no CaloCluster container found " );
-    return StatusCode::FAILURE;
-  }
 
-  //get RoI descriptor
-  SG::ReadHandle< TrigRoiDescriptorCollection > roisHandle = SG::makeHandle( m_roIInputKey, ctx );
-  ATH_MSG_DEBUG("Size of roisHandle: "<<roisHandle->size());
-  const TrigRoiDescriptor *roiDescriptor = roisHandle->at(0);
+    ATH_MSG_DEBUG("Size of vector CaloCluster container is: " << RoICaloClusterContainer->size());
 
-  // fill local variables for RoI reference position
-  float eta  = roiDescriptor->eta();
-  float phi  = roiDescriptor->phi();
-  float dEta = m_etaHalfWidth; 
-  float dPhi = m_phiHalfWidth;
+    // We first need to get the barycenter of the LCTopo jet, including all clusters
+    TLorentzVector tau_barycenter;
+    for(const xAOD::CaloCluster* cluster : *RoICaloClusterContainer) {
+        // Skip clusters with negative energy
+        if(cluster->e() < 0) continue;
 
-  float zed  = roiDescriptor->zed();
-  float zedPlus = roiDescriptor->zedPlus();
-  float zedMinus = roiDescriptor->zedMinus();
-  if(m_z0HalfWidth > 0.) {
-    zedPlus = zed + m_z0HalfWidth;
-    zedMinus = zed - m_z0HalfWidth;
-  }
+        tau_barycenter += cluster->p4();
+    }
 
-  ATH_MSG_DEBUG( "; RoI ID = " << roiDescriptor->roiId()
-                 << ": Eta = " << eta
-                 << ", Phi = " << phi );
+    // Determine the LCTopo jet pT at the detector axis
+    TLorentzVector tau_detector_axis;
+    for(const xAOD::CaloCluster* cluster : *RoICaloClusterContainer) {
+        // Skip clusters with negative energy
+        if(cluster->e() < 0) continue;
 
-  // Make a minimal effort to speed things up ;)
-  TLorentzVector myCluster;
-  TLorentzVector TauBarycenter(0., 0., 0., 0.);
+        // Skip clusters further than a maximum Delta R
+        if(tau_barycenter.DeltaR(cluster->p4()) > m_dRForCenter) continue;
 
-  xAOD::CaloClusterContainer::const_iterator clusterIt;
-  for (clusterIt=RoICaloClusterContainer->begin(); clusterIt != RoICaloClusterContainer->end(); ++clusterIt) {
-    if((*clusterIt)->e() < 0)
-      continue;
+        tau_detector_axis += cluster->p4();
+    }
 
-    myCluster.SetPtEtaPhiE((*clusterIt)->pt(), (*clusterIt)->eta(), (*clusterIt)->phi(), (*clusterIt)->e());
-    TauBarycenter += myCluster;
-  }
 
-  // Determine the LC tau pT at detector axis
-  TLorentzVector TauDetectorAxis(0.,0.,0.,0.);
-  for (clusterIt=RoICaloClusterContainer->begin(); clusterIt != RoICaloClusterContainer->end(); ++clusterIt) {
 
-    if((*clusterIt)->e() < 0)
-      continue;
+    //---------------------------------------------------------------
+    // Update the RoI
+    //---------------------------------------------------------------
+    
+    // Only update the roi if tau_detector_axis.Pt() > 0, i.e. if the calo cluster sum makes sense
+    if(tau_detector_axis.Pt() > 0) {
+        eta = tau_detector_axis.Eta();
+        phi = tau_detector_axis.Phi();
+    }
 
-    myCluster.SetPtEtaPhiE((*clusterIt)->pt(), (*clusterIt)->eta(), (*clusterIt)->phi(), (*clusterIt)->e());
-    if(TauBarycenter.DeltaR(myCluster) > m_dRForCenter)
-      continue;
+    // Create the new RoI
+    outputRoIHandle->push_back(std::make_unique<TrigRoiDescriptor>(
+        roiDescriptor->roiWord(), roiDescriptor->l1Id(), roiDescriptor->roiId(),
+        eta, eta-dEta, eta+dEta,
+        phi, CxxUtils::wrapToPi(phi-dPhi), CxxUtils::wrapToPi(phi+dPhi),
+        roiDescriptor->zed(), roiDescriptor->zedMinus(), roiDescriptor->zedPlus()
+    ));
 
-    TauDetectorAxis += myCluster;
-  } // end loop on clusters
 
-  //Only update the roi if TauDetectorAxis.Pt() is larger than zero, in other words, if the calo clusters sum makes sense
-  if(TauDetectorAxis.Eta()!=roiDescriptor->eta() && TauDetectorAxis.Pt()>0.) eta = TauDetectorAxis.Eta();
-  if(TauDetectorAxis.Phi()!=roiDescriptor->phi() && TauDetectorAxis.Pt()>0.) phi = TauDetectorAxis.Phi();
+    ATH_MSG_DEBUG("Input RoI: " << *roiDescriptor);
+    ATH_MSG_DEBUG("Output RoI: " << *outputRoIHandle->back());
 
-  // Prepare the new RoI
-  TrigRoiDescriptor *outRoi = new TrigRoiDescriptor(roiDescriptor->roiWord(), roiDescriptor->l1Id(), roiDescriptor->roiId(),
-                                                    eta, eta-dEta, eta+dEta,
-                                                    phi, CxxUtils::wrapToPi(phi-dPhi), CxxUtils::wrapToPi(phi+dPhi),
-                                                    zed, zedMinus, zedPlus);
-
-  ATH_MSG_DEBUG("Input RoI " << *roiDescriptor);
-  ATH_MSG_DEBUG("Output RoI " << *outRoi);
-
-  roICollection->push_back(outRoi);
-
-  // Save Outputs
-  ATH_MSG_DEBUG( "Saving RoIs to be used as input to Fast Tracking -- TO BE CHANGED -- ::: " << m_roIOutputKey.key() );
-  SG::WriteHandle< TrigRoiDescriptorCollection > outputRoiHandle = SG::makeHandle( m_roIOutputKey,ctx );
-  CHECK( outputRoiHandle.record( std::move( roICollection ) ) );
-
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
