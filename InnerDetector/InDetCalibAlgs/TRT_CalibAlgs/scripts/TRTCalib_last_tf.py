@@ -42,6 +42,16 @@ if __name__ == '__main__':
                             # Commented for now... path should be changed to the official one 
                             # help='Saving output for web display', default=trfArgClasses.argString('/afs/cern.ch/user/a/attrtcal/Tier0') , group='TRTCalib_last_tf')
     
+    # Notify people 
+    trf.parser.add_argument('--sendNotification',
+                            type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                            help='Notify the offline TRT calibration team', default=trfArgClasses.argBool(True) , group='TRTCalib_last_tf')
+    
+    # Email list 
+    trf.parser.add_argument('--emailList', nargs='+',
+                            type=trfArgClasses.argFactory(trfArgClasses.argList),
+                            help='Notify the offline TRT calibration team', default=trfArgClasses.argList(["Sergi.Rodriguez@cern.ch"]) , group='TRTCalib_last_tf')
+    
     trf.parseCmdLineArgs(sys.argv[1:])
     
     trf.execute()

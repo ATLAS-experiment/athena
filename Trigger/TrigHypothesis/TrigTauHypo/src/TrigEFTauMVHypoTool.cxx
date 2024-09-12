@@ -1,256 +1,233 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <list>
 #include <iterator>
 #include <sstream>
-//
-#include "GaudiKernel/StatusCode.h"
 
-#include "xAODTau/TauJetContainer.h"
+#include "GaudiKernel/StatusCode.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
-
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "xAODTau/TauJetContainer.h"
 
 #include "TrigEFTauMVHypoTool.h"
 
 using namespace TrigCompositeUtils;
 
-TrigEFTauMVHypoTool::TrigEFTauMVHypoTool( const std::string& type,
-                  const std::string& name, 
-                  const IInterface* parent ) 
-  : base_class( type, name, parent ),
-    m_decisionId( HLT::Identifier::fromToolName( name ) )
+TrigEFTauMVHypoTool::TrigEFTauMVHypoTool(const std::string& type, const std::string& name, const IInterface* parent)
+  : base_class(type, name, parent), 
+    m_decisionId(HLT::Identifier::fromToolName(name))
 {
+
 }
+
 
 TrigEFTauMVHypoTool::~TrigEFTauMVHypoTool()
 {  
+
 }
+
 
 StatusCode TrigEFTauMVHypoTool::initialize()
 {
-  
-  ATH_MSG_DEBUG( "in initialize()" );
-  
-  ATH_MSG_DEBUG( "TrigEFTauMVHypoTool will cut on ");
-  ATH_MSG_DEBUG( "param NTrackMin " << m_numTrackMin );
-  ATH_MSG_DEBUG( "param NTrackMax " << m_numTrackMax );
-  ATH_MSG_DEBUG( "param NWideTrackMax " << m_numWideTrackMax );
-  ATH_MSG_DEBUG( "param EtCalib " << m_EtCalibMin );
-  ATH_MSG_DEBUG( "param Level " << m_level );
-  ATH_MSG_DEBUG( "param Method " << m_method );
-  ATH_MSG_DEBUG( "param Highpt with thrs " << m_highpt << " " << m_highpttrkthr <<  " " << m_highptidthr << " " << m_highptjetthr );
-  if (m_perfTrackPtCut>0.) ATH_MSG_DEBUG( "param perfTrackPtCut: " << m_perfTrackPtCut );
-  ATH_MSG_DEBUG( "------ ");
+    ATH_MSG_DEBUG(name() << ": in initialize()");
 
-  if( (m_numTrackMin >  m_numTrackMax) || m_level == -1 || (m_highptidthr > m_highptjetthr))
-  {
-    ATH_MSG_ERROR( "TrigEFTauMVHypoTool is uninitialized! " );
-    return StatusCode::FAILURE;
-  }
-  
-  if( m_method == 0 && m_level != -1111)
-  {
-    ATH_MSG_ERROR( "Incorrect combination of Method and Level." );
-    return StatusCode::FAILURE;
-  } 
-  else if((m_level<0 && m_level!=-1111) || m_level>3 )
-  {
-    ATH_MSG_ERROR( "Incorrect Level value provided.");
-    return StatusCode::FAILURE;
-  }
+    ATH_MSG_DEBUG("TrigEFTauMVHypoTool will cut on:");
+    ATH_MSG_DEBUG(" - PtMin: " << m_ptMin);
+    ATH_MSG_DEBUG(" - NTrackMin: " << m_numTrackMin);
+    ATH_MSG_DEBUG(" - NTrackMax: " << m_numTrackMax);
+    ATH_MSG_DEBUG(" - NWideTrackMax: " << m_numWideTrackMax);
+    if(m_trackPtCut >= 0) ATH_MSG_DEBUG(" - trackPtCut: " << m_trackPtCut);
+    ATH_MSG_DEBUG(" - IDMethod: " << m_idMethod);
+    ATH_MSG_DEBUG(" - IDWP: " << m_idWP);
+    ATH_MSG_DEBUG(" - HighPtSelection: " << m_doHighPtSelection);
+    if(m_doHighPtSelection) {
+        ATH_MSG_DEBUG("   - HighPtSelectionTrkThr: " << m_highPtTrkThr);
+        ATH_MSG_DEBUG("   - HighPtSelectionLooseIDThr: " << m_highPtLooseIDThr);
+        ATH_MSG_DEBUG("   - HighPtSelectionJetThr: " << m_highPtJetThr);
+    }
 
-  return StatusCode::SUCCESS;
+    if((m_numTrackMin > m_numTrackMax) || (m_highPtLooseIDThr > m_highPtJetThr)) {
+        ATH_MSG_ERROR("Invalid tool configuration!");
+        return StatusCode::FAILURE;
+    }
+
+    if(!(m_idMethod == IDMethod::Disabled || m_idMethod == IDMethod::RNN)) {
+        ATH_MSG_ERROR("Invalid IDMethod value, " << m_idMethod);
+        return StatusCode::FAILURE;
+    } else if(m_idWP < IDWP::None || m_idWP > IDWP::Tight) {
+        ATH_MSG_ERROR("Invalid IDWP value, " << m_idWP);
+        return StatusCode::FAILURE;
+    } else if(m_idMethod == IDMethod::Disabled && m_idWP != IDWP::None) {
+        ATH_MSG_ERROR("IDMethod=0 must be set together with IDWP=-1");
+    }
+
+    return StatusCode::SUCCESS;
 }
 
 
-bool TrigEFTauMVHypoTool::decide(const ITrigEFTauMVHypoTool::TauJetInfo& input ) const
+bool TrigEFTauMVHypoTool::decide(const ITrigEFTauMVHypoTool::TauJetInfo& input) const
 {
+    ATH_MSG_DEBUG(name() << ": in execute()");
 
-  ATH_MSG_DEBUG(name() << ": in execute()" );
-  // general reset
-  bool pass=false;
+    // Tau pass flag
+    bool pass = false;
 
-  using namespace Monitored;
+    auto nInputTaus         = Monitored::Scalar<int>("nInputTaus", -1);
+    auto passedCuts         = Monitored::Scalar<int>("CutCounter", 0);
+    auto ptAccepted         = Monitored::Scalar<float>("ptAccepted", -1);
+    auto nTrackAccepted	    = Monitored::Scalar<int>("nTrackAccepted", -1);
+    auto nWideTrackAccepted = Monitored::Scalar<int>("nWideTrackAccepted", -1);
+    auto IDScore_0p         = Monitored::Scalar<float>("RNNJetScoreAccepted_0p", -1);
+    auto IDScoreSigTrans_0p = Monitored::Scalar<float>("RNNJetScoreSigTransAccepted_0p", -1);
+    auto IDScore_1p         = Monitored::Scalar<float>("RNNJetScoreAccepted_1p", -1);
+    auto IDScoreSigTrans_1p = Monitored::Scalar<float>("RNNJetScoreSigTransAccepted_1p", -1);
+    auto IDScore_mp         = Monitored::Scalar<float>("RNNJetScoreAccepted_mp", -1);
+    auto IDScoreSigTrans_mp = Monitored::Scalar<float>("RNNJetScoreSigTransAccepted_mp", -1);  
 
-  auto PassedCuts          = Monitored::Scalar<int>( "CutCounter", -1 );
-  auto ptAccepted          = Monitored::Scalar<float>( "ptAccepted", -1);
-  auto nTrackAccepted	   = Monitored::Scalar<int>( "nTrackAccepted", -1);
-  auto nWideTrackAccepted  = Monitored::Scalar<int>( "nWideTrackAccepted", -1);
-  auto ninputTaus          = Monitored::Scalar<int>( "nInputTaus", -1);
-  auto RNNJetScore_0p         = Monitored::Scalar<float>( "RNNJetScoreAccepted_0p", -1);
-  auto RNNJetScoreSigTrans_0p = Monitored::Scalar<float>( "RNNJetScoreSigTransAccepted_0p", -1);
-  auto RNNJetScore_1p         = Monitored::Scalar<float>( "RNNJetScoreAccepted_1p", -1);
-  auto RNNJetScoreSigTrans_1p = Monitored::Scalar<float>( "RNNJetScoreSigTransAccepted_1p", -1);
-  auto RNNJetScore_mp         = Monitored::Scalar<float>( "RNNJetScoreAccepted_mp", -1);
-  auto RNNJetScoreSigTrans_mp = Monitored::Scalar<float>( "RNNJetScoreSigTransAccepted_mp", -1);  
+    auto monitorIt = Monitored::Group(m_monTool,
+                                        nInputTaus, passedCuts,
+                                        ptAccepted,  nTrackAccepted, nWideTrackAccepted,
+                                        IDScore_0p, IDScoreSigTrans_0p,
+                                        IDScore_1p, IDScoreSigTrans_1p, 
+                                        IDScore_mp, IDScoreSigTrans_mp);
 
-  auto monitorIt = Monitored::Group(m_monTool, PassedCuts, ptAccepted,  nTrackAccepted, nWideTrackAccepted, ninputTaus, RNNJetScore_0p, RNNJetScoreSigTrans_0p, RNNJetScore_1p, RNNJetScoreSigTrans_1p, RNNJetScore_mp, RNNJetScoreSigTrans_mp );
-
-  // general reset
-  PassedCuts = 0;
-
-  if ( m_acceptAll ) {
-    pass = true;
-    ATH_MSG_DEBUG( "AcceptAll property is set: taking all events" );
-  } else {
-    pass = false;
-    ATH_MSG_DEBUG( "AcceptAll property not set: applying selection" );
-  }
-
-  //get RoI descriptor
-  auto roiDescriptor = input.roi;
-  float roIZ   = roiDescriptor->zed();
-  float roIEta = roiDescriptor->eta();
-  float roIPhi = roiDescriptor->phi();
-
-  ATH_MSG_DEBUG( "Input RoI eta: " << roIEta << " Input RoI phi: " << roIPhi << " Input RoI z: " << roIZ);
-
-  auto TauContainer = input.taujetcontainer;
-  ninputTaus = TauContainer->size();
- 
-  for(auto Tau: *TauContainer){
- 
-    ATH_MSG_DEBUG( " tauRec candidate ");
-    
-    double EFet = Tau->pt()*1e-3;
-    
-    if(!( EFet > m_EtCalibMin*1e-3)) continue;
-
-    ATH_MSG_DEBUG( "Et Calib "<<EFet );
-
-    PassedCuts++;
-    ptAccepted = EFet;
-
-    int numTrack = 0, numWideTrack = 0;
-    // raise the track pt threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
-    if (m_perfTrackPtCut>0.) {
-      for (const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
-	if (track->pt() > m_perfTrackPtCut) numTrack ++;
-      }
-      for (const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
-	if (track->pt() > m_perfTrackPtCut) numWideTrack++;
-      }
-    }
-    else {
-      numTrack = Tau->nTracks();
-      numWideTrack = Tau->nTracksIsolation();
+    if(m_acceptAll) {
+        pass = true;
+        ATH_MSG_DEBUG("AcceptAll property is set: taking all events that pass the pT cut");
+    } else {
+        ATH_MSG_DEBUG("AcceptAll property not set: applying selection");
     }
 
-    ATH_MSG_DEBUG( "Track size "<<numTrack );	
-    ATH_MSG_DEBUG( "Wide Track size "<<numWideTrack );
+    // Debugging location of the TauJet RoI
+    ATH_MSG_DEBUG("Input RoI eta: " << input.roi->eta() << ", phi: " << input.roi->phi() << ", z: " << input.roi->zed());
 
-    // turn off track selection at highpt
-    bool applyTrkSel(true);
-    bool applyMaxTrkSel(true);
-    if(m_highpt && (EFet > m_highpttrkthr*1e-3) ) applyTrkSel = false;
-    if(m_highpt && (EFet > m_highptjetthr*1e-3) ) applyMaxTrkSel = false;
+    const xAOD::TauJetContainer* TauContainer = input.taujetcontainer;
+    nInputTaus = TauContainer->size();
+    // There should only be a single TauJet in the TauJetContainer; just in case we still run the loop
+    for(const xAOD::TauJet* Tau: *TauContainer) {
+        ATH_MSG_DEBUG(" New HLT TauJet candidate:");
+        
+        float pT = Tau->pt();
+        
+        //---------------------------------------------------------
+        // Calibrated tau pT cut ('idperf' step)
+        //---------------------------------------------------------
+        ATH_MSG_DEBUG(" pT: " << pT / Gaudi::Units::GeV);
 
-    if(applyMaxTrkSel && !m_acceptAll) {
-      if( !(numTrack <= m_numTrackMax) ) continue;
+        if(!(pT > m_ptMin)) continue;
+        passedCuts++;
+        ptAccepted = pT / Gaudi::Units::GeV;
+
+
+        //---------------------------------------------------------
+        // Track counting ('perf' step)
+        //---------------------------------------------------------
+        int numTrack = 0, numWideTrack = 0;
+        if(m_trackPtCut >= 0) {
+            // Raise the track pT threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
+            // Overrides the default 1 GeV cut by the InDetTrackSelectorTool used during the TauJet construction
+            for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
+	            if(track->pt() > m_trackPtCut) numTrack++;
+            }
+            for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
+	            if(track->pt() > m_trackPtCut) numWideTrack++;
+            }
+        } else {
+            // Use the default 1 GeV selection in the InDetTrackSelectorTool, executed during the TauJet construction
+            numTrack = Tau->nTracks();
+            numWideTrack = Tau->nTracksIsolation();
+        }
+
+        ATH_MSG_DEBUG(" N Tracks: " << numTrack);
+        ATH_MSG_DEBUG(" N Wide Tracks: " << numWideTrack);
+
+        // Apply NTrackMin and NWideTrackMax cuts:
+        if(!m_acceptAll && !(m_doHighPtSelection && pT > m_highPtTrkThr)) {
+            if(!(numTrack >= m_numTrackMin)) continue;
+            if(!(numWideTrack <= m_numWideTrackMax)) continue;
+        }
+        // Apply NTrackMax cut:
+        if(!m_acceptAll && !(m_doHighPtSelection && pT > m_highPtJetThr)) {
+            if(!(numTrack <= m_numTrackMax)) continue;
+        }
+        // Note: we disabled the track selection for high pT taus
+
+        passedCuts++;
+        nTrackAccepted = numTrack;
+        nWideTrackAccepted = numWideTrack;  
+
+
+        //---------------------------------------------------------
+        // ID WP selection (ID step)
+        //---------------------------------------------------------
+        int local_idWP = m_idWP;
+        
+        // Loosen/disable the ID WP cut for high pT taus
+        if(m_doHighPtSelection && pT > m_highPtLooseIDThr && m_idWP > IDWP::Loose) local_idWP = IDWP::Loose; // Set ID WP to Loose
+        if(m_doHighPtSelection && pT > m_highPtJetThr) local_idWP = IDWP::None; // Disable the ID WP cut
+
+        ATH_MSG_DEBUG(" Local Tau ID WP: " << local_idWP);
+
+        if(m_idMethod == IDMethod::RNN) { // RNN/DeepSet scores
+            if(!Tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)) {
+                ATH_MSG_WARNING(" RNNJetScoreSigTrans not available. Make sure the TauWPDecorator too lis run for the RNN Tau ID!");
+            }
+        
+            ATH_MSG_DEBUG(" RNNJetScoreSigTrans: " << Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans));
+        
+            if(!m_acceptAll && local_idWP != IDWP::None) {
+                if(local_idWP == IDWP::VeryLoose && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)) {
+                    continue;
+                } else if(local_idWP == IDWP::Loose && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose)) {
+                    continue;
+                } else if(local_idWP == IDWP::Medium && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) {
+                    continue;
+                } else if(local_idWP == IDWP::Tight && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigTight)) {
+                    continue;
+                }
+            }
+
+            // Monitor ID scores
+            if(Tau->nTracks() == 0) {
+                IDScore_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+                IDScoreSigTrans_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+            } else if(Tau->nTracks() == 1) {
+                IDScore_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+                IDScoreSigTrans_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+            } else { // MP tau
+                IDScore_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
+                IDScoreSigTrans_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
+            }
+        }
+
+        passedCuts++;
+
+        
+        //---------------------------------------------------------
+        // At least one Tau passed all the cuts. Accept the event!
+        //---------------------------------------------------------
+        pass=true;
+
+        ATH_MSG_DEBUG(" Pass hypo tool: " << pass);
     }
-    if(applyTrkSel && !m_acceptAll) {
-      if( !(numTrack >= m_numTrackMin) ) continue;
-      if( !(numWideTrack <= m_numWideTrackMax)  ) continue;
-    }
-
-    PassedCuts++;
-    nTrackAccepted = numTrack;
-    nWideTrackAccepted = numWideTrack;  
-
-    auto local_level = m_level;
-    //loosen and turn off ID cut at highpt
-    if(m_highpt && (EFet > m_highptidthr*1e-3) && m_level>1) local_level = 1; 
-    if(m_highpt && (EFet > m_highptjetthr*1e-3) ) local_level = -1111;
-
-    ATH_MSG_DEBUG( "Local level " << local_level );
- 
-    //No tau ID
-    if(m_method == 0)
-    {
-      pass = true;
-      PassedCuts++;
-
-      if(Tau->nTracks() == 0){
-         RNNJetScore_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else if ( Tau->nTracks() == 1 ) {
-         RNNJetScore_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else {
-         RNNJetScore_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      }
-    }
-    else if(m_method == 1)
-    {
-      if(!Tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans))
-      ATH_MSG_WARNING( "RNNJetScoreSigTrans not available. Make sure TauWPDecorator is run for RNN!" );
-    
-      ATH_MSG_DEBUG( "RNNJetScoreSigTrans "<< Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans) );
-    
-      if(local_level == -1111)
-      {  //noCut, accept this TE
-         pass = true;
-         PassedCuts++;
-      }
-      else if (local_level == 0 && Tau->isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose) == 0 && !m_acceptAll)
-         continue;
-      else if (local_level == 1 && Tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose) == 0 && !m_acceptAll)
-         continue;
-      else if (local_level == 2 && Tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium) == 0 && !m_acceptAll)
-         continue;
-      else if (local_level == 3  && Tau->isTau(xAOD::TauJetParameters::JetRNNSigTight) == 0 && !m_acceptAll)
-         continue;
-
-      PassedCuts++;
-
-      if(Tau->nTracks() == 0){
-         RNNJetScore_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_0p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else if ( Tau->nTracks() == 1 ) {
-         RNNJetScore_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_1p = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      } else {
-         RNNJetScore_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScore);
-         RNNJetScoreSigTrans_mp = Tau->discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-      }
-    }
-    else
-    {
-       ATH_MSG_ERROR( " no valid method defined ");	
-       continue;
-    }
-    
-    //-------------------------------------------------
-    // At least one Tau matching passed all cuts.
-    // Accept the event!
-    //-------------------------------------------------
-    
-    pass=true;
-    
-    ATH_MSG_DEBUG( "pass hypo tool: "<<pass);
-    
-  } // end of loop in tau objects.
   
-  
-  return pass;
-  
+    return pass;
 }
 
-StatusCode TrigEFTauMVHypoTool::decide( std::vector<TauJetInfo>& input )  const {
 
-  for ( auto& i: input ) {
-    if ( passed ( m_decisionId.numeric(), i.previousDecisionIDs ) ) {
-      if ( decide( i ) ) {
-	addDecisionID( m_decisionId, i.decision );
-      }
+StatusCode TrigEFTauMVHypoTool::decide(std::vector<TauJetInfo>& input) const {
+    for(auto& i : input) {
+        if(passed(m_decisionId.numeric(), i.previousDecisionIDs)) {
+            if(decide(i)) {
+	            addDecisionID(m_decisionId, i.decision);
+            }
+        }
     }
-  }
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 

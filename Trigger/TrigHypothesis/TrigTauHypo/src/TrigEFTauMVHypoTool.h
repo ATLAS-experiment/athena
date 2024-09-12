@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGEFTAUMVHYPOTOOL_H
@@ -12,42 +12,50 @@
 
 
 class TrigEFTauMVHypoTool : public extends<AthAlgTool, ITrigEFTauMVHypoTool> {
- public:
-  TrigEFTauMVHypoTool( const std::string& type, 
-           const std::string& name, 
-           const IInterface* parent );
+public:
+    TrigEFTauMVHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
+    virtual ~TrigEFTauMVHypoTool();
 
-  virtual ~TrigEFTauMVHypoTool();
+    virtual StatusCode initialize() override;
 
-  virtual StatusCode initialize() override;
+    virtual StatusCode decide(std::vector<ITrigEFTauMVHypoTool::TauJetInfo>& input) const override;
+    virtual bool decide(const ITrigEFTauMVHypoTool::TauJetInfo& i) const override;
 
-  virtual StatusCode decide( std::vector<ITrigEFTauMVHypoTool::TauJetInfo>& input )  const override;
+private:
+    enum IDMethod {
+        Disabled = 0,
+        RNN = 1
+    };
 
-  virtual bool decide( const ITrigEFTauMVHypoTool::TauJetInfo& i ) const override;
+    enum IDWP {
+        None = -1,
+        VeryLoose = 0,
+        Loose = 1,
+        Medium = 2,
+        Tight = 3
+    };
 
- private:
+    HLT::Identifier m_decisionId;
 
-  HLT::Identifier m_decisionId;
+    Gaudi::Property<float> m_ptMin {this, "PtMin", -10000, "Tau pT minimum cut"};
 
-  Gaudi::Property<int>  m_numTrackMin{ this, "numTrackMin", 0, "Minimum number of tracks" };
-  Gaudi::Property<int>  m_numTrackMax{ this, "numTrackMax", 5, "Maximum number of tracks" };
-  Gaudi::Property<float>  m_numWideTrackMax{ this, "numWideTrackMax",999, "Maximum number of wide tracks" };
+    Gaudi::Property<int> m_numTrackMin {this, "NTrackMin", 0, "Minimum number of tracks"};
+    Gaudi::Property<int> m_numTrackMax {this, "NTrackMax", 5, "Maximum number of tracks"};
+    Gaudi::Property<int> m_numWideTrackMax {this, "NWideTrackMax", 999, "Maximum number of wide tracks"};
+    Gaudi::Property<float> m_trackPtCut {this, "TrackPtCut", -1, "Only count tracks above this pT threshold (override the 1 GeV cut in the InDetTrackSelectorTool)"};
 
-  Gaudi::Property<double>  m_EtCalibMin{ this, "EtCalibMin", -10000., "pT Minimum cut" };
-  Gaudi::Property<int>  m_level{ this, "level", -1, "Select ID Working point" };
-  Gaudi::Property<int>  m_method{ this, "method", 0, "Select ID method" };
-  Gaudi::Property<bool>  m_highpt{ this, "highpt", true , "Turn on/off high pt selection" };
-  Gaudi::Property<double>  m_highpttrkthr{ this, "highpttrkthr", 200000. , "Track threshold for high pt taus" };
-  Gaudi::Property<double>  m_highptidthr{ this, "highptidthr", 280000., "pT threshold for loosening ID level cut" };
-  Gaudi::Property<double>  m_highptjetthr{ this, "highptjetthr", 440000., "pT threshold for disabling ID level cut" };
+    Gaudi::Property<int> m_idMethod {this, "IDMethod", IDMethod::Disabled, "ID WP evaluation method (0: Disabled, 1: RNN)"};
+    Gaudi::Property<int> m_idWP {this, "IDWP", IDWP::None, "Minimum ID Working Point (-1: None, 0: VeryLoose, 1: Loose, 2: Medium, 3: Tight)"};
 
-  // this property is to override the track pt cut of the InDetTrackSelectorTool (1 GeV) when counting tracks in the 'perf' step
-  Gaudi::Property<double>  m_perfTrackPtCut{ this, "perfTrackPtCut", 0., "Count tracks above pt threshold in perf step" };
+    // High pT Tau selection
+    Gaudi::Property<bool> m_doHighPtSelection {this, "DoHighPtSelection", true , "Turn on/off high pT Tau selection"};
+    Gaudi::Property<float> m_highPtTrkThr {this, "HighPtSelectionTrkThr", 200000, "Tau pT threshold for disabling the NTrackMin and NWideTrackMax cuts" };
+    Gaudi::Property<float> m_highPtLooseIDThr {this, "HighPtSelectionLooseIDThr", 280000, "Tau pT threshold for loosening the IDWP cut to Loose (IDWP=1)"};
+    Gaudi::Property<float> m_highPtJetThr {this, "HighPtSelectionJetThr", 440000, "Tau pT threshold for disabling IDWP and NTrackMax cuts"};
 
-  Gaudi::Property<bool>  m_acceptAll{ this, "AcceptAll", false, "Ignore selection" };
+    Gaudi::Property<bool> m_acceptAll {this, "AcceptAll", false, "Ignore selection"};
 
-  ToolHandle<GenericMonitoringTool> m_monTool{ this, "MonTool", "", "Monitoring tool" };
-
-
+    ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 };
+
 #endif

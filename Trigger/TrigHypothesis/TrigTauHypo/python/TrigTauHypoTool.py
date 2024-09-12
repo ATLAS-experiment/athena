@@ -41,21 +41,21 @@ thresholdsEF = {
     ('tightRNN', 160): TauCuts(3, 1, 160000.0, 3),
     ('tightRNN', 180): TauCuts(3, 1, 180000.0, 3),
     ('tightRNN', 200): TauCuts(3, 1, 200000.0, 3),
-    ('perf',0)       : TauCuts(3, 1,0.,-1111),
-    ('perf',20)      : TauCuts(3, 1,20000.,-1111),
-    ('perf',25)      : TauCuts(3, 1,25000.,-1111),
-    ('perf',30)      : TauCuts(3, 1,30000.,-1111),
-    ('perf',35)      : TauCuts(3, 1,35000.,-1111),
-    ('perf',160)  : TauCuts(3, 1,160000.,-1111),
-    ('perf',200)  : TauCuts(3, 1,200000.,-1111),
-    ('idperf',0)     : TauCuts(3,999, 0.,2),
-    ('idperf',20)    : TauCuts(3,999,20000.,2),
-    ('idperf',25)    : TauCuts(3,999,25000.,2),
-    ('idperf',30)    : TauCuts(3,999,30000.,2),
-    ('idperf',35)    : TauCuts(3,999,35000.,2),
-    ('idperf',80)    : TauCuts(3,999,80000.,2),
-    ('idperf',160): TauCuts(3,999,160000.,2),    
-    ('idperf',200): TauCuts(3,999,200000.,2)
+    ('perf',0)       : TauCuts(3, 1,0.,-1),
+    ('perf',20)      : TauCuts(3, 1,20000.,-1),
+    ('perf',25)      : TauCuts(3, 1,25000.,-1),
+    ('perf',30)      : TauCuts(3, 1,30000.,-1),
+    ('perf',35)      : TauCuts(3, 1,35000.,-1),
+    ('perf',160)  : TauCuts(3, 1,160000.,-1),
+    ('perf',200)  : TauCuts(3, 1,200000.,-1),
+    ('idperf',0)     : TauCuts(3,999, 0.,-1),
+    ('idperf',20)    : TauCuts(3,999,20000.,-1),
+    ('idperf',25)    : TauCuts(3,999,25000.,-1),
+    ('idperf',30)    : TauCuts(3,999,30000.,-1),
+    ('idperf',35)    : TauCuts(3,999,35000.,-1),
+    ('idperf',80)    : TauCuts(3,999,80000.,-1),
+    ('idperf',160): TauCuts(3,999,160000.,-1),    
+    ('idperf',200): TauCuts(3,999,200000.,-1)
     }    
 
 # ATR-22644 + ATR-23239
@@ -92,67 +92,75 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
     
         currentHypo = CompFactory.TrigEFTauMVHypoTool(name)
 
+        # Only monitor chains with the 'tauMon:online' groups
         if 'tauMon:online' in chainDict['monGroups']:
-           monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
-           monTool.HistPath = 'TrigTauRecMerged_TrigEFTauMVHypo/' + name
+            monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
+            monTool.HistPath = f'TrigTauRecMerged_TrigEFTauMVHypo/{name}'
 
-           # define quantities to be monitored
-           monTool.defineHistogram("CutCounter", path='EXPERT',type='TH1I',title=';CutCounter; Entries', xbins=10, xmin=0.,xmax=10.) 
-           monTool.defineHistogram("ptAccepted", path='EXPERT',type='TH1F',title=';ptAccepted; Entries', xbins=80, xmin=0.,xmax=800.)
-           monTool.defineHistogram("nTrackAccepted", path='EXPERT',type='TH1F',title=';nTrackAccepted; Entries', xbins=10, xmin=0.,xmax=10.)
-           monTool.defineHistogram("nWideTrackAccepted", path='EXPERT',type='TH1F',title=';nWideTrackAccepted; Entries', xbins=10, xmin=0.,xmax=10.)       
-           monTool.defineHistogram("nInputTaus", path='EXPERT',type='TH1F',title=';nInputTaus; Entries', xbins=10, xmin=0.,xmax=10.) 
-           monTool.defineHistogram("RNNJetScoreAccepted_0p", path='EXPERT',type='TH1F',title=';RNN score Accepted for 0 prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           monTool.defineHistogram("RNNJetScoreSigTransAccepted_0p", path='EXPERT',type='TH1F',title=';RNN score sig trans Accepted for 0 prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           monTool.defineHistogram("RNNJetScoreAccepted_1p", path='EXPERT',type='TH1F',title=';RNN score Accepted for 1 prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           monTool.defineHistogram("RNNJetScoreSigTransAccepted_1p", path='EXPERT',type='TH1F',title=';RNN score sig trans Accepted for 1 prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           monTool.defineHistogram("RNNJetScoreAccepted_mp", path='EXPERT',type='TH1F',title=';RNN score Accepted for multi prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           monTool.defineHistogram("RNNJetScoreSigTransAccepted_mp", path='EXPERT',type='TH1F',title=';RNN score sig trans Accepted for multi prong taus; Entries', xbins=40, xmin=0.,xmax=1.)
-           currentHypo.MonTool = monTool
+            # Define quantities to be monitored
+            monTool.defineHistogram('nInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10) 
+
+            labels = ['Initial', 'p_{T}', 'NTracks & NWideTracks', 'ID']
+            monTool.defineHistogram('CutCounter', path='EXPERT', type='TH1I', title='Passed Tau cuts; Cut; Entries', xbins=10, xmin=0, xmax=10, xlabels=labels)
+
+            monTool.defineHistogram('ptAccepted', path='EXPERT', type='TH1F', title='Accepted Tau p_{T}; p_{T} [GeV]; Entries', xbins=80, xmin=0, xmax=800)
+            monTool.defineHistogram('nTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Tracks; N Tracks; Entries', xbins=10, xmin=0, xmax=10)
+            monTool.defineHistogram('nWideTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Wide Tracks; N Wide Tracks; Entries', xbins=10, xmin=0, xmax=10)       
+
+            monTool.defineHistogram('RNNJetScoreAccepted_0p', path='EXPERT', type='TH1F', title='Accepted 0-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
+            monTool.defineHistogram('RNNJetScoreSigTransAccepted_0p', path='EXPERT', type='TH1F', title='Accepted 0-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
+
+            monTool.defineHistogram('RNNJetScoreAccepted_1p', path='EXPERT', type='TH1F', title='Accepted 1-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
+            monTool.defineHistogram('RNNJetScoreSigTransAccepted_1p', path='EXPERT', type='TH1F', title='Accepted 1-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
+
+            monTool.defineHistogram('RNNJetScoreAccepted_mp', path='EXPERT', type='TH1F', title='Accepted multi-prong Tau ID score; Score; Entries', xbins=40, xmin=0, xmax=1)
+            monTool.defineHistogram('RNNJetScoreSigTransAccepted_mp', path='EXPERT', type='TH1F', title='Accepted multi-prong Tau ID transformed score; Transformed Signal Score; Entries', xbins=40, xmin=0, xmax=1)
+
+            currentHypo.MonTool = monTool
 
  
-        # setup the Hypo parameter
+        # Setup the Hypo parameter
         theThresh = thresholdsEF[(criteria, int(threshold))]
-        currentHypo.numTrackMax = theThresh.numTrackMax
-        currentHypo.numWideTrackMax = theThresh.numWideTrackMax
-        currentHypo.EtCalibMin  = theThresh.EtCalibMin
-        currentHypo.level       = theThresh.level
-        currentHypo.method      = 1   
+        currentHypo.PtMin           = theThresh.EtCalibMin
+        currentHypo.NTrackMax       = theThresh.numTrackMax
+        currentHypo.NWideTrackMax   = theThresh.numWideTrackMax
+        currentHypo.IDMethod        = 1 # RNN Score
+        currentHypo.IDWP            = theThresh.level
      
-        if criteria in [ 'verylooseRNN', 'looseRNN', 'mediumRNN', 'tightRNN' ]:
-            currentHypo.method      = 1
-        elif 'idperf' in criteria: 
-            currentHypo.AcceptAll = True
-        elif 'perf' in criteria:
-            currentHypo.method      = 0
+        if 'idperf' in criteria: 
+            currentHypo.AcceptAll   = True
 
         # 2023 DeepSet triggers
         if chainPart['preselection'] == 'tracktwoMVA':
-            currentHypo.highptidthr = 200e3
-            currentHypo.highptjetthr = 430e3
-            currentHypo.perfTrackPtCut = 1.5e3
+            currentHypo.HighPtSelectionLooseIDThr = 200e3
+            currentHypo.HighPtSelectionJetThr = 430e3
+            currentHypo.TrackPtCut = 1.5e3
 
-    elif criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion' ]: # ATR-22644
+    elif criteria in ['dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'singlepion']: # ATR-22644
         currentHypo = CompFactory.TrigEFTauDiKaonHypoTool(name)
-        monTool = GenericMonitoringTool(flags, 'MonTool_' + name)
-        monTool.HistPath = 'ComboHypo/' + name.replace("leg001_","")
+        monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
+        monTool.HistPath = 'ComboHypo/' + name.replace('leg001_', '')
 
-        monTool.defineHistogram('massTrkSysAccepted',path='EXPERT',type='TH1F',title=';DiPion Mass [GeV]; Entries', xbins=50, xmin=0.,xmax=3.)
-        monTool.defineHistogram('massTrkSysKaonAccepted',path='EXPERT',type='TH1F',title=';DiKaon Mass [GeV]; Entries', xbins=50, xmin=0.,xmax=3.)
-        monTool.defineHistogram('massTrkSysKaonPiAccepted',path='EXPERT',type='TH1F',title=';KaonPion Mass [GeV]; Entries', xbins=50, xmin=0.,xmax=3.)
-        monTool.defineHistogram('leadTrkPtAccepted',path='EXPERT',type='TH1F',title=';Leading Track p_{T} [GeV]; Entries', xbins=50, xmin=0.,xmax=300.)
-        monTool.defineHistogram('ptAccepted',path='EXPERT',type='TH1F',title=';p_{T}(#tau) [GeV]; Entries', xbins=50, xmin=0.,xmax=300.)
-        monTool.defineHistogram('nTrackAccepted',path='EXPERT',type='TH1F',title=';nTracks; Entries', xbins=10, xmin=-0.5,xmax=9.5)
-        monTool.defineHistogram('nWideTrackAccepted',path='EXPERT',type='TH1F',title=';nWideTracks; Entries', xbins=10, xmin=-0.5,xmax=9.5)
-        monTool.defineHistogram('dRAccepted',path='EXPERT',type='TH1F',title=';#DeltaR^{max}; Entries ', xbins=40, xmin=0.,xmax=0.4)
-        monTool.defineHistogram('etOverPtLeadTrkAccepted',path='EXPERT',type='TH1F',title=';etOverPtLeadTrk; Entries', xbins=50, xmin=0.,xmax=5.)
-        monTool.defineHistogram('EMOverTrkSysPAccepted',path='EXPERT',type='TH1F',title=';EMOverTrkSysP; Entries', xbins=50, xmin=0.,xmax=5.)  
-        monTool.defineHistogram('nInputTaus',path='EXPERT',type='TH1F',title=';nInputTaus; Entries', xbins=10, xmin=-0.5,xmax=9.5)  
+        monTool.defineHistogram('nInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10) 
 
-        currentHypo.MonTool       = monTool
+        monTool.defineHistogram('ptAccepted', path='EXPERT', type='TH1F', title='Accepted Tau p_{T}; p_{T} [GeV]; Entries', xbins=80, xmin=0, xmax=800)
+        monTool.defineHistogram('nTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Tracks; N Tracks; Entries', xbins=10, xmin=0, xmax=10)
+        monTool.defineHistogram('nWideTrackAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Wide Tracks; N Wide Tracks; Entries', xbins=10, xmin=0, xmax=10)       
+
+        monTool.defineHistogram('dRAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Maximum #DeltaR(Tau, Tracks); Maximum #DeltaR(Tau, Tracks); Entries', xbins=40, xmin=0, xmax=0.4)
+        monTool.defineHistogram('massTrkSysAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Di-pion system Mass; m_{#pi#pi} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
+        monTool.defineHistogram('massTrkSysKaonAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Di-kaon system Mass; m_{KK} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
+        monTool.defineHistogram('massTrkSysKaonPiAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Kaon+Pion system Mass; m_{K#pi} [GeV]; Entries', xbins=50, xmin=0, xmax=3)
+        monTool.defineHistogram('leadTrkPtAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Leading Track p_{T}; Leading Track p_{T} [GeV]; Entries', xbins=50, xmin=0, xmax=300)
+        monTool.defineHistogram('etOverPtLeadTrkAccepted', path='EXPERT', type='TH1F', title='Accepted Tau (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; (E_{T}^{EM} + E_{T}^{Had}) / p_{T}^{lead trk.}; Entries', xbins=50, xmin=0, xmax=5)
+        monTool.defineHistogram('EMOverTrkSysPAccepted', path='EXPERT', type='TH1F', title='Accepted Tau E_{T}^{EM} over Track system p_{T}; E_{T}^{EM} / p_{T}^{trk sys}; Entries', xbins=50, xmin=0, xmax=5)
+
+        currentHypo.MonTool = monTool
 
         if criteria in [ 'dikaonmass', 'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4']:
             theThresh = thresholdsEF_dikaon[(criteria, int(threshold))]
+            currentHypo.PtMin                  = theThresh.EtCalibMin 
+            currentHypo.leadTrkPtMin           = theThresh.leadTrkPtMin
             currentHypo.massTrkSysMin          = theThresh.massTrkSysMin          
             currentHypo.massTrkSysMax          = theThresh.massTrkSysMax          
             currentHypo.massTrkSysKaonMin      = theThresh.massTrkSysKaonMin      
@@ -160,14 +168,12 @@ def TrigEFTauMVHypoToolFromDict( flags, chainDict ):
             currentHypo.massTrkSysKaonPiMin    = theThresh.massTrkSysKaonPiMin    
             currentHypo.massTrkSysKaonPiMax    = theThresh.massTrkSysKaonPiMax    
             currentHypo.targetMassTrkSysKaonPi = theThresh.targetMassTrkSysKaonPi 
-            currentHypo.leadTrkPtMin           = theThresh.leadTrkPtMin
-            currentHypo.EtCalibMin             = theThresh.EtCalibMin 
             currentHypo.EMPOverTrkSysPMax      = theThresh.EMPOverTrkSysPMax      
             
         elif criteria in ['singlepion']:
             theThresh = thresholdsEF_singlepion[(criteria, int(threshold))]
+            currentHypo.PtMin              = theThresh.EtCalibMin 
             currentHypo.leadTrkPtMin       = theThresh.leadTrkPtMin
-            currentHypo.EtCalibMin         = theThresh.EtCalibMin 
             currentHypo.nTrackMax          = theThresh.nTrackMax              
             currentHypo.nWideTrackMax      = theThresh.nWideTrackMax          
             currentHypo.dRmaxMax           = theThresh.dRmaxMax               
