@@ -54,7 +54,7 @@ class TrigEFTauDiKaonHypoTool : public extends<AthAlgTool, ITrigEFTauMVHypoTool>
   Gaudi::Property<float>  m_massTrkSysKaonPiMin{ this, "massTrkSysKaonPiMin", 0., "Minimum KaonPi mass value" };
   Gaudi::Property<float>  m_massTrkSysKaonPiMax{ this, "massTrkSysKaonPiMax", 1000000000., "Maximum KaonPi mass value" };
   Gaudi::Property<float>  m_targetMassTrkSysKaonPi{ this, "targetMassTrkSysKaonPi", 0., "Target KaonPi mass value" };
-  Gaudi::Property<float>  m_EtCalibMin{ this, "EtCalibMin", 0., "Minimum Et value" };
+  Gaudi::Property<float>  m_EtCalibMin{ this, "PtMin", 0, "Minimum tau pT value" };
   Gaudi::Property<float>  m_leadTrkPtMin{ this, "leadTrkPtMin", 0., "Minimum Pt of Lead Track" };
   Gaudi::Property<int>  m_nTrackMax{ this, "nTrackMax", 2, "Maximum number of Tracks" };
   Gaudi::Property<int>  m_nTrackMin{ this, "nTrackMin", 1, "Minimum number of Tracks" };
