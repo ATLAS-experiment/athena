@@ -524,7 +524,13 @@ TrigConf::L1ThrExtraInfo_jJ::load()
          m_ptMinxTOBMeV2 = 1000*x.second.getValue<unsigned int>();
       } else if( x.first == "ptMinxTOB3" ){
          m_ptMinxTOBMeV3 = 1000*x.second.getValue<unsigned int>();
-      } 
+      } else if( x.first == "seedThreshold1" ){
+         m_seedThresholdMeV1 = int(1000*x.second.getValue<float>());
+      } else if( x.first == "seedThreshold2" ){
+         m_seedThresholdMeV2 = int(1000*x.second.getValue<float>());
+      } else if( x.first == "seedThreshold3" ){
+         m_seedThresholdMeV3 = int(1000*x.second.getValue<float>());
+      }
    }
 }
 

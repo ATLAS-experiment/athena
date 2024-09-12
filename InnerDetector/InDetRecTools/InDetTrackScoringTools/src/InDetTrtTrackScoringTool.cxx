@@ -437,7 +437,7 @@ InDet::InDetTrtTrackScoringTool::getMuDependentNtrtMinCut(unsigned int eta_bin) 
 
   if (m_TRTTrksMinTRTHitsMuDependencies[eta_bin] > 0) {
 
-    float avg_mu = m_lumiBlockMuTool->averageInteractionsPerCrossing();
+    float avg_mu = m_lumiBlockMuTool->averageInteractionsPerCrossing(Gaudi::Hive::currentContext());
 
     // The mu-dependent cuts have only been validted up to mu = 80.
     // Also there is some physical limit to nTRT, so at some point

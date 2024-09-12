@@ -607,18 +607,6 @@ HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_DarkJetPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA2
     1: 22
     2: 178
     3: 178
-HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_FTagPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
-  eventCount: 10
-  stepCounts:
-    0: 16
-    1: 11
-    2: 10
-    3: 10
-  stepFeatures:
-    0: 32
-    1: 22
-    2: 178
-    3: 178
 HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 10
   stepCounts:
@@ -643,17 +631,29 @@ HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_PhysicsTLA_L1J45p0ETA21_3J15p0ETA25:
     2: 178
     3: 178
     4: 20
-HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+HLT_2j20_2j20_pf_ftf_presel2c20XX2c20bgtwo85_FTagPEBTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 10
   stepCounts:
     0: 16
-    1: 11
+    1: 10
+    2: 10
+    3: 10
+  stepFeatures:
+    0: 32
+    1: 20
+    2: 178
+    3: 178
+HLT_2j20_2j20_pf_ftf_presel2c20XX2c20bgtwo85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 10
+  stepCounts:
+    0: 16
+    1: 10
     2: 10
     3: 10
     4: 10
   stepFeatures:
     0: 32
-    1: 22
+    1: 20
     2: 178
     3: 178
     4: 20

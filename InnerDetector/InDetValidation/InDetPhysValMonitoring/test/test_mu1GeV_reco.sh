@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: art job for InDetPhysValMonitoring, Single muon 1GeV
 # art-type: grid
-# art-input: user.keli:user.keli.mc16_13TeV.422032.ParticleGun_single_mu_Pt1GeV_Rel22073
+# art-input: mc23_13p6TeV:mc23_13p6TeV.902070.PG_singlemuon_Pt1_etaFlat0_2p7.recon.RDO.e8582_e8528_s4162_s4114_r15704
 # art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
@@ -12,9 +12,6 @@
 # art-output: art_core_0
 # art-output: dcube*
 # art-html: dcube_shifter_last
-
-#RDO is made at rel 22.0.73
-#reference plots are made at rel 22.0.73
 
 relname="r24.0.61"
 

@@ -29,7 +29,7 @@ def EfexInputMonitoringConfig(flags):
     import math
     helper.defineHistogram('TowerEta,TowerPhi;h_errors',title='EfexInput Errors (BadEMStatus,BadHadStatus);#eta;#phi',
                            path="Expert/Inputs/eFEX",
-                           hanConfig={"algorithm":"Histogram_Empty","description":"Locations of any non-zero em or hadronic status flags. Check detail/h_summary for more detail if there are entries"},
+                           hanConfig={"algorithm":"Histogram_Empty","description":"Locations of any non-zero em or hadronic status flags. Check <a href='./detail/h_summary'>detail/h_summary</a> for more detail if there are entries"},
                            fillGroup="errors",cutmask='IsMonReady',
                            type='TH2I',
                            xbins=50,xmin=-2.5,xmax=2.5,

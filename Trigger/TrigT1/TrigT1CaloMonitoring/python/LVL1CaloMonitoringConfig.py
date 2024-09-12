@@ -257,7 +257,7 @@ thresholds th_AnyBinIsError {
         argsCopy[0] = argsCopy[0].replace(";"+treeName,";"+histName)
         kwargsCopy = dict(kwargs)
         kwargsCopy["title"] = f"Number of Entries in {treeName} TTree" + ";" + ";".join(kwargsCopy.get("title","").split(";")[1:])
-        kwargsCopy["opt"] = ['kCanRebin']
+        kwargsCopy["opt"] = ['kCanRebin','kAddBinsDynamically']
         kwargsCopy["merge"] = "merge"
         is2d = (kwargsCopy["title"].count(";")>1)
         self.defineHistogram(argsCopy[0],type="TH2I" if is2d else "TH1I",xbins=1,xmin=0,xmax=1,ybins=1 if is2d else None,ymin=0,ymax=1,fillGroup=fillGroup,**kwargsCopy)

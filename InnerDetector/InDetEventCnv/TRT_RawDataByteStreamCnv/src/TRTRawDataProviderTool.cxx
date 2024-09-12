@@ -100,7 +100,7 @@ StatusCode TRTRawDataProviderTool::convert(const std::vector<const ROBFragment*>
 	 ATH_MSG_DEBUG( "Stored LVL1ID " << lvl1id << " and BCID " << bcid << " in InDetTimeCollections" );
 #endif
     }
-      StatusCode sc = m_decoder->fillCollection( &**rob_it, rdoIdc, bserr, dataItemsPool);
+      StatusCode sc = m_decoder->fillCollection( &**rob_it, rdoIdc, bserr, dataItemsPool, ctx);
       if ( sc == StatusCode::FAILURE )
       {
          if (DecodeErrCount < 100) {

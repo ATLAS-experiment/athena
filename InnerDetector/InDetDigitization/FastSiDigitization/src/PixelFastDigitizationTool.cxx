@@ -757,7 +757,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
                 clusterId, clusterPosition, std::vector<Identifier>(rdoList),
                 lvl1a, std::vector<int>(totList), siWidth,
                 hitSiDetElement, isGanged, m_pixErrorStrategy, *m_pixel_ID,
-                false, 0.0, 0.0, calibData, *offlineCalibData));
+                false, 0.0, 0.0, calibData, *offlineCalibData, ctx));
         if (isGanged) {
           pixelCluster->setGangedPixel(isGanged);
         }

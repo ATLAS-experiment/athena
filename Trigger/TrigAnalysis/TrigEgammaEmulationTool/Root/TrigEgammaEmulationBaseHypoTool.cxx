@@ -25,7 +25,7 @@ StatusCode TrigEgammaEmulationBaseHypoTool::initialize() {
 
 float TrigEgammaEmulationBaseHypoTool::avgmu() const 
 {
-  return m_lumiBlockMuTool->averageInteractionsPerCrossing();
+  return m_lumiBlockMuTool->averageInteractionsPerCrossing(Gaudi::Hive::currentContext());
 }
 
 

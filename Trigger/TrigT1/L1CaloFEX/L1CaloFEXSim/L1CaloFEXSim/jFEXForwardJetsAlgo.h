@@ -43,8 +43,8 @@ namespace LVL1 {
     virtual StatusCode reset() override;
 
     virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex) override;
-    virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists() override;
-    virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs() override;
+    virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists(int seedThreshold) override;
+    virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
 
   protected:
