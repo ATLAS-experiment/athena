@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file xAODHybridSelectorConfig
 # @purpose make the Athena framework read a set of xAOD files to emulate the
@@ -12,19 +12,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon import Logging
 from AthenaCommon import Constants
 from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-
-# suppress the event loop heartbeat as it is somewhat I/O hungry for
-# no real gain in n-tuple reading/writing scenarii
-# if not hasattr(svcMgr, theApp.EventLoop): svcMgr += getattr(CfgMgr, theApp.EventLoop)()
-# evtloop = getattr(svcMgr, theApp.EventLoop)
-# try:
-#     evtloop.EventPrintoutInterval = 10000
-# except Exception:
-#     msg.info('disabling event loop heartbeat... [failed]')
-#     msg.info('performances might be sub-par... sorry.')
-#     pass
-
 from enum import IntEnum
+
 # Duplicate here because it's probably more efficient than importing from ROOT
 class xAODAccessMode(IntEnum):
     BRANCH_ACCESS = 0
