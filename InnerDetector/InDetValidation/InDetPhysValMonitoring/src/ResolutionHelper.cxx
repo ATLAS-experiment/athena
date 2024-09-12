@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -297,7 +297,7 @@ ResolutionHelper::makeResolutions(const TH2* h_input2D, TH1* hwidth, TH1* hmean,
 
   for (int ibin = 0; ibin < hwidth->GetNbinsX(); ibin++) {
     std::string tmpName = h_input2D->GetName() + std::string("py_bin") + std::to_string(ibin + 1);
-    std::shared_ptr<TH1D> tmp {dynamic_cast<TH1D*>(h_input2D->ProjectionY(tmpName.c_str(), ibin+1, ibin+1))};
+    std::shared_ptr<TH1D> tmp {static_cast<TH1D*>(h_input2D->ProjectionY(tmpName.c_str(), ibin+1, ibin+1))};
     if (tmp->Integral() < 1) {
       continue;
     }
