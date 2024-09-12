@@ -14,11 +14,11 @@ Output="test_minbias.HITS.pool.root"
 OutputFilter="test_minbias.HITS_FLT.pool.root"
 
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --multithreaded \
 --CA \
---conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \

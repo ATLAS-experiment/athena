@@ -11,7 +11,7 @@
 # art-output: Config*.pkl
 
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --CA \
 --simulator 'FullG4MT_QS'  \
@@ -21,7 +21,7 @@ Sim_tf.py \
 --skipEvents '0' \
 --randomSeed '10' \
 --geometryVersion 'default:ATLAS-P2-RUN4-03-00-00' \
---conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation,SimuJobTransforms.CalHits,SimuJobTransforms.ParticleID' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \

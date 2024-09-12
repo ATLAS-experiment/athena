@@ -23,9 +23,9 @@ OverlayOutFile="RUN4_ttbar.mu200.overlay.RDO.pool.root"
 
 Overlay_tf.py \
 --CA \
---conditionsTag OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion ATLAS-P2-RUN4-01-01-00 \
+--geometryVersion ATLAS-P2-RUN4-03-00-00 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --maxEvents ${events} \

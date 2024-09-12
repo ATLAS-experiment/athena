@@ -21,7 +21,7 @@ DigiOutFileName="RUN4_ttbar.puTruth.RDO.pool.root"
 
 Digi_tf.py \
 --CA \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --preInclude 'HITtoRDO:Campaigns.PhaseIIPileUp1' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --runNumber="601229" \

@@ -14,7 +14,7 @@ RDO_FILENAME=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RD
 
 Reco_tf.py \
          --CA 'all:True' --autoConfiguration 'everything' \
-         --conditionsTag 'all:OFLCOND-MC15c-SDR-14-05' \
+         --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
          --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
          --multithreaded 'True' \
          --steering 'doRAWtoALL' \
@@ -43,7 +43,7 @@ function gnn_tracking() {
 
     Reco_tf.py \
         --CA 'all:True' --autoConfiguration 'everything' \
-        --conditionsTag 'all:OFLCOND-MC15c-SDR-14-05' \
+        --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
         --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
         --multithreaded 'True' \
         --steering 'doRAWtoALL' \
