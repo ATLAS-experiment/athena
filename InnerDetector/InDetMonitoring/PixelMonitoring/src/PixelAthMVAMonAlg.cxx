@@ -20,7 +20,7 @@ PixelAthMVAMonAlg::PixelAthMVAMonAlg( const std::string& name, ISvcLocator* pSvc
   AthMonitorAlgorithm(name, pSvcLocator),
   m_holeSearchTool("InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool", this),
   m_trackSelTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
-  m_trkextrapolator("Trk::Extrapolator/InDetExtrapolator"),
+  m_trkextrapolator("Trk::Extrapolator/InDetExtrapolator", this),
   m_atlasid(nullptr)
 {
   declareProperty("HoleSearchTool", m_holeSearchTool);
