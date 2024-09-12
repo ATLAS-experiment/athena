@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import sys, os, glob, subprocess, tarfile
+import sys, os, glob, subprocess, tarfile, fnmatch, smtplib
 
 def nextstep(text):
     print("\n"+"#"*100)
@@ -19,7 +19,42 @@ def tryError(command, error):
             exit(1)        
     except OSError as e:
         print(error,e)
-        sys.exit(e.errno)        
+        sys.exit(e.errno)       
+        
+    
+def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
+    mserver = 'cernmx.cern.ch'
+    mfrom   = 'atltzp1@cern.ch'
+    msubject = "TRT CALIB TESTING - SERGI & PETER - Exit Status for Run %d" % (runNumber)
+
+    # assemble mail body
+    mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
+    mbody += "   Here are the residuals obtained at detector level with currently used constants: \n"
+    mbody += "   Resdiual-Barrel A: %s, Time-Residual-Barrel A: %s \n" % (a, b)
+    mbody += "   Resdiual-Barrel C: %s, Time-Residual-Barrel C: %s \n" % (c, d)
+    mbody += "   Resdiual-Endcap A: %s, Time-Residual-Endcap A: %s \n" % (e, f)
+    mbody += "   Resdiual-Endcap C: %s, Time-Residual-Endcap C: %s \n\n" % (g, h)      
+    mbody += " Expect Residual 140 +- 10mu in the barrel (Ar) and 130 +- 10mu in EC (Xe). Expect Time-Residual 0.0 +- 0.5ns.\n\n" 
+    mbody += " Please check the histograms of the current run, to decide whether to upload new constants.\n" 
+    mbody += " Histograms can be found on AFS, directory %s \n\n" % (outdir)
+    
+    print("Email body:\n\n",mbody)
+    print("Email sent to:")
+    for i in mto:
+        print("\t- %s"% (i))
+    
+    try :
+        con = smtplib.SMTP(mserver)
+        if isinstance(mto, str) :
+            con.sendmail(mfrom, mto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
+        elif isinstance(mto, list) :
+            for onemto in mto :
+                con.sendmail(mfrom, onemto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
+        con.quit()
+    except OSError as e:
+        print("ERROR: Failed sending email notification\n",e)
+        exit(e.errno)
+
 
 def fromRunArgs(runArgs):
     
@@ -41,8 +76,8 @@ def fromRunArgs(runArgs):
     ##################################################################################################
     
     # RT files (nor merging barrel)
-    files_list_rt =[item for item in glob.glob("*rt.txt") if "barrel" not in item]
-    files_list_t0 =[item for item in glob.glob("*t0.txt") if "barrel" not in item]
+    files_list_rt =[item for item in glob.glob("*_rt.txt") if "barrel" not in item]
+    files_list_t0 =[item for item in glob.glob("*_t0.txt") if "barrel" not in item]
     files_list_cal=[item for item in glob.glob("*calibout.root") if "barrel" not in item]
     # tracks
     files_list_trk=glob.glob("*tracktuple.root")
@@ -232,24 +267,50 @@ def fromRunArgs(runArgs):
     
     tryError(command,"ERROR: Files cannot be copied to the chosen directory\n")
     
-    # WORK IN PROGRESS! -> Email notification to the mailing list! - FUTURE MR
+    
     
     ##################################################################################################
-    # nextstep("e-mail notification")
+    nextstep("Extractor information")
     ##################################################################################################
     
-    # try:
-    #     command = 'hadd -f %s.tracktuple.root %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.tracktuple.root " % str(file)) for file in runArgs.inputTARFile ))
-    #     print("\n Running: %s \n" % (command))
-    #     stdout, stderr = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-    #     print("OUTPUT:\n%s" % (stdout.decode('ascii')))
-    #     print("ERRORS:\n%s" % ("NONE" if stderr.decode('ascii')=='' else stderr.decode('ascii')))        
-    # except OSError as e:
-    #     print("ERROR: Failed in process merging *.tracktuple.root files\n",e)
-    #     sys.exit(e.errno)
+    command  = "python -m TRT_CalibAlgs.TRTCalib_Extractor %s/trtcalib_0%s_histograms.root > %s/extraction.txt" % (outDIR, itera, outDIR)
+    
+    tryError(command,"ERROR: Extracting information for email notification\n")
+    
+    ##################################################################################################
+    nextstep("Email notification")
+    ##################################################################################################   
 
+    res_ba  = 0 ; tres_ba = 0
+    res_bc  = 0 ; tres_bc = 0
+    res_ea  = 0 ; tres_ea = 0
+    res_ec  = 0 ; tres_ec = 0
+    
+    try:
+        with open("%s/extraction.txt" % (outDIR)) as exfile:
+            for line in exfile :
+                if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part 1*') :
+                        res_ba = line.split()[6]  
+                if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part 1*') :
+                        tres_ba = line.split()[6]
+                if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part -1*') :
+                        res_bc = line.split()[6]
+                if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part -1*') :
+                        tres_bc = line.split()[6]
+                if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part 2*') :
+                        res_ea = line.split()[6]
+                if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part 2*') :
+                        tres_ea = line.split()[6]
+                if fnmatch.fnmatch(line,'* res *') and fnmatch.fnmatch(line, '*part -2*') :
+                        res_ec = line.split()[6]
+                if fnmatch.fnmatch(line,'* tresmean *') and fnmatch.fnmatch(line, '*part -2*') :
+                        tres_ec = line.split()[6]
+    except OSError as e:
+        print("ERROR: Failed reading %s/extraction.txt file\n" % (outDIR) ,e)
+        sys.exit(e.errno)    
 
-    # Prints all types of txt files present in a Path
-    # print("\nListing files:")
-    # for file in sorted(glob.glob("./*", recursive=True)):
-    #     print("\t-",file)    
+    if runArgs.sendNotification and runArgs.emailList :
+        send_statusmail(itera, runNumber, runArgs.emailList, outDIR, res_ba, tres_ba, res_bc, tres_bc, res_ea, tres_ea, res_ec, tres_ec)
+    else:
+        print("INFO: No email notification sent since --sendNotification=%r or empty --emailList=" % (runArgs.sendNotification), runArgs.emailList)
+    
