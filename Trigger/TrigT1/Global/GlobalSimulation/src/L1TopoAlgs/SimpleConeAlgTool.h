@@ -9,7 +9,7 @@
  * AlgTool run the L1Topo SimpleCone DECISIOM Algorithm
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/GenericTOBArray.h"
 #include "../IO/Decision.h"
 #include "../IO/GenericTOBArrayVector_clid.h"
@@ -23,7 +23,7 @@
 
 namespace GlobalSim {
   
-  class SimpleConeAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class SimpleConeAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
 
     
   public:

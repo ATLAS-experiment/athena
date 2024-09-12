@@ -10,7 +10,7 @@
  * a jFexSRJetRoIContainer
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/jJetTOBArray.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -21,7 +21,7 @@
 
 namespace GlobalSim {
 
-  class jJetInputAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class jJetInputAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     jJetInputAlgTool(const std::string& type,

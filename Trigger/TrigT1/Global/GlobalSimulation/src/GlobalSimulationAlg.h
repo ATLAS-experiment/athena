@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_GLOBALL1TOPOSIMULATION_H
-#define GLOBALSIM_GLOBALL1TOPOSIMULATION_H
+#ifndef GLOBALSIM_GLOBALSIMULATIONALG_H
+#define GLOBALSIM_GLOBALSIMULATIONALG_H
 
 /*
  *  GlobalL1TopoSimulation runs L1Topo Algorithms.
@@ -19,14 +19,14 @@
  
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "IL1TopoAlgTool.h"
+#include "IGlobalSimAlgTool.h"
 
 namespace GlobalSim {
   
-  class GlobalL1TopoSimulation : public AthReentrantAlgorithm {
+  class GlobalSimulationAlg : public AthReentrantAlgorithm {
   public:
      
-    GlobalL1TopoSimulation(const std::string& name, ISvcLocator *pSvcLocator);
+    GlobalSimulationAlg(const std::string& name, ISvcLocator *pSvcLocator);
     
     virtual StatusCode initialize () override;
     virtual StatusCode execute (const EventContext& ctx) const override;
@@ -37,11 +37,11 @@ namespace GlobalSim {
     m_useTestInputEvent {this, "useTestInputEvent", {false},
       "use a test input event"};
 
-    ToolHandleArray<IL1TopoAlgTool> m_topoAlgs{
+    ToolHandleArray<IGlobalSimAlgTool> m_algTools{
       this,
-      "topo_algs",
+      "globalsim_algs",
       {},
-      "ordered sequence of L1 TopoAlgs"};
+      "ordered sequence of GlobalSim AlgTools"};
                 
     Gaudi::Property<bool>
     m_enableDumps {this, "enableDumps", {false},

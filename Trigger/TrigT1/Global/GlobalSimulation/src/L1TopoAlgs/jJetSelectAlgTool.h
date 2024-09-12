@@ -9,7 +9,7 @@
  * AlgTool run the L1Topo jJetSelect SORT Algorithm
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/jJetTOBArray.h"
 #include "../IO/GenericTOBArray.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -18,7 +18,7 @@
 
 namespace GlobalSim {
 
-  class jJetSelectAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class jJetSelectAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
 
   public:
     jJetSelectAlgTool(const std::string& type,

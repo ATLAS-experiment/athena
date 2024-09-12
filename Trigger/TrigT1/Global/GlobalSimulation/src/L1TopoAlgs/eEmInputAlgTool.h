@@ -9,7 +9,7 @@
  * AlgTool to obtain a GlobalSim::eEmTOBArray
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/eEmTOBArray.h"
 
 
@@ -21,7 +21,7 @@
 
 namespace GlobalSim {
 
-  class eEmInputAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class eEmInputAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     eEmInputAlgTool(const std::string& type,

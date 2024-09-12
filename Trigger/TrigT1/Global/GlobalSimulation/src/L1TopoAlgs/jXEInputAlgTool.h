@@ -9,7 +9,7 @@
  * AlgTool to obtain a GlobalSim::jXETOBArray from a jFexMETRoIContainer
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/jXETOBArray.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -21,7 +21,7 @@
 
 namespace GlobalSim {
  
-  class jXEInputAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class jXEInputAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     jXEInputAlgTool(const std::string& type,

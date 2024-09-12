@@ -9,7 +9,7 @@
  * AlgTool run the L1Topo EnergyThreshold COUNT Algorithm
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -21,7 +21,7 @@ namespace GlobalSim {
   class jXETOBArray;
   class Count;
 
-  class EnergyThresholdAlgTool_jXE: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class EnergyThresholdAlgTool_jXE: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     EnergyThresholdAlgTool_jXE(const std::string& type,
