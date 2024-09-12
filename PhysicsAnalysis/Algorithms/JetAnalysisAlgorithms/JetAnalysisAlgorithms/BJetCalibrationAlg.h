@@ -59,7 +59,7 @@ namespace CP
       this, "muonPreselection", "", "the preselection to apply to muons"};
 
     SysWriteDecorHandle<int> m_nmuons {
-      this, "NMuonsDecorName", "n_muons", "Name of output decorator for n_muons"};
+      this, "NMuonsDecorName", "n_muons_%SYS%", "Name of output decorator for n_muons"};
 
   };
 
