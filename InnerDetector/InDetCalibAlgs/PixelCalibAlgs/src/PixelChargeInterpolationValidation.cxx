@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationValidation_C
@@ -81,7 +81,7 @@ for(int i  = 0; i < ntot+1; i++){
 	
 	binsvectors[LayerIndex] = *layers;
 	binsvectors[AngleIndex] = etabins_Layer;
-	binsvectors[ClustersizeIndex] = clustersizeEta;
+	binsvectors[ClustersizeIndex] = std::move(clustersizeEta);
 
 	m_eta = new PixelResidualHistograms(std::string("ResEta"),
 			std::string("Local y residuals - Analog position"),
@@ -122,7 +122,7 @@ for(int i  = 0; i < ntot+1; i++){
 	binsnames[AngleIndex] = "#phi_{i} [#circ]";
 
 	binsvectors[AngleIndex] = phibins_Layer;
-	binsvectors[ClustersizeIndex] = clustersizePhi;
+	binsvectors[ClustersizeIndex] = std::move(clustersizePhi);
 
 	m_phi = new PixelResidualHistograms(std::string("ResPhi"),
 			std::string("Local x residuals - Analog position"),
@@ -166,7 +166,7 @@ for(int i  = 0; i < ntot+1; i++){
 	binsnames_Layer[0] = "p_{T} [GeV]";
 	binsnames_Layer[1] = "#eta_{i}";
 	
-	binsvectors_Layer[0] = ptbins_Layer;
+	binsvectors_Layer[0] = std::move(ptbins_Layer);
 	binsvectors_Layer[1] = etabins_Layer;
 
 	for(int i = 0 ; i < NLAYERS; i++){
@@ -264,7 +264,7 @@ for(int i  = 0; i < ntot+1; i++){
 
 
 	binsnames_Clustersize[0] = "#phi_{i} [#circ]";
-	binsvectors_Clustersize[0] = phibins_Layer;
+	binsvectors_Clustersize[0] = std::move(phibins_Layer);
 
 	for(int i = 0 ; i < NCLUSSIZES; i++){
 		std::ostringstream name;
@@ -569,7 +569,7 @@ void PixelChargeInterpolationValidation::WriteErrorsFile(const std::string& name
 	for (int i=1; i<nalpha && globalindex<ntotbins; i++, globalindex++) {
 		values.push_back(phiModel->GetBinLowEdge(i+1));
   }
-	parameters->setParameters(ncsx, ncsy, neta, nalpha,0,values);	
+	parameters->setParameters(ncsx, ncsy, neta, nalpha,0,std::move(values));	
 
 	int ntotyconstnx = ncsx * nalpha;
 	globalindex = 0;

@@ -288,14 +288,14 @@ int main(int argc, char *argv[])
         if     (variable.compare("tagName")    == 0) {
             tagName = value;
         }
-        else if(variable.compare("folder")     == 0) folderName = value;
-        else if(variable.compare("outputFile") == 0) outputFileName = value;       
-        else if(variable.compare("dbName")     == 0) dbName = value;
+        else if(variable.compare("folder")     == 0) folderName = std::move(value);
+        else if(variable.compare("outputFile") == 0) outputFileName = std::move(value);       
+        else if(variable.compare("dbName")     == 0) dbName = std::move(value);
         else if(variable.compare("IOV")        == 0){
             // By selecting an IOV is understood you dont want to use the last one 
             // hence use the "IOV=runNumber_LB" (it should exist in the DB)
             // if you want to print all of them use "IOV=all"
-            useIOV = value;
+            useIOV = std::move(value);
             useLastIOV = false;
         } 
         else{
