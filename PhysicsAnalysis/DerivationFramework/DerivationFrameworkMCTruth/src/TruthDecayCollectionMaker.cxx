@@ -131,7 +131,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
       for (size_t p=0;p<part_cont->size();++p){
         // Was it a hit?
         const xAOD::TruthParticle *theParticle = (*part_cont)[p];
-        if (HepMC::uniqueID(theParticle) == HepMC::uniqueID(&old_part)) return p;
+        if (HepMC::is_same_particle(theParticle,&old_part)) return p;
       } // Look through the old container
     } // Found it in the old container
     // Now we have seen it

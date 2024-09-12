@@ -256,7 +256,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
       // make sure tau has no tau children, i.e. is tau before decay
       for (uint i = 0; i < p->nChildren(); i++) {
         if (p->child(i) == nullptr) continue;
-        if (HepMC::uniqueID(p->child(i)) == HepMC::uniqueID(p)) continue;
+        if (HepMC::is_same_particle(p->child(i),p)) continue;
         hasChildren = true;
         if (p->child(i)->pdgId() == p->pdgId()) {
           childIsTau = true;

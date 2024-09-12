@@ -82,17 +82,17 @@ namespace DerivationFramework {
             } else if (!secondsp) {
               secondsp = tp;
             } else {
-              if (firstsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0))) {
+              if (firstsp->nChildren() != 0 && HepMC::is_same_particle(tp,firstsp->child(0))) {
                 firstsp = tp;
               }
-              else if (secondsp->nChildren() != 0 && HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0))) {
+              else if (secondsp->nChildren() != 0 && HepMC::is_same_particle(tp,secondsp->child(0))) {
                 secondsp = tp;
               }
-              else if (firstsp->nChildren() != 0 && HepMC::uniqueID(firstsp->child(0)) == HepMC::uniqueID(secondsp)) {
+              else if (firstsp->nChildren() != 0 && HepMC::is_same_particle(firstsp->child(0),secondsp)) {
                 firstsp = secondsp;
                 secondsp = tp;
               }
-              else if (secondsp->nChildren() != 0 && HepMC::uniqueID(secondsp->child(0)) == HepMC::uniqueID(firstsp)) {
+              else if (secondsp->nChildren() != 0 && HepMC::is_same_particle(secondsp->child(0),firstsp)) {
                 secondsp = firstsp;
                 firstsp = tp;
               }
@@ -106,7 +106,7 @@ namespace DerivationFramework {
 
     if (firstsp && firstsp->nChildren() == 1) {
       for (const auto tp : *truthP) {
-        if (HepMC::uniqueID(tp) == HepMC::uniqueID(firstsp->child(0)) && tp->pdgId() != firstsp->pdgId()) {
+        if (HepMC::is_same_particle(firstsp->child(0),tp) && tp->pdgId() != firstsp->pdgId()) {
           firstsp = tp;
           break;
         }
@@ -114,7 +114,7 @@ namespace DerivationFramework {
     }
     if (secondsp && secondsp->nChildren() == 1) {
       for (const auto tp : *truthP) {
-        if (HepMC::uniqueID(tp) == HepMC::uniqueID(secondsp->child(0)) && tp->pdgId() != secondsp->pdgId()) {
+        if (HepMC::is_same_particle(secondsp->child(0),tp) && tp->pdgId() != secondsp->pdgId()) {
           secondsp = tp;
           break;
         }

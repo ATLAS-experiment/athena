@@ -180,7 +180,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isInitialHadron(const xAOD::TruthParticle* 
   int qtype = std::abs(MC::leadingQuark(part));
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-      if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa 
+      if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa 
       int mothertype = std::abs(MC::leadingQuark(parent));
       if (mothertype == qtype ){
         return false;
@@ -196,7 +196,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isFinalHadron(const xAOD::TruthParticle* pa
   int qtype = std::abs(MC::leadingQuark(part));
   for(unsigned j = 0; j < part->nChildren(); j++){
     const xAOD::TruthParticle* child = part->child(j);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(child) ) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,child) ) continue; /// protection for sherpa
     int childtype = std::abs(MC::leadingQuark(child));
     if (childtype == qtype ){
       return false;
@@ -209,7 +209,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isQuarkFromHadron(const xAOD::TruthParticle
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa
     int mothertype = std::abs(MC::leadingQuark(parent));
     if (4 == mothertype || 5 == mothertype ){
       return true;
@@ -225,7 +225,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isCHadronFromB(const xAOD::TruthParticle* p
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa
     if (MC::isBottomHadron(parent)&&!HepMC::is_simulation_particle(parent) ){
       return true;
     }
@@ -251,7 +251,7 @@ const xAOD::TruthParticle*  TTbarPlusHeavyFlavorFilterTool::findInitial(const xA
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent)) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,parent)) continue; /// protection for sherpa
     if (part->pdgId() == parent->pdgId() ){
       return findInitial(parent, looping);
     }
@@ -268,7 +268,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromTop(const xAOD::TruthParticle
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent) ) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,parent) ) continue; /// protection for sherpa
     if (std::abs( parent->pdgId() ) == 6 ) return true;
   }
   return false;
@@ -278,7 +278,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isDirectlyFromWTop(const xAOD::TruthParticl
 
   for(unsigned int i=0; i<part->nParents(); ++i){
     const xAOD::TruthParticle* parent = part->parent(i);
-    if (HepMC::uniqueID(part) == HepMC::uniqueID(parent)) continue; /// protection for sherpa
+    if (HepMC::is_same_particle(part,parent)) continue; /// protection for sherpa
     if (MC::isW(parent) ){
       if (isFromTop(parent, looping) ) return true;
     }

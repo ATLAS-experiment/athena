@@ -170,7 +170,7 @@ float egammaTruthAlg::computeIso (const xAOD::TruthParticle& tp,
 {
   TLorentzVector sum;
   for (const xAOD::TruthParticle* p : cont) {
-    if (p == &tp || HepMC::uniqueID(p) == HepMC::uniqueID(tp)) continue;
+    if (p == &tp || HepMC::is_same_particle(p,tp)) continue;
     if (!((HepMC::is_simulation_particle(p) || MC::isZeroEnergyPhoton(p) || ( MC::isStable(p) && MC::isSpecialNonInteracting(p))) && MC::isStableOrSimDecayed(p))) continue;
     if (tp.p4().DeltaR (p->p4()) < m_isoCone)
       sum += p->p4();
