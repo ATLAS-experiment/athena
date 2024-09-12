@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """Utilities to get and set the AMITag in the metadata
 
 The input AMITag is contained in the AMITag attribute of the /TagInfo in-file
@@ -21,15 +21,8 @@ import os
 import re
 from AthenaCommon.AppMgr import ServiceMgr
 from AthenaCommon.Logging import logging
-try:
-    from PyJobTransformsCore.runargs import RunArguments
-except ModuleNotFoundError:
-    from PyJobTransforms.trfJobOptions import RunArguments
+from PyJobTransforms.trfJobOptions import RunArguments
 from PyUtils.MetaReaderPeeker import metadata
-try:
-    from RecExConfig.RecFlags import rec
-except ModuleNotFoundError:
-    pass
 
 log = logging.getLogger('AMITagHelper')
 amitagRegex = re.compile('^[a-z][0-9]+')
@@ -81,25 +74,13 @@ def OutputAMITag(runArgs=None):
     if not runArgs:
         runArgs = RunArguments()
 
-    flagTag = ''
-    try:
-        flagTag = rec.AMITag()
-    except (NameError, AttributeError,):
-        pass
-
     cliTag = ''
     try:
         cliTag = runArgs.AMITag
     except AttributeError:
         pass
 
-    if flagTag and flagTag != cliTag:
-        log.info('AMITag from recFlags does not match value form command line')
-
-    if cliTag:
-        return cliTag
-    else:
-        return flagTag
+    return cliTag
 
 
 def SetAMITag(outputTag=None, inputTags=None, runArgs=None):
