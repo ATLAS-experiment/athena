@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import os, sys, re, glob
+import os, re, glob
 from PyJobTransformsCore import fileutil
 
 __doc__ = """Environment variables utilities"""
@@ -94,25 +94,6 @@ def find_file( filename,
     <depth> < 0 : ascend upwards into the directory tree up to max -<depth> levels."""
     found = find_file_split( filename, dirlist, access, depth )
     return found and os.path.join( found[0], found[1] )
-
-
-def find_file_updir( filename,
-                     dir = os.getcwd(),  # noqa: B008 (getcwd always returns the same)
-                     access = os.R_OK ):
-    """Find a file in directory <dir> or its higher level dirs."""
-    curdir = os.path.abspath( dir )
-    fullfile = os.path.join( curdir, filename )
-    if fileutil.access( fullfile, access ): return fullfile
-    #go up in directory tree
-    updir = os.path.dirname(curdir)
-    while updir != curdir:
-        curdir = updir
-        fullfile = os.path.join( curdir, filename )
-        if fileutil.access( fullfile, access ): return fullfile
-        updir = os.path.dirname(curdir)
-
-    return None
-
 
 
 def find_files_split( filename, dirlist, access, depth ):
@@ -245,68 +226,3 @@ def find_libraries( lib ):
         libsfull = find_libraries( 'lib' + lib )
 
     return libsfull
-
-
-# list of possible extensions for python module filenames
-_pyext = [ '.so', '.pyo', '.pyc', '.py' ]
-
-def find_python_module_file( modname ):
-    """Search for python file (full path) corresponding to python module <mod> in sys.path
-    (PYTONPATH + some system paths). <mod> should not contain the filename
-    extension (.py etc), and no wildcards. Returns None is module is not found."""
-    # add wildcarded extension
-    filename = modname.replace('.',os.sep) + '.*'
-    # get all python module files
-    all = [ f for f in find_files_split( filename, sys.path ) if os.path.splitext(f[1])[1] in _pyext ]
-    if not all:
-        return None
-    else:
-        # take the first. When 2 appear in the same directory, choose the one with
-        # file extension that appears first in _pyext.
-        found = all[0]
-        if len(all) > 1:
-            foundPrio = _pyext.index( os.path.splitext(found[1])[1] )
-            for df in all[1:]:
-                d,f = df[0],df[1]
-                if d != found[0]: break # done
-                prio = _pyext.index( os.path.splitext(f)[1] )
-                if prio < foundPrio:
-                    found = df
-                    foundPrio = prio
-        
-        return os.path.join(found[0],found[1])
-
-
-def find_python_modules( mod ):
-    """Search for python module(s) in PYTHONPATH + some system paths.
-    Returns a list of full paths to python module files. If non are found, returns empty list.
-    <mod> can contain wildcards, in which case all files matching the wildcard will be returned.
-    If the same file appears in several paths, the first one found will be taken."""
-    b,e = os.path.splitext(mod)
-    if e in _pyext: # us filename as-is
-        # turn python module syntax into filename syntax
-        filename = b.replace('.',os.sep) + e
-        return find_files( filename, sys.path )
-    elif not has_wildcards( mod ):
-        m = find_python_module_file( mod.replace(os.sep, '.') )
-        if m:
-            return [ m ]
-        else:
-            return []
-    else:
-        # first expand the wildcards
-        filename = mod.replace('.',os.sep) + '.*'
-        modsFound = []
-        for df in find_files_split( filename, sys.path ):
-            f = df[1]
-            b,e = os.path.splitext(f)
-            if e not in _pyext: continue
-            modname = b.replace(os.sep, '.')
-            if modname not in modsFound:
-                modsFound.append( modname )
-        # now find the files for each module
-        found = []
-        for m in modsFound:
-            f = find_python_module_file( m )
-            if f: found.append( f )
-        return found
