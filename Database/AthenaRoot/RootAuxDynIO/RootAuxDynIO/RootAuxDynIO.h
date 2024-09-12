@@ -21,24 +21,14 @@ class TClass;
 
 namespace ROOT::Experimental {
   class RNTupleReader;
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
-  namespace Detail {
-    class RFieldBase;
-  }
-#else
   class RFieldBase;
-#endif
 }
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 
 namespace RootAuxDynIO
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    using ROOT::Experimental::RFieldBase;
-#else
-   using ROOT::Experimental::Detail::RFieldBase;
-#endif
    using ROOT::Experimental::RNTupleReader;
    class IRootAuxDynReader;
    class IRootAuxDynWriter;

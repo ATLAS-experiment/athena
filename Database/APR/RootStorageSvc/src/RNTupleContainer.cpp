@@ -28,9 +28,7 @@
 
 // Root include files
 #include "ROOT/RNTuple.hxx"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 
 #include "TError.h"
 // for version checks
@@ -208,7 +206,6 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
                 << DbPrint::endmsg;
             return Error;
          }
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          for( auto& dsc : m_fieldDescs ) {
             dsc.view_p = std::make_unique<RNTupleView<void,true>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
             if( dsc.hasAuxStore() ) {
@@ -222,7 +219,6 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
                dbH.setAge(-10);
             }
          }
-#endif
       }
 
       log << DbPrintLvl::Debug << "Opened container " << m_name << " of type "
@@ -413,7 +409,6 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              p.c_str += dsc.offset();
              break;
          }
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          if( !p.ptr ) {
             // create the object for the user and pass ownership to them
             p.ptr = dsc.view_p->GetField().CreateObject<void>().release();
@@ -422,7 +417,6 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
          dsc.view_p->BindRawPtr( p.ptr );
          // read into the object
          (*dsc.view_p)(evt_id);
-#endif
          numBytes += 1;
 
          // case DbColumn::BLOB:
