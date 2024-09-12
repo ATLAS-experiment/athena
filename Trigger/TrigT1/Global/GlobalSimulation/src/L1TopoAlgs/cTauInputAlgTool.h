@@ -7,13 +7,13 @@
 
 /**
  * AlgTool to obtain a GlobalSim::cTAUTOBArray
- * This class uses ReadHandls to jFex and eFex Tau Rois
+ * This class uses ReadHandles to jFex and eFex Tau Rois
  * If these objects are needed by another algorithm, runtime duplication
  * will occur. Future impreovement : have separate input Algorithms for
  *  jFex and eFex RoIs, and have cTauInputAlgTool use these results.
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/cTauTOBArray.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -28,7 +28,7 @@
 
 
 namespace GlobalSim {
-  class cTauInputAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class cTauInputAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     cTauInputAlgTool(const std::string& type,

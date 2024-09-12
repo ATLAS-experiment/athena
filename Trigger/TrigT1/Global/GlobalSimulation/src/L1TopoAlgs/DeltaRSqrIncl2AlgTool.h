@@ -9,7 +9,7 @@
  * AlgTool run the L1Topo DeltaRSqrIncl2 DECISION Algorithm
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/GenericTOBArray.h"
 #include "../IO/Decision.h"
 #include "../IO/GenericTOBArrayVector_clid.h"
@@ -21,7 +21,7 @@
 #include <vector>
 
 namespace GlobalSim {
-  class DeltaRSqrIncl2AlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class DeltaRSqrIncl2AlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     DeltaRSqrIncl2AlgTool(const std::string& type,

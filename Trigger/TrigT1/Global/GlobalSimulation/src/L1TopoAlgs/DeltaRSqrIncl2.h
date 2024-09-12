@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DELTARSQRINCL2_H
-#define DELTARSQRINCL2_H
+#ifndef GLOBALSIM_DELTARSQRINCL2_H
+#define GLOBALSIM_DELTARSQRINCL2_H
 
 // based on DeltaRSqrIncl2 of L1TopoSimulation
 

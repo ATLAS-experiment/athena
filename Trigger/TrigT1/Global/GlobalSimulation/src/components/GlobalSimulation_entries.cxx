@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../GlobalL1TopoSimulation.h"
+#include "../GlobalSimulationAlg.h"
 
 #include "../L1TopoAlgs/cTauMultiplicityAlgTool.h"
 #include "../L1TopoAlgs/EnergyThresholdAlgTool_jXE.h"
@@ -20,7 +20,7 @@
 #include "../GlobalAlgs/EMB1CellsFromCaloCells.h"
 #include "../GlobalAlgs/eFexRoIAlgTool.h"
 
-DECLARE_COMPONENT(GlobalSim::GlobalL1TopoSimulation)
+DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
 DECLARE_COMPONENT(GlobalSim::cTauMultiplicityAlgTool)
 DECLARE_COMPONENT(GlobalSim::EnergyThresholdAlgTool_jXE)

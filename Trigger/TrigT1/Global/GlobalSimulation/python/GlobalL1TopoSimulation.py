@@ -19,7 +19,7 @@ def GlobalL1TopoSimulationCfg(flags, algLogLevel):
 
     acc = ComponentAccumulator()
 
-    globalSimAlg = CompFactory.GlobalSim.GlobalL1TopoSimulation("GlobalSimTest")
+    globalSimAlg = CompFactory.GlobalSim.GlobalSimulationAlg("GlobalL1TopoSim")
     globalSimAlg.OutputLevel = algLogLevel
  
     if 'GSDEBUG' in os.environ:
@@ -39,7 +39,7 @@ def GlobalL1TopoSimulationCfg(flags, algLogLevel):
     alg_data_list = algdata_from_menu(flags, root_names=root_names, do_dot=True)
     logger.info("number of alg_data " + str(len(alg_data_list)))
   
-    [globalSimAlg.topo_algs.append(toolFromAlgData(flags, ad)) for
+    [globalSimAlg.globalsim_algs.append(toolFromAlgData(flags, ad)) for
      ad in alg_data_list]
 
     acc.addEventAlgo(globalSimAlg)

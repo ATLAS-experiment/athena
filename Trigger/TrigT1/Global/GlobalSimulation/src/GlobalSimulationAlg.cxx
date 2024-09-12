@@ -1,6 +1,6 @@
 //  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "GlobalL1TopoSimulation.h"
+#include "GlobalSimulationAlg.h"
 #include "TrigConfData/L1Menu.h"
 
 #include "CxxUtils/checker_macros.h"
@@ -9,18 +9,18 @@
 
 namespace GlobalSim {
 
-  GlobalL1TopoSimulation::GlobalL1TopoSimulation(const std::string& name,
-						 ISvcLocator *pSvcLocator):
+  GlobalSimulationAlg::GlobalSimulationAlg(const std::string& name,
+					   ISvcLocator *pSvcLocator):
     AthReentrantAlgorithm(name, pSvcLocator) {
   }
     
-  StatusCode GlobalL1TopoSimulation::initialize () {
+  StatusCode GlobalSimulationAlg::initialize () {
 
-    ATH_MSG_INFO("number of L1TopoAlgTools " << m_topoAlgs.size());
+    ATH_MSG_INFO("number of AlgTools " << m_algTools.size());
 
     if (m_enableDumps) {
       std::stringstream ss;
-      for (const auto& tool : m_topoAlgs) {
+      for (const auto& tool : m_algTools) {
 	ss << tool->toString() << '\n';
 	ss << "=========\n";
       }
@@ -34,11 +34,11 @@ namespace GlobalSim {
       
   
  
-  StatusCode GlobalL1TopoSimulation::execute(const EventContext& ctx) const {
+  StatusCode GlobalSimulationAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Executing ...");
 
  
-    for (const auto& tool : m_topoAlgs) {
+    for (const auto& tool : m_algTools) {
       CHECK(tool -> run(ctx));
     }
     

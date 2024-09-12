@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GLOBALSIM_IL1TOPOALGTOOL_H
-#define GLOBALSIM_IL1TOPOALGTOOL_H
+#ifndef GLOBALSIM_IGLOBALSIMALGTOOL_H
+#define GLOBALSIM_IGLOBALSIMALGTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
@@ -14,11 +14,11 @@
 // GlobalSim Algs.
 
 namespace GlobalSim {
-  class IL1TopoAlgTool : virtual public ::IAlgTool {
+  class IGlobalSimAlgTool : virtual public ::IAlgTool {
 
   public:
-    DeclareInterfaceID(IL1TopoAlgTool, 1, 0);
-    virtual ~IL1TopoAlgTool() = default;
+    DeclareInterfaceID(IGlobalSimAlgTool, 1, 0);
+    virtual ~IGlobalSimAlgTool() = default;
 
     virtual StatusCode run(const EventContext& ctx) const = 0;
 

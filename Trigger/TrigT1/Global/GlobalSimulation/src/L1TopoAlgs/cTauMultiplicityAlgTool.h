@@ -10,7 +10,7 @@
  */
 
 #include "../L1MenuResources.h"
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/cTauTOBArray.h"
 #include "../IO/Count.h"
 
@@ -25,7 +25,7 @@ namespace GlobalSim {
 
   class cTauMultiplicity;
   
-  class cTauMultiplicityAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class cTauMultiplicityAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     cTauMultiplicityAlgTool(const std::string& type,

@@ -9,7 +9,7 @@
  * AlgTool run the L1Topo eEmSelect SORT Algorithm
  */
 
-#include "../IL1TopoAlgTool.h"
+#include "../IGlobalSimAlgTool.h"
 #include "../IO/eEmTOBArray.h"
 #include "../IO/GenericTOBArray.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -18,7 +18,7 @@
 
 namespace GlobalSim {
   
-  class eEmSelectAlgTool: public extends<AthAlgTool, IL1TopoAlgTool> {
+  class eEmSelectAlgTool: public extends<AthAlgTool, IGlobalSimAlgTool> {
     
   public:
     eEmSelectAlgTool(const std::string& type,
