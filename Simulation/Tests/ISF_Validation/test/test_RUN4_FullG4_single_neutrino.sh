@@ -12,10 +12,10 @@ Input="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc2
 Output="test_neutrino.HITS.pool.root"
 
 # RUN4 setup
-# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC15c-SDR-14-05
+# ATLAS-P2-RUN4-03-00-00 and OFLCOND-MC21-SDR-RUN4-02
 Sim_tf.py \
 --CA \
---conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-02' \
 --simulator 'FullG4MT' \
 --postInclude 'default:PyJobTransforms.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \

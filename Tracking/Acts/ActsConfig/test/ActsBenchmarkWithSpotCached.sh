@@ -15,7 +15,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --perfmon 'fullmonmt' \
     --multithreaded 'True' \
     --autoConfiguration 'everything' \
-    --conditionsTag 'all:OFLCOND-MC15c-SDR-14-05' \
+    --conditionsTag 'all:OFLCOND-MC21-SDR-RUN4-02' \
     --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneWorkflowFlags' \

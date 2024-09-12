@@ -13,6 +13,7 @@ lastref_dir=last_results
 dcubeXml=dcube_ART_IDPVMPlots_ITk.xml
 
 geometry=ATLAS-P2-RUN4-03-00-00
+conditions=OFLCOND-MC21-SDR-RUN4-02
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -36,7 +37,7 @@ run () {
 run "Simulation" \
     Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC15c-SDR-14-05' \
+    --conditionsTag "default:${conditions}" \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
@@ -50,7 +51,7 @@ run "Simulation" \
 run "Digitization"\
     Digi_tf.py \
     --CA \
-    --conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+    --conditionsTag "default:${conditions}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion "default:${geometry}" \
     --inputHITSFile HITS.root \

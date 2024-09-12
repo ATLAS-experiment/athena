@@ -19,7 +19,7 @@ DigiOutFileName="RUN4_ttbar.RDO.pool.root"
 
 Digi_tf.py \
 --CA \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion default:ATLAS-P2-RUN4-03-00-00 \
 --inputHITSFile ${HSHitsFile} \

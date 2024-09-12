@@ -66,7 +66,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC21-SDR-RUN4-02" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
 
 	echo  "art-result: $? reconstruction"
 

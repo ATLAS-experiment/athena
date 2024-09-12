@@ -7,6 +7,7 @@ import sys
 from argparse import ArgumentParser
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Argument parsing
 parser = ArgumentParser("PrintSiDetectorElements.py")
@@ -43,7 +44,7 @@ if flags.Concurrency.NumThreads > 0:
 flags.GeoModel.Align.Dynamic = False
 flags.GeoModel.AtlasVersion = args.geometrytag
 flags.Input.isMC = True
-flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.Input.Files = []
 
 if args.localgeo:

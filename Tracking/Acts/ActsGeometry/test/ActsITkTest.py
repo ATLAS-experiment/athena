@@ -8,9 +8,9 @@ flags = initConfigFlags()
 
 from AthenaConfiguration.Enums import ProductionStep
 flags.Common.ProductionStep = ProductionStep.Simulation
-from AthenaConfiguration.TestDefaults import defaultGeometryTags
+from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.GeoModel.Align.Dynamic = False
 flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1']
 
