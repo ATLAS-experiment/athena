@@ -115,16 +115,22 @@ class MuonChainConfiguration(ChainConfigurationBase):
         else:
            doOvlpRm = False
 
+        trkMode = "FTF"
+        stepSuffix=""
+        if 'fT' in self.chainPart['addInfo']:
+            trkMode = "fastTracking"
+            stepSuffix = "fT"
+
         if 'l2mt' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags, "muCombl2mt", [mul2mtCBOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags, f"muCombl2mt{stepSuffix}", [mul2mtCBOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg, trackingMode=trkMode)
         elif 'l2io' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags, 'muCombIO', [mul2IOOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags, f'muCombIO{stepSuffix}', [mul2IOOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg, trackingMode=trkMode)
         elif doOvlpRm:
-           return self.getStep(flags, 'muCombOVR', [muCombOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags, f'muCombOVR{stepSuffix}', [muCombOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg, trackingMode=trkMode )
         elif "LRT" in self.chainPart['addInfo']:
-           return self.getStep(flags, 'muCombLRT', [muCombLRTSequenceGenCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags, f'muCombLRT{stepSuffix}', [muCombLRTSequenceGenCfg], is_probe_leg=is_probe_leg, trackingMode=trkMode )
         else:
-           return self.getStep(flags, 'muComb', [muCombSequenceGenCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags, f'muComb{stepSuffix}', [muCombSequenceGenCfg], is_probe_leg=is_probe_leg, trackingMode=trkMode )
 
     # --------------------
     def getmuCombIO(self, flags, is_probe_leg=False):

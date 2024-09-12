@@ -48,7 +48,7 @@ def ActsIDCCacheCreatorCfg(flags):
 
 
 @AccumulatorCache
-def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
+def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', patternMode='FTF', in_view=True ):
 
   log = logging.getLogger("trigInDetFastTrackingCfg")
   from TrigInDetConfig.utils import getFlagsForActiveConfig
@@ -62,8 +62,11 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
                                          flags.Tracking.ActiveConfig.input_name, 
                                          rois   = roisKey,
                                          inView = "VDVInDetFTF" if in_view else None)
-  acc = seq.sequence("FastTrackFinder")
-
+  if patternMode=='FTF':
+    acc = seq.sequence("FastTrackFinder")
+  elif patternMode=="fastTracking":
+    acc = seq.sequence("offlinePattern")
+    
   return acc
 
 

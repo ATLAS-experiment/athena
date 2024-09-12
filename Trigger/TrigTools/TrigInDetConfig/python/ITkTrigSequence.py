@@ -102,11 +102,13 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
     signature = self.flags.Tracking.ActiveConfig.input_name
 
     if not self.flags.Tracking.ActiveConfig.doZFinderOnly:
+      self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_FTF
       from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
       acc.merge(ITkTrackParticleCnvAlgCfg(self.flags,
                                           name = "ITkTrigTrackParticleCnvAlg"+signature,
-                                          TrackContainerName = self.flags.Tracking.ActiveConfig.trkTracks_FTF,
+                                          TrackContainerName = self.lastTrkCollection,
                                           xAODTrackParticlesFromTracksContainerName = self.flags.Tracking.ActiveConfig.tracks_FTF))
+    
     return acc
 
   def ambiguitySolver(self) -> ComponentAccumulator:
@@ -121,9 +123,9 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
       ITkTrkAmbiguityScoreCfg(
         self.flags,
         name = "TrkAmbiguityScore_",
-        SiSPSeededTrackCollectionKey=self.flags.Tracking.ActiveConfig.trkTracks_FTF
+        SiSPSeededTrackCollectionKey=self.lastTrkCollection
+        )
       )
-    )
 
     from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguitySolverCfg
     acc.merge(
@@ -147,6 +149,22 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
       self.flags,
       name = prefix+'xAODParticleCreatorAlg'+self.flags.Tracking.ActiveConfig.input_name+'_IDTrig',
       TrackContainerName = self.lastTrkCollection,
-      xAODTrackParticlesFromTracksContainerName = self.flags.Tracking.ActiveConfig.tracks_IDTrig
+      xAODTrackParticlesFromTracksContainerName = self.lastTrkCollection, 
     ))
     return acc
+
+  def offlinePattern(self) -> ComponentAccumulator:
+
+    ca = ComponentAccumulator()
+
+    from InDetConfig.SiSPSeededTrackFinderConfig import TrigITkSiSPSeededTrackFinderCfg
+
+    self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_IDTrig
+    ca.merge(TrigITkSiSPSeededTrackFinderCfg(self.flags,
+                                             name = 'EFsiSPSeededTrackFinder'+self.flags.Tracking.ActiveConfig.input_name,
+                                             TracksLocation = self.lastTrkCollection, 
+    ))
+
+    self.ambiPrefix = "EFAmbi"
+
+    return ca

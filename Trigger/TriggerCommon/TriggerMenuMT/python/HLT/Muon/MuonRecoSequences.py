@@ -242,11 +242,11 @@ def muonIDtrackVDVCfg( flags, name, RoIs, extraLoads=None, extraLoadsForl2mtmode
   result.addEventAlgo(ViewVerify)
   return result
 
-def muonIDFastTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False ):
+def muonIDFastTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None, doLRT=False, trackingMode="FTF" ):
 
   acc = ComponentAccumulator()
   from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-  acc.merge(trigInDetFastTrackingCfg( flags, roisKey=RoIs, signatureName=name ))
+  acc.merge(trigInDetFastTrackingCfg( flags, roisKey=RoIs, signatureName=name, patternMode=trackingMode ))
 
   acc.merge(muonIDtrackVDVCfg(flags, name, RoIs, extraLoads, extraLoadsForl2mtmode))
 
