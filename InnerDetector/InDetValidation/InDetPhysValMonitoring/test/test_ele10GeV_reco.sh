@@ -1,7 +1,7 @@
 #!/bin/bash
 # art-description: art job for InDetPhysValMonitoring, Single ele 10GeV
 # art-type: grid
-# art-input: user.keli:user.keli.mc16_13TeV.422029.ParticleGun_single_ele_Pt10GeV_Rel22073
+# art-input: mc23_13p6TeV:mc23_13p6TeV.902079.PG_singleelectron_Pt10_etaFlat0_2p5.recon.RDO.e8582_e8528_s4162_s4114_r15704
 # art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
@@ -12,9 +12,6 @@
 # art-output: art_core_0
 # art-output: dcube*
 # art-html: dcube_shifter_last
-
-#RDO is made at rel 22.0.73
-#reference plots are made at rel 22.0.73
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/physval_ele10GeV_reco_r24.root

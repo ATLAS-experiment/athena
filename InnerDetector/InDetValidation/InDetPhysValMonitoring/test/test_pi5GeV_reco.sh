@@ -1,7 +1,7 @@
 #!/bin/bash
-# art-description: art job for InDetPhysValMonitoring, Single muon 20GeV
+# art-description: art job for InDetPhysValMonitoring, Single pi 5GeV
 # art-type: grid
-# art-input: mc23_13p6TeV:mc23_13p6TeV.902074.PG_singlemuon_Pt20_etaFlat0_2p7.recon.RDO.e8582_e8528_s4162_s4114_r15704
+# art-input: mc23_13p6TeV:mc23_13p6TeV.902084.PG_singlepi_Pt5_etaFlat0_2p5.recon.RDO.e8582_e8528_s4162_s4114_r15704
 # art-input-nfiles: 10
 # art-cores: 4
 # art-memory: 4096
@@ -16,7 +16,7 @@
 relname="r24.0.61"
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_mu20GeV_reco.root 
+dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_piplus5GeV_reco.root
 
 script=test_MC_mu0_reco.sh
 

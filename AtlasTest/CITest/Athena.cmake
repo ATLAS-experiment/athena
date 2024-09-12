@@ -348,6 +348,9 @@ atlas_add_citest( MuonR4_PatternRecognition
 atlas_add_citest( TriggerMC
    SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_build.py )
 
+atlas_add_citest( TriggerMC_HI
+   SCRIPT test_trig_mc_v1DevHI_build.py )
+
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
@@ -360,5 +363,10 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
 
+atlas_add_citest( TriggerConfigFlags
+   SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
+   POST_EXEC_SCRIPT nopost.sh )
+
 atlas_add_citest( EFTracking_FPGATrackSim_workflow
    SCRIPT test_FPGATrackSimWorkflow.sh )
+

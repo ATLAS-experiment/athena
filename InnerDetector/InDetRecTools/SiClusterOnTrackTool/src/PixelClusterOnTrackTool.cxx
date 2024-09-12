@@ -475,7 +475,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
 
     Amg::Vector2D locpos = Amg::Vector2D(localphi, localeta);
     if (element->isBarrel() && !m_disableDistortions) {
-      correctBow(element->identify(), locpos, bowphi, boweta);
+      correctBow(element->identify(), locpos, bowphi, boweta,ctx);
     }
 
 
@@ -514,9 +514,9 @@ InDet::PixelClusterOnTrackTool::correctDefault
 
 void
 InDet::PixelClusterOnTrackTool::correctBow(const Identifier &id, Amg::Vector2D &localpos, const double phi,
-                                           const double theta) const {
+                                           const double theta, const EventContext& ctx) const {
   Amg::Vector3D dir(tan(phi), tan(theta), 1.);
-  Amg::Vector2D newpos = SG::ReadCondHandle<PixelDistortionData>(m_distortionKey)->correctReconstruction(m_pixelid->wafer_hash(id), localpos, dir);
+  Amg::Vector2D newpos = SG::ReadCondHandle<PixelDistortionData>(m_distortionKey, ctx)->correctReconstruction(m_pixelid->wafer_hash(id), localpos, dir);
 
   localpos = newpos;
 }
@@ -582,7 +582,7 @@ InDet::PixelClusterOnTrackTool::correctNN
 
     Amg::Vector2D locpos = pixelPrepCluster->localPosition();
     if (element->isBarrel() && !m_disableDistortions) {
-      correctBow(element->identify(), locpos, bowphi, boweta);
+      correctBow(element->identify(), locpos, bowphi, boweta,ctx);
     }
 
     Trk::LocalParameters locpar = Trk::LocalParameters(locpos);
@@ -627,7 +627,7 @@ InDet::PixelClusterOnTrackTool::correctNN
   double boweta = std::atan2(trketacomp, trknormcomp);
 
   if (element->isBarrel() && !m_disableDistortions) {
-    correctBow(element->identify(), finalposition, bowphi, boweta);
+    correctBow(element->identify(), finalposition, bowphi, boweta,ctx);
   }
 
   Amg::MatrixX cov = finalerrormatrix;

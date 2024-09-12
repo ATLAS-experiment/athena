@@ -120,23 +120,25 @@ class TRT_DetElementsRoadMaker_xk final:
       void detElementsRoadATL(
           std::deque<Amg::Vector3D>&,
           std::vector<const InDetDD::TRT_BaseElement*>&,
-          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used,
+          const EventContext& ctx) const;
       void detElementsRoadCTB(
           std::deque<Amg::Vector3D>&,
           std::vector<const InDetDD::TRT_BaseElement*>&,
-          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used) const;
+          InDet::TRT_DetElementLink_xk::TRT_DetElemUsedMap& used,
+          const EventContext& ctx) const;
       static double stepToDetElement(const InDetDD::TRT_BaseElement*&,
                                      Amg::Vector3D&, Amg::Vector3D&);
 
-      Trk::CylinderBounds getBound(MagField::AtlasFieldCache& fieldCache, const Trk::TrackParameters&) const;
+      Trk::CylinderBounds getBound(MagField::AtlasFieldCache& fieldCache, const Trk::TrackParameters&, const EventContext& ctx) const;
 
       MsgStream&    dumpConditions(MsgStream   & out) const;
 
       static MsgStream&    dumpEvent     (MsgStream   & out, int size_road) ;
 
       inline
-      const TRT_DetElementsLayerVectors_xk *getLayers() const {
-         SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey);
+      const TRT_DetElementsLayerVectors_xk *getLayers(const EventContext& ctx) const {
+         SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey, ctx);
          if (not roadData.isValid()) {
             ATH_MSG_FATAL("Failed to get " << m_roadDataKey.key());
          }
@@ -144,8 +146,8 @@ class TRT_DetElementsRoadMaker_xk final:
       }
 
       inline
-        const Trk::CylinderBounds get_bounds() const{
-        SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey);
+        const Trk::CylinderBounds get_bounds(const EventContext& ctx) const{
+        SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey, ctx);
         if (not roadData.isValid()) {
           ATH_MSG_FATAL("Failed to get " << m_roadDataKey.key());
         }
@@ -153,8 +155,8 @@ class TRT_DetElementsRoadMaker_xk final:
       }
 
       inline
-        double getTRTMinR() const{
-        SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey);
+        double getTRTMinR(const EventContext& ctx) const{
+        SG::ReadCondHandle<TRT_DetElementsRoadData_xk> roadData(m_roadDataKey, ctx);
         if (not roadData.isValid()) {
           ATH_MSG_FATAL("Failed to get " << m_roadDataKey.key());
         }

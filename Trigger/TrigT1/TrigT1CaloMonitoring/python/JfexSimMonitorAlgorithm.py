@@ -64,15 +64,15 @@ def JfexSimMonitoringConfig(flags):
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
                            opt=['kCanRebin','kAlwaysCreate'],merge='merge')
-    helper.defineHistogram('LBNString,Signature;h_mismatched_EmulatedTowerEvts',
+    helper.defineHistogram('LBN,Signature;h_mismatched_EmulatedTowerEvts',
                            fillGroup="mismatches",
                            type='TH2I', cutmask='IsEmulatedTowers',
-                           title='Mismatched EmulatedTower Events;LB:FirstEvtNum;Signature;Events',
+                           title='Mismatched EmulatedTower Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
                            ybins=1,ymin=0,ymax=1,
-                           opt=['kCanRebin','kAlwaysCreate'],merge='merge')
-    helper.defineTree('LBNString,Signature,LBN,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
-                      "lbnString/string:Signature/string:lbn/l:eventNumber/l:EventType/string:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
+                           opt=['kCanRebin','kAlwaysCreate','kAddBinsDynamically'],merge='merge')
+    helper.defineTree('LBN,Signature,LBNString,EventNumber,EventType,dataEtas,dataPhis,dataWord0s,simEtas,simPhis,simWord0s;mismatched',
+                      "lbn/l:Signature/string:lbnString/string:eventNumber/l:EventType/string:dataEtas/vector<float>:dataPhis/vector<float>:dataWord0s/vector<unsigned int>:simEtas/vector<float>:simPhis/vector<float>:simWord0s/vector<unsigned int>",
                       title="mismatched;LBN;Signature",fillGroup="mismatches")
 
 

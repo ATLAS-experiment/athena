@@ -29,8 +29,8 @@ namespace LVL1{
       
       virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int)  = 0;    
 
-      virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists() =0;
-      virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs() =0;
+      virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists(int seedThreshold) =0;
+      virtual std::unordered_map<int, jFEXForwardJetsInfo> calculateJetETs(int seedThreshold) =0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
 
    private:

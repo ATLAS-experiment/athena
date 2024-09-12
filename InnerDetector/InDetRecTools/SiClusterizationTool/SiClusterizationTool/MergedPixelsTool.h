@@ -95,7 +95,8 @@ namespace InDet {
         double splitProb1, 
         double splitProb2,
         const PixelChargeCalibCondData* calibData,
-        const PixelCalib::PixelOfflineCalibData* offlineCalibData) const;
+        const PixelCalib::PixelOfflineCalibData* offlineCalibData,
+        const EventContext& ctx) const;
 
     ///Retrieve the necessary services in initialize                
     virtual StatusCode initialize() override;

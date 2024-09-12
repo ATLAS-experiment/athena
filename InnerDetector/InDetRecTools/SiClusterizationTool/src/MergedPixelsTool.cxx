@@ -81,7 +81,8 @@ namespace InDet {
                                               double splitProb1,
                                               double splitProb2,
                                               const PixelChargeCalibCondData* calibData,
-                                              const PixelOfflineCalibData* offlineCalibData) const
+                                              const PixelOfflineCalibData* offlineCalibData,
+                                              const EventContext& ctx) const
   {
       ATH_MSG_VERBOSE("makeCluster called, number " << clusterNumber);
 
@@ -257,7 +258,7 @@ namespace InDet {
         return m_clusterMaker->pixelCluster(
             id, position, std::move(DVid), lvl1min, std::vector<int>(totgroup),
             siWidth, element, hasGanged, m_errorStrategy, pixelID, split,
-            splitProb1, splitProb2, calibData, offlineCalibData);
+            splitProb1, splitProb2, calibData, offlineCalibData,ctx);
       }
   }
 
@@ -428,13 +429,13 @@ namespace InDet {
           cluster = dataItemsPool->nextElementPtr();
           (*cluster) =
               makeCluster(DVid, Totg, Lvl1, element, pixelID, ++clusterNumber,
-                          false, 0.0, 0.0, calibData, offlineCalibData);
+                          false, 0.0, 0.0, calibData, offlineCalibData,ctx);
         } else {
           // collection will own the element release
           cluster = new PixelCluster();
           (*cluster) =
               makeCluster(DVid, Totg, Lvl1, element, pixelID, ++clusterNumber,
-                          false, 0.0, 0.0, calibData, offlineCalibData);
+                          false, 0.0, 0.0, calibData, offlineCalibData,ctx);
         }
         // statistics output
         cluster->setHashAndIndex(clusterCollection->identifyHash(),
