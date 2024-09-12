@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationHistograms_C
@@ -67,7 +67,7 @@ PixelChargeInterpolationHistograms::PixelChargeInterpolationHistograms(const std
 	}
 
 	m_parameters = new PixelChargeInterpolationParameters();
-	m_parameters->setParameters(NCSphi, NCSeta, Neta, Nphi, 0, bins);
+	m_parameters->setParameters(NCSphi, NCSeta, Neta, Nphi, 0, std::move(bins));
 	m_parameters->setVersion(-1);
 
 	// eta direction
@@ -86,8 +86,8 @@ PixelChargeInterpolationHistograms::PixelChargeInterpolationHistograms(const std
 	binsnames[ClustersizeIndex] = "ClusterSize";
 	
 	binsvectors[LayerIndex] = *layers;
-	binsvectors[AngleIndex] = etabins;
-	binsvectors[ClustersizeIndex] = clustersizeEta;
+	binsvectors[AngleIndex] = std::move(etabins);
+	binsvectors[ClustersizeIndex] = std::move(clustersizeEta);
 
 	m_etaProfile = new MultiHisto<TProfile>(*Profmodel,binsnames,binsvectors);
 	m_etaH = new MultiHisto<TH2F>(*THmodel,binsnames,binsvectors);
@@ -104,8 +104,8 @@ PixelChargeInterpolationHistograms::PixelChargeInterpolationHistograms(const std
 	
 	binsnames[AngleIndex] = "#phi";
 
-	binsvectors[AngleIndex] = phibins;
-	binsvectors[ClustersizeIndex] = clustersizePhi;
+	binsvectors[AngleIndex] = std::move(phibins);
+	binsvectors[ClustersizeIndex] = std::move(clustersizePhi);
 
 	m_phiProfile = new MultiHisto<TProfile>(*Profmodel,binsnames,binsvectors);
 	m_phiH = new MultiHisto<TH2F>(*THmodel1,binsnames,binsvectors);
