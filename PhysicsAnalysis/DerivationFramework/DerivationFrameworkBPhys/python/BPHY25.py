@@ -462,9 +462,9 @@ def BPHY25Cfg(flags):
         list_jpsietac_obj[i].JXDaug2MassHypo            = Mumass
         list_jpsietac_obj[i].NumberOfDisVDaughters      = 2
         list_jpsietac_obj[i].ExtraTrack1MassHypo        = list_jpsietac_extraTrk1Mass[i]
-        list_jpsietac_obj[i].ExtraTrack1MinPt           = 1430.
+        list_jpsietac_obj[i].ExtraTrack1MinPt           = 1900.
         list_jpsietac_obj[i].ExtraTrack2MassHypo        = list_jpsietac_extraTrk2Mass[i]
-        list_jpsietac_obj[i].ExtraTrack2MinPt           = 1430.
+        list_jpsietac_obj[i].ExtraTrack2MinPt           = 1230.
         list_jpsietac_obj[i].V0ExtraMassLowerCut        = etac_lo
         list_jpsietac_obj[i].V0ExtraMassUpperCut        = etac_hi
         list_jpsietac_obj[i].MaxMesonCandidates         = 20
@@ -529,11 +529,11 @@ def BPHY25Cfg(flags):
         list_3bodyA_obj[i].JXDaug2MassHypo            = Mumass
         list_3bodyA_obj[i].NumberOfDisVDaughters      = 2
         list_3bodyA_obj[i].ExtraTrack1MassHypo        = list_3bodyA_extraTrk1Mass[i]
-        list_3bodyA_obj[i].ExtraTrack1MinPt           = 1810.
+        list_3bodyA_obj[i].ExtraTrack1MinPt           = 2370.
         list_3bodyA_obj[i].ExtraTrack2MassHypo        = list_3bodyA_extraTrk2Mass[i]
-        list_3bodyA_obj[i].ExtraTrack2MinPt           = 1520.
+        list_3bodyA_obj[i].ExtraTrack2MinPt           = 1610.
         list_3bodyA_obj[i].ExtraTrack3MassHypo        = list_3bodyA_extraTrk3Mass[i]
-        list_3bodyA_obj[i].ExtraTrack3MinPt           = 1520.
+        list_3bodyA_obj[i].ExtraTrack3MinPt           = 1230.
         list_3bodyA_obj[i].LxyDpmCut                  = 0.25
         list_3bodyA_obj[i].LxyD0Cut                   = 0.15
         list_3bodyA_obj[i].DpmMassLowerCut            = Dpm_lo
@@ -684,7 +684,7 @@ def BPHY25Cfg(flags):
         list_3bodyC_obj[i].JXDaug2MassHypo          = Mumass
         list_3bodyC_obj[i].NumberOfDisVDaughters    = 3
         list_3bodyC_obj[i].DisVDaug3MassHypo        = Pimass
-        list_3bodyC_obj[i].DisVDaug3MinPt           = 480.
+        list_3bodyC_obj[i].DisVDaug3MinPt           = 850.
         list_3bodyC_obj[i].ExtraTrack1MassHypo      = list_3bodyC_extraTrkMass[i]
         list_3bodyC_obj[i].ExtraTrack1MinPt         = 480.
         list_3bodyC_obj[i].MassLowerCut             = list_3bodyC_massLo[i]
@@ -851,7 +851,6 @@ def BPHY25Cfg(flags):
     passedCandidates = []
 
     list_obj = list_disV_obj + list_trkLd_obj + list_jpsietac_obj + list_3bodyA_obj + list_3bodyB_obj + list_3bodyC_obj + list_2V0_obj
-    #list_obj = list_disV_obj + list_trkLd_obj + list_jpsietac_obj + list_3bodyB_obj + list_3bodyC_obj + list_2V0_obj
 
     for obj in list_obj:
         CascadeCollections += obj.CascadeVertexCollections
