@@ -35,8 +35,8 @@ private:
   Gaudi::Property<bool> m_passedb4Prescale{this,"PassedBeforePrescale",0,"boolean of if we want to measure the efficiency based on passed before prescale"};
 
   Gaudi::Property<std::vector<std::string>> m_multiJet_LegacySmallRadiusTriggers{this,"multiJet_LegacySmallRadiusTriggers",{},"Vector of single jet L1 triggers"};
-  Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_phase1_and_legacy{this,"SmallRadiusJetTriggers_phase1_and_legacy",{},"Vector of all SR triggers"};
-  Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_phase1_and_legacy{this,"LargeRadiusJetTriggers_phase1_and_legacy",{},"Vector of all SR triggers"};
+  Gaudi::Property<std::vector<std::string>> m_SmallRadiusJetTriggers_phase1{this,"SmallRadiusJetTriggers_phase1",{},"Vector of all Small radius triggers"};
+  Gaudi::Property<std::vector<std::string>> m_LargeRadiusJetTriggers_phase1{this,"LargeRadiusJetTriggers_phase1",{},"Vector of all Large radius triggers"};
 
   
   // container keys including steering parameter and description

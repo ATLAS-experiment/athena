@@ -214,28 +214,20 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   
   //Create and clean up the list of L1Triggers
   std::vector<std::string> multiJet_LegacySmallRadiusTriggers = m_multiJet_LegacySmallRadiusTriggers;
-  std::vector<std::string> SmallRadiusJetTriggers_phase1_and_legacy = m_SmallRadiusJetTriggers_phase1_and_legacy;
-  std::vector<std::string> LargeRadiusJetTriggers_phase1_and_legacy = m_LargeRadiusJetTriggers_phase1_and_legacy;
+  std::vector<std::string> SmallRadiusJetTriggers_phase1 = m_SmallRadiusJetTriggers_phase1;
+  std::vector<std::string> LargeRadiusJetTriggers_phase1 = m_LargeRadiusJetTriggers_phase1;
   
   std::map<std::string, int> l1_trigger_flatline_vals {
     //this is around where the l1trigger pt effiencies flatten out
     //in order to make eta effiency curves, its useful to isolate the pt behavior,
     // so we want 100% pt effiency, or after 'flattening out'
-    {"L1_J15", 35*GeV}, {"L1_J20", 40*GeV},  {"L1_J30", 60*GeV},
-    {"L1_J40", 80*GeV}, {"L1_J50", 90*GeV}, {"L1_J75", 120*GeV},
-    {"L1_J100", 140*GeV}, {"L1_gLJ80p0ETA25", 175*GeV}, {"L1_gLJ100p0ETA25", 200*GeV}, 
+    {"L1_gLJ80p0ETA25", 175*GeV}, {"L1_gLJ100p0ETA25", 200*GeV}, 
     {"L1_gLJ140p0ETA25", 270*GeV}, {"L1_gLJ160p0ETA25", 270*GeV}, {"L1_SC111-CJ15", 270*GeV}, {"L1_gJ20p0ETA25", 40*GeV},
     {"L1_gJ50p0ETA25", 80*GeV}, {"L1_gJ100p0ETA25", 200*GeV},
     {"L1_gJ400p0ETA25", 800*GeV}, {"L1_jJ30", 50*GeV}, {"L1_jJ40", 60*GeV},
     {"L1_jJ50", 70*GeV}, {"L1_jJ60", 80*GeV}, {"L1_jJ80", 100*GeV},
     {"L1_jJ90", 110*GeV}, {"L1_jJ125", 135*GeV}, {"L1_jJ140", 160*GeV}, {"L1_jJ160", 180*GeV},
     {"L1_jJ180", 200*GeV}
-  };
-  
-  std::map<std::string, std::vector<float>> multijet_triggers_val {
-    {"L1_3J50", {50*GeV, 50*GeV, 50*GeV}}, {"L1_4J15", {15*GeV, 15*GeV, 15*GeV, 15*GeV}},
-    {"L1_4J20", {20*GeV, 20*GeV, 20*GeV, 20*GeV}}, {"L1_J85_3J30", {85*GeV, 30*GeV, 30*GeV, 30*GeV}},
-    {"L1_2J15_XE55", {15*GeV, 15*GeV}}, {"L1_2J50_XE40", {50*GeV, 50*GeV}}
   };
 
   
@@ -257,10 +249,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
       //get the pt of leading jet 
       auto pt_ref  = Monitored::Scalar<float>("val_SRpt", jet_pt["leadingOffline_SmallRadiusJet"]);
       
-      for(unsigned int t=0; t< SmallRadiusJetTriggers_phase1_and_legacy.size(); ++t) {//iterate through triggers that we make effiency curves for
-        const std::string& trigger_name = SmallRadiusJetTriggers_phase1_and_legacy[t]; // define the trigger name and get its decision
-        
-  
+      for (const auto& trigger_name : SmallRadiusJetTriggers_phase1){
         bool trig_of_interest_decision = false; //default definition of the trigger of interest decison to be false,
         if (use_passed_before_prescale) {
           //We can choose if we want to use pass before prescale, or not when defining our trigger efficiency
@@ -289,39 +278,6 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
         } //(close IF) loop that checks if the trigger of interest is in list of flatline trigger vals
       } //(close FOR) loop that iterates through all of L1 single jet triggers we make effiency curves for
       
-      
-      //###########################
-      //###########################
-      //now lets iterate through the multi jet triggers to make efficiency curves!
-      for(unsigned int t=0; t< multiJet_LegacySmallRadiusTriggers.size(); ++t) {
-        const std::string& trigger_name = multiJet_LegacySmallRadiusTriggers[t];
-        
-         //determine if the trigger passed
-        bool trig_of_interest_decision = false;
-        if (use_passed_before_prescale) {
-          const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(trigger_name);
-          trig_of_interest_decision = bits & TrigDefs::L1_isPassedBeforePrescale;
-        } else { trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name); }
-        
-         // for these multijet triggers, we only want to fill the "last" jet of the trigger defintion 
-         // example: a 4J100 jet trigger? we want to only plot the pt of the jet with the 4th highest pT 
-        int multijet_num = multijet_triggers_val[trigger_name].size(); // number of jets we expect from trigger definition 
-        int jets_num = jets->size(); //total number of jets in the event
-        if (jets_num >= multijet_num) {
-          //iterate through each jet required by trigger and check that the value is satisfied
-          int jet_count = 0;
-          for (const auto* j : *jets) {
-            jet_count += 1;
-            if(jet_count == multijet_num) { //only want to fill histogram on the last jet of the multijet
-              const float jet_pt_loop = j->pt();
-              auto pt_ref  = Monitored::Scalar<float>("val_SRpt", jet_pt_loop);
-              auto passed_pt  = Monitored::Scalar<bool>("bool_" + r, trig_of_interest_decision);
-              fill(m_packageName, pt_ref, passed_pt);
-            } //(close IF) loop that checks we are filling only the last jet of the multijet
-          } //(close FOR) loop that iterates trhrough each jet required by the multijet trigger
-        } //(close IF) loop that checks if the number of jets preseent agrees with the multijet trigger
-      } //(close FOR) loop that iterates through the multijet triggers
-      
     } //(close IF) loop that checks if the reference trigger and physical property pass is passed
   } //(close FOR) the iteration that fills effiency histogram for 4 different kinds of refernce triggers
   
@@ -334,9 +290,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     if ( offlineLRJet_maxEta_minPt_requirement && reference_trigger_decision[r]) { //check that the physical cuts and reference trigger is passed
       auto pt_ref  = Monitored::Scalar<float>("val_LRpt", jet_pt["leadingOffline_LargeRadiusJet"]);
 
-      for(unsigned int t=0; t< LargeRadiusJetTriggers_phase1_and_legacy.size(); ++t){ //iterate through all of the useful LR triggers list (that we make effiency curves for)
-        const std::string& trigger_name = LargeRadiusJetTriggers_phase1_and_legacy[t];
-      
+      for (const auto& trigger_name : LargeRadiusJetTriggers_phase1){
         bool trig_of_interest_decision = false;
         if (use_passed_before_prescale) {
           const unsigned int bits = AthMonitorAlgorithm::getTrigDecisionTool()->isPassedBits(trigger_name);
