@@ -374,6 +374,7 @@ def BTagAlgsCfg(
             TrackCollection=trackCollection,
             nnFilePaths=networks['folds'],
             remapping=networks.get('remapping', {}),
+            JetCollection=jetcol,
         )
 
         # disable GN2v01 if there are 0 tracks

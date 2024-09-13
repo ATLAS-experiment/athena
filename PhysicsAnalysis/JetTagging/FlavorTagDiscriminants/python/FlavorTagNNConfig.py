@@ -252,13 +252,15 @@ def MultifoldGNNCfg(
 
     acc = ComponentAccumulator()
 
-    if JetCollection is not None:
-        acc.merge(
-            FoldDecoratorCfg(
-                flags,
-                jetCollection=JetCollection
-            )
+    if JetCollection is None:
+        raise ValueError('JetCollection must be specified')
+
+    acc.merge(
+        FoldDecoratorCfg(
+            flags,
+            jetCollection=JetCollection
         )
+    )
 
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
@@ -319,7 +321,6 @@ def MultifoldGNNCfg(
     if useBTaggingObject is not None:
         warn(f'the option {useBTaggingObject=} is deprecated', stacklevel=2)
 
-
     acc.addEventAlgo(
         Alg(
             name=algname,
@@ -337,6 +338,7 @@ def MultifoldGNNCfg(
                 perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
             ),
             undeclaredReadDecorKeys=veto_list,
+            ExtraInputs=[("xAOD::JetContainer", f"StoreGateSvc+{JetCollection}.jetFoldHash")],
             **alg_args
         )
     )
