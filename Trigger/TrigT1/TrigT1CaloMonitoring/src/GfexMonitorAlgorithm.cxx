@@ -49,7 +49,8 @@ StatusCode GfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
 	// Small-R and large-R jets container loop
 	for (const auto& key : m_gFexJetTobKeyList){
 		SG::ReadHandle<xAOD::gFexJetRoIContainer> jetContainer (key, ctx);
-
+		auto lumi = GetEventInfo(ctx)->lumiBlock();
+	
 		// Check that this container is present
 		if ( !jetContainer.isValid() ) {
 			ATH_MSG_WARNING("No gFex jet container found in storegate: "<< key.key());
@@ -60,14 +61,14 @@ StatusCode GfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
 				const xAOD::gFexJetRoIContainer* jetContainerPtr = jetContainer.cptr();
 			// Loop over all required pt cut values - LRJets
 				for(auto ptCut : m_ptCutValuesgLJ){
-					ATH_CHECK(fillJetHistograms(key.key(), jetContainerPtr, ptCut));
+					ATH_CHECK(fillJetHistograms(key.key(), jetContainerPtr, ptCut, lumi));
 				}
 			}
 			if (key.key() == "L1_gFexSRJetRoI"){
 				const xAOD::gFexJetRoIContainer* jetContainerPtr = jetContainer.cptr();
 				// Loop over all required pt cut values - SRJets
 				for(auto ptCut : m_ptCutValuesgJ){
-					ATH_CHECK(fillJetHistograms(key.key(), jetContainerPtr, ptCut));
+					ATH_CHECK(fillJetHistograms(key.key(), jetContainerPtr, ptCut, lumi));
 				}
 			}
 		}
@@ -101,7 +102,7 @@ StatusCode GfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
 	return StatusCode::SUCCESS;
 }
 
-StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container, const float& ptCutValue) const {
+StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container, const float& ptCutValue ,const auto& lbn) const {
 
 	// Define name extension based on pT cut value
 	std::string histNameExt = ptCutValue != -1. ? (std::string("_CutPt") + std::to_string(int(ptCutValue))) : "";
@@ -109,14 +110,41 @@ StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey,
 	auto jetEta = Monitored::Scalar<float>(handleKey + "Eta" + histNameExt, 0.0);
 	auto jetPhi = Monitored::Scalar<float>(handleKey + "Phi" + histNameExt, 0.0);
 	auto jetPt = Monitored::Scalar<float>(handleKey + "Pt" + histNameExt, 0.0);
+	auto binNumber = Monitored::Scalar<int>(handleKey+"binNumber"+histNameExt,0);
+	auto lumiNumber = Monitored::Scalar<int>(handleKey+"LBN"+histNameExt, lbn );
+
+
 
 	for(const xAOD::gFexJetRoI* gFexJetRoI : *container){
 		jetEta = gFexJetRoI->eta();
-		jetPhi = gFexJetRoI->phi();
+		auto phi = gFexJetRoI->phi();
 		jetPt  = gFexJetRoI->gFexTobEt();
+		
+		uint8_t etaidx = gFexJetRoI->iEta();
+		uint8_t phiidx = gFexJetRoI->iPhi();
+
+		int x = etaidx+1;
+		int y = phiidx+1;
+		binNumber = 40*(y-1)+x;
+
 
 		if(jetPt > ptCutValue){
+			if (handleKey == "L1_gFexSRJetRoI"){
+				if (std::abs(jetEta)>=3.3){
+					jetPhi = phi - M_PI/32;
+					fill(m_packageName,jetEta,jetPhi);
+					jetPhi = phi + M_PI/32;
+					fill(m_packageName,jetEta,jetPhi,jetPt);
+					fill(m_packageName,lumiNumber,binNumber);
+				} else {
+					jetPhi = phi;
+					fill(m_packageName,jetEta,jetPhi,jetPt);
+					fill(m_packageName,lumiNumber,binNumber);
+				}	
+			}
+			jetPhi = phi;
 			fill(m_packageName, jetEta, jetPhi, jetPt);
+			fill(m_packageName,lumiNumber,binNumber);
 		}
 	}
 	return StatusCode::SUCCESS;
