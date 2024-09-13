@@ -114,6 +114,20 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                     xmin=0, xmax=len(xlabels))
 
     for cable in range(4):
+        ylabels = ['#splitline{Sim counts <}{Hdw counts}','#splitline{Sim counts >}{Hdw counts}','#splitline{Sim counts =}{Hdw counts}']
+        topoName = 'Topo1Opt'+str(cable)
+        name = 'MultiplicityTopo1Opt'+str(cable)+',MultiplicityMatchTopo1Opt'+str(cable)
+        name += f';{topoName}_mismatch'
+        title = f'Topo Optical Cable {cable} Miss/Matches Summary'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
+        alg.MonTool.defineHistogram(name, path='EXPERT', type='TH2F',
+                                    title=title, xbins=len(xlabels), ybins=3,
+                                    xlabels=xlabels,ylabels=ylabels,
+                                    xmin=0, xmax=len(xlabels),
+                                    ymin=0, ymax=len(ylabels))
+
+    for cable in range(4):
         topoName = 'Topo1Opt'+str(cable)
         labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
         labels = [x for x in labels if x]

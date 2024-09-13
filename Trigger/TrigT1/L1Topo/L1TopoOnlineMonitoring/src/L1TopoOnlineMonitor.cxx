@@ -611,11 +611,18 @@ StatusCode L1TopoOnlineMonitor::doMultComp( std::vector<std::vector<unsigned>> &
   }
 
   for (size_t i=0;i<multWeightsSim.size();i++) {
+    auto mon_multiplicity = Monitored::Scalar<unsigned>("MultiplicityTopo1Opt" + std::to_string(i));
+    auto mon_match = Monitored::Scalar<unsigned>("MultiplicityMatchTopo1Opt" + std::to_string(i));
     for (size_t k=0;k<multWeightsSim[i].size();k++) {
       std::string colName = "Topo1Opt" + std::to_string(i) + "_" + std::to_string(k);
       auto monMultSim = Monitored::Scalar<unsigned>(colName+"_Sim", multWeightsSim[i][k]);
       auto monMultHdw = Monitored::Scalar<unsigned>(colName+"_Hdw", multWeightsHdw[i][k]);
       Monitored::Group(m_monTool, monMultSim, monMultHdw);
+      if (monMultSim < monMultHdw) mon_match = 0;
+      if (monMultSim > monMultHdw) mon_match = 1;
+      if (monMultSim == monMultHdw) mon_match = 2;
+      mon_multiplicity = static_cast<unsigned>(k);
+      Monitored::Group(m_monTool, mon_multiplicity, mon_match);
     }
   }
   return StatusCode::SUCCESS;
