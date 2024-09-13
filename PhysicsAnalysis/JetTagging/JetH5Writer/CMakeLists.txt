@@ -5,9 +5,6 @@
 # Set the name of the package:
 atlas_subdir( JetH5Writer )
 
-# We don't want any warnings in compilation
-add_compile_options(-Werror)
-
 # common requirements
 atlas_add_library(JetH5WriterLib
   src/EventInfoWriter.cxx
