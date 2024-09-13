@@ -1,26 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // IMagFieldSvc.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
-#ifndef MAGFIELDINTERFACES_IMAGFIELDSVC_H
-#define MAGFIELDINTERFACES_IMAGFIELDSVC_H
-
-#include <cmath>
-#include <iostream>
+#ifndef G4ATLASINTERFACES_IMAGFIELDSVC_H
+#define G4ATLASINTERFACES_IMAGFIELDSVC_H
 
 // Framework includes
 #include "GaudiKernel/IInterface.h"
 
-// Amg classes
-#include "GeoPrimitives/GeoPrimitives.h"
-
 namespace MagField {
 
 /** @ class IMagFieldSvc
- 
+
  @ author Elmar.Ritsch -at- cern.ch
  */
     class IMagFieldSvc: virtual public IInterface {
@@ -40,15 +34,6 @@ namespace MagField {
         /** xyz[3] is in mm, bxyz[3] is in kT */
         /** if deriv[9] is given, field derivatives are returned in kT/mm */
         virtual void getField(const double *xyz, double *bxyz, double *deriv = nullptr) const = 0;
-
-        /** a getField() wrapper for Amg classes */
-        void getField(const Amg::Vector3D *xyz, Amg::Vector3D *bxyz) const {
-          getField( xyz->data(), bxyz->data(), nullptr );
-        }
-        void getField(const Amg::Vector3D *xyz, Amg::Vector3D *bxyz, Amg::RotationMatrix3D *deriv) const {
-          // cppcheck-suppress nullPointer; false positive
-          getField( xyz->data(), bxyz->data(), deriv->data() );
-        }
 
         /** get B field value on the z-r plane at given position */
         /** works only inside the solenoid; otherwise calls getField() above */

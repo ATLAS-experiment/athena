@@ -22,7 +22,7 @@
 
 #include "ForwardRegionGeoModel/IForwardRegionProperties.h"
 // MagField includes
-#include "MagFieldInterfaces/IMagFieldSvc.h"
+#include "G4AtlasInterfaces/IMagFieldSvc.h"
 
 namespace MagField {
 
