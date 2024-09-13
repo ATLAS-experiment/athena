@@ -4,6 +4,7 @@
 
 #include "GfexInputMonitorAlgorithm.h"
 #include "TProfile2D.h"
+#include "TMath.h"
 GfexInputMonitorAlgorithm::GfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 	: AthMonitorAlgorithm(name,pSvcLocator)
 {
@@ -36,10 +37,12 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 	auto nGfexTowers = Monitored::Scalar<int>("NGfexTowers",0.0);
 	auto Towereta = Monitored::Scalar<float>("TowerEta",0.0);
 	auto Towerphi = Monitored::Scalar<float>("TowerPhi",0.0);
-	auto Towerfpga = Monitored::Scalar<uint8_t>("TowerFpga",0.0);
-	auto Maxet = Monitored::Scalar<int>("MaxEt",0.0);
 	auto Towersaturationflag = Monitored::Scalar<char>("TowerSaturationflag",0.0);
 	auto Toweret = Monitored::Scalar<int>("TowerEt",0);
+	auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
+    auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
+    auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
+	auto binNumber = Monitored::Scalar<int>("binNumber",0);
 
 	unsigned int nTowers = 0;
 	auto maxet = 0.0;
@@ -52,34 +55,58 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 		fill("gTowers",Toweret,Towersaturationflag);
 
 
-		Towereta=gfexTowerRoI->eta();
-		Towerphi=gfexTowerRoI->phi();
-
+		float eta = gfexTowerRoI->eta();
+		float phi = gfexTowerRoI->phi();
+		Towereta = eta;
+		Towerphi = phi;
+		
+		uint8_t etaidx = gfexTowerRoI->iEta();
+		uint8_t phiidx = gfexTowerRoI->iPhi();
+		int x = etaidx+1;
+		int y = phiidx+1;
+		binNumber = 40*(y-1)+x;
+		
+		
 		if (Towersaturationflag == 1 && gfexTowerRoI->towerEt() >= maxet){
 				maxet = gfexTowerRoI->towerEt();
 		}
 
-
-		if (Toweret >= 200){
+		if(gfexTowerRoI->towerEt() >= 200 ){
 			nTowers++;
-
-			Towerfpga=gfexTowerRoI->fpga();
-			fill("highEtgTowers",Towereta,Towerphi,Toweret,Towerfpga);
 		}
-
-		else {
-			fill("lowEtgTowers",Towereta,Towerphi);
+		
+		if (gfexTowerRoI->towerEt() >= 10){
+			if (std::abs(eta) >= 3.3 ){
+				Towerphi = phi - M_PI/32;
+				fill("highEtgTowers",Towereta,Towerphi);
+				Towerphi = phi + M_PI/32;
+				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",lbn,binNumber);
+			} else {
+				fill("highEtgTowers",Towereta,Towerphi);
+				fill("highEtgTowers",lbn,binNumber);
+			}
+			
+		}
+     // only for h_gTower_coldtowers_etaphimap
+		else if (gfexTowerRoI->towerEt() <= -10){
+			if (std::abs(eta) >= 3.3 ){
+				Towerphi = phi - M_PI/32;
+				fill("lowEtgTowers",Towereta,Towerphi);
+				Towerphi = phi + M_PI/32;
+				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",lbn,binNumber);
+			} else {
+				fill("lowEtgTowers",Towereta,Towerphi);
+				fill("lowEtgTowers",lbn,binNumber);
+				
+			}
 		}
 	}
 
-	Maxet = maxet;
-	if (Maxet != 0.0 )
-		fill ("gTowers", Maxet);
+	nGfexTowers = nTowers;
+	fill ("highEtgTowers",lbn,nGfexTowers);
 
-	if (nTowers != 0) {
-		nGfexTowers = nTowers;
-		fill ("highEtgTowers",nGfexTowers);
-	}
 
 	return StatusCode::SUCCESS;
 }
