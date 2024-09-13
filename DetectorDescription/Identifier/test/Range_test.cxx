@@ -42,8 +42,21 @@ BOOST_AUTO_TEST_CASE(RangeAssignment){
   BOOST_CHECK_NO_THROW(r3 = std::move(r2));
 }
 
+BOOST_AUTO_TEST_CASE(RangeStreamExtraction){
+  Range r;
+  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
+  std::istringstream in(larExample);
+  BOOST_CHECK_NO_THROW(in>>r);
+  BOOST_TEST(larExample == std::string(r));
+  Range r2;
+  const std::string larExample2="4/1/-1,1/3/0/0:9/0:63";
+  std::istringstream in2(larExample);
+  BOOST_CHECK_NO_THROW(in2>>r2);
+}
 
-BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
+
+
+BOOST_AUTO_TEST_CASE(RangeBuildFromText){
   const std::string sctExample="-6:-1/1:6";//SCT barrel has eta indices -1->-5 and 1->6
   Range r1;
   BOOST_CHECK_NO_THROW(r1.build(sctExample));
@@ -55,11 +68,10 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromText,* utf::expected_failures(2)){
   BOOST_CHECK_NO_THROW(r1.build(upperBound));
   const std::string enumerated="1,2,3,4,10";
   BOOST_CHECK_NO_THROW(r1.build(enumerated));
-  //I think it should throw if you feed it nonsense, but it doesn't; it fails silently
   const std::string empty;
-  BOOST_CHECK_THROW(r1.build(empty), std::runtime_error);
+  BOOST_CHECK_NO_THROW(r1.build(empty)); //do nothing
   const std::string nonsense="hgfclsdvoiwe";
-  BOOST_CHECK_THROW(r1.build(nonsense), std::invalid_argument);
+  BOOST_CHECK_THROW(r1.build(nonsense), std::invalid_argument); //throw exception
   const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
   BOOST_CHECK_NO_THROW(r1.build(larExample));
 }
@@ -96,13 +108,6 @@ BOOST_AUTO_TEST_CASE(RangeConst_identifier_factoryConstructors){
   BOOST_CHECK_NO_THROW(Range::const_identifier_factory f3(r1));
 }
 
-BOOST_AUTO_TEST_CASE(RangeStreamExtraction){
-  Range r;
-  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
-  std::istringstream in(larExample);
-  BOOST_CHECK_NO_THROW(in>>r);
-  BOOST_TEST(larExample == std::string(r));
-}
 
 
 

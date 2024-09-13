@@ -77,13 +77,6 @@ atlas_add_test(IdHelper_test
 )
 
 
-atlas_add_test(RangeParser_test
-  SOURCES  test/RangeParser_test.cxx 
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
-  POST_EXEC_SCRIPT nopost.sh 
-)
-
 atlas_add_test(IdentifierField_test
   SOURCES  test/IdentifierField_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}

@@ -4,10 +4,9 @@
 
 #include "Identifier/IdentifierField.h"
 #include "src/IdentifierFieldParser.h"
-#include <limits>
 #include <algorithm>
 #include <iostream>
-#include <bit>
+#include <bit> //std::bit_width
 #include <array>
 #include <cctype> //std::isspace
 #include <format>
@@ -93,7 +92,7 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
   switch (m_mode) { 
     case unbounded: {
       previous = current - 1; 
-      return (current != std::numeric_limits<element_type>::min());
+      return (current != minimum_possible);
       break; 
     }
     case low_bounded: {
@@ -107,7 +106,7 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
     }
     case high_bounded: {
       previous = current - 1; 
-      return (current != std::numeric_limits<element_type>::min());
+      return (current != minimum_possible);
       break;
     }
     case both_bounded: {
@@ -160,12 +159,12 @@ IdentifierField::get_next(element_type current, element_type& next) const{
   switch (m_mode) { 
     case unbounded: {
       next = current + 1; 
-      return (current != std::numeric_limits<element_type>::max());
+      return (current != maximum_possible);
       break; 
     }
     case low_bounded: {
       next = current + 1; 
-      return (current != std::numeric_limits<element_type>::max());
+      return (current != maximum_possible);
       break; 
     }
     case high_bounded: {
@@ -600,12 +599,6 @@ IdentifierField::operator == (const IdentifierField& other) const {
     return (true);
 }
 
-//----------------------------------------------- 
-bool 
-IdentifierField::operator != (const IdentifierField& other) const {
-    return (!((*this) == other));
-}
- 
 
 //----------------------------------------------- 
 void 
@@ -780,7 +773,11 @@ operator >> (std::istream &is, IdentifierField &idf){
       idf.add_value(v);
     }
   } else {
-    throw std::invalid_argument("Invalid argument to stream extraction for IdentifierField");
+    std::string msg{"Stream extraction for IdentifierField: "};
+    std::string remains;
+    is >> remains;
+    msg+=remains;
+    throw std::invalid_argument(msg);
   }
   return is;
 }

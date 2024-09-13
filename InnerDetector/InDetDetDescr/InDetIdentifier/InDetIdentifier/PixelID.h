@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_PIXELID_H
@@ -20,7 +20,7 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/Identifier32.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
+#include "Identifier/MultiRange.h"
 #include "Identifier/IdHelper.h"
 #include "IdDict/IdDictFieldImplementation.h"
 #include "AthenaKernel/CLASS_DEF.h"
