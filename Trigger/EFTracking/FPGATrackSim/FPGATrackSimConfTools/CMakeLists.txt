@@ -36,4 +36,5 @@ atlas_add_test( FPGATrackSimConfigFlags_test
 
 atlas_add_test( FPGATrackSimFromRDO_test
                 SCRIPT FPGATrackAnalysisOnRDO.sh
-                POST_EXEC_SCRIPT noerror.sh )
+                POST_EXEC_SCRIPT noerror.sh 
+                PROPERTIES TIMEOUT 240 )

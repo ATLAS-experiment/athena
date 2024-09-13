@@ -142,7 +142,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('lrtMonD0Range', (-100,100))
     cf.addFlag('lrtMonZ0Range', (-300,300)) 
 
-    # FPGATrackSimLogicalHistProcessAlg
+    # FPGATrackSimLogicalHitsProcessAlg
     # cf.addFlag('etaPatternRoadFilter', None) #TO DO (will be uncomment when the value is known)
     # cf.addFlag('phiRoadFilter', None) #TO DO (will be uncomment when the value is known)
     cf.addFlag('sampleType', '')
