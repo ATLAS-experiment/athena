@@ -9,12 +9,8 @@
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/RNTuple.hxx"
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 31, 0)
 #include "ROOT/RNTupleWriteOptions.hxx"
 #include "ROOT/RNTupleWriter.hxx"
-#else
-#include "ROOT/RNTupleOptions.hxx"
-#endif
 
 #include <tuple>
 
@@ -23,11 +19,7 @@ class RNTupleModel;
 }
 
 namespace RootStorageSvc {
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 31, 0)
 using RFieldBase = ROOT::Experimental::RFieldBase;
-#else
-using RFieldBase = ROOT::Experimental::Detail::RFieldBase;
-#endif
 using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
 using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using REntry = ROOT::Experimental::REntry;

@@ -11,9 +11,7 @@
 #include "RNTupleAuxDynStore.h"
 #include "RNTupleAuxDynReader.h"
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 
 using namespace RootAuxDynIO;
 
@@ -46,11 +44,9 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
          : std::unique_lock<std::recursive_mutex>();
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
       //auto view = m_reader.getNativeReader()->GetView<void>(fieldInfo.fieldName, nullptr);
       fieldInfo.view_p->BindRawPtr(data);
       (*fieldInfo.view_p)(m_entry);
-#endif
 
       int  nbytes = 1;   // MN: TODO how to get this?
       if( nbytes <= 0 ) {

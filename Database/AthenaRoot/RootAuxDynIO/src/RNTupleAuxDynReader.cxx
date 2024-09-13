@@ -19,9 +19,7 @@
 #include "TROOT.h"
 
 #include "ROOT/RNTuple.hxx"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 #include "ROOT/RField.hxx"
 
 using std::string;
@@ -145,11 +143,7 @@ namespace RootAuxDynIO
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
       const string field_prefix = m_storeFieldName + ':';
       const auto& desc = m_ntupleReader->GetDescriptor();
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
       for( const auto &f : desc.GetTopLevelFields() ) {
-#else
-      for( const auto &f : desc->GetTopLevelFields() ) {
-#endif
          const string field_name = f.GetFieldName();
          if( field_name.rfind(field_prefix,0) == 0 ) {
             const string attr_infile = field_name.substr(field_prefix.size());
@@ -162,10 +156,8 @@ namespace RootAuxDynIO
             if( auxid != SG::null_auxid ) {
                m_auxids.insert(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
                m_fieldInfos[auxid].view_p = std::make_unique<RNTupleView<void,true>>(
                   m_ntupleReader->GetView<void>(field_name, nullptr) );
-#endif
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");
                msg << "Could not find auxid for " << attr_infile << " type: " << field_type

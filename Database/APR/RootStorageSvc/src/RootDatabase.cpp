@@ -40,9 +40,7 @@
 #include "TSystem.h"
 
 #include "ROOT/RNTuple.hxx"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 
 using namespace pool;
 using namespace std;
@@ -636,11 +634,9 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
         return Success;
       }
       else if ( !strcasecmp(n,"FILEFORWARD_COMPATIBILITY") ) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
         DbPrint log("RootDatabase.setOption");
         log << DbPrintLvl::Info << "Setting ROOT TFile bit for forward compatibility, see ATEAM-1001" << DbPrint::endmsg;
         m_file->SetBit(TFile::k630forwardCompatibility);
-#endif
         return Success;
       }
       break;
@@ -1145,7 +1141,6 @@ RootDatabase::getNTupleWriter(const std::string& ntuple_name, bool create)
 
 uint64_t RootDatabase::indexLookup([[maybe_unused]] RNTupleReader* reader, uint64_t idx_val) {
    DbPrint log( m_file->GetName() );
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    if( m_ntupleIndexMap.find(reader) == m_ntupleIndexMap.end() ) {
       // First access the RNTuple, read and store the index
       log << DbPrintLvl::Debug << "Reading index" << DbPrint::endmsg;
@@ -1171,6 +1166,5 @@ uint64_t RootDatabase::indexLookup([[maybe_unused]] RNTupleReader* reader, uint6
       log << DbPrintLvl::Debug << "Remapped OID=" << hex << idx_val << " to " << it->second << DbPrint::endmsg;
       idx_val = it->second;
    }
-#endif
    return idx_val;
 }

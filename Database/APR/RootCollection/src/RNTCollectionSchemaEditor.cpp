@@ -16,9 +16,7 @@
 
 // for version checks
 #include "TROOT.h"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 #include "ROOT/RNTuple.hxx"
 
 
@@ -136,15 +134,9 @@ readSchema()
    m_description = desc;
    bool      foundToken = false;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    const auto& rntdesc = m_reader.GetDescriptor();
    for( const auto &f : rntdesc.GetTopLevelFields() ) {
       const std::string field_name = f.GetFieldName();
-#else
-   const auto rntdesc = m_reader.GetDescriptor();
-   for( const auto &f : rntdesc->GetTopLevelFields() ) {
-      const std::string field_name = f.GetFieldName();
-#endif
       // ignore the index column, it's not a user data
       if( field_name == APRDefaults::IndexColName )
          continue;

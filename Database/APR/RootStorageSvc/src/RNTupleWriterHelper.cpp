@@ -41,11 +41,7 @@ void RNTupleWriterHelper::makeNewEntry() {
         m_ntupleWriter->EnableMetrics();
     }
   }
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 31, 0)
   m_entry = m_ntupleWriter->GetModel().CreateBareEntry();
-#else
-  m_entry = m_ntupleWriter->GetModel()->CreateBareEntry();
-#endif
 }
 
 void RNTupleWriterHelper::addAttribute(const attrDataTuple& in) {
@@ -72,14 +68,12 @@ void RNTupleWriterHelper::addField(const std::string& field_name,
                                                   << attr_type);
   auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
   if (!m_model) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 31, 0)
     // first write was already done, need to update the model
     ATH_MSG_DEBUG("Adding late attribute " << field_name);
     auto updater = m_ntupleWriter->CreateModelUpdater();
     updater->BeginUpdate();
     updater->AddField(std::move(field));
     updater->CommitUpdate();
-#endif
   } else {
     m_model->AddField(std::move(field));
   }
@@ -102,7 +96,6 @@ void RNTupleWriterHelper::addFieldValue(const std::string& field_name,
 }
 
 int RNTupleWriterHelper::commit() {
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 31, 0)
   // write only if there was data added, ignore empty commits
   if (!needsCommit()) {
     ATH_MSG_DEBUG("Empty Commit");
@@ -142,10 +135,6 @@ int RNTupleWriterHelper::commit() {
   m_rowN++;
 
   return num_bytes;
-#else
-  ATH_MSG_WARNING("Commit not implemented for this ROOT version");
-  return 0;
-#endif
 }
 
 void RNTupleWriterHelper::close() {

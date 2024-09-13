@@ -9,9 +9,7 @@
 
 #include "ROOT/REntry.hxx"
 #include "ROOT/RNTuple.hxx"
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
 #include "ROOT/RNTupleReader.hxx"
-#endif
 
 using namespace pool::RootCollection;
 
@@ -25,7 +23,6 @@ RNTCollectionCursor::RNTCollectionCursor(
      m_idx(-1),
      m_dummyRef( false )
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    m_RNTEntry = reader->GetModel().CreateEntry();
    for( auto& attr : m_collectionRowBuffer.attributeList() ) {
       m_RNTEntry->BindRawPtr( attr.specification().name(), attr.addressOfData() );
@@ -43,7 +40,6 @@ RNTCollectionCursor::RNTCollectionCursor(
       m_tokens.emplace_back( &*tokenI, std::string() );
       m_RNTEntry->BindRawPtr( tokenI.tokenName(), &m_tokens.back().second );
    }
-#endif
 }
 
 
