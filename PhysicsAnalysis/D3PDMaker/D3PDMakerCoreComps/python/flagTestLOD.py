@@ -7,23 +7,7 @@
 # @brief Helper for making LOD functions to evaluate flags.
 #
 
-
-from AthenaCommon.JobProperties import JobProperty
-from AthenaConfiguration.AthConfigFlags import FlagAddress
 from .D3PDObject                import DeferArg
-
-
-def _make_fdict (flags):
-    if isinstance (flags, FlagAddress):
-        return flags.asdict()
-    fdict = {}
-    if not isinstance(flags, list):
-        flags = [flags]
-    for f in flags:
-        for k, v in f.__dict__.items():
-            if isinstance (v, JobProperty):
-               fdict[k] = v()
-    return fdict
 
 
 def _eval_deferred (expr, fdict, hookargs, **kw):
@@ -31,7 +15,6 @@ def _eval_deferred (expr, fdict, hookargs, **kw):
     dd.update (hookargs)
     dd.update (kw)
     return eval (expr, globals(), dd)
-
 
 
 def flagTestLOD (expr, flags, hook = None):
@@ -75,20 +58,12 @@ def flagTestLOD (expr, flags, hook = None):
     arguments and the hook arguments.
 
     Examples:
-    >>> from AthenaCommon.JobProperties import JobPropertyContainer, JobProperty
-    >>> f1=JobPropertyContainer ('f1')
-    >>> f2=JobPropertyContainer ('f2')
-    >>> class flag1(JobProperty):
-    ...   statusOn = True
-    ...   allowedTypes=['bool']
-    ...   StoredValue = True
-    >>> class flag2(JobProperty):
-    ...   statusOn = True
-    ...   allowedTypes=['bool']
-    ...   StoredValue = False
-    >>> f1.add_JobProperty(flag1)
-    >>> f2.add_JobProperty(flag2)
-    >>> lod = flagTestLOD ('flag1', f1)
+    >>> from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    >>> flags = initConfigFlags()
+    >>> flags.addFlag ('D3PD.flag1', True)
+    >>> flags.addFlag ('D3PD.flag2', False)
+
+    >>> lod = flagTestLOD ('flag1', flags.D3PD)
     >>> lod(2, {}, {})
     True
     >>> lod(2, {}, {'flag1': False})
@@ -97,14 +72,14 @@ def flagTestLOD (expr, flags, hook = None):
     False
     >>> lod(999, {}, {'flag1': False})
     True
-    >>> lod = flagTestLOD ('flag2 or reqlev>4', [f1,f2])
+    >>> lod = flagTestLOD ('flag2 or reqlev>4', flags.D3PD)
     >>> lod(2, {}, {})
     False
     >>> lod(10, {}, {})
     True
     >>> def hook(*args):
     ...    print(args)
-    >>> lod = flagTestLOD ('flag2 or reqlev>4', [f1,f2], hook)
+    >>> lod = flagTestLOD ('flag2 or reqlev>4', flags.D3PD, hook)
     >>> lod(2, {}, {})
     False
     >>> lod(10, {'a':1}, {'b':2})
@@ -112,7 +87,7 @@ def flagTestLOD (expr, flags, hook = None):
     True
 """
 
-    fdict = _make_fdict (flags)
+    fdict = flags.asdict()
     def flagTestLODFunc (reqlev, args, hookargs):
         if reqlev < 0:   return False # explicit exclusion
         if reqlev > 900:
@@ -162,23 +137,20 @@ def deferFlag (expr, flags, gdict={}):
 
 
     Examples:
-    >>> from AthenaCommon.JobProperties import JobPropertyContainer, JobProperty
-    >>> f3=JobPropertyContainer ('f3')
-    >>> class flag3(JobProperty):
-    ...   statusOn = True
-    ...   allowedTypes=['bool']
-    ...   StoredValue = True
-    >>> f3.add_JobProperty(flag3)
-    >>> arg = deferFlag ('flag3', f3)
+    >>> from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    >>> flags = initConfigFlags()
+    >>> flags.addFlag ('D3PD.flag3', True)
+
+    >>> arg = deferFlag ('flag3', flags.D3PD)
     >>> arg()
     True
     >>> arg({'flag3':False})
     False
-    >>> arg = deferFlag ('foo', f3, {'foo' : 2})
+    >>> arg = deferFlag ('foo', flags.D3PD, {'foo' : 2})
     >>> arg()
     2
 """
-    fdict = _make_fdict (flags)
+    fdict = flags.asdict()
     return DeferArg ('_eval_deferred(expr, fdict, locals(), **_gdict)',
                      expr = expr,
                      fdict = fdict,
