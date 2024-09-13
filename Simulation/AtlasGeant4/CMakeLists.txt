@@ -74,7 +74,6 @@ set( AtlasGeant4Component_TARGET_OBJECTS
     LArG4FastSimulation
     LArG4HEC
     LArG4SD
-    MagFieldUtils
     MuonG4SD
     MuonSensitiveDetectorsR4
     G4AtlasServices

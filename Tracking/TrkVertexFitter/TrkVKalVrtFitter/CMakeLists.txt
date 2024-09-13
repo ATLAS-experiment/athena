@@ -13,7 +13,7 @@ atlas_add_library( TrkVKalVrtFitterLib
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES AthenaBaseComps GeoPrimitives EventPrimitives xAODTracking
-   GaudiKernel MagFieldInterfaces MagFieldElements MagFieldConditions
+   GaudiKernel MagFieldElements MagFieldConditions
    TrkNeutralParameters TrkParameters
    TrkParticleBase VxSecVertex VxVertex TrkExInterfaces TrkVKalVrtCore
    TrkVertexFitterInterfaces
