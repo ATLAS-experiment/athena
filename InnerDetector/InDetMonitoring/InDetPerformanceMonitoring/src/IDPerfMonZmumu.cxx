@@ -321,10 +321,11 @@ StatusCode IDPerfMonZmumu::bookTrees()
     ATH_MSG_INFO("initialize() ** defining m_commonTree with name: " << m_commonTreeName.c_str());    
     m_commonTree = new TTree((m_commonTreeName).c_str(), m_ValidationTreeDescription.c_str());
 
-    m_commonTree->Branch("runNumber"           , &m_runNumber,  "runNumber/I");
-    m_commonTree->Branch("eventNumber"         , &m_evtNumber,  "eventNumber/I");
-    m_commonTree->Branch("lumi_block"          , &m_lumi_block, "lumi_block/I");
-    m_commonTree->Branch("mu"                  , &m_event_mu,   "mu/I");
+    m_commonTree->Branch("runNumber"           , &m_runNumber,       "runNumber/I");
+    m_commonTree->Branch("eventNumber"         , &m_evtNumber,       "eventNumber/I");
+    m_commonTree->Branch("lumi_block"          , &m_lumi_block,      "lumi_block/I");
+    m_commonTree->Branch("mu"                  , &m_event_mu,        "mu/I");
+    m_commonTree->Branch("preScale"            , &m_triggerPrescale, "preScale/I");
     m_commonTree->Branch("IDTrack_pt"          , &m_IDTrack_pt); 
     m_commonTree->Branch("IDTrack_eta"         , &m_IDTrack_eta); 
     m_commonTree->Branch("IDTrack_phi"         , &m_IDTrack_phi);
@@ -2295,11 +2296,11 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
 
   // check trigger status
   if(m_triggerDecision.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Unable to retrieve " << m_triggerDecision << " turn it off");
+    ATH_MSG_FATAL("CheckTriggerStatusAndPrescale -- Unable to retrieve " << m_triggerDecision << " turn it off");
     return StatusCode::FAILURE;
   }
   else {
-    ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );
+    ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- retrieved tool: " << m_triggerDecision );
   }
 
   float thisEventTriggerPrescale = 999999.9;
@@ -2338,12 +2339,13 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
   // event prescale
   thisEventTriggerPrescale = thisHLTTriggerPrescale;
   thisEventTriggerName = thisHLTTriggerName;
-  ATH_MSG_DEBUG("Event trigger prescale = " << thisEventTriggerPrescale);
-  ATH_MSG_DEBUG("Event trigger name = " << thisEventTriggerName);
+  ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger prescale = " << thisEventTriggerPrescale);
+  ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger name = " << thisEventTriggerName);
   
   m_triggerPrescale = thisEventTriggerPrescale;
   m_triggerName = thisEventTriggerName;
 
+  
   return StatusCode::SUCCESS;
 }
 
