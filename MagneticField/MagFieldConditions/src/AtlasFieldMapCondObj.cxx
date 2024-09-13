@@ -3,17 +3,6 @@
 */
 #include "MagFieldConditions/AtlasFieldMapCondObj.h"
 
-AtlasFieldMapCondObj::AtlasFieldMapCondObj() {}
-
-AtlasFieldMapCondObj::~AtlasFieldMapCondObj() {}
-
-// access to field map 
-const MagField::AtlasFieldMap*
-AtlasFieldMapCondObj::fieldMap () const
-{
-    return m_fieldMap.get();
-}
-
 // setter
 void
 AtlasFieldMapCondObj::setFieldMap(std::unique_ptr<MagField::AtlasFieldMap> fieldMap)
