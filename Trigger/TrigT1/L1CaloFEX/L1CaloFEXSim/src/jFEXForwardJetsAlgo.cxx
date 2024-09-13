@@ -245,7 +245,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     if(saturation) TriggerTowerInformation.setLRjetSat();                    
 
                     // Storing all jets in the same map!
-                    FCALJetTowerIDLists[myTTIDKey] = TriggerTowerInformation;                    
+                    FCALJetTowerIDLists[myTTIDKey] = std::move(TriggerTowerInformation);                    
                 }
                 
             }//end of centre_neta loop
@@ -420,7 +420,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculat
 
 
 void LVL1::jFEXForwardJetsAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
-    m_map_Etvalues=et_map;
+    m_map_Etvalues=std::move(et_map);
 }
 
 //getter for tower saturation
@@ -474,7 +474,7 @@ StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName,
         // rest of TTs that need to be checked
         elements.erase(elements.begin());
         
-        fillingMap[TTID] = elements;
+        fillingMap[TTID] = std::move(elements);
         
     }
     myfile.close();
