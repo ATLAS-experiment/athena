@@ -20,7 +20,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
+#include "Identifier/MultiRange.h"
 #include "Identifier/IdHelper.h"
 #include "IdDict/IdDictFieldImplementation.h"
 #include "AthenaKernel/CLASS_DEF.h"

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -17,7 +17,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
-#include "Identifier/Range.h"
+#include "Identifier/MultiRange.h"
 #include "IdDict/IdDictFieldImplementation.h"
 
 #include "CaloIdentifier/CaloID_Exception.h"

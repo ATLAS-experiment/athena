@@ -5,7 +5,7 @@
 #ifndef IDDICT_IDDICTDEFS_H
 #define IDDICT_IDDICTDEFS_H
  
-#include "Identifier/Range.h" 
+#include "Identifier/MultiRange.h" 
 #include "Identifier/Identifier.h" 
 #include "IdDict/IdDictFieldImplementation.h"
 

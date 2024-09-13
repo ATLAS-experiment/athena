@@ -9,6 +9,7 @@
 #include <string>
 #include <stdexcept>
 #include <iosfwd>
+#include <limits>
 
 
 /** 
@@ -21,6 +22,8 @@ class IdentifierField
   typedef ExpandedIdentifier::size_type size_type; 
   typedef std::vector <element_type> element_vector; 
   typedef std::vector <size_type>    index_vector; 
+  static constexpr auto minimum_possible = std::numeric_limits<element_type>::min();
+  static constexpr auto maximum_possible = std::numeric_limits<element_type>::max();
   /** 
    *   Characterizes the four possible modes of any IdentifierField specification 
    */ 
@@ -113,7 +116,6 @@ class IdentifierField
 
   operator std::string () const; 
   bool operator == (const IdentifierField& other) const; 
-  bool operator != (const IdentifierField& other) const; 
 
   void show() const;
     

@@ -17,10 +17,10 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/MultiRange.h" //used in the icc file
 #include "boost/range/iterator_range.hpp"
 #include <vector>
 #include <set>
-class MultiRange;
 class IMessageSvc;
 class IdDictRegion;
 
