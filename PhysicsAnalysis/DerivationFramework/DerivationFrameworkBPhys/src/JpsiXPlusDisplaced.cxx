@@ -1404,14 +1404,15 @@ namespace DerivationFramework {
       MesonCandidateVector etacCandidates(m_maxMesonCandidates, m_MesonPtOrdering);
       TLorentzVector p4_ExtraTrk1, p4_ExtraTrk2;
       for(const xAOD::TrackParticle* tp1 : tracksPlus) {
-	if( tp1->pt() < m_extraTrk1MinPt ) continue;
 	for(const xAOD::TrackParticle* tp2 : tracksMinus) {
-	  if( tp2->pt() < m_extraTrk2MinPt ) continue;
-	  p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
-	  p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
-	  if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() > m_MassUpper) continue;
-	  auto etac = getEtacCandidate(V0vtx,V0,tp1,tp2);
-	  if(etac.V0vtx) etacCandidates.push_back(etac);
+	  if((tp1->pt()>m_extraTrk1MinPt && tp2->pt()>m_extraTrk2MinPt) ||
+	     (tp1->pt()>m_extraTrk2MinPt && tp2->pt()>m_extraTrk1MinPt)) {
+	    p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	    p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	    if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2).M() > m_MassUpper) continue;
+	    auto etac = getEtacCandidate(V0vtx,V0,tp1,tp2);
+	    if(etac.V0vtx) etacCandidates.push_back(etac);
+	  }
 	}
       }
 
@@ -1573,18 +1574,19 @@ namespace DerivationFramework {
 	if( tp1->pt() < m_extraTrk1MinPt ) continue;
 	for(auto tp2Itr=tracksMinus.cbegin(); tp2Itr!=tracksMinus.cend(); ++tp2Itr) {
 	  const xAOD::TrackParticle* tp2 = *tp2Itr;
-	  if( tp2->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
 	  for(auto tp3Itr=tp2Itr+1; tp3Itr!=tracksMinus.cend(); ++tp3Itr) {
 	    const xAOD::TrackParticle* tp3 = *tp3Itr;
-	    if( tp3->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
-	    p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
-	    p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
-	    p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
-	    if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
-	    auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
-	    if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
-	    auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
-	    if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	    if((tp2->pt()>m_extraTrk2MinPt && tp3->pt()>m_extraTrk3MinPt) ||
+	       (tp2->pt()>m_extraTrk3MinPt && tp3->pt()>m_extraTrk2MinPt)) {
+	      p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	      p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	      p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
+	      if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
+	      auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
+	      auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	      if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	    }
 	  }
 	}
       }
@@ -1593,18 +1595,19 @@ namespace DerivationFramework {
 	if( tp1->pt() < m_extraTrk1MinPt ) continue;
 	for(auto tp2Itr=tracksPlus.cbegin(); tp2Itr!=tracksPlus.cend(); ++tp2Itr) {
 	  const xAOD::TrackParticle* tp2 = *tp2Itr;
-	  if( tp2->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
 	  for(auto tp3Itr=tp2Itr+1; tp3Itr!=tracksPlus.cend(); ++tp3Itr) {
 	    const xAOD::TrackParticle* tp3 = *tp3Itr;
-	    if( tp3->pt() < std::fmin(m_extraTrk2MinPt,m_extraTrk3MinPt) ) continue;
-	    p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
-	    p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
-	    p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
-	    if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
-	    auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
-	    if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
-	    auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
-	    if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	    if((tp2->pt()>m_extraTrk2MinPt && tp3->pt()>m_extraTrk3MinPt) ||
+	       (tp2->pt()>m_extraTrk3MinPt && tp3->pt()>m_extraTrk2MinPt)) {
+	      p4_ExtraTrk1.SetPtEtaPhiM(tp1->pt(), tp1->eta(), tp1->phi(), m_extraTrk1MassHypo);
+	      p4_ExtraTrk2.SetPtEtaPhiM(tp2->pt(), tp2->eta(), tp2->phi(), m_extraTrk2MassHypo);
+	      p4_ExtraTrk3.SetPtEtaPhiM(tp3->pt(), tp3->eta(), tp3->phi(), m_extraTrk3MassHypo);
+	      if((p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() < m_MassLower || (p4_moth+p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() > m_MassUpper) continue;
+	      auto Dpm = getDpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
+	      auto Dstpm = getDstpmCandidate(JXvtx,massesJX,tp1,tp2,tp3);
+	      if(Dstpm.extraTrack1) DstpmCandidates.push_back(Dstpm);
+	    }
 	  }
 	}
       }
