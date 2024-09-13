@@ -8,7 +8,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <memory>
-
+#include <vector>
 #include "AsgMessaging/AsgMessaging.h"
 
 /**
@@ -45,18 +45,24 @@ class get_MaterialResolutionEffect : public asg::AsgMessaging {
   */
   double getDelta(int particle_type, double energy, double eta,
                   int response_type, int isyst) const;
+  double interpolateTH1(TH1* hist, double x, bool abs_bins) const;
+  void store_IBL_PP0_YProjections();
+  void setInterpolate(bool interpolate) {
+    m_interpolate = interpolate;
+    store_IBL_PP0_YProjections();
+  }
 
  private:
   // histograms to store resolution parameters
   static const int s_nEtaBins = 8;
   static const int s_nSys = 4;
-  std::array<std::array<std::array<std::unique_ptr<TH1>, 3>, s_nEtaBins>,
-             s_nSys>
-      m_hSystPeak;
-  std::array<std::array<std::array<std::unique_ptr<TH1>, 3>, s_nEtaBins>,
-             s_nSys>
-      m_hSystResol;
+  std::array<std::array<std::array<std::unique_ptr<TH1>, 3>, s_nEtaBins>, s_nSys> m_hSystPeak;
+  std::array<std::array<std::array<std::unique_ptr<TH1>, 3>, s_nEtaBins>, s_nSys> m_hSystResol;
   std::array<std::unique_ptr<TH2>, 3> m_hsyst_IBL_PP0;
+  // each of the m_hsyst_IBL_PP0 is a TH2 with 11 eta bins on x-axis, in case of doing interpolation: 
+  // we will need the Y-projection for each eta bins
+  std::array<std::vector<std::unique_ptr<TH1>>, 3> m_hsyst_IBL_PP0_ProjectionY;
+  bool m_interpolate = false;
   const TArrayD* m_etBins;  // A xistogram will own this
 };
 
