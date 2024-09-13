@@ -120,7 +120,8 @@ def PixelMonitoringConfig(flags):
             from InDetConfig.InDetTrackHoleSearchConfig import InDetTrackHoleSearchToolCfg
             pixelAthMVAMonAlg.TrackSelectionTool = TrackSelectionTool
             pixelAthMVAMonAlg.HoleSearchTool     = acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))
-            pixelAthMVAMonAlg.Extrapolator       = acc.getPublicTool("InDetExtrapolator")
+            from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+            pixelAthMVAMonAlg.Extrapolator       = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
             PixelAthMVAMonAlgCfg(helper, pixelAthMVAMonAlg, **kwargsMVAMonAlg)
 
         acc.merge(helper.result())

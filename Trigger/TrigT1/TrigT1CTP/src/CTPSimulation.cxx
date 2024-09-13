@@ -671,25 +671,48 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
          }
          continue;
       }
-      else if (CxxUtils::starts_with (connName, "NIM2") && m_doTRT) // TRT simulation
+      else if (CxxUtils::starts_with (connName, "NIM2"))
       {
-         auto trtInput = SG::makeHandle(m_iKeyTRT, context);
-         if (not trtInput.isValid())
-         {
-            continue;
+	 if (m_doTRT) // TRT simulation
+	 {
+             auto trtInput = SG::makeHandle(m_iKeyTRT, context);
+             if (not trtInput.isValid())
+             {
+                continue;
+             }
+             cable = static_cast<uint64_t>(trtInput->cableWord0());
+             auto &conn = l1menu->connector(connName);
+             for (auto &tl : conn.triggerLines()){
+                if (tl.name().find("TRT") == std::string::npos)
+                {
+                   continue;
+                }
+                uint flatIndex = tl.flatindex();
+                uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
+                thrMultiMap[tl.name()] = pass;
+                ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
+             }
          }
-         cable = static_cast<uint64_t>(trtInput->cableWord0());
-         auto &conn = l1menu->connector(connName);
-         for (auto &tl : conn.triggerLines()){
-            if (tl.name().find("TRT") == std::string::npos)
-            {
-               continue;
-            }
-            uint flatIndex = tl.flatindex();
-            uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
-            thrMultiMap[tl.name()] = pass;
-            ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
-         }
+	 if (m_doZDC) // ZDC ALT simulation
+	 {
+             auto zdcInput = SG::makeHandle(m_iKeyZDC, context);
+             if (not zdcInput.isValid())
+             {
+                continue;
+             }
+             cable = static_cast<uint64_t>(zdcInput->cableWord0());
+             auto &conn = l1menu->connector(connName);
+             for (const auto &tl : conn.triggerLines()){
+                if (tl.name().find("ZDC") == std::string::npos)
+                {
+                   continue;
+                }
+                uint flatIndex = tl.flatindex();
+                uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
+                thrMultiMap[tl.name()] = pass;
+                ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
+             }
+	 } 
          continue;
       }
 

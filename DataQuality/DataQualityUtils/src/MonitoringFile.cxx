@@ -415,7 +415,7 @@ void MonitoringFile::mergeObjsMultiCycles(const std::string& keyname,
      std::cerr << "WARNING: CHANGE OF CLASS TYPES FOR " << h->GetName() << ", NOT MERGING" << std::endl;
      continue;
    }
-   MonitoringFile::mergeObjs(obj.get(), nextObj.get(), mergeType,m_debugLevel>VERBOSE?VERBOSE: (dqutils::MonitoringFile::debugLevel_t)m_debugLevel.load());
+	 MonitoringFile::mergeObjs(obj.get(), nextObj.get(), mergeType,m_debugLevel>VERBOSE?VERBOSE: (dqutils::MonitoringFile::debugLevel_t)m_debugLevel.load(),std::string(dir->GetPath()));
       } else {
    std::cerr << "MonitoringFile::mergeObjsMultiCycles(): NULL KEY; corrupt file?" << std::endl;
       }
@@ -1688,7 +1688,7 @@ setListFromFile( std::vector<std::string>& filelist, const std::string& listFile
   return true;
 }
 
-int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::string & mergeType, debugLevel_t debugLevel) {
+int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::string & mergeType, debugLevel_t debugLevel, const std::string& objPath) {
    // merge obj into objTarget based on method specified in mergeType
    // copied in large parts from mergeDirectory 
    std::string name("mergeObjs");
@@ -1795,8 +1795,24 @@ int MonitoringFile::mergeObjs(TObject *objTarget, TObject *obj, const std::strin
      std::cerr << name << ": object is not a histogram or graph, merging not implemented" << std::endl;
    }
    if (m_doTiming) {
-    const std::clock_t duration=std::clock()-cpuStart;
-    m_cpuPerHistogram[obj->GetName()]+=duration;
+     const std::clock_t duration=std::clock()-cpuStart;
+     std::string name;
+     if (!objPath.empty()) {
+       size_t pSlash=0;
+       //Ignore the first two /xx/yy/zz/ sub-strings (filename, run_NNNNNN)
+       for (unsigned i=0;i<3 && pSlash!=std::string::npos;++i) {
+	 pSlash=objPath.find_first_of('/',pSlash+1);
+       }
+       if (pSlash != std::string::npos) {
+	 name=objPath.substr(pSlash+1);
+       }
+       else {
+	 name=objPath;
+       }
+       name+="/";
+     }
+     name+=obj->GetName();
+     m_cpuPerHistogram[name]+=duration;
    }
    return 0;
 }
@@ -2129,7 +2145,7 @@ int MonitoringFile::mergeLB_processLBinterval(std::vector<TDirectory*>& v_dirsSt
                 delete objMerged;
                 objMerged = objThis->Clone();
                } else {
-        mergeObjs(objMerged, objThis.get(), mergeType, debugLevel);
+		 mergeObjs(objMerged, objThis.get(), mergeType, debugLevel, std::string(dir_out->GetPath()));
                }
             }
       //delete objThis;
