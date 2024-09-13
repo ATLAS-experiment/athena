@@ -80,15 +80,13 @@ def getNNs(flags):
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
     pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
-    if isRun3Derivation(flags):
-        return {
-            'AntiKt4EMPFlowJets': [
-                {
-                    'folds': pf_nns,
-                },
-            ]
-        }
-    return {}
+    return {
+        'AntiKt4EMPFlowJets': [
+            {
+                'folds': pf_nns,
+            },
+        ]
+    }
 
 
 def createBTaggingConfigFlags():
