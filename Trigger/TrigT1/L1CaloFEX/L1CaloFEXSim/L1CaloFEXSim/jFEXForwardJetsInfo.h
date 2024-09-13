@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardJetsInfo - Class to store information about trigger towers
@@ -68,12 +68,12 @@ class jFEXForwardJetsInfo {
         int getSearchWindowET();
 
     private:
-        int m_centre_TTID;
-        float m_centreTTPhi;
-        float m_centreTTEta;
+        int m_centre_TTID{};
+        float m_centreTTPhi{};
+        float m_centreTTEta{};
 
-        int m_centreLocalTTPhi;
-        int m_centreLocalTTEta;
+        int m_centreLocalTTPhi{};
+        int m_centreLocalTTEta{};
         
         bool m_saturation_SR = false;
         bool m_saturation_LR = false;
