@@ -4,7 +4,7 @@ Reco_tf.py \
     --steering doRAWtoALL \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName=None" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
-    --postInclude "FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimLogicalHistProcessAlgCfg" \
+    --postInclude "FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimLogicalHitsProcessAlgCfg" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --maxEvents 100

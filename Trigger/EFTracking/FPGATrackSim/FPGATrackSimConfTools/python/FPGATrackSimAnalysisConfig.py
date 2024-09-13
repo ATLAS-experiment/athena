@@ -11,7 +11,7 @@ def getBaseName(flags):
     if (not (flags.Trigger.FPGATrackSim.baseName == '')):
         return flags.Trigger.FPGATrackSim.baseName
     elif (flags.Trigger.FPGATrackSim.region == 0):
-        return 'eta0103phi0305'    
+        return 'eta0103phi0305'
     elif (flags.Trigger.FPGATrackSim.region == 1):
         return 'eta0709phi0305'
     elif (flags.Trigger.FPGATrackSim.region == 2):
@@ -29,13 +29,49 @@ def getBaseName(flags):
     else:
         return 'default'
 
-
 def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
-        n = fields.split()[1] 
+        n = fields.split()[1]
         return int(n)
+
+def FPGATrackSimRawLogicCfg(flags):
+    result=ComponentAccumulator()
+    FPGATrackSimRawLogic = CompFactory.FPGATrackSimRawToLogicalHitsTool()
+    FPGATrackSimRawLogic.SaveOptional = 2
+    if (flags.Trigger.FPGATrackSim.ActiveConfig.sampleType == 'skipTruth'):
+        FPGATrackSimRawLogic.SaveOptional = 1
+    FPGATrackSimRawLogic.TowersToMap = [0] # TODO TODO why is this hardcoded?
+    FPGATrackSimRawLogic.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    FPGATrackSimRawLogic.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
+    result.addPublicTool(FPGATrackSimRawLogic, primary=True)
+    return result
+
+def FPGATrackSimSpacePointsToolCfg(flags):
+    result=ComponentAccumulator()
+    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool()
+    SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
+    SpacePointTool.FilteringClosePoints = False
+    SpacePointTool.PhiWindow = 0.004
+    SpacePointTool.Duplication = True
+    result.addPublicTool(SpacePointTool, primary=True)
+    return result
+
+def FPGATrackSimHitFilteringToolCfg(flags):
+    result=ComponentAccumulator()
+    HitFilteringTool = CompFactory.FPGATrackSimHitFilteringTool()
+    HitFilteringTool.barrelStubDphiCut = 3.0
+    HitFilteringTool.doRandomRemoval = False
+    HitFilteringTool.doStubs = False
+    HitFilteringTool.endcapStubDphiCut = 1.5
+    HitFilteringTool.pixelClusRmFrac = 0
+    HitFilteringTool.pixelHitRmFrac = 0
+    HitFilteringTool.stripClusRmFrac = 0
+    HitFilteringTool.stripHitRmFrac = 0
+    HitFilteringTool.useNstrips = False
+    result.addPublicTool(HitFilteringTool, primary=True)
+    return result
 
 def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
@@ -45,6 +81,83 @@ def FPGATrackSimEventSelectionCfg(flags):
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
     result.addService(eventSelector, create=True, primary=True)
+    return result
+
+# Need to figure out if we have two output writers or somehow only one.
+def FPGATrackSimWriteOutputCfg(flags):
+    result=ComponentAccumulator()
+    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
+    FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    # RECREATE means that that this tool opens the file.
+    # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
+    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
+    result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
+    return result
+
+def FPGATrackSimDataPrepOutputCfg(flags):
+    result=ComponentAccumulator()
+    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
+    FPGATrackSimWriteOutput.InFileName = ["dataprep.root"]
+    # RECREATE means that that this tool opens the file.
+    # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
+    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
+    result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
+    return result
+
+def prepareFlagsForFPGATrackSimDataPrepAlg(flags):
+    newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
+    return newFlags
+
+def FPGATrackSimDataPrepAlgCfg(inputFlags):
+
+    flags = prepareFlagsForFPGATrackSimDataPrepAlg(inputFlags)
+
+    result=ComponentAccumulator()
+
+    theFPGATrackSimDataPrepAlg=CompFactory.FPGATrackSimDataPrepAlg()
+    theFPGATrackSimDataPrepAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
+    theFPGATrackSimDataPrepAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimDataPrepAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
+    theFPGATrackSimDataPrepAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
+    theFPGATrackSimDataPrepAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
+
+    FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
+    theFPGATrackSimDataPrepAlg.FPGATrackSimMapping = FPGATrackSimMaping
+
+    result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
+
+    theFPGATrackSimDataPrepAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
+
+    if flags.Trigger.FPGATrackSim.wrapperFileName and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
+        theFPGATrackSimDataPrepAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
+        if flags.Trigger.FPGATrackSim.wrapperFileName2 and flags.Trigger.FPGATrackSim.wrapperFileName2 is not None:
+            theFPGATrackSimDataPrepAlg.InputTool2 = result.getPrimaryAndMerge(FPGATrackSimReadInput2Cfg(flags))
+            theFPGATrackSimDataPrepAlg.SecondInputToolN = flags.Trigger.FPGATrackSim.secondInputToolN
+        theFPGATrackSimDataPrepAlg.SGInputTool = ""
+    else:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
+        theFPGATrackSimDataPrepAlg.InputTool = ""
+        theFPGATrackSimDataPrepAlg.InputTool2 = ""
+        from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
+        theFPGATrackSimDataPrepAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
+
+    theFPGATrackSimDataPrepAlg.SpacePointTool = result.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+
+    theFPGATrackSimDataPrepAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
+
+    theFPGATrackSimDataPrepAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
+    theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
+
+    # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
+    if flags.Trigger.FPGATrackSim.spacePoints:
+        theFPGATrackSimDataPrepAlg.Spacepoints = True
+
+    from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
+    theFPGATrackSimDataPrepAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
+
+    result.addEventAlgo(theFPGATrackSimDataPrepAlg)
+
     return result
 
 def FPGATrackSimMappingCfg(flags):
@@ -195,22 +308,6 @@ def FPGATrackSimRoadUnionTool1DCfg(flags):
     result.addPublicTool(RF, primary=True)
     return result
 
-
-
-
-
-def FPGATrackSimRawLogicCfg(flags):
-    result=ComponentAccumulator()
-    FPGATrackSimRawLogic = CompFactory.FPGATrackSimRawToLogicalHitsTool()
-    FPGATrackSimRawLogic.SaveOptional = 2
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.sampleType == 'skipTruth'): 
-        FPGATrackSimRawLogic.SaveOptional = 1
-    FPGATrackSimRawLogic.TowersToMap = [0] # TODO TODO why is this hardcoded?
-    FPGATrackSimRawLogic.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
-    FPGATrackSimRawLogic.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
-    result.addPublicTool(FPGATrackSimRawLogic, primary=True)
-    return result
-
 def FPGATrackSimDataFlowToolCfg(flags):
     result=ComponentAccumulator()
     DataFlowTool = CompFactory.FPGATrackSimDataFlowTool()
@@ -220,33 +317,6 @@ def FPGATrackSimDataFlowToolCfg(flags):
     DataFlowTool.THistSvc = CompFactory.THistSvc()
     result.setPrivateTools(DataFlowTool)
     return result
-
-def FPGATrackSimSpacePointsToolCfg(flags):
-    result=ComponentAccumulator()
-    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool()
-    SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.ActiveConfig.spacePointFiltering
-    SpacePointTool.FilteringClosePoints = False
-    SpacePointTool.PhiWindow = 0.004
-    SpacePointTool.Duplication = True
-    result.addPublicTool(SpacePointTool, primary=True)
-    return result
-
-
-def FPGATrackSimHitFilteringToolCfg(flags):
-    result=ComponentAccumulator()
-    HitFilteringTool = CompFactory.FPGATrackSimHitFilteringTool()
-    HitFilteringTool.barrelStubDphiCut = 3.0
-    HitFilteringTool.doRandomRemoval = False
-    HitFilteringTool.doStubs = False
-    HitFilteringTool.endcapStubDphiCut = 1.5
-    HitFilteringTool.pixelClusRmFrac = 0
-    HitFilteringTool.pixelHitRmFrac = 0
-    HitFilteringTool.stripClusRmFrac = 0
-    HitFilteringTool.stripHitRmFrac = 0
-    HitFilteringTool.useNstrips = False
-    result.addPublicTool(HitFilteringTool, primary=True)
-    return result
-
 
 def FPGATrackSimHoughRootOutputToolCfg(flags):
     result=ComponentAccumulator()
@@ -276,16 +346,6 @@ def NNTrackToolCfg(flags):
     NNTrackTool.THistSvc = CompFactory.THistSvc()
     NNTrackTool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     result.setPrivateTools(NNTrackTool)
-    return result
-
-def FPGATrackSimWriteOutputCfg(flags):
-    result=ComponentAccumulator()
-    FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
-    FPGATrackSimWriteOutput.InFileName = ["test.root"]
-    # RECREATE means that that this tool opens the file.
-    # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
-    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
-    result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
 
 def FPGATrackSimTrackFitterToolCfg(flags):
@@ -358,7 +418,7 @@ def FPGATrackSimReadInput2Cfg(flags):
     result.addPublicTool(InputTool2, primary=True)
     return result
 
-def prepareFlagsForFPGATrackSimLogicalHistProcessAlg(flags):
+def prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
 
@@ -377,67 +437,44 @@ def FPGAActsTrkConverterCfg(flags):
 
     return result
 
-def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
+def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
 
-    flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
+    flags = prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
    
     result=ComponentAccumulator()
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
         result.merge(AthenaTrkClusterizationCfg(flags))
 
-    theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
-    theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
-    theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
-    theFPGATrackSimLogicalHistProcessAlg.Clustering = flags.Trigger.FPGATrackSim.clustering
-    theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
-    theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
-    theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
-    theFPGATrackSimLogicalHistProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
-    theFPGATrackSimLogicalHistProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
-    theFPGATrackSimLogicalHistProcessAlg.DoNNTrack = False
-    theFPGATrackSimLogicalHistProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimEventSelectionCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.runOnRDO = True if not flags.Trigger.FPGATrackSim.wrapperFileName else False
+    theFPGATrackSimLogicalHitsProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
+    theFPGATrackSimLogicalHitsProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
+    theFPGATrackSimLogicalHitsProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
+    theFPGATrackSimLogicalHitsProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
+    theFPGATrackSimLogicalHitsProcessAlg.DoHoughRootOutput = flags.Trigger.FPGATrackSim.ActiveConfig.houghRootoutput
+    theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack = False
+    theFPGATrackSimLogicalHitsProcessAlg.runOnRDO = not flags.Trigger.FPGATrackSim.wrapperFileName
 
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
+    theFPGATrackSimLogicalHitsProcessAlg.FPGATrackSimMapping = FPGATrackSimMaping
 
     # If tracking is set to False, don't configure the bank service
     if flags.Trigger.FPGATrackSim.tracking:
         result.getPrimaryAndMerge(FPGATrackSimBankSvcCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.hough1D):
-      theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
+      theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     else:
-      theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
+      theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
 
-    theFPGATrackSimLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
-
-
-    if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
-        theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
-        if flags.Trigger.FPGATrackSim.wrapperFileName2 != [] and flags.Trigger.FPGATrackSim.wrapperFileName2 is not None:
-            theFPGATrackSimLogicalHistProcessAlg.InputTool2 = result.getPrimaryAndMerge(FPGATrackSimReadInput2Cfg(flags))
-            theFPGATrackSimLogicalHistProcessAlg.SecondInputToolN = flags.Trigger.FPGATrackSim.secondInputToolN
-        theFPGATrackSimLogicalHistProcessAlg.SGInputTool = ""
-    else:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
-        theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
-        theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
-        from FPGATrackSimSGInput.FPGATrackSimSGInputConfig import FPGATrackSimSGInputToolCfg
-        theFPGATrackSimLogicalHistProcessAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
-
-    theFPGATrackSimLogicalHistProcessAlg.DataFlowTool = result.getPrimaryAndMerge(FPGATrackSimDataFlowToolCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.SpacePointTool = result.getPrimaryAndMerge(FPGATrackSimSpacePointsToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.DataFlowTool = result.getPrimaryAndMerge(FPGATrackSimDataFlowToolCfg(flags))
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter):
         EtaPatternFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
         EtaPatternFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
         EtaPatternFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
         EtaPatternFilter.EtaPatterns = flags.Trigger.FPGATrackSim.mapsDir+"/"+getBaseName(flags)+".patt"
-        theFPGATrackSimLogicalHistProcessAlg.RoadFilter = EtaPatternFilter
-        theFPGATrackSimLogicalHistProcessAlg.FilterRoads = True
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFilter = EtaPatternFilter
+        theFPGATrackSimLogicalHitsProcessAlg.FilterRoads = True
 
     if (flags.Trigger.FPGATrackSim.ActiveConfig.phiRoadFilter):
         RoadFilter2 = CompFactory.FPGATrackSimPhiRoadFilterTool()
@@ -448,25 +485,21 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
         windows = [flags.Trigger.FPGATrackSim.Hough1D.phifilterwindow for i in range(len(flags.Trigger.FPGATrackSim.ActiveConfig.hitExtendX))]
         RoadFilter2.window = windows
         
-        theFPGATrackSimLogicalHistProcessAlg.RoadFilter2 = RoadFilter2
-        theFPGATrackSimLogicalHistProcessAlg.FilterRoads2 = True
+        theFPGATrackSimLogicalHitsProcessAlg.RoadFilter2 = RoadFilter2
+        theFPGATrackSimLogicalHitsProcessAlg.FilterRoads2 = True
 
-    theFPGATrackSimLogicalHistProcessAlg.HitFilteringTool = result.getPrimaryAndMerge(FPGATrackSimHitFilteringToolCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
 
     LRTRoadFilter = CompFactory.FPGATrackSimLLPRoadFilterTool()
     result.addPublicTool(LRTRoadFilter)
-    theFPGATrackSimLogicalHistProcessAlg.LRTRoadFilter = LRTRoadFilter
+    theFPGATrackSimLogicalHitsProcessAlg.LRTRoadFilter = LRTRoadFilter
 
-    theFPGATrackSimLogicalHistProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.LRTRoadFinder = result.getPrimaryAndMerge(LRTRoadFinderCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.NNTrackTool = result.getPrimaryAndMerge(NNTrackToolCfg(flags))
 
-    theFPGATrackSimLogicalHistProcessAlg.ClusteringTool = CompFactory.FPGATrackSimClusteringTool()
-    theFPGATrackSimLogicalHistProcessAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimWriteOutputCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.OverlapRemoval_2nd = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalTool_2ndCfg(flags))
-    theFPGATrackSimLogicalHistProcessAlg.TrackFitter_2nd = result.getPrimaryAndMerge(FPGATrackSimTrackFitterTool_2ndCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimWriteOutputCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.TrackFitter_1st = result.getPrimaryAndMerge(FPGATrackSimTrackFitterToolCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.OverlapRemoval_1st = result.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))
 
     # Create SPRoadFilterTool if spacepoints are turned on. TODO: make things configurable?
     if flags.Trigger.FPGATrackSim.spacePoints:
@@ -480,27 +513,27 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
           SPRoadFilter.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold[0]
         SPRoadFilter.setSectors = (flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads and flags.Trigger.FPGATrackSim.tracking)
 
-        theFPGATrackSimLogicalHistProcessAlg.SPRoadFilterTool = SPRoadFilter
-        theFPGATrackSimLogicalHistProcessAlg.Spacepoints = True
+        theFPGATrackSimLogicalHitsProcessAlg.SPRoadFilterTool = SPRoadFilter
+        theFPGATrackSimLogicalHitsProcessAlg.Spacepoints = True
 
 
     if flags.Trigger.FPGATrackSim.ActiveConfig.lrt:
         assert flags.Trigger.FPGATrackSim.ActiveConfig.lrtUseBasicHitFilter != flags.Trigger.FPGATrackSim.ActiveConfig.lrtUseMlHitFilter, 'Inconsistent LRT hit filtering setup, need either ML of Basic filtering enabled'
         assert flags.Trigger.FPGATrackSim.ActiveConfig.lrtUseStraightTrackHT != flags.Trigger.FPGATrackSim.ActiveConfig.lrtUseDoubletHT, 'Inconsistent LRT HT setup, need either double or strightTrack enabled'
-        theFPGATrackSimLogicalHistProcessAlg.doLRT = True
-        theFPGATrackSimLogicalHistProcessAlg.LRTHitFiltering = (not flags.Trigger.FPGATrackSim.ActiveConfig.lrtSkipHitFiltering)
+        theFPGATrackSimLogicalHitsProcessAlg.doLRT = True
+        theFPGATrackSimLogicalHitsProcessAlg.LRTHitFiltering = (not flags.Trigger.FPGATrackSim.ActiveConfig.lrtSkipHitFiltering)
 
     from FPGATrackSimAlgorithms.FPGATrackSimAlgorithmConfig import FPGATrackSimLogicalHitsProcessAlgMonitoringCfg
-    theFPGATrackSimLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
+    theFPGATrackSimLogicalHitsProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
-    result.addEventAlgo(theFPGATrackSimLogicalHistProcessAlg)
+    result.addEventAlgo(theFPGATrackSimLogicalHitsProcessAlg)
 
     return result
 
 
 def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **kwargs):
 
-    flags = prepareFlagsForFPGATrackSimLogicalHistProcessAlg(inputFlags)
+    flags = prepareFlagsForFPGATrackSimLogicalHitsProcessAlg(inputFlags)
    
     result=ComponentAccumulator()
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
@@ -611,10 +644,11 @@ if __name__ == "__main__":
     flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"
     
     ############################################
-    flags.Concurrency.NumThreads=0
-    flags.Concurrency.NumProcs=0
+    flags.Concurrency.NumThreads=1
+    #flags.Concurrency.NumProcs=0
     flags.Scheduler.ShowDataDeps=True
     flags.Scheduler.CheckDependencies=True
+
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
@@ -650,7 +684,10 @@ if __name__ == "__main__":
             from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
             acc.merge(InDetTrackRecoCfg(flags))
 
-    acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags))
+    # Configure both the dataprep and logical hits algorithms.
+    acc.merge(FPGATrackSimDataPrepAlgCfg(flags))
+    acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
         
