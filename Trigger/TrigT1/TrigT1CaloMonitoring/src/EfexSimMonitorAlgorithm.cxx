@@ -93,20 +93,13 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
     // for each collection record if TOB is matched or not
 
     for(const auto tob : *tobs1) {
-        tobMismatched=100;
         if(word0s2.find(tob->word0()) == word0s2.end()) {
             mismatches=true;
-        } else {
-            tobMismatched=0;
+            break;
         }
-        fill("mismatches",signature,evtType,tobMismatched);
     }
     if(tobs2.isValid() && tobs1->size() < tobs2->size()) {
-        tobMismatched=100;
         mismatches=true;
-        for(unsigned int i=0;i<(tobs2->size()-tobs1->size());i++) {
-            fill("mismatches",signature,tobMismatched,evtType);
-        }
     }
 
     auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
@@ -163,9 +156,10 @@ template <typename T> unsigned int EfexSimMonitorAlgorithm::fillHistos(const SG:
 
         tobMismatched=100;
         fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,evtType,timeSince,timeUntil,IsDataTowers,IsEmulatedTowers,signature,simReady);
+        fill("mismatches_count",lbn,signature,simReady,evtType);
     } else {
         tobMismatched=0;
-        fill("mismatches",tobMismatched,lbn,signature,simReady);
+        fill("mismatches",tobMismatched,lbn,signature,simReady,evtType);
     }
 
 

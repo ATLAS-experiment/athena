@@ -30,7 +30,7 @@ private:
   SG::ReadHandleKeyArray<xAOD::gFexJetRoIContainer> m_gFexRhoTobKeyList{this,"gFexRhoTobKeyList",{"L1_gFexRhoRoI"},"Array of gFEX rho ReadHandleKeys to fill histograms for"};
   SG::ReadHandleKeyArray<xAOD::gFexGlobalRoIContainer> m_gFexGlobalTobKeyList{this,"gFexGlobalTobKeyList", {"L1_gScalarEJwoj","L1_gMETComponentsJwoj","L1_gMHTComponentsJwoj","L1_gMSTComponentsJwoj"},"Array of gFEX global TOBs ReadHandleKeys to fill histograms for"};
   // Define private methods
-  StatusCode fillJetHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container, const float& ptCutValue) const;
+  StatusCode fillJetHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container, const float& ptCutValue, const auto& lbn) const;
   StatusCode fillRhoHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container) const;
   StatusCode fillGlobalTobHistograms(const std::string& handleKey, const xAOD::gFexGlobalRoIContainer* container) const;
   FPGAType getFPGAType(const float& eta) const;
