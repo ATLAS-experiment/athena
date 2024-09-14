@@ -149,7 +149,7 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
       self.flags,
       name = prefix+'xAODParticleCreatorAlg'+self.flags.Tracking.ActiveConfig.input_name+'_IDTrig',
       TrackContainerName = self.lastTrkCollection,
-      xAODTrackParticlesFromTracksContainerName = self.lastTrkCollection, 
+      xAODTrackParticlesFromTracksContainerName = self.flags.Tracking.ActiveConfig.tracks_IDTrig, 
     ))
     return acc
 
