@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -13,7 +13,7 @@ namespace MuonCalib {
     unsigned int MuonCalibEventInfo::timeStamp() const { return m_timeStamp; }
     unsigned int MuonCalibEventInfo::lumiBlock() const { return m_lumiBlock; }
     unsigned int MuonCalibEventInfo::bcId() const { return m_bcId; }
-    std::string MuonCalibEventInfo::tag() const { return m_tag; }
+    const std::string& MuonCalibEventInfo::tag() const { return m_tag; }
     const std::vector<bool> &MuonCalibEventInfo::triggerBits() const { return m_trigger_bits; }
 
     void MuonCalibEventInfo::setRunNumber(const unsigned int run_number) { m_runNumber = run_number; }

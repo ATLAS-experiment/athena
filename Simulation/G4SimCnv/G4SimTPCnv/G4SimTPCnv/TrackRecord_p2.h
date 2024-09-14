@@ -20,7 +20,7 @@ public:
   float positionZ() const {return m_positionZ;}
   float time() const {return m_time;}
   int uniqueID() const {return m_uniqueID;}
-  std::string volName() const {return m_volName;}
+  const std::string& volName() const {return m_volName;}
   friend class TrackRecordCnv_p2;
 
 private:

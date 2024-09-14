@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -80,7 +80,7 @@ class TrigInDetTrackTruth {
 
   // to handle mother-daughter relationships within matching particles   
   int updateFamilyTree();
-  std::vector< std::pair<unsigned int, unsigned int> > getFamilyTree() const;
+  const std::vector< std::pair<unsigned int, unsigned int> >& getFamilyTree() const;
   bool motherInChain(unsigned int) const;
   int motherIndexInChain(unsigned int) const;
   bool daughtersInChain(unsigned int) const;
