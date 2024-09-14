@@ -149,9 +149,6 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		if(!isMatched) {
             mismatchedTOBs.insert(tob1);
 		}
-
-		tobMismatched = (isMatched) ? 0 : 100;
-		fill("mismatches",eventType,Signature,tobMismatched);
 	}
 
     // also check for mismatches in tobs2 collection ... since may have extra tobs in tob2 that aren't in tobs1
@@ -167,8 +164,6 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
         if(!isMatched) {
             mismatchedTOBs.insert(tob2);
         }
-        tobMismatched = (isMatched) ? 0 : 100;
-        fill("mismatches",eventType,Signature,tobMismatched);
     }
 
 
@@ -207,7 +202,8 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 			std::cout << std::endl << std::dec;
 		}
         tobMismatched=100;
-		fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady);
+		fill("mismatches",tobMismatched,lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,simReady,eventType);
+        fill("mismatches_count",lbn,Signature,simReady,eventType);
 		if (label=="gJ" || label=="gLJ") {
             auto locIdx = Monitored::Scalar<std::string>("locIdx","");
             for(auto tob : mismatchedTOBs) {
@@ -217,7 +213,7 @@ bool GfexSimMonitorAlgorithm::compareJetRoI(const std::string& label,
 		}
 	} else {
         tobMismatched=0;
-        fill("mismatches",lbn,Signature,tobMismatched,simReady);
+        fill("mismatches",lbn,Signature,tobMismatched,simReady,eventType);
     }
 
 	return !mismatchedTOBs.empty();
@@ -261,14 +257,12 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 		if(!isMatched) {
 			mismatches = true;
 		}
-		tobMismatched = (isMatched) ? 0 : 100; //100*(!isMatched && !isPartMatched); - commented out. Is from when was treating part-matches as matches
-		fill("mismatches",eventType,Signature,tobMismatched);
 	}
 
+    auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
 	if(mismatches) {
 		// fill the debugging tree with all the words for this signature
 		auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
-		auto lbn = Monitored::Scalar<ULong64_t>("LBN",GetEventInfo(ctx)->lumiBlock());
 		auto evtNumber = Monitored::Scalar<ULong64_t>("EventNumber",GetEventInfo(ctx)->eventNumber());
 		{
 			std::scoped_lock lock(m_firstEventsMutex);
@@ -302,8 +296,13 @@ bool GfexSimMonitorAlgorithm::compareGlobalRoI(const std::string& label,
 			for (const auto w: sword0s) std::cout << w << " ";
 			std::cout << std::endl << std::dec;
 		}
-		fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature);
-	}
+        tobMismatched=100;
+		fill("mismatches",lbn,lbnString,evtNumber,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,Signature,tobMismatched,eventType);
+        fill("mismatches_count",lbn,Signature,eventType);
+	} else {
+        tobMismatched=0;
+        fill("mismatches",lbn,Signature,tobMismatched,eventType);
+    }
 
 
 	return !mismatches;

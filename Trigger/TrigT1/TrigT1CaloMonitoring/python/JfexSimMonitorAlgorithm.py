@@ -40,9 +40,9 @@ def JfexSimMonitoringConfig(flags):
                            ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
                            opt=['kCanRebin','kAlwaysCreate'],merge="merge")
     helper.defineHistogram('LBN,Signature;h_mismatched_SimReady',
-                           fillGroup="mismatches",
+                           fillGroup="mismatches_count",
                            paths=['Shifter/Sim'],
-                           hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready"},
+                           hanConfig={"algorithm":"Histogram_Empty","description":"Number of events with a mismatch, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready","display":"SetPalette(55)"},
                            type='TH2I', cutmask='SimulationReady',
                            title='Mismatched Simulation-Ready Events;LB;Signature;Events',
                            xbins=1,xmin=0,xmax=1,
@@ -51,9 +51,9 @@ def JfexSimMonitoringConfig(flags):
     helper.defineHistogram('LBN,Signature,tobMismatched;h_mismatched_SimReadyRate',
                            fillGroup="mismatches",
                            paths=['Expert/Sim'],
-                           hanConfig={"algorithm":"L1CaloMismatchRate","description":"Mismatch rate, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready - should not be high rate (see DQ algo)"},
+                           hanConfig={"algorithm":"L1CaloMismatchRate","description":"Mismatch rate, per LB (x-axis), per signature (y-axis) for signatures that are deemed simulation-ready - should not be high rate (see DQ algo)","display":"SetPalette(55)"},
                            type='TProfile2D', cutmask='SimulationReady',
-                           title='Mismatched Rate for Simulation-Ready Signatures;LB;Signature;Rate',
+                           title='Mismatched Rate for Simulation-Ready Signatures;LB;Signature;Event Rate (%)',
                            xbins=1,xmin=0,xmax=1,
                            ylabels=["gJ","gLJ","jJ","jTAU","jXE","jTE","eTAU","eEM"],
                            opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge='merge')

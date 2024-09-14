@@ -24,7 +24,8 @@ def GfexMonitoringConfig(flags):
     GfexMonAlg.gFexGlobalTobKeyList = ["L1_gScalarEJwoj", "L1_gMETComponentsJwoj", "L1_gMHTComponentsJwoj", "L1_gMSTComponentsJwoj"]
 
     # Define various quantities
-    trigPath = 'Developer/Gfex/'
+    devPath = 'Developer/GfexOutput/'
+    expertPath = 'Expert/Outputs/'
     globTobVarDict = {"gScalarEJwoj":["gFexMet", "gFexSumEt"], "gMETComponentsJwoj":["METx", "METy"], "gMHTComponentsJwoj":["MHTx", "MHTy"], "gMSTComponentsJwoj":["MSTx", "MSTy"]}  
 
     # "gMETComponentsNoiseCut":["METx_NoiseCut", "METy_NoiseCut"], "gMETComponentsRms":["METx_Rms", "METy_Rms"], "gScalarENoiseCut":["gFexMet_NoiseCut", "gFexSumEt_NoiseCut"], "gScalarERms":["gFexMet_Rms", "gFexSumEt_Rms"]}- these are to be used in the future when rho and NC are fixed
@@ -46,6 +47,46 @@ def GfexMonitoringConfig(flags):
     gFexRhoTobKeyList = GfexMonAlg.gFexRhoTobKeyList
     gFexGlobalTobKeyList = GfexMonAlg.gFexGlobalTobKeyList
 
+    # Eta bins description
+    import numpy as np
+    eta_bins= [-4.9, -4.5, -3.9,-3.5,-3.3,-3.1,-2.9,-2.7,-2.5,2.5,2.7,2.9,3.1,3.3,3.5,3.9,4.5,4.9]
+    eta_central = [-2.5,2.5]
+
+    for eta in np.arange (-2.2,2.4,0.2):
+            eta_bins.append(eta)
+            eta_central.append(eta)
+    
+    eta_bins = sorted(eta_bins)
+    eta_central = sorted (eta_central)
+    
+    nbins_total = 32*len(eta_bins)
+    nbins_central = 32*len(eta_central)
+
+     #bins for LBN vs pos histogram with y axis = 40(j-1)+i
+    pos = []
+    for j in range(1,33):
+        for i in range(1,41):
+            y= 40*(j-1)+i
+            pos.append(y)
+    pos = sorted(pos)
+
+
+
+
+
+    helper.defineDQAlgorithm("Gfex_etaPhiMapFilled_gJ",
+                            hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
+                            thresholdConfig={"NBins":[0,nbins_total]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
+                            )
+    
+    helper.defineDQAlgorithm("Gfex_etaPhiMapFilled_gLJ",
+                        hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
+                        thresholdConfig={"NBins":[0,nbins_central]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
+                        )
+
+
+
+
     # Jet TOB list
     for containerKey in gFexJetTobKeyList:
         ptCutValues = ptCutValuesgLJ if "LRJet" in containerKey else ptCutValuesgJ
@@ -58,21 +99,60 @@ def GfexMonitoringConfig(flags):
                 #histKey = containerKey + "{}" + ptCutString
                 #histKey += ";h_" + containerKey + "{}" + ptCutString
                 tobTypeStr = "gFex SRJet" if "SRJet" in containerKey else "gFex LRJet"
-                    
+
                 ptStrTitle = f" - tobEt [200 MeV Scale]>{ptCut}" if ptCut != -1 else ""
-                jPath = "gFexSRJets" if "SRJet" in containerKey else "gFexLRJets"
-                jPath += ptCutString
- 
-                helper.defineHistogram(f"{containerKey}Eta{ptCutString};h_{containerKey}Eta{ptCutString}", title="{} #eta{}; #eta; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{trigPath}{jPath}/", xbins=32,xmin=-5.0,xmax=5.0)
-                helper.defineHistogram(f"{containerKey}Phi{ptCutString};h_{containerKey}Phi{ptCutString}", title="{} #phi{}; #phi; counts".format(tobTypeStr, ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{trigPath}{jPath}/", xbins=32,xmin=-math.pi,xmax=math.pi)
-                helper.defineHistogram(f"{containerKey}Pt{ptCutString};h_{containerKey}Pt{ptCutString}" , title="{} Pt{} ; Pt [MeV]  ; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName,path=f"{trigPath}{jPath}/", xbins=100,xmin=-1,xmax=4096)
+                gPath = "gJ" if "SRJet" in containerKey else "gLJ"
+                #jPath += ptCutString
+
+                helper.defineHistogram(f"{containerKey}Eta{ptCutString};h_{containerKey}Eta{ptCutString}", title="{} #eta{}; #eta; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{devPath}{gPath}/", xbins=eta_bins)
+                helper.defineHistogram(f"{containerKey}Phi{ptCutString};h_{containerKey}Phi{ptCutString}", title="{} #phi{}; #phi; counts".format(tobTypeStr, ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{devPath}{gPath}", xbins=32,xmin=-math.pi,xmax=math.pi)
+                helper.defineHistogram(f"{containerKey}Pt{ptCutString};h_{containerKey}Pt{ptCutString}" , title="{} Pt{} ; Pt [MeV]  ; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName,path=f"{devPath}{gPath}",xbins=100,xmin=-1,xmax=4096)
 
                 # 2D histograms
-                helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle), type='TH2F',fillGroup=groupName, path=f"{trigPath}{jPath}/", xbins=32,xmin=-5.0,xmax=5.0,ybins=32,ymin=-math.pi,ymax=math.pi)
+                if gPath == "gJ":
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap_{containerKey}_{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
+                    hanConfig={
+                        "algorithm": "Gfex_etaPhiMapFilled_gJ",
+                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}_{ptCutString}_posVsLBN'>detail timeseries</a>",
+                        "display":"SetPalette(55),Draw=COL1Z"
+                    },
+                    opt=['kAlwaysCreate'],
+                    xbins=eta_bins,ybins=32,ymin=-math.pi,ymax=math.pi)
+                
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}_{ptCutString}_posVsLBN",title="{} {} LBN vs position = 40(y-1) + x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                           path=f"{expertPath}{gPath}/detail",
+                           fillGroup = groupName,
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap_{containerKey}_{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           type='TH2I',
+                           xbins=1,xmin=0,xmax=10,
+                           ybins=pos,
+                           opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
+
+                if (gPath == "gLJ"):
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap_{containerKey}_{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
+                    hanConfig={
+                        "algorithm": "Gfex_etaPhiMapFilled_gLJ",
+                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}_{ptCutString}_posVsLBN'>detail timeseries</a>",
+                        "display":"SetPalette(55),Draw=COL1Z"
+                    },
+                    opt=['kAlwaysCreate'],
+                    xbins=eta_central, ybins=32,ymin=-math.pi,ymax=math.pi)
+                    
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}_{ptCutString}_LBN_pos",title="{} {} LBN vs position = 40(y-1) + x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                           path=f"{expertPath}{gPath}/detail",
+                           fillGroup = groupName,
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap_{containerKey}_{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           type='TH2I',
+                           xbins=1,xmin=0,xmax=10,
+                           ybins=pos,
+                           opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
+
 
     # Rho TOB list
     for containerKey in gFexRhoTobKeyList:
-        helper.defineHistogram(f"{containerKey};h_{containerKey}", title=f"{containerKey}; gFexRho Et [MeV]; counts", fillGroup=groupName, type="TH1F", path=f"{trigPath}gRHO", xbins=100,xmin=0,xmax=100000)
+        helper.defineHistogram(f"{containerKey};h_{containerKey}", title=f"{containerKey}; gFexRho Et [MeV]; counts", fillGroup=groupName, type="TH1F", path=f"{devPath}gRHO", xbins=100,xmin=0,xmax=100000)
 
     # Global TOB list
     for containerKey in gFexGlobalTobKeyList:
@@ -84,8 +164,9 @@ def GfexMonitoringConfig(flags):
         xminOne, xmaxOne = globTobRangeDict.get(varOne, [0,1e6])
         xminTwo, xmaxTwo = globTobRangeDict.get(varTwo, [0,1e6])
 
-        helper.defineHistogram("{};h_{}".format(varOne, varOne), title="{}; {} [MeV]; counts".format(varOne, varOne), type="TH1F", fillGroup=groupName, path=trigPath+keyDirPathMap.get(varOne, "gFexGlob/"), xbins=100,xmin=xminOne,xmax=xmaxOne)
-        helper.defineHistogram("{};h_{}".format(varTwo, varTwo), title="{}; {} [MeV]; counts".format(varTwo, varTwo), type="TH1F", fillGroup=groupName, path=trigPath+keyDirPathMap.get(varTwo, "gFexGlob/"), xbins=100,xmin=xminTwo,xmax=xmaxTwo)
+        helper.defineHistogram("{};h_{}".format(varOne, varOne), title="{}; {} [MeV]; counts".format(varOne, varOne), type="TH1F", fillGroup=groupName, path=devPath+keyDirPathMap.get(varOne, "gFexGlob/"), xbins=100,xmin=xminOne,xmax=xmaxOne)
+        helper.defineHistogram("{};h_{}".format(varTwo, varTwo), title="{}; {} [MeV]; counts".format(varTwo, varTwo), type="TH1F", fillGroup=groupName, path=devPath+keyDirPathMap.get(varTwo, "gFexGlob/"), xbins=100,xmin=xminTwo,xmax=xmaxTwo)
+
 
     acc = helper.result()
     result.merge(acc)
