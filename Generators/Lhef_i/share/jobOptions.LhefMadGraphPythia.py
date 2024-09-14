@@ -16,7 +16,7 @@ from AthenaCommon.Logging import logging
 evgenLog = logging.getLogger('csc_evgen')
 
 # special setup for event generation
-include( "AthenaCommon/Atlas_Gen.UnixStandardJob.py" )
+import AthenaCommon.AtlasUnixGeneratorJob
 
 # remember output level I set
 

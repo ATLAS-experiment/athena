@@ -42,7 +42,7 @@ postSeq = topSeq.EvgenPostSeq
 ##==============================================================
 
 ## Special setup for event generation
-include("AthenaCommon/Atlas_Gen.UnixStandardJob.py")
+import AthenaCommon.AtlasUnixGeneratorJob
 include("PartPropSvc/PartPropSvc.py")
 
 ## Run performance monitoring (memory logging)

@@ -21,7 +21,6 @@ else()
 
     atlas_install_joboptions( share/Preparation.py
                               share/Execution.py
-                              share/Atlas_Gen.UnixStandardJob.py
                               share/runbatch.py )
     
     atlas_install_scripts( share/athena_preload.sh )
