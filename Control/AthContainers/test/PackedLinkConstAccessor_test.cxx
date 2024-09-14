@@ -275,7 +275,7 @@ void test3()
 
   {
     std::vector<IdxType> v;
-    for (const ElementLink<Cont>& el : vtyp1(b)) {
+    for (const ElementLink<Cont> el : vtyp1(b)) {
       if (el.isDefault()) {
         v.push_back (0);
       }
@@ -385,7 +385,7 @@ int asmtest [[maybe_unused]] (const SG::AuxElement& e,
   using Cont = std::vector<int>;
   using IdxType = std::result_of<decltype(&ElementLink<Cont>::index)(ElementLink<Cont>)>::type;
   IdxType out = 0;
-  for (const ElementLink<Cont>& el : acc(e)) {
+  for (const ElementLink<Cont> el : acc(e)) {
     out += el.key() + el.index();
   }
   return out;
