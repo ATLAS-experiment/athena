@@ -48,7 +48,6 @@ public:
     range_vector::const_iterator   	m_range_end; 
     id_iterator			m_id_vec_it;
     id_iterator			m_id_vec_end;
-    const MultiRange*		m_multirange{};
   }; 
  
   class const_identifier_factory {
@@ -71,7 +70,6 @@ public:
     range_vector::const_iterator   	m_range_end; 
     id_iterator			m_id_vec_it;
     id_iterator			m_id_vec_end;
-    const MultiRange*		m_multirange{};
   }; 
  
   /// Constructors 

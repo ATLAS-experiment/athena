@@ -195,8 +195,7 @@ MultiRange::const_identifier_factory MultiRange::factory_end () const
 MultiRange::identifier_factory::identifier_factory (const MultiRange& multirange) 
     :
     m_range_it(multirange.m_ranges.begin()),
-    m_range_end(multirange.m_ranges.end()),
-    m_multirange(&multirange)
+    m_range_end(multirange.m_ranges.end())
 { 
     if (m_range_it == m_range_end)return;  // no ranges
     /** 
@@ -260,8 +259,7 @@ bool MultiRange::identifier_factory::operator == (const identifier_factory& othe
 MultiRange::const_identifier_factory::const_identifier_factory (const MultiRange& multirange) 
     :
     m_range_it(multirange.m_ranges.begin()),
-    m_range_end(multirange.m_ranges.end()),
-    m_multirange(&multirange)
+    m_range_end(multirange.m_ranges.end())
 { 
 
     if (m_range_it == m_range_end)return;  // no ranges
