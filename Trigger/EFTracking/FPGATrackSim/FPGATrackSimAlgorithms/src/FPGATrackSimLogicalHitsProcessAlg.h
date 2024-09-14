@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_LOGICALHITSPROCESSALG_H
 #define FPGATrackSim_LOGICALHITSPROCESSALG_H
@@ -75,7 +75,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
     private:
 
         std::string m_description;
-        int m_ev = 0;
 
         // Handles
         ToolHandle<IFPGATrackSimRoadFinderTool>          m_roadFinderTool {this, "RoadFinder", "FPGATrackSimPatternMatchTool", "Road Finder Tool"};

@@ -106,7 +106,6 @@ class FPGATrackSimDataPrepAlg : public AthAlgorithm
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
-        double m_evt_truth = 0; // number of events passing event selection and having a truth object
 
         StatusCode readInputs(bool & done);
         StatusCode processInputs(SG::WriteHandle<FPGATrackSimHitCollection> &FPGAHitUnmapped,
