@@ -19,6 +19,8 @@
 #include "SUSYTools/ISUSYObjDef_xAODTool.h"
 // GRL
 #include "AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h"
+#include "xAODMissingET/MissingETContainer.h"
+#include "xAODMissingET/MissingETAuxContainer.h"
 
 
 // Timing
@@ -32,6 +34,18 @@
 // Need truth matching for TauJet CP tools 
 namespace TauAnalysisTools {
   class ITauTruthMatchingTool;
+}
+
+// Define ConstAccessors
+namespace STAlg {
+  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA_LooseCone("ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000");
+  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000");
+  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
+  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone40("topoetcone40");
+  const static SG::AuxElement::ConstAccessor<float> acc_ptcone20("ptcone20");
+  const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
+  const static SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
 }
 
 class SUSYToolsAlg : public EL::AnaAlgorithm {
@@ -99,6 +113,17 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     std::vector<std::string> m_levels; 
     std::vector<std::string> m_vars;   
     std::map<std::string,std::map<std::string,int>> m_obj_count;
+
+    xAOD::MissingETContainer* mettst_syst;
+    xAOD::MissingETAuxContainer* mettst_syst_aux;
+    xAOD::MissingETContainer* metcst_syst;
+    xAOD::MissingETAuxContainer* metcst_syst_aux;
+
+    xAOD::MissingETContainer* metcst_nominal;
+    xAOD::MissingETAuxContainer* metcst_nominal_aux;
+    xAOD::MissingETContainer* mettst_nominal;
+    xAOD::MissingETAuxContainer* mettst_nominal_aux;
+
 }; 
 
 #endif

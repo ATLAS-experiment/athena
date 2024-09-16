@@ -74,6 +74,11 @@
 
 #include "TrigDecisionTool/ChainGroup.h"
 
+// ConstAccessors
+const static SG::AuxElement::ConstAccessor<size_t> acc_TruthProng("TruthProng");
+const static SG::AuxElement::ConstAccessor<int> acc_TruthCharge("TruthCharge");
+const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
+
 const size_t Ncuts = 10;
 const char *cut_name[] =
 { "All",
@@ -934,11 +939,11 @@ int main( int argc, char* argv[] ) {
         for(const auto& tau : *taus){
           if (!isData){
             const xAOD::TruthParticle* truthTau = T2MT->getTruth(*tau) ;
-            if (ST::acc_IsTruthMatched(*tau) || !truthTau){
+            if (acc_IsTruthMatched(*tau) || !truthTau){
               ANA_MSG_DEBUG("Tau was matched to a truth tau, which has "
-                            << int(ST::acc_TruthProng(*tau))
+                            << int(acc_TruthProng(*tau))
                             << " prongs and a charge of "
-                            << ST::acc_TruthCharge(*tau));
+                            << acc_TruthCharge(*tau));
             } else { ANA_MSG_DEBUG( "Tau was not matched to truth" ); }
           }
         }

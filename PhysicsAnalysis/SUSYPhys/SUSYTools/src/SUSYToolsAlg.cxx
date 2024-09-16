@@ -489,12 +489,12 @@ StatusCode SUSYToolsAlg::execute() {
      ATH_MSG_DEBUG( "Number of taus: " << taus_nominal->size() );
   }
 
-  xAOD::MissingETContainer* metcst_nominal = new xAOD::MissingETContainer;
-  xAOD::MissingETAuxContainer* metcst_nominal_aux = new xAOD::MissingETAuxContainer;
+    metcst_nominal = new xAOD::MissingETContainer;
+    metcst_nominal_aux = new xAOD::MissingETAuxContainer;
     metcst_nominal->setStore(metcst_nominal_aux);
     metcst_nominal->reserve(10);
-  xAOD::MissingETContainer* mettst_nominal = new xAOD::MissingETContainer;
-  xAOD::MissingETAuxContainer* mettst_nominal_aux = new xAOD::MissingETAuxContainer;
+    mettst_nominal = new xAOD::MissingETContainer;
+    mettst_nominal_aux = new xAOD::MissingETAuxContainer;
     mettst_nominal->setStore(mettst_nominal_aux);
     mettst_nominal->reserve(10);
 
@@ -863,6 +863,7 @@ StatusCode SUSYToolsAlg::execute() {
     }
   }
 
+
   // Additionally define a nominal weight for each object type
   double electrons_weight_nominal(1.);
   double photons_weight_nominal(1.);
@@ -1009,10 +1010,10 @@ StatusCode SUSYToolsAlg::execute() {
       }
 
       ATH_MSG_DEBUG("Get systematics-varied MET");
-      xAOD::MissingETContainer* mettst_syst = new xAOD::MissingETContainer;
-      xAOD::MissingETAuxContainer* mettst_syst_aux = new xAOD::MissingETAuxContainer;
-      xAOD::MissingETContainer* metcst_syst = new xAOD::MissingETContainer;
-      xAOD::MissingETAuxContainer* metcst_syst_aux = new xAOD::MissingETAuxContainer;
+      mettst_syst = new xAOD::MissingETContainer;
+      mettst_syst_aux = new xAOD::MissingETAuxContainer;
+      metcst_syst = new xAOD::MissingETContainer;
+      metcst_syst_aux = new xAOD::MissingETAuxContainer;
       mettst_syst->setStore(mettst_syst_aux);
       metcst_syst->setStore(metcst_syst_aux);
       mettst_syst->reserve(10);
@@ -1306,6 +1307,11 @@ StatusCode SUSYToolsAlg::execute() {
   }
   ++m_Nevts;
 
+  delete metcst_nominal;
+  delete metcst_nominal_aux;
+  delete mettst_nominal;
+  delete mettst_nominal_aux;
+
   return StatusCode::SUCCESS;
 }
 
@@ -1473,31 +1479,39 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
    hist(dir+objtype+"_"+objlevel+"_mass")->Fill( obj->m()/1000. );
    //
    if (objtype=="el" || objtype=="mu" || objtype=="ph") {
-      hist(dir+objtype+"_"+objlevel+"_d0")->Fill( ST::acc_d0sig(*obj) );
-      hist(dir+objtype+"_"+objlevel+"_z0")->Fill( ST::acc_z0sinTheta(*obj) );
       if (objtype=="el") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( ST::acc_topoetcone20(*obj)/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptvarcone20_TTVA(*obj)/obj->pt() );
+         if (ST::acc_z0sinTheta.isAvailable(*obj))
+           hist(dir+objtype+"_"+objlevel+"_z0")->Fill( ST::acc_z0sinTheta(*obj) );
+         if (ST::acc_d0sig.isAvailable(*obj))
+           hist(dir+objtype+"_"+objlevel+"_d0")->Fill( ST::acc_d0sig(*obj) );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( STAlg::acc_topoetcone20(*obj)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( STAlg::acc_ptvarcone30_TTVA_LooseCone(*obj)/obj->pt() );
       } else if (objtype=="mu") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( ST::acc_topoetcone20(*obj)/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptvarcone30_TTVA(*obj)/obj->pt() );
+         if (ST::acc_z0sinTheta.isAvailable(*obj))
+           hist(dir+objtype+"_"+objlevel+"_z0")->Fill( ST::acc_z0sinTheta(*obj) );
+         if (ST::acc_d0sig.isAvailable(*obj))
+           hist(dir+objtype+"_"+objlevel+"_d0")->Fill( ST::acc_d0sig(*obj) );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( STAlg::acc_topoetcone20(*obj)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( STAlg::acc_ptvarcone30_TTVA(*obj)/obj->pt() );
       } else if (objtype=="ph") {
-         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( (ST::acc_topoetcone40(*obj)-2450)/obj->pt() );
-         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( ST::acc_ptcone20(*obj)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolCalo")->Fill( (STAlg::acc_topoetcone40(*obj)-2450)/obj->pt() );
+         hist(dir+objtype+"_"+objlevel+"_isolTrack")->Fill( STAlg::acc_ptcone20(*obj)/obj->pt() );
       }
    }
    //
    if (objtype=="el" || objtype=="mu" || objtype=="ph" || objtype=="tau") {
       if ( objtype!="tau" ) {
-        ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << ST::acc_truthType(*obj) << ", " << ST::acc_truthOrigin(*obj));
-        hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( ST::acc_truthType(*obj) );
-        hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( ST::acc_truthOrigin(*obj) );
+        if (ST::acc_truthType.isAvailable(*obj) && ST::acc_truthOrigin.isAvailable(*obj)) {
+          ATH_MSG_DEBUG(objtype << ", " << objlevel << ": " << ST::acc_truthType(*obj) << ", " << ST::acc_truthOrigin(*obj));
+          hist(dir+objtype+"_"+objlevel+"_truthType")->Fill( ST::acc_truthType(*obj) );
+          hist(dir+objtype+"_"+objlevel+"_truthOrigin")->Fill( ST::acc_truthOrigin(*obj) );
+        }
       } else {
         if(!m_isPHYSLITE){
-          bool istruthmatched = (bool)ST::acc_IsTruthMatched(*obj);
+          bool istruthmatched = STAlg::acc_IsTruthMatched.isAvailable(*obj) ? (bool)STAlg::acc_IsTruthMatched(*obj) : false;
           int pid(0),ppid(0);
-          if (istruthmatched && ST::acc_truthParticleLink.isAvailable(*obj)) {
-            const auto *tp = *(ST::acc_truthParticleLink(*obj));
+          if (istruthmatched && STAlg::acc_truthParticleLink.isAvailable(*obj)) {
+            const auto *tp = *(STAlg::acc_truthParticleLink(*obj));
             if (tp) {
               pid = tp->pdgId();
               ppid = (tp->nParents()>0)?tp->parent(0)->pdgId():0;
@@ -1513,7 +1527,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
       hist(dir+objtype+"_"+objlevel+"_nTracks")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracks() );
       hist(dir+objtype+"_"+objlevel+"_nTracksCharged")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracksCharged() );
       hist(dir+objtype+"_"+objlevel+"_nTracksIsolation")->Fill( dynamic_cast<xAOD::TauJet*>(obj)->nTracksIsolation() );
-      hist(dir+objtype+"_"+objlevel+"_RNNJetScoreSigTrans")->Fill( ST::acc_RNNJetScoreSigTrans(*obj) );
+      hist(dir+objtype+"_"+objlevel+"_RNNJetScoreSigTrans")->Fill( STAlg::acc_RNNJetScoreSigTrans(*obj) );
    }
    //
 
@@ -1533,7 +1547,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objty
    const static SG::AuxElement::ConstAccessor<bool> acc_toptagged(config["ToptaggerKey"]+"_Tagged");
    const static SG::AuxElement::ConstAccessor<float> acc_topscore(config["ToptaggerKey"]+"_Score");
 
-   if (objtype=="fatjet") {
+   if (objtype=="fatjet" && acc_topValidPtRangeLow.isAvailable(*obj) && acc_topValidPtRangeHigh.isAvailable(*obj) && acc_topValidEtaRange.isAvailable(*obj)) {
      bool kin = acc_topValidPtRangeLow(*obj) && acc_topValidPtRangeHigh(*obj) && acc_topValidEtaRange(*obj);
      if (config.find("WtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_wtagged")  ->Fill( acc_wtagged.isAvailable(*obj) ? kin && acc_wtagged(*obj) : -1);
      if (config.find("ZtaggerKey")!=config.end())   hist(dir+objtype+"_"+objlevel+"_ztagged")  ->Fill( acc_ztagged.isAvailable(*obj) ? kin && acc_ztagged(*obj) : -1);
