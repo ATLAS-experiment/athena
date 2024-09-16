@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CompactHardTruth.cxx
@@ -248,7 +248,7 @@ StatusCode CompactHardTruth::execute() {
     HepMC::GenVertex::particles_in_const_iterator inp = (*hadv)->particles_in_const_begin();
     HepMC::GenVertex::particles_in_const_iterator inpE = (*hadv)->particles_in_const_end();
     for (; inp != inpE; ++inp) {
-      if (!(MC::isParton(vp)|| MC::isDiquark(vp))) { isHadVtx = false; break;}
+      if (!(MC::isParton(*inp)|| MC::isDiquark(*inp))) { isHadVtx = false; break;}
     }
     HepMC::GenVertex::particles_out_const_iterator vp = (*hadv)->particles_out_const_begin();
     HepMC::GenVertex::particles_out_const_iterator vpE = (*hadv)->particles_out_const_end();
@@ -766,12 +766,12 @@ StatusCode CompactHardTruth::execute() {
 
         // Require two final partons and avoid duplication
         if (fp == pout1) {
-          if (!((MC::isParton(pout2)|| MC::isDiquark(pout2)) && pout2->end_vertex() == nullptr))) {
+          if (!((MC::isParton(pout2)|| MC::isDiquark(pout2)) && pout2->end_vertex() == nullptr)) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout2));
             continue;
           }
         } else if (fp == pout2) {
-          if (!((MC::isParton(pout1)|| MC::isDiquark(pout1)) && pout1->end_vertex() == nullptr))) {
+          if (!((MC::isParton(pout1)|| MC::isDiquark(pout1)) && pout1->end_vertex() == nullptr)) {
             if (doDebug) ATH_MSG_DEBUG("1->2: not final " << HepMC::uniqueID(pout1));
             continue;
           }
