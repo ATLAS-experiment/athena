@@ -17,6 +17,22 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("numSeedIncrement" , float("inf"))
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
+    kwargs.setdefault("useVariableMiddleSPRange", False)
+    kwargs.setdefault("rRangeMiddleSP", [
+        [0,0],
+        [140, 260],
+        [40, 260],
+        [40, 260],
+        [40, 260],
+        [40, 260],
+        [70, 260],
+        [40, 260],
+        [40, 260],
+        [40, 260],
+        [40, 260],
+        [140, 260],
+        [0, 0]])
+    kwargs.setdefault("zBinEdges", [-3000, -2550, -2300, -1400, -925, -450, -250, 250, 450, 925, 1400, 2300, 2550, 3000])
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
