@@ -26,7 +26,7 @@ Digi_tf.py \
     --CA \
     --PileUpPresampling True \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
@@ -64,7 +64,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 0 \
     --PileUpPresampling True \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
@@ -89,7 +89,7 @@ Digi_tf.py \
     --multiprocess --athenaMPEventsBeforeFork 1 \
     --PileUpPresampling True \
     --inputHITSFile ${InputHitsFile} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
