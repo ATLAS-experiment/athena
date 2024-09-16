@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -123,21 +123,18 @@ namespace Trk {
 
      /** returns the PrepRawData (also known as  RIO) object to which this RIO_OnTrack is associated.
       Can be null (in case where the Trk::PrepRawData is not persistified).
-      Use Detector Element if possible (this is always there).
-      - extends MeasurementBase */
+      Use Detector Element if possible (this is always there).*/
       virtual const Trk::PrepRawData* prepRawData() const = 0;
 
-       /** returns the DE hashID
-      - extends MeasurementBase */
+       /** returns the DE hashID*/
       virtual IdentifierHash idDE() const = 0;
 
-       /** returns the detector element, assoicated with the PRD of this class
-      - extends MeasurementBase */
+       /** returns the detector element, assoicated with the PRD of this class*/
       virtual const TrkDetElementBase* detectorElement() const = 0;
 
        /** return the identifier
       -extends MeasurementBase */
-      virtual Identifier identify() const final;
+      Identifier identify() const;
 
     protected:
       friend class ::RIO_OnTrackCnv_p1;
