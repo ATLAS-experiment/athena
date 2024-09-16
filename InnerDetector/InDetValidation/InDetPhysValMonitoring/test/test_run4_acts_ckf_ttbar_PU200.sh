@@ -15,7 +15,6 @@ dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 n_events=-1
 rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
 ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_ttbar200_reco_r25.root
-exit_rc=0
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -38,7 +37,6 @@ run () {
     [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     # whenever we exit, use the first non-zero return code
-    [ $exit_rc == 0 ] && exit_rc=$rc
     return $rc
 }
 
@@ -66,7 +64,7 @@ mv acts-expert-monitoring.root acts-expert-monitoring.ckf.root
 
 # don't stop right away on an ERROR message ($?=68)
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
-    exit $exit_rc
+    exit $reco_rc
 fi
 
 run "IDPVM-ckf" \
@@ -102,7 +100,7 @@ mv log.RAWtoALL log.RAWtoALL.AMBI
 mv acts-expert-monitoring.root acts-expert-monitoring.ambi.root
 
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
-    exit $exit_rc
+    exit $reco_rc
 fi
 
 run "IDPVM-ambi" \
@@ -116,6 +114,11 @@ run "IDPVM-ambi" \
     --doExpertPlots
 
 ambi_rc=$?
+if [ $ckf_rc != 0 ]; then
+    exit_rc=$ckf_rc
+else
+    exit_rc=$ambi_rc
+fi
 if [ $ckf_rc != 0 -a $ambi_rc != 0 ]; then
     exit $exit_rc
 fi
