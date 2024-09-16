@@ -59,11 +59,12 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   }
 
   // preload pt bins, systematics and SFs for each category
+  auto& json_config_OP = m_json_config[m_taggerName][m_jetAuthor][m_OP];
   for (auto& label : m_labelMap) {
     std::string labelString = label.second;
-    m_ptMap[labelString] = m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["pt"].get<std::vector<float>>();
-    m_sfMap[labelString] = m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["nominal"].get<std::vector<float>>();
-    for (auto& [systematicName, values] : m_json_config[m_taggerName][m_jetAuthor][m_OP][labelString]["systematics"].items()){
+    m_ptMap[labelString] = json_config_OP[labelString]["pt"].get<std::vector<float>>();
+    m_sfMap[labelString] = json_config_OP[labelString]["nominal"].get<std::vector<float>>();
+    for (auto& [systematicName, values] : json_config_OP[labelString]["systematics"].items()){
       m_sysMap[labelString][systematicName] = values.get<std::vector<float>>();
     }
   }
