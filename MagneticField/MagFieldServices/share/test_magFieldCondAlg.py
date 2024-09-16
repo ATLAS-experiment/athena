@@ -4,6 +4,12 @@
 #
 # Test magnetic field conditions algs with varying currents.
 #
+# Folder name
+import sys
+from MagFieldServices.createDBForTest import createDB
+folder = '/EXT/DCS/MAGNETS/SENSORDATA'
+sqlite = 'magfieldForTest.db'
+
 
 # Testing IOVs and currents: (since LB, solenoid, toroids)
 # Default test - should read both mag field files, and turn off fields for events 5 to 9, and back on for 10 to 14
@@ -23,48 +29,14 @@ currents = [(0, 7730, 20400),
 #             (5, 7730, 20400),
 #             (10, 7730, 20400)]
 
-# Folder name
-folder = '/EXT/DCS/MAGNETS/SENSORDATA'
-sqlite = 'magfield.db'
-
-def createDB():
-   """Create sqlite file with DCS currents"""
-   import os
-   os.environ['CLING_STANDARD_PCH'] = 'none' #See bug ROOT-10789
-   from PyCool import cool
-   from CoolConvUtilities import AtlCoolLib, AtlCoolTool
-
-   # Cleanup previous file
-   if os.path.isfile(sqlite):
-      os.remove(sqlite)
-
-   db = cool.DatabaseSvcFactory.databaseService().createDatabase(f'sqlite://;schema={sqlite};dbname=CONDBR2')
-   spec = cool.RecordSpecification()
-   spec.extend("value", cool.StorageType.Float)
-   spec.extend("quality_invalid", cool.StorageType.Bool)
-   f = AtlCoolLib.ensureFolder(db, folder, spec, AtlCoolLib.athenaDesc(True, 'CondAttrListCollection'))
-
-   for v in currents:
-      sol = cool.Record(spec)
-      sol['value'] = v[1]
-      sol['quality_invalid'] = False
-      tor = cool.Record(spec)
-      tor['value'] = v[2]
-      tor['quality_invalid'] = False
-      f.storeObject(v[0], cool.ValidityKeyMax, sol, 1)  # channel 1
-      f.storeObject(v[0], cool.ValidityKeyMax, tor, 3)  # channel 3
-
-   # print database content
-   act = AtlCoolTool.AtlCoolTool(db)
-   print (act.more(folder))
-
 
 # Create sqlite file with DCS currents
-createDB()
+createDB(folder, sqlite, currents)
 
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.ComponentFactory import CompFactory
+from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 flags = initConfigFlags()
 flags.Input.Files = []
@@ -78,10 +50,8 @@ flags.lock()
 acc = MainEvgenServicesCfg(flags)
 acc.getService('EventSelector').EventsPerLB = 1
 
-from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-acc.merge( AtlasFieldCacheCondAlgCfg(flags, LockMapCurrents=False) )
+acc.merge(AtlasFieldCacheCondAlgCfg(flags, LockMapCurrents=False))
 
-acc.addEventAlgo( CompFactory.MagField.CondReader('MagFieldCondReader') )
+acc.addEventAlgo(CompFactory.MagField.CondReader('MagFieldCondReader'))
 
-import sys
 sys.exit(acc.run().isFailure())

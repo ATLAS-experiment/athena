@@ -35,9 +35,9 @@ StatusCode MagField::CondReader::execute(const EventContext& ctx) const
   fieldCache. getField(xyz, bxyz);
 
   ATH_MSG_INFO("Field xyz: " << xyz[0] << ", " << xyz[1] << ", " << xyz[2] << ", " << bxyz[0] << ", " << bxyz[1] << ", " << bxyz[2]);
-  
 
 
-  
+
+
   return StatusCode::SUCCESS;
 }

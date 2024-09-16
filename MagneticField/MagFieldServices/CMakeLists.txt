@@ -24,5 +24,11 @@ if( NOT SIMULATIONBASE )
 
   atlas_add_test( MagFieldCondAlg
                   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/test_magFieldCondAlg.py
+                  PROPERTIES TIMEOUT 300
                   LOG_SELECT_PATTERN "MagFieldCondReader" )
+
+  atlas_add_test( MagFieldSolenoid
+                  SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/test_magFieldSolenoid.py
+                  PROPERTIES TIMEOUT 300
+                  LOG_SELECT_PATTERN "MagFieldSolenoidTest" )
 endif()
