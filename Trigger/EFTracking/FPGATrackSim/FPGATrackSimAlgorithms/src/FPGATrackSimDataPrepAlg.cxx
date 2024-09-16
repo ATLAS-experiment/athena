@@ -309,7 +309,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
     m_logicEventHeader_precluster->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader));
 
-    ATH_CHECK(m_hitMapTool->getUnmapped(m_hits_miss));
+    //ATH_CHECK(m_hitMapTool->getUnmapped(m_hits_miss));
     for (const FPGATrackSimHit& hit : m_hits_miss) FPGAHitUnmapped->push_back(hit);
 
 
@@ -343,7 +343,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         // get the sets of layers that we want to filter hits from
         std::vector<int> filter_pixel_physLayers;
         std::vector<int> filter_strip_physLayers;
-        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st();
+        const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
         ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap, filter_strip_physLayers));
         m_clusters.clear();
         ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, m_clusters));
