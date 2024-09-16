@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,17 +26,15 @@ void Trk::IdentifierExtractor::extract(std::vector<Identifier>& ids, const std::
 Identifier Trk::IdentifierExtractor::extract(const Trk::MeasurementBase* m)
 {
   Identifier id;
-  const Trk::RIO_OnTrack *rot = dynamic_cast<const Trk::RIO_OnTrack*>(m);
-  if (rot) {
+  if (m->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
+    const Trk::RIO_OnTrack* rot = static_cast<const Trk::RIO_OnTrack*>(m);
     id = rot->identify();
+  } else if (m->type(Trk::MeasurementBaseType::CompetingRIOsOnTrack)) {
+    const Trk::CompetingRIOsOnTrack* comprot =
+        static_cast<const Trk::CompetingRIOsOnTrack*>(m);
+    id = comprot->rioOnTrack(comprot->indexOfMaxAssignProb()).identify();
   } else {
-    // identify by CompetingROT:
-    const Trk::CompetingRIOsOnTrack* comprot = dynamic_cast<const Trk::CompetingRIOsOnTrack*>(m);
-    if (comprot) {
-      id = comprot->rioOnTrack(comprot->indexOfMaxAssignProb()).identify();
-    } else {
-      id.clear();
-    }
+    id.clear();
   }
   return id;
 }
