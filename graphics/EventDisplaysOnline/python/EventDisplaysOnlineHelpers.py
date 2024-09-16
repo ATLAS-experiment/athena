@@ -59,7 +59,7 @@ def WaitForPartition(partitionName=None):
 
 def EventCanBeSeenByPublic(projectTags):
 # Is the data allowed to be seen by the general public on atlas live and in the CCC
-
+  mlog = logging.getLogger( 'EventDisplays' )
   try:
     partition = IPCPartition('ATLAS')
     RunParams = ISObject(partition, 'RunParams.RunParams', 'RunParams')
@@ -81,7 +81,7 @@ def EventCanBeSeenByPublic(projectTags):
     return sendToPublicStream
 
   except Exception:
-    print('Failed to get bool for EventCanBeSeenByPublic, this is expected for offline test and GM test paritions')
+    mlog.warning('Failed to get bool for EventCanBeSeenByPublic, this is expected for offline test and GM test paritions')
     return False
 
 def GetUniqueJobID():

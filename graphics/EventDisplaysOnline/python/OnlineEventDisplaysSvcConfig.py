@@ -6,7 +6,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def OnlineEventDisplaysSvcCfg(flags, name = "OnlineEventDisplaysSvc", **kwargs):
 
     acc = ComponentAccumulator()
-
     kwargs.setdefault("MaxEvents", flags.OnlineEventDisplays.MaxEvents)
     kwargs.setdefault("OutputDirectory", flags.OnlineEventDisplays.OutputDirectory)
     kwargs.setdefault("ProjectTag", flags.OnlineEventDisplays.ProjectTag)

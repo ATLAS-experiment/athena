@@ -14,7 +14,7 @@ def ByteStreamCfg(flags, **kwargs):
     bytestreamInput.GroupName = "EventDisplaysOnline"
     bytestreamInput.PublishName = "EventDisplays"
     bytestreamInput.Key = "dcm"
-    bytestreamInput.KeyCount = 3
+    bytestreamInput.KeyCount = 1
     bytestreamInput.Timeout = 600000
     bytestreamInput.UpdatePeriod = 200
     bytestreamInput.BufferSize = 10 # three times of keycount for beam splashes
