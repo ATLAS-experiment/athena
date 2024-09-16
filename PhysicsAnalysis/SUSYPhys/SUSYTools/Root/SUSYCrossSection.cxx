@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -16,6 +16,99 @@
 
 // Text file i/o
 #include <fstream>
+#include <array>
+
+namespace{
+   enum Sparticles{
+    UNKNOWN = -1,
+    ngluino,
+    nsquark, // (up and down type without bottom/top)
+    nantisquark, // (up and down type without bottom/top)
+  
+    nsbottom,
+    nstop,
+    nsbottom2,
+    nstop2,
+    nantisbottom,
+    nantistop,
+    nantisbottom2,
+    nantistop2,
+  
+    nchi01,
+    nchi02,
+    nchi03,
+    nchi04,
+    nch1plus,
+    nch2plus,
+    nch1minus,
+    nch2minus,
+  
+   //sleptons
+    nsmuonRplus,
+    nsmuonRminus,
+    nselecRplus,
+    nselecRminus,
+  
+    nsmuonLplus,
+    nsmuonLminus,
+    nselecLplus,
+    nselecLminus,
+  
+    nstau1plus,
+    nstau1minus,
+    nstau2plus,
+    nstau2minus,
+  
+    //snutrinos
+    nselnuL,
+    nsmunuL,
+    nstaunuL,
+    NUM_SPARTICLES
+  };
+  
+  Sparticles
+  classifyOne(int pdgId){
+    if      (abs(pdgId) == 1000022) return nchi01;
+    else if (abs(pdgId) == 1000023) return nchi02;
+    else if (abs(pdgId) == 1000025) return nchi03;
+    else if (abs(pdgId) == 1000035) return nchi04;
+    else if (    pdgId == 1000024) return nch1plus;
+    else if (    pdgId == -1000024) return nch1minus;
+    else if (    pdgId == 1000037) return nch2plus;
+    else if (    pdgId == -1000037) return nch2minus;
+    else if (    pdgId == 1000021) return ngluino;
+    else if ((abs(pdgId) > 1000000 && abs(pdgId) <= 1000004) || (abs(pdgId) > 2000000 && abs(pdgId) <= 2000004)) {
+      if (pdgId > 0) return nsquark;
+      else return nantisquark;
+    }
+    else if (pdgId == 1000005) return nsbottom;
+    else if (pdgId == 1000006) return nstop;
+    else if (pdgId == 2000005) return nsbottom2;
+    else if (pdgId == 2000006) return nstop2;
+    else if (pdgId == -1000005) return nantisbottom;
+    else if (pdgId == -1000006) return nantistop;
+    else if (pdgId == -2000005) return nantisbottom2;
+    else if (pdgId == -2000006) return nantistop2;
+    else if (pdgId == 2000011) return nselecRminus;
+    else if (pdgId == -2000011) return nselecRplus;
+    else if (pdgId == 1000011) return nselecLminus;
+    else if (pdgId == -1000011) return nselecLplus;
+    else if (abs(pdgId) == 1000012) return nselnuL;
+    else if (pdgId == 2000013) return nsmuonRminus;
+    else if (pdgId == -2000013) return nsmuonRplus;
+    else if (pdgId == 1000013) return nsmuonLminus;
+    else if (pdgId == -1000013) return nsmuonLplus;
+    else if (abs(pdgId) == 1000014) return nsmunuL;
+    else if (pdgId == 1000015) return nstau1minus;
+    else if (pdgId == -1000015) return nstau1plus;
+    else if (pdgId == 2000015) return nstau2minus;
+    else if (pdgId == -2000015) return nstau2plus;
+    else if (abs(pdgId) == 1000016) return nstaunuL;
+    return UNKNOWN;
+  }
+  
+
+}
 
 SUSY::CrossSectionDB::CrossSectionDB(const std::string& txtfilename, bool usePathResolver, bool isExtended, bool usePMGTool)
   : m_pmgxs("")
@@ -133,224 +226,115 @@ SUSY::CrossSectionDB::Process SUSY::CrossSectionDB::process(int id, int proc) co
 
 unsigned int SUSY::finalState(const int SUSY_Spart1_pdgId, const int SUSY_Spart2_pdgId)
 {
-  int ngluino = 0;
-  int nsquark = 0; // (up and down type without bottom/top)
-  int nantisquark = 0; // (up and down type without bottom/top)
-
-  int nsbottom = 0;
-  int nstop = 0;
-  int nsbottom2 = 0;
-  int nstop2 = 0;
-  int nantisbottom = 0;
-  int nantistop = 0;
-  int nantisbottom2 = 0;
-  int nantistop2 = 0;
-
-  int nchi01 = 0;
-  int nchi02 = 0;
-  int nchi03 = 0;
-  int nchi04 = 0;
-  int nch1plus = 0;
-  int nch2plus = 0;
-  int nch1minus = 0;
-  int nch2minus = 0;
-
-  // sleptons
-  int nsmuonRplus = 0;
-  int nsmuonRminus = 0;
-  int nselecRplus = 0;
-  int nselecRminus = 0;
-
-  int nsmuonLplus = 0;
-  int nsmuonLminus = 0;
-  int nselecLplus = 0;
-  int nselecLminus = 0;
-
-  int nstau1plus = 0;
-  int nstau1minus = 0;
-  int nstau2plus = 0;
-  int nstau2minus = 0;
-
-  // snutrinos
-  int nselnuL = 0;
-  int nsmunuL = 0;
-  int nstaunuL = 0;
-
+  std::array<int, NUM_SPARTICLES> n{};
   //Classification of the event follows (gg, sq...):
-
-  if      (abs(SUSY_Spart1_pdgId) == 1000022) nchi01++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000023) nchi02++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000025) nchi03++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000035) nchi04++;
-  else if (    SUSY_Spart1_pdgId == 1000024) nch1plus++;
-  else if (    SUSY_Spart1_pdgId == -1000024) nch1minus++;
-  else if (    SUSY_Spart1_pdgId == 1000037) nch2plus++;
-  else if (    SUSY_Spart1_pdgId == -1000037) nch2minus++;
-  else if (    SUSY_Spart1_pdgId == 1000021) ngluino++;
-  else if ((abs(SUSY_Spart1_pdgId) > 1000000 && abs(SUSY_Spart1_pdgId) <= 1000004) || (abs(SUSY_Spart1_pdgId) > 2000000 && abs(SUSY_Spart1_pdgId) <= 2000004)) {
-    if (SUSY_Spart1_pdgId > 0) nsquark++;
-    else nantisquark++;
+  int idx = classifyOne(SUSY_Spart1_pdgId);
+  if ( (idx>=0) and (idx<std::ssize(n) )){
+    ++n[idx];
   }
-  else if (SUSY_Spart1_pdgId == 1000005) nsbottom++;
-  else if (SUSY_Spart1_pdgId == 1000006) nstop++;
-  else if (SUSY_Spart1_pdgId == 2000005) nsbottom2++;
-  else if (SUSY_Spart1_pdgId == 2000006) nstop2++;
-  else if (SUSY_Spart1_pdgId == -1000005) nantisbottom++;
-  else if (SUSY_Spart1_pdgId == -1000006) nantistop++;
-  else if (SUSY_Spart1_pdgId == -2000005) nantisbottom2++;
-  else if (SUSY_Spart1_pdgId == -2000006) nantistop2++;
-  else if (SUSY_Spart1_pdgId == 2000011) nselecRminus++;
-  else if (SUSY_Spart1_pdgId == -2000011) nselecRplus++;
-  else if (SUSY_Spart1_pdgId == 1000011) nselecLminus++;
-  else if (SUSY_Spart1_pdgId == -1000011) nselecLplus++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000012) nselnuL++;
-  else if (SUSY_Spart1_pdgId == 2000013) nsmuonRminus++;
-  else if (SUSY_Spart1_pdgId == -2000013) nsmuonRplus++;
-  else if (SUSY_Spart1_pdgId == 1000013) nsmuonLminus++;
-  else if (SUSY_Spart1_pdgId == -1000013) nsmuonLplus++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000014) nsmunuL++;
-  else if (SUSY_Spart1_pdgId == 1000015) nstau1minus++;
-  else if (SUSY_Spart1_pdgId == -1000015) nstau1plus++;
-  else if (SUSY_Spart1_pdgId == 2000015) nstau2minus++;
-  else if (SUSY_Spart1_pdgId == -2000015) nstau2plus++;
-  else if (abs(SUSY_Spart1_pdgId) == 1000016) nstaunuL++;
-
-
-  if (abs(SUSY_Spart2_pdgId) == 1000022) nchi01++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000023) nchi02++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000025) nchi03++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000035) nchi04++;
-  else if (SUSY_Spart2_pdgId == 1000024) nch1plus++;
-  else if (SUSY_Spart2_pdgId == -1000024) nch1minus++;
-  else if (SUSY_Spart2_pdgId == 1000037) nch2plus++;
-  else if (SUSY_Spart2_pdgId == -1000037) nch2minus++;
-
-  else if (SUSY_Spart2_pdgId == 1000021) ngluino++;
-  else if ((abs(SUSY_Spart2_pdgId) > 1000000 && abs(SUSY_Spart2_pdgId) <= 1000004) || (abs(SUSY_Spart2_pdgId) > 2000000 && abs(SUSY_Spart2_pdgId) <= 2000004)) {
-    if (SUSY_Spart2_pdgId > 0) nsquark++;
-    else nantisquark++;
+  int idx2 = classifyOne(SUSY_Spart2_pdgId);
+  if ( (idx2>=0) and (idx2<std::ssize(n) )){
+    ++n[idx2];
   }
-  else if (SUSY_Spart2_pdgId == 1000005) nsbottom++;
-  else if (SUSY_Spart2_pdgId == 1000006) nstop++;
-  else if (SUSY_Spart2_pdgId == 2000005) nsbottom2++;
-  else if (SUSY_Spart2_pdgId == 2000006) nstop2++;
-  else if (SUSY_Spart2_pdgId == -1000005) nantisbottom++;
-  else if (SUSY_Spart2_pdgId == -1000006) nantistop++;
-  else if (SUSY_Spart2_pdgId == -2000005) nantisbottom2++;
-  else if (SUSY_Spart2_pdgId == -2000006) nantistop2++;
-
-  else if (SUSY_Spart2_pdgId == 2000011) nselecRminus++;
-  else if (SUSY_Spart2_pdgId == -2000011) nselecRplus++;
-  else if (SUSY_Spart2_pdgId == 1000011) nselecLminus++;
-  else if (SUSY_Spart2_pdgId == -1000011) nselecLplus++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000012) nselnuL++;
-  else if (SUSY_Spart2_pdgId == 2000013) nsmuonRminus++;
-  else if (SUSY_Spart2_pdgId == -2000013) nsmuonRplus++;
-  else if (SUSY_Spart2_pdgId == 1000013) nsmuonLminus++;
-  else if (SUSY_Spart2_pdgId == -1000013) nsmuonLplus++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000014) nsmunuL++;
-  else if (SUSY_Spart2_pdgId == 1000015) nstau1minus++;
-  else if (SUSY_Spart2_pdgId == -1000015) nstau1plus++;
-  else if (SUSY_Spart2_pdgId == 2000015) nstau2minus++;
-  else if (SUSY_Spart2_pdgId == -2000015) nstau2plus++;
-  else if (abs(SUSY_Spart2_pdgId) == 1000016) nstaunuL++;
-
-
+ 
   ///Final classification
   // gluino/squark + X
-  if (ngluino == 1 && (nsquark == 1 || nantisquark == 1)) return 1;
-  else if (ngluino == 2) return 2;
-  else if (nsquark == 2 || nantisquark == 2) return 3;
-  else if (nsquark == 1 && nantisquark == 1) return 4;
+  auto nanysquark=[&n](int i)->bool {
+    return (n[nsquark] == i) or (n[nantisquark] == i);
+  };
+  if (n[ngluino] == 1 && nanysquark(1)) return 1;
+  else if (n[ngluino] == 2) return 2;
+  else if (nanysquark(2)) return 3;
+  else if (n[nsquark] == 1 && n[nantisquark] == 1) return 4;
 
-  else if (nsbottom == 1 && nantisbottom == 1) return 51;
-  else if (nsbottom2 == 1 && nantisbottom2 == 1) return 52;
-  else if (nstop == 1 && nantistop == 1) return 61;
-  else if (nstop2 == 1 && nantistop2 == 1) return 62;
+  else if (n[nsbottom] == 1 && n[nantisbottom] == 1) return 51;
+  else if (n[nsbottom2] == 1 && n[nantisbottom2] == 1) return 52;
+  else if (n[nstop] == 1 && n[nantistop] == 1) return 61;
+  else if (n[nstop2] == 1 && n[nantistop2] == 1) return 62;
 
-  else if (ngluino == 1 && nchi01 == 1) return 71;
-  else if (ngluino == 1 && nchi02 == 1) return 72;
-  else if (ngluino == 1 && nchi03 == 1) return 73;
-  else if (ngluino == 1 && nchi04 == 1) return 74;
+  else if (n[ngluino] == 1 && n[nchi01] == 1) return 71;
+  else if (n[ngluino] == 1 && n[nchi02] == 1) return 72;
+  else if (n[ngluino] == 1 && n[nchi03] == 1) return 73;
+  else if (n[ngluino] == 1 && n[nchi04] == 1) return 74;
 
-  else if (ngluino == 1 && nch1plus == 1) return 75;
-  else if (ngluino == 1 && nch2plus == 1) return 76;
-  else if (ngluino == 1 && nch1minus == 1) return 77;
-  else if (ngluino == 1 && nch2minus == 1) return 78;
+  else if (n[ngluino] == 1 && n[nch1plus] == 1) return 75;
+  else if (n[ngluino] == 1 && n[nch2plus] == 1) return 76;
+  else if (n[ngluino] == 1 && n[nch1minus] == 1) return 77;
+  else if (n[ngluino] == 1 && n[nch2minus] == 1) return 78;
 
-  else if ((nsquark == 1 || nantisquark == 1) && nchi01 == 1) return 81;
-  else if ((nsquark == 1 || nantisquark == 1) && nchi02 == 1) return 82;
-  else if ((nsquark == 1 || nantisquark == 1) && nchi03 == 1) return 83;
-  else if ((nsquark == 1 || nantisquark == 1) && nchi04 == 1) return 84;
+  else if (nanysquark(1) && n[nchi01] == 1) return 81;
+  else if (nanysquark(1) && n[nchi02] == 1) return 82;
+  else if (nanysquark(1) && n[nchi03] == 1) return 83;
+  else if (nanysquark(1) && n[nchi04] == 1) return 84;
 
-  else if ((nsquark == 1 || nantisquark == 1) && nch1plus == 1) return 85;
-  else if ((nsquark == 1 || nantisquark == 1) && nch2plus == 1) return 86;
-  else if ((nsquark == 1 || nantisquark == 1) && nch1minus == 1) return 87;
-  else if ((nsquark == 1 || nantisquark == 1) && nch2minus == 1) return 88;
+  else if (nanysquark(1) && n[nch1plus] == 1) return 85;
+  else if (nanysquark(1) && n[nch2plus] == 1) return 86;
+  else if (nanysquark(1) && n[nch1minus] == 1) return 87;
+  else if (nanysquark(1) && n[nch2minus] == 1) return 88;
 
 
   // Gaugino pair-production
   // chi^{0}_1 + X
-  else if (nchi01 == 2) return 111;
-  else if (nchi01 == 1 && nchi02 == 1) return 112;
-  else if (nchi01 == 1 && nchi03 == 1) return 113;
-  else if (nchi01 == 1 && nchi04 == 1) return 114;
-  else if (nchi01 == 1 && nch1plus == 1) return 115;
-  else if (nchi01 == 1 && nch2plus == 1) return 116;
-  else if (nchi01 == 1 && nch1minus == 1) return 117;
-  else if (nchi01 == 1 && nch2minus == 1) return 118;
+  else if (n[nchi01] == 2) return 111;
+  else if (n[nchi01] == 1 && n[nchi02] == 1) return 112;
+  else if (n[nchi01] == 1 && n[nchi03] == 1) return 113;
+  else if (n[nchi01] == 1 && n[nchi04] == 1) return 114;
+  else if (n[nchi01] == 1 && n[nch1plus] == 1) return 115;
+  else if (n[nchi01] == 1 && n[nch2plus] == 1) return 116;
+  else if (n[nchi01] == 1 && n[nch1minus] == 1) return 117;
+  else if (n[nchi01] == 1 && n[nch2minus] == 1) return 118;
 
   // chi^{0}_2 + X
-  else if (nchi02 == 2) return 122;
-  else if (nchi02 == 1 && nchi03 == 1) return 123;
-  else if (nchi02 == 1 && nchi04 == 1) return 124;
-  else if (nchi02 == 1 && nch1plus == 1) return 125;
-  else if (nchi02 == 1 && nch2plus == 1) return 126;
-  else if (nchi02 == 1 && nch1minus == 1) return 127;
-  else if (nchi02 == 1 && nch2minus == 1) return 128;
+  else if (n[nchi02] == 2) return 122;
+  else if (n[nchi02] == 1 && n[nchi03] == 1) return 123;
+  else if (n[nchi02] == 1 && n[nchi04] == 1) return 124;
+  else if (n[nchi02] == 1 && n[nch1plus] == 1) return 125;
+  else if (n[nchi02] == 1 && n[nch2plus] == 1) return 126;
+  else if (n[nchi02] == 1 && n[nch1minus] == 1) return 127;
+  else if (n[nchi02] == 1 && n[nch2minus] == 1) return 128;
 
   // chi^{0}_3 + X
-  else if (nchi03 == 2) return 133;
-  else if (nchi03 == 1 && nchi04 == 1) return 134;
-  else if (nchi03 == 1 && nch1plus == 1) return 135;
-  else if (nchi03 == 1 && nch2plus == 1) return 136;
-  else if (nchi03 == 1 && nch1minus == 1) return 137;
-  else if (nchi03 == 1 && nch2minus == 1) return 138;
+  else if (n[nchi03] == 2) return 133;
+  else if (n[nchi03] == 1 && n[nchi04] == 1) return 134;
+  else if (n[nchi03] == 1 && n[nch1plus] == 1) return 135;
+  else if (n[nchi03] == 1 && n[nch2plus] == 1) return 136;
+  else if (n[nchi03] == 1 && n[nch1minus] == 1) return 137;
+  else if (n[nchi03] == 1 && n[nch2minus] == 1) return 138;
 
   // chi^{0}_4 + X
-  else if (nchi04 == 2) return 144;
-  else if (nchi04 == 1 && nch1plus == 1) return 145;
-  else if (nchi04 == 1 && nch2plus == 1) return 146;
-  else if (nchi04 == 1 && nch1minus == 1) return 147;
-  else if (nchi04 == 1 && nch2minus == 1) return 148;
+  else if (n[nchi04] == 2) return 144;
+  else if (n[nchi04] == 1 && n[nch1plus] == 1) return 145;
+  else if (n[nchi04] == 1 && n[nch2plus] == 1) return 146;
+  else if (n[nchi04] == 1 && n[nch1minus] == 1) return 147;
+  else if (n[nchi04] == 1 && n[nch2minus] == 1) return 148;
 
   // chi^{+}_1/2 + chi^{-}_1/2
-  else if (nch1plus == 1 && nch1minus == 1) return 157;
-  else if (nch1plus == 1 && nch2minus == 1) return 158;
+  else if (n[nch1plus] == 1 && n[nch1minus] == 1) return 157;
+  else if (n[nch1plus] == 1 && n[nch2minus] == 1) return 158;
 
-  else if (nch2plus == 1 && nch1minus == 1) return 167;
-  else if (nch2plus == 1 && nch2minus == 1) return 168;
+  else if (n[nch2plus] == 1 && n[nch1minus] == 1) return 167;
+  else if (n[nch2plus] == 1 && n[nch2minus] == 1) return 168;
 
   // slepton
-  else if (nselecLplus == 1 && nselecLminus == 1) return 201; // sElectronLPair
-  else if (nselecRplus == 1 && nselecRminus == 1) return 202; // sElectronRPair
-  else if (nselnuL == 2) return 203; // sElectron neutrino pair
-  else if (nselecLplus == 1 && nselnuL == 1) return 204; // sElectron+ sNutrino
-  else if (nselecLminus == 1 && nselnuL == 1) return 205; // sElectron- sNutrino
-  else if (nstau1plus == 1 && nstau1minus == 1) return 206;
-  else if (nstau2plus == 1 && nstau2minus == 1) return 207;
-  else if ((nstau1plus == 1 || nstau1minus == 1) && (nstau2plus == 1 || nstau2minus == 1)) return 208;
-  else if (nstaunuL == 2) return 209; // sTau neutrino pair
-  else if (nstau1plus == 1 && nstaunuL == 1) return 210;
-  else if (nstau1minus == 1 && nstaunuL == 1) return 211;
-  else if (nstau2plus == 1 && nstaunuL == 1) return 212;
-  else if (nstau2minus == 1 && nstaunuL == 1) return 213;
+  else if (n[nselecLplus] == 1 && n[nselecLminus] == 1) return 201; // sElectronLPair
+  else if (n[nselecRplus] == 1 && n[nselecRminus] == 1) return 202; // sElectronRPair
+  else if (n[nselnuL] == 2) return 203; // sElectron neutrino pair
+  else if (n[nselecLplus] == 1 && n[nselnuL] == 1) return 204; // sElectron+ sNutrino
+  else if (n[nselecLminus] == 1 && n[nselnuL] == 1) return 205; // sElectron- sNutrino
+  else if (n[nstau1plus] == 1 && n[nstau1minus] == 1) return 206;
+  else if (n[nstau2plus] == 1 && n[nstau2minus] == 1) return 207;
+  else if ((n[nstau1plus] == 1 || n[nstau1minus] == 1) && (n[nstau2plus] == 1 || n[nstau2minus] == 1)) return 208;
+  else if (n[nstaunuL] == 2) return 209; // sTau neutrino pair
+  else if (n[nstau1plus] == 1 && n[nstaunuL] == 1) return 210;
+  else if (n[nstau1minus] == 1 && n[nstaunuL] == 1) return 211;
+  else if (n[nstau2plus] == 1 && n[nstaunuL] == 1) return 212;
+  else if (n[nstau2minus] == 1 && n[nstaunuL] == 1) return 213;
 
-  else if (nsmuonLplus == 1 && nsmuonLminus == 1) return 216; // sMuonPair
-  else if (nsmuonRplus == 1 && nsmuonRminus == 1) return 217; // sMuonPair
-  else if (nsmunuL == 2) return 218; // sMuon neutrino pair
-  else if (nsmuonLplus == 1 && nsmunuL == 1) return 219; // sMuon+ sNutrino
-  else if (nsmuonLminus == 1 && nsmunuL == 1) return 220; // sMuon- sNutrino
+  else if (n[nsmuonLplus] == 1 && n[nsmuonLminus] == 1) return 216; // sMuonPair
+  else if (n[nsmuonRplus] == 1 && n[nsmuonRminus] == 1) return 217; // sMuonPair
+  else if (n[nsmunuL] == 2) return 218; // sMuon neutrino pair
+  else if (n[nsmuonLplus] == 1 && n[nsmunuL] == 1) return 219; // sMuon+ sNutrino
+  else if (n[nsmuonLminus] == 1 && n[nsmunuL] == 1) return 220; // sMuon- sNutrino
 
   std::cerr << "ERROR. could not determine finalState for:" << std::endl;
   std::cerr << "  SUSY_Spart1_pdgId: " << SUSY_Spart1_pdgId << std::endl;

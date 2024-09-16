@@ -98,6 +98,12 @@ if( XAOD_STANDALONE )
       SUSYToolsLib )
 endif()
 
+atlas_add_test( SUSYCrossSection_test
+  SOURCES  test/SUSYCrossSection_test.cxx
+  LINK_LIBRARIES SUSYToolsLib
+  POST_EXEC_SCRIPT nopost.sh
+)
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.py )
