@@ -100,16 +100,16 @@ void OnlineEventDisplaysSvc::beginEvent(){
   }
   else{
     ATH_MSG_WARNING("Cannot find a stream adding to .Unknown directory");
-    m_outputStreamDir = ".Unkown";
+    m_outputStreamDir = ".Unknown";
   }
 
   m_entireOutputStr = m_outputDirectory + "/" + m_outputStreamDir;
-
   std::string FileNamePrefix = m_entireOutputStr + "/JiveXML";
   m_FileNamePrefix = FileNamePrefix;
 
   gid_t zpgid = setOwnershipToZpGrpOrDefault();
   createWriteableDir(m_outputDirectory, zpgid);
+  createWriteableDir(m_entireOutputStr, zpgid);
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
