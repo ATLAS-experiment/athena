@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
 #include "xAODJet/JetContainer.h"
 #include <AsgTools/StandaloneToolHandle.h>
@@ -21,13 +22,35 @@ ANA_MSG_SOURCE(testBTagJson, "BtaggingJsonToolTester")
 using namespace testBTagJson;
 
 int main() {
+
+  std::string TaggerName = "GN2XWithMassv00";
+  std::string OperatingPoint = "FixedCutBEff_70";
+  std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
+  std::string JsonConfigFile = "/afs/cern.ch/work/b/bdong/CDIMagic/csv_to_json_xbb/Xbb_lookup_table.json";
+
+  asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
+  StatusCode sel_code1 = sel_tool.setProperty( "MaxEta", 2.5 );
+  StatusCode sel_code2 = sel_tool.setProperty( "MinPt",  20000 );
+  StatusCode sel_code3 = sel_tool.setProperty( "TaggerName", TaggerName );
+  StatusCode sel_code4 = sel_tool.setProperty( "JetAuthor", JetCollection );
+  StatusCode sel_code5 = sel_tool.setProperty( "OperatingPoint", OperatingPoint );
+  StatusCode sel_code6 = sel_tool.setProperty( "JsonConfigFile", JsonConfigFile );
+  StatusCode sel_code7 = sel_tool.initialize();
+  std::vector<StatusCode> sel_codes = {sel_code1, sel_code2, sel_code3, sel_code4, sel_code5, sel_code6, sel_code7};
+  for(const auto& code : sel_codes) {
+    if(code.isFailure()) {
+      ANA_MSG_ERROR("Failed to set property or initialize tool");
+      return 1;
+    }
+  }
+
   asg::StandaloneToolHandle<IBTaggingEfficiencyJsonTool> tool("BTaggingEfficiencyJsonTool/BTagEffTest");
   StatusCode code1 = tool.setProperty( "MaxEta", 2.5 );
   StatusCode code2 = tool.setProperty( "MinPt",  20000 );
-  StatusCode code3 = tool.setProperty( "TaggerName", "GN2XWithMassv00" );
-  StatusCode code4 = tool.setProperty( "JetAuthor", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" );
-  StatusCode code5 = tool.setProperty( "OperatingPoint", "FixedCutBEff_70" );
-  StatusCode code6 = tool.setProperty( "JsonConfigFile", "/afs/cern.ch/work/b/bdong/CDIMagic/csv_to_json_xbb/Xbb_lookup_table.json" );
+  StatusCode code3 = tool.setProperty( "TaggerName", TaggerName );
+  StatusCode code4 = tool.setProperty( "JetAuthor", JetCollection );
+  StatusCode code5 = tool.setProperty( "OperatingPoint", OperatingPoint );
+  StatusCode code6 = tool.setProperty( "JsonConfigFile", JsonConfigFile );
   StatusCode code7 = tool.initialize();
   std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7};
   for(const auto& code : codes) {
@@ -62,6 +85,9 @@ int main() {
     for(const auto jet : *jets) {
       ANA_MSG_INFO("====================================");
       ANA_MSG_INFO("Jet pt: " << jet->pt() << " mass: " << jet->m() );
+      bool tagged = static_cast<bool>(sel_tool->accept(*jet));
+      ANA_MSG_INFO("Tagged: " << tagged);
+
       float sf = 1.;
 
       if (tool->getScaleFactor(*jet, sf) != CP::CorrectionCode::Ok) {

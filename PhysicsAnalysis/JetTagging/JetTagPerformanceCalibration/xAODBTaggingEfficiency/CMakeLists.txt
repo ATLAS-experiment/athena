@@ -41,8 +41,8 @@ if( XAOD_ANALYSIS )
    atlas_add_executable( BTaggingEfficiencyToolTester
       util/BTaggingEfficiencyToolTester.cxx
       LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
-   atlas_add_executable( BTaggingEfficiencyJsonToolTester
-      util/BTaggingEfficiencyJsonToolTester.cxx
+   atlas_add_executable( BTaggingJsonToolsTester
+      util/BTaggingJsonToolsTester.cxx
       LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
 
    atlas_add_executable( SystematicStrategyComparison
@@ -64,7 +64,7 @@ if( XAOD_ANALYSIS )
          PRIVATE xAODRootAccess )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE xAODRootAccess )
-      target_link_libraries( BTaggingEfficiencyJsonToolTester
+      target_link_libraries( BTaggingJsonToolsTester
          PRIVATE xAODRootAccess )
       target_link_libraries( SystematicStrategyComparison 
          PRIVATE xAODRootAccess )
@@ -73,7 +73,7 @@ if( XAOD_ANALYSIS )
          PRIVATE POOLRootAccessLib )
       target_link_libraries( BTaggingSelectionToolTester
          PRIVATE POOLRootAccessLib )
-       target_link_libraries( BTaggingEfficiencyJsonToolTester
+       target_link_libraries( BTaggingJsonToolsTester
          PRIVATE POOLRootAccessLib )
       target_link_libraries( SystematicStrategyComparison 
          PRIVATE POOLRootAccessLib )
