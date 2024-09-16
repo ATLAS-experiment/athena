@@ -13,7 +13,7 @@ TestBeam_tf.py \
     --CA \
     --DataRunNumber '1' \
     --outputHITSFile 'test.HITS.pool.root' \
-    --conditionsTag 'OFLCOND-MC16-SDR-RUN2-09' \
+    --conditionsTag 'OFLCOND-MC16-SDR-RUN2-12' \
     --maxEvents '10' \
     --Eta '0.35' \
     --testBeamConfig 'tbtile' \
