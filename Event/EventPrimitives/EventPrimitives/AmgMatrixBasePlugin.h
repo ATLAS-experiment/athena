@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define EVENTPRIMITIVES_AMGMATRIXBASEPLUGIN_H
 
 #include <cmath>
+
 
 /** This is a plugin that makes Eigen look like CLHEP
   & defines some convenience methods */
@@ -31,23 +32,24 @@ inline Scalar mag2() const {
   return (*this).squaredNorm();
 }
 
-/** perp method - perpenticular length */
-inline Scalar perp() const {
-  if (this->rows() < 2)
-    return 0.;
-  return std::sqrt((*this)[0] * (*this)[0] + (*this)[1] * (*this)[1]);
-}
-
 /** perp2 method - perpendicular length squared */
 inline Scalar perp2() const {
-  if (this->rows() < 2)
-    return 0.;
+  constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
+  constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;
+  static_assert(isVector && size>=2, "Method applicable for vectors of size >=2");
   return ((*this)[0] * (*this)[0] + (*this)[1] * (*this)[1]);
 }
 
+/** perp method - perpenticular length */
+inline Scalar perp() const {
+  constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
+  constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;
+  static_assert(isVector && size>=2, "Method applicable for vectors of size >=2");
+  return std::sqrt(this->perp2());
+}
+
+/** perp2 method wrt another vector */
 inline Scalar perp2(const MatrixBase<Derived>& vec) {
-  if (this->rows() < 2)
-    return 0.;
   Scalar tot = vec.mag2();
   if (tot > 0) {
     Scalar s = this->dot(vec);
@@ -56,28 +58,32 @@ inline Scalar perp2(const MatrixBase<Derived>& vec) {
   return this->mag2();
 }
 
+/** perp2 method wrt another vector */
 inline Scalar perp(const MatrixBase<Derived>& vec) {
   return std::sqrt(this->perp2(vec));
 }
 
 /** phi method */
 inline Scalar phi() const {
-  if (this->rows() < 2)
-    return 0.;
+  constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
+  constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;
+  static_assert(isVector && size>=2, "Method applicable for vectors of size >=2");
   return std::atan2((*this)[1], (*this)[0]);
 }
 
 /** theta method */
 inline Scalar theta() const {
-  if (this->rows() < 3)
-    return 0.;
-  return std::atan2(
-      std::sqrt((*this)[0] * (*this)[0] + (*this)[1] * (*this)[1]), (*this)[2]);
+  constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
+  constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;
+  static_assert(isVector && size>=3, "Method applicable for vectors of size >=3");
+  return std::atan2(this->perp(), (*this)[2]);
 }
 
 /** pseudorapidity  method */
 inline Scalar eta() const {
-  EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(MatrixBase, 3)
+  constexpr int size = Eigen::MatrixBase<Derived>::SizeAtCompileTime;
+  constexpr int isVector = Eigen::MatrixBase<Derived>::IsVectorAtCompileTime;
+  static_assert(isVector && size>=3, "Method applicable for vectors of size >=3");
   const Scalar rho2 = (*this).x() * (*this).x() + (*this).y() * (*this).y();
   const Scalar z = (*this).z();
   const Scalar z2 = z * z;
@@ -97,16 +103,14 @@ inline Scalar eta() const {
 }
 
 inline Scalar deltaR(const MatrixBase<Derived>& vec) const {
-  if (this->rows() < 2)
-    return 0.;
+  //we assert in eta/phi methods
   double a = this->eta() - vec.eta();
   double b = this->deltaPhi(vec);
   return std::sqrt(a * a + b * b);
 }
 
 inline Scalar deltaPhi(const MatrixBase<Derived>& vec) const {
-  if (this->rows() < 2)
-    return 0.;
+  //we assert in eta/phi methods
   double dphi = vec.phi() - this->phi();
   if (dphi > M_PI) {
     dphi -= M_PI * 2;
@@ -116,14 +120,13 @@ inline Scalar deltaPhi(const MatrixBase<Derived>& vec) const {
   return dphi;
 }
 
-// ------- Methods for symmetric matrix objects ---------------------- //
-/** method to fill symmetrically elments */
-void fillSymmetric(size_t i, size_t j, Scalar value) {
+/** method to fill elements for a symmetric matrix*/
+inline void fillSymmetric(size_t i, size_t j, Scalar value) {
   (*this)(i, j) = value;
   (*this)(j, i) = value;
 }
 
-//    /** similarity method : yields ms = m*s*m^T */
+/** similarity method : yields ms = m*s*m^T */
 template <typename OtherDerived>
 inline Matrix<Scalar, OtherDerived::RowsAtCompileTime,
               OtherDerived::RowsAtCompileTime>
