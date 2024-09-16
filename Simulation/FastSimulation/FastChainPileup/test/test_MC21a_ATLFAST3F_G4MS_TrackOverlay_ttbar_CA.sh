@@ -34,7 +34,7 @@ FastChain_tf.py \
   --digiSeedOffset2 727 \
   --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
   --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
-  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
+  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-10'  \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --preExec 'all:ConfigFlags.Overlay.doTrackOverlay=True;' \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
@@ -64,7 +64,7 @@ then
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --maxEvents '-1' \
                --autoConfiguration=everything \
-               --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
+               --conditionsTag 'OFLCOND-MC21-SDR-RUN3-10'  \
                --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
@@ -78,7 +78,7 @@ then
          Reco_tf.py --inputAODFile ${AOD_File} \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
                     --maxEvents '-1' \
-                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-10' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
 	                  --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
