@@ -14,7 +14,7 @@ Reco_tf.py \
 --CA "Overlay,RAWtoALL:True" \
 --preExec="RAWtoALL:flags.Exec.FPE=500" \
 --postExec="" \
---conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-11' \
+--conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-12' \
 --multithreaded \
 --steering doOverlay doRDO_TRIG \
 --maxEvents=500 \
