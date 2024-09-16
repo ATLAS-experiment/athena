@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace Trk
   /**
    @class ITrkDistanceFinder
 
-   Interface class for the algotool which calculates the distance between two 
+   Interface class for the algotool which calculates the distance between two
    tracks.
 
    @author Giacinto.Piacquadio@physik.uni-freiburg.de
@@ -51,11 +51,6 @@ namespace Trk
        /** method to do the calculation starting from two tracks */
        virtual std::optional<TwoPoints>
        CalculateMinimumDistance(const  Trk::Track &, const Trk::Track &) const = 0;
-       
-       /** method to do the calculation starting from two track particles */
-       virtual std::optional<TwoPoints>
-       CalculateMinimumDistance(const  Trk::TrackParticleBase &, const Trk::TrackParticleBase &) const = 0;
-
   };
 }
 

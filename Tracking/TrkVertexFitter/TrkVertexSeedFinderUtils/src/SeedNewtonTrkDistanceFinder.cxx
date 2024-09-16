@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -22,26 +22,26 @@
 
 namespace Trk
 {
-    
 
-  SeedNewtonTrkDistanceFinder::SeedNewtonTrkDistanceFinder(const std::string& t, const std::string& n, const IInterface*  p) : 
+
+  SeedNewtonTrkDistanceFinder::SeedNewtonTrkDistanceFinder(const std::string& t, const std::string& n, const IInterface*  p) :
     base_class(t,n,p),
     m_2ddistanceseeder("Trk::Trk2dDistanceSeeder"),
     m_distancefinder("Trk::NewtonTrkDistanceFinder"),
     m_numberOfMinimizationFailures(0)
-  {   
+  {
     declareProperty("Trk2dDistanceSeeder",     m_2ddistanceseeder);
     declareProperty("TrkDistanceFinderImplementation",     m_distancefinder);
   }
 
   SeedNewtonTrkDistanceFinder::~SeedNewtonTrkDistanceFinder() = default;
 
-  StatusCode SeedNewtonTrkDistanceFinder::initialize() 
-  { 
+  StatusCode SeedNewtonTrkDistanceFinder::initialize()
+  {
 
     //initialize number of failures to 0
     m_numberOfMinimizationFailures=0;
-    
+
     ATH_CHECK( AlgTool::initialize() );
     ATH_CHECK( m_2ddistanceseeder.retrieve() );
     ATH_CHECK( m_distancefinder.retrieve() );
@@ -49,9 +49,9 @@ namespace Trk
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SeedNewtonTrkDistanceFinder::finalize() 
+  StatusCode SeedNewtonTrkDistanceFinder::finalize()
   {
-    
+
     ATH_MSG_DEBUG( "Finalize successful. Number of failed minimizations: " << m_numberOfMinimizationFailures << ". Few per events is OK!" );
     return StatusCode::SUCCESS;
   }
@@ -63,9 +63,9 @@ namespace Trk
   SeedNewtonTrkDistanceFinder::CalculateMinimumDistance(const Trk::Perigee & a,
                                                         const Trk::Perigee & b)  const
   {
-    //defragmenting the meory: local variable instead of private data member    
+    //defragmenting the meory: local variable instead of private data member
     std::pair<PointOnTrack,PointOnTrack> minpoints;
-   
+
     //try first to get the minimum directly with the Newton method
     auto ret = m_distancefinder->GetClosestPoints(a,b);
     if (std::holds_alternative<TwoPoints>(ret)) {
@@ -94,34 +94,9 @@ namespace Trk
       ATH_MSG_ERROR( "Nan parameters in tracks. Cannot use them" );
       return std::nullopt;
     }
-    
+
     return CalculateMinimumDistance(*(a.perigeeParameters()),*(b.perigeeParameters()));
-    
+
   }
 
-  /** method to do the calculation starting from two track particles */
-  std::optional<ITrkDistanceFinder::TwoPoints>
-  SeedNewtonTrkDistanceFinder::CalculateMinimumDistance(const  Trk::TrackParticleBase & a,
-                                                        const Trk::TrackParticleBase & b) const
-  {
-    const Trk::TrackParameters& para=a.definingParameters();
-    const Trk::TrackParameters& parb=b.definingParameters();
-
-    const Trk::Perigee* parpera=dynamic_cast<const Trk::Perigee*>(&para);
-    const Trk::Perigee* parperb=dynamic_cast<const Trk::Perigee*>(&parb);
-
-    if (parpera==nullptr||parperb==nullptr) {
-      ATH_MSG_WARNING( "Cannot cast to perigee. Neutral will be supported soon" );
-      return std::nullopt;
-    }
-
-    if (std::isnan(parpera->parameters()[Trk::d0])||std::isnan(parperb->parameters()[Trk::d0])) {
-      ATH_MSG_ERROR( "Nan parameters in tracks. Cannot use them" );
-      return std::nullopt;
-    }
-    
-    return CalculateMinimumDistance(*(parpera),*(parperb));
-    
-  }
-  
 } // namespace Trk
