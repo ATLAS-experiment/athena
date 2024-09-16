@@ -39,16 +39,16 @@ InDet::InDetAmbiScoringTool::InDetAmbiScoringTool(const std::string& t,
   m_summaryTypeScore[Trk::numberOfTRTHits]              =   1;  // 10 straws ~ 1 SCT
   m_summaryTypeScore[Trk::numberOfTRTHighThresholdHits] =   0;  // addition for being TR
   m_summaryTypeScore[Trk::numberOfOutliersOnTrack]      =  -1;  // -ME- TRT oulier should not kill 5 TRT on track (was -5)
-  
+
   // scoring for Muons not needed
-  m_summaryTypeScore[Trk::numberOfMdtHits]    = 0;   
-  m_summaryTypeScore[Trk::numberOfTgcPhiHits] = 0; 
+  m_summaryTypeScore[Trk::numberOfMdtHits]    = 0;
+  m_summaryTypeScore[Trk::numberOfTgcPhiHits] = 0;
   m_summaryTypeScore[Trk::numberOfTgcEtaHits] = 0;
-  m_summaryTypeScore[Trk::numberOfCscPhiHits] = 0;     
+  m_summaryTypeScore[Trk::numberOfCscPhiHits] = 0;
   m_summaryTypeScore[Trk::numberOfCscEtaHits] = 0;
   m_summaryTypeScore[Trk::numberOfRpcPhiHits] = 0;
   m_summaryTypeScore[Trk::numberOfRpcEtaHits] = 0;
-  
+
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -57,14 +57,14 @@ StatusCode InDet::InDetAmbiScoringTool::initialize()
 {
   StatusCode sc = AlgTool::initialize();
   if (sc.isFailure()) return sc;
-  
+
   sc = m_extrapolator.retrieve();
   if (sc.isFailure()) {
     msg(MSG::FATAL) << "Failed to retrieve tool " << m_extrapolator << endmsg;
     return StatusCode::FAILURE;
-  } else 
+  } else
     msg(MSG::DEBUG) << "Retrieved tool " << m_extrapolator << endmsg;
-  
+
   // Get segment selector tool
   //
   ATH_CHECK(m_selectortool.retrieve( DisableTool{m_selectortool.empty()} ) );
@@ -75,10 +75,10 @@ StatusCode InDet::InDetAmbiScoringTool::initialize()
     msg(MSG::FATAL) << "Both on, normal ambi funciton and the one for back tracking, configuration problem, not recoverable" << endmsg;
     return StatusCode::FAILURE;
   }
-  
+
   // Read handle for AtlasFieldCacheCondObj
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
-  
+
   if (not m_etaDependentCutsSvc.name().empty()) ATH_CHECK(m_etaDependentCutsSvc.retrieve());
 
   if (m_useAmbigFcn || m_useTRT_AmbigFcn) setupScoreModifiers();
@@ -134,16 +134,15 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
   // add back extrapolation without errors
   std::unique_ptr<const Trk::TrackParameters> parm( m_extrapolator->extrapolateDirectly(ctx,*input, perigeeSurface) );
 
-  const Trk::Perigee*extrapolatedPerigee = dynamic_cast<const Trk::Perigee*> (parm.get());
-  if (!extrapolatedPerigee) {
+  if (parm->surfaceType()!=Trk::SurfaceType::Perigee) {
      ATH_MSG_WARNING( "Extrapolation of perigee failed, this should never happen" );
      return false;
   }
 
-  ATH_MSG_VERBOSE ("extrapolated perigee: "<<*extrapolatedPerigee);
+  ATH_MSG_VERBOSE ("extrapolated perigee: "<<*parm);
   double maxZ0 = m_etaDependentCutsSvc.name().empty() ?
     m_maxZImp.value() : m_etaDependentCutsSvc->getMaxZImpactAtEta(trackEta);
-  if (std::abs(extrapolatedPerigee->parameters()[Trk::z0]) > maxZ0) {
+  if (std::abs(parm->parameters()[Trk::z0]) > maxZ0) {
     ATH_MSG_DEBUG ("Track Z impact > "<<m_maxZImp<<", reject it");
     return false;
   }
@@ -155,7 +154,7 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
        maxD0 = m_maxRPhiImpEM;
      }
   }
-  if (std::abs(extrapolatedPerigee->parameters()[Trk::d0]) > maxD0) {
+  if (std::abs(parm->parameters()[Trk::d0]) > maxD0) {
     ATH_MSG_DEBUG ("Track Rphi impact > "<<maxD0<<", reject it");
     return false;
   }
@@ -194,12 +193,12 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
   int numPixelHoles     = trackSummary.get(Trk::numberOfPixelHoles);
   int numSCTHoles       = trackSummary.get(Trk::numberOfSCTHoles);
   int numSCTDoubleHoles = trackSummary.get(Trk::numberOfSCTDoubleHoles);
-  int numPixelDead      = trackSummary.get(Trk::numberOfPixelDeadSensors);  
-  int numSCTDead        = trackSummary.get(Trk::numberOfSCTDeadSensors);  
+  int numPixelDead      = trackSummary.get(Trk::numberOfPixelDeadSensors);
+  int numSCTDead        = trackSummary.get(Trk::numberOfSCTDeadSensors);
 
   if (numPixelDead<0) numPixelDead = 0;
   if (numSCTDead<0)   numSCTDead   = 0;
-  
+
   // is this a track from the pattern or a fitted track ?
   bool ispatterntrack = (track.info().trackFitter()==Trk::TrackInfo::Unknown);
   //
@@ -222,7 +221,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of double Holes
     if (numSCTDoubleHoles>=0) {
       int maxDoubleHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxDoubleHoles.value() :  m_etaDependentCutsSvc->getMaxDoubleHolesAtEta(trackEta);
+        m_maxDoubleHoles.value() :  m_etaDependentCutsSvc->getMaxDoubleHolesAtEta(trackEta);
       if (numSCTDoubleHoles > maxDoubleHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numSCTDoubleHoles <<" double holes, reject it!");
         return Trk::TrackScore(0);
@@ -231,7 +230,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of Si (Pixel+SCT) Holes
     if (numSCTHoles>=0 && numPixelHoles>=0) {
       int maxSiHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxSiHoles.value() :  m_etaDependentCutsSvc->getMaxSiHolesAtEta(trackEta);
+        m_maxSiHoles.value() :  m_etaDependentCutsSvc->getMaxSiHolesAtEta(trackEta);
       if (numPixelHoles+numSCTHoles > maxSiHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numPixelHoles <<" Pixel and " << numSCTHoles << " SCT holes, reject it!");
         return Trk::TrackScore(0);
@@ -240,7 +239,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of Pixel Holes
     if ( numPixelHoles>=0 ) {
       int maxPixelHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxPixelHoles.value() : m_etaDependentCutsSvc->getMaxPixelHolesAtEta(trackEta);
+        m_maxPixelHoles.value() : m_etaDependentCutsSvc->getMaxPixelHolesAtEta(trackEta);
       if (numPixelHoles > maxPixelHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numPixelHoles <<" Pixel  holes, reject it!");
         return Trk::TrackScore(0);
@@ -249,7 +248,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of SCT Holes
     if ( numSCTHoles>=0 ) {
       int maxSctHoles = m_etaDependentCutsSvc.name().empty() ?
-	m_maxSctHoles.value() : m_etaDependentCutsSvc->getMaxSctHolesAtEta(trackEta);
+        m_maxSctHoles.value() : m_etaDependentCutsSvc->getMaxSctHolesAtEta(trackEta);
       if ( numSCTHoles > maxSctHoles ) {
         ATH_MSG_DEBUG ("Track has "<< numSCTHoles << " SCT holes, reject it!");
         return Trk::TrackScore(0);
@@ -260,15 +259,15 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
       ATH_MSG_DEBUG ("Track has " << numTRT << " TRT hits,  reject it");
       return Trk::TrackScore(0);
     }
-    // TRT precision hits cut  
+    // TRT precision hits cut
     if (!m_useITkAmbigFcn && numTRT >= 15 && ((double)(numTRT-numTRTTube))/numTRT < m_minTRTprecision) {
       ATH_MSG_DEBUG ("Track has " << ((double)numTRTTube)/numTRT << " TRT tube hit fraction,  reject it");
-      return Trk::TrackScore(0);  
-    }  
+      return Trk::TrackScore(0);
+    }
     // Number of Si Clusters
     if ( numSCT>=0 && numPixel>=0) {
       int minSiClusters = m_etaDependentCutsSvc.name().empty() ?
-	m_minSiClusters.value() : m_etaDependentCutsSvc->getMinSiHitsAtEta(trackEta);
+        m_minSiClusters.value() : m_etaDependentCutsSvc->getMinSiHitsAtEta(trackEta);
       if (numPixel+numSCT+numPixelDead+numSCTDead < minSiClusters) {
         ATH_MSG_DEBUG ("Track has " << numPixel+numSCT << " Si clusters and " << numPixelDead+numSCTDead << " dead sensors, reject it");
         return Trk::TrackScore(0);
@@ -277,10 +276,10 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     // Number of pixel clusters
     if (numPixel>=0) {
       int minPixel = m_etaDependentCutsSvc.name().empty() ?
-	m_minPixel.value() : m_etaDependentCutsSvc->getMinPixelHitsAtEta(trackEta);
+        m_minPixel.value() : m_etaDependentCutsSvc->getMinPixelHitsAtEta(trackEta);
       if(numPixel < minPixel) {
-	ATH_MSG_DEBUG ("Track has " << numPixel << " pixel hits, reject it");
-	return Trk::TrackScore(0);
+        ATH_MSG_DEBUG ("Track has " << numPixel << " pixel hits, reject it");
+        return Trk::TrackScore(0);
       }
     }
   }
@@ -298,7 +297,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     return ambigScore(track,trackSummary);
 
   } else {
-  
+
     //
     // use classical score
     //
@@ -308,8 +307,8 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
     for (int i=0; i<Trk::numberOfTrackSummaryTypes; ++i) {
       int value = trackSummary.get(static_cast<Trk::SummaryType>(i));
       //value is -1 if undefined.
-      if (value>0) { 
-        score+=m_summaryTypeScore[i]*value; 
+      if (value>0) {
+        score+=m_summaryTypeScore[i]*value;
         ATH_MSG_DEBUG ("\tType ["<<i<<"], value \t= "<<value<<"], score \t="<<score);
       }
     }
@@ -320,8 +319,8 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
         score += log10( p );
       else
         score -= 50;
-    }    
-    
+    }
+
     return score;
   }
 
@@ -347,13 +346,13 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
     int iPixHoles = trackSummary.get(Trk::numberOfPixelHoles);
     if ( iPixHoles > -1 && m_maxPixHoles > 0) {
       if (iPixHoles > m_maxPixHoles) {
-        prob /= (iPixHoles - m_maxPixHoles + 1); // holes are bad ! 
+        prob /= (iPixHoles - m_maxPixHoles + 1); // holes are bad !
         iPixHoles = m_maxPixHoles;
       }
       prob *= m_factorPixHoles[iPixHoles];
       ATH_MSG_DEBUG ("Modifier for " << iPixHoles << " Pixel holes: "<<m_factorPixHoles[iPixHoles]
          << "  New score now: " << prob);
-    }  
+    }
   }
 
   if (m_useSCT) {
@@ -361,7 +360,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
     int iSCT_Holes = trackSummary.get(Trk::numberOfSCTHoles);
     if (iSCT_Holes > -1 && m_maxSCT_Holes > 0) {
       if (iSCT_Holes > m_maxSCT_Holes) {
-        prob /= (iSCT_Holes - m_maxSCT_Holes + 1); // holes are bad ! 
+        prob /= (iSCT_Holes - m_maxSCT_Holes + 1); // holes are bad !
         iSCT_Holes = m_maxSCT_Holes;
       }
       prob *= m_factorSCT_Holes[iSCT_Holes];
@@ -405,7 +404,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
     int pixelHits = trackSummary.get(Trk::numberOfPixelHits);
     if (pixelHits > -1 && m_maxPixelHits > 0) {
       if (pixelHits > m_maxPixelHits) {
-        prob *= (pixelHits - m_maxPixelHits + 1); // hits are good ! 
+        prob *= (pixelHits - m_maxPixelHits + 1); // hits are good !
         pixelHits = m_maxPixelHits;
       }
       prob *= m_factorPixelHits[pixelHits];
@@ -442,9 +441,9 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
   if (iHits > -1 && m_maxHits > 0) {
     if (iHits > m_maxHits) {
       prob *= (iHits - m_maxHits + 1); // hits are good !
-      iHits = m_maxHits; 
+      iHits = m_maxHits;
     }
-    prob *= m_factorHits[iHits]; 
+    prob *= m_factorHits[iHits];
     ATH_MSG_DEBUG ("Modifier for " << iHits << " Sihits: "<<m_factorHits[iHits]
        << "  New score now: " << prob);
   }
@@ -492,14 +491,14 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
   // is this a track from the pattern or a fitted track ?
   bool ispatterntrack = (track.info().trackFitter()==Trk::TrackInfo::Unknown);
 
-  // 
+  //
   // --- non binned Chi2
   //
   if (!ispatterntrack) {
     if (track.fitQuality()!=nullptr && track.fitQuality()->chiSquared()>0 && track.fitQuality()->numberDoF()>0 ) {
       int    indf  = track.fitQuality()->numberDoF();
       double chi2  = track.fitQuality()->chiSquared();
-      double fac   = 1. / log10 (10. + 10. * chi2 / indf); // very soft chi2 
+      double fac   = 1. / log10 (10. + 10. * chi2 / indf); // very soft chi2
       prob        *= fac;
       ATH_MSG_DEBUG ("Modifier for chi2 = " << chi2 << " and NDF = " << indf
          << " is : "<< fac << "  New score now: " << prob);
@@ -545,12 +544,12 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::ambigScore( const Trk::Track& track
     }
   }
 
-  return Trk::TrackScore(prob); 
+  return Trk::TrackScore(prob);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 
-void InDet::InDetAmbiScoringTool::setupScoreModifiers() 
+void InDet::InDetAmbiScoringTool::setupScoreModifiers()
 {
   //
   // --- number of Pixel holes
@@ -656,7 +655,7 @@ void InDet::InDetAmbiScoringTool::setupScoreModifiers()
     // --- BackTracking
     const int maxPixelHits = 8; // we see up to 8 with IBL (was 6)
     const double goodPixelHits[maxPixelHits+1] = {0.401, 0.079, 0.140, 0.291, 0.011, 0.078, 0.01   , 0.011, 0.012};
-    const double fakePixelHits[maxPixelHits+1] = {0.673, 0.138, 0.113, 0.057, 0.002, 0.011, 0.001  , 0.001, 0.001}; 
+    const double fakePixelHits[maxPixelHits+1] = {0.673, 0.138, 0.113, 0.057, 0.002, 0.011, 0.001  , 0.001, 0.001};
     m_maxPixelHits = maxPixelHits;
     for (int i=0; i<=m_maxPixelHits; ++i) m_factorPixelHits.push_back(goodPixelHits[i]/fakePixelHits[i]);
   }
@@ -700,7 +699,7 @@ void InDet::InDetAmbiScoringTool::setupScoreModifiers()
     m_maxPixLay = maxPixLay;
     for (int i=0; i<=m_maxPixLay; ++i) m_factorPixLay.push_back(goodPixLay[i]/fakePixLay[i]);
   }
-  
+
   //
   // --- number of Pixel Ganged Fakes
   //
@@ -795,29 +794,29 @@ void InDet::InDetAmbiScoringTool::setupScoreModifiers()
   //
   // --- debug output
   //
-  if (msgLvl(MSG::VERBOSE)) { 
-    
+  if (msgLvl(MSG::VERBOSE)) {
+
     for (int i=0; i<=m_maxPixHoles; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " Pixel holes: " << m_factorPixHoles[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxSCT_Holes; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " SCT holes: " << m_factorSCT_Holes[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxDblHoles; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " double SCT holes: " << m_factorDblHoles[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxPixLay; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " Pixel layers: " << m_factorPixLay[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxB_LayerHits; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " b-layer hits: " << m_factorB_LayerHits[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxPixelHits; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " Pixel hits: " << m_factorPixelHits[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxGangedFakes; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " ganged fakes: " << m_factorGangedFakes[i] <<endmsg;
-    
+
     for (int i=0; i<=m_maxHits; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << i << " Si hits: " << m_factorHits[i] <<endmsg;
 
@@ -830,8 +829,8 @@ void InDet::InDetAmbiScoringTool::setupScoreModifiers()
     for (int i=0; i<m_maxTrtFittedRatio; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << m_boundsTrtFittedRatio[i] << " < TRT fitted ratio  < "
       << m_boundsTrtFittedRatio[i+1] <<"  : " <<m_factorTrtFittedRatio[i] <<endmsg;
-    
-    
+
+
     // only if used
     for (int i=0; i<m_maxSigmaChi2; ++i)
       msg(MSG::VERBOSE) << "Modifier for " << m_boundsSigmaChi2[i] << " < sigma(chi2) - sqrt(2chi2)  < " << m_boundsSigmaChi2[i+1]
@@ -844,7 +843,7 @@ bool InDet::InDetAmbiScoringTool::isEmCaloCompatible(const Trk::Track& track, co
 {
   const Trk::TrackParameters * Tp = track.trackParameters()->front();
 
-  //Switch to the track parameters of the first measurment instead of the perigee parameters 
+  //Switch to the track parameters of the first measurment instead of the perigee parameters
   ATH_MSG_VERBOSE ("--> Looping over TSOS's");
   for (const auto *tsos : *track.trackStateOnSurfaces() ) {
     // get measurment from TSOS
