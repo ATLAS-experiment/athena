@@ -13,7 +13,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.AthArgumentParser import AthArgumentParser
 susyArgsParser = AthArgumentParser()
-susyArgsParser.add_argument("--testCampaign",action="store",default=None,choices=["mc20e","mc21a","mc23a","data23","data22","data18"],help="Specify to select a test campaign")
+susyArgsParser.add_argument("--testCampaign",action="store",default=None,choices=["mc20e","mc23a","mc23d","data23","data22","data18"],help="Specify to select a test campaign")
 susyArgsParser.add_argument("--testFormat",action="store",default="PHYS",choices=["PHYS","PHYSLITE"],help="Specify to select a test format")
 susyArgsParser.add_argument("--accessMode",action="store",choices=["POOLAccess","ClassAccess"],default="POOLAccess",help="xAOD read mode - Class is faster, POOL is more robust")
 susyArgsParser.add_argument("--configFile",action="store",default=None,help="Name of the SUSYTools config file, leave blank for auto-config")
@@ -25,15 +25,15 @@ susyArgsParser.add_argument("--fileOutput",default=None,help="Name of output fil
 susyArgs = susyArgsParser.parse_args()
 
 if susyArgs.testCampaign:
-    pTag = 'p5858' if ('data2' in susyArgs.testCampaign) else 'p5855'
+    pTag = 'p6269' if ('data2' in susyArgs.testCampaign) else 'p6266'
     inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
     inputFiles = {}
-    inputFiles['data18'] = f'data18_13TeV.00356250_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['data22'] = f'data22_13p6TeV.00440543_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['data23'] = f'data23_13p6TeV.00456314_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['mc20e']  = f'mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['mc21a']  = f'mc21_13p6TeV.601229.FS_mc21a_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data18'] = f'data18_13TeV.39756643_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data22'] = f'data22_13p6TeV.39672234_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data23'] = f'data23_13p6TeV.39756993_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['mc20e']  = f'DAOD_{susyArgs.testFormat}.mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
     inputFiles['mc23a']  = f'mc23_13p6TeV.601229.FS_mc23a_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['mc23d']  = f'mc23_13p6TeV.601229.FS_mc23d_{pTag}.{susyArgs.testFormat}.pool.root'
     jps.AthenaCommonFlags.FilesInput = [f'{inputDir}/{inputFiles[susyArgs.testCampaign]}']
     if susyArgs.fileOutput is None: 
         susyArgs.fileOutput = f"hist-Ath_{susyArgs.testCampaign}_DAOD_{susyArgs.testFormat}.root"
@@ -54,8 +54,7 @@ isMC = 'IS_SIMULATION' in metadata['eventTypes']
 isFastSim = isMC and ('ATLFASTII' in metadata['SimulationFlavour'].upper()) #full sim or atlfast
 print("INFO: Format: "," isMC: ",isMC," isFastSim: ",isFastSim)
 if isMC:
-    campaignMap = {284500:"mc20a",300000:"mc20d",310000:"mc20e",410000:"mc21a"}
-    MCCampaign = campaignMap[metadata["runNumbers"][0]]
+    MCCampaign = metadata["mc_campaign"]
 
 # configure SUSYTools algorithm and its tool
 susyAlg = CfgMgr.SUSYToolsAlg(DoSyst = isMC and not susyArgs.noSyst)
@@ -64,7 +63,7 @@ if susyArgs.configFile:
     susyAlg.SUSYTools.ConfigFile = susyArgs.configFile
 else:
     # select config file based on whether we are run3 or run2
-    if (isMC and ((MCCampaign in ["mc21a"]) or (MCCampaign in ["mc23a"]) or (MCCampaign in ["mc23c"]) )) or (not isMC and metadata["runNumbers"][0]>400000):
+    if (isMC and ((MCCampaign in ["mc23a"]) or (MCCampaign in ["mc23d"]) )) or (not isMC and metadata["runNumbers"][0]>400000):
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"   # run3
     else:
         susyAlg.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"        # run2
@@ -94,8 +93,9 @@ if isMC:
                                 '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root']
         PRWLumiCalc['mc20d'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root']
         PRWLumiCalc['mc20e'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root']
-        PRWLumiCalc['mc21a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221219/ilumicalc_histograms_None_428648-440613_OflLumi-Run3-002.root']
-        PRWLumiCalc['mc23a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root']
+        PRWLumiCalc['mc23a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root']
+        PRWLumiCalc['mc23d'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root']
+
         susyAlg.SUSYTools.PRWLumiCalcFiles = PRWLumiCalc[MCCampaign]
 
 

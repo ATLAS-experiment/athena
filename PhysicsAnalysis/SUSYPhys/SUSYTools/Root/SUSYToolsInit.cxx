@@ -1852,17 +1852,18 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     if (!m_metSignif.isUserConfigured()) {
       // See https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MetSignificance
       m_metSignif.setTypeAndName("met::METSignificance/metSignificance_"+jetname);
-      ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
-      ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
-      ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
-      ATH_CHECK( m_metSignif.setProperty("IsAFII", isAtlfast()) );
-      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", jetname) );
-      } else {
-        ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
-        ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
-      }
 #ifndef XAOD_STANDALONE // Athena and AthAnalysis; need to take into account that MuonCalibTool is private tool
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "SoftTermParam", m_softTermParam));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "TreatPUJets", m_treatPUJets));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "DoPhiReso", m_doPhiReso));
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "IsAFII", isAtlfast()));
+      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
+        ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", jetname) );
+      } else {
+          ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
+          ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "JetCollection", "AntiKt4EMTopo") );
+      }
+      // setup a dedicated new muon calib tool for passing down to METSignificance
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "MuonCalibTool", "CP::MuonCalibTool/calibTool"));
       if (m_isRun3)
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.IsRun3Geo", true));
@@ -1873,10 +1874,22 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (IdBaselineInt == 4)
         ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.do2StationsHighPt", true));
       ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "calibTool.doExtraSmearing", m_muHighPtExtraSmear));
-#else // AnalysisBase; can just pass the muon calib tool above
+      ATH_CHECK( AAH::setProperty(m_metSignif.getHandle(), "OutputLevel", this->msg().level()));
+#else // AnalysisBase; can just pass the muon calib tool configured above
+      ATH_CHECK( m_metSignif.setProperty("SoftTermParam", m_softTermParam) );
+      ATH_CHECK( m_metSignif.setProperty("TreatPUJets", m_treatPUJets) );
+      ATH_CHECK( m_metSignif.setProperty("DoPhiReso", m_doPhiReso) );
+      ATH_CHECK( m_metSignif.setProperty("IsAFII", isAtlfast()) );
+      if(jetname == "AntiKt4EMTopo" || jetname =="AntiKt4EMPFlow"){
+        ATH_CHECK( m_metSignif.setProperty("JetCollection", jetname) );
+      } else {
+        ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
+        ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
+      }
+      // just pass the muon calib tool
       ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
-#endif
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
+#endif
       ATH_CHECK( m_metSignif.retrieve() );
     } else ATH_CHECK( m_metSignif.retrieve() );
   }

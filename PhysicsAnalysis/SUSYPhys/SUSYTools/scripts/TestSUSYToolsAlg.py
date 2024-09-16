@@ -20,13 +20,12 @@ parser.add_option('-n', '--dryrun', dest = 'dryrun', default=False, action = 'st
 parser.add_option('--log-level', dest = 'log_level', default = 'INFO', choices = ['ALWAYS','FATAL','ERROR','WARNING','INFO','DEBUG','VERBOSE']) 
 parser.add_option('--dosyst', dest = 'dosyst', default = False, action = 'store_true')
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir', default = 'submitDir', help = 'Submission directory for EventLoop' )
-parser.add_option('-t', '--type', dest = 'type', default = 'mc20e', help = 'Job type. (mc20a, mc20d, mc20e, mc21a, mc23a, data18, data22, data23)', choices = ['mc20a', 'mc20d', 'mc20e', 'mc21a', 'mc23a', 'data18', 'data22','data23'])
+parser.add_option('-t', '--type', dest = 'type', default = 'mc20e', help = 'Job type. (mc20a, mc20d, mc20e, mc23a, mc23d, data18, data22, data23)', choices = ['mc20a', 'mc20d', 'mc20e', 'mc23a', 'mc23d', 'data18', 'data22','data23'])
 parser.add_option('--AF', dest = 'AF', default = False, action = 'store_true' )
-parser.add_option('-d', '--daod', dest = 'daod', type = 'int', default = 0, help = 'input DAOD type. Do not specify for xAOD input' )
-parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYS', help = 'input DAOD flavour' )
+parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYS', choices = ["PHYS", "PHYSLITE"], help = 'input DAOD flavour' )
 parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = -1, help = 'Max events (-1 is all)' )
 parser.add_option('-M', '--maxEvtsManual', dest = 'maxEvtsManual', type = 'int')
-parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p5855', help = 'ptag' )
+parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p6266', help = 'ptag' )
 parser.add_option('--grl', dest = 'grl')
 parser.add_option('--inputDir', dest = 'inputDir')
 parser.add_option('--inputFile', dest = 'inputFile')
@@ -34,13 +33,15 @@ parser.add_option('--inputGrid', dest = 'inputGrid')
 parser.add_option('--inputXRD', dest = 'inputXRD')
 parser.add_option('--overwrite', dest = 'overwrite', default = False, action = 'store_true' )
 ( options, args ) = parser.parse_args()
+
+# Print configuration
 print("Configured input data ptag: %s"%(options.ptag))
-ptageqdata = {'p5511':'p5514','p5631':'p5632','p5737':'p5740','p5855':'p5858'}
+ptageqdata = {'p6266' : 'p6269'}
 if 'data2' in options.type and options.ptag in ptageqdata: 
    options.ptag = ptageqdata[options.ptag]
    print("Overriding ptag to equivalent data ptag: -> %s"%(options.ptag))
 print("Configured input data type: %s"%(options.type))
-print("Configured input data DAOD flavour: %s"%('SUSY%d'%options.daod if options.daod>0 else options.flav))
+print("Configured input data DAOD flavour: %s"%(options.flav))
 print("Configured input data sim type: %s"%('FullSim' if not options.AF else 'AF'))
 
 # Set up (Py)ROOT.
@@ -59,19 +60,16 @@ sh.setMetaString( 'nc_tree', 'CollectionTree' )
 import shutil
 if options.overwrite and os.path.exists(options.submission_dir): shutil.rmtree(options.submission_dir)
 
-# set up file sources
-cvmfsInputArea = [
-'/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/',
-'/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/SUSYTools/ART/ARTInput/',
-]
+# set up file source
+cvmfsInputArea = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
+sim_type = "FS" if not options.AF else "AF3"
 inputFiles = {}
-inputFiles['mc20e']      = 'mc20_13TeV.410470.FS_mc20e_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['mc21a']      = 'mc21_13p6TeV.601229.FS_mc21a_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['mc23a']      = 'mc23_13p6TeV.601229.FS_mc23a_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['data18']     = 'data18_13TeV.00356250_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['data22']     = 'data22_13p6TeV.00440543_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['data23']     = 'data23_13p6TeV.00456314_%s.%s.pool.root'%(options.ptag,options.flav)
-if options.daod == 0 and not '%s%s'%(options.type,'_AF' if options.AF else '') in inputFiles: sys.exit('No input file configured for type %s%s. Exiting.'%(options.type,'_AF' if options.AF else ''))
+inputFiles['mc20e']      = 'DAOD_%s.mc20_13TeV.410470.%s_mc20e_%s.%s.pool.root'%(options.flav, sim_type, options.ptag, options.flav)
+inputFiles['mc23a']      = 'mc23_13p6TeV.601229.%s_mc23a_%s.%s.pool.root'%(sim_type, options.ptag, options.flav)
+inputFiles['mc23d']      = 'mc23_13p6TeV.601229.%s_mc23d_%s.%s.pool.root'%(sim_type, options.ptag, options.flav)
+inputFiles['data18']     = 'data18_13TeV.39756643_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data22']     = 'data22_13p6TeV.39672234_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data23']     = 'data23_13p6TeV.39756993_%s.%s.pool.root'%(options.ptag,options.flav)
 
 inputDir = ''
 inputFile = ''
@@ -87,13 +85,8 @@ elif options.inputGrid:
    dsname = options.inputGrid.split(':')[-1].rstrip() # drop scope if present, and not trailing spaces
    ROOT.SH.addGrid(sh,dsname)
 else:
-   if options.daod == 0:
-       inputDir = cvmfsInputArea[0]
-       ifile = options.type + ('_AF' if options.AF else '')
-       inputFile = inputFiles[ifile] if ifile in inputFiles else ''
-   else:
-       inputDir = cvmfsInputArea[1]
-       inputFile = 'DAOD_%s%s%s.%s.art.merge.root'%(options.type,'%s%d'%(options.flav,options.daod) if options.flav=='SUSY' else options.flav,'AF' if options.AF else '',options.ptag)
+   inputDir = cvmfsInputArea
+   inputFile = inputFiles[options.type] if options.type in inputFiles else ''
 
    if options.inputDir: inputDir = options.inputDir
    if options.inputFile: inputFile = options.inputFile
@@ -115,7 +108,7 @@ config = AnaAlgorithmConfig( 'SUSYToolsAlg' )
 config.addPrivateTool("SUSYTools","ST::SUSYObjDef_xAOD")
 
 config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"
-if ("data2" in options.type or "mc21" in options.type or "mc23" in options.type): config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
+if ("data2" in options.type or "mc23" in options.type): config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
 if ("data" not in options.type): config.DoSyst = options.dosyst
 config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
@@ -129,7 +122,7 @@ if options.flav == "PHYSLITE":
    config.SUSYTools.ConfigFile = STconfig_lite
    config.SUSYTools.IsPHYSLITE = True
 
-# set datasource if AtlasFastII or 3
+# set datasource if AF3
 if options.AF:
    config.SUSYTools.DataSource = 2
 
@@ -146,7 +139,7 @@ elif options.type == 'data22':
    config.SUSYTools.mcCampaign = options.type
    config.SUSYTools.DataSource = 0
 elif options.type == 'data23':
-   mcCampaign = 'mc23c'
+   mcCampaign = 'mc23d'
    config.SUSYTools.mcCampaign = options.type
    config.SUSYTools.DataSource = 0
 
@@ -157,9 +150,8 @@ PRWLumiCalc['mc20a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRun
                         '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root']
 PRWLumiCalc['mc20d'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root']
 PRWLumiCalc['mc20e'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root']
-PRWLumiCalc['mc21a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20220820/ilumicalc_histograms_None_427882-428855_OflLumi-Run3-001.root']
-PRWLumiCalc['mc23a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20220820/ilumicalc_histograms_None_427882-428855_OflLumi-Run3-001.root']
-PRWLumiCalc['mc23c'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root']
+PRWLumiCalc['mc23a'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root']
+PRWLumiCalc['mc23d'] = ['/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root']
 
 config.SUSYTools.PRWLumiCalcFiles = PRWLumiCalc[mcCampaign]
 

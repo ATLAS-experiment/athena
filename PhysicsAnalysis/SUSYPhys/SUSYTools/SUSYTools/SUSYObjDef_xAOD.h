@@ -1017,7 +1017,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
-  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
   const static SG::AuxElement::ConstAccessor<char> acc_cosmic("cosmic");
   const static SG::AuxElement::ConstAccessor<char> acc_passedHighPtCuts("passedHighPtCuts");
 
@@ -1031,15 +1030,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_passCrackVetoCleaning("DFCommonCrackVetoCleaning");
   const static SG::AuxElement::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
   const static SG::AuxElement::ConstAccessor<float> acc_DetEta("DetectorEta");
-  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone20_TTVA("ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000");
-  const static SG::AuxElement::ConstAccessor<float> acc_ptvarcone30_TTVA("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000");
-  const static SG::AuxElement::ConstAccessor<float> acc_topoetcone40("topoetcone40");
-  const static SG::AuxElement::ConstAccessor<float> acc_ptcone20("ptcone20");
-  const static SG::AuxElement::ConstAccessor<char> acc_IsTruthMatched("IsTruthMatched");
-  const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_truthParticleLink("truthParticleLink");
-  const static SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
-  const static SG::AuxElement::ConstAccessor<size_t> acc_TruthProng("TruthProng");
-  const static SG::AuxElement::ConstAccessor<int> acc_TruthCharge("TruthCharge");
 
 
 } // namespace ST
