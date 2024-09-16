@@ -13,7 +13,7 @@
 
 // Gaudi/Athena
 #include "GaudiKernel/ServiceHandle.h"
-#include "MagFieldInterfaces/IMagFieldSvc.h"
+#include "G4AtlasInterfaces/IMagFieldSvc.h"
 
 // Base classes
 #include "G4MagFieldSvcBase.h"
@@ -40,7 +40,7 @@ class AtlasField : public G4MagneticField
     AtlasField(MagField::IMagFieldSvc* m) :
         m_magFieldSvc(m)
         {}
-            
+
 
     MagField::AtlasFieldCache& fieldCache() { return m_fieldCache; }
 
@@ -92,9 +92,9 @@ class StandardFieldSvc final : public G4MagFieldSvcBase
     //
 
     // flag to use magnet field service
-    Gaudi::Property<bool> m_useMagFieldSvc {this, 
+    Gaudi::Property<bool> m_useMagFieldSvc {this,
             "UseMagFieldSvc", false, "Use magnetic field service - Should ONLY be used for ForwardRegionFieldSvc"};
-    
+
     /// Handle to the the Forward ATLAS magnetic field service
     ServiceHandle<MagField::IMagFieldSvc> m_magFieldSvc {this, "MagneticFieldSvc", ""};
 
