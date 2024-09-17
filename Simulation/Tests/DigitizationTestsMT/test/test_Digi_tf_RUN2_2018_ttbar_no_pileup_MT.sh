@@ -22,7 +22,7 @@ Digi_tf.py \
     --CA \
     --multithreaded \
     --inputHITSFile ${HSHITSFILE} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
     --digiSeedOffset1 170 \
     --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
@@ -42,7 +42,7 @@ mv log.HITtoRDO log.HITtoRDO_MT
 Digi_tf.py \
     --CA \
     --inputHITSFile ${HSHITSFILE} \
-    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-12 \
     --digiSeedOffset1 170 \
     --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \

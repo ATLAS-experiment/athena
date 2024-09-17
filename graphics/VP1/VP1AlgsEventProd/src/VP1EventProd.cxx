@@ -75,10 +75,6 @@ StatusCode VP1EventProd::execute()
 {
   ATH_MSG_DEBUG(" in execute(). Nothing to do here...");
 
-  if(m_isOnline){
-    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  }
-
   return StatusCode::SUCCESS;
 }
 
@@ -86,11 +82,6 @@ StatusCode VP1EventProd::finalize()
 {
   ATH_MSG_DEBUG("in finalize() ");
 
-  if(m_isOnline){
-    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  }
-
-  ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
   // handle the output of the last event
   if(m_nEvent) {
 
@@ -131,12 +122,6 @@ void VP1EventProd::handle(const Incident& inc)
 {
   ATH_MSG_DEBUG("in handle()... ");
   ATH_MSG_DEBUG("Handling incident '" << inc.type() << "'");
-
-  if(m_isOnline){
-    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-    }
-  
-  ATH_MSG_DEBUG("VP1ALG m_destinationDir " << m_destinationDir);
 
   // Let VP1FileUtilities handle the output of the previous event.
   // Skip this if m_nEvent == 0,
@@ -215,5 +200,10 @@ void VP1EventProd::handle(const Incident& inc)
 
   m_humanTimestamp = ostri.str();
   ATH_MSG_DEBUG("'human readable' timestamp: " << m_humanTimestamp);
+
+  if(m_isOnline){
+    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+  }
+  ATH_MSG_DEBUG("Destination Directory: " << m_destinationDir);
 
 }
