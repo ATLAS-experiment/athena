@@ -446,7 +446,7 @@ namespace Muon {
             return nullptr;
         }
         // update the track summary and add the track to the collection
-        m_trackSummary->updateTrack(*segtrack);
+        m_trackSummary->updateTrack(ctx, *segtrack);
         ATH_MSG_VERBOSE("Segment accepted with chi^2/nDoF = " << segtrack->fitQuality()->chiSquared() << "/"
                                                                << segtrack->fitQuality()->numberDoF());
         return segtrack;

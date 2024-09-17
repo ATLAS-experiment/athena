@@ -36,8 +36,6 @@ public:
     const EventContext& ctx,
     const Track& track) const = 0;
 
-  std::unique_ptr<Trk::TrackSummary> summary(const Track& track) const;
-
   /* Start from a copy of the existing input track summary if there,
    * otherwise start from a new one. Fill it and return it.
    * but without doing the hole search.
@@ -47,16 +45,12 @@ public:
     const EventContext& ctx,
     const Track& track) const = 0;
 
-  std::unique_ptr<Trk::TrackSummary> summaryNoHoleSearch(
-    const Track& track) const;
-
   /** Same behavious as
    * IExtendedTrackSummaryTool:computeAndReplaceTrackSummary
    * but without the need to pass
    * Does hole search
    */
   virtual void updateTrack(const EventContext& ctx, Track& track) const = 0;
-  void updateTrack(Track& track) const;
 
   /** method which can be used to update the summary of a track
    * it, without doing shared hit/ or hole search.
@@ -65,7 +59,6 @@ public:
    */
   virtual void updateTrackSummary(const EventContext& ctx,
                                   Track& track) const = 0;
-  void updateTrackSummary(Track& track) const;
 
   /** method to update additional information (PID,shared hits, dEdX), this is
    * optimised for track collection merging. */
@@ -79,5 +72,4 @@ Trk::ITrackSummaryTool::interfaceID()
 }
 
 }
-#include "TrkToolInterfaces/ITrackSummaryTool.icc"
 #endif
