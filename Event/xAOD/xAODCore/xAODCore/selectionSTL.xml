@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- "Single" vector type(s). -->
@@ -16,19 +16,29 @@
    <class name="std::vector<std::vector<unsigned char> >" />
    <class name="std::vector<std::vector<int> >" />
    <class name="std::vector<std::vector<size_t> >" />
+   <class name="std::vector<std::vector<int16_t> >" />
    <class name="std::vector<std::vector<uint16_t> >" />
+   <class name="std::vector<std::vector<int32_t> >" />
    <class name="std::vector<std::vector<uint32_t> >" />
+   <class name="std::vector<std::vector<long> >" />
    <class name="std::vector<std::vector<unsigned long> >" />
+   <class name="std::vector<std::vector<long long> >" />
    <class name="std::vector<std::vector<unsigned long long> >" />
    <class name="std::vector<std::vector<std::string> >" />
 
    <!-- "Triple" vector type(s). -->
    <class name="std::vector<std::vector<std::vector<int> > >" />
+   <class name="std::vector<std::vector<std::vector<char> > >" />
+   <class name="std::vector<std::vector<std::vector<signed char> > >" />
    <class name="std::vector<std::vector<std::vector<unsigned char> > >" />
    <class name="std::vector<std::vector<std::vector<size_t> > >" />
+   <class name="std::vector<std::vector<std::vector<int16_t> > >" />
    <class name="std::vector<std::vector<std::vector<uint16_t> > >" />
+   <class name="std::vector<std::vector<std::vector<int32_t> > >" />
    <class name="std::vector<std::vector<std::vector<uint32_t> > >" />
+   <class name="std::vector<std::vector<std::vector<long> > >" />
    <class name="std::vector<std::vector<std::vector<unsigned long> > >" />
+   <class name="std::vector<std::vector<std::vector<long long> > >" />
    <class name="std::vector<std::vector<std::vector<unsigned long long> > >" />
    <class name="std::vector<std::vector<std::vector<float> > >" />
    <class name="std::vector<std::vector<std::vector<std::string> > >" />
