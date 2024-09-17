@@ -46,6 +46,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <map>
 #include <memory>
 #include <vector>
@@ -454,7 +455,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
                 nbc_meas_A1++;
               }
               // Need to replace these magic numbers with constexpr with meaning full names
-              if (charge < 13750. / cos(theta) - 22500.) {
+              if (charge < 13750. / std::cos(theta) - 22500.) {
                 isBC_B3 = true;
                 nbc_meas_B3++;
               }

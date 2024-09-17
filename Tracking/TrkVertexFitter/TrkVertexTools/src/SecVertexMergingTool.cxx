@@ -4,14 +4,15 @@
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
 #include "TrkVertexTools/SecVertexMergingTool.h"
-#include "TrkVertexFitterInterfaces/IVertexWeightCalculator.h" 
-#include "VxVertex/VxTrackAtVertex.h"
 #include "AthContainers/Accessor.h"
 #include "AthContainers/Decorator.h"
-#include <vector> 
+#include "TrkVertexFitterInterfaces/IVertexWeightCalculator.h"
+#include "VxVertex/VxTrackAtVertex.h"
+#include <cmath>
+#include <vector>
 
 namespace Trk{
- 
+
    //constructor
   SecVertexMergingTool::SecVertexMergingTool ( const std::string& t, const std::string& n, const IInterface*  p )
           : AthAlgTool ( t,n,p ),
@@ -24,19 +25,19 @@ namespace Trk{
     declareProperty("CompatibilityDimension", m_Compatidime, "0 for z0, 1 for d0, 2 for all" ) ;
     declareProperty("MininumDistance", m_minDist, "in sigma" ) ;
   }
-  
+
   //destructor
   SecVertexMergingTool::~SecVertexMergingTool()= default;
 
 //initialize
   StatusCode SecVertexMergingTool::initialize()
   {
-    
+
     if ( m_iVertexFitter.retrieve().isFailure() ) {
       ATH_MSG_ERROR("Failed to retrieve tool " << m_iVertexFitter);
       return StatusCode::FAILURE;
-    } 
-    
+    }
+
     ATH_MSG_DEBUG("Re-merging tool initialization successful");
     return StatusCode::SUCCESS;
    }///EndOfInitialize
@@ -235,7 +236,7 @@ namespace Trk{
      }
 
      return std::make_pair(NewContainer, auxNewContainer);
- 
+
   }
 
   bool
@@ -247,15 +248,15 @@ namespace Trk{
 
     Amg::Vector3D vdif = v1->position() - v2->position() ;
     AmgSymMatrix(3) vErrs = v1->covariancePosition() + v2->covariancePosition() ;
-    vErrs = vErrs.inverse().eval(); 
+    vErrs = vErrs.inverse().eval();
 
     if ( m_Compatidime == 2 )  //  3 dimension
     {
       sigma = sqrt( vdif.dot( vErrs * vdif ) ) ;
-    } else if (  m_Compatidime == 1 )  // d0 
+    } else if (  m_Compatidime == 1 )  // d0
     {
       sigma = vdif(0)*vdif(0)*vErrs(0,0) + vdif(1)*vdif(1)*vErrs(1,1) + 2*vdif(0)*vdif(1)*vErrs(0,1) ;
-      sigma = sqrt( sigma ) ;
+      sigma = std::sqrt( sigma ) ;
 
     } else {  // z0
 
@@ -266,7 +267,7 @@ namespace Trk{
     ATH_MSG_DEBUG(" Compatibility/significance when merging vertices : " << sigma );
 
     return sigma < m_minDist;
-    
+
   }
 
-}///End trk namespace  
+}///End trk namespace
