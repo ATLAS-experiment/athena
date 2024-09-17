@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODCORE_XAODCORESTLDICT_H
 #define XAODCORE_XAODCORESTLDICT_H
@@ -29,20 +29,30 @@ namespace {
       std::vector< std::vector< unsigned char > > stl_vv4;
       std::vector< std::vector< int > > stl_vv5;
       std::vector< std::vector< size_t > > stl_vv6;
-      std::vector< std::vector< uint16_t > > stl_vv7;
-      std::vector< std::vector< uint32_t > > stl_vv8;
-      std::vector< std::vector< unsigned long > > stl_vv9;
-      std::vector< std::vector< unsigned long long > > stl_vv10;
+      std::vector< std::vector< int16_t > > stl_vv71;
+      std::vector< std::vector< uint16_t > > stl_vv72;
+      std::vector< std::vector< int32_t > > stl_vv81;
+      std::vector< std::vector< uint32_t > > stl_vv82;
+      std::vector< std::vector< long > > stl_vv91;
+      std::vector< std::vector< unsigned long > > stl_vv92;
+      std::vector< std::vector< long long > > stl_vv101;
+      std::vector< std::vector< unsigned long long > > stl_vv102;
       std::vector< std::vector< std::string > > stl_vv11;
 
       // "Triple" vector type(s).
       std::vector< std::vector< std::vector< int > > > stl_vvv1;
-      std::vector< std::vector< std::vector< unsigned char > > > stl_vvv2;
+      std::vector< std::vector< std::vector< char > > > stl_vvv21;
+      std::vector< std::vector< std::vector< signed char > > > stl_vvv22;
+      std::vector< std::vector< std::vector< unsigned char > > > stl_vvv23;
       std::vector< std::vector< std::vector< size_t > > > stl_vvv3;
-      std::vector< std::vector< std::vector< uint16_t > > > stl_vvv4;
-      std::vector< std::vector< std::vector< uint32_t > > > stl_vvv5;
-      std::vector< std::vector< std::vector< unsigned long > > > stl_vvv6;
-      std::vector< std::vector< std::vector< unsigned long long > > > stl_vvv7;
+      std::vector< std::vector< std::vector< int16_t > > > stl_vvv41;
+      std::vector< std::vector< std::vector< uint16_t > > > stl_vvv42;
+      std::vector< std::vector< std::vector< int32_t > > > stl_vvv51;
+      std::vector< std::vector< std::vector< uint32_t > > > stl_vvv52;
+      std::vector< std::vector< std::vector< long > > > stl_vvv61;
+      std::vector< std::vector< std::vector< unsigned long > > > stl_vvv62;
+      std::vector< std::vector< std::vector< long long > > > stl_vvv71;
+      std::vector< std::vector< std::vector< unsigned long long > > > stl_vvv72;
       std::vector< std::vector< std::vector< float > > >  stl_vvv8;
       std::vector< std::vector< std::vector< std::string > > > stl_vvv9;
 
