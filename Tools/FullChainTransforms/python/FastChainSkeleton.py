@@ -44,6 +44,7 @@ def fromRunArgs(runArgs):
         from OverlayConfiguration.OverlaySkeleton import setOverlayInputFiles
         setOverlayInputFiles(runArgs, flags, logFastChain)
         flags.Overlay.FastChain = True
+        flags.Digitization.PileUp = False
     else:
         # Setting input files for FastChain without overlay
         if hasattr(runArgs, 'inputEVNTFile'):
