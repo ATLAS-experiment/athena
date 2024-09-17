@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include "src/IParticleWriterAlg.h"
 #include "JetH5Writer/IParticleWriterConfig.h"
 
@@ -41,17 +44,17 @@ StatusCode IParticleWriterAlg::initialize() {
       std::string source_name = path.substr(pos+1);
       Primitive newprim {
         type,
-        source_name,
+        std::move(source_name),
         prim
       };
-      cfg.inputs.push_back(AssociatedPrimitive{link_name, newprim});
+      cfg.inputs.emplace_back(std::move(link_name), std::move(newprim));
     } else {
       Primitive newprim {
         type,
         prim,
         prim
       };
-      cfg.inputs.push_back(AssociatedPrimitive{"",newprim});
+      cfg.inputs.emplace_back("",std::move(newprim));
     }
   }
   m_writer.reset(new IParticleWriter(*m_output_svc->group(), cfg));

@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 
@@ -26,7 +30,7 @@ struct Primitive {
     INT2SHORT,
     UL2ULL,
   };
-  Type type;
+  Type type{};
   std::string source;
   std::string target;
 };

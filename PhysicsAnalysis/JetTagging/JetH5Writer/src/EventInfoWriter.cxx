@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include "JetH5Writer/EventInfoWriter.h"
 #include "JetH5Writer/EventInfoWriterConfig.h"
 
