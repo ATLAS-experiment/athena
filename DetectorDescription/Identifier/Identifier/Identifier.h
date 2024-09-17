@@ -23,10 +23,10 @@
 class Identifier{
 public:
 
-    typedef Identifier id_type;
-    typedef unsigned long long value_type;
-    typedef long long diff_type;
-    typedef unsigned long long size_type;
+    using id_type = Identifier;
+    using value_type = unsigned long long;
+    using diff_type = long long;
+    using size_type = unsigned long long ;
 
     enum bit_defs{
         NBITS = sizeof(value_type) * 8, // bits per byte

@@ -11,6 +11,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "Identifier/Range.h"
 #include "Identifier/ExpandedIdentifier.h"
+#include <sstream>
 
 //ensure BOOST knows how to represent an ExpandedIdentifier
 namespace boost::test_tools::tt_detail {
@@ -54,6 +55,52 @@ BOOST_AUTO_TEST_CASE(RangeStreamExtraction){
   BOOST_CHECK_NO_THROW(in2>>r2);
 }
 
+BOOST_AUTO_TEST_CASE(RangeConstructFromPart){
+  Range r1;
+  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
+  r1.build(larExample);
+  Range r2(r1,2);
+  const std::string truncated="-1,2/3/0/0:19/0:255";
+  Range r3;
+  r3.build(truncated);
+  //also testing equality
+  BOOST_TEST( r2 == r3, "Construction from part of another range");
+}
+
+BOOST_AUTO_TEST_CASE(RangeAccessors){
+  Range r1;
+  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
+  r1.build(larExample);
+  IdentifierField f(0,19);
+  BOOST_TEST( r1[5] == f, "r[5] gives IdentifierField '0:19'");
+  BOOST_TEST(r1.fields() == 7);
+  BOOST_TEST(r1.is_empty() == false);
+  Range r2;
+  BOOST_TEST(r2.is_empty() == true);
+  ExpandedIdentifier min{"4/1/-1/3/0/0/0"};
+  ExpandedIdentifier max{"4/1/2/3/0/19/255"};
+  BOOST_CHECK_NO_THROW(min = r1.minimum());
+  BOOST_CHECK_NO_THROW(max = r1.maximum());
+  //expanded multiplication by level for clarity
+  BOOST_TEST(r1.cardinality() = 1*1*2*1*1*20*256);
+  ExpandedIdentifier upto{"4/1/2/3/0"};
+  BOOST_TEST(r1.cardinalityUpTo(upto) = 1*1*2*1*1);
+  const std::string overlapping="4/1/-1,2/3/0/2/0:255";
+  r2.build(overlapping);
+  BOOST_TEST(r1.overlaps_with(r2) == true);
+  const std::string nonOverlapping="4/1/4,5/3/0/2/0:255";
+  r2.build(nonOverlapping);
+  BOOST_TEST(r1.overlaps_with(r2) == false);
+}
+
+
+BOOST_AUTO_TEST_CASE(RangeBuildFromExpandedIdentifier){
+  ExpandedIdentifier id{"4/1/1/3/0/0/26"};
+  Range r1;
+  BOOST_CHECK_NO_THROW(r1.build(id));
+  BOOST_TEST(r1[3] == 3);
+}
+
 
 
 BOOST_AUTO_TEST_CASE(RangeBuildFromText){
@@ -75,6 +122,8 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromText){
   const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
   BOOST_CHECK_NO_THROW(r1.build(larExample));
 }
+
+
 BOOST_AUTO_TEST_CASE(RangeMatch){
   Range r1, r2;
   const std::string larExample="4/1/-1,1/3/0/0:19/0:255";
@@ -85,6 +134,16 @@ BOOST_AUTO_TEST_CASE(RangeMatch){
   const std::string larExample2="4/1/-1,1/3/0/0:9/0:63";
   BOOST_CHECK_NO_THROW(r2.build(larExample2));
   BOOST_TEST(r2.match(id) == true);
+}
+
+BOOST_AUTO_TEST_CASE(RangeRepresentation){
+  Range r1;
+  const std::string larExample="4/1/-1,2/3/0/0:19/0:255";
+  r1.build(larExample);
+  std::ostringstream os;
+  r1.show(os);
+  BOOST_TEST(os.str() == "4/1/-1,2/3/0/0:19/0:255 (1+1+1+1+1+5+8=18) ");
+  BOOST_TEST(std::string(r1) == larExample);
 }
 
 

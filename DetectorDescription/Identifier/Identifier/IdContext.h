@@ -26,7 +26,7 @@
 class IdContext{
 public:
   //
-  typedef ExpandedIdentifier::size_type 	size_type;
+  using size_type = ExpandedIdentifier::size_type;
   //
   IdContext() = default;
   /// Construct with no prefix

@@ -18,10 +18,10 @@
 class IdentifierField 
 { 
   public : 
-  typedef ExpandedIdentifier::element_type element_type; 
-  typedef ExpandedIdentifier::size_type size_type; 
-  typedef std::vector <element_type> element_vector; 
-  typedef std::vector <size_type>    index_vector; 
+  using element_type = ExpandedIdentifier::element_type ; 
+  using size_type = ExpandedIdentifier::size_type; 
+  using element_vector = std::vector <element_type>; 
+  using index_vector = std::vector <size_type>; 
   static constexpr auto minimum_possible = std::numeric_limits<element_type>::min();
   static constexpr auto maximum_possible = std::numeric_limits<element_type>::max();
   /** 

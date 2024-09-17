@@ -29,10 +29,10 @@
 class Range { 
 public: 
  
-  typedef ExpandedIdentifier::element_type element_type; 
-  typedef ExpandedIdentifier::size_type size_type; 
-  typedef IdentifierField field;
-  typedef std::vector<field> field_vector; 
+  using element_type = ExpandedIdentifier::element_type ; 
+  using size_type = ExpandedIdentifier::size_type ; 
+  using field = IdentifierField ;
+  using field_vector = std::vector<field> ; 
  
   /** 
    *    This factory is able to generate all possible identifiers, from a  
@@ -59,8 +59,7 @@ public:
     const Range* m_range{}; 
   }; 
  
-  class const_identifier_factory 
-  { 
+  class const_identifier_factory { 
   public: 
     const_identifier_factory () = default; 
     const_identifier_factory (const Range& range); 
@@ -154,9 +153,7 @@ public:
  
   /// Match an identifier 
   int match (const ExpandedIdentifier& id) const; 
- 
-  /// Accessors 
- 
+  
   /// Access the field elements 
   const field& operator [] (size_type index) const; 
   size_type fields () const; 
@@ -173,12 +170,11 @@ public:
   /** 
    *  Computes a possible cardinality : 
    *   - all bounded fields are counted as they are 
-   *   - unbounded fields are conted for one value. 
+   *   - unbounded fields are counted for one value. 
    */ 
   size_type cardinality () const;
   //  Up to a given id
   size_type cardinalityUpTo (const ExpandedIdentifier& id) const;
-  size_type cardinalityUpTo (const int* id) const;
  
   /// Identifier_factory management 
   identifier_factory factory_begin (); 
@@ -213,42 +209,11 @@ inline Range::size_type Range::fields () const {
 
  
 //----------------------------------------------- 
-inline bool Range::is_empty () const 
-//----------------------------------------------- 
-{ 
+inline bool Range::is_empty () const { 
   if (m_fields.size () == 0) return (true); 
   return (false); 
 } 
 
-
-/**
- *   Get the cardinality from the beginning up to the given Identifier
- *   expanded into a int array. 
- */
-//--------------------------------------------------------------------------
-inline Range::size_type Range::cardinalityUpTo (const int* id) const 
-//--------------------------------------------------------------------------
-{ 
-  size_type result = 0; 
-
-  const Range& me = *this; 
-  size_type level = 0;
-  for (; level < fields (); ++level) {
-
-      const field& f = me[level]; 
-
-      size_type card = f.get_value_index (id[level]);
-      
-      for (size_type k = level + 1; k < fields(); ++k) {
-
-	  const field& f = me[k]; 
-
-	  card *= f.get_indices();
-      }
-      result += card;
-  }
-  return result;
-} 
 
 std::ostream & 
 operator << (std::ostream &out, const Range &r);

@@ -24,7 +24,7 @@
  */  
 class IdentifierHash{
 public:
-    typedef unsigned int	value_type;
+    using value_type = unsigned int;
     /// Default methods
     IdentifierHash () = default;
     /// Initialization with value
