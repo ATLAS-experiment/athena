@@ -47,10 +47,8 @@ class SolenoidTest : public AthAlgorithm {
   double m_xyzt[4]{};      //!< stores the current xyzt position
   double m_field[3]{};     //!< stores the field components
   double m_fieldZR[3]{};   //!< stores the 2d field components
-  double m_fieldOld[3]{};  //!< stores the old field components
   double m_deriv[9]{};     //!< stores derivatives
   double m_derivZR[9]{};   //!< stores derivatives
-  double m_derivOld[9]{};  //!< stores derivatives
   /// the ROOT tree containing the output
   TTree* m_tree{nullptr};
 
