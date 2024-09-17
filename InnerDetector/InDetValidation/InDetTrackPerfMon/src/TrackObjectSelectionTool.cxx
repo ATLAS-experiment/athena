@@ -154,7 +154,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     if( not truth ) return false;
 
     if( truthVec.empty() ) {
-      ATH_MSG_ERROR( "Truth vector is empty" );
+      ATH_MSG_DEBUG( "Truth vector is empty" );
       return false;
     }
 
