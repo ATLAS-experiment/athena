@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -230,7 +230,7 @@ public:
   void setEtaVetoRanges(std::string &range) ;
 
   /** get eta veto ranges */
-  std::string getEtaVetoRanges(void) { return m_etaVetoRanges; }
+  const std::string& getEtaVetoRanges(void) { return m_etaVetoRanges; }
   
 
   /** set minimum phi cut value */
@@ -250,7 +250,7 @@ public:
   void setPhiVetoRanges(std::string &range) ;
 
   /** get phi veto ranges */
-  std::string getPhiVetoRanges(void) { return m_phiVetoRanges; }
+  const std::string& getPhiVetoRanges(void) { return m_phiVetoRanges; }
   
 
   /** set minimum mass cut value */

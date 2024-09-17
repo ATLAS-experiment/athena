@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_COMBINEDFITTAG_H
@@ -69,7 +69,7 @@ namespace MuonCombined {
         void fieldIntegral(const Rec::FieldIntegral& fieldI);
 
         /** get field integral measurements*/
-        Rec::FieldIntegral fieldIntegral() const;
+        const Rec::FieldIntegral& fieldIntegral() const;
 
         /** set momentum balance significance*/
         void momentumBalanceSignificance(double m);
