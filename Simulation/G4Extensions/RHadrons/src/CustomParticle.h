@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CustomParticle_h
@@ -7,6 +7,7 @@
 
 #include "G4ParticleDefinition.hh"
 #include "globals.hh"
+#include <memory>
 
 // ######################################################################
 // ###                          CustomParticle                                ###
@@ -28,18 +29,18 @@ private:
                  G4bool              stable,       G4double            lifetime,
                  G4DecayTable        *decaytable
                  );
-  G4ParticleDefinition* m_cloud;
-  G4ParticleDefinition* m_spec;
+  std::unique_ptr<G4ParticleDefinition> m_cloud{};
+  G4ParticleDefinition *m_spec{};
 public:
-  void SetCloud(G4ParticleDefinition* theCloud);
+  void SetCloud(std::unique_ptr<G4ParticleDefinition> & theCloud);
   void SetSpectator(G4ParticleDefinition* theSpectator);
   G4ParticleDefinition* GetCloud();
   G4ParticleDefinition* GetSpectator();
   virtual ~CustomParticle() {}
 };
 
-inline void CustomParticle::SetCloud(G4ParticleDefinition* theCloud){ m_cloud = theCloud; }
-inline G4ParticleDefinition* CustomParticle::GetCloud(){ return m_cloud; }
+inline void CustomParticle::SetCloud(std::unique_ptr<G4ParticleDefinition> & theCloud){ m_cloud.swap(theCloud); }
+inline G4ParticleDefinition* CustomParticle::GetCloud(){ return m_cloud.get(); }
 inline void CustomParticle::SetSpectator(G4ParticleDefinition* theSpectator){ m_spec = theSpectator; }
 inline G4ParticleDefinition* CustomParticle::GetSpectator(){ return m_spec; }
 

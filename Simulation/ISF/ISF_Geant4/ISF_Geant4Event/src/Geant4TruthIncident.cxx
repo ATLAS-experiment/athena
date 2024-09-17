@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -26,6 +26,7 @@
 #include "G4Track.hh"
 #include "G4ThreeVector.hh"
 #include "G4VProcess.hh"
+#include "G4DecayProcessType.hh"
 
 #include "G4TrackStatus.hh"
 #include "G4ProcessType.hh"
@@ -387,7 +388,7 @@ ISF::InteractionClass_t iGeant4::Geant4TruthIncident::interactionClassification(
     if(this->parentSurvivesIncident()) {
       classification = ISF::QS_SURV_VTX;
     }
-    else if(processType==6 && processSubType==201) {
+    else if(processType==6 && (processSubType==DECAY || processSubType==DECAY_External)) { // 201 or 231
       classification = ISF::QS_PREDEF_VTX;
     }
     else {
