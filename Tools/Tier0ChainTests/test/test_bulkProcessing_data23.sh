@@ -23,7 +23,7 @@ Reco_tf.py --CA \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
 --outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
 --outputDRAW_TAULHFile="myDRAW_TAULH.data" \
---conditionsTag="OFLCOND-MC23-SDR-RUN3-06" \
+--conditionsTag="CONDBR2-BLKPA-2023-05" \
 --imf False
 
 rc1=$?
