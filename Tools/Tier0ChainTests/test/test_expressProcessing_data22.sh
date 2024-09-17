@@ -15,7 +15,7 @@ Reco_tf.py  \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---conditionsTag="CONDBR2-BLKPA-2022-15" \
+--conditionsTag="CONDBR2-ES1PA-2022-08" \
 --imf False
 
 rc1=$?
