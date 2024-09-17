@@ -248,7 +248,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // Overlap removal
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
     unsigned ntrackOLRChi2 = 0;
-    for (auto track : tracks_1st) {
+    for (const FPGATrackSimTrack& track : tracks_1st) {
         // This threshold probably shouldn't be hardcoded?
         if (track.getChi2ndof() < 10) {
             m_nTracksChi2Tot++;
@@ -287,7 +287,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         bool passchi2OLR = false;
         if (tracks_1st.size() > 0) {
             m_nTracksFound++;
-            for (auto track : tracks_1st) {
+            for (const auto& track : tracks_1st) {
                 if (track.getChi2ndof() < 10) {
                     passchi2 = true;
                     if (track.passedOR()) {
