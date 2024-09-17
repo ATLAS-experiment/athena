@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBDATA_CSCCALIBRESULTCOLLECTION_H
@@ -37,7 +37,7 @@ class CscCalibResultCollection : public DataVector<CscCalibResult>
             { };
 
         /** the identify of this collection */
-        std::string parName() const ;
+        const std::string& parName() const ;
 };
 
 #endif
