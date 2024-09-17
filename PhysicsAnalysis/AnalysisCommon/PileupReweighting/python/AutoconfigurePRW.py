@@ -37,6 +37,9 @@ def getLumicalcFiles(campaign):
         ],
         Campaign.MC23d: [
             'GoodRunsLists/data23_13p6TeV/20230828/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-003.root'
+        ],
+        Campaign.MC23e: [
+            'GoodRunsLists/data24_13p6TeV/20240723/ilumicalc_histograms_None_472943-477048_OflLumi-Run3-005.root'
         ]
     }
 
@@ -65,8 +68,12 @@ def actualMuFiles(campaign):
         list.append(
             'GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root'
         )
+    elif campaign in [Campaign.MC23e]:
+        list.append(
+            'GoodRunsLists/data24_13p6TeV/20240723/purw.actualMu.root'
+        )
 
-    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d]:
+    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e]:
         assert(len(list) == 1)
     else:
         assert(len(list) == 0)
@@ -104,6 +111,10 @@ def defaultConfigFiles(campaign):
     elif campaign in [Campaign.MC23d]:
         list.append(
             'PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root'
+        )
+    elif campaign in [Campaign.MC23e]:
+        list.append(
+            'PileupReweighting/mc23_common/mc23e.470000.physlite.prw.v1.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
