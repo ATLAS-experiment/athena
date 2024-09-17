@@ -1,8 +1,8 @@
 LumiBlockComps/LuminosityCondAlg_test
 
 
-Initializing Gaudi ApplicationMgr using job opts /data/20210807_ATLASRECTS-6527/build/x86_64-centos7-gcc8-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
-JobOptionsSvc        INFO # =======> /data/20210807_ATLASRECTS-6527/build/x86_64-centos7-gcc8-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
+Initializing Gaudi ApplicationMgr using job opts /home/jamesrc/atlassw/build/aarch64-el9-gcc13-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
+JobOptionsSvc        INFO # =======> /home/jamesrc/atlassw/build/aarch64-el9-gcc13-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
 JobOptionsSvc        INFO # (1,1): ApplicationMgr.ExtSvc = ["StoreGateSvc", "StoreGateSvc/ConditionStore"]
 JobOptionsSvc        INFO # (3,1): LuminosityCondAlg.LuminosityFolderInputKey = "testLumi"
 JobOptionsSvc        INFO # (4,1): LuminosityCondAlg.OnlineLumiCalibrationInputKey = "testCalib"
@@ -21,22 +21,22 @@ JobOptionsSvc        INFO # (18,1): LuminosityCondAlgMC.MCMuToLumi = 1.
 JobOptionsSvc        INFO # (20,1): LuminosityCondAlgMiss.LuminosityFolderInputKey = "testLumiMiss"
 JobOptionsSvc        INFO # (21,1): LuminosityCondAlgMiss.OnlineLumiCalibrationInputKey = "testCalibMiss"
 JobOptionsSvc        INFO # (22,1): LuminosityCondAlgMiss.LuminosityOutputKey = "LuminosityCondDataMiss"
-JobOptionsSvc        INFO Job options successfully read in from /data/20210807_ATLASRECTS-6527/build/x86_64-centos7-gcc8-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
-ApplicationMgr    SUCCESS 
+JobOptionsSvc        INFO Job options successfully read in from /home/jamesrc/atlassw/build/aarch64-el9-gcc13-opt/jobOptions/LumiBlockComps/LuminosityCondAlg_test.txt
+ApplicationMgr    SUCCESS
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r0)
-                                          running on pueo-nuc on Sat Aug 28 02:40:40 2021
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r3)
+                                          running on hepp04.hpc.uio.no on Mon Sep 16 16:02:18 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 2267 CLIDRegistry entries for module ALL
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+ClassIDSvc           INFO getRegistryEntries: read 2650 CLIDRegistry entries for module ALL
+EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
 ClassIDSvc           INFO getRegistryEntries: read 379 CLIDRegistry entries for module ALL
 test2
-ClassIDSvc           INFO getRegistryEntries: read 2056 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 2057 CLIDRegistry entries for module ALL
 test3
 test4
-LuminosityCondA...WARNING LBAvInstLumi is zero or negative in updatePerBunchLumi():0
+LuminosityCondA...   INFO LBAvInstLumi is zero or negative in updatePerBunchLumi():0
