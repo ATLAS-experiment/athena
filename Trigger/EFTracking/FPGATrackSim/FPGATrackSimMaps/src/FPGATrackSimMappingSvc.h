@@ -63,6 +63,8 @@ class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSv
         int m_numberOfPmaps = 0;
         // Helpers
         int readPmapSize(std::ifstream& fileIn);
+        int countPmapSize(std::ifstream& fileIn);
+
         StatusCode checkInputs();
         StatusCode checkAllocs();
 };

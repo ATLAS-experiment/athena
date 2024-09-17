@@ -31,7 +31,6 @@ Throughout FPGATrackSim, 'layer' with no other specifiers typically refers to a 
 An excerpt from an example pmap:
 
 ```
-2
 ATLAS-P2-ITK-22-02-00
 8 logical_s1
 13 logical_s2
@@ -94,12 +93,11 @@ SCT   0     -1    3 stereo 1 plane1 3     plane2 8  phi 40  eta 112
 ...
 ```
 
-The first line contains the number of pmaps in the pmap file. The second line contains the ITk Geometry version that the map depicts. The next two lines of the header describe how many logical layers are used in the first stage and second stage of track fitting respectively.
-The next six lines describe the number of pixel and strip layers in the barrel, negative endcap, and positive endcap that are contained in the file. 
-
+The first line contains the ITk Geometry version that the map depicts. The next two lines of the header describe how many logical layers are used in the first stage and second stage of track fitting respectively.
+The next six lines describe the number of pixel and strip layers in the barrel, negative endcap, and positive endcap that are contained in the file.
 The region ID is given after the header. Each pmap can have multiple regions, as long as each has the same number of layers.
-
 After the region ID, there is a row for each detector layer, each with up to 14 fields.
+If you want multiple pmaps just add another pmap in the same formate with the same geo key in  the pmap file
 
 1. **Silicon**: pixel or strip layer
 2. **Barrel/Encap**: 0 identifies the barrel, 1 the  positive endcap, and 2 the negative endcap

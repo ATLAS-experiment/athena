@@ -68,6 +68,26 @@ int FPGATrackSimMappingSvc::readPmapSize(std::ifstream& fileIn)
     }
     return m_numberOfPmaps;
 }
+int FPGATrackSimMappingSvc::countPmapSize(std::ifstream& fileIn)
+{
+    //int numberOfPmaps;  
+    std::string line;
+
+    getline(fileIn, line);
+    std::istringstream sline(line);
+    std::string geoKeyCheck;
+    sline >> geoKeyCheck;
+    m_numberOfPmaps = 1;
+    while (getline(fileIn,line)){
+        std::istringstream sline(line);
+        std::string geoKeyCandidate;
+        sline >> geoKeyCandidate;
+        if(geoKeyCheck.compare(geoKeyCandidate)==0){
+            m_numberOfPmaps++;
+        }
+    }
+    return m_numberOfPmaps;
+}
 StatusCode FPGATrackSimMappingSvc::initialize()
 {
     ATH_CHECK(m_EvtSel.retrieve());
@@ -83,8 +103,10 @@ StatusCode FPGATrackSimMappingSvc::initialize()
             throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
         }
         
-        readPmapSize(fin);
-
+        //readPmapSize(fin);
+        countPmapSize(fin);
+        fin.close();
+        fin.open(filepath);
         ATH_MSG_DEBUG("Creating the 1st stage plane map");
         for (int i = 0; i<m_numberOfPmaps; i++)
         {
@@ -93,7 +115,7 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         
         fin.close();
         fin.open(filepath);
-        readPmapSize(fin);
+        //readPmapSize(fin);
         
         ATH_MSG_DEBUG("Creating the 2nd stage plane map");
         m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 2));
@@ -103,7 +125,7 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
 
         fin.open(filepath);
-        readPmapSize(fin);
+        //readPmapSize(fin);
         m_pmap_vector_2nd.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
         fin.close();
 
