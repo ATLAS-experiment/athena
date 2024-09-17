@@ -221,7 +221,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         std::vector <std::vector < std::vector<float> > > m_z; // used to calculate median z per layer for each slice, [slice][plane][hit]
         // output map files and monitoring
         std::ofstream m_pmap, m_rmap, m_subrmap, m_etapat, m_radfile, m_zedfile;
-        TFile *m_monitorFile{};
+        std::unique_ptr<TFile> m_monitorFile{};
 
 
         // TODO make automatic

@@ -23,7 +23,7 @@ FPGATrackSimMapMakerAlg::FPGATrackSimMapMakerAlg (const std::string& name, ISvcL
 StatusCode FPGATrackSimMapMakerAlg::initialize()
 {
 
-    m_monitorFile = new TFile((m_outFileName.value() + ".root").c_str(), "RECREATE");  
+  m_monitorFile.reset (new TFile((m_outFileName.value() + ".root").c_str(), "RECREATE"));
     std::stringstream ss(m_description);
     std::string line;
     ATH_MSG_INFO("Tag config:");
@@ -682,8 +682,7 @@ StatusCode FPGATrackSimMapMakerAlg::finalize()
     ATH_CHECK(writeEtaPatterns());
     ATH_CHECK(writeRadiiFile(m_allHits));
     ATH_CHECK(writeMedianZFile(m_allHits));
-    delete m_monitorFile;
-    m_monitorFile = nullptr;
+    m_monitorFile.reset();
     delete m_moduleRelabel;
     m_moduleRelabel = nullptr;
     return StatusCode::SUCCESS;
