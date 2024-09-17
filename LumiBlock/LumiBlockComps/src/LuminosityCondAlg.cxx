@@ -206,11 +206,11 @@ LuminosityCondAlg::updateAvgLumi (const CondAttrListCollection& lumiData,
   if (valid & 0x01) {
     if (m_skipInvalid) {
       if (!m_expectInvalid) {
-        ATH_MSG_WARNING( " Invalid LB Average luminosity ... set lumi to 0" );
+        ATH_MSG_INFO( " Invalid LB Average luminosity ... set lumi to 0" );
       }
       return StatusCode::SUCCESS;
     } else {
-      ATH_MSG_WARNING( " Invalid LB Average luminosity ... continuing because skipInvalid == FALSE" );
+      ATH_MSG_DEBUG( " Invalid LB Average luminosity ... continuing because skipInvalid == FALSE" );
     }
   }
 
@@ -302,7 +302,7 @@ LuminosityCondAlg::updatePerBunchLumi (const EventContext& ctx,
 {
   if (lumi.lbAverageLuminosity() <= 0.) {
     if (!m_expectInvalid) {
-      ATH_MSG_WARNING( "LBAvInstLumi is zero or negative in updatePerBunchLumi():"
+      ATH_MSG_INFO( "LBAvInstLumi is zero or negative in updatePerBunchLumi():"
                        << lumi.lbAverageLuminosity());
      wHdl.addDependency(IOVInfiniteRange::infiniteRunLB());
     }
