@@ -121,7 +121,7 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
         // Decorate the info with all CB decisions
         for (std::size_t i = 0; i < m_cbNames.size(); ++i) {
           auto const& pidname = m_cbNames[i];
-          info.pidDecorator[pidname] = (bool)m_egammaElectronCBTools[i]->accept(electronHandle->at(cl));
+          info.pidDecorator[pidname] = (bool)m_egammaElectronCBTools[i]->accept(context, electronHandle->at(cl));
         }
 
         // Decorate the info with all LH decisions
