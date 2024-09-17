@@ -311,7 +311,7 @@ StatusCode Trk::EnergyLossExtrapolationValidation::execute()
     // are adopted for planar and straight line surfaces
     m_parameterPhi[0]   = M_PI * (2 * m_flatDist->shoot() - 1);
     m_parameterEta[0]   = m_minEta + m_flatDist->shoot()*(m_maxEta-m_minEta);
-    m_parameterTheta[0] = 2.*atan(std::exp(-m_parameterEta[0]));
+    m_parameterTheta[0] = 2.*std::atan(std::exp(-m_parameterEta[0]));
 
     double charge = -1.;
     m_parameterP[0] = m_momentum;

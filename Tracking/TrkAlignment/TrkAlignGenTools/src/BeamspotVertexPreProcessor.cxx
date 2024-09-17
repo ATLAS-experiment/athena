@@ -37,6 +37,7 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
+#include <cmath>
 #include <ext/algorithm>
 #include <functional>
 
@@ -534,8 +535,8 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
 
 
   float z0 = track->perigeeParameters()->parameters()[Trk::z0];
-  float beamX = beamSpotX + tan(beamTiltX) * (z0-beamSpotZ);
-  float beamY = beamSpotY + tan(beamTiltY) * (z0-beamSpotZ);
+  float beamX = beamSpotX + std::tan(beamTiltX) * (z0-beamSpotZ);
+  float beamY = beamSpotY + std::tan(beamTiltY) * (z0-beamSpotZ);
   Amg::Vector3D  BSC(beamX, beamY, z0);
   ATH_MSG_DEBUG("constructing beam point (x,y,z) = ( "<<beamX<<" , "<<beamY<<" , "<<z0<<" )");
   std::optional<PerigeeSurface> surface = std::nullopt;
@@ -622,8 +623,8 @@ void BeamspotVertexPreProcessor::provideVtxBeamspot(const AlignVertex* b, AmgSym
 
 
   float z0 = b->originalPosition()->z();
-  (*v)(0) = beamSpotX + tan(beamTiltX) * (z0-beamSpotZ);
-  (*v)(1) = beamSpotY + tan(beamTiltY) * (z0-beamSpotZ);
+  (*v)(0) = beamSpotX + std::tan(beamTiltX) * (z0-beamSpotZ);
+  (*v)(1) = beamSpotY + std::tan(beamTiltY) * (z0-beamSpotZ);
   (*v)(2) = beamSpotZ;
   (*q)(0,0) = beamSigmaX*beamSigmaX;
   (*q)(1,1) = beamSigmaY*beamSigmaY;

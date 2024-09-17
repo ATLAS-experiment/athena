@@ -10,6 +10,8 @@
 ///////////////////////////////////////////////////////////////////
 // Sebastian.Fleischmann -at- cern.ch, Wolfgang.Liebig -at- cern.ch
 ///////////////////////////////////////////////////////////////////
+#include <cmath>
+
 #include "TTree.h"
 // Trk
 #include "PerigeeParametersNtupleTool.h"
@@ -247,8 +249,8 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackTruthData ( const TrackPar
   m_mc_theta   = truePerigee->parameters()[Trk::theta];
   m_mc_qOverP  = truePerigee->parameters()[Trk::qOverP];
   
-  if ( sin( m_mc_theta ) != 0. )
-    m_mc_qOverPt = m_mc_qOverP / sin( m_mc_theta );
+  if ( std::sin( m_mc_theta ) != 0. )
+    m_mc_qOverPt = m_mc_qOverP / std::sin( m_mc_theta );
 
   m_mc_eta     = truePerigee->eta();
   
