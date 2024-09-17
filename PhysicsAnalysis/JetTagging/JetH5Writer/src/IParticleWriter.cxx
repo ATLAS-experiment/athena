@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 #include "JetH5Writer/IParticleWriter.h"
 #include "JetH5Writer/IParticleWriterConfig.h"
 
