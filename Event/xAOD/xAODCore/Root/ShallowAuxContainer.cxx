@@ -345,6 +345,7 @@ namespace xAOD {
    {
      guard_t guard (m_mutex);
      m_store->lockDecoration (auxid);
+     m_auxidsValid = false;
    }
 
    size_t ShallowAuxContainer::size() const {
