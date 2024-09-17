@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -59,7 +59,12 @@ namespace ROOT {
 
     }
     /*==========================================================================*/
-    double TileMuonTrackDistance::operator()(const std::vector<double>& par) const {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
+    double TileMuonTrackDistance::operator()(std::span<const double> par) const
+#else
+    double TileMuonTrackDistance::operator()(const std::vector<double>& par) const
+#endif
+    {
       double distSum2 = 0;
       std::vector<double> fourPar;
 
