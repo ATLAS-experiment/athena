@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFO_TRACKGRADE
@@ -31,6 +31,7 @@ class TrackGrade {
 
   operator int () const;
 
+  // cppcheck-suppress returnByReference
   operator const std::string () const;
 
  private:
