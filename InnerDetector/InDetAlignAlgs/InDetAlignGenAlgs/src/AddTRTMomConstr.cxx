@@ -179,7 +179,7 @@ bool AddTRTMomConstr::accept( const Trk::Track& track ) {
   float chisqpdof = track.fitQuality()->chiSquared() / track.fitQuality()->numberDoF() ;
   if( m_selChiSqPerDOFMin > 0 && chisqpdof > m_selChiSqPerDOFMin ) rc = false ;
   std::unique_ptr<const Trk::TrackSummary> summary
-    = m_trackSummaryTool->summary( *pTrack ) ;
+    = m_trackSummaryTool->summary(Gaudi::Hive::currentContext(), *pTrack ) ;
   if( summary->get(Trk::numberOfPixelHits) < m_selNHitPIXMin ) {
     ++m_nRejectPIX ;
     rc = false;

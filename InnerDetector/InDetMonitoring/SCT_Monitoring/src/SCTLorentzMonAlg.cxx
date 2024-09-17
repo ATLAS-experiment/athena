@@ -92,7 +92,7 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
     const Trk::TrackSummary* summary{track->trackSummary()};
     std::unique_ptr<Trk::TrackSummary> mySummary;
     if (summary==nullptr) {
-      mySummary = m_trackSummaryTool->summary(*track);
+      mySummary = m_trackSummaryTool->summary(ctx,*track);
       summary = mySummary.get();
       if (summary==nullptr) {
         ATH_MSG_WARNING("Trk::TrackSummary is null and cannot be created by " << m_trackSummaryTool.name());

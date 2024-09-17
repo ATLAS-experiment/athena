@@ -248,9 +248,9 @@ protected:
   // disappearing track
   bool m_doDisappearingTrk;
   int recoAndFillDisTrkCand(const std::string&, TrackCollection*, std::vector<Trk::Track*>&, xAOD::TrigCompositeContainer*, 
-			    const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, bool) const;
+			    const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, bool, const EventContext&) const;
   void print_disTrk(const Trk::Track* t) const;
-  std::unique_ptr<Trk::Track> disTrk_refit(Trk::Track* t) const;
+  std::unique_ptr<Trk::Track> disTrk_refit(Trk::Track* t, const EventContext& ctx) const;
   
   std::array<OneLayerInfo_t, N_BARREL_LAYERS> getTrkBarrelLayerInfo(Trk::Track* aTrack) const;
   bool isCleaningPassDisTrack(const TrigInDetTriplet&, Trk::Track*, bool) const;
@@ -258,7 +258,7 @@ protected:
   void recoVertexForDisTrack(const EventContext&, TrackCollection&, std::vector<double>&, std::vector<double>&, std::vector<double>&) const;
   bool isPreselPassDisTrackBeforeRefit(Trk::Track*, double, double) const;
   bool isPreselPassDisTrackAfterRefit(Trk::Track*, Trk::Track*, double, double) const;
-  bool isGoodForDisTrackVertex(Trk::Track*) const;
+  bool isGoodForDisTrackVertex(Trk::Track*, const EventContext&) const;
   std::unique_ptr<const Trk::TrackParameters> extrapolateDisTrackToBS(Trk::Track*, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&) const;
   void filterSharedDisTracks(std::vector<std::tuple<bool, double,Trk::Track*>>&) const;
   void fillDisTrkCand(xAOD::TrigComposite*, const std::string&, Trk::Track*, const std::unique_ptr<const Trk::TrackParameters>&) const;
