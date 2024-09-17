@@ -11,7 +11,9 @@
        will be run in the ZDC calibration stream & physics MinBias stream
        see https://acode-browser1.usatlas.bnl.gov/lxr/source/athenAControl/AthenaMonitoring/python/ExampleMonitorAlgorithm.py
        for details of structure of monitoring-configuration files
+@reference https://twiki.cern.ch/twiki/bin/view/Atlas/DQRun3FrameworkTutorial
 '''
+
 
 import numpy as np
 
@@ -62,6 +64,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     module_chisq_over_amp_min = 0.01
     module_chisq_over_amp_max = 100000
     module_FPGA_max_ADC = 5000 # For zoomed-in HG monitoring
+    module_HG_ampl_realistic = 4200
 
     if run_type == "LHCf2022":
         print ("looking at 2022 lhcf data")
@@ -388,10 +391,30 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
                             path='ModuleAmp',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+
+    zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC',title=';Module Max ADC;Events',
+                            path='ModuleAmp',
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_LG',title=';Module Amplitude LG [ADC Counts];Events',
+                            path='ModuleAmp',
+                            cutmask='zdcModuleLG', # require to use LG
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+    
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10',title=';LG-Refit Amplitude * 10. [ADC Counts];Events',
+                            path='ModuleAmp',
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+    
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_halfrange',title=';Module Amplitude [ADC Counts];Events',
                             path='ModuleAmp',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_HG',title=';Module Amplitude [ADC Counts];Events',
+    
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_HG',title=';Module Amplitude HG [ADC Counts];Events',
+                            path='ModuleAmp', 
+                            cutmask='zdcModuleHGValid',
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
+
+    zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC;zdcModuleMaxADC_HG',title=';Module Max ADC HG;Events',
                             path='ModuleAmp', 
                             cutmask='zdcModuleHGValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
@@ -458,13 +481,13 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC HG Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
                             path='ModuleHGLGCompr',
                             cutmask='zdcModuleHGValid',
-                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC,
+                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic,
                             ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC LG Amplitude * 10. [ADC Counts];HG-to-LG Amplitude Raio;Events',
                             path='ModuleHGLGCompr',
                             cutmask='zdcModuleHGValid',
-                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_FPGA_max_ADC,
+                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic,
                             ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff',title=';HG-LG T0 Difference [ns];Events',
@@ -475,8 +498,8 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';HG-LG T0 Difference [ns];HG-to-LG Amplitude Raio;Events',
                             path='ModuleHGLGCompr',
                             cutmask='zdcModuleHGValid',
-                            xbins=n_HG_LG_time_diff_bins * 2,xmin=.0,xmax=6.0,
-                            ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
+                            xbins=n_HG_LG_time_diff_bins,xmin=2.0,xmax=4.0, # zoomed in to see potential correlations
+                            ybins=n_HG_LG_amp_ratio_bins,ymin=0.9,ymax=1.2)
 
 
     # ---------------------------- LB and BCID-dep ZDC-module-level observables ---------------------------- 
@@ -628,6 +651,7 @@ if __name__=='__main__':
     flags.Input.Files = [directory+inputfile]
     # flags.Input.isMC = False
     parser = flags.getArgumentParser()
+    parser.add_argument('--datasetTag',default="HI2023",help="dataset tag")
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
     parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
@@ -635,9 +659,9 @@ if __name__=='__main__':
 
     flags.DQ.useTrigger = False if flags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
-        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_{args.datasetTag}_{args.streamTag}_{args.runNumber}.root'
     else:
-        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_{args.datasetTag}_{args.streamTag}.root'    
     
     if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
         flags.Output.HISTFileName = f'{args.outputHISTFile}'
