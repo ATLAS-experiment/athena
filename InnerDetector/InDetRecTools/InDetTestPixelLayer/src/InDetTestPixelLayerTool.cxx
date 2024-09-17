@@ -56,7 +56,6 @@ InDetTestPixelLayerTool::initialize()
     ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Retrieved tool " << m_extrapolator);
 
   ATH_CHECK(m_pixelCondSummaryTool.retrieve(DisableTool{
 	!m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED }));
@@ -333,9 +332,12 @@ InDet::InDetTestPixelLayerTool::isActive(
   const Trk::TrackParameters* trackpar) const
 {
 
+  const auto* tmp = trackpar->associatedSurface().associatedDetectorElement();
   const InDetDD::SiDetectorElement* siElement =
-    dynamic_cast<const InDetDD::SiDetectorElement*>(
-      trackpar->associatedSurface().associatedDetectorElement());
+      (tmp != nullptr && tmp->detectorType() == Trk::DetectorElemType::Silicon)
+          ? static_cast<const InDetDD::SiDetectorElement*>(tmp)
+          : nullptr;
+
   if (siElement == nullptr) {
     // -------  in dubio pro reo --> return false (is assumed insensitive)
     ATH_MSG_DEBUG("TrackParameters do not belong to a Si Element");
@@ -348,18 +350,13 @@ InDet::InDetTestPixelLayerTool::isActive(
       etatol = 3. * sqrt((*trackpar->covariance())(Trk::locY, Trk::locY));
     }
     InDetDD::SiIntersect siIn =
-      siElement->inDetector(trackpar->localPosition(), phitol, etatol);
+        siElement->inDetector(trackpar->localPosition(), phitol, etatol);
     if (siElement->nearBondGap(trackpar->localPosition(), etatol)) {
-      if (msgLvl(MSG::DEBUG)) {
-        msg(MSG::DEBUG) << "---> extrapolation on bond gap within " << etatol
-                        << ", return" << endmsg;
-      }
+      ATH_MSG_DEBUG("---> extrapolation on bond gap within " << etatol
+                                                             << ", return");
     } else if (!siIn.in()) {
-      if (msgLvl(MSG::DEBUG)) {
-        msg(MSG::DEBUG)
-          << "---> extrapolation not inside (active?) detector within "
-          << phitol << " " << etatol << ", return" << endmsg;
-      }
+      ATH_MSG_DEBUG("---> extrapolation not inside (active?) detector within "
+                    << phitol << " " << etatol << ", return");
     } else {
       return true;
     }
@@ -449,9 +446,11 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
     if (checkBarrelOnly && !m_pixelId->is_barrel(id)) continue;
     if (m_pixelId->layer_disk(id) != pixel_layer) continue;
 
+    const auto* tmp = trkParam->associatedSurface().associatedDetectorElement();
     const InDetDD::SiDetectorElement* sielem =
-      dynamic_cast<const InDetDD::SiDetectorElement*>(
-        trkParam->associatedSurface().associatedDetectorElement());
+      (tmp != nullptr && tmp->detectorType() == Trk::DetectorElemType::Silicon)
+          ? static_cast<const InDetDD::SiDetectorElement*>(tmp)
+          : nullptr;
 
     if (!sielem) {
       ATH_MSG_WARNING("Failed to cast TrackParameters associated surface to "
@@ -641,9 +640,11 @@ InDet::InDetTestPixelLayerTool::getFracGood(
 
   // now, check to see that phitol and etatol extend at least beyond the current
   // pixel
+  const auto* tmp = trkParam->associatedSurface().associatedDetectorElement();
   const InDetDD::SiDetectorElement* sielem =
-    dynamic_cast<const InDetDD::SiDetectorElement*>(
-      trkParam->associatedSurface().associatedDetectorElement());
+      (tmp != nullptr && tmp->detectorType() == Trk::DetectorElemType::Silicon)
+          ? static_cast<const InDetDD::SiDetectorElement*>(tmp)
+          : nullptr;
 
   if (!sielem) {
     ATH_MSG_WARNING(
