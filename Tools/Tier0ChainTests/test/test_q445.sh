@@ -17,7 +17,7 @@ Reco_tf.py \
 --multithreaded \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
---conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-12' \
+--conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-10' \
 --imf False
 
 rc1=$?

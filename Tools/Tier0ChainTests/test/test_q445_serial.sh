@@ -16,7 +16,7 @@ Reco_tf.py \
 --athenaopts "RDOtoRDOTrigger:--threads=1" \
 --maxEvents=100 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
---conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-12' \
+--conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-10' \
 --imf False
 
 rc1=$?
