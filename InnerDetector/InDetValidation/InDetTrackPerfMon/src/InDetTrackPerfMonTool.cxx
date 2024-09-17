@@ -156,10 +156,9 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
                  "\n==========================================" );
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
 
-  /// skip event if overall test/reference track vectors are empty
+  /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty() ) {
-    ATH_MSG_DEBUG( "Some FULL collections are empty. Skipping event." );
-    return StatusCode::SUCCESS;
+    ATH_MSG_DEBUG( "Some FULL collections are empty." );
   }
 
   /// ------------------------------
@@ -168,10 +167,9 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// Track-quality-based selection
   ATH_CHECK( m_trackQualitySelectionTool->selectTracks( thisTrkAnaCollections ) );
 
-  /// skip event if overall test/reference track vectors are empty
+  /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::FS ) ) {
-    ATH_MSG_DEBUG( "Some collections are empty after quality selection. Skipping event." );
-    return StatusCode::SUCCESS;
+    ATH_MSG_DEBUG( "Some collections are empty after quality selection." );
   }
 
   /// -------------------------------------------
@@ -240,8 +238,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
       /// checking if track collections are empty
       if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::InRoI ) ) {
-        ATH_MSG_DEBUG( "Some collections are empty after RoI selection. Skipping event." );
-        continue;
+        ATH_MSG_DEBUG( "Some collections are empty after RoI selection." );
       }
 
       /// -------------------------------
