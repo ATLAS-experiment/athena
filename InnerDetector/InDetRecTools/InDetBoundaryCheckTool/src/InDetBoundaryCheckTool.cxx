@@ -126,14 +126,14 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
 
     /// catch if we are on the edge of an active element
     if (intersection.nearBoundary()){
-        
+
         /*
-         * If we are around the boundary, we return a special state which 
+         * If we are around the boundary, we return a special state which
          * will not be counted as a hole or missing hit in the pattern,
-         * while still being recorded on the trajectory for later 
-         * refinement. 
+         * while still being recorded on the trajectory for later
+         * refinement.
          */
-        return Trk::BoundaryCheckResult::OnEdge; 
+        return Trk::BoundaryCheckResult::OnEdge;
     }
 
     if (intersection.out()) {
@@ -143,8 +143,8 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
         return Trk::BoundaryCheckResult::Outside;
     }
 
-    /* Now, to proceed further we need to confirm that the module is actually active 
-    */ 
+    /* Now, to proceed further we need to confirm that the module is actually active
+    */
 
     Identifier id = siElement.identify();
 
@@ -170,7 +170,7 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
      * track parameters.
      */
     if (alive) {
-        
+
         /*
         * now, we check whether the local position on the silicon element is
         * near the bonding gap of the module, which is insensitive. For this, we
@@ -192,7 +192,7 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheckSiElement(
          */
         return Trk::BoundaryCheckResult::Candidate;
 
-    } 
+    }
     else {
         /*
          * Finally, if the module is not alive, we simply return a DeadElement
@@ -221,7 +221,10 @@ Trk::BoundaryCheckResult InDet::InDetBoundaryCheckTool::boundaryCheck(
      * negative result: this tool is not designed to work on non-silicon
      * elements.
      */
-    const InDetDD::SiDetectorElement *siElement = dynamic_cast<const InDetDD::SiDetectorElement *>(element);
+    const InDetDD::SiDetectorElement *siElement =
+        (element->detectorType() == Trk::DetectorElemType::Silicon)
+            ? static_cast<const InDetDD::SiDetectorElement *>(element)
+            : nullptr;
 
     if (siElement != nullptr) {
         return boundaryCheckSiElement(*siElement, parameters);
