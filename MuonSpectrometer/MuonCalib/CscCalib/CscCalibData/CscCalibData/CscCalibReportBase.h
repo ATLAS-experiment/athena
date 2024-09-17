@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALIBDATA_CSCCALIBREPORTBASE_H
@@ -34,7 +34,7 @@ class CscCalibReportBase
         void setLabel  (const std::string & label);
 
         /* get report name*/
-        std::string getLabel() const;
+        const std::string& getLabel() const;
        
     private:
         /* Simple label for defining the type of report*/
