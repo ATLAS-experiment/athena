@@ -83,6 +83,7 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleChisqKey {this, "ZdcModuleChisqKey", m_zdcModuleContainerName + ".Chisq" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibEnergyKey {this, "ZdcModuleCalibEnergyKey", m_zdcModuleContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleCalibTimeKey {this, "ZdcModuleCalibTimeKey", m_zdcModuleContainerName + ".CalibTime" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleMaxADCKey {this, "ZdcModuleMaxADCKey", m_zdcModuleContainerName + ".MaxADC" + m_auxSuffix};
     
     // LG refit data
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmpLGRefitKey{this, "ZdcModuleAmpLGRefitKey", m_zdcModuleContainerName + ".AmpLGRefit" + m_auxSuffix, "ZDC module fit amp LG refit"};
