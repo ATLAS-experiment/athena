@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -23,6 +23,7 @@
 
 // external packages declarations
 #include "Minuit2/FCNBase.h"
+#include "RVersion.h"
 #include "CLHEP/Vector/ThreeVector.h"
 
 namespace ROOT {
@@ -52,8 +53,12 @@ namespace ROOT {
         }
 
         /** Provides Chi-square in function of parameter vector. */
-        virtual double operator()(const std::vector<double>&) const;
-        virtual double Up() const {
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
+        virtual double operator()(std::span<const double>) const override;
+#else
+        virtual double operator()(const std::vector<double>&) const override;
+#endif
+        virtual double Up() const override {
           return 1.;
         }
 
