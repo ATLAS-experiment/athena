@@ -202,7 +202,13 @@ BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core:
     TPython::Exec("logLevel('DEBUG')");
   }
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
+  std::any result;
+  TPython::Exec ("_anyresult = ROOT.std.make_any['dqi::HanConfigGroup'](FixRegion(config, top_level, path))", &result);
+  auto new_top_level = new dqi::HanConfigGroup (std::any_cast<HanConfigGroup>(result));
+#else
   HanConfigGroup* new_top_level = TPython::Eval("FixRegion(config, top_level, path)");
+#endif
   delete m_top_level;
   m_top_level = new_top_level;
 
