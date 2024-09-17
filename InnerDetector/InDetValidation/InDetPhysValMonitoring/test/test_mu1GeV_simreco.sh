@@ -6,7 +6,7 @@
 # art-include: main/Athena
 # art-include: 24.0/Athena
 # art-output: physval*.root
-# art-output: SiHitValid*.root
+# art-output: HitValid*.root
 # art-output: *Analysis*.root
 # art-output: *.xml 
 # art-output: dcube*
