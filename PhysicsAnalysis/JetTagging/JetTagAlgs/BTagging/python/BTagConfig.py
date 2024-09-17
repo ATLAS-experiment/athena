@@ -41,13 +41,6 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
         ],
-        "AntiKt4EMPFlowCustomVtx": [ # PFlow jet with custom vertex definition used in HIGG1D1 
-            "BTagging/201903/rnnip/antikt4empflow/network.json",
-            "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
-            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
-        ],
         "AntiKt4EMTopo": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
             "BTagging/201903/dl1r/antikt4empflow/network.json",
@@ -74,7 +67,8 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
             "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
         ]
     }
-
+    
+    networks_by_jet_col["AntiKt4EMPFlowCustomVtx"] = networks_by_jet_col["AntiKt4EMPFlow"] # PFlow jet with custom vertex definition used in HIGG1D1 
     networks_by_jet_col["AntiKt4HI"] = networks_by_jet_col["AntiKt4EMPFlow"]
     return networks_by_jet_col[jet_col]
 

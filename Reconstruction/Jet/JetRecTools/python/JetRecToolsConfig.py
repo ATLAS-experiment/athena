@@ -29,7 +29,9 @@ def getIDTrackSelectionTool(toolname, **toolProps):
         idtracksel.TrackSummaryTool = ""
     return idtracksel
 
-def getTrackSelAlg(jetdef, trackSelOpt=False):
+def getTrackSelAlg(jetdef, trackSelOpt=False, DecorDeps=None):
+    if not DecorDeps:
+        DecorDeps = ["TTVA_AMVFWeights_forReco", "TTVA_AMVFVertices_forReco"]
     trkProperties = jetdef._contextDic
     trkOpt=jetdef.context
 
@@ -48,7 +50,7 @@ def getTrackSelAlg(jetdef, trackSelOpt=False):
                                                   TrackSelector = getIDTrackSelectionTool(f"tracksel{trkOpt}",**trackToolProps),
                                                   InputContainer = trkProperties["Tracks"],
                                                   OutputContainer = trkProperties[outContainerKey],
-                                                  DecorDeps = ["TTVA_AMVFWeights_forReco", "TTVA_AMVFVertices_forReco"] # Hardcoded for now... we might want to have this context-dependent ??
+                                                  DecorDeps = DecorDeps # Hardcoded for now... we might want to have this context-dependent ??
                                                  )
 
     return trkSelAlg

@@ -7,6 +7,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def addJetContextFlags(flags):
     jetContextName = 'CustomVtx'
@@ -15,8 +16,8 @@ def addJetContextFlags(flags):
     def customVtxContext(prevflags):
         context = prevflags.Jet.Context.default.clone(
             Vertices         = HggVertexContainerName,
-            GhostTracks      = "PseudoJetGhostTrack"+jetContextName, 
-            GhostTracksLabel = "GhostTrack"+jetContextName,
+            GhostTracks      = "PseudoJetGhostTrack", 
+            GhostTracksLabel = "GhostTrack",
             TVA              = "JetTrackVtxAssoc"+jetContextName,
             JetTracks        = "JetSelectedTracks"+jetContextName,
             JetTracksQualityCuts = "JetSelectedTracks"+jetContextName+"_trackSelOpt"
@@ -60,6 +61,11 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     
     def updateCalibSequence(tup):
         newList = list(tup)
+        if ConfigFlags.GeoModel.Run is LHCPeriod.Run3:
+            rhoname = "Kt4EMPFlowNeutEventShape"
+        else:
+            rhoname = "Kt4EMPFlowCustomVtxEventShape" 
+
         for i, item in enumerate(newList):
             if "Calib" in item:
                 calibspecs = item.split(":")
@@ -67,7 +73,6 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                 calibseq=""
                 if len(calibspecs)>3: 
                   calibseq = calibspecs[3]
-                rhoname = "Kt4EMPFlowCustomVtxEventShape"
                 pvname = HggVertexContainerName
                 finalCalibString = f"CalibCustomVtx:{calibcontext}:{data_type}:{calibseq}:{rhoname}:{pvname}"
                 if len(calibspecs)>6: finalCalibString = f"{finalCalibString}:{calibspecs[6]}"
@@ -88,7 +93,6 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     modsCustomVtx = replaceItems(modsCustomVtx,"Charge","ChargeCustomVtx")
 
     ghostCustomVtx = AntiKt4EMPFlow.ghostdefs
-    ghostCustomVtx = replaceItems(ghostCustomVtx,"Track","TrackCustomVtx")
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     stdConstitDic["TrackCustomVtx"]  = JetInputConstit("TrackCustomVtx", xAODType.TrackParticle,"JetSelectedTracksCustomVtx" )
@@ -116,7 +120,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                         infix = "CustomVtx",
                                         context = jetContextName,
                                         ghostdefs = ghostCustomVtx,
-                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx"),
+                                        modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),
                                         ptmin = 10000,
     )
 
@@ -136,7 +140,8 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
 
     stdInputExtDic["JetSelectedTracksCustomVtx"] = JetInputExternal("JetSelectedTracksCustomVtx",     xAODType.TrackParticle,
                                                                                     prereqs= [ f"input:{context['Tracks']}" ], # in std context, this is InDetTrackParticles (see StandardJetContext)
-                                                                                    algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False )
+                                                                                    algoBuilder = lambda jdef,_ : jrtcfg.getTrackSelAlg(jdef, trackSelOpt=False, 
+                                                                                                                                              DecorDeps=["TTVA_AMVFWeights_forHiggs", "TTVA_AMVFVertices_forHiggs"] )
                                                                                  )
 
     stdInputExtDic["JetTrackUsedInFitDecoCustomVtx"] = JetInputExternal("JetTrackUsedInFitDecoCustomVtx", xAODType.TrackParticle,
@@ -146,7 +151,10 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
                                                                         )
 
     stdInputExtDic["JetTrackVtxAssocCustomVtx"] = JetInputExternal("JetTrackVtxAssocCustomVtx",  xAODType.TrackParticle,
-                                              algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVACustomVtx", WorkingPoint="Nonprompt_All_MaxWeight"),
+                                              algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVACustomVtx",
+                                                                                                                       WorkingPoint="Nonprompt_All_MaxWeight",
+                                                                                                                       AMVFVerticesDeco='TTVA_AMVFVertices_forHiggs',
+                                                                                                                       AMVFWeightsDeco='TTVA_AMVFWeights_forHiggs'),
                                               prereqs = [ "input:JetTrackUsedInFitDecoCustomVtx", f"input:{context['Vertices']}" ] )
 
     stdInputExtDic["EventDensityCustomVtx"] =     JetInputExternal("EventDensityCustomVtx", "EventShape", algoBuilder = buildEventShapeAlg,
@@ -186,15 +194,15 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
       TrackMomentsCustomVtx =    JetModifier("JetTrackMomentsTool", "trkmomsCustomVtx",
                                         createfn= lambda jdef,_ : JetMomentToolsConfig.getTrackMomentsTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
-                                        prereqs = [ "input:JetTrackVtxAssocCustomVtx","ghost:TrackCustomVtx" ],JetContainer = CustomPFJetContainerName),
+                                        prereqs = [ "input:JetTrackVtxAssocCustomVtx","ghost:Track" ],JetContainer = CustomPFJetContainerName),
 
       TrackSumMomentsCustomVtx = JetModifier("JetTrackSumMomentsTool", "trksummomsCustomVtx",
                                         createfn=lambda jdef,_ :JetMomentToolsConfig.getTrackSumMomentsTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
-                                        prereqs = [ "input:JetTrackVtxAssocCustomVtx","ghost:TrackCustomVtx" ],JetContainer = CustomPFJetContainerName),
+                                        prereqs = [ "input:JetTrackVtxAssocCustomVtx","ghost:Track" ],JetContainer = CustomPFJetContainerName),
 
       ChargeCustomVtx =          JetModifier("JetChargeTool", "jetchargeCustomVtx", 
-                                        prereqs = [ "ghost:TrackCustomVtx" ]),
+                                        prereqs = [ "ghost:Track" ]),
 
 
       QGTaggingCustomVtx =       JetModifier("JetQGTaggerVariableTool", "qgtaggingCustomVtx",
@@ -218,5 +226,68 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
   
     return acc
 
+def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
+    """Event cleaning and jet cleaning for HIGG1D1"""
 
+    acc = ComponentAccumulator()
 
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import AddJvtDecorationAlgCfg
+    acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorCustomVtxAlg", jetContainer='AntiKt4EMPFlowCustomVtx'))
+
+    from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
+
+    # Decorate if jet passes OR and save decoration DFCommonJets_passOR
+    # Use modified OR that does not check overlaps with tauls
+    from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
+
+    outputLabel = 'DFCommonJets_passOR'
+    bJetLabel = '' #default
+    tauLabel = 'DFTauLoose'
+    orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel))
+    algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_CustomVtx',
+                                                JetKey="AntiKt4EMPFlowCustomVtxJets",
+                                                OverlapLabel=outputLabel,
+                                                OverlapRemovalTool=orTool,
+                                                TauLabel=tauLabel,
+                                                BJetLabel=bJetLabel)
+    acc.addEventAlgo(algOR)
+
+    from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg, JetCleaningToolCfg
+    workingPoints = ['Loose', 'Tight']
+
+    for wp in workingPoints:
+        cleaningLevel = wp + "Bad"
+
+        jetCleaningTool = acc.popToolsAndMerge(
+            JetCleaningToolCfg(
+                ConfigFlags,
+                name="JetCleaningCustomVtxTool_" + cleaningLevel,
+                jetdef="AntiKt4EMPFlowCustomVtxJets",
+                cleaningLevel=cleaningLevel,
+                useDecorations=False,
+            )
+        )
+        acc.addPublicTool(jetCleaningTool)
+
+        ecTool = acc.popToolsAndMerge(
+            EventCleaningToolCfg(ConfigFlags, "EventCleaningCustomVtxTool_" + wp, cleaningLevel)
+        )
+        ecTool.JetCleanPrefix = "DFCommonJets_"
+        ecTool.JetContainer = "AntiKt4EMPFlowCustomVtxJets"
+        ecTool.JetCleaningTool = jetCleaningTool
+        acc.addPublicTool(ecTool)
+
+        # Alg to calculate event-level and jet-level cleaning variables
+        # Only store event-level flags for Loose* WPs
+        eventCleanAlg = CompFactory.EventCleaningTestAlg(
+            "EventCleaningCustomVtxTestAlg_" + wp,
+            EventCleaningTool=ecTool,
+            JetCollectionName="AntiKt4EMPFlowCustomVtxJets",
+            EventCleanPrefix="DFCommonJetsCustomVtx_",
+            CleaningLevel=cleaningLevel,
+            doEvent=True,
+        )
+        acc.addEventAlgo(eventCleanAlg)
+    
+    return acc

@@ -11,6 +11,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 import ROOT
 
 def getJvtEffToolCfg(flags, jetalg):
@@ -18,8 +19,11 @@ def getJvtEffToolCfg(flags, jetalg):
 
   acc = ComponentAccumulator()
 
+  run = "Run3" if flags.GeoModel.Run is LHCPeriod.Run3 else "Run2"
   configs = {"AntiKt4EMTopo": "JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root",
-             "AntiKt4EMPFlow": "JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlow.root"}
+             "AntiKt4EMPFlow": f"JetJvtEfficiency/May2024/NNJvtSFFile_{run}_EMPFlow.root"}
+
+  configs["AntiKt4EMPFlowCustomVtx"] = configs["AntiKt4EMPFlow"]
 
   jvtefftool = CompFactory.CP.JetJvtEfficiency("JVTEff_{0}".format(jetalg))
   jvtefftool.SFFile=configs[jetalg]
