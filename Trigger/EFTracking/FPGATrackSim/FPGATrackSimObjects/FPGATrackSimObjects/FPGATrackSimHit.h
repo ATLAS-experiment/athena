@@ -84,7 +84,7 @@ public:
     unsigned getPhysLayer() const; // Returns the FPGATrackSim-defined physical layer index (see FPGATrackSimPlaneMap.h)
     unsigned getEtaWidth() const { return m_etaWidth; }
     unsigned getPhiWidth() const { return m_phiWidth; }
-    int getEtaModule() const { return m_etaModule; }
+    int getEtaModule () const { return m_etaModule; }
     unsigned getPhiModule() const { return m_phiModule; }
 
     // --- Mapped Location ---
@@ -122,6 +122,13 @@ public:
     unsigned getPairedPhiModule() const { return m_pairedPhiModule; }
     unsigned getPairedSection() const { return m_pairedSection; }
     unsigned getPairedLayer() const { return m_pairedLayer; }
+    unsigned getPairedPhysLayer() const { return m_pairedPhysLayer; }
+    DetectorZone getPairedDetZone() const { return m_pairedDetZone; }
+    SiliconTech getPairedDetType() const { return m_pairedDetType; }
+
+    // These setters are used by FPGATrackSimPlaneMap to map hits that are SPs.
+    void setPairedLayer(unsigned v) { m_pairedLayer = v; }
+    void setPairedSection(unsigned v) { m_pairedSection = v; }
 
     // --- Global Coordinates ---
     void setX(float v) { m_originalX = m_x; m_x = v; }
@@ -215,6 +222,13 @@ protected:
     // These are the coordinates of the inner layer in a SP
     unsigned m_pairedPhiModule = -1;
     int m_pairedEtaModule = -1;
+
+    // These are the unmapped / physical detector coordinates of the SP inner layer.
+    DetectorZone m_pairedDetZone = DetectorZone::undefined; // barrel / posEC / negEC (0,1,2)
+    SiliconTech m_pairedDetType = SiliconTech::undefined;        // strip / pixel
+    unsigned m_pairedPhysLayer = 0;
+
+    // These are the mapped versions of the inner layer in a SP.
     unsigned m_pairedSection = 0;
     unsigned m_pairedLayer = 0;
 

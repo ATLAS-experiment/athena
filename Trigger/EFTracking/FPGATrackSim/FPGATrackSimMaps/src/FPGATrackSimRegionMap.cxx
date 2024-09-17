@@ -218,13 +218,28 @@ void FPGATrackSimRegionMap::loadRadiiFile(std::string const & filepath)
 
 bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &hit) const
 {
-    // To avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
+    // If the hit is unmapped, then instead of calling hit.getLayer(), use the (relevant) pmap
+    // Also, to avoid confusion and double-counting, by convention, always use the coordinates of the inner hit
     // when testing if a spacepoint is in a (sub)region.
-    if (hit.getHitType() == HitType::spacepoint) {
-        return isInRegion(region, hit.getPairedLayer(), hit.getPairedSection(), hit.getPairedEtaModule(), hit.getPairedPhiModule());
+    uint32_t layer;
+    uint32_t section;
+    if (hit.isMapped()) {
+        layer = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
+        section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
     } else {
-        return isInRegion(region, hit.getLayer(), hit.getSection(), hit.getEtaModule(), hit.getPhiModule());
+        LayerSection ls;
+        if (hit.getHitType() == HitType::spacepoint) {
+            ls = m_pmap->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
+        } else {
+            ls = m_pmap->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
+        }
+        layer = ls.layer;
+        section = ls.section;
     }
+
+    int etamod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedEtaModule() : hit.getEtaModule();
+    unsigned phimod = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedPhiModule() : hit.getPhiModule();
+    return isInRegion(region, layer, section, etamod, phimod);
 }
 
 
@@ -261,9 +276,10 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, uint32_t layer, uint32_t
 std::vector<uint32_t> FPGATrackSimRegionMap::getRegions(const FPGATrackSimHit &hit) const
 {
     std::vector<uint32_t> regions;
-    for (uint32_t region = 0; region < m_map.size(); region++)
+    for (uint32_t region = 0; region < m_map.size(); region++) {
         if (isInRegion(region, hit))
             regions.push_back(region);
+    }
     return regions;
 }
 

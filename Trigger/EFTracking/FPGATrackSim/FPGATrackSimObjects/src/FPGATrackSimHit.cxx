@@ -84,33 +84,36 @@ unsigned FPGATrackSimHit::getSection() const
 }
 
 void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FPGATrackSimHit& other, FPGATrackSimMultiTruth& new_truth) {
-  // Update coordinates. This keeps a copy of the old ones.
-  setX(x);
-  setY(y);
-  setZ(z);
+    // Update coordinates. This keeps a copy of the old ones.
+    setX(x);
+    setY(y);
+    setZ(z);
 
-  // Store the phi window.
-  m_phiWindow = window;
+    // Store the phi window.
+    m_phiWindow = window;
 
-  // Update the truth, so we can do truth matching.
-  setTruth(new_truth);
+    // Update the truth, so we can do truth matching.
+    setTruth(new_truth);
 
-  // Store the local coordinates of the inner hit.
-  // Having to do it this way is awkward and reinforces the need for a subclass.
-  if ((getPhysLayer() % 2) == 0) {
-    m_pairedEtaModule = getEtaModule();
-    m_pairedPhiModule = getPhiModule();
-    m_pairedSection = getSection();
-    m_pairedLayer = getLayer();
-  } else {
-    m_pairedEtaModule = other.getEtaModule();
-    m_pairedPhiModule = other.getPhiModule();
-    m_pairedSection = other.getSection();
-    m_pairedLayer = other.getLayer();
-  }
+    // Store the local coordinates of the inner hit.
+    // Having to do it this way is awkward and reinforces the need for a subclass.
+    const FPGATrackSimHit* inner = ((getPhysLayer() % 2) == 0) ? this : &other;
+    m_pairedEtaModule = inner->getEtaModule();
+    m_pairedPhiModule = inner->getPhiModule();
 
-  // Update the type.
-  setHitType(HitType::spacepoint);
+    // This is getting increasingly awkward. If the hit is unmapped we need to store the physical
+    // layer coordinates, and when the hit *becomes* mapped, update the paired logical layer too.
+    if (isMapped()) {
+        m_pairedSection = inner->getSection();
+        m_pairedLayer = inner->getLayer();
+    } else {
+        m_pairedDetZone = inner->getDetectorZone();
+        m_pairedDetType = inner->getDetType();
+        m_pairedPhysLayer = inner->getPhysLayer();
+    }
+
+    // Update the type.
+    setHitType(HitType::spacepoint);
 }
 
 const FPGATrackSimHit FPGATrackSimHit::getOriginalHit() const {
