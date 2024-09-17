@@ -23,12 +23,13 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
 
     # Diphoton Vertex creation  
     from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import ZeeVertexRefitterCfg, DiPhotonVertexCfg
-    from DerivationFrameworkHiggs.HIGG1D1CustomJetsConfig import HIGG1D1CustomJetsCfg
+    from DerivationFrameworkHiggs.HIGG1D1CustomJetsConfig import HIGG1D1CustomJetsCfg, HIGG1D1CustomJetsCleaningCfg
     acc.merge(ZeeVertexRefitterCfg(flags))
     acc.merge(DiPhotonVertexCfg(flags))
     
     #CustomJetsConfig
     acc.merge(HIGG1D1CustomJetsCfg(flags))
+    acc.merge(HIGG1D1CustomJetsCleaningCfg(flags))
     
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices'], trackAugmenterPrefix='btagIpHgg_'))
@@ -66,7 +67,9 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
 
     # Inner detector group recommendations for indet tracks in analysis
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    HIGG1D1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+    HIGG1D1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && \
+                                   abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && \
+                                   InDetTrackParticles.pt > 10*GeV"
     HIGG1D1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "HIGG1D1TrackParticleThinningTool",
@@ -130,10 +133,62 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
             TriggerExp               = ["EF_g35_loose_g25_loose"]
         if float(flags.Beam.Energy) == 6500000.0:
             # 13 TeV MC 
-            TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g25_tight_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_g35_loose_g25_loose","HLT_g35_medium_g25_medium","HLT_2g50_loose","HLT_2g20_tight","HLT_2g22_tight","HLT_2g20_tight_icalovloose_L12EM15VHI","HLT_2g20_tight_icalotight_L12EM15VHI","HLT_2g22_tight_L12EM15VHI","HLT_2g22_tight_icalovloose_L12EM15VHI","HLT_2g22_tight_icalotight_L12EM15VHI","HLT_2g22_tight_icalovloose","HLT_2g25_tight_L12EM20VH","HLT_2g20_loose","HLT_2g20_loose_L12EM15","HLT_g35_medium_g25_medium","HLT_g35_medium_g25_medium_L12EM15VH","HLT_g35_loose_g25_loose","HLT_g35_loose_g25_loose_L12EM15VH", "HLT_2g20_loose_g15_loose", "HLT_3g20_loose", "HLT_3g15_loose", "HLT_2g6_tight_icalotight_L1J100", "HLT_2g6_loose_L1J100", "HLT_2g6_tight_icalotight_L1J50", "HLT_2g6_loose_L1J50","HLT_g120_loose","HLT_g140_loose"]
+            TriggerExp               = ["HLT_g35_medium_g25_medium",
+                                        "HLT_g35_medium_g25_medium_L12EM20VH",
+                                        "HLT_g35_medium_g25_medium_L12EM15VH",
+                                        "HLT_g35_loose_g25_loose",
+                                        "HLT_g35_loose_g25_loose_L12EM15VH",
+                                        "HLT_g120_loose",
+                                        "HLT_g140_loose",
+                                        "HLT_3g20_loose",
+                                        "HLT_3g15_loose",
+                                        "HLT_2g6_tight_icalotight_L1J50",
+                                        "HLT_2g6_tight_icalotight_L1J100",
+                                        "HLT_2g6_loose_L1J50",
+                                        "HLT_2g6_loose_L1J100",
+                                        "HLT_2g50_loose",
+                                        "HLT_2g25_tight_L12EM20VH",
+                                        "HLT_2g25_loose_g15_loose",
+                                        "HLT_2g22_tight",
+                                        "HLT_2g22_tight_L12EM15VHI",
+                                        "HLT_2g22_tight_icalovloose",
+                                        "HLT_2g22_tight_icalovloose_L12EM15VHI",
+                                        "HLT_2g22_tight_icalotight_L12EM15VHI",
+                                        "HLT_2g20_tight",
+                                        "HLT_2g20_tight_icalovloose_L12EM15VHI",
+                                        "HLT_2g20_tight_icalotight_L12EM15VHI",
+                                        "HLT_2g20_loose",
+                                        "HLT_2g20_loose_L12EM15",
+                                        "HLT_2g20_loose_g15_loose",
+                                        "HLT_2g50_loose_L12EM20VH"
+                                       ]
         if float(flags.Beam.Energy) == 6800000.0:
             # 13.6 TeV
-            TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose_L12EM20VH","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_2g20_tight_icaloloose_L12EM15VHI","HLT_2g20_loose_L12EM15VH","HLT_2g9_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_L12EM7","HLT_g120_loose_L1EM22VHI","HLT_g140_loose_L1EM22VHI","HLT_2g50_loose_L12eEM24L","HLT_2g25_loose_g15_loose_L12eEM24L","HLT_g35_medium_g25_medium_L12eEM24L","HLT_2g22_tight_L12eEM18M","HLT_2g20_tight_icaloloose_L12eEM18M","HLT_2g20_loose_L12eEM18L","HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9","HLT_2g15_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M","HLT_2g15_tight_25dphiAA_L1DPHI-M70-2eEM15M","HLT_2g15_tight_L1DPHI-M70-2eEM15M","HLT_g120_loose_L1eEM26M","HLT_g140_loose_L1eEM26M"]
+            TriggerExp               = ["HLT_g35_medium_g25_medium_L12EM20VH",
+                                        "HLT_g35_medium_g25_medium_L12eEM24L",
+                                        "HLT_g140_loose_L1EM22VHI",
+                                        "HLT_g140_loose_L1eEM26M"
+                                        "HLT_g120_loose_L1EM22VHI",
+                                        "HLT_g120_loose_L1eEM26M",
+                                        "HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9",
+                                        "HLT_2g9_loose_25dphiAA_invmAA80_L12EM7",
+                                        "HLT_2g50_loose_L12EM20VH",
+                                        "HLT_2g50_loose_L12eEM24L",
+                                        "HLT_2g25_loose_g15_loose_L12EM20VH",
+                                        "HLT_2g25_loose_g15_loose_L12eEM24L",
+                                        "HLT_2g22_tight_L12EM15VHI",
+                                        "HLT_2g22_tight_L12eEM18M",
+                                        "HLT_2g20_tight_icaloloose_L12EM15VHI",
+                                        "HLT_2g20_tight_icaloloose_L12eEM18M",
+                                        "HLT_2g20_loose_L12EM15VH",
+                                        "HLT_2g20_loose_L12eEM18L",
+                                        "HLT_2g15_tight_L1DPHI-M70-2eEM15M",
+                                        "HLT_2g15_tight_25dphiAA_L1DPHI-M70-2eEM15M",
+                                        "HLT_2g15_tight_25dphiAA_L12EM7",
+                                        "HLT_2g15_tight_25dphiAA_invmAA80_L12EM7",
+                                        "HLT_2g15_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M",
+                                        "HLT_2g15_loose_25dphiAA_invmAA80_L12EM7",
+                                       ]
     print("HIGG1D1.py Skimming Tool Triggers:", ",".join(TriggerExp))
     skimmingTool = acc.popToolsAndMerge( SkimmingToolHIGG1Cfg(flags,RequireTrigger=not SkipTriggerRequirement,Triggers=TriggerExp) )
     acc.addPublicTool(skimmingTool)
@@ -240,29 +295,52 @@ def HIGG1D1Cfg(flags):
 
     # Truth containers
     if flags.Input.isMC:
-        HIGG1D1SlimmingHelper.AppendToDictionary = {'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
-                                                'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
-                                                'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthTaus':'xAOD::TruthParticleContainer','TruthTausAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthNeutrinos':'xAOD::TruthParticleContainer','TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBSM':'xAOD::TruthParticleContainer','TruthBSMAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBoson':'xAOD::TruthParticleContainer','TruthBosonAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthTop':'xAOD::TruthParticleContainer','TruthTopAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthForwardProtons':'xAOD::TruthParticleContainer','TruthForwardProtonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'BornLeptons':'xAOD::TruthParticleContainer','BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer','TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer','TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'TruthBSMWithDecayParticles':'xAOD::TruthParticleContainer','TruthBSMWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthBSMWithDecayVertices':'xAOD::TruthVertexContainer','TruthBSMWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'HardScatterParticles':'xAOD::TruthParticleContainer','HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'HardScatterVertices':'xAOD::TruthVertexContainer','HardScatterVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'TruthHFWithDecayParticles':'xAOD::TruthParticleContainer','TruthHFWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthHFWithDecayVertices':'xAOD::TruthVertexContainer','TruthHFWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                                'TruthCharm':'xAOD::TruthParticleContainer','TruthCharmAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthPrimaryVertices':'xAOD::TruthVertexContainer','TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer'
-                                                }
+        HIGG1D1SlimmingHelper.AppendToDictionary = {
+                    'TruthEvents':'xAOD::TruthEventContainer',
+                    'TruthEventsAux':'xAOD::TruthEventAuxContainer',
+                    'MET_Truth':'xAOD::MissingETContainer',
+                    'MET_TruthAux':'xAOD::MissingETAuxContainer',
+                    'TruthElectrons':'xAOD::TruthParticleContainer',
+                    'TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthMuons':'xAOD::TruthParticleContainer',
+                    'TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthPhotons':'xAOD::TruthParticleContainer',
+                    'TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthTaus':'xAOD::TruthParticleContainer',
+                    'TruthTausAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthNeutrinos':'xAOD::TruthParticleContainer',
+                    'TruthNeutrinosAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthBSM':'xAOD::TruthParticleContainer',
+                    'TruthBSMAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthBoson':'xAOD::TruthParticleContainer',
+                    'TruthBosonAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthTop':'xAOD::TruthParticleContainer',
+                    'TruthTopAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthForwardProtons':'xAOD::TruthParticleContainer',
+                    'TruthForwardProtonsAux':'xAOD::TruthParticleAuxContainer',
+                    'BornLeptons':'xAOD::TruthParticleContainer',
+                    'BornLeptonsAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer',
+                    'TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer',
+                    'TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
+                    'TruthBSMWithDecayParticles':'xAOD::TruthParticleContainer',
+                    'TruthBSMWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthBSMWithDecayVertices':'xAOD::TruthVertexContainer',
+                    'TruthBSMWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
+                    'HardScatterParticles':'xAOD::TruthParticleContainer',
+                    'HardScatterParticlesAux':'xAOD::TruthParticleAuxContainer',
+                    'HardScatterVertices':'xAOD::TruthVertexContainer',
+                    'HardScatterVerticesAux':'xAOD::TruthVertexAuxContainer',
+                    'TruthHFWithDecayParticles':'xAOD::TruthParticleContainer',
+                    'TruthHFWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthHFWithDecayVertices':'xAOD::TruthVertexContainer',
+                    'TruthHFWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
+                    'TruthCharm':'xAOD::TruthParticleContainer',
+                    'TruthCharmAux':'xAOD::TruthParticleAuxContainer',
+                    'TruthPrimaryVertices':'xAOD::TruthVertexContainer',
+                    'TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer'
+                }
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(HIGG1D1SlimmingHelper)
@@ -285,7 +363,7 @@ def HIGG1D1Cfg(flags):
                                                  "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                                  "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                                  "TruthPrimaryVertices.t.x.y.z",
-                                                 "EventInfo.hardScatterVertexLink.timeStampNSOffset",
+                                                 "EventInfo.DFCommonJetsCustomVtx_eventClean_LooseBad.DFCommonJetsCustomVtx_eventClean_TightBad.hardScatterVertexLink.timeStampNSOffset",
                                                  "TauJets.dRmax.etOverPtLeadTrk"]
         if flags.Reco.EnableTrigger:
             HIGG1D1SlimmingHelper.ExtraVariables += [
@@ -294,21 +372,42 @@ def HIGG1D1Cfg(flags):
             ]
 
     #  Additional content for HIGG1D1   
-    HIGG1D1SlimmingHelper.AppendToDictionary.update({"AntiKt4EMPFlowCustomVtxJets": "xAOD::JetContainer", "AntiKt4EMPFlowCustomVtxJetsAux":"xAOD::JetAuxContainer",
-          "METAssoc_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETAssociationMap", "METAssoc_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxAssociationMap",
-          "MET_Core_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETContainer", "MET_Core_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxContainer",
-          "HggPrimaryVertices":"xAOD::VertexContainer", "HggPrimaryVerticesAux":"xAOD::ShallowAuxContainer",
-          "Kt4EMPFlowCustomVtxEventShape":"xAOD::EventShape", "Kt4EMPFlowCustomVtxEventShapeAux":"xAOD::EventShapeAuxInfo",
-          "Kt4EMPFlowEventShape":"xAOD::EventShape", "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
-          "ZeeRefittedPrimaryVertices":"xAOD::VertexContainer","ZeeRefittedPrimaryVerticesAux":"xAOD::VertexAuxContainer",
-          "AFPSiHitContainer":"xAOD::AFPSiHitContainer","AFPSiHitContainerAux":"xAOD::AFPSiHitAuxContainer",
-          "AFPToFHitContainer":"xAOD::AFPToFHitContainer","AFPToFHitContainerAux":"xAOD::AFPToFHitAuxContainer",
-          "AFPVertexContainer":"xAOD::AFPVertexContainer", "AFPVertexContainerAux":"xAOD::AFPVertexAuxContainer",
-          "AFPToFTrackContainer":"xAOD::AFPToFTrackContainer", "AFPToFTrackContainerAux":"xAOD::AFPToFTrackAuxContainer",
-          "BTagging_AntiKt4EMPFlowCustomVtx":"xAOD::BTaggingContainer","BTagging_AntiKt4EMPFlowCustomVtxAux":"xAOD::BTaggingAuxContainer"
-        })
+    HIGG1D1SlimmingHelper.AppendToDictionary.update({
+                "AntiKt4EMPFlowCustomVtxJets": "xAOD::JetContainer",
+                "AntiKt4EMPFlowCustomVtxJetsAux":"xAOD::JetAuxContainer",
+                "METAssoc_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETAssociationMap",
+                "METAssoc_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxAssociationMap",
+                "MET_Core_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETContainer",
+                "MET_Core_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxContainer",
+                "HggPrimaryVertices":"xAOD::VertexContainer",
+                "HggPrimaryVerticesAux":"xAOD::ShallowAuxContainer",
+                "Kt4EMPFlowCustomVtxEventShape":"xAOD::EventShape",
+                "Kt4EMPFlowCustomVtxEventShapeAux":"xAOD::EventShapeAuxInfo",
+                "Kt4EMPFlowEventShape":"xAOD::EventShape",
+                "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
+                "ZeeRefittedPrimaryVertices":"xAOD::VertexContainer",
+                "ZeeRefittedPrimaryVerticesAux":"xAOD::VertexAuxContainer",
+                "AFPSiHitContainer":"xAOD::AFPSiHitContainer",
+                "AFPSiHitContainerAux":"xAOD::AFPSiHitAuxContainer",
+                "AFPToFHitContainer":"xAOD::AFPToFHitContainer",
+                "AFPToFHitContainerAux":"xAOD::AFPToFHitAuxContainer",
+                "AFPVertexContainer":"xAOD::AFPVertexContainer",
+                "AFPVertexContainerAux":"xAOD::AFPVertexAuxContainer",
+                "AFPToFTrackContainer":"xAOD::AFPToFTrackContainer",
+                "AFPToFTrackContainerAux":"xAOD::AFPToFTrackAuxContainer",
+                "BTagging_AntiKt4EMPFlowCustomVtx":"xAOD::BTaggingContainer",
+                "BTagging_AntiKt4EMPFlowCustomVtxAux":"xAOD::BTaggingAuxContainer"
+             })
 
-    HIGG1D1SlimmingHelper.AllVariables += ["HggPrimaryVertices","ZeeRefittedPrimaryVertices","AntiKt4EMPFlowCustomVtxJets","Kt4EMPFlowCustomVtxEventShape","Kt4EMPFlowEventShape","METAssoc_AntiKt4EMPFlowCustomVtx","MET_Core_AntiKt4EMPFlowCustomVtx"]
+    HIGG1D1SlimmingHelper.AllVariables += [
+            "HggPrimaryVertices",
+            "ZeeRefittedPrimaryVertices",
+            "AntiKt4EMPFlowCustomVtxJets",
+            "Kt4EMPFlowCustomVtxEventShape",
+            "Kt4EMPFlowEventShape",
+            "METAssoc_AntiKt4EMPFlowCustomVtx",
+            "MET_Core_AntiKt4EMPFlowCustomVtx"
+        ]
     
     # Add AFP information
     HIGG1D1SlimmingHelper.AllVariables += ["AFPSiHitContainer",
@@ -376,7 +475,7 @@ def HIGG1D1Cfg(flags):
                                                  "Photons.maxEcell_onlId",
                                                  "Photons.zvertex"])
     # Add TTVA variables
-    HIGG1D1SlimmingHelper.ExtraVariables.extend(["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"])
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.TTVA_AMVFVertices_forReco.TTVA_AMVFWeights_forReco.TTVA_AMVFVertices_forHiggs.TTVA_AMVFWeights_forHiggs.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"])
 
     # Trigger content
     HIGG1D1SlimmingHelper.IncludeTriggerNavigation = False

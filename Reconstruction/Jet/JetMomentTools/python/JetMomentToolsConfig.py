@@ -17,6 +17,7 @@ from AthenaCommon import Logging
 jetmomentlog = Logging.logging.getLogger('JetMomentToolsConfig')
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 from xAODBase.xAODType import xAODType
 
@@ -196,7 +197,10 @@ def getPFlowfJVTTool(jetdef, modspec):
     from JetCalibTools import JetCalibToolsConfig
     calibString = "AnalysisLatest:mc:JetArea_Residual_EtaJES"
     if( modspec and modspec == "CustomVtx" ) :
-      calibString = "AnalysisLatest:mc:JetArea_Residual_EtaJES:Kt4EMPFlowCustomVtxEventShape:HggPrimaryVertices"
+        if jetdef._cflags.GeoModel.Run is LHCPeriod.Run3:
+            calibString = "AnalysisLatest:mc:JetArea_Residual_EtaJES:Kt4EMPFlowNeutEventShape:HggPrimaryVertices"
+        else:
+            calibString = "AnalysisLatest:mc:JetArea_Residual_EtaJES:Kt4EMPFlowCustomVtxEventShape:HggPrimaryVertices"
     jetCalibrationTool = JetCalibToolsConfig.getJetCalibToolFromString(jetdef, calibString)
 
     wPFOTool = CompFactory.getComp('CP::WeightPFOTool')("fJVT__wPFO")

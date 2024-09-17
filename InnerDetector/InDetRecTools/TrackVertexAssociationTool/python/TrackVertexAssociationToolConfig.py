@@ -3,20 +3,14 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-
-def _assertPropertyValue(kwargs, key, force_value):
-    if kwargs.setdefault(key, force_value) != force_value:
-        raise ValueError(
-            f"{key} property must be set to {force_value} (provided value is '{kwargs[key]}')"
-        )
-
 def getTTVAToolForReco(name="TTVATool", **kwargs):
-    # First check that the user hasn't attempted to overwrite the AMVF vertices/weights decorations
-    _assertPropertyValue(kwargs, "AMVFVerticesDeco", "TTVA_AMVFVertices_forReco")
-    _assertPropertyValue(kwargs, "AMVFWeightsDeco", "TTVA_AMVFWeights_forReco")
+    
+    # set default values for AMVF decoration properties, in case they are not set
+    # passing other values in kwargs will override these, if you are using a custom vertex container (eg. HIGG1D1 jet reconstruction)
+    kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forReco")
+    kwargs.setdefault("AMVFWeightsDeco",  "TTVA_AMVFWeights_forReco")
 
     return CompFactory.CP.TrackVertexAssociationTool(name, **kwargs)
-    
 
 def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", **kwargs):
     """Create a component accumulator containing a TTVA tool
