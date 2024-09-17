@@ -246,14 +246,18 @@ void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<uns
   const unsigned nTot=std::accumulate(nChans.begin(),nChans.end(),0);
   const unsigned nTotProb=std::accumulate(probs.begin(),probs.end(),0);
 
-  constexpr const char* fmt="{:>7}: {:>5} of {} ({:.3f}%)";
-  
-  exeFile << std::format(fmt, "EMB",probs[EMB], nChans[EMB], probs[EMB]*(100./nChans[EMB])) << std::endl;
-  exeFile << std::format(fmt, "EMEC",probs[EMEC], nChans[EMEC], probs[EMEC]*(100./nChans[EMEC])) << std::endl;
-  exeFile << std::format(fmt, "EM tot",probs[EMEC]+probs[EMB],nChans[EMB]+nChans[EMEC],(probs[EMEC]+probs[EMB])*(100./(nChans[EMEC]+nChans[EMB]))) << std::endl;
-  exeFile << std::format(fmt, "EMEC",probs[HEC], nChans[HEC], probs[HEC]*(100./nChans[HEC])) << std::endl;
-  exeFile << std::format(fmt, "EMEC",probs[FCAL], nChans[FCAL], probs[FCAL]*(100./nChans[FCAL])) << std::endl;
-  exeFile << std::format(fmt, "Total",nTotProb,nTot,nTotProb*(100./nTot)) << std::endl;
+  constexpr const char* fmt="{:>7}: {:>5} of {} ({:.3f}%)\n";
+  //avoid divide by zero, return 0. instead
+  auto f = [](unsigned den)->double{ 
+    if (den > 0) return 100./den;
+    return 0.;
+  };
+  exeFile << std::format(fmt, "EMB",probs[EMB], nChans[EMB], probs[EMB]*f(nChans[EMB]));
+  exeFile << std::format(fmt, "EMEC",probs[EMEC], nChans[EMEC], probs[EMEC]*f(nChans[EMEC]));
+  exeFile << std::format(fmt, "EM tot",probs[EMEC]+probs[EMB],nChans[EMB]+nChans[EMEC],(probs[EMEC]+probs[EMB])*f(nChans[EMEC]+nChans[EMB]));
+  exeFile << std::format(fmt, "EMEC",probs[HEC], nChans[HEC], probs[HEC]*f(nChans[HEC]));
+  exeFile << std::format(fmt, "EMEC",probs[FCAL], nChans[FCAL], probs[FCAL]*f(nChans[FCAL]));
+  exeFile << std::format(fmt, "Total",nTotProb,nTot,nTotProb*f(nTot));
 
   exeFile << std::endl;
 

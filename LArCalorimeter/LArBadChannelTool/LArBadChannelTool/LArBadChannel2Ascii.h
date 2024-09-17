@@ -12,6 +12,8 @@
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include <string>
+#include <vector>
+#include <iosfwd> //ofstream
 
 class LArBadChannel2Ascii : public AthAlgorithm 
 {
