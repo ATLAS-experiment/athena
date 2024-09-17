@@ -1,4 +1,4 @@
-<!-- $Id: selection.xml 641134 2015-01-22 19:35:12Z ssnyder $ -->
+<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <class name="xAOD::EventFormatElement" />
@@ -10,6 +10,7 @@
    </class>
 
    <class name="xAOD::EventFormat_v1::const_iterator"/>
+   <typedef name="xAOD::EventFormat" />
 
    <!-- Custom streamer for the event format class: -->
    <read sourceClass="xAOD::EventFormat_v1" version="[1-]"
