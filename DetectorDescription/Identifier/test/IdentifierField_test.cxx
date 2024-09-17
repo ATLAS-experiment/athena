@@ -125,6 +125,7 @@ BOOST_AUTO_TEST_CASE(BoundedRangeFieldProperties){
   BOOST_TEST(f1.get_maximum() == e2);
   const auto & elementVec = f1.get_values();//should be empty
   BOOST_CHECK(elementVec.empty());
+  BOOST_TEST(f1.get_indices() == 9);
   //
   IdentifierField::element_type e{};
   IdentifierField::element_type eReturn(10);
@@ -161,6 +162,8 @@ BOOST_AUTO_TEST_CASE(BoundedRangeFieldProperties){
   IdentifierField f4;
   BOOST_TEST(f1.overlaps_with(f4));//overlaps with an unbounded value
 }
+
+
 
 BOOST_AUTO_TEST_CASE(SetAndTestRangeFieldProperties){
   //start with a virgin field
@@ -208,6 +211,7 @@ BOOST_AUTO_TEST_CASE(EnumeratedRangeFieldProperties){
   BOOST_CHECK(not f1.wrap_around());
   BOOST_TEST(f1.get_minimum() == -6);
   BOOST_TEST(f1.get_maximum() == 6);
+  BOOST_TEST(f1.get_indices() == 12);
   //
   IdentifierField::element_type e1{-1};
   IdentifierField::element_type e2{};

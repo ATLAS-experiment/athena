@@ -6,21 +6,19 @@
 #define IDENTIFIER_MULTIRANGE_H
 
 
-#include "Identifier/ExpandedIdentifier.h" //for typedefs
+#include "Identifier/ExpandedIdentifier.h"
 #include "Identifier/Range.h"
 #include <vector>
 #include <iosfwd>
 #include <string>
 
-
-
 /// @brief A MultiRange combines several Ranges 
 class MultiRange { 
 public: 
-  typedef std::vector<Range> range_vector; 
-  typedef ExpandedIdentifier::element_type element_type; 
-  typedef ExpandedIdentifier::size_type size_type;
-  typedef range_vector::const_iterator const_iterator;
+  using range_vector = std::vector<Range> ; 
+  using element_type = ExpandedIdentifier::element_type ; 
+  using size_type = ExpandedIdentifier::size_type ;
+  using const_iterator = range_vector::const_iterator;
  
   /** 
    *    This factory is able to generate all possible identifiers, from a  
@@ -59,9 +57,9 @@ public:
     bool operator == (const const_identifier_factory& other) const; 
  
   private: 
-    typedef std::vector<ExpandedIdentifier> id_vec;
-    typedef id_vec::iterator 		id_iterator;
-    typedef id_vec::const_iterator 		id_const_iterator;
+    using id_vec = std::vector<ExpandedIdentifier>;
+    using id_iterator = id_vec::iterator;
+    using id_const_iterator = id_vec::const_iterator;
 
     ExpandedIdentifier		m_id;
     Range::const_identifier_factory	m_id_fac_it; 
@@ -72,11 +70,7 @@ public:
     id_iterator			m_id_vec_end;
   }; 
  
-  /// Constructors 
-  MultiRange (); 
-  MultiRange (const MultiRange& other); 
-  /// Assignment.
-  MultiRange& operator= (const MultiRange& other);
+  MultiRange () = default; 
   /** 
    *   Construct a non-overlapping MultiRange from 
    *   two overlapping ones 
@@ -137,7 +131,7 @@ public:
   private: 
     friend class identifier_factory;
     friend class const_identifier_factory;
-    typedef std::vector<ExpandedIdentifier>	id_vec;
+    using id_vec = std::vector<ExpandedIdentifier>;
     range_vector 		m_ranges; 
 }; 
 

@@ -108,14 +108,14 @@
 class ExpandedIdentifier{
 public:
 
-  typedef ExpandedIdentifier 		id_type;
-  typedef int  				element_type;
-  typedef boost::container::small_vector<element_type,12> element_vector;
+  using id_type = ExpandedIdentifier;
+  using element_type = int;
+  using element_vector = boost::container::small_vector<element_type,12>;
 #ifdef __CPPCHECK__
   // Otherwise cppcheck warns about passing this type by value.
-  typedef size_t size_type;
+  using size_type = size_t ;
 #else
-  typedef boost::container::small_vector<element_type,12>::size_type size_type;
+  using size_type = boost::container::small_vector<element_type,12>::size_type ;
 #endif
 
   static constexpr element_type max_value = 0x3FFFFFFF;

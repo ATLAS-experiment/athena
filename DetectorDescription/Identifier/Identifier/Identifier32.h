@@ -24,9 +24,9 @@
  */
 class Identifier32{
 public:
-    typedef Identifier32                id_type;
-    typedef unsigned int                value_type;
-    typedef unsigned int                size_type;
+    using id_type = Identifier32;
+    using value_type = unsigned int;
+    using size_type = unsigned int;
 
     Identifier32 () = default;
 
