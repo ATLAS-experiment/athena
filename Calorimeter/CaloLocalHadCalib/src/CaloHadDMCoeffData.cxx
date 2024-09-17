@@ -7,7 +7,7 @@
 // $Id: CaloHadDMCoeffData.cxx,v 1.2 2009-05-18 20:31:52 pospelov Exp $
 //
 // Description: see CaloHadDMCoeffData.h
-// 
+//
 // Environment:
 //      Software developed for the ATLAS Detector at CERN LHC
 //
@@ -316,13 +316,13 @@ int CaloHadDMCoeffData::PackClusterVars(int i_cls, std::vector<float> &vars)
   float clusPhi = (*m_cls_phi)[i_cls];
   float clusEner = (*m_cls_ener_unw)[i_cls];
   if(clusEner > 0.0) {
-    clusEner = log10( clusEner );
+    clusEner = std::log10( clusEner );
   } else {
     clusEner = 0.0;
   }
   float clusLambda = (*m_cls_lambda)[i_cls];
   if(clusLambda > 0.0) {
-    clusLambda = log10(clusLambda);
+    clusLambda = std::log10(clusLambda);
   } else{
     clusLambda = 0.0;
   }
@@ -330,7 +330,7 @@ int CaloHadDMCoeffData::PackClusterVars(int i_cls, std::vector<float> &vars)
   vars.resize(CaloLocalHadCoeffHelper::DIM_UNKNOWN, 0.0);
   vars[CaloLocalHadCoeffHelper::DIM_EMFRAC] = clusEmFrac;
   vars[CaloLocalHadCoeffHelper::DIM_SIDE] = clusSide;
-  vars[CaloLocalHadCoeffHelper::DIM_ETA] = fabs(clusEta);
+  vars[CaloLocalHadCoeffHelper::DIM_ETA] = std::abs(clusEta);
   vars[CaloLocalHadCoeffHelper::DIM_PHI] = clusPhi;
   vars[CaloLocalHadCoeffHelper::DIM_ENER] = clusEner;
   vars[CaloLocalHadCoeffHelper::DIM_LAMBDA] = clusLambda;
