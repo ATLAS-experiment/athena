@@ -11,55 +11,59 @@ from AthenaCommon.Logging import logging
 # checkpair=True and remove=True, remove the files that do not form an atlanits-vp1 pair
 # checkpair=True and remove=False, generate event list for atlantis-vp1 pairs
 # checkpair=False, generate event list without checking for valid pairs
-def getEventlist(directory, checkpair, remove=True, patternAtlantis='.xml', patternVP1='.pool.root'):
+def getEventlist(directory, checkpair, remove=False, patternAtlantis='.xml', patternVP1='.pool.root'):
     msg = logging.getLogger( 'EventUtils' )
     msg.verbose('%s begin get event list', time.ctime(time.time()))
     filelist = []
-    files = os.listdir(directory)
-
-    # look for JiveXML_{RunNumber}_{EventNumber}.xml or vp1_r{RunNumber}_ev{EventNumber}_{TimeStamps}CEST.pool.root files
-    # excluding the CastorScript bookkeeping files with .STATUS suffix to the original data files
-    pattern = r'(?:JiveXML|vp1)_(?:|r)(\d+)_(?:|ev)(\d+)'+f'(?:{re.escape(patternAtlantis)}|_.+CEST{re.escape(patternVP1)})'+r'(?!\.)'
-
-    # Build a list of files ordered by run/event number
-    for file in files:
-        matches = re.search(pattern, file)
-
-        # Event file, add tot the list
-        if matches:
-            run = "%012d" % int(matches.group(1))
-            event = "%012d" % int(matches.group(2))
-
-            fileentry = run, event, file
-            filelist.append(fileentry)
-
-    i = 0
     eventlist = []
-    filelist.sort()
-    numfiles = len(filelist)
+    if os.path.exists(directory):
+        files = os.listdir(directory)
 
-    # Now loop through the files to form pairs
-    while i < numfiles-1:
-        if checkpair and (filelist[i][0] != filelist[i+1][0] or filelist[i][1] != filelist[i+1][1]):
+        # look for JiveXML_{RunNumber}_{EventNumber}.xml or vp1_r{RunNumber}_ev{EventNumber}_{TimeStamps}CEST.pool.root files
+        # excluding the CastorScript bookkeeping files with .STATUS suffix to the original data files
+        pattern = r'(?:JiveXML|vp1)_(?:|r)(\d+)_(?:|ev)(\d+)'+f'(?:{re.escape(patternAtlantis)}|_.+CEST{re.escape(patternVP1)})'+r'(?!\.)'
 
-            # Make sure that files without a partner (atlantis-vp1) are also removed
-            if remove and i == 0:
-                msg.warning("One of the files is missing for run %s, event %s, removing the other as well.", filelist[i][0], filelist[i][1])
-                try:
-                    msg.verbose("Removing %s/%s", directory, filelist[i][2])
-                    os.unlink("%s/%s" % (directory, filelist[i][2]))
-                except OSError as err:
-                    msg.warning("Could not remove '%s': %s", filelist[i][2], err)
+        # Build a list of files ordered by run/event number
+        for file in files:
+            matches = re.search(pattern, file)
 
-            # Do not include such files in the event list
-            i = i + 1
-        else:
-            # Build event list
-            evententry = filelist[i][0], filelist[i][1], filelist[i][2], filelist[i+1][2]
-            eventlist.append(evententry)
-            i = i + 1
+            # Event file, add tot the list
+            if matches:
+                run = "%012d" % int(matches.group(1))
+                event = "%012d" % int(matches.group(2))
 
-    msg.verbose('%s end get event list', time.ctime(time.time()))
+                fileentry = run, event, file
+                filelist.append(fileentry)
+
+        i = 0
+        eventlist = []
+        filelist.sort()
+        numfiles = len(filelist)
+
+        # Now loop through the files to form pairs
+        while i < numfiles-1:
+            if checkpair and (filelist[i][0] != filelist[i+1][0] or filelist[i][1] != filelist[i+1][1]):
+
+                # Make sure that files without a partner (atlantis-vp1) are also removed
+                if remove and i == 0:
+                    msg.warning("One of the files is missing for run %s, event %s, removing the other as well.", filelist[i][0], filelist[i][1])
+                    try:
+                        msg.info("Removing %s/%s", directory, filelist[i][2])
+                        os.unlink("%s/%s" % (directory, filelist[i][2]))
+                    except OSError as err:
+                        msg.warning("Could not remove '%s': %s", filelist[i][2], err)
+
+                # Do not include such files in the event list
+                i = i + 1
+            else:
+                # Build event list
+                evententry = filelist[i][0], filelist[i][1], filelist[i][2], filelist[i+1][2]
+                eventlist.append(evententry)
+                i = i + 1
+
+        msg.verbose('%s end get event list', time.ctime(time.time()))
+    else:
+          msg.warning('The directory %s does not exist.', directory)
     return eventlist
 
 # Prune events in the given directory if the number exceeds the specified number

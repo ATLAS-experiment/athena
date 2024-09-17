@@ -36,7 +36,7 @@ FastChain_tf.py \
     --digiSeedOffset1 '511' \
     --digiSeedOffset2 '727' \
     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
-    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-10' \
     --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
     --postInclude 'PyJobTransforms.UseFrontier' 'DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
@@ -68,7 +68,7 @@ then
                --maxEvents '-1' \
                --autoConfiguration=everything \
                --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
-               --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+               --conditionsTag default:OFLCOND-MC21-SDR-RUN3-10 \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
                --imf False
@@ -80,7 +80,7 @@ then
          Reco_tf.py --inputAODFile ${AOD_File} \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
                     --maxEvents '-1' \
-                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-10' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
 		            --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \

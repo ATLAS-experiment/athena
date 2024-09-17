@@ -7,11 +7,6 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
         autoConfigOnlineRecoFlags(flags, flags.OnlineEventDisplays.PartitionName)
 
-    flags.OnlineEventDisplays.CosmicMode = False
-    flags.OnlineEventDisplays.HIMode = False
-    flags.OnlineEventDisplays.BeamSplashMode = False
-    flags.OnlineEventDisplays.OfflineTest = False
-
     # An explicit list for nominal data taking to exclude some high rate streams
     # Empty list to read all
     flags.OnlineEventDisplays.TriggerStreams = ['MinBias','express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
@@ -50,7 +45,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
         flags.OnlineEventDisplays.PublicStreams=['']
     else:
-        flags.OnlineEventDisplays.MaxEvents=100
+        flags.OnlineEventDisplays.MaxEvents=50
         flags.OnlineEventDisplays.ProjectTag='data24_13p6TeV'
         flags.OnlineEventDisplays.PublicStreams=['Main']
 
@@ -66,9 +61,9 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     # Conditions tag
     flags.IOVDb.DatabaseInstance = "CONDBR2"
     if flags.OnlineEventDisplays.OfflineTest:
-        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
+        flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2024-03'
     else:
-        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' # Online conditions tag
+        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2024-02' # Online conditions tag
 
     # Geometry tag
     flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
@@ -79,9 +74,10 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.Trigger.triggerConfig='DB'
 
     jobId = GetUniqueJobID()
+
     # Test wth a small amount of events and write out to e.g. a tmp dir
     if flags.OnlineEventDisplays.PartitionName != 'ATLAS' or flags.OnlineEventDisplays.OfflineTest:
-        flags.Exec.MaxEvents = 3
+        flags.Exec.MaxEvents = 5
         flags.Output.ESDFileName = flags.OnlineEventDisplays.OutputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
     else:
         flags.Exec.MaxEvents = 20000 # hack until we find a way to fix the memory fragmentation ATEAM-896, this resets the memory after 20k events
@@ -91,7 +87,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.Output.doJiveXML = False #we call the AlgoJive later on
 
     if flags.OnlineEventDisplays.OfflineTest:
-        flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
+        flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data24_13p6TeV.00482485.physics_Main.daq.RAW._lb0111._SFO-13._0002.data']
     else:
         flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
 
@@ -209,6 +205,12 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+
+    flags.OnlineEventDisplays.CosmicMode = False
+    flags.OnlineEventDisplays.HIMode = False
+    flags.OnlineEventDisplays.BeamSplashMode = False
+    flags.OnlineEventDisplays.OfflineTest = False
+
     cfg = EventDisplaysOnlineCfg(flags)
     # Execute
     sc = cfg.run()
