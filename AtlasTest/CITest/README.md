@@ -4,16 +4,23 @@ these as they have a significant impact on the CI turnaround time.
 [TOC]
 
 # Running the tests
-After compiling this package locally, individual tests can be run specifying the test name (supports regex):
+Once you have made the local modifications to the code that you wish to test, compile them locally alongside this package. Remain in the build directory. Individual tests can then be run by specifying the test name (supports regex):
 ```sh
 ctest -R CITest_RecoRun2Data
 ```
+or
+```sh
+ctest -R LuminosityCondAlgConfig_test
+```
+for a test defined in `LumiBlockComps/CMakeLists.txt` with the name `LuminosityCondAlgConfig_test`.  
 
 For builds involving several packages, tests can be selected/excluded using the "CITest" label:
 ```sh
 ctest -L CITest   # run all CI tests
 ctest -LE CITest  # run all tests, except CI tests
 ```
+
+This runs the test job and compares the output with the reference file, whose locations are specified in the `CMakeLists.txt` file. The results of the test are written to a temporary directory as reported by the job's message to the command prompt. The output of the test job itself is embedded in this file and so the relevant lines can be extracted in case you need to update the reference file.
 
 # Adding new tests
 - Test are defined in separate files for each project (e.g. [`Athena.cmake`](Athena.cmake)).
