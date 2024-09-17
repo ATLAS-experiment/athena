@@ -598,7 +598,7 @@ class Registry(metaclass=Singleton):
         self.add_default("whichscale", 4, description="ttj_MiNNLO: set scale of overall two powers of alphas if fixedscale=0 [0:H_T^tt/2, 1:m_tt/2, 2:m_tt, 3:H_T^tt+jets/2, 4:H_T^tt/4, 5:H_T^tt+jets/4]")
         self.add_default("which_as",2, description="gg4l: running of alpha: 1 PWHG, 2 PDF")
         self.add_default("whichW", -1, description="bb4l: redecay one of the W bosons, thereby converting it into an hadronically decaying W boson, 1 or -1")
-        self.add_default("widthCorrection", 5, description="")
+        self.add_default("width_correction", 5, description="")
         self.add_default("width_H", powheg_atlas_common.width.H, description="Higgs boson width in GeV")
         self.add_default("width_t", powheg_atlas_common.width.t, description="top quark width in GeV")
         self.add_default("width_W", powheg_atlas_common.width.W, name="width_W", description="W boson width in GeV")
