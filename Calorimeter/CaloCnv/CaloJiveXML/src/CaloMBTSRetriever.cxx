@@ -284,7 +284,7 @@ namespace JiveXML {
         cellRawAmplitude.push_back(DataType( theMbtsrawamp[id.get_identifier32().get_compact()] ));
         myCellRawTimeStr =  DataType(theMbtsrawtime[id.get_identifier32().get_compact()]).toString();
 
-        if ( myCellRawTimeStr.find("n") == 1 )  myCellRawTimeStr="0."; 
+        if ( myCellRawTimeStr.find('n') == 1 )  myCellRawTimeStr="0.";
         cellRawTime.push_back( myCellRawTimeStr );
 
           // this can rarely be '-nan', but checking this each time may make code slow ?

@@ -22,7 +22,7 @@ CaloNoise::CaloNoise(const size_t nLArCells,
   m_larNoise.resize(lar_extent_gen[nLArGains][nLArCells]);
   boost::multi_array_types::extent_gen tile_extent_gen;
   m_tileNoise.resize(tile_extent_gen[nTileGains][nTileCells]);
-  
+
   IdentifierHash h1,h2;
   m_caloCellId->calo_cell_hash_range(CaloCell_ID::TILE, h1,h2);
   m_tileHashOffset=h1;
@@ -44,7 +44,7 @@ float CaloNoise::calcSig(const IdentifierHash subHash, const int dbGain, const f
   const double sigma1 = m_tileBlob->getData(subHash,dbGain,2);
   const double sigma2 = m_tileBlob->getData(subHash,dbGain,3);
   const double ratio  = m_tileBlob->getData(subHash,dbGain,4);
- 
+
 
   if((sigma1 == 0. && sigma2 == 0.) || e == 0.) return 0.;
   if(sigma1 == 0.) return e/sigma2;
@@ -53,12 +53,12 @@ float CaloNoise::calcSig(const IdentifierHash subHash, const int dbGain, const f
   const double x2 = e/sigma2;
 
   constexpr std::array<float,2> valid_range{0.9,7.5};
-  const float wide_gauss_sigma = std::min(fabs(x1),fabs(x2));
+  const float wide_gauss_sigma = std::min(std::abs(x1),std::abs(x2));
   if(wide_gauss_sigma > valid_range[1]) return wide_gauss_sigma;
 
-  const float narrow_gauss_sigma= std::max(fabs(x1),fabs(x2));
+  const float narrow_gauss_sigma= std::max(std::abs(x1),std::abs(x2));
   if(narrow_gauss_sigma < valid_range[0]) return narrow_gauss_sigma;
-  
+
 
   const double y1= TMath::Erf(M_SQRT1_2*x1);
   const double y2= TMath::Erf(M_SQRT1_2*x2);
@@ -67,7 +67,7 @@ float CaloNoise::calcSig(const IdentifierHash subHash, const int dbGain, const f
 
   //return the C.L. probability (with sign!)
   //  return z;
- 
+
   // if instead you want to return the sigma-equivalent C.L.
   // (with sign!) use the following line
   return M_SQRT2*TMath::ErfInverse(z);
@@ -87,7 +87,7 @@ float CaloNoise::getTileEffSigma(const IdentifierHash subHash, const int gain, c
   }
 
   const float sigma=calcSig(subHash,dbGain,e);
-  const float a= (sigma != 0.) ? fabs(e/sigma) : 0.0;
+  const float a= (sigma != 0.) ? std::abs(e/sigma) : 0.0;
 
   if (m_noiseType==CaloNoise::ELEC) {
     return a;

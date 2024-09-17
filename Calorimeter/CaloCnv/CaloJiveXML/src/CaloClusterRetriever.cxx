@@ -70,7 +70,7 @@ namespace JiveXML {
       //obtain all other collections from StoreGate
       std::vector<std::string> allkeys;
       evtStore()->keys(static_cast<CLID>( ClassID_traits<xAOD::CaloClusterContainer>::ID() ), allkeys);
-      for (auto key : allkeys) {
+      for (const auto& key : allkeys) {
         if (key!=m_sgKeyFavourite.key()) {
           ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << key << ")"  );
           SG::ReadHandle<xAOD::CaloClusterContainer> containerRH(key);
@@ -92,7 +92,7 @@ namespace JiveXML {
       }
     }else {
       //obtain all collections with keys provided by user: m_otherKeys
-      for (auto key : m_otherKeys) {
+      for (const auto& key : m_otherKeys) {
         if (key!=m_sgKeyFavourite.key()) {
           ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << key << ")"  );
           SG::ReadHandle<xAOD::CaloClusterContainer> containerRH(key);
