@@ -179,7 +179,7 @@ def getJetTruthLabelTool(jetdef, modspec):
     return jetTruthLabelTool
 
 def getJetTruthLabelToolPrereqs(jetdef, modspec):
-    return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"] if modspec == "R10WZTruthLabel_R22v1" else []
+    return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"] if modspec == "R10WZTruthLabel_R22v1" and jetdef._cflags.Input.isMC else []
 
 def getJetPileupLabelTool(jetdef, modspec):
 
