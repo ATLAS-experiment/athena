@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
@@ -39,4 +39,4 @@ def fastPhotonSequenceGenCfg(flags,is_probe_leg=False):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(thePhotonHypo)
 
-    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict)
+    return MenuSequence(flags,selAcc, HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict)

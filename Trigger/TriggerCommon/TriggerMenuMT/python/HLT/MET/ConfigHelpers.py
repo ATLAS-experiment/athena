@@ -12,7 +12,7 @@ from ..Config.MenuComponents import (
     ChainStep,
     InEventRecoCA,
     SelectionCA,
-    MenuSequenceCA,
+    MenuSequence,
 )
 from .StepOutput import StepOutput
 from copy import copy
@@ -301,7 +301,7 @@ class AlgConfig(ABC):
         raise ValueError("Unknown EFrecoAlg '{}' requested".format(EFrecoAlg))
 
 def make_MET_menu_sequenceGenCfg(flags, sel_acc, hypo_tool):
-    return MenuSequenceCA(flags, selectionCA=sel_acc, HypoToolGen=hypo_tool)
+    return MenuSequence(flags, selectionCA=sel_acc, HypoToolGen=hypo_tool)
 
 # Load all the defined configurations
 from . import AlgConfigs

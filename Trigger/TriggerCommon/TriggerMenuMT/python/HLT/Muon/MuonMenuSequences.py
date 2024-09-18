@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -113,7 +113,7 @@ def muFastSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2saHypo)
     
-    l2saSequence = MenuSequenceCA(flags, selAcc,
+    l2saSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigMufastHypoToolFromDict)
 
 
@@ -132,7 +132,7 @@ def muFastCalibSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2saHypo)
     
-    l2saSequence = MenuSequenceCA(flags, selAcc,
+    l2saSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigMufastHypoToolFromDict)
 
 
@@ -151,7 +151,7 @@ def mul2mtSAOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2saHypo)
     
-    l2saSequence = MenuSequenceCA(flags, selAcc,
+    l2saSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigMufastHypoToolFromDict)
 
 
@@ -267,7 +267,7 @@ def muCombSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2cbHypo)
     
-    l2cbSequence = MenuSequenceCA(flags, selAcc,
+    l2cbSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigmuCombHypoToolFromDict)
 
 
@@ -287,7 +287,7 @@ def mul2IOOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2cbHypo)
     
-    l2cbSequence = MenuSequenceCA(flags, selAcc,
+    l2cbSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = Trigl2IOHypoToolwORFromDict)
 
     return l2cbSequence
@@ -340,7 +340,7 @@ def muCombLRTSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2cbHypo)
     
-    l2cbSequence = MenuSequenceCA(flags, selAcc,
+    l2cbSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigmuCombHypoToolFromDict)
 
 
@@ -359,7 +359,7 @@ def muCombOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2cbHypo)
     
-    l2cbSequence = MenuSequenceCA(flags, selAcc,
+    l2cbSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = TrigmuCombHypoToolwORFromDict)
 
     return l2cbSequence
@@ -377,7 +377,7 @@ def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(l2cbHypo)
     
-    l2cbSequence = MenuSequenceCA(flags, selAcc,
+    l2cbSequence = MenuSequence(flags, selAcc,
                                   HypoToolGen = Trigl2mtCBHypoToolwORFromDict)
 
     return l2cbSequence
@@ -429,7 +429,7 @@ def muEFSASequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuMSHypo)
     
-    efmuMSSequence = MenuSequenceCA(flags, selAcc,
+    efmuMSSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict)
 
 
@@ -510,7 +510,7 @@ def muEFCBSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
 
     return efmuCBSequence
@@ -530,7 +530,7 @@ def muEFCBIDperfSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
 
     return efmuCBSequence
@@ -548,7 +548,7 @@ def muEFIDtpSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFIdtpHypoToolFromDict)
 
     return efmuCBSequence
@@ -590,7 +590,7 @@ def muEFCBLRTSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBLRTHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
 
     return efmuCBSequence
@@ -611,7 +611,7 @@ def muEFCBLRTIDperfSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBLRTHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromDict)
 
     return efmuCBSequence
@@ -660,7 +660,7 @@ def muEFSAFSSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuMSHypo)
     
-    efmuMSSequence = MenuSequenceCA(flags, selAcc,
+    efmuMSSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFMSonlyHypoToolFromName)
 
 
@@ -743,7 +743,7 @@ def muEFCBFSSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuCBHypo)
     
-    efmuCBSequence = MenuSequenceCA(flags, selAcc,
+    efmuCBSequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonEFCombinerHypoToolFromName)
 
     return efmuCBSequence
@@ -782,7 +782,7 @@ def efLateMuRoISequenceGenCfg(flags):
 
     selAcc.addHypoAlgo(latemuHypo)
     
-    latemuRoISequence = MenuSequenceCA(flags, selAcc,
+    latemuRoISequence = MenuSequence(flags, selAcc,
                                     HypoToolGen = TrigMuonLateMuRoIHypoToolFromDict)
 
 
@@ -833,7 +833,7 @@ def efLateMuSequenceGenCfg(flags):
     selAcc.addHypoAlgo(trigMuonEFLateHypo)
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequenceCA(flags, selAcc,
+    return MenuSequence(flags, selAcc,
                           HypoToolGen = TrigMuonEFCombinerHypoToolFromDict )
 
 
@@ -890,7 +890,7 @@ def muEFIsoSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuisoHypo)
     
-    efmuisoSequence = MenuSequenceCA(flags, selAcc,
+    efmuisoSequence = MenuSequence(flags, selAcc,
                                      HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
 
     return efmuisoSequence
@@ -908,7 +908,7 @@ def muEFMSIsoSequenceGenCfg(flags, is_probe_leg=False):
 
     selAcc.addHypoAlgo(efmuisoHypo)
     
-    efmuisoSequence = MenuSequenceCA(flags, selAcc,
+    efmuisoSequence = MenuSequence(flags, selAcc,
                                      HypoToolGen = TrigMuonEFTrackIsolationHypoToolFromDict)
 
     return efmuisoSequence
@@ -939,7 +939,7 @@ def muRoiClusterSequenceGenCfg(flags):
 
     selAcc.addHypoAlgo(hypoAlg)
     
-    muRoIClusterSequence = MenuSequenceCA(flags, selAcc,
+    muRoIClusterSequence = MenuSequence(flags, selAcc,
                                           HypoToolGen = TrigLongLivedParticlesHypoToolFromDict)
 
     return muRoIClusterSequence

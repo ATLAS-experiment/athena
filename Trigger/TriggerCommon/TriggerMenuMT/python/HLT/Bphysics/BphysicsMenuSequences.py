@@ -3,7 +3,7 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDM import recordable
@@ -40,7 +40,7 @@ def bmumuxSequenceGenCfg(flags):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
 def dimuL2SequenceGenCfg(flags):
@@ -53,7 +53,7 @@ def dimuL2SequenceGenCfg(flags):
                                              triggerLevel = 'L2')
     sequence.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags, sequence,
+    return MenuSequence(flags, sequence,
                                   HypoToolGen = TrigBphysStreamerHypoToolFromDict)
 
 
@@ -72,7 +72,7 @@ def dimuEFSequenceGenCfg(flags):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
 def getNoL2CombChainNames():

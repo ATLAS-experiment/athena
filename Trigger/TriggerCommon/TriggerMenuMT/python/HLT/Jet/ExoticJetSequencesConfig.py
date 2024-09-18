@@ -3,7 +3,7 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger("TriggerMenuMT.HLT.Jet.JetChainSequences")
 
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -34,7 +34,7 @@ def jetEJsMenuSequenceGenCfg(flags, jetsIn):
             PV     = vertices
         )
     )
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=trigJetEJsHypoToolFromDict)
 
 def jetCRVARMenuSequenceGenCfg(flags, jetsIn):
 
@@ -60,7 +60,7 @@ def jetCRVARMenuSequenceGenCfg(flags, jetsIn):
             Cells  = cellsin
         )
     )
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRVARHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=trigJetCRVARHypoToolFromDict)
 
 
 def jetCRMenuSequenceGenCfg(flags, jetsIn):
@@ -88,5 +88,5 @@ def jetCRMenuSequenceGenCfg(flags, jetsIn):
             Cells  = cellsin
         )
     )
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=trigJetCRHypoToolFromDict)
 

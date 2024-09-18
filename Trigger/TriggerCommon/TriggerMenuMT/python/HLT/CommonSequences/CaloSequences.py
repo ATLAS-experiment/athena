@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 class CaloMenuDefs(object):
@@ -42,4 +42,4 @@ def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False):
     selAcc.addHypoAlgo(theFastCaloHypo)
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)

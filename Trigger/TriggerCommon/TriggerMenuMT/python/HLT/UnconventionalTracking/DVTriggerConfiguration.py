@@ -7,7 +7,7 @@ from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA, InEventRecoCA
 
 from TrigEDMConfig.TriggerEDM import recordable
 
@@ -83,7 +83,7 @@ def DVRecoSequenceGenCfg(flags):
     selAcc.addHypoAlgo(HypoAlg)
 
     log.debug("Building the Step dictinary for TrigDV reco")
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                         selAcc,
                         HypoToolGen = StreamerHypoToolGenerator
                         )
@@ -112,7 +112,7 @@ def DVTriggerEDSequenceGenCfg(flags):
     selAcc.addHypoAlgo(theHypoAlg)
 
     log.info("Building the Step dictinary for DisVtxTrigger!")
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = TrigVSIHypoToolFromDict,
                           )

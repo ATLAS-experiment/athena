@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -46,7 +46,7 @@ def _caloSeq(flags, is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigL2TauHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)   
+    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigL2TauHypoToolFromDict)   
     return (selAcc , menuCA)
 
 
@@ -122,7 +122,7 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
                                                  trackcollection       = flags.Tracking.ActiveConfig.trkTracks_FTF )
     selAcc.addHypoAlgo(hypoAlg)
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -173,7 +173,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigTauTrackHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
+    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTauTrackHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -223,7 +223,7 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
+    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict)
     return (selAcc , menuCA)
 
 
@@ -276,7 +276,7 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
     selAcc.addHypoAlgo(hypoAlg)
 
     from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
-    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
+    menuCA = MenuSequence(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict)
     return (selAcc , menuCA)
 
 

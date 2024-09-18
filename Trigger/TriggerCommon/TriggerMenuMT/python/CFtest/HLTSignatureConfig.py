@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentAccumulator import CompFactory
 from TriggerMenuMT.CFtest.HLTSignatureHypoTools import MuTestHypoTool, ElTestHypoTool
 import sys
@@ -92,7 +92,7 @@ def elMenuSequence(flags, step, reconame, hyponame):
     selAcc=SelectionCA(hyponame+"elStep"+step)        
     selAcc.mergeReco(Sequence) 
     selAcc.addHypoAlgo(elHypo)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
+    return MenuSequence(flags, selAcc, HypoToolGen=ElTestHypoTool)
    
 
 def gamMenuSequence(flags, step, reconame, hyponame):
@@ -103,7 +103,7 @@ def gamMenuSequence(flags, step, reconame, hyponame):
     selAcc=SelectionCA(hyponame+"gamStep"+step+"Gam")        
     selAcc.mergeReco(Sequence) 
     selAcc.addHypoAlgo(elHypo)
-    return MenuSequenceCA(flags,selAcc, HypoToolGen=ElTestHypoTool)
+    return MenuSequence(flags,selAcc, HypoToolGen=ElTestHypoTool)
     
 
 
@@ -115,7 +115,7 @@ def muMenuSequence(flags, step, reconame, hyponame):
     selAcc=SelectionCA(hyponame+"muStep"+step)        
     selAcc.mergeReco(Sequence) 
     selAcc.addHypoAlgo(muHypo)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=MuTestHypoTool)
+    return MenuSequence(flags, selAcc, HypoToolGen=MuTestHypoTool)
     
         
 def genMenuSequence(flags, step, reconame, hyponame):
@@ -126,5 +126,5 @@ def genMenuSequence(flags, step, reconame, hyponame):
     selAcc=SelectionCA(hyponame+"elStep"+step)        
     selAcc.mergeReco(Sequence) 
     selAcc.addHypoAlgo(elHypo)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
+    return MenuSequence(flags, selAcc, HypoToolGen=ElTestHypoTool)
    

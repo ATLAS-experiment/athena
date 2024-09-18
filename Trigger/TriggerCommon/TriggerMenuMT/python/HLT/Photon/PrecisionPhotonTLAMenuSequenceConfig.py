@@ -3,7 +3,7 @@
 #
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from TrigEDMConfig.TriggerEDM import recordable
 from TrigEgammaHypo.TrigEgammaTLAPhotonHypoTool import TrigEgammaTLAPhotonHypoToolFromDict 
 
@@ -36,7 +36,7 @@ def PhotonTLAMenuSequenceGenCfg( flags, photonsIn ):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA( flags,
+    return MenuSequence( flags,
                            selAcc,
                            HypoToolGen = TrigEgammaTLAPhotonHypoToolFromDict
                          )

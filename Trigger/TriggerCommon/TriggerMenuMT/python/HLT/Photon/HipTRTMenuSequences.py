@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -62,5 +62,5 @@ def TRTHitGeneratorSequenceGenCfg(flags, is_probe_leg = False):
     trtHTHhypo = CompFactory.TrigTRTHTHhypoAlg(name="TrigTRTHTHhypo", RNNOutputName=TrigEgammaKeys.TrigTRTHTCountsContainer)
     selAcc.addHypoAlgo(trtHTHhypo)
     from TrigTRTHighTHitCounter.TrigTRTHTHhypoTool import TrigTRTHTHhypoToolFromDict
-    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict)
+    return MenuSequence(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict)
 

@@ -5,7 +5,7 @@ import functools
 from TrigEDMConfig import DataScoutingInfo
 from TrigEDMConfig.TriggerEDM import recordable
 from TriggerMenuMT.HLT.Menu import EventBuildingInfo
-from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, MenuSequence, SelectionCA, InEventRecoCA
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
@@ -289,7 +289,7 @@ def pebInputMaker(flags, chain, eventBuildType):
 
 def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     '''
-    Return the MenuSequenceCA for the PEB input maker for this chain.
+    Return the MenuSequence for the PEB input maker for this chain.
     '''
 
     def pebInfoWriterToolGenerator(chainDict):
@@ -303,7 +303,7 @@ def pebMenuSequenceGenCfg(flags, chain, eventBuildType, chainDict):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix))
 
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = pebInfoWriterToolGenerator)
 

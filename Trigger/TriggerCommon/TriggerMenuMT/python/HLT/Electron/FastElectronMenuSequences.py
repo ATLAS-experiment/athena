@@ -5,7 +5,7 @@
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
@@ -37,7 +37,7 @@ def fastElectronSequenceGenCfg(flags, name='FastElectron', variant='', is_probe_
     selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
     selAcc.addHypoAlgo(theFastElectronHypo)
 
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict)
 
 
 def fastElectron_LRTSequenceGenCfg(flags, name='FastElectron', is_probe_leg=False):
