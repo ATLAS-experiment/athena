@@ -22,7 +22,7 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     kwargs.setdefault("IsSecondStage",flags.Trigger.FPGATrackSim.Is2ndStage)
     kwargs.setdefault("missHitsConsts",flags.Trigger.FPGATrackSim.missHitsConsts)
 
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimMappingCfg
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimMappingCfg
     FPGATrackSimMapping = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))
     theFPGATrackSimConstGenAlg = CompFactory.FPGATrackSimConstGenAlgo(**kwargs)
     theFPGATrackSimConstGenAlg.FPGATrackSimMappingSvc = FPGATrackSimMapping 

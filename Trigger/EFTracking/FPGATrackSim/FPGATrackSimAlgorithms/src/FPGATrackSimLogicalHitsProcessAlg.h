@@ -46,7 +46,6 @@
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
-class FPGATrackSimDataFlowTool;
 class FPGATrackSimHoughRootOutputTool;
 class FPGATrackSimLLPRoadFilterTool;
 class FPGATrackSimNNTrackTool;
@@ -87,7 +86,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         ToolHandle<FPGATrackSimHoughRootOutputTool>      m_houghRootOutputTool {this, "HoughRootOutputTool", "FPGATrackSimHoughRootOutputTool/FPGATrackSimHoughRootOutputTool", "Hough ROOT Output Tool"};
         ToolHandle<FPGATrackSimTrackFitterTool>          m_trackFitterTool_1st {this, "TrackFitter_1st", "FPGATrackSimTrackFitterTool/FPGATrackSimTrackFitterTool_1st", "1st stage track fit tool"};
         ToolHandle<FPGATrackSimOverlapRemovalTool>       m_overlapRemovalTool_1st {this, "OverlapRemoval_1st", "FPGATrackSimOverlapRemovalTool/FPGATrackSimOverlapRemovalTool_1st", "1st stage overlap removal tool"};
-        ToolHandle<FPGATrackSimDataFlowTool>             m_dataFlowTool {this, "DataFlowTool", "FPGATrackSimDataFlowTool/FPGATrackSimDataFlowTool", "Data Flow Tool"};
         ToolHandle<FPGATrackSimOutputHeaderTool>         m_writeOutputTool {this, "OutputTool", "FPGATrackSimOutputHeaderTool/FPGATrackSimOutputHeaderTool", "Output tool"};
         ServiceHandle<IFPGATrackSimMappingSvc>           m_FPGATrackSimMapping {this, "FPGATrackSimMapping", "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         

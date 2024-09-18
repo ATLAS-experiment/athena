@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def FPGATrackSimMapMakerCfg(flags):
     acc = ComponentAccumulator()
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimReadInputCfg
+    from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimReadInputCfg
     alg = CompFactory.FPGATrackSimMapMakerAlg(
         GeometryVersion=flags.GeoModel.AtlasVersion,
         OutFileName=flags.OutFileName,

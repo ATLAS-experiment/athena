@@ -35,11 +35,12 @@
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrackCollection.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandleKeyArray.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadHandleKeyArray.h"
 
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
-class FPGATrackSimDataFlowTool;
 class FPGATrackSimHoughRootOutputTool;
 class FPGATrackSimLLPRoadFilterTool;
 class FPGATrackSimNNTrackTool;

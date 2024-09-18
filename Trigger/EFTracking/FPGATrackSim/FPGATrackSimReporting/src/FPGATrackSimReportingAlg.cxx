@@ -12,9 +12,10 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
 {
     ATH_CHECK(m_xAODPixelClusterContainerKeys.initialize());
     ATH_CHECK(m_xAODStripClusterContainerKeys.initialize());
-    ATH_CHECK(m_FPGARoadsKey.initialize());
-    ATH_CHECK(m_FPGATracksKey.initialize());
-    ATH_CHECK(m_FPGAProtoTrackCollection.initialize());
+    ATH_CHECK(m_FPGARoadsKey.initialize(!m_isDataPrep));
+    ATH_CHECK(m_FPGAProtoTrackCollection.initialize(!m_isDataPrep));
+    ATH_CHECK(m_FPGATracksKey.initialize(!m_isDataPrep));
+	      
     return StatusCode::SUCCESS;
 }
 
@@ -30,7 +31,6 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         }
         processxAODClusters<xAOD::PixelCluster>(clusterContainer);
     }
-
     // Process xAOD Strip Clusters
     std::vector<SG::ReadHandle<xAOD::StripClusterContainer>> xAODStripClusterContainers = m_xAODStripClusterContainerKeys.makeHandles(ctx);
     for (SG::ReadHandle<xAOD::StripClusterContainer>& clusterContainer : xAODStripClusterContainers)
@@ -41,31 +41,31 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         }
         processxAODClusters<xAOD::StripCluster>(clusterContainer);
     }
-
-    // Process FPGATrackSim Roads
-    SG::ReadHandle<FPGATrackSimRoadCollection> FPGATrackSimRoads(m_FPGARoadsKey, ctx);
-    if (!FPGATrackSimRoads.isValid()) {
+    if (!m_isDataPrep.value()) {
+      // Process FPGATrackSim Roads
+      SG::ReadHandle<FPGATrackSimRoadCollection> FPGATrackSimRoads(m_FPGARoadsKey, ctx);
+      if (!FPGATrackSimRoads.isValid()) {
         ATH_MSG_ERROR("Could not find FPGA Roads Collection with key " << FPGATrackSimRoads.key());
         return StatusCode::FAILURE;
-    }
-    processFPGARoads(FPGATrackSimRoads);
-
-    // Process FPGATrackSim Tracks
-    SG::ReadHandle<FPGATrackSimTrackCollection> FPGATrackSimTracks(m_FPGATracksKey, ctx);
-    if (!FPGATrackSimTracks.isValid()) {
+      }
+      processFPGARoads(FPGATrackSimRoads);
+      
+      // Process FPGATrackSim Tracks
+      SG::ReadHandle<FPGATrackSimTrackCollection> FPGATrackSimTracks(m_FPGATracksKey, ctx);
+      if (!FPGATrackSimTracks.isValid()) {
         ATH_MSG_ERROR("Could not find FPGA Track Collection with key " << FPGATrackSimTracks.key());
         return StatusCode::FAILURE;
-    }
-    processFPGATracks(FPGATrackSimTracks);
-
-    // Process FPGATrackSim Prototracks
-    SG::ReadHandle<ActsTrk::ProtoTrackCollection> FPGATrackSimProtoTracks(m_FPGAProtoTrackCollection, ctx);
-    if (!FPGATrackSimProtoTracks.isValid()) {
+      }
+      processFPGATracks(FPGATrackSimTracks);
+      
+      // Process FPGATrackSim Prototracks
+      SG::ReadHandle<ActsTrk::ProtoTrackCollection> FPGATrackSimProtoTracks(m_FPGAProtoTrackCollection, ctx);
+      if (!FPGATrackSimProtoTracks.isValid()) {
         ATH_MSG_ERROR("Could not find FPGA Prototrack Collection with key " << FPGATrackSimProtoTracks.key());
         return StatusCode::FAILURE;
+      }
+      processFPGAPrototracks(FPGATrackSimProtoTracks);
     }
-    processFPGAPrototracks(FPGATrackSimProtoTracks);
-
     return StatusCode::SUCCESS;
 }
 
@@ -73,57 +73,60 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::finalize()
 {
     ATH_MSG_INFO("Printing statistics for FPGA objects");
 
-    // Printing summary for clusters/FPGATracks 
-    std::string summaryTableFPGATracks = "\n"
+    if (!m_isDataPrep.value()) {
+      // Printing summary for clusters/FPGATracks 
+      std::string summaryTableFPGATracks = "\n"
         "Number of measurements for FPGA Tracks\n"
         "|-----------------------------------|\n"
         "|        |  min |  max |      Avg   |\n"
         "|-----------------------------------|\n";
-
-    if (not m_pixelClustersPerFPGATrack.empty()) {
+      
+      if (not m_pixelClustersPerFPGATrack.empty()) {
         summaryTableFPGATracks += std::format("| Pixels | {:>4} | {:>4} | {:>10.2f} |\n",
-            *std::min_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
-            *std::max_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
-            std::accumulate(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end(), 0.0) / m_pixelClustersPerFPGATrack.size());
-    }
-    else summaryTableFPGATracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
-
-    if (not m_stripClustersPerFPGATrack.empty()) {
+					      *std::min_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
+					      *std::max_element(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end()),
+					      std::accumulate(m_pixelClustersPerFPGATrack.begin(), m_pixelClustersPerFPGATrack.end(), 0.0) / m_pixelClustersPerFPGATrack.size());
+      }
+      else summaryTableFPGATracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
+      
+      if (not m_stripClustersPerFPGATrack.empty()) {
         summaryTableFPGATracks += std::format("| Strips | {:>4} | {:>4} | {:>10.2f} |\n",
-            *std::min_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
-            *std::max_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
-            std::accumulate(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end(), 0.0) / m_stripClustersPerFPGATrack.size());
+					      *std::min_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
+					      *std::max_element(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end()),
+					      std::accumulate(m_stripClustersPerFPGATrack.begin(), m_stripClustersPerFPGATrack.end(), 0.0) / m_stripClustersPerFPGATrack.size());
+      }
+      else summaryTableFPGATracks += std::format("| Strips | ---- | ---- |      inf   |\n");
+      
+      summaryTableFPGATracks += "|-----------------------------------|";
+      ATH_MSG_INFO( summaryTableFPGATracks );
+      
+      
+      // Printing summary for clusters/prototracks
+      std::string summaryTableFPGAPrototracks = std::format("\n"
+							    "Number of measurements for FPGA Prototracks\n"
+							    "|-----------------------------------|\n"
+							    "|        |  min |  max |      Avg   |\n"
+							    "|-----------------------------------|\n");
+      
+      if (not m_pixelClustersPerPrototrack.empty()) {
+	summaryTableFPGAPrototracks += std::format("| Pixels | {:>4} | {:>4} | {:>10.2f} |\n",
+						   *std::min_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
+						   *std::max_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
+						   std::accumulate(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end(), 0.0) / m_pixelClustersPerPrototrack.size());
+      }
+      else summaryTableFPGAPrototracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
+      
+      if (not m_stripClustersPerPrototrack.empty()) {
+	summaryTableFPGAPrototracks += std::format("| Strips | {:>4} | {:>4} | {:>10.2f} |\n",
+						   *std::min_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
+						   *std::max_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
+						   std::accumulate(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end(), 0.0) / m_stripClustersPerPrototrack.size());
+      }
+      else summaryTableFPGAPrototracks += std::format("| Strips | ---- | ---- |      inf   |\n");
+      
+      summaryTableFPGAPrototracks += "|-----------------------------------|";
+      ATH_MSG_INFO( summaryTableFPGAPrototracks );
     }
-    else summaryTableFPGATracks += std::format("| Strips | ---- | ---- |      inf   |\n");
-    
-    summaryTableFPGATracks += "|-----------------------------------|";
-    ATH_MSG_INFO( summaryTableFPGATracks );
-
-    // Printing summary for clusters/prototracks
-    std::string summaryTableFPGAPrototracks = std::format("\n"
-        "Number of measurements for FPGA Prototracks\n"
-        "|-----------------------------------|\n"
-        "|        |  min |  max |      Avg   |\n"
-        "|-----------------------------------|\n");
-
-    if (not m_pixelClustersPerPrototrack.empty()) {
-        summaryTableFPGAPrototracks += std::format("| Pixels | {:>4} | {:>4} | {:>10.2f} |\n",
-            *std::min_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
-            *std::max_element(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end()),
-            std::accumulate(m_pixelClustersPerPrototrack.begin(), m_pixelClustersPerPrototrack.end(), 0.0) / m_pixelClustersPerPrototrack.size());
-    }
-    else summaryTableFPGAPrototracks += std::format("| Pixels | ---- | ---- |      inf   |\n");
-
-    if (not m_stripClustersPerPrototrack.empty()) {
-        summaryTableFPGAPrototracks += std::format("| Strips | {:>4} | {:>4} | {:>10.2f} |\n",
-            *std::min_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
-            *std::max_element(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end()),
-            std::accumulate(m_stripClustersPerPrototrack.begin(), m_stripClustersPerPrototrack.end(), 0.0) / m_stripClustersPerPrototrack.size());
-    }
-    else summaryTableFPGAPrototracks += std::format("| Strips | ---- | ---- |      inf   |\n");
-
-    summaryTableFPGAPrototracks += "|-----------------------------------|";
-    ATH_MSG_INFO( summaryTableFPGAPrototracks );
 
     return StatusCode::SUCCESS;
 }
@@ -155,7 +158,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
             cluster->identifier());
     }
     mainTable += "|=========================================================================================|";
-    ATH_MSG_DEBUG("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
+    ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
 }
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processFPGARoads(SG::ReadHandle<FPGATrackSimRoadCollection>& FPGARoads) const
@@ -206,7 +209,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
         }
         mainTable += "|--------------------------------------------------------------------------------------------------|\n";
     }
-    ATH_MSG_DEBUG("List of FPGA roads for " << FPGARoads.key() << mainTable);
+    ATH_MSG_INFO("List of FPGA roads for " << FPGARoads.key() << mainTable);
 }
 
 
@@ -268,7 +271,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGA
         }
         maintable += "|--------------------------------------------------------------------------------------------------|\n";
     }
-    ATH_MSG_DEBUG("List of FPGA tracks for " << FPGATracks.key() << maintable);
+    ATH_MSG_INFO("List of FPGA tracks for " << FPGATracks.key() << maintable);
 }
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processFPGAPrototracks(SG::ReadHandle<ActsTrk::ProtoTrackCollection>& FPGAPrototracks) const
@@ -351,5 +354,5 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGAPrototracks(SG::ReadHandle
         }
         mainTable +=  "|---------------------------------------------------------------------------------------------|\n";
     }
-    ATH_MSG_DEBUG("Printing out prototracks coming from " << FPGAPrototracks.key() << mainTable);
+    ATH_MSG_INFO("Printing out prototracks coming from " << FPGAPrototracks.key() << mainTable);
 }

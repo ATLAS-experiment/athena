@@ -11,7 +11,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
-#include "FPGATrackSimDataFlowTool.h"
 #include "FPGATrackSimNNTrackTool.h"
 #include "FPGATrackSimOverlapRemovalTool.h"
 #include "FPGATrackSimTrackFitterTool.h"
@@ -68,7 +67,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_CHECK(m_trackFitterTool_1st.retrieve(EnableTool{m_doTracking}));
     ATH_CHECK(m_overlapRemovalTool_1st.retrieve());
-    ATH_CHECK(m_dataFlowTool.retrieve());
     ATH_CHECK(m_writeOutputTool.retrieve());
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
 
@@ -337,10 +335,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Write the output and reset
     if (m_writeOutputData)  {
-    //  TODO do we need to do this here? Is anyone using it?
-    //  If we need to do this here then we need to pass the logicEventInputHeader and the clusters
-    //  to this algorithm.
-    //  ATH_CHECK(m_dataFlowTool->calculateDataFlow(dataFlowInfo.get(), m_logicEventHeader_1st, m_clusters_1st, roads_1st, tracks_1st, roads_2nd, tracks_2nd));
         ATH_CHECK(writeOutputData(roads_1st, tracks_1st, dataFlowInfo.get()));
     }
 

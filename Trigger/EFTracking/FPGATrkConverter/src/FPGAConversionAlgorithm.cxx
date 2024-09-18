@@ -8,36 +8,34 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
   AthReentrantAlgorithm( name, pSvcLocator ){}
 
   StatusCode FPGAConversionAlgorithm::initialize() {
-
     ATH_CHECK(m_ClusterConverter.retrieve());
 
     ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters));
+    ATH_CHECK(m_FPGASPKey.initialize(m_doSP));
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGAHitInRoadsKey.initialize(m_doActsTrk));
     ATH_CHECK(m_FPGATrackKey.initialize(m_doActsTrk));
-
     ATH_CHECK(m_xAODPixelClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODStripClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODPixelClusterFromFPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_xAODStripClusterFromFPGAHitKey.initialize(m_doHits));
+    ATH_CHECK(m_xAODStripClusterFromFPGASPKey.initialize(m_doSP));    
     ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk));
     ATH_CHECK(m_ActsProtoTrackFromFPGATrackKey.initialize(m_doActsTrk));
-
     ATH_CHECK(m_outputStripClusterContainerKey.initialize(m_doClusters));
     ATH_CHECK(m_outputPixelClusterContainerKey.initialize(m_doClusters));
-
     return StatusCode::SUCCESS;
   }
 
   StatusCode FPGAConversionAlgorithm::execute(const EventContext& ctx) const {
-
     std::unique_ptr<InDet::PixelClusterCollection> PixelCollFromHits = std::make_unique<InDet::PixelClusterCollection>(); 
     std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromHits = std::make_unique<InDet::SCT_ClusterCollection>(); 
 
     std::unique_ptr<InDet::PixelClusterCollection> PixelCollFromClusters = std::make_unique<InDet::PixelClusterCollection>(); 
-    std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromClusters = std::make_unique<InDet::SCT_ClusterCollection>(); 
+    std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromClusters = std::make_unique<InDet::SCT_ClusterCollection>();
 
+    std::unique_ptr<InDet::SCT_ClusterCollection> SCTCollFromSP = std::make_unique<InDet::SCT_ClusterCollection>();     
     std::unique_ptr<xAOD::PixelClusterContainer> PixelContFromHits = std::make_unique<xAOD::PixelClusterContainer>();
     std::unique_ptr<xAOD::PixelClusterAuxContainer> PixelAuxContFromHits = std::make_unique<xAOD::PixelClusterAuxContainer>();
     PixelContFromHits->setStore (PixelAuxContFromHits.get());
@@ -49,30 +47,41 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     std::unique_ptr<xAOD::PixelClusterContainer> PixelContFromClusters = std::make_unique<xAOD::PixelClusterContainer>();
     std::unique_ptr<xAOD::PixelClusterAuxContainer> PixelAuxContFromClusters = std::make_unique<xAOD::PixelClusterAuxContainer>();
     PixelContFromClusters->setStore (PixelAuxContFromClusters.get());
-
     std::unique_ptr<xAOD::StripClusterContainer> SCTContFromClusters = std::make_unique<xAOD::StripClusterContainer>();
     std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromClusters = std::make_unique<xAOD::StripClusterAuxContainer>();
     SCTContFromClusters->setStore(SCTAuxContFromClusters.get() );
 
+    std::unique_ptr<xAOD::StripClusterContainer> SCTContFromSP = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromSP = std::make_unique<xAOD::StripClusterAuxContainer>();    
+    SCTContFromSP->setStore(SCTAuxContFromSP.get() );
+    
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromRoads = std::make_unique<ActsTrk::ProtoTrackCollection>();
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromTracks = std::make_unique<ActsTrk::ProtoTrackCollection>();
 
+    if (m_doSP) {
+      SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle = SG::ReadHandle<FPGATrackSimClusterCollection>(m_FPGASPKey, ctx);
+      const FPGATrackSimClusterCollection *FPGASPColl = FPGASPHandle.cptr();
+      std::unique_ptr<InDet::PixelClusterCollection> dummyColl = std::make_unique<InDet::PixelClusterCollection>();
+      std::unique_ptr<xAOD::PixelClusterContainer> dummyCont = std::make_unique<xAOD::PixelClusterContainer>();
+      ATH_CHECK( m_ClusterConverter->convertClusters(*FPGASPColl, *dummyColl, *SCTCollFromSP) );
+      ATH_CHECK( m_ClusterConverter->convertClusters(*FPGASPColl, *dummyCont, *SCTContFromSP) );
+      SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGASPHandle (m_xAODStripClusterFromFPGASPKey, ctx);
+      ATH_CHECK( xAODStripClusterFromFPGASPHandle.record (std::move(SCTContFromSP), std::move(SCTAuxContFromSP)));
+    }
+    
     if (m_doClusters) {
       
       SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
-
       if (FPGAClustersHandle.isValid()) { // To avoid running over events that didn't pass truth tracks selections
-
         const FPGATrackSimClusterCollection *FPGAClusterColl = FPGAClustersHandle.cptr();
 
         // Convert to InDet clusters
         ATH_MSG_DEBUG("InDet Clusters CONVERSION");
         ATH_CHECK( m_ClusterConverter->convertClusters(*FPGAClusterColl, *PixelCollFromClusters, *SCTCollFromClusters) );
-
+	  
         // Convert to xAOD clusters
         ATH_MSG_DEBUG("xAOD Clusters CONVERSION");
         ATH_CHECK( m_ClusterConverter->convertClusters(*FPGAClusterColl, *PixelContFromClusters, *SCTContFromClusters) );
-
         if (m_doActsTrk) {
           SG::ReadHandle<FPGATrackSimRoadCollection> FPGARoadsHandle (m_FPGARoadKey, ctx);
           if (!FPGARoadsHandle.isValid()) {
@@ -104,12 +113,11 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       }
 
       else {ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimClusterCollection. Will skip clusters and track conversion ");}
-
       SG::WriteHandle<xAOD::PixelClusterContainer> xAODPixelClusterFromFPGAClusterHandle (m_xAODPixelClusterFromFPGAClusterKey, ctx);
       SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAClusterHandle (m_xAODStripClusterFromFPGAClusterKey, ctx);
+
       ATH_CHECK( xAODPixelClusterFromFPGAClusterHandle.record (std::move(PixelContFromClusters), std::move(PixelAuxContFromClusters)));
       ATH_CHECK( xAODStripClusterFromFPGAClusterHandle.record (std::move(SCTContFromClusters), std::move(SCTAuxContFromClusters)));
-
       if(m_doActsTrk)
       {
         SG::WriteHandle<ActsTrk::ProtoTrackCollection> ActsProtoTrackFromFPGARoadHandle (m_ActsProtoTrackFromFPGARoadKey, ctx);
@@ -118,7 +126,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         ATH_CHECK( ActsProtoTrackFromFPGATrackHandle.record (std::move(ProtoTracksFromTracks)));
       }
     }  
-
 
     if (m_doHits) {
 
@@ -132,7 +139,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
         ATH_CHECK( m_ClusterConverter->convertHits(*FPGAHitColl, *PixelCollFromHits, *SCTCollFromHits) );
         ATH_MSG_DEBUG("xAOD Hits CONVERSION");
         ATH_CHECK( m_ClusterConverter->convertHits(*FPGAHitColl, *PixelContFromHits, *SCTContFromHits) );
-
       }
 
       else {ATH_MSG_WARNING("Failed to retrieve 1st stage FPGATrackSimHitCollection. Will skip hit conversion ");}
@@ -142,7 +148,6 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
       SG::WriteHandle<xAOD::StripClusterContainer> xAODStripClusterFromFPGAHitHandle (m_xAODStripClusterFromFPGAHitKey, ctx);
       ATH_CHECK( xAODPixelClusterFromFPGAHitHandle.record (std::move(PixelContFromHits),std::move(PixelAuxContFromHits)));
       ATH_CHECK( xAODStripClusterFromFPGAHitHandle.record (std::move(SCTContFromHits),std::move(SCTAuxContFromHits)));
-
     }
 
     return StatusCode::SUCCESS;
