@@ -300,6 +300,7 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
         CompFactory.PFAlgorithm(
             f"PFAlgorithm_{tracktype}",
             PFClusterSelectorTool = getPFClusterSelectorTool(
+                inputFlags,
                 clustersin,
                 calclustersin,
                 "PFClusterSelectorTool",

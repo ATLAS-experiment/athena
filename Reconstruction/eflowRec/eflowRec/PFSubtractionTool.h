@@ -16,6 +16,7 @@
 #include "eflowRec/PFMatchPositions.h"
 #include "eflowRec/PFTrackClusterMatchingTool.h"
 #include "eflowRec/PFCalcRadialEnergyProfiles.h"
+#include "eflowRec/PFSimulateTruthShowerTool.h"
 #include "eflowRec/PFSubtractionStatusSetter.h"
 #include "eflowRec/PFSubtractionEnergyRatioCalculator.h"
 #include "eflowRec/eflowSubtractor.h"
@@ -48,6 +49,8 @@ private:
 
   void performSubtraction(const unsigned int& startingPoint,PFData &data) const;
   void performSubtraction(eflowCaloObject& thisEflowCaloObject) const;
+  void performTruthSubtraction(PFData &data) const;
+  void performTruthSubtraction(eflowCaloObject& thisEflowCaloObject) const;
 
   bool isEOverPFail(double expectedEnergy, double sigma, double clusterEnergy) const;
 
@@ -104,6 +107,21 @@ private:
   
   /** Toggle whether we use the neural net energy */
   Gaudi::Property<bool> m_useNNEnergy{this, "useNNEnergy", false, "Toggle whether we use the neural net energy"};
+
+  //Only turn this on for MC samples without pileup that have calibration hits avaialble
+  /** Toggle whether to cheat and use truth information for track-cluster matching - only for performance studies! */
+  Gaudi::Property<bool> m_useTruthMatching{this, "useTrackClusterTruthMatching", false, "Toggle whether to cheat and use truth information for track-cluster matching"};
+
+  /** Toggle whether we use truth information for the charged shower subtraction or not */
+  Gaudi::Property<bool> m_useTruthForChargedShowerSubtraction{this, "useTruthForChargedShowerSubtraction", false, "Toggle whether we use truth information for the charged shower subtraction or not"};
+
+  /**Toggle whether we fully remove a cell with a truth deposit or reweight it based on truth contribution */
+  Gaudi::Property<bool> m_useFullCellTruthSubtraction{this,"useFullCellTruthSubtraction",false,"Toggle whether we fully remove a cell with a truth deposit or reweight it based on truth contribution"};
+
+  ToolHandle<PFSimulateTruthShowerTool> m_theTruthShowerSimulator{this, "PFSimulateTruthShowerTool", "", "The truth shower simulator"};
+
+  /** Read handle key to decorate CaloCluster with threeN leading truth particle barcode and energy */
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_caloClusterReadDecorHandleKeyNLeadingTruthParticles{this,"CaloClusterReadDecorHandleKey_NLeadingTruthParticles",""};
 
   /** Further discussion about why this flag exists can be found in https://its.cern.ch/jira/browse/ATLJETMET-1692
    and https://indico.cern.ch/event/1388633/contributions/5837876/attachments/2809591/4903439/PFlow_EOverP_Feb2024.pdf
