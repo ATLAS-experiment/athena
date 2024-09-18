@@ -44,4 +44,62 @@ BOOST_AUTO_TEST_CASE(MultiRangeAccessors){
   BOOST_TEST(m2.has_overlap() == false, "has_overlap returns false for disjoint ranges");
 }
 
+BOOST_AUTO_TEST_CASE(MultiRangeRepresentation){
+  Range p1;
+  p1.build("-1:5");
+  Range p2;
+  p2.build("4:10");
+  MultiRange m(p1,p2);
+  std::ostringstream os;
+  BOOST_CHECK_NO_THROW(m.show(os));
+  BOOST_TEST_MESSAGE(os.str());
+  BOOST_TEST(os.str() == "-1:5 (3=3) \n4:10 (3=3) ");
+  std::string s;
+  BOOST_CHECK_NO_THROW(s = std::string(m));
+  BOOST_TEST_MESSAGE(s);
+  BOOST_TEST(s == "-1:5 | 4:10");
+}
+
+
+
+
+BOOST_AUTO_TEST_CASE(MultiRangeModifiers){
+  Range p1;
+  p1.build("-1:5");
+  Range p2;
+  p2.build("4:10");
+  MultiRange m(p1,p2);
+  BOOST_TEST(m.size() == 2,"Size is 2 before adding a list"); //initially 2 elements
+  Range p3;
+  p3.build("-1,1");
+  //add a range
+  BOOST_CHECK_NO_THROW(m.add(p3));
+  BOOST_TEST(m.size() == 3, "Size is 3 after adding a list"); //three elements now
+  Range p4;
+  p4.build("20:30");
+  BOOST_CHECK_NO_THROW(m.add(std::move(p4)));
+  BOOST_TEST(m.size() == 4, "Size is 4 after adding a move(bounds)"); //three elements now
+  ExpandedIdentifier i("-3/-2/-1/1/2/2");
+  BOOST_CHECK_NO_THROW(m.add(i));
+  BOOST_TEST(m.size() == 5, "Size is 5 after adding an ExpandedIdentifier");
+  //what does that look like??
+  BOOST_TEST_MESSAGE(std::string(m));//-1:5 | 4:10 | -1,1 | 20:30 | -3/-2/-1/1/2/2
+  BOOST_CHECK_NO_THROW(m.remove_range(i));
+  BOOST_TEST(m.size() == 4, "Size is 4 after removing an ExpandedIdentifier");
+  p4.build("20:30");//rebuild, because it was moved
+  BOOST_TEST(m.back() == p4);
+  BOOST_CHECK_NO_THROW(m.clear());
+  BOOST_TEST(m.size() == 0, "Size is zero after clear()");
+}
+
+BOOST_AUTO_TEST_CASE(MultiRangeMatch){
+  MultiRange m;
+  ExpandedIdentifier i("-3/-2/-1/1/2/2");
+  ExpandedIdentifier j("-3/-2/-1/1/2/3");
+  m.add(i);
+  BOOST_TEST(m.match(i) == true);
+  ExpandedIdentifier k("-3/-2/-1/1/2/1");
+  BOOST_TEST(m.match(k) == false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

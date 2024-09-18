@@ -90,9 +90,6 @@ public:
   /// Remove a Range made from a single ExpandedIdentifier
   void remove_range (const ExpandedIdentifier& id); 
  
-  /// Create a new empty Range that can be adapted afterwards 
-  Range& add_range (); 
- 
   /// Get the last entered Range 
   Range& back (); 
  
@@ -108,13 +105,13 @@ public:
   /** 
    *  Computes a possible cardinality from all ranges. 
    */ 
-  size_type cardinality () const; 
+  size_type cardinality () const;
+  
   //  Up to a given id
   size_type cardinalityUpTo (const ExpandedIdentifier& id) const;
  
   /// Check if there are overlaps between any couple of Ranges 
-  bool has_overlap () const; 
-  void reduce (); 
+  bool has_overlap() const; 
  
   // identifier_factory management 
   identifier_factory 		factory_begin (); 
@@ -125,8 +122,6 @@ public:
   void show (std::ostream& s) const; 
   /// Generate a textual representation of the multirange using the input format 
   operator std::string () const; 
-  void show_all_ids (std::vector <ExpandedIdentifier>& unique_ids, 
-                     std::vector <ExpandedIdentifier>& duplicate_ids) const; 
  
   private: 
     friend class identifier_factory;
