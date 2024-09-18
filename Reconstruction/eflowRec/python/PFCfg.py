@@ -39,7 +39,7 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
 
     return result
 
-def getPFClusterSelectorTool(clustersin,calclustersin,algName):
+def getPFClusterSelectorTool(inputFlags,clustersin,calclustersin,algName):
 
     PFClusterSelectorToolFactory = CompFactory.PFClusterSelectorTool
     PFClusterSelectorTool = PFClusterSelectorToolFactory(algName)
@@ -47,6 +47,10 @@ def getPFClusterSelectorTool(clustersin,calclustersin,algName):
         PFClusterSelectorTool.clustersName = clustersin
     if calclustersin is not None:
         PFClusterSelectorTool.calClustersName = calclustersin
+
+    if inputFlags.PF.useTruthCheating:
+        if inputFlags.PF.useTrackClusterTruthMatching: 
+            PFClusterSelectorTool.CaloClusterReadDecorHandleKey_NLeadingTruthParticles = "CaloTopoClusters." + inputFlags.Calo.TopoCluster.CalibrationHitDecorationName
 
     return PFClusterSelectorTool
 
@@ -94,6 +98,15 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
         PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFCellLevelEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
         PFCellLevelSubtractionTool.NNEnergyPredictorTool = PFEnergyPredictorTool
     PFCellLevelSubtractionTool.addCPData = inputFlags.PF.addCPData
+
+    if inputFlags.PF.useTruthCheating:
+        if inputFlags.PF.useTrackClusterTruthMatching: 
+            PFCellLevelSubtractionTool.CaloClusterReadDecorHandleKey_NLeadingTruthParticles = "CaloTopoClusters." + inputFlags.Calo.TopoCluster.CalibrationHitDecorationName
+            PFCellLevelSubtractionTool.useTrackClusterTruthMatching=True
+
+        if inputFlags.PF.useTruthForChargedShowerSubtraction:
+            PFCellLevelSubtractionTool.useTruthForChargedShowerSubtraction = True
+            PFCellLevelSubtractionTool.PFSimulateTruthShowerTool = CompFactory.PFSimulateTruthShowerTool("PFSimulateTruthShowerTool")
 
     return PFCellLevelSubtractionTool
 
@@ -436,14 +449,14 @@ def getOfflinePFAlgorithm(inputFlags):
     
     
     if inputFlags.HeavyIon.Egamma.doSubtractedClusters: 
-        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags.HeavyIon.Egamma.UncalibCaloTopoCluster,inputFlags.HeavyIon.Egamma.CaloTopoCluster,"PFClusterSelectorTool")
+        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags,inputFlags.HeavyIon.Egamma.UncalibCaloTopoCluster,inputFlags.HeavyIon.Egamma.CaloTopoCluster,"PFClusterSelectorTool")
     else:
         topoClustersName="CaloTopoClusters"
-        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")
+        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags,topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")
     
     PFAlgorithm.SubtractionToolList = [getPFCellLevelSubtractionTool(inputFlags,"PFCellLevelSubtractionTool")]
 
-    if(False is inputFlags.PF.EOverPMode):
+    if(False is inputFlags.PF.EOverPMode and False is inputFlags.PF.useTruthCheating):
         PFAlgorithm.SubtractionToolList += [getPFRecoverSplitShowersTool(inputFlags,"PFRecoverSplitShowersTool")]
 
     PFMomentCalculatorTools=result.popToolsAndMerge(getPFMomentCalculatorTool(inputFlags,[]))

@@ -10,6 +10,10 @@
 #include "eflowRec/PFClusterFiller.h"
 #include "eflowRec/PFTrackFiller.h"
 
+#include "StoreGate/ReadDecorHandle.h"
+#include "xAODCaloEvent/CaloClusterKineHelper.h"
+#include "xAODTruth/TruthParticleContainer.h"
+
 using namespace eflowSubtract;
 
 PFSubtractionTool::PFSubtractionTool(const std::string &type, const std::string &name, const IInterface *parent) : base_class(type, name, parent),
@@ -46,6 +50,13 @@ StatusCode PFSubtractionTool::initialize()
   m_pfSubtractionStatusSetter.msg().setLevel(this->msg().level());
   m_pfSubtractionEnergyRatioCalculator.msg().setLevel(this->msg().level());
   m_subtractor.m_facilitator.msg().setLevel(this->msg().level());
+
+  if (!m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.empty()){
+    ATH_CHECK(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.initialize());
+  }
+
+  if (m_useTruthForChargedShowerSubtraction && !m_theTruthShowerSimulator.empty()) ATH_CHECK(m_theTruthShowerSimulator.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -71,8 +82,11 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
   if (msgLvl(MSG::DEBUG)) printAllClusters(*recClusterContainer);
 
   if (!m_calcEOverP){
-    if (!m_recoverSplitShowers) performSubtraction(0,data);
-    else performSubtraction(numMatches,data);
+    if (!m_useTruthForChargedShowerSubtraction){
+      if (!m_recoverSplitShowers) performSubtraction(0,data);
+      else performSubtraction(numMatches,data);
+    }
+    else performTruthSubtraction(data);
   }
   else{
     m_pfCalc.calculate(data);
@@ -109,7 +123,51 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
     std::vector<eflowTrackClusterLink*> bestClusters;
     std::vector<float> deltaRPrime;
 
-    if (!m_recoverSplitShowers){
+    if (m_useTruthMatching){
+
+      const xAOD::TruthParticle* trackMatchedTruthParticle = nullptr;
+      typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
+
+      const static SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
+      
+      TruthLink truthLink = truthLinkAccessor(*(thisEfRecTrack->getTrack()));
+      //if not valid don't print a WARNING because this is an expected condition as discussed here:
+      //https://indico.cern.ch/event/795039/contributions/3391771/attachments/1857138/3050771/TruthTrackFTAGWS.pdf
+      if (truthLink.isValid()) trackMatchedTruthParticle = *truthLink;
+ 
+      if (trackMatchedTruthParticle){
+        double barcode = trackMatchedTruthParticle->barcode();
+
+        SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
+        if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
+          ATH_MSG_WARNING("Failed to retrieve CaloCluster decoration with key " << caloClusterReadDecorHandleNLeadingTruthParticles.key());
+        }
+
+        for (auto * thisCluster : data.clusters){
+          //accessor for decoration
+          //split key into substring to get the name of the decoration
+
+          std::string decorHandleName = m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.key();
+          std::string::size_type pos = decorHandleName.find(".");
+          std::string decorName = decorHandleName.substr(pos+1);
+
+          SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
+
+          std::vector<std::pair<unsigned int, double > > barCodeTruthPairs = accessor(*(thisCluster->getCluster()));
+
+          for (auto &barCodeTruthPair : barCodeTruthPairs){
+            if (barCodeTruthPair.first == barcode){
+              eflowTrackClusterLink* thisLink = eflowTrackClusterLink::getInstance(thisEfRecTrack, thisCluster, ctx);
+              bestClusters.push_back(thisLink);
+              break;
+            }
+          }//loop over calocluster truth pair decorations
+        }//loop over caloclusters
+        
+      }//if have truth particle matched to track
+      else ATH_MSG_WARNING("Track with pt, eta and phi " << thisEfRecTrack->getTrack()->pt() << ", " << thisEfRecTrack->getTrack()->eta() << " and " << thisEfRecTrack->getTrack()->phi() << " does not have a valid truth pointer");
+    }
+    else if (!m_recoverSplitShowers){
       /** Add cluster matches needed for pull calculation (in eflowCaloObject::simulateShowers) which is used to determine whether to run the charged shower subtraction or not.
       / Clusters in both a cone of 0.15 and 0.2 are needed for this.
       / The clusters in a cone of 0.2 are also used as the matched cluster list for recover split showers mode.    
@@ -170,10 +228,12 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
       eflowTrackClusterLink *trackClusterLink = eflowTrackClusterLink::getInstance(thisEfRecTrack, thisEFRecCluster, ctx);
       thisEfRecTrack->addClusterMatch(trackClusterLink);
-      if (m_addCPData) thisEfRecTrack->addDeltaRPrime(deltaRPrime[linkIndex]);
+      if (m_addCPData && !m_useTruthMatching) {
+        thisEfRecTrack->addDeltaRPrime(deltaRPrime[linkIndex]);
+      }
       thisEFRecCluster->addTrackMatch(trackClusterLink);
     }
-    linkIndex++;
+     linkIndex++;
   }
 
   /* Create 3 types eflowCaloObjects: track-only, cluster-only, track-cluster-link */
@@ -207,7 +267,9 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   //For each eflowCaloObject we calculate the expected energy deposit in the calorimeter and cell ordering for subtraction.  
   for (unsigned int iCalo = nCaloObj; iCalo < data.caloObjects->size(); ++iCalo) {  
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
-    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);        
+    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);
+    if (m_useTruthForChargedShowerSubtraction) m_theTruthShowerSimulator->simulateShower(*thisEflowCaloObject);    
+
   }
 
   if (!m_recoverSplitShowers) return nMatches;
@@ -413,6 +475,72 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
 
     }//loop over tracks in eflowCaloObject
   }//cell by cell subtraction
+
+}
+
+void PFSubtractionTool::performTruthSubtraction(PFData &data) const{
+
+  ATH_MSG_DEBUG("In performTruthSubtraction");
+
+  unsigned int nEFCaloObs = data.caloObjects->size();
+
+  for (unsigned int iCalo = 0; iCalo < nEFCaloObs; ++iCalo) {
+    eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
+    this->performTruthSubtraction(*thisEflowCaloObject);
+  }
+
+}
+
+void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloObject) const{
+
+  for (unsigned iTrack = 0; iTrack < thisEflowCaloObject.nTracks(); ++iTrack){
+    eflowRecTrack *thisEfRecTrack = thisEflowCaloObject.efRecTrack(iTrack);
+
+    //although we are subtracting the truth, to be consistent we only do it if a reco
+    //e/p lookup bin exists for this track
+    if (!thisEfRecTrack->hasBin()) continue;
+
+    //Similarly we skip tracks in a dense environment
+    if (thisEfRecTrack->isInDenseEnvironment()) continue;
+
+    thisEfRecTrack->setSubtracted();
+
+    //get the set of matched clusters
+    std::vector<eflowTrackClusterLink *> links = thisEfRecTrack->getClusterMatches();
+
+    for (auto thisLink : links){
+      xAOD::CaloCluster *thisCluster = thisLink->getCluster()->getCluster();
+      CaloClusterCellLink* theCellLinks = thisCluster->getOwnCellLinks();
+      CaloClusterCellLink::iterator theCell = theCellLinks->begin();
+      CaloClusterCellLink::iterator lastCell = theCellLinks->end();
+
+      //loop over the cells in this cluster and subtract shower using truth information
+      //We can either remove a cell entireley if it has any truth deposit (closer to what the real 
+      //reco algorithm does) or reweight the cells contribution based on subtracting the truth
+      //energy from the reco cell energy
+
+      for (; theCell != lastCell; theCell++){
+        //get the truth energy for this cell
+        double truthEnergy = thisEfRecTrack->getCellTruthEnergy(*theCell);
+        //reweight the cell such that energy*weight gives the new energy
+        double oldCellEnergy = theCell->energy()*(theCell.weight());
+        double subtractedCellWeight = (oldCellEnergy - truthEnergy)/oldCellEnergy;
+
+        if (0.0 != truthEnergy && m_useFullCellTruthSubtraction) thisCluster->removeCell(*theCell);
+        else if (!m_useFullCellTruthSubtraction) theCell.reweight(subtractedCellWeight);
+      }//cell loop
+
+      float oldEnergy = thisCluster->e();
+      CaloClusterKineHelper::calculateKine(thisCluster, true, true);
+      if (0.0 != oldEnergy) {
+        float energyAdjustment = thisCluster->e() / oldEnergy;
+        thisCluster->setRawE(thisCluster->rawE() * energyAdjustment);
+        thisCluster->setRawEta(thisCluster->eta());
+        thisCluster->setRawPhi(thisCluster->phi());
+      }
+    }
+
+  }//eflowCaloObject track loop
 
 }
 

@@ -98,3 +98,14 @@ const std::vector<eflowTrackClusterLink*>* eflowRecTrack::getAlternativeClusterM
   return nullptr;
 
 }
+
+void eflowRecTrack::insertTruthEnergyPair (const CaloCell* cell, double truthEnergy){
+  if (m_cellTruthEnergyStore.count(cell->ID()) == 0) m_cellTruthEnergyStore[cell->ID()] = truthEnergy;
+  else m_cellTruthEnergyStore[cell->ID()] += truthEnergy;
+}
+
+double eflowRecTrack::getCellTruthEnergy (const CaloCell* cell) const{
+  if (m_cellTruthEnergyStore.count(cell->ID()) == 0) return 0.0;
+  else return m_cellTruthEnergyStore.at(cell->ID());
+}
+

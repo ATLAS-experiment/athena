@@ -55,6 +55,9 @@ private:
     "input"
   };
 
+  /** Read handle key to decorate CaloCluster with threeN leading truth particle barcode and energy */
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_caloClusterReadDecorHandleKeyNLeadingTruthParticles{this,"CaloClusterReadDecorHandleKey_NLeadingTruthParticles",""};
+
   /** ReadCondHandleKey for CaloDetDescrManager */
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{
     this,

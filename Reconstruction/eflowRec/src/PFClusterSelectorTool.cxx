@@ -18,6 +18,11 @@ StatusCode PFClusterSelectorTool::initialize(){
   if(!m_caloCalClustersReadHandleKey.key().empty()) {
     ATH_CHECK(m_caloCalClustersReadHandleKey.initialize());
   }
+
+  if (!m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.empty()){
+    ATH_CHECK(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.initialize());
+  }
+
   ATH_CHECK(m_caloMgrKey.initialize());
 
   return StatusCode::SUCCESS;
@@ -57,6 +62,16 @@ PFClusterSelectorTool::execute(
       retrieveLCCalCellWeight(caloClustersReadHandle->at(iCluster)->e(), iCluster, cellsWeightMap, *calclusters,**caloMgrHandle);
 
       thisEFRecCluster->setCellsWeight(std::move(cellsWeightMap));
+    }
+
+    if (!m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.empty()){
+
+      std::string decorHandleName = m_caloClusterReadDecorHandleKeyNLeadingTruthParticles.key();
+      std::string::size_type pos = decorHandleName.find(".");
+      std::string decorName = decorHandleName.substr(pos+1);
+
+      SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
+      accessor(*theCaloClusterContainer[iCluster]) = accessor(*caloClustersReadHandle->at(iCluster));
     }
 
     thisEFRecCluster->setClusterId(iCluster);

@@ -17,6 +17,8 @@
 #include <map>
 #include <string>
 
+#include "CaloEvent/CaloCell.h"
+
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -122,6 +124,9 @@ public:
   void setpull15(double pull15){ m_pull15 = pull15; }
   double getpull15() const { return m_pull15; }
 
+  void insertTruthEnergyPair (const CaloCell* cell, double truthEnergy);
+  double getCellTruthEnergy (const CaloCell* cell) const;
+
 private:
 
   int m_trackId;
@@ -152,6 +157,10 @@ private:
   /** List of distance measurements between track and cluster used in first pass matching - i.e dRPrime */
   std::vector<float> m_deltaRPrimes;
   std::map<std::string,std::vector<eflowTrackClusterLink*> > m_alternativeClusterMatches;
+
+  //for truth cheating mode only, we store the list of cells and their truth energies
+  std::vector<std::pair<const CaloCell*, double> > m_cellTruthEnergyList;
+  std::map<Identifier,double> m_cellTruthEnergyStore;
 
   IMessageSvc* m_msgSvc{};
   std::unique_ptr<MsgStream> m_mlog;
