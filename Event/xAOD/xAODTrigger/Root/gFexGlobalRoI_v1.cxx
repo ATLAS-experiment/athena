@@ -150,10 +150,10 @@ namespace xAOD {
     return -999;
    }
    /// SumEt() is for converting SumEt (METy, MHTy, MSTy)
-   /// Note that SumEt is the only quanity that use a different scale (ScaleTwo)
+   /// Note that SumEt is currently using scale one (200 MeV), but might change in the future
    float gFexGlobalRoI_v1::SumEt() const {
     if (globalType() == gScalar ){
-        return quantityTwo()*tobEtScaleTwo();
+        return quantityTwo()*tobEtScaleOne();
     }
     return -999;
    }
