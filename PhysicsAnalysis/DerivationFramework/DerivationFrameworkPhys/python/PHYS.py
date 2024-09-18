@@ -173,6 +173,8 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.IncludeBJetTriggerContent = False
     PHYSSlimmingHelper.IncludeBPhysTriggerContent = False
     PHYSSlimmingHelper.IncludeMinBiasTriggerContent = False
+    # Compact b-jet trigger matching info
+    PHYSSlimmingHelper.IncludeBJetTriggerByYearContent = True
 
     # Trigger matching
     # Run 2
