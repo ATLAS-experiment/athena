@@ -96,6 +96,7 @@ class SlimmingHelper:
                 self.IncludeTauTriggerContent = False
                 self.IncludeEtMissTriggerContent = False
                 self.IncludeBJetTriggerContent = False
+                self.IncludeBJetTriggerByYearContent = False
                 self.IncludeBPhysTriggerContent = False
                 self.IncludeMinBiasTriggerContent = False
                 self.OverrideJetTriggerContentWithTLAContent = False
@@ -207,6 +208,10 @@ class SlimmingHelper:
                 if (self.IncludeBJetTriggerContent is True):
                         triggerContent = True
                         self.SmartCollections.append("HLT_xAOD__BTaggingContainer_HLTBjetFex")
+
+                if (self.IncludeBJetTriggerByYearContent is True):
+                        triggerContent = True
+                        self.SmartCollections.append("HLT_BJetTriggerByYearContent")
 
                 if (self.IncludeBPhysTriggerContent is True):
                         triggerContent = True
@@ -631,6 +636,9 @@ class SlimmingHelper:
                                 items.extend(JetTriggerContentRun3)
                         else:
                                 items.extend(JetTriggerContentRun3TLA)
+                elif collectionName=="HLT_BJetTriggerByYearContent":
+                        from DerivationFrameworkTrigger.BJetTriggerByYearContent import getBJetTriggerContent
+                        items.extend(getBJetTriggerContent(self.flags))
 
                 else:
                         raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")

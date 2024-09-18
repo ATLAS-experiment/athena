@@ -1,0 +1,89 @@
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+from Campaigns.Utils import getMCCampaign, Campaign
+from PyUtils.Logging import logging
+msg = logging.getLogger('BJetTriggerByYearContent')
+msg.setLevel(logging.INFO)
+
+def getDataYear(flags):
+    if flags.Input.isMC:
+        campaign = getMCCampaign(flags.Input.Files)
+        dataYear = {
+            Campaign.MC20a: 2016, # prefer over 2015
+            Campaign.MC20d: 2017,
+            Campaign.MC20e: 2018,
+            Campaign.MC21a: 2022, # prefer over 2015
+            Campaign.MC23a: 2022, # prefer over 2015
+            Campaign.MC23d: 2023,
+            Campaign.MC23e: 2024,
+            Campaign.PhaseII: 2030,
+        }[campaign]
+    else:
+        dataYear = flags.Input.DataYear
+    return dataYear
+
+
+def getBJetTriggerContent(flags):
+    if flags.Trigger.EDMVersion == 2:
+        triggerContent = [
+            "HLT_xAOD__BTaggingContainer_HLTBjetFex",
+            "HLT_xAOD__BTaggingContainer_HLTBjetFexAux.MV2c00_discriminant.MV2c10_discriminant.MV2c20_discriminant",
+        ]
+        jetCollections = {
+            2016: [
+                # Jet collections needed for HLT jet matching
+                "HLT_xAOD__JetContainer_a4tcemsubjesFS",
+                "HLT_xAOD__JetContainer_a4tcemsubjesFSAux.pt.eta.phi.m",
+                # B-jet collections needed for HLT jet matching
+                "HLT_xAOD__JetContainer_EFJet", # 2015
+                "HLT_xAOD__JetContainer_EFJetAux.pt.eta.phi.m",
+                "HLT_xAOD__JetContainer_SplitJet",
+                "HLT_xAOD__JetContainer_SplitJetAux.pt.eta.phi.m",
+            ],
+            2017: [
+                # Jet collections needed for HLT jet matching
+                "HLT_xAOD__JetContainer_a4tcemsubjesISFS",
+                "HLT_xAOD__JetContainer_a4tcemsubjesISFSAux.pt.eta.phi.m",
+                # B-jet collections needed for HLT jet matching
+                "HLT_xAOD__JetContainer_SplitJet", # Mainly for low-pt 2b2j in 2018
+                "HLT_xAOD__JetContainer_SplitJetAux.pt.eta.phi.m",
+                "HLT_xAOD__JetContainer_GSCJet",
+                "HLT_xAOD__JetContainer_GSCJetAux.pt.eta.phi.m",
+            ],
+        }
+        jetCollections[2015] = jetCollections[2016]
+        jetCollections[2018] = jetCollections[2017]
+
+        year = getDataYear(flags)
+        msg.debug(f'Configured b-jet trigger content for {year}')
+
+        triggerContent += jetCollections[year]
+        return triggerContent
+    elif flags.Trigger.EDMVersion == 3:
+        triggerContent = [
+            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
+            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.pt.eta.phi.m",
+            "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging",
+        ]
+
+        year = getDataYear(flags)
+        msg.debug(f'Configured b-jet trigger content for {year}')
+
+        btagstrs = []
+        btaggers = {
+            2022: ['DL1d20211216'],
+            2023: ['GN120220813'],
+            2024: ['GN220240122'],
+            2030: [], # Some day we'll have something amazing here
+        }[year]
+        for btagger in btaggers:
+            btagstrs.append('.'.join([f'{btagger}_{p}' for p in ['pb','pc','pu']]))
+        btagvars = '.'.join(btagstrs)
+        triggerContent.append(f"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingAux.{btagvars}")
+        return triggerContent
+    elif flags.Trigger.EDMVersion == -1:
+        # Allow for undefined trigger content -- no RDOtoRDOTrigger run
+        msg.debug('Received EDMVersion=-1: no trigger info available. Returning empty b-jet trigger content')
+        return []
+
+    raise ValueError(f"Unsupported EDM version {flags.Trigger.EDMVersion} determined")
