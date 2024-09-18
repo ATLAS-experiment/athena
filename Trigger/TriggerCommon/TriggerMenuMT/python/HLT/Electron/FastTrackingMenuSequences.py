@@ -3,7 +3,7 @@
 #
 
 # menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -46,7 +46,7 @@ def fastTrackingSequenceGenCfg(flags, variant='', is_probe_leg = False):
     selAcc.addHypoAlgo(fastElectronHypoAlg)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
+    return MenuSequence(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 
 
 def fastTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):

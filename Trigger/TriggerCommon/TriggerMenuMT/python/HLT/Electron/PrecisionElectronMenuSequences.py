@@ -5,7 +5,7 @@
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -31,7 +31,7 @@ def precisionElectronSequenceGenCfg(flags, ion=False, variant='',is_probe_leg = 
 
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg_noGSF"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict)
 
 def precisionElectron_LRTSequenceGenCfg(flags, is_probe_leg=False):
     # This is to call precisionElectronMenuSequence for the _LRT variant

@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s",__name__)
@@ -43,7 +43,7 @@ def VrtSecInclusiveMenuSequenceGenCfg(flags):
     selAcc.addHypoAlgo(theHypoAlg)
     
     log.info("Building the Step dictinary for TrigVSI!")
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = TrigVSIHypoToolFromDict)
                           

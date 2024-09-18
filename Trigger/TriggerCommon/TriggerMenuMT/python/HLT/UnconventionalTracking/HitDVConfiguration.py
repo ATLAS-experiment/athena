@@ -6,7 +6,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaCommon.CFElements import seqAND
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -49,7 +49,7 @@ def UTTJetRecoSequenceGenCfg(flags):
         selAcc.mergeReco(reco)
         selAcc.addHypoAlgo(HypoAlg)
         
-        return MenuSequenceCA(flags,
+        return MenuSequence(flags,
                               selAcc,
                               HypoToolGen = StreamerHypoToolGenerator
                               )
@@ -76,7 +76,7 @@ def HitDVHypoSequenceGenCfg(flags):
         selAcc.mergeHypo(theHitDVHypo)
 
 
-        return MenuSequenceCA( flags,
+        return MenuSequence( flags,
                                selAcc,
                                HypoToolGen = TrigHitDVHypoToolFromDict
                               )

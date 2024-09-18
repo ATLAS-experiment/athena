@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
@@ -45,7 +45,7 @@ def getLArNoiseBurstSequenceGenCfg(flags):
     selAcc.mergeReco(InEventReco)
     selAcc.addHypoAlgo(hypoAlg)
     
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigLArNoiseBurstHypoToolGen)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigLArNoiseBurstHypoToolGen)
     
 
 # --------------------
@@ -76,7 +76,7 @@ def getCaloAllEMLayersPSSequenceGenCfg(flags,doAllorAllEM=False):
     TrigL2CaloLayersAlg = CompFactory.TrigL2CaloLayersAlg(hypoAlgName)
     TrigL2CaloLayersAlg.TrigClusterContainerKey = output
     selAcc.addHypoAlgo(TrigL2CaloLayersAlg)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigL2CaloLayersHypoToolGen)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigL2CaloLayersHypoToolGen)
 
 
 #----------------------------------------------------------------
@@ -169,7 +169,7 @@ def IDCalibTriggerSequenceGenCfg(flags):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(theHypoAlg)
 
-    msca = MenuSequenceCA(
+    msca = MenuSequence(
         flags, selAcc, 
         HypoToolGen=IDCalibHypoToolFromDict,
     )
@@ -187,7 +187,7 @@ def IDCalibFTFSequenceGenCfg(flags):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(CompFactory.TrigStreamerHypoAlg("IDCalibTrkDummyStream"))
 
-    msca = MenuSequenceCA(
+    msca = MenuSequence(
         flags, selAcc,
         HypoToolGen = lambda chainDict: CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
     )
@@ -202,7 +202,7 @@ def IDCalibFTFSequenceGenCfg(flags):
 @AccumulatorCache
 def acceptedEventsSequenceGenCfg(flags):
     '''
-    Return MenuSequenceCA for an HLT step used by the AcceptedEvents chains. This step is a trivial
+    Return MenuSequence for an HLT step used by the AcceptedEvents chains. This step is a trivial
     always-reject hypo with no reco. The step itself should be noop as only the HLTSeeding and the
     end-of-event sequence parts of AcceptedEvents chains are actually used.
     '''
@@ -225,7 +225,7 @@ def acceptedEventsSequenceGenCfg(flags):
         )
     )
 
-    msca = MenuSequenceCA(
+    msca = MenuSequence(
         flags, selAcc,
         HypoToolGen=TimeBurnerHypoToolGen
     )

@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
 from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
@@ -35,7 +35,7 @@ def timeBurnerCfg(flags):
         )
     )
 
-    msca = MenuSequenceCA(flags, selAcc,
+    msca = MenuSequence(flags, selAcc,
                           HypoToolGen=TimeBurnerHypoToolGen)
     return msca
 
@@ -61,7 +61,7 @@ def L1TopoOnlineMonitorSequenceCfg(flags):
         hypoAlg = TopoMonConfig.getL1TopoOnlineMonitorHypo(flags)
         selAcc.addHypoAlgo(hypoAlg)
 
-        return MenuSequenceCA(flags, selAcc,
+        return MenuSequence(flags, selAcc,
                               HypoToolGen = TopoMonConfig.L1TopoOnlineMonitorHypoToolGen)
 
 
@@ -85,7 +85,7 @@ def MistimeMonSequenceCfg(flags):
         hypoAlg = CompFactory.TrigGenericHypoAlg("MistimeMonJ400HypoAlg", TrigCompositeContainer=outputName)
         selAcc.addHypoAlgo(hypoAlg)
 
-        return MenuSequenceCA(flags, selAcc,
+        return MenuSequence(flags, selAcc,
                 HypoToolGen = TrigGenericHypoToolFromDict)
 
 

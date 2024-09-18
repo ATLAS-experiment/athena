@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import (parOR,seqAND)
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -36,7 +36,7 @@ def DJPromptStepSequenceGenCfg(flags):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(hypo_alg)
 
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = TrigDJHypoPromptToolFromDict,
                           )
@@ -92,7 +92,7 @@ def DJDispStepSequenceGenCfg(flags):
 
     selAcc.addHypoAlgo(hypo_alg)
     
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = TrigDJHypoDispToolFromDict,
                           )

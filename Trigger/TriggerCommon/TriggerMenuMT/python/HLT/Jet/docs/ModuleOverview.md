@@ -6,7 +6,7 @@ Overview of HLT jet reco configuration modules
 
 There are two sets of configuration caching used in the HLT reconstruction:
 1. `@AccumulatorCache` optimises the retrieval of components from `ComponentAccumulator` generating functions, storing a copy of the output from a function call and indexing it by the input arguments. If the same function is called with identical arguments, the cached result is returned.
-2. Deferred configuration of the chain step sequences: Where you see `functools.partial()` calls, these indicate that the `MenuSequenceCA` generation is set up as a function call with predefined arguments, but not executed until the Control Flow stage of HLT menu generation. This may be adjusted later in `JetChainConfiguration.py` to use the common `ChainConfigurationBase.getStep()` function.
+2. Deferred configuration of the chain step sequences: Where you see `functools.partial()` calls, these indicate that the `MenuSequence` generation is set up as a function call with predefined arguments, but not executed until the Control Flow stage of HLT menu generation. This may be adjusted later in `JetChainConfiguration.py` to use the common `ChainConfigurationBase.getStep()` function.
 
 To facilitate (2) above, we first generate jet reconstruction data dependencies, i.e. the set of jet collections needed for a particular step, which can be communicated to other steps that share this information. Then the list of collections is used to configure all reconstruction and hypo algorithms.
 
@@ -160,7 +160,7 @@ The following possible types of `ChainStep` are defined:
 [JetMenuSequencesConfig](../JetMenuSequencesConfig.py)
 -----
 
-Defines the `MenuSequenceCA` objects that form the basis of `ChainSteps`. Each `MenuSequenceCA` contains a `SelectionCA` that in turn holds a hypo algorithm and merges the `RecoCA` and an `InputMaker` (which defines the Region of Interest for the reco), and a hypo tool generator function. These are created as follows:
+Defines the `MenuSequence` objects that form the basis of `ChainSteps`. Each `MenuSequence` contains a `SelectionCA` that in turn holds a hypo algorithm and merges the `RecoCA` and an `InputMaker` (which defines the Region of Interest for the reco), and a hypo tool generator function. These are created as follows:
 * Reco sequence -- defined via functions in `JetRecoSequences.py`, based on the `JetRecoDict` extracted from the chain dictionary.
 * InputMaker -- varies depending on which sequence is needed. The basic fullscan InputMaker is provided by calo code.
 * Hypo algorithm -- In most cases this is a `TrigJetHypoAlg` defined in the `TrigHLTJetHypo` package. For the calo reco sequence only, this is a streamer hypo that does no selection. The hypo algorithm is given a filtered "view elements" jet collection to avoid running over many low-pt jets.

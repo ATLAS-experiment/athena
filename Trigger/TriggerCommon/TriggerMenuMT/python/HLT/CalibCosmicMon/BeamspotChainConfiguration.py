@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA, InViewRecoCA
 
 
 def allTE_trkfastSequenceGenCfg( flags, signature="FS" ):
@@ -47,7 +47,7 @@ def allTE_trkfastSequenceGenCfg( flags, signature="FS" ):
         # Accept every event
         beamspotHypoToolGen = StreamerHypoToolGenerator
 
-        return  MenuSequenceCA( flags,
+        return  MenuSequence( flags,
                                 beamspotViewsSequence,
                                 HypoToolGen = beamspotHypoToolGen )
 
@@ -79,7 +79,7 @@ def getBeamspotVtxSequenceGenCfg(flags):
         def getRejectingHypoTool(chainDict): 
                 return CompFactory.TrigStreamerHypoTool(chainDict['chainName'],Pass=False)
 
-        return  MenuSequenceCA( flags,
+        return  MenuSequence( flags,
                                 beamspotViewsSequence,
                                 HypoToolGen = getRejectingHypoTool )
 
