@@ -145,7 +145,7 @@ namespace MuonR4 {
 
         /// Smear the Phi Coordinate
         // True propagation time in nanoseconds along strip to y=-stripLength/2 (L) and y=stripLength/2 (R)
-        const IdentifierHash layHash = reEle.measurementHash(gasGapId);
+        const IdentifierHash layHash = reEle.layerHash(gasGapId);
         const double propagationTimeL = reEle.distanceToEdge(layHash, locPos, EdgeSide::readOut)    / m_propagationVelocity; 
         const double propagationTimeR = reEle.distanceToEdge(layHash, locPos, EdgeSide::highVoltage)/ m_propagationVelocity; 
 

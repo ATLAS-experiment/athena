@@ -91,7 +91,7 @@ Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash)
 double RpcReadoutElement::distanceToEdge(const IdentifierHash& layerHash, 
                                          const Amg::Vector2D& posInStripPlane,
                                          const EdgeSide side) const {
-    const StripDesign& design{measuresPhi(layerHash) ? *m_pars.etaDesign : *m_pars.phiDesign};
+    const StripDesign& design{measuresPhi(layerHash) ? *m_pars.phiDesign : *m_pars.etaDesign};
     /// For the moment define the readOut to be at negative y while the highVolt is at positive
     const double refPoint{design.longHalfHeight() * (side == EdgeSide::readOut ? -1. : 1.)};
     return std::abs(refPoint - posInStripPlane.y());                                    
