@@ -14,7 +14,7 @@
 #include "VectorVectorIntParser.h"
 
 // Define the parser
-#include "GaudiKernel/ParsersFactory.h"
+#include "Gaudi/Parsers/Factory.h"
 
 namespace Gaudi
 {

@@ -740,7 +740,7 @@ bool TrigEgammaMonitorBaseAlgorithm::isHLTTruncated() const {
 //!=============================================================================
 
 // Define the parser
-#include "GaudiKernel/ParsersFactory.h"
+#include "Gaudi/Parsers/Factory.h"
 
 namespace Gaudi
 {
