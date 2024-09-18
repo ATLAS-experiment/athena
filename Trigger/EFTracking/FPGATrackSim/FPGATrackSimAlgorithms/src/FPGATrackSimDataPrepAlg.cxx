@@ -10,7 +10,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 
-#include "FPGATrackSimDataFlowTool.h"
 #include "FPGATrackSimNNTrackTool.h"
 #include "FPGATrackSimOverlapRemovalTool.h"
 #include "FPGATrackSimTrackFitterTool.h"
@@ -112,6 +111,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
 #endif
 
     const EventContext& ctx = getContext();
+
     // Read inputs
     bool done = false;
     ATH_CHECK(readInputs(done));

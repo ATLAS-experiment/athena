@@ -36,6 +36,7 @@ namespace FPGATrackSim {
                 mutable std::vector<uint32_t> m_pixelClustersPerPrototrack ATLAS_THREAD_SAFE, m_stripClustersPerPrototrack ATLAS_THREAD_SAFE;
                 
                 Gaudi::Property<bool> m_printoutForEveryEvent {this, "perEventReports", false, "A flag to enable per event printout"};
+   	        Gaudi::Property<bool> m_isDataPrep {this, "isDataPrep", false, "If True, this is for data prep pipeline only"};
                 //_________________________________________________________________________________________________________________________
                 // xAOD Pixel clusters to monitor
                 SG::ReadHandleKeyArray <xAOD::PixelClusterContainer> m_xAODPixelClusterContainerKeys{
@@ -44,11 +45,10 @@ namespace FPGATrackSim {
                 
                 // xAOD Strip clusters to monitor
                 SG::ReadHandleKeyArray <xAOD::StripClusterContainer> m_xAODStripClusterContainerKeys{
-                        this, "xAODStripClusterContainersFromFPGA", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"},
+		  this, "xAODStripClusterContainersFromFPGA", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit", "xAODStripClusters_1stFromSP"},
                         "input list of xAOD Strip Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 
                 // FPGA Cluster collection
-                // SG::ReadHandleKey <FPGATrackSimClusterCollection> m_FPGAClusterKey{ this, "FPGATrackSimClusters","","FPGATrackSim Clusters key" }; // TODO: Read info about FPGAclusters 
                 // FPGA Road collection
                 SG::ReadHandleKey <FPGATrackSimRoadCollection> m_FPGARoadsKey{ this, "FPGATrackSimRoads","","FPGATrackSim Roads key" };
                 // FPGA Track collection

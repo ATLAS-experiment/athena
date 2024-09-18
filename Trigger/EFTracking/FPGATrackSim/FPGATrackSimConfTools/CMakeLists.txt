@@ -20,7 +20,7 @@ atlas_add_component( FPGATrackSimConfTools
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
-atlas_install_scripts( test/FPGATrackWorkflow/*.sh)
+atlas_install_scripts( test/FPGATrackSimWorkflow/*.sh)
 atlas_install_scripts( test/test_FPGATrackSimWorkflow.sh)
 atlas_install_scripts( test/FPGATrackSimInputTestSetup.sh )
 
@@ -35,6 +35,6 @@ atlas_add_test( FPGATrackSimConfigFlags_test
                 POST_EXEC_SCRIPT noerror.sh ) 
 
 atlas_add_test( FPGATrackSimFromRDO_test
-                SCRIPT FPGATrackAnalysisOnRDO.sh
+                SCRIPT FPGATrackSimAnalysisOnRDO.sh
                 POST_EXEC_SCRIPT noerror.sh 
                 PROPERTIES TIMEOUT 240 )

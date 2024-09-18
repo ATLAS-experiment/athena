@@ -41,6 +41,7 @@ protected: // was private
   ToolHandle<IFPGAActsTrkConverter> m_ActsTrkConverter{this, "ActsTrkConverter", "FPGAActsTrkConverter", "Make Acts Trks from converted clusters"};
 
   SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey","FPGAClusters","FPGATrackSim Clusters key"};
+  SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGASPKey{this, "FPGATrackSimSPKey","FPGASpacePoints_1st","FPGATrackSim Spacepoint key"};  
   SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits","FPGATrackSim Hits key"};
   SG::ReadHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoadKey","FPGARoads","FPGATrackSim Roads key"};
   SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrackKey","FPGATracks","FPGATrackSim Tracks key"};
@@ -48,6 +49,7 @@ protected: // was private
 
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_xAODPixelClusterFromFPGAClusterKey{this, "xAODPixelClusterFromFPGAClusterKey","xAODPixelClustersFromFPGACluster","FPGA->xAOD PixelClusters Container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGAClusterKey{this, "xAODStripClusterFromFPGAClusterKey","xAODStripClustersFromFPGACluster","FPGA->xAOD StripClusters Container"};
+  SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGASPKey{this, "xAODStripClusterFromFPGASPKey","xAODStripClustersFromFPGASP","FPGA SP->xAOD StripClusters Container"};  
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_xAODPixelClusterFromFPGAHitKey{this, "xAODPixelClusterFromFPGAHitKey","xAODPixelClustersFromFPGAHit","FPGA->xAOD PixelClusters Container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGAHitKey{this, "xAODStripClusterFromFPGAHitKey","xAODStripClustersFromFPGAHit","FPGA->xAOD StripClusters Container"};
   SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_ActsProtoTrackFromFPGARoadKey{this, "ActsProtoTrackFromFPGARoadKey","ActsProtoTracksFromFPGARoad","Vector of ActsTrk::ProtoTrack from FPGARoads"};
@@ -62,6 +64,7 @@ protected: // was private
   Gaudi::Property<bool> m_doClusters {this, "doClusters", true, "Convert FPGATrackSimCluster"};
   Gaudi::Property<bool> m_doHits {this, "doHits", true, "Convert FPGATrackSimHit"};
   Gaudi::Property<bool> m_doActsTrk {this, "doActsTrk", false, "Run Acts ProtoTrack finding"};
+  Gaudi::Property<bool> m_doSP {this, "doSP", false, "Convert SPs"};
 
 
 }; 

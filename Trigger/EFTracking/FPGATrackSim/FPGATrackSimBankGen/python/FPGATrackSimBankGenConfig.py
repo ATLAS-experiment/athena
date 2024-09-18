@@ -10,7 +10,8 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg,FPGATrackSimRawLogicCfg
+from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUnionToolCfg,FPGATrackSimRoadUnionTool1DCfg
+from FPGATrackSimConfTools.FPGATrackSimDataPrepConfig import FPGATrackSimRawLogicCfg
 from AthenaCommon.SystemOfUnits import GeV
 
 
