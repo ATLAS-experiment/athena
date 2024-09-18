@@ -225,13 +225,13 @@ bool FPGATrackSimRegionMap::isInRegion(uint32_t region, const FPGATrackSimHit &h
     uint32_t section;
     if (hit.isMapped()) {
         layer = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
-        section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedLayer() : hit.getLayer();
+        section = (hit.getHitType() == HitType::spacepoint) ? hit.getPairedSection() : hit.getSection();
     } else {
         LayerSection ls;
         if (hit.getHitType() == HitType::spacepoint) {
-            ls = m_pmap->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
+            ls = m_pmaps.at(region)->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
         } else {
-            ls = m_pmap->getLayerSection(hit.getPairedDetType(), hit.getPairedDetZone(), hit.getPairedPhysLayer());
+            ls = m_pmaps.at(region)->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
         }
         layer = ls.layer;
         section = ls.section;
