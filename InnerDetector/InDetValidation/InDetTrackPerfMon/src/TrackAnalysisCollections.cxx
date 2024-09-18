@@ -83,26 +83,66 @@ StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
 /// ----------------------------
 /// Truth particles
 StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
-  const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey )
+  const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey,
+  const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
+  const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey )
 {
   if( m_trkAnaDefSvc->useTruth() ) {
-    ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
-
-    SG::ReadHandle< xAOD::TruthParticleContainer > pColl( handleKey );
-
-    if( not pColl.isValid() ) {
-      ATH_MSG_ERROR( "Non valid truth particles collection: " << handleKey.key() );
+    ATH_MSG_DEBUG( "Loading collection: " << truthPartHandleKey.key() );
+    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( truthPartHandleKey );
+    if( not pTruthColl.isValid() ) {
+      ATH_MSG_ERROR( "Non valid truth particles collection: " << truthPartHandleKey.key() );
       return StatusCode::FAILURE;
     }
 
     /// Fill container
-    m_truthPartContainer = pColl.ptr();
+    m_truthPartContainer = pTruthColl.ptr();
 
     /// Fill FULL vector
-    m_truthPartVec[ FULL ].clear(); 
-    m_truthPartVec[ FULL ].insert(
-      m_truthPartVec[ FULL ].begin(),
-      pColl->begin(), pColl->end() );
+    m_truthPartVec[ FULL ].clear(); // clear to initialize it
+
+    /// Grab the entire truth particle collection
+    if( m_trkAnaDefSvc->pileupSwitch() == "All" ) {
+      m_truthPartVec[ FULL ].insert(
+        m_truthPartVec[ FULL ].begin(), pTruthColl->begin(), pTruthColl->end() );
+
+    /// Grab only truth particles from Hard Scatter
+    } else if( m_trkAnaDefSvc->pileupSwitch() == "HardScatter" ) {
+      if( not truthEventHandleKey.empty() ) {
+        SG::ReadHandle< xAOD::TruthEventContainer > pTruthEventCont( truthEventHandleKey );
+        if( not pTruthEventCont.isValid() ) {
+          ATH_MSG_WARNING( "Non valid truth event collection: " << truthEventHandleKey.key() );
+        } else {
+          const xAOD::TruthEvent* event = pTruthEventCont->at(0);
+          const auto& links = event->truthParticleLinks();
+          for( const auto& link : links ) {
+            if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
+          }
+        }
+      }
+
+    /// Grab only truth particles from Pile Up
+    } else if( m_trkAnaDefSvc->pileupSwitch() == "PileUp" ) {
+      if( not truthPUEventHandleKey.empty() ) {
+        SG::ReadHandle< xAOD::TruthPileupEventContainer > pTruthPUEventCont( truthPUEventHandleKey );
+        if( not pTruthPUEventCont.isValid() ) {
+          ATH_MSG_WARNING( "Non valid truth pile up event collection: " << truthPUEventHandleKey.key() );
+        } else {
+          // loop over all pile up events
+          for( size_t ipu=0; ipu < pTruthPUEventCont->size(); ipu++ ) {
+            const xAOD::TruthPileupEvent* eventPU = pTruthPUEventCont->at(ipu);
+            const auto& links = eventPU->truthParticleLinks();
+            for( const auto& link : links ) {
+              if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
+            }
+          }
+        }
+      }
+
+    } else {
+      ATH_MSG_ERROR( "Invalid pileupSwitch: " << m_trkAnaDefSvc->pileupSwitch() );
+      return StatusCode::FAILURE;
+    }
   } else {
     m_truthPartContainer = nullptr;
     m_truthPartVec[ FULL ].clear();

@@ -630,12 +630,12 @@ if __name__ == "__main__":
     from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
     flags = initializeIDTPMConfigFlags(flags)
     
-    flags.PhysVal.IDTPM.Output.outputFilePrefix = "myIDTPM_CA"
-    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt"
-    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json"
-    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.Output.outputFilePrefix + '.HIST.root'
+    flags.PhysVal.IDTPM.outputFilePrefix = "myIDTPM_CA"
+    flags.PhysVal.IDTPM.plotsDefFileList = "InDetTrackPerfMon/PlotsDefFileList_default.txt" # default value - not needed
+    flags.PhysVal.IDTPM.plotsCommonValuesFile = "InDetTrackPerfMon/PlotsDefCommonValues.json" # default value - not needed
+    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root' # automatically set in IDTPM config - not needed
     flags.Output.doWriteAOD_IDTPM = True
-    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.Output.outputFilePrefix + '.AOD_IDTPM.pool.root'
+    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root' # automatically set in IDTPM config - not needed
     flags.PhysVal.IDTPM.trkAnaCfgFile = "InDetTrackPerfMon/EFTrkAnaConfig_example.json"
     
     flags = initializeIDTPMTrkAnaConfigFlags(flags)

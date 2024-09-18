@@ -32,17 +32,17 @@ flags.Input.Files = []
 for path in MyArgs.inputFileNames.split( ',' ):
     flags.Input.Files += glob( path )
 
-## Outputs
-flags.PhysVal.OutputFileName = MyArgs.outputFilePrefix + '.HIST.root'
-
 ## Set output log level
 if MyArgs.debug:
     from AthenaCommon.Constants import DEBUG
     flags.Exec.OutputLevel = DEBUG
 
 from InDetTrackPerfMon.InDetTrackPerfMonFlags import initializeIDTPMConfigFlags, initializeIDTPMTrkAnaConfigFlags
-flags = initializeIDTPMConfigFlags(flags)
+
+# initialize general IDTPM job flags
+flags = initializeIDTPMConfigFlags( flags )
 flags.PhysVal.IDTPM.DirName = MyArgs.dirName
+flags.PhysVal.IDTPM.outputFilePrefix = MyArgs.outputFilePrefix
 flags.PhysVal.IDTPM.plotsDefFormat = MyArgs.plotsDefFormat
 flags.PhysVal.IDTPM.plotsDefFileList = MyArgs.plotsDefFileList
 flags.PhysVal.IDTPM.plotsCommonValuesFile = MyArgs.plotsCommonValuesFile
@@ -50,7 +50,9 @@ flags.PhysVal.IDTPM.sortPlotsByChain = MyArgs.sortPlotsByChain
 flags.PhysVal.IDTPM.trkAnaCfgFile = MyArgs.trkAnaCfgFile
 flags.Output.doWriteAOD_IDTPM = MyArgs.writeAOD_IDTPM
 flags.PhysVal.IDTPM.unpackTrigChains = MyArgs.unpackTrigChains
-flags = initializeIDTPMTrkAnaConfigFlags(flags)
+
+# initialize individual TrkAnalises flags (and output file names)
+flags = initializeIDTPMTrkAnaConfigFlags( flags )
 
 flags.lock()
 flags.dump()

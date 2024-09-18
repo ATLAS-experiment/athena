@@ -15,7 +15,7 @@ def __createIDTPMConfigFlags():
     icf.addFlag( "sortPlotsByChain", False )
     
     icf.addFlag( "trkAnaCfgFile", '' )
-    icf.addFlag( 'Output.outputFilePrefix','myIDTPM_out')
+    icf.addFlag( 'outputFilePrefix','myIDTPM_out')
     icf.addFlag( 'unpackTrigChains', False )
     return icf
 
@@ -36,6 +36,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "TrigTrkKey"    , "HLT_IDTrack_Electron_IDTrig" )
     icf.addFlag( "OfflineTrkKey" , "InDetTrackParticles" )
     icf.addFlag( "TruthPartKey"  , "TruthParticles" )
+    icf.addFlag( "pileupSwitch"  , "HardScatter" )
     # Matching properties
     icf.addFlag( "MatchingType"    , "DeltaRMatch" )
     icf.addFlag( "dRmax"           , 0.05 )
@@ -77,13 +78,16 @@ def initializeIDTPMConfigFlags(flags):
                            __createIDTPMConfigFlags , prefix=True )
     
     flags.addFlag( 'Output.doWriteAOD_IDTPM', False )
-    flags.addFlag( 'Output.AOD_IDTPMFileName', flags.PhysVal.IDTPM.Output.outputFilePrefix+'.AOD_IDTPM.pool.root')
-    # flags.dump()
+    flags.addFlag( 'Output.AOD_IDTPMFileName', 'myIDTPM_out.AOD_IDTPM.pool.root' )
     return flags
 
 
 ### Create flags category and corresponding set of flags
 def initializeIDTPMTrkAnaConfigFlags(flags):
+    # Set output file names
+    flags.PhysVal.OutputFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.HIST.root'
+    flags.Output.AOD_IDTPMFileName = flags.PhysVal.IDTPM.outputFilePrefix + '.AOD_IDTPM.pool.root'
+
     # Default TrackAnalysis configuration flags category
     flags.addFlagsCategory( "PhysVal.IDTPM.Default", 
                             __createIDTPMTrkAnaConfigFlags, 

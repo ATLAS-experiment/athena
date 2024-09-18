@@ -56,6 +56,10 @@ public:
   virtual const std::string& matchingType() const = 0;
   virtual float truthProbCut() const = 0;
 
+  virtual const std::vector<float>& etaBins() const = 0;
+  virtual const std::vector<unsigned int>& minSilHits() const = 0;
+  virtual const std::string& pileupSwitch() const = 0;
+
   /// histogram properties
   virtual bool plotTrackParameters() const = 0;
   virtual bool plotEfficiencies() const = 0;
@@ -64,9 +68,6 @@ public:
   virtual bool plotFakeRates() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   virtual unsigned int resolutionMethod() const = 0;
-
-  virtual const std::vector<float>& etaBins() const = 0;
-  virtual const std::vector<unsigned int>& minSilHits() const = 0;
   
 };
 

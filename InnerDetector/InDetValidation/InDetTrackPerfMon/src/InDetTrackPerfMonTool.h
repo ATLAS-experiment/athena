@@ -63,21 +63,30 @@ private :
     StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
 
     /// Offline TrackParticleContainer's name
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_offlineTrkParticleName {
+    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_offlineTrkParticleName {
         this, "OfflineTrkParticleContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
 
     /// Trigger TrackParticleContainer's name
-    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_triggerTrkParticleName {
+    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName {
         this, "TriggerTrkParticleContainerName", "HLT_IDTrack_Electron_IDTrig", "Name of container of trigger tracks" };
 
     /// TruthParticle container's name
-    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleName {
+    SG::ReadHandleKey< xAOD::TruthParticleContainer > m_truthParticleName {
         this, "TruthParticleContainerName",  "TruthParticles", "Name of container of TruthParticles" };
 
+    /// TruthEvent container's name
+    SG::ReadHandleKey< xAOD::TruthEventContainer > m_truthEventName {
+        this, "TruthEvents", "TruthEvents", "Name of the truth events container probably either TruthEvent or TruthEvents" };
+
+    /// TruthPileupEvent container's name
+    SG::ReadHandleKey< xAOD::TruthPileupEventContainer > m_truthPileUpEventName {
+        this, "TruthPileupEvents", "TruthPileupEvents", "Name of the truth pileup events container probably TruthPileupEvent(s)" };
+
     /// EventInfo container name
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoContainerName {
+    SG::ReadHandleKey< xAOD::EventInfo > m_eventInfoContainerName {
         this, "EventInfoContainerName", "EventInfo", "event info" };
 
+    /// WriteHandle for trkAnaInfo for reprocessing
     SG::WriteHandleKey< xAOD::BaseContainer > m_trkAnaInfoKey {
         this, "TrkAnaInfoKey", "TrackAnalysisInfo", "Dedicated TrackAnalysis Info written out" };
 

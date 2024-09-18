@@ -90,6 +90,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs.setdefault( "TestType", flags.PhysVal.IDTPM.currentTrkAna.TestType )
     kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
 
+    kwargs.setdefault( "pileupSwitch",  flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch )
+
     from InDetTrackPerfMon.ConfigUtils import getTag
     kwargs.setdefault( "TestTag", getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ) )
     kwargs.setdefault( "RefTag",  getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType ) )
