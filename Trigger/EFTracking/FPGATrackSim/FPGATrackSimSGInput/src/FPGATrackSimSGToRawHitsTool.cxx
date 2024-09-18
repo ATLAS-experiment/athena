@@ -250,9 +250,8 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
         hitIndexMap[tmpId] = hitIndex; // add second entry for ganged pixel ID
       }
       // if there is simulation truth available, try to retrieve the "most likely" barcode for this pixel.
-      HepMC::ConstGenParticlePtr bestParent = nullptr;
       FPGATrackSimInputUtils::ParentBitmask parentMask;
-      HepMcParticleLink::ExtendedBarCode bestExtcode;
+      const HepMcParticleLink* bestTruthLink{};
       if (!m_pixelSDOKey.empty()) {
         InDetSimDataCollection::const_iterator iter(pixelSDOHandle->find(rdoId));
         if (nCells > 1 && iter == pixelSDOHandle->end()) {
@@ -262,8 +261,9 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
           }
         } // end search for correct ganged pixel
         // if SDO found for this pixel, associate the particle. otherwise leave unassociated.
-        if (iter != pixelSDOHandle->end()) getTruthInformation(iter, parentMask, bestExtcode, bestParent);
+        if (iter != pixelSDOHandle->end()) { bestTruthLink = getTruthInformation(iter, parentMask); }
       } // end if pixel truth available
+      HepMC::ConstGenParticlePtr bestParent = (bestTruthLink) ? bestTruthLink->cptr() : nullptr;
       ++hitIndex;
 
       // push back the hit information  to DataInput for HitList
@@ -293,19 +293,12 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setZ(globalPos[Amg::z]);
       tmpSGhit.setToT(pixelRawData->getToT());
       tmpSGhit.setisValidForITkHit(true); // Pixel clusters are close enough right now that they all can be considered valid for ITK
-      index_type index, position;
-      bestExtcode.eventIndex(index, position);
-      if (bestParent)
-        tmpSGhit.setEventIndex(index);
-      else
-        tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-
       if (bestParent) {
-        unsigned int id2, barcode2;
-        bestExtcode.uniqueID(id2, barcode2);  
-        tmpSGhit.setBarcode(id2);
+        tmpSGhit.setEventIndex(bestTruthLink->eventIndex());
+        tmpSGhit.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
       }
       else {
+        tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
         tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
       }
 
@@ -314,8 +307,8 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
 
       // Add truth
       FPGATrackSimMultiTruth mt;
-      FPGATrackSimMultiTruth::Barcode uniquecode(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode());
-      mt.maximize(uniquecode, tmpSGhit.getBarcodePt());
+      FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
+      mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIXME barcode-based
       tmpSGhit.setTruth(mt);
 
       m_eventHeader->addHit(tmpSGhit);
@@ -405,14 +398,14 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       ++hitIndex;
       // if there is simulation truth available, try to retrieve the
       // "most likely" barcode for this strip.
-      HepMC::ConstGenParticlePtr bestParent = nullptr;
       FPGATrackSimInputUtils::ParentBitmask parentMask;
-      HepMcParticleLink::ExtendedBarCode bestExtcode;
+      const HepMcParticleLink* bestTruthLink{};
       if (!m_stripSDOKey.empty()) {
         InDetSimDataCollection::const_iterator iter(stripSDOHandle->find(rdoId));
         // if SDO found for this strip, associate the particle
-        if (iter != stripSDOHandle->end()) getTruthInformation(iter, parentMask, bestExtcode, bestParent);
+        if (iter != stripSDOHandle->end()) { bestTruthLink = getTruthInformation(iter, parentMask); }
       } // end if sct truth available
+      HepMC::ConstGenParticlePtr bestParent = (bestTruthLink) ? bestTruthLink->cptr() : nullptr;
       // push back the hit information  to DataInput for HitList , copy from RawInput.cxx
 
       FPGATrackSimHit tmpSGhit;
@@ -437,22 +430,14 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setSide(m_sctId->side(rdoId));
       tmpSGhit.setEtaWidth(sctRawData->getGroupSize());
       tmpSGhit.setPhiWidth(0);
-      index_type index, position;
-      bestExtcode.eventIndex(index, position);
-      if (bestParent)
-        tmpSGhit.setEventIndex(index);
-      else
-        tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-      
       if (bestParent) {
-        unsigned int id2, barcode2;
-        bestExtcode.uniqueID(id2, barcode2);
-        tmpSGhit.setBarcode(id2);
+        tmpSGhit.setEventIndex(bestTruthLink->eventIndex());
+        tmpSGhit.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
       }
       else {
+        tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
         tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
       }
-
 
       // If the strip has been identified by the previous for loop as a valid hit that can be encoded into ITk Strip format
       int stripID   = m_sctId->strip(rdoId);
@@ -486,8 +471,8 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
 
       // Add truth
       FPGATrackSimMultiTruth mt;
-      FPGATrackSimMultiTruth::Barcode uniquecode(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode());
-      mt.maximize(uniquecode, tmpSGhit.getBarcodePt());
+      FPGATrackSimMultiTruth::Barcode uniqueID(tmpSGhit.getEventIndex(), tmpSGhit.getBarcode()); // FIXME barcode-based
+      mt.maximize(uniqueID, tmpSGhit.getBarcodePt()); // FIMXE barcode-based
       tmpSGhit.setTruth(mt);
 
       m_eventHeader->addHit(tmpSGhit);
@@ -514,9 +499,7 @@ FPGATrackSimSGToRawHitsTool::dumpPixelClusters(HitIndexMap& pixelClusterIndexMap
     for (const InDet::SiCluster* cluster : *pixelClusterCollection) {
       Identifier theId = cluster->identify();
       // if there is simulation truth available, try to retrieve the "most likely" barcode for this pixel cluster.
-      HepMC::ConstGenParticlePtr bestParent = nullptr;
-      FPGATrackSimInputUtils::ParentBitmask parentMask;
-      HepMcParticleLink::ExtendedBarCode bestExtcode;
+      FPGATrackSimInputUtils::ParentBitmask parentMask; // FIXME set, but not used
       if (!m_pixelSDOKey.empty()) {
         for (const Identifier& rdoId : cluster->rdoList()) {
           const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId);
@@ -533,7 +516,7 @@ FPGATrackSimSGToRawHitsTool::dumpPixelClusters(HitIndexMap& pixelClusterIndexMap
             }
           } // end search for correct ganged pixel
           // if SDO found for this pixel, associate the particle. otherwise leave unassociated.
-          if (iter != pixelSDOHandle->end()) getTruthInformation(iter, parentMask, bestExtcode, bestParent);
+          if (iter != pixelSDOHandle->end()) { (void) getTruthInformation(iter, parentMask); } // FIXME not used??
         } // if we have pixel sdo's available
       }
       pixelClusterIndexMap[theId] = pixelClusterIndex;
@@ -563,9 +546,8 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
     for (const InDet::SiCluster* cluster : *pixelClusterCollection) {
 
       // if there is simulation truth available, try to retrieve the "most likely" barcode for this pixel cluster.
-      HepMC::ConstGenParticlePtr bestParent = nullptr;
       FPGATrackSimInputUtils::ParentBitmask parentMask;
-      HepMcParticleLink::ExtendedBarCode bestExtcode;
+      const HepMcParticleLink* bestTruthLink{};
       if (!m_pixelSDOKey.empty()) {
         for (const Identifier& rdoId : cluster->rdoList()) {
           const InDetDD::SiDetectorElement* sielement = m_PIX_mgr->getDetectorElement(rdoId);
@@ -581,9 +563,10 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
             }
           } // end search for correct ganged pixel
           // if SDO found for this pixel, associate the particle. otherwise leave unassociated.
-          if (iter != pixelSDOHandle->end()) getTruthInformation(iter, parentMask, bestExtcode, bestParent);
+          if (iter != pixelSDOHandle->end()) { bestTruthLink = getTruthInformation(iter, parentMask); }
         } // if we have pixel sdo's available
       }
+      HepMC::ConstGenParticlePtr bestParent = (bestTruthLink) ? bestTruthLink->cptr() : nullptr;
 
       Identifier theID = cluster->identify();
       //cluster object to be written out
@@ -620,22 +603,14 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       clusterEquiv.setPhiWidth(cluster->width().colRow()[1]);
       clusterEquiv.setEtaWidth(cluster->width().colRow()[0]);
       //Save the truth here as the MultiTruth object is only transient
-      index_type index, position;
-      bestExtcode.eventIndex(index, position);
-      if (bestParent)
-        clusterEquiv.setEventIndex(index);
-      else
-        clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-
       if (bestParent) {
-	unsigned int id2, barcode2;
-	bestExtcode.uniqueID(id2, barcode2);
-	clusterEquiv.setBarcode(id2);
+        clusterEquiv.setEventIndex(bestTruthLink->eventIndex());
+        clusterEquiv.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
       }
       else {
-	clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+        clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
+        clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
       }
-
 
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
@@ -662,14 +637,14 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       const Amg::Vector3D gPos = sielement->globalPosition(localPos);
       // if there is simulation truth available, try to retrieve the
       // "most likely" barcode for this strip.
-      HepMC::ConstGenParticlePtr bestParent = nullptr;
       FPGATrackSimInputUtils::ParentBitmask parentMask;
-      HepMcParticleLink::ExtendedBarCode bestExtcode;
+      const HepMcParticleLink* bestTruthLink{};
       if (!m_stripSDOKey.empty()) {
         InDetSimDataCollection::const_iterator iter(stripSDOHandle->find(rdoId));
         // if SDO found for this pixel, associate the particle
-        if (iter != stripSDOHandle->end()) getTruthInformation(iter, parentMask, bestExtcode, bestParent);
+        if (iter != stripSDOHandle->end()) { bestTruthLink = getTruthInformation(iter, parentMask); }
       } // end if sct truth available
+      HepMC::ConstGenParticlePtr bestParent = (bestTruthLink) ? bestTruthLink->cptr() : nullptr;
 
       // push back the hit information  to DataInput for HitList , copy from RawInput.cxx
       FPGATrackSimCluster clusterOut;
@@ -699,20 +674,13 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       //I think this is the strip "cluster" width
       clusterEquiv.setPhiWidth(sctRawData->getGroupSize());
       //Save the truth here as the MultiTruth object is only transient
-      index_type index, position;
-      bestExtcode.eventIndex(index, position);
-      if (bestParent)
-        clusterEquiv.setEventIndex(index);
-      else
-        clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-
       if (bestParent) {
-	unsigned int id2, barcode2;
-	bestExtcode.uniqueID(id2, barcode2);
-	clusterEquiv.setBarcode(id2);
+        clusterEquiv.setEventIndex(bestTruthLink->eventIndex());
+        clusterEquiv.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
       }
       else {
-	clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+        clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
+        clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
       }
 
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
@@ -846,13 +814,13 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
   return StatusCode::SUCCESS;
 }
 
-void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_iterator& iter,
-  FPGATrackSimInputUtils::ParentBitmask& parentMask,
-  HepMcParticleLink::ExtendedBarCode& bestExtcode,
-  HepMC::ConstGenParticlePtr& bestParent) {
 
+const HepMcParticleLink* FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_iterator& iter,
+                                                                          FPGATrackSimInputUtils::ParentBitmask& parentMask) {
+  const HepMcParticleLink* bestTruthLink{};
   const InDetSimData& sdo(iter->second);
   const std::vector<InDetSimData::Deposit>& deposits(sdo.getdeposits());
+  float bestPt{-999.f};
   for (const InDetSimData::Deposit& dep : deposits) {
 
     const HepMcParticleLink& particleLink = dep.first;
@@ -863,13 +831,13 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     // reject unstable particles
     if (!MC::isStable(particleLink.cptr())) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::is_simulation_particle(particleLink.cptr()) ||particleLink.barcode() == 0) { continue; }  // FIXME
+    if (HepMC::is_simulation_particle(particleLink.cptr()) || particleLink.barcode() == 0 /*HepMC::no_truth_link(particleLink)*/) { continue; }  // FIXME
     // reject far forward particles
     if (std::fabs(genEta) > m_maxEta) { continue; }
-    // "bestParent" is the highest pt particle
-    if (bestParent == nullptr || bestParent->momentum().perp() < genPt) {
-      bestParent = particleLink.cptr();
-      bestExtcode = HepMcParticleLink::ExtendedBarCode(particleLink.barcode(), particleLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based-syntax
+    // "bestTruthLink" links to the highest pt particle
+    if (bestPt < genPt) {
+      bestPt = genPt;
+      bestTruthLink = &particleLink;
     }
  #ifdef HEPMC3
      parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(std::shared_ptr<const HepMC3::GenParticle>(particleLink.cptr()));
@@ -878,5 +846,5 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
  #endif
      // check SDO
   } // end for each contributing particle
-
+  return bestTruthLink;
 }
