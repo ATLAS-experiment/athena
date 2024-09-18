@@ -374,7 +374,7 @@ def EmptyMenuSequenceCfg(flags, name):
 def isEmptySequenceCfg(o):
     return o == EmptyMenuSequenceCfg
 
-class MenuSequenceCA:
+class MenuSequence:
     """Class to group reco sequences with the Hypo.
     By construction it has one Hypo only, which gives the name to this class object"""
 
@@ -903,7 +903,7 @@ class InViewRecoCA(ComponentAccumulator):
 
 
 class SelectionCA(ComponentAccumulator):
-    """ CA component for MenuSequenceCA sequence """
+    """ CA component for MenuSequence sequence """
     def __init__(self, name, isProbe=False):
         self.name = name+"_probe" if isProbe else name        
         self.isProbe=isProbe

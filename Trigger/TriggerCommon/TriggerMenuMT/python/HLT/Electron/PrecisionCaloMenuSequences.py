@@ -3,7 +3,7 @@
 #
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -53,7 +53,7 @@ def precisionCaloSequenceGenCfg(flags, ion=False, is_probe_leg=False, variant=''
     
     from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict)
+    return MenuSequence(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict)
 
 
 def precisionCalo_LRTSequenceGenCfg(flags, ion=False, is_probe_leg=False):

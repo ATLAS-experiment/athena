@@ -63,7 +63,7 @@ bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output, co
   (*output)[TRT::Track::degreesOfFreedom]=aTrack->fitQuality()->numberDoF();
 
   // implicit memory allocation in createSummary, need to clean up later 
-  std::unique_ptr<Trk::TrackSummary> summary = m_TrackSummaryTool->summary(*aTrack);
+  std::unique_ptr<Trk::TrackSummary> summary = m_TrackSummaryTool->summary(Gaudi::Hive::currentContext(), *aTrack);
   (*output)[TRT::Track::numberOfPixelHits]=summary->get(Trk::numberOfPixelHits) ;
   (*output)[TRT::Track::numberOfSCTHits]=summary->get(Trk::numberOfSCTHits) ;
   (*output)[TRT::Track::numberOfTRTHits]=summary->get(Trk::numberOfTRTHits) ;

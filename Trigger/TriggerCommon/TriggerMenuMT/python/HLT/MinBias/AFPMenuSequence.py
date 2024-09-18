@@ -5,7 +5,7 @@
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequenceCA
+from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequence
 
 
 @AccumulatorCache
@@ -51,7 +51,7 @@ def AFPTrkSequenceGenCfg(flags):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigStreamerAFPHypoTool)
+    return MenuSequence(flags, selAcc, HypoToolGen=trigStreamerAFPHypoTool)
 
 
 def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
@@ -132,7 +132,7 @@ def AFPGlobalSequenceGenCfg(flags):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=trigStreamerAFPToFHypoTool)
+    return MenuSequence(flags, selAcc, HypoToolGen=trigStreamerAFPToFHypoTool)
 
 def AFPToFDeltaZToolGen(chainDict):
     hypotool = CompFactory.TrigAFPToFHypoTool(chainDict['chainName'])
@@ -170,7 +170,7 @@ def AFPToFDeltaZSequenceGenCfg(flags):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=AFPToFDeltaZToolGen)
+    return MenuSequence(flags, selAcc, HypoToolGen=AFPToFDeltaZToolGen)
 
 
 if __name__ == '__main__':

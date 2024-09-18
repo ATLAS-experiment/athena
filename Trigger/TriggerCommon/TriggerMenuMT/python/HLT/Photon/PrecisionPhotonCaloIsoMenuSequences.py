@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -33,4 +33,4 @@ def precisionPhotonCaloIsoSequenceGenCfg(flags, name, ion=False, is_probe_leg=Fa
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonCaloIsoHypoTool import createTrigEgammaPrecisionPhotonCaloIsoHypoAlg, TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict
     sequenceOut = TrigEgammaKeys.precisionPhotonIsoContainer
     selAcc.addHypoAlgo(createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name+tag(ion) +"Hypo", sequenceOut, TrigEgammaKeys.precisionPhotonContainer)) 
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict)
+    return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict)

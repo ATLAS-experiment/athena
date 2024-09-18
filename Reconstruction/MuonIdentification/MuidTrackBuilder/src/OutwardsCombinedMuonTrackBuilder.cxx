@@ -95,7 +95,7 @@ namespace Rec {
 
         // add the track summary
 
-        if (combinedTrack) m_trackSummary->updateTrack(*combinedTrack);
+        if (combinedTrack) m_trackSummary->updateTrack(ctx, *combinedTrack);
 
         return combinedTrack;
     }
@@ -272,7 +272,7 @@ namespace Rec {
 
         ATH_MSG_DEBUG(" OutwardsCombinedMuonTrackBuilder standaloneRefit OK ");
 
-        m_trackSummary->updateTrack(*refittedTrack);
+        m_trackSummary->updateTrack(ctx, *refittedTrack);
         return refittedTrack;
     }
 

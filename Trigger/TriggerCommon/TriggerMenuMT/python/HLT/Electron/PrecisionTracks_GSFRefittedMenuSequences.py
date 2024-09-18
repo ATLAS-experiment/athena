@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -39,7 +39,7 @@ def precisionTracks_GSFRefittedSequenceGenCfg(flags, name='Electron', ion=False,
     selAcc.addHypoAlgo(thePrecisionTrack_GSFRefittedHypo)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
+    return MenuSequence(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 
 
 def precisionTracks_GSFRefitted_LRTSequenceGenCfg(flags, name='Electron', is_probe_leg=False):

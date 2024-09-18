@@ -2,7 +2,7 @@
 
 from TrigEDMConfig.TriggerEDM import recordable
 
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -80,7 +80,7 @@ def getBJetSequenceGenCfg(flags, jc_name=None):
     BjetAthSequence.addHypoAlgo(hypo)
 
     from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           BjetAthSequence,
                           HypoToolGen = TrigBjetBtagHypoToolFromDict)
 
