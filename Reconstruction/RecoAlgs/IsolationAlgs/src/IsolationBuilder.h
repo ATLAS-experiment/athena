@@ -10,9 +10,6 @@
 #ifndef ISOLATIONALGS_ISOLATIONBUILDER_H
 #define ISOLATIONALGS_ISOLATIONBUILDER_H 1
 
-// to allow vector<vector<int>> properties
-#include "VectorVectorIntParser.h"
-
 // STL includes
 #include <set>
 #include <string>

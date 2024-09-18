@@ -18,7 +18,6 @@
 #include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "../src/helpers/PhiComps.h"
-#include "../src/helpers/VectorVectorIntParser.h"
 #include "CaloConditions/CaloNoise.h" 
 
 
