@@ -51,10 +51,10 @@ reco_rc=$?
 # Rename log
 mv log.RAWtoALL log.RAWtoALL.CKF
 
-if [ $reco_rc != 0 ]; then
+# don't stop right away on an ERROR message ($?=68)
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
-
 
 run "IDPVM" \
     runIDPVM.py \
@@ -68,10 +68,7 @@ run "IDPVM" \
     --OnlyTrackingPreInclude \
     --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
 
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
+ckf_rc=$?
 
 # Run with ACTS ambi. resolution
 run "Reconstruction-ambi" \
@@ -88,7 +85,7 @@ reco_rc=$?
 # Rename log
 mv log.RAWtoALL log.RAWtoALL.AMBI
 
-if [ $reco_rc != 0 ]; then
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
 
@@ -100,45 +97,58 @@ run "IDPVM" \
     --doHitLevelPlots \
     --doExpertPlots
 
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
+ambi_rc=$?
+if [ $ckf_rc != 0 ]; then
+    exit_rc=$ckf_rc
+else
+    exit_rc=$ambi_rc
+fi
+if [ $ckf_rc != 0 -a $ambi_rc != 0 ]; then
+    exit $exit_rc
 fi
 
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-ckf-last" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_last \
-    -c ${dcubeXmlTechEffAbsPath} \
-    -r ${lastref_dir}/idpvm.ckf.root \
-    idpvm.ckf.root
+if [ $ckf_rc == 0 ]; then
+    run "dcube-ckf-last" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ckf_last \
+        -c ${dcubeXmlTechEffAbsPath} \
+        -r ${lastref_dir}/idpvm.ckf.root \
+        idpvm.ckf.root
 
-run "dcube-ambi-last" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ambi_last \
-    -c ${dcubeXmlAbsPath} \
-    -r ${lastref_dir}/idpvm.ambi.root \
-    idpvm.ambi.root
+    # Compare performance WRT legacy Athena
+    run "dcube-ckf-athena" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ckf_athena \
+        -c ${dcubeXmlTechEffAbsPath} \
+        -r ${dcubeRef} \
+        -M "acts" \
+        -R "athena" \
+        idpvm.ckf.root
+fi
 
-# Compare performance w/ and w/o ambi. resolution
-run "dcube-ckf-ambi" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_ambi \
-    -c ${dcubeXmlAbsPath} \
-    -r idpvm.ckf.root \
-    -M "ckf" \
-    -R "ambi" \
-    idpvm.ambi.root
+if [ $ambi_rc == 0 ]; then
+    run "dcube-ambi-last" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ambi_last \
+        -c ${dcubeXmlAbsPath} \
+        -r ${lastref_dir}/idpvm.ambi.root \
+        idpvm.ambi.root
+fi
 
-# Compare performance WRT legacy Athena
-run "dcube-ckf-athena" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_ckf_athena \
-    -c ${dcubeXmlTechEffAbsPath} \
-    -r ${dcubeRef} \
-    -M "acts" \
-    -R "athena" \
-    idpvm.ckf.root
+if [ $ckf_rc == 0 -a $ambi_rc == 0 ]; then
+    # Compare performance w/ and w/o ambi. resolution
+    run "dcube-ckf-ambi" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ckf_ambi \
+        -c ${dcubeXmlAbsPath} \
+        -r idpvm.ckf.root \
+        -M "ckf" \
+        -R "ambi" \
+        idpvm.ambi.root
+fi
+
+exit $exit_rc

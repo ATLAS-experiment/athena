@@ -53,7 +53,8 @@ run "Reconstruction-ckf" \
 
 reco_rc=$?
 
-if [ $reco_rc != 0 ]; then
+# don't stop right away on an ERROR message ($?=68)
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
 

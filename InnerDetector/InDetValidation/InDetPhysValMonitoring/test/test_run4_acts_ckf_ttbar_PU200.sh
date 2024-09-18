@@ -36,7 +36,6 @@ run () {
     # they are different. We do not expect these tests to succeed
     [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
-    # whenever we exit, use the first non-zero return code
     return $rc
 }
 
