@@ -3001,15 +3001,15 @@ HLT_noalg_L1ZDC_A_C:
   eventCount: 0
 HLT_noalg_L1ZDC_C:
   eventCount: 0
-HLT_noalg_L1ZDC_EhLT15_jTE4000:
+HLT_noalg_L1ZDC_HELT15_jTE4000:
   eventCount: 0
-HLT_noalg_L1ZDC_EhLT20_jTE4000:
+HLT_noalg_L1ZDC_HELT20_jTE4000:
   eventCount: 0
-HLT_noalg_L1ZDC_EhLT25_jTE4000:
+HLT_noalg_L1ZDC_HELT25_jTE4000:
   eventCount: 0
-HLT_noalg_L1ZDC_EhLT35_jTE4000:
+HLT_noalg_L1ZDC_HELT35_jTE4000:
   eventCount: 0
-HLT_noalg_L1ZDC_EhLT50_jTE4000:
+HLT_noalg_L1ZDC_HELT50_jTE4000:
   eventCount: 0
 HLT_noalg_L1ZDC_XOR_TE5_VTE200:
   eventCount: 0

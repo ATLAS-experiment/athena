@@ -162,21 +162,21 @@ class ItemDef:
         ZDC_alt_comb7 = d.ZDC_ALT_2      & d.ZDC_ALT_1      & d.ZDC_ALT_0
 
         #new ZDC items in HI running
-        ZDC_EhLT15 = ZDC_alt_comb1 #hadronic energy sum < 15 TeV
-        ZDC_EhLT20 = ZDC_alt_comb2 #hadronic energy sum < 20 TeV
-        ZDC_EhLT25 = ZDC_alt_comb3 #hadronic energy sum < 25 TeV
-        ZDC_EhLT35 = ZDC_alt_comb4 #hadronic energy sum < 35 TeV
-        ZDC_EhLT50 = ZDC_alt_comb5 #hadronic energy sum < 50 TeV – supporting only
-        ZDC_EhLT100 = ZDC_alt_comb6 #hadronic energy sum < 100 TeV - for PU rejection
+        ZDC_HELT15 = ZDC_alt_comb1 #hadronic energy sum < 15 TeV
+        ZDC_HELT20 = ZDC_alt_comb2 #hadronic energy sum < 20 TeV
+        ZDC_HELT25 = ZDC_alt_comb3 #hadronic energy sum < 25 TeV
+        ZDC_HELT35 = ZDC_alt_comb4 #hadronic energy sum < 35 TeV
+        ZDC_HELT50 = ZDC_alt_comb5 #hadronic energy sum < 50 TeV – supporting only
+        ZDC_HELT100 = ZDC_alt_comb6 #hadronic energy sum < 100 TeV - for PU rejection
 
         #new ZDC items in pp running
-        ZDC_pp_C = ZDC_alt_comb1
-        ZDC_pp_A = ZDC_alt_comb2
-        ZDC_pp_OR = ZDC_pp_A | ZDC_pp_C
-        ZDC_pp_A_C = ZDC_pp_A & ZDC_pp_C
-        ZDC_pp_C2 = ZDC_alt_comb5
-        ZDC_pp_A2 = ZDC_alt_comb6
-        ZDC_pp_OR2 = ZDC_pp_C2 | ZDC_pp_A2
+        ZDC_PP_C = ZDC_alt_comb1
+        ZDC_PP_A = ZDC_alt_comb2
+        ZDC_PP_OR = ZDC_PP_A | ZDC_PP_C
+        ZDC_PP_A_C = ZDC_PP_A & ZDC_PP_C
+        ZDC_PP_C2 = ZDC_alt_comb5
+        ZDC_PP_A2 = ZDC_alt_comb6
+        ZDC_PP_OR2 = ZDC_PP_C2 | ZDC_PP_A2
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -1279,21 +1279,21 @@ class ItemDef:
         MenuItem('L1_ZDC_A_C'         ).setLogic( ZDC_A_C & physcond)
 
         # ZDC pp (ATR-29027)
-        MenuItem('L1_ZDC_pp_A'        ).setLogic( ZDC_pp_A & physcond)
-        MenuItem('L1_ZDC_pp_C'        ).setLogic( ZDC_pp_C & physcond)
-        MenuItem('L1_ZDC_pp_OR'       ).setLogic( ZDC_pp_OR & physcond)
-        MenuItem('L1_ZDC_pp_A_C'      ).setLogic( ZDC_pp_A_C & physcond)
-        MenuItem('L1_ZDC_pp_A2'        ).setLogic( ZDC_pp_A2 & physcond)
-        MenuItem('L1_ZDC_pp_C2'        ).setLogic( ZDC_pp_C2 & physcond)
-        MenuItem('L1_ZDC_pp_OR2'       ).setLogic( ZDC_pp_OR2 & physcond)
-        MenuItem('L1_ZDC_pp_A_EMPTY'        ).setLogic( ZDC_pp_A & cosmiccond)
-        MenuItem('L1_ZDC_pp_C_EMPTY'        ).setLogic( ZDC_pp_C & cosmiccond)
-        MenuItem('L1_ZDC_pp_A2_EMPTY'        ).setLogic( ZDC_pp_A2 & cosmiccond)
-        MenuItem('L1_ZDC_pp_C2_EMPTY'        ).setLogic( ZDC_pp_C2 & cosmiccond)
-        MenuItem('L1_ZDC_pp_A_UNPAIRED_NONISO'        ).setLogic( ZDC_pp_A & unpaired_nonisocond)
-        MenuItem('L1_ZDC_pp_C_UNPAIRED_NONISO'        ).setLogic( ZDC_pp_C & unpaired_nonisocond)
-        MenuItem('L1_ZDC_pp_A2_UNPAIRED_NONISO'        ).setLogic( ZDC_pp_A2 & unpaired_nonisocond)
-        MenuItem('L1_ZDC_pp_C2_UNPAIRED_NONISO'        ).setLogic( ZDC_pp_C2 & unpaired_nonisocond)
+        MenuItem('L1_ZDC_PP_A'        ).setLogic( ZDC_PP_A & physcond)
+        MenuItem('L1_ZDC_PP_C'        ).setLogic( ZDC_PP_C & physcond)
+        MenuItem('L1_ZDC_PP_OR'       ).setLogic( ZDC_PP_OR & physcond)
+        MenuItem('L1_ZDC_PP_A_C'      ).setLogic( ZDC_PP_A_C & physcond)
+        MenuItem('L1_ZDC_PP_A2'        ).setLogic( ZDC_PP_A2 & physcond)
+        MenuItem('L1_ZDC_PP_C2'        ).setLogic( ZDC_PP_C2 & physcond)
+        MenuItem('L1_ZDC_PP_OR2'       ).setLogic( ZDC_PP_OR2 & physcond)
+        MenuItem('L1_ZDC_PP_A_EMPTY'        ).setLogic( ZDC_PP_A & cosmiccond)
+        MenuItem('L1_ZDC_PP_C_EMPTY'        ).setLogic( ZDC_PP_C & cosmiccond)
+        MenuItem('L1_ZDC_PP_A2_EMPTY'        ).setLogic( ZDC_PP_A2 & cosmiccond)
+        MenuItem('L1_ZDC_PP_C2_EMPTY'        ).setLogic( ZDC_PP_C2 & cosmiccond)
+        MenuItem('L1_ZDC_PP_A_UNPAIRED_NONISO'        ).setLogic( ZDC_PP_A & unpaired_nonisocond)
+        MenuItem('L1_ZDC_PP_C_UNPAIRED_NONISO'        ).setLogic( ZDC_PP_C & unpaired_nonisocond)
+        MenuItem('L1_ZDC_PP_A2_UNPAIRED_NONISO'        ).setLogic( ZDC_PP_A2 & unpaired_nonisocond)
+        MenuItem('L1_ZDC_PP_C2_UNPAIRED_NONISO'        ).setLogic( ZDC_PP_C2 & unpaired_nonisocond)
 
         MenuItem('L1_ZDC_A_C_OVERLAY' ).setLogic( ZDC_A_C & physcond).setTriggerType(TT.zerobs)
         MenuItem('L1_ZDC_A_OVERLAY'   ).setLogic( ZDC_A & physcond).setTriggerType(TT.zerobs)
@@ -1593,11 +1593,11 @@ class ItemDef:
         MenuItem('L1_VZDC_A_VZDC_C_VjTE200_GAP_AANDC' ).setLogic(  PHYS_VZDC_A_VZDC_C  &  Not(d.jTE200) & GAPAC  & physcond)
 
         #ATR-30020
-        MenuItem('L1_ZDC_EhLT15_jTE4000').setLogic( ZDC_EhLT15 & d.jTE4000 & physcond )
-        MenuItem('L1_ZDC_EhLT20_jTE4000').setLogic( ZDC_EhLT20 & d.jTE4000 & physcond )
-        MenuItem('L1_ZDC_EhLT25_jTE4000').setLogic( ZDC_EhLT25 & d.jTE4000 & physcond )
-        MenuItem('L1_ZDC_EhLT35_jTE4000').setLogic( ZDC_EhLT35 & d.jTE4000 & physcond )
-        MenuItem('L1_ZDC_EhLT50_jTE4000').setLogic( ZDC_EhLT50 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_HELT15_jTE4000').setLogic( ZDC_HELT15 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_HELT20_jTE4000').setLogic( ZDC_HELT20 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_HELT25_jTE4000').setLogic( ZDC_HELT25 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_HELT35_jTE4000').setLogic( ZDC_HELT35 & d.jTE4000 & physcond )
+        MenuItem('L1_ZDC_HELT50_jTE4000').setLogic( ZDC_HELT50 & d.jTE4000 & physcond )
 
         # ATR-14967
         # MenuItem('L1_EM3_VZDC_A'           ).setLogic( d.EM3 & Not(ZDC_A) & physcond)
