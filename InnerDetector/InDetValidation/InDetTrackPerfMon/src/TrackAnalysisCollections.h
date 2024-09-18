@@ -25,6 +25,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthPileupEventContainer.h"
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
@@ -69,7 +71,9 @@ namespace IDTPM {
 
     /// fill FULL collections and vectors
     StatusCode fillTruthPartContainer(
-        const SG::ReadHandleKey<xAOD::TruthParticleContainer>& handleKey );
+        const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey,
+        const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
+        const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
 
     StatusCode fillOfflTrackContainer(
         const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
