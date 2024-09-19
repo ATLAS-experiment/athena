@@ -91,6 +91,7 @@ _all_streams = [
     StreamInfo('MinBiasOverlay', 'physics', True, True),
     StreamInfo('PC', 'physics', True, True),
     StreamInfo('CC', 'physics', True, True),
+    StreamInfo('UCC', 'physics', True, True),
     # DELAYED STREAMS
     StreamInfo('VBFDelayed'  , 'physics', True, True),
     StreamInfo('BphysDelayed', 'physics', True, True),
