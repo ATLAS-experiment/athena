@@ -28,7 +28,6 @@ def tryError(command, error):
 
 def fromRunArgs(runArgs):
     
-    inputFile  = runArgs.inputTARFile[0]
     outputFile = runArgs.outputTAR_CALIBFile
     
     ##################################################################################################
@@ -37,8 +36,9 @@ def fromRunArgs(runArgs):
     
     print("Uncompressing files:")
     try:
-        print("\t-",inputFile)
-        tarfile.open(inputFile).extractall(".") 
+        for file in runArgs.inputTARFile:
+            print("\t-",file)
+            tarfile.open(file).extractall(".") 
     except OSError as e:
         print("ERROR: Failed uncompressing TAR file\n",e)
         sys.exit(e.errno)  
@@ -47,10 +47,10 @@ def fromRunArgs(runArgs):
     nextstep("Renaming *straw.txt and *tracktuple.root files for the final output")
     ##################################################################################################   
     
-    command  = "mv -v %s.merged.straw.txt %s.merged.straw.txt; " % (inputFile,outputFile)
-    command += "mv -v %s.tracktuple.root %s.tracktuple.root; " % (inputFile,outputFile)
+    command  = "mv -v %s %s.merged.straw.txt; " % (glob.glob("*.merged.straw.txt")[0],outputFile)
+    command += "mv -v %s %s.tracktuple.root; " % (glob.glob("*.tracktuple.root")[0],outputFile)
     
-    tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
+    # tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
     
     ##################################################################################################
     nextstep("Calculating constants ATHENA")
@@ -60,24 +60,44 @@ def fromRunArgs(runArgs):
     # generating the RAW file path
     if runArgs.rawfile:
         myFile.append(runArgs.rawfile)
-    elif not runArgs.project or not runArgs.runnr or not runArgs.stream:
-        # This part is under testing, will be further developed
-        print("ERROR: project=\"%s\" or runNumber=\"%s\" or stream=\"%s\" missing..." % (runArgs.project, runArgs.runnr, runArgs.stream))
-        print("Provide them!")
-        sys.exit(1)
-    else:
-        rawpath = "/eos/atlas/atlastier0/rucio/%s/%s/%s/%s.%s.%s.merge.RAW/" % (runArgs.project,runArgs.stream,runArgs.runnr.zfill(8),runArgs.project,runArgs.runnr.zfill(8),runArgs.stream)
-        globedFiles = glob.glob(rawpath+"*")
-        if not globedFiles:
-            print("ERROR: Not able to find any file under %s. Please check that the path is correct or files exists" % (rawpath))
-            sys.exit(1)            
         
-        myFile.append(random.choice(globedFiles))
-        print("RAW file selected for testing:",myFile)
-        if not myFile:
-            print("ERROR: provide a valid project=\"%s\" or runNumber=\"%s\" or stream=\"%s\"" % (runArgs.project, runArgs.runnr, runArgs.stream))
+    else:
+        if not runArgs.project and not runArgs.runnr and not runArgs.stream:
+            try:
+                splitInput = runArgs.inputTARFile[0].split('.')
+                project="----"
+                runnr  ="----"
+                stream ="----"
+                if splitInput:
+                    runArgs.project = splitInput[0]
+                    runArgs.runnr   = splitInput[1]
+                    runArgs.stream  = splitInput[2]
+                    print("INFO: No input arguments are given to name the RAW file. Obtained from \"lsn\"...")
+                else:
+                    print("ERROR: not able to find project=\"%s\" or runNumber=\"%s\" or stream=\"%s\" from \"lsn\" " % (project, runnr, stream))
+                    exit(1)
+                
+            except OSError as e:
+                print("ERROR: Failed trying to build RAW file name for Athena.\n",e)
+                sys.exit(e.errno)
+          
+        if (not runArgs.project or not runArgs.runnr or not runArgs.stream):
+            # This part is under testing, will be further developed
+            print("ERROR: Raw file not provided, project=\"%s\" or runNumber=\"%s\" or stream=\"%s\" missing..." % (runArgs.project, runArgs.runnr, runArgs.stream))
+            print("Provide them!")
             sys.exit(1)
-    
+        else:
+            rawpath = "/eos/atlas/atlastier0/rucio/%s/%s/%s/%s.%s.%s.merge.RAW/" % (runArgs.project,runArgs.stream,runArgs.runnr.zfill(8),runArgs.project,runArgs.runnr.zfill(8),runArgs.stream)
+            globedFiles = glob.glob(rawpath+"*")
+            if not globedFiles:
+                print("ERROR: Not able to find any file under %s. Please check that the path is correct or files exists" % (rawpath))
+                sys.exit(1)            
+            
+            myFile.append(random.choice(globedFiles))
+            print("RAW file selected for testing:",myFile)
+            if not myFile:
+                print("ERROR: provide a valid project=\"%s\" or runNumber=\"%s\" or stream=\"%s\"" % (runArgs.project, runArgs.runnr, runArgs.stream))
+            sys.exit(1)
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags    
     flags=initConfigFlags()
@@ -109,6 +129,7 @@ def fromRunArgs(runArgs):
         keepOriginal=True)      
 
     flags.lock()
+    flags.dump()
     
     cfg=MainServicesCfg(flags)
     
@@ -118,7 +139,7 @@ def fromRunArgs(runArgs):
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     cfg.merge(InDetTrackRecoCfg(flags))    
     
-    cfg.merge(TRT_CalibrationMgrCfg(flags,DoCalibrate=True, Hittuple=inputFile+".basic.root", caltag=runArgs.piecetoken))
+    cfg.merge(TRT_CalibrationMgrCfg(flags,DoCalibrate=True, Hittuple=glob.glob("*.basic.root")[0], caltag=runArgs.piecetoken))
     cfg.merge(TRT_StrawStatusCfg(flags))
 
     processPostInclude(runArgs, flags, cfg)
