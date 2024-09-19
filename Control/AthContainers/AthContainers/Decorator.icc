@@ -224,7 +224,7 @@ Decorator<T, ALLOC>::getDecorationSpan (const AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 template <class ELT>
@@ -238,7 +238,7 @@ Decorator<T, ALLOC>::isAvailable (const ELT& e) const
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 template <class ELT>
@@ -249,6 +249,32 @@ Decorator<T, ALLOC>::isAvailableWritable (const ELT& e) const
 {
   return e.container() && e.container()->isAvailableWritableAsDecoration (m_auxid);
 }
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+Decorator<T, ALLOC>::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid);
+}
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+Decorator<T, ALLOC>::isAvailableWritable (const AuxVectorData& c) const
+{
+  return c.isAvailableWritableAsDecoration (m_auxid);
+}
+
 
 /**
  * @brief Return the aux id for this variable.

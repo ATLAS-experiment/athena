@@ -30,11 +30,18 @@ class LinkedVarAccessorBase
 public:
   /**
    * @brief Test to see if this variable exists in the store.
-   * @param e An element of the container which to test the variable.
+   * @param e An element of the container in which to test the variable.
    */
   template <class ELT>
   requires (IsConstAuxElement<ELT>)
   bool isAvailable (const ELT& e) const;
+
+
+  /**
+   * @brief Test to see if this variable exists in the store.
+   * @param c The container in which to test the variable.
+   */
+  bool isAvailable (const AuxVectorData& e) const;
 
 
   /**

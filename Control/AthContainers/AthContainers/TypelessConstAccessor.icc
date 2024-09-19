@@ -140,7 +140,7 @@ TypelessConstAccessor::getDataArray (const AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class ELT>
 ATH_REQUIRES( IsConstAuxElement<ELT> )
@@ -149,6 +149,18 @@ bool
 TypelessConstAccessor::isAvailable (const ELT& e) const
 {
   return e.container() && e.container()->isAvailable (m_auxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+inline
+bool
+TypelessConstAccessor::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid);
 }
 
 

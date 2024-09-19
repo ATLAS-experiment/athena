@@ -106,6 +106,16 @@ void test1()
   v.set (bc, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+  const SG::AuxVectorBase& vc = v;
+
+  assert (!ityp1.isAvailable(v));
+  assert (!ftyp1.isAvailable(v));
+  assert (!ityp1.isAvailable(vc));
+  assert (!ftyp1.isAvailable(vc));
+  assert (!ityp1.isAvailableWritable(v));
+  assert (!ftyp1.isAvailableWritable(v));
+  assert (!ityp1.isAvailableWritable(vc));
+  assert (!ftyp1.isAvailableWritable(vc));
 
   int* anInt = reinterpret_cast<int*> (store.getData(ityp1_id, 10, 10));
   anInt[5] = 3;
@@ -114,6 +124,10 @@ void test1()
   assert (ityp1.isAvailable(bc));
   assert (ityp1.isAvailableWritable(b));
   assert (ityp1.isAvailableWritable(bc));
+  assert (ityp1.isAvailable(v));
+  assert (ityp1.isAvailable(vc));
+  assert (ityp1.isAvailableWritable(v));
+  assert (ityp1.isAvailableWritable(vc));
 
   assert (ityp1(b) == 3);
   assert (ityp1(bc) == 3);
@@ -159,6 +173,10 @@ void test1()
   assert (ityp1.isAvailable(bc));
   assert (!ityp1.isAvailableWritable(b));
   assert (!ityp1.isAvailableWritable(bc));
+  assert (ityp1.isAvailable(v));
+  assert (ityp1.isAvailable(vc));
+  assert (!ityp1.isAvailableWritable(v));
+  assert (!ityp1.isAvailableWritable(vc));
 
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ityp1(b));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ityp1(bc));
@@ -167,6 +185,10 @@ void test1()
   assert (!ftyp1.isAvailable(bc));
   assert (!ftyp1.isAvailableWritable(b));
   assert (!ftyp1.isAvailableWritable(bc));
+  assert (!ftyp1.isAvailable(v));
+  assert (!ftyp1.isAvailable(vc));
+  assert (!ftyp1.isAvailableWritable(v));
+  assert (!ftyp1.isAvailableWritable(vc));
 
   ftyp1(bc) = 1.5;
 
@@ -174,6 +196,10 @@ void test1()
   assert (ftyp1.isAvailable(bc));
   assert (ftyp1.isAvailableWritable(b));
   assert (ftyp1.isAvailableWritable(bc));
+  assert (ftyp1.isAvailable(v));
+  assert (ftyp1.isAvailable(vc));
+  assert (ftyp1.isAvailableWritable(v));
+  assert (ftyp1.isAvailableWritable(vc));
 
   assert (ftyp1(b) == 1.5);
   assert (ftyp1(bc) == 1.5);

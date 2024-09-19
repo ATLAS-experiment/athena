@@ -178,6 +178,12 @@ void test1()
   v.set (bc5, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+
+  assert (!jtyp1.isAvailable(v));
+  assert (!jtyp1.isAvailable(vc));
+  assert (!jtyp1.isAvailableWritable(v));
+  assert (!jtyp1.isAvailableWritable(vc));
+
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
   std::ranges::copy (std::vector<Elt>{{2}, {2}, {2}, {2}, {2}, {5}}, elt);
@@ -190,6 +196,10 @@ void test1()
   assert (jtyp1.isAvailable(bc5));
   assert (jtyp1.isAvailableWritable(b5));
   assert (jtyp1.isAvailableWritable(bc5));
+  assert (jtyp1.isAvailable(v));
+  assert (jtyp1.isAvailable(vc));
+  assert (jtyp1.isAvailableWritable(v));
+  assert (jtyp1.isAvailableWritable(vc));
 
   SG::AuxElement b4;
   SG::ConstAuxElement bc4;
@@ -424,6 +434,10 @@ void test1()
   assert (jtyp1.isAvailable(bc5));
   assert (!jtyp1.isAvailableWritable(b5));
   assert (!jtyp1.isAvailableWritable(bc5));
+  assert (jtyp1.isAvailable(v));
+  assert (jtyp1.isAvailable(vc));
+  assert (!jtyp1.isAvailableWritable(v));
+  assert (!jtyp1.isAvailableWritable(vc));
 
   EXPECT_EXCEPTION (SG::ExcStoreLocked, jtyp1(b5) = (std::vector<float> {20.7, 20.8}));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, jtyp1(bc5) = (std::vector<float> {20.7, 20.8}));
@@ -434,6 +448,10 @@ void test1()
   assert (!jtyp2.isAvailable(bc5));
   assert (!jtyp2.isAvailableWritable(b5));
   assert (!jtyp2.isAvailableWritable(bc5));
+  assert (!jtyp2.isAvailable(v));
+  assert (!jtyp2.isAvailable(vc));
+  assert (!jtyp2.isAvailableWritable(v));
+  assert (!jtyp2.isAvailableWritable(vc));
 
   jtyp2(bc5) = std::vector<float> {20.7, 20.8};
 
@@ -441,6 +459,10 @@ void test1()
   assert (jtyp2.isAvailable(bc5));
   assert (jtyp2.isAvailableWritable(b5));
   assert (jtyp2.isAvailableWritable(bc5));
+  assert (jtyp2.isAvailable(v));
+  assert (jtyp2.isAvailable(vc));
+  assert (jtyp2.isAvailableWritable(v));
+  assert (jtyp2.isAvailableWritable(vc));
 
   assert (floatEQ (jtyp2(b5)[0], 20.7));
   assert (floatEQ (jtyp2(bc5)[1], 20.8));

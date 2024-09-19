@@ -364,7 +364,7 @@ Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDecorationSpan (const AuxVectorDat
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container om which to test the variable.
  */
 template <class PAYLOAD_T, class ALLOC>
 template <IsConstAuxElement ELT>
@@ -375,6 +375,20 @@ Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::isAvailableWritable (const ELT& e) co
   return e.container() &&
     e.container()->isAvailableWritableAsDecoration (m_auxid) &&
     e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class PAYLOAD_T, class ALLOC>
+inline
+bool
+Decorator<JaggedVecElt<PAYLOAD_T>, ALLOC>::isAvailableWritable (const AuxVectorData& c) const
+{
+  return c.isAvailableWritableAsDecoration (m_auxid) &&
+    c.isAvailableWritableAsDecoration (m_linkedAuxid);
 }
 
 

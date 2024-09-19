@@ -128,6 +128,11 @@ void test1()
   v.set (cb, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+  const SG::AuxVectorBase& cv = v;
+
+  assert (!ptyp1.isAvailable(v));
+  assert (!ptyp1.isAvailable(cv));
+
   PLink* plink = reinterpret_cast<PLink*> (store.getData(plink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   plink[5] = PLink (1, 10);
@@ -135,6 +140,8 @@ void test1()
 
   assert (ptyp1.isAvailable(b));
   assert (ptyp1.isAvailable(cb));
+  assert (ptyp1.isAvailable(v));
+  assert (ptyp1.isAvailable(cv));
 
   assert (ptyp1 (b).key() == 123);
   assert (ptyp1 (b).index() == 10);
@@ -258,6 +265,11 @@ void test3()
   v.set (cb, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+  const SG::AuxVectorBase& cv = v;
+
+  assert (!vtyp1.isAvailable(v));
+  assert (!vtyp1.isAvailable(cv));
+
   VElt* vlink = reinterpret_cast<VElt*> (store.getData(vlink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   vlink[5] = VElt{{1, 10}, {0, 0}, {1, 11}};
@@ -265,6 +277,8 @@ void test3()
 
   assert (vtyp1.isAvailable(b));
   assert (vtyp1.isAvailable(cb));
+  assert (vtyp1.isAvailable(v));
+  assert (vtyp1.isAvailable(cv));
 
   assert (vtyp1 (b).size() == 3);
   assert (vtyp1 (b)[0].key() == 123);

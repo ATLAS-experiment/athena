@@ -361,7 +361,7 @@ Decorator<PackedLink<CONT>, ALLOC>::getDecorationSpan (const AuxVectorData& cont
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class CONT, class ALLOC>
 template <IsConstAuxElement ELT>
@@ -372,6 +372,20 @@ Decorator<PackedLink<CONT>, ALLOC>::isAvailableWritable (const ELT& e) const
   return e.container() &&
     e.container()->isAvailableWritableAsDecoration (m_auxid) &&
     e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+bool
+Decorator<PackedLink<CONT>, ALLOC>::isAvailableWritable (const AuxVectorData& c) const
+{
+  return c.isAvailableWritableAsDecoration (m_auxid) &&
+    c.isAvailableWritableAsDecoration (m_linkedAuxid);
 }
 
 
@@ -816,7 +830,7 @@ DECORATOR::getDecorationSpan (const AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class CONT, class ALLOC, class VALLOC>
 template <IsConstAuxElement ELT>
@@ -827,6 +841,20 @@ DECORATOR::isAvailableWritable (const ELT& e) const
   return e.container() &&
     e.container()->isAvailableWritableAsDecoration (m_auxid) &&
     e.container()->isAvailableWritableAsDecoration (m_linkedAuxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+bool
+DECORATOR::isAvailableWritable (const AuxVectorData& c) const
+{
+  return c.isAvailableWritableAsDecoration (m_auxid) &&
+    c.isAvailableWritableAsDecoration (m_linkedAuxid);
 }
 
 

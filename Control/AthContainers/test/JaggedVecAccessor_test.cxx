@@ -170,6 +170,10 @@ void test1()
   v.set (b5, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+
+  assert (!jtyp1.isAvailable(v));
+  assert (!jtyp1.isAvailableWritable(v));
+
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
   std::ranges::copy (std::vector<Elt>{{2}, {2}, {2}, {2}, {2}, {5}}, elt);
@@ -180,6 +184,8 @@ void test1()
 
   assert (jtyp1.isAvailable(b5));
   assert (jtyp1.isAvailableWritable(b5));
+  assert (jtyp1.isAvailable(v));
+  assert (jtyp1.isAvailableWritable(v));
 
   SG::AuxElement b4;
   v.set (b4, 4);

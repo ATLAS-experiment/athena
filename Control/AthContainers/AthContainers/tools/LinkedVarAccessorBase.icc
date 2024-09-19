@@ -14,7 +14,7 @@ namespace SG { namespace detail {
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class ELT>
 requires( IsConstAuxElement<ELT> )
@@ -24,6 +24,17 @@ bool LinkedVarAccessorBase::isAvailable (const ELT& e) const
   return e.container() &&
     e.container()->isAvailable (m_auxid) &&
     e.container()->isAvailable (m_linkedAuxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+inline
+bool LinkedVarAccessorBase::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid) && c.isAvailable (m_linkedAuxid);
 }
 
 

@@ -125,6 +125,10 @@ void test1()
   v.set (b5, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+
+  assert (!ptyp1.isAvailable(v));
+  assert (!ptyp1.isAvailableWritable(v));
+
   PLink* plink = reinterpret_cast<PLink*> (store.getData(plink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   SG::IAuxTypeVector* linkedVec = store.linkedVector (plink_id);
@@ -134,6 +138,8 @@ void test1()
 
   assert (ptyp1.isAvailable(b5));
   assert (ptyp1.isAvailableWritable(b5));
+  assert (ptyp1.isAvailable(v));
+  assert (ptyp1.isAvailableWritable(v));
 
   SG::AuxElement b4;
   v.set (b4, 4);
@@ -322,6 +328,10 @@ void test3()
   v.set (b5, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+
+  assert (!vtyp1.isAvailable(v));
+  assert (!vtyp1.isAvailableWritable(v));
+
   VElt* vlink = reinterpret_cast<VElt*> (store.getData(vlink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   SG::IAuxTypeVector* linkedVec = store.linkedVector (vlink_id);
@@ -331,6 +341,8 @@ void test3()
 
   assert (vtyp1.isAvailable(b5));
   assert (vtyp1.isAvailableWritable(b5));
+  assert (vtyp1.isAvailable(v));
+  assert (vtyp1.isAvailableWritable(v));
 
   SG::AuxElement b4;
   v.set (b4, 4);

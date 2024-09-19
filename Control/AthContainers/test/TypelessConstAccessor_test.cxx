@@ -82,6 +82,7 @@ void test1()
 
   SG::TypelessConstAccessor ftyp1a ("aFloat");
   assert (ftyp1a.isAvailable (b3));
+  assert (ftyp1a.isAvailable (v3));
   assert (*reinterpret_cast<const float*>(ftyp1a (b3)) == 1.5);
   assert (*reinterpret_cast<const float*>(ftyp1a (v3, 6)) == 1.5);
   assert ((reinterpret_cast<const float*>(ftyp1a.getDataArray (v3)))[6] == 1.5);
@@ -115,6 +116,7 @@ void test2()
 
   SG::ConstAuxElement::TypelessConstAccessor ityp1a ("anInt");
   assert (ityp1a.isAvailable (b2));
+  assert (ityp1a.isAvailable (v2));
   assert (*reinterpret_cast<const int*>(ityp1a (b2)) == 123);
   assert (ityp1a.auxid() == ityp1_id);
 
