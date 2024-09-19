@@ -74,7 +74,6 @@ protected:
   int          m_productionMode{0};
   unsigned int m_nmbEventsTot{0};
   int          m_prodParticleId{0};
-  int          m_randomSeed{0}; // FIXME Repeated?
   int          m_outputFormat; // ???
   int          m_beamBreakupMode{0};
   bool         m_interferenceEnabled{false};
