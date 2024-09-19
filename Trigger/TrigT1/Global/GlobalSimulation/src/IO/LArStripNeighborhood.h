@@ -40,6 +40,8 @@ namespace GlobalSim {
     const StripDataVector& phi_center() const {return m_phi_center;}
     const StripDataVector& phi_high() const {return m_phi_high;}
 
+    std::size_t maxCellIndex() const {return m_max_cell_pos;}
+
     const Coords& roiCoords() const {return m_roiCoords;}
     const Coords& cellCoords() const {return m_cellCoords;}
 

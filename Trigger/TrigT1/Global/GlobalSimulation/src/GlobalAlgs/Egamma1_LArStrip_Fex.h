@@ -72,7 +72,7 @@ namespace GlobalSim {
     m_neighKey {
       this,
       "stripNeighborhoodKey",
-      "stripNeighborhood",
+      "stripNeighborhoodContainer",
       "location to write strip neighborhoods of EFex RoIs"};
 
     StatusCode
