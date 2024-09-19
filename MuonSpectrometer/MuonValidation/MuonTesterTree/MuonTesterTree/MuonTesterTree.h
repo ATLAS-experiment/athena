@@ -49,9 +49,9 @@ public:
     /// Name of the tree
     std::string name() const;
     /// file_stream of the analysis to which the tree belongs
-    std::string fileStream() const;
+    const std::string& fileStream() const;
     /// sub directory in the TFile
-    std::string path() const;
+    const std::string& path() const;
   
     /// Save the TTree in a subfolder of the TFile
     void setPath(const std::string& new_path);

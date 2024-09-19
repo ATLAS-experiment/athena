@@ -6,8 +6,9 @@
 #include <xAODMuon/Muon.h>
 namespace MuonVal{
     TrackChi2Branch::TrackChi2Branch(IParticleFourMomBranch& parent):
-        VectorBranch<float>(parent.tree(), parent.name() + "_chi2") {
-            m_nDoF = std::make_shared<VectorBranch<unsigned int>>(parent.tree(), parent.name() + "_nDoF");
+        VectorBranch<float>(parent.tree(), parent.name() + "_chi2"),
+        m_nDoF {std::make_shared<VectorBranch<unsigned int>>(parent.tree(), parent.name() + "_nDoF")}
+        {
             parent.getTree().addBranch(m_nDoF);
             m_nDoF = parent.getTree().getBranch<VectorBranch<unsigned int>>(m_nDoF->name());
     }
