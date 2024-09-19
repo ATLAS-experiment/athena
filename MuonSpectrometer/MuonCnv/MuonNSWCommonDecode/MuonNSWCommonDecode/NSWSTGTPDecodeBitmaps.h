@@ -86,8 +86,8 @@ namespace Muon
        constexpr int size_output_mm_phiID =               6;
        constexpr int size_output_mm_rIndex =              8;
 
-       constexpr int size_bcid             =                   16;
-       constexpr int size_v3_padding       =                   48;
+       constexpr int size_bcid             =                   12;
+       constexpr int size_v3_padding       =                   52;
 
        constexpr std::size_t size_v1         =                   0;
        constexpr std::size_t size_v2         =                   0;

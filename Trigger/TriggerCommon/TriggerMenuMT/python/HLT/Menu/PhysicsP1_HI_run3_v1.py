@@ -41,8 +41,8 @@ UPCStream="UPC"
 MinBiasOverlayStream="MinBiasOverlay"
 PCStream="PC"
 CCStream="CC"
+UCCStream="UCC"
 ### following stream tags not used yet, need to be implemented in StreamInfo.py before use
-#UCCStream="UCC"
 #PCpebStream="PCPEB"
 #CCpebStream="CCPEB"
 

@@ -1,12 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonNSWCommonDecode/NSWTriggerSTGL1AElink.h"
-
-
-#include "MuonNSWCommonDecode/NSWResourceId.h"
-#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
-#include "ers/ers.h"
 
 #include <cmath>
 #include <cstddef>
@@ -15,6 +10,11 @@
 #include <stdexcept>
 #include <string>
 
+#include "MuonNSWCommonDecode/NSWResourceId.h"
+#include "MuonNSWCommonDecode/NSWSTGTPDecodeBitmaps.h"
+#include "MuonNSWCommonDecode/NSWTriggerElink.h"
+#include "MuonNSWCommonDecode/STGTPPackets.h"
+#include "ers/ers.h"
 
 Muon::nsw::NSWTriggerSTGL1AElink::NSWTriggerSTGL1AElink(const uint32_t* bs, const uint32_t remaining)
     : NSWTriggerElink(bs, remaining), m_data{bs, remaining} {
@@ -188,11 +188,13 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
   }
 
   size_t felix_word_size =  WORD_SIZE_DOUBLE;
+  auto PADDING_BITS_END = std::size_t{16};
   const auto stream_head_nbits = decode(readPointer, STGTPL1A::size_stream_head_nbits);
   const auto stream_head_nwords = decode(readPointer, STGTPL1A::size_stream_head_nwords);
   const auto current_stream_head_fifo_size = decode(readPointer, STGTPL1A::size_stream_head_fifo_size);
   const auto current_stream_head_streamID = decode(readPointer, STGTPL1A::size_stream_head_streamID);
   const auto total_expected_size = stream_head_nbits * stream_head_nwords;
+  auto endOfData = m_wordCountFlx * felix_word_size - Muon::nsw::STGTPL1A::size_trailer_CRC - PADDING_BITS_END;
   size_t current_stream_head_nbits = 0;
   size_t current_stream_head_nwords = 0;
 
@@ -210,10 +212,18 @@ Muon::nsw::NSWTriggerSTGL1AElink::DataHeader Muon::nsw::NSWTriggerSTGL1AElink::d
         default:
            break;
   }
-  if (current_stream_head_nbits == 0){
-    throw std::runtime_error("current_stream_head_nbits is zero in NSWTriggerSTGL1AElink::decode_data_header_v3");
+
+  if (current_stream_head_nbits == 0 )
+  {
+      throw std::runtime_error( "Corrupted message - sTGC stream has an unrecognized stream header");
+  } 
+  
+  if (readPointer +  total_expected_size > endOfData)
+  {
+     throw std::runtime_error("Corrupted message - sTGC expected size goes beyond the end of data");
   }
-  current_stream_head_nwords = total_expected_size / current_stream_head_nbits;
+
+  current_stream_head_nwords = (stream_head_nwords == 0) ? 0 : total_expected_size / current_stream_head_nbits;
   size_t data_size = std::ceil(total_expected_size / felix_word_size);
 
   // in version 3 nbits correspond to either 16 or 32 bits. There is a stable packet size that we use and 
@@ -283,7 +293,7 @@ std::vector<std::vector<std::uint32_t>> Muon::nsw::NSWTriggerSTGL1AElink::decode
   }
 
   size_t word_size = WORD_SIZE;
-  size_t felix_n_words = std::ceil(header.data_size / header.nwords); // the number of felix words per stream word
+  size_t felix_n_words = (header.nwords == 0 ) ? 0 : std::ceil(header.data_size / header.nwords); // the number of felix words per stream word
   for (std::size_t i = 0; i < header.nwords; ++i) {
     std::vector<std::uint32_t> data{};
     for (std::size_t j = 0; j < felix_n_words; ++j) {
