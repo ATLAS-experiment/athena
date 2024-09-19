@@ -37,6 +37,7 @@
 #include "ActsInterop/TableUtils.h"
 #include "AtlasMeasurementSelector.h"
 #include "src/OnTrackCalibrator.h"
+#include "ActsGeometry/SurfaceOfMeasurementUtil.h"
 
 // STL
 #include <initializer_list>
@@ -66,7 +67,7 @@ namespace ActsTrk{
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_truthParticlesKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-
+    ATH_CHECK(m_actsFitter.retrieve());
     m_logger = makeActsAthenaLogger(this, name());
 
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
@@ -140,8 +141,8 @@ namespace ActsTrk{
     slAccessorDelegate.connect<&ActsTrk::UncalibSourceLinkAccessor::range>(&slAccessor);
 
     Acts::PropagatorPlainOptions plainOptions(tgContext, mfContext);
-    plainOptions.maxSteps = 100;
-    plainOptions.direction= Acts::Direction::Backward;
+    plainOptions.maxSteps = 1000;
+    plainOptions.direction= m_propagateForward ? Acts::Direction::Forward : Acts::Direction::Backward;
 
 
     TrackExtensionAlg::CKFOptions options(tgContext,
@@ -164,12 +165,40 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("truth: eta: " << truthParticle->eta() << " phi: " << truthParticle->phi() << " pt: " << truthParticle->pt());
       }
     }
-
+    ATH_MSG_DEBUG("Size of proto tracks collection " << protoTracksHandle->size());
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
-      ATH_MSG_DEBUG("proto track: eta: " <<  -1 * log(tan( protoTrack.parameters->theta() * 0.5)) << " phi: " << protoTrack.parameters->phi() << " pt:" << abs(1./protoTrack.parameters->qOverP() * sin(protoTrack.parameters->theta())));
+      if(protoTrack.measurements.empty()) continue;
+
+      const Acts::Surface* refSurface = ActsTrk::getSurfaceOfMeasurement(*acts_tracking_geometry, **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
+//        ActsTrk::getSurfaceOfMeasurement( *m_trackingGeometryTool->trackingGeometry(), **detectorElementToGeometryIdMap, *protoTrack.measurements[0]);
+
+      auto res = m_actsFitter->fit(context, protoTrack.measurements,*protoTrack.parameters,
+                                  m_trackingGeometryTool->getGeometryContext(context).context(),
+                                  m_extrapolationTool->getMagneticFieldContext(context),
+                                  Acts::CalibrationContext(),
+                                  **detectorElementToGeometryIdMap, 
+                                  refSurface);
+      if(!res) continue;
+      if (res->size() == 0 ) continue;
+      ATH_MSG_DEBUG(".......Done fit of track with "<< protoTrack.measurements.size() << " measurements");
+      const auto trackProxy = res->getTrack(0);
+      if (not trackProxy.hasReferenceSurface()) {
+        ATH_MSG_INFO("There is not reference surface for this track");
+        continue;
+      }
+      Acts::BoundTrackParameters parametersAtRefSurface( trackProxy.referenceSurface().getSharedPtr(), 
+                                                          trackProxy.parameters(), 
+                                                          trackProxy.covariance(),
+                                                          trackProxy.particleHypothesis());
+
+
+
+      ATH_MSG_DEBUG("proto track: eta: " <<  -1 * log(tan( parametersAtRefSurface.theta() * 0.5)) << " phi: " << parametersAtRefSurface.phi() << " pt:" << abs(1./protoTrack.parameters->qOverP() * sin(protoTrack.parameters->theta())));
       ATH_MSG_DEBUG("Extending proto track of " << protoTrack.measurements.size() << " measurements");
-      auto result = m_ckfConfig->ckf.findTracks(*protoTrack.parameters, options,
+      auto result = m_ckfConfig->ckf.findTracks(parametersAtRefSurface, options,
                                                        tracksContainerTemp);
+
+
       ATH_MSG_DEBUG("Built " << tracksContainerTemp.size() << " tracks from it");
       for (detail::RecoTrackContainer::TrackProxy tempTrackProxy : tracksContainerTemp) {
         ActsTrk::MutableTrackContainer::TrackProxy destTrackProxy = trackContainer.makeTrack();

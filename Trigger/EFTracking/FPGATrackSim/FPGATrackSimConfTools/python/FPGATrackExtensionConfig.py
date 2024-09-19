@@ -23,6 +23,12 @@ def FPGATrackExtensionAlgCfg(flags, **kwargs):
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
         kwargs["TrackingGeometryTool"] = acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
 
+    if 'ActsFitter' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
+                                                                           ReverseFilteringPt=0,
+                                                                           OutlierChi2Cut=30)))
+
     from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterCfg
     printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags))
     kwargs["TrackStatePrinter"] = printerTool 
