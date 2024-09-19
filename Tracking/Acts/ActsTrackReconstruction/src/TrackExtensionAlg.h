@@ -17,26 +17,26 @@
 #include "Acts/EventData/TrackContainer.hpp"
 
 // ActsTrk
-#include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ProtoTrackCollection.h"
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
+#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IFitterTool.h"
 
 // Athena
-#include "xAODTruth/TruthParticleContainer.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "GaudiKernel/EventContext.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
 
 // STL
-#include <string>
 #include <memory>
+#include <string>
 
 // Handle Keys
-#include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "TrackFindingData.h"
 #include "src/TrackStatePrinter.h"
-
 
 /**
  * @class TrackExtensionAlg
@@ -59,14 +59,17 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_protoTrackCollectionKey{
       this, "ProtoTracksLocation", "", "Input proto tracks"};
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey{
-    this, "TruthLocation", "", "Truth container (to be enabled only for debugging)"};
+      this, "TruthLocation", "",
+      "Truth container (to be enabled only for debugging)"};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{
       this, "ACTSTracksLocation", "",
       "Output track collection (ActsTrk variant)"};
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
-  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap> m_detectorElementToGeometryIdMapKey
-      {this, "DetectorElementToActsGeometryIdMapKey", "DetectorElementToActsGeometryIdMap",
-       "Map which associates detector elements to Acts Geometry IDs"};
+  SG::ReadCondHandleKey<ActsTrk::DetectorElementToActsGeometryIdMap>
+      m_detectorElementToGeometryIdMapKey{
+          this, "DetectorElementToActsGeometryIdMapKey",
+          "DetectorElementToActsGeometryIdMap",
+          "Map which associates detector elements to Acts Geometry IDs"};
 
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
@@ -79,14 +82,20 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
       m_stripCalibTool{this, "StripCalibrator", "",
                        "Opt. strip measurement calibrator"};
   ToolHandle<ActsTrk::TrackStatePrinter> m_trackStatePrinter{
-     this, "TrackStatePrinter", "", "optional track state printer"};
+      this, "TrackStatePrinter", "", "optional track state printer"};
+  ToolHandle<ActsTrk::IFitterTool> m_actsFitter{
+      this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
+
+  Gaudi::Property<bool> m_propagateForward{this, "PropagateForward", false,
+                                           "If true propagate forward"};
 
   std::unique_ptr<detail::CKF_config> m_ckfConfig;
   std::unique_ptr<const Acts::Logger> m_logger;
 
   detail::TrackFindingMeasurements collectMeasurements(
       const EventContext& context,
-      const ActsTrk::DetectorElementToActsGeometryIdMap &detectorElementToGeometryIdMap) const;
+      const ActsTrk::DetectorElementToActsGeometryIdMap&
+          detectorElementToGeometryIdMap) const;
 
   Acts::CalibrationContext
       m_calibrationContext;  // this will change in future to be updatable event
