@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -173,7 +173,7 @@ int main(int argc, char** argv)
   CHECK_WITH_CONTEXT(pSvcLoc->service("THistSvc", histSvc, true), "GenericMonPerf_test", -1);
 
   ISvcManager* svcmgr = dynamic_cast<ISvcManager*>(pSvcLoc);
-  svcmgr->startServices().ignore();
+  svcmgr->start().ignore();
 
   ToolHandle<GenericMonitoringTool> monTool("GenericMonitoringTool/MonTool");
   CHECK_WITH_CONTEXT(monTool.retrieve(), "GenericMonPerf_test", -1);
@@ -191,8 +191,8 @@ int main(int argc, char** argv)
   // Make sure that THistSvc gets finalized.
   // Otherwise, the output file will get closed while global dtors are running,
   // which can lead to crashes.
-  svcmgr->stopServices().ignore();
-  svcmgr->finalizeServices().ignore();
+  svcmgr->stop().ignore();
+  svcmgr->finalize().ignore();
 
   return 0;
 }

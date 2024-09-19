@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -791,7 +791,7 @@ int main() {
   }
 
   ISvcManager* svcmgr = dynamic_cast<ISvcManager*>( pSvcLoc );
-  svcmgr->startServices().ignore();
+  svcmgr->start().ignore();
 
   // we need to test what happens to the monitoring when tool is not valid
   ToolHandle<GenericMonitoringTool> emptyMon("");
@@ -845,8 +845,8 @@ int main() {
   // Make sure that THistSvc gets finalized.
   // Otherwise, the output file will get closed while global dtors are running,
   // which can lead to crashes.
-  svcmgr->stopServices().ignore();
-  svcmgr->finalizeServices().ignore();
+  svcmgr->stop().ignore();
+  svcmgr->finalize().ignore();
 
   return 0;
 }
