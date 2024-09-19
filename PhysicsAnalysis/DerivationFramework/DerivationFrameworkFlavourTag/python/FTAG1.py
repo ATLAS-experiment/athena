@@ -79,7 +79,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FTAG1SlimmingHelper.SmartCollections += [
                                            "BTagging_AntiKt4UFOCSSK",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                           "BTaggingless_AntiKt4EMPFlowJets",
+                                           "AntiKt4EMPFlowJets_FTAG",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
