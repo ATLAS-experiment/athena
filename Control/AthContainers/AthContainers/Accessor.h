@@ -161,11 +161,18 @@ public:
 
   /**
    * @brief Test to see if this variable exists in the store and is writable.
-   * @param e An element of the container which to test the variable.
+   * @param e An element of the container in which to test the variable.
    */
   template <class ELT>
   ATH_REQUIRES( IsAuxElement<ELT> )
   bool isAvailableWritable (ELT& e) const;
+    
+
+  /**
+   * @brief Test to see if this variable exists in the store and is writable.
+   * @param c The container in which to test the variable.
+   */
+  bool isAvailableWritable (AuxVectorData& c) const;
 };
 
 

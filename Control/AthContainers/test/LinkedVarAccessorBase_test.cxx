@@ -56,8 +56,10 @@ void test1()
   assert (b.auxid() == 1);
   assert (b.linkedAuxid() == 2);
   assert (b.isAvailable (e));
+  assert (b.isAvailable (c));
   LinkedVarAccessorBaseTest b2 (1, 3);
   assert (!b2.isAvailable (e));
+  assert (!b2.isAvailable (c));
 }
 
 

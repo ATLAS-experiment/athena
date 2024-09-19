@@ -235,6 +235,20 @@ Accessor<PackedLink<CONT>, ALLOC>::isAvailableWritable (AuxElement& e) const
 }
 
 
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container which to test the variable.
+ */
+template <class CONT, class ALLOC>
+inline
+bool
+Accessor<PackedLink<CONT>, ALLOC>::isAvailableWritable (AuxVectorData& c) const
+{
+  return c.isAvailableWritable (this->m_auxid) &&
+    c.isAvailableWritable (this->m_linkedAuxid);
+}
+
+
 //************************************************************************
 
 
@@ -472,7 +486,7 @@ ACCESSOR::getDataSpan (AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class CONT, class ALLOC, class VALLOC>
 inline
@@ -482,6 +496,20 @@ ACCESSOR::isAvailableWritable (AuxElement& e) const
   return e.container() &&
     e.container()->isAvailableWritable (this->m_auxid) &&
     e.container()->isAvailableWritable (this->m_linkedAuxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class CONT, class ALLOC, class VALLOC>
+inline
+bool
+ACCESSOR::isAvailableWritable (AuxVectorData& c) const
+{
+  return c.isAvailableWritable (this->m_auxid) &&
+    c.isAvailableWritable (this->m_linkedAuxid);
 }
 
 

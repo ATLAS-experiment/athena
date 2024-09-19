@@ -132,6 +132,11 @@ void test1()
   SG::AuxStoreInternal store;
   v.setStore (&store);
 
+  assert (!ptyp1.isAvailable(v));
+  assert (!ptyp1.isAvailable(vc));
+  assert (!ptyp1.isAvailableWritable(v));
+  assert (!ptyp1.isAvailableWritable(vc));
+
   PLink* plink = reinterpret_cast<PLink*> (store.getData(plink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   SG::IAuxTypeVector* linkedVec = store.linkedVector (plink_id);
@@ -143,6 +148,10 @@ void test1()
   assert (ptyp1.isAvailable(bc5));
   assert (ptyp1.isAvailableWritable(b5));
   assert (ptyp1.isAvailableWritable(bc5));
+  assert (ptyp1.isAvailable(v));
+  assert (ptyp1.isAvailable(vc));
+  assert (ptyp1.isAvailableWritable(v));
+  assert (ptyp1.isAvailableWritable(vc));
 
   SG::AuxElement b4;
   SG::ConstAuxElement bc4;
@@ -214,6 +223,10 @@ void test1()
   assert (ptyp1.isAvailable(bc5));
   assert (!ptyp1.isAvailableWritable(b5));
   assert (!ptyp1.isAvailableWritable(bc5));
+  assert (ptyp1.isAvailable(v));
+  assert (ptyp1.isAvailable(vc));
+  assert (!ptyp1.isAvailableWritable(v));
+  assert (!ptyp1.isAvailableWritable(vc));
 
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ptyp1(b5) = ElementLink<Cont> (123, 21));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, ptyp1(bc5) = ElementLink<Cont> (123, 22));
@@ -224,6 +237,10 @@ void test1()
   assert (!ptyp2.isAvailable(bc5));
   assert (!ptyp2.isAvailableWritable(b5));
   assert (!ptyp2.isAvailableWritable(bc5));
+  assert (!ptyp2.isAvailable(v));
+  assert (!ptyp2.isAvailable(vc));
+  assert (!ptyp2.isAvailableWritable(v));
+  assert (!ptyp2.isAvailableWritable(vc));
 
   ptyp2(bc5) = ElementLink<Cont> (123, 23);
 
@@ -231,6 +248,10 @@ void test1()
   assert (ptyp2.isAvailable(bc5));
   assert (ptyp2.isAvailableWritable(b5));
   assert (ptyp2.isAvailableWritable(bc5));
+  assert (ptyp2.isAvailable(v));
+  assert (ptyp2.isAvailable(vc));
+  assert (ptyp2.isAvailableWritable(v));
+  assert (ptyp2.isAvailableWritable(vc));
 
   assert (ptyp2 (b5).key() == 123);
   assert (ptyp2 (b5).index() == 23);
@@ -449,6 +470,11 @@ void test3()
   SG::AuxStoreInternal store;
   v.setStore (&store);
 
+  assert (!vtyp1.isAvailable(v));
+  assert (!vtyp1.isAvailable(vc));
+  assert (!vtyp1.isAvailableWritable(v));
+  assert (!vtyp1.isAvailableWritable(vc));
+
   VElt* vlink = reinterpret_cast<VElt*> (store.getData(vlink_id, 10, 10));
   DLink* dlink = reinterpret_cast<DLink*> (store.getData(dlink_id, 2, 2));
   SG::IAuxTypeVector* linkedVec = store.linkedVector (vlink_id);
@@ -460,6 +486,10 @@ void test3()
   assert (vtyp1.isAvailable(bc5));
   assert (vtyp1.isAvailableWritable(b5));
   assert (vtyp1.isAvailableWritable(bc5));
+  assert (vtyp1.isAvailable(v));
+  assert (vtyp1.isAvailable(vc));
+  assert (vtyp1.isAvailableWritable(v));
+  assert (vtyp1.isAvailableWritable(vc));
 
   SG::AuxElement b4;
   SG::ConstAuxElement bc4;
@@ -577,6 +607,10 @@ void test3()
   assert (vtyp1.isAvailable(bc5));
   assert (!vtyp1.isAvailableWritable(b5));
   assert (!vtyp1.isAvailableWritable(bc5));
+  assert (vtyp1.isAvailable(v));
+  assert (vtyp1.isAvailable(vc));
+  assert (!vtyp1.isAvailableWritable(v));
+  assert (!vtyp1.isAvailableWritable(vc));
 
   // Empty vectors.
   {
@@ -598,6 +632,10 @@ void test3()
   assert (!vtyp2.isAvailable(bc5));
   assert (!vtyp2.isAvailableWritable(b5));
   assert (!vtyp2.isAvailableWritable(bc5));
+  assert (!vtyp2.isAvailable(v));
+  assert (!vtyp2.isAvailable(vc));
+  assert (!vtyp2.isAvailableWritable(v));
+  assert (!vtyp2.isAvailableWritable(vc));
 
   vtyp2(bc5) = std::vector<ElementLink<Cont> > {{123, 23}};
 
@@ -605,6 +643,10 @@ void test3()
   assert (vtyp2.isAvailable(bc5));
   assert (vtyp2.isAvailableWritable(b5));
   assert (vtyp2.isAvailableWritable(bc5));
+  assert (vtyp2.isAvailable(v));
+  assert (vtyp2.isAvailable(vc));
+  assert (vtyp2.isAvailableWritable(v));
+  assert (vtyp2.isAvailableWritable(vc));
 
   assert (vtyp2 (b5).size() == 1);
   assert (vtyp2 (bc5).size() == 1);

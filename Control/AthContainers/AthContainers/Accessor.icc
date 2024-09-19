@@ -142,7 +142,7 @@ Accessor<T, ALLOC>::getDataSpan (AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 template <class ELT>
@@ -152,6 +152,19 @@ bool
 Accessor<T, ALLOC>::isAvailableWritable (ELT& e) const
 {
   return e.container() && e.container()->isAvailableWritable (this->m_auxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+Accessor<T, ALLOC>::isAvailableWritable (AuxVectorData& c) const
+{
+  return c.isAvailableWritable (this->m_auxid);
 }
 
 

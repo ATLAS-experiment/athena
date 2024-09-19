@@ -125,6 +125,11 @@ void test1()
   v.set (cb, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+  const SG::AuxVectorBase& cv = v;
+
+  assert (!jtyp1.isAvailable(v));
+  assert (!jtyp1.isAvailable(cv));
+
   Elt* elt = reinterpret_cast<Elt*> (store.getData(jvec_id, 10, 10));
   Payload* payload = reinterpret_cast<Payload*> (store.getData(payload_id, 5, 5));
   elt[0] = Elt (2);
@@ -135,6 +140,8 @@ void test1()
   elt[5] = Elt (5);
   std::ranges::copy (std::vector<float> {1.5, 2.5, 3.5, 4.5, 5.5}, payload);
 
+  assert (jtyp1.isAvailable(b));
+  assert (jtyp1.isAvailable(cb));
   assert (jtyp1.isAvailable(b));
   assert (jtyp1.isAvailable(cb));
 

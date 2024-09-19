@@ -101,6 +101,10 @@ void test1()
   v.setStore (&store);
   assert (ityp1.withDefault(v, 5, -1) == -1);
   assert (ftyp1.withDefault(v, 5, -1) == -1);
+  assert (!ityp1.isAvailable(b));
+  assert (!ftyp1.isAvailable(b));
+  assert (!ityp1.isAvailable(v));
+  assert (!ftyp1.isAvailable(v));
 
   int* anInt = reinterpret_cast<int*> (store.getData(ityp1_id, 10, 10));
   anInt[5] = 3;
@@ -109,6 +113,8 @@ void test1()
 
   assert (ityp1.isAvailable(b));
   assert (ftyp1.isAvailable(b));
+  assert (ityp1.isAvailable(v));
+  assert (ftyp1.isAvailable(v));
 
   assert (ityp1 (b) == 3);
   assert (ftyp1 (b) == 1.5);
@@ -150,6 +156,10 @@ void test2()
   v.set (b, 5);
   SG::AuxStoreInternal store;
   v.setStore (&store);
+
+  assert (!ityp1.isAvailable(v));
+  assert (!ftyp1.isAvailable(v));
+
   int* anInt = reinterpret_cast<int*> (store.getData(ityp1_id, 10, 10));
   anInt[5] = 3;
   float* aFloat = reinterpret_cast<float*> (store.getData(ftyp1_id, 10, 10));
@@ -157,6 +167,8 @@ void test2()
 
   assert (ityp1.isAvailable(b));
   assert (ftyp1.isAvailable(b));
+  assert (ityp1.isAvailable(v));
+  assert (ftyp1.isAvailable(v));
 
   assert (ityp1 (b) == 3);
   assert (ftyp1 (b) == 1.5);
