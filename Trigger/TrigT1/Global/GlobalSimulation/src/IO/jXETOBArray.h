@@ -3,7 +3,6 @@
 #ifndef GLOBALSIM_jXETOBARRAY_H
 #define GLOBALSIM_jXETOBARRAY_H
 
-#include <iostream>
 #include "L1TopoEvent/InputTOBArray.h"
 #include "L1TopoEvent/DataArrayImpl.h"
 #include "L1TopoEvent/jXETOB.h"
