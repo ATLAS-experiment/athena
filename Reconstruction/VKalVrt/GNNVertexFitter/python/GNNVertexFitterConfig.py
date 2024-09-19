@@ -63,7 +63,6 @@ def GNNVertexFitterAlgCfg(flags, jetcol="AntiKt4EMPFlowJets", inclusive=False, *
             TrackCollection=trackCollection,
             nnFilePaths=nnFilePaths,
             remapping=remapping,
-            useBTaggingObject=False,
             JetCollection=jetcol,
         )
 
