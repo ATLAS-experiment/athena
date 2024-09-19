@@ -27,3 +27,8 @@ atlas_add_component (GlobalSimulation
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_runtime(share/*.txt)
+
+atlas_add_test( testEfex
+   SCRIPT python/run_Egamma1_LArStrip_Fex.py --evtMax 10
+   POST_EXEC_SCRIPT noerror.sh )
+
