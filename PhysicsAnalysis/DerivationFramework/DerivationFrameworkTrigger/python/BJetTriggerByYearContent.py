@@ -12,8 +12,9 @@ def getDataYear(flags):
             Campaign.MC20a: 2016, # prefer over 2015
             Campaign.MC20d: 2017,
             Campaign.MC20e: 2018,
-            Campaign.MC21a: 2022, # prefer over 2015
-            Campaign.MC23a: 2022, # prefer over 2015
+            Campaign.MC21a: 2022,
+            Campaign.MC23a: 2022,
+            Campaign.MC23c: 2023,
             Campaign.MC23d: 2023,
             Campaign.MC23e: 2024,
             Campaign.PhaseII: 2030,
