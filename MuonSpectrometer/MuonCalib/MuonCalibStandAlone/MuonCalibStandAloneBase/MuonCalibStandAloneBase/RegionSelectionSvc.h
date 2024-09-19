@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RegionSelectionSvc_H
@@ -51,7 +51,7 @@ public:
     /** return true if id is in selected region */
     bool isInRegion(const MuonCalib::MuonFixedId &id) const;
     /** get region selection */
-    std::string GetRegionSelection() const;
+    const std::string& GetRegionSelection() const;
     /** get stations/multilayers in region */
     const std::vector<MuonCalib ::NtupleStationId> &GetStationsInRegions() const;
     /** add region ntuples which are relevant for this region to TChain */

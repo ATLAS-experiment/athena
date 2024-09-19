@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LabelIndex.h
@@ -35,7 +35,7 @@ public:
   Index addLabel(const Label& lab);
 
   /// Return the name of this map.
-  Label name() const;
+  const Label& name() const;
 
   /// Fetch the label for an index.
   /// Returns "" for error, e.g. unused index.
