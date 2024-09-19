@@ -20,6 +20,7 @@ if __name__=="__main__":
     flags.Reco.PostProcessing.TRTAloneThinning = False
 
     flags.fillFromArgs()
+    flags.Jet.strictMode = False
     flags.lock()
 
     from RecJobTransforms.RecoSteering import RecoSteering
