@@ -497,7 +497,7 @@ class SlimmingHelper:
                 elif collectionName=="BTagging_AntiKt4EMPFlow_expert":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingExpertContent
                         items.extend(BTaggingExpertContent("AntiKt4EMPFlowJets", self.flags))
-                elif collectionName=="BTaggingless_AntiKt4EMPFlowJets":
+                elif collectionName=="AntiKt4EMPFlowJets_FTAG":
                         from DerivationFrameworkFlavourTag.BTaggingContent import BTagginglessContent
                         items.extend(BTagginglessContent("AntiKt4EMPFlowJets", self.flags))
                 elif collectionName=="BTagging_AntiKt4EMTopo":

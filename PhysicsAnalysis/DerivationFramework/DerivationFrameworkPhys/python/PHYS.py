@@ -71,7 +71,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(flags))
-    
+
+    ## FTAG augmentations - run b-tagging on PFlow jets
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import JetCollectionsBTaggingCfg
+    acc.merge(JetCollectionsBTaggingCfg(flags, ["AntiKt4EMPFlowJets"]))
+
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
@@ -100,6 +104,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                            "AntiKt4EMTopoJets",
                                            "AntiKt4EMPFlowJets",
                                            "BTagging_AntiKt4EMPFlow",
+                                           "AntiKt4EMPFlowJets_FTAG",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                            "MET_Baseline_AntiKt4EMTopo",
                                            "MET_Baseline_AntiKt4EMPFlow",
