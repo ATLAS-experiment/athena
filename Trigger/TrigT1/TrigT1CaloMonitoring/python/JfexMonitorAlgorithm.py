@@ -17,6 +17,7 @@ def JfexMonitoringConfig(flags):
     # add any steering
     groupName = 'JfexMonitor' # the monitoring group name is also used for the package name
     mapGroupName = 'jFEXMaps'
+    mapHighPtGroupName = 'jFEXMapsHighPt'
     JfexMonAlg.Grouphist = groupName
 
     # mainDir = 'L1Calo'
@@ -126,6 +127,17 @@ def JfexMonitoringConfig(flags):
                            weight="weight",opt=['kAlwaysCreate'],
                            **eta_phi_bins)
 
+    helper.defineHistogram('jJ_Eta,jJ_Phi;h_jJ_EtaPhiMap_HighPt', title="jFex SRJet #geq 20 GeV #eta vs #phi;#eta;#phi",
+                           fillGroup=mapHighPtGroupName,
+                           type='TH2I',path=expertPath+'jJ/',
+                           hanConfig={
+                               "algorithm": "Jfex_etaPhiMapFilled",
+                               "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. Inspect for hot/cold spots - check help for list of known hot/coldspots",
+                               "display":"SetPalette(55),Draw=COL1Z"
+                           },
+                           weight="weight",opt=['kAlwaysCreate'],
+                           **eta_phi_bins)
+
     helper.defineHistogram('jJ_GlobalEta;h_jJ_GlobalEta', title='jFex SRJet Global #eta;#eta;Counts',
                            fillGroup=groupName,
                            type='TH1F', path=developerPath+'jJ/',xbins=100,xmin=-50,xmax=50)
@@ -216,6 +228,15 @@ def JfexMonitoringConfig(flags):
                            },
                            type='TH2I',path=expertPath+'jTau/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
 
+    helper.defineHistogram('jTau_Eta,jTau_Phi;h_jTau_EtaPhiMap_HighPt', title="jFex Tau #geq 10 GeV #eta vs #phi;#eta;#phi",
+                           fillGroup=mapHighPtGroupName,
+                           hanConfig={
+                               "algorithm": "Jfex_etaPhiMapFilled_TAU",
+                               "description": "Inspect for hot/cold spots - check help for list of known hot/coldspots",
+                               "display": "SetPalette(87)"
+                           },
+                           type='TH2I',path=expertPath+'jTau/',opt=['kAlwaysCreate'], **eta_phi_bins_central)
+
     helper.defineHistogram('jTau_GlobalEta;h_jTau_GlobalEta', title='jFex Tau Global #eta;#eta;Counts',
                            fillGroup=groupName,
                            type='TH1F', path=developerPath+'jTau/',xbins=100,xmin=-50,xmax=50)
@@ -267,6 +288,16 @@ def JfexMonitoringConfig(flags):
 
     helper.defineHistogram('jEM_Eta,jEM_Phi;h_jEM_EtaPhiMap', title="jFex EM #eta vs #phi;#eta;#phi",
                            fillGroup=mapGroupName,
+                           hanConfig={
+                               "algorithm":"Jfex_etaPhiMapFilled_EM",
+                               "description": "Bins with negative number of entries (in the FCAL and central region) signify that no TOBs can be produced at that position. Inspect for hot/cold spots, note that there are no jEM TOBs for |eta| < 2.3 - check help for list of known hot/coldspots",
+                               "display":"SetPalette(87),Draw=COL1Z"
+                           },
+                           weight="weight",
+                           type='TH2I',path=expertPath+'jEM/',opt=['kAlwaysCreate'],  **eta_phi_bins)
+
+    helper.defineHistogram('jEM_Eta,jEM_Phi;h_jEM_EtaPhiMap_HighPt', title="jFex EM #geq 10 GeV #eta vs #phi;#eta;#phi",
+                           fillGroup=mapHighPtGroupName,
                            hanConfig={
                                "algorithm":"Jfex_etaPhiMapFilled_EM",
                                "description": "Bins with negative number of entries (in the FCAL and central region) signify that no TOBs can be produced at that position. Inspect for hot/cold spots, note that there are no jEM TOBs for |eta| < 2.3 - check help for list of known hot/coldspots",
