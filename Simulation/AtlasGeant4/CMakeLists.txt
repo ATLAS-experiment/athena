@@ -163,3 +163,8 @@ atlas_add_component( AtlasGeant4
                      dummy.cc
                      LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
 set_target_properties( AtlasGeant4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+if( ATLAS_GEANT4_USE_LTO AND CMAKE_COMPILER_IS_GNUCXX )
+  # Suppress spurious warnings seen in the LTO build.
+  set_target_properties( AtlasGeant4Lib PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
+endif()
+
