@@ -202,7 +202,7 @@ void MuonTesterTree::disableBranch(const std::string& b_name) {
 void MuonTesterTree::disableBranch(const std::vector<std::string>& br_names) {
     if (!m_filled) m_excludedBranches.insert(br_names.begin(), br_names.end());
 }
-std::string MuonTesterTree::fileStream() const { return m_stream; }
+const std::string& MuonTesterTree::fileStream() const { return m_stream; }
 bool MuonTesterTree::isActive(const IMuonTesterBranch* branch) const {
     if (!branch) {        
         ATH_MSG_ERROR("Nullptr was given");
@@ -220,7 +220,7 @@ bool MuonTesterTree::isActive(const IMuonTesterBranch* branch) const {
         }) != m_branches_to_init.end();
 }
 void MuonTesterTree::setPath(const std::string& new_path) { m_path = new_path; }
-std::string MuonTesterTree::path() const { return m_path; }
+const std::string& MuonTesterTree::path() const { return m_path; }
 
 bool MuonTesterTree::addClient(MuonTesterTree* client) {
     if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
