@@ -1684,7 +1684,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_commonPRWFileMC23a, "PRW.commonPRWFileMC23a", rEnv, "PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root");
   configFromFile(m_commonPRWFileMC23c, "PRW.commonPRWFileMC23c", rEnv, "PileupReweighting/mc23_common/mc23c.450000.physlite.prw.v1.root");
   configFromFile(m_commonPRWFileMC23d, "PRW.commonPRWFileMC23d", rEnv, "PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root");
-  configFromFile(m_commonPRWFileMC23e, "PRW.commonPRWFileMC23e", rEnv, "PileupReweighting/mc23_common/mc23d.450000.physlite.prw.v1.root"); // PlaceHolder
+  configFromFile(m_commonPRWFileMC23e, "PRW.commonPRWFileMC23e", rEnv, "PileupReweighting/mc23_common/mc23e.470000.physlite.prw.v1.root");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 
