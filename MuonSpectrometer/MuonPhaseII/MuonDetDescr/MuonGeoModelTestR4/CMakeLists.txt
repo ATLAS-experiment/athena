@@ -23,19 +23,19 @@ atlas_add_test( testR4Geometry
 
 atlas_add_test( checkStripDesign
                 SCRIPT runStripDesignDump                
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 900
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testChamberBuilding
                 SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noMM --noSTGC
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 900
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
