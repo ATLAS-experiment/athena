@@ -8,7 +8,7 @@ from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
+from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequence
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -135,7 +135,7 @@ def MinBiasSPSel(flags):
 
 def MinBiasSPSequenceGenCfg(flags):
     selAcc = MinBiasSPSel(flags)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen = SPCountHypoToolGen)
+    return MenuSequence(flags, selAcc, HypoToolGen = SPCountHypoToolGen)
 
 def MinBiasZVertexFinderSequenceGenCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
@@ -149,7 +149,7 @@ def MinBiasZVertexFinderSequenceGenCfg(flags):
     selAcc = SelectionCA("ZVertexFinderSel")
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo( CompFactory.TrigZVertexHypoAlg("TrigZVertexHypoAlg", ZVertexKey=recordable("HLT_vtx_z")))
-    return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
+    return MenuSequence(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
 
 
 def MinBiasTrkSequenceGenCfg(flags):
@@ -170,7 +170,7 @@ def MinBiasTrkSequenceGenCfg(flags):
     from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
     trackCountHypoAlgo = TrackCounterHypoAlgCfg(flagsWithTrk)
     selAcc.mergeHypo(trackCountHypoAlgo)
-    return MenuSequenceCA(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
+    return MenuSequence(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
 
 def MinBiasMbtsSequenceGenCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")
@@ -182,7 +182,7 @@ def MinBiasMbtsSequenceGenCfg(flags):
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(hypo)
 
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = MbtsHypoToolGen,
                           globalRecoCA = MbtsSGInputCfg(flags))

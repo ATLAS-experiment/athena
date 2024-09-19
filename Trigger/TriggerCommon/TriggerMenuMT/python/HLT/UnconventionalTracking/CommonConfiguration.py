@@ -2,7 +2,7 @@
 
 from AthenaCommon.Logging import logging
 from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg,commonInDetLRTCfg
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -29,7 +29,7 @@ def getFullScanRecoOnlySequenceGenCfg(flags):
     selAcc.addHypoAlgo(HypoAlg)
 
     log.debug("Building the menu sequence for FullScanRecoOnlySequence")
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = StreamerHypoToolGenerator)
 

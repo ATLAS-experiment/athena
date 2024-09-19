@@ -63,7 +63,7 @@ bool InDetTrackSelectorTool::decision(const Trk::Track & track, const Trk::Verte
   std::unique_ptr<Trk::TrackSummary> summaryUniquePtr;
   const Trk::TrackSummary * summary = track.trackSummary();
   if (summary == nullptr && m_trackSumToolAvailable) {
-    summaryUniquePtr = m_trackSumTool->summary(track);
+    summaryUniquePtr = m_trackSumTool->summary(Gaudi::Hive::currentContext(), track);
     summary = summaryUniquePtr.get();
   }
 

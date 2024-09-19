@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -90,7 +90,7 @@ def enhancedBiasMenuSequenceGenCfg(flags):
     selAcc.mergeReco(reco)
     selAcc.addHypoAlgo(CompFactory.L1InfoHypo("EnhancedBiasHypo"))
 
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = EnhancedBiasHypoToolGen)
 

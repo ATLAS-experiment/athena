@@ -565,7 +565,7 @@ namespace JiveXML {
 				* Get number of Pix/SCT/TRT hits
 				*/
         std::unique_ptr<Trk::TrackSummary> summary = nullptr;
-				summary = m_trackSumTool->summary(**track);
+				summary = m_trackSumTool->summary(Gaudi::Hive::currentContext(), **track);
 
 				if(not summary){
 					ATH_MSG_DEBUG( "Track summary is NULL " );

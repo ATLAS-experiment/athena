@@ -3,7 +3,7 @@
 #
 
 # menu components
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from ..Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -42,7 +42,7 @@ def precisionTrackingSequenceGenCfg(flags, ion=False, variant='', is_probe_leg =
     selAcc.addHypoAlgo(precisionElectronHypoAlg)
     def acceptAllHypoToolGen(chainDict):
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
+    return MenuSequence(flags,selAcc,HypoToolGen=acceptAllHypoToolGen)
 
 
 def precisionTracking_LRTSequenceGenCfg(flags, is_probe_leg=False):

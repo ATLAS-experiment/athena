@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequenceCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InViewRecoCA, EmptyMenuSequenceCfg
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 
@@ -48,7 +48,7 @@ def CosmicsTrkSequenceGenCfg(flags):
     trkSequence.addHypoAlgo(trackCountHypo)
     log.debug("Prepared ID tracking sequence")
     log.debug(trkSequence)
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           trkSequence,
                           HypoToolGen = TrackCountHypoToolGen)
 

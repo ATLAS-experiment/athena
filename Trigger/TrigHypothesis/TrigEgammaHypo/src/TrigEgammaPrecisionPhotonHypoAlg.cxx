@@ -85,7 +85,7 @@ StatusCode TrigEgammaPrecisionPhotonHypoAlg::execute( const EventContext& contex
 
         int idx=0;
         for( auto& pidname : m_isemNames ){
-          info.pidDecorator[pidname] = (bool)m_egammaPhotonCutIDTools[idx]->accept(info.photon); 
+          info.pidDecorator[pidname] = (bool)m_egammaPhotonCutIDTools[idx]->accept(context, info.photon);
           idx++;
         }
 

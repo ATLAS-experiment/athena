@@ -217,7 +217,7 @@ namespace InDet
       std::unique_ptr<Trk::TrackSummary> summaryUniquePtr;
       const Trk::TrackSummary* summary = track.trackSummary();
       if (m_trackSumToolAvailable && summary == nullptr) {
-        summaryUniquePtr = m_trackSumTool->summary(track);
+        summaryUniquePtr = m_trackSumTool->summary(Gaudi::Hive::currentContext(), track);
         summary = summaryUniquePtr.get();
       }
       if (nullptr==summary ) {

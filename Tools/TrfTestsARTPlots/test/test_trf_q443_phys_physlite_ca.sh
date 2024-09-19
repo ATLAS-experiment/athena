@@ -12,6 +12,7 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py --CA "all:True" "RDOtoRDOTrigger:False" \
   --AMI q443 \
+  --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12' \
   --steering doRDO_TRIG doTRIGtoALL \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \

@@ -716,7 +716,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
        const TrigInDetTriplet &seed = triplets[seedIdx];
        for(std::list<Trk::Track*>::const_iterator t=tracks.begin(); t!=tracks.end(); ++t) {
 	  if( ! (*t) ) continue;
-	  m_trackSummaryTool->updateTrack(**t);
+	  m_trackSummaryTool->updateTrack(ctx, **t);
 	  disTrk_n_disCombTrks++;
 	  if( (*t)->perigeeParameters()!=0 && isCleaningPassDisTrack(seed, (*t), false) ) {
 	     ATH_MSG_VERBOSE("... combTrk, cleaningPass");
@@ -727,7 +727,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
        }
        for(std::list<Trk::Track*>::const_iterator t=tracksFail.begin(); t!=tracksFail.end(); ++t) {
 	  if( ! (*t) ) continue;
-	  m_trackSummaryTool->updateTrack(**t);
+	  m_trackSummaryTool->updateTrack(ctx, **t);
 	  disTrk_n_disFailTrks++;
 	  if( (*t)->perigeeParameters()!=0 && isCleaningPassDisTrack(seed, (*t), true) ) {
 	     ATH_MSG_VERBOSE("... failTrk, cleaningPass");
@@ -850,8 +850,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
      
      // large dEdx finding
      mnt_timer_dEdxTrk.start();
-     
-     for(auto t=outputTrackswTP.begin(); t!=outputTrackswTP.end();t++) { m_trackSummaryTool->updateTrack(**t); }
+     for(auto t=outputTrackswTP.begin(); t!=outputTrackswTP.end();t++) { m_trackSummaryTool->updateTrack(ctx, **t); }
      ATH_CHECK( finddEdxTrk(ctx,outputTrackswTP) );
      
   }
@@ -879,7 +878,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 	m_trigInDetTrackFitter->fit(extraDisCombTracks, fittedExtraDisCombTracks, ctx, m_particleHypothesis);
 	for (auto fittedTrack = fittedExtraDisCombTracks.begin(); fittedTrack!=fittedExtraDisCombTracks.end(); ++fittedTrack) {
 	   (*fittedTrack)->info().setPatternRecognitionInfo(Trk::TrackInfo::FastTrackFinderSeed);
-	   m_trackSummaryTool->updateTrack(**fittedTrack);
+	   m_trackSummaryTool->updateTrack(ctx, **fittedTrack);
 	   fittedDisCombTrks.push_back(*fittedTrack);
 	}
      }
@@ -945,7 +944,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
     (*fittedTrack)->info().setPatternRecognitionInfo(Trk::TrackInfo::FastTrackFinderSeed);
     ATH_MSG_VERBOSE("Updating fitted track: " << counter);
     ATH_MSG_VERBOSE(**fittedTrack);
-    m_trackSummaryTool->updateTrack(**fittedTrack);
+    m_trackSummaryTool->updateTrack(ctx, **fittedTrack);
     ATH_MSG_VERBOSE("Updated track: " << counter);
     ATH_MSG_VERBOSE(**fittedTrack);
 
@@ -2167,7 +2166,7 @@ void TrigFastTrackFinder::recoVertexForDisTrack(const EventContext& ctx, TrackCo
    QT.reserve(tracks.size());
 
    for (auto t=tracks.begin(); t!=tracks.end(); ++t) {
-      if( ! isGoodForDisTrackVertex(*t) ) continue;
+      if( ! isGoodForDisTrackVertex(*t, ctx) ) continue;
       // consider for vertex fitting (idx, sort, weight, Trk)
       double theta = (*t)->perigeeParameters()->parameters()[Trk::theta];
       double qOverP = std::abs((*t)->perigeeParameters()->parameters()[Trk::qOverP]);
@@ -2286,7 +2285,7 @@ void TrigFastTrackFinder::recoVertexForDisTrack(const EventContext& ctx, TrackCo
    }
 }
 
-bool TrigFastTrackFinder::isGoodForDisTrackVertex(Trk::Track* t) const
+bool TrigFastTrackFinder::isGoodForDisTrackVertex(Trk::Track* t, const EventContext& ctx) const
 {
    const double TRKCUT_CHI2_OV_NDOF        = 3.0;
    const double TRKCUT_PT                  = 1.0;
@@ -2299,7 +2298,7 @@ bool TrigFastTrackFinder::isGoodForDisTrackVertex(Trk::Track* t) const
    if ( ! t->perigeeParameters() ) return false;
    if ( ! t->fitQuality() )        return false;
    if ( t->trackSummary()==0 ) {
-      m_trackSummaryTool->updateTrack(*t);
+      m_trackSummaryTool->updateTrack(ctx, *t);
       if ( t->trackSummary()==0 )  return false;
    }
 
@@ -2398,7 +2397,7 @@ StatusCode TrigFastTrackFinder::findDisTracks(const EventContext& ctx,
    // select tracks to be used for isolation calculation
    std::vector<Trk::Track*> tracksForIso;
    for (auto t=tracks.begin(); t!=tracks.end(); ++t) {
-      if( isGoodForDisTrackVertex(*t) ) tracksForIso.push_back(*t);
+      if( isGoodForDisTrackVertex(*t,ctx) ) tracksForIso.push_back(*t);
    }
 
    //
@@ -2420,7 +2419,7 @@ StatusCode TrigFastTrackFinder::findDisTracks(const EventContext& ctx,
 
    TrackCollection fittedDisFailTrks;
    m_trigInDetTrackFitter->fit(initialDisFailTrks, fittedDisFailTrks, ctx, m_particleHypothesis);
-   int n_disFailTrkCands = recoAndFillDisTrkCand(prefix, &fittedDisFailTrks, tracksForIso, disTrkCandContainer, v_xvtx, v_yvtx, v_zvtx, true);
+   int n_disFailTrkCands = recoAndFillDisTrkCand(prefix, &fittedDisFailTrks, tracksForIso, disTrkCandContainer, v_xvtx, v_yvtx, v_zvtx, true, ctx);
    ATH_MSG_VERBOSE("disFailTrk: nr of cands = " << n_disFailTrkCands);
 
    mnt_disFailTrk_n      = qualityDisFailTrks.size();
@@ -2429,7 +2428,7 @@ StatusCode TrigFastTrackFinder::findDisTracks(const EventContext& ctx,
 
    // disCombTrk
    ATH_MSG_VERBOSE("===> nr of disCombTrk=" << qualityDisCombTrks.size() << " -> clone removal=" << fittedDisCombTrks.size());
-   int n_disCombTrkCands = recoAndFillDisTrkCand(prefix, &fittedDisCombTrks, tracksForIso, disTrkCandContainer, v_xvtx, v_yvtx, v_zvtx, false);
+   int n_disCombTrkCands = recoAndFillDisTrkCand(prefix, &fittedDisCombTrks, tracksForIso, disTrkCandContainer, v_xvtx, v_yvtx, v_zvtx, false, ctx);
    ATH_MSG_VERBOSE("disCombTrk: nr of cands = " << n_disCombTrkCands);
 
    mnt_disCombTrk_n      = qualityDisCombTrks.size();
@@ -2710,7 +2709,8 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
 					       const std::vector<double>& v_xvtx,
 					       const std::vector<double>& v_yvtx,
 					       const std::vector<double>& v_zvtx,
-					       bool isFail) const
+					       bool isFail,
+                 const EventContext& ctx) const
 {
    std::string prefix;
 
@@ -2736,14 +2736,14 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
 	 ATH_MSG_VERBOSE("z0 : " << z0 << " -> extrapolate -> " << z0_wrtVtx);
       }
 
-      m_trackSummaryTool->updateTrack(*ptrk);
+      m_trackSummaryTool->updateTrack(ctx, *ptrk);
 
       // pre-selection before refit
       if( ! isPreselPassDisTrackBeforeRefit(ptrk,d0_wrtVtx,z0_wrtVtx) ) continue;
 
       // refit
-      std::unique_ptr<Trk::Track> refit_trk = disTrk_refit(ptrk);
-      if( refit_trk != nullptr ) m_trackSummaryTool->updateTrack(*refit_trk);
+      std::unique_ptr<Trk::Track> refit_trk = disTrk_refit(ptrk, ctx);
+      if( refit_trk != nullptr ) m_trackSummaryTool->updateTrack(ctx, *refit_trk);
 
       // extrapolate refitted track to vertex
       double refit_d0 = 0;
@@ -2802,12 +2802,12 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
    return n_stored_tracks;
 }
 
-std::unique_ptr<Trk::Track> TrigFastTrackFinder::disTrk_refit(Trk::Track* t) const
+std::unique_ptr<Trk::Track> TrigFastTrackFinder::disTrk_refit(Trk::Track* t, const EventContext& ctx) const
 {
    std::unique_ptr<Trk::Track> newtrack = nullptr;
 
    if( t == nullptr ) return newtrack;
-   if( t->trackSummary() == nullptr ) m_trackSummaryTool->updateTrack(*t);
+   if( t->trackSummary() == nullptr ) m_trackSummaryTool->updateTrack(ctx, *t);
 
    ATH_MSG_VERBOSE("refitting - input track:");
    print_disTrk(t);
@@ -2842,7 +2842,7 @@ std::unique_ptr<Trk::Track> TrigFastTrackFinder::disTrk_refit(Trk::Track* t) con
    ATH_MSG_VERBOSE("... Nr of measurments / refit = " << n_measurements << " / " << n_measurements_refit);
 
    // perform refit
-   newtrack = m_disTrkFitter->fit(Gaudi::Hive::currentContext(),vec, *origPerigee, false, m_particleHypothesis); // false to run outlier switch
+   newtrack = m_disTrkFitter->fit(ctx,vec, *origPerigee, false, m_particleHypothesis); // false to run outlier switch
    ATH_MSG_VERBOSE("... ---> refit track:");
    if( newtrack!=0 && newtrack.get() ) {
       print_disTrk(dynamic_cast<const Trk::Track*>(newtrack.get()));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_VIEWHELPER_HH
@@ -11,6 +11,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthViews/View.h"
 #include "AthContainers/DataVector.h"
@@ -263,6 +264,20 @@ namespace ViewHelper
     if ( handle.setProxyDict( nview ).isFailure() ) {
       //We ignore it because the handle will be invalid anyway if this call is unsuccessful
       throw std::runtime_error( "Can't make ReadHandle of key " + rhKey.key() + " type " + ClassID_traits<T>::typeName() + " in view " + view->name() );
+    }
+    return handle;
+  }
+
+
+  template<typename T, typename CONT>
+  SG::WriteDecorHandle<CONT, T> makeHandle( const SG::View* view , const SG::WriteDecorHandleKey<CONT>& dKey, const EventContext& context )
+  {
+    SG::View* nview ATLAS_THREAD_SAFE = const_cast< SG::View* >( view ); //We need it until reading from const IProxyDict is supported
+
+    auto handle = SG::makeHandle<T>(dKey, context );
+    if ( handle.setProxyDict( nview ).isFailure() ) {
+      //We ignore it because the handle will be invalid anyway if this call is unsuccessful
+      throw std::runtime_error( "Can't make WriteDecorHandle of key " + dKey.key() + " type " + ClassID_traits<T>::typeName() + " in view " + view->name() );
     }
     return handle;
   }

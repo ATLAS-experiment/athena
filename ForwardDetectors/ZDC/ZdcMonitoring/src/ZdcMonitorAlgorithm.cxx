@@ -41,6 +41,7 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     ATH_CHECK( m_ZdcModuleChisqKey.initialize() );
     ATH_CHECK( m_ZdcModuleCalibEnergyKey.initialize() );
     ATH_CHECK( m_ZdcModuleCalibTimeKey.initialize() );
+    ATH_CHECK( m_ZdcModuleMaxADCKey.initialize() );
 
     ATH_CHECK( m_ZdcModuleAmpLGRefitKey.initialize() );
     ATH_CHECK( m_ZdcModuleT0LGRefitKey.initialize() );
@@ -231,6 +232,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleChisqHandle(m_ZdcModuleChisqKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle(m_ZdcModuleCalibEnergyKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibTimeHandle(m_ZdcModuleCalibTimeKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleMaxADCHandle(m_ZdcModuleMaxADCKey, ctx);
     
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleAmpLGRefitHandle(m_ZdcModuleAmpLGRefitKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleT0LGRefitHandle(m_ZdcModuleT0LGRefitKey, ctx);
@@ -249,6 +251,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
 
     auto zdcModuleAmp = Monitored::Scalar<float>("zdcModuleAmp", -1000.0);
+    auto zdcModuleMaxADC = Monitored::Scalar<float>("zdcModuleMaxADC", -1000.0);
     auto zdcModuleFract = Monitored::Scalar<float>("zdcModuleFract", -1000.0);
     auto zdcUncalibSumCurrentSide = Monitored::Scalar<float>("zdcUncalibSumCurrentSide", -1000.0);
     auto zdcAbove20NCurrentSide = Monitored::Scalar<bool>("zdcAbove20NCurrentSide", false);
@@ -317,6 +320,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
             if ((status & 1 << ZDCPulseAnalyzer::PulseBit) != 0){ // has pulse
                 zdcModuleAmp = zdcModuleAmplitudeHandle(*zdcMod);
+                zdcModuleMaxADC = zdcModuleMaxADCHandle(*zdcMod);
                 zdcModuleTime = zdcModuleTimeHandle(*zdcMod);
                 zdcModuleFitT0 = zdcModuleFitT0Handle(*zdcMod);
                 zdcModuleChisq = zdcModuleChisqHandle(*zdcMod);
@@ -351,7 +355,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                 if (imod == 0) zdcEMModuleEnergy[iside] = zdcModuleCalibAmp;
 
-                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleFract, zdcUncalibSumCurrentSide, zdcAbove20NCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleAmpLGRefitTimes10, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, lumiBlock, bcid);
+                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleMaxADC, zdcModuleFract, zdcUncalibSumCurrentSide, zdcAbove20NCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleAmpLGRefitTimes10, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, lumiBlock, bcid);
             } 
         } 
     }

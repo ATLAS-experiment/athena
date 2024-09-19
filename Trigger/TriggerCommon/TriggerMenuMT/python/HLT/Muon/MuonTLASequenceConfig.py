@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigEDMConfig.TriggerEDM import recordable
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromDict
@@ -41,7 +41,7 @@ def MuonTLAMenuSequenceGenCfg( flags, muChainPart):
     muonsIn = getMuonCollections(muChainPart)  
     selAcc=MuonTLASequenceCfg(flags, muons=muonsIn)
 
-    return MenuSequenceCA( flags,
+    return MenuSequence( flags,
                            selAcc,
                            HypoToolGen = TrigMuonEFMSonlyHypoToolFromDict
                          )

@@ -28,12 +28,14 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     nChannels = 16
 
     n_energy_bins_default = 200
+    n_adc_sum_fine_bins = 800
+    n_adc_sum_coarse_bins = 200
     n_time_bins_default = 150
     n_sample_bins_default = 25
     lumi_block_max = 2000
     bcid_max = 3564
     l1TriggerType_max = 256
-    adc_sum_max = 12288.0
+    adc_sum_max = 40000.0
     max_adc_max = 4096.0
     nsamples_max = 25.0
     time_max = 75.0
@@ -70,7 +72,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
  
     zdcModLEDMonToolArr.defineHistogram('zdcLEDADCSum', title='LED ADC Sum [ADC Counts];Events',
                             path='zdcLEDADCSum',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=adc_sum_max)
+                            xbins=n_adc_sum_fine_bins,xmin=0.0,xmax=adc_sum_max)
     zdcModLEDMonToolArr.defineHistogram('zdcLEDMaxADC', title='LED Max ADC [ADC Counts];Events',
                             path='zdcLEDMaxADC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=max_adc_max)
@@ -82,7 +84,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
                             xbins=n_time_bins_default,xmin=0.0,xmax=time_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDADCSum', title='LED ADC Sum [ADC Counts];Events',
                             path='rpdLEDADCSum',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=adc_sum_max)
+                            xbins=n_adc_sum_fine_bins,xmin=0.0,xmax=adc_sum_max)
     rpdChanLEDMonToolArr.defineHistogram('rpdLEDMaxADC', title='LED Max ADC [ADC Counts];Events',
                             path='rpdLEDMaxADC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=max_adc_max)
@@ -98,7 +100,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     zdcModLEDMonToolArr.defineHistogram('lumiBlock, zdcLEDADCSum;zdcLEDADCSum_vs_lb', type='TH2F', title=';lumi block;LED ADC Sum [ADC Counts]',
                             path='zdcLEDADCSumLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=adc_sum_max)
+                            ybins=n_adc_sum_fine_bins,ymin=0.0,ymax=adc_sum_max)
     zdcModLEDMonToolArr.defineHistogram('lumiBlock, zdcLEDMaxADC;zdcLEDMaxADC_vs_lb', type='TH2F', title=';lumi block;LED Max ADC [ADC Counts]',
                             path='zdcLEDMaxADCLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
@@ -114,7 +116,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDADCSum;rpdLEDADCSum_vs_lb', type='TH2F', title=';lumi block;LED ADC Sum [ADC Counts]',
                             path='rpdLEDADCSumLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=adc_sum_max)
+                            ybins=n_adc_sum_fine_bins,ymin=0.0,ymax=adc_sum_max)
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDMaxADC;rpdLEDMaxADC_vs_lb', type='TH2F', title=';lumi block;LED Max ADC [ADC Counts]',
                             path='rpdLEDMaxADCLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
@@ -134,7 +136,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDADCSum', type='TH2F', title=';BCID;LED ADC Sum [ADC Counts]',
                             path='zdcLEDADCSumBCIDdep',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=adc_sum_max)
+                            ybins=n_adc_sum_coarse_bins,ymin=0.0,ymax=adc_sum_max)
     zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDMaxADC', type='TH2F', title=';BCID;LED Max ADC [ADC Counts]',
                             path='zdcLEDMaxADCBCIDdep',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
@@ -150,7 +152,7 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDADCSum', type='TH2F', title=';BCID;LED ADC Sum [ADC Counts]',
                             path='rpdLEDADCSumBCIDdep',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=adc_sum_max)
+                            ybins=n_adc_sum_coarse_bins,ymin=0.0,ymax=adc_sum_max)
     rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDMaxADC', type='TH2F', title=';BCID;LED Max ADC [ADC Counts]',
                             path='rpdLEDMaxADCBCIDdep',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,

@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Logging import logging
@@ -43,7 +43,7 @@ def FullScanLRTMenuSequenceGenCfg(flags):
     selAcc.addHypoAlgo(theHypoAlg)
 
     log.info("Building the Step dictinary for FullScanLRT!")
-    return MenuSequenceCA(flags,
+    return MenuSequence(flags,
                           selAcc,
                           HypoToolGen = TrigLRTHypoToolFromDict)
 

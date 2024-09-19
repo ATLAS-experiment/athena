@@ -2,7 +2,7 @@
 #
 
 from enum import Enum
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -103,7 +103,7 @@ def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
 #   - Then pass the JetDefinitions into the configurator functions,
 #     which return ComponentAccumulator.
 #   - When ChainSteps are created by JetChainConfiguration.getStep,
-#     the MenuSequenceCA generators will be wrapped in a deferred call
+#     the MenuSequence generators will be wrapped in a deferred call
 #     so that when constructing the full HLT menu, we don't regenerate
 #     identical sequence configurations repeatedly.
 
@@ -186,7 +186,7 @@ def jetCaloPreselMenuSequenceGenCfg(flags, **jetDefDict):
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=JetHypoAlgType.CALOPRESEL))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.CALOPRESEL))
 
 # A null preselection, which will only run the cluster making (step 1)
 # We set RoIs='' for same reason as described for jetCaloPreselMenuSequence
@@ -203,7 +203,7 @@ def jetCaloRecoMenuSequenceGenCfg(flags, clusterCalib):
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr="caloreco", jetsIn=None, hypoType=JetHypoAlgType.PASSTHROUGH))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType=JetHypoAlgType.PASSTHROUGH))
 
 
 # A full hypo selecting only on calo jets (step 1)
@@ -230,7 +230,7 @@ def jetCaloHypoMenuSequenceGenCfg(flags, isPerf, **jetDefDict):
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=hypoType))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting only on heavy ion calo jets (step 1)
@@ -251,7 +251,7 @@ def jetHICaloHypoMenuSequenceGenCfg(flags, isPerf, **jetRecoDict):
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetRecoDict['jetDefStr'], jetsIn=jetsOut, hypoType=hypoType))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting on jets with FS track reco (step 2)
@@ -295,7 +295,7 @@ def jetFSTrackingHypoMenuSequenceGenCfg(flags, isPerf, **jetDefDict):
     selAcc.mergeReco(reco)
     selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=jetsOut, hypoType=hypoType))
 
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
 
 # A full hypo selecting on jets with RoI track reco (step 2)
@@ -352,5 +352,5 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
 
 def jetRoITrackJetTagHypoMenuSequenceGenCfg(flags, jetDef, isPresel=True):
     selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetDef, isPresel)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
