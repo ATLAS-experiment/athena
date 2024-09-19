@@ -14,6 +14,7 @@ SPCountHypoTool::SPCountHypoTool(const std::string &type, const std::string &nam
 StatusCode SPCountHypoTool::initialize() {
   return StatusCode::SUCCESS;
 }
+
 template<typename DetailType>
 bool SPCountHypoTool::applyCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
   if (threshold == -1) {
@@ -21,18 +22,19 @@ bool SPCountHypoTool::applyCut(const Gaudi::Property<DetailType> &threshold, con
   }
   const std::string detailName = (name != "" ? std::string(name) : threshold.name());
 
-  ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<int>(detailName) > threshold));
+  ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<DetailType>(detailName) > threshold));
   return (composit->getDetail<DetailType>(detailName) > threshold);
 }
 
-bool SPCountHypoTool::applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
+template<typename DetailType>
+bool SPCountHypoTool::applyInverseCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name) const {
   if (threshold == -1) {
     return m_logicAnd;  // If the logic is And, it should return true and otherwise it should return false.
   }
   const std::string detailName = (name != "" ? std::string(name) : threshold.name());
 
-  ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<int>(detailName) < threshold));
-  return (composit->getDetail<int>(detailName) < threshold);  // here is the difference
+  ATH_MSG_DEBUG("count for = " << threshold.name() << "=" << (composit->getDetail<DetailType>(detailName) < threshold));
+  return (composit->getDetail<DetailType>(detailName) < threshold);  // here is the difference
 }
 
 StatusCode SPCountHypoTool::decide(SPCountsInfo &spinfo) const {
