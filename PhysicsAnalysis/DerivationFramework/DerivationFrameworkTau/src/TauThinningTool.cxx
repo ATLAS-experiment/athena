@@ -82,6 +82,19 @@ StatusCode DerivationFramework::TauThinningTool::doThinning() const
     for (size_t i=0; i<nTaus; ++i) tausToKeep.push_back(taus->at(i));
   }
 
+
+  if(tausToKeep.size() >0) {
+    for(size_t i=0; i < tausToKeep.size()-1; i++){ 
+      for (size_t j=i+1; j < tausToKeep.size(); j++){
+        if( (tausToKeep.at(i)->p4().DeltaR(tausToKeep.at(j)->p4())) < 0.01){
+          ATH_MSG_WARNING("Found duplicated tau with eta " << tausToKeep.at(j)->eta() << " phi " << tausToKeep.at(j)->phi() << " pt " << tausToKeep.at(j)->pt() << ". Removing it  ...");
+	  tausToKeep.erase( tausToKeep.begin()+j);
+        } 
+      } 
+    } 
+  }    
+
+
   // keep the various tau-related objects for taus passing the selection
   for (const auto* tau : tausToKeep) {
     // tau
