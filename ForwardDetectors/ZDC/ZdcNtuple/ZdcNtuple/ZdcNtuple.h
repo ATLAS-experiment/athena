@@ -182,6 +182,7 @@ public:
   unsigned int t_ZdcModuleMask;
   float t_ZdcTrigEff[2];
   unsigned short t_ZdcLucrodTriggerSideAmp[2];
+  unsigned short t_ZdcLucrodTriggerSideAmpLG[2];
   float t_ZdcTruthTotal[2];
   float t_ZdcTruthInvis[2];
   float t_ZdcTruthEM[2];
@@ -210,6 +211,7 @@ public:
   float t_ZdcModulePresample[2][4];
   float t_ZdcModulePreSampleAmp[2][4];
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
+  unsigned short t_ZdcLucrodTriggerAmpLG[2][4];
   float t_ZdcModuleMaxADC[2][4];
   float t_ZdcModuleAmpLGRefit[2][4];
   float t_ZdcModuleT0LGRefit[2][4];
