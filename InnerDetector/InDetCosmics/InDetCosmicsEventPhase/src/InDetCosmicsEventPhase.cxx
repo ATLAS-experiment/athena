@@ -10,7 +10,7 @@
 #include "TrkTrack/TrackCollection.h"
 
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "TRT_ConditionsData/RtRelation.h"

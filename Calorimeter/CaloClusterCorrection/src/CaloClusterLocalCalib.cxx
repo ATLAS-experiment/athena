@@ -4,7 +4,7 @@
 
 #include "CaloClusterCorrection/CaloClusterLocalCalib.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 //Needed for abs option
 #include "CaloDetDescr/CaloDetDescrManager.h"

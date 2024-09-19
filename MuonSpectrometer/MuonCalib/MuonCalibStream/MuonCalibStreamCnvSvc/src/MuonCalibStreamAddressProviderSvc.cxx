@@ -4,7 +4,7 @@
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddressProviderSvc.h"
 
 #include "GaudiKernel/IClassIDSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
 #include "SGTools/TransientAddress.h"
 
@@ -47,7 +47,7 @@ StatusCode MuonCalibStreamAddressProviderSvc::preLoadAddresses(StoreID::type idp
     ATH_CHECK(service("ClassIDSvc", clidSvc));
 
     for (; it != it_e; ++it) {
-        ListItem item(*it);
+        Gaudi::Utils::TypeNameString item(*it);
         std::string t = item.type();
         std::string nm = item.name();
 

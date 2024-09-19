@@ -4,7 +4,7 @@
 
 // #include "GaudiKernel/MsgStream.h"
 // #include "GaudiKernel/Algorithm.h"
-// #include "GaudiKernel/ListItem.h"
+// #include "GaudiKernel/TypeNameString.h"
 // #include "GaudiKernel/IToolSvc.h"
 // #include "GaudiKernel/PropertyMgr.h"
 // #include "GaudiKernel/IMessageSvc.h"

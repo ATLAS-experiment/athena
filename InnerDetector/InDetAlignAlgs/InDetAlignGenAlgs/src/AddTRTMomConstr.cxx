@@ -9,7 +9,7 @@
 //
 
 #include "InDetAlignGenAlgs/AddTRTMomConstr.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/TrackCollection.h"

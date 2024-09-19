@@ -44,7 +44,7 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/MsgStream.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/StoreGateSvc.h"

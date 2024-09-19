@@ -4,7 +4,7 @@
 
 // Implementation of LArRodDecoder class 
 #include "LArByteStream/LArRodDecoder.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -98,7 +98,7 @@ LArRodDecoder::initialize ATLAS_NOT_THREAD_SAFE ()
  for(; it!=it_end;++it)
    {IAlgTool* tool; 
     CaloCellCorrection* corr; 
-    ListItem li(*it);
+    Gaudi::Utils::TypeNameString li(*it);
     if((toolSvc->retrieveTool(li.type(), li.name(), tool)).isFailure() ) 
       {msg(MSG::ERROR) << " Can't get AlgTool for CaloCellCorrection " << endmsg;
        return StatusCode::FAILURE; 

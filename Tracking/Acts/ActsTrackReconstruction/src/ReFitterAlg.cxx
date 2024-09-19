@@ -5,7 +5,7 @@
 #include "ReFitterAlg.h"
 
 // ATHENA
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkTrackSummary/TrackSummary.h"

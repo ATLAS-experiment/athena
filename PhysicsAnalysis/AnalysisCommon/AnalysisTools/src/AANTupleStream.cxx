@@ -16,7 +16,7 @@
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 
@@ -578,7 +578,7 @@ StatusCode AANTupleStream::initialize_subAlgos()
       //
       // Where <name> is the algorithm instance name, and <type> is the
       // algorithm class type (being a subclass of Algorithm).
-      ListItem foo(*it);
+      Gaudi::Utils::TypeNameString foo(*it);
       std::string theType = foo.type();
       std::string theName = foo.name();
 

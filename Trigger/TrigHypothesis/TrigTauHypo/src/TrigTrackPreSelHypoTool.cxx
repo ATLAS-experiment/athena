@@ -10,7 +10,7 @@
 
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 //
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"

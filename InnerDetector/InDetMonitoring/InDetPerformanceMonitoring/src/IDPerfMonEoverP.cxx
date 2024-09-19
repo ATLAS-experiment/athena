@@ -19,7 +19,7 @@ PURPOSE:  Create  a simple ntuple to perform EoverP studies with
 // INCLUDE GAUDI HEADER FILES:
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <algorithm>
 #include <cmath>

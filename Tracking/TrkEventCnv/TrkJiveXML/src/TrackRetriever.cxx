@@ -4,7 +4,7 @@
 
 #include "TrkJiveXML/TrackRetriever.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackInfo.h"

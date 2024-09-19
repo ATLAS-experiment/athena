@@ -13,7 +13,7 @@
 #include "TrkRefitAlg/ReFitTrack.h"
 
 // Gaudi includes
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkEventPrimitives/LocalParameters.h"

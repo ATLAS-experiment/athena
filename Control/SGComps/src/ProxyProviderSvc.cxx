@@ -14,7 +14,7 @@
 
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -308,7 +308,7 @@ ProxyProviderSvc::providerNamesPropertyHandler( Gaudi::Details::PropertyBase& /*
   for (const std::string& pName : providerNames) {
     IService *pIS(0);
     IAddressProvider *pAP(0);
-    ListItem tn(pName);
+    Gaudi::Utils::TypeNameString tn(pName);
     if (!(service(tn.type(), tn.name(), pIS)).isSuccess() ||
 	0 == (pAP = dynamic_cast<IAddressProvider*>(pIS))) {
       ATH_MSG_ERROR(" getting Address Provider "<< pName);

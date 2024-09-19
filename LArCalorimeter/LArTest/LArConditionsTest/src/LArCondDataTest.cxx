@@ -21,7 +21,7 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "LArElecCalib/ILArShape.h" 
 #include "LArElecCalib/ILArNoise.h" 

@@ -24,7 +24,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/GaudiException.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/MsgStream.h"
 #include <algorithm>  
 #include <cstdlib>  /* random */
