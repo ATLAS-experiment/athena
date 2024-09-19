@@ -8,7 +8,7 @@
 #include "CaloUtils/CaloLayerCalculator.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <algorithm>
 

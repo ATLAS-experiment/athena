@@ -8,7 +8,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 #include <string>
 #include <vector>
 #include "GaudiKernel/GaudiException.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IAlgManager.h"
@@ -51,7 +51,7 @@ MultipleEventLoopMgr::nextPassFilter() {
   INextPassFilter* pFilter(nullptr); 
   const string& filterName(m_nextPassFilterName.value());
   if (!(filterName.empty())) {
-    ListItem theFilter(filterName);
+    Gaudi::Utils::TypeNameString theFilter(filterName);
     IAlgTool* pHoldTool(nullptr);
     if ( (m_pToolSvc->retrieveTool(theFilter.type(), theFilter.name(), 
 				   pHoldTool)).isSuccess() ) { 
@@ -64,7 +64,7 @@ MultipleEventLoopMgr::nextPassFilter() {
     }
   }
   if (nullptr == pFilter) {
-    ListItem theFilter(filterName);
+    Gaudi::Utils::TypeNameString theFilter(filterName);
     MsgStream log(msgSvc(), name());
     log << MSG::WARNING << "Could not locate filter " 
 	<< theFilter.type() << '/' << theFilter.name() << endmsg;
@@ -85,7 +85,7 @@ MultipleEventLoopMgr::reInitList() {
   vector<string>::const_iterator iN(theNames.begin());
   vector<string>::const_iterator iEnd(theNames.end());
   while ( sc.isSuccess() && (iN != iEnd) ) {
-    ListItem theSvc(*iN++); //not really needed but safer...
+    Gaudi::Utils::TypeNameString theSvc(*iN++); //not really needed but safer...
     IService* pSvc(nullptr);
     sc = serviceLocator()->getService(theSvc.name(), pSvc);
     if (sc.isSuccess()) sc = pSvc->reinitialize();

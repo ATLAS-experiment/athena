@@ -17,7 +17,7 @@
 #include <sstream>
 
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTracking/TrackParticle.h"

@@ -15,7 +15,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "AthenaMon.h"
 
@@ -61,7 +61,7 @@ StatusCode AthenaMon::initialize()
     std::string toolname(*it);
     IMonitorToolBase* p_tool;
     
-    ListItem mytool(toolname);
+    Gaudi::Utils::TypeNameString mytool(toolname);
 
     sc = p_toolSvc->retrieveTool(mytool.type(), mytool.name(), p_tool);
     if(sc.isFailure()) {

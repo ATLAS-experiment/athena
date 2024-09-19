@@ -23,7 +23,7 @@
 
 #include "CaloDetDescr/CaloDepthTool.h"
 
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <map>
 #include <vector>

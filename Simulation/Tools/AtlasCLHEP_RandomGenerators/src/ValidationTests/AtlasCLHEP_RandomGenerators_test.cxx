@@ -21,7 +21,7 @@
 #include "GaudiKernel/Chrono.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <string>
 

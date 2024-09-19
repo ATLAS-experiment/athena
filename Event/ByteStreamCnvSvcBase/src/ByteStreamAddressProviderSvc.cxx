@@ -8,7 +8,7 @@
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
 #include "SGTools/TransientAddress.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/IClassIDSvc.h"
 
 #include "eformat/SourceIdentifier.h"
@@ -43,7 +43,7 @@ StatusCode ByteStreamAddressProviderSvc::preLoadAddresses(StoreID::type id, tadL
    }
 
    for (const std::string& typeName : m_typeNames) {
-      ListItem item(typeName);
+      Gaudi::Utils::TypeNameString item(typeName);
       const std::string& t = item.type();
       const std::string& nm = item.name();
       CLID classid;

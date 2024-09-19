@@ -13,7 +13,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 #include "Identifier/HWIdentifier.h"

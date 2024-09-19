@@ -4,7 +4,7 @@
 
 #include "AnalysisJiveXML/TrackParticleRetriever.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "Particle/TrackParticleContainer.h"
 

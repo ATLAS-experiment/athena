@@ -17,7 +17,7 @@
 //
 #include <sstream>
 #include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include "CxxUtils/phihelper.h"

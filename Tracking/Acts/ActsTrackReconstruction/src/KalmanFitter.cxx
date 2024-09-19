@@ -5,7 +5,7 @@
 #include "KalmanFitter.h"
 
 // ATHENA
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/PerigeeSurface.h"

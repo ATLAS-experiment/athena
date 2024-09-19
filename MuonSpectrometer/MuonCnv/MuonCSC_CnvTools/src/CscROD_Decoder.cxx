@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
 #include "StoreGate/DataHandle.h"

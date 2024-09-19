@@ -4,7 +4,7 @@
 
 
 #include "TBAlgoSequencer.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <string>
 #include <map>
@@ -55,7 +55,7 @@ TBAlgoSequencer::initialize()
   while ( numberOfAlgorithms < m_subAlgoNames.size() && 
 	  ! registerAlgs.isFailure() )
     {
-      ListItem   theAlgItem(*subAlgos);
+      Gaudi::Utils::TypeNameString   theAlgItem(*subAlgos);
       Gaudi::Algorithm* theAlgo;
       registerAlgs = createSubAlgorithm(theAlgItem.type(),theAlgItem.name(), 
 					theAlgo);

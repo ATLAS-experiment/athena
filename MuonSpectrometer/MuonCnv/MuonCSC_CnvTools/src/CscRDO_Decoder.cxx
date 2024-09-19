@@ -4,7 +4,7 @@
 
 #include "CscRDO_Decoder.h"
 
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "MuonIdHelpers/CscIdHelper.h"
 #include "MuonRDO/CscRawData.h"
 

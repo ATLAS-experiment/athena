@@ -10,7 +10,7 @@
 
 #include "eformat/Status.h"
 
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloGain.h"
@@ -112,7 +112,7 @@ StatusCode TBByteStreamCnvTool::initialize()
   std::vector<std::string> keys;
   keys.resize(24);
   for(; it!=it_e;++it) {
-    const ListItem &item(*it);
+    const Gaudi::Utils::TypeNameString &item(*it);
     const std::string &t = item.type();
     const std::string &nm = item.name();
     logstr << MSG::DEBUG << " type "<<t<<" name="<<nm<<endmsg;

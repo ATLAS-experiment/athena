@@ -19,7 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include "AthenaKernel/getMessageSvc.h"
 
 #include "GaudiKernel/GaudiException.h"
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -144,7 +144,7 @@ MixingEventSelector::decodeTrigger(string triggDescr) {
        (distance(tokens.begin(), tokens.end()) == 3) ){
     Tokenizer::iterator iToken(tokens.begin());
     try {
-      ListItem selTN(*iToken++);
+      Gaudi::Utils::TypeNameString selTN(*iToken++);
       const bool CREATEIF(true);
       //get selector
       IEvtSelector* pSelector(nullptr);

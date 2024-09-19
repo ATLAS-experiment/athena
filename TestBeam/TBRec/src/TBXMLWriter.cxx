@@ -8,7 +8,7 @@
 
 
 // event
-#include "GaudiKernel/ListItem.h"
+#include "GaudiKernel/TypeNameString.h"
 
 #include <string>
 #include <vector>
@@ -60,7 +60,7 @@ StatusCode TBXMLWriter::initialize()
   for (const std::string& toolName : m_writerToolNames)
     {
       IAlgTool* algToolPtr;
-      ListItem writerAlgoTool(toolName);
+      Gaudi::Utils::TypeNameString writerAlgoTool(toolName);
 
       // pick up tool
       StatusCode checkOut = toolSvcPtr->retrieveTool(writerAlgoTool.type(),
