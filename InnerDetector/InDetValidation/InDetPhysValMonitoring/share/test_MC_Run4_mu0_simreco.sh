@@ -46,8 +46,7 @@ run "Simulation" \
     --inputEVNTFile ${ArtInFile} \
     --outputHITSFile HITS.root \
     --maxEvents -1 \
-    --imf False \
-    --detectors Bpipe ITkPixel ITkStrip HGTD
+    --imf False
 
 run "Digitization"\
     Digi_tf.py \
@@ -60,15 +59,13 @@ run "Digitization"\
     --maxEvents -1 \
     --outputRDOFile RDO.root \
     --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
-    --postInclude 'PyJobTransforms.UseFrontier' \
-    --detectors ITkPixel ITkStrip HGTD
+    --postInclude 'PyJobTransforms.UseFrontier'
 
 run "Reconstruction" \
     Reco_tf.py --CA \
     --inputRDOFile RDO.root \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
-    --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude
 
 run "IDPVM" \
     runIDPVM.py \
