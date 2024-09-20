@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthSequencer.cxx
@@ -312,109 +312,66 @@ AthSequencer::createAndAppend( const std::string& type,
                                Gaudi::Algorithm*& pAlgorithm,
                                std::vector<Gaudi::Algorithm*>* theAlgs )
 {
-  StatusCode result = StatusCode::FAILURE;
-  IAlgManager* theAlgMgr;
-  //result = service( "ApplicationMgr", theAlgMgr );
-  result = serviceLocator()
-    ->getService( "ApplicationMgr",
-                  IAlgManager::interfaceID(),
-                  *pp_cast<IInterface>(&theAlgMgr) );
-  if ( result.isSuccess( ) ) {
-    IAlgorithm* tmp;
-    result = theAlgMgr->createAlgorithm( type, algName, tmp );
-    if ( result.isSuccess( ) ) {
-      try{
-        pAlgorithm = dynamic_cast<Gaudi::Algorithm*>(tmp);
-        theAlgs->push_back( pAlgorithm );
-      } catch(...){
-        ATH_MSG_ERROR ("Unable to create Algorithm " << algName);
-        result = StatusCode::FAILURE;
-      }
-    }
-  }
-  theAlgMgr->release();
-  return result;
+  SmartIF<IAlgManager> theAlgMgr(Gaudi::svcLocator()->as<IAlgManager>());
+  IAlgorithm* tmp = nullptr;
+
+  ATH_CHECK( theAlgMgr->createAlgorithm( type, algName, tmp ) );
+  pAlgorithm = dynamic_cast<Gaudi::Algorithm*>(tmp);
+  theAlgs->push_back( pAlgorithm );
+
+  return StatusCode::SUCCESS;
 }
 
 StatusCode
 AthSequencer::decodeNames( Gaudi::Property<std::vector<std::string>>& theNames,
                            std::vector<Gaudi::Algorithm*>* theAlgs )
 {
-  StatusCode result;
-  IAlgManager* theAlgMgr;
-  //result = service( "ApplicationMgr", theAlgMgr );
-  result = serviceLocator()->getService( "ApplicationMgr",
-                                         IAlgManager::interfaceID(),
-                                         *pp_cast<IInterface>(&theAlgMgr) );
+  SmartIF<IAlgManager> theAlgMgr(Gaudi::svcLocator()->as<IAlgManager>());
 
-  if ( result.isSuccess( ) ) {
-    
-    // Clear the existing list of algorithms
-    theAlgs->clear( );
+  // Clear the existing list of algorithms
+  theAlgs->clear( );
 
-    // Build the list of member algorithms from the contents of the
-    // theNames list.
-    const std::vector<std::string>& theNameVector = theNames.value( );
-    for (const std::string& name : theNameVector) {
+  // Build the list of member algorithms from the contents of the
+  // theNames list.
+  StatusCode result = StatusCode::SUCCESS;
+  for (const std::string& name : theNames.value()) {
 
-      // Parse the name for a syntax of the form:
-      //
-      // <type>/<name>
-      //
-      // Where <name> is the algorithm instance name, and <type> is the
-      // algorithm class type (being a subclass of Algorithm).
-      std::string theName = name;
-      std::string theType = name;
-      int slash = name.find_first_of( "/" );
-      if ( slash > 0 ) {
-        theType = name.substr( 0, slash );
-        theName = name.substr( slash+1 );
-      }
+    // Parse the name for a syntax of the form <type>/<name>
+    Gaudi::Utils::TypeNameString tn(name);
 
-      // Check whether the suppied name corresponds to an existing
-      // Algorithm object.
-      IAlgorithm* theIAlg;
-      Gaudi::Algorithm*  theAlgorithm = nullptr;
-      StatusCode status = theAlgMgr->getAlgorithm( theName, theIAlg );
-      if ( status.isSuccess( ) ) {
-        theAlgorithm = dynamic_cast<Gaudi::Algorithm*>(theIAlg);
-        if (!theAlgorithm) {
-          ATH_MSG_WARNING 
-            (theName << " is not an Algorithm - Failed dynamic cast");
-          status = StatusCode::FAILURE;
-        }
-      }
-      if ( status.isSuccess( ) && theAlgorithm != nullptr ) {
-        
-        // The specified Algorithm already exists - 
+    // Check whether the supplied name corresponds to an existing
+    // Algorithm object.
+    SmartIF<IAlgorithm>& theIAlg = theAlgMgr->algorithm(tn.name(), /*createIf*/false);
+    Gaudi::Algorithm* theAlgorithm = nullptr;
+    if ( theIAlg ) {
+      theAlgorithm = dynamic_cast<Gaudi::Algorithm*>(theIAlg.get());
+      if ( theAlgorithm ) {
+        // The specified Algorithm already exists -
         // just append it to the membership list.
-        status = append( theAlgorithm, theAlgs );
-        if ( status.isSuccess( ) ) {
-          ATH_MSG_DEBUG 
-            (theName << " already exists - appended to member list");
+        if ( append(theAlgorithm, theAlgs).isSuccess( ) ) {
+          ATH_MSG_DEBUG (tn.name() << " already exists - appended to member list");
         } else {
-          ATH_MSG_WARNING
-            (theName << " already exists - append failed!!!");
-          result = StatusCode::FAILURE;
-        }
-      } else {
-        
-        // The specified name doesn't exist -
-        // create a new object of the specified type and append it to 
-        // the membership list.
-        status = createAndAppend( theType, theName, theAlgorithm, theAlgs );
-        if ( status.isSuccess( ) ) {
-          ATH_MSG_DEBUG 
-            (theName << " doesn't exist - created and appended to member list");
-        } else {
-          ATH_MSG_WARNING
-            (theName << " doesn't exist - creation failed!!!");
+          ATH_MSG_WARNING (tn.name() << " already exists - append failed!!!");
           result = StatusCode::FAILURE;
         }
       }
-    } //> loop over names
-    
-  }
+      else {
+        ATH_MSG_WARNING (tn.name() << " is not an Algorithm - Failed dynamic cast");
+        result = StatusCode::FAILURE;
+      }
+    } else {
+      // The specified name doesn't exist -
+      // create a new object of the specified type and append it to
+      // the membership list.
+      if ( createAndAppend(tn.type(), tn.name(), theAlgorithm, theAlgs).isSuccess( ) ) {
+        ATH_MSG_DEBUG (tn.name() << " doesn't exist - created and appended to member list");
+      } else {
+        ATH_MSG_WARNING (tn.name() << " doesn't exist - creation failed!!!");
+        result = StatusCode::FAILURE;
+      }
+    }
+  } //> loop over names
+
   // Print membership list
   if (msgLvl(MSG::DEBUG)) {
     if ( result.isSuccess() && !theAlgs->empty() ) {
@@ -434,26 +391,13 @@ AthSequencer::decodeNames( Gaudi::Property<std::vector<std::string>>& theNames,
       msg(MSG::DEBUG) << endmsg;
     }
   }
-  theAlgMgr->release();
   return result;
 }
 
 StatusCode
-AthSequencer::remove( const std::string& algname, 
-                      std::vector<Gaudi::Algorithm*>* theAlgs )
+AthSequencer::remove( const std::string& /*algname*/,
+                      std::vector<Gaudi::Algorithm*>* /*theAlgs*/ )
 {
-  StatusCode result = StatusCode::FAILURE;
-  
-  // Test that the algorithm exists in the member list
-  for (Gaudi::Algorithm* theAlgorithm : *theAlgs) {
-    if ( theAlgorithm->name( ) == algname ) {
-      
-      // Algorithm with specified name exists in the algorithm list - remove it
-      // THIS ISN'T IMPLEMENTED YET!!!!
-      ATH_MSG_INFO ("AthSequencer::remove( ) isn't implemented yet!!!!!");
-      result = StatusCode::SUCCESS;
-      break;
-    }
-  }
-  return result;
+  ATH_MSG_ERROR ("AthSequencer::remove( ) is not supported");
+  return StatusCode::FAILURE;
 }
