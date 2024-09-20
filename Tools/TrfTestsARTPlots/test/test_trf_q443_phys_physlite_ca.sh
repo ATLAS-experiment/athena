@@ -28,6 +28,7 @@ echo "art-result: ${rc1} Reco_tf_q443_phys_physlite_mt_mp"
 if [ "$rc1" -ne "0" ]; then
 Reco_tf.py --CA \
   --AMI q443 \
+  --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-12' \
   --steering doRAWtoALL \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
