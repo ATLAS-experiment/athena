@@ -5,7 +5,7 @@
 
 #include <algorithm>
 #include <xAODMuonPrepData/RpcStripAuxContainer.h>
-#include <xAODMuonPrepData/ChamberMeasViewer.h>
+#include <xAODMuonViews/ChamberViewer.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/WriteDecorHandle.h>
 #include <StoreGate/WriteHandle.h>
@@ -59,7 +59,7 @@ namespace MuonR4{
         };
         
         /** Helper object returning ranges per chamber */
-        xAOD::ChamberMeasViewer hitsPerChamber{*inContainer};
+        xAOD::ChamberViewer hitsPerChamber{*inContainer};
         std::size_t seenHits{};
         do {
             seenHits+=hitsPerChamber.size();

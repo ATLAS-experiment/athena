@@ -4,6 +4,7 @@
 #include "sTgcFastDigiTool.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "xAODMuonViews/ChamberViewer.h"
 namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
@@ -45,20 +46,23 @@ namespace MuonR4 {
         ATH_CHECK(retrieveConditions(ctx, m_uncertCalibKey, nswUncertDB));
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
-        for (const TimedHit& simHit : hitsToDigit) {
-            /// ignore radiation for now
-            if (std::abs(simHit->pdgId()) != 13) continue;
-            
-            sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
-            bool digitized{false};
-            digitized |= digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
-            digitized |= digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
-            digitized |= digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+        xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
+        do {
+            for (const TimedHit& simHit : viewer) {
+                /// ignore radiation for now
+                if (std::abs(simHit->pdgId()) != 13) continue;
+                
+                sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
+                bool digitized{false};
+                digitized |= digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
+                digitized |= digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+                digitized |= digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
 
-            if (digitized) {
-                addSDO(simHit, sdoContainer);
+                if (digitized) {
+                    addSDO(simHit, sdoContainer);
+                }
             }
-        }
+        } while (viewer.next());
         /// Write everything at the end into the final digit container
         ATH_CHECK(writeDigitContainer(ctx, m_writeKey, std::move(digitCache), 
                                       idHelper.module_hash_max()));

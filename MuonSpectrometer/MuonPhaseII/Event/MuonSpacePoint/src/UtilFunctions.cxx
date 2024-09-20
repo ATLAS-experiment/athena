@@ -73,12 +73,7 @@ namespace MuonR4{
     }
     std::string toString(const CalibratedSpacePoint::Covariance_t& mat) {
          return std::visit([](const auto& cov)-> std::string {
-            using CovType = std::decay_t<decltype(cov)>;
-            if constexpr(std::is_same_v<CovType, AmgSymMatrix(2)>) {
-                return Amg::toString(cov);
-            } else {
-                return Amg::toString(cov);
-            }
+            return Amg::toString(cov);
         }, mat);
     }
 }

@@ -10,6 +10,6 @@ atlas_subdir( MuonClusterFormation )
 atlas_add_component( MuonClusterFormation
                      src/*.cxx
                      src/components/*.cxx                  
-                     LINK_LIBRARIES GaudiKernel AthenaBaseComps StoreGateLib xAODMuonPrepData )
+                     LINK_LIBRARIES GaudiKernel AthenaBaseComps StoreGateLib xAODMuonPrepData xAODMuonViews )
 
 # atlas_install_python_modules( python/*.py)

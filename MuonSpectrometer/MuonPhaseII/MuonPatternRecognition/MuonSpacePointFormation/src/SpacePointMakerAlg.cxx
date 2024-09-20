@@ -5,26 +5,17 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include <xAODMuonPrepData/ChamberMeasViewer.h>
+#include <xAODMuonViews/ChamberViewer.h>
 #include <thread>
 
 namespace {
-    using TgcStripVec = std::vector<const xAOD::TgcStrip*>;
-    inline unsigned int countMatches(const xAOD::TgcStrip* primaryPrd, 
-                                     const TgcStripVec& potentialMatches) {
-        unsigned int n{0};
-        for (const xAOD::TgcStrip* match : potentialMatches){
-            n += ((match->bcBitMap() & primaryPrd->bcBitMap()) >0);
+    inline std::vector<std::shared_ptr<unsigned>> matchCountVec(unsigned int n) {
+        std::vector<std::shared_ptr<unsigned>> out{};
+        out.reserve(n);
+        for (unsigned int p = 0; p < n ;++p) {
+            out.emplace_back(std::make_shared<unsigned>(0));
         }
-        return n;
-    }
-    inline std::vector<unsigned int> fillMatchCounts(const TgcStripVec& hitCollection,
-                                                     const TgcStripVec& potentialMatches) {
-        std::vector<unsigned int> match(hitCollection.size(), 0);
-        for (unsigned int p = 0; p < hitCollection.size() ;++p) {
-            match[p] = countMatches(hitCollection[p], potentialMatches);
-        }
-        return match;
+        return out;
     }
 }
 
@@ -159,7 +150,7 @@ template <class ContType>
     
     using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
-    xAOD::ChamberMeasViewer viewer{*readHandle};
+    xAOD::ChamberViewer viewer{*readHandle};
     do {
 
       SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->getChamber()];
@@ -185,7 +176,7 @@ template <class ContType>
                 }
 
                 bool measPhi{false};
-                if constexpr( std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
+                if constexpr(std::is_same_v<ContType, xAOD::sTgcMeasContainer>) {
                     /// Make directly to a space point
                     if (prd->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
                         pointsInChamb.etaHits.emplace_back(*gctx, prd, nullptr);
@@ -216,18 +207,19 @@ template <class ContType>
                     pointsInChamb.phiHits.reserve(pointsInChamb.phiHits.size() + phiHits.size());
                     for (const PrdType etaPrd : etaHits) {
                         pointsInChamb.etaHits.emplace_back(*gctx, etaPrd);
+                        ATH_MSG_VERBOSE("Add new eta hit "<<m_idHelperSvc->toString(pointsInChamb.etaHits.back().identify())
+                                <<" "<<Amg::toString(pointsInChamb.etaHits.back().positionInChamber()));
+
                     }
                     for (const PrdType phiPrd : phiHits) {
                         pointsInChamb.phiHits.emplace_back(*gctx, phiPrd);
+                        ATH_MSG_VERBOSE("Add new phi hit "<<m_idHelperSvc->toString(pointsInChamb.phiHits.back().identify())
+                                <<" "<<Amg::toString(pointsInChamb.phiHits.back().positionInChamber()));
                     }
                     continue;
                 }
-                std::vector<unsigned int> etaCounts(etaHits.size(), phiHits.size());
-                std::vector<unsigned int> phiCounts(phiHits.size(), etaHits.size());
-                if constexpr(std::is_same<xAOD::TgcStripContainer, ContType>::value){
-                    etaCounts = fillMatchCounts(etaHits, phiHits);
-                    phiCounts = fillMatchCounts(phiHits, etaHits);
-                }
+                std::vector<std::shared_ptr<unsigned>> etaCounts{matchCountVec(etaHits.size())}, 
+                                                       phiCounts{matchCountVec(phiHits.size())};
                 pointsInChamb.etaHits.reserve(etaHits.size()*phiHits.size());
 
                 /// Flag whether an isolated phi hit which cannot be combined with others exists 
@@ -237,10 +229,6 @@ template <class ContType>
                 /// Simple combination by taking the cross-product
                 for (unsigned int etaP = 0; etaP < etaHits.size(); ++etaP) {
                     /// There's no valid combination with another phi hit
-                    if (!etaCounts[etaP]) {
-                        pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP]);
-                        continue;
-                    }
                     for (unsigned int phiP = 0; phiP < phiHits.size(); ++ phiP){
                         /// The phi space point will never be combined 
                         if (!phiCounts[phiP]) {
@@ -254,8 +242,14 @@ template <class ContType>
                             }
                         }
                         SpacePoint& spacePoint{pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP], phiHits[phiP])};
+                        ATH_MSG_VERBOSE("Create new spacepoint from "<<m_idHelperSvc->toString(etaHits[etaP]->identify())
+                        <<" & "<<m_idHelperSvc->toString(phiHits[phiP]->identify())<<" at "<<Amg::toString(spacePoint.positionInChamber()));
                         spacePoint.setInstanceCounts(etaCounts[etaP], phiCounts[phiP]);
                         hasCombinedSpacePoint = true;
+                    }
+                    if (!(*etaCounts[etaP])) {
+                        pointsInChamb.etaHits.emplace_back(*gctx, etaHits[etaP]);
+                        continue;
                     }
                 }
                 /// If there's a phi measuremnt which cannot be combined with the others 
