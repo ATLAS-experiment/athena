@@ -1065,7 +1065,7 @@
   <y title="Fake Rate" lo="0.0" hi="2.0"/>
 </h>
 <h id="fakerate_vs_mu" type="TEfficiency" title="Fractions of reco-tracks with matching probability &lt; 50%">
-  <x title="#mu" n="100" lo="0" hi="100"/>
+  <x title="#mu" n="&NmuBINS;" lo="0" hi="&EXPMU;"/>
   <y title="Fake Rate" lo="0.0" hi="2.0"/>
 </h>
 <h id="fakerate_vs_R" type="TEfficiency" title="Fractions of reco-tracks with matching probability &lt; 50%">
