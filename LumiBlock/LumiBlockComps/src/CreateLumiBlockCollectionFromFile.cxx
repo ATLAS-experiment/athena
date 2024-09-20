@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CreateLumiBlockCollectionFromFile.h"
@@ -253,7 +253,7 @@ uint32_t CreateLumiBlockCollectionFromFile::getNEventsFromDb()
   }
   // Make sure we found it
   if (match == last) {
-    ATH_MSG_WARNING( "Stream " << m_streamName << " not found in /GLOBAL/FILECOUNT/PROMPT !" );
+    ATH_MSG_INFO( "Stream " << m_streamName << " not found in /GLOBAL/FILECOUNT/PROMPT !" );
     return nEvents;
   }
 
@@ -262,7 +262,7 @@ uint32_t CreateLumiBlockCollectionFromFile::getNEventsFromDb()
 
   // Check data availability
   if (attrList["NEventRec"].isNull()) {
-    ATH_MSG_WARNING( " NEventRec not in database. Set it to 0 " );
+    ATH_MSG_INFO( " NEventRec not in database. Set it to 0 " );
     return nEvents;
   }
 
