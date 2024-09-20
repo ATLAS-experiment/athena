@@ -479,6 +479,22 @@ ConstAuxElement::ConstAccessor<T, ALLOC>::ConstAccessor
 
 
 /**
+ * @brief Constructor taking an auxid directly.
+ * @param auxid ID for this auxiliary variable.
+ *
+ * Will throw @c SG::ExcAuxTypeMismatch if the types don't match.
+ */
+template <class T, class ALLOC>
+inline
+ConstAuxElement::ConstAccessor<T, ALLOC>::ConstAccessor (const SG::auxid_t auxid)
+  : m_auxid (auxid)
+{
+  SG::AuxTypeRegistry::instance().checkAuxID<T, ALLOC> (auxid, SG::AuxVarFlags::None);
+  // cppcheck-suppress missingReturn; false positive
+}
+
+
+/**
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.

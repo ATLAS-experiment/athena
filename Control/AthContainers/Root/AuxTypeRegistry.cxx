@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.cxx
@@ -161,6 +161,39 @@ AuxTypeRegistry::findAuxID( const std::string& name,
     return i->second;
   }
   return null_auxid;
+}
+
+
+/**
+ * @brief Verify type for an aux variable.
+ * @param auxid The ID of the variable to check.
+ * @param ti Type of the aux data item.
+ * @param ti_alloc Type of the vector allocator.
+ * @param flags Optional flags qualifying the type.  See above.
+ *
+ * If the type of @c auxid is not compatible with the supplied
+ * types @c ti / @c ti_alloc, then throw a @c SG::ExcAuxTypeMismatch exception.
+ * Also may throw @c SG::ExcAtomicMismatch.
+ */
+void AuxTypeRegistry::checkAuxID (const SG::auxid_t auxid,
+                                  const std::type_info& ti,
+                                  const std::type_info& ti_alloc,
+                                  const Flags flags)
+{
+  typeinfo_t& m = m_types.at (auxid);
+
+  if ( ! ((&ti == m.m_ti || strcmp(ti.name(), m.m_ti->name()) == 0) &&
+          m.checkAlloc (&ti_alloc, nullptr)))
+  {
+    throw SG::ExcAuxTypeMismatch (auxid, ti, *m.m_ti,
+                                  SG::normalizedTypeinfoName (ti_alloc),
+                                  m.m_alloc_name);
+  }
+  if ((CxxUtils::test (m.m_flags, Flags::Atomic) &&
+       !CxxUtils::test (flags, Flags::Atomic)))
+  {
+    throw SG::ExcAtomicMismatch (auxid, ti);
+  }
 }
 
 

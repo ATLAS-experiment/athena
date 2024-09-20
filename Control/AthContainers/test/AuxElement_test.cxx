@@ -171,6 +171,12 @@ void test1()
   assert (ityp1.auxid() == ityp1_id);
   assert (ftyp1.auxid() == ftyp1_id);
 
+  {
+    SG::AuxElement::ConstAccessor<int> i2 (ityp1_id);
+    assert (i2.auxid() == ityp1_id);
+    EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, (SG::AuxElement::ConstAccessor<float> (ityp1_id)));
+  }
+
   assert (ityp1(v, 5) == 1);
   ityp1(v, 5) = 2;
   assert (ityp1(v, 5) == 2);
