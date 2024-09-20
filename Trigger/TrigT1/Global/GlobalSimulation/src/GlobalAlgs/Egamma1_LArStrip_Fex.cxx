@@ -213,8 +213,6 @@ namespace GlobalSim {
 		   return std::abs(c->eta() - roi->eta()) < half_deta_roi;
 		 });
     
-    std::cout << "no roi cells " << roi_cells.size() << '\n';
-    
     
     auto it = std::max_element(std::begin(roi_cells),
 			       std::end(roi_cells),

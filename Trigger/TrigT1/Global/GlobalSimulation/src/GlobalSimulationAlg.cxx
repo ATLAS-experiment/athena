@@ -39,6 +39,7 @@ namespace GlobalSim {
 
  
     for (const auto& tool : m_algTools) {
+      ATH_MSG_DEBUG("Running Algtool " << tool.name());
       CHECK(tool -> run(ctx));
     }
     
