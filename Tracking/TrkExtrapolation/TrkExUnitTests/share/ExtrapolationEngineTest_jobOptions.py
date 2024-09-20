@@ -31,7 +31,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 # build GeoModel
-DetDescrVersion = 'ATLAS-R2-2016-01-00-03'
+DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
 #DetDescrVersion = 'ATLAS-PX-ITK-00-00-00'
 from AtlasGeoModel import SetGeometryVersion 
 from AtlasGeoModel import GeoModelInit 
@@ -57,8 +57,8 @@ TrkDetFlags.TRT_BuildStrawLayers     = False
 from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
 TrkDetFlags.MaterialSource              = 'COOL'
 #TrkDetFlags.MaterialSource              = 'Input'
-TrkDetFlags.MaterialVersion             = 20
-TrkDetFlags.MaterialSubVersion          = ''
+# TrkDetFlags.MaterialVersion             = 20
+# TrkDetFlags.MaterialSubVersion          = ''
 #TrkDetFlags.MaterialSubVersion          = 'f'
 TrkDetFlags.ConfigurationOutputLevel    = VERBOSE
 
@@ -75,6 +75,7 @@ if TrkDetFlags.MaterialDatabaseLocal() is True :
     TrkDetFlags.MaterialSubVersion           = ''
 TrkDetFlags.MagneticFieldCallbackEnforced    = False
 
+TrkDetFlags.InDetTrackingGeometryMaterialScaleFactor = 2.0
 #--------------------------------------------------------------
 # Event related parameters
 #--------------------------------------------------------------
@@ -124,7 +125,7 @@ ExtrapolationEngineTest.NumberOfTestsPerEvent   = 100
 # parameters mode: 0 - neutral tracks, 1 - charged particles 
 ExtrapolationEngineTest.ParametersMode          = 1
 # do the full test backwards as well            
-ExtrapolationEngineTest.BackExtrapolation       = True
+ExtrapolationEngineTest.BackExtrapolation       = False
 # Smear the production vertex - standard primary vertex paramters
 ExtrapolationEngineTest.SmearOrigin             = False   
 ExtrapolationEngineTest.SimgaOriginD0           = 0.015 
@@ -174,7 +175,7 @@ if not hasattr(ServiceMgr, 'THistSvc'):
        from GaudiSvc.GaudiSvcConf import THistSvc
        ServiceMgr += THistSvc()
 # add the G4 validation output stream
-ServiceMgr.THistSvc.Output += [ "val DATAFILE='ExtrapolationEngineTest.root' TYPE='ROOT' OPT='RECREATE'" ]
+ServiceMgr.THistSvc.Output += [ "val DATAFILE='ExtrapolationEngineTest_"+DetDescrVersion+".root' TYPE='ROOT' OPT='RECREATE'" ]
 
 #==============================================================
 #

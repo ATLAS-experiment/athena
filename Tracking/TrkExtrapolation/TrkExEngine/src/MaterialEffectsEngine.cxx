@@ -135,7 +135,8 @@ const Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(co
     // get the actual material bin
     const Trk::MaterialProperties* materialProperties = layer->layerMaterialProperties()->fullMaterial(parameters.position());
     // and let's check if there's acutally something to do
-    if (materialProperties && ( m_eLossCorrection || m_mscCorrection || eCell.checkConfigurationMode(Trk::ExtrapolationMode::CollectMaterial)) ){
+    if (materialProperties && std::abs(pathCorrection)>0. &&
+        ( m_eLossCorrection || m_mscCorrection || eCell.checkConfigurationMode(Trk::ExtrapolationMode::CollectMaterial)) ){
         // and add them
         int sign = int(eCell.materialUpdateMode);
         // a simple cross-check if the parameters are the initial ones
@@ -193,7 +194,10 @@ const Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(co
         // now either create new ones or update - only start parameters can not be updated
         if (eCell.leadParameters != eCell.startParameters ){
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on non-initial parameters.");
-            const_cast<Trk::TrackParameters*>(&parameters)->updateParameters(uParameters,*uCovariance);
+            if (uCovariance)
+                const_cast<Trk::TrackParameters*>(&parameters)->updateParameters(uParameters,*uCovariance);
+            else
+                const_cast<Trk::TrackParameters*>(&parameters)->updateParameters(uParameters);
         } else {
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on initial parameters, creating new ones.");
             // create new parameters

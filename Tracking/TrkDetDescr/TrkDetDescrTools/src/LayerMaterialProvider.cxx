@@ -183,9 +183,18 @@ StatusCode Trk::LayerMaterialProvider::process(const Trk::Layer& lay, size_t lev
         ATH_MSG_VERBOSE(displayBuffer.str() << "---[+] found material for Layer with Index: " << lIndex.value());
         if ( lay.surfaceRepresentation().isFree() ) 
            ATH_MSG_VERBOSE(displayBuffer.str() << "---[!] the Layer is not owned by the TrackingGeometry, could indicate problem.");
-	    else 
-           ATH_MSG_VERBOSE(displayBuffer.str() << "---[+] the Layer is owned by the TrackingGeometry." ); 
+        else
+           ATH_MSG_VERBOSE(displayBuffer.str() << "---[+] the Layer is owned by the TrackingGeometry." );
+      if (m_indices.empty()) {
+        ATH_MSG_INFO(displayBuffer.str() << "---[+] scaling tracking geometry material for layer " << lIndex.value() << " using scale factor = " << m_scale);
+        lay.assignMaterialProperties(*((*lmIter).second), m_scale);
+      } else if(std::find(m_indices.begin(), m_indices.end(), int(lIndex.value()))!=m_indices.end()) {
+        ATH_MSG_INFO(displayBuffer.str() << "---[+] scaling tracking geometry material for layer " << lIndex.value() << " using scale factor = " << m_scale);
+        lay.assignMaterialProperties(*((*lmIter).second), m_scale);
+      } else {
+        ATH_MSG_INFO(displayBuffer.str() << "---[+] scaling tracking geometry material for layer " << lIndex.value() << " using scale factor = 1.0");
         lay.assignMaterialProperties(*((*lmIter).second));
+      }
     } else {
         ATH_MSG_WARNING(displayBuffer.str() << "---[!] could not find material for Layer with Index: " << lIndex.value());
         return StatusCode::RECOVERABLE;

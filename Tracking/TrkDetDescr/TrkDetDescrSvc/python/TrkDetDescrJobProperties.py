@@ -544,6 +544,18 @@ class InDetBuildingOutputLevel(JobProperty):
     allowedTypes = ['int']
     StoredValue  = 3
 
+# scale factor for material on tracking geometry layer
+class InDetTrackingGeometryMaterialScaleFactor(JobProperty):
+    """ factor used to scale material on tracking geometry layer """
+    statusOn     = True
+    allowedTypes = ['float']
+    StoredValue  = 1.
+
+# tracking geometry layer to scale, if empty all layers are scaled
+class InDetTrackingGeometryMaterialLayersToScale(JobProperty):
+    statusOn     = True
+    allowedTypes = ['list']
+    StoredValue  = []
 
 ######################### CALORIMETER SECTION ##################################
 
@@ -828,6 +840,8 @@ jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetContainerName)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetStagedGeometryBuilder)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetBuildingHelperOutputLevel)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetBuildingOutputLevel)
+jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetTrackingGeometryMaterialScaleFactor)
+jobproperties.TrkDetDescrJobProperties.add_JobProperty(InDetTrackingGeometryMaterialLayersToScale)
 # Calorimeter setting
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(LArUseCaloSurfBuilder)
 jobproperties.TrkDetDescrJobProperties.add_JobProperty(LArBuildingOutputLevel)
