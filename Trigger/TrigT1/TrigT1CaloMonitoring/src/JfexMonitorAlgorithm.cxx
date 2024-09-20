@@ -153,6 +153,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
                 jFexEMeta = eta;
                 jFexEMphi = phi;
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
+                fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
             }
 
             // central region without jEM
@@ -184,10 +185,16 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             if (abs(eta) > 2.5 && abs(eta) < 3.2) {
                 jFexSRJetphi = phi - M_PI/64;
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                if (jFexSRJetRoI->et() >= 20000)
+                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
                 jFexSRJetphi = phi + M_PI/64;
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                if (jFexSRJetRoI->et() >= 20000)
+                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
             } else {
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                if (jFexSRJetRoI->et() >= 20000)
+                    fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
             }
         }
     }
@@ -218,6 +225,8 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexTaueta_glo=jFexTauRoI->globalEta();
             jFexTauphi_glo=jFexTauRoI->globalPhi();
             fill(m_Grouphist,jFexTauModule,jFexTauFPGA,jFexTauEt,jFexTauIso,jFexTaueta,jFexTauphi,jFexTaueta_glo,jFexTauphi_glo);
+            if (jFexTauRoI->et() >= 10000)
+                fill(m_GroupmapsHighPt,jFexTaueta,jFexTauphi);
         }
     }
 
@@ -240,10 +249,16 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             if (abs(eta) > 2.5 && abs(eta) < 3.2) {
                 jFexEMphi = phi - M_PI/64;
                 fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+                if (jFexFwdElRoI->et() >= 10000)
+                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
                 jFexEMphi = phi + M_PI/64;
                 fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+                if (jFexFwdElRoI->et() >= 10000)
+                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
             } else {
                 fill(m_Groupmaps,jFexEMeta,jFexEMphi,weight);
+                if (jFexFwdElRoI->et() >= 10000)
+                    fill(m_GroupmapsHighPt,jFexEMeta,jFexEMphi,weight);
             }
         }    
     }

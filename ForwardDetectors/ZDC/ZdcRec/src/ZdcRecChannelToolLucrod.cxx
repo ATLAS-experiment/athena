@@ -89,7 +89,17 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
   int Nchan = 0;
 
   std::vector<uint16_t> rodBCID;
+  std::array<xAOD::ZdcModule*, 2> zdcSideSum_ptrs;
+    
+  for (int iside = 0;iside<2;iside++)
+    {
+      xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
+      zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
+      zdcSideSum_ptrs[iside] = new_sum;
+      new_sum->setZdcSide((iside==0) ? -1 : 1);
+    }
 
+  
   for (const ZdcLucrodData* zld : *lucrodCollection)
     {
       ATH_MSG_DEBUG("Next LUCROD...");
@@ -174,26 +184,33 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 		  (*iter).second->setWaveform("g1data",zlc.waveform);
 		}
 
-	      if (lucrod_id==LUCROD_TRIG_ID) 
-		{
-                  static const SG::Accessor<uint16_t> LucrodTriggerAmpAcc ("LucrodTriggerAmp");
+	      if (type == 0) {
+		if (gain ==0) {
+      static const SG::Accessor<uint16_t> LucrodTriggerAmpLGAcc ("LucrodTriggerAmpLG");
+		  LucrodTriggerAmpLGAcc (*iter->second) = zlt.at(i);
+		}
+		else {
+      static const SG::Accessor<uint16_t> LucrodTriggerAmpAcc ("LucrodTriggerAmp");
 		  LucrodTriggerAmpAcc (*iter->second) = zlt.at(i);
 		}
+	      }
 	    }      
 	  
 	}
 
-      if (lucrod_id==LUCROD_TRIG_ID)
-	{
-	  for (int iside = 0;iside<2;iside++)
-	    {
-	      xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
-	      zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
-	      new_sum->setZdcSide((iside==0) ? -1 : 1);
-              static const SG::Accessor<uint16_t> LucrodTriggerSideAmpAcc ("LucrodTriggerSideAmp");
-	      LucrodTriggerSideAmpAcc (*new_sum) = (iside==0) ? zld->GetTrigAvgC() : zld->GetTrigAvgA();
-	    }
-	}
+      // Get the trigger information from ZDC lucrods
+      //
+      // Unfortunately, we have to hack a bit to get the information we want
+      //
+      int type = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["type"][0];
+      int gain = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["gain"][0];
+
+      if (type == 0) {
+	std::string auxName = (gain == 0 ? "LucrodTriggerSideAmpLG" : "LucrodTriggerSideAmp");
+  static const SG::Accessor<uint16_t> auxNameAcc (auxName);
+  auxNameAcc ( *zdcSideSum_ptrs[0]) = zld->GetTrigAvgC();
+  auxNameAcc ( *zdcSideSum_ptrs[1]) = zld->GetTrigAvgA();
+      }
     }
 
   xAOD::ZdcModule* global_sum = new xAOD::ZdcModule();

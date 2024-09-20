@@ -297,7 +297,8 @@ private:
   float m_delayedBaselineShift{};
 
   bool m_evtLGRefit{false};
-  float  m_refitLGAmpl{0};
+  float m_refitLGAmpl{0};
+  float m_refitLGAmplCorr{0};
   float m_refitLGAmpError{0};
   float m_refitLGChisq{0};
   float m_refitLGTime{0};
@@ -579,6 +580,12 @@ public:
   float getRefitLGAmp() const
   {
     if (m_evtLGRefit) return m_refitLGAmpl;
+    else return 0;
+  }
+
+  float getRefitLGAmpCorr() const
+  {
+    if (m_evtLGRefit) return m_refitLGAmplCorr;
     else return 0;
   }
 

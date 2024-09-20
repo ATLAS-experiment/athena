@@ -152,6 +152,7 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcTrigEff", &t_ZdcTrigEff, "zdc_ZdcTrigEff[2]/F");
     m_outputTree->Branch("zdc_ZdcModuleMask", &t_ZdcModuleMask, "zdc_ZdcModuleMask/i");
     m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmp",&t_ZdcLucrodTriggerSideAmp,"zdc_ZdcLucrodTriggerSideAmp[2]/S");
+    m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmpLG",&t_ZdcLucrodTriggerSideAmpLG,"zdc_ZdcLucrodTriggerSideAmpLG[2]/S");
 
     m_outputTree->Branch("zdc_ZdcModuleAmp", &t_ZdcModuleAmp, "zdc_ZdcModuleAmp[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModuleTime", &t_ZdcModuleTime, "zdc_ZdcModuleTime[2][4]/F");
@@ -167,6 +168,7 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcModulePresample", &t_ZdcModulePresample, "zdc_ZdcModulePresample[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSampleAmp[2][4]/F");
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
+    m_outputTree->Branch("zdc_ZdcLucrodTriggerAmpLG",&t_ZdcLucrodTriggerAmpLG,"zdc_ZdcLucrodTriggerAmpLG[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModuleAmpLGRefit", &t_ZdcModuleAmpLGRefit, "zdc_ZdcModuleAmpLGRefit[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModuleT0LGRefit", &t_ZdcModuleT0LGRefit, "zdc_ZdcModuleT0LGRefit[2][4]/F");
@@ -626,7 +628,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
   for (size_t iside = 0; iside < 2; iside++)
   {
     t_ZdcAmp[iside] = 0; t_ZdcEnergy[iside] = 0; t_ZdcTime[iside] = 0; t_ZdcStatus[iside] = 0;
-    t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcTruthTotal[iside] = 0;
+    t_ZdcTrigEff[iside] = 0;t_ZdcLucrodTriggerSideAmp[iside] = 0; t_ZdcLucrodTriggerSideAmpLG[iside] = 0; t_ZdcTruthTotal[iside] = 0;
     t_ZdcTruthInvis[iside] = 0; t_ZdcTruthEM[iside] = 0; t_ZdcTruthNonEM[iside] = 0;
     t_ZdcTruthEscaped[iside] = 0;
     for (int imod = 0; imod < 4; imod++)
@@ -636,7 +638,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
       t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
       t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
-      t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleAmpLGRefit[iside][imod] = 0; 
+      t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcLucrodTriggerAmpLG[iside][imod] = 0;
+      t_ZdcModuleMaxADC[iside][imod] = 0; t_ZdcModuleAmpLGRefit[iside][imod] = 0; 
       t_ZdcModuleT0LGRefit[iside][imod] = 0; t_ZdcModuleT0SubLGRefit[iside][imod] = 0; t_ZdcModuleChisqLGRefit[iside][imod] = 0;
 
       if (enableOutputSamples)
@@ -772,7 +775,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
   SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
+    static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpLGAcc("LucrodTriggerAmpLG");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
+  static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpLGAcc("LucrodTriggerSideAmpLG");
   static const SG::ConstAccessor<float> Amplitude0Acc("Amplitude");
   static const SG::ConstAccessor<float> MaxADCAcc("MaxADC");
   static const SG::ConstAccessor<std::vector<uint16_t> > g0d0DataAcc("g0d0Data");
@@ -806,6 +811,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
       if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
 	t_ZdcLucrodTriggerSideAmp[iside] = LucrodTriggerSideAmpAcc(*zdcSum);
+      if (LucrodTriggerSideAmpLGAcc.isAvailable(*zdcSum))
+	t_ZdcLucrodTriggerSideAmpLG[iside] = LucrodTriggerSideAmpLGAcc(*zdcSum);
 
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
@@ -901,6 +908,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
 	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
 	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
+  if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
+	  t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
 	if (MaxADCAcc.isAvailable(*zdcMod))
 	  t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
 

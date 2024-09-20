@@ -57,6 +57,7 @@ def fromRunArgs(runArgs):
         keepOriginal=True)      
 
     flags.lock()
+    flags.dump()
     
     cfg=MainServicesCfg(flags)
     
