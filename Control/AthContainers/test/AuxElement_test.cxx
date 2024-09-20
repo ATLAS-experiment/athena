@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxElement_test.cxx
@@ -131,6 +131,9 @@ void test1()
 
   assert (!ityp1.isAvailable(b));
   assert (!ityp1.isAvailableWritable(b));
+  assert (!ityp1.isAvailable(v));
+  assert (!ityp1_c.isAvailable(v));
+  assert (!ityp1.isAvailableWritable(v));
 
   SG::AuxVectorBase::testAuxElementCtor (&v, 10);
 
@@ -141,6 +144,10 @@ void test1()
   assert (!ftyp1.isAvailable(b));
   assert (!ityp1.isAvailableWritable(b));
   assert (!ftyp1.isAvailableWritable(b));
+  assert (!ityp1.isAvailable(v));
+  assert (!ftyp1.isAvailable(v));
+  assert (!ityp1.isAvailableWritable(v));
+  assert (!ftyp1.isAvailableWritable(v));
 
   ityp1(b) = 3;
   ftyp1(b) = 1.5;
@@ -178,6 +185,10 @@ void test1()
   assert (ftyp1.isAvailable(b));
   assert (ityp1.isAvailableWritable(b));
   assert (ftyp1.isAvailableWritable(b));
+  assert (ityp1.isAvailable(v));
+  assert (ftyp1.isAvailable(v));
+  assert (ityp1.isAvailableWritable(v));
+  assert (ftyp1.isAvailableWritable(v));
 
   {
     // Copying between aux var span and vector.
@@ -235,6 +246,7 @@ void test1()
 
   SG::AuxElement::TypelessConstAccessor ftyp1a ("aFloat");
   assert (ftyp1a.isAvailable (b3));
+  assert (ftyp1a.isAvailable (v3));
   assert (*reinterpret_cast<const float*>(ftyp1a (b3)) == 1.5);
   assert (*reinterpret_cast<const float*>(ftyp1a (v3, 6)) == 1.5);
   assert ((reinterpret_cast<const float*>(ftyp1a.getDataArray (v3)))[6] == 1.5);
@@ -693,14 +705,18 @@ void test_const1()
   SG::AuxStoreInternal store;
   v.setStore (&store);
 
+  assert (!ityp1_c.isAvailable(v));
+
   SG::ConstAuxElement b2 (&v, 5);
   assert (b2.index() == 5);
   assert (b2.container() == &v);
   assert (!ityp1_c.isAvailable(b2));
+  assert (!ityp1_c.isAvailable(v));
 
   int* anInt = reinterpret_cast<int*> (store.getData (ityp1_c.auxid(), 10, 10));
   anInt[5] = 123;
   assert (ityp1_c.isAvailable(b2));
+  assert (ityp1_c.isAvailable(v));
   assert (ityp1_c(b2) == 123);
 
   assert (ityp1_c(b2) == 123);
@@ -729,6 +745,7 @@ void test_const1()
 
   SG::ConstAuxElement::TypelessConstAccessor ityp1a ("anInt");
   assert (ityp1a.isAvailable (b2));
+  assert (ityp1a.isAvailable (v));
   assert (*reinterpret_cast<const int*>(ityp1a (b2)) == 123);
   assert (ityp1a.auxid() == ityp1_id);
 

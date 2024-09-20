@@ -402,7 +402,7 @@ ConstAuxElement::TypelessConstAccessor::getDataArray (const AuxVectorData& conta
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 inline
 bool
@@ -420,6 +420,18 @@ ConstAuxElement::TypelessConstAccessor::isAvailable (const AuxElement& e) const
   return e.container() && e.container()->isAvailable (m_auxid);
 }
 #endif
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+inline
+bool
+ConstAuxElement::TypelessConstAccessor::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid);
+}
 
 
 /**
@@ -563,7 +575,7 @@ ConstAuxElement::ConstAccessor<T, ALLOC>::getDataSpan (const AuxVectorData& cont
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 inline
@@ -583,6 +595,19 @@ ConstAuxElement::ConstAccessor<T, ALLOC>::isAvailable (const AuxElement& e) cons
   return e.container() && e.container()->isAvailable (m_auxid);
 }
 #endif
+
+
+/**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+ConstAuxElement::ConstAccessor<T, ALLOC>::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid);
+}
 
 
 /**
@@ -794,7 +819,7 @@ ConstAuxElement::Decorator<T, ALLOC>::getDecorationSpan (const AuxVectorData& co
 
 /**
  * @brief Test to see if this variable exists in the store.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 inline
@@ -816,8 +841,21 @@ ConstAuxElement::Decorator<T, ALLOC>::isAvailable (const AuxElement& e) const
 
 
 /**
+ * @brief Test to see if this variable exists in the store.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+ConstAuxElement::Decorator<T, ALLOC>::isAvailable (const AuxVectorData& c) const
+{
+  return c.isAvailable (m_auxid);
+}
+
+
+/**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 inline
@@ -836,6 +874,19 @@ ConstAuxElement::Decorator<T, ALLOC>::isAvailableWritable (const AuxElement& e) 
   return e.container() && e.container()->isAvailableWritableAsDecoration (m_auxid);
 }
 #endif
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+ConstAuxElement::Decorator<T, ALLOC>::isAvailableWritable (const AuxVectorData& c) const
+{
+  return c.isAvailableWritableAsDecoration (m_auxid);
+}
 
 
 /**
@@ -1091,7 +1142,7 @@ AuxElement::Accessor<T, ALLOC>::getDataSpan (AuxVectorData& container) const
 
 /**
  * @brief Test to see if this variable exists in the store and is writable.
- * @param e An element of the container which to test the variable.
+ * @param e An element of the container in which to test the variable.
  */
 template <class T, class ALLOC>
 inline
@@ -1099,6 +1150,19 @@ bool
 AuxElement::Accessor<T, ALLOC>::isAvailableWritable (AuxElement& e) const
 {
   return e.container() && e.container()->isAvailableWritable (this->m_auxid);
+}
+
+
+/**
+ * @brief Test to see if this variable exists in the store and is writable.
+ * @param c The container in which to test the variable.
+ */
+template <class T, class ALLOC>
+inline
+bool
+AuxElement::Accessor<T, ALLOC>::isAvailableWritable (AuxVectorData& c) const
+{
+  return c.isAvailableWritable (this->m_auxid);
 }
 
 
