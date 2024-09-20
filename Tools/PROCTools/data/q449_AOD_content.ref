@@ -1214,11 +1214,6 @@ HLT_TopoCaloClustersLC
 HLT_TopoCaloClustersLCAux.
 HLT_TopoCaloClustersLCAuxDyn.CENTER_MAG
 HLT_TopoCaloClustersLCAuxDyn.nCells
-HLT_TopoCaloClustersLCFS
-HLT_TopoCaloClustersLCFSAux.
-HLT_TopoCaloClustersLCFSAuxDyn.calE
-HLT_TopoCaloClustersLCFSAuxDyn.calEta
-HLT_TopoCaloClustersLCFSAuxDyn.calPhi
 HLT_TopoCaloClustersRoI
 HLT_TopoCaloClustersRoIAux.
 HLT_TopoCaloClustersRoIAuxDyn.nCells
