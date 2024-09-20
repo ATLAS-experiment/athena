@@ -35,6 +35,7 @@ PHYSVAL_FTAG1_FTAG2_AllVariables = [
 PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary = {}
 
 PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
+    "AntiKt10UFOCSSKJetsAux.GhostTrack",
     "AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
     "Electrons.TruthLink",
     "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta.ParamEnergyLoss.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.MeasEnergyLoss.MeasEnergyLossSigma",
