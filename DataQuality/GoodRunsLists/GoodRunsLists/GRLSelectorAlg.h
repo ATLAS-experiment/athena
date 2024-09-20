@@ -28,7 +28,7 @@ class GRLSelectorAlg: public EL::AnaAlgorithm {
   virtual StatusCode  finalize();
 
  private:
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_grlKey {this, "grlKey", "EventInfo.decoratorName", "Decoration for GRL"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_grlKey {this, "grlKey", "EventInfo.passGRL", "Decoration for GRL"};
   ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
   FilterReporterParams m_filterParams {this, "GoodRunsList", "Good Runs Lists selection"};
   Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply a GRL decoration"};
