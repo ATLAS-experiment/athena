@@ -35,6 +35,24 @@ AuxTypeRegistry::getAuxID (const std::string& name,
 
 
 /**
+ * @brief Verify type for an aux variable.
+ * @param auxid The ID of the variable to check.
+ * @param flags Optional flags qualifying the type.  See above.
+ *
+ * If the type of @c auxid is not compatible with the supplied
+ * types @c T / @c ALLOC, then throw a @c SG::ExcAuxTypeMismatch exception.
+ * Also may throw @c SG::ExcAtomicMismatch.
+ */
+template <class T, class ALLOC>
+void
+AuxTypeRegistry::checkAuxID (const SG::auxid_t auxid,
+                             const Flags flags /*= Flags::None*/)
+{
+  return checkAuxID (auxid, typeid(T), typeid(ALLOC), flags);
+}
+
+
+/**
  * @brief Return the vector factory for a given auxid.
  * @param auxid The desired aux data item.
  *
