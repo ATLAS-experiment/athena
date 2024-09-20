@@ -775,7 +775,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
   SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
+    static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpLGAcc("LucrodTriggerAmpLG");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpAcc("LucrodTriggerSideAmp");
+  static const SG::ConstAccessor<uint16_t> LucrodTriggerSideAmpLGAcc("LucrodTriggerSideAmpLG");
   static const SG::ConstAccessor<float> Amplitude0Acc("Amplitude");
   static const SG::ConstAccessor<float> MaxADCAcc("MaxADC");
   static const SG::ConstAccessor<std::vector<uint16_t> > g0d0DataAcc("g0d0Data");
@@ -805,12 +807,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
       t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
 
-      t_ZdcAmp[iside] = zdcSum->auxdataConst<float>("UncalibSum"+auxSuffix);
-      t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr"+auxSuffix);
-      if (zdcSum->isAvailable<uint16_t>("LucrodTriggerSideAmp"))
-	t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
-      if (zdcSum->isAvailable<uint16_t>("LucrodTriggerSideAmpLG"))
-	t_ZdcLucrodTriggerSideAmpLG[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmpLG");
+      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
+      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
+      if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
+	t_ZdcLucrodTriggerSideAmp[iside] = LucrodTriggerSideAmpAcc(*zdcSum);
+      if (LucrodTriggerSideAmpLGAcc.isAvailable(*zdcSum))
+	t_ZdcLucrodTriggerSideAmpLG[iside] = LucrodTriggerSideAmpLGAcc(*zdcSum);
 
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
@@ -903,13 +905,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  t_ZdcModuleT0SubLGRefit[iside][imod] = T0SubLGRefitAcc(*zdcMod);
 	  t_ZdcModuleChisqLGRefit[iside][imod] = ChisqLGRefitAcc(*zdcMod);
 	}
-	
-	if (zdcMod->isAvailable<uint16_t>("LucrodTriggerAmp"))
-	  t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
-	if (zdcMod->isAvailable<uint16_t>("LucrodTriggerAmpLG"))
-	  t_ZdcLucrodTriggerAmpLG[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmpLG");
-	if (zdcMod->isAvailable<float>("MaxADC"))
-	  t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
+
+	if (LucrodTriggerAmpAcc.isAvailable(*zdcMod))
+	  t_ZdcLucrodTriggerAmp[iside][imod] = LucrodTriggerAmpAcc(*zdcMod);
+  if (LucrodTriggerAmpLGAcc.isAvailable(*zdcMod))
+	  t_ZdcLucrodTriggerAmpLG[iside][imod] = LucrodTriggerAmpLGAcc(*zdcMod);
+	if (MaxADCAcc.isAvailable(*zdcMod))
+	  t_ZdcModuleMaxADC[iside][imod] = MaxADCAcc(*zdcMod);
 
         if (enableOutputSamples)
           {

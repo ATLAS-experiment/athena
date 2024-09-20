@@ -186,10 +186,12 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 
 	      if (type == 0) {
 		if (gain ==0) {
-		  (*iter).second->auxdata<uint16_t>("LucrodTriggerAmpLG") = zlt.at(i);
+      static const SG::Accessor<uint16_t> LucrodTriggerAmpLGAcc ("LucrodTriggerAmpLG");
+		  LucrodTriggerAmpLGAcc (*iter->second) = zlt.at(i);
 		}
 		else {
-		  (*iter).second->auxdata<uint16_t>("LucrodTriggerAmp") = zlt.at(i);
+      static const SG::Accessor<uint16_t> LucrodTriggerAmpAcc ("LucrodTriggerAmp");
+		  LucrodTriggerAmpAcc (*iter->second) = zlt.at(i);
 		}
 	      }
 	    }      
@@ -205,8 +207,9 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 
       if (type == 0) {
 	std::string auxName = (gain == 0 ? "LucrodTriggerSideAmpLG" : "LucrodTriggerSideAmp");
-	zdcSideSum_ptrs[0]->auxdata<uint16_t>(auxName) = zld->GetTrigAvgC();
-	zdcSideSum_ptrs[1]->auxdata<uint16_t>(auxName) = zld->GetTrigAvgA();
+  static const SG::Accessor<uint16_t> auxNameAcc (auxName);
+  auxNameAcc ( *zdcSideSum_ptrs[0]) = zld->GetTrigAvgC();
+  auxNameAcc ( *zdcSideSum_ptrs[1]) = zld->GetTrigAvgA();
       }
     }
 
