@@ -12,6 +12,7 @@
 
 #include "InDetIdentifier/SCT_ID.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "IdDict/IdDictDefs.h"
 #include <set>
 #include <algorithm>
@@ -319,10 +320,8 @@ SCT_ID::init_hashes(void) {
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_wafer_range.size(); ++i) {
     const Range& range = m_full_wafer_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id : rit) {
       Identifier id = wafer_id(exp_id);
       if (!(ids.insert(id)).second) {
         const std::string errMsg = "Error: duplicated id for wafer id. nid " + std::to_string(nids) + " compact id " + id.getString() + " id " + std::string(exp_id);
@@ -472,10 +471,8 @@ SCT_ID::init_neighbors(void) {
     const Range& range = m_full_wafer_range[i];
     const Range::field& phi_field = range[m_indices[PHI]];
     const Range::field& eta_field = range[m_indices[ETA]];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id : rit) {
       ExpandedIdentifier::element_type previous_phi;
       ExpandedIdentifier::element_type next_phi;
       ExpandedIdentifier::element_type previous_eta;

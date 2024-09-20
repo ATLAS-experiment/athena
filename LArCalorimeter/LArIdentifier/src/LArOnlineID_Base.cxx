@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnlineID_Base.h"
 #include "GaudiKernel/MsgStream.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "LArIdentifier/LArOnlID_Exception.h"
 #include <cmath>
 #include <iostream>
@@ -1137,11 +1138,9 @@ int LArOnlineID_Base::init_hashes(void)
   for (unsigned int i = 0; i < m_full_laronline_range.size(); ++i) 
     {
       const Range& range = m_full_laronline_range[i];
-      Range::const_identifier_factory first = range.factory_begin();
-      Range::const_identifier_factory last  = range.factory_end();
-      for (; first != last; ++first) 
+      ConstRangeIterator rit(range);
+      for (const auto & exp_id : rit) 
         {
-          const ExpandedIdentifier& exp_id = (*first);
           HWIdentifier id = this->channel_Id (exp_id[m_bec_index],
                                               exp_id[m_side_index],
                                               exp_id[m_feedthrough_index],
@@ -1203,10 +1202,8 @@ int LArOnlineID_Base::init_hashes(void)
   for (unsigned int i = 0; i < m_full_feedthrough_range.size(); ++i) 
     {
       const Range& range = m_full_feedthrough_range[i];
-      Range::const_identifier_factory first = range.factory_begin();
-      Range::const_identifier_factory last  = range.factory_end();
-      for (; first != last; ++first) {
-        const ExpandedIdentifier& exp_id = (*first);
+      ConstRangeIterator rit(range);
+      for (const auto & exp_id: rit) {
         HWIdentifier feedthroughId = feedthrough_Id( exp_id[m_bec_index],
                                                      exp_id[m_side_index],
                                                      exp_id[m_feedthrough_index] );
@@ -1266,11 +1263,9 @@ int LArOnlineID_Base::init_hashes(void)
   for (unsigned int i = 0; i < m_full_feb_range.size(); ++i) 
     {
       const Range& range = m_full_feb_range[i];
-      Range::const_identifier_factory first = range.factory_begin();
-      Range::const_identifier_factory last  = range.factory_end();
-      for (; first != last; ++first) 
+      ConstRangeIterator rit(range);
+      for (const auto & exp_id :rit) 
         {
-          const ExpandedIdentifier& exp_id = (*first);
           HWIdentifier febId = feb_Id( exp_id[m_bec_index],
                                        exp_id[m_side_index],
                                        exp_id[m_feedthrough_index],
@@ -1986,10 +1981,8 @@ int LArOnlineID_Base::init_calib_hashes(void)
   std::set<HWIdentifier> ids;
   for (unsigned int i = 0; i < m_full_calib_laronline_range.size(); ++i) {
       const Range& range = m_full_calib_laronline_range[i];
-      Range::const_identifier_factory first = range.factory_begin();
-      Range::const_identifier_factory last  = range.factory_end();
-      for (; first != last; ++first) {
-        const ExpandedIdentifier& exp_id = (*first);
+      ConstRangeIterator rit(range);
+      for (const auto & exp_id : rit) {
         HWIdentifier id = this->calib_channel_Id(exp_id[m_bec_index],
                                                  exp_id[m_side_index],
                                                  exp_id[m_feedthrough_index],
@@ -1999,12 +1992,12 @@ int LArOnlineID_Base::init_calib_hashes(void)
           if(m_msgSvc) {
             log << MSG::WARNING << " LArOnlineID_Base::init_calib_Hashes "
                       << " Error: duplicated id for channel id. nids= " << nids
-                      << " compact Id  " << std::string(*first) << " " << show_to_string(id) << endmsg;
+                      << " compact Id  " << std::string(exp_id) << " " << show_to_string(id) << endmsg;
           } else {
             std::cout << " LArOnlineID_Base::init_calib_Hashes "
                       << " Error: duplicated id for channel id. nids= " << nids
                       << " compact Id  " ;
-            (*first).show();
+            exp_id.show();
             std::cout << " " << show_to_string(id) << std::endl;
           }
         }
@@ -2026,10 +2019,8 @@ int LArOnlineID_Base::init_calib_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_calib_module_range.size(); ++i) {
       const Range& range = m_full_calib_module_range[i];
-      Range::const_identifier_factory first = range.factory_begin();
-      Range::const_identifier_factory last  = range.factory_end();
-      for (; first != last; ++first) {
-        const ExpandedIdentifier& exp_id = (*first);
+      ConstRangeIterator rit(range);
+      for (const auto & exp_id : rit) {
         HWIdentifier febId = calib_module_Id( exp_id[m_bec_index],
                                               exp_id[m_side_index],
                                               exp_id[m_feedthrough_index],
@@ -2038,12 +2029,12 @@ int LArOnlineID_Base::init_calib_hashes(void)
           if(m_msgSvc) {
             log << MSG::WARNING << " LArOnlineID_Base::init_calibhashes "
                     << " Warning: duplicated id for feb id. nids= " << nids
-                    << " compact Id  " << std::string(*first) << " " << show_to_string(febId) << endmsg;
+                    << " compact Id  " << std::string(exp_id) << " " << show_to_string(febId) << endmsg;
           } else {
              std::cout << " LArOnlineID_Base::init_calibhashes "
                     << " Error: duplicated id for feb id. nids= " << nids
                     << " compact Id  " ;
-                    (*first).show();
+                    exp_id.show();
                     std::cout << " " << show_to_string(febId) << std::endl;
                     std::cout << std::endl;
 

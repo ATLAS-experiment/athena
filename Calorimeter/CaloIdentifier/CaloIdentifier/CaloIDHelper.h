@@ -18,6 +18,7 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/MultiRange.h" //used in the icc file
+#include "Identifier/RangeIterator.h"
 #include "boost/range/iterator_range.hpp"
 #include <vector>
 #include <set>

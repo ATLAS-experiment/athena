@@ -5,6 +5,7 @@
 #include "MuonIdHelpers/MuonIdHelper.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "Identifier/RangeIterator.h"
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
 
@@ -359,11 +360,10 @@ int MuonIdHelper::init_hashes(void) {
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
         const Range& range = m_full_module_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier id;
-            get_id((*first), id);
+            get_id(expId, id);
             if (!(ids.insert(id)).second) {
                 ATH_MSG_ERROR("init_hashes "
                               << " Error: duplicated id for module id. nid " << (int)nids << " compact id " << id << " id ");
@@ -406,11 +406,10 @@ int MuonIdHelper::init_detectorElement_hashes(void) {
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_detectorElement_range.size(); ++i) {
         const Range& range = m_full_detectorElement_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier id;
-            get_id((*first), id);
+            get_id(expId, id);
             if (!(ids.insert(id)).second) {
                 ATH_MSG_ERROR("init_detectorElement_hashes "
                               << " Error: duplicated id for channel id. nid " << nids << " compact id " << id << " id ");
@@ -453,11 +452,10 @@ int MuonIdHelper::init_channel_hashes(void) {
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
         const Range& range = m_full_channel_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier id;
-            get_id((*first), id);
+            get_id(expId, id);
 
             if (!(ids.insert(id)).second) {
                 ATH_MSG_ERROR("init_channel_hashes "
@@ -535,10 +533,8 @@ int MuonIdHelper::init_neighbors(void) {
         const Range& range = m_full_module_range[i];
         const Range::field& phi_field = range[m_PHI_INDEX];
         const Range::field& eta_field = range[m_ETA_INDEX];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
-            const ExpandedIdentifier& id = (*first);
+        ConstRangeIterator rit(range);
+        for (const auto & id: rit) {
             ExpandedIdentifier::element_type previous_phi;
             ExpandedIdentifier::element_type next_phi;
             ExpandedIdentifier::element_type previous_eta;

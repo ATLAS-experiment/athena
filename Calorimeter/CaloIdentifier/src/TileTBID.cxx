@@ -13,6 +13,7 @@
 #include "CaloIdentifier/TileTBID.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -609,8 +610,9 @@ int TileTBID::init_hashes(void)
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_type_range.size(); ++i) {
     const Range& range = m_full_type_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier id = type_id (exp_id[m_TYPE_INDEX]);
@@ -631,8 +633,9 @@ int TileTBID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
     const Range& range = m_full_module_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier id = module_id (exp_id[m_TYPE_INDEX], 
@@ -654,8 +657,9 @@ int TileTBID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
     const Range& range = m_full_channel_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier id = channel_id    (exp_id[m_TYPE_INDEX], 

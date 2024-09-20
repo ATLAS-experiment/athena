@@ -33,8 +33,9 @@ CaloIDHelper::HashGroup::init (T& parent,
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < full_range.size(); ++i) {
     const Range& range = full_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier id = (parent.*idfunc) (exp_id);

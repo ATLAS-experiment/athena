@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -171,8 +171,9 @@ int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& fil
   ids.clear();
   for (unsigned int i = 0; i < tileID->m_full_cell_range.size(); ++i) {
     const Range& range = tileID->m_full_cell_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       phi = exp_id[tileID->m_MODULE_INDEX];

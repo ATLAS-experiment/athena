@@ -32,50 +32,8 @@ public:
   using element_type = ExpandedIdentifier::element_type ; 
   using size_type = ExpandedIdentifier::size_type ; 
   using field = IdentifierField ;
-  using field_vector = std::vector<field> ; 
+  using field_vector = std::vector<field>; 
  
-  /** 
-   *    This factory is able to generate all possible identifiers, from a  
-   *  fully bounded Range. 
-   *    The precondition is that the Range used to parameterize the factory  
-   *  must have all its fields completely bounded. 
-   */ 
-  class identifier_factory 
-  { 
-  public: 
-    identifier_factory () = default; 
-    identifier_factory (const Range& range); 
-   
-    void operator ++ (); 
- 
-    const ExpandedIdentifier& operator * () const; 
-    bool operator == (const identifier_factory& other) const; 
- 
-  private: 
-    std::vector<size_type> m_indices; 
-    ExpandedIdentifier m_id; 
-    ExpandedIdentifier m_min; 
-    ExpandedIdentifier m_max; 
-    const Range* m_range{}; 
-  }; 
- 
-  class const_identifier_factory { 
-  public: 
-    const_identifier_factory () = default; 
-    const_identifier_factory (const Range& range); 
- 
-    void operator ++ (); 
- 
-    const ExpandedIdentifier& operator * () const; 
-    bool operator == (const const_identifier_factory& other) const; 
- 
-  private: 
-    std::vector<size_type> m_indices; 
-    ExpandedIdentifier m_id; 
-    ExpandedIdentifier m_min; 
-    ExpandedIdentifier m_max; 
-    const Range* m_range{}; 
-  }; 
  
   Range () = default; 
 
@@ -176,12 +134,6 @@ public:
   //  Up to a given id
   size_type cardinalityUpTo (const ExpandedIdentifier& id) const;
  
-  /// Identifier_factory management 
-  identifier_factory factory_begin (); 
-  const_identifier_factory factory_begin () const; 
-  identifier_factory factory_end (); 
-  const_identifier_factory factory_end () const; 
- 
   /// Check if two Ranges overlap. 
   bool overlaps_with (const Range& other) const; 
  
@@ -196,8 +148,6 @@ public:
 private: 
   field_vector m_fields; 
 }; 
- 
-
  
 
 

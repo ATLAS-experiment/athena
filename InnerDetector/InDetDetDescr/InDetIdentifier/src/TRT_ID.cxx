@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -13,6 +13,7 @@
 
 #include "InDetIdentifier/TRT_ID.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "IdDict/IdDictDefs.h"
 #include <set>
 #include <algorithm>
@@ -368,10 +369,8 @@ TRT_ID::init_hashes(void) {
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
     const Range& range = m_full_module_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id: rit) {
       Identifier id = module_id(exp_id[m_BARREL_EC_INDEX],
                                 exp_id[m_PHI_MODULE_INDEX],
                                 exp_id[m_LAYER_OR_WHEEL_INDEX]);
@@ -380,13 +379,13 @@ TRT_ID::init_hashes(void) {
           log << MSG::ERROR << " TRT_ID::init_hashes "
               << " Error: duplicated id for module id. nid " << nids
               << " compact id " << show_to_string(id)
-              << " id " << (std::string) (*first)
+              << " id " << std::string(exp_id)
               << endmsg;
         } else {
           std::cout << " ERROR  TRT_ID::init_hashes "
                     << " Error: duplicated id for module id. nid " << nids
                     << " compact id " << show_to_string(id)
-                    << " id " << (std::string) (*first)
+                    << " id " << std::string(exp_id)
                     << std::endl;
         }
       }
@@ -432,10 +431,8 @@ TRT_ID::init_hashes(void) {
   ids.clear();
   for (unsigned int i = 0; i < m_full_straw_layer_range.size(); ++i) {
     const Range& range = m_full_straw_layer_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id: rit) {
       Identifier id = layer_id(exp_id[m_BARREL_EC_INDEX],
                                exp_id[m_PHI_MODULE_INDEX],
                                exp_id[m_LAYER_OR_WHEEL_INDEX],
@@ -445,12 +442,12 @@ TRT_ID::init_hashes(void) {
           log << MSG::ERROR << " TRT_ID::init_hashes "
               << " Error: duplicated id for straw layer id. nid " << nids
               << " compact id " << show_to_string(id)
-              << " id " << (std::string) (*first)
+              << " id " << std::string(exp_id)
               << endmsg;
           std::cout << " ERROR TRT_ID::init_hashes "
                     << " Error: duplicated id for straw layer id. nid " << nids
                     << " compact id " << show_to_string(id)
-                    << " id " << (std::string) (*first)
+                    << " id " << std::string(exp_id)
                     << std::endl;
         }
         nids++;
@@ -649,10 +646,8 @@ TRT_ID::init_straw_hash_vector(void) {
 
   for (unsigned int i = 0; i < m_full_straw_range.size(); ++i) {
     const Range& range = m_full_straw_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id:rit) {
       Identifier id = straw_id(exp_id[m_BARREL_EC_INDEX],
                                exp_id[m_PHI_MODULE_INDEX],
                                exp_id[m_LAYER_OR_WHEEL_INDEX],
@@ -663,13 +658,13 @@ TRT_ID::init_straw_hash_vector(void) {
           log << MSG::ERROR << " TRT_ID::init_hashes "
               << " Error: duplicated id for straw id. nid " << nids
               << " compact id " << show_to_string(id)
-              << " id " << (std::string) (*first)
+              << " id " << std::string(exp_id)
               << endmsg;
         } else {
           std::cout << " ERROR TRT_ID::init_hashes "
                     << " Error: duplicated id for straw id. nid " << nids
                     << " compact id " << show_to_string(id)
-                    << " id " << (std::string) (*first)
+                    << " id " << std::string(exp_id)
                     << std::endl;
         }
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,13 +13,14 @@
 #include "TileIdentifier/TileHWID.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
-
+#include "Identifier/RangeIterator.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include <algorithm>
 #include <iostream>
 #include <stdio.h>
 #include <assert.h>
+
 
 
 TileHWID::TileHWID( void ) 
@@ -822,10 +823,8 @@ int TileHWID::init_hashes(void)
   std::set<HWIdentifier> ids;
   for (unsigned int i = 0; i < m_full_ros_range.size(); ++i) {
     const Range& range = m_full_ros_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id : rit) {
       HWIdentifier id = ros_id (exp_id[m_ROS_INDEX]);
       if(!(ids.insert(id)).second){
 	log << MSG::ERROR << "init_hashes "
@@ -844,10 +843,8 @@ int TileHWID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_drawer_range.size(); ++i) {
     const Range& range = m_full_drawer_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id:rit) {
       HWIdentifier id = drawer_id (exp_id[m_ROS_INDEX], 
                                  exp_id[m_DRAWER_INDEX]);
       if(!(ids.insert(id)).second){
@@ -867,10 +864,8 @@ int TileHWID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
     const Range& range = m_full_channel_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id:rit) {
       HWIdentifier id = channel_id    (exp_id[m_ROS_INDEX], 
                                  exp_id[m_DRAWER_INDEX], 
                                  exp_id[m_CHANNEL_INDEX]);
@@ -891,10 +886,8 @@ int TileHWID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_adc_range.size(); ++i) {
     const Range& range = m_full_adc_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id : rit) {
       HWIdentifier id = adc_id    (exp_id[m_ROS_INDEX], 
                                  exp_id[m_DRAWER_INDEX], 
                                  exp_id[m_CHANNEL_INDEX],

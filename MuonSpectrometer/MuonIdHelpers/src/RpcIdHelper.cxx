@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include "MuonIdHelpers/RpcIdHelper.h"
+#include "Identifier/RangeIterator.h"
 RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper") {}
 
 // Initialize dictionary
@@ -319,11 +320,10 @@ void RpcIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vect
     Identifier parent = parentID(id);
     for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
         const Range& range = m_full_channel_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier child;
-            get_id((*first), child);
+            get_id(expId, child);
             if (parentID(child) == parent) vect.push_back(child);
         }
     }
@@ -772,11 +772,10 @@ int RpcIdHelper::init_detectorElement_hashes(void) {
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_detectorElement_range.size(); ++i) {
         const Range& range = m_full_detectorElement_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier id;
-            get_id((*first), id);
+            get_id(expId, id);
             Identifier doubletZ_id = doubletZID(id);
             if (!isExtraDetElId(id)) {
                 if (!ids.insert(doubletZ_id).second)
