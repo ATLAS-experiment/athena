@@ -293,6 +293,7 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_delayedBaselineShift = 0;
 
   m_fitAmplitude = 0;
+  m_ampNoNonLin = 0;
   m_fitTime      = -100;
   m_fitTimeSub   = -100;
   m_fitTimeCorr  = -100;
@@ -916,7 +917,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       //      the number of provided coefficients 
       //
       if (m_haveNonlinCorr) {
-        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
+        float ampCorrFact = (m_fitAmplitude - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
 	
 	float invNLCorr = 1.0;
 	for (size_t power = 1; power <= m_nonLinCorrParamsHG.size(); power++) {
@@ -933,6 +934,17 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
     if (m_LGMode == LGModeRefitLG && m_havePulse) {
       prepareLGRefit(m_ADCSamplesLGSub, m_ADCSSampSigLG, m_useSampleLG);
       DoFit(true);
+
+      if (m_haveNonlinCorr) {
+        float ampCorrFact = (m_refitLGAmpl - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
+	
+	float invNLCorr = 1.0;
+	for (size_t power = 1; power <= m_nonLinCorrParamsHG.size(); power++) {
+	  invNLCorr += m_nonLinCorrParamsHG[power - 1]*pow(ampCorrFact, power);
+	}
+
+	m_refitLGAmplCorr = m_refitLGAmpl/invNLCorr;
+      }
     }
     
     return result;

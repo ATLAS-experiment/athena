@@ -38,6 +38,7 @@ class JfexMonitorAlgorithm : public AthMonitorAlgorithm {
 
         StringProperty m_Grouphist{this,"Grouphist","JfexMonitor","group name for histograming"};
         StringProperty m_Groupmaps{this,"Groupmaps","jFEXMaps","group name for jFEX TOB maps"};
+        StringProperty m_GroupmapsHighPt{this,"GroupmapsHighPt","jFEXMapsHighPt","group name for jFEX TOB maps with higher energy thresholds"};
 
         // container keys including this, steering parameter, default value and help description
         SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer > m_jFexSRJetContainerKey {this,"jFexSRJetRoIContainer","L1_jFexSRJetRoI","SG key of the input jFex SR Jet Roi container"};

@@ -25,9 +25,10 @@ class SPCountHypoTool : virtual public AthCheckedComponent<::AthAlgTool> {
   StatusCode decide(SPCountsInfo &decisions) const;
 
  private:
- template<typename DetailType>
+  template<typename DetailType>
   bool applyCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
-  bool applyInverseCut(const Gaudi::Property<int> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
+  template<typename DetailType>
+  bool applyInverseCut(const Gaudi::Property<DetailType> &threshold, const xAOD::TrigComposite *composit, const std::string_view name = "") const;
 
   HLT::Identifier m_decisionId;
 

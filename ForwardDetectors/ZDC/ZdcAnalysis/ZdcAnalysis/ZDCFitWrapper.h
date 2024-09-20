@@ -682,7 +682,17 @@ public:
   virtual float GetTau2() const override {return m_tau2;}
 
   virtual float GetTime() const override {
-    return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
+        const TF1* theTF1 = GetWrapperTF1();
+
+    float fitT0 =  theTF1->GetParameter(1);
+
+    float tau1 = theTF1->GetParameter(2);
+    float tau2 = theTF1->GetParameter(3);
+
+    // Correct the time to the maximum
+    //
+    if (tau2 > tau1) fitT0 += tau1 * std::log(tau2 / tau1 - 1.0);
+    return fitT0;
   }
 
   virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(4);}

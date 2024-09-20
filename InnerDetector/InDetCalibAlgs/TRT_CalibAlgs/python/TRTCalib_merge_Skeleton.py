@@ -40,7 +40,7 @@ def fromRunArgs(runArgs):
     nextstep("Generating the tracktuple and StrawStatus file")
     ##################################################################################################
     
-    command  = 'TRTCalib_bhadd merged_histo.root %s' % ("".join(("%s.basic.root " % str(file)) for file in runArgs.inputTARFile ))
+    command  = 'TRTCalib_bhadd merged_histo.root %s' % ("".join(("%s " % str(file)) for file in glob.glob("*.basic.root") ))
     tryError(command,"ERROR: Failed in process TRTCalib_bhadd\n")
     
     ##################################################################################################
@@ -54,14 +54,14 @@ def fromRunArgs(runArgs):
     nextstep("Merging *.tracktuple.root files")
     ##################################################################################################
     
-    command = 'hadd -f %s.tracktuple.root %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.tracktuple.root " % str(file)) for file in runArgs.inputTARFile ))
+    command = 'hadd -f %s.tracktuple.root %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s " % str(file)) for file in glob.glob("*.tracktuple.root") ))
     tryError(command,"ERROR: Failed in process merging *.tracktuple.root files\n")
 
     ##################################################################################################
     nextstep("Merging *.straw.txt files")
     ##################################################################################################
     
-    command = 'TRTCalib_StrawStatus_merge %s.merged.straw.txt %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s.straw.txt " % str(file)) for file in runArgs.inputTARFile ))
+    command = 'TRTCalib_StrawStatus_merge %s.merged.straw.txt %s' % (runArgs.outputTAR_MERGEDFile, "".join(("%s " % str(file)) for file in glob.glob("*.straw.txt") ))
     tryError(command,"ERROR: Failed in process merging *.straw.txt files\n")
     
     ##################################################################################################
