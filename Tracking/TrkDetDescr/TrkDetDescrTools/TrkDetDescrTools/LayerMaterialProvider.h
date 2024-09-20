@@ -70,7 +70,9 @@ namespace Trk {
         mutable const LayerMaterialMap*             m_layerMaterialMap ATLAS_THREAD_SAFE;
         std::string                                 m_layerMaterialMapName;
                         
-        
+        Gaudi::Property<float> m_scale{this, "MaterialScaling", 1.0, "Scaling factor for material on layers"};
+        Gaudi::Property<std::vector<int>> m_indices{this, "LayerIndices", {}, "Scaling only these layers"};
+
     };
 
 } // end of namespace

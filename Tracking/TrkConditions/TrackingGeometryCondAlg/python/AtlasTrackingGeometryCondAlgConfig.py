@@ -318,7 +318,8 @@ def TrackingGeometryCondAlgCfg( flags , name = 'AtlasTrackingGeometryCondAlg', d
        CoolDataBaseFolder = '/GLOBAL/TrackingGeo/LayerMaterialV2' # Was from TrkDetFlags.MaterialStoreGateKey()
        # the material provider
        Trk__LayerMaterialProvider=CompFactory.Trk.LayerMaterialProvider
-       atlasMaterialProvider = Trk__LayerMaterialProvider('AtlasMaterialProvider', LayerMaterialMapName=CoolDataBaseFolder)
+       atlasMaterialProvider = Trk__LayerMaterialProvider('AtlasMaterialProvider',
+                                                          LayerMaterialMapName=CoolDataBaseFolder)
        atlas_geometry_processors += [ atlasMaterialProvider ]
 
        # Setup DBs

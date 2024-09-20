@@ -15,7 +15,7 @@ from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
 
 # build GeoModel
-DetDescrVersion = 'ATLAS-R1-2012-02-01-00'
+DetDescrVersion = 'ATLAS-R2-2016-01-00-01'
 from AtlasGeoModel import SetGeometryVersion 
 from AtlasGeoModel import GeoModelInit 
 
@@ -35,10 +35,10 @@ conddb.setGlobalTag('OFLCOND-SIM-00-00-00')
 # switch the material loading off
 from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
 TrkDetFlags.MaterialSource           = 'COOL'
-TrkDetFlags.MaterialVersion          = 17
+# TrkDetFlags.MaterialVersion          = 17
 TrkDetFlags.ConfigurationOutputLevel = VERBOSE
 
-TrkDetFlags.MaterialDatabaseLocal        = True
+TrkDetFlags.MaterialDatabaseLocal        = False
 if TrkDetFlags.MaterialDatabaseLocal() is True :
     # prepare the magic tag
     splitGeo = DetDescrVersion.split('-')
@@ -49,8 +49,10 @@ if TrkDetFlags.MaterialDatabaseLocal() is True :
     TrkDetFlags.MaterialDatabaseLocalName    = 'AtlasLayerMaterial-'+DetDescrVersion+'.db'
     TrkDetFlags.MaterialMagicTag             = MaterialMagicTag
 TrkDetFlags.MagneticFieldCallbackEnforced         = False
-TrkDetFlags.LArUseMaterialEffectsOnTrackProvider  = False
-TrkDetFlags.TileUseMaterialEffectsOnTrackProvider = False
+# TrkDetFlags.LArUseMaterialEffectsOnTrackProvider  = False
+# TrkDetFlags.TileUseMaterialEffectsOnTrackProvider = False
+
+TrkDetFlags.InDetTrackingGeometryMaterialScaleFactor = 2.
 
 ## The TrackingGeometrySvc
 from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
@@ -69,7 +71,7 @@ MaterialValidation.TrackingGeometrySvc         = AtlasTrackingGeometrySvc
 MaterialValidation.MaterialMapper              = MaterialMapper
 MaterialValidation.MinEta                      = -3.0
 MaterialValidation.MaxEta                      = 3.0
-MaterialValidation.OutputLevel                 = VERBOSE
+# MaterialValidation.OutputLevel                 = VERBOSE
 job += MaterialValidation   # 1 alg, named "MaterialValidation"
 
 #--------------------------------------------------------------
@@ -86,7 +88,7 @@ job += MaterialValidation   # 1 alg, named "MaterialValidation"
 # Number of events to be processed (default is until the end of
 # input, or -1, however, since we have no input, a limit needs
 # to be set explicitly, here, choose 10)
-theApp.EvtMax = 50000
+theApp.EvtMax = 500000
 
 #################################################################
 theApp.Dlls += [ 'RootHistCnv' ]

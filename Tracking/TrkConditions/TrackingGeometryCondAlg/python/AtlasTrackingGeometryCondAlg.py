@@ -161,7 +161,7 @@ class ConfiguredTrackingGeometryCondAlg( Trk__TrackingGeometryCondAlg ) :
         
         # processors
         AtlasGeometryProcessors = []   
-           
+
         # check whether the material retrieval is ment to be from COOL
         if TrkDetFlags.MaterialSource() == 'COOL':
             # the material provider
@@ -169,6 +169,8 @@ class ConfiguredTrackingGeometryCondAlg( Trk__TrackingGeometryCondAlg ) :
             AtlasMaterialProvider = LayerMaterialProvider('AtlasMaterialProvider')
             AtlasMaterialProvider.OutputLevel           = TrkDetFlags.ConfigurationOutputLevel()
             AtlasMaterialProvider.LayerMaterialMapName  = TrkDetFlags.MaterialStoreGateKey()
+            AtlasMaterialProvider.MaterialScaling  = TrkDetFlags.InDetTrackingGeometryMaterialScaleFactor()
+            AtlasMaterialProvider.LayerIndices = TrkDetFlags.InDetTrackingGeometryMaterialLayersToScale()
         
             AtlasGeometryProcessors += [ AtlasMaterialProvider ]
         

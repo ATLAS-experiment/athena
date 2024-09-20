@@ -115,7 +115,8 @@ class ConfiguredTrackingGeometrySvc( Trk__TrackingGeometrySvc ) :
             AtlasMaterialProvider = LayerMaterialProvider('AtlasMaterialProvider')
             AtlasMaterialProvider.OutputLevel           = TrkDetFlags.ConfigurationOutputLevel()
             AtlasMaterialProvider.LayerMaterialMapName  = TrkDetFlags.MaterialStoreGateKey()
-        
+            AtlasMaterialProvider.MaterialScaling  = TrkDetFlags.InDetTrackingGeometryMaterialScaleFactor()
+
             AtlasGeometryProcessors += [ AtlasMaterialProvider ]
         
             # the tag names

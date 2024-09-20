@@ -36,6 +36,7 @@ Trk::MaterialProperties* Trk::MaterialProperties::clone() const {
 
 Trk::MaterialProperties& Trk::MaterialProperties::operator*=(float scale) {
   // assuming rescaling of the material thickness
+
   m_dInX0 *= scale;
   m_dInL0 *= scale;
   m_zOaTrTd *= scale;
