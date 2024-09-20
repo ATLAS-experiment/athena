@@ -229,18 +229,16 @@ def FlavorTagNNCfg(
 
 def MultifoldGNNCfg(
         flags,
+        JetCollection,
+        TrackCollection,
+        nnFilePaths,
         BTaggingCollection=None,
-        TrackCollection=None,
         FlipConfig="STANDARD",
-        nnFilePaths=None,
         remapping={},
         useBTaggingObject=None,
-        JetCollection=None,
         tag_requirements=set(),
         defaultOutputValues={},
 ):
-    if nnFilePaths is None:
-        raise ValueError('nnFilePaths must be specified')
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
     algname = 'FtagMultifoldNN_{jc}_{tc}_{nn}_{fc}'.format(
@@ -250,15 +248,9 @@ def MultifoldGNNCfg(
         fc=FlipConfig,
     )
 
-    if TrackCollection is None:
-        raise ValueError('TrackCollection must be specified')
-
     veto_list = getStaticTrackVars(TrackCollection)
 
     acc = ComponentAccumulator()
-
-    if JetCollection is None:
-        raise ValueError('JetCollection must be specified')
 
     acc.merge(
         FoldDecoratorCfg(
