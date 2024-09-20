@@ -2,6 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcFastDigiTool.h"
+#include "xAODMuonViews/ChamberViewer.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 namespace {
@@ -39,31 +40,34 @@ namespace MuonR4 {
         ATH_CHECK(retrieveConditions(ctx, m_effiDataKey, efficiencyMap));
 
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
-        for (const TimedHit& simHit : hitsToDigit) {
-            const Identifier hitId{simHit->identify()};
-            /// ignore radiation for now
-            if (std::abs(simHit->pdgId()) != 13) continue;
-            
-            const MuonGMR4::RpcReadoutElement* readOutEle = m_detMgr->getRpcReadoutElement(hitId);
-            const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
-            RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
-            if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
-                /// Standard digitization path
-                bool digitized = digitizeHit(hitId, false, *readOutEle, 
-                                             hitTime(simHit), locPos.block<2,1>(0,0), 
-                                             efficiencyMap, *digiColl, rndEngine);
+        xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
+        do {
+            for (const TimedHit& simHit : viewer) {
+                const Identifier hitId{simHit->identify()};
+                /// ignore radiation for now
+                if (std::abs(simHit->pdgId()) != 13) continue;
 
-                digitized |=  digitizeHit(hitId, true, *readOutEle, hitTime(simHit),
-                                            Eigen::Rotation2D{90.*Gaudi::Units::deg}*locPos.block<2,1>(0,0),
-                                          efficiencyMap, *digiColl, rndEngine);
-                if (digitized) {
+                const MuonGMR4::RpcReadoutElement* readOutEle = m_detMgr->getRpcReadoutElement(hitId);
+                const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
+                RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
+                if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
+                    /// Standard digitization path
+                    bool digitized = digitizeHit(hitId, false, *readOutEle, 
+                                                 hitTime(simHit), locPos.block<2,1>(0,0), 
+                                                 efficiencyMap, *digiColl, rndEngine);
+
+                    digitized |=  digitizeHit(hitId, true, *readOutEle, hitTime(simHit),
+                                              Eigen::Rotation2D{-90.*Gaudi::Units::deg}*locPos.block<2,1>(0,0),
+                                              efficiencyMap, *digiColl, rndEngine);
+                    if (digitized) {
+                        addSDO(simHit, sdoContainer);
+                    }
+                } else if (digitizeHitBI(hitId, *readOutEle, hitTime(simHit), locPos.block<2,1>(0,0),
+                           efficiencyMap, *digiColl, rndEngine)) {
                     addSDO(simHit, sdoContainer);
                 }
-            } else if (digitizeHitBI(hitId, *readOutEle, hitTime(simHit), locPos.block<2,1>(0,0),
-                       efficiencyMap, *digiColl, rndEngine)) {
-                addSDO(simHit, sdoContainer);
             }
-        }
+        } while (viewer.next());
         /// Write everything at the end into the final digit container
         ATH_CHECK(writeDigitContainer(ctx, m_writeKey, std::move(digitCache), idHelper.module_hash_max()));
         return StatusCode::SUCCESS;

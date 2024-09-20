@@ -13,7 +13,7 @@ atlas_add_library( MuonDigitizationR4
                    PUBLIC_HEADERS MuonDigitizationR4
                    LINK_LIBRARIES MuonReadoutGeometryR4 PileUpToolsLib xAODMuonSimHit
                                   ActsGeometryInterfacesLib MuonIdHelpersLib HitManagement
-                                  AthenaBaseComps StoreGateLib)
+                                  AthenaBaseComps StoreGateLib xAODMuonViews)
 
 # Component(s) in the package:
 atlas_add_component( MuonDigitizationR4Comp

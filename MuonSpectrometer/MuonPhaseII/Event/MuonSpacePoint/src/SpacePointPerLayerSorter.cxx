@@ -47,6 +47,7 @@ namespace MuonR4 {
                     pushTo.reserve(pushTo.size() + 5);
                 }
                 pushTo.push_back(hit);
+                ++m_nMdtHits;
             } else {
                 const Identifier layId = idHelperSvc->gasGapId(id);
                 const unsigned int layer = stripLayerCounting.insert(std::make_pair(layId, stripLayerCounting.size())).first->second;
@@ -59,6 +60,7 @@ namespace MuonR4 {
                     pushTo.reserve(pushTo.size() + 5);
                 }
                 pushTo.push_back(hit);
+                ++m_nStripHits;
             }
         }
     }

@@ -31,7 +31,6 @@ namespace MuonR4{
              *  @param uncalibSpacePoint: Pointer to the underyling uncalibrated space point
              *  @param posInChamber: Calibrated position of the space point inside the chamber
              *  @param dirInChamber: Direction of the space point in chamber */
-            
             CalibratedSpacePoint(const SpacePoint* uncalibSpacePoint,
                                  Amg::Vector3D&& posInChamber,
                                  Amg::Vector3D&& dirInChamber,

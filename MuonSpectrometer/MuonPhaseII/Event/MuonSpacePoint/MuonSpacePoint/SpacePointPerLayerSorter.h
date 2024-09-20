@@ -23,14 +23,24 @@ namespace MuonR4{
             const HitLayVec& mdtHits() const {
               return m_mdtLayers;
             }
+            /** @brief Returns the number of all Mdt hits in the seed */
+            unsigned int nMdtHits() const {
+              return m_nMdtHits;
+            }
             /** @brief Returns the sorted strip hits */
             const HitLayVec& stripHits() const {
               return m_stripLayers;
+            }
+            /** @brief Returns the number of all strip hits in the seed */
+            unsigned int nStripHits() const {
+              return m_nStripHits;
             }
 
         private:
             HitLayVec m_mdtLayers{};
             HitLayVec m_stripLayers{};
+            unsigned int m_nMdtHits{0};
+            unsigned int m_nStripHits{0};
     
     };    
 

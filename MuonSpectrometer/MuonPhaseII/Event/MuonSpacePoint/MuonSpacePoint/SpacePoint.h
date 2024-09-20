@@ -60,7 +60,8 @@ namespace MuonR4 {
                        secondaryMeasurement() == other.secondaryMeasurement();
             }
             /** @brief Set the number of space points built with the same eta / phi prd. */
-            void setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd);
+            void setInstanceCounts(std::shared_ptr<unsigned> etaCounts,
+                                   std::shared_ptr<unsigned> phiCounts);
             /** @brief How many space points have been built in total with the same eta prd */
             unsigned int nEtaInstanceCounts() const;
             /** @brief How many space points have been built in total with the same phi prd  */
@@ -84,9 +85,9 @@ namespace MuonR4 {
             */
             AmgSymMatrix(2) m_measCovariance{AmgSymMatrix(2)::Identity()}; 
             /// In how many space points is the eta measurement used
-            unsigned int m_etaInstances{1};
+            std::shared_ptr<const unsigned> m_etaInstances{std::make_shared<unsigned>(1)};
             /// In how many space points is the phi measurement used
-            unsigned int m_phiInstances{1};
+            std::shared_ptr<const unsigned> m_phiInstances{std::make_shared<unsigned>(1)};
     };
 }
 

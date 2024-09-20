@@ -17,6 +17,17 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 
+namespace {
+    /**  @brief Helper function to overwrite the existing prd multiplicity counts */
+    inline void updateInstanceCounts(std::shared_ptr<const unsigned>& currCounter,
+                                     std::shared_ptr<unsigned>&& newCounter) {
+        if (!newCounter) {
+            return;
+        }
+        ++(*newCounter);
+        currCounter = std::move(newCounter);
+    }
+}
 
 namespace MuonR4{
     SpacePoint::SpacePoint(const ActsGeometryContext& gctx,
@@ -136,12 +147,13 @@ namespace MuonR4{
     const AmgSymMatrix(2)&  SpacePoint::covariance() const {
         return m_measCovariance;
     }
-    void SpacePoint::setInstanceCounts(unsigned int etaPrd, unsigned int phiPrd){
-        m_etaInstances = std::max(1u, etaPrd);
-        m_phiInstances = std::max(1u, phiPrd);
+    void SpacePoint::setInstanceCounts(std::shared_ptr<unsigned int> etaCounts, 
+                                       std::shared_ptr<unsigned int> phiCounts) {
+        updateInstanceCounts(m_etaInstances, std::move(etaCounts));
+        updateInstanceCounts(m_phiInstances, std::move(phiCounts));
     }
-    unsigned int SpacePoint::nEtaInstanceCounts() const { return m_etaInstances; }
-    unsigned int SpacePoint::nPhiInstanceCounts() const { return m_phiInstances; }
+    unsigned int SpacePoint::nEtaInstanceCounts() const { return (*m_etaInstances); }
+    unsigned int SpacePoint::nPhiInstanceCounts() const { return (*m_phiInstances); }
     unsigned int SpacePoint::dimension() const { 
         return (secondaryMeasurement() != nullptr) + 1;
     }

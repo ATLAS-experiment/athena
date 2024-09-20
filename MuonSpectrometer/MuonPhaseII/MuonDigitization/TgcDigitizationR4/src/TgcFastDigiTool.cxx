@@ -4,6 +4,7 @@
 #include "TgcFastDigiTool.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "xAODMuonViews/ChamberViewer.h"
 namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
@@ -200,19 +201,21 @@ namespace MuonR4 {
         
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
+        xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
+        do {
+            for (const TimedHit& simHit : hitsToDigit) {
+                /// ignore radiation for now
+                if (std::abs(simHit->pdgId()) != 13) continue;
+                TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
 
-        for (const TimedHit& simHit : hitsToDigit) {
-            /// ignore radiation for now
-            if (std::abs(simHit->pdgId()) != 13) continue;
-            TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
-
-            bool digitized = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine);
-            digitized |= digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine);
-            
-            if (digitized) {
-                addSDO(simHit, sdoContainer);
+                bool digitized = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine);
+                digitized |= digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine);
+                
+                if (digitized) {
+                    addSDO(simHit, sdoContainer);
+                }
             }
-        }
+        } while(viewer.next());
         /// Write everything at the end into the final digit container
         ATH_CHECK(writeDigitContainer(ctx, m_writeKey, std::move(digitCache), idHelper.module_hash_max()));
         return StatusCode::SUCCESS;

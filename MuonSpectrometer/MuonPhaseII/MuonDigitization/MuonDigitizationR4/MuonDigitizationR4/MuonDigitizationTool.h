@@ -23,6 +23,17 @@
 #include "HitManagement/TimedHitPtr.h"
 
 
+namespace std{
+    template<> class remove_pointer<TimedHitPtr<xAOD::MuonSimHit>>{
+        public:
+          using type = xAOD::MuonSimHit;
+    };
+      template<> class remove_pointer<TimedHitPtr<const xAOD::MuonSimHit>>{
+        public:
+          using type = xAOD::MuonSimHit;
+    };
+}
+
 namespace MuonR4 {
      /** @brief Barebone implementation of the I/O infrastructure for all MuonDigitizationTools.
       *         
