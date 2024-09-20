@@ -93,9 +93,9 @@ def TGCCablingConfigCfg(flags):
     TGCCablingSvc = TGCcablingServerSvc()
     acc.addService( TGCCablingSvc, primary=True )
 
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'
-    acc.merge(addFolders(flags, '/TGC/CABLING/MAP_SCHEMA', dbName))
+    #from IOVDbSvc.IOVDbSvcConfig import addFolders
+    #dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'
+    #acc.merge(addFolders(flags, '/TGC/CABLING/MAP_SCHEMA', dbName))
 
     return acc
 
