@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetIsolationTool.cxx 
@@ -7,7 +7,8 @@
 #include "JetMomentTools/JetIsolationTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-#include <sstream>
+//#include <sstream>
+#include <format>
 
 using std::string;
 using fastjet::PseudoJet;
@@ -15,32 +16,36 @@ using fastjet::PseudoJet;
 namespace jet {
 
   namespace JetIsolation {
-
+  
+    // **************************************************************************
+    // **************************************************************************
     using FourMom_t = TLorentzVector;
 
+    TVector3 unitVector(const FourMom_t& v){
+      TVector3 v3 = v.Vect();
+      return (1/v3.Mag())*v3;
+    }
+    
     /// IsolationCalculator : base class for isolation calculations
+    /// Implementations of this class encapsulate all the needed calculations inside the
+    /// calcIsolationVariables(jet, constituents) function, where 'constituents' is expected to
+    /// be a vector a consituent NOT containing the jet's constitents.
     class IsolationCalculator {
     public:
 
-      /// Define the availble isolation variables
+      /// Define the available isolation variables
       enum Kinematics {
-        SumPt, Par, Perp, P
+        Pt, PtPUsub, SumPt, Par, Perp, P
       };
 
-      /// names for isolation variables
-      static const string s_kname[4];
+      /// names for isolation variables. Must match EXACTLY the enum.
+      static constexpr std::array<string, 6> s_kname = {"Pt","PtPUsub" , "SumPt", "Par", "Perp", "P"};
 
       /// Holds the 4-vector of all constituents contributing to isolation.
-      ///  accessors to corresponding isolation variables.
-      struct IsolationResult {
-        double isoSumPt(){ return m_isoSumPt;}
-        double isoPar(const TVector3 &unitV){ return m_isoP.Vect().Dot(unitV);}
-        double isoPerp(const TVector3 &unitV){ return m_isoP.Vect().Perp(unitV);}
-        FourMom_t & isoP(){ return m_isoP;}
-        
-        FourMom_t m_isoP ;
-        double m_isoSumPt = 0.0;
-        
+      struct IsolationResult {        
+        FourMom_t isoP ;
+        double isoSumPt = 0.0;
+	double isoArea = 0.;
       };
       
       
@@ -50,118 +55,133 @@ namespace jet {
       virtual string baseName() const {return "";}
       virtual IsolationCalculator * clone(const xAOD::Jet* ) const {return nullptr;}
       virtual void copyFrom( const IsolationCalculator* o, const xAOD::Jet*){
-        m_attNames = o->m_attNames;
         m_kinematics = o->m_kinematics;
       }
       
         
-      /// Compute the isolation momentum from jet and jet inputs.
+      /// Compute the isolation 4-momentum from jet and jet inputs.
       /// It is assumed the caller has already removed jet constituents from the input list.
-      virtual IsolationResult jetIsolation(const xAOD::Jet*, std::vector<jet::ParticlePosition> & ) const {
+      virtual IsolationResult jetIsolation(const xAOD::Jet*, std::vector<const xAOD::IParticle*> & ) const {
         return {};
       }
-      virtual std::map<std::string, float>
-      calcIsolationAttributes(const xAOD::Jet* jet, std::vector<jet::ParticlePosition>& nearbyConstit) const {
-        IsolationResult result = jetIsolation(jet, nearbyConstit);
-        std::map<std::string, float> result_map;
-        for ( size_t i=0; i<m_kinematics.size(); ++i ) {
-          switch( m_kinematics[i] ) {
-          case Perp:
-            result_map.insert(std::pair<std::string, float>(s_kname[i], result.isoPerp(jet->p4().Vect()) ));
-            break;
-          case SumPt:
-            result_map.insert(std::pair<std::string, float>(s_kname[i], result.isoSumPt() ));
-            break;
-          case Par:
-            result_map.insert(std::pair<std::string, float>(s_kname[i], result.isoPar(jet->p4().Vect()) ));
-            break;
-          case P:
-            result_map.insert(std::pair<std::string, float>(s_kname[i], result.isoP().Vect().Mag() ));
-            break;
-          }
-        }
-        return result_map;
-      }
-      
+
       bool scheduleKinematicCalculation(const std::string& kname){
-        for( size_t i=0; i<4 ;i++){  
-          if( s_kname[i]==kname) {
-            m_kinematics.push_back( (Kinematics) i);
-            m_attNames.push_back( baseName()+kname );
-            return true;        
-          }
-        }
+	auto it = std::ranges::find(s_kname, kname);
+	if( it != s_kname.end( )){
+	  m_kinematics.push_back(static_cast<Kinematics>(it-s_kname.begin()) );
+	  return true;
+	}
         return false;
       }
-      
 
-      void dump(){
-        std::cout << "Isolation calculator "<< baseName() <<std::endl;
-        for( size_t i =0 ; i<m_attNames.size(); i++){
-          std::cout << "   - "<< m_attNames[i] << std::endl; 
+
+      /// Implement the calculation of isolation variables for this jet.
+      /// The vector<IParticle*> nearbyConstit is expected to contain all the constituents which can fall in the isolation area AND which are not constituent of the jet.
+      virtual std::vector<float> 
+      calcIsolationVariables(const xAOD::Jet* jet, std::vector<const xAOD::IParticle*>& nearbyConstit) const {
+        IsolationResult result = jetIsolation(jet, nearbyConstit);
+	std::vector<float> calcVector;
+	float pt = jet->jetP4(xAOD::JetConstitScaleMomentum).pt();
+	static const SG::AuxElement::Accessor<float> areaAcc("ActiveArea");
+	float jetArea=0;
+	for(auto k : m_kinematics){
+	  float v=-1;
+          switch( k ) {
+          case Pt:
+	    v = result.isoP.Pt() / pt; break ;
+	  case PtPUsub:
+	    jetArea= areaAcc(*jet);	    
+	    v = (result.isoP.Pt() - (result.isoArea-jetArea)*m_rho)/ (pt-jetArea*m_rho);
+	    break;
+          case Perp:
+            v = result.isoP.Vect().Dot(unitVector(jet->p4())) /pt; break;
+          case SumPt:
+            v = result.isoSumPt; break;
+          case Par:
+            v = result.isoP.Vect().Perp(unitVector(jet->p4())) /pt ; break;
+          case P:
+	    v = result.isoP.Vect().Mag()/pt; break ;
+	  }
+	  calcVector.push_back(v);
         }
+        return calcVector;
+      }
+
+      virtual
+      std::vector<std::string> calculationNames() const {
+	std::vector<std::string> v;
+	v.reserve(m_kinematics.size());
+	for(auto k : m_kinematics) {
+    		v.emplace_back(baseName() + s_kname[k]);
+	}
+	return v;	
+      }
+
+      
+      void dump() const {
+        std::cout << "Isolation calculator "<< baseName() <<std::endl;
+	for(const auto& n : calculationNames()){
+	  std::cout << "   - "<< n << std::endl; 
+	}
+      }
+
+      void setEventDensity(float rho){
+	m_rho=rho;
       }
       
     protected:
-      std::vector<Kinematics> m_kinematics; /// kinematics isolation vars to be computed
-      std::vector<string> m_attNames;  /// kinematics isolation vars names
+      /// kinematics isolation variables to be computed
+      std::vector<Kinematics> m_kinematics;
+      /// Value of the event density in case it is needed.
+      float m_rho=-9999.; // initialized to obviously wrong value.
     };
-
-  const string IsolationCalculator::s_kname[4] =  {"SumPt", "Par", "Perp", "P"};
 
     
-    struct PseudoJetKinematicGetter {
-      const FourMom_t getP(jet::ParticlePosition& p) const {
-        return TLorentzVector(p.px(), p.py(), p.pz(), p.e());
-      }
-      double getPt(jet::ParticlePosition& p) const { return p.pt();}
-    };
 
-    template<typename ISOCRITERIA, typename KINEMATICGETTER = PseudoJetKinematicGetter>
+    template<typename ISOCRITERIA>
     class IsolationCalculatorT : public IsolationCalculator {
     public:
 
       IsolationCalculatorT(double param=0.) : m_iso(param) { }
 
       virtual IsolationResult
-      jetIsolation(const xAOD::Jet* jet, std::vector<jet::ParticlePosition> &nearbyConstit) const {
+      jetIsolation(const xAOD::Jet* jet, std::vector<const xAOD::IParticle*> &nearbyConstit) const {
         IsolationResult result;
-        result.m_isoSumPt = 0;
-        for ( size_t i=0 ; i<nearbyConstit.size(); ++i ) {
-          if ( m_iso.inIsolationArea(jet, nearbyConstit[i]) ) {
-            result.m_isoP     += m_kine.getP(nearbyConstit[i]);
-            result.m_isoSumPt += m_kine.getPt(nearbyConstit[i]);
+	double rap = jet->rapidity();
+	double phi = jet->phi();
+	for(const xAOD::IParticle* constit:nearbyConstit){
+	  if ( m_iso.inIsolationArea(rap, phi, constit) ) {
+	    result.isoP     += constit->p4();
+            result.isoSumPt += constit->pt();
           }    
         }
+	result.isoArea = m_iso.isoArea();
         return result;
       }
-
+      
       virtual string baseName() const {return m_iso.name();}
 
       virtual IsolationCalculator * clone(const xAOD::Jet* j) const {
-        IsolationCalculator* iso;
-        auto* isoT= new IsolationCalculatorT();
+        IsolationCalculatorT* isoT= new IsolationCalculatorT();
         isoT->m_iso = m_iso;
         isoT->m_iso.setup(j);
-        isoT->m_kine = m_kine;
-        iso = isoT;
-        iso->copyFrom(this,j);
-        return iso;
+        isoT->copyFrom(this,j);
+        return isoT;
       }
 
       ISOCRITERIA m_iso;
-      KINEMATICGETTER m_kine;
     };
     
     
     /// \class IsolationAreaBase 
-    ///  Defines a zone from which constituents will contribute to the isolation of a jet.
-    /// In most cases, the zone is simply a cone.
+    /// Defines a zone from which constituents will contribute to the isolation of a jet.
+    /// In most cases, the zone is simply a cone which radius depends on the jet radius.
     struct IsolationAreaBase {
       IsolationAreaBase(double p, const string &n) : m_parameter(p), m_name(n){}
       
-      bool inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& part) const {
-        double dr2 = xAOD::P4Helpers::deltaR2(j->eta(), j->phi(), part.x(), part.y());
+      bool inIsolationArea(double rap, double phi, const xAOD::IParticle* part) const {
+	// we use eta rather than rapidity for constituents, because the later can generate FPE (presumably in very low pt PFlow constit)
+        double dr2 = xAOD::P4Helpers::deltaR2(rap, phi, part->rapidity(), part->phi());
         return dr2 < m_deltaRmax2;
       }
       
@@ -170,6 +190,10 @@ namespace jet {
         return oss.str();        
       }
 
+      double isoArea() const{
+	return m_deltaRmax2*M_PI;
+      }
+      
       double m_parameter;
       string m_name;
       double m_deltaRmax2 = 0.0;
@@ -178,16 +202,15 @@ namespace jet {
     
       
     
-    // here we define a short cut to declare implementation of IsolationAreaBase classes.
+    // here we define a short cut to declare implementations of IsolationAreaBase classes.
     // In most cases, only a definition of the max deltaR is enough to specify the area, hence these shortcuts. 
     // 1st parameter : class name
-    // 2nd parameter : code defining the max deltaR
+    // 2nd parameter : code defining the max deltaR. Can use the variable 'param' representing the size parameter of this IsolationCalculator
     // 3rd parameter (optional) : (re)-declaration of additional methods.
     /// See below for example
 #define ISOAREA( calcName, deltaRcode , additionalDecl )  struct calcName : public IsolationAreaBase { \
         calcName(double p) : IsolationAreaBase(p, #calcName){}          \
-        virtual void setup(const xAOD::Jet* j)  {double jetRadius=j->getSizeParameter();  double param = m_parameter; m_deltaRmax2=deltaRcode ; m_deltaRmax2*=m_deltaRmax2; param=jetRadius*param;}  additionalDecl }
-
+        virtual void setup(const xAOD::Jet* j)  {double jetRadius=j->getSizeParameter();  double param = m_parameter; m_deltaRmax2=deltaRcode ; m_deltaRmax2*=m_deltaRmax2; (void)(param+jetRadius);}  additionalDecl }
 
 
     ISOAREA( IsoKR , jetRadius*param, )  ;
@@ -196,9 +219,9 @@ namespace jet {
     ISOAREA( IsoFixedArea, sqrt(jetRadius*jetRadius+param*M_1_PI) , )  ;
 
     // For Iso6To8 we need to redefine inIsolationArea
-    ISOAREA( Iso6To8, 0.8 ,  bool inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& constit)const ;  )  ;
-    bool Iso6To8::inIsolationArea(const xAOD::Jet* j, jet::ParticlePosition& constit) const {
-      double dr2 = xAOD::P4Helpers::deltaR2(j->eta(), j->phi(), constit.x(), constit.y());
+    ISOAREA( Iso6To8, 0.8 ,  bool inIsolationArea(double rap, double phi, const xAOD::IParticle* constit)const ;  )  ;
+    bool Iso6To8::inIsolationArea(double rap, double phi, const xAOD::IParticle* constit) const {
+      double dr2 = xAOD::P4Helpers::deltaR2(rap, phi, constit->rapidity(), constit->phi());
       return ( (dr2<0.8*0.8) && (dr2>0.6*0.6) );
     }
 
@@ -227,14 +250,6 @@ namespace jet {
   }
 
 
-  bool isConstituent(const xAOD::IParticle* p,const xAOD::Jet* j){
-    // just need raw constituents.
-    for(size_t i = 0;i<j->numConstituents();i++){
-      if( p == j->rawConstituent(i) ) return true;
-    }
-    return false;
-  }
-
 } // namespace jet 
 
 using namespace jet::JetIsolation;
@@ -262,8 +277,15 @@ StatusCode JetIsolationTool::initialize() {
   // decode each isolation calculations as entered by properties
   for ( size_t i=0; i<nmom; ++i ) {
     string isocriteria, param_s, kinematic;
+    // decode the string passed as a property :
     jet::colonSplit(m_isolationCodes[i], isocriteria, param_s, kinematic);
+    if( (param_s.empty())||(kinematic.empty())) {
+      ATH_MSG_ERROR(" Can't extract parameter values or kinematic code from "<<m_isolationCodes[i]);
+      return StatusCode::FAILURE;
+    }
     string calcId = isocriteria + param_s;
+    // isocriteria + param_s defines a calculator which can then calculate several kinematics.
+    // check if this (isocriteria + param_s ) calculator has already been defined. If not do it now.
     IsolationCalculator*& isoC = calcMap[calcId];
     if ( isoC == nullptr ) {
       isoC = createCalulator( isocriteria, std::stod(param_s)*0.1 );
@@ -272,6 +294,7 @@ StatusCode JetIsolationTool::initialize() {
       ATH_MSG_ERROR(" Unkown isolation criteria "<< isocriteria << "  from "<< m_isolationCodes[i] );
       return StatusCode::FAILURE;
     }
+    // add this kinematic for this calculator 
     bool ok = isoC->scheduleKinematicCalculation( kinematic);
     if(!ok) {
       ATH_MSG_ERROR(" Unkown isolation kinematic "<< kinematic << "  from "<< m_isolationCodes[i] );
@@ -286,35 +309,36 @@ StatusCode JetIsolationTool::initialize() {
   
   // Fill the iso calculator vector from the map
   // Also fill DecorHandleKeyArrays at the same time
-  for ( auto& pair : calcMap ){ 
+  int ncalc=0;
+  for ( const auto& pair : calcMap ){ 
     m_isoCalculators.push_back(pair.second); 
-    ATH_MSG_DEBUG("Will use iso calculation : "<< pair.second->baseName() );
-    pair.second->dump();
+    ATH_MSG_DEBUG("Will use iso calculation : "<< pair.second->baseName() << "  and variables :" );
 
-    m_perpKeys.emplace_back(m_jetContainerName + "." + pair.second->baseName() + "Perp");
-    m_sumPtKeys.emplace_back(m_jetContainerName + "." + pair.second->baseName() + "SumPt");
-    m_parKeys.emplace_back(m_jetContainerName + "." + pair.second->baseName() + "Par");
-    m_pKeys.emplace_back(m_jetContainerName + "." + pair.second->baseName() + "P");
+    for(const auto& kname: pair.second->calculationNames()){
+      ATH_MSG_DEBUG("      -->  : "<< kname );
+      m_decorKeys.push_back(std::format("{}.{}", m_jetContainerName.value(), kname));
+      ncalc++;
+    }
   }
 
+  
   ATH_MSG_INFO("Initialized JetIsolationTool " << name());
-  if ( m_pjsin.empty() ) {
+  if ( m_inputConstitKey.empty() ) {
     ATH_MSG_ERROR("  No input pseudojet collection supplied");
     return StatusCode::FAILURE;
   } else {
-    ATH_MSG_INFO("  Input pseudojet collection: " << m_pjsin.key());
-    ATH_CHECK(m_pjsin.initialize());
+    ATH_MSG_INFO("  Input pseudojet collection: " << m_inputConstitKey.key());
+    ATH_CHECK(m_inputConstitKey.initialize());
   }
   ATH_MSG_INFO("  Isolation calculations: " << m_isolationCodes);
+  ATH_MSG_DEBUG("Total num calculations="<<ncalc<< "  ndecorations="<<m_decorKeys.size());
+  
+  ATH_CHECK(m_decorKeys.initialize());
 
-  m_inputTypeKey = m_jetContainerName + "." + m_inputTypeKey.key();
-  ATH_CHECK(m_inputTypeKey.initialize());
-
-  ATH_CHECK(m_perpKeys.initialize());
-  ATH_CHECK(m_sumPtKeys.initialize());
-  ATH_CHECK(m_parKeys.initialize());
-  ATH_CHECK(m_pKeys.initialize());
-
+  if(!m_rhoKey.empty()){
+    ATH_CHECK(m_rhoKey.initialize());
+    ATH_MSG_INFO(" Using EventDensity from: " << m_rhoKey.key());
+  }
   
   return StatusCode::SUCCESS;
 }
@@ -323,14 +347,12 @@ StatusCode JetIsolationTool::initialize() {
 
 StatusCode JetIsolationTool::decorate(const xAOD::JetContainer& jets) const {
 
-  SG::ReadDecorHandle<xAOD::JetContainer, int> inputTypeHandle(m_inputTypeKey);
   
   ATH_MSG_DEBUG("Modifying jets in container with size " << jets.size());
   if ( jets.empty() ) return StatusCode::SUCCESS;
 
   // Fetch the input pseudojets.
-  auto pjsin = SG::makeHandle(m_pjsin);
-  const PseudoJetContainer* inputConstits = pjsin.get();
+  auto inputConstits = SG::makeHandle(m_inputConstitKey);
   ATH_MSG_DEBUG("Retrieved input count is " << inputConstits->size());
 
   // adapt the calculators to these jets (radius, input type, etc...)
@@ -339,81 +361,67 @@ StatusCode JetIsolationTool::decorate(const xAOD::JetContainer& jets) const {
   std::vector<IsolationCalculator*> calculators; // the adapted calculators.
   for( const IsolationCalculator * calc : m_isoCalculators ){
     IsolationCalculator * cloned = calc->clone( jets[0] );
+    cloned->setEventDensity(0);
     calculators.push_back( cloned );
   }
 
-  // Loop over jets in this collection.
-  for (const xAOD::Jet* pjet : jets ) {
-
-    // Check this jet has the same inputs.
-    // int jinp = inputTypeHandle(*pjet);
-    // This needs to be reimplemented when we decide how to better
-    // encode this information -- right now this can't be matched
-    // to the input PseudoJetContainer
-
-    // Create jet position.
-    jet::ParticlePosition jetPos(pjet);
-  
-    // restrict to nearby particles which are NOT jet constituents
-    //  (for the expected num of constituents per jet (~30), doing a naive loop is
-    //    faster than using set objects)
-    std::vector<jet::ParticlePosition> nearbyC;
-    nearbyC.reserve( 30 ); // educated guess.
-
-    ATH_MSG_VERBOSE("Jet eta=" << jetPos.x() << ", phi=" << jetPos.y());
-    for ( unsigned int ippj=0; ippj<inputConstits->size(); ++ippj ) {
-      const PseudoJet* ppj = &(inputConstits->casVectorPseudoJet()->at(ippj));
-      const xAOD::IParticle* ppar = nullptr;
-      string label = "none";
-      if ( ppj->has_user_info<jet::IConstituentUserInfo>() ) {
-        const auto& uin = ppj->user_info<jet::IConstituentUserInfo>();
-        ppar = uin.particle();
-        label = uin.label();
-      } else {
-        ATH_MSG_WARNING("Pseudojet does not have the expected user info.");
-      }
-      jet::ParticlePosition pos(ppj);
-      string msg = "Skipping";
-      bool found = false;
-      if ( ppar != nullptr ) {
-        for ( unsigned int icon=0; icon<pjet->numConstituents(); ++icon ) {
-          if ( ippj == 0 ) ATH_MSG_VERBOSE("  Jet con: " << long(pjet->rawConstituent(icon)));
-          if ( pjet->rawConstituent(icon) == ppar ) {
-            found = true;
-            break;
-          }
-        }
-      }
-      if ( ! found ) {
-        msg = "Keeping";
-        nearbyC.push_back(pos); // the constituent does not belong to jet
-      }
-      ATH_MSG_VERBOSE("  " << msg << " eta=" << pos.x() << ", phi=" << pos.y()
-                      << " @" << long(ppar) << " " << label);
+  // Retrieve and set EventDensity if needed
+  if(!m_rhoKey.empty()){
+    double rho=0;
+    SG::ReadHandle<xAOD::EventShape> rhRhoKey(m_rhoKey);
+    if (! rhRhoKey->getDensity( xAOD::EventShape::Density, rho ) ) {
+      ATH_MSG_FATAL("Could not retrieve xAOD::EventShape::Density from xAOD::EventShape "<< m_rhoKey.key());
+      return StatusCode::FAILURE;
     }
-    if ( nearbyC.size() + pjet->numConstituents() != inputConstits->size() ) {
+    ATH_MSG_DEBUG("Rho = "<< rho);
+    for(  IsolationCalculator * calc : calculators ) calc->setEventDensity(rho);
+  }
+
+  // This will hold  all the constituents around a jet which are not constituents of the jet
+  std::vector<const xAOD::IParticle*> nearbyC;
+  nearbyC.reserve( inputConstits->size() ); 
+  const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+  // Loop over jets in this collection.
+  for (const xAOD::Jet* jet : jets ) {
+
+    nearbyC.clear();
+    size_t nRejected=0;
+    const std::vector< ElementLink< xAOD::IParticleContainer > >& constitEL = jet->constituentLinks();
+
+    // Fill nearbyC: for now we take ALL constituents  which not constituents of the jet.
+    //  this is a lot and it may render subsequent iso calculation slower. If so it
+    // could be useful to use a fast look-up map to preselect constituents close to the jet (ex: within 2*jetRadius)
+    for(const xAOD::IParticle *part: (*inputConstits)){
+      if((part->e()<=0) || ( PVMatchedAcc.isAvailable(*part) && !PVMatchedAcc(*part) )){
+	nRejected++;
+	continue;
+      }
+      bool found = std::any_of(constitEL.begin(), constitEL.end(), [&part](const auto& link) { return part == *link; });
+      if(!found){
+	nearbyC.push_back(part);	
+      }      
+    }
+    if ( (nearbyC.size() + jet->numConstituents()+nRejected) != inputConstits->size() ) {
       ATH_MSG_WARNING("Inconsistent number of jet constituents found in jet.");
     }
-    
-    ATH_MSG_DEBUG( "  # outside jet: "
-                   << nearbyC.size() << ", in jet: "<< pjet->numConstituents()
-                   << ", total: "<< inputConstits->size() );
 
-    std::map<std::string, const SG::WriteDecorHandleKeyArray<xAOD::JetContainer>* > decorKeyMap;
-    decorKeyMap.emplace(jet::JetIsolation::IsolationCalculator::s_kname[0], &m_sumPtKeys);
-    decorKeyMap.emplace(jet::JetIsolation::IsolationCalculator::s_kname[1], &m_parKeys);
-    decorKeyMap.emplace(jet::JetIsolation::IsolationCalculator::s_kname[2], &m_perpKeys);
-    decorKeyMap.emplace(jet::JetIsolation::IsolationCalculator::s_kname[3], &m_pKeys);
+    ATH_MSG_DEBUG(jet->index()<< "  # outside jet: " << nearbyC.size() << ", # rejected :"<< nRejected
+		  << ", in jet: "<< jet->numConstituents()
+		  << ", total: "<< inputConstits->size() );
+		      
     
     // loop over calculators, calculate isolation given the close-by particles not part of the jet.
-    for ( size_t iCalc = 0; iCalc < calculators.size(); iCalc++ ) {
-      std::map<std::string, float> results = calculators.at(iCalc)->calcIsolationAttributes(pjet, nearbyC);
-      for( const auto& [var_name, value]: results ) {
-        SG::WriteDecorHandle<xAOD::JetContainer, float> decorHandle(decorKeyMap.at(var_name)->at(iCalc));
-        decorHandle(*pjet) = value;
+    int c=0;
+    for(auto * isoCalc:calculators){
+      // perform all calculations with this isoCalc
+      std::vector<float> results = isoCalc->calcIsolationVariables(jet, nearbyC);
+      // decorate the jet with the calculated values
+      for( float value: results ) {
+	SG::WriteDecorHandle<xAOD::JetContainer, float> decorHandle(m_decorKeys[c++]);
+	ATH_MSG_DEBUG(" decor "<< decorHandle.decorKey()  << "  " << value << "  "<<c);
+	decorHandle(*jet) = value;
       }
-    }
-    
+    }    
   }
 
   // clear calculators :
@@ -424,6 +432,7 @@ StatusCode JetIsolationTool::decorate(const xAOD::JetContainer& jets) const {
   ATH_MSG_DEBUG("done");
   return StatusCode::SUCCESS;
 }
+
 
 //**********************************************************************
 

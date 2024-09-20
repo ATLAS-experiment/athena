@@ -82,6 +82,13 @@ def isMC(flags):
     return flags.Input.isMC, "Input file is not MC"
 
 
+def _constitContainername(jetdef,modspec):
+    """Returns the exact constituent container name used to build jetdef"""
+    constitdef = jetdef.inputdef
+    containername = constitdef.containername(jetdef).split(':')[-1] if callable(constitdef.containername) else constitdef.containername
+    return containername
+
+
 # Standard jet moments
 try:
     from JetMomentTools import JetMomentToolsConfig
@@ -184,6 +191,24 @@ try:
                                        JetContainer = _jetname
                                        ),
 
+        # *******************
+        # Isolation variables
+        jetiso = JetModifier("JetIsolationTool","iso",
+                             JetContainer=_jetname,
+                             InputConstitContainer = _constitContainername,
+                             IsolationCalculations = ["IsoFixedCone:5:Pt",   "IsoFixedCone:5:PtPUsub",],
+                             RhoKey = lambda jetdef, specs : "Kt4"+jetdef.inputdef.label+"EventShape" ,
+                             prereqs= ["input:EventDensity"], #lambda spec,jetdef : ["input:Kt4"+jetdef.inputdef.label+"EventShape",],
+                             ),
+
+        jetisoTruth = JetModifier("JetIsolationTool","isoTruth",
+                                   JetContainer=_jetname,
+                                   InputConstitContainer = _constitContainername,
+                                   IsolationCalculations = ["IsoFixedCone:5:Pt", ],
+                                   RhoKey = "",
+                                   ),
+        
+        
     )
 except ModuleNotFoundError:
     # In some releases (AthGeneration) JetMomentTools is not existing
