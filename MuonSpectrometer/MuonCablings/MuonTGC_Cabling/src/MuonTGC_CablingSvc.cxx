@@ -149,11 +149,12 @@ StatusCode MuonTGC_CablingSvc::initialize(void)
   ATH_CHECK(m_condDataTool.retrieve());
   std::string folderName = m_condDataTool->getFolderName();
 
-  bool isContained = detStore->contains<CondAttrListCollection>(folderName);
-  if(!isContained) {
-    ATH_MSG_FATAL("Could not found " << folderName << " in DetectorStore.");
-    return StatusCode::FAILURE;
-  } 
+  // temorarily commenting out this check to fix ATLASRECTS-7396. Will check again in the future if this whole tool can go 
+//  bool isContained = detStore->contains<CondAttrListCollection>(folderName);
+//  if(!isContained) {
+//    ATH_MSG_FATAL("Could not found " << folderName << " in DetectorStore.");
+//    return StatusCode::FAILURE;
+//  } 
 
   if(!m_cabling->updateCableASDToPP().isSuccess()) {
     ATH_MSG_WARNING("updateCableASDToPP failed");
