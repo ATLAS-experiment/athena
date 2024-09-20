@@ -91,6 +91,13 @@ atlas_add_test(Range_test
   POST_EXEC_SCRIPT nopost.sh 
 )
 
+atlas_add_test(RangeIterator_test
+  SOURCES test/RangeIterator_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils Identifier
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
 atlas_add_test(MultiRange_test
   SOURCES test/MultiRange_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}

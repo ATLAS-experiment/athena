@@ -122,7 +122,7 @@ MultiRange::const_identifier_factory MultiRange::factory_begin() const {
  
 //----------------------------------------------- 
 MultiRange::identifier_factory MultiRange::factory_end() { 
-  static const identifier_factory factory;
+  static const identifier_factory factory(*this);
   return (factory); 
 } 
  
@@ -142,8 +142,8 @@ MultiRange::identifier_factory::identifier_factory(const MultiRange& multirange)
      *  Set up iterators over ranges and ids.
      */
     if (m_range_it != m_range_end) {
-      m_id_fac_it  = (*m_range_it).factory_begin();
-      m_id_fac_end = (*m_range_it).factory_end();
+      m_id_fac_it  = ConstRangeIterator(*m_range_it).begin();
+      m_id_fac_end = ConstRangeIterator(*m_range_it).end();
       if(m_id_fac_it != m_id_fac_end) {
         // Set id
         m_id = *m_id_fac_it;
@@ -162,8 +162,8 @@ void MultiRange::identifier_factory::operator ++() {
       if (m_id_fac_it == m_id_fac_end) {
         ++m_range_it;
         if (m_range_it != m_range_end) {
-          m_id_fac_it  = (*m_range_it).factory_begin();
-          m_id_fac_end = (*m_range_it).factory_end();
+          m_id_fac_it  = ConstRangeIterator(*m_range_it).begin();
+          m_id_fac_end = ConstRangeIterator(*m_range_it).end();
         }
       }
       if (m_id_fac_it != m_id_fac_end) {
@@ -193,8 +193,8 @@ MultiRange::const_identifier_factory::const_identifier_factory (const MultiRange
      *  Set up iterators over ranges and ids.
      */
     if (m_range_it != m_range_end) {
-      m_id_fac_it  = (*m_range_it).factory_begin();
-      m_id_fac_end = (*m_range_it).factory_end();
+      m_id_fac_it  = ConstRangeIterator(*m_range_it).begin();
+      m_id_fac_end = ConstRangeIterator(*m_range_it).end();
       if(m_id_fac_it != m_id_fac_end) {
         // Set id
         m_id = *m_id_fac_it;
@@ -213,8 +213,8 @@ void MultiRange::const_identifier_factory::operator ++ () {
       if (m_id_fac_it == m_id_fac_end) {
         ++m_range_it;
         if (m_range_it != m_range_end) {
-          m_id_fac_it  = (*m_range_it).factory_begin();
-          m_id_fac_end = (*m_range_it).factory_end();
+          m_id_fac_it  = ConstRangeIterator(*m_range_it).begin();
+          m_id_fac_end = ConstRangeIterator(*m_range_it).end();
         }
       }
       if (m_id_fac_it != m_id_fac_end) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
@@ -8,6 +8,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -524,8 +525,9 @@ int  TTOnlineID::init_hashes(void)
 	  std::set<HWIdentifier> ids;
 	  for (unsigned int i = 0; i < m_full_crate_range.size(); ++i) {
 	    const Range& range = m_full_crate_range[i];
-	    Range::const_identifier_factory first = range.factory_begin();
-	    Range::const_identifier_factory last  = range.factory_end();
+	    ConstRangeIterator rit(range);
+	    auto first = rit.begin();
+	    auto last  = rit.end();
 	    for (; first != last; ++first) {
 	      const ExpandedIdentifier& exp_id = (*first);
 	      HWIdentifier cra_id = crateId( exp_id[m_crate_index] ) ;
@@ -587,8 +589,9 @@ int  TTOnlineID::init_hashes(void)
 	  std::set<HWIdentifier> ids;
 	  for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
 	    const Range& range = m_full_module_range[i];
-	    Range::const_identifier_factory first = range.factory_begin();
-	    Range::const_identifier_factory last  = range.factory_end();
+	    ConstRangeIterator rit(range);
+	    auto first = rit.begin();
+	    auto last  = rit.end();
 	    for (; first != last; ++first) {
 	      const ExpandedIdentifier& exp_id = (*first);
 	      HWIdentifier mod_id = moduleId(exp_id[m_crate_index], exp_id[m_module_index] ) ;
@@ -650,8 +653,9 @@ int  TTOnlineID::init_hashes(void)
 	  std::set<HWIdentifier> ids;
 	  for (unsigned int i = 0; i < m_full_submodule_range.size(); ++i) {
 	    const Range& range = m_full_submodule_range[i];
-	    Range::const_identifier_factory first = range.factory_begin();
-	    Range::const_identifier_factory last  = range.factory_end();
+	    ConstRangeIterator rit(range);
+	    auto first = rit.begin();
+	    auto last  = rit.end();
 	    for (; first != last; ++first) {
 	      const ExpandedIdentifier& exp_id = (*first);
 	      HWIdentifier submod_id = submoduleId(exp_id[m_crate_index], exp_id[m_module_index], exp_id[m_submodule_index] ) ;
@@ -714,8 +718,9 @@ int  TTOnlineID::init_hashes(void)
 	  std::set<HWIdentifier> ids;
 	  for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
 	    const Range& range = m_full_channel_range[i];
-	    Range::const_identifier_factory first = range.factory_begin();
-	    Range::const_identifier_factory last  = range.factory_end();
+	    ConstRangeIterator rit(range);
+	    auto first = rit.begin();
+	    auto last  = rit.end();
 	    for (; first != last; ++first) {
 	      const ExpandedIdentifier& exp_id = (*first);
 	      HWIdentifier chan_id = channelId(exp_id[m_crate_index], exp_id[m_module_index], exp_id[m_submodule_index], exp_id[m_channel_index]) ;

@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/test_indet_id.cxx,v 1.13 2008-12-09 09:55:22 dquarrie Exp $ 
-  
-//  #include "AGDD_Model/AGDD_Model.h"
-//  #include "AGDD_Parser/AGDD_Factory.h"
+
 
 #include "IdDictParser/IdDictParser.h"  
 #include "Identifier/Range.h" 
 #include "Identifier/Identifier.h" 
+#include "Identifier/RangeIterator.h" 
  
 #include <cstdlib>
 #include <iostream> 
@@ -20,24 +19,6 @@ static void tab (size_t level)
     for (size_t i = 0; i < level; ++i) std::cout << " "; 
 } 
  
-//  static ExpandedIdentifier
-//  pixel_id ( int barrel_ec,  
-//  	   int layer_disk, 
-//  	   int phi_module, 
-//  	   int eta_module,      
-//  	   int phi_index,
-//  	   int eta_index) 
-//  {
-//      // Build identifier
-//      ExpandedIdentifier result;
-//      result << 1 << barrel_ec << layer_disk << phi_module << eta_module;
-//      result << phi_index << eta_index;
-
-//      assert (result.last_error () == ExpandedIdentifier::none);
-
-//      return result;
-//}
-
 
 static bool
 pixel_values_ok ( int barrel_ec,  
@@ -297,8 +278,9 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region)
     for (unsigned int i = 0; i < full_wafer_range.size(); ++i) {
 	
 	Range range = full_wafer_range[i];
-	Range::identifier_factory first = range.factory_begin();
-	Range::identifier_factory last  = range.factory_end();
+	RangeIterator rit(range);
+	auto first = rit.begin();
+	auto last  = rit.end();
 	
 	int test_print = 0;
 	for (; first != last; ++first, ++nids) {
@@ -442,210 +424,6 @@ test_pixel (const IdDictMgr& idd, Identifier::size_type pixel_region)
     return(0);
 }
 
-// static void
-// set_indet_indexes(IdDictMgr& idd, 
-// 		  Identifier::size_type& pixel_region, 
-// 		  Identifier::size_type& sct_region, 
-// 		  Identifier::size_type& trt_region)
-// {
-    
-//     // Set overlap for pixel, sct and trt
-
-//     IdDictDictionary* dict = idd.find_dictionary ("InnerDetector"); 
-//     if(!dict) {
-// 	std::cout << " set_indet_indexes - cannot access InnerDetector dictionary "
-// 		  << std::endl;
-// 	return;
-//     }
-
-//     // Find value for the field indet
-//     int inDetField   = -1;
-//     if (dict->get_label_value("subdet", "InnerDetector", inDetField)) {
-// 	std::cout << "set_indet_indexes: Could not get value for label 'InnerDetector' of field 'subdet' in dictionary " 
-// 		  << dict->m_name
-// 		  << std::endl;
-// 	return;
-//     }
-
-//     // Find value for the field PIXEL
-//     int pixelField   = -1;
-//     if (dict->get_label_value("part", "Pixel", pixelField)) {
-// 	std::cout << "set_indet_indexes: Could not get value for label 'Pixel' of field 'part' in dictionary " 
-// 		  << dict->m_name
-// 		  << std::endl;
-// 	return;
-//     }
-//     // Find value for the field SCT
-//     int sctField   = -1;
-//     if (dict->get_label_value("part", "SCT", sctField)) {
-// 	std::cout << "set_indet_indexes: Could not get value for label 'SCT' of field 'part' in dictionary " 
-// 		  << dict->m_name
-// 		  << std::endl;
-// 	return;
-//     }
-//     // Find value for the field TRT
-//     int trtField   = -1;
-//     if (dict->get_label_value("part", "TRT", trtField)) {
-// 	std::cout << "set_indet_indexes: Could not get value for label 'TRT' of field 'part' in dictionary " 
-// 		  << dict->m_name
-// 		  << std::endl;
-// 	return;
-//     }
-//     std::cout << " set_indet_indexes:  " 
-// 	      << "Found field values: InDet - Pixel, SCT, TRT "  
-// 	      << inDetField << " "
-// 	      << pixelField << " "
-// 	      << sctField << " "
-// 	      << trtField << " "
-// 	      << std::endl;
-
-//     // Force uniform bit for pixel
-//     ExpandedIdentifier pixel_id;
-//     pixel_id.add(inDetField);
-//     pixel_id.add(pixelField);
-//     if(dict->find_region(pixel_id, pixel_region)){
-// 	std::cout << " set_indet_indexes:  " 
-// 		  << "unable to find region Pixel: id, reg "  << (std::string)pixel_id
-// 		  << pixel_region
-// 		  << std::endl;
-//     }
-    
-	
-//     // Force uniform bit for sct
-//     ExpandedIdentifier sct_id;
-//     sct_id.add(inDetField);
-//     sct_id.add(sctField);
-//     if (dict->find_region(sct_id, sct_region)) {
-// 	std::cout << " set_indet_indexes:  " 
-// 		  << "unable to find region SCT: id, reg "  << (std::string)sct_id
-// 		  << sct_region
-// 		  << std::endl;
-//     }
-	
-    
-    
-//     // Force uniform bit for trt
-//     ExpandedIdentifier trt_id;
-//     trt_id.add(inDetField);
-//     trt_id.add(trtField);
-//     if (dict->find_region(trt_id, trt_region)) {
-// 	std::cout << " set_indet_indexes:  " 
-// 		  << "unable to find region TRT: id, reg "  << (std::string)trt_id
-// 		  << trt_region
-// 		  << std::endl;
-//     }
-	
-    
-//     std::cout << " set_indet_indexes:  " 
-// 	      << "Region indices for  Pixel, SCT, TRT "  
-// 	      << pixel_region << " "
-// 	      << sct_region << " "
-// 	      << trt_region << " "
-// 	      << std::endl;
-
-// }
-
-//  static void
-//  set_lar_overlap(IdDictMgr& idd)
-//  {
-    
-//      // Set overlap for pixel, sct and trt
-
-//      IdDictDictionary* dict = idd.find_dictionary ("LArCalorimeter"); 
-//      if(!dict) {
-//  	std::cout << " set_lar_overlap - cannot access LArCalorimeter dictionary "
-//  		  << std::endl;
-//  	return;
-//      }
-
-//      // Find value for the field lar
-//      int larField   = -1;
-//      if (dict->get_label_value("subdet", "LArCalorimeter", larField)) {
-//  	std::cout << "set_lar_overlap: Could not get value for label 'LArCalorimeter' of field 'subdet' in dictionary " 
-//  		  << dict->m_name
-//  		  << std::endl;
-//  	return;
-//      }
-
-//      // Find value for the field LAREM
-//      int laremField   = -1;
-//      if (dict->get_label_value("part", "LArEM", laremField)) {
-//  	std::cout << "set_lar_overlap: Could not get value for label 'LArEM' of field 'part' in dictionary " 
-//  		  << dict->m_name
-//  		  << std::endl;
-//  	return;
-//      }
-//      // Find value for the field LARHEC
-//      int larhecField   = -1;
-//      if (dict->get_label_value("part", "LArHEC", larhecField)) {
-//  	std::cout << "set_lar_overlap: Could not get value for label 'LArHEC' of field 'part' in dictionary " 
-//  		  << dict->m_name
-//  		  << std::endl;
-//  	return;
-//      }
-//      // Find value for the field LARFCAL
-//      int larfcalField   = -1;
-//      if (dict->get_label_value("part", "LArFCAL", larfcalField)) {
-//  	std::cout << "set_lar_overlap: Could not get value for label 'LArFCAL' of field 'part' in dictionary " 
-//  		  << dict->m_name
-//  		  << std::endl;
-//  	return;
-//      }
-//      std::cout << " set_lar_overlap:  " 
-//  	      << "Found field values: Lar - LArEM, LArHEC, LArFCAL "  
-//  	      << larField << " "
-//  	      << laremField << " "
-//  	      << larhecField << " "
-//  	      << larfcalField << " "
-//  	      << std::endl;
-
-//      // Force uniform bit for larem
-//      ExpandedIdentifier larem_id;
-//      larem_id.add(larField);
-//      larem_id.add(laremField);
-//      size_t larem_region;
-//      if(dict->find_region(larem_id, larem_region)){
-//  	std::cout << " set_indet_indexes:  " 
-//  		  << "unable to find region LArEM: id, reg "  << (std::string)larem_id
-//  		  << larem_region
-//  		  << std::endl;
-//      }
-    
-//      // Force uniform bit for larhec
-//      ExpandedIdentifier larhec_id;
-//      larhec_id.add(larField);
-//      larhec_id.add(larhecField);
-//      size_t larhec_region;
-//      if(dict->find_region(larhec_id, larhec_region)){
-//  	std::cout << " set_indet_indexes:  " 
-//  		  << "unable to find region LArHEC: id, reg "  << (std::string)larhec_id
-//  		  << larhec_region
-//  		  << std::endl;
-//      }
-    
-//      // Force uniform bit for larfcal
-//      ExpandedIdentifier larfcal_id;
-//      larfcal_id.add(larField);
-//      larfcal_id.add(larfcalField);
-//      size_t larfcal_region;
-//      if(dict->find_region(larfcal_id, larfcal_region)){
-//  	std::cout << " set_indet_indexes:  " 
-//  		  << "unable to find region LArFCAL: id, reg "  << (std::string)larfcal_id
-//  		  << larfcal_region
-//  		  << std::endl;
-//      }
-    
-//      std::cout << " set_lar_overlap:  " 
-//  	      << "Region indices for  LArEM, LArHEC, LArFCAL "  
-//  	      << larem_region << " "
-//  	      << larhec_region << " "
-//  	      << larfcal_region << " "
-//  	      << std::endl;
-
-//      // Set integral over the number of bits
-//      dict->integrate_bits ();
-//  }
-
 static void
 print_bits (const IdDictMgr& idd)
 {
@@ -660,14 +438,6 @@ print_bits (const IdDictMgr& idd)
  
 	std::cout << "---- " << n << " ----------------------------" << std::endl; 
 	std::cout << "Dictionary " << dictionary.m_name << std::endl; 
-
-
-//  	if ("MuonSpectrometer" != dictionary.m_name) {
-//  	    std::cout << "skipping dictionary " << std::endl;
-//  	    continue;
-//  	}
-	
-
 
 	IdDictDictionary::regions_const_it rit; 
 	for (rit = dictionary.m_regions.begin (); rit != dictionary.m_regions.end (); ++rit) { 
@@ -707,10 +477,6 @@ print_bits (const IdDictMgr& idd)
  
 		tab (width - w); 
  
-//  		int index = impl.field();
-//  		std::string label = impl.range()->m_field->labels[index]->m_name;
-//  		std::cout << " name " << label << " ";
-
 		std::cout << " -> " << (std::string) impl.field() <<  
 		    "/" << (std::string) impl.ored_field() <<  
 		    " (" << impl.bits() << " bits)" <<  
@@ -752,55 +518,20 @@ print_ranges (const IdDictMgr& idd)
 int main (int argc, char* argv[])  
 {  
     if (argc < 2) return (1);  
-  
-//      AGDD_Factory& f = AGDD_Factory::Xerces_instance ();
-  
-//      std::cout << "AGDD_Parser created" << std::endl;
-  
-//      f.build_detector_description ("unittest.agdd");
-
-//      AGDD* agdd = f.get_detector_description ();
-
+ 
     IdDictParser parser;  
   
 // Use the following to specify a "non-standard" file for one or more
 // the the dictionary files
 
-//    parser.register_external_entity("LArCalorimeter", "IdDictLArCalorimeter_H8_2004.xml");
      std::cout << "Read IdDictInnerDetector_slhc.xml " << std::endl;
      parser.register_external_entity("InnerDetector", "IdDictInnerDetector_slhc.xml");
     IdDictMgr& idd = parser.parse (argv[1]);  
-//    IdDictMgr& idd = parser.parse (argv[1], "initial_layout");  
 
-//    std::cout << "regenerate for tag = initial_layout " << std::endl;
-//     idd.generate_implementation ("initial_layout");  
-
-    
-//     {
-// 	// Test multiple parsing
-
-// 	// Printout full multiranges - first parse
-// 	std::cout << "Ranges for first pass " << std::endl;
-// 	print_ranges (idd);
-
-// 	// Set LArCalo to test beam
-// 	parser.register_external_entity("LArCalorimeter", "IdDictLArCalorimeter.xml");
-// //	parser.register_external_entity("LArCalorimeter", "IdDictLArCalorimeter_H8_2004.xml");
-// 	IdDictMgr& idd1 = parser.parse (argv[1]);  
-
-// 	// Printout full multiranges - second parse
-// 	std::cout << "Ranges for second pass " << std::endl;
-// 	print_ranges (idd1);
-//     }
-    
 
     // Set the overlap for some dictionaries
     Identifier::size_type pixel_region = 0;
-//     Identifier::size_type sct_region;
-//     Identifier::size_type trt_region;
 
-//    set_indet_indexes(idd, pixel_region, sct_region, trt_region);
-    //set_lar_overlap(idd);
  
     // Printout full multiranges
     print_ranges (idd);
@@ -858,7 +589,6 @@ int main (int argc, char* argv[])
 		std::cout << "Unable to verify dictionary " << dictionary->m_name << std::endl; 
 	    }
 	    
-//  	    IdDictDictionary::bits32 b = dictionary->pack32 (id, 0, 6); 
 	    Identifier packedB((Identifier::value_type)0);
 	    dictionary->pack32 (id, 0, 6, packedB); 
  

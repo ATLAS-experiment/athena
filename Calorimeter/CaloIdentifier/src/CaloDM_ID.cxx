@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -8,6 +8,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -893,8 +894,9 @@ int   CaloDM_ID::init_lar_hashes(void)
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_lar_zone_range.size(); ++i) {
     const Range& range = m_full_lar_zone_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier zon_id = zone_id   ( exp_id[m_DETZSIDE_INDEX],
@@ -957,8 +959,9 @@ int   CaloDM_ID::init_lar_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_lar_region_range.size(); ++i) {
     const Range& range = m_full_lar_region_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       //     std::cout << "exp_id = " << (std::string)exp_id << std::endl;
@@ -1034,8 +1037,9 @@ int   CaloDM_ID::init_tile_hashes(void)
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_tile_zone_range.size(); ++i) {
     const Range& range = m_full_tile_zone_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier zon_id = zone_id   ( exp_id[m_DETZSIDE_INDEX],
@@ -1109,8 +1113,9 @@ int   CaloDM_ID::init_tile_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_tile_region_range.size(); ++i) {
     const Range& range = m_full_tile_region_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       //     std::cout << "exp_id = " << (std::string)exp_id << std::endl;

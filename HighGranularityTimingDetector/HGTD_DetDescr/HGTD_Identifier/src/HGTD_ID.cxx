@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
 
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "IdDict/IdDictDefs.h"  
 #include <set>
 #include <algorithm>
@@ -332,8 +333,9 @@ HGTD_ID::init_hashes(void)
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_wafer_range.size(); ++i) {
         const Range& range = m_full_wafer_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last  = range.factory_end();
+        ConstRangeIterator rit(range);
+        auto first = rit.begin();
+        auto last  = rit.end();
         for (; first != last; ++first) {
             const ExpandedIdentifier& exp_id = (*first);
             Identifier id = wafer_id (exp_id[m_ENDCAP_INDEX],
@@ -457,9 +459,9 @@ HGTD_ID::init_neighbors(void)
         const Range& range = m_full_wafer_range[i];
         const Range::field& phi_field = range[m_PHI_MODULE_INDEX];
         const Range::field& eta_field = range[m_ETA_MODULE_INDEX];
-
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last  = range.factory_end();
+        ConstRangeIterator rit(range);
+        auto first = rit.begin();
+        auto last  = rit.end();
         for (; first != last; ++first) {
             const ExpandedIdentifier& exp_id = (*first);
             ExpandedIdentifier::element_type previous_phi;

@@ -8,6 +8,7 @@
 
 #include "Identifier/ExpandedIdentifier.h"
 #include "Identifier/Range.h"
+#include "Identifier/RangeIterator.h"
 #include <vector>
 #include <iosfwd>
 #include <string>
@@ -40,8 +41,8 @@ public:
     using id_const_iterator = id_vec::const_iterator;
 
     ExpandedIdentifier		m_id;
-    Range::const_identifier_factory	m_id_fac_it; 
-    Range::const_identifier_factory	m_id_fac_end; 
+    ConstRangeIterator	m_id_fac_it; 
+    ConstRangeIterator	m_id_fac_end; 
     range_vector::const_iterator   	m_range_it; 
     range_vector::const_iterator   	m_range_end; 
     id_iterator			m_id_vec_it;
@@ -62,8 +63,8 @@ public:
     using id_const_iterator = id_vec::const_iterator;
 
     ExpandedIdentifier		m_id;
-    Range::const_identifier_factory	m_id_fac_it; 
-    Range::const_identifier_factory	m_id_fac_end; 
+    ConstRangeIterator	m_id_fac_it; 
+    ConstRangeIterator	m_id_fac_end; 
     range_vector::const_iterator   	m_range_it; 
     range_vector::const_iterator   	m_range_end; 
     id_iterator			m_id_vec_it;

@@ -145,30 +145,5 @@ BOOST_AUTO_TEST_CASE(RangeRepresentation){
   BOOST_TEST(os.str() == "4/1/-1,2/3/0/0:19/0:255 (1+1+1+1+1+5+8=18) ");
   BOOST_TEST(std::string(r1) == larExample);
 }
-
-
-//Range::identifier_factory is a publicly accessible class defined in the Range class
-BOOST_AUTO_TEST_CASE(RangeIdentifier_factoryConstructors){
-  BOOST_CHECK_NO_THROW(Range::identifier_factory());
-  Range::identifier_factory f1;
-  BOOST_CHECK_NO_THROW(Range::identifier_factory f2(f1));
-  BOOST_CHECK_NO_THROW(Range::identifier_factory f3(std::move(f1)));
-  Range r1;
-  BOOST_CHECK_NO_THROW(Range::identifier_factory f4(r1));
-}
-
-//const_identifier_factory
-//Range::const_identifier_factory is a publicly accessible class defined in the Range class
-BOOST_AUTO_TEST_CASE(RangeConst_identifier_factoryConstructors){
-  BOOST_CHECK_NO_THROW(Range::const_identifier_factory());
-  Range::const_identifier_factory f1;
-  BOOST_CHECK_NO_THROW(Range::const_identifier_factory f2(f1));
-  Range r1;
-  BOOST_CHECK_NO_THROW(Range::const_identifier_factory f3(r1));
-}
-
-
-
-
 BOOST_AUTO_TEST_SUITE_END()
 

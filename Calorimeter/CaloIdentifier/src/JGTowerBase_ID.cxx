@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/JGTowerBase_ID.h"
@@ -8,6 +8,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "IdDict/IdDictDefs.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
@@ -862,8 +863,9 @@ int   JGTowerBase_ID::init_hashes(void)
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_tower_range.size(); ++i) {
     const Range& range = m_full_tower_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier tow_id = tower_id   ( exp_id[m_DETZSIDE_INDEX],
@@ -924,8 +926,9 @@ int   JGTowerBase_ID::init_hashes(void)
   ids.clear();
   for (unsigned int i = 0; i < m_full_reg_range.size(); ++i) {
     const Range& range = m_full_reg_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       Identifier reg_id = region_id   ( exp_id[m_DETZSIDE_INDEX],
@@ -997,8 +1000,9 @@ int   JGTowerBase_ID::init_neighbors(void)
     const Range& range = m_full_tower_range[i];
     const Range::field& eta_field = range[m_ETA_INDEX];
     const Range::field& phi_field = range[m_PHI_INDEX];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last  = range.factory_end();
+    ConstRangeIterator rit(range);
+    auto first = rit.begin();
+    auto last  = rit.end();
     for (; first != last; ++first) {
       const ExpandedIdentifier& exp_id = (*first);
       ExpandedIdentifier::element_type previous_eta;

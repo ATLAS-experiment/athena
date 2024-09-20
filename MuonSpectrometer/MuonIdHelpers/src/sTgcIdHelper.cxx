@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/sTgcIdHelper.h"
+#include "Identifier/RangeIterator.h"
 
 /*******************************************************************************/
 // Constructor/Destructor
@@ -386,11 +387,10 @@ void sTgcIdHelper::idChannels(const Identifier& id, std::vector<Identifier>& vec
     Identifier parent = parentID(id);
     for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
         const Range& range = m_full_channel_range[i];
-        Range::const_identifier_factory first = range.factory_begin();
-        Range::const_identifier_factory last = range.factory_end();
-        for (; first != last; ++first) {
+        ConstRangeIterator rit(range);
+        for (const auto & expId:rit) {
             Identifier child;
-            get_id((*first), child);
+            get_id(expId, child);
             if (parentID(child) == parent) vect.push_back(child);
         }
     }

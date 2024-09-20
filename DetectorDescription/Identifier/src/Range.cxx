@@ -62,24 +62,24 @@ void Range::build (const ExpandedIdentifier& root) {
     // Construct from a root  
   m_fields.clear (); 
   for (size_type i = 0; i < root.fields (); ++i){ 
-    m_fields.push_back (field (root[i])); 
+    m_fields.emplace_back(root[i]); 
   } 
 } 
  
     // Modifications 
 //----------------------------------------------- 
 void Range::add () { 
-  m_fields.push_back (field ()); 
+  m_fields.emplace_back(); 
 } 
  
 //----------------------------------------------- 
 void Range::add (element_type value) { 
-  m_fields.push_back (field (value)); 
+  m_fields.emplace_back (value); 
 } 
  
 //----------------------------------------------- 
 void Range::add (element_type minimum, element_type maximum) { 
-  m_fields.push_back (field (minimum, maximum)); 
+  m_fields.emplace_back (minimum, maximum); 
 } 
  
 //----------------------------------------------- 
@@ -98,12 +98,12 @@ void Range::add_maximum (element_type maximum) {
  
 /// Add a range specified using a field  
 void Range::add (const field& f) {
-  m_fields.emplace_back (f); 
+  m_fields.emplace_back(f); 
 } 
  
 /// Add a range specified using a field, using move semantics.
 void Range::add (field&& f) {
-  m_fields.emplace_back (std::move(f));
+  m_fields.emplace_back(std::move(f));
 } 
  
 /// Append a subrange 
@@ -401,279 +401,6 @@ Range::operator == (const Range& other) const{
 
 
 
-
-//----------------------------------------------- 
-Range::identifier_factory Range::factory_begin () { 
-  const Range& me = *this; 
-  return (identifier_factory (me)); 
-} 
- 
-//----------------------------------------------- 
-Range::const_identifier_factory Range::factory_begin () const { 
-  const Range& me = *this; 
-  return (const_identifier_factory (me)); 
-} 
- 
-//----------------------------------------------- 
-Range::identifier_factory Range::factory_end () { 
-  static const Range r; 
-  static const identifier_factory factory (r); 
-  return (factory); 
-} 
- 
-//----------------------------------------------- 
-Range::const_identifier_factory Range::factory_end () const { 
-  static const const_identifier_factory factory; 
-  return (factory); 
-} 
- 
-
- 
-//----------------------------------------------- 
-Range::identifier_factory::identifier_factory (const Range& range) : m_range (&range) { 
-  /** 
-   *    Fill all running identifiers 
-   *    m_id : the current id 
-   *    m_min : the set of low bounds 
-   *    m_max : the set of high bounds 
-   */ 
-  for (Range::size_type i = 0; i < range.fields (); ++i) { 
-      element_type minimum; 
-      element_type maximum; 
-      m_indices.push_back (0); 
-      const field& f = range[i]; 
-      switch (f.get_mode ()) { 
-        case Range::field::unbounded: 
-          m_id << 0; 
-          m_min << 0; 
-          m_max << 0; 
-          break; 
-        case Range::field::low_bounded: 
-          minimum = f.get_minimum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << minimum; 
-          break; 
-        case Range::field::high_bounded: 
-          maximum = f.get_maximum (); 
-          m_id << maximum; 
-          m_min << maximum; 
-          m_max << maximum; 
-          break; 
-        case Range::field::both_bounded: 
-        case Range::field::enumerated: 
-          minimum = f.get_minimum (); 
-          maximum = f.get_maximum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << maximum; 
-          break; 
-        default:
-         throw std::runtime_error("Mode not recognised in Range::identifier_factory::identifier_factory.");
-         break;
-        } 
-    } 
-} 
-
- 
-//----------------------------------------------- 
-void Range::identifier_factory::operator ++ () { 
-  if (m_id.fields () == 0) return; 
-  size_type fields = m_id.fields (); 
-  size_type i = fields - 1; 
- 
-    // 
-    // Starting from the end, we try to increment the m_id fields 
-    // If at a given position it's not possible (max reached) 
-    // then we move back one pos and try again. 
-    // 
-    //  As soon as increment is possible, then the rest of the m_id 
-    // is reset to min values. 
-    // 
- 
-  for (;;) { 
-      const field& f = (*m_range)[i]; 
-      bool done = false; 
-      element_type value = 0; 
- 
-      if (f.get_mode () == Range::field::enumerated) { 
-          Range::size_type index = m_indices[i]; 
-          index++; 
-          if (index < f.get_indices ()) { 
-              m_indices[i] = index; 
-              value = f.get_value_at (index); 
-              done = true; 
-            } 
-        } else { 
-          value = m_id[i]; 
-          if (value < m_max[i]) { 
-              /** 
-               *   The local range is not exceeded. 
-               *   increase the value then reset the remaining fields. 
-               */ 
-              ++value; 
-              done = true; 
-          } 
-      } 
-      if (done) { 
-          m_id[i] = value; 
-          for (++i; i < fields; ++i) { 
-              m_indices[i] = 0; 
-              m_id[i] = m_min[i]; 
-          } 
-           
-          break; 
-        } 
- 
-      /** 
-       *  The current range field was exhausted 
-       *  check the previous one. 
-       */ 
- 
-      if (i == 0) { 
-          m_id.clear (); 
-          break; 
-      } 
-        
-      --i; 
-        
-    } 
-} 
- 
-//----------------------------------------------- 
-const ExpandedIdentifier& Range::identifier_factory::operator * () const { 
-  return (m_id); 
-} 
- 
-//----------------------------------------------- 
-bool Range::identifier_factory::operator == (const identifier_factory& other) const { 
-  if (m_id == other.m_id) return (true); 
-  return (false); 
-} 
-
-
- 
-//----------------------------------------------- 
-Range::const_identifier_factory::const_identifier_factory (const Range& range) :  
-  m_range (&range) { 
-  /** 
-   *    Fill all running identifiers 
-   *    m_id : the current id 
-   *    m_min : the set of low bounds 
-   *    m_max : the set of high bounds 
-   */ 
-  for (Range::size_type i = 0; i < range.fields (); ++i) { 
-      element_type minimum; 
-      element_type maximum; 
-      m_indices.push_back (0); 
-      const field& f = range[i]; 
-      switch (f.get_mode ()) { 
-        case Range::field::unbounded: 
-          m_id << 0; 
-          m_min << 0; 
-          m_max << 0; 
-          break; 
-        case Range::field::low_bounded: 
-          minimum = f.get_minimum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << minimum; 
-          break; 
-        case Range::field::high_bounded: 
-          maximum = f.get_maximum (); 
-          m_id << maximum; 
-          m_min << maximum; 
-          m_max << maximum; 
-          break; 
-        case Range::field::both_bounded: 
-        case Range::field::enumerated: 
-          minimum = f.get_minimum (); 
-          maximum = f.get_maximum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << maximum; 
-          break;
-        default:
-          throw std::runtime_error("Mode not recognised in Range::const_identifier_factory::const_identifier_factory");
-          break;
-        } 
-    } 
-} 
-
- 
-//----------------------------------------------- 
-void Range::const_identifier_factory::operator ++ () { 
-  if (m_id.fields () == 0) return; 
-  size_type fields = m_id.fields (); 
-  size_type i = fields - 1; 
- 
-    // 
-    // Starting from the end, we try to increment the m_id fields 
-    // If at a given position it's not possible (max reached) 
-    // then we move back one pos and try again. 
-    // 
-    //  As soon as increment is possible, then the rest of the m_id 
-    // is reset to min values. 
-    // 
- 
-  for (;;){ 
-      const field& f = (*m_range)[i]; 
-      bool done = false; 
-      element_type value = 0; 
- 
-      if (f.get_mode () == Range::field::enumerated) { 
-          Range::size_type index = m_indices[i]; 
-          index++; 
-          if (index < f.get_indices ()) { 
-              m_indices[i] = index; 
-              value = f.get_value_at (index); 
-              done = true; 
-          } 
-        }else { 
-          value = m_id[i]; 
-          if (value < m_max[i]){ 
-              /** 
-               *   The local range is not exceeded. 
-               *   increase the value then reset the remaining fields. 
-               */ 
-              ++value; 
-              done = true; 
-            } 
-        } 
- 
-      if (done) { 
-          m_id[i] = value; 
-          for (++i; i < fields; ++i) { 
-              m_indices[i] = 0; 
-              m_id[i] = m_min[i]; 
-          } 
-          break; 
-        } 
- 
-      /** 
-       *  The current range field was exhausted 
-       *  check the previous one. 
-       */ 
- 
-      if (i == 0) { 
-          m_id.clear (); 
-          break; 
-      } 
-      --i; 
-        
-    } 
-} 
- 
-//----------------------------------------------- 
-const ExpandedIdentifier& Range::const_identifier_factory::operator * () const { 
-  return (m_id); 
-} 
- 
-//----------------------------------------------- 
-bool Range::const_identifier_factory::operator == (const const_identifier_factory& other) const { 
-  if (m_id == other.m_id) return (true); 
-  return (false); 
-} 
 
 
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -12,6 +12,7 @@
 
 #include "InDetIdentifier/PixelID.h"
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/RangeIterator.h"
 #include "IdDict/IdDictDefs.h"
 #include <set>
 #include <algorithm>
@@ -404,10 +405,8 @@ PixelID::init_hashes(void) {
   std::set<Identifier> ids;
   for (unsigned int i = 0; i < m_full_wafer_range.size(); ++i) {
     const Range& range = m_full_wafer_range[i];
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id:rit) {
       Identifier id = wafer_id(exp_id[m_BARREL_EC_INDEX],
                                exp_id[m_LAYER_DISK_INDEX],
                                exp_id[m_PHI_MODULE_INDEX],
@@ -533,12 +532,8 @@ PixelID::init_neighbors(void) {
     // save the lowest value of the module offset
     m_ETA_MODULE_OFFSET = (eta_field.get_minimum() < m_ETA_MODULE_OFFSET) ?
                           eta_field.get_minimum() : m_ETA_MODULE_OFFSET;
-    // std::cout << "m_ETA_MODULE_OFFSET " << m_ETA_MODULE_OFFSET << std::endl;
-
-    Range::const_identifier_factory first = range.factory_begin();
-    Range::const_identifier_factory last = range.factory_end();
-    for (; first != last; ++first) {
-      const ExpandedIdentifier& exp_id = (*first);
+    ConstRangeIterator rit(range);
+    for (const auto & exp_id: rit) {
       ExpandedIdentifier::element_type previous_phi;
       ExpandedIdentifier::element_type next_phi;
       ExpandedIdentifier::element_type previous_eta;

@@ -3,7 +3,9 @@
 */
 
 // $Header: /DetectorDescription/IdDict/src/IdDictMgr.cxx,v 1.43 2008-12-09 09:49:43 dquarrie Exp $  
-  
+
+#include "IdDict/IdDictDefs.h"  
+#include "Identifier/RangeIterator.h"
 #include <fstream>  
 #include <iostream>  
  
@@ -11,7 +13,7 @@
 #include <cstdlib>
 #include <atomic>
   
-#include "IdDict/IdDictDefs.h"  
+
  
 class Debugger 
 { 
@@ -2174,12 +2176,12 @@ void IdDictGroup::sort ()
 
 	const IdDictRegion& region = *(*it);
 	Range range = region.build_range ();
-	Range::identifier_factory first = range.factory_begin();
-	Range::identifier_factory last  = range.factory_end();
+	RangeIterator itr(range);
+	auto first = itr.begin();
+	auto last = itr.end();
 	if (first != last) {
 	    regions[*first] = *it;
-	}
-	else {
+	} else {
 	    std::cout << "IdDictDictionary::sort - WARNING empty region cannot sort "
 		      << std::endl; 
 	}
