@@ -9,6 +9,7 @@
 
 #include "GaudiKernel/Bootstrap.h"
 
+#include "GaudiKernel/IIncidentSvc.h"
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IEventSeek.h"
@@ -113,6 +114,8 @@ namespace POOL {
          long m_size = -1; //cache of the event size, filled on first call to getEntries
 
          IEventProcessor* m_evtProcessor;
+
+         ServiceHandle<IIncidentSvc> m_incSvc;
          ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_joSvc;
 
          ServiceHandle<IEventSeek> m_evtLoop; //the AthenaEventLoopMgr

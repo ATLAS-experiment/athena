@@ -47,6 +47,7 @@ TEvent::TEvent(const std::string& name ) : TEvent( kPOOLAccess , name ) { }
 
 TEvent::TEvent(EReadMode mode, const std::string& name) : 
    m_evtProcessor (nullptr),
+   m_incSvc("IncidentSvc","TEvent"+name),
    m_joSvc("JobOptionsSvc","TEvent"+name),
    m_evtLoop("AthenaEventLoopMgr/"+name+"_EventLoopMgr","TEvent"+name),
    m_evtSelect("EventSelectorAthenaPool/"+name+"_EventSelector","TEvent"+name),
@@ -194,6 +195,7 @@ int TEvent::getEntry( long entry ) {
    }
    StatusCode out = m_evtProcessor->nextEvent(entry+1);
    m_curEntry = entry;
+   m_incSvc->fireIncident(Incident("BeginEvent",IncidentType::BeginEvent));
    return (out.isSuccess()) ? 0 : -1;
 }
 
