@@ -78,5 +78,16 @@ if (NOT XAOD_ANALYSIS )
       LOG_SELECT_PATTERN "UnitTest")
 endif()
 
+if (NOT XAOD_STANDALONE)
+  atlas_add_test( MacroTest
+    SCRIPT root -q ${CMAKE_CURRENT_SOURCE_DIR}/test/macroTest.cxx
+    PRIVATE_WORKING_DIRECTORY
+    POST_EXEC_SCRIPT noerror.sh )
+  atlas_add_test( ScriptTest
+    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/scriptTest.py
+    PRIVATE_WORKING_DIRECTORY
+    POST_EXEC_SCRIPT noerror.sh )
+endif()
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
