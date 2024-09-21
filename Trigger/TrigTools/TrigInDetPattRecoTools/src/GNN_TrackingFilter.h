@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_GNN_TRACKING_FILTER_H
@@ -61,7 +61,7 @@ typedef class TrigFTF_GNN_TrackingFilter {
   const std::vector<TrigInDetSiLayer>& m_geo;
   
   std::vector<TrigFTF_GNN_Edge>& m_segStore;
-
+ 
   std::vector<TrigFTF_GNN_EDGE_STATE*> m_stateVec;
 
   TrigFTF_GNN_EDGE_STATE m_stateStore[MAX_EDGE_STATE];

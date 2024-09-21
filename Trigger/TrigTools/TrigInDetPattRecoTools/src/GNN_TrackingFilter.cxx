@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include<iostream>
@@ -22,8 +22,8 @@ void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
 
   //n2->n1
 
-  float dx = pS->m_n1->m_sp.x() - pS->m_n2->m_sp.x();
-  float dy = pS->m_n1->m_sp.y() - pS->m_n2->m_sp.y();
+  float dx = pS->m_n1->x() - pS->m_n2->x();
+  float dy = pS->m_n1->y() - pS->m_n2->y();
   float L  = std::sqrt(dx*dx + dy*dy);
 
   m_s = dy/L;
@@ -33,19 +33,19 @@ void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
   // x' =  x*m_c + y*m_s
   // y' = -x*m_s + y*m_c
 
-  m_refY = pS->m_n2->m_sp.r();
-  m_refX = pS->m_n2->m_sp.x()*m_c + pS->m_n2->m_sp.y()*m_s;
+  m_refY = pS->m_n2->r();
+  m_refX = pS->m_n2->x()*m_c + pS->m_n2->y()*m_s;
 
   //X-state: y, dy/dx, d2y/dx2
 
-  m_X[0] = -pS->m_n2->m_sp.x()*m_s + pS->m_n2->m_sp.y()*m_c;
+  m_X[0] = -pS->m_n2->x()*m_s + pS->m_n2->y()*m_c;
   m_X[1] = 0.0;
   m_X[2] = 0.0;
 
   //Y-state: z, dz/dr
 
-  m_Y[0] = pS->m_n2->m_sp.z();
-  m_Y[1] = (pS->m_n1->m_sp.z() - pS->m_n2->m_sp.z())/(pS->m_n1->m_sp.r() - pS->m_n2->m_sp.r());
+  m_Y[0] = pS->m_n2->z();
+  m_Y[1] = (pS->m_n1->z() - pS->m_n2->z())/(pS->m_n1->r() - pS->m_n2->r());
 
   memset(&m_Cx[0][0], 0, sizeof(m_Cx));
   memset(&m_Cy[0][0], 0, sizeof(m_Cy));
@@ -77,9 +77,7 @@ void TrigFTF_GNN_EdgeState::clone(const TrigFTF_GNN_EDGE_STATE& st) {
   m_initialized = true;
 }
 
-TrigFTF_GNN_TrackingFilter::TrigFTF_GNN_TrackingFilter(const std::vector<TrigInDetSiLayer>& g, std::vector<TrigFTF_GNN_Edge>& sb) : m_geo(g), m_segStore(sb) {
-
-}
+TrigFTF_GNN_TrackingFilter::TrigFTF_GNN_TrackingFilter(const std::vector<TrigInDetSiLayer>& g, std::vector<TrigFTF_GNN_Edge>& sb) : m_geo(g), m_segStore(sb) { }
 
 void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& output) {
 
@@ -136,7 +134,7 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDG
   for(int nIdx=0;nIdx<pS->m_nNei;nIdx++) {//loop over the neighbours of this segment
     unsigned int nextSegmentIdx = pS->m_vNei[nIdx];
     
-    TrigFTF_GNN_Edge* pN = &(m_segStore.at(nextSegmentIdx));
+    TrigFTF_GNN_Edge* pN = &(m_segStore[nextSegmentIdx]);
     
     if(pN->m_level == -1) continue;//already collected
     
@@ -205,7 +203,7 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_S
   ts.m_Cx[2][2] += sigma_w*sigma_w;
   ts.m_Cx[1][1] += sigma_t*sigma_t;
 
-  int type1 = getLayerType(pS->m_n2->m_sp.layer());
+  int type1 = getLayerType(pS->m_n2->layer());
 
   float t2 = type1 == 0 ? 1.0 + ts.m_Y[1]*ts.m_Y[1] : 1.0 + 1.0/(ts.m_Y[1]*ts.m_Y[1]); 
   float s1 = sigmaMS*t2;
@@ -223,11 +221,11 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_S
   float refX, refY, mx, my;
 
   float x, y, z, r;
-
-  x = pS->m_n1->m_sp.x();
-  y = pS->m_n1->m_sp.y();
-  z = pS->m_n1->m_sp.z();
-  r = pS->m_n1->m_sp.r();
+  
+  x = pS->m_n1->x();
+  y = pS->m_n1->y();
+  z = pS->m_n1->z();
+  r = pS->m_n1->r();
 
   refX =  x*ts.m_c + y*ts.m_s;
   mx   = -x*ts.m_s + y*ts.m_c;//measured X[0]
@@ -269,7 +267,7 @@ bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_S
 
   float sigma_rz = 0.0;
 
-  int type = getLayerType(pS->m_n1->m_sp.layer());
+  int type = getLayerType(pS->m_n1->layer());
 
   if(type == 0) {//barrel TO-DO: split into barrel Pixel and barrel SCT
     sigma_rz = sigma_y*sigma_y;

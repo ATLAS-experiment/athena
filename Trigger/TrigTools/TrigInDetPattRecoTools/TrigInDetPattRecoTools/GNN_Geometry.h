@@ -56,6 +56,7 @@ public:
   const TrigFTF_GNN_Layer* getTrigFTF_GNN_LayerByIndex(int) const;
 
   int num_bins() const {return m_nEtaBins;}
+  unsigned int num_layers() const {return m_layArray.size();}
 
 protected:
 

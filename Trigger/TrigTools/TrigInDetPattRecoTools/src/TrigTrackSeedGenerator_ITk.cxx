@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -44,10 +44,14 @@ TrigTrackSeedGeneratorITk::~TrigTrackSeedGeneratorITk() {
 
 void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePointBase>& vSP) {
 
+  //create GNN nodes
+
+  bool useML = m_settings.m_useTrigSeedML > 0;
+  
   for(std::vector<TrigSiSpacePointBase>::const_iterator it = vSP.begin();it != vSP.end();++it) {
  
     bool isPixel = (*it).isPixel();
-
+    
     if (m_settings.m_LRTmode) {
       // Only Strip seeds in LRT mode
       if (isPixel) continue; 
@@ -55,9 +59,10 @@ void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePoi
       // Only Pixel Seeds 
       if(!isPixel) continue;
     }
-    m_storage->addSpacePoint((*it), (m_settings.m_useTrigSeedML > 0));
+    m_storage->addSpacePoint(&(*it), useML);
   }
   m_storage->sortByPhi();
+  m_storage->initializeNodes(useML);
   m_storage->generatePhiIndexing(1.5*m_phiSliceWidth);
 
 }
@@ -125,7 +130,7 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 
 	for(int b1=0;b1<nDstBins;b1++) {//loop over bins in Layer 1
 
-	  const TrigFTF_GNN_EtaBin& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
+	  TrigFTF_GNN_EtaBin& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
 
 	  if(B1.empty()) continue;
 
@@ -153,15 +158,15 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 	    
 	    unsigned int first_it = 0;
 
-	    for(std::vector<TrigFTF_GNN_Node*>::const_iterator n1It = B1.m_vn.begin();n1It!=B1.m_vn.end();++n1It) {//loop over nodes in Layer 1
+	    for(unsigned int n1Idx = 0;n1Idx<B1.m_vn.size();n1Idx++) {//loop over nodes in Layer 1
+                
+              if(B1.m_in[n1Idx].size() >= MAX_SEG_PER_NODE) continue;
+              
+              const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
 
-	      TrigFTF_GNN_Node* n1 = (*n1It);
-
-	      if(n1->m_in.size() >= MAX_SEG_PER_NODE) continue;
-	    
-	      float phi1 = n1->m_sp.phi();
-	      float r1 = n1->m_sp.r();
-	      float z1 = n1->m_sp.z();
+              float phi1 = n1pars[2];
+              float r1 = n1pars[3];
+              float z1 = n1pars[4];
 	      
 	      //sliding window phi1 +/- deltaPhi
 	      
@@ -177,19 +182,23 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		  continue;
 		}
 		if(phi2 > maxPhi) break;
-		
-		TrigFTF_GNN_Node* n2 = B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
-		
-		if(n2->m_in.size() >= MAX_SEG_PER_NODE) continue;
-		
-		float r2 = n2->m_sp.r();
+
+		unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
+ 
+                const std::vector<unsigned int>& v2In = B2.m_in[n2Idx];
+                const std::array<float, 5>& n2pars = B2.m_params[n2Idx];
+                
+                if(v2In.size() >= MAX_SEG_PER_NODE) continue;
+
+                float r2 = n2pars[3];
+
 		float dr = r2 - r1;
 	      
 		if(dr < m_minDeltaRadius) {
 		  continue;
 		}
 	      
-		float z2 = n2->m_sp.z();
+		float z2 = n2pars[4];
 
 		float dz = z2 - z1;
 		float tau = dz/dr;
@@ -198,10 +207,10 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		  continue;
 		}
 		
-		if(ftau < n1->m_minCutOnTau) continue;
-		if(ftau < n2->m_minCutOnTau) continue;
-		if(ftau > n1->m_maxCutOnTau) continue;
-		if(ftau > n2->m_maxCutOnTau) continue;
+		if(ftau < n1pars[0]) continue;
+                if(ftau < n2pars[0]) continue;
+                if(ftau > n1pars[1]) continue;
+                if(ftau > n2pars[1]) continue;
 		
 		if (m_settings.m_doubletFilterRZ) {
 		  
@@ -233,13 +242,14 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 
 		float exp_eta = std::sqrt(1+tau*tau)-tau;
 
-		bool isGood = n2->m_in.size() <= 2;//we must have enough incoming edges to decide
+		bool isGood = v2In.size() <= 2;//we must have enough incoming edges to decide
 
 		if(!isGood) {
 
 		  float uat_1 = 1.0f/exp_eta;
 		    
-		  for(const auto& n2_in_idx : n2->m_in) {
+		  for(const auto& n2_in_idx : v2In) {
+		    
 		    float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
 		    float tau_ratio = tau2*uat_1 - 1.0f;
 		    
@@ -257,9 +267,11 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
 		
 		if(nEdges < MaxEdges) {
 
-		  edgeStorage.emplace_back(n1, n2, exp_eta, curv, phi1 + dPhi1);
-		  
-		  n1->addIn(nEdges);
+		  edgeStorage.emplace_back(B1.m_vn[n1Idx], B2.m_vn[n2Idx], exp_eta, curv, phi1 + dPhi1);
+
+		  std::vector<unsigned int>& v1In = B1.m_in[n1Idx];
+                  
+                  if(v1In.size() < MAX_SEG_PER_NODE) v1In.push_back(nEdges);
 		  
                   int outEdgeIdx = nEdges;
 
@@ -267,9 +279,9 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
                   float Phi2  = phi2 + dPhi2;
                   float curv2 = curv;
 		  
-                  for(const auto& inEdgeIdx : n2->m_in) {//looking for neighbours of the new edge
+		  for(const auto& inEdgeIdx : v2In) {//looking for neighbours of the new edge
 
-                    TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
+		    TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 
                     if(pS->m_nNei >= N_SEG_CONNS) continue;
                     
@@ -421,9 +433,9 @@ void TrigTrackSeedGeneratorITk::runGNN_TrackFinder(const IRoiDescriptor* roiDesc
       (*sIt)->m_level = -1;//mark as collected
       
       if(sIt == rs.m_vs.rbegin()) {
-	vSP.push_back(&(*sIt)->m_n1->m_sp);
+	vSP.push_back((*sIt)->m_n1);
       }
-      vSP.push_back(&(*sIt)->m_n2->m_sp);
+      vSP.push_back((*sIt)->m_n2);
     }
 
     if(vSP.size()<3) continue;
