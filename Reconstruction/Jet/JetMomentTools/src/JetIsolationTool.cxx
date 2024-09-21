@@ -39,7 +39,7 @@ namespace jet {
       };
 
       /// names for isolation variables. Must match EXACTLY the enum.
-      static constexpr std::array<string, 6> s_kname = {"Pt","PtPUsub" , "SumPt", "Par", "Perp", "P"};
+      static constexpr std::array<std::string_view, 6> s_kname = {"Pt","PtPUsub" , "SumPt", "Par", "Perp", "P"};      
 
       /// Holds the 4-vector of all constituents contributing to isolation.
       struct IsolationResult {        
@@ -47,7 +47,6 @@ namespace jet {
         double isoSumPt = 0.0;
 	double isoArea = 0.;
       };
-      
       
       virtual ~IsolationCalculator() = default;
 
@@ -112,7 +111,7 @@ namespace jet {
 	std::vector<std::string> v;
 	v.reserve(m_kinematics.size());
 	for(auto k : m_kinematics) {
-    		v.emplace_back(baseName() + s_kname[k]);
+	  v.emplace_back(baseName() + string(s_kname[k]));
 	}
 	return v;	
       }
@@ -135,7 +134,6 @@ namespace jet {
       /// Value of the event density in case it is needed.
       float m_rho=-9999.; // initialized to obviously wrong value.
     };
-
     
 
     template<typename ISOCRITERIA>
