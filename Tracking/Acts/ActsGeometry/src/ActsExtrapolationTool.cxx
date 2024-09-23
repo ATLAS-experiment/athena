@@ -283,7 +283,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       // Action list and abort list
       using ActionList =
       Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using AbortConditions = Acts::AbortList<>;
       using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);
@@ -348,7 +348,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       // Action list and abort list
       using ActionList =
       Acts::ActionList<Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using AbortConditions = Acts::AbortList<>;
       using Options = typename Propagator::template Options<ActionList, AbortConditions>;
 
       Options options(anygctx, mctx);

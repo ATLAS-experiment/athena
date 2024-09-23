@@ -527,7 +527,7 @@ namespace ActsTrk
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActionList<Acts::MaterialInteractor>,
-                            Acts::AbortList<Acts::EndOfWorldReached>>
+                            Acts::AbortList<>>
     extrapolationOptions(tgContext, mfContext);
 
     Acts::TrackExtrapolationStrategy extrapolationStrategy =
@@ -648,6 +648,8 @@ namespace ActsTrk
            }
         }
 
+	Acts::calculateTrackQuantities(track);
+	
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
@@ -719,8 +721,6 @@ namespace ActsTrk
 
                 (*firstFirstState).previous() = (*std::next(secondTrack.trackStatesReversed().begin())).index();
                 secondTrack.tipIndex() = firstTrack.tipIndex();
-
-                Acts::calculateTrackQuantities(secondTrack);
 
                 addTrack(secondTrack);
 

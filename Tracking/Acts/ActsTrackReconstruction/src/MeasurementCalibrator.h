@@ -5,6 +5,7 @@
 #ifndef MEASUREMENTCALIBRATOR_H
 #define MEASUREMENTCALIBRATOR_H
 
+#include "Acts/EventData/Types.hpp"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
@@ -31,72 +32,34 @@ namespace ActsTrk {
 class MeasurementCalibratorBase
 {
 protected:
-   template <typename Derived>
-   static Acts::ProjectorBitset makeProjectorBitset(const Eigen::MatrixBase<Derived> &proj) {
-      constexpr int rows = Eigen::MatrixBase<Derived>::RowsAtCompileTime;
-      constexpr int cols = Eigen::MatrixBase<Derived>::ColsAtCompileTime;
-
-      Acts::TrackStateTraits<Acts::MultiTrajectoryTraits::MeasurementSizeMax>::Projector fullProjector =
-        decltype(fullProjector)::Zero();
-
-      fullProjector.template topLeftCorner<rows, cols>() = proj;
-
-      return Acts::matrixToBitset(fullProjector).to_ullong();
-   }
-
-   static Acts::ProjectorBitset makeStripProjector(bool annulus_strip) {
-      Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
-      proj.setZero();
-      if (annulus_strip) {
-         // transforms predicted[1] -> calibrated[0] in Acts::MeasurementSelector::calculateChi2()
-         proj(Acts::eBoundLoc0, Acts::eBoundLoc1) = 1;
-      } else {
-         proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
-      }
-      return makeProjectorBitset(proj);
-   }
-   // create strip projector bitsets for normal and annulus bounds
-   static std::array<Acts::ProjectorBitset,2> makeStripProjectorArray() {
-      return std::array<Acts::ProjectorBitset,2>{makeStripProjector(false), makeStripProjector(true) };
-   }
-
-   // create pixel projector bitsets
-   static Acts::ProjectorBitset makePixelProjector() {
-      Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
-      proj.setZero();
-      proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
-      proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
-      return makeProjectorBitset(proj);
-   }
-
-   // unfortunately cannot make static constexpr because of eigen
-   // could make static but usage easier if the projectors are members
-   std::array<Acts::ProjectorBitset,2> m_stripProjector; // strip projector for normal and annulus bounds
-   Acts::ProjectorBitset               m_pixelProjector;
+   constexpr static std::array<Acts::BoundSubspaceIndices, 2> s_stripSubspaceIndices = {
+     Acts::BoundSubspaceIndices{Acts::eBoundLoc0}, // normal strip: x -> l0
+     Acts::BoundSubspaceIndices{Acts::eBoundLoc1} // annulus strip: y -> l0
+   };
+   constexpr static Acts::BoundSubspaceIndices s_pixelSubspaceIndices = {
+    Acts::eBoundLoc0, Acts::eBoundLoc1
+   };
 
 public:
-   MeasurementCalibratorBase()
-      : m_stripProjector( makeStripProjectorArray()),
-        m_pixelProjector( makePixelProjector() )
-   {}
+   MeasurementCalibratorBase() = default;
 
    template <typename state_t>
-   inline void setProjectorBitSet(xAOD::UncalibMeasType measType,
-				  Acts::SurfaceBounds::BoundsType boundType,
-				  state_t &trackState ) const {
-       switch (measType) {
+   inline void setProjector(xAOD::UncalibMeasType measType,
+                            Acts::SurfaceBounds::BoundsType boundType,
+                            state_t &trackState ) const {
+     switch (measType) {
        case xAOD::UncalibMeasType::StripClusterType: {
-	   const std::size_t projector_idx  = boundType == Acts::SurfaceBounds::eAnnulus;
-	   trackState.setProjectorBitset(m_stripProjector[projector_idx]);
-	   break;
+         const std::size_t projector_idx  = boundType == Acts::SurfaceBounds::eAnnulus;
+         trackState.setBoundSubspaceIndices(s_stripSubspaceIndices[projector_idx]);
+         break;
        }
        case xAOD::UncalibMeasType::PixelClusterType: {
-	   trackState.setProjectorBitset(m_pixelProjector);
-	   break;
+         trackState.setBoundSubspaceIndices(s_pixelSubspaceIndices);
+         break;
        }
        default:
-	   throw std::domain_error("Can only handle measurement type pixel or strip");
-       }
+         throw std::domain_error("Can only handle measurement type pixel or strip");
+     }
    }
 
    template <size_t Dim, typename pos_t, typename cov_t, typename state_t>
@@ -106,7 +69,7 @@ public:
 			Acts::SurfaceBounds::BoundsType boundType,
 			state_t &trackState) const {
        trackState.allocateCalibrated(Dim);
-       setProjectorBitSet(measType, boundType, trackState);
+       setProjector(measType, boundType, trackState);
        trackState.template calibrated<Dim>() = locpos.template cast<Acts::ActsScalar>();
        trackState.template calibratedCovariance<Dim>() = cov.template cast<Acts::ActsScalar>();
    }

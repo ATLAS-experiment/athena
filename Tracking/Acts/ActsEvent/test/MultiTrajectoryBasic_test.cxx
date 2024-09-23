@@ -1,6 +1,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include "Acts/Definitions/TrackParametrization.hpp"
+#include "Acts/EventData/SubspaceHelpers.hpp"
+#include "Acts/EventData/Types.hpp"
 #undef NDEBUG
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
 #include <boost/test/data/test_case.hpp>
@@ -803,12 +806,12 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProjector, EmptyMTJ) {
   BOOST_CHECK_EQUAL(ts.effectiveCalibrated(), measPar);
   BOOST_CHECK_EQUAL(ts.effectiveCalibratedCovariance(), measCov);
 
-  // Set and test projector
-  Acts::ActsMatrix<eBoundSize, eBoundSize> proj;
-  proj.setIdentity();
-  ts.setProjector(proj);
+  // Set and test subspace
+  Acts::BoundSubspaceIndices subspace = {Acts::eBoundLoc0, Acts::eBoundLoc0, Acts::eBoundPhi, 
+                                         Acts::eBoundTheta, Acts::eBoundQOverP, Acts::eBoundTime};
+  ts.setBoundSubspaceIndices(subspace);
 
-  BOOST_CHECK_EQUAL(ts.effectiveProjector(), proj);
+  BOOST_CHECK(ts.boundSubspaceIndices() == subspace);
 }
 
 BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {

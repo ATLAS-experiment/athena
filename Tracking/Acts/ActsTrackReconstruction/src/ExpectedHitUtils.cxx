@@ -14,12 +14,11 @@ namespace ActsTrk {
    std::array<unsigned int,4> expectedLayerPattern(const EventContext& ctx,
                                                    const IActsExtrapolationTool &extrapolator,
                                                    Acts::BoundTrackParameters perigee_parameters,
-                                                   const Acts::CylinderSurface &extrapolation_volume) {
-
+                                                   double pathLimit) {
       ActsPropagationOutput result = extrapolator.propagationSteps(ctx,
                                                                    perigee_parameters,
-                                                                   extrapolation_volume,
-                                                                   Acts::Direction::Forward);
+                                                                   Acts::Direction::Forward,
+                                                                   pathLimit);
       std::array<unsigned int,4> expected_layer_pattern {0u,0u,0u,0u};
       for (const Acts::detail::Step &step : result.first ) {
          // @TODO boundary check ?, does layer number match layer numbering in athena ?
