@@ -334,6 +334,18 @@ class TriggerLeg:
         #only make a statement on the numerical values, with everything else identical
         reself  = self.detailpattern.findall(tag1)
         reother = self.detailpattern.findall(tag2)
+        extra_inverseCuts = ("b","c","bgtwo","gntau") # appear after "presel" string
+        for l in [reself,reother]:
+            if "presel" in l:
+                foundPresel = False
+                for i,s in enumerate(l):
+                    # only look after the presel string ... warning: this might invert things that follow presel block though (i.e. after next "_")
+                    if not foundPresel:
+                        if s=="presel": foundPresel=True
+                        continue
+                    for cut in extra_inverseCuts:
+                        if s==cut: l[i+1] = "-" + l[i+1] # adds a minus sign to the number that follows
+
 
         if len(reself) != len(reother): return -9
         thecomp = [mycomp(a,b) for a,b in zip(reself,reother)]

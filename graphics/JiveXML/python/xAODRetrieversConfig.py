@@ -52,11 +52,11 @@ def xAODRetrieversCfg(flags):
             ],
             BTaggerNames=[
                 "DL1dv01",
-                # "GN2v01" # GN2 not scheduled in default reconstruction yet
+                "GN2v01",
             ],
             CDIPaths=[
                 "xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root",
-                # "xAODBTaggingEfficiency/13p6TeV/2023-02_MC23_CDI_GN2v01-noSF.root", # GN2 not scheduled in default reconstruction yet
+                "xAODBTaggingEfficiency/13p6TeV/2023-02_MC23_CDI_GN2v01-noSF.root",
             ]
         )
     )
