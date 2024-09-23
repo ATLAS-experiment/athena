@@ -57,15 +57,19 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
     acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( name, **kwargs ) )
     return acc
 
-def OfflineQualitySelectionCfg(flags, name):
+def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
-    offlineTool = CompFactory.InDet.InDetTrackSelectionTool(CutLevel=flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP)
-    selTool = CompFactory.IDTPM.OfflineTrackQualitySelectionTool(name, offlineTool=offlineTool)
-    acc.setPrivateTools(selTool)
+
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+    offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags ) )
+    offlineSelectionTool.CutLevel = flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP
+
+    kwargs.setdefault( "offlineTool", offlineSelectionTool )
+    acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( name, **kwargs ) )
     return acc    
 
 
-def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs):
+def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
     
     from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg

@@ -16,7 +16,7 @@ def GetCustomAthArgs() :
     IDTPMparser.add_argument( "--unpackTrigChains", help="Run each configured trigger chain in a separate track analysis", action="store_true", default=False )
     IDTPMparser.add_argument( "--plotsDefFormat", help='Format of the plots definition file', default="JSON" )
     IDTPMparser.add_argument( "--plotsDefFileList", help='Plain txt file containing the list of .json file names with the plots definitions', default="InDetTrackPerfMon/PlotsDefFileList_default.txt" )
-    IDTPMparser.add_argument( "--plotsCommonValuesFile", help='JSON file listing all the default values to be used in plots', default="InDetTrackPerfMon/PlotsDefCommonValues.json" )
+    IDTPMparser.add_argument( "--plotsCommonValuesFile", help='JSON file listing all the default values to be used in plots', default="" )
     IDTPMparser.add_argument( "--sortPlotsByChain", help="Arrange plots first in subdirectories named after the current chain", action="store_true", default=False )
     return IDTPMparser.parse_args()
 

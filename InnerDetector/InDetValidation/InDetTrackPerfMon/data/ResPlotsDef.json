@@ -1,23 +1,23 @@
 {
 "resHelper_d0_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "3000", "low" : "-10.0", "high" : "+10.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "3000", "low" : "-$D0RESMAX", "high" : "+$D0RESMAX" }
 },
 "resHelper_z0_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "2000", "low" : "-20.0", "high" : "+20.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "2000", "low" : "-$Z0RESMAX", "high" : "+$Z0RESMAX" }
 },
 "resHelper_qoverp_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "2000", "low" : "-5.0", "high" : "+5.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "2000", "low" : "-$QOPRESMAX", "high" : "+$QOPRESMAX" }
 },
 "resHelper_ptqopt_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "(q/p_{T}) / ($TRKTYPE q/p_{T}) - 1", "nBins" : "2000", "low" : "-2.0", "high" : "+2.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "(q/p_{T}) / ($TRKTYPE q/p_{T}) - 1", "nBins" : "2000", "low" : "-$PTQOPTRESMAX", "high" : "+$PTQOPTRESMAX" }
 },
 "resolution_ptqopt_vs_$TRKTAG_eta" : {
     "yAxis" : { "title" : "Relative q/pT resolution" }
@@ -27,48 +27,48 @@
 },
 "resHelper_theta_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-0.1", "high" : "+0.1" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-$THETARESMAX", "high" : "+$THETARESMAX" }
 },
 "resHelper_phi_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-0.2", "high" : "+0.2" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-$PHIRESMAX", "high" : "+$PHIRESMAX" }
 },
 "resHelper_pt_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "p_{T} residual [GeV]", "nBins" : "1000", "low" : "-100.0", "high" : "+100.0" }
 },
 "resHelper_z0sin_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "1000", "low" : "-10.0", "high" : "+10.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "1000", "low" : "-$Z0SINRESMAX", "high" : "+$Z0SINRESMAX" }
 },
 "resHelper_eta_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "#eta residual", "nBins" : "1000", "low" : "-$ETAMAX", "high" : "$ETAMAX" }
 },
 "resHelper_d0_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "1000", "low" : "-10.0", "high" : "+10.0" }
+    "yAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "1000", "low" : "-$D0RESMAX", "high" : "+$D0RESMAX" }
 },
 "resHelper_z0_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "2000", "low" : "-20.0", "high" : "+20.0" }
+    "yAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "2000", "low" : "-$Z0RESMAX", "high" : "+$Z0RESMAX" }
 },
 "resHelper_qoverp_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "2000", "low" : "-5.0", "high" : "+5.0" }
+    "yAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "2000", "low" : "-$QOPRESMAX", "high" : "+$QOPRESMAX" }
 },
 "resHelper_ptqopt_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "(q/p_{T}) / ($TRKTYPE q/p_{T}) - 1", "nBins" : "2000", "low" : "-2.0", "high" : "+2.0" }
+    "yAxis" : { "title" : "(q/p_{T}) / ($TRKTYPE q/p_{T}) - 1", "nBins" : "2000", "low" : "-$PTQOPTRESMAX", "high" : "+$PTQOPTRESMAX" }
 },
 "resolution_ptqopt_vs_$TRKTAG_pt" : {
     "yAxis" : { "title" : "Relative q/pT resolution" }
@@ -79,12 +79,12 @@
 "resHelper_theta_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-0.1", "high" : "+0.1" }
+    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-$THETARESMAX", "high" : "+$THETARESMAX" }
 },
 "resHelper_phi_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-0.2", "high" : "+0.2" }
+    "yAxis" : { "title" : "#theta residual", "nBins" : "1000", "low" : "-$PHIRESMAX", "high" : "+$PHIRESMAX" }
 },
 "resHelper_pt_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
@@ -94,7 +94,7 @@
 "resHelper_z0sin_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
     "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "49", "low" : "0.745", "high" : "1000.0", "doLogLinBins" : "true" },
-    "yAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "1000", "low" : "-10.0", "high" : "+10.0" }
+    "yAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "1000", "low" : "-$Z0SINRESMAX", "high" : "+$Z0SINRESMAX" }
 },
 "resHelper_eta_vs_$TRKTAG_pt" : {
     "type" : "TH2F",
@@ -103,32 +103,32 @@
 },
 "res_d0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "100", "low" : "-10.0", "high" : "10.0" },
+    "xAxis" : { "title" : "d_{0} residual [mm]", "nBins" : "100", "low" : "-$D0RESMAX", "high" : "$D0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_z0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "100", "low" : "-20.0", "high" : "20.0" },
+    "xAxis" : { "title" : "z_{0} residual [mm]", "nBins" : "100", "low" : "-$Z0RESMAX", "high" : "$Z0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_qoverp" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "100", "low" : "-5.0", "high" : "5.0" },
+    "xAxis" : { "title" : "q/p residual [GeV^{-1}]", "nBins" : "100", "low" : "-$QOPRESMAX", "high" : "$QOPRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_ptqopt" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "q/pT residual", "nBins" : "100", "low" : "-2.0", "high" : "2.0" },
+    "xAxis" : { "title" : "q/pT residual", "nBins" : "100", "low" : "-$PTQOPTRESMAX", "high" : "$PTQOPTRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_theta" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#theta residual", "nBins" : "100", "low" : "-0.10", "high" : "0.10" },
+    "xAxis" : { "title" : "#theta residual", "nBins" : "100", "low" : "-$THETARESMAX", "high" : "$THETARESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_phi" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#phi residual", "nBins" : "100", "low" : "-0.20", "high" : "0.20" },
+    "xAxis" : { "title" : "#phi residual", "nBins" : "100", "low" : "-$PHIRESMAX", "high" : "$PHIRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_pt" : {
@@ -138,7 +138,7 @@
 },
 "res_z0sin" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "100", "low" : "-10.0", "high" : "10.0" },
+    "xAxis" : { "title" : "z_{0}sin#theta residual [mm]", "nBins" : "100", "low" : "-$Z0SINRESMAX", "high" : "$Z0SINRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "res_eta" : {
@@ -148,32 +148,32 @@
 },
 "sigma_$TRKTAG_d0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(d_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "10.0" },
+    "xAxis" : { "title" : "#sigma(d_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$D0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_z0" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(z_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "20.0" },
+    "xAxis" : { "title" : "#sigma(z_{0}) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0RESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_qoverp" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(q/p) [GeV^{-1}]", "nBins" : "100", "low" : "0.0", "high" : "5.0" },
+    "xAxis" : { "title" : "#sigma(q/p) [GeV^{-1}]", "nBins" : "100", "low" : "0.0", "high" : "$QOPRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_ptqopt" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(q/pT)", "nBins" : "100", "low" : "0.0", "high" : "2.0" },
+    "xAxis" : { "title" : "#sigma(q/pT)", "nBins" : "100", "low" : "0.0", "high" : "$PTQOPTRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_theta" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(#theta)", "nBins" : "100", "low" : "0.0", "high" : "0.10" },
+    "xAxis" : { "title" : "#sigma(#theta)", "nBins" : "100", "low" : "0.0", "high" : "$THETARESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_phi" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(#phi)", "nBins" : "100", "low" : "0.0", "high" : "0.20" },
+    "xAxis" : { "title" : "#sigma(#phi)", "nBins" : "100", "low" : "0.0", "high" : "$PHIRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_pt" : {
@@ -183,7 +183,7 @@
 },
 "sigma_$TRKTAG_z0sin" : {
     "type" : "TH1F",
-    "xAxis" : { "title" : "#sigma(z_{0}sin#theta) [mm]", "nBins" : "100", "low" : "0.0", "high" : "10.0" },
+    "xAxis" : { "title" : "#sigma(z_{0}sin#theta) [mm]", "nBins" : "100", "low" : "0.0", "high" : "$Z0SINRESMAX" },
     "yAxis" : { "title" : "Entries" }
 },
 "sigma_$TRKTAG_eta" : {
@@ -238,47 +238,47 @@
 },
 "pullHelper_d0_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "d_{0} pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_z0_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "z_{0} pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_qoverp_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "q/p pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_ptqopt_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "q/p_{T} pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_theta_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "#eta pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_phi_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
-    "yAxis" : { "title" : "#phi pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "yAxis" : { "title" : "#phi pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" } 
 },
 "pullHelper_pt_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "p_{T} pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_z0sin_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "z_{0}sin#theta pull", "nBins" : "100", "low" : "-10.0", "high" : "+10.0" }
 },
 "pullHelper_eta_vs_$TRKTAG_eta" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "64", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
+    "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "$NETABINS", "low" : "-$ETAMAX", "high" : "+$ETAMAX" },
     "yAxis" : { "title" : "#eta pull", "nBins" : "100", "low" : "-$ETAMAX", "high" : "$ETAMAX" }
 },
 "pullHelper_d0_vs_$TRKTAG_pt" : {
@@ -348,8 +348,8 @@
 },
 "corr_$TESTTAG_vs_$REFTAG_phi" : {
     "type" : "TH2F",
-    "xAxis" : { "title" : "$REFTYPE #phi", "nBins" : "100", "low" : "-3.14", "high" : "3.14" },
-    "yAxis" : { "title" : "$TESTTYPE #phi", "nBins" : "100", "low" : "-3.14", "high" : "3.14" }
+    "xAxis" : { "title" : "$REFTYPE #phi", "nBins" : "100", "low" : "-$PI", "high" : "$PI" },
+    "yAxis" : { "title" : "$TESTTYPE #phi", "nBins" : "100", "low" : "-$PI", "high" : "$PI" }
 },
 "corr_$TESTTAG_vs_$REFTAG_d0" : {
     "type" : "TH2F",
