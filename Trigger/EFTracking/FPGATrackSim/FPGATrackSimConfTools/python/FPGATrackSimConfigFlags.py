@@ -26,6 +26,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('clustering', True)
     cf.addFlag('bankDir', '')
     cf.addFlag('spacePoints', True)
+    cf.addFlag('outputMonitorFile',"monitoring.root")
 
     def __httHough1DFlags():
         """Additional function delays import"""
