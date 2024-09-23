@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -57,10 +57,10 @@ MultipleEventLoopMgr::nextPassFilter() {
 				   pHoldTool)).isSuccess() ) { 
       pFilter=dynamic_cast<INextPassFilter*>(pHoldTool);
     }
-    IAlgorithm* pHoldAlg(nullptr);
-    if (nullptr == pFilter &&
-	(algMgr()->getAlgorithm(theFilter.name(), pHoldAlg)).isSuccess() ) {
-      pFilter=dynamic_cast<INextPassFilter*>(pHoldAlg);
+
+    SmartIF<IAlgorithm>& pHoldAlg = algMgr()->algorithm(theFilter, /*createIf*/false);
+    if (nullptr == pFilter && pHoldAlg) {
+      pFilter=dynamic_cast<INextPassFilter*>(pHoldAlg.get());
     }
   }
   if (nullptr == pFilter) {
@@ -80,15 +80,11 @@ MultipleEventLoopMgr::doNextPass() {
 }
 StatusCode
 MultipleEventLoopMgr::reInitList() {
-  StatusCode sc(StatusCode::SUCCESS);
-  const vector<string>& theNames(m_toBeReInitializedNames.value());
-  vector<string>::const_iterator iN(theNames.begin());
-  vector<string>::const_iterator iEnd(theNames.end());
-  while ( sc.isSuccess() && (iN != iEnd) ) {
-    Gaudi::Utils::TypeNameString theSvc(*iN++); //not really needed but safer...
-    IService* pSvc(nullptr);
-    sc = serviceLocator()->getService(theSvc.name(), pSvc);
-    if (sc.isSuccess()) sc = pSvc->reinitialize();
+  StatusCode sc;
+  for (const std::string& name : m_toBeReInitializedNames.value()) {
+    SmartIF<IService>& svc = serviceLocator()->service(name, /*createIf*/false);
+    if (svc) sc = svc->reinitialize();
+    if (!sc.isSuccess()) return sc;
   }
   return sc;
 }

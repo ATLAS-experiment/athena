@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define  GAUDISVC_EVENTLOOPMGR_CPP
@@ -397,7 +397,7 @@ StatusCode AthenaEventLoopMgr::finalize()
   m_histoDataMgrSvc.release().ignore();
   m_histoPersSvc.release().ignore();
 
-  m_evtSelector   = releaseInterface(m_evtSelector);
+  if (m_evtSelector) m_evtSelector->release();
   m_incidentSvc.release().ignore();
 
   delete m_evtSelCtxt; m_evtSelCtxt = nullptr;
@@ -1002,12 +1002,12 @@ void AthenaEventLoopMgr::handle(const Incident& inc)
 // Execute certain algorithms/sequence in PreFork
 //=========================================================================
 StatusCode AthenaEventLoopMgr::execAtPreFork(const EventContext& ctx) const {
-  const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
-  IAlgorithm* alg{nullptr};
+  IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
 
   StatusCode sc;
   for (const std::string& name : m_execAtPreFork) {
-    if ( algMgr->getAlgorithm(name, alg) ) {
+    SmartIF<IAlgorithm>& alg = algMgr->algorithm(name, /*createIf*/false);
+    if ( alg ) {
       ATH_MSG_INFO("Executing " << alg->name() << "...");
       sc &= alg->sysExecute(ctx);
     }
