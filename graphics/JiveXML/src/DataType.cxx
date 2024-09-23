@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/DataType.h"
@@ -15,7 +15,7 @@ namespace JiveXML{
    /**
     * Return the string
     */
-   std::string DataType::toString() const {
+   const std::string& DataType::toString() const {
      return m_thing;
    }
   

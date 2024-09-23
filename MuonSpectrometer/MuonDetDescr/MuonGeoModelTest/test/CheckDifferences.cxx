@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -65,9 +65,9 @@ public:
     // static MaterialMap * getMaterialMap(std::string fileName, IOMaterialMap io=READ);
     ~MaterialMap();
     int readMapRecord();
-    Record getRecord() { return myrecord; }
+    const Record& getRecord() { return myrecord; }
     void setTech(const std::string& s) { tech = s; }
-    std::string fileName() { return m_filename; }
+    const std::string& fileName() { return m_filename; }
 
 private:
     std::string tech;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_DATATYPE_H
@@ -47,7 +47,7 @@ namespace JiveXML{
       DataType();
 
       /// Return the string
-      std::string toString() const ;
+      const std::string& toString() const ;
   };
   
   /// Allow this to be streamed in an ostream
