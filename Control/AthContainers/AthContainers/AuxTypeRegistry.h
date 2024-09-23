@@ -213,6 +213,37 @@ public:
 
 
   /**
+   * @brief Verify type for an aux variable.
+   * @param auxid The ID of the variable to check.
+   * @param flags Optional flags qualifying the type.  See above.
+   *
+   * If the type of @c auxid is not compatible with the supplied
+   * types @c T / @c ALLOC, then throw a @c SG::ExcAuxTypeMismatch exception.
+   * Also may throw @c SG::ExcAtomicMismatch.
+   */
+  template <class T, class ALLOC = AuxAllocator_t<T> >
+  void checkAuxID (const SG::auxid_t auxid,
+                   const Flags flags = Flags::None);
+
+
+  /**
+   * @brief Verify type for an aux variable.
+   * @param auxid The ID of the variable to check.
+   * @param ti Type of the aux data item.
+   * @param ti_alloc Type of the vector allocator.
+   * @param flags Optional flags qualifying the type.  See above.
+   *
+   * If the type of @c auxid is not compatible with the supplied
+   * types @c ti / @c ti_alloc, then throw a @c SG::ExcAuxTypeMismatch exception.
+   * Also may throw @c SG::ExcAtomicMismatch.
+   */
+  void checkAuxID (const SG::auxid_t auxid,
+                   const std::type_info& ti,
+                   const std::type_info& ti_alloc,
+                   const Flags flags);
+
+
+  /**
    * @brief Construct a new vector to hold an aux item.
    * @param auxid The desired aux data item.
    * @param size Initial size of the new vector.

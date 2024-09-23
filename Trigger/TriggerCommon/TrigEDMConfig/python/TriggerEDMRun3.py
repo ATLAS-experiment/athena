@@ -473,8 +473,8 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClusters',             'BS ESD AODFULL', 'Egamma'),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersAux.',  'BS ESD AODFULL', 'Egamma'),
     #
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLCFS',                               'BS ESD AODFULL', 'Jet', [Alias('CaloClusterContainerShallowCopy')]),
-    ('xAOD::ShallowAuxContainer#HLT_TopoCaloClustersLCFSAux.calE.calEta.calPhi',         'BS ESD AODFULL', 'Jet'),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLCFS',                               'BS ESD', 'Jet', [Alias('CaloClusterContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_TopoCaloClustersLCFSAux.calE.calEta.calPhi',         'BS ESD', 'Jet'),
 
     # Not sure we need these two...
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersRoI',          'BS ESD AODFULL', 'Egamma', [InViews('precisionCaloElectronViews'), InViews('precisionCaloPhotonViews')]),
