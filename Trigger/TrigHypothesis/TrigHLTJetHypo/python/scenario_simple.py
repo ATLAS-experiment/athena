@@ -66,15 +66,15 @@ def get_condition_args_from_chainpart(cp):
         if k == 'timing':
             key    = 'timing'
             values = v.split(key)
-            lo   = values[0]
-            vals = defaults(key, lo=lo)
+            lo, hi = v.split(key)
+            vals = defaults(key, lo=lo, hi=hi)
             condargs.append((key, vals))
 
         if k == 'timeSig':
             key    = 'timeSig'
             values = v.split(key)
-            lo   = values[0]
-            vals = defaults(key, lo=lo)
+            lo, hi = v.split(key)
+            vals = defaults(key, lo=lo, hi=hi)
             condargs.append((key, vals))
 
         if k =='clrsel':
