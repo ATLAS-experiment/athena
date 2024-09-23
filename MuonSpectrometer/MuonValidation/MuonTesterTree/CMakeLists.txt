@@ -17,6 +17,6 @@ if ( NOT XAOD_STANDALONE)
     atlas_add_library( MuonTesterTreeLib
                     MuonTesterTree/*.h Root/*.cxx
                     PUBLIC_HEADERS MuonTesterTree
-                    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEventInfo xAODMuon xAODTruth  AthenaKernel StoreGateLib AthenaBaseComps ${extra_libs})
+                    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEventInfo xAODMuon xAODTruth xAODTracking  AthenaKernel StoreGateLib AthenaBaseComps AtlasHepMCLib ${extra_libs})
 endif()
  
