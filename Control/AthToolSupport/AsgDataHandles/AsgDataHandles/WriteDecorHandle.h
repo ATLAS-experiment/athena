@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AsgDataHandles/WriteDecorHandle.h
@@ -168,10 +168,10 @@ public:
   bool isAvailable();
 
 
-//   /**
-//    * @brief Return the aux id for this variable.
-//    */
-//   SG::auxid_t auxid() const;
+   /**
+    * @brief Return the aux id for this variable.
+    */
+   SG::auxid_t auxid() const;
 
 
   // /**
