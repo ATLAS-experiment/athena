@@ -102,4 +102,37 @@ BOOST_AUTO_TEST_CASE(MultiRangeMatch){
   BOOST_TEST(m.match(k) == false);
 }
 
+BOOST_AUTO_TEST_CASE(MultiRangeIteratorConstructor){
+  using MultiRangeIterator = MultiRange::identifier_factory;
+  BOOST_CHECK_NO_THROW(MultiRangeIterator m1);
+  MultiRange m;
+  ExpandedIdentifier i("-3/-2/-1/1/2/2");
+  m.add(i);
+  BOOST_CHECK_NO_THROW(MultiRangeIterator m2(m));
+}
+
+BOOST_AUTO_TEST_CASE(MultiRangeIteratorBasic){
+  using MultiRangeIterator = MultiRange::identifier_factory;
+  MultiRange m;
+  ExpandedIdentifier i("-3/-2/-1/1/2/2");
+  m.add(i);
+  ExpandedIdentifier j("-3/-2/-1/1/2/3");
+  m.add(j);
+  BOOST_CHECK_NO_THROW(MultiRangeIterator m2(m));
+  auto b = m.begin();
+  //derefence
+  BOOST_TEST(*b == i);
+  BOOST_CHECK_NO_THROW(++b);
+  BOOST_TEST(*b == j);
+  b =  m.begin();
+  auto e = m.end();
+  std::array<ExpandedIdentifier, 2> expected = {i,j};
+  BOOST_CHECK_EQUAL_COLLECTIONS(b, e, expected.begin(), expected.end());
+  for (const auto & ex:m){
+    BOOST_TEST_MESSAGE(std::string(ex));
+  }
+}
+
+
+
 BOOST_AUTO_TEST_SUITE_END()
