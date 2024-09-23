@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_element_h
@@ -37,7 +37,7 @@ public:
   /**
    * Get element name
    */
-  std::string getName() { return m_name; };
+  const std::string& getName() { return m_name; };
 
   /**
    * Get atomic A of element
@@ -58,12 +58,12 @@ public:
   /**
    * Get vector of ln(energy) of energy levels (eV)
    */
-  std::vector<float> getLnELvls()  { return m_lnEnergyLvls; };
+  const std::vector<float>& getLnELvls()  { return m_lnEnergyLvls; };
 
   /**
    * Get vector of ln(cross sections) corresponding to energy levels (Mb)
    */
-  std::vector<float> getLnSigmas() { return m_lnCrossScts; };
+  const std::vector<float>& getLnSigmas() { return m_lnCrossScts; };
 
 private:
   std::string        m_name;
