@@ -484,17 +484,17 @@ double JSSWTopTaggerANN::getScore( const xAOD::Jet& jet ) const {
 
     /// Check that input variables are valid
     bool validVars = true;
-    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau21WTA(m_readTau21WTAKey);
-    if ( readTau21WTA(jet) < 0.0 ) validVars = false;
+    static const SG::AuxElement::ConstAccessor<float> Tau21WTA("Tau21_wta");
+    if ( Tau21WTA(jet) < 0.0 ) validVars = false;
     if ( m_tagClass == TAGCLASS::TopQuark ) {
-      SG::ReadDecorHandle<xAOD::JetContainer, float> readTau32WTA(m_readTau32WTAKey);
-      if ( readTau32WTA(jet) < 0.0 ) validVars = false;
+      static const SG::AuxElement::ConstAccessor<float> Tau32WTA("Tau32_wta");
+      if ( Tau32WTA(jet) < 0.0 ) validVars = false;
     }
 
     if ( !validVars ) {
 
-      if ( m_nWarnVar++ < m_nWarnMax ) ATH_MSG_WARNING( "One (or more) tagger input variable has an out-of-range value, setting score to -666" );
-      else ATH_MSG_WARNING( "One (or more) tagger input variable has an out-of-range value, setting score to -666" );
+      if ( m_nWarnVar++ < m_nWarnMax ) ATH_MSG_INFO( "One (or more) tagger input variable has an out-of-range value, setting score to -666" );
+      else ATH_MSG_DEBUG( "One (or more) tagger input variable has an out-of-range value, setting score to -666" );
 
       return ANNscore;
 
@@ -514,9 +514,6 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
   ATH_MSG_DEBUG( "Loading variables for common ANN tagger" );
 
   /// Create common read decor handles
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readTau21WTA(m_readTau21WTAKey);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readC2(m_readC2Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readD2(m_readD2Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit12(m_readSplit12Key);
 
   /// Mass and pT
@@ -528,11 +525,14 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
   ANN_inputValues["Split12"] = readSplit12(jet);
 
   /// Energy Correlation Functions
-  ANN_inputValues["C2"] = readC2(jet);
-  ANN_inputValues["D2"] = readD2(jet);
+  static const SG::AuxElement::ConstAccessor<float> C2("C2");
+  static const SG::AuxElement::ConstAccessor<float> D2("D2");
+  ANN_inputValues["C2"] = C2(jet);
+  ANN_inputValues["D2"] = D2(jet);
 
   /// Tau21 WTA
-  ANN_inputValues["Tau21_wta"] = readTau21WTA(jet);
+  static const SG::AuxElement::ConstAccessor<float> Tau21WTA("Tau21_wta");
+  ANN_inputValues["Tau21_wta"] = Tau21WTA(jet);
 
   if ( m_tagClass == TAGCLASS::WBoson ) {
 
@@ -570,23 +570,23 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     SG::ReadDecorHandle<xAOD::JetContainer, float> readTau1WTA(m_readTau1WTAKey);
     SG::ReadDecorHandle<xAOD::JetContainer, float> readTau2WTA(m_readTau2WTAKey);
     SG::ReadDecorHandle<xAOD::JetContainer, float> readTau3WTA(m_readTau3WTAKey);
-    SG::ReadDecorHandle<xAOD::JetContainer, float> readTau32WTA(m_readTau32WTAKey);
     SG::ReadDecorHandle<xAOD::JetContainer, float> readSplit23(m_readSplit23Key);
     SG::ReadDecorHandle<xAOD::JetContainer, float> readQw(m_readQwKey);
-    SG::ReadDecorHandle<xAOD::JetContainer, float> readE3(m_readE3Key);
 
     /// Additional splitting Scales
     ANN_inputValues["Split23"] = readSplit23(jet);
 
     /// e3 := normalized ECF3/ECF1**3
-    ANN_inputValues["e3"] = readE3(jet);
+    static const SG::AuxElement::ConstAccessor<float> e3("e3");
+    ANN_inputValues["e3"] = e3(jet);
 
     /// N-subjettiness
     ANN_inputValues["Tau1_wta"] = readTau1WTA(jet);
     ANN_inputValues["Tau2_wta"] = readTau2WTA(jet);
     ANN_inputValues["Tau3_wta"] = readTau3WTA(jet);
 
-    ANN_inputValues["Tau32_wta"] = readTau32WTA(jet);
+    static const SG::AuxElement::ConstAccessor<float> Tau32WTA("Tau32_wta");
+    ANN_inputValues["Tau32_wta"] = Tau32WTA(jet);
 
     /// Qw observable for top tagging
     ANN_inputValues["Qw"] = readQw(jet);
