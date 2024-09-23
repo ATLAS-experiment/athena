@@ -113,22 +113,14 @@ StatusCode JSSTaggerBase::initialize() {
   m_readTau2WTAKey = m_containerName + "." + m_readTau2WTAKey.key();
   m_readTau3WTAKey = m_containerName + "." + m_readTau3WTAKey.key();
   m_readTau4WTAKey = m_containerName + "." + m_readTau4WTAKey.key();
-  m_readTau21WTAKey = m_containerName + "." + m_readTau21WTAKey.key();
-  m_readTau32WTAKey = m_containerName + "." + m_readTau32WTAKey.key();
-  m_readTau42WTAKey = m_containerName + "." + m_readTau42WTAKey.key();
   m_readECF1Key = m_containerName + "." + m_readECF1Key.key();
   m_readECF2Key = m_containerName + "." + m_readECF2Key.key();
   m_readECF3Key = m_containerName + "." + m_readECF3Key.key();
-  m_readC2Key = m_containerName + "." + m_readC2Key.key();
-  m_readD2Key = m_containerName + "." + m_readD2Key.key();
-  m_readE3Key = m_containerName + "." + m_readE3Key.key();
   m_readSplit12Key = m_containerName + "." + m_readSplit12Key.key();
   m_readSplit23Key = m_containerName + "." + m_readSplit23Key.key();
   m_readQwKey = m_containerName + "." + m_readQwKey.key();
   m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
   m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
-  m_readL2Key = m_containerName + "." + m_readL2Key.key();
-  m_readL3Key = m_containerName + "." + m_readL3Key.key();
   m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
   m_readECFG311Key = m_containerName + "." + m_readECFG311Key.key();
   m_readECFG212Key = m_containerName + "." + m_readECFG212Key.key();
@@ -146,22 +138,14 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readTau2WTAKey.initialize() );
   ATH_CHECK( m_readTau3WTAKey.initialize() );
   ATH_CHECK( m_readTau4WTAKey.initialize() );
-  ATH_CHECK( m_readTau21WTAKey.initialize() );
-  ATH_CHECK( m_readTau32WTAKey.initialize() );
-  ATH_CHECK( m_readTau42WTAKey.initialize() );
   ATH_CHECK( m_readECF1Key.initialize() );
   ATH_CHECK( m_readECF2Key.initialize() );
   ATH_CHECK( m_readECF3Key.initialize() );
-  ATH_CHECK( m_readC2Key.initialize() );
-  ATH_CHECK( m_readD2Key.initialize() );
-  ATH_CHECK( m_readE3Key.initialize() );
   ATH_CHECK( m_readSplit12Key.initialize() );
   ATH_CHECK( m_readSplit23Key.initialize() );
   ATH_CHECK( m_readQwKey.initialize() );
   ATH_CHECK( m_readThrustMajKey.initialize() );
   ATH_CHECK( m_readSphericityKey.initialize() );
-  ATH_CHECK( m_readL2Key.initialize() );
-  ATH_CHECK( m_readL3Key.initialize() );
   ATH_CHECK( m_readECFG331Key.initialize() );
   ATH_CHECK( m_readECFG311Key.initialize() );
   ATH_CHECK( m_readECFG212Key.initialize() );
@@ -432,9 +416,6 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
 
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readL2(m_readL2Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readL3(m_readL3Key);
-
 
   /// WTA N-subjettiness ratios
   float tau21_wta = -999.0;
@@ -491,7 +472,8 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   float L2 = -999.0;
   float L3 = -999.0;
 
-  if(!readL2.isAvailable()){
+  static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+  if(!accL2.isAvailable(jet)){
     if(readECFG331.isAvailable() && readECFG212.isAvailable()){
       if(readECFG212(jet) > 1e-8){
 	L2 = readECFG331(jet) / pow(readECFG212(jet), (3.0/2.0));
@@ -501,7 +483,8 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
     decL2(jet) = L2;
   }
 
-  if(!readL3.isAvailable()){
+  static const SG::AuxElement::ConstAccessor<float> accL3("L3");
+  if(!accL3.isAvailable(jet)){
     if(readECFG331.isAvailable() && readECFG311.isAvailable()){
       if(readECFG331(jet) > 1e-8){
 	L3 = readECFG311(jet) / pow(readECFG331(jet), (1.0/3.0));
@@ -543,9 +526,6 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG331(m_readECFG331Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG311(m_readECFG311Key);
   SG::ReadDecorHandle<xAOD::JetContainer, float> readECFG212(m_readECFG212Key);
-
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readL2(m_readL2Key);
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readL3(m_readL3Key);
 
   for(const xAOD::Jet* jet : jets){
 
@@ -601,7 +581,8 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     float L2 = -999.0;
     float L3 = -999.0;
 
-    if(!readL2.isAvailable()){
+    static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+    if(!accL2.isAvailable(*jet)){
       if(readECFG331.isAvailable() && readECFG212.isAvailable()){
 	if(readECFG212(*jet) > 1e-8){
 	  L2 = readECFG331(*jet) / pow(readECFG212(*jet), (3.0/2.0));
@@ -610,7 +591,8 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
       decL2(*jet) = L2;
     }
 
-    if(!readL3.isAvailable()){
+    static const SG::AuxElement::ConstAccessor<float> accL3("L3");
+    if(!accL3.isAvailable(*jet)){
       if(readECFG331.isAvailable() && readECFG311.isAvailable()){
 	if(readECFG331(*jet) > 1e-8){
 	  L3 = readECFG311(*jet) / pow(readECFG331(*jet), (1.0/3.0));

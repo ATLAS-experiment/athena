@@ -152,17 +152,9 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau3WTAKey{this, "Tau3WTAName", "Tau3_wta", "SG key for Tau3_wta"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau4WTAKey{this, "Tau4WTAName", "Tau4_wta", "SG key for Tau4_wta"};
 
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau21WTAKey{this, "Tau21WTAName", "Tau21_wta", "SG key for Tau21_wta"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau32WTAKey{this, "Tau32WTAName", "Tau32_wta", "SG key for Tau32_wta"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readTau42WTAKey{this, "Tau42WTAName", "Tau42_wta", "SG key for Tau42_wta"};
-
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF1Key{this, "ECF1Name", "ECF1", "SG key for ECF1"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF2Key{this, "ECF2Name", "ECF2", "SG key for ECF2"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECF3Key{this, "ECF3Name", "ECF3", "SG key for ECF3"};
-
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readC2Key{this, "C2Name", "C2", "SG key for C2"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readD2Key{this, "D2Name", "D2", "SG key for D2"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readE3Key{this, "e3Name", "e3", "SG key for e3"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit12Key{this, "Split12Name", "Split12", "SG key for Split12"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit23Key{this, "Split23Name", "Split23", "SG key for Split23"};
@@ -171,9 +163,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readThrustMajKey{this, "ThrustMajName", "ThrustMaj", "SG key for ThrustMaj"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSphericityKey{this, "SphericityName", "Sphericity", "SG key for Sphericity"};
-
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readL2Key{this, "L2Name", "L2", "SG key for L2"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readL3Key{this, "L3Name", "L3", "SG key for L3"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG331Key{this, "ECFG331Name", "ECFG_3_3_1", "SG key for ECFG_3_3_1"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG311Key{this, "ECFG311Name", "ECFG_3_1_1", "SG key for ECFG_3_1_1"};

@@ -192,17 +192,12 @@ StatusCode SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
   float jet_pt   = jet.pt()/1000.0;
   float jet_mass = jet.m()/1000.0;
 
-  /// Initialize d2 to 0.  This probably gets used when the jet has one constituent, so it will fail the mass cut anyways
-  float jet_d2 = 0;
-
   /// Calculate NSubjettiness and ECF ratios
   calculateJSSRatios(jet);
 
-  /// Create D2 read decor handle
-  SG::ReadDecorHandle<xAOD::JetContainer, float> readD2(m_readD2Key);
-
   /// Get D2 value
-  jet_d2 = readD2(jet);
+  static const SG::AuxElement::ConstAccessor<float> D2("D2");
+  float jet_d2 = D2(jet);
 
   /// Evaluate the values of the upper and lower mass bounds and the d2 cut
   float cut_mass_low  = m_funcMassCutLow ->Eval(jet_pt);
