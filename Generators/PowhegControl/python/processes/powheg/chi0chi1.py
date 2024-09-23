@@ -108,7 +108,7 @@ class chi0chi1(PowhegV2):
         self.add_keyword("minlo")
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
-        self.add_keyword("ncall1", 1000)
+        self.add_keyword("ncall1", 10000)
         self.add_keyword("ncall1osres")
         self.add_keyword("ncall1rm")
         self.add_keyword("ncall2", 10000)

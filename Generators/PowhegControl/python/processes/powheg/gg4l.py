@@ -129,7 +129,7 @@ class gg4l(PowhegRES):
         self.add_keyword("mllmin", 0.)          # default 0.1 GeV this is minimum invar mass for Z leptons
         self.add_keyword("MSbarscheme")
         self.add_keyword("mt_expansion", 1)
-        self.add_keyword("ncall1", 5000)
+        self.add_keyword("ncall1", 10000)
         self.add_keyword("ncall1btl")
         self.add_keyword("ncall1btlbrn", 50000)
         self.add_keyword("ncall1rm")
