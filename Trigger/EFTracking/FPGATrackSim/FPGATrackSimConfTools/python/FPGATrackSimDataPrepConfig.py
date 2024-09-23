@@ -284,10 +284,10 @@ if __name__ == "__main__":
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
 
     flags.lock()
+    flags.dump()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     acc=MainServicesCfg(flags)
-
-    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = [f"EXPERT DATAFILE='{flags.Trigger.FPGATrackSim.outputMonitorFile}', OPT='RECREATE'"]))
 
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

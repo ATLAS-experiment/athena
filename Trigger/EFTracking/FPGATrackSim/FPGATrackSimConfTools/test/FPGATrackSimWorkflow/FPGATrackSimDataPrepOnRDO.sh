@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-RDO="/data/jahreda/reco_new/batch//output_1067934_8/output.rdo.999990.8.root"
-RDO_EVT=10
+RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/reg0_singlemu.root"
+RDO_EVT=200
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
@@ -21,6 +21,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimDataPrepConfig \
     Trigger.FPGATrackSim.sampleType='singleMuons' \
     Trigger.FPGATrackSim.doEDMConversion=True  \
     Trigger.FPGATrackSim.writeToAOD=True \
+    Trigger.FPGATrackSim.outputMonitorFile="monitoringDataPrep.root" \
     Output.AODFileName="FPGATrackSimCITestAOD.root"
 
 ls -l
