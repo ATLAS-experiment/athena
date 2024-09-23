@@ -97,7 +97,7 @@ def fromRunArgs(runArgs):
             print("RAW file selected for testing:",myFile)
             if not myFile:
                 print("ERROR: provide a valid project=\"%s\" or runNumber=\"%s\" or stream=\"%s\"" % (runArgs.project, runArgs.runnr, runArgs.stream))
-            sys.exit(1)
+                sys.exit(1)
     
     from AthenaConfiguration.AllConfigFlags import initConfigFlags    
     flags=initConfigFlags()
