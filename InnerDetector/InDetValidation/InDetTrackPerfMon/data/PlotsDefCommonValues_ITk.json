@@ -1,6 +1,6 @@
 {
     "PI"        : [ "3.1415926",  "pi value" ],
-    "ETAMAX"    : [ "2.5",        "eta coverage of the tracker" ],
+    "ETAMAX"    : [ "4.0",        "eta coverage of the tracker" ],
     "NETABINS"  : [ "100",        "Number of bins for eta plots" ],
     "D0MAX"     : [ "20.0",       "d_{0} range" ],
     "Z0MAX"     : [ "250.0",      "z_{0} range" ],
@@ -8,10 +8,10 @@
     "QOPMAX"    : [ "5.0e-3",     "qOverp range" ],
     "RMAX"      : [ "300.0",      "R range" ],
     "ZMAX"      : [ "300.0",      "Z range" ],
-    "D0RESMAX"     : [ "10.0",    "d_{0} range for resolution plots" ],
-    "Z0RESMAX"     : [ "20.0",    "z_{0} range for resolution plots" ],
-    "PHIRESMAX"    : [ "0.2",     "phi range for resolution plots" ],
-    "Z0SINRESMAX"  : [ "10.0",    "z_{0}sin range for resolution plots" ],
+    "D0RESMAX"     : [ "2.0",     "d_{0} range for resolution plots" ],
+    "Z0RESMAX"     : [ "10.0",    "z_{0} range for resolution plots" ],
+    "PHIRESMAX"    : [ "0.01",    "phi range for resolution plots" ],
+    "Z0SINRESMAX"  : [ "1.0",     "z_{0}sin range for resolution plots" ],
     "PTQOPTRESMAX" : [ "2.0",     "pTqOverpT range for resolution plots" ],
     "QOPRESMAX"    : [ "5.0",     "qOverp range for resolution plots" ],
     "THETARESMAX"  : [ "0.1",     "theta range for resolution plots" ]

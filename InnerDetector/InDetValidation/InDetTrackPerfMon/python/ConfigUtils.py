@@ -167,12 +167,22 @@ def getPlotsDefList( flags ):
 
     # Replace standard common fields (e.g. &ETAMAX)
     # with corresponding values (read from default json)
-    commonValuesDict = {}
-    commonValuesPath = find_datafile( flags.PhysVal.IDTPM.plotsCommonValuesFile )
+    plotsCommonValuesFileName = flags.PhysVal.IDTPM.plotsCommonValuesFile
+    if not plotsCommonValuesFileName :
+        if flags.Detector.GeometryID :
+            plotsCommonValuesFileName = "InDetTrackPerfMon/PlotsDefCommonValues.json"
+        elif flags.Detector.GeometryITk :
+            plotsCommonValuesFileName = "InDetTrackPerfMon/PlotsDefCommonValues_ITk.json"
+        else :
+            log.error( "Could not get detector geometry for plotsCommonValuesFile" )
+            return None
+
+    commonValuesPath = find_datafile( plotsCommonValuesFileName )
     if commonValuesPath is None :
-        log.error( "plotsCommonValuesFile not found" )
+        log.error( "plotsCommonValuesFile not found: %s", plotsCommonValuesFileName )
         return None
 
+    commonValuesDict = {}
     with open( commonValuesPath, "r" ) as input_commonValues : 
         commonValuesDict.update( json.load( input_commonValues ) )
 

@@ -10,8 +10,8 @@ def __createIDTPMConfigFlags():
     icf.addFlag( "DirName", "InDetTrackPerfMonPlots/" )
     icf.addFlag( "trkAnaNames", ["Default"] )
     icf.addFlag( "plotsDefFormat", "JSON" )
-    icf.addFlag( "plotsDefFileList" , "InDetTrackPerfMon/HistoDefFileList_default.txt" )
-    icf.addFlag( "plotsCommonValuesFile", "InDetTrackPerfMon/IDTPMPlotCommonValues.json" )
+    icf.addFlag( "plotsDefFileList" , "InDetTrackPerfMon/PlotsDefFileList_default.txt" )
+    icf.addFlag( "plotsCommonValuesFile", "" )
     icf.addFlag( "sortPlotsByChain", False )
     
     icf.addFlag( "trkAnaCfgFile", '' )
