@@ -105,10 +105,6 @@ def JetEfficiencyMonitoringConfig(flags):
                           "gfex_LR_triggers" : gfex_LR_triggers,
                           "jfex_SR_triggers" : jfex_SR_triggers,
                           "jfex_LR_triggers" : jfex_LR_triggers }
-    trigger_title_modifiers = {"gfex_SR_triggers" : "leading offline jet", 
-                               "gfex_LR_triggers" : "leading LR offline jet",
-                               "jfex_SR_triggers" : "leading offline jet",
-                               "jfex_LR_triggers" : "leading LR offline jet" }
     trigger_groups = list(trigger_group_list.keys())
 
     xlabel_for_prop = { "SRpt" :'pT [MeV]',  "SReta" : '#eta',  "LRpt" :'pT [MeV]',  "LReta" : '#eta'}
@@ -163,7 +159,7 @@ def JetEfficiencyMonitoringConfig(flags):
                                 )
             for p in properties: 
                 for r in references: #iteratate through the refernce trigger options
-                    eff_plot_title =  trigger_title_modifiers[tgroup]+';'+xlabel_for_prop[p]+'; Efficiency '
+                    eff_plot_title =  t+';'+xlabel_for_prop[p]+'; Efficiency '
 
                     #Using the muon reference trigger selection, as our least biased trigger selection inside the web displkay. Others still exist in the HIST file for now
                     if r == "Muon" and p in ["SRpt", "LRpt"]:
