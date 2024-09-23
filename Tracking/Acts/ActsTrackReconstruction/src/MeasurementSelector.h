@@ -340,7 +340,7 @@ protected:
                             const T_BoundState& boundState,
                             std::size_t prevTip,
                             trajectory_t& trajectory,
-                            const Acts::ProjectorBitset &projector_bitset,
+                            const Acts::BoundSubspaceIndices& subspaceIndices,
                             boost::container::small_vector< typename TrackStateProxy::IndexType, s_maxBranchesPerSurface> &track_states,
                             const Acts::Logger& logger,
                             bool outlier_states) {
@@ -387,7 +387,8 @@ protected:
          trackState.pathLength() = pathLength;
 
          trackState.setReferenceSurface(boundParams.referenceSurface().getSharedPtr());
-         trackState.setProjectorBitset(projector_bitset);
+
+         trackState.setBoundSubspaceIndices(subspaceIndices);
 
          Acts::TrackStateType typeFlags = trackState.typeFlags();
          if (trackState.referenceSurface().surfaceMaterial() != nullptr) {
@@ -471,7 +472,7 @@ protected:
 
 
       // get prediction in the measurement domain
-      ParameterMapping::type<DIM> parameter_map = derived().template parameterMap<DIM>(geometryContext,
+      Acts::SubspaceIndices<DIM> parameter_map = derived().template parameterMap<DIM>(geometryContext,
                                                                                        calibrationContext,
                                                                                        surface);
       auto predicted
@@ -577,12 +578,15 @@ protected:
       // @TODO first create state then copy measurements, or crete state by state and set measurements ?
       //       the lastter has the "advantage" that the outlier flag can be set individually
       //       the former has the advantage that part of the state creation code is independent of the
-      //       the measuerement.
+      //       the measurement.
+      
+      Acts::BoundSubspaceIndices boundSubspaceIndices;
+      std::copy(parameter_map.begin(), parameter_map.end(), boundSubspaceIndices.begin());
       createStates( selected_measurements.size(),
                     boundState,
                     prevTip,
                     trajectory,
-                    ProjectorBitSetMaker::create(parameter_map),
+                    boundSubspaceIndices,
                     *result,
                     logger,
                     (!selected_measurements.empty()

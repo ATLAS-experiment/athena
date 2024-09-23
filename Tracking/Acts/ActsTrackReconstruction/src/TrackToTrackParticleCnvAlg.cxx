@@ -169,14 +169,6 @@ namespace ActsTrk
         return StatusCode::FAILURE;
      }
 
-     if (m_pixelExpectLayerCylinder.size() != 2) {
-        ATH_MSG_ERROR("Expected 2 values for PixelExpectLayerCylinder a cylinder radius and half length but got "
-                      << m_pixelExpectLayerCylinder.size() << ".");
-        return StatusCode::FAILURE;
-     }
-     m_innerExtrapolationVolume = Acts::Surface::makeShared<Acts::CylinderSurface>(Acts::Transform3::Identity(),
-                                                                                   m_pixelExpectLayerCylinder[0],
-                                                                                   m_pixelExpectLayerCylinder[1]);
      initParticleHypothesisMap();
 
      return StatusCode::SUCCESS;
@@ -360,7 +352,7 @@ namespace ActsTrk
 							   ? expectedLayerPattern(ctx,
 										  *m_extrapolationTool,
 										  perigeeParam,
-										  *m_innerExtrapolationVolume)
+										  m_pixelExpectLayerPathLimitInMM.value() * Acts::UnitConstants::mm)
 							   : std::array<unsigned int,4> {0u,0u, 0u,0u} );
 	
 	// @TODO consider end-caps  for inner most pixel hits ?

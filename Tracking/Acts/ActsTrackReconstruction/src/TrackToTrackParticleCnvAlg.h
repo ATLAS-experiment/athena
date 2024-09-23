@@ -89,11 +89,10 @@ namespace ActsTrk
     Gaudi::Property<bool>  m_expectIfPixelContributes
        {this, "expectIfPixelContribution",true, "Only expect pixel hits if there are pixel hits on track." };
 
-     Gaudi::Property<std::vector<float> >  m_pixelExpectLayerCylinder
-       {this, "PixelExpectLayerCylinder",{350,10000.},
-        "Radius and half length of extrapoltion target when searching for expected pixel layers." };
+     Gaudi::Property<double>  m_pixelExpectLayerPathLimitInMM
+       {this, "PixelExpectLayerPathLimitInMM",1000,
+        "PathLimit for extrapolating to get the expected pixel layer pattern in mm." };
 
-     std::shared_ptr<Acts::CylinderSurface> m_innerExtrapolationVolume;
      std::unique_ptr<Propagator> m_propagator;
 
      static std::vector<std::pair<Acts::PdgParticle, xAOD::ParticleHypothesis> > s_actsHypothesisToxAOD ATLAS_THREAD_SAFE;

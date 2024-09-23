@@ -5,6 +5,7 @@
 #ifndef MEASUREMENTCALIBRATOR2_H
 #define MEASUREMENTCALIBRATOR2_H
 
+#include "Acts/EventData/Types.hpp"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
@@ -30,25 +31,6 @@
 namespace ActsTrk {
    // helper to create map from nound track parameters to measurements
    struct MeasurementParameterMap {
-      template <std::size_t N>
-      using ParameterMap = std::array<unsigned char, N>;
-
-      static constexpr ParameterMap<1> makeStripProjector(bool annulus_strip) {
-         if (annulus_strip) {
-            return ParameterMap<1>{static_cast<unsigned char>(Acts::eBoundLoc1)};
-         } else {
-            return ParameterMap<1>{static_cast<unsigned char>(Acts::eBoundLoc0)};
-         }
-      }
-      // create strip projector bitsets for normal and annulus bounds
-      static constexpr std::array<ParameterMap<1>,2> makeStripProjectorArray() {
-         return std::array<ParameterMap<1>,2>{makeStripProjector(false), makeStripProjector(true) };
-      }
-
-      // create pixel projector bitsets
-      static constexpr ParameterMap<2> makePixelProjector() {
-         return ParameterMap<2>{static_cast<unsigned char>(Acts::eBoundLoc0), static_cast<unsigned char>(Acts::eBoundLoc1)};
-      }
 
       std::array<unsigned char, 128> m_volumeIdToMeasurementType{};
       xAOD::UncalibMeasType measurementTypeFromVolumeId(unsigned int volume_id) const {
@@ -62,10 +44,7 @@ namespace ActsTrk {
          unsigned char idx = volume_id/2;
          m_volumeIdToMeasurementType[idx] |= ((static_cast<unsigned int>(type) & 0xf) << shift);
       }
-      MeasurementParameterMap()
-         : m_stripProjector( makeStripProjectorArray()),
-           m_pixelProjector( makePixelProjector() )
-      {
+      MeasurementParameterMap() {
          // @TODO get mapping from converter tool ?
          std::vector<unsigned int> pixel_vol {16, 15, 9, 20, 19, 18, 10, 14, 13,  8};
          for (unsigned int vol_id : pixel_vol) {
@@ -78,27 +57,33 @@ namespace ActsTrk {
       }
 
       template <std::size_t DIM>
-      ParameterMap<DIM> parameterMap([[maybe_unused]] const Acts::GeometryContext&,
+      Acts::SubspaceIndices<DIM> parameterMap([[maybe_unused]] const Acts::GeometryContext&,
                                      [[maybe_unused]] const Acts::CalibrationContext&,
                                      const Acts::Surface &surface) const {
          // @TODO make interface measurement type aware ?
          if constexpr(DIM==2) {
             assert( measurementTypeFromVolumeId(surface.geometryId().volume()) == xAOD::UncalibMeasType::PixelClusterType );
-            return m_pixelProjector;
+            return s_pixelSubspaceIndices;
          }
          else if constexpr(DIM==1) {
             assert( measurementTypeFromVolumeId(surface.geometryId().volume()) == xAOD::UncalibMeasType::StripClusterType );
             auto boundType = surface.bounds().type();
             const std::size_t projector_idx  = boundType == Acts::SurfaceBounds::eAnnulus;
-            return m_stripProjector[projector_idx];
+            return s_stripSubspaceIndices[projector_idx];
          }
          else {
             throw std::runtime_error("Unsupported dimension");
          }
 
       }
-      std::array<ParameterMap<1>,2> m_stripProjector; // strip projector for normal and annulus bounds
-      ParameterMap<2>               m_pixelProjector;
+
+      constexpr static std::array<Acts::SubspaceIndices<1>, 2> s_stripSubspaceIndices = {
+        {{Acts::eBoundLoc0}, // normal strip: x -> l0
+        {Acts::eBoundLoc1}} // annulus strip: y -> l0
+      };
+      constexpr static Acts::SubspaceIndices<2> s_pixelSubspaceIndices = {
+        Acts::eBoundLoc0, Acts::eBoundLoc1
+      };
 
    };
 

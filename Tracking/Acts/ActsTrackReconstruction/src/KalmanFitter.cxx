@@ -5,6 +5,7 @@
 #include "KalmanFitter.h"
 
 // ATHENA
+#include "Acts/EventData/Types.hpp"
 #include "GaudiKernel/TypeNameString.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
@@ -131,26 +132,20 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
       } else if (dim == 1) {
         trackState.template calibrated<1>() = (*rot).localParameters().template head<1>(); 
         trackState.template calibratedCovariance<1>() = (*rot).localCovariance().template topLeftCorner<1, 1>(); 
-        // Create a projection matrix onto 1D measurement 
-        Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
-        proj.setZero();
+        Acts::BoundSubspaceIndices subspaceIndices;
         if ((*rot).associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) { 
-          proj(Acts::eBoundLoc0, Acts::eBoundLoc1) = 1; // transforms predicted[1] -> calibrated[0] in Acts::MeasurementSelector::calculateChi2()
+          subspaceIndices = {Acts::eBoundLoc1}; // y coordinate is l0
         } else {
-          proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+          subspaceIndices = {Acts::eBoundLoc0}; // x coordinate is l0
         }
-        trackState.setProjector(proj);
+        trackState.setBoundSubspaceIndices(subspaceIndices);
       }
       else if (dim == 2)
         {
           trackState.template calibrated<2>() = (*rot).localParameters().template head<2>();
           trackState.template calibratedCovariance<2>() = (*rot).localCovariance().template topLeftCorner<2, 2>();
-          // Create a 2D projection matrix
-          Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
-          proj.setZero();
-          proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
-          proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
-          trackState.setProjector(proj);
+          Acts::BoundSubspaceIndices subspaceIndices = {Acts::eBoundLoc0, Acts::eBoundLoc1};
+          trackState.setBoundSubspaceIndices(subspaceIndices);
         }
       else
       {
