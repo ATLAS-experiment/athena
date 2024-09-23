@@ -86,7 +86,7 @@ class ttH(PowhegV2):
         self.add_keyword("max_io_bufsize")
         self.add_keyword("manyseeds")
         self.add_keyword("minlo")
-        self.add_keyword("ncall1", 8000)
+        self.add_keyword("ncall1", 10000)
         self.add_keyword("ncall1rm")
         self.add_keyword("ncall2", 20000)
         self.add_keyword("ncall2rm")

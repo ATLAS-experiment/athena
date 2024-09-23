@@ -113,7 +113,7 @@ class Z_EW(PowhegV2):
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
         self.add_keyword("Mumass")
-        self.add_keyword("ncall1", 5000)
+        self.add_keyword("ncall1", 10000)
         self.add_keyword("ncall1rm")
         self.add_keyword("ncall2", 30000)
         self.add_keyword("ncall2rm")
