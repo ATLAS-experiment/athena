@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_EVENTSTREAM_H
@@ -40,7 +40,7 @@ namespace JiveXML {
       //Get the different values
       unsigned long EventNumber() const { return m_event; };
       unsigned int RunNumber() const { return m_run; };
-      std::string StreamName() const { return m_stream; };
+      const std::string& StreamName() const { return m_stream; };
       const char* StreamNameCStr() const { return m_stream.c_str(); };
 
       //Check wether two EventStreamIDs are refering to the same event
