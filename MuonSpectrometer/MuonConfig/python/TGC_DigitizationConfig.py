@@ -55,7 +55,6 @@ def TGC_DigitizationToolCfg(flags, name="TgcDigitizationTool", **kwargs):
     
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "TGC_SDO")
-        kwargs.setdefault("OutputObjectName", flags.Overlay.BkgPrefix +"TGC_DIGITS")
     else:
         kwargs.setdefault("OutputSDOName", "TGC_SDO")
         kwargs.setdefault("OutputObjectName", "TGC_DIGITS")

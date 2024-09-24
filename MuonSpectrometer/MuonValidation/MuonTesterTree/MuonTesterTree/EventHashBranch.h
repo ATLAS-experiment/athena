@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTERTREE_EVENTHASHBRANCH_H
 #define MUONTESTERTREE_EVENTHASHBRANCH_H
@@ -13,7 +13,7 @@ namespace MuonVal {
 class EventHashBranch: public IMuonTesterBranch {
     public:
         ~EventHashBranch() = default;
-        EventHashBranch(TTree* tree);
+        EventHashBranch(TTree* tree, const std::string& evtKey="EventInfo");
     
         bool fill(const EventContext& ctx) override final;
         bool init() override final;
@@ -27,8 +27,8 @@ class EventHashBranch: public IMuonTesterBranch {
         bool is_dumped(const EventContext& ctx) const;
 
     private:
-        SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{"EventInfo"};
         ArrayBranch<ULong64_t> m_cache;
+        SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{"EventInfo"};
         const EventContext* m_last_dump{nullptr};
 };
 }
