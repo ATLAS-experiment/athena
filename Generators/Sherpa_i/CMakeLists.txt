@@ -26,7 +26,9 @@ ExtAmp ExtraXSNLO ExtraXSSpecial ExtraXS2_2 ExtraXS1_2 ExtraXS1_3 ExtraXS
 METoolsExplicit METoolsCurrents METoolsVertices METoolsColors METoolsSpinCorrelations METoolsLoops METoolsMain ModelUFO ModelMain
 PDF
 BeamMain BeamSpectra
-ToolsPhys ToolsMath ToolsYaml ToolsOrg)
+ToolsPhys ToolsMath ToolsYaml ToolsOrg
+YFSCEEX YFSMain YFSNLO YFSTools
+)
 
 if (HEPMC3_USE)
 find_package( hepmc3 )
