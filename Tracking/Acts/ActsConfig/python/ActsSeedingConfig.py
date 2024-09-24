@@ -229,8 +229,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
             seedTool_strip = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
         else:
             seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
-                                                                          rMax=flags.Tracking.ActiveConfig.radMax,
-                                                                          gridRMax=flags.Tracking.ActiveConfig.radMax))
+                                                                          rMax=flags.Tracking.ActiveConfig.radMax))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
@@ -400,10 +399,17 @@ def ActsSeedingCfg(flags) -> ComponentAccumulator:
     kwargs = dict()
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
-    
-    if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
-        kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool', minPt=flags.Tracking.ActiveConfig.minPTSeed)))
 
+    # TO-DO: refactor this seeding tool configuration
+    if flags.Tracking.ActiveConfig.extension == "ActsHeavyIon" and processPixels:
+        kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
+                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool',
+                                                                                                   minPt=flags.Tracking.ActiveConfig.minPTSeed)))
+    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.Default:
+        kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
+                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool',
+                                                                                                   rMax=flags.Tracking.ActiveConfig.radMax)))
+        
     if processPixels:
         # Seeding algo
         kwargs.setdefault('PixelSeedingAlg.name', f'{flags.Tracking.ActiveConfig.extension}PixelSeedingAlg')
