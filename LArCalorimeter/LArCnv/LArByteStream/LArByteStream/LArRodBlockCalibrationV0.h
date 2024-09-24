@@ -105,7 +105,7 @@ inline void  LArRodBlockCalibrationV0<DSPHEADER>::setPulsed(const unsigned chann
 { 
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if (channelNumber>=128) {
-    std::cout << "ERROR WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
     std::abort();
   }
 #endif

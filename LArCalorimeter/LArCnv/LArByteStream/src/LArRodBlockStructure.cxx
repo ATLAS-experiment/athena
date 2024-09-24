@@ -56,99 +56,99 @@ LArRodBlockStructure::~LArRodBlockStructure()
 //Error reporting for not implemented methods
 void LArRodBlockStructure::setDAC(const uint16_t)
 {
- std::cout << "ERROR: Function setDAC not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setDAC not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setDelay(const uint16_t)
 {
- std::cout << "ERROR: Function setDelay not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setDelay not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setPulsed (const unsigned)
 {
- std::cout << "ERROR: Function setPulsed not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setPulsed not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setNTrigger (const uint16_t)
 {
- std::cout << "ERROR: Function setNTrigger not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setNTrigger not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void  LArRodBlockStructure::concatinateFEBs()
 {
- std::cout << "ERROR: Function concatinateFEBs not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function concatinateFEBs not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 
 int   LArRodBlockStructure::getNextRawData(int&, std::vector<short>&, uint32_t&)
 {
- std::cout << "ERROR: Function getNextRawData not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNextRawData not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 int   LArRodBlockStructure::getNextAccumulatedCalibDigit(int&, std::vector < uint64_t >&, std::vector < uint64_t >& , uint32_t&, uint32_t&)
 {
- std::cout << "ERROR: Function getNextAccumulatedCalibDigit not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNextAccumulatedCalibDigit not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 int   LArRodBlockStructure::getNextAccumulatedDigit(int&, std::vector<uint64_t>&, std::vector < uint64_t >& , uint32_t&)
 {
- std::cout << "ERROR: Function getNextAccumulatedDigit not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNextAccumulatedDigit not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 void LArRodBlockStructure::setNextEnergy(const int, const int32_t, const int32_t, const int32_t, const uint32_t)
 {
- std::cout << "ERROR: Function setNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 
 void LArRodBlockStructure::setRawData(const int , const std::vector<short>& , const uint32_t)
 {
- std::cout << "ERROR: Function setRawData not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setRawData not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 
 void LArRodBlockStructure::setEtQ(const int, const int32_t, const int32_t, const int32_t, const uint32_t)
 {
- std::cout << "ERROR: Function setEtQ not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setEtQ not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setRawDataFixed(const int , const std::vector<short>&, const uint32_t )
 {
- std::cout << "ERROR: Function setRawDataFixed not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setRawDataFixed not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setNumberOfSamples(const uint8_t)
 {
- std::cout << "ERROR: Function setNumberOfSamples not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setNumberOfSamples not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setNumberOfGains(const uint8_t )
 {
- std::cout << "ERROR: Function setNumberOfGains not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setNumberOfGains not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::setTDCPhase(const uint8_t)
 {
- std::cout << "ERROR: Function setTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function setTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 uint8_t LArRodBlockStructure::getTDCPhase() const
 {
- std::cout << "ERROR: Function getTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getTDCPhase not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
@@ -174,26 +174,26 @@ uint32_t LArRodBlockStructure::offlineCheckSum() const
 
 void LArRodBlockStructure::dumpFragment()
 {
- std::cout << "ERROR: Function dumpFragment() not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function dumpFragment() not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 
 void LArRodBlockStructure::initializeFEB(const uint32_t)
 {
- std::cout << "ERROR: Function initializeFEB not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function initializeFEB not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::initializeFragment(std::vector<uint32_t>& )
 {
- std::cout << "ERROR: Function initializeFragment not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function initializeFragment not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 
 void LArRodBlockStructure::finalizeFEB()
 {
- std::cout << "ERROR: Function finalizeFEB not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function finalizeFEB not implemented in this instance of LArRodBlockStructure!\n";
  return;
 }
 

@@ -12,6 +12,7 @@ from TrigMinBiasMonitoring.TrigAFPSidHypoMonitoring import TrigAFPSidHypoMonitor
 from TrigMinBiasMonitoring.TrigFwdAFPMonitoring import TrigFwdAFPAllMonitoringCfg
 from TrigMinBiasMonitoring.TrigFwdZDCMonitoring import TrigFwdZDCMonitoringAlg
 from TrigMinBiasMonitoring.TrigHIMonitoringMT import TrigHIMonCfg
+from TrigMinBiasMonitoring.TrigTRTMonitoring import TrigTRTMonCfg
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
@@ -28,6 +29,7 @@ def TrigMinBias(flags):
         if flags.DQ.DataType is DQDataType.HeavyIon:
             acc.merge(TrigFwdZDCMonitoringAlg(flags))
             acc.merge(TrigHIMonCfg(flags))
+            acc.merge(TrigTRTMonCfg(flags))
     return acc
 
 

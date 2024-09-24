@@ -162,6 +162,12 @@ namespace TrigCompositeUtils {
     }
   }
 
+  void NavGraph::reset() {
+    m_nodePositionMap.clear();
+    m_nodes.clear();
+    m_finalNodes.clear(); 
+    m_edges = 0;
+  }
 
   void NavGraph::printAllPaths(MsgStream& log, MSG::Level msgLevel) const {
     for (const NavGraphNode* finalNode : m_finalNodes) {

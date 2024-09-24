@@ -165,8 +165,14 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
     }
 
     if (!rodBlock->setFragment(pData,nData)) {
-      ATH_MSG_ERROR("Failed to assign fragment pointer to LArRodBlockStructure");
-      return StatusCode::FAILURE;
+      if (m_failOnCorruption) {
+	ATH_MSG_ERROR("Failed to assign fragment pointer to LArRodBlockStructure");
+	return StatusCode::FAILURE;
+      }
+      else {
+	ATH_MSG_WARNING("Failed to assign fragment pointer to LArRodBlockStructure");
+	continue; // Jump to next ROD
+      }
     }
 
     if(m_verifyChecksum) {

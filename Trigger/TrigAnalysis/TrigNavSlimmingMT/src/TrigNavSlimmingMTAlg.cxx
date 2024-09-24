@@ -169,6 +169,7 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
     chainIDs, 
     /*enforce chainIDs on terminus node*/ true);
 
+  const size_t passing_nodes = transientNavGraph.nodes();
   ATH_MSG_DEBUG("Collated nodes from passing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << " edges");
 
   // Stage 2. We can optionally include branches through the graph which were never accepted by any chain.
@@ -192,6 +193,25 @@ StatusCode TrigNavSlimmingMTAlg::execute(const EventContext& ctx) const {
         /*enforce chainIDs on terminus node*/ false);
     }
     ATH_MSG_DEBUG("Collated nodes from failing paths, now have " << transientNavGraph.nodes() << " nodes with " << transientNavGraph.edges() << " edges");
+  }
+  const size_t passing_and_failing_nodes = transientNavGraph.nodes();
+
+  // Stage 2.5. While the persistent node-edge index type is uint16_t, we must limit the maximum allowed size of the graph
+  // This isn't put after recursiveFlagForThinning(...) as it will first impact online slimming, which has minimal to no thinning.
+  if (passing_and_failing_nodes > std::numeric_limits<uint16_t>::max()) {
+    ATH_MSG_WARNING("Too many graph nodes! Passing:" << passing_nodes << ", Passing-and-Failing:" << passing_and_failing_nodes << ". Limit: " << std::numeric_limits<uint16_t>::max());
+    if (passing_nodes <= std::numeric_limits<uint16_t>::max()) { // Can we fit just the passing nodes? Still OK for physics use
+      ATH_MSG_WARNING("Too many graph nodes! Just saving the passing nodes.");
+      transientNavGraph.reset();
+      fullyExploredFrom.clear();
+      TrigCompositeUtils::recursiveGetDecisionsInternal(terminusNode, nullptr, transientNavGraph, fullyExploredFrom, chainIDs, true); // Re-do only stage 1
+    } else { // Does not fit at all! Have to just save a dummy graph with only the terminus node. Note that we exit early here.
+      ATH_MSG_WARNING("Too many graph nodes! Recording a dummy HLT navigation for this event with only the terminus node.");
+      Decision* terminusNodeOut = nullptr;
+      IOCacheMap cache;
+      ATH_CHECK(inputToOutput(terminusNode, &terminusNodeOut, cache, outputContainers, chainIDs, ctx));
+      return StatusCode::SUCCESS;
+    }
   }
 
   // Stage 3. Walk all paths through the graph. Flag for thinning.

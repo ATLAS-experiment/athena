@@ -148,7 +148,7 @@ AdaptiveMultiVertexFitter::fit(std::vector<xAOD::Vertex*>& allVertices) const
           const bool success = m_ImpactPoint3dEstimator->addIP3dAtaPlane(
             *pThisTrack, *MvfFitInfo(*pThisVertex)->linearizationVertex());
           if (!success) {
-            ATH_MSG_WARNING(
+            ATH_MSG_DEBUG(
               "Adding compatibility to vertex information failed. Newton "
               "distance finder didn't converge...");
           }
@@ -385,7 +385,7 @@ AdaptiveMultiVertexFitter::prepareCompatibility(xAOD::Vertex* newvertex) const
   const bool success = std::all_of(
     vertexTracksAtVertex.begin(), vertexTracksAtVertex.end(), addImpactPoint);
   if (not success) {
-    ATH_MSG_WARNING("Adding compatibility to vertex information failed. Newton "
+    ATH_MSG_DEBUG("Adding compatibility to vertex information failed. Newton "
                     "distance finder didn't converge...");
   }
 }

@@ -334,7 +334,7 @@ namespace Trk
    if (const Trk::AtaPlane* res = dynamic_cast<const Trk::AtaPlane *>(pTrackPar); res){
      return res;
    }
-   ATH_MSG_WARNING("TrackParameters ptr returned from extrapolate could not be cast to Trk::AtaPlane* in IP3dAtaPlane(..)");
+   ATH_MSG_DEBUG("TrackParameters ptr returned from extrapolate could not be cast to Trk::AtaPlane* in IP3dAtaPlane(..)");
    return nullptr;
   }
 
