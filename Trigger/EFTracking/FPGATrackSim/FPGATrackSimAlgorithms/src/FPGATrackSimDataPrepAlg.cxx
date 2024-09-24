@@ -117,8 +117,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
     ATH_CHECK(readInputs(done));
 
     if (done) {
-      IEventProcessor* appMgr = nullptr;
-      ATH_CHECK(service("ApplicationMgr",appMgr));
+      SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
       if (!appMgr) {
           ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
           return StatusCode::FAILURE;

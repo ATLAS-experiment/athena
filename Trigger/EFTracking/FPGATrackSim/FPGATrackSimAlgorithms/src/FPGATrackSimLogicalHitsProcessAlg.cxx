@@ -117,8 +117,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         if (m_evt == 0) {
             ATH_MSG_WARNING("Didn't receive FPGAHits_1st on first event; assuming no input events.");
         }
-        IEventProcessor* appMgr = nullptr;
-        ATH_CHECK(service("ApplicationMgr",appMgr));
+        SmartIF<IEventProcessor> appMgr{service("ApplicationMgr")};
         if (!appMgr) {
             ATH_MSG_ERROR("Failed to retrieve ApplicationMgr as IEventProcessor");
             return StatusCode::FAILURE;
