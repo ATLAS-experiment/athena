@@ -1,0 +1,1 @@
+LArCAF_tf.py --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCafJobs/data24_13p6TeV.00484909.calibration_LArCellsEmpty.daq.RAW.10evt.data --outputNTUP_HECNOISEFile=hecnoise.root --outputNTUP_SAMPLESMONFile=samplesmon.rootm --conditionsTag="CONDBR2-BLKPA-2024-04"

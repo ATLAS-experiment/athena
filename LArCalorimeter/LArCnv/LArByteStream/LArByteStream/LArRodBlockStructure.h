@@ -258,13 +258,13 @@ inline bool LArRodBlockStructure::setFragment(const uint32_t* p, uint32_t n)
   uint32_t BlockSize = 0;
 
   if (n==0) {
-    std::cout << "ERROR while decoding LArByteStream: Got Rod block size 0" << std::endl;
+    std::cout << "Error while decoding LArByteStream: Got Rod block size 0" << std::endl;
     return false;
   }
 
   BlockSize = getNumberOfWords();
   if (BlockSize>n) {
-    std::cout << "ERROR while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << n << std::endl;
+    std::cout << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << n << std::endl;
     return false;
   }
   m_FebBlockSize = BlockSize;
@@ -283,11 +283,11 @@ inline int LArRodBlockStructure::setFragmentVirtualROB(const uint32_t* p,
 	m_virtualROBPointer=0;
 	m_virtualROBPointerLocal=0;
 	m_virtualROBJump=0;
-	if ( n<2 ) { std::cout << "ERROR" << std::endl; return 0;}
+	if ( n<2 ) { std::cout << "Error" << std::endl; return 0;}
 	m_virtualROBJump = ((*p)>>16)>>1; // Divide by two (two FEBs-1ROB)
 	m_ROB_to_decode = ( (*p) & 0xFFFF )<<1; // Multiply by two
 	if ( (n - m_virtualROBJump*m_ROB_to_decode-1) ){
-		std::cout << "ERROR AGAIN" << std::endl;
+		std::cout << "Error AGAIN" << std::endl;
 		return 0;
 	}
 	m_virtualROBPointer = (uint32_t*)(p+1);
@@ -381,7 +381,7 @@ inline void LArRodBlockStructure::setHeader16(const unsigned n, const uint16_t w
 {
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "ERROR WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
     std::abort();
   }
 #endif
@@ -395,7 +395,7 @@ inline void LArRodBlockStructure::setHeader32(const unsigned n, const uint32_t w
 { 
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "ERROR WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
     std::abort();
   }
 #endif
@@ -418,7 +418,7 @@ inline void LArRodBlockStructure::LE_setHeader16(const unsigned n, const uint16_
 {
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "LArRodBlockStructure::LE_setHeader16 ERROR: WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    std::cout << "LArRodBlockStructure::LE_setHeader16 Error: WRITE BEYOND ARRAY BONDARY!" << std::endl;
     std::abort();
   }
 #endif
@@ -455,42 +455,42 @@ inline void LArRodBlockStructure::setBit(uint32_t *const p, const unsigned chan)
 
 inline int  LArRodBlockStructure::getNextEnergy(int&, int32_t&, int32_t&, int32_t&,uint32_t&)
 {
- std::cout << "ERROR: Function getNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
                                   
 inline bool LArRodBlockStructure::getPulsed(unsigned) const 
 {
- std::cout << "ERROR: Function getPulsed not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getPulsed not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getDAC() const
 {
- std::cout << "ERROR: Function getDAC not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getDAC not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getDelay() const
 {
- std::cout << "ERROR: Function getDelay not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getDelay not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
  
 inline uint16_t  LArRodBlockStructure::getNTrigger() const
 {
- std::cout << "ERROR: Function getNTrigger not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNTrigger not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getStepIndex() const
 {
- std::cout << "ERROR: Function getStepIndex not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getStepIndex not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 inline uint16_t  LArRodBlockStructure::getNStep() const
 {
- std::cout << "ERROR: Function getNStep not implemented in this instance of LArRodBlockStructure!\n";
+ std::cout << "Error: Function getNStep not implemented in this instance of LArRodBlockStructure!\n";
  return 0;
 }
 
@@ -506,7 +506,7 @@ inline bool LArRodBlockStructure::nextFEB()
   const int32_t BlockSize = getNumberOfWords();
   //std::cout << "LeftSize=" << LeftSize << " BlockSize=" << BlockSize << std::endl;
   if (BlockSize>LeftSize) {
-      std::cout << "ERROR while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << LeftSize << std::endl;
+      std::cout << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << LeftSize << std::endl;
       m_error_next_feb = true;
       return false;
     }
