@@ -332,20 +332,19 @@ class TriggerLeg:
             tag1 = tag1.replace(cut,cut+"-")
             tag2 = tag2.replace(cut,cut+"-")
         #only make a statement on the numerical values, with everything else identical
-        reself  = self.detailpattern.findall(tag1)
-        reother = self.detailpattern.findall(tag2)
-        extra_inverseCuts = ("b","c","bgtwo","gntau") # appear after "presel" string
-        for l in [reself,reother]:
-            if "presel" in l:
-                foundPresel = False
-                for i,s in enumerate(l):
-                    # only look after the presel string ... warning: this might invert things that follow presel block though (i.e. after next "_")
-                    if not foundPresel:
-                        if s=="presel": foundPresel=True
-                        continue
-                    for cut in extra_inverseCuts:
-                        if s==cut: l[i+1] = "-" + l[i+1] # adds a minus sign to the number that follows
-
+        extra_inverseCuts = ("b","emf","bgtwo","gntau") # all only appear in "presel" block
+        def findall(tag): # do the findall per tag block, so that can apply special rule to presel block only
+            out = []
+            for s in tag.split(" "):
+                l  = self.detailpattern.findall(s)
+                if len(l) and l[0]=='presel':
+                    for i,s in enumerate(l):
+                        for cut in extra_inverseCuts:
+                            if s==cut: l[i+1] = "-" + l[i+1] # adds a minus sign to the number that follows
+                out += l
+            return out
+        reself  = findall(tag1)
+        reother = findall(tag2)
 
         if len(reself) != len(reother): return -9
         thecomp = [mycomp(a,b) for a,b in zip(reself,reother)]
