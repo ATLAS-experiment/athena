@@ -48,7 +48,7 @@ StatusCode FPGATrackSimRoadUnionTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-
+//TODO this tool should be fither
 StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) 
 {
     
@@ -66,7 +66,6 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
         {
             
             std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
-            ATH_MSG_INFO("tn:" << m_tools.size() << "mapped?:"<<hitCopy->isMapped());
  
             pmap->map(*hitCopy);
             if (hitCopy->getLayer()>=0)
@@ -82,10 +81,8 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     roads.clear();
     for (auto & tool : m_tools)
     {
-       // std::cout<<"SUBR:"<<tool->getSubRegion()<<"\n";
         //std::vector<FPGATrackSimRoad*> r;
         std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
-//        std::cout<<"slice"<<tool->getSubRegion()<<" hitNum:"<<sliceHits[tool->getSubRegion()].size()<<"\n";
         ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r));
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
     }

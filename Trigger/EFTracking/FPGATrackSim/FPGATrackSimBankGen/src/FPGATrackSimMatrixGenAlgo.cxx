@@ -197,7 +197,6 @@ void fillTrackPars(TH1I* const hists[FPGATrackSimTrackPars::NPARS], FPGATrackSim
 
 StatusCode FPGATrackSimMatrixGenAlgo::execute()
 {
-  ATH_MSG_DEBUG("execute()");
   m_eventHeader->clearHits();
   m_eventHeader->reset();
 
@@ -222,68 +221,94 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
   // hit coordinates and track parameters.
   for (FPGATrackSimTruthTrack const & track : tracks) {
 
+    int nSlices = m_FPGATrackSimMapping->SubRegionMap()->getNRegions();
     // Get list of hits associated to the current truth track
     std::vector<FPGATrackSimHit> & track_hits = barcode_hits[track.getBarcode()];
-    
-    // Get the hits that will form the actual sector
-    std::vector<FPGATrackSimHit> sector_hits;
-    bool success = filterSectorHits(track_hits, sector_hits, track);
-    if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
-    m_h_trackQoP_okHits->Fill(track.getQOverPt());
-    
-    // Get the region of this sector
-    int region = getRegion(sector_hits);
-    if (region < 0 || region >= m_nRegions) continue;
-    m_h_trackQoP_okRegion->Fill(track.getQOverPt());
-    
-    //For the Hough constants, find the Hough roads
-    std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
-    if (m_doHoughConstants){
-      
-      std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
-      
-      for (const FPGATrackSimHit& hit : sector_hits) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
-      
-      StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
-      if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
-      
-      if (!houghRoads.empty()){
-	double y = 0.0;
-	double x = 0.0;
-	
-	//For each Hough road, make the accumulator
-	for (auto const &hr : houghRoads){
-	  y = hr->getY();
-	  x = hr->getX();
-	  
-	  // Prepare the accumulator struct
-	  std::vector<module_t> modules(m_nLayers);
-	  FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
-	  acc.pars.qOverPt = y;
-	  acc.pars.phi = x;
-	  std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-	  ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-	  
-	  // Add the track to the accumulate map
-	  accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-	  m_nTracksUsed++;
-	}
-      }
-      else{
-	ATH_MSG_DEBUG("execute(): no hough roads?");	
-	return StatusCode::SUCCESS;
-      }
+
+    // TODO: split the hits into slices
+    const FPGATrackSimPlaneMap *t_pmap = nullptr;
+    /*
+    for (int iSlice=0; iSlice<nSlices;iSlice++){
+        t_pmap = m_FPGATrackSimMapping->PlaneMap_1st(iSlice);
+        auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
+        for(auto & iHit:track_hits){
+            std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
+            t_pmap->map(*hitCopy);
+            if (hitCopy->getLayer()>=0)
+            {
+                if ((subrmap->isInRegion(iSlice, *hitCopy))) {
+                    track_hits[iSlice].push_back(hitCopy);
+                }
+            }
+        }
     }
-    else{
-      // Prepare the accumulator struct
-      std::vector<module_t> modules(m_nLayers);
-      FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
-      std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
-      ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
-      
-      // Add the track to the accumulate map
-      accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
-      m_nTracksUsed++;
+    */
+    // Get the hits that will form the actual sector
+
+    for (int iSlice = 0; iSlice<nSlices; iSlice++){
+        t_pmap = m_FPGATrackSimMapping->PlaneMap_1st(iSlice);
+        for(auto & iHit:track_hits){
+            t_pmap->map(iHit);
+        }
+        std::vector<FPGATrackSimHit> sector_hits;
+        bool success = filterSectorHits(track_hits, sector_hits, track);
+        if (!success) continue; // Skip this track if it has bad hits (not complete, etc.)
+        m_h_trackQoP_okHits->Fill(track.getQOverPt());
+
+        // Get the region of this sector
+        int region = getRegion(sector_hits);
+        if (region < 0 || region >= m_nRegions) continue;
+        m_h_trackQoP_okRegion->Fill(track.getQOverPt());
+        
+        //For the Hough constants, find the Hough roads
+        std::vector<std::shared_ptr<const FPGATrackSimRoad>> houghRoads;
+        if (m_doHoughConstants){
+        
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> phits;
+        
+        for (const FPGATrackSimHit& hit : sector_hits) phits.emplace_back(std::make_shared<const FPGATrackSimHit>(hit));
+        
+        StatusCode sc = m_roadFinderTool->getRoads(phits, houghRoads);
+        if (sc.isFailure()) ATH_MSG_WARNING("Hough Transform -> getRoads() failed");
+        
+        if (!houghRoads.empty()){
+        double y = 0.0;
+        double x = 0.0;
+        
+        //For each Hough road, make the accumulator
+        for (auto const &hr : houghRoads){
+        y = hr->getY();
+        x = hr->getX();
+        
+        // Prepare the accumulator struct
+        std::vector<module_t> modules(m_nLayers);
+        FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
+        acc.pars.qOverPt = y;
+        acc.pars.phi = x;
+        std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+        ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
+        
+        // Add the track to the accumulate map
+        accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+        m_nTracksUsed++;
+        }
+        }
+        else{
+        ATH_MSG_DEBUG("execute(): no hough roads?");	
+        return StatusCode::SUCCESS;
+        }
+        }
+        else{
+        // Prepare the accumulator struct
+        std::vector<module_t> modules(m_nLayers);
+        FPGATrackSimMatrixAccumulator acc(m_nLayers, m_nDim);
+        std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> modules_acc = {modules, acc};
+        ATH_CHECK(makeAccumulator(sector_hits, track, modules_acc));
+        
+        // Add the track to the accumulate map
+        accumulate(m_sector_cum[region], modules_acc.first, modules_acc.second);
+        m_nTracksUsed++;
+        }
     }
   }
   
@@ -406,7 +431,7 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
     ATH_MSG_DEBUG("Two hits on same module");
     return selectHit_returnCode::SH_FAILURE;
   }
-  
+    
   // Always prefer spacepoints, regardless of all other considerations.
   // This is necessary in part due to spacepoint duplication.
   if (old_hit.getHitType() == HitType::spacepoint && new_hit.getHitType() != HitType::spacepoint) {
@@ -423,7 +448,7 @@ FPGATrackSimMatrixGenAlgo::selectHit_returnCode FPGATrackSimMatrixGenAlgo::selec
     if (old_hit.getEtaModule() == new_hit.getEtaModule()) {
       int rmax = 0;
       if (m_doHoughConstants) {
-	int reg = m_FPGATrackSimMapping->RegionMap_1st()->getRegions(new_hit)[0]; // just take region with lowest index
+	int reg = m_FPGATrackSimMapping->RegionMap_1st()->getRegions(new_hit)[0]; // just take region with lowest index//TODO THIS IS WHERE IT CRASHES
 	
 	int phi_max = m_FPGATrackSimMapping->RegionMap_1st()->getRegionBoundaries(reg, new_hit.getLayer(), new_section).phi_max;
 	int phi_min = m_FPGATrackSimMapping->RegionMap_1st()->getRegionBoundaries(reg, new_hit.getLayer(), new_section).phi_min;
@@ -507,10 +532,20 @@ bool FPGATrackSimMatrixGenAlgo::filterSectorHits(std::vector<FPGATrackSimHit> co
   nohit.setHitType(HitType::wildcard);
   sector_hits.resize(m_nLayers, nohit);
   std::vector<int> layer_count(m_nLayers); // count number of hits seen in each layer
-
+  bool all_Hits_Not_In_Layer = true;
+  for (FPGATrackSimHit const & hit : all_hits){
+    if(hit.getLayer()>=0){
+        all_Hits_Not_In_Layer=false;
+    }
+  }
+  if(all_Hits_Not_In_Layer){
+    return false;
+  }
   for (FPGATrackSimHit const & hit : all_hits) {
     int layer = hit.getLayer();
-    
+    if (layer<0){
+        continue;
+    }
     if (layer_count[layer] == 0){
       layer_count[layer]++;
       sector_hits[layer] = hit;
