@@ -41,7 +41,7 @@ void TFCSSimpleLWTNNHandler::setupNet() {
       config.inputs, config.layers, config.outputs);
   // Get the output layers
   ATH_MSG_DEBUG("Getting output layers for neural network");
-  for (std::string name : config.outputs) {
+  for (const std::string& name : config.outputs) {
     ATH_MSG_VERBOSE("Found output layer called " << name);
     m_outputLayers.push_back(name);
   };

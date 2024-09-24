@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSHitCellMappingWiggle_h
@@ -42,10 +42,10 @@ public:
   inline const TFCS1DFunction *get_function(int bin) const {
     return m_functions[bin];
   };
-  const std::vector<const TFCS1DFunction *> get_functions() {
+  const std::vector<const TFCS1DFunction *>& get_functions() {
     return m_functions;
   };
-  const std::vector<float> get_bin_low_edges() { return m_bin_low_edge; };
+  const std::vector<float>& get_bin_low_edges() { return m_bin_low_edge; };
 
   /// modify one hit position to emulate the LAr accordeon shape
   /// and then fills all hits into calorimeter cells

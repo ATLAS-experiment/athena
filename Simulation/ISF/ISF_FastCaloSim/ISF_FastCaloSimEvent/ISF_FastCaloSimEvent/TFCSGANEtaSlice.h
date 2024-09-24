@@ -48,8 +48,8 @@ public:
                                    TFCSSimulationState simulstate) const;
 
   bool IsGanCorrectlyLoaded() const;
-  FitResultsPerLayer GetFitResults() const { return m_allFitResults; }
-  ExtrapolatorWeights GetExtrapolatorWeights() { return m_extrapolatorWeights; }
+  const FitResultsPerLayer& GetFitResults() const { return m_allFitResults; }
+  const ExtrapolatorWeights& GetExtrapolatorWeights() { return m_extrapolatorWeights; }
 
   void Print() const;
 
