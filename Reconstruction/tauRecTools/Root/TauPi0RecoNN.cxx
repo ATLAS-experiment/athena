@@ -18,6 +18,7 @@
 
 // helper function include(s)
 #include "PathResolver/PathResolver.h"
+#include "tauRecTools/TauDecayModeNNClassifier.h" // to get TauDecayModeNNVariable and TauDecayModeNNHelper from the tauRecTools namespace
 
 // standard library include(s)
 #include <array>
@@ -27,7 +28,7 @@
 
 /*
 * TO DO
-* these are doubles, where I later use floats. Is that an issue?
+* these are doubles, where I later use floats. Is that an issue? No, all good, tu I might want double precision for the four vectors
 * I guess I should change the names of things like TauDecayModeNNVariable and TauDecayModeNNHelper
 */
 using PFOPtr = const xAOD::PFO *;
@@ -54,6 +55,7 @@ TauPi0RecoNN::TauPi0RecoNN(const std::string &name)
   declareProperty("MaxConvTracks", m_maxConvTracks = 4);
   declareProperty("NeutralPFOPtCut", m_neutralPFOPtCut = 1.5);
   declareProperty("DecayModeName", m_DecayModeName = "NNDecayMode"); // needs to be same as m_outputName in TauDecayModeNNClassifier.cxx
+  // declareProperty("FourVecDimNames", m_FourVecDimNames = {"E", "eta", "phi"});
 }
 
 TauPi0RecoNN::~TauPi0RecoNN()
@@ -88,11 +90,11 @@ StatusCode TauPi0RecoNN::initialize()
   ATH_MSG_INFO("Loaded 3pXn network configuration from: " << weightFile_3pXn);
 
   // load lwt graph configurations
-  std::ifstream inputFile(weightFile_1p1n);
+  std::ifstream inputFile_1p1n(weightFile_1p1n);
   lwt::GraphConfig lwtGraphConfig_1p1n;
-  std::ifstream inputFile(weightFile_1pXn);
+  std::ifstream inputFile_1pXn(weightFile_1pXn);
   lwt::GraphConfig lwtGraphConfig_1pXn;
-  std::ifstream inputFile(weightFile_3pXn);
+  std::ifstream inputFile_3pXn(weightFile_3pXn);
   lwt::GraphConfig lwtGraphConfig_3pXn;
   try
   {
@@ -156,16 +158,22 @@ StatusCode TauPi0RecoNN::initialize()
 
 StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
 {
-    /*
-    * TO DO
-    * Do I need checks, if the decay mode is actually on the tau (and has one of the allowed values)? Or is it enough, that the accessor will throw errors, when it tries to get to the decayMode and that doesn't exist?
-    */
-
   // Read the previously classified decay mode of the tau
   // Decay modes are "1p0n", "1p1n", "1pXn", "3p0n", "3pXn",
   // here they are encoded as 0, 1, 2, 3, 4 (as in TauDecayModeNNClassifier.cxx)
   const static SG::AuxElement::Accessor<int> accDecayMode(m_DecayModeName); // This can probably also be a ConstAccessor?
-  int decayMode = accDecayMode(xTau);
+  int decayMode = 7; // 7 is the error mode used as initialisation
+  if (accDecayMode.isAvailable(xTau))
+  {
+    decayMode = accDecayMode(xTau);
+    // concert to enum DecayMode and throw error if that fails
+    // then change if else statements to use this enum "if Mode_1p0n" instead of "if 0" etc.
+  }
+  else
+  {
+    ATH_MSG_WARNING("Initializing TauPi0RecoNN"); // maybe this should even be an error?
+    // decorate zeros.
+  }
 
   // inputs
   // ------
@@ -229,7 +237,7 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   // {
   //   for (int i = 0; i < 3; i++)
   //   {
-  //     outputs[DMVar::sFourVecDimNames[i]] = 0;
+  //     outputs[FourVecDimNames[i]] = 0;
   //   }
   // }
 
@@ -240,10 +248,12 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
   * TO DO
   *  I think, we're currently predicting p not E, but wanna change that. Gotta make sure, this uses whatever the final version of the network is.
   *  I'm currently just guessing, that the names of the output are going to be c_E, c_eta, and c_phi. E, eta, and phi make sense to me (though they might be like E_pi0 or something?), the c_ prefix I copy pasted from the DecayModeClassifier tool, because I assume that's a convention for these kind of json files or something. Gonna have to check that with Lukas' code (but that will of course also show up in testing)
+  * Maybe add mass to output (pion mass for 1p1n, but not trivial for 1pXn and 3pXn). In the end we wanna decorate TauDecayParticle Objects to the tau, not just the individual values, so for this step of development, I don't really need it. But in the end we do still need a decision on what mass to decorate onto the Xn objects.
   */
   // Outputs are E, eta, and phi
   // here they are encoded as 0, 1, 2
   //
+  const std::array<std::string, 3> FourVecDimNames = {"E", "eta", "phi"}; // ideally this shouldn't be "buried" down here in the code, but with declare properties but that doesn't seem to like getting vectors.
   std::array<float, 3> pi0fourVec = {}; // = {} should initialize all values in the array to be 0 (which we want for deacy modes without neutral pions)
   if (decayMode != 0 && decayMode != 3) // not 1p0n or 1p3n
   {
@@ -251,13 +261,13 @@ StatusCode TauPi0RecoNN::execute(xAOD::TauJet &xTau) const
     std::string prefix = "c_";
     for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
     {
-      pi0fourVec[i] = outputs.at(prefix + DMVar::sFourVecDimNames[i]);
+      pi0fourVec[i] = outputs.at(prefix + FourVecDimNames[i]);
     }
   }
 
   for (std::size_t i = 0; i < pi0fourVec.size(); ++i)
   {
-    const std::string fourVecDimName = m_OutputPrefix + DMVar::sFourVecDimNames[i];
+    const std::string fourVecDimName = m_OutputPrefix + FourVecDimNames[i];
     const SG::AuxElement::Accessor<float> accPi0(fourVecDimName);
     accPi0(xTau) = pi0fourVec[i];
   }
@@ -436,94 +446,3 @@ StatusCode TauPi0RecoNN::getInputs(const xAOD::TauJet &xTau, InputSequenceMap &i
 
   return StatusCode::SUCCESS;
 }
-
-// Helper functions
-namespace tauRecTools
-{
-  const std::set<std::string> TauDecayModeNNVariable::sCommonP4Vars = {
-      "dphiECal", "detaECal", "dphi", "deta", "pt_log", "jetpt_log"};
-
-  const std::set<std::string> TauDecayModeNNVariable::sTrackIPVars = {
-      "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA"};
-
-  const std::set<std::string> TauDecayModeNNVariable::sNeutralPFOVars = {
-      "FIRST_ETA", "SECOND_R_log", "DELTA_THETA", "CENTER_LAMBDA_log", "LONGITUDINAL", "ENG_FRAC_CORE",
-      "SECOND_ENG_DENS_log", "NPosECells_EM1", "NPosECells_EM2", "energy_EM1", "energy_EM2", "EM1CoreFrac", 
-      "firstEtaWRTClusterPosition_EM1", "firstEtaWRTClusterPosition_EM2", 
-      "secondEtaWRTClusterPosition_EM1_log", "secondEtaWRTClusterPosition_EM2_log"};
-
-  const std::array<std::string, 3> TauDecayModeNNVariable::sFourVecDimNames = {
-      "E", "eta", "phi"};
-
-  float TauDecayModeNNVariable::deltaPhi(const TLorentzVector &p4, const TLorentzVector &p4_tau)
-  {
-    return p4_tau.DeltaPhi(p4);
-  }
-
-  float TauDecayModeNNVariable::deltaEta(const TLorentzVector &p4, const TLorentzVector &p4_tau)
-  {
-    return p4.Eta() - p4_tau.Eta();
-  }
-
-  float TauDecayModeNNVariable::deltaPhiECal(const TLorentzVector &p4, const std::pair<float, bool> &tau_phiTrkECal)
-  {
-    // if not retrieved, then set to 0. (mean value)
-    return tau_phiTrkECal.second ? TVector2::Phi_mpi_pi(p4.Phi() - tau_phiTrkECal.first) : 0.0f;
-  }
-
-  float TauDecayModeNNVariable::deltaEtaECal(const TLorentzVector &p4, const std::pair<float, bool> &tau_etaTrkECal)
-  {
-    // if not retrieved, then set to 0. (mean value)
-    return tau_etaTrkECal.second ? p4.Eta() - tau_etaTrkECal.first : 0.0f;
-  }
-
-  template <typename T>
-  T TauDecayModeNNVariable::pfoAttr(const PFOPtr pfo, const PFOAttributes &attr)
-  {
-    T val{static_cast<T>(0)};
-    if (!pfo->attribute(attr, val))
-    {
-      throw std::runtime_error("Can not retrieve PFO attribute! enum = " + std::to_string(static_cast<unsigned>(attr)));
-    }
-    return val;
-  }
-
-  float TauDecayModeNNVariable::ptSubRatio(const PFOPtr pfo)
-  {
-    float clus0pt = pfo->cluster(0)->pt();
-    return clus0pt > 0.0f ? (clus0pt - pfo->pt()) / clus0pt : 0.0f;
-  }
-
-  float TauDecayModeNNVariable::energyFracEM2(const PFOPtr pfo, float energy_em2)
-  {
-    float clus0e = pfo->cluster(0)->e();
-    return clus0e > 0.0f ? energy_em2 / clus0e : 0.0f;
-  }
-
-  float TauDecayModeNNHelper::Log10Robust(const float val, const float min_val)
-  {
-    return TMath::Log10(std::max(val, min_val));
-  }
-
-  template <typename T>
-  void TauDecayModeNNHelper::sortAndKeep(std::vector<T> &vec, const std::size_t n_obj)
-  {
-    auto cmp_pt = [](const T lhs, const T rhs) { return lhs->pt() > rhs->pt(); };
-    std::sort(vec.begin(), vec.end(), cmp_pt);
-    if (vec.size() > n_obj)
-    {
-      vec.erase(vec.begin() + n_obj, vec.end());
-    }
-  }
-
-  template <typename T>
-  void TauDecayModeNNHelper::initMapKeys(std::map<std::string, T> &empty_map,
-                                         const std::set<std::string> &keys)
-  {
-    // T can be any type
-    for (const auto &key : keys)
-    {
-      empty_map[key];
-    }
-  }
-} // namespace tauRecTools
