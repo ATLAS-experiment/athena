@@ -22,3 +22,24 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
      COMPILE_DEFINITIONS "FLATTEN" )
 endif()
+
+atlas_add_test(IdDictDictLabel_test
+  SOURCES test/IdDictLabel_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+atlas_add_test(IdDictDictField_test
+  SOURCES test/IdDictField_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+atlas_add_test(IdDictDictionary_test
+  SOURCES test/IdDictDictionary_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict
+  POST_EXEC_SCRIPT nopost.sh 
+)
