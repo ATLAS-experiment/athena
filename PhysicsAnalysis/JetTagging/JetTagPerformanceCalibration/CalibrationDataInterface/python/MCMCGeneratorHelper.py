@@ -30,7 +30,7 @@ def MCMC_generator_map(generatorDict):
     generator = None
     if 'Powheg' in generatorDict and 'Pythia8' in generatorDict:
         generator = 'Powheg+Pythia8'
-    elif 'aMcAtNlo' in generatorDict and 'Pythia8' in generatorDict:
+    elif ('aMcAtNlo' in generatorDict or 'MadGraph' in generatorDict) and 'Pythia8' in generatorDict:
         generator = 'aMcAtNlo+Pythia8'
     elif 'aMcAtNlo' in generatorDict and 'Herwig7' in generatorDict:
         generator = 'aMcAtNlo+Herwig7'
