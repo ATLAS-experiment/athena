@@ -37,7 +37,7 @@ run "Reconstruction" \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
-    --preExec "flags.Tracking.useITkFTF=True;flags.Tracking.doITkFastTracking=True;flags.Tracking.ITkFTFPass.useTracklets=True;flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True;flags.Tracking.ITkFTFPass.useTrigTrackFollowing=True;flags.Tracking.doTruth=False;flags.Tracking.doLargeD0=True;"
+    --preExec "flags.Tracking.useITkFTF=True;flags.Tracking.doITkFastTracking=True;flags.Tracking.ITkFTFPass.useTracklets=True;flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True;flags.Tracking.ITkFTFPass.useTrigTrackFollowing=True;flags.Tracking.doLargeD0=True;"
 
 
 run "IDPVM" \
