@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,9 +52,9 @@ class GenParticleJet
       return std::make_pair(m_particles.at(i),m_indices.at(i));
     }
   
-  std::vector<HepMC::ConstGenParticlePtr > getParticles() const {return m_particles;}
+  const std::vector<HepMC::ConstGenParticlePtr >& getParticles() const {return m_particles;}
 
-  std::vector<int> getIndicesInEvent() const {return m_indices;}
+  const std::vector<int>& getIndicesInEvent() const {return m_indices;}
 
   int getNumParticles() const {return m_particles.size();}
   
