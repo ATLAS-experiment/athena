@@ -58,6 +58,9 @@ parser.add_option( '--for-compare', dest='for_compare',
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
+parser.add_option( '--force-mc', dest='forceMC',
+                   action = 'store_true', default = False,
+                   help = 'Force the job to treat input as MC' )
 parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
                    action = 'store_true', default = False,
                    help = 'Only run overlap removal for nominal (skip systematics)')
@@ -114,6 +117,8 @@ if options.input_file:
     flags.Input.Files = options.input_file[:]
 else:
     flags.Input.Files = [testFile]
+if options.forceMC :
+    flags.Input.isMC = True
 flags.lock()
 
 # Create an EventLoop job.

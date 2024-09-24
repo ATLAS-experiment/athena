@@ -7,6 +7,7 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 from TrigGlobalEfficiencyCorrection.TriggerLeg_DictHelpers import TriggerDict
 from Campaigns.Utils import Campaign
+from AthenaCommon.Logging import logging
 
 
 class MuonCalibrationConfig (ConfigBlock):
@@ -81,7 +82,11 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.calibrationAndSmearingTool.calibMode = calibMode
         # To be used in MetAnalysisConfig
         config._muonCalibMode = alg.calibrationAndSmearingTool.calibMode
-        alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
+        if config.geometry() is LHCPeriod.Run4:
+            logging.warning("MuonCalibrationConfig: disabling NSW hits for Run4 geometry")
+            alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = True
+        else:
+            alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -216,7 +221,11 @@ class MuonWorkingPointConfig (ConfigBlock) :
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
         alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
-        alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
+        if config.geometry() is LHCPeriod.Run4:
+            logging.warning("MuonCalibrationConfig: disabling NSW hits for Run4 geometry")
+            alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
+        else:
+            alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)

@@ -23,6 +23,7 @@
 #include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/CopyNominalSelectionAlg.h>
+#include <AsgAnalysisAlgorithms/EventDecoratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
@@ -61,6 +62,7 @@ DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)
 DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
 DECLARE_COMPONENT (CP::BootstrapGeneratorAlg)
 DECLARE_COMPONENT (CP::CopyNominalSelectionAlg)
+DECLARE_COMPONENT (CP::EventDecoratorAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)

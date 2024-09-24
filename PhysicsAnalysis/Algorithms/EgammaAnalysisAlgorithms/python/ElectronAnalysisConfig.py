@@ -77,6 +77,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
                 alg.calibrationAndSmearingTool.ESModel = 'es2023_R22_Run2_v0'
             elif config.geometry() is LHCPeriod.Run3:
                 alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
+            elif config.geometry() is LHCPeriod.Run4:
+                logging.warning("No ESModel set for Run4, using Run 3 model instead")
+                alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
             else:
                 raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")

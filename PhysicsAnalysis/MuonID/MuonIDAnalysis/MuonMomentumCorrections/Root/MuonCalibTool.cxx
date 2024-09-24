@@ -611,8 +611,12 @@ namespace CP
                 return MCP::DataYear::Data23;
             }
         }
-        ATH_MSG_FATAL("Could not assign run-number " << run << " to a specific year of data-taking");
-        return MCP::DataYear::Data16;
+        static std::atomic<bool> warningPrinted {false};
+        if (!warningPrinted) {
+            ATH_MSG_WARNING("Could not assign run-number " << run << " to a specific year of data-taking, using default year 23");
+            warningPrinted = true;
+        }
+        return MCP::DataYear::Data23;
     }
 
 
