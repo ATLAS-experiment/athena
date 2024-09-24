@@ -308,7 +308,6 @@ public:
 private:
     std::string m_file_name;  
     std::string m_dict_tag;  
-    //bool m_resolved_references;
     bool m_generated_implementation;
     bool  m_do_checks;
     bool  m_do_neighbours;
@@ -334,10 +333,6 @@ public:
     std::string                   m_name;  
     std::vector <IdDictLabel*>    m_labels; 
     size_t                        m_index; 
-
-private:
-    //bool m_resolved_references;
-    //bool m_generated_implementation;
 };  
   
 class IdDictLabel 
@@ -385,7 +380,6 @@ private:
     std::string                   m_name;  
     std::vector<IdDictDictEntry*> m_entries;  // just the RegionEntries
     std::vector<IdDictRegion*>    m_regions;  // regions derived from entries
-    //bool m_resolved_references;
     bool m_generated_implementation;
 }; 
  
@@ -599,7 +593,6 @@ public:
 
 private:
     bool m_resolved_references;
-    //bool m_generated_implementation;
 }; 
  
 class IdDictRangeRef : public IdDictRegionEntry 
@@ -622,9 +615,6 @@ public:
  
     IdDictRange* m_range; 
 
-private:
-    //bool m_resolved_references;
-    //bool m_generated_implementation; 
 }; 
   
 class IdDictReference : public IdDictRegionEntry 
@@ -650,7 +640,6 @@ public:
 
 private:
     bool m_resolved_references;
-    //bool m_generated_implementation;
 }; 
  
 class IdDictDictionaryRef : public IdDictRegionEntry 
