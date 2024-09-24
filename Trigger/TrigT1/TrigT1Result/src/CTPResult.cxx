@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -155,10 +155,8 @@ namespace ROIB {
 
    void CTPResult::dumpData() const
    {
-      IMessageSvc*  msgSvc;
-      ISvcLocator* svcLoc = Gaudi::svcLocator( );
-      StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-      if ( sc.isFailure() ) {
+      SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+      if ( !msgSvc ) {
          return;
       }
       MsgStream log(msgSvc, "CTPResult");

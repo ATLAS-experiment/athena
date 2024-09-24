@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -126,10 +126,8 @@ bool MuCTPI_RIO::getRoI( const int index, uint16_t &bcId, uint16_t &pTval, uint1
  */
 void MuCTPI_RIO::dumpData() const {
 
-  IMessageSvc* msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if( sc.isFailure() ) {
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if ( !msgSvc ) {
     return;
   }
   MsgStream log( msgSvc, "MuCTPI_RIO" );
@@ -195,10 +193,8 @@ MuCTPI_RIO::MyRoI::MyRoI( const uint16_t bcId, const uint16_t pTVal,const uint16
  */
 void MuCTPI_RIO::MyRoI::dumpData() const {
 
-  IMessageSvc* msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if( sc.isFailure() ) {
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if ( !msgSvc ) {
     return;
   }
   MsgStream log( msgSvc, "MuCTPI_RIO::RoI" );
