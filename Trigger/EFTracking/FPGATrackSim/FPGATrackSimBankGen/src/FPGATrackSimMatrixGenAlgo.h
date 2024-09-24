@@ -139,10 +139,10 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         std::vector<FPGATrackSimHit> getLogicalHits() ;
         std::vector<FPGATrackSimTruthTrack> filterTrainingTracks(std::vector<FPGATrackSimTruthTrack> const & truth_tracks) const;
         std::map<int, std::vector<FPGATrackSimHit>> makeBarcodeMap(std::vector<FPGATrackSimHit> const & hits, std::vector<FPGATrackSimTruthTrack> const & tracks) const;
-        selectHit_returnCode selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit) const;
-        bool filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits, FPGATrackSimTruthTrack const & t) const;
+        selectHit_returnCode selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit, int subregion) const;
+        bool filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits, FPGATrackSimTruthTrack const & t, int subregion) const;
         int getRegion(std::vector<FPGATrackSimHit> const & hits) const;
-	StatusCode makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
+        StatusCode makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
         std::vector<TTree*> createMatrixTrees();
         void fillMatrixTrees(std::vector<TTree*> const & matrixTrees);
         void writeSliceTree();

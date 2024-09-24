@@ -265,7 +265,8 @@ void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
     
     // re-assign layers in the pixel endcap to be each individual disk
     // technically this returns a success/fail but I'm not sure we need it?
-    if (hit.isMapped()){ 
+    // This should only happen if the hit is not already mapped.
+    if (!hit.isMapped()){
         m_moduleRelabel->remap(hit);
     }
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
