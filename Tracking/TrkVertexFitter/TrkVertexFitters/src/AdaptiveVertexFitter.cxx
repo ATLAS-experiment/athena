@@ -184,7 +184,7 @@ namespace Trk
       bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(*LinTrackToAdd,SeedPoint);
       if (!success)
       {
-	msg(MSG::WARNING) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
+	msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
       }
 
       theLinTracks.push_back(*LinTrackToAdd);
@@ -210,7 +210,7 @@ namespace Trk
       bool success = m_ImpactPoint3dEstimator->addIP3dAtaPlane(*LinTrackToAdd,SeedPoint);
       if (!success)
       {
-	msg(MSG::WARNING) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
+	msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
       }
       
       theLinTracks.push_back(*LinTrackToAdd);
@@ -390,7 +390,7 @@ namespace Trk
           bool success=m_ImpactPoint3dEstimator->addIP3dAtaPlane(*iter,NewVertex);
           if (!success)
           {
-            msg(MSG::WARNING) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
+            msg(MSG::DEBUG) << "Adding compatibility to vertex information failed. Newton distance finder didn't converge..." << endmsg;
           }
         }
         
