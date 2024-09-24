@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef INDETTRTPIDNN_H
 #define INDETTRTPIDNN_H
@@ -30,21 +30,21 @@ namespace InDet {
     TRTPIDNN()=default;
     virtual ~TRTPIDNN()=default;
 
-    std::string getDefaultOutputNode() const {
+    const std::string& getDefaultOutputNode() const {
       return m_outputNode;
     }
 
-    std::string getDefaultOutputLabel() const {
+    const std::string& getDefaultOutputLabel() const {
       return m_outputLabel;
     }
 
     // get the structure of the scalar inputs to the NN
-    std::map<std::string, std::map<std::string, double>> getScalarInputs() const {
+    const std::map<std::string, std::map<std::string, double>>& getScalarInputs() const {
       return m_scalarInputs;
     }
 
     // get the structure of the vector inputs to the NN
-    std::map<std::string, std::map<std::string, std::vector<double>>> getVectorInputs() const {
+    const std::map<std::string, std::map<std::string, std::vector<double>>>& getVectorInputs() const {
       return m_vectorInputs;
     }
 

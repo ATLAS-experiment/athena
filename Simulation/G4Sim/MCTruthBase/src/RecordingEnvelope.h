@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTruthBase_RECORDINGENVELOPE_H
@@ -45,7 +45,7 @@ public:
   inline int GetLevel() const;
 
   /// Returns the name of the recording envelope volume.
-  inline std::string GetVolumeName() const;
+  inline const std::string& GetVolumeName() const;
 
   /// Returns the pointer to the G4LogicalVolume used by this
   /// recording envelope.
@@ -80,7 +80,7 @@ private:
   SG::WriteHandle<TrackRecordCollection> m_trackRecordCollection;
 };
 
-std::string RecordingEnvelope::GetVolumeName() const
+const std::string& RecordingEnvelope::GetVolumeName() const
 {
   return m_envelopeVolumeName;
 }
