@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERVALIDATIONUTILS_TRKPRIVXPURITY_H
@@ -66,12 +66,12 @@ namespace Trk
 /**
  * Weights of tracks from pileUp events   
  */
-  const std::vector<double> pileUpWeights() const;
+  const std::vector<double>& pileUpWeights() const;
      
 /**
  * Weights of not associated tracks     
  */ 
-  const std::vector<double> noTruthFound() const;
+  const std::vector<double>& noTruthFound() const;
    
 /**
  * Number of lost pointers: these must software bugs if any
@@ -81,12 +81,12 @@ namespace Trk
 /** 
  * List of track weights for inliers (only tracks from signal event are listed) 
  */
-   const std::vector<double> inlierWeights()const;
+   const std::vector<double>& inlierWeights()const;
     
 /**
  * List of track weights for outliers (only tracks from the signal event are listed)   
  */
-   const std::vector<double> outlierWeights()const;
+   const std::vector<double>& outlierWeights()const;
    
 /**
  * Dump info method
@@ -112,19 +112,19 @@ namespace Trk
   inline unsigned int TrkPriVxPurity::fittedTracks() const
   { return m_fittedTracks; } 
   
-  inline const std::vector<double> TrkPriVxPurity::noTruthFound() const
+  inline const std::vector<double>& TrkPriVxPurity::noTruthFound() const
   { return m_noTruth; }
   
-  inline const std::vector<double> TrkPriVxPurity::outlierWeights()const
+  inline const std::vector<double>& TrkPriVxPurity::outlierWeights()const
   { return m_outWeights; }
   
-  inline const std::vector<double> TrkPriVxPurity::inlierWeights()const
+  inline const std::vector<double>& TrkPriVxPurity::inlierWeights()const
   { return m_inWeights; }
   
   inline  unsigned int TrkPriVxPurity::brokenLinks() const
   {return m_brokenLinks; }
   
-  inline const std::vector<double> TrkPriVxPurity::pileUpWeights() const
+  inline const std::vector<double>& TrkPriVxPurity::pileUpWeights() const
   {return m_puWeights; }
  
 }// end of namespace definitions
