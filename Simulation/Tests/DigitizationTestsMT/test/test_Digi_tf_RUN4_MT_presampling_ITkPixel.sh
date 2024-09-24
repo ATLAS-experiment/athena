@@ -4,7 +4,6 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_presampling_MT.RDO.pool.root
 
@@ -26,7 +25,7 @@ Digi_tf.py \
 --detectors ITkPixel \
 --multithreaded \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-P2-RUN4-03-00-00 \

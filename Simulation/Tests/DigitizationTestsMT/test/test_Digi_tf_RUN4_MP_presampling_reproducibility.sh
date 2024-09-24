@@ -4,7 +4,6 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_presampling_SP.RDO.pool.root
 # art-output: RUN4_presampling_MP_fork_evt0.RDO.pool.root
@@ -30,7 +29,7 @@ geotag="ATLAS-P2-RUN4-03-00-00"
 Digi_tf.py \
 --CA \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
@@ -68,7 +67,7 @@ Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
 --CA \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
@@ -93,7 +92,7 @@ Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 1 \
 --CA \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
