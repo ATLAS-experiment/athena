@@ -597,7 +597,7 @@ def createITkConversionTrackingPassFlags():
     icf.nHolesGapMax            = icf.maxHoles
     icf.nWeightedClustersMin    = [6]
     icf.maxdImpactSSSSeeds      = [20.0 * Units.mm]
-    icf.radMax                  = 1000. * Units.mm
+    icf.radMax                  = 1100. * Units.mm
     icf.doZBoundary             = False
 
     icf.Xi2max                  = [9.0]
