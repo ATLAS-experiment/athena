@@ -1355,11 +1355,11 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_sigD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="tagger_DIPS">
+     <TDirectory name="tagger_GN2v01">
       <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DIPS_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DIPS_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DIPS_pu" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pb" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pc" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_SV1">

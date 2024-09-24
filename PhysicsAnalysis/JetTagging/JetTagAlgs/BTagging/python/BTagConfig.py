@@ -31,9 +31,7 @@ def GetTaggerTrainingMap(inputFlags, jet_col):
     """This function defines the networks used for the different jet collections."""
     if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_col:
         return [
-            "BTagging/20221008/dipsrun4/antikt4emtopo/network.json",
-            "BTagging/20221017/dl1drun4/antikt4emtopo/network.json",
-            "BTagging/20221010/GN1run4/antikt4emtopo/network.onnx",
+            "BTagging/20240918/gn2hl/antikt4emtopo/network.onnx",
         ]
     
     networks_by_jet_col = {
