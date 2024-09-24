@@ -41,7 +41,7 @@
 
 #include "TFile.h"
 #include "TSpline.h"
-#include "MuonTesterTree/throwExcept.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 using namespace MuonCalib;
 using namespace CxxUtils;

@@ -15,7 +15,7 @@
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
-#include "MuonTesterTree/throwExcept.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 #include<ctime>
 
