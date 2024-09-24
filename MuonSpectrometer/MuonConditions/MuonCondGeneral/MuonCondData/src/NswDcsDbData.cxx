@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/NswDcsDbData.h"
@@ -14,7 +14,7 @@
 #include "MuonNSWCommonDecode/MapperSTG.h"
 #include "MuonNSWCommonDecode/MapperMMG.h"
 
-#include "MuonTesterTree/throwExcept.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 
 
@@ -23,9 +23,7 @@
 
 NswDcsDbData::NswDcsDbData(const Muon::IMuonIdHelperSvc* idHelperSvc, const MuonGM::MuonDetectorManager* muonGeoMgr):
     m_idHelperSvc(idHelperSvc),
-    m_muonGeoMgr(muonGeoMgr)
-{
-}
+    m_muonGeoMgr(muonGeoMgr){}
 
 std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& obj) {
     ostr  << " timeSince " << obj.timeSince << " timeUntil " << obj.timeUntil << " elink " << obj.elink;
