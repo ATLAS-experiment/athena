@@ -177,10 +177,10 @@ namespace MuonGM {
 	      << " no MuonStation found => no possibility to align" << endmsg;
 	  continue;
 	}
-
 	mst->setTransform(xf);
 	GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
-	mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, position));
+	GeoTrf::Transform3D   nativeToAmdbLRS=tsz_to_szt * station->native_to_tsz_frame(*mysql, position); 
+	mst->setNativeToAmdbLRS(nativeToAmdbLRS);
 	mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, position) * tsz_to_szt.inverse());
 
 	int nAlines = station->CountAlignPos(zi, fi);
@@ -198,11 +198,13 @@ namespace MuonGM {
 	      log << MSG::ERROR << "Inconsistent AlignedPosition found in the static Geometry DB: aligPos.fi, zi = " << ap.phiindex << ", " << ap.zindex
 		  << " for station " << station->GetName() << " at fi/zi = " << fi << "/" << zi << " AlignPos indices fi/zi " << fi << "/" << zi << endmsg;
 	    }
-	    if (ap.jobindex == 0) {
-	      mst->setDelta_fromAline(ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
-	    } else {
-	      mst->setDelta_fromAline_forComp(ap.jobindex, ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
-	    }
+	    GeoTrf::Transform3D tsz_to_szt = GeoTrf::RotateZ3D(-90 * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90 * Gaudi::Units::degree);
+	    // Keep, for later developments.	    GeoTrf::Transform3D nominalTransform=station->getNominalTransform(*mysql, position);
+	    // Keep, for later developments.        GeoTrf::Transform3D native_to_amdbl=tsz_to_szt * station->native_to_tsz_frame(*mysql, position);
+	    mst->setTransform(xf);
+	    mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, position)); 
+	    mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, position) * tsz_to_szt.inverse()); 
+	    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
 	  }
 	}
       } // end loop on positions
