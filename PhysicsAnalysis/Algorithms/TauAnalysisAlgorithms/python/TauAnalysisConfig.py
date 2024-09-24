@@ -4,6 +4,7 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from Campaigns.Utils import Campaign
+from AthenaCommon.Logging import logging
 
 
 class TauCalibrationConfig (ConfigBlock):
@@ -369,6 +370,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 triggers = self.triggerChainsPerYear.get('2022',[])
             elif config.campaign() in [Campaign.MC23c, Campaign.MC23d]:
                 triggers = self.triggerChainsPerYear.get('2023',[])
+            else:
+                logging.warning("unknown campaign, skipping triggers: " + str(config.campaign()))
+                triggers = []
 
             for trig in triggers:
                 trig = trig.replace("HLT_","")

@@ -238,17 +238,23 @@ class PileupReweightingBlock (ConfigBlock):
             log.info('Data needs no lumicalc and PRW configuration files')
 
         # Set up the only algorithm of the sequence:
-        alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
-                                      'PileupReweightingAlg'+self.postfix )
-        config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
-        alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
-        if not toolConfigFiles and config.dataType() is not DataType.Data:
-            log.info("No PRW config files provided. Disabling reweighting")
-            # Setting the weight decoration to the empty string disables the reweighting
-            alg.pileupWeightDecoration = ""
+        if config.geometry() is LHCPeriod.Run4:
+            log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
+            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg'+self.postfix )
+            alg.uint32Decorations = { 'RandomRunNumber' : 350000 }
+
         else:
-            alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
-        alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+            alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
+                                        'PileupReweightingAlg'+self.postfix )
+            config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
+            alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
+            if not toolConfigFiles and config.dataType() is not DataType.Data:
+                log.info("No PRW config files provided. Disabling reweighting")
+                # Setting the weight decoration to the empty string disables the reweighting
+                alg.pileupWeightDecoration = ""
+            else:
+                alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
+            alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
 
         if not self.alternativeConfig:
             config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)

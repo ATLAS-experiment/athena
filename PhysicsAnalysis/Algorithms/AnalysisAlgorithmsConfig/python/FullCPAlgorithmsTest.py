@@ -728,22 +728,26 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
     configSeq += config.makeConfig( 'Jets.JVT',
         containerName='AnaJets' )
 
-    btagger = "DL1dv01"
-    btagWP = "FixedCutBEff_60"
-    configSeq += config.makeConfig( 'Jets.FlavourTagging',
-        containerName='AnaJets',
-        selectionName='ftag' )
-    configSeq.setOptionValue ('.noEffSF', forCompare)
-    configSeq.setOptionValue ('.btagger', btagger)
-    configSeq.setOptionValue ('.btagWP', btagWP)
-    configSeq.setOptionValue ('.saveScores', 'All')
+    # disabling flavor tagging for Run 4, as the configuration just
+    # refuses to work on that
+    if geometry is not LHCPeriod.Run4:
 
-    if not forCompare:
-        configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
-            containerName='AnaJets.baselineJvt',
-            selectionName='ftag')
+        btagger = "DL1dv01"
+        btagWP = "FixedCutBEff_60"
+        configSeq += config.makeConfig( 'Jets.FlavourTagging',
+            containerName='AnaJets',
+            selectionName='ftag' )
+        configSeq.setOptionValue ('.noEffSF', forCompare)
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.saveScores', 'All')
+
+        if not forCompare:
+            configSeq += config.makeConfig( 'Jets.FlavourTaggingEventSF',
+                containerName='AnaJets.baselineJvt',
+                selectionName='ftag')
+            configSeq.setOptionValue ('.btagger', btagger)
+            configSeq.setOptionValue ('.btagWP', btagWP)
 
     if largeRJets :
         configSeq += config.makeConfig( 'Jets',
@@ -934,7 +938,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
         configSeq.setOptionValue ('.addPreselection', True)
 
     # Include and set up a basic run of the event selection algorithm config:
-    if not forCompare:
+    if not forCompare and geometry is not LHCPeriod.Run4:
         # configSeq += config.makeConfig( 'EventSelection', None )
         # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
         # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
@@ -994,9 +998,10 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
-    # disabling comparisons for triggers, because the config blocks do a lot
-    # more than the sequences
-    if not forCompare :
+    # disabling comparisons for triggers, because the config blocks do a
+    # lot more than the sequences.  also disabling for Run 4, not sure
+    # what the issue with that is.
+    if not forCompare and geometry is not LHCPeriod.Run4:
         # Include, and then set up the trigger analysis sequence:
         configSeq += config.makeConfig( 'Trigger' )
         configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )

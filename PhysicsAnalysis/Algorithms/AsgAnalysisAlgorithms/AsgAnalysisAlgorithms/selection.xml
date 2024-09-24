@@ -19,6 +19,7 @@
    <class name="CP::BootstrapGeneratorAlg" />
    <class name="CP::BootstrapGenerator" />
    <class name="CP::CopyNominalSelectionAlg" />
+   <class name="CP::EventDecoratorAlg" />
    <class name="CP::EventFlagSelectionAlg" />
    <class name="CP::EventStatusSelectionAlg" />
    <class name="CP::EventSelectionByObjectFlagAlg" />
