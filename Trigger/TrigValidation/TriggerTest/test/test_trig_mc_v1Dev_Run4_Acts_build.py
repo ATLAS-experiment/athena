@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+# art-description: Trigger test for Run4 with single muon
+# art-type: build
+# art-include: main/Athena
+# art-include: 24.0/Athena
+# Skipping art-output which has no effect for build tests.
+# If you create a grid version, check art-output in existing grid tests.
+
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+
+# Generate configuration run file
+run = ExecStep.ExecStep()
+run.type = 'athena'
+run.threads = 1
+run.input = 'Single_mu_Run4'
+run.job_options = 'TriggerJobOpts/runHLT.py'
+
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
+             'Trigger.enabledSignatures=["Muon","Egamma","Jet","Bjet"]',  #need to skip Tau temporarily and disabled does not work
+             'Trigger.useActsTracking=True',
+             'Trigger.doRuntimeNaviVal=True',
+             'ITk.doTruth=False',
+             'Tracking.doTruth=False',
+             'Trigger.enableL1CaloPhase1=False',
+             f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
+             ]
+
+# The full test configuration
+test = Test.Test()
+test.art_type = 'build'
+test.exec_steps = [run]
+check_log = CheckSteps.CheckLogStep('CheckLog')
+check_log.log_file = run.get_log_file_name()
+test.check_steps = [check_log]
+
+import sys
+sys.exit(test.run())

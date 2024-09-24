@@ -1,7 +1,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
-from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,9 +23,10 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
         DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                       ('PixelRDO_Cache', 'PixRDOCache'),
                       ('SCT_RDO_Cache', 'SctRDOCache'),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
-                      ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
+                      #enable later when BS ready
+                      #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.PixBSErrCacheKey ),
+                      #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTBSErrCacheKey ),
+                      #( 'IDCInDetBSErrContainer_Cache' , self.flags.Trigger.ITkTracking.SCTFlaggedCondCacheKey ),
                       ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
                       ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripSpacePointCache_Back'),
                       ('ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend', 'StoreGateSvc+ActsStripOverlapSpacePointCache_Back'),
@@ -126,7 +126,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
 
     acc.merge(ActsMainTrackFindingAlgCfg(self.flags, name="ActsTrackFindingAlg_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,SeedLabels=["PPP"],SeedContainerKeys=["ActsPixelSeeds"],UncalibratedMeasurementContainerKeys=["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature ,"ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature],EstimatedTrackParametersKeys=["ActsPixelEstimatedTrackParams"]))
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF, TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,name="ActsTrackParticleCreator_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_FTF], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_FTF))
 
     return acc
 
@@ -147,6 +147,6 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
     acc = ComponentAccumulator()
     from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,"ActsTrackParticleCreator_Ambi_"+self.signature, ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_IDTrig, TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_IDTrig))
+    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,"ActsTrackParticleCreator_Ambi_"+self.signature, ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], TrackParticlesOutKey=self.flags.Tracking.ActiveConfig.tracks_IDTrig))
 
     return acc
