@@ -43,8 +43,8 @@ namespace NSWL1 {
       m_incidentSvc->addListener(this,IncidentType::BeginEvent);
 
       if ( algo_name=="NSWL1Simulation" ) {
-        ITHistSvc* tHistSvc;
-        ATH_CHECK( service("THistSvc", tHistSvc) );
+        SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+        ATH_CHECK( tHistSvc.isValid() );
 
         m_tree = nullptr;
         std::string ntuple_name = algo_name+"Tree";
