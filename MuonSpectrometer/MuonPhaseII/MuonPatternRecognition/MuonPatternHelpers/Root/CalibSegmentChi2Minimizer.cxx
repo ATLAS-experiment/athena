@@ -5,7 +5,6 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
 #include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
-
 #include "GaudiKernel/PhysicalConstants.h"
 namespace {
     constexpr double c_inv{1./ Gaudi::Units::c_light};
@@ -69,7 +68,7 @@ namespace MuonR4{
         return m_locToGlob;
     }
     unsigned int CalibSegmentChi2Minimizer::NDim() const {
-        return toInt(AxisDefs::nPars);
+        return toInt(ParamDefs::nPars);
     }
     bool CalibSegmentChi2Minimizer::doTimeFit() const {
         return m_doT0Fit;
@@ -84,27 +83,26 @@ namespace MuonR4{
         return m_hits;
     }
     HitVec CalibSegmentChi2Minimizer::release(const double* pars) {
-        const Amg::Vector3D segPos{pars[toInt(AxisDefs::x0)],
-                                   pars[toInt(AxisDefs::y0)], 0.};
-
-        const Amg::Vector3D segDir = Amg::Vector3D(pars[toInt(AxisDefs::tanPhi)],
-                                                   pars[toInt(AxisDefs::tanTheta)], 1.).unit();
         
-        const double timeDelay = pars[toInt(AxisDefs::time)];
+        Parameters parVec{Parameters::Zero()};
+        for (int p = 0 ; p < toInt(ParamDefs::nPars); ++p) {
+            parVec[p] = pars[p];
+        }
+        const auto[segPos, segDir] = makeLine(parVec);
+        const double timeDelay = pars[toInt(ParamDefs::time)];
         HitVec released = m_calibrator->calibrate(m_ctx, std::move(m_hits), segPos, segDir, timeDelay);
         m_hits.clear();
         return released;
     }
     double CalibSegmentChi2Minimizer::DoEval(const double* pars) const {
       
-        /// 
-        const Amg::Vector3D segPos{pars[toInt(AxisDefs::x0)],
-                                   pars[toInt(AxisDefs::y0)], 0.};
-
-        const Amg::Vector3D segDir = Amg::Vector3D(pars[toInt(AxisDefs::tanPhi)],
-                                                   pars[toInt(AxisDefs::tanTheta)], 1.).unit();
-        
-        const double timeDelay = pars[toInt(AxisDefs::time)];
+        Parameters parVec{Parameters::Zero()};
+        for (int p = 0 ; p < toInt(ParamDefs::nPars); ++p) {
+            parVec[p] = pars[p];
+        }
+        const auto[segPos, segDir] = makeLine(parVec);
+   
+        const double timeDelay = pars[toInt(ParamDefs::time)];
         ATH_MSG_VERBOSE("Starting parameters  position: "<<Amg::toString(segPos)<<", direction: "<<Amg::toString(segDir)
                        <<", timeDelay: "<<timeDelay<<".");
    

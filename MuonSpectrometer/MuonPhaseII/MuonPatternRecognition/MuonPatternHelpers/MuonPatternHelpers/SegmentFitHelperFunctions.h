@@ -127,6 +127,11 @@ namespace MuonR4{
                      const HoughHitType& uncalibHit,
                      MsgStream& msg);
 
+      int driftSign(const Amg::Vector3D& posInChamber,
+                    const Amg::Vector3D& dirInChamber,
+                    const CalibratedSpacePoint& calibHit,
+                    MsgStream& msg);
+
       /** @brief Calculates the chi2 per measurement and the chi2 itself after the fit is finished. Outlier hits have a non-vanishing entry
        *         in the chi2 per measurements but do not contribute to the overall chi2. Hits which cannot be calibrated do not contribute.
        */

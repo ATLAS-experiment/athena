@@ -22,10 +22,12 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, mdtErrorScaleFactor=2.0)))
-    kwargs.setdefault("ResoSeedHitAssoc", 3. )
+    kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
     kwargs.setdefault("useMinuit", False)
     kwargs.setdefault("fitSegmentT0", False)
+    kwargs.setdefault("doBeamspotConstraint", True)
+    
 
     theAlg = CompFactory.MuonR4.SegmentFittingAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)

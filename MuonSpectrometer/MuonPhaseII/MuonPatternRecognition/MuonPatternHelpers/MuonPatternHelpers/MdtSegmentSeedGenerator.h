@@ -23,17 +23,21 @@ namespace MuonR4 {
      *         within the parameter resolution are generated, then the latter one is skipped. */
     class MdtSegmentSeedGenerator: public AthMessaging {
         public:
+            using HitVec = SpacePointPerLayerSorter::HitVec;
             
             /** @brief Configuration switches of the module  */
             struct Config{
                 /** @brief Upper cut on the hit chi2 w.r.t. seed in order to be associated to the seed*/
-                double chi2PerHit{5.};
+                double hitPullCut{5.};
                 /** @brief Try at the first time the pattern seed as candidate */
-                bool startWithPattern{true};
+                bool startWithPattern{false};
                 /** @brief How many drift circles may be on a layer to be used for seeding */
                 unsigned int busyLayerLimit{2};
                 /** @brief How many drift circle hits needs the seed to contain in order to be valid */
-                unsigned int nMdtHitCut{4};
+                unsigned int nMdtHitCut{3};
+                /** @brief Hit cut based on the fraction of collected tube layers. 
+                 *         The seed must pass the tighter of the two requirements.  */
+                double nMdtLayHitCut{2./3.};
                 /** @brief Once a seed with even more than initially required hits is found,
                  *         reject all following seeds with less hits */
                 bool tightenHitCut{true};
@@ -47,12 +51,30 @@ namespace MuonR4 {
                  *         are considered to have the same angle. If intercept & angle
                  *         are equivalent, then the second seed is rejected as duplicate */
                 double tanThetaReso{250.* Gaudi::Units::mrad};
-                /** @brief Scale factor of the drift radius uncertainty estimates */
-                double uncertScale{2.};
+                /** @brief Recalibrate the seed drift circles from the initial estimate  */
+                bool recalibSeedCircles{false};
                 /** @brief Pointer to the space point calibrator */
                 const ISpacePointCalibrator* calibrator{nullptr};
+                /**  */
+                bool fastSeedFit{false};
+                /** @brief Maximum number of iterations in the fast segment fit */
+                unsigned int nMaxIter{100};
+                /** @brief Precision cut off in the fast segment fit */
+                double precCutOff{1.e-6};
             };
-        
+            /** @brief Helper struct from a generated Mdt seed */
+            struct DriftCircleSeed{
+                /** @brief Seed parameters */
+                SegmentFit::Parameters parameters{SegmentFit::Parameters::Zero()};
+                /** @brief List of calibrated measurements */
+                std::vector<std::unique_ptr<CalibratedSpacePoint>> measurements{};
+                /** @brief Iterations to obtain the seed */
+                unsigned int nIter{0};
+                /** @brief Seed chi2 */
+                double chi2{0.};
+                /** @brief Pointer to the parent bucket */
+                const SpacePointBucket* parentBucket{nullptr};
+            };
         
         /** @brief Standard constructor taking the segmentSeed to start with and then few
          *         configuration tunes
@@ -65,41 +87,65 @@ namespace MuonR4 {
 
         ~MdtSegmentSeedGenerator();
         /** @brief returns the next seed in the row */
-        std::optional<SegmentSeed> nextSeed(const EventContext& ctx);
+        std::optional<DriftCircleSeed> nextSeed(const EventContext& ctx);
         /** @brief Returns how many seeds have been generated */
         unsigned int numGenerated() const;
     
         private:
-            /** @brief Tries to build the seed from the two hits. Fails if the solution is invalid
-             *         or if the seed has already been built before
-             *  @param topHit: Hit candidate from the upper layer
-             *  @param bottomHit: Hit candidate from the lower layer
-             *  @param sign: Object encoding whether the tangent is left / right & also
-             *               whether to pick the positive or negative solution. */
-            std::optional<SegmentSeed> buildSeed(const EventContext& ctx,
-                                                 const HoughHitType & topHit, 
-                                                 const HoughHitType & bottomHit, 
-                                                 const std::array<int,3> & signs ); 
-        
-            /** @brief Prepares the generator to generate the seed from the next pair of drift circles */
-            void moveToNextCandidate();
-            Config m_cfg{};
-            
             /** @brief Sign combinations to draw the 4 lines tangent to 2 drift circles
              *         The first two are indicating whether the tangent is left/right to the
              *         first/second circle. The last sign is picking the sign of the 
              *         solution arising from the final quadratic equation. */
-            constexpr static std::array<std::array<int,3>,8> s_signCombos{
-                std::array{-1,-1,-1}, std::array{-1,-1, 1}, 
-                std::array{-1, 1,-1}, std::array{-1, 1, 1}, 
-                std::array{ 1,-1,-1}, std::array{ 1,-1, 1}, 
-                std::array{ 1, 1,-1}, std::array{ 1, 1, 1}
+            using SignComboType = std::array<int, 2>;
+            constexpr static std::array<SignComboType,4> s_signCombos{
+                std::array{ 1, 1}, std::array{ 1,-1}, 
+                std::array{-1,-1}, std::array{-1, 1},  
             };
+            /** @brief Cache of all solutions seen thus far */
+            struct SeedSolution{
+                /** @brief: Theta of the line */
+                double theta{0.};
+                /** @brief Intersecpt of the line */
+                double Y0{0.};
+                /** @brief: Uncertainty on the slope*/
+                double dTheta{0.};
+                /** @brief: Uncertainty on the intercept */
+                double dY0{0.};
+                /** @brief Used hits in the seed */
+                HitVec seedHits{};
+                /** @brief Vector of radial signs of the valid hits */
+                std::vector<int> solutionSigns{};
+
+                friend std::ostream& operator<<(std::ostream& ostr, const SeedSolution& sol) {
+                    return sol.print(ostr);
+                }
+                std::ostream& print(std::ostream& ostr) const;
+            };
+
+
+            /** @brief Tries to build the seed from the two hits. Fails if the solution is invalid
+             *         or if the seed has already been built before
+             *  @param topHit: Hit candidate from the upper layer
+             *  @param bottomHit: Hit candidate from the lower layer
+             *  @param sign: Object encoding whether the tangent is left / right  */
+            std::optional<DriftCircleSeed> buildSeed(const EventContext& ctx,
+                                                     const HoughHitType & topHit, 
+                                                     const HoughHitType & bottomHit, 
+                                                     const SignComboType& signs); 
+            
+            /** @brief Refine the seed by performing a fast Mdt segment fit. 
+             *         If the fit converged, the fit parameters and its errors are returned
+             *         as optional. Otherwise nullopt is returned
+             *  @param seed: Seed built from the tangent adjacent to the two seed circles */
+            void fitDriftCircles(DriftCircleSeed& seed) const;
+            
+            /** @brief Prepares the generator to generate the seed from the next pair of drift circles */
+            void moveToNextCandidate();
+            Config m_cfg{};
+            
+
             const SegmentSeed* m_segmentSeed{nullptr};
             SpacePointPerLayerSorter m_hitLayers{m_segmentSeed->getHitsInMax()};
-            using HitVec = SpacePointPerLayerSorter::HitVec;
-        
-            /** @brief Indices indicating which element in the row is built next */
             
             /** @brief Considered layer to pick the top drift circle from*/
             std::size_t m_upperLayer{0};
@@ -111,22 +157,6 @@ namespace MuonR4 {
             std::size_t m_upperHitIndex{0};
             /** @brief Explicit hit to pick in the selected top layer */
             std::size_t m_signComboIndex{0};
-
-            /** @brief Cache of all solutions seen thus far */
-            struct SeedSolution{
-                /** @brief: Theta of the line */
-                double tanTheta{0.};
-                /** @brief Intersecpt of the line */
-                double Y0{0.};
-                /** @brief: Uncertainty on the slope*/
-                double dTanTheta{0.};
-                /** @brief: Uncertainty on the intercept */
-                double dY0{0.};
-                /** @brief Used hits in the seed */
-                HitVec seedHits{};
-                /** @brief Vector of radial signs of the valid hits */
-                std::vector<int> solutionSigns{};
-            };
 
             std::vector<SeedSolution> m_seenSolutions{};
             /** Counter on how many seeds have been generated */

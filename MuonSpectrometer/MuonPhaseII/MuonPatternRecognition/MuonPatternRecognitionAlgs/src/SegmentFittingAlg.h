@@ -7,6 +7,8 @@
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
 
+
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
 #include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
 
@@ -54,17 +56,22 @@ namespace MuonR4{
             template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
                                                                         const SG::ReadHandleKey<ContainerType>& key,
                                                                         const ContainerType* & contToPush) const;
-            
-            SegmentFitResult fitSegmentHits(const EventContext& ctx,
-                                            const ActsGeometryContext& gctx,
-                                            const Parameters& startPars,
-                                            const std::vector<HoughHitType>& unCalibHits) const;
-            
+            /** @brief Executes the segment fit with start parameters. The returned fit result
+             *         indicates whether the fit was a success and all relevant output parameters
+             *  @brief ctx: Event context needed to access the calibration constants of the hits
+             *  @brief gctx: Geometry context needed to place the segment globally within ATLAS to
+             *               calculate the nominal time of arrival
+             *  @brief startPars: Segment parameters preestimated from the SegmentSeed 
+             *                    (either  hough pattern or two drift circle seed)
+             *  @brief calibHits: Vector of strip & mdt hits to consider for the fit */
             SegmentFitResult fitSegmentHits(const EventContext& ctx,
                                             const ActsGeometryContext& gctx,
                                             const Parameters& startPars,
                                             SegmentFitResult::HitVec&& calibHits) const;
-            
+            /** @brief  */
+            const xAOD::MuonSegment* getTruthSegment(const EventContext& ctx,
+                                                     const std::unordered_set<const xAOD::MuonSimHit*>& matchedSeedHits) const;
+
             std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
                                                                  const ActsGeometryContext& gctx,
                                                                  const SegmentSeed* seed) const;             
@@ -90,8 +97,10 @@ namespace MuonR4{
                            const ActsGeometryContext& gctx,
                            const SegmentSeed& seed,
                            SegmentFitResult& toRecover) const;
-            /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes which cannot be crossed
-             *         by the segment. 
+            /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes 
+             *         which cannot be crossed by the segment. 
+             *  @param gctx: Geometry context needed to calculate the nominal time of arrival,
+             *               if the time fit is activated
              *  @param candidate: Reference of the segment candidate to prune. */
             void eraseWrongHits(const ActsGeometryContext& gctx, SegmentFitResult& candidate) const;            
             
@@ -101,8 +110,13 @@ namespace MuonR4{
             void visualizeFit(const EventContext& ctx,
                               const SegmentFitResult& fitResult,
                               const SpacePointBucket* bucket,
-                              const std::string& extra_label,
+                              const std::string& extraLabel,
                               std::vector<std::unique_ptr<TObject>> primitives={}) const; 
+            
+            void visualizeFitPhi(const EventContext& ctx,
+                                 const SegmentFitResult& fitResult,
+                                 const SpacePointBucket* bucket,
+                                 const std::string& extraLabel) const;
 
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
@@ -144,6 +158,8 @@ namespace MuonR4{
             mutable std::atomic<unsigned int> m_canvCounter ATLAS_THREAD_SAFE{0};
             /// Draw maximally 5000 segment fit visualizations
             Gaudi::Property<unsigned int> m_nDrawCanvases{this, "MaxCanvases", 5000};
+
+            const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
     };
 }
 

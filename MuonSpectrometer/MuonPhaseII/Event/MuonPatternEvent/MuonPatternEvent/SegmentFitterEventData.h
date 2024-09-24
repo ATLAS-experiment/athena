@@ -20,13 +20,13 @@ namespace MuonR4{
 
         std::string makeLabel(const Parameters& pars);
         std::string toString(const Parameters& pars);
-        std::string toString(const AxisDefs a);
+        std::string toString(const ParamDefs par);
     }
 
 
     struct SegmentFitResult {
         SegmentFitResult() = default;
-        using AxisDefs = SegmentFit::AxisDefs;
+        using ParamDefs = SegmentFit::ParamDefs;
         using Parameters = SegmentFit::Parameters;
         using Covariance = SegmentFit::Covariance;
 
