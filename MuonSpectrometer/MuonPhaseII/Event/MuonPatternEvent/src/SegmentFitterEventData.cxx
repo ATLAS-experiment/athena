@@ -2,51 +2,57 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPatternEvent/SegmentFitterEventData.h>
-
+#include <GaudiKernel/SystemOfUnits.h>
+#include <CxxUtils/sincos.h>
 #include <vector>
 #include <array>
 #include <sstream>
+#include <format>
+
 namespace MuonR4{
     namespace SegmentFit {
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
-            return std::make_pair(Amg::Vector3D(pars[toInt(AxisDefs::x0)], 
-                                                pars[toInt(AxisDefs::y0)],0.),
-                                    Amg::Vector3D(pars[toInt(AxisDefs::tanPhi)],
-                                                pars[toInt(AxisDefs::tanTheta)], 1.).unit());
+            const CxxUtils::sincos theta{pars[toInt(ParamDefs::theta)]}, phi{pars[toInt(ParamDefs::phi)]}; 
+            return std::make_pair(Amg::Vector3D(pars[toInt(ParamDefs::x0)], 
+                                                pars[toInt(ParamDefs::y0)],0.),
+                                    Amg::Vector3D(phi.cs*theta.sn,phi.sn*theta.sn, theta.cs));
         }
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};
-            sstr<<"x_{0}="<<pars[toInt(AxisDefs::x0)]<<", y_{0}="<<pars[toInt(AxisDefs::y0)];
-            sstr<<", tan(#theta)="<<pars[toInt(AxisDefs::tanTheta)]<<", tan(#phi)="<<pars[toInt(AxisDefs::tanPhi)];
-            sstr<<", t_{0}="<<pars[toInt(AxisDefs::time)];
+            sstr<<"x_{0}="<<std::format("{:.2f}", pars[toInt(ParamDefs::x0)])<<", ";
+            sstr<<"y_{0}="<<std::format("{:.2f}", pars[toInt(ParamDefs::y0)])<<", ";
+            sstr<<std::format("#theta={:.3f}", pars[toInt(ParamDefs::theta)] / Gaudi::Units::deg )<<", ";
+            sstr<<std::format("#phi={:.3f}", pars[toInt(ParamDefs::phi)] / Gaudi::Units::deg)<<", ";
+            sstr<<"t_{0}="<<std::format("{:.1f}", pars[toInt(ParamDefs::time)]);
             return sstr.str();
         }
         std::string toString(const Parameters& pars) {
             std::stringstream sstr{};
-            for (int p = 0; p < toInt(AxisDefs::nPars); ++p) {
-                const AxisDefs pe = static_cast<AxisDefs>(p);
-                sstr<<toString(pe)<<"="<<pars[toInt(pe)]<<", ";
-            }
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::x0), pars[toInt(ParamDefs::x0)]);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::y0), pars[toInt(ParamDefs::y0)]);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::theta), pars[toInt(ParamDefs::theta)]/Gaudi::Units::deg);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::phi),  pars[toInt(ParamDefs::phi)]/Gaudi::Units::deg);
+            sstr<< std::format("{}={:.2f}, ",toString(ParamDefs::time), pars[toInt(ParamDefs::time)]);
             return sstr.str();
         }
-        std::string toString(const AxisDefs a) {
+        std::string toString(const ParamDefs a) {
             switch (a){
-                case AxisDefs::x0:{
+                case ParamDefs::x0:{
                     return "x0";
                     break;
-                } case AxisDefs::y0: {
+                } case ParamDefs::y0: {
                     return "y0";
                     break;
-                } case AxisDefs::tanTheta: {
-                    return "tanTheta";
+                } case ParamDefs::theta: {
+                    return "theta";
                     break;
-                } case AxisDefs::tanPhi: {
-                    return "tanPhi";
+                } case ParamDefs::phi: {
+                    return "phi";
                     break;
-                } case AxisDefs::time: {
+                } case ParamDefs::time: {
                     return "time";
                     break;
-                } case AxisDefs::nPars:
+                } case ParamDefs::nPars:
                     break;
             }
             return "";

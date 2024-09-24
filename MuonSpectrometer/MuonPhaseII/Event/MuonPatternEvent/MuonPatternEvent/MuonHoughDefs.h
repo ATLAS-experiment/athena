@@ -26,19 +26,27 @@ namespace MuonR4{
   using ActsPeakFinderForMuonCfg = Acts::HoughTransformUtils::PeakFinders::IslandsAroundMaxConfig;
 
   namespace SegmentFit {
-        enum class AxisDefs{
+        enum class ParamDefs{
             y0 = 0,
-            tanTheta = 1,
+            theta = 1,
             x0 = 2,
-            tanPhi = 3,
+            phi = 3,
             time = 4,
             nPars
         };
-        constexpr int toInt(const AxisDefs p) {
+        enum class AxisDefs{
+            phi = 0,
+            eta = 1,
+            t0 = 2,
+        };
+        constexpr int toInt(const ParamDefs p) {
             return static_cast<int>(p);
         }
-        using Parameters = AmgVector(toInt(AxisDefs::nPars));
-        using Covariance = AmgSymMatrix(toInt(AxisDefs::nPars));
+        constexpr int toInt(const AxisDefs a) {
+          return static_cast<int>(a);
+        }
+        using Parameters = AmgVector(toInt(ParamDefs::nPars));
+        using Covariance = AmgSymMatrix(toInt(ParamDefs::nPars));
   }
 
 }

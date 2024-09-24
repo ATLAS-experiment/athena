@@ -6,13 +6,27 @@
 #include <MuonSpacePointCalibrator/ISpacePointCalibrator.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
-
+#include <EventPrimitives/EventPrimitivesHelpers.h>
+#include <CxxUtils/sincos.h>
+#include <format>
 
 namespace MuonR4{
     using namespace SegmentFit;
     using namespace SegmentFitHelpers;
     using HitVec = SpacePointPerLayerSorter::HitVec;
 
+    double driftCov(const CalibratedSpacePoint& dcHit){
+        return std::visit([](const auto& cov) ->double{
+            return Amg::error(cov, toInt(AxisDefs::eta));
+        }, dcHit.covariance());
+    }
+
+    std::ostream& MdtSegmentSeedGenerator::SeedSolution::print(std::ostream& ostr) const{
+        ostr<<"two circle solution with ";
+        ostr<<"theta: "<<theta / Gaudi::Units::deg<<" pm "<<dTheta / Gaudi::Units::deg<<", ";
+        ostr<<"y0: "<<Y0<<" pm "<<dY0;
+        return ostr;
+    }
     MdtSegmentSeedGenerator::~MdtSegmentSeedGenerator() = default;
     MdtSegmentSeedGenerator::MdtSegmentSeedGenerator(const std::string& name,
                                                      const SegmentSeed* segmentSeed, 
@@ -93,16 +107,24 @@ namespace MuonR4{
             }
         }
     }
-    std::optional<SegmentSeed> MdtSegmentSeedGenerator::nextSeed(const EventContext& ctx) {
-        std::optional<SegmentSeed> found = std::nullopt; 
+    std::optional<MdtSegmentSeedGenerator::DriftCircleSeed> 
+        MdtSegmentSeedGenerator::nextSeed(const EventContext& ctx) {
+        std::optional<DriftCircleSeed> found = std::nullopt; 
         if (!m_nGenSeeds && m_cfg.startWithPattern) {
             ++m_nGenSeeds;
-            found = *m_segmentSeed;
+            found = std::make_optional<DriftCircleSeed>();
+            found->parameters = m_segmentSeed->parameters();
+            found->measurements = m_cfg.calibrator->calibrate(ctx,
+                                                              m_segmentSeed->getHitsInMax(),
+                                                              m_segmentSeed->positionInChamber(),
+                                                              m_segmentSeed->directionInChamber(),0.);
+            found->parentBucket = m_segmentSeed->parentBucket();
+            
             SeedSolution patternSeed{};
             patternSeed.seedHits.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
             patternSeed.Y0 = m_segmentSeed->interceptY();
-            patternSeed.tanTheta = m_segmentSeed->tanTheta();
+            patternSeed.theta = m_segmentSeed->tanTheta();
             m_seenSolutions.push_back(std::move(patternSeed));
             return found;
         }
@@ -125,218 +147,254 @@ namespace MuonR4{
         }
         return std::nullopt; 
     }
-    /* Calculate the line parameters, y_{0}  & tanTheta from 2 measurements:
-     * 
-     *      y_{0} = T_{y1} - tanTheta * T_{z1} +- r_{1} * sqrt( 1+ tanTheta^{2})
-     *      y_{0} = T_{y2} - tanTheta * T_{z2} +- r_{2} * sqrt( 1+ tanTheta^{2})
-     * 
-     * --> 0 = T_{y1} - T_{y2} - tanTheta*[T_{z1} - T_{z2}] + (+-r_{1} - +-r_{2})*sqrt( 1+ tanTheta^{2})
-     * -->     T_{y2} - T_{y1} - tanTheta*[T_{z2} - T_{z1}] = (+-r_{2} - +-r_{1})*sqrt( 1+ tanTheta^{2})
-     *      with D = T_{2} - T_{1}, R = (+-r_{1} - +-r_{2}) 
-     *          D_{y} - tanTheta* D_{z} = R*sqrt(1 + tanTheta^{2})
-     *     D_{y}^{2} - 2 D_{y}*D_{z} * tanTheta + D_{z}^{2} * tanTheta^{2} = R^{2}(1+tanTheta^{2}) 
-     *    (D_{z}^{2} -  R^{2})* tanTheta^{2} - 2 D_{y}*D_{z} * tanTheta + D_{y}^{2} - R^{2} = 0
-     * 
-     *                       2* D_{y}*D_{z} +- sqrt ( 4 *(D_{y}*D_{z})^{2} - 4 * (D_{y}^{2} - R^{2}) * (D_{z}^{2} -  R^{2}))
-     *       tanTheta =     -----------------------------------------------------------------------------------------------
-     *                                            2 * (D_{z}^{2} -  R^{2})
-     * 
-     *      simplify the sqrt term -->
-     *                      D_{y}*D_{z} +- |R|sqrt (D_{z}^{2} + D_{y}^{2} - R^{2})    D_{y}*D_{z} +- |R|*S
-     *       tanTheta =   -------------------------------------------------------- =  --------------------
-     *                                      (D_{z}^{2} -  R^{2})                             K
-     * 
-     *    dTanTheta     K*( +- dR/dr_{i} * S - +-|R|^{2}dR / dr_{i} / S) - (D_{y}*D_{z} +- S)(-2*R dR/dr_{i})
-     *    ---------  =  -------------------------------------------------------------------------------------
-     *       dr_{i}                            K^{2}
-     * 
-     *    dy_{0}          dtanTheta                                                    tanTheta          dtanTheta
-     *   --------  =  -  ---------- T_{zi} +- sqrt( 1 + tanTheta^{2}) +- r_{i}   -------------------  * ---------- 
-     *    dr_{i}           dr_{i}                                                sqrt(1+ tanTheta^2)       dr_{i}   */
-    std::optional<SegmentSeed>  
+    std::optional<MdtSegmentSeedGenerator::DriftCircleSeed>  
         MdtSegmentSeedGenerator::buildSeed(const EventContext& ctx,
                                            const HoughHitType & topHit, 
                                            const HoughHitType & bottomHit, 
-                                           const std::array<int,3> & signs) {
+                                           const SignComboType& signs) {
         
-        const auto* bottomPrd =static_cast<const xAOD::MdtDriftCircle*>(bottomHit->primaryMeasurement()); 
-        const auto* topPrd =static_cast<const xAOD::MdtDriftCircle*>(topHit->primaryMeasurement());
+        const auto* bottomPrd = static_cast<const xAOD::MdtDriftCircle*>(bottomHit->primaryMeasurement()); 
+        const auto* topPrd = static_cast<const xAOD::MdtDriftCircle*>(topHit->primaryMeasurement());
         if (bottomPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime ||
             topPrd->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                 return std::nullopt;
-        }
-        
+        }   
+        const int signTop = signs[0];
+        const int signBot = signs[1];
+        double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
         const Amg::Vector3D& bottomPos{bottomHit->positionInChamber()};
         const Amg::Vector3D& topPos{topHit->positionInChamber()};
         const Muon::IMuonIdHelperSvc* idHelperSvc{topHit->chamber()->idHelperSvc()};
-        const Amg::Vector3D D = topPos - bottomPos; 
-        ATH_MSG_VERBOSE("Bottom tube "<<idHelperSvc->toString(bottomHit->identify())<<" "<<Amg::toString(bottomPos)
-                        <<", driftRadius: "<<bottomHit->driftRadius()<<" - top tube "<<idHelperSvc->toString(topHit->identify())
-                        <<" "<<Amg::toString(topPos)<<", driftRadius: "<<topHit->driftRadius()
-                        <<"Distance: "<<Amg::toString(D));
+        const Amg::Vector3D D = topPos - bottomPos;
+        const double thetaTubes = std::atan2(D.y(), D.z()); 
+        const double distTubes =  std::hypot(D.y(), D.z());
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<": Bottom tube "<<idHelperSvc->toString(bottomHit->identify())<<" "<<Amg::toString(bottomPos)
+                    <<", driftRadius: "<<bottomHit->driftRadius()<<" - top tube "<<idHelperSvc->toString(topHit->identify())
+                    <<" "<<Amg::toString(topPos)<<", driftRadius: "<<topHit->driftRadius()
+                    <<", tube distance: "<<Amg::toString(D));
 
-        int signTop = signs[0];
-        int signBot = signs[1];
-        int solSign = signs[2]; 
-
-        const double R = signBot *bottomHit->driftRadius() - signTop * topHit->driftRadius(); 
-        double det = D.z()*D.z() + D.y()*D.y() - R * R; 
-        if (det < 0) {
-            ATH_MSG_WARNING("For one reason or another the drift radii are larger than the tube pitch "
-                            <<bottomHit->chamber()->idHelperSvc()->toString(bottomHit->identify()));
-            return std::nullopt; 
+        DriftCircleSeed candidateSeed{};
+        candidateSeed.parameters = m_segmentSeed->parameters();
+        candidateSeed.parentBucket = m_segmentSeed->parentBucket();
+        double theta{thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.))};
+        const CxxUtils::sincos initTheta{theta};
+        Amg::Vector3D seedDir{0, initTheta.sn, initTheta.cs};
+        double Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
+        double combDriftUncert{std::sqrt(bottomPrd->driftRadiusCov() + topPrd->driftRadiusCov())};
+        if (m_cfg.recalibSeedCircles) {
+            candidateSeed.parameters[toInt(ParamDefs::theta)] = theta;
+            candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / initTheta.cs;
+            /// Create a new line position & direction which also takes the
+            /// potential phi estimates into account
+            const auto [linePos, lineDir] = makeLine(candidateSeed.parameters);
+            auto calibBottom = m_cfg.calibrator->calibrate(ctx, bottomHit, linePos, lineDir, 
+                                                           candidateSeed.parameters[toInt(ParamDefs::time)]);
+            auto calibTop = m_cfg.calibrator->calibrate(ctx, topHit, linePos, lineDir, 
+                                                        candidateSeed.parameters[toInt(ParamDefs::time)]);
+            R = signBot * calibBottom->driftRadius() - signTop * calibTop->driftRadius();
+            /// Recalculate the seed with the calibrated parameters
+            theta =  thetaTubes - std::asin(std::clamp(R / distTubes, -1., 1.));
+            const CxxUtils::sincos initTheta{theta};
+            seedDir = Amg::Vector3D{0, initTheta.sn, initTheta.cs};
+            Y0 = bottomPos.y()*seedDir.z() - bottomPos.z()*seedDir.y() + signBot*bottomHit->driftRadius();
+            combDriftUncert = std::sqrt(driftCov(*calibBottom) + driftCov(*calibTop));
         }
-        const double sqrtTerm = std::abs(R) * std::sqrt(det); 
-        const double denom = D.z()*D.z() -R*R;
-        const double tanTheta = (D.y()*D.z() + solSign *sqrtTerm) / denom;
-        const double csec = std::hypot(1., tanTheta);
-        const double Y0 = bottomPos.y() - tanTheta * bottomPos.z() + signBot * bottomHit->driftRadius()*csec;
-        const double Y1 = topPos.y() - tanTheta * topPos.z() + signTop * topHit->driftRadius()*csec;
-        /// Reject invalid solutions... Not totally clear why not all 8 converge
-        if (std::abs(Y0 -Y1) > std::numeric_limits<float>::epsilon()) {
-            ATH_MSG_VERBOSE("Mismatch between tube intercepts: "<<Y0<<" vs. "<<Y1);
-            return std::nullopt;
-        }
-
-        auto dTanTheta = [&](const HoughHitType& hit){
-            const int dR = hit == bottomHit? signBot : -signTop;
-            return  ( dR*solSign*sqrtTerm - solSign*R*R*dR/sqrtTerm) / denom - (D.y()*D.z() + solSign*sqrtTerm)*(-2*R*dR)/ (denom*denom);
-        };
-        auto dY = [&](const HoughHitType& hit) {
-            const double dTan = dTanTheta(hit);
-            const int sign = hit == bottomHit ? signBot : signTop;
-            return - hit->positionInChamber().z() * dTan + sign * csec + sign*hit->driftRadius()* tanTheta/ csec * dTan; 
-        };
-
-        /// Add the solution to the list. That we don't iterate twice over it
-        SeedSolution solCandidate{};
-        solCandidate.Y0 = Y0;
-        solCandidate.tanTheta = tanTheta;
-        solCandidate.dTanTheta = m_cfg.uncertScale * std::hypot(dTanTheta(bottomHit) * bottomPrd->driftRadiusUncert(),
-                                                                dTanTheta(topHit) * topPrd->driftRadiusUncert());
-
-        solCandidate.dY0 = m_cfg.uncertScale * std::hypot(dY(bottomHit) * bottomPrd->driftRadiusUncert(),
-                                                          dY(topHit) * topPrd->driftRadiusUncert());
-
-        ATH_MSG_VERBOSE("Test new solution tanTheta: "<<solCandidate.tanTheta<<"+-"<<solCandidate.dTanTheta
-                    <<", Y0: "<<solCandidate.Y0<<"+-"<<solCandidate.dY0);
-        /// Check whether the seed has been seen before
-        if (std::find_if(m_seenSolutions.begin(), m_seenSolutions.end(),
-                        [&solCandidate] (const SeedSolution& seen) {
-                            return std::abs(seen.Y0 - solCandidate.Y0) < std::hypot(seen.dY0, solCandidate.dY0) &&
-                                   std::abs(seen.tanTheta - solCandidate.tanTheta) < std::hypot(seen.dTanTheta, solCandidate.dTanTheta);
-                        }) != m_seenSolutions.end()){
-            return std::nullopt;
-        }
-        solCandidate.seedHits.resize(2*m_hitLayers.mdtHits().size());
-        solCandidate.solutionSigns.resize(2*m_hitLayers.mdtHits().size());
-
-        const auto covScale = [&solCandidate] (const double cov) {
-            return cov / (cov + solCandidate.dTanTheta*solCandidate.dTanTheta + solCandidate.dY0 * solCandidate.dY0);
-        };
-        SegmentFit::Parameters candidatePars = m_segmentSeed->parameters();
-        candidatePars[toInt(AxisDefs::y0)] = Y0;
-        candidatePars[toInt(AxisDefs::tanTheta)] = tanTheta;
-            
-        const auto [linePos, lineDir] = makeLine(candidatePars);
         
-        HitVec assocHits{};
-        unsigned int nMdt{0}, nLayer{0};
-        /** Check for the best Mdt hit per each layer */
-        for (const std::vector<HoughHitType>& hitsInLayer : m_hitLayers.mdtHits()) {
-            HoughHitType bestHit{nullptr}, secBestHit{nullptr};
-            double bestChi2{m_cfg.chi2PerHit};
+        candidateSeed.parameters[toInt(ParamDefs::theta)] = theta;
+        candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / seedDir.z();
+
+        const Amg::Vector3D seedPos = Y0 / seedDir.z() * Amg::Vector3D::UnitY();
+
+        assert(std::abs(topPos.y()*seedDir.z() - topPos.z() * seedDir.y() + signTop*topHit->driftRadius() - Y0) < std::numeric_limits<float>::epsilon() );
+        ATH_MSG_VERBOSE("Candidate seed theta: "<<theta<<", tanTheta: "<<(seedDir.y() / seedDir.z())<<", y0: "<<Y0/seedDir.z());
+
+        SeedSolution solCandidate{};
+        solCandidate.Y0 = seedPos[toInt(ParamDefs::y0)];
+        solCandidate.theta = theta;
+        /// d/dx asin(x) = 1 / sqrt(1- x*x)
+        solCandidate.dTheta =  combDriftUncert / std::sqrt(1 - std::pow(std::clamp(R / distTubes, -1., 1.), 2)) / distTubes;
+        solCandidate.dY0 =  std::hypot(-bottomPos.y()*seedDir.y() + bottomPos.z()*seedDir.z(), 1.) * solCandidate.dTheta;
+        ATH_MSG_VERBOSE("Test new "<<solCandidate<<".");
+
+        using CalibSpacePointPtr = ISpacePointCalibrator::CalibSpacePointPtr;
+        unsigned int nMdt{0};
+        /** Collect all hits close to the seed line */
+        for (const std::vector<HoughHitType>& hitsInLayer : m_hitLayers.mdtHits()) {           
             for (const HoughHitType testMe : hitsInLayer){
-                ISpacePointCalibrator::CalibSpacePointPtr calibHit = m_cfg.calibrator->calibrate(ctx,testMe, linePos,lineDir, 0.);
+                CalibSpacePointPtr calibHit = m_cfg.calibrator->calibrate(ctx,testMe, seedPos, seedDir, 0.);
                 if (!calibHit || calibHit->fitState() != CalibratedSpacePoint::State::Valid) {
                     continue;
                 }
-                const double chi2 = SegmentFitHelpers::chiSqTermMdt(linePos, lineDir, *calibHit, msg())*covScale( testMe->covariance()(Amg::y,Amg::y));              
+                const double pull = std::sqrt(SegmentFitHelpers::chiSqTermMdt(seedPos, seedDir, *calibHit, msg()));            
                 ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
-                            <<" "<<Amg::toString(testMe->positionInChamber())<<", chi2: "<<chi2);
-                /// Add all hits with a chi2 better than 5
-                if (chi2 < bestChi2) {
-                    secBestHit = bestHit;
-                    bestHit = testMe;
-                    bestChi2 = chi2;
-                }
-            }
-            solCandidate.seedHits[2*nLayer] = bestHit;
-            solCandidate.seedHits[2*nLayer +1] = secBestHit;
-            ++nLayer;
-            if (!bestHit) {
-                continue;
-            }
-            assocHits.push_back(bestHit);
-            ++nMdt;
-            if (secBestHit && driftSign(linePos,lineDir,bestHit, msg()) != driftSign(linePos,lineDir,secBestHit, msg())) {
-                ATH_MSG_VERBOSE("Add second hit to the seed.");
-                assocHits.push_back(secBestHit);
-                ++nMdt;               
+                            <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);              
+                if (pull < m_cfg.hitPullCut) {
+                    solCandidate.seedHits.emplace_back(calibHit->spacePoint());
+                    candidateSeed.measurements.push_back(std::move(calibHit));
+                    ++nMdt;
+                } 
             }
         }
-        /** Reject seeds with too litle mdt hit association */
-        if (nMdt < m_cfg.nMdtHitCut) {
+        /** Reject seeds with too litle Mdt hit association */
+        if (1.*nMdt < std::max(1.*m_cfg.nMdtHitCut, m_cfg.nMdtLayHitCut * m_hitLayers.mdtHits().size())) {
             return std::nullopt;
         }
         /* Calculate the left-right signs of the used hits */
         if (m_cfg.overlapCorridor) {
-            solCandidate.solutionSigns = driftSigns(linePos, lineDir, solCandidate.seedHits, msg());
+            solCandidate.solutionSigns = driftSigns(seedPos, seedDir, solCandidate.seedHits, msg());
             ATH_MSG_VERBOSE("Circle solutions for seed "<<idHelperSvc->toStringChamber(bottomHit->identify())<<" - "
-                           <<"Y0: "<<solCandidate.Y0<<", tanTheta: "<<solCandidate.tanTheta<<", cricle signs: "<<solCandidate.solutionSigns);
-        
+                           <<solCandidate);
             /** Last check wheather another seed with the same left-right combination hasn't already been found */
-            for (unsigned int a = 1; a< m_seenSolutions.size() ;++a) { 
+            for (unsigned int a = m_cfg.startWithPattern; a< m_seenSolutions.size() ;++a) { 
                 const SeedSolution& accepted = m_seenSolutions[a];
                 unsigned int nOverlap{0};
-                std::vector<int> corridor = driftSigns(linePos, lineDir, accepted.seedHits,  msg());                
-                ATH_MSG_VERBOSE("Test seed against accepted solution Y0: "<<accepted.Y0<<", tanTheta: "<<accepted.tanTheta
-                              <<", initial circle signs: "<<accepted.solutionSigns<<", updated signs: "<<corridor);
+                std::vector<int> corridor = driftSigns(seedPos, seedDir, accepted.seedHits,  msg());                
+                ATH_MSG_VERBOSE("Test seed against accepted "<<accepted<<", updated signs: "<<corridor);
                 /// All seed hits are of the same size
                 for (unsigned int l = 0; l < accepted.seedHits.size(); ++l){
                     nOverlap  += corridor[l] == accepted.solutionSigns[l];
                 }
                 /// Including the places where no seed hit was assigned. Both solutions match in terms of 
                 /// left-right solutions. It's very likely that they're converging to the same segment.
-                if (nOverlap == corridor.size()) {
-                    ATH_MSG_VERBOSE("Shared hits at the same corridor. Reject seed.");
+                if (nOverlap == corridor.size() && accepted.seedHits.size() >= solCandidate.seedHits.size()) {
+                    ATH_MSG_VERBOSE("Same set of hits collected within the same corridor");
                     return std::nullopt;
                 }
             }
+        } else if (std::ranges::find_if(m_seenSolutions,
+                        [&solCandidate] (const SeedSolution& seen) {
+                            return std::abs(seen.Y0 - solCandidate.Y0) < std::hypot(seen.dY0, solCandidate.dY0) &&
+                                   std::abs(seen.theta - solCandidate.theta) < std::hypot(seen.dTheta, solCandidate.dTheta);
+                        }) != m_seenSolutions.end()){
+            return std::nullopt;
         }
+        
+        /// Add the solution to the list. That we don't iterate twice over it
         m_seenSolutions.emplace_back(std::move(solCandidate));
         /** If we found a long Mdt seed, then ensure that all
          *  subsequent seeds have at least the same amount of Mdt hits. */
         if (m_cfg.tightenHitCut) {
             m_cfg.nMdtHitCut = std::max(m_cfg.nMdtHitCut, nMdt);
         }
-        /** Associate strip hits */
-        for (const std::vector<HoughHitType>& hitsInLayer : m_hitLayers.stripHits()) {
-            HoughHitType bestHit{nullptr};
-            double bestChi2{m_cfg.chi2PerHit};
-            for (const HoughHitType testMe : hitsInLayer){
-                const double chi2 = SegmentFitHelpers::chiSqTermStrip(linePos, lineDir, testMe, msg()) /
-                                     testMe->dimension();
-                ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
-                            <<" "<<Amg::toString(testMe->positionInChamber())<<", chi2: "<<chi2);
-                /// Add all hits with a chi2 better than 3
-                if (chi2 <= bestChi2) {
-                    bestHit = testMe;
-                    bestChi2 = chi2;
-                }
-            }
-            if (!bestHit) {
-                continue;
-            }
-            assocHits.push_back(bestHit);           
-        }
         ++m_nGenSeeds;
+        
+        ATH_MSG_VERBOSE("In event "<<ctx.eventID().event_number()<<" found new seed solution "<<toString(candidateSeed.parameters));
+        if (m_cfg.fastSeedFit) {
+            fitDriftCircles(candidateSeed);
+        }
 
-        return std::make_optional<SegmentSeed>(candidatePars[toInt(AxisDefs::tanTheta)],
-                                               candidatePars[toInt(AxisDefs::y0)],
-                                               candidatePars[toInt(AxisDefs::tanPhi)],
-                                               candidatePars[toInt(AxisDefs::x0)],
-                                               nMdt, std::move(assocHits), 
-                                               m_segmentSeed->parentBucket());
-    }  
+        // Combine the seed with the phi estimate
+        {
+            const Amg::Vector3D patternDir = m_segmentSeed->directionInChamber();
+            Amg::Vector3D parDir{patternDir.x() / patternDir.z(), std::tan(theta), 1.};
+            candidateSeed.parameters[toInt(ParamDefs::theta)] = parDir.theta();
+            candidateSeed.parameters[toInt(ParamDefs::phi)] = parDir.phi();
+        }
+
+        /** Associate strip hits */
+        {
+            const auto [seedPos, seedDir] = makeLine(candidateSeed.parameters); 
+            for (const std::vector<HoughHitType>& hitsInLayer : m_hitLayers.stripHits()) {
+                HoughHitType bestHit{nullptr};
+                double bestPull{m_cfg.hitPullCut};
+                for (const HoughHitType testMe : hitsInLayer){
+                    const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(seedPos, seedDir, testMe, msg())) 
+                                      / testMe->dimension();
+                    ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
+                                <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);
+                    /// Add all hits with a pull better than the threshold
+                    if (pull <= bestPull) {
+                        bestHit = testMe;
+                        bestPull = pull;
+                    }
+                }
+                if (!bestHit) {
+                    continue;
+                }
+                candidateSeed.measurements.push_back(m_cfg.calibrator->calibrate(ctx,bestHit, seedPos, seedDir, 0));           
+            }
+        }
+        return candidateSeed;
+    }
+    void MdtSegmentSeedGenerator::fitDriftCircles(DriftCircleSeed& inSeed) const {
+  
+        double theta = inSeed.parameters[toInt(ParamDefs::theta)];
+        
+        Amg::Vector3D seedDir{0, std::sin(theta), std::cos(theta)};
+
+        const double y0 = inSeed.parameters[toInt(ParamDefs::y0)] * seedDir.z();
+
+        double norm{0.}, fitY0{0.};
+        Amg::Vector3D centerOfGravity{Amg::Vector3D::Zero()};
+        std::vector<int> driftSigns{};
+        std::vector<double> invCovs{};
+        driftSigns.reserve(inSeed.measurements.size());
+        invCovs.reserve(inSeed.measurements.size());
+        for (const std::unique_ptr<CalibratedSpacePoint>& hit : inSeed.measurements) {
+            const double invCov = 1./ driftCov(*hit);
+            norm += invCov;
+            const Amg::Vector3D& pos{hit->positionInChamber()};
+            centerOfGravity+= invCov * pos;
+            invCovs.push_back(invCov);
+            const int sign = y0  - pos.y() * seedDir.z() + pos.z()* seedDir.y() > 0 ? 1 : -1;
+            fitY0 +=  invCov * sign * hit->driftRadius();
+            driftSigns.push_back(sign);
+        }
+        /// Calculate the coefficients to minimize the chi2
+        const double invNorm = 1./ norm;
+        fitY0*= invNorm;
+        centerOfGravity *= invNorm;
+
+        double Tzzyy{0.}, Tyz{0.}, Trz{0.}, Try{0.};
+        unsigned int covIdx{0};
+        for (const std::unique_ptr<CalibratedSpacePoint>& hit : inSeed.measurements) {
+            const double invCov = invCovs[covIdx]*invNorm;
+            const int sign = driftSigns[covIdx++];
+            const Amg::Vector3D pos  = hit->positionInChamber() - centerOfGravity;
+            Tzzyy += invCov * (std::pow(pos.z(), 2) - std::pow(pos.y(), 2));
+            Tyz   += invCov * pos.y()*pos.z();
+            Trz   += invCov * sign*pos.z() * hit->driftRadius();
+            Try   += invCov * sign*pos.y() * hit->driftRadius();
+        }
+        /// Now it's time to use the guestimate
+        const double thetaMin =  - (Tzzyy  - Try) / (4* Tyz + Trz);
+        const double thetaDet =  std::pow(Tzzyy -Try,2) + 4*(Tyz + Trz)*(2*Tyz + 0.5*Trz);
+        const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*Tyz + Trz);
+        ATH_MSG_VERBOSE("Start fast fit seed: "<<theta<<", guess: "<<thetaGuess
+                    <<", y0: "<<y0<<", fitY0: "<<fitY0<<", centre: "<<Amg::toString(centerOfGravity));
+        //// 
+        theta = thetaGuess;
+        bool converged{false};
+        while (!converged && inSeed.nIter++ <= m_cfg.nMaxIter) {
+            const CxxUtils::sincos twoTheta{2.*theta};
+            const double thetaPrime = 0.5*Tzzyy *twoTheta.sn - Tyz * twoTheta.cs - Trz * seedDir.z() - Try * seedDir.y();
+            if (std::abs(thetaPrime) < m_cfg.precCutOff){
+                converged = true;
+                break;
+            }
+
+            const double thetaTwoPrime =  Tzzyy * twoTheta.cs + 2* Tyz * twoTheta.sn + Trz * seedDir.y() - Try * seedDir.z();
+            const double update = thetaPrime / thetaTwoPrime;
+            ATH_MSG_VERBOSE("Fit iteration #"<<inSeed.nIter<<" -- theta: "<<theta<<", thetaPrime: "<<thetaPrime
+                        <<", thetaTwoPrime: "<<thetaTwoPrime<<" -- "<<std::format("{:.8f}", update)
+                        <<" --> next theta "<<(theta - thetaPrime / thetaTwoPrime));
+
+            if (std::abs(update) < m_cfg.precCutOff) {
+                converged = true;
+                break;
+            }
+            theta -= update;
+            const CxxUtils::sincos thetaUpdate{theta};
+            seedDir.y() = thetaUpdate.sn;
+            seedDir.z() = thetaUpdate.cs;
+        }
+        if (!converged) {
+           return;
+        }
+        inSeed.parameters[toInt(ParamDefs::theta)] = theta;
+        inSeed.parameters[toInt(ParamDefs::y0)] = (centerOfGravity.y() *seedDir.z() - centerOfGravity.z() * seedDir.y() + fitY0);
+        ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter
+                    <<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2);
+    }
+  
 }

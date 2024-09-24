@@ -31,7 +31,7 @@ namespace MuonValR4 {
             MuonHoughTransformTester::matchWithTruth(const xAOD::MuonSegmentContainer* truthSegments,
                                                      const SegmentSeedContainer* seedContainer,
                                                      const SegmentContainer* segmentContainer) const {
-        std::vector<ObjectMatching> assocObj{};
+        std::vector<ObjectMatching> assocObj{}, assocObjMultMatch{};
         std::unordered_set<const SegmentSeed*> usedSeeds{};
         std::unordered_set<const Segment*> usedSegs{};
         std::vector<TruthHitCol> truthHitsVec{}, seedHitsVec{}, segmentHitsVec{};
@@ -46,13 +46,13 @@ namespace MuonValR4 {
 
             for (const xAOD::MuonSegment* truth: *truthSegments) {
                 const TruthHitCol& truthHits{truthHitsVec.emplace_back(getTruthMatchedHits(*truth))};
-                ObjectMatching match{};
-                match.truthSegment = truth;
-                match.chamber = m_r4DetMgr->getChamber((*truthHits.begin())->identify());
+                ObjectMatching matchTempl{};
+                matchTempl.truthSegment = truth;
+                matchTempl.chamber = m_r4DetMgr->getChamber((*truthHits.begin())->identify());
                 int seedIdx{-1};
                 for (const SegmentSeed* seed : *seedContainer){
                     ++seedIdx;
-                    if (seed->chamber() != match.chamber) {
+                    if (seed->chamber() != matchTempl.chamber) {
                         continue;
                     }
                     const TruthHitCol& seedHits{seedHitsVec[seedIdx]};
@@ -61,17 +61,18 @@ namespace MuonValR4 {
                         continue;
                     }
                     double matchFracion{1.*matchedHits / (1.*seed->getHitsInMax().size())};
-                    if (matchFracion > match.matchFracSeed) {
-                        match.matchFracSeed = matchFracion;
-                        match.matchedSeed = seed;
-                        match.nTruthMatchedMax = matchedHits;
+                    if (matchFracion > matchTempl.matchFracSeed) {
+                        matchTempl.matchFracSeed = matchFracion;
+                        matchTempl.matchedSeed = seed;
+                        matchTempl.nTruthMatchedMax = matchedHits;
                     } 
                 }
                 int segmentIdx{-1};
                 /** Match segments */
+                std::vector<const Segment*> matchedSegs{};
                 for (const Segment* segment : *segmentContainer) {
                     ++segmentIdx;
-                    if (segment->chamber() != match.chamber) {
+                    if (segment->chamber() != matchTempl.chamber) {
                         continue;
                     }
                     const TruthHitCol& segmentHits{segmentHitsVec[segmentIdx]};
@@ -81,15 +82,27 @@ namespace MuonValR4 {
                     }
 
                     double matchFracion{1.*matchedHits / (1.*truthHits.size())};
-                    if (matchFracion > match.matchFracSegment) {
-                        match.matchFracSegment = matchFracion;
-                        match.matchedSegment = segment;
-                        match.nTruthMatchedSeg = matchedHits;
+                    if (matchFracion > matchTempl.matchFracSegment) {
+                        matchTempl.matchFracSegment = matchFracion;
+                        matchTempl.nTruthMatchedSeg = matchedHits;
+                        matchTempl.matchedSegment = segment;
+                        matchedSegs.clear();
+                    /// Same number of hits but maybe different solution?
+                    } else if (matchTempl.nTruthMatchedSeg == matchedHits) {
+                        matchedSegs.push_back(segment);
                     }
                 }
-                usedSeeds.insert(match.matchedSeed);
-                usedSegs.insert(match.matchedSegment);
-                assocObj.push_back(match);
+                usedSegs.insert(matchTempl.matchedSegment);
+                usedSeeds.insert(matchTempl.matchedSeed);
+                assocObj.push_back(matchTempl);
+                for (const Segment* matched : matchedSegs) {
+                    ObjectMatching matching{matchTempl};
+                    matching.matchedSeed = matched->parent();
+                    matching.matchedSegment = matched;
+                    usedSeeds.insert(matching.matchedSeed);
+                    usedSegs.insert(matching.matchedSegment);
+                    assocObjMultMatch.push_back(std::move(matching));
+                }                
             }
         }
         int segIdx{-1};
@@ -144,6 +157,8 @@ namespace MuonValR4 {
             }
             assocObj.push_back(match);
         }
+        assocObj.insert(assocObj.end(), std::make_move_iterator(assocObjMultMatch.begin()),
+                                        std::make_move_iterator(assocObjMultMatch.end()));
         return assocObj;
     }
 
@@ -302,11 +317,11 @@ namespace MuonValR4 {
         m_out_segment_nDoF = segment->nDoF();
         m_out_segment_hasTimeFit = segment->hasTimeFit();
 
-        m_out_segment_err_x0 = segment->covariance()(toInt(AxisDefs::x0), toInt(AxisDefs::x0));
-        m_out_segment_err_y0 = segment->covariance()(toInt(AxisDefs::y0), toInt(AxisDefs::y0));
-        m_out_segment_err_tantheta = segment->covariance()(toInt(AxisDefs::tanTheta), toInt(AxisDefs::tanTheta));
-        m_out_segment_err_tanphi   = segment->covariance()(toInt(AxisDefs::tanPhi), toInt(AxisDefs::tanPhi));
-        m_out_segment_err_time = segment->covariance()(toInt(AxisDefs::time), toInt(AxisDefs::time));
+        m_out_segment_err_x0 = segment->covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0));
+        m_out_segment_err_y0 = segment->covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0));
+        m_out_segment_err_tantheta = segment->covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
+        m_out_segment_err_tanphi   = segment->covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
+        m_out_segment_err_time = segment->covariance()(toInt(ParamDefs::time), toInt(ParamDefs::time));
         const Amg::Transform3D trf{segment->chamber()->globalToLocalTrans(gctx)};
         for (const double c2 : segment->chi2PerMeasurement()){
             m_out_segment_chi2_measurement.push_back(c2); 

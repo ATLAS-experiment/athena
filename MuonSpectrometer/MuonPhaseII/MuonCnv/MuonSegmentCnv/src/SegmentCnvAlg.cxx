@@ -198,11 +198,11 @@ namespace MuonR4{
         covMatrix.setIdentity();
         using namespace MuonR4::SegmentFit;
         /** TODO: Check that the covariance terms are actually correct */
-        covMatrix(0, 0) = segment.covariance()(toInt(AxisDefs::x0), toInt(AxisDefs::x0));
-        covMatrix(1, 1) = segment.covariance()(toInt(AxisDefs::y0), toInt(AxisDefs::y0));
+        covMatrix(0, 0) = segment.covariance()(toInt(ParamDefs::x0), toInt(ParamDefs::x0));
+        covMatrix(1, 1) = segment.covariance()(toInt(ParamDefs::y0), toInt(ParamDefs::y0));
                 
-        covMatrix(2, 2) = segment.covariance()(toInt(AxisDefs::tanPhi), toInt(AxisDefs::tanPhi));
-        covMatrix(3, 3) = segment.covariance()(toInt(AxisDefs::tanTheta), toInt(AxisDefs::tanTheta));
+        covMatrix(2, 2) = segment.covariance()(toInt(ParamDefs::phi), toInt(ParamDefs::phi));
+        covMatrix(3, 3) = segment.covariance()(toInt(ParamDefs::theta), toInt(ParamDefs::theta));
 
         auto legacySeg = std::make_unique<Muon::MuonSegment>(Amg::Vector2D::Zero(),std::move(segDir),
                                                             std::move(covMatrix), segSurf.release(),

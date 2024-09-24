@@ -17,7 +17,7 @@ namespace MuonR4{
     class ISpacePointCalibrator;
     class MdtSegmentFitter: public AthMessaging{
         public:
-            using AxisDefs = SegmentFit::AxisDefs;
+            using ParamDefs = SegmentFit::ParamDefs;
             using Parameters = SegmentFit::Parameters;
             using HitType = std::unique_ptr<CalibratedSpacePoint>;
             using HitVec = std::vector<HitType>;
@@ -33,8 +33,10 @@ namespace MuonR4{
                 unsigned int nParsOutOfBounds{1};
                 /** @brief Pointer to the calibrator tool*/
                 const ISpacePointCalibrator* calibrator{nullptr};
+                /** @brief How many iterations with changes below tolerance */
+                unsigned int noMoveIter{2};
                 /** @brief Allowed parameter ranges */
-                using RangeArray = std::array<std::array<double,2>, SegmentFit::toInt(AxisDefs::nPars)>;
+                using RangeArray = std::array<std::array<double,2>, SegmentFit::toInt(ParamDefs::nPars)>;
                 /** @brief Function that returns a set of predefined ranges for testing */
                 static RangeArray defaultRanges();
 
@@ -56,13 +58,11 @@ namespace MuonR4{
             /** @brief Store the partial derivative of the line w.r.t. the fit parameters
              *         at the slots x0,y0 the derivatives of the position are saved
              *         while at the slot tanPhi, tanTheta, the deriviatives of the direction vector are saved */        
-            using LinePartialArray = std::array<Amg::Vector3D, toInt(AxisDefs::nPars)>;
+            using LinePartialArray = std::array<Amg::Vector3D, toInt(ParamDefs::nPars)>;
             /** @brief Updates the partial derivaitves of the line w.r.t the fit parameters 
              *  @param fitPars: Set of segment parameters in the current iteration
-             *  @param updateNonBending: If set to true, the derivatives for tanPhi / x0 are calculated
              *  @param linePartials: Storage to safe the line partials to */            
             void updateLinePartials(const Parameters& fitPars, 
-                                    const bool updateNonBending,
                                     LinePartialArray& linePartials) const;
 
             /** @brief Calculates the partial derivative of the point of closest approach
@@ -77,7 +77,7 @@ namespace MuonR4{
                                                         const Amg::Vector3D& segPos,
                                                         const Amg::Vector3D& segDir,
                                                         const LinePartialArray& linePartials,
-                                                        const AxisDefs fitPar);
+                                                        const ParamDefs fitPar);
 
 
             /** @brief Calculates the partial derivative of the intersection point between  the segment line and the 
@@ -94,7 +94,7 @@ namespace MuonR4{
                                                        const Amg::Vector3D& segPos, 
                                                        const Amg::Vector3D& segDir,
                                                        const LinePartialArray& linePartials,
-                                                       const AxisDefs fitPar);
+                                                       const ParamDefs fitPar);
             
             /** @brief Updates the chi2, its Gradient & Hessian from the measurement residual. Depending on whether 
              *          the time needs to be taken into account or not the template parameter nDim is either 3 or 2, respectively.
@@ -114,17 +114,28 @@ namespace MuonR4{
                                     double& chi2,
                                     int startPar) const;
             
+
+            enum class UpdateStatus{
+                allOkay = 0,
+                outOfBounds = 1,
+                noChange = 2,
+            };
             /** @brief Update step of the segment parameters using the Hessian and the gradient. If the Hessian is definite,
              *         the currentParameters are updated according to
              *                   x_{n+1} = x_{n} - H_{n}^{1} * grad(x_{n})
              *          Otherwise, the method of steepest descent is attempted.
+             *  @param currentPars:  Best segment estimator parameters
+             *  @param previousPars: Segment estimator parameters from the last iteration
+             *  @param currGrad: Gradient of the chi2 from this iteration
+             *  @param prevGrad: Gradient of the chi2 from the previous iteration
+             *  @param hessian: Hessian estimator
              */            
             template <unsigned int nDim>
-                bool updateParameters(Parameters& currentPars,
-                                      Parameters& previousPars,
-                                      Parameters& currGrad,
-                                      Parameters& prevGrad,
-                                      const AmgSymMatrix(5)& hessian) const;
+                UpdateStatus updateParameters(Parameters& currentPars,
+                                             Parameters& previousPars,
+                                             Parameters& currGrad,
+                                             Parameters& prevGrad,
+                                             const AmgSymMatrix(5)& hessian) const;
             
             template <unsigned int nDim>
                 void blockCovariance(const AmgSymMatrix(5)& hessian,                                    

@@ -105,7 +105,7 @@ namespace MuonR4{
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec> hitDecor{m_eleLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> ptDecor{m_ptKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float> qDecor{m_qKey, ctx};
-        using SegPars = xAOD::MeasVector<toInt(AxisDefs::nPars)>;
+        using SegPars = xAOD::MeasVector<toInt(ParamDefs::nPars)>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars> parDecor{m_locParKey, ctx};
         for (auto& [chamber, collectedParts] : hitCollector) {
             const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
@@ -174,14 +174,14 @@ namespace MuonR4{
                 ptDecor(*truthSegment) = particle->momentum().perp();
                 qDecor(*truthSegment) = particle->pdg_id() > 0 ? -1 : 1;
                 SegPars& locPars{parDecor(*truthSegment)};
-                locPars[toInt(AxisDefs::x0)] = chamberPos.x();
-                locPars[toInt(AxisDefs::y0)] = chamberPos.y();
-                locPars[toInt(AxisDefs::time)] = simHit->globalTime() + distance *c_inv /simHit->beta();
-                locPars[toInt(AxisDefs::tanTheta)] = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10);
-                locPars[toInt(AxisDefs::tanPhi)]   = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10);
+                locPars[toInt(ParamDefs::x0)] = chamberPos.x();
+                locPars[toInt(ParamDefs::y0)] = chamberPos.y();
+                locPars[toInt(ParamDefs::time)] = simHit->globalTime() + distance *c_inv /simHit->beta();
+                locPars[toInt(ParamDefs::theta)] = chamberDir.theta();
+                locPars[toInt(ParamDefs::phi)]   = chamberDir.phi();
                 truthSegment->setPosition(globPos.x(), globPos.y(), globPos.z());
                 truthSegment->setDirection(globDir.x(), globDir.y(), globDir.z());
-                truthSegment->setT0Error(locPars[toInt(AxisDefs::time)], 0.);
+                truthSegment->setT0Error(locPars[toInt(ParamDefs::time)], 0.);
                 
                 truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
                 truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 

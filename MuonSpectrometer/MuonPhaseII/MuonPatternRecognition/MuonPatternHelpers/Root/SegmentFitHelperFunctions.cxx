@@ -219,9 +219,8 @@ namespace MuonR4 {
             }            
             return signs;
         }
-        int driftSign (const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
-                       const HoughHitType& sp,
-                       MsgStream& msg) {
+        int driftSign(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
+                       const HoughHitType& sp, MsgStream& msg) {
             if (!sp || sp->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
                 return 0;
             }
@@ -231,6 +230,21 @@ namespace MuonR4 {
                 msg<<printLvl<<"Hit "<<sp->chamber()->idHelperSvc()->toString(sp->identify())<<" drift radius "<<sp->driftRadius()
                                 <<", signed distance: "<<signedDist<<", unsigned distance: "
                                 <<Amg::lineDistance<3>(segPos, segDir, sp->positionInChamber(), sp->directionInChamber())<<endmsg;
+            }
+            return signedDist >0 ? 1 : -1;
+        }
+        int driftSign(const Amg::Vector3D& segPos, const Amg::Vector3D& segDir,
+                      const CalibratedSpacePoint& calibHit,  MsgStream& msg) {
+            if (calibHit.type() != xAOD::UncalibMeasType::MdtDriftCircleType){
+                return 0;
+            }
+            const Amg::Vector3D deltaPos{segPos - calibHit.positionInChamber()};
+            const double signedDist = deltaPos.y() - (segDir.y() / segDir.z()) * deltaPos.z();
+            if (msg.level() <= printLvl) {
+                const SpacePoint* sp = calibHit.spacePoint();
+                msg<<printLvl<<"Hit "<<sp->chamber()->idHelperSvc()->toString(sp->identify())<<" drift radius "<<calibHit.driftRadius()
+                                <<", signed distance: "<<signedDist<<", unsigned distance: "
+                                <<Amg::lineDistance<3>(segPos, segDir, calibHit.positionInChamber(), calibHit.directionInChamber())<<endmsg;
             }
             return signedDist >0 ? 1 : -1;
         }
@@ -245,10 +259,10 @@ namespace MuonR4 {
             for (std::unique_ptr<CalibratedSpacePoint>& hit : hits) {
                 if (hit->fitState() == State::Outlier){
                     hit->setFitState(State::Valid);
-                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(AxisDefs::time)],arrivalTime, *hit, msg));
+                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(ParamDefs::time)],arrivalTime, *hit, msg));
                     hit->setFitState(State::Outlier);
                 } else {
-                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(AxisDefs::time)],arrivalTime, *hit, msg));
+                    measChi2.push_back(chiSqTerm(segPos,segDir, segPars[toInt(ParamDefs::time)],arrivalTime, *hit, msg));
                     chi2+= measChi2.back();
                 }
             }
