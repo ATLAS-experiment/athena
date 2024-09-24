@@ -35,12 +35,12 @@ public:
                          const std::string &FastCaloGANInputFolderName);
   void Print() const;
 
-  std::vector<int> GetRelevantLayers() const { return m_relevantlayers; };
+  const std::vector<int>& GetRelevantLayers() const { return m_relevantlayers; };
   const Binning &GetBinning() const { return m_binning; };
   int GetLatentSpaceSize() const { return m_latentDim; };
   int GetGANVersion() const { return m_ganVersion; };
   bool IsSymmetrisedAlpha() const { return m_symmetrisedAlpha; };
-  std::string GetInputFolder() const { return m_fastCaloGANInputFolderName; };
+  const std::string& GetInputFolder() const { return m_fastCaloGANInputFolderName; };
 
 private:
   static bool ReadBooleanAttribute(const std::string &name, xmlNodePtr node);

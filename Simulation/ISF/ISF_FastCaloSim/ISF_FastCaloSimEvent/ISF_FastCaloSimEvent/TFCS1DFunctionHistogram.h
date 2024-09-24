@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionHistogram_h
@@ -34,8 +34,8 @@ public:
   static double sample_from_histo(TH1 *hist, double);
   double sample_from_histovalues(double);
 
-  std::vector<float> get_HistoBorders() { return m_HistoBorders; };
-  std::vector<float> get_HistoContents() { return m_HistoContents; };
+  const std::vector<float>& get_HistoBorders() { return m_HistoBorders; };
+  const std::vector<float>& get_HistoContents() { return m_HistoContents; };
 
 protected:
   std::vector<float> m_HistoBorders;
