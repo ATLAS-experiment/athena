@@ -73,6 +73,38 @@ DerivationFramework::MaxCellDecorator::initialize()
     ATH_CHECK(m_SGKey_photons_decorations.initialize());
   }
 
+  if (!m_SGKey_taus.key().empty()) {
+    const std::string key = m_SGKey_taus.key();
+    ATH_MSG_INFO("Using " << key << " for taus");
+    ATH_CHECK(m_SGKey_taus.initialize());
+
+    // setup vector of decorators
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_time");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_energy");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_gain");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_onlId");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_x");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_y");
+    m_SGKey_taus_decorations.emplace_back(key + ".maxEcell_z");
+    ATH_CHECK(m_SGKey_taus_decorations.initialize());
+  }
+
+  if (!m_SGKey_jets.key().empty()) {
+    const std::string key = m_SGKey_jets.key();
+    ATH_MSG_INFO("Using " << key << " for jets");
+    ATH_CHECK(m_SGKey_jets.initialize());
+
+    // setup vector of decorators
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_time");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_energy");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_gain");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_onlId");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_x");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_y");
+    m_SGKey_jets_decorations.emplace_back(key + ".maxEcell_z");
+    ATH_CHECK(m_SGKey_jets_decorations.initialize());
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -132,7 +164,7 @@ DerivationFramework::MaxCellDecorator::addBranches() const
     const xAOD::CaloClusterContainer* egClContainer(nullptr);
     if (!m_SGKey_egammaClusters.key().empty()) {
       SG::ReadHandle<xAOD::CaloClusterContainer> egClContainerRH(
-	m_SGKey_egammaClusters, ctx);
+        m_SGKey_egammaClusters, ctx);
       egClContainer = egClContainerRH.ptr();
       odecorationEl7.emplace(m_SGKey_electrons_decorations[7], ctx);
     }
@@ -157,17 +189,17 @@ DerivationFramework::MaxCellDecorator::addBranches() const
     for (const auto* egamma : *importedElectrons) {
       const xAOD::CaloCluster *cluster = egamma->caloCluster();
       if (!m_SGKey_egammaClusters.key().empty()) {
-	double dRMin = 9e9;
-	const xAOD::CaloCluster *matchedCluster(nullptr);
-	for (const auto *clus : *egClContainer) {
-	  double dR = clus->p4().DeltaR(cluster->p4());
-	  if (dR < dRMin && dR < m_dRLRTegClusegClusMax) {
-	    dRMin = dR;
-	    matchedCluster = clus;
-	  }
-	}
-	cluster = matchedCluster;
-	odecorationEl7.value()(*egamma) = dRMin;
+        double dRMin = 9e9;
+        const xAOD::CaloCluster *matchedCluster(nullptr);
+        for (const auto *clus : *egClContainer) {
+          double dR = clus->p4().DeltaR(cluster->p4());
+          if (dR < dRMin && dR < m_dRLRTegClusegClusMax) {
+            dRMin = dR;
+            matchedCluster = clus;
+          }
+        }
+        cluster = matchedCluster;
+        odecorationEl7.value()(*egamma) = dRMin;
       }
       DerivationFramework::MaxCellDecorator::calculation res =
         decorateObject(cluster, ctx);
@@ -178,6 +210,128 @@ DerivationFramework::MaxCellDecorator::addBranches() const
       decorationEl4(*egamma) = res.maxEcell_x;
       decorationEl5(*egamma) = res.maxEcell_y;
       decorationEl6(*egamma) = res.maxEcell_z;
+    }
+  }
+	
+  if (!m_SGKey_taus.key().empty()) {
+    // Retrieve tau container
+    SG::ReadHandle<xAOD::TauJetContainer> tauJetContainer(m_SGKey_taus, ctx);
+    // setup vector of decorators
+    SG::WriteDecorHandle<xAOD::TauJetContainer, float> decorationTau0(
+      m_SGKey_taus_decorations[0], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, float> decorationTau1(
+      m_SGKey_taus_decorations[1], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, int> decorationTau2(
+      m_SGKey_taus_decorations[2], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, uint64_t> decorationTau3(
+      m_SGKey_taus_decorations[3], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, float> decorationTau4(
+      m_SGKey_taus_decorations[4], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, float> decorationTau5(
+      m_SGKey_taus_decorations[5], ctx);
+    SG::WriteDecorHandle<xAOD::TauJetContainer, float> decorationTau6(
+      m_SGKey_taus_decorations[6], ctx);
+    
+    const xAOD::TauJetContainer* importedTaus = tauJetContainer.ptr();
+    for (const auto* tau : *importedTaus) {
+      DerivationFramework::MaxCellDecorator::calculation res;
+      res.maxEcell_energy = -9999.;
+      for (size_t i = 0;i<tau->nClusters();++i) {
+        // get particle
+        const xAOD::IParticle* part = tau->cluster(i);
+        if ( not part ) {
+          ATH_MSG_WARNING("Tau particle link invalid");
+          continue;
+        }
+        
+        const xAOD::CaloCluster* cluster=dynamic_cast<const xAOD::CaloCluster*> (part);
+        if ( not cluster ) {
+          ATH_MSG_WARNING("Tau cluster link invalid");
+          continue;
+        }
+        
+        DerivationFramework::MaxCellDecorator::calculation resCand =
+          decorateObject(cluster, ctx);
+        if (resCand.maxEcell_energy > res.maxEcell_energy) {
+          res = resCand;
+        }
+      }
+      
+      decorationTau0(*tau) = res.maxEcell_time;
+      decorationTau1(*tau) = res.maxEcell_energy;
+      decorationTau2(*tau) = res.maxEcell_gain;
+      decorationTau3(*tau) = res.maxEcell_onlId;
+      decorationTau4(*tau) = res.maxEcell_x;
+      decorationTau5(*tau) = res.maxEcell_y;
+      decorationTau6(*tau) = res.maxEcell_z;
+    }
+  }
+	
+  if (!m_SGKey_jets.key().empty()) {
+    // Retrieve jet container
+    SG::ReadHandle<xAOD::JetContainer> jetContainer(m_SGKey_jets, ctx);
+    // setup vector of decorators
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decorationJet0(
+      m_SGKey_jets_decorations[0], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decorationJet1(
+      m_SGKey_jets_decorations[1], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, int> decorationJet2(
+      m_SGKey_jets_decorations[2], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, uint64_t> decorationJet3(
+      m_SGKey_jets_decorations[3], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decorationJet4(
+      m_SGKey_jets_decorations[4], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decorationJet5(
+      m_SGKey_jets_decorations[5], ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decorationJet6(
+      m_SGKey_jets_decorations[6], ctx);
+
+    const xAOD::JetContainer* importedJets = jetContainer.ptr();
+    for (const auto* jet : *importedJets) {
+      DerivationFramework::MaxCellDecorator::calculation res;
+      res.maxEcell_energy = -9999.;
+      std::vector<const xAOD::CaloCluster*> clusterList;
+      clusterList.clear();
+      for (auto part : jet->getConstituents()) {
+        // get particle
+        if ( not part ) {
+          ATH_MSG_WARNING("Jet particle link invalid");
+          continue;
+        }
+        
+        const xAOD::CaloCluster* cluster=dynamic_cast<const xAOD::CaloCluster*> (part->rawConstituent());
+        if ( cluster) {
+          clusterList.push_back(cluster);
+        } else {
+          const xAOD::IParticle* ipart = dynamic_cast<const xAOD::IParticle*> (part->rawConstituent());
+          if ( ipart ) {
+            const xAOD::PFO* iPFO = dynamic_cast<const xAOD::PFO*>(ipart);
+            if ( iPFO ) {
+              for (unsigned int cidx=0;cidx<iPFO->nCaloCluster();++cidx) {
+                  if ( iPFO->cluster(cidx) ) {
+                      clusterList.push_back(iPFO->cluster(cidx));
+                  }
+              }
+            }
+          }
+        }
+      }
+
+      for (auto cluster : clusterList) {
+        DerivationFramework::MaxCellDecorator::calculation resCand =
+          decorateObject(cluster, ctx);
+        if (resCand.maxEcell_energy > res.maxEcell_energy) {
+          res = resCand;
+        }
+      }
+      
+      decorationJet0(*jet) = res.maxEcell_time;
+      decorationJet1(*jet) = res.maxEcell_energy;
+      decorationJet2(*jet) = res.maxEcell_gain;
+      decorationJet3(*jet) = res.maxEcell_onlId;
+      decorationJet4(*jet) = res.maxEcell_x;
+      decorationJet5(*jet) = res.maxEcell_y;
+      decorationJet6(*jet) = res.maxEcell_z;
     }
   }
 

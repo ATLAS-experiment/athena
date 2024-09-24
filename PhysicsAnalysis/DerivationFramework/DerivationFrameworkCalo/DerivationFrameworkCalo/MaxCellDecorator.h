@@ -22,6 +22,8 @@
 #include "xAODEgamma/EgammaContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "xAODTau/TauJetContainer.h"
+#include "xAODJet/Jet.h"
 
 namespace DerivationFramework {
 
@@ -77,6 +79,12 @@ private:
     "SG key of cluster container associated to standard egammas"
   };
 
+  SG::ReadHandleKey<xAOD::TauJetContainer>
+    m_SGKey_taus{ this, "SGKey_taus", "", "SG key of tau container" };
+
+  SG::ReadHandleKey<xAOD::JetContainer>
+    m_SGKey_jets{ this, "SGKey_jets", "", "SG key of jet container" };
+    
   /** @brief matching cone size*/
   Gaudi::Property<double> m_dRLRTegClusegClusMax{
     this,
@@ -99,6 +107,22 @@ private:
       "SGKey_electrons_decorations_noConf",
       {},
       "SG keys for electrons decorations not really configurable"
+    };
+
+  SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer>
+    m_SGKey_taus_decorations{
+      this,
+      "SGKey_taus_decorations_noConf",
+      {},
+      "SG keys for tau decorations not really configurable"
+    };
+
+  SG::WriteDecorHandleKeyArray<xAOD::JetContainer>
+    m_SGKey_jets_decorations{
+      this,
+      "SGKey_jets_decorations_noConf",
+      {},
+      "SG keys for jet decorations not really configurable"
     };
 
   calculation decorateObject(const xAOD::CaloCluster* cluster,
