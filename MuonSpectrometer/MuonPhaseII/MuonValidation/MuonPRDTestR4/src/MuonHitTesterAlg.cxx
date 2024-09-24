@@ -29,8 +29,8 @@ namespace MuonValR4 {
     StatusCode MuonHitTesterAlg::initialize(){
         int evOpts{0};
         if (m_isMC) evOpts |= EventInfoBranch::isMC;
-        
-        m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, evOpts));
+        ATH_CHECK(m_evtKey.initialize());
+        m_tree.addBranch(std::make_shared<EventInfoBranch>(m_tree, evOpts,m_evtKey.key()));
         ATH_CHECK(setupSimHits());
         ATH_CHECK(setupDigits());
         ATH_CHECK(setupPrds());

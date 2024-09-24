@@ -41,9 +41,31 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     result.addEventAlgo(theAlg, primary = True)
     return result
 
+
+def MuonDigiTestCfg(flags, name="MuonDigiTester", outFile="DigiTest.root", **kwargs):
+    kwargs.setdefault("MdtSimHitKey", "MDT_SDO")
+    kwargs.setdefault("RpcSimHitKey", "RPC_SDO")
+    kwargs.setdefault("TgcSimHitKey", "TGC_SDO")
+    kwargs.setdefault("MmSimHitKey", "MM_SDO")
+    kwargs.setdefault("sTgcSimHitKey", "sTGC_SDO")
+    kwargs.setdefault("dumpDigits", True)
+    return MuonHitTesterCfg(flags, name = name, outFile = outFile, **kwargs)
+
+def MuonPileUpTestCfg(flags, name="MuonDigiTester", outFile="DigiTest.root", **kwargs):
+    kwargs.setdefault("MdtSimHitKey", "Bkg_MDT_SDO")
+    kwargs.setdefault("RpcSimHitKey", "Bkg_RPC_SDO")
+    kwargs.setdefault("TgcSimHitKey", "Bkg_TGC_SDO")
+    kwargs.setdefault("MmSimHitKey", "Bkg_MM_SDO")
+    kwargs.setdefault("sTgcSimHitKey", "Bkg_sTGC_SDO")
+    kwargs.setdefault("EvtInfoKey", "Bkg_EventInfo")
+    kwargs.setdefault("dumpDigits", True)
+    return MuonHitTesterCfg(flags, name = name, outFile = outFile, **kwargs)
+
+
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
+    parser.add_argument("--runTester", help="Choice on the tester to setup", default="SIM", choices=["SIM", "DIGI", "PILEUP"])
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R3SimHits.pool.root"])
     parser.set_defaults(outRootFile="SimHitDumpNtuple.root")
@@ -53,6 +75,30 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)
     from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
     cfg.merge(MuonSimHitToMeasurementCfg(flags))
-    cfg.merge(MuonHitTesterCfg(flags,outFile=args.outRootFile, dumpPrds = False))
+    
+    if args.runTester != "SIM":
+        if flags.Detector.GeometryMDT:
+            from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+            cfg.merge(MdtRdoToMdtDigitCfg(flags))
+        if flags.Detector.GeometryRPC:
+            from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
+            cfg.merge(RpcRdoToRpcDigitCfg(flags))
+        if flags.Detector.GeometryTGC:
+            from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
+            cfg.merge(TgcRdoToTgcDigitCfg(flags))
+        if flags.Detector.GeometrysTGC:
+            from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
+            cfg.merge(STGC_RdoToDigitCfg(flags))
+        if flags.Detector.GeometryMM:
+            from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
+            cfg.merge(MM_RdoToDigitCfg(flags))
+
+    if args.runTester == "SIM":
+        cfg.merge(MuonHitTesterCfg(flags,outFile=args.outRootFile))
+    elif args.runTester == "DIGI": 
+        cfg.merge(MuonDigiTestCfg(flags,outFile=args.outRootFile))
+    elif args.runTester == "PILEUP":
+        cfg.merge(MuonPileUpTestCfg(flags,outFile=args.outRootFile))
+
     executeTest(cfg)
 

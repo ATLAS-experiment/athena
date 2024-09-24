@@ -9,7 +9,7 @@
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTesterTree/MuonTesterTree.h"
-
+#include "xAODEventInfo/EventInfo.h"
 namespace MuonValR4 {
     class MuonHitTesterAlg: public AthHistogramAlgorithm{
         public:
@@ -25,6 +25,8 @@ namespace MuonValR4 {
             MuonVal::MuonTesterTree m_tree{"MuonHitTest", "MuonR4HitTest"};
 
             Gaudi::Property<bool> m_isMC{this, "isMC", true};
+
+            SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EvtInfoKey", "EventInfo"};
 
             /**
              *  @brief Toggle whether the simHit collection of each sub detector shall
@@ -67,7 +69,7 @@ namespace MuonValR4 {
             Gaudi::Property<std::string> m_rpcDigitKey{this, "RpcDigitKey", "RPC_DIGITS"};
             Gaudi::Property<std::string> m_tgcDigitKey{this, "TgcDigitKey", "TGC_DIGITS"};
             Gaudi::Property<std::string> m_mmDigitKey{this, "MmDigitKey", "MM_DIGITS"};
-            Gaudi::Property<std::string> m_sTgcDigitKey{this, "sTgcDigitKey", "STGC_DIGITS"};
+            Gaudi::Property<std::string> m_sTgcDigitKey{this, "sTgcDigitKey", "sTGC_DIGITS"};
             /**
              *  @brief Toggle whether the uncalibrated measurement collections shall be tested
              * */

@@ -14,9 +14,11 @@ namespace MuonVal {
 std::atomic<unsigned int> EventInfoBranch::s_num_lhe = 0;
 void EventInfoBranch::setNumLHE(unsigned int n) { s_num_lhe = n;}
 unsigned int EventInfoBranch::getNumLHE() { return s_num_lhe;}
-EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask):
+EventInfoBranch::EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask,
+                                 const std::string& evtKey):
     MuonTesterBranch{tree, " event info "},    
-    m_writemask{write_mask} {
+    m_key{evtKey},
+    m_writemask{write_mask}{
     if (m_writemask & WriteOpts::isMC) {
         if (m_writemask & WriteOpts::writeLHE) {
             for (unsigned int lhe = 1; lhe < s_num_lhe ; ++lhe ) {

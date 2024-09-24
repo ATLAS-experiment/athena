@@ -105,7 +105,7 @@ def STGC_RdoToDigitCfg(flags, name="STGC_RdoToDigitAlg", **kwargs):
     acc = ComponentAccumulator()
     if flags.Common.isOverlay:
         kwargs.setdefault("sTgcRdoContainer", f"{flags.Overlay.BkgPrefix}sTGCRDO")
-        kwargs.setdefault("sTgcDigitContainer", f"{flags.Overlay.BkgPrefix}sTGC_DIGITS")
+        kwargs.setdefault("sTgcDigitContainer",f"{flags.Overlay.BkgPrefix}sTGC_DIGITS")
     else:
         kwargs.setdefault("sTgcRdoContainer", "sTGCRDO")
         kwargs.setdefault("sTgcDigitContainer", "sTGC_DIGITS")
@@ -196,7 +196,6 @@ def TgcDigitToTgcRDOCfg(flags, name="TgcDigitToTgcRDO", **kwargs):
     kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        kwargs.setdefault("InputObjectName", f"{flags.Overlay.BkgPrefix}TGC_DIGITS")
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}TGCRDO")
     else:
         kwargs.setdefault("OutputObjectName", "TGCRDO")

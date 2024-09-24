@@ -30,7 +30,8 @@ public:
         writeLHE = 1<<5
     };
   
-    EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask);
+    EventInfoBranch(MuonTesterTree& tree, unsigned int write_mask,
+                    const std::string& evtKey="EventInfo");
 
     bool fill(const EventContext& ctx) override final;
     bool init() override final;
