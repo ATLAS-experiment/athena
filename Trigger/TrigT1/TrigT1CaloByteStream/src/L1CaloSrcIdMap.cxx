@@ -7,6 +7,8 @@
 
 namespace LVL1BS {
 
+    std::atomic<bool> L1CaloSrcIdMap::s_useSWROD = false;
+
 L1CaloSrcIdMap::L1CaloSrcIdMap()
 {
 }
@@ -18,6 +20,9 @@ uint32_t L1CaloSrcIdMap::getRodID(int crate, int slink, int daqOrRoi,
 {
   // module ID = r0sscccc (ROD-spec-version1_06d, P33)
   uint16_t moduleId = (daqOrRoi << 7) | (slink << 4) | crate;
+  if(s_useSWROD && (crate == 6 || crate == 7)) {
+      moduleId |= (0x1<<12);
+  }
   eformat::helper::SourceIdentifier helpID(subdet, moduleId);
   return helpID.code();
 }

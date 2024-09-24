@@ -96,6 +96,8 @@ class RodHeaderByteStreamTool : public AthAlgTool {
    std::vector<uint32_t> m_sourceIDsJEPRoIBProp;
    /// Source ID converter
    const L1CaloSrcIdMap m_srcIdMap;
+
+   bool m_useSWROD = false;
 };
 
 } // end namespace

@@ -218,6 +218,8 @@ private:
    static const uint8_t s_modules  = 16;
    static const uint8_t s_channels = 64;
    static const uint16_t s_maxtowers = s_crates * s_modules * s_channels;
+
+   bool m_useSWROD = false;
 };
 
 // ===========================================================================
