@@ -217,6 +217,41 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                           LLP1IsolationTrackDecoratorPdEdxTightDTTool,
                           LLP1TrackParticleCaloCellDecoratorTool ]
 
+    # Specific for Taus
+    LLP1TauMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+        flags,
+        name = "LLP1TauMaxCellDecoratorTool",
+        SGKey_taus = 'TauJets',
+        SGKey_electrons = '',
+        SGKey_photons = ''))
+    acc.addPublicTool(LLP1TauMaxCellDecoratorTool)
+
+    augmentationTools += [ LLP1TauMaxCellDecoratorTool ]
+
+    # Specific for Jets: AntiKt4EMTopoJets
+    LLP1AntiKt4EMTopoJetMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+        flags,
+        name = "LLP1AntiKt4EMTopoJetMaxCellDecoratorTool",
+        SGKey_jets = 'AntiKt4EMTopoJets',
+        SGKey_taus = '',
+        SGKey_electrons = '',
+        SGKey_photons = ''))
+    acc.addPublicTool(LLP1AntiKt4EMTopoJetMaxCellDecoratorTool)
+
+    augmentationTools += [ LLP1AntiKt4EMTopoJetMaxCellDecoratorTool ]
+
+    # Specific for Jets: AntiKt4EMPFlowJets
+    LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+        flags,
+        name = "LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool",
+        SGKey_jets = 'AntiKt4EMPFlowJets',
+        SGKey_taus = '',
+        SGKey_electrons = '',
+        SGKey_photons = ''))
+    acc.addPublicTool(LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool)
+
+    augmentationTools += [ LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool ]
+                                           
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
@@ -764,8 +799,8 @@ def LLP1Cfg(flags):
                                           "Photons.DFCommonPhotonsIsEMMedium.DFCommonPhotonsIsEMMediumIsEMValue.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "egammaClusters.phi_sampl.eta0.phi0",
                                           "LRTegammaClusters.phi_sampl.eta0.phi0",
-                                          "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.GhostTrack.GhostTrackCount.GhostTrackLRT.GhostTrackLRTCount",
-                                          "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal",
+                                          "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.GhostTrack.GhostTrackCount.GhostTrackLRT.GhostTrackLRTCount.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z",
+                                          "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.DFCommonJets_fJvt.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201903.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
                                           "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201810.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostTausFinal.GhostTausFinalCount",
                                           "TruthPrimaryVertices.t.x.y.z.sumPt2",
@@ -781,7 +816,6 @@ def LLP1Cfg(flags):
                                           "InDetTrackParticles.LLP1_ptcone20.LLP1_ptcone30.LLP1_ptcone40.LLP1_ptvarcone20.LLP1_ptvarcone30.LLP1_ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
                                           "InDetTrackParticles.LLP1_topoetcone20.LLP1_topoetcone30.LLP1_topoetcone40.LLP1_topoetcone20NonCoreCone.LLP1_topoetcone30NonCoreCone.LLP1_topoetcone40NonCoreCone",
                                           "InDetTrackParticles.LLP1_CaloCelldEta.LLP1_CaloCelldPhi.LLP1_CaloCelldR.LLP1_CaloCelldX.LLP1_CaloCelldY.LLP1_CaloCelldZ.LLP1_CaloCellE.LLP1_CaloCellEta.LLP1_CaloCellGain.LLP1_CaloCellID.LLP1_CaloCellPhi.LLP1_CaloCellProvenance.LLP1_CaloCellQuality.LLP1_CaloCellR.LLP1_CaloCellSampling.LLP1_CaloCellTime.LLP1_CaloCellX.LLP1_CaloCellY.LLP1_CaloCellZ.LLP1_CaloCellEneDiff.LLP1_CaloCellTimeDiff",
-
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
                                           "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
                                           "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
@@ -789,7 +823,7 @@ def LLP1Cfg(flags):
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                           "EventInfo.DFCommonJets_eventClean_SuperLooseBadLLP.DFCommonJets_eventClean_SuperLooseBadLLP_EMTopo.DFCommonJets_eventClean_LooseBadLLP_EMTopo",
-                                          "TauJets.dRmax.etOverPtLeadTrk",
+                                          "TauJets.dRmax.etOverPtLeadTrk.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
