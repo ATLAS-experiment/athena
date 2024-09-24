@@ -83,15 +83,9 @@ BTaggingRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['Simpl
 BTaggingRun4Aux = [
     "SV1_NGTinSvx",
     "SV1_masssvx",
-    "dipsrun420221008_pu",
-    "dipsrun420221008_pc",
-    "dipsrun420221008_pb",
-    "DL1drun420221017_pu",
-    "DL1drun420221017_pc",
-    "DL1drun420221017_pb",
-    "GN1run420221010_pu",
-    "GN1run420221010_pc",
-    "GN1run420221010_pb"
+    "GN2HL_pu",
+    "GN2HL_pc",
+    "GN2HL_pb",
 ]
 
 # more involved outputs we might not want to save (ExpertContent)

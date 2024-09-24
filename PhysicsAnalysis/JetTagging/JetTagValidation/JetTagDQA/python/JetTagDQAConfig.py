@@ -40,9 +40,9 @@ def PhysValBTagCfg(flags, **kwargs):
             InDetTrackTruthOriginToolCfg(flags)))
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        kwargs.setdefault("dipsTaggerName",    "dipsrun420221008")
-        kwargs.setdefault("DL1dv01TaggerName", "DL1drun420221017")
-        kwargs.setdefault("GN2v01TaggerName", "")
+        kwargs.setdefault("dipsTaggerName",    "")
+        kwargs.setdefault("DL1dv01TaggerName", "")
+        kwargs.setdefault("GN2v01TaggerName", "GN2HL")
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
