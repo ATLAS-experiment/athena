@@ -51,7 +51,9 @@ public:
    *   Construct from a simple ExpandedIdentifier. This implies that all fields 
    *   will have their min=max=id[i] 
    */ 
-  Range (const ExpandedIdentifier& root); 
+  Range (const ExpandedIdentifier& root);
+  
+  explicit Range(const std::string & text);
 
  /** 
    * Build Range from a textual description. 

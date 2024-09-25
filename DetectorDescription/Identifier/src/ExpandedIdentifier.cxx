@@ -54,22 +54,6 @@ ExpandedIdentifier::set (const std::string& text){
 }
 
 
-bool 
-ExpandedIdentifier::prefix_less (const ExpandedIdentifier& other) const{
-  const ExpandedIdentifier& me = *this;
-  const size_type my_fields = fields ();
-  const size_type other_fields = other.fields ();
-  // Scan fields up to the less common field number
-  size_type field = 0;
-  while ((field < my_fields) && (field < other_fields)){
-    element_type my_field = me[field];
-    element_type other_field = other[field];
-    if (my_field < other_field) return true;
-    if (my_field > other_field) return false;
-    field++;
-  }
-  return false;
-}
 
 ExpandedIdentifier::operator std::string () const{
   std::string result;
@@ -89,6 +73,11 @@ ExpandedIdentifier::operator std::string () const{
 void 
 ExpandedIdentifier::show () const{
   show_vector (m_fields);
+}
+
+std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x){
+  out<<std::string(x);
+  return out;
 }
 
 

@@ -42,7 +42,11 @@ Range::Range (const Range& other, size_type start) {
   } 
 } 
  
-
+Range::Range(const std::string & text):Range(){
+   if (text.empty()) return;
+   std::istringstream in(text);
+   in>>*this;
+}
  
 //----------------------------------------------- 
 Range::Range (const ExpandedIdentifier& root) { 

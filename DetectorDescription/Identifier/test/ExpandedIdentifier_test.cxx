@@ -12,6 +12,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "Identifier/ExpandedIdentifier.h"
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 //redirect cout buffer for test
 struct cout_redirect {
@@ -69,6 +70,9 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
     g.show();
   }
   BOOST_CHECK( output.is_equal( "[-3.-2.-1.1.2.3]" ) );
+  std::ostringstream s;
+  BOOST_CHECK_NO_THROW(s<<g);
+  BOOST_TEST( s.str() == "-3/-2/-1/1/2/3");
 }
 
 
@@ -89,13 +93,9 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierComparison){
   BOOST_TEST(g != i);
   BOOST_TEST(i < h);
   BOOST_TEST(j > h);
-  BOOST_TEST(j.prefix_less(h) == false);
   //
   BOOST_TEST(k != i);
   BOOST_TEST(j > k);
-  BOOST_TEST(k.prefix_less(h) == false);
-  ExpandedIdentifier m("-3/-2/-1/0");
-  BOOST_TEST(m.prefix_less(k) == true);
   //Is the shorter sequence at the beginning of the longer sequence?
   BOOST_TEST(k.match(j) == true);
   BOOST_TEST(k.match(i) == false);

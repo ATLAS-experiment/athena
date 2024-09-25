@@ -8,6 +8,7 @@
 #include <string>
 #include <algorithm>//for lexicographical_compare in the .icc file
 #include <boost/container/small_vector.hpp>
+#include <iosfwd>
 
 //-----------------------------------------------
 //
@@ -79,14 +80,7 @@
 //                                       /1   < /1/3
 //                                       /1 is implicitly /1/0...
 //  
-//  prefix_less (id_type& other)         : comparison on the equal length 
-//                                         prefix parts of two ids, 
-//
-//                                         e.g. :
-//
-//                                       /1/2 < /1/3,
-//                                          but now 
-//                                       /1 == /1/3  
+
 //
 //
 //  ----------------------------------------------------
@@ -150,7 +144,6 @@ public:
 
   bool operator == (const ExpandedIdentifier& other) const;
   
-  bool prefix_less (const ExpandedIdentifier& other) const;
   
   /**
    *    Test if the shorter of two ids is identical
@@ -167,6 +160,9 @@ private:
 
   element_vector m_fields;
 };
+
+std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x);
+
 
 
 #include "Identifier/ExpandedIdentifier.icc"
