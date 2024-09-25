@@ -410,9 +410,9 @@ void iFatras::HitCreatorSilicon::createSimHit(const ISF::ISFParticle& isp, const
   else
     ATH_MSG_VERBOSE("[ sihit ] SiHit SiDetElement not found to add to the SiHitCollection.");
 
-  HepMcParticleLink partLink(HepMC::barcode(isp), 0,
+  HepMcParticleLink partLink(HepMC::uniqueID(isp), 0,
                              HepMcParticleLink::IS_POSITION,
-                             HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+                             HepMcParticleLink::IS_ID);
   m_hitColl->Emplace(localEntryHep,
                      localExitHep,
                      energyDeposit,
