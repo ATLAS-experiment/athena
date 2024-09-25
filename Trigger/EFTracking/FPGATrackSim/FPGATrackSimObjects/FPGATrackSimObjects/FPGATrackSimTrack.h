@@ -13,10 +13,14 @@
 #include <iosfwd>
 #include <cmath>
 
+#include "GeneratorObjects/HepMcParticleLink.h"
 class FPGATrackSimTrack : public TObject {
 
  public:
-
+    // Constructors
+    FPGATrackSimTrack() = default;
+    virtual ~FPGATrackSimTrack() = default;
+  
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
   TrackStage getTrackStage() const { return m_trackStage; }
   bool getDoDeltaGPhis() const { return m_doDeltaGPhis; }
@@ -47,7 +51,8 @@ class FPGATrackSimTrack : public TObject {
   //write a detmap
   int getNCoords() const;
   signed long getEventIndex() const { return m_eventindex; }
-  unsigned long getBarcode() const { return m_barcode; }
+  HepMcParticleLink::barcode_type getBarcode() const { return m_barcode; }
+  HepMcParticleLink::barcode_type getUniqueID() const { return m_uniqueID; }
   unsigned long barcode() const { return getBarcode(); }
   float getBarcodeFrac() const { return m_barcode_frac; }
   //Should be passed as const ref to avoid excessive copying.
@@ -91,7 +96,8 @@ class FPGATrackSimTrack : public TObject {
   void setTypeMask(unsigned int v) { m_typemask = v; }
   void setHitMap(unsigned int v) { m_hitmap = v; }
   void setEventIndex(const signed long& v) { m_eventindex = v; }
-  void setBarcode(const unsigned long& v) { m_barcode = v; }
+  void setBarcode(const HepMcParticleLink::barcode_type& v) { m_barcode = v; }
+  void setUniqueID(const HepMcParticleLink::barcode_type& v) { m_uniqueID = v; }
   void setBarcodeFrac(const float& v) { m_barcode_frac = v; }
 
   void setValidCand(bool v)   { m_isValidCand = v; }
@@ -147,7 +153,9 @@ class FPGATrackSimTrack : public TObject {
   std::vector<FPGATrackSimHit> m_hits; //[m_nlayers] hits associated to the track
 
   signed long m_eventindex = -1; // matched particle event index
-  unsigned long m_barcode = std::numeric_limits<unsigned long>::max(); // matched geant particle barcode
+  HepMcParticleLink::barcode_type m_barcode = std::numeric_limits<HepMcParticleLink::barcode_type>::max(); // matched geant particle barcode
+  HepMcParticleLink::barcode_type m_uniqueID = std::numeric_limits<HepMcParticleLink::barcode_type>::max();
+  // HepMcParticleLink::barcode_type m_uniqueID = std::numeric_limits<HepMcParticleLink::barcode_type>::max();
   float m_barcode_frac = 0.0F; // largest "matching fraction" with any "good"
   // geant particle, corresponding to the
   // particle with m_barcode
@@ -165,7 +173,7 @@ class FPGATrackSimTrack : public TObject {
   // There is currently only one algorithm
   unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
-  ClassDef(FPGATrackSimTrack, 2)
+  ClassDef(FPGATrackSimTrack, 3)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H
