@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "iostream"
@@ -29,7 +29,7 @@ using namespace std;
 using namespace HLTNavDetails;
 using namespace TrigNavTest;
 
-StoreGateSvc* pStore(0);
+SmartIF<StoreGateSvc> pStore;
 asg::AsgMessaging logger("Holder_test");
 
 typedef TrigSerializeConverter<TestBContainer> TestBContainerSerCnv;
@@ -371,7 +371,8 @@ int main() {
 
    Gaudi::Hive::setCurrentContextEvt(0);
 
-  if( pSvcLoc->service("StoreGateSvc", pStore, true).isSuccess() ) {
+   pStore = pSvcLoc->service("StoreGateSvc");
+  if( pStore ) {
     *msglog << MSG::DEBUG << "SG pointer: " << pStore << endmsg;
   } else {
     ABORT( "ERROR no SG available" );
