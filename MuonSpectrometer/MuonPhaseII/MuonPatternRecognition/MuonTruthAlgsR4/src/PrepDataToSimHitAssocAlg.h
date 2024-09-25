@@ -34,9 +34,6 @@ namespace MuonR4{
            template <class ContainerType> StatusCode retrieveContainer(const EventContext& ctx,
                                                                        const SG::ReadHandleKey<ContainerType>& key,
                                                                        const ContainerType* & contToPush) const;
-
-            using ChamberRange = std::array<xAOD::MuonSimHitContainer::const_iterator, 2>;
-            ChamberRange getRange(const xAOD::MuonSimHitContainer& simHits, const Identifier& refId) const;
             /** @brief Key to the associated simHit container */
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitsKey{this, "SimHits" , ""};
             /** @brief Key to the uncalibrated measurements to decorate */
