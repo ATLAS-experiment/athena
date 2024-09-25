@@ -17,7 +17,7 @@ atlas_add_library( FPGATrackSimObjectsLib
    src/*.cxx FPGATrackSimObjects/*.h src/*.h ${FPGATrackSimObjectsLibDictSource}
    PUBLIC_HEADERS          FPGATrackSimObjects
    INCLUDE_DIRS            ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES          ${ROOT_LIBRARIES} AthContainers
+   LINK_LIBRARIES          ${ROOT_LIBRARIES} AthContainers GeneratorObjects
 )
 
 # Tests in the package:

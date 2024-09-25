@@ -295,10 +295,12 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       if (bestParent) {
         tmpSGhit.setEventIndex(bestTruthLink->eventIndex());
         tmpSGhit.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
+        tmpSGhit.setUniqueID(bestTruthLink->id()); // May need fixing when uid will be used.
       }
       else {
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-        tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+        tmpSGhit.setBarcode(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
+        tmpSGhit.setUniqueID(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
       }
 
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
@@ -432,10 +434,12 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       if (bestParent) {
         tmpSGhit.setEventIndex(bestTruthLink->eventIndex());
         tmpSGhit.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
+        tmpSGhit.setUniqueID(bestTruthLink->id());
       }
       else {
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-        tmpSGhit.setBarcode(std::numeric_limits<unsigned long>::max());
+        tmpSGhit.setBarcode(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
+        tmpSGhit.setUniqueID(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
       }
 
       // If the strip has been identified by the previous for loop as a valid hit that can be encoded into ITk Strip format
@@ -605,10 +609,12 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       if (bestParent) {
         clusterEquiv.setEventIndex(bestTruthLink->eventIndex());
         clusterEquiv.setBarcode(bestTruthLink->barcode()); // FIXME barcode-based
+        clusterEquiv.setUniqueID(bestTruthLink->id());
       }
       else {
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-        clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+        clusterEquiv.setBarcode(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
+        clusterEquiv.setUniqueID(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
       }
 
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
@@ -679,7 +685,8 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
       }
       else {
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-        clusterEquiv.setBarcode(std::numeric_limits<unsigned long>::max());
+        clusterEquiv.setBarcode(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
+        clusterEquiv.setUniqueID(std::numeric_limits<HepMcParticleLink::barcode_type>::max());
       }
 
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
@@ -766,6 +773,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
       const int bc = HepMC::barcode(particle); // FIXME update barcode-based syntax
+      const int uid = particle->id();
       if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; } // FIXME update barcode-based syntax
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
@@ -779,10 +787,8 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         isPrimary = false;
       }
 
-      HepMcParticleLink::ExtendedBarCode extBarcode2(bc, ievt,
-                                                     HepMcParticleLink::IS_EVENTNUM,
-                                                     HepMcParticleLink::IS_BARCODE); // FIXME update barcode-based syntax
-
+      HepMcParticleLink truthLink2(uid, ievt, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
+      
       FPGATrackSimTruthTrack tmpSGTrack;
       tmpSGTrack.setVtxX(track_truth_x0);
       tmpSGTrack.setVtxY(track_truth_y0);
@@ -797,13 +803,9 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setPDGCode(pdgcode);
       tmpSGTrack.setStatus(particle->status());
 
-      unsigned int id2, barcode2;
-      extBarcode2.uniqueID(id2, barcode2);
-      tmpSGTrack.setBarcode(id2);
-
-      index_type index2, position2;
-      extBarcode2.eventIndex(index2, position2);
-      tmpSGTrack.setEventIndex(index2);
+      tmpSGTrack.setBarcode(truthLink2.barcode());
+      tmpSGTrack.setUniqueID(truthLink2.id());
+      tmpSGTrack.setEventIndex(truthLink2.eventIndex());
 
       truth.push_back(tmpSGTrack);
     } // end for each GenParticle in this GenEvent

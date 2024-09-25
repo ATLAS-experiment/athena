@@ -32,6 +32,8 @@
 #include <Rtypes.h>
 #include "TMath.h"
 
+#include "GeneratorObjects/HepMcParticleLink.h"
+
  // Some types are inclusive of others. For example, clustered implies mapped.
 enum class HitType { unmapped, mapped, clustered, wildcard, guessed, undefined, extrapolated, spacepoint };
 
@@ -134,13 +136,15 @@ public:
 
     // --- Truth and Other ---
     void setToT(unsigned v) { m_ToT = v; }
-    void setBarcode(unsigned long v) { m_barcode = v; }
+    void setBarcode(const HepMcParticleLink::barcode_type& v) { m_barcode = v; }
+    void setUniqueID(const HepMcParticleLink::barcode_type& v) { m_uniqueID = v; }
     void setBarcodePt(float v) { m_barcode_pt = v; }
     void setEventIndex(long v) { m_eventindex = v; }
     void setParentageMask(unsigned long v) { m_parentage_mask = v; }
     void setTruth(const FPGATrackSimMultiTruth& v) { m_truth = v; }
     unsigned getToT() const { return m_ToT ;}
-    unsigned long getBarcode() const { return m_barcode; }
+    HepMcParticleLink::barcode_type getBarcode() const { return m_barcode; }
+    HepMcParticleLink::barcode_type getUniqueID() const { return m_uniqueID; }
     long getEventIndex() const { return m_eventindex; }
     float getBarcodePt() const { return m_barcode_pt; }
     unsigned long getParentageMask() const { return m_parentage_mask; }
@@ -218,7 +222,8 @@ protected:
     unsigned m_hw_word = 0; // store Strip and Pixel cluster positions as integers using the same FPGATrackSim_IM HW definition
     unsigned m_ToT = 0; // time over Threshold
     long m_eventindex = 0; // athena event index assigned to this channel
-    unsigned long m_barcode = 0; // geant particle barcode assigned to this channel
+    HepMcParticleLink::barcode_type m_barcode = 0; // geant particle barcode assigned to this channel
+    HepMcParticleLink::barcode_type m_uniqueID = 0;
     float m_barcode_pt = 0; // maximum 'pt' for any 'good' geant particle contributing to the channel.
                             // corresponds to the particle with m_barcode
     unsigned long m_parentage_mask = 0; // ancestor information of this channel
@@ -237,7 +242,7 @@ protected:
 
     int m_roadID = 0;
     
-    ClassDef(FPGATrackSimHit, 6);
+    ClassDef(FPGATrackSimHit, 7);
 };
 
 // Container of <FPGATrackSimHit const *>
