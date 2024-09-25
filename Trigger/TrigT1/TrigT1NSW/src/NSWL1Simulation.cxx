@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -18,8 +18,8 @@ namespace NSWL1 {
     ATH_CHECK( m_trigRdoContainer.initialize() );
     // Create an register the ntuple if requested, add branch for event and run number
     if ( m_doNtuple ) {
-      ITHistSvc* tHistSvc;
-      ATH_CHECK(service("THistSvc", tHistSvc));
+      SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+      ATH_CHECK( tHistSvc.isValid() );
 
       // create Ntuple and the branches
       std::string ntuple_name = name()+"Tree";

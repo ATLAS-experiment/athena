@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -66,8 +66,8 @@ namespace NSWL1 {
             m_incidentSvc->addListener(this,IncidentType::BeginEvent);
 
             if ( algo_name=="NSWL1Simulation" ) {
-                ITHistSvc* tHistSvc=nullptr;
-                ATH_CHECK(service("THistSvc", tHistSvc));
+                SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+                ATH_CHECK( tHistSvc.isValid() );
 
                 TTree *tree = nullptr;
                 std::string treename = algo_name+"Tree";
