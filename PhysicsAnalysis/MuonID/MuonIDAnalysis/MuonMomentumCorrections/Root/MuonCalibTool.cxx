@@ -537,19 +537,25 @@ namespace CP
     MCP::DataYear MuonCalibTool::getPeriod(bool isData) const 
     {
         static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
-        // I've copied the run number ranges from SUSYTools
+        // I've copied the run number ranges from SUSYTools (Run2) - Haider
         // https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/SUSYPhys/SUSYTools/Root/SUSYObjDef_xAOD.cxx#L2438
+	// Range for Run3 taken from COMA - Luca
+	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data22_13p6TeV
+	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data23_13p6TeV
+	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data24_13p6TeV
         constexpr unsigned int last_run_16 = 320000;
         constexpr unsigned int last_run_17 = 342000;
         constexpr unsigned int last_run_18 = 370000;
         constexpr unsigned int last_run_22 = 440614;
-        constexpr unsigned int last_run_23 = 999999;
+        constexpr unsigned int last_run_23 = 456750;
+	constexpr unsigned int last_run_24 = 999999;
 
         static const std::set<int> MCperiods1516{284500};
         static const std::set<int> MCperiods17{300000, 304000, 305000};
         static const std::set<int> MCperiods18{310000};
         static const std::set<int> MCperiods22{330000, 410000};
         static const std::set<int> MCperiods23{450000};
+	static const std::set<int> MCperiods24{470000};
 
         static const std::set<int> MCperiodsRun4{350000, 350060, 350140, 350200};
 
@@ -581,14 +587,17 @@ namespace CP
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc20e / data18");
                 return MCP::DataYear::Data18;
             } else if (MCperiods22.count(run)) {
-                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc21a / data22");
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc21 / mc23a / data22");
                 return MCP::DataYear::Data22;
             } else if (MCperiods23.count(run)) {
-                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23c / data23");
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23c / mc23d / data23");
                 return MCP::DataYear::Data23;
+            } else if (MCperiods24.count(run)) {
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23e / data24");
+                return MCP::DataYear::Data24;
             } else if (MCperiodsRun4.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data Run4");
-                return MCP::DataYear::Data23;
+                return MCP::DataYear::Run4;
             }
 
         }
@@ -609,14 +618,17 @@ namespace CP
             }  else if (run < last_run_23) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 23");
                 return MCP::DataYear::Data23;
+            }  else if (run < last_run_24) {
+                ATH_MSG_DEBUG("The current run " << run << " is taken in data 24");
+                return MCP::DataYear::Data24;
             }
         }
         static std::atomic<bool> warningPrinted {false};
         if (!warningPrinted) {
-            ATH_MSG_WARNING("Could not assign run-number " << run << " to a specific year of data-taking, using default year 23");
+            ATH_MSG_WARNING("Could not assign run-number " << run << " to a specific year of data-taking, using default year 24");
             warningPrinted = true;
         }
-        return MCP::DataYear::Data23;
+        return MCP::DataYear::Data24;
     }
 
 
