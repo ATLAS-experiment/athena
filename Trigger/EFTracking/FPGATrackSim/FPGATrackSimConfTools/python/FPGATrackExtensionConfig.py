@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def FPGATrackExtensionAlgCfg(flags, **kwargs):
+def FPGATrackExtensionAlgCfg(flags,enableTrackStatePrinter=False, **kwargs):
     acc = ComponentAccumulator()
 
     from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
@@ -28,10 +28,10 @@ def FPGATrackExtensionAlgCfg(flags, **kwargs):
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
                                                                            ReverseFilteringPt=0,
                                                                            OutlierChi2Cut=30)))
-
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterCfg
-    printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags))
-    kwargs["TrackStatePrinter"] = printerTool 
+    if enableTrackStatePrinter:
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterCfg
+        printerTool = acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags))
+        kwargs["TrackStatePrinter"] = printerTool 
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))

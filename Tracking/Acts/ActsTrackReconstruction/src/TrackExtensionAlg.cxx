@@ -205,7 +205,7 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("Reco MTJ size " << trackStateBackend.size() );
         for ( size_t stateIndex=0; stateIndex < trackStateBackend.size(); ++stateIndex) {
           auto state = trackStateBackend.getTrackState(stateIndex);
-          m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
+          if (m_trackStatePrinter.isSet()) m_trackStatePrinter->printTrackState(tgContext, state, measurements.measurementContainerOffsets(), false);
         }
         ATH_MSG_DEBUG("Track has: " << tempTrackProxy.nMeasurements() << " measurements ");
         ATH_MSG_DEBUG("track: eta: " <<  -1 * log(tan( tempTrackProxy.theta() * 0.5)) << " phi: " << tempTrackProxy.phi() << " pt:" << abs(1./tempTrackProxy.qOverP() * sin(protoTrack.parameters->theta())));
