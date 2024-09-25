@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -415,12 +415,12 @@ void InDet::SegmentDriftCircleAssValidation::tracksComparison( const Trk::Segmen
 
       //* looping over the returned list of genParticles
       for(ik=lk.begin(); ik!=ike; ++ik){
-        int k = (*ik)->second.barcode();
-        if (k<=0) continue;
+        const int uniqueID = HepMC::uniqueID((*ik)->second);
+        if (uniqueID<=0) continue;
         int m = -1;
 
         for(int n=0; n!=NK; ++n) {
-          if(k==KINE[n]) {
+          if(uniqueID==KINE[n]) {
             ++NKINE[n];
             m=n;
             break;
@@ -428,7 +428,7 @@ void InDet::SegmentDriftCircleAssValidation::tracksComparison( const Trk::Segmen
         }
 
         if(m<0) {
-          KINE[NK] = k;
+          KINE[NK] = uniqueID;
           NKINE[NK] = 1;
           if(NK < 200) ++NK;
         }
@@ -489,7 +489,7 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
   if(!find) return lk;
   std::list<PRD_MultiTruthCollection::const_iterator>::iterator imc, imce=mc.end();
   for(imc=mc.begin();imc!=imce;++imc){ 
-    int k = (*imc)->second.barcode(); if(k<=0) continue;
+    const int uniqueID = HepMC::uniqueID((*imc)->second); if(uniqueID<=0) continue;
 
     HepMC::ConstGenParticlePtr pa = (*imc)->second.cptr(); 	
     if(!pa || !pa->production_vertex()) continue;
@@ -518,7 +518,7 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
     double           r = sqrt(v.x()*v.x()+v.y()*v.y());
     if( r < m_rmin || r > m_rmax) continue;
     
-    lk.push_back(k);
+    lk.push_back(uniqueID);
   }
 
   return lk;
@@ -540,7 +540,7 @@ std::list<PRD_MultiTruthCollection::const_iterator> InDet::SegmentDriftCircleAss
   std::list<PRD_MultiTruthCollection::const_iterator>::iterator imc, imce=mc.end();
   for(imc=mc.begin();imc!=imce;++imc){ 
 
-    int k = (*imc)->second.barcode(); if(k<=0) continue;
+    const int uniqueID = HepMC::uniqueID((*imc)->second); if(uniqueID<=0) continue;
    
     HepMC::ConstGenParticlePtr pa = (*imc)->second.cptr(); 	
     if(!pa || !pa->production_vertex()) continue;

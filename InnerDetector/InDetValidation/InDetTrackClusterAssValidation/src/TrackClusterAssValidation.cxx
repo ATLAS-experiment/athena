@@ -1200,13 +1200,13 @@ void InDet::TrackClusterAssValidation::efficiencyReconstruction(InDet::TrackClus
 
     while (p!=pe) {
 
-      int k = (*p).barcode();
-      int n = event_data.m_kinecluster.count(k);
+      const int uniqueID = HepMC::uniqueID(*p);
+      int n = event_data.m_kinecluster.count(uniqueID);
       int m = 0;
       int w = 0;
-      t = event_data.m_tracks[nc].find(k);
+      t = event_data.m_tracks[nc].find(uniqueID);
       for(; t!=te; ++t) {
-	if((*t).first!=k) break;
+	if((*t).first!=uniqueID) break;
 	int ts = (*t).second/1000;
 	int ws = (*t).second%1000;
 	if     (ts > m         ) {m = ts; w = ws;}
@@ -1270,7 +1270,7 @@ int InDet::TrackClusterAssValidation::kine
 
     if( (*mc).first != ID ) return nkine;
 
-    int k = (*mc).second.barcode(); if(k<=0) continue;
+    const int uniqueID = HepMC::uniqueID((*mc).second); if(uniqueID<=0) continue;
 
     const HepMC::ConstGenParticlePtr pa = (*mc).second.cptr();
     if(!pa or !pa->production_vertex()) continue;
@@ -1300,7 +1300,7 @@ int InDet::TrackClusterAssValidation::kine
     double           r = std::sqrt(vx*vx+vy*vy);
     if( r < m_rmin || r > m_rmax) continue;
 
-    Kine[nkine] = k; if(++nkine >= nmax) break;
+    Kine[nkine] = uniqueID; if(++nkine >= nmax) break;
   }
   return nkine;
 }
@@ -1323,8 +1323,8 @@ int InDet::TrackClusterAssValidation::kine0
 
     if( (*mc).first != ID ) return nkine;
 
-    int k = (*mc).second.barcode(); if(k<=0) continue;
-    Kine[nkine] = k; if(++nkine >= nmax) break;
+    const int uniqueID = HepMC::uniqueID((*mc).second); if(uniqueID<=0) continue;
+    Kine[nkine] = uniqueID; if(++nkine >= nmax) break;
   }
   return nkine;
 }
@@ -1427,9 +1427,9 @@ bool InDet::TrackClusterAssValidation::noReconstructedParticles(const InDet::Tra
     n = 0;
     for(; p!=pe; ++p) {
 
-      int k = (*p).barcode();
+      const int uniqueID = HepMC::uniqueID(*p);
 
-      c = event_data.m_kinecluster.find(k); if(c==ce) continue;
+      c = event_data.m_kinecluster.find(uniqueID); if(c==ce) continue;
       const Trk::PrepRawData* d = (*c).second;
 
       PRD_MultiTruthCollection::const_iterator mce;
@@ -1439,7 +1439,7 @@ bool InDet::TrackClusterAssValidation::noReconstructedParticles(const InDet::Tra
       bool Q = false;
       for(; mc!=mce; ++mc) {
 	if((*mc).first != ID) break;
-	if((*mc).second.barcode()==k) {Q=true; break;}
+	if(HepMC::uniqueID((*mc).second)==uniqueID) {Q=true; break;}
       }
 
       if(!Q) continue;
@@ -1461,9 +1461,9 @@ bool InDet::TrackClusterAssValidation::noReconstructedParticles(const InDet::Tra
 	     <<std::setw(4)<<n
 	       <<std::setw(6)<<pa->pdg_id()
 	       <<std::setw(10)<<HepMC::barcode(pa)
-	       <<std::setw(4)<<event_data.m_kinecluster   .count(k)
-	       <<std::setw(4)<<event_data.m_kineclusterTRT.count(k)
-	       <<std::setw(4)<<event_data.m_kinespacepoint.count(k)
+	       <<std::setw(4)<<event_data.m_kinecluster   .count(uniqueID)
+	       <<std::setw(4)<<event_data.m_kineclusterTRT.count(uniqueID)
+	       <<std::setw(4)<<event_data.m_kinespacepoint.count(uniqueID)
 	       <<std::setw(4)<<(*dif)
 	       <<std::setw(12)<<std::setprecision(5)<<pt
 	       <<std::setw(12)<<std::setprecision(5)<<ra
@@ -1517,13 +1517,13 @@ InDet::TrackClusterAssValidation::findTruth
 
 int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidation::EventData_t &event_data,std::pair<int,const Trk::PrepRawData*> pa,int& rap) const
 {
-  int                     k = pa.first;
+  const int uniqueID = pa.first;
   const Trk::PrepRawData* d = pa.second;
   PRD_MultiTruthCollection::const_iterator mce;
   PRD_MultiTruthCollection::const_iterator mc = findTruth(event_data,d,mce);
 
   for(; mc!=mce; ++mc) {
-    if((*mc).second.barcode()==k) {
+    if(HepMC::uniqueID((*mc).second)==uniqueID) {
 
       const HepMC::ConstGenParticlePtr   pat  = (*mc).second.cptr();
 
