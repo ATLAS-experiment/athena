@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # "Standalone" jobOptions for running
 # AthCUDAExamples::LinearTransformTaskExampleAlg.
@@ -24,7 +24,7 @@ from AthExCUDA.AthExCUDAConf import \
    AthCUDAExamples__LinearTransformTaskExampleAlg
 algSequence += AthCUDAExamples__LinearTransformTaskExampleAlg(
    KernelRunnerSvc = ServiceMgr.CUDAKernelRunnerSvc,
-   Blocking = True )
+   Asynchronous = True )
 
 # Run for some larger number of events.
 theApp.EvtMax = 10000
