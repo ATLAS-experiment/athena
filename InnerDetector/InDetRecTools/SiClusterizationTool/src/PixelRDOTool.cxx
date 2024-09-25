@@ -164,6 +164,7 @@ namespace InDet
 				     int defaultLabel) const
   {
     std::vector<UnpackedPixelRDO> unpacked;
+    unpacked.reserve(collection.size());
     std::unordered_set<Identifier> idset;
     const IdentifierHash idHash = collection.identifyHash();
 
