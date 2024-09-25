@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCTriggerCondSvc/TGCTriggerBWCWReader.h"
@@ -8,7 +8,8 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 TGCTriggerBWCWReader::TGCTriggerBWCWReader(int lutType):
-  TGCTriggerLUTReader(lutType)
+  TGCTriggerLUTReader(lutType),
+  AthMessaging("TGCTriggerBWCWReader")
 {
 }
 
@@ -17,11 +18,6 @@ TGCTriggerBWCWReader::TGCTriggerBWCWReader(int lutType):
 bool TGCTriggerBWCWReader::loadParameters(TGCTriggerLUTs* writeCdo,
                                           const CondAttrListCollection* readCdo) {
 
-  MsgStream log(m_msgSvc, "TGCTriggerBWCWReader::loadParameters");
-  if(m_svcLocator->service("MessageSvc", m_msgSvc) == StatusCode::FAILURE){
-    return false;
-  }
-
   CondAttrListCollection::const_iterator itr = readCdo->begin();
   CondAttrListCollection::const_iterator itr_e = readCdo->end();
 
@@ -29,7 +25,7 @@ bool TGCTriggerBWCWReader::loadParameters(TGCTriggerLUTs* writeCdo,
     const unsigned int channel = (*itr).first;
     const coral::AttributeList& atr = (*itr).second;
 
-    log << MSG::DEBUG<<"channel: " << channel<<endmsg;
+    ATH_MSG_DEBUG("channel: " << channel);
     std::string file    = *(static_cast<const std::string*>((atr["file"]).addressOfData()));
     std::string data    = *(static_cast<const std::string*>((atr["data"]).addressOfData()));
     std::string version = *(static_cast<const std::string*>((atr["version"]).addressOfData()));
@@ -41,8 +37,8 @@ bool TGCTriggerBWCWReader::loadParameters(TGCTriggerLUTs* writeCdo,
     writeCdo->m_version[m_lutType].push_back(version);
     writeCdo->m_type[m_lutType].push_back(type);
 
-    log << MSG::INFO<<"file: " <<file<<endmsg;
-    log << MSG::DEBUG<<"data: " << data<<endmsg;
+    ATH_MSG_INFO("file: " <<file);
+    ATH_MSG_DEBUG("data: " << data);
 
   }
   return true;
@@ -57,12 +53,7 @@ bool TGCTriggerBWCWReader::loadParameters(TGCTriggerLUTs* writeCdo,
 
 bool TGCTriggerBWCWReader::readLUT(TGCTriggerLUTs* writeCdo){
 
-  MsgStream log(m_msgSvc, "TGCTriggerBWCWReader::readLUT");
-  if(m_svcLocator->service("MessageSvc", m_msgSvc) == StatusCode::FAILURE){
-    return false;
-  }
-
-  const int numberOfCoincidenceType = 4; 
+  const int numberOfCoincidenceType = 4;
 
   const int moduleNumber[TGCTriggerLUTs::N_MODULETYPE]  =
     {  0,  1,   2,   2,  3,  4,   5,   5,  6,  7,   8,  8 };

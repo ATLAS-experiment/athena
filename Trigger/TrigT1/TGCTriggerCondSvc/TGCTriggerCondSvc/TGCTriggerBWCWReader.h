@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCTRIGGERBWCWREADER_H
 #define TGCTRIGGERBWCWREADER_H
 
 #include "TGCTriggerCondSvc/TGCTriggerLUTReader.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 class TGCTriggerLUTs;
 class CondAttrListCollection;
 
-class TGCTriggerBWCWReader: public TGCTriggerLUTReader{
+class TGCTriggerBWCWReader: public TGCTriggerLUTReader, public AthMessaging {
 
  public:
   TGCTriggerBWCWReader(int lutType);
