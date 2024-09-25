@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatCandidateTool.h"
@@ -154,6 +154,7 @@ namespace Muon {
         // loop over hits
         bool is_first_meas = true;
         for (const Trk::MeasurementBase* meas : measurements) {
+            // cppcheck-suppress invalidLifetime; false positive
             Identifier id = m_edmHelperSvc->getIdentifier(*meas);
             if (!id.is_valid()) {
                 fakePhiHits.push_back(meas);

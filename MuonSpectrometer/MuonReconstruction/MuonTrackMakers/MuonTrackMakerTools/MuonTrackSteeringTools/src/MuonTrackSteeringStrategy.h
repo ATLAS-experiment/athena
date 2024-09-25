@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKSTEERINGSTRATEGY_H
@@ -50,7 +50,7 @@ namespace Muon {
         void setOption(Option, bool value);
         void setOption(const std::string&, bool value);
         bool option(Option) const;
-        std::bitset<Last> allOptions() const { return m_bits; }
+        const std::bitset<Last>& allOptions() const { return m_bits; }
 
         // Set methods
         void setCh(const std::vector<MuonStationIndex::ChIndex>& val, const unsigned int layer);
@@ -61,7 +61,7 @@ namespace Muon {
         const std::vector<MuonStationIndex::ChIndex>& getCh(const unsigned int) const;
 
         // for the name
-        const std::string getName() const { return m_name; }
+        const std::string& getName() const { return m_name; }
         void setName(const std::string& name) { m_name = name; }
 
         const std::vector<unsigned int>& seeds() const { return m_seeds; }
