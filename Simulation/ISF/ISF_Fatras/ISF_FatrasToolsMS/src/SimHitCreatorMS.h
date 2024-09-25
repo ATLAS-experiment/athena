@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FATRASTOOLSMS_SIMHITCREATORMS_H
@@ -75,7 +75,7 @@ namespace iFatras
       /** handle for incident service */
       void handle(const Incident& inc);    
 
-       /** Loop over the hits and call the hit creator - also provide the ISF particle to register the barcode */
+       /** Loop over the hits and call the hit creator - also provide the ISF particle to register the truth link */
       void createHits(const ISF::ISFParticle& isp, 
                       const std::vector<Trk::HitInfo>& hits) const;
 
