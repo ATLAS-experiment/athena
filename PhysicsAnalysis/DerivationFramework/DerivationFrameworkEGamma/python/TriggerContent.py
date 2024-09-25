@@ -692,8 +692,8 @@ ExtraContainersPhotonTrigger = {}
 ExtraContainersPhotonTrigger["Run3"] = [
     "HLT_egamma_Photons",
     "HLT_egamma_PhotonsAux.",
-    "HLT_egamma_IsoPhotons",
-    "HLT_egamma_IsoPhotonsAux.",
+    "HLT_egamma_Iso_Photons",
+    "HLT_egamma_Iso_PhotonsAux.",
     "HLT_FastCaloEMClusters",
     "HLT_FastCaloEMClustersAux.",
     "HLT_CaloEMClusters_Photon",
