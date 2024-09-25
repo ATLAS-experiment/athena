@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETAILEDHITINFO_H
@@ -38,7 +38,7 @@ namespace Trk {
       int getStripHits();
       
       // the tuple elements are: layer number, # contributing layers, # hits
-      std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > > getHitInfo();
+      const std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > >& getHitInfo();
       
     private:
       // the tuple elements are: layer number, # contributing layers, # hits

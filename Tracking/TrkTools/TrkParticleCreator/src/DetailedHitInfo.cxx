@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkParticleCreator/DetailedHitInfo.h"
@@ -50,7 +50,7 @@ namespace{
 
 
 
-std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > > 
+const std::vector < std::pair < Trk::DetectorRegion, std::vector < std::tuple <int , int , int> > > > &
 Trk::DetailedHitInfo::getHitInfo(){
   return m_detailedHitInfo;
 }
