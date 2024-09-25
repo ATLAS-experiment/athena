@@ -407,8 +407,8 @@ namespace ActsTrk
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
     plainOptions.maxSteps = m_maxPropagationStep;
+    plainOptions.direction = Acts::Direction::Forward;
     plainSecondOptions.maxSteps = m_maxPropagationStep;
-    plainSecondOptions.direction = Acts::Direction::Forward;
     plainSecondOptions.direction = plainOptions.direction.invert();
 
     // Set the CombinatorialKalmanFilter options
@@ -436,6 +436,7 @@ namespace ActsTrk
       if (!m_useDefaultMeasurementSelector.value()) {
          m_measurementSelector->connect( &secondOptions->trackStateCandidateCreator);
       }
+      secondOptions->skipPrePropagationUpdate = true;
     }
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
@@ -648,7 +649,7 @@ namespace ActsTrk
            }
         }
 
-	Acts::calculateTrackQuantities(track);
+        Acts::calculateTrackQuantities(track);
 	
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
@@ -712,14 +713,9 @@ namespace ActsTrk
 
               auto &secondTracksForSeed = secondResult.value();
               for (auto &secondTrack : secondTracksForSeed) {
-                if (secondTrack.nTrackStates() < 2) {
-                  ATH_MSG_DEBUG("Second track from " << seedType << " seed " << iseed << " track " << nfirst << " has only " << secondTrack.nTrackStates() << " track states");
-                  continue;
-                }
-
                 secondTrack.reverseTrackStates(true);
 
-                (*firstFirstState).previous() = (*std::next(secondTrack.trackStatesReversed().begin())).index();
+                (*firstFirstState).previous() = secondTrack.outermostTrackState().index();
                 secondTrack.tipIndex() = firstTrack.tipIndex();
 
                 addTrack(secondTrack);
