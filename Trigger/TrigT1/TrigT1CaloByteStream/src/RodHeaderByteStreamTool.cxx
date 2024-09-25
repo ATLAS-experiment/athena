@@ -52,6 +52,8 @@ RodHeaderByteStreamTool::RodHeaderByteStreamTool(const std::string& type,
 {
   declareInterface<RodHeaderByteStreamTool>(this);
 
+  declareProperty("UseSWROD",m_useSWROD = false, "Use SWROD readout instead of legacy (which was removed in 2024)");
+
   declareProperty("ErrorTool", m_errorTool,
                   "Tool to collect errors for monitoring");
   declareProperty("ROBSourceIDs",        m_sourceIDsProp,
@@ -84,6 +86,8 @@ RodHeaderByteStreamTool::~RodHeaderByteStreamTool()
 StatusCode RodHeaderByteStreamTool::initialize()
 {
   ATH_MSG_INFO( "Initializing " << name() );
+
+  m_srcIdMap.useSWROD(m_useSWROD);
 
   ATH_CHECK( m_errorTool.retrieve() );
 

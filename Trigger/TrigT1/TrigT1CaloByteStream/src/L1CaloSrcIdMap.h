@@ -6,8 +6,10 @@
 #define TRIGT1CALOBYTESTREAM_L1CALOSRCIDMAP_H
 
 #include <stdint.h>
+#include <atomic>
 
 #include "eformat/SourceIdentifier.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace LVL1BS {
 
@@ -23,6 +25,9 @@ class L1CaloSrcIdMap {
 
 public:
   L1CaloSrcIdMap();
+
+  /// Flag to decide if SWROD readout should be used instead of legacy
+  static void useSWROD(bool in) { s_useSWROD = in; }
 
   /// Make a ROD Source ID
   uint32_t getRodID (int crate, int slink, int daqOrRoi,
@@ -57,6 +62,9 @@ public:
 
   /// Return last ROD header minor version for pre-LS1 data
   uint16_t minorVersionPreLS1() const {return 0x1003;}
+
+  private:
+    static std::atomic<bool> s_useSWROD ATLAS_THREAD_SAFE;
 
 };
 
