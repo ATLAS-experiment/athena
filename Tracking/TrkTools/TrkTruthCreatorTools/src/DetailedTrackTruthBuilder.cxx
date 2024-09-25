@@ -203,8 +203,8 @@ namespace Trk {
         }
       }
 
-      HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_barcode, IProxyDict *proxy) {
-        return {other_particle_barcode, m_eventIndex, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), HepMcParticleLink::IS_BARCODE, proxy}; // FIXME barcode-based
+      HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_id, IProxyDict *proxy) {
+        return {other_particle_id, m_eventIndex, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), HepMcParticleLink::IS_ID, proxy};
       }
 
     private:
@@ -271,10 +271,10 @@ namespace Trk {
               }
               if (n == 0) {
                 ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:"<<id<<" subdet:"<<subdet);
-                // add barcode 0 to pairs, we like to keep track of fake fakes
-                unsigned int BC(0);
+                // add id 0 to pairs, we like to keep track of fake fakes
+                unsigned int UID(HepMC::UNDEFINED_ID);
                 unsigned int EV(0);
-                pairStat[HepMcParticleLink(BC,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE)].subDetHits[subdet].insert(id); // FIXME barcode-based
+                pairStat[HepMcParticleLink(UID,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID)].subDetHits[subdet].insert(id);
               }
             } // orderedPRD_Truth[] available
           } // subdet type check, warning in findSubDetType()
@@ -303,11 +303,11 @@ namespace Trk {
         seeds.insert(i->first);
       }
       else {
-        // add barcode 0 particles, we like to keep track of fake fakes
+        // add id 0 particles, we like to keep track of fake fakes
         TruthTrajectory traj;
         traj.reserve(1);
         traj.push_back(i->first);
-        ATH_MSG_VERBOSE("addTrack(): add barcode 0 hits (noise ?) to DetailedTrackTruthCollection.");
+        ATH_MSG_VERBOSE("addTrack(): add id 0 hits (noise ?) to DetailedTrackTruthCollection.");
 
         // noise/no truth hits on this track
         SubDetHitStatistics noiseStat = makeSubDetHitStatistics(i->second);
@@ -334,7 +334,7 @@ namespace Trk {
       HepMC::ConstGenParticlePtr current = link.cptr();
 
       do {
-        HepMcParticleLink curlink( eventIndex.makeLink(HepMC::barcode(current), proxy)); // FIXME barcode-based syntax needs to be updated..
+        HepMcParticleLink curlink( eventIndex.makeLink(HepMC::uniqueID(current), proxy));
 
         // remove the current particle from the list of particles to consider (if it is still there)
         seeds.erase(curlink);
@@ -396,7 +396,7 @@ namespace Trk {
       TruthTrajectory traj;
       traj.reserve(2); // The average size is about 1.05.  Hardcode that instead of using slow list::size().
       for (Sprout::const_iterator ppart=s->second.begin(); ppart!=s->second.end(); ++ppart) {
-        traj.push_back(HepMcParticleLink(ExtendedEventIndex(s->first, proxy).makeLink(HepMC::barcode(*ppart), proxy))); // FIXME barcode-based syntax needs to be updated
+        traj.push_back(HepMcParticleLink(ExtendedEventIndex(s->first, proxy).makeLink(HepMC::uniqueID(*ppart), proxy)));
       }
 
       // Count PRDs on the TruthTrajectory
@@ -439,12 +439,10 @@ namespace Trk {
 
     SubDetPRDs prds;
     for (TruthTrajectory::const_iterator p = traj.begin(); p != traj.end(); ++p) {
-      // if this is a geantino (pile-up truth reduction), then we would
-      // sum over hits from all particles that arise from this pile-up
-      // collision. the result is useless. don't do it.
-      // in release 20, geantinos have
-      //   barcode==HepMC::SUPPRESSED_PILEUP_BARCODE
-      //   pdg_id==999
+      // if this is a geantino (pile-up truth reduction), then we
+      // would sum over hits from all particles that arise from this
+      // pile-up collision. the result is useless. don't do it.  in
+      // release 20, geantinos have pdg_id==999
       if (!(*p).cptr()) {
         ATH_MSG_WARNING( "HepMcParticleLink " << *p << " in truth trajectory does not point to a valid GenParticle.");
         continue;
