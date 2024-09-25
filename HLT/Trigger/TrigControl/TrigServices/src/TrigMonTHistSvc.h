@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMONTHISTSVC_THISTSVC_H
@@ -51,7 +51,6 @@ public:
   
   virtual StatusCode regHist(const std::string& name) override;
   virtual StatusCode regHist(const std::string& name, std::unique_ptr<TH1> hist) override;
-  virtual StatusCode regHist(const std::string& name, std::unique_ptr<TH1> hist, TH1* hist_ptr) override;
   virtual StatusCode regHist(const std::string& name, TH1*) override;
   virtual StatusCode getHist(const std::string& id, TH1*& hist, size_t ind) const override;
   virtual StatusCode getHist(const std::string& id, TH2*& hist, size_t ind) const override;
