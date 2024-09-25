@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_TOOL_HELPERFUNCTIONS
@@ -64,7 +64,7 @@ namespace PanTau {
 	static StatusCode bindToolHandle( ToolHandle<T>& , std::string){return StatusCode::SUCCESS;}
 #endif
 
-	std::string getName() const
+	const std::string& getName() const
 	{
 	  return m_name;
 	}
