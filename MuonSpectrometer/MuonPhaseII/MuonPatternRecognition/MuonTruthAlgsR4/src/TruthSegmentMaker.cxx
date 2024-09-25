@@ -37,7 +37,7 @@ namespace MuonR4{
             ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
             return StatusCode::SUCCESS;
         }
-        SG::ReadHandle<ContainerType> readHandle{key, ctx};
+        SG::ReadHandle readHandle{key, ctx};
         ATH_CHECK(readHandle.isPresent());
         contToPush = readHandle.cptr();
         return StatusCode::SUCCESS;
@@ -97,7 +97,7 @@ namespace MuonR4{
             }
         } 
 
-        SG::WriteHandle<xAOD::MuonSegmentContainer> writeHandle{m_segmentKey, ctx};
+        SG::WriteHandle writeHandle{m_segmentKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSegmentContainer>(),
                                      std::make_unique<xAOD::MuonSegmentAuxContainer>()));
         

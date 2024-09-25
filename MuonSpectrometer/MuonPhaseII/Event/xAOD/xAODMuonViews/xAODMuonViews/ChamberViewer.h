@@ -54,12 +54,21 @@ namespace xAOD{
              hasIdentifyHash<typename  std::remove_pointer_t<typename HitObjContainer::value_type>>::value);
     }
 
+    namespace ChamberView {
+        /** @brief Switch setting the view mode if the chamber viewer is initialized with the IdHelperSvc */
+        enum class Mode{
+            DetElement /** @brief View ends if the detElementHash changes */,
+            Chamber /** @brief View ends if the moduleHash changes */
+        };
+    }
+
       
     template<ChamberViewConcepts::ContainerConcept HitObjContainer>
         class ChamberViewer {
             public:
                 using value_type = typename HitObjContainer::value_type;
                 using element_type = typename std::remove_pointer_t<value_type>;
+                using ViewMode = ChamberView::Mode;
                 
                 /** @brief Standard constructor
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/
@@ -71,9 +80,11 @@ namespace xAOD{
                 /** @brief Standard constructor
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/               
                 ChamberViewer(const HitObjContainer& container, 
-                             const Muon::IMuonIdHelperSvc* idHelperSvc) noexcept:
+                             const Muon::IMuonIdHelperSvc* idHelperSvc,
+                             const ViewMode mode = ViewMode::DetElement) noexcept:
                     m_container{container},
-                    m_idHelperSvc{idHelperSvc} {
+                    m_idHelperSvc{idHelperSvc},
+                    m_mode{mode} {
                     static_assert(ChamberViewConcepts::hasIdentify<element_type>::value, "Object needs to provide identify()" );
                     next();
                 }
@@ -115,19 +126,39 @@ namespace xAOD{
                                             return meas->identifierHash() != m_currentHash;
                                         });
                     } else {
-                         m_currentHash = m_idHelperSvc->moduleHash((*m_end)->identify());
+                         m_currentHash = idHash((*m_end)->identify());
                          m_end = std::find_if(m_begin, m_container.end(),
                                          [this](const auto& meas){
-                                            return m_idHelperSvc->moduleHash(meas->identify()) != m_currentHash;
+                                            return idHash(meas->identify()) != m_currentHash;
                                         });                       
                     }
                     if (m_begin == m_end) return next(); // veto empty views
                     return true;
                 }
 
-            private:               
+                /** @brief  Loads the view matching the parsed identifier. I.e. the collection of hits sharing
+                 *          the same IdentifierHash. Returns whether the view is empty or not
+                 * @param chamberId: Identifier from the chamber / detElement to consider */
+                bool loadView(const Identifier& chamberId) {
+                    static_assert(ChamberViewConcepts::hasIdentify<element_type>::value, "Object needs to provide identify()" );
+                    const IdentifierHash detId = idHash(chamberId);
+                    m_begin = std::ranges::find_if(m_container,[this,&detId](const auto& meas) {
+                                                        return idHash(meas->identify()) == detId;
+                                                   });
+                    m_end = std::find_if(m_begin, m_container.end(),[this,&detId](const auto& meas) {
+                                                        return idHash(meas->identify()) != detId;
+                                                   });
+                    return m_begin != m_end;
+                }
+            private:
+                /** @brief Returns the IdentifierHash from an Identifier */
+                IdentifierHash idHash(const Identifier& id) const {
+                    return m_mode == ViewMode::DetElement ? m_idHelperSvc->detElementHash(id)
+                                                          : m_idHelperSvc->moduleHash(id);
+                }
                 const HitObjContainer& m_container;
                 const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+                const ViewMode m_mode{ViewMode::DetElement};
                 DetectorIDHashType m_currentHash{0};
                 HitObjContainer::const_iterator m_end{m_container.begin()};
                 HitObjContainer::const_iterator m_begin{m_container.begin()};

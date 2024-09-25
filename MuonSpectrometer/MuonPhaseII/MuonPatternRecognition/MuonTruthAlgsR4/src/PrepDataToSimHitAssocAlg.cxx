@@ -10,7 +10,7 @@
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/MMCluster.h"
-
+#include "xAODMuonViews/ChamberViewer.h"
 namespace MuonR4{
     template <class ContainerType>
         StatusCode PrepDataToSimHitAssocAlg::retrieveContainer(const EventContext& ctx, 
@@ -21,7 +21,7 @@ namespace MuonR4{
             ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
             return StatusCode::SUCCESS;
         }
-        SG::ReadHandle<ContainerType> readHandle{key, ctx};
+        SG::ReadHandle readHandle{key, ctx};
         ATH_CHECK(readHandle.isPresent());
         contToPush = readHandle.cptr();
         return StatusCode::SUCCESS;
@@ -34,22 +34,7 @@ namespace MuonR4{
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
-    }
-    PrepDataToSimHitAssocAlg::ChamberRange 
-        PrepDataToSimHitAssocAlg::getRange(const xAOD::MuonSimHitContainer& simHits, const Identifier& refId) const {
-            const IdentifierHash detHash = m_idHelperSvc->detElementHash(refId);
-            ChamberRange range{};
-            range[0] = std::find_if(simHits.begin() ,simHits.end(), 
-                            [this, &detHash](const xAOD::MuonSimHit* simHit){
-                                return m_idHelperSvc->detElementHash(simHit->identify()) == detHash;
-                            });
-            range[1] = std::find_if(range[0] ,simHits.end(), 
-                            [this, &detHash](const xAOD::MuonSimHit* simHit){
-                                return m_idHelperSvc->detElementHash(simHit->identify()) != detHash;
-                            });
-
-            return range;
-    }
+    }    
     StatusCode PrepDataToSimHitAssocAlg::execute(const EventContext & ctx) const {
         const ActsGeometryContext* gctx{nullptr};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
@@ -99,10 +84,13 @@ namespace MuonR4{
                     double closestDistance{m_PullCutOff};
 
                     /** Fetch a range of candidate hits */
-                    ChamberRange candHits = getRange(*simHits, prdId);
+                    xAOD::ChamberViewer chambViewer{*simHits, m_idHelperSvc.get(), 
+                                                    xAOD::ChamberView::Mode::DetElement};
 
-                    for ( ; candHits[0] != candHits[1]; ++candHits[0]) {
-                        const xAOD::MuonSimHit* simHit{*candHits[0]};
+                    if (!chambViewer.loadView(gasGapId)) {
+                        break;
+                    }
+                    for ( const xAOD::MuonSimHit* simHit : chambViewer) {
                         if (gasGapId != m_idHelperSvc->gasGapId(simHit->identify())) {
                             continue; 
                         }
