@@ -69,7 +69,7 @@ Trk::PerigeeParametersNtupleTool::PerigeeParametersNtupleTool(
          m_mc_pull_qOverP{},
 
          m_mc_particleID{},
-         m_mc_barcode{},  
+         m_mc_uniqueID{},
          m_mc_truthTreeIndex{},
          m_mc_energy{},   
 
@@ -147,7 +147,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::addNtupleItems( TTree* tree ) {
         tree->Branch( "trk_Mc_pull_qOverP", &m_mc_pull_qOverP      );
             
         tree->Branch( "trk_Mc_particleID",  &m_mc_particleID       );
-        tree->Branch( "trk_Mc_barcode",     &m_mc_barcode          );
+        tree->Branch( "trk_Mc_barcode",     &m_mc_uniqueID         ); // TODO update variable name to be consistent
         tree->Branch( "trk_Mc_energy",      &m_mc_energy           );
         tree->Branch( "trk_Mc_prob",        &m_mc_prob             );
         tree->Branch( "trk_Mc_truthTreeIndex",&m_mc_truthTreeIndex );
@@ -230,7 +230,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackTruthData ( const TrackPar
 
   const HepMcParticleLink& particleLink = trackTruth.particleLink();
 
-  m_mc_barcode = particleLink.barcode();
+  m_mc_uniqueID = HepMC::uniqueID(particleLink);
   m_mc_prob=trackTruth.probability();
   m_mc_truthTreeIndex = indexInTruthTree;
   
