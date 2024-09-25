@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatPrimitives/MuPatHit.h"
@@ -15,7 +15,7 @@ namespace Muon {
 
     // member functions
     MuPatHit::MuPatHit(std::shared_ptr<const Trk::TrackParameters> pars, std::shared_ptr<const Trk::MeasurementBase> presMeas,
-                       std::shared_ptr<const Trk::MeasurementBase> broadMeas,  Info info) :
+                       std::shared_ptr<const Trk::MeasurementBase> broadMeas,  const Info& info) :
         Trk::ObjectCounter<MuPatHit>{},
         m_pars(std::move(pars)), m_precisionMeas(std::move(presMeas)), m_broadMeas(std::move(broadMeas)), m_info(info) {
 
