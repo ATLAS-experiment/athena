@@ -196,13 +196,26 @@ namespace InDetGNNHardScatterSelection
       dec_z_skew(*vertex) = z_skew;
 
       if (acc_deltaZ.isAvailable()) {
+        //protect against rare NaNs before assigning decorator
+        if (std::isnan(acc_deltaZ(*vertex))) {
+          ATH_MSG_WARNING("photon deltaZ is NaN: setting to -999!");
+          dec_photon_deltaz(*vertex) = -999;
+        }
+        else{
         dec_photon_deltaz(*vertex) = acc_deltaZ(*vertex);
+        }
       }
       else{
        dec_photon_deltaz(*vertex) = -999;
       }
       if (acc_deltaPhi.isAvailable()) {
+        if (std::isnan(acc_deltaPhi(*vertex))) {
+          ATH_MSG_WARNING("photon deltaPhi is NaN: setting to -999!");
+          dec_photon_deltaPhi(*vertex) = -999;
+        }
+        else{
         dec_photon_deltaPhi(*vertex) = acc_deltaPhi(*vertex);
+        }
       }
       else{
        dec_photon_deltaPhi(*vertex) = -999;
