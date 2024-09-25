@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -203,10 +203,8 @@ uint16_t MuCTPI_DataWord_Decoder::getVetoed() const {
  */
 void MuCTPI_DataWord_Decoder::dumpData() const {
 
-  IMessageSvc* msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if( sc.isFailure() ) {
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if ( !msgSvc ) {
     return;
   }
   MsgStream log( msgSvc, "MuCTPI_DataWord_Decoder" );

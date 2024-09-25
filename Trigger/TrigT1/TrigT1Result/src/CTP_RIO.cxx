@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
@@ -18,10 +18,8 @@ CTP_RIO::~CTP_RIO() {
 
 void CTP_RIO::dumpData() const
 {
-  IMessageSvc*  msgSvc;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc = svcLoc->service( "MessageSvc", msgSvc );
-  if ( sc.isFailure() ) {
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if ( !msgSvc ) {
     return;
   }
   MsgStream log(msgSvc, "CTP_RIO");
