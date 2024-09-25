@@ -131,6 +131,10 @@ def LVL1CaloRun2ReadBSCfg(flags, forRoIBResultToxAOD=False):
 
     acc.merge(ByteStreamReadCfg(flags, type_names=typeNamesToDecode))
 
+    # need to set UseSWROD property of the decoder tools that are sensitive to it (crates 6 and 7) ....
+    acc.addPublicTool(CompFactory.LVL1BS.RodHeaderByteStreamTool("RodHeaderByteStreamTool",UseSWROD=(flags.Input.DataYear>=2024)))
+    acc.addPublicTool(CompFactory.LVL1BS.PpmByteStreamReadV1V2Tool("PpmByteStreamReadV1V2Tool",UseSWROD=(flags.Input.DataYear>=2024)))
+
     if flags.Trigger.Online.isPartition:
         acc.merge(readOnlyToolsForRerunLVL1(flags))
 

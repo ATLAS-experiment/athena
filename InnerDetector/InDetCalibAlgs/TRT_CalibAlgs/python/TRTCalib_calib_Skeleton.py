@@ -47,10 +47,17 @@ def fromRunArgs(runArgs):
     nextstep("Renaming *straw.txt and *tracktuple.root files for the final output")
     ##################################################################################################   
     
-    command  = "mv -v %s %s.merged.straw.txt; " % (glob.glob("*.merged.straw.txt")[0],outputFile)
-    command += "mv -v %s %s.tracktuple.root; " % (glob.glob("*.tracktuple.root")[0],outputFile)
+    listOfStrawFiles = glob.glob("*.merged.straw.txt")
+    listOfTrackFiles = glob.glob("*.tracktuple.root")
     
-    # tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
+    if not listOfStrawFiles or not listOfTrackFiles:
+        print("ERROR: Empty array of \"*.merged.straw.txt\" (size %d) or \"*.tracktuple.root\" (size %d) files" % (len(listOfStrawFiles), len(listOfTrackFiles)))
+        exit(1)
+    
+    command  = "mv -v %s %s.merged.straw.txt; " % (listOfStrawFiles[0],outputFile)
+    command += "mv -v %s %s.tracktuple.root; " % (listOfTrackFiles[0],outputFile)
+    
+    tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
     
     ##################################################################################################
     nextstep("Calculating constants ATHENA")
@@ -82,7 +89,6 @@ def fromRunArgs(runArgs):
                 sys.exit(e.errno)
           
         if (not runArgs.project or not runArgs.runnr or not runArgs.stream):
-            # This part is under testing, will be further developed
             print("ERROR: Raw file not provided, project=\"%s\" or runNumber=\"%s\" or stream=\"%s\" missing..." % (runArgs.project, runArgs.runnr, runArgs.stream))
             print("Provide them!")
             sys.exit(1)

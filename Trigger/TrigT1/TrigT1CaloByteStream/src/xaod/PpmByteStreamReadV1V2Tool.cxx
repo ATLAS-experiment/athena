@@ -70,6 +70,7 @@ PpmByteStreamReadV1V2Tool::PpmByteStreamReadV1V2Tool(const std::string& name /*=
     m_maxSizeSeen(0)
 {
   declareInterface<PpmByteStreamReadV1V2Tool>(this);
+    declareProperty("UseSWROD",m_useSWROD = false, "Use SWROD readout instead of legacy (which was removed in 2024)");
   declareProperty("PpmMappingTool", m_ppmMaps,
       "Crate/Module/Channel to Eta/Phi/Layer mapping tool");
   declareProperty("ROBDataProviderSvc", m_robDataProvider,
@@ -84,6 +85,7 @@ StatusCode PpmByteStreamReadV1V2Tool::initialize() {
   ATH_MSG_DEBUG("Initializing " << name());
 
   m_srcIdMap = new L1CaloSrcIdMap();
+  m_srcIdMap->useSWROD(m_useSWROD);
   CHECK(m_errorTool.retrieve());
   CHECK(m_ppmMaps.retrieve());
   CHECK(m_robDataProvider.retrieve());

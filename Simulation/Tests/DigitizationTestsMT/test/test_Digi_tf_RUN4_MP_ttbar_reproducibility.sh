@@ -4,7 +4,6 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
-# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: RUN4_ttbar_SP.RDO.pool.root
 # art-output: RUN4_ttbar_MP_fork_evt0.RDO.pool.root
@@ -62,7 +61,7 @@ echo "art-result: $rc1 RDOMerge_tf.py SP"
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 0 \
 --CA \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
@@ -86,7 +85,7 @@ echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 Digi_tf.py \
 --multiprocess --athenaMPEventsBeforeFork 1 \
 --CA \
---conditionsTag default:OFLCOND-MC15c-SDR-14-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN4-02 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:${geotag} \
