@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ private:
     float       m_mc_pull_qOverP;//!< parameter-pull for q/p           UNIT:1
 
     int         m_mc_particleID; //!< PDG-ID for matched truth track
-    int         m_mc_barcode;    //!< barcode for matched truth track
+    int         m_mc_uniqueID;    //!< unique ID for matched truth track
     int         m_mc_truthTreeIndex; //!< entry index linking to 'Truth' tree in ntuple
     float       m_mc_energy;     //!< energy of the truth particle     UNIT:MeV
 

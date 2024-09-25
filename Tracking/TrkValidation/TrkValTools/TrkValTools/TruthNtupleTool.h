@@ -90,7 +90,7 @@ private:
     float       m_mc_eta;           //!< eta of MC truth particle's perigee parameters
 
     int         m_mc_particleID;    //!< PDG ID of MC truth particle
-    int         m_mc_barcode;       //!< MC truth particle's barcode
+    int         m_mc_uniqueID;       //!< MC truth particle's uniqueID
     float       m_mc_energy;        //!< MC truth particle's energy at production vertex
     int         m_mc_jetLinkIndex;  //!< link to jet this particle belongs to (if jet tree is ON)
     float       m_mc_prodR; //!< Rxy of particle's production vertex

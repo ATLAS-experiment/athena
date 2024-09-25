@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ Trk::TruthNtupleTool::TruthNtupleTool(
          m_mc_eta{},          
 
          m_mc_particleID{},   
-         m_mc_barcode{},      
+         m_mc_uniqueID{},
          m_mc_energy{},       
          m_mc_jetLinkIndex{}, 
          m_mc_prodR{}, 
@@ -122,7 +122,7 @@ StatusCode Trk::TruthNtupleTool::initialize() {
     m_nt->Branch( "truth_qOverPt",      &m_mc_qOverPt      );
     m_nt->Branch( "truth_eta",          &m_mc_eta          );
     m_nt->Branch( "truth_particleID",   &m_mc_particleID   );
-    m_nt->Branch( "truth_barcode",      &m_mc_barcode      );
+    m_nt->Branch( "truth_barcode",      &m_mc_uniqueID     ); // TODO Update variable name to be consistent
     m_nt->Branch( "truth_energy",       &m_mc_energy       );
     m_nt->Branch( "truth_prod_R",       &m_mc_prodR        );
     m_nt->Branch( "truth_prod_z",       &m_mc_prodz        );
@@ -279,7 +279,7 @@ StatusCode Trk::TruthNtupleTool::writeTruthData (
           if (genParticle==nullptr) ATH_MSG_WARNING ("NULL pointer to gen particle at index "<<index<<
                                                   ", problem with truth selection logic?");
           else ATH_MSG_DEBUG ("NULL pointer perigee from TruthToTrack. Index is "<<index);
-            m_mc_barcode = 0;
+          m_mc_uniqueID = HepMC::UNDEFINED_ID;
             for (unsigned int trackColIndex = 0; trackColIndex < m_mc_prob.size(); ++trackColIndex ) {
                 (m_mc_prob[trackColIndex])->clear();
                 (m_TrackLinkIndex[trackColIndex])->clear();
@@ -298,7 +298,7 @@ StatusCode Trk::TruthNtupleTool::writeTruthData (
             m_mc_prodR   = 0.;
             m_mc_prodz   = 0.;
         } else {
-            m_mc_barcode = HepMC::barcode(genParticle);
+            m_mc_uniqueID = HepMC::uniqueID(genParticle);
             m_mc_particleID = genParticle->pdg_id();
             m_mc_energy     = genParticle->momentum().e();
 

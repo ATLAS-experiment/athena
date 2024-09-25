@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
 		ATH_MSG_DEBUG ("Selected this electron/positron!");
 		break;
 	      } // if (particle pt, eta)
-	    } // if (mother is gamma wit barcode ...)
+	    } // if (mother is electron or gamma ...)
 	  } // loop over mother particles
 	} // if (have electron/positron)
       } // if (have stable particle)
