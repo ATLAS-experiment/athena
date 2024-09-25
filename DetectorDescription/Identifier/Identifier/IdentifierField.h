@@ -118,6 +118,9 @@ class IdentifierField
   bool operator == (const IdentifierField& other) const; 
 
   void show() const;
+  
+  /// Check mode - switch from enumerated to both_bounded if possible
+  bool check_for_both_bounded();
     
   /// Optimize - try to switch mode to both_bounded, set up lookup
   /// table for finding index from value
@@ -125,8 +128,7 @@ class IdentifierField
 
 private : 
   static constexpr int m_maxNumberOfIndices = 100;
-  /// Check mode - switch from enumerated to both_bounded if possible
-  void check_for_both_bounded();
+  
 
   /// Create index table from value table
   void create_index_table();

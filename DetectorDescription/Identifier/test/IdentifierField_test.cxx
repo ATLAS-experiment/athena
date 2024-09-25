@@ -212,6 +212,7 @@ BOOST_AUTO_TEST_CASE(EnumeratedRangeFieldProperties){
   BOOST_TEST(f1.get_minimum() == -6);
   BOOST_TEST(f1.get_maximum() == 6);
   BOOST_TEST(f1.get_indices() == 12);
+  BOOST_TEST(f1.check_for_both_bounded() == false);
   //
   IdentifierField::element_type e1{-1};
   IdentifierField::element_type e2{};

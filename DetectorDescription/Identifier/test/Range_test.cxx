@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(RangeConstructors){
   BOOST_CHECK_NO_THROW(Range r3(std::move(r1)));
   ExpandedIdentifier e;
   BOOST_CHECK_NO_THROW(Range r4(e));
+  BOOST_CHECK_NO_THROW(Range r5("-6:-1/1:6"));
 }
 
 BOOST_AUTO_TEST_CASE(RangeAssignment){
@@ -105,6 +106,8 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromExpandedIdentifier){
 
 BOOST_AUTO_TEST_CASE(RangeBuildFromText){
   const std::string sctExample="-6:-1/1:6";//SCT barrel has eta indices -1->-5 and 1->6
+  Range r0(sctExample);
+  BOOST_TEST(r0.is_empty() == false);
   Range r1;
   BOOST_CHECK_NO_THROW(r1.build(sctExample));
   const std::string wildCard="*";

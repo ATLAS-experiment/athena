@@ -666,9 +666,7 @@ IdentifierField::show() const {
 void 
 IdentifierField::optimize() {
     /// Check mode - switch from enumerated to both_bounded if possible
-    check_for_both_bounded();
-    /// Create index table from value table
-    create_index_table();
+    if (not check_for_both_bounded()) create_index_table();    
 }
 
 //----------------------------------------------- 
@@ -684,20 +682,22 @@ IdentifierField::set_indices() {
 } 
 
 //----------------------------------------------- 
-void 
+bool 
 IdentifierField::check_for_both_bounded() {
   if (m_mode == enumerated && !m_values.empty()) {
-    element_type last = m_values.front(); 
-    for (const auto & thisValue: m_values) { 
-        if (thisValue > last + 1) return;
-        last = thisValue;
+    element_type first = m_values.front();
+    element_type last = m_values.back();
+    //the enumerated values are kept sorted
+    if (std::ssize(m_values)-1 == last - first){
+      // Is both bounded - switch mode
+      m_minimum = first;
+      m_maximum = last;
+      m_mode = both_bounded; 
+      m_values.clear (); 
+      return true;
     }
-    // Is both bounded - switch mode
-    m_minimum = m_values.front();
-    m_maximum = m_values.back();
-    m_mode = both_bounded; 
-    m_values.clear (); 
   }
+  return false;
 }
 
 //----------------------------------------------- 
