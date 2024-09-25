@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_InputConverter.h"
@@ -89,6 +89,7 @@ StatusCode PanTau::Tool_InputConverter::ConvertToTauConstituent(const xAOD::PFO*
     
   // get type (based on charge and DR to tau)
   std::vector<int> typeFlags = std::vector<int>((unsigned int)PanTau::TauConstituent::t_nTypes, 0);
+  if (typeFlags.size() < (unsigned int)PanTau::TauConstituent::t_nTypes) std::abort(); // suppress cppcheck warning
   typeFlags.at((int)PanTau::TauConstituent::t_NoType) = 1;
     
   double mvaValue = PanTau::TauConstituent::DefaultBDTValue();
