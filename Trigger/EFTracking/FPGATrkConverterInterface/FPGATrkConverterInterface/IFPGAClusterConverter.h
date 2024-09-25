@@ -18,6 +18,8 @@
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
 namespace InDet {
   class PixelCluster;
@@ -46,6 +48,11 @@ public:
   virtual StatusCode convertClusters(const std::vector<FPGATrackSimCluster>& cl,
                                       xAOD::PixelClusterContainer& pixelCont,
                                       xAOD::StripClusterContainer& SCTCont) const = 0;
+  virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& cl,
+                                      xAOD::SpacePointContainer& SCTCont) const = 0;
+
+
+  virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const = 0;
 
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>&) const = 0;
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, xAOD::PixelCluster&) const = 0;

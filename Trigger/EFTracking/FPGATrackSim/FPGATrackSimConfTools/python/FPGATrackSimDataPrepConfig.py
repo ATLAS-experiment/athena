@@ -79,6 +79,7 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks%s" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
     kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
+    kwargs.setdefault("xAODSpacePointFromFPGASPKey", "xAODSpacePoints%sFromFPGASP" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAHitKey", "xAODPixelClusters%sFromFPGAHit" %(stage))
     kwargs.setdefault("xAODStripClusterFromFPGAHitKey", "xAODStripClusters%sFromFPGAHit" %(stage))
     kwargs.setdefault("ActsProtoTrackFromFPGARoadKey", "ActsProtoTracks%sFromFPGARoad" %(stage))
@@ -313,12 +314,12 @@ if __name__ == "__main__":
 
     if flags.Trigger.FPGATrackSim.doEDMConversion:
         acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=False))
+        if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
         
         from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
         acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=True,isDataPrep=True))        
         
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
-        if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = 'SpacePoints_1st', doSP=True)) 
         if flags.Trigger.FPGATrackSim.writeToAOD:
             acc.merge(WriteToAOD(flags, stage = '_1st'))
             if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags, stage = 'SpacePoints_1st'))

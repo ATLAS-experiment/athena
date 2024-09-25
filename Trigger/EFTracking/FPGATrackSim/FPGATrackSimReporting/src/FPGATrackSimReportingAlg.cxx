@@ -12,6 +12,7 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
 {
     ATH_CHECK(m_xAODPixelClusterContainerKeys.initialize());
     ATH_CHECK(m_xAODStripClusterContainerKeys.initialize());
+    ATH_CHECK(m_xAODSpacePointContainerKeys.initialize());
     ATH_CHECK(m_FPGARoadsKey.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGAProtoTrackCollection.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGATracksKey.initialize(!m_isDataPrep));
@@ -40,6 +41,15 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             return StatusCode::FAILURE;
         }
         processxAODClusters<xAOD::StripCluster>(clusterContainer);
+    }
+    // Process xAOD SpacePoints
+    std::vector<SG::ReadHandle<xAOD::SpacePointContainer>> xAODSpacePointContainers = m_xAODSpacePointContainerKeys.makeHandles(ctx);
+    for (SG::ReadHandle<xAOD::SpacePointContainer>& spContainer : xAODSpacePointContainers)
+    {
+        if (!spContainer.isValid()) {
+            ATH_MSG_WARNING("Invalid SG key " << spContainer.key());
+        }
+        else {processxAODSpacePoints(spContainer);}
     }
     if (!m_isDataPrep.value()) {
       // Process FPGATrackSim Roads
@@ -160,6 +170,36 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
     mainTable += "|=========================================================================================|";
     ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
 }
+
+
+void FPGATrackSim::FPGATrackSimReportingAlg::processxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const
+{
+    if (m_printoutForEveryEvent) printxAODSpacePoints(spContainer);
+}
+
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const
+{
+    std::string mainTable = "\n"
+        "|============================================================================|\n"
+        "|      # |             Global coordinates             |     element ID list  |\n"
+        "|        |       x      |       y      |       z      |                      |\n"
+        "|----------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    for (const auto& sp : *spContainer)
+    {
+        ++counter;
+        mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>9}, {:>9} |\n",
+            counter,
+            sp->globalPosition().x(),
+            sp->globalPosition().y(),
+            sp->globalPosition().z(),
+            sp->elementIdList()[0],
+            sp->elementIdList()[1]);
+    }
+    mainTable += "|=========================================================================================|";
+    ATH_MSG_INFO("Printout of xAOD space points coming from " << spContainer.key() << mainTable );
+}
+
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processFPGARoads(SG::ReadHandle<FPGATrackSimRoadCollection>& FPGARoads) const
 {
