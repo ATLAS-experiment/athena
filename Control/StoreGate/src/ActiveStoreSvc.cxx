@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ActiveStoreSvc.h"
@@ -11,12 +11,10 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 using namespace SG;
-using namespace std;
 
 /// Standard Constructor
 ActiveStoreSvc::ActiveStoreSvc(const std::string& name,ISvcLocator* svc) : 
   Service(name,svc),
-  p_activeStore(0),
   m_storeName()
 {
   declareProperty("StoreName", m_storeName=StoreID::storeName(StoreID::EVENT_STORE));
@@ -35,16 +33,15 @@ StatusCode ActiveStoreSvc::initialize()    {
 
   msg() << MSG::VERBOSE << "Initializing " << name() << endmsg;
 
-  const bool CREATEIF(true);
-  CHECK(  service(m_storeName, p_activeStore, CREATEIF) );
-  p_activeStore->makeCurrent();
+  SmartIF<StoreGateSvc> storeGate{service(m_storeName, /*createIf*/true)};
+  CHECK( storeGate.isValid() );
+  storeGate->makeCurrent();
+
   return StatusCode::SUCCESS;
 }
 
 ///set the active store pointer: used by the event loop mgrs
 void ActiveStoreSvc::setStore(StoreGateSvc *s) {
-  // Now unconditional because the actual active store is thread_local
-  p_activeStore = s; // honestly, probably not necessary any more
   s->makeCurrent();
 }
 
@@ -66,7 +63,7 @@ SG::DataProxy* ActiveStoreSvc::proxy_exact (SG::sgkey_t sgkey) const
 }
 
 /// return the list of all current proxies in store
-vector<const SG::DataProxy*> 
+std::vector<const SG::DataProxy*>
 ActiveStoreSvc::proxies() const {
   return activeStore()->proxies();
 }
