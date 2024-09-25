@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // testing code
 
-StoreGateSvc* pStore(0);
+SmartIF<StoreGateSvc> pStore;
 
 double interval( struct timeval& begin, struct timeval& end) {
   return (end.tv_sec - begin.tv_sec)*1000. + (end.tv_usec - begin.tv_usec)*1e-3;
@@ -817,17 +817,16 @@ bool run () {
   msglog = &log;
 
 
+  pStore = pSvcLoc->service("StoreGateSvc");
 
-
-
-  if( pSvcLoc->service("StoreGateSvc", pStore, true).isSuccess() ) {
+  if( pStore ) {
     log << MSG::DEBUG << "SG pointer: " << pStore << endmsg;
   } else REPORT_AND_STOP( "no SG available" );
 
 
-  IToolSvc* toolSvc{nullptr};
+  SmartIF<IToolSvc> toolSvc{pSvcLoc->service("ToolSvc")};
 
-  if( pSvcLoc->service("ToolSvc", toolSvc, true).isSuccess()  ) {
+  if( toolSvc ) {
     log << MSG::DEBUG << "ToolSvc pointer: " << toolSvc << endmsg;
   } else {
     ABORT ( "no ToolSvc available" );
