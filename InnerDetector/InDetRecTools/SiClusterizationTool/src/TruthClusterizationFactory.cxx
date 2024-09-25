@@ -78,30 +78,58 @@ namespace InDet {
     std::vector<double> probabilities(3,0.);
     const auto &rdos = pCluster.rdoList();
     unsigned int nPartContributing = 0;
-    //Initialize set for a list of UNIQUE barcodes for the cluster
-    std::set<int> barcodes;
-    SG::ReadHandle<InDetSimDataCollection> pixSdoColl(m_simDataCollectionName);
-    //Loop over all elements (pixels/strips) in the cluster
-    if(pixSdoColl.isValid()){
-      for (auto rdoIter :  rdos){
-        auto simDataIter = pixSdoColl->find(rdoIter);
-        if (simDataIter != pixSdoColl->end()){
-          // get the SimData and count the individual contributions
-          auto simData = (simDataIter->second);
-          for( const auto& deposit : simData.getdeposits() ){
-            //If deposit exists
-            if (!deposit.first){ATH_MSG_WARNING("No deposits found"); continue;}
-	    // This should only be used for samples with pile-up
-            if (m_discardPUHits && deposit.first.eventIndex()!=0) continue;
-            int bc = deposit.first.barcode();
-            barcodes.insert(bc);
+    if (m_discardPUHits) {
+      // Initialize set for a list of distinct uniqueIDs for the cluster
+      std::set<int> uniqueIDs;
+      SG::ReadHandle<InDetSimDataCollection> pixSdoColl(m_simDataCollectionName);
+      //Loop over all elements (pixels/strips) in the cluster
+      if(pixSdoColl.isValid()){
+        for (auto rdoIter :  rdos){
+          auto simDataIter = pixSdoColl->find(rdoIter);
+          if (simDataIter != pixSdoColl->end()){
+            // get the SimData and count the individual contributions
+            auto simData = (simDataIter->second);
+            for( const auto& deposit : simData.getdeposits() ){
+              //If deposit exists
+              if (!deposit.first){ATH_MSG_DEBUG("No deposits found"); continue;}
+              // This should only be used for samples without pile-up
+              if (deposit.first.eventIndex() != 0) continue;
+              uniqueIDs.insert(deposit.first.id());
+            }
           }
         }
       }
+      //uniqueIDs lists the unique truth particles contributing to the
+      //cluster
+      nPartContributing = uniqueIDs.size();
     }
-    //Barcodes list of the total number of UNIQUE
-    //barcodes in the cluster, each corresponding to a truth particle
-    nPartContributing = barcodes.size();
+    else {
+      //Initialize set for a list of distinct uniqueIDs for the cluster
+      //- if we are taking into account pile-up, then we need
+      //GenEvent::event_number() + GenParticle::id() to uniquely
+      //idenftify a GenParticle from a group of GenEvents.
+      std::set< std::pair<HepMcParticleLink::index_type, int> > uniqueIDs;
+      SG::ReadHandle<InDetSimDataCollection> pixSdoColl(m_simDataCollectionName);
+      //Loop over all elements (pixels/strips) in the cluster
+      if(pixSdoColl.isValid()){
+        for (auto rdoIter :  rdos){
+          auto simDataIter = pixSdoColl->find(rdoIter);
+          if (simDataIter != pixSdoColl->end()){
+            // get the SimData and count the individual contributions
+            auto simData = (simDataIter->second);
+            for( const auto& deposit : simData.getdeposits() ){
+              //If deposit exists
+              if (!deposit.first){ATH_MSG_DEBUG("No deposits found"); continue;}
+              // This should only be used for samples with pile-up
+              uniqueIDs.insert(std::make_pair(deposit.first.eventIndex(), deposit.first.id()));
+            }
+          }
+        }
+      }
+      //uniqueIDs lists the unique truth particles contributing to the
+      //cluster
+      nPartContributing = uniqueIDs.size();
+    }
     ATH_MSG_VERBOSE("n Part Contributing: " << nPartContributing);
     ATH_MSG_VERBOSE("Smearing TruthClusterizationFactory probability output for TIDE studies");
     //If only 1 truth particles found

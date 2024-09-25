@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrackClusterAssValidationUtils_H
@@ -22,29 +22,29 @@ namespace InDet {
       ///copy c'tor defaulted
       PartPropCache(const PartPropCache&) = default;
       ///c'tor 
-      PartPropCache(int charge,int rapidity);
+      PartPropCache(int uidCharge,int rapidity);
       ///destructor does nothing
       ~PartPropCache() = default;
       ///assignment defaulted
       PartPropCache& operator = (const PartPropCache&) = default;
       ///getters
-      int barcode () const {return abs(m_barcharge);}
-      int charge  () const {return ((m_barcharge>0) - (m_barcharge<0));} //returns 1, -1 or 0 depending on sign
+      int id () const {return abs(m_uidCharge);}
+      int charge  () const {return ((m_uidCharge>0) - (m_uidCharge<0));} //returns 1, -1 or 0 depending on sign
       int rapidity() const {return m_rapidity;}
 
     protected:
-      int m_barcharge;
-      int m_rapidity;
+      int m_uidCharge{};
+      int m_rapidity{};
     };
 
  /////////////////////////////////////////////////////////////////////////////////
   // Inline methods
   /////////////////////////////////////////////////////////////////////////////////
 
-  inline PartPropCache::PartPropCache (int bc,int rap)
+  inline PartPropCache::PartPropCache (int uidCharge,int rapidity)
     {
-      m_barcharge = bc ;
-      m_rapidity  = rap;
+      m_uidCharge = uidCharge ;
+      m_rapidity  = rapidity;
     }
 
 
