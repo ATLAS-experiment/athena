@@ -9,6 +9,7 @@ atlas_add_component( LArConditionsTest
                      src/LArCondDataTest.cxx
                      src/LArConditionsTestAlg.cxx
                      src/LArCablingTest.cxx
+		     src/LArSCIdVsIdTest.cxx
                      LINK_LIBRARIES AthenaBaseComps CxxUtils StoreGateLib Identifier GaudiKernel LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawUtilsLib LArRecConditions CaloDetDescrLib CaloEvent CaloIdentifier AthenaKernel CaloInterfaceLib CaloConditions )
 
 # Install files from the package:
@@ -26,3 +27,6 @@ atlas_add_test( LArConditionsTestReadNoReg
  		LOG_SELECT_PATTERN "DEBUG|ERROR"
 	    	DEPENDS LArConditionsTestWriteNoReg)
 
+atlas_add_test( LArSCidVsIdTest 
+	        SCRIPT python -m LArConditionsTest.LArSCidTest 
+		POST_EXEC_SCRIPT noerror.sh )

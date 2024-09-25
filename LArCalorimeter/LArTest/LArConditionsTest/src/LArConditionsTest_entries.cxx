@@ -4,8 +4,8 @@
 #include "LArConditionsTest/LArConditionsTestAlg.h"
 #include "LArConditionsTest/LArCondDataTest.h"
 #include "LArConditionsTest/LArCablingTest.h"
-
+#include "LArSCIdVsIdTest.h"
 DECLARE_COMPONENT( LArConditionsTestAlg )
 DECLARE_COMPONENT( LArCondDataTest )
 DECLARE_COMPONENT( LArCablingTest )
-
+DECLARE_COMPONENT( LArSCIdvsIdTest )
