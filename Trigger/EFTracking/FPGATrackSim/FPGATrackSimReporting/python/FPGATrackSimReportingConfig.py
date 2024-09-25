@@ -10,11 +10,12 @@ def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',**kwargs):
     xAODStripClustersOfInterest=[]
     
     xAODPixelClustersOfInterest += ["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"]
-    xAODStripClustersOfInterest += ["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"]
+    xAODStripClustersOfInterest += ["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit","xAODSpacePoints_1stFromFPGASP"]
     
     kwargs.setdefault('perEventReports',True)
     kwargs.setdefault('xAODPixelClusterContainersFromFPGA',["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"])
-    kwargs.setdefault('xAODStripClusterContainersFromFPGA',["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit","xAODStripClustersFromFPGASP"])
+    kwargs.setdefault('xAODStripClusterContainersFromFPGA',["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"])
+    kwargs.setdefault('xAODSpacePointContainersFromFPGA',["xAODSpacePoints_1stFromFPGASP"])
     kwargs.setdefault('FPGATrackSimTracks','FPGATracks_1st')
     kwargs.setdefault('FPGATrackSimRoads','FPGARoads_1st')
     kwargs.setdefault('FPGATrackSimProtoTracks','ActsProtoTracks_1stFromFPGATrack')

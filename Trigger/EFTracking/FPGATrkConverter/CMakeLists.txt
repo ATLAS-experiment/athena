@@ -19,7 +19,7 @@ atlas_add_library( FPGATrkConverterLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel StoreGateLib SGtests FPGATrkConverterInterface FPGATrackSimObjectsLib FPGATrackSimConfToolsLib InDetIdentifier InDetReadoutGeometry SCT_ReadoutGeometry PixelReadoutGeometryLib InDetPrepRawData xAODInDetMeasurement ActsEventLib ActsGeometryLib
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel StoreGateLib SGtests FPGATrkConverterInterface FPGATrackSimObjectsLib FPGATrackSimConfToolsLib InDetIdentifier InDetReadoutGeometry SCT_ReadoutGeometry PixelReadoutGeometryLib InDetPrepRawData xAODInDetMeasurement ActsEventLib ActsGeometryLib BeamSpotConditionsData
                    
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES} AtlasDetDescr GeoPrimitives FPGATrackSimInputLib PixelGeoModelLib)
 

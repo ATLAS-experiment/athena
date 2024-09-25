@@ -1,3 +1,4 @@
+
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -12,7 +13,10 @@
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h" 
+#include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
 
 class AtlasDetectorID;
 class PixelID;
@@ -56,6 +60,10 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode convertClusters(const std::vector<FPGATrackSimCluster>& cl,
                                     xAOD::PixelClusterContainer& pixelCont,
                                     xAOD::StripClusterContainer& SCTCont) const override final;
+    virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& cl,
+                                    xAOD::SpacePointContainer& SCTCont) const override final;
+
+    virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const override final;
 
     virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>&) const override final;
     virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, xAOD::PixelCluster &) const override final;
@@ -70,6 +78,8 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const override final;
 
     SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey","FPGAClusters","FPGATrackSim Clusters key"};
+    SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+
 
     bool m_doShift = true; 
 

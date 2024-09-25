@@ -9,6 +9,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -45,9 +46,13 @@ namespace FPGATrackSim {
                 
                 // xAOD Strip clusters to monitor
                 SG::ReadHandleKeyArray <xAOD::StripClusterContainer> m_xAODStripClusterContainerKeys{
-		  this, "xAODStripClusterContainersFromFPGA", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit", "xAODStripClusters_1stFromSP"},
+		  this, "xAODStripClusterContainersFromFPGA", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"},
                         "input list of xAOD Strip Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 
+                // xAOD SpacePoints to monitor
+                SG::ReadHandleKeyArray <xAOD::SpacePointContainer> m_xAODSpacePointContainerKeys{
+		  this, "xAODSpacePointContainersFromFPGA", {"xAODSpacePoints_1stFromFPGASP"},
+                        "input list of xAOD SpacePoint Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 // FPGA Cluster collection
                 // FPGA Road collection
                 SG::ReadHandleKey <FPGATrackSimRoadCollection> m_FPGARoadsKey{ this, "FPGATrackSimRoads","","FPGATrackSim Roads key" };
@@ -63,6 +68,9 @@ namespace FPGATrackSim {
                 void processxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const;
                 template <class XAOD_CLUSTER>
                 void printxAODClusters(SG::ReadHandle<DataVector< XAOD_CLUSTER >>& clusterContainer) const;
+
+                void processxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const;
+                void printxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const;
 
                 void processFPGAClusters(SG::ReadHandle<FPGATrackSimClusterCollection> &FPGAClusters) const;
                 void printFPGAClusters(SG::ReadHandle<FPGATrackSimClusterCollection> &FPGAClusters) const;
