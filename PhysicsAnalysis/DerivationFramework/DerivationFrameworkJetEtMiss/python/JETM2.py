@@ -149,7 +149,8 @@ def JETM2Cfg(flags):
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ExtraJSSVariables
     JETM2SlimmingHelper.ExtraVariables += [".".join(["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"] + ExtraJSSVariables)]
 
-    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower",
+    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
+                                           "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",
                                            "GSFTrackParticles.particleHypothesis.vx.vy.vz",
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
@@ -192,7 +193,9 @@ def JETM2Cfg(flags):
 
         JETM2SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
                                                "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalPt.GhostHBosonsPt.GhostZBosonsPt.GhostWBosonsPt",
-                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt"]
+                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt",
+                                               "AntiKt4TruthWZJets.IsoFixedCone5Pt",
+                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
 
     # Trigger content
     JETM2SlimmingHelper.IncludeTriggerNavigation = False
