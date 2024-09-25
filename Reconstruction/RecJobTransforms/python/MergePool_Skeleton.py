@@ -103,8 +103,6 @@ def fromRunArgs(runArgs):
             streamToMerge,
         )
     )
-    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-    cfg.merge(IOVDbSvcCfg(flags))
 
     log.info(f'**** Configured {streamToMerge} writing')
 
