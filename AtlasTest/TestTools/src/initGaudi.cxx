@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -12,66 +12,49 @@
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IProperty.h"
-#include "GaudiKernel/ISvcManager.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/ModuleIncident.h"
-using std::cout;
-using std::endl;
-using std::string;
+#include "GaudiKernel/PathResolver.h"
+
 
 namespace Athena_test {
+
   bool initGaudi(ISvcLocator*& pSvcLoc) {
-    return initGaudi(string(), pSvcLoc); //wily hack
+    return initGaudi({}, pSvcLoc);
   }
+
+
   bool initGaudi(const std::string& jobOptsFile, ISvcLocator*& pSvcLoc) {
-    string jobOptsPath = jobOptsFile;
-    if (access (jobOptsPath.c_str(), R_OK) != 0)
-      jobOptsPath = "../share/"+jobOptsFile;
-    if (access (jobOptsPath.c_str(), R_OK) != 0) {
-      const char* jopath = getenv ("JOBOPTSEARCHPATH");
-      if (jopath) {
-        char* savepath = new char[strlen(jopath)+1];
-        strcpy (savepath, jopath);
-        char* saveptr = nullptr;
-        char* str = savepath;
-        while (char* tok = strtok_r (str, ":", &saveptr)) {
-          str = nullptr;
-          jobOptsPath = std::string(tok) + "/" + jobOptsFile;
-          if (access (jobOptsPath.c_str(), R_OK) == 0) {
-            break;
-          }
-          jobOptsPath.clear();
-        }
-        delete [] savepath;
+
+    std::string jobOptsPath;
+    if (!jobOptsFile.empty()) {
+      jobOptsPath = System::PathResolver::find_file(jobOptsFile, "JOBOPTSEARCHPATH");
+      if (jobOptsPath.empty()) {
+        std::cout << "\n\nCannot find job opts " << jobOptsFile << std::endl;
+      }
+      else {
+        std::cout << "\n\nInitializing Gaudi ApplicationMgr using job opts " << jobOptsPath << std::endl;
       }
     }
 
-    if (jobOptsPath.empty()) {
-      cout << "\n\nCannot find job opts " << jobOptsFile << endl;
-    }
-    else {
-      cout << "\n\nInitializing Gaudi ApplicationMgr using job opts " << jobOptsPath << endl;
-    }
-
-    // Create an instance of an application manager
-    IInterface* iface = Gaudi::createApplicationMgr();
-    if( 0 == iface ) {
-      cout << "Fatal error while creating the ApplicationMgr " << endl;
+    // Create an instance of ApplicationMgr
+    SmartIF<IAppMgrUI> appMgr = Gaudi::createApplicationMgr();
+    if(!appMgr.isValid()) {
+      std::cout << "Fatal error while creating the ApplicationMgr " << std::endl;
       return false;
     }
 
-    SmartIF<ISvcManager> svcMgr(iface);
-    SmartIF<IAppMgrUI> appMgr(iface);
-    SmartIF<IProperty> propMgr(iface);
-    SmartIF<ISvcLocator> svcLoc(iface);
-    if(!svcLoc.isValid() || !appMgr.isValid() || !svcMgr.isValid() || !propMgr.isValid()) {
-      cout << "Fatal error while creating the AppMgr smart if " << endl;
+    SmartIF<IProperty> propMgr(appMgr);
+    SmartIF<ISvcLocator> svcLoc(appMgr);
+    if(!svcLoc.isValid() || !propMgr.isValid()) {
+      std::cout << "Fatal error while retrieving AppMgr interfaces " << std::endl;
       return false;
     }
 
-    pSvcLoc = svcLoc.pRef();
+    // Return pointer to ISvcLocator
+    pSvcLoc = svcLoc.get();
 
     propMgr->setProperty( "EvtSel", "NONE" ).
       orThrow("Cannnot set EvtSel property", "initGaudi");
@@ -85,12 +68,11 @@ namespace Athena_test {
         orThrow("Cannnot set JobOptionsPath property", "initGaudi");
     }
 
-    if ((appMgr->configure()).isSuccess() &&
-	(appMgr->initialize()).isSuccess()) {
-      cout<<"ApplicationMgr Ready"<<endl;
+    if (appMgr->configure().isSuccess() && appMgr->initialize().isSuccess()) {
+      std::cout<<"ApplicationMgr Ready"<<std::endl;
       return true;
     } else {
-      cout << "Fatal error while initializing the AppMgr" << endl;
+      std::cout << "Fatal error while initializing the AppMgr" << std::endl;
       return false;
     }
   }

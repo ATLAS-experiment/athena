@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TEST_INITGAUDI_H
@@ -8,7 +8,6 @@
  * @brief  minimal gaudi initialization for AthenaServices unit testing
  *
  * @author Paolo Calafiura <pcalafiura@lbl.gov> -ATLAS Collaboration
- * $Id: initGaudi.h,v 1.4 2005-11-29 00:51:33 calaf Exp $
  **/
 
 #include <string>
@@ -19,15 +18,20 @@ class ISvcLocator;
 
 
 namespace Athena_test {
-  /** @fn bool initGaudi(ISvcLocator*& pSvcLoc)
-   *  @brief  minimal gaudi initialization for AthenaServices unit testing
+  /**
+   *  Minimal Gaudi initialization for unit testing without job options.
+   *
    *  @param pSvcLoc returns a pointer to the Gaudi ServiceLocator
+   *  @return true on success, false on failure
    */
   bool initGaudi(ISvcLocator*& pSvcLoc);
-  /** @fn initGaudi(const std::string& jobOptsFile, ISvcLocator*& pSvcLoc);
-   *  @brief  minimal gaudi initialization for AthenaServices unit testing
-   *  @param jobOptsFile job opts file name (located at ../share/jobOptFiles)
+
+  /**
+   *  Minimal Gaudi initialization for unit testing.
+   *
+   *  @param jobOptsFile job options file name
    *  @param pSvcLoc returns a pointer to the Gaudi ServiceLocator
+   *  @return true on success, false on failure
    */
   bool initGaudi(const std::string& jobOptsFile, ISvcLocator*& pSvcLoc);
 }
