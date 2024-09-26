@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationLArCalculator
@@ -240,31 +240,21 @@ namespace LArG4 {
           etaBin = (int) ( eta * sc_oneOverDeta );
           // G.P. to treat material between HEC and FCAL
         } else if ( eta > 2.9 && eta < 3.3 && absZ > sc_startZFCal1 && absZ < sc_endZFCal3) {
-          if ( fabs(p.z()) < sc_startZFCal1 ) {
-            type = 2;
-            sampling = 1;
-            region = 5;
-            etaBin = (int) ( (eta-3.0) * sc_oneOverDeta );
-          } else if ( fabs(p.z()) < sc_startZFCal2 ) {
+          if ( absZ < sc_startZFCal2 ) {
             type = 2;
             sampling = 1;
             region = 4;
             etaBin = 0;
-          } else if ( fabs(p.z()) < sc_startZFCal3 ) {
+          } else if ( absZ < sc_startZFCal3 ) {
             type = 2;
             sampling = 2;
             region = 4;
             etaBin = 0;
-          } else if ( fabs(p.z()) < sc_endZFCal3 ) { //
+          } else { //
             type = 2;
             sampling = 3;
             region = 4;
             etaBin = 0;
-          } else{ // leakage behind FCAL+HEC
-            type = 1;
-            sampling = 3;
-            region = 0;
-            etaBin = (int) ( (eta-1.7) * sc_oneOverDeta );
           }
           //GU change for eta above 1.7 for sampling 3
         } else if ( eta < 5. && eta >=1.7 ) {
