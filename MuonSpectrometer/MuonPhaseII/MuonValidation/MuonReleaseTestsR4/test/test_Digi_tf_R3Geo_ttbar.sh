@@ -5,7 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
 # art-output: log.*
-# art-output: MuonSimHitNtuple.root
+# art-output: MuonDigitNTuple.root
 # art-output: myRDO.pool.root
 
 
@@ -17,7 +17,7 @@ BASE_DIR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/OverlayTe
 HITS_FILE="${BASE_DIR}/601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep/myHits.pool.root"
 geo_db="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R3-MUONTEST_v3.db"
 geo_tag="ATLAS-R3S-2021-03-02-00"
-validNTuple="MuonSimHitNtuple.root"
+validNTuple="MuonDigitNTuple.root"
 
 
 mkdir -p Geometry/

@@ -52,8 +52,7 @@ def RPCLegacyCablingConfigCfg(flags):
 
     acc.merge(addFolders(flags, [rpcTrigEta,rpcTrigPhi], dbName, className='CondAttrListCollection'))
 
-    RpcCablingCondAlg=CompFactory.RpcCablingCondAlg
-    RpcCablingAlg = RpcCablingCondAlg("RpcCablingCondAlg",DatabaseRepository=dbRepo)
+    RpcCablingAlg = CompFactory.RpcCablingCondAlg("RpcCablingCondAlg",DatabaseRepository=dbRepo)
     acc.addCondAlgo( RpcCablingAlg )
 
     return acc

@@ -50,11 +50,13 @@ namespace MuonR4 {
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
+            std::unordered_map<Identifier, double> deadTimes{};
             for (const TimedHit& simHit : viewer) {
+                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+                    continue;
+                }
                 const Identifier hitId{simHit->identify()};
-                /// ignore radiation for now
-                if (std::abs(simHit->pdgId()) != 13) continue;
-
+ 
                 const MuonGMR4::MmReadoutElement* readOutEle = m_detMgr->getMmReadoutElement(hitId);
                 const Amg::Vector2D locPos{xAOD::toEigen(simHit->localPosition()).block<2,1>(0,0)};
 
@@ -85,9 +87,16 @@ namespace MuonR4 {
                 }
 
                 if(efficiencyMap && efficiencyMap->getEfficiency(clusId) < CLHEP::RandFlat::shoot(rndEngine, 0., 1.)){
-                        continue;
+                    continue;
                 }
 
+                double& lastDeadHit{deadTimes[clusId]};
+                if (hitTime(simHit) - lastDeadHit > m_deadTime) {
+                    lastDeadHit = hitTime(simHit);
+                } else {
+                    /// Reject hit within the dead time interval
+                    continue;
+                }
                 NswErrorCalibData::Input errorCalibInput{};
                 errorCalibInput.stripId = clusId;
                 errorCalibInput.locTheta = M_PI- simHit->localDirection().theta();
@@ -163,7 +172,8 @@ namespace MuonR4 {
                     outColl->push_back(std::make_unique<MmDigit>(digitIdA, dummyResponseTime, w3 * dummyDepositedCharge));
                 }
 
-                addSDO(simHit, sdoContainer);
+                xAOD::MuonSimHit* sdoHit = addSDO(simHit, sdoContainer);
+                sdoHit->setIdentifier(clusId);
                 ++m_acceptedHits[hitGapInNsw];
             }
         } while(viewer.next());

@@ -83,7 +83,6 @@ def MDT_TruthOverlayCfg(flags, name="MdtTruthOverlay", **kwargs):
 
     return acc
 
-
 def MDT_OverlayCfg(flags):
     """Configure and return a ComponentAccumulator for MDT overlay"""
     acc = ComponentAccumulator()
@@ -102,7 +101,11 @@ def MDT_OverlayCfg(flags):
     acc.merge(MDT_OverlayAlgCfg(flags))
     # Add MDT truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(MDT_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="MdtTruthOverlay", WriteKey="MDT_SDO", deadTime = 700.))
+        else:
+            acc.merge(MDT_TruthOverlayCfg(flags))
     # Add MDT digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import MdtDigitToMdtRDOCfg
     acc.merge(MdtDigitToMdtRDOCfg(flags))
