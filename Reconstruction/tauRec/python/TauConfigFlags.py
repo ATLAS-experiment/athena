@@ -56,15 +56,23 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
     tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     # GNTau ID tune file (need to add another version for noAux)
-    tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_noAux_simplified.onnx"])
-    tau_cfg.addFlag("Tau.TauGNNWP", ["GNTauNA_flat_model_1p.root", "GNTauNA_flat_model_2p.root", "GNTauNA_flat_model_3p.root"])
-    tau_cfg.addFlag("Tau.GNTauScoreName", "GNTauScore")
-    tau_cfg.addFlag("Tau.GNTauTransScoreName", "GNTauScoreSigTrans_v0")
-    tau_cfg.addFlag("Tau.GNTauMaxTracks", 30)
-    tau_cfg.addFlag("Tau.GNTauMaxClusters", 20)
+    tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_pruned_MC23.onnx","GNTau_trunc_MC23.onnx"])
+    tau_cfg.addFlag("Tau.TauGNNWP",
+                    [ 
+                        ["GNTauNAprune_flat_model_1p.root", "GNTauNAprune_flat_model_2p.root", "GNTauNAprune_flat_model_3p.root"],
+                        ["GNTauNAtrunc_flat_model_1p.root", "GNTauNAtrunc_flat_model_2p.root", "GNTauNAtrunc_flat_model_3p.root"]
+                    ])
+    tau_cfg.addFlag("Tau.GNTauScoreName", ["GNTauScore_v0prune","GNTauScore_v1trunc"])
+    tau_cfg.addFlag("Tau.GNTauTransScoreName", ["GNTauScoreSigTrans_v0prune","GNTauScoreSigTrans_v1trunc"])
+    tau_cfg.addFlag("Tau.GNTauMaxTracks", [30,10])
+    tau_cfg.addFlag("Tau.GNTauMaxClusters", [20,6])
     tau_cfg.addFlag("Tau.GNTauNodeNameTau", "GN2TauNoAux_pb")
     tau_cfg.addFlag("Tau.GNTauNodeNameJet", "GN2TauNoAux_pu")
-    tau_cfg.addFlag("Tau.GNTauDecorWPNames", ["GNTauVL_v0", "GNTauL_v0", "GNTauM_v0", "GNTauT_v0"])
+    tau_cfg.addFlag("Tau.GNTauDecorWPNames", 
+                    [
+                        ["GNTauVL_v0prune", "GNTauL_v0prune", "GNTauM_v0prune", "GNTauT_v0prune"],
+                        ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
+                    ])
 
 
     # PanTau config flags
