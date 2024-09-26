@@ -20,13 +20,13 @@ def writeEmulationFiles(data):
 
 class makeChainStep(object):
     """Used to store the step info, regardless of the chainDict"""
-    def __init__(self, name, seq=[], multiplicity=[1], comboHypoCfg=ComboHypoCfg, comboToolConfs=[], chainDicts=None):
-        self.name=name
-        self.seq=seq
-        self.mult=multiplicity
-        self.comboToolConfs=comboToolConfs
-        self.comboHypoCfg=comboHypoCfg
+    def __init__(self, name, seq=[], comboHypoCfg=ComboHypoCfg, comboToolConfs=[], chainDicts=None, isEmpty=False):
+        self.name = name
+        self.seq = seq
+        self.comboToolConfs = comboToolConfs
+        self.comboHypoCfg = comboHypoCfg
         self.chainDicts = chainDicts
+        self.isEmpty = isEmpty
     
 
 chainsCounter = 0
@@ -51,10 +51,9 @@ def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Gr
     for step in ChainSteps:        
         StepConfig+=[ChainStep(step.name, 
                                 step.seq,  
-                                multiplicity=step.mult, 
                                 chainDicts=step.chainDicts if step.chainDicts else listOfChainDicts, 
                                 comboHypoCfg=step.comboHypoCfg, 
-                                comboToolConfs=step.comboToolConfs)]
+                                comboToolConfs=step.comboToolConfs, isEmpty=step.isEmpty)]
 
     chainConfig = Chain( name=name, L1decisions=L1decisions, ChainSteps=StepConfig )
     HLTMenuConfig.registerChain( chainDict )

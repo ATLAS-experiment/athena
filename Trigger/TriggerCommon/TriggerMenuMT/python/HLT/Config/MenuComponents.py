@@ -372,7 +372,7 @@ def EmptyMenuSequenceCfg(flags, name):
     return EmptyMenuSequence(name)
 
 def isEmptySequenceCfg(o):
-    return o == EmptyMenuSequenceCfg
+    return o.func.__name__ == "EmptyMenuSequenceCfg"
 
 class MenuSequence:
     """Class to group reco sequences with the Hypo.
@@ -575,13 +575,14 @@ class Chain(object):
             new_step_name =  prev_step_name+'_'+empty_step_name+'%d_'%stepID+next_step_name
 
             log.debug("Configuring empty step %s", new_step_name)
-            steps_to_add += [ChainStep(new_step_name, [], [], chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg)]
+            steps_to_add += [ChainStep(new_step_name, chainDicts=prev_chain_dict, comboHypoCfg=ComboHypoCfg, isEmpty=True)]
         
         self.steps = chain_steps_pre_split + steps_to_add + chain_steps_post_split
 
         return
 
     def checkMultiplicity(self):
+        #TODO: Not used anymore, can we delete it?
         if len(self.steps) == 0:
             return 0
         mult=[sum(step.multiplicity) for step in self.steps] # on mult per step
@@ -608,7 +609,7 @@ class Chain(object):
         self.topoMap[step] = topoPair
 
     def __repr__(self):
-        return "-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
+        return "\n-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
                     self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))       
         
 
@@ -616,25 +617,21 @@ class Chain(object):
 # next: can we describe emtpy steps with isEmpty flag only (not via multiplicity and setting comboHypoCfg=None)?
 class ChainStep(object):
     """Class to describe one step of a chain; if multiplicity is greater than 1, the step is combo/combined.  Set one multiplicity value per sequence"""
-    def __init__(self, name,  Sequences = [], multiplicity = [1], chainDicts = [], comboHypoCfg = ComboHypoCfg, comboToolConfs = [], isEmpty = False, createsGhostLegs = False):
-        # TODO: remove parameter multiplicity, since this must be extracted from the ChainDict ATR-23928
-        # include cases of empty steps with multiplicity = [] or multiplicity=[0,0,0///]
-        if sum(multiplicity) == 0:
-            multiplicity = []
+    def __init__(self, name,  Sequences = [], chainDicts = [], comboHypoCfg = ComboHypoCfg, comboToolConfs = [], isEmpty = False, createsGhostLegs = False):        
+                
+        self.isEmpty = isEmpty        
+        if self.isEmpty:
+            self.multiplicity = []
         else:
-            log.debug("chain %s, step %s: len=%d multiplicty=%d", chainDicts[0]['chainName'], name, len(chainDicts), len(multiplicity))
+            self.multiplicity = [1 for seq in Sequences]                    
+            log.debug("Building step %s for chain %s: len=%d multiplicty=%s",  name, chainDicts[0]['chainName'], len(chainDicts), ' '.join(map(str,[mult for mult in self.multiplicity])))           
             # sanity check on inputs, excluding empty steps
-            if len(chainDicts) != len(multiplicity):
+            if len(chainDicts) != len(self.multiplicity) and 'Jet' not in chainDicts[0]['signatures']:
                 log.error("[ChainStep] Sequences: %s",Sequences)
                 log.error("[ChainStep] chainDicts: %s",chainDicts)
-                log.error("[ChainStep] multiplicity: %s",multiplicity)
-                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i multiplicity and %i dictionaries. These lists must have the same size" % (name, len(multiplicity), len(chainDicts)) )
-            
-            if len(Sequences) != len(multiplicity) and 'Jet' not in chainDicts[0]['signatures']:
-                log.error("[ChainStep] Sequences: %s",Sequences)
-                log.error("[ChainStep] multiplicities: %s",multiplicity)
-                raise RuntimeError("Tried to configure a ChainStep %s with %i Sequences and %i multiplicities. These lists must have the same size" % (name, len(Sequences), len(multiplicity)) )
- 
+                log.error("[ChainStep] multiplicity: %s",self.multiplicity)
+                raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i multiplicity and %i dictionaries. These lists must have the same size" % (name, len(self.multiplicity), len(chainDicts)) )
+                        
         self.name = name
         self.sequences = []
         self.sequenceFunctions = Sequences    
@@ -648,24 +645,23 @@ class ChainStep(object):
         sig_set = None
         if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
             leg_signatures = [step['signature'] for step in chainDicts if step['signature'] != 'Bjet']
-            if (len(multiplicity) > 0 and leg_signatures.count('Jet') == 1) and (len(set(leg_signatures)) > 1 and chainDicts[0]['signatures'].count('Jet') > 1) and (len(leg_signatures) != 2 or leg_signatures.count('MET') == 0):
+            if (len(self.multiplicity) > 0 and leg_signatures.count('Jet') == 1) and (len(set(leg_signatures)) > 1 and chainDicts[0]['signatures'].count('Jet') > 1) and (len(leg_signatures) != 2 or leg_signatures.count('MET') == 0):
                 index_jetLeg = leg_signatures.index('Jet')
-                multiplicity[index_jetLeg:index_jetLeg] = [1] * (len(chainDicts[0]['chainMultiplicities']) - len(multiplicity))
+                self.multiplicity[index_jetLeg:index_jetLeg] = [1] * (len(chainDicts[0]['chainMultiplicities']) - len(self.multiplicity))
             sig_set = set([step['signature'] for step in chainDicts])
             if len(sig_set) == 1 and ('Jet' in sig_set or 'Bjet' in sig_set):
                 self.onlyJets = True
             if len(sig_set) == 2 and ('Jet' in sig_set and 'Bjet' in sig_set):
                 self.onlyJets = True
 
-        self.multiplicity = multiplicity
         self.comboHypoCfg = comboHypoCfg
         self.comboToolConfs = list(comboToolConfs)
         self.stepDicts = chainDicts # one dict per leg
-        self.isEmpty = (sum(multiplicity) == 0 or isEmpty)
+        
         if not self.isEmpty:
             #self.relabelLegIdsForJets()
             self.setChainPartIndices()
-        self.legIds = self.getLegIds() if len(multiplicity) > 1 else [0]
+        self.legIds = self.getLegIds() 
         self.makeCombo()
 
     def createSequences(self):
@@ -733,6 +729,9 @@ class ChainStep(object):
         return
 
     def getLegIds(self):
+        """ get the gelId from the step dictionary for multi-leg chains"""
+        if len(self.multiplicity) <= 1: # single leg step
+            return [0]
         leg_ids = []
         for istep,step_dict in enumerate(self.stepDicts):
             if step_dict['chainName'][0:3] != 'leg':
@@ -746,7 +745,7 @@ class ChainStep(object):
         return leg_ids
 
     def addComboHypoTools(self, tool):
-        #this function does not add tools, it just adds tool. do not pass it a list!
+        #this function does not add tools, it just adds one tool. do not pass it a list!
         self.comboToolConfs.append(tool)
 
     def makeCombo(self):
@@ -776,9 +775,9 @@ class ChainStep(object):
 
     def __repr__(self):
         if len(self.sequenceFunctions) == 0:        
-            return "--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
+            return "\n--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
         
-        repr_string= "--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences = %s "%\
+        repr_string= "\n--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences = %s "%\
           (self.name,  ' '.join(map(str,[mult for mult in self.multiplicity])),
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
              ' '.join(map(str, [seq.func.__name__ for seq in self.sequenceFunctions]) ))

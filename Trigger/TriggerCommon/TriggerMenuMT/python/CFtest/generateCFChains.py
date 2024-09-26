@@ -78,7 +78,7 @@ def generateCFChains(flags):
         # step4
         muEFCBS = functools.partial(muEFCBSequenceGenCfg,flags)
         step4muEFCB = makeChainStep("Step4_muEFCB", [ muEFCBS ])
-        emptyStep   = makeChainStep("Step2_empty", multiplicity=[])
+        emptyStep   = makeChainStep("Step2_empty", isEmpty=True)
 
         ## single muon trigger  
         MuonChains += [ makeChain(flags, name='HLT_mu6fast_L1MU5VF',     L1Thresholds=["MU5VF"], ChainSteps=[ step1mufast ])]
@@ -88,14 +88,14 @@ def generateCFChains(flags):
 
         # multi muon trigger
         # 2muons symmetric
-        step1_2mufast_sym= makeChainStep("Step1_2muFast_sym", [ mufastS], multiplicity=[2])
-        step2_2muComb_sym= makeChainStep("Step2_2muComb_sym", [ mucombS], multiplicity=[2])
+        step1_2mufast_sym= makeChainStep("Step1_2muFast_sym", [ mufastS])
+        step2_2muComb_sym= makeChainStep("Step2_2muComb_sym", [ mucombS])
     
         MuonChains += [ makeChain(flags, name='HLT_2mu6Comb_L12MU5VF',  L1Thresholds=["MU5VF"], ChainSteps=[ step1_2mufast_sym, step2_2muComb_sym ])]
 
         # 2muons asymmetric (this will change): 2 sequences, 2 seeds
-        step1_2mufast_asym= makeChainStep("Step1_2muFast_asym", [ mufastS, mufastS], multiplicity=[1,1])
-        step2_2muComb_asym= makeChainStep("Step1_2muComb_asym", [ mucombS, mucombS], multiplicity=[1,1])
+        step1_2mufast_asym= makeChainStep("Step1_2muFast_asym", [ mufastS, mufastS])
+        step2_2muComb_asym= makeChainStep("Step1_2muComb_asym", [ mucombS, mucombS])
     
         MuonChains += [ makeChain(flags, name='HLT_mu6_mu4_L12MU3V',
                                 L1Thresholds=["MU3V", "MU3V"],
@@ -226,14 +226,14 @@ def generateCFChains(flags):
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
         muFast = functools.partial(muFastSequenceGenCfg, flags)
-        step1_dimufast=makeChainStep("Step1_dimuFast", [muFast], multiplicity=[2])
+        step1_dimufast=makeChainStep("Step1_dimuFast", [muFast])
         mucombS = functools.partial(muCombSequenceGenCfg, flags)
-        step2_dimuComb=makeChainStep("Step2_dimuComb", [mucombS], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
+        step2_dimuComb=makeChainStep("Step2_dimuComb", [mucombS], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
         muEFSAS = functools.partial(muEFSASequenceGenCfg, flags)
         muEFCBS = functools.partial(muEFCBSequenceGenCfg, flags)
 
-        step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSAS], multiplicity=[2])
-        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBS], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
+        step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSAS])
+        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBS], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
         steps = [step1_dimufast, step2_dimuComb, step3_dimuEFSA, step4_dimuEFCB]
 
         menu.chainsInMenu['Bphysics'] = [
@@ -255,7 +255,7 @@ def generateCFChains(flags):
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequenceGenCfg
         muFast = functools.partial(muFastSequenceGenCfg,flags)
 
-        comboStep_et_mufast = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
+        comboStep_et_mufast = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast])
 
         menu.chainsInMenu['Combined'] = [
             makeChain(flags, name='HLT_e3_etcut_mu6_L12eEM10L_MU8F', L1Thresholds=["eEM10L", "MU8F"],  ChainSteps=[comboStep_et_mufast ])
