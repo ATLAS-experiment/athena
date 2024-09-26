@@ -12,8 +12,6 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-// needed to parse set<string>
-#include "Gaudi/Parsers/Factory.h"
 
 namespace detail {
   using JetCondTag_t = FlavorTagDiscriminants::DecoratorAlg<
