@@ -34,6 +34,9 @@ def xAODTestRead2Cfg (flags):
                                            CVecWDReadKey = 'copy_cvecWD'))
     acc.addEventAlgo (DMTest.xAODTestReadCView ("xAODTestReadCView_copy",
                                                 CViewKey = "copy_cview"))
+    acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec"))
+    acc.addEventAlgo (DMTest.xAODTestReadPVec ("xAODTestReadPVec_copy",
+                                               PVecKey = "copy_pvec"))
     acc.addEventAlgo (DMTest.xAODTestReadHVec ("xAODTestReadHVec_copy",
                                                HVecKey = "copy_hvec",
                                                HViewKey = "copy_hview"))

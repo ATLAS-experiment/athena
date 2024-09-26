@@ -220,6 +220,11 @@ class xAODTestRead:
         for c in vec:
             dump_c (c)
 
+        print (self.readPrefix + 'pvec')
+        vec = getattr (tree, self.readPrefix + 'pvec')
+        for p in vec:
+            dump_xaodobj (p)
+
         print (self.readPrefix + 'hvec')
         vec = getattr (tree, self.readPrefix + 'hvec')
         for h in vec:
@@ -263,6 +268,7 @@ class xAODTestCopy:
         CHECK (event.copy (self.readPrefix + 'ctrig'))
         CHECK (event.copy (self.readPrefix + 'cvecWD'))
         CHECK (event.copy (self.readPrefix + 'cview'))
+        CHECK (event.copy (self.readPrefix + 'pvec'))
         CHECK (event.copy (self.readPrefix + 'hvec'))
         CHECK (event.copy (self.readPrefix + 'jvecContainer'))
         CHECK (event.copy (self.readPrefix + 'jvecInfo'))
@@ -286,6 +292,9 @@ class xAODTestCopy:
             cview = getattr (tree, self.readPrefix + 'cview')
             copy_view (event, cview, self.writePrefix + 'cview')
             
+            pvec = getattr (tree, self.readPrefix + 'pvec')
+            copy_vec (event, pvec, self.writePrefix + 'pvec')
+
             hvec = getattr (tree, self.readPrefix + 'hvec')
             copy_vec (event, hvec, self.writePrefix + 'hvec')
 

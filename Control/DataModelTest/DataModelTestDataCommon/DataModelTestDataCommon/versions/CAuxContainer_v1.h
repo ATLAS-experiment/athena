@@ -15,7 +15,6 @@
 
 
 #include "xAODCore/AuxContainerBase.h"
-#include "AthContainers/PackedContainer.h"
 #include "AthenaKernel/BaseInfo.h"
 #include <vector>
 
@@ -32,10 +31,6 @@ public:
 private:
   AUXVAR_DECL (int, anInt);
   AUXVAR_DECL (float, aFloat);
-  AUXVAR_PACKEDCONTAINER_DECL (unsigned int, pInt);
-  AUXVAR_PACKEDCONTAINER_DECL (float, pFloat);
-  AUXVAR_PACKEDCONTAINER_DECL (std::vector<int>, pvInt);
-  AUXVAR_PACKEDCONTAINER_DECL (std::vector<float>, pvFloat);
 };
 
 

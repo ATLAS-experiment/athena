@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelTestDataCommon )
@@ -29,7 +29,10 @@ atlas_add_dictionary( DataModelTestDataCommonDict
 
 atlas_add_sercnv_library ( DataModelTestDataCommonSerCnv
                            FILES DataModelTestDataCommon/CVec.h DataModelTestDataCommon/CView.h DataModelTestDataCommon/CAuxContainer.h
-                           TYPES_WITH_NAMESPACE DMTest::CVec DMTest::CView DMTest::CAuxContainer
+                           FILES DataModelTestDataCommon/PVec.h DataModelTestDataCommon/PAuxContainer.h
+                           TYPES_WITH_NAMESPACE
+                           DMTest::CVec DMTest::CView DMTest::CAuxContainer
+                           DMTest::PVec DMTest::PAuxContainer
                            INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                            LINK_LIBRARIES ${ROOT_LIBRARIES} DataModelTestDataCommonLib TrigSerializeCnvSvcLib )
 

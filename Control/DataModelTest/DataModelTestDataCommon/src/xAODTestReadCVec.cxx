@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file  DataModelTestDataCommon/src/xAODTestReadCVec.cxx
@@ -16,6 +16,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/ConstAccessor.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/StrFormat.h"
@@ -34,7 +35,7 @@ StatusCode xAODTestReadCVec::initialize()
 {
   errorcheck::ReportMessage::hideErrorLocus();
 
-  C::Accessor<float> dVar1 ("dVar1");
+  SG::ConstAccessor<float> dVar1 ("dVar1");
 
   ATH_CHECK( m_cvecKey.initialize() );
   if (!m_writeKey.key().empty())
@@ -60,17 +61,15 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
     return StatusCode::SUCCESS;
   }
 
-  const static C::Accessor<int> anInt2 ("anInt2");
-  const static C::Accessor<int> anInt10 ("anInt10");
-  const static C::Accessor<int> dInt1 ("dInt1");
-  const static C::Accessor<float> dVar1 ("dVar1"); // testing schema evolution
-  const static C::Accessor<unsigned int> dpInt1 ("dpInt1");
-  const static C::Accessor<std::vector<float> > dpvFloat ("dpvFloat");
-  const static C::Accessor<int> dInt100 ("dInt100");
-  const static C::Accessor<int> dInt150 ("dInt150");
-  const static C::Accessor<int> dInt200 ("dInt200");
-  const static C::Accessor<int> dInt250 ("dInt250");
-  const static C::Accessor<ElementLink<DMTest::CVec> > cEL ("cEL");
+  const static SG::ConstAccessor<int> anInt2 ("anInt2");
+  const static SG::ConstAccessor<int> anInt10 ("anInt10");
+  const static SG::ConstAccessor<int> dInt1 ("dInt1");
+  const static SG::ConstAccessor<float> dVar1 ("dVar1"); // testing schema evolution
+  const static SG::ConstAccessor<int> dInt100 ("dInt100");
+  const static SG::ConstAccessor<int> dInt150 ("dInt150");
+  const static SG::ConstAccessor<int> dInt200 ("dInt200");
+  const static SG::ConstAccessor<int> dInt250 ("dInt250");
+  const static SG::ConstAccessor<ElementLink<DMTest::CVec> > cEL ("cEL");
 
   // Ordering of auxid is not reliable.  Sort by name.
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -92,17 +91,13 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
   for (const C* c : *cvec) {
     std::ostringstream ost;
     ost << " anInt1 " << c->anInt()
-              << " aFloat: " << c->aFloat()
-              << " pInt: " << c->pInt()
-              << " pFloat: " << CxxUtils::strformat ("%.2f", c->pFloat());
+        << " aFloat: " << c->aFloat();
     if (anInt2.isAvailable(*c))
       ost << " anInt2: " << anInt2(*c);
     if (dInt1.isAvailable(*c))
       ost << " dInt1: " << dInt1(*c);
     if (dVar1.isAvailable(*c))
       ost << " dVar1: " << dVar1(*c);
-    if (dpInt1.isAvailable(*c))
-      ost << " dpInt1: " << dpInt1(*c);
     if (dInt100.isAvailable(*c))
       ost << " dInt100: " << dInt100(*c);
     if (dInt150.isAvailable(*c))
@@ -118,31 +113,6 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
                 << "[" << cEL(*c).index() << "]";
     ost << "\n";
     
-    {
-      const std::vector<int>& pvi = c->pvInt();
-      ost << "  pvInt: [";
-      for (auto ii : pvi)
-        ost << ii << " ";
-      ost << "]\n";
-    }
-
-    {
-      const std::vector<float>& pvf = c->pvFloat();
-      ost << "  pvFloat: [";
-      for (auto ii : pvf)
-        ost << CxxUtils::strformat ("%.3f", ii) << " ";
-      ost << "]\n";
-    }
-
-    if (dpvFloat.isAvailable(*c))
-    {
-      const std::vector<float>& pvf = dpvFloat(*c);
-      ost << "  dpvFloat: [";
-      for (auto ii : pvf)
-        ost << CxxUtils::strformat ("%.3f", ii) << " ";
-      ost << "]\n";
-    }
-
     ATH_MSG_INFO (ost.str());
   }
 
@@ -158,15 +128,6 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
     ATH_CHECK( writevec.record(std::move(vecnew), std::move(store)) );
   }
 
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Algorithm finalization; called at the end of the job.
- */
-StatusCode xAODTestReadCVec::finalize()
-{
   return StatusCode::SUCCESS;
 }
 

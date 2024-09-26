@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestWriteCVec.h
@@ -51,15 +51,11 @@ public:
   virtual StatusCode execute (const EventContext& ctx) const override;
 
 
-  /**
-   * @brief Algorithm finalization; called at the end of the job.
-   */
-  virtual StatusCode finalize() override;
-
-
 private:
-  SG::WriteHandleKey<DMTest::CVec> m_cvecKey;
-  SG::WriteDecorHandleKey<DMTest::CVec> m_cvecDecorKey;
+  SG::WriteHandleKey<DMTest::CVec> m_cvecKey
+  { this, "CVecKey", "cvec" };
+  SG::WriteDecorHandleKey<DMTest::CVec> m_cvecDecorKey
+  { this, "CVecDecorKey", "" };
 };
 
 

@@ -1,14 +1,14 @@
-Mon Jul 29 16:42:55 EDT 2024
+Tue Sep 24 20:51:56 EDT 2024
 Preloading libexcabort.so
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Mon Jul 29 16:42:58 2024
+                                          running on karma on Tue Sep 24 20:51:57 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc           INFO getRegistryEntries: read 6303 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 6380 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadWriteDicts       INFO Initializing LoadWriteDicts...
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
@@ -26,7 +26,7 @@ PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
 Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63202
+RootDatabase.open    INFO xaodthinned1.root File version:63204
 xaodthinned1.root    INFO Database being retired...
 Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
@@ -35,32 +35,32 @@ DbSession            INFO     Open     DbSession
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
 Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63202
+RootDatabase.open    INFO xaodthinned1.root File version:63204
 xaodthinned1.root    INFO Database being retired...
 Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 3B3BE17C-7994-F242-9EFD-DBCBA484D2C1
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
 Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63202
+RootDatabase.open    INFO xaodthinned1.root File version:63204
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 3B3BE17C-7994-F242-9EFD-DBCBA484D2C1
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 3B3BE17C-7994-F242-9EFD-DBCBA484D2C1
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
 Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63202
+RootDatabase.open    INFO xaodthinned1.root File version:63204
 ApplicationMgr       INFO Application Manager Started successfully
 ClassIDSvc           INFO getRegistryEntries: read 9541 CLIDRegistry entries for module ALL
-EventP...stencySvc   INFO Added successfully Conversion service:AthenaPoolCnvSvc
+EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
 TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
@@ -84,27 +84,16 @@ xAODTestReadJVec     INFO   decorJVec: [304.5]
 xAODTestReadPLinks   INFO plinksContainer
 xAODTestReadPLinks   INFO   plink_DLinks: 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 100 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 103 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=340 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=341 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
-xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 pInt: 1501 pFloat: 0.03 anInt2: 901 dVar1: 1351 dpInt1: 151 cEL: [0]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 anInt2: 901 dVar1: 1351 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 305 aFloat: 600.4 pInt: 1505 pFloat: 4.03 anInt2: 905 dVar1: 1355 dpInt1: 155 cEL: [0]
-  pvInt: [-160 -159 -158 -157 ]
-  pvFloat: [-0.457 -0.357 -0.257 -0.157 ]
-  dpvFloat: [0.430 0.431 0.432 0.433 ]
+xAODTestReadCVec     INFO  anInt1 305 aFloat: 600.4 anInt2: 905 dVar1: 1355 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 309 aFloat: 600.8 pInt: 1509 pFloat: 8.03 anInt2: 909 dVar1: 1359 dpInt1: 159 cEL: [0]
-  pvInt: [-120 -119 -118 -117 -116 -115 -114 -113 ]
-  pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 0.283 ]
-  dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 0.837 ]
+xAODTestReadCVec     INFO  anInt1 309 aFloat: 600.8 anInt2: 909 dVar1: 1359 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
@@ -129,22 +118,13 @@ xAODTestReadPLinks   INFO   link: (:inv)  links:
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:0) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 402 aFloat: 800.1 pInt: 2002 pFloat: 1.04 anInt2: 1202 dVar1: 1802 dpInt1: 202 cEL: [0]
-  pvInt: [-90 ]
-  pvFloat: [-0.486 ]
-  dpvFloat: [0.140 ]
+xAODTestReadCVec     INFO  anInt1 402 aFloat: 800.1 anInt2: 1202 dVar1: 1802 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 406 aFloat: 800.5 pInt: 2006 pFloat: 5.04 anInt2: 1206 dVar1: 1806 dpInt1: 206 cEL: [0]
-  pvInt: [-50 -49 -48 -47 -46 ]
-  pvFloat: [-0.446 -0.346 -0.246 -0.146 -0.046 ]
-  dpvFloat: [0.540 0.541 0.542 0.543 0.544 ]
+xAODTestReadCVec     INFO  anInt1 406 aFloat: 800.5 anInt2: 1206 dVar1: 1806 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 410 aFloat: 800.9 pInt: 2010 pFloat: 9.04 anInt2: 1210 dVar1: 1810 dpInt1: 210 cEL: [0]
-  pvInt: [-10 -9 -8 -7 -6 -5 -4 -3 -2 ]
-  pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 0.394 ]
-  dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 0.948 ]
+xAODTestReadCVec     INFO  anInt1 410 aFloat: 800.9 anInt2: 1210 dVar1: 1810 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
@@ -173,7 +153,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:4) (:inv) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:7)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:inv) links: 
@@ -202,17 +182,11 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 603 aFloat: 1200.2 pInt: 3003 pFloat: 2.06 anInt2: 1803 dVar1: 2703 dpInt1: 303 cEL: [0]
-  pvInt: [120 121 ]
-  pvFloat: [-0.474 -0.374 ]
-  dpvFloat: [0.260 0.261 ]
+xAODTestReadCVec     INFO  anInt1 603 aFloat: 1200.2 anInt2: 1803 dVar1: 2703 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 607 aFloat: 1200.6 pInt: 3007 pFloat: 6.06 anInt2: 1807 dVar1: 2707 dpInt1: 307 cEL: [0]
-  pvInt: [160 161 162 163 164 165 ]
-  pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 0.066 ]
-  dpvFloat: [0.660 0.661 0.662 0.663 0.664 0.665 ]
+xAODTestReadCVec     INFO  anInt1 607 aFloat: 1200.6 anInt2: 1807 dVar1: 2707 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) 
@@ -237,32 +211,17 @@ xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:7)
 xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:0) (:inv) (cvec:0) (ctrig:3)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 pInt: 3501 pFloat: 0.07 anInt2: 2101 dVar1: 3151 dpInt1: 351 cEL: [0]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 anInt2: 2101 dVar1: 3151 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 703 aFloat: 1400.2 pInt: 3503 pFloat: 2.07 anInt2: 2103 dVar1: 3153 dpInt1: 353 cEL: [0]
-  pvInt: [220 221 ]
-  pvFloat: [-0.473 -0.373 ]
-  dpvFloat: [0.270 0.271 ]
+xAODTestReadCVec     INFO  anInt1 703 aFloat: 1400.2 anInt2: 2103 dVar1: 3153 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 705 aFloat: 1400.4 pInt: 3505 pFloat: 4.07 anInt2: 2105 dVar1: 3155 dpInt1: 355 cEL: [0]
-  pvInt: [240 241 242 243 ]
-  pvFloat: [-0.453 -0.353 -0.253 -0.153 ]
-  dpvFloat: [0.470 0.471 0.472 0.473 ]
+xAODTestReadCVec     INFO  anInt1 705 aFloat: 1400.4 anInt2: 2105 dVar1: 3155 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 707 aFloat: 1400.6 pInt: 3507 pFloat: 6.07 anInt2: 2107 dVar1: 3157 dpInt1: 357 cEL: [0]
-  pvInt: [260 261 262 263 264 265 ]
-  pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 0.067 ]
-  dpvFloat: [0.670 0.671 0.672 0.673 0.674 0.675 ]
+xAODTestReadCVec     INFO  anInt1 707 aFloat: 1400.6 anInt2: 2107 dVar1: 3157 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 709 aFloat: 1400.8 pInt: 3509 pFloat: 8.07 anInt2: 2109 dVar1: 3159 dpInt1: 359 cEL: [0]
-  pvInt: [280 281 282 283 284 285 286 287 ]
-  pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 0.287 ]
-  dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 0.877 ]
+xAODTestReadCVec     INFO  anInt1 709 aFloat: 1400.8 anInt2: 2109 dVar1: 3159 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) (:0) 
@@ -287,32 +246,17 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:0) (:inv) (cvec:1) (ctri
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:3) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 802 aFloat: 1600.1 pInt: 4002 pFloat: 1.08 anInt2: 2402 dVar1: 3602 dpInt1: 402 cEL: [0]
-  pvInt: [310 ]
-  pvFloat: [-0.482 ]
-  dpvFloat: [0.180 ]
+xAODTestReadCVec     INFO  anInt1 802 aFloat: 1600.1 anInt2: 2402 dVar1: 3602 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 803 aFloat: 1600.2 pInt: 4003 pFloat: 2.08 anInt2: 2403 dVar1: 3603 dpInt1: 403 cEL: [0]
-  pvInt: [320 321 ]
-  pvFloat: [-0.472 -0.372 ]
-  dpvFloat: [0.280 0.281 ]
+xAODTestReadCVec     INFO  anInt1 803 aFloat: 1600.2 anInt2: 2403 dVar1: 3603 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 806 aFloat: 1600.5 pInt: 4006 pFloat: 5.08 anInt2: 2406 dVar1: 3606 dpInt1: 406 cEL: [0]
-  pvInt: [350 351 352 353 354 ]
-  pvFloat: [-0.442 -0.342 -0.242 -0.142 -0.042 ]
-  dpvFloat: [0.580 0.581 0.582 0.583 0.584 ]
+xAODTestReadCVec     INFO  anInt1 806 aFloat: 1600.5 anInt2: 2406 dVar1: 3606 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 807 aFloat: 1600.6 pInt: 4007 pFloat: 6.08 anInt2: 2407 dVar1: 3607 dpInt1: 407 cEL: [0]
-  pvInt: [360 361 362 363 364 365 ]
-  pvFloat: [-0.432 -0.332 -0.232 -0.132 -0.032 0.068 ]
-  dpvFloat: [0.680 0.681 0.682 0.683 0.684 0.685 ]
+xAODTestReadCVec     INFO  anInt1 807 aFloat: 1600.6 anInt2: 2407 dVar1: 3607 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 810 aFloat: 1600.9 pInt: 4010 pFloat: 9.08 anInt2: 2410 dVar1: 3610 dpInt1: 410 cEL: [0]
-  pvInt: [390 391 392 393 394 395 396 397 398 ]
-  pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 0.398 ]
-  dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 0.988 ]
+xAODTestReadCVec     INFO  anInt1 810 aFloat: 1600.9 anInt2: 2410 dVar1: 3610 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) 
@@ -341,47 +285,23 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:4) (ctrig:0) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:1)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 pInt: 4501 pFloat: 0.09 anInt2: 2701 dVar1: 4051 dpInt1: 451 cEL: cvec[7]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 anInt2: 2701 dVar1: 4051 cEL: cvec[7]
 
-xAODTestReadCVec     INFO  anInt1 902 aFloat: 1800.1 pInt: 4502 pFloat: 1.09 anInt2: 2702 dVar1: 4052 dpInt1: 452 cEL: cvec[6]
-  pvInt: [410 ]
-  pvFloat: [-0.481 ]
-  dpvFloat: [0.190 ]
+xAODTestReadCVec     INFO  anInt1 902 aFloat: 1800.1 anInt2: 2702 dVar1: 4052 cEL: cvec[6]
 
-xAODTestReadCVec     INFO  anInt1 903 aFloat: 1800.2 pInt: 4503 pFloat: 2.09 anInt2: 2703 dVar1: 4053 dpInt1: 453 cEL: [0]
-  pvInt: [420 421 ]
-  pvFloat: [-0.471 -0.371 ]
-  dpvFloat: [0.290 0.291 ]
+xAODTestReadCVec     INFO  anInt1 903 aFloat: 1800.2 anInt2: 2703 dVar1: 4053 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 905 aFloat: 1800.4 pInt: 4505 pFloat: 4.09 anInt2: 2705 dVar1: 4055 dpInt1: 455 cEL: cvec[4]
-  pvInt: [440 441 442 443 ]
-  pvFloat: [-0.451 -0.351 -0.251 -0.151 ]
-  dpvFloat: [0.490 0.491 0.492 0.493 ]
+xAODTestReadCVec     INFO  anInt1 905 aFloat: 1800.4 anInt2: 2705 dVar1: 4055 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 906 aFloat: 1800.5 pInt: 4506 pFloat: 5.09 anInt2: 2706 dVar1: 4056 dpInt1: 456 cEL: cvec[3]
-  pvInt: [450 451 452 453 454 ]
-  pvFloat: [-0.441 -0.341 -0.241 -0.141 -0.041 ]
-  dpvFloat: [0.590 0.591 0.592 0.593 0.594 ]
+xAODTestReadCVec     INFO  anInt1 906 aFloat: 1800.5 anInt2: 2706 dVar1: 4056 cEL: cvec[3]
 
-xAODTestReadCVec     INFO  anInt1 907 aFloat: 1800.6 pInt: 4507 pFloat: 6.09 anInt2: 2707 dVar1: 4057 dpInt1: 457 cEL: [0]
-  pvInt: [460 461 462 463 464 465 ]
-  pvFloat: [-0.431 -0.331 -0.231 -0.131 -0.031 0.069 ]
-  dpvFloat: [0.690 0.691 0.692 0.693 0.694 0.695 ]
+xAODTestReadCVec     INFO  anInt1 907 aFloat: 1800.6 anInt2: 2707 dVar1: 4057 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 909 aFloat: 1800.8 pInt: 4509 pFloat: 8.09 anInt2: 2709 dVar1: 4059 dpInt1: 459 cEL: cvec[1]
-  pvInt: [480 481 482 483 484 485 486 487 ]
-  pvFloat: [-0.411 -0.311 -0.211 -0.111 -0.011 0.089 0.189 0.289 ]
-  dpvFloat: [0.890 0.891 0.892 0.893 0.894 0.895 0.896 0.897 ]
+xAODTestReadCVec     INFO  anInt1 909 aFloat: 1800.8 anInt2: 2709 dVar1: 4059 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 910 aFloat: 1800.9 pInt: 4510 pFloat: 9.09 anInt2: 2710 dVar1: 4060 dpInt1: 460 cEL: cvec[0]
-  pvInt: [490 491 492 493 494 495 496 497 498 ]
-  pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 0.399 ]
-  dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 0.998 ]
+xAODTestReadCVec     INFO  anInt1 910 aFloat: 1800.9 anInt2: 2710 dVar1: 4060 cEL: cvec[0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) (cvec:7) 
@@ -410,17 +330,11 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:6) (:inv) (cvec:6)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1004 aFloat: 2000.3 pInt: 5004 pFloat: 3.10 anInt2: 3004 dVar1: 4504 dpInt1: 504 cEL: [0]
-  pvInt: [530 531 532 ]
-  pvFloat: [-0.460 -0.360 -0.260 ]
-  dpvFloat: [0.400 0.401 0.402 ]
+xAODTestReadCVec     INFO  anInt1 1004 aFloat: 2000.3 anInt2: 3004 dVar1: 4504 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1008 aFloat: 2000.7 pInt: 5008 pFloat: 7.10 anInt2: 3008 dVar1: 4508 dpInt1: 508 cEL: [0]
-  pvInt: [570 571 572 573 574 575 576 ]
-  pvFloat: [-0.420 -0.320 -0.220 -0.120 -0.020 0.080 0.180 ]
-  dpvFloat: [0.800 0.801 0.802 0.803 0.804 0.805 0.806 ]
+xAODTestReadCVec     INFO  anInt1 1008 aFloat: 2000.7 anInt2: 3008 dVar1: 4508 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) 
@@ -449,32 +363,17 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:6) (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 pInt: 5501 pFloat: 0.11 anInt2: 3301 dVar1: 4951 dpInt1: 551 cEL: [0]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 anInt2: 3301 dVar1: 4951 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1104 aFloat: 2200.3 pInt: 5504 pFloat: 3.11 anInt2: 3304 dVar1: 4954 dpInt1: 554 cEL: [0]
-  pvInt: [630 631 632 ]
-  pvFloat: [-0.459 -0.359 -0.259 ]
-  dpvFloat: [0.410 0.411 0.412 ]
+xAODTestReadCVec     INFO  anInt1 1104 aFloat: 2200.3 anInt2: 3304 dVar1: 4954 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1105 aFloat: 2200.4 pInt: 5505 pFloat: 4.11 anInt2: 3305 dVar1: 4955 dpInt1: 555 cEL: [0]
-  pvInt: [640 641 642 643 ]
-  pvFloat: [-0.449 -0.349 -0.249 -0.149 ]
-  dpvFloat: [0.510 0.511 0.512 0.513 ]
+xAODTestReadCVec     INFO  anInt1 1105 aFloat: 2200.4 anInt2: 3305 dVar1: 4955 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1108 aFloat: 2200.7 pInt: 5508 pFloat: 7.11 anInt2: 3308 dVar1: 4958 dpInt1: 558 cEL: [0]
-  pvInt: [670 671 672 673 674 675 676 ]
-  pvFloat: [-0.419 -0.319 -0.219 -0.119 -0.019 0.081 0.181 ]
-  dpvFloat: [0.810 0.811 0.812 0.813 0.814 0.815 0.816 ]
+xAODTestReadCVec     INFO  anInt1 1108 aFloat: 2200.7 anInt2: 3308 dVar1: 4958 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1109 aFloat: 2200.8 pInt: 5509 pFloat: 8.11 anInt2: 3309 dVar1: 4959 dpInt1: 559 cEL: [0]
-  pvInt: [680 681 682 683 684 685 686 687 ]
-  pvFloat: [-0.409 -0.309 -0.209 -0.109 -0.009 0.091 0.191 0.291 ]
-  dpvFloat: [0.910 0.911 0.912 0.913 0.914 0.915 0.916 0.917 ]
+xAODTestReadCVec     INFO  anInt1 1109 aFloat: 2200.8 anInt2: 3309 dVar1: 4959 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (cvec:1) (cvec:2) (:0) (:0) (cvec:3) (cvec:4) (:0) 
@@ -503,32 +402,17 @@ xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (:inv) (ctrig:6)
 xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1202 aFloat: 2400.1 pInt: 6002 pFloat: 1.12 anInt2: 3602 dVar1: 5402 dpInt1: 602 cEL: [0]
-  pvInt: [710 ]
-  pvFloat: [-0.478 ]
-  dpvFloat: [0.220 ]
+xAODTestReadCVec     INFO  anInt1 1202 aFloat: 2400.1 anInt2: 3602 dVar1: 5402 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1204 aFloat: 2400.3 pInt: 6004 pFloat: 3.12 anInt2: 3604 dVar1: 5404 dpInt1: 604 cEL: [0]
-  pvInt: [730 731 732 ]
-  pvFloat: [-0.458 -0.358 -0.258 ]
-  dpvFloat: [0.420 0.421 0.422 ]
+xAODTestReadCVec     INFO  anInt1 1204 aFloat: 2400.3 anInt2: 3604 dVar1: 5404 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1206 aFloat: 2400.5 pInt: 6006 pFloat: 5.12 anInt2: 3606 dVar1: 5406 dpInt1: 606 cEL: [0]
-  pvInt: [750 751 752 753 754 ]
-  pvFloat: [-0.438 -0.338 -0.238 -0.138 -0.038 ]
-  dpvFloat: [0.620 0.621 0.622 0.623 0.624 ]
+xAODTestReadCVec     INFO  anInt1 1206 aFloat: 2400.5 anInt2: 3606 dVar1: 5406 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1208 aFloat: 2400.7 pInt: 6008 pFloat: 7.12 anInt2: 3608 dVar1: 5408 dpInt1: 608 cEL: [0]
-  pvInt: [770 771 772 773 774 775 776 ]
-  pvFloat: [-0.418 -0.318 -0.218 -0.118 -0.018 0.082 0.182 ]
-  dpvFloat: [0.820 0.821 0.822 0.823 0.824 0.825 0.826 ]
+xAODTestReadCVec     INFO  anInt1 1208 aFloat: 2400.7 anInt2: 3608 dVar1: 5408 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1210 aFloat: 2400.9 pInt: 6010 pFloat: 9.12 anInt2: 3610 dVar1: 5410 dpInt1: 610 cEL: [0]
-  pvInt: [790 791 792 793 794 795 796 797 798 ]
-  pvFloat: [-0.398 -0.298 -0.198 -0.098 0.002 0.102 0.202 0.302 0.402 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 1210 aFloat: 2400.9 anInt2: 3610 dVar1: 5410 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (cvec:1) (:0) (cvec:2) (:0) (cvec:3) (:0) (cvec:4) 
@@ -561,47 +445,23 @@ xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:2) (ctrig:6)
 xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 pInt: 6501 pFloat: 0.13 anInt2: 3901 dVar1: 5851 dpInt1: 651 cEL: cvec[7]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 anInt2: 3901 dVar1: 5851 cEL: cvec[7]
 
-xAODTestReadCVec     INFO  anInt1 1302 aFloat: 2600.1 pInt: 6502 pFloat: 1.13 anInt2: 3902 dVar1: 5852 dpInt1: 652 cEL: cvec[6]
-  pvInt: [810 ]
-  pvFloat: [-0.477 ]
-  dpvFloat: [0.230 ]
+xAODTestReadCVec     INFO  anInt1 1302 aFloat: 2600.1 anInt2: 3902 dVar1: 5852 cEL: cvec[6]
 
-xAODTestReadCVec     INFO  anInt1 1304 aFloat: 2600.3 pInt: 6504 pFloat: 3.13 anInt2: 3904 dVar1: 5854 dpInt1: 654 cEL: [0]
-  pvInt: [830 831 832 ]
-  pvFloat: [-0.457 -0.357 -0.257 ]
-  dpvFloat: [0.430 0.431 0.432 ]
+xAODTestReadCVec     INFO  anInt1 1304 aFloat: 2600.3 anInt2: 3904 dVar1: 5854 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1305 aFloat: 2600.4 pInt: 6505 pFloat: 4.13 anInt2: 3905 dVar1: 5855 dpInt1: 655 cEL: cvec[4]
-  pvInt: [840 841 842 843 ]
-  pvFloat: [-0.447 -0.347 -0.247 -0.147 ]
-  dpvFloat: [0.530 0.531 0.532 0.533 ]
+xAODTestReadCVec     INFO  anInt1 1305 aFloat: 2600.4 anInt2: 3905 dVar1: 5855 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 1306 aFloat: 2600.5 pInt: 6506 pFloat: 5.13 anInt2: 3906 dVar1: 5856 dpInt1: 656 cEL: cvec[3]
-  pvInt: [850 851 852 853 854 ]
-  pvFloat: [-0.437 -0.337 -0.237 -0.137 -0.037 ]
-  dpvFloat: [0.630 0.631 0.632 0.633 0.634 ]
+xAODTestReadCVec     INFO  anInt1 1306 aFloat: 2600.5 anInt2: 3906 dVar1: 5856 cEL: cvec[3]
 
-xAODTestReadCVec     INFO  anInt1 1308 aFloat: 2600.7 pInt: 6508 pFloat: 7.13 anInt2: 3908 dVar1: 5858 dpInt1: 658 cEL: [0]
-  pvInt: [870 871 872 873 874 875 876 ]
-  pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 ]
-  dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 ]
+xAODTestReadCVec     INFO  anInt1 1308 aFloat: 2600.7 anInt2: 3908 dVar1: 5858 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1309 aFloat: 2600.8 pInt: 6509 pFloat: 8.13 anInt2: 3909 dVar1: 5859 dpInt1: 659 cEL: cvec[1]
-  pvInt: [880 881 882 883 884 885 886 887 ]
-  pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 ]
-  dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 ]
+xAODTestReadCVec     INFO  anInt1 1309 aFloat: 2600.8 anInt2: 3909 dVar1: 5859 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 1310 aFloat: 2600.9 pInt: 6510 pFloat: 9.13 anInt2: 3910 dVar1: 5860 dpInt1: 660 cEL: cvec[0]
-  pvInt: [890 891 892 893 894 895 896 897 898 ]
-  pvFloat: [-0.397 -0.297 -0.197 -0.097 0.003 0.103 0.203 0.303 0.403 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 1310 aFloat: 2600.9 anInt2: 3910 dVar1: 5860 cEL: cvec[0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (cvec:2) (cvec:3) (cvec:4) (:0) (cvec:5) (cvec:6) (cvec:7) 
@@ -634,27 +494,15 @@ xAODTestReadPLinks   INFO   link: (cvec:4)  links:
 xAODTestReadPLinks   INFO   decorLink: (cvec:4) decorVLinks: (ctrig:9) (:inv) (cvec:1)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1403 aFloat: 2800.2 pInt: 7003 pFloat: 2.14 anInt2: 4203 dVar1: 6303 dpInt1: 703 cEL: cvec[3]
-  pvInt: [920 921 ]
-  pvFloat: [-0.466 -0.366 ]
-  dpvFloat: [0.340 0.341 ]
+xAODTestReadCVec     INFO  anInt1 1403 aFloat: 2800.2 anInt2: 4203 dVar1: 6303 cEL: cvec[3]
 
-xAODTestReadCVec     INFO  anInt1 1404 aFloat: 2800.3 pInt: 7004 pFloat: 3.14 anInt2: 4204 dVar1: 6304 dpInt1: 704 cEL: cvec[2]
-  pvInt: [930 931 932 ]
-  pvFloat: [-0.456 -0.356 -0.256 ]
-  dpvFloat: [0.440 0.441 0.442 ]
+xAODTestReadCVec     INFO  anInt1 1404 aFloat: 2800.3 anInt2: 4204 dVar1: 6304 cEL: cvec[2]
 
-xAODTestReadCVec     INFO  anInt1 1407 aFloat: 2800.6 pInt: 7007 pFloat: 6.14 anInt2: 4207 dVar1: 6307 dpInt1: 707 cEL: cvec[1]
-  pvInt: [960 961 962 963 964 965 ]
-  pvFloat: [-0.426 -0.326 -0.226 -0.126 -0.026 0.074 ]
-  dpvFloat: [0.740 0.741 0.742 0.743 0.744 0.745 ]
+xAODTestReadCVec     INFO  anInt1 1407 aFloat: 2800.6 anInt2: 4207 dVar1: 6307 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 1408 aFloat: 2800.7 pInt: 7008 pFloat: 7.14 anInt2: 4208 dVar1: 6308 dpInt1: 708 cEL: cvec[0]
-  pvInt: [970 971 972 973 974 975 976 ]
-  pvFloat: [-0.416 -0.316 -0.216 -0.116 -0.016 0.084 0.184 ]
-  dpvFloat: [0.840 0.841 0.842 0.843 0.844 0.845 0.846 ]
+xAODTestReadCVec     INFO  anInt1 1408 aFloat: 2800.7 anInt2: 4208 dVar1: 6308 cEL: cvec[0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) 
@@ -683,42 +531,21 @@ xAODTestReadPLinks   INFO   link: (:inv)  links:
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:9) (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 pInt: 7501 pFloat: 0.15 anInt2: 4501 dVar1: 6751 dpInt1: 751 cEL: [0]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 anInt2: 4501 dVar1: 6751 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1503 aFloat: 3000.2 pInt: 7503 pFloat: 2.15 anInt2: 4503 dVar1: 6753 dpInt1: 753 cEL: cvec[5]
-  pvInt: [1020 1021 ]
-  pvFloat: [-0.465 -0.365 ]
-  dpvFloat: [0.350 0.351 ]
+xAODTestReadCVec     INFO  anInt1 1503 aFloat: 3000.2 anInt2: 4503 dVar1: 6753 cEL: cvec[5]
 
-xAODTestReadCVec     INFO  anInt1 1504 aFloat: 3000.3 pInt: 7504 pFloat: 3.15 anInt2: 4504 dVar1: 6754 dpInt1: 754 cEL: cvec[4]
-  pvInt: [1030 1031 1032 ]
-  pvFloat: [-0.455 -0.355 -0.255 ]
-  dpvFloat: [0.450 0.451 0.452 ]
+xAODTestReadCVec     INFO  anInt1 1504 aFloat: 3000.3 anInt2: 4504 dVar1: 6754 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 1505 aFloat: 3000.4 pInt: 7505 pFloat: 4.15 anInt2: 4505 dVar1: 6755 dpInt1: 755 cEL: [0]
-  pvInt: [1040 1041 1042 1043 ]
-  pvFloat: [-0.445 -0.345 -0.245 -0.145 ]
-  dpvFloat: [0.550 0.551 0.552 0.553 ]
+xAODTestReadCVec     INFO  anInt1 1505 aFloat: 3000.4 anInt2: 4505 dVar1: 6755 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1507 aFloat: 3000.6 pInt: 7507 pFloat: 6.15 anInt2: 4507 dVar1: 6757 dpInt1: 757 cEL: cvec[2]
-  pvInt: [1060 1061 1062 1063 1064 1065 ]
-  pvFloat: [-0.425 -0.325 -0.225 -0.125 -0.025 0.075 ]
-  dpvFloat: [0.750 0.751 0.752 0.753 0.754 0.755 ]
+xAODTestReadCVec     INFO  anInt1 1507 aFloat: 3000.6 anInt2: 4507 dVar1: 6757 cEL: cvec[2]
 
-xAODTestReadCVec     INFO  anInt1 1508 aFloat: 3000.7 pInt: 7508 pFloat: 7.15 anInt2: 4508 dVar1: 6758 dpInt1: 758 cEL: cvec[1]
-  pvInt: [1070 1071 1072 1073 1074 1075 1076 ]
-  pvFloat: [-0.415 -0.315 -0.215 -0.115 -0.015 0.085 0.185 ]
-  dpvFloat: [0.850 0.851 0.852 0.853 0.854 0.855 0.856 ]
+xAODTestReadCVec     INFO  anInt1 1508 aFloat: 3000.7 anInt2: 4508 dVar1: 6758 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 1509 aFloat: 3000.8 pInt: 7509 pFloat: 8.15 anInt2: 4509 dVar1: 6759 dpInt1: 759 cEL: [0]
-  pvInt: [1080 1081 1082 1083 1084 1085 1086 1087 ]
-  pvFloat: [-0.405 -0.305 -0.205 -0.105 -0.005 0.095 0.195 0.295 ]
-  dpvFloat: [0.950 0.951 0.952 0.953 0.954 0.955 0.956 0.957 ]
+xAODTestReadCVec     INFO  anInt1 1509 aFloat: 3000.8 anInt2: 4509 dVar1: 6759 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (cvec:1) (cvec:2) (cvec:3) (:0) (cvec:4) (cvec:5) (cvec:6) (:0) 
@@ -747,42 +574,21 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:6) (ctrig:9)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1602 aFloat: 3200.1 pInt: 8002 pFloat: 1.16 anInt2: 4802 dVar1: 7202 dpInt1: 802 cEL: [0]
-  pvInt: [1110 ]
-  pvFloat: [-0.474 ]
-  dpvFloat: [0.260 ]
+xAODTestReadCVec     INFO  anInt1 1602 aFloat: 3200.1 anInt2: 4802 dVar1: 7202 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1603 aFloat: 3200.2 pInt: 8003 pFloat: 2.16 anInt2: 4803 dVar1: 7203 dpInt1: 803 cEL: cvec[5]
-  pvInt: [1120 1121 ]
-  pvFloat: [-0.464 -0.364 ]
-  dpvFloat: [0.360 0.361 ]
+xAODTestReadCVec     INFO  anInt1 1603 aFloat: 3200.2 anInt2: 4803 dVar1: 7203 cEL: cvec[5]
 
-xAODTestReadCVec     INFO  anInt1 1604 aFloat: 3200.3 pInt: 8004 pFloat: 3.16 anInt2: 4804 dVar1: 7204 dpInt1: 804 cEL: cvec[4]
-  pvInt: [1130 1131 1132 ]
-  pvFloat: [-0.454 -0.354 -0.254 ]
-  dpvFloat: [0.460 0.461 0.462 ]
+xAODTestReadCVec     INFO  anInt1 1604 aFloat: 3200.3 anInt2: 4804 dVar1: 7204 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 1606 aFloat: 3200.5 pInt: 8006 pFloat: 5.16 anInt2: 4806 dVar1: 7206 dpInt1: 806 cEL: [0]
-  pvInt: [1150 1151 1152 1153 1154 ]
-  pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 ]
-  dpvFloat: [0.660 0.661 0.662 0.663 0.664 ]
+xAODTestReadCVec     INFO  anInt1 1606 aFloat: 3200.5 anInt2: 4806 dVar1: 7206 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1607 aFloat: 3200.6 pInt: 8007 pFloat: 6.16 anInt2: 4807 dVar1: 7207 dpInt1: 807 cEL: cvec[2]
-  pvInt: [1160 1161 1162 1163 1164 1165 ]
-  pvFloat: [-0.424 -0.324 -0.224 -0.124 -0.024 0.076 ]
-  dpvFloat: [0.760 0.761 0.762 0.763 0.764 0.765 ]
+xAODTestReadCVec     INFO  anInt1 1607 aFloat: 3200.6 anInt2: 4807 dVar1: 7207 cEL: cvec[2]
 
-xAODTestReadCVec     INFO  anInt1 1608 aFloat: 3200.7 pInt: 8008 pFloat: 7.16 anInt2: 4808 dVar1: 7208 dpInt1: 808 cEL: cvec[1]
-  pvInt: [1170 1171 1172 1173 1174 1175 1176 ]
-  pvFloat: [-0.414 -0.314 -0.214 -0.114 -0.014 0.086 0.186 ]
-  dpvFloat: [0.860 0.861 0.862 0.863 0.864 0.865 0.866 ]
+xAODTestReadCVec     INFO  anInt1 1608 aFloat: 3200.7 anInt2: 4808 dVar1: 7208 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 1610 aFloat: 3200.9 pInt: 8010 pFloat: 9.16 anInt2: 4810 dVar1: 7210 dpInt1: 810 cEL: [0]
-  pvInt: [1190 1191 1192 1193 1194 1195 1196 1197 1198 ]
-  pvFloat: [-0.394 -0.294 -0.194 -0.094 0.006 0.106 0.206 0.306 0.406 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 1610 aFloat: 3200.9 anInt2: 4810 dVar1: 7210 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (cvec:1) (cvec:2) (:0) (cvec:3) (cvec:4) (cvec:5) (:0) (cvec:6) 
@@ -815,57 +621,27 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (ctrig:9)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 pInt: 8501 pFloat: 0.17 anInt2: 5101 dVar1: 7651 dpInt1: 851 cEL: cvec[9]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 anInt2: 5101 dVar1: 7651 cEL: cvec[9]
 
-xAODTestReadCVec     INFO  anInt1 1702 aFloat: 3400.1 pInt: 8502 pFloat: 1.17 anInt2: 5102 dVar1: 7652 dpInt1: 852 cEL: cvec[8]
-  pvInt: [1210 ]
-  pvFloat: [-0.473 ]
-  dpvFloat: [0.270 ]
+xAODTestReadCVec     INFO  anInt1 1702 aFloat: 3400.1 anInt2: 5102 dVar1: 7652 cEL: cvec[8]
 
-xAODTestReadCVec     INFO  anInt1 1703 aFloat: 3400.2 pInt: 8503 pFloat: 2.17 anInt2: 5103 dVar1: 7653 dpInt1: 853 cEL: cvec[7]
-  pvInt: [1220 1221 ]
-  pvFloat: [-0.463 -0.363 ]
-  dpvFloat: [0.370 0.371 ]
+xAODTestReadCVec     INFO  anInt1 1703 aFloat: 3400.2 anInt2: 5103 dVar1: 7653 cEL: cvec[7]
 
-xAODTestReadCVec     INFO  anInt1 1704 aFloat: 3400.3 pInt: 8504 pFloat: 3.17 anInt2: 5104 dVar1: 7654 dpInt1: 854 cEL: cvec[6]
-  pvInt: [1230 1231 1232 ]
-  pvFloat: [-0.453 -0.353 -0.253 ]
-  dpvFloat: [0.470 0.471 0.472 ]
+xAODTestReadCVec     INFO  anInt1 1704 aFloat: 3400.3 anInt2: 5104 dVar1: 7654 cEL: cvec[6]
 
-xAODTestReadCVec     INFO  anInt1 1705 aFloat: 3400.4 pInt: 8505 pFloat: 4.17 anInt2: 5105 dVar1: 7655 dpInt1: 855 cEL: cvec[5]
-  pvInt: [1240 1241 1242 1243 ]
-  pvFloat: [-0.443 -0.343 -0.243 -0.143 ]
-  dpvFloat: [0.570 0.571 0.572 0.573 ]
+xAODTestReadCVec     INFO  anInt1 1705 aFloat: 3400.4 anInt2: 5105 dVar1: 7655 cEL: cvec[5]
 
-xAODTestReadCVec     INFO  anInt1 1706 aFloat: 3400.5 pInt: 8506 pFloat: 5.17 anInt2: 5106 dVar1: 7656 dpInt1: 856 cEL: cvec[4]
-  pvInt: [1250 1251 1252 1253 1254 ]
-  pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 ]
-  dpvFloat: [0.670 0.671 0.672 0.673 0.674 ]
+xAODTestReadCVec     INFO  anInt1 1706 aFloat: 3400.5 anInt2: 5106 dVar1: 7656 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 1707 aFloat: 3400.6 pInt: 8507 pFloat: 6.17 anInt2: 5107 dVar1: 7657 dpInt1: 857 cEL: cvec[3]
-  pvInt: [1260 1261 1262 1263 1264 1265 ]
-  pvFloat: [-0.423 -0.323 -0.223 -0.123 -0.023 0.077 ]
-  dpvFloat: [0.770 0.771 0.772 0.773 0.774 0.775 ]
+xAODTestReadCVec     INFO  anInt1 1707 aFloat: 3400.6 anInt2: 5107 dVar1: 7657 cEL: cvec[3]
 
-xAODTestReadCVec     INFO  anInt1 1708 aFloat: 3400.7 pInt: 8508 pFloat: 7.17 anInt2: 5108 dVar1: 7658 dpInt1: 858 cEL: cvec[2]
-  pvInt: [1270 1271 1272 1273 1274 1275 1276 ]
-  pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 ]
-  dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 ]
+xAODTestReadCVec     INFO  anInt1 1708 aFloat: 3400.7 anInt2: 5108 dVar1: 7658 cEL: cvec[2]
 
-xAODTestReadCVec     INFO  anInt1 1709 aFloat: 3400.8 pInt: 8509 pFloat: 8.17 anInt2: 5109 dVar1: 7659 dpInt1: 859 cEL: cvec[1]
-  pvInt: [1280 1281 1282 1283 1284 1285 1286 1287 ]
-  pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 ]
-  dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 ]
+xAODTestReadCVec     INFO  anInt1 1709 aFloat: 3400.8 anInt2: 5109 dVar1: 7659 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 1710 aFloat: 3400.9 pInt: 8510 pFloat: 9.17 anInt2: 5110 dVar1: 7660 dpInt1: 860 cEL: cvec[0]
-  pvInt: [1290 1291 1292 1293 1294 1295 1296 1297 1298 ]
-  pvFloat: [-0.393 -0.293 -0.193 -0.093 0.007 0.107 0.207 0.307 0.407 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 1710 aFloat: 3400.9 anInt2: 5110 dVar1: 7660 cEL: cvec[0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (cvec:2) (cvec:3) (cvec:4) (cvec:5) (cvec:6) (cvec:7) (cvec:8) (cvec:9) 
@@ -898,7 +674,7 @@ xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:1) (ctrig:2) (:
 xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (cvec:4)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
@@ -923,22 +699,13 @@ xAODTestReadPLinks   INFO plinksContainer
 xAODTestReadPLinks   INFO   plink_DLinks: 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 pInt: 9501 pFloat: 0.19 anInt2: 5701 dVar1: 8551 dpInt1: 951 cEL: [0]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 anInt2: 5701 dVar1: 8551 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1905 aFloat: 3800.4 pInt: 9505 pFloat: 4.19 anInt2: 5705 dVar1: 8555 dpInt1: 955 cEL: [0]
-  pvInt: [1440 1441 1442 1443 ]
-  pvFloat: [-0.441 -0.341 -0.241 -0.141 ]
-  dpvFloat: [0.590 0.591 0.592 0.593 ]
+xAODTestReadCVec     INFO  anInt1 1905 aFloat: 3800.4 anInt2: 5705 dVar1: 8555 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 1909 aFloat: 3800.8 pInt: 9509 pFloat: 8.19 anInt2: 5709 dVar1: 8559 dpInt1: 959 cEL: [0]
-  pvInt: [1480 1481 1482 1483 1484 1485 1486 1487 ]
-  pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 ]
-  dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 ]
+xAODTestReadCVec     INFO  anInt1 1909 aFloat: 3800.8 anInt2: 5709 dVar1: 8559 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) (:0) 
@@ -963,22 +730,13 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:2)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:5) (:inv) (:inv) (ctrig:8)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 2002 aFloat: 4000.1 pInt: 10002 pFloat: 1.20 anInt2: 6002 dVar1: 9002 dpInt1: 1002 cEL: [0]
-  pvInt: [1510 ]
-  pvFloat: [-0.470 ]
-  dpvFloat: [0.300 ]
+xAODTestReadCVec     INFO  anInt1 2002 aFloat: 4000.1 anInt2: 6002 dVar1: 9002 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 2006 aFloat: 4000.5 pInt: 10006 pFloat: 5.20 anInt2: 6006 dVar1: 9006 dpInt1: 1006 cEL: [0]
-  pvInt: [1550 1551 1552 1553 1554 ]
-  pvFloat: [-0.430 -0.330 -0.230 -0.130 -0.030 ]
-  dpvFloat: [0.700 0.701 0.702 0.703 0.704 ]
+xAODTestReadCVec     INFO  anInt1 2006 aFloat: 4000.5 anInt2: 6006 dVar1: 9006 cEL: [0]
 
-xAODTestReadCVec     INFO  anInt1 2010 aFloat: 4000.9 pInt: 10010 pFloat: 9.20 anInt2: 6010 dVar1: 9010 dpInt1: 1010 cEL: [0]
-  pvInt: [1590 1591 1592 1593 1594 1595 1596 1597 1598 ]
-  pvFloat: [-0.390 -0.290 -0.190 -0.090 0.010 0.110 0.210 0.310 0.410 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 2010 aFloat: 4000.9 anInt2: 6010 dVar1: 9010 cEL: [0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (cvec:0) (:0) (:0) (:0) (cvec:1) (:0) (:0) (:0) (cvec:2) 
@@ -1007,37 +765,19 @@ xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:0) (ctrig:2) (:
 xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 dpInt1 dpvFloat pFloat pInt pvFloat pvInt 
+xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 pInt: 10501 pFloat: 0.21 anInt2: 6301 dVar1: 9451 dpInt1: 1051 cEL: cvec[5]
-  pvInt: []
-  pvFloat: []
-  dpvFloat: []
+xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 anInt2: 6301 dVar1: 9451 cEL: cvec[5]
 
-xAODTestReadCVec     INFO  anInt1 2102 aFloat: 4200.1 pInt: 10502 pFloat: 1.21 anInt2: 6302 dVar1: 9452 dpInt1: 1052 cEL: cvec[4]
-  pvInt: [1610 ]
-  pvFloat: [-0.469 ]
-  dpvFloat: [0.310 ]
+xAODTestReadCVec     INFO  anInt1 2102 aFloat: 4200.1 anInt2: 6302 dVar1: 9452 cEL: cvec[4]
 
-xAODTestReadCVec     INFO  anInt1 2105 aFloat: 4200.4 pInt: 10505 pFloat: 4.21 anInt2: 6305 dVar1: 9455 dpInt1: 1055 cEL: cvec[3]
-  pvInt: [1640 1641 1642 1643 ]
-  pvFloat: [-0.439 -0.339 -0.239 -0.139 ]
-  dpvFloat: [0.610 0.611 0.612 0.613 ]
+xAODTestReadCVec     INFO  anInt1 2105 aFloat: 4200.4 anInt2: 6305 dVar1: 9455 cEL: cvec[3]
 
-xAODTestReadCVec     INFO  anInt1 2106 aFloat: 4200.5 pInt: 10506 pFloat: 5.21 anInt2: 6306 dVar1: 9456 dpInt1: 1056 cEL: cvec[2]
-  pvInt: [1650 1651 1652 1653 1654 ]
-  pvFloat: [-0.429 -0.329 -0.229 -0.129 -0.029 ]
-  dpvFloat: [0.710 0.711 0.712 0.713 0.714 ]
+xAODTestReadCVec     INFO  anInt1 2106 aFloat: 4200.5 anInt2: 6306 dVar1: 9456 cEL: cvec[2]
 
-xAODTestReadCVec     INFO  anInt1 2109 aFloat: 4200.8 pInt: 10509 pFloat: 8.21 anInt2: 6309 dVar1: 9459 dpInt1: 1059 cEL: cvec[1]
-  pvInt: [1680 1681 1682 1683 1684 1685 1686 1687 ]
-  pvFloat: [-0.399 -0.299 -0.199 -0.099 0.001 0.101 0.201 0.301 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 2109 aFloat: 4200.8 anInt2: 6309 dVar1: 9459 cEL: cvec[1]
 
-xAODTestReadCVec     INFO  anInt1 2110 aFloat: 4200.9 pInt: 10510 pFloat: 9.21 anInt2: 6310 dVar1: 9460 dpInt1: 1060 cEL: cvec[0]
-  pvInt: [1690 1691 1692 1693 1694 1695 1696 1697 1698 ]
-  pvFloat: [-0.389 -0.289 -0.189 -0.089 0.011 0.111 0.211 0.311 0.411 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+xAODTestReadCVec     INFO  anInt1 2110 aFloat: 4200.9 anInt2: 6310 dVar1: 9460 cEL: cvec[0]
 
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (cvec:0) links: (cvec:0) (cvec:1) (:0) (:0) (cvec:2) (cvec:3) (:0) (:0) (cvec:4) (cvec:5) 
@@ -1066,15 +806,15 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2) (ctrig:5) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 3B3BE17C-7994-F242-9EFD-DBCBA484D2C1
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
 ApplicationMgr       INFO Application Manager Stopped successfully
 LoadWriteDicts       INFO Finalizing LoadWriteDicts...
 Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              71 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             202 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              68 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             210 ms |
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully
