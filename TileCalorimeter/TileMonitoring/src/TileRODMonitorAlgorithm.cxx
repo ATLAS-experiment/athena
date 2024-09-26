@@ -291,7 +291,7 @@ StatusCode TileRODMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     std::vector<int> fragmentSizes;
 
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFragments;
-    m_robSvc->getROBData(m_tileRobIds, robFragments);
+    m_robSvc->getROBData(ctx, m_tileRobIds, robFragments);
 
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFragment : robFragments) {
       uint32_t rodSourceId = robFragment->rod_source_id();

@@ -201,7 +201,7 @@ StatusCode TileTBStat::execute() {
   static std::atomic<bool> firstORsecond=true;
   
   if ( firstORsecond ) {
-    const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent();
+    const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent(ctx);
     if( true /* event->check_tree() */) { // valid event
       if ( ! first ) firstORsecond = m_printAllEvents;
       first=false;
@@ -324,7 +324,7 @@ StatusCode TileTBStat::execute() {
     m_cisCard.addValue(m_cisPar[8]);
   }
   
-  const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent();
+  const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent(ctx);
 
   if (testsum!=0) {
     memcpy(m_cisEnd,m_cisPar,sizeof(m_cisPar));
@@ -363,7 +363,7 @@ StatusCode TileTBStat::execute() {
     robid.push_back( hid2re->getRobFromFragID(DIGI_PAR_FRAG) );
     robid.push_back( hid2re->getRobFromFragID(LASER_OBJ_FRAG) );
     std::vector<const ROBDataProviderSvc::ROBF*> robf;
-    m_robSvc->getROBData(robid, robf);
+    m_robSvc->getROBData(ctx, robid, robf);
     const ROBDataProviderSvc::ROBF* robFrag = (robf.size() > 0 ) ? robf[0] : 0;
     if (robFrag) {
       m_runNo = robFrag->rod_run_no();   // take it from beam ROD header

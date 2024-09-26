@@ -88,7 +88,7 @@ StatusCode JepReadByteStreamV1Cnv<Container>::createObjConst( IOpaqueAddress* pA
 
   // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
   // size check
   auto collection = std::make_unique<Container>();

@@ -47,35 +47,25 @@ public:
    virtual StatusCode initialize() override;
 
    /// Add ROBFragments to cache for given ROB ids, ROB fragments may be retrieved with DataCollector
-   virtual void addROBData(const std::vector<uint32_t>& robIds, const std::string_view callerName="UNKNOWN") override;
+   virtual void addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, const std::string_view callerName="UNKNOWN") override;
 
    /// Add a given LVL1/LVL2 ROBFragment to cache
-   virtual void setNextEvent(const std::vector<ROBF>& result) override;
+   virtual void setNextEvent(const EventContext& context, const std::vector<OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment>& result) override;
 
    /// Add all ROBFragments of a RawEvent to cache
-   virtual void setNextEvent(const RawEvent* re) override;
+   virtual void setNextEvent(const EventContext& context, const RawEvent* re) override;
 
    /// Retrieve ROBFragments for given ROB ids from cache
-   virtual void getROBData(const std::vector<uint32_t>& robIds, std::vector<const ROBF*>& robFragments, const std::string_view callerName="UNKNOWN") override;
-
-   /// Retrieve the whole event.
-   virtual const RawEvent* getEvent() override;
-
-   /// Store the status for the event.
-   virtual void setEventStatus(uint32_t status) override;
-
-   /// Retrieve the status for the event.
-   virtual uint32_t getEventStatus() override;
-
-
-   /// MT variants 
-   virtual void addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, const std::string_view callerName="UNKNOWN") override;
-   virtual void setNextEvent(const EventContext& context, const std::vector<OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment>& result) override;
-   virtual void setNextEvent(const EventContext& context, const RawEvent* re) override;
    virtual void getROBData(const EventContext& context, const std::vector<uint32_t>& robIds, VROBFRAG& robFragments, 
 			   const std::string_view callerName="UNKNOWN") override;
+
+   /// Retrieve the whole event.
    virtual const RawEvent* getEvent(const EventContext& context) override;
+
+   /// Store the status for the event.
    virtual void setEventStatus(const EventContext& context, uint32_t status) override;
+
+   /// Retrieve the status for the event.
    virtual uint32_t getEventStatus(const EventContext& context) override;
 
    virtual void processCachedROBs(const EventContext& context, 

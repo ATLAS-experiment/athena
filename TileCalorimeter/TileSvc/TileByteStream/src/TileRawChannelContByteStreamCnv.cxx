@@ -120,7 +120,7 @@ StatusCode TileRawChannelContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(robid, robf);
+      m_robSvc->getROBData(Gaudi::Hive::currentContext(), robid, robf);
     }
     
     // unpack ROB data

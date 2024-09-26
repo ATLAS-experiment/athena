@@ -54,7 +54,7 @@ StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm& rdoColl, DigitCollection& d
     // for each Csm, loop over AmtHit, converter AmtHit to digit
     // retrieve/create digit collection, and insert digit into collection
     for (const MdtAmtHit* amtHit : rdoColl) {
-        std::unique_ptr<MdtDigit> newDigit{m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId)};
+        std::unique_ptr<MdtDigit> newDigit{m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId, Gaudi::Hive::currentContext())};
 
         if (!newDigit) {
             ATH_MSG_WARNING("Error in MDT RDO decoder");

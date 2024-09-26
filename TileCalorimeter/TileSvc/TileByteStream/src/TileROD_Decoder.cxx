@@ -4287,7 +4287,7 @@ void TileROD_Decoder::initHid2re() {
         
         IROBDataProviderSvc* robSvc;
         if (service("ROBDataProviderSvc", robSvc).isSuccess()) {
-          const eformat::FullEventFragment<const uint32_t*> * event = robSvc->getEvent();
+          const eformat::FullEventFragment<const uint32_t*> * event = robSvc->getEvent(Gaudi::Hive::currentContext());
           try {
             event->check_tree();
             m_hid2re->setROD2ROBmap(event, m_of2Default, msg());

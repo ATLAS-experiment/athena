@@ -73,8 +73,7 @@ StatusCode TBCheckBCIDs::execute()
   ATH_MSG_DEBUG( "Executing event #"<< m_count++  );
 
   unsigned RODCounter=0;
-  const RawEvent* re = m_rdpSvc->getEvent();
-
+  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
   if (!re) {
     ATH_MSG_FATAL( "RawEvent retrieved by TBCheckBCIDs is a null pointer!"  );
     return StatusCode::FAILURE;

@@ -115,7 +115,7 @@ StatusCode CTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& pObj
   // Get the ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData( Gaudi::Hive::currentContext(), vID, robFrags );
 
   //
   // Size check:

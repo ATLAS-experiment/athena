@@ -81,8 +81,8 @@ LArDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pO
   }
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags ); 
-  const RawEvent* re = m_rdpSvc->getEvent( ); 
+  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags ); 
+  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext()); 
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   CaloGain::CaloGain gain=CaloGain::LARNGAIN; //At this place, LARNGAINS means Automatic gain.

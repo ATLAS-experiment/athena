@@ -45,7 +45,7 @@ LArLATOMEHeaderContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObje
     }
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags );
+  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags );
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   std::unique_ptr<LArLATOMEHeaderContainer> header_coll=std::make_unique<LArLATOMEHeaderContainer>(); 

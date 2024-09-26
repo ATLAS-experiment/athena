@@ -364,7 +364,7 @@ namespace Muon {
 
             // FIXME: Still use the digit class.
             ATH_MSG_VERBOSE("Amt Hit n. " << mc << " tdcId = " << amtHit->tdcId());
-            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId)};
+            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId, ctx)};
             if (!newDigit) {
                 ATH_MSG_WARNING("Found issue MDT RDO decoder for subdetId/mrodId/csmId "
                                 << subdetId << "/" << mrodId << "/" << csmId << " amtHit channelId/tdcId =" << amtHit->channelId() << "/"
@@ -445,7 +445,7 @@ namespace Muon {
         std::map<int, twin_digit> mdtDigitColl;
 
         for (const MdtAmtHit* amtHit : *rdoColl) {
-            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId)};
+            std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(amtHit, subdetId, mrodId, csmId, ctx)};
 
             if (!newDigit) {
                 ATH_MSG_WARNING("Error in MDT RDO decoder for subdetId/mrodId/csmId "

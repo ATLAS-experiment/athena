@@ -68,7 +68,7 @@ StatusCode HLT::HLTResultByteStreamTool::convert(IROBDataProviderSvc& dataProvid
 
   // request the ROB and deserialize into HLTResult
   IROBDataProviderSvc::VROBFRAG robFrags;
-  dataProvider.getROBData({rob.code()}, robFrags);
+  dataProvider.getROBData(Gaudi::Hive::currentContext(), {rob.code()}, robFrags);
 
   // unsigned int vector where to store HLT payload
   std::vector<uint32_t> hltContent;

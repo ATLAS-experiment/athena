@@ -75,10 +75,11 @@ StatusCode TileLaserCalibAlg::execute() {
   ATH_MSG_DEBUG( "Running on execute! TileLaserCalibAlg" );
 
   // Get the run number and type once for all 
+  auto event = m_RobSvc->getEvent(Gaudi::Hive::currentContext());
 
   if (m_runNo == 0) {
-    m_runNo = static_cast<uint32_t>(m_RobSvc->getEvent()->run_no());
-    m_runType = static_cast<uint32_t>(m_RobSvc->getEvent()->run_type());
+    m_runNo = static_cast<uint32_t>(event->run_no());
+    m_runType = static_cast<uint32_t>(event->run_type());
   }
 
   // Then check that we are dealing with a LASER event
@@ -86,7 +87,7 @@ StatusCode TileLaserCalibAlg::execute() {
   // If run_type is 0,1 or 2, the correct trigger type (52) should be there
   // If run_type is 15 (Test) trigger type is not available
 
-  int trig_type = static_cast<uint32_t>(m_RobSvc->getEvent()->lvl1_trigger_type());
+  int trig_type = static_cast<uint32_t>(event->lvl1_trigger_type());
 
   if (trig_type != 52 && m_runType != 15) {
     ATH_MSG_DEBUG( "This is not a LASER event : skip it !!" );

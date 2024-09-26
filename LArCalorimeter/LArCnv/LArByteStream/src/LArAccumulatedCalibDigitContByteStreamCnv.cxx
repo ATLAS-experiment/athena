@@ -80,7 +80,7 @@ LArAccumulatedCalibDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
     return StatusCode::FAILURE;
   }
 
-  const RawEvent* re = m_rdpSvc->getEvent();
+  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
   if (!re) {
     ATH_MSG_ERROR(  "Could not get raw event from ByteStreamInputSvc" );
   }

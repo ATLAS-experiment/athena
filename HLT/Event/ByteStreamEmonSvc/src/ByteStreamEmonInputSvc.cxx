@@ -420,8 +420,8 @@ const RawEvent* ByteStreamEmonInputSvc::nextEvent()
                     continue;
                 } // else fall through
             }
-	    m_robProvider->setNextEvent(m_re.get());
-	    m_robProvider->setEventStatus(0);	    
+	    m_robProvider->setNextEvent(Gaudi::Hive::currentContext(), m_re.get());
+	    m_robProvider->setEventStatus(Gaudi::Hive::currentContext(), 0);	    
 
         } else {
             // We got something we didn't expect.

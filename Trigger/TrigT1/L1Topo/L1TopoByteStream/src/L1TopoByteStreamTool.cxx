@@ -178,7 +178,7 @@ StatusCode L1TopoByteStreamTool::convert(const std::string& sgKey,
   // Get the ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(m_sourceIDs, robFrags);
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), m_sourceIDs, robFrags);
 
   if (robFrags.size() == 0) {
     ATH_MSG_WARNING("No ROB fragments found");

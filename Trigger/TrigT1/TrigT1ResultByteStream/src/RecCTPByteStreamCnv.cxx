@@ -102,7 +102,7 @@ StatusCode RecCTPByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 
   // get ROB fragment
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
   // size check
   if ( robFrags.size() != 1 ) {
