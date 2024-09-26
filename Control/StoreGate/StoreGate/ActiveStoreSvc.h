@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_ACTIVESTORESVC_H
@@ -24,7 +24,6 @@ class ISvcLocator;
  *  execution. It is important, for example, that converters always refer
  *  to the active store rather than to the default one.
  *  @author ATLAS Collaboration
- *  $Id: ActiveStoreSvc.h,v 1.10 2009-04-18 02:56:20 calaf Exp $
  **/
 
 class ActiveStoreSvc : public IProxyDict,
@@ -157,7 +156,6 @@ public:
 
 private:
   StoreGateSvc* activeStoreOOL() const;
-  StoreGateSvc* p_activeStore;    
   std::string m_storeName; //< property: StoreGate instance name
 
 };
