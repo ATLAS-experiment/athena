@@ -25,6 +25,7 @@ Sim_tf.py \
       --geometrySQLite True \
       --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-07' \
       --simulator 'FullG4MT_QS' \
+      --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
       --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
       --preExec "all:flags.Scheduler.CheckDependencies = True;flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True;flags.Scheduler.ShowControlFlow = True;from AtlasGeoModel import CommonGeoDB;CommonGeoDB.SetupLocalSqliteGeometryDb(\"Geometry/${geo_tag}.db\",flags.GeoModel.AtlasVersion);" \
       --postExec "all:flags.dump(evaluate=True);from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg;cfg.merge(MuonHitTesterCfg(flags,dumpSimHits=True, outFile=\"${validNTuple}\"));cfg.printConfig(withDetails=True, summariseProps=True);" \

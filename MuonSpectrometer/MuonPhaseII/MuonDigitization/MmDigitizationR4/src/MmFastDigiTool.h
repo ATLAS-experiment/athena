@@ -41,8 +41,11 @@ namespace MuonR4{
             mutable std::array<std::atomic<unsigned>, 8> m_allHits ATLAS_THREAD_SAFE{};
             mutable std::array<std::atomic<unsigned>, 8> m_acceptedHits ATLAS_THREAD_SAFE{};
 
+            // Dead time between two hits in the same channel
+            Gaudi::Property<double> m_deadTime{this, "deadTime", 300. * Gaudi::Units::ns};
 
-
+            Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false, 
+                                                     "If set to true hit with pdgId != 13 are skipped"};
     };
 }
 #endif

@@ -50,16 +50,28 @@ namespace MuonR4 {
         do {
             for (const TimedHit& simHit : viewer) {
                 /// ignore radiation for now
-                if (std::abs(simHit->pdgId()) != 13) continue;
-                
+                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+                    continue;
+                }
                 sTgcDigitCollection* digiColl = fetchCollection(simHit->identify(), digitCache);
-                bool digitized{false};
-                digitized |= digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
-                digitized |= digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
-                digitized |= digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+                const bool digitizedStrip = digitizeStrip(ctx, simHit, nswUncertDB, efficiencyMap, rndEngine, *digiColl);
+                const bool digitizedWire = digitizeWire(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
+                const bool digitizedPad = digitizePad(ctx, simHit, efficiencyMap, rndEngine, *digiColl);
 
-                if (digitized) {
-                    addSDO(simHit, sdoContainer);
+                if (digitizedStrip) {
+                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                    size_t stripIdx = digiColl->size() - 1 - digitizedWire - digitizedPad;
+                    sdo->setIdentifier(digiColl->at(stripIdx)->identify());
+                } else if (digitizedWire || digitizedPad) {
+                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                    sdo->setIdentifier(digiColl->at(digiColl->size() - 1)->identify());
+                    const MuonGMR4::sTgcReadoutElement* re{m_detMgr->getsTgcReadoutElement(simHit->identify())};
+
+                    const Amg::Transform3D etaToPhi{re->globalToLocalTrans(getGeoCtx(ctx), re->layerHash(sdo->identify())) *
+                                                    re->localToGlobalTrans(getGeoCtx(ctx), re->layerHash(simHit->identify()))};
+                
+                    sdo->setLocalDirection(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localDirection())));
+                    sdo->setLocalPosition(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localPosition())));
                 }
             }
         } while (viewer.next());

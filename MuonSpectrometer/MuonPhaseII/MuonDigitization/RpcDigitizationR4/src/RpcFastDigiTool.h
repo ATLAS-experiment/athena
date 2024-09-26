@@ -26,7 +26,8 @@ namespace MuonR4{
         
  
         private:
-            using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;            
+            using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
+            using DeadTimeMap = std::unordered_map<Identifier, double>;            
             int m_stIdxBIL{-1}; // Station name index of the BIL stations
             
             /**  @brief Digitize the sim hit as Rpc strip 1D hit.  
@@ -38,7 +39,7 @@ namespace MuonR4{
              *   @param effiMap: Pointer to an efficiency look-up table
              *   @param outContainer: DigitCollection to push the new digit into
              *   @param rndEngine:  Random engine used for smearing
-            */
+             *   @param deadTimes: Reference to the last digitized times in order to apply the dead time model */
             bool digitizeHit(const Identifier& gasGapId,
                              const bool measuresPhi,
                              const MuonGMR4::RpcReadoutElement& reEle,
@@ -46,7 +47,8 @@ namespace MuonR4{
                              const Amg::Vector2D& locPos,
                              const Muon::DigitEffiData* effiMap,
                              RpcDigitCollection& outContainer,
-                             CLHEP::HepRandomEngine* rndEngine) const;
+                             CLHEP::HepRandomEngine* rndEngine,
+                             DeadTimeMap& deadTimes) const;
             
             /**  @brief Digitize the sim hit as Rpc strip 2D hit.  
              *   @param gasGapId: Identifier of the associated gasGap
@@ -56,14 +58,15 @@ namespace MuonR4{
              *   @param effiMap: Pointer to an efficiency look-up table
              *   @param outContainer: DigitCollection to push the new digit into
              *   @param rndEngine:  Random engine used for smearing
-            */
+             *   @param deadTimes: Reference to the last digitized times in order to apply the dead time model */
             bool digitizeHitBI(const Identifier& gasGapId,
                                const MuonGMR4::RpcReadoutElement& reEle,
                                const double hitTime,
                                const Amg::Vector2D& locPos,
                                const Muon::DigitEffiData* effiMap,
                                RpcDigitCollection& outContainer,
-                               CLHEP::HepRandomEngine* rndEngine) const;
+                               CLHEP::HepRandomEngine* rndEngine,
+                               DeadTimeMap& deadTimes) const;
 
             /** @brief Roll the time over threshold for each signal digit */
             static double timeOverThreshold(CLHEP::HepRandomEngine* rndmEngine) ;
@@ -82,6 +85,12 @@ namespace MuonR4{
     
             Gaudi::Property<double> m_stripTimeResolution{this, "timeResolution", 0.6 * Gaudi::Units::nanosecond,
                                                           "Estimated time resolution of the strip readout"};
+
+            Gaudi::Property<double> m_deadTime{this, "deadTime", 100.*Gaudi::Units::nanosecond};
+
+            Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false, 
+                                                     "If set to true hit with pdgId != 13 are skipped"};
+
     };
 }
 #endif

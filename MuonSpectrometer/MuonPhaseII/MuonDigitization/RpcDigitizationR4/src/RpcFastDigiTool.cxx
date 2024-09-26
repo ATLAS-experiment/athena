@@ -9,7 +9,8 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
-
+    /// Rotation matrix to rotate from the eta -> phi coordinate system
+    const Eigen::Rotation2D etaToPhi{-90.*Gaudi::Units::deg};
 }
 namespace MuonR4 {
     
@@ -42,29 +43,46 @@ namespace MuonR4 {
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
+            DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : viewer) {
+                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
+                    continue;
+                }
                 const Identifier hitId{simHit->identify()};
-                /// ignore radiation for now
-                if (std::abs(simHit->pdgId()) != 13) continue;
 
                 const MuonGMR4::RpcReadoutElement* readOutEle = m_detMgr->getRpcReadoutElement(hitId);
                 const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
                 RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
                 if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
                     /// Standard digitization path
-                    bool digitized = digitizeHit(hitId, false, *readOutEle, 
-                                                 hitTime(simHit), locPos.block<2,1>(0,0), 
-                                                 efficiencyMap, *digiColl, rndEngine);
+                    const bool digitizedEta = digitizeHit(hitId, false, *readOutEle, 
+                                                          hitTime(simHit), locPos.block<2,1>(0,0), 
+                                                          efficiencyMap, *digiColl, rndEngine, deadTimes);
 
-                    digitized |=  digitizeHit(hitId, true, *readOutEle, hitTime(simHit),
-                                              Eigen::Rotation2D{-90.*Gaudi::Units::deg}*locPos.block<2,1>(0,0),
-                                              efficiencyMap, *digiColl, rndEngine);
-                    if (digitized) {
-                        addSDO(simHit, sdoContainer);
+                    const bool digitizedPhi = digitizeHit(hitId, true, *readOutEle, hitTime(simHit),
+                                                          etaToPhi*locPos.block<2,1>(0,0),
+                                                          efficiencyMap, *digiColl, rndEngine, deadTimes);
+                    if (digitizedEta) {
+                        xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                        const Identifier digitId{(*digiColl)[digiColl->size() -1 - digitizedPhi]->identify()};
+                        sdo->setIdentifier(digitId);
+                    } else if (digitizedPhi) {
+                        xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                        /// We need to rotate the local frame in order to be consistent with the Identifier
+                        Amg::Vector3D phiPos{locPos};
+                        phiPos.block<2,1>(0,0) = etaToPhi * phiPos.block<2,1>(0,0);
+                        Amg::Vector3D locDir{xAOD::toEigen(simHit->localDirection())};
+                        locDir.block<2,1>(0,0) = etaToPhi * locDir.block<2,1>(0,0);
+                        const Identifier digitId{(*digiColl)[digiColl->size() -1]->identify()};
+                        sdo->setIdentifier(digitId);
+                        sdo->setLocalDirection(xAOD::toStorage(locDir));
+                        sdo->setLocalPosition(xAOD::toStorage(phiPos));
                     }
                 } else if (digitizeHitBI(hitId, *readOutEle, hitTime(simHit), locPos.block<2,1>(0,0),
-                           efficiencyMap, *digiColl, rndEngine)) {
-                    addSDO(simHit, sdoContainer);
+                           efficiencyMap, *digiColl, rndEngine, deadTimes)) {
+                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                    const Identifier digitId{(*digiColl)[digiColl->size() -1]->identify()};
+                    sdo->setIdentifier(digitId);
                 }
             }
         } while (viewer.next());
@@ -79,7 +97,8 @@ namespace MuonR4 {
                                       const Amg::Vector2D& locPos,
                                       const Muon::DigitEffiData* effiMap,
                                       RpcDigitCollection& outContainer,
-                                      CLHEP::HepRandomEngine* rndEngine) const {
+                                      CLHEP::HepRandomEngine* rndEngine,
+                                      DeadTimeMap& deadTimes) const {
 
         ++(m_allHits[measuresPhi]);
         const MuonGMR4::StripDesign& design{measuresPhi ? *reEle.getParameters().phiDesign
@@ -122,6 +141,12 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Hit is marked as inefficient");
             return false;            
         }
+        double& lastHitTime{deadTimes[digitId]};
+        if (hitTime - lastHitTime < m_deadTime) {
+            ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
+            return false;
+        }
+        lastHitTime = hitTime;
         /// Correct for the signal propagation time
         const double signalTime = hitTime + reEle.distanceToEdge(reEle.measurementHash(digitId),
                                                                  locHitPos, EdgeSide::readOut) / m_propagationVelocity;
@@ -136,7 +161,8 @@ namespace MuonR4 {
                                         const Amg::Vector2D& locPos,
                                         const Muon::DigitEffiData* effiMap,
                                         RpcDigitCollection& outContainer,
-                                        CLHEP::HepRandomEngine* rndEngine) const {
+                                        CLHEP::HepRandomEngine* rndEngine,
+                                        DeadTimeMap& deadTimes) const {
         
         ++(m_allHits[false]);
         const MuonGMR4::StripDesign& design{*reEle.getParameters().etaDesign};
@@ -199,9 +225,14 @@ namespace MuonR4 {
                           <<", strip: "<<strip);
             return false;
         }
-
+        double& lastTimedHit{deadTimes[digitId]};
+        if ( hitTime - lastTimedHit < m_deadTime) {
+            ATH_MSG_VERBOSE("Reject hit due to dead time constraint");
+            return false;
+        }
+        lastTimedHit = hitTime;
         /// Check whether the digit is actually efficient
-        const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0.,1.);
+        const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
         const bool effiSignal2 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
         if (effiSignal1) {
             outContainer.push_back(std::make_unique<RpcDigit>(digitId, hitTime + smearedTimeR, timeOverThreshold(rndEngine)));

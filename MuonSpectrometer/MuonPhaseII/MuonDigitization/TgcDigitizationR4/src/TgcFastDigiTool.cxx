@@ -37,7 +37,8 @@ namespace MuonR4 {
                                           const TimedHit& timedHit,
                                           const Muon::DigitEffiData* efficiencyMap,
                                           TgcDigitCollection& outColl,
-                                          CLHEP::HepRandomEngine* rndEngine) const {
+                                          CLHEP::HepRandomEngine* rndEngine,
+                                          DeadTimeMap& deadTimes) const {
 
         
         /// Check efficiencies
@@ -97,7 +98,12 @@ namespace MuonR4 {
                       <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum
                       <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
 
-
+        double& lastHitTime{deadTimes[digitId]};
+        if (hitTime(timedHit) - lastHitTime < m_deadTime) {
+            ATH_MSG_VERBOSE("Reject hit due to dead time constraint.");
+            return false;
+        }
+        lastHitTime = hitTime(timedHit);
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
         ++m_acceptedHits[false];    
         return true;
@@ -106,7 +112,8 @@ namespace MuonR4 {
                                            const TimedHit& timedHit,
                                            const Muon::DigitEffiData* efficiencyMap,
                                            TgcDigitCollection& outColl,
-                                           CLHEP::HepRandomEngine* rndEngine) const {
+                                           CLHEP::HepRandomEngine* rndEngine,
+                                           DeadTimeMap& deadTimes) const {
         
         const Identifier hitId = timedHit->identify();
         const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
@@ -179,6 +186,14 @@ namespace MuonR4 {
             ATH_MSG_WARNING("Invalid channel "<< m_idHelperSvc->toStringGasGap(hitId)<<", channel: "<<digitStripNum);
             return false;
         }
+
+        double& lastHitTime{deadTimes[digitId]};
+        if (hitTime(timedHit) - lastHitTime < m_deadTime) {
+            ATH_MSG_VERBOSE("Reject hit due to dead time constraint.");
+            return false;
+        }
+        lastHitTime = hitTime(timedHit);
+
         ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toString(digitId)<<" located at "
                         <<Amg::toString(locSimHitPos, 2)<<" phi strip number: "<<digitStripNum
                         <<" strip position "<<Amg::toString(design.center(digitStripNum).value_or(Amg::Vector2D::Zero()), 2));
@@ -203,16 +218,31 @@ namespace MuonR4 {
 
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
+            DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : hitsToDigit) {
                 /// ignore radiation for now
-                if (std::abs(simHit->pdgId()) != 13) continue;
+                if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13) {
+                    continue;
+                }
                 TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
 
-                bool digitized = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine);
-                digitized |= digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine);
                 
-                if (digitized) {
-                    addSDO(simHit, sdoContainer);
+                const bool digitizedEta = digitizeWireHit(ctx,simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
+                const bool digitizedPhi = digitizeStripHit(ctx, simHit, efficiencyMap,*outColl, rndEngine, deadTimes);
+                
+                if (digitizedEta) {
+                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                    sdo->setIdentifier(outColl->at(outColl->size() - 1 - digitizedPhi)->identify());
+                } else if (digitizedPhi) {
+                    xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
+                    sdo->setIdentifier(outColl->at(outColl->size() - 1)->identify());
+                    const MuonGMR4::TgcReadoutElement* re{m_detMgr->getTgcReadoutElement(simHit->identify())};
+
+                    const Amg::Transform3D etaToPhi{re->globalToLocalTrans(getGeoCtx(ctx), re->layerHash(sdo->identify())) *
+                                                    re->localToGlobalTrans(getGeoCtx(ctx), re->layerHash(simHit->identify()))};
+                
+                    sdo->setLocalDirection(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localDirection())));
+                    sdo->setLocalPosition(xAOD::toStorage(etaToPhi * xAOD::toEigen(sdo->localPosition())));
                 }
             }
         } while(viewer.next());

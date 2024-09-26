@@ -102,7 +102,11 @@ def MM_OverlayCfg(flags):
     acc.merge(MM_OverlayAlgCfg(flags))
     # Add MM truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(MM_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="MmTruthOverlay", WriteKey="MM_SDO", deadTime = 300.))
+        else:
+            acc.merge(MM_TruthOverlayCfg(flags))
     # Add MM digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import MM_DigitToRDOCfg
     acc.merge(MM_DigitToRDOCfg(flags))

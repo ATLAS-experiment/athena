@@ -100,7 +100,11 @@ def TGC_OverlayCfg(flags):
     acc.merge(TGC_OverlayAlgCfg(flags))
     # Add TGC truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(TGC_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="TgcTruthOverlay", WriteKey="TGC_SDO", deadTime = 100.))
+        else:
+            acc.merge(TGC_TruthOverlayCfg(flags))
     # Add TGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import TgcDigitToTgcRDOCfg
     acc.merge(TgcDigitToTgcRDOCfg(flags))

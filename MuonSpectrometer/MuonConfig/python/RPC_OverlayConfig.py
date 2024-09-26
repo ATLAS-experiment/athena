@@ -108,7 +108,11 @@ def RPC_OverlayCfg(flags):
     acc.merge(RPC_OverlayAlgCfg(flags))
     # Add RPC truth overlay
     if flags.Digitization.EnableTruth:
-        acc.merge(RPC_TruthOverlayCfg(flags))
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonTruthOverlayR4.TruthOverlayConfig import TruthOverlayCfg
+            acc.merge(TruthOverlayCfg(flags, name="RpcTruthOverlay", WriteKey="RPC_SDO", deadTime = 100.))
+        else:
+            acc.merge(RPC_TruthOverlayCfg(flags))
     # Add RPC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcDigitToRpcRDOCfg
     acc.merge(RpcDigitToRpcRDOCfg(flags))
