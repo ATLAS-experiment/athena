@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolBase_CXX
@@ -651,9 +651,8 @@ intervalStringToEnum( const std::string& str )
       return file;
 
    if( Imp::s_svcLocator ) {
-      IMessageSvc* ms(0);
-      StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
-      if( sc.isSuccess() ) {
+      SmartIF<IMessageSvc> ms{Imp::s_svcLocator.load()->service( "MessageSvc" )};
+      if( ms.isValid() ) {
          MsgStream log( ms, "ManagedMonitorToolBase::intervalStringToEnum()" );
          log << MSG::WARNING << "Unknown ManagedMonitorToolBase::Interval_t \""
             << str << "\", returning \"file\"" << endmsg;

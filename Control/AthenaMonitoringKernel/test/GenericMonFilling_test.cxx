@@ -784,8 +784,8 @@ int main() {
   MsgStream log( Athena::getMessageSvc(), "GenericMonFilling_test" );
   log.setLevel(0);
 
-  ITHistSvc* histSvc;
-  if( pSvcLoc->service( "THistSvc", histSvc, true ).isFailure()  ) {
+  SmartIF<ITHistSvc> histSvc{pSvcLoc->service("THistSvc")};
+  if( !histSvc ) {
     log << MSG::ERROR << "THistSvc not available " << endmsg;
     return -1;
   }

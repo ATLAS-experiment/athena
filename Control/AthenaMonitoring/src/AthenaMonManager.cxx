@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -81,7 +81,7 @@ public:
     ObjMapLW_t   m_objMapLW;
 
     AthenaMonManager * m_theManager;
-    ISGAudSvc * m_sgAudSvc;
+    SmartIF<ISGAudSvc> m_sgAudSvc;
 
     bool         m_isPrimaryManager;
 
@@ -208,7 +208,7 @@ AthenaMonManager::
 AthenaMonManager( const std::string& name, ISvcLocator* pSvcLocator )
   : AthAlgorithm( name, pSvcLocator )
   , m_monTools( this )
-  , m_THistSvc(0)
+  , m_THistSvc("THistSvc", name)
   , m_d(new Imp(this, name))
 {
     declareProperty( "AthenaMonTools", m_monTools );
@@ -272,9 +272,8 @@ envStringToEnum( const std::string& str )
         return altprod;
 
     if( Imp::s_svcLocator ) {
-        IMessageSvc* ms(0);
-        StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
-        if( sc.isSuccess() ) {
+        SmartIF<IMessageSvc> ms{Imp::s_svcLocator.load()->service( "MessageSvc" )};
+        if( ms.isValid() ) {
             MsgStream log( ms, "AthenaMonManager::envStringToEnum()" );
             log << MSG::WARNING << "Unknown AthenaMonManager::Environment_t \""
                 << str << "\", returning \"user\"" << endmsg;
@@ -303,9 +302,8 @@ dataTypeStringToEnum( const std::string& str )
         return heavyIonCollisions;
 
     if( Imp::s_svcLocator ) {
-        IMessageSvc* ms(0);
-        StatusCode sc = Imp::s_svcLocator.load()->service( "MessageSvc", ms, true );
-        if( sc.isSuccess() ) {
+        SmartIF<IMessageSvc> ms{Imp::s_svcLocator.load()->service( "MessageSvc" )};
+        if( ms.isValid() ) {
             MsgStream log( ms, "AthenaMonManager::dataTypeStringToEnum()" );
             log << MSG::WARNING << "Unknown AthenaMonManager::DataType_t \""
                 << str << "\", returning \"userDefined\"" << endmsg;
@@ -385,24 +383,12 @@ initialize()
 {
     Imp::LWHistLeakChecker lc(m_d);
 
-    //typedef std::vector<IMonitorToolBase*> MonList_t;
-    //typedef MonList_t::iterator            MonIter_t;
-
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "AthenaMonManager::initialize():" << endmsg;
 
-    if (Imp::s_svcLocator.load()->service("SGAudSvc", m_d->m_sgAudSvc, false/*do not create*/).isFailure())
-        m_d->m_sgAudSvc=0;
-
-
+    m_d->m_sgAudSvc = Imp::s_svcLocator.load()->service("SGAudSvc", false/*do not create*/);
     m_d->m_doResourceMon = msgLvl(AthMonBench::s_resourceMonThreshold);
 
-    StatusCode sc;
-
-    sc = service( "THistSvc", m_THistSvc, true );
-    if( !sc.isSuccess() ) {
-        msg(MSG::ERROR) << "!! Unable to locate the THistSvc service !!" << endmsg;
-        return sc;
-    }
+    ATH_CHECK( m_THistSvc.retrieve() );
 
     if( !Imp::s_staticDataAreInit ) {
         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "  --> Initializing static data" << endmsg;
@@ -476,11 +462,7 @@ initialize()
     LWHistControls::setROOTBackend(m_d->m_rootBackend);
 
     if( m_monTools.size() > 0 ) {
-      sc = m_monTools.retrieve();
-      if( !sc.isSuccess() ) {
-	msg(MSG::ERROR) << "!! Unable to retrieve monitoring tool " << m_monTools << endmsg;
-	return sc;
-      }
+      ATH_CHECK( m_monTools.retrieve() );
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "  --> Retrieved AthenaMonTools" << endmsg;
     }
 

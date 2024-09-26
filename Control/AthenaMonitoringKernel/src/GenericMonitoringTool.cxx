@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -40,8 +40,8 @@ StatusCode GenericMonitoringTool::stop() {
   m_fillers.clear();
   if (m_registerHandler) {
     ATH_MSG_DEBUG("Deregistering incident handler");
-    IIncidentSvc* incSvc{nullptr};
-    ATH_CHECK(service("IncidentSvc", incSvc));
+    SmartIF<IIncidentSvc> incSvc{service("IncidentSvc")};
+    ATH_CHECK(incSvc.isValid());
     incSvc->removeListener(this, IncidentType::BeginEvent);
   }
   return StatusCode::SUCCESS;
@@ -110,8 +110,8 @@ StatusCode GenericMonitoringTool::book() {
   // then register to be notified on every event
   if (! m_alwaysCreateFillers.empty() && m_registerHandler) {
     ATH_MSG_DEBUG("Registering incident handler");
-    IIncidentSvc* incSvc{nullptr};
-    ATH_CHECK(service("IncidentSvc", incSvc));
+    SmartIF<IIncidentSvc> incSvc{service("IncidentSvc")};
+    ATH_CHECK(incSvc.isValid());
     incSvc->addListener(this, IncidentType::BeginEvent);
   }
 
