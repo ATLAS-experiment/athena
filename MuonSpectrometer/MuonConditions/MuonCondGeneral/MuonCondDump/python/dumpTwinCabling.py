@@ -9,8 +9,6 @@ def MdtToyTwinCablingDumpAlgCfg(flags, name="MdtToyTwinCablingDumpAlg",**kwargs)
 
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     kwargs.setdefault("MuonIdHelperSvc", result.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
-    kwargs.setdefault("stationsToTwin",["BOL"])
-    
     the_alg = CompFactory.MdtToyTwinCablingDumpAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -25,12 +23,17 @@ if __name__ == "__main__":
     parser.set_defaults(noTgc=True)
     parser.add_argument("--setupRun4", default=False, action="store_true")
     parser.add_argument("--cablingMap", default="twinMap.json", help="External JSON file containing the cabling map of each channel")
-    parser.add_argument("--stationsToTwin",nargs='+', help="Specify the station names for which you want twin tubes")
-
+    parser.add_argument("--stationsToTwin",nargs='+', help="Specify the station names for which you want twin tubes",
+                        default=[])
+    parser.add_argument("--chamberToTwin",nargs='+', help="Specify the station names for which you want twin tubes",
+                        default=["BOL4A13M1", "BOL4C13M1"])
     args = parser.parse_args()
     args.geoModelFile = geoModelFileDefault(args.setupRun4)
     flags, cfg = setupGeoR4TestCfg(args)
-    cfg.merge(MdtToyTwinCablingDumpAlgCfg(flags, stationsToTwin = args.stationsToTwin, OutCablingJSON = args.cablingMap))
+    cfg.merge(MdtToyTwinCablingDumpAlgCfg(flags, 
+                                          stationsToTwin = args.stationsToTwin, 
+                                          outCablingJSON = args.cablingMap,
+                                          detElIdToTwin = args.chamberToTwin if "all" not in args.chamberToTwin else []))
     
     executeTest(cfg)
 

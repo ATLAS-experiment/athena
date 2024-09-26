@@ -28,13 +28,17 @@ public:
     virtual unsigned int cardinality() const override final{return 1;}
 
 private:
+    bool equipREwithTwins(const Identifier& detElId) const;
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 
-    Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "MdtTwinMapping.json", "Cabling JSON"};
+    Gaudi::Property<std::string> m_cablingJSON{this, "outCablingJSON", "MdtTwinMapping.json", "Cabling JSON"};
     Gaudi::Property<std::vector<std::string>> m_stationsToTwin{this, "stationsToTwin", {}, "List of station names that should have twinned tubes"};
 
+    Gaudi::Property<std::vector<std::string>> m_detElIdToTwin{this, "detElIdToTwin", {"BOL4A13M1", "BOL4C13M1" }};
+    Gaudi::Property<int> m_spacing{this, "IndentSpace", -1, "How many spaces shall be used for indentation"};    
 
 
 };

@@ -6,6 +6,7 @@
 
 #include <AthenaBaseComps/AthMessaging.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <MuonCablingData/HedgehogBoard.h>
 #include <unordered_map> 
 
 namespace Muon{
@@ -14,8 +15,9 @@ namespace Muon{
      *         for a given Mdt Identifier the associated twin-tube Identifier, if there's any at all. */
     class TwinTubeMap : public AthMessaging {
         public:
+            using HedgehogBoardPtr = HedgehogBoard::HedgehogBoardPtr;
+            
             TwinTubeMap(const IMuonIdHelperSvc* idHelperSvc);
-
             /** @brief Returns whether the multilayer is equipped with twin-tubes or not 
              *  @param channelId: Identifier of a tube in the multilayer */
             bool isTwinTubeLayer(const Identifier& channelId) const;
@@ -26,20 +28,23 @@ namespace Muon{
             /** @brief Returns the HV time delay for a given twin tube pair. 
              *         If there's no dedicated delay safed for the pair, the default value is returned */
             double hvDelayTime(const Identifier& channelId) const;
-
-            /** @brief adds a twin tube sibling pair to the map  */
-            StatusCode addTwinPair(const Identifier& sibling1, const Identifier& sibling2);
-            /** @brief Sets the HV delay time for a given twin tube pair */
-            StatusCode setHVDelay(const Identifier& twinSibling, double hvDelay);
             /** @brief Sets the default HV delay */
             void setDefaultHVDelay(const double hvDelay);
+            /** @brief Add a new hedgehog board with twin tube mapping
+             *  @param detElId: Identifier of the multilayer
+             *  @param board: Pointer to the HedgehogBoard instance encoding the mapping
+             *  @param slot: Integer indicating which tube range is covered by the board */
+            StatusCode addHedgeHogBoard(const Identifier& detElId, const HedgehogBoardPtr& board, const uint16_t slot);
         private:
             const IMuonIdHelperSvc* m_idHelperSvc{nullptr};
-            using Storage = std::unordered_map<Identifier, Identifier>;
-            std::vector<Storage> m_twinTubesPerRE{};
 
-            using HVDelayMap = std::unordered_map<Identifier, double>;
-            std::vector<HVDelayMap> m_hvDelayTimes{};
+    	    struct HedgehogTray{
+                uint8_t nTubesPerLay{0};
+                std::vector<HedgehogBoardPtr> cards{};
+            };
+            using Storage = std::unordered_map<IdentifierHash, HedgehogTray>;
+            Storage m_twinTubesPerRE{};
+
             double m_defaultHVDelay{0.};
     };
 }

@@ -150,9 +150,14 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
 def MdtTwinTubeMapCondAlgCfg(flags, name="MdtTwinTubeCondAlg", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMDT: return result
-    from MuonCondDump.dumpTwinCabling import writeTwinTubeMap
-    kwargs.setdefault("JSONFile", "TwinTubeMap.json")
-    writeTwinTubeMap(kwargs["JSONFile"])
+    kwargs.setdefault("JSONFile","")
+    if(not kwargs["JSONFile"]):
+        kwargs.setdefault("FolderName","/MDT/TWINMAPPING")
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        result.merge(addFolders(flags,[kwargs["FolderName"]], ("MDT_OFL" if flags.Input.isMC else "MDT"),className="CondAttrListCollection", tag="MDTTwinMapping_compactFormat_Run123"))
+    else:
+        kwargs["FolderName"] = ""
+
     the_alg = CompFactory.Muon.TwinTubeMappingCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)    
     return result
