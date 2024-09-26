@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -41,13 +41,13 @@ int main() {
   if (!initGaudi("StoreGate/ActiveStore_test.txt", pSvcLoc)) {
     return 1;
   }
-  ActiveStoreSvc* pASS(0);
-  assert( pSvcLoc->service("ActiveStoreSvc", pASS, true).isSuccess() );
+  SmartIF<ActiveStoreSvc> pASS{pSvcLoc->service("ActiveStoreSvc")};
+  assert( pASS.isValid() );
   assert( pASS->activeStore() == pASS->operator->() );
   //as set in ActiveStore_test.txt
   assert( pASS->activeStore()->name() == "E1" ); 
-  StoreGateSvc* pE2(0);
-  assert( pSvcLoc->service("E2", pE2).isSuccess() );
+  SmartIF<StoreGateSvc> pE2{pSvcLoc->service("E2")};
+  assert( pE2.isValid() );
   pASS->setStore(pE2);
   assert( pASS->activeStore()->name() == "E2" ); 
   assert( pASS->finalize().isSuccess() );

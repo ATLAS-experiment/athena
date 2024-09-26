@@ -26,6 +26,4 @@ ApplicationMgr       INFO Application Manager Initialized successfully[m
 ApplicationMgr Ready
 StoreGateSvc        DEBUG Property update for OutputLevel : new value = 1[m
 StoreGateSvc        DEBUG Service base class initialized successfully[m
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc[m
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc[m
 *** StoreID_test OK ***

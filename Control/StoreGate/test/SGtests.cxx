@@ -746,8 +746,8 @@ namespace Athena_test {
 //      // try to bind it twice with a different key
 //FIXME      assert(rSG.bind(chFoo,dbKey2).isSuccess());
 
-    IProxyProviderSvc* pIPPSvc;
-    assert((rSG.serviceLocator()->service("ProxyProviderSvc", pIPPSvc, true)).isSuccess());
+    SmartIF<IProxyProviderSvc> pIPPSvc{rSG.serviceLocator()->service("ProxyProviderSvc")};
+    assert(pIPPSvc.isValid());
 
 //FIXME      TransientID id(ClassID_traits<Foo>::ID(), dbKey);
 //FIXME      DataProxy *dp = pIPPSvc->getProxy(id, rSG);

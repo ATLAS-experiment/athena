@@ -6,8 +6,6 @@ AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 WriteData            INFO in initialize()
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 ReadData             INFO in initialize()
 ReadData             INFO Data Object producer: WriteData
 ApplicationMgr       INFO Application Manager Initialized successfully

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestTools/initGaudi.h"
@@ -12,8 +12,8 @@ namespace Athena_test {
 
   void segmem_test (ISvcLocator *psvc) {
 
-    SegMemSvc* p_sms(0);
-    assert((psvc->service("SegMemSvc", p_sms, true)).isSuccess());
+    SmartIF<SegMemSvc> p_sms{psvc->service("SegMemSvc")};
+    assert ( p_sms.isValid() );
 
     int* p_int = new ( p_sms->allocate<int>(SegMemSvc::EVENT) ) int(1001);
 

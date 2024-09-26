@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadHandle_test.cxx
@@ -340,8 +340,8 @@ void test6()
 
 unsigned int perftest (ISvcLocator* svcloc, unsigned int ntry)
 {
-  StoreGateSvc* sg = nullptr;
-  assert (svcloc->service ("StoreGateSvc", sg).isSuccess());
+  SmartIF<StoreGateSvc> sg{svcloc->service ("StoreGateSvc")};
+  assert ( sg.isValid() );
   assert (sg->record (std::make_unique<MyObj> (42), "MyObj", false).isSuccess());
 
   SG::ReadHandleKey<MyObj> key ("MyObj");

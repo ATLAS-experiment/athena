@@ -29,6 +29,4 @@ StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Service base class initialized successfully
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 *** StoreID_test OK ***

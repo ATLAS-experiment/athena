@@ -100,15 +100,18 @@ namespace SG {
 ///////////////////////////////////////////////////////////////////////////
 /// Standard Constructor
 SGImplSvc::SGImplSvc(const string& name,ISvcLocator* svc)
-  : Service(name, svc), m_pCLIDSvc(0), m_pDataLoader(0), 
+  : Service(name, svc),
+    m_pCLIDSvc("ClassIDSvc", name),
+    m_pDataLoader("EventPersistencySvc", name),
     m_pPPSHandle("ProxyProviderSvc", name),
     m_pPPS(nullptr),
-    m_pHistorySvc(0), m_pStore(new DataStore(*this)), 
+    m_pHistorySvc("HistorySvc", name),
+    m_pStore(new DataStore(*this)),
     m_pIncSvc("IncidentSvc", name),
     m_DumpStore(false), 
     m_ActivateHistory(false),
     m_DumpArena(false),
-    m_pIOVSvc(0),
+    m_pIOVSvc("IOVSvc", name),
     m_storeLoaded(false),
     m_remap_impl (new SG::RemapImpl),
     m_arena (name),
@@ -168,26 +171,11 @@ StatusCode SGImplSvc::initialize()    {
     return StatusCode::FAILURE;
   }
 
-  //start listening to "EndEvent"
-  // const int PRIORITY = 100;
-  // Mother svc should register these incidents
-  // m_pIncSvc->addListener(this, "EndEvent", PRIORITY);
-  // m_pIncSvc->addListener(this, "BeginEvent", PRIORITY);
+  // We explicitly do not retrieve m_pIOVSvc and rely on retrieval
+  // on first use to avoid an initialization loop here.
 
-  const bool CREATEIF(true);
-  // cache pointer to Persistency Service
-  if (!(service("EventPersistencySvc", m_pDataLoader, CREATEIF)).isSuccess()) {
-    m_pDataLoader = 0;
-    error() << "Could not get pointer to Persistency Service"
-            << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-  if (!(service("ClassIDSvc", m_pCLIDSvc, CREATEIF)).isSuccess()) {
-    error() << "Could not get pointer to ClassID Service"
-            << endmsg;
-    return StatusCode::FAILURE;
-  }
+  CHECK( m_pDataLoader.retrieve() );
+  CHECK( m_pCLIDSvc.retrieve() );
 
   if (!m_pPPSHandle.empty()) {
     CHECK( m_pPPSHandle.retrieve() );
@@ -201,11 +189,8 @@ StatusCode SGImplSvc::initialize()    {
     }
 
   // Get hold of History Service
-  if (m_ActivateHistory &&
-      !(service("HistorySvc", m_pHistorySvc, CREATEIF)).isSuccess()) {
-    error() << "Could not locate History Service"
-            << endmsg;
-    return StatusCode::FAILURE;
+  if (m_ActivateHistory) {
+    CHECK( m_pHistorySvc.retrieve() );
   }
 
   return StatusCode::SUCCESS;
@@ -241,16 +226,6 @@ StatusCode SGImplSvc::stop()    {
               << " so that event stores get finalized and cleared before other stores" <<endmsg;
   }
   return StatusCode::SUCCESS;
-}
-
-//////////////////////////////////////////////////////////////
-IIOVSvc* SGImplSvc::getIIOVSvc() {
-  // Get hold of the IOVSvc
-  if (0 == m_pIOVSvc && !(service("IOVSvc", m_pIOVSvc)).isSuccess()) {
-    warning() << "Could not locate IOVSvc "
-              << endmsg;
-  }
-  return m_pIOVSvc;
 }
 
 //////////////////////////////////////////////////////////////
@@ -334,12 +309,6 @@ StatusCode SGImplSvc::finalize()    {
   
   const bool FORCEREMOVE(true);
   clearStore(FORCEREMOVE).ignore();
-  
-  //protect against double release
-  if (m_pHistorySvc) {
-    m_pHistorySvc->release();
-    m_pHistorySvc = 0;
-  }
   
   m_stringpool.clear();
   delete m_pStore;
@@ -445,7 +414,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
       // create the proxy object and register it
       dp = new DataProxy (TransientAddress (dataID, skey,
                                             pAddress, clearAddressFlag),
-                          m_pDataLoader, true, true);
+                          m_pDataLoader.get(), true, true);
       m_pStore->addToStore(dataID, dp).ignore();
 
       addAutoSymLinks (skey, dataID, dp, 0, false);
@@ -568,7 +537,7 @@ SGImplSvc::regFcn( const CallBackID& c1,
                    bool trigger)
 {
   lock_t lock (m_mutex);
-  return ( getIIOVSvc()->regFcn(c1,c2,fcn,trigger) );
+  return ( m_pIOVSvc->regFcn(c1,c2,fcn,trigger) );
 }
 
 
@@ -579,7 +548,7 @@ SGImplSvc::regFcn( const std::string& toolName,
                    bool trigger)
 {
   lock_t lock (m_mutex);
-  return ( getIIOVSvc()->regFcn(toolName,c2,fcn,trigger) );
+  return ( m_pIOVSvc->regFcn(toolName,c2,fcn,trigger) );
 }
 
 
@@ -1153,7 +1122,7 @@ SGImplSvc::typeless_overwrite( const CLID& clid,
   }
   //for detector store objects managed by IIOVSvc, replace the old proxy with the new one (#104311)
   if (toRemove && sc.isSuccess() && store()->storeID() == StoreID::DETECTOR_STORE) {
-    sc = getIIOVSvc()->replaceProxy(toRemove, proxy(clid, key));
+    sc = m_pIOVSvc->replaceProxy(toRemove, proxy(clid, key));
   }
   if (toRemove)
     toRemove->release();
@@ -1457,7 +1426,7 @@ bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string&
   lock_t lock (m_mutex);
   bool ret = bindHandleToProxy (id, key, ir, dp);
   if (ret) {
-    StatusCode sc = getIIOVSvc()->regProxy(dp,key);
+    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
     if (sc.isFailure()) return false;
   }
   return true;
@@ -1474,9 +1443,9 @@ bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string&
   lock_t lock (m_mutex);
   bool ret = bindHandleToProxy (id, key, ir, dp);
   if (ret) {
-    StatusCode sc = getIIOVSvc()->regProxy(dp,key);
+    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
     if (sc.isFailure()) return false;
-    sc = getIIOVSvc()->regFcn(dp,c,fcn,trigger);
+    sc = m_pIOVSvc->regFcn(dp,c,fcn,trigger);
     if (sc.isFailure()) return false;
   }
   return true;
@@ -1488,8 +1457,6 @@ StatusCode
 SGImplSvc::record_HistObj(const CLID& id, const std::string& key,
                           const std::string& store, 
                           bool allowMods, bool resetOnly) {
-
-  assert(m_pHistorySvc);
 
   DataHistory *dho;
   dho = m_pHistorySvc->createDataHistoryObj( id, key, store );

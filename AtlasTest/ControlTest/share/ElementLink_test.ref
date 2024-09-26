@@ -32,8 +32,6 @@ StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Service base class initialized successfully
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
  ************* Starting Test 1 
 StoreGateSvc        DEBUG Recorded object @0x15c61d0 with key fooVec of type DataVector<Foo>(CLID 1234)
  in DataObject @0x15c6160

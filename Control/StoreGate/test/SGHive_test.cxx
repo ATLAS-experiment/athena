@@ -116,10 +116,10 @@ int main() {
   if (!initGaudi("StoreGate/SGHive_test.txt", pSvcLoc)) {
     return 1;
   }
-  IHiveWhiteBoard* pWB(0);
-  assert( pSvcLoc->service("SG::HiveMgrSvc/HiveMgrSvc", pWB, true).isSuccess() );
+  SmartIF<IHiveWhiteBoard> pWB{pSvcLoc->service("SG::HiveMgrSvc/HiveMgrSvc")};
+  assert( pWB.isValid() );
 
-  SG::HiveMgrSvc* pSGHM(dynamic_cast<SG::HiveMgrSvc*>(pWB));
+  SG::HiveMgrSvc* pSGHM(dynamic_cast<SG::HiveMgrSvc*>(pWB.get()));
   assert( pSGHM );
 
   //too late to change the number of stores
@@ -141,8 +141,8 @@ int main() {
   
   //now test the HiveStoreSvc itself
 
-  StoreGateSvc* pHSG(0);
-  assert( pSvcLoc->service("StoreGateSvc", pHSG, true).isSuccess() );
+  SmartIF<StoreGateSvc> pHSG{pSvcLoc->service("StoreGateSvc")};
+  assert( pHSG.isValid() );
 
   SG::TestHiveStoreSvc testHSG(*pHSG);
   testHSG.testNoSlot();

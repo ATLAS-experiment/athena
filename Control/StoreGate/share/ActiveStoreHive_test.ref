@@ -30,8 +30,6 @@ SG::HiveStoreSvc     INFO Initializing SG::HiveStoreSvc - package version StoreG
 StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-02-39-07-branch
 StoreGateSvc        DEBUG Service base class initialized successfully
 StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service IncidentSvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ProxyProviderSvc
 ActiveStoreSvc       INFO Initializing ActiveStoreSvc - package version StoreGate-02-39-07-branch
 ActiveStoreSvc       INFO ActiveStoreSvc will use SG::HiveStoreSvc

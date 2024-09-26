@@ -35,8 +35,6 @@ StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Service base class initialized successfully
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 StoreGateSvc        DEBUG Recorded object @0xfe61c0 with key circVector of type CircularVector(CLID 218202856) 
  in DataObject @0xfe62d0 
  object modifiable when retrieved

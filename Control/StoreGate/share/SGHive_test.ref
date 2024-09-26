@@ -28,29 +28,19 @@ StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 StoreGateSvc_Impl   DEBUG Service base class initialized successfully
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
 ClassIDSvc           INFO  getRegistryEntries: read 264 CLIDRegistry entries for module ALL
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 0_StoreGateSvc_...  DEBUG Property update for OutputLevel : new value = 1
 0_StoreGateSvc_...VERBOSE Initializing 0_StoreGateSvc_Impl
 0_StoreGateSvc_...  DEBUG Service base class initialized successfully
-0_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-0_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 1_StoreGateSvc_...  DEBUG Property update for OutputLevel : new value = 1
 1_StoreGateSvc_...VERBOSE Initializing 1_StoreGateSvc_Impl
 1_StoreGateSvc_...  DEBUG Service base class initialized successfully
-1_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-1_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 2_StoreGateSvc_...  DEBUG Property update for OutputLevel : new value = 1
 2_StoreGateSvc_...VERBOSE Initializing 2_StoreGateSvc_Impl
 2_StoreGateSvc_...  DEBUG Service base class initialized successfully
-2_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-2_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 3_StoreGateSvc_...  DEBUG Property update for OutputLevel : new value = 1
 3_StoreGateSvc_...VERBOSE Initializing 3_StoreGateSvc_Impl
 3_StoreGateSvc_...  DEBUG Service base class initialized successfully
-3_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-3_StoreGateSvc_...VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 Now we expect to see an error message:
 ----Error Message Starts--->>
 HiveMgrSvc          FATAL Too late to change the number of slots!
