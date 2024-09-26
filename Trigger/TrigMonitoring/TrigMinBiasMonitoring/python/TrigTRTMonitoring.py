@@ -24,9 +24,11 @@ def TrigTRTMonCfg(flags):
 
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     monAccess = getHLTMonitoringAccess(flags)
-    chains = getMinBiasChains(monAccess, 'HLT_noalg_L1TRT_FILLED')
+    chains = getMinBiasChains(monAccess, 'HLT_noalg_L1TRT_FILLED|HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20')
 
-    ref_chains = ['HLT_noalg_L1RD0_FILLED', 'HLT_mb_sp_L1VTE50']
+    ref_chains = ['HLT_mb_sptrk_hi_FgapC5_L1VjTE200', 'HLT_mb_sptrk_hi_FgapA5_L1VjTE200',
+        'HLT_noalg_L1RD0_FILLED', 'HLT_mb_sptrk_L1VTE50',
+        'HLT_mb_sptrk_hi_FgapA5_L1VZDC_A_ZDC_C_VTE200', 'HLT_mb_sptrk_hi_FgapC5_L1ZDC_A_VZDC_C_VTE200']
 
     log.info(f'Monitoring {len(chains)} L1TRT chain(s)')
     log.debug([name for name, _ in chains])
@@ -38,12 +40,12 @@ def TrigTRTMonCfg(flags):
         hiTRTGroup = monConfig.addGroup(alg, f'{chain}', topPath=f'HLT/MinBiasMon/{group}/L1TRT/{chain}/')
 
         # 1D histograms
-        hiTRTGroup.defineHistogram('n_trk', title='Track multiplicity;N_{trk};Events / 1', xbins=50, xmin=-0.5, xmax=49.5)
+        hiTRTGroup.defineHistogram('n_trk', title='Track multiplicity;N_{trk};Events / 1', xbins=20, xmin=-0.5, xmax=19.5)
         hiTRTGroup.defineHistogram('lead_trk_pT', title='Leading track p_{T};p_{T}^{lead} [GeV];Events / 100 MeV', xbins=40, xmin=0, xmax=4)
 
         # TEfficiency
         hiTRTGroup.defineHistogram(f'effPassed,n_trk;{chain}_eff_ntrk', type='TEfficiency',
-                                        title='L1 TRT efficiency;N_{trk};Efficiency', xbins=50, xmin=-0.5, xmax=49.5)
+                                        title='L1 TRT efficiency;N_{trk};Efficiency', xbins=20, xmin=-0.5, xmax=19.5)
         hiTRTGroup.defineHistogram(f'effPassed,lead_trk_pT;{chain}_eff_pT', type='TEfficiency',
                                     title='L1 TRT efficiency;p_{T}^{lead} [GeV];Efficiency', xbins=40, xmin=0, xmax=4)
 
