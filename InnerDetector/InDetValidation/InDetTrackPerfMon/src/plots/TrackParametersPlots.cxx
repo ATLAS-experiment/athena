@@ -83,7 +83,7 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   float pz0    = z0( particle );
   float pz0sin = z0SinTheta( particle );
   float ptheta = theta( particle );
-  float pqoverp = qOverP( particle ) * Gaudi::Units::GeV;
+  float pqoverp = qOverP( particle ); // in MeV^-1
   float pprodR = prodR( particle );
   float pprodZ = prodZ( particle );
   float pnSiHits = nSiHits( particle );

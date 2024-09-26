@@ -36,7 +36,7 @@
     },
     "$TRKTAG_qoverp" : {
         "type" : "TH1F",
-        "xAxis" : { "title" : "$TRKTYPE q/p [GeV^{-1}]", "nBins" : "100", "low" : "-$QOPMAX", "high" : "$QOPMAX" },
+        "xAxis" : { "title" : "$TRKTYPE q/p [MeV^{-1}]", "nBins" : "100", "low" : "-$QOPMAX", "high" : "$QOPMAX" },
         "yAxis" : { "title" : "Entries" }
     },
     "$TRKTAG_prodR" : {
