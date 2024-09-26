@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_CollisionTime_H
@@ -52,7 +52,7 @@ class BcmCollisionTime
   //bool getIsBkg() const{ return m_IsBkg; };
 
   /** @brief get complete list of deltaTs */
-  std::vector<float> getDeltaT() const{ return m_deltaT; };
+  const std::vector<float>& getDeltaT() const{ return m_deltaT; };
   
  private:
 

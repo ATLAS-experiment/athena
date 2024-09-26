@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENALGS_SPLAYER_H
@@ -26,7 +26,7 @@ class SPLayer {
   int nmod() const;
   int nhit() const;
   TH1* hptr(int) const;
-  std::string name() const;
+  const std::string& name() const;
 
  private:
   int m_dettype;
@@ -48,7 +48,7 @@ inline int SPLayer::layer() const { return m_layer; }
 inline int SPLayer::side() const { return m_side; }
 inline int SPLayer::nmod() const { return m_nmod; }
 inline int SPLayer::nhit() const { return m_nhit; }
-inline std::string SPLayer::name() const { return m_name; }
+inline const std::string& SPLayer::name() const { return m_name; }
 inline TH1* SPLayer::hptr(int i) const { return m_histlist[i]; }
 
 #endif // INDETALIGNGENALGS_SPLAYER_H

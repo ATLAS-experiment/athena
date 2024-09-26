@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -270,7 +270,7 @@ class SCTCalib : public AthAlgorithm {
       StatusCode getLorentzAngle ATLAS_NOT_THREAD_SAFE (); // Thread unsafe SCTCalibWriteTool::createListLA method is used.
 
       // To handle XML file for DB
-      StatusCode openXML4DB(std::ofstream&, const char*, const char*, IOVTime, IOVTime) const;
+      StatusCode openXML4DB(std::ofstream&, const char*, const char*, const IOVTime&, const IOVTime&) const;
       StatusCode closeXML4DB(std::ofstream&) const;
       StatusCode addToXML4DB(std::ofstream&, const Identifier&, const char*, float, const char*) const;
 
