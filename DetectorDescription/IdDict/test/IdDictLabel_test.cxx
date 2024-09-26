@@ -13,6 +13,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 BOOST_AUTO_TEST_SUITE(IdDictLabelTest)
 BOOST_AUTO_TEST_CASE(IdDictLabelConstructors){
   BOOST_CHECK_NO_THROW(IdDictLabel());
+  IdDictLabel i1;
+  BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i2(i1));
+  BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i3(std::move(i1)));
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictLabelAccessors){
   IdDictLabel f;
