@@ -233,7 +233,7 @@ bool FPGATrackSimEventSelectionSvc::passCuts(const FPGATrackSimTruthTrack& truth
 
 bool FPGATrackSimEventSelectionSvc::passMatching(FPGATrackSimTrack const & track) const
 {
-  if (track.getBarcode() == 0 || track.getBarcode() == std::numeric_limits<long>::max()) return false;
+  if (track.getBarcode() == 0 || track.getBarcode() == std::numeric_limits<HepMcParticleLink::barcode_type>::max()) return false;
   if (track.getEventIndex() == std::numeric_limits<long>::max()) return false;
   if (track.getQOverPt() == 0) return false;
 
