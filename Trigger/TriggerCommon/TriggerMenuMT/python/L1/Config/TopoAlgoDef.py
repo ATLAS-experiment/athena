@@ -363,6 +363,40 @@ class TopoAlgoDef:
             alg.addvariable('MaxMSqr', d.maxInvm*d.maxInvm*_et_conversion*_et_conversion )
             tm.registerTopoAlgo(alg)
 
+
+
+        #ATR-30179
+        #Mu+Tau dR cut
+        algolist = [
+            {"minDr": 3, "maxDr": 99, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR99-MU8Fab-eTAU30ab
+            {"minDr": 3, "maxDr": 28, "mult": 1, "otype1" : "MU8Fab" ,  "otype2" : "eTAU", "ocut2" : 30, "olist2" : "ab",  }, #3DR28-MU8Fab-eTAU30ab
+        ]
+
+        for x in algolist:
+            class d:
+                pass
+            for k in x:
+                setattr (d, k, x[k])
+            obj1 = "%s%s" % ((str(d.mult) if d.mult>1 else ""), d.otype1)
+            obj2 = "-%s%d%s" % (d.otype2, d.ocut2, d.olist2)
+            toponame = "%iDR%i-%s%s"  % (d.minDr, d.maxDr, obj1, obj2)
+            log.debug("Define %s", toponame)
+            inputList = [ d.otype1, 'eTAUs']
+            algoname = AlgConf.DeltaRSqrIncl2
+            alg = algoname( name = toponame,  inputs = inputList, outputs = [ toponame ]) 
+            #alg = AlgConf.NotMatch( name = toponame, inputs = [ d.otype1, 'eTAUs'], outputs = [ toponame ] )
+            alg.addgeneric('InputWidth1', HW.muonOutputWidthSelect)
+            alg.addgeneric('InputWidth2', HW.eTauOutputWidthSort) 
+            alg.addgeneric('MaxTob1', HW.muonOutputWidthSelect)
+            alg.addgeneric('MaxTob2', 1)
+            alg.addgeneric('NumResultBits', 1)
+            alg.addvariable('MinET1',    0*_et_conversion)
+            alg.addvariable('MinET2',    get_threshold_cut('eTAU', d.ocut2)*_et_conversion)
+            alg.addvariable('DeltaRMin', d.minDr*d.minDr*_dr_conversion*_dr_conversion)
+            alg.addvariable('DeltaRMax', d.maxDr*d.maxDr*_dr_conversion*_dr_conversion)
+            tm.registerTopoAlgo(alg)
+
+        
         # dimu DR items
         # Parameter ordering:
         # 1. MinEt1
@@ -378,7 +412,6 @@ class TopoAlgoDef:
             {"minDr": 2, "maxDr": 15, "mult": 2, "otype1" : "MU5VFab",  "otype2" : "",       }, #2DR15-2MU5VFab
             {"minDr": 0, "maxDr": 22, "mult": 2, "otype1" : "MU5VFab",  "otype2" : "",       }, #0DR22-2MU5VFab
             {"minDr": 2, "maxDr": 99, "mult": 2, "otype1" : "MU3Vab" ,  "otype2" : "",       }, #2DR99-2MU3Vab
-
         ]
         for x in listofalgos:
             class d:
@@ -1975,10 +2008,6 @@ class TopoAlgoDef:
                 
             tm.registerTopoAlgo(alg)
       
-
-
-    
-
         #ATR-18824 ZAFB-DPHI
         # TODO: update with fwd electrons
         # Parameter ordering

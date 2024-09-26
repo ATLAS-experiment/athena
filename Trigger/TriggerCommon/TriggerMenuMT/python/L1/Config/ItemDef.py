@@ -2097,6 +2097,11 @@ class ItemDef:
             MenuItem('L1_HT190-jJ40s5pETA21').setLogic( d.TOPO_HT190_jJ40s5pETA21   & physcond)
             MenuItem('L1_SC111-CjJ40').setLogic(  d.TOPO_SC111_CjJ40abpETA26 & physcond)
 
+            #ATR-30179
+            MenuItem('L1_cTAU30M_3DR99-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR99_MU8Fab_eTAU30ab & physcond)
+            MenuItem('L1_cTAU30M_3DR28-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR28_MU8Fab_eTAU30ab & physcond)
+
+            
             # Needed?
             MenuItem('L1_DPHI-2eEM5').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & physcond)
             # Need to redefine these wrt Phase-I TE
