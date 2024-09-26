@@ -24,7 +24,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
     if kwargs["doVeryLoose"]:
         TauSelectorVeryLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                         name = 'TauSelectorVeryLoose',
-                                                                        ConfigPath = 'TauAnalysisAlgorithms/tau_selection_veryloose.conf'))
+                                                                        ConfigPath = 'TauAnalysisAlgorithms/tau_selection_veryloose_noeleid.conf'))
         acc.addPublicTool(TauSelectorVeryLoose)
 
         TauVeryLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
@@ -37,7 +37,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
     if kwargs["doLoose"]:
         TauSelectorLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                     name = 'TauSelectorLoose',
-                                                                    ConfigPath = 'TauAnalysisAlgorithms/tau_selection_loose.conf'))
+                                                                    ConfigPath = 'TauAnalysisAlgorithms/tau_selection_loose_noeleid.conf'))
         acc.addPublicTool(TauSelectorLoose)
 
         TauLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
@@ -50,7 +50,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
     if kwargs["doMedium"]:
         TauSelectorMedium = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                      name = 'TauSelectorMedium',
-                                                                     ConfigPath = 'TauAnalysisAlgorithms/tau_selection_medium.conf'))
+                                                                     ConfigPath = 'TauAnalysisAlgorithms/tau_selection_medium_noeleid.conf'))
         acc.addPublicTool(TauSelectorMedium)
 
         TauMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
@@ -63,7 +63,7 @@ def AddTauAugmentationCfg(flags, **kwargs):
     if kwargs["doTight"]:
         TauSelectorTight = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
                                                                     name = 'TauSelectorTight',
-                                                                    ConfigPath = 'TauAnalysisAlgorithms/tau_selection_tight.conf'))
+                                                                    ConfigPath = 'TauAnalysisAlgorithms/tau_selection_tight_noeleid.conf'))
         acc.addPublicTool(TauSelectorTight)
 
         TauTightWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
