@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for TLA jet reconstruction + decorations
@@ -126,9 +126,6 @@ def AddStandardTLATruthContentsCfg(flags,
     if "McEventCollection#GEN_EVENT" in flags.Input.TypedCollections: isEVNT = True
     # Tools that must come before jets
     acc.merge(PreJetMCTruthAugmentationsCfg(flags,decorationDressing = decorationDressing))
-    # Should photons that are dressed onto taus also be removed from truth jets?
-    if includeTausInDressingPhotonRemoval:
-        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
     # Jets and MET
     acc.merge(AddTLATruthJetsCfg(flags))
     # Tools that must come after jets
@@ -138,6 +135,10 @@ def AddStandardTLATruthContentsCfg(flags,
         acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
     else:
         acc.merge(PostTLAJetMCTruthAugmentationsCfg(flags, decorationDressing = decorationDressing))
+    # Should photons that are dressed onto taus also be removed from truth jets?
+    if includeTausInDressingPhotonRemoval:
+        acc.getPublicTool("DFCommonTruthTauDressingTool").decorationName=decorationDressing
+    acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="AddStandardTLATruthContentsLockDecoration", Decoration = 'TruthParticles.' + decorationDressing))
 
     # Add back the navigation contect for the collections we want
     acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos", "TruthBSM", "TruthBottom", "TruthTop", "TruthBoson"], prefix=prefix))
