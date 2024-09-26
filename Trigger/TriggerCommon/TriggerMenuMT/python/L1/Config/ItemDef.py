@@ -170,12 +170,12 @@ class ItemDef:
         ZDC_HELT100 = ZDC_alt_comb6 #hadronic energy sum < 100 TeV - for PU rejection
 
         #new ZDC items in pp running
-        ZDC_PP_C = ZDC_alt_comb1
-        ZDC_PP_A = ZDC_alt_comb2
+        ZDC_PP_C = Not(d.ZDC_ALT_2) & d.ZDC_ALT_0
+        ZDC_PP_A = Not(d.ZDC_ALT_2) & d.ZDC_ALT_1
         ZDC_PP_OR = ZDC_PP_A | ZDC_PP_C
-        ZDC_PP_A_C = ZDC_PP_A & ZDC_PP_C
-        ZDC_PP_C2 = ZDC_alt_comb5
-        ZDC_PP_A2 = ZDC_alt_comb6
+        ZDC_PP_A_C = d.ZDC_ALT_1 & d.ZDC_ALT_0
+        ZDC_PP_C2 = d.ZDC_ALT_2 & d.ZDC_ALT_0
+        ZDC_PP_A2 = d.ZDC_ALT_2 & d.ZDC_ALT_1
         ZDC_PP_OR2 = ZDC_PP_C2 | ZDC_PP_A2
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
