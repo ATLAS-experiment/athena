@@ -179,7 +179,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   }
 
   const auto *vertexContainer = handle_vxContainer.cptr();
-  for(const auto & vtx : *vertexContainer) {
+  for(const auto vtx : *vertexContainer) {
     if ( !vtx ) continue;
     if ( !vtx->vxTrackAtVertexAvailable() ) continue;
     
@@ -648,7 +648,7 @@ bool IDAlignMonGenericTracksAlg::fillVertexInformation(std::map<const xAOD::Trac
 
   const auto *vertexContainer = handle_vxContainer.cptr();
     
-  for(const auto & vtx : *vertexContainer) {
+  for(const auto vtx : *vertexContainer) {
       auto tpLinks = vtx->trackParticleLinks();
       ATH_MSG_DEBUG("tpLinks size " << tpLinks.size());
 
