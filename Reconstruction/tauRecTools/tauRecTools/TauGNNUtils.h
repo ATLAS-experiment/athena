@@ -179,7 +179,13 @@ bool d0SigTJVA(
 bool dEta(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
+bool dEtaJetSeedAxis(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
 bool dPhi(
+    const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
+
+bool dPhiJetSeedAxis(
     const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out);
 
 bool nInnermostPixelHits(

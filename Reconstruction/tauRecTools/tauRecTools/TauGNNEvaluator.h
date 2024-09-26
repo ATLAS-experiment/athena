@@ -48,8 +48,8 @@ private:
     std::string m_output_ptau;
     std::string m_output_pjet;
     std::string m_weightfile;
-    std::size_t m_max_tracks;
-    std::size_t m_max_clusters;
+    int m_max_tracks;
+    int m_max_clusters;
     float m_max_cluster_dr;
     float m_minTauPt;
     bool m_doVertexCorrection;

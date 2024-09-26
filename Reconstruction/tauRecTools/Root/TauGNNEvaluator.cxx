@@ -38,7 +38,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator");
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks<<" tracks and "<<m_max_clusters<<" clusters...");
   
   std::string weightfile("");
 
@@ -90,13 +90,16 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   }
 
   // Get input objects
+  ATH_MSG_DEBUG("Fetching Tracks");
   std::vector<const xAOD::TauTrack *> tracks;
   ATH_CHECK(get_tracks(tau, tracks));
+  ATH_MSG_DEBUG("Fetching clusters");
   std::vector<xAOD::CaloVertexedTopoCluster> clusters;
   ATH_CHECK(get_clusters(tau, clusters));
+  ATH_MSG_DEBUG("Constituent fetching done...");
 
   // Truncate tracks
-  int numTracksMax = std::min(m_max_tracks, tracks.size());
+  int numTracksMax = std::min(m_max_tracks, static_cast<int>(tracks.size()));
   std::vector<const xAOD::TauTrack *> trackVec(tracks.begin(), tracks.begin()+numTracksMax);
   // Evaluate networks
   if (m_net) {
@@ -168,7 +171,7 @@ StatusCode TauGNNEvaluator::get_clusters(const xAOD::TauJet &tau, std::vector<xA
   std::sort(clusters.begin(), clusters.end(), et_cmp);
 
   // Truncate clusters
-  if (clusters.size() > m_max_clusters) {
+  if (static_cast<int>(clusters.size()) > m_max_clusters) {
     clusters.resize(m_max_clusters, clusters[0]);
   }
 

@@ -162,7 +162,9 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
     calc->insert("d0TJVA", Variables::Track::d0TJVA, track_vars);
     calc->insert("d0SigTJVA", Variables::Track::d0SigTJVA, track_vars);
     calc->insert("dEta", Variables::Track::dEta, track_vars);
+    calc->insert("dEtaJetSeedAxis", Variables::Track::dEtaJetSeedAxis, track_vars);
     calc->insert("dPhi", Variables::Track::dPhi, track_vars);
+    calc->insert("dPhiJetSeedAxis", Variables::Track::dPhiJetSeedAxis, track_vars);
     calc->insert("nInnermostPixelHits", Variables::Track::nInnermostPixelHits, track_vars);
     calc->insert("nPixelHits", Variables::Track::nPixelHits, track_vars);
     calc->insert("nSCTHits", Variables::Track::nSCTHits, track_vars);
@@ -527,8 +529,20 @@ bool dEta(const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out) {
     return true;
 }
 
+bool dEtaJetSeedAxis(const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out) {
+    TLorentzVector tlvSeedJet = tau.p4(xAOD::TauJetParameters::JetSeed);
+    out = std::abs(tlvSeedJet.Eta() - track.eta());
+    return true;
+}
+
 bool dPhi(const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out) {
     out = track.p4().DeltaPhi(tau.p4());
+    return true;
+}
+
+bool dPhiJetSeedAxis(const xAOD::TauJet &tau, const xAOD::TauTrack &track, double &out) {
+    TLorentzVector tlvSeedJet = tau.p4(xAOD::TauJetParameters::JetSeed);
+    out = tlvSeedJet.DeltaPhi(track.p4());
     return true;
 }
 
