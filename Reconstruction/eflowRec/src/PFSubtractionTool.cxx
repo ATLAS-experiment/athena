@@ -136,7 +136,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       if (truthLink.isValid()) trackMatchedTruthParticle = *truthLink;
  
       if (trackMatchedTruthParticle){
-        double barcode = trackMatchedTruthParticle->barcode();
+        double barcode = trackMatchedTruthParticle->barcode(); // FIXME barcode-based
 
         SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
         if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
@@ -153,10 +153,10 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
           SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
 
-          std::vector<std::pair<unsigned int, double > > barCodeTruthPairs = accessor(*(thisCluster->getCluster()));
+          std::vector<std::pair<unsigned int, double > > barCodeTruthPairs = accessor(*(thisCluster->getCluster())); // FIXME barcode-based
 
-          for (auto &barCodeTruthPair : barCodeTruthPairs){
-            if (barCodeTruthPair.first == barcode){
+          for (auto &barCodeTruthPair : barCodeTruthPairs){ // FIXME barcode-based
+            if (barCodeTruthPair.first == barcode){ // FIXME barcode-based
               eflowTrackClusterLink* thisLink = eflowTrackClusterLink::getInstance(thisEfRecTrack, thisCluster, ctx);
               bestClusters.push_back(thisLink);
               break;

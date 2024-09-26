@@ -14,7 +14,7 @@ atlas_add_library( VrtSecInclusiveLib
                    PUBLIC_HEADERS VrtSecInclusive
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LAPACK_INCLUDE_DIRS} ${BLAS_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} AthenaBaseComps xAODEventInfo xAODTracking xAODTruth xAODMuon xAODEgamma xAODJet GaudiKernel GeneratorObjects ITrackToVertex TrkDetDescrInterfaces TrkSurfaces TrkExInterfaces InDetConditionsSummaryService TrkToolInterfaces TrkVertexFitterInterfaces StoreGateLib SGtests TrkVKalVrtFitterLib AtlasDetDescr InDetIdentifier MVAUtils PathResolver
-                   PRIVATE_LINK_LIBRARIES xAODEventInfo TrkTrackSummary VxVertex )
+                   PRIVATE_LINK_LIBRARIES xAODEventInfo TrkTrackSummary VxVertex TruthUtils )
 
 atlas_add_component( VrtSecInclusive
                      src/components/*.cxx

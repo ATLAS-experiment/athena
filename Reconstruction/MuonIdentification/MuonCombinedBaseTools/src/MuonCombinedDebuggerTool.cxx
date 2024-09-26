@@ -62,7 +62,7 @@ namespace MuonCombined {
         m_recoTree->Branch("mstrack_has_truth_par", &m_mstrack_has_truth_par);
         m_recoTree->Branch("mstrack_has_sa", &m_mstrack_has_sa);
 
-        m_recoTree->Branch("mstrack_truth_id", &m_mstrack_truth_id); // FIXME this represents the PDG code - needs to be renamed
+        m_recoTree->Branch("mstrack_truth_id", &m_mstrack_truth_pdgid); // TODO Update variable name to be consistent
         m_recoTree->Branch("mstrack_truth_barcode", &m_mstrack_truth_barcode); // FIXME barcode-based
         m_recoTree->Branch("mstrack_truth_sur_x", &m_mstrack_truth_sur_x);
         m_recoTree->Branch("mstrack_truth_sur_y", &m_mstrack_truth_sur_y);
@@ -101,7 +101,7 @@ namespace MuonCombined {
         m_recoTree->Branch("mstrack_sa_cov_theta", &m_mstrack_sa_cov_theta);
         m_recoTree->Branch("mstrack_sa_cov_qOverP", &m_mstrack_sa_cov_qOverP);
 
-        m_recoTree->Branch("idtrack_truth_id", &m_idtrack_truth_id); // FIXME this represents the pdg code - needs to be renamed
+        m_recoTree->Branch("idtrack_truth_id", &m_idtrack_truth_pdgid); // TODO Update variable name to be consistent
         m_recoTree->Branch("idtrack_truth_barcode", &m_idtrack_truth_barcode); // FIXME barcode-based
         m_recoTree->Branch("idtrack_has_truth", &m_idtrack_has_truth);
         m_recoTree->Branch("idtrack_has_truth_par", &m_idtrack_has_truth_par);
@@ -203,7 +203,7 @@ namespace MuonCombined {
 
     void MuonCombinedDebuggerTool::fillIdBranches(const InDetCandidateCollection& inDetCandidates) {
         // truth
-        m_idtrack_truth_id.clear();
+        m_idtrack_truth_pdgid.clear();
         m_idtrack_truth_barcode.clear();
         m_idtrack_has_truth.clear();
         m_idtrack_has_truth_par.clear();
@@ -264,7 +264,7 @@ namespace MuonCombined {
                   truthParticleLinkAcc(inDetCandidate->indetTrackParticle());
                 if (truthLink.isValid()) {
                     m_idtrack_has_truth.push_back(1);
-                    m_idtrack_truth_id.push_back((*truthLink)->pdgId());
+                    m_idtrack_truth_pdgid.push_back((*truthLink)->pdgId());
                     m_idtrack_truth_barcode.push_back(HepMC::barcode(*truthLink)); // FIXME barcode-based
                     const Trk::TrackParameters* perigee = m_truthToTrack->makePerigeeParameters(*truthLink);
                     if (perigee) {
@@ -291,8 +291,8 @@ namespace MuonCombined {
                 } else {
                     m_idtrack_has_truth.push_back(0);
                     m_idtrack_has_truth_par.push_back(0);
-                    m_idtrack_truth_id.push_back(-1); // FIXME use a better value for an invalid PDG code
-                    m_idtrack_truth_barcode.push_back(HepMC::INVALID_PARTICLE_ID);
+                    m_idtrack_truth_pdgid.push_back(0); // FIXME Create a constant for undefined PDGID?
+                    m_idtrack_truth_barcode.push_back(HepMC::UNDEFINED_ID); // FIXME barcode-based
                     m_idtrack_truth_sur_x.push_back(-1);
                     m_idtrack_truth_sur_y.push_back(-1);
                     m_idtrack_truth_sur_z.push_back(-1);
@@ -305,8 +305,8 @@ namespace MuonCombined {
             } else {
                 m_idtrack_has_truth.push_back(0);
                 m_idtrack_has_truth_par.push_back(0);
-                m_idtrack_truth_id.push_back(-1); // FIXME use a better value for an invalid PDG code
-                m_idtrack_truth_barcode.push_back(HepMC::INVALID_PARTICLE_ID);
+                m_idtrack_truth_pdgid.push_back(0); // FIXME Create a constant for undefined PDGID?
+                m_idtrack_truth_barcode.push_back(HepMC::UNDEFINED_ID); // FIXME barcode-based
                 m_idtrack_truth_sur_x.push_back(-1);
                 m_idtrack_truth_sur_y.push_back(-1);
                 m_idtrack_truth_sur_z.push_back(-1);
@@ -354,7 +354,7 @@ namespace MuonCombined {
         // truth
         m_mstrack_has_truth.clear();
         m_mstrack_has_truth_par.clear();
-        m_mstrack_truth_id.clear();
+        m_mstrack_truth_pdgid.clear();
         m_mstrack_truth_barcode.clear();
         m_mstrack_truth_sur_x.clear();
         m_mstrack_truth_sur_y.clear();
@@ -441,7 +441,7 @@ namespace MuonCombined {
                   truthParticleLinkAcc(**muonCandidate->muonSpectrometerTrackLink());
                 if (truthLink.isValid()) {
                     m_mstrack_has_truth.push_back(1);
-                    m_mstrack_truth_id.push_back((*truthLink)->pdgId());
+                    m_mstrack_truth_pdgid.push_back((*truthLink)->pdgId());
                     m_mstrack_truth_barcode.push_back(HepMC::barcode(*truthLink)); // FIXME barcode-based
                     const Trk::TrackParameters* perigee = m_truthToTrack->makePerigeeParameters(*truthLink);
                     if (perigee) {
@@ -468,8 +468,8 @@ namespace MuonCombined {
                 } else {  // no truth link available
                     m_mstrack_has_truth.push_back(0);
                     m_mstrack_has_truth_par.push_back(0);
-                    m_mstrack_truth_id.push_back(0); // undefined PDG code
-                    m_mstrack_truth_barcode.push_back(HepMC::UNDEFINED_ID);
+                    m_mstrack_truth_pdgid.push_back(0); // FIXME Create a constant for undefined PDGID?
+                    m_mstrack_truth_barcode.push_back(HepMC::UNDEFINED_ID); // FIXME barcode-based
                     m_mstrack_truth_sur_x.push_back(-1);
                     m_mstrack_truth_sur_y.push_back(-1);
                     m_mstrack_truth_sur_z.push_back(-1);
@@ -482,8 +482,8 @@ namespace MuonCombined {
             } else {  // no truth link available
                 m_mstrack_has_truth.push_back(0);
                 m_mstrack_has_truth_par.push_back(0);
-                m_mstrack_truth_id.push_back(0); // undefined PDG code
-                m_mstrack_truth_barcode.push_back(HepMC::UNDEFINED_ID);
+                m_mstrack_truth_pdgid.push_back(0); // FIXME Create a constant for undefined PDGID?
+                m_mstrack_truth_barcode.push_back(HepMC::UNDEFINED_ID); // FIXME barcode-based
                 m_mstrack_truth_sur_x.push_back(-1);
                 m_mstrack_truth_sur_y.push_back(-1);
                 m_mstrack_truth_sur_z.push_back(-1);

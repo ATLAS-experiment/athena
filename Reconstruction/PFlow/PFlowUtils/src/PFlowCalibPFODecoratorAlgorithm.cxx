@@ -32,13 +32,13 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
        ATH_MSG_ERROR("Dynamic cast failed in PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO");
        return StatusCode::FAILURE;
     }
-    std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
-    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newBarCodeTruthPairs);
+    std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs; // FIXME barcode-based
+    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newBarCodeTruthPairs); // FIXME barcode-based
     if (sc == StatusCode::FAILURE) return sc;
     
     for (const auto& thisPair : newBarCodeTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with barcode " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
     
-    pfoWriteDecorHandle(*thisFE) = newBarCodeTruthPairs;
+    pfoWriteDecorHandle(*thisFE) = newBarCodeTruthPairs; // FIXME barcode-based
   }
   return StatusCode::SUCCESS;
 }

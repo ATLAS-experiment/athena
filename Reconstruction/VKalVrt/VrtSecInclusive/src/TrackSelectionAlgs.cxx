@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -8,6 +8,7 @@
 #include "VrtSecInclusive/Tools.h"
 
 #include "xAODEgamma/ElectronxAODHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <iostream>
 
@@ -184,14 +185,14 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
       // Here we firstly need to register the empty pointer to the m_selectedTracks,
       // then need to do deep copy after then. This is the feature of xAOD.
         
-      unsigned long barcode=0;
+      int barcode=HepMC::UNDEFINED_ID; // FIXME barcode-based
       
       if( m_jp.doTruth ) {  
         
-        const auto* truth = getTrkGenParticle(trk);
+        const xAOD::TruthParticle *truth = getTrkGenParticle(trk);
         
         if ( truth ) {
-          barcode = truth->barcode();
+          barcode = truth->barcode(); // FIXME barcode-based
         }
         
       }
@@ -206,7 +207,7 @@ for( auto func : m_trackSelectionFuncs ) cutBits.emplace_back( (this->*func)( tr
       
       m_selectedTracks->emplace_back( trk );
       
-      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // will need this later          
+      if( m_jp.FillNtuple ) m_ntupleVars->get< vector<int> >( "SelTrk_barcode" ).emplace_back(barcode); // will need this later // FIXME barcode-based
       
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index() << " has been selected." );
       ATH_MSG_VERBOSE( " > " << __FUNCTION__ << ": Track index " << trk->index()
