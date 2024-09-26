@@ -31,8 +31,6 @@ NAME:     LArFebSummaryMaker
 
 #include "CxxUtils/checker_macros.h"
 
-#include "Gaudi/Parsers/Factory.h"
-
 #include <array>
 #include <set>
 
