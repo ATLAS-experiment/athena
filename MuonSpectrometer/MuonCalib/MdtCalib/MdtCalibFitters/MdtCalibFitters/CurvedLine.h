@@ -53,11 +53,11 @@ namespace MuonCalib {
 
         // Methods //
         // get-methods //
-        Amg::Vector3D getPointOnLine(const double &loc_z) const;
+        Amg::Vector3D getPointOnLine(const double loc_z) const;
         ///< get the point on the line a the local
         ///< z coordinate "loc_z"
 
-        MTStraightLine getTangent(const double &loc_z) const;
+        MTStraightLine getTangent(const double loc_z) const;
         ///< get the tangent to the line a the local
         ///< z coordinate "loc_z"
 

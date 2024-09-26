@@ -36,7 +36,7 @@ RtCalibrationCurved::RtCalibrationCurved(const std::string &name) : IMdtCalibrat
     init(0.5 * CLHEP::mm, 1, 15, true, false, 15, false, false, false);
 }
 
-RtCalibrationCurved::RtCalibrationCurved(const std::string &name, const double &rt_accuracy, const unsigned int &func_type,
+RtCalibrationCurved::RtCalibrationCurved(const std::string &name, const double rt_accuracy, const unsigned int &func_type,
                                          const unsigned int &ord, const bool &fix_min, const bool &fix_max, const int &max_it,
                                          bool do_parabolic_extrapolation, bool do_smoothing, bool do_multilayer_rt_scale) :
     IMdtCalibration(name), m_rt_accuracy_previous(0.0) {
@@ -58,7 +58,7 @@ int RtCalibrationCurved::iteration() const { return m_iteration; }
 
 bool RtCalibrationCurved::smoothing() const { return m_do_smoothing; }
 
-void RtCalibrationCurved::setEstimateRtAccuracy(const double &acc) { m_rt_accuracy = std::abs(acc); }
+void RtCalibrationCurved::setEstimateRtAccuracy(const double acc) { m_rt_accuracy = std::abs(acc); }
 
 void RtCalibrationCurved::switch_on_control_histograms(const std::string &file_name) {
     /////////////////////////////////////////////
@@ -572,7 +572,6 @@ bool RtCalibrationCurved::analyse(const MuonSegVec &seg) {
     double r_corr;                               // radial correction
     std::vector<double> rt_param(m_rt->nPar());  // parameters for the new r-t
     double x;                                    // reduced time
-    RtFromPoints rt_from_points;                 // r-t from points
 
     ////////////////////////////////////////
     // SOLVE THE AUTOCALIBRATION EQUATION //
@@ -723,7 +722,7 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::getResults() const {
 //:::::::::::::::::
 //:: METHOD init ::
 //:::::::::::::::::
-void RtCalibrationCurved::init(const double &rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &fix_min,
+void RtCalibrationCurved::init(const double rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &fix_min,
                                const bool &fix_max, const int &max_it, bool do_parabolic_extrapolation, bool do_smoothing,
                                bool do_multilayer_rt_scale) {
     /////////////////////////////
@@ -803,7 +802,7 @@ void RtCalibrationCurved::init(const double &rt_accuracy, const unsigned int &fu
 
     return;
 }
-double RtCalibrationCurved::t_from_r(const double &r) {
+double RtCalibrationCurved::t_from_r(const double r) {
     ///////////////
     // VARIABLES //
     ///////////////

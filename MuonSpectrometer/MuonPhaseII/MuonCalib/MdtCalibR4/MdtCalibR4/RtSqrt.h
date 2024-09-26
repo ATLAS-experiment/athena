@@ -13,12 +13,12 @@ namespace MuonCalibR4 {
         public:
             explicit RtSqrt(ParVec& vec) : MuonCalib::IRtRelation(vec) {}
 
-            std::string name(void) const;
+            std::string name() const;
             double radius(double t) const;
             double drdt(double t) const;
             double driftvelocity(double t) const;
-            double tLower(void) const;
-            double tUpper(void) const;
+            double tLower() const;
+            double tUpper() const;
 
     };
 

@@ -44,7 +44,7 @@ namespace MuonCalib {
         std::vector<int> m_index;   // indices
 
         // initialization methods //
-        void init(void);
+        void init();
         // default initiailization method; the number of indices is set to 0
         void init(const unsigned int& r_nb_indices);
         // initialization method; the number of indices is set to r_nb_indices
@@ -54,7 +54,7 @@ namespace MuonCalib {
 
     public:
         // Constructors //
-        IndexSet(void) { init(); }
+        IndexSet() { init(); }
         ///< default constructor: the number of indices is set to 0
 
         IndexSet(const unsigned int& r_nb_indices) { init(r_nb_indices); }
@@ -65,7 +65,7 @@ namespace MuonCalib {
         ///<              the vector r_index contains the indices
 
         // Methods //
-        unsigned int size(void) const;
+        unsigned int size() const;
         ///< get the number of indices
         void resize(const unsigned int& r_size);
         ///< resize the index set to r_size;
@@ -78,7 +78,7 @@ namespace MuonCalib {
         ///< 0 <= r_k < size();
         ///< WARNING: no test on the index is
         ///< performed
-        void sort(void);
+        void sort();
         ///< sort the indices in ascending order
         bool operator==(const IndexSet& r_index_set) const;
         bool operator!=(const IndexSet& r_index_set) const;

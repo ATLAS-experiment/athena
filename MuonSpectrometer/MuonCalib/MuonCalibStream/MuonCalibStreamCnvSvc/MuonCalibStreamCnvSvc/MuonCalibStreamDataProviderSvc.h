@@ -17,7 +17,7 @@ class MuonCalibStreamDataProviderSvc : public AthService, virtual public IMuonCa
 
 public:
     MuonCalibStreamDataProviderSvc(const std::string &name, ISvcLocator *svcloc);
-    virtual ~MuonCalibStreamDataProviderSvc(void);
+    virtual ~MuonCalibStreamDataProviderSvc();
     virtual StatusCode initialize();
     virtual StatusCode queryInterface(const InterfaceID &riid, void **ppvInterface);
     virtual void setNextEvent(const LVL2_MUON_CALIBRATION::CalibEvent *re);

@@ -70,7 +70,7 @@ namespace MuonCalib {
         ///< relating the errors in r(t) to the residuals is used.
         ///< By default no smoothing is applied after convergence.
 
-        RtCalibrationAnalytic(const std::string &name, const double &rt_accuracy, const unsigned int &func_type, const unsigned int &ord,
+        RtCalibrationAnalytic(const std::string &name, const double rt_accuracy, const unsigned int &func_type, const unsigned int &ord,
                               const bool &split, const bool &full_matrix, const bool &fix_min, const bool &fix_max, const int &max_it,
                               bool do_smoothing = false, bool do_parabolic_extrapolation = false);
         ///< Constructor: r-t accuracy is set to rt_accuracy (unit: CLHEP::mm).
@@ -142,7 +142,7 @@ namespace MuonCalib {
         ///< returns false otherwise
 
         // set-method //
-        void setEstimateRtAccuracy(const double &acc);
+        void setEstimateRtAccuracy(const double acc);
         ///< set the estimated r-t accuracy =acc
         void splitIntoMultilayers(const bool &yes_or_no);
         ///< yes_or_no=true: segments are
@@ -302,7 +302,7 @@ namespace MuonCalib {
         std::unique_ptr<TH2F> m_residuals;        // residual distribution
 
         // private methods //
-        void init(const double &rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &split,
+        void init(const double rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &split,
                   const bool &full_matrix, const bool &fix_min, const bool &fix_max, const int &max_it, bool do_smoothing,
                   bool do_parabolic_extrapolation);
         // initialization method:
@@ -326,7 +326,7 @@ namespace MuonCalib {
         // parabolic extrapolation for small and large
         // radii;
         // max_it: maximum number of iterations
-        double t_from_r(const double &r);
+        double t_from_r(const double r);
         // get t(r) for the input r-t relationship,
         // the method is auxiliary and not optimized;
         // it will disappear when the t(r) will be

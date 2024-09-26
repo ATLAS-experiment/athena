@@ -22,7 +22,7 @@ using namespace MuonCalib;
 
 ConstantContentBinMaker::ConstantContentBinMaker(
                             const std::vector<DataPoint> & points,
-                            const double & epsilon)
+                            const double  epsilon)
   : m_points (points),
     m_epsilon (std::abs(epsilon))
 {
@@ -116,7 +116,7 @@ bool ConstantContentBinMaker::binDataPoints(const unsigned int & bin_content,
 //:: METHOD getBins ::
 //::::::::::::::::::::
 
-const std::vector<DataBin *> & ConstantContentBinMaker::getBins(void) const {
+const std::vector<DataBin *> & ConstantContentBinMaker::getBins() const {
 
     return m_bins;
 

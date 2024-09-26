@@ -47,7 +47,7 @@ namespace MuonCalib {
 
         // Methods //
         // get-methods //
-        unsigned int number_of_hits_used(void) const;
+        unsigned int number_of_hits_used() const;
         ///< get the number of hits used in the
         ///< r-t determination
 
@@ -60,9 +60,9 @@ namespace MuonCalib {
         ///< the method is empty as no initial
         ///< r-t relationship is required by
         ///< the algorithm
-        bool analyse(void);
+        bool analyse();
         ///< perform the integration method
-        bool converged(void) const;
+        bool converged() const;
         ///< returns true, if the integration
         ///< method has been performed
         MdtCalibOutputPtr getResults() const override;

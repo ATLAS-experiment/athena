@@ -1,46 +1,23 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "MdtCalibData/RtResolutionChebyshev.h"
-
-#include <TString.h>  // for Form
+#include "MuonCalibMath/ChebychevPoly.h"
+#include "GeoModelHelpers/throwExcept.h"
 
 using namespace MuonCalib;
 
-//*****************************************************************************
-
-//////////////////
-// METHOD _init //
-//////////////////
-void RtResolutionChebyshev::_init(void) {
+ RtResolutionChebyshev::RtResolutionChebyshev(const ParVec& vec) : 
+    IRtResolution(vec) { 
     // check for consistency //
     if (nPar() < 3) {
-        throw std::runtime_error(Form("File: %s, Line: %d\nRtResolutionChebyshev::_init() - Not enough parameters!", __FILE__, __LINE__));
+        THROW_EXCEPTION("Not enough parameters!");
     }
-    if (parameters()[0] >= parameters()[1]) {
-        throw std::runtime_error(
-            Form("File: %s, Line: %d\nRtResolutionChebyshev::_init() - Lower time boundary >= upper time boundary!", __FILE__, __LINE__));
+    if (tLower() >= tUpper()) {
+        THROW_EXCEPTION("Lower time boundary >= upper time boundary!");
     }
-
-    // pointer to the chebyshev service //
-    m_Chebyshev = Tschebyscheff_polynomial::get_Tschebyscheff_polynomial();
-
-    return;
 }
-
-//*****************************************************************************
-
-/////////////////
-// METHOD name //
-/////////////////
-std::string RtResolutionChebyshev::name(void) const { return std::string("RtResolutionChebyshev"); }
-
-//*****************************************************************************
-
-///////////////////
-// METHOD radius //
-///////////////////
+std::string RtResolutionChebyshev::name() const { return std::string("RtResolutionChebyshev"); }
 double RtResolutionChebyshev::resolution(double t, double /*bgRate*/) const {
     ////////////////////////
     // INITIAL TIME CHECK //
@@ -51,63 +28,33 @@ double RtResolutionChebyshev::resolution(double t, double /*bgRate*/) const {
         double res_min(resolution(tLower())), res_max(resolution(tUpper()));
 
         // if x is out of bounds, return 99999 //
-        if (t < parameters()[0]) return res_min;
+        if (t < tLower()) return res_min;
 
-        if (t > parameters()[1]) return res_max;
+        if (t > tUpper()) return res_max;
     }
     ///////////////
     // VARIABLES //
     ///////////////
     // argument of the Chebyshev polynomials
-    double x(2 * (t - 0.5 * (parameters()[1] + parameters()[0])) / (parameters()[1] - parameters()[0]));
+    double x(2 * (t - 0.5 * (tUpper() + tLower())) / (tUpper() - tLower()));
     double resol(0.0);  // auxiliary resolution
 
     ////////////////////
     // CALCULATE r(t) //
     ////////////////////
-    for (unsigned int k = 0; k < nPar() - 2; k++) { resol = resol + parameters()[k + 2] * m_Chebyshev->value(k, x); }
+    for (unsigned int k = 0; k < nPar() - 2; k++) { resol = resol + parameters()[k + 2]  * chebyshevPoly1st(k, x); }
 
     return resol;
 }
-
-//*****************************************************************************
-
-///////////////////
-// METHOD tLower //
-///////////////////
-double RtResolutionChebyshev::tLower(void) const { return parameters()[0]; }
-
-//*****************************************************************************
-
-///////////////////
-// METHOD tUpper //
-///////////////////
-double RtResolutionChebyshev::tUpper(void) const { return parameters()[1]; }
-
-//*****************************************************************************
-
-//////////////////////////////////
-// METHOD numberOfResParameters //
-//////////////////////////////////
-unsigned int RtResolutionChebyshev::numberOfResParameters(void) const { return nPar() - 2; }
-
-//*****************************************************************************
-
-//////////////////////////
-// METHOD resParameters //
-//////////////////////////
-std::vector<double> RtResolutionChebyshev::resParameters(void) const {
+double RtResolutionChebyshev::tLower() const { return parameters()[0]; }
+double RtResolutionChebyshev::tUpper() const { return parameters()[1]; }
+unsigned int RtResolutionChebyshev::numberOfResParameters() const { return nPar() - 2; }
+std::vector<double> RtResolutionChebyshev::resParameters() const {
     std::vector<double> alpha(nPar() - 2);
     for (unsigned int k = 0; k < alpha.size(); k++) { alpha[k] = parameters()[k + 2]; }
 
     return alpha;
 }
-
-//*****************************************************************************
-
-/////////////////////////////
-// METHOD get_reduced_time //
-/////////////////////////////
-inline double RtResolutionChebyshev::get_reduced_time(const double& t) const {
-    return 2 * (t - 0.5 * (parameters()[1] + parameters()[0])) / (parameters()[1] - parameters()[0]);
+inline double RtResolutionChebyshev::get_reduced_time(const double  t) const {
+    return 2 * (t - 0.5 * (tUpper() + tLower())) / (tUpper() - tLower());
 }

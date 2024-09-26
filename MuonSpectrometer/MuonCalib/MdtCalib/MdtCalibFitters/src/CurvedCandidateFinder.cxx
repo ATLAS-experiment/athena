@@ -11,7 +11,7 @@ using namespace MuonCalib;
 
 CurvedCandidateFinder::CurvedCandidateFinder(const MdtHitVec &hits) : m_hits{hits} {}
 
-const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double &road_width) {
+const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double road_width) {
     Amg::Vector3D est_dir(0.0, 0.0, 1.0);
     return getCandidates(road_width, est_dir);
 }
@@ -22,7 +22,7 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
 //:: METHOD getCandidates ::
 //::::::::::::::::::::::::::
 
-const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double &road_width, const Amg::Vector3D &est_dir) {
+const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double road_width, const Amg::Vector3D &est_dir) {
     /////////////////////////////////////////
     // RETURN IF THERE ARE NOT ENOUGH HITS //
     /////////////////////////////////////////

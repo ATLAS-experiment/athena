@@ -17,7 +17,7 @@ using namespace MuonCalib;
 //:: DEFAULT CONSTRUCTOR ::
 //:::::::::::::::::::::::::
 
-Combination::Combination(void) {
+Combination::Combination() {
 
 	init(1,1);
 
@@ -76,7 +76,7 @@ void Combination::init(const unsigned int & n, const unsigned int & k) {
 //:: METHOD numberOfElements ::
 //:::::::::::::::::::::::::::::
 
-unsigned int Combination::numberOfElements(void) const {
+unsigned int Combination::numberOfElements() const {
 
 	return m_n;
 
@@ -88,7 +88,7 @@ unsigned int Combination::numberOfElements(void) const {
 //:: METHOD whichClass ::
 //:::::::::::::::::::::::
 
-unsigned int Combination::whichClass(void) const {
+unsigned int Combination::whichClass() const {
 
 	return m_k;
 
@@ -100,7 +100,7 @@ unsigned int Combination::whichClass(void) const {
 //:: METHOD numberOfCombinations ::
 //:::::::::::::::::::::::::::::::::
 
-unsigned int Combination::numberOfCombinations(void) const {
+unsigned int Combination::numberOfCombinations() const {
 
 ///////////////
 // VARIABLES //
@@ -210,7 +210,7 @@ void Combination::nextCombination(std::vector<unsigned int> & index_array) {
 //:: METHOD reset ::
 //::::::::::::::::::
 
-void Combination::reset(void) {
+void Combination::reset() {
 
 	for (unsigned int j=0; j<m_k; j++) {
 		m_index[j] = j+1;

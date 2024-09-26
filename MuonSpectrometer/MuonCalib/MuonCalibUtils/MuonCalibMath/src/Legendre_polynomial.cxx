@@ -28,7 +28,7 @@ namespace MuonCalib {
 // METHOD get_Legendre_polynomial //
 ////////////////////////////////////
 
- const Legendre_polynomial * Legendre_polynomial::get_Legendre_polynomial(void) {
+ const Legendre_polynomial * Legendre_polynomial::get_Legendre_polynomial() {
     static const Legendre_polynomial s_polynomial; 
     return &s_polynomial;
 
@@ -40,7 +40,7 @@ namespace MuonCalib {
 // PRIVATE CONSTRUCTOR //
 /////////////////////////
 
-    Legendre_polynomial::Legendre_polynomial(void) {
+    Legendre_polynomial::Legendre_polynomial() {
     }
 
 }

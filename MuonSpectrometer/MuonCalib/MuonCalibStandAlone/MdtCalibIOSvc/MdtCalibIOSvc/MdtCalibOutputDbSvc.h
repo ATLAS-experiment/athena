@@ -121,7 +121,7 @@ private:
     ServiceHandle<MdtCalibInputSvc> m_input_service;
     std::vector<MuonCalib::NtupleStationId> m_region_ids;
     // private methods //
-    StatusCode saveCalibrationResults(void);
+    StatusCode saveCalibrationResults();
     ///< write out all memorized results to text files (location specified
     ///< in the job options) which can be uploaded to the calibration
     ///< database; method returns true in case of success, false otherwise

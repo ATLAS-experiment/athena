@@ -30,8 +30,8 @@ void MTStraightLine::init(const Amg::Vector3D& r_position, const Amg::Vector3D& 
     return;
 }
 
-void MTStraightLine::init(const double& r_a_x1, const double& r_b_x1, const double& r_a_x2, const double& r_b_x2, const double& r_a_x1_err,
-                          const double& r_b_x1_err, const double& r_a_x2_err, const double& r_b_x2_err) {
+void MTStraightLine::init(const double  r_a_x1, const double  r_b_x1, const double  r_a_x2, const double  r_b_x2, const double  r_a_x1_err,
+                          const double  r_b_x1_err, const double  r_a_x2_err, const double  r_b_x2_err) {
     m_position = Amg::Vector3D(r_b_x1, r_b_x2, 0.0);
     m_direction = Amg::Vector3D(r_a_x1, r_a_x2, 1.0);
     m_position_error = Amg::Vector3D(r_b_x1_err, r_b_x2_err, 0.0);
@@ -84,7 +84,7 @@ double MTStraightLine::b_x2_error() const {
     return std::hypot(m_position_error.y(), a_x2() * m_position_error.z(), m_position.z() * a_x2_error());
 }
 
-Amg::Vector3D MTStraightLine::pointOnLine(const double& lambda) const { return m_position + lambda * m_direction; }
+Amg::Vector3D MTStraightLine::pointOnLine(const double  lambda) const { return m_position + lambda * m_direction; }
 
 double MTStraightLine::signDistFrom(const MTStraightLine& h) const {
     //:::::::::::::::::::::::::

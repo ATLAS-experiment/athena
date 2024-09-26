@@ -41,12 +41,12 @@ This class provides a sample point for the BaseFunctionFitter.
 
     msigma = error of the x2 coordinate of the sample point
     */
-    inline void init(const double & mx1, const double & mx2,
-		       const double & msigma); 
+    inline void init(const double  mx1, const double  mx2,
+		       const double  msigma); 
 
   public:
     // Constructors
-    SamplePoint(void) {
+    SamplePoint() {
       m_x1 = 0.0; m_x2 = 0.0; m_sigma = 0.0;
     }				//!< default constructor
     /** constructor,
@@ -69,16 +69,16 @@ This class provides a sample point for the BaseFunctionFitter.
 
     msigma = error of the x2 coordinate of the sample point
     */
-    SamplePoint(const double & mx1, const double & mx2,
-		const double & msigma) {
+    SamplePoint(const double  mx1, const double  mx2,
+		const double  msigma) {
       init(mx1, mx2, msigma);
     }
 
     // Methods
     // get-methods //
-    inline double x1(void) const; //!< get the x1 coordinate of the sample point
-    inline double x2(void) const; //!< get the x2 coordinate of the sample point
-    inline double error(void) const; //!< get the error on the x2 coordinate of the sample point
+    inline double x1() const; //!< get the x1 coordinate of the sample point
+    inline double x2() const; //!< get the x2 coordinate of the sample point
+    inline double error() const; //!< get the error on the x2 coordinate of the sample point
 
     // set-methods //
     /** set the sample point,
@@ -90,9 +90,9 @@ This class provides a sample point for the BaseFunctionFitter.
     x[2] = error of the x2 coordinate of the sample point
     */
     inline void set_triplet(const double x[3]); 
-    inline void set_x1(const double & mx1); //!< set the x1 coordinate of the sample point to mx1
-    inline void set_x2(const double & mx2); //!< set the x2 coordinate of the sample point to mx2
-    inline void set_error(const double & merror); //!< set the error of the x2 coordinate sample point to merror
+    inline void set_x1(const double  mx1); //!< set the x1 coordinate of the sample point to mx1
+    inline void set_x2(const double  mx2); //!< set the x2 coordinate of the sample point to mx2
+    inline void set_error(const double  merror); //!< set the error of the x2 coordinate sample point to merror
 
   };
 

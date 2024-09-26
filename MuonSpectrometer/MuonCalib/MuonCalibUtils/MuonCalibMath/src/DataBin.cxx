@@ -20,7 +20,7 @@ using namespace MuonCalib;
 //:: CONSTRUCTOR ::
 //:::::::::::::::::
 
-DataBin::DataBin(void) {
+DataBin::DataBin() {
 }
 
 //*****************************************************************************
@@ -29,7 +29,7 @@ DataBin::DataBin(void) {
 //:: CONSTRUCTOR ::
 //:::::::::::::::::
 
-DataBin::DataBin(const std::vector<DataPoint>& points, const double & epsilon) {
+DataBin::DataBin(const std::vector<DataPoint>& points, const double  epsilon) {
 
     for (unsigned int k=0; k<points.size(); k++) {
         addPointAndResize(points[k], epsilon);
@@ -71,7 +71,7 @@ DataBin::DataBin(const Amg::VectorX & lower_boundaries,
 //:: METHOD DataBin ::
 //::::::::::::::::::::
 
-double DataBin::density(void) const {
+double DataBin::density() const {
 
     double volume(1.0);
     for (int k=0; k<m_lower_boundaries.cols(); k++) {
@@ -87,7 +87,7 @@ double DataBin::density(void) const {
 //:: METHOD centreOfBin ::
 //::::::::::::::::::::::::
 
-const Amg::VectorX & DataBin::centreOfBin(void) const {
+const Amg::VectorX & DataBin::centreOfBin() const {
 
     return m_bin_centre;
 
@@ -99,7 +99,7 @@ const Amg::VectorX & DataBin::centreOfBin(void) const {
 //:: METHOD lowerBinBoundaries ::
 //:::::::::::::::::::::::::::::::
 
-const Amg::VectorX & DataBin::lowerBinBoundaries(void) const {
+const Amg::VectorX & DataBin::lowerBinBoundaries() const {
 
     return m_lower_boundaries;
 
@@ -111,7 +111,7 @@ const Amg::VectorX & DataBin::lowerBinBoundaries(void) const {
 //:: METHOD upperbinBoundaries ::
 //:::::::::::::::::::::::::::::::
 
-const Amg::VectorX & DataBin::upperbinBoundaries(void) const {
+const Amg::VectorX & DataBin::upperbinBoundaries() const {
 
     return m_upper_boundaries;
 
@@ -123,7 +123,7 @@ const Amg::VectorX & DataBin::upperbinBoundaries(void) const {
 //:: METHOD centreOfGravity ::
 //::::::::::::::::::::::::::::
 
-const Amg::VectorX & DataBin::centreOfGravity(void) const {
+const Amg::VectorX & DataBin::centreOfGravity() const {
 
     return m_centre_of_gravity;
 
@@ -135,7 +135,7 @@ const Amg::VectorX & DataBin::centreOfGravity(void) const {
 //:: METHOD standardDeviations ::
 //:::::::::::::::::::::::::::::::
 
-const Amg::VectorX & DataBin::standardDeviations(void) const {
+const Amg::VectorX & DataBin::standardDeviations() const {
 
     return m_standard_deviations;
 
@@ -147,7 +147,7 @@ const Amg::VectorX & DataBin::standardDeviations(void) const {
 //:: METHOD numberOfDataPoints ::
 //:::::::::::::::::::::::::::::::
 
-unsigned int DataBin::numberOfDataPoints(void) const {
+unsigned int DataBin::numberOfDataPoints() const {
 
     return m_points.size();
 
@@ -159,7 +159,7 @@ unsigned int DataBin::numberOfDataPoints(void) const {
 //:: METHOD dataPoints ::
 //:::::::::::::::::::::::
 
-const std::vector<DataPoint> & DataBin::dataPoints(void) const {
+const std::vector<DataPoint> & DataBin::dataPoints() const {
 
     return m_points;
 
@@ -292,7 +292,7 @@ bool DataBin::addPoint(const DataPoint & point) {
 //:: METHOD addPointAndResize ::
 //::::::::::::::::::::::::::::::
 
-void DataBin::addPointAndResize(const DataPoint & point, const double & epsilon) {
+void DataBin::addPointAndResize(const DataPoint & point, const double  epsilon) {
 
 // add the point //
     m_points.push_back(point);

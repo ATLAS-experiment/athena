@@ -30,8 +30,8 @@ inline void SamplePoint::init(double triplet[3]) {
 // METHOD init(., ., .) //
 ////////////////////////////
 
-inline void SamplePoint::init(const double & mx1, const double & mx2,
-						const double & msigma) {
+inline void SamplePoint::init(const double  mx1, const double  mx2,
+						const double  msigma) {
 
 	m_x1 = mx1;
 	m_x2 = mx2;
@@ -47,7 +47,7 @@ inline void SamplePoint::init(const double & mx1, const double & mx2,
 // METHOD x1 //
 ///////////////
 
-inline double SamplePoint::x1(void) const {
+inline double SamplePoint::x1() const {
 
 	return m_x1;
 
@@ -59,7 +59,7 @@ inline double SamplePoint::x1(void) const {
 // METHOD x2 //
 ///////////////
 
-inline double SamplePoint::x2(void) const {
+inline double SamplePoint::x2() const {
 
 	return m_x2;
 
@@ -71,7 +71,7 @@ inline double SamplePoint::x2(void) const {
 // METHOD error //
 //////////////////
 
-inline double SamplePoint::error(void) const {
+inline double SamplePoint::error() const {
 
 	return m_sigma;
 
@@ -100,7 +100,7 @@ inline void SamplePoint::set_triplet(const double x[3]) {
 // METHOD set_x1 //
 ///////////////////
 
-inline void SamplePoint::set_x1(const double & mx1) {
+inline void SamplePoint::set_x1(const double  mx1) {
 
 	m_x1 = mx1;
 	return;
@@ -113,7 +113,7 @@ inline void SamplePoint::set_x1(const double & mx1) {
 // METHOD set_x2 //
 ///////////////////
 
-inline void SamplePoint::set_x2(const double & mx2) {
+inline void SamplePoint::set_x2(const double  mx2) {
 
 	m_x2 =mx2;
 	return;
@@ -126,7 +126,7 @@ inline void SamplePoint::set_x2(const double & mx2) {
 // METHOD set_error //
 //////////////////////
 
-inline void SamplePoint::set_error(const double & merror) {
+inline void SamplePoint::set_error(const double  merror) {
 
 	m_sigma = merror;
 	return;

@@ -50,8 +50,8 @@ namespace MuonCalib {
         double drdt(double /*t*/) const { return 0; }
 
         /** return rt range */
-        inline double tLower(void) const;
-        inline double tUpper(void) const;
+        inline double tLower() const;
+        inline double tUpper() const;
 
     private:
         int getBin(double t) const {
@@ -120,9 +120,9 @@ namespace MuonCalib {
         return bin;
     }
 
-    inline double RtRelationLookUp::tLower(void) const { return m_t_min; }
+    inline double RtRelationLookUp::tLower() const { return m_t_min; }
 
-    inline double RtRelationLookUp::tUpper(void) const { return m_t_min + m_bin_size * rtBins(); }
+    inline double RtRelationLookUp::tUpper() const { return m_t_min + m_bin_size * rtBins(); }
 
 }  // namespace MuonCalib
 #endif

@@ -48,13 +48,13 @@ namespace MuonCalib {
     class AdaptiveResidualSmoothing {
     public:
         // Constructor //
-        AdaptiveResidualSmoothing(void);
+        AdaptiveResidualSmoothing();
         ///< Default constructor.
 
         // Methods //
-        void clear(void);
+        void clear();
         ///< clear the memory of the class
-        void addResidual(const double& radius, const double& residual);
+        void addResidual(const double  radius, const double  residual);
         ///< add the residual at the given radius
         bool addResidualsFromSegment(MuonCalibSegment& seg, bool curved, double road_width);
         ///< reconstruct the given segment and
@@ -84,7 +84,7 @@ namespace MuonCalib {
         std::vector<DataPoint> m_residual_point;  // vector of residual points
         StraightPatRec m_sfitter;                 // straight-line fitter
         CurvedPatRec m_cfitter;                   // curved-line fitter
-        double t_from_r(const IRtRelation& rt_rel, const double& r);
+        double t_from_r(const IRtRelation& rt_rel, const double  r);
         // get t(r) for the given r-t relationship,
         // the method is auxiliary and not optimized;
         // it will disappear when the t(r) will be

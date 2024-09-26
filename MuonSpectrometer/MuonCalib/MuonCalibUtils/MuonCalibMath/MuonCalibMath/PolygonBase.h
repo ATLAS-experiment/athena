@@ -39,32 +39,21 @@ namespace MuonCalib {
 
 namespace MuonCalib {
 
-class PolygonBase : public BaseFunction {
+    class PolygonBase : public BaseFunction {
 
-public:
-// Constructor //
-	PolygonBase(const std::vector<double> & x) {
-		init(x);
-		}
-	///< Constructor: the vector x contains the abscissae of the
-	///< base points of the polygon. x must contain the abscissae in
-	///< increasing order.
+        public:
+            PolygonBase(const std::vector<double> & x);
+            ///< Constructor: the vector x contains the abscissae of the
+            ///< base points of the polygon. x must contain the abscissae in
+            ///< increasing order.
 
-// Method //
-	double value(const int & k, const double & x) const;
-	                                ///< get the value of the k-th base 
-					///< function in x
+            ///< get the value of the k-th base  function in x
+            double value(const int k, const double x) const;
 
-private:
-	std::vector<double> m_x; // vector containing the abscissae of the base
-	                         // points of the polygon
-	void init(const std::vector<double> & x);
-	                         // initialization method,
-	                         // x contains the abscissae of the base points
-	                         // of the polygon.
-
-};
-
+        private:
+            std::vector<double> m_x{}; // vector containing the abscissae of the base
+                                       // points of the polygon
+    };
 }
 
 #endif

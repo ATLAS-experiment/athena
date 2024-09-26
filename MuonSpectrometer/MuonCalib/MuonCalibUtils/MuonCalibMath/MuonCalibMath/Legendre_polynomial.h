@@ -45,16 +45,16 @@ This class is a monoton/singleton object.
   class Legendre_polynomial {
 
   private:
-    Legendre_polynomial(void); //!< constructor
+    Legendre_polynomial(); //!< constructor
 
   public:
     // Methods
     /** get a pointer to the Legendre polynomial */
-    static const Legendre_polynomial * get_Legendre_polynomial(void);
+    static const Legendre_polynomial * get_Legendre_polynomial();
 
     /** get the value of the Legendre polynomial of order m_order at x */
     inline double value(const int & order,
-			   const double & x) const;
+			   const double  x) const;
 
   };
 

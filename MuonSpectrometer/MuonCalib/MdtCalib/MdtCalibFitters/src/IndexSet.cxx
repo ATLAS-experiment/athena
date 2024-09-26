@@ -24,7 +24,7 @@ using namespace MuonCalib;
 //:: METHOD init ::
 //:::::::::::::::::
 
-void IndexSet::init(void) {
+void IndexSet::init() {
     m_nb_indices = 0;
     return;
 }
@@ -79,7 +79,7 @@ void IndexSet::init(const unsigned int& r_nb_indices, const std::vector<int>& r_
 //:: METHOD size ::
 //:::::::::::::::::
 
-unsigned int IndexSet::size(void) const { return m_nb_indices; }
+unsigned int IndexSet::size() const { return m_nb_indices; }
 
 //*****************************************************************************
 
@@ -134,7 +134,7 @@ int IndexSet::operator[](const unsigned int& r_k) const { return m_index[r_k]; }
 //:: METHOD sort ::
 //:::::::::::::::::
 
-void IndexSet::sort(void) {
+void IndexSet::sort() {
     std::stable_sort(m_index.begin(), m_index.end());
     return;
 }

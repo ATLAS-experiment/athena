@@ -13,7 +13,7 @@
 
 using namespace MuonCalib;
 
-RtParabolicExtrapolation::RtParabolicExtrapolation(void) {}
+RtParabolicExtrapolation::RtParabolicExtrapolation() = default;
 
 //*****************************************************************************
 
@@ -21,8 +21,8 @@ RtParabolicExtrapolation::RtParabolicExtrapolation(void) {}
 //:: METHOD getRtWithParabolicExtrapolation(.,.,.) ::
 //:::::::::::::::::::::::::::::::::::::::::::::::::::
 
-RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const IRtRelation& in_rt, const double& r_min,
-                                                                           const double& r_max) const {
+RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const IRtRelation& in_rt, const double  r_min,
+                                                                           const double  r_max) const {
     ///////////////
     // VARIABLES //
     ///////////////
@@ -69,8 +69,8 @@ RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const
 //:: METHOD getRtWithParabolicExtrapolation(.,.,.,.,.) ::
 //:::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const IRtRelation& in_rt, const double& r_min,
-                                                                           const double& r_max, const double& r_ext,
+RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const IRtRelation& in_rt, const double  r_min,
+                                                                           const double  r_max, const double  r_ext,
                                                                            const std::vector<SamplePoint>& add_fit_points) const {
     ///////////////
     // VARIABLES //
@@ -152,7 +152,7 @@ RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const
 //:: METHOD t_from_r ::
 //:::::::::::::::::::::
 
-double RtParabolicExtrapolation::t_from_r(const double& r, const IRtRelation& in_rt) const {
+double RtParabolicExtrapolation::t_from_r(const double  r, const IRtRelation& in_rt) const {
     ///////////////
     // VARIABLES //
     ///////////////
@@ -182,7 +182,7 @@ double RtParabolicExtrapolation::t_from_r(const double& r, const IRtRelation& in
 //:: METHOD get_max_t_at_r ::
 //:::::::::::::::::::::::::::
 
-double RtParabolicExtrapolation::get_max_t_at_r(const double& r, const IRtRelation& in_rt) const {
+double RtParabolicExtrapolation::get_max_t_at_r(const double  r, const IRtRelation& in_rt) const {
     for (double t = in_rt.tUpper(); t >= in_rt.tLower(); t = t - 1.0) {
         if (in_rt.radius(t) < r) { return t + 1.0; }
     }

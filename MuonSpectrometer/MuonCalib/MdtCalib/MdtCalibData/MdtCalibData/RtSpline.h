@@ -49,7 +49,7 @@ namespace MuonCalib {
 
         // private methods //
         /** initialization method */
-        void _init(void);
+        void _init();
 
     public:
         // Constructors
@@ -67,7 +67,7 @@ namespace MuonCalib {
 
         // Methods //
         // methods required by the base classes //
-        inline std::string name(void) const { return "RtSpline"; }
+        inline std::string name() const { return "RtSpline"; }
 
         //!< get the class name
         double radius(double t) const;
@@ -82,9 +82,9 @@ namespace MuonCalib {
         double drdt(double /*t*/) const { return 0.0; }
 
         // get-methods specific to the RtSpline class //
-        double tLower(void) const;
+        double tLower() const;
         //!< get the lower drift-time bound
-        double tUpper(void) const;
+        double tUpper() const;
         //!< get the upper drift-time bound
     };
 }  // namespace MuonCalib

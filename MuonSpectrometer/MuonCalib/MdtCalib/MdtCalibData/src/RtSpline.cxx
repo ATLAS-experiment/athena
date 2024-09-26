@@ -56,8 +56,8 @@ namespace MuonCalib {
 
     double RtSpline::driftvelocity(double t) const { return p_sp3->Derivative(t); }
 
-    double RtSpline::tLower(void) const { return par(0); }
+    double RtSpline::tLower() const { return par(0); }
 
-    double RtSpline::tUpper(void) const { return par(nPar() - 2); }
+    double RtSpline::tUpper() const { return par(nPar() - 2); }
 
 }  // namespace MuonCalib

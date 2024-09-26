@@ -7,7 +7,7 @@
 
 using namespace MuonCalibR4;
 
-std::string RtResolutionSqrt::name(void) const {return "RtResolutionSqrt";}
+std::string RtResolutionSqrt::name() const {return "RtResolutionSqrt";}
 
 double RtResolutionSqrt::resolution(double /*t*/, double /*bgRate*/) const {
     return 0.5;

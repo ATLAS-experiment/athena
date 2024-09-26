@@ -24,7 +24,7 @@ using namespace MuonCalib;
 
 AdaptiveResidualSmoothing::AdaptiveResidualSmoothing() {}
 void AdaptiveResidualSmoothing::clear() { m_residual_point.clear(); }
-void AdaptiveResidualSmoothing::addResidual(const double &radius, const double &residual) {
+void AdaptiveResidualSmoothing::addResidual(const double radius, const double residual) {
     // make the data point //
     CLHEP::HepVector point(2);
     point[0] = radius;
@@ -295,7 +295,7 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
 
     return improved_rt;
 }
-double AdaptiveResidualSmoothing::t_from_r(const IRtRelation &rt_rel, const double &r) {
+double AdaptiveResidualSmoothing::t_from_r(const IRtRelation &rt_rel, const double r) {
     ///////////////
     // VARIABLES //
     ///////////////

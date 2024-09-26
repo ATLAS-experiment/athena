@@ -139,7 +139,7 @@ bool MdtCalibOutputDbSvc::memorize(std::shared_ptr<const MuonCalib::IMdtCalibrat
 //:::::::::::::::::::::::::::::::::::
 //:: METHOD saveCalibrationResults ::
 //:::::::::::::::::::::::::::::::::::
-StatusCode MdtCalibOutputDbSvc::saveCalibrationResults(void) {
+StatusCode MdtCalibOutputDbSvc::saveCalibrationResults() {
     if (!m_results) return StatusCode::SUCCESS;
 
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey};

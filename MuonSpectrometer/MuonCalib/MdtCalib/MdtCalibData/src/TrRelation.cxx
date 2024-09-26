@@ -53,7 +53,7 @@ TrRelation::TrRelation(const std::vector<double> &r_values, const std::vector<do
 //:::::::::::::::::::
 //:: METHOD tFromR ::
 //:::::::::::::::::::
-double TrRelation::tFromR(const double &r, bool &out_of_bound_flag) const {
+double TrRelation::tFromR(const double r, bool &out_of_bound_flag) const {
     //////////////////
     // CHECK BOUNDS //
     //////////////////
@@ -89,7 +89,7 @@ double TrRelation::tFromR(const double &r, bool &out_of_bound_flag) const {
 //:::::::::::::::::::
 //:: METHOD rFromT ::
 //:::::::::::::::::::
-double TrRelation::rFromT(const double &t, bool &out_of_bound_flag) const {
+double TrRelation::rFromT(const double t, bool &out_of_bound_flag) const {
     //////////////////
     // CHECK BOUNDS //
     //////////////////
@@ -125,7 +125,7 @@ double TrRelation::rFromT(const double &t, bool &out_of_bound_flag) const {
 //::::::::::::::::::::::
 //:: METHOD getTFromR ::
 //::::::::::::::::::::::
-double TrRelation::getTFromR(const double &r, const IRtRelation &input_rt) {
+double TrRelation::getTFromR(const double r, const IRtRelation &input_rt) {
     ///////////////
     // VARIABLES //
     ///////////////

@@ -10,25 +10,18 @@ namespace MuonCalib {
 
 /**
 
-@class BaseFunction
-
-This is an abstract base class for a set of base functions for fits to 
-sample points. 
-
-@author Oliver.Kortner@cern.ch
-
-@date 04.04.2005
-
-*/
+  @class BaseFunction 
+          This is an abstract base class for a set of base functions for fits to 
+          sample points. */
   class BaseFunction {
 
   public:
     // Constructor and destructor
-    BaseFunction(void) {}			//!< default constructor
-    virtual ~BaseFunction(void) {}		//!< destructor
+    BaseFunction() = default;          //!< default constructor
+    virtual ~BaseFunction() = default; //!< destructor
 
     // Methods
-    virtual double value(const int & k, const double & x) const = 0; //!< get the value of the k-th base function at x
+    virtual double value(const int k, const double x) const = 0; //!< get the value of the k-th base function at x
 
   };
 

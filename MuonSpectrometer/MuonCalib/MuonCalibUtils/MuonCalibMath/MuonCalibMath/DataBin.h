@@ -38,10 +38,10 @@ class DataBin {
 
 public:
 // Constructors //
-    DataBin(void);
+    DataBin();
     ///< Default constructor. Give a bin with 0 content and no extensions.
 
-    DataBin(const std::vector<DataPoint>& points, const double & epsilon);
+    DataBin(const std::vector<DataPoint>& points, const double  epsilon);
     ///< Constructor.
     ///< \param points Data points occupying the bin.
     ///< \param epsilon The upper bin boundaries are shifted by epsilon to
@@ -56,24 +56,24 @@ public:
 
 // Methods //
 // get-methods //
-    double density(void) const;
+    double density() const;
                                     ///< get the data point density in the bin
-    const Amg::VectorX & centreOfBin(void) const;
+    const Amg::VectorX & centreOfBin() const;
                                     ///< get the centre of the bin
-    const Amg::VectorX & lowerBinBoundaries(void) const;
+    const Amg::VectorX & lowerBinBoundaries() const;
                                     ///< get the lower boundaries of the bin
-    const Amg::VectorX & upperbinBoundaries(void) const;
+    const Amg::VectorX & upperbinBoundaries() const;
                                     ///< get the upper boundaries of the bin
-    const Amg::VectorX & centreOfGravity(void) const;
+    const Amg::VectorX & centreOfGravity() const;
                                     ///< get the centre of gravity of the data
                                     ///< points
-    const Amg::VectorX & standardDeviations(void) const;
+    const Amg::VectorX & standardDeviations() const;
                                     ///< get the standard deviations of the
                                     ///< data points from the centre of gravity
                                     ///< in all dimensions
-    unsigned int numberOfDataPoints(void) const;
+    unsigned int numberOfDataPoints() const;
                                     ///< get the number of data points
-    const std::vector<DataPoint> & dataPoints(void) const;
+    const std::vector<DataPoint> & dataPoints() const;
                                     ///< get the data points filling this bin
     DataBin * splitBin(const unsigned int & ref_coord);
                                     ///< divide the bin into two of equal
@@ -88,7 +88,7 @@ public:
                                     ///< add the data point to the bin if
                                     ///< possible; returns true if the point
                                     ///< can be added, false otherwise
-    void addPointAndResize(const DataPoint & point, const double & epsilon);
+    void addPointAndResize(const DataPoint & point, const double  epsilon);
                                     ///< add the data point to the bin; the bin
                                     ///< will be resized if the point does not
                                     ///< fit into the bin; the upper bin 

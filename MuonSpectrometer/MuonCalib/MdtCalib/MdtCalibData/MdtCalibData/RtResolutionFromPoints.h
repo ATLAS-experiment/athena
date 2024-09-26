@@ -30,7 +30,7 @@ namespace MuonCalib {
     class RtResolutionFromPoints {
     public:
         // Constructor //
-        RtResolutionFromPoints(void) {}
+        RtResolutionFromPoints() = default;
         ///< Default constructor.
 
         // Methods //

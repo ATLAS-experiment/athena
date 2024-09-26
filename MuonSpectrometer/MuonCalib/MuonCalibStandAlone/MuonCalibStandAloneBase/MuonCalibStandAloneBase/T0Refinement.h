@@ -57,12 +57,12 @@ namespace MuonCalib {
         ///< the time correction,
         ///< if curved is set to true, a curved
         ///< fit is performed
-        inline void SetDeltaT0(const double &dt0) { m_delta_t0 = dt0; }
+        inline void SetDeltaT0(const double dt0) { m_delta_t0 = dt0; }
         ///< Set the scan point distance
-        void setTimeOut(const double &time_out);
+        void setTimeOut(const double time_out);
         ///< set the time-out for pattern finding
         ///< to time_out (s)
-        void setRoadWidth(const double &road_width);
+        void setRoadWidth(const double road_width);
         ///< set the road with to road_width (mm) (default: 1mm)
 
     private:

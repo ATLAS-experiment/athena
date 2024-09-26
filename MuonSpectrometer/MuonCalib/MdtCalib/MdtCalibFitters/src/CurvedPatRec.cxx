@@ -15,11 +15,11 @@
 using namespace MuonCalib;
 CurvedPatRec::CurvedPatRec() = default;
 
-CurvedPatRec::CurvedPatRec(const double &road_width) { m_road_width = road_width; }
+CurvedPatRec::CurvedPatRec(const double road_width) { m_road_width = road_width; }
 
 double CurvedPatRec::roadWidth() const { return m_road_width; }
-void CurvedPatRec::setRoadWidth(const double &r_road_width) { m_road_width = r_road_width; }
-void CurvedPatRec::setTimeOut(const double &time_out) { m_time_out = time_out; }
+void CurvedPatRec::setRoadWidth(const double r_road_width) { m_road_width = r_road_width; }
+void CurvedPatRec::setTimeOut(const double time_out) { m_time_out = time_out; }
 bool CurvedPatRec::fit(MuonCalibSegment &r_segment) const {
     // select all hits //
     HitSelection selection(r_segment.mdtHitsOnTrack(), 0);

@@ -37,16 +37,16 @@ namespace MuonCalib {
         /** Number of bins for ADC histogram and range*/
         inline const int &NBinsADC() const { return m_n_bins_adc; }
         inline int &NBinsADC() { return m_n_bins_adc; }
-        inline const double &ADCMin() const { return m_adc_min; }
+        inline double ADCMin() const { return m_adc_min; }
         inline double &ADCMin() { return m_adc_min; }
-        inline const double &ADCMax() const { return m_adc_max; }
+        inline double ADCMax() const { return m_adc_max; }
         inline double &ADCMax() { return m_adc_max; }
         /** Number of bins for time histogram and range*/
         inline const int &NBinsTime() const { return m_n_bins_time; }
         inline int &NBinsTime() { return m_n_bins_time; }
-        inline const double &TimeMin() const { return m_time_min; }
+        inline double TimeMin() const { return m_time_min; }
         inline double &TimeMin() { return m_time_min; }
-        inline const double &TimeMax() const { return m_time_max; }
+        inline double TimeMax() const { return m_time_max; }
         inline double &TimeMax() { return m_time_max; }
         //@}
         /** @name Debug settings

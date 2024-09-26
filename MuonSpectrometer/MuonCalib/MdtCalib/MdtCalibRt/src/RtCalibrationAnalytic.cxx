@@ -39,7 +39,7 @@ RtCalibrationAnalytic::RtCalibrationAnalytic(const std::string &name) : IMdtCali
     init(0.5 * CLHEP::mm, 1, 5, true, true, true, true, 100, false, false);
 }
 
-RtCalibrationAnalytic::RtCalibrationAnalytic(const std::string &name, const double &rt_accuracy, const unsigned int &func_type,
+RtCalibrationAnalytic::RtCalibrationAnalytic(const std::string &name, const double rt_accuracy, const unsigned int &func_type,
                                              const unsigned int &ord, const bool &split, const bool &full_matrix, const bool &fix_min,
                                              const bool &fix_max, const int &max_it, bool do_smoothing, bool do_parabolic_extrapolation) :
     IMdtCalibration(name), m_rt(nullptr) {
@@ -53,7 +53,7 @@ RtCalibrationAnalytic::~RtCalibrationAnalytic() {
 //:::::::::::::::::
 //:: METHOD init ::
 //:::::::::::::::::
-void RtCalibrationAnalytic::init(const double &rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &split,
+void RtCalibrationAnalytic::init(const double rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &split,
                                  const bool &full_matrix, const bool &fix_min, const bool &fix_max, const int &max_it, bool do_smoothing,
                                  bool do_parabolic_extrapolation) {
     /////////////////////////////
@@ -140,7 +140,7 @@ void RtCalibrationAnalytic::init(const double &rt_accuracy, const unsigned int &
 //:::::::::::::::::::::
 //:: METHOD t_from_r ::
 //:::::::::::::::::::::
-double RtCalibrationAnalytic::t_from_r(const double &r) {
+double RtCalibrationAnalytic::t_from_r(const double r) {
     ///////////////
     // VARIABLES //
     ///////////////
@@ -333,7 +333,7 @@ void RtCalibrationAnalytic::doSmoothing() { m_do_smoothing = true; }
 void RtCalibrationAnalytic::noSmoothing() { m_do_smoothing = false; }
 void RtCalibrationAnalytic::doParabolicExtrapolation() { m_do_parabolic_extrapolation = true; }
 void RtCalibrationAnalytic::noParabolicExtrapolation() { m_do_parabolic_extrapolation = false; }
-void RtCalibrationAnalytic::setEstimateRtAccuracy(const double &acc) { m_rt_accuracy = std::abs(acc); }
+void RtCalibrationAnalytic::setEstimateRtAccuracy(const double acc) { m_rt_accuracy = std::abs(acc); }
 void RtCalibrationAnalytic::splitIntoMultilayers(const bool &yes_or_no) { m_split_into_ml = yes_or_no; }
 void RtCalibrationAnalytic::fullMatrix(const bool &yes_or_no) { m_full_matrix = yes_or_no; }
 RtCalibrationAnalytic::MdtCalibOutputPtr RtCalibrationAnalytic::analyseSegments(const MuonSegVec &seg) {
@@ -752,8 +752,6 @@ bool RtCalibrationAnalytic::analyse() {
     std::vector<double> rt_param(m_rt->nPar());  // parameters for the new r-t
     double x;                                    // reduced time
     RtParabolicExtrapolation rt_extrapolator;    // r-t extrapolator
-    RtFromPoints rt_from_points;                 // r-t from points
-
     ////////////////////////////////////////
     // SOLVE THE AUTOCALIBRATION EQUATION //
     ////////////////////////////////////////

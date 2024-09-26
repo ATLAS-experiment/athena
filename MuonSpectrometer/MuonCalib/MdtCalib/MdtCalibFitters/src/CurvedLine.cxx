@@ -83,7 +83,7 @@ CurvedLine::CurvedLine(std::vector<Amg::Vector3D>& points, std::vector<Amg::Vect
 //:: METHOD getPointOnLine ::
 //::::::::::::::::::::::::::::::
 
-Amg::Vector3D CurvedLine::getPointOnLine(const double& loc_z) const {
+Amg::Vector3D CurvedLine::getPointOnLine(const double  loc_z) const {
     ///////////////
     // VARIABLES //
     ///////////////
@@ -111,7 +111,7 @@ Amg::Vector3D CurvedLine::getPointOnLine(const double& loc_z) const {
 //:: METHOD getTangent ::
 //::::::::::::::::::::::::
 
-MTStraightLine CurvedLine::getTangent(const double& loc_z) const {
+MTStraightLine CurvedLine::getTangent(const double  loc_z) const {
     ///////////////
     // VARIABLES //
     ///////////////

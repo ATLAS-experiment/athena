@@ -1,22 +1,31 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// 19.07.2006, AUTHOR: OLIVER KORTNER
-// Modified: 16.01.2008 by O. Kortner, RtSpline allowed as input; faster, but
-//                      less accuracte implementation of correction funtion can
-//                      be requested; bug fix in integral calculation.
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 #ifndef MuonCalib_BFieldCorFuncH
 #define MuonCalib_BFieldCorFuncH
+namespace MuonCalib {
 
-//:::::::::::::::::::::::::
-//:: CLASS BFieldCorFunc ::
-//:::::::::::::::::::::::::
+}
+
+
+// STL //
+#include <string>
+#include <vector>
+#include <limits>
+
+// CLHEP //
+#include "EventPrimitives/EventPrimitives.h"
+
+// MuonCalib //
+#include "MdtCalibData/IMdtBFieldCorFunc.h"
+#include "MdtCalibData/IRtRelation.h"
+#include "MuonCalibMath/Legendre_polynomial.h"
 
 namespace MuonCalib {
+
+    class IRtRelation;
+
+    
     /// \class BFieldCorFunc
     /// This class allows the user to get the difference between the drift time
     /// measured by a tube operated in a magnetic field @f$ \vec{B} @f$ and the drift time
@@ -36,35 +45,10 @@ namespace MuonCalib {
     ///
     /// @f$ \vec{B}_\mu @f$: magnetic field magnetic field perpendicular to wire and
     ///                parallel to the muon trajectory in the given tube.
-}
-
-//::::::::::::::::::
-//:: HEADER FILES ::
-//::::::::::::::::::
-
-// STL //
-#include <string>
-#include <vector>
-
-// CLHEP //
-#include "EventPrimitives/EventPrimitives.h"
-
-// MuonCalib //
-#include "MdtCalibData/IMdtBFieldCorFunc.h"
-#include "MdtCalibData/IRtRelation.h"
-#include "MuonCalibMath/Legendre_polynomial.h"
-
-namespace MuonCalib {
-
-    class IRtRelation;
-
     class BFieldCorFunc : public IMdtBFieldCorFunc {
     public:
         // Constructors //
-        explicit BFieldCorFunc(const std::string &quality, const CalibFunc::ParVec &parameters, const IRtRelation *rt) :
-            IMdtBFieldCorFunc(parameters) {
-            init(quality, parameters, rt);
-        }
+        explicit BFieldCorFunc(const std::string &quality, const CalibFunc::ParVec &parameters, const IRtRelation *rt);
         ///< Constructor:
         ///< quality = "high", slow but accurate initialization initialization
         ///< of the correction function,
@@ -74,9 +58,7 @@ namespace MuonCalib {
         ///< at the price of lower quality.
         ///< parameters[0] = high voltage [V],
         ///< parameters[1] = @f$ \epsilon @f$,
-        explicit BFieldCorFunc(const CalibFunc::ParVec &parameters, const IRtRelation *rt) : IMdtBFieldCorFunc(parameters) {
-            init(std::string("medium"), parameters, rt);
-        }
+        explicit BFieldCorFunc(const CalibFunc::ParVec &parameters, const IRtRelation *rt);
         ///< Constructor:
         ///< parameters[0] = high voltage [V],
         ///< parameters[1] = @f$ \epsilon @f$,
@@ -89,7 +71,7 @@ namespace MuonCalib {
 
         // set-methods //
         ///< set the @f$ \epsilon @f$ parameter of the B-field correction function = eps
-        //	void setEpsilon(const double & eps);
+        //	void setEpsilon(const double  eps);
 
         ///< set the r-t relationship used to calculate the B field correction
         ///< to the measured drift time = rt
@@ -118,11 +100,11 @@ namespace MuonCalib {
         // data //
 
         // parameters (copy of m_parameter in the base class, needed to enable overwriting)
-        std::vector<double> m_param;
+        std::vector<double> m_param{};
 
         // quality setting //
-        std::string m_quality;  // quality string ("high", "medium", "low")
-        double m_step_size;     // integration step size steering the quality
+        std::string m_quality{};  // quality string ("high", "medium", "low")
+        double m_step_size{0.};     // integration step size steering the quality
 
         // correction function //
         Amg::VectorX m_alpha;  // parameter of the fit function describing the
@@ -134,9 +116,11 @@ namespace MuonCalib {
         // information about r(t) used to calculate the correction function //
 
         // minimum and maximum drift times allowed by the r-t relationship
-        double m_t_min, m_t_max;
+        double m_t_min{-std::numeric_limits<double>::max()};
+        double m_t_max{std::numeric_limits<double>::max()};
         // minimum and maximum drift radius
-        double m_r_min, m_r_max;
+        double m_r_min{-std::numeric_limits<double>::max()};
+        double m_r_max{std::numeric_limits<double>::max()};
 
         // private methods //
         // initialization method, parameters are the parameters passed to constructor of this class
@@ -144,11 +128,11 @@ namespace MuonCalib {
 
         // get t(r) for the relationship "rt", the method is auxiliary and not optimized;
         // it will disappear when the t(r) will be available in the MuonCalib framework
-        double t_from_r(const double &r, const IRtRelation *rt) const;
+        double t_from_r(const double r, const IRtRelation *rt) const;
 
         // get the integral in the correction function from r_min to r_max; rt contains the drift
         // velocity needed to calculate the integral
-        double integral(const double &r_min, const double &r_max, const IRtRelation *rt) const;
+        double integral(const double r_min, const double r_max, const IRtRelation *rt) const;
     };
 
 }  // namespace MuonCalib
