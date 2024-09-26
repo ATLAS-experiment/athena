@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ClassID.h"
@@ -216,9 +216,9 @@ int main() {
   }
   assert(pSvcLoc);
 
-  StoreGateSvc* pStore(0);
+  SmartIF<StoreGateSvc> pStore{pSvcLoc->service("StoreGateSvc")};
 
-  if( pSvcLoc->service("StoreGateSvc", pStore, true).isFailure() ) {
+  if( !pStore ) {
     log << MSG::ERROR << "SG not available" << endmsg;
     return -1;
   }

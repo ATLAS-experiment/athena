@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -104,29 +104,21 @@ int main(int argc, char* argv[]) {
 
   // Now we can use the MessagesSvc
   SmartIF<IMessageSvc> msgSvc(pSvcLoc);
-  if (!msgSvc.isValid()) {
-    std::cerr << "cannot retrieve MessageSvc" << std::endl;
-    return 2;
-  }
+  CHECK_WITH_CONTEXT( msgSvc.isValid(), appName, 2 );
+
   MsgStream log(msgSvc, appName);
   if (!verbose) {
     log.setLevel(MSG::WARNING);
   }
 
   SmartIF<IClassManager> pICM(pSvcLoc);
-  if (!pICM.isValid()) {
-    log << MSG::ERROR << "cannot retrieve ClassManager" << endmsg;
-    return 2;
-  }
+  CHECK_WITH_CONTEXT( pICM.isValid(), appName, 2 );
 
-  IClassIDSvc* pClassIDSvc(nullptr);
-  CHECK_WITH_CONTEXT( pSvcLoc->service("ClassIDSvc", pClassIDSvc, true), appName, 2 );
+  SmartIF<IClassIDSvc> pClassIDSvc(pSvcLoc->service("ClassIDSvc"));
+  CHECK_WITH_CONTEXT( pClassIDSvc.isValid(), appName, 2 );
 
   SmartIF<IProperty> pCLIDSvcProp(pClassIDSvc);
-  if (!pCLIDSvcProp.isValid()) {
-    log << MSG::ERROR << "cannot retrieve ClassIDSvc" << std::endl;
-    return 2;
-  }
+  CHECK_WITH_CONTEXT( pCLIDSvcProp.isValid(), appName, 2 );
 
   log << MSG::INFO << "Writing clid.db for package "
       << vm["package"].as<std::string>() << " to " << outFileName << "." << endmsg;

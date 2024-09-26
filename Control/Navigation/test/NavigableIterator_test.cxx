@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: NavigableIterator_test.cxx,v 1.2 2008-09-09 18:52:06 ssnyder Exp $
 /**
  * @file Navigation/test/NavigableIterator_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -218,9 +217,8 @@ int main()
     return 0;
   }  
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = 0;
-  assert ( svcLoc->service("StoreGateSvc", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{pSvcLoc->service("StoreGateSvc")};
+  assert ( sg.isValid() );
 
   dv_t* dv = new dv_t;
   for (size_t i = 0; i < 10; i++) {

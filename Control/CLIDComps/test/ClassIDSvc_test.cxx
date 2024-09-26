@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ClassIDSvc_test.cxx  
@@ -47,11 +47,10 @@ void incident_test(ISvcLocator* pSvcLoc) {
   cout << "*** ClassIDSvc incident test starts ***" <<endl;
   assert(pSvcLoc);
 
-  IClassIDSvc* pClassIDSvc(0);
-  assert((pSvcLoc->service("ClassIDSvc", pClassIDSvc, true)).isSuccess());
+  SmartIF<IClassIDSvc> pClassIDSvc{pSvcLoc->service("ClassIDSvc")};
   assert(pClassIDSvc);
   ModuleLoadedIncident fooInc("test", "Foo");
-  IIncidentListener* il = dynamic_cast<IIncidentListener*>(pClassIDSvc);
+  SmartIF<IIncidentListener> il{pClassIDSvc};
   if (!il) std::abort();
   il->handle(fooInc);
   ModuleLoadedIncident barInc("test", "Bar");
@@ -62,8 +61,7 @@ void basic_test(ISvcLocator* pSvcLoc) {
   cout << "*** ClassIDSvc basic test starts ***" <<endl;
   assert(pSvcLoc);
 
-  IClassIDSvc* pClassIDSvc(0);
-  assert((pSvcLoc->service("ClassIDSvc", pClassIDSvc, true)).isSuccess());
+  SmartIF<IClassIDSvc> pClassIDSvc{pSvcLoc->service("ClassIDSvc")};
   assert(pClassIDSvc);
 
   assert(pClassIDSvc->nextAvailableID() == CLIDdetail::MINCLID);
@@ -121,7 +119,7 @@ void basic_test(ISvcLocator* pSvcLoc) {
   assert(name == "Bla<unsigned int>");
   //  dynamic_cast<ClassIDSvc*>(pClassIDSvc)->dump();
 
-  assert((dynamic_cast<IService*>(pClassIDSvc)->finalize()).isSuccess());
+  assert(pClassIDSvc->finalize().isSuccess());
   cout << "*** ClassIDSvc basic test OK ***" <<endl;
 }
 

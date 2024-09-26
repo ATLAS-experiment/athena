@@ -33,7 +33,7 @@ DataStore::DataStore (IProxyDict& pool)
     m_storeMap(),
     m_keyMap(KeyMap_t::Updater_t()),
     m_storeID(StoreID::UNKNOWN), m_t2p(), 
-    m_pSGAudSvc(0), m_noAudSvc(0), m_pSvcLoc(0)
+    m_noAudSvc(0), m_pSvcLoc(0)
 {
    setSvcLoc().ignore();
 }
@@ -52,12 +52,12 @@ StatusCode DataStore::setSvcLoc(){
 }
 
 void DataStore::setSGAudSvc() {
-  if (0 == m_pSGAudSvc) {
+  if (!m_pSGAudSvc) {
     //try once to get the service
-    const bool DONOTCREATE(false);
     if (!m_noAudSvc) {
-      m_noAudSvc = m_pSvcLoc->service("SGAudSvc", m_pSGAudSvc, 
-				      DONOTCREATE).isFailure();
+      const bool DONOTCREATE(false);
+      m_pSGAudSvc = m_pSvcLoc->service("SGAudSvc", DONOTCREATE);
+      m_noAudSvc = not m_pSGAudSvc.isValid();
     }
   }
   return;
