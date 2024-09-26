@@ -1,33 +1,26 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCTRIGGERLUTREADER_H
 #define TGCTRIGGERLUTREADER_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
-
 class TGCTriggerLUTs;
 class CondAttrListCollection;
 
 
-class TGCTriggerLUTReader{
+class TGCTriggerLUTReader {
 
  public:
   TGCTriggerLUTReader(int lutType);
   ~TGCTriggerLUTReader() = default;
 
-  virtual bool readLUT(TGCTriggerLUTs* );
+  virtual bool readLUT(TGCTriggerLUTs* ) = 0;
   virtual bool loadParameters(TGCTriggerLUTs* ,
-                              const CondAttrListCollection* );
+                              const CondAttrListCollection* ) = 0;
 
  protected:
-  const int m_lutType;
-  IMessageSvc* m_msgSvc;
-  ISvcLocator* m_svcLocator;
+  int m_lutType{0};
 };
 
 
