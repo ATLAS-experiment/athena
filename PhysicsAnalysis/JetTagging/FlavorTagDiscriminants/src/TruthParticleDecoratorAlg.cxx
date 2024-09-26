@@ -99,13 +99,13 @@ namespace FlavorTagDiscriminants {
         dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
-        dec_parent_barcode(*truth_particle) = HepMC::INVALID_PARTICLE_BARCODE; // FIXME barcode-based
+        dec_parent_barcode(*truth_particle) = HepMC::UNDEFINED_ID; // FIXME barcode-based
         continue;
       }
 
-      // get parent hadron and decorate barcode 
+      // get parent hadron and decorate barcode
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::barcode(truth_parent) : -2; // FIXME barcode-based -2 is an odd default
+      dec_parent_barcode(*truth_particle) = truth_parent ? HepMC::barcode(truth_parent) : HepMC::UNDEFINED_ID; // FIXME barcode-based
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);
@@ -136,7 +136,7 @@ namespace FlavorTagDiscriminants {
     for ( size_t i = 0; i != tp_truth_vertices.size(); i++) {
       auto this_vert = tp_truth_vertices.at(i);
       auto this_tp = sorted_truth_particles.at(i);
-      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
+      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance); // This is a position in an array of xAOD::TruthVertex objects
     }
     return StatusCode::SUCCESS;
   }
