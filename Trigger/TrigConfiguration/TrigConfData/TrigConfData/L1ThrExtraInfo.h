@@ -587,7 +587,7 @@ namespace TrigConf {
          L1ThrExtraInfoBase(thrTypeName, data) { load(); }
       virtual ~L1ThrExtraInfo_gXE() override = default;
       virtual std::string className() const override { return "L1ThrExtraInfo_gXE"; }
-      float seedThr(const char fpga) const { return seedThrMeV(fpga)/ 1000.0; }
+      float seedThr(const char fpga) const { return energyInCounts(seedThrMeV(fpga), resolutionMeV()); }//seedThr is defined in counts
       unsigned int seedThrCounts(const char fpga) const { return energyInCounts(seedThrMeV(fpga), resolutionMeV()); }
       unsigned int seedThrMeV(const char fpga) const {
           if(fpga=='A') return m_seedThrMeVA;
