@@ -260,9 +260,9 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int gXE_seedThrA = 0;
    int gXE_seedThrB = 0;
    int gXE_seedThrC = 0;
-   gXE_seedThrA = thr_gXE.seedThr('A')/0.800; //defined in GeV by default, with value 24
-   gXE_seedThrB = thr_gXE.seedThr('B')/0.800; //defined in GeV by default, with value 24
-   gXE_seedThrC = thr_gXE.seedThr('C')/0.800; //defined in GeV by default, with value 24
+   gXE_seedThrA = thr_gXE.seedThr('A'); //defined in counts
+   gXE_seedThrB = thr_gXE.seedThr('B'); //defined in counts
+   gXE_seedThrC = thr_gXE.seedThr('C'); //defined in counts
 
 
    int aFPGA_A = thr_gXE.JWOJ_param('A','a');// 1003

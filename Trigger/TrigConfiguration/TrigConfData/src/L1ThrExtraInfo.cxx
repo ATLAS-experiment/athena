@@ -662,11 +662,11 @@ TrigConf::L1ThrExtraInfo_gXE::load()
 {
    for( auto & x : m_extraInfo ) {
       if( x.first == "seedThrA" ){
-         m_seedThrMeVA = 1000*x.second.getValue<unsigned int>();
+         m_seedThrMeVA = 200*x.second.getValue<unsigned int>();
       } else if( x.first == "seedThrB" ){
-         m_seedThrMeVB = 1000*x.second.getValue<unsigned int>();
+         m_seedThrMeVB = 200*x.second.getValue<unsigned int>();
       } else if( x.first == "seedThrC" ){
-         m_seedThrMeVC = 1000*x.second.getValue<unsigned int>();
+         m_seedThrMeVC = 200*x.second.getValue<unsigned int>();
       } else if( x.first == "XERHO_sigmaPosA" ){
          m_XERHO_sigmaPosA = x.second.getValue<unsigned int>();
       } else if( x.first == "XERHO_sigmaPosB" ){
