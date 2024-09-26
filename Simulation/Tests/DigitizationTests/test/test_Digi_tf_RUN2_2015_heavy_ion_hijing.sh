@@ -22,7 +22,7 @@ Digi_tf.py \
     --postExec 'HITtoRDO:cfg.getCondAlgo("TileSamplingFractionCondAlg").G4Version=-1;cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="CAJO.txt"))' \
     --postInclude 'all:PyJobTransforms.UseFrontier,MCTruthSimAlgs.MCTruthSimAlgsConfig.MergeHijingParsCfg,PixelConditionsAlgorithms.PixelConditionsConfig.PostInclude_UsePixelModuleLevelMask' \
     --geometryVersion ATLAS-R2-2015-03-01-00 \
-    --conditionsTag all:OFLCOND-RUN12-SDR-31-01 \
+    --conditionsTag all:OFLCOND-RUN12-SDR-31-02 \
     --imf False
 
 rc=$?
