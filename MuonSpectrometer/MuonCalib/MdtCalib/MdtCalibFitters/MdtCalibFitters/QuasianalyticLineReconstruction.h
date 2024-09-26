@@ -39,7 +39,7 @@ namespace MuonCalib {
         QuasianalyticLineReconstruction() { init(); }
         ///< Default constructor: road width for pattern recognition = 0.5 mm.
 
-        QuasianalyticLineReconstruction(const double& r_road_width) { init(r_road_width); }
+        QuasianalyticLineReconstruction(const double  r_road_width) { init(r_road_width); }
         ///< Constructor: user-defined road width for pattern recognition.
 
         // Methods //
@@ -49,13 +49,13 @@ namespace MuonCalib {
         ///< pattern recognition
 
         // set-method //
-        void setRoadWidth(const double& r_road_width);
+        void setRoadWidth(const double  r_road_width);
         ///< set the road width for the pattern
         ///< recognition = r_road_width
-        void setTimeOut(const double& time_out);
+        void setTimeOut(const double  time_out);
         ///< set the time-out for the track
         ///< finding to time_out (in seconds)
-        void setMaxRadius(const double& maxR);
+        void setMaxRadius(const double  maxR);
         ///< set the max innerRadius, default for MDT
         ///< sMDT 7.1mm, MDT 14.6mm
         // methods required by the base class "IMdtSegmentFitter" //
@@ -113,12 +113,12 @@ namespace MuonCalib {
         // initialization methods //
         void init();
         // default initialization:  road width = 0.5 CLHEP::mm
-        void init(const double& r_road_width);
+        void init(const double  r_road_width);
         // initialization with user-defined road width
 
         // auxiliary methods //
-        MTStraightLine tangent(const Amg::Vector3D& r_w1, const double& r_r1, const double& r_sigma12, const Amg::Vector3D& r_w2,
-                               const double& r_r2, const double& r_sigma22, const int& r_case) const;
+        MTStraightLine tangent(const Amg::Vector3D& r_w1, const double  r_r1, const double  r_sigma12, const Amg::Vector3D& r_w2,
+                               const double  r_r2, const double  r_sigma22, const int& r_case) const;
         // method for the calculation of tangents with errors;
         // r_w1: wire position for the first hit,
         // r_r1: drift radius of the first hit,

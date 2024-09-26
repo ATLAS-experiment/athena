@@ -23,7 +23,7 @@ void QuasianalyticLineReconstruction::init() {
     init(0.5 * CLHEP::mm);  // default road width = 0.5 CLHEP::mm
     return;
 }
-void QuasianalyticLineReconstruction::init(const double& r_road_width) {
+void QuasianalyticLineReconstruction::init(const double  r_road_width) {
     //::::::::::::::::::
     //:: SET TIME-OUT ::
     //::::::::::::::::::
@@ -44,8 +44,8 @@ void QuasianalyticLineReconstruction::init(const double& r_road_width) {
 
     return;
 }
-MTStraightLine QuasianalyticLineReconstruction::tangent(const Amg::Vector3D& r_w1, const double& r_r1, const double& r_sigma12,
-                                                        const Amg::Vector3D& r_w2, const double& r_r2, const double& r_sigma22,
+MTStraightLine QuasianalyticLineReconstruction::tangent(const Amg::Vector3D& r_w1, const double  r_r1, const double  r_sigma12,
+                                                        const Amg::Vector3D& r_w2, const double  r_r2, const double  r_sigma22,
                                                         const int& r_case) const {
     //:::::::::::::::
     //:: VARIABLES ::
@@ -316,9 +316,9 @@ MTStraightLine QuasianalyticLineReconstruction::track_candidate(const IndexSet& 
 }
 
 double QuasianalyticLineReconstruction::roadWidth() const { return m_road_width; }
-void QuasianalyticLineReconstruction::setRoadWidth(const double& r_road_width) { m_road_width = std::abs(r_road_width); }
-void QuasianalyticLineReconstruction::setTimeOut(const double& time_out) { m_time_out = time_out; }
-void QuasianalyticLineReconstruction::setMaxRadius(const double& maxR) {
+void QuasianalyticLineReconstruction::setRoadWidth(const double  r_road_width) { m_road_width = std::abs(r_road_width); }
+void QuasianalyticLineReconstruction::setTimeOut(const double  time_out) { m_time_out = time_out; }
+void QuasianalyticLineReconstruction::setMaxRadius(const double  maxR) {
     if (maxR < 7 || maxR > 15)
         throw std::runtime_error(Form(
             "File: %s, Line: %d\nQuasianalyticLineReconstruction::setMaxRadius() - given radius %.3f not supported, neither MDT nor sMDT",

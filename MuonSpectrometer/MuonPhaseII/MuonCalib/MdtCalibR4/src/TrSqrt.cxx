@@ -9,11 +9,11 @@
 
 using namespace MuonCalibR4;
 
-double TrSqrt::tFromR(const double& r, bool& /*out_of_bound_flag*/) const {
+double TrSqrt::tFromR(const double  r, bool& /*out_of_bound_flag*/) const {
     return r*r;
 }
 
-double TrSqrt::rFromT(const double& t, bool& /*out_of_bound_flag*/) const {
+double TrSqrt::rFromT(const double  t, bool& /*out_of_bound_flag*/) const {
     return std::sqrt(t);
 }
 

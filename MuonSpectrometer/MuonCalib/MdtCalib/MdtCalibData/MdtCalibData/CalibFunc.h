@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_CALIBFUNC_H
@@ -9,7 +9,6 @@
 #include <vector>
 
 namespace MuonCalib {
-
     /** generic interface for a calibration function.
 
         The class caches the parameters and offers routines to access them.
@@ -32,23 +31,24 @@ namespace MuonCalib {
     */
 
     class CalibFunc {
-    public:
-        typedef std::vector<double> ParVec;
-        inline explicit CalibFunc(const ParVec& vec) : m_parameters(vec) {}
-        inline virtual ~CalibFunc(){};
-        inline unsigned int nPar() const { return m_parameters.size(); }
-        inline const ParVec& parameters() const { return m_parameters; }
-        inline double par(unsigned int index) const {
-            if (index < nPar())
-                return m_parameters[index];
-            else
-                return 0.;
-        }
-        virtual std::string typeName() const = 0;
-        virtual std::string name() const = 0;
+        public:
+            using ParVec = std::vector<double>;
+            explicit CalibFunc(const ParVec& vec) : 
+                    m_parameters{vec} {}
+            virtual ~CalibFunc() = default;
+            unsigned int nPar() const { return m_parameters.size(); }
+            const ParVec& parameters() const { return m_parameters; }
+            double par(unsigned int index) const {
+                if (index < nPar())
+                    return m_parameters[index];
+                else
+                    return 0.;
+            }
+            virtual std::string typeName() const = 0;
+            virtual std::string name() const = 0;
 
-    private:
-        ParVec m_parameters;
+        private:
+            ParVec m_parameters{};
     };
 
 }  // namespace MuonCalib

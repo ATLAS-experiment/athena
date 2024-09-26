@@ -21,8 +21,8 @@ namespace MuonCalib {
         virtual double radius(double t) const = 0;
         virtual double driftvelocity(double t) const = 0;
         virtual double drdt(double t) const = 0;
-        virtual double tLower(void) const = 0;
-        virtual double tUpper(void) const = 0;
+        virtual double tLower() const = 0;
+        virtual double tUpper() const = 0;
 
         /** return the difference in total dirft time between the two multilayers (ML1 - ML2) */
         float GetTmaxDiff() const { return HasTmaxDiff() ? m_tmax_diff : 0.0; }

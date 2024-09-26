@@ -20,7 +20,7 @@ using namespace MuonCalib;
 //:: CONSTRUCTOR ::
 //:::::::::::::::::
 
-DataPoint::DataPoint(void): m_ref_comp(0){
+DataPoint::DataPoint(): m_ref_comp(0){
 }
 
 //*****************************************************************************
@@ -29,7 +29,7 @@ DataPoint::DataPoint(void): m_ref_comp(0){
 //:: CONSTRUCTOR ::
 //:::::::::::::::::
 
-DataPoint::DataPoint(const unsigned int & length, const double & fill)
+DataPoint::DataPoint(const unsigned int & length, const double  fill)
   : m_vec (length),
     m_ref_comp (0)
 {
@@ -72,7 +72,7 @@ DataPoint::DataPoint(const CLHEP::HepVector & vec, const unsigned int ref_comp)
 //:: METHOD dataVector ::
 //:::::::::::::::::::::::
 
-const Amg::VectorX & DataPoint::dataVector(void) const {
+const Amg::VectorX & DataPoint::dataVector() const {
 
     return m_vec;
 
@@ -84,7 +84,7 @@ const Amg::VectorX & DataPoint::dataVector(void) const {
 //:: METHOD dataVector ::
 //:::::::::::::::::::::::
 
-Amg::VectorX & DataPoint::dataVector(void) {
+Amg::VectorX & DataPoint::dataVector() {
 
     return m_vec;
 
@@ -96,7 +96,7 @@ Amg::VectorX & DataPoint::dataVector(void) {
 //:: METHOD referenceComponent ::
 //:::::::::::::::::::::::::::::::
 
-unsigned int DataPoint::referenceComponent(void) const {
+unsigned int DataPoint::referenceComponent() const {
 
     return m_ref_comp;
 

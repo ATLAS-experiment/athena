@@ -24,7 +24,7 @@ namespace MuonCalib {
     class MdtStationT0Container {
     public:
         // Constructors //
-        MdtStationT0Container(void) :
+        MdtStationT0Container() :
             m_t0(2, std::vector<std::vector<double> >(4, std::vector<double>(78, 9e9))),
             m_adc(2, std::vector<std::vector<double> >(4, std::vector<double>(78, 9e9))),
             m_t0_loaded(false) {}
@@ -68,8 +68,6 @@ namespace MuonCalib {
         std::vector<std::vector<std::vector<double> > > m_t0;   // t0 values
         std::vector<std::vector<std::vector<double> > > m_adc;  // t0 values
 
-        // private methods //
-        //	void init(void); // initialization method
 
         // is true if t0s are loaded correctly
         bool m_t0_loaded;

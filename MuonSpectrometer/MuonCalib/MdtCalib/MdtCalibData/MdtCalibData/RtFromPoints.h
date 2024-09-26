@@ -30,7 +30,7 @@ namespace MuonCalib {
     class RtFromPoints {
     public:
         // Constructor //
-        RtFromPoints(void) {}
+        RtFromPoints() = default;
         ///< Default constructor.
 
         // Methods //

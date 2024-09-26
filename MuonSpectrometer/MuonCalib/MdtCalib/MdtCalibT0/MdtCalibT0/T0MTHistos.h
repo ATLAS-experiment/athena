@@ -111,7 +111,7 @@ namespace MuonCalib {
         /** returns function fitted to the riding edge of the spectrum */
         inline TF1 *GetTMaxFunctionNC() const { return m_tmax_fermi.get(); }
         /** returns t0 chi2*/
-        inline const double &T0Chi2() const { return m_chi2; }
+        inline double T0Chi2() const { return m_chi2; }
 
     private:
         //---------------------------private data members-------------------------------

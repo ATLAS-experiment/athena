@@ -1,13 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// 19.06.2006, AUTHOR: OLIVER KORTNER
-// Modified: 16.01.2008 by O. Kortner, RtSpline allowed as input; faster, but
-//                      less accurate implementation of correction funtion can
-//                      be requested; bug fix in integral calculation.
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #include "MdtCalibData/BFieldCorFunc.h"
 
@@ -22,9 +15,17 @@ using namespace MuonCalib;
 
 //*****************************************************************************
 
-//:::::::::::::::::
-//:: METHOD init ::
-//:::::::::::::::::
+
+BFieldCorFunc::BFieldCorFunc(const std::string &quality, const CalibFunc::ParVec &parameters, const IRtRelation *rt) :
+    IMdtBFieldCorFunc(parameters) {
+    init(quality, parameters, rt);
+}
+      
+BFieldCorFunc::BFieldCorFunc(const CalibFunc::ParVec &parameters, const IRtRelation *rt) : 
+    IMdtBFieldCorFunc(parameters) {
+    init(std::string("medium"), parameters, rt);
+}
+
 void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &params, const IRtRelation *rt) {
     ////////////////
     // PARAMETERS //
@@ -47,11 +48,11 @@ void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &pa
     ///////////////
     unsigned int nb_points(31);    // number of sample points for the integral
                                    // in the correction function
-    double step;                   // r step size
-    double time;                   // auxiliary time variable
+    double step{0.};                   // r step size
+    double time{0.};                   // auxiliary time variable
     BaseFunctionFitter fitter(6);  // 6 fit parameters for the integral by
                                    // default ("medium quality")
-    LegendrePolynomial legendre;
+    LegendrePolynomial legendre{};
 
     /////////////////////
     // QUALITY SETTING //
@@ -118,23 +119,16 @@ void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &pa
     //////////////////////////////////////////////
     m_Legendre = Legendre_polynomial::get_Legendre_polynomial();
 
-    return;
 }  // end BFieldCorFunc::init
-
-//*****************************************************************************
-
-//:::::::::::::::::::::
-//:: METHOD t_from_r ::
-//:::::::::::::::::::::
-double BFieldCorFunc::t_from_r(const double &r, const IRtRelation *rt) const {
+double BFieldCorFunc::t_from_r(const double r, const IRtRelation *rt) const {
     ///////////////
     // VARIABLES //
     ///////////////
-    double precision(0.010);  // spatial precision of the inversion
-    double t_max(m_t_max);    // upper time search limit
-    double t_min(m_t_min);    // lower time search limit
-    double r_max(m_r_max);    // upper radius search limit
-    double r_min(m_r_min);    // lower radius search limit
+    constexpr double precision{0.010};  // spatial precision of the inversion
+    double t_max{m_t_max};    // upper time search limit
+    double t_min{m_t_min};    // lower time search limit
+    double r_max{m_r_max};    // upper radius search limit
+    double r_min{m_r_min};    // lower radius search limit
                               /////////////////////////////////////////////
                               // SEARCH FOR THE CORRESPONDING DRIFT TIME //
                               /////////////////////////////////////////////
@@ -154,24 +148,20 @@ double BFieldCorFunc::t_from_r(const double &r, const IRtRelation *rt) const {
     return t_guess;
 }  // end BFieldCorFunc::t_from_r
 
-//*****************************************************************************
-
-//:::::::::::::::::::::
-//:: METHOD integral ::
-//:::::::::::::::::::::
-double BFieldCorFunc::integral(const double &r_min, const double &r_max, const IRtRelation *rt) const {
+double BFieldCorFunc::integral(const double r_min, const double r_max, const IRtRelation *rt) const {
     // catch fp exceptions//
     if (m_r_min < 1e-10 || r_min < m_r_min) return 0.0;
 
     ///////////////
     // VARIABLES //
     ///////////////
-    double E0(m_param[0] / std::log(m_r_max / m_r_min));  // E(r)=E0/r
-    double radius(r_max), rp(r_min);                      // auxiliary radius variables
-    double integ(0.0);                                    // current value of the integral
+    const double E0{m_param[0] / std::log(m_r_max / m_r_min)};  // E(r)=E0/r
+    double radius{r_max};
+    double rp{r_min};                                     // auxiliary radius variables
+    double integ{0.0};                                    // current value of the integral
                                                           // 	double step(0.010); // integration step size [mm]
-    double step(m_step_size);                             // integration step size [mm]
-    double time;                                          // drift time
+    double step{m_step_size};                             // integration step size [mm]
+    double time{0.};                                      // drift time
 
     //////////////////////////////
     // r IN [m_r_min, m_r_max]? //
@@ -186,71 +176,37 @@ double BFieldCorFunc::integral(const double &r_min, const double &r_max, const I
     while (rp < radius) {
         time = t_from_r(rp, rt);
         if (rp + step > radius) delta = radius - rp;
-        integ = integ + 1.0e-3 * delta * std::pow(std::abs(rt->driftvelocity(time)) * 1.0e6, 1.0 - m_param[1]) /
+        integ += 1.0e-3 * delta * std::pow(std::abs(rt->driftvelocity(time)) * 1.0e6, 1.0 - m_param[1]) /
                             std::pow(E0 / (rp * 1.0e-3), 2.0 - m_param[1]);
-        rp = rp + step;
+        rp += step;
     }
 
     return integ;
 }  // end BFieldCorFunc::integral
-
-//*****************************************************************************
-
-//::::::::::::::::::::
-//:: METHOD epsilon ::
-//::::::::::::::::::::
-double BFieldCorFunc::epsilon(void) const { return m_param[1]; }
-
-//*****************************************************************************
-
-//:::::::::::::::::::::::
-//:: METHOD setEpsilon ::
-//:::::::::::::::::::::::
-/*void BFieldCorFunc::setEpsilon(const double & eps) {
-  m_param[1] = eps;
-  init(m_quality, m_param);
-  return;
-}*/
-
-//*****************************************************************************
-
-//::::::::::::::::::::::::::::::
-//:: METHOD setRtRelationship ::
-//::::::::::::::::::::::::::::::
+double BFieldCorFunc::epsilon() const { return m_param[1]; }
 void BFieldCorFunc::setRtRelationship(const IRtRelation &rt) {
     init(m_quality, m_param, &rt);
-    return;
 }
 
-//*****************************************************************************
-
-//:::::::::::::::::
-//:: METHOD name ::
-//:::::::::::::::::
 std::string BFieldCorFunc::name() const { return std::string("BFieldCorFunc"); }
 
-//*****************************************************************************
-
-//:::::::::::::::::::::::
-//:: METHOD correction ::
-//:::::::::::::::::::::::
 double BFieldCorFunc::correction(double t, double B_wire, double B_mu) const {
     if (m_Legendre == nullptr) { return 0.0; }
 
     ///////////////
     // VARIABLES //
     ///////////////
-    double B_perp(std::hypot(B_wire, B_mu));  // B orthogonal to the
+    double B_perp{std::hypot(B_wire, B_mu)};  // B orthogonal to the
                                               // electron drift path
-    double B_factor(std::pow(B_perp, 2.0 - m_param[1]));
-    double precision(0.1);                                             // precision of the correction in ns
-    double t_max(t);                                                   // upper time search limit
-    double t_min(t - 2 * correction_to_B(t, B_wire, B_mu, B_factor));  // lower time search limit
+    double B_factor{std::pow(B_perp, 2.0 - m_param[1])};
+    double precision{0.1};                                             // precision of the correction in ns
+    double t_max{t};                                                   // upper time search limit
+    double t_min{t - 2 * correction_to_B(t, B_wire, B_mu, B_factor)};  // lower time search limit
     if (t_min < m_t_min) t_min = m_t_min;
-    double time(t);                           // auxiliary time variable
-    double integ(0.0);                        // integral
-    double tmean(0.5 * (m_t_min + m_t_max));  // mean time
-    double tlength(m_t_max - m_t_min);        // length of drift-time interval
+    double time{t};                           // auxiliary time variable
+    double integ{0.0};                        // integral
+    double tmean{0.5 * (m_t_min + m_t_max)};  // mean time
+    double tlength{m_t_max - m_t_min};        // length of drift-time interval
 
     //////////////////////
     // DRIFT TIME CHECK //
@@ -267,7 +223,7 @@ double BFieldCorFunc::correction(double t, double B_wire, double B_mu) const {
     while (t_max - t_min > precision) {
         integ = 0.0;
         for (int k = 0; k < m_alpha.rows(); k++) {
-            integ = integ + m_alpha[k] * m_Legendre->value(k, 2 * (0.5 * (t_min + t_max) - tmean) / tlength);
+            integ += m_alpha[k] * m_Legendre->value(k, 2 * (0.5 * (t_min + t_max) - tmean) / tlength);
         }
         if (0.5 * (t_min + t_max) + B_factor * integ > time) {
             t_max = 0.5 * (t_min + t_max);
@@ -290,14 +246,14 @@ double BFieldCorFunc::correction_to_B(double t, double B_wire, double B_mu, doub
     // VARIABLES //
     ///////////////
     if (B_factor < 0) {
-        double B_perp(std::hypot(B_wire, B_mu));
+        const double B_perp{std::hypot(B_wire, B_mu)};
         // B orthogonal to the electron drift path
         B_factor = std::pow(B_perp, 2.0 - m_param[1]);
     }
-    double time(t);
-    double integ(0.0);                        // integral
-    double tmean(0.5 * (m_t_min + m_t_max));  // mean time
-    double tlength(m_t_max - m_t_min);        // length of drift-time interval
+    double time{t};
+    double integ{0.0};                        // integral
+    double tmean{0.5 * (m_t_min + m_t_max)};  // mean time
+    double tlength{m_t_max - m_t_min};        // length of drift-time interval
 
     //////////////////////
     // DRIFT TIME CHECK //
@@ -308,8 +264,9 @@ double BFieldCorFunc::correction_to_B(double t, double B_wire, double B_mu, doub
     //////////////////////////////
     // CALCULATE THE CORRECTION //
     //////////////////////////////
-    integ = 0.0;
-    for (int k = 0; k < m_alpha.rows(); k++) { integ = integ + m_alpha[k] * m_Legendre->value(k, 2 * (time - tmean) / tlength); }
+    for (int k = 0; k < m_alpha.rows(); k++) { 
+        integ += m_alpha[k] * m_Legendre->value(k, 2 * (time - tmean) / tlength); 
+    }
 
     return B_factor * integ;
 }  // end BFieldCorFunc::correction_to_B

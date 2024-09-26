@@ -34,7 +34,7 @@ class Combination {
 
 public:
 // Constructors //
-	Combination(void);
+	Combination();
 	///< Default construcor. A combination of 1 out of 1 is created.
 
 	Combination(const unsigned int & n, const unsigned int & k);
@@ -44,11 +44,11 @@ public:
 
 // Methods //
 // get-methods //
-	unsigned int numberOfElements(void) const;
+	unsigned int numberOfElements() const;
 				///< get the number of elements
-	unsigned int whichClass(void) const;
+	unsigned int whichClass() const;
 				///< get the class of which the combination is
-	unsigned int numberOfCombinations(void) const;
+	unsigned int numberOfCombinations() const;
 				///< get the number of combinations
 	void currentCombination(std::vector<unsigned int> & index_array) const;
 				///< get the current combination; the result
@@ -58,7 +58,7 @@ public:
 				///< stored in the array index_array
 
 // set-methods //
-	void reset(void);
+	void reset();
 				///< go back to the first combination
 	void setNewParameters(const unsigned int & nb_elements,
 					const unsigned int & wh_class);

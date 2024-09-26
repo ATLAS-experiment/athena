@@ -41,7 +41,7 @@ namespace MuonCalib {
         CurvedPatRec();
         ///< Default constructor: road width of 0.5 mm is used.
 
-        CurvedPatRec(const double& road_width);
+        CurvedPatRec(const double  road_width);
         ///< Constructor: user defined road width [mm] for pattern recognition.
 
         // Methods //
@@ -50,10 +50,10 @@ namespace MuonCalib {
         ///< pattern recognition [mm]
 
         // set-method //
-        void setRoadWidth(const double& r_road_width);
+        void setRoadWidth(const double  r_road_width);
         ///< set the road width [mm] for the pattern
         ///< recognition = r_road_width
-        void setTimeOut(const double& time_out);
+        void setTimeOut(const double  time_out);
         ///< set the time-out for the track
         ///< finding to time_out (in seconds)
 

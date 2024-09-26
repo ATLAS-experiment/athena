@@ -1,34 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// 23.03.2005, AUTHOR: OLIVER KORTNER
-// Modified: 31.05.2006 by O. Kortner: major redesign:
-//                                     driftvelocity implemented,
-//                                     resolution has been removed,
-//                                     set-method have been removed
-//           04.06.2006 by O. Kortner: bug in constructor fixed,
-//                                     doxygen entry updated.
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 #ifndef MUONCALIB_RTCHEBYSHEV_H
 #define MUONCALIB_RTCHEBYSHEV_H
 
-//////////////////
-// HEADER FILES //
-//////////////////
-
-// standard C++ //
 #include <cstdlib>
 #include <iostream>
-
-// STL //
 #include <vector>
 
 // MDT calibration //
 #include "MdtCalibData/IRtRelation.h"
-#include "MuonCalibMath/Tschebyscheff_polynomial.h"
 
 namespace MuonCalib {
     /**
@@ -43,22 +24,10 @@ namespace MuonCalib {
     where T_k is the Chebyshev polynomial of k-th order,
     tupper and tlower are upper and lower drift-time bounds.
 
-    Units: [t] = ns, [r] = mm, [v] = mm/ns.
-
-    @author Oliver.Kortner@cern.ch
-    @date 04.06.2006
-    */
-
+    Units: [t] = ns, [r] = mm, [v] = mm/ns. */
     class RtChebyshev : public IRtRelation {
-    private:
-        // Chebyshev polyonomials //
-        const Tschebyscheff_polynomial* m_Chebyshev;  //!< pointer to the Chebyshev polynomials
 
-        // private methods //
-        /** initialization method */
-        void _init(void);
-
-    public:
+       public:
         // Constructors
         /** initialization constructor,
 
@@ -70,11 +39,10 @@ namespace MuonCalib {
 
         */
 
-        explicit RtChebyshev(const ParVec& vec) : IRtRelation(vec) { _init(); }
-
+        explicit RtChebyshev(const ParVec& vec) ;
         // Methods //
         // methods required by the base classes //
-        std::string name(void) const;  //!< get the class name
+        std::string name() const;  //!< get the class name
 
         double radius(double t) const;
         //!< get the radius corresponding to the drift time t;
@@ -88,18 +56,18 @@ namespace MuonCalib {
 
         // get-methods specific to the RtChebyshev class //
         //!< get the lower drift-time bound
-        double tLower(void) const;
+        double tLower() const;
         //!< get the upper drift-time bound
-        double tUpper(void) const;
+        double tUpper() const;
 
         //!< get the number of parameters used to describe the r(t) relationship
-        unsigned int numberOfRtParameters(void) const;
+        unsigned int numberOfRtParameters() const;
 
         //!< get the coefficients of the r(t) polynomial
-        std::vector<double> rtParameters(void) const;
+        std::vector<double> rtParameters() const;
 
         //!< get the reduced time which is the argument of the Chebyshev polynomial
-        double get_reduced_time(const double& t) const;
+        double get_reduced_time(const double  t) const;
     };
 }  // namespace MuonCalib
 

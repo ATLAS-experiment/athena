@@ -33,10 +33,10 @@ class DataPoint {
 
 public:
 // Constructors //
-    DataPoint(void);
+    DataPoint();
     ///< Default constructor. Gives the vector of length 0.
 
-    DataPoint(const unsigned int & length, const double & fill);
+    DataPoint(const unsigned int & length, const double  fill);
     ///< Constructor.
     ///< \param length Length of the vector.
     ///< \param fill Sets the value of the components of the vector to fill.
@@ -53,11 +53,11 @@ public:
 
 // Methods //
 // get-methods //
-    const Amg::VectorX & dataVector(void) const;
+    const Amg::VectorX & dataVector() const;
                                     ///< get the data vector
-    Amg::VectorX & dataVector(void);
+    Amg::VectorX & dataVector();
                                     ///< get the data vector
-    unsigned int referenceComponent(void) const;
+    unsigned int referenceComponent() const;
                                     ///< get the ordering component (>=0)
 
 // set-methods //

@@ -26,7 +26,7 @@ void StraightPatRec::init() {
     return;
 }
 
-void StraightPatRec::init(const double &r_road_width) {
+void StraightPatRec::init(const double r_road_width) {
     //:::::::::::::::
     //:: VARIABLES ::
     //:::::::::::::::
@@ -64,8 +64,8 @@ void StraightPatRec::init(const double &r_road_width) {
     return;
 }
 
-MTStraightLine StraightPatRec::tangent(const Amg::Vector3D &r_w1, const double &r_r1, const double &r_sigma12, const Amg::Vector3D &r_w2,
-                                       const double &r_r2, const double &r_sigma22, const int &r_case) const {
+MTStraightLine StraightPatRec::tangent(const Amg::Vector3D &r_w1, const double r_r1, const double r_sigma12, const Amg::Vector3D &r_w2,
+                                       const double r_r2, const double r_sigma22, const int &r_case) const {
     //:::::::::::::::
     //:: VARIABLES ::
     //:::::::::::::::
@@ -276,11 +276,11 @@ MTStraightLine StraightPatRec::fitCandidate(MuonCalibSegment &r_segment, const s
 
 double StraightPatRec::roadWidth() const { return m_road_width; }
 
-void StraightPatRec::setRoadWidth(const double &r_road_width) {
+void StraightPatRec::setRoadWidth(const double r_road_width) {
     m_road_width = std::abs(r_road_width);
     return;
 }
-void StraightPatRec::setTimeOut(const double &time_out) {
+void StraightPatRec::setTimeOut(const double time_out) {
     m_time_out = time_out;
     return;
 }

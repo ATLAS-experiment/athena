@@ -14,8 +14,8 @@ namespace MuonCalibR4 {
 
             TrSqrt(const MuonCalib::IRtRelation& rt) : TrRelation(rt) {}
 
-            double tFromR(const double& r, bool& out_of_bound_flag) const;
+            double tFromR(const double  r, bool& out_of_bound_flag) const;
 
-            double rFromT(const double& t, bool& out_of_bound_flag) const;            
+            double rFromT(const double  t, bool& out_of_bound_flag) const;            
     };
 }

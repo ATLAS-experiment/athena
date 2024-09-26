@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIB_IMDTPATRECFITTER_H
 #define MUONCALIB_IMDTPATRECFITTER_H
@@ -13,7 +13,6 @@ namespace MuonCalib {
     /** @class IMdtPatRecFitter
     Interface class for MdtSegment fitters performing a pattern recognition
 
-    @author rauscher@cern.ch
     */
 
     class IMdtPatRecFitter : public IMdtSegmentFitter {
@@ -43,7 +42,7 @@ namespace MuonCalib {
         /** return refit flag */
         bool refit() const { return m_refit; }
         /** set road width */
-        virtual void setRoadWidth(const double &) = 0;
+        virtual void setRoadWidth(const double ) = 0;
 
     protected:
         //! flags

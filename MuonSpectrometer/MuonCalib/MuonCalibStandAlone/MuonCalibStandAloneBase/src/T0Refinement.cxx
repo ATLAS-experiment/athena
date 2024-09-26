@@ -296,11 +296,11 @@ double T0Refinement::getDeltaT0(MuonCalibSegment* segment, const IRtRelation* rt
 
     return delta_t0_opt;
 }
-void T0Refinement::setTimeOut(const double& time_out) {
+void T0Refinement::setTimeOut(const double  time_out) {
     m_time_out = time_out;
     return;
 }
-void T0Refinement::setRoadWidth(const double& road_width) {
+void T0Refinement::setRoadWidth(const double  road_width) {
     m_qfitter->setRoadWidth(road_width);
     m_cfitter->setRoadWidth(road_width);
 

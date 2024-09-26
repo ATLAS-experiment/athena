@@ -18,7 +18,7 @@
 namespace MuonCalib {
 
 inline double Legendre_polynomial::value(const int & order,
-						const double & x) const {
+						const double  x) const {
 
 //////////////////////////////////////////////////////////////////////////////
 // LOWER ORDER LEGENDRE POLYNOMIALS ARE GIVEN EXPLICITLY, HIGHER ORDERS ARE //

@@ -33,8 +33,8 @@ namespace MuonCalib {
         ///< r_position_error: error on the position vector;
         ///< r_direction_error: error on the direction vector.
 
-        MTStraightLine(const double& r_a_x1, const double& r_b_x1, const double& r_a_x2, const double& r_b_x2, const double& r_a_x1_err,
-                       const double& r_b_x1_err, const double& r_a_x2_err, const double& r_b_x2_err) {
+        MTStraightLine(const double  r_a_x1, const double  r_b_x1, const double  r_a_x2, const double  r_b_x2, const double  r_a_x1_err,
+                       const double  r_b_x1_err, const double  r_a_x2_err, const double  r_b_x2_err) {
             init(r_a_x1, r_b_x1, r_a_x2, r_b_x2, r_a_x1_err, r_b_x1_err, r_a_x2_err, r_b_x2_err);
         }
         ///< Coordinates: x1, x2, x3.
@@ -86,7 +86,7 @@ namespace MuonCalib {
         ///< get the slope of the intercept of
         ///< the straight line in the x2-x3
         ///< plane
-        Amg::Vector3D pointOnLine(const double& lambda) const;
+        Amg::Vector3D pointOnLine(const double  lambda) const;
         ///< get the point on the line for the
         ///< given scale factor lambda,
         ///< point=position_vector+lambda*direction_vector
@@ -134,8 +134,8 @@ namespace MuonCalib {
         // r_position_error: error on the position vector;
         // r_direction_error: error on the direction vector
 
-        void init(const double& r_a_x1, const double& r_b_x1, const double& r_a_x2, const double& r_b_x2, const double& r_a_x1_err,
-                  const double& r_b_x1_err, const double& r_a_x2_err, const double& r_b_x2_err);
+        void init(const double  r_a_x1, const double  r_b_x1, const double  r_a_x2, const double  r_b_x2, const double  r_a_x1_err,
+                  const double  r_b_x1_err, const double  r_a_x2_err, const double  r_b_x2_err);
         // Coordinates: x1, x2, x3.
         // Parametrization of the straight line: x1 = r_a_x1*x3 + r_b_x1;
         //                                       x2 = r_a_x2*x3 + r_b_x2;

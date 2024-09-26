@@ -11,7 +11,7 @@
 
 using namespace MuonCalibR4;
 
-std::string RtSqrt::name(void) const {
+std::string RtSqrt::name() const {
     return "RtSqrt";
 }
 
@@ -30,11 +30,11 @@ double RtSqrt::driftvelocity(double t) const {
     return 0.5 / std::sqrt(t);
 }
 
-double RtSqrt::tLower(void) const {
+double RtSqrt::tLower() const {
     return parameters()[0];
 }
 
-double RtSqrt::tUpper(void) const {
+double RtSqrt::tUpper() const {
     return parameters()[1];
 }
 

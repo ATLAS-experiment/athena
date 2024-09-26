@@ -39,7 +39,7 @@ class ConstantContentBinMaker {
 public:
 // Constructor //
     ConstantContentBinMaker(const std::vector<DataPoint> & points,
-                            const double & epsilon);
+                            const double  epsilon);
     ///< Constructor.
     ///< \param points Data points to be grouped into bins.
     ///< \param epsilon The upper boundaries of the seed bin are shifted by
@@ -57,7 +57,7 @@ public:
                                     ///< axes stored in ref_coord successively;
                                     ///< if ref_coord is of size 0, splitting
                                     ///< will be done in all axes successively
-    const std::vector<DataBin *> & getBins(void) const;
+    const std::vector<DataBin *> & getBins() const;
                                     ///< get the bins determined by the method
                                     ///< "binDataPoints"
 

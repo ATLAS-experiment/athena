@@ -11,7 +11,7 @@ namespace MuonCalibR4 {
     class RtResolutionSqrt : public MuonCalib::IRtResolution {
         public:
             explicit RtResolutionSqrt(ParVec& vec) : MuonCalib::IRtResolution(vec) {}
-            std::string name(void) const;
+            std::string name() const;
             double resolution(double t, double bgRate = 0.0) const;
 
     };

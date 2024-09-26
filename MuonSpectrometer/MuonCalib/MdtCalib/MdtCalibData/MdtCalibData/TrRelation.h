@@ -49,9 +49,9 @@ namespace MuonCalib {
 
         // Methods //
         ///< Get t(r). out_of_bound_flag is set to true if r is out of bounds.
-        double tFromR(const double &r, bool &out_of_bound_flag) const;
+        double tFromR(const double r, bool &out_of_bound_flag) const;
         ///< Get r(t). out_of_bound_flag is set to true if t is out of bounds.
-        double rFromT(const double &t, bool &out_of_bound_flag) const;
+        double rFromT(const double t, bool &out_of_bound_flag) const;
 
     private:
         // (r, t) pairs
@@ -59,7 +59,7 @@ namespace MuonCalib {
         std::vector<double> m_t;  // drift times
 
         // r(t) inversion method
-        static double getTFromR(const double &r, const IRtRelation &input_rt);
+        static double getTFromR(const double r, const IRtRelation &input_rt);
     };
 
 }  // namespace MuonCalib

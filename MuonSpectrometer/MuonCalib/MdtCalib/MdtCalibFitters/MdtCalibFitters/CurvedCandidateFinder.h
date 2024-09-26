@@ -42,10 +42,10 @@ namespace MuonCalib {
         ///< @param hits Vector of hits used in the candidate finding.
 
         // Methods //
-        const std::vector<CurvedLine> &getCandidates(const double &road_width);
+        const std::vector<CurvedLine> &getCandidates(const double road_width);
         ///< get all candidates connecting all hits
         ///< within the given road width (mm)
-        const std::vector<CurvedLine> &getCandidates(const double &road_width, const Amg::Vector3D &est_dir);
+        const std::vector<CurvedLine> &getCandidates(const double road_width, const Amg::Vector3D &est_dir);
         ///< get all candidates connecting all hits
         ///< within the given road width (mm);
         ///< est_dir is the estimated direction of
