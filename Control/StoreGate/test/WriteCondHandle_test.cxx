@@ -561,8 +561,8 @@ int main()
     return 1;
   }
 
-  StoreGateSvc *cs=nullptr;
-  assert (svcloc->service("StoreGateSvc/ConditionStore",cs).isSuccess());
+  SmartIF<StoreGateSvc> cs{ svcloc->service("StoreGateSvc/ConditionStore") };
+  assert (cs.isValid());
 
   // test1();
   // std::cout << "clearing ConditionStore\n";

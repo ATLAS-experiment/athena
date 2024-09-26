@@ -25,8 +25,8 @@ int main() {
     return 1;
   }
 
-  StoreGateSvc* pSG(0);
-  assert( pSvcLoc->service("StoreGateSvc", pSG, true).isSuccess() );
+  SmartIF<StoreGateSvc> pSG{pSvcLoc->service("StoreGateSvc")};
+  assert( pSG.isValid() );
 
   std::chrono::time_point<std::chrono::high_resolution_clock> start, end;
 

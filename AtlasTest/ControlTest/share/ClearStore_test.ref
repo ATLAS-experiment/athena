@@ -8,8 +8,6 @@ ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 *** ClearStore_test run standard testRecord a first time ***
 *** StoreGateSvcClient_test record BEGINS ***
  object modifiable when retrieved

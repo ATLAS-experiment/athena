@@ -29,8 +29,6 @@ StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl[m
 StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 1[m
 StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl[m
 StoreGateSvc_Impl   DEBUG Service base class initialized successfully[m
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc[m
-StoreGateSvc_Impl VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc[m
 StoreGateSvc        DEBUG Recorded object @0x4ce3340 with key foo2 of type Foo(CLID 8101)
  in DataObject @0x4ce45a0
  object modifiable when retrieved[m

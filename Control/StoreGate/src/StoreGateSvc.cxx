@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -70,9 +70,8 @@ StoreGateSvc *StoreGateSvc::currentStoreGate() {
   if (!::currentStoreGate) {
     // this is a static function so we don't have many conveniences
     ISvcLocator *svcLocator = Gaudi::svcLocator();
-    StoreGateSvc *sg = nullptr;
-    if (!svcLocator->service("StoreGateSvc/StoreGateSvc", sg, false)
-             .isSuccess()) {
+    SmartIF<StoreGateSvc> sg{svcLocator->service("StoreGateSvc/StoreGateSvc")};
+    if ( !sg.isValid() ) {
       throw GaudiException(
           "Could not get \"StoreGateSvc\" to initialize currentStoreGate",
           "StoreGateSvc", StatusCode::FAILURE);
@@ -124,16 +123,8 @@ StatusCode StoreGateSvc::initialize()    {
 
   verbose() << "Initializing " << name() << endmsg;
 
-  // lifted from AlwaysPrivateToolSvc (see Wim comment about lack of global jo svc accessor
-  // retrieve the job options svc (TODO: the code below relies heavily on
-  // internals; figure out if there's no global getJobOptionsSvc() ... )
-  IAppMgrUI* appmgr = Gaudi::createApplicationMgr();
-  IProperty* appmgrprop = 0;
-  appmgr->queryInterface( IProperty::interfaceID(), (void**)&appmgrprop ).ignore();
-  //all of the above to get the jo svc type
-  const Gaudi::Details::PropertyBase& prop = appmgrprop->getProperty( "JobOptionsSvcType" );
-  Gaudi::Interfaces::IOptionsSvc* pJOSvc(0);
-  if ( serviceLocator()->service( prop.toString(), "JobOptionsSvc", pJOSvc ).isFailure() ) {
+  SmartIF<Gaudi::Interfaces::IOptionsSvc> pJOSvc{serviceLocator()->service("JobOptionsSvc")};
+  if ( !pJOSvc.isValid() ) {
     error() << "Failed to retrieve JobOptionsSvc" << endmsg;
   }
   //copy our properties to the prototype (default) SGImplSvc
@@ -141,8 +132,6 @@ StatusCode StoreGateSvc::initialize()    {
   for (const Gaudi::Details::PropertyBase* p : getProperties()) {
     pJOSvc->set( implStoreName + "." + p->name(), p->toString() );
   }
-  pJOSvc->release();
-  pJOSvc=0;
 
   //HACK ALERT: using createService rather then the customary service(...,CREATEIF=true) we set our pointer
   // to SGImplSvc early (even before it is initialized). This should help take care of some initialize loops

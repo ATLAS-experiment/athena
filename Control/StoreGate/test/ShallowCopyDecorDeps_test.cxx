@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ShallowCopyDecorDeps_test.cxx
@@ -50,8 +50,8 @@ void test1 (ISvcLocator* svcloc)
   assert (owner.getProperty ("SCDDReadKeys").toString() == "['StoreGateSvc+myObj.d1','StoreGateSvc+myObj.d2']");
   assert (owner.getProperty ("SCDDReadKeys").ownerTypeName() == "TestOwner");
 
-  StoreGateSvc* sg = nullptr;
-  assert (svcloc->service ("StoreGateSvc", sg).isSuccess());
+  SmartIF<StoreGateSvc> sg{ svcloc->service ("StoreGateSvc") };
+  assert (sg.isValid());
   assert (sg->record (std::make_unique<MyObj>(), "myObj", false).isSuccess());
 
   EventContext ctx;

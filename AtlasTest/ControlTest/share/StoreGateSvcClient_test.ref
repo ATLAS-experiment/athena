@@ -7,8 +7,6 @@ ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 *** StoreGateSvcClient_test record BEGINS ***
  object modifiable when retrieved
 Now we expect to see an error message:

@@ -28,8 +28,6 @@ ClassIDSvc           INFO  getRegistryEntries: read 5881 CLIDRegistry entries fo
 TrigSerializeCn...   INFO initialize()
 StoreGateSvc      VERBOSE Initializing StoreGateSvc - package version StoreGate-00-00-00
 StoreGateSvc        DEBUG Service base class initialized successfully
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service EventPersistencySvc
-StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ClassIDSvc
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.

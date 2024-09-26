@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGIMPLSVC_H
@@ -687,15 +687,15 @@ private:
   /// Only intended to be called by ActiveStoreSvc.
   void makeCurrent();
 
-  IClassIDSvc* m_pCLIDSvc;  
-  IConversionSvc* m_pDataLoader;   
+  ServiceHandle<IClassIDSvc> m_pCLIDSvc;
+  ServiceHandle<IConversionSvc> m_pDataLoader;
 
   ServiceHandle<IProxyProviderSvc> m_pPPSHandle;
   // Has to be separate from handle due to setProxyProviderSvc() interface.
   // Can we get rid of that?
   IProxyProviderSvc* m_pPPS;
 
-  IHistorySvc* m_pHistorySvc;
+  ServiceHandle<IHistorySvc> m_pHistorySvc;
 
   SG::DataStore* m_pStore;             
   std::list<DataObject*> m_trash;    ///< The Recycle Bin
@@ -709,8 +709,7 @@ private:
   StringArrayProperty m_folderNameList; ///< FolderNameList Property
 
   ///get the IOVSvc "just in time" (breaks recursion at initialize)
-  IIOVSvc* getIIOVSvc();
-  IIOVSvc* m_pIOVSvc;
+  ServiceHandle<IIOVSvc> m_pIOVSvc;
 
   bool m_storeLoaded;  ///< FIXME hack needed by loadEventProxies
 
