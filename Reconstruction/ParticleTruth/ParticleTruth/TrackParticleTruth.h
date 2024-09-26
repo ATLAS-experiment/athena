@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -20,7 +20,6 @@ class TrackParticleTruth {
   TrackParticleTruth(const TrackParticleTruth& other);
   TrackParticleTruth & operator=(const TrackParticleTruth& ) = default;
   virtual ~TrackParticleTruth();
-  int barcode() const;
   const HepMcParticleLink& particleLink() const;
   float probability() const;
 
@@ -28,12 +27,6 @@ class TrackParticleTruth {
   HepMcParticleLink m_particleLink;
   float m_probability; //probability of being m_barcode the truth information
 };
-
-inline int TrackParticleTruth::barcode() const
-{
- // EJWM - I've kept this in for the moment to avoid breaking existing code. In my opinion it should be removed though. EJWM.
-  return m_particleLink.barcode();
-}
 
 inline const HepMcParticleLink& TrackParticleTruth::particleLink() const
 {

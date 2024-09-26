@@ -6,8 +6,9 @@
 #include "VrtSecInclusive/VrtSecInclusive.h"
 #include "VrtSecInclusive/IntersectionPos.h"
 #include "VrtSecInclusive/NtupleVars.h"
-#include "AthContainers/ConstAccessor.h"
 
+#include "AthContainers/ConstAccessor.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <iostream>
 #include <vector>
@@ -309,7 +310,7 @@ namespace VKalVrtAthena {
         m_ntupleVars->get< vector<double> >( "SVTrk_ZIP" )  .emplace_back(perigee.parameters()[Trk::z0]);
       
         double matchProb = -1;
-        int barcode = 0; // FIXME barcode-based
+        int barcode = HepMC::UNDEFINED_ID; // FIXME barcode-based
         if(m_jp.doTruth) 
           {  
             const xAOD::TruthParticle* aTemp_truth = getTrkGenParticle( trk );

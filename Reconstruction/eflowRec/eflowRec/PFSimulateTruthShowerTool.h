@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFSIMULATETRUTHSHOWERTOOL_H
@@ -34,7 +34,7 @@ private:
     /** ReadHandleKey for Active LAr Calibration Hits */
     SG::ReadHandleKey<CaloCalibrationHitContainer> m_lArActiveCaloCalibrationHitReadHandleKey{this,"lArActiveCaloCalibrationHitsName","LArCalibrationHitActive","ReadHandleKey for Active LAr Calibration Hits"};
 
-    void fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, double& barcode, const CaloCalibrationHit& thisCalibHit) const;
+    void fillMap(std::map<Identifier,double>& identifierToTruthEnergyMap, int barcode, const CaloCalibrationHit& thisCalibHit) const; // FIXME barcode-based
 
 };
 
