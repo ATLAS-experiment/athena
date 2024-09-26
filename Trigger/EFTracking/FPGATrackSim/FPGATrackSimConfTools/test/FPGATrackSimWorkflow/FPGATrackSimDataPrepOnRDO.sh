@@ -5,9 +5,11 @@ RDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking
 RDO_EVT=200
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
+
+# instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
+MAP_VERSION="v0.10"
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
-BANKS="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/banks_9L/"
-MAPS="maps_9L/"
+MAPS="maps_9L/OtherFPGAPipelines/${MAP_VERSION}"
 
 echo "... analysis on RDO"
 
@@ -15,7 +17,6 @@ python -m FPGATrackSimConfTools.FPGATrackSimDataPrepConfig \
     --evtMax=${RDO_EVT} \
     --filesInput=${RDO} \
     Trigger.FPGATrackSim.mapsDir=${MAPS} \
-    Trigger.FPGATrackSim.bankDir=${BANKS} \
     Trigger.FPGATrackSim.region=0 \
     Trigger.FPGATrackSim.spacePoints=True \
     Trigger.FPGATrackSim.sampleType='singleMuons' \

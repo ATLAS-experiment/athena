@@ -35,7 +35,7 @@
 #include <TVectorD.h>
 #include <TDecompLU.h>
 
-#define MIN_TRACK_SEC 15 // min number of tracks per sector
+#define MIN_TRACK_SEC 50 // min number of tracks per sector
 
 using namespace std;
 

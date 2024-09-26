@@ -22,7 +22,8 @@ echo "Running over " $RDO_EVT " events"
 
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-COMBINED_MATRIX='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/combined_matrix.root'
+BANKS_VERSION="v0.10" # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
+COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/${BANKS_VERSION}/combined_matrix.root"
 
 #make wrapper file
 echo "... RDO to AOD with sim"
