@@ -99,7 +99,6 @@ namespace InDet {
       else {
         const xAOD::TruthParticle *parent = truth->parent(0);
 
-        // in some cases particle has a parent, but that parent's barcode is zero
         if(parent == nullptr) {
           origin = origin | (0x1 << InDet::TrkOrigin::OtherOrigin);
         }
@@ -239,41 +238,6 @@ namespace InDet {
     }
 
     return false;
-  }
-
-  // Not used in getTruthOrigin anymore, kept for backwards compatibility
-  int InDetTrackTruthOriginTool::getParentID(const xAOD::TruthParticle* truth) const {
-
-    // no parents? is anything even there?
-    if(truth->nParents() != 1) return -3;
-
-    int pdgId = truth->pdgId();
-
-    const xAOD::TruthParticle *parent = truth->parent(0);
-
-    // in some files, the particle has a parent but that parent's barcode is zero.
-    // treat this as "other" (anything less than -2)
-    if (parent == nullptr) return -4;
-
-    int parentId = parent->pdgId();
-
-    // photon conversions:
-    if(parent->isPhoton() && truth->isElectron()) return parentId;
-
-    // Kshort:
-    if(abs(pdgId) == 211 && parentId == 310 && parent->nChildren() == 2) return parentId;
-
-    // Lambdas
-    if((abs(pdgId) == 211 || abs(pdgId) == 2212) && abs(parentId) == 3122 && parent->nChildren() == 2) return parentId;
-
-    // other decays:
-    if(parent->isHadron() && parent->nChildren() == 2) return parentId;
-
-    // hadronic interactions
-    if(parent->nChildren() > 2) return -1;
-
-    // other secondaries: is anything even there??
-    return -2;
   }
 
 }
