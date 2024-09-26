@@ -4,12 +4,9 @@
 # @purpose: a set of py-components to test various aspects of PyAthena
 # @author: Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
-
 __doc__ = """Module containing a set of py-components to test various aspects
 of PyAthena.
 """
-__version__ = "0.0.1"
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
 import AthenaCommon.SystemOfUnits as Units

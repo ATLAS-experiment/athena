@@ -4,12 +4,10 @@
 # @author: Sebastien Binet <binet@cern.ch>
 
 ### data
-__author__  = """
-Sebastien Binet (binet@cern.ch)
-"""
+__author__  = "Sebastien Binet (binet@cern.ch)"
 
 ### imports
-from functools import cache
+from functools import cache, partialmethod
 from AthenaCommon.Logging import logging
 
 @cache
@@ -90,8 +88,6 @@ class _PyAthenaBindingsCatalog(object):
             registry.load_type (name)
             try:
                 import cppyy
-                #klass = getattr(ROOT, name)
-                #klass = cppyy.makeClass(name)
                 klass=getattr(cppyy.gbl,name)
             except AttributeError:
                 raise AttributeError("no reflex-dict for type [%s]"%name)
@@ -350,9 +346,10 @@ def _py_init_THistSvc():
 
     # save original regXYZ methods: we'll use some modified ones
     # to improve look-up time from python
-    for n in ('Hist', 'Graph', 'Efficiency', 'Tree'):
-        code = "ITHistSvc._cpp_reg%s = ITHistSvc.reg%s" % (n,n)
-        exec (code, globals(),locals())
+    ITHistSvc._cpp_regHist = ITHistSvc.regHist
+    ITHistSvc._cpp_regGraph = ITHistSvc.regGraph
+    ITHistSvc._cpp_regEfficiency = ITHistSvc.regEfficiency
+    ITHistSvc._cpp_regTree = ITHistSvc.regTree
 
     def book(self, oid, obj=None, *args, **kw):
         """book a histogram, profile or tree
@@ -389,16 +386,16 @@ def _py_init_THistSvc():
         if obj:
             if isinstance(obj, ROOT.TH1):
                 # capture all of TH1x,TH2x,TH3x,TProfileXY
-                meth = '_cpp_regHist'
+                meth = self._cpp_regHist
             elif isinstance(obj, (ROOT.TGraph,)):
-                meth = '_cpp_regGraph'
+                meth = self._cpp_regGraph
             elif isinstance(obj, (ROOT.TEfficiency,)):
-                meth = '_cpp_regEfficiency'
+                meth = self._cpp_regEfficiency
             elif isinstance(obj, (ROOT.TTree,)):
-                meth = '_cpp_regTree'
+                meth = self._cpp_regTree
             else:
                 raise TypeError("invalid type '%r'"%type(obj))
-            if getattr(self,meth)(oid, obj).isSuccess():
+            if meth(oid, obj).isSuccess():
                 self._py_cache[oid]=obj
                 return obj
             raise RuntimeError('could not book object [%r]'%obj)
@@ -503,22 +500,23 @@ def _py_init_THistSvc():
     ITHistSvc.__setitem__  = setitem
     del setitem
 
-    ## ties some loose ends
-    for n in ('Hist', 'Graph', 'Efficiency', 'Tree'):
-        code = """\
-def reg%s(self, oid, oid_type=None):
-    if not (oid_type is None):
-        return self.book(oid,obj=oid_type)
-    if ITHistSvc._cpp_reg%s(self,oid).isSuccess():
-        # update py_cache
-        return self.get(oid)
-    err = ''.join(['invalid arguments oid=',repr(oid),' oid_type=',
-                   repr(oid_type)])
-    raise ValueError(err)
-ITHistSvc.reg%s = reg%s
-del reg%s""" % (n,n,n,n,n)
-        exec (code, globals(),locals())
-        pass
+    def regObject(self, regFcn, oid, oid_type=None):
+        """Helper method to register object 'oid' using 'regFcn'."""
+        if oid_type is not None:
+            return self.book(oid,obj=oid_type)
+        if regFcn(self,oid).isSuccess():
+            # update py_cache
+            return self.get(oid)
+        err = ''.join(['invalid arguments oid=',repr(oid),' oid_type=',
+                       repr(oid_type)])
+        raise ValueError(err)
+
+    ITHistSvc.regHist = partialmethod(regObject, ITHistSvc._cpp_regHist)
+    ITHistSvc.regTree = partialmethod(regObject, ITHistSvc._cpp_regTree)
+    ITHistSvc.regEfficiency = partialmethod(regObject, ITHistSvc._cpp_regEfficiency)
+    ITHistSvc.regGraph = partialmethod(regObject, ITHistSvc._cpp_regGraph)
+    del regObject
+
     def load(self, oid, oid_type):
         """Helper method to load a given object `oid' from a stream, knowing
         its type. `oid_type' is a string whose value is either:
@@ -527,17 +525,21 @@ del reg%s""" % (n,n,n,n,n)
          - 'efficiency', to load TEfficiency
          - 'graph', to load TGraph and TGraphErrors
         """
-        _allowed_values = ('hist','tree','efficiency','graph')
-        if oid_type not in _allowed_values:
-            raise ValueError(
-                'oid_type (=%r) MUST be one of %r'%(oid_type,
-                                                    _allowed_values)
-                )
-        return getattr(self, 'reg%s'%oid_type.capitalize())(oid)
+        if oid_type == 'hist':
+            return self.regHist(oid)
+        elif oid_type == 'tree':
+            return self.regTree(oid)
+        elif oid_type == 'efficiency':
+            return self.regEfficiency(oid)
+        elif oid_type == 'graph':
+            return self.regGraph(oid)
+        else:
+            raise ValueError(f'oid_type (={oid_type}) MUST be one of hist, tree, efficiency, graph')
+
     ITHistSvc.load = load
     del load
     ## --
-    
+
     ## 'dict-onization' of ITHistSvc
     for n in ('__contains__',
               '__iter__',
@@ -545,14 +547,20 @@ del reg%s""" % (n,n,n,n,n)
               'has_key',
               'items', 'iteritems',
               'iterkeys', 'itervalues',
-              'keys',
-              'values'):
+              'keys', 'values'):
         code = """\
 def %s(self, *args, **kw):
     return self._py_cache.%s(*args,**kw)
 ITHistSvc.%s = %s
 del %s""" % (n,n,n,n,n)
         exec (code, globals(),locals())
+
+    ## override bool (otherwise len will be used for nullptr pointer check)
+    def __bool__(self):
+        return self is not None
+    ITHistSvc.__bool__ = __bool__
+    del __bool__
+
     def pop(self, k):
         obj = self.get(k)
         assert self.deReg(obj).isSuccess(), \

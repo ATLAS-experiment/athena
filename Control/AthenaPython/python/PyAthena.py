@@ -1,13 +1,10 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: PyAthena.py
 # @purpose: a set of Python classes for PyAthena
 # @author: Sebastien Binet <binet@cern.ch>
 
-from __future__ import print_function
-
 __doc__     = """Module containing a set of Python base classes for PyAthena"""
-__version__ = "$Revision: 1.16 $"
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
 ### data
