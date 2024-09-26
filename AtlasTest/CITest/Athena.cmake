@@ -368,6 +368,6 @@ atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
    POST_EXEC_SCRIPT nopost.sh )
 
-#atlas_add_citest( EFTracking_FPGATrackSim_workflow
-#   SCRIPT test_FPGATrackSimWorkflow.sh )
+atlas_add_citest( EFTracking_FPGATrackSim_workflow
+  SCRIPT test_FPGATrackSimWorkflow.sh )
 
