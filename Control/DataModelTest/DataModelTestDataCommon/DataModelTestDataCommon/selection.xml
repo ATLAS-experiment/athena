@@ -28,6 +28,9 @@
   <class name="DMTest::CLinksAOD" id="99D3AFCC-F13B-4A15-B2C8-800FB4B8EC92"/>
 
   <class name="DMTest::CView::Pers_t" id="CDB407A6-1B30-4214-BC29-47268D2F28F7"/>
+  <class name="DMTest::PAuxContainer_v1" id="58081418-53B0-4D30-92FC-3DAB2432FF59"/>
+  <class name="DMTest::P_v1" id="474284D8-2EF8-4B5A-8DD3-AE1F9E565096"/>
+  <class name="DMTest::PVec_v1" id="177BD1E5-4D4C-47A9-9743-59FF93BC09FA"/>
   
   <class name="DMTest::JVec_v1" id="27CC6E50-0C8C-11EF-9541-E0C2649C5CE8"/>
   <class name="DMTest::JVecContainer_v1" id="D80ED384-0C8C-11EF-A65E-E0C2649C5CE8"/>

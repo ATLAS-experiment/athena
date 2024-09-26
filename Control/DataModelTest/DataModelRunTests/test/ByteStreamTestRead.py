@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/ByteStreamTestRead.py
 # Author: snyder@bnl.gov
@@ -25,6 +25,8 @@ def ByteStreamTestReadCfg (flags):
 
     acc.addEventAlgo (DMTest.xAODTestReadCVec ('xAODTestReadCVec',
                                                CVecKey = 'HLT_DMTest__CVec_cvec'))
+    acc.addEventAlgo (DMTest.xAODTestReadPVec ('xAODTestReadPVec',
+                                               PVecKey = 'HLT_DMTest__PVec_pvec'))
     acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView',
                                                 CViewKey = 'HLT_DMTest__CView_cview'))
     acc.addEventAlgo (DMTest.xAODTestReadHVec ('xAODTestReadHVec',

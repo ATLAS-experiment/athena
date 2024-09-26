@@ -19,6 +19,7 @@ def xAODTestWriteCfg (flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     DMTest = CompFactory.DMTest
     acc.addEventAlgo (DMTest.xAODTestWriteCVec ('xAODTestWriteCVec'))
+    acc.addEventAlgo (DMTest.xAODTestWritePVec ('xAODTestWritePVec'))
     acc.addEventAlgo (DMTest.xAODTestWriteHVec ('xAODTestWriteHVec'))
     acc.addEventAlgo (DMTest.xAODTestWriteCView ('xAODTestWriteCView'))
     acc.addEventAlgo (DMTest.xAODTestWriteCInfo ('xAODTestWriteCInfo'))
@@ -37,6 +38,8 @@ def xAODTestWriteCfg (flags):
                 'DMTest::CVecWithData#cvecWD',
                 'DMTest::CView#cview',
                 'DMTest::CAuxContainer#cvecWDAux.',
+                'DMTest::PVec#pvec',
+                'DMTest::PAuxContainer#pvecAux.',
                 'DMTest::GVec#gvec',
                 'DMTest::GAuxContainer#gvecAux.',
                 'DMTest::CVec#ctrig',
@@ -70,6 +73,9 @@ def xAODTestWriteCfg (flags):
                   'ViewVector<DataVector<DMTest::C_v1,DataModel_detail::NoBase> >',
                   'DMTest::C_v1',
                   'DMTest::CInfoAuxContainer_v1',
+                  'DataVector<DMTest::P_v1>',
+                  'DMTest::P_v1',
+                  'DMTest::PAuxContainer_v1',
                   'DataVector<DMTest::G_v1>',
                   'DMTest::GAuxContainer_v1',
                   'DMTest::G_v1',

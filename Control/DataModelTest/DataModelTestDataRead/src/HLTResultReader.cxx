@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file DataModelTestDataRead/src/HLTResultReader.cxx
  * @author snyder@bnl.gov
@@ -16,6 +15,9 @@
 #include "DataModelTestDataCommon/CView.h"
 #include "DataModelTestDataCommon/C.h"
 #include "DataModelTestDataCommon/CAuxContainer.h"
+#include "DataModelTestDataCommon/PVec.h"
+#include "DataModelTestDataCommon/P.h"
+#include "DataModelTestDataCommon/PAuxContainer.h"
 #include "DataModelTestDataRead/HVec.h"
 #include "DataModelTestDataRead/HView.h"
 #include "DataModelTestDataRead/H.h"
@@ -28,6 +30,7 @@
 HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(DMTest::C, DMTest::CVec, DMTest::CVec, DMTest::CAuxContainer) 
   HLT_REGISTER_TYPE(DMTest::C, DMTest::CView, DMTest::CView, DMTest::CAuxContainer) 
+  HLT_REGISTER_TYPE(DMTest::P, DMTest::PVec, DMTest::PVec, DMTest::PAuxContainer) 
   HLT_REGISTER_TYPE(DMTest::H, DMTest::HVec, DMTest::HVec, DMTest::HAuxContainer) 
   HLT_REGISTER_TYPE(DMTest::H, DMTest::HView, DMTest::HView, DMTest::HAuxContainer) 
 HLT_END_TYPE_REGISTRATION(DataModelTest)
@@ -77,6 +80,8 @@ StatusCode HLTResultReader::initialize ATLAS_NOT_THREAD_SAFE()
   HLT::TypeMaps::registerFeatureContainer<DMTest::CVec,DMTest::CVec>();
   HLT::TypeMaps::registerFeatureContainer<DMTest::CView,DMTest::CView>();
   HLT::TypeMaps::registerType<DMTest::CAuxContainer>();
+  HLT::TypeMaps::registerFeatureContainer<DMTest::PVec,DMTest::PVec>();
+  HLT::TypeMaps::registerType<DMTest::PAuxContainer>();
   HLT::TypeMaps::registerFeatureContainer<DMTest::HVec,DMTest::HVec>();
   HLT::TypeMaps::registerFeatureContainer<DMTest::HView,DMTest::HView>();
   HLT::TypeMaps::registerType<DMTest::HAuxContainer>();

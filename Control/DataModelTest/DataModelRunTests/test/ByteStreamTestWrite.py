@@ -22,6 +22,8 @@ def ByteStreamTestWriteCfg (flags):
                                                   DecisionKey = 'xTrigDecision'))
     acc.addEventAlgo (DMTest.xAODTestWriteCVec ("xAODTestWriteCVec",
                                                 CVecKey = 'HLT_DMTest__CVec_cvec'))
+    acc.addEventAlgo (DMTest.xAODTestWritePVec ("xAODTestWritePVec",
+                                                PVecKey = 'HLT_DMTest__PVec_pvec'))
     acc.addEventAlgo (DMTest.xAODTestWriteCView ("xAODTestWriteCView",
                                                  CVecKey = 'HLT_DMTest__CVec_cvec',
                                                  CViewKey = 'HLT_DMTest__CView_cview'))
@@ -39,6 +41,7 @@ def ByteStreamTestWriteCfg (flags):
 
     bswrite = [ 'DMTest::CVec#cvec.-dVar2.-dtest',
                 'DMTest::CView#cview',
+                'DMTest::PVec#pvec.dpInt1.dpvFloat',
                 'DMTest::HVec#hvec',
                 'DMTest::HView#hview',
                 'DMTest::CVec#cvec2' ]

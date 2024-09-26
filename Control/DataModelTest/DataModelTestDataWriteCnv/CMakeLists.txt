@@ -19,6 +19,7 @@ FILES
    DataModelTestDataWrite/G.h DataModelTestDataWrite/GVec.h DataModelTestDataWrite/GAuxContainer.h
    DataModelTestDataWrite/H.h DataModelTestDataWrite/HVec.h DataModelTestDataWrite/HAuxContainer.h DataModelTestDataWrite/HView.h
    DataModelTestDataCommon/C.h DataModelTestDataCommon/CVec.h DataModelTestDataCommon/CAuxContainer.h DataModelTestDataCommon/CView.h DataModelTestDataCommon/CVecWithData.h DataModelTestDataCommon/CInfoAuxContainer.h DataModelTestDataCommon/CTrigAuxContainer.h
+   DataModelTestDataCommon/P.h DataModelTestDataCommon/PVec.h DataModelTestDataCommon/PAuxContainer.h
    DataModelTestDataCommon/S1.h DataModelTestDataCommon/S2.h
    DataModelTestDataCommon/CLinks.h DataModelTestDataCommon/CLinksContainer.h DataModelTestDataCommon/CLinksAuxInfo.h DataModelTestDataCommon/CLinksAuxContainer.h DataModelTestDataCommon/CLinksAOD.h
    DataModelTestDataWrite/AllocTestContainer.h DataModelTestDataWrite/AllocTestAuxContainer.h
@@ -29,6 +30,7 @@ TYPES_WITH_NAMESPACE
    DMTest::DVec DMTest::DDer
    DMTest::ELVec
    DMTest::C DMTest::CVec DMTest::CAuxContainer DMTest::CVecWithData DMTest::CInfoAuxContainer DMTest::CTrigAuxContainer DMTest::CView
+   DMTest::P DMTest::PVec DMTest::PAuxContainer
    DMTest::G DMTest::GVec DMTest::GAuxContainer
    DMTest::H DMTest::HVec DMTest::HAuxContainer DMTest::HView
    DMTest::S1 DMTest::S2

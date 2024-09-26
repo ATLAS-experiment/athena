@@ -18,6 +18,9 @@
 #include "DataModelTestDataCommon/CAuxContainer.h"
 #include "DataModelTestDataCommon/CTrigAuxContainer.h"
 #include "DataModelTestDataCommon/CInfoAuxContainer.h"
+#include "DataModelTestDataCommon/P.h"
+#include "DataModelTestDataCommon/PVec.h"
+#include "DataModelTestDataCommon/PAuxContainer.h"
 #include "DataModelTestDataRead/H.h"
 #include "DataModelTestDataRead/HAuxContainer.h"
 #include "DataModelTestDataRead/HVec.h"
@@ -411,6 +414,7 @@ StatusCode xAODTestTypelessRead::execute()
   CHECK(( testit<CVec, CTrigAuxContainer> ("ctrig") ));
   CHECK(( testit<CVecWithData, CAuxContainer> ("cvecWD") ));
   CHECK(( testit_view<CView> ("cview") ));
+  CHECK(( testit<PVec, PAuxContainer>     ("pvec") ));
   CHECK(( testit<HVec, HAuxContainer>     ("hvec") ));
   CHECK(( testit_view<HView> ("hview") ));
   CHECK(( testit<JVecContainer, JVecAuxContainer> ("jvecContainer") ));

@@ -16,6 +16,8 @@
 #include "../xAODTestWriteCVec.h"
 #include "../xAODTestWriteCInfo.h"
 #include "../xAODTestThinCVec.h"
+#include "../xAODTestWritePVec.h"
+#include "../xAODTestReadPVec.h"
 #include "../xAODTestThinJVec.h"
 #include "../xAODTestThinPLinks.h"
 #include "../xAODTestWriteCLinks.h"
@@ -45,6 +47,8 @@ DECLARE_COMPONENT( DMTest::xAODTestAlg )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCInfo )
 DECLARE_COMPONENT( DMTest::xAODTestThinCVec )
+DECLARE_COMPONENT( DMTest::xAODTestWritePVec )
+DECLARE_COMPONENT( DMTest::xAODTestReadPVec )
 DECLARE_COMPONENT( DMTest::xAODTestThinJVec )
 DECLARE_COMPONENT( DMTest::xAODTestThinPLinks )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCLinks )

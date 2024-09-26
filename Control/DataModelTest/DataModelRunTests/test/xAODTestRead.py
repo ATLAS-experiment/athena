@@ -28,6 +28,8 @@ def xAODTestReadCfg (flags):
                                            CVecWDWriteKey = 'copy_cvecWD'))
     acc.addEventAlgo (DMTest.xAODTestReadCView ('xAODTestReadCView',
                                                 WriteKey = 'copy_cview'))
+    acc.addEventAlgo (DMTest.xAODTestReadPVec ('xAODTestReadPVec',
+                                               WriteKey = 'copy_pvec'))
     acc.addEventAlgo (DMTest.xAODTestReadHVec ('xAODTestReadHVec',
                                                VecWriteKey = 'copy_hvec',
                                                ViewWriteKey = 'copy_hview'))
@@ -55,6 +57,8 @@ def xAODTestReadCfg (flags):
                 'DMTest::CVecWithData#cvecWD',
                 'DMTest::CView#cview',
                 'DMTest::CAuxContainer#cvecWDAux.',
+                'DMTest::PVec#pvec',
+                'DMTest::PAuxContainer#pvecAux.',
                 'DMTest::GVec#gvec',
                 'DMTest::GAuxContainer#gvecAux.',
                 'DMTest::CVec#ctrig',
@@ -70,6 +74,8 @@ def xAODTestReadCfg (flags):
                 'DMTest::CVecWithData#copy_cvecWD',
                 'DMTest::CView#copy_cview',
                 'DMTest::CAuxContainer#copy_cvecWDAux.',
+                'DMTest::PVec#copy_pvec',
+                'DMTest::PAuxContainer#copy_pvecAux.',
                 'DMTest::GVec#copy_gvec',
                 'DMTest::GAuxContainer#copy_gvecAux.',
                 'DMTest::CVec#copy_ctrig',
@@ -105,6 +111,9 @@ def xAODTestReadCfg (flags):
                   'DMTest::CTrigAuxContainer_v1',
                   'DMTest::C_v1',
                   'DMTest::CInfoAuxContainer_v1',
+                  'DataVector<DMTest::P_v1>',
+                  'DMTest::P_v1',
+                  'DMTest::PAuxContainer_v1',
                   'DMTest::JVecContainer_v1',
                   'DataVector<DMTest::JVec_v1>',
                   'DMTest::JVecAuxContainer_v1',

@@ -3,18 +3,18 @@
  * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
- * @file DataModelTestDataCommon/src/xAODTestReadCVec.h
+ * @file DataModelTestDataCommon/xAODTestReadPVec.h
  * @author scott snyder <snyder@bnl.gov>
- * @date Apr, 2016
- * @brief Algorithm to test reading xAOD data (CVec)
+ * @date Sep, 2024
+ * @brief Algorithm to test reading xAOD data with packed containers.
  */
 
 
-#ifndef DATAMODELTESTDATACOMMON_XAODTESTREADCVEC_H
-#define DATAMODELTESTDATACOMMON_XAODTESTREADCVEC_H
+#ifndef DATAMODELTESTDATACOMMON_XAODTESTREADPVEC_H
+#define DATAMODELTESTDATACOMMON_XAODTESTREADPVEC_H
 
 
-#include "DataModelTestDataCommon/CVec.h"
+#include "DataModelTestDataCommon/PVec.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -24,9 +24,9 @@ namespace DMTest {
 
 
 /**
- * @brief Algorithm to test reading xAOD data (CVec).
+ * @brief Algorithm to test reading xAOD data with packed containers.
  */
-class xAODTestReadCVec
+class xAODTestReadPVec
   : public AthReentrantAlgorithm
 {
 public:
@@ -46,18 +46,18 @@ public:
 
 
 private:
-  SG::ReadHandleKey<DMTest::CVec> m_cvecKey
-  { this, "CVecKey", "cvec", "" };
+  SG::ReadHandleKey<DMTest::PVec> m_pvecKey
+  { this, "PVecKey", "pvec", "" };
 
-  SG::WriteHandleKey<DMTest::CVec> m_writeKey
+  SG::WriteHandleKey<DMTest::PVec> m_writeKey
   { this, "WriteKey", "", "" };
-
-  BooleanProperty m_brief
-  { this, "Brief", false, "" };
 };
 
 
 } // namespace DMTest
 
 
-#endif // not DATAMODELTESTDATACOMMON_XAODTESTREADCVEC_H
+
+
+
+#endif // not DATAMODELTESTDATACOMMON_XAODTESTREADPVEC_H
