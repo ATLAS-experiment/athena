@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -48,13 +48,8 @@ StatusCode AthenaMon::initialize()
   log << MSG::INFO << "initialize AthenaMon algorithm" << endmsg;
 
   std::vector<std::string>::iterator it = m_monToolNames.begin();
-  IToolSvc* p_toolSvc;
-  StatusCode sc = service("ToolSvc",p_toolSvc);
-
-  if (sc.isFailure()) {
-    log << MSG::FATAL << " Tool Service not found " << endmsg;
-    return StatusCode::FAILURE;
-  }
+  SmartIF<IToolSvc> p_toolSvc{service("ToolSvc")};
+  ATH_CHECK( p_toolSvc.isValid() );
 
   for (; it < m_monToolNames.end(); ++it) {
  
@@ -63,7 +58,7 @@ StatusCode AthenaMon::initialize()
     
     Gaudi::Utils::TypeNameString mytool(toolname);
 
-    sc = p_toolSvc->retrieveTool(mytool.type(), mytool.name(), p_tool);
+    StatusCode sc = p_toolSvc->retrieveTool(mytool.type(), mytool.name(), p_tool);
     if(sc.isFailure()) {
       log << MSG::FATAL << "Unable to create " << toolname
 	  << " AlgTool" << endmsg;

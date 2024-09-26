@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonManager_H
@@ -10,6 +10,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/StatusCode.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -122,7 +123,7 @@ class AthenaMonManager : public AthAlgorithm {
    protected:
       ToolHandleArray<IMonitorToolBase> m_monTools;
 
-      ITHistSvc*  m_THistSvc;
+      ServiceHandle<ITHistSvc> m_THistSvc;
 
    private:
       // Use private implementation idiom for more flexible development.

@@ -42,7 +42,7 @@
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-ITHistSvc* histSvc{nullptr};
+SmartIF<ITHistSvc> histSvc;
 size_t RUNS;
 
 void resetHists()
@@ -170,7 +170,8 @@ int main(int argc, char** argv)
   }
   MsgStream log(Athena::getMessageSvc(), "GenericMonPerf_test");
 
-  CHECK_WITH_CONTEXT(pSvcLoc->service("THistSvc", histSvc, true), "GenericMonPerf_test", -1);
+  histSvc = pSvcLoc->service("THistSvc");
+  CHECK_WITH_CONTEXT(histSvc.isValid(), "GenericMonPerf_test", -1);
 
   ISvcManager* svcmgr = dynamic_cast<ISvcManager*>(pSvcLoc);
   svcmgr->start().ignore();
