@@ -68,6 +68,13 @@ def defineInputsMenu():
                                     TopoMenuDef( '2DISAMB_jJ30ab_DR_eTAU_eTAU',             outputbits = (14,15), outputlines = ['2DISAMB-jJ30ab-0DR25-eTAU30ab-eTAU20ab',
                                                                                                                                  '2DISAMB-jJ30ab-0DR28-eTAU30ab-eTAU20ab']),
                             ]
+                        elif group['fpga']==1 and group['clock']==0:
+                            group["algorithms"] += [
+                                #TopoMenuDef( 'DR_eTAU_MU',                       outputbits = (11,12), outputlines =  ['3DR99-MU8Fab-eTAU30ab',
+                                #                                                                                           '3DR28-MU8Fab-eTAU30ab' ]) #ATR-30170
+                                    TopoMenuDef( '3DR99-MU8Fab-eTAU30ab', outputbits = 2),
+                                    TopoMenuDef( '3DR28-MU8Fab-eTAU30ab', outputbits = 3),
+                            ]
 
     #----------------------------------------------
 

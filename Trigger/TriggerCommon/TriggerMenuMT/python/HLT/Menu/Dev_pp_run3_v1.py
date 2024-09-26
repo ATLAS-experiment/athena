@@ -34,6 +34,7 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  EgammaJetGroup,
                                                                  MuonJetGroup,
                                                                  MuonMETGroup,
+                                                                 MuonTauGroup,
                                                                  MinBiasGroup,
                                                                  PrimaryLegGroup,
                                                                  PrimaryPhIGroup,
@@ -848,6 +849,11 @@ def getDevSignatures():
         # Phase 1
         ChainProp(name='HLT_j180_dispjet120_x3d1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
         ChainProp(name='HLT_j180_dispjet140_x3d1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
+
+        #ATR-30179
+        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR99-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
+        ChainProp(name='HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_3DR28-MU8F-eTAU30', l1SeedThresholds=['MU8F','cTAU30M'], stream=[PhysicsStream], groups=SupportPhIGroup+MuonTauGroup),
+
     ]
 
     chains['Beamspot'] = [
