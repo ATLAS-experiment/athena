@@ -86,19 +86,7 @@ void Range::add (element_type minimum, element_type maximum) {
   m_fields.emplace_back (minimum, maximum); 
 } 
  
-//----------------------------------------------- 
-void Range::add_minimum (element_type minimum) { 
-  field f; 
-  f.set_minimum (minimum); 
-  m_fields.push_back (f); 
-} 
- 
-//----------------------------------------------- 
-void Range::add_maximum (element_type maximum) { 
-  field f; 
-  f.set_maximum (maximum); 
-  m_fields.push_back (f); 
-} 
+
  
 /// Add a range specified using a field  
 void Range::add (const field& f) {

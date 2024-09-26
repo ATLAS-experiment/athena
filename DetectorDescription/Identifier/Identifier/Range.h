@@ -93,12 +93,6 @@ public:
   /// Add a bounded value. 
   void add (element_type minimum, element_type maximum); 
  
-  /// Add a range bounded by a minimum. 
-  void add_minimum (element_type minimum); 
- 
-  /// Add a range bounded by a maximum. 
-  void add_maximum (element_type maximum); 
- 
   /// Add a range specified using a field  
   void add (const field& f); 
  
