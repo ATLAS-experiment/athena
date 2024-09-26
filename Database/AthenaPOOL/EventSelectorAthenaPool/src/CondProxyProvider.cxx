@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondProxyProvider.cxx
@@ -29,7 +29,7 @@
 
 //________________________________________________________________________________
 CondProxyProvider::CondProxyProvider(const std::string& name, ISvcLocator* pSvcLocator) :
-	::AthService(name, pSvcLocator),
+    base_class(name, pSvcLocator),
 	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name),
 	m_poolCollectionConverter(0),
 	m_contextId(IPoolSvc::kInputStream)
@@ -41,27 +41,18 @@ CondProxyProvider::~CondProxyProvider() {
 //________________________________________________________________________________
 StatusCode CondProxyProvider::initialize() {
    ATH_MSG_INFO("Initializing " << name());
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
    // Check for input collection
    if (m_inputCollectionsProp.value().size() == 0) {
       return(StatusCode::FAILURE);
    }
    // Retrieve AthenaPoolCnvSvc
-   if (!m_athenaPoolCnvSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get AthenaPoolCnvSvc.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
+
    // Get PoolSvc and connect as "Conditions"
    IPoolSvc *poolSvc = m_athenaPoolCnvSvc->getPoolSvc();
    m_contextId = poolSvc->getInputContext("Conditions");
-   StatusCode status = poolSvc->connect( pool::ITransaction::READ, m_contextId );
-   if (!status.isSuccess()) {
-      ATH_MSG_FATAL("Cannot connect to Database.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( poolSvc->connect(pool::ITransaction::READ, m_contextId) );
+
    for( const auto &inp : m_inputCollectionsProp.value() ) {
       ATH_MSG_INFO("Inputs: " << inp);
    }
@@ -84,11 +75,7 @@ StatusCode CondProxyProvider::finalize() {
    if (!m_athenaPoolCnvSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release AthenaPoolCnvSvc.");
    }
-   return(::AthService::finalize());
-}
-//________________________________________________________________________________
-StatusCode CondProxyProvider::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   return(::AthService::queryInterface(riid, ppvInterface));
+   return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
 StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
@@ -98,10 +85,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
    }
    ServiceHandle<StoreGateSvc> detectorStoreSvc("DetectorStore", name());
    // Retrieve DetectorStoreSvc
-   if (!detectorStoreSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get DetectorStoreSvc.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( detectorStoreSvc.retrieve() );
 
    if (m_poolCollectionConverter == nullptr) {
      return StatusCode::FAILURE;
@@ -158,9 +142,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          EventSelectorAthenaPoolUtil::registerKeys(element, &*detectorStoreSvc);
       }
    }
-   if (!detectorStoreSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release DetectorStoreSvc.");
-   }
+
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________

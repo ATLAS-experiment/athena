@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolAddressProviderSvc.cxx
@@ -28,12 +28,10 @@
 
 //________________________________________________________________________________
 AthenaPoolAddressProviderSvc::AthenaPoolAddressProviderSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	::AthService(name, pSvcLocator),
+	base_class(name, pSvcLocator),
 	m_metaDataStore("MetaDataStore", name),
 	m_clidSvc("ClassIDSvc", name),
 	m_guid() {
-   declareProperty("DataHeaderKey",       m_dataHeaderKey = "EventSelector");
-   declareProperty("AttributeListKey",    m_attrListKey = "");
 }
 //________________________________________________________________________________
 AthenaPoolAddressProviderSvc::~AthenaPoolAddressProviderSvc() {
@@ -44,20 +42,10 @@ StoreGateSvc* AthenaPoolAddressProviderSvc::eventStore() const {
 }
 //________________________________________________________________________________
 StatusCode AthenaPoolAddressProviderSvc::initialize() {
-   if (!::AthService::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize AthService base class.");
-      return(StatusCode::FAILURE);
-   }
-   // Retrieve MetaDataStore
-   if (!m_metaDataStore.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get MetaDataStore.");
-      return(StatusCode::FAILURE);
-   }
-   // Retrieve ClassIDSvc
-   if (!m_clidSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get ClassIDSvc.");
-      return(StatusCode::FAILURE);
-   }
+
+   ATH_CHECK( m_metaDataStore.retrieve() );
+   ATH_CHECK( m_clidSvc.retrieve() );
+
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
@@ -70,11 +58,8 @@ StatusCode AthenaPoolAddressProviderSvc::finalize() {
    if (!m_metaDataStore.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release MetaDataStore.");
    }
-   return(::AthService::finalize());
-}
-//________________________________________________________________________________
-StatusCode AthenaPoolAddressProviderSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   return(::AthService::queryInterface(riid, ppvInterface));
+
+   return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
 StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
@@ -83,10 +68,8 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
       return(StatusCode::SUCCESS);
    }
    ServiceHandle<StoreGateSvc> detectorStoreSvc("DetectorStore", name());
-   if (!detectorStoreSvc.retrieve().isSuccess()) {
-      ATH_MSG_ERROR("Cannot get DetectorStore.");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( detectorStoreSvc.retrieve() );
+
    SG::ReadHandle<DataHeader> dataHeader("CondProxyProvider", detectorStoreSvc->name());
    if (!dataHeader.isValid()) {
       ATH_MSG_DEBUG("Cannot retrieve DataHeader from DetectorStore.");
@@ -103,9 +86,7 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
       }
       EventSelectorAthenaPoolUtil::registerKeys(element, &*detectorStoreSvc);
    }
-   if (!detectorStoreSvc.release().isSuccess()) {
-      ATH_MSG_WARNING("Cannot release DetectorStoreSvc.");
-   }
+
    return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________

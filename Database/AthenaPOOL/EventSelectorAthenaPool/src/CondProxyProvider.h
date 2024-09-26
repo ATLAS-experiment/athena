@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONDPROXYPROVIDER_H
@@ -27,7 +27,7 @@ class IAthenaPoolCnvSvc;
 /** @class CondProxyProvider
  *  @brief This class is the AddressProvider for conditions data.
  **/
-class ATLAS_CHECK_THREAD_SAFETY CondProxyProvider : public ::AthService, virtual public IAddressProvider {
+class CondProxyProvider : public extends<AthService, IAddressProvider> {
 public: // Constructor and Destructor
    /// Standard Service Constructor
    CondProxyProvider(const std::string& name, ISvcLocator* pSvcLocator);
@@ -35,25 +35,23 @@ public: // Constructor and Destructor
    virtual ~CondProxyProvider();
 
    /// Required of all Gaudi Services
-   virtual StatusCode initialize();
+   virtual StatusCode initialize() override;
    /// Required of all Gaudi Services
-   virtual StatusCode finalize();
-   /// Does this object satisfy a given interface?  See Gaudi documentation for details.
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
+   virtual StatusCode finalize() override;
 
    /// Get all addresses from provider. Called before begin event.
    /// @param storeID [IN] store ID, this function only preloads detector store addresses.
    /// @param tads [OUT] list of the transient addresses which were preloaded.
-   virtual StatusCode preLoadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads);
+   virtual StatusCode preLoadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads) override;
 
    /// Implementation of the loadAddresses function without any functionality.
-   virtual StatusCode loadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads);
+   virtual StatusCode loadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads) override;
 
    /// Update a transient address.
    /// @param storeID [IN] store ID, this function only preloads detector store addresses.
    /// @param tad [IN] transient address to be updated.
    virtual StatusCode updateAddress(StoreID::type storeID, SG::TransientAddress* tad,
-                                    const EventContext& ctx);
+                                    const EventContext& ctx) override;
 
 private: // data
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
