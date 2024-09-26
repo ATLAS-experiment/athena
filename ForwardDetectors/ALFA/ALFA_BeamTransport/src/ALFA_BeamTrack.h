@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
  #ifndef ALFA_BeamTrack_H
@@ -38,9 +38,9 @@ class ALFA_BeamTrack
 	run first CalculatePosRP() then posRP() and momRP()*/
     	int CalculatePosRP(FPTracker::Particle particle);
 	/**Gives Back Position*/
-	FPTracker::Point PosRP();
+	const FPTracker::Point& PosRP();
 	/**gives back Momentum*/
-	FPTracker::Point MomRP();
+	const FPTracker::Point& MomRP();
 	
     
     
