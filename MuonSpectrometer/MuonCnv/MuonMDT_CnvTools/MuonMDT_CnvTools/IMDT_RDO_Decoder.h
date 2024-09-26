@@ -10,6 +10,7 @@
 class MdtDigit;
 class MdtAmtHit;
 class Identifier;
+class EventContext;
 
 static const InterfaceID IID_IMDT_RDO_Decoder("Muon::IMDT_RDO_Decoder", 1, 0);
 
@@ -21,7 +22,7 @@ namespace Muon {
          */
         static const InterfaceID& interfaceID();
 
-        virtual MdtDigit* getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId) const = 0;
+        virtual MdtDigit* getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, const EventContext& ctx) const = 0;
 
         virtual Identifier getOfflineData(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, int& tdc,
                                           int& width) const = 0;

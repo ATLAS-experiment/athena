@@ -52,7 +52,7 @@ StatusCode ZdcByteStreamLucrodData::execute() {
   }
 
   ATH_MSG_DEBUG("ZdcByteStreamLucrodData::execute::getROBDATA");
-  m_robDataProvider->getROBData(ROBIDs, listOfRobf);
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), ROBIDs, listOfRobf);
   
   auto zdcLucrodDataContainer = std::make_unique<ZdcLucrodDataContainer>(); 
   

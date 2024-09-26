@@ -85,7 +85,7 @@ StatusCode  Muon::TGC_RawDataProviderToolMT::convert(const EventContext& ctx) co
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
   const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
 
-  m_robDataProvider->getROBData(robIds, vecOfRobf);
+  m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
 
   return convert(vecOfRobf, ctx); 
 }
@@ -96,7 +96,7 @@ StatusCode  Muon::TGC_RawDataProviderToolMT::convert(const std::vector<Identifie
 
 StatusCode  Muon::TGC_RawDataProviderToolMT::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const
 {
-  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf = getROBData(rdoIdhVect);
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf = getROBData(rdoIdhVect, ctx);
 
   return convert(vecOfRobf, rdoIdhVect, ctx);
 }

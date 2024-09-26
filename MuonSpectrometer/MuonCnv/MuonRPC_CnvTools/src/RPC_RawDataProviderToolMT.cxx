@@ -44,7 +44,7 @@ StatusCode Muon::RPC_RawDataProviderToolMT::convert(const EventContext& ctx) con
     ///
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
     std::vector<uint32_t> robIds = readCdo->giveFullListOfRobIds();
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     // CALLGRIND_STOP_INSTRUMENTATION
     return convert(vecOfRobf, ctx);  // using the old one
 }
@@ -69,7 +69,7 @@ StatusCode Muon::RPC_RawDataProviderToolMT::convert(const std::vector<uint32_t>&
     // CALLGRIND_START_INSTRUMENTATION
     std::vector<IdentifierHash> collections;
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     // CALLGRIND_STOP_INSTRUMENTATION
     return convert(vecOfRobf, collections, ctx);
 }
@@ -86,7 +86,7 @@ StatusCode Muon::RPC_RawDataProviderToolMT::convert(const std::vector<Identifier
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
     std::vector<uint32_t> robIds;
     CHECK(readCdo->giveROB_fromRDO(rdoIdhVect, robIds));
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     // CALLGRIND_STOP_INSTRUMENTATION
     return convert(vecOfRobf, rdoIdhVect, ctx);  // using the old one
 }

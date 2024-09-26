@@ -144,10 +144,6 @@ StatusCode ROBDataProviderSvc::initialize() {
     - in offline only check that given ROB ids are in the map, issue an
       error if not
 */
-void ROBDataProviderSvc::addROBData(const std::vector<uint32_t>& robIds, const std::string_view callerName) {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return addROBData( context, robIds, callerName );
-}
 
 void ROBDataProviderSvc::addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, const std::string_view callerName) {
     EventCache* cache = m_eventsCache.get( context );
@@ -188,10 +184,6 @@ void ROBDataProviderSvc::addROBData(const EventContext& context, const std::vect
     - this version of ROBDataProviderSvc does not support it
     - this version is for offline use only
 */
-void ROBDataProviderSvc::setNextEvent(const std::vector<ROBF>& result) {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return setNextEvent( context, result );
-}
 void ROBDataProviderSvc::setNextEvent(const EventContext& /*context*/, const std::vector<ROBF>& result) { 
   // clear the old map
   // TB honestly, why do any action if this is FATAL mistake
@@ -213,11 +205,6 @@ void ROBDataProviderSvc::setNextEvent(const EventContext& /*context*/, const std
 /** - add a new Raw event
     - rebuild the map
 */
-void ROBDataProviderSvc::setNextEvent(const RawEvent* re) {
-  // obtain context and redirect to the real implementation
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return setNextEvent( context, re );
-}
 
 void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEvent* re ) {
   EventCache* cache = m_eventsCache.get( context );
@@ -290,10 +277,6 @@ void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEve
 }
 /** return ROBData for ROBID
  */
-void ROBDataProviderSvc::getROBData(const std::vector<uint32_t>& ids, std::vector<const ROBF*>& v, const std::string_view callerName) {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return getROBData( context, ids, v, callerName );
-}
 
 void ROBDataProviderSvc::getROBData(const EventContext& context, const std::vector<uint32_t>& ids, std::vector<const ROBF*>& v, 
 				    const std::string_view callerName) {
@@ -339,10 +322,6 @@ void ROBDataProviderSvc::robmapClear( ROBMAP& toclear) {
   toclear.clear();
 }
 /// Retrieve the whole event.
-const RawEvent* ROBDataProviderSvc::getEvent() {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return getEvent( context );
-}
 const RawEvent* ROBDataProviderSvc::getEvent( const EventContext& context ) {
   
   return m_eventsCache.get( context )->event;
@@ -350,19 +329,11 @@ const RawEvent* ROBDataProviderSvc::getEvent( const EventContext& context ) {
 
 
 /// Set the status for the event.
-void ROBDataProviderSvc::setEventStatus(uint32_t status) {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  setEventStatus( context, status );
-}
 
 void ROBDataProviderSvc::setEventStatus(const EventContext& context, uint32_t status) {
   m_eventsCache.get(context)->eventStatus = status;
 }
 /// Retrieve the status for the event.
-uint32_t ROBDataProviderSvc::getEventStatus() {
-  const EventContext context{ Gaudi::Hive::currentContext() };
-  return getEventStatus( context );
-}
 
 uint32_t ROBDataProviderSvc::getEventStatus( const EventContext& context ) {
   return m_eventsCache.get( context )->eventStatus;

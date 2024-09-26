@@ -143,7 +143,7 @@ StatusCode PpmByteStreamReadV1V2Tool::convert(const std::string& sgKey,
   const std::vector<uint32_t>& vID(ppmSourceIDs(state, sgKey));
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(vID, robFrags, "PpmByteStreamxAODReadTool");
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "PpmByteStreamxAODReadTool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
 
   CHECK(convert(state, robFrags));

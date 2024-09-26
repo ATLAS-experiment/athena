@@ -196,7 +196,7 @@ StatusCode ZdcByteStreamReadV1V2Tool::convert(const std::string& sgKey,
 
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(vID, robFrags, "ZdcByteStreamxAODReadTool");
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "ZdcByteStreamxAODReadTool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
 
   CHECK(convert(robFrags, ttCollection));

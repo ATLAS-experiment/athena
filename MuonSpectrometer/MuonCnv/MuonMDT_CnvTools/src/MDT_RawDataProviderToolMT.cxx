@@ -94,7 +94,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<uint32_t>&
 
 StatusCode Muon::MDT_RawDataProviderToolMT::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const {
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     return convert(vecOfRobf, ctx);  // using the old one
 }
 

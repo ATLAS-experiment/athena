@@ -96,7 +96,7 @@ const ITGCcablingSvc*  Muon::TGC_RawDataProviderToolCore::getCabling() const
 }
 
 
-std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> Muon::TGC_RawDataProviderToolCore::getROBData(const std::vector<IdentifierHash>& rdoIdhVect) const
+std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> Muon::TGC_RawDataProviderToolCore::getROBData(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const
 {
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
   const ITGCcablingSvc* cabling = getCabling();
@@ -124,7 +124,7 @@ std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> Muon::TGC_RawDataPr
       robIds.push_back(robId);
     }
   }
-  m_robDataProvider->getROBData(robIds, vecOfRobf);
+  m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
   ATH_MSG_VERBOSE( "Number of ROB fragments " << vecOfRobf.size() );
   return vecOfRobf;
 }

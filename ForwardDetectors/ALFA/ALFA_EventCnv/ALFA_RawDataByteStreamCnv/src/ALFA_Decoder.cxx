@@ -546,7 +546,7 @@ StatusCode ALFA_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFr
 
 
       // take full event
-  const eformat::FullEventFragment<const uint32_t*> * event =  m_robDataProvider->getEvent();
+  const eformat::FullEventFragment<const uint32_t*> * event =  m_robDataProvider->getEvent(Gaudi::Hive::currentContext());
 
   msg(MSG::DEBUG) << "========FULL=============" << std::endl;
   msg(MSG::DEBUG) << "Event time (sec): " << (uint32_t)event->bc_time_seconds() << std::endl;

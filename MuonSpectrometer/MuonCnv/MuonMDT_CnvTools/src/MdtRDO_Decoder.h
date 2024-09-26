@@ -28,7 +28,7 @@ namespace Muon {
 
         virtual StatusCode initialize();
 
-        MdtDigit* getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId) const;
+        MdtDigit* getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, const EventContext& ctx) const;
 
         Identifier getOfflineData(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, int& tdc,
                                   int& width) const;
@@ -40,8 +40,8 @@ namespace Muon {
 
 }  // namespace Muon
 
-inline MdtDigit* Muon::MdtRDO_Decoder::getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId) const {
-    SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey};
+inline MdtDigit* Muon::MdtRDO_Decoder::getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId, const EventContext& ctx) const {
+    SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey, ctx};
     const MuonMDT_CablingMap* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");

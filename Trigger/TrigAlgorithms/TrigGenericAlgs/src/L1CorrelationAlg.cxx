@@ -148,8 +148,8 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
   std::vector<uint32_t> roblist;
   // magic number!
   roblist.push_back(0x770000); 
-  m_robDataProviderSvc->addROBData(roblist);
-  m_robDataProviderSvc->getROBData(roblist, robFragments);
+  m_robDataProviderSvc->addROBData(ctx, roblist);
+  m_robDataProviderSvc->getROBData(ctx, roblist, robFragments);
   if (msgLvl(MSG::DEBUG)) {
     std::ostringstream os;
     for(auto rob : roblist){

@@ -64,7 +64,7 @@ StatusCode Muon::CSC_RawDataProviderToolMT::convert(const std::vector<Identifier
         m_cabling->hash2RobFull(rdoIdhVect[i], rob_id);
         robIds.push_back(rob_id);
     }
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
 
     // This would be passed to the function which does not use the IdentifierHash further
@@ -76,7 +76,7 @@ StatusCode Muon::CSC_RawDataProviderToolMT::convert(const EventContext& ctx) con
     const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
     ATH_MSG_VERBOSE("Number of ROB ids " << robIds.size());
     // ask ROBDataProviderSvc for the vector of ROBFragment for all MDT ROBIDs
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
 
     return convert(vecOfRobf, ctx);

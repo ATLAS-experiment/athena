@@ -125,7 +125,7 @@ StatusCode CpByteStreamV2Tool::convert(
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(vID, robFrags, "CpByteStreamV2Tool");
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "CpByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, ttCollection);
 }
@@ -147,7 +147,7 @@ StatusCode CpByteStreamV2Tool::convert(
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(vID, robFrags, "CpByteStreamV2Tool");
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "CpByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, tobCollection);
 }
@@ -169,7 +169,7 @@ StatusCode CpByteStreamV2Tool::convert(
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(vID, robFrags, "CpByteStreamV2Tool");
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "CpByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, hitCollection);
 }
