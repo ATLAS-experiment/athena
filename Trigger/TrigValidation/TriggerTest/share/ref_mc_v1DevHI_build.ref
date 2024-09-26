@@ -937,11 +937,11 @@ HLT_hi_FgapAC5_L1VTE50:
   eventCount: 0
 HLT_hi_FgapC10_L1VTE50:
   eventCount: 0
-HLT_hi_uccTh1_L1jTE6500:
+HLT_hi_uccTh1_L1jTE8300:
   eventCount: 0
-HLT_hi_uccTh2_L1jTE7000:
+HLT_hi_uccTh2_L1jTE9000:
   eventCount: 0
-HLT_hi_uccTh3_L1jTE7500:
+HLT_hi_uccTh3_L1jTE10000:
   eventCount: 0
 HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
@@ -3317,6 +3317,8 @@ HLT_noalg_L1jTE10:
   eventCount: 20
 HLT_noalg_L1jTE100:
   eventCount: 20
+HLT_noalg_L1jTE10000:
+  eventCount: 0
 HLT_noalg_L1jTE1500:
   eventCount: 0
 HLT_noalg_L1jTE1500_OVERLAY:
@@ -3327,8 +3329,6 @@ HLT_noalg_L1jTE200:
   eventCount: 20
 HLT_noalg_L1jTE3:
   eventCount: 20
-HLT_noalg_L1jTE3000:
-  eventCount: 0
 HLT_noalg_L1jTE4:
   eventCount: 20
 HLT_noalg_L1jTE4000_OVERLAY:
@@ -3345,9 +3345,9 @@ HLT_noalg_L1jTE600:
   eventCount: 10
 HLT_noalg_L1jTE6500:
   eventCount: 0
-HLT_noalg_L1jTE7000:
+HLT_noalg_L1jTE8300:
   eventCount: 0
-HLT_noalg_L1jTE7500:
+HLT_noalg_L1jTE9000:
   eventCount: 0
 HLT_noalg_eb_L12eEM18:
   eventCount: 12

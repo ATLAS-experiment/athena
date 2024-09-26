@@ -214,7 +214,7 @@ class TopoAlgoDefMultiplicity(object):
 
             #additional jTE thresholds needed for 2023 heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
-            'jTE100', 'jTE600', 'jTE1500', 'jTE3000', 'jTE4000', 'jTE6500', 'jTE7000', 'jTE7500',
+            'jTE100', 'jTE600', 'jTE1500', 'jTE4000', 'jTE6500', 'jTE8300', 'jTE9000', 'jTE10000',
             'jTEFWDA1', 'jTEFWDC1', 'jTEFWDA5', 'jTEFWDC5',
 
             'gMHT500',
