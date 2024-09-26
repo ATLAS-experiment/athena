@@ -10,6 +10,7 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "nlohmann/json.hpp"
 namespace Muon{
+    using HedgehogBoardPtr = HedgehogBoard::HedgehogBoardPtr;
     StatusCode TwinTubeMappingCondAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKey.initialize(m_extJSONFile.value().empty()));
@@ -27,6 +28,8 @@ namespace Muon{
                                         << " if multiple concurrent events are being processed out of order.");
             return StatusCode::SUCCESS;
         }
+        writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
+
         nlohmann::json blob{};
         if (m_extJSONFile.value().size()){
             std::ifstream in_json{m_extJSONFile};
@@ -49,40 +52,48 @@ namespace Muon{
                 /// Ideally there should be one big JSON blob
                 break;
             }
-        }
-        writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
+        }        
         auto condObj = std::make_unique<TwinTubeMap>(m_idHelperSvc.get());
         condObj->setDefaultHVDelay(m_hvDelay);
         const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-        for (const auto& twinMapping : blob.items()) {
-             nlohmann::json payLoad = twinMapping.value();
-
-             const int stIndex =  idHelper.stationNameIndex(payLoad["station"]);
-             const int eta = payLoad["eta"];
-             const int phi = payLoad["phi"];
-             const int ml = payLoad["ml"];
-
-             const int tubeLayer1 = payLoad["layer"];
-             const int tube1 = payLoad["tube"];
-             const int tubeLayer2 = payLoad["layerTwin"];
-             const int tube2 = payLoad["tubeTwin"];
-
-             bool isValid{false};
-             const Identifier sibling1{idHelper.channelID(stIndex, eta, phi, ml, tubeLayer1, tube1, isValid)};
-             if(!isValid) {
+        
+        std::unordered_map<unsigned int, HedgehogBoardPtr> hedgeHogBoards{};
+        using Mapping = HedgehogBoard::Mapping;
+        for (const auto& boardMapping : blob["HedgehogBoards"].items()) {
+            nlohmann::json payLoad = boardMapping.value();
+            ATH_MSG_VERBOSE("Parse payload "<<payLoad);
+            const unsigned boardId = payLoad["boardId"];
+            const Mapping mapping = payLoad["hedgeHogPins"];
+            const unsigned tubeLayers = payLoad["nTubeLayers"];
+            auto newBoard = std::make_unique<HedgehogBoard>(mapping, tubeLayers, boardId);
+            if (payLoad.find("hvDelayTime") != payLoad.end()) {
+                newBoard->setHVDelayTime(payLoad["hvDelayTime"]);
+            }
+            HedgehogBoardPtr& storeMe = hedgeHogBoards[newBoard->boardId()];
+            if (storeMe) {
+                ATH_MSG_FATAL("There's already a board registered under "<<storeMe->boardId()<<".");
+                return StatusCode::FAILURE;
+            }
+            storeMe = std::move(newBoard);
+        }        
+        for (const auto& twinMapping : blob["TwinTubeMapping"].items()) {
+            nlohmann::json payLoad = twinMapping.value();
+            ATH_MSG_VERBOSE("Parse "<<payLoad);
+            const int stIndex =  idHelper.stationNameIndex(payLoad["station"]);
+            const int eta = payLoad["eta"];
+            const int phi = payLoad["phi"];
+            const int ml = payLoad["ml"];
+            bool isValid{false};
+            const Identifier detElId{idHelper.channelID(stIndex, eta, phi, ml, 1, 1, isValid)};
+            if(!isValid) {
                 ATH_MSG_FATAL("Failed to build valid identifier from "<<payLoad);
                 return StatusCode::FAILURE;
-             }
-             const Identifier sibling2{idHelper.channelID(stIndex, eta, phi ,ml ,tubeLayer2, tube2, isValid)};
-             if (!isValid) {
-                ATH_MSG_FATAL("The twin of "<<m_idHelperSvc->toString(sibling1)<<" is very evlil evil evil: "<<tubeLayer2<<", "<<tube2);
-                return StatusCode::FAILURE;
-             }
-             ATH_CHECK(condObj->addTwinPair(sibling1, sibling2));
+            };
+            const std::vector<unsigned int> boardMounting = payLoad["mountedBoards"];
+            for (unsigned int place = 0; place < boardMounting.size(); ++place) {
+                ATH_CHECK(condObj->addHedgeHogBoard(detElId, hedgeHogBoards[boardMounting[place]], place));
+            }
         }
-
-
-
         ATH_CHECK(writeHandle.record(std::move(condObj)));
         return StatusCode::SUCCESS;
     }

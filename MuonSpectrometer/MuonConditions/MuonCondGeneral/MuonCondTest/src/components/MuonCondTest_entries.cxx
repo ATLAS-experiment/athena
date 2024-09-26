@@ -14,6 +14,7 @@
 #include "../TgcCondDbTestAlg.h"
 #include "../TgcDigtThresholdTestAlg.h"
 #include "../TgcDigtJitterTestAlg.h"
+#include "../MdtTwinTubeTestAlg.h"
 
 DECLARE_COMPONENT(ALineInjectTestAlg)
 DECLARE_COMPONENT(MdtConditionsTestAlg)
@@ -28,3 +29,4 @@ DECLARE_COMPONENT(MMCablingTestAlg)
 DECLARE_COMPONENT(TgcCondDbTestAlg)
 DECLARE_COMPONENT(TgcDigtThresholdTestAlg)
 DECLARE_COMPONENT(TgcDigtJitterTestAlg)
+DECLARE_COMPONENT(Muon::MdtTwinTubeTestAlg)

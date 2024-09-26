@@ -14,8 +14,8 @@ atlas_add_component( MuonCondTest
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
-                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonCondSvcLib MuonIdHelpersLib 
-                                    MuonReadoutGeometry StoreGateLib MuonCablingData )
+                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonIdHelpersLib 
+                                    MuonReadoutGeometry StoreGateLib MuonCablingData MuonReadoutGeometryR4 )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
@@ -90,6 +90,12 @@ atlas_add_test( TgcDigiJitterTest
 
 atlas_add_test( MdtCalibDbR4Test
                 SCRIPT python -m MuonCondTest.MdtCalibDbTesterR4
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( MdtTwinCablingTest
+                SCRIPT python -m MuonCondDump.dumpTwinCabling --cablingMap twinCabling.json  --chamberToTwin all && python -m MuonCondTest.MdtTwinTester --cablingJSON twinCabling.json
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
