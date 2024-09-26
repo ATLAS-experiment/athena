@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -2447,7 +2447,7 @@ StatusCode SCTCalib::getLorentzAngle ATLAS_NOT_THREAD_SAFE () { // Thread unsafe
 ///////////////////////////////////////////////////////////////////////////////////
 // Functions to handle XML File for COOL
 ///////////////////////////////////////////////////////////////////////////////////
-StatusCode SCTCalib::openXML4DB(std::ofstream& file, const char* type, const char* tag, IOVTime start, IOVTime end) const {
+StatusCode SCTCalib::openXML4DB(std::ofstream& file, const char* type, const char* tag, const IOVTime& start, const IOVTime& end) const {
    if (!strcmp(type, "DeadStrip")) {
       file.open(m_deadStripsFile.value().c_str(), std::ios::out);
       if (!file.good()) return StatusCode::FAILURE;
