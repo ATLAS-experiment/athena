@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_BeamTrack.h"
@@ -173,12 +173,12 @@ int ALFA_BeamTrack::CalculatePosRP(FPTracker::Particle particle){
 }
   
 //returns particle position
-FPTracker::Point ALFA_BeamTrack::PosRP(){
+const FPTracker::Point& ALFA_BeamTrack::PosRP(){
 	return m_PosParticleRP;
 }
   
 // returns momentum of particle
-FPTracker::Point ALFA_BeamTrack::MomRP(){
+const FPTracker::Point& ALFA_BeamTrack::MomRP(){
 	return m_MomParticleRP;
 }
 

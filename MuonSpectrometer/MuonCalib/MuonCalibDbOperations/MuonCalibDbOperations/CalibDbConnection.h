@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALIBDBCONNECTION_H
@@ -35,7 +35,7 @@ namespace MuonCalib {
             username = m_username;
             password = m_password;
         }
-        inline const std::string GetConnectionString() const { return m_connection_string; }
+        inline const std::string& GetConnectionString() const { return m_connection_string; }
         // set target user - the given login will be used as proxy
         inline void SetTargetUser(const std::string& target_user) { m_target_user = target_user; }
         // transaction control
