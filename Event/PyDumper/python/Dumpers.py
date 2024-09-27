@@ -1388,7 +1388,7 @@ def dump_TruthParticle (p, f):
 
 
 def dump_TrackParticleTruth (p, f):
-    fprint (f, '%4d %f' % (p.barcode(), p.probability()))
+    fprint (f, '%4d %f' % (p.particleLink().barcode(), p.probability()))
     gp = p.particleLink().cptr()
     if gp:
         dump_HLV (gp.momentum(), f)
