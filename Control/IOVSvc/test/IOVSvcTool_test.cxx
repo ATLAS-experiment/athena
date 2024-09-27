@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -53,9 +53,8 @@ int main() {
   ISvcLocator* pSvc;
   if (!initGaudi("IOVSvcTool_test.txt", pSvc))
     return 1;
-  //initGaudi(pSvc); 
-  IToolSvc* pTS(0);
-  assert((pSvc->service("ToolSvc", pTS, true)).isSuccess());
+  SmartIF<IToolSvc> pTS(pSvc->service("ToolSvc"));
+  assert(pTS.isValid());
   IIOVSvcTool* pTool(0);
   assert((pTS->retrieveTool("IOVSvcTool", pTool, 0, true)).isSuccess());
   IOVSvcTool_test(pTool);

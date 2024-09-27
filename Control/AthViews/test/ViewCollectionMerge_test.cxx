@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -108,8 +108,8 @@ protected:
     ASSERT_TRUE( m_appMgr->configure().isSuccess() );
     ASSERT_TRUE( m_appMgr->initialize().isSuccess() );
 
-    m_sg = nullptr;
-    ASSERT_TRUE( m_svcLoc->service ("StoreGateSvc", m_sg).isSuccess() );
+    m_sg = m_svcLoc->service("StoreGateSvc");
+    ASSERT_TRUE( m_sg.isValid() );
   }
 
   void TearDownGaudi() {
@@ -132,7 +132,7 @@ protected:
   SmartIF<ISvcManager>     m_svcMgr;
   SmartIF<IToolSvc>        m_toolSvc;
   SmartIF<IProperty>       m_propMgr;
-  StoreGateSvc*            m_sg = nullptr;
+  SmartIF<StoreGateSvc>    m_sg;
 };
 
 

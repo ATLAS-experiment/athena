@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -238,8 +238,8 @@ int main ATLAS_NOT_THREAD_SAFE ()
 	}
 	assert(pSvcLoc);
 
-	IChronoStatSvc* p_svc;
-	if ((pSvcLoc->service("ChronoStatSvc", p_svc)).isSuccess())
+	SmartIF<IChronoStatSvc> p_svc{pSvcLoc->service("ChronoStatSvc")};
+	if (p_svc.isValid())
 	{
 		p_svc->chronoStart("ChronoStatSvc");
 	}

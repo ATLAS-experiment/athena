@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -80,9 +80,10 @@ int main (int argc, char** argv)
 
   // --------------------------------------------------------------------------------
   ISvcLocator* svcLoc = nullptr;
-  IMessageSvc* msgSvc = nullptr;
   if (!Athena_test::initGaudi ("AthMessaging_test.txt", svcLoc)) return 1;
-  if (svcLoc->service("MessageSvc", msgSvc).isFailure()) return 1;
+
+  SmartIF<IMessageSvc> msgSvc{svcLoc->service("MessageSvc")};
+  if (!msgSvc) return 1;
 
   std::cout << "--- Test with MessageSvc" << std::endl;
   test(msgSvc);

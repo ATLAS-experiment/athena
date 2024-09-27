@@ -18,6 +18,7 @@
 #include "CxxUtils/ConcurrentMap.h"
 #include "CxxUtils/SimpleUpdater.h"
 #include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include <exception>
@@ -200,7 +201,7 @@ namespace SG {
     T2pMap  m_t2p;
 
     void setSGAudSvc();
-    ISGAudSvc * m_pSGAudSvc;
+    SmartIF<ISGAudSvc> m_pSGAudSvc;
     bool m_noAudSvc;    
     inline bool doAudit() {
       if (!m_noAudSvc) setSGAudSvc();
