@@ -39,7 +39,8 @@ namespace OverlayTesting
   protected:
     virtual void SetUp() override {
       m_alg = new HGTD_Overlay{"HGTD_Overlay", g_svcLoc};
-      ASSERT_TRUE( g_svcLoc->service("StoreGateSvc", m_sg) );
+      m_sg = g_svcLoc->service("StoreGateSvc");
+      ASSERT_TRUE( m_sg.isValid() );
     }
 
     virtual void TearDown() override {
@@ -49,7 +50,7 @@ namespace OverlayTesting
     }
 
     HGTD_Overlay *m_alg{};
-    StoreGateSvc *m_sg{};
+    SmartIF<StoreGateSvc> m_sg;
   }; // HGTD_Overlay_test fixture
 
 

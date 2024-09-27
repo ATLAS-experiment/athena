@@ -92,8 +92,8 @@ bool HGTD_OverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceIntersection>&
     ISvcLocator* svcLocator = Gaudi::svcLocator();
     
     // get DetectorStore service
-    StoreGateSvc* detStore;
-    if (svcLocator->service("DetectorStore",detStore).isFailure()) {
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if (!detStore) {
       return false;
     }
     

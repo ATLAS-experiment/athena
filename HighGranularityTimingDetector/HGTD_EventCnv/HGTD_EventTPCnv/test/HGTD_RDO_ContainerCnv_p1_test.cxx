@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/test/HGTD_RDO_ContainerCnv_p1_test.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -95,8 +95,8 @@ void registerIDHelperAndDetManager() {
   hgtd_id->initialize_from_dictionary(idd);
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  BOOST_CHECK(svcLoc->service("DetectorStore", sg).isSuccess());
+  SmartIF<StoreGateSvc> sg{svcLoc->service("DetectorStore")};
+  BOOST_CHECK(sg.isValid());
   BOOST_CHECK(sg->record(std::move(hgtd_id), "HGTD_ID"));
 }
 
@@ -107,25 +107,22 @@ HGTD_ID* retrieve() {
   ISvcLocator* svc_locator = Gaudi::svcLocator();
   // get StoreGate service
 
-  StoreGateSvc* storegate;
-
-  StatusCode sc = svc_locator->service("StoreGateSvc", storegate);
-  if (sc.isFailure()) {
+  SmartIF<StoreGateSvc> storegate{svc_locator->service("StoreGateSvc")};
+  if (!storegate) {
     std::cout << "StoreGate service not found !\n";
     return nullptr;
   }
 
   // get DetectorStore service
-  StoreGateSvc* detStore;
-  sc = svc_locator->service("DetectorStore", detStore);
-  if (sc.isFailure()) {
+  SmartIF<StoreGateSvc> detStore{svc_locator->service("DetectorStore")};
+  if (!detStore) {
     std::cout << "DetectorStore service not found !\n";
     return nullptr;
   }
 
   // Get the sct helper from the detector store
   HGTD_ID* hgtd_idhelper = nullptr;
-  sc = detStore->retrieve(hgtd_idhelper, "HGTD_ID");
+  StatusCode sc = detStore->retrieve(hgtd_idhelper, "HGTD_ID");
   if (sc.isFailure()) {
     std::cout << "Could not get HGTD_ID helper !\n";
     return nullptr;

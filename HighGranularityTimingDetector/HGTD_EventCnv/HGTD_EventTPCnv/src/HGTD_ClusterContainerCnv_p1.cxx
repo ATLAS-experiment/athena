@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/src/HGTD_ClusterContainerCnv_p1.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -8,6 +8,7 @@
  */
 
 #include "HGTD_EventTPCnv/HGTD_ClusterContainerCnv_p1.h"
+#include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
@@ -23,33 +24,19 @@
 #include "StoreGate/StoreGateSvc.h"
 #include <memory>
 
-StatusCode HGTD_ClusterContainerCnv_p1::initialize(MsgStream& log) {
+StatusCode HGTD_ClusterContainerCnv_p1::initialize(MsgStream& /*log*/) {
   // Do not initialize again:
   m_is_initialized = true;
 
   // Get Storegate, ID helpers, and so on
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-
-  StoreGateSvc* detStore;
-  // get StoreGate service
-  StatusCode sc = svcLocator->service("StoreGateSvc", detStore);
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-    return StatusCode::FAILURE;
-  }
   // get DetectorStore service
-  sc = svcLocator->service("DetectorStore", detStore);
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  CHECK( detStore.isValid() );
+
   // Get the ID helper from the detector store
-  sc = detStore->retrieve(m_hgtd_idhelper, "HGTD_ID");
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "Could not get HGTD_ID helper !" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  CHECK( detStore->retrieve(m_hgtd_idhelper, "HGTD_ID") );
 
   return StatusCode::SUCCESS;
 }

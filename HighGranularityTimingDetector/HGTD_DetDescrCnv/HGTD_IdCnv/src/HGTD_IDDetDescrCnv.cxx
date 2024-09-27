@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -58,24 +58,12 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-        ATH_MSG_FATAL( "DetectorStore service not found !" );
-        return StatusCode::FAILURE;
-    } else {}
+    SmartIF<StoreGateSvc> detStore{serviceLocator()->service("DetectorStore")};
+    ATH_CHECK( detStore.isValid() );
 
     // Get the dictionary manager from the detector store
     const IdDictManager* idDictMgr;
-    status = detStore->retrieve(idDictMgr, "IdDict");
-    if (status.isFailure()) {
-        ATH_MSG_FATAL( "Could not get IdDictManager !" );
-        return StatusCode::FAILURE;
-    } 
-    else {
-        ATH_MSG_DEBUG( " Found the IdDictManager. " );
-    }
-
+    ATH_CHECK( detStore->retrieve(idDictMgr, "IdDict") );
 
     // Only initialize helper if it is the first pass or if there is a
     // change in the the file or tag
