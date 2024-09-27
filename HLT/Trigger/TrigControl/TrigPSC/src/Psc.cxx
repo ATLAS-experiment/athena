@@ -772,15 +772,14 @@ template <typename T>
 StatusCode psc::Psc::callOnEventLoopMgr(std::function<StatusCode (T*)> func,
                                         const std::string& name) const
 {
-  T* processingMgr{nullptr};
-  StatusCode sc = m_svcLoc->service(m_nameEventLoopMgr, processingMgr);
-  if(!sc.isSuccess()) {
+  SmartIF<T> processingMgr{m_svcLoc->service(m_nameEventLoopMgr)};
+  if(!processingMgr) {
     ERS_PSC_ERROR("Error retrieving EventLoopMgr = '" << m_nameEventLoopMgr << "'" );
-    return sc;
+    return StatusCode::FAILURE;
   }
 
   // Call the given function of the EventLoopMgr
-  sc = func(processingMgr);   // processingMgr->func()
+  StatusCode sc = func(processingMgr);   // processingMgr->func()
   if(!sc.isSuccess())
   {
     ERS_PSC_ERROR("Error executing " << name << " for EventLoopMgr = '"

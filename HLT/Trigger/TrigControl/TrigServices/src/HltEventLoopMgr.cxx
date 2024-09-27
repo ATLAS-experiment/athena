@@ -392,12 +392,12 @@ StatusCode HltEventLoopMgr::prepareForRun(const ptree& /*pt*/)
 // =============================================================================
 StatusCode HltEventLoopMgr::execAtStart(const EventContext& ctx) const
 {
-  const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
-  IAlgorithm* alg{nullptr};
+  IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
 
   StatusCode sc;
   for (const std::string& name : m_execAtStart) {
-    if ( algMgr->getAlgorithm(name, alg) ) {
+    SmartIF<IAlgorithm>& alg = algMgr->algorithm(name, /*createIf*/false);
+    if ( alg ) {
       ATH_MSG_INFO("Executing " << alg->name() << "...");
       sc &= alg->sysExecute(ctx);
     }
@@ -673,10 +673,10 @@ StatusCode HltEventLoopMgr::updateMagField(const ptree& pt) const
       auto sol_cur = pt.get<float>("Magnets.SolenoidCurrent.value");
 
       // Set current on conditions alg
-      const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
-      IAlgorithm* fieldAlg{nullptr};
-      algMgr->getAlgorithm("AtlasFieldMapCondAlg", fieldAlg).ignore();
-      if ( fieldAlg != nullptr ) {
+      IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
+
+      SmartIF<IAlgorithm>& fieldAlg = algMgr->algorithm("AtlasFieldMapCondAlg", /*createIf*/false);
+      if ( fieldAlg ) {
         ATH_MSG_INFO("Setting field currents on AtlasFieldMapCondAlg");
         ATH_CHECK( Gaudi::Utils::setProperty(fieldAlg, "MapSoleCurrent", sol_cur) );
         ATH_CHECK( Gaudi::Utils::setProperty(fieldAlg, "MapToroCurrent", tor_cur) );
