@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TgcPREPDATACONTAINERCNV_P3_H
@@ -14,8 +14,8 @@
 
 #include <iostream>
 
-class StoreGateSvc;
 class TgcIdHelper;
+
 namespace Muon{
 /** Class to handle the conversion of the transient TgcPrepDataContainer into its persistent representation (defined in MuonPRD_Container_p3).
 This replaces TgcPrepDataContainerCnv_tlp1, which is a AthenaPoolTopLevelTPConverter, as I have now simplified/flattened the TgcPrepData.*/
@@ -38,8 +38,7 @@ private:
     const MuonGM::TgcReadoutElement* getReadOutElement(const Identifier& id ) const;
    
     const TgcIdHelper *m_TgcId{nullptr};
-    StoreGateSvc *m_storeGate{nullptr};
-    ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
+    ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"};
     bool m_isInitialized{false};
     StatusCode initialize(MsgStream &log);
 };

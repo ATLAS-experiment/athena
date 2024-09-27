@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -22,7 +22,6 @@
 namespace MuonGM{ class MuonDetectorManager;}
 
 class MsgStream;
-class StoreGateSvc;
 class RpcIdHelper;
 
 namespace Muon{
@@ -40,7 +39,6 @@ namespace Muon{
         StatusCode initialize(MsgStream &log);
 
         const RpcIdHelper *m_RpcId;
-        // StoreGateSvc *m_storeGate;
         const MuonGM::MuonDetectorManager* m_muonDetMgr;
         bool m_isInitialized;
     };

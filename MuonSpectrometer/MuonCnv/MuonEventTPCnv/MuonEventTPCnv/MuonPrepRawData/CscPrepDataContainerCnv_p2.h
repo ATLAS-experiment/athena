@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CscPREPDATACONTAINERCNV_P2_H
@@ -14,7 +14,6 @@
 
 #include <iostream>
 
-class StoreGateSvc;
 class CscIdHelper;
 
 
@@ -39,8 +38,7 @@ public:
 private:
     const MuonGM::CscReadoutElement* getReadOutElement(const Identifier& id ) const;
     const CscIdHelper *m_CscId{nullptr};
-    StoreGateSvc *m_storeGate{nullptr};
-    ToolHandle  < Trk::IEventCnvSuperTool >  m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
+    ToolHandle  < Trk::IEventCnvSuperTool >  m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"};
     bool m_isInitialized{false};
 
     StatusCode initialize(MsgStream &log);
