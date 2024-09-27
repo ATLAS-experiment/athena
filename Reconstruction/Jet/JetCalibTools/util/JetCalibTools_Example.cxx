@@ -52,10 +52,11 @@ void usage() {
   std::cout << "	--jetCalibConfig= : Specify the JetCalibTools config" << std::endl;
   std::cout << "	--jetColl= : Specify the jet collection" << std::endl;
   std::cout << "	--calibSeq= : Specify the calibration sequence for JetCalibTools" << std::endl;
-  std::cout << "        --calibArea : Specify the calibration area for JetCalibTools" << std::endl;
+  std::cout << "    --calibArea : Specify the calibration area for JetCalibTools" << std::endl;
   std::cout << "	--isData=TRUE : Specify isData true for JetCalibTools" << std::endl;
   std::cout << "	--isData=FALSE : Specify isData false for JetCalibTools" << std::endl;
   std::cout << "	--sample= : Specify input xAOD" << std::endl;
+  std::cout << "	--devMode : Set dev mode for calibration sequence" << std::endl;
   std::cout << "        Example: Example --jetCalibConfig=JES_2015dataset_recommendation_Feb2016.config --jetColl=AntiKt4EMTopo --calibSeq=JetArea_Residual_Origin_EtaJES_GSC --isData=FALSE --sample=xAOD.root" << std::endl;
 }
 
@@ -77,6 +78,7 @@ int main(int argc, char* argv[]){
   std::string jetCalibConfig = "";
   std::string calibSeq = "";
   std::string calibArea = "";
+  bool devMode = false;
   bool isCollision = false;
 
   //---------------------------
@@ -110,6 +112,8 @@ int main(int argc, char* argv[]){
     if ( opt.find("--calibArea=")   != std::string::npos ) calibArea = v[1];
 
     if ( opt.find("--isData=")   != std::string::npos ) isData = v[1];
+
+    if ( opt.find("--devMode")   != std::string::npos ) devMode = true;
 
   }//End: Loop over input options
 
@@ -147,7 +151,7 @@ int main(int argc, char* argv[]){
   ANA_CHECK( event.readFrom( ifile.get() ) );
   ANA_MSG_WARNING(calibSeq);
   // Create ONNX service for LargeRDNN calibration
-  asg::AsgServiceConfig config ("AthOnnx::IOnnxRuntimeSvc/OnnxRuntimeSvc");
+  asg::AsgServiceConfig config ("AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc");
   std::shared_ptr<AthOnnx::IOnnxRuntimeSvc> service;
   ANA_CHECK(config.makeService (service));
 #else // Athena "Store" is the same StoreGate used by the TEvent
@@ -173,6 +177,8 @@ int main(int argc, char* argv[]){
   if(!calibArea.empty()){
     ANA_CHECK( jetCalibrationTool.setProperty("CalibArea",calibArea.c_str()) );
   }
+
+  ANA_CHECK( jetCalibrationTool.setProperty("DEVmode", devMode ) );
 
   // Initialize the tool
   if(!(jetCalibrationTool.initialize().isSuccess())){

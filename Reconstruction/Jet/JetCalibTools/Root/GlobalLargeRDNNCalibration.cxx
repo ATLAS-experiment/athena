@@ -29,12 +29,12 @@ namespace{
         std::string serviceName;
         #ifdef XAOD_STANDALONE
             using namespace asg::msgUserCode;
-            ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthONNX::ONNXRuntimeSvc with name AthONNXSvc");
+            ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthOnnx::OnnxRuntimeSvc with name OnnxRuntimeSvc");
             ATH_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
             ATH_MSG_WARNING("Or in python config with");
             ATH_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
-            ATH_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'AthONNXSvc', myAlgSequence)");
-            serviceName = "AthONNXSvc";
+            ATH_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc', myAlgSequence)");
+            serviceName = "OnnxRuntimeSvc";
         #else
             serviceName = "AthOnnx::OnnxRuntimeSvc";
         #endif
@@ -134,6 +134,7 @@ namespace {
     
     // Std jet variables
     DEF_RETRIEVER0( eta, jet.eta()*eScale ) ;
+    DEF_RETRIEVER0( rapidity, jet.rapidity()*eScale ) ;
     DEF_RETRIEVER0( log_e, log(jet.e()*eScale) ) ;
     DEF_RETRIEVER0( log_m, log(jet.m()*eScale) ) ;
     DEF_RETRIEVER0( m, jet.m()*eScale ) ;
@@ -141,8 +142,8 @@ namespace {
     // Ratio variables -- default values consistent with DNN training
     DEF_RATIO_RETRIEVER( Tau21_wta, m_accTau1(jet) > 1e-8 ? eScale * m_accTau2(jet) / m_accTau1(jet) : -0.1);
     DEF_RATIO_RETRIEVER( Tau32_wta, m_accTau2(jet) > 1e-8 ? eScale * m_accTau3(jet) / m_accTau2(jet) : -0.1);
-    DEF_RATIO_RETRIEVER( C2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * m_accECF1(jet) / pow(m_accECF2(jet), 2.0) : -999);
-    DEF_RATIO_RETRIEVER( D2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * pow(m_accECF1(jet), 3.0) / pow(m_accECF2(jet), 3.0) : -999);
+    DEF_RATIO_RETRIEVER( C2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * m_accECF1(jet) / pow(m_accECF2(jet), 2.0) : -0.1);
+    DEF_RATIO_RETRIEVER( D2, m_accECF2(jet) > 1e-8 ? eScale * m_accECF3(jet) * pow(m_accECF1(jet), 3.0) / pow(m_accECF2(jet), 3.0) : -0.1);
     
     // Std pile-up info
     DEF_RETRIEVER1( mu, jetInfo.mu()*eScale );
@@ -156,6 +157,7 @@ namespace {
         // it's just a map "name" <-> function returning a Var_xyz()
         static const std::map<std::string, std::function<GlobalLargeRDNNCalibration::VarRetriever*()> > knownVar{
             {"eta",       [](){return new Var_eta();} },
+            {"rapidity",  [](){return new Var_rapidity();} },
             {"log_e",     [](){return new Var_log_e();} },
             {"log_m",     [](){return new Var_log_m();} },
             {"Tau21_wta", [](){return new Ratio_Tau21_wta();} },
@@ -189,9 +191,9 @@ GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name)
 {
 }
 
-GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, const TString& calibArea, bool /*dev*/)
+GlobalLargeRDNNCalibration::GlobalLargeRDNNCalibration(const std::string& name, TEnv * config, const TString& calibArea, bool dev)
   : JetCalibrationStep::JetCalibrationStep( name.c_str() ),
-    m_config(config), m_calibArea(calibArea)
+    m_config(config), m_calibArea(calibArea), m_devMode(dev)
 {
 }
 
@@ -240,7 +242,12 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
     
     // Get DNN config file
     m_modelFileName = m_config->GetValue("DNNC.ONNXInput","");
-    std::string modelPath="JetCalibTools/"+m_calibArea+"CalibrationConfigs/"+m_modelFileName;
+    std::string modelPath = "";
+    if (m_devMode) {
+        modelPath="JetCalibTools/"+m_modelFileName;
+    } else {
+        modelPath="JetCalibTools/"+m_calibArea+"CalibrationConfigs/"+m_modelFileName;
+    }
     const std::string fullModelPath = PathResolverFindCalibFile( modelPath ); // Full path
     ATH_MSG_INFO("Using ONNX model : " << m_modelFileName);
     ATH_MSG_INFO("resolved in: " << fullModelPath);

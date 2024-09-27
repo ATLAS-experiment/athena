@@ -103,6 +103,7 @@ public:
     
     TEnv * m_config;
     std::string m_calibArea;
+    bool m_devMode;
 
 
 }; // Class GlobalLargeRDNNCalibration
