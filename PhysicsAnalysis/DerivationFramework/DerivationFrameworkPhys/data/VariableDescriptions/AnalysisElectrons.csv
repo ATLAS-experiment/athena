@@ -38,7 +38,7 @@ LineNumber,VariableName,Type,Description
 37,DFCommonElectronsDNNLoose,vector<char>,DNN identification + charge-flip rejection decision
 38,DFCommonElectronsDNNMedium,vector<char>,DNN identification + charge-flip rejection decision
 39,DFCommonElectronsDNNTight,vector<char>,DNN identification + charge-flip rejection decision
-40,DFCommonElectronsDNNLooseNoCF,vector<char>,DNN identification decision
+40,DFCommonElectronsDNNVeryLooseNoCF97,vector<char>,DNN identification decision
 41,DFCommonElectronsDNNMediumNoCF,vector<char>,DNN identification decision
 42,DFCommonElectronsDNNTightNoCF,vector<char>,DNN identification decision
 43,DFCommonElectronsECIDS,vector<char>,Charge selection (to reject wrong charge assignment)
