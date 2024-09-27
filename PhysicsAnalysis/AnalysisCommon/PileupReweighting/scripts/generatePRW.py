@@ -106,6 +106,7 @@ def main():
         ntupDatasetName = theParent.replace("AOD","NTUP_PILEUP")
         ntupDatasetName = ntupDatasetName.replace("aod","%")
         ntupDatasetName = ntupDatasetName.replace("merge","%")
+        ntupDatasetName = ntupDatasetName.replace("recon","%")
         #remove everything after first rtag of ami tag .. replace with wildcard
         first_rtag_pos = ntupDatasetName.index("_r",ntupDatasetName.index("NTUP_PILEUP"))
         try:
