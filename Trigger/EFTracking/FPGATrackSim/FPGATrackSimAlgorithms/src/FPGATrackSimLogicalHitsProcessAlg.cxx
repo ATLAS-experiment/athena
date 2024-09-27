@@ -237,6 +237,13 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             Monitored::Group(m_monTool,mon_best_chi2_1st);
         }
     }
+    else { // we are not doing tracking so get the number of combinations for monitoring
+      int ntrackDummy = 0;
+      for (const std::shared_ptr<const FPGATrackSimRoad>& road : roads_1st) {
+	ntrackDummy += road->getNHitCombos();
+      }
+      tracks_1st.resize(ntrackDummy); // just filled with dummy tracks for monitoring
+    }
     auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
     Monitored::Group(m_monTool,mon_ntracks_1st);
     
