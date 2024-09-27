@@ -97,7 +97,7 @@ StatusCode PadTrig_RawDataProviderToolMT::convert(const EventContext& ctx) const
     }
   }
 
-  m_robDataProvider->getROBData(robIDs, fragments);
+  m_robDataProvider->getROBData(ctx, robIDs, fragments);
   return convert(fragments, ctx);
 }
 

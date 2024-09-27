@@ -413,7 +413,7 @@ msg(MSG::DEBUG) << " Buffer size 0 ! "<< endmsg;
 	
 		
 	// take full event
-const eformat::FullEventFragment<const uint32_t*> * event =  m_robDataProvider->getEvent();
+const eformat::FullEventFragment<const uint32_t*> * event =  m_robDataProvider->getEvent(Gaudi::Hive::currentContext());
   
 msg(MSG::DEBUG) << "========FULL Event=============" << std::endl;
 msg(MSG::DEBUG) << "Event time (sec): " << (uint32_t)event->bc_time_seconds() << std::endl;

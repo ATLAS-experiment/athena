@@ -260,7 +260,7 @@ protected:
   bool isPreselPassDisTrackBeforeRefit(Trk::Track*, double, double) const;
   bool isPreselPassDisTrackAfterRefit(Trk::Track*, Trk::Track*, double, double) const;
   bool isGoodForDisTrackVertex(Trk::Track*, const EventContext&) const;
-  std::unique_ptr<const Trk::TrackParameters> extrapolateDisTrackToBS(Trk::Track*, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&) const;
+  std::unique_ptr<const Trk::TrackParameters> extrapolateDisTrackToBS(Trk::Track*, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&, const EventContext&) const;
   void filterSharedDisTracks(std::vector<std::tuple<bool, double,Trk::Track*>>&) const;
   void fillDisTrkCand(xAOD::TrigComposite*, const std::string&, Trk::Track*, const std::unique_ptr<const Trk::TrackParameters>&) const;
   void fillDisTrkCand(xAOD::TrigComposite*, const std::string&, Trk::Track*, const std::unique_ptr<const Trk::TrackParameters>&, bool, std::vector<Trk::Track*>&) const;

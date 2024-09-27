@@ -86,7 +86,7 @@ StatusCode NRPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds
 
 StatusCode NRPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const {
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     return convert(vecOfRobf, ctx); 
 }
 

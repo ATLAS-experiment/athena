@@ -225,7 +225,7 @@ StatusCode TileTBDump::execute() {
   const EventContext &ctx = Gaudi::Hive::currentContext();
 
   // take full event
-  const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent();
+  const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent(ctx);
   
   if (m_dumpOnce) {
     if (m_lvl1_trigger_type<0) {

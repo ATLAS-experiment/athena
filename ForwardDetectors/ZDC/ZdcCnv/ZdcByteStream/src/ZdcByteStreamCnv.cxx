@@ -139,7 +139,7 @@ StatusCode ZdcByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& 
 
 	// get ROB fragments
 	IROBDataProviderSvc::VROBFRAG robFrags;
-	m_robDataProvider->getROBData(vID, robFrags);
+	m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags);
 
 	// size check
         ATH_MSG_DEBUG( "ZDC: Number of ROB fragments is " << robFrags.size() );

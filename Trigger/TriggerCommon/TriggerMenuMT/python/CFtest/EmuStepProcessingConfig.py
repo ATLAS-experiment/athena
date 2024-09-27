@@ -164,7 +164,7 @@ def generateChainsManually(flags, maskbit=0x7):
         step_mu32  = makeChainStep("Step3_mu32", [mu32] )
         step_mu41  = makeChainStep("Step4_mu41", [mu41] )
         
-        step_empy= makeChainStep("Step2_mu1empty", multiplicity=[])
+        step_empy= makeChainStep("Step2_mu1empty", isEmpty=True)
 
         MuChains  = [
             makeChain(flags, name='HLT_TestChain8_mv1step_L1MU5VF', L1Thresholds=["MU5VF"],    ChainSteps=[step_mu11]),
@@ -230,66 +230,60 @@ def generateChainsManually(flags, maskbit=0x7):
            
            
         from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
-                       
-        # multiplicity here indicates the number of objects to be combined:
-        # for the chain dictionary, get the sum of the multiplicity in the multiplicy array
-        # in symmetric chains, multiplicity=2 but only one sequence is used
-        
+                            
 
         CombChains =[
             # This is an example of a chain running in "serial"
             makeChain(flags, name='HLT_TestChain6_mv1_TestChain10_ev1_L12eEM10L_MU8F',  L1Thresholds=["MU5VF","EM3"], ChainSteps=[
-                makeChainStep("Step1_mu_em_serial", [mu11, emptySeq1], multiplicity=[1,1]),
-                makeChainStep("Step2_mu_em_serial", [emptySeq2, el21], multiplicity=[1,1]),
-                makeChainStep("Step3_mu_em_serial", multiplicity=[]),
-                makeChainStep("Step4_mu_em_serial", [mu41, el41],  multiplicity=[1,1])] ),
+                makeChainStep("Step1_mu_em_serial", [mu11, emptySeq1]),
+                makeChainStep("Step2_mu_em_serial", [emptySeq2, el21]),
+                makeChainStep("Step3_mu_em_serial",  isEmpty=True),
+                makeChainStep("Step4_mu_em_serial", [mu41, el41])] ),
 
             makeChain(flags, name='HLT_TestChain6_mv2_TestChain8_ev2_L12eEM10L_MU8F', L1Thresholds=["MU5VF","EM3"], ChainSteps=[
-                makeChainStep("Step1_mu2_em", [mu12, el11], multiplicity=[1,1]),
-                makeChainStep("Step2_mu_em", [mu21, el21], multiplicity=[1,1])] ),
+                makeChainStep("Step1_mu2_em", [mu12, el11]),
+                makeChainStep("Step2_mu_em", [mu21, el21])] ),
 
             makeChain(flags, name='HLT_TestChain5_ev1_TestChain8_ev1_L12EM3',   L1Thresholds=["EM3","EM3"], ChainSteps=[ #norun
-                makeChainStep("Step1_2emAs",   [el11, el11], multiplicity=[1,1]),
-                makeChainStep("Step2_2emAs",   [el21, el21], multiplicity=[1,1]) ]),
+                makeChainStep("Step1_2emAs",   [el11, el11]),
+                makeChainStep("Step2_2emAs",   [el21, el21]) ]),
                 
             makeChain(flags, name='HLT_TestChain5_ev1_TestChain8_ev1_2TestChain6_mv1_L12EM8VH_MU8F',   L1Thresholds=["EM8VH","EM8VH","MU8F"], ChainSteps=[
-                makeChainStep("Step1_2em_2mu",   [el11,el11,mu11], multiplicity=[1,1,2]),
-                makeChainStep("Step2_2em_2mu",   [el21,el21,mu21], multiplicity=[1,1,2]) ]),
+                makeChainStep("Step1_2em_2mu",   [el11,el11,mu11]),
+                makeChainStep("Step2_2em_2mu",   [el21,el21,mu21]) ]),
 
             makeChain(flags, name='HLT_2TestChain6_mv1_L12MU5VF',       L1Thresholds=["MU5VF"], ChainSteps=[
-                makeChainStep("Step1_2mu",   [mu11], multiplicity=[2]),
-                makeChainStep("Step2_2mu",   [mu21], multiplicity=[2]) ]),
+                makeChainStep("Step1_2mu",   [mu11]),
+                makeChainStep("Step2_2mu",   [mu21]) ]),
 
             makeChain(flags, name='HLT_3TestChain6_mv1_L12MU5VF',       L1Thresholds=["MU5VF"], ChainSteps=[
-                makeChainStep("Step1_2mu",   [mu11], multiplicity=[3]),
-                makeChainStep("Step2_2mu",   [mu21], multiplicity=[3]) ]),
+                makeChainStep("Step1_2mu",   [mu11]),
+                makeChainStep("Step2_2mu",   [mu21]) ]),
 
             makeChain(flags, name='HLT_TestChain6_mv1_TestChain10_mv1_L12MU5VF',       L1Thresholds=["MU5VF", "MU5VF"], ChainSteps=[
-                makeChainStep("Step1_2muAs",   [mu11,mu11], multiplicity=[1,1]),
-                makeChainStep("Step2_2muAs",   [mu21,mu21], multiplicity=[1,1]) ]),
+                makeChainStep("Step1_2muAs",   [mu11,mu11]),
+                makeChainStep("Step2_2muAs",   [mu21,mu21]) ]),
                 
             makeChain(flags, name='HLT_2TestChain6_mEmpty1_L12MU5VF',   L1Thresholds=["MU5VF"], ChainSteps=[
-                makeChainStep("Step1_2mu_empty",  multiplicity=[]),#[2]
-                makeChainStep("Step2_2mu", [mu21], multiplicity=[2]) ]),
+                makeChainStep("Step1_2mu_empty", isEmpty=True),
+                makeChainStep("Step2_2mu", [mu21]) ]),
 
             makeChain(flags, name='HLT_TestChain6_mv1_TestChain5_ev1dr_L12MU5VF',  L1Thresholds=["MU5VF","EM3"], ChainSteps=[
-                makeChainStep("Step1_mu_em", [mu11, el11], multiplicity=[1,1], comboToolConfs=[dimuDrComboHypoTool]),
-                makeChainStep("Step2_mu_em", [mu21, el21], multiplicity=[1,1], comboToolConfs=[dimuDrComboHypoTool])] ),
+                makeChainStep("Step1_mu_em", [mu11, el11], comboToolConfs=[dimuDrComboHypoTool]),
+                makeChainStep("Step2_mu_em", [mu21, el21], comboToolConfs=[dimuDrComboHypoTool])] ),
                                                                              
            
             makeChain(flags, name='HLT_2TestChain4_mv1dr_L12MU5VF', L1Thresholds=["MU5VF"], ChainSteps=[
-                makeChainStep("Step1_2mu",    [mu11], multiplicity=[2], comboToolConfs=[dimuDrComboHypoTool]),
-                makeChainStep("Step2_2mu22",  [mu22], multiplicity=[2]) ] ),
+                makeChainStep("Step1_2mu",    [mu11], comboToolConfs=[dimuDrComboHypoTool]),
+                makeChainStep("Step2_2mu22",  [mu22]) ] ),
 
             # FSNOSEED not implemented in emulation
             #  L1Thresholds=["MU5VF", "MU5VF"],
             makeChain(flags, name='HLT_TestChain10_mEmpty1_TestChain6_mEmpty1_L12MU5VF', L1Thresholds=["MU5VF", "MU5VF"],  ChainSteps=[                 
-                 makeChainStep("Step1_2muAs_empty", multiplicity=[]),
-                 makeChainStep("Step2_2muAs",   [mu21, mu21], multiplicity=[1,1]) ])
+                 makeChainStep("Step1_2muAs_empty", isEmpty=True),
+                 makeChainStep("Step2_2muAs",   [mu21, mu21]) ])
             ]
-            # Note: There used to be a test here of change of multiplicity signature, e.g. from multiplicity = [1]
-            # in Step1 to multiplicity = [1,1] in Step2. This is no longer supported.
-
+           
         HLTChains += CombChains
 
     return HLTChains

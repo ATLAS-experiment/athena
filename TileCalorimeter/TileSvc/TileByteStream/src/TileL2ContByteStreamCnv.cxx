@@ -108,7 +108,7 @@ StatusCode TileL2ContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataOb
     return StatusCode::FAILURE;    
   }
 
-  const RawEvent* re = m_robSvc->getEvent();
+  const RawEvent* re = m_robSvc->getEvent(Gaudi::Hive::currentContext());
   if (!re) {
     ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
     return StatusCode::FAILURE;

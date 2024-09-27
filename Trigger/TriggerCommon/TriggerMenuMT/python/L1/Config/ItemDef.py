@@ -170,12 +170,12 @@ class ItemDef:
         ZDC_HELT100 = ZDC_alt_comb6 #hadronic energy sum < 100 TeV - for PU rejection
 
         #new ZDC items in pp running
-        ZDC_PP_C = ZDC_alt_comb1
-        ZDC_PP_A = ZDC_alt_comb2
+        ZDC_PP_C = Not(d.ZDC_ALT_2) & d.ZDC_ALT_0
+        ZDC_PP_A = Not(d.ZDC_ALT_2) & d.ZDC_ALT_1
         ZDC_PP_OR = ZDC_PP_A | ZDC_PP_C
-        ZDC_PP_A_C = ZDC_PP_A & ZDC_PP_C
-        ZDC_PP_C2 = ZDC_alt_comb5
-        ZDC_PP_A2 = ZDC_alt_comb6
+        ZDC_PP_A_C = d.ZDC_ALT_1 & d.ZDC_ALT_0
+        ZDC_PP_C2 = d.ZDC_ALT_2 & d.ZDC_ALT_0
+        ZDC_PP_A2 = d.ZDC_ALT_2 & d.ZDC_ALT_1
         ZDC_PP_OR2 = ZDC_PP_C2 | ZDC_PP_A2
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
@@ -1022,10 +1022,10 @@ class ItemDef:
         MenuItem('L1_jTE100'     ).setLogic( d.jTE100  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE600'     ).setLogic( d.jTE600  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE1500'    ).setLogic( d.jTE1500 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jTE3000'    ).setLogic( d.jTE3000 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE6500'    ).setLogic( d.jTE6500 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jTE7000'    ).setLogic( d.jTE7000 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_jTE7500'    ).setLogic( d.jTE7500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE8300'    ).setLogic( d.jTE8300 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE9000'    ).setLogic( d.jTE9000 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE10000'   ).setLogic( d.jTE10000 & physcond).setTriggerType(TT.calo)
         # additional VjTE items for 2023 heavy ion runs
         MenuItem('L1_VjTE10'    ).setLogic( Not(d.jTE10)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE50'    ).setLogic( Not(d.jTE50)  & physcond).setTriggerType(TT.calo)
@@ -2097,6 +2097,11 @@ class ItemDef:
             MenuItem('L1_HT190-jJ40s5pETA21').setLogic( d.TOPO_HT190_jJ40s5pETA21   & physcond)
             MenuItem('L1_SC111-CjJ40').setLogic(  d.TOPO_SC111_CjJ40abpETA26 & physcond)
 
+            #ATR-30179
+            MenuItem('L1_cTAU30M_3DR99-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR99_MU8Fab_eTAU30ab & physcond)
+            MenuItem('L1_cTAU30M_3DR28-MU8F-eTAU30').setLogic( d.cTAU30M & d.TOPO_3DR28_MU8Fab_eTAU30ab & physcond)
+
+            
             # Needed?
             MenuItem('L1_DPHI-2eEM5').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & physcond)
             # Need to redefine these wrt Phase-I TE

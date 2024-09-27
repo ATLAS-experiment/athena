@@ -235,15 +235,15 @@ class AlgConfig(ABC):
             # Build the menu sequence and create the actual chainStep
             output_steps.append(
                 ChainStep(
-                    name=step_name,
-                    multiplicity=[] if sel_acc is None else [1],
+                    name=step_name,                    
                     chainDicts=[chainDict],
                     Sequences=[]
                     if sel_acc is None
                     else [
                         functools.partial(make_MET_menu_sequenceGenCfg, flags, sel_acc, hypo_tool)                                                
                     ],
-                    comboHypoCfg=ComboHypoCfg
+                    comboHypoCfg=ComboHypoCfg,
+                    isEmpty=True if sel_acc is None else False
                 )
             )
 

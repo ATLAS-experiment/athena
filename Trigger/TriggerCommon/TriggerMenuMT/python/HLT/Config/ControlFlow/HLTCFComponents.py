@@ -172,9 +172,8 @@ class CFSequence(object):
 
 class CFGroup(object):
     """Class to store the Step + its Filter (CFSequence) plus the chains and dictionaries of the legs using that step   """
-    def __init__(self, ChainStep, FilterAlg):#, fastMenu):
+    def __init__(self, ChainStep, FilterAlg):
         self.stepDicts = []  # will become a list of lists
-        self.multiplicity = []
         self.chains = []
         self.comboToolConfs = []
         self.createCFSequence(ChainStep, FilterAlg)
@@ -190,12 +189,11 @@ class CFGroup(object):
         self.stepDicts.append(newstep.stepDicts) # one dict per leg
         self.chains.append(chainName)
         self.comboToolConfs.append(newstep.comboToolConfs)
-        self.multiplicity.append(newstep.multiplicity)   
     
 
     def connect(self, connections):
         """Connect filter to ChainStep (and all its sequences) through these connections (which are sets of filter outputs)
-        if a ChainStep contains the same sequence multiple times (for multi-object chains),
+        if a ChainStep contains the same sequence multiple times (for multi-leg chains),
         the filter is connected only once (to avoid multiple DH links)
         """
         if log.isEnabledFor(logging.DEBUG):

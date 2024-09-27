@@ -54,7 +54,7 @@ StatusCode Muon::CSC_RawDataProviderTool::convert(const std::vector<IdentifierHa
         m_cabling->hash2RobFull(rdoIdhVect[i], rob_id);
         robIds.push_back(rob_id);
     }
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), robIds, vecOfRobf);
     ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
     return convert(vecOfRobf, rdoIdhVect);
 }
@@ -64,7 +64,7 @@ StatusCode Muon::CSC_RawDataProviderTool::convert(const EventContext& ctx) const
     const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
     ATH_MSG_VERBOSE("Number of ROB ids " << robIds.size());
     // ask ROBDataProviderSvc for the vector of ROBFragment for all MDT ROBIDs
-    m_robDataProvider->getROBData(robIds, vecOfRobf);
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
 
     return convert(vecOfRobf, ctx);

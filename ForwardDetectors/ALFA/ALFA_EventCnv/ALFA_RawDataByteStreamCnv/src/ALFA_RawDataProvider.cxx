@@ -92,7 +92,7 @@ StatusCode ALFA_RawDataProvider::execute()
   ROBIDs.push_back(0x00840000);
   ROBIDs.push_back(0x00840001);
 
-  m_robDataProvider->getROBData(ROBIDs, listOfRobf);
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), ROBIDs, listOfRobf);
 
 
   msg(MSG::DEBUG) << "  ROB ID " << std::hex <<ROBIDs <<MSG::dec<< endmsg;

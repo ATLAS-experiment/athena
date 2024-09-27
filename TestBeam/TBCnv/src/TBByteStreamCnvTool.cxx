@@ -432,7 +432,7 @@ StatusCode TBByteStreamCnvTool::GetRODBlock(eformat::SubDetector subdet_id,
     return StatusCode::FAILURE;
    }
 
-  const RawEvent* re = m_rdpSvc->getEvent();
+  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
  
   if (!re)
     {logstr <<MSG::FATAL << "Can't get RawEvent!" << endmsg;

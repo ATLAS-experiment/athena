@@ -96,7 +96,7 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
 
   // get ROB fragment
   IROBDataProviderSvc::VROBFRAG robFrags ;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
   // size check
   if ( robFrags.size() == 0 ) {    
@@ -105,7 +105,7 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
     uint32_t newRobId = robId;
     newRobId |= 0x00000b;
     vID[0] = ( newRobId );
-    m_robDataProvider->getROBData( vID, robFrags );
+    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
     // size check
     if ( robFrags.size() != 1 ) {
       log << MSG::WARNING << " Number of ROB fragments for source ROB ID " << MSG::hex << newRobId << " (ROD ID " 

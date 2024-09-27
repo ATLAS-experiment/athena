@@ -39,6 +39,9 @@ StatusCode TRTMonitoringAlg::fillHistograms(const EventContext& context) const {
     }
   }
 
+  if(!(offlineTrkHandle->size()==2 and good_tracks==2)) // get pT only for exclusive 2 track events
+    lead_track_pt = -1;
+
   // set monitored values
   auto n_trk = Monitored::Scalar<int>("n_trk", good_tracks);
   auto lead_trk_pT = Monitored::Scalar<double>("lead_trk_pT", lead_track_pt);

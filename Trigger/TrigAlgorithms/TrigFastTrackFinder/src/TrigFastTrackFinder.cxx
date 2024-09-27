@@ -2525,7 +2525,7 @@ bool TrigFastTrackFinder::isPreselPassDisTrackBeforeRefit(Trk::Track* trk, doubl
 }
 
 std::unique_ptr<const Trk::TrackParameters> TrigFastTrackFinder::extrapolateDisTrackToBS(
-   Trk::Track* t, const std::vector<double>& v_xvtx, const std::vector<double>& v_yvtx,  const std::vector<double>& v_zvtx) const
+   Trk::Track* t, const std::vector<double>& v_xvtx, const std::vector<double>& v_yvtx,  const std::vector<double>& v_zvtx, const EventContext& ctx) const
 {
    float vtx_x  = 0;
    float vtx_y  = 0;
@@ -2545,7 +2545,7 @@ std::unique_ptr<const Trk::TrackParameters> TrigFastTrackFinder::extrapolateDisT
    Amg::Vector3D gp(vtx_x, vtx_y, vtx_z);
    Trk::PerigeeSurface persf(gp);
    std::unique_ptr<const Trk::TrackParameters> tmp =
-      m_extrapolator->extrapolateDirectly(Gaudi::Hive::currentContext(), (*(t->perigeeParameters())), persf);
+      m_extrapolator->extrapolateDirectly(ctx, (*(t->perigeeParameters())), persf);
    if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
       return tmp;
    }
@@ -2724,7 +2724,7 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
       if( ptrk->perigeeParameters()==nullptr ) continue;
 
       // extrapolate to vertex
-      std::unique_ptr<const Trk::TrackParameters> vertexPerigee = extrapolateDisTrackToBS(ptrk,v_xvtx,v_yvtx,v_zvtx);
+      std::unique_ptr<const Trk::TrackParameters> vertexPerigee = extrapolateDisTrackToBS(ptrk,v_xvtx,v_yvtx,v_zvtx, ctx);
       double d0 = ptrk->perigeeParameters()->parameters()[Trk::d0];
       double z0 = ptrk->perigeeParameters()->parameters()[Trk::z0];
       double d0_wrtVtx = 0;
@@ -2752,18 +2752,18 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
       double refit_z0_wrtVtx = 0;
       std::unique_ptr<const Trk::TrackParameters> refitVertexPerigee = nullptr;
       if( refit_trk != nullptr ) {
-	 refitVertexPerigee = extrapolateDisTrackToBS(refit_trk.get(),v_xvtx,v_yvtx,v_zvtx);
-	 if( refitVertexPerigee == nullptr ) {
-	    ATH_MSG_VERBOSE("extrapote to BS fails for refit track");
-	 }
-	 else {
-	    refit_d0 = refit_trk.get()->perigeeParameters()->parameters()[Trk::d0];
-	    refit_z0 = refit_trk.get()->perigeeParameters()->parameters()[Trk::z0];
-	    refit_d0_wrtVtx = refitVertexPerigee->parameters()[Trk::d0];
-	    refit_z0_wrtVtx = refitVertexPerigee->parameters()[Trk::z0];
-	    ATH_MSG_VERBOSE("refit trk d0 : " << refit_d0 << " -> extrapolate -> " << refit_d0_wrtVtx);
-	    ATH_MSG_VERBOSE("refit trk z0 : " << refit_z0 << " -> extrapolate -> " << refit_z0_wrtVtx);
-	 }
+        refitVertexPerigee = extrapolateDisTrackToBS(refit_trk.get(),v_xvtx,v_yvtx,v_zvtx,ctx);
+        if( refitVertexPerigee == nullptr ) {
+          ATH_MSG_VERBOSE("extrapote to BS fails for refit track");
+        }
+        else {
+          refit_d0 = refit_trk.get()->perigeeParameters()->parameters()[Trk::d0];
+          refit_z0 = refit_trk.get()->perigeeParameters()->parameters()[Trk::z0];
+          refit_d0_wrtVtx = refitVertexPerigee->parameters()[Trk::d0];
+          refit_z0_wrtVtx = refitVertexPerigee->parameters()[Trk::z0];
+          ATH_MSG_VERBOSE("refit trk d0 : " << refit_d0 << " -> extrapolate -> " << refit_d0_wrtVtx);
+          ATH_MSG_VERBOSE("refit trk z0 : " << refit_z0 << " -> extrapolate -> " << refit_z0_wrtVtx);
+        }
       }
 
       // pre-selection after refit

@@ -45,35 +45,6 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  /// --- Implementation of IROBDataProviderSvc interface ---
-  /// --- Legacy interface (deprecated) ---
-
-  /// Signal ROB fragments which should be considered for prefetching in online running
-  virtual void addROBData(const std::vector<uint32_t>& /*robIds*/, 
-			  const std::string_view callerName="UNKNOWN") override;
-
-  /// Start a new event with a set of ROB fragments, e.g. from LVL1 result, in online and add the fragments to the ROB cache
-  virtual void setNextEvent(const std::vector<ROBF>& /*result*/) override;
-
-  /// Start a new event with a full event fragment and add all ROB fragments in to the ROB cache
-  virtual void setNextEvent(const RawEvent* /*re*/) override;
-
-  /// Retrieve ROB fragments for given ROB ids from the ROB cache
-  virtual void getROBData(const std::vector<uint32_t>& /*robIds*/, std::vector<const ROBF*>& /*robFragments*/, 
-			  const std::string_view callerName="UNKNOWN") override;
-
-  /// Retrieve the full event fragment
-  virtual const RawEvent* getEvent() override;
-
-  /// Store the status for the event.
-  virtual void setEventStatus(uint32_t /*status*/) override;
-
-  /// Retrieve the status for the event.
-  virtual uint32_t getEventStatus() override;
-
-  /// --- Implementation of IROBDataProviderSvc interface ---
-  /// --- Context aware interface for MT ---
-
   /// Signal ROB fragments which should be considered for prefetching in online running
   virtual void addROBData(const EventContext& /*context*/, const std::vector<uint32_t>& /*robIds*/, 
 			  const std::string_view callerName="UNKNOWN") override;

@@ -124,8 +124,8 @@ LArRawScContByteStreamCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 
   // patch for the HLT usage
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData( LArByteStream::s_allROBIDs_LATOME, robFrags );
-  const RawEvent* re = m_rdpSvc->getEvent();
+  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags );
+  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
   if (!re)
     {(*m_log) << MSG::ERROR << "Could not get raw event from ByteStreamInputSvc" << endmsg;
      return StatusCode::FAILURE;
