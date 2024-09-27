@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,6 +12,11 @@
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/DecorKeyHelpers.h"
+#include "AthContainers/ConstAccessor.h"
+
+#include "TruthUtils/MagicNumbers.h"
+
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include <vector>
@@ -98,10 +103,14 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,float > decorator_m_vis(m_decorator_m_visKey, ctx);
     SG::WriteDecorHandle< xAOD::TruthParticleContainer,int > decorator_nphoton(m_decorator_nphotonKey, ctx);
     // One for the photons as well
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, char > dressDec (m_decorationKey, ctx);
+    // Can't use a handle here, as this decoration gets touched by
+    // multiple algorithms.  Need to explicitly schedule a LockDecoration
+    // algorithm to lock it after all modifications.
+    // FIXME: This is not MT-safe.
+    SG::Decorator< char > dressDec (SG::decorKeyFromKey (m_decorationKey.key()));
     // If we want to decorate, then we need to decorate everything with false to begin with
     if (!m_decorationKey.key().empty()){
-      if (!dressDec.isAvailable()) {
+      if (!dressDec.isAvailable(*truthParticles)) {
         for (const auto * particle : *truthParticles){
           dressDec(*particle);
         }
