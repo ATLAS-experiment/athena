@@ -120,8 +120,7 @@ namespace FlavorTagDiscriminants {
         dec_vertex_index(*electron) = acc_vertex_index(*truth);
         dec_type_label(*electron) = acc_type_label(*truth);
         dec_source_label(*electron) = acc_source_label(*truth);
-        // ATLASRECTS-8290: replace uid with ->uid() eventually
-        dec_uniqueID(*electron) = uid(*truth);
+        dec_uniqueID(*electron) = HepMC::uniqueID(truth);
         dec_parent_uniqueID(*electron) = acc_parent_uniqueID(*truth);
       }
     }

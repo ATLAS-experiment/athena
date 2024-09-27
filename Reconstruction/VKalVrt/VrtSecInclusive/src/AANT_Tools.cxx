@@ -64,7 +64,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TRTHits"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_PixBar1"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_PixBar2"          );
-    m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_barcode"          ); // FIXME barcode-based
+    m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_uniqueID"         );
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_matchPr"          );
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_2dIPErr"          );
     m_ntupleVars->addNewVar< vector<double> > ( "RecoTrk_ZIPErr"           );
@@ -73,7 +73,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TrkAuth"          );
     m_ntupleVars->addNewVar< vector<int> >    ( "RecoTrk_TrkLowPt"         );
     
-    m_ntupleVars->addNewVar< vector<int> >    ( "SelTrk_barcode"           ); // FIXME barcode-based
+    m_ntupleVars->addNewVar< vector<int> >    ( "SelTrk_uniqueID"          );
     
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_id"                 );
     m_ntupleVars->addNewVar< vector<double> > ( "SVTrk_pT"                 );
@@ -90,7 +90,7 @@ namespace VKalVrtAthena {
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_PixHits"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_SCTHits"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TRTHits"            );
-    m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_barcode"            ); // FIXME barcode-based
+    m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_uniqueID"           );
     m_ntupleVars->addNewVar< vector<double> > ( "SVTrk_matchPr"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TrkAuth"            );
     m_ntupleVars->addNewVar< vector<int> >    ( "SVTrk_TrkLowPt"           );
@@ -322,7 +322,7 @@ namespace VKalVrtAthena {
               }
           }
       
-        m_ntupleVars->get< vector<int>    >( "SVTrk_barcode" ) .emplace_back( uniqueID ); // TODO Rename variable name to be consistent?
+        m_ntupleVars->get< vector<int>    >( "SVTrk_uniqueID" ) .emplace_back( uniqueID );
         m_ntupleVars->get< vector<double> >( "SVTrk_matchPr" ) .emplace_back( matchProb );
       
         ATH_MSG_DEBUG(" > fillAANT_SelectedBaseTracks: Sel Trk d0/pT/eta/match bc/pr "

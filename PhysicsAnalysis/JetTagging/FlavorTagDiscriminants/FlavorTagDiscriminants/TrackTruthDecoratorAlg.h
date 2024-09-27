@@ -52,7 +52,7 @@ namespace FlavorTagDiscriminants {
       this, "acc_ftagTruthVertexIndex", m_truthParticleContainerKey, "ftagTruthVertexIndex",
         "Accessor for the vertex index of the truth particle"};
     RDHK m_acc_parent_uniqueID {
-      this, "acc_ftagTruthParentBarcode", m_truthParticleContainerKey, "ftagTruthParentBarcode",
+      this, "acc_ftagTruthParentUniqueID", m_truthParticleContainerKey, "ftagTruthParentUniqueID",
         "Accessor for the uniqueID of the parent of linked truth particle"};
 
     // Decorators for tracks
@@ -70,10 +70,10 @@ namespace FlavorTagDiscriminants {
       this, "dec_ftagTruthVertexIndex", m_TrackContainerKey, "ftagTruthVertexIndex",
         "ftagTruth vertex index of the track"};
     WDHK m_dec_uniqueID {
-      this, "dec_ftagTruthBarcode", m_TrackContainerKey, "ftagTruthBarcode",
+      this, "dec_ftagTruthUniqueID", m_TrackContainerKey, "ftagTruthUniqueID",
         "UniqueID of linked truth particle"};
     WDHK m_dec_parent_uniqueID {
-      this, "dec_ftagTruthParentBarcode", m_TrackContainerKey, "ftagTruthParentBarcode",
+      this, "dec_ftagTruthParentUniqueID", m_TrackContainerKey, "ftagTruthParentUniqueID",
         "UniqueID of parent of linked truth particle"};
     WDHK m_dec_muon_origin_label {
       this, "dec_ftagTruthMuonOriginLabel", m_TrackContainerKey, "ftagTruthMuonOriginLabel",
