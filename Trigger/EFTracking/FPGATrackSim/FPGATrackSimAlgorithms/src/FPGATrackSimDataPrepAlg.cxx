@@ -171,9 +171,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 {
                     for (const FPGATrackSimTruthTrack& fpgaTruthTrack : truthtracks) // loop over FPGA truth tracks
                     {
-                        if (fabs(fpgaTruthTrack.getPt() - truthParticle->pt()) < fabs(truthParticle->pt() * 0.001) &&
-                            fabs(fpgaTruthTrack.getEta() - truthParticle->eta()) < fabs(truthParticle->eta() * 0.001) &&
-                            fabs(fpgaTruthTrack.getPhi() - truthParticle->phi()) < fabs(truthParticle->phi() * 0.001)) // TO DO: this needs to change and use barcodes
+                        if (fpgaTruthTrack.getBarcode() == static_cast<HepMcParticleLink::barcode_type>(truthParticle->barcode()))
                         {
                             truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(truthParticle->barcode(), 0,
                                 HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp));
