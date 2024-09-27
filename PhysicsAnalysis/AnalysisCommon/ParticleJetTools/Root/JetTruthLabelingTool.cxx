@@ -393,10 +393,8 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     float truthJetPt = -9999;
 
     if ( matchTruthJet ) {
-      // Can't use the WriteDecorHandle to read --- the decoration may have
-      // been added and locked by a previous algorithm.
-      SG::ConstAccessor<int> labelAcc (dh.labelHandle->auxid());
-      label = labelAcc(*matchTruthJet);
+      // WriteDecorHandles can also read
+      label = (*dh.labelHandle)(*matchTruthJet);
       if ( m_useDRMatch ) {
         if(dh.dRWHandle->isAvailable()) dR_truthJet_W = (*dh.dRWHandle)(*matchTruthJet);
         if(dh.dRZHandle->isAvailable()) dR_truthJet_Z = (*dh.dRZHandle)(*matchTruthJet);
@@ -508,7 +506,6 @@ StatusCode JetTruthLabelingTool::labelTruthJets( DecorHandles& dh,
 
   /// Check if the truth jet collection already has labels applied
   if(dh.labelHandle->isAvailable()){
-    // Beware: if we get here, the configuration is probably not MT-compatible.
     ATH_MSG_DEBUG("labelTruthJets: Truth jet collection already labelled with " << m_truthLabelName);
     return StatusCode::SUCCESS;
   }
