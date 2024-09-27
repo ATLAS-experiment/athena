@@ -182,6 +182,16 @@ def EGammaCommonCfg(ConfigFlags):
     # ====================================================================
     # ELECTRON DNN SELECTORS WITHOUT CF REJECTION
     # ====================================================================
+    # Very-Loose 97%
+    ElectronDNNSelectorVeryLooseNoCF97 = acc.popToolsAndMerge(
+        AsgElectronSelectorToolCfg(
+            ConfigFlags,
+            name="ElectronDNNSelectorVeryLooseNoCF97",
+            WorkingPoint="VeryLooseDNNnoCF97Electron",
+        )
+    )
+    acc.addPublicTool(ElectronDNNSelectorVeryLooseNoCF97)
+
     # Loose
     ElectronDNNSelectorLooseNoCF = acc.popToolsAndMerge(
         AsgElectronSelectorToolCfg(
@@ -495,6 +505,19 @@ def EGammaCommonCfg(ConfigFlags):
         )
     )
 
+    # decorate electrons with the output of DNN VeryLoose97 without CF
+    ElectronPassDNNVeryLooseNoCF97 = acc.getPrimaryAndMerge(
+        EGElectronLikelihoodToolWrapperCfg(
+            ConfigFlags,
+            name="ElectronPassDNNVeryLooseNoCF97",
+            EGammaElectronLikelihoodTool=ElectronDNNSelectorVeryLooseNoCF97,
+            EGammaFudgeMCTool=(ElectronVariableCorrectionTool if isFullSim else None),
+            CutType="",
+            StoreGateEntryName="DFCommonElectronsDNNVeryLooseNoCF97",
+            ContainerName="Electrons",
+            StoreTResult=False,
+        )
+    )
     # decorate electrons with the output of DNN Loose without CF
     ElectronPassDNNLooseNoCF = acc.getPrimaryAndMerge(
         EGElectronLikelihoodToolWrapperCfg(
@@ -711,6 +734,7 @@ def EGammaCommonCfg(ConfigFlags):
         ElectronPassDNNLoose,
         ElectronPassDNNMedium,
         ElectronPassDNNTight,
+        ElectronPassDNNVeryLooseNoCF97,
         ElectronPassDNNLooseNoCF,
         ElectronPassDNNMediumNoCF,
         ElectronPassDNNTightNoCF,

@@ -240,7 +240,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: TightLH, "
             "MediumLH, LooseBLayerLH, TightDNN, MediumDNN, LooseDNN, "
-            "TightDNNnoCF, MediumDNNnoCF, LooseDNNnoCF.")
+            "TightDNNnoCF, MediumDNNnoCF, VeryLooseDNNnoCF97.")
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP (string) to use. Supported isolation WPs: "
             "HighPtCaloOnly, Loose_VarRad, Tight_VarRad, TightTrackOnly_"
