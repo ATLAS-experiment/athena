@@ -3,29 +3,32 @@
 */
 
 /**
- * @file src/ClusterContainerMaker.cxx
+ * @file src/xAODContainerMaker.cxx
  * @author zhaoyuan.cui@cern.ch
  * @author yuan-tang.chou@cern.ch
  * @date Apr. 15, 2024
  */
 
-#include "ClusterContainerMaker.h"
+#include "xAODContainerMaker.h"
 
 #include "Identifier/Identifier.h"
 #include "StoreGate/WriteHandle.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+#include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 
-StatusCode ClusterContainerMaker::initialize() {
-  ATH_MSG_INFO("Initializing ClusterContainerMaker tool");
+StatusCode xAODContainerMaker::initialize() {
+  ATH_MSG_INFO("Initializing xAODContainerMaker tool");
 
   ATH_CHECK(m_pixelClustersKey.initialize());
   ATH_CHECK(m_stripClustersKey.initialize());
+  ATH_CHECK(m_stripSpacePointsKey.initialize());
+  ATH_CHECK(m_pixelSpacePointsKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode ClusterContainerMaker::makeStripClusterContainer(
+StatusCode xAODContainerMaker::makeStripClusterContainer(
     const int numClusters,
     const EFTrackingDataFormats::StripClusterAuxInput &scAux,
     const EFTrackingDataFormats::Metadata *meta,
@@ -77,7 +80,7 @@ StatusCode ClusterContainerMaker::makeStripClusterContainer(
   return StatusCode::SUCCESS;
 }
 
-StatusCode ClusterContainerMaker::makePixelClusterContainer(
+StatusCode xAODContainerMaker::makePixelClusterContainer(
     const int numClusters,
     const EFTrackingDataFormats::PixelClusterAuxInput &pxAux,
     const EFTrackingDataFormats::Metadata *meta,
@@ -153,6 +156,102 @@ StatusCode ClusterContainerMaker::makePixelClusterContainer(
     pixelCl->setIsSplit(pxAux.isSplit.at(i));
     pixelCl->setSplitProbabilities(pxAux.splitProbability1.at(i),
                                    pxAux.splitProbability2.at(i));
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode xAODContainerMaker::makePixelSpacePointContainer(
+    const int numPixelSpacePoints,
+    const EFTrackingDataFormats::SpacePointAuxInput &psAux,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        pixelsp_meas,
+    const EventContext &ctx) const {
+  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
+
+  SG::WriteHandle<xAOD::SpacePointContainer> pixelSpacePointsHandle{
+      m_pixelSpacePointsKey, ctx};
+
+  ATH_CHECK(pixelSpacePointsHandle.record(
+      std::make_unique<xAOD::SpacePointContainer>(),
+      std::make_unique<xAOD::SpacePointAuxContainer>()));
+
+  ATH_CHECK(pixelSpacePointsHandle.isValid());
+  ATH_MSG_DEBUG("Container '" << m_pixelSpacePointsKey << "' initialised");
+
+  for (int i = 0; i < numPixelSpacePoints; i++) {
+    // Puch back numPixelSpacePoints of SpacePoint
+    auto pxsp =
+        pixelSpacePointsHandle->push_back(std::make_unique<xAOD::SpacePoint>());
+    Eigen::Matrix<float, 3, 1> globalPosition(
+        psAux.globalPosition.at(i * 3), psAux.globalPosition.at(i * 3 + 1),
+        psAux.globalPosition.at(i * 3 + 2));
+
+    std::vector<const xAOD::UncalibratedMeasurement *> pixel_meas(
+        pixelsp_meas.at(i).size());
+    std::copy(pixelsp_meas.at(i).begin(), pixelsp_meas.at(i).end(),
+              pixel_meas.begin());
+
+    pxsp->setSpacePoint(psAux.elementIdList.at(i), globalPosition,
+                        psAux.varianceR.at(i), psAux.varianceZ.at(i),
+                        pixel_meas);
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode xAODContainerMaker::makeStripSpacePointContainer(
+    const int numStripSpacePoints,
+    const EFTrackingDataFormats::SpacePointAuxInput &sspAux,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        stripsp_meas,
+    const EventContext &ctx) const {
+  ATH_MSG_DEBUG("Making xAOD::SpacePointContainer");
+
+  SG::WriteHandle<xAOD::SpacePointContainer> stripSpacePointsHandle{
+      m_stripSpacePointsKey, ctx};
+
+  ATH_CHECK(stripSpacePointsHandle.record(
+      std::make_unique<xAOD::SpacePointContainer>(),
+      std::make_unique<xAOD::SpacePointAuxContainer>()));
+
+  ATH_CHECK(stripSpacePointsHandle.isValid());
+  ATH_MSG_DEBUG("Container '" << m_stripSpacePointsKey << "' initialised");
+
+  for (int i = 0; i < numStripSpacePoints; i++) {
+    // Puch back numStripSpacePoints of SpacePoint
+    auto ssp =
+        stripSpacePointsHandle->push_back(std::make_unique<xAOD::SpacePoint>());
+
+    Eigen::Matrix<float, 3, 1> globalPosition(
+        sspAux.globalPosition.at(i * 3), sspAux.globalPosition.at(i * 3 + 1),
+        sspAux.globalPosition.at(i * 3 + 2));
+
+    std::vector<const xAOD::UncalibratedMeasurement *> strip_meas(
+        stripsp_meas.at(i).size());
+    std::copy(stripsp_meas.at(i).begin(), stripsp_meas.at(i).end(),
+              strip_meas.begin());
+
+    float topHalfStripLength = sspAux.topHalfStripLength.at(i);
+    float bottomHalfStripLength = sspAux.bottomHalfStripLength.at(i);
+    Eigen::Matrix<float, 3, 1> topStripDirection(
+        sspAux.topStripDirection.at(i * 3),
+        sspAux.topStripDirection.at(i * 3 + 1),
+        sspAux.topStripDirection.at(i * 3 + 2));
+    Eigen::Matrix<float, 3, 1> bottomStripDirection(
+        sspAux.bottomStripDirection.at(i * 3),
+        sspAux.bottomStripDirection.at(i * 3 + 1),
+        sspAux.bottomStripDirection.at(i * 3 + 2));
+    Eigen::Matrix<float, 3, 1> stripCenterDistance(
+        sspAux.topStripCenter.at(i * 3), sspAux.topStripCenter.at(i * 3 + 1),
+        sspAux.topStripCenter.at(i * 3 + 2));
+    Eigen::Matrix<float, 3, 1> topStripCenter(
+        sspAux.topStripCenter.at(i * 3), sspAux.topStripCenter.at(i * 3 + 1),
+        sspAux.topStripCenter.at(i * 3 + 2));
+    ssp->setSpacePoint(
+        {sspAux.elementIdList.at(i), sspAux.elementIdList.at(i + 1)},
+        globalPosition, sspAux.varianceR.at(i), sspAux.varianceZ.at(i),
+        strip_meas, topHalfStripLength, bottomHalfStripLength,
+        topStripDirection, bottomStripDirection, stripCenterDistance,
+        topStripCenter);
   }
   return StatusCode::SUCCESS;
 }

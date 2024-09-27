@@ -4,27 +4,29 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Constants import DEBUG
 
-def ClusterContainerMakerCfg(flags, name = 'ClusterContainerMaker', **kwarg):
+def xAODContainerMakerCfg(flags, name = 'xAODContainerMaker', **kwarg):
     
     acc = ComponentAccumulator()
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('OutputStripName', 'ITkStripClusters')
     kwarg.setdefault('OutputPixelName', 'ITkPixelClusters')
+    kwarg.setdefault('OutputStripSpacePointName', 'ITkStripSpacePoints')
+    kwarg.setdefault('OutputPixelSpacePointName', 'ITkPixelSpacePoints')
     
-    acc.setPrivateTools(CompFactory.ClusterContainerMaker(**kwarg))
+    acc.setPrivateTools(CompFactory.xAODContainerMaker(**kwarg))
     return acc
 
 def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
 
     acc = ComponentAccumulator()
     
-    tool = acc.popToolsAndMerge(ClusterContainerMakerCfg(flags))
+    tool = acc.popToolsAndMerge(xAODContainerMakerCfg(flags))
     
     kwarg.setdefault('name', name)
     kwarg.setdefault('xclbin', './xAODTransfer.xclbin')
     kwarg.setdefault('KernelName', 'xAODTransfer')
-    kwarg.setdefault('ClusterMaker', tool)
+    kwarg.setdefault('xAODMaker', tool)
     kwarg.setdefault('StripClusterContainerKey', 'FPGAITkStripClusters')
     kwarg.setdefault('PixelClusterContainerKey', 'FPGAITkPixelClusters')
 

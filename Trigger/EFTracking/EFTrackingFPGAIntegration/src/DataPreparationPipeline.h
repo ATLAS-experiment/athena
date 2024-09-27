@@ -14,13 +14,14 @@
 #define EFTRACKING_FPGA_INTEGRATION_DATAPREPARATIONPIPELINE_H
 
 // EFTracking include
-#include "ClusterContainerMaker.h"
 #include "EFTrackingDataFormats.h"
 #include "IntegrationBase.h"
+#include "xAODContainerMaker.h"
 
 // Athena include
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 
 /**
@@ -59,12 +60,30 @@ class DataPreparationPipeline : public IntegrationBase {
       long unsigned int N) const;
 
   /**
+   * @brief Convert the space point from xAOD container to simple std::vector
+   * of EFTrackingDataFormats::SpacePoint.
+   *
+   * This is needed for the kernel input.
+   */
+  StatusCode getInputSpacePointData(
+      const xAOD::SpacePointContainer *sp,
+      std::vector<EFTrackingDataFormats::SpacePoint> &ef_sp,
+      std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> &sp_meas,
+      long unsigned int N, bool isStrip) const;
+
+  /**
    * @brief Run the software version of the transfer kernel. This doesn't
    * require the FPGA accelerator in the machine.
    */
   StatusCode runSW(
       const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
       const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+      const std::vector<EFTrackingDataFormats::SpacePoint> &ef_ssp,
+      const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+          &ssp_mes,
+      const std::vector<EFTrackingDataFormats::SpacePoint> &ef_psp,
+      const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+          &psp_mes,
       const EventContext &ctx) const;
 
   /**
@@ -74,41 +93,53 @@ class DataPreparationPipeline : public IntegrationBase {
    */
   StatusCode runHW(
       const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-      const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc) const;
+      const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+      const std::vector<EFTrackingDataFormats::SpacePoint> &ef_ssp,
+      const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+          &ssp_mes,
+      const std::vector<EFTrackingDataFormats::SpacePoint> &ef_psp,
+      const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+          &psp_mes) const;
 
   /**
    * @brief Software version of the transfer kernel. The purse of this function
    * is to mimic the FPGA output at software level.
    *
-   * It takes the EFTrackingDataFormats::StripCluster and
-   * EFTrackingDataFormats::PixelCluster as input arguments and mimic the
-   * transfer kernel by giving array output.
+   * It takes the EFTrackingDataFormats::StripCluster
+   * EFTrackingDataFormats::PixelCluster, and EFTrackingDataFormat::SpacePoints
+   * as input arguments and mimic the transfer kernel by giving array output.
    */
   StatusCode transferSW(
-      const EFTrackingDataFormats::StripCluster *inputSC, int inputSCSize,
-      float *scLocalPosition, float *scLocalCovariance, unsigned int *scIdHash,
-      long unsigned int *scId, float *scGlobalPosition,
-      unsigned long long *scRdoList, int *scChannelsInPhi,
+      const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
+      EFTrackingDataFormats::StripClusterOutput &outputSC,
       // PixelCluster
-      const EFTrackingDataFormats::PixelCluster *inputPC, int inputPCSize,
-      float *pcLocalPosition, float *pcLocalCovariance, unsigned int *pcIdHash,
-      long unsigned int *pcId, float *pcGlobalPosition,
-      unsigned long long *pcRdoList, int *pcChannelsInPhi, int *pcChannelsInEta,
-      float *pcWidthInEta, float *pcOmegaX, float *pcOmegaY, int *pcTotList,
-      int *pcTotalToT, float *pcChargeList, float *pcTotalCharge,
-      float *pcEnergyLoss, char *pcIsSplit, float *pcSplitProbability1,
-      float *pcSplitProbability2, int *pcLvl1a,
-      EFTrackingDataFormats::Metadata *metadata) const;  // mimic the tranfser kernel
+      const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
+      EFTrackingDataFormats::PixelClusterOutput &outputPC,
+      // Strip SpacePoint
+      const std::vector<EFTrackingDataFormats::SpacePoint> &inputSSP,
+      EFTrackingDataFormats::SpacePointOutput &outputSSP,
+      // Pixel SpacePoint
+      const std::vector<EFTrackingDataFormats::SpacePoint> &inputPSP,
+      EFTrackingDataFormats::SpacePointOutput &outputPSP,
+      // Metadata
+      EFTrackingDataFormats::Metadata *metadata)
+      const;  // mimic the tranfser kernel
 
  private:
-  // At this stage of development we need xAOD::Strip/PixelClusterContainer as
-  // our input
+  // At this stage of development we need
+  // xAOD::Strip/PixelCluster/SpacePointContainer as our input
   SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClustersKey{
       this, "StripClusterContainerKey", "FPGAITkStripClusters",
       "Key for Strip Cluster Containers"};
   SG::ReadHandleKey<xAOD::PixelClusterContainer> m_pixelClustersKey{
       this, "PixelClusterContainerKey", "FPGAITkPixelClusters",
       "Key for Pixel Cluster Containers"};
+  SG::ReadHandleKey<xAOD::SpacePointContainer> m_stripSpacePointsKey{
+      this, "StripSpacePointContainerKey", "FPGAITkStripSpacePoints",
+      "Key for Strip SpacePoint Containers"};
+  SG::ReadHandleKey<xAOD::SpacePointContainer> m_pixelSpacePointsKey{
+      this, "PixelSpacePointContainerKey", "FPGAITkPixelSpacePoints",
+      "Key for Pixel SpacePoint Containers"};
   Gaudi::Property<std::string> m_xclbin{
       this, "xclbin", "",
       "xclbin path and name"};  //!< Path and name of the xclbin file
@@ -119,10 +150,9 @@ class DataPreparationPipeline : public IntegrationBase {
       "Run software mode"};  //!< Software mode, not running on the FPGA
 
   // Conver kernel outputs into xAOD containers
-  ToolHandle<ClusterContainerMaker> m_clusterContainerMaker{
-      this, "ClusterMaker", "ClusterContainerMaker",
-      "tool to make cluster"};  //!< Tool handle for ClusterContainerMaker
-
+  ToolHandle<xAODContainerMaker> m_xAODContainerMaker{
+      this, "xAODMaker", "xAODContainerMaker",
+      "tool to make cluster"};  //!< Tool handle for xAODContainerMaker
 };
 
 #endif  // EFTRACKING_FPGA_INTEGRATION_DATAPREPARATIONPIPELINE_H
