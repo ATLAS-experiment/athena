@@ -57,10 +57,12 @@ def prepareFlagsForFPGATrackSimDataPrepAlg(flags):
 def FPGATrackSimDataPrepOutputCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutputDataPrep")
-    FPGATrackSimWriteOutput.InFileName = ["dataprep.root"]
+    FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    FPGATrackSimWriteOutput.OutputTreeName = "FPGATrackSimDataPrepTree"
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
-    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
+    FPGATrackSimWriteOutput.RWstatus = "HEADER"
+    FPGATrackSimWriteOutput.THistSvc = CompFactory.THistSvc()
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
 
@@ -289,6 +291,8 @@ if __name__ == "__main__":
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
     acc=MainServicesCfg(flags)
     acc.addService(CompFactory.THistSvc(Output = [f"EXPERT DATAFILE='{flags.Trigger.FPGATrackSim.outputMonitorFile}', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='dataprep.root', OPT='RECREATE'"]))
+
 
     if not flags.Trigger.FPGATrackSim.wrapperFileName:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg

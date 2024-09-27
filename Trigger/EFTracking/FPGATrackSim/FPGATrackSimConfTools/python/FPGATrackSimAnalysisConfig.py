@@ -27,7 +27,8 @@ def FPGATrackSimWriteOutputCfg(flags):
     FPGATrackSimWriteOutput.InFileName = ["test.root"]
     # RECREATE means that that this tool opens the file.
     # HEADER would mean that something else (e.g. THistSvc) opens it and we just add the object.
-    FPGATrackSimWriteOutput.RWstatus = "RECREATE"
+    FPGATrackSimWriteOutput.RWstatus = "HEADER"
+    FPGATrackSimWriteOutput.THistSvc = CompFactory.THistSvc()
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
 
@@ -419,6 +420,7 @@ if __name__ == "__main__":
 
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
 
     
     if not flags.Trigger.FPGATrackSim.wrapperFileName:

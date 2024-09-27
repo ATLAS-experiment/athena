@@ -88,6 +88,8 @@ StatusCode FPGATrackSimOutputHeaderTool::configureReadBranches() {
 StatusCode FPGATrackSimOutputHeaderTool::initialize()
 {
  
+  ATH_CHECK(m_tHistSvc.retrieve());
+
   if( m_rwoption.value()!=std::string("HEADER"))
   {
     if (m_inpath.value().empty())
@@ -100,13 +102,17 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
 
   if (m_rwoption.value() == std::string("READ")) {
     ATH_MSG_DEBUG ("Initialized in READ MODE");
-  }
-  else if (m_rwoption.value()==std::string("RECREATE") || m_rwoption.value()==std::string("HEADER")) {
-    ATH_CHECK(openFile(m_inpath.value().front())); 
-    m_EventTree = new TTree(m_treeName.value().c_str(), "data");
+  } else if (m_rwoption.value()==std::string("RECREATE") || m_rwoption.value()==std::string("HEADER")) {
+
     // branches are NO LONGER created here, the user needs to do this.
-  }
-  else {
+    m_EventTree = new TTree(m_treeName.value().c_str(), "data");
+
+    // For HEADER-- use THistSvc explicitly to set things up.
+    if (m_rwoption.value() == std::string("HEADER")) {
+      ATH_CHECK(m_tHistSvc->regTree(Form("/FPGATRACKSIMOUTPUT/%s", m_treeName.value().c_str()), m_EventTree));
+    }
+
+  } else {
     ATH_MSG_ERROR ("RWstatus = " << m_rwoption.value() << " is not allowed!");
     return StatusCode::FAILURE;
   }
