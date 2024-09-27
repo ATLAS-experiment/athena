@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # L1CALOCore.py
 # Define the list of containers for the L1Calo derivations
@@ -453,7 +453,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(AddTruthJetsCfg(flags))
         acc.merge(AddTruthMETCfg(flags))
         acc.merge(PostJetMCTruthAugmentationsCfg(flags, decorationDressing = 'dressedPhoton'))
-        acc.addEventAlgo(CompFactory.DerivationFramework.LockDecoration(name ="L1CALOTruthContentsLockDecoration", Decoration = 'TruthParticles.dressedPhoton'))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(flags, ["TruthElectrons", "TruthMuons", "TruthPhotons", "TruthTaus", "TruthNeutrinos"]))
         # Special collection for Born leptons
         acc.merge(AddBornLeptonCollectionCfg(flags))
