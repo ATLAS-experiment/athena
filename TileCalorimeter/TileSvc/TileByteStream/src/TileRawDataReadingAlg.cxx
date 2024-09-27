@@ -153,7 +153,7 @@ StatusCode TileRawDataReadingAlg::readDigits(const SG::WriteHandleKey<TileDigits
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
 
     if (robf.size() > 0 ) {
@@ -200,7 +200,7 @@ StatusCode TileRawDataReadingAlg::readRawChannels(const SG::WriteHandleKey<TileR
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
 
     // Unpack ROB data
@@ -273,7 +273,7 @@ StatusCode TileRawDataReadingAlg::readBeamElements(const SG::WriteHandleKey<Tile
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
 
     // Unpack ROB data
@@ -301,7 +301,7 @@ StatusCode TileRawDataReadingAlg::readLaserObject(const SG::WriteHandleKey<TileL
   m_decoder->setLaserVersion(*laserObject);
 
   robid[0] = hid2re->getRobFromFragID(LASER_OBJ_FRAG);
-  m_robSvc->getROBData(robid, robf);
+  m_robSvc->getROBData(ctx, robid, robf);
 
   if (robf.size() > 0 ) {
     m_decoder->fillTileLaserObj(robf[0], *laserObject);
@@ -321,7 +321,7 @@ StatusCode TileRawDataReadingAlg::readLaserObject(const SG::WriteHandleKey<TileL
 StatusCode TileRawDataReadingAlg::readMuonReceiver(const SG::WriteHandleKey<TileMuonReceiverContainer>& muRcvKey,
                                                    const EventContext& ctx) const {
 
-  const RawEvent* re = m_robSvc->getEvent();
+  const RawEvent* re = m_robSvc->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
     return StatusCode::FAILURE;
@@ -343,7 +343,7 @@ StatusCode TileRawDataReadingAlg::readMuonReceiver(const SG::WriteHandleKey<Tile
 StatusCode TileRawDataReadingAlg::readL2(const SG::WriteHandleKey<TileL2Container>& l2Key,
                                          const EventContext& ctx) const {
 
-  const RawEvent* re = m_robSvc->getEvent();
+  const RawEvent* re = m_robSvc->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
     return StatusCode::FAILURE;

@@ -130,7 +130,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   ATH_MSG_DEBUG("Creating Objects");
 
   // get RawEvent
-  const RawEvent* re = m_robDataProvider->getEvent();
+  const RawEvent* re = m_robDataProvider->getEvent(Gaudi::Hive::currentContext());
   if (!re) {
     ATH_MSG_ERROR("Can not get RawEvent ");
     return StatusCode::FAILURE;
@@ -261,7 +261,7 @@ StatusCode EventInfoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr, DataObjec
   evtInfo.setStreamTags(streamTags);
 
   // record EventInfo
-  evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus());
+  evtInfo.setEventFlags(xAOD::EventInfo::Core, m_robDataProvider->getEventStatus(Gaudi::Hive::currentContext()));
   pObj = SG::asStorable(pEvtInfoAux);
 
   ATH_MSG_DEBUG(" New xAOD::EventAuxInfo made, run/event= " << runNumber 

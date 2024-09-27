@@ -174,11 +174,10 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
                     seqNames = [getEmptySeqName(previous_step_dicts[iSeq]['signature'], current_leg_ag_length+i, align_grp_to_lengthen) for iSeq in range(len(sigNames))]
 
                     emptySequences = build_empty_sequences(previous_step_dicts, step_mult, 'mergeParallel', cConfig.L1decisions, seqNames, chainName)
-
-                    cConfig.steps.insert(current_leg_ag_length + i - 1, #-1 to go to indexed from zero
-                                        ChainStep( seqStepName, Sequences=emptySequences,
-                                                  multiplicity = step_mult, chainDicts=previous_step_dicts,
-                                                  isEmpty = True)
+                    # insert a step with an empty sequence
+                    cConfig.steps.insert(current_leg_ag_length + i - 1, #-1 to go to indexed from zero                    
+                                        ChainStep( seqStepName, Sequences = emptySequences,
+                                                  chainDicts = previous_step_dicts)
                                         )
                                  
                                  
@@ -362,9 +361,8 @@ def serial_zip(allSteps, chainName, chainDefList, legOrdering):
                         
                     emptySequences = build_empty_sequences(emptyChainDicts, step_mult, 'serial_zip', chainDefList[stepPlacement2].L1decisions, seqNames, chainName)
 
-                    stepList[stepPlacement2] = ChainStep( seqStepName, Sequences=emptySequences,
-                                                          multiplicity = step_mult, chainDicts=emptyChainDicts,
-                                                          isEmpty = True)
+                    stepList[stepPlacement2] = ChainStep( seqStepName, Sequences = emptySequences,
+                                                         chainDicts = emptyChainDicts)
 
             newsteps.append(stepList)
     log.debug('After serial_zip')
@@ -437,7 +435,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
     stepName = 'merged' #we will renumber all steps after chains are aligned #Step' + str(stepNumber)
     stepSeq = []
     stepMult = []
-    log.verbose("[makeCombinedStep] steps %s ", parallel_steps)
+    log.debug("[makeCombinedStep] stepNumber %d, steps %s ", stepNumber, parallel_steps)
     stepDicts = []
     comboHypoTools = []
     comboHypo = None
@@ -447,6 +445,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
     # if *all* the steps we're trying to merge are either empty sequences or empty steps
     # we need to create a single empty step instead. 
     hasNonEmptyStep = checkStepContent(parallel_steps)
+    log.debug("hasNonEmptyStep %d", hasNonEmptyStep)
   
     if not hasNonEmptyStep:
         
@@ -459,7 +458,8 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
 
         for chain_index, step in enumerate(parallel_steps):
             # every step is empty but some might have empty sequences and some might not
-            if step is None or len(step.sequenceFunctions) == 0:
+            if step is None or step.isEmpty: # or len(step.sequenceFunctions) == 0:
+#                if step is None or len(step.sequenceFunctions) == 0:
 
                 new_stepDicts = deepcopy(chainDefList[chain_index].steps[-1].stepDicts)
                 currentStepName = 'Empty' + chainDefList[chain_index].alignmentGroups[0]+'Align'+str(stepNumber)+'_'+new_stepDicts[0]['chainParts'][0]['multiplicity']+new_stepDicts[0]['signature']
@@ -499,13 +499,13 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
 
             stepName += '_' + currentStepName
 
-        theChainStep = ChainStep(stepName, Sequences=[], multiplicity=[], chainDicts=stepDicts, comboHypoCfg=ComboHypoCfg) 
+        theChainStep = ChainStep(stepName, chainDicts = stepDicts, isEmpty = True) 
         log.debug("[makeCombinedStep] Merged empty step: \n %s", theChainStep)
         return theChainStep
 
     for chain_index, step in enumerate(parallel_steps): #this is a horizontal merge!
-
-        if step is None or (hasNonEmptyStep and len(step.sequenceFunctions) == 0):
+#TODO hasNonEmptyStep is already true here, 
+        if step is None or (hasNonEmptyStep and step.isEmpty): #) len(step.sequenceFunctions) == 0):
             # this happens for merging chains with different numbers of steps, we need to "pad" out with empty sequences to propogate the decisions
             # all other chain parts' steps should contain an empty sequence
 
@@ -525,7 +525,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
                 stepSeq.append(functools.partial(EmptyMenuSequenceCfg, None, name=seqName))
                 currentStepName = 'Empty' + alignment_group +'Align'+str(stepNumber)+'_'+new_stepDict['chainParts'][0]['multiplicity']+new_stepDict['signature']
 
-            log.debug("[makeCombinedStep]  chain_index: %s, step name: %s,  empty sequence name: %s", chain_index, currentStepName, seqName)
+            log.debug("[makeCombinedStep] found empty step, step number %d chain_index: %s, step name: %s, made new empty sequence name: %s", stepNumber, chain_index, currentStepName, seqName)            
 
             #stepNumber is indexed from 1, need the previous step indexed from 0, so do - 2
             prev_step_mult = -1
@@ -587,7 +587,8 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
         # for merged steps, we need to update the name to add the leg name
     
     comboHypoTools = list(set(comboHypoTools))
-    theChainStep = ChainStep(stepName, Sequences=stepSeq, multiplicity=stepMult, chainDicts=stepDicts, comboHypoCfg=comboHypo, comboToolConfs=comboHypoTools) 
+    theChainStep = ChainStep(stepName, Sequences = stepSeq, chainDicts = stepDicts, 
+                             comboHypoCfg = comboHypo, comboToolConfs = comboHypoTools) 
     log.debug("[makeCombinedStep] Merged step: \n %s", theChainStep)
   
     

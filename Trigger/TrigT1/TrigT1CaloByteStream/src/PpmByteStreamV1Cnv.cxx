@@ -96,7 +96,7 @@ StatusCode PpmByteStreamV1Cnv::createObjConst ( IOpaqueAddress* pAddr,
 
   // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
   // size check
   auto ttCollection = std::make_unique<DataVector<LVL1::TriggerTower> >(SG::VIEW_ELEMENTS);

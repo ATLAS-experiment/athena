@@ -142,7 +142,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
   // Get ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData( vID, robFrags );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
   //
   // Size check:
@@ -159,7 +159,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 #ifdef CTP_MUCTPI_HAVE_SAME_ROS
     vID.push_back( robId | 0x00000a );
 #endif
-    m_robDataProvider->getROBData( vID, robFrags );
+    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
 
     if( robFrags.size() == 0 ) {
       // yet another temporary hack!!! - for some time the ROB ID was 0!
@@ -167,7 +167,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 #ifdef CTP_MUCTPI_HAVE_SAME_ROS
       vID[1] = 0x00000a;
 #endif
-      m_robDataProvider->getROBData( vID, robFrags );
+      m_robDataProvider->getROBData(Gaudi::Hive::currentContext(),  vID, robFrags );
       
       if( robFrags.size() == 0 ) {
         log << MSG::WARNING << "No MuCTPI ROB fragments found!" << endmsg;

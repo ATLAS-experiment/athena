@@ -100,7 +100,7 @@ CollectionByteStreamCnv<TOOL>::createObj(IOpaqueAddress* pAddr, DataObject*& pOb
   const std::vector<uint32_t>& vID = pBS_Addr->getRobIDs(); 
 
   IROBDataProviderSvc::VROBFRAG  robFrags ;
-  m_robDataProvider->getROBData(vID,robFrags); 
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID,robFrags); 
 
   // make ROBData for the Collection Tools.
   typedef std::vector<ROBData> VROBDATA ;

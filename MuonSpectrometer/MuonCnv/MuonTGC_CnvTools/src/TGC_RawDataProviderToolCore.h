@@ -45,7 +45,7 @@ namespace Muon {
 
     protected:
       /** Function to get the ROB data from a vector of IdentifierHash **/
-      std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> getROBData(const std::vector<IdentifierHash>& rdoIdhVect) const;
+      std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> getROBData(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const;
 
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       /** Decoder for ROB fragment RDO conversion */

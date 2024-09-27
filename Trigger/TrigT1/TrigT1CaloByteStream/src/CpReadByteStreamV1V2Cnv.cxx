@@ -92,9 +92,9 @@ StatusCode CpReadByteStreamV1V2Cnv::createObjConst( IOpaqueAddress* pAddr,
 
   // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags1;
-  m_robDataProvider->getROBData( vID1, robFrags1 );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID1, robFrags1 );
   IROBDataProviderSvc::VROBFRAG robFrags2;
-  m_robDataProvider->getROBData( vID2, robFrags2 );
+  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID2, robFrags2 );
 
   // size check
   auto towerCollection = std::make_unique<DataVector<LVL1::CPMTower> >();

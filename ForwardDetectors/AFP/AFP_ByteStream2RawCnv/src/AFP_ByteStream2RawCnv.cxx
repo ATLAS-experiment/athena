@@ -101,7 +101,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
     return StatusCode::SUCCESS;
   }
 
-  const eformat::FullEventFragment<const uint32_t*> *event = m_robDataProvider->getEvent();
+  const eformat::FullEventFragment<const uint32_t*> *event = m_robDataProvider->getEvent(Gaudi::Hive::currentContext());
 
   // this information will be present only in offline reconstruction
   // not be at HLT; however the remaining AFP information will be

@@ -196,61 +196,6 @@ StatusCode HltROBDataProviderSvc::finalize()
 }
 
 /// --- Implementation of IROBDataProviderSvc interface ---
-/// --- Legacy interface (deprecated) ---
-
-/// Signal ROB fragments which should be considered for prefetching in online running
-void HltROBDataProviderSvc::addROBData(const std::vector<uint32_t>& robIds, 
-					 const std::string_view callerName)
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return addROBData( context, robIds, callerName );
-}
-
-/// Start a new event with a set of ROB fragments, e.g. from LVL1 result, in online and add the fragments to the ROB cache
-void HltROBDataProviderSvc::setNextEvent(const std::vector<ROBF>& result)
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return setNextEvent( context, result );
-}
-
-/// Start a new event with a full event fragment and add all ROB fragments in to the ROB cache
-void HltROBDataProviderSvc::setNextEvent(const RawEvent* re)
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return setNextEvent( context, re );
-}
-
-/// Retrieve ROB fragments for given ROB ids from the ROB cache
-void HltROBDataProviderSvc::getROBData(const std::vector<uint32_t>& robIds, std::vector<const ROBF*>& robFragments, 
-				       const std::string_view callerName)
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return getROBData( context, robIds, robFragments, callerName );
-}
-
-/// Retrieve the full event fragment
-const RawEvent* HltROBDataProviderSvc::getEvent() 
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return getEvent( context );
-}
-
-/// Store the status for the event.
-void HltROBDataProviderSvc::setEventStatus(uint32_t status)
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  setEventStatus( context, status );
-}
-
-/// Retrieve the status for the event.
-uint32_t HltROBDataProviderSvc::getEventStatus() 
-{
-  const EventContext& context{ Gaudi::Hive::currentContext() };
-  return getEventStatus( context );
-}
-
-/// --- Implementation of IROBDataProviderSvc interface ---
-/// --- Context aware interface for MT ---
 
 /// Signal ROB fragments which should be considered for prefetching in online running
 void HltROBDataProviderSvc::addROBData(const EventContext& context, const std::vector<uint32_t>& robIds, 

@@ -19,7 +19,7 @@ Digi_tf.py \
     --digiSeedOffset1 11 \
     --digiSeedOffset2 22  \
     --geometryVersion ATLAS-R2-2015-03-01-00  \
-    --conditionsTag default:OFLCOND-RUN12-SDR-31-01  \
+    --conditionsTag default:OFLCOND-RUN12-SDR-31-02  \
     --DataRunNumber 222500  \
     --preExec 'HITtoRDO:flags.Sim.TRTRangeCut=0.05' \
     --preInclude 'HITtoRDO:LArConfiguration.LArConfigRun2.LArConfigRun2NoPileUp' \

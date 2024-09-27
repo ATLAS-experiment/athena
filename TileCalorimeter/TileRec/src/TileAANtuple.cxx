@@ -386,10 +386,10 @@ StatusCode TileAANtuple::execute() {
   if (m_bsInput) {
     const eformat::FullEventFragment<const uint32_t*>* event = nullptr;
     const eformat::ROBFragment<const uint32_t*>* robFrag = nullptr;
-    event = m_robSvc->getEvent();
+    event = m_robSvc->getEvent(ctx);
     std::vector<const ROBDataProviderSvc::ROBF*> robf;
     // keep pointer to whole event and to CIS PAR frag internally
-    m_robSvc->getROBData(m_ROBID, robf);
+    m_robSvc->getROBData(ctx, m_ROBID, robf);
     robFrag = (robf.size() > 0 ) ? robf[0] : nullptr;
     if (event) {
       m_evTime = event->bc_time_seconds();

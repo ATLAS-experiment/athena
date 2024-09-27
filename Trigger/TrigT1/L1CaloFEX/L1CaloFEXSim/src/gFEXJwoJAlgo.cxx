@@ -329,7 +329,8 @@ void gFEXJwoJAlgo::metFPGA(int FPGAnum, const gTowersType& twrs,
                            int & MHT_x, int & MHT_y,
                            int & MST_x, int & MST_y,
                            int & MET_x, int & MET_y) const {
-
+  
+  gBlockthreshold = gBlockthreshold * 200 / 800; //gBlockthreshold is provided in counts with a resolution of 200 MeV, but here needs to be applied with a resolution of 800 GeV
   // in the RTL  code these are 19+ 5 = 24 bits 
   int64_t h_tx_hi = 0;
   int64_t h_ty_hi = 0;
@@ -422,7 +423,7 @@ void gFEXJwoJAlgo::metFPGA(int FPGAnum, const gTowersType& twrs,
 void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBlkSum,
                           int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const {
 
-
+  gBlockthreshold = gBlockthreshold * 200 / 800; //gBlockthreshold is provided in counts with a resolution of 200 MeV, but here needs to be applied with a resolution of 800 GeV
 
   int64_t ethard_hi = 0;
   int64_t etsoft_hi = 0;

@@ -38,7 +38,7 @@ StatusCode LUCID_ByteStreamRawDataCnv::execute(const EventContext& ctx) const{
   
   ROBIDs.push_back(m_rodDecoder.getSourceID());
   
-  m_robDataProvider->getROBData(ROBIDs, listOfRobf);
+  m_robDataProvider->getROBData(ctx, ROBIDs, listOfRobf);
   
   auto container = std::make_unique<LUCID_RawDataContainer>();
   
