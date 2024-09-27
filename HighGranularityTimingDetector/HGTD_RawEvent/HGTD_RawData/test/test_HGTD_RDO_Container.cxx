@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RawData/test/test_HGTD_RDO_Container.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -40,10 +40,8 @@ BOOST_AUTO_TEST_CASE(HGTD_RDO_Container_test) {
   ISvcLocator* svc_locator = Gaudi::svcLocator();
   // get StoreGate service
 
-  StoreGateSvc* storegate;
-
-  StatusCode sc = svc_locator->service("StoreGateSvc", storegate);
-  if (sc.isFailure()) {
+  SmartIF<StoreGateSvc> storegate{svc_locator->service("StoreGateSvc")};
+  if (!storegate) {
     BOOST_TEST(false);
   }
 
@@ -62,7 +60,7 @@ BOOST_AUTO_TEST_CASE(HGTD_RDO_Container_test) {
 
     BOOST_CHECK(collection->identifierHash() == IdentifierHash(hash));
 
-    sc = container->addCollection(collection.release(), hash);
+    StatusCode sc = container->addCollection(collection.release(), hash);
     if (sc.isFailure()) {
       std::cout << "Could not add HGTD_RDO_Collection to the HGTD_RDO_Container!\n";
       BOOST_TEST(false);
@@ -70,7 +68,7 @@ BOOST_AUTO_TEST_CASE(HGTD_RDO_Container_test) {
   }
 
   // Get the sct helper from the detector store
-  sc = storegate->record(container.release(), "HGTD_RDO_Container");
+  StatusCode sc = storegate->record(container.release(), "HGTD_RDO_Container");
   if (sc.isFailure()) {
     std::cout << "Could not record the HGTD_RDO_Container!\n";
     BOOST_TEST(false);
