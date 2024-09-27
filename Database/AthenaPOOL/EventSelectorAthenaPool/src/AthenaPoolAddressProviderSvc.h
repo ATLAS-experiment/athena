@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLADDRESSPROVIEDERSVC_H
@@ -17,16 +17,14 @@
 #include "AthenaBaseComps/AthService.h"
 #include "PersistentDataModel/Guid.h"
 
-#include <map>
 #include <string>
 
-class DataHeader;
 class IClassIDSvc;
 
 /** @class AthenaPoolAddressProviderSvc
  *  @brief This class is the EventSelector and AddressProvider for event data.
  **/
-class AthenaPoolAddressProviderSvc : public ::AthService, virtual public IAddressProvider {
+class AthenaPoolAddressProviderSvc : public extends<AthService, IAddressProvider> {
 public: // Constructor and Destructor
    /// Standard Service Constructor
    AthenaPoolAddressProviderSvc(const std::string& name, ISvcLocator* pSvcLocator);
@@ -34,27 +32,25 @@ public: // Constructor and Destructor
    virtual ~AthenaPoolAddressProviderSvc();
 
    /// Required of all Gaudi Services
-   virtual StatusCode initialize();
+   virtual StatusCode initialize() override;
    /// Required of all Gaudi Services
-   virtual StatusCode finalize();
-   /// Does this object satisfy a given interface?  See Gaudi documentation for details.
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
+   virtual StatusCode finalize() override;
 
    /// Get all addresses from provider. Called before begin event.
    /// @param storeID [IN] store ID, this function only preloads detector store addresses.
    /// @param tads [OUT] list of the transient addresses which were preloaded.
-   virtual StatusCode preLoadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads);
+   virtual StatusCode preLoadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads) override;
 
    /// Get all addresses for this event from provider.
    /// @param storeID [IN] store ID, this function only preloads event store addresses.
    /// @param tads [OUT] list of the transient addresses which were preloaded.
-   virtual StatusCode loadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads);
+   virtual StatusCode loadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads) override;
 
    /// Update a transient address.
    /// @param storeID [IN] store ID, this function only preloads event store addresses.
    /// @param tad [IN] transient address to be updated.
    virtual StatusCode updateAddress(StoreID::type storeID, SG::TransientAddress* tad,
-                                    const EventContext& ctx);
+                                    const EventContext& ctx) override;
 
 private: // data
    ServiceHandle<StoreGateSvc> m_metaDataStore;
@@ -62,12 +58,11 @@ private: // data
    Guid m_guid;
 
 private: // properties
-   /// DataHeaderKey, StoreGate key of event entry object (type DataHeader).
-   StringProperty m_dataHeaderKey;
+   Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "EventSelector",
+       "StoreGate key of event entry object"};
 
-   /// Attribute list key of a secondary input file. If non-zero,
-   /// creates a new IOpaqueAddress for that file and records it.
-   Gaudi::Property<std::string> m_attrListKey;
+   Gaudi::Property<std::string> m_attrListKey{this, "AttributeListKey", {},
+     "Attribute list key of a secondary input file. If non-zero, creates a new IOpaqueAddress for that file and records it."};
 
 private: // internal helper functions
    /// Return pointer to active event SG
