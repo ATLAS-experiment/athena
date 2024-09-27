@@ -14,6 +14,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "GaudiKernel/ITHistSvc.h"
+
 #include "TFile.h"
 #include "TTree.h"
 
@@ -63,6 +65,9 @@ private:
 
   // Name of the output tree to create, can be overridden.
   Gaudi::Property<std::string> m_treeName {this, "OutputTreeName", "FPGATrackSimLogicalEventTree", "Name of the output TTree to create."};
+
+  // Service handle for the histogram service.
+  ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
 
   // internal counters  
   std::atomic<unsigned> m_event = 0;
