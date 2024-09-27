@@ -16,6 +16,8 @@ BOOST_AUTO_TEST_CASE(IdDictLabelConstructors){
   IdDictLabel i1;
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i2(i1));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictLabel i3(std::move(i1)));
+  [[maybe_unused]] IdDictLabel i4{"test", true, 100};
+  [[maybe_unused]] IdDictLabel i5{.m_name="sroe", .m_valued=true, .m_value=1};
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictLabelAccessors){
   IdDictLabel f;

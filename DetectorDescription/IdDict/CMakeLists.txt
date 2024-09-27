@@ -37,6 +37,20 @@ atlas_add_test(IdDictField_test
   POST_EXEC_SCRIPT nopost.sh 
 )
 
+atlas_add_test(IdDictRegion_test
+  SOURCES test/IdDictRegion_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
+atlas_add_test(IdDictRange_test
+  SOURCES test/IdDictRange_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict
+  POST_EXEC_SCRIPT nopost.sh 
+)
+
 atlas_add_test(IdDictDictionary_test
   SOURCES test/IdDictDictionary_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
