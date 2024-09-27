@@ -130,12 +130,12 @@ python -m EFTrackingFPGAIntegration.DataPrepConfig
 ```bash 
 # Spin up container
 singularity run --bind /cvmfs,$PWD docker://maxwellcui/athenaxrt:2022.2
-# CMake 
-cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filter_EFT.txt ../athena/Projects/WorkDir/
 # Move to build directory
 cd build
 # Setup Athena
 asetup Athena,main,latest
+# CMake 
+cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filter_EFT.txt ../athena/Projects/WorkDir/
 # Build
 make -j20
 source x*/setup.sh

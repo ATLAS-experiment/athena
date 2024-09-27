@@ -11,10 +11,16 @@
 
 #include "DataPreparationPipeline.h"
 
+#include <algorithm>
+
 #include "AthContainers/debug.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 
 #define MAX_CLUSTER_NUM \
+  500000  // A large enough number for the current development, should be
+          // further discussed
+
+#define MAX_SPACEPOINT_NUM \
   500000  // A large enough number for the current development, should be
           // further discussed
 
@@ -34,7 +40,9 @@ StatusCode DataPreparationPipeline::initialize() {
 
   ATH_CHECK(m_stripClustersKey.initialize());
   ATH_CHECK(m_pixelClustersKey.initialize());
-  ATH_CHECK(m_clusterContainerMaker.retrieve());
+  ATH_CHECK(m_stripSpacePointsKey.initialize());
+  ATH_CHECK(m_pixelSpacePointsKey.initialize());
+  ATH_CHECK(m_xAODContainerMaker.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -46,6 +54,10 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
       m_stripClustersKey, ctx);
   SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusters(
       m_pixelClustersKey, ctx);
+  SG::ReadHandle<xAOD::SpacePointContainer> inputStripSpacePoints(
+      m_stripSpacePointsKey, ctx);
+  SG::ReadHandle<xAOD::SpacePointContainer> inputPixelSpacePoints(
+      m_pixelSpacePointsKey, ctx);
 
   // Check if the strip cluster container is valid
   if (!inputStripClusters.isValid()) {
@@ -59,12 +71,26 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
     return StatusCode::FAILURE;
   }
 
+  // Check if the Strip space point container is valid
+  if (!inputStripSpacePoints.isValid()) {
+    ATH_MSG_ERROR("Failed to retrieve: " << m_stripSpacePointsKey);
+    return StatusCode::FAILURE;
+  }
+  // Check if the Pixel space point container is valid
+  if (!inputPixelSpacePoints.isValid()) {
+    ATH_MSG_ERROR("Failed to retrieve: " << m_pixelSpacePointsKey);
+    return StatusCode::FAILURE;
+  }
   if (msgLvl(MSG::DEBUG)) {
 
     ATH_MSG_DEBUG("There are " << inputStripClusters->size()
                                << " strip cluster in this event");
     ATH_MSG_DEBUG("There are " << inputPixelClusters->size()
                                << " pixel cluster in this event");
+    ATH_MSG_DEBUG("There are " << inputStripSpacePoints->size()
+                               << " Strip space point in this event");
+    ATH_MSG_DEBUG("There are " << inputPixelSpacePoints->size()
+                               << " Pixel space point in this event");
 
     // Print auxid for data members for later assignments
     // This is only temporary for development purpose and will be removed in the
@@ -80,6 +106,18 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
       ATH_MSG_DEBUG("PixelClusterContainer" << SGdebug::aux_var_name(id)
                                             << " has AuxId: " << id);
     }
+
+    const SG::auxid_set_t &auxid_set_ssp = inputStripSpacePoints->getAuxIDs();
+    for (auto id : auxid_set_ssp) {
+      ATH_MSG_DEBUG("StripSpacePointContainer" << SGdebug::aux_var_name(id)
+                                               << " has AuxId: " << id);
+    }
+
+    const SG::auxid_set_t &auxid_set_psp = inputPixelSpacePoints->getAuxIDs();
+    for (auto id : auxid_set_psp) {
+      ATH_MSG_DEBUG("PixelSpacePointContainer" << SGdebug::aux_var_name(id)
+                                               << " has AuxId: " << id);
+    }
   }
 
   // Prepare the input data for the kernel
@@ -89,6 +127,15 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
       ef_stripClusters;  // Strip clusters as kernel input argument
   std::vector<EFTrackingDataFormats::PixelCluster>
       ef_pixelClusters;  // Pixel clusters as kernel input argument
+  std::vector<EFTrackingDataFormats::SpacePoint>
+      ef_stripSpacePoints;  // Strip Space points as kernel input argument
+  std::vector<EFTrackingDataFormats::SpacePoint>
+      ef_pixelSpacePoints;  // Pixel Space points as kernel input argument
+
+  // vector of vector of to send transit xAOD::UncalibratedMeasurement for the
+  // spacepoint
+  std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> pixelsp_meas;
+  std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> stripsp_meas;
 
   // Currently we only take the first 10 clusters for testing, this will be
   // removed in the future
@@ -96,6 +143,13 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
       getInputClusterData(inputStripClusters.ptr(), ef_stripClusters, 10));
   ATH_CHECK(
       getInputClusterData(inputPixelClusters.ptr(), ef_pixelClusters, 10));
+  bool isStrip = true;
+  ATH_CHECK(getInputSpacePointData(inputStripSpacePoints.ptr(),
+                                   ef_stripSpacePoints, stripsp_meas, 10,
+                                   isStrip));
+  ATH_CHECK(getInputSpacePointData(inputPixelSpacePoints.ptr(),
+                                   ef_pixelSpacePoints, pixelsp_meas, 10,
+                                   !isStrip));
 
   if (msgLvl(MSG::DEBUG)) {
     // print the first 3 elements for all the arrays
@@ -115,9 +169,11 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
   }
 
   if (m_runSW) {
-    ATH_CHECK(runSW(ef_stripClusters, ef_pixelClusters, ctx));
+    ATH_CHECK(runSW(ef_stripClusters, ef_pixelClusters, ef_stripSpacePoints,
+                    stripsp_meas, ef_pixelSpacePoints, pixelsp_meas, ctx));
   } else {
-    ATH_CHECK(runHW(ef_stripClusters, ef_pixelClusters));
+    ATH_CHECK(runHW(ef_stripClusters, ef_pixelClusters, ef_stripSpacePoints,
+                    stripsp_meas, ef_pixelSpacePoints, pixelsp_meas));
   }
 
   return StatusCode::SUCCESS;
@@ -126,7 +182,7 @@ StatusCode DataPreparationPipeline::execute(const EventContext &ctx) const {
 StatusCode DataPreparationPipeline::getInputClusterData(
     const xAOD::StripClusterContainer *sc,
     std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-    long unsigned int N) const{
+    long unsigned int N) const {
   if (N > sc->size()) {
     ATH_MSG_ERROR("You want to get the "
                   << N << "th strip cluster, but there are only " << sc->size()
@@ -222,13 +278,82 @@ StatusCode DataPreparationPipeline::getInputClusterData(
   return StatusCode::SUCCESS;
 }
 
+StatusCode DataPreparationPipeline::getInputSpacePointData(
+    const xAOD::SpacePointContainer *sp,
+    std::vector<EFTrackingDataFormats::SpacePoint> &ef_sp,
+    std::vector<std::vector<const xAOD::UncalibratedMeasurement *>> &sp_meas,
+    long unsigned int N, bool isStrip) const {
+  if (N > sp->size()) {
+    ATH_MSG_ERROR("You want to get the "
+                  << N << "th space point, but there are only " << sp->size()
+                  << " SpacePoint in the container.");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Making vector of space point...");
+  for (long unsigned int i = 0; i < N; i++) {
+    EFTrackingDataFormats::SpacePoint cache;
+    // Get the data from the input xAOD::SpacePointContainer and set it to the
+    // cache
+    cache.idHash[0] = sp->at(i)->elementIdList()[0];
+    cache.globalPosition[0] = sp->at(i)->x();
+    cache.globalPosition[1] = sp->at(i)->y();
+    cache.globalPosition[2] = sp->at(i)->z();
+    cache.radius = sp->at(i)->radius();
+    cache.cov_r = sp->at(i)->varianceR();
+    cache.cov_z = sp->at(i)->varianceZ();
+
+    // Pass the uncalibrated measurement for later stage of xAOD container
+    // creation for spacepoint
+    std::vector<const xAOD::UncalibratedMeasurement *> temp_vec(
+        sp->at(i)->measurements().size());
+    std::copy(sp->at(i)->measurements().begin(),
+              sp->at(i)->measurements().end(), temp_vec.begin());
+
+    sp_meas.push_back(temp_vec);
+
+    if (isStrip) {
+      cache.idHash[1] = sp->at(i)->elementIdList()[1];
+      cache.topHalfStripLength = sp->at(i)->topHalfStripLength();
+      cache.bottomHalfStripLength = sp->at(i)->bottomHalfStripLength();
+      std::copy(sp->at(i)->topStripDirection().data(),
+                sp->at(i)->topStripDirection().data() +
+                    sp->at(i)->topStripDirection().size(),
+                cache.topStripDirection);
+      std::copy(sp->at(i)->bottomStripDirection().data(),
+                sp->at(i)->bottomStripDirection().data() +
+                    sp->at(i)->bottomStripDirection().size(),
+                cache.bottomStripDirection);
+      std::copy(sp->at(i)->stripCenterDistance().data(),
+                sp->at(i)->stripCenterDistance().data() +
+                    sp->at(i)->stripCenterDistance().size(),
+                cache.stripCenterDistance);
+      std::copy(sp->at(i)->topStripCenter().data(),
+                sp->at(i)->topStripCenter().data() +
+                    sp->at(i)->topStripCenter().size(),
+                cache.topStripCenter);
+    }
+    ef_sp.push_back(cache);
+  }
+
+  ATH_MSG_DEBUG("Made " << ef_sp.size() << " space points in the vector");
+  return StatusCode::SUCCESS;
+}
+
 StatusCode DataPreparationPipeline::runSW(
     const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
     const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+    const std::vector<EFTrackingDataFormats::SpacePoint> &ef_ssp,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        &ssp_mes,
+    const std::vector<EFTrackingDataFormats::SpacePoint> &ef_psp,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        &psp_mes,
     const EventContext &ctx) const {
   ATH_MSG_DEBUG("Running the software version of the kernel");
 
-  std::unique_ptr<EFTrackingDataFormats::Metadata> metadata = std::make_unique<EFTrackingDataFormats::Metadata>();
+  std::unique_ptr<EFTrackingDataFormats::Metadata> metadata =
+      std::make_unique<EFTrackingDataFormats::Metadata>();
+  // Strip cluster
   std::vector<float> scLocalPosition(MAX_CLUSTER_NUM);
   std::vector<float> scLocalCovariance(MAX_CLUSTER_NUM);
   std::vector<unsigned int> scIdHash(MAX_CLUSTER_NUM);
@@ -236,7 +361,16 @@ StatusCode DataPreparationPipeline::runSW(
   std::vector<float> scGlobalPosition(MAX_CLUSTER_NUM * 3);
   std::vector<unsigned long long> scRdoList(MAX_CLUSTER_NUM * 1000);
   std::vector<int> scChannelsInPhi(MAX_CLUSTER_NUM);
+  EFTrackingDataFormats::StripClusterOutput ef_scOutput;
+  ef_scOutput.scLocalPosition = scLocalPosition.data();
+  ef_scOutput.scLocalCovariance = scLocalCovariance.data();
+  ef_scOutput.scIdHash = scIdHash.data();
+  ef_scOutput.scId = scId.data();
+  ef_scOutput.scGlobalPosition = scGlobalPosition.data();
+  ef_scOutput.scRdoList = scRdoList.data();
+  ef_scOutput.scChannelsInPhi = scChannelsInPhi.data();
 
+  // Pixel cluster
   std::vector<float> pcLocalPosition(MAX_CLUSTER_NUM * 2);
   std::vector<float> pcLocalCovariance(MAX_CLUSTER_NUM * 2);
   std::vector<unsigned int> pcIdHash(MAX_CLUSTER_NUM);
@@ -257,19 +391,72 @@ StatusCode DataPreparationPipeline::runSW(
   std::vector<float> pcSplitProbability1(MAX_CLUSTER_NUM);
   std::vector<float> pcSplitProbability2(MAX_CLUSTER_NUM);
   std::vector<int> pcLvl1a(MAX_CLUSTER_NUM);
+  EFTrackingDataFormats::PixelClusterOutput ef_pcOutput;
+  ef_pcOutput.pcLocalPosition = pcLocalPosition.data();
+  ef_pcOutput.pcLocalCovariance = pcLocalCovariance.data();
+  ef_pcOutput.pcIdHash = pcIdHash.data();
+  ef_pcOutput.pcId = pcId.data();
+  ef_pcOutput.pcGlobalPosition = pcGlobalPosition.data();
+  ef_pcOutput.pcRdoList = pcRdoList.data();
+  ef_pcOutput.pcChannelsInPhi = pcChannelsInPhi.data();
+  ef_pcOutput.pcChannelsInEta = pcChannelsInEta.data();
+  ef_pcOutput.pcWidthInEta = pcWidthInEta.data();
+  ef_pcOutput.pcOmegaX = pcOmegaX.data();
+  ef_pcOutput.pcOmegaY = pcOmegaY.data();
+  ef_pcOutput.pcTotList = pcTotList.data();
+  ef_pcOutput.pcTotalToT = pcTotalToT.data();
+  ef_pcOutput.pcChargeList = pcChargeList.data();
+  ef_pcOutput.pcTotalCharge = pcTotalCharge.data();
+  ef_pcOutput.pcEnergyLoss = pcEnergyLoss.data();
+  ef_pcOutput.pcIsSplit = pcIsSplit.data();
+  ef_pcOutput.pcSplitProbability1 = pcSplitProbability1.data();
+  ef_pcOutput.pcSplitProbability2 = pcSplitProbability2.data();
+  ef_pcOutput.pcLvl1a = pcLvl1a.data();
 
-  ATH_CHECK(transferSW(
-      ef_sc.data(), ef_sc.size(), scLocalPosition.data(),
-      scLocalCovariance.data(), scIdHash.data(), scId.data(),
-      scGlobalPosition.data(), scRdoList.data(), scChannelsInPhi.data(),
-      ef_pc.data(), ef_pc.size(), pcLocalPosition.data(),
-      pcLocalCovariance.data(), pcIdHash.data(), pcId.data(),
-      pcGlobalPosition.data(), pcRdoList.data(), pcChannelsInPhi.data(),
-      pcChannelsInEta.data(), pcWidthInEta.data(), pcOmegaX.data(),
-      pcOmegaY.data(), pcTotList.data(), pcTotalToT.data(), pcChargeList.data(),
-      pcTotalCharge.data(), pcEnergyLoss.data(), pcIsSplit.data(),
-      pcSplitProbability1.data(), pcSplitProbability2.data(), pcLvl1a.data(),
-      metadata.get()));
+  // Strip SpacePoint
+  std::vector<unsigned int> sspIdHash(MAX_SPACEPOINT_NUM * 2);
+  std::vector<float> sspGlobalPosition(MAX_SPACEPOINT_NUM * 3);
+  std::vector<float> sspRadius(MAX_SPACEPOINT_NUM);
+  std::vector<float> sspVarianceR(MAX_SPACEPOINT_NUM);
+  std::vector<float> sspVarianceZ(MAX_SPACEPOINT_NUM);
+  std::vector<int> sspMeasurementIndexes(MAX_SPACEPOINT_NUM * 100);
+  std::vector<float> sspTopHalfStripLength(MAX_SPACEPOINT_NUM);
+  std::vector<float> sspBottomHalfStripLength(MAX_SPACEPOINT_NUM);
+  std::vector<float> sspTopStripDirection(MAX_SPACEPOINT_NUM * 3);
+  std::vector<float> sspBottomStripDirection(MAX_SPACEPOINT_NUM * 3);
+  std::vector<float> sspStripCenterDistance(MAX_SPACEPOINT_NUM * 3);
+  std::vector<float> sspTopStripCenter(MAX_SPACEPOINT_NUM * 3);
+  EFTrackingDataFormats::SpacePointOutput ef_sspOutput;
+  ef_sspOutput.spIdHash = sspIdHash.data();
+  ef_sspOutput.spGlobalPosition = sspGlobalPosition.data();
+  ef_sspOutput.spRadius = sspRadius.data();
+  ef_sspOutput.spVarianceR = sspVarianceR.data();
+  ef_sspOutput.spVarianceZ = sspVarianceZ.data();
+  ef_sspOutput.spMeasurementIndexes = sspMeasurementIndexes.data();
+  ef_sspOutput.spTopHalfStripLength = sspTopHalfStripLength.data();
+  ef_sspOutput.spBottomHalfStripLength = sspBottomHalfStripLength.data();
+  ef_sspOutput.spTopStripDirection = sspTopStripDirection.data();
+  ef_sspOutput.spBottomStripDirection = sspBottomStripDirection.data();
+  ef_sspOutput.spStripCenterDistance = sspStripCenterDistance.data();
+  ef_sspOutput.spTopStripCenter = sspTopStripCenter.data();
+
+  // Pixel SpacePoint
+  std::vector<unsigned int> pspIdHash(MAX_SPACEPOINT_NUM);
+  std::vector<float> pspGlobalPosition(MAX_SPACEPOINT_NUM * 3);
+  std::vector<float> pspRadius(MAX_SPACEPOINT_NUM);
+  std::vector<float> pspVarianceR(MAX_SPACEPOINT_NUM);
+  std::vector<float> pspVarianceZ(MAX_SPACEPOINT_NUM);
+  std::vector<int> pspMeasurementIndexes(MAX_SPACEPOINT_NUM * 100);
+  EFTrackingDataFormats::SpacePointOutput ef_pspOutput;
+  ef_pspOutput.spIdHash = pspIdHash.data();
+  ef_pspOutput.spGlobalPosition = pspGlobalPosition.data();
+  ef_pspOutput.spRadius = pspRadius.data();
+  ef_pspOutput.spVarianceR = pspVarianceR.data();
+  ef_pspOutput.spVarianceZ = pspVarianceZ.data();
+  ef_pspOutput.spMeasurementIndexes = pspMeasurementIndexes.data();
+
+  ATH_CHECK(transferSW(ef_sc, ef_scOutput, ef_pc, ef_pcOutput, ef_ssp,
+                       ef_sspOutput, ef_psp, ef_pspOutput, metadata.get()));
 
   // resize the vector to be the length of the cluster
   scLocalPosition.resize(metadata->numOfStripClusters);
@@ -301,49 +488,128 @@ StatusCode DataPreparationPipeline::runSW(
   pcSplitProbability2.resize(metadata->numOfPixelClusters);
   pcLvl1a.resize(metadata->numOfPixelClusters);
 
+  // resize the vector to be the length of the space point
+  sspIdHash.resize(metadata->numOfStripSpacePoints * 2);
+  sspGlobalPosition.resize(metadata->numOfStripSpacePoints * 3);
+  sspRadius.resize(metadata->numOfStripSpacePoints);
+  sspVarianceR.resize(metadata->numOfStripSpacePoints);
+  sspVarianceZ.resize(metadata->numOfStripSpacePoints);
+  sspTopHalfStripLength.resize(metadata->numOfStripSpacePoints);
+  sspBottomHalfStripLength.resize(metadata->numOfStripSpacePoints);
+  sspTopStripDirection.resize(metadata->numOfStripSpacePoints * 3);
+  sspBottomStripDirection.resize(metadata->numOfStripSpacePoints * 3);
+  sspStripCenterDistance.resize(metadata->numOfStripSpacePoints * 3);
+  sspTopStripCenter.resize(metadata->numOfStripSpacePoints * 3);
+
+  pspIdHash.resize(metadata->numOfPixelSpacePoints);
+  pspGlobalPosition.resize(metadata->numOfPixelSpacePoints * 3);
+  pspRadius.resize(metadata->numOfPixelSpacePoints);
+  pspVarianceR.resize(metadata->numOfPixelSpacePoints);
+  pspVarianceZ.resize(metadata->numOfPixelSpacePoints);
+
   // print all strip clusters
   for (unsigned i = 0; i < metadata->numOfStripClusters; i++) {
-    ATH_MSG_DEBUG("scLocalPosition[" << i << "] = " << scLocalPosition[i]);
-    ATH_MSG_DEBUG("scLocalCovariance[" << i << "] = " << scLocalCovariance[i]);
-    ATH_MSG_DEBUG("scIdHash[" << i << "] = " << scIdHash[i]);
-    ATH_MSG_DEBUG("scId[" << i << "] = " << scId[i]);
-    ATH_MSG_DEBUG("scGlobalPosition[" << i << "] = " << scGlobalPosition[i * 3]
-                                      << ", " << scGlobalPosition[i * 3 + 1]
-                                      << ", " << scGlobalPosition[i * 3 + 2]);
-    ATH_MSG_DEBUG("scRdoList[" << i << "] = " << scRdoList[i]);
-    ATH_MSG_DEBUG("scChannelsInPhi[" << i << "] = " << scChannelsInPhi[i]);
+    ATH_MSG_DEBUG("scLocalPosition["
+                  << i << "] = " << ef_scOutput.scLocalPosition[i]);
+    ATH_MSG_DEBUG("scLocalCovariance["
+                  << i << "] = " << ef_scOutput.scLocalCovariance[i]);
+    ATH_MSG_DEBUG("scIdHash[" << i << "] = " << ef_scOutput.scIdHash[i]);
+    ATH_MSG_DEBUG("scId[" << i << "] = " << ef_scOutput.scId[i]);
+    ATH_MSG_DEBUG("scGlobalPosition["
+                  << i << "] = " << ef_scOutput.scGlobalPosition[i * 3] << ", "
+                  << ef_scOutput.scGlobalPosition[i * 3 + 1] << ", "
+                  << ef_scOutput.scGlobalPosition[i * 3 + 2]);
+    ATH_MSG_DEBUG("scRdoList[" << i << "] = " << ef_scOutput.scRdoList[i]);
+    ATH_MSG_DEBUG("scChannelsInPhi["
+                  << i << "] = " << ef_scOutput.scChannelsInPhi[i]);
   }
 
   // print all pixel clusters
   for (unsigned i = 0; i < metadata->numOfPixelClusters; i++) {
 
-    ATH_MSG_DEBUG("pcLocalPosition[" << i << "] = " << pcLocalPosition[i * 2]
-                                     << ", " << pcLocalPosition[i * 2 + 1]);
+    ATH_MSG_DEBUG("pcLocalPosition["
+                  << i << "] = " << ef_pcOutput.pcLocalPosition[i * 2] << ", "
+                  << ef_pcOutput.pcLocalPosition[i * 2 + 1]);
     ATH_MSG_DEBUG("pcLocalCovariance["
-                  << i << "] = " << pcLocalCovariance[i * 2] << ", "
-                  << pcLocalCovariance[i * 2 + 1]);
-    ATH_MSG_DEBUG("pcIdHash[" << i << "] = " << pcIdHash[i]);
+                  << i << "] = " << ef_pcOutput.pcLocalCovariance[i * 2] << ", "
+                  << ef_pcOutput.pcLocalCovariance[i * 2 + 1]);
+    ATH_MSG_DEBUG("pcIdHash[" << i << "] = " << ef_pcOutput.pcIdHash[i]);
     ATH_MSG_DEBUG("pcId[" << i << "] = " << pcId[i]);
-    ATH_MSG_DEBUG("pcGlobalPosition[" << i << "] = " << pcGlobalPosition[i * 3]
-                                      << ", " << pcGlobalPosition[i * 3 + 1]
-                                      << ", " << pcGlobalPosition[i * 3 + 2]);
+    ATH_MSG_DEBUG("pcGlobalPosition["
+                  << i << "] = " << ef_pcOutput.pcGlobalPosition[i * 3] << ", "
+                  << ef_pcOutput.pcGlobalPosition[i * 3 + 1] << ", "
+                  << ef_pcOutput.pcGlobalPosition[i * 3 + 2]);
     // ATH_MSG_DEBUG("pcRdoList[" << i << "] = " << pcRdoList[i]);
-    ATH_MSG_DEBUG("pcChannelsInPhi[" << i << "] = " << pcChannelsInPhi[i]);
-    ATH_MSG_DEBUG("pcChannelsInEta[" << i << "] = " << pcChannelsInEta[i]);
-    ATH_MSG_DEBUG("pcWidthInEta[" << i << "] = " << pcWidthInEta[i]);
-    ATH_MSG_DEBUG("pcOmegaX[" << i << "] = " << pcOmegaX[i]);
-    ATH_MSG_DEBUG("pcOmegaY[" << i << "] = " << pcOmegaY[i]);
+    ATH_MSG_DEBUG("pcChannelsInPhi["
+                  << i << "] = " << ef_pcOutput.pcChannelsInPhi[i]);
+    ATH_MSG_DEBUG("pcChannelsInEta["
+                  << i << "] = " << ef_pcOutput.pcChannelsInEta[i]);
+    ATH_MSG_DEBUG("pcWidthInEta[" << i
+                                  << "] = " << ef_pcOutput.pcWidthInEta[i]);
+    ATH_MSG_DEBUG("pcOmegaX[" << i << "] = " << ef_pcOutput.pcOmegaX[i]);
+    ATH_MSG_DEBUG("pcOmegaY[" << i << "] = " << ef_pcOutput.pcOmegaY[i]);
     // ATH_MSG_DEBUG("pcTotList[" << i << "] = " << pcTotList[i]);
-    ATH_MSG_DEBUG("pcTotalToT[" << i << "] = " << pcTotalToT[i]);
+    ATH_MSG_DEBUG("pcTotalToT[" << i << "] = " << ef_pcOutput.pcTotalToT[i]);
     // ATH_MSG_DEBUG("pcChargeList[" << i << "] = " << pcChargeList[i]);
-    ATH_MSG_DEBUG("pcTotalCharge[" << i << "] = " << pcTotalCharge[i]);
-    ATH_MSG_DEBUG("pcEnergyLoss[" << i << "] = " << pcEnergyLoss[i]);
-    ATH_MSG_DEBUG("pcIsSplit[" << i << "] = " << pcIsSplit[i]);
-    ATH_MSG_DEBUG("pcSplitProbability1[" << i
-                                         << "] = " << pcSplitProbability1[i]);
-    ATH_MSG_DEBUG("pcSplitProbability2[" << i
-                                         << "] = " << pcSplitProbability2[i]);
-    ATH_MSG_DEBUG("pcLvl1a[" << i << "] = " << pcLvl1a[i]);
+    ATH_MSG_DEBUG("pcTotalCharge[" << i
+                                   << "] = " << ef_pcOutput.pcTotalCharge[i]);
+    ATH_MSG_DEBUG("pcEnergyLoss[" << i
+                                  << "] = " << ef_pcOutput.pcEnergyLoss[i]);
+    ATH_MSG_DEBUG("pcIsSplit[" << i << "] = " << ef_pcOutput.pcIsSplit[i]);
+    ATH_MSG_DEBUG("pcSplitProbability1["
+                  << i << "] = " << ef_pcOutput.pcSplitProbability1[i]);
+    ATH_MSG_DEBUG("pcSplitProbability2["
+                  << i << "] = " << ef_pcOutput.pcSplitProbability2[i]);
+    ATH_MSG_DEBUG("pcLvl1a[" << i << "] = " << ef_pcOutput.pcLvl1a[i]);
+  }
+
+  // print all Strip space points
+  for (unsigned i = 0; i < metadata->numOfStripSpacePoints; i++) {
+    ATH_MSG_DEBUG("sspIdHash[" << i << "] = " << ef_sspOutput.spIdHash[i * 2]
+                               << ", " << ef_sspOutput.spIdHash[i * 2 + 1]);
+    ATH_MSG_DEBUG("sspGlobalPosition["
+                  << i << "] = " << ef_sspOutput.spGlobalPosition[i * 3] << ", "
+                  << ef_sspOutput.spGlobalPosition[i * 3 + 1] << ", "
+                  << ef_sspOutput.spGlobalPosition[i * 3 + 2]);
+    ATH_MSG_DEBUG("sspRadius[" << i << "] = " << ef_sspOutput.spRadius[i]);
+    ATH_MSG_DEBUG("sspVarianceR[" << i
+                                  << "] = " << ef_sspOutput.spVarianceR[i]);
+    ATH_MSG_DEBUG("sspVarianceZ[" << i
+                                  << "] = " << ef_sspOutput.spVarianceZ[i]);
+    ATH_MSG_DEBUG("sspTopHalfStripLength["
+                  << i << "] = " << ef_sspOutput.spTopHalfStripLength[i]);
+    ATH_MSG_DEBUG("sspBottomHalfStripLength["
+                  << i << "] = " << ef_sspOutput.spBottomHalfStripLength[i]);
+    ATH_MSG_DEBUG("sspTopStripDirection["
+                  << i << "] = " << ef_sspOutput.spTopStripDirection[i * 3]
+                  << ", " << ef_sspOutput.spTopStripDirection[i * 3 + 1] << ", "
+                  << ef_sspOutput.spTopStripDirection[i * 3 + 2]);
+    ATH_MSG_DEBUG("sspBottomStripDirection["
+                  << i << "] = " << ef_sspOutput.spBottomStripDirection[i * 3]
+                  << ", " << ef_sspOutput.spBottomStripDirection[i * 3 + 1]
+                  << ", " << ef_sspOutput.spBottomStripDirection[i * 3 + 2]);
+    ATH_MSG_DEBUG("sspStripCenterDistance["
+                  << i << "] = " << ef_sspOutput.spStripCenterDistance[i * 3]
+                  << ", " << ef_sspOutput.spStripCenterDistance[i * 3 + 1]
+                  << ", " << ef_sspOutput.spStripCenterDistance[i * 3 + 2]);
+    ATH_MSG_DEBUG("sspTopStripCenter["
+                  << i << "] = " << ef_sspOutput.spTopStripCenter[i * 3] << ", "
+                  << ef_sspOutput.spTopStripCenter[i * 3 + 1] << ", "
+                  << ef_sspOutput.spTopStripCenter[i * 3 + 2]);
+  }
+
+  // print all Pixel space points
+  for (unsigned i = 0; i < metadata->numOfPixelSpacePoints; i++) {
+    ATH_MSG_DEBUG("pspIdHash[" << i << "] = " << ef_pspOutput.spIdHash[i]);
+    ATH_MSG_DEBUG("pspGlobalPosition["
+                  << i << "] = " << ef_pspOutput.spGlobalPosition[i * 3] << ", "
+                  << ef_pspOutput.spGlobalPosition[i * 3 + 1] << ", "
+                  << ef_pspOutput.spGlobalPosition[i * 3 + 2]);
+    ATH_MSG_DEBUG("pspRadius[" << i << "] = " << ef_pspOutput.spRadius[i]);
+    ATH_MSG_DEBUG("pspVarianceR[" << i
+                                  << "] = " << ef_pspOutput.spVarianceR[i]);
+    ATH_MSG_DEBUG("pspVarianceZ[" << i
+                                  << "] = " << ef_pspOutput.spVarianceZ[i]);
   }
 
   // Group data to make the strip cluster container
@@ -356,7 +622,7 @@ StatusCode DataPreparationPipeline::runSW(
   scAux.rdoList = scRdoList;
   scAux.channelsInPhi = scChannelsInPhi;
 
-  ATH_CHECK(m_clusterContainerMaker->makeStripClusterContainer(
+  ATH_CHECK(m_xAODContainerMaker->makeStripClusterContainer(
       ef_sc.size(), scAux, metadata.get(), ctx));
 
   // Group data to make the pixel cluster container
@@ -382,8 +648,38 @@ StatusCode DataPreparationPipeline::runSW(
   pxAux.splitProbability2 = pcSplitProbability2;
   pxAux.lvl1a = pcLvl1a;
 
-  ATH_CHECK(m_clusterContainerMaker->makePixelClusterContainer(
+  ATH_CHECK(m_xAODContainerMaker->makePixelClusterContainer(
       ef_pc.size(), pxAux, metadata.get(), ctx));
+
+  // Group data to make the strip space point container
+  EFTrackingDataFormats::SpacePointAuxInput sspAux;
+  sspAux.elementIdList = sspIdHash;
+  sspAux.globalPosition = sspGlobalPosition;
+  sspAux.radius = sspRadius;
+  sspAux.varianceR = sspVarianceR;
+  sspAux.varianceZ = sspVarianceZ;
+  sspAux.measurementIndexes = sspMeasurementIndexes;
+  sspAux.topHalfStripLength = sspTopHalfStripLength;
+  sspAux.bottomHalfStripLength = sspBottomHalfStripLength;
+  sspAux.topStripDirection = sspTopStripDirection;
+  sspAux.bottomStripDirection = sspBottomStripDirection;
+  sspAux.stripCenterDistance = sspStripCenterDistance;
+  sspAux.topStripCenter = sspTopStripCenter;
+
+  ATH_CHECK(m_xAODContainerMaker->makeStripSpacePointContainer(
+      ef_ssp.size(), sspAux, ssp_mes, ctx));
+
+  // Group data to make the pixel space point container
+  EFTrackingDataFormats::SpacePointAuxInput pspAux;
+  pspAux.elementIdList = pspIdHash;
+  pspAux.globalPosition = pspGlobalPosition;
+  pspAux.radius = pspRadius;
+  pspAux.varianceR = pspVarianceR;
+  pspAux.varianceZ = pspVarianceZ;
+  pspAux.measurementIndexes = pspMeasurementIndexes;
+
+  ATH_CHECK(m_xAODContainerMaker->makePixelSpacePointContainer(
+      ef_psp.size(), pspAux, psp_mes, ctx));
 
   // validate output container
   SG::ReadHandle<xAOD::StripClusterContainer> outputStripClusters(
@@ -410,7 +706,13 @@ StatusCode DataPreparationPipeline::runSW(
 // This function is still in protoype and should be further discussed
 StatusCode DataPreparationPipeline::runHW(
     const std::vector<EFTrackingDataFormats::StripCluster> &ef_sc,
-    const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc) const {
+    const std::vector<EFTrackingDataFormats::PixelCluster> &ef_pc,
+    const std::vector<EFTrackingDataFormats::SpacePoint> &ef_ssp,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        &ssp_mes,
+    const std::vector<EFTrackingDataFormats::SpacePoint> &ef_psp,
+    const std::vector<std::vector<const xAOD::UncalibratedMeasurement *>>
+        &psp_mes) const {
   ATH_MSG_DEBUG("Running on the hardware");
 
   // Prepare host pointers for kernel output
@@ -707,19 +1009,18 @@ StatusCode DataPreparationPipeline::runHW(
 }
 
 StatusCode DataPreparationPipeline::transferSW(
-    const EFTrackingDataFormats::StripCluster *inputSC, int inputSCSize,
-    float *scLocalPosition, float *scLocalCovariance, unsigned int *scIdHash,
-    long unsigned int *scId, float *scGlobalPosition,
-    unsigned long long *scRdoList, int *scChannelsInPhi,
+    const std::vector<EFTrackingDataFormats::StripCluster> &inputSC,
+    EFTrackingDataFormats::StripClusterOutput &ef_scOutput,
     // PixelCluster
-    const EFTrackingDataFormats::PixelCluster *inputPC, int inputPCSize,
-    float *pcLocalPosition, float *pcLocalCovariance, unsigned int *pcIdHash,
-    long unsigned int *pcId, float *pcGlobalPosition,
-    unsigned long long *pcRdoList, int *pcChannelsInPhi, int *pcChannelsInEta,
-    float *pcWidthInEta, float *pcOmegaX, float *pcOmegaY, int *pcTotList,
-    int *pcTotalToT, float *pcChargeList, float *pcTotalCharge,
-    float *pcEnergyLoss, char *pcIsSplit, float *pcSplitProbability1,
-    float *pcSplitProbability2, int *pcLvl1a,
+    const std::vector<EFTrackingDataFormats::PixelCluster> &inputPC,
+    EFTrackingDataFormats::PixelClusterOutput &ef_pcOutput,
+    // StripSpacePoint
+    const std::vector<EFTrackingDataFormats::SpacePoint> &inputSSP,
+    EFTrackingDataFormats::SpacePointOutput &ef_sspOutput,
+    // PixelSpacePoint
+    const std::vector<EFTrackingDataFormats::SpacePoint> &inputPSP,
+    EFTrackingDataFormats::SpacePointOutput &ef_pspOutput,
+    // Metadata
     EFTrackingDataFormats::Metadata *metadata) const {
   // return input
   int rdoIndex_counter = 0;
@@ -729,22 +1030,22 @@ StatusCode DataPreparationPipeline::transferSW(
 
   // transfer inputSC
   // trasnsfer_sc:
-  for (int i = 0; i < inputSCSize; i++) {
-    scLocalPosition[i] = inputSC[i].localPosition;
-    scLocalCovariance[i] = inputSC[i].localCovariance;
-    scIdHash[i] = inputSC[i].idHash;
-    scId[i] = inputSC[i].id;
-    scGlobalPosition[i * 3] = inputSC[i].globalPosition[0];
-    scGlobalPosition[i * 3 + 1] = inputSC[i].globalPosition[1];
-    scGlobalPosition[i * 3 + 2] = inputSC[i].globalPosition[2];
+  for (size_t i = 0; i < inputSC.size(); i++) {
+    ef_scOutput.scLocalPosition[i] = inputSC[i].localPosition;
+    ef_scOutput.scLocalCovariance[i] = inputSC[i].localCovariance;
+    ef_scOutput.scIdHash[i] = inputSC[i].idHash;
+    ef_scOutput.scId[i] = inputSC[i].id;
+    ef_scOutput.scGlobalPosition[i * 3] = inputSC[i].globalPosition[0];
+    ef_scOutput.scGlobalPosition[i * 3 + 1] = inputSC[i].globalPosition[1];
+    ef_scOutput.scGlobalPosition[i * 3 + 2] = inputSC[i].globalPosition[2];
 
     inputscRdoIndexSize += inputSC[i].sizeOfRDOList;
 
     for (int j = 0; j < inputSC[i].sizeOfRDOList; j++) {
-      scRdoList[rdoIndex_counter + j] = inputSC[i].rdoList[j];
+      ef_scOutput.scRdoList[rdoIndex_counter + j] = inputSC[i].rdoList[j];
     }
     // update the index counter
-    scChannelsInPhi[i] = inputSC[i].channelsInPhi;
+    ef_scOutput.scChannelsInPhi[i] = inputSC[i].channelsInPhi;
     rdoIndex_counter += inputSC[i].sizeOfRDOList;
     metadata[0].scRdoIndex[i] = inputSC[i].sizeOfRDOList;
   }
@@ -758,46 +1059,47 @@ StatusCode DataPreparationPipeline::transferSW(
   unsigned int inputpcChargeListsize = 0;
 
   // trasnsfer_pc:
-  for (int i = 0; i < inputPCSize; i++) {
-    pcLocalPosition[i * 2] = inputPC[i].localPosition[0];
-    pcLocalPosition[i * 2 + 1] = inputPC[i].localPosition[1];
-    pcLocalCovariance[i * 2] = inputPC[i].localCovariance[0];
-    pcLocalCovariance[i * 2 + 1] = inputPC[i].localCovariance[1];
-    pcIdHash[i] = inputPC[i].idHash;
-    pcId[i] = inputPC[i].id;
-    pcGlobalPosition[i * 3] = inputPC[i].globalPosition[0];
-    pcGlobalPosition[i * 3 + 1] = inputPC[i].globalPosition[1];
-    pcGlobalPosition[i * 3 + 2] = inputPC[i].globalPosition[2];
+  for (size_t i = 0; i < inputPC.size(); i++) {
+    ef_pcOutput.pcLocalPosition[i * 2] = inputPC[i].localPosition[0];
+    ef_pcOutput.pcLocalPosition[i * 2 + 1] = inputPC[i].localPosition[1];
+    ef_pcOutput.pcLocalCovariance[i * 2] = inputPC[i].localCovariance[0];
+    ef_pcOutput.pcLocalCovariance[i * 2 + 1] = inputPC[i].localCovariance[1];
+    ef_pcOutput.pcIdHash[i] = inputPC[i].idHash;
+    ef_pcOutput.pcId[i] = inputPC[i].id;
+    ef_pcOutput.pcGlobalPosition[i * 3] = inputPC[i].globalPosition[0];
+    ef_pcOutput.pcGlobalPosition[i * 3 + 1] = inputPC[i].globalPosition[1];
+    ef_pcOutput.pcGlobalPosition[i * 3 + 2] = inputPC[i].globalPosition[2];
 
     inputpcRdoIndexSize += inputPC[i].sizeOfRDOList;
 
     for (int j = 0; j < inputPC[i].sizeOfRDOList; j++) {
-      pcRdoList[rdoIndex_counter + j] = inputPC[i].rdoList[j];
+      ef_pcOutput.pcRdoList[rdoIndex_counter + j] = inputPC[i].rdoList[j];
     }
-    pcChannelsInPhi[i] = inputPC[i].channelsInPhi;
-    pcChannelsInEta[i] = inputPC[i].channelsInEta;
-    pcWidthInEta[i] = inputPC[i].widthInEta;
-    pcOmegaX[i] = inputPC[i].omegaX;
-    pcOmegaY[i] = inputPC[i].omegaY;
+    ef_pcOutput.pcChannelsInPhi[i] = inputPC[i].channelsInPhi;
+    ef_pcOutput.pcChannelsInEta[i] = inputPC[i].channelsInEta;
+    ef_pcOutput.pcWidthInEta[i] = inputPC[i].widthInEta;
+    ef_pcOutput.pcOmegaX[i] = inputPC[i].omegaX;
+    ef_pcOutput.pcOmegaY[i] = inputPC[i].omegaY;
 
     inputpcTotListsize += inputPC[i].sizeOfTotList;
 
     for (int j = 0; j < inputPC[i].sizeOfTotList; j++) {
-      pcTotList[totIndex_counter + j] = inputPC[i].totList[j];
+      ef_pcOutput.pcTotList[totIndex_counter + j] = inputPC[i].totList[j];
     }
-    pcTotalToT[i] = inputPC[i].totalToT;
+    ef_pcOutput.pcTotalToT[i] = inputPC[i].totalToT;
 
     inputpcChargeListsize += inputPC[i].sizeOfChargeList;
 
     for (int j = 0; j < inputPC[i].sizeOfChargeList; j++) {
-      pcChargeList[chargeIndex_counter + j] = inputPC[i].chargeList[j];
+      ef_pcOutput.pcChargeList[chargeIndex_counter + j] =
+          inputPC[i].chargeList[j];
     }
-    pcTotalCharge[i] = inputPC[i].totalCharge;
-    pcEnergyLoss[i] = inputPC[i].energyLoss;
-    pcIsSplit[i] = inputPC[i].isSplit;
-    pcSplitProbability1[i] = inputPC[i].splitProbability1;
-    pcSplitProbability2[i] = inputPC[i].splitProbability2;
-    pcLvl1a[i] = inputPC[i].lvl1a;
+    ef_pcOutput.pcTotalCharge[i] = inputPC[i].totalCharge;
+    ef_pcOutput.pcEnergyLoss[i] = inputPC[i].energyLoss;
+    ef_pcOutput.pcIsSplit[i] = inputPC[i].isSplit;
+    ef_pcOutput.pcSplitProbability1[i] = inputPC[i].splitProbability1;
+    ef_pcOutput.pcSplitProbability2[i] = inputPC[i].splitProbability2;
+    ef_pcOutput.pcLvl1a[i] = inputPC[i].lvl1a;
 
     // update the index counter
     rdoIndex_counter += inputPC[i].sizeOfRDOList;
@@ -808,9 +1110,56 @@ StatusCode DataPreparationPipeline::transferSW(
     metadata[0].pcChargeIndex[i] = inputPC[i].sizeOfChargeList;
   }
 
+  // transfer strip space points
+  for (size_t i = 0; i < inputSSP.size(); i++) {
+    ef_sspOutput.spIdHash[i * 2] = inputSSP[i].idHash[0];
+    ef_sspOutput.spIdHash[i * 2 + 1] = inputSSP[i].idHash[1];
+    ef_sspOutput.spGlobalPosition[i * 3] = inputSSP[i].globalPosition[0];
+    ef_sspOutput.spGlobalPosition[i * 3 + 1] = inputSSP[i].globalPosition[1];
+    ef_sspOutput.spGlobalPosition[i * 3 + 2] = inputSSP[i].globalPosition[2];
+    ef_sspOutput.spRadius[i] = inputSSP[i].radius;
+    ef_sspOutput.spVarianceR[i] = inputSSP[i].cov_r;
+    ef_sspOutput.spVarianceZ[i] = inputSSP[i].cov_z;
+    ef_sspOutput.spTopHalfStripLength[i] = inputSSP[i].topHalfStripLength;
+    ef_sspOutput.spBottomHalfStripLength[i] = inputSSP[i].bottomHalfStripLength;
+    ef_sspOutput.spTopStripDirection[i * 3] = inputSSP[i].topStripDirection[0];
+    ef_sspOutput.spTopStripDirection[i * 3 + 1] =
+        inputSSP[i].topStripDirection[1];
+    ef_sspOutput.spTopStripDirection[i * 3 + 2] =
+        inputSSP[i].topStripDirection[2];
+    ef_sspOutput.spBottomStripDirection[i * 3] =
+        inputSSP[i].bottomStripDirection[0];
+    ef_sspOutput.spBottomStripDirection[i * 3 + 1] =
+        inputSSP[i].bottomStripDirection[1];
+    ef_sspOutput.spBottomStripDirection[i * 3 + 2] =
+        inputSSP[i].bottomStripDirection[2];
+    ef_sspOutput.spStripCenterDistance[i * 3] =
+        inputSSP[i].stripCenterDistance[0];
+    ef_sspOutput.spStripCenterDistance[i * 3 + 1] =
+        inputSSP[i].stripCenterDistance[1];
+    ef_sspOutput.spStripCenterDistance[i * 3 + 2] =
+        inputSSP[i].stripCenterDistance[2];
+    ef_sspOutput.spTopStripCenter[i * 3] = inputSSP[i].topStripCenter[0];
+    ef_sspOutput.spTopStripCenter[i * 3 + 1] = inputSSP[i].topStripCenter[1];
+    ef_sspOutput.spTopStripCenter[i * 3 + 2] = inputSSP[i].topStripCenter[2];
+  }
+
+  // transfer pixel space points
+  for (size_t i = 0; i < inputPSP.size(); i++) {
+    ef_pspOutput.spIdHash[i] = inputPSP[i].idHash[0];
+    ef_pspOutput.spGlobalPosition[i * 3] = inputPSP[i].globalPosition[0];
+    ef_pspOutput.spGlobalPosition[i * 3 + 1] = inputPSP[i].globalPosition[1];
+    ef_pspOutput.spGlobalPosition[i * 3 + 2] = inputPSP[i].globalPosition[2];
+    ef_pspOutput.spRadius[i] = inputPSP[i].radius;
+    ef_pspOutput.spVarianceR[i] = inputPSP[i].cov_r;
+    ef_pspOutput.spVarianceZ[i] = inputPSP[i].cov_z;
+  }
+
   // transfer metadata
-  metadata[0].numOfStripClusters = inputSCSize;
-  metadata[0].numOfPixelClusters = inputPCSize;
+  metadata[0].numOfStripClusters = inputSC.size();
+  metadata[0].numOfPixelClusters = inputPC.size();
+  metadata[0].numOfStripSpacePoints = inputSSP.size();
+  metadata[0].numOfPixelSpacePoints = inputPSP.size();
   metadata[0].scRdoIndexSize = inputscRdoIndexSize;
   metadata[0].pcRdoIndexSize = inputpcRdoIndexSize;
   metadata[0].pcTotIndexSize = inputpcTotListsize;
