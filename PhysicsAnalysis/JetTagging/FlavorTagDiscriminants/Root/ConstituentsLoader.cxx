@@ -91,7 +91,7 @@ namespace FlavorTagDiscriminants {
       TypeRegexes iparticle_type_regexes {
           // iparticle variables
           // ConstituentsEDMType picked correspond to the first matching regex
-          {"(pt|deta|dphi|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(pt|deta|dphi|dr|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes trk_type_regexes {
           // Some innermost / next-to-innermost hit variables had a different
