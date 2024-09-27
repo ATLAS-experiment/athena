@@ -32,14 +32,14 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         # noalg PEB chain
         step_name = 'PEBInfoWriter_{:s}'.format( eventBuildType)
         step = ChainStep(name=step_name,
-                         Sequences=[seq],
+                         SequenceGens=[seq],
                          chainDicts=[chainDict])
     else:
         # standard PEB chain
         prevStep = chain.steps[-1]        
         step_name = 'EventBuild_{:s}_PEBInfoWriter_{:s}'.format(prevStep.name, eventBuildType)
         step = ChainStep(name=step_name,
-                         Sequences=[seq for leg in prevStep.legIds],
+                         SequenceGens=[seq for leg in prevStep.legIds],
                          chainDicts=prevStep.stepDicts)
 
     chain.steps.append(step)

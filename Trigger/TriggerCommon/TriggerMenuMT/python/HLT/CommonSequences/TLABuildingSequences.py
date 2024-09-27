@@ -33,7 +33,7 @@ def addTLAStep(flags, chain, chainDict):
     prevStep = chain.steps[-1]
     stepName = 'TLAStep_{:s}'.format(prevStep.name)
     step = ChainStep(name         = stepName,
-                    Sequences     = tlaSequencesList,
+                    SequenceGens     = tlaSequencesList,
                     chainDicts   = prevStep.stepDicts)	
 
     log.debug("addTLAStep: About to add step %s ", stepName) 
