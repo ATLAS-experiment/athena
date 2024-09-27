@@ -1,38 +1,25 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/***************************************************************************
- IdDict package
- -----------------------------------------
- ***************************************************************************/
-
-//<doc><file>	$Id: IdDictFieldImplementation.cxx,v 1.4 2003-09-04 08:55:25 schaffer Exp $
-//<version>	$Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
+/**
+ * @fileIdDictFieldImplementation.cxx
+ * @date 2003-09-04 08:55:25 
+ * @author schaffer
+**/
 
 #include "IdDict/IdDictFieldImplementation.h"
 #include "IdDict/IdDictDefs.h"
 #include <iostream>
 #include <sstream>
 
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
-//<<<<<< PRIVATE CONSTANTS                                              >>>>>>
-//<<<<<< PRIVATE TYPES                                                  >>>>>>
-//<<<<<< PRIVATE VARIABLE DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC VARIABLE DEFINITIONS                                    >>>>>>
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
-//<<<<<< PRIVATE FUNCTION DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC FUNCTION DEFINITIONS                                    >>>>>>
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
-
-static void tabify (int ntot_spaces, std::stringstream& str) 
-{ 
-    for (int i = 0; i < ntot_spaces; ++i) { 
-	str << " "; 
-    } 
-} 
+namespace{
+  void tabify (int ntot_spaces, std::stringstream& str) { 
+      for (int i = 0; i < ntot_spaces; ++i) { 
+        str << " "; 
+      } 
+  } 
+}
 
 //-----------------------------------------------------------------
 const IdDictRange*  IdDictFieldImplementation::range() const

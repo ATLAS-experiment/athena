@@ -333,7 +333,7 @@ IdDictField* IdDictDictionary::find_field (const std::string& name) const
 IdDictLabel* IdDictDictionary::find_label (const std::string& field, const std::string& label) const
 {
     IdDictField* idField = find_field(field);
-    if (!idField) return (0);
+    if (!idField) return nullptr;
     return (idField->find_label(label));
 }
 
@@ -1892,20 +1892,6 @@ IdDictDictionary::set_do_neighbours	(bool do_neighbours)
     m_do_neighbours = do_neighbours;
 }
 
- 
-/** 
- * 
- */ 
-IdDictField::IdDictField () 
-    : 
-    m_index(0)
- 
-{
-}
-  
-IdDictField::~IdDictField () 
-{ 
-} 
   
 void IdDictField::resolve_references (const IdDictMgr& /*idd*/) 
 { 
@@ -1936,79 +1922,49 @@ IdDictLabel* IdDictField::find_label (const std::string& name) const
   return (0); 
 } 
  
-void IdDictField::add_label (IdDictLabel* label) 
-{ 
+void 
+IdDictField::add_label (IdDictLabel* label) { 
   m_labels.push_back (label); 
 } 
   
-size_t IdDictField::get_label_number () const 
-{ 
-  return (m_labels.size ()); 
+size_t 
+IdDictField::get_label_number () const { 
+  return m_labels.size (); 
 } 
  
-const std::string& IdDictField::get_label (size_t index) const 
-{ 
-  return ((m_labels[index])->m_name); 
+const std::string& 
+IdDictField::get_label (size_t index) const { 
+  return m_labels.at(index)->m_name; 
 } 
  
-ExpandedIdentifier::element_type IdDictField::get_label_value (const std::string& name) const 
-{ 
-  ExpandedIdentifier::element_type value = 0; 
- 
-  int int_value; 
- 
-  if (sscanf (name.c_str (), "%80d", &int_value) == 1)  
-    { 
-      value = (ExpandedIdentifier::element_type) int_value; 
-      return (value); 
-    } 
- 
-  for (size_t i = 0; i < m_labels.size (); ++i) 
-    { 
-      IdDictLabel* label = m_labels[i]; 
-      if (label == 0) continue; 
- 
+ExpandedIdentifier::element_type 
+IdDictField::get_label_value (const std::string& name) const { 
+  ExpandedIdentifier::element_type value = 0;
+  try{
+    value = std::stoi(name);
+    return value; 
+  } catch (std::invalid_argument & e){
+    for (const auto *label:m_labels) { 
+      if (label == nullptr) continue; 
       if (label->m_valued) value = label->m_value; 
- 
-      if (label->m_name == name)  
-        { 
-          return (value); 
-        } 
- 
+      if (label->m_name == name)  { 
+        return (value); 
+      } 
       value++; 
     } 
- 
+  }
   std::cerr << "Warning : label " << name << " not found" << std::endl; 
- 
   return (0); 
 } 
  
-void IdDictField::clear () 
-{ 
-  for (size_t i = 0; i < m_labels.size (); ++i) 
-    { 
+void IdDictField::clear () { 
+  for (size_t i = 0; i < m_labels.size (); ++i) { 
       IdDictLabel* label = m_labels[i]; 
       delete label; 
-    } 
- 
+  } 
   m_labels.clear (); 
 } 
  
- 
- 
- 
-/** 
- * 
- */ 
-IdDictLabel::IdDictLabel () 
-  : m_valued (false),
-    m_value (0)
-{ 
-} 
- 
-IdDictLabel::~IdDictLabel () 
-{ 
-} 
  
 /** 
  * 
@@ -2331,162 +2287,113 @@ IdDictAltRegions::clear ()
 }
  
 Range 
-IdDictAltRegions::build_range () const
-{
+IdDictAltRegions::build_range () const{
     Range result;
     
     if(m_selected_region)result = m_selected_region->build_range();
     return (result);
 }
 
- 
-/** 
- * 
- */ 
-IdDictRegion::IdDictRegion () 
-    :
-    m_index(0),
-    m_is_empty(false),
-    m_prev_abs_eta(0),
-    m_next_abs_eta(0),
-    m_eta0(0.0),
-    m_deta(0.0),
-    m_phi0(0.0),
-    m_dphi(0.0),
-    m_resolved_references(false),
-    m_generated_implementation(false)
-{ 
-} 
- 
-IdDictRegion::~IdDictRegion () 
-{ 
-} 
- 
+
 std::string 
-IdDictRegion::group_name () const
-{
+IdDictRegion::group_name () const{
     return (m_group);
 }
 
 void 
-IdDictRegion::set_index (size_t index)
-{
+IdDictRegion::set_index (size_t index){
     m_index = index;
 }
 
-void IdDictRegion::add_entry (IdDictRegionEntry* entry) 
-{ 
+void 
+IdDictRegion::add_entry (IdDictRegionEntry* entry) { 
   m_entries.push_back (entry); 
 } 
  
-void IdDictRegion::resolve_references (const IdDictMgr& idd, 
-				       IdDictDictionary& dictionary) 
-{ 
+void 
+IdDictRegion::resolve_references (const IdDictMgr& idd, IdDictDictionary& dictionary) { 
   std::vector<IdDictRegionEntry*>::iterator it;  
-  
-  for (it = m_entries.begin (); it != m_entries.end (); ++it)  
-    {  
+  for (it = m_entries.begin (); it != m_entries.end (); ++it) {  
       IdDictRegionEntry* entry = *it;  
       entry->resolve_references (idd, dictionary, *this);  
     } 
 } 
   
-void IdDictRegion::generate_implementation (const IdDictMgr& idd, 
+void 
+IdDictRegion::generate_implementation (const IdDictMgr& idd, 
 					    IdDictDictionary& dictionary,
-					    const std::string& tag) 
-{ 
+					    const std::string& tag){ 
 
-  if (Debugger::debug ()) 
-    { 
+  if (Debugger::debug ()) { 
       std::cout << "IdDictRegion::generate_implementation>" << std::endl; 
-    } 
-  
-
+  } 
   if (!m_generated_implementation) {
-      
       std::vector<IdDictRegionEntry*>::iterator it;  
-  
       for (it = m_entries.begin (); it != m_entries.end (); ++it)  {  
-	  IdDictRegionEntry* entry = *it;  
-	  entry->generate_implementation (idd, dictionary, *this, tag);  
+        IdDictRegionEntry* entry = *it;  
+        entry->generate_implementation (idd, dictionary, *this, tag);  
       } 
       m_generated_implementation = true;
   }
 } 
   
-void IdDictRegion::find_neighbours (const IdDictDictionary& dictionary)
-{
+void 
+IdDictRegion::find_neighbours (const IdDictDictionary& dictionary){
     // Find the neighbours
     IdDictRegion* region = 0;
     if ("" != m_next_abs_eta_name) {
-	region = dictionary.find_region(m_next_abs_eta_name,m_group );
-	if (region) {
-	    region->m_prev_abs_eta = this;
-	    m_next_abs_eta         = region;
-	}
-	else {
-	}
-	  
+      region = dictionary.find_region(m_next_abs_eta_name,m_group );
+      if (region) {
+          region->m_prev_abs_eta = this;
+          m_next_abs_eta         = region;
+      }
     }
     for (unsigned int i = 0; i < m_prev_samp_names.size(); ++i) {
-	if ("" != m_prev_samp_names[i]) {
-	    region = dictionary.find_region(m_prev_samp_names[i],m_group );
-	    if (region) {
-		m_prev_samp.push_back(region);
+      if ("" != m_prev_samp_names[i]) {
+        region = dictionary.find_region(m_prev_samp_names[i],m_group );
+        if (region) {
+          m_prev_samp.push_back(region);
+        }
 	    }
-	    else {
-	    }
-	      
-	}
     }
     for (unsigned int i = 0; i < m_next_samp_names.size(); ++i) {
-	if ("" != m_next_samp_names[i]) {
-	    region = dictionary.find_region(m_next_samp_names[i],m_group );
-	    if (region) {
-		m_next_samp.push_back(region);
-	    }
-	    else {
-	    }
-	}
+      if ("" != m_next_samp_names[i]) {
+          region = dictionary.find_region(m_next_samp_names[i],m_group );
+          if (region) {
+            m_next_samp.push_back(region);
+          }
+      }
     }
 
     for (unsigned int i = 0; i < m_prev_subdet_names.size(); ++i) {
-	if ("" != m_prev_subdet_names[i]) {
-	    region = dictionary.find_region(m_prev_subdet_names[i],m_group );
-	    if (region) {
-		m_prev_subdet.push_back(region);
-	    }
-	    else {
-	    }
-	}
+      if ("" != m_prev_subdet_names[i]) {
+          region = dictionary.find_region(m_prev_subdet_names[i],m_group );
+          if (region) {
+            m_prev_subdet.push_back(region);
+          }
+      }
     }
     for (unsigned int i = 0; i < m_next_subdet_names.size(); ++i) {
-	if ("" != m_next_subdet_names[i]) {
-	    region = dictionary.find_region(m_next_subdet_names[i],m_group );
-	    if (region) {
-		m_next_subdet.push_back(region);
-	    }
-	    else {
-	    }
-	}
+      if ("" != m_next_subdet_names[i]) {
+          region = dictionary.find_region(m_next_subdet_names[i],m_group );
+          if (region) {
+            m_next_subdet.push_back(region);
+          }
+          
+      }
     }
 }
 
 
-void IdDictRegion::reset_implementation () 
-{ 
-
+void 
+IdDictRegion::reset_implementation () { 
   if (m_generated_implementation) {
-      
       m_implementation.clear();  // remove implementation
-
       std::vector<IdDictRegionEntry*>::iterator it;  
-  
       for (it = m_entries.begin (); it != m_entries.end (); ++it)  {  
-	  IdDictRegionEntry* entry = *it;  
-	  entry->reset_implementation ();  
+        IdDictRegionEntry* entry = *it;  
+        entry->reset_implementation ();  
       } 
-
       // reset neighbours
       m_prev_abs_eta = 0;
       m_next_abs_eta = 0;
@@ -2499,42 +2406,31 @@ void IdDictRegion::reset_implementation ()
   }
 } 
   
-bool IdDictRegion::verify () const 
-{ 
+bool IdDictRegion::verify () const { 
   return (true); 
 } 
  
-void IdDictRegion::clear () 
-{ 
+void 
+IdDictRegion::clear () { 
   std::vector<IdDictRegionEntry*>::iterator it;  
-  
-  for (it = m_entries.begin (); it != m_entries.end (); ++it)  
-    {  
+  for (it = m_entries.begin (); it != m_entries.end (); ++it){  
       IdDictRegionEntry* entry = *it;  
       entry->clear (); 
       delete entry; 
     }  
- 
   m_entries.clear (); 
 } 
   
-Range IdDictRegion::build_range () const 
-{
+Range 
+IdDictRegion::build_range () const {
   Range result; 
   std::vector <IdDictRegionEntry*>::const_iterator it;
-  for (it = m_entries.begin (); it != m_entries.end (); ++it)
-  { 
+  for (it = m_entries.begin (); it != m_entries.end (); ++it){ 
       const IdDictRegionEntry& entry = *(*it); 
       Range r = entry.build_range (); 
-
-
-
-
       result.add (std::move(r)); 
   } 
-
   return (result); 
-
 } 
 
  
@@ -2582,94 +2478,27 @@ IdDictSubRegion::generate_implementation (const IdDictMgr& idd,
       } 
 } 
  
-void IdDictSubRegion::reset_implementation ()
-{ 
-      std::vector<IdDictRegionEntry*>::iterator it;  
-  
-      for (it = m_entries.begin (); it != m_entries.end (); ++it) { 
-	  IdDictRegionEntry* entry = *it;  
+void 
+IdDictSubRegion::reset_implementation (){ 
+  for (auto * entry:m_entries) { 
 	  entry->reset_implementation ();  
-      } 
-} 
- 
-  
- 
- 
- 
- 
-/** 
- * 
- */ 
-IdDictRegionEntry::IdDictRegionEntry () 
-{ 
-} 
- 
-IdDictRegionEntry::~IdDictRegionEntry () 
-{ 
-} 
- 
-void IdDictRegionEntry::resolve_references (const IdDictMgr& /*idd*/,  
-					    IdDictDictionary& /*dictionary*/, 
-					    IdDictRegion& /*region*/) 
-{ 
-} 
-  
-void IdDictRegionEntry::generate_implementation (const IdDictMgr& /*idd*/,  
-						 IdDictDictionary& /*dictionary*/, 
-						 IdDictRegion& /*region*/,
-						 const std::string& /*tag*/) 
-{ 
-} 
-  
-void IdDictRegionEntry::reset_implementation ()
-{ 
+  } 
 } 
 
-bool IdDictRegionEntry::verify () const 
-{ 
-  return (true); 
-} 
- 
-void IdDictRegionEntry::clear () 
-{ 
-} 
 
-/** 
- * 
- */ 
-IdDictRange::IdDictRange () 
-    :
-    m_field (0),
-    m_specification (unknown),
-    m_value(0),
-    m_minvalue(0),
-    m_maxvalue(0),
-    m_prev_value(0),
-    m_next_value(0),
-    m_continuation_mode(none),
-    m_resolved_references(false)
-    //m_generated_implementation(false)
-{
-} 
  
-IdDictRange::~IdDictRange () 
-{ 
-} 
+void 
+IdDictRange::resolve_references (const IdDictMgr& /*idd*/,  
+	  IdDictDictionary& dictionary, IdDictRegion& /*region*/) { 
+  if(!m_resolved_references) {
+    m_field = dictionary.find_field (m_field_name); 
+    if (m_field == nullptr)  { 
+        m_field = new IdDictField; 
+        m_field->m_name = m_field_name; 
+        dictionary.add_field (m_field); 
+    } 
  
-void IdDictRange::resolve_references (const IdDictMgr& /*idd*/,  
-				      IdDictDictionary& dictionary, 
-				      IdDictRegion& /*region*/) 
-{ 
-    if(!m_resolved_references) {
-	m_field = dictionary.find_field (m_field_name); 
-	if (m_field == 0)  { 
-	    m_field = new IdDictField; 
-	    m_field->m_name = m_field_name; 
- 
-	    dictionary.add_field (m_field); 
-	} 
- 
-	if (m_specification == unknown) { 
+	  if (m_specification == unknown) { 
 	    /** 
 	     *  The range values were unspecified in the range element. 
 	     * 
@@ -2680,42 +2509,34 @@ void IdDictRange::resolve_references (const IdDictMgr& /*idd*/,
 	     * 
 	     */ 
 	    unsigned int labels = m_field->get_label_number (); 
- 
 	    if (labels == 1)    { 
-		m_specification = by_label; 
-		m_label = m_field->get_label (0); 
+        m_specification = by_label; 
+        m_label = m_field->get_label (0); 
+	    } else if (labels > 1) { 
+		    m_specification = by_labels; 
+        for (size_t i = 0; i < labels; ++i) { 
+          m_labels.push_back (m_field->get_label (i)); 
+        } 
 	    } 
-	    else if (labels > 1)    { 
-		m_specification = by_labels; 
-		for (size_t i = 0; i < labels; ++i) { 
-		    m_labels.push_back (m_field->get_label (i)); 
-		} 
-	    } 
-	} 
+	  } 
  
-	if (m_specification == by_label) { 
-	    m_value = m_field->get_label_value (m_label); 
-
-	} 
-	else if (m_specification == by_labels)  { 
+    if (m_specification == by_label) { 
+        m_value = m_field->get_label_value (m_label); 
+    } else if (m_specification == by_labels)  { 
 	    m_values.clear (); 
 	    for (size_t i = 0; i < m_labels.size (); ++i) { 
-		const std::string& label = m_labels[i]; 
-		int value = m_field->get_label_value (label); 
- 
-		m_values.push_back (value); 
-
+        const std::string& label = m_labels[i]; 
+        int value = m_field->get_label_value (label); 
+        m_values.push_back (value);
 	    } 
-	} 
-	m_resolved_references = true;
-    }
+	  } 
+	  m_resolved_references = true;
+  }
 } 
   
-void IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,  
-					   IdDictDictionary& dictionary, 
-					   IdDictRegion& region,
-					   const std::string& /*tag*/) 
-{ 
+void 
+IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,  
+	  IdDictDictionary& dictionary,  IdDictRegion& region,const std::string& /*tag*/) { 
 
     // Add IdDictFieldImplementation to this region
 
@@ -2724,11 +2545,9 @@ void IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
     // called more than once because there are IdDictRangeRef's which
     // point to the same IdDictRange's.
 
-  if (Debugger::debug ()) 
-    { 
+  if (Debugger::debug ()) { 
       std::cout << "IdDictRange::generate_implementation>" << std::endl; 
-    } 
-
+  } 
 
   region.m_implementation.resize (region.m_implementation.size () + 1); 
   IdDictFieldImplementation& impl = region.m_implementation.back (); 
@@ -2736,8 +2555,7 @@ void IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
   if (m_field->m_index == 0)  { 
       m_field->m_index = region.m_implementation.size () - 1; 
 
-  } 
-  else if (m_field->m_index != (region.m_implementation.size () - 1))  { 
+  } else if (m_field->m_index != (region.m_implementation.size () - 1))  { 
       std::cout <<  "Bad field index for " << m_field_name 
 		<<  " index " << m_field->m_index 
 		<<  " in dictionary " << dictionary.m_name   
@@ -2756,153 +2574,114 @@ void IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
 
   Range::field field;
   switch (m_specification) { 
-  case by_value: 
-  case by_label: 
+    case by_value: 
+    case by_label: {
       impl.set_field(Range::field(m_value, m_value)); 
-      break; 
-  case by_values: 
-  case by_labels: 
-  { 
-      Range::field::element_vector v; 
- 
-      for (size_t i = 0; i < m_values.size (); ++i) 
-	  { 
-	      v.push_back (m_values[i]); 
-	  } 
+      break;
+    } 
+    case by_values: 
+    case by_labels: { 
+      Range::field::element_vector v;
+      v.insert(v.end(), m_values.begin(), m_values.end());
       field.set(v);
       impl.set_field(field); 
-  } 
-  break; 
-  case by_minvalue: 
-      field.set_minimum (m_minvalue); 
-      impl.set_field(field); 
-      break; 
-  case by_maxvalue: 
-      field.set_maximum (m_maxvalue); 
-      impl.set_field(field); 
-      break; 
-  case by_minmax: 
-      field.set (m_minvalue, m_maxvalue); 
-      impl.set_field(field); 
-      break; 
-  case unknown: 
-      break; 
+    } 
+    break; 
+    case by_minvalue: 
+        field.set_minimum (m_minvalue); 
+        impl.set_field(field); 
+        break; 
+    case by_maxvalue: 
+        field.set_maximum (m_maxvalue); 
+        impl.set_field(field); 
+        break; 
+    case by_minmax: 
+        field.set (m_minvalue, m_maxvalue); 
+        impl.set_field(field); 
+        break; 
+    case unknown: 
+        break; 
   }
 } 
-  
-void IdDictRange::reset_implementation () 
-{} 
 
-bool IdDictRange::verify () const 
-{ 
-  return (true); 
-} 
  
-Range IdDictRange::build_range () const 
-{ 
+Range 
+IdDictRange::build_range () const { 
   Range result; 
- 
   Range::field field; 
- 
-  switch (m_specification) 
-    { 
+  switch (m_specification) { 
     case by_value: 
-    case by_label: 
+    case by_label:{
       field.set (m_value, m_value); 
-
-      break; 
+      break;
+    }
     case by_values: 
-    case by_labels: 
-      { 
-        Range::field::element_vector v; 
- 
-        for (size_t i = 0; i < m_values.size (); ++i) 
-          { 
-            v.push_back (m_values[i]); 
-
-          } 
- 
-        field.set (v); 
-      } 
-      break; 
-    case by_minvalue: 
+    case by_labels:{ 
+      Range::field::element_vector v; 
+      v.insert(v.end(), m_values.begin(), m_values.end());
+      field.set (v); 
+      break;
+    }
+    case by_minvalue:{ 
       field.set_minimum (m_minvalue); 
-
-      break; 
-    case by_maxvalue: 
+      break;
+    }
+    case by_maxvalue:{
       field.set_maximum (m_maxvalue); 
-
-      break; 
-    case by_minmax: 
+      break;
+    }
+    case by_minmax:{
       field.set (m_minvalue, m_maxvalue); 
-
-      break; 
-    case unknown: 
-
-      break; 
-    } 
- 
-
+      break;
+    }
+    case unknown:{
+      break;
+    }
+  } 
   if (wrap_around == m_continuation_mode) {
       field.set(true);
-  }
-  else if (has_previous == m_continuation_mode) {
+  } else if (has_previous == m_continuation_mode) {
       field.set_previous(m_prev_value);
-  }
-  else if (has_next == m_continuation_mode) {
+  } else if (has_next == m_continuation_mode) {
       field.set_next(m_next_value);
-  }
-  else if (has_both == m_continuation_mode) {
+  } else if (has_both == m_continuation_mode) {
       field.set_previous(m_prev_value);
       field.set_next(m_next_value);
   }
-
   result.add (std::move(field));
   return (result); 
 } 
  
-/** 
- * 
- */ 
-IdDictRangeRef::IdDictRangeRef () 
-    :
-    m_range(0)
+
  
-{ 
-} 
- 
-IdDictRangeRef::~IdDictRangeRef () 
-{ 
-} 
- 
-void IdDictRangeRef::resolve_references (const IdDictMgr& idd,  
+void 
+IdDictRangeRef::resolve_references (const IdDictMgr& idd,  
 					 IdDictDictionary& dictionary, 
-					 IdDictRegion& region) 
-{ 
+					 IdDictRegion& region) { 
     if (m_range) m_range->resolve_references (idd, dictionary, region);
 } 
   
-void IdDictRangeRef::generate_implementation (const IdDictMgr& idd,  
+void 
+IdDictRangeRef::generate_implementation (const IdDictMgr& idd,  
 					      IdDictDictionary& dictionary, 
 					      IdDictRegion& region,
-					      const std::string& tag) 
-{ 
+					      const std::string& tag) { 
     if (m_range) m_range->generate_implementation (idd, dictionary, region, tag);
 } 
   
-void IdDictRangeRef::reset_implementation () 
-{ 
+void 
+IdDictRangeRef::reset_implementation () { 
     if (m_range) m_range->reset_implementation ();
 } 
   
-bool IdDictRangeRef::verify () const 
-{ 
+bool 
+IdDictRangeRef::verify () const { 
     if (m_range) return (m_range->verify());
     return (true); 
 } 
  
-Range IdDictRangeRef::build_range () const 
-{ 
+Range 
+IdDictRangeRef::build_range () const { 
   Range result; 
   if (m_range) result = m_range->build_range();
   return (result);
@@ -3121,11 +2900,8 @@ bool IdDictDictionaryRef::verify () const
   return (true); 
 } 
  
-Range IdDictDictionaryRef::build_range () const 
-{ 
+Range IdDictDictionaryRef::build_range () const { 
   Range result; 
- 
- 
   return (result); 
 } 
  
