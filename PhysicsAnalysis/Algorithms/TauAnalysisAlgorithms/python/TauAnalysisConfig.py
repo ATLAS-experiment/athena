@@ -108,10 +108,10 @@ class TauWorkingPointConfig (ConfigBlock) :
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('quality', None, type=str,
             info="the ID WP (string) to use. Supported ID WPs: Tight, Medium, "
-            "Loose, VeryLoose, NoID.")
-        self.addOption ('use_eVeto', True, type=bool,
+            "Loose, VeryLoose, Baseline.")
+        self.addOption ('use_eVeto', False, type=bool,
             info="use selection with or without eVeto combined with tauID "
-            "recommendations: set it to False if electron mis-reconstructed as tau is not large background for your analysis")
+            "recommendations: set it to True if electron mis-reconstructed as tau is a large background for your analysis")
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau based ID instead of RNNTau ID "
             "recommendations: that's new experimental feature and might come default soon")
@@ -133,18 +133,18 @@ class TauWorkingPointConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         if self.useGNTau:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}.conf'
+            nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_eleid.conf'
             if not self.use_eVeto:
                 nameFormat = 'TauAnalysisAlgorithms/tau_selection_gntau_{}_noeleid.conf'
         else:
-            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
+            nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_eleid.conf'
             if not self.use_eVeto:
                 nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
 
-        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'NoID', 'Baseline'] :
+        if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline'] :
             raise ValueError ("invalid tau quality: \"" + self.quality +
                               "\", allowed values are Tight, Medium, Loose, " +
-                              "VeryLoose, NoID, Baseline")
+                              "VeryLoose, Baseline")
         inputfile = nameFormat.format(self.quality.lower())
 
         # Set up the algorithm selecting taus:
@@ -178,7 +178,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'Reco_effSF' + postfix)
 
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
-            if self.quality not in ('NoID','VeryLoose','Baseline'):
+            if self.quality not in ('VeryLoose','Baseline'):
 
                 alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlgID' + postfix )
