@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMPREPDATACONTAINERCNV_p2_H
@@ -39,7 +39,6 @@ public:
 private:
     const MuonGM::MMReadoutElement* getReadOutElement(const Identifier& id ) const;
     const MmIdHelper *m_MMId{nullptr};
-    StoreGateSvc *m_storeGate{nullptr};
     ToolHandle  < Trk::IEventCnvSuperTool > m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"};
     bool m_isInitialized{false};
     StatusCode initialize(MsgStream &log);

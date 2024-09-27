@@ -14,7 +14,6 @@
 
 #include <iostream>
 
-class StoreGateSvc;
 class sTgcIdHelper;
 
 
@@ -39,7 +38,6 @@ public:
 private:
     const MuonGM::sTgcReadoutElement* getReadOutElement(const Identifier& id ) const;
     const sTgcIdHelper *m_sTgcId{nullptr};
-    StoreGateSvc *m_storeGate{nullptr};
     ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
     bool m_isInitialized{false};
     StatusCode initialize(MsgStream &log);

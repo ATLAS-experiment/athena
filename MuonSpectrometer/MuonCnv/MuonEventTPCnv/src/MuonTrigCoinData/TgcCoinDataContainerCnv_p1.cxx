@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -20,51 +20,23 @@
 #include "GaudiKernel/MsgStream.h"
 
 // Athena
-#include "StoreGate/StoreGateSvc.h"
-
-
-
+#include "AthenaKernel/errorcheck.h"
 #include "AthAllocators/DataPool.h"
-
+#include "StoreGate/StoreGateSvc.h"
 
 
 StatusCode Muon::TgcCoinDataContainerCnv_p1::initialize(MsgStream &log) {
    // Do not initialize again:
     m_isInitialized=true;
 
-   // Get Storegate, ID helpers, and so on
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-    StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    }
-
    // get DetectorStore service
-    StoreGateSvc *detStore;
-    sc = svcLocator->service("DetectorStore", detStore);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-    }
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+    CHECK( detStore.isValid() );
 
-   // Get the pixel helper from the detector store
-    sc = detStore->retrieve(m_TgcId);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "Could not get Tgc ID helper !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        log << MSG::DEBUG << "Found the Tgc ID helper." << endmsg;
-    }
+   // Get the helper from the detector store
+    CHECK( detStore->retrieve(m_TgcId) );
 
-    sc = detStore->retrieve(m_muonDetMgr);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "Could not get PixelDetectorDescription" << endmsg;
-        return sc;
-    }
+    CHECK( detStore->retrieve(m_muonDetMgr) );
 
     log << MSG::DEBUG << "Converter initialized." << endmsg;
     return StatusCode::SUCCESS;

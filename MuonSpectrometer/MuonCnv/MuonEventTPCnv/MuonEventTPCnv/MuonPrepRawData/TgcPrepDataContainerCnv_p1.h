@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCPREPDATACONTAINERCNV_P1_H
@@ -19,7 +19,6 @@
 
 
 class MsgStream;
-class StoreGateSvc;
 class TgcIdHelper;
 
 namespace Muon{
@@ -38,8 +37,7 @@ namespace Muon{
 
         const MuonGM::TgcReadoutElement* getReadOutElement(const Identifier& id ) const;   
         const TgcIdHelper *m_TgcId{nullptr};
-        StoreGateSvc *m_storeGate{nullptr};
-        ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
+        ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"};
         bool m_isInitialized{false};
     
    

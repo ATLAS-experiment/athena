@@ -289,8 +289,8 @@ GeoFullPhysVol* make_dummy_pvol ATLAS_NOT_THREAD_SAFE (size_t nlayer,
 const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = 0;
-  assert ( svcLoc->service("DetectorStore", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{svcLoc->service("DetectorStore")};
+  assert ( sg.isValid() );
 
   GeoBox* box = new GeoBox (20, 10, 5);
   GeoMaterial* mat = new GeoMaterial ("dummy", 1);
@@ -298,8 +298,8 @@ const MuonGM::MuonDetectorManager& make_dd ATLAS_NOT_THREAD_SAFE ()
   GeoFullPhysVol* pvol1 = make_dummy_pvol (1, box, mat);
   GeoFullPhysVol* pvol4 = make_dummy_pvol (4, box, mat);
 
-  IAGDDtoGeoSvc* agddsvc = nullptr;
-  assert ( svcLoc->service("AGDDtoGeoSvc", agddsvc).isSuccess() );
+  SmartIF<IAGDDtoGeoSvc> agddsvc{svcLoc->service("AGDDtoGeoSvc")};
+  assert ( agddsvc.isValid() );
   IAGDDtoGeoSvc::LockedController c = agddsvc->getController();
   AGDDDetectorStore& ds = c->GetDetectorStore();
   AGDDVolumeStore& vs = c->GetVolumeStore();

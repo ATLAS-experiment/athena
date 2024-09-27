@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCPREPDATACONTAINERCNV_P1_H
@@ -19,7 +19,6 @@
 #include "TrkEventCnvTools/IEventCnvSuperTool.h"
 
 class MsgStream;
-class StoreGateSvc;
 class RpcIdHelper;
 
 namespace Muon{
@@ -38,8 +37,7 @@ namespace Muon{
 
         const MuonGM::RpcReadoutElement* getReadOutElement(const Identifier& id ) const;   
         const RpcIdHelper *m_RpcId{nullptr};
-        StoreGateSvc *m_storeGate{nullptr};
-        ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
+        ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"};
         bool m_isInitialized{false};
     };
 

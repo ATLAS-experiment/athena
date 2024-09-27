@@ -19,7 +19,6 @@
 
 
 class MsgStream;
-class StoreGateSvc;
 class MdtIdHelper;
 
 namespace Muon{
@@ -39,7 +38,6 @@ namespace Muon{
         const MuonGM::MdtReadoutElement* getReadOutElement(const Identifier& id ) const;         
         
         const MdtIdHelper *m_MdtId{nullptr};
-        StoreGateSvc *m_storeGate{nullptr};
         ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
         bool m_isInitialized{false};
     };

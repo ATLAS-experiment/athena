@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrepRawData/sTgcPrepData.h"
@@ -10,12 +10,13 @@
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataCnv_p1.h"
 #include "MuonEventTPCnv/MuonPrepRawData/sTgcPrepDataContainerCnv_p1.h"
 #include "TrkEventCnvTools/ITrkEventCnvTool.h"
+
 // Gaudi
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 
-
 // Athena
+#include "AthenaKernel/errorcheck.h"
 #include "StoreGate/StoreGateSvc.h"
 
 
@@ -23,38 +24,14 @@ StatusCode Muon::sTgcPrepDataContainerCnv_p1::initialize(MsgStream &log) {
    // Do not initialize again:
     m_isInitialized=true;
 
-   // Get Storegate, ID helpers, and so on
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-    StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    }
-
    // get DetectorStore service
-    StoreGateSvc *detStore;
-    sc = svcLocator->service("DetectorStore", detStore);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-    }
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+    CHECK( detStore.isValid() );
 
    // Get the helper from the detector store
-    sc = detStore->retrieve(m_sTgcId);
-    if (sc.isFailure()) {
-        log << MSG::FATAL << "Could not get ID helper !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found the  ID helper." << endmsg;
-    }
+    CHECK( detStore->retrieve(m_sTgcId) );
 
-    if (m_eventCnvTool.retrieve().isFailure()) {
-        log << MSG::FATAL << "Could not get DetectorDescription manager" << endmsg;
-        return StatusCode::FAILURE;
-    }
+    CHECK( m_eventCnvTool.retrieve() );
 
     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized. " << endmsg;
     return StatusCode::SUCCESS;
