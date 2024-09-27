@@ -176,7 +176,9 @@ class PileupReweightingBlock (ConfigBlock):
         toolLumicalcFiles = []
 
         # PRW config files should only be configured if we run on MC
-        if config.dataType() is not DataType.Data:
+        # Run 4 not supported yet
+        if (config.dataType() is not DataType.Data and
+            config.geometry() is not LHCPeriod.Run4):
             # check if user provides per-campaign pileup config list
             if self.userPileupConfigs is not None and self.userPileupConfigsPerCampaign is not None:
                 raise ValueError('Both userPileupConfigs and userPileupConfigsPerCampaign specified, '
@@ -241,7 +243,8 @@ class PileupReweightingBlock (ConfigBlock):
         if config.geometry() is LHCPeriod.Run4:
             log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
             alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg'+self.postfix )
-            alg.uint32Decorations = { 'RandomRunNumber' : 350000 }
+            alg.uint32Decorations = { 'RandomRunNumber' :
+                                      config.autoconfigFlags().Input.RunNumbers[0] }
 
         else:
             alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
