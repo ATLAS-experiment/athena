@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -821,8 +821,14 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	  
       } /// Loop over SC
 
-	//// lets make sure the 0 padding is correct
+      //// lets make sure the 0 padding is correct
+      if(byteshift!=0){
+	  increaseWordShift(wordshift);
+	  byteshift=0;
+      }
+      ATH_MSG_DEBUG("wordshift before: " << wordshift << ", s: " << s);
       if((wordshift-s)%2) increaseWordShift(wordshift);
+      ATH_MSG_DEBUG("wordshift after : " << wordshift << ", s: " << s);
       if( (wordshift-s-((m_iPacket-oldipacket)*(m_monHeaderSize+m_monTrailerSize))) != n64word*2){
 	ATH_MSG_WARNING( " ERROR: time slice end is not padded properly " << (wordshift-s-m_iPacket*(m_monHeaderSize+m_monTrailerSize)) << "!=" << n64word*2  <<  " m_ipacket " << m_iPacket );
       }
