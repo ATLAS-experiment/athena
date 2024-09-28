@@ -127,7 +127,7 @@ def makeTauWorkingPointSequence( seq, dataType, workingPoint, postfix = ''):
     if len (splitWP) != 1 :
         raise ValueError ('working point should be of format "quality", not ' + workingPoint)
 
-    nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
+    nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}_noeleid.conf'
 
     if splitWP[0] not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'NoID', 'Baseline'] :
         raise ValueError ("invalid tau quality: \"" + splitWP[0] +
