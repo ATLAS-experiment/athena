@@ -49,7 +49,7 @@ void TRTDigCondFakeMap::setStrawStateInfo(Identifier& TRT_Identifier,
 
   // Anatoli says we need to scale the noise amplitude of Kr,Ar according to LT_(Kr,Ar)/LT_Xe
   MsgStream* amsg = &(msg());
-  const int statusHT = m_sumTool->getStatusHT(TRT_Identifier);
+  const int statusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
   const int strawGasType = TRTDigiHelper::StrawGasType(statusHT,m_UseGasMix, amsg);
   bool isBar = abs(m_id_helper->barrel_ec(TRT_Identifier))==1;
   double averagenoiseampforstrawlength = ( ( (800.)/(100*CLHEP::cm) ) * strawlength + 2100.0 ) / 2500.0;

@@ -12,7 +12,7 @@
 
 TRTActiveCondAlg::TRTActiveCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator),
+  : ::AthReentrantAlgorithm(name,pSvcLocator),
     m_strawStatus("TRT_StrawStatusSummaryTool",this),
     m_trtId(nullptr)
 { declareProperty("TRTStrawStatusSummaryTool",m_strawStatus); }
@@ -38,13 +38,13 @@ StatusCode TRTActiveCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTActiveCondAlg::execute()
+StatusCode TRTActiveCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 
   // ____________ Construct Write Cond Handle and check its validity ____________
 
-  SG::WriteCondHandle<TRTCond::ActiveFraction> writeHandle{m_strawWriteKey};
+  SG::WriteCondHandle<TRTCond::ActiveFraction> writeHandle{m_strawWriteKey, ctx};
 
   // Do we have a valid Write Cond Handle for current time?
   if(writeHandle.isValid()) {
@@ -86,7 +86,7 @@ StatusCode TRTActiveCondAlg::execute()
   std::vector<std::vector<int> > dummyTableCountAll( writeCdo->getEtaBins().size(), dummyPhiVec );
   std::vector<std::vector<int> > dummyTableCountDead( writeCdo->getEtaBins().size(), dummyPhiVec );
 
-  SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey);
+  SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey, ctx);
   const InDetDD::TRT_DetElementCollection* elements(trtDetEleHandle->getElements());
   if (not trtDetEleHandle.isValid() or elements==nullptr) {
     ATH_MSG_FATAL(m_trtDetEleContKey.fullKey() << " is not available.");
@@ -106,7 +106,7 @@ StatusCode TRTActiveCondAlg::execute()
         //Get hash Id
         IdentifierHash hashId = m_trtId->straw_layer_hash(strawLayerId);
 
-        bool status = m_strawStatus->get_status(id);
+        bool status = m_strawStatus->get_status(id, ctx);
         countAll++; if (status) countDead++;
 
         const Amg::Vector3D &strawPosition = elements->getDetectorElement(hashId)->center(id);
@@ -194,7 +194,7 @@ StatusCode TRTActiveCondAlg::execute()
   //__________ Assign range of writeCdo to that of the ReadHandle___________ 
   EventIDRange rangeW;
 
-    SG::ReadCondHandle<StrawStatusContainer> strawReadHandle{m_strawReadKey};
+    SG::ReadCondHandle<StrawStatusContainer> strawReadHandle{m_strawReadKey, ctx};
     const StrawStatusContainer* strawContainer{*strawReadHandle};
     if(strawContainer==nullptr) {
         ATH_MSG_ERROR("Null pointer to the straw status container");
@@ -217,12 +217,6 @@ StatusCode TRTActiveCondAlg::execute()
   }
 
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TRTActiveCondAlg::finalize()
-{
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }
 

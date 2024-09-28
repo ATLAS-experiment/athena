@@ -141,7 +141,7 @@ void TRTNoise::InitThresholdsAndNoiseAmplitudes_and_ProduceNoiseDigitPool(CLHEP:
   while ( m_pDigConditions->getNextStraw(hitid, noiselevel, noiseamp) ) {
 
     const bool isBarrel(!(hitid & 0x00200000));
-    const int statusHT =  m_sumTool->getStatusHT(getStrawIdentifier(hitid));
+    const int statusHT =  m_sumTool->getStatusHT(getStrawIdentifier(hitid), Gaudi::Hive::currentContext());
     const int strawGasType = TRTDigiHelper::StrawGasType(statusHT,m_UseGasMix, &msg());
     float lt = useLookupTable(noiselevel, maxLTOverNoiseAmp, 0., 1.) * noiseamp;
 
@@ -193,7 +193,7 @@ void TRTNoise::InitThresholdsAndNoiseAmplitudes_and_ProduceNoiseDigitPool(CLHEP:
 
   while ( m_pDigConditions->getNextStraw( hitid, noiselevel, noiseamp) ) {
 
-    const int statusHT =  m_sumTool->getStatusHT(getStrawIdentifier(hitid));
+    const int statusHT =  m_sumTool->getStatusHT(getStrawIdentifier(hitid), Gaudi::Hive::currentContext());
     const int strawGasType = TRTDigiHelper::StrawGasType(statusHT,m_UseGasMix, &msg());
 
     const bool isBarrel(!(hitid & 0x00200000));
