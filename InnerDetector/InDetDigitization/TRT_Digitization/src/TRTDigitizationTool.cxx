@@ -460,9 +460,9 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     //}
 
     // if StatusHT == 6 thats emulate argon, ==7 that's emulate krypton
-    bool emulateArFlag = m_sumTool->getStatusHT(idStraw) == 6;
-    bool emulateKrFlag = m_sumTool->getStatusHT(idStraw) == 7;
-    const int statusHT = m_sumTool->getStatusHT(idStraw);
+    bool emulateArFlag = m_sumTool->getStatusHT(idStraw, ctx) == 6;
+    bool emulateKrFlag = m_sumTool->getStatusHT(idStraw, ctx) == 7;
+    const int statusHT = m_sumTool->getStatusHT(idStraw, ctx);
     m_pProcessingOfStraw->ProcessStraw(fieldCache, i, e, digit_straw,
                                        m_alreadyPrintedPDGcodeWarning,
                                        m_cosmicEventPhase, //m_ComTime,

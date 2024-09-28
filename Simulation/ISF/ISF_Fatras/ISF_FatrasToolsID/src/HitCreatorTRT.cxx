@@ -153,7 +153,7 @@ void iFatras::HitCreatorTRT::createSimHit(const ISF::ISFParticle& isp, const Trk
        // get the real identifier
        Identifier hitId = hitSurface.associatedDetectorElementIdentifier();
        // check conditions of the straw
-       if (m_useConditionsSvc &&  !m_trtStatusSummaryTool->get_status(hitId) ){
+       if (m_useConditionsSvc &&  !m_trtStatusSummaryTool->get_status(hitId, Gaudi::Hive::currentContext()) ){
            ATH_MSG_VERBOSE("[ trthit ] Straw is not active ( says ConditionsTool). Ignore. ");
            return; 
        }

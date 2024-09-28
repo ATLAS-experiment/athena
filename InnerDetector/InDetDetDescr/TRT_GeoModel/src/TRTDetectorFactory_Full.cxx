@@ -970,7 +970,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 	pShell->add(new GeoIdentifierTag(iABC));
   TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
   int strawStatusHT = TRTCond::StrawStatus::Good;
-  if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+  if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
   ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
   // Ruslan: insert radiators with Ar-straws
@@ -1283,7 +1283,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
     int bar_ec = (iiSide) ? -2 : +2;
     TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
     int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
     ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
     // Ruslan: insert plane with Ar-straws
@@ -1583,7 +1583,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
     int bar_ec = (iiSide) ? -2 : +2;
     TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
     int strawStatusHT = TRTCond::StrawStatus::Good;
-    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+    if (m_strawsvcavailable && (m_doArgon || m_doKrypton)) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
     ActiveGasMixture agm = DecideGasMixture(strawStatusHT);
 
     //Ruslan: insert plane with Ar-straws

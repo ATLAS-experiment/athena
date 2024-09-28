@@ -161,7 +161,7 @@ StatusCode TRTStrawStatusRead::writeToTextFile(const std::string& filename )
         slay = m_trtid->straw_layer(id);
         straw = m_trtid->straw(id);
 
-        stat = m_status->getStatus(id);
+        stat = m_status->getStatus(id, Gaudi::Hive::currentContext());
         if(stat!=TRTCond::StrawStatus::Good) {
 	  if(bec==-2) {
 	    deadec[lay]++;
@@ -198,7 +198,7 @@ StatusCode TRTStrawStatusRead::writeToTextFile(const std::string& filename )
      // print gas status for sector 1, strawlayer 1, straw 1 in this layer-or-wheel
      if(sec==1 && slay==1) {
 
-        int stat = int(m_status->getStatusHT(id));
+        int stat = int(m_status->getStatusHT(id, Gaudi::Hive::currentContext()));
 
         ATH_MSG_INFO( bec << "  " << lay << " " << stat );
      }
@@ -266,7 +266,7 @@ StatusCode TRTStrawStatusRead::writeToTextFile(const std::string& filename )
         sec = m_trtid->phi_module(id);
         slay = m_trtid->straw_layer(id);
         straw = m_trtid->straw(id);
-        stat = int(m_status->getStatusPermanent(id));
+        stat = int(m_status->getStatusPermanent(id, Gaudi::Hive::currentContext()));
 
 	if(slay==0 && straw==0) std::cout << bec << " " << lay << " " << sec << " " << stat << std::endl;
       }
