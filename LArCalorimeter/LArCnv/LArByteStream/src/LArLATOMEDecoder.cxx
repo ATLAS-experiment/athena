@@ -826,8 +826,14 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	  
       } /// Loop over SC
 
-	//// lets make sure the 0 padding is correct
+      //// lets make sure the 0 padding is correct
+      if(byteshift!=0){
+	  increaseWordShift(wordshift);
+	  byteshift=0;
+      }
+      ATH_MSG_DEBUG("wordshift before: " << wordshift << ", s: " << s);
       if((wordshift-s)%2) increaseWordShift(wordshift);
+      ATH_MSG_DEBUG("wordshift after : " << wordshift << ", s: " << s);
       if( (wordshift-s-((m_iPacket-oldipacket)*(m_monHeaderSize+m_monTrailerSize))) != n64word*2){
 	ATH_MSG_WARNING( " ERROR: time slice end is not padded properly " << (wordshift-s-m_iPacket*(m_monHeaderSize+m_monTrailerSize)) << "!=" << n64word*2  <<  " m_ipacket " << m_iPacket );
       }
