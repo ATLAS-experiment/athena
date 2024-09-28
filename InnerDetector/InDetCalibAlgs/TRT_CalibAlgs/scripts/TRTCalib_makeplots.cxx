@@ -3048,15 +3048,15 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
 
     cout << "    Configure time residual histograms" << endl;
     if (treshist1)
-        treshist1->SetTitle(Form("time-residual whole TRT"));
+        treshist1->SetTitle("time-residual whole TRT");
     if (treshist2)
-        treshist2->SetTitle(Form("time-residual (barrel side C)"));
+        treshist2->SetTitle("time-residual (barrel side C)");
     if (treshist3)
-        treshist3->SetTitle(Form("time-residual (barrel side A)"));
+        treshist3->SetTitle("time-residual (barrel side A)");
     if (treshist4)
-        treshist4->SetTitle(Form("time-residual (endcap side C)"));
+        treshist4->SetTitle("time-residual (endcap side C)");
     if (treshist5)
-        treshist5->SetTitle(Form("time-residual (endcap side A)"));
+        treshist5->SetTitle("time-residual (endcap side A)");
     if (treshist2)
         treshist2->SetFillColor(38);
     if (treshist3)
@@ -3070,25 +3070,25 @@ ResidualPlots::ResidualPlots(TFile *file, bool isAr = false)
     {
         cout << "    Configure Argon residual histograms" << endl;
         if (reshist1)
-            reshist1->SetTitle(Form("residual Argon whole TRT"));
+            reshist1->SetTitle("residual Argon whole TRT");
         if (reshist2)
-            reshist2->SetTitle(Form("residual Argon (endcap side C)"));
+            reshist2->SetTitle("residual Argon (barrel side C)");
         if (reshist3)
-            reshist3->SetTitle(Form("residual Argon (barrel side A)"));
+            reshist3->SetTitle("residual Argon (barrel side A)");
         if (reshist4)
-            reshist4->SetTitle(Form("residual Argon (barrel side C)"));
+            reshist4->SetTitle("residual Argon (endcap side C)");
         if (reshist5)
-            reshist5->SetTitle(Form("residual Argon (endcap side A)"));
+            reshist5->SetTitle("residual Argon (endcap side A)");
         if (treshist1)
-            treshist1->SetTitle(Form("time-residual Argon whole TRT"));
+            treshist1->SetTitle("time-residual Argon whole TRT");
         if (treshist2)
-            treshist2->SetTitle(Form("time-residual Argon (endcap side C)"));
+            treshist2->SetTitle("time-residual Argon (barrel side C)");
         if (treshist3)
-            treshist3->SetTitle(Form("time-residual Argon (barrel side A)"));
+            treshist3->SetTitle("time-residual Argon (barrel side A)");
         if (treshist4)
-            treshist4->SetTitle(Form("time-residual Argon (barrel side C)"));
+            treshist4->SetTitle("time-residual Argon (endcap side C)");
         if (treshist5)
-            treshist5->SetTitle(Form("time-residual Argon (endcap side A)"));
+            treshist5->SetTitle("time-residual Argon (endcap side A)");
     }
 
     TF1 *resfit2 = nullptr;
