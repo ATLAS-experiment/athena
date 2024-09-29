@@ -14,8 +14,8 @@ namespace Muon{
     class MdtTwinTubeTestAlg: public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
-            StatusCode initialize() override  final;
-            StatusCode execute(const EventContext& ctx) const;
+            virtual StatusCode initialize() override  final;
+            virtual StatusCode execute(const EventContext& ctx) const override;
         private:
             ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
