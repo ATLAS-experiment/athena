@@ -1,19 +1,8 @@
 LineNumber,VariableName,Type,Description
-1,nameOfComponent,vector<vector<string> >,"HLT MET (missing transverse energy) quantities, compacted into a single container"
-2,exComponent,vector<vector<float> >,"x-direction energy from MET, for each term of MET - to be removed"
-3,eyComponent,vector<vector<float> >,"y-direction energy from MET, for each term of MET - to be removed"
-4,ezComponent,vector<vector<float> >,"z-direction energy from MET, for each term of MET - to be removed"
-5,sumEtComponent,vector<vector<float> >,"Sum of transverse energy, for each term of MET - to be removed"
-6,sumEComponent,vector<vector<float> >,"Sum of energy, for each term of MET - to be removed"
-7,calib0Component,vector<vector<float> >,"MET calibration components - to be removed"
-8,calib1Component,vector<vector<float> >,"MET calibration components - to be removed"
-9,sumOfSignsComponent,vector<vector<float> >,to be removed
-10,statusComponent,vector<vector<short> >,to be removed
-11,usedChannelsComponent,vector<vector<unsigned short> >,to be removed
-12,ex,vector<float>,"x-direction energy from MET"
-13,ey,vector<float>,"y-direction energy from MET"
-14,ez,vector<float>,"z-direction energy from MET"
-15,sumEt,vector<float>,"Sum of transverse energy from MET"
-16,sumE,vector<float>,"Sum of energy from MET"
-17,flag,vector<int>,"Flag for MET"
-18,roiWord,vector<unsigned int>,"L1 Region of interest word for MET"
+1,ex,vector<float>,"x-direction energy from MET"
+2,ey,vector<float>,"y-direction energy from MET"
+3,ez,vector<float>,"z-direction energy from MET"
+4,sumEt,vector<float>,"Sum of transverse energy from MET"
+5,sumE,vector<float>,"Sum of energy from MET"
+6,flag,vector<int>,"Flag for MET"
+7,roiWord,vector<unsigned int>,"L1 Region of interest word for MET"

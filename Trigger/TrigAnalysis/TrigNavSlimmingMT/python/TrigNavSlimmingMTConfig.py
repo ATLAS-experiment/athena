@@ -101,10 +101,13 @@ def AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimmingHelper):
                                             'HLTNav_RepackedFeatures_MET':'xAOD::TrigMissingETContainer','HLTNav_RepackedFeatures_METAux':'xAOD::TrigMissingETAuxContainer',
                                             'HLTNav_RepackedROIs':'TrigRoiDescriptorCollection'})
 
+  # Collections where we drop some branches
+  slimmingHelper.ExtraVariables += ['HLTNav_RepackedFeatures_Particle.px.py.pz.e', # Dropping charge and pdgid (neither filled)
+                                    'HLTNav_RepackedFeatures_MET.ex.ey.ez.sumEt.sumE.flag.roiWord'] # Dropping MET component branches
+
+  # Collections where we keep all branches
   slimmingHelper.AllVariables += ['HLTNav_Summary_DAODSlimmed',
-                                  'HLTNav_RepackedFeatures_Particle',
-                                  'HLTNav_RepackedFeatures_MET',
-                                  'HLTNav_RepackedROIs']
+                                    'HLTNav_RepackedROIs']
 
 #
 # Return an ComponentAccumulator which configures trigger navigation slimming during 
