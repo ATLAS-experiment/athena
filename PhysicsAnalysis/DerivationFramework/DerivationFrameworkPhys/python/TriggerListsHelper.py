@@ -2,11 +2,9 @@
 # TriggerListsHelper: helper class which retrieves the full set of triggers needed for
 # trigger matching in the DAODs and can then return them when needed. 
 
-from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
-from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
+from TriggerMenuMT.TriggerAPI import TriggerAPISession, TriggerType, TriggerAPI, TriggerPeriod
 from PathResolver import PathResolver
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
-import re
 
 def read_trig_list_file(fname):
    """Read a text file containing a list of triggers
@@ -30,6 +28,44 @@ def read_trig_list_flags(flags):
         else:
             trigger_names_notau.append(chain_name)
     return (trigger_names_notau, trigger_names_tau)
+
+def getTapisSession(flags):
+    from Campaigns.Utils import Campaign
+    from AthenaConfiguration.Enums import Format
+    yearStr = str(flags.Input.DataYear) if not flags.Input.isMC else ""
+    if flags.Input.isMC:
+        if flags.Input.MCCampaign == Campaign.MC16a or flags.Input.MCCampaign == Campaign.MC20a:
+            yearStr = "2015_2016" 
+        elif flags.Input.MCCampaign == Campaign.MC16d or flags.Input.MCCampaign == Campaign.MC20d:
+            yearStr = "2017"
+        elif flags.Input.MCCampaign == Campaign.MC16e or flags.Input.MCCampaign == Campaign.MC20e:
+            yearStr = "2018"
+        elif flags.Input.MCCampaign == Campaign.MC23a or flags.Input.MCCampaign == Campaign.MC21a:
+            yearStr = "2022"
+        elif flags.Input.MCCampaign == Campaign.MC23c or flags.Input.MCCampaign == Campaign.MC23d:
+            yearStr = "2023"
+
+    session_files = {
+        "2015": "TriggerAPISessions/tapis_data15_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns.json",
+        "2016": "TriggerAPISessions/tapis_data16_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_WITH_IGNORES.json",
+        "2015_2016": "TriggerAPISessions/tapis_data15_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_data16_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_WITH_IGNORES.json",
+        "2017": "TriggerAPISessions/tapis_data17_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.json",
+        "2018": "TriggerAPISessions/tapis_data18_13TeV_20190708_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.json",
+        "2022": "TriggerAPISessions/tapis_data22_13p6TeV_20230207_PHYS_StandardGRL_All_Good_25ns.json",
+        "2023": "TriggerAPISessions/tapis_data23_13p6TeV_20230828_PHYS_StandardGRL_All_Good_25ns.json",
+    }
+
+    if yearStr in session_files:
+        return TriggerAPISession(json=session_files[yearStr])
+
+    # Otherwise: data24, MC23e, phase-II. Base this on the menu from the AOD.
+    if flags.Input.Format == Format.POOL:
+        return TriggerAPISession(file=flags.Input.Files[0])
+
+    from AthenaCommon.Logging import logging
+    logging.getLogger('TriggerListHelper::GetTriggerLists::getTapisSession').error('Failed to obtain a session.')
+    return None
+
 
 class TriggerListsHelper:
     def __init__(self, flags):
@@ -94,36 +130,47 @@ class TriggerListsHelper:
 
         else: # Run 3 and Run 4
 
-            ## TODO, Trigger API missing for Run 3 - currently wildcard
+            # TriggerAPI Session based trigger lists
+            session = getTapisSession(self.flags)
+            lf = 0.8 # Prescale weighted life fraction of the GRL's LBs 
+            api_trigger_names = set()
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.el, livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.mu, livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.g, livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.tau, livefraction=lf).union(api_trigger_names)
+            ## Add Run 2 cross-triggers for some sets
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.mu], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.tau], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.mu,  TriggerType.tau], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.tau, TriggerType.xe], livefraction=lf).union(api_trigger_names)
+            ## Add additional cross-trigger categories identified from investigating API output
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.g], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el,  TriggerType.xe], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.mu,  TriggerType.g], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.g,   TriggerType.xe], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.tau, TriggerType.g], livefraction=lf).union(api_trigger_names)
 
-            ## NOTE: The splitting of tau vs. no-tau only needs to be maintained so long as we want to be able to
-            ##       run the run-2 style matching during derivation over the run-3 trigger lists.
-
-            r_tau = re.compile("HLT_.*tau.*")
-            r_notau = re.compile("HLT_[1-9]*(e|mu|g|j).*")
-
-            trigger_names_notau = []
-            trigger_names_tau = []
-            if hlt_menu:
-                for chain_name in hlt_menu:
-                    result_tau = r_tau.match(chain_name)
-                    result_notau = r_notau.match(chain_name)
-                    if result_tau is not None: trigger_names_tau.append(chain_name)
-                    if result_notau is not None: trigger_names_notau.append(chain_name)
+            # Add hadronic categories, new for Run 3
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.j, livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.bj, livefraction=lf).union(api_trigger_names)
+            # Add cross-triggers as well
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.el, TriggerType.j], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.mu, TriggerType.j], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.j,  TriggerType.bj], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.j,  TriggerType.g], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.j,  TriggerType.tau], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.j,  TriggerType.xe], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.j,  TriggerType.ht], livefraction=lf).union(api_trigger_names)
+            api_trigger_names = session.getLowestUnprescaled(triggerType=[TriggerType.bj, TriggerType.xe], livefraction=lf).union(api_trigger_names)
 
             ## Add extra chains from flags
             extra_flag_notau, extra_flag_tau = read_trig_list_flags(self.flags)
+            extra_flag = extra_flag_notau + extra_flag_tau
 
-            ## Add extra chains from file (dropping the tau vs. non-tau distinction at this point)
+            ## Add extra chains from file
             extra_file = read_trig_list_file("DerivationFrameworkPhys/run3ExtraMatchingTriggers.txt")
 
             ## Merge and remove duplicates
-            trigger_names_full_notau = list(set(trigger_names_notau+extra_file+extra_flag_notau))
-            trigger_names_full_tau = list(set(trigger_names_tau+extra_flag_tau))
-            trigger_names_full_all = list(set.union(set(trigger_names_full_notau), set(trigger_names_full_tau)))
-
-            self.Run3TriggerNames = trigger_names_full_all
-            self.Run3TriggerNamesNoTau = trigger_names_full_notau
-            self.Run3TriggerNamesTau = trigger_names_full_tau
+            self.Run3TriggerNames = list(set(extra_file + extra_flag + list(api_trigger_names)))
 
         return
