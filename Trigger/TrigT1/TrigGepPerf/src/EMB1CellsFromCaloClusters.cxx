@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMB1CellsFromCaloClusters.h"
@@ -41,7 +41,7 @@ EMB1CellsFromCaloClusters::cells(std::vector<std::vector<const CaloCell*>>& cell
 
 
   
-  for(const auto& cl : dvec){
+  for(const auto cl : dvec){
     const auto *cell_links = cl->getCellLinks();
     if (!cell_links){
       ATH_MSG_ERROR("No link from cluster to cells");
