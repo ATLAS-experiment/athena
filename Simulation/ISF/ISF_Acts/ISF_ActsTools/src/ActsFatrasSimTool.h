@@ -209,9 +209,10 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // ISF BaseSimulatorTool Interface methods
   virtual StatusCode initialize() override;
-  virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer&,
+  virtual StatusCode simulate(const EventContext& ctx, ISFParticle& isp, ISFParticleContainer&,
                               McEventCollection*) override;
   virtual StatusCode simulateVector(
+            const EventContext& ctx,
             const ISFParticleVector& particles,
             ISFParticleContainer& secondaries,
             McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;

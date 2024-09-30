@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -237,7 +237,7 @@ void iGeant4::G4LegacyTransportTool::finalizeOnce()
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4LegacyTransportTool::simulate(const EventContext& ctx, ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
 
   // give a screen output that you entered Geant4SimSvc
   ATH_MSG_VERBOSE( "Particle " << isp << " received for simulation." );
@@ -246,7 +246,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate( ISF::ISFParticle& isp, ISF:
   // wrap the given ISFParticle into a STL vector of ISFParticles with length 1
   // (minimizing code duplication)
   const ISF::ISFParticleVector ispVector(1, &isp);
-  StatusCode success = this->simulateVector(ispVector, secondaries, mcEventCollection);
+  StatusCode success = this->simulateVector(ctx, ispVector, secondaries, mcEventCollection);
   ATH_MSG_VERBOSE( "Simulation done" );
 
   // Geant4 call done
@@ -254,11 +254,11 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate( ISF::ISFParticle& isp, ISF:
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection*) {
+StatusCode iGeant4::G4LegacyTransportTool::simulateVector(const EventContext& ctx, const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection*) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */
-  G4Event* inputEvent = m_inputConverter->ISF_to_G4Event(particles, genEvent(mcEventCollection));
+  G4Event* inputEvent = m_inputConverter->ISF_to_G4Event(ctx, particles, genEvent(mcEventCollection));
   if (!inputEvent) {
     ATH_MSG_ERROR("ISF Event conversion failed ");
     return StatusCode::FAILURE;

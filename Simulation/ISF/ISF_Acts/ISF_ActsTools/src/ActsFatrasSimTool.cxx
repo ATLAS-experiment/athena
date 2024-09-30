@@ -56,7 +56,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::ActsFatrasSimTool::simulate(
+StatusCode ISF::ActsFatrasSimTool::simulate(const EventContext& ctx,
   ISFParticle& isp, ISFParticleContainer& secondaries,
   McEventCollection* mcEventCollection) {
   ATH_MSG_VERBOSE("Particle " << isp << " received for simulation.");
@@ -69,17 +69,17 @@ StatusCode ISF::ActsFatrasSimTool::simulate(
   // Wrap the input ISFParticle in an STL vector with size of 1
   const ISF::ISFParticleVector ispVector(1, &isp);
   ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
-  ATH_CHECK(this->simulateVector(ispVector, secondaries, mcEventCollection));
+  ATH_CHECK(this->simulateVector(ctx, ispVector, secondaries, mcEventCollection));
   ATH_MSG_VERBOSE("Simulation done");
   return StatusCode::SUCCESS;
 }
 
 StatusCode ISF::ActsFatrasSimTool::simulateVector(
-    const ISFParticleVector& particles,
-    ISFParticleContainer& secondaries,
-    McEventCollection* /*mcEventCollection*/, McEventCollection *) {
+                                                  const EventContext& ctx,
+                                                  const ISFParticleVector& particles,
+                                                  ISFParticleContainer& secondaries,
+                                                  McEventCollection* /*mcEventCollection*/, McEventCollection *) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   m_randomEngine->setSeed(m_randomEngineName, ctx);
   CLHEP::HepRandomEngine* randomEngine = m_randomEngine->getEngine(ctx);
   Generator generator(CLHEP::RandFlat::shoot(randomEngine->flat()));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -261,7 +261,7 @@ StatusCode ISF::SimKernelMT::execute() {
 
     ATH_MSG_VERBOSE("Selected " << particles.size() << " particles to be processed by " << lastSimulator->name());
     // Run the simulation
-    ATH_CHECK( lastSimulator->simulateVector( particles, newSecondaries, outputTruth.ptr(), shadowTruth.get() ) );
+    ATH_CHECK( lastSimulator->simulateVector( ctx, particles, newSecondaries, outputTruth.ptr(), shadowTruth.get() ) );
     ATH_MSG_VERBOSE(lastSimulator->name() << " returned " << newSecondaries.size() << " new particles to be added to the queue." );
     // Register returned particles with the entry layer tool, set their order and enqueue them
     for ( auto* secondary : newSecondaries ) {

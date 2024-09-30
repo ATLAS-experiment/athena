@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -159,7 +159,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEventST()
 }
 
 /** Simulation Call */
-StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
+StatusCode ISF::FastCaloSimV2Tool::simulate(const EventContext& ctx, ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE("NEW PARTICLE! FastCaloSimV2Tool called with ISFParticle: " << isfp);
@@ -167,7 +167,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
   Amg::Vector3D particle_position =  isfp.position();
   Amg::Vector3D particle_direction(isfp.momentum().x(),isfp.momentum().y(),isfp.momentum().z());
 
-  ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomEngineName); // TODO ideally would pass the event context to this method
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomEngineName);
 
   //Don't simulate particles with total energy below 10 MeV
   if(isfp.ekin() < 10) {
@@ -195,8 +195,8 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
 
   //only simulate if extrapolation to calo surface succeeded
   if(extrapol.IDCaloBoundary_eta() != -999){
-
-    TFCSSimulationState simulstate(*rngWrapper);
+    CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+    TFCSSimulationState simulstate(rndmEngine);
 
     ATH_CHECK(m_paramSvc->simulate(simulstate, &truth, &extrapol));
 
@@ -215,7 +215,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
     if (m_doPunchThrough) {
       int process = 201;
       // call punch-through simulation
-      const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, simulstate, *rngWrapper);
+      const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, simulstate, rndmEngine);
 
       if (someSecondaries && !someSecondaries->empty()) {
         //Record truth incident for created punch through particles

@@ -67,12 +67,12 @@ namespace ISFTesting {
     // cppcheck-suppress unknownMacro
     MOCK_CONST_METHOD2(convert, StatusCode(McEventCollection&,
                                            ISF::ISFParticleContainer&));
-    MOCK_CONST_METHOD3(convertHepMCToG4Event, StatusCode(McEventCollection&,
+    MOCK_CONST_METHOD4(convertHepMCToG4Event, StatusCode(const EventContext&, McEventCollection&,
                                                          G4Event*&,
                                                          McEventCollection&));
-   MOCK_CONST_METHOD2(convertHepMCToG4EventLegacy, StatusCode(McEventCollection&,
+   MOCK_CONST_METHOD3(convertHepMCToG4EventLegacy, StatusCode(const EventContext&, McEventCollection&,
                                                               G4Event*&));
-    MOCK_CONST_METHOD4(ISF_to_G4Event, G4Event*(const std::vector<ISF::ISFParticle*>&,
+    MOCK_CONST_METHOD5(ISF_to_G4Event, G4Event*(const EventContext&, const std::vector<ISF::ISFParticle*>&,
                                                 HepMC::GenEvent*,
                                                 HepMC::GenEvent*,
                                                 bool));
@@ -178,8 +178,8 @@ public:
 
   MOCK_METHOD0(finalize, StatusCode());
   MOCK_METHOD1(setupEvent, StatusCode(const EventContext&));
-  MOCK_METHOD3(simulate, StatusCode(ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
-  MOCK_METHOD4(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
+  MOCK_METHOD4(simulate, StatusCode(const EventContext&, ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD5(simulateVector, StatusCode(const EventContext&, const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
   MOCK_METHOD1(releaseEvent, StatusCode(const EventContext&));
   MOCK_CONST_METHOD1(bid, int(const ISF::ISFParticle&));
 
@@ -209,8 +209,8 @@ public:
 
   MOCK_METHOD0(finalize, StatusCode());
   MOCK_METHOD1(setupEvent, StatusCode(const EventContext&));
-  MOCK_METHOD3(simulate, StatusCode(ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
-  MOCK_METHOD4(simulateVector, StatusCode(const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
+  MOCK_METHOD4(simulate, StatusCode(const EventContext&, ISF::ISFParticle&, ISF::ISFParticleContainer&, McEventCollection*));
+  MOCK_METHOD5(simulateVector, StatusCode(const EventContext&, const ISF::ISFParticleVector&, ISF::ISFParticleContainer&, McEventCollection*, McEventCollection*));
   MOCK_METHOD1(releaseEvent, StatusCode(const EventContext&));
   MOCK_CONST_METHOD1(bid, int(const ISF::ISFParticle&));
 
@@ -869,7 +869,7 @@ protected:
 
     ASSERT_NE( m_mockParticleKillerTool, nullptr );
     ISFTesting::MockParticleKillerTool *particleKillerTool = dynamic_cast<ISFTesting::MockParticleKillerTool*>(getParticleKillerTool());
-    EXPECT_CALL( *particleKillerTool, simulateVector(::testing::_,::testing::_,::testing::_,::testing::_) )
+    EXPECT_CALL( *particleKillerTool, simulateVector(::testing::_,::testing::_,::testing::_,::testing::_,::testing::_) )
       .Times(1)
       .WillOnce(::testing::Return(StatusCode::SUCCESS));
 
