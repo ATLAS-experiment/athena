@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -284,9 +284,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   }  
   assert(pSvcLoc);
 
-  StoreGateSvc* pStore(nullptr);
-  static const bool CREATE(true);
-  assert((pSvcLoc->service("StoreGateSvc", pStore, CREATE)).isSuccess());
+  SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
   assert(pStore);
 
   testRecord(*pStore);
@@ -337,8 +335,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   ///////
 
-  StoreGateSvc* detStore(nullptr);
-  assert((pSvcLoc->service("DetectorStore", detStore, CREATE)).isSuccess());
+  SmartIF<StoreGateSvc> detStore(pSvcLoc->service("DetectorStore"));
   assert(detStore);
 
   testRecord(*detStore);

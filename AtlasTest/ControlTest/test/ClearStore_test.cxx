@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -8,7 +8,6 @@
  ATLAS Collaboration
  ***************************************************************************/
 
-// $Id: ClearStore_test.cxx,v 1.1 2007-07-10 01:14:31 calaf Exp $
 
 #include <iostream>
 
@@ -32,9 +31,7 @@ int main() {
   }  
   assert(pSvcLoc);
 
-  StoreGateSvc* pStore(nullptr);
-  static const bool CREATE(true);
-  assert((pSvcLoc->service("StoreGateSvc", pStore, CREATE)).isSuccess());
+  SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
   assert(pStore);
   
   cout << "*** ClearStore_test run standard testRecord a first time ***" << endl;

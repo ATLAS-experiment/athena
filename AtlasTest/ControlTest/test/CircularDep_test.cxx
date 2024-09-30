@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -44,10 +44,8 @@ int main() {
   }  
 
   assert(pSvcLoc);
-  StoreGateSvc* pSG;
-  
-  const bool CREATEIF(true);
-  assert((pSvcLoc->service("StoreGateSvc", pSG, CREATEIF)).isSuccess());
+
+  SmartIF<StoreGateSvc> pSG(pSvcLoc->service("StoreGateSvc"));
   assert(pSG);
 
   Circular *circ0(new Circular), *circ1(new Circular);
