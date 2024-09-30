@@ -5,7 +5,7 @@
 //
 // BFieldSolenoid.cxx
 //
-#include "BFieldSolenoid.h"
+#include "MagFieldUtils/BFieldSolenoid.h"
 #include <string>
 #include <cmath>
 #include <algorithm>
