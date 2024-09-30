@@ -592,7 +592,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 
 	Identifier TRT_Identifier = idHelper->straw_id(1, iMod, iABC, 1, 1);
 	int strawStatusHT = TRTCond::StrawStatus::Good;
-	if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+	if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
 	refreshGasBarrel(strawStatusHT,pShell);
 	
 	//-------------------------------------------------------------------//
@@ -828,7 +828,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
 		
 		
 		childPlane = mapFPV["TRTWheelA-StrawPlane-"
@@ -957,7 +957,7 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 		int bar_ec = (iiSide) ? -2 : +2;
 		TRT_Identifier = idHelper->straw_id(bar_ec, 1, iiWheel, 1, 1);
 		int strawStatusHT = TRTCond::StrawStatus::Good;
-		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier);
+		if (m_strawsvcavailable) strawStatusHT = m_sumTool->getStatusHT(TRT_Identifier, Gaudi::Hive::currentContext());
 		
 		childPlane = mapFPV["TRTWheelB-StrawPlane-"
 				    +std::to_string(iiSide)+"-"
