@@ -84,7 +84,7 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         from AthenaConfiguration.Enums import LHCPeriod
         kwargs.setdefault("decode2DStrips", flags.GeoModel.Run >= LHCPeriod.Run4)
         if kwargs["decode2DStrips"]:
-            from xAODMuonMeasViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
+            from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
             result.merge(RpcMeasViewAlgCfg(flags))
         else:
             kwargs.setdefault("OutputContainer", "xRpcMeasurements")
@@ -192,7 +192,7 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
         kwargs.setdefault("xAODStripKey", "xAODsTgcStrips")
         kwargs.setdefault("xAODWireKey", "xAODsTgcWires")
         kwargs.setdefault("xAODPadKey", "xAODsTgcPads")
-        from xAODMuonMeasViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
+        from xAODMuonViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
         result.merge(sTgcMeasViewAlgCfg(flags))
 
 
