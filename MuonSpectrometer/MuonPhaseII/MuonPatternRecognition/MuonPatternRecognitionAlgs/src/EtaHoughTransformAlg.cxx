@@ -130,6 +130,22 @@ StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
     }
     return StatusCode::SUCCESS;
 }
+bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
+    switch (hit->type()){
+        case xAOD::UncalibMeasType::MdtDriftCircleType: {
+            const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit->primaryMeasurement());
+            return dc->status() == Muon::MdtDriftCircleStatus::MdtStatusDriftTime;
+            break;
+        }
+        case xAOD::UncalibMeasType::MMClusterType:
+        case xAOD::UncalibMeasType::sTgcStripType:
+            return true;
+            break;
+        default:
+            break;
+    }
+    return false;
+}
 
 StatusCode EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     HoughPlaneConfig cfg;
@@ -207,8 +223,16 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     for (const auto& max : maxima) {
         /// TODO: Proper weighted hit counting...
         std::vector<HoughHitType> hitList;
-        hitList.insert(hitList.end(), max.hitIdentifiers.begin(),
-                       max.hitIdentifiers.end());
+        hitList.reserve(max.hitIdentifiers.size());
+        unsigned int nPrec{0};
+        for (const HoughHitType& hit : max.hitIdentifiers) {
+            nPrec += isPrecisionHit(hit);
+            hitList.push_back(hit);
+        }
+        if (nPrec < m_nPrecHitCut) {
+            ATH_MSG_VERBOSE("The maximum did not pass the precision hit cut");
+            continue;
+        }
         size_t nHits = hitList.size();
         extendWithPhiHits(hitList, bucket);
         sortHits(hitList);
