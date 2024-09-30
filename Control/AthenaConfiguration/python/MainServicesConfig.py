@@ -30,7 +30,10 @@ def AvalancheSchedulerSvcCfg(flags, **kwargs):
     kwargs.setdefault("ShowControlFlow", flags.Scheduler.ShowControlFlow)
     kwargs.setdefault("VerboseSubSlots", flags.Scheduler.EnableVerboseViews)
     kwargs.setdefault("ThreadPoolSize", flags.Concurrency.NumThreads)
-
+    kwargs.setdefault("DataDepsGraphFile", flags.Scheduler.DataDepsGraphFile)
+    kwargs.setdefault("DataDepsGraphAlgPattern", flags.Scheduler.DataDepsGraphAlgPattern)
+    kwargs.setdefault("DataDepsGraphObjectPattern", flags.Scheduler.DataDepsGraphObjectPattern)
+    
     cfg = ComponentAccumulator()
     scheduler = CompFactory.AvalancheSchedulerSvc(**kwargs)
     cfg.addService(scheduler, primary=True)
