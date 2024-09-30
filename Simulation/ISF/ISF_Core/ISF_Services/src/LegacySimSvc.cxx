@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -33,8 +33,9 @@ StatusCode ISF::LegacySimSvc::releaseEvent()
 /** Simulation Call */
 StatusCode ISF::LegacySimSvc::simulate(ISF::ISFParticle& isfp, McEventCollection* mcEventCollection)
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   ISF::ISFParticleContainer secondaries;
-  ATH_CHECK(m_simulatorTool->simulate(isfp, secondaries, mcEventCollection));
+  ATH_CHECK(m_simulatorTool->simulate(ctx, isfp, secondaries, mcEventCollection));
   if (not secondaries.empty()) {
     for (auto particle : secondaries) {
       m_particleBroker->push( particle, &isfp);

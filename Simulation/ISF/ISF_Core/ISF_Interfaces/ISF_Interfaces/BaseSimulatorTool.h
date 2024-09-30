@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_INTERFACES_BASESIMULATORTOOL_H
@@ -70,11 +70,11 @@ namespace ISF {
     { return setupEvent(Gaudi::Hive::currentContext()); }
 
     /** */
-    virtual StatusCode simulate( ISFParticle& , ISFParticleContainer&, McEventCollection*) override
+    virtual StatusCode simulate(const EventContext& , ISFParticle& , ISFParticleContainer&, McEventCollection*) override
     { return StatusCode::FAILURE; }
 
     /** Simulation call for vectors of particles */
-    virtual StatusCode simulateVector(const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *) override
+    virtual StatusCode simulateVector(const EventContext& ctx, const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *) override
     {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input
@@ -82,7 +82,7 @@ namespace ISF {
       // simulate each particle individually
       for (auto* cisp : particles) {
         ATH_MSG_VERBOSE( "Starting simulation of particle: " << (*cisp) );
-        ATH_CHECK(this->simulate(*cisp, secondaries, mcEventCollection));
+        ATH_CHECK(this->simulate(ctx, *cisp, secondaries, mcEventCollection));
       }
       return StatusCode::SUCCESS;
 

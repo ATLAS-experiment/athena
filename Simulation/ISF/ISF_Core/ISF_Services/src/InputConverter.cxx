@@ -152,7 +152,7 @@ ISF::InputConverter::convert(McEventCollection& inputGenEvents,
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGenEvents,
+StatusCode ISF::InputConverter::convertHepMCToG4Event(const EventContext& ctx, McEventCollection& inputGenEvents,
                                                       G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const
 {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
@@ -163,16 +163,16 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGe
       std::make_move_iterator(std::end(simParticleList))
       };
   if (!shadowGenEvents.empty()) {
-    outputG4Event = this->ISF_to_G4Event(simParticleVector, inputGenEvents.back(), shadowGenEvents.back());
+    outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), shadowGenEvents.back());
   }
   else{
-    outputG4Event = this->ISF_to_G4Event(simParticleVector, inputGenEvents.back(), nullptr);
+    outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), nullptr);
   }
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
+StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(const EventContext& ctx, McEventCollection& inputGenEvents,
                                                             G4Event*& outputG4Event) const
 {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
@@ -182,7 +182,7 @@ StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(McEventCollection& i
     std::make_move_iterator(std::begin(simParticleList)),
       std::make_move_iterator(std::end(simParticleList))
       };
-  outputG4Event = this->ISF_to_G4Event(simParticleVector, inputGenEvents.back(), nullptr);
+  outputG4Event = this->ISF_to_G4Event(ctx, simParticleVector, inputGenEvents.back(), nullptr);
   return StatusCode::SUCCESS;
 }
 
@@ -466,10 +466,9 @@ ISF::InputConverter::passesFilters(const HepMC::GenParticle& part) const
 
 
 //________________________________________________________________________
-G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVector, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent, bool useHepMC) const
+G4Event* ISF::InputConverter::ISF_to_G4Event(const EventContext& ctx, const ISF::ISFParticleVector& ispVector, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent, bool useHepMC) const
 {
-  const int eventID(1);
-  G4Event *g4evt = new G4Event(eventID);
+  G4Event *g4evt = new G4Event(ctx.eventID().event_number());
 
   // retrieve world solid (volume)
   const G4VSolid *worldSolid = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume()->GetSolid();

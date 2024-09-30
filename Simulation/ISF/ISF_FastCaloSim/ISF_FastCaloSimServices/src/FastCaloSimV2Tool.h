@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMV2TOOL_H
@@ -53,7 +53,7 @@ namespace ISF {
     virtual StatusCode initialize() override final;
 
     /** Simulation Call */
-    virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) override final;
+    virtual StatusCode simulate(const EventContext& ctx, ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) override final;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent(const EventContext&) override final;

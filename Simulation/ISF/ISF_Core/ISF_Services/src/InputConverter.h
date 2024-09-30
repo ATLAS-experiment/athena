@@ -62,14 +62,14 @@ namespace ISF {
                                ISF::ISFParticleContainer& simParticles) const override final;
 
     /** */
-    virtual StatusCode convertHepMCToG4Event(McEventCollection& inputGenEvents,
+    virtual StatusCode convertHepMCToG4Event(const EventContext& ctx, McEventCollection& inputGenEvents,
                                              G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const override final;
 
-    virtual StatusCode convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
+    virtual StatusCode convertHepMCToG4EventLegacy(const EventContext& ctx, McEventCollection& inputGenEvents,
                                              G4Event*& outputG4Event) const override final;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
-    G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const override final;
+    G4Event* ISF_to_G4Event(const EventContext& ctx, const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const override final;
 
   private:
 

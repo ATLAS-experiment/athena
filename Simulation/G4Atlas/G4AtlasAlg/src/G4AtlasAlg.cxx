@@ -403,7 +403,7 @@ StatusCode G4AtlasAlg::execute()
   ATH_CHECK( m_truthRecordSvc->initializeTruthCollection(largestGeneratedParticleBC, largestGeneratedVertexBC) );
 
   G4Event *inputEvent{};
-  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth) );
+  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(ctx, *outputTruthCollection, inputEvent, *shadowTruth) );
 
   bool abort = false;
   // Worker run manager

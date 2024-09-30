@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./ParticleKillerSimTool.h"
@@ -17,7 +17,7 @@ StatusCode ISF::ParticleKillerSimTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::ParticleKillerSimTool::simulate( ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) {
+StatusCode ISF::ParticleKillerSimTool::simulate(const EventContext&, ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) {
 
   // give a screen output that you entered ParticleKillerSimSvc
   ATH_MSG_VERBOSE( "Particle '" << isp << "' received for simulation." );
@@ -29,9 +29,9 @@ StatusCode ISF::ParticleKillerSimTool::simulate( ISFParticle& isp, ISFParticleCo
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::ParticleKillerSimTool::simulateVector(const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *) {
+StatusCode ISF::ParticleKillerSimTool::simulateVector(const EventContext& ctx, const ISFParticleVector& particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection, McEventCollection *) {
   for (auto isp : particles) {
-    ATH_CHECK(simulate(*isp, secondaries, mcEventCollection));
+    ATH_CHECK(simulate(ctx, *isp, secondaries, mcEventCollection));
   }
   return StatusCode::SUCCESS;
 }
