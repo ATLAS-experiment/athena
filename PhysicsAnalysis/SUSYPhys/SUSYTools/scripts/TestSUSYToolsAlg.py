@@ -67,8 +67,8 @@ inputFiles = {}
 inputFiles['mc20e']      = 'DAOD_%s.mc20_13TeV.410470.%s_mc20e_%s.%s.pool.root'%(options.flav, sim_type, options.ptag, options.flav)
 inputFiles['mc23a']      = 'mc23_13p6TeV.601229.%s_mc23a_%s.%s.pool.root'%(sim_type, options.ptag, options.flav)
 inputFiles['mc23d']      = 'mc23_13p6TeV.601229.%s_mc23d_%s.%s.pool.root'%(sim_type, options.ptag, options.flav)
-inputFiles['data18']     = 'data18_13TeV.39756643_%s.%s.pool.root'%(options.ptag,options.flav)
-inputFiles['data22']     = 'data22_13p6TeV.39672234_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data18']     = 'data18_13TeV.39757132_%s.%s.pool.root'%(options.ptag,options.flav)
+inputFiles['data22']     = 'data22_13p6TeV.39672246_%s.%s.pool.root'%(options.ptag,options.flav)
 inputFiles['data23']     = 'data23_13p6TeV.39756993_%s.%s.pool.root'%(options.ptag,options.flav)
 
 inputDir = ''
