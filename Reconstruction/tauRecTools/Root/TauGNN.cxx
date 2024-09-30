@@ -14,7 +14,8 @@
 
 TauGNN::TauGNN(const std::string &nnFile, const Config &config):
     asg::AsgMessaging("TauGNN"),
-    m_onnxUtil(std::make_shared<FlavorTagDiscriminants::OnnxUtil>(nnFile))
+    m_onnxUtil(std::make_shared<FlavorTagDiscriminants::OnnxUtil>(nnFile)),
+    m_config{config}
   {
     //==================================================//
     // This part is ported from FTagDiscriminant GNN.cxx//
