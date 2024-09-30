@@ -34,7 +34,6 @@ class LArSCIdvsIdTest : public AthReentrantAlgorithm {
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store"};
 
   ToolHandle<ICaloSuperCellIDTool> m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
-  bool m_print;
   const LArOnlineID* m_onlineId=nullptr;
   const CaloCell_ID* m_caloCellId=nullptr;
 
