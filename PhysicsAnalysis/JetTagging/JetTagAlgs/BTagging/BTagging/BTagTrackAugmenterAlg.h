@@ -49,7 +49,7 @@ namespace Analysis {
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_track_mom {this, "trackMomentum","trackMomentum","trackMomentum of tracks" };
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trk_origin_vtx {this, "TrkOriginVertex", "TrkOriginVtx", "origin vertex of track"};
-
+    
 
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_invalid {
       this, "invalidIp", "invalidIp", "flag for invalid impact parameter"
