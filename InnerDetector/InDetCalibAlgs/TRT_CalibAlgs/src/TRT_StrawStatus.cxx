@@ -320,9 +320,9 @@ void InDet::TRT_StrawStatus::printDetailedInformation() {
                 ATH_MSG_INFO( "if you do not need the detailed print information, you can also just set printDetailedInformation to 0 to avoid this crash" );
                 m_printStatusCount++;
             }
-            int status = m_TRTStrawStatusSummaryTool->get_status( id );
-            int statusTemporary = m_TRTStrawStatusSummaryTool->getStatus( id );
-            int statusPermanent = m_TRTStrawStatusSummaryTool->getStatusPermanent( id );
+            int status = m_TRTStrawStatusSummaryTool->get_status( id, Gaudi::Hive::currentContext() );
+            int statusTemporary = m_TRTStrawStatusSummaryTool->getStatus( id, Gaudi::Hive::currentContext() );
+            int statusPermanent = m_TRTStrawStatusSummaryTool->getStatusPermanent( id, Gaudi::Hive::currentContext() );
             for (int j=0; j<6; j++) fprintf(f, "%d ", index[j]);
             fprintf(f, "%d %d %d %d %d\n", chip, HVpad, status, statusTemporary, statusPermanent);
         }

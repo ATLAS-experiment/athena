@@ -483,17 +483,23 @@ class MenuSequence:
 class Chain(object):
     """Basic class to define the trigger menu """
     __slots__ ='name','steps','nSteps','alignmentGroups','L1decisions', 'topoMap'
-    def __init__(self, name, ChainSteps, L1decisions, nSteps = [], alignmentGroups = [], topoMap=None):
+    def __init__(self, name, ChainSteps, L1decisions, nSteps = None, alignmentGroups = None, topoMap=None):
  
         """
         Construct the Chain from the steps
         Out of all arguments the ChainSteps & L1Thresholds are most relevant, the chain name is used in debug messages
         """
+        
+        # default mutable values must be initialized to None
+        if nSteps is None:  nSteps = []  
+        if alignmentGroups is None:  alignmentGroups = []
+
         self.name   = name
         self.steps  = ChainSteps
         self.nSteps = nSteps
         self.alignmentGroups = alignmentGroups
-
+       
+        
         # The chain holds a map of topo ComboHypoTool configurators
         # This is needed to allow placement of the ComboHypoTool in the right position
         # for multi-leg chains (defaults to last step)
@@ -617,27 +623,38 @@ class Chain(object):
 # next: can we describe emtpy steps with isEmpty flag only (not via multiplicity and setting comboHypoCfg=None)?
 class ChainStep(object):
     """Class to describe one step of a chain; if multiplicity is greater than 1, the step is combo/combined.  Set one multiplicity value per sequence"""
-    def __init__(self, name,  Sequences = [], chainDicts = [], comboHypoCfg = ComboHypoCfg, comboToolConfs = [], isEmpty = False, createsGhostLegs = False):        
-                
+    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg, comboToolConfs = None, isEmpty = False, createsGhostLegs = False): 
+
+        # default mutable values must be initialized to None
+        if SequenceGens is None:  SequenceGens = []
+        if comboToolConfs is None: comboToolConfs = []
+
+        assert chainDicts is not None,"Error building a ChainStep without a chainDicts"
+
+        self.name = name
+        self.sequences = []
+        self.sequenceGens = SequenceGens 
+        self.comboHypoCfg = comboHypoCfg
+        self.comboToolConfs = list(comboToolConfs)
+        self.stepDicts = chainDicts # one dict per leg
+
         self.isEmpty = isEmpty        
         if self.isEmpty:
             self.multiplicity = []
         else:
-            self.multiplicity = [1 for seq in Sequences]                    
+            self.multiplicity = [1 for seq in self.sequenceGens]                    
             log.debug("Building step %s for chain %s: len=%d multiplicty=%s",  name, chainDicts[0]['chainName'], len(chainDicts), ' '.join(map(str,[mult for mult in self.multiplicity])))           
             # sanity check on inputs, excluding empty steps
             if len(chainDicts) != len(self.multiplicity) and 'Jet' not in chainDicts[0]['signatures']:
-                log.error("[ChainStep] Sequences: %s",Sequences)
+                log.error("[ChainStep] SequenceGens: %s",self.sequenceGens)
                 log.error("[ChainStep] chainDicts: %s",chainDicts)
                 log.error("[ChainStep] multiplicity: %s",self.multiplicity)
                 raise RuntimeError("[ChainStep] Tried to configure a ChainStep %s with %i multiplicity and %i dictionaries. These lists must have the same size" % (name, len(self.multiplicity), len(chainDicts)) )
                         
-        self.name = name
-        self.sequences = []
-        self.sequenceFunctions = Sequences    
-        for iseq, seq in enumerate(self.sequenceFunctions):              
+           
+        for iseq, seq in enumerate(self.sequenceGens):              
             if not isinstance(seq, functools.partial):
-                log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", self.name, iseq)
+                log.error("[ChainStep] %s SequenceGens verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", self.name, iseq)
                 log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
                 raise RuntimeError("Sequence is not packaged in a tuple, see error message above" ) 
                                                  
@@ -654,9 +671,7 @@ class ChainStep(object):
             if len(sig_set) == 2 and ('Jet' in sig_set and 'Bjet' in sig_set):
                 self.onlyJets = True
 
-        self.comboHypoCfg = comboHypoCfg
-        self.comboToolConfs = list(comboToolConfs)
-        self.stepDicts = chainDicts # one dict per leg
+        
         
         if not self.isEmpty:
             #self.relabelLegIdsForJets()
@@ -667,7 +682,7 @@ class ChainStep(object):
     def createSequences(self):
         """ creation of this step sequences with instantiation of the CAs"""
         log.debug("creating sequences for step %s", self.name)
-        for seq in self.sequenceFunctions:                        
+        for seq in self.sequenceGens:                        
             self.sequences.append(seq()) # create the sequences         
         
     def relabelLegIdsForJets(self):
@@ -774,13 +789,13 @@ class ChainStep(object):
         return self.getChainLegs()
 
     def __repr__(self):
-        if len(self.sequenceFunctions) == 0:        
+        if len(self.sequenceGens) == 0:        
             return "\n--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
         
-        repr_string= "\n--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences = %s "%\
+        repr_string= "\n--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequenceGens = %s "%\
           (self.name,  ' '.join(map(str,[mult for mult in self.multiplicity])),
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
-             ' '.join(map(str, [seq.func.__name__ for seq in self.sequenceFunctions]) ))
+             ' '.join(map(str, [seq.func.__name__ for seq in self.sequenceGens]) ))
              
         if self.combo is not None:
             repr_string += "\n + ComboHypo = %s" % self.combo.Alg.name

@@ -107,7 +107,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::initialize() {
 
         if (m_sumTool.name() != "") {
             ATH_MSG_VERBOSE("Trying " << m_sumTool << " isGood");
-            ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(ident));
+            ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(ident, Gaudi::Hive::currentContext()));
         }
 
         // Retrieve the TRT_ByteStreamService.
@@ -248,7 +248,7 @@ std::vector<std::vector<std::vector<int>>> TRTMonitoringRun3RAW_Alg::initScaleVe
             for (int j = 0; j < 32; j++ ) {
                 Identifier Dummy_Identifier;
                 Dummy_Identifier = m_pTRTHelper->straw_id(side, j, lN, sLN, sN);
-                bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(Dummy_Identifier) ) == GasType::Ar);
+                bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(Dummy_Identifier, Gaudi::Hive::currentContext()) ) == GasType::Ar);
 
                 if (isArgonStraw)
                     countAr += 1.0;
@@ -863,7 +863,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
     // Test out the TRT_StrawStatusSummarySvc.
     if (!m_sumTool.name().empty() && m_doExpert) {
         ATH_MSG_VERBOSE("Trying " << m_sumTool << " isGood");
-        ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(TRT_Identifier));
+        ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(TRT_Identifier, Gaudi::Hive::currentContext()));
     }
 
     // ibe = 0 (Barrel), ibe = 1 (Endcap)
@@ -902,7 +902,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
             bool is_anybininVgate_high = (hitinvaliditygate != 0);
             TRT_Identifier = (*p_rdo)->identify();
 
-            if (m_doMaskStraws && m_sumTool->get_status(TRT_Identifier)) continue;
+            if (m_doMaskStraws && m_sumTool->get_status(TRT_Identifier, Gaudi::Hive::currentContext())) continue;
 
             int barrel_ec = m_pTRTHelper->barrel_ec(TRT_Identifier);
             //ToDo: Check TRT_LoLumRawData object
@@ -930,7 +930,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTRDOs(const TRT_RDO_Container& rdoCon
             // To get proper straw numbering
             TRT_Identifier = p_lolum->identify();
             //inline function checks m_ArgonXenonSplitter
-            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(TRT_Identifier) ) == GasType::Ar);
+            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(TRT_Identifier,Gaudi::Hive::currentContext()) ) == GasType::Ar);
             int phi_module     = m_pTRTHelper->phi_module(TRT_Identifier);
             int layer_or_wheel = m_pTRTHelper->layer_or_wheel(TRT_Identifier);
             int straw_layer    = m_pTRTHelper->straw_layer(TRT_Identifier);
@@ -1835,7 +1835,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
             int phi_module      = m_pTRTHelper->phi_module(id);
             int straw_layer     = m_pTRTHelper->straw_layer(id);
             int straw           = m_pTRTHelper->straw(id);
-            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(id) ) == GasType::Ar);
+            const bool isArgonStraw = (Straw_Gastype( m_sumTool->getStatusHT(id, Gaudi::Hive::currentContext()) ) == GasType::Ar);
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             int ibe   = abs(barrel_ec) - 1;     // ibe   = 0 (Barrel), ibe   = 1 (Endcap)
             int iside = barrel_ec > 0 ? 0 : 1;  // iside = 0 (Side A), iside = 1 (Side C)
@@ -1947,7 +1947,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
                     int phi_module = m_pTRTHelper->phi_module(id);
                     int straw_layer = m_pTRTHelper->straw_layer(id);
                     int straw = m_pTRTHelper->straw(id);
-                    const bool isArgonStraw = Straw_Gastype( m_sumTool->getStatusHT(id) ) == GasType::Ar;
+                    const bool isArgonStraw = Straw_Gastype( m_sumTool->getStatusHT(id, Gaudi::Hive::currentContext()) ) == GasType::Ar;
                     // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
                     int ibe = abs(barrel_ec) - 1;      // ibe   = 0 (Barrel), ibe   = 1 (Endcap)
                     int iside = barrel_ec > 0 ? 0 : 1; // iside = 0 (Side A), iside = 1 (Side C)
@@ -2316,7 +2316,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
 
             Identifier surfaceID;
             surfaceID = trtCircle->identify();
-            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID) ) == GasType::Ar );
+            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext()) ) == GasType::Ar );
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             float temp_locr = aTrackParam->parameters()[Trk::driftRadius];
             int iphi_module = -9999;

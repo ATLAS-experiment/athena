@@ -728,7 +728,7 @@ int TRTFastDigitizationTool::gasType( const Identifier &straw_id ) const
   // see InnerDetector/InDetConditions/TRT_ConditionsData/TRT_ConditionsData/StrawStatus.h
   // TRT representation of gasType = Xenon: 0, Argon: 1, Krypton: 2
 
-  int status = m_trtStrawStatusSummaryTool->getStatusHT( straw_id );
+  int status = m_trtStrawStatusSummaryTool->getStatusHT( straw_id, Gaudi::Hive::currentContext());
 
   if ( status == 2 || status == 3 )
     return 0;

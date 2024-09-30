@@ -103,7 +103,7 @@ StatusCode TRTMonitoringRun3ESD_Alg::initialize() {
 
         if (m_sumTool.name() != "") {
             ATH_MSG_VERBOSE("Trying " << m_sumTool << " isGood");
-            ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(ident));
+            ATH_MSG_VERBOSE("TRT_StrawStatusTool reports status = " << m_sumTool->getStatus(ident, Gaudi::Hive::currentContext()));
         }
     } //If do expert
 
@@ -724,7 +724,7 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
             Identifier surfaceID;
             const Trk::MeasurementBase *mesb = (*TSOSItBegin)->measurementOnTrack();
             surfaceID = trtCircle->identify();
-            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID) ) == GasType::Ar );
+            const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext()) ) == GasType::Ar );
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             float temp_locr = aTrackParam->parameters()[Trk::driftRadius];
             TRTCond::RtRelation const *rtr = m_TRTCalDbTool->getRtRelation(surfaceID);
