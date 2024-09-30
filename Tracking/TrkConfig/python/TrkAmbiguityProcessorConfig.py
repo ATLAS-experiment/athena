@@ -239,12 +239,15 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
             InDetScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import (
-            NnPixelClusterSplitProbToolCfg)
-        kwargs.setdefault(
-            "SplitProbTool",
-            (acc.popToolsAndMerge(NnPixelClusterSplitProbToolCfg(flags))
-             if flags.Tracking.doPixelClusterSplitting else None))
+        if flags.Tracking.doPixelTruthSplit:
+            from InDetConfig.SiClusterizationToolConfig import (
+                TruthPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
+        else:
+            from InDetConfig.SiClusterizationToolConfig import (
+                NnPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
+        kwargs.setdefault("SplitProbTool", (
+            acc.popToolsAndMerge(PixelClusterSplitProbToolCfg(flags))
+            if flags.Tracking.doPixelClusterSplitting else None))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
@@ -312,12 +315,15 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
             ITkScoringToolCfg(flags)))
 
     if "SplitProbTool" not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import (
-            ITkTruthPixelClusterSplitProbToolCfg)
-        kwargs.setdefault(
-            "SplitProbTool",
-            (acc.popToolsAndMerge(ITkTruthPixelClusterSplitProbToolCfg(flags))
-             if flags.Tracking.doPixelClusterSplitting else None))
+        if flags.Tracking.doPixelTruthSplit:
+            from InDetConfig.SiClusterizationToolConfig import (
+                ITkTruthPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
+        else:
+            from InDetConfig.SiClusterizationToolConfig import (
+                ITkNnPixelClusterSplitProbToolCfg as PixelClusterSplitProbToolCfg)
+        kwargs.setdefault("SplitProbTool", (
+            acc.popToolsAndMerge(PixelClusterSplitProbToolCfg(flags))
+            if flags.Tracking.doPixelClusterSplitting else None))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import (
