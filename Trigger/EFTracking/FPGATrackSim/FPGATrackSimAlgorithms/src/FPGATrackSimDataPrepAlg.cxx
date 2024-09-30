@@ -163,6 +163,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer(m_inputTruthParticleContainerKey, ctx); // Read offline TruthParticles
                 if (!truthParticleContainer.isValid()) {
                     ATH_MSG_ERROR("No valid truth particle container with key " << truthParticleContainer.key());
+                    m_evtSel->setSelectedEvent(false);
                     return StatusCode::FAILURE;
                 }
                 const ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticleContainer, truthParticleContainer->size() - 1);
@@ -185,6 +186,7 @@ StatusCode FPGATrackSimDataPrepAlg::execute()
                 if (truthLinkVec->size() == 0)
                 {
                     ATH_MSG_DEBUG("No truth particles selected. Event skipped...");
+                    m_evtSel->setSelectedEvent(false);
                     return StatusCode::SUCCESS;
                 }
             }

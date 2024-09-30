@@ -62,8 +62,13 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
   virtual bool passMatching(FPGATrackSimTrack const &) const override;
   virtual bool passMatching(FPGATrackSimTruthTrack const &) const override;
 
-  virtual bool selectEvent(FPGATrackSimEventInputHeader*) const override;
-  virtual bool selectEvent(FPGATrackSimLogicalEventInputHeader*) const override;
+  virtual bool selectEvent(FPGATrackSimEventInputHeader*) override;
+  virtual bool selectEvent(FPGATrackSimLogicalEventInputHeader*) override;
+
+  // Allow code to query whether or not an event was selected by the service.
+  // If running over RDO part of this decision is made inside the dataprep algorithm, so it needs a setter.
+  virtual bool getSelectedEvent() const override { return m_selectEvent; }
+  virtual void setSelectedEvent(bool s) override { m_selectEvent =  s; }
 
  private:
 
@@ -91,6 +96,10 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
   void createRegions();                  // helper function to create RegionSlices object
   bool checkTruthTracks(const std::vector<FPGATrackSimTruthTrack>&) const; // helper function to check the truth tracks for selectEvent()
   bool checkTruthTracksLRT(const std::vector<FPGATrackSimTruthTrack>&) const; // check the truth tracks for selectEvent() with LRT requirements
+
+  // Cache result of selectEvent().
+  bool m_selectEvent = false;
+
 };
 
 /*inline const InterfaceID& FPGATrackSimEventSelectionSvc::interfaceID()

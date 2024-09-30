@@ -40,8 +40,8 @@ class IFPGATrackSimEventSelectionSvc : public virtual IService
   virtual bool passMatching(FPGATrackSimTrack const &) const = 0;
   virtual bool passMatching(FPGATrackSimTruthTrack const &) const = 0;
 
-  virtual bool selectEvent(FPGATrackSimEventInputHeader*) const = 0;
-  virtual bool selectEvent(FPGATrackSimLogicalEventInputHeader*) const = 0;
+  virtual bool selectEvent(FPGATrackSimEventInputHeader*) = 0;
+  virtual bool selectEvent(FPGATrackSimLogicalEventInputHeader*) = 0;
 
   virtual bool passQOverPt(const FPGATrackSimTrack&) const = 0;
   virtual bool passEta(const FPGATrackSimTrack&) const = 0;
@@ -54,6 +54,10 @@ class IFPGATrackSimEventSelectionSvc : public virtual IService
   virtual bool passPhi(const FPGATrackSimOfflineTrack&) const = 0;
   virtual bool passD0(const FPGATrackSimOfflineTrack&) const = 0;
   virtual bool passZ0(const FPGATrackSimOfflineTrack&) const = 0;
+
+  virtual bool getSelectedEvent() const = 0;
+  virtual void setSelectedEvent(bool s) = 0;
+
 };
 
 inline const InterfaceID& IFPGATrackSimEventSelectionSvc::interfaceID()

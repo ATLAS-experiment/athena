@@ -138,6 +138,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitsFiltered_1st (m_FPGAHitFilteredKey, ctx);
     ATH_CHECK( FPGAHitsFiltered_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
 
+    // Query the event selection service to make sure this event passed cuts.
+    if (!m_evtSel->getSelectedEvent()) {
+        ATH_MSG_DEBUG("Event skipped by: " << m_evtSel->name());
+        return StatusCode::SUCCESS;
+    }
+
     // Event passes cuts, count it. technically, DataPrep does this now.
     m_evt++;
 
