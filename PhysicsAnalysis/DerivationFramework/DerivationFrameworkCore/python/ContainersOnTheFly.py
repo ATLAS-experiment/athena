@@ -133,6 +133,8 @@ def ContainersOnTheFly(flags=None):
         ["TrackCaloClustersCombinedAndNeutralAux","xAOD::TrackCaloClusterAuxContainer"],
         ["BTagging_AntiKt4EMPFlow","xAOD::BTaggingContainer"],
         ["BTagging_AntiKt4EMPFlowAux","xAOD::BTaggingAuxContainer"],
+        ["BTagging_AntiKt4EMPFlowByVertex","xAOD::BTaggingContainer"], #ByVertex
+        ["BTagging_AntiKt4EMPFlowByVertexAux","xAOD::BTaggingAuxContainer"],
         ["BTagging_AntiKt4EMTopo","xAOD::BTaggingContainer"],
         ["BTagging_AntiKt4EMTopoAux","xAOD::BTaggingAuxContainer"],
         ["BTagging_AntiKtVR30Rmax4Rmin02Track","xAOD::BTaggingContainer"],
@@ -169,6 +171,12 @@ def ContainersOnTheFly(flags=None):
         ["BTagging_AntiKt4EMPFlowJFVtxAux","xAOD::BTagVertexAuxContainer"],
         ["BTagging_AntiKt4EMPFlowSecVtx","xAOD::VertexContainer"],
         ["BTagging_AntiKt4EMPFlowSecVtxAux","xAOD::VertexAuxContainer"],
+
+        ["BTagging_AntiKt4EMPFlowByVertexJFVtx","xAOD::BTagVertexContainer"],
+        ["BTagging_AntiKt4EMPFlowByVertexJFVtxAux","xAOD::BTagVertexAuxContainer"],
+        ["BTagging_AntiKt4EMPFlowByVertexSecVtx","xAOD::VertexContainer"],
+        ["BTagging_AntiKt4EMPFlowByVertexSecVtxAux","xAOD::VertexAuxContainer"],
+
 
         ["GNNVertices", "xAOD::VertexContainer"],
         ["GNNVerticesAux","xAOD::VertexAuxContainer"],
