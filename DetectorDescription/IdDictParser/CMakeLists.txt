@@ -21,6 +21,14 @@ atlas_add_dictionary( IdDictParserDict
                       IdDictParser/IdDictParserDict.h
                       IdDictParser/selection.xml
                       LINK_LIBRARIES IdDictParser )
+                      
+atlas_add_test( IdDictParser_test
+                SOURCES test/IdDictParser_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDictParser
+                POST_EXEC_SCRIPT nopost.sh )
+                
+set_property(TEST IdDictParser_IdDictParser_test_ctest PROPERTY ENVIRONMENT_MODIFICATION "XMLDEBUG=set:1")
 
 # Install files from the package:
 atlas_install_xmls( data/*.dtd data/*.xml )

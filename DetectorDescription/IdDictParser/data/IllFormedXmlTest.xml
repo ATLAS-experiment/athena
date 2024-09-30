@@ -1,0 +1,11 @@
+<IdDictionary name="IllFormed" version="v1">
+
+<!-- ill formed xml in badElement -->
+  <field name="elementOk" >
+    <label name="t1" value="0" />
+    <label name="t2" value="1" />
+    <label name="badElement" value="2" >
+    <label name="t3" value="3" />
+    <label name="t4" value="4" />
+  </field>
+</IdDictionary>
