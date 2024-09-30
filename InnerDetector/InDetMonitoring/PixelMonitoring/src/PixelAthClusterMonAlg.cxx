@@ -15,6 +15,8 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
+#include "InDetTestPixelLayer/InDetTestPixelLayerTool.h"
+#include "InDetTestPixelLayer/TrackStateOnPixelLayerInfo.h"
 
 
 PixelAthClusterMonAlg::PixelAthClusterMonAlg(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -45,6 +47,7 @@ StatusCode PixelAthClusterMonAlg::initialize() {
 
   ATH_CHECK(m_tracksKey.initialize());
   ATH_CHECK(m_clustersKey.initialize());
+  ATH_CHECK(  m_testPixelLayerTool.retrieve( DisableTool{m_testPixelLayerTool.empty()} ) );
   return StatusCode::SUCCESS;
 }
 
@@ -184,6 +187,8 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
   VecAccumulator2DMap TSOS_Measurement(*this, "TSOSMeasurement");
   VecAccumulator2DMap TSOS_Measurement_FE(*this, "TSOSMeasurementFE");
   VecAccumulator2DMap HolesRatio(*this, "HolesRatio");
+  VecAccumulator2DMap MissIBLhit(*this, "MissIBLhit");
+  VecAccumulator2DMap MissIBLpresentBLhit(*this, "MissIBLpresentBLhit");
   VecAccumulator2DMap MissHitsRatio(*this, "MissHitsRatio");
   auto trackGroup = getGroup("Track");
 
@@ -216,6 +221,8 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
     bool passJOTrkTightCut = static_cast<bool>(m_trackSelTool->accept(*track));
     bool pass1hole1GeVptTightCut = (passJOTrkTightCut && (measPerigee->pT() / 1000.0 > 1.0));  // misshit ratios
     bool pass1hole5GeVptTightCut = (passJOTrkTightCut && (measPerigee->pT() / 1000.0 > 5.0));  // eff vs lumi
+
+    if(measPerigee->pT()<1000.) continue; // Remove problematic low-pt tracks
 
     const Trk::Track* trackWithHoles(track);
     std::unique_ptr<const Trk::Track> trackWithHolesUnique = nullptr;
@@ -364,6 +371,32 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
       }
     } // end of TSOS loop
 
+    auto etanoibl = Monitored::Scalar<float>("eta_noibl", measPerigee->momentum().eta());
+    auto phinoibl = Monitored::Scalar<float>("phi_noibl", measPerigee->momentum().phi());
+    auto missibl  = Monitored::Scalar<float>("missIBLhit", 0.);
+    bool expectIBLHit = m_testPixelLayerTool->expectHitInInnermostPixelLayer(measPerigee);
+    int nIBLHits=0, nBLHits=0;
+    const Trk::TrackSummary *trksumm = track->trackSummary();
+    if (trksumm){ 
+      nIBLHits = trksumm->get(Trk::numberOfInnermostPixelLayerHits);
+      nBLHits  = trksumm->get(Trk::numberOfNextToInnermostPixelLayerHits);
+    }
+    if(expectIBLHit && nIBLHits==0 && pass1hole1GeVptTightCut){
+      std::vector<InDet::TrackStateOnPixelLayerInfo>  trackStateIBLlayer;
+      if(m_testPixelLayerTool->getTrackStateOnInnermostPixelLayerInfo(measPerigee, trackStateIBLlayer)){
+        Identifier posid_prev;
+        for (auto &tstate : trackStateIBLlayer){
+          Identifier posid = tstate.pixelId();
+          if(posid==posid_prev)continue;
+          MissIBLhit.add(PixLayers::kIBL, posid, 1.);
+          if(nBLHits>0)MissIBLpresentBLhit.add(PixLayers::kIBL, posid, 1.);
+          missibl=1.;
+          fill(trackGroup,etanoibl,phinoibl,missibl);
+          posid_prev=posid;
+        }
+      } 
+    } else if(expectIBLHit && pass1hole1GeVptTightCut) fill(trackGroup,etanoibl,phinoibl,missibl);
+
     ntracksPerEvent++;
     auto nph = Monitored::Scalar<int>("npixhits_per_track", nPixelHits);
     auto nphwgt = Monitored::Scalar<float>("npixhits_per_track_wgt", 1.0);
@@ -384,6 +417,8 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
   }
 
   fill2DProfLayerAccum(HolesRatio);
+  fill2DProfLayerAccum(MissIBLhit);
+  fill2DProfLayerAccum(MissIBLpresentBLhit);
   fill2DProfLayerAccum(MissHitsRatio);
   fill2DProfLayerAccum(TSOS_Outlier);
   fill2DProfLayerAccum(TSOS_Hole);
@@ -639,3 +674,4 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
 
   return StatusCode::SUCCESS;
 }
+

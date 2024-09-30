@@ -13,7 +13,7 @@
 
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "TrkTrack/TrackCollection.h"
-
+#include "InDetRecToolInterfaces/IInDetTestPixelLayerTool.h"
 
 
 //------------------------------
@@ -50,6 +50,9 @@ private:
   SG::ReadHandleKey<TrackCollection> m_tracksKey {
     this, "TrackName", "CombinedInDetTracks", "track data key"
   };
+
+  /**tool to calculate expected hit information in innermost layers*/
+  ToolHandle<InDet::IInDetTestPixelLayerTool> m_testPixelLayerTool{ this,"TestPixelLayerTool","","" };
 
   bool m_doOnline {};
   bool m_doLumiBlock {};

@@ -40,6 +40,9 @@ StatusCode PixelAthErrorMonAlg::fillHistograms(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("Filling Error Monitoring Histograms");
 
+  unsigned int bcid = GetEventInfo(ctx)->bcid();
+  auto bcidval = Monitored::Scalar<unsigned int>("pixdesyncmontool_bcid", bcid);
+
   // Generate a vector of error maps for all different error states.
   std::vector<VecAccumulator2DMap> error_maps_per_state;
   error_maps_per_state.reserve(kNumErrorStatesFEI3 + kNumErrorStatesFEI4);
@@ -375,6 +378,11 @@ StatusCode PixelAthErrorMonAlg::fillHistograms(const EventContext& ctx) const {
   fill2DProfLayerAccum(modsync_errors_maps);
   fill2DProfLayerAccum(rodsync_errors_maps);
 
+  for (int i = 0; i < PixLayers::COUNT; i++) {
+    auto val = Monitored::Scalar<float>("AvgSyncErrPerBCID_val", num_errormodules_per_cat_rodmod[0][i]);
+    fill(pixLayersLabel[i], bcidval, val);
+  }
+
   if (!m_doOnline) {
     for (unsigned int cat = 0; cat < ErrorCategoryRODMOD::kTruncROD + 1; ++cat) {
       fill2DProfLayerAccum(error_maps_per_cat_rodmod[cat]);
@@ -507,3 +515,4 @@ bool PixelAthErrorMonAlg::isPerFEI3State(const std::string& state) const {
 	 state.find("EOC") != std::string::npos || 
 	 state.find("Warning") != std::string::npos);
 }
+
