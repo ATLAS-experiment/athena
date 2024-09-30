@@ -237,7 +237,7 @@ class AlgConfig(ABC):
                 ChainStep(
                     name=step_name,                    
                     chainDicts=[chainDict],
-                    Sequences=[]
+                    SequenceGens=[]
                     if sel_acc is None
                     else [
                         functools.partial(make_MET_menu_sequenceGenCfg, flags, sel_acc, hypo_tool)                                                

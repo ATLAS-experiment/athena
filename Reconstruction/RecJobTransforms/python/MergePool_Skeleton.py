@@ -109,7 +109,7 @@ def fromRunArgs(runArgs):
     # Configure extra bits that are needed for TP conversion
     for item in flags.Input.TypedCollections:
         ctype, cname = item.split('#')
-        if ctype.startswith('Trk'):
+        if ctype.startswith('Trk') or ctype.startswith('InDet'):
             from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
             cfg.merge(TrkEventCnvSuperToolCfg(flags))
         if ctype.startswith('Calo') or ctype.startswith('LAr'):

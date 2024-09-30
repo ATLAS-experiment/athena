@@ -473,23 +473,30 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
     if(std::regex_match(chainName, SpecialCases::gammaXeChain))
       multiplicities={1,1};
 
-
     if ( multiplicities.size() > 1 ) {
       ATH_MSG_DEBUG(" this " << (is2LegTopoChain(ptrChain) ? "is": "is not") << " topological chain");
       // the chain structure (in terms of multiplicities) may change along the way
       // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
       // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
-      //
 
       // hack for HLT.*tau.*xe.* case
       if (std::regex_match(chainName, SpecialCases::tauXeChain)) {
-          if (multiplicities.size()==3) multiplicities={1,1};
-          else if (multiplicities.size()==2) multiplicities={1};
+          std::vector<size_t> mult_hack; // type mismatch with ChainNameParser::multiplicities
+          if (multiplicities.size()==3) mult_hack={1,1};
+          else if (multiplicities.size()==2) mult_hack={1};
+          ptrChain->set_leg_multiplicities(mult_hack); // HLTChain needs vector<size_t>
+      }
+
+      // hack for mu2MunoL1Special
+      if (std::regex_match(chainName, SpecialCases::mu2MunoL1Special)) {
+          std::vector<size_t> mult_hack;
+          if (multiplicities.size()==3) mult_hack={1,1};
+          else if (multiplicities.size()==2) mult_hack={2}; // HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6
+          ptrChain->set_leg_multiplicities(mult_hack);
       }
 
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
       std::vector<unsigned int> teIdsLastHealthyStepIds;
-
 
       for (auto ptrHLTSignature : ptrChain->signatures())
         {

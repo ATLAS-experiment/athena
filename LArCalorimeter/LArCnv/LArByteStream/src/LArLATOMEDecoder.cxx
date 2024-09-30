@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -723,6 +723,11 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	unsigned int at0Data=0, at1Data=0, satData=0;
 	bool at0val=false, at1val=false;
 		
+        // protection against corrupted bytestream data
+        if(nsc > N_LATOME_CHANNELS - 1){
+            break;
+            //FIXME: should fill some default data to all channels, because clearly this block is corrupted
+        }
 	if(!m_isAveraged && !m_isAutoCorr){
 	  decodeChannel(wordshift, byteshift, p, at0, at1,
 			at0Data, at1Data, satData, at0val, at1val);
@@ -821,8 +826,14 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	  
       } /// Loop over SC
 
-	//// lets make sure the 0 padding is correct
+      //// lets make sure the 0 padding is correct
+      if(byteshift!=0){
+	  increaseWordShift(wordshift);
+	  byteshift=0;
+      }
+      ATH_MSG_DEBUG("wordshift before: " << wordshift << ", s: " << s);
       if((wordshift-s)%2) increaseWordShift(wordshift);
+      ATH_MSG_DEBUG("wordshift after : " << wordshift << ", s: " << s);
       if( (wordshift-s-((m_iPacket-oldipacket)*(m_monHeaderSize+m_monTrailerSize))) != n64word*2){
 	ATH_MSG_WARNING( " ERROR: time slice end is not padded properly " << (wordshift-s-m_iPacket*(m_monHeaderSize+m_monTrailerSize)) << "!=" << n64word*2  <<  " m_ipacket " << m_iPacket );
       }

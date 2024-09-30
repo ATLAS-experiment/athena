@@ -105,7 +105,7 @@ void TRTDigCondBase::initialize(CLHEP::HepRandomEngine* rndmEngine) {
       // get ID of the straw, and the gas mix
       const int hitid(hitid_helper->buildHitId( endcap, isneg, ringwheel, phisector, layer, iStraw));
       Identifier strawId = m_id_helper->straw_id(side, phisector, ringwheel, layer, iStraw);
-      const int statusHT = m_sumTool->getStatusHT(strawId);
+      const int statusHT = m_sumTool->getStatusHT(strawId, Gaudi::Hive::currentContext());
       const int strawGasType = TRTDigiHelper::StrawGasType(statusHT,m_UseGasMix, &msg());
 
       //Get info about the straw conditions, then create and fill the strawstate

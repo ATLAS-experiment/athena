@@ -296,7 +296,7 @@ bool FillAlignTRTHits::fill(const Trk::Track* aTrack, TRT::TrackInfo* output, co
 						// Prepare for Xe-Ar mixed conditions:
 						int isArgonStraw = 0;
 						if (!m_TRTStrawSummaryTool.empty()) {
-							if (m_TRTStrawSummaryTool->getStatusHT(ident) != TRTCond::StrawStatus::Good) {
+							if (m_TRTStrawSummaryTool->getStatusHT(ident, Gaudi::Hive::currentContext()) != TRTCond::StrawStatus::Good) {
 								isArgonStraw = 1;
 							}
 						}

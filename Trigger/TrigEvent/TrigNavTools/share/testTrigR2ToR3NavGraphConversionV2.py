@@ -9,6 +9,8 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
 flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
+# BELOW: alternative test AOD file
+# flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13167/AOD.27162646._000001.pool.root.1"]
 # can browse config for this file here: 
 flags.Detector.GeometryLAr=True
 flags.Detector.GeometryTile=True
@@ -16,7 +18,7 @@ flags.Exec.MaxEvents = 20
 flags.Exec.SkipEvents = 0
 flags.Trigger.doEDMVersionConversion=True
 flags.fillFromArgs()
-flags.Concurrency.NumThreads=6
+flags.Concurrency.NumThreads=1
 flags.lock()
 
 # Initialize configuration object, add accumulator, merge, and run.

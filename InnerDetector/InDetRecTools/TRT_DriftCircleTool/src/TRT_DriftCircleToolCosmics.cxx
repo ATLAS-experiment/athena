@@ -205,7 +205,7 @@ InDet::TRT_DriftCircleCollection* InDet::TRT_DriftCircleToolCosmics::convert(int
       int strawstat=1;
 
       if(m_useConditionsStatus){
-         if(m_ConditionsSummary->getStatus(id) != TRTCond::StrawStatus::Good) {
+         if(m_ConditionsSummary->getStatus(id, ctx) != TRTCond::StrawStatus::Good) {
             strawstat = 0;
          }
          if(!strawstat) continue;

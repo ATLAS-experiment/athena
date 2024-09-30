@@ -274,7 +274,7 @@ StatusCode TRT_PrepDataToxAOD::execute()
       
       char gas_type = kUnset;
       if (!m_TRTStrawSummaryTool.empty()) {
-        int stat = m_TRTStrawSummaryTool->getStatusHT(surfaceID);
+        int stat = m_TRTStrawSummaryTool->getStatusHT(surfaceID, Gaudi::Hive::currentContext());
         
         if       ( stat==1 || stat==4 ) { gas_type = kArgon; }
         else if  ( stat==5 )            { gas_type = kKrypton; }

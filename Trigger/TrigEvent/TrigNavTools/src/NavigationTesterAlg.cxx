@@ -221,11 +221,13 @@ namespace Trig {
             return false; // No subset from Run3 was found in Run2
         };
         
-        
-
         bool result { false };
         // hack for "HLT_e26_lhmedium_nod0_mu8noL1" case
-        if ( std::regex_match(chain, SpecialCases::specialEchain) ) {  
+        // hack for "HLT_e24_lhmedium_L1EM20VHI_mu8noL1" type case
+        // hack for "HLT_mu11_2mu4noL1_nscan03_L1MU11_2MU6" type case
+        if ( std::regex_match(chain, SpecialCases::specialEchain) or
+             std::regex_match(chain, SpecialCases::specialElMuChain) or
+             std::regex_match(chain, SpecialCases::mu2MunoL1Special) ) {  
             result = isAnySubsetPresent(run3, run2);
         } else {
             // now subset checked on a level of objects, instead of group of objects

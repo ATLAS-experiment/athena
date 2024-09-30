@@ -45,26 +45,6 @@ class ATLAS_NOT_THREAD_SAFE TRT_StrawStatusSummaryTool:
   virtual StatusCode finalize() override;
 
 
- /// access to the status
-  virtual int getStatus(Identifier offlineId) const override {
-    return getStatus(offlineId,Gaudi::Hive::currentContext());
-  }
-
-  virtual int getStatusPermanent(Identifier offlineId) const override {
-    return getStatusPermanent(offlineId,Gaudi::Hive::currentContext());
-  }
-
-  virtual int getStatusHT(Identifier offlineId) const override {
-    return getStatusHT(offlineId,Gaudi::Hive::currentContext());
-  }
-
-  virtual bool get_status(Identifier offlineId) const override {
-    return get_status(offlineId,Gaudi::Hive::currentContext());
-  }
-
-  virtual bool get_statusHT(Identifier offlineId) const override {
-    return get_statusHT(offlineId,Gaudi::Hive::currentContext());
-  }
   virtual const StrawStatusContainer* getStrawStatusHTContainer() const override;
 
   virtual int getStatus(Identifier offlineId,const EventContext& ) const override;
