@@ -46,7 +46,7 @@ def CaloCellMakerCfg(flags):
         theCaloTimeCorr=CaloCellTimeCorrCfg(flags)
         cellMakerTools.append(result.popToolsAndMerge(theCaloTimeCorr))
 
-    if flags.LAr.doDeadOTCCorr:
+    if flags.LAr.doDeadOTxCorr:
         from LArCellRec.LArCellBuilderConfig import LArDeadOTXCorrCfg
         theLArDeadOTXCorr=LArDeadOTXCorrCfg(flags)
         cellMakerTools.append(result.popToolsAndMerge(theLArDeadOTXCorr))
