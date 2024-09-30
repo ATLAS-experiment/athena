@@ -2,149 +2,223 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArCelldeadOTXTool.h" 
+#include "LArCelldeadOTXTool.h"
+
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArElecCalib/LArProvenance.h"
-
-
+#include "LArIdentifier/LArOnlineID.h"
 
 StatusCode LArCelldeadOTXTool::initialize() {
 
   ATH_CHECK(m_SCKey.initialize());
   ATH_CHECK(m_MFKey.initialize());
+  ATH_CHECK(m_badSCKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_cablingSCKey.initialize());
+  ATH_CHECK(m_caloMgrKey.initialize());
 
-  ATH_CHECK(detStore()->retrieve(m_onlineID,"LArOnlineID"));
-  ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
+  ATH_CHECK(detStore()->retrieve(m_onlineID, "LArOnlineID"));
+  ATH_CHECK(detStore()->retrieve(m_calo_id, "CaloCell_ID"));
 
   ATH_CHECK(m_scidtool.retrieve());
+
+  if (m_testMode) {
+    ATH_MSG_WARNING(
+        "Test mode activated with additional debug output. Makes only sense if we try to patch a FEB that is actually there, so we have a reference");
+  }
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode LArCelldeadOTXTool::process(CaloCellContainer* cellCollection, const EventContext& ctx) const {
 
-   ATH_MSG_VERBOSE (" in process...");
-   if (!cellCollection) {
-     ATH_MSG_ERROR( "Cell Correction tool receives invalid cell Collection"  );
-     return StatusCode::FAILURE;
-   }
-    
-   SG::ReadCondHandle<LArBadFebCont> mfHdl(m_MFKey, ctx);
-   if(!mfHdl.isValid()) {
-       ATH_MSG_ERROR("Do not have Missing FEBs container !!!!");
-       return StatusCode::FAILURE;
-   }
+  ATH_MSG_VERBOSE(" in process...");
+  if (!cellCollection) {
+    ATH_MSG_ERROR("Cell Correction tool receives invalid cell Collection");
+    return StatusCode::FAILURE;
+  }
 
-   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey, ctx);
-   if(!cablingHdl.isValid()) {
-       ATH_MSG_ERROR("Do not have Onl-Ofl cabling map !!!!");
-       return StatusCode::FAILURE;
-   }
+  StatusCode sc = StatusCode::SUCCESS;
+  std::call_once(m_onceFlag, &LArCelldeadOTXTool::buildMap, this, ctx, m_scToDead, sc);
 
-   SG::ReadCondHandle<LArOnOffIdMapping> cablingSCHdl(m_cablingSCKey, ctx);
-   if(!cablingSCHdl.isValid()) {
-       ATH_MSG_ERROR("Do not have Onl-Ofl cabling map for SuperCells !!!!");
-       return StatusCode::FAILURE;
-   }
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR("Call to LArCelldeadOTXTool::buidMap returned an error");
+    return StatusCode::FAILURE;
+  }
 
-   // vector of all missing cells Id
-   std::vector<Identifier> cell_array;
-   cell_array.reserve(512);
-   std::vector<Identifier> sc_array;
-   sc_array.reserve(512);
-   
-   LArBadFebCont::const_iterator firstFeb = mfHdl->begin();
-   LArBadFebCont::const_iterator lastFeb  = mfHdl->end();
+  if (m_scToDead.empty()) {
+    return StatusCode::SUCCESS;  // No dead FEBs, do nothing
+  }
+  
+  // get SuperCellContainer
+  SG::ReadHandle<LArRawSCContainer> scHdl(m_SCKey, ctx);
+  if (!scHdl.isValid()) {
+    ATH_MSG_WARNING("Do not have SuperCell container no patching !!!!");
+    return StatusCode::SUCCESS;
+  }
 
+  const unsigned int bcid = ctx.eventID().bunch_crossing_id();
 
-   // Step ONE - Loop Over FEB, find missing FEB
-   for (LArBadFebCont::const_iterator i= firstFeb; i != lastFeb; ++i) {
-       if(i->second.deadReadout()){
-           HWIdentifier febId(i->first);
-           //Find the corresponding Cell(s)
-           for (int ch=0; ch<m_onlineID->channelInSlotMax(febId); ++ch) {
-               HWIdentifier hwid = m_onlineID->channel_Id(febId, ch);
-               if (cablingHdl->isOnlineConnected(hwid)) {
-                   Identifier fid = cablingHdl->cnvToIdentifier( hwid);
-                   //Save the CellIds 
-                   cell_array.push_back(fid);
-                   // and find corresponding SC
-                   Identifier scId = m_scidtool->offlineToSuperCellID(fid);
-                   if (!scId.is_valid()) {
-                      sc_array.push_back(Identifier(0));
-                   } else {
-                      sc_array.push_back(scId);
-                   }
-               } //If Online
-           }//Cell Loop
-       }//Missing FEB
-   }   // loop over bad Febs
+  // get the SC, container is unordered, so have to loop
+  const LArRawSCContainer* scells = scHdl.cptr();
+  for (const auto* sc : *scells) {
+    if (!sc)
+      continue;
+    const HWIdentifier scHwid = sc->hardwareID();
+    auto itr = m_scToDead.find(scHwid);
+    if (itr == m_scToDead.end())
+      continue;  // This SC is not connected to any deadFEB cell
 
+    const std::vector<unsigned short>& bcids = sc->bcids();
+    const std::vector<int>& energies = sc->energies();
+    const std::vector<bool>& satur = sc->satur();
 
-   ATH_MSG_DEBUG (" Number of missing cells " << cell_array.size());
-   // nothing to do if no missing Febs
-   if (cell_array.size()==0) return StatusCode::SUCCESS;
+    // Look for bcid:
+    float scEne = 0;
+    const size_t nBCIDs = bcids.size();
+    size_t i = 0;
+    for (i = 0; i < nBCIDs && bcids[i] != bcid; i++)
+      ;
 
-   // get SuperCellContainer
-   SG::ReadHandle<LArRawSCContainer> scHdl(m_SCKey, ctx);
-   if(!scHdl.isValid()) {
-       ATH_MSG_WARNING("Do not have SuperCell container no patching !!!!");
-       return StatusCode::SUCCESS;
-   } else {
-       ATH_MSG_DEBUG("Reading SuperCell container with key "<<m_SCKey.key());
-   }
+    if (ATH_LIKELY(!satur[i]))
+      scEne = energies[i];
+    if (scEne < m_scCut) {
+      ATH_MSG_VERBOSE("SC value " << scEne << " below threshold, ignoring");
+      continue;
+    }
+    float cellESum = 0;
+    float patchEneSum = 0;
+    for (const auto& [h, convFactor] : itr->second) {  // Loop over all deadFEB cells connected to this SC
+      CaloCell* cell = cellCollection->findCell(h);
+      if (cell) {
+        const float patchEne = scEne * convFactor;  // Convert ET (coming from LATOMEs) into Energy
+        if (m_testMode) {
+          cellESum += cell->energy();
+          patchEneSum += patchEne;
+        }
+        ATH_MSG_DEBUG("Cell id 0x" << std::hex << cell->ID().get_identifier32().get_compact() << " Replacing energy " << cell->energy() << " " << patchEne
+                                   << ", SCene=" << scEne);
+        cell->setEnergy(patchEne);
+        cell->setProvenance(cell->provenance() | LArProv::PATCHED);
+      }  // end if cell obj found
+    }  // end loop over all deadFEB cells connected to this SC
+    if (m_testMode) {
+      const float ratio = patchEneSum != 0 ? cellESum / patchEneSum : 0;
+      ATH_MSG_DEBUG("ESums=" << cellESum << "/" << patchEneSum << "=" << ratio);
+      std::scoped_lock l(m_mtx);
+      auto& entry = m_testMap[scEne];
+      entry.first += ratio;
+      entry.second++;
+    }  // end if testMode
+  }  // End loop over SuperCell container
 
-   const unsigned int bcid = ctx.eventID().bunch_crossing_id();
+  return StatusCode::SUCCESS;
+}
 
-   // loop over missing cells
-   std::vector<float> energy_arr(cell_array.size(),0.);
-   //get the SC, container is unordered, so have to loop
-   const LArRawSCContainer* scells = scHdl.cptr();
-   for(const auto *sc: *scells) {
-      if ( !sc ) continue;
-      Identifier off_id = cablingSCHdl->cnvToIdentifier(sc->hardwareID()); 
-      auto it = std::find(sc_array.begin(), sc_array.end(), off_id);
-      if(it !=  sc_array.end()) {// we have to use this SC
-         int idx = std::distance(sc_array.begin(), it);
-         const std::vector< unsigned short >& bcids = sc->bcids();
-         const std::vector< int >& energies = sc->energies();
-         const std::vector< bool>& satur = sc->satur();
-         for(unsigned int i=0;i<bcids.size();i++) {
-               if ( bcids[i]==bcid && !satur[i]) { // that's our bcid and not saturated
-                    energy_arr[idx] = energies[i];
-               }
-         } 
-         // and now divide by number of cells in the SC
-         unsigned nCell=(m_scidtool->superCellToOfflineID(off_id)).size();
-         if(nCell) energy_arr[idx] /= nCell;
-         ATH_MSG_DEBUG("Got ET "<<energy_arr[idx]<<" from 0x"<<std::hex<<off_id.get_identifier32().get_compact()<<std::dec<<" out of "<<nCell<<" cells...");
-         for(unsigned l=idx+1; l<sc_array.size();++l) {
-            if(sc_array[l] == sc_array[idx]) energy_arr[l]=energy_arr[idx];
-         }
-      } // find SC
-   } // over all SC
+void LArCelldeadOTXTool::buildMap(const EventContext& ctx, scToDeadCellMap_t& scToHwidMap, StatusCode& sc) const {
+  scToHwidMap.clear();  // Just to be sure ...
 
-   // Assign energy
-   for(unsigned i=0; i<cell_array.size(); ++i) {
+  sc = StatusCode::FAILURE;
 
-      IdentifierHash theCellHashID = m_calo_id->calo_cell_hash(cell_array[i]);
-      int index = cellCollection->findIndex(theCellHashID);
- 
-      if(index!=-1){
-          CaloCell* thisCell = cellCollection->at(index);
- 
-          if (thisCell ) {
-             // convert ET (coming from LATOMEs) into Energy and apply magic 12.5 factor
-             thisCell->setEnergy(12.5*energy_arr[i]*cosh(thisCell->eta()));
-             thisCell->setProvenance(thisCell->provenance() | LArProv::PATCHED); 
-             ATH_MSG_DEBUG ("   assign " << thisCell->energy()<< " to the cell 0x"<<std::hex<<cell_array[i].get_identifier32().get_compact()<<std::dec);
-          }
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey, ctx);
+  if (!cablingHdl.isValid()) {
+    ATH_MSG_ERROR("Do not have Onl-Ofl cabling map !!!!");
+    return;
+  }
+  const LArOnOffIdMapping* oflCabling = cablingHdl.cptr();
+
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingSCHdl(m_cablingSCKey, ctx);
+  if (!cablingSCHdl.isValid()) {
+    ATH_MSG_ERROR("Do not have Onl-Ofl cabling map for SuperCells !!!!");
+    return;
+  }
+
+  const LArOnOffIdMapping* scCabling = cablingSCHdl.cptr();
+
+  SG::ReadCondHandle<LArBadFebCont> mfHdl(m_MFKey, ctx);
+  if (!mfHdl.isValid()) {
+    ATH_MSG_ERROR("Do not have Missing FEBs container !!!!");
+    return;
+  }
+
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
+  if (!caloMgrHandle.isValid()) {
+    ATH_MSG_ERROR("Do not have CaloDetDescManager !!!");
+    return;
+  }
+
+  const CaloDetDescrManager* caloDDM = *caloMgrHandle;
+
+  SG::ReadCondHandle<LArBadChannelCont> bcSCHdl(m_badSCKey, ctx);
+  if (!bcSCHdl.isValid()) {
+    ATH_MSG_ERROR("Do not have BadSCContainer !!!!");
+    return;
+  }
+  const LArBadChannelCont* bcSCCont = *bcSCHdl;
+
+  const auto& badFebs = mfHdl->fullCont();
+
+  unsigned nDeadFebs = 0;
+  for (const auto& idBF : badFebs) {
+    if (idBF.second.deadReadout()) {
+      ++nDeadFebs;
+      const HWIdentifier febid(idBF.first);
+      ATH_MSG_INFO("FEB " << m_onlineID->channel_name(febid) << " labelled as dead");
+      const unsigned nChans = m_onlineID->channelInSlotMax(febid);
+      for (unsigned ch = 0; ch < nChans; ++ch) {
+        const HWIdentifier chid = m_onlineID->channel_Id(febid, ch);
+        const Identifier id = oflCabling->cnvToIdentifier(chid);
+        const IdentifierHash hashId = m_calo_id->calo_cell_hash(id);
+        const Identifier scID = m_scidtool->offlineToSuperCellID(id);
+        const HWIdentifier scHwid = scCabling->createSignalChannelID(scID);
+        if (!bcSCCont->status(scHwid).good()) {
+          ATH_MSG_DEBUG("SuperCell with id 0x" << std::hex << scHwid.get_identifier32().get_compact() << std::dec
+                                               << " is ignored b/c of it's bad-channel word. Connected to deadFEB channel " << m_onlineID->channel_name(chid));
+          continue;
+        }
+        const unsigned nCell = (m_scidtool->superCellToOfflineID(scID)).size();
+        const CaloDetDescrElement* dde = caloDDM->get_element(hashId);
+        if (ATH_UNLIKELY(!dde)) {
+          ATH_MSG_ERROR("No DetDescElement for cell hash" << hashId);
+          return;
+        }
+        const float convFactor = 12.5 * (1.0 / nCell) * (1.0 / dde->sinTh());
+        // 12.5: Convert SC ADC to MeV (Et), et ->e, scale by the number of regular cells connected to this super-cell
+        scToHwidMap[scHwid].emplace_back(hashId, convFactor);
+      }  // end loop over channels of one dead FEB
+    }  // end if feb is deadAll
+  }  // end loop over dead febs
+
+  // bit of log-output ...
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_INFO("Dead Febs for this run:" << nDeadFebs);
+    for (const auto& p : scToHwidMap) {
+      ATH_MSG_DEBUG("  SuperCell with id 0x" << std::hex << p.first.get_identifier32().get_compact() << std::dec << " connected to " << p.second.size()
+                                             << " deadFEB channels.");
+      for (const auto& [h, convFactor] : p.second) {
+        const HWIdentifier hwid = cablingHdl->createSignalChannelIDFromHash(h);
+        ATH_MSG_DEBUG("      " << m_onlineID->channel_name(hwid) << " " << convFactor);
       }
-   } // over cell_array
-   return StatusCode::SUCCESS;
+    }
+  }
+  sc = StatusCode::SUCCESS;
+  return;
+}
+
+StatusCode LArCelldeadOTXTool::finalize() {
+  if (m_testMode) {
+    ATH_MSG_INFO("Test mode for cell-patching:");
+    std::vector<std::pair<float, float> > avgList;
+    for (auto& [scEne, entry] : m_testMap) {
+      avgList.emplace_back(scEne, entry.first / entry.second);
+    }
+    auto ordering = [](const std::pair<float, float>& a, std::pair<float, float>& b) { return (a.first < b.first); };
+    std::sort(avgList.begin(), avgList.end(), ordering);
+    for (auto& p : avgList) {
+      ATH_MSG_INFO("SCEne=" << p.first << "Avg patching ratio=" << p.second);
+    }
+  }
+  return StatusCode::SUCCESS;
 }
