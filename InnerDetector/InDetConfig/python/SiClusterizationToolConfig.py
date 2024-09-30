@@ -290,13 +290,55 @@ def TrigNnClusterizationFactoryCfg(flags, name="TrigNnClusterizationFactory"):
         CompFactory.InDet.NnClusterizationFactory(name, **kwargs))
     return acc
 
+def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kwargs):
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
+        ITkPixelReadoutManagerCfg)
+    acc = ITkPixelReadoutManagerCfg(flags)
+
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+        ITkPixelChargeCalibCondAlgCfg)
+    acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
+
+    acc.merge(LWTNNCondAlgCfg(flags))
+
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
+            ITkPixelLorentzAngleToolCfg)
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(
+            ITkPixelLorentzAngleToolCfg(flags)))
+
+    kwargs.setdefault("useToT", False)
+    kwargs.setdefault("NnCollectionReadKey", "")
+    kwargs.setdefault("NnCollectionWithTrackReadKey", "")
+    kwargs.setdefault("NnCollectionJSONReadKey", "PixelClusterNNJSON")
+
+    kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
+    kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
+
+    acc.setPrivateTools(
+        CompFactory.InDet.NnClusterizationFactory(name, **kwargs))
+    return acc
+
 
 def NnPixelClusterSplitProbToolCfg(
         flags, name="NnPixelClusterSplitProbTool", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
-            NnClusterizationFactoryCfg(flags)))
+        NnClusterizationFactoryCfg(flags)))
+    kwargs.setdefault("PriorMultiplicityContent", [1, 1, 1])
+    kwargs.setdefault("useBeamSpotInfo", flags.Tracking.useBeamSpotInfoNN)
+
+    acc.setPrivateTools(
+        CompFactory.InDet.NnPixelClusterSplitProbTool(name, **kwargs))
+    return acc
+
+def ITkNnPixelClusterSplitProbToolCfg(
+        flags, name="ITkNnPixelClusterSplitProbTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
+        ITkNnClusterizationFactoryCfg(flags)))
     kwargs.setdefault("PriorMultiplicityContent", [1, 1, 1])
     kwargs.setdefault("useBeamSpotInfo", flags.Tracking.useBeamSpotInfoNN)
 
@@ -410,6 +452,17 @@ def ITKStrip_SCT_ClusteringToolCfg(
     return acc
 
 
+def TruthClusterizationFactoryCfg(
+        flags, name='TruthClusterizationFactory', **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("discardPUHits", flags.Digitization.PileUp)
+    kwargs.setdefault("truthClusterSplittingEff", flags.Tracking.TruthClusterSplittingEff)
+    acc.setPrivateTools(
+        CompFactory.InDet.TruthClusterizationFactory(name, **kwargs))
+    return acc
+
+
 def ITkTruthClusterizationFactoryCfg(
         flags, name='ITkTruthClusterizationFactory', **kwargs):
     acc = ComponentAccumulator()
@@ -419,6 +472,17 @@ def ITkTruthClusterizationFactoryCfg(
     kwargs.setdefault("truthClusterSplittingEff", flags.Tracking.TruthClusterSplittingEff)
     acc.setPrivateTools(
         CompFactory.InDet.TruthClusterizationFactory(name, **kwargs))
+    return acc
+
+
+def TruthPixelClusterSplitProbToolCfg(
+        flags, name="TruthPixelClusterSplitProbTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("PriorMultiplicityContent", [1, 1, 1])
+    kwargs.setdefault("NnClusterizationFactory", acc.popToolsAndMerge(
+        TruthClusterizationFactoryCfg(flags)))
+    acc.setPrivateTools(
+        CompFactory.InDet.TruthPixelClusterSplitProbTool(name, **kwargs))
     return acc
 
 
