@@ -28,17 +28,28 @@ public:
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
-
+    StatusCode calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
+    float calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const;
+    
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)
+    Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
     Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
+    Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
 
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
     Gaudi::Property<float> m_expected1N{this, "Expected1NADC", 1000., "Expected 1N position in ADC"}; // only needs to indicate the rough scale, only used in the >20N cut mask
+    
+    Gaudi::Property<float> m_moduleChisqHistMinValue{this, "ZDCModuleChisqHistMinValue", 1000., "Min value for logarithmic binning for ZDC module chisq distribution"}; // to manually calculate inverse-bin-width weight
+    Gaudi::Property<float> m_moduleChisqHistMaxvalue{this, "ZDCModuleChisqHistMaxvalue", 1000., "Max value for logarithmic binning for ZDC module chisq distribution"}; // to manually calculate inverse-bin-width weight
+    Gaudi::Property<float> m_moduleChisqHistNumBins{this, "ZDCModuleChisqHistNumBins", 1000., "Number of bins for logarithmic binning for ZDC module chisq distribution"}; // to manually calculate inverse-bin-width weight
+    Gaudi::Property<float> m_moduleChisqOverAmpHistMinValue{this, "ZDCModuleChisqOverAmpHistMinValue", 1000., "Min value for logarithmic binning for ZDC module chisq over amplitude distribution"}; // to manually calculate inverse-bin-width weight
+    Gaudi::Property<float> m_moduleChisqOverAmpHistMaxvalue{this, "ZDCModuleChisqOverAmpHistMaxvalue", 1000., "Max value for logarithmic binning for ZDC module chisq over amplitude distribution"}; // to manually calculate inverse-bin-width weight
+    Gaudi::Property<float> m_moduleChisqOverAmpHistNumBins{this, "ZDCModuleChisqOverAmpHistNumBins", 1000., "Number of bins for logarithmic binning for ZDC module chisq over amplitude distribution"}; // to manually calculate inverse-bin-width weight
 
     // single side triggers - less error-prone if defined as separate properties then in a vector (where order would be crucial)
     Gaudi::Property<std::string> m_triggerSideA{this, "triggerSideA", "L1_ZDC_A", "Trigger on side A, needed for 1N-peak monitoring on side C"};
@@ -58,6 +69,8 @@ private:
     std::vector<std::vector<int>> m_ZDCModuleToolIndices;
     std::vector<std::vector<int>> m_RPDChannelToolIndices;
 
+    std::vector<float> m_ZdcModuleChisqBinEdges;
+    std::vector<float> m_ZdcModuleChisqOverAmpBinEdges;
     //---------------------------------------------------
     
     // owner, name (allows us to modify the key in python configuration), key

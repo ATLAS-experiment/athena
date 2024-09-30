@@ -132,7 +132,11 @@ def ZdcRecRun2Cfg(flags):
 def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
-    config = "PbPb2023"
+    if flags.Input.TriggerStream == "calibration_ZDCInjCalib":
+        config = "Injector2024"
+    else:
+        config = "PbPb2023"
+
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
@@ -150,7 +154,7 @@ def ZdcRecRun3Cfg(flags):
         config = "pp2023"
     elif flags.Input.ProjectName == "data23_5p36TeV":
         config = "pp2023"
-    elif flags.Input.ProjectName == "data23_hi":
+    elif flags.Input.ProjectName == "data23_hi": # for "data24_hi," need to also check flags.Input.TriggerStream != "calibration_ZDCInjCalib"
         config = "PbPb2023"
         doCalib = True
         doTimeCalib = True
@@ -354,7 +358,8 @@ if __name__ == '__main__':
     # check for LED running, and configure appropriately    
 
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" )
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "calibration_ZDCInjCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" )
+    isInjPulse = (flags.Input.TriggerStream == "calibration_ZDCInjCalib")
 
     if (isLED):
        print('ZdcRecConfig: Running LED data!')
