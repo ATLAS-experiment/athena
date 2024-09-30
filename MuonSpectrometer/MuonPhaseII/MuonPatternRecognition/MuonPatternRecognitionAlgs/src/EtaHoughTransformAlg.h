@@ -76,7 +76,8 @@ namespace MuonR4{
             /// @param hitList: list of hits to extend 
             /// @param bucket: the bucket to take the phi hits from 
             void extendWithPhiHits(std::vector<HoughHitType> & hitList, HoughSetupForBucket& bucket) const ;  
-
+            /// @brief Returns whether the hit is a precision hit or not
+            static bool isPrecisionHit(const HoughHitType& hit);
             // target resolution in the angle
             DoubleProperty m_targetResoTanTheta{this, "ResolutionTargetTanTheta", 0.03};
             // target resolution in the y intercept
@@ -95,6 +96,8 @@ namespace MuonR4{
             DoubleProperty m_minMaxDistIntercept{this, "MaximumSeparationIntercept", 15.};
             // Fraction of weighted counts around the peak to be associated to the maximum
             DoubleProperty m_peakFractionCutOff{this, "PeakFractionCutOff", 0.6};
+            // How many valid precision hits have to be on the pattern
+            UnsignedIntegerProperty m_nPrecHitCut{this, "nMinPrecHits", 3};
             
             // number of accumulator bins for the angle 
             IntegerProperty m_nBinsTanTheta{this, "nBinsTanTheta", 5};
