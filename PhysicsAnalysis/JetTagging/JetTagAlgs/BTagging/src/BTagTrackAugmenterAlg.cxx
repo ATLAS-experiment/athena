@@ -120,9 +120,8 @@ namespace Analysis {
 
     int vtx_i=0; //counter for the vertex index   
     // now decorate the tracks
-    int trk_i=0;
     for (const xAOD::TrackParticle *track: *tracks) {
-      trk_i++;
+      
       auto minDz =100.;
       const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
       ElementLink<xAOD::VertexContainer> vertexLink;
@@ -148,9 +147,9 @@ namespace Analysis {
 	extrap_pars = std::unique_ptr< const Trk::TrackParameters >( m_extrapolator->extrapolate(ctx,
                                                                                              track->perigeeParameters(),
                                                                                              primary_surface ) );
-        std::cout << "Mario primary yes "<< trk_i <<std::endl;
+        
       	if ( ip ) {
-	std::cout << "Mario ip yes "<< trk_i <<std::endl;
+	
 	      decor_TrkOriginVtx(*track) = vertexLink;
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;
@@ -162,7 +161,7 @@ namespace Analysis {
            " sigmaz0SinTheta= " << ip->sigmaz0SinTheta << 
            " TrkOriginVtx= " << primary );
       	} else {
-		std::cout << "Mario primary no " << trk_i <<std::endl;
+	
         ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
         decor_d0(*track) = NAN;
         decor_z0(*track) = NAN;
