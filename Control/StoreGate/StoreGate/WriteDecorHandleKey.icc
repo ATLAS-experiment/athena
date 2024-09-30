@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandleKey.icc
@@ -179,8 +179,10 @@ StatusCode WriteDecorHandleKey<T>::initialize (bool used /*= true*/)
     m_contHandleKey = m_contKey->key();
     std::string decorKey=decorKeyFromKey(this->key());
     VarHandleKey::operator=(makeContDecorKey (m_contKey->key(), decorKey));
-  }			  
-  detail::registerWriteDecorHandleKey (this->owner(), m_contHandleKey.fullKey());
+  }
+  if (!renounced()) {
+    detail::registerWriteDecorHandleKey (this->owner(), m_contHandleKey.fullKey());
+  }
   if (m_contHandleKey.initialize (used).isFailure())
     return StatusCode::FAILURE;
   return Base::initialize (used);

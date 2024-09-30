@@ -18,6 +18,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/DecorKeyHelpers.h"
 #include "AthContainers/AuxElement.h"
+#include "CxxUtils/bitmask.h"
 #include "GaudiKernel/EventContext.h"
 #include <type_traits>
 
@@ -253,31 +254,14 @@ public:
   
 private:
   /**
-   * @brief Retrieve an object from StoreGate.
-   * @param quiet If true, suppress failure messages.
-   *
-   * Extended for decoration handles: when we first retrieve the object,
-   * we make an alias for the decoration and also create the decoration itself.
+   * @brief Create the decoration if it doesn't actually exist yet.
+   *        Also create the decoration alias in SG (unless this handle
+   *        has been renounced).
+   * @param avd The AuxVectorData instance we're decorating.
+   *            (May not be the same as this->vectorData() if the
+   *            handle has been renounced.)
    */
-  virtual void* typeless_dataPointer_impl (bool quiet) override;
-
-
-  /**
-   * @brief Test to see if this variable exists in the store,
-   *        for the referenced object.
-   *        Specialization for the case of a standalone object
-   *        (@c T derives from @c SG::AuxElement).
-   */
-  bool isAvailable (std::true_type);
-
-
-  /**
-   * @brief Test to see if this variable exists in the store,
-   *        for the referenced object.
-   *        Specialization for the case of a container
-   *        (@c T does not derive from @c SG::AuxElement).
-   */
-  bool isAvailable (std::false_type);
+  void makeDecor (const AuxVectorData* avd);
 
 
   /** 
@@ -312,14 +296,11 @@ private:
   /// Accessor for the aux data item.
   accessor_t m_acc;
 
-  /// Set no NO_ALIAS when the handle is created, changed to MADE_ALIAS
-  /// after the alias has been made.  But if renounce() has been called
-  /// on the parent key, then we set this to RENOUNCED to indicate that
-  /// we shouldn't make an alias.
-  enum { NO_ALIAS,
-         MADE_ALIAS,
-         RENOUNCED }
-    m_state;
+  /// Was this handle renounced?
+  bool m_renounced;
+
+  /// Have we created the decoration?
+  bool m_decorated;
 };
 
 
