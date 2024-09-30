@@ -828,8 +828,8 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 
       //// lets make sure the 0 padding is correct
       if(byteshift!=0){
-	  increaseWordShift(wordshift);
-	  byteshift=0;
+        increaseWordShift(wordshift);
+        byteshift=0;
       }
       ATH_MSG_DEBUG("wordshift before: " << wordshift << ", s: " << s);
       if((wordshift-s)%2) increaseWordShift(wordshift);
