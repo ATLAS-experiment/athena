@@ -1,0 +1,107 @@
+{
+    "duplrate_vs_$TRKTAG_pt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_$TRKTAG_eta" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_$TRKTAG_phi" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "20", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_$TRKTAG_d0" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "20", "low" : "-25.0", "high" : "25.0" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_$TRKTAG_z0" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "20", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_truthMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplrate_vs_actualMu" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Duplicate rate" }
+    },
+    "duplnum_vs_$TRKTAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_$TRKTAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_$TRKTAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "20", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_$TRKTAG_d0" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "20", "low" : "-25.0", "high" : "25.0" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_$TRKTAG_z0" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "20", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_$TRKTAG_pt" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_$TRKTAG_eta" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_$TRKTAG_phi" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE #phi", "nBins" : "20", "low" : "-$PI", "high" : "$PI" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_$TRKTAG_d0" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE d_{0}", "nBins" : "20", "low" : "-25.0", "high" : "25.0" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_$TRKTAG_z0" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "$TRKTYPE z_{0}", "nBins" : "20", "low" : "-$Z0MAX", "high" : "$Z0MAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_truthMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Truth <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    },
+    "duplnum_nonzero_vs_actualMu" : {
+        "type" : "TProfile",
+        "xAxis" : { "title" : "Actual <#mu>", "nBins" : "$NMUBINS", "low" : "0", "high" : "$EXPMUMAX" },
+        "yAxis" : { "title" : "Average number of $TESTTYPEs" }
+    }
+}
