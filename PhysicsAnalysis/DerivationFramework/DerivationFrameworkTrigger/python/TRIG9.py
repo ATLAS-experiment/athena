@@ -227,7 +227,7 @@ def TRIG9Cfg(flags):
     # Output stream
     TRIG9ItemList = TRIG9SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_TRIG9", ItemList=TRIG9ItemList, AcceptAlgs=["TRIG9Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TRIG9", AcceptAlgs=["TRIG9Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TRIG9", AcceptAlgs=["TRIG9Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 
