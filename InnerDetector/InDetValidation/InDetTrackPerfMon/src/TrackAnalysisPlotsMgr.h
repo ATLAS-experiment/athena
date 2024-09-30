@@ -25,6 +25,7 @@
 #include "plots/OfflineElectronPlots.h"
 #include "plots/ResolutionPlots.h"
 #include "plots/FakeRatePlots.h"
+#include "plots/DuplicateRatePlots.h"
 
 /// STD includes
 #include <string>
@@ -111,6 +112,8 @@ namespace IDTPM {
     /// fake rate plots (only when reference=truth)
     std::unique_ptr< FakeRatePlots >         m_plots_fakeRate;
     std::unique_ptr< FakeRatePlots >         m_plots_missingTruth;
+    /// duplicate rate plots
+    std::unique_ptr< DuplicateRatePlots >    m_plots_duplRate;
     /// plots w.r.t. reference offline electron
     std::unique_ptr< OfflineElectronPlots >  m_plots_offEle;
     std::unique_ptr< OfflineElectronPlots >  m_plots_eff_vsOffEle;

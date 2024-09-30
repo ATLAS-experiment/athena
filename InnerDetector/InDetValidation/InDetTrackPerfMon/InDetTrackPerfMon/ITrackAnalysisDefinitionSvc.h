@@ -66,6 +66,7 @@ public:
   virtual bool plotTechnicalEfficiencies() const = 0;
   virtual bool plotResolutions() const = 0;
   virtual bool plotFakeRates() const = 0;
+  virtual bool plotDuplicateRates() const = 0;
   virtual bool plotOfflineElectrons() const = 0;
   virtual unsigned int resolutionMethod() const = 0;
   

@@ -96,6 +96,12 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(), true );
   }
 
+  /// Duplicate Rate plots
+  if( m_trkAnaDefSvc->plotDuplicateRates() ) {
+    m_plots_duplRate = std::make_unique< DuplicateRatePlots >(
+        this, "Tracks/Duplicates", m_anaTag, m_trkAnaDefSvc->referenceTag(), true );
+  }
+
   /// Offline electron plots
   if( m_trkAnaDefSvc->plotOfflineElectrons() ) {
     m_plots_offEle = std::make_unique< OfflineElectronPlots >(
@@ -282,8 +288,9 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsRef ) {
-      if (  m_trkAnaDefSvc->isReferenceTruth() and 
-            isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() )) {
+      if( m_trkAnaDefSvc->isReferenceTruth() and 
+          isReconstructable( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
+      {
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isMatched, truthMu, actualMu, weight ) );
       }
@@ -310,10 +317,19 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
             isReconstructable( *linkedTruth, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) : false;
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
             *particle, isTechMatched, truthMu, actualMu, weight ) );
-
       }
     }
-    
+
+    /// duplicate rate plots
+    if( m_plots_duplRate ) {
+      unsigned int nMatched = m_trkAnaDefSvc->isTestTruth() ?
+                              matches.getMatchedTestTruths( *particle ).size() :
+                              matches.getMatchedTestTracks( *particle ).size();
+
+      ATH_CHECK( m_plots_duplRate->fillPlots(
+          *particle, nMatched, truthMu, actualMu, weight ) );
+    }
+ 
     /// offline electron plots (Offline is always either test or reference)
     if( m_trkAnaDefSvc->isReferenceOffline() ) {
       if( m_plots_offEle ) {

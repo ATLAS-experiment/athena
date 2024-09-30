@@ -72,6 +72,7 @@ public:
   virtual bool plotTechnicalEfficiencies() const override { return m_plotTechnicalEfficiencies.value(); };
   virtual bool plotResolutions() const override { return m_plotResolutions.value(); };
   virtual bool plotFakeRates() const override { return m_plotFakeRates.value(); };
+  virtual bool plotDuplicateRates() const override { return m_plotDuplicateRates.value(); };
   virtual bool plotOfflineElectrons() const override { return m_plotOfflineElectrons.value(); };
   virtual unsigned int resolutionMethod() const override;
 
@@ -108,6 +109,7 @@ private:
   BooleanProperty m_plotTechnicalEfficiencies { this, "plotTechnicalEfficiencies", true, "Book/fill track technical efficiencies histograms" };
   BooleanProperty m_plotResolutions { this, "plotResolutions", true, "Book/fill track resolutions histograms" };
   BooleanProperty m_plotFakeRates { this, "plotFakeRates", true, "Book/fill fake rate histograms" };
+  BooleanProperty m_plotDuplicateRates { this, "plotDuplicateRates", false, "Book/fill duplicate rate histograms" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
   StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
 };
