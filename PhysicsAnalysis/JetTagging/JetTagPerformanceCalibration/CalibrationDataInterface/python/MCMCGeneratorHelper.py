@@ -13,6 +13,7 @@ MC20_Generator_dict = {
     "Sherpa2210": "700122",
     "Sherpa2211": "700122",
     "Sherpa2212": "700660",
+    "Sherpa2212f290b9": "700660",
     "Sherpa2214": "700660",
 }
 
@@ -23,6 +24,7 @@ MC23_Generator_dict = {
     "Herwig723": "601414",
     "Sherpa2211": "700660",
     "Sherpa2212": "700660",
+    "Sherpa2212f290b9": "700660",
     "Sherpa2214": "700660",
 }
 
