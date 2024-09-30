@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/test/LuminosityAlg_test.cxx
@@ -375,8 +375,8 @@ void test3 ATLAS_NOT_REENTRANT (ISvcLocator* svcloc)
 {
   std::cout << "test3\n";
 
-  StoreGateSvc* eventStore = nullptr;
-  assert( svcloc->service("StoreGateSvc/StoreGateSvc", eventStore) );
+  SmartIF<StoreGateSvc> eventStore{svcloc->service("StoreGateSvc/StoreGateSvc")};
+  assert( eventStore.isValid() );
   EventContext ctx;
   EventIDBase eid (1, 0, 0, 0, 20, 0);
   ctx.setEventID (eid);
@@ -387,8 +387,8 @@ void test3 ATLAS_NOT_REENTRANT (ISvcLocator* svcloc)
   alg->addRef();
   assert( alg->sysInitialize().isSuccess() );
 
-  StoreGateSvc* conditionStore = nullptr;
-  assert( svcloc->service("ConditionStore", conditionStore) );
+  SmartIF<StoreGateSvc> conditionStore{svcloc->service("ConditionStore")};
+  assert( conditionStore.isValid() );
   auto eventinfo = std::make_unique<xAOD::EventInfo>();
   auto eventauxinfo = std::make_unique<xAOD::EventAuxInfo>();
   eventinfo->setStore(eventauxinfo.get());
