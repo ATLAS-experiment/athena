@@ -161,7 +161,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
 
     #Track Augmenter
     result.merge(BTagTrackAugmenterAlgCfg(inputFlags))
-
+    print("Mario: jet collection ", JetCollection)
     # loop over jet collections and schedule btagging algorithms
     for jc in JetCollection:
         result.merge(
@@ -274,6 +274,7 @@ def BTagAlgsCfg(
         trackCollection,
         JetTrackAssociator,
     ))
+    print("Mario: jet collection new  ", JetCollection, " " , jetcol)
 
     if muons:
         result.merge(JetParticleAssociationAlgCfg(

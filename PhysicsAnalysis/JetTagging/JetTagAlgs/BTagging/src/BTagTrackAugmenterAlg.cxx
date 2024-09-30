@@ -109,31 +109,49 @@ namespace Analysis {
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> decor_invalid(
         m_dec_invalid, ctx);
 
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, xAOD::Vertex> decor_TrkOriginVtx(m_trk_origin_vtx, ctx);
+    // Mario: add decoration for origin vertex link
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<xAOD::VertexContainer>> decor_TrkOriginVtx(m_trk_origin_vtx, ctx);
 
     // ==========================================================================================================================
     //    ** Computation
     // ==========================================================================================================================
 
     //Trk::PerigeeSurface primary_surface( primaryVtx->position() );
-    
+
+    int vtx_i=0; //counter for the vertex index   
     // now decorate the tracks
+    int trk_i=0;
     for (const xAOD::TrackParticle *track: *tracks) {
+      trk_i++;
       auto minDz =100.;
       const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
+      ElementLink<xAOD::VertexContainer> vertexLink;
+      vtx_i=0;
       for (const xAOD::Vertex *vertex: *verteces) {
+	vtx_i++;
         std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
         if ( ipMin ){
-          if ( std::fabs(ipMin->IPz0SinTheta) < minDz && std::fabs(ipMin->IPz0SinTheta) > 1){
+          if ( std::fabs(ipMin->IPz0SinTheta) < minDz && std::fabs(ipMin->IPz0SinTheta) < 3){
             minDz = std::fabs(ipMin->IPz0SinTheta);
             primary = vertex;
+	    vertexLink = ElementLink<xAOD::VertexContainer>(*verteces, vtx_i);
           }
-	      }
+        }
       }
-      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary) );
-      Trk::PerigeeSurface primary_surface( primary->position() );
-      if ( ip ) {
-	      decor_TrkOriginVtx(*track) = *primary;
+      Trk::PerigeeSurface primary_surface;
+      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip;
+      std::unique_ptr< const Trk::TrackParameters > extrap_pars;
+
+      if (primary){
+      	ip = std::unique_ptr< const Trk::ImpactParametersAndSigma >( m_track_to_vx->estimate( track, primary) );
+      	primary_surface = Trk::PerigeeSurface( primary->position() );
+	extrap_pars = std::unique_ptr< const Trk::TrackParameters >( m_extrapolator->extrapolate(ctx,
+                                                                                             track->perigeeParameters(),
+                                                                                             primary_surface ) );
+        std::cout << "Mario primary yes "<< trk_i <<std::endl;
+      	if ( ip ) {
+	std::cout << "Mario ip yes "<< trk_i <<std::endl;
+	      decor_TrkOriginVtx(*track) = vertexLink;
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;
         decor_d0_sigma(*track) = ip->sigmad0;
@@ -143,20 +161,33 @@ namespace Analysis {
            " sigmad0= " << ip->sigmad0 <<
            " sigmaz0SinTheta= " << ip->sigmaz0SinTheta << 
            " TrkOriginVtx= " << primary );
-      } else {
+      	} else {
+		std::cout << "Mario primary no " << trk_i <<std::endl;
         ATH_MSG_WARNING( "failed to estimate track impact parameter, using dummy values" );
         decor_d0(*track) = NAN;
         decor_z0(*track) = NAN;
         decor_d0_sigma(*track) = NAN;
         decor_z0_sigma(*track) = NAN;
-      }
+	decor_TrkOriginVtx(*track) = vertexLink;
+
+      	}
+      }else{
+		
+	ATH_MSG_WARNING( "failed to find origin vertex" );
+        decor_d0(*track) = NAN;
+        decor_z0(*track) = NAN;
+        decor_d0_sigma(*track) = NAN;
+        decor_z0_sigma(*track) = NAN;
+	decor_TrkOriginVtx(*track) = vertexLink;
+
+	}
+
+
 
       // some other parameters we have go get directly from the
       // extrapolator. This is more or less copied from:
       // https://goo.gl/iWLv5T
-      std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx, 
-                                                                                             track->perigeeParameters(), 
-                                                                                             primary_surface ) );
+      
       if ( extrap_pars ) {
         const Amg::Vector3D& track_pos = extrap_pars->position();
         const Amg::Vector3D& vertex_pos = primary->position();
