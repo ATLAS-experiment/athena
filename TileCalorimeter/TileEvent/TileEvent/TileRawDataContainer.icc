@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // implementation of TileRawDataContainer 
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
+#include "AthenaKernel/errorcheck.h"
 #include "Identifier/IdentifierHash.h"
 #include "TileConditions/TileCablingService.h"
 
@@ -26,19 +25,10 @@ void TileRawDataContainer<TCOLLECTION>::initialize(bool createColl, TYPE type,
             TileFragHash::ID frag = this->m_hashFunc.identifier(i);
             TCOLLECTION * coll = new TCOLLECTION(frag,ownPolicy) ;
             StatusCode sc = this->addCollection(coll,static_cast<IdentifierHash>(i));
-            if (sc.isFailure() ) {
-                ISvcLocator* svcLoc = Gaudi::svcLocator( );
-                IMessageSvc*  msgSvc;
-                sc = svcLoc->service( "MessageSvc", msgSvc  );
-                if ( sc.isFailure() ) {
-                    std::cout << "TileRawDataContainer   ERROR Can not retrieve MessageSvc" << std::endl;
-                    std::cout << "TileRawDataContainer   ERROR Can not create collection for frag 0x" << std::hex << frag
-                              << " in container with CLID " << std::dec << this->clID() << std::endl;
-                } else {
-                    MsgStream log(msgSvc, "TileRawDataContainer");
-                    log << MSG::ERROR <<" Can not create collection for frag 0x" << MSG::hex << frag
-                        << " in container with CLID " << MSG::dec << this->clID() << endmsg;
-                }
+            if (sc.isFailure()) {
+                REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "TileRawDataContainer") <<
+                    "Can not create collection for frag 0x" << MSG::hex << frag <<
+                    " in container with CLID " << MSG::dec << this->clID() << endmsg;
             }
         }
     }
