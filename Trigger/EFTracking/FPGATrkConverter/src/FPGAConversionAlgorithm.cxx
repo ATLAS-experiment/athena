@@ -10,7 +10,7 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
   StatusCode FPGAConversionAlgorithm::initialize() {
     ATH_CHECK(m_ClusterConverter.retrieve());
 
-    ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters));
+    ATH_CHECK(m_FPGAClusterKey.initialize(m_doClusters or m_doSP));
     ATH_CHECK(m_FPGASPKey.initialize(m_doSP));
     ATH_CHECK(m_FPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_FPGARoadKey.initialize(m_doActsTrk));
@@ -20,7 +20,8 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     ATH_CHECK(m_xAODStripClusterFromFPGAClusterKey.initialize(m_doClusters));
     ATH_CHECK(m_xAODPixelClusterFromFPGAHitKey.initialize(m_doHits));
     ATH_CHECK(m_xAODStripClusterFromFPGAHitKey.initialize(m_doHits));
-    ATH_CHECK(m_xAODSpacePointFromFPGASPKey.initialize(m_doSP));    
+    ATH_CHECK(m_xAODStripSpacePointFromFPGAKey.initialize(m_doSP));  
+    ATH_CHECK(m_xAODPixelSpacePointFromFPGAKey.initialize(m_doSP));      
     ATH_CHECK(m_ActsProtoTrackFromFPGARoadKey.initialize(m_doActsTrk));
     ATH_CHECK(m_ActsProtoTrackFromFPGATrackKey.initialize(m_doActsTrk));
     ATH_CHECK(m_outputStripClusterContainerKey.initialize(m_doClusters));
@@ -51,19 +52,28 @@ FPGAConversionAlgorithm::FPGAConversionAlgorithm(const std::string& name, ISvcLo
     std::unique_ptr<xAOD::StripClusterAuxContainer> SCTAuxContFromClusters = std::make_unique<xAOD::StripClusterAuxContainer>();
     SCTContFromClusters->setStore(SCTAuxContFromClusters.get() );
 
-    std::unique_ptr<xAOD::SpacePointContainer> SPContFromSP = std::make_unique<xAOD::SpacePointContainer>();
-    std::unique_ptr<xAOD::SpacePointAuxContainer> SPAuxContFromSP = std::make_unique<xAOD::SpacePointAuxContainer>();    
-    SPContFromSP->setStore(SPAuxContFromSP.get() );
+    std::unique_ptr<xAOD::SpacePointContainer> StripSPCont = std::make_unique<xAOD::SpacePointContainer>();
+    std::unique_ptr<xAOD::SpacePointAuxContainer> StripSPAuxCont = std::make_unique<xAOD::SpacePointAuxContainer>();    
+    StripSPCont->setStore(StripSPAuxCont.get() );
+
+    std::unique_ptr<xAOD::SpacePointContainer> PixelSPCont = std::make_unique<xAOD::SpacePointContainer>();
+    std::unique_ptr<xAOD::SpacePointAuxContainer> PixelSPAuxCont = std::make_unique<xAOD::SpacePointAuxContainer>();    
+    PixelSPCont->setStore(PixelSPAuxCont.get() );
     
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromRoads = std::make_unique<ActsTrk::ProtoTrackCollection>();
     std::unique_ptr<ActsTrk::ProtoTrackCollection> ProtoTracksFromTracks = std::make_unique<ActsTrk::ProtoTrackCollection>();
 
     if (m_doSP) {
-      SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle = SG::ReadHandle<FPGATrackSimClusterCollection>(m_FPGASPKey, ctx);
+      SG::ReadHandle<FPGATrackSimClusterCollection> FPGASPHandle (m_FPGASPKey, ctx);
+      SG::ReadHandle<FPGATrackSimClusterCollection> FPGAClustersHandle (m_FPGAClusterKey, ctx);
       const FPGATrackSimClusterCollection *FPGASPColl = FPGASPHandle.cptr();
-      ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *SPContFromSP) );
-      SG::WriteHandle<xAOD::SpacePointContainer> xAODSpacePointFromFPGASPHandle (m_xAODSpacePointFromFPGASPKey, ctx);
-      ATH_CHECK( xAODSpacePointFromFPGASPHandle.record (std::move(SPContFromSP), std::move(SPAuxContFromSP)));
+      const FPGATrackSimClusterCollection *FPGAClustersColl = FPGAClustersHandle.cptr();
+      ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGASPColl, *StripSPCont) );
+      ATH_CHECK( m_ClusterConverter->convertSpacePoints(*FPGAClustersColl, *PixelSPCont, true) );
+      SG::WriteHandle<xAOD::SpacePointContainer> xAODStripSpacePointFromFPGAHandle (m_xAODStripSpacePointFromFPGAKey, ctx);
+      SG::WriteHandle<xAOD::SpacePointContainer> xAODPixelSpacePointFromFPGAHandle (m_xAODPixelSpacePointFromFPGAKey, ctx);
+      ATH_CHECK( xAODStripSpacePointFromFPGAHandle.record (std::move(StripSPCont), std::move(StripSPAuxCont)));
+      ATH_CHECK( xAODPixelSpacePointFromFPGAHandle.record (std::move(PixelSPCont), std::move(PixelSPAuxCont)));
     }
 
     

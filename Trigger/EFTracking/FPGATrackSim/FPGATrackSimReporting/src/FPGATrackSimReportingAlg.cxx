@@ -194,7 +194,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODSpacePoints(SG::ReadHandle
             sp->globalPosition().y(),
             sp->globalPosition().z(),
             sp->elementIdList()[0],
-            sp->elementIdList()[1]);
+            sp->elementIdList().size() == 2 ? sp->elementIdList()[1] : 0);
     }
     mainTable += "|=========================================================================================|";
     ATH_MSG_INFO("Printout of xAOD space points coming from " << spContainer.key() << mainTable );

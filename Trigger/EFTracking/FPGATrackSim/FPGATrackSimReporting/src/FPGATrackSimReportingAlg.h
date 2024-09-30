@@ -51,7 +51,7 @@ namespace FPGATrackSim {
                 
                 // xAOD SpacePoints to monitor
                 SG::ReadHandleKeyArray <xAOD::SpacePointContainer> m_xAODSpacePointContainerKeys{
-		  this, "xAODSpacePointContainersFromFPGA", {"xAODSpacePoints_1stFromFPGASP"},
+		  this, "xAODSpacePointContainersFromFPGA", {"xAODStripSpacePoints_1stFromFPGA","xAODPixelSpacePoints_1stFromFPGA"},
                         "input list of xAOD SpacePoint Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 // FPGA Cluster collection
                 // FPGA Road collection
