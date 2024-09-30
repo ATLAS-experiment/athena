@@ -47,7 +47,7 @@ class AnaAlgSequence( AlgSequence ):
 
         print("WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING")
         print("WARNING!!!!!    Usage of AnaAlgSequence is deprecated, please use ConfigBlocks instead")
-        print("WARNING!!!!!    For more info see https://atlassoftwaredocs.web.cern.ch/AnalysisSWTutorial/cpalg_intro/")
+        print("WARNING!!!!!    For more info see https://atlassoftwaredocs.web.cern.ch/analysis-software/AnalysisSWTutorial/cpalg_intro/")
         print("WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING")
 
         # Set up the sequence's member variables:
