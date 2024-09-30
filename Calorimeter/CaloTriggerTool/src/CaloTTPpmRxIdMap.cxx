@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTriggerTool/CaloTTPpmRxIdMap.h"
@@ -10,6 +10,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IMessageSvc.h"
 
+#include "AthenaKernel/errorcheck.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <iostream>
@@ -26,22 +27,16 @@ void CaloTTPpmRxIdMap::set( const CaloTTPpmRxId& m ) {
 
   convert_to_P(m);
 
-  IMessageSvc *msgSvc;
-  StatusCode status =Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-  if(status.isFailure()){
-    std::cout <<  "Cannot locate MessageSvc" << std::endl;
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if(!msgSvc){
+      throw std::runtime_error("Cannot locate MessageSvc");
   }
   MsgStream log( msgSvc, "CaloTTPpmRxIdMap");
-  bool dump=false;
-  if (log.level()<=MSG::VERBOSE) dump=true;
-  bool dump2=false;
-  if (log.level()<=MSG::DEBUG) dump2=true;
-
 
   log<<MSG::DEBUG<<" CaloTTPpmRxId size = "<<m.size() <<endmsg;
-  StoreGateSvc * detStore;
-  status = Gaudi::svcLocator()->service("DetectorStore",detStore);
-  if(status.isFailure()){
+
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore){
      log << MSG::ERROR <<  "Cannot locate DetectorStore" << endmsg;
   }
 
@@ -55,24 +50,17 @@ void CaloTTPpmRxIdMap::set( const CaloTTPpmRxId& m ) {
 			L1CaloCoolChannelId ppmChannelId(t.ppm_crate, L1CaloModuleType::Ppm, t.ppm_module, t.ppm_subModule, t.ppm_channel);
 			L1CaloRxCoolChannelId rxChannelId(t.rx_crate, t.rx_module, t.rx_inputConn, t.rx_inputPair, t.rx_outputConn, t.rx_outputPair);
 
-/*
-            log<<MSG::VERBOSE
-            << " db struct= "
-            <<" pn="<<t.pn<<" sampling="<<t.sampling
-            <<" region="<<t.region
-            <<" eta="<<t.eta<<" phi="<<t.phi<<" layer="<<t.layer<<" | "
-            <<" crate="<<t.crate<<" module="<<t.module
-            <<" submodule="<<t.submodule
-            <<" channel="<<t.channel
-            << endmsg;
-*/
-            if (dump) log << MSG::VERBOSE << " ppm id = " << ppmChannelId.id() << " rx id =" << rxChannelId.id() <<endmsg;
+            if (log.level()<=MSG::VERBOSE) {
+              log << MSG::VERBOSE << " ppm id = " << ppmChannelId.id() << " rx id =" << rxChannelId.id() <<endmsg;
+            }
 
 			m_mPpmIdToRx[ppmChannelId].push_back(rxChannelId);
 			m_mRxIdToPpm[rxChannelId] = ppmChannelId;
 
         }
-        if (dump2) log<<MSG::DEBUG<<" CaloTTPpmRxIdMap::set : number of Ids="<<m_mPpmIdToRx.size()<<std::endl;
+        if (log.level()<=MSG::DEBUG) {
+          log<<MSG::DEBUG<<" CaloTTPpmRxIdMap::set : number of Ids="<<m_mPpmIdToRx.size()<<std::endl;
+        }
     } catch (CaloID_Exception& except) {
         log<<MSG::ERROR<<" Failed in CaloTTPpmRxIdMap::set " << endmsg;
         log<<MSG::ERROR<< (std::string) except  << endmsg ;
@@ -89,14 +77,8 @@ std::vector<L1CaloRxCoolChannelId> CaloTTPpmRxIdMap::ppmToRxId(const L1CaloCoolC
         return it->second;
     }
 
-    IMessageSvc *msgSvc;
-    StatusCode status = Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-    if(status.isFailure()){
-        std::cout <<  "Cannot locate MessageSvc" << std::endl;
-    }
-
-    MsgStream log( msgSvc, "CaloTTPpmRxIdMap");
-    log<<MSG::ERROR<<" Ppm channel ID not found, id= "<< ppmChannelId.id()<<" in Ppm to Rx map." <<endmsg;
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CaloTTPpmRxIdMap") <<
+      "Ppm channel ID not found, id= "<< ppmChannelId.id()<<" in Ppm to Rx map." <<endmsg;
 
     return std::vector<L1CaloRxCoolChannelId>();
 }
@@ -112,14 +94,8 @@ L1CaloCoolChannelId CaloTTPpmRxIdMap::rxToPpmId(const L1CaloRxCoolChannelId& rxC
     }
 
     // ERROR, can not find the id.
-    IMessageSvc *msgSvc;
-    StatusCode status =Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-    if(status.isFailure()){
-        std::cout <<  "Cannot locate MessageSvc" << std::endl;
-    }
-
-    MsgStream log( msgSvc, "CaloTTPpmRxIdMap");
-    log<<MSG::ERROR<<" Rx channel ID not found, id = " <<rxChannelId.id()<<" in Rx to Ppm map."<< endmsg;
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CaloTTPpmRxIdMap") <<
+      "Rx channel ID not found, id = " <<rxChannelId.id()<<" in Rx to Ppm map."<< endmsg;
 
     return L1CaloCoolChannelId(0) ;
 }
