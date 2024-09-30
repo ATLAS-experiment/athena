@@ -53,7 +53,8 @@ protected: // was private
 
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_xAODPixelClusterFromFPGAClusterKey{this, "xAODPixelClusterFromFPGAClusterKey","xAODPixelClustersFromFPGACluster","FPGA->xAOD PixelClusters Container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGAClusterKey{this, "xAODStripClusterFromFPGAClusterKey","xAODStripClustersFromFPGACluster","FPGA->xAOD StripClusters Container"};
-  SG::WriteHandleKey<xAOD::SpacePointContainer> m_xAODSpacePointFromFPGASPKey{this, "xAODSpacePointFromFPGASPKey","xAODSpacePointsFromFPGASP","FPGA SP->xAOD SpacePoint Container"};  
+  SG::WriteHandleKey<xAOD::SpacePointContainer> m_xAODStripSpacePointFromFPGAKey{this, "xAODStripSpacePointFromFPGAKey","xAODStripSpacePointsFromFPGA","FPGA SP->xAOD Strip SpacePoint Container"};  
+  SG::WriteHandleKey<xAOD::SpacePointContainer> m_xAODPixelSpacePointFromFPGAKey{this, "xAODPixelSpacePointFromFPGAKey","xAODPixelSpacePointsFromFPGA","FPGA Cluster->xAOD Pixel SpacePoint Container"};  
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_xAODPixelClusterFromFPGAHitKey{this, "xAODPixelClusterFromFPGAHitKey","xAODPixelClustersFromFPGAHit","FPGA->xAOD PixelClusters Container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_xAODStripClusterFromFPGAHitKey{this, "xAODStripClusterFromFPGAHitKey","xAODStripClustersFromFPGAHit","FPGA->xAOD StripClusters Container"};
   SG::WriteHandleKey<ActsTrk::ProtoTrackCollection> m_ActsProtoTrackFromFPGARoadKey{this, "ActsProtoTrackFromFPGARoadKey","ActsProtoTracksFromFPGARoad","Vector of ActsTrk::ProtoTrack from FPGARoads"};

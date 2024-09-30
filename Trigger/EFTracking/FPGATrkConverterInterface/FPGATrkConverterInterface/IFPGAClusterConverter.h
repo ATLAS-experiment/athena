@@ -49,10 +49,7 @@ public:
                                       xAOD::PixelClusterContainer& pixelCont,
                                       xAOD::StripClusterContainer& SCTCont) const = 0;
   virtual StatusCode convertSpacePoints(const std::vector<FPGATrackSimCluster>& cl,
-                                      xAOD::SpacePointContainer& SCTCont) const = 0;
-
-
-  virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const = 0;
+                                      xAOD::SpacePointContainer& SPCont, bool doPixel = false) const = 0;
 
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>&) const = 0;
   virtual StatusCode createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, xAOD::PixelCluster&) const = 0;
@@ -62,9 +59,12 @@ public:
   virtual StatusCode createPixelCluster(const FPGATrackSimCluster&, xAOD::PixelCluster& ) const = 0;
   virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, std::unique_ptr<InDet::SCT_Cluster>&) const = 0;
   virtual StatusCode createSCTCluster(const FPGATrackSimCluster&, xAOD::StripCluster& ) const = 0;
+  virtual StatusCode createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp) const = 0;
 
   virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const = 0;
   virtual StatusCode getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimHit& hit) const = 0;
+  virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const = 0;
+
 
 };
 

@@ -79,7 +79,8 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
     kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks%s" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClusters%sFromFPGACluster" %(stage))
     kwargs.setdefault("xAODStripClusterFromFPGAClusterKey", "xAODStripClusters%sFromFPGACluster" %(stage))
-    kwargs.setdefault("xAODSpacePointFromFPGASPKey", "xAODSpacePoints%sFromFPGASP" %(stage))
+    kwargs.setdefault("xAODStripSpacePointFromFPGAKey", "xAODStripSpacePoints%sFromFPGA" %(stage))
+    kwargs.setdefault("xAODPixelSpacePointFromFPGAKey", "xAODPixelSpacePoints%sFromFPGA" %(stage))
     kwargs.setdefault("xAODPixelClusterFromFPGAHitKey", "xAODPixelClusters%sFromFPGAHit" %(stage))
     kwargs.setdefault("xAODStripClusterFromFPGAHitKey", "xAODStripClusters%sFromFPGAHit" %(stage))
     kwargs.setdefault("ActsProtoTrackFromFPGARoadKey", "ActsProtoTracks%sFromFPGARoad" %(stage))
@@ -132,6 +133,8 @@ def WriteToAOD(flags, stage = ''): #  store xAOD containers in AOD file
     toAOD += [f"xAOD::PixelClusterContainer#xAODPixelClusters{stage}FromFPGACluster",f"xAOD::PixelClusterAuxContainer#xAODPixelClusters{stage}FromFPGAClusterAux.",
               f"xAOD::StripClusterContainer#xAODStripClusters{stage}FromFPGACluster",f"xAOD::StripClusterAuxContainer#xAODStripClusters{stage}FromFPGAClusterAux.",
               "xAOD::TrackParticleContainer#xAODFPGAProtoTracksTrackParticles","xAOD::TrackParticleAuxContainer#xAODFPGAProtoTracksTrackParticlesAux.",
+              f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGA",f"xAOD::SpacePointContainer#xAODPixelSpacePoints{stage}FromFPGAAux",
+              f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGA",f"xAOD::SpacePointContainer#xAODStripSpacePoints{stage}FromFPGAAux",
             ]
     
     result.merge(addToAOD(flags, toAOD))
@@ -322,7 +325,7 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         if flags.Trigger.FPGATrackSim.writeToAOD:
             acc.merge(WriteToAOD(flags, stage = '_1st'))
-            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags, stage = 'SpacePoints_1st'))
+            if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(WriteToAOD(flags, stage = '_1st'))
 
         # Add the truth decorators
         from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg

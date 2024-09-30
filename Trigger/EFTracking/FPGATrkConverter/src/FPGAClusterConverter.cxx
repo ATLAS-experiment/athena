@@ -220,134 +220,21 @@ StatusCode FPGAClusterConverter::convertClusters(const std::vector<FPGATrackSimC
 }
 
 StatusCode FPGAClusterConverter::convertSpacePoints(const std::vector<FPGATrackSimCluster>& clusters,
-                                                  xAOD::SpacePointContainer& SPCont) const {
+                                                  xAOD::SpacePointContainer& SPCont, bool doPixel) const {
 
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
-  Amg::Vector3D vertex = beamSpot->beamVtx().position();
-
-  ATH_MSG_DEBUG("Found " << clusters.size() << " FPGATrackSimSpacePoints");
+  ATH_MSG_DEBUG("Found " << clusters.size() << " FPGATrackSimClusters (SP conversion)");
   SPCont.reserve(clusters.size());
 
-  // Container of xAOD::StripCluster associated to SP
-  std::unique_ptr<xAOD::StripClusterContainer> clusterCont = std::make_unique<xAOD::StripClusterContainer>();
-  std::unique_ptr<xAOD::StripClusterAuxContainer> clusterAuxCont = std::make_unique<xAOD::StripClusterAuxContainer>();
-  clusterCont->setStore(clusterAuxCont.get() );
-
   for(const FPGATrackSimCluster& cl : clusters) {
-
     FPGATrackSimHit clEq = cl.getClusterEquiv();
-    ATH_MSG_DEBUG(" SP eta, phi " << clEq.getEtaIndex() << " " << clEq.getPhiIndex());
-
-    // **** Get global SpacePoint infos ****
-    
-    //Get xAOD::StripCluster from FPGA SP
-    IdentifierHash hash = clEq.getIdentifierHash();
-    std::vector<Identifier> rdoList;
-    ATH_CHECK(getRdoList(rdoList, cl));
-    xAOD::StripCluster *xaod_scl = new xAOD::StripCluster();
-    clusterCont->push_back(xaod_scl);
-    ATH_CHECK(createSCTCluster(clEq, rdoList, *xaod_scl));
-
-    // Global position and covariance 
-    auto globalPos = xaod_scl->globalPosition();
-
-    // TODO: update to ITk?
-    // Lines taken from SCT_SpacePoint::setupLocalCovarianceSCT()
-    float deltaY = 0.0004; // roughly pitch of SCT (80 mu) / sqrt(12)
-    float covTerm = 1600.*deltaY;
-    Eigen::Matrix<float, 2, 1> variance(0.1, 8.*covTerm);
-    const InDetDD::SiDetectorElement* element = m_SCTManager->getDetectorElement(hash);
-    // Swap r/z covariance terms for endcap clusters
-    if ( element->isEndcap() )
-        std::swap( variance(0, 0), variance(1, 0) );
-    float cov_r = variance(0,0);
-    float cov_z = variance(1,0);
-
-    // ***** Get Strips related infos *****
-    std::unique_ptr<xAOD::StripClusterContainer> SPstripsCont = std::make_unique<xAOD::StripClusterContainer>();
-    std::unique_ptr<xAOD::StripClusterAuxContainer> SPstripsAuxCont = std::make_unique<xAOD::StripClusterAuxContainer>();
-    SPstripsCont->setStore(SPstripsAuxCont.get() );
-    SPstripsCont->reserve(2.0);
-
-    // idHashes and measurements
-    std::vector<unsigned int> idHashList;
-    std::vector< const xAOD::UncalibratedMeasurement* > measurements;
-    for (const FPGATrackSimHit& h : cl.getHitList()) {
-      idHashList.push_back(h.getIdentifierHash());
-      ATH_MSG_DEBUG(" Strip eta, phi " << h.getEtaIndex() << " " << h.getPhiIndex());
-      std::vector<Identifier> rdo;
-      ATH_CHECK(getRdoList(rdo, h));
-      xAOD::StripCluster *meas = new xAOD::StripCluster();
-      SPstripsCont->push_back(meas);
-      ATH_CHECK(createSCTCluster(h, rdo, *meas));
-      measurements.push_back(meas);
+    if ( (doPixel and clEq.isPixel()) or (not doPixel and clEq.isStrip()) ) {
+      xAOD::SpacePoint *xaod_sp = new xAOD::SpacePoint();
+      SPCont.push_back(xaod_sp);
+      ATH_CHECK(createSP(cl, *xaod_sp));
     }
-
-    xAOD::StripCluster *strip1 = SPstripsCont->at(0);
-    xAOD::StripCluster *strip2 = SPstripsCont->at(1);
-
-    float topHalfStripLength, bottomHalfStripLength;
-    Amg::Vector3D topStripDirection;
-    Amg::Vector3D bottomStripDirection;
-    Amg::Vector3D stripCenter1;
-    Amg::Vector3D stripCenter2;
-    ATH_CHECK(getStripsInfo(*strip1, topHalfStripLength, topStripDirection, stripCenter1));
-    ATH_CHECK(getStripsInfo(*strip2, bottomHalfStripLength, bottomStripDirection, stripCenter2));
-    Amg::Vector3D topTrajDir = 2. * ( stripCenter1 - vertex);
-    Amg::Vector3D topStripCenter = 0.5 * topTrajDir;
-    Amg::Vector3D stripCenterDistance = stripCenter1 - stripCenter2;
-
-    ATH_MSG_DEBUG("topHalfStripLength = " << topHalfStripLength << " bottomHalfStripLength = " << bottomHalfStripLength);
-    ATH_MSG_DEBUG("stripCenter1 = (" << stripCenter1.x() <<", " << stripCenter1.y() <<", " << stripCenter1.z() <<") " << "stripCenter2 = (" << stripCenter2.x() <<", " << stripCenter2.y() <<", " << stripCenter2.z() <<") " );
-    ATH_MSG_DEBUG("topStripDirection = (" << topStripDirection.x() <<", " << topStripDirection.y() <<", " << topStripDirection.z() <<") " << "bottomStripDirection = (" << bottomStripDirection.x() <<", " << bottomStripDirection.y() <<", " << bottomStripDirection.z() <<") " );
-    ATH_MSG_DEBUG("stripCenterDistance = (" << stripCenterDistance.x() <<", " << stripCenterDistance.y() <<", " << stripCenterDistance.z() << ")" );
-    ATH_MSG_DEBUG("topStripCenter = (" << topStripCenter.x() <<", " << topStripCenter.y() <<", " << topStripCenter.z() << ")" );
-
-    // **** Create xAOD::SpacePoint ****
-    xAOD::SpacePoint *xaod_sp = new xAOD::SpacePoint();
-    SPCont.push_back(xaod_sp);
-
-    xaod_sp->setSpacePoint(
-      idHashList, 
-      globalPos, 
-      cov_r, 
-      cov_z, 
-      measurements,
-      topHalfStripLength,
-      bottomHalfStripLength,
-      topStripDirection.cast<float>(),
-      bottomStripDirection.cast<float>(),
-      stripCenterDistance.cast<float>(),
-      topStripCenter.cast<float>()
-    );
   }
-
   return StatusCode::SUCCESS;
 }
-
-StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const {
-
-  const int strip = m_SCTId->strip(cl.rdoList().front());
-  IdentifierHash hash = cl.identifierHash();
-
-  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
-
-  Identifier wafer_id = m_SCTId->wafer_id(hash);
-  Identifier strip_id = m_SCTId->strip_id(wafer_id, strip);
-  InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(strip_id);
-
-  const InDetDD::SiLocalPosition localPos( pDE->rawLocalPositionOfCell(cell ));
-  std::pair<Amg::Vector3D, Amg::Vector3D> end = (pDE->endsOfStrip(localPos));
-  stripCenter = 0.5 * (end.first + end.second);
-  Amg::Vector3D stripDir = end.first - end.second;
-  
-  halfStripLength = 0.5 * stripDir.norm();
-  stripDirection = stripDir / (2. * (halfStripLength));
-
-  return StatusCode::SUCCESS;
-}
-
 
 StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h, const std::vector<Identifier>& rdoList, std::unique_ptr<InDet::PixelCluster>& cl) const {
   ATH_MSG_DEBUG("\tCreate InDet::PixelCluster from FPGATrackSimHit");
@@ -724,6 +611,142 @@ StatusCode FPGAClusterConverter::createSCTCluster(const FPGATrackSimCluster& clu
   return StatusCode::SUCCESS;
 }
 
+StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp ) const {
+
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+  const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
+  Amg::Vector3D vertex = beamSpot->beamVtx().position();
+
+  FPGATrackSimHit clEq = cl.getClusterEquiv();
+  ATH_MSG_DEBUG(" SP eta, phi " << clEq.getEtaIndex() << " " << clEq.getPhiIndex() << " is Pixel? " << clEq.isPixel());
+
+  IdentifierHash hash = clEq.getIdentifierHash();
+  std::vector<Identifier> rdoList;
+  ATH_CHECK(getRdoList(rdoList, cl));
+
+  if (clEq.isStrip()) {
+
+    // **** Get global SpacePoint infos ****
+    
+    //Get xAOD::StripCluster from FPGA SP
+    std::unique_ptr<xAOD::StripClusterContainer> clusterCont = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterAuxContainer> clusterAuxCont = std::make_unique<xAOD::StripClusterAuxContainer>();
+    clusterCont->setStore(clusterAuxCont.get() );
+
+    xAOD::StripCluster *xaod_scl = new xAOD::StripCluster();
+    clusterCont->push_back(xaod_scl);
+    ATH_CHECK(createSCTCluster(clEq, rdoList, *xaod_scl));
+
+    // Global position and covariance 
+    auto globalPos = xaod_scl->globalPosition();
+
+    // Covariance
+    // TODO: update to ITk? Can it be done as for pixel? (L728-729)?
+    // Lines taken from SCT_SpacePoint::setupLocalCovarianceSCT()
+    float deltaY = 0.0004; // roughly pitch of SCT (80 mu) / sqrt(12)
+    float covTerm = 1600.*deltaY;
+    Eigen::Matrix<float, 2, 1> variance(0.1, 8.*covTerm);
+    const InDetDD::SiDetectorElement* element =  m_SCTManager->getDetectorElement(hash);
+    // Swap r/z covariance terms for endcap clusters
+    if ( element->isEndcap() )
+        std::swap( variance(0, 0), variance(1, 0) );
+    float cov_r = variance(0,0);
+    float cov_z = variance(1,0);
+
+    // ***** Get Strips related infos *****
+    std::unique_ptr<xAOD::StripClusterContainer> SPstripsCont = std::make_unique<xAOD::StripClusterContainer>();
+    std::unique_ptr<xAOD::StripClusterAuxContainer> SPstripsAuxCont = std::make_unique<xAOD::StripClusterAuxContainer>();
+    SPstripsCont->setStore(SPstripsAuxCont.get() );
+    SPstripsCont->reserve(2.0);
+
+    // idHashes and measurements
+    std::vector<unsigned int> idHashList;
+    std::vector< const xAOD::UncalibratedMeasurement* > measurements;
+    for (const FPGATrackSimHit& h : cl.getHitList()) {
+      idHashList.push_back(h.getIdentifierHash());
+      ATH_MSG_DEBUG(" Strip eta, phi " << h.getEtaIndex() << " " << h.getPhiIndex());
+      std::vector<Identifier> rdo;
+      ATH_CHECK(getRdoList(rdo, h));
+      xAOD::StripCluster *meas = new xAOD::StripCluster();
+      SPstripsCont->push_back(meas);
+      ATH_CHECK(createSCTCluster(h, rdo, *meas));
+      measurements.push_back(meas);
+    }
+
+    // Strip length / center / direction / distance
+    xAOD::StripCluster *strip1 = SPstripsCont->at(0);
+    xAOD::StripCluster *strip2 = SPstripsCont->at(1);
+
+    float topHalfStripLength, bottomHalfStripLength;
+    Amg::Vector3D topStripDirection;
+    Amg::Vector3D bottomStripDirection;
+    Amg::Vector3D stripCenter1;
+    Amg::Vector3D stripCenter2;
+    ATH_CHECK(getStripsInfo(*strip1, topHalfStripLength, topStripDirection, stripCenter1));
+    ATH_CHECK(getStripsInfo(*strip2, bottomHalfStripLength, bottomStripDirection, stripCenter2));
+    Amg::Vector3D topTrajDir = 2. * ( stripCenter1 - vertex);
+    Amg::Vector3D topStripCenter = 0.5 * topTrajDir;
+    Amg::Vector3D stripCenterDistance = stripCenter1 - stripCenter2;
+
+    ATH_MSG_DEBUG("topHalfStripLength = " << topHalfStripLength << " bottomHalfStripLength = " << bottomHalfStripLength);
+    ATH_MSG_DEBUG("topStripDirection = (" << topStripDirection.x() <<", " << topStripDirection.y() <<", " << topStripDirection.z() <<") " << "bottomStripDirection = (" << bottomStripDirection.x() <<", " << bottomStripDirection.y() <<", " << bottomStripDirection.z() <<") " );
+    ATH_MSG_DEBUG("stripCenterDistance = (" << stripCenterDistance.x() <<", " << stripCenterDistance.y() <<", " << stripCenterDistance.z() << ")" );
+    ATH_MSG_DEBUG("topStripCenter = (" << topStripCenter.x() <<", " << topStripCenter.y() <<", " << topStripCenter.z() << ")" );
+
+    // Fill xAOD::SpacePoint
+    sp.setSpacePoint(
+      idHashList, 
+      globalPos, 
+      cov_r, 
+      cov_z, 
+      measurements,
+      topHalfStripLength,
+      bottomHalfStripLength,
+      topStripDirection.cast<float>(),
+      bottomStripDirection.cast<float>(),
+      stripCenterDistance.cast<float>(),
+      topStripCenter.cast<float>()
+    );
+}
+  if (clEq.isPixel()) {
+
+    ATH_MSG_DEBUG(" Pixel eta, phi " << clEq.getEtaIndex() << " " << clEq.getPhiIndex());
+  
+    //Get xAOD::PixelCluster from FPGA cluster
+    std::unique_ptr<xAOD::PixelClusterContainer> clusterCont = std::make_unique<xAOD::PixelClusterContainer>();
+    std::unique_ptr<xAOD::PixelClusterAuxContainer> clusterAuxCont = std::make_unique<xAOD::PixelClusterAuxContainer>();
+    clusterCont->setStore(clusterAuxCont.get() );
+
+    xAOD::PixelCluster *xaod_pcl = new xAOD::PixelCluster();
+    clusterCont->push_back(xaod_pcl);
+    ATH_CHECK(createPixelCluster(clEq, rdoList, *xaod_pcl));
+
+    // Global position and covariance 
+    auto globalPos = xaod_pcl->globalPosition();
+
+    // Covariance (to be cross-checked)
+    float cov_r = xaod_pcl->localCovariance<1>()(0,0);
+    float cov_z = xaod_pcl->localCovariance<1>()(1,0);
+
+    // idHash and measurements
+    unsigned int idHash = clEq.getIdentifierHash();
+    std::vector< const xAOD::UncalibratedMeasurement* > measurements;
+    measurements.push_back(xaod_pcl);
+
+    // Fill xAOD::SpacePoint
+    sp.setSpacePoint(
+      idHash, 
+      globalPos, 
+      cov_r, 
+      cov_z, 
+      measurements
+    );
+
+  }
+
+  return StatusCode::SUCCESS;
+}
+
 StatusCode FPGAClusterConverter::getRdoList(std::vector<Identifier> &rdoList, const FPGATrackSimCluster& cluster) const {
 
   std::vector<FPGATrackSimHit> hits = cluster.getHitList();
@@ -769,3 +792,26 @@ StatusCode FPGAClusterConverter::getRdoList(std::vector<Identifier> &rdoList, co
 
   return StatusCode::SUCCESS;
 }
+
+StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const {
+
+  const int strip = m_SCTId->strip(cl.rdoList().front());
+  IdentifierHash hash = cl.identifierHash();
+
+  const InDetDD::SiDetectorElement* pDE = m_SCTManager->getDetectorElement(hash);
+
+  Identifier wafer_id = m_SCTId->wafer_id(hash);
+  Identifier strip_id = m_SCTId->strip_id(wafer_id, strip);
+  InDetDD::SiCellId cell =  pDE->cellIdFromIdentifier(strip_id);
+
+  const InDetDD::SiLocalPosition localPos( pDE->rawLocalPositionOfCell(cell ));
+  std::pair<Amg::Vector3D, Amg::Vector3D> end = (pDE->endsOfStrip(localPos));
+  stripCenter = 0.5 * (end.first + end.second);
+  Amg::Vector3D stripDir = end.first - end.second;
+  
+  halfStripLength = 0.5 * stripDir.norm();
+  stripDirection = stripDir / (2. * (halfStripLength));
+
+  return StatusCode::SUCCESS;
+}
+
