@@ -33,7 +33,6 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     n_time_bins_default = 150
     n_sample_bins_default = 25
     lumi_block_max = 2000
-    bcid_max = 3564
     l1TriggerType_max = 256
     adc_sum_max = 40000.0
     max_adc_max = 4096.0
@@ -49,23 +48,14 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 # ------------------------- All-event (including bad events) diagnostic histograms -------------------------
 
 
-    zdcLEDAllEventsDiagMonTool.defineHistogram('bcid', title=';BCID;Events',
-                            path='BCID',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max)
-
     zdcLEDAllEventsDiagMonTool.defineHistogram('l1TriggerType', title=';L1TriggerType;Events',
                             path='L1TriggerType',
                             xbins=l1TriggerType_max,xmin=0.0,xmax=l1TriggerType_max)
 
-    zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, bcid', type='TH2F', title=';lumi block;BCID',
-                            path='BCID',
-                            xbins=int(lumi_block_max/10),xmin=0.0,xmax=lumi_block_max,
-                            ybins=bcid_max,ymin=0.0,ymax=bcid_max)
-
-    zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, l1TriggerType', type='TH2F', title=';lumi block;L1TriggerType',
-                            path='L1TriggerType',
-                            xbins=int(lumi_block_max/10),xmin=0.0,xmax=lumi_block_max,
-                            ybins=l1TriggerType_max,ymin=0.0,ymax=l1TriggerType_max)
+    # zdcLEDAllEventsDiagMonTool.defineHistogram('lumiBlock, l1TriggerType', type='TH2F', title=';lumi block;L1TriggerType',
+    #                         path='L1TriggerType',
+    #                         xbins=int(lumi_block_max/10),xmin=0.0,xmax=lumi_block_max,
+    #                         ybins=l1TriggerType_max,ymin=0.0,ymax=l1TriggerType_max)
 
 
 # -------------------------------------------- Observables ------------------------------------------------------
@@ -128,42 +118,6 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
     rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDAvgTime;rpdLEDAvgTime_vs_lb', type='TH2F', title=';lumi block;LED Average Time [ns]',
                             path='rpdLEDAvgTimeLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_bins_default,ymin=0.0,ymax=time_max)
-
-
-# -------------------------------------------- BCID dependence ------------------------------------------------------
-
-    zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDADCSum', type='TH2F', title=';BCID;LED ADC Sum [ADC Counts]',
-                            path='zdcLEDADCSumBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_adc_sum_coarse_bins,ymin=0.0,ymax=adc_sum_max)
-    zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDMaxADC', type='TH2F', title=';BCID;LED Max ADC [ADC Counts]',
-                            path='zdcLEDMaxADCBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=max_adc_max)
-    zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDMaxSample', type='TH2F', title=';BCID;LED Max Sample [ADC Counts]',
-                            path='zdcLEDMaxSampleBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_sample_bins_default,ymin=0.0,ymax=nsamples_max)
-    zdcModLEDMonToolArr.defineHistogram('bcid, zdcLEDAvgTime', type='TH2F', title=';BCID;LED Average Time [ns]',
-                            path='zdcLEDAvgTimeBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_time_bins_default,ymin=0.0,ymax=time_max)
-    rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDADCSum', type='TH2F', title=';BCID;LED ADC Sum [ADC Counts]',
-                            path='rpdLEDADCSumBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_adc_sum_coarse_bins,ymin=0.0,ymax=adc_sum_max)
-    rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDMaxADC', type='TH2F', title=';BCID;LED Max ADC [ADC Counts]',
-                            path='rpdLEDMaxADCBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=max_adc_max)
-    rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDMaxSample', type='TH2F', title=';BCID;LED Max Sample [ADC Counts]',
-                            path='rpdLEDMaxSampleBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_sample_bins_default,ymin=0.0,ymax=nsamples_max)
-    rpdChanLEDMonToolArr.defineHistogram('bcid, rpdLEDAvgTime', type='TH2F', title=';BCID;LED Average Time [ns]',
-                            path='rpdLEDAvgTimeBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
                             ybins=n_time_bins_default,ymin=0.0,ymax=time_max)
 
 
