@@ -269,6 +269,7 @@ class ItemDef:
         MenuItem('L1_J30_VTE200'         ).setLogic( d.J30  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_XE35_VTE200'        ).setLogic( d.XE35 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_XE50_VTE200'        ).setLogic( d.XE50 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_jJ30_VjTE200'         ).setLogic( d.jJ30  & Not(d.jTE200) & physcond).setTriggerType( TT.calo )
 
         MenuItem('L1_VTE200'             ).setLogic( Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TE20_VTE200'        ).setLogic( d.TE20 & Not(d.TE200) & physcond).setTriggerType( TT.calo )

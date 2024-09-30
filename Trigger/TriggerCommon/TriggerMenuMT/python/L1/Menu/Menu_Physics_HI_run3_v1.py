@@ -57,7 +57,6 @@ def defineMenu():
         # legacy single jet - in P1 chains
         'L1_J15','L1_J20','L1_J400',
         'L1_J75p31ETA49',
-        'L1_J12_VTE100','L1_J12_VTE200','L1_J30_VTE200',
 
         # single jet 
         # new calo
@@ -66,6 +65,7 @@ def defineMenu():
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
         'L1_jJ15p30ETA49', 'L1_jJ20p30ETA49',
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
+        'L1_jJ30_VjTE200',
 
         # gJ - ATR-28029
         "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25",
