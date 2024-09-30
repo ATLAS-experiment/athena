@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOSIMEVENTATHENAPOOL_CALOSIMEVENTATHENAPOOLCNVDICT_H
@@ -10,9 +10,12 @@
 
 //Version 2
 #include "CaloSimEventTPCnv/CaloCalibrationHitContainer_p2.h"
+#include "CaloSimEventTPCnv/CaloCalibrationHit_p2.h"
 
 //Version 3
 #include "CaloSimEventTPCnv/CaloCalibrationHitContainer_p3.h"
-#include "CaloSimEventTPCnv/CaloCalibrationHit_p2.h"
+
+//Version4
+#include "CaloSimEventTPCnv/CaloCalibrationHitContainer_p4.h"
 
 #endif

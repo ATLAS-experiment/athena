@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloSimEvent/CaloCalibrationHit.h"
@@ -118,7 +118,8 @@ void CaloCalibrationHitContainerCnv_p3::persToTrans(const CaloCalibrationHitCont
                                   tempE[i*4+1],
                                   tempE[i*4+2],
                                   tempE[i*4+3],
-                                  persCont->m_particleID[i]));
+                                  static_cast<int>(persCont->m_particleID[i]),
+                                  HepMC::INVALID_PARTICLE_ID));
 
 //		if(!dog) std::cout<<"Reading hash: "<<sum <<"\t E: "<< (double)tempE[i] <<std::endl;
     }

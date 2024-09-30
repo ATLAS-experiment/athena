@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloSimEvent/CaloCalibrationHit.h"
@@ -17,7 +17,8 @@ void CaloCalibrationHitCnv_p2::persToTrans(const CaloCalibrationHit_p2* persObj,
                                   persObj->m_energy1,
                                   persObj->m_energy2,
                                   persObj->m_energy3,
-                                  persObj->m_particleID);
+                                  static_cast<int>(persObj->m_particleID),
+                                  HepMC::INVALID_PARTICLE_ID);
 }
 
 

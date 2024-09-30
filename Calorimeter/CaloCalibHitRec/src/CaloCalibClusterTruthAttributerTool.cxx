@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CaloCalibClusterTruthAttributerTool.h"
@@ -9,7 +9,7 @@ CaloCalibClusterTruthAttributerTool::CaloCalibClusterTruthAttributerTool(const s
 
 CaloCalibClusterTruthAttributerTool::~CaloCalibClusterTruthAttributerTool()= default;
 
-StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAOD::CaloCluster& theCaloCluster, unsigned int numTruthParticles, const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, std::vector<std::pair<unsigned int, double > >& barcodeTrueCalHitEnergy) const{
+StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAOD::CaloCluster& theCaloCluster, unsigned int numTruthParticles, const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, std::vector<std::pair<unsigned int, double > >& truthIDTrueCalHitEnergy) const{
 
   ATH_MSG_DEBUG("In calculateTruthEnergies");
 
@@ -20,7 +20,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     return StatusCode::FAILURE;
   }  
   
-  std::map<unsigned int, double> barcodeTruePtMap;
+  std::map<unsigned int, double> truthIDTruePtMap;
 
   //Loop on calorimeter cells to sum up the truth energies of the truth particles.    
   for (const auto *thisCaloCell : *theCellLinks){
@@ -39,32 +39,32 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     std::vector<const CaloCalibrationHit*> theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
     for (const auto *thisCalibrationHit : theseCalibrationHits){
-      unsigned int barcode = thisCalibrationHit->particleID();
+      int truthID = thisCalibrationHit->particleUID();
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());
 
-      auto iterator = barcodeTruePtMap.find(barcode);
-      if (iterator != barcodeTruePtMap.end()) barcodeTruePtMap[barcode] += thisCalHitTruthEnergy;
-      else barcodeTruePtMap[barcode] = thisCalHitTruthEnergy;
+      auto iterator = truthIDTruePtMap.find(truthID);
+      if (iterator != truthIDTruePtMap.end()) truthIDTruePtMap[truthID] += thisCalHitTruthEnergy;
+      else truthIDTruePtMap[truthID] = thisCalHitTruthEnergy;
       
     }//calibration hit loop
     
   }//loop on calorimeter cells to sum up truth energies
 
   //now create a vector with the same information as the map, which we can then sort
-  std::vector<std::pair<unsigned int, double > > barcodeTruePtPairs;
+  std::vector<std::pair<unsigned int, double > > truthIDTruePtPairs;
 
-  barcodeTruePtPairs.reserve(barcodeTruePtMap.size());
-  for (const auto& thisEntry : barcodeTruePtMap) barcodeTruePtPairs.emplace_back(thisEntry);
+  truthIDTruePtPairs.reserve(truthIDTruePtMap.size());
+  for (const auto& thisEntry : truthIDTruePtMap) truthIDTruePtPairs.emplace_back(thisEntry);
 
   //sort vector by calibration hit truth energy
-  std::sort(barcodeTruePtPairs.begin(),barcodeTruePtPairs.end(),[]( std::pair<unsigned int, double> a, std::pair<unsigned int, double> b) -> bool {return a.second > b.second;} );
+  std::sort(truthIDTruePtPairs.begin(),truthIDTruePtPairs.end(),[]( std::pair<unsigned int, double> a, std::pair<unsigned int, double> b) -> bool {return a.second > b.second;} );
 
-  //store the barcode and truth energy of the top numTruthParticles truth particles
-  if (numTruthParticles > barcodeTruePtPairs.size()) numTruthParticles = barcodeTruePtPairs.size();
-  for ( unsigned int counter = 0; counter < numTruthParticles; counter++) barcodeTrueCalHitEnergy.push_back(barcodeTruePtPairs[counter]);
+  //store the truthID and truth energy of the top numTruthParticles truth particles
+  if (numTruthParticles > truthIDTruePtPairs.size()) numTruthParticles = truthIDTruePtPairs.size();
+  for ( unsigned int counter = 0; counter < numTruthParticles; counter++) truthIDTrueCalHitEnergy.push_back(truthIDTruePtPairs[counter]);
 
-  for (const auto& thisPair : barcodeTrueCalHitEnergy) ATH_MSG_DEBUG("Truncated loop 2: barcode and true energy are " << thisPair.first << " and " << thisPair.second << " for cluster with e, eta of " << theCaloCluster.e() << " and " << theCaloCluster.eta() );
+  for (const auto& thisPair : truthIDTrueCalHitEnergy) ATH_MSG_DEBUG("Truncated loop 2: truthID and true energy are " << thisPair.first << " and " << thisPair.second << " for cluster with e, eta of " << theCaloCluster.e() << " and " << theCaloCluster.eta() );
 
   return StatusCode::SUCCESS;
   

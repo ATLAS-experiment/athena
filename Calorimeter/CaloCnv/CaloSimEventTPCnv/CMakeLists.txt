@@ -51,3 +51,9 @@ atlas_add_test( CaloCalibrationHitContainerCnv_p3_test
                 test/CaloCalibrationHitContainerCnv_p3_test.cxx
                 LINK_LIBRARIES CaloSimEventTPCnv CxxUtils
                 LOG_IGNORE_PATTERN "Athena::getMessageSvc" )
+
+atlas_add_test( CaloCalibrationHitContainerCnv_p4_test
+                SOURCES
+                test/CaloCalibrationHitContainerCnv_p4_test.cxx
+                LINK_LIBRARIES CaloSimEventTPCnv CxxUtils
+                LOG_IGNORE_PATTERN "Athena::getMessageSvc" )
