@@ -28,8 +28,8 @@ if susyArgs.testCampaign:
     pTag = 'p6269' if ('data2' in susyArgs.testCampaign) else 'p6266'
     inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
     inputFiles = {}
-    inputFiles['data18'] = f'data18_13TeV.39756643_{pTag}.{susyArgs.testFormat}.pool.root'
-    inputFiles['data22'] = f'data22_13p6TeV.39672234_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data18'] = f'data18_13TeV.39757132_{pTag}.{susyArgs.testFormat}.pool.root'
+    inputFiles['data22'] = f'data22_13p6TeV.39672246_{pTag}.{susyArgs.testFormat}.pool.root'
     inputFiles['data23'] = f'data23_13p6TeV.39756993_{pTag}.{susyArgs.testFormat}.pool.root'
     inputFiles['mc20e']  = f'DAOD_{susyArgs.testFormat}.mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
     inputFiles['mc23a']  = f'mc23_13p6TeV.601229.FS_mc23a_{pTag}.{susyArgs.testFormat}.pool.root'
