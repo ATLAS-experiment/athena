@@ -249,44 +249,50 @@ bool FPGATrackSimEventSelectionSvc::passMatching(FPGATrackSimTruthTrack const & 
   return true;
 }
 
-bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimEventInputHeader* eventHeader) const
+bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimEventInputHeader* eventHeader)
 {
+  bool retval = false;
   if (m_st == SampleType::skipTruth)
-    return true;
+    retval = true;
   else if (m_st == SampleType::singleElectrons || m_st == SampleType::singleMuons || m_st == SampleType::singlePions){
     const auto& truthTracks = eventHeader->optional().getTruthTracks();
-    return checkTruthTracks(truthTracks);
+    retval = checkTruthTracks(truthTracks);
   }
   else if (m_st == SampleType::LLPs) {
     const auto& truthTracks = eventHeader->optional().getTruthTracks();
     // Maybe change this later - could be we want LRT selection in all cases but I suspect not
-    if (m_LRT) return checkTruthTracksLRT(truthTracks);
-    else return checkTruthTracks(truthTracks);
+    if (m_LRT) retval = checkTruthTracksLRT(truthTracks);
+    else retval = checkTruthTracks(truthTracks);
   }
   else {
     ATH_MSG_DEBUG("selectEvent(): Error with sampleType property");
-    return false;
   }
+
+  m_selectEvent = retval;
+  return retval;
 }
 
-bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimLogicalEventInputHeader* eventHeader) const
+bool FPGATrackSimEventSelectionSvc::selectEvent(FPGATrackSimLogicalEventInputHeader* eventHeader)
 {
+  bool retval = false;
   if (m_st == SampleType::skipTruth)
-    return true;
+    retval = true;
   else if (m_st == SampleType::singleElectrons || m_st == SampleType::singleMuons || m_st == SampleType::singlePions){
     const auto& truthTracks = eventHeader->optional().getTruthTracks();
-    return checkTruthTracks(truthTracks);
+    retval = checkTruthTracks(truthTracks);
   }
   else if (m_st == SampleType::LLPs) {
     const auto& truthTracks = eventHeader->optional().getTruthTracks();
     // Maybe change this later - could be we want LRT selection in all cases but I suspect not
-    if (m_LRT) return checkTruthTracksLRT(truthTracks);
-    else return checkTruthTracks(truthTracks);
+    if (m_LRT) retval = checkTruthTracksLRT(truthTracks);
+    else retval =  checkTruthTracks(truthTracks);
   }  
   else {
     ATH_MSG_DEBUG("selectEvent(): Error with sampleType property");
-    return false;
   }
+
+  m_selectEvent = retval;
+  return retval;
 
 }
 
