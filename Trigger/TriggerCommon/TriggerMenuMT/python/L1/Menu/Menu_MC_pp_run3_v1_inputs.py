@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from ..Base.L1MenuFlags import L1MenuFlags
 from ..Base.MenuConfObj import TopoMenuDef
-import TriggerMenuMT.L1.Menu.Menu_Physics_pp_run3_v1_inputs as phys_menu_inputs
+from . import Menu_Physics_pp_run3_v1_inputs as phys_menu_inputs
+from .Menu_Physics_pp_run3_v1_inputs import remapThresholds
 
 
 def defineInputsMenu():
@@ -78,29 +79,5 @@ def defineInputsMenu():
 
     #----------------------------------------------
 
-    def remapThresholds():
-        # remap thresholds. TODO: add checks in case the remap does not fulfill HW constraints?
-        for boardName, boardDef in L1MenuFlags.boards().items():
-            if "connectors" in boardDef:
-                for conn in boardDef["connectors"]:
-                    if "thresholds" in conn:
-                        thresholdsToRemove = []
-                        for thrIndex, thrName in enumerate(conn["thresholds"]):
-                            nBits = 0
-                            if type(thrName)==tuple:
-                                (thrName,nBits) = thrName
-                            if thrName in L1MenuFlags.ThresholdMap():
-                                if (L1MenuFlags.ThresholdMap()[thrName] != ''):
-                                    if nBits > 0:
-                                        conn["thresholds"][thrIndex] = (L1MenuFlags.ThresholdMap()[thrName],nBits)
-                                    else:
-                                        conn["thresholds"][thrIndex] = L1MenuFlags.ThresholdMap()[thrName]
-                                else:
-                                    thresholdsToRemove.append(thrIndex) 
-                        for i in reversed(thresholdsToRemove):
-                            del conn["thresholds"][i]
-
-    #----------------------------------------------
-
-    remapThresholds()
+    remapThresholds(L1MenuFlags)
 
