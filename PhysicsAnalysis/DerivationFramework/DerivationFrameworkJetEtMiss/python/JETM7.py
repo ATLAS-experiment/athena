@@ -214,7 +214,7 @@ def JETM7Cfg(flags):
                                             ]
 
     
-    JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights"]
+    JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.btagIp_TrkOriginVtx"]
     JETM7SlimmingHelper.AllVariables = ["BTagging_AntiKt4EMPFlow","BTagging_AntiKt4EMPFlowByVertex"] #ByVertex"]
     # Truth containers
     if flags.Input.isMC:
