@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibClusterDecoratorAlgorithm.h"
@@ -27,16 +27,14 @@ StatusCode CaloCalibClusterDecoratorAlgorithm::execute(const EventContext& ctx) 
   }  
 
   SG::WriteDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterWriteDecorHandleNLeadingTruthParticles(m_caloClusterWriteDecorHandleKeyNLeadingTruthParticles, ctx);
-  StatusCode sc;
   
   for (const auto *thisCaloCluster : *caloClusterWriteDecorHandleNLeadingTruthParticles){
 
-    std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
-    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, newBarCodeTruthPairs);
-    if (sc == StatusCode::FAILURE) return sc;
+    std::vector<std::pair<unsigned int, double > > newTruthIDTruthPairs;
+    ATH_CHECK(m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, newTruthIDTruthPairs));
     
-    for (const auto& thisPair : newBarCodeTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with barcode " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
-    caloClusterWriteDecorHandleNLeadingTruthParticles(*thisCaloCluster) = newBarCodeTruthPairs;
+    for (const auto& thisPair : newTruthIDTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with truthID " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
+    caloClusterWriteDecorHandleNLeadingTruthParticles(*thisCaloCluster) = newTruthIDTruthPairs;
   }
   
   return StatusCode::SUCCESS;

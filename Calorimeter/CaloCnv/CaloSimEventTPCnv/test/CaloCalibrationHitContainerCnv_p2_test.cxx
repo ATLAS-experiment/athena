@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloSimEventTPCnv/test/CaloCalibrationHitContainerCnv_p2_test.cxx
@@ -18,12 +18,15 @@
 #include <iostream>
 
 
-void compare (const CaloCalibrationHit& h1,
-              const CaloCalibrationHit& h2)
+void compare (const CaloCalibrationHit& trans1,
+              const CaloCalibrationHit& trans2)
 {
-  assert (h1.Equals (&h2));
-  for (int i=0; i<4; i++)
-    assert (h1.energy(i) == h2.energy(i));
+  assert (trans1.Equals (&trans2));
+  for (int i=0; i<4; i++) {
+    assert (trans1.energy(i) == trans2.energy(i));
+  }
+  assert (trans1.particleID() == trans2.particleID());
+  assert (trans1.particleUID() == trans2.particleUID());
 }
 
 

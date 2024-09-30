@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloCalibrationHit
@@ -12,6 +12,8 @@
 #define CaloSimEvent_CaloCalibrationHit_h
 
 #include "Identifier/Identifier.h"
+#include "TruthUtils/MagicNumbers.h"
+#include "GeneratorObjects/HepMcParticleLink.h"
 
 class CaloCalibrationHit 
 /** @brief Class to store calorimeter calibration hit. <br>
@@ -37,8 +39,7 @@ class CaloCalibrationHit
     m_energy0(energyEM), 
     m_energy1(energyNonEM), 
     m_energy2(energyInvisible), 
-    m_energy3(energyEscaped),
-    m_particleID(0)
+    m_energy3(energyEscaped)
   {}
 
   /** @brief Standard constructor using identifer, energy by type and primary particle ID
@@ -50,27 +51,30 @@ class CaloCalibrationHit
     @param[in] particleID barcode of primary particle which caused given hit
   */
   CaloCalibrationHit(Identifier id, 
-                       double energyEM, 
-                       double energyNonEM, 
-                       double energyInvisible, 
-                       double energyEscaped, 
-                       unsigned int particleID):
+                     double energyEM, 
+                     double energyNonEM, 
+                     double energyInvisible, 
+                     double energyEscaped, 
+                     int barcode,
+                     int uniqueID = HepMC::INVALID_PARTICLE_ID):
   m_ID(id), 
   m_energy0(energyEM), 
   m_energy1(energyNonEM), 
   m_energy2(energyInvisible), 
   m_energy3(energyEscaped),
-  m_particleID(particleID)
-                                               {}
+  m_barcode(barcode),
+  m_uniqueID(uniqueID)
+  {
+    if (m_barcode == HepMC::UNDEFINED_ID) { m_uniqueID = HepMC::UNDEFINED_ID; } // No link to a truth particle
+    else if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_barcode != HepMC::INVALID_PARTICLE_ID) {
+      m_partLink = std::make_unique<HepMcParticleLink>(m_barcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE); // FIXME is barcode-based
+    }
+  }
+
   /** Default constructor; should never be used, but provided for some
       persistency services. */
   CaloCalibrationHit():
-    m_ID(Identifier()),
-    m_energy0(0.),
-    m_energy1(0.),
-    m_energy2(0.),
-    m_energy3(0.),
-    m_particleID(0)
+    m_ID(Identifier())
   {}
 
   /** Copy constructor **/
@@ -80,8 +84,13 @@ class CaloCalibrationHit
       m_energy1 (cchSource.m_energy1),
       m_energy2 (cchSource.m_energy2),
       m_energy3 (cchSource.m_energy3),
-      m_particleID (cchSource.m_particleID)
+      m_barcode (cchSource.m_barcode),
+      m_uniqueID(cchSource.m_uniqueID)
   {
+    if (m_barcode == HepMC::UNDEFINED_ID) { m_uniqueID = HepMC::UNDEFINED_ID; } // No link to a truth particle
+    else if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_barcode != HepMC::INVALID_PARTICLE_ID) {
+      m_uniqueID = cchSource.particleUID(); // Try a look-up via HepMcParticleLink
+    }
   }
 
   /** Assignment operator **/
@@ -93,7 +102,12 @@ class CaloCalibrationHit
     m_energy1 = cchSource.m_energy1;
     m_energy2 = cchSource.m_energy2;
     m_energy3 = cchSource.m_energy3;
-    m_particleID = cchSource.m_particleID;
+    m_barcode = cchSource.m_barcode;
+    m_uniqueID = cchSource.m_uniqueID;
+    if (m_barcode == HepMC::UNDEFINED_ID) { m_uniqueID = HepMC::UNDEFINED_ID; } // No link to a truth particle
+    else if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_barcode != HepMC::INVALID_PARTICLE_ID) {
+      m_uniqueID = cchSource.particleUID(); // Try a look-up via HepMcParticleLink
+    }
     return *this;
   }
 
@@ -138,8 +152,11 @@ class CaloCalibrationHit
       }
   }
 
-  /** @return primary particle identifier which caused his hit */
-  unsigned int particleID()      const { return m_particleID; }
+  /** @return primary particle identifier (barcode) which caused his hit */
+  int particleID()      const { return m_barcode; }
+
+  /** @return primary particle identifier (barcode) which caused his hit */
+  int particleUID()      const { if (m_uniqueID == HepMC::INVALID_PARTICLE_ID && m_partLink) { return m_partLink->id(); } else  { return m_uniqueID;} }
 
   /** @return energy deposits by specifying input type, same as above method */
   double operator() (unsigned int i) const { return energy(i); }
@@ -150,18 +167,34 @@ class CaloCalibrationHit
     if(m_ID != h->m_ID){
       return m_ID < h->m_ID; 
     }else{
-      return m_particleID < h->m_particleID; 
+      if (particleID() == HepMC::INVALID_PARTICLE_ID || h->particleUID() == HepMC::INVALID_PARTICLE_ID) {
+        return m_barcode < h->m_barcode;
+      }
+      else {
+        return particleUID() < h->particleUID();
+      }
     }
   }
 
   /** Calibration hits are ordered by values of their identifiers */
-  /** Calibration hits are ordered by values of their identifiers */
-  bool Equals(const CaloCalibrationHit& h) const { 
-    return (m_ID == h.m_ID) && (m_particleID == h.m_particleID); 
+  bool Equals(const CaloCalibrationHit& h) const {
+    bool equal = (m_ID == h.m_ID);
+    const bool validBarcode(particleID() != HepMC::INVALID_PARTICLE_ID && h.particleID() != HepMC::INVALID_PARTICLE_ID);
+    const bool validUID(particleUID() != HepMC::INVALID_PARTICLE_ID && h.particleUID() != HepMC::INVALID_PARTICLE_ID);
+    equal &= (validBarcode || validUID);
+    if ( validBarcode ) {
+      equal &= (m_barcode == h.m_barcode);
+    }
+    if ( validBarcode ) {
+      equal &= (particleUID() == h.particleUID());
+    }
+    return  equal;
   };
-  bool Equals(const CaloCalibrationHit* h) const {
-    return Equals (*h);
-  }
+
+    /** Calibration hits are ordered by values of their identifiers */
+    bool Equals(const CaloCalibrationHit* h) const {
+      return Equals (*h);
+    }
 
   /** Method used for energy accumulation */
   void Add(const CaloCalibrationHit* h)
@@ -183,13 +216,17 @@ private:
    * "invisible" energy deposited
    * escaped energy
    * Energies are accumulated in double precision and stored as floats */
-  double m_energy0;
-  double m_energy1;
-  double m_energy2;
-  double m_energy3;
+  double m_energy0{0.};
+  double m_energy1{0.};
+  double m_energy2{0.};
+  double m_energy3{0.};
 
+  /** legacy barcode of Primary Particle which caused this hit */
+  int m_barcode{HepMC::UNDEFINED_ID};
   /** identifier of Primary Particle which caused this hit */
-  unsigned int m_particleID;
+  int m_uniqueID{HepMC::UNDEFINED_ID};
+  std::unique_ptr<HepMcParticleLink> m_partLink{}; // nullptr unless object was produced by reading TrackRecord_p1.
+
 };
 
 #endif  // CaloSimEvent_CaloCalibrationHit_h

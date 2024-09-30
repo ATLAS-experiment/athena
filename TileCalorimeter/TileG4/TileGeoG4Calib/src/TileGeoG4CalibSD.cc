@@ -18,6 +18,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "CLHEP/Units/SystemOfUnits.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "TileGeoG4CalibSD.h"
 #include "TileGeoG4DMLookupBuilder.h"
@@ -354,16 +355,20 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
     return true;
   }
 
-  int primary_id = 0;
+  int primary_barcode{HepMC::UNDEFINED_ID};
+  int primary_id{HepMC::UNDEFINED_ID};
   if (m_doCalibHitParticleID) {
-    if (m_atlasG4EvtUserInfo && m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()) primary_id = HepMC::barcode(m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+    if (m_atlasG4EvtUserInfo && m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()) {
+      primary_barcode = HepMC::barcode(m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+      primary_id = HepMC::uniqueID(m_atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    }
     else throw std::runtime_error("CalibrationSensitiveDetector: Unable to retrieve barcode!");
   }
 
   CaloCalibrationHit* hit = new CaloCalibrationHit(m_id, m_result.energy[CaloG4::SimulationEnergies::kEm],
                                                    m_result.energy[CaloG4::SimulationEnergies::kNonEm],
                                                    m_result.energy[CaloG4::SimulationEnergies::kInvisible0],
-                                                   m_result.energy[CaloG4::SimulationEnergies::kEscaped], primary_id);
+                                                   m_result.energy[CaloG4::SimulationEnergies::kEscaped], primary_barcode, primary_id);
 
   // If we haven't had a hit in this cell before, add the current hit
   // to the hit collection.

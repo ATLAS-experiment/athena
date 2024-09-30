@@ -60,10 +60,14 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
 {
 
   // retreive particle ID
-  unsigned int particleID = 0;
+  int particleID = HepMC::UNDEFINED_ID;
+  int particleUID = HepMC::UNDEFINED_ID;
   if( m_doPID ) {
     AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if (atlasG4EvtUserInfo) particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+    if (atlasG4EvtUserInfo) {
+      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    }
   }
 
 
@@ -82,7 +86,8 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
                                                    energies[1],
                                                    energies[2],
                                                    energies[3],
-                                                   particleID);
+                                                   particleID,
+                                                   particleUID);
 
   //Get the hash for this volume to keep track of hits
   uint32_t hash = id.get_identifier32().get_compact();

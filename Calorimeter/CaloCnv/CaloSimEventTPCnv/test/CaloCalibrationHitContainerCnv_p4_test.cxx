@@ -2,14 +2,14 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
- * @file CaloSimEventTPCnv/test/CaloCalibrationHitContainerCnv_p1_test.cxx
+ * @file CaloSimEventTPCnv/test/CaloCalibrationHitContainerCnv_p4_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Nov, 2015
  * @brief Regression tests.
  */
 
 #undef NDEBUG
-#include "CaloSimEventTPCnv/CaloCalibrationHitContainerCnv_p1.h"
+#include "CaloSimEventTPCnv/CaloCalibrationHitContainerCnv_p4.h"
 #include "TestTools/leakcheck.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
 #include "CxxUtils/checker_macros.h"
@@ -25,7 +25,7 @@ void compare (const CaloCalibrationHit& trans1,
   for (int i=0; i<4; i++) {
     assert (trans1.energy(i) == trans2.energy(i));
   }
-  assert (trans1.particleID() == trans2.particleID());
+  // NB barcode is not stored in the p4 persistent version so not checking particleID
   assert (trans1.particleUID() == trans2.particleUID());
 }
 
@@ -41,30 +41,37 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                             45.5,
                                             55.5,
                                             65.5,
-                                            75.5));
+                                            75.5,
+                                            333,
+                                            1));
   trans1.push_back (new CaloCalibrationHit (Identifier(234),
                                             145.5,
                                             155.5,
                                             165.5,
-                                            175.5));
+                                            175.5,
+                                            444,
+                                            2));
   trans1.push_back (new CaloCalibrationHit (Identifier(345),
                                             245.5,
                                             255.5,
                                             265.5,
-                                            275.5));
+                                            275.5,
+                                            555,
+                                            3));
 
   Athena_test::Leakcheck check;
 
-  CaloCalibrationHitContainerCnv_p1 cnv;
-  CaloCalibrationHitContainer_p1 pers;
+  CaloCalibrationHitContainerCnv_p4 cnv;
+  CaloCalibrationHitContainer_p4 pers;
   cnv.transToPers (&trans1, &pers, log);
 
   CaloCalibrationHitContainer trans2;
   cnv.persToTrans (&pers, &trans2, log);
 
   assert (trans1.size() == trans2.size());
-  for (size_t i = 0; i < trans1.size(); i++)
-    compare (*trans1[i], *trans2[i]);
+  compare (*trans1[0], *trans2[2]);
+  compare (*trans1[1], *trans2[0]);
+  compare (*trans1[2], *trans2[1]);
 }
 
 

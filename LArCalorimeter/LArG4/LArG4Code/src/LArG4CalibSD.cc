@@ -72,10 +72,14 @@ G4bool LArG4CalibSD::ProcessHits(G4Step* a_step,G4TouchableHistory*)
 G4bool LArG4CalibSD::SimpleHit( const LArG4Identifier& a_ident , const std::vector<double>& energies, m_calibrationHits_t& calibrationHits ){
 
   // retreive particle ID
-  unsigned int particleID = 0;
+  int particleID{HepMC::UNDEFINED_ID};
+  int particleUID{HepMC::UNDEFINED_ID};
   if( m_doPID ) {
     AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if (atlasG4EvtUserInfo) particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+    if (atlasG4EvtUserInfo) {
+      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
+      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    }
   }
 
   // Build the hit from the calculator results.
@@ -96,7 +100,8 @@ G4bool LArG4CalibSD::SimpleHit( const LArG4Identifier& a_ident , const std::vect
                                                    energies[1],
                                                    energies[2],
                                                    energies[3],
-                                                   particleID);
+                                                   particleID,
+                                                   particleUID);
 
   // If we haven't had a hit in this cell before, create one and add
   // it to the hit collection.

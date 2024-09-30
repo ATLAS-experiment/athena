@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCALIBHITREC_ICALOCALIBCLUSTERTRUTHATTRIBUTERTOOL_H
@@ -27,7 +27,7 @@ public:
   virtual StatusCode calculateTruthEnergies(const xAOD::CaloCluster& theCaloCluster
 					    , unsigned int numTruthParticles
 					    , const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap					    
-					    , std::vector<std::pair<unsigned int, double > >& barcodeTrueCalHitEnergy) const = 0;
+					    , std::vector<std::pair<unsigned int, double > >& truthIDTrueCalHitEnergy) const = 0;
 
   DeclareInterfaceID(ICaloCalibClusterTruthAttributerTool,1,0);
 
