@@ -362,7 +362,7 @@ def Csc4dSegmentMakerCfg(flags, name= "Csc4dSegmentMaker", **kwargs):
 def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs):
 
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
+    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     result=ComponentAccumulator()
     kwargs.setdefault("IPConstraint", flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault('SegmentAmbiguityTool', result.popToolsAndMerge( MuonAmbiProcessorCfg(flags) ) ) 
@@ -373,11 +373,8 @@ def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs
         kwargs.setdefault("MmOccupancyBinWidth", 2048)
 
     kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) ) ) 
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonTrackSummaryToolCfg(flags, name='MuonTrackSummary') ) ) 
-    else:
-        kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonCombinedTrackSummaryToolCfg(flags, name='CombinedMuonTrackSummary') ) ) 
-    
+    kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonTrackSummaryToolCfg(flags, name='MuonTrackSummary') ) ) 
+     
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
 
