@@ -123,7 +123,10 @@ def initConfigFlags():
     acf.addFlag('Scheduler.ShowControlFlow', False, help='show data flow')
     acf.addFlag('Scheduler.EnableVerboseViews', True, help='enable verbose view output')
     acf.addFlag('Scheduler.AutoLoadUnmetDependencies', True, help='auto-load unmet data dependencies')
-
+    acf.addFlag('Scheduler.DataDepsGraphFile', '', help='file name containing the data dependency graph [.dot or .md]')
+    acf.addFlag('Scheduler.DataDepsGraphAlgPattern', '.*', help='regex pattern for selecting algorithms to be drawn in the data dependency graph')
+    acf.addFlag('Scheduler.DataDepsGraphObjectPattern', '.*', help='regex pattern for selecting I/O to be drawn in the data dependency graph')
+    
     acf.addFlag('MP.WorkerTopDir', 'athenaMP_workers', help='work directory for MP workers')
     acf.addFlag('MP.OutputReportFile', 'AthenaMPOutputs', help='name of MP report file')
     acf.addFlag('MP.Strategy', 'SharedQueue', help='event assignment strategy')
