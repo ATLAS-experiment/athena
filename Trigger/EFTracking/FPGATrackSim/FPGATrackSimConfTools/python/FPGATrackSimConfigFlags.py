@@ -161,7 +161,7 @@ def createHough1dFPGATrackSimConfigFlags():
     cf.phiMin = 0.0
     cf.phiMax = 0.8
     cf.xBins = 200
-    cf.threshold = [5]
+    cf.threshold = [7]
     cf.hitExtendX = [1] * 9
 
     cf.addFlag('phiRangeCut', True)
