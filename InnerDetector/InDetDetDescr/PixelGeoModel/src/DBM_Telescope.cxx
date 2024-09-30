@@ -129,7 +129,7 @@ GeoVPhysVol* DBM_Telescope::Build() {
   // the bounding box with a hardcoded number of sample points of 1e6.
   // This is particularly slow in a debug build, as we have to do a bunch
   // of eigen calculations for each MC point.
-  const static double vol = trapBack1.volume();
+  const static double vol = trapBack1.GeoShape::volume();
   const GeoMaterial* dbmPeek4 = m_mat_mgr->getMaterialForVolume("pix::DBMPeek4",vol);
   const GeoLogVol* trapBackLog = new GeoLogVol("bracketLog", &trapBack1, dbmPeek4);
   GeoPhysVol* trapBackPhys = new GeoPhysVol(trapBackLog);
