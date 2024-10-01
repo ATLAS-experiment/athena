@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "OnDemandMinbiasSvc.h"
@@ -34,7 +34,11 @@ inline std::string CLIDToString(const CLID& clid) {
 
 OnDemandMinbiasSvc::OnDemandMinbiasSvc(const std::string& name,
                                        ISvcLocator* svc)
-    : base_class(name, svc), m_bkg_evt_sel_ctx(nullptr), m_last_loaded_hs() {}
+    : base_class(name, svc),
+      m_bkg_evt_sel_ctx(nullptr),
+      m_proxyProviderSvc("ProxyProviderSvc/BkgPPSvc_"+name, name),
+      m_last_loaded_hs()
+{}
 
 OnDemandMinbiasSvc::~OnDemandMinbiasSvc() {}
 
@@ -54,40 +58,34 @@ StatusCode OnDemandMinbiasSvc::initialize() {
     ATH_MSG_ERROR("Failed to create background event selector context");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK(dynamic_cast<Service*>(m_bkgEventSelector.get())->start());
+  ATH_CHECK(SmartIF<IService>(m_bkgEventSelector.get())->start());
 
   // Setup proxy provider
-  m_proxyProviderSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("ProxyProviderSvc/BkgPPSvc_{}", name()), m_proxyProviderSvc,
-      true));
+  ATH_CHECK(m_proxyProviderSvc.retrieve());
+
   // Setup Address Providers
-  auto* addressProvider =
-      dynamic_cast<IAddressProvider*>(m_bkgEventSelector.get());
-  if (addressProvider == nullptr) {
+  SmartIF<IAddressProvider> addressProvider{m_bkgEventSelector.get()};
+  if (!addressProvider) {
     ATH_MSG_WARNING(
         "Could not cast background event selector to IAddressProvider");
   } else {
     m_proxyProviderSvc->addProvider(addressProvider);
   }
   // AthenaPoolAddressProviderSvc
-  IService* athPoolSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()),
-      athPoolSvc));
-  auto* athPoolAP = dynamic_cast<IAddressProvider*>(athPoolSvc);
-  if (athPoolAP == nullptr) {
+  SmartIF<IAddressProvider> athPoolAP{
+    serviceLocator()->service(fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
+  };
+  if (!athPoolAP) {
     ATH_MSG_WARNING(
         "Could not cast AthenaPoolAddressProviderSvc to IAddressProvider");
   } else {
     m_proxyProviderSvc->addProvider(athPoolAP);
   }
   // AddressRemappingSvc
-  IService* addRemapSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()), addRemapSvc));
-  auto* addRemapAP = dynamic_cast<IAddressProvider*>(addRemapSvc);
-  if (addRemapAP == nullptr) {
+  SmartIF<IAddressProvider> addRemapAP{
+    serviceLocator()->service(fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()))
+  };
+  if (!addRemapAP) {
     ATH_MSG_WARNING("Could not cast AddressRemappingSvc to IAddressProvider");
   } else {
     m_proxyProviderSvc->addProvider(addRemapAP);
@@ -115,14 +113,14 @@ StatusCode OnDemandMinbiasSvc::initialize() {
           fmt::format("StoreGateSvc/StoreGate_{}_{}_{}", name(), i, j), name());
       ATH_CHECK(sg.retrieve());
       sg->setStoreID(StoreID::PILEUP_STORE);
-      sg->setProxyProviderSvc(m_proxyProviderSvc);
+      sg->setProxyProviderSvc(m_proxyProviderSvc.get());
     }
   }
 
   // setup spare store for event skipping
   ATH_CHECK(m_spare_store.retrieve());
   m_spare_store->setStoreID(StoreID::PILEUP_STORE);
-  m_spare_store->setProxyProviderSvc(m_proxyProviderSvc);
+  m_spare_store->setProxyProviderSvc(m_proxyProviderSvc.get());
   auto skipEvent_callback = [this](
                                 ISkipEventIdxSvc::EvtIter begin,
                                 ISkipEventIdxSvc::EvtIter end) -> StatusCode {
@@ -237,7 +235,7 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
           name());
       ATH_CHECK(sg.retrieve());
       sg->setStoreID(StoreID::PILEUP_STORE);
-      sg->setProxyProviderSvc(m_proxyProviderSvc);
+      sg->setProxyProviderSvc(m_proxyProviderSvc.get());
     }
   }
   // Ensure loading is done in order

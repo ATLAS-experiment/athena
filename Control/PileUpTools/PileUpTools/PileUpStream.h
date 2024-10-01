@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPSTREAM_PILEUPSTREAM_H
 #define PILEUPSTREAM_PILEUPSTREAM_H
 /** @file PileUpStream.h
  * @brief a triple selector/context/store defines a stream
- * $Id: PileUpStream.h,v 1.18 2008-10-31 18:34:42 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
@@ -56,12 +55,12 @@ public:
   /// @name accessors
   //@{
   inline const std::string& name() { return m_name; }
-  inline IEvtSelector& selector() { return *p_sel; }
+  inline IEvtSelector& selector() { return *m_sel; }
   inline EvtIterator& iterator() { return *p_iter; }
-  inline StoreGateSvc& store() { return *p_SG; }
-  inline const IEvtSelector& selector() const { return *p_sel; }
+  inline StoreGateSvc& store() { return *m_SG; }
+  inline const IEvtSelector& selector() const { return *m_sel; }
   inline const EvtIterator& iterator() const { return *p_iter; }
-  inline const StoreGateSvc& store() const { return *p_SG; }
+  inline const StoreGateSvc& store() const { return *m_SG; }
   //@}
 
   ///return next Event, load store with next Event
@@ -116,19 +115,19 @@ private:
   /// ServiceLocator 
   ISvcLocator* p_svcLoc;
   /// Selector 
-  IEvtSelector* p_sel;
+  SmartIF<IEvtSelector> m_sel;
   /// StoreGateSvc;
-  StoreGateSvc* p_SG;
+  SmartIF<StoreGateSvc> m_SG;
   /// Input Iterators
   EvtIterator* p_iter; 
 
-  PileUpMergeSvc* p_mergeSvc;
+  SmartIF<PileUpMergeSvc> m_mergeSvc;
   
 
   bool m_ownEvtIterator; ///> do we own p_iter? 
   /// Private message stream member
   bool m_neverLoaded;  ///> has an event been loaded into this stream?
-  bool m_ownStore;  ///> is p_SG a store we cloned from the master one?
+  bool m_ownStore;  ///> is m_SG a store we cloned from the master one?
 
   bool m_used; ///has this stream already been used? (for the current event)
   bool m_hasRing;

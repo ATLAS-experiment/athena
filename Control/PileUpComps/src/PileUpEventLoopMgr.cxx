@@ -143,11 +143,12 @@ StatusCode PileUpEventLoopMgr::initialize()
 
   // Get the value of SkipEvents. It is needed for seeking
   SmartIF<IProperty> prpMgr(serviceLocator());
-  IEvtSelector* evtSelector{};
+  SmartIF<IEvtSelector> evtSelector;
   if (prpMgr.isValid()) {
     // Get event selector name. Retrieve EventSelector
     std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
-    CHECK(serviceLocator()->service(evtSelName,evtSelector));
+    evtSelector = serviceLocator()->service(evtSelName);
+    CHECK(evtSelector.isValid());
   }
   else {
     ATH_MSG_ERROR ( "IProperty interface not found in ApplicationMgr" );
