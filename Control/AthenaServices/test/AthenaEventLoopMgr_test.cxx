@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/test/AthenaEventLoopMgr_test.cxx
@@ -323,8 +323,8 @@ void test1 (ISvcLocator* svcloc)
 {
   std::cout << "test1\n";
 
-  IService *mgr = nullptr;
-  if (svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr1", mgr).isFailure()) std::abort();
+  SmartIF<IService> mgr{svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr1")};
+  if (!mgr) std::abort();
 
   testit (mgr);
 }
@@ -334,8 +334,8 @@ void test2 (ISvcLocator* svcloc)
 {
   std::cout << "test2\n";
 
-  IService *mgr = nullptr;
-    if (svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr2", mgr).isFailure()) std::abort();
+  SmartIF<IService> mgr{svcloc->service ("AthenaEventLoopMgr/AthenaEventLoopMgr2")};
+  if (!mgr) std::abort();
 
   testit (mgr);
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <GaudiKernel/DataIncident.h>
@@ -224,36 +224,31 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
     m_histoPersSvc = IConversionSvc_t( "HistogramPersistencySvc", 
 				       this->name() );
 
-    IService *is = 0;
+    SmartIF<IProperty> histSvc;
     if (histPersName == "ROOT") {
-      sc = serviceLocator()->service("RootHistSvc", is);
+      histSvc = serviceLocator()->service("RootHistSvc");
     } else if ( histPersName == "HBOOK" ) {
-      sc = serviceLocator()->service("HbookHistSvc", is);
+      histSvc = serviceLocator()->service("HbookHistSvc");
     }
 
-    if (sc.isFailure()) {
+    if (!histSvc) {
       ATH_MSG_ERROR ( "could not locate actual Histogram persistency service" );
     } else {
-      Service *s = dynamic_cast<Service*>(is);
-      if (s == 0) {
-	ATH_MSG_ERROR ( "Could not dcast HistPersSvc to a Service" );
-      } else {
-	const Gaudi::Details::PropertyBase &prop = s->getProperty("OutputFile");
-	std::string val;
-	try {
-	  const StringProperty &sprop = dynamic_cast<const StringProperty&>( prop );
-	  val = sprop.value();
-	} catch (...) {
-	  ATH_MSG_VERBOSE ( "could not dcast OutputFile property to a StringProperty."
-		    << " Need to fix Gaudi." );
-	  val = prop.toString();
-	}
+      const Gaudi::Details::PropertyBase &prop = histSvc->getProperty("OutputFile");
+      std::string val;
+      try {
+        const StringProperty &sprop = dynamic_cast<const StringProperty&>( prop );
+        val = sprop.value();
+      } catch (...) {
+        ATH_MSG_VERBOSE ( "could not dcast OutputFile property to a StringProperty."
+                          << " Need to fix Gaudi." );
+        val = prop.toString();
+      }
 
-	if (val != "" &&
-	    val != "UndefinedROOTOutputFileName" &&
-	    val != "UndefinedHbookOutputFileName" ) {
-	  m_writeHists = true;
-	}
+      if (val != "" &&
+          val != "UndefinedROOTOutputFileName" &&
+          val != "UndefinedHbookOutputFileName" ) {
+        m_writeHists = true;
       }
     }
   }  else {
@@ -282,22 +277,21 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
 
   // We do not expect a Event Selector necessarily being declared
   if( !selName.empty() && selName != "NONE") {
-    IEvtSelector* theEvtSel(0);
-    StatusCode sc(serviceLocator()->service( selName, theEvtSel ));
-    if( sc.isSuccess() && ( theEvtSel != m_evtSelector ) ) {
+    SmartIF<IEvtSelector> theEvtSel{serviceLocator()->service( selName )};
+    if( theEvtSel && ( theEvtSel != m_evtSelector ) ) {
       // Event Selector changed (or setup for the first time)
       m_evtSelector = theEvtSel;
       
       // reset iterator
       if (m_evtSelector->createContext(m_evtContext).isFailure()) {
-	ATH_MSG_FATAL ( "Can not create the event selector Context." );
-	return StatusCode::FAILURE;
+        ATH_MSG_FATAL ( "Can not create the event selector Context." );
+        return StatusCode::FAILURE;
       }
       if (msgLevel(MSG::INFO)) {
-	INamedInterface* named (dynamic_cast< INamedInterface* >(theEvtSel));
-	if (0 != named) {
+        SmartIF<INamedInterface> named(theEvtSel);
+        if (named) {
           ATH_MSG_INFO ( "Setup EventSelector service " << named->name( ) );
-	}
+        }
       }
     } else if (sc.isFailure()) {
       ATH_MSG_FATAL ( "No valid event selector called " << selName );
