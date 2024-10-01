@@ -99,7 +99,7 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const xAOD::TruthPartic
   // fill measurement bias, resolution, and pull plots
 
   // fill ITK resolutions (bias / resolutions)
-  SG::ConstAccessor<float> tpTruthProbKeyAcc(m_trackParticleTruthProbKey);
+  static const SG::ConstAccessor<float> tpTruthProbKeyAcc("truthMatchProbability");
   if (tpTruthProbKeyAcc.isAvailable(particle)) {
     const float prob = tpTruthProbKeyAcc(particle);
     int uniqueID = HepMC::uniqueID(truthParticle);

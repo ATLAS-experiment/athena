@@ -162,9 +162,6 @@ private:
   /// configuration object
   InDetRttPlotConfig m_config; 
 
-  /// key for the truth match prob 
-  const std::string m_trackParticleTruthProbKey{"truthMatchProbability"};
-
   /// plot members.
   /// No explicit initialisation, since unique_ptr will default-construct 
   /// to return a nullptr
