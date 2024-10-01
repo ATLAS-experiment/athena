@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #include "TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackRecalibrateTool.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 #include "TrkEventPrimitives/LocalParameters.h"
-#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ReadoutGeometry/TRT_EndcapElement.h"
 #include "TrkRIO_OnTrack/ErrorScalingCast.h"
 
@@ -25,17 +24,9 @@
 
 InDet::TRT_DriftCircleOnTrackRecalibrateTool::TRT_DriftCircleOnTrackRecalibrateTool
 (const std::string& ty,const std::string& na,const IInterface* pa)
-  : AthAlgTool(ty,na,pa),
-    m_riontrackTube("InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"),
-    m_drifttool("TRT_DriftFunctionTool"),
-    m_useToTCorrection(false),
-    m_scalefactor(2.)
+  : AthAlgTool(ty,na,pa)
 {
   declareInterface<IRIO_OnTrackCreator>(this);
-  declareProperty("RIOonTrackToolTube",   m_riontrackTube  );
-  declareProperty("DriftFunctionTool",    m_drifttool);
-  declareProperty("ScaleHitUncertainty",  m_scalefactor    );
-  declareProperty("useDriftTimeToTCorrection",m_useToTCorrection);
 }
 
 ///////////////////////////////////////////////////////////////////

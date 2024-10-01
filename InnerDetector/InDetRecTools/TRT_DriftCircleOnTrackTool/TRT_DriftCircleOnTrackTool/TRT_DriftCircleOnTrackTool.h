@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,12 +61,11 @@ public:
   SG::ReadCondHandleKey<LuminosityCondData>     m_lumiDataKey
       {this, "LumiDataKey", "", "SG key for luminosity data"};
 
-  //  SG::ReadCondHandleKey<TRTRIO_OnTrackErrorScaling> m_trtErrorScalingKey
   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_trtErrorScalingKey
-      {this,"TRTErrorScalingKey", "/Indet/TrkErrorScalingTRT", "Key for TRT error scaling conditions data."};
+      {this,"TRTErrorScalingKey", "/Indet/TrkErrorScalingTRT",
+       "Key for TRT error scaling conditions data."};
 
-
-  bool                                          m_useErrorCorrection;
+  BooleanProperty m_useErrorCorrection{this, "UseErrorCorrection", false};
 };
 
 } // end of namespace InDet
