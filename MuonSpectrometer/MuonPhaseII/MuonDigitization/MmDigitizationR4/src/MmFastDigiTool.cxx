@@ -50,7 +50,7 @@ namespace MuonR4 {
         CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
         xAOD::ChamberViewer viewer{hitsToDigit, m_idHelperSvc.get()};
         do {
-            std::unordered_map<Identifier, double> deadTimes{};
+            DeadTimeMap deadTimes{};
             for (const TimedHit& simHit : viewer) {
                 if (m_digitizeMuonOnly && std::abs(simHit->pdgId()) != 13){
                     continue;
@@ -89,11 +89,7 @@ namespace MuonR4 {
                 if(efficiencyMap && efficiencyMap->getEfficiency(clusId) < CLHEP::RandFlat::shoot(rndEngine, 0., 1.)){
                     continue;
                 }
-
-                double& lastDeadHit{deadTimes[clusId]};
-                if (hitTime(simHit) - lastDeadHit > m_deadTime) {
-                    lastDeadHit = hitTime(simHit);
-                } else {
+                if (!passDeadTime(clusId, hitTime(simHit), m_deadTime, deadTimes)) {
                     /// Reject hit within the dead time interval
                     continue;
                 }
