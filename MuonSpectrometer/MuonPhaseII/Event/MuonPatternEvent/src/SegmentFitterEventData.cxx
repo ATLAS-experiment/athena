@@ -11,11 +11,19 @@
 
 namespace MuonR4{
     namespace SegmentFit {
+        Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta) {
+            Amg::Vector3D dir = Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
+            return tanTheta >= 0. ? dir : - dir;
+        }
+        Amg::Vector3D dirFromAngles(const double phi, const double theta) {
+            const CxxUtils::sincos csPhi{phi}, csTheta{theta};
+            return Amg::Vector3D{csPhi.cs*csTheta.sn,csPhi.sn*csTheta.sn, csTheta.cs};
+        }
         std::pair<Amg::Vector3D, Amg::Vector3D> makeLine(const Parameters& pars) {
-            const CxxUtils::sincos theta{pars[toInt(ParamDefs::theta)]}, phi{pars[toInt(ParamDefs::phi)]}; 
             return std::make_pair(Amg::Vector3D(pars[toInt(ParamDefs::x0)], 
                                                 pars[toInt(ParamDefs::y0)],0.),
-                                    Amg::Vector3D(phi.cs*theta.sn,phi.sn*theta.sn, theta.cs));
+                                  dirFromAngles(pars[toInt(ParamDefs::phi)],
+                                                pars[toInt(ParamDefs::theta)]));
         }
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};
