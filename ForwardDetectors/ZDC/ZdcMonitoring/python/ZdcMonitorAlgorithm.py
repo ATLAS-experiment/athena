@@ -16,6 +16,7 @@
 
 
 import numpy as np
+import os
 
 def create_log_bins(min_value, max_value, num_bins):
     # Calculate the logarithmic bin edges
