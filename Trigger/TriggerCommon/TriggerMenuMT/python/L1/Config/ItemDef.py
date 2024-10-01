@@ -331,6 +331,8 @@ class ItemDef:
         MenuItem('L1_2eTAU1_VjTE200_GAP_AANDC').setLogic( d.eTAU1.x(2)      & Not(d.jTE200) & GAPAC  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_eEM9_VjTE200').setLogic( d.eEM9      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_eEM9_VjTE200_EMPTY').setLogic( d.eEM9      & Not(d.jTE200) & cosmiccond).setTriggerType(TT.calo)
+        MenuItem('L1_eEM1_TRT_VjTE50').setLogic( d.eEM1 & d.NIMTRT & Not(d.jTE50) & physcond)
+        MenuItem('L1_eTAU1_TRT_VjTE50').setLogic( d.eTAU1 & d.NIMTRT & Not(d.jTE50) & physcond)
 
         #mixed items: eEM + legacy TE (ATR-22067), HI run 2023
         MenuItem('L1_eEM1_TE4_VTE200').setLogic( d.eEM1 & d.TE4  &   Not(d.TE200) & physcond).setTriggerType(TT.calo)
@@ -1033,6 +1035,7 @@ class ItemDef:
         MenuItem('L1_VjTE200'    ).setLogic( Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE600'    ).setLogic( Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE50_VjTE600'    ).setLogic(  d.jTE50  & Not(d.jTE600)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE50_VjTE200').setLogic(  d.jTE50  & Not(d.jTE200)  & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_XE10').setLogic( d.XE10 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE20').setLogic( d.XE20 & physcond).setTriggerType(TT.calo)
@@ -1609,6 +1612,11 @@ class ItemDef:
         MenuItem('L1_TRT_ZDC_A_C_VjTE10'         ).setLogic(d.NIMTRT & ZDC_A_C & Not(d.jTE10) & physcond)
         MenuItem('L1_TRT_ZDC_XOR_VjTE10' ).setLogic(d.NIMTRT & ZDC_XOR  & Not(d.jTE10) & physcond)
         MenuItem('L1_TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO'  ).setLogic(d.NIMTRT & ZDC_XOR & Not(d.jTE10) & unpaired_nonisocond)
+        MenuItem('L1_VZDC_A_VZDC_C_VjTE50').setLogic(PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & physcond)
+        MenuItem('L1_ZDC_A_VjTE200').setLogic(ZDC_A & Not(d.jTE200) & physcond)
+        MenuItem('L1_ZDC_C_VjTE200').setLogic(ZDC_C & Not(d.jTE200) & physcond)
+        MenuItem('L1_TRT_ZDC_A_VjTE50').setLogic(d.NIMTRT & ZDC_A & Not(d.jTE50) & physcond)
+        MenuItem('L1_TRT_ZDC_C_VjTE50').setLogic(d.NIMTRT & ZDC_C & Not(d.jTE50) & physcond)
 
         MenuItem('L1_TAU1_VZDC_A_VZDC_C_VTE100' ).setLogic( d.HA1 & PHYS_VZDC_A_VZDC_C & Not(d.TE100)   & physcond)
         MenuItem('L1_TAU1_ZDC_XOR4_VTE100' ).setLogic( d.HA1 & PHYS_ZDC_XOR4 & Not(d.TE100)   & physcond)
