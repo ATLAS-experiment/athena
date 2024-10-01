@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTriggerTool/CaloTTOnOffIdMap.h"
@@ -12,6 +12,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IMessageSvc.h"
 
+#include "AthenaKernel/errorcheck.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <iostream>
@@ -28,29 +29,23 @@ void CaloTTOnOffIdMap::set( const CaloTTOnOffId& m ) {
 
   convert_to_P(m);
 
-  IMessageSvc *msgSvc;
-  StatusCode status =Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-  if(status.isFailure()){
-    std::cout <<  "Cannot locate MessageSvc" << std::endl;
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if(!msgSvc){
+      throw std::runtime_error("Cannot locate MessageSvc");
   }
   MsgStream log( msgSvc, "CaloTTOnOffIdMap");
-  bool dump=false;
-  if (log.level()<=MSG::VERBOSE) dump=true;
-  bool dump2=false;
-  if (log.level()<=MSG::DEBUG) dump2=true;
-
 
   log<<MSG::DEBUG<<" CaloTTOnOffId size = "<<m.size() <<endmsg;
-  StoreGateSvc * detStore;
-  status = Gaudi::svcLocator()->service("DetectorStore",detStore);
-  if(status.isFailure()){
-     log << MSG::ERROR <<  "Cannot locate DetectorStore" << endmsg;
+
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if(!detStore){
+      log << MSG::ERROR <<  "Cannot locate DetectorStore" << endmsg;
   }
 
   const TTOnlineID* online_id = nullptr;
   const CaloLVL1_ID* offline_id = nullptr;
 
-  status=detStore->retrieve(online_id);
+  StatusCode status=detStore->retrieve(online_id);
   if(status.isFailure()){
     log << MSG::ERROR <<  "Cannot retrieve online_id" << endmsg;
   }
@@ -69,7 +64,7 @@ void CaloTTOnOffIdMap::set( const CaloTTOnOffId& m ) {
             Identifier id = offline_id->tower_id(t.pn, t.sampling, t.region, t.eta, t.phi);
             HWIdentifier sid = online_id->channelId(t.crate, t.module, t.submodule, t.channel);
 
-            if (dump) {
+            if (log.level()<=MSG::VERBOSE) {
               log<<MSG::VERBOSE
               << " db struct= "
               <<" pn="<<t.pn<<" sampling="<<t.sampling
@@ -86,7 +81,9 @@ void CaloTTOnOffIdMap::set( const CaloTTOnOffId& m ) {
             m_off2onIdMap[id] = sid;
             m_on2offIdMap[sid] = id;
         }
-        if (dump2) log<<MSG::DEBUG<<" CaloTTOnOffIdMap::set : number of Ids="<<m_on2offIdMap.size()<<std::endl;
+        if (log.level()<=MSG::DEBUG) {
+            log<<MSG::DEBUG<<" CaloTTOnOffIdMap::set : number of Ids="<<m_on2offIdMap.size()<<std::endl;
+        }
     } catch (CaloID_Exception& except) {
         log<<MSG::ERROR<<" Failed in CaloTTOnOffIdMap::set " << endmsg;
         log<<MSG::ERROR<< (std::string) except  << endmsg ;
@@ -108,14 +105,8 @@ HWIdentifier CaloTTOnOffIdMap::createSignalChannelID(const Identifier& id, bool 
 
     } else {
 
-		IMessageSvc *msgSvc;
-		StatusCode status = Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-		if(status.isFailure()){
-			std::cout <<  "Cannot locate MessageSvc" << std::endl;
-		}
-
-		MsgStream log( msgSvc, "CaloTTOnOffIdMap");
-		log<<MSG::ERROR<<" Offline ID not found "<< id <<endmsg;
+        REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CaloTTOnOffIdMap") <<
+          "Offline ID not found "<< id <<endmsg;
 
 		return HWIdentifier(0);
 	}
@@ -136,15 +127,9 @@ Identifier CaloTTOnOffIdMap::cnvToIdentifier(const HWIdentifier & sid, bool bQui
 
     } else {
 
-		// ERROR, can not find the id.
-		IMessageSvc *msgSvc;
-		StatusCode status =Gaudi::svcLocator()->service("MessageSvc",msgSvc);
-		if(status.isFailure()){
-			std::cout <<  "Cannot locate MessageSvc" << std::endl;
-		}
-
-		MsgStream log( msgSvc, "CaloTTOnOffIdMap");
-		log<<MSG::ERROR<<" Online ID not found, id = " <<sid.get_compact()<< endmsg;
+        // ERROR, can not find the channelId.
+        REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "CaloTTOnOffIdMap") <<
+          "Online ID not found, id = " <<sid.get_compact()<< endmsg;
 
 		return Identifier(0) ;
     }
