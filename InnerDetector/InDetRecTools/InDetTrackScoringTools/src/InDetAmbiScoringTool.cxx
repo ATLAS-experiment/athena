@@ -134,7 +134,7 @@ bool InDet::InDetAmbiScoringTool::passBasicSelections( const Trk::Track& track )
   // add back extrapolation without errors
   std::unique_ptr<const Trk::TrackParameters> parm( m_extrapolator->extrapolateDirectly(ctx,*input, perigeeSurface) );
 
-  if (parm->surfaceType()!=Trk::SurfaceType::Perigee) {
+  if (!parm || parm->surfaceType()!=Trk::SurfaceType::Perigee) {
      ATH_MSG_WARNING( "Extrapolation of perigee failed, this should never happen" );
      return false;
   }
