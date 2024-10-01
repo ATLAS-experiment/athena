@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -72,17 +72,27 @@ public:
   ///////////////////////////////////////////////////////////////////
   // Private data:
   ///////////////////////////////////////////////////////////////////
-  SG::ReadHandleKey<ComTime> m_evtPhaseKey {this,"TRT_Phase","TRT_Phase","RHK to retrieve TRT Phase"};
-  SG::ReadCondHandleKey<InDetDD::TRT_DetElementContainer> m_trtDetEleContKey{this, "TRTDetEleContKey", "TRT_DetElementContainer", "Key of TRT_DetElementContainer for TRT"};
+  SG::ReadHandleKey<ComTime> m_evtPhaseKey{this, "TRT_Phase", "TRT_Phase",
+      "RHK to retrieve TRT Phase"};
+  SG::ReadCondHandleKey<InDetDD::TRT_DetElementContainer> m_trtDetEleContKey
+    {this, "TRTDetEleContKey", "TRT_DetElementContainer",
+     "Key of TRT_DetElementContainer for TRT"};
 
-  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool;  //!< DriftFunctionTool
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary; //!< The ConditionsSummaryTool
+  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool
+    {this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool"};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary
+    {this, "ConditionsSummaryTool", "TRT_StrawStatusSummaryTool",
+     "The ConditionsSummaryTool"};
 
-  bool                                 m_useConditionsStatus;     //!< SHall the ConditionsSummaryTool be used?
-  const TRT_ID                       * m_trtid            ;  //!< TRT id helper handle
-  float                                m_global_offset    ;  //!< Global offset to TRT Phase to make TRT Calibration happy ...
-  bool				       m_useToTCorrection;  //!< Shall the Time over Threshold correction be used?
-  bool                                 m_useHTCorrection;  //!< Shall the High Threshold correction be used?
+  BooleanProperty m_useConditionsStatus{this, "UseConditionsStatus", false,
+    "Shall the ConditionsSummaryTool be used?"};
+  const TRT_ID* m_trtid = nullptr;  //!< TRT id helper handle
+  FloatProperty m_global_offset{this, "GlobalPhaseOffset", 0.,
+    "Global offset to TRT Phase"};
+  BooleanProperty m_useToTCorrection{this, "useDriftTimeToTCorrection", false,
+    "Shall the Time over Threshold correction be used?"};
+  BooleanProperty m_useHTCorrection{this, "useDriftTimeHTCorrection", false,
+    "Shall the High Threshold correction be used?"};
 
 };
 

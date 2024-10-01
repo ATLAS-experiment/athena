@@ -35,10 +35,8 @@ def TRT_DriftCircleToolCfg(
     if "TRTDriftFunctionTool" not in kwargs:
         from InDetConfig.TRT_DriftFunctionToolConfig import (
             TRT_DriftFunctionToolCfg)
-        TRT_DriftFunctionTool = acc.popToolsAndMerge(
-            TRT_DriftFunctionToolCfg(flags))
-        acc.addPublicTool(TRT_DriftFunctionTool)
-        kwargs.setdefault("TRTDriftFunctionTool", TRT_DriftFunctionTool)
+        kwargs.setdefault("TRTDriftFunctionTool", acc.popToolsAndMerge(
+            TRT_DriftFunctionToolCfg(flags)))
 
     if "ConditionsSummaryTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
@@ -93,10 +91,8 @@ def TRT_NoTime_DriftCircleToolCfg(
     if "TRTDriftFunctionTool" not in kwargs:
         from InDetConfig.TRT_DriftFunctionToolConfig import (
             TRT_NoTime_DriftFunctionToolCfg)
-        TRT_DriftFunctionTool = acc.popToolsAndMerge(
-            TRT_NoTime_DriftFunctionToolCfg(flags))
-        acc.addPublicTool(TRT_DriftFunctionTool)
-        kwargs.setdefault("TRTDriftFunctionTool", TRT_DriftFunctionTool)
+        kwargs.setdefault("TRTDriftFunctionTool", acc.popToolsAndMerge(
+            TRT_NoTime_DriftFunctionToolCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_DriftCircleToolCfg(flags, name, **kwargs)))
@@ -110,10 +106,8 @@ def TRT_Phase_DriftCircleToolCfg(
     if "TRTDriftFunctionTool" not in kwargs:
         from InDetConfig.TRT_DriftFunctionToolConfig import (
             TRT_Phase_DriftFunctionToolCfg)
-        TRT_DriftFunctionTool = acc.popToolsAndMerge(
-            TRT_Phase_DriftFunctionToolCfg(flags))
-        acc.addPublicTool(TRT_DriftFunctionTool)
-        kwargs.setdefault("TRTDriftFunctionTool", TRT_DriftFunctionTool)
+        kwargs.setdefault("TRTDriftFunctionTool", acc.popToolsAndMerge(
+            TRT_Phase_DriftFunctionToolCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_DriftCircleToolCfg(flags, name, usePhase=True, **kwargs)))

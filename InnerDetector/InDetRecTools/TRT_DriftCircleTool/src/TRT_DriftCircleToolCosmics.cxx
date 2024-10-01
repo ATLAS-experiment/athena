@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -36,27 +36,13 @@
 // Constructior
 ///////////////////////////////////////////////////////////////////
 
-InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string& t,
-						const std::string& n,
-						const IInterface*  p ):
-  AthAlgTool(t,n,p),
-  m_driftFunctionTool("TRT_DriftFunctionTool"),
-  m_ConditionsSummary("TRT_StrawStatusSummaryTool",this),
-  m_useConditionsStatus(false),
-  m_trtid(nullptr),
-  m_global_offset(0),
-  m_useToTCorrection(false),
-  m_useHTCorrection(false)
-
+InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics
+(const std::string& t,
+ const std::string& n,
+ const IInterface*  p ):
+  AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_DriftCircleTool>(this);
-  declareProperty("TRTDriftFunctionTool", m_driftFunctionTool);
-  declareProperty("ConditionsSummaryTool",m_ConditionsSummary);
-  declareProperty("UseConditionsStatus",m_useConditionsStatus);
-
-  declareProperty("useDriftTimeToTCorrection",m_useToTCorrection);
-  declareProperty("useDriftTimeHTCorrection",m_useHTCorrection);
-  declareProperty("GlobalPhaseOffset",m_global_offset);
 }
 
 ///////////////////////////////////////////////////////////////////

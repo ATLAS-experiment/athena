@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,7 +55,8 @@ public:
     {this, "RIOonTrackToolDrift", "InDet::TRT_DriftCircleOnTrackTool/TRT_DriftCircleOnTrackTool"};
   ToolHandle<Trk::IRIO_OnTrackCreator> m_riontrackTube
     {this, "RIOonTrackToolTube", "InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"};
-  double                               m_scalefactor; //scale factor for hit uncertainty
+  DoubleProperty m_scalefactor{this, "ScaleHitUncertainty", 2.,
+    "scale factor for hit uncertainty"};
 };
 
 } // end of namespace InDet

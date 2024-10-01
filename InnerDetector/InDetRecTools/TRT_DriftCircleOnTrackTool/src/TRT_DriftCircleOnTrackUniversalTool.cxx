@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,11 +20,9 @@
 
 InDet::TRT_DriftCircleOnTrackUniversalTool::TRT_DriftCircleOnTrackUniversalTool
 (const std::string& ty,const std::string& na,const IInterface* pa)
-  : AthAlgTool(ty,na,pa),
-    m_scalefactor(2.)
+  : AthAlgTool(ty,na,pa)
 {
   declareInterface<IRIO_OnTrackCreator>(this);
-  declareProperty("ScaleHitUncertainty"  ,m_scalefactor    );    
 }
 
 ///////////////////////////////////////////////////////////////////

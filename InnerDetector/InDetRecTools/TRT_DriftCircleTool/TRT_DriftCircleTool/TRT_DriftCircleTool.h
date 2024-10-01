@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,12 +23,12 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
+#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 
 #include "LumiBlockData/LuminosityCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
-class ITRT_StrawSummaryTool;
-class ITRT_DriftFunctionTool;
+
 class IInDetConditionsSvc;
 class TRT_ID;
 class TRT_RDORawData;
@@ -81,28 +81,45 @@ public:
   SG::ReadCondHandleKey<LuminosityCondData>     m_lumiDataKey
       {this, "LumiDataKey", "", "SG key for luminosity data"};
 
-  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool; //!< DriftFunctionTool
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary; //!< The ConditionsSummaryTool
+  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool{
+    this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool"};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary{
+    this, "ConditionsSummaryTool", "TRT_StrawStatusSummaryTool"};
 
-  bool                                 m_useConditionsStatus;     //!< Shall the ConditionsSummaryTool be used?
-  bool                                 m_useConditionsHTStatus;     //!< Shall the ConditionsSummaryTool be used for HT to find argon straws?
-  bool				       m_useToTCorrection;  //!< Shall the Time over Threshold correction be used?
-  bool				       m_useHTCorrection;  //!< Shall the High Threshold correction be used?
-  const TRT_ID                       * m_trtid            ; //!< ID helper
-  bool                                 m_reject_if_first_bit; //!< If true, reject this DC if first bit high
-  bool                                 m_reject_if_first_bit_argon; //!< If true, reject this DC if first bit high
-  float                                m_min_trailing_edge; //!< Min raw trailing edge position to not reject this DC
-  float                                m_min_trailing_edge_argon; //!< Min raw trailing edge position to not reject this DC
-  float                                m_max_drift_time; //!< Max allowed raw drift time to not reject this DC
-  float                                m_max_drift_time_argon; //!< Max allowed raw drift time to not reject this DC
-  bool                                 m_out_of_time_supression; //!< Turn this on to turn on the OOT options!
-  bool                                 m_out_of_time_supression_argon; //!< Turn this on to turn on the OOT options!
-  bool                                 m_validity_gate_suppression; //! Turn on suppression using validity gates
-  bool                                 m_validity_gate_suppression_argon; //! Turn on suppression using validity gates
-  float                                m_low_gate; //! Low value for gate 
-  float                                m_low_gate_argon; //! Low value for gate 
-  float                                m_high_gate; //! High value for gate
-  float                                m_high_gate_argon; //! High value for gate
+  BooleanProperty m_useConditionsStatus{this, "UseConditionsStatus", false,
+    "Shall the ConditionsSummaryTool be used?"};
+  BooleanProperty m_useConditionsHTStatus{this, "UseConditionsHTStatus", false,
+    "Shall the ConditionsSummaryTool be used for HT to find argon straws?"};
+  BooleanProperty m_useToTCorrection{this, "useDriftTimeToTCorrection", false,
+    "Shall the Time over Threshold correction be used?"};
+  BooleanProperty m_useHTCorrection{this, "useDriftTimeHTCorrection", false,
+    "Shall the High Threshold correction be used?"};
+  const TRT_ID* m_trtid = nullptr; //!< ID helper
+  BooleanProperty m_reject_if_first_bit{this, "RejectIfFirstBit", false,
+    "If true, reject this DC if first bit high"};
+  BooleanProperty m_reject_if_first_bit_argon{this, "RejectIfFirstBitArgon", true,
+    "If true, reject this DC if first bit high"};
+  FloatProperty m_min_trailing_edge{this, "MinTrailingEdge", 11.0*CLHEP::ns,
+    "Min raw trailing edge position to not reject this DC"};
+  FloatProperty m_min_trailing_edge_argon{this, "MinTrailingEdgeArgon", 11.0*CLHEP::ns,
+    "Min raw trailing edge position to not reject this DC"};
+  FloatProperty m_max_drift_time{this, "MaxDriftTime", 60.0*CLHEP::ns,
+    "Max allowed raw drift time to not reject this DC"};
+  FloatProperty m_max_drift_time_argon{this, "MaxDriftTimeArgon", 60.0*CLHEP::ns,
+    "Max allowed raw drift time to not reject this DC"};
+  BooleanProperty m_out_of_time_supression{this, "SimpleOutOfTimePileupSupression", false,
+    "Turn this on to turn on the OOT options!"};
+  BooleanProperty m_out_of_time_supression_argon
+    {this, "SimpleOutOfTimePileupSupressionArgon", false,
+     "Turn this on to turn on the OOT options!"};
+  BooleanProperty m_validity_gate_suppression{this, "ValidityGateSuppression", false,
+    "Turn on suppression using validity gates"};
+  BooleanProperty m_validity_gate_suppression_argon
+    {this, "ValidityGateSuppressionArgon", false, "Turn on suppression using validity gates"};
+  FloatProperty m_low_gate{this, "LowGate", 18.0*CLHEP::ns, "Low value for gate"};
+  FloatProperty m_low_gate_argon{this, "LowGateArgon", 18.0*CLHEP::ns, "Low value for gate"};
+  FloatProperty m_high_gate{this, "HighGate", 38.0*CLHEP::ns, "High value for gate"};
+  FloatProperty m_high_gate_argon{this, "HighGateArgon", 38.0*CLHEP::ns, "High value for gate"};
 };
 
 } // end of namespace

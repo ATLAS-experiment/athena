@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,12 +16,11 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
+#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "InDetRIO_OnTrack/TRTRIO_OnTrackErrorScaling.h"
 
 #include "LumiBlockData/LuminosityCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
-
-class ITRT_DriftFunctionTool;
 
 
 namespace InDet {
@@ -58,8 +57,10 @@ public:
   // Private data:
   ///////////////////////////////////////////////////////////////////
 
-  ToolHandle<Trk::IRIO_OnTrackCreator>          m_riontrackTube   ;
-  ToolHandle<ITRT_DriftFunctionTool>            m_drifttool       ;
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_riontrackTube{this, "RIOonTrackToolTube",
+    "InDet::TRT_DriftCircleOnTrackNoDriftTimeTool/TRT_DriftCircleOnTrackNoDriftTimeTool"};
+  ToolHandle<ITRT_DriftFunctionTool> m_drifttool{this, "DriftFunctionTool",
+    "TRT_DriftFunctionTool"};
 
   SG::ReadCondHandleKey<LuminosityCondData>     m_lumiDataKey
       {this, "LumiDataKey", "", "SG key for luminosity data"};
@@ -68,8 +69,10 @@ public:
   SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_trtErrorScalingKey
       {this,"TRTErrorScalingKey", "/Indet/TrkErrorScalingTRT", "Key for TRT error scaling conditions data."};
 
-  bool                                          m_useToTCorrection{};  //!< Shall the Time over Threshold correction be used?
-  double                                        m_scalefactor{}     ; //scale factor for hit uncertainty
+  BooleanProperty m_useToTCorrection{this, "useDriftTimeToTCorrection", false,
+    "Shall the Time over Threshold correction be used?"};
+  DoubleProperty m_scalefactor{this, "ScaleHitUncertainty", 2.,
+    "scale factor for hit uncertainty"};
 
 };
 

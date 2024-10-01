@@ -24,11 +24,9 @@
 
 InDet::TRT_DriftCircleOnTrackTool::TRT_DriftCircleOnTrackTool
 (const std::string& ty,const std::string& na,const IInterface* pa)
-  : AthAlgTool(ty,na,pa),
-    m_useErrorCorrection(false)
+  : AthAlgTool(ty,na,pa)
 {
   declareInterface<IRIO_OnTrackCreator>(this);
-  declareProperty("UseErrorCorrection",m_useErrorCorrection);
 }
 
 ///////////////////////////////////////////////////////////////////
