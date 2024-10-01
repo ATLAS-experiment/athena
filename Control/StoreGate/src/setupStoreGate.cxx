@@ -74,14 +74,10 @@ bool setupStoreGate (std::string progname,
     }  
     assert( 0 != svcLoc);
     
-    StoreGateSvc* storeGate = 0;
-    static const bool CREATE(true);
-    bool sc = ( svcLoc->service( "StoreGateSvc", 
-                                 storeGate, CREATE) ).isSuccess();
-    assert( sc );
-    assert( 0 != storeGate );
+    SmartIF<StoreGateSvc> storeGate{svcLoc->service( "StoreGateSvc" )};
+    assert( storeGate );
     
-    if ( false == sc || 0 == storeGate ) {
+    if ( !storeGate ) {
       std::string error = "No valid pointer to StoreGateSvc !!";
       std::cerr << error << std::endl;
       return false;

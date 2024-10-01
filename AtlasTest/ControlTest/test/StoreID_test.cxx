@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -8,7 +8,6 @@
  ATLAS Collaboration
  ***************************************************************************/
 
-// $Id: StoreID_test.cxx 770224 2016-08-26 01:59:31Z ssnyder $
 
 #include <iostream>
 
@@ -32,18 +31,15 @@ int main() {
   }  
   assert(pSvcLoc);
 
-  StoreGateSvc* pStore(nullptr);
-  static const bool CREATE(true);
-  assert((pSvcLoc->service("StoreGateSvc", pStore, CREATE)).isSuccess());
+  SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
   assert(pStore);
-  
   assert(pStore->storeID() == StoreID::EVENT_STORE);
 
-  assert((pSvcLoc->service("DetectorStore", pStore)).isSuccess());
+  pStore = pSvcLoc->service("DetectorStore");
   assert(pStore);
   assert(pStore->storeID() == StoreID::DETECTOR_STORE);
   
-  assert((pSvcLoc->service("ConditionStore", pStore, CREATE)).isSuccess());
+  pStore = pSvcLoc->service("ConditionStore");
   assert(pStore);
   assert(pStore->storeID() == StoreID::CONDITION_STORE);
   

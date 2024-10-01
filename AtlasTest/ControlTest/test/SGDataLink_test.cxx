@@ -349,10 +349,7 @@ int main() {
   errorcheck::ReportMessage::hideErrorLocus();
 
   assert(pSvcLoc);
-  StoreGateSvc* pSG;
-  
-  const bool CREATEIF(true);
-  assert((pSvcLoc->service("StoreGateSvc", pSG, CREATEIF)).isSuccess());
+  SmartIF<StoreGateSvc> pSG(pSvcLoc->service("StoreGateSvc"));
   assert(pSG);
 
   Foo* pFoo = new Foo;

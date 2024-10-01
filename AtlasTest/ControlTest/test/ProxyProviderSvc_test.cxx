@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ProxyProviderSvc_test.cxx
@@ -180,12 +180,9 @@ int main ATLAS_NOT_THREAD_SAFE () {
   }  
   assert( pSvcLoc );
 
-  StoreGateSvc* pStore(nullptr);
-  static const bool CREATE(true);
-  assert( (pSvcLoc->service("StoreGateSvc", pStore, CREATE)).isSuccess() );
+  SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
   assert( pStore );
-  IProxyProviderSvc* pIPPSvc;
-  assert( (pSvcLoc->service("ProxyProviderSvc", pIPPSvc, CREATE)).isSuccess() );
+  SmartIF<IProxyProviderSvc> pIPPSvc(pSvcLoc->service("ProxyProviderSvc"));
   assert( pIPPSvc );
 
   pIPPSvc->addProvider(new TestProvider<Foo>("aFoo"));

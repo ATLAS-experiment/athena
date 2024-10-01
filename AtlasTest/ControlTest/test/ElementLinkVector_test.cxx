@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestTools/SGassert.h"
@@ -133,10 +133,8 @@ int main() {
     return 0;
   }  
   assert(pSvcLoc);
-  StoreGateSvc* pSG;
-  
-  const bool CREATEIF(true);
-  assert((pSvcLoc->service("StoreGateSvc", pSG, CREATEIF)).isSuccess());
+
+  SmartIF<StoreGateSvc> pSG(pSvcLoc->service("StoreGateSvc"));
   assert(pSG);
 
   linkVector(*pSG);

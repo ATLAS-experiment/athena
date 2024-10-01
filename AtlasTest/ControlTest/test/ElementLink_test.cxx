@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestTools/FLOATassert.h"
@@ -134,9 +134,7 @@ int main(int argc, char** argv) {
     std::cerr << " This test cannot be run without init Gaudi" << endl;
   }
   assert(pSvcLoc);
-  StoreGateSvc* pSG;
-  const bool CREATEIF(true);
-  assert((pSvcLoc->service("StoreGateSvc", pSG, CREATEIF)).isSuccess());
+  SmartIF<StoreGateSvc> pSG(pSvcLoc->service("StoreGateSvc"));
   assert(pSG);
 
   StatusCode sc;

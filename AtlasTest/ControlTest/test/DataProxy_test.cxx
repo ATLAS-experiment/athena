@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -19,8 +19,6 @@
 #include <iostream>
 
 #include <cassert>
-
-const bool CREATEIF(true);
 
 struct Bla{
   Bla(): i(0) {}
@@ -85,9 +83,7 @@ int main() {
   assert( (DataProxy_cast<Bla>(&transientProxy))->i == 77 );
 
 
-  IConversionSvc* pIConvSvc(nullptr);
-  StatusCode cs((pSvcLoc->service("EventPersistencySvc", pIConvSvc, CREATEIF)));
-  assert(cs.isSuccess());
+  SmartIF<IConversionSvc> pIConvSvc(pSvcLoc->service("EventPersistencySvc"));
   assert(pIConvSvc);
   // create a transient address with IOA.
   TransientAddress* tGen = new TransientAddress(ClassID_traits<Foo>::ID(),
@@ -114,9 +110,7 @@ int main() {
   fptr->doNothing(); //remove warning
 
 
-  IProxyProviderSvc* pIPPSvc(nullptr);
-  StatusCode psc(pSvcLoc->service("ProxyProviderSvc", pIPPSvc, CREATEIF));
-  assert( psc.isSuccess() );
+  SmartIF<IProxyProviderSvc> pIPPSvc(pSvcLoc->service("ProxyProviderSvc"));
   assert( pIPPSvc );
 
   TransientAddress* tad = new TransientAddress(ClassID_traits<Bla>::ID(), "bla");
