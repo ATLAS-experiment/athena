@@ -21,6 +21,14 @@ namespace MuonR4{
         std::string makeLabel(const Parameters& pars);
         std::string toString(const Parameters& pars);
         std::string toString(const ParamDefs par);
+        /** @brief Constructs a direction vector from tanPhi & tanTheta
+         *  @param tanPhi: Tangent of the [x] to [z] axis
+         *  @param tanTheta: Tangent of the [y] to [z] axis  */
+        Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta);
+        /** @brief Constructs a direction vector from the polar theta & phi angles */
+        /**  @brief phi: Polar angle in the [x]-[y] plane
+          * @brief theta: Azimuthal angle mesured from the positive [z]-axis */
+        Amg::Vector3D dirFromAngles(const double phi, const double theta);
     }
 
 
