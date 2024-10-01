@@ -16,7 +16,7 @@ LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4
 Reco_tf.py \
   --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
-  --digiSteeringConf "StandardInTimeOnlyTruth" \
+  --digiSteeringConf "StandardSignalOnlyTruth" \
   --preInclude "all:Campaigns.PhaseIIPileUp200" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --inputHITSFile "${HSHitsFile}" \
