@@ -19,7 +19,9 @@ def AthenaPoolExampleReadCfg(flags, readCatalogs = [] ):
     lists, caConfig = propagateMetaData( flags, "", MetadataCategory.FileMetaData )
     mdLists += lists
     acc.merge(caConfig)
-    
+
+    mdLists.mdItems += ["IOVMetaDataContainer#*"]
+
     esiList, _ = createEventStreamInfo(flags)
     mdLists += esiList
 

@@ -212,7 +212,17 @@ def fromRunArgs(runArgs):
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS"))
+    from AthenaConfiguration.Enums import MetadataCategory
+
+    cfg.merge(
+        SetupMetaDataForStreamCfg(
+            flags,
+            "HITS",
+            createMetadata=[
+                MetadataCategory.IOVMetaData,
+            ],
+        )
+    )
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
