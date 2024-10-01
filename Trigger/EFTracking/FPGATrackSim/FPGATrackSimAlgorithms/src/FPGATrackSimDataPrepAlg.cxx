@@ -344,6 +344,7 @@ StatusCode FPGATrackSimDataPrepAlg::processInputs(SG::WriteHandle<FPGATrackSimHi
         std::vector<int> filter_pixel_physLayers;
         std::vector<int> filter_strip_physLayers;
         const FPGATrackSimPlaneMap *planeMap = m_FPGATrackSimMapping->PlaneMap_1st(0);
+        //TODO This needs to change to deal with multimaps when multi logi layer maps start to use strips
         ATH_CHECK(m_hitFilteringTool->GetPairedStripPhysLayers(planeMap, filter_strip_physLayers));
         m_clusters.clear();
         ATH_CHECK(m_hitFilteringTool->DoHitFiltering(*m_logicEventHeader, filter_pixel_physLayers, filter_strip_physLayers, m_clusters));

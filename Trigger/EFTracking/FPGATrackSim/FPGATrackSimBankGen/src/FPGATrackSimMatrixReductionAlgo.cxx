@@ -32,8 +32,6 @@ StatusCode FPGATrackSimMatrixReductionAlgo::initialize()
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_CHECK(m_tHistSvc.retrieve());
 
-    //TODO matrix generation needs to be reworked to deal with slices 
-    //m_pmap_1st->getLayerInfo(layer_1st, 0)
   m_pmap_1st = m_FPGATrackSimMapping->PlaneMap_1st(0);
   m_pmap_2nd = m_FPGATrackSimMapping->PlaneMap_2nd();
 

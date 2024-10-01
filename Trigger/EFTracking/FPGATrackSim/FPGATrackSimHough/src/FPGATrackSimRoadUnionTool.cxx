@@ -81,7 +81,6 @@ StatusCode FPGATrackSimRoadUnionTool::getRoads(const std::vector<std::shared_ptr
     roads.clear();
     for (auto & tool : m_tools)
     {
-        //std::vector<FPGATrackSimRoad*> r;
         std::vector<std::shared_ptr<const FPGATrackSimRoad>> r;
         ATH_CHECK(tool->getRoads(sliceHits[tool->getSubRegion()], r));
         roads.insert(roads.end(), std::make_move_iterator(r.begin()), std::make_move_iterator(r.end()));
