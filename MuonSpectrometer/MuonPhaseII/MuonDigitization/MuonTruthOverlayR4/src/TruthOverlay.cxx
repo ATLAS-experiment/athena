@@ -30,8 +30,7 @@ namespace MuonR4{
                  Muon::IdentifierByDetElSorter> overlayed{m_idHelperSvc.get()};
 
         /// Helper function to fill the hits to merge
-        auto fillMap = [&overlayed, this] (const EventContext& ctx,
-                                           const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key) -> StatusCode{
+        auto fillMap = [&overlayed, &ctx, this] (const SG::ReadHandleKey<xAOD::MuonSimHitContainer>& key) -> StatusCode{
             SG::ReadHandle hits{key, ctx};
             ATH_CHECK(hits.isPresent());
             xAOD::ChamberViewer viewer{*hits, m_idHelperSvc.get()};
@@ -43,8 +42,8 @@ namespace MuonR4{
 
             return StatusCode::SUCCESS;
         };
-        ATH_CHECK(fillMap(ctx, m_sigKey));
-        ATH_CHECK(fillMap(ctx, m_bkgKey));
+        ATH_CHECK(fillMap(m_sigKey));
+        ATH_CHECK(fillMap(m_bkgKey));
 
         /// Setup the container for merging        
         SG::WriteHandle writeHandle {m_writeKey, ctx};
