@@ -103,6 +103,7 @@ namespace FlavorTagDiscriminants {
       throw std::runtime_error(
         "unused default values: [" + join(unused_defaults) + "]");
     }
+    m_defaultZeroTracks = o.default_zero_tracks;
   }
 
   GNN::GNN(const std::string& file,
@@ -110,7 +111,7 @@ namespace FlavorTagDiscriminants {
            const std::map<std::string, std::string>& remap,
            const TrackLinkType link_type,
            float def_out_val):
-    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, {}} )
+    GNN( file, GNNOptions { flip, remap, link_type, def_out_val, {}, false} )
   {}
 
   GNN::GNN(GNN&&) = default;
@@ -177,6 +178,8 @@ namespace FlavorTagDiscriminants {
 
     // constituent level inputs
     Tracks input_tracks;
+    int64_t num_tracks = 0;
+    bool  using_tracks = false;
     for (auto loader : m_constituentsLoaders){
       auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
       if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V2) {
@@ -191,11 +194,17 @@ namespace FlavorTagDiscriminants {
         for (auto constituent : input_objects){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
+        num_tracks += input_data.first.size();
+        using_tracks = true;
       }
     }
 
     // run inference
     // -------------
+    if (m_defaultZeroTracks && using_tracks && num_tracks == 0) {
+      this->decorateWithDefaults(btag);
+      return;
+    }
     auto [out_f, out_vc, out_vf] = m_onnxUtil->runInference(gnn_inputs);
 
     // decorate outputs
