@@ -163,6 +163,7 @@ def MinBiasTrkSequenceGenCfg(flags):
                                               flagsWithTrk.Tracking.ActiveConfig.input_name, 
                                               rois = "InputRoI", 
                                               inView = "VDVMinBiasIDTracking") # here
+
     recoAcc.mergeReco(trkSeq.sequence("OfflineNoDataPrep"))
 
     selAcc = SelectionCA("MBTrackCountSel")
@@ -171,6 +172,30 @@ def MinBiasTrkSequenceGenCfg(flags):
     trackCountHypoAlgo = TrackCounterHypoAlgCfg(flagsWithTrk)
     selAcc.mergeHypo(trackCountHypoAlgo)
     return MenuSequence(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
+
+
+def MinBiasPixelTrkSequenceGenCfg(flags):
+    recoAcc = InViewRecoCA(name="MBPixelTrackReco", InViewRoIs="InputRoI", RequireParentView=True)
+
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsWithTrk = getFlagsForActiveConfig(flags, "minBiasPixel", log)
+
+    from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+    trkSeq = InnerTrackingTrigSequence.create(flagsWithTrk, 
+                                              flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                              rois = "InputRoI", 
+                                              inView = "VDVMinBiasIDTracking") # here
+
+    recoAcc.mergeReco(trkSeq.sequence("OfflineNoDataPrep"))
+
+    selAcc = SelectionCA("MBPixelTrackCountSel")
+    selAcc.mergeReco(recoAcc)
+    from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
+    trackCountHypoAlgo = TrackCounterHypoAlgCfg(flagsWithTrk)
+    selAcc.mergeHypo(trackCountHypoAlgo)
+    return MenuSequence(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
+
+
 
 def MinBiasMbtsSequenceGenCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")
@@ -183,9 +208,9 @@ def MinBiasMbtsSequenceGenCfg(flags):
     selAcc.addHypoAlgo(hypo)
 
     return MenuSequence(flags,
-                          selAcc,
-                          HypoToolGen = MbtsHypoToolGen,
-                          globalRecoCA = MbtsSGInputCfg(flags))
+                        selAcc,
+                        HypoToolGen = MbtsHypoToolGen,
+                        globalRecoCA = MbtsSGInputCfg(flags))
 
 
 if __name__ == "__main__":

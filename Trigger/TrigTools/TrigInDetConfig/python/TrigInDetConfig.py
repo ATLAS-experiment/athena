@@ -32,6 +32,9 @@ def InDetIDCCacheCreatorCfg(flags):
   return acc
 
 
+
+
+
 @AccumulatorCache
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
 
@@ -52,6 +55,9 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   return acc
 
 
+
+
+
 @AccumulatorCache
 def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=tuple()):
   from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
@@ -64,12 +70,10 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
   if in_view:
     acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
       name = "LRTInputVDV_"+viewname + "_" + flags.Tracking.ActiveConfig.input_name,
-      DataObjects = {
-        ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
-        ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
-      } | set(extra_view_inputs)
-    ) )
-
+      DataObjects = { ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
+                      ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
+                    } | set(extra_view_inputs) ) )
+    
     #need to make sure the cache containers are available
     acc.merge(seq.viewDataVerifier(viewname))
     acc.merge(seq.dataPreparation())
@@ -78,6 +82,9 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
   acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
   
   return acc
+
+
+
 
 
 ############################################################################################################################
@@ -101,7 +108,7 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
                                                                     ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{rois}' ),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
                                                                     ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )} )
-
+    
     acc.addEventAlgo(verifier)
 
   from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
@@ -115,6 +122,10 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
 
   return acc
 
+
+
+
+
 def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
   
   acc = ComponentAccumulator()
@@ -123,6 +134,9 @@ def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
   acc.merge(InDetTrigPriVxFinderCfg(flags, inputTracks = inputTracks, outputVtx =outputVtx))
 
   return acc
+
+
+
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
