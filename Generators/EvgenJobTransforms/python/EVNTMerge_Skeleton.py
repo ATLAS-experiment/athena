@@ -21,7 +21,7 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    from AthenaConfiguration.Enums import ProductionStep
+    from AthenaConfiguration.Enums import ProductionStep, MetadataCategory
     flags.Common.ProductionStep = ProductionStep.Generation
 
     commonRunArgsToFlags(runArgs, flags)
@@ -63,7 +63,13 @@ def fromRunArgs(runArgs):
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-    cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT", disableEventTag=True))
+
+    cfg.merge(
+        SetupMetaDataForStreamCfg(flags, "EVNT", disableEventTag=True),
+        createMetadata=[
+            MetadataCategory.IOVMetaData,
+        ],
+    )
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

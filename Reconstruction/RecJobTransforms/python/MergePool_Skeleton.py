@@ -97,10 +97,15 @@ def fromRunArgs(runArgs):
     Stream.ForceRead = True
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    from AthenaConfiguration.Enums import MetadataCategory
+
     cfg.merge(
         SetupMetaDataForStreamCfg(
             flags,
             streamToMerge,
+            createMetadata=[
+                MetadataCategory.IOVMetaData,
+            ],
         )
     )
 

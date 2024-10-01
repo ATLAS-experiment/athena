@@ -40,5 +40,15 @@ def PreTrackingCfg(flags):
    acc.merge(OutputStreamCfg(flags, "RDO", ItemList=itemsToRecord, takeItemsFromInput=True))
    # Add in-file MetaData
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-   acc.merge(SetupMetaDataForStreamCfg(flags, "RDO"))
+   from AthenaConfiguration.Enums import MetadataCategory
+
+   acc.merge(
+       SetupMetaDataForStreamCfg(
+           flags,
+           "RDO",
+           createMetadata=[
+                MetadataCategory.IOVMetaData,
+            ],
+        )
+    )
    return acc
