@@ -14,7 +14,6 @@ HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-03-00-00/m
 Reco_tf.py \
   --conditionsTag OFLCOND-MC21-SDR-RUN4-02 \
   --geometryVersion ATLAS-P2-RUN4-03-00-00 \
-  --digiSteeringConf "StandardSignalOnlyTruth" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
   --postInclude "all:PyJobTransforms.UseFrontier.py" \
   --inputHITSFile "${HSHitsFile}" \
