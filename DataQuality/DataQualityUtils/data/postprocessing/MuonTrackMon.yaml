@@ -22,3 +22,87 @@ Input : ['MuonPhysics/MuonTrackPhys/Jpsi/JPsiMassAverage']
 Output : ['MuonPhysics/MuonTrkPhys/Jpsi/m_Jpsi_M_Mean_eta', 'MuonPhysics/MuonTrkPhys/Jpsi/m_Jpsi_M_Sigma_eta']
 Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.project_mean_ROOT
 Description: 2DMassToMeanSigma
+#
+#
+# Efficiency Plots
+#
+---
+Input : ['MuonPhysics/Muons/Z/Muons_Z_Medium_eff', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
+Output : ['MuonPhysics/Muons/Z/Muons_Z_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/Z/Muons_Z_Tight_eff', 'MuonPhysics/Muons/Z/Muons_Z_Origin_eta_phi']
+Output : ['MuonPhysics/Muons/Z/Muons_Z_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Medium_eff', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
+Output : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Tight_eff', 'MuonPhysics/Muons/Jpsi/Muons_Jpsi_Origin_eta_phi']
+Output : ['MuonPhysics/Muons/Jpsi/Muons_Jpsi_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_eta_phi_medium', 'MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_eta_phi_tight', 'MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/AllCBMuons/Muons_AllCBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_eta_phi_medium', 'MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_eta_phi_tight', 'MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/AllNonCBMuons/Muons_AllNonCBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_eta_phi_medium', 'MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_eta_phi_tight', 'MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NoTrigCBMuons/Muons_NoTrigCBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_eta_phi_medium', 'MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_eta_phi_tight', 'MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NoTrigNonCBMuons/Muons_NoTrigNonCBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_eta_phi_medium', 'MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_eta_phi_tight', 'MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/NonCBMuons/Muons_NonCBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
+---
+Input : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_eta_phi_medium', 'MuonPhysics/Muons/CBMuons/Muons_CBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_Medium_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiMediumEfficiency
+---
+Input : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_eta_phi_tight', 'MuonPhysics/Muons/CBMuons/Muons_CBMuons_eta_phi']
+Output : ['MuonPhysics/Muons/CBMuons/Muons_CBMuons_Tight_eff']
+Function : MuonTrackMonitoring.MuonTrackMonitorPostProcessing.efficiencies_2d
+Description: EtaPhiTightEfficiency
