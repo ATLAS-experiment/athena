@@ -173,12 +173,10 @@ def FlavorTagNNCfg(
 
     FTD = CompFactory.FlavorTagDiscriminants
     alg = FTD.BTagDecoratorAlg
-    alg_args = {}
 
     acc = ComponentAccumulator()
 
     NNFile_extension = NNFile.split(".")[-1]
-    min_links = 1
     nn_opts = dict(
         NNFile=NNFile,
         flipTagConfig=FlipConfig,
@@ -188,18 +186,8 @@ def FlavorTagNNCfg(
         decorator = acc.popToolsAndMerge(DL2ToolCfg(flags, **nn_opts))
     elif NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
+        nn_opts["defaultZeroTracks"] = True
         decorator = acc.popToolsAndMerge(GNNToolCfg(flags, **nn_opts))
-        acc.addEventAlgo(
-            FTD.CountTrackParticleAlg(
-                f'CountTrackParticleAlg{BTaggingCollection}',
-                links=f'{BTaggingCollection}.BTagTrackToJetAssociator',
-                minimumLinks=min_links,
-                flag=f'{BTaggingCollection}.{NONZERO_TRACKS}',
-            )
-        )
-        alg = FTD.BTagConditionalDecoratorAlg
-        alg_args = dict(tagFlag=NONZERO_TRACKS)
-
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
@@ -218,7 +206,6 @@ def FlavorTagNNCfg(
         constituentContainer=TrackCollection,
         decorator=decorator,
         undeclaredReadDecorKeys=veto_list,
-        **alg_args,
     )
 
     # -- create the association algorithm
@@ -248,6 +235,7 @@ def MultifoldGNNCfg(
         fc=FlipConfig,
     )
 
+    default_zero_tracks = NONZERO_TRACKS in tag_requirements
     veto_list = getStaticTrackVars(TrackCollection)
 
     acc = ComponentAccumulator()
@@ -261,50 +249,17 @@ def MultifoldGNNCfg(
 
     tp_assoc = 'BTagTrackToJetAssociator'
     ip_assoc = 'TracksForBTagging'
-    tag_flag = NONZERO_TRACKS
-    min_links = 1
 
     FTD = CompFactory.FlavorTagDiscriminants
 
     if BTaggingCollection is not None:
-        if tag_requirements:
-            Alg = FTD.BTagConditionalDecoratorAlg
-            if len(tag_requirements) > 1:
-                raise ValueError(f'{tag_requirements=} must have size 0 or 1')
-            alg_args = dict(tagFlag=next(iter(tag_requirements)))
-        else:
-            Alg = FTD.BTagDecoratorAlg
-            alg_args = {}
-        if tag_flag in tag_requirements:
-            remapped_tp = remapping.get(tp_assoc, tp_assoc)
-            acc.addEventAlgo(
-                FTD.CountTrackParticleAlg(
-                    f'CountTrackParticleAlg{BTaggingCollection}',
-                    links=f'{BTaggingCollection}.{remapped_tp}',
-                    minimumLinks=min_links,
-                    flag=f'{BTaggingCollection}.{tag_flag}',
-                )
-            )
+        Alg = FTD.BTagDecoratorAlg
         trackLinkType = 'TRACK_PARTICLE'
         veto_list += getUndeclaredBtagVars(BTaggingCollection)
         container = BTaggingCollection
     elif JetCollection is not None:
         remapping.setdefault(tp_assoc, ip_assoc)
-        if tag_requirements:
-            Alg = FTD.JetTagConditionalDecoratorAlg
-            alg_args = dict(tagFlags=tag_requirements)
-        else:
-            Alg = FTD.JetTagDecoratorAlg
-            alg_args = {}
-        if tag_flag in tag_requirements:
-            acc.addEventAlgo(
-                FTD.CountIParticleAlg(
-                    f'CountTrackParticleAlg{JetCollection}',
-                    links=f'{JetCollection}.{remapping[tp_assoc]}',
-                    minimumLinks=min_links,
-                    flag=f'{JetCollection}.{tag_flag}',
-                )
-            )
+        Alg = FTD.JetTagDecoratorAlg
         trackLinkType = 'IPARTICLE'
         algname += '_Jet'
         container = JetCollection
@@ -333,10 +288,10 @@ def MultifoldGNNCfg(
                 trackLinkType=trackLinkType,
                 defaultOutputValues=defaultOutputValues,
                 perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
+                defaultZeroTracks=default_zero_tracks,
             ),
             undeclaredReadDecorKeys=veto_list,
             ExtraInputs=[("xAOD::JetContainer", f"StoreGateSvc+{JetCollection}.jetFoldHash")],
-            **alg_args
         )
     )
 

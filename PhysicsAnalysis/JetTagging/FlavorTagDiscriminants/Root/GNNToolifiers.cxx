@@ -18,6 +18,7 @@ namespace FlavorTagDiscriminants {
       "access tracks as IParticleContainer or as TrackParticleContainer");
     t.declareProperty("defaultOutputValue", props->default_output_value);
     t.declareProperty("defaultOutputValues", props->default_output_values);
+    t.declareProperty("defaultZeroTracks", props->default_zero_tracks);
   }
 
   GNNOptions getOptions(const GNNToolProperties& props) {
@@ -34,6 +35,7 @@ namespace FlavorTagDiscriminants {
       const auto& d = props.default_output_values;
       opts.default_output_values.insert(d.begin(), d.end());
     }
+    opts.default_zero_tracks = props.default_zero_tracks;
     return opts;
   }
 
