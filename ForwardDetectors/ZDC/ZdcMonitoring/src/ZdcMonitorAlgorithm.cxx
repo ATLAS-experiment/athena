@@ -16,7 +16,7 @@ ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* 
 ZdcMonitorAlgorithm::~ZdcMonitorAlgorithm() {}
 
 
-StatusCode ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges) {
+void ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges) {
     // Clear the vector to ensure it's empty
     bin_edges.clear();
 
@@ -32,8 +32,6 @@ StatusCode ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float m
         float edge = log_min + i * step;
         bin_edges.push_back(std::pow(10, edge));
     }
-
-    return StatusCode::SUCCESS;
 }
 
 
@@ -402,9 +400,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                 zdcModuleChisqEventWeight = calculate_inverse_bin_width(zdcModuleChisq, "module chisq", m_ZdcModuleChisqBinEdges);
                 zdcModuleChisqOverAmpEventWeight = calculate_inverse_bin_width(zdcModuleChisqOverAmp, "module chisq over amplitude", m_ZdcModuleChisqOverAmpBinEdges);
-
-                bool HG_overflow = status & 1 << ZDCPulseAnalyzer::HGOverflowBit;
-                bool HG_underflow = status & 1 << ZDCPulseAnalyzer::HGUnderflowBit;
 
                 if (imod == 0) zdcEMModuleEnergy[iside] = zdcModuleCalibAmp;
 

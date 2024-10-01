@@ -29,7 +29,6 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
     n_energy_bins_default = 200
     n_adc_sum_fine_bins = 800
-    n_adc_sum_coarse_bins = 200
     n_time_bins_default = 150
     n_sample_bins_default = 25
     lumi_block_max = 2000

@@ -28,7 +28,7 @@ public:
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
-    StatusCode calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
+    void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const;
     
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
