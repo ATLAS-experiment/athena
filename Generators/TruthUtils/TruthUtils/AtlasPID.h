@@ -267,7 +267,7 @@ template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p
 /// Should some colored states be long-lived enough that hadrons would form around them, the coding strategy of 11g applies, with the initial
 /// two nnr digits preserved in the combined code.
 template<> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) );}
-template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
+template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isKK(value_digits);}
 
 
 /// PDG rule 11k
