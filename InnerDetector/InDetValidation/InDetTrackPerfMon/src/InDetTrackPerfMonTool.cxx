@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,8 +33,8 @@ InDetTrackPerfMonTool::InDetTrackPerfMonTool(
     const std::string& type,
     const std::string& name,
     const IInterface* parent ) :
-        ManagedMonitorToolBase( type, name, parent ),
-        m_trkAnaDefSvc( nullptr ) { }
+        ManagedMonitorToolBase( type, name, parent )
+{ }
 
 
 ///----------------------------------
@@ -53,8 +53,8 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   /// Retrieving trkAnaDefSvc
   if ( not m_trkAnaDefSvc ) {
     ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag.value(), m_trkAnaDefSvc ) );
+    m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
+    ATH_CHECK( m_trkAnaDefSvc.isValid() );
   }
 
   ATH_MSG_DEBUG( "Initializing sub-tools" );

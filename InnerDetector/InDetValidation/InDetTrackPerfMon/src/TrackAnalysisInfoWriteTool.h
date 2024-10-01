@@ -98,7 +98,7 @@ namespace IDTPM {
 
     StringProperty m_anaTag{ this, "AnaTag", "", "Track analysis tag" };
 
-    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
+    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
  
   }; // class TrackAnalysisInfoWriteTool
 

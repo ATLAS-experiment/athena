@@ -29,7 +29,7 @@ IDTPM::TrackAnalysisPlotsMgr::TrackAnalysisPlotsMgr(
     PlotMgr* pParent ) :
         PlotMgr( dirName, anaTag, pParent ), 
         m_anaTag( anaTag ), m_chain( chain ),
-        m_directory( dirName ), m_trkAnaDefSvc( nullptr ) { }
+        m_directory( dirName ) { }
 
 
 /// ------------------
@@ -40,13 +40,8 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   ATH_MSG_DEBUG( "Initialising in directory: " << m_directory );
 
   /// load trkAnaDefSvc 
-  if( not m_trkAnaDefSvc ) {
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag, m_trkAnaDefSvc ) );
-    if( !m_trkAnaDefSvc ) { // suppress cppcheck warning.
-      return StatusCode::FAILURE;
-    }
-  }
+  m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
+  ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
   /// Track parameters plots
   if( m_trkAnaDefSvc->plotTrackParameters() ) {

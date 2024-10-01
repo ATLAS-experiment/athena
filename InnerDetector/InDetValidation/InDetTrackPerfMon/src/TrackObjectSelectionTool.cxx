@@ -47,9 +47,9 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
 
   ATH_MSG_DEBUG( "Selecting offline tracks matched to an offline " << m_objectType.value() );
 
-  ITrackAnalysisDefinitionSvc* trkAnaDefSvc( nullptr );
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  ATH_CHECK( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag(), trkAnaDefSvc ) );
+  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag() ) );
+  ATH_CHECK( trkAnaDefSvc.isValid() );
 
   if( not trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Tool not enabled if offline tracks are not used." );

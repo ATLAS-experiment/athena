@@ -49,9 +49,9 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
 
   ATH_MSG_DEBUG( "Initially copying collections to FullScan vectors" );
 
-  ITrackAnalysisDefinitionSvc* trkAnaDefSvc( nullptr );
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  ATH_CHECK( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag(), trkAnaDefSvc ) );
+  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag() ) );
+  ATH_CHECK( trkAnaDefSvc.isValid() );
 
   /// First copy the full collections vectors to the selected vectors (Full-Scan)
   if( trkAnaDefSvc->useOffline() ) {
