@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RootElement>
+    <!-- simple example of a well formed xml without schema -->
+    <first>
+        <second myatt="att1">Hello World</second>
+    </first>
+</RootElement>

@@ -55,7 +55,6 @@ int main (int argc, char* argv[])
     file = argv[1]; 
   else
     file += "/ATLAS_AGDD.xml";
- 
   p.visit (file); 
   return (0); 
 } 
