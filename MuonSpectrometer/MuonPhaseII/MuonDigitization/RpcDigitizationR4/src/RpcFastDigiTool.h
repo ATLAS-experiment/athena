@@ -27,7 +27,6 @@ namespace MuonR4{
  
         private:
             using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
-            using DeadTimeMap = std::unordered_map<Identifier, double>;            
             int m_stIdxBIL{-1}; // Station name index of the BIL stations
             
             /**  @brief Digitize the sim hit as Rpc strip 1D hit.  

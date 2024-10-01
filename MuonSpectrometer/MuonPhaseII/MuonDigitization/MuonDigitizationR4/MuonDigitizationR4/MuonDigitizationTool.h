@@ -126,7 +126,16 @@ namespace MuonR4 {
 
             /** @brief Returns the global time of the hit which is the sum of eventTime & individual hit time */
             static double hitTime(const TimedHit& hit);
-
+            using DeadTimeMap = std::unordered_map<Identifier, double>;
+            /** @brief Returns whether the new digit is within the dead time window
+             *  @brief channelId: Identifier of the fired channel
+             *  @brief hitTime: Current hit time
+             *  @brief deadTimeWindow: Dead time to pass before the next hit may be accepted
+             *  @brief deadTimeMap: Map storing the last hit times from each Identifier */
+            static bool passDeadTime(const Identifier& channelId,
+                                     const double hitTime, 
+                                     const double deadTimeWindow,
+                                     DeadTimeMap& deadTimeMap);
 
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

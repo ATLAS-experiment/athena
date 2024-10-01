@@ -166,4 +166,20 @@ namespace MuonR4{
         acc_puType(*sdoHit) = hit.pileupType();
         return sdoHit;
     }
+    bool MuonDigitizationTool::passDeadTime(const Identifier& channelId,
+                                            const double hitTime, 
+                                            const double deadTimeWindow,
+                                            DeadTimeMap& deadTimeMap) {
+        auto insertItr = deadTimeMap.insert(std::make_pair(channelId,hitTime));
+        /// Channel not seen before
+        if (insertItr.second) {
+            return true;
+        }
+        if (hitTime - insertItr.first->second < deadTimeWindow) {
+            return false;
+        }
+        /// Update dead time map & accept hit
+        insertItr.first->second = hitTime;
+        return true;
+    }
 }

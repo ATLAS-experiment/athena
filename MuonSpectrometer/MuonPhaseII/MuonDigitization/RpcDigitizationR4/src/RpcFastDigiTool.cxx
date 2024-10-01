@@ -141,12 +141,11 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("Hit is marked as inefficient");
             return false;            
         }
-        double& lastHitTime{deadTimes[digitId]};
-        if (hitTime - lastHitTime < m_deadTime) {
+        
+        if (!passDeadTime(digitId, hitTime, m_deadTime, deadTimes)) {
             ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-        lastHitTime = hitTime;
         /// Correct for the signal propagation time
         const double signalTime = hitTime + reEle.distanceToEdge(reEle.measurementHash(digitId),
                                                                  locHitPos, EdgeSide::readOut) / m_propagationVelocity;
@@ -225,12 +224,11 @@ namespace MuonR4 {
                           <<", strip: "<<strip);
             return false;
         }
-        double& lastTimedHit{deadTimes[digitId]};
-        if ( hitTime - lastTimedHit < m_deadTime) {
-            ATH_MSG_VERBOSE("Reject hit due to dead time constraint");
+        if (!passDeadTime(digitId, hitTime, m_deadTime, deadTimes)) {
+            ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-        lastTimedHit = hitTime;
+
         /// Check whether the digit is actually efficient
         const bool effiSignal1 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);
         const bool effiSignal2 = !effiMap ||  effiMap->getEfficiency(gasGapId) >= CLHEP::RandFlat::shoot(rndEngine,0., 1.);

@@ -98,12 +98,11 @@ namespace MuonR4 {
                       <<Amg::toString(locSimHitPos, 2)<<" wire group number: "<<prdWireNum
                       <<" wiregroup pos "<<Amg::toString(design.center(prdWireNum).value_or(Amg::Vector2D::Zero()), 2));
 
-        double& lastHitTime{deadTimes[digitId]};
-        if (hitTime(timedHit) - lastHitTime < m_deadTime) {
-            ATH_MSG_VERBOSE("Reject hit due to dead time constraint.");
+        
+        if (!passDeadTime(digitId, hitTime(timedHit), m_deadTime, deadTimes)) {
+            ATH_MSG_VERBOSE("Reject hit due to dead map constraint");
             return false;
         }
-        lastHitTime = hitTime(timedHit);
         outColl.push_back(std::make_unique<TgcDigit>(digitId, associateBCIdTag(ctx, timedHit)));
         ++m_acceptedHits[false];    
         return true;

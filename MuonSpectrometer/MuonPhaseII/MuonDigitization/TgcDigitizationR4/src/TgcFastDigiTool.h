@@ -23,7 +23,6 @@ namespace MuonR4{
         
  
         private:
-            using DeadTimeMap = std::unordered_map<Identifier, double>;
             /** @brief Digitize the wire hit by smearing the truth hit position according to the
              *         wire group pitch and then assigning the Identifier to it
              *         If an efficiency conditions object is scheduled, hits may additionally rejected
