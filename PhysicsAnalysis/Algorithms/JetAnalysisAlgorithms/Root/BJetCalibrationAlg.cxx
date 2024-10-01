@@ -68,19 +68,19 @@ namespace CP
 
       for(xAOD::Jet* jet : *jets) {
 
-	jet->setJetP4("NoBJetCalibMomentum", jet->jetP4());
-	jet->setJetP4("MuonCorrMomentum", jet->jetP4());
+        jet->setJetP4("NoBJetCalibMomentum", jet->jetP4());
+        jet->setJetP4("MuonCorrMomentum", jet->jetP4());
 
-	if(m_jetPreselection.getBool(*jet, sys)) {
-	  int nmuons = 0;
-	  ANA_CHECK (m_muonInJetTool->applyMuonInJetCorrection(*jet, muons_for_correction, nmuons));
-	  jet->setJetP4("MuonCorrMomentum", jet->jetP4());
-	  m_nmuons.set(*jet, nmuons, sys);
+        int nmuons = 0;
+        if(m_jetPreselection.getBool(*jet, sys)) {
+          ANA_CHECK (m_muonInJetTool->applyMuonInJetCorrection(*jet, muons_for_correction, nmuons));
+          jet->setJetP4("MuonCorrMomentum", jet->jetP4());
+          if(!m_bJetTool.empty()){
+            ANA_CHECK (m_bJetTool->applyBJetCorrection(*jet, nmuons>0));
+          }
+        }
+        m_nmuons.set(*jet, nmuons, sys);
 
-	  if(!m_bJetTool.empty()){
-	    ANA_CHECK (m_bJetTool->applyBJetCorrection(*jet, nmuons>0));
-	  }
-	}
       }
     }
 
