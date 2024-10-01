@@ -14,6 +14,8 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     super().__init__(flags, signature,rois,inView)
     self.log = logging.getLogger("InDetTrigSequence")
     self.log.info(f"signature: {self.signature} rois: {self.rois} inview: {self.inView}")
+
+
     
   def offlinePattern(self) -> ComponentAccumulator:
 
@@ -21,8 +23,7 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
 
     from InDetConfig.SiSPSeededTrackFinderConfig import TrigSiSPSeededTrackFinderCfg
     ca.merge(TrigSiSPSeededTrackFinderCfg(self.flags,
-                                          name = 'EFsiSPSeededTrackFinder'+self.flags.Tracking.ActiveConfig.input_name
-    ))
+                                          name = 'EFsiSPSeededTrackFinder'+self.flags.Tracking.ActiveConfig.input_name ))
 
     self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_IDTrig
     self.ambiPrefix = "EFAmbi"
@@ -30,6 +31,7 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     return ca
     
 
+  
   def viewDataVerifier(self, viewVerifier='IDViewDataVerifier') -> ComponentAccumulator:
 
     acc = ComponentAccumulator()
@@ -60,6 +62,7 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
 
 
     
+
   def viewDataVerifierTRT(self, viewVerifier='IDViewDataVerifierTRT') -> ComponentAccumulator:
     
     acc = ComponentAccumulator()
@@ -81,6 +84,8 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     acc.addEventAlgo(ViewDataVerifier)
     return acc
 
+
+  
   def viewDataVerifierAfterDataPrep(self, viewVerifier='IDViewDataVerifierAfterDataPrep') -> ComponentAccumulator:
 
     acc = ComponentAccumulator()
@@ -105,7 +110,10 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
 
     acc.addEventAlgo(ViewDataVerifier)
     return acc
-    
+
+
+
+  
   def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
     
     acc = ComponentAccumulator()
@@ -125,6 +133,9 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     acc.addEventAlgo(ViewDataVerifier)
     return acc
 
+
+
+  
   def dataPreparation(self) -> ComponentAccumulator:
     
     signature = self.flags.Tracking.ActiveConfig.input_name
@@ -160,6 +171,8 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     return acc
   
 
+
+  
   def dataPreparationTRT(self) ->ComponentAccumulator:
   
     acc = ComponentAccumulator()
@@ -185,6 +198,9 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     return acc
 
 
+
+
+  
   def spacePointFormation(self) -> ComponentAccumulator:
     
     signature = self.flags.Tracking.ActiveConfig.input_name
@@ -217,6 +233,9 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     return acc
 
 
+
+
+  
   def ambiguitySolver(self) -> ComponentAccumulator:  
 
     acc = ComponentAccumulator()
@@ -246,6 +265,9 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     return acc
 
 
+
+
+  
   def trtExtensions(self) -> ComponentAccumulator:
 
     acc = self.dataPreparationTRT()
@@ -259,6 +281,9 @@ class InDetTrigSequence(InnerTrackerTrigSequence):
     self.lastTrkCollection = self.flags.Tracking.ActiveConfig.trkTracks_IDTrig
 
     return acc
+
+
+
 
   
   def xAODParticleCreation(self) -> ComponentAccumulator:

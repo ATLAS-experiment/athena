@@ -1064,6 +1064,9 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_MinBias_IDTrig',                 'BS ESD AODFULL AODSLIM', 'MinBias', [InViews('MBTrackRecoViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MinBias_IDTrigAux.',          'BS ESD AODFULL AODSLIM', 'MinBias'),
 
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_MinBiasPixel_IDTrig',                 'BS ESD AODFULL AODSLIM', 'MinBias', [InViews('MBPixelTrackRecoViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MinBiasPixel_IDTrigAux.',          'BS ESD AODFULL AODSLIM', 'MinBias'),
+
     ('xAOD::TrigT2MbtsBitsContainer#HLT_MbtsBitsContainer',                     'BS ESD AODFULL', 'MinBias'),
     ('xAOD::TrigT2MbtsBitsAuxContainer#HLT_MbtsBitsContainerAux.',              'BS ESD AODFULL', 'MinBias'),
 
