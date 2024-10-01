@@ -187,6 +187,14 @@ CP::SystematicSet FFJetSmearingTool::recommendedSystematics() const
 {
     
   CP::SystematicSet filteredSysts;
+
+  if(m_truth_jetColl.find("SoftDrop")!=std::string::npos){//no Calo/Comb/TA masses for UFO jets                                                                      
+    for (auto ci = m_SysList.begin(); ci != m_SysList.end(); ci++) {
+      filteredSysts.insert(*ci);
+    }
+    return filteredSysts;
+  }
+
   if(m_MassDef==JetTools::FFJetAllowedMassDefEnum::Calo){//take only Calo-like syst
     for (auto ci = m_SysList.begin(); ci != m_SysList.end(); ci++) {
       if ((*ci).basename().find("CALO_")!=std::string::npos)
@@ -520,7 +528,7 @@ StatusCode FFJetSmearingTool::getJMSJMR( xAOD::Jet& jet_reco, double jet_mass_va
     } //Only apply the systematic to the proper mass definition
     else{return StatusCode::SUCCESS;}
 
-    if(m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName) != "All" && m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName) != jetTopology){
+    if(m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName) != "All" && !TString(m_Syst_TopologyAffected_map.at(m_currentSysData->SysBaseName)).Contains(jetTopology)){
         ATH_MSG_VERBOSE("The systematic do not affects to this jet topology");
         return StatusCode::SUCCESS;
     }
