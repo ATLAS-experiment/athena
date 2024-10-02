@@ -86,6 +86,7 @@ BTaggingRun4Aux = [
     "GN2HL_pu",
     "GN2HL_pc",
     "GN2HL_pb",
+    "GN2HL_ptau"
 ]
 
 # more involved outputs we might not want to save (ExpertContent)
