@@ -38,10 +38,10 @@ template <class TYPE> class SvcFactory;
 /** @class AthenaPoolCnvSvc
  *  @brief This class provides the interface between Athena and PoolSvc.
  **/
-class AthenaPoolCnvSvc : public ::AthCnvSvc,
-		public virtual IAthenaPoolCnvSvc,
-		public virtual IIncidentListener,
-		public virtual IIoComponent {
+class AthenaPoolCnvSvc : public extends<AthCnvSvc,
+                                        IAthenaPoolCnvSvc,
+                                        IIncidentListener,
+                                        IIoComponent> {
    // Allow the factory class access to the constructor
    friend class SvcFactory<AthenaPoolCnvSvc>;
 
@@ -54,8 +54,6 @@ public:
    virtual StatusCode finalize() override;
    virtual StatusCode io_finalize() override;
    virtual StatusCode stop() override final;
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
    /// Implementation of IConversionSvc: Create the transient representation of an object from persistent state.
    /// @param pAddress [IN] pointer to IOpaqueAddress of the representation.

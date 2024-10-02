@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: $
 /**
  * @file  IDataShare.h
  * @author peter van gemmeren <gemmeren@anl.gov>
@@ -21,18 +20,15 @@
  * @class IDataShare
  * @brief Abstract interface for sharing data
  */
-
-static const InterfaceID IID_IDataShare("IDataShare", 1 , 0);
-
 class IDataShare : virtual public INamedInterface
 {
 public:
+  DeclareInterfaceID(IDataShare, 1, 0);
+
   /**
    * @brief Destructor.
    */
   virtual ~IDataShare ();
-
-  static const InterfaceID& interfaceID() { return IID_IDataShare; }
 
   /**
    * @brief Make this a server.

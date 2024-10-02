@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHENASHAREDWRITERSVC_H
@@ -7,14 +7,11 @@
 
 #include "GaudiKernel/IService.h"
 
-static const InterfaceID IID_IAthenaSharedWriterSvc( "IAthenaSharedWriterSvc", 1, 0 );
-
 class IAthenaSharedWriterSvc : virtual public ::IService {
 public:
-   virtual StatusCode share(int numClients = 0, bool motherClient = false) = 0;
+   DeclareInterfaceID( IAthenaSharedWriterSvc, 1, 0 );
 
-   /// Gaudi boilerplate
-   static const InterfaceID& interfaceID() { return IID_IAthenaSharedWriterSvc; }
+   virtual StatusCode share(int numClients = 0, bool motherClient = false) = 0;
 };
 
 #endif

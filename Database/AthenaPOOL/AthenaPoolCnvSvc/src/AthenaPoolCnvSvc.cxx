@@ -194,17 +194,6 @@ StatusCode AthenaPoolCnvSvc::io_finalize() {
    ATH_MSG_DEBUG("I/O finalization...");
    return(StatusCode::SUCCESS);
 }
-//_______________________________________________________________________
-StatusCode AthenaPoolCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (IAthenaPoolCnvSvc::interfaceID().versionMatch(riid)) {
-      *ppvInterface = dynamic_cast<IAthenaPoolCnvSvc*>(this);
-   } else {
-      // Interface is not directly available: try out a base class
-      return(::AthCnvSvc::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& refpObject) {
    assert(pAddress);
@@ -1263,10 +1252,8 @@ void AthenaPoolCnvSvc::handle(const Incident& incident) {
 }
 //______________________________________________________________________________
 AthenaPoolCnvSvc::AthenaPoolCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	::AthCnvSvc(name, pSvcLocator, POOL_StorageType),
-	m_outputStreamingTool(this)
+	base_class(name, pSvcLocator, POOL_StorageType)
 {
-   declareProperty("OutputStreamingTool", m_outputStreamingTool);
 }
 //__________________________________________________________________________
 void AthenaPoolCnvSvc::extractPoolAttributes(const StringArrayProperty& property,
