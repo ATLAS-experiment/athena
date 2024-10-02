@@ -1,6 +1,6 @@
 /* -*- C++ -*- */
 /*
-  Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_ONDEMANDMINBIASSVC_H
@@ -89,7 +89,7 @@ class OnDemandMinbiasSvc final : public extends<AthService, IMinbiasSvc> {
                          fmt::format("StoreGateSvc/discards_{}", name()),
                          "StoreGate for discarding events"};
   IEvtSelector::Context* m_bkg_evt_sel_ctx;
-  IProxyProviderSvc* m_proxyProviderSvc = nullptr;
+  ServiceHandle<IProxyProviderSvc> m_proxyProviderSvc;
 
   std::vector<std::vector<SGHandle>> m_stores;
   std::vector<std::vector<std::uint64_t>> m_num_mb_by_bunch;

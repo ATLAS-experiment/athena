@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BatchedMinbiasSvc.h"
@@ -70,40 +70,37 @@ StatusCode BatchedMinbiasSvc::initialize() {
     ATH_MSG_ERROR("Failed to create background event selector context");
     return StatusCode::FAILURE;
   }
-  ATH_CHECK(dynamic_cast<Service*>(m_bkgEventSelector.get())->start());
+  ATH_CHECK(SmartIF<IService>(m_bkgEventSelector.get())->start());
 
   // Setup proxy provider
-  IProxyProviderSvc* proxyProviderSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("ProxyProviderSvc/BkgPPSvc_{}", name()), proxyProviderSvc,
-      true));
+  SmartIF<IProxyProviderSvc> proxyProviderSvc{
+    serviceLocator()->service(fmt::format("ProxyProviderSvc/BkgPPSvc_{}", name()))
+  };
+  ATH_CHECK(proxyProviderSvc.isValid());
+
   // Setup Address Providers
-  auto* addressProvider =
-      dynamic_cast<IAddressProvider*>(m_bkgEventSelector.get());
-  if (addressProvider == nullptr) {
+  SmartIF<IAddressProvider> addressProvider{m_bkgEventSelector.get()};
+  if (!addressProvider) {
     ATH_MSG_WARNING(
         "Could not cast background event selector to IAddressProvider");
   } else {
     proxyProviderSvc->addProvider(addressProvider);
   }
   // AthenaPoolAddressProviderSvc
-  IService* athPoolSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()),
-      athPoolSvc));
-  auto* athPoolAP = dynamic_cast<IAddressProvider*>(athPoolSvc);
-  if (athPoolAP == nullptr) {
+  SmartIF<IAddressProvider> athPoolAP{
+    serviceLocator()->service(fmt::format("AthenaPoolAddressProviderSvc/BkgAPAPSvc_{}", name()))
+  };
+  if (!athPoolAP) {
     ATH_MSG_WARNING(
         "Could not cast AthenaPoolAddressProviderSvc to IAddressProvider");
   } else {
     proxyProviderSvc->addProvider(athPoolAP);
   }
   // AddressRemappingSvc
-  IService* addRemapSvc = nullptr;
-  ATH_CHECK(serviceLocator()->service(
-      fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()), addRemapSvc));
-  auto* addRemapAP = dynamic_cast<IAddressProvider*>(addRemapSvc);
-  if (addRemapAP == nullptr) {
+  SmartIF<IAddressProvider> addRemapAP{
+    serviceLocator()->service(fmt::format("AddressRemappingSvc/BkgARSvc_{}", name()))
+  };
+  if (!addRemapAP) {
     ATH_MSG_WARNING("Could not cast AddressRemappingSvc to IAddressProvider");
   } else {
     proxyProviderSvc->addProvider(addRemapAP);

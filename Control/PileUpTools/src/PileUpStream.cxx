@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpStream.h"
@@ -26,8 +26,8 @@ class IOpaqueAddress;
 /// Structors
 PileUpStream::PileUpStream():
   AthMessaging ("PileUpStream"),
-  m_name("INVALID"), p_svcLoc(0), p_sel(0), p_SG(0), p_iter(0), 
-  p_mergeSvc(nullptr), m_ownEvtIterator(false),
+  m_name("INVALID"), p_svcLoc(0), m_sel(0), m_SG(0), p_iter(0),
+  m_ownEvtIterator(false),
   m_neverLoaded(true), m_ownStore(false),
   m_used(false), m_hasRing(false), m_iOriginalRing(0)
 { 
@@ -35,8 +35,8 @@ PileUpStream::PileUpStream():
 
 PileUpStream::PileUpStream(PileUpStream&& rhs):
   AthMessaging (rhs.m_name),
-  m_name(rhs.m_name), p_svcLoc(rhs.p_svcLoc), p_sel(rhs.p_sel), 
-  p_SG(rhs.p_SG), p_iter(rhs.p_iter), p_mergeSvc(rhs.p_mergeSvc), m_ownEvtIterator(rhs.m_ownEvtIterator),
+  m_name(rhs.m_name), p_svcLoc(rhs.p_svcLoc), m_sel(rhs.m_sel),
+  m_SG(rhs.m_SG), p_iter(rhs.p_iter), m_mergeSvc(rhs.m_mergeSvc), m_ownEvtIterator(rhs.m_ownEvtIterator),
   m_neverLoaded(rhs.m_neverLoaded), m_ownStore(rhs.m_ownStore),
   m_used(rhs.m_used), m_hasRing(rhs.m_hasRing), m_iOriginalRing(rhs.m_iOriginalRing)
 { 
@@ -50,10 +50,10 @@ PileUpStream::operator=(PileUpStream&& rhs) {
   if (this != &rhs) {
     m_name=rhs.m_name;
     p_svcLoc=rhs.p_svcLoc;
-    p_sel=rhs.p_sel; 
-    p_SG=rhs.p_SG; 
+    m_sel=rhs.m_sel;
+    m_SG=rhs.m_SG;
     p_iter=rhs.p_iter;
-    p_mergeSvc = rhs.p_mergeSvc;
+    m_mergeSvc = rhs.m_mergeSvc;
     m_ownEvtIterator=rhs.m_ownEvtIterator;
     rhs.m_ownEvtIterator=false;
     m_neverLoaded=rhs.m_neverLoaded;
@@ -70,16 +70,15 @@ PileUpStream::PileUpStream(const std::string& name,
 			   ISvcLocator* svcLoc,
 			   IEvtSelector* sel):
   AthMessaging (name),
-  m_name(name), p_svcLoc(svcLoc), p_sel(sel), p_SG(0), p_iter(0), 
+  m_name(name), p_svcLoc(svcLoc), m_sel(sel), m_SG(0), p_iter(0),
   m_ownEvtIterator(false), 
   m_neverLoaded(true), m_ownStore(false),
   m_used(false), m_hasRing(false), m_iOriginalRing(0)
 { 
-  assert(p_sel);
+  assert(m_sel);
   assert(p_svcLoc);
-  if( !( p_sel->createContext(p_iter).isSuccess() &&
-         serviceLocator()->service("PileUpMergeSvc", p_mergeSvc, true).isSuccess() ) ) {
-
+  m_mergeSvc = serviceLocator()->service<PileUpMergeSvc>("PileUpMergeSvc");
+  if( !( m_sel->createContext(p_iter).isSuccess() && m_mergeSvc.isValid() ) ) {
     const std::string errMsg("PileUpStream:: can not create stream");
     ATH_MSG_ERROR ( errMsg );
     throw std::runtime_error(errMsg);
@@ -90,16 +89,17 @@ PileUpStream::PileUpStream(const std::string& name,
 			   ISvcLocator* svcLoc,
 			   const std::string& selecName):
   AthMessaging (name),
-  m_name(name), p_svcLoc(svcLoc), p_sel(0), p_SG(0), p_iter(0),
+  m_name(name), p_svcLoc(svcLoc), m_sel(0), m_SG(0), p_iter(0),
   m_ownEvtIterator(false), 
   m_neverLoaded(true), m_ownStore(false),
   m_used(false), m_hasRing(false), m_iOriginalRing(0)
 
 {
   assert(p_svcLoc);
-  if (!(serviceLocator()->service(selecName, p_sel).isSuccess() &&
-        serviceLocator()->service("PileUpMergeSvc", p_mergeSvc, true).isSuccess() &&
-	p_sel->createContext(p_iter).isSuccess() )) {
+  m_sel = serviceLocator()->service<IEvtSelector>(selecName);
+  m_mergeSvc = serviceLocator()->service<PileUpMergeSvc>("PileUpMergeSvc");
+  if ( !(m_sel.isValid() && m_mergeSvc.isValid() &&
+         m_sel->createContext(p_iter).isSuccess()) ) {
     const std::string errMsg("PileUpStream: can not create stream");
     ATH_MSG_ERROR ( errMsg );
     throw std::runtime_error(errMsg);
@@ -113,63 +113,56 @@ PileUpStream::~PileUpStream()
 bool PileUpStream::setupStore() 
 {
   assert( p_iter );
-  assert( p_sel );
+  assert( m_sel );
   bool rc(true);
   std::string storeName(name() + "_SG");
 
   //start by looking for the store directly: in overlay jobs it may already be there
-  const bool DONOTCREATE(false);
-  rc = (serviceLocator()->service(storeName, p_SG, DONOTCREATE)).isSuccess();
-  if (rc) {
+  m_SG = serviceLocator()->service<StoreGateSvc>(storeName, /*createIf*/false);
+  if (m_SG) {
     m_ownStore = false;
   } else {
     //not there, create one cloning the master store
     Service *child;
     //if the parent store is not there barf
     //remember the clone function also initializes the service if needed
-    IService* pIS(0);
-    rc = ((serviceLocator()->getService("StoreGateSvc", pIS)).isSuccess() &&
+    SmartIF<StoreGateSvc> pIS(serviceLocator()->service("StoreGateSvc"));
+    rc = (pIS.isValid() &&
           CloneService::clone(pIS, storeName, child).isSuccess() &&
-          0 != (p_SG = dynamic_cast<StoreGateSvc*>(child)));
+          (m_SG = SmartIF<StoreGateSvc>(child)).isValid());
     if ( rc )  {
       m_ownStore = true;
       // further initialization of the cloned service 
-      rc = (p_SG->sysInitialize()).isSuccess();      
-      p_SG->setStoreID(StoreID::PILEUP_STORE); //needed by ProxyProviderSvc
+      rc = (m_SG->sysInitialize()).isSuccess();
+      m_SG->setStoreID(StoreID::PILEUP_STORE); //needed by ProxyProviderSvc
     } //clones
   }
   if (rc) {
     //if the selector is an address provider like the AthenaPool one, 
     //create a dedicated ProxyProviderSvc and associate it to the store
-    IAddressProvider* pIAP(dynamic_cast<IAddressProvider*>(p_sel));
-    if (0 != pIAP) {
-      IProxyProviderSvc* pPPSvc(0);
-      std::string PPSName(name() + "_PPS");
-      ISvcManager* pISM(dynamic_cast<ISvcManager*>(serviceLocator()));
-      if ( 0 != pISM &&  
-	   (pISM->declareSvcType(PPSName, "ProxyProviderSvc")).isSuccess() &&
-	   //check the service is not there then create it
-	   (serviceLocator()->service(PPSName,
-				      pPPSvc,
-				      true)).isSuccess()) {
-	pPPSvc->addProvider(pIAP);
-        IService* pSAthPoolAddProv(0);
-        IAddressProvider* pAthPoolAddProv(0);
-        if (serviceLocator()->service("AthenaPoolAddressProviderSvc", pSAthPoolAddProv).isSuccess() &&
-            0 != (pAthPoolAddProv = dynamic_cast<IAddressProvider*>(pSAthPoolAddProv))) {
+    SmartIF<IAddressProvider> pIAP(m_sel);
+    if (pIAP.isValid()) {
+      const std::string PPSName(name() + "_PPS");
+      SmartIF<IProxyProviderSvc> pPPSvc(serviceLocator()->service(PPSName));
+      SmartIF<ISvcManager> pISM(serviceLocator());
+      if ( pISM.isValid() &&
+           pISM->declareSvcType(PPSName, "ProxyProviderSvc").isSuccess() &&
+           pPPSvc.isValid() ) {
+
+        pPPSvc->addProvider(pIAP);
+        SmartIF<IAddressProvider> pAthPoolAddProv(serviceLocator()->service("AthenaPoolAddressProviderSvc"));
+        if (pAthPoolAddProv.isValid()) {
           pPPSvc->addProvider(pAthPoolAddProv);
         } else {
           ATH_MSG_WARNING ( "could not add AthenaPoolAddressProviderSvc as AddresssProvider for "<< PPSName );
         }
-	IService* pSAddrRemap(0);
-	IAddressProvider* pAddrRemap(0);
-	if (serviceLocator()->service("AddressRemappingSvc", pSAddrRemap).isSuccess() &&
-	    0 != (pAddrRemap = dynamic_cast<IAddressProvider*>(pSAddrRemap))) {
-	  pPPSvc->addProvider(pAddrRemap);
-	} else {
-	  ATH_MSG_WARNING ( "could not add AddressRemappingSvc as AddresssProvider for "<< PPSName );
-	}
-	p_SG->setProxyProviderSvc(pPPSvc);
+        SmartIF<IAddressProvider> pAddrRemap(serviceLocator()->service("AddressRemappingSvc"));
+        if (pAddrRemap.isValid()) {
+          pPPSvc->addProvider(pAddrRemap);
+        } else {
+          ATH_MSG_WARNING ( "could not add AddressRemappingSvc as AddresssProvider for "<< PPSName );
+        }
+        m_SG->setProxyProviderSvc(pPPSvc);
       } 
     } //valid address provider
   }
@@ -234,7 +227,7 @@ const xAOD::EventInfo* PileUpStream::nextEventPre(bool readRecord)
       return nullptr;
    }
 
-   const xAOD::EventInfo* xAODEventInfo = p_mergeSvc->getPileUpEvent( p_SG, "" );
+   const xAOD::EventInfo* xAODEventInfo = m_mergeSvc->getPileUpEvent( m_SG, "" );
    if (readRecord and xAODEventInfo) {
       ATH_MSG_DEBUG ( "nextEventPre(): read new event " 
 		      <<  xAODEventInfo->eventNumber() 
