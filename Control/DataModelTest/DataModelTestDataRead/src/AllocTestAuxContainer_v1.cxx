@@ -73,8 +73,6 @@ AllocTestAuxContainer_v1::AllocTestAuxContainer_v1 (std::pmr::memory_resource* r
   : xAOD::AuxContainerBase(),
     atInt1 (r)
 {
-  AUX_VARIABLE (atInt1);
-  AUX_VARIABLE (atInt2);
 }
 
 
