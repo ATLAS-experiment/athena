@@ -9,23 +9,17 @@
 #ifndef ISF_TFCSGANXMLPARAMETERS_H
 #define ISF_TFCSGANXMLPARAMETERS_H 1
 
+#include <libxml/tree.h>
+
 #include <map>
 #include <vector>
 
-// XML reader
-#include <libxml/xmlmemory.h>
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-#include <libxml/xmlreader.h>
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include "TH2D.h"
-
 #include "ISF_FastCaloSimEvent/MLogging.h"
-
+#include "TH2D.h"
+;
 
 class TFCSGANXMLParameters : public ISF_FCS::MLogging {
-public:
+ public:
   typedef std::map<int, TH2D> Binning;
 
   TFCSGANXMLParameters();
@@ -42,7 +36,7 @@ public:
   bool IsSymmetrisedAlpha() const { return m_symmetrisedAlpha; };
   const std::string& GetInputFolder() const { return m_fastCaloGANInputFolderName; };
 
-private:
+ private:
   static bool ReadBooleanAttribute(const std::string &name, xmlNodePtr node);
 
   bool m_symmetrisedAlpha{};
@@ -52,7 +46,7 @@ private:
   int m_latentDim{};
   std::string m_fastCaloGANInputFolderName;
 
-  ClassDef(TFCSGANXMLParameters, 2) // TFCSGANXMLParameters
+  ClassDef(TFCSGANXMLParameters, 2)  // TFCSGANXMLParameters
 };
 
-#endif //> !ISF_TFCSGANXMLPARAMETERS_H
+#endif  //> !ISF_TFCSGANXMLPARAMETERS_H
