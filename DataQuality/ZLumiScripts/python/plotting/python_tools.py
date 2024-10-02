@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import os
 import subprocess
 import re
 import ROOT as R
@@ -16,18 +15,10 @@ plotlabel["Zee"] = "Z #rightarrow ee"
 plotlabel["Zmumu"] = "Z #rightarrow #mu#mu"
 plotlabel["Zll"] = "Z #rightarrow ll"
 
-# global livetime cut in seconds, typically 40min
-livetimecut = 40*60 # in seconds
-
-try:
-    from AthenaCommon.Utils import unixtools
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasStyle.C'))
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasLabels.C'))
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasUtils.C'))
-except Exception:
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasStyle.C")
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasLabels.C")
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasUtils.C")
+# global run livetime cut in seconds, for paper 40min, reduce to 10min for now
+runlivetimecut = 10*60 # in seconds
+# global lumiblock livetime cut in seconds, 9sec for now
+lblivetimecut = 9 # in seconds
 
 def get_grl(year, verbose=True):
     '''
@@ -56,14 +47,86 @@ def get_grl(year, verbose=True):
     return runs
 
 def setAtlasStyle():
-    R.SetAtlasStyle()
+    R.gROOT.SetStyle("Plain")
 
-def drawAtlasLabel(x, y, text):
-    R.ATLASLabel(x, y, text, 1)
+    # use plain black on white colors
+    icol = 0
+    R.gStyle.SetFrameBorderMode(icol)
+    R.gStyle.SetFrameFillColor(icol)
+    R.gStyle.SetCanvasBorderMode(icol)
+    R.gStyle.SetCanvasColor(icol)
+    R.gStyle.SetPadBorderMode(icol)
+    R.gStyle.SetPadColor(icol)
+    R.gStyle.SetStatColor(icol)
 
-def drawText(x, y, text, size=False):
-    R.myText(x, y, 1, text, size)
+    R.gStyle.SetLineColor(R.kBlack)
+    
+    # set the paper & margin sizes
+    R.gStyle.SetPaperSize(20,26)
 
+    # set margin sizes
+    R.gStyle.SetPadTopMargin(0.05)
+    R.gStyle.SetPadRightMargin(0.05)
+    R.gStyle.SetPadBottomMargin(0.16)
+    R.gStyle.SetPadLeftMargin(0.16)
+
+    # set title offsets (for axis label)
+    R.gStyle.SetTitleXOffset(1.4)
+    R.gStyle.SetTitleYOffset(1.4)
+
+    # use large fonts
+    font=42 # Helvetica
+    tsize=0.05
+    R.gStyle.SetTextFont(font)
+    R.gStyle.SetTextSize(tsize)
+    R.gStyle.SetLegendFont(font)
+    R.gStyle.SetLabelFont(font,"xyz")
+    R.gStyle.SetTitleFont(font,"xyz")
+  
+    R.gStyle.SetLabelSize(tsize,"xyz")
+    R.gStyle.SetTitleSize(tsize,"xyz")
+
+    # use bold lines and markers
+    R.gStyle.SetMarkerStyle(20)
+    R.gStyle.SetMarkerSize(1.2)
+    R.gStyle.SetLineStyleString(2,"[12 12]") # postscript dashes
+
+    R.gStyle.SetEndErrorSize(0.)
+
+    # do not display any of the standard histogram decorations
+    R.gStyle.SetOptTitle(0)
+    R.gStyle.SetOptStat(0)
+    R.gStyle.SetOptFit(0)
+
+    # put tick marks on top and RHS of plots
+    R.gStyle.SetPadTickX(1)
+    R.gStyle.SetPadTickY(1)
+    R.gROOT.ForceStyle()
+
+def drawAtlasLabel(x, y, text = "", color = R.kBlack):
+    l = R.TLatex()
+    l.SetNDC()
+    l.SetTextFont(72)
+    l.SetTextColor(color)
+    
+    delx = 0.115*696*R.gPad.GetWh()/(472*R.gPad.GetWw())
+
+    l.DrawLatex(x,y,"ATLAS")
+    if len(text) > 0:
+        p = R.TLatex()
+        p.SetNDC()
+        p.SetTextFont(42)
+        p.SetTextColor(color)
+        p.DrawLatex(x+delx,y,text)
+
+def drawText(x, y, text, size=27, color = R.kBlack):
+    l = R.TLatex()
+    l.SetNDC()
+    if size > 0:
+        l.SetTextSize(size)
+    l.SetTextFont(43)
+    l.SetTextColor(color)
+    l.DrawLatex(x,y,text)
 
 def make_bands(vec_in, stdev, yval):
     vec_y = array('d', [yval] * (len(vec_in) + 2))
@@ -79,19 +142,27 @@ def make_bands(vec_in, stdev, yval):
 
     return line
 
+def get_year(run):
+    run=int(run)
+    if run >= 472553: return "24"
+    elif run >= 450227: return "23"
+    elif run >= 427394: return "22"
+    elif run >= 348885: return "18"
+    elif run >= 325713: return "17"
+    elif run >= 297730: return "16"
+    elif run >= 276262: return "15"
+    else:
+        print("ERROR: Cannot classify run", run)
+        exit(1)
+    
 def get_dfz(basedir, year, run, channel, standardcuts = True):
     '''
     Standard retrieval of Z counting Panda dataframe from CSV
     '''
     if year=="run3":
-        if int(run) >= 472553: mydir = basedir + "data24_13p6TeV/physics_Main/"
-        elif int(run) >= 450227: mydir = basedir + "data23_13p6TeV/physics_Main/"
-        elif int(run) >= 427394: mydir = basedir + "data22_13p6TeV/physics_Main/"
+        mydir = basedir + "data"+get_year(run)+"_13p6TeV/physics_Main/"
     elif year=="run2":
-        if int(run) >= 348885: mydir = basedir + "data18_13TeV/physics_Main/"
-        elif int(run) >= 325713: mydir = basedir + "data17_13TeV/physics_Main/"
-        elif int(run) >= 297730: mydir = basedir + "data16_13TeV/physics_Main/"
-        elif int(run) >= 276262: mydir = basedir + "data15_13TeV/physics_Main/"
+        mydir = basedir + "data"+get_year(run)+"_13TeV/physics_Main/"
     elif int(year) >= 22:
         mydir = basedir + "data" + year + "_13p6TeV/physics_Main/"
     else:
@@ -111,7 +182,7 @@ def get_dfz(basedir, year, run, channel, standardcuts = True):
         dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
         if standardcuts:
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<lblivetimecut) | (dfz_small['PassGRL']==0)].index)
 
         dfz_small['ZLumi'] *= dfz_small['LBLive']
         dfz_small['ZLumiErr'] *= dfz_small['LBLive']
@@ -123,7 +194,7 @@ def get_dfz(basedir, year, run, channel, standardcuts = True):
         # reading both Zee and Zll, some preparatory calculations, but nothing final
         if standardcuts:
             dfz_small = dfz_small.drop(dfz_small[(dfz_small.ZeeLumi == 0) | (dfz_small.ZmumuLumi == 0)].index)
-            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<lblivetimecut) | (dfz_small['PassGRL']==0)].index)
         dfz_small['ZeeLumi']    *= dfz_small['LBLive']
         dfz_small['ZeeLumiErr'] *= dfz_small['LBLive']
         dfz_small['ZeeLumiErr'] *= dfz_small['ZeeLumiErr']

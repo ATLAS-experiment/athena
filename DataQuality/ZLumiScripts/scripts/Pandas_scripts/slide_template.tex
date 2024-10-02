@@ -1,0 +1,151 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{pgffor}
+\usepackage{verbatim}
+
+\def\plotdir{/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/Plots/}
+\def\year{YEAR}
+\def\datayear{data\year_13p6TeV/}
+
+\title{$Z$ counting}
+\author{Sam Alibocus, Uta Klein, Jan Kretzschmar, Josh Newell\\University of Liverpool}
+\date{\today}
+
+\begin{document} 
+
+\frame{\titlepage} 
+
+\frame{\frametitle{Table of contents}
+  \scriptsize
+  \begin{columns}[t]
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={1-20}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={21-40}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={41-60}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={61-80}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={81-100}]
+    \end{column}
+  \end{columns}
+}
+
+\frame{\frametitle{Table of contents II}
+  \scriptsize
+  \begin{columns}[t]
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={101-120}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={121-140}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={141-160}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={161-180}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={181-200}]
+    \end{column}
+  \end{columns}
+}
+
+\frame{\frametitle{Table of contents III}
+  \scriptsize
+  \begin{columns}[t]
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={201-220}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={221-240}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={241-260}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={261-280}]
+    \end{column}%
+    \begin{column}{.2\textwidth}
+      \tableofcontents[sections={281-300}]
+    \end{column}
+  \end{columns}
+}
+
+\section{Full Run 3}
+
+\frame{\frametitle{Full Run 3 -- Luminosity}
+  \includegraphics[width=.56\textwidth]{\plotdir/ZllATLAS_ratio_vs_time_run3}
+  \includegraphics[width=.41\textwidth]{\plotdir/ZllATLAS_ratio_vs_mu_run3}
+
+  \includegraphics[width=.56\textwidth]{\plotdir/ZeeZmm_ratio_vs_time_run3}
+  \includegraphics[width=.41\textwidth]{\plotdir/ZeeZmm_ratio_vs_mu_run3}
+}
+
+\frame{\frametitle{Full Run 3 -- Efficiencies}
+  \includegraphics[width=.48\textwidth]{\plotdir/Zee_eff_vs_time_run3}
+  \includegraphics[width=.4\textwidth]{\plotdir/Zee_eventeff_vs_mu_run3}
+
+  \includegraphics[width=.48\textwidth]{\plotdir/Zmumu_eff_vs_time_run3}
+  \includegraphics[width=.4\textwidth]{\plotdir/Zmumu_eventeff_vs_mu_run3}
+}
+
+\section{20\year}
+
+\frame{\frametitle{20\year{} -- Luminosity}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_time_data\year}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZllATLAS_ratio_vs_mu_data\year}
+
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_time_data\year}
+  \includegraphics[width=.41\textwidth]{\plotdir/\datayear/ZeeZmm_ratio_vs_mu_data\year}
+}
+
+\frame{\frametitle{20\year{} -- Skipped runs}
+  \scriptsize
+  \begin{columns}[t]
+    \begin{column}{.5\textwidth}
+      \verbatiminput{xaa}
+    \end{column}%
+    \begin{column}{.5\textwidth}
+      \verbatiminput{xab}
+    \end{column}
+  \end{columns}
+}
+
+\foreach \X in {RUNLIST}{
+  
+\section{Run \X}
+\frame{\frametitle{Run \X}
+  \IfFileExists{\plotdir/\datayear/\X/ZllATLAS_vs_lb.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/ZllATLAS_vs_lb}%
+  }{File missing.}%
+  \IfFileExists{\plotdir/\datayear/\X/ZllATLAS_vs_lb_abs.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/ZllATLAS_vs_lb_abs}%
+  }{File missing.}%
+  \IfFileExists{\plotdir/\datayear/\X/ZllATLAS_vs_mu.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/ZllATLAS_vs_mu}%
+  }{File missing.}
+
+  \IfFileExists{\plotdir/\datayear/\X/ZeeZmm_ratio_vs_lb.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/ZeeZmm_ratio_vs_lb}%
+  }{File missing.}%
+  \IfFileExists{\plotdir/\datayear/\X/Zee_eff_vs_lb.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/Zee_eff_vs_lb}%
+  }{File missing.}%
+  \IfFileExists{\plotdir/\datayear/\X/Zee_eff_vs_lb.pdf} {%
+    \includegraphics[width=.33\textwidth]{\plotdir/\datayear/\X/Zmumu_eff_vs_lb}%
+  }{File missing.}
+}
+
+}
+
+\end{document}
+
+
+
