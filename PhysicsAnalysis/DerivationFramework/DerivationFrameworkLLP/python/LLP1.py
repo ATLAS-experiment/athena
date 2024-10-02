@@ -885,7 +885,15 @@ def LLP1Cfg(flags):
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau)
+        # Schedule additional pre-matching against LLP offline muons and electrons
         acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
@@ -893,24 +901,17 @@ def LLP1Cfg(flags):
                                               InputElectrons=MergedElectronContainer,
                                               InputMuons=MergedMuonContainer
                                               ))
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        # And add the additional LLP trigger matching branches to the slimming helper 
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         OutputContainerPrefix = "LRTTrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
-                                         InputElectrons=MergedElectronContainer,
-                                         InputMuons=MergedMuonContainer
-                                         )
-    # Run 3
-    elif flags.Trigger.EDMVersion == 3:
+                                               OutputContainerPrefix = "LRTTrigMatch_",
+                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
+                                               InputElectrons=MergedElectronContainer,
+                                               InputMuons=MergedMuonContainer
+                                               )
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(LLP1SlimmingHelper)
-
 
     # Output stream
     LLP1ItemList = LLP1SlimmingHelper.GetItemList()

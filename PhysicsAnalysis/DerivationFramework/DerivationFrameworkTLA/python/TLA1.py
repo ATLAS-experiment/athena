@@ -223,15 +223,15 @@ def TLA1Cfg(flags):
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TLA1SlimmingHelper, 
-                                        OutputContainerPrefix = "TrigMatch_", 
-                                        TriggerList = TLA1TriggerListsHelper.Run2TriggerNamesTau)
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TLA1TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TLA1SlimmingHelper, 
-                                        OutputContainerPrefix = "TrigMatch_",
-                                        TriggerList = TLA1TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TLA1TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TLA1SlimmingHelper)        
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TLA1SlimmingHelper)           
 
     # Output stream    
     TLA1ItemList = TLA1SlimmingHelper.GetItemList()

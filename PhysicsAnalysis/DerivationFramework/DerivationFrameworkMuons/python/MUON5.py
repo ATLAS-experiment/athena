@@ -490,29 +490,15 @@ def MUON5Cfg(flags):
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON5SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = MUON5TriggerListsHelper.Run2TriggerNamesTau)
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = MUON5TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON5SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = MUON5TriggerListsHelper.Run2TriggerNamesNoTau)
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = MUON5TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(MUON5SlimmingHelper)
-        ##################################################### 
-        ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
-        ## This adds a LOT of containers to the output! In order to help validate the conversion.
-        ## It should be removed once doEDMVersionConversion goes into production use.
-        if flags.Trigger.doEDMVersionConversion:   
-            from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-            from AthenaCommon.Logging import logging
-            msg = logging.getLogger('MUON5Cfg')
-            msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
-            addTrigEDMSetToOutput(flags, MUON5SlimmingHelper, "AODFULL")
-            MUON5SlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
-            MUON5SlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
-        ##
-        #####################################################
     
     # Output stream    
     MUON5ItemList = MUON5SlimmingHelper.GetItemList()

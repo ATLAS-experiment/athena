@@ -474,24 +474,16 @@ def EGAM7Cfg(flags):
     # Add egamma trigger objects
     EGAM7SlimmingHelper.IncludeEGammaTriggerContent = True
 
-    # Add trigger matching info
+    # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM7SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM7TriggerListsHelper.Run2TriggerNamesNoTau,
-        )
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
-        )
-
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = EGAM7SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = EGAM7TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM7SlimmingHelper)
 
     # Add CellContainer and cluster->cell links

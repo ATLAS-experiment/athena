@@ -213,14 +213,14 @@ def TRIG9Cfg(flags):
     # Run 2
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG9SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = TRIG9TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG9SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = TRIG9TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    elif flags.Trigger.EDMVersion == 3:
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG9SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TRIG9TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG9SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TRIG9TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TRIG9SlimmingHelper)
 

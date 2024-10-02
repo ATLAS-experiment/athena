@@ -294,24 +294,15 @@ def JETM3Cfg(flags):
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM3SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = JETM3TriggerListsHelper.Run2TriggerNamesTau)
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = JETM3TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM3SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = JETM3TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = JETM3TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM3SlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM3SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = JETM3TriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM3SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = JETM3TriggerListsHelper.Run3TriggerNamesNoTau)
-
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM3SlimmingHelper)
 
     jetOutputList = ["AntiKt4EMPFlowLowPtJets","AntiKt4EMTopoLowPtJets", "AntiKt4UFOCSSKLowPtJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool

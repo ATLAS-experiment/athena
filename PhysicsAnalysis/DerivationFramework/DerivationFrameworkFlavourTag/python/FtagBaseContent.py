@@ -131,29 +131,19 @@ def trigger_setup(SlimmingHelper, option=''):
 
 
 def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
-    # Trigger matching
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                OutputContainerPrefix = "TrigMatch_",
-                TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                OutputContainerPrefix = "TrigMatch_",
-                TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(SlimmingHelper)
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                OutputContainerPrefix = "TrigMatch_",
-                TriggerList = TriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
-                OutputContainerPrefix = "TrigMatch_",
-                TriggerList = TriggerListsHelper.Run3TriggerNamesNoTau)
-
 
 def add_baseline_slimming_smartcollections(SlimmingHelper):
     SlimmingHelper.SmartCollections += PHYSVAL_FTAG1_FTAG2_SmartCollections
