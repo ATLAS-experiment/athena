@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventInfoByteStreamAuxCnv.h"
@@ -30,7 +30,6 @@
 EventInfoByteStreamAuxCnv::EventInfoByteStreamAuxCnv(ISvcLocator* svcloc)
   : Converter(storageType(), classID(), svcloc)
   , AthMessaging(svcloc != nullptr ? msgSvc() : nullptr, "EventInfoByteStreamAuxCnv")
-  , m_ByteStreamCnvSvc(nullptr)
   , m_robDataProvider("ROBDataProviderSvc", "EventInfoByteStreamAuxCnv")
   , m_mdSvc("InputMetaDataStore", "EventInfoByteStreamAuxCnv")
   , m_isSimulation(false)
@@ -55,24 +54,14 @@ StatusCode EventInfoByteStreamAuxCnv::initialize()
 
   CHECK(Converter::initialize());
 
-  // Check ByteStreamCnvSvc
-  IService* svc{nullptr};
-  StatusCode sc = serviceLocator()->getService("ByteStreamCnvSvc", svc);
-  if (!sc.isSuccess()) {
-    ATH_MSG_ERROR("Cannot get ByteStreamCnvSvc ");
-    return sc;
-  }
-  m_ByteStreamCnvSvc = dynamic_cast<ByteStreamCnvSvcBase*>(svc);
-  if (!m_ByteStreamCnvSvc) {
-    ATH_MSG_ERROR("Cannot cast to ByteStreamCnvSvcBase");
-    return StatusCode::FAILURE;
-  }
-
   CHECK(m_robDataProvider.retrieve());
   CHECK(m_mdSvc.retrieve());
 
+  SmartIF<IProperty> byteStreamCnvSvc(service("ByteStreamCnvSvc"));
+  CHECK( byteStreamCnvSvc.isValid() );
+
   SimpleProperty<bool> propIsSimulation("IsSimulation", m_isSimulation);
-  sc = m_ByteStreamCnvSvc->getProperty(&propIsSimulation);
+  StatusCode sc = byteStreamCnvSvc->getProperty(&propIsSimulation);
   if (sc.isSuccess()) {
     m_isSimulation = propIsSimulation.value();
     ATH_MSG_INFO("IsSimulation : " << m_isSimulation);
@@ -83,7 +72,7 @@ StatusCode EventInfoByteStreamAuxCnv::initialize()
   }
 
   SimpleProperty<bool> propIsTestbeam("IsTestbeam", m_isTestbeam);
-  sc = m_ByteStreamCnvSvc->getProperty(&propIsTestbeam);
+  sc = byteStreamCnvSvc->getProperty(&propIsTestbeam);
   if (sc.isSuccess()) {
     m_isTestbeam = propIsTestbeam.value();
     ATH_MSG_INFO("IsTestbeam : " << m_isTestbeam);
@@ -94,7 +83,7 @@ StatusCode EventInfoByteStreamAuxCnv::initialize()
   }
 
   SimpleProperty<bool> propIsCalibration("IsCalibration", m_isCalibration);
-  sc = m_ByteStreamCnvSvc->getProperty(&propIsCalibration);
+  sc = byteStreamCnvSvc->getProperty(&propIsCalibration);
   if (sc.isSuccess()) {
     m_isCalibration = propIsCalibration.value();
     ATH_MSG_INFO("IsCalibration : " << m_isCalibration);

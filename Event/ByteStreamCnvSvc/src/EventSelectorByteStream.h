@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTSELECTORBYTESTREAM_H
@@ -188,7 +188,7 @@ private: // properties
 
    EventContextByteStream*  m_beginIter{};
    EventContextByteStream*  m_endIter{};
-   ByteStreamInputSvc*      m_eventSource{};
+   SmartIF<ByteStreamInputSvc> m_eventSource;
    Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp{this, "Input", {}, ""};
    void inputCollectionsHandler(Gaudi::Details::PropertyBase&);
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};

@@ -107,14 +107,9 @@ StatusCode EventSelectorByteStream::initialize() {
    std::sort(m_skipEventSequence.begin(), m_skipEventSequence.end());
 
    // Check ByteStreamCnvSvc
-   IService* svc;
-   if (!serviceLocator()->getService(m_eventSourceName.value(), svc).isSuccess()) {
+   m_eventSource = serviceLocator()->service(m_eventSourceName.value());
+   if (!m_eventSource) {
       ATH_MSG_FATAL("Cannot get ByteStreamInputSvc");
-      return(StatusCode::FAILURE);
-   }
-   m_eventSource = dynamic_cast<ByteStreamInputSvc*>(svc);
-   if (m_eventSource == 0) {
-      ATH_MSG_FATAL("Cannot cast ByteStreamInputSvc");
       return(StatusCode::FAILURE);
    }
 
