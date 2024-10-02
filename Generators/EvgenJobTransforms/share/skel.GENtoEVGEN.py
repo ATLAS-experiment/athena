@@ -453,8 +453,9 @@ if hasattr( runArgs, "outputEVNTFile") or hasattr( runArgs, "outputEVNT_PreFile"
 
     # ROOT inadvertently broke forward compatibility in v6.30+ (see root/issues/15964)
     # This workaround is needed so that older releases can read files created by the new ones
-    # For more information see ATEAM-1001
+    # For more information see ATEAM-1001 and ATEAM-1015 (for DataHeaderForm)
     svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ f"DatabaseName = '{poolFile}'; FILEFORWARD_COMPATIBILITY = '1'" ]
+    svcMgr.AthenaPoolCnvSvc.OneDataHeaderForm = False
 
     StreamEVGEN = AthenaPoolOutputStream("StreamEVGEN", poolFile, noTag=True, eventInfoKey="EventInfo")
 
