@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUCALSTREAMERTOOL_H
@@ -61,7 +61,7 @@ namespace TrigL2MuonSA {
 
     virtual StatusCode initialize() override;
 
-    std::string instanceName() const {return m_algInstanceName;}
+    const std::string& instanceName() const {return m_algInstanceName;}
     void setInstanceName(const std::string& name) { m_algInstanceName = name; }
 
     // set the properties
