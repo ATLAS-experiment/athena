@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -155,29 +155,28 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
 
     // Get name of event selector from the application manager to
     // make sure we get the one for MC signal events
-    IProperty* propertyServer(0); 
-    StatusCode sc = serviceLocator()->service("ApplicationMgr", propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
+    SmartIF<IProperty> appMgr{serviceLocator()->service("ApplicationMgr")};
+    if (!appMgr) {
         ATH_MSG_ERROR("checkOverrideRunNumber: Cannot get ApplicationMgr "); 
         return;
     }
     StringProperty property("EvtSel", "");
-    sc = propertyServer->getProperty(&property);
+    StatusCode sc = appMgr->getProperty(&property);
     if (!sc.isSuccess()) {
         ATH_MSG_ERROR("checkOverrideRunNumber: unable to get EvtSel: found " << property.value());
         return;
     }
     // Get EventSelector for ApplicationMgr
-    std::string eventSelector = property.value();
-    sc = serviceLocator()->service(eventSelector, propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
+    const std::string eventSelector = property.value();
+    SmartIF<IProperty> evtSel{serviceLocator()->service(eventSelector)};
+    if (!evtSel) {
         ATH_MSG_ERROR("checkOverrideRunNumber: Cannot get EventSelector " << eventSelector); 
         return;
     }
 
     // Is flag set to override the run number? 
     BooleanProperty overrideRunNumber = IntegerProperty("OverrideRunNumberFromInput", false);
-    sc = propertyServer->getProperty(&overrideRunNumber);
+    sc = evtSel->getProperty(&overrideRunNumber);
     if (!sc.isSuccess()) {
         // Not all EventSelectors have this property, so we must be tolerant
         ATH_MSG_DEBUG("resetRunNumber: unable to get OverrideRunNumberFromInput property from EventSelector ");
@@ -187,7 +186,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
     if (m_overrideRunNumber) {
         // New run number
         IntegerProperty runNumber = IntegerProperty("RunNumber", 0);
-        sc = propertyServer->getProperty(&runNumber);
+        sc = evtSel->getProperty(&runNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get RunNumber from EventSelector: found "
                           << runNumber.value());
@@ -196,7 +195,7 @@ IOVDbMetaDataTool::checkOverrideRunNumber()
         m_newRunNumber = runNumber.value();
         // Old run number
         runNumber = IntegerProperty("OldRunNumber", 0);
-        sc = propertyServer->getProperty(&runNumber);
+        sc = evtSel->getProperty(&runNumber);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR("checkOverrideRunNumber: unable to get OldRunNumber from EventSelector: found "
                           << runNumber.value());
