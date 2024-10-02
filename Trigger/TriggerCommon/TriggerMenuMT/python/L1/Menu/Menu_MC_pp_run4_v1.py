@@ -13,25 +13,28 @@ def defineMenu():
     # remove AFP and MBTS items
     discard_list = ["L1_AFP", "L1_MBTS"]
 
-    def match_any(str):
-        return any([str.startswith(pattern) for pattern in discard_list])
+    def match_any(item):
+        return any([item.startswith(pattern) for pattern in discard_list])
 
     l1items = [l1 for l1 in l1items if not match_any(l1)]
+    existed = set(l1items)
+
+    def try_add(item):
+        if item not in existed:
+            l1items.append(item)
+
+    def try_recover(item):
+        if item in L1MenuFlags.ItemMap():
+            l1items.append(item)
 
     # add run4 new items
-    l1items += [
-        'L1_eEM10L_MU8F',
-        'L1_2eEM10L',
-        'L1_MU5VF_cTAU30M',
-        'L1_3jJ40',
-    ]
+    try_add("L1_eEM10L_MU8F")
+    try_add("L1_2eEM10L")
+    try_add("L1_MU5VF_cTAU30M")
+    try_add("L1_3jJ40")
 
     # recover the ones removed by run3 MC
-    def check_and_add(str):
-        if str in L1MenuFlags.ItemMap():
-            l1items.append(str)
-
-    check_and_add('L1_eEM22M')
-    check_and_add('L1_jJ140')
+    try_recover("L1_eEM22M")
+    try_recover("L1_jJ140")
 
     L1MenuFlags.items = l1items
