@@ -11,6 +11,24 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
+#Skiming
+def HION14SkimmingToolCfg(flags):
+    """Configure the example skimming tool"""
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    acc = ComponentAccumulator()
+    
+    #Building jet skimming triggers
+    triggers  = ["HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50","HLT_noalg_mb_L1TE50"]
+    
+    expression = ' ( ' +' || '.join(triggers) + ' )'
+    
+    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION14StringSkimmingTool",
+                                                                             expression = expression,
+                                                                             TrigDecisionTool=tdt), 
+                                                                             primary = True) 
+    return(acc)
+
 def HION14GlobalAugmentationToolCfg(flags):
     """Configure the example augmentation tool"""
     acc = ComponentAccumulator()
@@ -67,6 +85,11 @@ def HION14CentralityAugmentationToolCfg(flags):
 def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
     acc = ComponentAccumulator()
+    skimmingTool = []
+    # Only apply the triggers to data (it doesn't work on MC for a unknown reason)
+    if not flags.Input.isMC:
+        triggers = acc.getPrimaryAndMerge(HION14SkimmingToolCfg(flags))
+        skimmingTool += [triggers]
 
     ################################### Thinning ###################################
     thinningTool = []
@@ -124,6 +147,7 @@ def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
+                                    SkimmingTools= skimmingTool,
                                     ThinningTools=thinningTool,
                                     AugmentationTools=augmentationTool
                                     ),
