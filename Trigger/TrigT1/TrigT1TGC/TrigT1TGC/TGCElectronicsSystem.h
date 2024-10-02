@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCElectronicsSystem_hh
@@ -39,7 +39,7 @@ class TGCElectronicsSystem {
   TGCRegionType getRegionType(int mod) const;
   TGCForwardBackwardType getForwardBackward(int side, int oct, int mod) const;
   int getSectorId(int side, int oct, int mod) const;
-  TGCSector* getSector(TGCReadoutIndex index) const;
+  TGCSector* getSector(const TGCReadoutIndex& index) const;
   TGCSector* getSector(int side, int oct, int mod) const { 
     if ( (side<0) || (oct<0) || (mod<0) ) return 0;
     return m_sector[side][oct][mod];

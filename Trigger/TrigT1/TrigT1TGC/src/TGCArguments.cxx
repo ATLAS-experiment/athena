@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCArguments.h"
@@ -46,7 +46,7 @@ TGCArguments::~TGCArguments()
   bool TGCArguments::useRun3Config() const {return m_useRun3Config;}
   bool TGCArguments::USE_NSW() const {return m_USE_NSW;}
   bool TGCArguments::FORCE_NSW_COIN() const {return m_FORCE_NSW_COIN;}
-  std::string TGCArguments::NSWSideInfo() const { return m_NSWSideInfo;}
+  const std::string& TGCArguments::NSWSideInfo() const { return m_NSWSideInfo;}
   bool TGCArguments::USE_BIS78() const {return m_USE_BIS78;}
 
 }

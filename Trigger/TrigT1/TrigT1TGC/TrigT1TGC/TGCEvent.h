@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGC_EVENT_H
@@ -37,7 +37,7 @@ class TGCEvent {
   // set functions
   void SetEventNumber(int num) { m_eventNumber= num; }
 
-  TGCASDOut* NewASDOut(TGCReadoutIndex tgcindex, 
+  TGCASDOut* NewASDOut(const TGCReadoutIndex& tgcindex, 
 		       TGCSignalType sigtype=WIRE, int id=-1, 
 		       double tof=0);
 
