@@ -4,6 +4,11 @@
         "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "50.0" },
         "yAxis" : { "title" : "Efficiency" }
     },
+    "eff_vs_$TRKTAG_lowPt" : {
+        "type" : "TEfficiency",
+        "xAxis" : { "title" : "$TRKTYPE p_{T} [GeV]", "nBins" : "25", "low" : "0.0", "high" : "10.0" },
+        "yAxis" : { "title" : "Efficiency" }
+    },
     "eff_vs_$TRKTAG_eta" : {
         "type" : "TEfficiency",
         "xAxis" : { "title" : "$TRKTYPE #eta", "nBins" : "20", "low" : "-$ETAMAX", "high" : "$ETAMAX" },

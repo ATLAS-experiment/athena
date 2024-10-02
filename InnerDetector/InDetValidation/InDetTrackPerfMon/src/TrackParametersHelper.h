@@ -257,7 +257,12 @@ namespace IDTPM {
   inline float deltaR( const U1& p1, const U2& p2 ) {
     return p1.p4().DeltaR( p2.p4() );
   }
-
+  
+  /// Accessor utility function for getting the value of isHadron
+  inline float getIsHadron( const xAOD::TrackParticle& ) { return 0; }
+  inline float getIsHadron( const xAOD::TruthParticle& p ) { return p.isHadron();}
+  template< class U >
+  inline float isHadron( const U& p ) { return getIsHadron( p ); }
 } // namespace IDTPM
 
 #endif // > ! INDETTRACKPERFMON_TRKPARAMETERSHELPER_H
