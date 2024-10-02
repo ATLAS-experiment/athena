@@ -106,7 +106,12 @@ StatusCode ZdcRecRun3::execute()
     {
       if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::DECODINGERROR ))
 	{
-	  ATH_MSG_WARNING("Error in LUCROD decoding");
+	  bool rpdErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+	  bool zdcErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+	  std::string errs = "";
+	  if (zdcErr) errs += "* ZDC ";
+	  if (rpdErr) errs += "* RPD ";
+	  ATH_MSG_WARNING("Decoding error in LUCROD decoding:"+errs);
 	  return StatusCode::SUCCESS;
 	}
     }
