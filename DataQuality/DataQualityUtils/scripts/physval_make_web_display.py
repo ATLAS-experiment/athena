@@ -14,6 +14,7 @@ from __future__ import print_function
 from DQConfMakerBase.DQElements import DQRegion, DQReference, DQAlgorithm, DQAlgorithmParameter
 from DQConfMakerBase.Helpers import make_thresholds
 from DataQualityUtils.hanwriter import writeHanConfiguration
+from DataQualityUtils import HanMetadata
 import ROOT
 
 repeatalgorithm = DQAlgorithm(id='RepeatAlgorithm',
@@ -263,6 +264,10 @@ def super_process(fname, options):
             rv = ROOT.dqi.HanApp().Analyze( hanhcfg, haninput, hanoutput )
             if rv != 0:
                 raise Exception('failure in han')
+            if options.amitag:
+                rf = ROOT.TFile.Open(hanoutput, 'UPDATE')
+                HanMetadata.addMetadata(rf, 'AMI', {'AMI Tag': options.amitag})
+                rf.Close()
             if not options.hanonly:
                 print('====> Dumping web display output')
                 from DataQualityUtils import handimod
@@ -351,6 +356,8 @@ if __name__=="__main__":
                       help='set range for ratio plots (as delta to 1.0)')
     parser.add_option('--refmangle', default=None, type="string",
                       help='provide a Python module to translate histogram names between test and reference files. Module should provide\na function mangle(testhistoname, reflabel)')
+    parser.add_option('--amitag', default=None,
+                      help='AMI tag to add as metadata')
 
     options, args = parser.parse_args()
     
