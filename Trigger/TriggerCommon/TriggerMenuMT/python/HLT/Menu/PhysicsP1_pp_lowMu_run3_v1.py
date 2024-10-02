@@ -13,7 +13,9 @@ from .Physics_pp_run3_v1 import (
     PhysicsStream,
     SingleMuonGroup,
     MultiMuonGroup,
+    MultiElectronGroup,
     SingleElectronGroup,
+    Topo2Group,
     MinBiasGroup,
     SupportGroup,
     SupportLegGroup,
@@ -85,6 +87,8 @@ def getLowMuPhysicsSignatures():
 
         #BLS triggers
         ChainProp(name='HLT_2mu4_bDimu_L12MU3V', stream=[PhysicsStream], groups=PrimaryL1MuGroup+BphysicsGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+
+
 
     ]
 
@@ -171,6 +175,12 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_g20_loose_L1eEM15', stream=[PhysicsStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_g30_loose_L1eEM18',  stream=[PhysicsStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_g50_loose_L1eEM26',  stream=[PhysicsStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
+
+        #----------- Jpsi ee chains - ATR-30145        
+        ChainProp(name='HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM9','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
+        ChainProp(name='HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM9'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
+        ChainProp(name='HLT_e5_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group+['RATE:CPS_JPSI-1M5-eEM9'], monGroups=['egammaMon:shifter_topo']),
+        ChainProp(name='HLT_e5_lhtight_e4_etcut_1invmAB5_L1RD0_FILLED', stream=[PhysicsStream,'express'], l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+MultiElectronGroup+Topo2Group, monGroups=['egammaMon:shifter_topo']),
 
     ]
 

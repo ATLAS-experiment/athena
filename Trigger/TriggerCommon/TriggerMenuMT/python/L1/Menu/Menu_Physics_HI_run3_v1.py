@@ -301,6 +301,8 @@ def defineMenu():
         #--------------------------------
 
         'L1_LAR-ZEE', 'L1_LAR-ZEE-eEM',
+        #ATR-30145
+        'L1_JPSI-1M5-eEM9',
         #ATR-29784
         'L1_DPHI-2eEM1','L1_DPHI-2eTAU1', 'L1_DPHI-2jTAU1',
         'L1_DPHI-2eEM1_VjTE200','L1_DPHI-2eTAU1_VjTE200',
