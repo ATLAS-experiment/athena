@@ -3059,6 +3059,10 @@
   <x title="#DeltaR(jet,track)" n="100" lo="0.0" hi="&DRMAX;"/>
   <y title="reco_{p_{T}} [GeV]" n="100" lo="0.0" hi="10.0"/>
 </h>
+<h id="reco_track_pt_vs_jet_pt" type="TProfile" title="reco_track_{p_{T}} [GeV]">
+  <x title="jet_{p_{T}} [GeV]" n="49" lo="100.0" hi="5000."/>
+  <y title="reco_{p_{T}} [GeV]" n="100" lo="0.0" hi="100.0"/>
+</h>
 
 <h id="reco_z0sin_vs_dR" type="TProfile" title="reco_{z_{0} #times sin}">
   <x title="#DeltaR(jet,track)" n="100" lo="0.0" hi="&DRMAX;"/>

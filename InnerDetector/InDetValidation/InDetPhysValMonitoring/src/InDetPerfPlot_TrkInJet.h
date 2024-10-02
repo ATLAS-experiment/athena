@@ -61,7 +61,8 @@ private:
   TProfile* m_reco_eta_vs_dR;
   TProfile* m_reco_pt_vs_dR;
   TProfile* m_reco_lowpt_vs_dR;
-
+  TProfile* m_reco_track_pt_vs_jet_pt;
+  
   TProfile* m_reco_chi2Overndof_vs_dR;
 
   TEfficiency* m_efficiency_vs_dR;
