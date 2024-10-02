@@ -96,12 +96,12 @@ void FPGATrackSimHit::makeSpacepoint(float x, float y, float z, float window, FP
     setTruth(new_truth);
 
     // Store the local coordinates of the inner hit.
-    // Having to do it this way is awkward and reinforces the need for a subclass.
+    // the need for a subclass in the futer should be considered.
     const FPGATrackSimHit* inner = ((getPhysLayer() % 2) == 0) ? this : &other;
     m_pairedEtaModule = inner->getEtaModule();
     m_pairedPhiModule = inner->getPhiModule();
 
-    // This is getting increasingly awkward. If the hit is unmapped we need to store the physical
+    // If the hit is unmapped we need to store the physical
     // layer coordinates, and when the hit *becomes* mapped, update the paired logical layer too.
     if (isMapped()) {
         m_pairedSection = inner->getSection();

@@ -47,15 +47,11 @@ StatusCode FPGATrackSimDataFlowTool::calculateDataFlow(FPGATrackSimDataFlowInfo*
 {
     info->nMappedHits_1st_layer.resize(m_nLayers_1st);
     for (FPGATrackSimHit const & hit : header_1st->towers().at(0).hits()) {
-        //TODO some info calls have to be reworked as changing where some assingments happed broke some lines 
-        //lines in the file the might have to be moved or moved to regain thier funtionlty will be maked with a '*' after the // of the comment 
-        //*info->nMappedHits_1st_layer[hit.getLayer()]++;
         info->nMappedHits_1st_total++;
     }
 
     info->nClusters_1st_layer.resize(m_nLayers_1st);
     for (FPGATrackSimCluster const & cluster : clusters_1st) {
-        //*info->nClusters_1st_layer[cluster.getClusterEquiv().getLayer()]++;
         info->nClusters_1st_total = clusters_1st.size();
     }
 

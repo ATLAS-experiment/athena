@@ -225,24 +225,8 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
     // Get list of hits associated to the current truth track
     std::vector<FPGATrackSimHit> & track_hits = barcode_hits[track.getBarcode()];
 
-    // TODO: split the hits into slices
     const FPGATrackSimPlaneMap *t_pmap = nullptr;
-    /*
-    for (int iSlice=0; iSlice<nSlices;iSlice++){
-        t_pmap = m_FPGATrackSimMapping->PlaneMap_1st(iSlice);
-        auto* subrmap = m_FPGATrackSimMapping->SubRegionMap();
-        for(auto & iHit:track_hits){
-            std::shared_ptr<FPGATrackSimHit> hitCopy = std::make_shared<FPGATrackSimHit>(*iHit);
-            t_pmap->map(*hitCopy);
-            if (hitCopy->getLayer()>=0)
-            {
-                if ((subrmap->isInRegion(iSlice, *hitCopy))) {
-                    track_hits[iSlice].push_back(hitCopy);
-                }
-            }
-        }
-    }
-    */
+
     // Get the hits that will form the actual sector
 
     for (int iSlice = 0; iSlice<nSlices; iSlice++){
