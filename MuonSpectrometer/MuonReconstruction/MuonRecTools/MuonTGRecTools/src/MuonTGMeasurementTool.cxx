@@ -664,7 +664,6 @@ const Trk::RIO_OnTrack* Muon::MuonTGMeasurementTool::measToLayer(const Trk::Laye
         Muon::MdtDriftCircleStatus status = Muon::MdtStatusDriftTime;
         const Muon::MdtPrepData* mdtPrd =
           new Muon::MdtPrepData(id,
-                                idHash,
                                 Amg::Vector2D(locLay, 0.),
                                 cov,
                                 mdtROE,

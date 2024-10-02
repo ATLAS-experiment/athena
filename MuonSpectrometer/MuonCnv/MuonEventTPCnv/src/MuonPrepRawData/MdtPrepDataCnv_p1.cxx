@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -18,7 +18,6 @@ persToTrans( const Muon::MdtPrepData_p1 *persObj, Muon::MdtPrepData *transObj,Ms
    driftRadius.setZero();
 
    *transObj = Muon::MdtPrepData (transObj->identify(),
-                                  transObj->collectionHash(),
                                   driftRadius,
                                   {}, // errDriftRadius
                                   transObj->detectorElement(),

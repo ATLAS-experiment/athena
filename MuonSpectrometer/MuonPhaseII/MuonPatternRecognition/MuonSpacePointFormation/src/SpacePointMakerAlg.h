@@ -140,7 +140,7 @@ namespace MuonR4{
                 bool passOccupancy2D(const std::vector<const PrdType*>& etaHits,
                                      const std::vector<const PrdType*>& phiHits) const;
             
-            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xAODMdtCircles",
+            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtKey{this, "MdtKey", "xMdtMeasurements",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             
             SG::ReadHandleKey<xAOD::RpcMeasurementContainer> m_rpcKey{this, "RpcKey", "xRpcMeasurements",

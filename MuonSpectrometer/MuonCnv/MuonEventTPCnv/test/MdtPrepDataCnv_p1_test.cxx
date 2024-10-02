@@ -65,15 +65,9 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Amg::MatrixX cov(1,1);
   cov(0,0) = 101;
 
-  std::vector<Identifier> rdoList { Identifier(5432),
-                                    Identifier(5361),
-                                    Identifier(6456) };
-
   Muon::MdtPrepData trans1 (Identifier (1234),
-                            IdentifierHash (1234),
                             driftRadius,
                             std::move(cov),
-                            std::vector<Identifier> (rdoList),
                             nullptr, // detEl,
                             4,
                             5,

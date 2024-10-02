@@ -103,20 +103,16 @@ makeclusts (const MuonGM::MuonDetectorManager& muo_dd)
     for (int i=0; i < 10; i++) {
       int offs = i*10 + hash*100;
       Identifier clusId = muo_dd.mdtIdHelper()->channelID(0, 1, hash, 1, 1, i+1);
-      int clusHash = 567 + offs;
       
       Amg::Vector2D driftRadius (offs + 2.5, offs + 3.5);
-      std::vector<Identifier> rdoList { clusId };
 
       Amg::MatrixX cov(1,1);
       cov(0,0) = 101 + offs;
 
       auto cl = std::make_unique<Muon::MdtPrepData>
         (clusId,
-         clusHash,
          driftRadius,
          std::move(cov),
-         std::vector<Identifier> (rdoList),
          muo_dd.getMdtReadoutElement (clusId),
          4.5 + offs,
          5.5 + offs,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,10 +9,6 @@
 // (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 // Class to implement DriftCircle for Muons
-///////////////////////////////////////////////////////////////////
-// Version 1.0 03/30/2005 Ketevi A. Assamagan
-///////////////////////////////////////////////////////////////////
-
 #ifndef MUONPREPDATA_MDTPREPDATA_H
 #define MUONPREPDATA_MDTPREPDATA_H
 
@@ -61,28 +57,13 @@ public:
     @param adc ADC count
     @param status enum to indicate whether the measurement is masked, in time, etc (see MdtPrepDataStatus for details).
     */
-    MdtPrepData(
-        const Identifier &id,
-        const IdentifierHash &collectionHash,
-        const Amg::Vector2D& driftRadius,
-        const Amg::MatrixX& errDriftRadius,
-        const MuonGM::MdtReadoutElement* detEl,
-        const int tdc,
-        const int adc,
-        const MdtDriftCircleStatus status
-    );
-
-    MdtPrepData(
-        const Identifier &id,
-        const IdentifierHash &collectionHash,
-        const Amg::Vector2D& driftRadius,
-        Amg::MatrixX&& errDriftRadius,
-        std::vector<Identifier>&& rdoList,
-        const MuonGM::MdtReadoutElement* detEl,
-        const int tdc,
-        const int adc,
-        const MdtDriftCircleStatus status
-    );
+    MdtPrepData(const Identifier &id,
+                const Amg::Vector2D& driftRadius,
+                const Amg::MatrixX& errDriftRadius,
+                const MuonGM::MdtReadoutElement* detEl,
+                const int tdc,
+                const int adc,
+                const MdtDriftCircleStatus status);
 
     /** @brief Destructor*/
     virtual ~MdtPrepData();
@@ -96,9 +77,13 @@ public:
     virtual const MuonGM::MdtReadoutElement* detectorElement() const override;
 
     /** Interface method checking the type*/
-    virtual bool type(Trk::PrepRawDataType type) const override
-    {
+    virtual bool type(Trk::PrepRawDataType type) const override {
       return type == Trk::PrepRawDataType::MdtPrepData;
+    }
+    /** @brief Returns the dimension of the MdtPrepData. Ordinary prepData has dimension one
+     *         twin drift circles have dimension 2 */
+    unsigned int dimension() const {
+        return localCovariance().rows();
     }
 
     /** @brief Returns the TDC (typically range is 0 to 2500). */
@@ -120,24 +105,23 @@ public:
     virtual std::ostream& dump( std::ostream& stream) const override;
 
 private:
-
     /** @brief Cached pointer to detector element (not deleted in destructor, not written to disk) */
-    const MuonGM::MdtReadoutElement* m_detEl;
+    const MuonGM::MdtReadoutElement* m_detEl{nullptr};
 
     /** @brief TDC value - typical TDC spectra can go from 0 up to 2500.*/
-    int m_tdc;
+    int m_tdc{0};
 
     /** @brief ADC value - typical ADC spectra can go from 0 up to 250.*/
-    int m_adc;
+    int m_adc{0};
 
     /** @brief enum to hold 'status' of measurement */
-    MdtDriftCircleStatus m_status;
+    MdtDriftCircleStatus m_status{MdtDriftCircleStatus::MdtStatusUnDefined};
 
 protected :
 
     /**@brief Global position of measurement.
     Calculated on demand and cached (not deleted in destructor, not written to disk)*/
-    CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition;
+    CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition{};
 
 };
 
@@ -146,35 +130,22 @@ protected :
 ///////////////////////////////////////////////////////////////////
 
 // return globalPosition:
-inline const Amg::Vector3D& MdtPrepData::globalPosition() const
-{
-    if (not m_globalPosition) m_globalPosition.set(std::make_unique<const Amg::Vector3D>(m_detEl->surface(identify()).center()));
+inline const Amg::Vector3D& MdtPrepData::globalPosition() const {
+    if (!m_globalPosition) {
+        m_globalPosition.set(std::make_unique<Amg::Vector3D>(m_detEl->surface(identify()).center()));
+    }
     return *m_globalPosition;
 }
 
 
-inline const MuonGM::MdtReadoutElement* MdtPrepData::detectorElement() const
-{
+inline const MuonGM::MdtReadoutElement* MdtPrepData::detectorElement() const{
     return m_detEl;
 }
 
-inline int MdtPrepData::tdc() const
-{
-    return m_tdc;
-}
-
-inline int MdtPrepData::adc() const
-{
-    return m_adc;
-}
-
-inline MdtDriftCircleStatus MdtPrepData::status() const
-{
-    return m_status;
-}
-
-inline IdentifierHash MdtPrepData::collectionHash() const
-{
+inline int MdtPrepData::tdc() const { return m_tdc; }
+inline int MdtPrepData::adc() const { return m_adc; }
+inline MdtDriftCircleStatus MdtPrepData::status() const { return m_status; }
+inline IdentifierHash MdtPrepData::collectionHash() const {
     return getHashAndIndex().collHash();
 }
 
