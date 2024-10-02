@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_BASESIMULATIONSVC_H
@@ -42,27 +42,7 @@ namespace ISF {
 
     //** Constructor with parameters */
     BaseSimulationSvc( const std::string& name, ISvcLocator* pSvcLocator):
-      base_class(name,pSvcLocator),
-      m_evtStore( "StoreGateSvc/StoreGateSvc",  name ),
-      m_detStore( "StoreGateSvc/DetectorStore", name )
-    {
-      // to be set to a unique descriptor
-      declareProperty( "Identifier",
-                       m_simDescr,
-                       "A unique string to identify the simulator.");
-
-      declareProperty( "EvtStore",
-                       m_evtStore = StoreGateSvc_t ("StoreGateSvc", name),
-                       "Handle to a StoreGateSvc instance: it will be used to retrieve data during the course of the job" );
-      declareProperty( "DetStore",
-                       m_detStore = StoreGateSvc_t ("StoreGateSvc/DetectorStore", name),
-                       "Handle to a StoreGateSvc/DetectorStore instance: it will be used to retrieve data during the course of the job" );
-      // refine the screen output for debugging
-      declareProperty("ScreenOutputPrefix",   m_screenOutputPrefix);
-      // Service handling
-      declareProperty("ChronoStatService",    m_chronoSvcName     );
-
-    };
+      base_class(name,pSvcLocator) {};
 
     /** Destructor */
     virtual ~BaseSimulationSvc() {};
@@ -74,7 +54,7 @@ namespace ISF {
         ATH_MSG_FATAL( m_screenOutputPrefix << " Cannot initialize AthService! Abort.");
         return StatusCode::FAILURE;
       }
-      if ( serviceLocator()->service(m_chronoSvcName, m_chrono ).isFailure()){
+      if ( m_chrono.retrieve().isFailure()){
         ATH_MSG_FATAL( m_screenOutputPrefix << " Cannot retrieve ChronoStatSvc! Abort.");
         return StatusCode::FAILURE;
       }
@@ -83,7 +63,7 @@ namespace ISF {
     }
 
     /** Return the simulation service descriptor */
-    std::string& simSvcDescriptor() override { return m_simDescr; }
+    const std::string& simSvcDescriptor() override { return m_simDescr.value(); }
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent() override
@@ -132,19 +112,17 @@ namespace ISF {
       return nullptr;
     }
 
-    typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
-
     /** @brief The standard @c StoreGateSvc (event store)
      * Returns (kind of) a pointer to the @c StoreGateSvc
      */
-    const StoreGateSvc_t& evtStore() const {return m_evtStore;};
-    StoreGateSvc_t& evtStore() {return m_evtStore;};
+    const ServiceHandle<StoreGateSvc>& evtStore() const {return m_evtStore;};
+    ServiceHandle<StoreGateSvc>& evtStore() {return m_evtStore;};
 
     /** @brief The standard @c StoreGateSvc/DetectorStore
      * Returns (kind of) a pointer to the @c StoreGateSvc
      */
-    const StoreGateSvc_t& detStore() const {return m_detStore;};
-    StoreGateSvc_t& detStore() {return m_detStore;};
+    const ServiceHandle<StoreGateSvc>& detStore() const {return m_detStore;};
+    ServiceHandle<StoreGateSvc>& detStore() {return m_detStore;};
 
     /** templated Tool retrieval - gives unique handling & look and feel */
     template <class T> StatusCode retrieveTool(ToolHandle<T>& thandle){
@@ -202,25 +180,26 @@ namespace ISF {
     /** Default constructor */
     BaseSimulationSvc();
 
-    /// Pointer to StoreGate (event store by default)
-    StoreGateSvc_t m_evtStore;
+    /// Handle to StoreGate (event store by default)
+    ServiceHandle<StoreGateSvc> m_evtStore{this, "EvtStore", "StoreGateSvc/StoreGateSvc",
+      "Handle to a StoreGateSvc instance: it will be used to retrieve data during the course of the job"};
 
-    /// Pointer to StoreGate (detector store by default)
-    StoreGateSvc_t m_detStore;
+    /// Handle to StoreGate (detector store by default)
+    ServiceHandle<StoreGateSvc> m_detStore{this, "DetStore", "StoreGateSvc/DetectorStore",
+      "Handle to a StoreGateSvc/DetectorStore instance: it will be used to retrieve data during the course of the job"};
 
 
   protected:
     /** The simulator service descriptor */
-    std::string       m_simDescr{""};
+    Gaudi::Property<std::string> m_simDescr{this, "Identifier", {},
+      "A unique string to identify the simulator."};
 
-    /** Screen output refinement - can be changed by declareProperty() */
-    std::string       m_screenOutputPrefix{"isf >> "};
-
-    /** Name of the timing service - can be set by declareProperty()*/
-    std::string       m_chronoSvcName{"ChronoStatSvc"};
+    /** Screen output refinement */
+    Gaudi::Property<std::string> m_screenOutputPrefix{this, "ScreenOutputPrefix", "isf >> ",
+      "Prefix for log output"};
 
     /** The timing service for general usage */
-    IChronoStatSvc*   m_chrono{};
+    ServiceHandle<IChronoStatSvc>   m_chrono{this, "ChronoStatService", "ChronoStatSvc"};
 
     /** The particle service used to push particles into the simulation */
     IParticleBroker*  m_particleBroker{};
