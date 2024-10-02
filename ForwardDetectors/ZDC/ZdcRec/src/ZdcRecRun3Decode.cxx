@@ -92,6 +92,27 @@ StatusCode ZdcRecRun3Decode::execute()
 
   if (zldContainer->size() < m_nFragments)
     {
+      int zdcLucrod = 0;
+      int rpdLucrod = 0;
+      for (auto zld : *zldContainer)
+	{
+	  uint32_t lucrod_id =  zld->GetLucrodID();
+	  if (lucrod_id == ZdcEventInfo::LucrodLowGain || lucrod_id == ZdcEventInfo::LucrodHighGain) // ZDC LUCRODs
+	    {
+	      zdcLucrod++;
+	    }
+	  else if (lucrod_id == ZdcEventInfo::LucrodRPD1A
+		   || lucrod_id == ZdcEventInfo::LucrodRPD1C
+		   || lucrod_id == ZdcEventInfo::LucrodRPD2A
+		   || lucrod_id == ZdcEventInfo::LucrodRPD2C)
+	    {
+	      rpdLucrod++;
+	    }
+	  else
+	    {
+	      ATH_MSG_WARNING("Unidentified LUCROD ID = " << lucrod_id);
+	    }
+	}
       SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
       if (!eventInfo->updateErrorState(xAOD::EventInfo::ForwardDet,xAOD::EventInfo::Error))
 	{
@@ -100,7 +121,21 @@ StatusCode ZdcRecRun3Decode::execute()
       if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::DECODINGERROR)) 
 	{
 	  ATH_MSG_WARNING( " cannot set flag bit for ForwardDet "  );      
-	} 
+	}
+      if (rpdLucrod < ZdcEventInfo::nTotalRpdLucrod)
+	{
+	  if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::RPDDECODINGERROR)) 
+	    {
+	      ATH_MSG_WARNING( " cannot set RPDDECODINGERROR flag bit for ForwardDet "  );      
+	    }
+	}
+      if (zdcLucrod < ZdcEventInfo::nTotalZdcLucrod)
+	{
+	  if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::ZDCDECODINGERROR)) 
+	    {
+	      ATH_MSG_WARNING( " cannot set ZDCDECODINGERROR flag bit for ForwardDet "  );      
+	    }
+	}
     }
 
   //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
