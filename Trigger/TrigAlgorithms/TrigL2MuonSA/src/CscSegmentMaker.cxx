@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,6 +140,7 @@ ReturnCode CscSegmentMaker::FindSuperPointCsc( const TrigL2MuonSA::CscHits &cscH
 
 
 
+// cppcheck-suppress passedByValue
 ReturnCode  CscSegmentMaker::make_segment(int mod_hash, TrigL2MuonSA::CscHits clusters[8],
                                             CscSegment &cscsegment,
                                             CscSegment &cscsegment_noip, const MuonGM::MuonDetectorManager* muDetMgr) const
@@ -257,6 +258,7 @@ ReturnCode  CscSegmentMaker::make_segment(int mod_hash, TrigL2MuonSA::CscHits cl
 }
 
 
+// cppcheck-suppress passedByValue
   ReturnCode CscSegmentMaker::make_2dsegment(int measphi, const localCscHit &ip_loc, const std::vector<localCscHit> hits_loc[4],
                                              local2dSegment &seg2d,
                                              local2dSegment &seg2d_ipremoved,
@@ -390,6 +392,7 @@ ReturnCode CscSegmentMaker::make_2dseg4hit(int measphi, const localCscHit &ip_lo
 
 
 ReturnCode CscSegmentMaker::make_2dseg3hit(int measphi, const localCscHit &ip_loc,
+                                             // cppcheck-suppress passedByValue
                                              const std::vector<localCscHit> hits_loc[4],
                                              std::vector<local2dSegment> &seg2d_3hitCollection,
                                              int &nhit) const
@@ -647,6 +650,7 @@ CscSegment CscSegmentMaker::segmentAtFirstLayer(int mod_hash, TrigL2MuonSA::CscS
 
 
 
+// cppcheck-suppress passedByValue
 ReturnCode CscSegmentMaker::display_hits(const std::vector<localCscHit> localHits[4]) const
 {  
   for(unsigned int ilyr=0; ilyr<4; ++ilyr){
