@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkVolumes )
@@ -21,3 +21,9 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      PROPERTIES
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 endif()
+
+atlas_add_test(test_VolumeTests
+           SOURCES test/test_VolumeTests.cxx
+           INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+           LINK_LIBRARIES ${Boost_LIBRARIES} TrkVolumes TrkSurfaces
+           POST_EXEC_SCRIPT nopost.sh)

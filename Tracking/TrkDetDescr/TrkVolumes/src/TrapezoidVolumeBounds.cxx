@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -130,53 +130,61 @@ const std::vector<const Trk::Surface*>*
   // face surfaces yz
   // transmute cyclical
   //   (3) - at point A, attached to alpha opening angle
-  Amg::Vector3D A(
-    this->minHalflengthX(), this->halflengthY(), trapezoidCenter.z());
-  Amg::RotationMatrix3D alphaZRotation =
-    (s_idRotation *
-     Amg::AngleAxis3D(this->alpha() - 0.5 * M_PI, Amg::Vector3D(0., 0., 1.)))
-      .toRotationMatrix();
-  // CLHEP::HepRotation  alphaRotation(alphaZRotation*trapezoidRotation);
-  Amg::RotationMatrix3D faceAlphaRotation;
-  faceAlphaRotation.col(0) = alphaZRotation.col(1);
-  faceAlphaRotation.col(1) = -alphaZRotation.col(2);
-  faceAlphaRotation.col(2) = -alphaZRotation.col(0);
+  //  the yz bound are created that the surface y-direction has to be come the z-direction.
+  //  this is achieved by rotating the plane surface by 90 degrees around the x-axis
+  //  Then, the plane has to be rotated around the z-axis by alpha:
+  //
+  //  double c=cos(M_PI/2);
+  //  double s=sin(M_PI/2);
+  //  Amg::RotationMatrix3D rotate_to_xz;
+  //  rotate_to_xz << 1.f, 0.f, 0.f, // 1 0  0
+  //                  0.f, c,  -s,   // 0 0 -1
+  //                  0.f, s,   c;   // 0 1  0
+  //
+  //  s=sin(-alpha());
+  //  c=cos(-alpha());
+  //  Amg::RotationMatrix3D rotate_left;
+  //  rotate_left <<   c,   s,   0.f,
+  //                  -s,   c,   0.f,
+  //                 0.f, 0.f,   1.f;
+  //
+  //  Amg::RotationMatrix3D rotateToFaceAlpha( rotate_left * rotate_to_xz);
+  Amg::RotationMatrix3D rotateToFaceAlpha;
+  {
+  double s=sin(-alpha());
+  double c=cos(-alpha());
+  rotateToFaceAlpha <<   c,  0.f,  -s,
+                        -s,  0.f,  -c,
+                       0.f,  1.f, 0.f;
+  }
+
   RectangleBounds* faceAlphaBounds = this->faceAlphaRectangleBounds();
-  // Amg::Vector3D
-  // faceAlphaPosition(A+faceAlphaRotation.colX()*faceAlphaBounds->halflengthX());
   Amg::Vector3D faceAlphaPosition0(
     -0.5 * (this->minHalflengthX() + this->maxHalflengthX()), 0., 0.);
   Amg::Vector3D faceAlphaPosition = transform * faceAlphaPosition0;
-  retsf->push_back(new Trk::PlaneSurface(
-    Amg::Transform3D(
-      (trapezoidRotation * faceAlphaRotation) *
-      Amg::Translation3D(faceAlphaPosition)),
-    faceAlphaBounds));
+  retsf->push_back(new Trk::PlaneSurface( Amg::Translation3D(faceAlphaPosition)
+                                          * Amg::Transform3D(trapezoidRotation * rotateToFaceAlpha),
+                                          faceAlphaBounds));
   //   (4) - at point B, attached to beta opening angle
-  Amg::Vector3D B(
-    this->minHalflengthX(), -this->halflengthY(), trapezoidCenter.z());
-  Amg::RotationMatrix3D betaZRotation =
-    (s_idRotation *
-     Amg::AngleAxis3D(-(this->beta() - 0.5 * M_PI), Amg::Vector3D(0., 0., 1.)))
-      .toRotationMatrix();
-  // CLHEP::HepRotation  betaRotation(betaZRotation*trapezoidRotation);
-  Amg::RotationMatrix3D faceBetaRotation;
-  faceBetaRotation.col(0) = betaZRotation.col(1);
-  faceBetaRotation.col(1) = betaZRotation.col(2);
-  faceBetaRotation.col(2) = betaZRotation.col(0);
+  //  same as above but rotate to the right by beta
+  Amg::RotationMatrix3D rotateToFaceBeta;
+  {
+  double s=sin(beta());
+  double c=cos(beta());
+  rotateToFaceBeta  <<   c,  0.f,  -s,
+                        -s,  0.f,  -c,
+                       0.f,  1.f, 0.f;
+  }
+
   RectangleBounds* faceBetaBounds = this->faceBetaRectangleBounds();
   // Amg::Vector3D
   // faceBetaPosition(B+faceBetaRotation.colX()*faceBetaBounds->halflengthX());
   Amg::Vector3D faceBetaPosition0(
     0.5 * (this->minHalflengthX() + this->maxHalflengthX()), 0., 0.);
   Amg::Vector3D faceBetaPosition = transform * faceBetaPosition0;
-  retsf->push_back(new Trk::PlaneSurface(
-    Amg::Transform3D(
-      trapezoidRotation * faceBetaRotation *
-      Amg::Translation3D(faceBetaPosition)),
-    faceBetaBounds));
-  // face surfaces zx
-  //   (5) - at negative local x
+  retsf->push_back(new Trk::PlaneSurface( Amg::Translation3D(faceBetaPosition)
+                                          * Amg::Transform3D(trapezoidRotation * rotateToFaceBeta),
+                                          faceBetaBounds));
   retsf->push_back(new Trk::PlaneSurface(
     Amg::Transform3D(
       transform *
