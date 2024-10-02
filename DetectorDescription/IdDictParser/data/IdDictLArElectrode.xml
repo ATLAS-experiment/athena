@@ -305,7 +305,7 @@
      <range field="zside" values="0 1" />
      <range field="module" minvalue="1" maxvalue="5" />
      <range field="hvphi" value="0" />
-     <range field="hveta" minvalue="0" />
+     <range field="hveta" value="0" />
      <range field="hvgap" minvalue="0" maxvalue="1" />
      <range field="electrode" value="0" />
    </region>
@@ -317,7 +317,7 @@
      <range field="zside" values="0 1" />
      <range field="module" minvalue="1" maxvalue="10" />
      <range field="hvphi" value="0" />
-     <range field="hveta" minvalue="0" />
+     <range field="hveta" value="0" />
      <range field="hvgap" minvalue="0" maxvalue="1" />
      <range field="electrode" value="0" />
    </region>

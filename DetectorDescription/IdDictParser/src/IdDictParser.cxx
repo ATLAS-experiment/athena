@@ -577,18 +577,15 @@ RangeFactory::idd_start (IdDictParser& parser, const XMLCoreNode& node)  {
         } 
       } 
     } else  { 
-      if (has_attribute (node, "minvalue")) { 
-          range->m_specification = IdDictRange::by_minvalue; 
-          range->m_minvalue = get_int (node, "minvalue"); 
-      } 
- 
-      if (has_attribute (node, "maxvalue")) { 
-        if (range->m_specification == IdDictRange::by_minvalue) 
+      const bool hasMin = has_attribute (node, "minvalue");
+      const bool hasMax = has_attribute (node, "maxvalue");
+      if (hasMin and hasMax) { 
           range->m_specification = IdDictRange::by_minmax; 
-        else 
-          range->m_specification = IdDictRange::by_maxvalue; 
-        range->m_maxvalue = get_int (node, "maxvalue"); 
-      } 
+          range->m_minvalue = get_int (node, "minvalue");
+          range->m_maxvalue = get_int (node, "maxvalue"); 
+      }
+      //falls through to a case where there is *no* attribute value, values, minvalue, maxvalue
+      //https://its.cern.ch/jira/browse/ATLASSIM-7295
     } 
   if (has_attribute (node, "wraparound")){
     bool wraparound = get_boolean (node, "wraparound");
