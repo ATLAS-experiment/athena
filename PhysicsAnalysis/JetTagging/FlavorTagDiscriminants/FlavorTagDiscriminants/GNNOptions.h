@@ -19,6 +19,7 @@ namespace FlavorTagDiscriminants {
     TrackLinkType track_link_type = TrackLinkType::TRACK_PARTICLE;
     float default_output_value = NAN;
     std::map<std::string, float> default_output_values;
+    bool default_zero_tracks = false;
     bool operator==(const GNNOptions&) const;
     std::size_t hash() const;
   };

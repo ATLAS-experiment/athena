@@ -25,6 +25,7 @@ namespace FlavorTagDiscriminants {
     std::string trackLinkType;
     float default_output_value = NAN;
     std::map<std::string, double> default_output_values; // hack [1]
+    bool default_zero_tracks = false;
   };
 
   void propify(asg::AsgTool& tool, GNNToolProperties* props);
