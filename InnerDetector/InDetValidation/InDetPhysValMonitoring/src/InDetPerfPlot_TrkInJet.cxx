@@ -59,6 +59,7 @@ InDetPerfPlot_TrkInJet::InDetPerfPlot_TrkInJet(InDetPlotBase* pParent, const std
   m_reco_eta_vs_dR{},
   m_reco_pt_vs_dR{},
   m_reco_lowpt_vs_dR{},
+  m_reco_track_pt_vs_jet_pt{},
 
   m_reco_chi2Overndof_vs_dR{},
 
@@ -118,7 +119,8 @@ InDetPerfPlot_TrkInJet::initializePlots() {
   book(m_reco_eta_vs_dR, "reco_eta_vs_dR");
   book(m_reco_pt_vs_dR, "reco_pt_vs_dR");
   book(m_reco_lowpt_vs_dR, "reco_lowpt_vs_dR");
-
+  book(m_reco_track_pt_vs_jet_pt, "reco_track_pt_vs_jet_pt");
+    
   book(m_reco_chi2Overndof_vs_dR, "reco_chi2Overndof_vs_dR");
   if (m_doFakeAndEff){
     book(m_efficiency_vs_dR, "efficiency_vs_dR");
@@ -238,7 +240,8 @@ InDetPerfPlot_TrkInJet::fill(const xAOD::TrackParticle& trk, const xAOD::Jet& je
   float chi2 = trk.chiSquared();
   float ndof = trk.numberDoF();
   float chi2Overndof = ndof > 0 ? chi2 / ndof : 0;
-  
+
+  float jet_pt = jet.pt() / Gaudi::Units::GeV;
 
   fillHisto(m_reco_d0_vs_dR, dR, trk.d0(),weight);
   fillHisto(m_reco_z0_vs_dR, dR, trk.z0(),weight);
@@ -249,6 +252,7 @@ InDetPerfPlot_TrkInJet::fill(const xAOD::TrackParticle& trk, const xAOD::Jet& je
   fillHisto(m_reco_pt_vs_dR, dR, pt,weight);
   fillHisto(m_reco_lowpt_vs_dR, dR, pt,weight);
   fillHisto(m_reco_chi2Overndof_vs_dR, dR, chi2Overndof,weight);
+  fillHisto(m_reco_track_pt_vs_jet_pt, jet_pt, pt, weight);
 
 }
 
