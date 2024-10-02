@@ -3,21 +3,19 @@
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
+
+#include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandGauss.h"
+#include "HepPDT/ParticleData.hh"
+#include "HepPDT/ParticleDataTable.hh"
+#include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
+#include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
-#include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
-#include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
-
-#include "TFile.h"
 #include "TF1.h"
+#include "TFile.h"
 #include "TH2D.h"
-
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
-
-#include "CLHEP/Random/RandGauss.h"
-#include "CLHEP/Random/RandFlat.h"
 
 #if defined(__FastCaloSimStandAlone__)
 #include "CLHEP/Random/TRandomEngine.h"
@@ -25,8 +23,8 @@
 #include <CLHEP/Random/RanluxEngine.h>
 #endif
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <limits>
 
 //=============================================
@@ -104,10 +102,9 @@ bool TFCSEnergyAndHitGANV2::initializeNetwork(
   return m_slice->LoadGAN();
 }
 
-const std::string
-TFCSEnergyAndHitGANV2::get_variable_text(TFCSSimulationState &simulstate,
-                                         const TFCSTruthState *,
-                                         const TFCSExtrapolationState *) const {
+const std::string TFCSEnergyAndHitGANV2::get_variable_text(
+    TFCSSimulationState &simulstate, const TFCSTruthState *,
+    const TFCSExtrapolationState *) const {
   return std::string(
       Form("layer=%d", simulstate.getAuxInfo<int>("GANlayer"_FCShash)));
 }
@@ -149,7 +146,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   const TFCSGANXMLParameters::Binning &binsInLayers = m_param.GetBinning();
   const auto ganVersion = m_param.GetGANVersion();
   const TFCSGANEtaSlice::FitResultsPerLayer &fitResults =
-      m_slice->GetFitResults(); // used only if GAN version > 1
+      m_slice->GetFitResults();  // used only if GAN version > 1
 
   ATH_MSG_DEBUG("energy voxels size = " << outputs.size());
 
@@ -170,6 +167,25 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   for (const auto &element : binsInLayers) {
     const int layer = element.first;
     const TH2D *h = &element.second;
+
+    // attempt to debug intermittent ci issues described in
+    // https://its.cern.ch/jira/browse/ATLASSIM-7031
+    if (h->IsZombie()) {
+      ATH_MSG_INFO("Got truth state: ");
+      truth->Print();
+
+      ATH_MSG_INFO("Got extrapolation state: ");
+      extrapol->Print();
+
+      ATH_MSG_INFO("Got simulation state: ");
+      simulstate.Print();
+
+      ATH_MSG_INFO("Got GAN XML parameters: ");
+      m_param.Print();
+
+      ATH_MSG_ERROR("Histogram pointer for layer " << layer << " is broken");
+      return false;
+    }
 
     const int xBinNum = h->GetNbinsX();
     const int yBinNum = h->GetNbinsY();
@@ -420,10 +436,11 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
               // -delta_eta
               if (center_eta < 0.)
                 delta_eta_mm = -delta_eta_mm;
-              // We derive the shower shapes for electrons and positively charged hadrons.
-              // Particle with the opposite charge are expected to have the same shower shape
-              // after the transformation: delta_phi --> -delta_phi
-              if ((charge < 0. && pdgId!=11) || pdgId==-11)
+              // We derive the shower shapes for electrons and positively
+              // charged hadrons. Particle with the opposite charge are expected
+              // to have the same shower shape after the transformation:
+              // delta_phi --> -delta_phi
+              if ((charge < 0. && pdgId != 11) || pdgId == -11)
                 delta_phi_mm = -delta_phi_mm;
 
               const float delta_eta = delta_eta_mm / eta_jakobi / dist000;
@@ -434,13 +451,14 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
 
               ATH_MSG_VERBOSE(" Hit eta " << hit.eta() << " phi " << hit.phi()
                                           << " layer " << layer);
-            } else { // FCAL is in (x,y,z)
+            } else {  // FCAL is in (x,y,z)
               const float hit_r = r * cos(alpha) + center_r;
               float delta_phi = r * sin(alpha) / center_r;
-              // We derive the shower shapes for electrons and positively charged hadrons.
-              // Particle with the opposite charge are expected to have the same shower shape
-              // after the transformation: delta_phi --> -delta_phi
-              if ((charge < 0. && pdgId!=11) || pdgId==-11)
+              // We derive the shower shapes for electrons and positively
+              // charged hadrons. Particle with the opposite charge are expected
+              // to have the same shower shape after the transformation:
+              // delta_phi --> -delta_phi
+              if ((charge < 0. && pdgId != 11) || pdgId == -11)
                 delta_phi = -delta_phi;
               const float hit_phi =
                   TVector2::Phi_mpi_pi(center_phi + delta_phi);
@@ -514,10 +532,9 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   return true;
 }
 
-FCSReturnCode
-TFCSEnergyAndHitGANV2::simulate(TFCSSimulationState &simulstate,
-                                const TFCSTruthState *truth,
-                                const TFCSExtrapolationState *extrapol) const {
+FCSReturnCode TFCSEnergyAndHitGANV2::simulate(
+    TFCSSimulationState &simulstate, const TFCSTruthState *truth,
+    const TFCSExtrapolationState *extrapol) const {
   for (unsigned int ichain = 0; ichain < m_bin_start[0]; ++ichain) {
     ATH_MSG_DEBUG("now run for all bins: " << chain()[ichain]->GetName());
     if (simulate_and_retry(chain()[ichain], simulstate, truth, extrapol) !=
@@ -576,22 +593,24 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
                                       const TFCSExtrapolationState *extrapol) {
   ISF_FCS::MLogging logger;
   ATH_MSG_NOCLASS(logger, "Start lwtnn test" << std::endl);
-  std::string path = "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
-                     "InputsToBigParamFiles/FastCaloGANWeightsVer02/";
+  std::string path =
+      "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
+      "InputsToBigParamFiles/FastCaloGANWeightsVer02/";
   test_path(path, simulstate, truth, extrapol, "lwtnn");
 
   ATH_MSG_NOCLASS(logger, "Start onnx test" << std::endl);
-  path = "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
-         "InputsToBigParamFiles/FastCaloGANWeightsONNXVer08/";
+  path =
+      "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
+      "InputsToBigParamFiles/FastCaloGANWeightsONNXVer08/";
   test_path(path, simulstate, truth, extrapol, "onnx");
   ATH_MSG_NOCLASS(logger, "Finish all tests" << std::endl);
 }
 
-void TFCSEnergyAndHitGANV2::test_path(const std::string& path,
+void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
                                       TFCSSimulationState *simulstate,
                                       const TFCSTruthState *truth,
                                       const TFCSExtrapolationState *extrapol,
-                                      const std::string& outputname, int pid) {
+                                      const std::string &outputname, int pid) {
   ISF_FCS::MLogging logger;
   ATH_MSG_NOCLASS(logger, "Running test on " << path << std::endl);
   if (!simulstate) {

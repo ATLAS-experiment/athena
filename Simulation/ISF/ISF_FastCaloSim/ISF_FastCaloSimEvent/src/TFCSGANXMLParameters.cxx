@@ -1,89 +1,104 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // TFCSGANXMLParameters.cxx, (c) ATLAS Detector software             //
 ///////////////////////////////////////////////////////////////////
 
-// class header include
+// Class header include
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
-#include <sstream>
-#include "TMath.h"
-#include <iostream>
 
-TFCSGANXMLParameters::TFCSGANXMLParameters() {}
+TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
-TFCSGANXMLParameters::~TFCSGANXMLParameters() {}
+TFCSGANXMLParameters::~TFCSGANXMLParameters() = default;
 
 void TFCSGANXMLParameters::InitialiseFromXML(
-    int pid, int etaMid, const std::string &FastCaloGANInputFolderName) {
+    int pid, int etaMid, const std::string& FastCaloGANInputFolderName) {
+
   m_fastCaloGANInputFolderName = FastCaloGANInputFolderName;
   std::string xmlFullFileName = FastCaloGANInputFolderName + "/binning.xml";
 
+  // Parse the XML file
   xmlDocPtr doc = xmlParseFile(xmlFullFileName.c_str());
+  if (!doc) {
+    ATH_MSG_WARNING("Failed to parse XML file: " << xmlFullFileName);
+    return;
+  }
+
   for (xmlNodePtr nodeRoot = doc->children; nodeRoot != nullptr;
        nodeRoot = nodeRoot->next) {
     if (xmlStrEqual(nodeRoot->name, BAD_CAST "Bins")) {
       for (xmlNodePtr nodeParticle = nodeRoot->children;
            nodeParticle != nullptr; nodeParticle = nodeParticle->next) {
         if (xmlStrEqual(nodeParticle->name, BAD_CAST "Particle")) {
-          int nodePid =
-              atof((const char *)xmlGetProp(nodeParticle, BAD_CAST "pid"));
-          for (xmlNodePtr nodeBin = nodeParticle->children; nodeBin != nullptr;
-               nodeBin = nodeBin->next) {
-            if (nodePid == pid) {
-              if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
-                int nodeEtaMin =
-                    atof((const char *)xmlGetProp(nodeBin, BAD_CAST "etaMin"));
-                int nodeEtaMax =
-                    atof((const char *)xmlGetProp(nodeBin, BAD_CAST "etaMax"));
-                int regionId = atof(
-                    (const char *)xmlGetProp(nodeBin, BAD_CAST "regionId"));
+          int nodePid = std::stoi(reinterpret_cast<const char*>(
+              xmlGetProp(nodeParticle, BAD_CAST "pid")));
 
-                if (std::abs(etaMid) > nodeEtaMin && std::abs(etaMid) < nodeEtaMax) {
+          if (nodePid == pid) {
+            for (xmlNodePtr nodeBin = nodeParticle->children;
+                 nodeBin != nullptr; nodeBin = nodeBin->next) {
+              if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
+                int nodeEtaMin = std::stoi(reinterpret_cast<const char*>(
+                    xmlGetProp(nodeBin, BAD_CAST "etaMin")));
+                int nodeEtaMax = std::stoi(reinterpret_cast<const char*>(
+                    xmlGetProp(nodeBin, BAD_CAST "etaMax")));
+                int regionId = std::stoi(reinterpret_cast<const char*>(
+                    xmlGetProp(nodeBin, BAD_CAST "regionId")));
+
+                if (std::abs(etaMid) > nodeEtaMin &&
+                    std::abs(etaMid) < nodeEtaMax) {
 
                   m_symmetrisedAlpha =
                       ReadBooleanAttribute("symmetriseAlpha", nodeParticle);
-                  m_ganVersion = atof(
-                      (const char *)xmlGetProp(nodeBin, BAD_CAST "ganVersion"));
-                  m_latentDim = atof((const char *)xmlGetProp(
-                      nodeParticle, BAD_CAST "latentDim"));
+                  m_ganVersion = std::stod(reinterpret_cast<const char*>(
+                      xmlGetProp(nodeBin, BAD_CAST "ganVersion")));
+                  m_latentDim = std::stod(reinterpret_cast<const char*>(
+                      xmlGetProp(nodeParticle, BAD_CAST "latentDim")));
 
                   for (xmlNodePtr nodeLayer = nodeBin->children;
                        nodeLayer != nullptr; nodeLayer = nodeLayer->next) {
                     if (xmlStrEqual(nodeLayer->name, BAD_CAST "Layer")) {
                       std::vector<double> edges;
-                      std::string s((const char *)xmlGetProp(nodeLayer, BAD_CAST
-                                                             "r_edges"));
+                      std::string s(reinterpret_cast<const char*>(
+                          xmlGetProp(nodeLayer, BAD_CAST "r_edges")));
 
                       std::istringstream ss(s);
                       std::string token;
 
                       while (std::getline(ss, token, ',')) {
-                        edges.push_back(atof(token.c_str()));
+                        edges.push_back(std::stod(token));
                       }
 
-                      int binsInAlpha = atof((const char *)xmlGetProp(
-                          nodeLayer, BAD_CAST "n_bin_alpha"));
-                      int layer = atof(
-                          (const char *)xmlGetProp(nodeLayer, BAD_CAST "id"));
+                      int binsInAlpha = std::stoi(reinterpret_cast<const char*>(
+                          xmlGetProp(nodeLayer, BAD_CAST "n_bin_alpha")));
+                      int layer = std::stoi(reinterpret_cast<const char*>(
+                          xmlGetProp(nodeLayer, BAD_CAST "id")));
 
                       std::string name = "hist_pid_" + std::to_string(nodePid) +
                                          "_region_" + std::to_string(regionId) +
                                          "_layer_" + std::to_string(layer);
-                      int xBins = edges.size() - 1;
-                      if (xBins == 0)
-                        xBins = 1; // remove warning
-                      else
+                      int xBins = static_cast<int>(edges.size()) - 1;
+
+                      if (xBins <= 0) {
+                        ATH_MSG_DEBUG(
+                            "No bins defined in r for layer "
+                            << layer
+                            << ", setting to 1 bin to avoid empty histogram");
+                        xBins = 1;  // Remove warning and set a default bin
+                      } else {
                         m_relevantlayers.push_back(layer);
-                      double minAlpha = -TMath::Pi();
+                      }
+
+                      double minAlpha = -M_PI;
                       if (m_symmetrisedAlpha && binsInAlpha > 1) {
                         minAlpha = 0;
                       }
-                      m_binning[layer] =
-                          TH2D(name.c_str(), name.c_str(), xBins, &edges[0],
-                               binsInAlpha, minAlpha, TMath::Pi());
+                      // Create histogram and add to binning map
+                      m_binning.emplace(
+                          layer,
+                          TH2D(name.c_str(), name.c_str(), xBins, edges.data(),
+                               binsInAlpha, minAlpha, M_PI));
                     }
                   }
                 }
@@ -94,14 +109,16 @@ void TFCSGANXMLParameters::InitialiseFromXML(
       }
     }
   }
+
+  // Free XML document after parsing
   xmlFreeDoc(doc);
 }
 
-bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string &name,
+bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string& name,
                                                 xmlNodePtr node) {
-  std::string attribute = (const char *)xmlGetProp(node, BAD_CAST name.c_str());
-  bool value = attribute == "true" ? true : false;
-  return value;
+  std::string attribute =
+      reinterpret_cast<const char*>(xmlGetProp(node, BAD_CAST name.c_str()));
+  return attribute == "true";
 }
 
 void TFCSGANXMLParameters::Print() const {
@@ -110,19 +127,26 @@ void TFCSGANXMLParameters::Print() const {
   ATH_MSG_INFO("  ganVersion:" << m_ganVersion);
   ATH_MSG_INFO("  latentDim: " << m_latentDim);
   ATH_MSG(INFO) << "  relevantlayers: ";
-  for (auto l : m_relevantlayers) {
+  for (const auto& l : m_relevantlayers) {
     ATH_MSG(INFO) << l << " ";
   }
   ATH_MSG(INFO) << END_MSG(INFO);
 
-  for (auto element : m_binning) {
+  for (const auto& element : m_binning) {
     int layer = element.first;
-    TH2D *h = &element.second;
+    const TH2D* h = &element.second;
+
+    // attempt to debug intermittent ci issues described in
+    // https://its.cern.ch/jira/browse/ATLASSIM-7031
+    if (h->IsZombie()) {
+      ATH_MSG_WARNING("Histogram pointer for layer "
+                      << layer << " is broken. Skipping.");
+      continue;
+    }
 
     int xBinNum = h->GetNbinsX();
-    TAxis *x = (TAxis *)h->GetXaxis();
+    const TAxis* x = h->GetXaxis();
 
-    // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
       ATH_MSG_INFO("layer " << layer << " not used");
       continue;
