@@ -98,6 +98,7 @@ namespace FlavorTagDiscriminants {
     Decorators m_decorators;
     std::vector<std::pair<Dec<float>, float>> m_defaultValues;
     FTagDataDependencyNames m_dataDependencyNames;
+    bool m_defaultZeroTracks;
   };
 } // end namespace FlavorTagDiscriminants
 #endif //GNN_H
