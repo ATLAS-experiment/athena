@@ -508,35 +508,17 @@ def EGAM8Cfg(flags):
     EGAM8SlimmingHelper.IncludeEGammaTriggerContent = True
     EGAM8SlimmingHelper.IncludeMuonTriggerContent = True
 
-    # Add trigger matching info
+    # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM8SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM8TriggerListsHelper.Run2TriggerNamesNoTau,
-        )
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
-        )
-
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = EGAM8SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = EGAM8TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM8SlimmingHelper)
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM8SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM8TriggerListsHelper.Run3TriggerNamesNoTau,
-        )
 
     # Add full CellContainer
     EGAM8SlimmingHelper.StaticContent = [

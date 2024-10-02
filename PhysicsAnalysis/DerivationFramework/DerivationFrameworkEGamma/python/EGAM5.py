@@ -460,24 +460,16 @@ def EGAM5Cfg(flags):
     # Add egamma trigger objects
     EGAM5SlimmingHelper.IncludeEGammaTriggerContent = True
 
-    # Add trigger matching info
+    # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM5SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM5TriggerListsHelper.Run2TriggerNamesNoTau,
-        )
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
-        )
-
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = EGAM5SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = EGAM5TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM5SlimmingHelper)
 
     EGAM5ItemList = EGAM5SlimmingHelper.GetItemList()

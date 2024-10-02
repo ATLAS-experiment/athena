@@ -479,23 +479,20 @@ def SUSY20Cfg(flags):
 	SUSY20SlimmingHelper.IncludeMinBiasTriggerContent = False
 
 	# Trigger matching
-	# Run-2
+	# Run 2
 	if flags.Trigger.EDMVersion == 2:
 		from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-		AddRun2TriggerMatchingToSlimmingHelper(
-			SlimmingHelper        = SUSY20SlimmingHelper, 
-			OutputContainerPrefix = "TrigMatch_", 
-			TriggerList           = SUSY20TriggerListsHelper.Run2TriggerNamesTau
-		)
-		AddRun2TriggerMatchingToSlimmingHelper(
-			SlimmingHelper        = SUSY20SlimmingHelper, 
-			OutputContainerPrefix = "TrigMatch_",
-			TriggerList           = SUSY20TriggerListsHelper.Run2TriggerNamesNoTau
-		)
-	# Run 3
-	if flags.Trigger.EDMVersion == 3:
+		AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SUSY20SlimmingHelper, 
+										OutputContainerPrefix = "TrigMatch_", 
+										TriggerList = SUSY20TriggerListsHelper.Run2TriggerNamesTau)
+		AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SUSY20SlimmingHelper, 
+										OutputContainerPrefix = "TrigMatch_",
+										TriggerList = SUSY20TriggerListsHelper.Run2TriggerNamesNoTau)
+	# Run 3, or Run 2 with navigation conversion
+	if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
 		from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
 		AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(SUSY20SlimmingHelper)
+
 
 	# Output stream
 	SUSY20ItemList = SUSY20SlimmingHelper.GetItemList()

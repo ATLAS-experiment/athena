@@ -487,20 +487,17 @@ def EGAM2Cfg(flags):
     # Add egamma trigger objects
     EGAM2SlimmingHelper.IncludeEGammaTriggerContent = True
 
-    # Add trigger matching info
+    # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM2SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM2TriggerListsHelper.Run2TriggerNamesNoTau,
-        )
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = EGAM2SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = EGAM2TriggerListsHelper.Run2TriggerNamesNoTau)
 
         # add some single-leg trigger matching info needed for Jpsi triggers
+        # This is scheduling an instance of TriggerMatchingCommonRun2Cfg which is in addition to the ones from PhysCommonAugmentationsCfg
+        # And adding the output branches to the SlimmingHelper in addition
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             TriggerMatchingCommonRun2Cfg
         )
@@ -515,20 +512,17 @@ def EGAM2Cfg(flags):
             OutputContainerPrefix="TrigMatch_",
             ChainNames=EGAM2TrigMatchList)
         )
-
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper=EGAM2SlimmingHelper,
             OutputContainerPrefix="TrigMatch_",
             TriggerList=EGAM2TrigMatchList
         )
 
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
-        )
-
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM2SlimmingHelper)
+
 
     EGAM2ItemList = EGAM2SlimmingHelper.GetItemList()
     acc.merge(

@@ -193,11 +193,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper

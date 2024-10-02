@@ -201,19 +201,10 @@ def STDM7Cfg(flags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = STDM7SlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = STDM7TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(STDM7SlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = STDM7SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = STDM7TriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = STDM7SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = STDM7TriggerListsHelper.Run3TriggerNamesNoTau)
-
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(STDM7SlimmingHelper)
 
     # Output stream    
     STDM7ItemList = STDM7SlimmingHelper.GetItemList()

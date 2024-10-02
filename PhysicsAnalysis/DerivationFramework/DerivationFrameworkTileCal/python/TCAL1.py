@@ -160,7 +160,6 @@ def TCAL1Cfg(flags):
 
     TCAL1SlimmingHelper.ExtraVariables = [TCAL1ExtraVariables]
 
-
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
@@ -171,10 +170,10 @@ def TCAL1Cfg(flags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TCAL1TriggerListsHelper.Run2TriggerNamesNoTau)
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TCAL1SlimmingHelper)        
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TCAL1SlimmingHelper)      
 
     TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))

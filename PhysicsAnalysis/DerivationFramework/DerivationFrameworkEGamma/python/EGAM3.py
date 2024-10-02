@@ -591,35 +591,17 @@ def EGAM3Cfg(flags):
     # Add egamma trigger objects
     EGAM3SlimmingHelper.IncludeEGammaTriggerContent = True
 
-    # Add trigger matching info
+    # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM3SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM3TriggerListsHelper.Run2TriggerNamesNoTau,
-        )
-    # Run 3
-    if flags.Trigger.EDMVersion == 3:
-        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
-            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
-        )
-
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = EGAM3SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = EGAM3TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3, or Run 2 with navigation conversion
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM3SlimmingHelper)
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
-            AddRun2TriggerMatchingToSlimmingHelper,
-        )
-
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper=EGAM3SlimmingHelper,
-            OutputContainerPrefix="TrigMatch_",
-            TriggerList=EGAM3TriggerListsHelper.Run3TriggerNamesNoTau,
-        )
 
     # Add full CellContainer
     EGAM3SlimmingHelper.StaticContent = [

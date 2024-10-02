@@ -396,38 +396,23 @@ def MUON1Cfg(flags):
     if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesTau)
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesNoTau)
-        
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = MUON1TriggerListsHelper.Run2TriggerNamesNoTau)
+
         # Custom (B-physics) muon chains not in PHYS
         from DerivationFrameworkMuons.MuonsExtraTriggerConfig import MuonExtraTriggerHelper
         ExtraHelper = MuonExtraTriggerHelper(flags,MUON1TriggerListsHelper)
         acc.merge(ExtraHelper.Run2MatchAugmentationCfg(flags))
         ExtraHelper.AddRun2MatchingToSlimmingHelper(SlimmingHelper = MUON1SlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_")
+                                                    OutputContainerPrefix = "TrigMatch_")
 
-       
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(MUON1SlimmingHelper)
-        ##################################################### 
-        ## NOTE: This block is temporary, during validation of the doEDMVersionConversion flag.
-        ## This adds a LOT of containers to the output! In order to help validate the conversion.
-        ## It should be removed once doEDMVersionConversion goes into production use.
-        if flags.Trigger.doEDMVersionConversion:   
-            from DerivationFrameworkTrigger.TrigSlimmingHelper import addTrigEDMSetToOutput
-            from AthenaCommon.Logging import logging
-            msg = logging.getLogger('MUON1Cfg')
-            msg.warn('doEDMVersionConversion is still in validation, WRITING FULL TRIGGER EDM TO THE DAOD!')
-            addTrigEDMSetToOutput(flags, MUON1SlimmingHelper, "AODFULL")
-            MUON1SlimmingHelper.AppendToDictionary.update({'HLTNav_R2ToR3Summary':'xAOD::TrigCompositeContainer','HLTNav_R2ToR3SummaryAux':'xAOD::TrigCompositeAuxContainer'})
-            MUON1SlimmingHelper.AllVariables += ['HLTNav_R2ToR3Summary']
-        ##
-        #####################################################
 
     # Output stream    
     MUON1ItemList = MUON1SlimmingHelper.GetItemList()
