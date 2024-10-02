@@ -1821,6 +1821,12 @@ class ItemDef:
         MenuItem('L1_BPTX0_BGRP12', ctpid=0xf1).setLogic(d.BPTX0 & bgrp12cond ).setTriggerType(TT.rand)
         MenuItem('L1_BPTX1_BGRP12', ctpid=0xf2).setLogic(d.BPTX1 & bgrp12cond ).setTriggerType(TT.rand)
 
+        #MenuItem('L1_RD4_FILLED'         ).setLogic( d.RNDM4 & physcond ).setTriggerType(TT.lardigital)
+        #MenuItem('L1_RD4_EMPTY'          ).setLogic( d.RNDM4 & cosmiccond ).setTriggerType(TT.lardigital)
+        #MenuItem('L1_RD1_FIRSTEMPTY'     ).setLogic( d.RNDM1 & firstempty ).setTriggerType(TT.lardigital)
+        #MenuItem('L1_RD1_BGRP7'          ).setLogic( d.RNDM1 & bgrp7cond ).setTriggerType(TT.lardigital)
+
+
         # lumi measurements
         MenuItem('L1_MLZ_A').setLogic( (d.MBTS_A|ZDC_A|d.LUCID_A) & physcond)
         MenuItem('L1_MLZ_C').setLogic( (d.MBTS_C|ZDC_C|d.LUCID_C) & physcond)
