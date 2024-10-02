@@ -55,8 +55,7 @@ RNTCollection::RNTCollection(
      m_open( false ),
      m_readOnly( mode == ICollection::READ ? true : false ),
      m_poolOut( "RNTCollection"),
-     m_dataEditor( 0 ),
-     m_fileMgr( 0 )
+     m_dataEditor( 0 )
 {
    RNTCollection::open();
 }
@@ -254,25 +253,23 @@ void RNTCollection::open()  try
             root_mode = "UPDATE";
             io_mode = (Io::WRITE | Io::APPEND);
          }
-         if( m_fileMgr == 0 ) {
-            IService *is(0);
-            if (Gaudi::svcLocator()->getService("FileMgr",is,true).isFailure()) {
+         if( !m_fileMgr ) {
+            m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
+            if ( !m_fileMgr ) {
                m_poolOut << coral::Error 
                          << "unable to get the FileMgr, will not manage TFiles"
                          << coral::MessageStream::endmsg;
-            } else {
-               m_fileMgr = dynamic_cast<IFileMgr*>(is);
             }
          }
-         if (m_fileMgr != 0 && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
+         if (m_fileMgr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
             m_poolOut << coral::Info
                       << "Unable to locate ROOT file handler via FileMgr. "
                       << "Will use default TFile::Open"
                       << coral::MessageStream::endmsg;
-            m_fileMgr = 0;
+            m_fileMgr.reset();
          }
 
-         if (m_fileMgr == 0) {
+         if (!m_fileMgr) {
             m_file = TFile::Open(m_fileName.c_str(), root_mode);
          } else {
             void* vf(0);
@@ -308,7 +305,7 @@ void RNTCollection::open()  try
       if (!m_reader) {
 
          int n(0);
-         if (m_fileMgr == 0) {
+         if (!m_fileMgr) {
             m_file->Close();
          } else {
             n = m_fileMgr->close(m_file, "RNTCollection");
@@ -349,7 +346,7 @@ void RNTCollection::open()  try
       
    if (m_session && m_mode == ICollection::UPDATE) {
       int n(0);
-      if (m_fileMgr == 0) {
+      if (!m_fileMgr) {
          m_file->Close();
       } else {
          n = m_fileMgr->close(m_file, "RNTCollection");

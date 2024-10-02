@@ -15,6 +15,7 @@
 #include "CoralBase/MessageStream.h"
 
 #include "GaudiKernel/IFileMgr.h"
+#include "GaudiKernel/SmartIF.h"
 #include "Gaudi/PluginService.h"
 
 #include <string>
@@ -144,7 +145,7 @@ namespace pool {
         std::unique_ptr<RNTCollectionSchemaEditor>   m_schemaEditor;
         ICollectionDataEditor*            m_dataEditor;
 
-        IFileMgr*                           m_fileMgr;
+        SmartIF<IFileMgr>                    m_fileMgr;
       };
    }
 }
