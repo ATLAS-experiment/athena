@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream> 
@@ -9,7 +9,7 @@
 
 namespace LVL1TGCTrigger {
 
-TGCASDOut* TGCEvent::NewASDOut(TGCReadoutIndex tgcrindex, 
+TGCASDOut* TGCEvent::NewASDOut(const TGCReadoutIndex& tgcrindex, 
 			       TGCSignalType sigtype, int id, double tof)
 {
   TGCASDOut* asdout= new TGCASDOut(tgcrindex, sigtype, id, tof);

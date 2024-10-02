@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCASDOut_H
@@ -30,7 +30,7 @@ class TGCASDOut {
   void SetChannel(int ch);
 
   // get functions
-  TGCReadoutIndex GetTGCReadoutIndex() const { return m_tgcReadoutIndex; }
+  const TGCReadoutIndex& GetTGCReadoutIndex() const { return m_tgcReadoutIndex; }
   TGCSignalType GetSignalType() const { return m_signalType; }
   int GetHitID() const { return m_hitID; }
   int GetChannel() const { return m_channel; }

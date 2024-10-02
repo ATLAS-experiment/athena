@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1TGC_TGCARGUMENTS_HH
 #define TRIGT1TGC_TGCARGUMENTS_HH
@@ -35,7 +35,7 @@ class TGCArguments
     bool useRun3Config() const;
     bool USE_NSW() const;
     bool FORCE_NSW_COIN() const;
-    std::string NSWSideInfo() const;
+    const std::string& NSWSideInfo() const;
     bool USE_BIS78() const;
 
   private:

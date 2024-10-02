@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCElectronicsSystem.h"
@@ -176,7 +176,7 @@ int TGCElectronicsSystem::getSectorId(int side, int oct, int mod) const
   return NumberOfModule*NumberOfOctant*side+NumberOfModule*oct+mod;
 }
 
-TGCSector* TGCElectronicsSystem::getSector(LVL1TGCTrigger::TGCReadoutIndex index) const
+TGCSector* TGCElectronicsSystem::getSector(const LVL1TGCTrigger::TGCReadoutIndex& index) const
 { 
   if (index.GetSideNumber()<0) return 0;
   return m_sector[index.GetSideNumber()][index.GetOctantNumber()][index.GetModuleNumber()];
