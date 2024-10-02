@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # usage:
-# ./process_Z_Counting.sh [year] [update HISTs 0/1] [update CSVs 0/1]
+# ./process_Z_Counting.sh [year] [update HISTs 0/1] [update CSVs 0/1] [update GRL]
 # e.g.
-# ./process_Z_Counting.sh 24 1 1
-# where 'update=1' will only process new files not processed before (default) and '0' will overwrite everything
+# ./process_Z_Counting.sh 24 1 1 0
+# where 'update=1' will only process new files not processed before (default) and '0' will overwrite everything or create new GRL
 
 if [[ $# -ge 1 ]]; then
     if [[ $1 -ge 24 && $number -le 24 ]]; then
@@ -31,6 +31,13 @@ if [[ $# -lt 3 ]] || [[ $3 -gt 0 ]]; then
 else
     echo "Will overwrite all CSVs on Z counting EOS"
     updateC=0
+fi
+if [[ $# -lt 4 ]] || [[ $4 -gt 0 ]]; then
+    updateGRL=1
+    echo "Will create new temporary GRL"
+else
+    updateGRL=0
+    echo "Will reuse last GRL"
 fi
 
 dataset=data${year}_13p6TeV
@@ -133,28 +140,30 @@ echo "HIST file copied to $indir as far as available, rotating log"
 mv -f $oldlogfile ${oldlogfile}.old
 mv -f $newlogfile $oldlogfile
 
-echo
-echo "Creating temporary PHYS_StandardGRL_All_Good GRL"
-mkdir ${tmpdir}/grls
-python grl_maker.py ${tmpdir}/grls `awk '{print $1}' $oldlogfile` >& /dev/null
-if [[ $? -ne 0 ]]; then
-    echo "Something failed in GRL preparation"
-    exit 1
-fi
-# check each run for empty GRL
-for run in `awk '{print $1}' $oldlogfile`; do
-    if ! grep LBRange ${tmpdir}/grls/${run}_grl.xml >& /dev/null; then
-	echo "GRL for run $run is empty, removing"
-	rm ${tmpdir}/grls/${run}_grl.xml
+if [[ $updateGRL == 1 ]]; then
+    echo
+    echo "Creating temporary PHYS_StandardGRL_All_Good GRL"
+    mkdir ${tmpdir}/grls
+    python grl_maker.py ${tmpdir}/grls `awk '{print $1}' $oldlogfile` >& /dev/null
+    if [[ $? -ne 0 ]]; then
+	echo "Something failed in GRL preparation"
+	exit 1
     fi
-done
-grlname=${indir}${dataset}_PHYS_StandardGRL_All_Good_`date "+%F_%R"`.xml
-merge_goodrunslists ${tmpdir}/grls $grlname
-rm -f `readlink ${indir}latest_GRL.xml`
-rm -f ${indir}latest_GRL.xml
-ln -s $grlname ${indir}latest_GRL.xml
-echo "GRL creation complete $grlname" 
-rm -rf ${tmpdir}/grls
+    # check each run for empty GRL
+    for run in `awk '{print $1}' $oldlogfile`; do
+	if ! grep LBRange ${tmpdir}/grls/${run}_grl.xml >& /dev/null; then
+	    echo "GRL for run $run is empty, removing"
+	    rm ${tmpdir}/grls/${run}_grl.xml
+	fi
+    done
+    grlname=${indir}${dataset}_PHYS_StandardGRL_All_Good_`date "+%F_%R"`.xml
+    merge_goodrunslists ${tmpdir}/grls $grlname
+    rm -f `readlink ${indir}latest_GRL.xml`
+    rm -f ${indir}latest_GRL.xml
+    ln -s $grlname ${indir}latest_GRL.xml
+    echo "GRL creation complete $grlname" 
+    rm -rf ${tmpdir}/grls
+fi
 
-./process_HISTtoCSV.sh $year $updateC $grlname
+./process_HISTtoCSV.sh $year $updateC ${indir}latest_GRL.xml
 

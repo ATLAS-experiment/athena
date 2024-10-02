@@ -8,5 +8,4 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Install files from the package:
 atlas_install_scripts( scripts/*.py scripts/Pandas_scripts/*py scripts/Pandas_scripts/plotting/dqt_csv_luminosity.sh )
-atlas_install_data( scripts/Pandas_scripts/plotting/AtlasStyle )
 atlas_install_python_modules( python/* )

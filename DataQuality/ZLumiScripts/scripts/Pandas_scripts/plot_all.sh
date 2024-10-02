@@ -1,30 +1,31 @@
-#!/bin/bash
+# do all plot updates, year is hardcoded below
+# ./plot_all.sh [quiet] [update]
+# e.g. for a quiet, minimal update: ./plot_all.sh 1 1
 
-#script to make all plots
+if [[ $# -lt 1 ]] || [[ $1 -gt 0 ]]; then
+    filter="INFO|Info|WARNING|ERROR"
+    echo "INFO: Will suppress output of scripts."
+else
+    filter="."
+    echo "INFO: Pass through of all output."
+fi
 
-indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data24_13p6TeV/physics_Main/"
-outdir="/eos/home-j/jnewell/data24_13p6TeV_physics_plot_prelimgrl/"
+if [[ $# -lt 2 ]] || [[ $2 -gt 0 ]]; then
+    update=1
+    echo "INFO: Will keep Plots for existing runs and only add new ones"
+else
+    echo "INFO: Will overwrite all run-dependent Plots on Z counting EOS"
+    update=0
+fi
 
-filelist=$(ls $indir)
-for file in $filelist;
-do
-	
-	filename=${file/run_/}
-	run_number=${filename/.csv/}
+echo "INFO: Running now ./plot_runwise.sh 24 $update"
 
-	mkdir -p $outdir$run_number
+./plot_runwise.sh 24 $update | egrep $filter
 
-	# Kinematic plots
-	#python plotting/plot_kinematics.py --infile $infile
-	
-	# Time dependent efficiency and luminosity plots
-	python ../../python/plotting/efficiency.py --infile $indir$file --outdir $outdir
-	python ../../python/plotting/luminosity.py --infile $indir$file --outdir $outdir
-        python ../../python/plotting/luminosity.py --absolute --infile $indir$file --outdir $outdir
+echo "INFO: Running now ./plot_yearwise.sh 24 run3"
+./plot_yearwise.sh 24 run3 | egrep $filter
 
-	# Pileup dependent efficiency and luminosity plots
-	python ../../python/plotting/efficiency.py --usemu --infile $indir$file --outdir $outdir
-	python ../../python/plotting/luminosity.py --usemu --infile $indir$file --outdir $outdir
 
-done
+echo "INFO: Running now ./make_latexslides"
+./make_latexslides.sh | egrep $filter
 
