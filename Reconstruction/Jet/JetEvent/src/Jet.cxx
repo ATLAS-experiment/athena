@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,6 @@
 #include "NavFourMom/INavigable4MomentumCollection.h"
 
 // JetEvent
-#include "JetEvent/JetStoreHelper.h"
 #include "JetEvent/Jet.h"
 #include "JetEvent/JetKeyDescriptor.h"
 #include "JetEvent/JetConstituentIterator.h"
