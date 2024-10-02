@@ -35,9 +35,6 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 
-#include "McParticleEvent/TruthParticle.h"
-#include "McParticleEvent/TruthParticleContainer.h"
-
 #include "StoreGate/ReadHandle.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
