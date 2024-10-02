@@ -23,6 +23,7 @@
 #include "TestTools/expect_exception.h"
 #include <cassert>
 #include <iostream>
+#include "AthContainers/debug.h"
 
 
 class MyObj
@@ -124,6 +125,7 @@ void test2()
   assert (h1.store() == "TestStore");
   assert (h1.auxid() == ityp);
   assert (h1.cptr() == fooptr);
+  assert (h1.getDecorationArray() != nullptr);
   // + 1 from the alias.
   assert (foo_proxy->refCount() == 2);
 
@@ -154,6 +156,7 @@ void test2()
   SG::WriteDecorHandle<MyObj, int> h4 (k4);
   assert (h4.setProxyDict (&testStore).isSuccess());
   assert (h4.cptr() == barptr);
+  assert (h4.getDecorationArray() != nullptr);
   assert (bar_proxy->refCount() == 2);
   assert (h4.auxid() == ityp2);
 
@@ -369,16 +372,31 @@ void test6()
   assert (foo1_proxy->refCount() == 2);
   EXPECT_EXCEPTION( SG::ExcBadDecorElement, h1 (*(*pcont2)[0]) = 12 );
 
-  SG::WriteDecorHandleKey<MyObjCont> k2 ("foo2.aaa");
+  SG::WriteDecorHandleKey<MyObjCont> k2 ("foo2.bbb");
   assert (k2.initialize().isSuccess());
   k2.renounce();
   SG::WriteDecorHandle<MyObjCont, int> h2 (k2);
   assert (h2.setProxyDict (&testStore).isSuccess());
 
-  assert (foo2_proxy->refCount() == 1);
-  h2 (*(*pcont2)[0]) = 13;
+  assert (!pcont1->isAvailable (h2.auxid()));
+  assert (!pcont2->isAvailable (h2.auxid()));
+
   assert (foo2_proxy->refCount() == 1);
   h2 (*(*pcont1)[0]) = 14; // ok, h2 has been renounced.
+  assert (pcont1->isAvailable (h2.auxid()));
+  assert (!pcont2->isAvailable (h2.auxid()));
+
+  assert (foo2_proxy->refCount() == 1);
+  h2 (*(*pcont2)[0]) = 13;
+  assert (pcont1->isAvailable (h2.auxid()));
+  assert (pcont2->isAvailable (h2.auxid()));
+
+  SG::WriteDecorHandleKey<MyObjCont> k3 ("foo2.ccc");
+  assert (k3.initialize().isSuccess());
+  k3.renounce();
+  SG::WriteDecorHandle<MyObjCont, int> h3 (k3);
+  assert (h3.setProxyDict (&testStore).isSuccess());
+  h3 (*(*pcont1)[0]) = 24;
 }
 
 
