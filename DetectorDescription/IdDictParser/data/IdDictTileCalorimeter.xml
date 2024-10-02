@@ -26,7 +26,7 @@
   </subregion>
 
   <subregion name="cylinder" >
-    <range field="side" />
+    <range field="side" values="negative positive"/>
     <range field="module" minvalue="0" maxvalue="63" />
   </subregion>
 
