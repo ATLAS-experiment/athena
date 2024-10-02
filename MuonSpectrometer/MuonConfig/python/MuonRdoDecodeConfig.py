@@ -252,13 +252,15 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
     # We need the MDT cabling to be setup
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg, MdtTwinTubeMapCondAlgCfg
     acc.merge(MDTCablingConfigCfg(flags))
+    acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
 
     tool_kwargs = {}
-    tool_kwargs["MdtxAODKey"] =  "xAODMdtCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
+    tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
+    tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else ""
+    
     ### Disable the twin tubes in the Phase II geometry setup
-    tool_kwargs["UseTwin"] = not flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, DoPropagationCorrection = False))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
@@ -271,6 +273,9 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
 
     # Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+    if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
+        from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
+        acc.merge(MdtMeasViewAlgCfg(flags))
     return acc
 
 

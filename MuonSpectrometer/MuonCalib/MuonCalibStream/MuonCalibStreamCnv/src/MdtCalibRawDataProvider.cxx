@@ -132,7 +132,7 @@ StatusCode MdtCalibRawDataProvider::decodeImpl(Muon::MdtPrepDataContainer *mdtPr
             mdtCollection->setIdentifier(idHelper.elementID(channelId));
         }
 
-        std::unique_ptr<Muon::MdtPrepData> newPrepData = std::make_unique<Muon::MdtPrepData>(channelId, mdtHashId, driftRadius, std::move(errorMatrix), detEl, tdc_counts, adc_counts, digitStatus);
+        std::unique_ptr<Muon::MdtPrepData> newPrepData = std::make_unique<Muon::MdtPrepData>(channelId, driftRadius, std::move(errorMatrix), detEl, tdc_counts, adc_counts, digitStatus);
 
         ATH_MSG_DEBUG(" "<<m_muonIdHelper->toString(channelId)<<" ADC="<<adc_counts<<" TDC="<<tdc_counts<<" mdtHashId : "<<mdtHashId );
         if (newPrepData->adc() < m_adcCut) {

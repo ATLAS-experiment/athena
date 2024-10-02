@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONVALR4_MDTCALIBDBALGTEST_H
@@ -33,7 +33,7 @@ namespace MuonValR4{
 
         private:
             //Retrieve the xAODMdtCircles container
-            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_MdtKey{this, "MdtKey", "xAODMdtCircles",
+            SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_MdtKey{this, "MdtKey", "xMdtDriftCircles",
                                                                       "Key to the uncalibrated Drift circle measurements"};
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** pointer to MdtCalibSvc */

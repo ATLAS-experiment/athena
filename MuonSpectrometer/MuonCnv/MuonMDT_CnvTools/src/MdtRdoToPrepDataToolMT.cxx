@@ -17,7 +17,10 @@
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "xAODMuonPrepData/MdtDriftCircleAuxContainer.h"
-#include "MuonIdHelpers/IdentifierByDetElSorter.h" 
+#include "MuonIdHelpers/IdentifierByDetElSorter.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircleAuxContainer.h"
+
+
 using namespace MuonGM;
 using namespace Trk;
 
@@ -74,19 +77,16 @@ namespace Muon {
                 std::ranges::sort(sortMe, IdentifierByDetElSorter{m_idHelperSvc});
                 for (const MdtPrepData* prd : sortMe) {
                     const Identifier prdId{prd->identify()};
-                    xAOD::MdtDriftCircle* dc = xAODPrd->push_back(std::make_unique<xAOD::MdtDriftCircle>());
-
-                    xAOD::MeasVector<1> driftRadius{0.f};
-                    xAOD::MeasMatrix<1> cov{0.f};
-                    if (prd->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
-                        driftRadius[0] = prd->localPosition().x();
-                        cov(0,0) = prd->localCovariance()(0,0);
+                    xAOD::MdtDriftCircle* dc{nullptr};
+                    /// The prepdata represents an actual drift circle
+                    if (!xAODTwinPrd|| !twinTubeMap || twinTubeMap->twinId(prdId) == prdId ||
+                        prd->dimension() == 1) {
+                        dc = xAODPrd->push_back(std::make_unique<xAOD::MdtDriftCircle>());
                     } else {
-                        cov(0, 0) = std::pow(14.6 * Gaudi::Units::mm, 2);
+                        dc = xAODTwinPrd->push_back(std::make_unique<xAOD::MdtTwinDriftCircle>());                       
                     }
                     /// That method is kind of depreciated but needed for the Acts conversion test..
                     dc->setIdentifier(prdId.get_compact());
-                    dc->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId), std::move(driftRadius), std::move(cov));
                     dc->setTdc(prd->tdc());
                     dc->setAdc(prd->adc());
                     dc->setTube(idHelper.tube(prdId));
@@ -94,6 +94,35 @@ namespace Muon {
                     dc->setStatus(prd->status());
                     if (r4DetMgr){
                         dc->setReadoutElement(r4DetMgr->getMdtReadoutElement(prdId));
+                    }
+                    const IdentifierHash detHash{m_idHelperSvc->detElementHash(prdId)};
+                    float driftRadius{0.f}, driftCov{0.f};
+                    if (prd->status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+                        driftRadius = prd->localPosition().x();
+                        driftCov = prd->localCovariance()(0,0);
+                    } else {
+                        /// Invalid drift circles have a covariance as large as the inner radius assigned
+                        const float maxR = r4DetMgr ? dc->readoutElement()->innerTubeRadius() 
+                                                    : prd->detectorElement()->innerTubeRadius();
+                        driftCov = std::pow(maxR, 2);
+                    }
+                    /// Ordinary 1D circle
+                    if (dc->numDimensions() == 1) {
+                        xAOD::MeasVector<1> locPos{driftRadius};
+                        xAOD::MeasMatrix<1> locCov{driftCov};
+                        dc->setMeasurement<1>(detHash, std::move(locPos), std::move(locCov));
+                    } else {
+                        xAOD::MeasMatrix<2> locCov{xAOD::MeasMatrix<2>::Identity()};
+                        locCov(Trk::locR, Trk::locR) = prd->localCovariance()(Trk::locR, Trk::locR);
+                        locCov(Trk::locZ, Trk::locZ) = prd->localCovariance()(Trk::locZ, Trk::locZ);
+                        dc->setMeasurement<2>(detHash, xAOD::toStorage(prd->localPosition()), std::move(locCov));
+                        auto* twinDC{static_cast<xAOD::MdtTwinDriftCircle*>(dc)};
+                        auto* twinPRD{static_cast<const MdtTwinPrepData*>(prd)};
+                        twinDC->setTwinAdc(twinPRD->adcTwin());
+                        twinDC->setTwinTdc(twinPRD->tdcTwin());
+                        const Identifier twinId = twinTubeMap->twinId(prdId);
+                        twinDC->setTwinTube(idHelper.tube(twinId));
+                        twinDC->setTwinLayer(idHelper.tubeLayer(twinId));
                     }
                 }
             }
@@ -103,7 +132,12 @@ namespace Muon {
                 return StatusCode::FAILURE;
             }
         }
-        if (xAODPrd) xAODPrd->lock();
+        if (xAODPrd) {
+            xAODPrd->lock();
+        }
+        if (xAODTwinPrd) {
+            xAODTwinPrd->lock();
+        }
         return StatusCode::SUCCESS;
     }
 
@@ -118,24 +152,8 @@ namespace Muon {
         // Retrieve the RDO decoder
         ATH_CHECK(m_mdtDecoder.retrieve());
 
-        // + TWIN TUBES
-        // make an array of [multilayer][layer][twin-pair]; 2 multilayers, 3 layer per multilayer, 36 twin-pairs per layer
-        if (m_useTwin) {
-            for (int i = 0; i < 2; i++) {
-                for (int j = 0; j < 3; j++) {
-                    for (int k = 0; k < 36; k++) {
-                        // fill m_twin_chamber array with unique numbers
-                        m_twin_chamber[i][j][k] = 1000 * i + 100 * j + k;
-                        // for secondary hits we need to make a second array with unique numbers
-                        // (i+1 is used in the expression, so numbers are always different from m_twin_chamber array)
-                        m_secondaryHit_twin_chamber[i][j][k] = 10000 * (i + 1) + 100 * j + k;
-                    }
-                }
-            }
-        }  // end if(m_useTwin){
-        // - TWIN TUBES
-
-
+        ATH_CHECK(m_twinTubeKey.initialize(m_useTwin));
+      
         m_BMGid = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG");
         m_BMGpresent = m_BMGid != -1;
         if (m_useNewGeo) {
@@ -166,7 +184,7 @@ namespace Muon {
                 if (re->stationName() != m_BMGid) {
                     continue;
                 }
-                for (IdentifierHash dead : re->getParameters().removedTubes) {
+                for (const IdentifierHash& dead : re->getParameters().removedTubes) {
                     m_DeadChannels.insert(re->measurementId(dead));
                 }
             }
@@ -177,7 +195,8 @@ namespace Muon {
         ATH_CHECK(m_mdtPrepDataContainerKey.initialize());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_muDetMgrKey.initialize());
-        ATH_CHECK(m_mdtxAODKey.initialize(!m_mdtxAODKey.empty()));
+        ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
+        ATH_CHECK(m_xAODTwinKey.initialize(!m_xAODTwinKey.empty()));
         ATH_CHECK(m_geoCtxKey.initialize(m_useNewGeo));
         return StatusCode::SUCCESS;
     }
@@ -193,7 +212,7 @@ namespace Muon {
     }
 
     const MdtCsmContainer* MdtRdoToPrepDataToolMT::getRdoContainer(const EventContext& ctx) const {
-        SG::ReadHandle<MdtCsmContainer> rdoContainerHandle{m_rdoContainerKey, ctx};
+        SG::ReadHandle rdoContainerHandle{m_rdoContainerKey, ctx};
         if (rdoContainerHandle.isValid()) {
             ATH_MSG_DEBUG("MdtgetRdoContainer success");
             return rdoContainerHandle.cptr();
@@ -296,10 +315,9 @@ namespace Muon {
             const float sigR = calibOutput.driftRadiusUncert();
             driftRadius[0] = r; 
             (cov)(0, 0) = sigR * sigR;
-        } else (cov)(0, 0) = 0;
+        } else (cov)(0, 0) = std::pow(descriptor->innerTubeRadius(), 2);
         
        return std::make_unique<MdtPrepData>(calibInput.identify(), 
-                                            descriptor->identifyHash(), 
                                             std::move(driftRadius), 
                                             std::move(cov), 
                                             descriptor,
@@ -312,13 +330,7 @@ namespace Muon {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         // first handle the case of twin tubes
         if (m_useTwin) {
-            // two chambers in ATLAS are installed with Twin Tubes; in detector coordinates BOL4A13 & BOL4C13; only INNER multilayer(=1) is
-            // with twin tubes implement twin tube writing to prepData either for all BOL (m_useAllBOLTwin = true) _OR_ only for two
-            // chambers really installed
-            Identifier elementId = rdoColl->identify();
-            MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(elementId);
-            if (chIndex == MuonStationIndex::BOL &&
-                (m_useAllBOLTwin || (std::abs(id_helper.stationEta(elementId)) == 4 && id_helper.stationPhi(elementId) == 7))) {
+            if (cache.twinTubeMap->isTwinTubeLayer(rdoColl->identify())) {
                 return processCsmTwin(ctx, cache, rdoColl);
             }
         }
@@ -386,7 +398,7 @@ namespace Muon {
         }
         return StatusCode::SUCCESS;
     }
-    StatusCode MdtRdoToPrepDataToolMT::processCsmTwin(const EventContext& ctx, ConvCache& cache, const MdtCsm* rdoColl) const {
+ StatusCode MdtRdoToPrepDataToolMT::processCsmTwin(const EventContext& ctx, ConvCache& cache, const MdtCsm* rdoColl) const {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         ATH_MSG_DEBUG(" ***************** Start of processCsmTwin");
         ATH_MSG_DEBUG(" Number of AmtHit in this Csm " << rdoColl->size());
@@ -400,204 +412,120 @@ namespace Muon {
                                         << " / " << rdoColl->MrodId() << " / " << rdoColl->CsmId());
 
         // for each Csm, loop over AmtHit, converter AmtHit to digit
-        // retrieve/create digit collection, and insert digit into collection
-
-        // make a map to be filled for every twin-pair
-        //   std::map<int, std::vector<MdtDigit*> > mdtDigitColl;
-
-        using twin_digit = std::pair<std::unique_ptr<MdtDigit>, std::unique_ptr<MdtDigit>>;
-        std::map<int, twin_digit> mdtDigitColl;
+        // retrieve/create digit collection, and insert digit into collection        
+        std::map<Identifier, std::array<std::unique_ptr<MdtDigit>, 2>> mdtDigitColl{};
 
         for (const MdtAmtHit* amtHit : *rdoColl) {
             std::unique_ptr<MdtDigit> newDigit{m_mdtDecoder->getDigit(ctx, *amtHit, subdetId, mrodId, csmId)};
 
             if (!newDigit) {
-                ATH_MSG_DEBUG("Error in MDT RDO decoder for subdetId/mrodId/csmId "
+                ATH_MSG_WARNING("Error in MDT RDO decoder for subdetId/mrodId/csmId "
                                 << subdetId << "/" << mrodId << "/" << csmId << " amtHit channelId/tdcId =" << amtHit->channelId() << "/"
                                 << amtHit->tdcId());
                 continue;
             }
-
-            // make an Identifier
-            Identifier channelId = newDigit->identify();
-
-            // get tube params
-            int tube = id_helper.tube(channelId);
-            int layer = id_helper.tubeLayer(channelId);
-            int multilayer = id_helper.multilayer(channelId);
-
-            // find the correct twin-pair (tube-1 & tube-3 are twin pair 1, tube-2 & tube-4 are twin pair 2)
-            int twinPair = -1;
-            if (tube % 4 == 1) {
-                twinPair = (tube + 1) / 2;
-            } else if (tube % 4 == 3) {
-                twinPair = (tube - 1) / 2;
-            } else if (tube % 4 == 2) {
-                twinPair = (tube + 2) / 2;
+            std::array<std::unique_ptr<MdtDigit>, 2> & moveTo = mdtDigitColl[newDigit->identify()];
+            if (!moveTo[0]) {
+                moveTo[0] = std::move(newDigit);
+            } else if  (!moveTo[1] && !m_discardSecondaryHitTwin) {
+                moveTo[1] = std::move(newDigit);
             } else {
-                twinPair = tube / 2;
-            }  // tube%4 == 0
-
-            // fill the digitColl map
-            twin_digit& pair = mdtDigitColl[m_twin_chamber[multilayer - 1][layer - 1][twinPair - 1]];
-            if (!pair.first) {
-                pair.first = std::move(newDigit);
-            } else if (!pair.second) {
-                pair.second = std::move(newDigit);
-            }
-            // if a secondary hit appears in a tube add it to mdtDigitColl, unless m_discardSecondaryHitTwin flag is true
-            else {
-                ATH_MSG_VERBOSE(" TWIN TUBES: found a secondary(not twin) hit in a twin tube");
-                twin_digit& secondPair = mdtDigitColl[m_secondaryHit_twin_chamber[multilayer - 1][layer - 1][twinPair - 1]];
-                if (!m_discardSecondaryHitTwin) {
-                    if (!secondPair.first) {
-                        secondPair.first = std::move(newDigit);
-                    } else if (!secondPair.second) {
-                        secondPair.second = std::move(newDigit);
-                    } else {
-                        ATH_MSG_VERBOSE(" TWIN TUBES: found a tertiary hit in a twin tube in one RdoCollection for "
-                                        << m_idHelperSvc->toString(channelId) << " with adc  = " << newDigit->adc()
-                                        << "  tdc = " << newDigit->tdc());
-                    }
-                }  // end --   if(!m_discardSecondaryHitTwin){
-                else {
-                    ATH_MSG_DEBUG(" TWIN TUBES: discarding secondary(non-twin) hit in a twin tube as flag m_discardSecondaryHitTwin is set to true");
-                }
+                ATH_MSG_VERBOSE(" TWIN TUBES: found a tertiary hit in a twin tube in one RdoCollection for "
+                             << m_idHelperSvc->toString(newDigit->identify()) << " with adc  = " << newDigit->adc()
+                             << "  tdc = " << newDigit->tdc());
             }
         }  // end for-loop over rdoColl
 
-        // iterate over mdtDigitColl
-        for (std::pair<const int, twin_digit>& digitPair : mdtDigitColl) {
-            // get the twin hits from mdtDigitColl
-            std::unique_ptr<MdtDigit>& digit = digitPair.second.first;
-            std::unique_ptr<MdtDigit>& second_digit = digitPair.second.second;
-
-            if (!digit) {
-                ATH_MSG_FATAL("nullptr to a digit ");
-                return StatusCode::FAILURE;
-            }
-            if (digit->isMasked() || (second_digit&& second_digit->isMasked())){
-                continue;
+        auto convertTwins = [this, &cache, &ctx](std::unique_ptr<MdtDigit> digit,
+                                                 std::unique_ptr<MdtDigit> digit2) {
+            if (!digit || digit->isMasked() || !cache.legacyDetMgr) {
+                return;
             }
 
-            // Do something with it
-            Identifier channelId = digit->identify();
-            int multilayer = id_helper.multilayer(channelId);
+            MdtPrepDataCollection* driftCircleColl = cache.createCollection(digit->identify());
+            
+            if (!digit2 || digit2->isMasked()) {
+                ATH_MSG_VERBOSE("Got single digit " << m_idHelperSvc->toString(digit->identify())<<", tdc: "
+                             <<digit->tdc()<<", adc: "<<digit->adc() 
+                             << ", hash: "<< driftCircleColl->identifyHash());
 
-            MdtPrepDataCollection* driftCircleColl = cache.createCollection(channelId);
-            if (!driftCircleColl) {
-                ATH_MSG_DEBUG("Corresponding multi layer " << m_idHelperSvc->toString(channelId) << " is already decoded.");
-                continue;
-            }
+                const MdtCalibInput mdtCalibIn = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}: 
+                                                               MdtCalibInput{*digit, *cache.legacyDetMgr};
 
-            // check if the hit is in multilayer=1
-            // two chambers in ATLAS are installed with Twin Tubes; in detector coordinates BOL4A13 & BOL4C13; only INNER multilayer(=1) is
-            // with twin tubes
-            if (multilayer == 1) {
-                // if no twin hit present in data, use standard PRD making
-                if (!second_digit) {
-                    ATH_MSG_VERBOSE("got digit with id ext / hash " << m_idHelperSvc->toString(channelId) << " / "
-                                                                    << driftCircleColl->identifyHash());
-
-                    const MdtCalibInput mdtCalibIn = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}: 
-                                                                   MdtCalibInput{*digit, *cache.legacyDetMgr};
-
-                    const MdtCalibOutput mdtCalibOut{m_calibrationTool->calibrate(ctx, mdtCalibIn, false)};
+                const MdtCalibOutput mdtCalibOut{m_calibrationTool->calibrate(ctx, mdtCalibIn, false)};
                     
-                    // Create new PrepData
-                    std::unique_ptr<MdtPrepData> newPrepData = createPrepData(mdtCalibIn, mdtCalibOut, cache);
-                    if (newPrepData) {
-                        newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
-                        driftCircleColl->push_back(std::move(newPrepData));
-
-                    } 
-                    ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " " << mdtCalibOut);
-                    continue;
-                }
-                MdtCalibInput mdtCalib1st = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}
-                                                        : MdtCalibInput{*digit, *cache.legacyDetMgr};
+                /// Create new PrepData
+                std::unique_ptr<MdtPrepData> newPrepData = createPrepData(mdtCalibIn, mdtCalibOut, cache);
+                if (!newPrepData) return;
                 
-                MdtCalibInput mdtCalib2nd = m_useNewGeo ? MdtCalibInput{*second_digit, *m_detMgrR4, *cache.gctx}
-                                                        : MdtCalibInput{*second_digit, *cache.legacyDetMgr};
+                newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
+                driftCircleColl->push_back(std::move(newPrepData));                
+                return;
+            } 
+            ATH_MSG_VERBOSE("Twin digit calibration "<<m_idHelperSvc->toString(digit->identify())
+                         <<", tdc: "<<digit->tdc()<<", adc: "<<digit->adc()<<" -- "
+                         <<m_idHelperSvc->toString(digit2->identify())
+                         <<", tdc: "<<digit2->tdc()<<", adc: "<<digit2->adc());
+            MdtCalibInput mdtCalib1st = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}
+                                                    : MdtCalibInput{*digit, *cache.legacyDetMgr};
                 
-                updateClosestApproachTwin(mdtCalib1st);
-                updateClosestApproachTwin(mdtCalib2nd);
-
-                const MdtCalibTwinOutput twinCalib = m_calibrationTool->calibrateTwinTubes(ctx, std::move(mdtCalib1st), std::move(mdtCalib2nd));
-
-                Amg::Vector2D hitPos{twinCalib.primaryDriftR(), twinCalib.locZ()};
-                Amg::MatrixX cov(2, 2);
-                (cov)(0, 0) = twinCalib.uncertPrimaryR() * twinCalib.uncertPrimaryR();
-                (cov)(1, 1) = twinCalib.sigmaZ() * twinCalib.sigmaZ();
-                (cov)(0, 1) = 0;
-                (cov)(1, 0) = 0;
+            MdtCalibInput mdtCalib2nd = m_useNewGeo ? MdtCalibInput{*digit2, *m_detMgrR4, *cache.gctx}
+                                                    : MdtCalibInput{*digit2, *cache.legacyDetMgr};
                 
-                const MuonGM::MdtReadoutElement* descriptor = cache.legacyDetMgr->getMdtReadoutElement(mdtCalib1st.identify());
-                std::unique_ptr<MdtTwinPrepData> twin_newPrepData = std::make_unique<MdtTwinPrepData>(twinCalib.primaryID(),
-                                                                                                      descriptor->identifyHash(),
-                                                                                                      std::move(hitPos),
-                                                                                                      std::move(cov),
-                                                                                                      descriptor,
-                                                                                                      twinCalib.primaryTdc(),
-                                                                                                      twinCalib.primaryAdc(),
-                                                                                                      twinCalib.twinTdc(),
-                                                                                                      twinCalib.twinAdc(),
-                                                                                                      twinCalib.primaryStatus());
+            updateClosestApproachTwin(mdtCalib1st);
+            updateClosestApproachTwin(mdtCalib2nd);
+
+            const MdtCalibTwinOutput twinCalib = m_calibrationTool->calibrateTwinTubes(ctx, 
+                                                                                       std::move(mdtCalib1st), 
+                                                                                       std::move(mdtCalib2nd));
+
+            Amg::Vector2D hitPos{twinCalib.primaryDriftR(), twinCalib.locZ()};
+            Amg::MatrixX cov(2, 2);
+            cov(0, 0) = twinCalib.uncertPrimaryR() * twinCalib.uncertPrimaryR();
+            cov(1, 1) = twinCalib.sigmaZ() * twinCalib.sigmaZ();
+            cov(0, 1) = cov(1, 0) = 0;
+                
+            const MuonGM::MdtReadoutElement* descriptor = cache.legacyDetMgr->getMdtReadoutElement(digit->identify());
+            auto twin_newPrepData = std::make_unique<MdtTwinPrepData>(twinCalib.primaryID(),
+                                                                      std::move(hitPos),
+                                                                      std::move(cov),
+                                                                      descriptor,
+                                                                      twinCalib.primaryTdc(),
+                                                                      twinCalib.primaryAdc(),
+                                                                      twinCalib.twinTdc(),
+                                                                      twinCalib.twinAdc(),
+                                                                      twinCalib.primaryStatus());
                         
-                ATH_MSG_DEBUG(" MADE A 2D TWINPREPDATA " << m_idHelperSvc->toString(twinCalib.primaryID()) << " & "
-                                                         << m_idHelperSvc->toString(twinCalib.twinID()) << " "<<twinCalib);
-                Amg::Vector3D gpos_centertube = twin_newPrepData->globalPosition();
-               
-                Amg::Vector3D locpos_centertube = twinCalib.locZ() * Amg::Vector3D::UnitZ();
-                const Amg::Vector3D gpos_twin = descriptor->localToGlobalTransf(twinCalib.primaryID())*locpos_centertube;
+            ATH_MSG_VERBOSE(" MADE A 2D TWINPREPDATA " << m_idHelperSvc->toString(twinCalib.primaryID()) << " & "
+                                                      << m_idHelperSvc->toString(twinCalib.twinID()) << " "<<twinCalib);
+       
+            ATH_MSG_VERBOSE("global pos center tube  " << Amg::toString(twin_newPrepData->globalPosition(), 2) << std::endl
+                        <<"local pos center tube w/ TWIN INFO "<<Amg::toString(twinCalib.locZ() * Amg::Vector3D::UnitZ(), 2)<<std::endl
+                        <<"global pos w/o TWIN INFO  "<<Amg::toString(descriptor->tubePos(twinCalib.primaryID())));
 
-                ATH_MSG_DEBUG("global pos center tube  " << Amg::toString(gpos_centertube, 2) << std::endl
-                            <<"local pos center tube w/ TWIN INFO "<<Amg::toString(locpos_centertube, 2)<<std::endl
-                            <<"global pos w/ TWIN INFO  "<<Amg::toString(gpos_twin));
+            twin_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
+            driftCircleColl->push_back(std::move(twin_newPrepData));
+        };
 
-                twin_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
-                driftCircleColl->push_back(std::move(twin_newPrepData));
-
-                   
+        // iterate over mdtDigitColl
+        for (auto &[id,  digits] : mdtDigitColl) {
+            // get the twin hits from mdtDigitColl
+            const Identifier twinId = cache.twinTubeMap->twinId(id);
+            /// check for the twin tube id
+            if (id != twinId) {
+                std::array<std::unique_ptr<MdtDigit>, 2>& twinDigits = mdtDigitColl[twinId];
+                ATH_MSG_VERBOSE("Convert digits: "<<digits[0].get()<<" "<<twinDigits[0].get());
+                convertTwins(std::move(digits[0]), std::move(twinDigits[0]));
+                ATH_MSG_VERBOSE("Convert digits: "<<digits[1].get()<<" "<<twinDigits[1].get());
+                convertTwins(std::move(digits[1]), std::move(twinDigits[1]));
             } else {
-                // if multilayer=2, then treat every hit as a separate hit, no twin hit should be present here as the hardware is not
-                // installed
-
-                const MdtCalibInput calibInput1st = m_useNewGeo ? MdtCalibInput{*digit, *m_detMgrR4, *cache.gctx}
-                                                                : MdtCalibInput{*digit, *cache.legacyDetMgr};
-                const MdtCalibOutput calibResult1st{m_calibrationTool->calibrate(ctx, calibInput1st, false)};
-                // Create new PrepData
-                std::unique_ptr<MdtPrepData> newPrepData = createPrepData(calibInput1st, calibResult1st, cache);
-                if (newPrepData) {
-                    newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
-                    driftCircleColl->push_back(std::move(newPrepData));
-                    ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " "<<calibResult1st);
-                }
-                
-                if (!second_digit) continue;
-                    // Calculate radius
-                    
-                const MdtCalibInput calibInput2nd = m_useNewGeo ? MdtCalibInput{*second_digit, *m_detMgrR4, *cache.gctx}
-                                                                : MdtCalibInput{*second_digit, *cache.legacyDetMgr};
-                const MdtCalibOutput calibResult2nd{m_calibrationTool->calibrate(ctx, calibInput2nd, false)};
-
-                // second_digit
-                // Create new PrepData
-                std::unique_ptr<MdtPrepData> second_newPrepData = createPrepData(calibInput2nd, calibResult2nd, cache);
-                if (second_newPrepData) {
-                    second_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
-                    driftCircleColl->push_back(std::move(second_newPrepData));
-                } 
-                // second_digit
-                ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA FOR SECOND DIGIT " 
-                              << m_idHelperSvc->toString(calibInput2nd.identify()) 
-                              << " "<<calibResult2nd);
-              
+                convertTwins(std::move(digits[0]), nullptr);
+                convertTwins(std::move(digits[1]), nullptr);
             }
-        } 
+        }
         return StatusCode::SUCCESS;
     }
-    void MdtRdoToPrepDataToolMT::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl) {
+void MdtRdoToPrepDataToolMT::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl) {
         PVConstLink cv = mydetEl->getMaterialGeom();  // it is "Multilayer"
         int nGrandchildren = cv->getNChildVols();
         if (nGrandchildren <= 0) return;
@@ -645,7 +573,7 @@ namespace Muon {
             cache.legacyPrd = handle.ptr();
         } else {
             // use the cache to get the container
-            SG::UpdateHandle<MdtPrepDataCollection_Cache> update{m_prdContainerCacheKey, ctx};
+            SG::UpdateHandle update{m_prdContainerCacheKey, ctx};
             if (!update.isValid()) {
                 ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
                 return cache;
@@ -659,19 +587,29 @@ namespace Muon {
             ATH_MSG_VERBOSE("Created container using cache for " << m_prdContainerCacheKey.key());
             cache.legacyPrd = handle.ptr();
         }
-        if (!m_mdtxAODKey.empty()) {
-            SG::WriteHandle<xAOD::MdtDriftCircleContainer> writeHandle{m_mdtxAODKey, ctx};
+        if (!m_xAODTwinKey.empty()) {
+            SG::WriteHandle writeHandle{m_xAODTwinKey, ctx};
+            if (!writeHandle.recordNonConst(std::make_unique<xAOD::MdtTwinDriftCircleContainer>(),
+                                            std::make_unique<xAOD::MdtTwinDriftCircleAuxContainer>()).isSuccess() ||
+                !writeHandle.isValid()) {
+                ATH_MSG_FATAL("Failed to write xAOD::MdtPrepDataContainer "<<m_xAODTwinKey.fullKey());
+                return cache;
+            }
+            cache.xAODTwinPrd = writeHandle.ptr();
+        }
+        if (!m_xAODKey.empty()) {
+            SG::WriteHandle writeHandle{m_xAODKey, ctx};
             if (!writeHandle.recordNonConst(std::make_unique<xAOD::MdtDriftCircleContainer>(),
                                             std::make_unique<xAOD::MdtDriftCircleAuxContainer>()).isSuccess() ||
                 !writeHandle.isValid()) {
-                ATH_MSG_FATAL("Failed to write xAOD::MdtPrepDataContainer "<<m_mdtxAODKey.fullKey());
+                ATH_MSG_FATAL("Failed to write xAOD::MdtPrepDataContainer "<<m_xAODKey.fullKey());
                 return cache;
             }
             cache.xAODPrd = writeHandle.ptr();
         }
         /// Retrieve the Geometry context if activated
         if (!m_geoCtxKey.empty()) {
-            SG::ReadHandle<ActsGeometryContext> readHandle{m_geoCtxKey, ctx};
+            SG::ReadHandle readHandle{m_geoCtxKey, ctx};
             if (!readHandle.isPresent()) {
                 ATH_MSG_FATAL("Failed to retrieve the geometry context "<<m_geoCtxKey.fullKey());
                 return cache;
@@ -680,12 +618,20 @@ namespace Muon {
         }
         /// Retrieve the legacy detector mananger if activated
         if (!m_muDetMgrKey.empty()) {
-            SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgrHandle{m_muDetMgrKey, ctx};
+            SG::ReadCondHandle detMgrHandle{m_muDetMgrKey, ctx};
             if (!detMgrHandle.isValid()) {
                 ATH_MSG_FATAL("Failed to retrieve the detector manager from the conditions store "<<m_muDetMgrKey.fullKey());
                 return cache;
             }
             cache.legacyDetMgr = detMgrHandle.cptr();
+        }
+        if (m_useTwin) {
+            SG::ReadCondHandle twinTubeHandle{m_twinTubeKey, ctx};
+            if (!twinTubeHandle.isValid()) {
+                ATH_MSG_FATAL("Failed to initialize twin tube map "<<m_twinTubeKey.fullKey());
+                return cache;
+            }
+            cache.twinTubeMap = twinTubeHandle.cptr();
         }
         cache.r4DetMgr = m_detMgrR4;
         // Pass the container from the handle

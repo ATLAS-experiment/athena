@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -22,17 +22,13 @@ createMdtPrepData( const Muon::MdtPrepData_p2 *persObj,
   localPos[Trk::locX] = persObj->m_driftRadius; 
   localPos[Trk::locY] = 0.0; 
     
-  std::vector<Identifier> rdoList(1);
-  rdoList[0] = id;
-    
+
   auto cmat = Amg::MatrixX(1,1);
   cmat(0,0) = static_cast<double>(persObj->m_errorMat);
     
   Muon::MdtPrepData data(id,
-                         0, // collectionHash
                          localPos,
                          std::move(cmat),
-                         std::move(rdoList),
                          detEl,
                          persObj->m_tdc,
                          persObj->m_adc,

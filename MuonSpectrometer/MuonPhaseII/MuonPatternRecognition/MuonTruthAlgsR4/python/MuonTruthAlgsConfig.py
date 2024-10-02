@@ -16,21 +16,7 @@ def TruthSegmentMakerCfg(flags, name = "TruthSegmentMakerAlg", **kwargs):
     if flags.Detector.EnableMM: containerNames+=["MM_SDO"]
     if flags.Detector.EnablesTGC: containerNames+=["sTGC_SDO"] 
     kwargs.setdefault("SimHitKeys", containerNames)
-    PrdLinkInputs = []
-    if flags.Detector.EnableMDT: 
-        PrdLinkInputs+=[( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODMdtCircles.simHitLink' )]       
-    if flags.Detector.EnableRPC: 
-        PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xRpcMeasurements.simHitLink' )]
-    if flags.Detector.EnableTGC: 
-        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xTgcStrips.simHitLink' )] 
-    if flags.Detector.EnableMM:
-        PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODMMClusters.simHitLink' )]
-    if flags.Detector.EnablesTGC:
-        PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcStrips.simHitLink' )]
-        PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcWires.simHitLink' )]
-        PrdLinkInputs+=[ ( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcPads.simHitLink' )]
 
-    kwargs.setdefault("ExtraInputs", PrdLinkInputs)
     the_alg = CompFactory.MuonR4.TruthSegmentMaker(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -52,7 +38,12 @@ def TruthHitAssociationCfg(flags):
         result.merge(MeasToSimHitAssocAlgCfg(flags,
                                              name="MdtPrepDataToSimHitAssoc",
                                              SimHits = "MDT_SDO",
-                                             Measurements="xAODMdtCircles"))
+                                             Measurements="xMdtDriftCircles"))
+        result.merge(MeasToSimHitAssocAlgCfg(flags,
+                                             name="MdtTwinPrepDataToSimHitAssoc",
+                                             SimHits = "MDT_SDO",
+                                             Measurements="xMdtTwinDriftCircles"))
+
     if flags.Detector.EnableRPC: 
         result.merge(MeasToSimHitAssocAlgCfg(flags,
                                              name="RpcPrepDataToSimHitAssoc",
@@ -84,6 +75,26 @@ def TruthHitAssociationCfg(flags):
                                              SimHits = "sTGC_SDO",
                                              Measurements="xAODsTgcPads",
                                              AssocPull=1.))
-
     return result
 
+def MuonTruthAlgsCfg(flags):
+    result = ComponentAccumulator()
+    result.merge(TruthHitAssociationCfg(flags))
+    PrdLinkInputs = []
+    if flags.Detector.EnableMDT: 
+        PrdLinkInputs+=[( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xMdtDriftCircles.simHitLink' )]       
+        PrdLinkInputs+=[( 'xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xMdtTwinDriftCircles.simHitLink' )]       
+    if flags.Detector.EnableRPC: 
+        PrdLinkInputs+=[ ('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xRpcMeasurements.simHitLink' )]
+    if flags.Detector.EnableTGC: 
+        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xTgcStrips.simHitLink' )] 
+    if flags.Detector.EnableMM:
+        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODMMClusters.simHitLink' )] 
+
+    if flags.Detector.EnablesTGC: 
+        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcStrips.simHitLink' )] 
+        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcWires.simHitLink' )] 
+        PrdLinkInputs+=[('xAOD::UncalibratedMeasurementContainer' , 'StoreGateSvc+xAODsTgcPads.simHitLink' )] 
+
+    result.merge(TruthSegmentMakerCfg(flags, ExtraInputs =PrdLinkInputs ))
+    return result

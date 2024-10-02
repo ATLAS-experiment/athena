@@ -5,34 +5,32 @@
 #ifndef MUONMdtRdoToPrepDataToolMT_H
 #define MUONMdtRdoToPrepDataToolMT_H
 
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
-#include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonMDT_CnvTools/IMDT_RDO_Decoder.h"
+
+#include "MuonCablingData/MuonMDT_CablingMap.h"
+#include "MuonCablingData/TwinTubeMap.h"
+
 #include "MuonPrepRawData/MuonPrepDataCollection_Cache.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRDO/MdtCsmContainer.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "StoreGate/ReadCondHandleKey.h"
+
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "xAODMuonPrepData/MdtTwinDriftCircleContainer.h"
+
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 class MdtDigit;
-class MdtCalibHit;
-
-namespace MuonGM {
-    class MdtReadoutElement;
-}
-namespace MuonGMR4 {
-    class MuonDetectorManager;
-}
 
 namespace Muon {
     /** @class MdtRdoToPrepDataToolMT
@@ -75,6 +73,7 @@ namespace Muon {
 
             Muon::MdtPrepDataContainer* legacyPrd{nullptr};
             xAOD::MdtDriftCircleContainer* xAODPrd{nullptr};
+            xAOD::MdtTwinDriftCircleContainer* xAODTwinPrd{nullptr};
 
             const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
             /// Detector manager from the conditions store
@@ -83,6 +82,8 @@ namespace Muon {
             const MuonGMR4::MuonDetectorManager* r4DetMgr{nullptr};
             /// Acts Geometry context
             const ActsGeometryContext* gctx{nullptr};
+            /// Pointer to the map having the mapping of twin tube pairs
+            const TwinTubeMap* twinTubeMap{nullptr};
 
             /// Flag set to indicate that the complete validation was successful
             bool isValid{false};
@@ -145,12 +146,10 @@ namespace Muon {
 
         // + TWIN TUBE
         Gaudi::Property<bool> m_useTwin{this, "UseTwin", true};
-        Gaudi::Property<bool> m_useAllBOLTwin{this, "UseAllBOLTwin", false};
-        Gaudi::Property<bool> m_twinCorrectSlewing{this, "TwinCorrectSlewing", false};
         Gaudi::Property<bool> m_discardSecondaryHitTwin{this, "DiscardSecondaryHitTwin", false};
-        int m_twin_chamber[2][3][36]{};
-        int m_secondaryHit_twin_chamber[2][3][36]{};
+
         // - TWIN TUBE
+        SG::ReadCondHandleKey<TwinTubeMap> m_twinTubeKey{this, "TwinTubeKey", "MdtTwinTubeMap"};
 
         std::unordered_set<Identifier> m_DeadChannels{};
         void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
@@ -164,7 +163,9 @@ namespace Muon {
                                                                                 "Optional external cache for the MDT PRD container"};
 
         // xAOD PRDs
-        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer> m_mdtxAODKey{this, "MdtxAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer> m_xAODKey{this, "xAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+        SG::WriteHandleKey<xAOD::MdtTwinDriftCircleContainer> m_xAODTwinKey{this, "xAODTwinKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
+
     };
 }  // namespace Muon
 
