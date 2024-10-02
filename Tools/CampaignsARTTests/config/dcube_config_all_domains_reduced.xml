@@ -1360,6 +1360,7 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pb" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_pu" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN2v01_ptau" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_SV1">
