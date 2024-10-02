@@ -103,7 +103,7 @@ class FPGATrackSimRegionMap
         const std::vector<double>& getAvgRadii(unsigned region) const { return m_radii_map.at(region); };
 
     private:
-        
+        std::string m_filepath;
         std::vector<std::unique_ptr<FPGATrackSimPlaneMap>> const & m_pmaps  ;
         int m_nregions = 0;
 

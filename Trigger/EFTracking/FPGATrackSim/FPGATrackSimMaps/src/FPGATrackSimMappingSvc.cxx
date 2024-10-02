@@ -55,19 +55,6 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
     return StatusCode::SUCCESS;
 }
 
-int FPGATrackSimMappingSvc::readPmapSize(std::ifstream& fileIn)
-{
-    //int numberOfPmaps;  
-    std::string line;
-
-    getline(fileIn, line);
-    std::istringstream sline(line);
-    sline >> m_numberOfPmaps;
-    if ( !(m_numberOfPmaps>0) ){
-        ATH_MSG_FATAL("Number of Pmaps is set to" << m_numberOfPmaps);
-    }
-    return m_numberOfPmaps;
-}
 int FPGATrackSimMappingSvc::countPmapSize(std::ifstream& fileIn)
 {
     //int numberOfPmaps;  
@@ -103,7 +90,6 @@ StatusCode FPGATrackSimMappingSvc::initialize()
             throw ("FPGATrackSimPlaneMap Couldn't open " + filepath);
         }
         
-        //readPmapSize(fin);
         countPmapSize(fin);
         fin.close();
         fin.open(filepath);
@@ -115,7 +101,6 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         
         fin.close();
         fin.open(filepath);
-        //readPmapSize(fin);
         
         ATH_MSG_DEBUG("Creating the 2nd stage plane map");
         m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 2));
@@ -125,7 +110,6 @@ StatusCode FPGATrackSimMappingSvc::initialize()
         m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_vector_1st, PathResolverFindCalibFile(m_rmap_path.value())));
 
         fin.open(filepath);
-        //readPmapSize(fin);
         m_pmap_vector_2nd.push_back(std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(fin, m_EvtSel->getRegionID(), 1, m_layerOverrides)));
         fin.close();
 

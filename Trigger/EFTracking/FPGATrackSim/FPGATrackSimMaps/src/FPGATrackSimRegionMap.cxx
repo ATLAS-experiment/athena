@@ -36,6 +36,7 @@ FPGATrackSimRegionMap::FPGATrackSimRegionMap(const std::vector<std::unique_ptr<F
         ANA_MSG_FATAL("Couldn't open " << filepath);
         throw ("FPGATrackSimRegionMap Couldn't open " + filepath);
     }
+    m_filepath=filepath;
 
     // Reads the header of the file to resize all the vector members
     allocateMap(fin);
@@ -57,13 +58,18 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
     istringstream sline(line);
     ok = ok && (sline >> towerKey >> m_nregions);
     ok = ok && (towerKey == "towers");
-
+    if((m_filepath.size()-7)==m_filepath.find("subrmap")){
+        if(m_pmaps.size()!= m_nregions){
+            ANA_MSG_FATAL("Error Pmap slice size does not match Rmap: PMAP_SIZE:"<<m_pmaps.size()<<"  RMAP_SIZE:"<<m_nregions);
+            throw ("Pmap slice size does not match Rmap:" );
+        }
+    }
+    
 
     if (!ok) ANA_MSG_FATAL("Error reading header");
 
     m_map.resize(m_nregions);
     
-    //for (auto & vv : m_map)
     for (int iRegion=0; iRegion<m_map.size(); iRegion++)
     {
         m_map.at(iRegion).resize(m_pmaps.at(0)->getNLogiLayers());
