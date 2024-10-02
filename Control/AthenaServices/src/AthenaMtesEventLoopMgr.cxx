@@ -215,36 +215,29 @@ StatusCode AthenaMtesEventLoopMgr::initialize()
     m_histoPersSvc = IConversionSvc_t( "HistogramPersistencySvc", 
 				       this->name() );
 
-    IService *is{nullptr};
-    sc = serviceLocator()->service("RootHistSvc", is);
+    SmartIF<IProperty> histSvc{serviceLocator()->service("RootHistSvc")};
 
-    if (sc.isFailure()) {
+    if (!histSvc) {
       error() << "could not locate actual Histogram persistency service" << endmsg;
     }
     else {
-      Service *s = dynamic_cast<Service*>(is);
-      if(!s) {
-	error() << "Could not dcast HistPersSvc to a Service" << endmsg;
+      const Gaudi::Details::PropertyBase &prop = histSvc->getProperty("OutputFile");
+      std::string val;
+      try {
+        const StringProperty &sprop = dynamic_cast<const StringProperty&>(prop);
+        val = sprop.value();
       }
-      else {
-	const Gaudi::Details::PropertyBase &prop = s->getProperty("OutputFile");
-	std::string val;
-	try {
-	  const StringProperty &sprop = dynamic_cast<const StringProperty&>(prop);
-	  val = sprop.value();
-	}
-	catch (...) {
-	  verbose() << "could not dcast OutputFile property to a StringProperty."
-		    << " Need to fix Gaudi."
-		    << endmsg;
+      catch (...) {
+        verbose() << "could not dcast OutputFile property to a StringProperty."
+                  << " Need to fix Gaudi."
+                  << endmsg;
 
-	  val = prop.toString();
-	}
+        val = prop.toString();
+      }
 
-	if (val != ""
-	    && val != "UndefinedROOTOutputFileName") {
-	  m_writeHists = true;
-	}
+      if (val != ""
+          && val != "UndefinedROOTOutputFileName") {
+        m_writeHists = true;
       }
     }
   }
@@ -283,22 +276,21 @@ StatusCode AthenaMtesEventLoopMgr::initialize()
 
   // We do not expect a Event Selector necessarily being declared
   if( !selName.empty() && selName != "NONE") {
-    IEvtSelector* theEvtSel{nullptr};
-    sc = serviceLocator()->service(selName, theEvtSel);
-    if(sc.isSuccess() && (theEvtSel != m_evtSelector)) {
+    SmartIF<IEvtSelector> theEvtSel{serviceLocator()->service(selName)};
+    if(theEvtSel && (theEvtSel != m_evtSelector)) {
       // Event Selector changed (or setup for the first time)
       m_evtSelector = theEvtSel;
       
       // reset iterator
       if (m_evtSelector->createContext(m_evtContext).isFailure()) {
-	fatal() << "Can not create the event selector Context." << endmsg;
-	return StatusCode::FAILURE;
+        fatal() << "Can not create the event selector Context." << endmsg;
+        return StatusCode::FAILURE;
       }
       if (msgLevel(MSG::INFO)) {
-	INamedInterface* named (dynamic_cast< INamedInterface* >(theEvtSel));
-	if (0 != named) {
+        SmartIF<INamedInterface> named{theEvtSel};
+        if (named) {
           info() << "Setup EventSelector service " << named->name( ) << endmsg;
-	}
+        }
       }
     }
     else if (sc.isFailure()) {

@@ -145,47 +145,33 @@ MixingEventSelector::decodeTrigger(string triggDescr) {
     Tokenizer::iterator iToken(tokens.begin());
     try {
       Gaudi::Utils::TypeNameString selTN(*iToken++);
-      const bool CREATEIF(true);
       //get selector
-      IEvtSelector* pSelector(nullptr);
-      if ((serviceLocator()->service(selTN.type(), selTN.name(), pSelector, CREATEIF)).isSuccess()) {
-	//must be an address provider
-	if (nullptr != dynamic_cast<IEvtSelector*>(pSelector) ) {
-	  //FIXME	  if (!pSelector.done()) {
-	    //try to add to trig list
-	    unsigned int firstEvt(boost::lexical_cast<unsigned int>(*iToken++));
-	    unsigned int lastEvt(boost::lexical_cast<unsigned int>(*iToken));
-	    if (m_trigList.add(Trigger(pSelector, firstEvt, lastEvt))) {
-	      if (msgLvl(MSG::DEBUG)) {
-		INamedInterface *pNamed(dynamic_cast<INamedInterface*>(pSelector));
-		if (nullptr != pNamed) {
-		  msg() << "decodeTrigger: added selector " << pNamed->name() 
-			<< " first event to be read " << firstEvt
-			<< " last event to be read " << lastEvt << endmsg;
-		}
-	      }
-	    } else {
-	      ATH_MSG_ERROR 
-		("decodeTrigger: Selector [" 
-		 << selTN.type() << '/' << selTN.name() 
-		 << "] not added");
-	    } //can add to range
-// 	  } else {
-// 	    log << MSG::ERROR << "decodeTrigger: Selector [" 
-// 		<< selTN.type() << '/' << selTN.name() 
-// 		<< "] is empty, not added" << endmsg;
-// 	  } //selector empty
-	} else {
-	  ATH_MSG_ERROR
-	    ("decodeTrigger: Selector [" 
-	     << selTN.type() << '/' << selTN.name() 
-	     << "] not an IEvtSelector, not added");
-	} //is address provider
+      SmartIF<IEvtSelector> pSelector(serviceLocator()->service(selTN));
+      if (pSelector) {
+        //FIXME	  if (!pSelector.done()) {
+        //try to add to trig list
+        unsigned int firstEvt(boost::lexical_cast<unsigned int>(*iToken++));
+        unsigned int lastEvt(boost::lexical_cast<unsigned int>(*iToken));
+        if (m_trigList.add(Trigger(pSelector, firstEvt, lastEvt))) {
+          if (msgLvl(MSG::DEBUG)) {
+            SmartIF<INamedInterface> pNamed(pSelector);
+            if (pNamed) {
+              msg() << "decodeTrigger: added selector " << pNamed->name()
+                    << " first event to be read " << firstEvt
+                    << " last event to be read " << lastEvt << endmsg;
+            }
+          }
+        } else {
+          ATH_MSG_ERROR
+            ("decodeTrigger: Selector ["
+             << selTN.type() << '/' << selTN.name()
+             << "] not added");
+        } //can add to range
       } else {
         ATH_MSG_ERROR 
-	  ("decodeTrigger: Selector [" 
-	   << selTN.type() << '/' << selTN.name() 
-	   << "] can not be found or created");
+          ("decodeTrigger: Selector ["
+           << selTN.type() << '/' << selTN.name()
+           << "] can not be found or created");
       } //selector available
     } catch (const boost::bad_lexical_cast& e) {
       ATH_MSG_ERROR

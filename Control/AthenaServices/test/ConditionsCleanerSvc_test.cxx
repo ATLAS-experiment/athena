@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/test/ConditionsCleanerSvc_test.cxx
@@ -159,8 +159,9 @@ void test1 (ISvcLocator* svcloc)
 {
   std::cout << "test1\n";
 
-  IService *mgr = nullptr;
-  if (svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc1", mgr).isFailure()) std::abort();
+  SmartIF<IService> mgr{svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc1")};
+  if (!mgr) std::abort();
+
   testit (mgr);
 }
 
@@ -169,8 +170,9 @@ void test2 (ISvcLocator* svcloc)
 {
   std::cout << "test2\n";
 
-  IService *mgr = nullptr;
-  if (svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc2", mgr).isFailure()) std::abort();
+  SmartIF<IService> mgr{svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc2")};
+  if (!mgr) std::abort();
+
   testit (mgr);
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -258,10 +258,9 @@ AthenaSummarySvc::newHandler() {
   std::cerr << "AthenaSummarySvc     FATAL out of memory: saving summary ..."
             << std::endl;
 
-  IAthenaSummarySvc *ipa(nullptr);
-  Gaudi::svcLocator()->service("AthenaSummarySvc",ipa).ignore();
+  SmartIF<IAthenaSummarySvc> ipa(Gaudi::svcLocator()->service("AthenaSummarySvc"));
 
-  if (ipa != nullptr) {    
+  if (ipa) {
     std::string btrace;
     if ( System::backTrace(btrace,5,3) ) {
       ipa->addSummary("badalloc backtrace",btrace);

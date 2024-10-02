@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -63,9 +63,8 @@ int main()
   }  
   assert(svcloc);
 
-  IService *tmpsvc = nullptr;
-  if (svcloc->service ("FPEControlSvc", tmpsvc).isFailure()) std::abort();
-  Service* svc = dynamic_cast<Service*> (tmpsvc);
+  SmartIF<IProperty> svc{svcloc->service ("FPEControlSvc")};
+  assert(svc);
 
   std::vector<std::string> flags;
 

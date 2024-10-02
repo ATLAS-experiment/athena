@@ -53,12 +53,11 @@ namespace {
 // Outside access to the event loop manager
 //=========================================================================
 PyAthenaEventLoopMgr* PyAthenaEventLoopMgr::pointer() {
-   IEventProcessor* ep = nullptr;
 
-   static const bool CREATEIF( false );
-   if ( ( Gaudi::svcLocator()->service( "PyAthenaEventLoopMgr", ep, CREATEIF ) ).isSuccess() ) {
+   SmartIF<IEventProcessor> ep{Gaudi::svcLocator()->service( "PyAthenaEventLoopMgr", /*createIf*/false )};
+   if ( ep ) {
       ep->addRef();
-      return dynamic_cast< PyAthenaEventLoopMgr* >( ep ); 
+      return dynamic_cast< PyAthenaEventLoopMgr* >( ep.get() );
    }
 
    return nullptr;
