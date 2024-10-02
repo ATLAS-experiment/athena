@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_IATHENAPOOLCNVSVC_H
@@ -27,16 +27,14 @@ namespace pool {
    class DbType;
 }
 
-/// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IAthenaPoolCnvSvc ("IAthenaPoolCnvSvc", 1 , 0);
 
 /** @class IAthenaPoolCnvSvc
  *  @brief This class provides the interface between Athena and PoolSvc.
  **/
-class IAthenaPoolCnvSvc : virtual public IConversionSvc, public IDataShare, public IAthenaPoolCleanUpSvc {
+class IAthenaPoolCnvSvc : virtual public extend_interfaces<IConversionSvc, IDataShare, IAthenaPoolCleanUpSvc> {
 public:
-   /// Retrieve interface ID
-   static const InterfaceID& interfaceID() { return(IID_IAthenaPoolCnvSvc); }
+   /// Declare interface ID
+   DeclareInterfaceID(IAthenaPoolCnvSvc, 1 ,0);
 
    virtual ~IAthenaPoolCnvSvc() {}
 

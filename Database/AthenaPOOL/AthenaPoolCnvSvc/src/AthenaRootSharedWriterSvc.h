@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAROOTSHAREDWRITERSVC_H
@@ -22,7 +22,7 @@ class TMonitor;
 /** @class AthenaRootSharedWriterSvc
  *  @brief This class provides an example for writing event data objects to Pool.
  **/
-class AthenaRootSharedWriterSvc : public AthService, virtual public IAthenaSharedWriterSvc {
+class AthenaRootSharedWriterSvc : public extends<AthService, IAthenaSharedWriterSvc> {
    // Allow the factory class access to the constructor
    friend class SvcFactory<AthenaRootSharedWriterSvc>;
 
@@ -37,7 +37,6 @@ public:
    virtual StatusCode initialize() override;
    virtual StatusCode stop() override;
    virtual StatusCode finalize() override;
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
    virtual StatusCode share(int numClients = 0, bool motherClient = false) override;
 

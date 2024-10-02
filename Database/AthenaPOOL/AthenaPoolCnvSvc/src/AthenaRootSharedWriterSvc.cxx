@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaRootSharedWriterSvc.cxx
@@ -156,7 +156,7 @@ struct ParallelFileMerger : public TObject
 
 //___________________________________________________________________________
 AthenaRootSharedWriterSvc::AthenaRootSharedWriterSvc(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthService(name, pSvcLocator)
+  : base_class(name, pSvcLocator)
   , m_rootServerSocket(nullptr), m_rootMonitor(nullptr), m_rootMergers(), m_rootClientIndex(0), m_rootClientCount(0), m_numberOfStreams(0) {
 }
 //___________________________________________________________________________
@@ -327,15 +327,4 @@ StatusCode AthenaRootSharedWriterSvc::finalize() {
    delete m_rootMonitor; m_rootMonitor = nullptr;
    delete m_rootServerSocket; m_rootServerSocket = nullptr;
    return StatusCode::SUCCESS;
-}
-//___________________________________________________________________________
-StatusCode AthenaRootSharedWriterSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if ( IAthenaSharedWriterSvc::interfaceID().versionMatch(riid) ) {
-      *ppvInterface = (IAthenaSharedWriterSvc*)this;
-   } else {
-      // Interface is not directly available: try out a base class
-      return(AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
 }

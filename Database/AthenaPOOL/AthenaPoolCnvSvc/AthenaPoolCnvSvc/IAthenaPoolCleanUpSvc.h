@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_IATHENAPOOLCLEANUPSVC_H
@@ -11,6 +11,7 @@
  **/
 
 #include "AthenaPoolCnvSvc/IAthenaPoolCleanUp.h"
+#include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include <vector>
@@ -19,9 +20,11 @@
  *  @brief This class provides the interface for the IAthenaPoolCleanUpSvc which is used to clean up
  *  AthenaPoolConverter
  **/
-class IAthenaPoolCleanUpSvc {
+class IAthenaPoolCleanUpSvc : virtual public IInterface {
 
 public:
+   DeclareInterfaceID(IAthenaPoolCleanUpSvc, 1, 0);
+
    /// Destructor
    virtual ~IAthenaPoolCleanUpSvc() {};
 
