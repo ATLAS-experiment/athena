@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloCalibHitRec )
@@ -12,7 +12,7 @@ atlas_add_library( CaloCalibHitRecLib
 		           PUBLIC_HEADERS CaloCalibHitRec
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloDmDetDescr CaloGeoHelpers CaloIdentifier CaloSimEvent GaudiKernel Identifier StoreGateLib xAODCaloEvent xAODTruth CaloUtilsLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasDetDescr CaloDetDescrLib CaloEvent LArRecEvent McParticleEvent TileEvent )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasDetDescr CaloDetDescrLib CaloEvent LArRecEvent TileEvent )
 
 # Component(s) in the package:
 atlas_add_component( CaloCalibHitRec

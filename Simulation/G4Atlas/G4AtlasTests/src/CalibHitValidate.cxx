@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -13,11 +13,10 @@
 
 #include "CalibHitValidate.h"
 
-#include "McParticleEvent/TruthParticle.h"
-
 #include "CaloSimEvent/CaloCalibrationHit.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
+#include "GeneratorObjects/McEventCollection.h"
 
 //###############################################################################
 
