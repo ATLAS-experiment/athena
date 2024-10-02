@@ -57,7 +57,6 @@ def defineMenu():
         # legacy single jet - in P1 chains
         'L1_J15','L1_J20','L1_J400',
         'L1_J75p31ETA49',
-        'L1_J12_VTE100','L1_J12_VTE200','L1_J30_VTE200',
 
         # single jet 
         # new calo
@@ -66,6 +65,7 @@ def defineMenu():
         'L1_jJ40', 'L1_jJ50', 'L1_jJ55', 'L1_jJ60', 'L1_jJ80', 'L1_jJ90',
         'L1_jJ15p30ETA49', 'L1_jJ20p30ETA49',
         'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
+        'L1_jJ30_VjTE200',
 
         # gJ - ATR-28029
         "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25",
@@ -96,6 +96,7 @@ def defineMenu():
         'L1_VjTE200',
         'L1_VjTE600',
         'L1_jTE50_VjTE600',
+        'L1_jTE50_VjTE200',
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
 
@@ -113,6 +114,7 @@ def defineMenu():
         'L1_eEM1_TRT_VjTE200', 'L1_eTAU1_TRT_VjTE200',
         'L1_2eTAU1_VjTE200_EMPTY','L1_2eTAU1_VjTE200_UNPAIRED_ISO','L1_2eTAU1_VjTE200_UNPAIRED_NONISO',
         'L1_eTAU1_TRT_VjTE200_EMPTY','L1_eTAU1_TRT_VjTE200_UNPAIRED_ISO','L1_eTAU1_TRT_VjTE200_UNPAIRED_NONISO',
+        'L1_eEM1_TRT_VjTE50', 'L1_eTAU1_TRT_VjTE50',
 
         'L1_eTAU1', 'L1_jTAU1',
         
@@ -140,6 +142,8 @@ def defineMenu():
         #UPC magnetic monopoles
         'L1_ZDC_A_C_VjTE10','L1_ZDC_XOR_VjTE10', 'L1_ZDC_XOR_VjTE10_UNPAIRED_NONISO',
         'L1_TRT_ZDC_A_C_VjTE10','L1_TRT_ZDC_XOR_VjTE10', 'L1_TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO',
+        'L1_VZDC_A_VZDC_C_VjTE50', 'L1_ZDC_A_VjTE200', 'L1_ZDC_C_VjTE200',
+        'L1_TRT_ZDC_A_VjTE50', 'L1_TRT_ZDC_C_VjTE50',
 
         # Run3 ZDC items for heavy ion runs 
         'L1_VZDC_A_VZDC_C', #comb0

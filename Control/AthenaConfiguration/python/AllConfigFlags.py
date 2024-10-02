@@ -77,7 +77,8 @@ def initConfigFlags():
         if dataYear:
             return int(dataYear)
         if prevFlags.Input.ProjectName.startswith("data"):
-            return 2000 + int(prevFlags.Input.ProjectName[4:6])
+            if prevFlags.Input.ProjectName[4:6].isdigit():
+               return 2000 + int(prevFlags.Input.ProjectName[4:6])
         return 0
 
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", ""), help='project name')

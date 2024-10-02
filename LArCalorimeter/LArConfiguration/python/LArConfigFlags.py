@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum
+from AthenaConfiguration.Enums import FlagEnum, LHCPeriod
 from AthenaCommon.Logging import logging
 
 class RawChannelSource(FlagEnum):
@@ -22,7 +22,7 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.doCellNoiseMasking",True)
     lcf.addFlag("LAr.doCellSporadicNoiseMasking",True)
     lcf.addFlag("LAr.doBadFebMasking",lambda prevFlags : not prevFlags.Input.isMC)
-    lcf.addFlag("LAr.doDeadOTCCorr",False)
+    lcf.addFlag("LAr.doDeadOTxCorr",lambda prevFlags : not prevFlags.Input.isMC and prevFlags.GeoModel.Run >= LHCPeriod.Run3)
 
     # Include MC shape folder
     lcf.addFlag("LAr.UseMCShape", True)

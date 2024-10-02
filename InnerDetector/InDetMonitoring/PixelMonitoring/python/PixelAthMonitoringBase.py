@@ -116,12 +116,17 @@ ModulesECC = [
 
 
 #yBarrel
-StavesL0 = [
+StavesL00 = [
     "B11_S2", "B01_S1", "B01_S2", "B02_S1", "B02_S2", "B03_S1", "B03_S2",
     "B04_S1", "B04_S2", "B05_S1", "B05_S2", "B06_S1", "B06_S2", "B07_S1",
     "B07_S2", "B08_S1", "B08_S2", "B09_S1", "B09_S2", "B10_S1", "B10_S2",
     "B11_S1"]
 
+StavesL0 = [
+    "B11_S2(-0.29)", "B01_S1(0.0)", "B01_S2(0.29)", "B02_S1(0.57)", "B02_S2(0.87)", "B03_S1(1.14)", "B03_S2(1.43)",
+    "B04_S1(1.71)", "B04_S2(2.0)", "B05_S1(2.28)", "B05_S2(2.57)", "B06_S1(2.86)", "B06_S2(3.14)", "B07_S1(-2.86)",
+    "B07_S2(-2.57)", "B08_S1(2.28)", "B08_S2(-2.0)", "B09_S1(-1.71)", "B09_S2(-1.43)", "B10_S1(-1.14)",
+    "B10_S2(-0.86)", "B11_S1(-0.57)"]
 
 StavesL1 = [
     "B01_S1", "B01_S2", "B02_S1", "B02_S2", "B03_S1", "B03_S2", "B04_S1",
@@ -142,8 +147,8 @@ StavesL2 = [
     "B26_S1", "B26_S2", "B01_S1"]
 #yIBL
 StavesIBL = [
-    "S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11",
-    "S12", "S13","S14"]
+    "S01(0.33)", "S02(0.78)", "S03(1.23)", "S04(1.68)", "S05(2.12)", "S06(2.57)", "S07(3.02)", 
+    "S08(-2.81)", "S09(-2.36)", "S10(-1.91)", "S11(-1.47)", "S12(-1.02)", "S13(-0.57)","S14(-0.12)"]
 
 LabelY = [ModulesECA, ModulesECC, StavesL0, StavesL1, StavesL2, StavesIBL]
 
@@ -155,7 +160,7 @@ ModulesFEECC = []
 for i in ModulesECC: 
     ModulesFEECC.extend([i+'_FE#1', i+'_FE#2'])
 StavesFEL0 = []
-for i in StavesL0:
+for i in StavesL00:
     StavesFEL0.extend([i+'_FE#1', i+'_FE#2'])
 StavesFEL1 = []
 for i in StavesL1:

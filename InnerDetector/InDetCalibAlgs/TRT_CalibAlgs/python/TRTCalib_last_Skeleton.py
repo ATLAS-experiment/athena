@@ -30,10 +30,10 @@ def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
     # assemble mail body
     mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
     mbody += "   Here are the residuals obtained at detector level with currently used constants: \n"
-    mbody += "   Resdiual-Barrel A: %s, Time-Residual-Barrel A: %s \n" % (a, b)
-    mbody += "   Resdiual-Barrel C: %s, Time-Residual-Barrel C: %s \n" % (c, d)
-    mbody += "   Resdiual-Endcap A: %s, Time-Residual-Endcap A: %s \n" % (e, f)
-    mbody += "   Resdiual-Endcap C: %s, Time-Residual-Endcap C: %s \n\n" % (g, h)      
+    mbody += "   Residual-Barrel A: %s, Time-Residual-Barrel A: %s \n" % (a, b)
+    mbody += "   Residual-Barrel C: %s, Time-Residual-Barrel C: %s \n" % (c, d)
+    mbody += "   Residual-Endcap A: %s, Time-Residual-Endcap A: %s \n" % (e, f)
+    mbody += "   Residual-Endcap C: %s, Time-Residual-Endcap C: %s \n\n" % (g, h)      
     mbody += " Expect Residual 140 +- 10mu in the barrel (Ar) and 130 +- 10mu in EC (Xe). Expect Time-Residual 0.0 +- 0.5ns.\n\n" 
     mbody += " Please check the histograms of the current run, to decide whether to upload new constants.\n" 
     mbody += " Histograms can be found on AFS, directory %s \n\n" % (outdir)
@@ -163,7 +163,9 @@ def fromRunArgs(runArgs):
         print("merge.root.. already exists. Removed.")
         os.remove("merge.root")  
         
-    command = 'hadd merge.root '
+    command  = 'echo "ROOT version used: $ROOTSYS"; cp -v $ROOTSYS/bin/thisroot.sh .; chmod u+x thisroot.sh; source thisroot.sh; '
+    command += 'cp -v $ROOTSYS/bin/hadd .; '
+    command += './hadd merge.root '
     # merge all the files
     for _f in files_list_cal :
         command += "%s " % (_f)     

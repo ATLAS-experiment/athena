@@ -69,6 +69,9 @@ def LArDeadOTXCorrCfg(configFlags):
     acc.merge(LArBadFebCfg(configFlags))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     acc.merge(LArOnOffIdMappingSCCfg(configFlags))
+    from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+    #acc.merge(LArBadChannelCfg(flags))
+    acc.merge(LArBadChannelCfg(configFlags,isSC=True))
     from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
     runinfo=getLArDTInfoForRun(configFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
     SCInput="SC_ET"

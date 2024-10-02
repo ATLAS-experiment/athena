@@ -305,6 +305,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if(!cabling->isOnlineConnected(id)) continue;
 
       const unsigned  trueNSamples = pLArDigit->nsamples();
+      if(trueNSamples==0) continue;
       Digi_Nsamples = trueNSamples; // Fill the monitored variable
       const int cgain = pLArDigit->gain();
 
