@@ -58,6 +58,7 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_truthMu, "efficiency_vs_truthMu");
   book(m_efficiency_vs_actualMu, "efficiency_vs_actualMu");
 
+  book(m_technical_efficiency_vs_pteta, "technical_efficiency_vs_pteta");
   book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
   book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
   book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
@@ -169,6 +170,7 @@ InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& tru
   double eta = truth.eta();
   double pt = truth.pt() / Gaudi::Units::GeV; // convert MeV to GeV
   double phi = truth.phi();
+  fillHisto(m_technical_efficiency_vs_pteta, pt, eta, isGood, weight);
   fillHisto(m_technical_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_technical_efficiency_vs_pt, pt, isGood, weight);
   fillHisto(m_technical_efficiency_vs_phi, phi, isGood, weight);
