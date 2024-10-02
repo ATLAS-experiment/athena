@@ -44,6 +44,7 @@ namespace Analysis {
 
     m_dec_invalid = m_TrackContainerKey.key() + "." + m_prefix.value() + m_dec_invalid.key();
     m_trk_origin_vtx = m_TrackContainerKey.key() + "." + m_prefix.value() + m_trk_origin_vtx.key();
+    m_trk_origin_vtx_idx = m_TrackContainerKey.key() + "." + m_prefix.value() + m_trk_origin_vtx_idx.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
@@ -55,6 +56,7 @@ namespace Analysis {
     ATH_MSG_DEBUG( "    ** " << m_dec_track_mom );
     ATH_MSG_DEBUG( "    ** " << m_dec_invalid  );
     ATH_MSG_DEBUG( "    ** " << m_trk_origin_vtx  );
+    ATH_MSG_DEBUG( "    ** " << m_trk_origin_vtx_idx  );
     
 
     CHECK( m_dec_d0.initialize() );
@@ -65,6 +67,7 @@ namespace Analysis {
     CHECK( m_dec_track_mom.initialize() );
     CHECK( m_dec_invalid.initialize() );
     CHECK( m_trk_origin_vtx.initialize() );
+    CHECK( m_trk_origin_vtx_idx.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -111,31 +114,32 @@ namespace Analysis {
 
     // Mario: add decoration for origin vertex link
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<xAOD::VertexContainer>> decor_TrkOriginVtx(m_trk_origin_vtx, ctx);
-
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> decor_TrkOriginVtx_idx(m_trk_origin_vtx_idx, ctx);
     // ==========================================================================================================================
     //    ** Computation
     // ==========================================================================================================================
 
     //Trk::PerigeeSurface primary_surface( primaryVtx->position() );
 
-    int vtx_i=0; //counter for the vertex index   
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
       
       auto minDz =100.;
       const xAOD::Vertex* primary = nullptr; // calling it primary for now so I dont have to change anything
       ElementLink<xAOD::VertexContainer> vertexLink;
-      vtx_i=0;
+      int vtx_i=0; //counter for the vertex index 
+      int save_vtx_idx =0;  //index of vertex to save
       for (const xAOD::Vertex *vertex: *verteces) {
-	vtx_i++;
         std::unique_ptr< const Trk::ImpactParametersAndSigma > ipMin( m_track_to_vx->estimate( track, vertex) );
         if ( ipMin ){
           if ( std::fabs(ipMin->IPz0SinTheta) < minDz && std::fabs(ipMin->IPz0SinTheta) < 3){
             minDz = std::fabs(ipMin->IPz0SinTheta);
             primary = vertex;
+	    save_vtx_idx = vtx_i;
 	    vertexLink = ElementLink<xAOD::VertexContainer>(*verteces, vtx_i);
           }
         }
+	vtx_i++;
       }
       Trk::PerigeeSurface primary_surface;
       std::unique_ptr< const Trk::ImpactParametersAndSigma > ip;
@@ -150,7 +154,8 @@ namespace Analysis {
         
       	if ( ip ) {
 	
-	      decor_TrkOriginVtx(*track) = vertexLink;
+	decor_TrkOriginVtx(*track) = vertexLink;
+	decor_TrkOriginVtx_idx(*track) = save_vtx_idx;
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;
         decor_d0_sigma(*track) = ip->sigmad0;
@@ -168,6 +173,7 @@ namespace Analysis {
         decor_d0_sigma(*track) = NAN;
         decor_z0_sigma(*track) = NAN;
 	decor_TrkOriginVtx(*track) = vertexLink;
+	decor_TrkOriginVtx_idx(*track) = -10;
 
       	}
       }else{
@@ -178,6 +184,7 @@ namespace Analysis {
         decor_d0_sigma(*track) = NAN;
         decor_z0_sigma(*track) = NAN;
 	decor_TrkOriginVtx(*track) = vertexLink;
+	decor_TrkOriginVtx_idx(*track) = -10;
 
 	}
 
