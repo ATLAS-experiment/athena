@@ -182,7 +182,7 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
             jFexSRJeteta_glo=jFexSRJetRoI->globalEta();
             jFexSRJetphi_glo=jFexSRJetRoI->globalPhi();
             fill(m_Grouphist,jFexSRJetModule,jFexSRJetFPGA,jFexSRJetEt,jFexSRJeteta,jFexSRJetphi,jFexSRJeteta_glo,jFexSRJetphi_glo);
-            if (abs(eta) > 2.5 && abs(eta) < 3.2) {
+            if (abs(eta) > 2.5 && abs(eta) < 3.1) {
                 jFexSRJetphi = phi - M_PI/64;
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
                 if (jFexSRJetRoI->et() >= 20000)
@@ -191,6 +191,26 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
                 if (jFexSRJetRoI->et() >= 20000)
                     fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+            } else if (abs(eta) > 3.1 && abs(eta) < 3.2) {
+                uint8_t localEta = jFexSRJetRoI->tobLocalEta();
+                bool isFCAL = localEta >= 13;
+                if (isFCAL) {
+                    jFexSRJeteta = eta > 0 ? 3.175 : -3.175;
+                    jFexSRJetphi = phi;
+                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                    if (jFexSRJetRoI->et() >= 20000)
+                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+                } else {
+                    jFexSRJeteta = eta > 0 ? 3.125 : -3.125;
+                    jFexSRJetphi = phi - M_PI/64;
+                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                    if (jFexSRJetRoI->et() >= 20000)
+                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+                    jFexSRJetphi = phi + M_PI/64;
+                    fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                    if (jFexSRJetRoI->et() >= 20000)
+                        fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+                }
             } else {
                 fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
                 if (jFexSRJetRoI->et() >= 20000)
