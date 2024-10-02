@@ -109,6 +109,14 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
     title = 'Holes per track'
     define2DProfHist(helper, alg, histoGroupName, title, path, type='TProfile2D')
 
+    histoGroupName = 'MissIBLhit' 
+    title = 'Expected but missing IBL hits (pT>1GeV)'
+    define2DProfPerFEHist(helper, alg, histoGroupName, title, path, type='TH2F', onlylayers=['IBL'])
+
+    histoGroupName = 'MissIBLpresentBLhit' 
+    title = 'Expected but missing IBL hits, BL_on_track hit present (pT>1GeV)'
+    define2DProfPerFEHist(helper, alg, histoGroupName, title, path, type='TH2F', onlylayers=['IBL'])
+
     histoGroupName = 'MissHitsRatio' 
     title = 'Hole+Outlier per track'
     define2DProfHist(helper, alg, histoGroupName, title, path, type='TProfile2D')
@@ -152,6 +160,13 @@ def PixelAthClusterMonAlgCfg(helper, alg, **kwargs):
     trackGroup.defineHistogram(varName,
                                 type='TProfile', path=path, title=title,
                                 xbins=lumibinsx, xmin=-0.5, xmax=-0.5+lumibinsx)
+
+    varName = 'eta_noibl,phi_noibl,missIBLhit'
+    title   = fullDressTitle('Eta-phi of tracks with an absent expected IBL hit, ratio to total tracks', False, ';eta', ';phi')
+    varName += ';MissIBLhitsEtaPhi'
+    trackGroup.defineHistogram(varName,
+                    type='TProfile2D', path=path, title=title,
+                    xbins=50, xmin=-2.5, xmax=2.5,ybins=25, ymin=-3.1416, ymax=3.1416, zmin=0., zmax=1.5)
 
     if not doOnline:
         varName = 'pixclusmontool_lb,npixhits_per_track'

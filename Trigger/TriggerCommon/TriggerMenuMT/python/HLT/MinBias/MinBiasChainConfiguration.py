@@ -8,6 +8,7 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 
 from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceGenCfg, 
                                                             MinBiasTrkSequenceGenCfg,
+                                                            MinBiasPixelTrkSequenceGenCfg,
                                                             MinBiasMbtsSequenceGenCfg,
                                                             MinBiasZVertexFinderSequenceGenCfg)
 from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceGenCfg, AFPGlobalSequenceGenCfg, AFPToFDeltaZSequenceGenCfg
@@ -40,9 +41,14 @@ class MinBiasChainConfig(ChainConfigurationBase):
         if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl', 'pixsptrk']:
             steps.append(self.getMinBiasSpStep(flags))
 
-        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl', 'pixsptrk']:
+#       if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl', 'pixsptrk']:
+        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl' ]:
             steps.append(self.getMinBiasZFindStep(flags))
             steps.append(self.getMinBiasTrkStep(flags))
+
+        if self.chainPart['recoAlg'][0] in ['pixsptrk']:
+            steps.append(self.getMinBiasZFindStep(flags))
+            steps.append(self.getMinBiasPixelTrkStep(flags))
 
         return self.buildChain(steps)
 
@@ -60,6 +66,9 @@ class MinBiasChainConfig(ChainConfigurationBase):
 
     def getMinBiasTrkStep(self, flags):
         return self.getStep(flags, 'TrkCount', [MinBiasTrkSequenceGenCfg])
+ 
+    def getMinBiasPixelTrkStep(self, flags):
+        return self.getStep(flags, 'TrkCount', [MinBiasPixelTrkSequenceGenCfg])
 
     def getAFPTrkStep(self, flags):
         return self.getStep(flags, 'AFPTrk', [AFPTrkSequenceGenCfg])

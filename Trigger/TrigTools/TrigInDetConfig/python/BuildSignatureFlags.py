@@ -182,10 +182,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
                 
     "cosmics"      : cosmics,
     "bmumux"       : bmumux,
-    "minBias"      : minBias,
 
-    # don't wllow this at the moment 
-    # "minBiasPixel" : minBiasPixel,
+    "minBias"      : minBias,
+    "minBiasPixel" : minBiasPixel,
     
     "electronLRT"  : electronLRT,
     "muonLRT"      : muonLRT,
@@ -424,7 +423,7 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.maxPrimaryImpact    = 10.*Units.mm
   flags.maxZImpact          = 150.*Units.mm
   flags.roadWidth           = 20
-  flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
+  flags.usePrdAssociationTool = False
   return flags
 
 

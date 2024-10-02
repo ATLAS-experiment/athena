@@ -149,6 +149,12 @@ Chain2L1JetCollDict['HI'] = {
   'L1_J15': ['LVL1JetRoIs'],
   'L1_J20': ['LVL1JetRoIs'],
   'L1_J100': ['LVL1JetRoIs'],
+
+  'L1_jJ40': ['L1_jFexSRJetRoI'],
+  'L1_jJ60': ['L1_jFexSRJetRoI'],
+  'L1_jJ90': ['L1_jFexSRJetRoI'],
+
+  'L1jJ40p30ETA49': ['L1_jFexSRJetRoI'],
 }
 
 
@@ -219,7 +225,6 @@ JetCollections['pp'] = {
 
 JetCollections['HI'] = {
   'HLT_AntiKt4HIJets'  : {'MatchTo': 'AntiKt4HIJets'},
-  'HLT_AntiKt4EMTopoJets_subjesIS' : {'MatchTo': 'AntiKt4HIJets'},
   'HLT_AntiKt4EMPFlowJets_jes_ftf' : {'MatchTo': 'AntiKt4HIJets'}
 }
 
@@ -243,8 +248,21 @@ def getChains2Monitor(inputFlags, monMode):
           Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4HIJets"
           Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4HIJets"
       else: 
-          Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4EMTopoJets_subjesIS"
-          Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
+          Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_jes_ftf"
+          if not inputFlags.Common.doExpressProcessing:
+            Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets" #we do not have EMPFlowJets in HI express stream
+          else:
+            Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4HIJets"
+    # only HLT_noalg get efficiency curves by default, so...
+    # these are additional hard-coded chains for efficiency monitoring
+    if Chains2Monitor['HI'].get('HLT_j60_ion_L1jJ40'): Chains2Monitor['HI']['HLT_j60_ion_L1jJ40'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j75_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j75_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j85_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j85_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j150_ion_L1jJ90'): Chains2Monitor['HI']['HLT_j150_ion_L1jJ90'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+
+    if Chains2Monitor['HI'].get('HLT_j50f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j50f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j60f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j60f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+
   elif monMode == "pp":  
     # logic to define HLTColl, RefChain, OfflineColl
     for chainName in Chains2Monitor['pp']:

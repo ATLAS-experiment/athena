@@ -16,6 +16,61 @@ ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* 
 ZdcMonitorAlgorithm::~ZdcMonitorAlgorithm() {}
 
 
+void ZdcMonitorAlgorithm::calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges) {
+    // Clear the vector to ensure it's empty
+    bin_edges.clear();
+
+    // Calculate the logarithmic bin edges
+    float log_min = std::log10(min_value);
+    float log_max = std::log10(max_value);
+    
+    // Linear space between log_min and log_max with num_bins+1 points
+    float step = (log_max - log_min) / num_bins;
+
+    // Populate the vector with the bin edges
+    for (int i = 0; i <= num_bins; ++i) {
+        float edge = log_min + i * step;
+        bin_edges.push_back(std::pow(10, edge));
+    }
+}
+
+
+float ZdcMonitorAlgorithm::calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const {
+    // Check if the event_value is out of range
+    if (event_value < bin_edges.front() || event_value > bin_edges.back()) {
+        ATH_MSG_WARNING("Warning: in calculation of inverse-bin-width event weight for the variable " << variable_name << ", the current event value " << event_value << " is out of the bin range.");
+        ATH_MSG_WARNING("Assign zero weight for the current event (event not filled)."); 
+        return 0.0; // event weight is zero
+    }
+    
+    // Find the bin in which event_value falls
+    for (size_t i = 0; i < bin_edges.size() - 1; ++i) {
+        if (event_value >= bin_edges[i] && event_value < bin_edges[i + 1]) {
+            float bin_width = bin_edges[i + 1] - bin_edges[i];
+            if (bin_width != 0) {
+                return 1.0f / bin_width; // Return the inverse of bin width
+            } else {
+                ATH_MSG_WARNING("Warning: in calculation of inverse-bin-width event weight for the variable " << variable_name << ", bin width containing the event value " << event_value << " is zero.");
+                ATH_MSG_WARNING("Assign zero weight for the current event (event not filled)."); 
+                return 0.0; // event weight is zero
+            }
+        }
+    }
+
+    // Handle edge case where event_value == bin_edges.back()
+    if (event_value == bin_edges.back()) {
+        size_t last_bin_index = bin_edges.size() - 2;
+        float bin_width = bin_edges[last_bin_index + 1] - bin_edges[last_bin_index];
+        return 1.0 / bin_width;
+    }
+
+    // If no bin is found (should not reach here)
+    ATH_MSG_WARNING("Warning: in calculation of inverse-bin-width event weight for the variable " << variable_name << ", no valid bin found for the event value " << event_value << ".");
+    ATH_MSG_WARNING("Assign zero weight for the current event (event not filled)."); 
+    return 0.0; // event weight is zero
+}
+
+
 StatusCode ZdcMonitorAlgorithm::initialize() {
 
     ATH_MSG_DEBUG("initializing for the monitoring algorithm");
@@ -65,7 +120,10 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
     ATH_CHECK( m_RPDcosDeltaReactionPlaneAngleKey.initialize() );
     ATH_CHECK( m_RPDcentroidStatusKey.initialize() );
     ATH_CHECK( m_RPDSideStatusKey.initialize() );
-    
+        
+    // calculate log binnings
+    calculate_log_bin_edges(m_moduleChisqHistMinValue, m_moduleChisqHistMaxvalue, m_moduleChisqHistNumBins, m_ZdcModuleChisqBinEdges);
+    calculate_log_bin_edges(m_moduleChisqOverAmpHistMinValue, m_moduleChisqOverAmpHistMaxvalue, m_moduleChisqOverAmpHistNumBins, m_ZdcModuleChisqOverAmpBinEdges);
 
     m_ZDCSideToolIndices = buildToolMap<int>(m_tools,"ZdcSideMonitor",m_nSides);
     m_ZDCModuleToolIndices = buildToolMap<std::vector<int>>(m_tools,"ZdcModuleMonitor",m_nSides,m_nModules);
@@ -258,7 +316,9 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto zdcModuleTime = Monitored::Scalar<float>("zdcModuleTime", -1000.0);
     auto zdcModuleFitT0 = Monitored::Scalar<float>("zdcModuleFitT0", -1000.0);
     auto zdcModuleChisq = Monitored::Scalar<float>("zdcModuleChisq", -1000.0);
+    auto zdcModuleChisqEventWeight = Monitored::Scalar<float>("zdcModuleChisqEventWeight", -1000.0);
     auto zdcModuleChisqOverAmp = Monitored::Scalar<float>("zdcModuleChisqOverAmp", -1000.0);
+    auto zdcModuleChisqOverAmpEventWeight = Monitored::Scalar<float>("zdcModuleChisqOverAmpEventWeight", -1000.0);
     auto zdcModuleCalibAmp = Monitored::Scalar<float>("zdcModuleCalibAmp", -1000.0);
     auto zdcModuleCalibTime = Monitored::Scalar<float>("zdcModuleCalibTime", -1000.0);
     auto zdcModuleLG = Monitored::Scalar<bool>("zdcModuleLG", false);
@@ -283,14 +343,9 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto absRpdChannelAmplitude = Monitored::Scalar<float>("absRPDChannelAmplitude", -1000.); // EM module energy on the same side (assuming filled already)
     auto rpdChannelValid = Monitored::Scalar<bool>("RPDChannelValid", false);
     auto rpdChannelCentroidValid = Monitored::Scalar<bool>("RPDChannelCentroidValid", false);
-    auto rpdChannelNegativeAmp = Monitored::Scalar<bool>("RPDChannelNegativeAmp", false); // negative amplitude
-    auto rpdChannelNegativePileup = Monitored::Scalar<bool>("RPDChannelNegativePileup", false); // negative amplitude & performed pileup fitting
-    auto rpdChannelNoPileup = Monitored::Scalar<bool>("RPDChannelNoPileup", false); // no pileup fitting performed
     auto rpdChannelPileupFrac = Monitored::Scalar<float>("RPDChannelPileupFrac", -1000.);
     auto zdcEMModuleEnergySameSide = Monitored::Scalar<float>("zdcEMModuleEnergySameSide", -1000.); // EM module energy on the same side (assuming filled already)
-    auto zdcEMModuleSameSideHasPulse = Monitored::Scalar<bool>("zdcEMModuleSameSideHasPulse", false);
-    auto rpdValidZdcEMModuleEnergySameSideBelow0 = Monitored::Scalar<bool>("rpdValidZdcEMModuleEnergySameSideBelow0", false);
-    auto rpdValidZdcEMModuleEnergySameSideBelow70 = Monitored::Scalar<bool>("rpdValidZdcEMModuleEnergySameSideBelow70", false);
+    auto zdcEnergySumSameSide = Monitored::Scalar<float>("zdcEnergySumSameSide", -1000.); // EM module energy on the same side (assuming filled already)
 
     std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
     std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
@@ -302,7 +357,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
 
     for (const auto zdcMod : *zdcModules){ // separate ZDC and RPD variable retrieval into two for loops to make sure the EM module energy array is properly filled before being filled into RPD channel monitoring
-        int iside = (zdcMod->zdcSide() > 0)? 1 : 0; // in this way, a negative (default-value) EM module energy indicates no pulse (since filling happens within an if statement)
+        int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
     
         if (zdcMod->zdcType() == 0){
             int imod = zdcMod->zdcModule();
@@ -343,19 +398,12 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 zdcModuleHGtoLGAmpRatio = (!zdcModuleHGValid || zdcModuleAmpLGRefit == 0)? -1000. : zdcModuleAmp * 1. / zdcModuleAmpLGRefitTimes10; // HG/LG ratio if HG is valid and LG-refit amplitude is nonzero (shouldn't be)
                 zdcModuleHGtoLGT0Diff = (!zdcModuleHGValid)? -1000. : zdcModuleFitT0 - zdcModuleT0LGRefit;
 
-                ATH_MSG_DEBUG("Sanity check: ZDC status: " << status);
-                bool HG_overflow = status & 1 << ZDCPulseAnalyzer::HGOverflowBit;
-                ATH_MSG_DEBUG("Did HG overflow? " << HG_overflow);
-                bool HG_underflow = status & 1 << ZDCPulseAnalyzer::HGUnderflowBit;
-                ATH_MSG_DEBUG("Did HG underflow? " << HG_underflow);
-                ATH_MSG_DEBUG("Is HG valid? " << zdcModuleHGValid);
-                ATH_MSG_DEBUG("What's HG amplitude? " << zdcModuleAmp);
-                ATH_MSG_DEBUG("What's LG amplitude? " << zdcModuleAmpLGRefit);
-                ATH_MSG_DEBUG("What's the HG-to-LG amplitude ratio? " << zdcModuleHGtoLGAmpRatio);
+                zdcModuleChisqEventWeight = calculate_inverse_bin_width(zdcModuleChisq, "module chisq", m_ZdcModuleChisqBinEdges);
+                zdcModuleChisqOverAmpEventWeight = calculate_inverse_bin_width(zdcModuleChisqOverAmp, "module chisq over amplitude", m_ZdcModuleChisqOverAmpBinEdges);
 
                 if (imod == 0) zdcEMModuleEnergy[iside] = zdcModuleCalibAmp;
 
-                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleMaxADC, zdcModuleFract, zdcUncalibSumCurrentSide, zdcAbove20NCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleAmpLGRefitTimes10, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, lumiBlock, bcid);
+                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleMaxADC, zdcModuleFract, zdcUncalibSumCurrentSide, zdcAbove20NCurrentSide, zdcModuleTime, zdcModuleFitT0, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleChisqEventWeight, zdcModuleChisqOverAmpEventWeight, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, zdcModuleHGValid, zdcModuleAmpLGRefit, zdcModuleAmpLGRefitTimes10, zdcModuleT0LGRefit, zdcModuleT0SubLGRefit, zdcModuleChisqLGRefit, zdcModuleHGtoLGAmpRatio, zdcModuleHGtoLGT0Diff, lumiBlock, bcid);
             } 
         } 
     }
@@ -389,20 +437,15 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
             absRpdChannelAmplitude = abs(rpdChannelAmplitude);
             zdcEMModuleEnergySameSide = zdcEMModuleEnergy[iside];
-            zdcEMModuleSameSideHasPulse = (zdcEMModuleEnergySameSide >= 0); // default negative value indicates no pulse in the EM module
+            zdcEnergySumSameSide = zdcEnergySum[iside];
             bool curRpdChannelValid = status & 1 << RPDDataAnalyzer::ValidBit;
-            rpdValidZdcEMModuleEnergySameSideBelow0 = (zdcEMModuleEnergySameSide == 0) && curRpdChannelValid;
-            rpdValidZdcEMModuleEnergySameSideBelow70 = (zdcEMModuleEnergySameSide < 70) && curRpdChannelValid;
             rpdChannelValid = curRpdChannelValid;
             rpdChannelCentroidValid = centroidSideValid.at(iside);
-            rpdChannelNegativeAmp = (rpdChannelAmplitude < 0);
-            rpdChannelNegativePileup = (rpdChannelPileupFrac == -1);
-            rpdChannelNoPileup = (rpdChannelPileupFrac == 0);
 
             rpdAmplitudeCalibSum[iside] += rpdChannelAmplitudeCalib;
             rpdMaxADCSum[iside] += rpdChannelMaxADC;
 
-            fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelSubAmp, rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, rpdChannelPileupFitSlope, absRpdChannelAmplitude, rpdChannelPileupFrac, zdcEMModuleEnergySameSide, zdcEMModuleSameSideHasPulse, rpdValidZdcEMModuleEnergySameSideBelow0, rpdValidZdcEMModuleEnergySameSideBelow70, rpdChannelValid, rpdChannelCentroidValid, rpdChannelNegativeAmp, rpdChannelNegativePileup, rpdChannelNoPileup, lumiBlock, bcid);
+            fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelSubAmp, rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, rpdChannelPileupFitSlope, absRpdChannelAmplitude, rpdChannelPileupFrac, zdcEMModuleEnergySameSide, zdcEnergySumSameSide, rpdChannelValid, rpdChannelCentroidValid, lumiBlock, bcid);
         }
     }
     

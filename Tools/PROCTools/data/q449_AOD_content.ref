@@ -1031,6 +1031,8 @@ HLT_IDTrack_FS_FTFAuxDyn.passPFTrackPresel
 HLT_IDTrack_JetSuper_FTF
 HLT_IDTrack_JetSuper_FTFAux.
 HLT_IDTrack_JetSuper_FTFAuxDyn.viewIndex
+HLT_IDTrack_MinBiasPixel_IDTrig
+HLT_IDTrack_MinBiasPixel_IDTrigAux.
 HLT_IDTrack_MinBias_IDTrig
 HLT_IDTrack_MinBias_IDTrigAux.
 HLT_IDTrack_MuonIso_FTF

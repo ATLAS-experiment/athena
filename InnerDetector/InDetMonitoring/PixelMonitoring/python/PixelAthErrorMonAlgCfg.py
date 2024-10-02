@@ -11,7 +11,7 @@ from PixelMonitoring.PixelAthMonitoringBase import define2DProfHist, define2DPro
 from PixelMonitoring.PixelAthMonitoringBase import defineMapVsLumiLayers
 from PixelMonitoring.PixelAthMonitoringBase import define1DProfLumiLayers
 from PixelMonitoring.PixelAthMonitoringBase import layers, fei3layers, fei4layers
-from PixelMonitoring.PixelAthMonitoringBase import fullDressTitle
+from PixelMonitoring.PixelAthMonitoringBase import fullDressTitle, runtext, bcidbinsx, getLayerGroup
 from PixelMonitoring.PixelAthMonitoringBase import errbbinsy, errbminsy, errbbsizy, errtbinsy
 from PixelMonitoring.PixelAthMonitoringBase import ErrCatRODModLabels, ErrCatLabels, ErrCatRODModLabelsNorm, ErrCatLabelsNorm
 from PixelMonitoring.PixelAthMonitoringBase import ErrStateLabelsFEI3, ErrStateLabelsFEI4
@@ -139,3 +139,14 @@ def PixelAthErrorMonAlgCfg(helper, alg, **kwargs):
                                type='TH1F', path=pathExpert, title=title,
                                xbins=32, xmin=-0.5, xmax=31.5)
  
+
+    desynchistoname = 'AvgSyncErrPerBCID'
+    for layer in layers:
+        title      = 'Average syncrohisation error per BCID, {0}'.format(layer) + runtext + ';BCID;# hits/pixel/event'
+        layerGroup = getLayerGroup(helper, alg, layer)
+        fullvarstr = 'pixdesyncmontool_bcid'
+        fullvarstr+= ',{0}_{1}'.format(desynchistoname, 'val')
+        fullvarstr+= ';' + desynchistoname + '_{0}'.format(layer)
+        layerGroup.defineHistogram(fullvarstr, 
+                                   type='TProfile', path='/Pixel/Errors', title=title,
+                                   xbins=bcidbinsx, xmin=-0.5, xmax=-0.5+bcidbinsx)

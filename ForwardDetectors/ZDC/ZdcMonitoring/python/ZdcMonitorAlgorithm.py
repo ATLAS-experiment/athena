@@ -16,6 +16,7 @@
 
 
 import numpy as np
+import os
 
 def create_log_bins(min_value, max_value, num_bins):
     # Calculate the logarithmic bin edges
@@ -38,6 +39,9 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     # Edit properties of a algorithm
     zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger
     zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'express_express' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias or express_express
+    zdcMonAlg.IsOnline = inputFlags.Common.isOnline # if running online select a subset of histograms & use coarser binnings
+    zdcMonAlg.IsInjectedPulse = (os.getenv("ZDC_STREAM_NAME") == 'ZDCInjCalib') if zdcMonAlg.IsOnline else (inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib') # if running online select a subset of histograms & use coarser binnings
+
 
     genZdcMonTool = helper.addGroup(
         zdcMonAlg,
@@ -61,8 +65,21 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     module_chisq_min = 0.1
     module_chisq_max = 800000
+    module_chisq_nbins = 80
     module_chisq_over_amp_min = 0.01
-    module_chisq_over_amp_max = 100000
+    module_chisq_over_amp_max = 5000
+    module_chisq_over_amp_nbins = 80
+
+    # to ensure the logarithmic binning in C++ algorithm agrees with python
+    # so that the inverse-bin-width weight calculation is correct
+    zdcMonAlg.ZDCModuleChisqHistMinValue = module_chisq_min
+    zdcMonAlg.ZDCModuleChisqHistMaxvalue = module_chisq_max
+    zdcMonAlg.ZDCModuleChisqHistNumBins = module_chisq_nbins
+    zdcMonAlg.ZDCModuleChisqOverAmpHistMinValue = module_chisq_over_amp_min
+    zdcMonAlg.ZDCModuleChisqOverAmpHistMaxvalue = module_chisq_over_amp_max
+    zdcMonAlg.ZDCModuleChisqOverAmpHistNumBins = module_chisq_over_amp_nbins
+
+
     module_FPGA_max_ADC = 5000 # For zoomed-in HG monitoring
     module_HG_ampl_realistic = 4200
 
@@ -400,10 +417,11 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             path='ModuleAmp',
                             cutmask='zdcModuleLG', # require to use LG
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
-    
+
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10',title=';LG-Refit Amplitude * 10. [ADC Counts];Events',
                             path='ModuleAmp',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+                            cutmask='zdcModuleHGValid',
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
     
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_halfrange',title=';Module Amplitude [ADC Counts];Events',
                             path='ModuleAmp',
@@ -418,7 +436,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             path='ModuleAmp', 
                             cutmask='zdcModuleHGValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
-
+    
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
                             xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
@@ -447,9 +465,19 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime',title=';Module Time [ns];Events',
                             path='ModuleTime',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+
     zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0',title=';Module FitT0 [ns];Events',
                             path='ModuleFitT0',
                             xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_LG',title=';Module FitT0 LG [ns];Events',
+                            path='ModuleFitT0',
+                            cutmask='zdcModuleLG',                            
+                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_HG',title=';Module FitT0 HG [ns];Events',
+                            path='ModuleFitT0',
+                            cutmask='zdcModuleHG',
+                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_LG',title=';Module Time [ns];Events',
                             path='ModuleTime',
                             cutmask='zdcModuleLG',
@@ -458,6 +486,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             path='ModuleTime',
                             cutmask='zdcModuleHG',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+    
     zdcModuleMonToolArr.defineHistogram('zdcModuleCalibTime',title=';Module Calibrated Time [ns];Events',
                             path='ModuleCalibTime',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
@@ -466,10 +495,24 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisq',title=';Module Chi-square;Events',
                             path='ModuleChisq',
-                            xbins=create_log_bins(module_chisq_min, module_chisq_max, 80))
+                            weight='zdcModuleChisqEventWeight',
+                            xbins=create_log_bins(module_chisq_min, module_chisq_max, module_chisq_nbins))
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp',title=';Module Chi-square / Amplitude;Events',
                             path='ModuleChisq',
-                            xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, 80))
+                            weight='zdcModuleChisqOverAmpEventWeight',
+                            xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleChisqOverAmp',type='TH2F',title=';Module Amplitude [ADC Counts];Module Chi-square / Amplitude',
+                            path='ModuleChisq',
+                            weight='zdcModuleChisqOverAmpEventWeight',
+                            # xbins=create_log_bins(module_chisq_over_amp_min, module_amp_xmax./2., module_chisq_over_amp_nbins),
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.,
+                            ybins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
+    zdcModuleMonToolArr.defineHistogram('zdcModuleChisq;zdcModuleChisq_unweighted',title=';Module Chi-square;Events',
+                            path='ModuleChisq',
+                            xbins=create_log_bins(module_chisq_min, module_chisq_max, module_chisq_nbins))
+    zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp;zdcModuleChisqOverAmp_unweighted',title=';Module Chi-square / Amplitude;Events',
+                            path='ModuleChisq',
+                            xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
 
 
     # ---------------------------- LG & HG comparisons ---------------------------- 
@@ -583,46 +626,6 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             cutmask='RPDChannelValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
-
-
-    # study on EM module energy, max ADC and pile-up fit slope for RPD channels with negative amplitude
-    rpdChannelMonToolArr.defineHistogram('RPDChannelPileupFrac;RPDChannelPileupFrac_negative_amp', title=';;Events',
-                            path='NegativeAmpDistrs',
-                            cutmask='RPDChannelNegativeAmp',
-                            xlabels=['pileup','no pileup'],
-                            xbins=2,xmin=-1.5,xmax=0.5)
-
-    rpdChannelMonToolArr.defineHistogram('zdcEMModuleSameSideHasPulse;zdcEMModuleSameSideHasPulse_negative_amp', title=';;Events',
-                            path='NegativeAmpDistrs',
-                            cutmask='RPDChannelNegativeAmp',
-                            xlabels=['EM pulse bit false','EM pulse bit true'],
-                            xbins=2,xmin=-0.5,xmax=1.5)
-
-    rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC;RPDChannelMaxADC_negative_amp', title=';Max ADC [ADC Counts];Events',
-                            path='NegativeAmpDistrs',
-                            cutmask='RPDChannelNegativeAmp',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=4096.0)
-
-    rpdChannelMonToolArr.defineHistogram('zdcEMModuleEnergySameSide;zdcEMModuleEnergySameSide_negative_amp', title=';E EM module AorC [GeV];Events',
-                            path='NegativeAmpDistrs',
-                            cutmask='RPDChannelNegativeAmp',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2.)
-
-    rpdChannelMonToolArr.defineHistogram('zdcEMModuleEnergySameSide, RPDChannelPileupFitSlope;RPDChannelPileupFitSlope_vs_zdcEMModuleEnergySameSide_negative_amp', type='TH2F', title=';E EM module AorC [GeV];RPD Pileup Fitted Slope',
-                            path='NegativeAmpDistrs',
-                            cutmask='RPDChannelNegativePileup',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2., # divide by 2 to make a more zoomed-in plot (not full range)
-                            ybins=n_energy_bins_default,ymin=-100.,ymax=10.) # try a value for now
-
-    # Study of effect of minimum EM module energy cut on RPD channel amplitude
-    rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_EMbelow0', title=';RPD Channel Calibrated Amplitude;Events',
-                            path='CalibAmp/RpdChanAmpDistrAtLowEMModuleEnergy',
-                            cutmask='rpdValidZdcEMModuleEnergySameSideBelow0',
-                            xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_EMbelow70', title=';RPD Channel Calibrated Amplitude;Events',
-                            path='CalibAmp/RpdChanAmpDistrAtLowEMModuleEnergy',
-                            cutmask='rpdValidZdcEMModuleEnergySameSideBelow70',
-                            xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
 
 
     ### STEP 6 ###
