@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AnalysisTools )
@@ -14,7 +14,7 @@ atlas_add_library( AthAnalysisToolsLib
                    PUBLIC_HEADERS AnalysisTools
                    INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} AnalysisUtilsLib AthContainers AthenaBaseComps CxxUtils GaudiKernel McParticleEvent NavFourMom
+                   LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} AnalysisUtilsLib AthContainers AthenaBaseComps CxxUtils GaudiKernel NavFourMom
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaPoolUtilities EventInfo PersistentDataModel RootCollection RootUtils SGTools StoreGateLib xAODEventInfo )
 
 atlas_add_component( AthAnalysisTools

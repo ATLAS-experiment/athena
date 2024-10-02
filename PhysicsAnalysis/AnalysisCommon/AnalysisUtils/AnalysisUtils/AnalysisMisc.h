@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISUTILS_ANALYSISMISC_H
@@ -24,7 +24,6 @@
 #ifndef XAOD_STANDALONE
 #include "CLHEP/Vector/LorentzVector.h"
 #include "EventKernel/INavigable4Momentum.h"
-#include "McParticleEvent/TruthParticleContainer.h"
 #endif
 
 namespace AnalysisUtils {
@@ -115,38 +114,6 @@ namespace AnalysisUtils {
       return l_return;
     }
 
-    inline bool R (const double eta, const double phi, const TruthParticleContainer *coll, int &index, 
-		   double &deltaR, const int pdg, const bool genOnly=true)
-    {
-      deltaR = 10000.; // big value
-      bool l_return = false;
-      int l_idx = 0;
-      TruthParticleContainer::const_iterator it  = coll->begin();
-      TruthParticleContainer::const_iterator itE = coll->end();
-      if ( genOnly )
-	{
-	  for (; it != itE; ++it)
-	    {
-	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
-		{
-		  if (((*it)->pdgId()==pdg) || pdg==0 )
-		    {
-		      double rtu = Delta::R(*it,eta,phi);
-		      if ( rtu < deltaR )
-			{
-			  index  = l_idx;
-			  deltaR = rtu;
-			  l_return = true;
-			}
-		    }
-		}
-	      ++l_idx;
-	    }
-	  return l_return;
-	}
-      else return R( eta, phi, coll, index, deltaR, pdg);
-    }
-
     /** find the closest element in R - with a condition on E
 	@param index [out] index of the closest element
 	@param deltaR [out] @f$ \Delta{R} @f$
@@ -181,41 +148,6 @@ namespace AnalysisUtils {
       return l_return;
     }
 
-    inline bool R (const double eta, const double phi, const double e, const TruthParticleContainer *coll, 
-                   int &index, double &deltaR, const int pdg, double &deltaE, const bool genOnly=true)
-    {
-      deltaR = 1.0e+20; // big value
-      deltaE = 1.0e+20;
-      bool l_return = false;
-      int l_idx = 0;
-      TruthParticleContainer::const_iterator it  = coll->begin();
-      TruthParticleContainer::const_iterator itE = coll->end();
-      if ( genOnly ) 
-	{
-	  for (; it != itE; ++it)
-	    {
-	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
-		{	      
-		  if (((*it)->pdgId()==pdg) || pdg==0 )
-		    {
-		      double rtu = Delta::R(*it,eta,phi);
-		      double dE  = fabs( e-(*it)->e() );
-		      if ( rtu < deltaR && dE < deltaE)
-			{
-			  index  = l_idx;
-			  deltaR = rtu;
-			  deltaE = dE;
-			  l_return = true;
-			}
-		    }
-		}
-	      ++l_idx;
-	    }
-	  return l_return;
-	}
-      else return R(eta, phi, e, coll, index, deltaR, pdg, deltaE);
-    }
-
     /** find the closest element in R
 	@param index [out] index of the closest element
 	@param deltaR [out] @f$ \Delta{R} @f$
@@ -225,12 +157,6 @@ namespace AnalysisUtils {
     inline bool R (const INavigable4Momentum *t, COLL *coll, int &index, double &deltaR, const int pdg)
     {
       return R (t->eta(), t->phi(), coll, index, deltaR, pdg);
-    }
-
-    inline bool R (const INavigable4Momentum *t, const TruthParticleContainer *coll, int &index, double &deltaR,
-		   const int pdg, const bool genOnly=true)
-    {
-      return R (t->eta(), t->phi(), coll, index, deltaR, pdg, genOnly);
     }
 
     /** find the closest element in R - with a condition on E
@@ -243,12 +169,6 @@ namespace AnalysisUtils {
                    const int pdg, double &deltaE)
     {
       return R (t->eta(), t->phi(), t->e(), coll, index, deltaR, pdg, deltaE);
-    }
-
-    inline bool R (const INavigable4Momentum *t, const TruthParticleContainer *coll, int &index, 
-		   double &deltaR, const int pdg, double &deltaE, const bool genOnly=true)
-    {
-      return R (t->eta(), t->phi(), t->e(), coll, index, deltaR, pdg, deltaE, genOnly);
     }
 
     /** find the closest element in R (not check PDG ID)
@@ -274,35 +194,6 @@ namespace AnalysisUtils {
 	  ++l_idx;
 	}
       return l_return;
-    }
-
-    inline bool R (const double eta, const double phi, const TruthParticleContainer *coll, 
-		   int &index, double &deltaR, const bool genOnly=true)
-    {
-      deltaR = 10000.; // big value
-      bool l_return = false;
-      int l_idx = 0;
-      TruthParticleContainer::const_iterator it  = coll->begin();
-      TruthParticleContainer::const_iterator itE = coll->end();
-      if ( genOnly ) 
-	{
-	  for (; it != itE; ++it)
-	    {
-	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
-		{
-		  double rtu = Delta::R(*it,eta,phi);
-		  if ( rtu < deltaR )
-		    {
-		      index  = l_idx;
-		      deltaR = rtu;
-		      l_return = true;
-		    }
-		}
-	      ++l_idx;
-	    }
-	  return l_return;
-	}
-      else return R(eta,phi,coll, index, deltaR);
     }
 
     /** find the closest element in R (not check PDG ID) - with a condition on E
@@ -334,38 +225,6 @@ namespace AnalysisUtils {
       return l_return;
     }
 
-    inline bool R (const double eta, const double phi, const double e, const TruthParticleContainer *coll, int &index, 
-                   double &deltaR, double &deltaE, const bool genOnly=true)
-    {
-      deltaR = 1.0e+20; // big value
-      deltaE = 1.0e+20;
-      bool l_return = false;
-      int l_idx = 0;
-      TruthParticleContainer::const_iterator it  = coll->begin();
-      TruthParticleContainer::const_iterator itE = coll->end();
-      if ( genOnly ) 
-	{
-	  for (; it != itE; ++it)
-	    {
-	      if ( !HepMC::is_simulation_particle(*it) ) // only generator particles
-		{
-		  double rtu = Delta::R(*it,eta,phi);
-		  double dE  = fabs( e-(*it)->e() );
-		  if ( rtu < deltaR && dE < deltaE)
-		    {
-		      index  = l_idx;
-		      deltaR = rtu;
-		      deltaE = dE;
-		      l_return = true;
-		    }
-		}
-	      ++l_idx;
-	    }
-	  return l_return;
-	}
-      else return R(eta, phi, e, coll, index, deltaR, deltaE);
-    }
-
     /** find the closest element in R (not check PDG ID)
 	@return index of the element; -1 if not found
     */
@@ -375,12 +234,6 @@ namespace AnalysisUtils {
       return R (t->eta(), t->phi(), coll, index, deltaR);
     }
 
-    inline bool R (const INavigable4Momentum *t, const TruthParticleContainer *coll, int &index, double &deltaR,
-		   const bool genOnly=true)
-    {
-      return R (t->eta(), t->phi(), coll, index, deltaR, genOnly);
-    }
-
     /** find the closest element in R (not check PDG ID) - with a condition on E
 	@return index of the element; -1 if not found
     */
@@ -388,12 +241,6 @@ namespace AnalysisUtils {
     inline bool R (const INavigable4Momentum *t, COLL *coll, int &index, double &deltaR, double &deltaE)
     {
       return R (t->eta(), t->phi(), t->e(), coll, index, deltaR, deltaE);
-    }
-
-    inline bool R (const INavigable4Momentum *t, const TruthParticleContainer *coll, int &index, 
-		   double &deltaR, double &deltaE, const bool genOnly=true)
-    {
-      return R (t->eta(), t->phi(), t->e(), coll, index, deltaR, deltaE, genOnly);
     }
 
   } // end of Math namespace
