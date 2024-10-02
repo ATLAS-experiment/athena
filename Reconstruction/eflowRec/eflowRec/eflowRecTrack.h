@@ -38,8 +38,6 @@
 class eflowTrackClusterLink;
 class eflowTrackExtrapolatorBaseAlgTool;
 
-class IMessageSvc;
-class ISvcLocator;
 
 /**
 This class extends the information about a xAOD::Track. It stores an ElementLink to a track, a raw pointer to that track, the expected energy deposit (mean and width of the reference distribution) of the track in the calorimeter, the pull15 variable (used to decide whether to run the charged shower subtraction or not), a bool to tag whether this track is in an energy dense calorimeter environment (if it is, then the charged shower subtraction is not run for that track), a bool to signify if the track has already had its shower removed from the calorimeter clusters and a bool to signify if we found a reference e/p bin (which depends on the track eta,pt and LHED). In addition to these variables we store a pointer to an eflowTrackCaloPoints object, a reference to an eflowRingSubtractionManager object and a vector of pointers to eflowTrackClusterLink. There is also an option to store additional vectors in a map using a string as a key (this allows us to store sets of eflowTrackClusterLink for multiple track-cluster matching schemes).
@@ -79,21 +77,7 @@ public:
   const std::vector<double>& getCaloDepthArray() const { return m_caloDepthArray; }
 
   bool isSubtracted() const { return m_isSubtracted; }
-
-  void setSubtracted() {
-    if (isSubtracted()){
-      MsgStream* mlog = m_mlog.get();
-      std::string errorString = "Invoke setSubtracted() on track that is subtracted already!";
-      if (mlog) (*mlog) << MSG::WARNING << errorString << endmsg;
-      else {
-	std::string errorPrefix = "eflowRecTrack: WARNING";
-	std::cerr << errorPrefix << " - have invalid pointer to MsgStream service " << std::endl;
-	std::cerr << errorPrefix << errorString << std::endl;
-      }//if don't have valid pointer to mlog service, warn and use cerr
-      return;
-    }//if track was already subtracted then print a warning to the user about that and return
-    m_isSubtracted = true;
-  }
+  void setSubtracted();
 
   void setEExpect(double eExpect, double varEExpect){ m_eExpect = eExpect; m_varEExpect = varEExpect; }
   double getEExpect() const { return m_eExpect; }
@@ -161,9 +145,6 @@ private:
   //for truth cheating mode only, we store the list of cells and their truth energies
   std::vector<std::pair<const CaloCell*, double> > m_cellTruthEnergyList;
   std::map<Identifier,double> m_cellTruthEnergyStore;
-
-  IMessageSvc* m_msgSvc{};
-  std::unique_ptr<MsgStream> m_mlog;
 
 public:
   class SortDescendingPt {

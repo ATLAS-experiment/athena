@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,9 +13,9 @@
 #include "eflowRec/eflowDepthCalculator.h"
 #include "eflowRec/eflowTrackExtrapolatorBaseAlgTool.h"
 
-#include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
+#include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/StatusCode.h"
+
 
 eflowRecTrack::eflowRecTrack(
     const ElementLink<xAOD::TrackParticleContainer>& trackElemLink,
@@ -31,10 +31,6 @@ eflowRecTrack::eflowRecTrack(
     m_hasBin(true),
     m_trackCaloPoints(theTrackExtrapolatorTool->execute(m_track))
 {
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
-  if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
-  else m_mlog = nullptr;
 }
 
 eflowRecTrack::eflowRecTrack(const eflowRecTrack& eflowRecTrack)
@@ -52,10 +48,6 @@ eflowRecTrack::eflowRecTrack(const eflowRecTrack& eflowRecTrack)
     m_hasBin (eflowRecTrack.m_hasBin),
     m_trackCaloPoints (std::make_unique<eflowTrackCaloPoints>(*eflowRecTrack.m_trackCaloPoints))
 {
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
-  if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
-  else m_mlog = nullptr;
 }
 
 eflowRecTrack& eflowRecTrack::operator = (const eflowRecTrack& originalEflowRecTrack){
@@ -74,10 +66,6 @@ eflowRecTrack& eflowRecTrack::operator = (const eflowRecTrack& originalEflowRecT
     m_isRecovered = originalEflowRecTrack.m_isRecovered;
     m_hasBin = originalEflowRecTrack.m_hasBin;
     m_trackCaloPoints = std::make_unique<eflowTrackCaloPoints>(*originalEflowRecTrack.m_trackCaloPoints);
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc );  
-    if ( status.isSuccess( ) ) m_mlog = std::make_unique<MsgStream>(m_msgSvc,"eflowRecTrack");
-    else m_mlog = nullptr;
     m_layerHED = originalEflowRecTrack.m_layerHED;
     return *this;
   }//if not assigning to self, then we have copied the data to the new object
@@ -109,3 +97,11 @@ double eflowRecTrack::getCellTruthEnergy (const CaloCell* cell) const{
   else return m_cellTruthEnergyStore.at(cell->ID());
 }
 
+void eflowRecTrack::setSubtracted() {
+  if (isSubtracted()){
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::WARNING, "eflowRecTrack")
+      << "Invoke setSubtracted() on track that is subtracted already!" << endmsg;
+    return;
+  }//if track was already subtracted then print a warning to the user about that and return
+  m_isSubtracted = true;
+}
