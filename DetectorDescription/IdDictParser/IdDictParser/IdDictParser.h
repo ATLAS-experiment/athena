@@ -20,7 +20,7 @@ public:
   IdDictRegion*         m_region; 
   IdDictAltRegions*	m_altregions;
   IdDictSubRegion*      m_subregion; 
-  IdDictRegionEntry*    m_regionentry; 
+  IdDictRegionEntry*    m_regionentry;
 }; 
   
 #endif  
