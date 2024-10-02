@@ -93,7 +93,7 @@ namespace IDTPM {
     std::string m_directory;
 
     /// TrackAnalysis definition service to "hold" the histograms configurations/flags
-    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
+    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
     /// Plot categories
     /// plots w.r.t. test tracks parameters

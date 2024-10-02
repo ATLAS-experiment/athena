@@ -255,9 +255,9 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
   ATH_MSG_DEBUG( "Selecting tracks in RoI" );
 
   /// retrieving TrkAnaDefSvc
-  ITrackAnalysisDefinitionSvc* trkAnaDefSvc( nullptr );
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+trkAnaColls.anaTag(), trkAnaDefSvc ) );
+  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc"+trkAnaColls.anaTag() ) );
+  ATH_CHECK( trkAnaDefSvc.isValid() );
 
   const TrigRoiDescriptor* const* roi = roiLink.cptr();
 

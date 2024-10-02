@@ -19,7 +19,7 @@
 IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
   const std::string& anaTag ) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag ), m_trkAnaDefSvc( nullptr )
+    m_anaTag( anaTag )
 {
   m_truthPartVec.resize( NStages );
   m_offlTrackVec.resize( NStages );
@@ -32,13 +32,8 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections(
 StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
   /// load trkAnaDefSvc
-  if( not m_trkAnaDefSvc ) {
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    ATH_CHECK( svcLoc->service( "TrkAnaDefSvc"+m_anaTag, m_trkAnaDefSvc ) );
-    if( !m_trkAnaDefSvc ) { // suppress cppcheck warning.
-      return StatusCode::FAILURE;
-    }
-  }
+  m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
+  ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
   /// construct track matching lookup table
   /// based on the types of test and reference

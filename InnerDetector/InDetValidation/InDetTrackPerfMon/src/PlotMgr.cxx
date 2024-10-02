@@ -51,14 +51,9 @@ IDTPM::SinglePlotDefinition IDTPM::PlotMgr::retrieveDefinition(
     const std::string& nameOverride ) const
 {
   /// Loading PlotsDefinitionSvc
-  IPlotsDefinitionSvc* plotsDefSvc;
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode sc = svcLoc->service( "PlotsDefSvc"+m_anaTag, plotsDefSvc );
-  if( sc.isFailure() ) {
-    ATH_MSG_ERROR( "Could not load PlotsDefSvc"+m_anaTag );
-    SinglePlotDefinition nullDef;
-    return nullDef;
-  }
+  SmartIF<IPlotsDefinitionSvc> plotsDefSvc(svcLoc->service( "PlotsDefSvc"+m_anaTag ));
+  ATH_CHECK( plotsDefSvc.isValid(), {} );
 
   /// retrieve a copy of the plot definition
   SinglePlotDefinition sDef = plotsDefSvc->definition( identifier );

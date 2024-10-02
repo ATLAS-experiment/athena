@@ -139,10 +139,9 @@ std::string IDTPM::TrackMatchingLookupBase<T, R>::printMaps(
     std::string_view chainRoiName_s ) const
 {
   std::string testT(""), refT("");
-  ITrackAnalysisDefinitionSvc* trkAnaDefSvc;
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode sc = svcLoc->service( "TrkAnaDefSvc"+m_anaTag, trkAnaDefSvc );
-  if( sc.isSuccess() ) {
+  SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc(svcLoc->service( "TrkAnaDefSvc"+m_anaTag ));
+  if( trkAnaDefSvc ) {
     testT = "( " + trkAnaDefSvc->testType() + " ) ";
     refT  = "( " + trkAnaDefSvc->referenceType()  + " ) ";
   } else {

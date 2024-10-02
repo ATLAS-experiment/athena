@@ -179,7 +179,7 @@ namespace IDTPM {
 
     /// TrackAnalysis properties
     std::string m_anaTag;
-    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
+    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
     /// --- Collections class variables ---
     /// EventInfo

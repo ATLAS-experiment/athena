@@ -26,7 +26,7 @@
 ///---------------------------
 IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool(
     const std::string& name ) :
-  asg::AsgTool( name ), m_trkAnaDefSvc( nullptr ) { }
+  asg::AsgTool( name ) { }
 
 
 ///--------------------------
@@ -39,8 +39,8 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::initialize()
   ATH_CHECK( asg::AsgTool::initialize() );
 
   /// Retrieving TrkAnaDefSvc
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  ATH_CHECK( svcLoc->service( "TrkAnaDefSvc" + m_anaTag.value(), m_trkAnaDefSvc ) );
+  m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc" + m_anaTag.value());
+  ATH_CHECK( m_trkAnaDefSvc.isValid() );
 
   return StatusCode::SUCCESS;
 }

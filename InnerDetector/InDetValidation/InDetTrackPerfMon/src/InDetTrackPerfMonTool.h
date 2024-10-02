@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_INDETTRACKPERFMONTOOL_H
@@ -119,7 +119,7 @@ private :
     BooleanProperty m_writeOut{ this, "writeOut", false, "Write TrkAnaInfo Collection to AOD_IDTPM" };
 
     /// TrackAnalysisDefinitionSvc
-    ITrackAnalysisDefinitionSvc* m_trkAnaDefSvc;
+    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
     /// plots
     std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
