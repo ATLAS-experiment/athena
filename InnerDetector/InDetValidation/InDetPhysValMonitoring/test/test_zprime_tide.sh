@@ -16,9 +16,16 @@ run() { (set -x; exec "$@") }
 
 
 lastref_dir=last_results
-artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
+dcubeXml_idtide=dcube_IDPVMPlots_idtide.xml
 dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-05-30T2101/physval_test_zprime_tide_2024-05-30T2101.root"
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_idtide -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
 
 export ATHENA_PROC_NUMBER=1
 export ATHENA_CORE_NUMBER=1
@@ -50,7 +57,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "compare with 24.0.1"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide \
-    -c ${dcubeXml_idtide} \
+    -c ${dcubeXmlAbsPath} \
     -r ${dcubeRef_idtide} \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide"
@@ -58,7 +65,7 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_idtide_last \
-    -c ${dcubeXml_idtide} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/physval_idtide.ntuple.root \
     physval_idtide.ntuple.root
   echo "art-result: $? shifter_plots_idtide_last"
