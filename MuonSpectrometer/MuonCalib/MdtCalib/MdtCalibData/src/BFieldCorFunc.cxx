@@ -9,6 +9,7 @@
 #include "MdtCalibData/IRtRelation.h"
 #include "MuonCalibMath/BaseFunctionFitter.h"
 #include "MuonCalibMath/LegendrePolynomial.h"
+#include "GeoModelHelpers/throwExcept.h"
 #include "cmath"
 
 using namespace MuonCalib;
@@ -37,9 +38,7 @@ void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &pa
     // CONSISTENCY CHECK //
     ///////////////////////
     if (m_param.size() != 2) {
-        MsgStream log(Athena::getMessageSvc(), "BFieldCorFunc");
-        log << MSG::ERROR << "Wrong number of parameters!" << endmsg;
-        m_Legendre = nullptr;
+        THROW_EXCEPTION("Wrong number of parameters!");
         return;
     }
 
@@ -107,17 +106,9 @@ void BFieldCorFunc::init(const std::string &quality, const CalibFunc::ParVec &pa
 
     // perform the fit //
     if (fitter.fit_parameters(sample_points, 1, nb_points, &legendre)) {
-        MsgStream log(Athena::getMessageSvc(), "BFieldCorFunc");
-        log << MSG::WARNING << "Unable to fit the integral in the correction!" << endmsg;
-        m_Legendre = nullptr;
-        return;
+        THROW_EXCEPTION("Unable to fit the integral in the correction!");
     }
     m_alpha = fitter.coefficients();
-
-    //////////////////////////////////////////////
-    // SET A POINTER TO THE LEGENDRE POLYNOMIAL //
-    //////////////////////////////////////////////
-    m_Legendre = Legendre_polynomial::get_Legendre_polynomial();
 
 }  // end BFieldCorFunc::init
 double BFieldCorFunc::t_from_r(const double r, const IRtRelation *rt) const {
@@ -191,8 +182,6 @@ void BFieldCorFunc::setRtRelationship(const IRtRelation &rt) {
 std::string BFieldCorFunc::name() const { return std::string("BFieldCorFunc"); }
 
 double BFieldCorFunc::correction(double t, double B_wire, double B_mu) const {
-    if (m_Legendre == nullptr) { return 0.0; }
-
     ///////////////
     // VARIABLES //
     ///////////////
@@ -223,7 +212,7 @@ double BFieldCorFunc::correction(double t, double B_wire, double B_mu) const {
     while (t_max - t_min > precision) {
         integ = 0.0;
         for (int k = 0; k < m_alpha.rows(); k++) {
-            integ += m_alpha[k] * m_Legendre->value(k, 2 * (0.5 * (t_min + t_max) - tmean) / tlength);
+            integ += m_alpha[k] * std::legendre(k, 2 * (0.5 * (t_min + t_max) - tmean) / tlength);
         }
         if (0.5 * (t_min + t_max) + B_factor * integ > time) {
             t_max = 0.5 * (t_min + t_max);
@@ -235,13 +224,7 @@ double BFieldCorFunc::correction(double t, double B_wire, double B_mu) const {
     return B_factor * integ;
 }  // end BFieldCorFunc::correction
 
-//*****************************************************************************
-
-//::::::::::::::::::::::::::::
-//:: METHOD correction_to_B ::
-//::::::::::::::::::::::::::::
 double BFieldCorFunc::correction_to_B(double t, double B_wire, double B_mu, double B_factor) const {
-    if (m_Legendre == nullptr) { return 0.0; }
     ///////////////
     // VARIABLES //
     ///////////////
@@ -265,7 +248,7 @@ double BFieldCorFunc::correction_to_B(double t, double B_wire, double B_mu, doub
     // CALCULATE THE CORRECTION //
     //////////////////////////////
     for (int k = 0; k < m_alpha.rows(); k++) { 
-        integ += m_alpha[k] * m_Legendre->value(k, 2 * (time - tmean) / tlength); 
+        integ += m_alpha[k] * std::legendre(k, 2 * (time - tmean) / tlength); 
     }
 
     return B_factor * integ;

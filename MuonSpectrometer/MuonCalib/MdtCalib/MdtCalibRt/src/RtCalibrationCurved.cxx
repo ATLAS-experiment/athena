@@ -399,7 +399,7 @@ bool RtCalibrationCurved::handleSegment(MuonCalibSegment &seg) {
         for (int p = 0; p < F[h].num_row(); p++) {
             double x = std::sqrt(1.0 + std::pow(track.getTangent((track.trackHits()[h]->localPosition()).z()).a_x2(), 2));
             if (x) {
-                (F[h])[p] = m_Legendre->value(p, (track.trackHits()[h]->localPosition()).z()) / x;
+                (F[h])[p] = std::legendre(p, (track.trackHits()[h]->localPosition()).z()) / x;
             } else {
                 (F[h])[p] = 0.;
             }
@@ -795,8 +795,6 @@ void RtCalibrationCurved::init(const double rt_accuracy, const unsigned int &fun
     // smoothing //
     m_do_smoothing = do_smoothing;
 
-    // Legendre polynomials and tracking objects //
-    m_Legendre = Legendre_polynomial::get_Legendre_polynomial();
     m_M_track = CLHEP::HepSymMatrix(3);
     m_M_track_inverse = CLHEP::HepSymMatrix(3);
 

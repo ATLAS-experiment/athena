@@ -39,7 +39,6 @@ namespace MuonCalib {
     class CurvedPatRec;
     class MuonCalibSegment;
     class BaseFunction;
-    class Legendre_polynomial;
     class CurvedLine;
     class MultilayerRtDifference;
 
@@ -254,21 +253,19 @@ namespace MuonCalib {
 
         // correction functions //
         std::unique_ptr<BaseFunction> m_base_function;  // pointer to the base function u
-        const Legendre_polynomial *m_Legendre = nullptr;          // pointer to the Legendre polynomial
-                                                        // describing the curved line
 
         // control histograms //
-        std::unique_ptr<TFile> m_tfile;                 // ROOT file
-        std::unique_ptr<TH1F> m_cut_evolution;          // cut evolution histogram
-        std::unique_ptr<TH1F> m_nb_segment_hits;        // number of hits on the segments
-        std::unique_ptr<TH1F> m_pull_initial;           // initial pull distribution
-        std::unique_ptr<TH1F> m_pull_final;             // final pull distribution after convergence
-        std::unique_ptr<TH2F> m_residuals_initial;      // initial residual distribution
-        std::unique_ptr<TH2F> m_residuals_initial_all;  // initial residual distribution before convergence
-        std::unique_ptr<TH2F> m_residuals_final;        // final residual distribution after convergence
-        std::unique_ptr<TH2F> m_driftTime_initial;      // final residual distribution after convergence
-        std::unique_ptr<TH2F> m_driftTime_final;        // final residual distribution after convergence
-        std::unique_ptr<TH2F> m_adc_vs_residual_final;  // final residual distribution after convergence
+        std::unique_ptr<TFile> m_tfile{};                 // ROOT file
+        std::unique_ptr<TH1F> m_cut_evolution{};          // cut evolution histogram
+        std::unique_ptr<TH1F> m_nb_segment_hits{};        // number of hits on the segments
+        std::unique_ptr<TH1F> m_pull_initial{};           // initial pull distribution
+        std::unique_ptr<TH1F> m_pull_final{};             // final pull distribution after convergence
+        std::unique_ptr<TH2F> m_residuals_initial{};      // initial residual distribution
+        std::unique_ptr<TH2F> m_residuals_initial_all{};  // initial residual distribution before convergence
+        std::unique_ptr<TH2F> m_residuals_final{};        // final residual distribution after convergence
+        std::unique_ptr<TH2F> m_driftTime_initial{};      // final residual distribution after convergence
+        std::unique_ptr<TH2F> m_driftTime_final{};        // final residual distribution after convergence
+        std::unique_ptr<TH2F> m_adc_vs_residual_final{};  // final residual distribution after convergence
 
         // private methods //
         void init(const double rt_accuracy, const unsigned int &func_type, const unsigned int &ord, const bool &fix_min,
