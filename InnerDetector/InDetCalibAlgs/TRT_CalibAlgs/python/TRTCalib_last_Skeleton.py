@@ -163,7 +163,7 @@ def fromRunArgs(runArgs):
         print("merge.root.. already exists. Removed.")
         os.remove("merge.root")  
         
-    command += 'hadd merge.root '
+    command  = 'hadd merge.root '
     # merge all the files
     for _f in files_list_cal :
         command += "%s " % (_f)     
