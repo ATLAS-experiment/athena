@@ -14,11 +14,11 @@ from AthenaCommon.Constants import INFO
 def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
     acc = ComponentAccumulator()
     alg = CompFactory.CP.TrackParticleMergerAlg(name, **kwargs)
-    kwargs.setdefault("TrackParticleLocation",
+    kwargs.setdefault("InputTrackParticleLocations",
                       ["InDetTrackParticles", "InDetLargeD0TrackParticles"])
     kwargs.setdefault("OutputTrackParticleLocation",
                       "InDetWithLRTTrackParticles")
-    kwargs.setdefault("CreateViewColllection", True)
+    kwargs.setdefault("CreateViewCollection", True)
     acc.addEventAlgo(alg, primary=True)
     return acc
 
@@ -46,12 +46,12 @@ def UsedInVertexFitTrackDecoratorCfg(
 def HardScatterVertexDecoratorCfg(flags, name = "DFCommonHSDecorator", **kwargs):
     """Configure the hard process vertex decorator"""
     acc = ComponentAccumulator()
-    from InDetConfig.InDetHardScatterSelectionToolConfig import InDetHardScatterSelectionToolCfg     
+    from InDetConfig.InDetHardScatterSelectionToolConfig import InDetHardScatterSelectionToolCfg
     kwargs.setdefault("HardScatterSelectionTool", acc.getPrimaryAndMerge(InDetHardScatterSelectionToolCfg(flags, name = "HSSelectionTool",
                                                                                                                 ReturnDeco = False)))
     kwargs.setdefault("VertexContainerName", "PrimaryVertices")
     kwargs.setdefault("HardScatterDecoName", "hardScatterVertexLink")
-    the_tool = CompFactory.DerivationFramework.HardScatterVertexDecorator(name = "HardScatterDecorTool", **kwargs) 
+    the_tool = CompFactory.DerivationFramework.HardScatterVertexDecorator(name = "HardScatterDecorTool", **kwargs)
     acc.addPublicTool(the_tool, primary=True)
     the_alg = CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools=[the_tool])
     acc.addEventAlgo(the_alg)
@@ -111,7 +111,7 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
     listOfAugmTools = []
     for extension in listOfExtensions:
         # Fix inconsistency in naming convention for R3LargeD0
-        if extension == "R3LargeD0": 
+        if extension == "R3LargeD0":
             extension = "LargeD0"
         TrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
             TrackStateOnSurfaceDecoratorCfg(
@@ -295,7 +295,7 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
         ResidualPullCalculatorCfg)
     kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
         acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
-    
+
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PixelMapName", "ITkPixelClustersOffsets")
     kwargs.setdefault("SctMapName", "ITkStripClustersOffsets")
