@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
@@ -4529,7 +4529,7 @@ StatusCode TrigEDMChecker::dumpNavigation()
         // Dump TE
         ATH_MSG_INFO( "te: " << thisElement->getId() << " " << hash2string[ thisElement->getId() ] );
         ATH_MSG_INFO( "  chain: " << hash2chain[ thisElement->getId() ] );
-        for ( auto helper : thisElement->getFeatureAccessHelpers() ) {
+        for ( const auto& helper : thisElement->getFeatureAccessHelpers() ) {
           ATH_MSG_INFO( "   feat: " << helper );
         }
         ATH_MSG_INFO( theseAncestors.size() << " ancestors" );
