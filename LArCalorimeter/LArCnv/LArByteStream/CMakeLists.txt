@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArByteStream )
@@ -14,9 +14,8 @@ atlas_add_library( LArByteStreamLib
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} CaloIdentifier AthenaBaseComps
    AthenaKernel xAODEventInfo ByteStreamData GaudiKernel LArIdentifier LArRawEvent
    LArRecConditions LArRecEvent CaloDetDescrLib CaloUtilsLib StoreGateLib
-   ByteStreamCnvSvcBaseLib LArRawUtilsLib LArRecUtilsLib LArCablingLib
-   ByteStreamCnvSvcLib CaloConditions CxxUtils
-   PRIVATE_LINK_LIBRARIES AtlasDetDescr CaloInterfaceLib Identifier LArRawConditions )
+   ByteStreamCnvSvcBaseLib LArCablingLib CaloConditions CxxUtils
+   PRIVATE_LINK_LIBRARIES AtlasDetDescr ByteStreamCnvSvcLib Identifier LArElecCalib LArRawConditions )
 
 atlas_add_component( LArByteStream
    src/components/*.cxx

@@ -1,7 +1,6 @@
 #include "LArByteStream/LArRawChannelContByteStreamCnv.h"
 #include "LArByteStream/LArDigitContByteStreamCnv.h"
 #include "LArByteStream/LArLATOMEHeaderContByteStreamCnv.h"
-#include "LArByteStream/LArRawScContByteStreamCnv.h"
 #include "LArByteStream/LArCalibDigitContByteStreamCnv.h"
 #include "LArByteStream/LArAccumulatedCalibDigitContByteStreamCnv.h"
 #include "LArByteStream/LArAccumulatedDigitContByteStreamCnv.h"
@@ -29,7 +28,6 @@ DECLARE_COMPONENT( LArRawSCCalibDataReadingAlg )
 DECLARE_CONVERTER( LArRawChannelContByteStreamCnv )
 DECLARE_CONVERTER( LArDigitContByteStreamCnv )
 DECLARE_CONVERTER( LArLATOMEHeaderContByteStreamCnv )
-DECLARE_CONVERTER( LArRawScContByteStreamCnv )
 DECLARE_CONVERTER( LArCalibDigitContByteStreamCnv )
 DECLARE_CONVERTER( LArAccumulatedCalibDigitContByteStreamCnv )
 DECLARE_CONVERTER( LArAccumulatedDigitContByteStreamCnv )
