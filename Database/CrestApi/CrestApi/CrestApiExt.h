@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2019-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -24,17 +24,45 @@ BOOST_PARAMETER_NAME(sort)
 BOOST_PARAMETER_NAME(dateformat)
 BOOST_PARAMETER_NAME(name)
 
-
-
 namespace Crest {
   class CrestClientExt: public CrestClient {
   public:
-    CrestClientExt(bool rewriteIfExists, const std::string& root_folder = "/tmp/crest_dump") : CrestClient(
-        rewriteIfExists, root_folder) {}
-  CrestClientExt(const std::string& _host, const std::string& _port, bool _check_version = s_CREST_CLIENT_CHECK) : CrestClient(_host, _port, _check_version) {}
-  CrestClientExt(const std::string& url, bool check_version = s_CREST_CLIENT_CHECK) : CrestClient(url, check_version) {}
+    CrestClientExt(const std::string& _host, const std::string& _port, bool _check_version = s_CREST_CLIENT_CHECK) : CrestClient(_host, _port, _check_version) {}
+    CrestClientExt(const std::string& url, bool check_version = s_CREST_CLIENT_CHECK) : CrestClient(url, check_version) {}
 
 // ~CrestClientExt();
+
+/**
+ * This method returns the global tag list. It has boost parameters, all of them are optional.
+ * @param _name - global tag name pattern, optional parameter,
+ * @param _size - page size, a number of tags per a page, optional parameter, default value is 1000,
+ * @param _page - page number optional parameter, default value is 0,
+ * @param _sort - sorting order, default value is "name:ASC".
+ * If you dont use the optional parameter names, you have to use the same parameter order.
+ * Example: <br>
+ * <pre>
+ *   nlohmann::json list1 = myCrestClient.listGlobalTagsParams();
+ *   nlohmann::json list2 = myCrestClient.listGlobalTagsParams("",3,5);
+ *   nlohmann::json list2 = myCrestClient.listGlobalTagsParams(_page=3,_size=5);
+ * </pre>
+ *
+ *  nlohmann::json listGlobalTagsParams(std::string _name, int _size, int _page);
+ */
+    BOOST_PARAMETER_MEMBER_FUNCTION(
+      (GlobalTagSetDto),
+      listGlobalTagsParams,
+      tag,
+      (required
+      )
+      (optional
+         (name, (std::string), "")
+         (size, (int), 1000)
+         (page, (int), 0)
+         (sort, (std::string), "name:ASC")
+      )
+      ) {
+      return listGlobalTags(name, size, page, sort);
+    }
 
 /**
  * This method returns the tag list. It has boost parameters, all of them are optional.
@@ -54,7 +82,7 @@ namespace Crest {
  *  nlohmann::json listTagsParams(std::string _name, int _size, int _page);
  */
     BOOST_PARAMETER_MEMBER_FUNCTION(
-      (nlohmann::json),
+      (TagSetDto),
       listTagsParams,
       tag,
       (required
@@ -69,69 +97,6 @@ namespace Crest {
       return listTags(name, size, page, sort);
     }
 
-/**
- * This method finds all iovs for a given tag name. The result is a JSON object. It is a verion of this method with all
- * parameters.
- * (This method is an analogue of the find_all_iovs method in Python)
- * @param tagname - tag name.
- * @param _size - page size. Default value is 1000.
- * @param _page - page number. Default value is 0.
- * @param _sort - sorting order, "id.since:ASC" or "id.since:DESC". Default value is "id.since:ASC"
- * @param _dateformat - date format
- * Examples: <br>
- * <pre>
- *   nlohmann::json list1 = myCrestClient.findAllIovsParams("myTag");
- *   nlohmann::json list2 = myCrestClient.findAllIovsParams("myTag",100,200);
- *   nlohmann::json list2 = myCrestClient.findAllIovsParams("myTag",_page=3,_size=5);
- * </pre>
- */
-    BOOST_PARAMETER_MEMBER_FUNCTION(
-      (nlohmann::json),
-      findAllIovsParams,
-      tag,
-      (required
-         (tagname, (std::string))
-      )
-        (optional
-          (size, (int), 1000)
-          (page, (int), 0)
-          (sort, (std::string), "id.since:ASC")
-          (dateformat, (std::string), "ms")
-        )
-      ) {
-      return findAllIovs(tagname, size, page, sort, dateformat);
-    }
-
-/**
- * This method returns the global tag list. It has boost parameters, all of them are optional.
- * @param _name - global tag name pattern, optional parameter,
- * @param _size - page size, a number of tags per a page, optional parameter, default value is 1000,
- * @param _page - page number optional parameter, default value is 0,
- * @param _sort - sorting order, default value is "name:ASC".
- * If you dont use the optional parameter names, you have to use the same parameter order.
- * Example: <br>
- * <pre>
- *   nlohmann::json list1 = myCrestClient.listGlobalTagsParams();
- *   nlohmann::json list2 = myCrestClient.listGlobalTagsParams("",3,5);
- *   nlohmann::json list2 = myCrestClient.listGlobalTagsParams(_page=3,_size=5);
- * </pre>
- *
- *  nlohmann::json listGlobalTagsParams(std::string _name, int _size, int _page);
- */
-    BOOST_PARAMETER_MEMBER_FUNCTION(
-      (nlohmann::json),
-      listGlobalTagsParams,
-      tag,
-      (required
-      )
-      (optional
-         (name, (std::string), "")
-         (size, (int), 1000)
-         (page, (int), 0)
-         (sort, (std::string), "id.since:ASC")
-      )
-      ) {
-      return listGlobalTags(name, size, page, sort);
-    }
   }; // CrestClientExt (end)
+
 } // namespace Crest

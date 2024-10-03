@@ -56,7 +56,8 @@
 #include <fstream>
 #include <filesystem>
 
-#include "CrestApi/CrestApi.h"
+#include "CrestApi/CrestApiFs.h"
+
 #include "IOVDbJsonStringFunctions.h"
 
 using namespace IOVDbNamespace;
@@ -106,6 +107,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_cachepar = folderprop.cache();
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
+  if (m_source == "CREST")
+    m_cfunctions.emplace(IOVDbNamespace::CrestFunctions(m_crestServer));	  
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
 
   // channel selection from 'channelSelection' property
@@ -234,15 +237,13 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   bool vectorPayload{};
   std::string strCrestNodeDesc;
   if (m_source == "CREST"){
-    CrestFunctions cfunctions(m_crestServer);
     ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
 
     if (m_crest_tag != m_crestTag){
       m_crest_tag = m_crestTag;
-      m_tag_info = cfunctions.getTagInfo(m_crestTag);
+      m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
     }
-
-    strCrestNodeDesc = cfunctions.getTagInfoElement(m_tag_info,"node_description");
+    strCrestNodeDesc = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
     vectorPayload = (strCrestNodeDesc.find("CondAttrListVec") != std::string::npos);
   }
   else {
@@ -896,13 +897,11 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-      CrestFunctions cfunctions(m_crestServer);
-
       if (m_crest_tag != m_crestTag){
         m_crest_tag = m_crestTag;
-        m_tag_info = cfunctions.getTagInfo(m_crestTag);
+        m_tag_info = m_cfunctions.value().getTagInfo(m_crestTag); 
       }
-      m_folderDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
+      m_folderDescription = m_cfunctions.value().folderDescriptionForTag(m_crestTag);
     } else {
       //folder desc from db
       std::tie(m_multiversion, m_folderDescription) = IOVDbNamespace::folderMetadata(m_conn, m_foldername);
@@ -925,12 +924,10 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-        CrestFunctions cfunctions(m_crestServer); 
-
-        const std::string & payloadSpec = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");  
-        std::string chanList = cfunctions.getTagInfoElement(m_tag_info,"channel_list");
-        std::tie(m_channums, m_channames) = cfunctions.extractChannelListFromString(chanList);
-
+        const std::string & payloadSpec = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");   
+        std::string chanList = m_cfunctions.value().getTagInfoElement(m_tag_info,"channel_list"); 
+        std::tie(m_channums, m_channames) = m_cfunctions.value().extractChannelListFromString(chanList); 
+	
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
  
@@ -959,15 +956,19 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
           tagInfo["node_description"] = m_folderDescription;
           tagInfo["payload_spec"] = payloadSpec;
 
-          tag_meta["tagInfo"] = tagInfo;
+          tag_meta["tagInfo"] = tagInfo.dump();
 
           std::string crest_work_dir=std::filesystem::current_path();
           crest_work_dir += "/crest_data";
           bool crest_rewrite = true;
-          Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+
+	  Crest::CrestFsClient crestFSClient = Crest::CrestFsClient(crest_rewrite, crest_work_dir);
 
           try{
-            crestFSClient.createTagMetaInfo(tag_meta);;
+	    TagMetaDto dto = TagMetaDto();
+	    dto = dto.from_json(tag_meta);
+            crestFSClient.createTagMeta(dto);
+	    
             ATH_MSG_INFO("Tag meta info for " << m_crestTag << " saved to disk.");
             ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
           }
@@ -1168,16 +1169,15 @@ IOVDbFolder::printCache(){
   
 }
 
-std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs()
+std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until)
 {
   std::vector<IOVHash> result;
-  CrestFunctions cfunctions(m_crestServer);
 
   // Get a vector of pairs retrieved from crest
-  //  <IOV_SINCE(string),HASH(string)>
-  auto crestIOVs = cfunctions.getIovsForTag(m_crestTag);
+  auto crestIOVs = m_cfunctions.value().getIovsForTag(m_crestTag, since, until); 
   if(crestIOVs.empty()){
     ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
+    return result; 
   }
   std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
   iov2IndexVect.reserve(crestIOVs.size());
@@ -1185,12 +1185,6 @@ std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs()
   for(const auto& crestIOV : crestIOVs) {
     iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
   }
-
-  std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
-		  [](const IOV2Index& a, const IOV2Index& b)
-		  {
-		    return a.first < b.first;
-		  });
 
   size_t nIOVs = iov2IndexVect.size();
   result.reserve(nIOVs);
@@ -1206,7 +1200,7 @@ std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs()
 				        , cool::ValidityKeyMax)
 		        , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
   }
-
+  
   return result;
 }
 
@@ -1261,10 +1255,9 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
 					                , cool::ValidityKey vkey
 							, const std::string& nodeDesc)
 {
-  CrestFunctions cfunctions(m_crestServer);
 
   std::string crestPayloadType="crest-json-single-iov";
-  nlohmann::json tagProperties = cfunctions.getTagProperties(m_crestTag);
+  nlohmann::json tagProperties = m_cfunctions.value().getTagProperties(m_crestTag);
   if(tagProperties!=nullptr
      && tagProperties.contains("payloadSpec")) {
     crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
@@ -1360,8 +1353,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
     ATH_MSG_FATAL(errorMessage);
     throw std::runtime_error{errorMessage};
   }
-
-  const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
+  const std::string specString = m_cfunctions.value().getTagInfoElement(m_tag_info,"payload_spec");
   if (specString.empty()) {
     std::string errorMessage = "Reading payload spec from " + m_foldername + " failed.";
     ATH_MSG_FATAL(errorMessage);
@@ -1371,7 +1363,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
   std::vector<BasicFolder> retVector;
 
   // Vector of non-overlapping IOVs + corresponding Hashes
-  std::vector<IOVHash> iovHashVect = fetchCrestIOVs();
+  std::vector<IOVHash> iovHashVect = fetchCrestIOVs(since, until);
 
   if(iovHashVect.empty() || until<=iovHashVect[0].first.first) {
     if(iovHashVect.empty()) {
@@ -1405,7 +1397,7 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
   }
 
   for(unsigned ind = indIOVStart; ind <= indIOVEnd; ++ind) {
-    std::string reply = cfunctions.getPayloadForHash(iovHashVect[ind].second); 
+    std::string reply = m_cfunctions.value().getPayloadForHash(iovHashVect[ind].second); 
 
     if (m_crestToFile) { 
       unsigned long long sinceT =  iovHashVect[ind].first.first;
@@ -1413,15 +1405,24 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
       std::string crest_work_dir=std::filesystem::current_path();
       crest_work_dir += "/crest_data";
       bool crest_rewrite = true;
-      Crest::CrestClient crestFSClient = Crest::CrestClient(crest_rewrite, crest_work_dir);
+      Crest::CrestFsClient crestFSClient = Crest::CrestFsClient(crest_rewrite, crest_work_dir);
 
       nlohmann::json js =
       {
-        {"name", m_crestTag}
-      };
+          {"description", "none"},
+          {"endOfValidity", 0},
+          {"lastValidatedTime", 0},
+          {"name", m_crestTag},
+          {"payloadSpec", "none"},
+          {"synchronization", "none"},
+          {"timeType", "time"}};
+
+      TagDto dto = TagDto();
+      dto = dto.from_json(js);
 
       try{
-        crestFSClient.createTag(js);
+	crestFSClient.createTag(dto);
+	
         ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
         ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
       }
@@ -1429,8 +1430,30 @@ std::vector<BasicFolder> IOVDbFolder::fetchCrestObjects(cool::ValidityKey since
         ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
       }
 
+      uint64_t endtime = 0;
+      nlohmann::json elem = 
+        {
+          {"since", sinceT},
+          {"data", reply},
+          {"streamerInfo", "none"}
+        };
+
+      nlohmann::json jResources = json::array();
+      jResources.push_back(elem);
+
+      nlohmann::json jsStoreSet= 
+      {
+        {"size", 1},
+        {"datatype", "data"},
+        {"format", "StoreSetDto"},
+        {"resources", jResources}
+      };
+
+      StoreSetDto storeSetDto = StoreSetDto::from_json(jsStoreSet);
+      
       try{
-        crestFSClient.storePayloadDump(m_crestTag, sinceT, reply);
+        crestFSClient.storeData(m_crestTag, storeSetDto, "JSON", "test", "test", "1", endtime);
+	
         ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
       }
       catch (const std::exception& e) {

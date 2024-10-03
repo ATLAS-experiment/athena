@@ -33,6 +33,8 @@
 #include <map> 
 #include "nlohmann/json.hpp"
 
+#include "CrestFunctions.h"
+
 class MsgStream;
 class IOVDbConn;
 class IOpaqueAddress;
@@ -236,7 +238,7 @@ private:
 
   // Function which converts openended CREST IOVs into non-overlapping IOVs
   // It returns a vector of non-overlapping IOVs + corresponding Hashes
-  std::vector<IOVHash> fetchCrestIOVs();
+  std::vector<IOVHash> fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until); 
 
   // Function which reads CREST objects by the cache IOV boundaries
   std::vector<IOVDbNamespace::BasicFolder> fetchCrestObjects(cool::ValidityKey since
@@ -328,6 +330,8 @@ private:
   const std::string m_crestTag;
   std::string m_crest_tag = "";
   nlohmann::json m_tag_info = nullptr;
+
+  std::optional<IOVDbNamespace::CrestFunctions> m_cfunctions;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}

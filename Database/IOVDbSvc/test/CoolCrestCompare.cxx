@@ -48,7 +48,7 @@ private:
 public:
   CoolCrestCompare(std::string& cool_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, cool::ValidityKey vkey):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
-  m_crest_str("http://crest-undertow-api.web.cern.ch"),
+  m_crest_str("http://crest-03.cern.ch:8090"),
   m_gTagCrest(gTagCrest),
   m_gTagCool(gTagCool),
   m_folder(folder),
@@ -102,7 +102,7 @@ public:
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection(m_cool_con_str, true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE",false,"","",true);
+    IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "COOL_DATABASE",false,"http://unknown","unknown",true);
     f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     f.loadCache(m_vkey, 0,m_gTagCool, true);
   }
@@ -126,6 +126,7 @@ public:
     IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
     IOVDbConn connection("", true, m_log);
     IOVDbFolder f(&(connection), parser, m_log, m_clidSvc.get(), nullptr, false, false, "CREST",false,m_crest_str,m_crest_tag,true);
+    f.preLoadFolder(tagInfoMgr.get() , 0, 0);
     f.loadCache(m_vkey, 0,m_gTagCrest, true);
   }
 };

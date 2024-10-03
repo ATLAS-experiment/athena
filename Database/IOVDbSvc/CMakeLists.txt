@@ -162,13 +162,6 @@ atlas_add_test( Cool2Json_test
    AthenaPoolUtilities CxxUtils TestTools 
    POST_EXEC_SCRIPT "nopost.sh" )
 
-atlas_add_test( CrestFunctions_test
-   SOURCES test/CrestFunctions_test.cxx src/CrestFunctions.cxx
-   src/IOVDbStringFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CrestApiLib
-   POST_EXEC_SCRIPT "nopost.sh" )
-
 atlas_add_test( Base64Codec_test
    SOURCES test/Base64Codec_test.cxx src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CxxUtils

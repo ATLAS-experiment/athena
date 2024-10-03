@@ -113,8 +113,24 @@ namespace IOVDbNamespace{
   cool::RecordSpecification *
   Json2Cool::parsePayloadSpec(const std::string & stringSpecification){
     if (stringSpecification.empty()) return nullptr;
-    std::string input(stringSpecification);
     auto *spec = new cool::RecordSpecification();
+
+    std::string inputObj=stringSpecification;
+    nlohmann::json nl=nlohmann::json::parse(stringSpecification);
+    if(nl.is_array()){
+      for (unsigned int i = 0; i < nl.size(); i++)
+      {
+        if(nl[i].size()>0){
+	  auto it = nl[i].items().begin();
+	  std::string n((*it).key());
+          std::string t((*it).value());
+          spec->extend(n, typeCorrespondance.find(t)->second);	  
+	}	
+      }
+      return spec;
+    }
+
+    std::string input(stringSpecification);
     
     std::string regex=R"delim(([^\s,:]*):\s?([^\s,]*),?)delim";
     boost::regex expression(regex);
