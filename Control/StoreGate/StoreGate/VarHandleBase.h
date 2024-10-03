@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/VarHandleBase.h
@@ -429,7 +429,7 @@ namespace SG {
      * @brief Retrieve an object from StoreGate.
      * @param quiet If true, suppress failure messages.
      */
-    virtual void* typeless_dataPointer_impl(bool quiet);
+    void* typeless_dataPointer_impl(bool quiet);
 
 
     /**
