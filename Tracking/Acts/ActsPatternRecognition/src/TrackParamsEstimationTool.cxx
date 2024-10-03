@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackParamsEstimationTool.h"
@@ -26,19 +26,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_sigmaQOverP );
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
-
-    m_covariance(Acts::eBoundLoc0, Acts::eBoundLoc0) =
-      m_initialVarInflation[Acts::eBoundLoc0] * m_sigmaLoc0 * m_sigmaLoc0;
-    m_covariance(Acts::eBoundLoc1, Acts::eBoundLoc1) =
-      m_initialVarInflation[Acts::eBoundLoc1] * m_sigmaLoc1 * m_sigmaLoc1;
-    m_covariance(Acts::eBoundPhi, Acts::eBoundPhi) =
-      m_initialVarInflation[Acts::eBoundPhi] * m_sigmaPhi * m_sigmaPhi;
-    m_covariance(Acts::eBoundTheta, Acts::eBoundTheta) =
-      m_initialVarInflation[Acts::eBoundTheta] * m_sigmaTheta * m_sigmaTheta;
-    m_covariance(Acts::eBoundQOverP, Acts::eBoundQOverP) =
-      m_initialVarInflation[Acts::eBoundQOverP] * m_sigmaQOverP * m_sigmaQOverP;
-    m_covariance(Acts::eBoundTime, Acts::eBoundTime) =
-      m_initialVarInflation[Acts::eBoundTime] * m_sigmaT0 * m_sigmaT0;
 
     return StatusCode::SUCCESS;
   }
@@ -67,7 +54,6 @@ namespace ActsTrk {
 				   seed,
 				   geoContext,
 				   surface,
-				   m_covariance,
 				   bField,
 				   m_bFieldMin);
   }
@@ -77,7 +63,6 @@ namespace ActsTrk {
 						     const ActsTrk::Seed& seed,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::Surface& surface,
-						     const Acts::BoundSquareMatrix& covariance,
 						     const Acts::Vector3& bField,
 						     double bFieldMin) const 
   {
@@ -98,6 +83,34 @@ namespace ActsTrk {
       return std::nullopt;
 
     const auto& params = params_opt.value();
+
+    Acts::BoundVector initialSigmas = {m_sigmaLoc0, m_sigmaLoc1, m_sigmaPhi,
+        m_sigmaTheta, m_sigmaQOverP, m_sigmaT0};
+    Acts::BoundMatrix covariance = Acts::BoundMatrix::Zero();
+
+    for (std::size_t i = Acts::eBoundLoc0; i < Acts::eBoundSize; ++i) {
+      double variance = initialSigmas[i] * initialSigmas[i];
+
+      if (i == Acts::eBoundQOverP) {
+        // note that we rely on the fact that sigma theta is already computed
+        double varianceTheta = covariance(Acts::eBoundTheta, Acts::eBoundTheta);
+
+        // transverse momentum contribution
+        variance +=
+            std::pow(m_initialSigmaPtRel * params[Acts::eBoundQOverP], 2);
+
+        // theta contribution
+        variance +=
+            varianceTheta * std::pow(params[Acts::eBoundQOverP] /
+                                        std::tan(params[Acts::eBoundTheta]),
+                                    2);
+      }
+
+      // Inflate the initial covariance
+      variance *= m_initialVarInflation[i];
+
+      covariance(i, i) = variance;
+    }
 
     // Create BoundTrackParameters
     return Acts::BoundTrackParameters(surface.getSharedPtr(),

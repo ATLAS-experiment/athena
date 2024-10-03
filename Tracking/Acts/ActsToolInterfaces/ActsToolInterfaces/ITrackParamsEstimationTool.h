@@ -37,7 +37,6 @@ namespace ActsTrk {
                               const ActsTrk::Seed& seed,
                               const Acts::GeometryContext& geoContext,
                               const Acts::Surface& surface,
-                              const Acts::BoundSquareMatrix& covariance,
                               const Acts::Vector3& bField,
                               double bFieldMin) const = 0;
   };

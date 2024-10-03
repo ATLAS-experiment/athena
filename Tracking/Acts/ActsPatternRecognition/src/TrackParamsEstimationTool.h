@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
@@ -36,7 +36,6 @@ namespace ActsTrk {
 			      const ActsTrk::Seed& seed,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::Surface& surface,
-			      const Acts::BoundSquareMatrix& covariance,
 			      const Acts::Vector3& bField,
 			      double bFieldMin) const override;
     
@@ -47,24 +46,22 @@ namespace ActsTrk {
     // Properties
     Gaudi::Property< double > m_bFieldMin {this, "bFieldMin", 0.1 * Acts::UnitConstants::T,
         "The minimum magnetic field to trigger the track parameters estimation"};
-    Gaudi::Property< double > m_sigmaLoc0 {this, "sigmaLoc0", 25 * Acts::UnitConstants::um,
+    Gaudi::Property< double > m_sigmaLoc0 {this, "sigmaLoc0", 1 * Acts::UnitConstants::mm,
         "Constant term of the loc0 resolution"};
-    Gaudi::Property< double > m_sigmaLoc1 {this, "sigmaLoc1", 100 * Acts::UnitConstants::um,
+    Gaudi::Property< double > m_sigmaLoc1 {this, "sigmaLoc1", 1 * Acts::UnitConstants::mm,
         "Constant term of the loc1 resolution"};
-    Gaudi::Property< double > m_sigmaPhi {this, "sigmaPhi", 0.02 * Acts::UnitConstants::degree,
+    Gaudi::Property< double > m_sigmaPhi {this, "sigmaPhi", 0.1 * Acts::UnitConstants::degree,
         "Phi angular resolution"};
-    Gaudi::Property< double > m_sigmaTheta {this, "sigmaTheta", 0.02 * Acts::UnitConstants::degree,
+    Gaudi::Property< double > m_sigmaTheta {this, "sigmaTheta", 0.1 * Acts::UnitConstants::degree,
         "Theta angular resolution"};
-    Gaudi::Property< double > m_sigmaQOverP {this, "sigmaQOverP", 0.1 / Acts::UnitConstants::GeV,
+    Gaudi::Property< double > m_sigmaQOverP {this, "sigmaQOverP", 0.1 * Acts::UnitConstants::e / Acts::UnitConstants::GeV,
         "q/p resolution"};
     Gaudi::Property< double > m_sigmaT0 {this, "sigmaT0", 1 * Acts::UnitConstants::ns,
         "Time resolution"};
+    Gaudi::Property< double > m_initialSigmaPtRel {this, "initialSigmaPtRel", 0.1,
+        "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
-
-    /// The track parameters covariance (assumed to be the same for all estimated
-    /// track parameters for the moment)
-    Acts::BoundSquareMatrix m_covariance = Acts::BoundSquareMatrix::Zero();
   };
   
 } // namespace
