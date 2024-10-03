@@ -21,6 +21,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include <CrestApi/CrestApiBase.h>
+
 
 namespace IOVDbNamespace{
   typedef std::pair<std::string,std::string> IovHashPair; // <IOV,Hash> pairs extracted from Json
@@ -36,48 +38,23 @@ namespace IOVDbNamespace{
 
     void setURLBase(const std::string & crest_path);
 
-    std::vector<IovHashPair>
-    extractIovAndHash(const std::string_view jsonReply);
-
     std::string
     extractHashFromJson(const std::string & jsonReply);
 
     std::vector<IovHashPair>
-    getIovsForTag(const std::string & tag, const bool testing=false);
+    getIovsForTag(const std::string & tag, uint64_t since, uint64_t until);
 
     std::string
-    getLastHashForTag(const std::string & tag, const bool testing=false);
+    getLastHashForTag(const std::string & tag);
+    
+    std::string 
+    getPayloadForHash(const std::string & hash);
 
     std::string 
-    getPayloadForHash(const std::string & hash, const bool testing=false);
-  
-    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-    extractChannelListFromJson(const std::string & jsonReply);
+    folderDescriptionForTag(const std::string & tag);
 
-    std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
-    channelListForTag(const std::string & tag, const bool testing=false);
-  
-    std::map<cool::ChannelId, std::string> 
-    channelNameMap(const std::string & folderName);
-  
-    std::string 
-    getPayloadForTag(const std::string & tag,const bool testing=false);
-  
-    std::string 
-    folderDescriptionForTag(const std::string & tag, const bool testing=false);
-  
-    std::string 
-    payloadSpecificationForTag(const std::string & tag, const bool testing=false);
-  
     std::string 
     extractDescriptionFromJson(const std::string & jsonReply);
-  
-    std::string
-    resolveCrestTag(const std::string & globalTagName, const std::string & folderName, const std::string & forceTag="", const bool testing=false);
-	
-  
-    std::string
-    jsonTagName(const std::string &globalTag, const std::string & folderName);
 
     std::map<std::string, std::string>
     getGlobalTagMap(const std::string& globaltag);
@@ -86,21 +63,31 @@ namespace IOVDbNamespace{
 
     nlohmann::json getTagProperties(const std::string & tag);
 
-    std::string 
-    extractPayloadSpecification(const std::string & tag, nlohmann::json tagMeta);
-
     std::string
     getTagInfoElement(nlohmann::json tag_info, const std::string & key);
 
     std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
     extractChannelListFromString(const std::string & chanString);
 
-    std::string 
-    extractSpecificationFromJson(const std::string & jsonReply);
+    std::vector<uint64_t>
+    getIovGroups(const std::string & tag);
+
+    std::pair<uint64_t,uint64_t>
+    getSinceUntilPair(std::vector<uint64_t> v, const uint64_t since, const uint64_t until);
+
+    int
+    getTagSize(const std::string& tagname);
+
+    std::pair<uint64_t,uint64_t>
+    getIovInterval(const std::string&  tag, const uint64_t since, const uint64_t until);
 
     private:
 
+    std::unique_ptr<Crest::CrestApiBase> m_crestCl;
+    
     std::string m_CREST_PATH = "";
+    
+    nlohmann::json getResources(nlohmann::json& js);
 
   };
 }

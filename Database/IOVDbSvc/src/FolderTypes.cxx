@@ -7,6 +7,7 @@
 #include "CoolKernel/IRecordSpecification.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include <vector>
+#include "nlohmann/json.hpp"
 
 namespace IOVDbNamespace{
 
@@ -100,8 +101,20 @@ namespace IOVDbNamespace{
    
    bool
    poolCompatible(const std::string & specString){
+     nlohmann::json js = nlohmann::json::parse(specString);
+     if(js.is_array()){
+       int n = js.size();
+       for (int i = 0; i <= n; i++) {
+         nlohmann::json j_object = js[i];
+         for (auto& [key, val] : j_object.items()){
+	   if(key=="PoolRef" && val=="String4k")
+	     return true;	   
+         }
+       }
+       return false;
+     }     
      return (specString.find("PoolRef:String4k") != std::string::npos || specString.find("PoolRef: String4k") != std::string::npos ||
-                    specString.find("PoolRef : String4k") != std::string::npos);
+                    specString.find("PoolRef : String4k") != std::string::npos); 
    }
    
    bool
