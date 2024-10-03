@@ -64,7 +64,7 @@ else:
     out_tag = "data"+year
     date_string = "Data 20"+year+", #sqrt{s} = 13 TeV"
     grl = pt.get_grl(year)
-    if int(year) >= 22: date_string.replace("13 TeV", "13.6 TeV")
+    if int(year) >= 22: date_string = date_string.replace("13 TeV", "13.6 TeV")
 
 outfile = "ZeeZmm_ratio_vs_mu_"+out_tag+".pdf"
 
@@ -76,7 +76,7 @@ def main():
         livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
 
         # Cut out short runs
-        if livetime < pt.livetimecut:
+        if livetime < pt.runlivetimecut:
             if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
             continue
             
@@ -135,14 +135,12 @@ def main():
     line.SetLineColor(R.kRed)
     line.Draw()
     
-    if comp: 
+    if comp:
         h_total.GetYaxis().SetRangeUser(ymin, ymax)
-        if year != "run2":
-            leg = R.TLegend(0.645, 0.72, 0.805, 0.91)
-        else: 
-            leg = R.TLegend(0.2, 0.2, 0.45, 0.43)
+        leg = R.TLegend(0.54, 0.72, 0.805, 0.92)
+        leg.SetTextSize(18)
         leg.AddEntry(h_total, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
-        leg.AddEntry(line, f"Median #pm 68% band = {median:.3f} #pm {stdev:.3f}", "l")
+        leg.AddEntry(line, f"Median = {median:.3f} #pm {stdev:.3f}", "l")
     else: 
         h_total.GetYaxis().SetRangeUser(0.95, 1.05)
         leg = R.TLegend(0.20, 0.18, 0.45, 0.35)
@@ -166,13 +164,13 @@ def main():
 
     if comp:
         pt.drawAtlasLabel(0.2, 0.88, "Internal")
-        pt.drawText(0.2, 0.82, date_string)
-        pt.drawText(0.2, 0.76, zstring)
+        pt.drawText(0.2, 0.83, date_string, size=22)
+        pt.drawText(0.2, 0.78, zstring, size=22)
     else:
         pt.drawAtlasLabel(xmin, 0.88, "Internal")
-        pt.drawText(xmin, 0.82, date_string)
-        pt.drawText(xmin, 0.76, zstring)
-        pt.drawText(xmin, 0.68, "OflLumi-Run3-005")
+        pt.drawText(xmin, 0.83, date_string, size=22)
+        pt.drawText(xmin, 0.78, zstring, size=22)
+        pt.drawText(xmin, 0.71, "OflLumi-Run3-005", size=22)
         
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()

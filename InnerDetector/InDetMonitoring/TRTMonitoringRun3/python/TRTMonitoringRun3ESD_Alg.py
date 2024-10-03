@@ -37,6 +37,26 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
     result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className="TRTCond::RtRelationMultChanContainer"))
     result.merge(addFoldersSplitOnline(flags, "TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className="TRTCond::StrawT0MultChanContainer"))
 
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+        TRT_CalDbToolCfg)
+    algTRTMonitoringRun3ESD.ITRT_CalDbTool = (
+        result.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
+
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+        TRT_StrawStatusSummaryToolCfg)
+    algTRTMonitoringRun3ESD.InDetTRTStrawStatusSummaryTool = (
+        result.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
+
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+        TRT_StrawNeighbourSvcCfg)
+    algTRTMonitoringRun3ESD.NeighbourSvc = (
+        result.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
+
+    from InDetConfig.TRT_DriftFunctionToolConfig import (
+        TRT_DriftFunctionToolCfg)
+    algTRTMonitoringRun3ESD.DriftFunctionTool = (
+        result.popToolsAndMerge(TRT_DriftFunctionToolCfg(flags)))
+
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
     algTRTMonitoringRun3ESD.TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
 

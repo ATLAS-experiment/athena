@@ -99,11 +99,11 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
     flags = initConfigFlags()
-    flags.Input.Files = ['root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/det-tile/test/data14_cos.00239908.physics_CosmicCalo.merge.RAW._lb0004._SFO-ALL._0001.1']
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileRecEx/data24_13p6TeV.00485506.physics_CosmicCalo.merge.RAW._lb0202._SFO-ALL.TT130.10_events._0001.1']
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
     flags.Output.HISTFileName = 'TileRawChannelNoiseMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False

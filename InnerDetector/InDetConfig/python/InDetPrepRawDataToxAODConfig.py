@@ -150,6 +150,31 @@ def ITkStripPrepDataToxAOD_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAOD_Ext
 def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+
+    if "TRTCalDbTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_CalDbToolCfg)
+        kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(
+            TRT_CalDbToolCfg(flags)))
+
+    if "TRTStrawSummaryTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawStatusSummaryToolCfg)
+        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(
+            TRT_StrawStatusSummaryToolCfg(flags)))
+
+    if "NeighbourSvc" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawNeighbourSvcCfg)
+        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(
+            TRT_StrawNeighbourSvcCfg(flags)))
+
+    if "TRTDriftFunctionTool" not in kwargs:
+        from InDetConfig.TRT_DriftFunctionToolConfig import (
+            TRT_DriftFunctionToolCfg)
+        kwargs.setdefault("TRTDriftFunctionTool", acc.popToolsAndMerge(
+            TRT_DriftFunctionToolCfg(flags)))
+
     acc.addEventAlgo(CompFactory.TRT_PrepDataToxAOD(name, **kwargs))
     return acc
 

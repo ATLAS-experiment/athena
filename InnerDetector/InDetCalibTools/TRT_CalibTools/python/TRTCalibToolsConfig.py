@@ -21,11 +21,30 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     acc = ComponentAccumulator()
     
     kwargs.setdefault("minTimebinsOverThreshold", 0)
-    
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg, TRT_StrawStatusSummaryToolCfg, TRT_StrawNeighbourSvcCfg
-    kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
-    kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
-    kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
+
+    if "TRTCalDbTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_CalDbToolCfg)
+        kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(
+            TRT_CalDbToolCfg(flags)))
+
+    if "TRTStrawSummaryTool" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawStatusSummaryToolCfg)
+        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(
+            TRT_StrawStatusSummaryToolCfg(flags)))
+
+    if "NeighbourSvc" not in kwargs:
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawNeighbourSvcCfg)
+        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(
+            TRT_StrawNeighbourSvcCfg(flags)))
+
+    if "TRTDriftFunctionTool" not in kwargs:
+        from InDetConfig.TRT_DriftFunctionToolConfig import (
+            TRT_DriftFunctionToolCfg)
+        kwargs.setdefault("TRTDriftFunctionTool", acc.popToolsAndMerge(
+            TRT_DriftFunctionToolCfg(flags)))
     
     if flags.Output.HISTFileName:
         kwargs.setdefault("NtupleName", flags.Output.HISTFileName)

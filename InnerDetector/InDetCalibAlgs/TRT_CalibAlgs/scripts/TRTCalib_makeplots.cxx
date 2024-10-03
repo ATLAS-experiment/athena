@@ -1943,7 +1943,7 @@ DGraph::DGraph(char *infile, string path, string folder, int det, int lay, bool 
             break;
         } else {
           levels.push_back(path.substr(0, f));
-          path.erase(f+1,std::string::npos);
+          path.erase(0, f+1);
         }
     }
     levels.push_back(path.substr(0, path.find(',')));

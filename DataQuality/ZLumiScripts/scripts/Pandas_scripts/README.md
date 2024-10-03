@@ -11,12 +11,12 @@ Scripts provided here cover (roughly in sequence of execution):
 
 The Z counting Analysis framework is maintained in three separate locations:
 
-1. The core analysis is performed in the athena framework under DataQualityTools (https://gitlab.cern.ch/atlas/athena/-/tree/main/DataQuality/DataQualityTools, specifically src/DQTGlobalWZFinderAlg.cxx). Here Z events are selected and histograms produced that are later used to calculate the data-driven single-lepton efficiencies and the Zlumi. The code is run automatically at Tier0 as part of the DQ framework, but may also be run separately on the grid over AODs.
+1. The core analysis is performed in the Athena framework under DataQualityTools (https://gitlab.cern.ch/atlas/athena/-/tree/main/DataQuality/DataQualityTools, specifically src/DQTGlobalWZFinderAlg.cxx). Here Z events are selected and histograms produced that are later used to calculate the data-driven single-lepton efficiencies and the Z-counting luminosity. The code is run automatically at Tier0 as part of the DQ framework, but may also be run separately on the grid over AODs.
 (Some partially obsolete information on how to run the main code can be found here [https://twiki.cern.ch/twiki/bin/viewauth/Atlas/ZCountingLumi](https://twiki.cern.ch/twiki/bin/viewauth/Atlas/ZCountingLumi) - to be checked and migrated.)
 
 2. The Monte Carlo correction factors require running the core DQ components from 1., but the output needs to be processed further with the tools from a separate git project (https://gitlab.cern.ch/z-counting/monte-carlo). The results are then inserted into the Python files from point 3 to process the HIST->CSV.
 
-3. CSV files are created using scripts under ZlumiScripts (https://gitlab.cern.ch/atlas/athena/-/tree/main/DataQuality/ZLumiScripts/scripts/Pandas_scripts) using the inputs from 1. and 2. Here there are also the scripts to produce plots for the luminosity and efficiency using the csv files. The primary script is dqt_zlumi_pandas.py script that produces a single csv file containing all information for one ATLAS run. Each row of the csv file corresponds to a single luminosity block, and contains all information for both channels; such as the number of reconstructed Zs per channel, trigger efficiency, reconstruction efficiency, luminosity, as well as the arithmeric mean of the Zee and Zmumu luminosities and all axuilliary official information (livetime, pileup, luminosity, GRL).
+3. CSV files are created using scripts under ZlumiScripts (https://gitlab.cern.ch/atlas/athena/-/tree/main/DataQuality/ZLumiScripts/scripts/Pandas_scripts) using the inputs from 1. and 2. Here there are also the scripts to produce plots for the luminosity and efficiency using the CSV files. The primary script is dqt_zlumi_pandas.py script that produces a single CSV file containing all information for one ATLAS run. Each row of the CSV file corresponds to a single luminosity block, and contains all information for both channels; such as the number of reconstructed Zs per channel, trigger efficiency, reconstruction efficiency, luminosity, as well as the arithmeric mean of the Zee and Zmumu luminosities and all auxiliary official information (livetime, pileup, luminosity, GRL).
 
 ## Other related useful links
 
@@ -36,8 +36,8 @@ The Run 3 intermediate and processed files are in the following directories:
 
 # Semi-automatic full-chain running to update CVSs and Plots with latest runs
 
-Loging to LXPLUS as several inputs and outputs are from EOS.  A more-or-less
-recent version of Athena (e.g. 24.0.58) needs to be setup for the
+Login to LXPLUS as several inputs and outputs are from EOS.  A more-or-less
+recent version of Athena (e.g. 24.0.64) needs to be setup for the
 scripts to be found and work. As of rel 24 releases work directly on LXPLUS ALMA9.
 
 ## First time only
@@ -51,7 +51,7 @@ scripts are needed). So only the very first time do
 setupATLAS
 mkdir zcounting
 cd zcounting
-asetup 24.0.58,Athena
+asetup 24.0.64,Athena
 lsetup git
 git atlas init-workdir https://:@gitlab.cern.ch:8443/atlas/athena.git
 cd athena/
@@ -75,7 +75,7 @@ The best is to do this in your home directory on AFS. Increase quote if necessar
 ```
 setupATLAS
 cd zcounting # or where your code is
-asetup 24.0.58,Athena
+asetup 24.0.64,Athena
 source build/x86_64-el9-gcc13-opt/setup.sh
 cd athena/DataQuality/ZLumiScripts/scripts/Pandas_scripts/
 ```
@@ -84,23 +84,51 @@ cd athena/DataQuality/ZLumiScripts/scripts/Pandas_scripts/
 
 The primary script is `process_Z_Counting.sh`. Usage:
 ```
-./process_Z_Counting.sh [year] [update HISTs 0/1] [update CSVs 0/1]
+./process_Z_Counting.sh [year] [update HISTs 0/1] [update CSVs 0/1] [update temp GRL]
 ```
 
 E.g. the typical run to update 2024 with the latest extra runs is
 ```
-./process_Z_Counting.sh 24 1 1
+./process_Z_Counting.sh 24 1 1 1
 ```
-If the either of the two last arguments are 0, then old HIST and CVS files are recreated.
+If the either of the two middle arguments are 0, then old HIST and CVS files are recreated.
+Setting the final argument to 0 can be useful to avoid the (slow) recreation of the temporary GRL.
+
 
 Look at the output and ensure all is going well! The output has been
 mostly slimmed down to the minimum. The steps performed by the script are:
-1. check `/eos/atlas/atlastier0/rucio/${dataset}/physics_Main/` for the list of runs taken
-2. cross-check the list with available HIST files in ZCounting MergedOutputs and make a reduced copy of HISTs. Only the latest runs are available on the atlastier0 EOS location and in case, rucio may need to be envoked (requires rucio and grid setup beforehand)
+1. check `/eos/atlas/atlastier0/rucio/${dataset}/physics_Main/` for the list of runs taken, exclude runs listed in /eos/atlas/atlastier0/rucio/${dataset}/physics_Main/skipruns
+2. cross-check the list with available HIST files in ZCounting MergedOutputs and make a reduced copy of HISTs. Only the latest runs are available on the atlastier0 EOS location and in case, rucio may need to be invoked (requires rucio and grid setup beforehand)
 3. Creating temporary PHYS_StandardGRL_All_Good GRL, empty runs are removed and excluded from further processing
-4. HIST->CVS processing is launched. Output is a bit more noisy and more things can go wrong here as Limu information is loded from the database, runs may have problems not covered by the GRL etc.
+4. HIST->CVS processing is launched. Output is a bit more noisy and more things can go wrong here as Lumi information is loaded from the database, runs may have problems not covered by the GRL etc.
 
-## Update of Yearwise and Run 3 plots
+## Update of Plots
+
+The plotting scripts actually perform a decent amount of
+analysis-level work. Important points are:
+
+* Application of selections for minimal LB livetime and minimal run
+  livetime (for year-dependent plots) - these are steered globally
+  with two variables `lblivetimecut` and `runlivetimecut` in the
+  `python_tools.py` file
+* Averaging over 20 LBs for run-dependent plots or sorting data into mu-bins
+* Computation and display of arithmetic mean / pol0 fit mean / median
+  and the respective standard deviation or 68% bands
+
+Due to significant amount of files being opened, the runtime may be
+couple of minutes, so be patient.
+
+NEW: there is now an overall plot update/remake script. For updating
+the 2024 plots with small screen output, just run
+
+```
+./plot_all.sh
+```
+
+The script as options to show all output (can be a lot) and re-create
+plots for older runs. Usage beyond 2024 will need small adjustments.
+
+This script will work through the steps as lined out in the following subsections.
 
 ```
 ./plot_yearwise.sh
@@ -116,15 +144,45 @@ You can also do e.g. only 2022 plots with
 ./plot_yearwise.sh 22
 ```
 
-## Update of Runwise plots (TODO)
+### Update of runwise plots
+
+The entry point is the script `plot_runwise.sh` that loops over all .CSV
+files for a given year and plots efficiency and luminosity against LB
+and pileup. By default, it will skip any runs for which the output
+directory already exists (without inspecting the actual contents).
 
 
-The entry point is the script  `plot_all.sh`.
+### Update of yearwise plots
 
-Note this is script requires changing of input/output locations and a bit more testing.
+```
+./plot_yearwise.sh
+```
 
-It will loops over all .csv files in a given directory and plots efficiency and luminosity against LB and pileup.
+Default arguments are "24 run3", which will update the 2024 and full
+Run 3 plots.
 
+This step will write both plots and a run-summary CSV file into the
+directory structure under
+/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/Plots/
+
+You can also do e.g. only 2022 plots with 
+```
+./plot_yearwise.sh 22
+```
+
+### Preparation of plot summary slides
+
+As the amount of plots produced is very large, a script is provided to
+prepare LaTeX beamer slides that summarise: Run 3 overview plots; 2024
+overview plots; One page with plots for each 2024 run (adaptation to
+non-2024 is simple, but not done).
+
+```
+./make_latexslides.sh
+```
+
+The output will be a PDF file with the name plotdump_YYMMDD.pdf, where
+YYMMDD is today's date, e.g. 241225 for X-mas day 2024.
 
 # GRLs
 
@@ -132,25 +190,25 @@ A GRL is required for the HIST->CSV step.
 
 Official GRLs are taken from: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/
 
-While data taking is progessing, the official GRL updates are usually slow and instead a preliminary GRL is created 'on-the-fly' using the script grl_maker.py is included.
+While data taking is progressing, the official GRL updates are usually slow and instead a preliminary GRL is created 'on-the-fly' using the script grl_maker.py is included.
 The procedure is part of the process_Z_Counting.sh script, so the instructions below generally do NOT need to be executed manually.
 The produced 'latest' GRL is copied to EOS and available at (e.g.) /eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/MergedOutputs/data24_13p6TeV/latest_GRL.xml
 
 ## Further Technical GRL info
 
-Creating a cusom GRL loops through a list of runs and produces a .xml file for each run. These can then be merged into a single grl by moving all files to a single directory and running merge_goodrunslists e.g.:
+Creating a custom GRL loops through a list of runs and produces a .xml file for each run. These can then be merged into a single grl by moving all files to a single directory and running merge_goodrunslists e.g.:
 ```
 merge_goodrunslists grls/
 ```
 
 # Notes on status of Run 3 processing status
 
-Several updates were mdae as Run 3 progresses, this tries to track what has been used for files stored on EOS
+Several updates were made as Run 3 progresses, this tries to track what has been used for files stored on EOS
 
 2022 MergedOutputs were processed by Sam on the grid, CSV Outputs are processed with MC21a MCCFs and the official GRL
 
 2023 CSV Outputs are processed with MC23a MCCFs and the official GRL, other preliminary versions have been removed
-Most 2023 were taken from official Tier0 DQ processing, either the DQ EOS directories /eos/atlas/atlastier0/rucio/data23_13p6TeV/physics_Main/*/data23_13p6TeV.*.physics_Main.merge.HIST.f*, or downloaded from the grid. Only the DQTGlobalWZFinder folder from the root files is sored to save space, scripts provided were used (process_rucio_files.sh and copySelective.py)
+Most 2023 were taken from official Tier0 DQ processing, either the DQ EOS directories /eos/atlas/atlastier0/rucio/data23_13p6TeV/physics_Main/*/data23_13p6TeV.*.physics_Main.merge.HIST.f*, or downloaded from the grid. Only the DQTGlobalWZFinder folder from the root files is stored to save space, scripts provided were used (process_rucio_files.sh and copySelective.py)
 
 A series of 2023 runs were manually processed on the grid from AOD files using the WZFinder (Z-counting) framework. This was either because the Z-counting framework was not yet fully functional or electron triggers were changed (from run 451896 onwards) and not immediately updated. This resulted in a number of runs missing Z Lumi data in the electron channel (451896, 451936, 451949, 452028, 452163, 452202, 452241, 452463, 452533, 452573, 452624, 452640, 452660, 452669, 452696, 452726, 452785, 452787, 452799, 452843, 452872)
 

@@ -81,7 +81,7 @@ class MonitorDef:
                     'MBTS_A8', 'MBTS_A9', 'MBTS_A10', 'MBTS_A11', 'MBTS_A12', 'MBTS_A13', 'MBTS_A14', 'MBTS_A15',
                     'MBTS_C0', 'MBTS_C1', 'MBTS_C2',  'MBTS_C3',  'MBTS_C4',  'MBTS_C5',  'MBTS_C6',  'MBTS_C7',
                     'MBTS_C8', 'MBTS_C9', 'MBTS_C10', 'MBTS_C11', 'MBTS_C12', 'MBTS_C13', 'MBTS_C14', 'MBTS_C15',
-                    'BMA0', 'BMA1', 'BMA2', 'BMA3',
+                    'BMA0', 'BMA1', 'BMA2', 'BMA3',"ZDC_0", "ZDC_1", "ZDC_2", "ZDC_ALT_0", "ZDC_ALT_1", "ZDC_ALT_2" 
                    ]
 
         for mult in cThr:
