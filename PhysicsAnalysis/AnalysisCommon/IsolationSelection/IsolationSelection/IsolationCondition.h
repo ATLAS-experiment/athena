@@ -38,7 +38,7 @@ namespace CP {
         IsolationCondition& operator=(const IsolationCondition& rhs) = delete;
         virtual ~IsolationCondition() = default;
 
-        std::string name() const;
+        const std::string& name() const;
 
         unsigned int num_types() const;
         xAOD::Iso::IsolationType type(unsigned int n = 0) const;

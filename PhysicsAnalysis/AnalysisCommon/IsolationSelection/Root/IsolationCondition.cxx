@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IsolationSelection/IsolationCondition.h"
@@ -33,7 +33,7 @@ namespace CP {
         IsolationCondition(name, std::vector<std::string>{isoType}, isoDecSuffix) {}
 
     unsigned int IsolationCondition::num_types() const { return m_isolationType.size(); }
-    std::string IsolationCondition::name() const { return m_name; }
+    const std::string& IsolationCondition::name() const { return m_name; }
     xAOD::Iso::IsolationType IsolationCondition::type(unsigned int n) const { return m_isolationType[n]; }
     const SG::AuxElement::ConstAccessor<float>& IsolationCondition::accessor(unsigned int n) const { return m_acc.at(n); }
 }  // namespace CP
