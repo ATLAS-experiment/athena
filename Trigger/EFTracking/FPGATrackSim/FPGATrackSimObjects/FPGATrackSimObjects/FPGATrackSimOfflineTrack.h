@@ -9,9 +9,10 @@
 #include <cmath>
 #include <TObject.h>
 
-class FPGATrackSimOfflineTrack : public TObject {
+class FPGATrackSimOfflineTrack {
 public:
   FPGATrackSimOfflineTrack();
+  virtual ~FPGATrackSimOfflineTrack() = default;
 
   void setQOverPt(double v) { m_qoverpt = v; }
   void setEta(double v) { m_eta = v; }
@@ -54,7 +55,7 @@ private:
   std::vector<FPGATrackSimOfflineHit> m_hits;
 
 
-  ClassDef(FPGATrackSimOfflineTrack, 4)
+  ClassDefNV(FPGATrackSimOfflineTrack, 5)
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimOfflineTrack&);

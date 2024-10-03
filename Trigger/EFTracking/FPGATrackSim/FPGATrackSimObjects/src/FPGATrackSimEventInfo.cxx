@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimEventInfo.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimEventInfo)
 
 
 FPGATrackSimEventInfo::~FPGATrackSimEventInfo() {

@@ -9,18 +9,19 @@
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include <vector>
-#include <TObject.h>
 #include <iosfwd>
 #include <cmath>
 
 #include "GeneratorObjects/HepMcParticleLink.h"
-class FPGATrackSimTrack : public TObject {
+#include "TObject.h"
+
+class FPGATrackSimTrack {
 
  public:
-    // Constructors
-    FPGATrackSimTrack() = default;
-    virtual ~FPGATrackSimTrack() = default;
-  
+
+  FPGATrackSimTrack() = default;
+  virtual ~FPGATrackSimTrack();
+
   TrackCorrType getTrackCorrType() const { return m_trackCorrType; }
   TrackStage getTrackStage() const { return m_trackStage; }
   bool getDoDeltaGPhis() const { return m_doDeltaGPhis; }
@@ -173,7 +174,7 @@ class FPGATrackSimTrack : public TObject {
   // There is currently only one algorithm
   unsigned int m_ORcode = 1; // Each digit should represent pass/fail(1/0) result from a specific OR algorithm
 
-  ClassDef(FPGATrackSimTrack, 3)
+  ClassDefNV(FPGATrackSimTrack, 4)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H

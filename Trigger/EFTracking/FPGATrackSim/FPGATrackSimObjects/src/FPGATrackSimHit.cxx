@@ -7,7 +7,6 @@
 
 #include <stdexcept>
 
-ClassImp(FPGATrackSimHit)
 
 
 

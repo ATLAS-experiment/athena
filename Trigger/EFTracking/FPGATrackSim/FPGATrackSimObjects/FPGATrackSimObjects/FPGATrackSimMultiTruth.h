@@ -43,7 +43,7 @@
 // then returns that barcode.
 //
 
-class FPGATrackSimMultiTruth : public TObject {
+class FPGATrackSimMultiTruth {
 public:
 
   typedef std::pair<unsigned long, unsigned long> Barcode; // = (event index, barcode)
@@ -122,7 +122,7 @@ private:
   TruthMap m_truth;
 
 
-  ClassDef(FPGATrackSimMultiTruth, 2) // this is a TObject to be stored in the FPGATrackSim ROOT output streams
+  ClassDefNV(FPGATrackSimMultiTruth, 3)
 };
 std::ostream& operator<<(std::ostream& o, const FPGATrackSimMultiTruth& mt);
 

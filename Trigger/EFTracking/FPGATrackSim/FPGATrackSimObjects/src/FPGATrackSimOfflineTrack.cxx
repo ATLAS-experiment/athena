@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrack.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimOfflineTrack)
 
 FPGATrackSimOfflineTrack::FPGATrackSimOfflineTrack() :
   m_qoverpt(0.), m_eta(0.), m_phi(0.), m_d0(0.), m_z0(0.),

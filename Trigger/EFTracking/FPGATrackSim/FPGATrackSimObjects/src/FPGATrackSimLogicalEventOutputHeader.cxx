@@ -4,7 +4,6 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventOutputHeader.h"
 
-ClassImp(FPGATrackSimLogicalEventOutputHeader)
 
 FPGATrackSimLogicalEventOutputHeader::~FPGATrackSimLogicalEventOutputHeader() {
   reset();

@@ -5,13 +5,13 @@
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimEVENTINFO_H
 #define TRIGFPGATrackSimOBJECTS_FPGATrackSimEVENTINFO_H
 
-#include <TObject.h>
 #include <vector>
 #include <iostream>
 #include <sstream>
 
+#include "TObject.h"
 
-class FPGATrackSimEventInfo : public  TObject {
+class FPGATrackSimEventInfo {
 
 public:
 
@@ -36,7 +36,7 @@ public:
     m_level1TriggerType(0)
   {};
 
-  virtual ~FPGATrackSimEventInfo();
+  ~FPGATrackSimEventInfo();
   void reset();
 
   //event info
@@ -74,7 +74,7 @@ protected:
   unsigned int m_level1TriggerType;
   std::vector<unsigned int> m_level1TriggerInfo;
 
-  ClassDef(FPGATrackSimEventInfo, 1)
+  ClassDefNV(FPGATrackSimEventInfo, 2)
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimEventInfo&);

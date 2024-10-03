@@ -6,11 +6,13 @@ atlas_subdir( FPGATrackSimObjects )
 # External dependencies:
 find_package( ROOT COMPONENTS Core MathCore Hist )
 
-# Component(s) in the package:
-atlas_add_root_dictionary( FPGATrackSimObjectsLib
-   FPGATrackSimObjectsLibDictSource
-   ROOT_HEADERS            FPGATrackSimObjects/*.h
-   EXTERNAL_PACKAGES       ROOT
+# Replaces older "ROOT dictionary" (i.e. CINT) with "reflex" dictionary.
+# See https://its.cern.ch/jira/browse/ATLINFR-5511 for some discussion on this;
+# CINT dictionaries can cause problems for the Athena buildsystem.
+atlas_add_dictionary( FPGATrackSimObjectsDict
+   FPGATrackSimObjects/FPGATrackSimObjectsDict.h
+   FPGATrackSimObjects/selection.xml
+   LINK_LIBRARIES FPGATrackSimObjectsLib
 )
 
 atlas_add_library( FPGATrackSimObjectsLib

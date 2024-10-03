@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 
 
-ClassImp(FPGATrackSimLogicalEventInputHeader)
 
 
 void FPGATrackSimLogicalEventInputHeader::reset()

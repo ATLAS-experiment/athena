@@ -14,13 +14,15 @@
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
-class FPGATrackSimTowerInputHeader : public TObject
+class FPGATrackSimTowerInputHeader
 {
 public:
 
   FPGATrackSimTowerInputHeader() { reset(); }
   FPGATrackSimTowerInputHeader(int id) { reset(); m_id = id; }
   FPGATrackSimTowerInputHeader(int id, double eta, double phi, double deta = 0, double dphi = 0);
+
+  virtual ~FPGATrackSimTowerInputHeader() = default;
 
   void reset();
 
@@ -60,7 +62,7 @@ private:
   std::vector<FPGATrackSimHit>      m_Hits; // variables related to the FPGATrackSimHit storage
 
 
-  ClassDef(FPGATrackSimTowerInputHeader, 1)
+  ClassDefNV(FPGATrackSimTowerInputHeader, 2)
 };
 
 

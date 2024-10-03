@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimOptionalEventInfo.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimOptionalEventInfo)
 
 FPGATrackSimOptionalEventInfo::~FPGATrackSimOptionalEventInfo() {
   reset();

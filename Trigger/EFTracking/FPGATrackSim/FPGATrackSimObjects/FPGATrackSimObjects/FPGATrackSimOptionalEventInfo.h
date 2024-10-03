@@ -14,7 +14,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
 
-class FPGATrackSimOptionalEventInfo : public  TObject {
+class FPGATrackSimOptionalEventInfo {
 
 public:
 
@@ -52,7 +52,7 @@ private:
   std::vector<FPGATrackSimTruthTrack>    m_TruthTracks;
 
 
-  ClassDef(FPGATrackSimOptionalEventInfo, 2)
+  ClassDefNV(FPGATrackSimOptionalEventInfo, 3)
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimOptionalEventInfo&);

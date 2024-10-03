@@ -9,7 +9,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include <TObject.h>
 
-class FPGATrackSimLogicalEventOutputHeader : public TObject {
+class FPGATrackSimLogicalEventOutputHeader {
 public:
 
     FPGATrackSimLogicalEventOutputHeader() {};
@@ -56,7 +56,7 @@ private:
 
     FPGATrackSimDataFlowInfo             m_dataflowInfo;
 
-    ClassDef(FPGATrackSimLogicalEventOutputHeader, 4);
+    ClassDefNV(FPGATrackSimLogicalEventOutputHeader, 5);
 };
 
 std::ostream& operator<<(std::ostream& s, FPGATrackSimLogicalEventOutputHeader const& h);

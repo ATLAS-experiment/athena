@@ -26,7 +26,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 
 
-class FPGATrackSimRoad : public TObject
+class FPGATrackSimRoad
 {
 public:
 
@@ -43,6 +43,8 @@ public:
     {
         setHits(hits);
     }
+
+    virtual ~FPGATrackSimRoad() = default;
 
     ///////////////////////////////////////////////////////////////////////
     // Setters
@@ -149,7 +151,7 @@ private:
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDef(FPGATrackSimRoad, 4);
+    ClassDefNV(FPGATrackSimRoad, 5);
 };
 
 #endif // FPGATrackSimROAD_H

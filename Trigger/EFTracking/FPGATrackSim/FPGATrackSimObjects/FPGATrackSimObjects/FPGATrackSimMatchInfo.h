@@ -7,7 +7,7 @@
 
 #include <TObject.h>
 
-class FPGATrackSimMatchInfo : public TObject {
+class FPGATrackSimMatchInfo {
 public:
   FPGATrackSimMatchInfo() : m_barcode(0), m_evtindex(-1) { ; }
   FPGATrackSimMatchInfo(int v1, int v2) : m_barcode(v1), m_evtindex(v2) { ; }
@@ -24,7 +24,7 @@ private:
   int m_evtindex;
 
 
-  ClassDef(FPGATrackSimMatchInfo, 1)
+  ClassDefNV(FPGATrackSimMatchInfo, 2)
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimMatchInfo&);

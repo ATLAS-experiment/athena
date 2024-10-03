@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimOfflineHit.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimOfflineHit)
 
 
 std::ostream& operator<<(std::ostream& s, const FPGATrackSimOfflineHit& h) {
