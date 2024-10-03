@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IdDictParser )
@@ -32,4 +32,10 @@ set_property(TEST IdDictParser_IdDictParser_test_ctest PROPERTY ENVIRONMENT_MODI
 
 # Install files from the package:
 atlas_install_xmls( data/*.dtd data/*.xml )
+
+atlas_add_test( ValidateIdDictXml_test
+                SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/data/ATLAS_IDS.xml --valid --loaddtd --noent --noout"
+                POST_EXEC_SCRIPT "nopost.sh" 
+)
+
 

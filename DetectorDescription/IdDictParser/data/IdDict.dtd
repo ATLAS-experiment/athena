@@ -83,12 +83,14 @@
            group      CDATA  #IMPLIED
            tag        CDATA  #IMPLIED
            next_abs_eta CDATA  #IMPLIED
-	   prev_samp  CDATA  #IMPLIED
-	   next_samp  CDATA  #IMPLIED
-	   prev_subdet  CDATA  #IMPLIED
-	   next_subdet  CDATA  #IMPLIED
-	   eta0       CDATA  #IMPLIED
-	   deta       CDATA  #IMPLIED>
+           prev_samp  CDATA  #IMPLIED
+           next_samp  CDATA  #IMPLIED
+           prev_subdet  CDATA  #IMPLIED
+           next_subdet  CDATA  #IMPLIED
+           eta0       CDATA  #IMPLIED
+           deta       CDATA  #IMPLIED
+           phi0       CDATA  #IMPLIED
+           dphi       CDATA  #IMPLIED>
 
 <!ELEMENT  range      EMPTY>
 <!ATTLIST  range
