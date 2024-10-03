@@ -6,8 +6,6 @@
 
 // Athena includes
 #include "ForwardTracker/Point.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "MCTruth/PrimaryParticleInformation.h"
 
 #include "G4PrimaryParticle.hh"
@@ -27,11 +25,10 @@
 
 ForwardTransportModel::ForwardTransportModel(const std::string& name, const int verboseLevel, const std::string& FwdTrSvcName)
   : G4VFastSimulationModel(name)
+  , m_fwdSvc(FwdTrSvcName, "ForwardTransportModel")
   , m_verboseLevel(verboseLevel)
-  , m_FwdTrSvcName(FwdTrSvcName)
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-  if (svcLocator->service(FwdTrSvcName,m_fwdSvc).isFailure()) {
+  if (m_fwdSvc.retrieve().isFailure()) {
     G4ExceptionDescription description;
     description << "ForwardTransportModel::ForwardTransportModel Attempt to access ForwardTransportSvc failed.";
     G4Exception("ForwardTransportModel", "ForwardTransportModel01", FatalException, description);
