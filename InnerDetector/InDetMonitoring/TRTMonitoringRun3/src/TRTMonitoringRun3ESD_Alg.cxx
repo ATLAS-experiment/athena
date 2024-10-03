@@ -44,7 +44,7 @@ TRTMonitoringRun3ESD_Alg::TRTMonitoringRun3ESD_Alg( const std::string& name, ISv
 ,m_sumTool("TRT_StrawStatusSummaryTool", this)
 ,m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name)
 ,m_TRTCalDbTool("TRT_CalDbTool", this)
-,m_drifttool("TRT_DriftFunctionTool")
+,m_drifttool("TRT_DriftFunctionTool", this)
 ,m_pTRTHelper(nullptr)
 ,m_mgr(nullptr)
 ,m_isCosmics(false)
@@ -54,6 +54,7 @@ TRTMonitoringRun3ESD_Alg::TRTMonitoringRun3ESD_Alg( const std::string& name, ISv
 ,m_trackSelTool("InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
 {
     declareProperty("InDetTRTStrawStatusSummaryTool",                 m_sumTool);
+    declareProperty("NeighbourSvc",                                   m_TRTStrawNeighbourSvc);
     declareProperty("ITRT_CalDbTool",                                 m_TRTCalDbTool);
     declareProperty("DriftFunctionTool",                              m_drifttool);
     declareProperty("TrackSelectionTool",                             m_trackSelTool);

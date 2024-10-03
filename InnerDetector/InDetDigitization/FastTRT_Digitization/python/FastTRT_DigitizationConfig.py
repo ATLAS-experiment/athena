@@ -39,6 +39,13 @@ def BasicTRTFastDigitizationToolCfg(flags, name, **kwargs):
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("RandomStreamName", "FastTRTDigitization")
+
+    if "TRT_DriftFunctionTool" not in kwargs:
+        from InDetConfig.TRT_DriftFunctionToolConfig import (
+            TRT_DriftFunctionToolCfg)
+        kwargs.setdefault("TRT_DriftFunctionTool", acc.popToolsAndMerge(
+            TRT_DriftFunctionToolCfg(flags)))
+
     tool = CompFactory.TRTFastDigitizationTool(name,**kwargs)
     acc.setPrivateTools(tool)
     return acc
