@@ -12,11 +12,9 @@ def defineMenu():
 
         # legacy EM
         #'L1_EM8VH',
-        #'L1_EM10',
-        #'L1_EM10VH',
-        #'L1_EM12',
+        'L1_EM10', 'L1_EM10VH', 'L1_EM12',
         #'L1_EM14', 
-        #'L1_EM15', 
+        'L1_EM15', 
         #'L1_EM16','L1_EM18VH', 
         #'L1_EM20VHI', 'L1_EM22',
         #'L1_EM22VHI',
@@ -27,36 +25,31 @@ def defineMenu():
 
         #combined mu+jet
         'L1_MU3V_J12',
-       # 'L1_MU3V_J20',
-       # 'L1_MU3V_J30',        
+        'L1_MU3V_J20',
+        'L1_MU3V_J30',        
 
         #single jet
-        #'L1_J12',
-        #'L1_J15','L1_J20',
-        #'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50' ,'L1_J75','L1_J85', 'L1_J100',
-        #'L1_J15p31ETA49',
-        #'L1_J20p31ETA49', 
-        'L1_J30p31ETA49', 'L1_J50p31ETA49',
-        #'L1_J75p31ETA49', 
-        'L1_J12_EMPTY','L1_J12_FIRSTEMPTY', 'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO', 'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
-        'L1_J15p31ETA49_UNPAIRED_ISO',
+        'L1_J12', 'L1_J15','L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 
+        'L1_J50' ,'L1_J75','L1_J85', 'L1_J100', 'L1_J400',
+        'L1_J15p31ETA49', 'L1_J20p31ETA49', 'L1_J30p31ETA49', 'L1_J50p31ETA49', 'L1_J75p31ETA49', 
+        'L1_J12_EMPTY','L1_J12_FIRSTEMPTY', 'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO', 'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2', 'L1_J15p31ETA49_UNPAIRED_ISO',
         'L1_J30_EMPTY', 'L1_J30_FIRSTEMPTY', 'L1_J30p31ETA49_EMPTY', 'L1_J30p31ETA49_UNPAIRED_ISO', 'L1_J30p31ETA49_UNPAIRED_NONISO',
         'L1_J50_UNPAIRED_ISO', 'L1_J50_UNPAIRED_NONISO',
         'L1_J100_FIRSTEMPTY',
         'L1_J12_BGRP12',
-        #'L1_J400',
         'L1_J400_LAR',
         
         # XE
-        'L1_XE50', #'L1_XE55', 
+        'L1_XE50', 'L1_XE55', 
         'L1_XE300',
        
         'L1_J40_XE50', 'L1_J40_XE60',
 
          # calo
-        #'L1_TE3', 'L1_TE4', 'L1_TE5', # also for HMT triggers
-        #'L1_TE10', 'L1_TE20', 'L1_TE50',
-        #'L1_TE100', 
+        'L1_TE3', 
+        #'L1_TE4', 
+        'L1_TE5', # also for HMT triggers
+        'L1_TE10', 'L1_TE20', 'L1_TE50', 'L1_TE100', 
         'L1_TE200',
         'L1_TE3p0ETA49', 'L1_TE7p0ETA49',
         'L1_TE600p0ETA49', 'L1_TE1500p0ETA49', 'L1_TE3000p0ETA49', 'L1_TE3500p0ETA49', 'L1_TE6500p0ETA49', 'L1_TE8000p0ETA49',
@@ -64,7 +57,7 @@ def defineMenu():
         # calo overlay
         'L1_TE50_OVERLAY', 'L1_TE600p0ETA49_OVERLAY', 'L1_TE1500p0ETA49_OVERLAY', 'L1_TE3000p0ETA49_OVERLAY',
         'L1_TE3500p0ETA49_OVERLAY', 'L1_TE6500p0ETA49_OVERLAY', 'L1_TE8000p0ETA49_OVERLAY',
-        
+
         #UPC - MU
         'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50', 'L1_MU3V_VTE200',
         
@@ -81,7 +74,7 @@ def defineMenu():
         'L1_eEM1_VTE200', 'L1_2eEM1_VTE200', 'L1_2eEM2_VTE200', 'L1_eEM9_VTE200',
 
         #UPC - calo
-        'L1_ZDC_XOR_VTE200', # 'L1_VZDC_A_VZDC_C_TE5_VTE200',
+        'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200',
         'L1_VZDC_A_VZDC_C_TE10_VTE200',
         'L1_ZDC_A_VZDC_C_VTE200', 'L1_VZDC_A_ZDC_C_VTE200',
         
@@ -107,13 +100,12 @@ def defineMenu():
         'L1_ZDC_1XOR5_TE3_VTE200', 'L1_ZDC_A_VZDC_C_TE3_VTE200',
         'L1_VZDC_A_ZDC_C_TE5_VTE200', 'L1_1ZDC_A_1ZDC_C_TE5_VTE200',
         'L1_ZDC_1XOR5_TE5_VTE200', 'L1_ZDC_A_VZDC_C_TE5_VTE200',
-        'L1_ZDC_XOR_TE3_VTE200', #'L1_ZDC_XOR_TE5_VTE200',
-        #'L1_1ZDC_NZDC_TE5_VTE200',
+        'L1_ZDC_XOR_TE3_VTE200', 'L1_ZDC_XOR_TE5_VTE200',
+        'L1_1ZDC_NZDC_TE5_VTE200',
          
         'L1_ZDC_5XOR_TE5_VTE200', 'L1_ZDC_XOR4_TE5_VTE200',
         'L1_VZDC_A_VZDC_C_TE5_VTE200_UNPAIRED_ISO', 'L1_ZDC_XOR_TE5_VTE200_UNPAIRED_ISO',
-        #'L1_5ZDC_A_5ZDC_C_TE5_VTE200', 
-        'L1_VZDC_A_VZDC_C_VTE200',
+        'L1_5ZDC_A_5ZDC_C_TE5_VTE200', 'L1_VZDC_A_VZDC_C_VTE200',
         'L1_VZDC_A_VZDC_C_TE5', 'L1_ZDC_XOR_TE5',
 
         'L1_ZDC_A_C_VTE10', 'L1_ZDC_XOR_VTE10', 'L1_ZDC_A_C_VTE10_UNPAIRED_ISO',
@@ -143,6 +135,9 @@ def defineMenu():
         'L1_J100_VTE200', # to be checked if J100 is too high
         'L1_XE35_VTE200',
         'L1_XE50_VTE200',
+
+        #Topo
+        'L1_LAR-ZEE', 
  
     ]
 
