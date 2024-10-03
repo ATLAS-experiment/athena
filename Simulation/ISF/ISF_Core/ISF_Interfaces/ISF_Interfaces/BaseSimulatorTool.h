@@ -40,8 +40,6 @@ namespace ISF {
     BaseSimulatorTool(const std::string& type, const std::string& name,  const IInterface* parent)
       : base_class(type, name, parent)
     {
-      // Service handling
-      declareProperty("ChronoStatService",    m_chronoSvcName     );
     }
 
     /** Destructor */
@@ -51,7 +49,7 @@ namespace ISF {
     virtual StatusCode sysInitialize() override
     {
       ATH_CHECK( AthAlgTool::sysInitialize() );
-      ATH_CHECK( serviceLocator()->service(m_chronoSvcName, m_chrono ) );
+      ATH_CHECK( m_chrono.retrieve() );
       return StatusCode::SUCCESS;
     }
 
@@ -113,11 +111,8 @@ namespace ISF {
     BaseSimulatorTool();
 
   protected:
-    /** Name of the timing service - can be set by declareProperty()*/
-    std::string       m_chronoSvcName{"ChronoStatSvc"};
-
     /** The timing service for general usage */
-    IChronoStatSvc*   m_chrono{};
+    ServiceHandle<IChronoStatSvc>   m_chrono{this, "ChronoStatService", "ChronoStatSvc"};
 
   };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_INTERFACES_ISIMULATIONSVC_H
@@ -55,7 +55,7 @@ namespace ISF {
     virtual StatusCode simulate(ISFParticle& isp, McEventCollection* mcEventCollection) = 0;
 
     /** Return the simulation service descriptor */
-    virtual std::string& simSvcDescriptor() = 0;
+    virtual const std::string& simSvcDescriptor() = 0;
 
     /** Setup Event chain - in case of a begin-of event action is needed,
         to be called by simulation kernel */
