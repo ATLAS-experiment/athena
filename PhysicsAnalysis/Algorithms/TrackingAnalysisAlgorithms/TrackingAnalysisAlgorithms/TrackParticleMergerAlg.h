@@ -27,7 +27,7 @@ namespace CP {
    ///
    /// This algorithm is most commonly used to merge the
    /// InDetTrackParticles and InDetLargeD0TrackParticles
-   /// containers. The "CreateViewColllection" will do so
+   /// containers. The "CreateViewCollection" will do so
    /// without actually copying the TrackParticle objects.
    ///
    /// @author Jackson Burzynski <jackson.carl.burzynski@cern.ch>
@@ -70,7 +70,7 @@ namespace CP {
       };
 
       /// Option to create a view collection and not deep-copy tracks
-      Gaudi::Property<bool>  m_createViewCollection{this, "CreateViewColllection", true};
+      Gaudi::Property<bool>  m_createViewCollection{this, "CreateViewCollection", true};
 
       /// Extra guard for deep-copy mode
       SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_requiredDecorations{

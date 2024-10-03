@@ -30,9 +30,7 @@ def BPHY25Cfg(flags):
     if doLRT:
         from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
         acc.merge(InDetLRTMergeCfg( flags,
-                                    InputTrackParticleLocations = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-                                    OutputTrackParticleLocation = mainIDInput,
-                                    CreateViewColllection       = True ))
+                                    OutputTrackParticleLocation = mainIDInput ))
 
     TrkToRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else ["InDetTrackParticles"]
 
@@ -139,7 +137,7 @@ def BPHY25Cfg(flags):
         Chi2Cut                     = 5., # NDF=1 if no mass constraint
         oppChargesOnly	            = True,
         atLeastOneComb              = True,
-        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True
         muonCollectionKey           = "Muons",
         TrackParticleCollection     = "InDetTrackParticles",
         V0VertexFitterTool          = None,
@@ -890,7 +888,7 @@ def BPHY25Cfg(flags):
     ## ID track particles
     BPHY25_AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
 
-    ## combined / extrapolated muon track particles 
+    ## combined / extrapolated muon track particles
     ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
     ##        are stored in InDetTrackParticles collection)
     BPHY25_AllVariables += ["CombinedMuonTrackParticles", "ExtrapolatedMuonTrackParticles"]
