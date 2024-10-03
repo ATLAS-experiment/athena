@@ -75,7 +75,7 @@ namespace CP {
       // no jets (clusters) - nothing to do
       if (clusters.empty()) {
         ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys));
-        return StatusCode::SUCCESS;
+        continue;
       }
 
       fastjet::ClusterSequence cluster_sequence(clusters, *m_fastjetClustering);
