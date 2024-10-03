@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_H
@@ -8,6 +8,7 @@
 #include "G4VFastSimulationModel.hh"
 #include "ForwardTransportSvc/IForwardTransportSvc.h"
 #include "ForwardTracker/ForwardTrack.h"
+#include "GaudiKernel/ServiceHandle.h"
 
 class PrimaryParticleInformation;
 
@@ -26,11 +27,11 @@ private:
   void KillPrimaryTrack(const G4FastTrack&, G4FastStep&);
 
   PrimaryParticleInformation* getPrimaryParticleInformation(const G4FastTrack& fastTrack) const;
-  IForwardTransportSvc    *m_fwdSvc{};
+
+  ServiceHandle<IForwardTransportSvc> m_fwdSvc;
   ForwardTrack             m_fwdTrack;
   ForwardTracker::Particle m_fwdParticle;
   const int                m_verboseLevel{0};
-  std::string m_FwdTrSvcName{};
 };
 
 #endif //FORWARDTRANSPORT_FORWARD_TRANSPORT_MODEL_H
