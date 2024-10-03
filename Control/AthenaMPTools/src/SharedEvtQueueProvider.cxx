@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedEvtQueueProvider.h"
@@ -172,9 +172,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::boots
 
   // _______________________ event counting ________________________________
   // Use incident service for registering a EndInputFile handler 
-  IIncidentSvc* incsvc(0);
-  StatusCode sc = serviceLocator()->service("IncidentSvc",incsvc);
-  if(sc.isFailure() || incsvc==0) {
+  SmartIF<IIncidentSvc> incsvc(serviceLocator()->service("IncidentSvc"));
+  if(!incsvc) {
     ATH_MSG_ERROR( "Error retrieving IncidentSvc" );
     return outwork;
   }
@@ -185,7 +184,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::boots
   // _______________________ event sharing ________________________________
   // Use EventSelector as SharedReader (if configured) and enable output streaming
   if (m_useSharedReader) {
-    m_evtShare  = dynamic_cast<IEventShare*>(m_evtSelector);
+    m_evtShare = SmartIF<IEventShare>(m_evtSelector);
     if(!m_evtShare) {
       ATH_MSG_ERROR( "Failed to dyncast event selector to IEventShare" );
       return outwork;
@@ -209,7 +208,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::boots
 
   // ________________________ Event selector restart ________________________
   if(m_evtSelector) {
-    IService* evtSelSvc = dynamic_cast<IService*>(m_evtSelector);
+    SmartIF<IService> evtSelSvc(m_evtSelector);
     if(!evtSelSvc) {
       ATH_MSG_ERROR( "Failed to dyncast event selector to IService" );
       return outwork;
@@ -243,7 +242,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueProvider::exec_
 
   // Get SkipEvents property of the event selector
   if(m_evtSelector) {
-    IProperty* propertyServer = dynamic_cast<IProperty*>(m_evtSelector);
+    SmartIF<IProperty> propertyServer(m_evtSelector);
     if(propertyServer==0) {
       ATH_MSG_ERROR( "Unable to cast event selector to IProperty" );
       all_ok=false;

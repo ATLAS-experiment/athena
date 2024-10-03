@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthMpEvtLoopMgr.h"
@@ -89,7 +89,8 @@ StatusCode AthMpEvtLoopMgr::initialize()
   }
 
   std::string evtSelName = prpMgr->getProperty("EvtSel").toString();
-  ATH_CHECK(serviceLocator()->service(evtSelName,m_evtSelector));
+  m_evtSelector = serviceLocator()->service(evtSelName);
+  ATH_CHECK(m_evtSelector.isValid());
 
   if(m_strategy=="EventService") {
     // ES with non-zero events before forking makes no sense
@@ -115,7 +116,7 @@ StatusCode AthMpEvtLoopMgr::initialize()
 
   ATH_CHECK(m_evtProcessor.retrieve());
   if(!m_isPileup) {
-    IProperty* propertyServer = dynamic_cast<IProperty*>(m_evtProcessor.get());
+    SmartIF<IProperty> propertyServer(m_evtProcessor.get());
     if(propertyServer) {
       if(propertyServer->setProperty("EventPrintoutInterval",m_eventPrintoutInterval).isFailure()) {
         ATH_MSG_WARNING("Could not set AthenaEventLoopMgr EventPrintoutInterval to " << m_eventPrintoutInterval);
@@ -259,14 +260,8 @@ StatusCode AthMpEvtLoopMgr::executeRun(int maxevt)
   // we have to make sure that mother process is a conversion service
   // client so that events before forking workers are captured...
 
-  IConversionSvc* cnvSvc{nullptr};
-  StatusCode scCnvSvc = serviceLocator()->service("AthenaPoolCnvSvc",cnvSvc);
-  if(!scCnvSvc.isSuccess()) {
-    ATH_MSG_FATAL("Cannot retrieve AthenaPoolCnvSvc");
-    return StatusCode::FAILURE;
-  }
-  IDataShare* dataShare{nullptr};
-  dataShare = dynamic_cast<IDataShare*>(cnvSvc);
+  SmartIF<IDataShare> dataShare{serviceLocator()->service("AthenaPoolCnvSvc")};
+  ATH_CHECK(dataShare.isValid());
 
   auto sharedWriterTool = m_tools["SharedWriterTool"];
   const bool sharedWriterWithFAFE = (m_nEventsBeforeFork!=0 && sharedWriterTool);
@@ -613,7 +608,7 @@ std::shared_ptr<AthenaInterprocess::FdsRegistry> AthMpEvtLoopMgr::extractFds()
 
 StatusCode AthMpEvtLoopMgr::updateSkipEvents(int skipEvents)
 {
-  IProperty* propertyServer = dynamic_cast<IProperty*>(m_evtSelector);
+  SmartIF<IProperty> propertyServer(m_evtSelector);
   if(!propertyServer) {
     ATH_MSG_ERROR("Unable to dyn-cast the event selector to IProperty");
     return StatusCode::FAILURE;

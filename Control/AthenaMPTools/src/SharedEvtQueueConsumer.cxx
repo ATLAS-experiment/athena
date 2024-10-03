@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedEvtQueueConsumer.h"
@@ -79,36 +79,36 @@ StatusCode SharedEvtQueueConsumer::initialize()
   // For pile-up jobs use event loop manager for seeking
   // otherwise use event selector
   if(m_isPileup) {
-    m_evtSeek = dynamic_cast<IEventSeek*>(m_evtProcessor.operator->());
+    m_evtSeek = SmartIF<IEventSeek>(m_evtProcessor.get());
     if(!m_evtSeek) {
       ATH_MSG_ERROR("Unable to dyn-cast PileUpEventLoopMgr to IEventSeek");
       return StatusCode::FAILURE;
     }
   }
   else if(m_evtSelector) {
-    ATH_CHECK(serviceLocator()->service(m_evtSelName,m_evtSelSeek));
+    m_evtSelSeek = serviceLocator()->service(m_evtSelName);
+    ATH_CHECK(m_evtSelSeek.isValid());
   }
 
   if(m_evtSelector) {
     ATH_CHECK( m_evtSelector->createContext (m_evtContext) );
 
-    StatusCode sc = serviceLocator()->service(m_evtSelName,m_evtShare);
-    if(sc.isFailure() || m_evtShare==0) {
+    m_evtShare = serviceLocator()->service(m_evtSelName);
+    if(!m_evtShare) {
       if(m_useSharedReader) {
-	ATH_MSG_ERROR("Error retrieving IEventShare");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Error retrieving IEventShare");
+        return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("Could not retrieve IEventShare");
     }
 
     //FIXME: AthenaPool dependent for now
-    IConversionSvc* cnvSvc{nullptr};
-    sc = serviceLocator()->service("AthenaPoolCnvSvc",cnvSvc);
-    m_dataShare = dynamic_cast<IDataShare*>(cnvSvc);
-    if(sc.isFailure() || m_dataShare==0) {
+
+    m_dataShare = SmartIF<IDataShare>(serviceLocator()->service("AthenaPoolCnvSvc"));
+    if(!m_dataShare) {
       if(m_useSharedWriter) {
-	ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc " << cnvSvc);
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc");
+        return StatusCode::FAILURE;
       }
     }
   }
@@ -299,19 +299,19 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
     for(IService* ptrSvc : serviceLocator()->getServices()) {
       IEvtSelector* evtsel = dynamic_cast<IEvtSelector*>(ptrSvc);
       if(evtsel && (evtsel != m_evtSelector)) {
-	if(m_nEventsBeforeFork>0) {
-	  IEvtSelectorSeek* evtselseek = dynamic_cast<IEvtSelectorSeek*>(evtsel);
-	  if(evtselseek) {
-	    bkgEvtSelectors.emplace(ptrSvc,evtselseek->curEvent(*m_evtContext));
-	  }
-	  else {
-	    ATH_MSG_ERROR("Failed to cast IEvtSelector* onto IEvtSelectorSeek* for " << (ptrSvc)->name());
-	    return outwork;
-	  }
-	}
-	else {
-	  bkgEvtSelectors.emplace(ptrSvc,0);
-	}
+        if(m_nEventsBeforeFork>0) {
+          IEvtSelectorSeek* evtselseek = dynamic_cast<IEvtSelectorSeek*>(evtsel);
+          if(evtselseek) {
+            bkgEvtSelectors.emplace(ptrSvc,evtselseek->curEvent(*m_evtContext));
+          }
+          else {
+            ATH_MSG_ERROR("Failed to cast IEvtSelector* onto IEvtSelectorSeek* for " << (ptrSvc)->name());
+            return outwork;
+          }
+        }
+        else {
+          bkgEvtSelectors.emplace(ptrSvc,0);
+        }
       }
     }
   }
@@ -323,8 +323,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   // ...
 
   // ________________________ Get IncidentSvc and fire PostFork ________________________
-  IIncidentSvc* p_incidentSvc(0);
-  if(!serviceLocator()->service("IncidentSvc", p_incidentSvc).isSuccess()) {
+  SmartIF<IIncidentSvc> p_incidentSvc(serviceLocator()->service("IncidentSvc"));
+  if(!p_incidentSvc) {
     ATH_MSG_ERROR("Unable to retrieve IncidentSvc");
     return outwork;
   }
@@ -396,8 +396,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   }
 
   if(m_useSharedWriter && m_dataShare) {
-    IProperty* propertyServer = dynamic_cast<IProperty*>(m_dataShare);
-    if (propertyServer==0 || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
+    SmartIF<IProperty> propertyServer(m_dataShare);
+    if (!propertyServer || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
       ATH_MSG_ERROR("Could not change AthenaPoolCnvSvc MakeClient Property");
       return outwork;
     } 
@@ -417,7 +417,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
 
   // _______________ Get the value of SkipEvent ________________________
   if(m_evtSelector) {
-    IProperty* propertyServer = dynamic_cast<IProperty*>(m_evtSelector);
+    SmartIF<IProperty> propertyServer(m_evtSelector);
     if(!propertyServer) {
       ATH_MSG_ERROR("Unable to cast event selector to IProperty");
       return outwork;
@@ -435,7 +435,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
 
 
     // ________________________ Event selector restart ________________________
-    IService* evtSelSvc = dynamic_cast<IService*>(m_evtSelector);
+    SmartIF<IService> evtSelSvc(m_evtSelector);
     if(!evtSelSvc) {
       ATH_MSG_ERROR("Failed to dyncast event selector to IService");
       return outwork;
@@ -453,7 +453,8 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
   // Background event selectors: restart, and advance if we forked after N events
   if(m_isPileup) {
     // Deal with the main event selector first
-    if(serviceLocator()->service(m_evtSelName,m_evtSelSeek).isFailure() || !m_evtSelSeek) {
+    m_evtSelSeek = serviceLocator()->service(m_evtSelName);
+    if(!m_evtSelSeek) {
       ATH_MSG_ERROR("Error retrieving Event Selector with IEvtSelectorSeek interface for PileUp job");
       return outwork;
     }
@@ -468,7 +469,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedEvtQueueConsumer::boots
     for(auto [evtsel,curEvt] : bkgEvtSelectors) {
       if(evtsel->start().isSuccess()) {
 	if (m_nEventsBeforeFork>0) {
-	  IEvtSelectorSeek* evtselseek = dynamic_cast<IEvtSelectorSeek*>(evtsel);
+	  SmartIF<IEvtSelectorSeek> evtselseek(evtsel);
 	  if(evtselseek->seek(*m_evtContext,curEvt).isFailure()) {
 	    ATH_MSG_ERROR("Failed to seek to " << curEvt << " in the BKG Event Selector " << evtsel->name());
 	    return outwork;

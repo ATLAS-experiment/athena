@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EvtRangeScatterer.h"
@@ -165,7 +165,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::bootstrap_
   }
 
   // Start the event selector 
-  IService* evtSelSvc = dynamic_cast<IService*>(m_evtSelector);
+  SmartIF<IService> evtSelSvc(m_evtSelector);
   if(!evtSelSvc) {
     ATH_MSG_ERROR("Failed to dyncast event selector to IService");
     return outwork;

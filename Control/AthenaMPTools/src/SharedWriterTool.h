@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_SHAREDWRITERTOOL_H
@@ -49,7 +49,7 @@ class SharedWriterTool final : public AthenaMPToolBase
   int  m_rankId;          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1)
 
   AthenaInterprocess::SharedQueue*  m_sharedRankQueue;
-  IConversionSvc*             m_cnvSvc;
+  SmartIF<IConversionSvc>           m_cnvSvc;
 
 };
 

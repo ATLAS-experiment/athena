@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_SHAREDHIVEEVTQUEUECONSUMER_H
@@ -70,8 +70,8 @@ class SharedHiveEvtQueueConsumer final : public AthenaMPToolBase
   int  m_rankId{};          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1) 
 
   ServiceHandle<IChronoStatSvc>  m_chronoStatSvc;
-  IDataShare*                    m_dataShare{};
-  IEvtSelectorSeek*              m_evtSelSeek{};
+  SmartIF<IDataShare>            m_dataShare;
+  SmartIF<IEvtSelectorSeek>      m_evtSelSeek;
   IEvtSelector::Context*         m_evtContext{};
 
   AthenaInterprocess::SharedQueue*  m_sharedEventQueue{};          
