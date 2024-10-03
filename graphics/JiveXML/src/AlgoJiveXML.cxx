@@ -90,37 +90,11 @@ namespace JiveXML{
       ATH_CHECK(m_StreamToServerTool.retrieve());
    }
 
-    /**
-     * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc
-     * and store them in the ToolHandleArray
-     */
-    ATH_MSG_DEBUG("Obtaining list of data retrievers");
-
-    /// Iteratate over the given data types
-    std::vector<std::string>::iterator DataTypesEnd = m_dataTypes.end();
-    std::vector<std::string>::iterator DataTypeItr = m_dataTypes.begin();
-
-    /// Loop over the retriever names
-    for( ; DataTypeItr != DataTypesEnd; ++DataTypeItr)
-      {
-        /// Create a tool handle for this tool
-        ToolHandle<IDataRetriever> DataRetrieverTool(*DataTypeItr);
-        /// See if we can retrieve the tool
-        if( DataRetrieverTool.retrieve().isFailure() ) {
-          ATH_MSG_WARNING( "Unable to locate tool "
-                    << DataRetrieverTool.type() << " with name "
-                    << DataRetrieverTool.name());
-        } else {
-          /// If so, store it in our list
-          m_DataRetrievers.push_back(DataRetrieverTool);
-        }
-      }
-
-    ATH_MSG_INFO("Retrieving data from " << m_DataRetrievers.size() << " tools" );
+  
+    ATH_MSG_INFO("Retrieving data from " << m_DataRetrieverTools.size() << " tools" );
 
     ATH_MSG_INFO("List property settings: ");
     ATH_MSG_INFO("AtlasRelease: " << m_AtlasRelease);
-    ATH_MSG_INFO("DataTypes: " << m_dataTypes );
     ATH_MSG_INFO("WriteToFile: " << m_writeToFile);
     ATH_MSG_INFO("OnlineMode: " << m_onlineMode);
     ATH_MSG_INFO("WriteGeometry: " << m_writeGeometry);
@@ -259,8 +233,8 @@ namespace JiveXML{
      */
     ATH_MSG_DEBUG("Starting loop over data retrievers" );
     //Loop over data retrievers
-    ToolHandleArray<IDataRetriever>::iterator DataRetrieverItr = m_DataRetrievers.begin();
-    for(; DataRetrieverItr != m_DataRetrievers.end(); ++DataRetrieverItr)  {
+    ToolHandleArray<IDataRetriever>::iterator DataRetrieverItr = m_DataRetrieverTools.begin();
+    for(; DataRetrieverItr != m_DataRetrieverTools.end(); ++DataRetrieverItr)  {
       //Add try-catch to avoid retrieval to fail on single retriever
       try {
         //Retrieve information and pass it to formatting tool object
@@ -317,7 +291,7 @@ namespace JiveXML{
     ATH_MSG_VERBOSE( "finalize()" );
 
     /// Release all the tools
-    m_DataRetrievers.release().ignore();
+    m_DataRetrieverTools.release().ignore();
     m_FormatTool.release().ignore();
     m_StreamToFileTool.release().ignore();
     m_StreamToServerTool.release().ignore();

@@ -43,7 +43,6 @@ namespace JiveXML {
   private:
 
     Gaudi::Property<std::string> m_AtlasRelease {this, "AtlasRelease", "unknown", "The Athena release number"};
-    Gaudi::Property<std::vector<std::string>> m_dataTypes {this, "DataTypes", {}, "List of data retriever names to be run"};
     Gaudi::Property<bool> m_writeToFile {this, "WriteToFile", true, "Whether XML files shall be produced"};
     Gaudi::Property<bool> m_onlineMode {this, "OnlineMode", false, "Whether an XMLRPC server shall be started"};
     Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
@@ -54,7 +53,7 @@ namespace JiveXML {
      * supplied by the jobOptions. DataRetrievers are AlgTools residing in the
      * corresponding sub-detector packages (e.g. TrackRetriever in InDetJiveXML).
      **/
-    ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrievers;
+    ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrieverTools{this, "DataRetrieverTools", {}, ""};
 
     /**
      * Handle to the formatting tool, which is passed on to
