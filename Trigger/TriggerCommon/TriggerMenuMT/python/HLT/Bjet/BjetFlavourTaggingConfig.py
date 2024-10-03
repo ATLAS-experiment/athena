@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import BTagAlgsCfg
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 
 # fast btagging
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
@@ -21,7 +20,6 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
 
     acc = ComponentAccumulator()
 
-    acc.merge(JetTagCalibCfg(flags))
 
     #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
@@ -35,15 +33,8 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
 
         # These are trigger-specific trainings
         #
-        # R22 retraining for DIPS, provides dips20211116 with a loose
-        # track selection
-        'BTagging/20211216trig/dips/AntiKt4EMPFlow/network.json',
-        # R22 retraining with the above DIPS, provides DL1d20211216
-        'BTagging/20211216trig/dl1d/AntiKt4EMPFlow/network.json',
         # Trigger GN1 training
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
-        # Trigger DL1dbb training
-        'BTagging/20230314trig/dl1dbb/antikt4empflow/network.json',
         #Trigger GN2 training
         'BTagging/20240122trig/gn2/antikt4empflow/SmallPrec.onnx'
     ]
@@ -58,7 +49,8 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         primaryVertices=inputVertex,
         BTagCollection=BTagName,
         renameTrackJets=False,
-        AddedJetSuffix='Jets'
+        AddedJetSuffix='Jets',
+        SecVertexers = [],
     ))
 
     return acc
@@ -69,8 +61,6 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     """
 
     ca = ComponentAccumulator()
-
-    ca.merge(JetTagCalibCfg(flags))
 
     # first add the track augmentation
     jet_name = inputJets
