@@ -1,7 +1,7 @@
 // this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -13,12 +13,12 @@
 #ifndef EVENTATHENAPOOL_EVENTINFOCNV_H
 #define EVENTATHENAPOOL_EVENTINFOCNV_H 1
 
+#include "GaudiKernel/SmartIF.h"
+
+#include "AthenaKernel/IEvtIdModifierSvc.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 #include "EventInfo/EventInfo.h"
 #include "EventTPCnv/EventInfo_p4.h"
-
-// fwd declarations
-class IEvtIdModifierSvc;
 
 // the latest persistent representation type of EventInfo
 typedef  EventInfo_p4  EventInfo_PERS;
@@ -46,7 +46,7 @@ private:
     unsigned int   m_timeStamp;
     unsigned int   m_timeStampInterval;
 
-    IEvtIdModifierSvc* m_evtIdModSvc;
+    SmartIF<IEvtIdModifierSvc> m_evtIdModSvc;
 };
 
 
