@@ -24,7 +24,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MdtCalibFitters/MTStraightLine.h"
 #include "MuonCalibEventBase/MuonCalibSegment.h"
-#include "MuonCalibMath/Legendre_polynomial.h"
 
 namespace MuonCalib {
 
@@ -75,9 +74,6 @@ namespace MuonCalib {
         const MdtHitVec &trackHits() const;
 
     private:
-        // parameters of the curved line //
-        const Legendre_polynomial *m_Legendre = nullptr;  // pointer to the Legendre polynomial
-                                                // describing the curved line
         Amg::VectorX m_coeff_xz;                // coefficients of the straight line in the local
                                                 // xz plane
         Amg::VectorX m_coeff_yz;                // coefficients of the curved line in the local

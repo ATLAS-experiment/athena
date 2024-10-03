@@ -54,13 +54,7 @@ CurvedLine::CurvedLine(std::vector<Amg::Vector3D>& points) {
     // VARIABLES //
     ///////////////
 
-    std::vector<Amg::Vector3D> errors(points.size());
-
-    ////////////////////
-    // FILL VARIABLES //
-    ////////////////////
-
-    for (auto & error : errors) { error = Amg::Vector3D(1.0, 1.0, 0.0); }
+    std::vector<Amg::Vector3D> errors(points.size(), Amg::Vector3D(1.0, 1.0, 0.0));
 
     ////////////////////
     // INITIALIZATION //
@@ -88,15 +82,19 @@ Amg::Vector3D CurvedLine::getPointOnLine(const double  loc_z) const {
     // VARIABLES //
     ///////////////
 
-    double loc_x(0.0), loc_y(0.0);
+    double loc_x{0.0}, loc_y{0.0};
 
     ///////////////////////////////
     // CALCULATE THE COORDINATES //
     ///////////////////////////////
 
-    for (int k = 0; k < m_coeff_xz.rows(); k++) { loc_x = loc_x + m_coeff_xz[k] * m_Legendre->value(k, loc_z); }
+    for (int k = 0; k < m_coeff_xz.rows(); k++) { 
+        loc_x += m_coeff_xz[k] * std::legendre(k, loc_z); 
+    }
 
-    for (int k = 0; k < m_coeff_yz.rows(); k++) { loc_y = loc_y + m_coeff_yz[k] * m_Legendre->value(k, loc_z); }
+    for (int k = 0; k < m_coeff_yz.rows(); k++) { 
+        loc_y += m_coeff_yz[k] * std::legendre(k, loc_z); 
+    }
 
     ////////////////////////////////
     // RETURN THE REQUESTED POINT //
@@ -179,13 +177,6 @@ void CurvedLine::init(std::vector<Amg::Vector3D>& points, std::vector<Amg::Vecto
     fitter.fit_parameters(sample_points, 1, sample_points.size(), &legendre);
     m_coeff_yz = fitter.coefficients();
 
-    //////////////////////////////////////////////
-    // GET A POINTER TO THE LEGENDRE POLYNOMIAL //
-    //////////////////////////////////////////////
-
-    m_Legendre = Legendre_polynomial::get_Legendre_polynomial();
-
-    return;
 }
 void CurvedLine::setChi2(double chi2) { m_chi2 = std::isnan(chi2) ? -1 : chi2; }
 double CurvedLine::chi2() const { return m_chi2; }

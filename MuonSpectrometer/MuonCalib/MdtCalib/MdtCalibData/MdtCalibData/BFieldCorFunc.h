@@ -19,7 +19,6 @@ namespace MuonCalib {
 // MuonCalib //
 #include "MdtCalibData/IMdtBFieldCorFunc.h"
 #include "MdtCalibData/IRtRelation.h"
-#include "MuonCalibMath/Legendre_polynomial.h"
 
 namespace MuonCalib {
 
@@ -110,8 +109,6 @@ namespace MuonCalib {
         Amg::VectorX m_alpha;  // parameter of the fit function describing the
                                // integral part of the correction function
 
-        // pointer to the Legendre polynomial singleton (chosen in order to limit the amount of memory used)
-        const Legendre_polynomial *m_Legendre;
 
         // information about r(t) used to calculate the correction function //
 
