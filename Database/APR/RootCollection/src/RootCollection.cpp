@@ -56,8 +56,7 @@ namespace pool {
       m_readOnly( mode == ICollection::READ ? true : false ),
       m_poolOut( "RootCollection"),
       m_schemaEditor( 0 ),
-      m_dataEditor( 0 ),
-	m_fileMgr( 0 )
+      m_dataEditor( 0 )
     {
        RootCollection::open();
     }
@@ -271,27 +270,25 @@ namespace pool {
                root_mode = "UPDATE";
 	       io_mode = (Io::WRITE | Io::APPEND);
             }
-	    if( m_fileMgr == 0 ) {
-               IService *is(0);
-               if (Gaudi::svcLocator()->getService("FileMgr",is,true).isFailure()) {
+            if( !m_fileMgr ) {
+               m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
+               if ( !m_fileMgr ) {
                   m_poolOut << coral::Error 
                             << "unable to get the FileMgr, will not manage TFiles"
                             << coral::MessageStream::endmsg;
-               } else {
-                  m_fileMgr = dynamic_cast<IFileMgr*>(is);
                }
 	    }
 	    // FIXME: hack to avoid issue with setting up RecExCommon links
-	    if (m_fileMgr != 0 && 
+	    if (m_fileMgr &&
 		m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
 	      m_poolOut << coral::Info 
 			<< "Unable to locate ROOT file handler via FileMgr. "
 			<< "Will use default TFile::Open" 
 			<< coral::MessageStream::endmsg;
-	      m_fileMgr = 0;
+	      m_fileMgr.reset();
 	    }
 
-	    if (m_fileMgr == 0) {
+	    if (!m_fileMgr) {
 	      m_file = TFile::Open(m_fileName.c_str(), root_mode);
 	    } else {
 	      void *vf(0);
@@ -326,7 +323,7 @@ namespace pool {
 	   // m_file->Write();
 	   
 	   int n(0);
-	   if (m_fileMgr == 0) {
+	   if (!m_fileMgr) {
 	     m_file->Close();
 	   } else {
 	     n = m_fileMgr->close(m_file,"RootCollection");
@@ -365,7 +362,7 @@ namespace pool {
         m_tree->SetDirectory(0);
 
 	int n(0);
-	if (m_fileMgr == 0) {
+	if (!m_fileMgr) {
 	  m_file->Close();
 	} else {
 	  n = m_fileMgr->close(m_file,"RootCollection");

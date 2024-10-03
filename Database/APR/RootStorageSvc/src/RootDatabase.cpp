@@ -63,8 +63,7 @@ RootDatabase::RootDatabase() :
         m_rntBufferedWriteEnabled(true),
         m_rntReaderMetricsEnabled(false),
         m_rntWriterMetricsEnabled(false),
-        m_indexMasterID(0),
-        m_fileMgr(nullptr)
+        m_indexMasterID(0)
 {
   m_counters[READ_COUNTER] = m_counters[WRITE_COUNTER] = m_counters[OTHER_COUNTER] = 0;
 }
@@ -141,25 +140,22 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
   TDirectory::TContext dirCtxt(0);
 
 
-  if (m_fileMgr == nullptr) {
-    IService *is(nullptr);
-
-    if (Gaudi::svcLocator()->getService("FileMgr",is,true).isFailure()) {
+  if (!m_fileMgr) {
+    m_fileMgr = Gaudi::svcLocator()->service("FileMgr");
+    if (!m_fileMgr) {
       log << DbPrintLvl::Error
 	  << "unable to get the FileMgr, will not manage TFiles"
 	  << DbPrint::endmsg;
-    } else {
-      m_fileMgr = dynamic_cast<IFileMgr*>(is);
     }
   }
 
   // FIXME: hack to avoid issue with setting up RecExCommon links
-  if (m_fileMgr != nullptr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
+  if (m_fileMgr && m_fileMgr->hasHandler(Io::ROOT).isFailure()) {
     log << DbPrintLvl::Info
 	<< "Unable to locate ROOT file handler via FileMgr. "
 	<< "Will use default TFile::Open" 
 	<< DbPrint::endmsg;
-    m_fileMgr = nullptr;
+    m_fileMgr.reset();
   }
 
   // Lock ROOT::gCoreMutex before loading any dictionaries to avoid deadlocks
@@ -167,7 +163,7 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
   ROOT::TReadLockGuard lock (ROOT::gCoreMutex);
 
   if ( mode == pool::READ )   {
-    if (m_fileMgr == nullptr) {
+    if (!m_fileMgr) {
       m_file = TFile::Open(fname);
     } else {
       void *vf(nullptr);
@@ -197,7 +193,7 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
     }
   }
   else if ( pool::RECREATE == (mode&pool::RECREATE) )   {
-    if (m_fileMgr == nullptr) {
+    if (!m_fileMgr) {
       m_file = TFile::Open(fname, "RECREATE", fname);
     } else {
       void *vf(nullptr);
@@ -212,7 +208,7 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
     }
   }
   else if ( mode&pool::CREATE && result == kTRUE )   {
-    if (m_fileMgr == nullptr) {
+    if (!m_fileMgr) {
       m_file = TFile::Open(fname, "RECREATE", fname);
     } else {
       void *vf(nullptr);
@@ -333,7 +329,7 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
             }
             m_file->ResetErrno();
 
-            if (m_fileMgr == nullptr) {
+            if (!m_fileMgr) {
                m_file->Close();
             } else {
                fclose_rc = m_fileMgr->close(m_file,"RootDatabase");
@@ -362,7 +358,7 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
              << "I/O WRITE Bytes: " << byteCount(WRITE_COUNTER) << DbPrint::endmsg
              << "I/O OTHER Bytes: " << byteCount(OTHER_COUNTER) << DbPrint::endmsg;
 
-         if (!closed && m_fileMgr != nullptr) {
+         if (!closed && m_fileMgr) {
             fclose_rc = m_fileMgr->close(m_file,"RootDatabase");
          }      
       }    

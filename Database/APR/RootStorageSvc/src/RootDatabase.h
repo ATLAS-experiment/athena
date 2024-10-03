@@ -12,6 +12,7 @@
 #define POOL_ROOTSTORAGESVC_ROOTDBASE_H 1
 
 // Framework include files
+#include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
 
@@ -120,7 +121,7 @@ namespace pool  {
     
     std::map< std::string, int >        m_customSplitLevel;
 
-    IFileMgr*     m_fileMgr;
+    SmartIF<IFileMgr>     m_fileMgr;
 
     // mutex to prevent concurrent read I/O from AuxDynReader
     std::recursive_mutex  m_iomutex;
