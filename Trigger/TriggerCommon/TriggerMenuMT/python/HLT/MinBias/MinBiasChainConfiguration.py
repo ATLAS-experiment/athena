@@ -41,8 +41,7 @@ class MinBiasChainConfig(ChainConfigurationBase):
         if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl', 'pixsptrk']:
             steps.append(self.getMinBiasSpStep(flags))
 
-#       if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl', 'pixsptrk']:
-        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl' ]:
+        if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl']:
             steps.append(self.getMinBiasZFindStep(flags))
             steps.append(self.getMinBiasTrkStep(flags))
 
@@ -68,7 +67,7 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.getStep(flags, 'TrkCount', [MinBiasTrkSequenceGenCfg])
  
     def getMinBiasPixelTrkStep(self, flags):
-        return self.getStep(flags, 'TrkCount', [MinBiasPixelTrkSequenceGenCfg])
+        return self.getStep(flags, 'PixTrkCount', [MinBiasPixelTrkSequenceGenCfg])
 
     def getAFPTrkStep(self, flags):
         return self.getStep(flags, 'AFPTrk', [AFPTrkSequenceGenCfg])
