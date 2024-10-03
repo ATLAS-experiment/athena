@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedWriterTool.h"
@@ -21,7 +21,6 @@ SharedWriterTool::SharedWriterTool(const std::string& type
   : AthenaMPToolBase(type,name,parent)
   , m_rankId(0)
   , m_sharedRankQueue(nullptr)
-  , m_cnvSvc(0)
 {
   m_subprocDirPrefix = "shared_writer";
 }
@@ -35,7 +34,8 @@ StatusCode SharedWriterTool::initialize()
   ATH_MSG_DEBUG("In initialize");
 
   ATH_CHECK(AthenaMPToolBase::initialize());
-  ATH_CHECK(serviceLocator()->service("AthenaPoolCnvSvc", m_cnvSvc));
+  m_cnvSvc = serviceLocator()->service("AthenaPoolCnvSvc");
+  ATH_CHECK(m_cnvSvc.isValid());
 
   return StatusCode::SUCCESS;
 }
@@ -60,8 +60,8 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   m_nprocs = (nprocs==-1?sysconf(_SC_NPROCESSORS_ONLN):nprocs) + 1;
   m_subprocTopDir = topdir;
 
-  IProperty* propertyServer = dynamic_cast<IProperty*>(m_cnvSvc);
-  if(propertyServer==0) {
+  SmartIF<IProperty> propertyServer(m_cnvSvc);
+  if(!propertyServer) {
     ATH_MSG_ERROR("Unable to cast conversion service to IProperty");
     return -1;
   }
@@ -73,13 +73,12 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
       ATH_MSG_INFO("Conversion service does not have ParallelCompression property");
     }
     else {
-      IService* poolSvc;
-      if(serviceLocator()->service("PoolSvc", poolSvc).isFailure() || poolSvc==0) {
+      SmartIF<IProperty> poolSvc(serviceLocator()->service("PoolSvc"));
+      if(!poolSvc) {
         ATH_MSG_ERROR("Error retrieving PoolSvc");
       }
       else if(parallelCompressionProp.value()) {
-        propertyServer = dynamic_cast<IProperty*>(poolSvc);
-        if (propertyServer==0 || propertyServer->setProperty("FileOpen", "update").isFailure()) {
+        if (poolSvc->setProperty("FileOpen", "update").isFailure()) {
           ATH_MSG_ERROR("Could not change PoolSvc FileOpen Property");
         }
       }
@@ -206,15 +205,14 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
   ATH_MSG_INFO("File descriptors re-opened in the AthenaMP Shared Writer PID=" << getpid());
 
   // Try to initialize AthenaRootSharedWriterSvc early on
-  IAthenaSharedWriterSvc* sharedWriterSvc;
-  StatusCode sc = serviceLocator()->service("AthenaRootSharedWriterSvc", sharedWriterSvc);
-  if(sc.isFailure() || sharedWriterSvc == nullptr) {
+  SmartIF<IAthenaSharedWriterSvc> sharedWriterSvc(serviceLocator()->service("AthenaRootSharedWriterSvc"));
+  if(!sharedWriterSvc) {
     ATH_MSG_WARNING("Error retrieving AthenaRootSharedWriterSvc from SharedWriterTool::bootstrap_func()");
   }
 
   // Use IDataShare to make ConversionSvc a Share Server
-  IDataShare* cnvSvc = dynamic_cast<IDataShare*>(m_cnvSvc);
-  if (cnvSvc == 0 || !cnvSvc->makeServer(-m_nprocs - 1 - 1024 * m_rankId).isSuccess()) {
+  SmartIF<IDataShare> cnvSvc(m_cnvSvc);
+  if (!cnvSvc || !cnvSvc->makeServer(-m_nprocs - 1 - 1024 * m_rankId).isSuccess()) {
     ATH_MSG_ERROR("Failed to make the conversion service a share server");
     return outwork;
   }
@@ -246,16 +244,15 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::exec_func()
   ATH_MSG_INFO("Exec function in the AthenaMP Shared Writer PID=" << getpid());
   bool all_ok=true;
 
-  IAthenaSharedWriterSvc* sharedWriterSvc;
-  StatusCode sc = serviceLocator()->service("AthenaRootSharedWriterSvc", sharedWriterSvc);
-  if(sc.isFailure() || sharedWriterSvc==0) {
+  SmartIF<IAthenaSharedWriterSvc> sharedWriterSvc(serviceLocator()->service("AthenaRootSharedWriterSvc"));
+  if(!sharedWriterSvc) {
     ATH_MSG_ERROR("Error retrieving AthenaRootSharedWriterSvc");
     all_ok=false;
   } else if(!sharedWriterSvc->share(m_nprocs, m_nMotherProcess.value()).isSuccess()) {
     ATH_MSG_ERROR("Exec function could not share data");
     all_ok=false;
   }
-  AthCnvSvc* cnvSvc = dynamic_cast<AthCnvSvc*>(m_cnvSvc);
+  AthCnvSvc* cnvSvc = dynamic_cast<AthCnvSvc*>(m_cnvSvc.get());
   if (cnvSvc == 0 || !cnvSvc->disconnectOutput("").isSuccess()) {
     ATH_MSG_ERROR("Exec function could not disconnectOutput");
     all_ok=false;

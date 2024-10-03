@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EvtRangeProcessor.h"
@@ -66,7 +66,8 @@ StatusCode EvtRangeProcessor::initialize()
   ATH_MSG_DEBUG("In initialize");
 
   ATH_CHECK(AthenaMPToolBase::initialize());
-  ATH_CHECK(serviceLocator()->service(m_evtSelName,m_evtSeek));
+  m_evtSeek = serviceLocator()->service(m_evtSelName);
+  ATH_CHECK(m_evtSeek.isValid());
   ATH_CHECK(m_chronoStatSvc.retrieve());
   ATH_CHECK(m_incidentSvc.retrieve());
   

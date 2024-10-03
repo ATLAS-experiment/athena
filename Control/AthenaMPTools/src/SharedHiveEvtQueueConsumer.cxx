@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SharedHiveEvtQueueConsumer.h"
@@ -70,19 +70,15 @@ StatusCode SharedHiveEvtQueueConsumer::initialize()
   if(!sc.isSuccess())
     return sc;
 
-  sc = serviceLocator()->service(m_evtSelName,m_evtSelSeek);
-  if(sc.isFailure() || m_evtSelSeek==0) {
-    ATH_MSG_ERROR("Error retrieving IEvtSelectorSeek");
-    return StatusCode::FAILURE;
-  }
+  m_evtSelSeek = serviceLocator()->service(m_evtSelName);
+  ATH_CHECK( m_evtSelSeek.isValid() );
   ATH_CHECK( evtSelector()->createContext (m_evtContext) );
 
   ATH_CHECK(m_chronoStatSvc.retrieve());
 
-  IConversionSvc* cnvSvc = 0;
-  sc = serviceLocator()->service("AthenaPoolCnvSvc",cnvSvc);
-  m_dataShare = dynamic_cast<IDataShare*>(cnvSvc);
-  if(sc.isFailure() || m_dataShare==0) {
+  SmartIF<IConversionSvc> cnvSvc(serviceLocator()->service("AthenaPoolCnvSvc"));
+  m_dataShare = SmartIF<IDataShare>(cnvSvc);
+  if(!m_dataShare) {
     if(m_useSharedWriter) {
       ATH_MSG_ERROR("Error retrieving AthenaPoolCnvSvc " << cnvSvc);
       return StatusCode::FAILURE;
@@ -263,8 +259,8 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   // ...
 
   // ________________________ Get IncidentSvc and fire PostFork ________________________
-  IIncidentSvc* p_incidentSvc(0);
-  if(!serviceLocator()->service("IncidentSvc", p_incidentSvc).isSuccess()) {
+  SmartIF<IIncidentSvc> p_incidentSvc(serviceLocator()->service("IncidentSvc"));
+  if (!p_incidentSvc) {
     ATH_MSG_ERROR("Unable to retrieve IncidentSvc");
     return outwork;
   }
@@ -324,8 +320,8 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   // ________________________ Make Shared Writer Client ________________________
 
   if(m_useSharedWriter && m_dataShare) {
-    IProperty* propertyServer = dynamic_cast<IProperty*>(m_dataShare);
-    if (propertyServer==0 || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
+    SmartIF<IProperty> propertyServer(m_dataShare);
+    if (!propertyServer || propertyServer->setProperty("MakeStreamingToolClient", m_rankId + 1).isFailure()) {
       ATH_MSG_ERROR("Could not change AthenaPoolCnvSvc MakeClient Property");
       return outwork;
     } else {
@@ -342,7 +338,7 @@ SharedHiveEvtQueueConsumer::bootstrap_func()
   }
 
   // ________________________ Event selector restart ________________________
-  IService* evtSelSvc = dynamic_cast<IService*>(m_evtSelector);
+  SmartIF<IService> evtSelSvc(m_evtSelector);
   if(!evtSelSvc) {
     ATH_MSG_ERROR("Failed to dyncast event selector to IService");
     return outwork;
@@ -383,7 +379,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedHiveEvtQueueConsumer::e
 
   // Get the value of SkipEvent
   int skipEvents(0);
-  IProperty* propertyServer = dynamic_cast<IProperty*>(m_evtSelector);
+  SmartIF<IProperty> propertyServer(m_evtSelector);
   if(propertyServer==0) {
     ATH_MSG_ERROR("Unable to cast event selector to IProperty");
     all_ok = false;

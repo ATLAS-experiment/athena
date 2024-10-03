@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMP_ATHMPEVTLOOPMGR_H
@@ -37,7 +37,7 @@ class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr
 
  private:
   ServiceHandle<IEventProcessor> m_evtProcessor;
-  IService*                      m_evtSelector;
+  SmartIF<IService>              m_evtSelector;
   int                            m_nWorkers;
   std::string                    m_workerTopDir;
   std::string                    m_outputReportName;

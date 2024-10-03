@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_ATHENAMPTOOLBASE_H
@@ -91,7 +91,7 @@ class AthenaMPToolBase : public AthAlgTool
   ServiceHandle<IAppMgrUI>       m_appMgr;
   ServiceHandle<IFileMgr>        m_fileMgr;
   ServiceHandle<IIoComponentMgr> m_ioMgr;
-  IEvtSelector*                  m_evtSelector;
+  SmartIF<IEvtSelector>          m_evtSelector;
   std::string                    m_fileMgrLog;
   std::shared_ptr<AthenaInterprocess::FdsRegistry> m_fdsRegistry;
   std::string                    m_randStr;

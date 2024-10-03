@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_EVTRANGEPROCESSOR_H
@@ -70,7 +70,7 @@ class EvtRangeProcessor final : public AthenaMPToolBase
 
   ServiceHandle<IChronoStatSvc>     m_chronoStatSvc;
   ServiceHandle<IIncidentSvc>       m_incidentSvc;
-  IEvtSelectorSeek*                 m_evtSeek;
+  SmartIF<IEvtSelectorSeek>         m_evtSeek;
 
   StringProperty                    m_channel2Scatterer;
   StringProperty                    m_channel2EvtSel;

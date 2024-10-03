@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_SHAREDEVTQUEUEPROVIDER_H
@@ -55,7 +55,7 @@ class SharedEvtQueueProvider final : public AthenaMPToolBase
   int  m_nEvtCounted;      // The number of events this tool has counted itself in the input files 
   
   AthenaInterprocess::SharedQueue*  m_sharedEventQueue;          
-  IEventShare*             m_evtShare;
+  SmartIF<IEventShare>              m_evtShare;
 
   // Add next event chunk to the queue
   void addEventsToQueue(); 

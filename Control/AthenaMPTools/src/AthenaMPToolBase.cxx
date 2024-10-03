@@ -72,7 +72,10 @@ StatusCode AthenaMPToolBase::initialize()
     // Get event selector name. Retrieve EventSelector and EventSeek
     m_evtSelName = prpMgr->getProperty("EvtSel").toString();
     // If the job runs with no event selector, then the name will be empty
-    if(!m_evtSelName.empty()) ATH_CHECK(serviceLocator()->service(m_evtSelName,m_evtSelector));
+    if(!m_evtSelName.empty()) {
+      m_evtSelector = serviceLocator()->service(m_evtSelName);
+      ATH_CHECK(m_evtSelector.isValid());
+    }
   }
   else {
     ATH_MSG_ERROR("IProperty interface not found in ApplicationMgr");
@@ -298,14 +301,7 @@ int AthenaMPToolBase::redirectLog(const std::string& rundir, bool addTimeStamp)
   }
 
   if(addTimeStamp) {
-    IMessageSvc* messageSvc(0);
-    StatusCode sc = serviceLocator()->service("MessageSvc",messageSvc);
-    if(sc.isFailure()) {
-      ATH_MSG_ERROR("Error retrieving IMessageSvc");
-      return -1;
-    }
-
-    IProperty* propertyServer = dynamic_cast<IProperty*>(messageSvc);
+    SmartIF<IProperty> propertyServer(msgSvc());
     if(propertyServer==0) {
       ATH_MSG_ERROR("Unable to cast message svc to IProperty");
       return -1;
@@ -314,7 +310,7 @@ int AthenaMPToolBase::redirectLog(const std::string& rundir, bool addTimeStamp)
     std::string propertyName("Format");
     std::string oldFormat("");
     StringProperty formatProp(propertyName,oldFormat);
-    sc = propertyServer->getProperty(&formatProp);
+    StatusCode sc = propertyServer->getProperty(&formatProp);
     if(sc.isFailure()) {
       ATH_MSG_WARNING("Message Service does not have Format property");
     }
