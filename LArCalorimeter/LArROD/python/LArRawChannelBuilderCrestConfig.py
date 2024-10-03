@@ -115,4 +115,5 @@ if __name__=="__main__":
     acc.getService("IOVDbSvc").Source="CREST"
     acc.getService("IOVDbSvc").OutputLevel=DEBUG
     acc.getService("IOVDbSvc").DBInstance=""
+    acc.getService("IOVDbSvc").crestServer="http://crest-03.cern.ch:8090"
     acc.run(3)
