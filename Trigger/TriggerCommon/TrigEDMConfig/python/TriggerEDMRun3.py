@@ -1064,8 +1064,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_MinBias_IDTrig',                 'BS ESD AODFULL AODSLIM', 'MinBias', [InViews('MBTrackRecoViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MinBias_IDTrigAux.',          'BS ESD AODFULL AODSLIM', 'MinBias'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_MinBiasPixel_IDTrig',                 'BS ESD AODFULL AODSLIM', 'MinBias', [InViews('MBPixelTrackRecoViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MinBiasPixel_IDTrigAux.',          'BS ESD AODFULL AODSLIM', 'MinBias'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_MinBiasPixel_IDTrig',                 'BS ESD AODFULL', 'MinBias', [InViews('MBPixelTrackRecoViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_MinBiasPixel_IDTrigAux.',          'BS ESD AODFULL', 'MinBias'),
 
     ('xAOD::TrigT2MbtsBitsContainer#HLT_MbtsBitsContainer',                     'BS ESD AODFULL', 'MinBias'),
     ('xAOD::TrigT2MbtsBitsAuxContainer#HLT_MbtsBitsContainerAux.',              'BS ESD AODFULL', 'MinBias'),
@@ -1075,6 +1075,9 @@ TriggerHLTListRun3 = [
 
     ('xAOD::TrigCompositeContainer#HLT_TrackCount',                                                'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('xAOD::TrigCompositeAuxContainer#HLT_TrackCountAux.ntrks.pTcuts.z0cuts.vertexZcuts.counts',  'BS ESD AODFULL AODSLIM', 'MinBias'),
+
+    ('xAOD::TrigCompositeContainer#HLT_PixelTrackCount',                                                'BS ESD AODFULL', 'MinBias'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_PixelTrackCountAux.ntrks.pTcuts.z0cuts.vertexZcuts.counts',  'BS ESD AODFULL', 'MinBias'),
 
     ('xAOD::TrigCompositeContainer#HLT_vtx_z',                              'BS ESD AODFULL AODSLIM', 'MinBias' ,[InViews('ZVertFinderRecoViews')]),
     ('xAOD::TrigCompositeAuxContainer#HLT_vtx_zAux.zfinder_vtx_z.zfinder_vtx_weight.zfinder_tool', 'BS ESD AODFULL AODSLIM', 'MinBias'),

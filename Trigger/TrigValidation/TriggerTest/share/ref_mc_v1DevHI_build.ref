@@ -1935,7 +1935,19 @@ HLT_mb_nototpix70_excl_0trk2_pt0p2_L1ZDC_XOR_VTE10:
   eventCount: 0
 HLT_mb_pixsptrk_nototpix20_q2_L1RD0_FILLED:
   eventCount: 0
+HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_A_C_VjTE10:
+  eventCount: 0
+HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_XOR_VjTE10:
+  eventCount: 0
+HLT_mb_pixsptrk_nototpix20_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO:
+  eventCount: 0
 HLT_mb_pixsptrk_nototpix20_q2_L1VjTE10:
+  eventCount: 0
+HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_A_C_VjTE10:
+  eventCount: 0
+HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10:
+  eventCount: 0
+HLT_mb_pixsptrk_nototpix30_q2_L1TRT_ZDC_XOR_VjTE10_UNPAIRED_NONISO:
   eventCount: 0
 HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50:
   eventCount: 0

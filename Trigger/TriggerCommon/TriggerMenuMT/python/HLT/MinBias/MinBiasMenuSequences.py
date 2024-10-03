@@ -190,8 +190,8 @@ def MinBiasPixelTrkSequenceGenCfg(flags):
 
     selAcc = SelectionCA("MBPixelTrackCountSel")
     selAcc.mergeReco(recoAcc)
-    from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
-    trackCountHypoAlgo = TrackCounterHypoAlgCfg(flagsWithTrk)
+    from TrigMinBias.MinBiasCountersConfig import PixelTrackCounterHypoAlgCfg
+    trackCountHypoAlgo = PixelTrackCounterHypoAlgCfg(flagsWithTrk)
     selAcc.mergeHypo(trackCountHypoAlgo)
     return MenuSequence(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
 
