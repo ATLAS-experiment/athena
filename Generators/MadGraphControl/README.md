@@ -1374,7 +1374,7 @@ as nominal.
 correct weight - the difference in cross section can be quite a lot
 (sometimes up to 5-10% or more) depending on the phase space, and if you
 are using the wrong weight in your signal then this could affect your
-results by a similar amount.**
+results by a similar amount.*
 
 ## Wrong Pythia cross section in LO samples with negative-weight events bug
 
@@ -1406,6 +1406,18 @@ you think you might be affected you can:
 More details can be found here:
 <https://its.cern.ch/jira/browse/AGENE-1725>
 
+## Parameter not found when updating the parameter card
+
+In certain circumstances you might see an error that looks like:
+
+    RuntimeError: Did not find any of the parameters for block <block name> in param_card
+
+Please check to see if you are referring in your job options to the parameters by a
+name in the comments (e.g. mW or mH) and, if so, that the comment also appears in the
+existing param_card in the process directory. There are certain situations in which
+MG5_aMC might remove comments from parameters. In these cases, you will need to refer
+to the parameter according to its index (the number or numbers before the value), which
+will always be present.
 
 # To do list
 
