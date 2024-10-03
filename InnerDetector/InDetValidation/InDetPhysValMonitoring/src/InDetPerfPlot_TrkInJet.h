@@ -19,60 +19,65 @@ public:
 
   void fillEfficiency(const xAOD::TruthParticle& trk, const xAOD::Jet& jet, const bool isEfficient, float weight);
   void fillFakeRate(const xAOD::TrackParticle& trk, const xAOD::Jet& jet, const bool isFake, float weight);
-
+  void fillTruth(const xAOD::TruthParticle& truth, const xAOD::Jet& jet, float weight);
 
 private:
   void initializePlots();
 
-  TProfile* m_nInnerMostPixelHits_vs_dR;
-  TProfile* m_nNextToInnerMostPixelHits_vs_dR;
-  TProfile* m_nPixelHits_vs_dR;
-  TProfile* m_nSCTHits_vs_dR;
-  TProfile* m_nTRTHits_vs_dR;
-  TProfile* m_nPixelHoles_vs_dR;
-  TProfile* m_nSCTHoles_vs_dR;
-  TProfile* m_nTRTHighThresholdHits_vs_dR;
-  TProfile* m_nInnerMostPixelOutliers_vs_dR;
-  TProfile* m_nInnerMostPixelSharedHits_vs_dR;
-  TProfile* m_nInnerMostPixelSplitHits_vs_dR;
-  TProfile* m_nExpectedInnerMostPixelHits_vs_dR;
-  TProfile* m_nExpectedNextToInnerMostPixelHits_vs_dR;
-  TProfile* m_nPixelOutliers_vs_dR;
-  TProfile* m_nPixelContribLayers_vs_dR;
-  TProfile* m_nPixelSharedHits_vs_dR;
-  TProfile* m_nPixelSplitHits_vs_dR;
-  TProfile* m_nPixelGangedHits_vs_dR;
-  TProfile* m_nPixelGangedHitsFlaggedFakes_vs_dR;
-  TProfile* m_nSCTOutliers_vs_dR;
-  TProfile* m_nSCTDoubleHoles_vs_dR;
-  TProfile* m_nSCTSharedHits_vs_dR;
-  TProfile* m_nTRTOutliers_vs_dR;
-  TProfile* m_nTRTHighThresholdOutliers_vs_dR;
-  TProfile* m_nPixelDeadSensors_vs_dR;
-  TProfile* m_nSCTDeadSensors_vs_dR;
+  TProfile* m_nInnerMostPixelHits_vs_dR{};
+  TProfile* m_nNextToInnerMostPixelHits_vs_dR{};
+  TProfile* m_nPixelHits_vs_dR{};
+  TProfile* m_nSCTHits_vs_dR{};
+  TProfile* m_nTRTHits_vs_dR{};
+  TProfile* m_nPixelHoles_vs_dR{};
+  TProfile* m_nSCTHoles_vs_dR{};
+  TProfile* m_nTRTHighThresholdHits_vs_dR{};
+  TProfile* m_nInnerMostPixelOutliers_vs_dR{};
+  TProfile* m_nInnerMostPixelSharedHits_vs_dR{};
+  TProfile* m_nInnerMostPixelSplitHits_vs_dR{};
+  TProfile* m_nExpectedInnerMostPixelHits_vs_dR{};
+  TProfile* m_nExpectedNextToInnerMostPixelHits_vs_dR{};
+  TProfile* m_nPixelOutliers_vs_dR{};
+  TProfile* m_nPixelContribLayers_vs_dR{};
+  TProfile* m_nPixelSharedHits_vs_dR{};
+  TProfile* m_nPixelSplitHits_vs_dR{};
+  TProfile* m_nPixelGangedHits_vs_dR{};
+  TProfile* m_nPixelGangedHitsFlaggedFakes_vs_dR{};
+  TProfile* m_nSCTOutliers_vs_dR{};
+  TProfile* m_nSCTDoubleHoles_vs_dR{};
+  TProfile* m_nSCTSharedHits_vs_dR{};
+  TProfile* m_nTRTOutliers_vs_dR{};
+  TProfile* m_nTRTHighThresholdOutliers_vs_dR{};
+  TProfile* m_nPixelDeadSensors_vs_dR{};
+  TProfile* m_nSCTDeadSensors_vs_dR{};
 
 
-  TProfile* m_reco_d0_vs_dR;
-  TProfile* m_reco_z0_vs_dR;
-  TProfile* m_reco_z0sin_vs_dR;
+  TProfile* m_reco_d0_vs_dR{};
+  TProfile* m_reco_z0_vs_dR{};
+  TProfile* m_reco_z0sin_vs_dR{};
 
-  TProfile* m_reco_phi_vs_dR;
-  TProfile* m_reco_theta_vs_dR;
-  TProfile* m_reco_eta_vs_dR;
-  TProfile* m_reco_pt_vs_dR;
-  TProfile* m_reco_lowpt_vs_dR;
-  TProfile* m_reco_track_pt_vs_jet_pt;
+  TProfile* m_reco_phi_vs_dR{};
+  TProfile* m_reco_theta_vs_dR{};
+  TProfile* m_reco_eta_vs_dR{};
+  TProfile* m_reco_pt_vs_dR{};
+  TProfile* m_reco_lowpt_vs_dR{};
+  TProfile* m_reco_track_pt_vs_jet_pt{};
   
-  TProfile* m_reco_chi2Overndof_vs_dR;
+  TProfile* m_reco_chi2Overndof_vs_dR{};
 
-  TEfficiency* m_efficiency_vs_dR;
-  TEfficiency* m_efficiency_vs_smalldR;
-  TEfficiency* m_efficiency_vs_jetpT;
+  TEfficiency* m_efficiency_vs_dR{};
+  TEfficiency* m_efficiency_vs_smalldR{};
+  TEfficiency* m_efficiency_vs_jetpT{};
 
-  TEfficiency* m_fakerate_vs_dR;
-  TEfficiency* m_fakerate_vs_smalldR;
-  TEfficiency* m_fakerate_vs_jetpT;
+  TEfficiency* m_fakerate_vs_dR{};
+  TEfficiency* m_fakerate_vs_smalldR{};
+  TEfficiency* m_fakerate_vs_jetpT{};
 
+  TProfile* m_truth_track_phi_vs_dR{};
+  TProfile* m_truth_track_eta_vs_dR{};
+  TProfile* m_truth_track_pt_vs_dR{};
+  TProfile* m_truth_track_pt_vs_jet_pt{};
+  
   bool m_doFakeAndEff;
 
 

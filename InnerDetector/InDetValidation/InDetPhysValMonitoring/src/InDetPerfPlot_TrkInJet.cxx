@@ -21,60 +21,7 @@ using namespace IDPVM;
 
 InDetPerfPlot_TrkInJet::InDetPerfPlot_TrkInJet(InDetPlotBase* pParent, const std::string & sDir, bool bookFakeAndEff) :
   InDetPlotBase(pParent, sDir),
-
-  m_nInnerMostPixelHits_vs_dR{},
-  m_nNextToInnerMostPixelHits_vs_dR{},
-  m_nPixelHits_vs_dR{},
-  m_nSCTHits_vs_dR{},
-  m_nTRTHits_vs_dR{},
-  m_nPixelHoles_vs_dR{},
-  m_nSCTHoles_vs_dR{},
-  m_nTRTHighThresholdHits_vs_dR{},
-  m_nInnerMostPixelOutliers_vs_dR{},
-  m_nInnerMostPixelSharedHits_vs_dR{},
-  m_nInnerMostPixelSplitHits_vs_dR{},
-  m_nExpectedInnerMostPixelHits_vs_dR{},
-  m_nExpectedNextToInnerMostPixelHits_vs_dR{},
-  m_nPixelOutliers_vs_dR{},
-  m_nPixelContribLayers_vs_dR{},
-  m_nPixelSharedHits_vs_dR{},
-  m_nPixelSplitHits_vs_dR{},
-  m_nPixelGangedHits_vs_dR{},
-  m_nPixelGangedHitsFlaggedFakes_vs_dR{},
-  m_nSCTOutliers_vs_dR{},
-  m_nSCTDoubleHoles_vs_dR{},
-  m_nSCTSharedHits_vs_dR{},
-  m_nTRTOutliers_vs_dR{},
-  m_nTRTHighThresholdOutliers_vs_dR{},
-  m_nPixelDeadSensors_vs_dR{},
-  m_nSCTDeadSensors_vs_dR{},
-
-
-  m_reco_d0_vs_dR{},
-  m_reco_z0_vs_dR{},
-  m_reco_z0sin_vs_dR{},
-
-  m_reco_phi_vs_dR{},
-  m_reco_theta_vs_dR{},
-  m_reco_eta_vs_dR{},
-  m_reco_pt_vs_dR{},
-  m_reco_lowpt_vs_dR{},
-  m_reco_track_pt_vs_jet_pt{},
-
-  m_reco_chi2Overndof_vs_dR{},
-
-  m_efficiency_vs_dR{},
-  m_efficiency_vs_smalldR{},
-  m_efficiency_vs_jetpT{},
-
-  m_fakerate_vs_dR{},
-  m_fakerate_vs_smalldR{},
-  m_fakerate_vs_jetpT{},
-  m_doFakeAndEff(bookFakeAndEff) {
-
-  //nop
-
-}
+  m_doFakeAndEff(bookFakeAndEff) {}
 
 void
 InDetPerfPlot_TrkInJet::initializePlots() {
@@ -130,6 +77,11 @@ InDetPerfPlot_TrkInJet::initializePlots() {
     book(m_fakerate_vs_dR, "fakerate_vs_dR");
     book(m_fakerate_vs_smalldR, "fakerate_vs_smalldR");
     book(m_fakerate_vs_jetpT, "fakerate_vs_jetpT");
+
+    book(m_truth_track_phi_vs_dR, "truth_track_phi_vs_dR");
+    book(m_truth_track_eta_vs_dR, "truth_track_eta_vs_dR");
+    book(m_truth_track_pt_vs_dR, "truth_track_pt_vs_dR");
+    book(m_truth_track_pt_vs_jet_pt, "truth_track_pt_vs_jet_pt");
   }
 
 }
@@ -264,8 +216,24 @@ InDetPerfPlot_TrkInJet::fillEfficiency(const xAOD::TruthParticle& truth, const x
   fillHisto(m_efficiency_vs_dR, dR, isGood, weight);
   fillHisto(m_efficiency_vs_smalldR, dR, isGood, weight);
   fillHisto(m_efficiency_vs_jetpT, jetpT, isGood, weight);
+  // truth info
+  fillTruth(truth, jet, weight);
 }
 
+void
+InDetPerfPlot_TrkInJet::fillTruth(const xAOD::TruthParticle& truth, const xAOD::Jet& jet, float weight) {
+  if (!m_doFakeAndEff) return;
+  float dR = jet.p4().DeltaR(truth.p4());
+  float jetpT = jet.pt() / Gaudi::Units::GeV;
+  float trackpT = truth.pt() / Gaudi::Units::GeV;
+  float trackEta = truth.eta();
+  float trackPhi = truth.phi();
+
+  fillHisto(m_truth_track_phi_vs_dR, dR, trackPhi, weight);
+  fillHisto(m_truth_track_eta_vs_dR, dR, trackEta, weight);
+  fillHisto(m_truth_track_pt_vs_dR, dR, trackpT, weight);
+  fillHisto(m_truth_track_pt_vs_jet_pt, jetpT, trackpT, weight);
+}
 
 void
 InDetPerfPlot_TrkInJet::fillFakeRate(const xAOD::TrackParticle& trk, const xAOD::Jet& jet, const bool isFake, float weight) {

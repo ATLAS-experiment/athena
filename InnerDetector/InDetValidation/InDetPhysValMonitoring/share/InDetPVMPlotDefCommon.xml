@@ -3074,6 +3074,24 @@
   <y title="reco_{#chi^2/ndof}" n="100" lo="0.0" hi="5.0"/>
 </h>
 
+<!-- Truth -->
+<h id="truth_track_phi_vs_dR" type="TProfile" title="truth_track_{#phi}">
+  <x title="#DeltaR(jet,track)" n="100" lo="0.0" hi="&DRMAX;"/>
+  <y title="truth_track_{#phi} [rads]" n="100" lo="-&PI;" hi="&PI;"/>
+</h>
+<h id="truth_track_eta_vs_dR" type="TProfile" title="truth_track_{#eta}">
+  <x title="#DeltaR(jet,track)" n="100" lo="0.0" hi="&DRMAX;"/>
+  <y title="truth_track_{#eta} [rads]" n="100" lo="-&ETA;" hi="&ETA;"/>
+</h>
+
+<h id="truth_track_pt_vs_dR" type="TProfile" title="truth_track_{p_{T}} [GeV]">
+  <x title="#DeltaR(jet,track)" n="100" lo="0.0" hi="&DRMAX;"/>
+  <y title="truth_track_{p_{T}} [GeV]" n="100" lo="0.0" hi="100.0"/>
+</h>
+<h id="truth_track_pt_vs_jet_pt" type="TProfile" title="truth_track_{p_{T}} [GeV]">
+  <x title="jet_{p_{T}} [GeV]" n="49" lo="100.0" hi="5000."/>
+  <y title="truth_track_{p_{T}} [GeV]" n="100" lo="0.0" hi="100.0"/>
+</h>
 
 <!-- Efficiency -->
 <h id="efficiency_vs_dR" type="TEfficiency" title="Fraction of reco-matched truth track versus #DeltaR">
