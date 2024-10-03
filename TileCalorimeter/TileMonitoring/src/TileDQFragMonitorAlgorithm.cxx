@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileDQFragMonitorAlgorithm.h"
@@ -37,6 +37,10 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
 
   m_errorsGroups = Monitored::buildToolMap<std::vector<int>>(m_tools, "TileDigiErrors",
                                                              Tile::MAX_ROS - 1, Tile::MAX_DRAWER);
+  if (m_fillDigiErrorsInLB) {
+    m_errorsInLBGroups = Monitored::buildToolMap<std::vector<int>>(m_tools, "TileDigiErrorsInLB",
+                                                                   Tile::MAX_ROS - 1, Tile::MAX_DRAWER);
+  }
 
   m_errorsVsLBGroups = Monitored::buildToolMap<std::vector<int>>(m_tools, "FracTileDigiErrors",
                                                                  Tile::MAX_ROS - 1, Tile::MAX_DRAWER);
@@ -474,6 +478,10 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
       // in histograms with DMU header errors
       setDigiError(dmus, errors, -1, OK);
       fill(m_tools[m_errorsGroups[ros - 1][drawer]], drawerDMUs, errorsInDMUs);
+      if (m_fillDigiErrorsInLB) {
+        fill(m_tools[m_errorsInLBGroups[ros - 1][drawer]], drawerDMUs, errorsInDMUs);
+      }
+
       fill(m_tools[m_errorsVsLBGroups[ros - 1][drawer]], lumiBlock, fractionOfBadDMUs);
 
       if (dqStatus->checkGlobalCRCErr(ros, drawer, 0) != 0) {

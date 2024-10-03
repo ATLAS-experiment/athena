@@ -50,6 +50,8 @@ def TileDQFragMonitoringConfig(flags, **kwargs):
     from AthenaCommon.SystemOfUnits import GeV
     kwargs.setdefault('MinEnergyChan', -5.0 * GeV)
     kwargs.setdefault('MinEnergyGap', -10.0 * GeV)
+    kwargs.setdefault('fillDigiErrorsHistogramsPerLB', flags.Common.isOnline)
+    fillDigiErrorsHistogramsPerLB = kwargs['fillDigiErrorsHistogramsPerLB']
 
     runNumber = flags.Input.RunNumbers[0]
     run = str(runNumber)
@@ -150,6 +152,22 @@ def TileDQFragMonitoringConfig(flags, **kwargs):
                              xbins = maxDMUs, xmin = 0.0, xmax = maxDMUs,
                              ybins = maxErrors, ymin = 0.0, ymax = maxErrors)
 
+
+    if fillDigiErrorsHistogramsPerLB:
+        kLBNHistoryDepth = 2
+        errorsInLBArray = helper.addArray([int(Tile.MAX_ROS - 1), int(Tile.MAX_DRAWER)],
+                                          tileDQFragMonAlg, 'TileDigiErrorsInLB', topPath = 'Tile/')
+        for postfix, tool in errorsInLBArray.Tools.items():
+            ros, module = [int(x) for x in postfix.split('_')[1:]]
+
+            moduleName = Tile.getDrawerString(ros + 1, module)
+            title = 'Run ' + run + ': ' + moduleName + f' Channel and DMU Header Errors (reset every {kLBNHistoryDepth} LBs);DMU'
+            name = 'DMU,Error;TileDigiErrors' + moduleName
+
+            tool.defineHistogram(name, title = title, type = 'TH2F', path = 'DMUErrors/LB',
+                                 opt = f'kLBNHistoryDepth={kLBNHistoryDepth}', xlabels = dmuLabels, ylabels = dmuErrorLabels,
+                                 xbins = maxDMUs, xmin = 0.0, xmax = maxDMUs,
+                                 ybins = maxErrors, ymin = 0.0, ymax = maxErrors)
 
 
     # 8) Configure histograms with fraction of events/DMUs Tile DMU errors vs lumi blocks
