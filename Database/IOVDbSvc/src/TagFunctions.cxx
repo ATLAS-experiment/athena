@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //@file TagFunctions.cxx
 //@brief Implementation of helper functions for tag resolution
@@ -31,15 +31,12 @@ namespace IOVDbNamespace{
   
   std::string
   getGeoAtlasVersion(){
-    std::string version{};
-    IGeoModelSvc* geomodel=nullptr;
-    ISvcLocator* svcLocator=Gaudi::svcLocator();
-    if (not svcLocator or StatusCode::SUCCESS!=svcLocator->service("GeoModelSvc",geomodel)) {
+    SmartIF<IGeoModelSvc> geomodel{Gaudi::svcLocator()->service("GeoModelSvc")};
+    if (not geomodel) {
       throw std::runtime_error("The GeoModelSvc could not be retrieved in TagFunctions.cxx getGeoAtlasVersion()");
     } else { 
-      version=geomodel->atlasVersion();
+      return geomodel->atlasVersion();
     }
-    return version;
   }
   
   std::optional<bool>
