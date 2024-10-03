@@ -88,8 +88,12 @@ def configureGeometry(flags, cfg):
     if flags.Detector.GeometryZDC:
         from ZDC_GeoM.ZdcGeoModelConfig import ZDC_DetToolCfg
         cfg.merge(ZDC_DetToolCfg(flags))
-
-    
+    # Temporary 'hack': 
+    # Replace EllipticTube with Box, 
+    # to bypass a crash due to lack of support 
+    # for EllipticTube in GeoModelIO 
+    # See: https://its.cern.ch/jira/browse/ATLASSIM-7263
+    cfg.getService("GeoModelSvc").DetectorTools["ForwardRegionGeoModelTool"].vp1Compatibility=True
 
 
 def getATLASVersion():
@@ -172,6 +176,7 @@ if __name__=="__main__":
     parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("-f", "--forceOverwrite",
                         help="Force to overwrite an existing SQLite output file with the same name, if any", action = 'store_true')
+    parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
     args = flags.fillFromArgs(parser=parser)
 
@@ -270,11 +275,6 @@ if __name__=="__main__":
             #raise ValueError("The output file exists already!")
 
 
-    # DEBUG -- inspect the flags
-    # flags.dump()
-    # flags._loadDynaFlags('GeoModel')
-    # flags._loadDynaFlags('Detector')
-    # flags.dump('Detector.(Geometry|Enable)', True)
 
     # ++++ Now we setup the actual configuration ++++
     _logger.verbose("+ Setup main services")
@@ -285,6 +285,30 @@ if __name__=="__main__":
     _logger.verbose("+ About to setup geometry")
     configureGeometry(flags,cfg)
     _logger.verbose("+ ...Done")
+
+    # debug messages
+    if args.debugCA:
+        debugCAlevel = int(args.debugCA)
+        if debugCAlevel >= 1:
+            _logger.verbose("Debug --- printing flags...")
+            print("\nflags:", flags)
+            for fl in flags:
+                print("fl:", fl)
+            print("\nflags.Tile:", flags.Tile)
+            for fl in flags.Tile:
+                print("fl.Tile:", fl)
+            print(dir(cfg))
+            print("cfg._privateTools: ", cfg._privateTools)
+            print("cfg._publicTools: ", cfg._publicTools)
+        if debugCAlevel >= 2:
+            flags.dump()
+            flags._loadDynaFlags('GeoModel')
+            flags._loadDynaFlags('Detector')
+            flags.dump('Detector.(Geometry|Enable)', True)
+        if debugCAlevel >= 1:
+            _logger.verbose("We're in a debugCA session, flags have been printed out, now exiting...")
+            sys.exit()
+    
 
     # configure DumpGeo
     cfg.merge(DumpGeoCfg(flags, args, outFileName=outFileName)) 
