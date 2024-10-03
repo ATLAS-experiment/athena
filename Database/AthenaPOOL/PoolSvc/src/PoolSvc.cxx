@@ -125,8 +125,8 @@ StatusCode PoolSvc::initialize() {
    ATH_MSG_INFO("Frontier compression level set to " << webCache.compressionLevel());
    if (m_sortReplicas) {
       // set replica sorter - get service
-      IDBReplicaSvc* replicasvc;
-      if (Gaudi::svcLocator()->service("DBReplicaSvc", replicasvc).isSuccess()) {
+      ServiceHandle<IDBReplicaSvc> replicasvc("DBReplicaSvc", name());
+      if (replicasvc.retrieve().isSuccess()) {
          csConfig.setReplicaSortingAlgorithm(*replicasvc);
          ATH_MSG_INFO("Successfully setup replica sorting algorithm");
       } else {
