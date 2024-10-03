@@ -13,7 +13,6 @@
  * Email: martyniu@cern.ch
  */
 
-#include <TObject.h>
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
  /*
@@ -21,9 +20,10 @@
   * The raw hits used to form this cluster are stored in the m_hitlist, the first entry is the seed that initiated this cluster.
   */
 typedef std::vector<FPGATrackSimHit> hitVector;
-class FPGATrackSimCluster : public TObject
+class FPGATrackSimCluster
 {
 public:
+  FPGATrackSimCluster() = default;
   virtual ~FPGATrackSimCluster() = default;
 
   // get private members
@@ -41,7 +41,7 @@ private:
   hitVector m_hitlist; // list of hits that make the cluster, the seed of the cluster will be the first entry in this list.
   FPGATrackSimHit m_clusterEquiv; // This is the cluster
 
-  ClassDef(FPGATrackSimCluster, 3);
+  ClassDefNV(FPGATrackSimCluster, 4);
 };
 
 std::ostream& operator<<(std::ostream& o, const FPGATrackSimCluster& cluster);

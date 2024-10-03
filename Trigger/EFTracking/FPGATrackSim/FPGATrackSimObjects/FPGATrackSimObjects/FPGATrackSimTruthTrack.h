@@ -11,9 +11,10 @@
 #include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 
-class FPGATrackSimTruthTrack : public TObject {
+class FPGATrackSimTruthTrack {
 public:
   FPGATrackSimTruthTrack();
+  virtual ~FPGATrackSimTruthTrack() = default;
 
   void setD0(double v) { m_d0 = v; }
   void setZ0(double v) { m_z0 = v; }
@@ -99,7 +100,7 @@ private:
                                 // particle with m_barcode
 
 
-  ClassDef(FPGATrackSimTruthTrack, 4)
+  ClassDefNV(FPGATrackSimTruthTrack, 5)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRUTHTRACK_H

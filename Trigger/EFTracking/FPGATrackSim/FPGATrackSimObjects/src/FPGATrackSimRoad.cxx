@@ -15,6 +15,8 @@
 
 using namespace std;
 
+//FPGATrackSimRoad::~FPGATrackSimRoad() { }
+
 size_t FPGATrackSimRoad::getNHits() const
 {
     size_t n = 0;

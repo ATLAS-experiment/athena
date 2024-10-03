@@ -5,7 +5,6 @@
 #include <algorithm>
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 
-ClassImp(FPGATrackSimMultiTruth)
 
 // FPGATrackSimMultiTruth
 // ================================================================

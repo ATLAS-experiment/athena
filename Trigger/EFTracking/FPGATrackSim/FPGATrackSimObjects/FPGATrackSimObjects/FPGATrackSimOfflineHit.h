@@ -9,9 +9,10 @@
 #include <TObject.h>
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 
-class FPGATrackSimOfflineHit : public TObject {
+class FPGATrackSimOfflineHit {
 public:
   FPGATrackSimOfflineHit() {m_locX=0; m_locY=0; m_isPixel = false; m_isBarrel = false; m_layer = -1; m_clustID = -1; m_trackNumber = -1; m_hitType = OfflineHitType::Other;}
+  virtual ~FPGATrackSimOfflineHit() = default;
 
   void setLocX(float locx) { m_locX = locx; }
   void setLocY(float locy) { m_locY = locy; }
@@ -41,7 +42,7 @@ private:
   int     m_trackNumber;
   OfflineHitType   m_hitType;
 
-  ClassDef(FPGATrackSimOfflineHit, 2)
+  ClassDefNV(FPGATrackSimOfflineHit, 3)
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimOfflineHit&);

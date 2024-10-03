@@ -18,10 +18,11 @@
 class FPGATrackSimEventInfo;
 class FPGATrackSimOptionalEventInfo;
 
-class FPGATrackSimEventInputHeader : public TObject
+class FPGATrackSimEventInputHeader
 {
 public:
 
+  FPGATrackSimEventInputHeader() = default;
   virtual ~FPGATrackSimEventInputHeader();
 
   void newEvent(FPGATrackSimEventInfo const& event) { reset(); m_event = event; }
@@ -46,7 +47,7 @@ private:
   std::vector<FPGATrackSimHit>          m_Hits;
 
 
-  ClassDef(FPGATrackSimEventInputHeader, 3);
+  ClassDefNV(FPGATrackSimEventInputHeader, 4);
 };
 
 std::ostream& operator<<(std::ostream&, const FPGATrackSimEventInputHeader&);

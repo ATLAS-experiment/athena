@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimEventInputHeader)
 
 FPGATrackSimEventInputHeader::~FPGATrackSimEventInputHeader()
 {

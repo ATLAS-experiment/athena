@@ -1,0 +1,24 @@
+<!-- Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+    <class name="FPGATrackSimCluster" />
+    <class name="FPGATrackSimDataFlowInfo" />
+    <class name="FPGATrackSimEventInfo" />
+    <class name="FPGATrackSimEventInputHeader" />
+    <class name="FPGATrackSimHit" />
+    <class name="FPGATrackSimLogicalEventInputHeader" />
+    <class name="FPGATrackSimLogicalEventOutputHeader" />
+    <class name="FPGATrackSimMatchInfo" />
+    <class name="FPGATrackSimMultiTruth" />
+    <class name="FPGATrackSimOfflineHit" />
+    <class name="FPGATrackSimOfflineTrack" />
+    <class name="FPGATrackSimOptionalEventInfo" />
+    <class name="FPGATrackSimTowerInputHeader" />
+    <class name="FPGATrackSimRoad" />
+    <class name="FPGATrackSimTrack" />
+    <class name="FPGATrackSimTrackStream" />
+    <class name="FPGATrackSimTruthTrack" />
+
+    <!-- Type signature for MultiTruth.m_truth -->
+    <class name="std::map<std::pair<unsigned long,unsigned long>,float>" />
+
+</lcgdict>

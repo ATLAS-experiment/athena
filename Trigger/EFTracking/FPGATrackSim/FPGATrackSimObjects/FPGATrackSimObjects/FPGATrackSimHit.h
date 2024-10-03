@@ -241,8 +241,8 @@ protected:
     int m_stripHitMapinITKEDM = -1; // Strip hit map in ITk EDM format
 
     int m_roadID = 0;
-    
-    ClassDef(FPGATrackSimHit, 7);
+
+    ClassDefNV(FPGATrackSimHit, 8);
 };
 
 // Container of <FPGATrackSimHit const *>

@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimTowerInputHeader)
 
 FPGATrackSimTowerInputHeader::FPGATrackSimTowerInputHeader(int id, double e, double p, double de, double dp) :
   m_id(id),

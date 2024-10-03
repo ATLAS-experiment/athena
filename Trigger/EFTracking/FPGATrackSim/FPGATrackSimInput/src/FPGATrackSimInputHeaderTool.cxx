@@ -116,7 +116,9 @@ StatusCode FPGATrackSimInputHeaderTool::writeData(FPGATrackSimEventInputHeader* 
     ATH_MSG_DEBUG ("Wrote Event "<<m_event <<" in header event "<<m_eventHeader->event() );
     m_event++;
   }
-  m_eventHeader->Clear(); //clean the pointer
+
+  // Do we need this? TODO
+  //m_eventHeader->Clear(); //clean the pointer
 
   return StatusCode::SUCCESS;
 }

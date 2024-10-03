@@ -11,9 +11,10 @@
 #include <cmath>
 using namespace std;
 
-ClassImp(FPGATrackSimTrack)
 // first stage only
 
+// We need a destructor apparently?
+FPGATrackSimTrack::~FPGATrackSimTrack() {}
 
 std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 {

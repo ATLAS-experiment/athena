@@ -5,7 +5,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimMatchInfo.h"
 #include <iostream>
 
-ClassImp(FPGATrackSimMatchInfo)
 
 std::ostream& operator<<(std::ostream& s, const FPGATrackSimMatchInfo& h) {
 

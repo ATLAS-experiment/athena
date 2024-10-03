@@ -17,7 +17,7 @@
 class FPGATrackSimEventInfo;
 class FPGATrackSimOptionalEventInfo;
 
-class FPGATrackSimLogicalEventInputHeader : public TObject
+class FPGATrackSimLogicalEventInputHeader
 {
 public:
 
@@ -45,7 +45,7 @@ private:
     FPGATrackSimOptionalEventInfo              m_optional; // This is only available for 1st stage
     std::vector<FPGATrackSimTowerInputHeader>  m_towers;
 
-    ClassDef(FPGATrackSimLogicalEventInputHeader, 1)
+    ClassDefNV(FPGATrackSimLogicalEventInputHeader, 2)
 };
 
 

@@ -137,7 +137,7 @@ private:
   std::map< std::pair<int, int>, int > m_trackIdMap; //! Not saved on disk.
   // Used to optimize the findTrack function.
 
-  ClassDef(FPGATrackSimTrackStream, 1)
+  ClassDefNV(FPGATrackSimTrackStream, 2)
 };
 
 
