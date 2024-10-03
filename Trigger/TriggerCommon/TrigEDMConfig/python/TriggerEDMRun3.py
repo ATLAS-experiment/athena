@@ -113,30 +113,11 @@ HIJetVarsToKeep = JetVarsToKeep + ['HLT_HIClusters_DR8Assoc']
 HIJetVars = '.'.join(HIJetVarsToKeep)
 
 BTagOutput = ['jetLink','BTagTrackToJetAssociator','Muons',]
-BTagOutput_IPxD = [
-    'IP{x}D_TrackParticleLinks','IP{x}D_nTrks','IP{x}D_isDefaults',
-    'IP{x}D_cu','IP{x}D_bu','IP{x}D_bc',
-    'IP{x}D_pu','IP{x}D_pc','IP{x}D_pb',]
+BTagOutput_IPxD = []
 BTagOutput_IP2D = [f.format(x=2) for f in BTagOutput_IPxD]
 BTagOutput_IP3D = [f.format(x=3) for f in BTagOutput_IPxD]
-BTagOutput_SV1 = ['SV1_TrackParticleLinks','SV1_vertices','SV1_isDefaults','SV1_NGTinSvx','SV1_masssvx','SV1_N2Tpair',
-                  'SV1_efracsvx','SV1_deltaR','SV1_Lxy','SV1_L3d','SV1_significance3d','SV1_energyTrkInJet',
-                  'SV1_dstToMatLay','SV1_badTracksIP','SV1_normdist',]
-BTagOutput_JetFitter = [
-    'JetFitter_deltaeta','JetFitter_deltaphi','JetFitter_fittedPosition','JetFitter_JFvertices','JetFitter_nVTX',
-    'JetFitter_nSingleTracks','JetFitter_isDefaults','JetFitter_deltaR',
-    'JetFitterSecondaryVertex_isDefaults','JetFitterSecondaryVertex_nTracks','JetFitterSecondaryVertex_mass',
-    'JetFitterSecondaryVertex_energy','JetFitterSecondaryVertex_energyFraction','JetFitterSecondaryVertex_displacement3d',
-    'JetFitterSecondaryVertex_displacement2d',
-    'JetFitterSecondaryVertex_minimumTrackRelativeEta',
-    'JetFitterSecondaryVertex_maximumTrackRelativeEta',
-    'JetFitterSecondaryVertex_averageTrackRelativeEta',
-    'JetFitterSecondaryVertex_minimumAllJetTrackRelativeEta',
-    'JetFitterSecondaryVertex_maximumAllJetTrackRelativeEta',
-    'JetFitterSecondaryVertex_averageAllJetTrackRelativeEta',
-    'JetFitter_mass','JetFitter_energyFraction','JetFitter_significance3d','JetFitter_nTracksAtVtx','JetFitter_N2Tpair',
-    'JetFitter_fittedCov','JetFitter_tracksAtPVchi2','JetFitter_tracksAtPVndf','JetFitter_tracksAtPVlinks',
-    'JetFitter_massUncorr','JetFitter_chi2','JetFitter_ndof','JetFitter_dRFlightDir',]
+BTagOutput_SV1 = []
+BTagOutput_JetFitter = []
 BTagOutput_rnnip = ['rnnip_isDefaults','rnnip_pu','rnnip_pc','rnnip_pb','rnnip_ptau',]
 
 # we don't plan to keep all these, they are just for comparisons while tuning
@@ -1035,17 +1016,17 @@ TriggerHLTListRun3 = [
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.'+BTagJetVars, 'BS ESD AODFULL AODSLIM', 'Bjet'),
 
     # secvertex for b-jets
-    ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet', [InViews(BTagViewsEMTopo)]),
+    ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet'),
     ('xAOD::VertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   '', 'Bjet'),
 
-    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          '', 'Bjet'),
     ('xAOD::VertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   '', 'Bjet'),
 
     # btagvertex for b-jets
-    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet', [InViews(BTagViewsEMTopo)]),
+    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet'),
     ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   '', 'Bjet'),
 
-    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          '', 'Bjet'),
     ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   '', 'Bjet'),
 
     # bjet b-tagging

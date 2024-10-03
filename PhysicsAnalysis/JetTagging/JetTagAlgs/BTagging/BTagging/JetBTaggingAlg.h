@@ -61,7 +61,9 @@ class  JetBTaggingAlg:
     bool m_DoMuons = false;
 
     ToolHandle< IBTagTool > m_bTagTool;
-    ToolHandle< IBTagLightSecVertexing > m_bTagSecVtxTool;
+     ToolHandle< IBTagLightSecVertexing > m_bTagSecVtxTool {
+       this, "BTagSecVertexing", {}, "Light secondary vertexing tool"
+     };
 
 };
 

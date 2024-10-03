@@ -296,26 +296,27 @@ def BTagAlgsCfg(
         result.merge(NewVrtSecInclusiveAlgLooseCfg(inputFlags))
 
     # Add some high level information to the b-tagging object we created above
-    result.merge(
-        BTagJetAugmenterAlgCfg(
-            inputFlags,
-            BTagCollection=BTagCollection,
-            Associator=BTagTrackAssociator,
-            TrackCollection=trackCollection,
+    if VxSecVertexInfoNameList:
+        result.merge(
+            BTagJetAugmenterAlgCfg(
+                inputFlags,
+                BTagCollection=BTagCollection,
+                Associator=BTagTrackAssociator,
+                TrackCollection=trackCollection,
+            )
         )
-    )
 
-    # add also Flip tagger information
-    if inputFlags.BTagging.RunFlipTaggers:
-       result.merge(
-           BTagJetAugmenterAlgCfg(
-               inputFlags,
-               BTagCollection=BTagCollection,
-               Associator=BTagTrackAssociator,
-               TrackCollection=trackCollection,
-               doFlipTagger=True,
-           )
-       )
+        # add also Flip tagger information
+        if inputFlags.BTagging.RunFlipTaggers:
+            result.merge(
+                BTagJetAugmenterAlgCfg(
+                    inputFlags,
+                    BTagCollection=BTagCollection,
+                    Associator=BTagTrackAssociator,
+                    TrackCollection=trackCollection,
+                    doFlipTagger=True,
+                )
+            )
 
     # add muon info
     if muons:
