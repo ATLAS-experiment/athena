@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  *
  * @author RD Schaffer  <R.D.Schaffer@cern.ch>
  *
- * $Id: LArConditionsContainerBase.cxx,v 1.14 2008-10-03 17:46:39 schaffer Exp $
  */
 
 #include "LArRawConditions/LArConditionsContainerBase.h"
@@ -22,12 +21,9 @@
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 // Gaudi/Athena
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/IService.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
-#include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/errorcheck.h"
 #include <atomic>
 
 LArConditionsContainerBase::LArConditionsContainerBase( )
@@ -55,70 +51,36 @@ LArConditionsContainerBase::~LArConditionsContainerBase()
 StatusCode 
 LArConditionsContainerBase::initializeBase()
 {
-    MsgStream log(Athena::getMessageSvc(), "LArConditionsContainerBase");
-    log << MSG::DEBUG << "initializeBase "<< endmsg;
-
-    if (m_isInitialized) {
-	log << MSG::DEBUG << "already initialized - returning "<< endmsg;
-	return (StatusCode::SUCCESS);
-    }
- 
     //Get LArOnlineID....
-    ISvcLocator* svcLoc = Gaudi::svcLocator( );
-    StoreGateSvc* detStore;
-    StatusCode sc = svcLoc->service("DetectorStore",detStore);
-    if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot get DetectorStore!" << endmsg;
-	return sc;
-    }
+    ServiceHandle<StoreGateSvc> detStore("DetectorStore", "LArConditionsContainerBase");
+    CHECK( detStore.isValid() );
 
     if (m_groupType == LArConditionsContainerBase::SuperCells) {
       //Dealing with supercells, need supercell identifier helper
       const LArOnline_SuperCellID* onlID = nullptr;
-      sc = detStore->retrieve(onlID,"LArOnline_SuperCellID");
-      if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot get LArOnline_SuperCellID!" << endmsg;
-	return sc;
-      }
+      CHECK( detStore->retrieve(onlID,"LArOnline_SuperCellID") );
       m_onlineHelper=onlID;//cast to base-class
 
       const CaloCell_SuperCell_ID* oflID = nullptr;
-      sc = detStore->retrieve(oflID,"CaloCell_SuperCell_ID");
-      if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot get CaloCell_SuperCell_ID!" << endmsg;
-	return sc;
-      }
+      CHECK( detStore->retrieve(oflID,"CaloCell_SuperCell_ID") );
       m_offlineHelper=oflID; //cast to base-class
     }
     else {
       //Regular readout
       const LArOnlineID* onlID = nullptr;
-      sc = detStore->retrieve(onlID,"LArOnlineID");
-      if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot get LArOnlineID!" << endmsg;
-	return sc;
-      }
+      CHECK( detStore->retrieve(onlID,"LArOnlineID") );
       m_onlineHelper=onlID;//cast to base-class
 
       const CaloCell_ID* oflID = nullptr;
-      sc = detStore->retrieve(oflID,"CaloCell_ID");
-      if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot get CaloCell_ID!" << endmsg;
-	return sc;
-      }
+      CHECK( detStore->retrieve(oflID,"CaloCell_ID") );
       m_offlineHelper=oflID; //cast to base-class
     }
 
     // initialize the grouping
-    sc = initGrouping();
-    if (sc.isFailure()) {
-	log << MSG::ERROR << "Cannot initialize the Grouping" << endmsg;
-	return sc;
-    }
+    CHECK( initGrouping() );
 
     // Set initialized to true
     m_isInitialized = true;
-    log << MSG::DEBUG << "end initializeBase " << endmsg;
 
     return (StatusCode::SUCCESS);
 }

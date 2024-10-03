@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawConditions/LArCalibParams.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/errorcheck.h"
 #include "LArIdentifier/LArOnlineID.h"
 
 LArCalibParams::LArCalibParams():
@@ -17,30 +16,15 @@ LArCalibParams::LArCalibParams():
 StatusCode LArCalibParams::initialize() 
 {
   //Get online Helper via DetectorStore
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StoreGateSvc* detStore;
-  MsgStream log(Athena::getMessageSvc(), "LArCalibParams");
-  StatusCode sc = svcLoc->service( "DetectorStore",detStore);
-  if (sc.isSuccess()) {
-    sc=detStore->retrieve(m_onlineHelper, "LArOnlineID");
-    if (sc.isFailure()) {
-      log << MSG::ERROR << "LArCalibParams: Can't get LArOnlineID" << endmsg;
-      return (StatusCode::FAILURE);
-    }
-  }
-  else {
-      log << MSG::ERROR << "LArCalibParams: Can't get DetectorStore" << endmsg;
-      return (StatusCode::FAILURE);
-  }
-  
+  ServiceHandle<StoreGateSvc> detStore("DetectorStore", "LArCalibParams");
+  CHECK_WITH_CONTEXT( detStore.isValid(), "LArCalibParams" );
+  CHECK_WITH_CONTEXT( detStore->retrieve(m_onlineHelper, "LArOnlineID"), "LArCalibParams" );
   return (StatusCode::SUCCESS);
-
 }  
 
 
 LArCalibParams::~LArCalibParams()
 {
-  //std::cout << "Destructor of LArCalibParams" << std::endl;
 }
 
 void LArCalibParams::set(const HWIdentifier CalibModuleID, const unsigned nTrigger,
