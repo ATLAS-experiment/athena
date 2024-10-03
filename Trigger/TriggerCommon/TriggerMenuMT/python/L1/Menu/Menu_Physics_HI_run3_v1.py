@@ -11,13 +11,7 @@ def defineMenu():
 
     L1MenuFlags.items = RequiredL1Items + [
 
-        #legacy chains used in low-mu menu
-        'L1_EM10','L1_EM12','L1_EM15','L1_EM10VH',
-        'L1_J12','L1_J25','L1_J30','L1_J40','L1_J50','L1_J75','L1_J85','L1_J100',
-        'L1_J15p31ETA49','L1_J20p31ETA49',
-        'L1_TE3','L1_TE5','L1_TE10','L1_TE20','L1_TE50','L1_TE100',
-        'L1_XE55',
-        'L1_MU3V_J20','L1_MU3V_J30',
+        
 
         ##
         # single EM
@@ -53,10 +47,6 @@ def defineMenu():
         'L1_MU3V_jJ60',        
 
         'L1_eTAU12_EMPTY', 'L1_eTAU80', 
-
-        # legacy single jet - in P1 chains
-        'L1_J15','L1_J20','L1_J400',
-        'L1_J75p31ETA49',
 
         # single jet 
         # new calo
@@ -155,9 +145,6 @@ def defineMenu():
         'L1_ZDC_1XOR5',     #comb2
         'L1_5ZDC_A_5ZDC_C', #comb3
         
-        #ZDC and legacy calo - in P1 chains
-        'L1_VZDC_A_VZDC_C_TE5_VTE200','L1_ZDC_XOR_TE5_VTE200',
-        'L1_1ZDC_NZDC_TE5_VTE200','L1_5ZDC_A_5ZDC_C_TE5_VTE200',
         #ZDC and phase-1 calo
         'L1_1ZDC_A_1ZDC_C_VjTE200', 'L1_ZDC_1XOR5_VjTE200',
         'L1_ZDC_XOR_VjTE200', 'L1_VZDC_A_VZDC_C_VjTE200',
@@ -300,7 +287,7 @@ def defineMenu():
         # TOPO items
         #--------------------------------
 
-        'L1_LAR-ZEE', 'L1_LAR-ZEE-eEM',
+        'L1_LAR-ZEE-eEM',
         #ATR-30145
         'L1_JPSI-1M5-eEM9',
         #ATR-29784
