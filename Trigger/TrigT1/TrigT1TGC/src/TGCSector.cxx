@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSector.h"
@@ -21,13 +21,10 @@
 #include "TrigT1TGC/TGCWireDoubletSB.h"
 #include "TrigT1TGC/TGCWireTripletSB.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 
 #include <iostream>
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
 
 namespace LVL1TGCTrigger {
 
@@ -53,12 +50,7 @@ int TGCSector::distributeSignal(const TGCASDOut* ASDOut)
   }
 
   if (tgcArgs()->MSGLEVEL() <= MSG::DEBUG) {
-    IMessageSvc* msgSvc = 0;
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) {
-      return -1;
-    };
-    MsgStream log(msgSvc, "LVL1TGCTrigger::TGCSector");
+    MsgStream log(Athena::getMessageSvc(), "LVL1TGCTrigger::TGCSector");
     if (!notFound) {
       log << MSG::DEBUG
 	    << "signalType= " << ((signalType == WIRE) ? "Wire" : "Strip")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/BigWheelCoincidenceLUT.h"
@@ -11,14 +11,10 @@
 
 #include "TrigT1TGC/TGCNumbering.h"
 #include "TrigT1TGC/TGCDatabaseManager.h"
-#include "PathResolver/PathResolver.h"
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
-
+#include "AthenaKernel/getMessageSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-
+#include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadCondHandle.h"
 
 namespace LVL1TGC {
@@ -71,13 +67,8 @@ BigWheelCoincidenceLUT::BigWheelCoincidenceLUT(LVL1TGCTrigger::TGCArguments* tgc
 : m_verName(version),
   m_tgcArgs(tgcargs),
   m_readCondKey(readKey) {
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) {
-    return;
-  }
-  MsgStream log(msgSvc, "LVL1TGC::BigWheelCoincidenceLUT");
 
+  MsgStream log(Athena::getMessageSvc(), "LVL1TGC::BigWheelCoincidenceLUT");
   log << MSG::INFO
       << " BigWheel LUT version of " << m_verName << " is selected." << endmsg;
 
@@ -102,12 +93,7 @@ bool BigWheelCoincidenceLUT::readMap()
     {  "0", "1", "2", "3", "4", "5", "6", "7"};
   const std::string coincidenceTypeName[N_COIN_TYPE] = {"HH", "HL", "LH", "LL"};
 
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) {
-    return false;
-  }
-  MsgStream log(msgSvc, "LVL1TGC::BigWheelCoincidenceLUT");
+  MsgStream log(Athena::getMessageSvc(), "LVL1TGC::BigWheelCoincidenceLUT");
 
   // Automatic identification of octant-symmetry or full-CW from version
   std::string tryname = PathResolver::FindCalibDirectory("dev")+"/TrigT1TGC/BW/cm_a0aHH_Octant_" + m_verName + ".db";
