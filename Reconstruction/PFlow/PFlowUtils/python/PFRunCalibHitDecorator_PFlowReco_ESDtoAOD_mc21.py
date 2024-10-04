@@ -38,6 +38,6 @@ if __name__=="__main__":
     from PFlowUtils.PFlowCalibHitDecoratorCfg import PFlowCalibHitDecoratorCfg
     cfg.merge(PFlowCalibHitDecoratorCfg(cfgFlags))
 
-    cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"
+    cfg.getEventAlgo("PFlowCalibPFODecoratorAlgorithm").PFOWriteDecorHandleKey_NLeadingTruthParticles="GlobalNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleUniqueIDEnergyPairs"
 
     cfg.run()

@@ -34,8 +34,8 @@ if __name__=="__main__":
     #Rename existing decorations in input file, such that we can create new ones.
     from SGComps.AddressRemappingConfig import InputRenameCfg
     remaps = [
-        InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters.calclus_NLeadingTruthParticleBarcodeEnergyPairs','CaloCalTopoClusters.calclus_NLeadingTruthParticleBarcodeEnergyPairs_OLD'),
-        InputRenameCfg ('xAOD::FlowElementContainer', 'JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs', 'JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs_OLD')
+        InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters.calclus_NLeadingTruthParticleUniqueIDEnergyPairs','CaloCalTopoClusters.calclus_NLeadingTruthParticleUniqueIDEnergyPairs_OLD'),
+        InputRenameCfg ('xAOD::FlowElementContainer', 'JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleUniqueIDEnergyPairs', 'JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleUniqueIDEnergyPairs_OLD')
     ]
 
     for mapping in remaps:

@@ -43,7 +43,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.xtalkEtaEratio", 4.)
     ccf.addFlag("Calo.TopoCluster.xtalk2DEratio", 4.)
     ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
-    ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleBarcodeEnergyPairs")
+    ccf.addFlag("Calo.TopoCluster.CalibrationHitDecorationName","calclus_NLeadingTruthParticleUniqueIDEnergyPairs")
     ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)
     ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
     ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)
