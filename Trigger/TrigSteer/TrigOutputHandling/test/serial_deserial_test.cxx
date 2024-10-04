@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 
@@ -54,11 +54,11 @@ int main() {
   assert(pSvcLoc);
   MsgStream log(Athena::getMessageSvc(), "serial_deserial_test");
 
-  StoreGateSvc* pStore = nullptr;
-  VALUE( pSvcLoc->service("StoreGateSvc", pStore, true).isSuccess() ) EXPECTED ( true );
+  SmartIF<StoreGateSvc> pStore{pSvcLoc->service("StoreGateSvc")};
+  VALUE( pStore.isValid() ) EXPECTED ( true );
 
-  IToolSvc * toolSvc = nullptr;
-  VALUE( pSvcLoc->service("ToolSvc", toolSvc, true) ) EXPECTED ( StatusCode::SUCCESS );
+  SmartIF<IToolSvc> toolSvc{pSvcLoc->service("ToolSvc")};
+  VALUE( toolSvc.isValid() ) EXPECTED ( true );
 
   IAlgTool* algTool{nullptr};
   VALUE( toolSvc->retrieveTool("TriggerEDMSerialiserTool/serialiser", algTool) ) EXPECTED( StatusCode::SUCCESS );

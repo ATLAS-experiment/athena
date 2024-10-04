@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -25,8 +25,8 @@ int main ATLAS_NOT_THREAD_SAFE () {
   // initialize Gaudi, SG
   ISvcLocator* pSvcLoc{nullptr};
   assert( Athena_test::initGaudi(pSvcLoc) );
-  StoreGateSvc* pSG(0);
-  assert( pSvcLoc->service("StoreGateSvc", pSG, true).isSuccess() );
+  SmartIF<StoreGateSvc> pSG{pSvcLoc->service("StoreGateSvc")};
+  assert( pSG );
 
   // Create a context
   IProxyDict* xdict = &*pSG;

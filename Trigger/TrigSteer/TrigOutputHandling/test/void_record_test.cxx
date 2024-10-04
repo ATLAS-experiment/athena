@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include "TestTools/expect.h"
@@ -23,9 +23,9 @@ int main() {
   }
   assert(pSvcLoc);
   MsgStream log(Athena::getMessageSvc(), "void_record_test");
-  
-  StoreGateSvc* pStore{nullptr};
-  if( pSvcLoc->service("StoreGateSvc", pStore, true).isSuccess() ) {
+
+  SmartIF<StoreGateSvc> pStore{pSvcLoc->service("StoreGateSvc")};
+  if( pStore ) {
     log << MSG::INFO << "SG pointer: " << pStore << endmsg;
   } else {
     log << MSG::ERROR << "can't obtain SG ptr" << endmsg;
