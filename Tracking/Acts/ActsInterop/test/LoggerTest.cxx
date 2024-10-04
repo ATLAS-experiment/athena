@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #define BOOST_TEST_MODULE ActsLoggerTest
@@ -10,10 +10,9 @@
 #include <memory>
 #include <stdexcept>
 
-#include "AthenaBaseComps/AthMessaging.h"
-#include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
+#include "GaudiKernel/SmartIF.h"
 #include "TestTools/initGaudi.h"
 
 #include "ActsInterop/Logger.h"
@@ -42,10 +41,11 @@ BOOST_AUTO_TEST_CASE( loglevel_conversion )
 BOOST_AUTO_TEST_CASE( loglevel_propagation ) 
 {
   ISvcLocator* svcLoc = nullptr;
-  IMessageSvc* msgSvc = nullptr;
-  if (!Athena_test::initGaudi(svcLoc)) 
+  if (!Athena_test::initGaudi(svcLoc))
     throw std::runtime_error("Failure in initializing Gaudi");
-  if (svcLoc->service("MessageSvc", msgSvc).isFailure()) 
+
+  SmartIF<IMessageSvc> msgSvc(svcLoc->service("MessageSvc"));
+  if (!msgSvc)
     throw std::runtime_error("Failure in retrieving MessageSvc");
 
   for (MSG::Level lvl : ActsTrk::Test::gaudiLogLevels) {
