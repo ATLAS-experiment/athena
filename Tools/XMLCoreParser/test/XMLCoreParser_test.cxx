@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE(XMLCoreParserTest)
     BOOST_TEST(m.get_type() ==  CoreParser::DOMNode::NodeType::DOCUMENT_NODE);
   }
   
-  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition, *utf::expected_failures(2)){
+  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition, *utf::expected_failures(1)){
     XMLCoreParser s;
     const std::string noFile= "Inexistent.xml";
     BOOST_CHECK_THROW( [[maybe_unused]] XMLCoreNode n = s.parse(noFile), std::runtime_error);
@@ -50,6 +50,8 @@ BOOST_AUTO_TEST_SUITE(XMLCoreParserTest)
     BOOST_TEST_MESSAGE("Filename: "+ file);
     BOOST_CHECK_THROW( [[maybe_unused]] XMLCoreNode n = p.parse(file), std::runtime_error);
     //the following should not work, as the xml file is ill-formed
+    //but expat is a *stream* parser, so might not fail until it explicitly tries
+    //to parse the ill-formed element
     XMLCoreNode n{p.parse(file)};
     const auto & m = n.get_node();
     BOOST_TEST(m.get_type() ==  CoreParser::DOMNode::NodeType::DOCUMENT_NODE);

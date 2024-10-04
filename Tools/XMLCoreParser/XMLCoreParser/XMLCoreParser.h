@@ -12,36 +12,30 @@
 class XMLCoreParser;
 class XMLCoreParserImpl;
 
-namespace CoreParser
-{
+namespace CoreParser{
   class DOMNode;
 }
 
-class XMLCoreNode
-{
+class XMLCoreNode{
 public:
   XMLCoreNode (const CoreParser::DOMNode* node)
     : m_node (node),
-      m_owns (false)
-  {
+      m_owns (false){
   }
 
   XMLCoreNode (std::unique_ptr<CoreParser::DOMNode> node)
     : m_node (node.release()),
-      m_owns (true)
-  {
+      m_owns (true){
   }
 
   XMLCoreNode (const XMLCoreNode& other)
     : m_node (other.m_node),
-      m_owns (false)
-  {
+      m_owns (false){
   }
 
   XMLCoreNode (XMLCoreNode&& other)
     : m_node (other.m_node),
-      m_owns (other.m_owns)
-  {
+      m_owns (other.m_owns){
     other.m_node = nullptr;
     other.m_owns = false;
   }
@@ -52,23 +46,20 @@ public:
 
   ~XMLCoreNode();
     
-  operator const CoreParser::DOMNode& () const
-      {
+  operator const CoreParser::DOMNode& () const{
         return (*m_node);
       }
 
-  const CoreParser::DOMNode& get_node () const
-      {
+  const CoreParser::DOMNode& get_node () const{
         return (*m_node);
       }
 
 private:
-  const CoreParser::DOMNode* m_node;
-  bool m_owns;
+  const CoreParser::DOMNode* m_node{};
+  bool m_owns{};
 };
 
-class XMLCoreFactory 
-{ 
+class XMLCoreFactory { 
 public: 
    
   virtual ~XMLCoreFactory(); 
@@ -103,17 +94,9 @@ protected:
   std::string m_xmlelementname; 
 }; 
 
-class XMLCoreParser 
-{ 
+class XMLCoreParser { 
 public: 
- 
-  XMLCoreParser (); 
-  ~XMLCoreParser (); 
-  void set_validation_scheme (const char* parm); 
-  void set_do_namespaces (); 
-  void set_do_schema (); 
-  void set_validation_schema_full_checking (); 
-  void set_create_entity_reference_nodes (); 
+
   XMLCoreNode parse (const std::string& file_name); 
   void visit (const std::string& file_name); 
  
@@ -133,7 +116,6 @@ private:
   void visit (const XMLCoreNode& node);
   void terminate ();
   XMLCoreFactory* find_factory (const std::string& name);
-
 
   typedef std::map <std::string, std::unique_ptr<XMLCoreFactory> > FactoryMap; 
   FactoryMap m_factories;
