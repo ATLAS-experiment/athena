@@ -207,7 +207,11 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
             return Error;
          }
          for( auto& dsc : m_fieldDescs ) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+            dsc.view_p = std::make_unique<RNTupleView<void>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
+#else
             dsc.view_p = std::make_unique<RNTupleView<void,true>>( m_ntupleReader->GetView<void>(dsc.fieldname, nullptr) );
+#endif
             if( dsc.hasAuxStore() ) {
                // Attach RNTuple Reader (owned by the DB)
                const std::string type_name = dsc.view_p->GetField().GetTypeName();
