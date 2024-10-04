@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,12 +35,12 @@ namespace SCT_Monitoring {
       // nop
     }
 
-    std::string
+    const std::string&
       layer() const {
       return m_layerStr;
     }
 
-    std::string
+    const std::string&
       side() const {
       return m_sideStr;
     }

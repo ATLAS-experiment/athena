@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -79,7 +79,7 @@ class VertexNode : public Br {
 		void addNeutralTrack(double px, double py, double pz, unsigned long color);
 
 		//inline methods
-		std::vector<VertexNode*> getDaughters() { return m_daughters; }
+		const std::vector<VertexNode*>& getDaughters() { return m_daughters; }
 
 	private:
 		void init();
