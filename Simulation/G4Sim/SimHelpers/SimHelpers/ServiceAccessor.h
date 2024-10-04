@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ServiceAccessor_H
@@ -15,10 +15,8 @@ inline INTupleSvc* ntupleSvc()
 {
   auto findNtupleSvc = []()
     {
-      INTupleSvc* nS = nullptr;
-      ISvcLocator* svcLocator = Gaudi::svcLocator();
-      StatusCode status = svcLocator->service("NTupleSvc",nS);
-      if (status.isFailure())
+      SmartIF<INTupleSvc> nS{ Gaudi::svcLocator()->service("NTupleSvc") };
+      if (!nS)
         std::cout<<" ntupleSvc(); could not access NTupleSvc"<<std::endl;
       return nS;
     };
