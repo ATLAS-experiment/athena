@@ -14,6 +14,7 @@
 #include "../LArCalibDelayMonAlg.h"
 #include "../LArSuperCellMonAlg.h"
 #include "../LArRawChannelMonAlg.h"
+#include "../LArSCvsRawChannelMonAlg.h"
 
 DECLARE_COMPONENT(LArCollisionTimeMonAlg)
 DECLARE_COMPONENT(LArAffectedRegionsAlg)
@@ -31,3 +32,4 @@ DECLARE_COMPONENT(LArCoherentNoisefractionMonAlg)
 DECLARE_COMPONENT(LArCalibDelayMonAlg)
 DECLARE_COMPONENT(LArSuperCellMonAlg)
 DECLARE_COMPONENT(LArRawChannelMonAlg)
+DECLARE_COMPONENT(LArSCvsRawChannelMonAlg)
