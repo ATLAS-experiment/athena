@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,8 +18,6 @@
 #include "EventTPCnv/EventInfoCnv_p3.h"
 #include "EventTPCnv/EventInfoCnv_p4.h"
 
-#include "AthenaKernel/IEvtIdModifierSvc.h"
-
 static const EventInfoCnv_p4   TPconverter_p4;
 static const EventInfoCnv_p3   TPconverter_p3;
 static const EventInfoCnv_p2   TPconverter_p2;
@@ -35,16 +33,9 @@ EventInfoCnv::EventInfoCnv(ISvcLocator* svcloc)
   m_evtsPerLumiBlock(0),
   m_lbEvtCounter(0),
   m_timeStamp(0),
-  m_timeStampInterval(0),
-  m_evtIdModSvc(0)
+  m_timeStampInterval(0)
 {
-  IService *svc = 0;
-  bool createif = false;
-  svcloc->getService("EvtIdModifierSvc", svc, createif).ignore();
-  if (svc) {
-    m_evtIdModSvc = dynamic_cast<IEvtIdModifierSvc*>(svc);
-  }
-
+  m_evtIdModSvc = svcloc->service("EvtIdModifierSvc", /*createif*/false);
 }
 
 EventInfo_PERS* EventInfoCnv::createPersistent(EventInfo* transObj) {
@@ -151,27 +142,26 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
 
         // Get name of event selector from the application manager to
         // make sure we get the one for MC signal events
-        IProperty* propertyServer(0); 
-        StatusCode sc = serviceLocator()->service("ApplicationMgr", propertyServer); 
-        if (sc != StatusCode::SUCCESS ) {
+        SmartIF<IProperty> appMgr{serviceLocator()->service("ApplicationMgr")};
+        if (!appMgr) {
             log << MSG::ERROR << "massageEventInfo: Cannot get ApplicationMgr " << endmsg; 
             throw std::runtime_error("Cannot get ApplicationMgr");
         }
         StringProperty property("EvtSel", "");
-        sc = propertyServer->getProperty(&property);
+        StatusCode sc = appMgr->getProperty(&property);
         if (!sc.isSuccess()) {
             log << MSG::ERROR << "unable to get EvtSel: found " << property.value() << endmsg;
             throw std::runtime_error("Cannot get property EvtSel from the ApplicationMgr");
         }
         // Get EventSelector for ApplicationMgr
         std::string eventSelector = property.value();
-        sc = serviceLocator()->service(eventSelector, propertyServer); 
-        if (sc != StatusCode::SUCCESS ) {
+        SmartIF<IProperty> evtSel{serviceLocator()->service(eventSelector)};
+        if (!evtSel) {
             log << MSG::ERROR << "massageEventInfo: Cannot get EventSelector " << eventSelector << endmsg; 
             throw std::runtime_error("Cannot get EventSelector");
         }
         BooleanProperty overrideRunNumber = IntegerProperty("OverrideRunNumberFromInput", false);
-        sc = propertyServer->getProperty(&overrideRunNumber);
+        sc = evtSel->getProperty(&overrideRunNumber);
         if (!sc.isSuccess()) {
             // Not all EventSelectors have this property, so we must be tolerant
             ATH_MSG_INFO("massageEventInfo: unable to get OverrideRunNumberFromInput property from EventSelector ");
@@ -180,7 +170,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
         m_overrideRunNumber = overrideRunNumber.value();
         if (m_overrideRunNumber) {
             IntegerProperty runNumber = IntegerProperty("RunNumber", 0);
-            sc = propertyServer->getProperty(&runNumber);
+            sc = evtSel->getProperty(&runNumber);
             if (!sc.isSuccess()) {
                 log << MSG::ERROR << "massageEventInfo: unable to get RunNumber from EventSelector: found " 
                     << runNumber.value()
@@ -193,7 +183,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                     << " obtained from " << eventSelector << endmsg;
             }
             IntegerProperty lumiBlockNumber = IntegerProperty("FirstLB", 0);
-            sc = propertyServer->getProperty(&lumiBlockNumber);
+            sc = evtSel->getProperty(&lumiBlockNumber);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get FirstLB from EventSelector. Using "
                     << m_lumiBlockNumber << endmsg;
@@ -204,7 +194,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                     << " obtained from " << eventSelector << endmsg;
             }
             IntegerProperty evtsPerLumiBlock = IntegerProperty("EventsPerLB", 0);
-            sc = propertyServer->getProperty(&evtsPerLumiBlock);
+            sc = evtSel->getProperty(&evtsPerLumiBlock);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get EventsPerLB from EventSelector. Using "
                     << m_evtsPerLumiBlock << endmsg;
@@ -215,7 +205,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                     << " obtained from " << eventSelector << endmsg;
             }
             IntegerProperty timeStamp = IntegerProperty("InitialTimeStamp", 0);
-            sc = propertyServer->getProperty(&timeStamp);
+            sc = evtSel->getProperty(&timeStamp);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get InitialTimeStamp from EventSelector. Using "
                     << m_timeStamp << endmsg;
@@ -226,7 +216,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
                     << " obtained from " << eventSelector << endmsg;
             }
             IntegerProperty timeStampInterval = IntegerProperty("TimeStampInterval", 0);
-            sc = propertyServer->getProperty(&timeStampInterval);
+            sc = evtSel->getProperty(&timeStampInterval);
             if (!sc.isSuccess()) {
                 log << MSG::INFO << "massageEventInfo: unable to get TimeStampInterval from EventSelector. Using "
                     << m_timeStampInterval << endmsg;
