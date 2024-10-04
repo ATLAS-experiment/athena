@@ -24,7 +24,7 @@ def TrigTRTMonCfg(flags):
 
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     monAccess = getHLTMonitoringAccess(flags)
-    chains = getMinBiasChains(monAccess, 'HLT_noalg_L1TRT_FILLED|HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20')
+    chains = getMinBiasChains(monAccess, 'HLT_noalg_L1TRT_FILLED|HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VjTE20|HLT_noalg_L1TRT_VjTE50')
 
     ref_chains = ['HLT_mb_sptrk_hi_FgapC5_L1VjTE200', 'HLT_mb_sptrk_hi_FgapA5_L1VjTE200',
         'HLT_noalg_L1RD0_FILLED', 'HLT_mb_sptrk_L1VTE50',
