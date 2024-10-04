@@ -82,9 +82,9 @@ namespace MC
   /// @brief Identify a special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());
-    if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
+    if (apid == NU_E || apid == NU_MU || apid == NU_TAU) return true; //< neutrinos
     if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
-    if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
+    if (apid == GRAVITON || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
     if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
     return false;
   }
