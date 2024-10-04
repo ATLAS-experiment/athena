@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCPatchPanel.h"
@@ -12,20 +12,14 @@
 #include <iostream>
 #include <string>
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 
 namespace LVL1TGCTrigger {
 
 void TGCPatchPanel::showResult() const
 {
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) return ;
-  MsgStream log(msgSvc, "LVL1TGCTrigger::TGCPatchPanel");
+  MsgStream log(Athena::getMessageSvc(), "LVL1TGCTrigger::TGCPatchPanel");
 
   int i,j,k;
   if(m_hasASDOut){
