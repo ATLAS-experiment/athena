@@ -19,6 +19,8 @@ TrackingVariables = ["particleHypothesis.vx.vy.vz",
                      "leptonID.trackFitter.trackLink.trackProperties.AssoClustersUFO",
                      "ftagTruthOriginLabel.ftagTruthTypeLabel.ftagTruthVertexIndex.ftagTruthParentBarcode.ftagTruthBarcode"]
 
+TrackingVariablesHGTD = ["HGTD_cluster_time", "HGTD_extrap_x", "HGTD_extrap_y"]
+
 FELinks = ["Electrons.neutralGlobalFELinks.chargedGlobalFELinks",
            "Photons.neutralGlobalFELinks",
            "Muons.neutralGlobalFELinks.chargedGlobalFELinks"]

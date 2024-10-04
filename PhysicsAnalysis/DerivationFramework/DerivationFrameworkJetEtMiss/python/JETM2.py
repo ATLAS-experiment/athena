@@ -6,7 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
 
 # Main algorithm config
 def JETM2KernelCfg(flags, name='JETM2Kernel', **kwargs):
@@ -135,13 +135,16 @@ def JETM2Cfg(flags):
                                         "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
     # Low-level inputs
-    from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables, FELinks
+    from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables,  TrackingVariablesHGTD, FELinks
     JETM2SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFO"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFOCSSK"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["InDetTrackParticles"] + TrackingVariables)]
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        JETM2SlimmingHelper.ExtraVariables += [".".join(["InDetTrackParticles"] + TrackingVariablesHGTD)]
+
     # Links of physics objects to FlowElements
     JETM2SlimmingHelper.ExtraVariables += FELinks
 
