@@ -156,7 +156,11 @@ namespace RootAuxDynIO
             if( auxid != SG::null_auxid ) {
                m_auxids.insert(auxid);
                m_fieldInfos[auxid].fieldName = field_name;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+               m_fieldInfos[auxid].view_p = std::make_unique<RNTupleView<void>>(
+#else
                m_fieldInfos[auxid].view_p = std::make_unique<RNTupleView<void,true>>(
+#endif
                   m_ntupleReader->GetView<void>(field_name, nullptr) );
             } else {
                errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RNTupleAuxDynReader::init");

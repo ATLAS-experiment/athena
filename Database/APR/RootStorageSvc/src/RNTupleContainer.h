@@ -51,7 +51,11 @@ class RNTupleContainer : public DbContainerImp
   struct FieldDesc : public DbColumn
   {
     std::string fieldname;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 33, 0 )
+    std::unique_ptr< RNTupleView<void> > view_p;  // pointer because lack of default xtor
+#else
     std::unique_ptr< RNTupleView<void, true> > view_p;  // pointer because lack of default xtor
+#endif
     std::string sgkey;
     TClass*     clazz = nullptr;
     void*       object = nullptr;
