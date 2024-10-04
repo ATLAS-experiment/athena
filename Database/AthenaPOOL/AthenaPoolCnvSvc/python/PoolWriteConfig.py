@@ -67,6 +67,7 @@ def PoolWriteCfg(flags):
     # Defaults for common formats
     # Stream : [compression algorithm, compression level, auto flush, split level, dyn split level]
     defaults = {
+        "EVNT"           : [2, 1,  500, 0, 0],
         "EVNT_TR"        : [2, 1,    1, 0, 0],
         "HITS"           : [2, 1,   10, 0, 0],
         "RDO"            : [2, 1,   10, 0, 0],
