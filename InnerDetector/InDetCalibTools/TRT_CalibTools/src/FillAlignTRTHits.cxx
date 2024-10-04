@@ -38,7 +38,6 @@ PURPOSE: Tool
 FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& name, const IInterface* parent) :
 	AthAlgTool(type, name, parent),
 	m_DetID(nullptr), m_TRTID(nullptr),
-	m_updator(nullptr),
 	m_maxDistance(2.8),
 	m_maxTimeResidual(150),
 	m_minTimebinsOverThreshold(2),
