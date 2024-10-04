@@ -67,6 +67,7 @@ namespace ActsTrk {
     SG::WriteHandleKey< ActsTrk::BoundTrackParametersContainer > m_actsTrackParamsKey {this, "OutputEstimatedTrackParameters", "", ""};
 
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
+    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
     bool skipSpacePoint(float x, float y, float z) const;
 
   public:

@@ -26,6 +26,8 @@ def ActsStripSpacePointToolCfg(flags,
                                **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("useTopSp", flags.Acts.reverseTrackFindingForStrips)
+
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )

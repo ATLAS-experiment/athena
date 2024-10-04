@@ -62,6 +62,8 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
+    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false,
+        "Use top SP. By default, use bottom SP."};
   };
   
 } // namespace

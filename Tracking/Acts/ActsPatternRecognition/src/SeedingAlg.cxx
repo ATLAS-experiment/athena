@@ -193,7 +193,10 @@ namespace ActsTrk {
     auto retrieveSurfaceFunction = 
       [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
       { 
-	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(seed.sp().front()->elementIdList()[0]);
+	const xAOD::SpacePoint* sp = this->m_useTopSp ? seed.sp().back() : seed.sp().front();
+	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(
+	    this->m_useTopSp ? sp->elementIdList().back()
+	                     : sp->elementIdList().front());
 	const Trk::Surface& atlas_surface = Element->surface();
 	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface); 
       };
