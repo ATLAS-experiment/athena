@@ -527,7 +527,7 @@ namespace TrigCompositeUtils {
     const std::string& linkName,
     sgkey_t& key,
     uint32_t& clid,
-    uint16_t& index,
+    Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning = false);
 
@@ -539,7 +539,7 @@ namespace TrigCompositeUtils {
     const std::string& linkName,
     sgkey_t& key,
     uint32_t& clid,
-    uint16_t& index,
+    Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning = false);
 
@@ -562,7 +562,7 @@ namespace TrigCompositeUtils {
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec,
     std::vector<uint32_t>& clidVec,
-    std::vector<uint16_t>& indexVec,
+    std::vector<Decision::index_type>& indexVec,
     std::vector<const Decision*>& sourceVec,
     const unsigned int behaviour = TrigDefs::allFeaturesOfType, 
     std::set<const Decision*>* fullyExploredFrom = nullptr);
@@ -574,7 +574,7 @@ namespace TrigCompositeUtils {
     const std::string& linkName,
     std::vector<sgkey_t>& key,
     std::vector<uint32_t>& clid,
-    std::vector<uint16_t>& index,
+    std::vector<Decision::index_type>& index,
     std::vector<const Decision*>& sourceVec,
     const unsigned int behaviour = TrigDefs::allFeaturesOfType, 
     std::set<const Decision*>* fullyExploredFrom = nullptr);
@@ -587,7 +587,7 @@ namespace TrigCompositeUtils {
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec, 
     std::vector<uint32_t>& clidVec,
-    std::vector<uint16_t>& indexVec, 
+    std::vector<Decision::index_type>& indexVec, 
     std::vector<const Decision*>& sourceVec);
 
   /**

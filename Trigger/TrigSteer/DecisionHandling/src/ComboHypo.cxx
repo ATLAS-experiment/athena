@@ -3,7 +3,6 @@
 */
 
 #include "DecisionHandling/ComboHypo.h"
-#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "AthViews/View.h"
@@ -229,7 +228,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
       for (const ElementLink<DecisionContainer>& dEL : it->second){
         SG::sgkey_t featureKey = 0; // The container hash of the DecisionObject's most-recent feature, and its initial ROI
         SG::sgkey_t roiKey = 0;
-        uint16_t featureIndex = 0, roiIndex = 0; // The container index of the DecisionObject's most-recent feature, and its initial ROI
+        Decision::index_type featureIndex = 0, roiIndex = 0; // The container index of the DecisionObject's most-recent feature, and its initial ROI
         bool roiIsFullscan = false; // Will be set to true if the DecisionObject's initial ROI is flagged as FullScan
         bool objectRequestsNoMultiplicityCheck = false; // Will be set to true if the object has been flagged as independently satisfying all requirements on a leg
         ATH_CHECK( extractFeatureAndRoI(it->first, dEL, featureKey, featureIndex, roiKey, roiIndex, roiIsFullscan, objectRequestsNoMultiplicityCheck, priorFeaturesMap) );
@@ -381,9 +380,9 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 StatusCode ComboHypo::extractFeatureAndRoI(const HLT::Identifier& chainLegId,
   const ElementLink<DecisionContainer>& dEL,
   SG::sgkey_t& featureKey,
-  uint16_t& featureIndex,
+  Decision::index_type& featureIndex,
   SG::sgkey_t& roiKey,
-  uint16_t& roiIndex,
+  Decision::index_type& roiIndex,
   bool& roiIsFullscan,
   bool& objectRequestsNoMultiplicityCheck,
   SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap) const 
@@ -404,10 +403,10 @@ StatusCode ComboHypo::extractFeatureAndRoI(const HLT::Identifier& chainLegId,
 
   std::vector<SG::sgkey_t> keys;
   std::vector<uint32_t> clids; // We don't care about the class ID. This part gets ignored.
-  std::vector<uint16_t> indicies;
+  std::vector<Decision::index_type> indicies;
   std::vector<const Decision*> sources;
 
-  std::set<const xAOD::TrigComposite*> fullyExploredFrom; // This is a cache which typelessFindLinks will use to avoid re-visiting already explored regions of the graph
+  std::set<const Decision*> fullyExploredFrom; // This is a cache which typelessFindLinks will use to avoid re-visiting already explored regions of the graph
   // Note: This call to typelessFindLinks is exploring from a NavGraphNode* rather than a Decision*,
   // this indicates that the search is restricted to a sub-graph (specifically, only following one chain-leg)
   const bool foundFeature = typelessFindLinks(start, featureString(), keys, clids, indicies, sources, TrigDefs::allFeaturesOfType, &fullyExploredFrom);

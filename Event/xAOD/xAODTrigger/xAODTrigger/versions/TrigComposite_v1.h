@@ -53,6 +53,7 @@ namespace xAOD {
 
    public:
       using sgkey_t = SG::sgkey_t;
+      using index_type = uint32_t;
 
       /// Default constructor
       TrigComposite_v1();
@@ -135,8 +136,8 @@ namespace xAOD {
       void typelessSetObjectLink( const std::string& name, 
                                   const sgkey_t key, 
                                   const uint32_t clid, 
-                                  const uint16_t beginIndex, 
-                                  const uint16_t endIndex = 0 );
+                                  const index_type beginIndex, 
+                                  const index_type endIndex = 0 );
 
       /// Fetches a single link without type. Note: Will not work for collections of links, use typelessGetObjectCollectionLinks
       /// @param[in] name Name of the stored link
@@ -147,7 +148,7 @@ namespace xAOD {
       bool typelessGetObjectLink( const std::string& name, 
                                   sgkey_t& key,
                                   uint32_t& clid, 
-                                  uint16_t& index) const;
+                                  index_type& index) const;
 
       /// Fetches a collection of links without type.
       /// @param[in] name Name of the stored link
@@ -158,7 +159,7 @@ namespace xAOD {
       bool typelessGetObjectCollectionLinks( const std::string& name, 
                                   std::vector<sgkey_t>& keyVec,
                                   std::vector<uint32_t>& clidVec, 
-                                  std::vector<uint16_t>& indexVec) const;
+                                  std::vector<index_type>& indexVec) const;
 
 
       /// Look up all links stored to objects of (container) type CONTAINER
@@ -222,7 +223,7 @@ namespace xAOD {
       /// Raw access to the persistent link labels. 
       const std::vector< sgkey_t >& linkColKeys() const;
       /// Raw access to the persistent link indices. 
-      const std::vector< uint16_t >& linkColIndices() const;
+      const std::vector< index_type >& linkColIndices() const;
       /// Raw access to the persistent link CLIDs
       const std::vector< uint32_t >& linkColClids() const;
 
@@ -234,7 +235,7 @@ namespace xAOD {
       /// Raw access to the persistent link labels. Will attempt to access remapped link data.
       const std::vector< sgkey_t >& linkColKeysRemap() const;
       /// Raw access to the persistent link indices. Will attempt to access remapped link data.
-      const std::vector< uint16_t >& linkColIndicesRemap() const;
+      const std::vector< index_type >& linkColIndicesRemap() const;
 
       /// @}
 
@@ -283,12 +284,12 @@ namespace xAOD {
       /// Raw access to the persistent link labels (non-const)
       std::vector< sgkey_t >& linkColKeysNC();
       /// Raw access to the persistent link indices (non-const)
-      std::vector< uint16_t >& linkColIndicesNC();
+      std::vector< index_type >& linkColIndicesNC();
       /// Raw access to the persistent link CLIDs (non-const)
       std::vector< uint32_t >& linkColClidsNC();
 
       // Helper function, check for exact link match
-      bool hasObjectLinkExact(const std::string& name, const sgkey_t key, const uint16_t index, const uint32_t clid) const;
+      bool hasObjectLinkExact(const std::string& name, const sgkey_t key, const index_type index, const uint32_t clid) const;
 
       /// Helper function, copy one link into this object
       void copyLinkInternal(const xAOD::TrigComposite_v1& other, const size_t index, const std::string& newName);
