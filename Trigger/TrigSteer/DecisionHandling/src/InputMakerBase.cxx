@@ -121,7 +121,7 @@ bool InputMakerBase::matchInCollection(const DecisionContainer* outDecisions, co
   std::set<const Decision*> cache; //!< Used to accelerate the recursive typelessFindLinks.
   std::vector<SG::sgkey_t> keys;
   std::vector<uint32_t> clids;
-  std::vector<uint16_t> indicies;
+  std::vector<Decision::index_type> indicies;
   std::vector<const Decision*> sources; // Unused
   TrigCompositeUtils::typelessFindLinks(toMatch, featureString(), keys, clids, indicies, sources, TrigDefs::lastFeatureOfType, &cache);
   bool hasFeature = false;
@@ -163,7 +163,7 @@ uint64_t InputMakerBase::getMatchingHashForDecision(const Decision* toMatch, con
   std::set<const Decision*> cache; //!< Used to accelerate the recursive typelessFindLinks.
   std::vector<SG::sgkey_t> keys;
   std::vector<uint32_t> clids;
-  std::vector<uint16_t> indicies;
+  std::vector<Decision::index_type> indicies;
   std::vector<const Decision*> sources; // Unused
   TrigCompositeUtils::typelessFindLinks(toMatch, linkNameToMatch, keys, clids, indicies, sources, TrigDefs::lastFeatureOfType, &cache);
   ATH_MSG_DEBUG("getMatchingHashForDecision keys.size()="<<keys.size());

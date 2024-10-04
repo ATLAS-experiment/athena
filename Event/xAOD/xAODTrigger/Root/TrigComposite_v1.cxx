@@ -23,7 +23,27 @@
 
 
 namespace xAOD {
-  
+
+  // The "linkColIndices" aux type underwent an in-line schema evolution in October 2024 
+  // from vector<vector<uint16_t>> to vector<vector<uint32_t>>.
+  //
+  // We need to have a static Accessor object defined for this aux name which lives outside of class scope in libxAODTrigger.so
+  // This object will be instantiated early, when ROOT reads this libraries dictionary upon opening a file.
+  // It will register the updated type in the aux registry at this early time, before any dictionaries 
+  // stored in the file are read - which would populate the aux registry with the outdated type if the
+  // file was produced prior to the schema update.
+  //
+  // For consistency, the other Accessors used by the TrigComposite interface implementation are moved up here too. 
+  static const SG::Accessor< std::vector< std::string > > acc_linkColNames( "linkColNames" );
+  static const SG::Accessor< std::vector< TrigComposite_v1::sgkey_t > > acc_linkColKeys( "linkColKeys" );
+  static const SG::Accessor< std::vector< TrigComposite_v1::index_type > > acc_linkColIndices( "linkColIndices" ); // Caution: Schema evolution, October 2024
+  static const SG::Accessor< std::vector< uint32_t > > acc_linkColClids( "linkColClids" );
+
+  // Remapped element link keys and indices are decorated temporarily onto immutable nodes via these accessors. 
+  // These become solidified when a navigation graph is run through TrigNavSlimmingMTAlg.
+  static const SG::Accessor< std::vector< TrigComposite_v1::sgkey_t > > acc_remap_linkColKeys( "remap_linkColKeys" );
+  static const SG::Accessor< std::vector< TrigComposite_v1::index_type > > acc_remap_linkColIndices( "remap_linkColIndices" );
+
   ExcNotIParticleContainer::ExcNotIParticleContainer (const std::string& msg)
     : std::runtime_error (msg)
   {
@@ -227,15 +247,13 @@ namespace xAOD {
 
       // Since this function shouldn't throw exceptions too easily,
       // let's be super careful here...
-      static const ConstAccessor< std::vector< std::string > > accNames( "linkColNames" );
-      static const ConstAccessor< std::vector< uint32_t > >    accCLIDs( "linkColClids" );
-      if( ! (accNames.isAvailable( *this ) || accCLIDs.isAvailable( *this) ) ) {
+      if( ! (acc_linkColNames.isAvailable( *this ) || acc_linkColClids.isAvailable( *this) ) ) {
          return false;
       }
 
       // The check itself is pretty simple:
-      const std::vector< std::string >& names = accNames( *this );
-      const std::vector< uint32_t >&    clids = accCLIDs( *this );
+      const std::vector< std::string >& names = acc_linkColNames( *this );
+      const std::vector< uint32_t >&    clids = acc_linkColClids( *this );
       
       std::vector<std::string>::const_iterator vecIt = std::find( names.begin(), names.end(), name );
       if (vecIt == names.end()) {
@@ -260,7 +278,7 @@ namespace xAOD {
    }
 
 
-   bool TrigComposite_v1::hasObjectLinkExact(const std::string& name, const sgkey_t key, const uint16_t index, const uint32_t clid) const {
+   bool TrigComposite_v1::hasObjectLinkExact(const std::string& name, const sgkey_t key, const TrigComposite_v1::index_type index, const uint32_t clid) const {
       for (size_t i = 0; i < this->linkColNames().size(); ++i) {
          if (this->linkColNames().at(i) != name) continue;
          if (!SG::sgkeyEqual (this->linkColKeys().at(i), key)) continue;
@@ -290,55 +308,43 @@ namespace xAOD {
                            linkColClids )
 
    const std::vector< SG::sgkey_t >& TrigComposite_v1::linkColKeys() const {
-      static const Accessor< std::vector< sgkey_t > > acc_builtin( "linkColKeys" );
-      return acc_builtin( *this );
+      return acc_linkColKeys( *this );
    }
 
-   const std::vector< uint16_t >& TrigComposite_v1::linkColIndices() const {
-      static const Accessor< std::vector< uint16_t > > acc_builtin( "linkColIndices" );
-      return acc_builtin( *this );
+   const std::vector< TrigComposite_v1::index_type >& TrigComposite_v1::linkColIndices() const {
+      return acc_linkColIndices( *this );
    }
 
    const std::vector< SG::sgkey_t >& TrigComposite_v1::linkColKeysRemap() const {
-      static const Accessor< std::vector< sgkey_t > > acc( "remap_linkColKeys" );
-      return acc( *this );
+      return acc_remap_linkColKeys( *this );
    }
 
-   const std::vector< uint16_t >& TrigComposite_v1::linkColIndicesRemap() const {
-      static const Accessor< std::vector< uint16_t > > acc( "remap_linkColIndices" );
-      return acc( *this );
+   const std::vector< TrigComposite_v1::index_type >& TrigComposite_v1::linkColIndicesRemap() const {
+      return acc_remap_linkColIndices( *this );
    }
 
    ////////
 
    std::vector< std::string >& TrigComposite_v1::linkColNamesNC() {
-
-      static const Accessor< std::vector< std::string > > acc( "linkColNames" );
-      return acc( *this );
+      return acc_linkColNames( *this );
    }
 
    std::vector< SG::sgkey_t >& TrigComposite_v1::linkColKeysNC() {
-
-      static const Accessor< std::vector< sgkey_t > > acc( "linkColKeys" );
-      return acc( *this );
+      return acc_linkColKeys( *this );
    }
 
-   std::vector< uint16_t >& TrigComposite_v1::linkColIndicesNC() {
-
-      static const Accessor< std::vector< uint16_t > > acc( "linkColIndices" );
-      return acc( *this );
+   std::vector< TrigComposite_v1::index_type >& TrigComposite_v1::linkColIndicesNC() {
+      return acc_linkColIndices( *this );
    }
 
    std::vector< uint32_t >& TrigComposite_v1::linkColClidsNC() {
-
-      static const Accessor< std::vector< uint32_t > > acc( "linkColClids" );
-      return acc( *this );
+      return acc_linkColClids( *this );
    }
 
-   void TrigComposite_v1::typelessSetObjectLink( const std::string& name, const sgkey_t key, const uint32_t clid, const uint16_t beginIndex, const uint16_t endIndex ) {
+   void TrigComposite_v1::typelessSetObjectLink( const std::string& name, const sgkey_t key, const uint32_t clid, const TrigComposite_v1::index_type beginIndex, const TrigComposite_v1::index_type endIndex ) {
 
      // Loop over collections
-     if ( endIndex - beginIndex > 1 ) { // Adding a *collection* of links
+     if ( int32_t(endIndex) - int32_t(beginIndex) > 1 ) { // Adding a *collection* of links, this needs to be a signed check as a difference <= 0 implies that endIndex is less than or equal to beginIndex
 
        // Check uniqueness
        const std::string mangledName = name + s_collectionSuffix;
@@ -360,7 +366,6 @@ namespace xAOD {
 
        // Erase the old collection, if there was one
        if ( oldStart != -1 ) {
-
          this->linkColNamesNC().erase( this->linkColNamesNC().begin() + oldStart, this->linkColNamesNC().begin() + oldEnd );
          this->linkColKeysNC().erase( this->linkColKeysNC().begin() + oldStart, this->linkColKeysNC().begin() + oldEnd );
          this->linkColIndicesNC().erase( this->linkColIndicesNC().begin() + oldStart, this->linkColIndicesNC().begin() + oldEnd );
@@ -368,15 +373,14 @@ namespace xAOD {
        }
 
        // Append the new collection
-       for ( unsigned int index = beginIndex; index < endIndex; ++index ) {
-
+       for ( TrigComposite_v1::index_type index = beginIndex; index < endIndex; ++index ) {
          this->linkColNamesNC().push_back( mangledName );
          this->linkColKeysNC().push_back( key );
          this->linkColIndicesNC().push_back( index );
          this->linkColClidsNC().push_back( clid );
        }
-     }
-     else { // Adding a *single* link
+
+     } else { // Adding a *single* link
 
        // Check uniqueness
        if ( std::find( linkColNamesNC().begin(), linkColNamesNC().end(), name ) == linkColNamesNC().end() ) {
@@ -385,26 +389,26 @@ namespace xAOD {
          this->linkColKeysNC().push_back( key );
          this->linkColIndicesNC().push_back( beginIndex );
          this->linkColClidsNC().push_back( clid );
-       }
-       else {
+
+       } else {
 
          // Over-write an existing object
          const std::vector< std::string >& names = linkColNames();
          for( size_t nameIndex = 0; nameIndex < names.size(); ++nameIndex ) {
-
            if( names[ nameIndex ] == name ) {
-
              this->linkColKeysNC()[ nameIndex ] = key;
              this->linkColIndicesNC()[ nameIndex ] = beginIndex;
              this->linkColClidsNC()[ nameIndex ] = clid;
              break; // Names are unique, so stop once found
-           }
-         }
-       }
-     }
+           } // Check of names
+         } // Loop over names
+
+       } // Check of uniqueness of adding single link
+
+     } // Check of adding single link vs link collection
    }
 
-   bool TrigComposite_v1::typelessGetObjectLink( const std::string& name, sgkey_t& key, uint32_t& clid, uint16_t& index) const {
+   bool TrigComposite_v1::typelessGetObjectLink( const std::string& name, sgkey_t& key, uint32_t& clid, TrigComposite_v1::index_type& index) const {
       std::vector<std::string>::const_iterator it = std::find(linkColNames().begin(), linkColNames().end(), name);
       if (it == linkColNames().end()) {
          return false;
@@ -424,7 +428,7 @@ namespace xAOD {
 
 
    bool TrigComposite_v1::typelessGetObjectCollectionLinks( const std::string& name, 
-     std::vector<sgkey_t>& keyVec, std::vector<uint32_t>& clidVec, std::vector<uint16_t>& indexVec ) const
+     std::vector<sgkey_t>& keyVec, std::vector<uint32_t>& clidVec, std::vector<TrigComposite_v1::index_type>& indexVec ) const
    {
       bool found = false;
       const std::string mangledName = name + s_collectionSuffix;
@@ -448,11 +452,9 @@ namespace xAOD {
 
 
    bool TrigComposite_v1::isRemapped() const {
-      static const Accessor< std::vector< sgkey_t > > key_remap( "remap_linkColKeys" );
-      static const Accessor< std::vector< uint16_t > > index_remap( "remap_linkColIndices" );
       size_t nDecorations = 0;
-      if (key_remap.isAvailable( *this )) ++nDecorations;
-      if (index_remap.isAvailable( *this )) ++nDecorations;
+      if (acc_remap_linkColKeys.isAvailable( *this )) ++nDecorations;
+      if (acc_remap_linkColIndices.isAvailable( *this )) ++nDecorations;
       if (nDecorations == 1) {
         throw std::runtime_error("TrigComposite_v1::isRemapped Only one of the 'remap_linkColKeys' and 'remap_linkColIndices' "
           "decorations were found on this object. This should never happen, a remapped element link must have both of these collections.");
