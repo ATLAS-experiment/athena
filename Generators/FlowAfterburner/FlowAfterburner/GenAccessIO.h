@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHHELPER_GENACCESSIO_H
@@ -8,9 +8,6 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
-
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <vector>
@@ -24,9 +21,9 @@ namespace TruthHelper {
 class GenAccessIO {
 public:
 
-    GenAccessIO() : m_sgSvc(0) {
-        if (Gaudi::svcLocator()->service("StoreGateSvc", m_sgSvc).isFailure()) {
-            throw StatusCode::FAILURE;
+    GenAccessIO() : m_sgSvc("StoreGateSvc", "GenAccessIO") {
+        if (m_sgSvc.retrieve().isFailure()) {
+          throw StatusCode::FAILURE;
         }
     }
     StatusCode getMC(MCParticleCollection& mcParticles, const bool ifgen=false, const std::string& key="GEN_EVENT") const {
@@ -80,7 +77,7 @@ public:
         return m_sgSvc->record(storee, key);
     }
 private:
-    StoreGateSvc* m_sgSvc;
+    ServiceHandle<StoreGateSvc> m_sgSvc;
 };
 }
 
