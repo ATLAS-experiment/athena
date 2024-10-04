@@ -8,7 +8,7 @@ from TileConfiguration.TileConfigFlags import TileRunType
 @file TileRawChannelTimeMonitorAlgorithm.py
 @brief Python configuration of TileRawChannelTimeMonitorAlgorithm algorithm for the Run III
 '''
-def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
+def TileRawChannelTimeMonitoringConfig(flags, amplitudeFragIDs=None, **kwargs):
 
     ''' Function to configure TileRawChannelTimeMonitorAlgorithm algorithm in the monitoring system.'''
 
@@ -66,6 +66,8 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
     TileRawChannelTimeMonitorAlgorithm = CompFactory.TileRawChannelTimeMonitorAlgorithm
     tileRawChanTimeMonAlg = helper.addAlgorithm(TileRawChannelTimeMonitorAlgorithm, 'TileRawChanTimeMonAlg')
 
+    if amplitudeFragIDs is not None:
+        tileRawChanTimeMonAlg.AmplitudeFragIDs = amplitudeFragIDs
     for k, v in kwargs.items():
         setattr(tileRawChanTimeMonAlg, k, v)
 
@@ -151,6 +153,30 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
 
         tool.defineHistogram(name, title = title, path = path, type = 'TProfile',
                              xbins = 1000, xmin = -0.5, xmax = 999.5, opt = 'kAddBinsDynamically', merge = 'merge')
+
+
+    modules = []
+    if amplitudeFragIDs is not None:
+        # Preapare module names for which monitoring histograms with amplitude vs LB should be produced
+        for fragID in amplitudeFragIDs:
+            ros = fragID >> 8
+            drawer = fragID & 0x3F
+            modules += [Tile.getDrawerString(ros, drawer)]
+
+        ampVsLBArray = helper.addArray([modules], tileRawChanTimeMonAlg, 'TileAmplitudeVsLB', topPath='Tile/RawChannelTime')
+        for postfix, tool in ampVsLBArray.Tools.items():
+            # Define set of monitoring histograms with amplitude vs LB for each specified module
+            moduleName = postfix[1:]
+            partition = moduleName[:3]
+            for channel in range(0, Tile.MAX_CHAN):
+                # Define monitoring histogram with amplitude vs LB for each channel in the module
+                title = f'Run {run} {moduleName} Channel {channel}: Amplitude vs luminosity block;LumiBlock;Amplitude [pC]'
+                name = f'lumiBlock,amplitude_{channel};TileAmplitudeVsLB_{moduleName}_ch_{channel}'
+                path = f'{partition}/{moduleName}'
+
+                tool.defineHistogram(name, title=title, path=path, type='TProfile',
+                                     xbins=1000, xmin=-0.5, xmax=999.5, opt='kAddBinsDynamically', merge='merge')
+
 
     accumalator = helper.result()
     result.merge(accumalator)
