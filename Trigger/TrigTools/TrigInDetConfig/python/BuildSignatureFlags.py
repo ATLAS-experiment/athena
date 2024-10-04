@@ -426,8 +426,7 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
     flags.useSCTSeeding    = False
     flags.useTRT           = False
 
-    flags.minSecondaryPt   = lambda pcf: 3 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
-    flags.roadWidth        = 12.0 
+    flags.roadWidth        = 12.0
     flags.Xi2max           = 15
     flags.Xi2maxNoAdd      = 35.0
     flags.nWeightedClustersMin = 6
