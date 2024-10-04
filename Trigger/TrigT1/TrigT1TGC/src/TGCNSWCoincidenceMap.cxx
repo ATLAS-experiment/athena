@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,7 +140,10 @@ namespace LVL1TGCTrigger {
     std::string fullName = PathResolver::FindCalibDirectory("dev")+"/TrigT1TGC"+dbname;
 
     std::ifstream data(fullName);
-    if(!data.is_open()){return false;}
+    if(!data.is_open()){
+      ATH_MSG_WARNING("Cannot open file dev/TrigT1TGC" << dbname);
+      return false;
+    }
     char delimiter = '\n';
     std::string field;
     std::string tag;
