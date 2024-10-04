@@ -157,10 +157,10 @@ template<> inline bool isTau(const int& p){ return std::abs(p) == TAU;}
 
 /// APID: the fourth generation neutrinos are neutrinos.
 template<class T> inline bool isNeutrino(const T& p){return isNeutrino(p->pdg_id());}
-template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == 12 || sp == 14 || sp == 16|| sp == 18;  }
+template<> inline bool isNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU || sp == 18;  }
 
 template<class T> inline bool isSMNeutrino(const T& p){return isSMNeutrino(p->pdg_id());}
-template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return sp == 12 || sp == 14 || sp == 16;  }
+template<> inline bool isSMNeutrino(const int& p){ auto sp = std::abs(p); return sp == NU_E || sp == NU_MU || sp == NU_TAU;  }
 
 template<class T> inline bool isGluon(const T& p){return isGluon(p->pdg_id());}
 template<> inline bool isGluon(const int& p){ return p == GLUON; }
@@ -200,7 +200,7 @@ template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 template<class T> inline bool isResonance(const T& p) { return isZ(p)||isW(p)||isHiggs(p)||isTop(p); }
 
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
-template<> inline bool isGraviton(const int& p){ return p == 39; }
+template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
 
 template<class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template<> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
