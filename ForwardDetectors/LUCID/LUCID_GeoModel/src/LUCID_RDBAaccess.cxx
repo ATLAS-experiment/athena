@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_RDBAaccess.h"
@@ -37,12 +37,8 @@ void LUCID_RDBAccess::ReadDB() {
   log << MSG::DEBUG << " Starting LUCID_GeoModel::LUCID_RDBAaccess " << endmsg;
   log << MSG::DEBUG << " LUCID_RDBAaccess::ReadDB "<< endmsg;  
 
-  m_svcLocator = Gaudi::svcLocator();
-  IRDBAccessSvc* iAccessSvc = nullptr;
-  
-  StatusCode result = m_svcLocator->service("RDBAccessSvc", iAccessSvc);
-
-  if (result.isFailure() || iAccessSvc == nullptr) {
+  SmartIF<IRDBAccessSvc> iAccessSvc(Gaudi::svcLocator()->service("RDBAccessSvc"));
+  if (!iAccessSvc) {
 
     log << MSG::FATAL << " Could not initialize RDBAccessSvc! " << endmsg;
     

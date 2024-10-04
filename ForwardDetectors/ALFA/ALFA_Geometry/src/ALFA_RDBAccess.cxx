@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Geometry/ALFA_GeometryReader.h"
@@ -7,9 +7,7 @@
 
 
 ALFA_RDBAccess::ALFA_RDBAccess()
-  : m_svcLocator(nullptr)
 {
-
 }
 
 ALFA_RDBAccess::~ALFA_RDBAccess()
@@ -25,11 +23,9 @@ bool ALFA_RDBAccess::ReadGeometry(const eRPotName eRPName, eFiberType eFType,
 	
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_RDBAaccess::ReadGeometry");
 	
-	m_svcLocator = Gaudi::svcLocator();
-	IRDBAccessSvc* iAccessSvc = nullptr;
+	SmartIF<IRDBAccessSvc> iAccessSvc(Gaudi::svcLocator()->service("RDBAccessSvc"));
 
-	StatusCode result = m_svcLocator->service("RDBAccessSvc", iAccessSvc);
-	if (result.isFailure() || iAccessSvc == nullptr)
+	if (!iAccessSvc)
 	{
 		LogStream << MSG::FATAL << " Could not initialize RDBAccessSvc! ((RP no."<<eRPName<<", Fiber type "<<eFType<<")"<< endmsg;
 

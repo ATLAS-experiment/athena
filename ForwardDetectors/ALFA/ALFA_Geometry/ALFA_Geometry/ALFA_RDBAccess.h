@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_RDBAccess_h
@@ -54,7 +54,6 @@ class ALFA_RDBAccess
 		
 	private:
 		IRDBRecordset_ptr m_fiberGeometry;
-		ISvcLocator* m_svcLocator;
 
 	public:
 		std::list<FIBERDATA> m_ListFiberData;

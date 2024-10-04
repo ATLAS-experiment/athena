@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_RDBAaccess_h
@@ -46,8 +46,7 @@ class LUCID_RDBAccess {
 
  private: 
   
-  IRDBRecordset_ptr m_lucidParams; 
-  ISvcLocator* m_svcLocator{}; 
+  IRDBRecordset_ptr m_lucidParams;
 }; 
 
 #endif
