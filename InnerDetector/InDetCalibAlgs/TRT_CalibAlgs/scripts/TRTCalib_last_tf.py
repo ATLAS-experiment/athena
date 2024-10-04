@@ -37,10 +37,7 @@ if __name__ == '__main__':
     # Directory for the attrtcal account web display
     trf.parser.add_argument('--attrtcal_dir',
                             type=trfArgClasses.argFactory(trfArgClasses.argString),
-                            # Temporary LOCAL path - @serodrig 
-                            help='Saving output for web display', default=trfArgClasses.argString('.') , group='TRTCalib_last_tf')
-                            # Commented for now... path should be changed to the official one 
-                            # help='Saving output for web display', default=trfArgClasses.argString('/afs/cern.ch/user/a/attrtcal/Tier0') , group='TRTCalib_last_tf')
+                            help='Saving output for web display', default=trfArgClasses.argString('/afs/cern.ch/user/a/attrtcal/Tier0') , group='TRTCalib_last_tf')
     
     # Notify people 
     trf.parser.add_argument('--sendNotification',
@@ -50,7 +47,7 @@ if __name__ == '__main__':
     # Email list 
     trf.parser.add_argument('--emailList', nargs='+',
                             type=trfArgClasses.argFactory(trfArgClasses.argList),
-                            help='Notify the offline TRT calibration team', default=trfArgClasses.argList(["Sergi.Rodriguez@cern.ch"]) , group='TRTCalib_last_tf')
+                            help='Notify the offline TRT calibration team', default=trfArgClasses.argList(["atlas-trt-offline-shifts@cern.ch"]) , group='TRTCalib_last_tf')
     
     trf.parseCmdLineArgs(sys.argv[1:])
     
