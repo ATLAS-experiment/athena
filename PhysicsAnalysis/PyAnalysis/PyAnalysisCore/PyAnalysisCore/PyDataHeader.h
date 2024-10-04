@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYANALYSISCORE_PYDATAHEADER_H
@@ -16,6 +16,8 @@
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/SmartIF.h"
 #include "AthenaKernel/getMessageSvc.h"
 
 #include <vector>
@@ -28,16 +30,15 @@ public:
     MsgStream log(Athena::getMessageSvc(), "PyDataHeader");
 
     // get StoreGate
-    StoreGateSvc *pSvc = 0;
-    StatusCode sc = Gaudi::svcLocator()->service("StoreGateSvc", pSvc);
-    if (sc.isFailure())
+    SmartIF<StoreGateSvc> pSvc{ Gaudi::svcLocator()->service("StoreGateSvc") };
+    if (!pSvc)
       log << MSG::ERROR << "could not get StoreGateSvc" << endmsg;
     else
       {
 	// retrieve DataHeader
         SG::ConstIterator<DataHeader> beg; 
         SG::ConstIterator<DataHeader> ending; 
-	sc = pSvc->retrieve(beg,ending);
+	StatusCode sc = pSvc->retrieve(beg,ending);
 	if (sc.isFailure() || beg==ending)
 	  log << MSG::ERROR << "could not get DataHeader" << endmsg;
 	else
@@ -53,9 +54,7 @@ public:
 	  }
       }
 
-    m_classIDSvc = 0;
-    sc = Gaudi::svcLocator()->service("ClassIDSvc", m_classIDSvc);
-    if (sc.isFailure())
+    if (m_classIDSvc.retrieve().isFailure())
       log << MSG::ERROR << "could not get ClassIDSvc" << endmsg;
   }
 
@@ -78,7 +77,7 @@ public:
 	// convert CLID to class name
 	std::string localName;
 	StatusCode sc = m_classIDSvc->getTypeNameOfID (clid, localName);
-	if (sc.isFailure()) 
+	if (sc.isFailure())
 	  {
 	    MsgStream log(Athena::getMessageSvc(), "PyDataHeader");
 	    log << MSG::ERROR << "could not get TypeName for " << clid << endmsg;
@@ -108,7 +107,7 @@ private:
   std::vector<const DataHeaderElement *> m_DataHeaderElementV;
 
   //!  class ID service
-  IClassIDSvc *m_classIDSvc;
+  ServiceHandle<IClassIDSvc> m_classIDSvc{"ClassIDSvc", "PyDataHeader"};
 };
 
 #endif
