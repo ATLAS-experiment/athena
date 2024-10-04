@@ -56,8 +56,8 @@ namespace MCTesting {
     }
 
     virtual void TearDown() override {
-      StoreGateSvc* pStore(nullptr);
-      ASSERT_TRUE(MCTesting::g_svcLoc->service("StoreGateSvc", pStore).isSuccess());
+      SmartIF<StoreGateSvc> pStore(MCTesting::g_svcLoc->service("StoreGateSvc"));
+      ASSERT_TRUE(pStore.isValid());
       pStore->clearStore(true).ignore(); // forceRemove=true to remove all proxies
     }
   };

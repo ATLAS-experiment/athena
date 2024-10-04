@@ -457,9 +457,8 @@ HepMC::GenParticlePtr aParticle = HepMC::newGenParticlePtr (HepMC::FourVector(mo
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 double ParticleDecayer::getParticleMass(int pid) {
-  IPartPropSvc* partPropSvc = 0;
-  StatusCode PartPropStatus = Gaudi::svcLocator()->service("PartPropSvc", partPropSvc);
-  if (!PartPropStatus.isSuccess() || 0 == partPropSvc) throw GaudiException("PartPropSvc error", "I_ParticleDecayer", StatusCode::FAILURE);      
+  SmartIF<IPartPropSvc> partPropSvc(Gaudi::svcLocator()->service("PartPropSvc"));
+  if (!partPropSvc) throw GaudiException("PartPropSvc error", "I_ParticleDecayer", StatusCode::FAILURE);
   m_particleTable = partPropSvc->PDT();
 
   const HepPDT::ParticleData* particle = m_particleTable->particle(HepPDT::ParticleID(std::abs(pid)));

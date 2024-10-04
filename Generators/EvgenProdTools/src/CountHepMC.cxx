@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -260,23 +260,12 @@ StatusCode CountHepMC::execute() {
 
   if (m_nPass == m_nCount) {
     ATH_MSG_INFO("Stopping the event processing...." << m_nPass << "/" << m_nCount);
-    IEventProcessor* apm = 0;
-    IService* ssvc = 0;
-    static const bool CRE(false);
-    StatusCode sc = serviceLocator()->getService("AthenaEventLoopMgr", ssvc, CRE);
-    if (sc.isSuccess()) {
-      sc = ssvc->queryInterface(IEventProcessor::interfaceID(), pp_cast<void>(&apm));
-    } else {
-      ATH_MSG_WARNING("No EventLoop Manager found ");
+    SmartIF<IEventProcessor> apm(serviceLocator()->service("AthenaEventLoopMgr", /*createIf*/false));
+    if (apm) {
+      ATH_CHECK(apm->stopRun());
     }
-    if (sc.isSuccess()) {
-      if ((apm->stopRun()).isFailure()) {
-        ATH_MSG_ERROR("StatusCode Failure in stopRun()");
-        return StatusCode::FAILURE;
-      }
-      apm->release();
-    } else {
-      ATH_MSG_WARNING("No EventLoop Manager specified ");
+    else {
+      ATH_MSG_WARNING("No EventLoop Manager found ");
     }
   }
 
