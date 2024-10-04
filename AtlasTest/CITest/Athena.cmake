@@ -347,7 +347,7 @@ atlas_add_citest( MuonR4_PatternRecognition
 #################################################################################
 
 atlas_add_citest( TriggerMC
-   SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_build.py )
+   SCRIPT test_trig_mc_v1Dev_ITk_ttbar200PU_build.py )
 
 atlas_add_citest( TriggerMC_HI
    SCRIPT test_trig_mc_v1DevHI_build.py )
