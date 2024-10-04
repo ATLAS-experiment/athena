@@ -6,7 +6,6 @@ from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 
 def TileGMCfg(flags):
     result=GeoModelCfg(flags)
-
     result.getPrimary().DetectorTools += [ CompFactory.TileDetectorTool() ]
     if flags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
         result.getPrimary().DetectorTools["TileDetectorTool"].GeometryConfig = "RECO"

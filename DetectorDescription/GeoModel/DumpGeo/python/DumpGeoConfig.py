@@ -47,7 +47,11 @@ def configureGeometry(flags, cfg):
 
     if flags.Detector.GeometryTile:
         from TileGeoModel.TileGMConfig import TileGMCfg
+        #flags.Tile.forceFullGeometry = True
         cfg.merge(TileGMCfg(flags))
+        # We must set the "FULL" geometry explicitely, otherwise the "RECO" version will be used by default,
+        # which is almost 'empty' (just the first level of child volumes is created for the "RECO" geo).
+        cfg.getService("GeoModelSvc").DetectorTools["TileDetectorTool"].GeometryConfig="FULL"
     # TODO: do we need to set this separately?
     # if flags.Detector.GeometryMBTS:
 
@@ -125,7 +129,8 @@ def DumpGeoCfg(flags, name="DumpGeoCA", outFileName="", **kwargs):
     kwargs.setdefault("OutSQLiteFileName", outFileName)
     if args.filterDetManagers:
         kwargs.setdefault("UserFilterDetManager", args.filterDetManagers.split(","))
-
+    if args.showTreetopContent:
+        kwargs.setdefault("ShowTreetopContent", True)
 
     the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
@@ -176,6 +181,8 @@ if __name__=="__main__":
     parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("-f", "--forceOverwrite",
                         help="Force to overwrite an existing SQLite output file with the same name, if any", action = 'store_true')
+    parser.add_argument("--showTreetopContent",
+                        help="Show the content of the Treetops --- (by default, only the list of Treetops is shown)", action = 'store_true')
     parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
     args = flags.fillFromArgs(parser=parser)

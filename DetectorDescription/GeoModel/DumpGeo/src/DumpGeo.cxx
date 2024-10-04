@@ -169,8 +169,6 @@ StatusCode DumpGeo::initialize() {
         unsigned int nTreetops = manager->getNumTreeTops();
         ATH_MSG_INFO("\t" << mm << " - # TreeTops: " << nTreetops);
 
-        // if ( nTreetops > 0) && isStringInVector(m_user_filterDetManagersList,
-        // detManName) ) {
         if ((nTreetops > 0) && user_managersList.count(detManName)) {
 
           for (unsigned int i = 0; i < nTreetops; ++i) {
@@ -186,7 +184,7 @@ StatusCode DumpGeo::initialize() {
 
             // get volume's logvol's name
             std::string volName = vol->getLogVol()->getName();
-            ATH_MSG_DEBUG("\t\t treetop: " << volName);
+            ATH_MSG_INFO("\t* treetop " << i << ": " << volName);
 
             // Add to the main volume a GeoNameTag with the name of the
             // DetectorManager
@@ -195,16 +193,39 @@ StatusCode DumpGeo::initialize() {
             volTop->add(volXf);
             volTop->add(const_cast<GeoVPhysVol*>(vol));
 
-            if (msgLvl(MSG::DEBUG)) {
-              // DEBUG: dive into the Treetop
-              if ("BeamPipe" == detManName) {
+            if (m_showTreetopContent) {
+                ATH_MSG_INFO("You enabled the option 'showTreetopContent', so we now print the content of the first layers of child volumes of the Treetops...");
+                unsigned v1{0};
                 GeoVolumeCursor av(treetop);
                 while (!av.atEnd()) {
-                  ATH_MSG_DEBUG("\t\ttreetop n."
-                                << i << " - child name: " << av.getName());
-                  av.next();  // increment volume cursor.
+                    ++v1;
+                    if(1==v1) ATH_MSG_INFO("first level of child volumes:");
+                    ATH_MSG_INFO("\t\t- child's name: " << av.getName());
+                    ATH_MSG_INFO("\t\t- child's n. sub-nodes: " << av.getVolume()->getNChildNodes());
+                    ATH_MSG_INFO("\t\t- child's n. sub-volumes: " << av.getVolume()->getNChildVols());
+
+
+                    unsigned v2{0};
+                    GeoVolumeCursor av2(av.getVolume());
+                    while (!av2.atEnd()) {
+                        ++v2;
+                        if(1==v2) ATH_MSG_INFO("second level of child volumes:");
+                        ATH_MSG_INFO("\t\t\t- child's logvol's name: " << av2.getVolume()->getLogVol()->getName());
+
+                        unsigned v3{0};
+                        GeoVolumeCursor av3(av2.getVolume());
+                        while (!av3.atEnd()) {
+                            ++v3;
+                            if(1==v3) ATH_MSG_INFO("third level of child volumes:");
+                            ATH_MSG_INFO("\t\t\t\t- child's logvol's name: " << av3.getVolume()->getLogVol()->getName());
+                            av3.next();  // increment volume cursor.
+                        }             // end while
+
+                        av2.next();  // increment volume cursor.
+                    }             // end while
+
+                    av.next();  // increment volume cursor.
                 }             // end while
-              }
             }
           }
         }
@@ -248,16 +269,17 @@ StatusCode DumpGeo::initialize() {
 
   ATH_MSG_INFO("Traversing the GeoModel tree...");
   // Dump the tree volumes into a DB
-  GeoModelIO::WriteGeoModel dumpGeoModelGraph(
-      db);  // init the GeoModel node action
-  // visit all GeoModel nodes
+  // 1. init the GeoModel node action
+  GeoModelIO::WriteGeoModel dumpGeoModelGraph(db);  
+  // 2. visit all GeoModel nodes
   if (!(m_user_filterDetManagersList.empty())) {
     volTop->exec(&dumpGeoModelGraph);
   } else {
     world->exec(&dumpGeoModelGraph);
   }
   ATH_MSG_INFO("Saving the GeoModel tree to the DB...");
-  dumpGeoModelGraph.saveToDB();  // save to the SQlite DB file
+  // 3. save it to an SQLite file
+  dumpGeoModelGraph.saveToDB(); 
   ATH_MSG_ALWAYS("DONE. Geometry saved to " << m_outFileName);
 
   // Quick test if DEBUG
