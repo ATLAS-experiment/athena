@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILERAWCHANNELTIMEMONITORALGORITHM_H
@@ -52,6 +52,9 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<std::vector<std::pair<int, int>>> m_partitionTimeDifferencePairs{this,
          "PartitionTimeDiffferncePairs", {}, "Partition (ROS - 1) pairs to monitor time differnce"};
 
+    Gaudi::Property<std::vector<int>> m_amplitudeFragIDs{this,
+        "AmplitudeFragIDs", {}, "Tile Frag IDs of modules to fill histograms with amplitude vs LB."};
+
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey{this,
         "TileDQstatus", "TileDQstatus", "Tile DQ status name"};
 
@@ -91,6 +94,9 @@ class TileRawChannelTimeMonitorAlgorithm : public AthMonitorAlgorithm {
     std::vector<int> m_timeDiffLBGroups;
     std::vector<std::vector<std::vector<int>>> m_digiTimeLBGroups;
     std::vector<int> m_amplitudeGroups;
+    std::map<std::string, int> m_amplitudeVsLBGroups;
+
+    std::array<bool, TileCalibUtils::MAX_DRAWERIDX> m_amplitudeMonitoredDrawerIdx{};
 };
 
 

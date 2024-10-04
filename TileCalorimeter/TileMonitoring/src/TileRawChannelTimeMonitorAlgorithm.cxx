@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelTimeMonitorAlgorithm.h"
@@ -40,6 +40,33 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::initialize() {
 
   m_amplitudeGroups = buildToolMap<int>(m_tools, "TileAverageAmplitude", Tile::MAX_ROS - 1);
 
+  std::vector<std::string> modules;
+  for (int fragID : m_amplitudeFragIDs) {
+    unsigned int ros = fragID >> 8;
+    unsigned int drawer = fragID & 0x3F;
+    modules.push_back(TileCalibUtils::getDrawerString(ros, drawer));
+    m_amplitudeMonitoredDrawerIdx[TileCalibUtils::getDrawerIdx(ros, drawer)] = true;
+  }
+
+  std::ostringstream os;
+  if ( m_amplitudeFragIDs.size() != 0) {
+    std::sort(m_amplitudeFragIDs.begin(), m_amplitudeFragIDs.end());
+    for (int fragID : m_amplitudeFragIDs) {
+      unsigned int ros    = fragID >> 8;
+      unsigned int drawer = fragID & 0x3F;
+      std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+      os << " " << module << "/0x" << std::hex << fragID << std::dec;
+    }
+  } else {
+    os << "NONE";
+  }
+
+  ATH_MSG_INFO("Monitored amplitude vs LB for modules/frag ID:" << os.str());
+
+  if (!modules.empty()) {
+    m_amplitudeVsLBGroups = buildToolMap<int>(m_tools, "TileAmplitudeVsLB", modules);
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -59,6 +86,9 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
     fill("TileRawChanTimeMonExecuteTime", timer);
     return StatusCode::SUCCESS;
   }
+
+  unsigned int lumiBlock = eventInfo->lumiBlock();
+  auto monLumiBlock = Monitored::Scalar<double>("lumiBlock", lumiBlock);
 
   std::vector<int> drawers[Tile::MAX_ROS - 1];
   std::vector<int> channels[Tile::MAX_ROS - 1];
@@ -87,6 +117,7 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
     int drawer = m_tileHWID->drawer(adc_id);
     unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
     int partition = ros - 1;
+    std::string moduleName = TileCalibUtils::getDrawerString(ros, drawer);
 
     for (const TileRawChannel* rawChannel : *rawChannelCollection) {
 
@@ -128,6 +159,11 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
       float amplitude = rawChannel->amplitude();
       amplitude = emScale->calibrateChannel(drawerIdx, channel, adc, amplitude, rawChannelUnit, TileRawChannelUnit::PicoCoulombs);
       channelAmplitudes[partition].push_back(amplitude);
+
+      if (m_amplitudeMonitoredDrawerIdx[drawerIdx]) {
+        auto monAmplitude = Monitored::Scalar<double>("amplitude_" + std::to_string(channel), amplitude);
+        fill(m_tools[m_amplitudeVsLBGroups.at(moduleName)], monLumiBlock, monAmplitude);
+      }
     }
   }
 
@@ -165,8 +201,6 @@ StatusCode TileRawChannelTimeMonitorAlgorithm::fillHistograms( const EventContex
                                             1, 1, 1,  1, 1, 1,
                                             0, 0, 0,  0, 0, 0};
 
-  unsigned int lumiBlock = eventInfo->lumiBlock();
-  auto monLumiBlock = Monitored::Scalar<double>("lumiBlock", lumiBlock);
 
   for (unsigned int partition = 0; partition < Tile::MAX_ROS - 1; ++partition) {
     if (!channelTimes[partition].empty()) {
