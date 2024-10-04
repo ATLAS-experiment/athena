@@ -5,6 +5,8 @@
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC
 #define ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC 1
 
+#include "src/TrackStatePrinter.h"
+
 // ATHENA
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -27,6 +29,18 @@ namespace ActsTrk
     std::ostringstream os;
     (os << ... << values);
     return os.str();
+  }
+
+  template <typename measurement_container_t>
+  static std::size_t
+  containerOffset(const measurement_container_t *container,
+                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets)
+  {
+    for (const auto &[c, offset] : container_offsets)
+    {
+      if (c == container) return offset;
+    }
+    return 0;
   }
 
   template <typename track_container_t>
@@ -90,7 +104,7 @@ namespace ActsTrk
   void
   TrackStatePrinter::printTrackState(const Acts::GeometryContext &tgContext,
                                      const track_state_proxy_t &state,
-                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
+                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offsets,
                                      bool useFiltered) const
   {
     if (!m_printFilteredStates && useFiltered)
@@ -102,15 +116,7 @@ namespace ActsTrk
     {
       ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       const xAOD::UncalibratedMeasurement &umeas = getUncalibratedMeasurement(sl);
-      index = umeas.index();
-      for (const auto &[container, offset] : container_offset)
-      {
-        if (umeas.container() == container)
-        {
-          index += offset;
-          break;
-        }
-      }
+      index = umeas.index() + containerOffset(umeas.container(), container_offsets);
     }
 
     std::cout << std::setw(5) << state.index() << ' ';

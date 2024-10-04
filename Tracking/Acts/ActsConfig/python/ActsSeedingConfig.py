@@ -337,7 +337,7 @@ def ActsStripSeedingAlgCfg(flags,
     # Track Param Estimation Tool
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, useTopSp=flags.Acts.reverseTrackFindingForStrips)))
 
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
@@ -353,6 +353,8 @@ def ActsStripSeedingAlgCfg(flags,
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
+
+    kwargs.setdefault('useTopSp', flags.Acts.reverseTrackFindingForStrips)
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc

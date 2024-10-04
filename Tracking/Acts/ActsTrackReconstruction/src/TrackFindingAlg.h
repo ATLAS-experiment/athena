@@ -105,6 +105,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
+    Gaudi::Property<std::vector<bool>> m_reverseSearch {this, "reverseSearch", {}, "Whether to run the finding in seed parameter direction (false or not specified) or reverse direction (true), specified separately for each seed collection"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")

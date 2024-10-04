@@ -471,7 +471,7 @@ namespace ActsTrk {
             }
         }
 
-	Eigen::Matrix<double, 3, 1> globalPosition(firstInfo.position(m));
+	Eigen::Matrix<double, 3, 1> globalPosition(m_useTopSp ? secondInfo.position(m) : firstInfo.position(m));
 
         // evaluation of the local covariance
         // Lines taken from SCT_SpacePoint::setupLocalCovarianceSCT()

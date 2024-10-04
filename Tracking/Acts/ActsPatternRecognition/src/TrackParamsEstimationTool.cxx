@@ -26,6 +26,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_sigmaQOverP );
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
+    ATH_MSG_DEBUG( "   " << m_useTopSp );
 
     return StatusCode::SUCCESS;
   }
@@ -39,7 +40,7 @@ namespace ActsTrk {
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const auto& bottom_sp = sp_collection.front();
+    const auto& bottom_sp = m_useTopSp ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
@@ -71,7 +72,13 @@ namespace ActsTrk {
     if ( sp_collection.size() < 3 ) return std::nullopt;
 
     // Compute Bound parameters at surface
-    std::optional<Acts::BoundVector> params_opt =
+    std::optional<Acts::BoundVector> params_opt = m_useTopSp ?
+      Acts::estimateTrackParamsFromSeed(geoContext,
+                                        sp_collection.rbegin(),
+                                        sp_collection.rend(),
+                                        surface,
+                                        bField,
+                                        bFieldMin) :
       Acts::estimateTrackParamsFromSeed(geoContext,
                                         sp_collection.begin(),
                                         sp_collection.end(),
@@ -82,7 +89,15 @@ namespace ActsTrk {
     if ( not params_opt.has_value() )
       return std::nullopt;
 
-    const auto& params = params_opt.value();
+    auto& params = params_opt.value();
+
+    if (m_useTopSp) {
+      // reverse direction so momentum vector pointing outwards
+      auto [phi, theta] = Acts::detail::normalizePhiTheta(params[Acts::eBoundPhi] - M_PI, M_PI - params[Acts::eBoundTheta]);
+      params[Acts::eBoundPhi] = phi;
+      params[Acts::eBoundTheta] = theta;
+      params[Acts::eBoundQOverP] *= -1.0;
+    }
 
     Acts::BoundVector initialSigmas = {m_sigmaLoc0, m_sigmaLoc1, m_sigmaPhi,
         m_sigmaTheta, m_sigmaQOverP, m_sigmaT0};

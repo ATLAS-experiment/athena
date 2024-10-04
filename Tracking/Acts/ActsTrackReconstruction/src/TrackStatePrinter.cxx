@@ -443,7 +443,7 @@ namespace ActsTrk
   TrackStatePrinter::printSeed(const Acts::GeometryContext &tgContext,
                                const ActsTrk::Seed &seed,
                                const Acts::BoundTrackParameters &initialParameters,
-                               size_t measurementOffset,
+                               const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
                                size_t iseed,
                                bool isKF) const
   {
@@ -457,14 +457,13 @@ namespace ActsTrk
       size_t nom = 0;
       for (const auto *el : sp->measurements())
       {
-        std::size_t index = el->index();
         if (nom > 0)
           os << '+';
         else if (nos > 0)
           os << ',';
         ++nos;
         ++nom;
-        os << measurementOffset + index;
+        os << el->index() + containerOffset(el->container(), offset);
       }
     }
 

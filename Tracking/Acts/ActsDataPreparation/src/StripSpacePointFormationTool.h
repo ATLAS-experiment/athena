@@ -107,6 +107,7 @@ namespace ActsTrk {
         /// @name Configuration flags
         //@{
         Gaudi::Property< bool > m_allClusters{this, "AllClusters", false, "Process all clusters without limits."};
+        Gaudi::Property< bool > m_useTopSp{this, "useTopSp", false, "SP global position is for second strip module."};
         //@}
 
         /// @name Cut parameters

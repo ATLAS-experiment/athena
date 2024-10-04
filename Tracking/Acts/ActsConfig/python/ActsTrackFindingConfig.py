@@ -18,6 +18,15 @@ def isdet(flags,
         keys += strip
     return keys
 
+def seedOrder(flags,
+          *,
+          pixel: list = None,
+          strip: list = None) -> list:
+    keys = isdet(flags, pixel=pixel, strip=strip)
+    if flags.Acts.useStripSeedsFirst:
+        keys.reverse()
+    return keys
+
 def ActsTrackStatePrinterCfg(flags,
                              name: str = "ActsTrackStatePrinterTool",
                              **kwargs) -> ComponentAccumulator:
@@ -49,10 +58,12 @@ def ActsMainTrackFindingAlgCfg(flags,
     acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
     kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
 
-    # Seed labels and collections. These 3 lists must match element for element.
-    kwargs.setdefault("SeedLabels", isdet(flags, pixel=["PPP"], strip=["SSS"]))
-    kwargs.setdefault("EstimatedTrackParametersKeys", isdet(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
-    kwargs.setdefault("SeedContainerKeys", isdet(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
+    # Seed labels and collections.
+    # These 3 lists must match element for element, reversed if flags.Acts.useStripSeedsFirst is True.
+    # Maybe it is best to start with strips where the occupancy is lower.
+    kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
+    kwargs.setdefault("EstimatedTrackParametersKeys", seedOrder(flags, pixel=["ActsPixelEstimatedTrackParams"], strip=["ActsStripEstimatedTrackParams"]))
+    kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
 
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", isdet(flags, pixel=["ITkPixelClusters_Cached" if flags.Acts.useCache else "ITkPixelClusters"], strip=["ITkStripClusters_Cached" if flags.Acts.useCache else "ITkStripClusters"]))
 
@@ -61,6 +72,8 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
+    if flags.Acts.reverseTrackFindingForStrips:
+        kwargs.setdefault("reverseSearch", seedOrder(flags, pixel=[False], strip=[True]))
 
     # Borrow many settings from flags.Tracking.ActiveConfig, normally initialised in createITkTrackingPassFlags() at
     # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L121
@@ -195,9 +208,9 @@ def ActsTrackFindingCfg(flags,
     
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters]))
-    kwargs.setdefault('SeedLabels', isdet(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
-    kwargs.setdefault('SeedContainerKeys', isdet(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault('EstimatedTrackParametersKeys', isdet(flags, pixel=pixelParameterKeys, strip=stripParameterKeys))
+    kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
+    kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
+    kwargs.setdefault('EstimatedTrackParametersKeys', seedOrder(flags, pixel=pixelParameterKeys, strip=stripParameterKeys))
             
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",

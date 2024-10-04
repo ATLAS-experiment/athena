@@ -63,7 +63,7 @@ namespace ActsTrk
     printSeed(const Acts::GeometryContext &tgContext,
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
-              size_t measurementOffset,
+              const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset,
               size_t iseed,
               bool isKF) const;
 
@@ -123,6 +123,8 @@ namespace ActsTrk
 
 } // namespace
 
+#ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTER_ICC
 #include "src/TrackStatePrinter.icc"
+#endif
 
 #endif

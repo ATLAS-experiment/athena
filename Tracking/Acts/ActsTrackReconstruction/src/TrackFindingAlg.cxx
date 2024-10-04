@@ -78,6 +78,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
     ATH_MSG_DEBUG("   " << m_doBranchStopper);
     ATH_MSG_DEBUG("   " << m_doTwoWay);
+    ATH_MSG_DEBUG("   " << m_reverseSearch);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -322,9 +323,6 @@ namespace ActsTrk
     event_stat.resize(m_stat.size());
 
     // Perform the track finding for all initial parameters.
-    // Until the CKF can do a backward search, start with the pixel seeds
-    // (will become relevant when we can remove pixel/strip duplicates).
-    // Afterwards, we could start with strips where the occupancy is lower.
     for (std::size_t icontainer = 0; icontainer < estimatedTrackParametersContainers.size(); ++icontainer)
     {
       if (estimatedTrackParametersContainers[icontainer]->empty())
@@ -406,8 +404,9 @@ namespace ActsTrk
     Acts::PropagatorPlainOptions plainOptions{tgContext, mfContext};
     Acts::PropagatorPlainOptions plainSecondOptions{tgContext, mfContext};
 
+    const bool reverseSearch = (typeIndex < m_reverseSearch.size() && m_reverseSearch[typeIndex]);
     plainOptions.maxSteps = m_maxPropagationStep;
-    plainOptions.direction = Acts::Direction::Forward;
+    plainOptions.direction = reverseSearch ? Acts::Direction::Backward : Acts::Direction::Forward;
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
 
@@ -420,6 +419,7 @@ namespace ActsTrk
                                trackFinder().ckfExtensions,
                                plainOptions,
                                pSurface.get());
+    if (reverseSearch) options.targetSurface = pSurface.get();
     if (!m_useDefaultMeasurementSelector.value()) {
        m_measurementSelector->connect( &options.trackStateCandidateCreator );
     }
@@ -432,7 +432,7 @@ namespace ActsTrk
                             trackFinder().ckfExtensions,
                             plainSecondOptions,
                             pSurface.get());
-      secondOptions->targetSurface = pSurface.get();
+      if (!reverseSearch) secondOptions->targetSurface = pSurface.get();
       if (!m_useDefaultMeasurementSelector.value()) {
          m_measurementSelector->connect( &secondOptions->trackStateCandidateCreator);
       }
@@ -546,7 +546,7 @@ namespace ActsTrk
       {
         ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
       }
-      m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], seedParameters, measurements.measurementOffset(typeIndex), iseed, isKF);
+      m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], seedParameters, measurementContainerOffsets, iseed, isKF);
     };
 
     // Loop over the track finding results for all initial parameters
@@ -686,7 +686,7 @@ namespace ActsTrk
         }
 
         if (m_doTwoWay) {
-          std::optional<detail::RecoTrackStateContainerProxy> firstState;
+          std::optional<detail::RecoTrackStateContainerProxy> firstMeasurement;
           for (auto st : firstTrack.trackStatesReversed()) {
             bool isMeasurement = st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag);
             bool isOutlier = st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag);
@@ -694,13 +694,13 @@ namespace ActsTrk
             // decrease resolution because only the smoothing corrected the very
             // first prediction as filtering is not possible.
             if (isMeasurement && !isOutlier)
-              firstState = st;
+              firstMeasurement = st;
           }
 
-          if (firstState.has_value()) {
+          if (firstMeasurement.has_value()) {
             Acts::BoundTrackParameters secondInitialParameters(
-                firstState->referenceSurface().getSharedPtr(),
-                firstState->parameters(), firstState->covariance(),
+                firstMeasurement->referenceSurface().getSharedPtr(),
+                firstMeasurement->parameters(), firstMeasurement->covariance(),
                 initialParameters->particleHypothesis());
 
             auto secondResult = trackFinder().ckf.findTracks(secondInitialParameters, *secondOptions, tracksContainerTemp);
@@ -708,23 +708,34 @@ namespace ActsTrk
             if (not secondResult.ok()) {
               ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
             } else {
-              auto firstFirstState = std::next(firstTrack.trackStatesReversed().begin(),
-                                               firstTrack.nTrackStates() - 1);
+              // store the original previous state to restore it later
+              auto originalFirstMeasurementPrevious = firstMeasurement->previous();
 
               auto &secondTracksForSeed = secondResult.value();
               for (auto &secondTrack : secondTracksForSeed) {
                 secondTrack.reverseTrackStates(true);
 
-                (*firstFirstState).previous() = secondTrack.outermostTrackState().index();
+                firstMeasurement->previous() = secondTrack.outermostTrackState().index();
                 secondTrack.tipIndex() = firstTrack.tipIndex();
+
+                if (reverseSearch) {
+                  // smooth the full track
+                  auto secondSmoothingResult = Acts::smoothTrack(tgContext, secondTrack, logger());
+                  if (!secondSmoothingResult.ok()) {
+                    ATH_MSG_WARNING("Second smoothing for seed " << iseed << " and track " << secondTrack.index() << " failed with error " << secondSmoothingResult.error());
+                    continue;
+                  }
+
+                  secondTrack.reverseTrackStates(true);
+                }
 
                 addTrack(secondTrack);
 
-                // restore first track
-                (*firstFirstState).previous() = Acts::kTrackIndexInvalid;
-
                 ++nsecond;
               }
+
+              // restore the original previous state for the first track
+              firstMeasurement->previous() = originalFirstMeasurementPrevious;
             }
           }
         }
