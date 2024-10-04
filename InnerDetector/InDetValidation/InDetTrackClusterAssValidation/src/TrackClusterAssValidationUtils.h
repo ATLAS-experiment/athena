@@ -29,6 +29,9 @@ namespace InDet {
       PartPropCache& operator = (const PartPropCache&) = default;
       ///getters
       int id () const {return abs(m_uidCharge);}
+#if !defined(HEPMC3)
+      int barcode () const {return abs(m_uidCharge);}
+#endif
       int charge  () const {return ((m_uidCharge>0) - (m_uidCharge<0));} //returns 1, -1 or 0 depending on sign
       int rapidity() const {return m_rapidity;}
 
