@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloTopoTowerContainer_test.cxx
@@ -266,9 +266,8 @@ int main()
     return 0;
   }  
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  assert ( svcLoc->service("StoreGateSvc", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{pSvcLoc->service("StoreGateSvc")};
+  assert (sg.isValid());
 
   test1 (sg);
   test2 (sg);
