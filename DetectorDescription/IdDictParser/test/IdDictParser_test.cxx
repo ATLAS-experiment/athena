@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_SUITE(IdDictParserTest)
     IdDictParser parser;
     BOOST_CHECK_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/IllFormedXmlTest.xml"), std::runtime_error);
     //the following simply crashes with memory access violation
-    //BOOST_CHECK_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/Inexistent.xml"), std::runtime_error);
+    BOOST_CHECK_THROW( [[maybe_unused]] IdDictMgr & idd = parser.parse ("IdDictParser/Inexistent.xml"), std::runtime_error);
   }
   
 BOOST_AUTO_TEST_SUITE_END()
