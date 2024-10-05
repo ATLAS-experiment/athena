@@ -1670,6 +1670,7 @@ class ItemDef:
         MenuItem('L1_eEM1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.eEM1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
         MenuItem('L1_eTAU1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.eTAU1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
         MenuItem('L1_jTAU1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.jTAU1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
+        MenuItem('L1_TRT_1ZDC_NZDC_VjTE200' ).setLogic( d.NIMTRT & PHYS_1ZDC_NZDC & Not(d.jTE200)   & physcond)
 
         #ATR-30020
         MenuItem('L1_ZDC_HELT15_jTE4000').setLogic( ZDC_HELT15 & d.jTE4000 & physcond )

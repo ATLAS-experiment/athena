@@ -2481,6 +2481,8 @@ HLT_mb_sptrk_L1MBTS_1_1_VjTE50:
   eventCount: 0
 HLT_mb_sptrk_L1MBTS_1_VTE5:
   eventCount: 0
+HLT_mb_sptrk_L1TRT_1ZDC_NZDC_VjTE200:
+  eventCount: 0
 HLT_mb_sptrk_L1TRT_VTE20:
   eventCount: 0
 HLT_mb_sptrk_L1TRT_VjTE200:
@@ -3131,19 +3133,13 @@ HLT_noalg_L1TE100:
   eventCount: 20
 HLT_noalg_L1TE1500p0ETA49:
   eventCount: 0
-HLT_noalg_L1TE1500p0ETA49_OVERLAY:
-  eventCount: 0
 HLT_noalg_L1TE20:
   eventCount: 20
 HLT_noalg_L1TE200:
   eventCount: 15
 HLT_noalg_L1TE3000p0ETA49:
   eventCount: 0
-HLT_noalg_L1TE3000p0ETA49_OVERLAY:
-  eventCount: 0
 HLT_noalg_L1TE3500p0ETA49:
-  eventCount: 0
-HLT_noalg_L1TE3500p0ETA49_OVERLAY:
   eventCount: 0
 HLT_noalg_L1TE3p0ETA49:
   eventCount: 20
@@ -3151,25 +3147,17 @@ HLT_noalg_L1TE5:
   eventCount: 20
 HLT_noalg_L1TE50:
   eventCount: 20
-HLT_noalg_L1TE50_OVERLAY:
-  eventCount: 20
 HLT_noalg_L1TE50_VTE200:
   eventCount: 5
 HLT_noalg_L1TE50_VTE600p0ETA49:
   eventCount: 16
 HLT_noalg_L1TE600p0ETA49:
   eventCount: 4
-HLT_noalg_L1TE600p0ETA49_OVERLAY:
-  eventCount: 4
 HLT_noalg_L1TE6500p0ETA49:
-  eventCount: 0
-HLT_noalg_L1TE6500p0ETA49_OVERLAY:
   eventCount: 0
 HLT_noalg_L1TE7p0ETA49:
   eventCount: 20
 HLT_noalg_L1TE8000p0ETA49:
-  eventCount: 0
-HLT_noalg_L1TE8000p0ETA49_OVERLAY:
   eventCount: 0
 HLT_noalg_L1TRT_EMPTY:
   eventCount: 0
