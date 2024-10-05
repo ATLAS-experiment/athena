@@ -51,7 +51,7 @@ if __name__ == "__main__":
         "Muon"     : ["^Muon", "^TileMuObj", "^MS", "^SlowMuons", ".*Stau", "(.*)MuonTrackParticles$", "MUCTPI_RDO", "^RPC", "^TGC", "^MDT", "^CSC", "^sTGC", "^MM", ".*MuonMeasurements$", "^ExtrapolatedMuonTracks", "^CombinedMuonTracks", "^NCB_MuonSegments", "^UnAssocMuonSegments", "^EMEO_Muons", "^EMEO_MuonSpectrometerTrackParticles", "^xAODNSWSegments"],
         "BTag"     : ["^BTag"],
         "HGTD"     : ["^HGTD"],
-        "InDet"    : ["^InDet", "^PrimaryVertices", "^ComTime_TRT", "^Pixel", "^TRT", "^SCT", "^BCM", "^CTP", "^Tracks", "^ResolvedForwardTracks", "^SplitClusterAmbiguityMap", "^SoftBVrt","^BLMHits"],
+        "InDet"    : ["^InDet", "^PrimaryVertices", "^ComTime_TRT", "^Pixel", "^TRT", "^SCT", "^BCM", "^CTP", "^Tracks", "^ResolvedForwardTracks", "^SplitClusterAmbiguityMap", "^SoftBVrt","^BLMHits", "^FourLeptonVertices"],
         "ITk"      : ["^ITk"],
         "Jet"      : ["^CamKt", "^AntiKt", "^Jet(?!.*ParticleFlowObjects$)","^LCOriginTopoClusters","^EMOriginTopoClusters"],
         "CaloTopo" : ["CaloCalTopoCluster", "CaloCalFwdTopoTowers"],
@@ -68,6 +68,7 @@ if __name__ == "__main__":
         "AnalysisHLT" : ["^AnalysisHLT" ],
         "AnalysisTrigMatch" : ["^AnalysisTrigMatch" ],
         "AnalysisLargeRJets" : ["^AnalysisLargeRJets" ],
+        "AnalysisSiHitElectrons" : ["^AnalysisSiHitElectrons" ],
         }
     
     fileNames = []
