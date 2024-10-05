@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ****************************************************************************
@@ -147,8 +147,6 @@ class CaloDmDescrManager {
     static CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName);
     static CaloCell_ID::CaloSample get_calo_sample(const std::string &SamplingName, float &etaMin, float &etaMax);
 
-    std::string m_DmRegionFileName;
-
     /* iterators over set of DM regions (LAr + Tiles) */
     std::vector<CaloDmRegion *>::const_iterator reg_begin    (void) const;
     std::vector<CaloDmRegion *>::const_iterator reg_end      (void) const;
@@ -156,7 +154,7 @@ class CaloDmDescrManager {
   private:
     const CaloDM_ID*    m_caloDM_ID;
     const AtlasDetectorID* m_id_helper;
-    StoreGateSvc* m_detStore = nullptr;
+    ServiceHandle<StoreGateSvc> m_detStore;
 
     CaloDmDescrElement* build_element(const Identifier& cellId, const CaloDmRegion *myRegion);
     StatusCode load_regions(const std::string& DmRegionFileName);

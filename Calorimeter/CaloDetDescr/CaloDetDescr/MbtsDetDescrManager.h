@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALODETDESCR_MBTSDETDESCRMANAGER_H
@@ -25,8 +25,6 @@ class MbtsDetDescrManager
  private:
   typedef std::map<Identifier, CaloDetDescrElement*> MbtsElements;
   MbtsElements m_elements;
-
-  IMessageSvc*  m_msgSvc;
 };
 
 CLASS_DEF( MbtsDetDescrManager , 66448502 , 1 )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ****************************************************************************
@@ -13,10 +13,9 @@
  Enjoy with element->eta(), element->phi().
 **************************************************************************** */
 #include "CaloDmDetDescr/CaloDmDescrManager.h"
+#include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/getMessageSvc.h"
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "PathResolver/PathResolver.h"
@@ -28,6 +27,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #define MAX_BUFFER_LEN 1024
@@ -38,7 +38,8 @@
 ************************************************************************** */
 CaloDmDescrManager::CaloDmDescrManager()
   : m_caloDM_ID (nullptr),
-    m_id_helper (nullptr)
+    m_id_helper (nullptr),
+    m_detStore ("DetectorStore", "CaloDmDescrManager")
 {
   initialize();
 }
@@ -75,38 +76,11 @@ const CaloDmDescrManager* CaloDmDescrManager::instance()
 ************************************************************************** */
 int CaloDmDescrManager::initialize()
 {
-  MsgStream log(Athena::getMessageSvc(), "CaloDmDescrManager");
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode sc = svcLoc->service("DetectorStore", m_detStore);
-  if ( sc.isFailure() ) {
-    log << MSG::ERROR
-        << "Unable to get pointer to StoreGate Service" << endmsg;
-    return 1;
-  }
-
-  sc = m_detStore->retrieve(m_caloDM_ID);
-  if (sc.isFailure() || !m_caloDM_ID) {
-    log << MSG::ERROR
-        << "Unable to retrieve caloDM_ID helper from DetectorStore" << endmsg;
-    return 1;
-  }
-
-  sc = m_detStore->retrieve(m_id_helper);
-  if (sc.isFailure()) {
-    log << MSG::ERROR
-        << "Unable to retrieve AtlasDetectorID helper from DetectorStore" << endmsg;
-    return 1;
-  }
-
-  //  m_caloDM_ID->set_do_checks(true);
-  m_DmRegionFileName = "DeadMaterialRegionDescription_1.10c.txt";
-  sc = load_regions(m_DmRegionFileName);
-  if (sc.isFailure()) {
-    log << MSG::ERROR
-        << "Unable to load DM regions from '" << m_DmRegionFileName << "' file."<< endmsg;
-    return 1;
-  }
+  const std::string& name = "CaloDmDescrManager";
+  CHECK_WITH_CONTEXT( m_detStore.retrieve(), name, 1);
+  CHECK_WITH_CONTEXT( m_detStore->retrieve(m_caloDM_ID), name, 1);
+  CHECK_WITH_CONTEXT( m_detStore->retrieve(m_id_helper), name, 1);
+  CHECK_WITH_CONTEXT( load_regions("DeadMaterialRegionDescription_1.10c.txt"), name, 1);
 
   build_element_vector();
 

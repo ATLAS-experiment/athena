@@ -7,6 +7,7 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 
 #include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/SmartIF.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
@@ -33,17 +34,16 @@ CaloCellVolumes::CaloCellVolumes(ISvcLocator* svcLocator
   : m_calocell_id(calocell_id)
 {
   // Retrieve input parameters from the database
-  IGeoModelSvc*  geoModel{nullptr};
-  IGeoDbTagSvc*  geoDbTagSvc{nullptr};
-  IRDBAccessSvc* rdbAccess{nullptr};
-
-  if(svcLocator->service("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+  SmartIF<IGeoModelSvc>  geoModel{svcLocator->service("GeoModelSvc")};
+  if(!geoModel)
     throw std::runtime_error("CellVolumes error: cannot access GeoModelSvc");
-  
-  if(svcLocator->service("GeoDbTagSvc",geoDbTagSvc) == StatusCode::FAILURE)
+
+  SmartIF<IGeoDbTagSvc>  geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+  if(!geoDbTagSvc)
     throw std::runtime_error("CellVolumes error: cannot access GeoDbTagSvc");
 
-  if(svcLocator->service(geoDbTagSvc->getParamSvcName(),rdbAccess) == StatusCode::FAILURE)
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if(!rdbAccess)
     throw std::runtime_error("CellVolumes error: cannot access RDBAccessSvc");
 
   std::string larKey, larNode;

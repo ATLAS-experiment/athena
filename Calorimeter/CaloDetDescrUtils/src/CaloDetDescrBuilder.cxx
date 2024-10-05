@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
@@ -51,8 +51,8 @@ std::unique_ptr<CaloDetDescrManager> buildCaloDetDescr(ISvcLocator* svcLocator
   MsgStream log(msgSvc, "buildCaloDetDescr"); 
 
   // --- --- Get CaloCell_ID and CaloIdManager helpers --- ---
-  StoreGateSvc* detStore{nullptr};
-  if(svcLocator->service("DetectorStore", detStore)!=StatusCode::SUCCESS)
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if(!detStore)
     throw std::runtime_error("buildCaloDetDescr failed to acquire a pointer to DetectorStore");
 
   const CaloCell_ID* cell_id{nullptr};
