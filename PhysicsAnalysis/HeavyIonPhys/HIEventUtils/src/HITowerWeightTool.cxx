@@ -148,30 +148,40 @@ StatusCode HITowerWeightTool::initialize()
   m_h3Phi->SetDirectory(0);
   m_h3Mag->SetDirectory(0);
 
-  m_h3EtaPhiResponse=(TH3F*)f->GetObjectChecked("h3_eta_phi_response","TH3F");
-  if(m_h3EtaPhiResponse==nullptr)
+  if(m_applycorrection)
   {
-    ATH_MSG_FATAL("Cannot find TH3F h3_eta_phi_response in config file " << full_path );
-    return StatusCode::FAILURE;
-  }
-  m_h3EtaPhiResponse->SetDirectory(0);
-  m_h3EtaPhiOffset=(TH3F*)f->GetObjectChecked("h3_eta_phi_offset","TH3F");
-  if(m_h3EtaPhiOffset==nullptr)
-  {
-    ATH_MSG_FATAL("Cannot find TH3F h3_eta_phi_offset in config file " << full_path );
-    return StatusCode::FAILURE;
-  }
-  m_h3EtaPhiOffset->SetDirectory(0);
+    ATH_MSG_DEBUG("ApplyCorrection is set to true, now loading h3_eta_phi_response, h3_eta_phi_offset, and h1_run_index.");
+    
+    m_h3EtaPhiResponse=(TH3F*)f->GetObjectChecked("h3_eta_phi_response","TH3F");
+    if(m_h3EtaPhiResponse==nullptr)
+    {
+      ATH_MSG_FATAL("Cannot find TH3F h3_eta_phi_response in config file " << full_path );
+      return StatusCode::FAILURE;
+    }
+    m_h3EtaPhiResponse->SetDirectory(0);
+    m_h3EtaPhiOffset=(TH3F*)f->GetObjectChecked("h3_eta_phi_offset","TH3F");
+    if(m_h3EtaPhiOffset==nullptr)
+    {
+      ATH_MSG_FATAL("Cannot find TH3F h3_eta_phi_offset in config file " << full_path );
+      return StatusCode::FAILURE;
+    }
+    m_h3EtaPhiOffset->SetDirectory(0);
 
-  TH1I* h1_run_index=(TH1I*)f->GetObjectChecked("h1_run_index","TH1I");
-  if(h1_run_index==nullptr)
+    TH1I* h1_run_index=(TH1I*)f->GetObjectChecked("h1_run_index","TH1I");
+    if(h1_run_index==nullptr)
+    {
+      ATH_MSG_FATAL("Cannot find TH3F h1_run_index in config file " << full_path );
+      return StatusCode::FAILURE;
+    }
+    for(int xbin=1; xbin<=h1_run_index->GetNbinsX(); xbin++) {
+      m_runMap.emplace_hint(m_runMap.end(),std::make_pair(h1_run_index->GetBinContent(xbin),xbin));
+    }
+  }
+  else
   {
-    ATH_MSG_FATAL("Cannot find TH3F h1_run_index in config file " << full_path );
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG("ApplyCorrection is set to false, not loading h3_eta_phi_response, h3_eta_phi_offset, and h1_run_index.");
   }
-  for(int xbin=1; xbin<=h1_run_index->GetNbinsX(); xbin++) {
-    m_runMap.emplace_hint(m_runMap.end(),std::make_pair(h1_run_index->GetBinContent(xbin),xbin));
-  }
+
   f->Close();
   return StatusCode::SUCCESS;
 }
