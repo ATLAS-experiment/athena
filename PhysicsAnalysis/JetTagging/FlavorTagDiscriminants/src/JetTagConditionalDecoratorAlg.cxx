@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/JetTagConditionalDecoratorAlg.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace FlavorTagDiscriminants {
   JetTagConditionalDecoratorAlg::JetTagConditionalDecoratorAlg(
@@ -46,6 +47,17 @@ namespace FlavorTagDiscriminants {
         m_decorator->decorateWithDefaults(*element);
       }
     }
+
+    // Lock the decorations
+    //
+    // Ok --- we just made these decorations; no one else should be accessing
+    // them yet.
+    auto* container_nc ATLAS_THREAD_SAFE = const_cast<xAOD::JetContainer*>(container.get());
+    for (SG::auxid_t id: m_auxids) {
+      ATH_MSG_DEBUG("locking auxid " << id << " in " << m_containerKey.key());
+      container_nc->lockDecoration(id);
+    }
+
     return StatusCode::SUCCESS;
   }
 
