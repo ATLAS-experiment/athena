@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,7 +38,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "StoreGate/StoreGateSvc.h"
 #include "IdDictParser/IdDictParser.h"
 #include "TestTools/initGaudi.h"
-#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <iostream>
 #include <cmath>
@@ -248,9 +248,8 @@ int main()
     return 0;
   }  
 
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  assert ( svcLoc->service("StoreGateSvc", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{pSvcLoc->service("StoreGateSvc")};
+  assert (sg.isValid());
 
   CaloTester tester;
   const CaloCellContainer* cells = fill_cells (tester);
