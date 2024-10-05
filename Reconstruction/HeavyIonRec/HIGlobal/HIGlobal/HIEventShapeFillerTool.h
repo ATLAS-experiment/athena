@@ -41,7 +41,7 @@ private:
 
   void updateShape(std::unique_ptr<xAOD::HIEventShapeContainer>& shape, const HIEventShapeIndex* index, const CaloCell* theCell, float geoWeight, float eta0, float phi0, bool isNeg = false) const;
 
-  ToolHandle<IHITowerWeightTool>   m_towerWeightTool{ this, "TowerWeightTool", "HITowerWeightTool", "Handle to Tower Weight Tool" };
+  ToolHandle<IHITowerWeightTool>   m_towerWeightTool{ this, "TowerWeightTool", "", "Handle to Tower Weight Tool" };
   ToolHandle<IHIEventShapeMapTool> m_eventShapeMapTool{ this, "EventShapeMapTool", "HIEventShapeMapTool", "Handle to Event Shape Map Tool" };
   Gaudi::Property< bool >          m_useClusters{ this, "UseClusters", false, "use Clusters boolean switch" };
   Gaudi::Property< int >           m_numOrders{ this, "OrderOfFlowHarmonics", 7, "The number of Orders of harmonic flow to store in the EventShape" };
