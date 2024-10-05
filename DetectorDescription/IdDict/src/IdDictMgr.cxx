@@ -1595,8 +1595,6 @@ IdDictDictionary::unpack (const Identifier& id,
 		const IdDictRange*  range = impl.range(); 
 		IdDictLabel* label = range->m_field->find_label(range->m_label);  
 		switch (range->m_specification) { 
-		case IdDictRange::by_minvalue: 
-		case IdDictRange::by_maxvalue: 
 		case IdDictRange::by_minmax: 
 		    // For a range of values (numbers), add in the field name
 		    str_value = range->m_field->m_name + ' ';
@@ -2587,14 +2585,6 @@ IdDictRange::generate_implementation (const IdDictMgr& /*idd*/,
       impl.set_field(field); 
     } 
     break; 
-    case by_minvalue: 
-        field.set_minimum (m_minvalue); 
-        impl.set_field(field); 
-        break; 
-    case by_maxvalue: 
-        field.set_maximum (m_maxvalue); 
-        impl.set_field(field); 
-        break; 
     case by_minmax: 
         field.set (m_minvalue, m_maxvalue); 
         impl.set_field(field); 
@@ -2620,14 +2610,6 @@ IdDictRange::build_range () const {
       Range::field::element_vector v; 
       v.insert(v.end(), m_values.begin(), m_values.end());
       field.set (v); 
-      break;
-    }
-    case by_minvalue:{ 
-      field.set_minimum (m_minvalue); 
-      break;
-    }
-    case by_maxvalue:{
-      field.set_maximum (m_maxvalue); 
       break;
     }
     case by_minmax:{

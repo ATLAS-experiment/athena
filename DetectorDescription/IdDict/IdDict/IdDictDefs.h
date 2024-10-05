@@ -542,9 +542,7 @@ public:
         by_value, 
         by_values, 
         by_label, 
-        by_labels, 
-        by_minvalue, 
-        by_maxvalue, 
+        by_labels,
         by_minmax 
     } ; 
  
