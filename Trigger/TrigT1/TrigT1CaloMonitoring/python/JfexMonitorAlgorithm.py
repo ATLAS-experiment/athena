@@ -44,17 +44,27 @@ def JfexMonitoringConfig(flags):
 
     # C-side irregular region
     eta_bins = [-4.8 + 0.1*i for i in range(16)]
+    eta_bins_jets = [-4.8 + 0.1*i for i in range(16)]
     # C-side coarse region
     eta_bins += [-3.2,-3.1,-2.9,-2.7]
+    eta_bins_jets += [-3.2,-3.15,-3.1,-2.9,-2.7]
     # central region
     eta_bins += [-2.5 + 0.1*i for i in range(51)]
+    eta_bins_jets += [-2.5 + 0.1*i for i in range(51)]
     # A-side coarse region
     eta_bins += [2.7,2.9,3.1,3.2]
+    eta_bins_jets += [2.7,2.9,3.1,3.15,3.2]
     # A-side irregular region
     eta_bins += [3.3 + 0.1*i for i in range(16)]
+    eta_bins_jets += [3.3 + 0.1*i for i in range(16)]
 
     eta_phi_bins = {
         'xbins': eta_bins,
+        'ybins': 64, 'ymin': -TMath.Pi(), 'ymax': TMath.Pi()
+    }
+
+    eta_phi_bins_jets = {
+        'xbins': eta_bins_jets,
         'ybins': 64, 'ymin': -TMath.Pi(), 'ymax': TMath.Pi()
     }
 
@@ -64,15 +74,16 @@ def JfexMonitoringConfig(flags):
     }
 
     n_bins_total = len(eta_bins) * 64
+    n_bins_total_jets = len(eta_bins_jets) * 64
     n_bins_eta_2p5 = len(eta_phi_bins_central) * 64
     n_bins_eta_2p3 = 46 * 64
     # number of bins above |eta| = 3.2 that will never be filled with TOBs
     # due to the low granularity and irregular structure of the FCAL
     # (given by the length of the list of empty bin in JfexMapForwardEmptyBins.h)
-    n_empty_bins_fcal = 2036
+    n_empty_bins_fcal = 2132
 
     # all bins should be filled with jets, except the always empty ones in FCAL
-    n_expected_filled_bins_jJ = n_bins_total - n_empty_bins_fcal
+    n_expected_filled_bins_jJ = n_bins_total_jets - n_empty_bins_fcal
     # taus are only produced for |eta| < 2.5
     n_expected_filled_bins_jTAU = n_bins_eta_2p5
     # forward electrons are produced for |eta| > 2.3
@@ -121,22 +132,22 @@ def JfexMonitoringConfig(flags):
                            type='TH2I',path=expertPath+'jJ/',
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled",
-                               "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. Inspect for hot/cold spots - check help for list of known hot/coldspots",
+                               "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. In the region 3.1 < |eta| < 3.2 seeded in EMEC and FCAL1 are displayed next to each other, though in reality have similar eta coordinates. Inspect for hot/cold spots - check help for list of known hot/coldspots",
                                "display":"SetPalette(55),Draw=COL1Z"
                            },
                            weight="weight",opt=['kAlwaysCreate'],
-                           **eta_phi_bins)
+                           **eta_phi_bins_jets)
 
     helper.defineHistogram('jJ_Eta,jJ_Phi;h_jJ_EtaPhiMap_HighPt', title="jFex SRJet #geq 20 GeV #eta vs #phi;#eta;#phi",
                            fillGroup=mapHighPtGroupName,
                            type='TH2I',path=expertPath+'jJ/',
                            hanConfig={
                                "algorithm": "Jfex_etaPhiMapFilled",
-                               "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. Inspect for hot/cold spots - check help for list of known hot/coldspots",
+                               "description": "Bins with negative number of entries (in the FCAL) signify that no TOBs can be produced at that position. In the region 3.1 < |eta| < 3.2 seeded in EMEC and FCAL1 are displayed next to each other, though in reality have similar eta coordinates. Inspect for hot/cold spots - check help for list of known hot/coldspots",
                                "display":"SetPalette(55),Draw=COL1Z"
                            },
                            weight="weight",opt=['kAlwaysCreate'],
-                           **eta_phi_bins)
+                           **eta_phi_bins_jets)
 
     helper.defineHistogram('jJ_GlobalEta;h_jJ_GlobalEta', title='jFex SRJet Global #eta;#eta;Counts',
                            fillGroup=groupName,

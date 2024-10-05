@@ -71,7 +71,7 @@ def plot_efficiency_comb(channel, years):
             livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
 
             # Cut out short runs
-            if livetime < pt.livetimecut:
+            if livetime < pt.runlivetimecut:
                 if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                 continue
 

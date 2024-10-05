@@ -32,17 +32,12 @@ PURPOSE: Tool
 #include "TRT_ConditionsData/RtRelation.h"
 #include "TrkToolInterfaces/IUpdator.h"
 
-#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
-
 #include "xAODTracking/VertexContainer.h"
 
 
 FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& name, const IInterface* parent) :
 	AthAlgTool(type, name, parent),
 	m_DetID(nullptr), m_TRTID(nullptr),
-	// m_trtcaldbTool("ITRT_CalDbTool", this),
-	// m_neighbourSvc("ITRT_StrawNeighbourSvc", name),
-	// m_TRTStrawSummaryTool("InDetTRTStrawStatusSummaryTool",this),
 	m_updator(nullptr),
 	m_maxDistance(2.8),
 	m_maxTimeResidual(150),
@@ -63,61 +58,18 @@ FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& n
 }
 
 StatusCode FillAlignTRTHits::initialize(){
-	msg(MSG::INFO) << "initialize() " << endmsg;
-	if ((detStore()->retrieve(m_DetID,"AtlasID")).isFailure()) {
-		msg(MSG::FATAL) << "Problem retrieving ATLASDetectorID helper" << endmsg;
-		return StatusCode::FAILURE;
-	}
-	if ((detStore()->retrieve(m_TRTID)).isFailure()) {
-		msg(MSG::FATAL) << "Problem retrieving TRTID helper" << endmsg;
-		return StatusCode::FAILURE;
-	}
+  ATH_CHECK ( detStore()->retrieve(m_DetID, "AtlasID") );
+  ATH_CHECK ( detStore()->retrieve(m_TRTID, "TRT_ID") );
 
-    std::cout<< m_trtcaldbTool<< std::endl;
-	if(m_trtcaldbTool.retrieve().isFailure()) {
-		msg(MSG::FATAL) << "Could not get TRT_CalDbTool !" << endmsg;
-		return StatusCode::FAILURE;
-	}
-	if(StatusCode::SUCCESS!=m_neighbourSvc.retrieve() ) {
-		msg(MSG::FATAL) <<"Could not get TRTStrawNeighbourSvc !"<<endmsg;
-		return StatusCode::FAILURE;
-	}
+  ATH_CHECK ( m_trtcaldbTool.retrieve() );
+  ATH_CHECK ( m_neighbourSvc.retrieve() );
+  ATH_CHECK ( m_driftFunctionTool.retrieve() );
+  ATH_CHECK ( m_updator.retrieve() );
+  ATH_CHECK ( m_TRTStrawSummaryTool.retrieve() );
 
-	// To extract ToT Corrections:
-	// Get DriftFunction tool service
-	//
-	if ( m_driftFunctionTool.retrieve().isFailure() ) {
-		msg(MSG::FATAL) << m_driftFunctionTool.propertyName() << ": Failed to retrieve tool " << m_driftFunctionTool.type() << endmsg;
-		return StatusCode::FAILURE;
-	} else {
-		msg(MSG::INFO) << m_driftFunctionTool.propertyName() << ": Retrieved tool " << m_driftFunctionTool.type() << endmsg;
-	}
-
-	// use updator to get unbiased states
-	if ( ! m_updatorHandle.empty() ) {
-		StatusCode sc = m_updatorHandle.retrieve();
-		if (sc.isFailure()) {
-			msg(MSG::FATAL) << "Could not retrieve measurement updator tool: "<< m_updatorHandle << endmsg;
-			return sc;
-		}
-		m_updator = &(*m_updatorHandle);
-	} else {
-		ATH_MSG_DEBUG ("No Updator for unbiased track states given, use normal states!");
-		m_updator = nullptr;
-	}
-
-	// The tool to get the argon status:
-	if (m_TRTStrawSummaryTool.retrieve().isFailure() ) {
-		ATH_MSG_ERROR ("Failed to retrieve StrawStatus Summary " << m_TRTStrawSummaryTool);
-		ATH_MSG_ERROR ("configure as 'None' to avoid its loading.");
-		return StatusCode::FAILURE;
-	} else {
-		msg(MSG::INFO) << "Retrieved tool " << m_TRTStrawSummaryTool << endmsg;
-	}
-
-	m_f = new TFile(m_ntupleName.value().c_str(),"RECREATE");
-	m_ntuple = new TNtuple("ntuple","TRT calibration ntuple","run:evt:lbn:nvx:trk:det:lay:mod:stl:stw:brd:chp:sid:locx:locy:locz:x:y:z:r:dr:t:rtrack:drrtrack:rtrackunbias:drrtrackunbias:ttrack:ttrackunbias:t0:ephase:phi:theta:pt:qoverp:d0:ToT:HT:ToTCorrection:HTCorrection:isArgonStraw");
-	return StatusCode::SUCCESS;
+  m_f = new TFile(m_ntupleName.value().c_str(),"RECREATE");
+  m_ntuple = new TNtuple("ntuple","TRT calibration ntuple","run:evt:lbn:nvx:trk:det:lay:mod:stl:stw:brd:chp:sid:locx:locy:locz:x:y:z:r:dr:t:rtrack:drrtrack:rtrackunbias:drrtrackunbias:ttrack:ttrackunbias:t0:ephase:phi:theta:pt:qoverp:d0:ToT:HT:ToTCorrection:HTCorrection:isArgonStraw");
+  return StatusCode::SUCCESS;
 }
 
 

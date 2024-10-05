@@ -25,7 +25,7 @@ def tryError(command, error):
 def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
     mserver = 'cernmx.cern.ch'
     mfrom   = 'atltzp1@cern.ch'
-    msubject = "TRT CALIB TESTING - SERGI & PETER - Exit Status for Run %d" % (runNumber)
+    msubject = "TRT CALIB TESTING TIER0 - SERGI & PETER - Exit Status for Run %d" % (runNumber)
 
     # assemble mail body
     mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
@@ -163,9 +163,7 @@ def fromRunArgs(runArgs):
         print("merge.root.. already exists. Removed.")
         os.remove("merge.root")  
         
-    command  = 'echo "ROOT version used: $ROOTSYS"; cp -v $ROOTSYS/bin/thisroot.sh .; chmod u+x thisroot.sh; source thisroot.sh; '
-    command += 'cp -v $ROOTSYS/bin/hadd .; '
-    command += './hadd merge.root '
+    command  = 'hadd merge.root '
     # merge all the files
     for _f in files_list_cal :
         command += "%s " % (_f)     

@@ -22,7 +22,6 @@
 // Tool interfaces
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
-#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
 

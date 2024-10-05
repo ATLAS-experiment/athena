@@ -22,8 +22,6 @@
 
 
 #include "TrkSurfaces/Surface.h"
-#include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
-#include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
 
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"

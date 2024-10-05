@@ -56,7 +56,7 @@ runname = None
 for key in fin.GetListOfKeys():
     if key.GetName().startswith('run_'):
         runname = key.GetName()
-        runnumber = runname.replace('run_','')
+        runnumber = int(runname.replace('run_',''))
         break
 
 if not runname:
@@ -85,9 +85,8 @@ if args.grl:
     grlReader.Interpret()
     grl = grlReader.GetMergedGRLCollection()
 else:
-    #grlname = 'grl_'+runnumber+'.xml'
-    #grl_file = doZLumi.makeGRL(int(runnumber), 'PHYS_StandardGRL_All_Good', grlname)
-    grl = None
+    grlname = 'grl_'+str(runnumber)+'.xml'
+    grl_file = doZLumi.makeGRL(runnumber, 'PHYS_StandardGRL_All_Good', grlname)
 
 lb_length_old = fin.Get(lb_length_name)
 lbmin, lbmax = lb_length_old.FindFirstBinAbove(0, 1, 0, -1), lb_length_old.FindLastBinAbove(0, 1, 0, -1)
@@ -107,7 +106,7 @@ else:
 official_lum_zero = ROOT.TProfile('official_lum_zero', 'official inst luminosity', int(lbmax-lbmin), lbmin, lbmax)
 official_mu = ROOT.TProfile('official_mu', 'official mu', int(lbmax-lbmin), lbmin, lbmax)
 
-lblb = fetch_iovs("LBLB", runs=int(runname[4:]))
+lblb = fetch_iovs("LBLB", runs=runnumber)
 lbtime = inverse_lblb(lblb)
 iovs_acct = fetch_iovs('COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LumiAccounting', lbtime.first.since, lbtime.last.until, tag=args.tag)
 
@@ -245,6 +244,20 @@ for ibin in range(1, int(lbmax-lbmin)+1):
     
     this_lb = int(lb_full.GetBinCenter(ibin))
     loclivetime = divisor[ibin]
+    # some ad-hoc Run 2 corrections
+    if runnumber == 302831 and this_lb < 11:
+        loclivetime = 0
+    elif runnumber == 329835 and this_lb < 554:
+        loclivetime = 0
+    elif runnumber == 310247 and (this_lb == 442 or this_lb == 462):
+        loclivetime = 0
+    elif runnumber == 281385 and this_lb < 197:
+        loclivetime *= 4.0/6.0
+    elif runnumber == 281385 and this_lb < 375:
+        loclivetime *= 5.0/6.0
+    elif runnumber == 286367:
+        loclivetime *= 5.0/6.0
+    
     try:
         this_fill = lb_lhcfill[this_lb]
     except KeyError: 
@@ -253,8 +266,11 @@ for ibin in range(1, int(lbmax-lbmin)+1):
 
     passgrl = 1
     for channel in ["Zee", "Zmumu"]:
-        if grl and not grl.HasRunLumiBlock(int(runname[4:]), this_lb):
+        if grl and not grl.HasRunLumiBlock(runnumber, this_lb):
             passgrl = 0
+            continue
+        # at less than 9s LB livetime: all Z counting zeroed
+        if loclivetime < 9: 
             continue
 
         lb = "lb_" + str(this_lb)
@@ -378,34 +394,12 @@ for ibin in range(1, int(lbmax-lbmin)+1):
         eff_Acomb  = ACCEPTANCE * eff_comb
         err_Acomb  = ACCEPTANCE * err_comb
 
-        lblive = divisor[ibin]
-
-        if lblive < 9: 
-            continue
-
-        loclivetime = lblive
-        run = int(runname.replace("run_", ""))
         if do_toys: 
-            effcy     = arr_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
+            effcy     = arr_comb * dq_cf.correction(official_mu[ibin], channel, campaign, runnumber)
         else:
-            effcy     = eff_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
-            effcyerr  = err_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
+            effcy     = eff_comb * dq_cf.correction(official_mu[ibin], channel, campaign, runnumber)
+            effcyerr  = err_comb * dq_cf.correction(official_mu[ibin], channel, campaign, runnumber)
         
-        if run == 302831 and this_lb < 11:
-            loclivetime = 0
-        elif run == 329835 and this_lb < 554:
-            loclivetime = 0
-        elif run == 310247 and (this_lb == 442 or this_lb == 462):
-            loclivetime = 0
-        elif run == 281385 and this_lb < 197:
-            loclivetime = lblive * 4.0/6.0 # ad-hoc scale factor
-        elif run == 281385 and this_lb < 375:
-            loclivetime = lblive * 5.0/6.0 # ad-hoc scale factor
-        elif run == 286367:
-            loclivetime = lblive * 5.0/6.0 # ad-hoc scale factor
-        else:
-            loclivetime = lblive 
-
         zlumi = zlumistat = zrate = 0.0
         CORRECTIONS = ZPURITYFACTOR/ACCEPTANCE/ZXSEC
 
@@ -423,17 +417,16 @@ for ibin in range(1, int(lbmax-lbmin)+1):
 
         out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat, zrate]    
 
-    run = int(runname.replace("run_", ""))
-       
     lumi_index = len(out_dict['Zee'])-3
     error_index = len(out_dict['Zee'])-2
     zll_lumi = (out_dict['Zee'][lumi_index] + out_dict['Zmumu'][lumi_index])/2
     zll_lumi_err = 0.5 * math.sqrt( pow(out_dict['Zee'][error_index], 2) + pow(out_dict['Zmumu'][error_index], 2) )
-    out_write = [this_fill, run, this_lb, lb_start_end[this_lb][0], lb_start_end[this_lb][1], loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]
+    out_write = [this_fill, runnumber, this_lb, lb_start_end[this_lb][0], lb_start_end[this_lb][1], loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]
     csvwriter.writerow(out_write)
 
-print("Missing LBs in Zee channel: ", zee_missing_lbs)
-print("Missing LBs in Zmumu channel: ", zmumu_missing_lbs)
+if (len(zee_missing_lbs) > 0 or len(zmumu_missing_lbs) > 0):
+    print("Missing LBs in Zee channel: ", zee_missing_lbs)
+    print("Missing LBs in Zmumu channel: ", zmumu_missing_lbs)
 
 if bad_database:
     print("WARNING: There was an error retrieving information from the lumi database, likely need to update the tags.")

@@ -3,8 +3,7 @@
 
 """
 Plot comparisons of Zee/Zmumu and Z/ATLAS over entire data-periods. 
-This can be done as a function of time (validated, working perfectly), 
-and pileup (not yet fully validated).
+This can be done as a function of time or pileup
 """
 
 import numpy as np
@@ -33,35 +32,27 @@ outdir = args.outdir
 outcsv = args.outcsv
 
 # Do all of the ugly plot stlying here
+yval = 0.85
+xval = 0.2
+if args.absolute: ymin, ymax = 0.91, 1.09
+else: ymin, ymax = 0.93, 1.07
+
 if year == "run3": 
     years = ["22", "23", "24"]
     out_tag = "run3"
     time_format = "%m/%y"
-    if args.absolute:
-        ymin, ymax = 0.93, 1.07
-    else:
-        ymin, ymax = 0.93, 1.07
     xtitle = 'Month / Year'
     date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
+    labelsize = 44
     norm_type = "Run3"
-    if channel is not None: 
-        xval = 0.25
-        yval = 0.85
-    else:
-        xval = 0.25
-        yval = 0.85
-    set_size = 1
 else: 
     years = [year]
     out_tag = "data"+year
     time_format = "%d/%m"
-    ymin, ymax = 0.94, 1.06
     xtitle = 'Date in 20' + year
     date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
     norm_type = "year"
-    xval = 0.20
-    yval = 0.86
-    set_size = 0
+    labelsize = 22
 
 def main():
     if args.comp: 
@@ -83,7 +74,7 @@ def channel_comparison(years):
             for run in grl: 
                 livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
                 # Cut out short runs
-                if livetime < pt.livetimecut:
+                if livetime < pt.runlivetimecut:
                     if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                     continue
 
@@ -112,6 +103,7 @@ def channel_comparison(years):
 
     tg = R.TGraphErrors(len(vec_times), vec_times, vec_ratio, R.nullptr, vec_ratio_err)
     leg = R.TLegend(0.645, 0.72, 0.805, 0.91)
+    leg.SetFillStyle(0)
 
     # Depending if we're plotting over whole Run-3, change canvas size
     if out_tag == "run3":
@@ -136,19 +128,19 @@ def channel_comparison(years):
     print("Pol0 fit mean +- 68% percentile = ", round(mean,3), " +- ", round(stdev, 3))
    
     leg.SetBorderSize(0)
-    leg.SetTextSize(0.045)
+    leg.SetTextSize(0.05)
     leg.AddEntry(tg, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
     leg.AddEntry(tg.GetFunction("pol0"), "Mean = " + str(round(mean, 3)), "l")
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
 
-    pt.drawAtlasLabel(xval, 0.86, "Internal")
-    pt.drawText(xval, 0.80, date_tag, set_size)
+    pt.drawAtlasLabel(xval, 0.88, "Internal")
+    pt.drawText(xval, 0.82, date_tag, size=labelsize)
 
     new_trig_line = R.TLine(1683743066.0, 0.95, 1683743066.0, 1.05)
         
     new_trig_line.SetLineColor(R.kBlue)
-    new_trig_line.SetLineWidth(3)
+    new_trig_line.SetLineWidth(1)
     new_trig_line.SetLineStyle(2)
     new_trig_line.Draw("same")
     R.gPad.Update()
@@ -200,7 +192,7 @@ def zcounting_vs_atlas(channel, years):
             livetime, zlumi, zerr, olumi, timestamp, dfz_small = pt.get_dfz(args.indir, year, run, channel)
             
             # Cut out short runs
-            if livetime < pt.livetimecut:
+            if livetime < pt.runlivetimecut:
                 if livetime >= 0.: print(f"Skip Run {run} because of live time {livetime/60:.1f} min")
                 continue
 
@@ -249,21 +241,18 @@ def zcounting_vs_atlas(channel, years):
 
     tg = R.TGraphErrors(len(arr_date), arr_date, array('d',arr_zlumi_ratio), R.nullptr, array('d',arr_zerr_ratio))
 
-    if args.absolute:
-        plot_title = "Ratio of absolute "+ zstring +" Luminosity to ATLAS Luminosity across " + norm_type
-    else:
-        plot_title = "Ratio of normalised "+ zstring +" Luminosity to ATLAS Luminosity across " + norm_type
-    tg.SetTitle(plot_title+";"+xtitle+";"+ytitle)
-
     # Depending if we're plotting over whole Run-3, change canvas size
     if out_tag == "run3":
-        c1 = R.TCanvas("c1", "c1", 2000, 1200)
+        c1 = R.TCanvas("c1", "c1", 2000, 1000)
     else:
-        c1 = R.TCanvas("c1", "c1", 1000, 750)
-    c1.SetTopMargin(0.1)
+        c1 = R.TCanvas()
 
     tg.Draw('ap')
     tg.GetYaxis().SetRangeUser(ymin, ymax)
+    if args.absolute:
+        plot_title = "Absolute L_{"+ zstring +"} to ATLAS across " + norm_type
+    else:
+        plot_title = "Normalised L_{"+ zstring +"} to ATLAS across " + norm_type
     
     # Plot 68% percentile band
     stdev = np.percentile(abs(arr_zlumi_ratio - np.median(arr_zlumi_ratio)), 68)
@@ -279,30 +268,25 @@ def zcounting_vs_atlas(channel, years):
     tg.Draw('same ep')
 
     leg = R.TLegend(0.55, 0.20, 0.69, 0.45)
+    leg.SetFillStyle(0)
     leg.SetBorderSize(0)
-    leg.SetTextSize(0.045)
+    leg.SetTextSize(0.05)
     leg.AddEntry(tg, leg_entry, "ep")
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
-    
-    if args.absolute:
-        pt.drawAtlasLabel(xval, yval-0.47, "Internal")       
-        pt.drawText(xval, yval-0.53, date_tag, set_size)
-        pt.drawText(xval, yval-0.59, zstring, set_size)
-        pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", set_size)
-    else:
-        pt.drawAtlasLabel(xval, yval-0.47, "Internal")
-        pt.drawText(xval, yval-0.53, date_tag, set_size)
-        pt.drawText(xval, yval-0.59, zstring, set_size)
-        pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", set_size)
-        pt.drawText(xval, yval-0.02, total_zlumi_string, set_size)
 
-    pt.drawText(xval-0.12, 0.95, plot_title, set_size)
+    pt.drawAtlasLabel(xval, yval-0.47, "Internal")
+    pt.drawText(xval, yval-0.53, date_tag, size=labelsize)
+    pt.drawText(xval, yval-0.59, zstring, size=labelsize)
+    pt.drawText(xval, yval-0.65, "OflLumi-Run3-005", size=labelsize)
+    pt.drawText(xval, yval-0.04, total_zlumi_string, size=labelsize)
 
+    pt.drawText(xval, 0.88, plot_title, size=labelsize)
+
+    tg.GetXaxis().SetTitle(xtitle)
+    tg.GetYaxis().SetTitle(ytitle)
     tg.GetYaxis().SetRangeUser(ymin, ymax)
     tg.GetXaxis().SetTimeDisplay(2)
-    tg.GetXaxis().SetLabelSize(0.04)
-    tg.GetYaxis().SetLabelSize(0.04)
     tg.GetXaxis().SetNdivisions(9,R.kFALSE)
     tg.GetXaxis().SetTimeFormat(time_format)
     tg.GetXaxis().SetTimeOffset(0,"gmt")

@@ -409,16 +409,37 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.suffix   = "MinBiasPixel"
   flags.roi      = "HLT_Roi_MinBias"
   flags.doFullScan      = True
-  flags.pTmin    = 0.1*Units.GeV # TODO: double check
+  flags.pTmin    = 0.1*Units.GeV # this is good for HI which is the client of this setup
   flags.minPT    = tsetter(flags.minPT, flags.pTmin)
+
+
+  flags.maxHoles         = 0 # HI setup
+  flags.maxPixelHoles    = 0 # HI setup
+  flags.maxSctHoles      = 0
+  flags.maxDoubleHoles   = 0
+  flags.minSiNotShared   = 3
+  flags.maxShared        = 0
+  flags.nHolesMax        = 0
+  flags.nHolesGapMax     = 0
+  if recoMode=="InDet":
+    flags.useSCT           = False
+    flags.useSCTSeeding    = False
+    flags.useTRT           = False
+
+    flags.roadWidth        = 12.0
+    flags.Xi2max           = 15
+    flags.Xi2maxNoAdd      = 35.0
+    flags.nWeightedClustersMin = 6
+    flags.doBremRecoverySi        = False
+    flags.RunPixelPID = False # we use these tracks only for counting
 
   flags.doTRT           = False
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
-  flags.doZFinder       = True
+  flags.doZFinder       = False
   flags.doZFinderOnly   = True
   
-  flags.nClustersMin        = 5
+  flags.nClustersMin        = 3
   flags.useSeedFilter       = True
   flags.maxPrimaryImpact    = 10.*Units.mm
   flags.maxZImpact          = 150.*Units.mm
