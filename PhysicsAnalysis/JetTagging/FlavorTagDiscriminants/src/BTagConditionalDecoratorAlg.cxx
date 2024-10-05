@@ -3,6 +3,7 @@
 */
 
 #include "FlavorTagDiscriminants/BTagConditionalDecoratorAlg.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace FlavorTagDiscriminants {
   BTagConditionalDecoratorAlg::BTagConditionalDecoratorAlg(
@@ -35,6 +36,17 @@ namespace FlavorTagDiscriminants {
         m_decorator->decorateWithDefaults(*element);
       }
     }
+
+    // Lock the decorations
+    //
+    // Ok --- we just made these decorations; no one else should be accessing
+    // them yet.
+    auto* container_nc ATLAS_THREAD_SAFE = const_cast<xAOD::BTaggingContainer*>(container.get());
+    for (SG::auxid_t id: m_auxids) {
+      ATH_MSG_DEBUG("locking auxid " << id << " in " << m_containerKey.key());
+      container_nc->lockDecoration(id);
+    }
+
     return StatusCode::SUCCESS;
   }
 
