@@ -10,13 +10,16 @@
  * @brief Main builder to create/position all volumes described in a GeoModel Tree
  */
 
+#include "G4LogicalVolume.hh"
 #include "VolumeBuilder.h"
+
+#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaBaseComps/AthMessaging.h"
+
+#include "G4AtlasInterfaces/IGeo2G4Svc.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoDefinitions.h"
-#include "G4LogicalVolume.hh"
-
 #include "GeoModelUtilities/GeoBorderSurfaceContainer.h"
-#include "AthenaBaseComps/AthMessaging.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 // STL includes
@@ -57,7 +60,8 @@ private:
 
   // std::Air in the case when top boolean envelope has to be built
   const GeoMaterial* m_matAir{nullptr};
-  StoreGateSvc* m_pDetStore{nullptr};
+  ServiceHandle<StoreGateSvc> m_pDetStore{"DetectorStore", "Geo2G4Builder"};
+  ServiceHandle<IGeo2G4Svc> m_g2gSvc{"Geo2G4Svc", "Geo2G4Builder"};
   GeoModelExperiment* m_theExpt{nullptr};
 };
 

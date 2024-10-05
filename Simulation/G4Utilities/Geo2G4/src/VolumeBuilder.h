@@ -6,11 +6,9 @@
 #define GEO2G4_VolumeBuilder_H
 
 #include "G4LogicalVolume.hh"
-#include "Geo2G4SvcAccessor.h"
+#include "G4VPhysicalVolume.hh"
 
 #include "GeoModelUtilities/GeoOpticalPhysVol.h"
-
-#include "G4VPhysicalVolume.hh"
 
 #include <string>
 #include <map>

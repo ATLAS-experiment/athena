@@ -3,8 +3,6 @@
 */
 
 #include "Geo2G4Builder.h"
-#include "Geo2G4SvcAccessor.h"
-#include "G4AtlasInterfaces/Geo2G4SvcBase.h"
 #include "Geo2G4OpticalSurfaceFactory.h"
 
 #include "GeoModelKernel/GeoVDetectorManager.h"
@@ -20,8 +18,6 @@
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include "G4ReflectionFactory.hh"
@@ -38,13 +34,11 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
   , m_detectorName(detectorName)
   , m_motherTransform(GeoTrf::Transform3D::Identity())
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-  StatusCode sc=svcLocator->service("DetectorStore",m_pDetStore);
-  if (sc.isFailure()) {
+  if (m_pDetStore.retrieve().isFailure()) {
     THROW_EXCEPTION("ERROR: Geo2G4Builder for detector "<< detectorName << " could not access the detector store.");
   }
 
-  sc = m_pDetStore->retrieve( m_theExpt, "ATLAS" );
+  StatusCode sc = m_pDetStore->retrieve( m_theExpt, "ATLAS" );
   if(sc.isFailure()){
     THROW_EXCEPTION(detectorName<<" could not get GeoModelExperiment");
   }
@@ -73,9 +67,11 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
 	}
     }
 
-    Geo2G4SvcAccessor accessor;
-    Geo2G4SvcBase *g=accessor.GetGeo2G4Svc();
-    m_theBuilder=g->GetDefaultBuilder();
+    if (m_g2gSvc.retrieve().isFailure()) {
+      THROW_EXCEPTION("Failed to retrieve manager Geo2G4Svc");
+    }
+
+    m_theBuilder = m_g2gSvc->GetDefaultBuilder();
     if(m_theBuilder)
       ATH_MSG_INFO("Set volume builder ---> "<< m_theBuilder->GetKey());
     else
@@ -170,10 +166,7 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
 
 VolumeBuilder*  Geo2G4Builder::GetVolumeBuilder(std::string bname)
 {
-  Geo2G4SvcAccessor accessor;
-  Geo2G4SvcBase *g=accessor.GetGeo2G4Svc();
-
-  m_theBuilder=g->GetVolumeBuilder(std::move(bname));
+  m_theBuilder = m_g2gSvc->GetVolumeBuilder(std::move(bname));
   return m_theBuilder;
 }
 
