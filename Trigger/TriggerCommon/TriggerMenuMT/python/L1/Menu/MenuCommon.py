@@ -65,6 +65,7 @@ RequiredL1Items = [
         'L1_RD2_FILLED',
         'L1_RD3_EMPTY',
         'L1_RD3_FILLED',
+        'L1_RD0_LAR_FILLED','L1_RD0_LAR_EMPTY','L1_RD0_LAR_FIRSTEMPTY','L1_RD0_LAR_BGRP7',
 
          # ZB 
         'L1_ZeroBias', 
