@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -21,12 +21,13 @@ Updated:  Ilija Vukotic August 2008.
 
 ********************************************************************/
 #include "CaloUtils/CaloTowerStore.h"
+
+#include "AthenaKernel/getMessageSvc.h"
 #include "CaloEvent/CaloTowerSeg.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IMessageSvc.h"
-// include header files
 #include "Identifier/IdentifierHash.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -87,12 +88,7 @@ bool CaloTowerStore::buildLookUp(const CaloDetDescrManager& theManager,
   ///////////////////////
 
   // messaging
-  IMessageSvc* theMsgSvc;
-  StatusCode sc = Gaudi::svcLocator()->service("MessageSvc",theMsgSvc);
-  if(sc.isFailure()){
-    std::cout <<  "Cannot locate MessageSvc" << std::endl;
-  }
-  MsgStream msg(theMsgSvc,"CaloTowerStore");
+  MsgStream msg(Athena::getMessageSvc(),"CaloTowerStore");
 
   // get cell description manager
   if ( ! theManager.isInitialized() ){
