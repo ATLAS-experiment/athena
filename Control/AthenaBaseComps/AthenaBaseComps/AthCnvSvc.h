@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthCnvSvc.h 
@@ -60,11 +60,10 @@ template <class TYPE> class SvcFactory;
     @version 1.0
 */
 
-class AthCnvSvc
-  : virtual public ::IConversionSvc,
-    virtual public ::IAddressCreator,
-            public ::AthService
-{ 
+class AthCnvSvc : public extends<::AthService,
+                                 ::IConversionSvc,
+                                 ::IAddressCreator>
+{
   friend class SvcFactory<AthCnvSvc>;
 
 public:
@@ -120,16 +119,14 @@ public:
 
   /// Gaudi Service Implementation
   //@{
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual StatusCode queryInterface (const InterfaceID& riid,
-                                     void** ppvInterface);
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   //@}
 
   ///@name @c IConversionSvc implementation
   //@{
   /// Retrieve the class type of the data store the converter uses.
-  virtual long repSvcType() const;
+  virtual long repSvcType() const override;
 
   /// Implementation of IConverter: dummy call
   const CLID& objType() const;
@@ -139,20 +136,20 @@ public:
       @param     pService   Pointer to data provider service
   */
   virtual 
-  StatusCode setDataProvider(IDataProviderSvc* pService);
+  StatusCode setDataProvider(IDataProviderSvc* pService) override;
 
   /** Implementation of IConverter: Get Data provider service
       @return    Pointer to data provider service
   */
-  virtual SmartIF<IDataProviderSvc>& dataProvider()  const;
+  virtual SmartIF<IDataProviderSvc>& dataProvider() const override;
 
   /// Implementation of IConverter: Set conversion service the converter is connected to
   virtual
-  StatusCode setConversionSvc(IConversionSvc* svc);
+  StatusCode setConversionSvc(IConversionSvc* svc) override;
 
   /// Implementation of IConverter: Get conversion service the converter is connected to
   virtual 
-  SmartIF<IConversionSvc>& conversionSvc()    const;
+  SmartIF<IConversionSvc>& conversionSvc() const override;
 
   /// Set address creator facility
   virtual
@@ -160,68 +157,68 @@ public:
 
   /// Retrieve address creator facility
   virtual
-  SmartIF<IAddressCreator>& addressCreator()   const;
+  SmartIF<IAddressCreator>& addressCreator() const override;
   
   /// Implementation of IConverter: Create the transient representation of an object.
   virtual
-  StatusCode createObj(IOpaqueAddress* pAddress,DataObject*& refpObject);
+  StatusCode createObj(IOpaqueAddress* pAddress,DataObject*& refpObject) override;
 
   /// Implementation of IConverter: Resolve the references of the created transient object.
   virtual
-  StatusCode fillObjRefs(IOpaqueAddress* pAddress, DataObject* pObject);
+  StatusCode fillObjRefs(IOpaqueAddress* pAddress, DataObject* pObject) override;
 
   /// Implementation of IConverter: Update the transient object from the other representation.
   virtual
-  StatusCode updateObj(IOpaqueAddress* pAddress, DataObject* refpObject);
+  StatusCode updateObj(IOpaqueAddress* pAddress, DataObject* refpObject) override;
 
   /// Implementation of IConverter: Update the references of an updated transient object.
   virtual
-  StatusCode updateObjRefs(IOpaqueAddress* pAddress, DataObject* pObject);
+  StatusCode updateObjRefs(IOpaqueAddress* pAddress, DataObject* pObject) override;
 
   /// Implementation of IConverter: Convert the transient object to the requested representation.
   virtual
-  StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress);
+  StatusCode createRep(DataObject* pObject, IOpaqueAddress*& refpAddress) override;
 
   /// Implementation of IConverter: Resolve the references of the converted object. 
   virtual
-  StatusCode fillRepRefs(IOpaqueAddress* pAddress,DataObject* pObject);
+  StatusCode fillRepRefs(IOpaqueAddress* pAddress,DataObject* pObject) override;
 
   /// Implementation of IConverter: Update the converted representation of a transient object.
   virtual
-  StatusCode updateRep(IOpaqueAddress* pAddress, DataObject* pObject);
+  StatusCode updateRep(IOpaqueAddress* pAddress, DataObject* pObject) override;
 
   /// Implementation of IConverter: Update the references of an already converted object.
   virtual
-  StatusCode updateRepRefs(IOpaqueAddress* pAddress, DataObject* pObject);
+  StatusCode updateRepRefs(IOpaqueAddress* pAddress, DataObject* pObject) override;
 
   /// Add converter object to conversion service.
   virtual
-  StatusCode addConverter(const CLID& clid);
+  StatusCode addConverter(const CLID& clid) override;
 
   /// Add converter object to conversion service.
   virtual
-  StatusCode addConverter(IConverter* pConverter);
+  StatusCode addConverter(IConverter* pConverter) override;
 
   /// Remove converter object from conversion service (if present).
   virtual
-  StatusCode removeConverter(const CLID& clid);
+  StatusCode removeConverter(const CLID& clid) override;
 
   /// Retrieve converter from list
   virtual
-  IConverter* converter(const CLID& wanted);
+  IConverter* converter(const CLID& wanted) override;
 
   /// Connect the output file to the service with open mode.
   virtual
   StatusCode connectOutput(const std::string& outputFile,
-                                   const std::string& openMode);
+                                   const std::string& openMode) override;
 
   /// Connect the output file to the service.
   virtual
-  StatusCode connectOutput(const std::string& output);
+  StatusCode connectOutput(const std::string& output) override;
 
   /// Commit pending output.
   virtual
-  StatusCode commitOutput(const std::string& output, bool do_commit);
+  StatusCode commitOutput(const std::string& output, bool do_commit) override;
 
   //@}
 
@@ -237,19 +234,19 @@ public:
                             const CLID& clid,
                             const std::string* par, 
                             const unsigned long* ip,
-                            IOpaqueAddress*& refpAddress);
+                            IOpaqueAddress*& refpAddress) override;
 
   /// Convert an address to string form
   virtual 
   StatusCode convertAddress (const IOpaqueAddress* pAddress,
-                             std::string& refAddress);
+                             std::string& refAddress) override;
 
   /// Convert an address in string form to object form
   virtual
   StatusCode createAddress (long svc_type, 
                             const CLID& clid,
                             const std::string& refAddress,
-                            IOpaqueAddress*& refpAddress);
+                            IOpaqueAddress*& refpAddress) override;
 
   /// Update state of the service
   virtual

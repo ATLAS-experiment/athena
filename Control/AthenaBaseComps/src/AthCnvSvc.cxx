@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthCnvSvc.cxx 
@@ -46,19 +46,12 @@ enum CnvSvcAction   {
 AthCnvSvc::AthCnvSvc (const std::string& name, 
                       ISvcLocator* pSvcLocator,
                       long type) : 
-  ::AthService (name, pSvcLocator),
+  base_class (name, pSvcLocator),
   m_dataSvc    (0),
   m_addressCreator(0),
   m_type       (type),
   m_workers    ( )
 {
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-  AthCnvSvc::setAddressCreator(this).ignore();
-
-  m_cnvSvc = this;
 }
 
 // Destructor
@@ -110,6 +103,9 @@ AthCnvSvc::~AthCnvSvc()
 ////////////////////////////
 StatusCode AthCnvSvc::initialize()
 {
+  m_cnvSvc = this;  // needed for conversionSvc()
+  ATH_CHECK( AthCnvSvc::setAddressCreator(this) );
+
   return StatusCode::SUCCESS;
 }
 
@@ -137,31 +133,6 @@ StatusCode AthCnvSvc::finalize()
   m_dataSvc = 0;
   m_cnvSvc = 0;
 
-  return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-AthCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( riid == IConversionSvc::interfaceID() )  {
-    *ppvInterface = (IConversionSvc*)this;
-  }
-  else if ( riid == IConverter::interfaceID() )  {
-    *ppvInterface = (IConverter*)this;
-  }
-  else if ( riid == IAddressCreator::interfaceID() )  {
-    *ppvInterface = (IAddressCreator*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 
