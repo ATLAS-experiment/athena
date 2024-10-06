@@ -69,6 +69,17 @@ public:
         for (const auto& hit : m_hits_trans[layer])
             m_hits[layer].push_back(*hit);
     } // ensure setNLayers is called first
+
+    void repopulateTransHits() {  // this is needed if trying to read the hits from the road in a stored output file, call this first, otherwise not in Athena
+      m_hits_trans.resize(m_hits.size());
+      for (unsigned ilayer = 0; ilayer < m_hits.size(); ilayer++) {
+	m_hits_trans[ilayer].resize(m_hits[ilayer].size());
+	for (unsigned ihit = 0; ihit < m_hits[ilayer].size(); ihit++) {
+	  m_hits_trans[ilayer][ihit] = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer][ihit]);
+	}
+      }
+    }
+  
     void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
 
     void setSubRegion(int v) { m_subRegion = v; }
@@ -151,7 +162,7 @@ private:
     ///////////////////////////////////////////////////////////////////////
     // Misc
     friend std::ostream& operator<<(std::ostream& os, const FPGATrackSimRoad& road);
-    ClassDefNV(FPGATrackSimRoad, 5);
+    ClassDefNV(FPGATrackSimRoad, 6);
 };
 
 #endif // FPGATrackSimROAD_H
