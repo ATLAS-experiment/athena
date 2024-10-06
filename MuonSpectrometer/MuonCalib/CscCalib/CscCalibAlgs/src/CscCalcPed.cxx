@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalcPed.h"
@@ -23,7 +23,6 @@ namespace MuonCalib {
 
   CscCalcPed::CscCalcPed(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name,pSvcLocator),
-    m_chronoSvc(nullptr),
     m_maxStripHash(0),
     m_numBits(12),
     m_ampHists(nullptr),
@@ -81,12 +80,10 @@ namespace MuonCalib {
 
     ATH_CHECK(m_readKey.initialize());
 
-    ATH_CHECK(service("ChronoStatSvc",m_chronoSvc));    
+    m_chronoSvc = service("ChronoStatSvc");
+    ATH_CHECK(m_chronoSvc.isValid());
 
     ATH_CHECK(m_cscRdoDecoderTool.retrieve());
-
-    IToolSvc* toolSvc=nullptr;
-    ATH_CHECK(service("ToolSvc",toolSvc));
 
     //Set to SG::VIEW_ELEMENTS, since we want root to do its own memory
     //management.

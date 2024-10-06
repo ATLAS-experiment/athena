@@ -81,7 +81,7 @@ namespace MuonCalib{
       /*********Private member variables*/
       /**Services and tools*/
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-      IChronoStatSvc* m_chronoSvc;
+      SmartIF<IChronoStatSvc> m_chronoSvc;
       ToolHandle<Muon::ICSC_RDO_Decoder> m_cscRdoDecoderTool{this,"CscRdoDecoderTool","Muon::CscRDO_Decoder"};
       SG::ReadCondHandleKey<CscCondDbData> m_readKey{this, "ReadKey", "CscCondDbData", "Key of CscCondDbData"};   
  
