@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalcSlope.h"
@@ -7,7 +7,6 @@
 #include "MuonRDO/CscRawData.h"
 #include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
-#include "CscCalibTools/ICscCalibTool.h"
 #include "GaudiKernel/Chrono.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 #include "CscCalibData/CscCalibResultContainer.h"
@@ -30,9 +29,6 @@ namespace MuonCalib {
 
   CscCalcSlope::CscCalcSlope(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name,pSvcLocator),
-    m_storeGate(nullptr),
-    m_cscCalibTool(nullptr),
-    m_chronoSvc(nullptr),
     m_outputFileName("output.cal"),
     m_dumpAllHists(false),
     m_maxStripHash(0),
@@ -126,17 +122,12 @@ namespace MuonCalib {
     ATH_MSG_INFO("CscCalcSlope::initialize() called");
 
     //*******Register services and tools *********/ 	
-    // Store Gate active store
-    ATH_CHECK(serviceLocator()->service("StoreGateSvc", m_storeGate));
-
     ATH_CHECK(m_idHelperSvc.retrieve());
- 
-    ATH_CHECK(service("ChronoStatSvc",m_chronoSvc));
 
-    IToolSvc* toolSvc=nullptr;
-    ATH_CHECK(service("ToolSvc",toolSvc));
+    m_chronoSvc = service("ChronoStatSvc");
+    ATH_CHECK(m_chronoSvc.isValid());
 
-    ATH_CHECK(toolSvc->retrieveTool("CscCalibTool",m_cscCalibTool));
+    ATH_CHECK(m_cscCalibTool.retrieve());
 
     ATH_CHECK(m_cscRdoDecoderTool.retrieve());
 
@@ -329,7 +320,7 @@ namespace MuonCalib {
     ATH_MSG_DEBUG("Collecting event info for event " << m_eventCnt);
     //Below might need to be changed depending on how we get data
     const CscRawDataContainer* fullRDO;
-    StatusCode sc_read = m_storeGate->retrieve(fullRDO, "CSCRDO"); 
+    StatusCode sc_read = evtStore()->retrieve(fullRDO, "CSCRDO");
     if (sc_read != StatusCode::SUCCESS)
     {
       ATH_MSG_FATAL("Could not find event");
@@ -886,7 +877,7 @@ namespace MuonCalib {
     CscCalibReportContainer * repCont = new CscCalibReportContainer(histKey);
     repCont->push_back(report);
 
-    sc = m_storeGate->record(repCont, histKey);
+    sc = evtStore()->record(repCont, histKey);
     if(sc.isFailure())
     {
       ATH_MSG_ERROR("Failed to record CscCalibReportSlope to storegate");
@@ -901,7 +892,7 @@ namespace MuonCalib {
     calibResults->push_back(m_intercepts);
     if(m_findPeakTime)
       calibResults->push_back(m_peakTimes);
-    sc = m_storeGate->record(calibResults,"CscCalibResultSlope");
+    sc = evtStore()->record(calibResults,"CscCalibResultSlope");
     if(sc.isFailure())
     {
       ATH_MSG_ERROR("Failed to record results to storegate");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCCALCSLOPE_H
@@ -17,6 +17,7 @@ so that he can determine the validity of the constants
 
 #include "AthContainers/DataVector.h"
 #include "CscCalibData/CscCalibResultCollection.h"
+#include "CscCalibTools/ICscCalibTool.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 #include "MuonCondData/CscCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -31,7 +32,6 @@ so that he can determine the validity of the constants
 #include <set>
 
 class TProfile;
-class ICscCalibTool;
 class TGraphErrors;
 
 namespace MuonCalib{
@@ -77,11 +77,10 @@ namespace MuonCalib{
 
       /*********Private member variables*/
       /**Services and tools*/
-      StoreGateSvc* m_storeGate;
-      ICscCalibTool* m_cscCalibTool;
+      ToolHandle<ICscCalibTool> m_cscCalibTool{this, "CscCalibTool", "CscCalibTool"};
       ToolHandle<Muon::ICSC_RDO_Decoder> m_cscRdoDecoderTool{this,"CscRDODecoder","Muon::CscRDO_Decoder"};
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-      IChronoStatSvc* m_chronoSvc;
+      SmartIF<IChronoStatSvc> m_chronoSvc;
       SG::ReadCondHandleKey<CscCondDbData> m_readKey{this, "ReadKey", "CscCondDbData", "Key of CscCondDbData"};   
 
       /**Parameters input through joboptions*/
