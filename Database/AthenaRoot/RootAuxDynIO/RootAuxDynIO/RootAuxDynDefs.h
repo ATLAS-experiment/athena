@@ -4,6 +4,8 @@
 #ifndef ROOTAUXDYN_DEFS_H
 #define ROOTAUXDYN_DEFS_H
 
+#include <format>
+
 namespace RootAuxDynIO
 {
    /// Common post-fix for the names of auxiliary containers in StoreGate
@@ -54,9 +56,14 @@ RootAuxDynIO::auxBranchName(const std::string& attr_name, const std::string& bas
 inline std::string
 RootAuxDynIO::auxFieldName(const std::string& attr_name, const std::string& baseName)
 {
+   // RNTuple field names cannot contain dot characters '.'
+   // Therefore, for now, we're using a colon instead ':'
+   // This can be changed in the future
    std::string field_name = baseName;
-   if( field_name.back() == '.' )  field_name.pop_back();
-   field_name += ":" + attr_name;    // MN TODO <- find a good delimiter
+   if (field_name.ends_with(':')) {
+     field_name.pop_back();
+   }
+   field_name = std::format("{}Dyn:{}", field_name, attr_name);
    return field_name;
 }
 
