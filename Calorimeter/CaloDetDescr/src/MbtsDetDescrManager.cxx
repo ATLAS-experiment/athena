@@ -1,22 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescr/MbtsDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IMessageSvc.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
-MbtsDetDescrManager::MbtsDetDescrManager():
-  m_msgSvc(nullptr)
+MbtsDetDescrManager::MbtsDetDescrManager()
 {
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service( "MessageSvc", m_msgSvc);
-  if(status.isFailure() || m_msgSvc==nullptr)
-    std::cerr << "CaloDetDescrManager: Could not locate the MessageSvc!\n";
 }
 
 MbtsDetDescrManager::~MbtsDetDescrManager()
@@ -42,8 +35,8 @@ void MbtsDetDescrManager::add(CaloDetDescrElement* element)
     m_elements[element->identify()] = element;
   else {
     // Issue warning message and don't update map entry
-    if(m_msgSvc) {
-      MsgStream log(m_msgSvc, "MbtsDetDescrManager::add");
+    MsgStream log(Athena::getMessageSvc(), "MbtsDetDescrManager");
+    if (log.level() <= MSG::DEBUG) {
       log << MSG::DEBUG << "Attempt to update map entry for ID=" << element->identify().getString() << ". Skipping" << endmsg;
     }
   }
