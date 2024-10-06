@@ -141,7 +141,7 @@ namespace RootAuxDynIO
       if( m_initialized )  return;
    
       const SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
-      const string field_prefix = m_storeFieldName + ':';
+      const string field_prefix = RootAuxDynIO::auxFieldName("", m_storeFieldName);
       const auto& desc = m_ntupleReader->GetDescriptor();
       for( const auto &f : desc.GetTopLevelFields() ) {
          const string field_name = f.GetFieldName();
@@ -200,7 +200,7 @@ namespace RootAuxDynIO
          bool isFieldFound = false;
 
          if( !fieldInfo.fieldName.empty() ) {
-            const string field_prefix = m_storeFieldName + ':';
+            const string field_prefix = RootAuxDynIO::auxFieldName("", m_storeFieldName);
             const string attr_infile = fieldInfo.fieldName.substr(field_prefix.size());
             isFieldFound = (attr_infile == fieldInfo.attribName);
          }
