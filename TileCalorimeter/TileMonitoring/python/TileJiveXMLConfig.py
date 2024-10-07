@@ -70,8 +70,6 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
                                  In the case of empty string it will not be used.
     """
 
-    data_types = []  # These data types need to match the tools added later
-
     if TileDigitsContainer is None:
         digitsContainer = getTileDigitsContainer(flags)
     else:
@@ -131,10 +129,9 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
         from TileMonitoring.TileTopoClusterConfig import TileTopoClusterCfg
         acc.merge( TileTopoClusterCfg(flags) )
 
-    data_types += ["JiveXML::CaloTileRetriever/CaloTileRetriever"]
-    acc.addPublicTool(
+    dataRetrieverTools = [
         CompFactory.JiveXML.CaloTileRetriever(
-            name="CaloTileRetriever",
+            name="TileRetriever",
             TileDigitsContainer=digitsContainer,
             TileRawChannelContainer=rawChannelContainer,
             DoTileCellDetails=useRawChannels,
@@ -142,29 +139,30 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
             DoBadTile=False,
             CellThreshold=50.0
         )
-    )
+    ]
 
-    data_types += ["JiveXML::CaloMBTSRetriever/CaloMBTSRetriever"]
-    acc.addPublicTool(
+    dataRetrieverTools += [
         CompFactory.JiveXML.CaloMBTSRetriever(
-            name="CaloMBTSRetriever",
+            name="MBTSRetriever",
             TileDigitsContainer=digitsContainer,
             TileRawChannelContainer=rawChannelContainer,
             DoMBTSDigits=useDigits,
             DoMBTSCellDetails=useRawChannels,
             MBTSThreshold=0.05
         )
-    )
+    ]
 
     if useClusters:
-        data_types += ["JiveXML::CaloClusterRetriever/CaloClusterRetriever"]
-        acc.addPublicTool(
+        dataRetrieverTools += [
             CompFactory.JiveXML.CaloClusterRetriever(
-                name="CaloClusterRetriever",
+                name="TileClusterRetriever",
                 FavouriteClusterCollection="TileTopoCluster",
                 OtherClusterCollections=["TileTopoCluster"]
             )
-        )
+        ]
+
+    for dataRetrieverTool in dataRetrieverTools:
+        acc.addPublicTool(dataRetrieverTool)
 
     kwargs.setdefault("AtlasRelease", os.environ.get("AtlasVersion", "Unknown"))
     kwargs.setdefault("WriteToFile", True)
@@ -172,7 +170,7 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
     kwargs.setdefault("StreamToServerTool", None)
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
-    kwargs.setdefault("DataTypes", data_types)
+    kwargs.setdefault("DataRetrieverTools", dataRetrieverTools)
 
     AlgoJiveXML = CompFactory.JiveXML.AlgoJiveXML
     acc.addEventAlgo(AlgoJiveXML(name="AlgoJiveXML", **kwargs), primary=True)
