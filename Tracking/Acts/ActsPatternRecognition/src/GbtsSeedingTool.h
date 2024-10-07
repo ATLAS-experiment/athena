@@ -14,7 +14,7 @@
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Seeding/Seed.hpp"
+#include "Acts/EventData/Seed.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinderGbts.hpp" 
 #include "Acts/Definitions/Units.hpp"
@@ -49,7 +49,7 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
 
   public:
-    using seed_type = Acts::Seed< xAOD::SpacePoint >;
+    using seed_type = ActsTrk::Seed;
 
     GbtsSeedingTool(const std::string& type, const std::string& name,
 			  const IInterface* parent);
@@ -60,11 +60,10 @@ namespace ActsTrk {
     // Interface
     virtual StatusCode
       createSeeds(const EventContext& ctx,
-		  const std::vector<const xAOD::SpacePoint*>& spContainer,
-		  const Acts::Vector3& beamSpotPos,
-		  const Acts::Vector3& bField,
-		  ActsTrk::SeedContainer& seedContainer ) const override;
-
+                  const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
+                  const Acts::Vector3& beamSpotPos,
+                  const Acts::Vector3& bField,
+                  ActsTrk::SeedContainer& seedContainer ) const override;
 
 
 

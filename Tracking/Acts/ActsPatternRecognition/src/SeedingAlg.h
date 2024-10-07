@@ -68,6 +68,7 @@ namespace ActsTrk {
 
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
+    Gaudi::Property< bool > m_usePixel {this, "UsePixel", true};
     bool skipSpacePoint(float x, float y, float z) const;
 
   public:

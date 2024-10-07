@@ -17,6 +17,7 @@
 #include "TrkTrack/Track.h"
 
 // ACTS
+#include "Acts/EventData/Types.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -61,7 +62,7 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
     typename trajectory_t::TrackStateProxy trackState) const {
     
     const Trk::PrepRawData* prd = sl.template get<PRDSourceLink>().prd;
-    trackState.setUncalibratedSourceLink(sl);
+    trackState.setUncalibratedSourceLink(Acts::SourceLink{sl});
 
     const Acts::BoundTrackParameters actsParam(trackState.referenceSurface().getSharedPtr(),
              trackState.predicted(),

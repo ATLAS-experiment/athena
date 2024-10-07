@@ -527,8 +527,7 @@ namespace ActsTrk
       secondOptions->extensions.branchStopper.connect(stopBranch);
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
-                            Acts::ActionList<Acts::MaterialInteractor>,
-                            Acts::AbortList<>>
+                            Acts::ActorList<Acts::MaterialInteractor>>
     extrapolationOptions(tgContext, mfContext);
 
     Acts::TrackExtrapolationStrategy extrapolationStrategy =
@@ -649,8 +648,9 @@ namespace ActsTrk
            }
         }
 
+        Acts::trimTrack(track, true, true, true);
         Acts::calculateTrackQuantities(track);
-	
+
         if (!m_trackStatePrinter.empty()) {
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
@@ -708,6 +708,7 @@ namespace ActsTrk
             if (not secondResult.ok()) {
               ATH_MSG_WARNING("Second track finding failed for " << seedType << " seed " << iseed << " track " << nfirst << " with error" << secondResult.error());
             } else {
+
               // store the original previous state to restore it later
               auto originalFirstMeasurementPrevious = firstMeasurement->previous();
 

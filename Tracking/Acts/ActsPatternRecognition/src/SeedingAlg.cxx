@@ -172,10 +172,20 @@ namespace ActsTrk {
     // ===================== COMPUTATION ================ //
     // ================================================== // 
 
+    ActsTrk::SpacePointCollector backEnd(selectedSpacePoints);
+
+    Acts::SpacePointContainerConfig spConfig;
+    spConfig.useDetailedDoubleMeasurementInfo = not m_usePixel;
+    // Options
+    Acts::SpacePointContainerOptions spOptions;
+    spOptions.beamPos = Acts::Vector2(beamPos.x(), beamPos.y());
+    
+    Acts::SpacePointContainer<decltype(backEnd), Acts::detail::RefHolder> collect(spConfig, spOptions, backEnd);
+
     ATH_MSG_DEBUG("Running Seed Finding ...");    
     time_seedCreation.start();
     ATH_CHECK( m_seedsTool->createSeeds( ctx, 
-					 selectedSpacePoints,
+					 collect,
 					 beamPos,
 					 bField,
 					 *seedPtrs ) );
@@ -191,7 +201,7 @@ namespace ActsTrk {
 
     // Estimate Track Parameters
     auto retrieveSurfaceFunction = 
-      [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
+      [this, &detEle] (const ActsTrk::Seed& seed) -> const Acts::Surface& 
       { 
 	const xAOD::SpacePoint* sp = this->m_useTopSp ? seed.sp().back() : seed.sp().front();
 	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(

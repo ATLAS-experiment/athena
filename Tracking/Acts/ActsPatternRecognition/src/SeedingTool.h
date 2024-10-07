@@ -27,7 +27,7 @@
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinder.hpp"
-#include "Acts/Seeding/Seed.hpp"
+#include "Acts/EventData/Seed.hpp"
 
 #include <cmath> //for M_PI
 
@@ -36,9 +36,15 @@ namespace ActsTrk {
   class SeedingTool :
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
   public:
-    using value_type = xAOD::SpacePoint;
-    using seed_type = Acts::Seed< xAOD::SpacePoint >;
+    using value_type = typename Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>::SpacePointProxyType;
+    using seed_type = Acts::Seed< value_type, 3ul >;
+    using external_type = typename std::conditional< 
+      std::is_const< typename value_type::ValueType >::value,
+      typename std::remove_const< typename value_type::ValueType >::type,
+      typename value_type::ValueType
+      >::type;
     
+
     SeedingTool(const std::string& type, 
 		const std::string& name,
 		const IInterface* parent);
@@ -49,11 +55,10 @@ namespace ActsTrk {
     // Interface
     virtual StatusCode
       createSeeds(const EventContext& ctx,
-		  const std::vector<const xAOD::SpacePoint*>& spContainer,
+		  const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
-		  ActsTrk::SeedContainer& seedContainer) const override;
-    
+		  ActsTrk::SeedContainer& seedContainer ) const override;
   protected:
     // metafunction to obtain correct type in iterated container given the iterator type
     template<typename spacepoint_iterator_t>
@@ -71,7 +76,7 @@ namespace ActsTrk {
 		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-		   std::vector< seed_type >& seeds) const;
+		   DataVector< Acts::Seed< external_type, 3ul > >& seeds ) const;
     
     StatusCode prepareConfiguration();
 
@@ -255,10 +260,10 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_useExperimentCuts {this, "useExperimentCuts", false, ""};
     
   private:
-    std::unique_ptr< Acts::GridBinFinder< 2ul > > m_bottomBinFinder{nullptr};
-    std::unique_ptr< Acts::GridBinFinder< 2ul > > m_topBinFinder{nullptr};
+    std::unique_ptr< Acts::GridBinFinder< 3ul > > m_bottomBinFinder{nullptr};
+    std::unique_ptr< Acts::GridBinFinder< 3ul > > m_topBinFinder{nullptr};
 
-    std::array<std::vector<std::size_t>, 2ul> m_navigation{};
+    std::array<std::vector<std::size_t>, 3ul> m_navigation{};
   };
 
 } // namespace
