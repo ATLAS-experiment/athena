@@ -26,62 +26,47 @@ StatusCode Spacepoints::execute(const EventContext &ctx) const
 
     int MAX_DATA_SIZE = 46219;
 
-    // Read in the testvector
-    std::ifstream ifs;
-    ATH_MSG_DEBUG("Reading in TV");
+    // Prepare input test vector
+    EFTrackingFPGAIntegration::TVHolder spacePointsTV("Spacepoints");
+    ATH_CHECK(m_testVectorTool->prepareTV(m_inputTV, spacePointsTV.inputTV));
+    ATH_CHECK(m_testVectorTool->prepareTV(m_refTV, spacePointsTV.refTV));
 
-    // Open the testvector to ifstream and check if it is open
-    ifs.open(m_inputTV, std::ios::binary);
-    if (!ifs.is_open())
+    // print the first 10 elements of the input vector
+    for (int i = 0; i < 10; i++)
     {
-        ATH_MSG_ERROR("Error reading testvector file");
-        return StatusCode::FAILURE;
+        ATH_MSG_DEBUG("inputTV[" << std::dec << i << "] = " << std::hex << spacePointsTV.inputTV[i]<<std::dec);
     }
-
-    // make new vector of uint64_t
-    std::vector<uint64_t> inputTV;
-    // a new buffer to read in the file
-    uint64_t temp = 0;
-    // read in the file 8 bytes at a time and store it in the vector of uint64_t
-    while (ifs.good())
-    {
-        ifs.read(reinterpret_cast<char *>(&temp), sizeof(temp));
-        if (ifs.good())
-        {
-            // Reverse the byte order
-            temp = __builtin_bswap64(temp);
-            inputTV.push_back(temp);
-        }
-    }
-
-    // Close the file
-    ifs.close();
 
     // Work with the accelerator
     cl_int err = 0;
 
     // Allocate buffers on acc. card
-    cl::Buffer acc_inbuff(m_context, CL_MEM_READ_ONLY, inputTV.size() * sizeof(uint64_t), NULL, &err);
-    cl::Buffer acc_outbuff(m_context, CL_MEM_READ_WRITE, inputTV.size() * sizeof(uint64_t), NULL, &err);
+    cl::Buffer acc_inbuff(m_context, CL_MEM_READ_ONLY, spacePointsTV.inputTV.size() * sizeof(uint64_t), NULL, &err);
+    cl::Buffer acc_outbuff(m_context, CL_MEM_READ_WRITE, spacePointsTV.inputTV.size() * sizeof(uint64_t), NULL, &err);
+
+    // Prepare kernel
+    // Connect kernel to buffer before command queue
+    cl::Kernel acc_kernel(m_program, m_kernelName.value().data(), &err);
+    acc_kernel.setArg(0, acc_inbuff);
+    acc_kernel.setArg(1, acc_outbuff);
+    acc_kernel.setArg<int>(2, spacePointsTV.inputTV.size());
 
     // Make queue of commands
     cl::CommandQueue acc_queue(m_context, m_accelerator);
 
-    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, inputTV.size() * sizeof(uint64_t), inputTV.data(), NULL, NULL);
-
-    // // Prepare kernel
-    cl::Kernel acc_kernel(m_program, m_kernelName.value().data(), &err);
-    acc_kernel.setArg(0, acc_inbuff);
-    acc_kernel.setArg(1, acc_outbuff);
-    acc_kernel.setArg<int>(2, inputTV.size());
+    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, spacePointsTV.inputTV.size() * sizeof(uint64_t), spacePointsTV.inputTV.data(), NULL, NULL);
 
     // // Enqueue task
     acc_queue.enqueueTask(acc_kernel);
 
-    std::vector<uint64_t> output(MAX_DATA_SIZE);
-    acc_queue.enqueueReadBuffer(acc_outbuff, CL_TRUE, 0, inputTV.size() * sizeof(uint64_t), output.data(), NULL, NULL);
-
     acc_queue.finish();
+
+    std::vector<uint64_t> output(spacePointsTV.inputTV.size(), 0);
+
+    acc_queue.enqueueReadBuffer(acc_outbuff, CL_TRUE, 0, spacePointsTV.inputTV.size() * sizeof(uint64_t), output.data(), NULL, NULL);
+
+    // Compare the output with the reference
+    ATH_CHECK(m_testVectorTool->compare(spacePointsTV.refTV, output));
 
     return StatusCode::SUCCESS;
 }
