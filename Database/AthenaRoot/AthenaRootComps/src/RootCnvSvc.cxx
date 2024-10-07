@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootCnvSvc.cxx
@@ -29,7 +29,7 @@
 namespace Athena {
 
 RootCnvSvc::RootCnvSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	::AthCnvSvc(name, pSvcLocator, ROOT_StorageType),
+	base_class(name, pSvcLocator, ROOT_StorageType),
 	m_dictSvc("AthDictLoaderSvc", name),
 	m_tpCnvSvc("AthTPCnvSvc", name),
 	m_rootSvc("Athena::RootSvc/AthenaRootSvc", name),
@@ -53,17 +53,6 @@ StatusCode RootCnvSvc::initialize() {
 
 StatusCode RootCnvSvc::finalize() {
   return ::AthCnvSvc::finalize();
-}
-
-StatusCode RootCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (IAthenaRootCnvSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IAthenaRootCnvSvc*>(this);
-  } else {
-    // Interface is not directly available: try out a base class
-    return ::AthCnvSvc::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// Connect the output file to the service with open mode.

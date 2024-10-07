@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // NtupleCnvSvc.cxx 
@@ -34,14 +34,8 @@ namespace Athena {
 ////////////////
 NtupleCnvSvc::NtupleCnvSvc( const std::string& name, 
                             ISvcLocator* pSvcLocator ) : 
-  ::AthCnvSvc( name, pSvcLocator, ROOT_StorageType )
+  base_class( name, pSvcLocator, ROOT_StorageType )
 {
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  // std::cerr << "::NtupleCnvSvc(" << name << ")...\n";
 }
 
 // Destructor
@@ -65,24 +59,6 @@ NtupleCnvSvc::finalize()
   ATH_MSG_DEBUG ("Finalizing " << name() << "...");
 
   return AthCnvSvc::finalize();
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-NtupleCnvSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( IConversionSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IConversionSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return ::AthCnvSvc::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// update the service state (well, just check the @c IOpaqueAddress is in

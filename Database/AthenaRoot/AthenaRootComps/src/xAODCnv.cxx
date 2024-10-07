@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODCnv.cxx 
@@ -120,34 +120,7 @@ StatusCode xAODCnv::initialize()
   return StatusCode::SUCCESS;
 }
 
-// StatusCode xAODCnv::finalize()
-// {
-//   m_msg << MSG::INFO 
-//      << "Finalizing " << name() << "..." 
-//      << endmsg;
-
-//   return StatusCode::SUCCESS;
-// }
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-// StatusCode 
-// xAODCnv::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-// {
-//   if ( IConverter::interfaceID().versionMatch(riid) ) {
-//     *ppvInterface = dynamic_cast<IConverter*>(this);
-//   } else {
-//     // Interface is not directly available : try out a base class
-//     return ::Service::queryInterface(riid, ppvInterface);
-//   }
-//   addRef();
-//   return StatusCode::SUCCESS;
-// }
-
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 // Const methods: 
 ///////////////////////////////////////////////////////////////////
 

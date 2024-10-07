@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootSvc.cxx
@@ -25,7 +25,7 @@
 namespace Athena {
 
 RootSvc::RootSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	::AthService(name, pSvcLocator),
+	base_class(name, pSvcLocator),
 	m_catalog(0),
 	m_conns(),
 	m_wconn(0),
@@ -69,17 +69,6 @@ StatusCode RootSvc::finalize() {
     delete m_catalog; m_catalog = 0;
   }
   return ::AthService::finalize();
-}
-
-StatusCode RootSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (IRootSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IRootSvc*>(this);
-  } else {
-    // Interface is not directly available: try out a base class
-    return ::AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 /// Load the type (dictionary) from Root.

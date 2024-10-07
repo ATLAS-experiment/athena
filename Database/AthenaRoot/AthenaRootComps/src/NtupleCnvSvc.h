@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // NtupleCnvSvc.h 
@@ -27,10 +27,8 @@ template <class TYPE> class SvcFactory;
 namespace Athena {
 
 class NtupleCnvSvc
-  : virtual public ::IConversionSvc,
-            public ::AthCnvSvc
+  : public extends<::AthCnvSvc, ::IConversionSvc>
 { 
-  friend class SvcFactory<Athena::NtupleCnvSvc>;
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
@@ -52,8 +50,6 @@ class NtupleCnvSvc
   //@{
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
   //@}
 
   /// @c IConversionSvc and @c IConverter interfaces
@@ -144,16 +140,6 @@ class NtupleCnvSvc
                            IOpaqueAddress*& refpAddress);
   //@}
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
-
 protected:
 
   /// Create new Converter using factory (override AthCnvSvc::createConverter)
@@ -174,18 +160,6 @@ protected:
   
 
 }; 
-
-// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& NtupleCnvSvc::interfaceID() 
-{ 
-  return IConversionSvc::interfaceID(); 
-}
 
 } //> end namespace Athena
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAROOTKERNEL_IATHENAROOTCNVSVC_H
@@ -27,15 +27,12 @@ class ITPCnvBase;
 /** @class IAthenaRootCnvSvc
  *  @brief This class provides the interface between Athena and RootSvc.
  **/
-class IAthenaRootCnvSvc : virtual public ::IConversionSvc, virtual public ::IAddressCreator {
+class IAthenaRootCnvSvc : virtual public extend_interfaces<IConversionSvc, IAddressCreator> {
 public:
   virtual ~IAthenaRootCnvSvc();
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() {
-    static const InterfaceID s_iid("IAthenaRootCnvSvc", 1, 0);
-    return s_iid;
-  }
+  /// Declare interface ID
+  DeclareInterfaceID(IAthenaRootCnvSvc, 1, 0);
 
   ///@{ RootType-based API
   /// Load the class (dictionary) from Root.

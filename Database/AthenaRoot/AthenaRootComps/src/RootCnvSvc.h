@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootCnvSvc.h
@@ -32,17 +32,16 @@ namespace Athena {
 /** @class Athena::RootCnvSvc
  *  @brief This class provides the interface between Athena and RootSvc.
  **/
-class RootCnvSvc: virtual public ::IAthenaRootCnvSvc, public ::AthCnvSvc {
-  friend class SvcFactory<Athena::RootCnvSvc>;
+class RootCnvSvc: public extends<::AthCnvSvc, ::IAthenaRootCnvSvc> {
 
 public:
+
   /// Standard Service Constructor
   RootCnvSvc(const std::string& name, ISvcLocator* pSvcLocator);
 
   /// Gaudi Service Interface method implementations:
   StatusCode initialize();
   StatusCode finalize();
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
 
   /// Connect the output file to the service.
   StatusCode connectOutput(const std::string& file);

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IIoSvc.h 
@@ -31,6 +31,8 @@ class IIoSvc
   // Public typedef: 
   /////////////////////////////////////////////////////////////////// 
 public: 
+  /// InterfaceID
+  DeclareInterfaceID(IIoSvc, 1, 0);
 
   /// unix-y file descriptor
   typedef int Fd;
@@ -87,8 +89,6 @@ public:
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  static const InterfaceID& interfaceID();
-
   /// open file `fname` with open mode `mode`
   /// @returns -1 if not successful
   virtual 
@@ -117,19 +117,5 @@ public:
   IoType mode(Fd fd) const = 0;
   
 }; 
-
-// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& IIoSvc::interfaceID() 
-{ 
-  static const InterfaceID IID_IIoSvc("IIoSvc", 1, 0);
-  return IID_IIoSvc; 
-}
-
 
 #endif //> !ATHENAKERNEL_IIOSVC_H
