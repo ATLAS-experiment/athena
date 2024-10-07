@@ -106,3 +106,57 @@ bool TgcRawDataMonitorTool::getMapIndex(const TGC::TgcChamber& tgcCham, int iLay
   ATH_MSG_DEBUG("TgcRawDataMonitorTool::getMapIndex(const TGC::TgcChamber& tgcCham,: End");
   return true;
 }
+
+bool TgcRawDataMonitorTool::getMapIndexOnline(const std::string& chamber_type_name, // e.g. A01M01f00E01L03W
+					      int& etamap_index, int& phimap_index, int& phimap_global_index) const {
+  etamap_index=-1;
+  phimap_index=-1;
+  phimap_global_index=-1;
+  if( chamber_type_name.size() != 16 ) return false; // e.g. A01M01f01E01L01S
+
+  const int offset = (chamber_type_name[5]=='1')?(0):((chamber_type_name[5]=='2')?(3):((chamber_type_name[5]=='3')?(5):(7)));
+  const int layerNumber = std::atoi(chamber_type_name.substr(14,1).c_str())-1 + offset;/*0..6..8*/
+  const bool isEndcap = chamber_type_name[9] == 'E';
+  const int phiId =// 0..47 for E, 0..23 for F, A/M1/sector01/phi0/E1 is 0,  A/M1/sector01/phi2/F is also 1
+    (chamber_type_name[5]=='4')
+    ?( std::atoi(chamber_type_name.substr(8,1).c_str()) + (std::atoi(chamber_type_name.substr(1,2).c_str())/2)*3 ) /*0..23*/
+    :( (isEndcap)
+       ?( std::atoi(chamber_type_name.substr(8,1).c_str()) + (std::atoi(chamber_type_name.substr(1,2).c_str())-1)*4 ) /*0..47*/
+       :( std::atoi(chamber_type_name.substr(8,1).c_str())/2 + (std::atoi(chamber_type_name.substr(1,2).c_str())-1)*2 ) /*0..23*/ );
+  const int eNumber = std::atoi(chamber_type_name.substr(11,1).c_str())-1;/*0..4*/
+  const bool isStrip = chamber_type_name[15] == 'S';
+
+  int sector = isEndcap ? phiId/4+1 : phiId/2+1;
+  int phi = isEndcap ? phiId%4 : (phiId%2)*2;
+  int efNumber = (isEndcap) ? eNumber : ( (layerNumber<3)?(4):(5)) ; // 0..3 or 4, plus 1 for forward
+
+  phimap_index = (!isEndcap || chamber_type_name[5]=='4') ? (phiId*2+1) : (phiId+1);
+
+  int station = 0;
+  int iLay = 0;
+  if(layerNumber<3){ // M1
+    station=1;
+    iLay = layerNumber+1;
+    etamap_index = ((isStrip)?(2):(3)) * efNumber + ((isStrip)?(iLay/2+1):(iLay));
+  }else if(layerNumber<5){ // M2
+    station=2;
+    iLay = layerNumber+1-3;
+    etamap_index = 2 * efNumber + iLay + ((isStrip)?(10):(15));
+  }else if(layerNumber<7){ // M3
+    station=3;
+    iLay = layerNumber+1-5;
+    etamap_index = 2 * efNumber + iLay + ((isStrip)?(22):(27));
+  }else{ // M4
+    station=4;
+    iLay = layerNumber+1-7;
+    etamap_index = iLay + ((isStrip)?(34):(39));
+  }
+
+  if(layerNumber<7){
+    phimap_global_index = iLay + (efNumber-1)*3 + phi*18 + (station-1)*72 + (sector-1)*216;
+  }else{
+    phimap_global_index = 2592 + iLay + phiId*2;
+  }
+
+  return true;
+}

@@ -790,13 +790,53 @@ def TgcRawDataMonitoringConfig(inputFlags):
                         if lay==1:
                             label_iphi_sw[phi_index-1] = 'E%df%d(%s)' % (sector,phi,label_iphi_sw[phi_index-1])
                         label_glbl_index_sw[glbl_index-1] = 'E%df%d%s%dL%d' % (sector,phi,'F' if eta==0 else 'E',eta,lay)
-
     label_ieta_bw1 = []
     label_iphi_bw1 = []
     label_glbl_index_bw1 = []
     label_ieta_bw23 = []
     label_iphi_bw23 = []
     label_glbl_index_bw23 = []
+    label_ieta_online_wire = []
+    label_ieta_online_strip = []
+    label_iphi_online = []
+    label_glbl_index_online = []
+    i = 0
+    for sec in range(1,13):
+        for phi in range(4):
+            i = i+1
+            label_iphi_online.append('%02df%d(%d)' % (sec,phi,i))
+    for iM in range(1,5):
+        for iEta in range(1,7):
+            if iEta>1 and iM == 4: continue
+            if iEta>5 and iM == 1: continue
+            e_or_f = ("E%d" % (iEta)) if (iEta<=4 and iM==1) or (iEta<=5 and (iM==2 or iM==3)) or (iM==4) else "F"
+            for igap in range(1,4):
+                if iM>=2 and igap>2: continue
+                label_ieta_online_wire.append('M%d%sL%d' % (iM,e_or_f,igap))
+                if iM==1 and igap==2: continue
+                label_ieta_online_strip.append('M%d%sL%d' % (iM,e_or_f,igap))
+    for isec in range(1,13):
+        for ista in range(1,4):
+            for iphi in range(4):
+                for ieta in range(1,7):
+                    if ista==1: #M1
+                        if ieta<=4: Eta='E%d' % (ieta)
+                        else: Eta='F'
+                    else: # M23
+                        if ieta<=5: Eta='E%d' % (ieta)
+                        else: Eta='F'
+                    for igap in range(1,4):
+                        if iphi==0 and igap==1 and ieta==1:
+                            label =  '%02dM%df%d%sL%d' % (isec,ista,iphi,Eta,igap)
+                        else:
+                            label =  ''
+                        label_glbl_index_online.append( label )
+    for iphi in range(24):
+        for igap in range(1,3):
+            if iphi==0 and igap==1: label =  'M4f%dL%d' % (iphi,igap)
+            else: label =  ''
+            label_glbl_index_online.append( label )
+
     for i in range(15) : label_ieta_bw1.append('')
     for i in range(48) : label_iphi_bw1.append('')
     for i in range(720) : label_glbl_index_bw1.append('')
@@ -881,12 +921,47 @@ def TgcRawDataMonitoringConfig(inputFlags):
     myGroupHit.defineHistogram('hit_bcmask_bw24sectors_Strip,hit_bcmask_for_bw24sectors_Strip;TgcPrd_BWSectorsVsBCMask_Strip',
                                title='BWSectorsVsBCMask_Strip;;',type='TH2F',
                                path=hitPath,xbins=25,xmin=-12.5,xmax=12.5,xlabels=label_bw24sectors,ybins=8,ymin=-0.5,ymax=7.5,ylabels=['Undef','Next-only','Curr-only','Curr&Next','Prev-only','Prev&Next','Prev&Curr','Prev&Curr&Next'])
-
-
     
     for side in ['A', 'C']:# side-A or side-C
-        for station in range(1,5):# M1,2,3,4
-            for s_or_w in ['S','W']:# strip or wire
+        for s_or_w in ['S','W']:# strip or wire
+
+            s_or_w_long = "wire" if s_or_w == "W" else "strip"
+            x_name = "hit_online_x_%s_%s" % (side,s_or_w_long)
+            y_name = "hit_online_y_%s_%s" % (side,s_or_w_long)
+            objname = "HitMap_EtaVsPhi_%s_%s" % (side,s_or_w_long)
+            title = "HitMap_EtaVsPhi_%s_%s" % (side,s_or_w_long)
+            nbinsx = 36 if s_or_w == "S" else 41
+            nbinsy = 48
+            label_ieta = label_ieta_online_wire if s_or_w == "W" else label_ieta_online_strip
+            label_iphi = label_iphi_online
+            myGroupHit.defineHistogram(x_name+','+y_name+';'+objname,title=title+';;',type='TH2F',path=hitPath,
+                                       xbins=nbinsx,xmin=0.5,xmax=nbinsx+0.5,ybins=nbinsy,ymin=0.5,ymax=nbinsy+0.5,
+                                       xlabels=label_ieta,ylabels=label_iphi)
+            eff_name = "hit_online_effnum_x_%s_%s" % (side,s_or_w_long)
+            x_name = "hit_online_effden_x_%s_%s" % (side,s_or_w_long)
+            y_name = "hit_online_effden_y_%s_%s" % (side,s_or_w_long)
+            objname = "EffMap_EtaVsPhi_%s_%s" % (side,s_or_w_long)
+            title = "EffMap_EtaVsPhi_%s_%s" % (side,s_or_w_long)
+            myGroupHit.defineHistogram(eff_name+','+x_name+','+y_name+';'+objname,
+                                       title=title+';;',type='TEfficiency',path=hitEffPath,
+                                       xbins=nbinsx,xmin=0.5,xmax=nbinsx+0.5,xlabels=label_ieta,
+                                       ybins=nbinsy,ymin=0.5,ymax=nbinsy+0.5,ylabels=label_iphi)
+            x_name = "hit_online_glblphi_effnum_%s_%s" % (side,s_or_w_long)
+            y_name = "hit_online_glblphi_effden_%s_%s" % (side,s_or_w_long)
+            objname = "EffMap_GlobalChamberIndex_%s_%s" % (side,s_or_w_long)
+            title = "EffMap_GlobalChamberIndex_%s_%s" % (side,s_or_w_long)
+            nbins = 2640
+            myGroupHit.defineHistogram(x_name+','+y_name+';'+objname,
+                                       title=title+';;Efficiency',type='TEfficiency',path=hitEffPath,
+                                       xbins=nbins,xmin=0.5,xmax=nbins+0.5,xlabels=label_glbl_index_online)
+            x_name = "mon_lb"
+            y_name = "hit_online_glblphi_%s_%s" % (side,s_or_w_long)
+            objname = "HitMap_LumiblockVsGlobalChamberIndex_%s_%s" % (side,s_or_w_long)
+            title = "HitMap_LumiblockVsGlobalChamberIndex_%s_%s" % (side,s_or_w_long)
+            myGroupHit.defineHistogram(x_name+','+y_name+';'+objname,
+                                       title=title+';LumiBlock;',type='TH2F',path=hitPath,xbins=100,xmin=-0.5,xmax=99.5,
+                                       ybins=nbins,ymin=0.5,ymax=nbins+0.5,ylabels=label_glbl_index_online,opt='kAddBinsDynamically', merge='merge')
+            for station in range(1,5):# M1,2,3,4
                 name = "%sM%02i%s" % (side,station,s_or_w) # e.g. AM01W
                 nbins = 10
                 label_glbl_index = []
@@ -1457,7 +1532,7 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.isMC = True
-    flags.Concurrency.NumThreads = 6
+    flags.Concurrency.NumThreads = 8
 
     import glob
     import sys
