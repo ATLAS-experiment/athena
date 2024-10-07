@@ -48,6 +48,15 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
             SelectionString         = tp_thinning_expression,
             InDetTrackParticlesKey  = "InDetTrackParticles"))
 
+    # Include inner detector tracks associated with muons
+    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg
+    TRIG9MuonTrackParticleThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
+            flags,
+            name                    = 'TRIG9MuonTrackParticleThinningTool',
+            StreamName              = kwargs['StreamName'],
+            MuonKey                 = "Muons",
+            InDetTrackParticlesKey  = "InDetTrackParticles"))
+
     # tau thinning
     from DerivationFrameworkTau.TauCommonConfig import TauThinningCfg
     #tau_thinning_expression = "TauJets.pt >= 20*GeV"
@@ -67,6 +76,7 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     # Finally the kernel itself
     thinningTools = [
                      TRIG9TrackParticleThinningTool,
+                     TRIG9MuonTrackParticleThinningTool,
                      TRIG9TauJetThinningTool,
                     ]
 
@@ -154,6 +164,7 @@ def TRIG9Cfg(flags):
                                             "Photons",
                                             "Muons",
                                             "PrimaryVertices",
+                                            "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "BTagging_AntiKt4EMPFlow",
