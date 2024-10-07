@@ -24,10 +24,10 @@ references_map = {
     "d1759": "v18",
     "d1912": "v6",
     # Reco
-    "q442": "v65",
-    "q449": "v102",
-    "q452": "v24",
-    "q454": "v35",
+    "q442": "v66",
+    "q449": "v103",
+    "q452": "v25",
+    "q454": "v36",
     # Derivations
     "data_PHYS_Run2": "v37",
     "data_PHYSLITE_Run2": "v18",
