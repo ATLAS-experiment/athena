@@ -1162,14 +1162,16 @@ def MuonSystemExtensionToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
 
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-    particle_calo_extension_tool = result.popToolsAndMerge(
-        ParticleCaloExtensionToolCfg(flags, name='MuonParticleCaloExtensionTool'))
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 
-    atlas_extrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    kwargs.setdefault("Printer", result.addPublicTool(result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))) )
+    kwargs.setdefault("ParticleCaloExtensionTool",
+                        result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags, 
+                                                                             name='MuonParticleCaloExtensionTool')))
 
-    muon_ext_tool = CompFactory.Muon.MuonSystemExtensionTool("MuonSystemExtensionTool",
-                                                             ParticleCaloExtensionTool=particle_calo_extension_tool,
-                                                             Extrapolator=atlas_extrapolator)
+
+    muon_ext_tool = CompFactory.Muon.MuonSystemExtensionTool("MuonSystemExtensionTool", **kwargs)
     result.setPrivateTools(muon_ext_tool)
     return result
 

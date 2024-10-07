@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonInDetToMuonSystemExtensionAlg.h"
@@ -47,6 +47,7 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::initialize() {
 }
 
 StatusCode MuonInDetToMuonSystemExtensionAlg::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("Cakes are availablei in "<<ctx.eventID().event_number());
     InDetCandidateCache output_cache{};
 
     SG::ReadHandle<InDetCandidateCollection> input_container{m_inputCandidate, ctx};
@@ -361,13 +362,16 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::createStaus(const EventContext& ct
         cache.requireSystemExtension = true;
 
         if (!m_muonSystemExtensionTool->muonLayerInterSections(ctx, *idMuidCo.cmb_trk, cache)) {
-            ATH_MSG_DEBUG("Could not determine the intersections. Although that should be possible");
-            continue;
+            ATH_MSG_FATAL("Could not determine the intersections. Although that should be possible");
+            return StatusCode::FAILURE;
         }
         stau_cache.outputContainer->push_back(std::move(cache.candidate));
     }
 
     SG::WriteHandle<InDetCandidateCollection> indetCandidateCollection(m_stauInDetCandKey, ctx);
+    // sort candidates beofre storing, otherwise ordering in container of stau segments can be inconsistent
+    std::sort(stau_cache.outputContainer->begin(),stau_cache.outputContainer->end(),[](const MuonCombined::InDetCandidate*a, const MuonCombined::InDetCandidate*b){
+        return a->indetTrackParticle().pt() < b->indetTrackParticle().pt();});
     ATH_CHECK(indetCandidateCollection.record(std::move(stau_cache.outputContainer)));
     return StatusCode::SUCCESS;
 }
