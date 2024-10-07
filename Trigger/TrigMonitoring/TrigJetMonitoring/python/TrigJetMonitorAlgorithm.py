@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file MTMonitoring.py
@@ -259,6 +259,7 @@ def getChains2Monitor(inputFlags, monMode):
     if Chains2Monitor['HI'].get('HLT_j75_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j75_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
     if Chains2Monitor['HI'].get('HLT_j85_ion_L1jJ60'): Chains2Monitor['HI']['HLT_j85_ion_L1jJ60'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
     if Chains2Monitor['HI'].get('HLT_j150_ion_L1jJ90'): Chains2Monitor['HI']['HLT_j150_ion_L1jJ90'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
+    if Chains2Monitor['HI'].get('HLT_j200_ion_L1jJ90'): Chains2Monitor['HI']['HLT_j200_ion_L1jJ90'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
 
     if Chains2Monitor['HI'].get('HLT_j50f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j50f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
     if Chains2Monitor['HI'].get('HLT_j60f_ion_L1jJ40p30ETA49'): Chains2Monitor['HI']['HLT_j60f_ion_L1jJ40p30ETA49'].update({"RefChain": "HLT_noalg_L1jTE50", "OfflineColl": "AntiKt4HIJets"})
@@ -308,13 +309,20 @@ def getChains2Monitor(inputFlags, monMode):
 
 def getEtaRange(chain):
   etaMin,etaMax = 0,2.5 # central jets by default
-  if 'eta' in chain:
+
+  if 'eta490_j' in chain: #workaround for the UPC (ultra-peripheral) trigger chains
+    etaMin,etaMax = 0,4.9
+  elif 'eta' in chain:
     etaParts    = chain.split('eta')
     etaMinTemp  = etaParts[0].split('_')
     etaMin      = etaMinTemp[len(etaMinTemp)-1]
     etaMin      = int(etaMin)/10
     etaMax      = etaParts[1].split('_')[0]
     etaMax      = int(etaMax)/10
+
+  if 'f_ion' in chain: #workaround for the HLT forward triggers
+    etaMin,etaMax = 3.2,4.9
+  
   return etaMin,etaMax
 
 def getBinningFromThreshold(chain,varname):
@@ -637,8 +645,52 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
                                        title='#phi;#phi;Entries',
                                        xvar='phi')
   Conf.appendHistos(
-    # See knownHistos in JetStandardHistoSpecs.py
-    # for the list of standard specification.
+    
+    #See knownHistos in JetStandardHistoSpecs.py for the list of standard specification.
+    #or we can directly add our custom histo specification in the form of a HistoSpec:
+    #the basic call is : HistoSpec( variable, histobins, title='histotile;xtitle,ytitle')
+    
+    #Say we want a 2nd 'pt' plot but with a different binning than in the standard spec.
+    #WARNING : we can not re-use the same spec name in a given JetMonitoringAlg !!!
+    #so we give a new name AND we specify the actual variable with the argument 'xvar'
+    #(the ':GeV' means the variable is to be set at GeV scale)
+    #HistoSpec( 'lowpt',  (100,0,150) , title='p_{T};p_{T} [GeV];', xvar='pt:GeV'),            
+    #An equivalent solution would have been to clone the existing spec like in :
+    #knownHistos.pt.clone('lowpt',bins= (100,0,200) ),
+
+    #2D histos are usually refered to by concatenating vars with a ';' as in 'varx;vary' 
+    #if the 'vax;vary' alias doesn't exist in knownHistos but 'varx' and 'vary'
+    #do exist, then a spec fot 'vax;vary' will be automatically generated.
+
+    #Jet multiplicity histograms can be added by using an EventHistoSpec
+    #Their specifications (pT cut, ET cut, eta cuts) must be defined in the knownEventVar dictionary within JetStandardHistoSpecs.py
+    #The following line is an example for a jet multiplicity histogram with ET>40 GeV, 1.0<|eta|<2.0, and binning of (10,0,10):
+    #EventHistoSpec('njetsEt40Eta1_2', (10,0,10), title='NJetsEt40Eta1_2;NJetsEt40Eta1_2;Entries' ),
+
+    #To select on multiple variables simultaneously, simply combine the selection strings via &
+    #Example below to select on ET > 100 GeV and |eta| > 3.2:
+    #SelectSpec( 'ETeta', '100<et:GeV&|eta|<3.2', path, FillerTools = ["pt","et","m","eta"] )
+
+    #TProfile2D : just use 3 variables. For now the sytem will automatically
+    #interpret it as a TProfile2D (the 3rd variable being profiled)
+    #"phi;eta;e",  --> Average Energy vs pt and eta
+     
+    #another possible selections : only sub-leading jets and highJVF
+    #SelectSpec( 'subleading',
+    #           '', # no selection on variables
+    #           SelectedIndex=1, # force 2nd (sub-leading) jet (we would set 0 for leading jets)
+    #           path='standardHistos', # force the path where the histos are saved in the final ROOT file
+    #           FillerTools = [
+    #               "pt",
+    #               "m",
+    #           ] ),
+    #SelectSpec( 'highJVF',
+    #           '0.3<JVF[0]', # JVF is a vector<float> for each jets. Here we cut on the 0th entry of this vector
+    #           FillerTools = [
+    #               "pt",
+    #           ] ),
+
+    #1D histos
     "pt",  
     "m",
     "eta",
@@ -646,59 +698,109 @@ def basicJetMonAlgSpec(jetcoll,isOnline):
     "phi_tight",
     "e",
     "et",
-    # or we can directly add our custom histo specification in the form of a HistoSpec:
-    # the basic call is : HistoSpec( variable, histobins, title='histotile;xtitle,ytitle')
     
-    # Say we want a 2nd 'pt' plot but with a different binning than in the standard spec.
-    # WARNING : we can not re-use the same spec name in a given JetMonitoringAlg !!!
-    # so we give a new name AND we specify the actual variable with the argument 'xvar'
-    #   (the ':GeV' means the variable is to be set at GeV scale)
-    #HistoSpec( 'lowpt',  (100,0,150) , title='p_{T};p_{T} [GeV];', xvar='pt:GeV'),            
-    # An equivalent solution would have been to clone the existing spec like in :
-    # knownHistos.pt.clone('lowpt',bins= (100,0,200) ),
-
-    # 2D histos are usually refered to by concatenating vars with a ';' as in 'varx;vary' 
-    # if the 'vax;vary' alias doesn't exist in knownHistos but 'varx' and 'vary'
-    # do exist, then a spec fot 'vax;vary' will be automatically generated.
+    #2D histos
     "pt;m",    # mass vs pt
     "eta;phi", # phi vs eta
     "eta;e",   # energy vs eta
     "phi;e",   # energy vs phi
     "phi_tight;e", # energy vs phi
 
+    #Event selection
     SelectSpec( 'central', '|eta|<3.2', path, FillerTools = ["pt","et","m"] ),
     SelectSpec( 'forward', '3.2<|eta|', path, FillerTools = ["pt","et","m"] ),
     SelectSpec( 'lowmu', 'avgMu<30', path, isEventVariable=True, FillerTools = ["pt","et","m","phi","eta"]),
     SelectSpec( 'highmu', '30<avgMu', path, isEventVariable=True, FillerTools = ["pt","et","m","phi","eta"]),
-    # To select on multiple variables simultaneously, simply combine the selection strings via &
-    # Example below to select on ET > 100 GeV and |eta| > 3.2:
-    # SelectSpec( 'ETeta', '100<et:GeV&|eta|<3.2', path, FillerTools = ["pt","et","m","eta"] )
+    
     EventHistoSpec('njets', (25,minNjetBin,25), title='NJets;NJets;Entries' ),
     EventHistoSpec('njetsPt20', (25,minNjetBin,25), title='NJetsPt20;NJetsPt20;Entries' ),
     EventHistoSpec('njetsPt50', (25,minNjetBin,25), title='NJetsPt50;NJetsPt50;Entries' ),
-    # Jet multiplicity histograms can be added by using an EventHistoSpec
-    # Their specifications (pT cut, ET cut, eta cuts) must be defined in the knownEventVar dictionary within JetStandardHistoSpecs.py
-    # The following line is an example for a jet multiplicity histogram with ET>40 GeV, 1.0<|eta|<2.0, and binning of (10,0,10):
-    # EventHistoSpec('njetsEt40Eta1_2', (10,0,10), title='NJetsEt40Eta1_2;NJetsEt40Eta1_2;Entries' ),
+    
+  )
 
-    # TProfile2D : just use 3 variables. For now the sytem will automatically
-    #  interpret it as a TProfile2D (the 3rd variable being profiled)
-    #"phi;eta;e", # --> Average Energy vs pt and eta
+  return Conf
+
+# Basic selection of histograms common for heavy ion online and offline jets
+def basicHIJetMonAlgSpec(jetcoll,isOnline):
+  # we use a specialized dictionnary (JetMonAlgSpec) which will be translated into the final C++ tool
+  path = 'NoTriggerSelection' if isOnline else 'standardHistos/'
+
+  TopLevelDir  = 'HLT/JetMon/'
+  TopLevelDir += 'Online/' if isOnline else 'Offline/'
+
+  jetcollFolder = jetcoll
+  jetcollFolder=jetcoll.replace(f"_{copySuffix}","")
+  Conf = JetMonAlgSpec(jetcoll+"Mon",JetContainerName = jetcoll, defaultPath = path, topLevelDir=TopLevelDir, bottomLevelDir=jetcollFolder, failureOnMissingContainer=False)
+
+  # Now start filling the histo spec list
+  knownHistos['phi_tight'] = HistoSpec('phi_tight',
+                                       (50,-math.pi,math.pi),
+                                       title='#phi;#phi;Entries',
+                                       xvar='phi')
+  Conf.appendHistos(
+    
+    #See knownHistos in JetStandardHistoSpecs.py for the list of standard specification.
+    #or we can directly add our custom histo specification in the form of a HistoSpec:
+    #the basic call is : HistoSpec( variable, histobins, title='histotile;xtitle,ytitle')
+    
+    #Say we want a 2nd 'pt' plot but with a different binning than in the standard spec.
+    #WARNING : we can not re-use the same spec name in a given JetMonitoringAlg !!!
+    #so we give a new name AND we specify the actual variable with the argument 'xvar'
+    #(the ':GeV' means the variable is to be set at GeV scale)
+    #HistoSpec( 'lowpt',  (100,0,150) , title='p_{T};p_{T} [GeV];', xvar='pt:GeV'),            
+    #An equivalent solution would have been to clone the existing spec like in :
+    #knownHistos.pt.clone('lowpt',bins= (100,0,200) ),
+
+    #2D histos are usually refered to by concatenating vars with a ';' as in 'varx;vary' 
+    #if the 'vax;vary' alias doesn't exist in knownHistos but 'varx' and 'vary'
+    #do exist, then a spec fot 'vax;vary' will be automatically generated.
+
+    #Jet multiplicity histograms can be added by using an EventHistoSpec
+    #Their specifications (pT cut, ET cut, eta cuts) must be defined in the knownEventVar dictionary within JetStandardHistoSpecs.py
+    #The following line is an example for a jet multiplicity histogram with ET>40 GeV, 1.0<|eta|<2.0, and binning of (10,0,10):
+    #EventHistoSpec('njetsEt40Eta1_2', (10,0,10), title='NJetsEt40Eta1_2;NJetsEt40Eta1_2;Entries' ),
+
+    #To select on multiple variables simultaneously, simply combine the selection strings via &
+    #Example below to select on ET > 100 GeV and |eta| > 3.2:
+    #SelectSpec( 'ETeta', '100<et:GeV&|eta|<3.2', path, FillerTools = ["pt","et","m","eta"] )
+
+    #TProfile2D : just use 3 variables. For now the sytem will automatically
+    #interpret it as a TProfile2D (the 3rd variable being profiled)
+    #"phi;eta;e",  --> Average Energy vs pt and eta
      
-    # another possible selections : only sub-leading jets and highJVF
+    #another possible selections : only sub-leading jets and highJVF
     #SelectSpec( 'subleading',
-    #            '', # no selection on variables
-    #            SelectedIndex=1, # force 2nd (sub-leading) jet (we would set 0 for leading jets)
-    #            path='standardHistos', # force the path where the histos are saved in the final ROOT file
-    #            FillerTools = [
-    #                "pt",
-    #                "m",
-    #            ] ),
+    #           '', # no selection on variables
+    #           SelectedIndex=1, # force 2nd (sub-leading) jet (we would set 0 for leading jets)
+    #           path='standardHistos', # force the path where the histos are saved in the final ROOT file
+    #           FillerTools = [
+    #               "pt",
+    #               "m",
+    #           ] ),
     #SelectSpec( 'highJVF',
-    #            '0.3<JVF[0]', # JVF is a vector<float> for each jets. Here we cut on the 0th entry of this vector
-    #            FillerTools = [
-    #                "pt",
-    #            ] ),
+    #           '0.3<JVF[0]', # JVF is a vector<float> for each jets. Here we cut on the 0th entry of this vector
+    #           FillerTools = [
+    #               "pt",
+    #           ] ),
+
+    #1D histos
+    "pt",  
+    "m",
+    "eta",
+    "phi",
+    "et",
+    
+    #2D histos
+    "eta;phi", # phi vs eta
+    HistoSpec( 'pt:GeV;m:GeV',  (100,0,400, 100,0,400) , title='p_{T} vs mass;p_{T} [GeV];m [GeV];Entries'),
+    HistoSpec( 'eta;et:GeV',  (100,-5,5, 100,0,400) , title='#eta vs e_{T};#eta;E_{T} [GeV];Entries'),
+    HistoSpec( 'phi;et:GeV',  (60,-math.pi,math.pi, 100,0,400) , title='#phi vs E_{T};#phi;E_{T} [GeV];Entries'),
+
+    #Event selection
+    SelectSpec( 'central', '|eta|<3.2', path, FillerTools = ["pt","et","m"] ),
+    SelectSpec( 'forward', '3.2<|eta|', path, FillerTools = ["pt","et","m"] ),
+    SelectSpec( 'pt60', '60<pt:GeV', path, FillerTools = ["m","phi","eta","eta;phi"]),
+    
   )
 
   return Conf
@@ -707,14 +809,19 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
    '''Function to configures some algorithms in the monitoring system.'''
 
    isOnline  = True if 'HLT' in jetcoll else False
-   conf      = basicJetMonAlgSpec(jetcoll,isOnline)
+
+   if monMode == 'HI': # Heavy ion jet monitoring histos
+      conf      = basicHIJetMonAlgSpec(jetcoll,isOnline)
+   else:
+      conf      = basicJetMonAlgSpec(jetcoll,isOnline)
 
    jetCollMonDetails = jetCollDict[monMode][jetcoll]
 
    # Declare a configuration dictionnary for a JetContainer
    if isOnline:
      if 'AntiKt4' in jetcoll or 'a4tcem' in jetcoll:
-       for hist in ExtraSmallROnlineHists: conf.appendHistos(hist)
+       if monMode == 'pp': #Use extra histos for pp only
+        for hist in ExtraSmallROnlineHists: conf.appendHistos(hist)
        if 'ftf' in jetcoll: # dedicated histograms for FTF chains
          conf.appendHistos("Jvt")
          conf.appendHistos("JVFCorr")
@@ -761,6 +868,14 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
            group.defineHistogram('ptresp,etaref;ptresp_vs_etaRef',title='ptresponse vs etaRef', type="TH2F",
                                  path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
                                  xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=-5., ymax=5.,)
+
+           group.defineHistogram('ptref,ptresp;ptRef_vs_ptresp',title='ptRef vs ptresponse', type="TH2F",
+                                 path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
+                                 xbins=100 , xmin=0., xmax=400000., ybins=80, ymin=-2., ymax=2.,)
+                                
+           group.defineHistogram('etaref,ptresp;etaRef_vs_ptresp',title='etaRef vs ptresponse', type="TH2F",
+                                 path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
+                                 xbins=100 , xmin=-5., xmax=5., ybins=80, ymin=-2., ymax=2.,)
            
        matchedJetColl   = jetCollMonDetails['MatchTo']
 
@@ -820,6 +935,14 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
          group.defineHistogram('ptresp,etaref;ptresp_vs_etaRef',title='ptresp vs etaRef', type="TH2F",
                                path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
                                xbins=10 , xmin=-2., xmax=2., ybins=10, ymin=-5., ymax=5.,)
+
+         group.defineHistogram('ptref,ptresp;ptRef_vs_ptresp',title='ptRef vs ptresponse', type="TH2F",
+                                 path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
+                                 xbins=100 , xmin=0., xmax=400000., ybins=80, ymin=-2., ymax=2.,)
+                                
+         group.defineHistogram('etaref,ptresp;etaRef_vs_ptresp',title='etaRef vs ptresponse', type="TH2F",
+                                 path='MatchedJets_{}'.format(jetCollMonDetails['MatchTo']),
+                                 xbins=100 , xmin=-5., xmax=5., ybins=80, ymin=-2., ymax=2.,)
          
        matchedJetColl   = jetCollMonDetails['MatchTo']
        jetmatchKey      = '{}.matched_{}'.format(jetcoll,matchedJetColl)
@@ -882,13 +1005,17 @@ def jetChainMonitoringConfig(inputFlags,jetcoll,chain,onlyUsePassingJets=True):
 
    def getEtaRangeString(chain):
      etaMin, etaMax = 0, 32
-     if 'eta' in chain:
+     if 'eta490_j' in chain: #workaround for the upc chains
+       etaMin, etaMax = 0, 49
+     elif 'eta' in chain:
        etaParts    = chain.split('eta')
        etaMinTemp  = etaParts[0].split('_')
        etaMin      = etaMinTemp[len(etaMinTemp)-1]
        etaMax      = etaParts[1].split('_')[0]
        if int(etaMin) > 0 : etaMin = str(int(int(etaMin)/10))
        if int(etaMax) > 0 : etaMax = str(int(int(etaMax)/10))
+     if 'f_ion' in chain:
+       etaMin, etaMax = 32, 49
      return 'Eta{}_{}'.format(etaMin,etaMax)
 
    def getNjetHistName(chain):
