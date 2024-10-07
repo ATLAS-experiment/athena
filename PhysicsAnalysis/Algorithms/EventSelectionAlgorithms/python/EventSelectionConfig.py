@@ -17,7 +17,11 @@ class EventSelectionMergerConfig(ConfigBlock):
             "remove events not passing the full list of selection cuts.")
 
     def makeAlgs(self, config):
-        alg = config.createAlgorithm('CP::SaveFilterAlg', 'EventSelectionMerger')
+        if not ( isinstance(self.selections, list) and self.selections and all(isinstance(item, str) for item in self.selections) ):
+            print('EventSelectionMerger: selections = ', self.selections)
+            raise ValueError('EventSelectionMerger requires a non-empty list of selection strings to be '
+                             'passed as `selections`!')
+        alg = config.createAlgorithm('CP::SaveFilterAlg', 'EventSelectionMerger' + self.selections[0].split("_%SYS%")[0])
         alg.FilterDescription = 'events passing at least one EventSelection algorithm'
         alg.eventDecisionOutputDecoration = 'ignore_anySelection_%SYS%'
         alg.selection = '||'.join([sel+',as_char' for sel in self.selections if sel])

@@ -154,7 +154,10 @@ class OutputAnalysisConfig (ConfigBlock):
                     outputName += '_%SYS%'
                 myVars += [outputConfig.outputContainerName + '.' + outputConfig.variableName + ' -> ' + outputName]
 
-        postfix = self.postfix
+        if self.postfix:
+            postfix = self.postfix
+        else:
+            postfix = self.treeName
 
         # Add an ntuple dumper algorithm:
         treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' + postfix )
