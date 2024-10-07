@@ -61,7 +61,7 @@ def CscClusterOnTrackCreatorCfg(flags,name="CscClusterOnTrackCreator", **kwargs)
 
 def MdtCalibToolForRotsCfg(flags, name ="MdtCalibrationTool", **kwargs):
     kwargs.setdefault("DoMagneticFieldCorrection", flags.Muon.Calib.correctMdtRtForBField)
-    kwargs.setdefault("DoWireSagCorrection", flags.Muon.useWireSagCorrections)
+
     kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]:
         kwargs.setdefault("DoTofCorrection", False)

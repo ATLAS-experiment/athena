@@ -110,7 +110,11 @@ namespace MuonR4{
                         fitState =  State::FailedCalib;
                         diagCov(Amg::x, Amg::x) = std::pow(dc->readoutElement()->innerTubeRadius(), 2);
                     } else {
-                        diagCov(Amg::x, Amg::x) = std::pow(m_mdtErrorScale * calibOutput.driftRadiusUncert(), 2);
+                        double uncert = calibOutput.driftRadiusUncert();
+                        if(m_doMdtUncertFromProp) {
+                            uncert = std::hypot(uncert, calibOutput.driftUncertSigProp());
+                        }
+                        diagCov(Amg::x, Amg::x) = std::pow(m_mdtErrorScale * uncert, 2);
                     }
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), std::move(chDir), fitState);
                     calibSP->setCovariance<2>(jac.inverse()*diagCov*jac);

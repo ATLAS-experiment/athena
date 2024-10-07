@@ -85,7 +85,6 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
 
     kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("DoTemperatureCorrection", flags.Muon.Calib.applyRtScaling)
-    kwargs.setdefault("DoWireSagCorrection", flags.Muon.Calib.correctMdtRtWireSag)
     kwargs.setdefault("DoTofCorrection", flags.Beam.Type is BeamType.Collisions) # No TOF correction if not collisions
 
     if flags.Beam.Type is BeamType.Collisions:
@@ -131,7 +130,6 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("PropagationSpeedBeta", flags.Muon.Calib.mdtPropagationSpeedBeta)
     # the same as MdtCalibrationDbTool
     kwargs.setdefault("CreateBFieldFunctions", flags.Muon.Calib.correctMdtRtForBField)
-    kwargs.setdefault("CreateWireSagFunctions", flags.Muon.Calib.correctMdtRtWireSag)
     kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))

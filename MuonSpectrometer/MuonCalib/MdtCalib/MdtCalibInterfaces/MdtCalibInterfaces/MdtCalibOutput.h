@@ -54,13 +54,13 @@ public:
     double backgroundTime() const;
     /// Sets the background time correction
     void setBackgroundTime(const double bkgTime);
-
-    // Returns the time correction arising from a wire sagging in the tube
-    double saggingTime() const;
-    /// Sets the sagging time
-    void setSaggingTime(const double sagTime);
-
-    using  MdtDriftCircleStatus = Muon::MdtDriftCircleStatus;    
+    /// Sets the uncertainty on the drift radius arising from the unknown
+    /// position along the wires
+    void setDriftUncertSigProp(const double uncert);
+    /// Returns the uncertainty on the drift radius arising from 
+    /// the unknown position along the wire
+    double driftUncertSigProp() const;
+    using MdtDriftCircleStatus = Muon::MdtDriftCircleStatus;    
     /// Status of the calibration
     MdtDriftCircleStatus status() const;
     void setStatus(const MdtDriftCircleStatus stat);
@@ -75,7 +75,8 @@ private:
     double m_tempTime{0.};
     double m_meanAdc{0.};
     double m_bkgTime{0.};
-    double m_sagTime{0.};
+    /// Uncertainty on the drift radius from the propagation
+    double m_radUncertFromProp{0.};
     MdtDriftCircleStatus m_status{MdtDriftCircleStatus::MdtStatusUnDefined};
 };
 

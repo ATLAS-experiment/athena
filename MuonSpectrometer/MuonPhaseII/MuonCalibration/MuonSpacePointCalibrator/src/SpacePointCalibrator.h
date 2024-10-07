@@ -79,6 +79,7 @@ namespace MuonR4{
 
             Gaudi::Property<double> m_mdtErrorScale{this, "mdtErrorScaleFactor", 1.0, "Scaling to apply to MDT errors for the pattern"}; 
 
+            Gaudi::Property<bool> m_doMdtUncertFromProp{this, "MdtPropagationTimeUncert", false};
 
     };
 

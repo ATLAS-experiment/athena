@@ -200,28 +200,13 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
     Amg::Vector2D posOnWire{Amg::Vector2D::Zero()};
     // if wire sag is taken into account, cast the surface to
     // StraightLineSurface so it can be added to the ROT
-    if (myStrategy.creationParameter(MuonDriftCircleErrorStrategy::WireSagGeomCorrection)) {
-        const Trk::Surface& surf{calibInput.saggedSurface()};
-        // set large value for tolerance, to make sure that global position
-        // including drift radius is taken to the wire.
-        std::optional<Amg::Vector2D> posOnSaggedWire = surf.globalToLocal(GP,
-                                                                          m_globalToLocalTolerance);
-        if (!posOnSaggedWire) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" globalToLocal() failed for sagged surface, not applying sagging! ");
+    const Trk::Surface& surf{calibInput.legacySurface()};
+    std::optional<Amg::Vector2D> posOnIdealWire = surf.globalToLocal(GP, m_globalToLocalTolerance);
+    if (!posOnIdealWire) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" globalToLocal() failed for ideal surface");
             return nullptr;
-        }
-        /// replace tempLocOnWire with tempLocOnSaggedWire
-        posOnWire = std::move(*posOnSaggedWire);
-    } else {
-        const Trk::Surface& surf{calibInput.idealSurface()};
-        std::optional<Amg::Vector2D> posOnIdealWire = surf.globalToLocal(GP,
-                                                                         m_globalToLocalTolerance);
-        if (!posOnIdealWire) {
-             ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" globalToLocal() failed for ideal surface");
-             return nullptr;
-        }
-        posOnWire = std::move(*posOnIdealWire);
     }
+    posOnWire = std::move(*posOnIdealWire);
 
     double positionAlongWire = posOnWire[Trk::locZ];
     // set driftcirclestatus, NODRIFTTIME if creating tube hits else UNDECIDED
@@ -243,7 +228,7 @@ MdtRotPtr MdtDriftCircleOnTrackCreator::createRIO_OnTrack(const MdtPrepData& mdt
     // we have to calculate sign, check whether direction is given
     if (m_doMdt && GD) {
         // calculate sign using surface
-        const Trk::Surface& surf{calibInput.idealSurface()};
+        const Trk::Surface& surf{calibInput.legacySurface()};
         std::optional<Amg::Vector2D> pos = surf.globalToLocal(GP, calibInput.trackDirection());
 
         // check this might still fail....
@@ -338,7 +323,7 @@ CalibrationOutput MdtDriftCircleOnTrackCreator::getLocalMeasurement(const EventC
         errRadius = radius;                 /// Use same value
 
         if (myStrategy.creationParameter(MuonDriftCircleErrorStrategy::ErrorAtPredictedPosition)) {
-            const Trk::Surface& surf{calibInput.idealSurface()};
+            const Trk::Surface& surf{calibInput.legacySurface()};
             std::optional<Amg::Vector2D> myLocalPosition = surf.globalToLocal(gpos, gdir);
             if (myLocalPosition) {
                 errRadius = (*myLocalPosition)[Trk::driftRadius];

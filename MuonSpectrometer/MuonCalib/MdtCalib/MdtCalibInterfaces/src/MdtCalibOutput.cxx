@@ -52,5 +52,5 @@ double MdtCalibOutput::meanAdc() const { return m_meanAdc; }
 double MdtCalibOutput::backgroundTime() const{ return m_bkgTime; }
 void MdtCalibOutput::setBackgroundTime(const double bkgTime) { m_bkgTime = bkgTime ;}
 
-double MdtCalibOutput::saggingTime() const{ return m_sagTime; }
-void MdtCalibOutput::setSaggingTime(const double sagTime) { m_sagTime = sagTime; }
+void MdtCalibOutput::setDriftUncertSigProp(const double uncert) { m_radUncertFromProp  = uncert; }
+double MdtCalibOutput::driftUncertSigProp() const { return m_radUncertFromProp; }
