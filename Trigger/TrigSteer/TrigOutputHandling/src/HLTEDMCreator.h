@@ -139,8 +139,8 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
 
   HLTEDMCreator();
   Gaudi::Property<std::vector<std::string>> m_fixLinks{ this, "FixLinks", {}, "Which keys of the TrigCompositeContainer WriteHandleKeyArray might need to have their (e.g. feature) element links re-mapped outside of views"};
-  SG::WriteDecorHandleKeyArray<xAOD::TrigCompositeContainer, std::vector<uint32_t> > m_remapLinkColKeys{ this, "DoNotSet_RemapLinkColKeys", {}, "Do not set, it is configured accordingly to FixLinks & TC output property"};
-  SG::WriteDecorHandleKeyArray<xAOD::TrigCompositeContainer, std::vector<uint16_t> > m_remapLinkColIndices{ this, "DoNotSet_RemapLinkColIndices", {}, "Do not set, it is configured accordingly to FixLinks & TC output property"};
+  SG::WriteDecorHandleKeyArray<xAOD::TrigCompositeContainer, std::vector<SG::sgkey_t> > m_remapLinkColKeys{ this, "DoNotSet_RemapLinkColKeys", {}, "Do not set, it is configured accordingly to FixLinks & TC output property"};
+  SG::WriteDecorHandleKeyArray<xAOD::TrigCompositeContainer, std::vector<xAOD::TrigComposite::index_type> > m_remapLinkColIndices{ this, "DoNotSet_RemapLinkColIndices", {}, "Do not set, it is configured accordingly to FixLinks & TC output property"};
 
   Gaudi::Property<bool> m_dumpSGBefore{ this, "dumpSGBefore", false, "Dump SG content before the merging"}; // for debugging 
   Gaudi::Property<bool> m_dumpSGAfter { this, "dumpSGAfter", false, "Dump SG content after the merging"};
