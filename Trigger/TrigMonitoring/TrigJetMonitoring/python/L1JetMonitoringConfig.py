@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 class L1JetMonAlg():
   def __init__(self,
@@ -103,6 +103,7 @@ class L1JetMonAlg():
       
     myGroup.defineHistogram('eta',title='eta',path=Path,xbins=50,xmin=-5,xmax=5)
     myGroup.defineHistogram('phi',title='phi',path=Path,xbins=50,xmin=-3.3,xmax=3.3)
+    myGroup.defineHistogram('eta,phi',title='map eta vs phi',type="TH2F",path=Path,xbins=100,xmin=-5,xmax=5,ybins=100,ymin=-3.2,ymax=3.2)
 
     if self.matched:
       for matchcoll,tag in [ [self.matchedOJ, 'off'], [self.matchedHLTJ, 'hlt'] ]:
@@ -130,6 +131,16 @@ class L1JetMonAlg():
                                 title='ptresponse vs etaRef', type="TH2F", path=Path,
                                 xbins=10, xmin=-1., xmax=2.,
                                 ybins=10, ymin=-5., ymax=5.,)
+
+        myGroup.defineHistogram(tag+'ptref,'+tag+'ptresp;ptRef_vs_ptresp',
+                                title='ptRef vs ptresponse', type="TH2F", path=Path,
+                                xbins=100, xmin=0., xmax=400000.,
+                                ybins=100, ymin=-5., ymax=5.,)
+
+        myGroup.defineHistogram(tag+'etaref,'+tag+'ptresp;etaRef_vs_ptresp',
+                                title='etaRef vs ptresponse', type="TH2F", path=Path,
+                                xbins=100, xmin=-5., xmax=5.,
+                                ybins=100, ymin=-5., ymax=5.,)
 
 
     return alg
