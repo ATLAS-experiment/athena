@@ -77,8 +77,7 @@ class MdtCalibInput {
       MdtCalibInput(const Muon::MdtPrepData& prd);
       /** Constructor taking taking the xAOD::MdtDriftCircle
         * @param prd: Reference to the uncalibrated Drift circle
-        * @param gctx: Geometry context to place the drift circle globally within ATLAS
-       */
+        * @param gctx: Geometry context to place the drift circle globally within ATLAS */
       MdtCalibInput(const xAOD::MdtDriftCircle& prd,
                     const ActsGeometryContext& gctx);
 
@@ -132,18 +131,10 @@ class MdtCalibInput {
       /// Calculates the distance that the signal has to travel along the wire
       double signalPropagationDistance() const;
       /// Returns the assocaited ideal surface  (Throw exception if no legacy RE is available)
-      const Trk::SaggedLineSurface& idealSurface() const;
-
-      /// Returns the surface modeling the wire sagging at the point of 
-      /// the closest approach (Throw exceptions if no legacy RE is available)
-      const Trk::StraightLineSurface& saggedSurface() const;
-      /// Releases the sagged line surface (Can be a nullptr)
-      std::unique_ptr<Trk::StraightLineSurface> releaseSurface();
+      const Trk::StraightLineSurface& legacySurface() const;
 
       /// Returns the center of the associated surface
       const Amg::Vector3D& surfaceCenter() const;
-      /// Returns the center of the sagged line surface
-      const Amg::Vector3D& saggedSurfCenter() const;
       /// Returns the tube length
       double tubeLength() const;
       /// Returns the sign of the readout position in local coordinates
@@ -175,7 +166,6 @@ class MdtCalibInput {
     double m_trigTime{0.};
     /// Distance to track (signed)
     double m_distToTrack{0.};
-    CxxUtils::CachedUniquePtrT<Trk::StraightLineSurface> m_saggedSurf{};
 
 };
 

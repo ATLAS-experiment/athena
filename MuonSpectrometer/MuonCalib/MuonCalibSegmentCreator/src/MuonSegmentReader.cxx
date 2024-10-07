@@ -287,7 +287,6 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
       m_trkHit_lorTime.push_back(calibResult.lorentzTime());
       m_trkHit_slewTime.push_back(calibResult.slewingTime());
       m_trkHit_propTime.push_back(calibResult.signalPropagationTime());
-      m_trkHit_sagTime.push_back(calibResult.saggingTime());
       m_trkHit_tempTime.push_back(calibResult.temperatureTime());
       m_trkHit_bkgTime.push_back(calibResult.backgroundTime());
       m_trkHit_tof.push_back(calibIn.timeOfFlight());

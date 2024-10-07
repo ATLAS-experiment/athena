@@ -41,7 +41,6 @@ ToolSettings MdtCalibrationTool::getSettings() const {
     settings.setBit(Property::PropCorrection, m_doProp);
     settings.setBit(Property::TempCorrection, m_doTemp);
     settings.setBit(Property::MagFieldCorrection, m_doField);
-    settings.setBit(Property::WireSagTimeCorrection, m_doWireSag);
     settings.setBit(Property::SlewCorrection, m_doSlew);
     settings.setBit(Property::BackgroundCorrection, m_doBkg);
     settings.window = static_cast<timeWindowMode>(m_windowSetting.value()); 
@@ -92,7 +91,6 @@ StatusCode MdtCalibrationTool::initialize() {
                 <<"   Correct propagation time "<<(m_doProp ? "si" : "no")<<std::endl
                 <<"   Correct temperature "<<(m_doTemp ? "si" : "no")<<std::endl
                 <<"   Correct magnetic field "<<(m_doField ? "si" : "no")<<std::endl
-                <<"   Correct wire sagging "<<(m_doWireSag ? "si" : "no")<<std::endl
                 <<"   Correct time slew "<<(m_doSlew ? "si" : "no")<<std::endl
                 <<"   Correct background "<<(m_doBkg ? "si" : "no"));
   return StatusCode::SUCCESS;
@@ -158,11 +156,11 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
                          - calibIn.triggerTime()
                          - calibResult.tubeT0() 
                          - calibResult.signalPropagationTime();
-  
+
   calibResult.setDriftTime(driftTime);
   // apply corrections
   double corrTime{0.};
-  const bool doCorrections = m_doField || m_doTemp || m_doBkg || m_doWireSag;
+  const bool doCorrections = m_doField || m_doTemp || m_doBkg;
   if (doCorrections) {
     const CorrectionPtr& corrections{calibConstants->corrections};
     const RtRelationPtr& rtRelation{calibConstants->rtRelation};
@@ -208,27 +206,6 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
         calibResult.setBackgroundTime(corrections->background()->correction(calibResult.driftTime(), bgLevel ));
         corrTime += calibResult.backgroundTime();
       }
-      /// Wire sag corrections
-      if (m_doWireSag && corrections->wireSag()) {
-        /// Retrieve the center of the sagged surface in global coordinates
-        const Amg::Vector3D& saggedSurfPos{calibIn.saggedSurfCenter()};
-        const Amg::Vector3D& nominalSurfPos{calibIn.surfaceCenter()};
-        /// Calculate the sagging as the difference of the point of closest approach to the
-        /// sagged center surface
-        const double deltaY = calibIn.closestApproach().y() - saggedSurfPos.y();
-        
-        // sign of drift radius (for sag calculation) is +/- of track passes
-        // above/below wire
-        const double signedDriftRadius = deltaY*(std::abs(calibResult.driftRadius()/deltaY));
-
-        // calculate the magnitude of the wire sag
-        double effectiveSag = nominalSurfPos.y()
-                            - saggedSurfPos.y();
-
-        calibResult.setSaggingTime(corrections->wireSag()->correction(signedDriftRadius, effectiveSag));
-        // apply the correction
-        corrTime += calibResult.saggingTime();
-      }
   }
 
   calibResult.setDriftTime(calibResult.driftTime() + corrTime);
@@ -238,55 +215,73 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   double t = calibResult.driftTime();
   double t_inrange = t;
   Muon::MdtDriftCircleStatus timeStatus = driftTimeStatus(t, *rtRelation);
-  if(rtRelation->rt()) {
-    r = rtRelation->rt()->radius(t);
-    // apply tUpper gshift
-    if (m_doTMaxShift) {
-      float tShift = m_tMaxShiftTool->getValue(id);
-      r = rtRelation->rt()->radius( t * (1 + tShift) );
+  
+  assert(rtRelation->rt() != nullptr);
+  r = rtRelation->rt()->radius(t);
+  // apply tUpper gshift
+  if (m_doTMaxShift) {
+    float tShift = m_tMaxShiftTool->getValue(id);
+    r = rtRelation->rt()->radius( t * (1 + tShift) );
+  }
+  // check whether drift times are within range, if not fix them to the min/max range
+  if ( t < rtRelation->rt()->tLower() ) {
+    t_inrange = rtRelation->rt()->tLower();
+    double rmin = rtRelation->rt()->radius( t_inrange );
+    double drdt = (rtRelation->rt()->radius( t_inrange + 30. ) - rmin)/30.;
+    /// now check whether we are outside the time window
+    if (timeStatus == Muon::MdtStatusBeforeSpectrum) {
+      t = rtRelation->rt()->tLower() - m_timeWindowLowerBound;
     }
-    // check whether drift times are within range, if not fix them to the min/max range
-    if ( t < rtRelation->rt()->tLower() ) {
-      t_inrange = rtRelation->rt()->tLower();
-      double rmin = rtRelation->rt()->radius( t_inrange );
-      double drdt = (rtRelation->rt()->radius( t_inrange + 30. ) - rmin)/30.;
-
-      /// now check whether we are outside the time window
-      if (timeStatus == Muon::MdtStatusBeforeSpectrum) {
-        t = rtRelation->rt()->tLower() - m_timeWindowLowerBound;
-      }
-      // if we get here we are outside the rt range but inside the window.
-      r = std::max(rmin + drdt*(t-t_inrange), m_unphysicalHitRadiusLowerBound.value());
-    } else if( t > rtRelation->rt()->tUpper() ) {
-      t_inrange = rtRelation->rt()->tUpper();
-      double rmax = rtRelation->rt()->radius( t_inrange );
-      double drdt = (rmax - rtRelation->rt()->radius( t_inrange - 30. ))/30.;
-
-      // now check whether we are outside the time window
-      if ( timeStatus == Muon::MdtStatusAfterSpectrum ) {
-        t = rtRelation->rt()->tUpper() + m_timeWindowUpperBound;
-      }
-      // if we get here we are outside the rt range but inside the window.
-      r = rmax + drdt*(t-t_inrange);
+    // if we get here we are outside the rt range but inside the window.
+    r = std::max(rmin + drdt*(t-t_inrange), m_unphysicalHitRadiusLowerBound.value());
+  } else if( t > rtRelation->rt()->tUpper() ) {
+    t_inrange = rtRelation->rt()->tUpper();
+    double rmax = rtRelation->rt()->radius( t_inrange );
+    double drdt = (rmax - rtRelation->rt()->radius( t_inrange - 30. ))/30.;
+    // now check whether we are outside the time window
+    if ( timeStatus == Muon::MdtStatusAfterSpectrum ) {
+      t = rtRelation->rt()->tUpper() + m_timeWindowUpperBound;
     }
-  } else {
-    ATH_MSG_WARNING( "no rt found" );
-    return calibResult;
+    // if we get here we are outside the rt range but inside the window.
+    r = rmax + drdt*(t-t_inrange);
   }
 
-  if (rtRelation->rtRes()) {
-    if (!resolFromRtrack) {
-      reso = rtRelation->rtRes()->resolution( t_inrange );
-    } else {
-      bool boundFlag{false};
-      const double tFromR = rtRelation->tr()->tFromR(std::abs(calibIn.distanceToTrack()),
-                                                     boundFlag);
-      reso = rtRelation->rtRes()->resolution(tFromR);
-    }
+  assert(rtRelation->rtRes() != nullptr);
+  if (!resolFromRtrack) {
+    reso = rtRelation->rtRes()->resolution( t_inrange );
   } else {
-    ATH_MSG_WARNING( "no rtRes found" );
-    return calibResult;
+    bool boundFlag{false};
+    const double tFromR = rtRelation->tr()->tFromR(std::abs(calibIn.distanceToTrack()),
+                                                   boundFlag);
+    reso = rtRelation->rtRes()->resolution(tFromR);
   }
+  
+
+  if (m_doPropUncert) {
+      assert(rtRelation->rt() != nullptr);
+
+      const double driftTimeUp = std::min(rtRelation->rt()->tUpper(),
+                                          calibIn.tdc() * tdcBinSize 
+                                        - (m_doTof ? calibIn.timeOfFlight() : 0.)
+                                        - calibIn.triggerTime()
+                                        - calibResult.tubeT0());
+
+      const double driftTimeDn = std::max(rtRelation->rt()->tLower(),
+                                          calibIn.tdc() * tdcBinSize 
+                                        - (m_doTof ? calibIn.timeOfFlight() : 0.)
+                                        - calibIn.triggerTime()
+                                        - calibResult.tubeT0()
+                                        - calibIn.tubeLength() * singleTubeData->inversePropSpeed);
+
+      const double radiusUp = rtRelation->rt()->radius(driftTimeUp);
+      const double radiusDn = rtRelation->rt()->radius(driftTimeDn);
+      ATH_MSG_VERBOSE("Measurement "<<m_idHelperSvc->toString(calibIn.identify())
+          <<" nominal drift time "<<driftTime<<", down: "<<driftTimeDn<<", up: "<<driftTimeUp
+          <<" --> driftRadius: "<<r<<" pm "<<reso<<", prop-up: "<<radiusUp<<", prop-dn: "<<radiusDn
+          <<" delta: "<<(radiusUp-radiusDn));
+      calibResult.setDriftUncertSigProp(0.5*std::abs(radiusUp - radiusDn));
+  }
+
   calibResult.setDriftRadius(r, reso);
   calibResult.setStatus(timeStatus);
   // summary

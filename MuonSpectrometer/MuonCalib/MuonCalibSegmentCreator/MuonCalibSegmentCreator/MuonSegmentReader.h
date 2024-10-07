@@ -170,7 +170,6 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<float>& m_trkHit_tubeMeanAdc{m_tree.newVector<float>("trkHit_tubeMeanAdc")};        
         VectorBranch<float>& m_trkHit_slewTime{m_tree.newVector<float>("trkHit_slewTime")};        
         VectorBranch<float>& m_trkHit_lorTime{m_tree.newVector<float>("trkHit_lorTime")};        
-        VectorBranch<float>& m_trkHit_sagTime{m_tree.newVector<float>("trkHit_sagTime")};        
         VectorBranch<float>& m_trkHit_propTime{m_tree.newVector<float>("trkHit_propTime")};        
         VectorBranch<float>& m_trkHit_tempTime{m_tree.newVector<float>("trkHit_tempTime")};        
         VectorBranch<float>& m_trkHit_bkgTime{m_tree.newVector<float>("trkHit_bkgTime")};        

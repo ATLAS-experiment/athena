@@ -106,10 +106,9 @@ private:
   Gaudi::Property<bool> m_doProp{this, "DoPropagationCorrection",  true};
   Gaudi::Property<bool> m_doTemp{this, "DoTemperatureCorrection", false};
   Gaudi::Property<bool> m_doField{this,"DoMagneticFieldCorrection", false};
-  Gaudi::Property<bool> m_doWireSag{this, "DoWireSagCorrection", false};
   Gaudi::Property<bool> m_doSlew{this, "DoSlewingCorrection", false};
   Gaudi::Property<bool> m_doBkg{this, "DoBackgroundCorrection", false};
-
+  Gaudi::Property<bool> m_doPropUncert{this, "DoPropagationTimeUncert", false};
   /* T0 Shift tool -- Per-tube offsets of t0 value */
   ToolHandle<MuonCalib::IShiftMapTools> m_t0ShiftTool{this, "T0ShiftTool", ""};
   /* TMax Shift tool -- Per-tube offsets of Tmax */

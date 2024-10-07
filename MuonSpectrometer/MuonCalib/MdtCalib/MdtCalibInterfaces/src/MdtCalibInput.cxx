@@ -105,10 +105,6 @@ const MuonGMR4::MdtReadoutElement* MdtCalibInput::decriptor() const {
 const Amg::Vector3D& MdtCalibInput::closestApproach() const {return m_approach; }
 void MdtCalibInput::setClosestApproach(const Amg::Vector3D& approach) {
    m_approach = approach;
-   releaseSurface();
-}
-std::unique_ptr<Trk::StraightLineSurface> MdtCalibInput::releaseSurface() {
-   return m_saggedSurf.release();
 }
 const Amg::Vector3D& MdtCalibInput::trackDirection() const { return m_trackDir; }
 void MdtCalibInput::setTrackDirection(const Amg::Vector3D& trackDir) { m_trackDir = trackDir; }
@@ -121,7 +117,6 @@ void MdtCalibInput::setTriggerTime(const double trigTime) { m_trigTime = trigTim
 const Amg::Vector3D& MdtCalibInput::surfaceCenter() const {
     return legacyDescriptor()->surface(identify()).center();
 }
-const Amg::Vector3D& MdtCalibInput::saggedSurfCenter() const { return saggedSurface().center();}
 
 Amg::Vector2D MdtCalibInput::projectMagneticField(const Amg::Vector3D& fieldInGlob) const {
    const Amg::Transform3D trf{localToGlobal().inverse()};
@@ -136,26 +131,10 @@ Amg::Vector2D MdtCalibInput::projectMagneticField(const Amg::Vector3D& fieldInGl
    /// Convert kilo tesla into tesla... Waaait whaat? 
    return 1000. * Amg::Vector2D{paralelComp, perpendComp};
 }
-const Trk::SaggedLineSurface& MdtCalibInput::idealSurface() const {
-   const auto* re = legacyDescriptor();
+const Trk::StraightLineSurface& MdtCalibInput::legacySurface() const {
+   const MuonGM::MdtReadoutElement* re = legacyDescriptor();
    assert(re != nullptr);
    return re->surface(identify());
-}
-const Trk::StraightLineSurface& MdtCalibInput::saggedSurface() const {
-   if (!m_saggedSurf) {
-      const Trk::SaggedLineSurface& surf{idealSurface()};
-      const Trk::Surface& baseSurf{surf};
-      std::optional<Amg::Vector2D> locApproach = baseSurf.globalToLocal(closestApproach(),1000.);
-      if (!locApproach) {
-         return surf;
-      }
-      std::unique_ptr<Trk::StraightLineSurface> sagged{surf.correctedSurface(*locApproach)};
-      if (!sagged) {
-         return surf;
-      }
-      return (*m_saggedSurf.set(std::move(sagged)));
-   }
-   return (*m_saggedSurf);
 }
 double MdtCalibInput::signalPropagationDistance() const {
    const double propDist = std::visit([this](const auto& re) ->double {

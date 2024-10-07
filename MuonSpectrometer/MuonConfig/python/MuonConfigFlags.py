@@ -62,7 +62,6 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.useLooseErrorTuning",False) 
     mcf.addFlag("Muon.useTGCPriorNextBC",False) # Use TGC measurements from Prior and Next Bunch Crossings. These measurements are available in the real data since somewhere in 2008.
     mcf.addFlag("Muon.useAlignmentCorrections",True) # Apply alignment corrections to MuonGeoModel. The corrections are read from a COOL database
-    mcf.addFlag("Muon.useWireSagCorrections",False) # tApply wire sag corrections.
     
     mcf.addFlag("Muon.makePRDs",True) # Disable when e.g. re-running from ESD
     
@@ -92,7 +91,6 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.Calib.correctMdtRtForTimeSlewing", lambda prevFlags : prevFlags.Input.isMC is False) # Apply time slewing correction to drift time only for data (as done in https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0028)
     mcf.addFlag("Muon.Calib.useMLRt", True) # use ML-RT functions from COOL
     mcf.addFlag("Muon.Calib.applyRtScaling", False) # TODO - apparently not needed, but currently used in MuonCalibConfig. Set false to match https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonCnvExample/python/MuonCalibFlags.py#0072
-    mcf.addFlag("Muon.Calib.correctMdtRtWireSag", False) # Apply RT wiresag correction
     mcf.addFlag("Muon.Calib.mdtCalibrationSource", "MDT") # Source for MDT t0s and rts
     mcf.addFlag("Muon.Calib.mdtPropagationSpeedBeta", lambda prevFlags : 1.0 if prevFlags.Input.isMC else 0.85) #
      
