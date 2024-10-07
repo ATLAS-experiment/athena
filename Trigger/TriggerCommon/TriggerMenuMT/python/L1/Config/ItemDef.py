@@ -1167,7 +1167,7 @@ class ItemDef:
 
         # MBTS
         MBTS_1   = d.MBTS_A | d.MBTS_C
-        MBTS_2   = (d.MBTS_A.x(2) | d.MBTS_C.x(2) | d.MBTS_A) & (d.MBTS_A.x(2) | d.MBTS_C.x(2) | d.MBTS_C)
+        MBTS_2   = (d.MBTS_C.x(2) | d.MBTS_A) & (d.MBTS_A.x(2) | d.MBTS_C)
         MBTS_1_1 = d.MBTS_A & d.MBTS_C
         MBTS_2_2 = d.MBTS_A.x(2) & d.MBTS_C.x(2)
         MBTS_1_A = d.MBTS_A.x(1)
