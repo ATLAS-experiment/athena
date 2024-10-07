@@ -29,6 +29,8 @@ def DataPrepCfg(flags, name = "DataPreparationPipeline", **kwarg):
     kwarg.setdefault('xAODMaker', tool)
     kwarg.setdefault('StripClusterContainerKey', 'FPGAITkStripClusters')
     kwarg.setdefault('PixelClusterContainerKey', 'FPGAITkPixelClusters')
+    kwarg.setdefault('StripSpacePointContainerKey', 'FPGAITkStripSpacePoints')
+    kwarg.setdefault('PixelSpacePointContainerKey', 'FPGAITkPixelSpacePoints')
 
     acc.addEventAlgo(CompFactory.DataPreparationPipeline(**kwarg))
     return acc

@@ -161,6 +161,11 @@ def ITkRecPreProcessingSiliconCfg(flags,
                 ITkSiTrackerSpacePointFinderCfg)
             acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
+    if flags.Tracking.ActiveConfig.doFPGASpacePoint:
+        from EFTrackingFPGAIntegration.EFSpacePointFormationConfig import (
+            EFSpacePointFormationCfg)
+        acc.merge(EFSpacePointFormationCfg(flags, previousActsExtension=previousActsExtension))
+
     if flags.Tracking.ActiveConfig.doActsSpacePoint:
         from ActsConfig.ActsSpacePointFormationConfig import (
             ActsSpacePointFormationCfg)
