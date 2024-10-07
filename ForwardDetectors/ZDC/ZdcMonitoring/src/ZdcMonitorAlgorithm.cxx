@@ -238,7 +238,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
                 centroidValid = (rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ValidBit);
                 centroidSideValid.at(iside) = rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ValidBit;
-                rpdSideValid.at(iside) = rpdStatusCurSide & 1 << RPDDataAnalyzer::ValidBit;
+                rpdSideValid.at(iside) = rpdStatusCurSide & 1 << ZDC::RPDDataAnalyzer::ValidBit;
                 bool curSideHasCentroid = (rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::HasCentroidBit);
 
                 bothReactionPlaneAngleValid &= centroidValid;
@@ -438,7 +438,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             absRpdChannelAmplitude = abs(rpdChannelAmplitude);
             zdcEMModuleEnergySameSide = zdcEMModuleEnergy[iside];
             zdcEnergySumSameSide = zdcEnergySum[iside];
-            bool curRpdChannelValid = status & 1 << RPDDataAnalyzer::ValidBit;
+            bool curRpdChannelValid = status & 1 << ZDC::RPDDataAnalyzer::ValidBit;
             rpdChannelValid = curRpdChannelValid;
             rpdChannelCentroidValid = centroidSideValid.at(iside);
 

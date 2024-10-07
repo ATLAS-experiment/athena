@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
@@ -69,20 +69,6 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
 
     declareProperty("DeltaTCut", m_deltaTCut = 10);
     declareProperty("ChisqRatioCut", m_ChisqRatioCut = 10);
-
-    declareProperty("RpdNbaselineSamples", m_rpdNbaselineSamples = 7, "Number of baseline samples; the sample equal to this number is the start of signal region");
-    declareProperty("RpdEndSignalSample", m_rpdEndSignalSample = 23, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
-    declareProperty("RpdPulse2ndDerivThresh", m_rpdPulse2ndDerivThresh = -18, "Second differences less than or equal to this number indicate a pulse");
-    declareProperty("RpdPostPulseFracThresh", m_rpdPostPulseFracThresh = 0.15, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
-    declareProperty("RpdGoodPulseSampleStart", m_rpdGoodPulseSampleStart = 8, "Pulses before this sample are considered pre-pulses");
-    declareProperty("RpdGoodPulseSampleStop", m_rpdGoodPulseSampleStop = 10, "Pulses after this sample are considered post-pulses");
-    declareProperty("RpdNominalBaseline", m_rpdNominalBaseline = 100, "The global nominal baseline; used when pileup is detected");
-    declareProperty("RpdPileupBaselineSumThresh", m_rpdPileupBaselineSumThresh = 53, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
-    declareProperty("RpdPileupBaselineStdDevThresh", m_rpdPileupBaselineStdDevThresh = 2, "Baseline standard deviations less than this number indicate there is NO pileup");
-    declareProperty("RpdNNegativesAllowed", m_rpdNNegativesAllowed = 2, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
-    declareProperty("RpdAdcOverflow", m_rpdAdcOverflow = 4095, "ADC values greater than or equal to this number are considered overflow");
-    declareProperty("RpdSideCCalibFactors", m_rpdSideCOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
-    declareProperty("RpdSideACalibFactors", m_rpdSideAOutputCalibFactors = std::vector<float>(16, 1.0), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 
     declareProperty("LHCRun", m_LHCRun = 3);
 
@@ -291,25 +277,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   zdcDataAnalyzer->disableModule(0, 0);
   zdcDataAnalyzer->disableModule(1, 0);
 
-
-  RPDConfig rpdConfig{};
-  rpdConfig.nRows = 4;
-  rpdConfig.nColumns = 4;
-  rpdConfig.nSamples = m_numSample;
-  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
-  rpdConfig.endSignalSample = m_rpdEndSignalSample;
-  rpdConfig.pulse2ndDerivThresh = m_rpdPulse2ndDerivThresh;
-  rpdConfig.postPulseFracThresh = m_rpdPostPulseFracThresh;
-  rpdConfig.goodPulseSampleStart = m_rpdGoodPulseSampleStart;
-  rpdConfig.goodPulseSampleStop = m_rpdGoodPulseSampleStop;
-  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
-  rpdConfig.pileupBaselineSumThresh = m_rpdPileupBaselineSumThresh;
-  rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
-  rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
-  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
-
  return zdcDataAnalyzer;
 
 }
@@ -398,25 +365,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   // Set the amplitude fit range limits
   //
   zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
-
-
-  RPDConfig rpdConfig{};
-  rpdConfig.nRows = 4;
-  rpdConfig.nColumns = 4;
-  rpdConfig.nSamples = m_numSample;
-  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
-  rpdConfig.endSignalSample = m_rpdEndSignalSample;
-  rpdConfig.pulse2ndDerivThresh = m_rpdPulse2ndDerivThresh;
-  rpdConfig.postPulseFracThresh = m_rpdPostPulseFracThresh;
-  rpdConfig.goodPulseSampleStart = m_rpdGoodPulseSampleStart;
-  rpdConfig.goodPulseSampleStop = m_rpdGoodPulseSampleStop;
-  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
-  rpdConfig.pileupBaselineSumThresh = m_rpdPileupBaselineSumThresh;
-  rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
-  rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
-  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
 
  return zdcDataAnalyzer;
 
@@ -583,27 +531,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
 
-  //
-  // The RPD configuration
-  //
-  RPDConfig rpdConfig{};
-  rpdConfig.nRows = 4;
-  rpdConfig.nColumns = 4;
-  rpdConfig.nSamples = m_numSample;
-  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
-  rpdConfig.endSignalSample = m_rpdEndSignalSample;
-  rpdConfig.pulse2ndDerivThresh = m_rpdPulse2ndDerivThresh;
-  rpdConfig.postPulseFracThresh = m_rpdPostPulseFracThresh;
-  rpdConfig.goodPulseSampleStart = m_rpdGoodPulseSampleStart;
-  rpdConfig.goodPulseSampleStop = m_rpdGoodPulseSampleStop;
-  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
-  rpdConfig.pileupBaselineSumThresh = m_rpdPileupBaselineSumThresh;
-  rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
-  rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
-  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
-  
   return zdcDataAnalyzer;
 }
 
@@ -768,27 +695,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjector2024()
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
 
-  //
-  // The RPD configuration
-  //
-  RPDConfig rpdConfig{};
-  rpdConfig.nRows = 4;
-  rpdConfig.nColumns = 4;
-  rpdConfig.nSamples = m_numSample;
-  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
-  rpdConfig.endSignalSample = m_rpdEndSignalSample;
-  rpdConfig.pulse2ndDerivThresh = m_rpdPulse2ndDerivThresh;
-  rpdConfig.postPulseFracThresh = m_rpdPostPulseFracThresh;
-  rpdConfig.goodPulseSampleStart = m_rpdGoodPulseSampleStart;
-  rpdConfig.goodPulseSampleStop = m_rpdGoodPulseSampleStop;
-  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
-  rpdConfig.pileupBaselineSumThresh = m_rpdPileupBaselineSumThresh;
-  rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
-  rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
-  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
-  
   return zdcDataAnalyzer;
 }
 
@@ -943,25 +849,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeMonteCarloPbPb2023()
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
-  
-  RPDConfig rpdConfig{};
-  rpdConfig.nRows = 4;
-  rpdConfig.nColumns = 4;
-  rpdConfig.nSamples = m_numSample;
-  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
-  rpdConfig.endSignalSample = m_rpdEndSignalSample;
-  rpdConfig.pulse2ndDerivThresh = m_rpdPulse2ndDerivThresh;
-  rpdConfig.postPulseFracThresh = m_rpdPostPulseFracThresh;
-  rpdConfig.goodPulseSampleStart = m_rpdGoodPulseSampleStart;
-  rpdConfig.goodPulseSampleStop = m_rpdGoodPulseSampleStop;
-  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
-  rpdConfig.pileupBaselineSumThresh = m_rpdPileupBaselineSumThresh;
-  rpdConfig.pileupBaselineStdDevThresh = m_rpdPileupBaselineStdDevThresh;
-  rpdConfig.nNegativesAllowed = m_rpdNNegativesAllowed;
-  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig, m_rpdSideCOutputCalibFactors));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig, m_rpdSideAOutputCalibFactors));
-  
+
   return zdcDataAnalyzer;
 }
 
@@ -1710,37 +1598,6 @@ StatusCode ZdcAnalysisTool::initialize()
     m_zdcModuleChisqLGRefit = m_zdcModuleContainerName+".ChisqLGRefit"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleChisqLGRefit.initialize());
 
-    // RPD per-channel data
-    //
-    m_rpdChannelBaseline = m_zdcModuleContainerName+".RPDChannelBaseline"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelBaseline.initialize());
-    m_rpdChannelPileupExpFitParams = m_zdcModuleContainerName+".RPDChannelPileupExpFitParams"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupExpFitParams.initialize());
-    m_rpdChannelPileupStretchedExpFitParams = m_zdcModuleContainerName+".RPDChannelPileupStretchedExpFitParams"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupStretchedExpFitParams.initialize());
-    m_rpdChannelPileupExpFitParamErrs = m_zdcModuleContainerName+".RPDChannelPileupExpFitParamErrs"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupExpFitParamErrs.initialize());
-    m_rpdChannelPileupStretchedExpFitParamErrs = m_zdcModuleContainerName+".RPDChannelPileupStretchedExpFitParamErrs"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupStretchedExpFitParamErrs.initialize());
-    m_rpdChannelPileupExpFitMSE = m_zdcModuleContainerName+".RPDChannelPileupExpFitMSE"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupExpFitMSE.initialize());
-    m_rpdChannelPileupStretchedExpFitMSE = m_zdcModuleContainerName+".RPDChannelPileupStretchedExpFitMSE"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupStretchedExpFitMSE.initialize());
-    m_rpdChannelAmplitude = m_zdcModuleContainerName+".RPDChannelAmplitude"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelAmplitude.initialize());
-    m_rpdChannelAmplitudeCalib = m_zdcModuleContainerName+".RPDChannelAmplitudeCalib"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelAmplitudeCalib.initialize());
-    m_rpdChannelMaxADC = m_zdcModuleContainerName+".RPDChannelMaxADC"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelMaxADC.initialize());
-    m_rpdChannelMaxADCCalib = m_zdcModuleContainerName+".RPDChannelMaxADCCalib"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelMaxADCCalib.initialize());
-    m_rpdChannelMaxSample = m_zdcModuleContainerName+".RPDChannelMaxSample"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelMaxSample.initialize());
-    m_rpdChannelStatus = m_zdcModuleContainerName+".RPDChannelStatus"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelStatus.initialize());
-    m_rpdChannelPileupFrac = m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelPileupFrac.initialize());
-
     // ZDC per-calorimeter data
     //
     m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
@@ -1759,8 +1616,6 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_zdcSumStatus.initialize());
     m_zdcSumModuleMask = m_zdcSumContainerName+".ModuleMask"+m_auxSuffix;
     ATH_CHECK( m_zdcSumModuleMask.initialize());
-    m_zdcSumRPDStatus = m_zdcSumContainerName+".RPDStatus"+m_auxSuffix;
-    ATH_CHECK( m_zdcSumRPDStatus.initialize());
 
     if (m_writeAux && m_auxSuffix != "") {
         ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
@@ -1841,12 +1696,6 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   
   m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
 
-  if (m_LHCRun==3)
-    {
-      m_rpdDataAnalyzer.at(0)->reset();
-      m_rpdDataAnalyzer.at(1)->reset();
-    }
-
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
   
@@ -1868,36 +1717,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   // Ignore MC only modules
   if(zdcModule->zdcModule() > 4) continue;
 
-	if (zdcModule->zdcType() == 1) {
-	  //  This is RPD data in Run 3
-	  //
-	  if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
-	  ATH_MSG_DEBUG("RPD side " << side << " chan " << zdcModule->zdcChannel() );
-
-	  unsigned int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
-	  if (rpdChannel > 15) {
-	    //
-	    //  The data is somehow corrupt, spit out an error
-	    //
-	    ATH_MSG_WARNING("Invalid RPD channel found on side " << side << ", channel number = " << rpdChannel << ", skipping this module");
-	    continue;
-	  }
-	  else {
-	    const std::vector<uint16_t>* vector_p = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data"));
-	    if (!vector_p) {
-	      //  This is obviously a problem, generate a non-fatal but serious error and continue
-	      //
-	      ATH_MSG_WARNING("Could not retrieve waveform for side " << side << ", module " << zdcModule->zdcModule() << ", skipping this module");
-	      continue;
-	    }
-	    
-	    //
-	    // Pass the data to the RPD analysis tool 
-	    //
-	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel, *vector_p);
-	  }
-	}
-	else {
+	if (zdcModule->zdcType() == 0) {
 	  //
 	  // This is ZDC data
 	  //
@@ -1973,13 +1793,6 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  }
 	}
       }
-    
-    // analyze RPD data only once all channels have been loaded
-    if (m_LHCRun==3)
-      {
-	m_rpdDataAnalyzer.at(0)->analyzeData();
-	m_rpdDataAnalyzer.at(1)->analyzeData();
-      }
 
     ATH_MSG_DEBUG("Finishing event processing");
     
@@ -2007,21 +1820,6 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleT0SubLGRefit(m_zdcModuleT0SubLGRefit);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleChisqLGRefit(m_zdcModuleChisqLGRefit);
     
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelBaseline(m_rpdChannelBaseline);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupExpFitParams(m_rpdChannelPileupExpFitParams);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupStretchedExpFitParams(m_rpdChannelPileupStretchedExpFitParams);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupExpFitParamErrs(m_rpdChannelPileupExpFitParamErrs);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupStretchedExpFitParamErrs(m_rpdChannelPileupStretchedExpFitParamErrs);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupExpFitMSE(m_rpdChannelPileupExpFitMSE);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupStretchedExpFitMSE(m_rpdChannelPileupStretchedExpFitMSE);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitude(m_rpdChannelAmplitude);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitudeCalib(m_rpdChannelAmplitudeCalib);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxADC(m_rpdChannelMaxADC);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxADCCalib(m_rpdChannelMaxADCCalib);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelMaxSample(m_rpdChannelMaxSample);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelStatus(m_rpdChannelStatus);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupFrac(m_rpdChannelPileupFrac);
-    
     // CalibTime
     // Status
     // Time
@@ -2042,26 +1840,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
         // Ignore MC only modules
         if(mod > 4) continue;
 
-        if (zdcModule->zdcType() == 1 && m_LHCRun==3) {
-          // this is the RPD
-          if (m_writeAux) {
-            int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
-	    rpdChannelBaseline(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChBaseline(rpdChannel);
-	    rpdChannelPileupExpFitParams(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupExpFitParams(rpdChannel);
-	    rpdChannelPileupStretchedExpFitParams(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupStretchedExpFitParams(rpdChannel);
-	    rpdChannelPileupExpFitParamErrs(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupExpFitParamErrs(rpdChannel);
-	    rpdChannelPileupStretchedExpFitParamErrs(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupStretchedExpFitParamErrs(rpdChannel);
-	    rpdChannelPileupExpFitMSE(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupExpFitMSE(rpdChannel);
-	    rpdChannelPileupStretchedExpFitMSE(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupStretchedExpFitMSE(rpdChannel);
-	    rpdChannelAmplitude(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdc(rpdChannel);
-	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdcCalib(rpdChannel);
-	    rpdChannelMaxADC(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdc(rpdChannel);
-	    rpdChannelMaxADCCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdcCalib(rpdChannel);
-	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxSample(rpdChannel);
-	    rpdChannelStatus(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
-	    rpdChannelPileupFrac(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChPileupFrac(rpdChannel);
-          }
-        } else if (zdcModule->zdcType() == 0) {
+        if (zdcModule->zdcType() == 0) {
           // this is the main ZDC
           if (m_writeAux) {
               if (m_doCalib) {
@@ -2112,7 +1891,6 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumAverageTime(m_zdcSumAverageTime);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumStatus(m_zdcSumStatus);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumModuleMask(m_zdcSumModuleMask);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumRPDStatus(m_zdcSumRPDStatus);
 
     for (const auto zdc_sum: moduleSumContainer)
       {
@@ -2137,10 +1915,6 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	zdcSumAverageTime(*zdc_sum) = getAverageTime(iside);
 	zdcSumStatus(*zdc_sum) = !sideFailed(iside);
 	zdcSumModuleMask(*zdc_sum) = (getModuleMask() >> (4 * iside)) & 0xF;
-	if (m_LHCRun==3)
-	  {
-	    zdcSumRPDStatus(*zdc_sum) = m_rpdDataAnalyzer.at(iside)->getSideStatus();
-	  }
       }
 
     return StatusCode::SUCCESS;
