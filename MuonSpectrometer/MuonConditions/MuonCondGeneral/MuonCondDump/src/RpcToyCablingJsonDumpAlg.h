@@ -36,6 +36,7 @@ private:
     Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "RpcCabling.json", "Cabling JSON"};
 
     int m_BIL_stIdx{9999};
+    int m_BIS_stIdx{9999};
     
 };
 

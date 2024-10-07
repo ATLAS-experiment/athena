@@ -23,6 +23,7 @@ StatusCode RpcToyCablingJsonDumpAlg::initialize() {
     }
 
     m_BIL_stIdx = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
+    m_BIS_stIdx = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
     return StatusCode::SUCCESS;
 }
 StatusCode RpcToyCablingJsonDumpAlg::execute() {
@@ -58,8 +59,9 @@ StatusCode RpcToyCablingJsonDumpAlg::execute() {
               const unsigned int nTdcStrips = (nStrips % nStripsPerTdc ? 1 : 0) + 
                                               (nStrips - (nStrips % nStripsPerTdc)) / nStripsPerTdc;  
                 for (bool side : {false, true}) {
-                    if (side && reEle->stationName() != m_BIL_stIdx) {
-                      /// Do not create side cablings for non BIL stations
+		    bool run4_BIS = ((reEle->stationName() == m_BIS_stIdx) && (abs(reEle->stationEta()) < 7));
+                    if (side && reEle->stationName() != m_BIL_stIdx && !(run4_BIS)) {
+                      /// Do not create side cablings for non BIL and non BIS 1-6 stations
                         continue;
                     }
                     unsigned int measPhiSide = (side * stripSideBit) | (measPhi * measPhiBit);

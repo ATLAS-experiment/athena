@@ -28,6 +28,7 @@ namespace MuonR4{
         private:
             using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
             int m_stIdxBIL{-1}; // Station name index of the BIL stations
+	    int m_stIdxBIS{-1}; // Station name index of the BIS stations
             
             /**  @brief Digitize the sim hit as Rpc strip 1D hit.  
              *   @param gasGapId: Identifier of the associated gasGap
