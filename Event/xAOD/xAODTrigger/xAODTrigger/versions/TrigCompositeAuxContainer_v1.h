@@ -37,6 +37,7 @@ namespace xAOD {
 
    public:
       using sgkey_t = SG::sgkey_t;
+      using index_type = uint32_t;
 
       /// Default constuctor
       TrigCompositeAuxContainer_v1();
@@ -45,8 +46,8 @@ namespace xAOD {
       std::vector< std::string > name;
 
       std::vector< std::vector< std::string > > linkColNames;
-      std::vector< std::vector< sgkey_t > >    linkColKeys;
-      std::vector< std::vector< uint16_t > >    linkColIndices;
+      std::vector< std::vector< sgkey_t > >     linkColKeys;
+      std::vector< std::vector< index_type > >  linkColIndices;
       std::vector< std::vector< uint32_t > >    linkColClids;
 
    }; // class TrigCompositeAuxContainer_v1

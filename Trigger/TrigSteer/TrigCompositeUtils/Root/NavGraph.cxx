@@ -182,7 +182,7 @@ namespace TrigCompositeUtils {
     if (node->hasObjectLink(featureString())) {
       SG::sgkey_t key;
       uint32_t clid;
-      uint16_t index;
+      Decision::index_type index;
       node->typelessGetObjectLink(featureString(), key, clid, index);
 #ifndef XAOD_STANDALONE // Athena or AthAnalysis
       ss << " Feature(#" << index << ", " << CLIDRegistry::CLIDToTypeinfo(clid)->name() << ", " << key << ")"; 

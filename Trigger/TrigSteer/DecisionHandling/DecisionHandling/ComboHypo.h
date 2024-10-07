@@ -6,6 +6,7 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "xAODTrigger/TrigComposite.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 // STL includes
@@ -90,14 +91,13 @@ class ComboHypo : public ::AthReentrantAlgorithm {
   StatusCode extractFeatureAndRoI(const HLT::Identifier& chainLegId,
     const ElementLink<TrigCompositeUtils::DecisionContainer>& EL,
     SG::sgkey_t& featureKey, 
-    uint16_t& featureIndex, 
+    TrigCompositeUtils::Decision::index_type& featureIndex, 
     SG::sgkey_t& roiKey, 
-    uint16_t& roiIndex, 
+    TrigCompositeUtils::Decision::index_type& roiIndex, 
     bool& roiFullscan, 
     bool& objectRequestsNoMultiplicityCheck,
     SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap,
     const EventContext& ctx) const; 
-
 
   /**
    * @brief iterates over all inputs, associating inputs to legs

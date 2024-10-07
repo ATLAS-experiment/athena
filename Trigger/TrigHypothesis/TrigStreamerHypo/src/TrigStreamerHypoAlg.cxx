@@ -52,7 +52,7 @@ StatusCode TrigStreamerHypoAlg::execute( const EventContext& context ) const {
        // Obligatory link to feature. Re-use previous Step's feature.
        SG::sgkey_t key = 0;
        uint32_t clid = 0;
-       uint16_t index = 0;
+       Decision::index_type index = 0;
        const Decision* source = nullptr; // Unused
        ATH_CHECK( typelessFindLink(previousDecision, featureString(), key, clid, index, source) );
        newDecision->typelessSetObjectLink(featureString(), key, clid, index);

@@ -216,9 +216,6 @@ StatusCode HLTEDMCreator::fixLinks() const {
     return StatusCode::SUCCESS;
   }
 
-  static const SG::AuxElement::ConstAccessor< std::vector< uint32_t > > keyAccessor( "linkColKeys" );
-  static const SG::AuxElement::ConstAccessor< std::vector< uint16_t > > indexAccessor( "linkColIndices" );
-
   ATH_MSG_DEBUG("fixLinks called for " << m_fixLinks.size() << " of " << m_TrigCompositeContainer.size() << " collections");
 
   // Do the remapping
@@ -244,8 +241,8 @@ StatusCode HLTEDMCreator::fixLinks() const {
     ATH_MSG_DEBUG("Collection exists with size " << readHandle->size() << " Decision objects" );
     ATH_MSG_DEBUG("Adding decorations: " << m_remapLinkColKeys.at( writeHandleArrayIndex ).key() << " and " << m_remapLinkColIndices.at( writeHandleArrayIndex ).key() );
     
-    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<uint32_t> > keyDecor( m_remapLinkColKeys.at( writeHandleArrayIndex ) );
-    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<uint16_t> > indexDecor( m_remapLinkColIndices.at( writeHandleArrayIndex ) );
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<SG::sgkey_t> > keyDecor( m_remapLinkColKeys.at( writeHandleArrayIndex ) );
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, std::vector<xAOD::TrigComposite::index_type> > indexDecor( m_remapLinkColIndices.at( writeHandleArrayIndex ) );
 
     // Examine each input TC
     int decisionObjectIndex = -1;
@@ -253,8 +250,8 @@ StatusCode HLTEDMCreator::fixLinks() const {
       ++decisionObjectIndex;
 
       // Retrieve the link information for remapping
-      std::vector< uint32_t > remappedKeys = keyAccessor( *inputDecision );
-      std::vector< uint16_t > remappedIndexes = indexAccessor( *inputDecision );
+      std::vector< SG::sgkey_t > remappedKeys = inputDecision->linkColKeys(); // Vec copy
+      std::vector< xAOD::TrigComposite::index_type > remappedIndexes = inputDecision->linkColIndices(); // Vec copy
 
       // Search the linked collections for remapping
       size_t const collectionTotal = inputDecision->linkColNames().size();
@@ -263,9 +260,9 @@ StatusCode HLTEDMCreator::fixLinks() const {
 
         // Load ElementLink identifiers (except for CLID)
         std::string const collectionName = inputDecision->linkColNames().at(elementLinkIndex);
-        uint32_t const collectionKey = remappedKeys.at(elementLinkIndex); //Note: This is the existing before-remap key
+        SG::sgkey_t const collectionKey = remappedKeys.at(elementLinkIndex); //Note: This is the existing before-remap key
         std::string const keyString = *( evtStore()->keyToString( collectionKey ) );
-        uint16_t const collectionIndex = remappedIndexes.at(elementLinkIndex); //Note: This is the existing before-remap index
+        xAOD::TrigComposite::index_type const collectionIndex = remappedIndexes.at(elementLinkIndex); //Note: This is the existing before-remap index
 
         // Check for remapping in a merge
         SG::sgkey_t newKey = 0;
