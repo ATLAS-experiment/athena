@@ -8,23 +8,22 @@
 #include <array>
 #include <bitset>
 
-#include "AsgTools/AsgTool.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
-#include "xAODForward/ZdcModuleContainer.h"
+#include "ZdcAnalysis/RPDDataAnalyzer.h"
+#include "ZdcAnalysis/ZDCPulseAnalyzer.h"
+#include "ZdcUtils/RPDUtils.h"
 
+#include "AsgTools/AsgTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
-
+#include "xAODForward/ZdcModuleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
-namespace ZDC
-{
+namespace ZDC {
 
-class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::AsgTool
-{
+class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::AsgTool {
   ASG_TOOL_CLASS(RpdSubtractCentroidTool, ZDC::IZdcAnalysisTool)
-
  public:
   enum {
     ValidBit                     =  0, // analysis and output are valid
@@ -49,10 +48,18 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     Col1ValidBit                 = 18, // column 1 y centroid is valid
     Col2ValidBit                 = 19, // column 2 y centroid is valid
     Col3ValidBit                 = 20, // column 3 y centroid is valid
+
+    N_STATUS_BITS
   };
 
-  RpdSubtractCentroidTool(const std::string& name);
-  virtual ~RpdSubtractCentroidTool() override;
+  explicit RpdSubtractCentroidTool(const std::string& name);
+  ~RpdSubtractCentroidTool() override = default;
+
+  // this tool should never be copied or moved
+  RpdSubtractCentroidTool(RpdSubtractCentroidTool const&) = delete;
+  RpdSubtractCentroidTool& operator=(RpdSubtractCentroidTool const&) = delete;
+  RpdSubtractCentroidTool(RpdSubtractCentroidTool &&) = delete;
+  RpdSubtractCentroidTool& operator=(RpdSubtractCentroidTool &&) = delete;
 
   // interface from AsgTool and IZdcAnalysisTool
   StatusCode initialize() override;
@@ -76,26 +83,20 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   bool m_useRpdSumAdc;
   bool m_useCalibDecorations;
 
-
-  //   As in the ZDC analysis, we use side C = 0, side A = 1 for indexing
-  //   note that ZDC side from AOD containers is C = -1, A = 1, but
-  //     side C is mapped -1 -> 0 for indexing
-
-  // constants
-  //
-  unsigned int const m_nRows = 4;
-  unsigned int const m_nCols = 4;
-  unsigned int const m_nChannels = m_nRows*m_nCols;
+  StatusCode initializeKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key);
+  StatusCode initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
+  static bool nonNegative(float const x) { return x >= 0; }
+  static bool anyNonNegative(std::vector<float> const& v) { return std::any_of(v.begin(), v.end(), nonNegative); }
 
   // internal properties
   //
-  std::string m_name;
-  bool m_init;
+  bool m_initialized = false;
+  bool m_readZDCDecorations = false;
 
   // results from RPD analysis needed for centroid calculation (read from AOD)
   //
   struct RpdChannelData {
-    int channel;
+    unsigned int channel;
     float xposRel;
     float yposRel;
     unsigned short row;
@@ -105,59 +106,50 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     float pileupFrac;
     unsigned int status;
   };
-  std::array<std::bitset<32>, 2> m_rpdSideStatus = {0, 0}; /** RPD analysis status word on each side */
-  std::array<unsigned int, 2> m_zdcSideStatus = {0, 0}; /** ZDC analysis status on each side */
-  std::array<float, 2> m_zdcFinalEnergy = {0, 0}; /** ZDC final (calibrated) energy on each side */
-  std::array<float, 2> m_emCalibEnergy = {0, 0}; /** EM calibrated energy on each side */
-  std::array<std::bitset<32>, 2> m_emStatus = {0, 0}; /** EM modlue status word on each side */
-  std::array<std::vector<std::vector<RpdChannelData>>, 2> m_rpdChannelData = {
-    std::vector<std::vector<RpdChannelData>>(m_nRows, std::vector<RpdChannelData>(m_nCols)),
-    std::vector<std::vector<RpdChannelData>>(m_nRows, std::vector<RpdChannelData>(m_nCols))
-  }; /** RPD channel data for each channel (first index row, then index column) on each side */
+  std::array<std::bitset<RPDDataAnalyzer::N_STATUS_BITS>, 2> m_rpdSideStatus {}; /** RPD analysis status word on each side */
+  std::optional<std::array<unsigned int, 2>> m_zdcSideStatus; /** ZDC analysis status on each side */
+  std::optional<std::array<float, 2>> m_zdcFinalEnergy; /** ZDC final (calibrated) energy on each side */
+  std::optional<std::array<float, 2>> m_emCalibEnergy; /** EM calibrated energy on each side */
+  std::optional<std::array<std::bitset<ZDCPulseAnalyzer::N_STATUS_BITS>, 2>> m_emStatus; /** EM modlue status word on each side */
+  std::array<std::array<std::array<RpdChannelData, RPDUtils::nCols>, RPDUtils::nRows>, 2> m_rpdChannelData {}; /** RPD channel data for each channel (first index row, then index column) on each side */
 
   // alignment (geometry) and crossing angle correction, to be read from ZdcConditions
   //
-  std::array<float, 2> m_alignmentXOffset = {0.0, 0.0}; /** geometry + crossing angle correction in x (ATLAS coordinates) */
-  std::array<float, 2> m_alignmentYOffset = {0.0, 0.0}; /** geometry + crossing angle correction in y (ATLAS coordinates) */
+  std::array<float, 2> m_alignmentXOffset {}; /** geometry + crossing angle correction in x (ATLAS coordinates) */
+  std::array<float, 2> m_alignmentYOffset {}; /** geometry + crossing angle correction in y (ATLAS coordinates) */
   /** ROTATIONS GO HERE */
 
   // average centroids, to be read from monitoring histograms
   //
-  std::array<float, 2> m_avgXCentroid = {0.0, 0.0}; /** average x centroid */
-  std::array<float, 2> m_avgYCentroid = {0.0, 0.0}; /** average y centroid */
+  std::array<float, 2> m_avgXCentroid {}; /** average x centroid */
+  std::array<float, 2> m_avgYCentroid {}; /** average y centroid */
 
   // centroid calculation results (reset each event)
   //
-  bool m_eventStatus; /** event status */
-  std::array<std::bitset<32>, 2> m_centroidStatus = {1 << ValidBit, 1 << ValidBit}; /** centroid status (valid by default) on each side */
+  bool m_eventValid = false; /** event status */
+  std::array<std::bitset<N_STATUS_BITS>, 2> m_centroidStatus {1 << ValidBit, 1 << ValidBit}; /** centroid status (valid by default) on each side */
   std::array<std::vector<float>, 2> m_subtrAmp = {
-    std::vector<float>(m_nChannels, 0.0),
-    std::vector<float>(m_nChannels, 0.0)
+    std::vector<float>(RPDUtils::nChannels, 0.0),
+    std::vector<float>(RPDUtils::nChannels, 0.0)
   }; /** subtracted amplitude for each channel on each side */
-  std::array<std::vector<float>, 2> m_subtrAmpRowSum = {
-    std::vector<float>(m_nRows, 0.0),
-    std::vector<float>(m_nRows, 0.0)
-  }; /** subtracted amplitude for each row on each side */
-  std::array<std::vector<float>, 2> m_subtrAmpColSum = {
-    std::vector<float>(m_nCols, 0.0),
-    std::vector<float>(m_nCols, 0.0)
-  }; /** subtracted amplitude for each column on each side */
-  std::array<float, 2> m_subtrAmpSum = {0.0, 0.0}; /** subtracted amplitude sum on each side */
-  std::array<float, 2> m_xCentroidPreGeomCorPreAvgSubtr = {0.0, 0.0};  /** x centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
-  std::array<float, 2> m_yCentroidPreGeomCorPreAvgSubtr = {0.0, 0.0};  /** y centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
-  std::array<float, 2> m_xCentroidPreAvgSubtr = {0.0, 0.0};  /** x centroid after geomerty correction and before average subtraction on each side */
-  std::array<float, 2> m_yCentroidPreAvgSubtr = {0.0, 0.0};  /** y centroid after geomerty correction and before average subtraction on each side */
-  std::array<float, 2> m_xCentroid = {0.0, 0.0};  /** x centroid after geomerty correction and after average subtraction on each side */
-  std::array<float, 2> m_yCentroid = {0.0, 0.0};  /** y centroid after geomerty correction and after average subtraction on each side */
+  std::array<std::array<float, RPDUtils::nRows>, 2> m_subtrAmpRowSum {}; /** subtracted amplitude for each row on each side */
+  std::array<std::array<float, RPDUtils::nCols>, 2> m_subtrAmpColSum {}; /** subtracted amplitude for each column on each side */
+  std::array<float, 2> m_subtrAmpSum {}; /** subtracted amplitude sum on each side */
+  std::array<float, 2> m_xCentroidPreGeomCorPreAvgSubtr {};  /** x centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
+  std::array<float, 2> m_yCentroidPreGeomCorPreAvgSubtr {};  /** y centroid before geomerty correction and before average subtraction (RPD detector coordinates) on each side */
+  std::array<float, 2> m_xCentroidPreAvgSubtr {};  /** x centroid after geomerty correction and before average subtraction on each side */
+  std::array<float, 2> m_yCentroidPreAvgSubtr {};  /** y centroid after geomerty correction and before average subtraction on each side */
+  std::array<float, 2> m_xCentroid {};  /** x centroid after geomerty correction and after average subtraction on each side */
+  std::array<float, 2> m_yCentroid {};  /** y centroid after geomerty correction and after average subtraction on each side */
   std::array<std::vector<float>, 2> m_xRowCentroid = {
-    std::vector<float>(m_nRows, 0.0),
-    std::vector<float>(m_nRows, 0.0)
+    std::vector<float>(RPDUtils::nRows, 0.0),
+    std::vector<float>(RPDUtils::nRows, 0.0)
   }; /** the x centroid for each row on each side */
   std::array<std::vector<float>, 2> m_yColCentroid = {
-    std::vector<float>(m_nCols, 0.0),
-    std::vector<float>(m_nCols, 0.0)
+    std::vector<float>(RPDUtils::nCols, 0.0),
+    std::vector<float>(RPDUtils::nCols, 0.0)
   }; /** the y centroid for each column on each side */
-  std::array<float, 2> m_reactionPlaneAngle = {0.0, 0.0}; /** reaction plane angle on each side */
+  std::array<float, 2> m_reactionPlaneAngle {}; /** reaction plane angle on each side */
   float m_cosDeltaReactionPlaneAngle = 0; /** cosine of difference between reaction plane angles of the two sides */
 
   // methods used for centroid calculation
