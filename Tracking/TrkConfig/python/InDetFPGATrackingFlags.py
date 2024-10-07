@@ -15,7 +15,8 @@ def createFPGATrackingPassFlags():
     icf.doAthenaAmbiguityResolution = False
 
     icf.doActsCluster = True
-    icf.doActsSpacePoint = True
+    icf.doActsSpacePoint = False
+    icf.doFPGASpacePoint = True
     icf.doActsSeed = True
     icf.doActsTrack = True
 
