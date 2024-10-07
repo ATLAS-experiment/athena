@@ -13,7 +13,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 mlog = logging.getLogger ('TrigCaloRecConfig')
 
 
-def trigCaloClusterMakerMonTool(flags, doMonCells = False):
+def trigCaloClusterMonitoringTool(flags, doMonCells = False):
     """Monitoring tool for TrigCaloClusterMaker"""
 
     monTool = GenericMonitoringTool(flags, 'MonTool')
@@ -216,7 +216,7 @@ def hltCaloDMCalib(flags, name = "TrigDMCalib" ):
 
 @AccumulatorCache
 def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
-                           cellsKey=None, doLC=False):
+                           cellsKey=None, doLC=False, separateMonitoring=False):
     acc = ComponentAccumulator()
     cellsFromName = 'CaloCellsFS' if "FS" in clustersKey else "CaloCells"
     cells = cellsFromName if cellsKey is None else cellsKey
@@ -285,20 +285,39 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
                                 ]
 
     doMonCells = "FS" in name
-    alg = CompFactory.TrigCaloClusterMaker(
-        name,
-        Cells=cells,
-        CaloClusters=recordable(clustersKey),
-        CellLinks = clustersKey+"_links",
-        ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
-        ClusterCorrectionTools = listClusterCorrectionTools,
-        MonCells = doMonCells,
-        MonTool = trigCaloClusterMakerMonTool(flags, doMonCells) )
+    
+    if separateMonitoring:
+      alg = CompFactory.CaloClusterMaker(
+            name,
+            ClustersOutputName=recordable(clustersKey),
+            ClusterCellLinkOutputName = clustersKey+"_links",
+            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments],
+            ClusterCorrectionTools = listClusterCorrectionTools,
+            SaveUncalibratedSignalState = True,
+            WriteTriggerSpecificInfo = True)
+    else:
+      alg = CompFactory.TrigCaloClusterMaker(
+            name,
+            Cells=cells,
+            CaloClusters=recordable(clustersKey),
+            CellLinks = clustersKey+"_links",
+            ClusterMakerTools = [ topoMaker, topoSplitter, topoMoments], # moments are missing yet
+            ClusterCorrectionTools = listClusterCorrectionTools,
+            MonCells = doMonCells,
+            MonTool = trigCaloClusterMonitoringTool(flags, doMonCells) )
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     acc.merge(CaloNoiseCondAlgCfg(flags))
     acc.addEventAlgo(alg, primary=True)
+    if separateMonitoring:
+      monitor = CompFactory.TrigCaloClusterMonitor(name + 'Monitoring',
+                                                   CellsName = cells,
+                                                   ClustersName = clustersKey,
+                                                   MonitorCells = doMonCells,
+                                                   MonitoringTool = trigCaloClusterMonitoringTool(flags, doMonCells))
+      acc.addEventAlgo(monitor, primary=False)
     return acc
+
 
 
 def hltCaloTopoClusterCalibratorCfg(flags, name, clustersin, clustersout, **kwargs):
@@ -380,7 +399,7 @@ def hltCaloTopoClusteringCfg(
                                      CellsName,
                                      clustersname = recordable(clusters),
                                      name = clustermakername,
-                                     MonitorTool = trigCaloClusterMakerMonTool(flags, monitorCells),
+                                     MonitorTool = trigCaloClusterMonitoringTool(flags, monitorCells),
                                      MonitorCells = monitorCells,
                                      ReallyUseGPUTools = not flags.CaloRecGPU.GlobalFlags.UseCPUToolsInstead)
                                      
