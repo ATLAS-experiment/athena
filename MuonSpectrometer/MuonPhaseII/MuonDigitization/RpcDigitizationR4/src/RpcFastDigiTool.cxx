@@ -22,6 +22,7 @@ namespace MuonR4 {
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
         m_stIdxBIL = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
+	m_stIdxBIS = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
         return StatusCode::SUCCESS;
     }
     StatusCode RpcFastDigiTool::finalize() {
@@ -53,7 +54,8 @@ namespace MuonR4 {
                 const MuonGMR4::RpcReadoutElement* readOutEle = m_detMgr->getRpcReadoutElement(hitId);
                 const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
                 RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
-                if (m_idHelperSvc->stationName(hitId) != m_stIdxBIL) {
+		bool run4_BIS = ((m_idHelperSvc->stationName(hitId) == m_stIdxBIS) && (abs(m_idHelperSvc->stationEta(hitId)) < 7));
+	        if ((m_idHelperSvc->stationName(hitId) != m_stIdxBIL) && !(run4_BIS)) {
                     /// Standard digitization path
                     const bool digitizedEta = digitizeHit(hitId, false, *readOutEle, 
                                                           hitTime(simHit), locPos.block<2,1>(0,0), 
