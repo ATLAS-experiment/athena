@@ -522,6 +522,8 @@ def MuidTrackIsolationCfg(flags, name='MuidTrackIsolation', **kwargs):
 
 def MuidCaloEnergyToolCfg(flags, name='MuidCaloEnergyTool', **kwargs):
     result = MuidCaloEnergyMeasCfg(flags)
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result.merge(LArGMCfg(flags))
     kwargs.setdefault("CaloMeasTool", result.popPrivateTools())
     kwargs.setdefault("CaloParamTool", MuidCaloEnergyParam(flags))
     kwargs.setdefault("MinFinalEnergy", 1.0*GeV)
