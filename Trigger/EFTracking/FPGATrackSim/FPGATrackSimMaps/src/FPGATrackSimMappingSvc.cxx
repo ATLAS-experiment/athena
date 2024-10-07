@@ -57,7 +57,6 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
 
 int FPGATrackSimMappingSvc::countPmapSize(std::ifstream& fileIn)
 {
-    //int numberOfPmaps;  
     std::string line;
 
     getline(fileIn, line);
