@@ -16,3 +16,4 @@ atlas_add_component( InDetDetDescrExample
 # Install files from the package:
 
 atlas_install_runtime( tools/RunPrintSiDetElements.py )
+atlas_install_runtime( tools/geometry_dat_to_json.py )

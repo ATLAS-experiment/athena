@@ -80,7 +80,9 @@ if flags.Detector.EnableITkPixel:
     PrintPixelDetElements = CompFactory.PrintSiElements('PrintPixelDetElements')
     PrintPixelDetElements.OutputLevel = 5
     PrintPixelDetElements.DetectorManagerNames = ["ITkPixel"]
+    PrintPixelDetElements.OutputFile = "PixelGeometry.dat"
     acc.addEventAlgo(PrintPixelDetElements)
+
 
 # ITk Strip
 if flags.Detector.EnableITkStrip:
@@ -96,6 +98,7 @@ if flags.Detector.EnableITkStrip:
     PrintStripDetElements = CompFactory.PrintSiElements('PrintStripDetElements')
     PrintStripDetElements.OutputLevel = 5
     PrintStripDetElements.DetectorManagerNames = ["ITkStrip"]
+    PrintStripDetElements.OutputFile = "StripGeometry.dat"
     acc.addEventAlgo(PrintStripDetElements)
 
 # Execute and finish
