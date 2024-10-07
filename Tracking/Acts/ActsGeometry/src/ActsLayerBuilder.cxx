@@ -148,7 +148,7 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
       std::ofstream ofs{name.str()};
       Acts::ObjVisualization3D vis{};
       Acts::ViewConfig vc = Acts::s_viewSensitive;
-      vc.nSegments = 200;
+      vc.quarterSegments = 200;
       for (const auto &surface : layerSurfaces) {
         Acts::GeometryView3D::drawSurface(vis, *surface, gctx,
                                           Acts::Transform3::Identity(), vc);
@@ -433,7 +433,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
       std::ofstream ofs{ss.str()};
       Acts::ObjVisualization3D vis{};
       Acts::ViewConfig vc = Acts::s_viewSensitive;
-      vc.nSegments = 200;
+      vc.quarterSegments = 200;
       for (const auto &surface : mergedProtoLayers[i].surfaces()) {
         Acts::GeometryView3D::drawSurface(vis, *surface, gctx,
                                           Acts::Transform3::Identity(), vc);

@@ -5,13 +5,13 @@
 #ifndef ACTSTRKEVENT_SEED_H
 #define ACTSTRKEVENT_SEED_H 1
 
-#include "Acts/Seeding/Seed.hpp"
+#include "Acts/EventData/Seed.hpp"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "AthContainers/DataVector.h"
 
 namespace ActsTrk {
-  typedef Acts::Seed< xAOD::SpacePoint > Seed;
-  typedef DataVector< Acts::Seed< xAOD::SpacePoint > > SeedContainer;
+  typedef Acts::Seed< xAOD::SpacePoint, 3ul > Seed;
+  typedef DataVector< ActsTrk::Seed > SeedContainer;
 }
 
 // Set up a CLID for the type:

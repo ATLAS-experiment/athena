@@ -25,6 +25,7 @@
 #include "TrkExInterfaces/IExtrapolationEngine.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/CurvilinearSurface.hpp"
 
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
@@ -265,7 +266,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   // create a Acts::Surface that correspond to the Trk::Surface
-  auto destinationSurfaceActs = Acts::Surface::makeShared<Acts::PlaneSurface>(destinationSurface.center(), destinationSurface.normal());
+  auto destinationSurfaceActs = Acts::CurvilinearSurface(destinationSurface.center(), destinationSurface.normal()).planeSurface();
   std::optional<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
 											   *m_actsParameterCache, 
 											   *destinationSurfaceActs, 

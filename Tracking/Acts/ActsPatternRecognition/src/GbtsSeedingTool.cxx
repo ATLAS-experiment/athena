@@ -42,10 +42,10 @@ namespace ActsTrk {
 
   StatusCode
   GbtsSeedingTool::createSeeds(const EventContext& ctx,
-				     const std::vector<const xAOD::SpacePoint*>& spContainer,
-				     const Acts::Vector3& beamSpotPos,
-				     const Acts::Vector3& bField,
-				     ActsTrk::SeedContainer& seedContainer ) const
+			       const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
+			       const Acts::Vector3& beamSpotPos,
+			       const Acts::Vector3& bField,
+			       ActsTrk::SeedContainer& seedContainer ) const
   {
     // Seed Finder Options
     Acts::SeedFinderOptions finderOpts;
@@ -67,9 +67,9 @@ namespace ActsTrk {
         spContainer.size()); 
 
     // for loop filling space
-    for (const xAOD::SpacePoint *spacePoint : spContainer) { //xaod space points
+    for (const auto& spacePoint : spContainer) { //xaod space points
         // loop over space points, get necessary info from athena: 
-        const std::vector<xAOD::DetectorIDHashType>& elementlist = spacePoint->elementIdList() ;
+      const std::vector<xAOD::DetectorIDHashType>& elementlist = spacePoint.externalSpacePoint().elementIdList() ;
 
         for (const xAOD::DetectorIDHashType element : elementlist) { 
 
@@ -84,7 +84,7 @@ namespace ActsTrk {
           int Gbts_id = getCombinedID(eta_mod,barrel_ec,lay_id).second ; 
         
           // fill Gbts vector with current sapce point and ID
-          auto StSp = std::make_unique<GbtsSeedingTool::GbtsSpacePoint>(spacePoint->x(), spacePoint->y(), spacePoint->z(), spacePoint->radius(), spacePoint) ;
+          auto StSp = std::make_unique<GbtsSeedingTool::GbtsSpacePoint>(spacePoint.x(), spacePoint.y(), spacePoint.z(), spacePoint.radius(), &spacePoint.externalSpacePoint());
         
           GbtsSpacePoints.emplace_back(StSp.get(), Gbts_id, combined_id); 
           SeedingToolSP.emplace_back(std::move(StSp)); 
@@ -101,12 +101,12 @@ namespace ActsTrk {
     //temporary solution until trigger ROIs implemented 
     Acts::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
 
-    std::vector<Acts::Seed<GbtsSeedingTool::GbtsSpacePoint>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
+    std::vector<Acts::Seed<GbtsSeedingTool::GbtsSpacePoint, 3ul>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
 
     // Store seeds
 
     seedContainer.reserve(groupSeeds.size());
-    for( Acts::Seed<GbtsSeedingTool::GbtsSpacePoint>& seed: groupSeeds) {
+    for( Acts::Seed<GbtsSeedingTool::GbtsSpacePoint, 3ul>& seed: groupSeeds) {
       //turn interim into group seeds 
 
       const auto& spacepoints = seed.sp() ; 
@@ -115,7 +115,9 @@ namespace ActsTrk {
       const xAOD::SpacePoint* sp2 = spacepoints[1]->return_SP() ; 
       const xAOD::SpacePoint* sp3 = spacepoints[2]->return_SP() ; 
 
-      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(*sp1, *sp2, *sp3, seed.z(), seed.seedQuality());
+      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(*sp1, *sp2, *sp3);
+      to_add->setVertexZ(seed.z());
+      to_add->setQuality(seed.seedQuality());
       seedContainer.push_back(std::move(to_add));  
 
     }

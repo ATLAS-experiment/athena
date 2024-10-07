@@ -90,7 +90,7 @@ namespace ActsTrk {
 
   StatusCode
   OrthogonalSeedingTool::createSeeds(const EventContext& /*ctx*/,
-				     const std::vector<const xAOD::SpacePoint*>& spContainer,
+				     const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
 				     const Acts::Vector3& beamSpotPos,
 				     const Acts::Vector3& bField,
 				     ActsTrk::SeedContainer& seedContainer ) const
@@ -102,22 +102,21 @@ namespace ActsTrk {
     finderOpts.bFieldInZ = bField[2];
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
 
-    std::function<std::tuple<Acts::Vector3, Acts::Vector2, std::optional<Acts::ActsScalar>>(const xAOD::SpacePoint *sp)>
-      create_coordinates = [](const xAOD::SpacePoint *sp) {
-      Acts::Vector3 position(sp->x(), sp->y(), sp->z());
-      Acts::Vector2 variance(sp->varianceR(), sp->varianceZ());
-      return std::make_tuple(position, variance, std::nullopt);
-    };
-    
     // Compute seeds
-    auto groupSeeds = m_finder.createSeeds(finderOpts, spContainer,
-					   create_coordinates);
+    auto groupSeeds = m_finder.createSeeds(finderOpts, spContainer);
 
     // Store seeds
     seedContainer.reserve(groupSeeds.size());
-    for( const auto& seed: groupSeeds) {
-      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(seed);
-      seedContainer.push_back(std::move(to_add));  
+    for(const auto& seed: groupSeeds) {
+      const auto [bottom, middle, top] = seed.sp();
+
+      std::unique_ptr< ActsTrk::Seed > toAdd =
+	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
+					  middle->externalSpacePoint(),
+					  top->externalSpacePoint());
+      toAdd->setVertexZ(seed.z());
+      toAdd->setQuality(seed.seedQuality());
+      seedContainer.push_back(std::move(toAdd)); 
     }
 
     return StatusCode::SUCCESS;

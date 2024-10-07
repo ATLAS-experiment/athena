@@ -55,7 +55,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const
   ATH_CHECK(seedsHandle.isValid());
   ATH_CHECK(parameterHandle.isValid());
   for (std::size_t seedIndex = 0 ;  seedIndex < seedsHandle->size() ;++seedIndex){
-    const Acts::Seed<xAOD::SpacePoint_v1>* seedPointer = seedsHandle->at(seedIndex);
+    const ActsTrk::Seed* seedPointer = seedsHandle->at(seedIndex);
     const Acts::BoundTrackParameters* paramsPointer = parameterHandle->at(seedIndex);
 
     auto actsTrack =  tracksContainer.makeTrack();

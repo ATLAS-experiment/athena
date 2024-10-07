@@ -28,9 +28,10 @@
 #include "Acts/EventData/GenericCurvilinearTrackParameters.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
+#include "Acts/Propagator/EigenStepperDefaultExtension.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
-#include "Acts/Propagator/ActionList.hpp"
+#include "Acts/Propagator/ActorList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Definitions/ParticleData.hpp"
 #include "ActsFatras/EventData/ProcessType.hpp"
@@ -135,17 +136,15 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       ACTS_VERBOSE("Using ActsFatrasSimTool simulate()");
       // propagator-related additional types
       using SteppingLogger = Acts::detail::SteppingLogger;
-      using Actor = ActsFatras::detail::SimulationActor<generator_t, decay_t, interactions_t, hit_surface_selector_t>;
-      using Aborter = typename Actor::ParticleNotAlive;
-      using Result = typename Actor::result_type;
-      using Actions = Acts::ActionList<SteppingLogger, Actor>;
-      using Abort = Acts::AbortList<Aborter, Acts::EndOfWorldReached>;
-      using PropagatorOptions = typename propagator_t::template Options<Actions, Abort>;
+      using SimulationActor = ActsFatras::detail::SimulationActor<generator_t, decay_t, interactions_t, hit_surface_selector_t>;
+      using Result = typename SimulationActor::result_type;
+      using Actions = Acts::ActorList<SteppingLogger, SimulationActor, Acts::EndOfWorldReached>;
+      using PropagatorOptions = typename propagator_t::template Options<Actions>;
 
       // Construct per-call options.
       PropagatorOptions options(geoCtx, magCtx);
       // setup the interactor as part of the propagator options
-      auto &actor = options.actionList.template get<Actor>();
+      auto &actor = options.actorList.template get<SimulationActor>();
       actor.generator = &generator;
       actor.decay = decay;
       actor.interactions = interactions;
@@ -173,11 +172,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   // Use default navigator
   using Navigator = Acts::Navigator;
   // Propagate charged particles numerically in the B-field
-  using ChargedStepper = Acts::EigenStepper<Acts::StepperExtensionList<
-                                            Acts::DefaultExtension,
-                                            Acts::DenseEnvironmentExtension
-                                          >
-                        >;
+  using ChargedStepper = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
   using ChargedPropagator = Acts::Propagator<ChargedStepper, Navigator>;
   // Propagate neutral particles in straight lines
   using NeutralStepper = Acts::StraightLineStepper;

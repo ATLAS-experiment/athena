@@ -18,8 +18,9 @@ Reco_tf.py \
 	     flags.Detector.GeometryCalo=True; \
 	     flags.Detector.EnableLAr=True; \
 	     flags.Detector.EnableTile=True; \
-       flags.Detector.EnableMuon=False; \
-	     flags.Acts.doLargeRadius=True;" \
+       	     flags.Detector.EnableMuon=False; \
+	     flags.Acts.doLargeRadius=True; \
+	     flags.Acts.doLowPt=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsAloneWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

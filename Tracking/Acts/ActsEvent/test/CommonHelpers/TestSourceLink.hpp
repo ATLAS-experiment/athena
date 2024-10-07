@@ -12,7 +12,6 @@
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "Acts/Utilities/detail/Subspace.hpp"
 
 #include <array>
 #include <cassert>
@@ -91,17 +90,13 @@ void testSourceLinkCalibratorReturn(
     trackState.allocateCalibrated(2);
     trackState.template calibrated<2>() = sl.parameters;
     trackState.template calibratedCovariance<2>() = sl.covariance;
-    trackState.setProjector(detail::FixedSizeSubspace<BoundIndices::eBoundSize, 2>(
-                                std::array{sl.indices[0], sl.indices[1]})
-                                .template projector<double>());
+    trackState.template setSubspaceIndices<2>({sl.indices[0], sl.indices[1]});
   } else if (sl.indices[0] != Acts::eBoundSize) {
     trackState.allocateCalibrated(1);
     trackState.template calibrated<1>() = sl.parameters.head<1>();
     trackState.template calibratedCovariance<1>() =
         sl.covariance.topLeftCorner<1, 1>();
-    trackState.setProjector(detail::FixedSizeSubspace<BoundIndices::eBoundSize, 1>(
-                                std::array{sl.indices[0]})
-                                .template projector<double>());
+    trackState.template setSubspaceIndices<1>({sl.indices[0]});
   } else {
     throw std::runtime_error(
         "Tried to extract measurement from invalid TestSourceLink");

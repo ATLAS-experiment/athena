@@ -14,8 +14,10 @@
 // ACTS EDM
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
+#include "ActsEvent/SpacePointCollector.h"
 #include "ActsEvent/Seed.h"
 
+#include "Acts/EventData/SpacePointContainer.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 
 namespace ActsTrk {
@@ -24,10 +26,10 @@ namespace ActsTrk {
   public:
     DeclareInterfaceID(ISeedingTool, 1, 0);
     
-    virtual 
+    virtual
       StatusCode
       createSeeds(const EventContext& ctx,
-                  const std::vector<const xAOD::SpacePoint*>& spContainer,
+		  const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
                   const Acts::Vector3& beamSpotPos,
                   const Acts::Vector3& bField,
                   ActsTrk::SeedContainer& seedContainer ) const = 0;

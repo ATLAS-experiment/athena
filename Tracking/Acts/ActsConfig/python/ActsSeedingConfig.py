@@ -297,6 +297,7 @@ def ActsPixelSeedingAlgCfg(flags,
     kwargs.setdefault('OutputSeeds', 'ActsPixelSeeds')
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsPixelEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
+    kwargs.setdefault('UsePixel', True)
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
@@ -349,6 +350,7 @@ def ActsStripSeedingAlgCfg(flags,
     kwargs.setdefault('OutputSeeds', 'ActsStripSeeds')
     kwargs.setdefault('OutputEstimatedTrackParameters', 'ActsStripEstimatedTrackParams')
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
+    kwargs.setdefault('UsePixel', False)
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg

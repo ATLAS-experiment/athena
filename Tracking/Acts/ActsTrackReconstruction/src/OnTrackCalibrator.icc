@@ -46,7 +46,7 @@ void OnTrackCalibrator<traj_t>::calibrate(
     const Acts::SourceLink& link,
     TrackStateProxy state) const
 {
-    state.setUncalibratedSourceLink(link);
+    state.setUncalibratedSourceLink(Acts::SourceLink{link});
     ATLASUncalibSourceLink sourceLink = link.template get<ATLASUncalibSourceLink>();
     assert(sourceLink!=nullptr);
     const xAOD::UncalibratedMeasurement &measurement = getUncalibratedMeasurement(sourceLink);

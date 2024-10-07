@@ -13,6 +13,8 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Seeding/SeedConfirmationRangeConfig.hpp"
 
+using namespace Acts::HashedStringLiteral;
+
 namespace ActsTrk {
    SeedingTool::SeedingTool(const std::string& type,
     const std::string& name,
@@ -158,39 +160,31 @@ namespace ActsTrk {
 
     ATH_CHECK( prepareConfiguration() );
 
-    m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 2ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value());
-    m_topBinFinder = std::make_unique< Acts::GridBinFinder< 2ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsTop.value());
+    m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(), 0);
+    m_topBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsTop.value(), 0);
 
     m_navigation[0ul] = {};
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
+    m_navigation[2ul] = {};
     
     return StatusCode::SUCCESS;
   }
-  
+
   StatusCode
   SeedingTool::createSeeds(const EventContext& /*ctx*/,
-                           const std::vector<const xAOD::SpacePoint*>& spContainer,
-                           const Acts::Vector3& beamSpotPos,
-                           const Acts::Vector3& bField,
-                           ActsTrk::SeedContainer& seedContainer ) const
+			   const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
+			   const Acts::Vector3& beamSpotPos,
+			   const Acts::Vector3& bField,
+			   ActsTrk::SeedContainer& seedContainer ) const
   {
     // Create Seeds
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    std::vector<Acts::Seed< xAOD::SpacePoint >> groupSeeds;
     ATH_CHECK(createSeeds(spContainer.begin(),
 			  spContainer.end(),
 			  beamSpotPos,
 			  bField,
-			  groupSeeds));
-    
-    // Store seeds
-    seedContainer.reserve(groupSeeds.size());
-    for( const auto& seed: groupSeeds) {
-      std::unique_ptr< seed_type > to_add = 
-	std::make_unique< seed_type >(seed);
-      seedContainer.push_back(std::move(to_add));  
-    }
-    
+			  seedContainer));
+
     return StatusCode::SUCCESS;
   }
   
@@ -200,14 +194,15 @@ namespace ActsTrk {
 			   external_iterator_t spEnd,
 			   const Acts::Vector3& beamSpotPos,
 			   const Acts::Vector3& bField,
-			   std::vector< seed_type >& seeds) const 
+			   DataVector< Acts::Seed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
   {
-    static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, value_type>::value,
+    static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, const value_type&>::value,
 		  "Inconsistent type");
-    
-    seeds.clear();
+
     if (spBegin == spEnd)
       return StatusCode::SUCCESS;
+
+    std::vector< seed_type > seeds;
 
     // Space Point Grid Options
     Acts::CylindricalSpacePointGridOptions gridOpts;
@@ -220,70 +215,41 @@ namespace ActsTrk {
     		       	               beamSpotPos[Amg::y]);
     finderOpts.bFieldInZ = bField[2];
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+
+
+
     
-    auto extractCovariance = [](const value_type& sp, 
-				float, float, float) -> std::tuple<Acts::Vector3, Acts::Vector2, std::optional<Acts::ActsScalar>> 
-      {
-	/// Do not convert coordinates w.r.t. beam spot
-	/// Coordinates are converted internally when constructing 
-	/// InternalSpacePoints 
-	Acts::Vector3 position(sp.x(),
-			       sp.y(),
-			       sp.z());
-	Acts::Vector2 covariance(sp.varianceR(), sp.varianceZ());
-	return std::make_tuple(position, covariance, std::nullopt);
-      };
-    
-    
-    Acts::Extent rRangeSPExtent;
-        
     Acts::CylindricalSpacePointGrid< value_type > grid =
       Acts::CylindricalSpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
 
     Acts::CylindricalSpacePointGridCreator::fillGrid(m_finderCfg, finderOpts, grid,
-						     spBegin, spEnd, extractCovariance, rRangeSPExtent);
+						     spBegin, spEnd);
 
+    // Compute radius Range
+    // we rely on the fact the grid is storing the proxies
+    // with a sorting in the radius
+    float minRange = std::numeric_limits<float>::max();
+    float maxRange = std::numeric_limits<float>::lowest();
+    for (const auto& coll : grid) {
+      if (coll.empty()) {
+        continue;
+      }
+      const auto* firstEl = coll.front();
+      const auto* lastEl = coll.back();
+      minRange = std::min(firstEl->radius(), minRange);
+      maxRange = std::max(lastEl->radius(), maxRange);
+    }
+    
     Acts::CylindricalBinnedGroup< value_type > spacePointsGrouping(std::move(grid), *m_bottomBinFinder,
 								   *m_topBinFinder, m_navigation);
     
     // variable middle SP radial region of interest
-    const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::BinningValue::binR) / 2) * 2 +
-					      m_finderCfg.deltaRMiddleMinSPRange,
-					      std::floor(rRangeSPExtent.max(Acts::BinningValue::binR) / 2) * 2 -
-					      m_finderCfg.deltaRMiddleMaxSPRange);
+    const Acts::Range1D<float> rMiddleSPRange(std::floor(minRange/2)*2 + m_finderCfg.deltaRMiddleMinSPRange,
+					      std::floor(maxRange/2)*2 - m_finderCfg.deltaRMiddleMaxSPRange);
     
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
     typename decltype(m_finder)::SeedingState state;
-    state.spacePointData.resize(std::distance(spBegin, spEnd),
-				m_useDetailedDoubleMeasurementInfo);
-
-    if (m_useDetailedDoubleMeasurementInfo) {
-      for (std::size_t idx(0); idx < spacePointsGrouping.grid().size(); ++idx) {
-        const std::vector<std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>>& collection = spacePointsGrouping.grid().at(idx);
-        for (const std::unique_ptr<Acts::InternalSpacePoint<xAOD::SpacePoint>>& sp : collection) {
-          std::size_t index = sp->index();
-
-          const float topHalfStripLength =
-              m_finderCfg.getTopHalfStripLength(sp->sp());
-          const float bottomHalfStripLength =
-              m_finderCfg.getBottomHalfStripLength(sp->sp());
-          const Acts::Vector3 topStripDirection =
-              m_finderCfg.getTopStripDirection(sp->sp());
-          const Acts::Vector3 bottomStripDirection =
-              m_finderCfg.getBottomStripDirection(sp->sp());
-
-          state.spacePointData.setTopStripVector(
-              index, topHalfStripLength * topStripDirection);
-          state.spacePointData.setBottomStripVector(
-              index, bottomHalfStripLength * bottomStripDirection);
-          state.spacePointData.setStripCenterDistance(
-              index, m_finderCfg.getStripCenterDistance(sp->sp()));
-          state.spacePointData.setTopStripCenterPosition(
-              index, m_finderCfg.getTopStripCenterPosition(sp->sp()));
-
-        }
-      }
-    }
+    state.spacePointMutableData.resize(std::distance(spBegin, spEnd));
 
     for (const auto [bottom, middle, top] : spacePointsGrouping) {
       m_finder.createSeedsForGroup(finderOpts, state, spacePointsGrouping.grid(), 
@@ -294,16 +260,12 @@ namespace ActsTrk {
       // Selection function - temporary implementation
       // need change from ACTS for final implementation
       // To be used only on PPP
-      auto selectionFunction = [&state] (const Acts::Seed<xAOD::SpacePoint>& seed) -> bool 
+      auto selectionFunction = [&state] (const seed_type& seed) -> bool 
 	{
-	  const xAOD::SpacePoint* bottom_sp =  seed.sp()[0];
-	  const xAOD::SpacePoint* middle_sp =  seed.sp()[1];
-	  const xAOD::SpacePoint* top_sp =  seed.sp()[2];
-	  
 	  float seed_quality = seed.seedQuality();
-	  float bottom_quality = state.spacePointData.quality(bottom_sp->index());
-	  float middle_quality = state.spacePointData.quality(middle_sp->index());
-	  float top_quality = state.spacePointData.quality(top_sp->index());
+	  float bottom_quality = state.spacePointMutableData.quality(seed.sp()[0]->index());
+	  float middle_quality = state.spacePointMutableData.quality(seed.sp()[1]->index());
+	  float top_quality = state.spacePointMutableData.quality(seed.sp()[2]->index());
 	  
 	  if (bottom_quality > seed_quality and
 	      middle_quality > seed_quality and
@@ -331,6 +293,21 @@ namespace ActsTrk {
       // remove seeds that didn't make it
       // they are all at the end of the collection
       seeds.erase(seeds.begin() + acceptedSeeds, seeds.end());     
+    }
+
+
+    // Store seeds
+    seedContainer.reserve(seeds.size());
+    for(const auto& seed: seeds) {
+      const auto [bottom, middle, top] = seed.sp();
+
+      std::unique_ptr< ActsTrk::Seed > toAdd =
+	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
+					  middle->externalSpacePoint(),
+					  top->externalSpacePoint());
+      toAdd->setVertexZ(seed.z());
+      toAdd->setQuality(seed.seedQuality());
+      seedContainer.push_back(std::move(toAdd)); 
     }
 
     return StatusCode::SUCCESS;
@@ -394,33 +371,6 @@ namespace ActsTrk {
     m_finderCfg.zAlign = m_zAlign;
     m_finderCfg.rAlign = m_rAlign;
     m_finderCfg.sigmaError = m_sigmaError;
-
-    if (m_useDetailedDoubleMeasurementInfo) {
-      m_finderCfg.getTopHalfStripLength.connect(
-        [](const void*, const value_type& sp) -> float {
-          return sp.topHalfStripLength();
-        });
-      m_finderCfg.getBottomHalfStripLength.connect(
-        [](const void*, const value_type& sp) -> float {
-          return sp.bottomHalfStripLength();
-        });
-      m_finderCfg.getTopStripDirection.connect(
-        [](const void*, const value_type& sp) -> Acts::Vector3 {
-          return sp.topStripDirection().cast<double>();
-        });
-      m_finderCfg.getBottomStripDirection.connect(
-        [](const void*, const value_type& sp) -> Acts::Vector3 {
-          return sp.bottomStripDirection().cast<double>();
-        });
-      m_finderCfg.getStripCenterDistance.connect(
-          [](const void*, const value_type& sp) -> Acts::Vector3 {
-            return sp.stripCenterDistance().cast<double>();
-          });
-      m_finderCfg.getTopStripCenterPosition.connect(
-          [](const void*, const value_type& sp) -> Acts::Vector3 {
-            return sp.topStripCenter().cast<double>();
-          });
-    }
 
     // Fast tracking
     // manually convert the two types

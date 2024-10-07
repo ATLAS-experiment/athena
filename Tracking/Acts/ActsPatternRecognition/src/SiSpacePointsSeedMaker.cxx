@@ -617,17 +617,29 @@ namespace ActsTrk {
 
     Acts::Vector3 bField( data.bField[0], data.bField[1], data.bField[2] );
 
+
+    ActsTrk::SpacePointCollector backEnd(data.v_ActsSpacePointForSeed);
+
+    Acts::SpacePointContainerConfig spConfig;
+    spConfig.useDetailedDoubleMeasurementInfo = not isPixel;
+    // Options
+    Acts::SpacePointContainerOptions spOptions;
+    spOptions.beamPos = Acts::Vector2(beamPos.x(), beamPos.y());
+    
+    Acts::SpacePointContainer<decltype(backEnd), Acts::detail::RefHolder> collect(spConfig, spOptions, backEnd);
+
+    
     StatusCode sc;
 
     if (isPixel)
       sc = m_seedsToolPixel->createSeeds( ctx,
-                                          data.v_ActsSpacePointForSeed,
+                                          collect,
                                           beamPos,
                                           bField,
                                           *seedPtrs.get() );
     else {
       sc = m_seedsToolStrip->createSeeds( ctx,
-                                          data.v_ActsSpacePointForSeed,
+                                          collect,
                                           beamPos,
                                           bField,
                                           *seedPtrs.get() );

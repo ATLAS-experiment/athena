@@ -14,6 +14,7 @@
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/CurvilinearSurface.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "ActsEvent/MultiTrajectory.h"
 #include "CommonHelpers/GenerateParameters.hpp"
@@ -52,8 +53,8 @@ struct TestTrackState {
   // @param size_t nMeasurement either 1 or 2
   template <typename rng_t>
   TestTrackState(rng_t &rng, size_t nMeasurements)
-      : surface(Acts::Surface::makeShared<Acts::PlaneSurface>(
-            Vector3::Zero(), Vector3::UnitZ())),
+      : surface(Acts::CurvilinearSurface(
+            Vector3::Zero(), Vector3::UnitZ()).planeSurface()),
         // set bogus parameters first since they are not default-constructible
         predicted(surface, BoundVector::Zero(), std::nullopt, ParticleHypothesis::pion()),
         filtered(surface, BoundVector::Zero(), std::nullopt, ParticleHypothesis::pion()),
@@ -846,7 +847,7 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
 
   // set SourceLink to a pointer to a fictional measurement and get it back
   auto link = Acts::SourceLink(reinterpret_cast<const xAOD::UncalibratedMeasurement *>(0xDEADBEEF));
-  ts.setUncalibratedSourceLink(link);
+  ts.setUncalibratedSourceLink(Acts::SourceLink{link});
   BOOST_CHECK_EQUAL(
       static_cast<const void *>(ts.getUncalibratedSourceLink()
                                 .get<const xAOD::UncalibratedMeasurement *>()),
@@ -856,8 +857,8 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
 BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {
   size_t ia = mtj->addTrackState(TrackStatePropMask::All);
   auto ts = mtj->getTrackState(ia);\
-  auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(
-            Vector3::Zero(), Vector3::UnitZ());
+  auto surf = Acts::CurvilinearSurface(
+            Vector3::Zero(), Vector3::UnitZ()).planeSurface();
   ts.setReferenceSurface(std::shared_ptr<const Acts::Surface>(surf));
 }
 

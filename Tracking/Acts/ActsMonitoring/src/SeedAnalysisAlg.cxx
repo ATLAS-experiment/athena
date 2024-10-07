@@ -235,7 +235,7 @@ namespace ActsTrk {
     // utilities
     // Used for param estimation
     auto retrieveSurfaceFunction = 
-      [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
+      [this, &detEle] (const ActsTrk::Seed& seed) -> const Acts::Surface& 
       { 
 	const auto& els = seed.sp().front()->measurements();
 	const auto* cluster = els[0];

@@ -146,7 +146,7 @@ public:
                    const Acts::SourceLink& sl,
                    typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) const {
       auto sourceLink = sl.template get<ATLASSourceLink>();
-      trackState.setUncalibratedSourceLink(sl);
+      trackState.setUncalibratedSourceLink(Acts::SourceLink{sl});
       assert(sourceLink);
       const Acts::Surface &surface = this->m_converterTool->trkSurfaceToActsSurface(sourceLink->associatedSurface());
       this->setStateFromMeasurement<MeasurementAdapter, trajectory_t>(MeasurementAdapter(*sourceLink),

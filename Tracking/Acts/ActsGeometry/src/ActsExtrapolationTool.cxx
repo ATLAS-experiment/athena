@@ -17,15 +17,11 @@
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Propagator/AbortList.hpp"
-#include "Acts/Propagator/ActionList.hpp"
+#include "Acts/Propagator/ActorList.hpp"
 #include <Acts/Propagator/StraightLineStepper.hpp>
+#include "Acts/Propagator/EigenStepperDefaultExtension.hpp"
 
 #include "Acts/Utilities/Logger.hpp"
-
-#include "Acts/Propagator/DefaultExtension.hpp"
-#include "Acts/Propagator/DenseEnvironmentExtension.hpp"
-
 
 // BOOST
 #include <boost/variant/variant.hpp>
@@ -40,14 +36,7 @@ namespace ActsExtrapolationDetail {
 
   
   using VariantPropagatorBase = boost::variant<
-      Acts::Propagator<Acts::EigenStepper<Acts::StepperExtensionList<Acts::DefaultExtension,  
-                                                                     Acts::DenseEnvironmentExtension>, 
-                                          Acts::detail::HighestValidAuctioneer>,
-                       Acts::Navigator>,
-      Acts::Propagator<Acts::EigenStepper<Acts::StepperExtensionList<Acts::DefaultExtension,  
-                                                                     Acts::DenseEnvironmentExtension>, 
-                                          Acts::detail::HighestValidAuctioneer>,        
-                       Acts::Navigator> > ;
+      Acts::Propagator<Acts::EigenStepper<Acts::EigenStepperDefaultExtension>, Acts::Navigator>>;
 
   class VariantPropagator : public VariantPropagatorBase
   {
@@ -90,10 +79,8 @@ ActsExtrapolationTool::initialize()
 
   if (m_fieldMode == "ATLAS"s) {    
     ATH_MSG_INFO("Using ATLAS magnetic field service");
-    using Stepper = Acts::EigenStepper<Acts::StepperExtensionList<Acts::DefaultExtension,
-                                                                  Acts::DenseEnvironmentExtension>,
-                                       Acts::detail::HighestValidAuctioneer>;
-                                       
+    using Stepper = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
+
     ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
     auto bField = std::make_shared<ATLASMagneticFieldWrapper>();
 
@@ -118,9 +105,7 @@ ActsExtrapolationTool::initialize()
                                                                    << m_constantFieldVector[1] << ", " 
                                                                    << m_constantFieldVector[2] << ")");
     
-    using Stepper = Acts::EigenStepper<Acts::StepperExtensionList<Acts::DefaultExtension,
-                                                                  Acts::DenseEnvironmentExtension>,
-                                       Acts::detail::HighestValidAuctioneer>;
+    using Stepper = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
 
     auto bField = std::make_shared<Acts::ConstantBField>(constantFieldVector);
     auto stepper = Stepper(std::move(bField));
@@ -155,11 +140,10 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
-      using ActionList =
-      Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<EndOfWorld>;
+      using ActorList =
+      Acts::ActorList<SteppingLogger, Acts::MaterialInteractor, EndOfWorld>;
 
-      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
+      using Options = typename Propagator::template Options<ActorList>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -170,7 +154,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       options.direction = navDir;
       options.stepping.maxStepSize = m_maxStepSize * 1_m;
 
-      auto &mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      auto &mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
       mInteractor.multipleScattering = m_interactionMultiScatering;
       mInteractor.energyLoss = m_interactionEloss;
       mInteractor.recordInteractions = m_interactionRecord;
@@ -228,10 +212,9 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
-      using ActionList =
-      Acts::ActionList<Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<EndOfWorld>;
-      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
+      using ActorList =
+      Acts::ActorList<Acts::MaterialInteractor, EndOfWorld>;
+      using Options = typename Propagator::template Options<ActorList>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -242,7 +225,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       options.direction = navDir;
       options.stepping.maxStepSize = m_maxStepSize * 1_m;
 
-      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
       mInteractor.multipleScattering = m_interactionMultiScatering;
       mInteractor.energyLoss = m_interactionEloss;
       mInteractor.recordInteractions = m_interactionRecord;
@@ -281,10 +264,9 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
-      using ActionList =
-      Acts::ActionList<SteppingLogger, Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<>;
-      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
+      using ActorList =
+      Acts::ActorList<SteppingLogger, Acts::MaterialInteractor>;
+      using Options = typename Propagator::template Options<ActorList>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -295,7 +277,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
       options.direction = navDir;
       options.stepping.maxStepSize = m_maxStepSize * 1_m;
 
-      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
       mInteractor.multipleScattering = m_interactionMultiScatering;
       mInteractor.energyLoss = m_interactionEloss;
       mInteractor.recordInteractions = m_interactionRecord;
@@ -346,10 +328,9 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
-      using ActionList =
-      Acts::ActionList<Acts::MaterialInteractor>;
-      using AbortConditions = Acts::AbortList<>;
-      using Options = typename Propagator::template Options<ActionList, AbortConditions>;
+      using ActorList =
+      Acts::ActorList<Acts::MaterialInteractor>;
+      using Options = typename Propagator::template Options<ActorList>;
 
       Options options(anygctx, mctx);
       options.pathLimit = pathLimit;
@@ -360,7 +341,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
       options.direction = navDir;
       options.stepping.maxStepSize = m_maxStepSize * 1_m;
 
-      auto& mInteractor = options.actionList.template get<Acts::MaterialInteractor>();
+      auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
       mInteractor.multipleScattering = m_interactionMultiScatering;
       mInteractor.energyLoss = m_interactionEloss;
       mInteractor.recordInteractions = m_interactionRecord;

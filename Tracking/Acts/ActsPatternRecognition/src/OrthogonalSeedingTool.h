@@ -12,7 +12,7 @@
 // ACTS CORE
 #include "Acts/Utilities/KDTree.hpp"
 #include "Acts/Geometry/Extent.hpp"
-#include "Acts/Seeding/Seed.hpp"
+#include "Acts/EventData/Seed.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinderOrthogonal.hpp"
 #include "Acts/Definitions/Units.hpp"
@@ -30,8 +30,8 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
 
   public:
-    using value_type = xAOD::SpacePoint;
-    using seed_type = Acts::Seed< xAOD::SpacePoint >;
+    using value_type = typename Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>::SpacePointProxyType;
+    using seed_type = Acts::Seed< value_type, 3ul >;
 
     OrthogonalSeedingTool(const std::string& type, const std::string& name,
 			  const IInterface* parent);
@@ -42,11 +42,11 @@ namespace ActsTrk {
     // Interface
     virtual StatusCode
       createSeeds(const EventContext& ctx,
-		  const std::vector<const xAOD::SpacePoint*>& spContainer,
+		  const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
 		  ActsTrk::SeedContainer& seedContainer ) const override;
-    
+
   private:
     StatusCode prepareConfiguration();
     
