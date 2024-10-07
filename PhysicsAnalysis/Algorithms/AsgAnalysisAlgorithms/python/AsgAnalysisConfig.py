@@ -308,7 +308,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
-            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
+            alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg' + self.streamName)
             alg.RootStreamName = self.streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics:
@@ -320,7 +320,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
-        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
+        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' + self.streamName )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
         config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
