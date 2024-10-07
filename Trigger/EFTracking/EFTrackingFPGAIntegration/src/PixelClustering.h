@@ -14,6 +14,7 @@
 
 // EFTracking include
 #include "IntegrationBase.h"
+#include "TestVectorTool.h"
 
 // STL include
 #include <string>
@@ -30,6 +31,8 @@ private:
     Gaudi::Property<std::string> m_kernelName{this, "KernelName", "", "Kernel name"};  //!< Kernel name
     Gaudi::Property<std::string> m_inputTV{this, "InputTV", "", "Input TestVector"};   //!< Input TestVector
     Gaudi::Property<std::string> m_refTV{this, "RefTV", "", "Reference TestVector"};   //!< Reference TestVector
+
+    ToolHandle<TestVectorTool> m_testVectorTool{this, "TestVectorTool", "TestVectorTool", "Tool to prepare test vector"}; //!< Tool handle for TestVectorTool
 };
 
 #endif // EFTRACKING_FPGA_INTEGRATION_PIXELCLUSTERING_H

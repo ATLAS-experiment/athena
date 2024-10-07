@@ -25,46 +25,27 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 {
     ATH_MSG_DEBUG("In execute(), event slot: " << ctx.slot());
 
-    // open the input testvector file
-    std::ifstream ifs;
-    ATH_MSG_DEBUG("Reading in TV");
+    // Make a TVHolder object
+    EFTrackingFPGAIntegration::TVHolder pixelTV("PixelClustering");
 
-    // Open the testvector to ifstream and check if it is open
-    ifs.open(m_inputTV);
-    if (!ifs.is_open())
+    ATH_CHECK(m_testVectorTool->prepareTV(m_inputTV, pixelTV.inputTV));
+    ATH_CHECK(m_testVectorTool->prepareTV(m_refTV, pixelTV.refTV));
+
+    // Convert input vector to 32-bit unsigned integers
+    std::vector<uint32_t> inputTV32;
+    for (auto &elem : pixelTV.inputTV)
     {
-        ATH_MSG_ERROR("Error reading testvector file");
-        return StatusCode::FAILURE;
+        inputTV32.push_back(static_cast<uint32_t>(elem));
     }
-
-    uint32_t *inputTV;
-    uint32_t *outputTV;
-
-    // do 4k alignment
-    posix_memalign((void **)&inputTV, 4096, sizeof(uint32_t) * 4096);
-    posix_memalign((void **)&outputTV, 4096, sizeof(uint32_t) * 4096);
-
-    // read in the file 4 bytes at a time and store it in a pointer of uint32_t
-    uint32_t cache;
-    int counter = 0;
-    while (ifs >> std::hex >> cache)
-    {
-        inputTV[counter] = cache;
-        counter++;
-
-        if (counter == 4096)
-        {
-            break;
-        }
-    }
+    
     // print the first 10 elements of the input vector
     for (int i = 0; i < 10; i++)
     {
-        ATH_MSG_DEBUG("inputTV[" << std::dec << i << "] = " << std::hex << inputTV[i]);
+        ATH_MSG_DEBUG("inputTV[" << std::dec << i << "] = " << std::hex << pixelTV.inputTV[i]);
     }
 
-    // Close the file
-    ifs.close();
+    // Prepare output vector
+    std::vector<uint32_t> outputTV32(4096, 0);
 
     // Work with the accelerator
     cl_int err = 0;
@@ -82,23 +63,32 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
     // Make queue of commands
     cl::CommandQueue acc_queue(m_context, m_accelerator);
 
-    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, inputTV, NULL, NULL);
+    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, inputTV32.data(), NULL, NULL);
 
     err = acc_queue.enqueueTask(acc_kernel);
 
-    acc_queue.enqueueReadBuffer(acc_outbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, outputTV, NULL, NULL);
-
     acc_queue.finish();
+
+    // The current implementation of the kernel Read/Write the same buffer
+    // So the line below reads the inbuff insatead of outbuff
+    acc_queue.enqueueReadBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, outputTV32.data(), NULL, NULL);
 
     // Quick validation
     // Print the fist 10 elements of output vector
     for (int i = 0; i < 10; i++)
     {
-        ATH_MSG_DEBUG("outputTV[" << std::dec << i << "] = " << std::hex << outputTV[i]);
+        ATH_MSG_DEBUG("outputTV[" << std::dec << i << "] = " << std::hex << outputTV32[i]);
     }
 
-    free(inputTV);
-    free(outputTV);
+    // Convert the output vector to 64-bit unsigned integers
+    std::vector<uint64_t> outputTV;
+    for (auto &elem : outputTV32)
+    {
+        outputTV.push_back(static_cast<uint64_t>(elem));
+    }
+
+    // Compare the output vector with the reference vector
+    ATH_CHECK(m_testVectorTool->compare(pixelTV, outputTV));
 
     return StatusCode::SUCCESS;
 }
