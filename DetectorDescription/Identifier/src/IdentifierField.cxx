@@ -54,11 +54,7 @@ IdentifierField::match(element_type value) const {
       return (std::ranges::find(m_values, value) != m_values.end());
     } else if (unbounded == m_mode) {
       return (true); 
-    }  else if (high_bounded == m_mode) {
-      return (value <= m_maximum); 
-    } else if (low_bounded == m_mode) {
-      return (value >= m_minimum); 
-    }
+    } 
     return (false);
 } 
 
@@ -81,9 +77,17 @@ IdentifierField::IdentifierField (element_type minimum, element_type maximum)
     m_next(0),
     m_mode(both_bounded),
     m_continuation_mode(none){ 
-  set (minimum, maximum); 
-  set_indices();    
+  set (minimum, maximum);    
 } 
+
+
+/// Create with enumerated values
+IdentifierField::IdentifierField (const element_vector &values)
+    :
+    m_mode(enumerated),
+    m_continuation_mode(none){ 
+  set (values);     
+}
  
  
 //----------------------------------------------- 
@@ -95,20 +99,7 @@ IdentifierField::get_previous (element_type current, element_type& previous) con
       return (current != minimum_possible);
       break; 
     }
-    case low_bounded: {
-      if (current == m_minimum) {
-        previous = current;
-        return (false);
-      }
-      previous = current - 1; 
-      return (true); 
-      break; 
-    }
-    case high_bounded: {
-      previous = current - 1; 
-      return (current != minimum_possible);
-      break;
-    }
+    
     case both_bounded: {
       if (current == m_minimum) {
         if (has_wrap_around == m_continuation_mode) {
@@ -162,20 +153,7 @@ IdentifierField::get_next(element_type current, element_type& next) const{
       return (current != maximum_possible);
       break; 
     }
-    case low_bounded: {
-      next = current + 1; 
-      return (current != maximum_possible);
-      break; 
-    }
-    case high_bounded: {
-      if (current == m_maximum) {
-        next = current;
-        return (false);
-      }
-      next = current + 1; 
-      return (true); 
-      break; 
-    }
+    
     case both_bounded: {
       if (current == m_maximum) {
         if (has_wrap_around == m_continuation_mode) {
@@ -331,7 +309,7 @@ IdentifierField::set (element_type minimum, element_type maximum)  {
   set_indices();
 } 
  
-//----------------------------------------------- 
+
 void 
 IdentifierField::set_minimum (element_type value){ 
   if (m_mode == unbounded) { 
@@ -353,17 +331,17 @@ IdentifierField::set_maximum (element_type value) {
   if (m_mode == unbounded) { 
       m_mode = high_bounded; 
       m_maximum = value; 
-    }  else if ((m_mode == low_bounded) ||  
+  } else if ((m_mode == low_bounded) ||  
            (m_mode == both_bounded) || 
            (m_mode == enumerated)) { 
-      set (get_minimum (), value); 
-    } else  { 
-      m_maximum = value; 
-    } 
+     set (get_minimum (), value); 
+  } else  { 
+    m_maximum = value; 
+  } 
 
   set_indices();
 } 
- 
+
 //----------------------------------------------- 
 void 
 IdentifierField::add_value (element_type value) { 
@@ -378,7 +356,6 @@ IdentifierField::add_value (element_type value) {
   } 
   //value already exists in the enumeration vector
   if (std::ranges::find(m_values, value) !=  m_values.end()) return;
- 
   m_values.push_back (value); 
   std::sort (m_values.begin (), m_values.end()); 
   m_minimum = m_values.front(); 
@@ -390,14 +367,12 @@ IdentifierField::add_value (element_type value) {
 void 
 IdentifierField::set (const std::vector <element_type>& values) { 
   if (values.empty())  { 
-      clear (); 
-      return; 
-    } 
- 
+    clear (); 
+    return; 
+  } 
   for (size_type i = 0; i < values.size (); ++i) { 
-      add_value (values[i]); 
-    } 
-
+    add_value (values[i]); 
+  } 
   set_indices();
 } 
  
@@ -437,121 +412,72 @@ IdentifierField::set_previous (int previous) {
 void 
 IdentifierField::operator |= (const IdentifierField& other) {
   mode other_mode = other.get_mode ();
-
   if (m_mode == other_mode) {
-        /*
-          x . . . .
-          . x . . .
-          . . x . .
-          . . . x .
-          . . . . x
-        */
-      switch (m_mode) { 
-          case unbounded: 
-            break; 
-          case high_bounded: 
-            if (other.get_maximum () > m_maximum) m_maximum = other.get_maximum ();
-            break; 
-          case low_bounded: 
-            if (other.get_minimum () < m_minimum) m_minimum = other.get_minimum ();
-            break; 
-          case enumerated:
-          {
-            const element_vector& ev = other.get_values ();
-
-            for (size_t i = 0; i < ev.size (); ++i) 
-              { 
-                add_value (ev[i]);
-              } 
-          }
-            break; 
-          default:  // both_bounded 
-              /**
-               *  If there is no overlap we should build a multi-segment specification.
-               *  The current algorithm is only correct if the overlap in not empty !!
-               *   A multi-segment specification might also be implemented as an 
-               *  expanded enumerated set (not very optimized !!)
-               */
-            if (other.get_maximum () > m_maximum) m_maximum = other.get_maximum ();
-            if (other.get_minimum () < m_minimum) m_minimum = other.get_minimum ();
-
-            break; 
-        } 
-    }
-  else if ((m_mode == unbounded) || (other_mode == unbounded))
-    {
-        /*
-          o x x x x
-          x o . . .
-          x . o . .
-          x . . o .
-          x . . . o
-         */
-      clear ();
-    } else if ((m_mode == low_bounded) && (other_mode == high_bounded)) {
+    /*
+      x . . . .
+      . x . . .
+      . . x . .
+      . . . x .
+      . . . . x
+    */
+    switch (m_mode) { 
+      case unbounded:{ 
+        break;
+      }
+      //
+      case enumerated:{
+        const element_vector& ev = other.get_values ();
+        for (size_t i = 0; i < ev.size (); ++i){ 
+            add_value (ev[i]);
+        }
+        break; 
+      }
+      //
+      default:{  // both_bounded 
         /**
          *  If there is no overlap we should build a multi-segment specification.
          *  The current algorithm is only correct if the overlap in not empty !!
-         *
-         *   (in addition, the expanded solution - to enumerated - is not possible
-         *    due to the unbounded nature of this mode)
+         *   A multi-segment specification might also be implemented as an 
+         *  expanded enumerated set (not very optimized !!)
          */
-
-
-        /*
-          o o o o o
-          o o x . .
-          o . o . .
-          o . . o .
-          o . . . o
-        */
+        if (other.get_maximum () > m_maximum) m_maximum = other.m_maximum;
+        if (other.get_minimum () < m_minimum) m_minimum = other.m_minimum;
+  
+        break;
+      }
+    } 
+  } else if ((m_mode == unbounded) || (other_mode == unbounded)) {
+      /*
+        o x x x x
+        x o . . .
+        x . o . .
+        x . . o .
+        x . . . o
+      */
       clear ();
-    } else if ((m_mode == high_bounded) && (other_mode == low_bounded)) {
-        /**
-         *  If there is no overlap we should build a multi-segment specification.
-         *  The current algorithm is only correct if the overlap in not empty !!
-         *
-         *   (in addition, the expanded solution - to enumerated - is not possible
-         *    due to the unbounded nature of this mode)
-         */
-
-
-        /*
-          o o o o o
-          o o o . .
-          o x o . .
-          o . . o .
-          o . . . o
-         */
-      clear ();
-    } else {
-        // all other cases...
-
-      if (has_minimum () && other.has_minimum ()) {
-            /*
-              o o o o o
-              o o o x x
-              o o o . .
-              o x . o x
-              o x . x o
-            */
-
-          if (other.get_minimum () < m_minimum) set_minimum (other.get_minimum ());
-        }
-
-      if (has_maximum () && other.has_maximum ()) {
-            /*
-              o o o o o
-              o o o . .
-              o o o x x
-              o . x o x
-              o . x x o
-            */
-
-          if (other.get_maximum () > m_maximum) set_maximum (other.get_maximum ());
-        }
+  } else {
+    // all other cases...
+    if (has_minimum () && other.has_minimum ()) {
+      /*
+        o o o o o
+        o o o x x
+        o o o . .
+        o x . o x
+        o x . x o
+      */
+      if (other.get_minimum () < m_minimum) set_minimum (other.get_minimum ());
     }
-
+    if (has_maximum () && other.has_maximum ()) {
+      /*
+        o o o o o
+        o o o . .
+        o o o x x
+        o . x o x
+        o . x x o
+       */
+        if (other.get_maximum () > m_maximum) set_maximum (other.get_maximum ());
+      }
+    }
   set_indices();
 }
 
@@ -560,32 +486,29 @@ IdentifierField::operator |= (const IdentifierField& other) {
 //----------------------------------------------- 
 IdentifierField::operator std::string () const { 
   std::string result; 
-
   if (!is_valued ()) { 
       result = "*"; 
-    }  else  { 
-      element_type minimum = get_minimum (); 
-      element_type maximum = get_maximum (); 
- 
-      if (!has_maximum ()) { 
-          result = std::format("{}:",minimum);
-        }  else if (!has_minimum ())  { 
-          result = std::format(":{}", maximum); 
-        } else if (minimum == maximum)  { 
-          result =  std::to_string(minimum);
-        }  else  { 
-          if (get_mode () == IdentifierField::enumerated)  { 
-              std::string prefix;
-              for (size_type i = 0; i < get_indices (); ++i)  { 
-                  result += prefix+std::to_string(get_value_at (i));
-                  prefix = ",";
-                } 
-            } else  { 
-              result = std::format("{}:{}", minimum, maximum);
-            } 
+  }  else  { 
+    element_type minimum = get_minimum (); 
+    element_type maximum = get_maximum (); 
+    if (!has_maximum ()) { 
+      result = std::format("{}:",minimum);
+    }  else if (!has_minimum ())  { 
+      result = std::format(":{}", maximum); 
+    } else if (minimum == maximum)  { 
+      result =  std::to_string(minimum);
+    } else  { 
+      if (get_mode () == IdentifierField::enumerated)  { 
+        std::string prefix;
+        for (size_type i = 0; i < get_indices (); ++i)  { 
+          result += prefix+std::to_string(get_value_at (i));
+          prefix = ",";
         } 
+      } else { 
+        result = std::format("{}:{}", minimum, maximum);
+      } 
     } 
- 
+  } 
   return (result); 
 } 
 
@@ -621,12 +544,6 @@ IdentifierField::show() const {
   switch (m_mode) { 
   case IdentifierField::unbounded: 
       std::cout << "unbounded  ";
-      break; 
-  case IdentifierField::low_bounded: 
-      std::cout << "low_bounded  ";
-      break; 
-  case IdentifierField::high_bounded: 
-      std::cout << "high_bounded  ";
       break; 
   case IdentifierField::both_bounded: 
       std::cout << "both_bounded  ";
@@ -665,20 +582,20 @@ IdentifierField::show() const {
 //----------------------------------------------- 
 void 
 IdentifierField::optimize() {
-    /// Check mode - switch from enumerated to both_bounded if possible
-    if (not check_for_both_bounded()) create_index_table();    
+  /// Check mode - switch from enumerated to both_bounded if possible
+  if (not check_for_both_bounded()) create_index_table();    
 }
 
 //----------------------------------------------- 
 void 
 IdentifierField::set_indices() {
-    /// Set the number of indices
-    m_indices = 1;
-    if (m_mode == both_bounded) { 
-      m_indices = m_maximum - m_minimum + 1; 
-    }  else if (m_mode == enumerated) { 
-      m_indices = m_values.size (); 
-    } 
+  /// Set the number of indices
+  m_indices = 1;
+  if (m_mode == both_bounded) { 
+    m_indices = m_maximum - m_minimum + 1; 
+  }  else if (m_mode == enumerated) { 
+    m_indices = m_values.size (); 
+  } 
 } 
 
 //----------------------------------------------- 
@@ -748,7 +665,7 @@ operator >> (std::istream &is, IdentifierField &idf){
     //do nothing; the 'clear' set idf to unbounded
   } else if (c==':'){ //upper bound
     is.ignore();
-    idf.set_maximum(parseStreamDigits(is));
+    //idf.set_maximum(parseStreamDigits(is));
   } else if (isDigit(c)){
     if (c =='+') is.ignore();
     int v = parseStreamDigits(is);//i is incremented
@@ -766,9 +683,7 @@ operator >> (std::istream &is, IdentifierField &idf){
       if (isDigit(c)){ //bounded
         int v1 = parseStreamDigits(is);
         idf.set(v,v1);
-      } else { //lower bound
-        idf.set_minimum(v);
-      }
+      } 
     } else { //remaining alternative: single number
       idf.add_value(v);
     }

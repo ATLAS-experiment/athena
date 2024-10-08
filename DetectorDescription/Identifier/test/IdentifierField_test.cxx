@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_SUITE(IdentifierFieldTest)
 
 //IdentifierField is a publicly accessible class defined in the Range class
 //Range holds a vector of these as a private data member
-BOOST_AUTO_TEST_CASE(RangeFieldConstructors){
+BOOST_AUTO_TEST_CASE(IdentifierFieldConstructors){
   BOOST_CHECK_NO_THROW(IdentifierField());
   IdentifierField f1;
   BOOST_CHECK_NO_THROW(IdentifierField f2(f1));
@@ -28,9 +28,11 @@ BOOST_AUTO_TEST_CASE(RangeFieldConstructors){
   BOOST_CHECK_NO_THROW(IdentifierField f4(e1));
   IdentifierField::element_type e2(10);
   BOOST_CHECK_NO_THROW(IdentifierField f5(e1, e2));
+  IdentifierField::element_vector e3{1,2,3};
+  BOOST_CHECK_NO_THROW(IdentifierField f6(e3));
 }
 
-BOOST_AUTO_TEST_CASE(DefaultRangeFieldProperties){
+BOOST_AUTO_TEST_CASE(DefaultIdentifierFieldProperties){
   IdentifierField f1;//default constructed...
   BOOST_CHECK(not f1.has_minimum());
   BOOST_CHECK(not f1.has_maximum());
@@ -70,7 +72,7 @@ BOOST_AUTO_TEST_CASE(DefaultRangeFieldProperties){
   BOOST_TEST(f1.overlaps_with(f2));
 }
 
-BOOST_AUTO_TEST_CASE(UniqueRangeFieldProperties){
+BOOST_AUTO_TEST_CASE(UniqueIdentifierFieldProperties){
   const IdentifierField::element_type e =565;//randomly chosen unique value
   IdentifierField f1(e);
   BOOST_CHECK(f1.has_minimum());
@@ -113,7 +115,7 @@ BOOST_AUTO_TEST_CASE(UniqueRangeFieldProperties){
   BOOST_TEST(f1.overlaps_with(f3));//overlaps with an unbounded value
 }
 
-BOOST_AUTO_TEST_CASE(BoundedRangeFieldProperties){
+BOOST_AUTO_TEST_CASE(BoundedIdentifierFieldProperties){
   const IdentifierField::element_type e1 =-3;//randomly chosen unique value
   const IdentifierField::element_type e2 =5;//randomly chosen unique value
   IdentifierField f1(e1,e2);
@@ -166,17 +168,8 @@ BOOST_AUTO_TEST_CASE(BoundedRangeFieldProperties){
 
 
 BOOST_AUTO_TEST_CASE(SetAndTestRangeFieldProperties){
-  //start with a virgin field
-   IdentifierField f1;
-   BOOST_CHECK_NO_THROW(f1.set_minimum(9));//now it's lower bounded at 9?
-   //lets check...
-   BOOST_TEST(f1.get_mode() == IdentifierField::low_bounded);
-   //can't overlap with 0
-   BOOST_TEST(not f1.overlaps_with(0));
-   //but 100 should be ok
-   BOOST_TEST(f1.overlaps_with(100));
-   //now add an upper bound 
-   BOOST_CHECK_NO_THROW(f1.set_maximum(20));//now it's also upper bounded at 20?
+   //
+   IdentifierField f1(9,20);
    //lets check...
    BOOST_TEST(f1.get_mode() == IdentifierField::both_bounded);
    //but 100 doesnt overlap now
@@ -198,12 +191,10 @@ BOOST_AUTO_TEST_CASE(SetAndTestRangeFieldProperties){
    BOOST_TEST((f1==f2));//also test equality
 }
 
-BOOST_AUTO_TEST_CASE(EnumeratedRangeFieldProperties){
-  //start with a virgin field
-  IdentifierField f1;
+BOOST_AUTO_TEST_CASE(EnumeratedIdentiferFieldProperties){
   //these are like SCT barrel eta values
   const std::vector<IdentifierField::element_type> ev{-6, -5, -4, -3, -2, -1 , 1, 2, 3, 4, 5, 6};
-  BOOST_CHECK_NO_THROW(f1.set(ev));
+  IdentifierField f1(ev);
   BOOST_TEST(f1.get_values() == ev);
   BOOST_TEST(f1.get_mode() == IdentifierField::enumerated);
   BOOST_CHECK(f1.has_minimum());
@@ -233,7 +224,7 @@ BOOST_AUTO_TEST_CASE(EnumeratedRangeFieldProperties){
   BOOST_CHECK(e2 == 6);
 }
 
-BOOST_AUTO_TEST_CASE(RangeFieldOperators){
+BOOST_AUTO_TEST_CASE(IdentifierFieldOperators){
   //start with a virgin field
   IdentifierField f1;
   IdentifierField f2;
@@ -256,13 +247,12 @@ BOOST_AUTO_TEST_CASE(RangeFieldOperators){
   os<<f2;
   BOOST_TEST(os.str() == std::string("0,1,2,3,4,5"));
 }
-BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
+BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   //Field 'or' is the method for combining range fields, giving a superset of valid indices
   //start with an unbounded virgin field
   //UNBOUNDED
-  IdentifierField f1;
   const std::vector<IdentifierField::element_type> ev{0,1,2,3,4,5};
-  f1.set(ev); //f1 is now enumerated (check...)
+   IdentifierField  f1(ev); //f1 is now enumerated (check...)
   const auto enum1 = f1;//use this later
   BOOST_CHECK(f1.get_mode() == IdentifierField::enumerated);
   const IdentifierField f2;//unbounded
@@ -284,44 +274,12 @@ BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
   //the following would fail (as per comment in the code)
   BOOST_TEST(both1.get_maximum() == 20);
   BOOST_TEST(both1.get_mode() == IdentifierField::both_bounded);
-  //HIGH bounded
-  IdentifierField hi1;
-  hi1.set_maximum(10);
   //check mode
-  BOOST_TEST(hi1.get_mode() == IdentifierField::high_bounded);
-  IdentifierField hi2;
-  hi2.set_maximum(12);
-  BOOST_CHECK_NO_THROW(hi1 |= hi2);
-  BOOST_TEST(hi1.get_mode() == IdentifierField::high_bounded);
-  BOOST_TEST(hi1.get_maximum() == 12);
-  //'or' a high bounded with a both bounded
-  BOOST_CHECK_NO_THROW(hi1 |= both3);
-  BOOST_TEST(hi1.get_mode() == IdentifierField::high_bounded);
-  BOOST_TEST(hi1.get_maximum() == 20);
-  //'or' a high bounded with a low bounded
-  IdentifierField lo1;
-  lo1.set_minimum(3);
-  BOOST_CHECK_NO_THROW(hi1 |= lo1);
-  BOOST_TEST(hi1.get_mode() == IdentifierField::unbounded);
-  //'or' a high bounded with an enumerated
-  hi1.set_maximum(2);
-  BOOST_TEST(hi1.get_maximum() == 2);
-  BOOST_CHECK_NO_THROW(hi1 |= enum1);//{0,1,2,3,4,5}
-  BOOST_TEST(hi1.get_mode() == IdentifierField::high_bounded);
-  BOOST_TEST(hi1.get_maximum() == 5);
-  //'or' a high bounded with disjoint enumerated
   const std::vector<IdentifierField::element_type> ev2{8,9,10,11};
-  IdentifierField enum2;
-  enum2.set(ev2);
-  BOOST_CHECK_NO_THROW(hi1 |= enum2);
-  BOOST_TEST(hi1.get_maximum() == 11);
-  IdentifierField::element_type e{};
-  BOOST_TEST(hi1.get_next(5,e));
-  //fails, it treats the regions as one contiguous field, giving 6 as next to 5
-  BOOST_TEST(e == 8);
+  IdentifierField enum2(ev2);
+  int e{};
   //ENUMERATED
-  IdentifierField enumField;
-  enumField.set(ev);//{0,1,2,3,4,5}
+  IdentifierField enumField(ev);
   //...disjoint enumerated region
   BOOST_CHECK_NO_THROW(enumField |= enum2); //{8,9,10,11}, enumerated with enumerated
   BOOST_TEST(enumField.get_values().size() == 10); //disjoint; add entries
@@ -339,53 +297,9 @@ BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
   BOOST_CHECK_NO_THROW(enumField |= enum3);//{0,1,2,3,4,5,6,7,8}; it removes duplicates
   BOOST_TEST(enumField.get_values().size() == 9);
   BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);
-  BOOST_TEST(hi1.get_next(5,e));
-  BOOST_TEST(e == 6);
+ 
   enumField.clear();
-  //..with a high bound field which encompasses all values
-  IdentifierField hi;
-  enumField.clear();
-  enumField.set(ev);
-  hi.set_maximum(20);
-  BOOST_CHECK_NO_THROW(enumField |= hi);
-  //whats its type?
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);//unexpectedly, it is a both_bounded
-  //whats the possible value?
-  BOOST_TEST(enumField.get_maximum() == 20);
-  BOOST_TEST(enumField.has_minimum() == false);//failing
-  BOOST_TEST(enumField.get_minimum() == 0);//it doesnt have a minimum
-  //..with a high bound field which is disjoint
-  enumField.clear();
-  hi.clear();
-  enumField.set(ev);//{0,1,2,3,4,5}
-  hi.set_maximum(-2);
-  BOOST_CHECK_NO_THROW(enumField |= hi);
-  //whats its type?
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);//unexpectedly, it is a both_bounded
-  BOOST_TEST(enumField.get_maximum() == 5);
-  BOOST_TEST(enumField.get_minimum() == 0);
-  //with a lo bound field encompassing all values
-  enumField.clear();
-  IdentifierField lo;
-  enumField.set(ev);//{0,1,2,3,4,5}
-  lo.set_minimum(-1);
-  BOOST_CHECK_NO_THROW(enumField |= lo);
-  //whats its type?
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);//unexpectedly, it is a both_bounded
-  BOOST_TEST(enumField.has_maximum() == false);//failing
-  BOOST_TEST(enumField.get_maximum() == 0);//fails, gives 5
-  BOOST_TEST(enumField.get_minimum() == -1);
-  //with a disjoint lo bound field
-  enumField.clear();
-  lo.clear();
-  enumField.set(ev);//{0,1,2,3,4,5}
-  lo.set_minimum(8);
-  BOOST_CHECK_NO_THROW(enumField |= lo);
-  //whats its type?
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);//unexpectedly, it is a both_bounded
-  BOOST_TEST(enumField.has_maximum() == false);//failing
-  BOOST_TEST(enumField.get_maximum() == 0);//fails, gives 5
-  BOOST_TEST(enumField.get_minimum() == 0);
+ 
   //with a both_bounded field encompassing the enumerated values
   enumField.clear();
   enumField.set(ev);//{0,1,2,3,4,5}
@@ -399,8 +313,7 @@ BOOST_AUTO_TEST_CASE(RangeFieldOrOperators, * utf::expected_failures(9)){
   enumField.clear();
   enumField.set(ev);//{0,1,2,3,4,5}
   bounded.clear();
-  bounded.set_minimum(10);
-  bounded.set_maximum(20);
+  bounded.set(10, 20);
   BOOST_CHECK_NO_THROW(enumField |= bounded);
   BOOST_TEST(enumField.get_mode() == IdentifierField::both_bounded);
   BOOST_TEST(enumField.has_maximum() == true);
@@ -413,14 +326,6 @@ BOOST_AUTO_TEST_CASE(RangeFieldStreamExtraction){
   std::istringstream asterisk("  *");
   BOOST_CHECK_NO_THROW(asterisk>>f);
   BOOST_TEST(std::string(f) == "*");
-  f.clear();
-  std::istringstream upperBound("  :999 ");
-  BOOST_CHECK_NO_THROW(upperBound>>f);
-  BOOST_TEST(std::string(f) == ":999");
-  f.clear();
-  std::istringstream lowerBound("  -10: ");
-  BOOST_CHECK_NO_THROW(lowerBound>>f);
-  BOOST_TEST(std::string(f) == "-10:");
   f.clear();
   std::istringstream bound("  -10:100 ");
   BOOST_CHECK_NO_THROW(bound>>f);
