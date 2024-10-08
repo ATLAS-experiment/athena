@@ -13,7 +13,6 @@ MC20_Generator_dict = {
     "Sherpa2210": "700122",
     "Sherpa2211": "700122",
     "Sherpa2212": "700660",
-    "Sherpa2212f290b9": "700660",
     "Sherpa2214": "700660",
 }
 
@@ -24,7 +23,6 @@ MC23_Generator_dict = {
     "Herwig723": "601414",
     "Sherpa2211": "700660",
     "Sherpa2212": "700660",
-    "Sherpa2212f290b9": "700660",
     "Sherpa2214": "700660",
 }
 
@@ -39,7 +37,13 @@ def MCMC_generator_map(generatorDict):
     elif 'Herwig7' in generatorDict:
         generator = 'Herwig'+generatorDict['Herwig7'].replace('.', '')
     elif 'Sherpa' in generatorDict:
+        sherpa_versions = ['Sherpa2210', 'Sherpa2211', 'Sherpa2212', 'Sherpa2214']
         generator = 'Sherpa'+generatorDict['Sherpa'].replace('.', '')
+        if any(generator.startswith(version) for version in sherpa_versions):
+            generator = generator[:10]
+        elif generator.startswith('Sherpa221'):
+            generator = 'Sherpa221'
+
     else:
         generator = str(generatorDict)
     return generator
