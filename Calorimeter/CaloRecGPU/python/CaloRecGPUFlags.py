@@ -223,6 +223,7 @@ def _createDefaultSubFlagsCaloRecGPU():
     flags.addFlag('MomentsMinRLateral',4*cm)
     flags.addFlag('MomentsMinLLongitudinal',10*cm)
     
+    flags.addFlag('CalibrationUseAbsEnergy', lambda prevFlags: prevFlags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute)
     
     #FLAGS THAT MIRROR CPU OPTIONS
     

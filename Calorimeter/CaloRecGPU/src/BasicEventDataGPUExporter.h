@@ -58,10 +58,10 @@ class BasicEventDataGPUExporter :
 
   /** @brief If @p true, into account the possibility of a cell being shared between clusters.
    *  Hurts performance when not needed.
-   *  Defaults to @p false.
+   *  Defaults to @p true.
    *
    */
-  Gaudi::Property<bool> m_considerSharedCells {this, "ConsiderSharedCells", false, "Take into account the possibility of a cell being shared between clusters."};
+  Gaudi::Property<bool> m_considerSharedCells {this, "ConsiderSharedCells", true, "Take into account the possibility of a cell being shared between clusters."};
 
   /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
    */

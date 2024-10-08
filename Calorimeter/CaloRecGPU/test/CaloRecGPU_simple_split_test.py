@@ -10,9 +10,9 @@ if __name__=="__main__":
         
     flags.lock()
     
-    testopts.TestGrow = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.Split
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_splitting", "GPU_splitting"], ["splitting"])
     
-    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, PlotterConfigurator = PlotterConfig)
+    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
     
