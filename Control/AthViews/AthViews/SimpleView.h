@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_SIMPLEVIEW_H
@@ -31,10 +31,9 @@ class DataObject;
  *
  * @author Ben Wynne - ATLAS
  */
-class SimpleView : public IProxyDict
+class SimpleView : public implements<IProxyDict>
 {
   public:
-    DeclareInterfaceID( SimpleView, 2, 0 );
 
     SimpleView() = delete;
     SimpleView( std::string const& Name, bool AllowFallThrough = true, std::string const& storeName = "StoreGateSvc" );
@@ -172,9 +171,6 @@ class SimpleView : public IProxyDict
     virtual bool tryELRemap ( sgkey_t sgkey_in,   size_t index_in,
                               sgkey_t& sgkey_out, size_t& index_out);
 
-    virtual unsigned long addRef();
-    virtual unsigned long release();
-    virtual StatusCode queryInterface( const InterfaceID &ti, void** pp );
     virtual const std::string& name() const;
 
     //IStringPool
