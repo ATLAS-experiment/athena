@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimCONFTOOLS_FPGATrackSimEVENTSELECTIONSVC_H
@@ -30,9 +30,6 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-
-  //static const InterfaceID& interfaceID();
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIf) override;
 
   virtual unsigned getRegionID() const override { return m_regionID; }
   virtual SampleType getSampleType() const override { return m_st; }
@@ -101,11 +98,5 @@ class FPGATrackSimEventSelectionSvc : public extends< AthService, IFPGATrackSimE
   bool m_selectEvent = false;
 
 };
-
-/*inline const InterfaceID& FPGATrackSimEventSelectionSvc::interfaceID()
-{
-  static const InterfaceID IID_FPGATrackSimEventSelectionSvc("FPGATrackSimEventSelectionSvc", 1, 0);
-  return IID_FPGATrackSimEventSelectionSvc;
-}*/
 
 #endif  // FPGATrackSimCONFTOOLS_FPGATrackSimEVENTSELECTIONSVC_H

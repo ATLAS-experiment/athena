@@ -1,27 +1,13 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
 #include "PathResolver/PathResolver.h"
 
 FPGATrackSimMappingSvc::FPGATrackSimMappingSvc(const std::string& name, ISvcLocator*svc) :
-    AthService(name, svc),
+    base_class(name, svc),
     m_EvtSel("FPGATrackSimEventSelectionSvc", name)
 {
-}
-
-
-StatusCode FPGATrackSimMappingSvc::queryInterface(const InterfaceID& riid, void** ppvIf)
-{
-    if (interfaceID() == riid)
-        *ppvIf = dynamic_cast< FPGATrackSimMappingSvc* > (this);
-    else if (IFPGATrackSimMappingSvc::interfaceID() == riid)
-        *ppvIf = dynamic_cast<IFPGATrackSimMappingSvc*> (this);
-    else
-        return AthService::queryInterface(riid, ppvIf);
-
-    addRef();
-    return StatusCode::SUCCESS;
 }
 
 

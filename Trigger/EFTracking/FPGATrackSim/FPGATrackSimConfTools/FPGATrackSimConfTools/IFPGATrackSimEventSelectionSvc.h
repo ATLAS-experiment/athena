@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimCONFTOOLS_IFPGATrackSimEVENTSELECTIONSVC_H
@@ -21,8 +21,7 @@ enum class SampleType;
 class IFPGATrackSimEventSelectionSvc : public virtual IService
 {
  public:
-
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID(IFPGATrackSimEventSelectionSvc, 1, 0);
 
   virtual FPGATrackSimTrackPars getMin() const = 0;
   virtual FPGATrackSimTrackPars getMax() const = 0;
@@ -59,11 +58,5 @@ class IFPGATrackSimEventSelectionSvc : public virtual IService
   virtual void setSelectedEvent(bool s) = 0;
 
 };
-
-inline const InterfaceID& IFPGATrackSimEventSelectionSvc::interfaceID()
-{
-  static const InterfaceID IID("IFPGATrackSimEventSelectionSvc", 1, 0);
-  return IID;
-}
 
 #endif  //FPGATrackSimCONFTOOLS_IFPGATrackSimEVENTSELECTIONSVC_H
