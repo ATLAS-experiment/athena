@@ -14,12 +14,12 @@
   </field>
 
   <subregion name="cylinder1" >
-    <range field="side" />
+    <range field="side" values="negative positive"/>
     <range field="module" minvalue="0" maxvalue="1" />
   </subregion>
 
   <subregion name="cylinder2" >
-    <range field="side" />
+    <range field="side" values="negative positive"/>
     <range field="module" value="2" />
   </subregion>
 
