@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IVALGRINDSVC_H 
@@ -10,34 +10,24 @@
 // STL includes
 #include <iosfwd>
 
-
 // FrameWork includes
 #include "GaudiKernel/IService.h"
 
-// Forward declaration
 
 /**
  * @class IValgrindSvc
- * @brief Abstract interface for ValgrindSvc. FIXME
+ * @brief Abstract interface for ValgrindSvc.
  * @author Sebastien Binet
  */
 class IValgrindSvc : virtual public IService
 { 
  
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
+ public:
+  /// Declare interface ID
+  DeclareInterfaceID(IValgrindSvc, 2, 0);
 
-  /** Destructor: 
-   */
+  /// Destructor
   virtual ~IValgrindSvc();
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
 
   /// Start callgrind instrumentation
   virtual void callgrindStartInstrumentation() = 0;
@@ -57,21 +47,6 @@ class IValgrindSvc : virtual public IService
   /// Number of created callgrind profiles
   virtual unsigned int profileCount() = 0;
   
-  /////////////////////////////////////////////////////////////////// 
-  // Private methods: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
-
-}; 
-
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-inline const InterfaceID& IValgrindSvc::interfaceID() 
-{ 
-  static const InterfaceID IID_IValgrindSvc("IValgrindSvc", 2, 0);
-  return IID_IValgrindSvc; 
-}
+};
 
 #endif //> ATHENAKERNEL_IVALGRINDSVC_H

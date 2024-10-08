@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ValgrindSvc.h 
@@ -26,25 +26,16 @@
 class ISvcLocator;
 class IAuditorSvc;
 
-template <class TYPE> class SvcFactory;
-
-class ValgrindSvc : virtual public IValgrindSvc,
-                    virtual public IIncidentListener,
-                    public AthService
+class ValgrindSvc : public extends<AthService,
+                                   IValgrindSvc,
+                                   IIncidentListener>
 { 
-
-protected:
-    
-  friend class SvcFactory<ValgrindSvc>;
-
-  /////////////////////////////////////////////////////////////////// 
+  ///////////////////////////////////////////////////////////////////
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
   ValgrindSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 
@@ -52,43 +43,30 @@ protected:
 
   /// Gaudi Service Implementation
   //@{
-  StatusCode initialize();
-  StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   //@}
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
-
-  /** incident service handle for Begin/EndEvent
-   */
-  void handle( const Incident& incident );
+  /// incident service handle for Begin/EndEvent
+  virtual void handle( const Incident& incident ) override;
 
   /// Start callgrind instrumentation
-  virtual void callgrindStartInstrumentation();
+  virtual void callgrindStartInstrumentation() override;
 
   /// Stop callgrind instrumentation
-  virtual void callgrindStopInstrumentation();
+  virtual void callgrindStopInstrumentation() override;
 
   /// Dump callgrind profiling stats
-  virtual void callgrindDumpStats( std::ostream& out );
+  virtual void callgrindDumpStats( std::ostream& out ) override;
 
   /// Toggle callgrind event collection
-  virtual void callgrindToggleCollect();
+  virtual void callgrindToggleCollect() override;
   
   /// Do a leak check now
-  virtual void valgrindDoLeakCheck();
+  virtual void valgrindDoLeakCheck() override;
   
   /// Number of created callgrind profiles
-  virtual unsigned int profileCount() { return m_profileCounter; }
+  virtual unsigned int profileCount() override { return m_profileCounter; }
   
   /////////////////////////////////////////////////////////////////// 
   // Private methods: 
@@ -104,9 +82,6 @@ protected:
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
  private: 
-
-  /// Default constructor: 
-  ValgrindSvc();
 
   /// List of algorithms to profile
   /// If list is empty, profile between begin/end event
@@ -134,17 +109,5 @@ protected:
   /// Counter of created profiles
   unsigned int m_profileCounter;
 }; 
-
-/// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& ValgrindSvc::interfaceID() 
-{ 
-   return IValgrindSvc::interfaceID(); 
-}
 
 #endif //> ATHENASERVICES_VALGRINDSVC_H
