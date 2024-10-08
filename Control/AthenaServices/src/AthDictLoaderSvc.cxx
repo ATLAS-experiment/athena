@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthDictLoaderSvc.cxx 
@@ -37,7 +37,7 @@ bool startsWith (const std::string& a, const std::string& b)
 ////////////////
 AthDictLoaderSvc::AthDictLoaderSvc (const std::string& name, 
                                     ISvcLocator* pSvcLocator) : 
-  ::AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_dsodb (nullptr),
   m_clidSvc ("ClassIDSvc", name),
   m_tpCnvSvc("AthTPCnvSvc", name)
@@ -70,24 +70,6 @@ StatusCode AthDictLoaderSvc::initialize()
 StatusCode AthDictLoaderSvc::finalize()
 {
   ATH_MSG_INFO ("in finalize...");
-  return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-AthDictLoaderSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( IDictLoaderSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IDictLoaderSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return ::AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 

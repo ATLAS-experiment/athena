@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -25,17 +25,13 @@ using Athena::RCURead;
 
 
 class TestRCUSvc
-  : public IRCUSvc
+  : public implements<IRCUSvc>
 {
 public:
   virtual StatusCode remove (IRCUObject* /*obj*/) override { return StatusCode::SUCCESS; }
   virtual size_t getNumSlots() const override { return 1; }
   virtual void add (IRCUObject* obj) override
   { m_added = obj; }
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 
   IRCUObject* m_added = nullptr;
 };

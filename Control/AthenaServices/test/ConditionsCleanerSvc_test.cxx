@@ -24,15 +24,12 @@
 
 
 class RCUTest
-  : public Athena::IRCUSvc
+  : public implements<Athena::IRCUSvc>
 {
 public:
   virtual void add (Athena::IRCUObject*) override {  }
   virtual StatusCode remove (Athena::IRCUObject*) override { return StatusCode::SUCCESS; }
   virtual size_t getNumSlots() const override { return 1; }
-  virtual unsigned long addRef()override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface( const InterfaceID&, void** ) override { std::abort(); }
 
 };
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IEvtIdModifierSvc.h
@@ -39,6 +39,8 @@ class IEvtIdModifierSvc : virtual public ::IInterface {
   // Public typedefs:
   ///////////////////////////////////////////////////////////////////
  public:
+  DeclareInterfaceID(IEvtIdModifierSvc, 1, 0);
+
   using number_type = EventIDBase::number_type;
 
   ///////////////////////////////////////////////////////////////////
@@ -61,21 +63,10 @@ class IEvtIdModifierSvc : virtual public ::IInterface {
   // Non-const methods:
   ///////////////////////////////////////////////////////////////////
 
-  static const InterfaceID& interfaceID();
-
   /** @brief modify an `EventID`'s content
    */
   virtual void modify_evtid(EventID& evt_id, event_number_t eventIndex,
                             bool consume_stream) = 0;
 };
-
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
-
-inline const InterfaceID& IEvtIdModifierSvc::interfaceID() {
-  static const InterfaceID IID_IEvtIdModifierSvc("IEvtIdModifierSvc", 1, 0);
-  return IID_IEvtIdModifierSvc;
-}
 
 #endif  //> !ATHENAKERNEL_IEVTIDMODIFIERSVC_H

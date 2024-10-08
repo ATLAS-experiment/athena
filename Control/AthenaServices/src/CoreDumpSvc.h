@@ -21,9 +21,6 @@
 #include "EventInfo/EventID.h"
 
 
-// Forward declarations
-template <class TYPE> class SvcFactory;
-
 namespace CoreDumpSvcHandler {
   void action ATLAS_NOT_THREAD_SAFE ( int sig, siginfo_t *info, void* extra );
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PersistencySvc )
@@ -15,7 +15,7 @@ atlas_add_library( PersistencySvc
    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} GaudiUtils FileCatalog
    LINK_LIBRARIES CxxUtils DataModelRoot POOLCore StorageSvc
    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel FileCatalog
-   PersistentDataModel )
+   GaudiKernel PersistentDataModel )
 
 atlas_add_dictionary( PersistencySvcDict PersistencySvc/dict.h PersistencySvc/dict.xml
    LINK_LIBRARIES PersistencySvc )

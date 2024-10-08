@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -803,22 +803,6 @@ void LoggedMessageSvc::eraseMessage( const StatusCode& key, const Message& msg )
       }
     }
   }
-}
-
-// ---------------------------------------------------------------------------
-StatusCode LoggedMessageSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-// ---------------------------------------------------------------------------
-  if ( riid == ILoggedMessageSvc::interfaceID() )  {
-    *ppvInterface = (ILoggedMessageSvc*)this;
-  }
-  else if ( riid == IMessageSvc::interfaceID() )  {
-    *ppvInterface = (IMessageSvc*)this;
-  }
-  else  {
-    return base_class::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -37,7 +37,7 @@ const int ninflight = 10;
 
 
 class TestRCUSvc
-  : public Athena::IRCUSvc
+  : public implements<Athena::IRCUSvc>
 {
 public:
   virtual StatusCode remove (Athena::IRCUObject* obj) override
@@ -49,10 +49,6 @@ public:
   { return nslots; }
   virtual void add (Athena::IRCUObject* /*obj*/) override
   { }
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 
   Athena::IRCUObject* m_removed = nullptr;
 };

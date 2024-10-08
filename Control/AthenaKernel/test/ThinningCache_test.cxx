@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ThinningCache_test.cxx
@@ -19,7 +19,7 @@
 #include <stdexcept>
 
 
-class TestTrigNavigationThinningSvc : public ITrigNavigationThinningSvc
+class TestTrigNavigationThinningSvc : public implements<ITrigNavigationThinningSvc>
 {
 public:
   virtual
@@ -28,13 +28,6 @@ public:
   {
     return StatusCode::SUCCESS;
   }
-  virtual unsigned long addRef() override { return 0; }
-  virtual unsigned long release() override { return 0; }
-  virtual StatusCode queryInterface( const InterfaceID& , void** ) override
-  {
-    return StatusCode::FAILURE;
-  }
-
 };
 
 

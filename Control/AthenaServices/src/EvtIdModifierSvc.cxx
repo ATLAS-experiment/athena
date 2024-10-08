@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EvtIdModifierSvc.cxx
@@ -45,11 +45,7 @@ using number_type = IEvtIdModifierSvc::number_type;
 ////////////////
 EvtIdModifierSvc::EvtIdModifierSvc(const std::string& name,
                                    ISvcLocator* pSvcLocator)
-    : ::AthService(name, pSvcLocator) {
-  //
-  // Property declaration
-  //
-  // declareProperty( "Property", m_nProperty );
+    : base_class(name, pSvcLocator) {
 
   declareProperty("Modifiers", m_evtNpletsProp,
                   "A list of n-uplets "
@@ -113,23 +109,6 @@ StatusCode EvtIdModifierSvc::initialize() {
     msg(MSG::DEBUG) << "]" << endmsg;
   }
 
-  return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode EvtIdModifierSvc::queryInterface(const InterfaceID& riid,
-                                            void** ppvInterface) {
-  if (IEvtIdModifierSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IEvtIdModifierSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return ::AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 

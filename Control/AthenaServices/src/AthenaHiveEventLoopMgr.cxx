@@ -62,7 +62,7 @@
 //=========================================================================
 AthenaHiveEventLoopMgr::AthenaHiveEventLoopMgr(const std::string& nam, 
 				       ISvcLocator* svcLoc)
-  : MinimalEventLoopMgr(nam, svcLoc), 
+  : base_class(nam, svcLoc),
     AthMessaging (nam),
     m_incidentSvc ( "IncidentSvc",  nam ), 
     m_eventStore( "StoreGateSvc", nam ), 
@@ -922,31 +922,6 @@ void AthenaHiveEventLoopMgr::handle(const Incident& inc)
   if(!sc.isSuccess()) {
     ATH_MSG_ERROR ( "Clear of Event data store failed" );
   }
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-AthenaHiveEventLoopMgr::queryInterface(const InterfaceID& riid, 
-				   void** ppvInterface) 
-{
-  if ( IEventSeek::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IEventSeek*>(this);
-  }
-  else if ( IEventProcessor::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IEventProcessor*>(this);
-  }
-  else if ( ICollectionSize::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<ICollectionSize*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return MinimalEventLoopMgr::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------------------------------

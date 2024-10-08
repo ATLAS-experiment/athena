@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/cPtrAccessSEGVHandler.h"
@@ -7,7 +7,7 @@
 #include "PageAccessControlSvc.h"
 PageAccessControlSvc::PageAccessControlSvc( const std::string& name, 
 					    ISvcLocator* pSvcLocator ) : 
-  AthService(name, pSvcLocator), m_saveSEGVaction(),
+  base_class(name, pSvcLocator), m_saveSEGVaction(),
   m_accessControl(), m_SEGVHandler(m_accessControl)
 {
   //pass m_SEGVHandler pointer to cPtrAccessSEGVHandler
@@ -52,25 +52,6 @@ StatusCode PageAccessControlSvc::finalize() {
   }
   return sc;
 }
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode
-PageAccessControlSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-    if ( IPageAccessControlSvc::interfaceID().versionMatch(riid) )    {
-        *ppvInterface = (IPageAccessControlSvc*)this;
-    }
-    else  {
-	// Interface is not directly available: try out a base class
-	return Service::queryInterface(riid, ppvInterface);
-    }
-    this->addRef();
-    return StatusCode::SUCCESS;
-}
-
 
 void PageAccessControlSvc::report() const {
   msg(MSG::INFO) << "Access monitoring report" << endmsg;

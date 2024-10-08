@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  RCUObject_test.cxx
@@ -34,7 +34,7 @@ const int nslots = 4;
 
 
 class TestRCUSvc
-  : public IRCUSvc
+  : public implements<IRCUSvc>
 {
 public:
   virtual StatusCode remove (IRCUObject* obj) override
@@ -46,10 +46,6 @@ public:
   { return nslots; }
   virtual void add (IRCUObject* /*obj*/) override
   { }
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 
   IRCUObject* m_removed = nullptr;
 };

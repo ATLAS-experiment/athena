@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IHYBRIDPROCESSORHELPER_H
 #define ATHENAKERNEL_IHYBRIDPROCESSORHELPER_H
+
+#include "GaudiKernel/IInterface.h"
 
 /**
  * @file  IHybridProcessorHelper.h
@@ -11,9 +13,10 @@
  * @brief Helper interface for implementing hybrid MP+MT.
           Used by the Hybrid Shared Event Queue Consumer MP tool
  **/
+class IHybridProcessorHelper : virtual public IInterface {
+ public:
+  DeclareInterfaceID( IHybridProcessorHelper, 1, 0 );
 
-class IHybridProcessorHelper {
- public: 
   virtual void resetAppReturnCode() = 0;
   virtual void setCurrentEventNum(int num) = 0;
   virtual bool terminateLoop() = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file OutputStreamSequencerSvc.cxx
@@ -17,9 +17,10 @@
 #include <sstream>
 
 //________________________________________________________________________________
-OutputStreamSequencerSvc::OutputStreamSequencerSvc(const std::string& name, ISvcLocator* pSvcLocator) : ::AthService(name, pSvcLocator),
-	m_metaDataSvc("MetaDataSvc", name),
-	m_fileSequenceNumber(-1)
+OutputStreamSequencerSvc::OutputStreamSequencerSvc(const std::string& name, ISvcLocator* pSvcLocator)
+  : base_class(name, pSvcLocator),
+    m_metaDataSvc("MetaDataSvc", name),
+    m_fileSequenceNumber(-1)
 {
 }
 
@@ -66,17 +67,6 @@ StatusCode OutputStreamSequencerSvc::finalize() {
    if (!m_metaDataSvc.release().isSuccess()) {
       ATH_MSG_WARNING("Cannot release MetaDataSvc.");
    }
-   return(StatusCode::SUCCESS);
-}
-//_______________________________________________________________________
-StatusCode OutputStreamSequencerSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (riid == this->interfaceID()) {
-      *ppvInterface = this;
-   } else {
-      // Interface is not directly available: try out a base class
-      return(::AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
    return(StatusCode::SUCCESS);
 }
 

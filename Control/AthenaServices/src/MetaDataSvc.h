@@ -37,12 +37,6 @@ namespace Io {
   class FileAttr;
 }
 
-static const InterfaceID IID_MetaDataSvc("MetaDataSvc", 1, 0);
-
-// forward declaration to allow making SvcFactory a friend
-template <class TYPE>
-class SvcFactory;
-
 /**
  * @brief Manages the content of the metadata stores
  *
@@ -93,17 +87,13 @@ class MetaDataSvc : public extends<::AthService,
                                     IAthMetaDataSvc,
                                     IIoComponent>
 {
-  // Allow the factory class access to the constructor
-  friend class SvcFactory<MetaDataSvc>;  // <-- obsolete, remove
+ public:
+  using IService::interfaceID;
 
- public:  // Constructor and Destructor
   /// Standard Service Constructor
   MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator);
   /// Destructor
   virtual ~MetaDataSvc();
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_MetaDataSvc; }
 
  public:  // Non-static members
   /**
@@ -180,10 +170,6 @@ class MetaDataSvc : public extends<::AthService,
    */
   virtual StatusCode shmProxy(const std::string& filename) override;
   /**@}*/
-
-  /** Provide access to the interfaces implemented by this service */
-  StatusCode queryInterface(const InterfaceID& riid,
-                            void** ppvInterface) override;
 
   /**
    * \ingroup IAddressProvider IAddressProvider implementation
