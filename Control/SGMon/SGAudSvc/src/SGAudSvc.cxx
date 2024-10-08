@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGAudSvc.cxx 
@@ -37,9 +37,11 @@
 // Constructors
 ////////////////
 SGAudSvc::SGAudSvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
-  AthService  ( name,     pSvcLocator ),
+  base_class  ( name,     pSvcLocator ),
   m_msg       ( msgSvc(),        name ), 
-  p_algCtxSvc(0), m_pCID(0), m_useCLID(true),
+  p_algCtxSvc("AlgContextSvc", name),
+  m_pCID("ClassIDSvc", name),
+  m_useCLID(true),
   m_nCurrAlg(0),
   m_nCurrObj(0),
   m_nEvents(0), m_startEvent(3), m_inExec(false)
@@ -91,19 +93,8 @@ SGAudSvc::initialize() {
     return StatusCode::FAILURE;
   }
 
-  static const bool CREATEIF(true);
-  
-  if ( service("AlgContextSvc",p_algCtxSvc,CREATEIF).isFailure() ) {
-    m_msg << MSG::ERROR << "Unable to retrieve the AlgContextSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  
-  assert(p_algCtxSvc);
-
-  if ( service("ClassIDSvc",m_pCID,CREATEIF).isFailure() ) {
-    m_msg << MSG::ERROR << "Unable to retrieve the ClassIDSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( p_algCtxSvc.retrieve() );
+  ATH_CHECK( m_pCID.retrieve() );
 
   if (m_allFileName != "") {
     m_ofa.open(m_allFileName.c_str());
@@ -115,10 +106,8 @@ SGAudSvc::initialize() {
   
   // Set to be listener for end-of-event
   ServiceHandle<IIncidentSvc> incSvc( "IncidentSvc", this->name() );
-  if ( !incSvc.retrieve().isSuccess() ) {
-    m_msg << MSG::ERROR << "Unable to get the IncidentSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( incSvc.retrieve() );
+
   incSvc->addListener( this, IncidentType::BeginRun );
   incSvc->addListener( this, IncidentType::BeginEvent );
   incSvc->addListener( this, IncidentType::EndEvent );
@@ -182,30 +171,6 @@ SGAudSvc::finalize() {
 
   return StatusCode::SUCCESS;
 }
-
-/*----------------------------------------------------------------------------*/
-
-// Query the interfaces.
-StatusCode 
-SGAudSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( ISGAudSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<ISGAudSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-/////////////////////////////////////////////////////////////////// 
-// Const methods: 
-///////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
 
 /*----------------------------------------------------------------------------*/
 

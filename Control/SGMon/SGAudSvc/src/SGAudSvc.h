@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGAudSvc.h 
@@ -32,22 +32,14 @@
 
 // Forward declaration
 class ISvcLocator;
-template <class TYPE> class SvcFactory;
 class IChronoStatSvc;
 class IAlgContextSvc;
 class AlgContextSvc;
 
-class SGAudSvc : virtual public ISGAudSvc,
-		 virtual public IIncidentListener,
-		 public AthService
-{ 
-
-protected:
-    
-  friend class SvcFactory<SGAudSvc>;
-
-
-public: 
+class SGAudSvc : public extends<AthService,
+                                ISGAudSvc, IIncidentListener>
+{
+public:
 
   /// Constructor with parameters: 
   SGAudSvc( const std::string& name, ISvcLocator* pSvcLocator );
@@ -57,13 +49,9 @@ public:
 
   /// Gaudi Service Implementation
   //@{
-  StatusCode initialize();
-  StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   //@}
-
-  static const InterfaceID& interfaceID();
-  
 
 /** incident service handle for EndEvent. Calls monitor. There should be more elegant way to get number of events passed.
 */
@@ -113,8 +101,8 @@ public:
   MsgStream m_msg;
 
   /// Pointer to the @c AlgContextScv
-  IAlgContextSvc *p_algCtxSvc;
-  IClassIDSvc* m_pCID;
+  ServiceHandle<IAlgContextSvc> p_algCtxSvc;
+  ServiceHandle<IClassIDSvc> m_pCID;
   
   /// Name of the output file 
   std::string m_outFileName, m_allFileName, m_sumFileName;  
@@ -150,14 +138,4 @@ public:
   bool m_inExec;
 }; 
 
-
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& SGAudSvc::interfaceID() 
-{ 
-   return ISGAudSvc::interfaceID(); 
-}
-
-#endif 
+#endif
