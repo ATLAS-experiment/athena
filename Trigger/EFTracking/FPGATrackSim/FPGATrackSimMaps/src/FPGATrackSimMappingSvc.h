@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimMAPPINGSVC_H
 #define TRIGFPGATrackSimMAPPINGSVC_H
@@ -13,7 +13,7 @@
 
 class IFPGATrackSimEventSelectionSvc;
 
-class FPGATrackSimMappingSvc : public AthService, virtual public IFPGATrackSimMappingSvc
+class FPGATrackSimMappingSvc : public extends<AthService, IFPGATrackSimMappingSvc>
 {
     public:
 
@@ -28,9 +28,6 @@ class FPGATrackSimMappingSvc : public AthService, virtual public IFPGATrackSimMa
         virtual const FPGATrackSimRegionMap* RegionMap_2nd()     const override { return m_rmap_2nd.get(); }
         virtual const FPGATrackSimRegionMap* SubRegionMap()      const override { return m_subrmap.get();  }
         virtual const FPGATrackSimNNMap* NNMap()                 const override { return m_NNmap.get();    }
-
-        static const InterfaceID& interfaceID();
-        virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIf) override;
 
     private:
 
@@ -60,11 +57,5 @@ class FPGATrackSimMappingSvc : public AthService, virtual public IFPGATrackSimMa
         StatusCode checkInputs();
         StatusCode checkAllocs();
 };
-
-inline const InterfaceID& FPGATrackSimMappingSvc::interfaceID()
-{
-    static const InterfaceID IID_FPGATrackSimMappingSvc("FPGATrackSimMappingSvc", 1, 0);
-    return IID_FPGATrackSimMappingSvc;
-}
 
 #endif   // TRIGFPGATrackSimMAPPINGSVC_H

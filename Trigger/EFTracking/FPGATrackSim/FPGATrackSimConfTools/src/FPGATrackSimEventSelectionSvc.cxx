@@ -76,25 +76,6 @@ StatusCode FPGATrackSimEventSelectionSvc::finalize()
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode FPGATrackSimEventSelectionSvc::queryInterface(const InterfaceID& riid, void** ppvIf)
-{
- if ( !ppvIf ) return StatusCode::FAILURE;
- 
- // find indirect interfaces :
- if (IFPGATrackSimEventSelectionSvc::interfaceID().versionMatch(riid)) {
-  *ppvIf = dynamic_cast<IFPGATrackSimEventSelectionSvc*>(this);
- } else if (base_class::queryInterface(riid, ppvIf).isSuccess()) {
-   return StatusCode::SUCCESS;
- } else {
-   // Interface is not directly available: try out a base class
-   return ::AthService::queryInterface(riid, ppvIf);
- }
- addRef();
- return StatusCode::SUCCESS;
-}
-
-
 bool FPGATrackSimEventSelectionSvc::passCuts(const FPGATrackSimHit& hit) const
 {
   float eta = TMath::ASinH(hit.getGCotTheta());
