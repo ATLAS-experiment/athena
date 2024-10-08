@@ -1584,7 +1584,6 @@
     <range field="rpcMeasuresPhi" minvalue="0" maxvalue="1" />
     <range field="rpcStrip" minvalue="1" maxvalue="99" />
   </region>
-  //bml 9 
   <region group="rpc">
     <range field="stationName" value="BML" />
     <range field="stationEta" value="-1" />
