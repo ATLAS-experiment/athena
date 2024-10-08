@@ -53,7 +53,6 @@ namespace LVL1 {
   class BcmCTP;
   class BptxCTP;
   class NimCTP;
-  class RecMuonRoiSvc;
 }
 
 namespace TrigT1CTMonitoring {
