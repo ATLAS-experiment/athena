@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -59,12 +59,13 @@ BOOST_AUTO_TEST_SUITE(IOVDbSvcTest )
   }
   
   BOOST_AUTO_TEST_CASE(interfaceID){
-    InterfaceID testId("IOVDbSvc",1,0);
+    InterfaceID testId("IIOVDbSvc",1,0);
     BOOST_TEST(iovdbsvc->interfaceID()==testId);
   }
 
   BOOST_AUTO_TEST_CASE(preloadAddresses){
-    IAddressProvider* iovdbsvc_ap =  dynamic_cast<IAddressProvider*> (iovdbsvc.get());
+    SmartIF<IAddressProvider> iovdbsvc_ap(iovdbsvc.get());
+    BOOST_TEST( iovdbsvc_ap.isValid() );
     IAddressProvider::tadList tlist;
     BOOST_TEST( iovdbsvc_ap->preLoadAddresses (StoreID::DETECTOR_STORE, tlist).isSuccess() );
   }
