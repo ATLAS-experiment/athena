@@ -81,7 +81,7 @@ namespace CP
 	};
 
     /// \brief decoration of the global trigger matching flag
-    SysWriteDecorHandle<bool> m_matchingDecoration {
+    SysWriteDecorHandle<char> m_matchingDecoration {
       this, "matchingDecoration", "", "the decoration for the global trigger matching decision"
 	};
 

@@ -782,9 +782,13 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "GLOBALTRIGMATCH":
             self.raise_misconfig(text, "GLOBALTRIGMATCH")
-        if len(items) != 1:
+        if len(items) != 1 and len(items) != 2 :
             self.raise_misconfig(text, "number of arguments")
-        self.setDecorationName(None, config, "globalTriggerMatch_dontsave_%SYS%,as_char")
+        if len(items) == 1:
+            self.setDecorationName(None, config, "globalTriggerMatch_%SYS%,as_char")
+        else:
+            postfix = self.check_string(items[1])
+            self.setDecorationName(None, config, f"globalTriggerMatch{postfix}_%SYS%,as_char")
         return
 
     def add_SAVE(self, text, config):

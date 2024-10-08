@@ -227,6 +227,8 @@ class ConfigFactory():
         # trigger
         from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import Trigger
         self.addAlgConfigBlock(algName="Trigger", alg=Trigger)
+        from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import TriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig

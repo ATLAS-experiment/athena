@@ -82,6 +82,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         self.addOption ('triggerMatchingChainsPerYear', {}, type=None,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
+        self.addOption ('postfix', '', type=str,
+            info="a unique identifier for the trigger matching decorations. Only "
+            "useful when defining multiple setups. The default is '' (empty string).")
 
     
 
@@ -91,8 +94,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             return config._algorithms["TrigDecisionTool"]
 
         # Create public trigger tools
-        xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' )
-        decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' )
+        xAODConfTool = config.createPublicTool( 'TrigConf::xAODConfigTool', 'xAODConfigTool' + self.postfix )
+        decisionTool = config.createPublicTool( 'Trig::TrigDecisionTool', 'TrigDecisionTool' + self.postfix )
         decisionTool.ConfigTool = '%s/%s' % \
             ( xAODConfTool.getType(), xAODConfTool.getName() )
         if config.geometry() is LHCPeriod.Run3:
@@ -103,15 +106,15 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
     def makeTriggerMatchingTool(self, config: ConfigAccumulator, decisionTool):
         # Create public trigger tools
-        drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' )
+        drScoringTool = config.createPublicTool( 'Trig::DRScoringTool', 'DRScoringTool' + self.postfix )
         if config.geometry() is LHCPeriod.Run3:
-            matchingTool = config.createPublicTool( 'Trig::R3MatchingTool', 'MatchingTool' )
+            matchingTool = config.createPublicTool( 'Trig::R3MatchingTool', 'MatchingTool' + self.postfix )
             matchingTool.ScoringTool = '%s/%s' % \
                     ( drScoringTool.getType(), drScoringTool.getName() )
             matchingTool.TrigDecisionTool = '%s/%s' % \
                     ( decisionTool.getType(), decisionTool.getName() )
         else:
-            matchingTool = config.createPublicTool( 'Trig::MatchFromCompositeTool', 'MatchingTool' )
+            matchingTool = config.createPublicTool( 'Trig::MatchFromCompositeTool', 'MatchingTool' + self.postfix )
             if config.isPhyslite():
                 matchingTool.InputPrefix = "AnalysisTrigMatch_"
 
@@ -124,7 +127,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         noSF: bool,
         triggerSuffix: str = ''
     ) -> None:
-        alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix )
+        alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' + triggerSuffix + self.postfix)
         if config.geometry() is LHCPeriod.Run3:
             alg.triggers_2022 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2022',[])]
             alg.triggers_2023 = [trig.replace("HLT_","").replace(" || ", "_OR_") for trig in self.triggerChainsPerYear.get('2023',[])]
@@ -159,9 +162,9 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
-        alg.scaleFactorDecoration = 'globalTriggerEffSF'+triggerSuffix+'_%SYS%'
-        alg.matchingDecoration = 'globalTriggerMatch'+triggerSuffix+'_%SYS%'
-        alg.eventDecisionOutputDecoration = 'globalTriggerMatch'+triggerSuffix+'_dontsave_%SYS%'
+        alg.scaleFactorDecoration = 'globalTriggerEffSF' + triggerSuffix + self.postfix + '_%SYS%'
+        alg.matchingDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_%SYS%'
+        alg.eventDecisionOutputDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_dontsave_%SYS%'
         alg.doMatchingOnly = config.dataType() is DataType.Data or noSF
         alg.noFilter = self.noFilter
         alg.electronID = self.electronID
@@ -178,9 +181,31 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             raise ValueError('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
         if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
-            config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF'+triggerSuffix)
-        config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch'+triggerSuffix, noSys=False)
+            config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF' + triggerSuffix + self.postfix)
+        config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False)
 
+        return
+
+    def createTrigMatching(
+            self,
+            config: ConfigAccumulator,
+            matchingTool,
+            particles,
+            triggerSuffix: str = '',
+            trig_string: str = '',
+            trig_chains: list = ['']
+    ) -> None:
+        if particles and any(trig_string in trig for trig in trig_chains):
+            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', f'TrigMatchingAlg_{trig_string}{triggerSuffix}{self.postfix}' )
+            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+            alg.matchingDecoration = 'trigMatched' + triggerSuffix + self.postfix
+            alg.trigSingleMatchingList = trig_chains
+            alg.particles, alg.particleSelection = config.readNameAndSelection(particles)
+
+            for trig in alg.trigSingleMatchingList:
+                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+                if trig_string in trig:
+                    config.addOutputVar(particles, f'trigMatched_{triggerSuffix}{self.postfix}{trig}', f'trigMatched_{triggerSuffix}{self.postfix}{trig}')
         return
 
     def makeTrigMatchingAlg(
@@ -205,50 +230,10 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         # Remove duplicates
         triggerMatchingChains = list(set(triggerMatchingChains))
 
-        if self.electrons and any("HLT_e" in trig for trig in triggerMatchingChains):
-            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_ele' + triggerSuffix )
-            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
-            alg.trigSingleMatchingList =  list(triggerMatchingChains)
-            alg.particles, alg.particleSelection = config.readNameAndSelection(self.electrons)
-            for trig in  alg.trigSingleMatchingList:
-                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
-                if "HLT_e" in trig:
-                    config.addOutputVar(self.electrons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
-
-        if self.muons and any("HLT_mu" in trig for trig in triggerMatchingChains):
-            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_mu' + triggerSuffix )
-            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
-            alg.trigSingleMatchingList =  list(triggerMatchingChains)
-            alg.particles, alg.particleSelection = config.readNameAndSelection(self.muons)
-            for trig in  alg.trigSingleMatchingList:
-                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
-                if "HLT_mu" in trig:
-                    config.addOutputVar(self.muons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
-
-        if self.photons and any("HLT_g" in trig for trig in triggerMatchingChains):
-            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_ph' + triggerSuffix )
-            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
-            alg.trigSingleMatchingList =  list(triggerMatchingChains)
-            alg.particles, alg.particleSelection = config.readNameAndSelection(self.photons)
-            for trig in  alg.trigSingleMatchingList:
-                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
-                if "HLT_g" in trig:
-                    config.addOutputVar(self.photons,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
-
-        if self.taus and any("HLT_tau" in trig for trig in triggerMatchingChains):
-            alg = config.createAlgorithm( 'CP::TrigMatchingAlg', 'TrigMatchingAlg_tau' + triggerSuffix )
-            alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
-            alg.matchingDecoration = 'trigMatched'+ triggerSuffix
-            alg.trigSingleMatchingList =  list(triggerMatchingChains)
-            alg.particles, alg.particleSelection = config.readNameAndSelection(self.taus)
-            for trig in  alg.trigSingleMatchingList:
-                trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
-                if "HLT_tau" in trig:
-                    config.addOutputVar(self.taus,'trigMatched_'+ triggerSuffix + trig,'trigMatched_'+ triggerSuffix + trig)
-
+        self.createTrigMatching(config, matchingTool, self.electrons, triggerSuffix, 'HLT_e',   triggerMatchingChains)
+        self.createTrigMatching(config, matchingTool, self.muons,     triggerSuffix, 'HLT_mu',  triggerMatchingChains)
+        self.createTrigMatching(config, matchingTool, self.photons,   triggerSuffix, 'HLT_g',   triggerMatchingChains)
+        self.createTrigMatching(config, matchingTool, self.taus,      triggerSuffix, 'HLT_tau', triggerMatchingChains)
 
         return
 
