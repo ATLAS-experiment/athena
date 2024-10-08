@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigL1FexJetMonitorTool.h"
@@ -19,24 +19,10 @@ template<typename T>
 TrigL1FexJetMonitorTool<T>::TrigL1FexJetMonitorTool(const std::string& type,
 						      const std::string& name,
 						      const IInterface* parent) 
-  : AthAlgTool( type, name, parent )
+  : base_class( type, name, parent )
 {
   declareProperty("l1container", m_l1jetContainerkey);
 
-}
-
-
-template<typename T>
-StatusCode
-TrigL1FexJetMonitorTool<T>::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == ITrigJetMonitorTool::interfaceID() )  {
-    *ppvIf = (ITrigJetMonitorTool*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-
-  return AthAlgTool::queryInterface( riid, ppvIf );
 }
 
 

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGJETMONITORING_TRIGL1JETFEXMONITORTOOL_H
@@ -18,8 +18,8 @@
 
 // Template paramter must provide a name T::JetContainer
 template<typename T>
-class TrigL1FexJetMonitorTool : virtual public AthAlgTool,
-				virtual public ITrigJetMonitorTool {
+class TrigL1FexJetMonitorTool : public extends<AthAlgTool,
+                                               ITrigJetMonitorTool> {
   
 public:
   
@@ -29,10 +29,6 @@ public:
 			  const std::string&,
 			  const IInterface*);
 
-  virtual StatusCode
-  queryInterface( const InterfaceID& riid, void** ppvIf ) override;
-
-  
   virtual StatusCode initialize() override;
   
   virtual StatusCode
