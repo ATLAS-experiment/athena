@@ -18,18 +18,18 @@ _log = logging.getLogger(__name__)
 def _condAlgName(detector):
     return "RegSelCondAlg_"+detector
 
-def _createRegSelCondAlg( detector,  CondAlgConstructor, isOnline ):
+def _createRegSelCondAlg( detector,  CondAlgConstructor, isOnline, printTable=False ):
     """
     Creates conditions alg that provides data to a RegSel Tool
     """
     if detector == "TRT":
         condAlg = CondAlgConstructor( name = _condAlgName( detector ),
-                                      PrintTable  = False,
+                                      PrintTable  = printTable,
                                       RegSelLUT = ("RegSelLUTCondData_"+detector) )
     else:
         condAlg = CondAlgConstructor( name = _condAlgName( detector ),
                                       ManagerName = detector,
-                                      PrintTable  = False,
+                                      PrintTable  = printTable,
                                       RegSelLUT = ("RegSelLUTCondData_"+detector) )
 
     if detector == "MDT" and isOnline:
@@ -83,11 +83,18 @@ def regSelToolCfg(flags, detector, algorithm, readout_geometry=None, conditions=
     if conditions:
         ca.merge(conditions)
     ca.setPrivateTools(_createRegSelTool(detector, True))
-    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Common.isOnline)
+
+    # test if we have a PrintLUT flag ... 
+    printLUT = False
+    if flags.hasFlag("PrintLUT"):
+        printLUT = flags.PrintLUT
+        
+    the_alg = _createRegSelCondAlg(detector, algorithm, flags.Common.isOnline, printTable=printLUT )
     if detector == "MDT" and flags.Common.isOnline:
         the_alg.Conditions = ""
     ca.addCondAlgo(the_alg)
     return ca
+
 
 # inner detector
 @AccumulatorCache
@@ -245,7 +252,7 @@ def regSelTool_TILE_Cfg(flags):
                          conditions=TileHid2RESrcIDCondAlgCfg(flags, ForHLT=True))
 
 
-def regSelToolsCfg(flags, detNames):
+def regSelToolsCfg( flags, detNames ):
     '''
     Get a list of RegionSelector tools for given detector look-up tables if the corresponding Detector flags are enabled
     '''
@@ -293,12 +300,21 @@ if __name__=='__main__':
     flags.Input.FailOnUnknownCollections = True
     flags.Scheduler.AutoLoadUnmetDependencies = False
 
+    # have to add a printLUT=True flag, so it can be tested in the regSelToolCgf
+    # and passed in to _createRe=gSelTool woithout having to add it to *every* tool config
+
+    flags.addFlag( "PrintLUT", True )
+    
     detNames = sys.argv[1:]
+    
     # Toggle detectors. Note that we are not toggling the geometry because this would
     # result in un-physical configurations that we are not supporting in reco anyway.
+
     DetectorConfigFlags.disableDetectors(flags, DetectorConfigFlags.allDetectors +
                                          list(DetectorConfigFlags.allGroups.keys()), toggle_geometry=False)
+
     DetectorConfigFlags.enableDetectors(flags, detNames, toggle_geometry=False)
+
     flags.lock()
 
     acc = MainServicesCfg(flags)
@@ -315,8 +331,10 @@ if __name__=='__main__':
         detNames.append('STGC')
 
     toolsCfg = regSelToolsCfg(flags, detNames)
+
     alg = CompFactory.RegSelToolTester(
         RegionSelectorTools = acc.popToolsAndMerge(toolsCfg) )
+    
     acc.addEventAlgo(alg, sequenceName='AthAlgSeq')
 
     sys.exit(acc.run().isFailure())
