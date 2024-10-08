@@ -1153,7 +1153,7 @@ namespace top {
     std::sort(onlyQjets.begin(), onlyQjets.end(), [](auto &left, auto &right) { return left->second.second > right->second.second; }); 
 
     //remove the extra LF jets: 
-    int NLFjcut=m_Njcut-(onlyBjets.size()+canbeBOTHjets.size());
+    int NLFjcut=std::max(0,m_Njcut-static_cast<int>(onlyBjets.size()+canbeBOTHjets.size()));
     if(static_cast<int>(onlyQjets.size())>NLFjcut) onlyQjets.erase(onlyQjets.begin()+NLFjcut,onlyQjets.end());
 
     //now merge everything to prepare the lists
