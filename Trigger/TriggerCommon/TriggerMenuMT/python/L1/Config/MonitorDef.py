@@ -380,6 +380,13 @@ class MonitorDef:
             "L1_BCM_Wide", "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN"
         ]
 
+        if "HI" in menuName:
+            monItemsHF[TBP|TAP|TAV] = [
+                "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C", 
+                "L1_ZDC_OR", "L1_ZDC_XOR", 
+                "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C", "L1_5ZDC_A_5ZDC_C"
+            ]
+
 
 
         check = True
