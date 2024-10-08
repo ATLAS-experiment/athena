@@ -13,9 +13,7 @@ if __name__=="__main__":
     
     flags.lock()
     
-    testopts.TestGrow = True
-    testopts.TestSplit = True
-    testopts.DoCrossTests = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.CrossTests
     testopts.OutputCounts = True
     
     CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts)

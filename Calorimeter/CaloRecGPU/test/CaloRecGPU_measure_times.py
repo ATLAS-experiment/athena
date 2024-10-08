@@ -14,9 +14,7 @@ if __name__=="__main__":
     
     flags.lock()
     
-    testopts.TestGrow = True
-    testopts.TestSplit = True
-    testopts.TestMoments = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.GrowSplitMoments
     testopts.SkipSyncs = True
     
     CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts)

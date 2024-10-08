@@ -12,10 +12,7 @@ from CaloRecGPUTestingChecker import check
 import sys
 
 def do_test(files):
-    #files does nothing for now, to be improved in the future to maybe allow multiple tests?
-    
-    
-    flags, testopts = CaloRecGPUTestingConfig.PrepareTest(default_files = files, parse_command_arguments = False)
+    flags, testopts = CaloRecGPUTestingConfig.PrepareTest(default_argument_for_files = files, parse_command_arguments = False)
     
     flags.CaloRecGPU.ActiveConfig.SeedThreshold = 6.0
     flags.CaloRecGPU.ActiveConfig.GrowThreshold = 3.0
@@ -32,17 +29,14 @@ def do_test(files):
     
     flags.lock()
     
-    testopts.TestGrow = True
-    testopts.TestSplit = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.GrowSplit
     testopts.NumEvents = 500
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPU_splitting", "GPU_splitting"], ["growing", "splitting"])
         
-    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, PlotterConfigurator = PlotterConfig)
+    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
     
 if __name__=="__main__":
-    do_test(["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-             "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-             "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ])
+    do_test(['ttbar'])
     sys.exit(check())
 

@@ -11,9 +11,9 @@ if __name__=="__main__":
             
     flags.lock()
     
-    testopts.TestMoments = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.Moments
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
     
-    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, PlotterConfigurator = PlotterConfig)
+    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
     

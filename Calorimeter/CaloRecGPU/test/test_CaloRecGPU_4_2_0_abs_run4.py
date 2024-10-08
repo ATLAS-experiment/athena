@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# art-description: GPU Topological (Topo-Automaton) Clustering test: 4 2 0 thresholds.
+# art-description: GPU Topological (Topo-Automaton) Clustering test: 4 2 0 thresholds (in absolute value) with Run 4 MC.
 # art-type: grid
 # art-include: main/Athena
 # art-architecture: '#&nvidia'
@@ -18,11 +18,11 @@ def do_test(files):
     flags.CaloRecGPU.ActiveConfig.GrowThreshold = 2.0
     flags.CaloRecGPU.ActiveConfig.TermThreshold = 0.0
         
-    flags.CaloRecGPU.ActiveConfig.UseAbsSeedThreshold = False
-    flags.CaloRecGPU.ActiveConfig.UseAbsGrowThreshold = False
-    flags.CaloRecGPU.ActiveConfig.UseAbsTermThreshold = False
+    flags.CaloRecGPU.ActiveConfig.UseAbsSeedThreshold = True
+    flags.CaloRecGPU.ActiveConfig.UseAbsGrowThreshold = True
+    flags.CaloRecGPU.ActiveConfig.UseAbsTermThreshold = True
     
-    flags.CaloRecGPU.ActiveConfig.SplittingUseNegativeClusters = False
+    flags.CaloRecGPU.ActiveConfig.SplittingUseNegativeClusters = True
     
     flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria = False
     flags.CaloRecGPU.ActiveConfig.doTwoGaussianNoise = False
@@ -37,5 +37,6 @@ def do_test(files):
     CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
     
 if __name__=="__main__":
-    do_test(['ttbar'])
+    do_test(['ttbar_pu200_Run4'])
     sys.exit(check())
+

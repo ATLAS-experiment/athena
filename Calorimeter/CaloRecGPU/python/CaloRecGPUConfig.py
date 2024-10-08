@@ -403,13 +403,13 @@ def DefaultCalibMomentsToolCfg(flags, name = "TopoCalibMoments", **kwargs):
     result.setPrivateTools(TopoCalibMoments)
     return result
 
-def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger):
+def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, prefix = ''):
     result=ComponentAccumulator()
         
     CaloClusterLocalCalib=CompFactory.CaloClusterLocalCalib
     
     # Local cell weights    
-    LCClassify   = CompFactory.CaloLCClassificationTool("TrigLCClassify" if instantiateForTrigger else "LCClassify")
+    LCClassify   = CompFactory.CaloLCClassificationTool(prefix + "LCClassify")
     LCClassify.ClassificationKey   = "EMFracClassify"
     LCClassify.UseSpread = False
     LCClassify.MaxProbability = 0.85 if flags.GeoModel.AtlasVersion.startswith("Rome") and instantiateForTrigger else 0.5
@@ -417,57 +417,57 @@ def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger):
     if instantiateForTrigger:
         LCClassify.UseNormalizedEnergyDensity = not flags.GeoModel.AtlasVersion.startswith("Rome")
     if not instantiateForTrigger:
-        LCClassify.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+        LCClassify.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
-    LCWeight = CompFactory.CaloLCWeightTool("TrigLCWeight" if instantiateForTrigger else "LCWeight")
+    LCWeight = CompFactory.CaloLCWeightTool(prefix + "LCWeight")
     LCWeight.CorrectionKey       = "H1ClusterCellWeights"
     LCWeight.SignalOverNoiseCut  = 2.0
     LCWeight.UseHadProbability   = True
 
-    LocalCalib = CaloClusterLocalCalib ("TrigLocalCalib" if instantiateForTrigger else "LocalCalib")
+    LocalCalib = CaloClusterLocalCalib (prefix + "LocalCalib")
     LocalCalib.ClusterClassificationTool     = [LCClassify]
     LocalCalib.ClusterRecoStatus             = [1,2]
     LocalCalib.LocalCalibTools               = [LCWeight]
     if not instantiateForTrigger:
-        LocalCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+        LocalCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
     # Out-of-cluster corrections
-    LCOut     = CompFactory.CaloLCOutOfClusterTool("TrigLCOut" if instantiateForTrigger else "LCOut")
+    LCOut     = CompFactory.CaloLCOutOfClusterTool(prefix + "LCOut")
     LCOut.CorrectionKey       = "OOCCorrection"
     LCOut.UseEmProbability    = False
     LCOut.UseHadProbability   = True
 
-    OOCCalib   = CaloClusterLocalCalib ("TrigOOCCalib" if instantiateForTrigger else "OOCCalib")
+    OOCCalib   = CaloClusterLocalCalib (prefix + "OOCCalib")
     OOCCalib.ClusterRecoStatus   = [1,2]
     OOCCalib.LocalCalibTools     = [LCOut]
     if not instantiateForTrigger:
-        OOCCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+        OOCCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
-    LCOutPi0  = CompFactory.CaloLCOutOfClusterTool("TrigLCOutPi0" if instantiateForTrigger else "LCOutPi0")
+    LCOutPi0  = CompFactory.CaloLCOutOfClusterTool(prefix + "LCOutPi0")
     LCOutPi0.CorrectionKey    = "OOCPi0Correction"
     LCOutPi0.UseEmProbability  = True
     LCOutPi0.UseHadProbability = False
 
-    OOCPi0Calib   = CaloClusterLocalCalib ("TrigOOCPi0Calib" if instantiateForTrigger else "OOCPi0Calib")
+    OOCPi0Calib   = CaloClusterLocalCalib (prefix + "OOCPi0Calib")
     OOCPi0Calib.ClusterRecoStatus   = [1,2]
     OOCPi0Calib.LocalCalibTools     = [LCOutPi0]
     if not instantiateForTrigger:
-        OOCPi0Calib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+        OOCPi0Calib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
     # Dead material corrections
-    LCDeadMaterial   = CompFactory.CaloLCDeadMaterialTool("TrigLCDeadMaterial" if instantiateForTrigger else "LCDeadMaterial")
+    LCDeadMaterial   = CompFactory.CaloLCDeadMaterialTool(prefix + "LCDeadMaterial")
     LCDeadMaterial.HadDMCoeffKey       = "HadDMCoeff2"
     LCDeadMaterial.ClusterRecoStatus   = 0
     LCDeadMaterial.WeightModeDM        = 2
     LCDeadMaterial.UseHadProbability   = True
     if not instantiateForTrigger:
-        LCDeadMaterial.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+        LCDeadMaterial.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
-    DMCalib    = CaloClusterLocalCalib ("TrigDMCalib" if instantiateForTrigger else "DMCalib")
+    DMCalib    = CaloClusterLocalCalib (prefix + "DMCalib")
     DMCalib.ClusterRecoStatus   = [1,2]
     DMCalib.LocalCalibTools      = [LCDeadMaterial]
     if not instantiateForTrigger:
-      DMCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.doTreatEnergyCutAsAbsolute
+      DMCalib.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.CalibrationUseAbsEnergy
 
     lccalibtools = [
         LocalCalib,
@@ -591,7 +591,7 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
           result.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
           result.merge(caloTopoCoolFolderCfg(flags))
         
-        calibTools = result.popToolsAndMerge(DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger))
+        calibTools = result.popToolsAndMerge(DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, 'Trig' if instantiateForTrigger else ''))
         
         HybridClusterProcessor.AfterGPUTools += calibTools
         #This is already a tool array.

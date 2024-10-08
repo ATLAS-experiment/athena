@@ -328,17 +328,11 @@ from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def DefaultCaloCellMakerCfg(flags, testoptions, cellname):
+def DefaultCaloCellMakerCfg(flags, cellname):
     from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCfg
     from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
     from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellPedestalCorrCfg, CaloCellNeighborsAverageCorrCfg, CaloCellTimeCorrCfg, CaloEnergyRescalerCfg
     result=ComponentAccumulator()
-
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    from TileGeoModel.TileGMConfig import TileGMCfg
-
-    result.merge(LArGMCfg(flags))
-    result.merge(TileGMCfg(flags))
 
     larCellBuilder     = result.popToolsAndMerge(LArCellBuilderCfg(flags))
     larCellCorrectors  = result.popToolsAndMerge(LArCellCorrectorCfg(flags))
@@ -374,22 +368,14 @@ def DefaultCaloCellMakerCfg(flags, testoptions, cellname):
     result.addEventAlgo(cellAlgo)
     return result
 
-
-class TestOptions:
-    def __init__(self):
-        self.OutputClusters = False
-        self.OutputCounts = False
-        self.TestGrow = False
-        self.TestSplit = False
-        self.TestMoments = False
-        self.DoCrossTests = False
-        self.OutputCellInfo = False
-        self.SkipSyncs = True
-        self.UsePerfMon = False
-        self.NumEvents = -1
-
 def PrevAlgorithmsConfigurationCfg(flags, testoptions, cellsname):
     result=ComponentAccumulator()
+    
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    from TileGeoModel.TileGMConfig import TileGMCfg
+
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
     
     if flags.Input.Format is Format.BS:
         #Data-case: Schedule ByteStream reading for LAr & Tile
@@ -421,7 +407,7 @@ def PrevAlgorithmsConfigurationCfg(flags, testoptions, cellsname):
         result.merge(LArFebErrorSummaryMakerCfg(flags))
         
     if flags.Input.Format is Format.BS or 'StreamRDO' in flags.Input.ProcessingTags:
-        result.merge(DefaultCaloCellMakerCfg(flags, testoptions, cellsname))
+        result.merge(DefaultCaloCellMakerCfg(flags, cellsname))
     elif flags.CaloRecGPU.ActiveConfig.FillMissingCells:
         from AthenaCommon.Logging import log
         log.warning("Asked to fill missing cells but will not run cell maker! Slow path might be taken!")
@@ -438,28 +424,402 @@ def PrevAlgorithmsConfigurationCfg(flags, testoptions, cellsname):
         result.merge(LArElecCalibDBCfg(flags,["HVScaleCorr"]))
     
     return result
+
+from enum import Enum
+
+TestTypes = Enum('TestType', ['RunAllGPU',           #Simply run everything that can be run on the GPU
+                              'RunAllCPU',           #Simply run everything that can be run on the CPU
+                              'Grow',                #Compare CPU and GPU growing
+                              'Split',               #Compare CPU and GPU splitting
+                              'GrowSplit',           #Compare CPU and GPU (growing + splitting)
+                              'CrossTests',          #Compare (CPU or GPU) (growing or splitting)
+                              'Moments',             #Compare CPU and GPU moments calculation
+                              'GrowSplitMoments',    #Compare CPU and GPU full clusters + moments
+                              'PostGPUCalib',        #Compare CPU and GPU full clusters + moments with CPU calibrations on top
+                             ])
+
+
+class TestOptions:
+    def __init__(self):
+        self.OutputClusters = False
+        self.OutputCounts = False
+        self.TestType = TestTypes.RunAllGPU
+        self.DoCPULocalCalib = False
+        self.OutputCellInfo = False
+        self.SkipSyncs = True
+        self.UsePerfMon = False
+        self.NumEvents = -1
+
+def TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname):
+    result=ComponentAccumulator()
+    
+    from CaloRecGPU.CaloRecGPUConfig import PlotterToolCfg, SingleToolToPlot, ComparedToolsToPlot
+    
+    Plotter = result.popToolsAndMerge(PlotterToolCfg(flags, cellsname))
+  
+    Plotter = plotter_configurator(Plotter)
+    
+    #In general: 1) add the name of tools whose resulting clusters we want to plot
+    #               as SingleToolToPlot(tool name, prefix we want for the plots)
+    #            2) add the names of tools whose resulting clusters we want to compare
+    #               as ComparedToolsToPlot(reference tool name, test tool name, prefix for the plots, match in energy or not)
+    
+    plot_grow = (testoptions.TestType is TestTypes.Grow or testoptions.TestType is TestTypes.GrowSplit or testoptions.TestType is TestTypes.GrowSplitMoments)
+    plot_split = (testoptions.TestType is TestTypes.Split or testoptions.TestType is TestTypes.GrowSplit)
+    plot_moments = (testoptions.TestType is TestTypes.Moments or testoptions.TestType is TestTypes.GrowSplitMoments)
+    
+    if plot_grow:
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultGrowing", "CPU_growing") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostGrowing", "GPU_growing") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultGrowing", "PropCalcPostGrowing", "growing") ]
+    if plot_split:
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPU_splitting") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPU_splitting") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "splitting", True) ]
+    if plot_moments:
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultMoments", "CPU_moments") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("AthenaClusterImporter", "GPU_moments") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultMoments", "AthenaClusterImporter", "moments", True) ]
+        
+    if testoptions.TestType is TestTypes.PostGPUCalib:
+        pass
+        #No plots for now, to be defined later.
+    
+    elif testoptions.TestType is TestTypes.CrossTests:
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultGrowing", "CPU_growing") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostGrowing", "GPU_growing") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultGrowing", "PropCalcPostGrowing", "growing") ]
+        
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPUCPU_splitting") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPUGPU_splitting") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "CPU_to_GPUGPU_splitting", True) ]
+        
+        Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcDefaultGrowGPUSplit", "CPUGPU_splitting") ]
+        Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultPostGPUSplitting", "GPUCPU_splitting") ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcDefaultGrowGPUSplit", "CPU_to_CPUGPU_splitting", True) ]
+        Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "DefaultPostGPUSplitting", "CPU_to_GPUCPU_splitting", True) ]
+    
+    result.setPrivateTools(Plotter)
+    
+    return result
+
+
+def TestConstantConversionTool(flags, testoptions):
+    #Return a component accumulator or None
+    
+    if testoptions.TestType is TestTypes.RunAllCPU:
+        return None
+    else:
+        from CaloRecGPU.CaloRecGPUConfig import BasicConstantDataExporterToolCfg
+        return BasicConstantDataExporterToolCfg(flags)
+  
+def TestCPUtoGPUExporterTool(flags, testoptions, cellsname):
+    #Return a component accumulator or None
+    
+    if testoptions.TestType is TestTypes.RunAllCPU:
+        return None
+    else:
+        from CaloRecGPU.CaloRecGPUConfig import BasicEventDataExporterToolCfg
+        return BasicEventDataExporterToolCfg(flags, cellsname)
+        
+def TestGPUtoCPUImporterTool(flags, testoptions, cellsname):
+    #Return a component accumulator or None
+    
+    only_simple_properties = ( testoptions.TestType is TestTypes.Grow        or
+                               testoptions.TestType is TestTypes.Split       or
+                               testoptions.TestType is TestTypes.GrowSplit   or
+                               testoptions.TestType is TestTypes.CrossTests     )
+    
+    if testoptions.TestType is TestTypes.RunAllCPU:
+        return None
+    elif only_simple_properties:
+        from CaloRecGPU.CaloRecGPUConfig import BasicAthenaClusterImporterToolCfg
+        return BasicAthenaClusterImporterToolCfg(flags, cellsname,"AthenaClusterImporter")
+    else:
+        from CaloRecGPU.CaloRecGPUConfig import AthenaClusterAndMomentsImporterToolCfg
+        return AthenaClusterAndMomentsImporterToolCfg(flags, cellsname, False, "AthenaClusterImporter")
+    
+def TestBeforeGPUToolsConfiguration(flags, testoptions, cellsname, clustersname):
+    
+    do_growing = ( testoptions.TestType is TestTypes.Grow              or
+                   testoptions.TestType is TestTypes.Split             or
+                   testoptions.TestType is TestTypes.GrowSplit         or
+                   testoptions.TestType is TestTypes.CrossTests        or 
+                   testoptions.TestType is TestTypes.Moments           or 
+                   testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                   testoptions.TestType is TestTypes.RunAllCPU         or
+                   testoptions.TestType is TestTypes.PostGPUCalib         )
+                   
+    do_splitting = ( testoptions.TestType is TestTypes.Split             or
+                     testoptions.TestType is TestTypes.GrowSplit         or
+                     testoptions.TestType is TestTypes.CrossTests        or 
+                     testoptions.TestType is TestTypes.Moments           or 
+                     testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                     testoptions.TestType is TestTypes.RunAllCPU         or
+                     testoptions.TestType is TestTypes.PostGPUCalib         )
+                 
+    do_moments = ( testoptions.TestType is TestTypes.Moments           or 
+                   testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                   testoptions.TestType is TestTypes.RunAllCPU         or
+                   testoptions.TestType is TestTypes.PostGPUCalib         )
+                   
+    do_calib = ( testoptions.TestType is TestTypes.PostGPUCalib )
+    
+    clear_clusters = ( testoptions.TestType is TestTypes.Grow              or
+                       testoptions.TestType is TestTypes.Split             or
+                       testoptions.TestType is TestTypes.GrowSplit         or
+                       testoptions.TestType is TestTypes.CrossTests        or 
+                       testoptions.TestType is TestTypes.Moments           or 
+                       testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                       testoptions.TestType is TestTypes.PostGPUCalib         )
+    
+    do_post_clear_grow = ( testoptions.TestType is TestTypes.Split        or
+                           testoptions.TestType is TestTypes.CrossTests   or 
+                           testoptions.TestType is TestTypes.Moments         )
+                           
+    do_post_clear_split = ( testoptions.TestType is TestTypes.Moments )
+    
+    do_post_clear_moments = False
+    #Potentially useful for future work on calibrations
+    
+    from CaloRecGPU.CaloRecGPUConfig import ( DefaultTopologicalClusteringToolCfg,
+                                              DefaultClusterSplittingToolCfg,
+                                              DefaultClusterMomentsCalculatorToolCfg,
+                                              MomentsDumperToolCfg,
+                                              CellsCounterCPUToolCfg,
+                                              CPUOutputToolCfg,
+                                              DefaultTopoClusterLocalCalibToolsCfg )
     
     
-def MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, clustersname):    
-    if not (testoptions.TestGrow and testoptions.TestSplit):
-        testoptions.DoCrossTests = False
+    return_tools = []
+    
+    result = ComponentAccumulator()
+    
+    if do_growing:
+        DefaultClustering = result.popToolsAndMerge( DefaultTopologicalClusteringToolCfg(flags, cellsname,"DefaultGrowing") )
+        
+        return_tools += [DefaultClustering]
+        
+        if testoptions.OutputCounts:
+            CPUCount1 = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"DefaultGrowCounter", SavePath = "./counts", FilePrefix = "default_grow") )
+            return_tools += [CPUCount1]
+        if testoptions.OutputClusters:
+            CPUOut1 = result.popToolsAndMerge( CPUOutputToolCfg(flags,cellsname,"DefaultGrowOutput", SavePath = "./out_default_grow") )
+            return_tools += [CPUOut1]
+    
+    if do_splitting:
+        DefaultSplitter = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"DefaultSplitting") )
+        return_tools += [DefaultSplitter]
+        
+        if testoptions.OutputCounts:
+            CPUCount2 = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"DefaultGrowAndSplitCounter", SavePath = "./counts", FilePrefix = "default_grow_split") )
+            return_tools += [CPUCount2]
+        if testoptions.OutputClusters:
+            CPUOut2 = result.popToolsAndMerge( CPUOutputToolCfg(flags, cellsname,"DefaultGrowAndSplitOutput", SavePath = "./out_default_grow_split") )
+            return_tools += [CPUOut2]
+        
+    if do_moments:
+        DefaultMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, False,"DefaultMoments") )
+        return_tools += [DefaultMoments]
+        if testoptions.OutputCounts:
+            CPUDumper = result.popToolsAndMerge( MomentsDumperToolCfg(flags,"DefaultMomentsDumper", SavePath = "./moments", FilePrefix = "CPU") )
+            return_tools += [CPUDumper]
+                   
+    if do_calib:
+        from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
+        caloBadChanTool = result.popToolsAndMerge( CaloBadChanToolCfg(flags, name = "DefaultCaloBadChanTool") )
+        return_tools += [CompFactory.CaloClusterBadChannelList("DefaultBadChannelList", badChannelTool = caloBadChanTool)]
+        
+        calibTools = result.popToolsAndMerge(DefaultTopoClusterLocalCalibToolsCfg(flags, False, "Default"))
+        return_tools += calibTools
+        #This is already a tool array.
+        
+        from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
+        result.merge(caloTopoCoolFolderCfg(flags))
+      
+    if clear_clusters:
+          return_tools += [CompFactory.CaloClusterDeleter("ClusterDeleter")]
+    
+    if do_post_clear_grow:
+        SecondDefaultClustering = result.popToolsAndMerge( DefaultTopologicalClusteringToolCfg(flags,cellsname,"SecondDefaultGrowing") )
+        return_tools += [SecondDefaultClustering]
+        
+    if do_post_clear_split:
+        SecondDefaultSplitting = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"SecondDefaultSpltting") )
+        return_tools += [SecondDefaultSplitting]
+    
+    if do_post_clear_moments:
+        SecondDefaultMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, False,"SecondDefaultMoments") )
+        return_tools += [SecondDefaultMoments]
+    
+    result.setPrivateTools(return_tools)
+    
+    return result
+
+
+def TestGPUToolsConfiguration(flags, testoptions, cellsname, clustersname):
+                   
+    from CaloRecGPU.CaloRecGPUConfig import ( GPUOutputToolCfg,
+                                              TopoAutomatonSplitterToolCfg,
+                                              ClusterInfoCalcToolCfg,
+                                              CellsCounterGPUToolCfg,
+                                              TopoAutomatonClusteringToolCfg,
+                                              GPUClusterMomentsCalculatorToolCfg )
+                            
+    return_tools = []
+    
+    result = ComponentAccumulator()    
+
+    if testoptions.OutputCellInfo:
+        CellOut = result.popToolsAndMerge( GPUOutputToolCfg(flags,"CellInfoOutput", SavePath = "./out_cell", OnlyOutputCellInfo = True) )
+        return_tools += [CellOut]
+    
+    if testoptions.TestType is TestTypes.CrossTests:
+        GPUClusterSplitting1 = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUSplitterCPUGrowing") )
+        GPUClusterSplitting1.TimeFileOutput = "" #This means there's no output.
+        GPUClusterSplitting1.MeasureTimes = False
+        return_tools += [GPUClusterSplitting1]
+        PropCalc1 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcDefaultGrowGPUSplit", do_cut = False) )
+        PropCalc1.TimeFileOutput = "" #This means there's no output.
+        PropCalc1.MeasureTimes = False
+        return_tools += [PropCalc1]
+        if testoptions.OutputCounts:
+            GPUCount1 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"DefaultGrowModifiedSplitCounter", SavePath = "./counts", FilePrefix = "default_grow_modified_split") )
+            return_tools += [GPUCount1]
+        if testoptions.OutputClusters:
+            GPUOut1 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"DefaultGrowModifiedSplitOutput", SavePath = "./out_default_grow_modified_split") )
+            return_tools += [GPUOut1]
+    
+    do_growing = ( testoptions.TestType is TestTypes.Grow              or
+                   testoptions.TestType is TestTypes.Split             or
+                   testoptions.TestType is TestTypes.GrowSplit         or
+                   testoptions.TestType is TestTypes.CrossTests        or 
+                   testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                   testoptions.TestType is TestTypes.RunAllGPU         or
+                   testoptions.TestType is TestTypes.PostGPUCalib         )
+    
+    do_splitting = ( testoptions.TestType is TestTypes.Split             or
+                     testoptions.TestType is TestTypes.GrowSplit         or
+                     testoptions.TestType is TestTypes.CrossTests        or 
+                     testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                     testoptions.TestType is TestTypes.RunAllGPU         or
+                     testoptions.TestType is TestTypes.PostGPUCalib         )
+    
+    do_moments = ( testoptions.TestType is TestTypes.Moments           or
+                   testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                   testoptions.TestType is TestTypes.RunAllGPU         or
+                   testoptions.TestType is TestTypes.PostGPUCalib         )
+    
+    if do_growing:
+        TopoAutomatonClustering1 = result.popToolsAndMerge( TopoAutomatonClusteringToolCfg(flags,"GPUGrowing") )
+        if testoptions.SkipSyncs:
+            TopoAutomatonClustering1.MeasureTimes = False
+        return_tools += [TopoAutomatonClustering1]
+        PropCalc2 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostGrowing") )
+        if testoptions.SkipSyncs:
+            PropCalc2.MeasureTimes = False
+        return_tools += [PropCalc2]
+        if testoptions.OutputCounts:
+            GPUCount2 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"ModifiedGrowCounter", SavePath = "./counts", FilePrefix = "modified_grow") )
+            return_tools += [GPUCount2]
+        if testoptions.OutputClusters:
+            GPUOut2 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"ModifiedGrowOutput", SavePath = "./out_modified_grow") )
+            return_tools += [GPUOut2]
+    
+    if do_splitting:
+        GPUClusterSplitting2 = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUSplitter") )
+        if testoptions.SkipSyncs:
+            GPUClusterSplitting2.MeasureTimes = False
+        return_tools += [GPUClusterSplitting2]
+        if not do_moments:
+            PropCalc3 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostSplitting", False) )
+            if testoptions.SkipSyncs:
+                PropCalc3.MeasureTimes = False
+            return_tools += [PropCalc3]
+        if testoptions.OutputCounts:
+            GPUCount3 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"ModifiedGrowSplitCounter", SavePath = "./counts", FilePrefix = "modified_grow_split") )
+            return_tools += [GPUCount3]
+        if testoptions.OutputClusters:
+            GPUOut3 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"ModifiedGrowSplitOutput", SavePath = "./out_modified_grow_split") )
+            return_tools += [GPUOut3]
+    
+    if do_moments:
+        GPUMomentsDef = result.popToolsAndMerge( GPUClusterMomentsCalculatorToolCfg(flags,"GPUTopoMoments") )
+        if testoptions.SkipSyncs:
+            GPUMomentsDef.MeasureTimes = False
+        return_tools += [GPUMomentsDef]
+        
+    if testoptions.TestType is TestTypes.CrossTests:
+        TopoAutomatonClustering2 = result.popToolsAndMerge( TopoAutomatonClusteringToolCfg(flags,"SecondGPUGrowing") )
+        TopoAutomatonClustering2.MeasureTimes = False
+        TopoAutomatonClustering2.TimeFileOutput = "" #This means there's no output.
+        return_tools += [TopoAutomatonClustering2]
+        
+        PropCalc4 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalc4", True) )
+        PropCalc4.TimeFileOutput = "" #This means there's no output.
+        PropCalc4.MeasureTimes = False
+        return_tools += [PropCalc4]
+    
+    result.setPrivateTools(return_tools)
+    
+    return result
+    
+def TestAfterGPUToolsConfiguration(flags, testoptions, cellsname, clustersname):
+                   
+    from CaloRecGPU.CaloRecGPUConfig import ( MomentsDumperToolCfg,
+                                              DefaultClusterSplittingToolCfg,
+                                              CellsCounterCPUToolCfg,
+                                              CPUOutputToolCfg,
+                                              DefaultTopoClusterLocalCalibToolsCfg )
+                            
+    return_tools = []
+    
+    result = ComponentAccumulator()
+    
+    did_GPU_moments = ( testoptions.TestType is TestTypes.Moments  or
+                        testoptions.TestType is TestTypes.GrowSplitMoments  or 
+                        testoptions.TestType is TestTypes.RunAllGPU         or
+                        testoptions.TestType is TestTypes.PostGPUCalib         )
+    
+    
+    if did_GPU_moments and testoptions.OutputCounts:
+        GPUDumper = result.popToolsAndMerge( MomentsDumperToolCfg(flags,"GPUMomentsDumper", SavePath = "./moments", FilePrefix = "GPU") )
+        return_tools += [GPUDumper]
+        
+    if testoptions.TestType is TestTypes.CrossTests:
+    
+        TopoSplitter = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"DefaultPostGPUSplitting") )
+        return_tools += [TopoSplitter]
+        if testoptions.OutputCounts:
+            CPUCount = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"ModifiedGrowDefaultSplitCounter", SavePath = "./counts", FilePrefix = "modified_grow_default_split") )
+            return_tools += [CPUCount]
+        if testoptions.OutputClusters:
+            CPUOut = result.popToolsAndMerge( CPUOutputToolCfg(flags,cellsname,"ModifiedGrowDefaultSplitOutput", SavePath = "./out_modified_grow_default_split") )
+            return_tools += [CPUOut]
+    
+    if testoptions.TestType is TestTypes.PostGPUCalib:
+        from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
+        caloBadChanTool = result.popToolsAndMerge( CaloBadChanToolCfg(flags, name = "ModifiedCaloBadChanTool") )
+        return_tools += [CompFactory.CaloClusterBadChannelList("ModifiedBadChannelList", badChannelTool = caloBadChanTool)]
+        
+        calibTools = result.popToolsAndMerge(DefaultTopoClusterLocalCalibToolsCfg(flags, False, "Modified"))
+        return_tools += calibTools
+        #This is already a tool array.
+        
+        from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
+        result.merge(caloTopoCoolFolderCfg(flags))
+    
+    result.setPrivateTools(return_tools)
+    
+    return result
+
+def MainTestConfiguration(flags, testoptions, plotter_configurator, cellsname, clustersname):
     
     result = PrevAlgorithmsConfigurationCfg(flags, testoptions, cellsname)
         
     GPUKernelSvc = CompFactory.GPUKernelSizeOptimizerSvc()
     result.addService(GPUKernelSvc)
     
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    from TileGeoModel.TileGMConfig import TileGMCfg
-    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    
-    result.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
-    result.merge(CaloNoiseCondAlgCfg(flags,"electronicNoise"))
-        
-    result.merge(LArGMCfg(flags))
-    result.merge(TileGMCfg(flags))
-    
-
     HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor("HybridClusterProcessor")
     HybridClusterProcessor.ClustersOutputName = clustersname
     
@@ -471,259 +831,66 @@ def MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, cl
     
     HybridClusterProcessor.DeferConstantDataPreparationToFirstEvent = True
     
-    if PlotterConfigurator is None:
+    if plotter_configurator is None:
         HybridClusterProcessor.DoPlots = False
     else:
         HybridClusterProcessor.DoPlots = True
         
-        from CaloRecGPU.CaloRecGPUConfig import PlotterToolCfg, SingleToolToPlot, ComparedToolsToPlot
-        
-        Plotter = PlotterConfigurator(result.popToolsAndMerge(PlotterToolCfg(flags, cellsname)))
-        HybridClusterProcessor.PlotterTool = Plotter
-        
-        if testoptions.TestGrow and not testoptions.DoCrossTests:
-            Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultGrowing", "CPU_growing") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostGrowing", "GPU_growing") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultGrowing", "PropCalcPostGrowing", "growing") ]
-        if testoptions.TestSplit and not testoptions.DoCrossTests:
-            Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPU_splitting") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "splitting", True) ]
-        if testoptions.TestMoments:
-            Plotter.ToolsToPlot += [ SingleToolToPlot("CPUMoments", "CPU_moments") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("AthenaClusterImporter", "GPU_moments") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("CPUMoments", "AthenaClusterImporter", "moments", True) ]
-        if testoptions.DoCrossTests:
-            Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultGrowing", "CPU_growing") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostGrowing", "GPU_growing") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultGrowing", "PropCalcPostGrowing", "growing") ]
-            
-            Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultSplitting", "CPUCPU_splitting") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcPostSplitting", "GPUGPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcPostSplitting", "CPU_to_GPUGPU_splitting", True) ]
-            
-            Plotter.ToolsToPlot += [ SingleToolToPlot("PropCalcDefaultGrowGPUSplit", "CPUGPU_splitting") ]
-            Plotter.ToolsToPlot += [ SingleToolToPlot("DefaultPostGPUSplitting", "GPUCPU_splitting") ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "PropCalcDefaultGrowGPUSplit", "CPU_to_CPUGPU_splitting", True) ]
-            Plotter.PairsToPlot += [ ComparedToolsToPlot("DefaultSplitting", "DefaultPostGPUSplitting", "CPU_to_GPUCPU_splitting", True) ]
-            
+        HybridClusterProcessor.PlotterTool = result.popToolsAndMerge( TestPlotterConfiguration(flags, testoptions, plotter_configurator, cellsname) )
+    
     HybridClusterProcessor.DoMonitoring = False
     
     HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders
         
-    if PlotterConfigurator is not None:
+    if plotter_configurator is not None:
         histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
         result.addService(histSvc)
     
-    AthenaClusterImporter = None
-
-    from CaloRecGPU.CaloRecGPUConfig import ( BasicConstantDataExporterToolCfg,
-                                              BasicEventDataExporterToolCfg,
-                                              BasicAthenaClusterImporterToolCfg,
-                                              AthenaClusterAndMomentsImporterToolCfg,
-                                              DefaultTopologicalClusteringToolCfg, 
-                                              DefaultClusterSplittingToolCfg,
-                                              DefaultClusterMomentsCalculatorToolCfg,
-                                              MomentsDumperToolCfg,
-                                              CellsCounterCPUToolCfg,
-                                              CPUOutputToolCfg,
-                                              TopoAutomatonClusteringToolCfg,
-                                              ClusterInfoCalcToolCfg,
-                                              GPUClusterMomentsCalculatorToolCfg,
-                                              TopoAutomatonSplitterToolCfg,
-                                              CellsCounterGPUToolCfg,
-                                              GPUOutputToolCfg )
-                                            
+    ConstantDataTool = TestConstantConversionTool(flags, testoptions)
+    
+    ExportingTool = TestCPUtoGPUExporterTool(flags, testoptions, cellsname)
+    
+    ImportingTool = TestGPUtoCPUImporterTool(flags, testoptions, cellsname)
+    
+    if ConstantDataTool is not None and ExportingTool is not None and ImportingTool is not None:
+        HybridClusterProcessor.ConstantDataToGPUTool = result.popToolsAndMerge( ConstantDataTool )
         
-    if testoptions.TestMoments:
-        AthenaClusterImporter = result.popToolsAndMerge( AthenaClusterAndMomentsImporterToolCfg(flags, cellsname, False, "AthenaClusterImporter") )
+        HybridClusterProcessor.EventDataToGPUTool = result.popToolsAndMerge( ExportingTool )
+        
+        HybridClusterProcessor.GPUToEventDataTool = result.popToolsAndMerge( ImportingTool )
+        
     else:
-        AthenaClusterImporter = result.popToolsAndMerge( BasicAthenaClusterImporterToolCfg(flags, cellsname,"AthenaClusterImporter") )
-            
-    HybridClusterProcessor.ConstantDataToGPUTool = result.popToolsAndMerge(BasicConstantDataExporterToolCfg(flags, cellsname))
-    HybridClusterProcessor.EventDataToGPUTool = result.popToolsAndMerge(BasicEventDataExporterToolCfg(flags, cellsname))
-    HybridClusterProcessor.GPUToEventDataTool = AthenaClusterImporter
+        if ConstantDataTool is not None or ExportingTool is not None or ImportingTool is not None:
+            from AthenaCommon.Logging import log
+            log.warning( "At least one of the conversion tools is None, but not all. Logic error in test types!" +
+                        f"Valid tools: constant {ConstantDataTool is not None}, export {ExportingTool is not None}, import {ImportingTool is not None}.")
+        
+        HybridClusterProcessor.ConstantDataToGPUTool = None
+        HybridClusterProcessor.EventDataToGPUTool    = None
+        HybridClusterProcessor.GPUToEventDataTool    = None
+        
+        HybridClusterProcessor.SkipConversions = True
+        
+    
     
     HybridClusterProcessor.BeforeGPUTools = []
-           
-    if testoptions.TestGrow or testoptions.TestSplit or testoptions.TestMoments:
-        DefaultClustering = result.popToolsAndMerge( DefaultTopologicalClusteringToolCfg(flags, cellsname,"DefaultGrowing") )
-        
-        HybridClusterProcessor.BeforeGPUTools += [DefaultClustering]
-                    
-        if testoptions.TestGrow and (not testoptions.TestSplit or testoptions.DoCrossTests):
-            if testoptions.OutputCounts:
-                CPUCount1 = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"DefaultGrowCounter", SavePath = "./counts", FilePrefix = "default_grow") )
-                HybridClusterProcessor.BeforeGPUTools += [CPUCount1]
-            if testoptions.OutputClusters:
-                CPUOut1 = result.popToolsAndMerge( CPUOutputToolCfg(flags,cellsname,"DefaultGrowOutput", SavePath = "./out_default_grow") )
-                HybridClusterProcessor.BeforeGPUTools += [CPUOut1]
-        
-            
-        if testoptions.TestSplit or testoptions.TestMoments:
-            FirstSplitter = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"DefaultSplitting") )
-            HybridClusterProcessor.BeforeGPUTools += [FirstSplitter]
-            
-            if testoptions.OutputCounts:
-                CPUCount2 = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"DefaultGrowAndSplitCounter", SavePath = "./counts", FilePrefix = "default_grow_split") )
-                HybridClusterProcessor.BeforeGPUTools += [CPUCount2]
-            if testoptions.OutputClusters:
-                CPUOut2 = result.popToolsAndMerge( CPUOutputToolCfg(flags, cellsname,"DefaultSplitOutput", SavePath = "./out_default_grow_split") )
-                HybridClusterProcessor.BeforeGPUTools += [CPUOut2]
-        
-        if testoptions.TestMoments:
-            CPUMoments = result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, False,"CPUMoments") )
-            HybridClusterProcessor.BeforeGPUTools += [CPUMoments]
-            if testoptions.OutputCounts:
-                CPUDumper = result.popToolsAndMerge( MomentsDumperToolCfg(flags,"CPUMomentsDumper", SavePath = "./moments", FilePrefix = "CPU") )
-                HybridClusterProcessor.BeforeGPUTools += [CPUDumper]
-        
-        HybridClusterProcessor.BeforeGPUTools += [CompFactory.CaloClusterDeleter("ClusterDeleter")]                
-        
-        if testoptions.TestSplit and (not testoptions.TestGrow or testoptions.DoCrossTests):
-            SecondDefaultClustering = result.popToolsAndMerge( DefaultTopologicalClusteringToolCfg(flags,cellsname,"SecondDefaultGrowing") )
-            HybridClusterProcessor.BeforeGPUTools += [SecondDefaultClustering]
+    
+    HybridClusterProcessor.BeforeGPUTools += result.popToolsAndMerge( TestBeforeGPUToolsConfiguration(flags, testoptions, cellsname, clustersname) )
         
     HybridClusterProcessor.GPUTools = []
     
-    if testoptions.OutputCellInfo:
-        CellOut = result.popToolsAndMerge( GPUOutputToolCfg(flags,"CellInfoOutput", SavePath = "./out_cell", OnlyOutputCellInfo = True) )
-        HybridClusterProcessor.GPUTools += [CellOut]
-        
-    if testoptions.TestSplit:
-        if not testoptions.TestGrow:
-            GPUClusterSplitting1 = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUSplitter") )
-            if testoptions.SkipSyncs:
-                GPUClusterSplitting1.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [GPUClusterSplitting1]
-            PropCalc1 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostSplitting", False) )
-            if testoptions.SkipSyncs:
-                PropCalc1.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [PropCalc1]
-        elif testoptions.DoCrossTests:
-            GPUClusterSplitting1 = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"FirstGPUSplitter") )
-            GPUClusterSplitting1.TimeFileOutput = "" #This means there's no output.
-            GPUClusterSplitting1.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [GPUClusterSplitting1]
-            PropCalc1 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcDefaultGrowGPUSplit", False) )
-            PropCalc1.TimeFileOutput = "" #This means there's no output.
-            PropCalc1.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [PropCalc1]
-        
-        if ((not testoptions.TestGrow) or testoptions.DoCrossTests):
-            if testoptions.OutputCounts:
-                GPUCount1 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"DefaultGrowModifiedSplitCounter", SavePath = "./counts", FilePrefix = "default_grow_modified_split") )
-                HybridClusterProcessor.GPUTools += [GPUCount1]
-            if testoptions.OutputClusters:
-                GPUOut1 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"DefaultGrowModifiedSplitOutput", SavePath = "./out_default_grow_modified_split") )
-                HybridClusterProcessor.GPUTools += [GPUOut1]
-        
-    if testoptions.TestGrow:
-        TopoAutomatonClustering1 = result.popToolsAndMerge( TopoAutomatonClusteringToolCfg(flags,"GPUGrowing") )
-        if testoptions.SkipSyncs:
-            TopoAutomatonClustering1.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [TopoAutomatonClustering1]
-        
-        PropCalc2 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostGrowing", True))
-        if testoptions.SkipSyncs:
-            PropCalc2.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [PropCalc2]
-        if ((not testoptions.TestSplit) or testoptions.DoCrossTests):
-            if testoptions.OutputCounts:
-                GPUCount2 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"ModifiedGrowCounter", SavePath = "./counts", FilePrefix = "modified_grow") )
-                HybridClusterProcessor.GPUTools += [GPUCount2]
-            if testoptions.OutputClusters:
-                GPUOut2 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"ModifiedGrowOutput", SavePath = "./out_modified_grow") )
-                HybridClusterProcessor.GPUTools += [GPUOut2]
+    HybridClusterProcessor.GPUTools += result.popToolsAndMerge( TestGPUToolsConfiguration(flags, testoptions, cellsname, clustersname) )
     
-    if testoptions.TestGrow and testoptions.TestSplit:
-        GPUClusterSplitting2 = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUSplitter") )
-        if testoptions.SkipSyncs:
-            GPUClusterSplitting2.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [GPUClusterSplitting2]
-        
-        if HybridClusterProcessor.DoPlots or not testoptions.TestMoments:
-          PropCalc3 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostSplitting", False) )
-          if testoptions.SkipSyncs:
-              PropCalc3.MeasureTimes = False
-          HybridClusterProcessor.GPUTools += [PropCalc3]
-        
-        if testoptions.OutputCounts:
-            GPUCount3 = result.popToolsAndMerge( CellsCounterGPUToolCfg(flags,"ModifiedGrowSplitCounter", SavePath = "./counts", FilePrefix = "modified_grow_split") )
-            HybridClusterProcessor.GPUTools += [GPUCount3]
-        if testoptions.OutputClusters:
-            GPUOut3 = result.popToolsAndMerge( GPUOutputToolCfg(flags,"ModifiedGrowSplitOutput", SavePath = "./out_modified_grow_split") )
-            HybridClusterProcessor.GPUTools += [GPUOut3]
-        
-        if testoptions.DoCrossTests:
-            TopoAutomatonClustering2 = result.popToolsAndMerge( TopoAutomatonClusteringToolCfg(flags,"SecondGPUGrowing") )
-            TopoAutomatonClustering2.MeasureTimes = False
-            TopoAutomatonClustering2.TimeFileOutput = "" #This means there's no output.
-            HybridClusterProcessor.GPUTools += [TopoAutomatonClustering2]
-            
-            PropCalc4 = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalc4", True) )
-            PropCalc4.TimeFileOutput = "" #This means there's no output.
-            PropCalc4.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [PropCalc4]
-        
-    if not (testoptions.TestGrow or testoptions.TestSplit):
-        TopoAutomatonClusteringDef = result.popToolsAndMerge( TopoAutomatonClusteringToolCfg(flags,"TopoAutomatonClustering") )
-        if testoptions.SkipSyncs:
-            TopoAutomatonClusteringDef.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [TopoAutomatonClusteringDef]
-        
-        FirstPropCalcDef = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostGrowing", True) )
-        if testoptions.SkipSyncs:
-            FirstPropCalcDef.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [FirstPropCalcDef]
-        
-        GPUClusterSplittingDef = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUTopoSplitter") )
-        if testoptions.SkipSyncs:
-            GPUClusterSplittingDef.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [GPUClusterSplittingDef]
-        
-        if not testoptions.TestMoments:
-            SecondPropCalcDef = result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PropCalcPostSplitting", False) )
-            if testoptions.SkipSyncs:
-                SecondPropCalcDef.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [SecondPropCalcDef]
-    
-    if testoptions.TestMoments and not testoptions.DoCrossTests:
-        if testoptions.TestGrow and not testoptions.TestSplit:
-            GPUClusterSplittingDef = result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUTopoSplitter") )
-            if testoptions.SkipSyncs:
-                GPUClusterSplittingDef.MeasureTimes = False
-            HybridClusterProcessor.GPUTools += [GPUClusterSplittingDef]
-            
-        GPUMomentsDef = result.popToolsAndMerge( GPUClusterMomentsCalculatorToolCfg(flags,"GPUTopoMoments") )
-        if testoptions.SkipSyncs:
-            GPUMomentsDef.MeasureTimes = False
-        HybridClusterProcessor.GPUTools += [GPUMomentsDef]
-        
     HybridClusterProcessor.AfterGPUTools = []
     
-    if testoptions.TestMoments and testoptions.OutputCounts:
-        GPUDumper = result.popToolsAndMerge( MomentsDumperToolCfg(flags,"GPUMomentsDumper", SavePath = "./moments", FilePrefix = "GPU") )
-        HybridClusterProcessor.AfterGPUTools += [GPUDumper]
-        
-    if testoptions.TestGrow and (not testoptions.TestSplit or testoptions.DoCrossTests):
+    HybridClusterProcessor.AfterGPUTools += result.popToolsAndMerge( TestAfterGPUToolsConfiguration(flags, testoptions, cellsname, clustersname) )
     
-        TopoSplitter = result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"DefaultPostGPUSplitting") )
-        HybridClusterProcessor.AfterGPUTools += [TopoSplitter]
-        
-        if testoptions.DoCrossTests:
-            if testoptions.OutputCounts:
-                CPUCount3 = result.popToolsAndMerge( CellsCounterCPUToolCfg(flags,cellsname,"ModifiedGrowDefaultSplitCounter", SavePath = "./counts", FilePrefix = "modified_grow_default_split") )
-                HybridClusterProcessor.AfterGPUTools += [CPUCount3]
-            if testoptions.OutputClusters:
-                CPUOut3 = result.popToolsAndMerge( CPUOutputToolCfg(flags,cellsname,"ModifiedGrowDefaultSplitOutput", SavePath = "./out_modified_grow_default_split") )
-                HybridClusterProcessor.AfterGPUTools += [CPUOut3]
-            
+    
     result.addEventAlgo(HybridClusterProcessor,primary=True)
 
     return result
 
-def RunFullTestConfiguration(flags, testoptions, PlotterConfigurator = None, cellsname = "AllCalo", clustersname = "CaloCalTopoClustersNew"):
+def RunFullTestConfiguration(flags, testoptions, plotter_configurator = None, cellsname = "AllCalo", clustersname = "CaloCalTopoClustersNew"):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     cfg=MainServicesCfg(flags)
@@ -731,28 +898,71 @@ def RunFullTestConfiguration(flags, testoptions, PlotterConfigurator = None, cel
     if flags.Input.Format is Format.BS:
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         cfg.merge(ByteStreamReadCfg(flags))
-    else:
+    elif flags.Input.Format is Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(flags))
-    
+        if "EventInfo" not in flags.Input.Collections:
+            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+            cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True),sequenceName="AthAlgSeq")
+    else:
+        from AthenaCommon.Logging import log
+        log.warning("Unsupported format...")
+        
     if testoptions.UsePerfMon:
        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
        cfg.merge(PerfMonMTSvcCfg(flags))
-            
-    if 'StreamRDO' in flags.Input.ProcessingTags:
-        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True),sequenceName="AthAlgSeq")
         
-    cfg.merge(MainTestConfiguration(flags, testoptions, PlotterConfigurator, cellsname, clustersname))
+    cfg.merge(MainTestConfiguration(flags, testoptions, plotter_configurator, cellsname, clustersname))
     
     cfg.getService("MessageSvc").infoLimit = 100000000
     
     cfg.run(testoptions.NumEvents)
+
+def GetRealInputFilePaths(files, default_files):
+    if files is None or len(files) == 0:
+        return default_files
+    else:
+        ret = []
+      
+        from AthenaConfiguration.TestDefaults import defaultTestFiles
+        standard_tests = {a: b for (a,b) in defaultTestFiles.__dict__.items() if not a.startswith("__") and not callable(b) }
+        #Since all the standard tests are specified as member variables,
+        #extract them...
+        
+        from TrigValTools.TrigValSteering.Input import load_input_json
+        trigger_tests = load_input_json()
+        
+        
+        for f in files:
+            if f == 'default':
+                ret += default_files
+            elif f == 'trigEB':
+                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1",
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-12._0001.1"]
+            elif f == 'ttbar' or f == 'ttbar_original':
+                #We used ttbar to mean a different sample from the ttbar from the trigger tests...
+                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
+                        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
+            elif f == 'jets':
+                ret += ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
+            elif f == 'ttbar_triggertest':
+                #This is the way to get the 'proper' ttbar from the trigger test
+                ret += trigger_tests['ttbar']['paths']
+            elif f in trigger_tests.keys():
+                ret += trigger_tests[f]['paths']
+            elif f in standard_tests.keys():
+                ret += standard_tests[f]
+            else:
+                ret += [f]
+        
+        return ret
     
     
 def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"],
                 parse_command_arguments = True,
-                allocate_as_many_as_threads = True):
+                allocate_as_many_as_threads = True,
+                default_argument_for_files = None):
 
     import argparse
     
@@ -793,9 +1003,6 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
         else:
             rest = pre_rest
     
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=1
-
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
                     
     initflags = initConfigFlags()
@@ -804,37 +1011,18 @@ def PrepareTest(default_files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-
     flags = initflags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default", True)
     
     flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU = True 
+        
+    if args is None:
+        flags.Input.Files = GetRealInputFilePaths(default_argument_for_files, default_files)
+    else:
+        flags.Input.Files = GetRealInputFilePaths(args.files, default_files)
     
     if parse_command_arguments:
         flags.fillFromArgs(listOfArgs=rest)
         #We could instead use our parser to overload here and so on, but...
-    
-    if args is None or args.files is None:
-        flags.Input.Files = default_files
-    elif len(args.files) == 0:
-        flags.Input.Files = default_files
-    elif len(args.files) == 1:
-        if args.files[0] == 'default':
-            flags.Input.Files = default_files
-        elif args.files[0] == 'ttbar':
-            flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000001.pool.root.1",
-                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000002.pool.root.1",
-                                       "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ]
-            
-        elif args.files[0] == 'jets':
-            flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"]
-        elif args.files[0] == 'trigEB':
-            flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1",
-                                 "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-12._0001.1"]
-        else:
-            flags.Input.Files = args.files
-    else:
-        flags.Input.Files = args.files
-    
-    if parse_command_arguments:
         flags.Concurrency.NumThreads = int(args.numthreads)
         flags.Concurrency.NumConcurrentEvents = int(args.numthreads)
-        #This is to ensure the measurments are multi-threaded in the way we expect, I guess?
+        #This is to ensure the measurements are multi-threaded in the way we expect, I guess?
         flags.PerfMon.doFastMonMT = args.perfmon
         flags.PerfMon.doFullMonMT = args.fullmon
         # configure GPU

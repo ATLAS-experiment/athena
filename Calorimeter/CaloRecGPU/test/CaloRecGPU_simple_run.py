@@ -10,6 +10,8 @@ if __name__=="__main__":
             
     flags.lock()
     
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.RunAllGPU
+    
     CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts)
 
 

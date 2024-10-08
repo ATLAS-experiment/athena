@@ -17,12 +17,10 @@ if __name__=="__main__":
         
     flags.lock()
     
-    testopts.TestGrow = True
-    testopts.TestSplit = True
-    testopts.DoCrossTests = True
+    testopts.TestType = CaloRecGPUTestingConfig.TestTypes.CrossTests
     
     PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPUCPU_splitting", "GPUGPU_splitting", "CPUGPU_splitting", "GPUCPU_splitting"],
                                                           ["growing", "CPU_to_GPUGPU_splitting", "CPU_to_CPUGPU_splitting", "CPU_to_GPUCPU_splitting"])   
     
-    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, PlotterConfigurator = PlotterConfig)
+    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, plotter_configurator = PlotterConfig)
     
