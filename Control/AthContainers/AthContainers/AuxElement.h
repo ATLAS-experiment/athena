@@ -1649,6 +1649,15 @@ private:
 };
 
 
+using TypelessConstAccessor = ConstAuxElement::TypelessConstAccessor;
+template <class T, class ALLOC = AuxAllocator_t<T> >
+using ConstAccessor = ConstAuxElement::ConstAccessor<T, ALLOC>;
+template <class T, class ALLOC = AuxAllocator_t<T> >
+using Accessor = AuxElement::Accessor<T, ALLOC>;
+template <class T, class ALLOC = AuxAllocator_t<T> >
+using Decorator = ConstAuxElement::Decorator<T, ALLOC>;
+
+
 } // namespace SG
 
 
