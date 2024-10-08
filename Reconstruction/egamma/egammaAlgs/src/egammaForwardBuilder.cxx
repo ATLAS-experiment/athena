@@ -20,6 +20,8 @@
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
 #include "PATCore/AcceptData.h"
 
+#include "FourMomUtils/P4Helpers.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -346,7 +348,7 @@ std::unique_ptr<xAOD::CaloCluster> egammaForwardBuilder::cookieCut(
 
   for (; cellItr != cellEnd; ++cellItr) {
     const float deltaEta = std::abs(eta - cellItr->eta());
-    const float deltaPhi = std::abs(phi - cellItr->phi());
+    const float deltaPhi = std::abs(P4Helpers::deltaPhi(phi, cellItr->phi()));
 
     const float deltaEta2 = deltaEta * deltaEta;
     const float deltaPhi2 = deltaPhi * deltaPhi;
