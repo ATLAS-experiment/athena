@@ -83,13 +83,8 @@ def RpcRdoToPrepDataToolCfg(flags, name ="RpcRdoToRpcPrepData",RDOContainer = No
         result.merge(NRPCCablingConfigCfg(flags))
         from AthenaConfiguration.Enums import LHCPeriod
         kwargs.setdefault("decode2DStrips", flags.GeoModel.Run >= LHCPeriod.Run4)
-        if kwargs["decode2DStrips"]:
-            from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
-            result.merge(RpcMeasViewAlgCfg(flags))
-        else:
+        if not kwargs["decode2DStrips"]:
             kwargs.setdefault("OutputContainer", "xRpcMeasurements")
-        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
-        result.merge(xRpcToRpcPrepDataCnvAlgCfg(flags))
         the_tool = CompFactory.MuonR4.RpcRdoToRpcPrepDataTool(name, **kwargs)
         result.setPrivateTools(the_tool)
 
@@ -192,9 +187,6 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
         kwargs.setdefault("xAODStripKey", "xAODsTgcStrips")
         kwargs.setdefault("xAODWireKey", "xAODsTgcWires")
         kwargs.setdefault("xAODPadKey", "xAODsTgcPads")
-        from xAODMuonViewAlgs.ViewAlgsConfig import sTgcMeasViewAlgCfg
-        result.merge(sTgcMeasViewAlgCfg(flags))
-
 
     from MuonConfig.MuonRecToolsConfig import SimpleSTgcClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleSTgcClusterBuilderToolCfg(flags)))
@@ -273,9 +265,6 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kw
 
     # Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
-    if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup:
-        from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
-        acc.merge(MdtMeasViewAlgCfg(flags))
     return acc
 
 

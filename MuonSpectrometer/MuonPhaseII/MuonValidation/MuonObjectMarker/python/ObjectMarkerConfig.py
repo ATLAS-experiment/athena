@@ -10,44 +10,21 @@ def SegmentMarkerAlgCfg(flags, name = "SegmentMarkerAlg", **kwargs):
 
 def MeasurementMarkerAlgCfg(flags, name = "MeasurementMarkerAlg", **kwargs) :
     result = ComponentAccumulator()
-    PrdContainers = []
-    if flags.Detector.EnableMDT: 
-        PrdContainers+=['xAODMdtCircles']
-    if flags.Detector.EnableRPC: 
-        PrdContainers+=['xRpcMeasurements']
-    if flags.Detector.EnableTGC: 
-        PrdContainers+=['xTgcStrips'] 
-    if flags.Detector.EnableMM:
-        PrdContainers+=['xAODMMClusters']
-    if flags.Detector.EnablesTGC:
-        PrdContainers+=['xAODsTgcStrips']
-        PrdContainers+=['xAODsTgcWires']
-        PrdContainers+=['xAODsTgcPads']
-    kwargs.setdefault("PrdContainer", PrdContainers)
+    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+    kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
     the_alg = CompFactory.MuonR4.MeasurementMarkerAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 def TruthMeasMarkerAlgCfg(flags, name = "TruthMeasMarkerAlg", **kwargs):
     result = ComponentAccumulator()
-    PrdContainers = []
-    if flags.Detector.EnableMDT: 
-        PrdContainers+=['xAODMdtCircles']
-    if flags.Detector.EnableRPC: 
-        PrdContainers+=['xRpcMeasurements']
-    if flags.Detector.EnableTGC: 
-        PrdContainers+=['xTgcStrips'] 
-    if flags.Detector.EnableMM:
-        PrdContainers+=['xAODMMClusters']
-    if flags.Detector.EnablesTGC:
-        PrdContainers+=['xAODsTgcStrips']
-        PrdContainers+=['xAODsTgcWires']
-        PrdContainers+=['xAODsTgcPads']
-    kwargs.setdefault("PrdContainer", PrdContainers)
+    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+    kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
     kwargs.setdefault("SegmentLinkKey", "truthSegLinks")
     the_alg = CompFactory.MuonR4.TruthMeasMarkerAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
 def MuonSegmentFitParDecorAlgCfg(flags,name = "MuonSegmentFitParDecorAlg", **kwargs):
     result = ComponentAccumulator()
 

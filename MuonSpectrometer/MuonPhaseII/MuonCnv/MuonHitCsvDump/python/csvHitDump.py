@@ -13,19 +13,11 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)
 
     from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonSimHitDumpCfg, CsvSpacePointDumpCfg
+   
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
     if flags.Input.isMC:
-        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-        cfg.merge(MuonSimHitToMeasurementCfg(flags))
-        ### Truth hit conversion
         cfg.merge(CsvMuonSimHitDumpCfg(flags))
-
-    else:
-        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
-        cfg.merge(MuonByteStreamDecodersCfg(flags))
-        from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
-        cfg.merge(MuonRDOtoPRDConvertorsCfg(flags))
-
-
     cfg.merge(CsvSpacePointDumpCfg(flags))
 
     executeTest(cfg)

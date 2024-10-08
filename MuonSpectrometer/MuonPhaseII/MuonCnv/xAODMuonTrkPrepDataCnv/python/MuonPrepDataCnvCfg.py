@@ -65,8 +65,8 @@ if __name__ == "__main__":
     flags.lock()
     
     cfg = setupServicesCfg(flags)
-    from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
-    cfg.merge(MuonPrepDataConvCfg(flags))
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
     cfg.merge(MuonPrepDataToxAODCnvAlg(flags))
     cfg.merge(setupTestOutputCfg(flags))
 

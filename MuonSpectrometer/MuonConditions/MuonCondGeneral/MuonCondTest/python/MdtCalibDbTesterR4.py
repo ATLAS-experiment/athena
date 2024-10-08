@@ -20,6 +20,6 @@ if __name__ == "__main__":
     from MuonCondTest.MdtCablingTester import MdtCablingTestAlgCfg
     cfg.merge(MdtCablingTestAlgCfg(flags))
     cfg.merge(MdtCalibDbAlgCfg(flags))
-    from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-    cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
     executeTest(cfg)

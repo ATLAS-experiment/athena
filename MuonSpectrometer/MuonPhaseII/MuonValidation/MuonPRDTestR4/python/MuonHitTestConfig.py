@@ -73,8 +73,9 @@ if __name__=="__main__":
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-    cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
     
     if args.runTester != "SIM":
         if flags.Detector.GeometryMDT:
