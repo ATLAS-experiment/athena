@@ -1,7 +1,7 @@
 
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrkConverter/FPGAClusterConverter.h"
+#include "FPGAClusterConverter.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "InDetIdentifier/PixelID.h" 

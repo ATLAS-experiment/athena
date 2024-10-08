@@ -5,12 +5,13 @@
 #ifndef FPGATrkConverter_CONVERSIONALGORITHM_H
 #define FPGATrkConverter_CONVERSIONALGORITHM_H
 
+#include "FPGAClusterConverter.h"
+#include "FPGAActsTrkConverter.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
-#include "FPGATrkConverter/FPGAClusterConverter.h"
-#include "FPGATrkConverter/FPGAActsTrkConverter.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 
