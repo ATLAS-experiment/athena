@@ -386,7 +386,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "JET_N_BTAG":
             self.raise_misconfig(text, "JET_N_BTAG")
-        if len(items) != 3 and len(items) != 4:
+        if len(items) != 3 and len(items) != 4 and len(items) != 5:
             self.raise_misconfig(text, "number of arguments")
         if not self.jets:
             self.raise_missinginput("jets")
@@ -400,11 +400,23 @@ class EventSelectionConfig(ConfigBlock):
             alg.sign  = self.check_sign(items[1])
             alg.count = self.check_int(items[2])
         elif len(items) == 4:
-            btagger, btagWP = self.check_btagging(items[1])
-            customBtag = f'ftag_select_{btagger}_{btagWP}'
-            alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
+            if ":" in text:
+                btagger, btagWP = self.check_btagging(items[1])
+                customBtag = f'ftag_select_{btagger}_{btagWP}'
+                alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
+            else:
+                extraSel = self.check_string(items[1])
+                alg.objectSelection = "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
             alg.sign  = self.check_sign(items[2])
             alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            extraSel = self.check_string(items[1])
+            btagger, btagWP = self.check_btagging(items[2])
+            customBtag = f'ftag_select_{btagger}_{btagWP}'
+            alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
+            alg.objectSelection+= "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
