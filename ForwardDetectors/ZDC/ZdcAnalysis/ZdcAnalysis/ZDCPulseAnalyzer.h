@@ -46,6 +46,8 @@ public:
         FitMinAmpBit          = 16, // 0x10000
         RepassPulseBit        = 17, // 0x20000
         ArmSumIncludeBit      = 18,
+
+        N_STATUS_BITS
        };
 
   enum LowGainMode {

@@ -5,8 +5,14 @@ from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
 def JetTagCalibCfg(ConfigFlags):
 
-    channelAliases = ConfigFlags.BTagging.calibrationChannelAliases
+    result = ComponentAccumulator()
+
     TaggerList = ConfigFlags.BTagging.taggerList
+    # if there are no taggers no need to set anything up
+    if not TaggerList:
+        return result
+
+    channelAliases = ConfigFlags.BTagging.calibrationChannelAliases
     scheme = ConfigFlags.BTagging.databaseScheme
 
     #IP2D
@@ -16,9 +22,8 @@ def JetTagCalibCfg(ConfigFlags):
     RNNIPConfig = {'rnnip':''}
 
     if scheme and scheme != "Trig":
-        raise RuntimeError(f"Invalid 'scheme' passed to JetTagCalibCfg: {scheme}")
+        raise ValueError(f"Invalid 'scheme' passed to JetTagCalibCfg: {scheme}")
 
-    result = ComponentAccumulator()
     readkeycalibpath = f"/GLOBAL/Onl/{scheme}BTagCalib/RUN12"
 
     if ConfigFlags.Input.isMC:

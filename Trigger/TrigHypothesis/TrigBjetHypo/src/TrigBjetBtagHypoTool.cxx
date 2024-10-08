@@ -104,24 +104,6 @@ StatusCode TrigBjetBtagHypoTool::decide( std::vector< TrigBjetBtagHypoToolInfo >
         mons.emplace_back(monpair.second, monpair.first(*btagging));
       }
 
-      static const SG::ConstAccessor<char> SV1_isDefaultsAcc("SV1_isDefaults");
-      static const SG::ConstAccessor<float> SV1_masssvxAcc("SV1_masssvx");
-      static const SG::ConstAccessor<float> SV1_efracsvxAcc("SV1_efracsvx");
-      if ( not SV1_isDefaultsAcc(*btagging) ){
-	mons.emplace_back("SV1_masssvx",SV1_masssvxAcc(*btagging));
-	mons.emplace_back("SV1_efracsvx",SV1_efracsvxAcc(*btagging));
-      }
-
-      static const SG::ConstAccessor<char> JetFitter_isDefaultsAcc("JetFitter_isDefaults");
-      static const SG::ConstAccessor<float> JetFitter_massAcc("JetFitter_mass");
-      static const SG::ConstAccessor<float> JetFitter_energyFractionAcc("JetFitter_energyFraction");
-      if ( not JetFitter_isDefaultsAcc(*btagging) ){
-	mons.emplace_back("JetFitter_mass",JetFitter_massAcc(*btagging));
-	mons.emplace_back("JetFitter_energyFraction",JetFitter_energyFractionAcc(*btagging));
-      }
-
-
-
       std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> mons_wrappers(
         mons.begin(), mons.end());
       Monitored::Group(m_monTool, mons_wrappers);

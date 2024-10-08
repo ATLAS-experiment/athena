@@ -2851,6 +2851,9 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
       std::map<std::string, std::vector<int>> tgcHitPhiMap;
       std::map<std::string, std::vector<int>> tgcHitEtaMap;
       std::map<std::string, std::vector<int>> tgcHitPhiMapGlobal;
+      std::map<std::string, std::vector<int>> tgcHitPhiMapOnline;
+      std::map<std::string, std::vector<int>> tgcHitEtaMapOnline;
+      std::map<std::string, std::vector<int>> tgcHitPhiMapGlobalOnline;
       std::map<std::string, std::vector<int>> tgcHitTiming;
       std::map<std::string, std::vector<int>> tgcHitPhiMapGlobalWithTrack;
       std::map<std::string, std::vector<int>> tgcHitTimingWithTrack;
@@ -2903,6 +2906,11 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
         int etamap_index = 0;
         int phimap_global_index = 0; // no empty bins compare to the above index
         m_tgcMonTool->getMapIndex(tgcHit,etamap_index,phimap_index,phimap_global_index );
+	int phimap_index_online = 0;
+	int etamap_index_online = 0;
+	int phimap_global_index_online = 0;
+	m_tgcMonTool->getMapIndexOnline(tgcHit.type_name(),etamap_index_online,phimap_index_online,phimap_global_index_online );
+	std::string wire_or_strip = (tgcHit.type_name().size()==16) ? Form("%c_%s",tgcHit.type_name()[0],(tgcHit.type_name()[15]=='W')?("wire"):("strip")) : "null";
         for(int bunch = -1 ; bunch <= +1 ; bunch++){
           if(bunch==-1 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_PREVIOUS)==0)continue;
           if(bunch== 0 && (tgcHit.bcmask()&Muon::TgcPrepData::BCBIT_CURRENT)==0)continue;
@@ -2911,6 +2919,9 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
           tgcHitEtaMap[station_name].push_back(etamap_index);
           tgcHitPhiMapGlobal[station_name].push_back(phimap_global_index);
           tgcHitTiming[station_name].push_back(bunch);
+	  tgcHitPhiMapOnline[wire_or_strip].push_back(phimap_index_online);
+	  tgcHitEtaMapOnline[wire_or_strip].push_back(etamap_index_online);
+	  tgcHitPhiMapGlobalOnline[wire_or_strip].push_back(phimap_global_index_online);
           if(hasAssociatedGoodMuonTrack){
             tgcHitPhiMapGlobalWithTrack[station_name].push_back(phimap_global_index);
             tgcHitTimingWithTrack[station_name].push_back(bunch);
@@ -3006,13 +3017,22 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
       hit_variables.push_back(hit_bwtiming_wire_wTrack);
 
       std::vector<Monitored::ObjectsCollection<std::vector<int>, double>> varowner;
-      varowner.reserve(tgcHitPhiMap.size() * 2 + tgcHitPhiMapGlobal.size() * 2 + tgcHitPhiMapGlobalWithTrack.size() * 2);
+      varowner.reserve(tgcHitPhiMap.size() * 2 + tgcHitPhiMapGlobal.size() * 2 + tgcHitPhiMapOnline.size() * 3 + tgcHitPhiMapGlobalWithTrack.size() * 2);
       for (const auto &phimap : tgcHitPhiMap) {
 	varowner.push_back(Monitored::Collection(Form("hit_x_%s",phimap.first.data()),tgcHitEtaMap[phimap.first],[](const int&m){return m;}));
       	hit_variables.push_back(varowner.back());
 	varowner.push_back(Monitored::Collection(Form("hit_y_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
       	hit_variables.push_back(varowner.back());
       }
+      for (const auto &phimap : tgcHitPhiMapOnline) {
+	varowner.push_back(Monitored::Collection(Form("hit_online_x_%s",phimap.first.data()),tgcHitEtaMapOnline[phimap.first],[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+	varowner.push_back(Monitored::Collection(Form("hit_online_y_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+	varowner.push_back(Monitored::Collection(Form("hit_online_glblphi_%s", phimap.first.data()),tgcHitPhiMapGlobalOnline[phimap.first],[](const int&m){return m;}));
+	hit_variables.push_back(varowner.back());
+      }
+
       for (const auto &phimap : tgcHitPhiMapGlobal) {
 	varowner.push_back(Monitored::Collection(Form("hit_glblphi_%s", phimap.first.data()),phimap.second,[](const int&m){return m;}));
 	hit_variables.push_back(varowner.back());
@@ -3087,6 +3107,12 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
       std::map<std::string, std::vector<double>> tgcEffPhiMap_Numerator;
       std::map<std::string, std::vector<double>> tgcEffEtaMap_Numerator;
       std::map<std::string, std::vector<double>> tgcEffPhiMapGlobal_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapOnline_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffEtaMapOnline_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobalOnline_Denominator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapOnline_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffEtaMapOnline_Numerator;
+      std::map<std::string, std::vector<double>> tgcEffPhiMapGlobalOnline_Numerator;
       std::map<std::string, std::vector<double>> tgcEffMapExtX;
       std::map<std::string, std::vector<double>> tgcEffMapExtY;
       std::map<std::string, std::vector<double>> tgcEffMapHasHit;
@@ -3122,9 +3148,17 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
 	      if(nWhits < m_nHitsInOtherBWTGCWire)continue;
 	      if(nShits < m_nHitsInOtherBWTGCStrip)continue;
 	      std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),(iSorW==0)?("S"):("W"));
+	      int phimap_index_online = 0;
+	      int etamap_index_online = 0;
+	      int phimap_global_index_online = 0;
+	      m_tgcMonTool->getMapIndexOnline(type_name,etamap_index_online,phimap_index_online,phimap_global_index_online );
+	      std::string wire_or_strip = (type_name.size()==16) ? Form("%c_%s",type_name[0],(type_name[15]=='W')?("wire"):("strip")) : ("null");
 	      tgcEffPhiMap_Denominator[station_name].push_back(phimap_index);
 	      tgcEffEtaMap_Denominator[station_name].push_back(etamap_index);
 	      tgcEffPhiMapGlobal_Denominator[station_name].push_back(phimap_global_index);
+	      tgcEffPhiMapOnline_Denominator[wire_or_strip].push_back(phimap_index_online);
+	      tgcEffEtaMapOnline_Denominator[wire_or_strip].push_back(etamap_index_online);
+	      tgcEffPhiMapGlobalOnline_Denominator[wire_or_strip].push_back(phimap_global_index_online);
 	      tgcEffMapExtX[type_name].push_back(newX);
 	      tgcEffMapExtY[type_name].push_back(newY);
 	      double hitExist = 0;
@@ -3132,6 +3166,9 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
 	      tgcEffPhiMap_Numerator[station_name].push_back(hitExist);
 	      tgcEffEtaMap_Numerator[station_name].push_back(hitExist);
 	      tgcEffPhiMapGlobal_Numerator[station_name].push_back(hitExist);
+	      tgcEffPhiMapOnline_Numerator[wire_or_strip].push_back(hitExist);
+	      tgcEffEtaMapOnline_Numerator[wire_or_strip].push_back(hitExist);
+	      tgcEffPhiMapGlobalOnline_Numerator[wire_or_strip].push_back(hitExist);
 	      tgcEffMapHasHit[type_name].push_back(hitExist);
 
 	    }
@@ -3147,7 +3184,7 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
       if(m_fillGapByGapHistograms){
 
 	ATH_MSG_DEBUG("hit efficiency plots");
-	varowner_hiteff.reserve(tgcEffPhiMap_Denominator.size() * 4 + tgcEffPhiMapGlobal_Denominator.size() * 2 + tgcEffMapHasHit.size() * 3);
+	varowner_hiteff.reserve(tgcEffPhiMap_Denominator.size() * 4 + tgcEffPhiMapGlobal_Denominator.size() * 2 + tgcEffMapHasHit.size() * 3 + tgcEffPhiMapOnline_Denominator.size() * 6);
 	for (const auto &phimap : tgcEffPhiMap_Denominator) {
 	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_effden_x_%s",phimap.first.data()),tgcEffEtaMap_Denominator[phimap.first],[](const double&m){return m;}));
 	  hit_variables.push_back(varowner_hiteff.back());
@@ -3162,6 +3199,20 @@ TgcRawDataMonitorAlgorithm::fillTgcPrdHistograms(Monitored::Scalar<int> & mon_bc
 	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effden_%s", phimap.first.data()),tgcEffPhiMapGlobal_Denominator[phimap.first],[](const double&m){return m;}));
 	  hit_variables.push_back(varowner_hiteff.back());
 	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_glblphi_effnum_%s", phimap.first.data()),tgcEffPhiMapGlobal_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	}
+	for (const auto &phimap : tgcEffPhiMapOnline_Denominator) {
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_effden_x_%s",phimap.first.data()),tgcEffEtaMapOnline_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_effden_y_%s", phimap.first.data()),tgcEffPhiMapOnline_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_effnum_x_%s",phimap.first.data()),tgcEffEtaMapOnline_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_effnum_y_%s", phimap.first.data()),tgcEffPhiMapOnline_Numerator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_glblphi_effden_%s", phimap.first.data()),tgcEffPhiMapGlobalOnline_Denominator[phimap.first],[](const double&m){return m;}));
+	  hit_variables.push_back(varowner_hiteff.back());
+	  varowner_hiteff.push_back(Monitored::Collection(Form("hit_online_glblphi_effnum_%s", phimap.first.data()),tgcEffPhiMapGlobalOnline_Numerator[phimap.first],[](const double&m){return m;}));
 	  hit_variables.push_back(varowner_hiteff.back());
 	}
 	for(const auto& hiteffmap : tgcEffMapHasHit){

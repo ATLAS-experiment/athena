@@ -1,62 +1,61 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
 
 #include "TLinearFitter.h"
 #include "TMath.h"
 #include <limits>
 
-const auto zeroVector = [](std::vector<float>& v){ v.assign(v.size(), 0); };
-const auto zeroVectorVector = [](std::vector<std::vector<float>>& vv){ for (std::vector<float>& v : vv) v.assign(v.size(), 0); };
-const auto zeroPileupFunc = [](unsigned int){ return 0; };
-const auto zeroPileupFuncVector = [](std::vector<std::function<float(unsigned int)>>& v){ v.assign(v.size(), zeroPileupFunc); };
+namespace ZDC {
+
+unsigned int nullPileupFunc(unsigned int /* sample */) {
+  return 0;
+}
+
+void helpResetFuncs(std::span<std::function<float(unsigned int)>> v) {
+  std::fill(v.begin(), v.end(), nullPileupFunc);
+}
 
 RPDDataAnalyzer::RPDDataAnalyzer(
-  ZDCMsg::MessageFunctionPtr messageFunc_p, const std::string& tag, const RPDConfig& config, std::vector<float> const& calibFactors
-) :
-  m_msgFunc_p(std::move(messageFunc_p)),
-  m_tag(tag),
-  m_nRows(config.nRows),
-  m_nColumns(config.nColumns),
-  m_nChannels(m_nRows*m_nColumns),
-  m_nSamples(config.nSamples),
-  m_nBaselineSamples(config.nBaselineSamples),
-  m_endSignalSample(config.endSignalSample),
-  m_pulse2ndDerivThresh(config.pulse2ndDerivThresh),
-  m_postPulseFracThresh(config.postPulseFracThresh),
-  m_goodPulseSampleStart(config.goodPulseSampleStart),
-  m_goodPulseSampleStop(config.goodPulseSampleStop),
-  m_nominalBaseline(config.nominalBaseline),
-  m_pileupBaselineSumThresh(config.pileupBaselineSumThresh),
-  m_pileupBaselineStdDevThresh(config.pileupBaselineStdDevThresh),
-  m_nNegativesAllowed(config.nNegativesAllowed),
-  m_AdcOverflow(config.AdcOverflow),
-  m_outputCalibFactors(calibFactors),
-  m_chFadcData(m_nChannels, std::vector<float>(m_nSamples, 0)),
-  m_chCorrectedFadcData(m_nChannels, std::vector<float>(m_nSamples, 0)),
-  m_chMaxSample(m_nChannels, 0),
-  m_chSumAdc(m_nChannels, 0),
-  m_chSumAdcCalib(m_nChannels, 0),
-  m_chMaxAdc(m_nChannels, 0),
-  m_chMaxAdcCalib(m_nChannels, 0),
-  m_chPileupFrac(m_nChannels, 0),
-  m_chBaseline(m_nChannels, 0),
-  m_chPileupExpFitParams(m_nChannels, std::vector<float>(2, 0)),
-  m_chPileupStretchedExpFitParams(m_nChannels, std::vector<float>(3, 0)),
-  m_chPileupExpFitParamErrs(m_nChannels, std::vector<float>(2, 0)),
-  m_chPileupStretchedExpFitParamErrs(m_nChannels, std::vector<float>(3, 0)),
-  m_chPileupFuncType(m_nChannels, false),
-  m_chExpPileupFuncs(m_nChannels, zeroPileupFunc),
-  m_ch2ndOrderStretchedExpPileupFuncs(m_nChannels, zeroPileupFunc),
-  m_chExpPileupMSE(m_nChannels, 0),
-  m_ch2ndOrderStretchedExpPileupMSE(m_nChannels, 0),
-  m_chStatus(m_nChannels)
+  ZDCMsg::MessageFunctionPtr messageFunc_p,
+  std::string tag,
+  RPDConfig const& config,
+  std::vector<float> const& calibFactors
+) : m_msgFunc_p(std::move(messageFunc_p)),
+    m_tag(std::move(tag)),
+    m_nSamples(config.nSamples),
+    m_nBaselineSamples(config.nBaselineSamples),
+    m_endSignalSample(config.endSignalSample),
+    m_pulse2ndDerivThresh(config.pulse2ndDerivThresh),
+    m_postPulseFracThresh(config.postPulseFracThresh),
+    m_goodPulseSampleStart(config.goodPulseSampleStart),
+    m_goodPulseSampleStop(config.goodPulseSampleStop),
+    m_nominalBaseline(config.nominalBaseline),
+    m_pileupBaselineSumThresh(config.pileupBaselineSumThresh),
+    m_pileupBaselineStdDevThresh(config.pileupBaselineStdDevThresh),
+    m_nNegativesAllowed(config.nNegativesAllowed),
+    m_AdcOverflow(config.AdcOverflow)
 {
   if (m_endSignalSample == 0) m_endSignalSample = m_nSamples; // sentinel value 0 -> go to end of waveform
-  if (m_outputCalibFactors.size() != m_nChannels) {
+  if (m_outputCalibFactors.size() != s_nChannels) {
     (*m_msgFunc_p)(ZDCMsg::Fatal,
       "RPDDataAnalyzer::RPDDataAnalyzer: received incorrect number of channels in calibration factors ("
-        + std::to_string(m_outputCalibFactors.size()) + " != " + std::to_string(m_nChannels) + ")"
+        + std::to_string(m_outputCalibFactors.size()) + " != " + std::to_string(s_nChannels) + ")"
     );
   }
+  std::copy(calibFactors.begin(), calibFactors.end(), m_outputCalibFactors.data());
+  m_chFADCData.fill(std::vector<uint16_t>(m_nSamples, 0));
+  m_chCorrectedFadcData.fill(std::vector<float>(m_nSamples, 0));
+  m_chPileupExpFitParams.fill(std::vector<float>(2, 0));
+  m_chPileupStretchedExpFitParams.fill(std::vector<float>(3, 0));
+  m_chPileupExpFitParamErrs.fill(std::vector<float>(2, 0));
+  m_chPileupStretchedExpFitParamErrs.fill(std::vector<float>(3, 0));
+  m_chPileupFuncType.fill(PileupFitFuncType::None);
+  m_chExpPileupFuncs.fill(nullPileupFunc);
+  m_ch2ndOrderStretchedExpPileupFuncs.fill(nullPileupFunc);
+
   m_sideStatus.reset();
   m_sideStatus.set(ValidBit, true);
   for (auto& status : m_chStatus) {
@@ -71,11 +70,12 @@ RPDDataAnalyzer::RPDDataAnalyzer(
 void RPDDataAnalyzer::loadChannelData(unsigned int channel, const std::vector<uint16_t>& FadcData)
 {
   if (FadcData.size() != m_nSamples) {
-    (*m_msgFunc_p)(ZDCMsg::Fatal, "RPDDataAnalyzer::loadChannelData: received incorrect number of samples in FADC data");
+    (*m_msgFunc_p)(ZDCMsg::Fatal,
+      "RPDDataAnalyzer::loadChannelData: received incorrect number of samples "
+      "in FADC data (" + std::to_string(FadcData.size()) + ", expected " + std::to_string(m_nSamples) + ")"
+    );
   }
-  for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-    m_chFadcData.at(channel).at(sample) = FadcData.at(sample);
-  }
+  m_chFADCData.at(channel) = FadcData;
   m_nChannelsLoaded++;
 }
 
@@ -92,28 +92,28 @@ void RPDDataAnalyzer::reset()
     status.set(ValidBit, true);
   }
 
-  zeroVectorVector(m_chFadcData);
-  zeroVectorVector(m_chCorrectedFadcData);
-  zeroVectorVector(m_chPileupExpFitParams);
-  zeroVectorVector(m_chPileupStretchedExpFitParams);
-  zeroVectorVector(m_chPileupExpFitParamErrs);
-  zeroVectorVector(m_chPileupStretchedExpFitParamErrs);
-  m_chPileupFuncType.assign(m_chPileupFuncType.size(), false);
+  RPDUtils::helpZero(m_chFADCData);
+  RPDUtils::helpZero(m_chCorrectedFadcData);
+  RPDUtils::helpZero(m_chPileupExpFitParams);
+  RPDUtils::helpZero(m_chPileupStretchedExpFitParams);
+  RPDUtils::helpZero(m_chPileupExpFitParamErrs);
+  RPDUtils::helpZero(m_chPileupStretchedExpFitParamErrs);
+  m_chPileupFuncType.fill(PileupFitFuncType::None);
 
-  zeroPileupFuncVector(m_chExpPileupFuncs);
-  zeroPileupFuncVector(m_ch2ndOrderStretchedExpPileupFuncs);
+  helpResetFuncs(m_chExpPileupFuncs);
+  helpResetFuncs(m_ch2ndOrderStretchedExpPileupFuncs);
 
-  zeroVector(m_chExpPileupMSE);
-  zeroVector(m_ch2ndOrderStretchedExpPileupMSE);
+  RPDUtils::helpZero(m_chExpPileupMSE);
+  RPDUtils::helpZero(m_ch2ndOrderStretchedExpPileupMSE);
 
   m_nChannelsLoaded = 0;
-  zeroVector(m_chMaxSample);
-  zeroVector(m_chSumAdc);
-  zeroVector(m_chSumAdcCalib);
-  zeroVector(m_chMaxAdc);
-  zeroVector(m_chMaxAdcCalib);
-  zeroVector(m_chPileupFrac);
-  zeroVector(m_chBaseline);
+  RPDUtils::helpZero(m_chMaxSample);
+  RPDUtils::helpZero(m_chSumAdc);
+  RPDUtils::helpZero(m_chSumAdcCalib);
+  RPDUtils::helpZero(m_chMaxAdc);
+  RPDUtils::helpZero(m_chMaxAdcCalib);
+  RPDUtils::helpZero(m_chPileupFrac);
+  RPDUtils::helpZero(m_chBaseline);
 }
 
 /**
@@ -123,7 +123,7 @@ void RPDDataAnalyzer::reset()
 bool RPDDataAnalyzer::checkOverflow(unsigned int channel)
 {
   for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-    if (m_chFadcData.at(channel).at(sample) >= m_AdcOverflow) {
+    if (m_chFADCData.at(channel).at(sample) >= m_AdcOverflow) {
       m_chStatus.at(channel).set(OverflowBit, true);
       return false; // overflow - not good
     }
@@ -144,7 +144,7 @@ bool RPDDataAnalyzer::checkPulses(unsigned int channel) {
   float postPulseSize = 0;
   unsigned int postPulseSample = 0;
   for (unsigned int sample = 1; sample < m_nSamples - 1; sample++) {
-    float secondDiff = m_chFadcData.at(channel).at(sample + 1) - 2*m_chFadcData.at(channel).at(sample) + m_chFadcData.at(channel).at(sample - 1);
+    float const secondDiff = m_chFADCData.at(channel).at(sample + 1) - 2*m_chFADCData.at(channel).at(sample) + m_chFADCData.at(channel).at(sample - 1);
     if (secondDiff > m_pulse2ndDerivThresh) continue; // no pulse here
     if (sample < m_goodPulseSampleStart && secondDiff < prePulseSize) {
       prePulseSize = secondDiff;
@@ -183,7 +183,7 @@ float RPDDataAnalyzer::calculateBaselineSamplesMSE(unsigned int channel, std::fu
 {
   float MSE = 0;
   for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
-    MSE += std::pow(m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel) - fit(sample), 2);
+    MSE += std::pow(m_chFADCData.at(channel).at(sample) - m_chBaseline.at(channel) - fit(sample), 2);
   }
   MSE /= m_nBaselineSamples;
   return MSE;
@@ -196,7 +196,7 @@ float RPDDataAnalyzer::calculateBaselineSamplesMSE(unsigned int channel, std::fu
 bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
   TLinearFitter fitter(1, "1 ++ x");
-  double x;
+  double x {};
   for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
     fitter.AddPoint(&x, std::log(y));
@@ -227,7 +227,7 @@ bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel, std::vector<std::pair
 bool RPDDataAnalyzer::doPileupStretchedExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
   TLinearFitter fitter(1, "1 ++ (x + 4)**(0.5) ++ (x + 4)**(-0.5)");
-  double x;
+  double x {};
   for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
     fitter.AddPoint(&x, std::log(y));
@@ -279,7 +279,7 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   /** points (sample, baseline-subtracted ADC) with ADC above baseline, to be used in fit in case of pileup */
   std::vector<std::pair<unsigned int, float>> pileupFitPoints;
   for (unsigned int sample = 0; sample < m_nBaselineSamples; sample++) {
-    float const& adc = m_chFadcData.at(channel).at(sample);
+    float const& adc = m_chFADCData.at(channel).at(sample);
     float const adcBaselineSubtr = adc - m_nominalBaseline;
     nominalBaselineSubtrSum += adcBaselineSubtr;
     if (adcBaselineSubtr > 0) {
@@ -287,14 +287,14 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
       pileupFitPoints.emplace_back(sample, adcBaselineSubtr);
     }
   }
-  float baselineStdDev = TMath::RMS(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
+  float baselineStdDev = TMath::StdDev(m_chFADCData.at(channel).begin(), std::next(m_chFADCData.at(channel).begin(), m_nBaselineSamples));
 
   if (nominalBaselineSubtrSum < m_pileupBaselineSumThresh || baselineStdDev < m_pileupBaselineStdDevThresh) {
     // there is NO pileup, we will trust the average of baseline samples as a good baseline estimate
-    m_chBaseline.at(channel) = TMath::Mean(m_chFadcData.at(channel).begin(), std::next(m_chFadcData.at(channel).begin(), m_nBaselineSamples));
+    m_chBaseline.at(channel) = TMath::Mean(m_chFADCData.at(channel).begin(), std::next(m_chFADCData.at(channel).begin(), m_nBaselineSamples));
     // calculate fadc data with baseline subtracted
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-      m_chCorrectedFadcData.at(channel).at(sample) = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel);
+      m_chCorrectedFadcData.at(channel).at(sample) = m_chFADCData.at(channel).at(sample) - m_chBaseline.at(channel);
     }
     if (countSignalRangeNegatives(m_chCorrectedFadcData.at(channel)) > m_nNegativesAllowed) {
       m_chStatus.at(channel).set(BadAvgBaselineSubtrBit, true);
@@ -310,7 +310,7 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
     m_chStatus.at(channel).set(InsufficientPileupFitPointsBit, true);
     // there are not enough points to do fit, so just use nominal baseline and call it a day
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-      m_chCorrectedFadcData.at(channel).at(sample) = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel);
+      m_chCorrectedFadcData.at(channel).at(sample) = m_chFADCData.at(channel).at(sample) - m_chBaseline.at(channel);
     }
     return true; // all good
   }
@@ -324,13 +324,13 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   if (stretchedExpFitSuccess) {
     // calculate fadc data with baseline and pileup contribution subtracted
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-      m_chCorrectedFadcData.at(channel).at(sample) = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel) - m_ch2ndOrderStretchedExpPileupFuncs.at(channel)(sample);
+      m_chCorrectedFadcData.at(channel).at(sample) = m_chFADCData.at(channel).at(sample) - m_chBaseline.at(channel) - m_ch2ndOrderStretchedExpPileupFuncs.at(channel)(sample);
     }
     if (countSignalRangeNegatives(m_chCorrectedFadcData.at(channel)) > m_nNegativesAllowed) {
       m_chStatus.at(channel).set(PileupBadStretchedExpSubtrBit, true);
       // fallback to exponential fit
     } else {
-      m_chPileupFuncType.at(channel) = true;
+      m_chPileupFuncType.at(channel) = PileupFitFuncType::SecondOrderStretchedExp;
       return true; // all good
     }
   }
@@ -338,12 +338,13 @@ bool RPDDataAnalyzer::doBaselinePileupSubtraction(unsigned int channel) {
   if (expFitSuccess) {
     // calculate fadc data with baseline and pileup contribution subtracted
     for (unsigned int sample = 0; sample < m_nSamples; sample++) {
-      m_chCorrectedFadcData.at(channel).at(sample) = m_chFadcData.at(channel).at(sample) - m_chBaseline.at(channel) - m_chExpPileupFuncs.at(channel)(sample);
+      m_chCorrectedFadcData.at(channel).at(sample) = m_chFADCData.at(channel).at(sample) - m_chBaseline.at(channel) - m_chExpPileupFuncs.at(channel)(sample);
     }
     if (countSignalRangeNegatives(m_chCorrectedFadcData.at(channel)) > m_nNegativesAllowed) {
       m_chStatus.at(channel).set(PileupBadExpSubtrBit, true);
       return false;
     }
+    m_chPileupFuncType.at(channel) = PileupFitFuncType::Exp;
     return true; // all good
   }
 
@@ -396,18 +397,21 @@ void RPDDataAnalyzer::calculateSumAdc(unsigned int channel) {
     // there is pileup in this channel, calculate fraction of baseline-subtracted raw signal
     // that is pileup (beginning of window until end of signal)
     std::function<float(unsigned int)> pileupFunc;
-    if (m_chPileupFuncType.at(channel)) {
-      // use stretched exponential
-      pileupFunc = m_ch2ndOrderStretchedExpPileupFuncs.at(channel);
-    } else {
-      // use exponential
-      pileupFunc = m_chExpPileupFuncs.at(channel);
+    switch (m_chPileupFuncType.at(channel)) {
+      case PileupFitFuncType::SecondOrderStretchedExp:
+        pileupFunc = m_ch2ndOrderStretchedExpPileupFuncs.at(channel);
+        break;
+      case PileupFitFuncType::Exp:
+        pileupFunc = m_chExpPileupFuncs.at(channel);
+        break;
+      default:
+        break;
     }
 
     float totalAdcSum = 0;
     float pileupTotalAdcSum = 0;
     for (unsigned int sample = 0; sample < m_endSignalSample; sample++) {
-      totalAdcSum += m_chFadcData.at(channel).at(sample) - m_nominalBaseline;
+      totalAdcSum += m_chFADCData.at(channel).at(sample) - m_nominalBaseline;
       pileupTotalAdcSum += pileupFunc(sample);
     }
     if (totalAdcSum > 0) {
@@ -424,7 +428,7 @@ void RPDDataAnalyzer::calculateSumAdc(unsigned int channel) {
 */
 void RPDDataAnalyzer::setSideStatusBits()
 {
-  for (unsigned int channel = 0; channel < m_nChannels; channel++) {
+  for (unsigned int channel = 0; channel < s_nChannels; channel++) {
     if (!m_chStatus.at(channel)[ValidBit]) m_sideStatus.set(ValidBit, false);
 
     if (m_chStatus.at(channel)[OutOfTimePileupBit]) m_sideStatus.set(OutOfTimePileupBit, true);
@@ -449,13 +453,13 @@ void RPDDataAnalyzer::setSideStatusBits()
 */
 void RPDDataAnalyzer::analyzeData()
 {
-  if (m_nChannelsLoaded != m_nChannels) {
+  if (m_nChannelsLoaded != s_nChannels) {
     (*m_msgFunc_p)(ZDCMsg::Warn,
       "RPDDataAnalyzer::analyzeData: analyzing data with " + std::to_string(m_nChannelsLoaded) + " of "
-      + std::to_string(m_nChannels) + " channels loaded"
+      + std::to_string(s_nChannels) + " channels loaded"
     );
   }
-  for (unsigned int channel = 0; channel < m_nChannels; channel++) {
+  for (unsigned int channel = 0; channel < s_nChannels; channel++) {
     if (!checkOverflow(channel)) {
       // there was overflow, stop analysis
       m_chStatus.at(channel).set(ValidBit, false);
@@ -591,3 +595,5 @@ unsigned int RPDDataAnalyzer::getSideStatus() const
 {
   return static_cast<unsigned int>(m_sideStatus.to_ulong());
 }
+
+} // namespace ZDC

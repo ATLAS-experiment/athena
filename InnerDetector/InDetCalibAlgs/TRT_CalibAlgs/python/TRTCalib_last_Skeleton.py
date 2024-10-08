@@ -24,8 +24,8 @@ def tryError(command, error):
     
 def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
     mserver = 'cernmx.cern.ch'
-    mfrom   = 'atltzp1@cern.ch'
-    msubject = "TRT CALIB TESTING TIER0 - SERGI & PETER - Exit Status for Run %d" % (runNumber)
+    mfrom   = 'no-reply@cern.ch'
+    msubject = "TRT CALIB TESTING TIER0 - Exit Status for Run %d" % (runNumber)
 
     # assemble mail body
     mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
@@ -40,15 +40,15 @@ def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
     
     print("Email body:\n\n",mbody)
     print("Email sent to:")
-    for i in mto:
-        print("\t- %s"% (i))
     
     try :
         con = smtplib.SMTP(mserver)
         if isinstance(mto, str) :
+            print("\t- %s"% (mto))
             con.sendmail(mfrom, mto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
         elif isinstance(mto, list) :
             for onemto in mto :
+                print("\t- %s"% (onemto))
                 con.sendmail(mfrom, onemto, 'Subject:' + str(msubject) + '\n\n' + str(mbody))
         con.quit()
     except OSError as e:
@@ -246,7 +246,7 @@ def fromRunArgs(runArgs):
     nextstep("Copying files to AFS Directory")
     ################################################################################################## 
     
-    outDIR = "%s/run_%d" % (runArgs.attrtcal_dir, runNumber)
+    outDIR = "%s/run_%d_test" % (runArgs.attrtcal_dir, runNumber)
     
     # Extracting iteration from Tier0 and for emails
     outputFile_split = outputFile.split('.')

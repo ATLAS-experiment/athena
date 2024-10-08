@@ -84,6 +84,13 @@ def ZdcTrigValToolCfg(flags, config = 'PbPb2023'):
       
     return acc
 
+def RPDAnalysisToolCfg(flags):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+        CompFactory.ZDC.RPDAnalysisTool(name="RPDAnalysisTool")
+    )
+    return acc
+
 def RpdSubtractCentroidToolCfg(flags):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.ZDC.RpdSubtractCentroidTool(name = 'RpdSubtractCentroidTool'))
@@ -158,21 +165,30 @@ def ZdcRecRun3Cfg(flags):
         config = "PbPb2023"
         doCalib = True
         doTimeCalib = True
-        
+
+    doRPD = config != "LHCf2022"
+
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
+    rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags))
     centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
 
     if ( flags.Input.isMC ):
-        zdcTools = [anaTool,centroidTool] # expand list as needed
+        zdcTools = [anaTool] # expand list as needed
+        if doRPD:
+            zdcTools += [rpdAnaTool,centroidTool]
     elif ( flags.Trigger.doZDC ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
         zdcTools = [anaTool] # expand list as needed
     elif (flags.Common.isOnline): # running online, no trigger info
-        zdcTools = [anaTool,centroidTool] # expand list as needed
+        zdcTools = [anaTool] # expand list as needed
+        if doRPD:
+            zdcTools += [rpdAnaTool,centroidTool]
     else: # default (not MC, not trigger repoc, not online)
         trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))   
-        zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
+        zdcTools = [anaTool,trigTool] # expand list as needed
+        if doRPD:
+            zdcTools += [rpdAnaTool,centroidTool]
         
     if flags.Input.Format is Format.BS:
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCRPhiCoincidenceMatrix.h"
@@ -11,10 +11,7 @@
 #include "TrigT1TGC/BigWheelCoincidenceLUT.h"
 #include "TrigT1TGC/TGCSectorLogic.h"
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 namespace LVL1TGCTrigger {
 
@@ -110,19 +107,15 @@ TGCRPhiCoincidenceOut* TGCRPhiCoincidenceMatrix::doCoincidence()
   }
 
   if (tgcArgs()->MSGLEVEL() <= MSG::DEBUG){
-    IMessageSvc* msgSvc = 0;
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    if (svcLocator->service("MessageSvc", msgSvc) != StatusCode::FAILURE) {
-      MsgStream log(msgSvc, "LVL1TGCTrigger::TGCRPhiCoincidenceMatrix");
-      if (j0>0) {
-	log << MSG::DEBUG << " Trigger Out : "
+    MsgStream log(Athena::getMessageSvc(), "LVL1TGCTrigger::TGCRPhiCoincidenceMatrix");
+    if (j0>0) {
+      log << MSG::DEBUG << " Trigger Out : "
 	      << " pt =" << ptMax+1 << " R=" << m_r << " Phi=" << m_phi[j0]
 	      << " ptR=" << m_ptR << " dR=" << m_dR 
 	      << " ptPhi=" << m_ptPhi[j0] << " dPhi=" << m_dPhi[j0] 
 	      << endmsg;
-      } else {
-	log << MSG::DEBUG << "NO Trigger Out : " << endmsg;
-      }
+    } else {
+      log << MSG::DEBUG << "NO Trigger Out : " << endmsg;
     }
   }
   

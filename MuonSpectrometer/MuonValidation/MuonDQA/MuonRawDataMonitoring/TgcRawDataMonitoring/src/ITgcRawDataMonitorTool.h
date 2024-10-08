@@ -20,6 +20,9 @@ class ITgcRawDataMonitorTool: public virtual IAlgTool {
 			   int& etamapindex, int& phimapindex, int& globalphimapindex ) const = 0;
   virtual bool getMapIndex(const TGC::TgcChamber& tgcCham, int ilay,
 			   int& etamapindex, int& phimapindex, int& globalphimapindex ) const = 0;
+  virtual bool getMapIndexOnline(const std::string& chamber_type_name,
+				 int& etamap_index, int& phimap_index, int& phimap_global_index) const = 0;
+
 };
 
 #endif

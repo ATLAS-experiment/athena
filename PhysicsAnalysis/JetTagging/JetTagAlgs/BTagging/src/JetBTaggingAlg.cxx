@@ -18,12 +18,10 @@ namespace Analysis {
   JetBTaggingAlg::JetBTaggingAlg(const std::string& n, ISvcLocator *p) : 
     AthReentrantAlgorithm(n,p),
     m_JetName(""),
-    m_bTagTool("Analysis::BTagTool",this),
-    m_bTagSecVtxTool("Analysis::BTagSecVertexing",this)
+    m_bTagTool("Analysis::BTagTool",this)
   {
     declareProperty("JetCalibrationName", m_JetName);
     declareProperty("BTagTool", m_bTagTool);
-    declareProperty("BTagSecVertexing", m_bTagSecVtxTool);
   }
 
   StatusCode JetBTaggingAlg::initialize() {
@@ -72,11 +70,13 @@ namespace Analysis {
     }
 
     /// retrieve the bTagSecVtxTool
-    if ( m_bTagSecVtxTool.retrieve().isFailure() ) {
-      ATH_MSG_FATAL("#BTAGVTX# Failed to retrieve tool " << m_bTagSecVtxTool);
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_DEBUG("#BTAGVTX# Retrieved tool " << m_bTagSecVtxTool);
+    if (!m_bTagSecVtxTool.empty()) {
+      if ( m_bTagSecVtxTool.retrieve().isFailure() ) {
+        ATH_MSG_FATAL("#BTAGVTX# Failed to retrieve tool " << m_bTagSecVtxTool);
+        return StatusCode::FAILURE;
+      } else {
+        ATH_MSG_DEBUG("#BTAGVTX# Retrieved tool " << m_bTagSecVtxTool);
+      }
     }
 
     /// handle to the magnetic field cache
@@ -188,14 +188,16 @@ namespace Analysis {
     }
 
     // Secondary vertex reconstruction.
-    StatusCode SV = m_bTagSecVtxTool->BTagSecVertexing_exec(h_JetCollectionName.ptr(), h_BTaggingCollectionName.ptr());
-    if (SV.isFailure()) {
-      ATH_MSG_WARNING("#BTAG# Failed to reconstruct sec vtx");
+    if (!m_bTagSecVtxTool.empty()) {
+      StatusCode SV = m_bTagSecVtxTool->BTagSecVertexing_exec(h_JetCollectionName.ptr(), h_BTaggingCollectionName.ptr());
+      if (SV.isFailure()) {
+        ATH_MSG_WARNING("#BTAG# Failed to reconstruct sec vtx");
+      }
     }
 
 
     //Tag the jets
-    SV = m_bTagTool->tagJet( h_JetCollectionName.ptr(), h_BTaggingCollectionName.ptr(), m_JetName);
+    StatusCode SV = m_bTagTool->tagJet( h_JetCollectionName.ptr(), h_BTaggingCollectionName.ptr(), m_JetName);
     if (SV.isFailure()) {
       ATH_MSG_WARNING("#BTAG# Failed in taggers call");
     }
