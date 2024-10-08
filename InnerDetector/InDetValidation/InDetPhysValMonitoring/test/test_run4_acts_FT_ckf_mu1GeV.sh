@@ -13,4 +13,4 @@ ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValM
 script=test_MC_Run4_acts_FT_ckf_mu0_reco.sh
 echo "Executing script ${script}"
 echo " "
-"$script" ${rdo} ${ref_idpvm_athena}
+"$script" ${rdo} ${ref_idpvm_athena} --truthMinPt 999

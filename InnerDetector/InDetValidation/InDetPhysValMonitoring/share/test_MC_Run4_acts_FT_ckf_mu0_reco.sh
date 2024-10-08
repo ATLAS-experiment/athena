@@ -6,6 +6,8 @@
 
 ArtInFile=$1
 dcubeRef=$2
+shift 2
+idpvmOpts=("$@")
 
 nEvents=1000
 
@@ -62,7 +64,8 @@ run "IDPVM" \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
+    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles" \
+    ${idpvmOpts[@]}
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then

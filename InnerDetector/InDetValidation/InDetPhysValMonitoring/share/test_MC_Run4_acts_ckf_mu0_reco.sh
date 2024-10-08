@@ -6,6 +6,8 @@
 
 ArtInFile=$1
 dcubeRef=$2
+shift 2
+idpvmOpts=("$@")
 
 nEvents=1000
 
@@ -66,7 +68,8 @@ run "IDPVM" \
     --doTechnicalEfficiency \
     --doExpertPlots \
     --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles"
+    --validateExtraTrackCollections "SiSPSeededTracksActsValidateTracksTrackParticles" \
+    ${idpvmOpts[@]}
 
 ckf_rc=$?
 
@@ -95,7 +98,8 @@ run "IDPVM" \
     --outputFile idpvm.ambi.root \
     --doTightPrimary \
     --doHitLevelPlots \
-    --doExpertPlots
+    --doExpertPlots \
+    ${idpvmOpts[@]}
 
 ambi_rc=$?
 if [ $ckf_rc != 0 ]; then
