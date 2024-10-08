@@ -129,7 +129,7 @@ public:
   virtual long repSvcType() const override;
 
   /// Implementation of IConverter: dummy call
-  const CLID& objType() const;
+  virtual const CLID& objType() const override;
 
   /** Implementation of IConverter: Set Data provider service
       @return    Status code indicating success or failure
@@ -153,7 +153,7 @@ public:
 
   /// Set address creator facility
   virtual
-  StatusCode setAddressCreator(IAddressCreator* creator);
+  StatusCode setAddressCreator(IAddressCreator* creator) override;
 
   /// Retrieve address creator facility
   virtual
