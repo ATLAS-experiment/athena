@@ -1565,6 +1565,9 @@ namespace CP {
             } else if (eventInfo->runNumber() < 500000) { //mc21: 330000, mc23a: 410000, mc23c: 450000
                 ATH_MSG_DEBUG("Random run number not available and this is mc21/mc23, for the time being we're returing a dummy run number.");
                 return 399999;
+            } else {
+                ATH_MSG_DEBUG("Detected some run 4 / phase II runnumber "<<eventInfo->runNumber()<<". ");
+                return 666666;
             }
 
             ATH_MSG_FATAL("Random run number not available, fallback option of using runNumber failed since "<<eventInfo->runNumber()<<" cannot be recognised");

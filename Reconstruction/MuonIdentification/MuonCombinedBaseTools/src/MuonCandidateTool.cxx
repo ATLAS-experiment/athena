@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -16,9 +16,9 @@
 namespace {
     // Temporary collection for extrapolated tracks and links with correspondent MS tracks
     struct track_link {
-        std::unique_ptr<Trk::Track> track;
-        unsigned int container_index;
-        bool extp_succeed;
+        std::unique_ptr<Trk::Track> track{};
+        unsigned int container_index{0};
+        bool extp_succeed{false};
         track_link(std::unique_ptr<Trk::Track> _trk, unsigned int _idx, bool _succeed) :
             track{std::move(_trk)}, container_index{_idx}, extp_succeed{_succeed} {}
     };
@@ -33,21 +33,15 @@ namespace MuonCombined {
 
     StatusCode MuonCandidateTool::initialize() {
         ATH_CHECK(m_printer.retrieve());
-        if (!m_trackBuilder.empty())
-            ATH_CHECK(m_trackBuilder.retrieve());
-        else
-            m_trackBuilder.disable();
-        if (!m_trackExtrapolationTool.empty())
-            ATH_CHECK(m_trackExtrapolationTool.retrieve());
-        else
-            m_trackExtrapolationTool.disable();
+        ATH_CHECK(m_trackBuilder.retrieve(EnableTool{!m_trackBuilder.empty()}));
+        ATH_CHECK(m_trackExtrapolationTool.retrieve(EnableTool{!m_trackExtrapolationTool.empty()}));
         ATH_CHECK(m_ambiguityProcessor.retrieve());
         ATH_CHECK(m_trackSummaryTool.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_beamSpotKey.initialize());
 
         ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
-        if (!m_segmentKey.empty()) { ATH_CHECK(m_trackSegmentAssociationTool.retrieve()); }
+        ATH_CHECK(m_trackSegmentAssociationTool.retrieve(EnableTool{!m_segmentKey.empty()}));
         return StatusCode::SUCCESS;
     }
     void MuonCandidateTool::create(const xAOD::TrackParticleContainer& tracks, MuonCandidateCollection& outputCollection,
