@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -38,8 +38,12 @@ namespace asg
   ///
   /// Loosely based on the \ref AsgTool implementation.
 
-  class AsgService : public virtual IAsgService,
-                     public AsgServiceBase
+  class AsgService :
+#ifndef XAOD_STANDALONE
+    public extends<AsgServiceBase, IAsgService>
+#else
+    public AsgServiceBase, public virtual IAsgService
+#endif
   {
   public:
     AsgService (const std::string& name,
@@ -60,11 +64,8 @@ namespace asg
 
 
 #ifndef XAOD_STANDALONE
-    /// query interface for gaudi
-    virtual StatusCode queryInterface (const InterfaceID& riid, void **ppvi);
-
-    /// list of interfaces we have
   private:
+    /// list of interfaces we have
     std::vector<std::pair<const InterfaceID& (*)(),void *(*)(AsgService*)>> m_interfaces;
 #endif
 
