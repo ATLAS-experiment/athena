@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataProxy_test.cxx
@@ -57,10 +57,10 @@ public:
 CLASS_DEF(XLockObj, 8124, 1)
 
 class TestConversionSvc
-  : public IConversionSvc
+  : public implements<IConversionSvc>
 {
 public:
-  virtual StatusCode addConverter(IConverter* /*pConverter*/) 
+  virtual StatusCode addConverter(IConverter* /*pConverter*/)
   { std::cout << "addConverter\n"; std::abort(); }
   virtual StatusCode addConverter(const CLID& /*clid*/)
   { std::cout << "addConverter clid\n"; std::abort(); }
@@ -112,10 +112,9 @@ public:
   virtual StatusCode updateRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/)
   { std::cout << "updateRepRefs\n"; std::abort(); }
 
+  // dummy ref-counting to avoid double-delete in this test
   virtual unsigned long addRef() { return 1; }
   virtual unsigned long release() { return 1; }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) 
-  { std::cout << "queryInterface\n"; std::abort(); }
 
   virtual StatusCode createRep(DataObject* /*pObject*/, IOpaqueAddress*& /*refpAddress*/)
   { std::cout << "createRep\n"; std::abort(); }
@@ -126,6 +125,7 @@ class TestOpaqueAddress
   : public IOpaqueAddress
 {
 public:
+  // dummy ref-counting
   virtual unsigned long        addRef     () { return 1; }
   virtual unsigned long        release    () { return 1; }
   virtual const CLID&          clID       () const

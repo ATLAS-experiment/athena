@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGTools/TestStore.h
@@ -48,13 +48,9 @@ struct TestStoreRemapHash
 
 
 class TestStore
-  : virtual public IProxyDict
+  : public implements<IProxyDict>
 {
 public:
-  // These are unimplemented and will abort.
-  virtual unsigned long addRef() override;
-  virtual unsigned long release() override;
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override;
   virtual std::vector<const SG::DataProxy*> proxies() const override;
   virtual const std::string* keyToString (sgkey_t /*key*/) const override;
   virtual void registerKey (sgkey_t /*key*/,

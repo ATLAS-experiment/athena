@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -27,7 +27,7 @@ using namespace SG;
 Folder::Folder( const std::string& type, 
                 const std::string& name,
                 const IInterface* parent) : 
-  AthAlgTool( type, name, parent ), 
+  base_class( type, name, parent ),
   m_pCLIDSvc("ClassIDSvc", name),
   m_checkItems(false)
 {
@@ -41,16 +41,6 @@ Folder::Folder( const std::string& type,
 //-----------------------------------------------------------------------------
 Folder::~Folder()
 {}
-
-//-----------------------------------------------------------------------------
-StatusCode Folder::queryInterface(const InterfaceID& riid, void** ppvIf) {
-  if ( riid == SG::IFolder::interfaceID() ) {
-    *ppvIf = (IFolder*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-  return AthAlgTool::queryInterface( riid, ppvIf );
-}
 
 //-----------------------------------------------------------------------------
 StatusCode Folder::initialize() {

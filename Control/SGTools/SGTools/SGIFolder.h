@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_IFOLDER_H
@@ -19,11 +19,13 @@ namespace SG {
    * @brief a run-time configurable list of data objects
    *
    * @author pcalafiura@lbl.gov - ATLAS Collaboration
-   * $Id: SGIFolder.h,v 1.3 2008-04-24 00:55:21 calaf Exp $
    **/
   class IFolder : public virtual IAlgTool
   {
   public:
+    /// Interface ID
+    DeclareInterfaceID( IFolder, 1, 0 );
+
     /// the list we manage
     typedef std::set<FolderItem> ItemList; //FIXME would be nice to move to SG::Folder
 
@@ -43,12 +45,7 @@ namespace SG {
 
     ///update list of items
     virtual void updateItemList(bool checkValidCLID) = 0;
-    
 
-    static const InterfaceID& interfaceID() {
-      static const InterfaceID IID( "SG::IFolder", 1, 0 );
-      return IID;
-    }
   };
 } //ns SG
 
