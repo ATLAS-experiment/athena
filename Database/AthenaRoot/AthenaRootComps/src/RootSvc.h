@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootSvc.h
@@ -36,8 +36,7 @@ namespace Athena {
 /** @class RootSvc
  *  @brief This class provides the interface to the ROOT software.
  **/
-class RootSvc : virtual public ::IRootSvc, public ::AthService {
-  friend class SvcFactory<Athena::RootSvc>;
+class RootSvc : public extends<::AthService, ::IRootSvc> {
 
 public:
   /// Standard Service Constructor
@@ -46,12 +45,6 @@ public:
   /// Gaudi Service Interface method implementations:
   StatusCode initialize();
   StatusCode finalize();
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() {
-    return ::IRootSvc::interfaceID();
-  }
 
   ///@{ RootType-base interface
   /// Load the type (dictionary) from Root.

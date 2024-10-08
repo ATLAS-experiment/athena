@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAROOTKERNEL_IROOTSVC_H
@@ -33,11 +33,8 @@ class IRootSvc : virtual public IInterface {
 public:
   virtual ~IRootSvc();
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() {
-    static const InterfaceID s_iid("IRootSvc", 1, 0);
-    return s_iid;
-  }
+  /// Declare interface ID
+  DeclareInterfaceID(IRootSvc, 1, 0);
 
   ///@{ RootType-base interface
   /// Load the type (dictionary) from Root.

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LeafCnv.h 
@@ -51,8 +51,6 @@ class LeafCnv
   /// Gaudi Service Implementation
   //@{
   virtual StatusCode initialize();
-//   virtual StatusCode queryInterface( const InterfaceID& riid, 
-//                                      void** ppvInterface );
   //@}
 
   /////////////////////////////////////////////////////////////////// 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.h 
@@ -45,12 +45,13 @@ namespace Athena {
  *         ROOT @c TTree as a backend
  */
 class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
-  virtual public IEvtSelector,
-  virtual public IEvtSelectorSeek,
-  virtual public IAddressProvider,
-  virtual public IIoComponent, virtual public IIncidentListener,
-          public ::AthService
-{ 
+    public extends<::AthService,
+                    IEvtSelector,
+                    IEvtSelectorSeek,
+                    IAddressProvider,
+                    IIoComponent,
+                    IIncidentListener>
+{
   friend class Athena::xAODEventContext;
 
 
@@ -69,9 +70,7 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
   // Athena hooks
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface ) override;
-  
+
   virtual void handle(const Incident& incident) override;
 
   ///@{

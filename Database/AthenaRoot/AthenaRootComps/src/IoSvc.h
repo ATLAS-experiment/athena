@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IoSvc.h 
@@ -28,9 +28,8 @@ template <class TYPE> class SvcFactory;
 
 
 class IoSvc
-  : virtual public ::IIoSvc,
-            public ::AthService
-{ 
+  : public extends<::AthService, ::IIoSvc>
+{
   friend class SvcFactory<IoSvc>;
 
   /////////////////////////////////////////////////////////////////// 
@@ -39,9 +38,7 @@ class IoSvc
  public: 
   typedef IIoSvc::Fd Fd;
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
   IoSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 
@@ -52,10 +49,8 @@ class IoSvc
 
   /// Gaudi Service Implementation
   //@{
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   //@}
 
   /////////////////////////////////////////////////////////////////// 
@@ -79,8 +74,6 @@ class IoSvc
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
 
   /// open file `fname` with open mode `mode`
   /// @returns -1 if not successful
@@ -110,19 +103,5 @@ class IoSvc
   /// last created Fd
   Fd m_last_fd;
 }; 
-
-// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& IoSvc::interfaceID() 
-{ 
-  return IIoSvc::interfaceID(); 
-}
-
-
 
 #endif //> !ATHENASERVICES_IOSVC_H

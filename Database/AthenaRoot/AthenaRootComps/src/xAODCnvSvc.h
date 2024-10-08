@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // NtupleCnvSvc.h 
@@ -20,26 +20,18 @@
 // GaudiKernel
 #include "GaudiKernel/IConversionSvc.h"
 
-// Forward declaration
-class ISvcLocator;
-template <class TYPE> class SvcFactory;
 
 namespace Athena {
 
 class xAODCnvSvc
-  : virtual public ::IConversionSvc,
-            public ::AthCnvSvc
-{ 
-  friend class SvcFactory<Athena::xAODCnvSvc>;
-
-  /////////////////////////////////////////////////////////////////// 
+  : public extends<::AthCnvSvc, ::IConversionSvc>
+{
+  ///////////////////////////////////////////////////////////////////
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
+  /// Constructor with parameters:
   xAODCnvSvc( const std::string& name, ISvcLocator* pSvcLocator );
 
   /// Destructor: 
@@ -52,8 +44,6 @@ class xAODCnvSvc
   //@{
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
   //@}
 
   /// @c IConversionSvc and @c IConverter interfaces
@@ -144,16 +134,6 @@ class xAODCnvSvc
                            IOpaqueAddress*& refpAddress);
   //@}
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
-
 protected:
 
   /// Create new Converter using factory (override AthCnvSvc::createConverter)
@@ -174,18 +154,6 @@ protected:
   
 
 }; 
-
-// I/O operators
-//////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& xAODCnvSvc::interfaceID() 
-{ 
-  return IConversionSvc::interfaceID(); 
-}
 
 } //> end namespace Athena
 

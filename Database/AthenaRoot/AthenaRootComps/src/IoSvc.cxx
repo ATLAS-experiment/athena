@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IoSvc.cxx 
@@ -30,7 +30,7 @@ typedef IIoSvc::IoType IoType;
 ////////////////
 IoSvc::IoSvc( const std::string& name, 
 		      ISvcLocator* pSvcLocator ) : 
-  ::AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_fds(),
   m_last_fd(3) // 1==cout, 2==cerr, 3==clog
 {
@@ -62,25 +62,7 @@ StatusCode IoSvc::finalize()
   return StatusCode::SUCCESS;
 }
 
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-IoSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( IIoSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IIoSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return ::AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 // Const methods: 
 ///////////////////////////////////////////////////////////////////
 
