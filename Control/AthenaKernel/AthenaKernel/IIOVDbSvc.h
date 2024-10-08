@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IIOVDBSVC_H
@@ -37,8 +37,8 @@ class EventContext;
  */
 class IIOVDbSvc  : virtual public IInterface  {
 public:
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID();
+    /// Declare interface ID
+    DeclareInterfaceID(IIOVDbSvc, 1, 0);
 
     /// Filled by IIOVDbSvc::getKeyInfo
     struct KeyInfo {
@@ -93,13 +93,5 @@ public:
     virtual bool dropObject(const std::string& key,
                             const bool resetCache=false) = 0;
 };
-
-
-inline
-const InterfaceID&
-IIOVDbSvc::interfaceID() {
-    static const InterfaceID IID("IOVDbSvc", 1, 0);
-    return IID;
-}
 
 #endif

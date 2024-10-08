@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,20 +74,17 @@ class CondAttrListCollection;
  *           
  * 
  */
-class IOVDbSvc : public virtual IIOVCondDbSvc,
-                 public virtual IIOVDbSvc,
-                 public virtual IAddressProvider,
-                 public virtual IIncidentListener,
-                 public virtual AthService,
-                 public virtual IIoComponent
+class IOVDbSvc : public extends<AthService,
+                                IIOVCondDbSvc,
+                                IIOVDbSvc,
+                                IAddressProvider,
+                                IIncidentListener,
+                                IIoComponent>
 {
-  // Forward declarations
-  template <class TYPE> class SvcFactory;
-  
 public:
   
   /// Forward base class ctor
-  using AthService::AthService;
+  using base_class::base_class;
   virtual ~IOVDbSvc();
   
   /// Service init
@@ -98,11 +95,7 @@ public:
   virtual StatusCode finalize() override;
   StatusCode io_finalize() override final;
 
-  /// Query the interfaces.
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface )  override;
-  static const InterfaceID& interfaceID();
-  
-  // IIOVDbSvc interface   
+  // IIOVDbSvc interface
 
   /// Access to COOL database for a given folder
   virtual cool::IDatabasePtr getDatabase( bool readOnly ) override;

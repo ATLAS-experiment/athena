@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbSvc.cxx
@@ -136,20 +136,6 @@ LockedDatabase::~LockedDatabase()
 
 
 IOVDbSvc::~IOVDbSvc() = default;
-
-/// Identify interfaces to which this service is responsive
-StatusCode
-IOVDbSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (IIOVDbSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface=(IIOVDbSvc*)this;
-  } else if  ( IIOVCondDbSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface=(IIOVCondDbSvc*)this;
-  } else {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  return StatusCode::SUCCESS;
-}
 
 int IOVDbSvc::poolSvcContext()
 {
