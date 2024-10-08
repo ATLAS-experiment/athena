@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGCOMPS_FOLDER_H
@@ -10,7 +10,6 @@
    * @brief a run-time configurable list of data objects
    *
    * @author pcalafiura@lbl.gov - ATLAS Collaboration
-   * $Id: SGFolder.h,v 1.8 2009-04-16 00:33:07 calaf Exp $
    **/
 
 #include <string>
@@ -40,7 +39,7 @@ namespace SG {
    * But if the type name ends with a !, then the object will be written
    * as the exact type which was requested in the ItemList.
    **/
-  class Folder : public virtual IFolder, public virtual AthAlgTool
+  class Folder : public extends<AthAlgTool, IFolder>
   {
   public:
     /// \name structors
@@ -82,8 +81,6 @@ namespace SG {
     /// \name AlgTool boilerplate 
     //@{
     virtual StatusCode initialize() override;
-    /// Query for a given interface
-    virtual StatusCode queryInterface(const InterfaceID& , void** ) override;
     //@}
 
   private:

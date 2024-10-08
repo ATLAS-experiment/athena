@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -21,24 +21,6 @@ namespace SGTest {
 
 
 TestStore store;
-
-
-unsigned long TestStore::addRef()
-{
-  std::cout << "addRef\n"; std::abort();
-}
-
-
-unsigned long TestStore::release()
-{
-  std::cout << "release\n"; std::abort();
-}
-
-
-StatusCode TestStore::queryInterface(const InterfaceID &/*ti*/, void** /*pp*/)
-{
-  std::cout << "queryInterface\n"; std::abort();
-}
 
 
 std::vector<const SG::DataProxy*> TestStore::proxies() const

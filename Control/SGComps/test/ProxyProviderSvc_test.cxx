@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGComps/test/ProxyProviderSvc_test.cxx
@@ -25,14 +25,9 @@
 
 
 class TestProvider
-  : public IAddressProvider
+  : public implements<IAddressProvider>
 {
 public:
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override
-  { std::abort(); }
-
   virtual StatusCode preLoadAddresses(StoreID::type storeID,
 				      tadList& list)  override;
 

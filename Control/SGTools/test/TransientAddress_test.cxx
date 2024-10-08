@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TransientAddress_test.cxx
@@ -46,13 +46,9 @@ public:
 
 
 class TestProvider
-  : public IAddressProvider
+  : public implements<IAddressProvider>
 {
 public:
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override
-  { std::abort(); }
 
   virtual StatusCode updateAddress(StoreID::type /*storeID*/,
 				   SG::TransientAddress* /*pTAd*/,

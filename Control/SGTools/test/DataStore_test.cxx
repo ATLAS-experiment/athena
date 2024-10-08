@@ -37,13 +37,9 @@ SG_BASES( Derived, Base );
 
 
 class TestProvider
-  : public IAddressProvider
+  : public implements<IAddressProvider>
 {
 public:
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override
-  { std::abort(); }
 
   virtual StatusCode updateAddress(StoreID::type /*storeID*/,
 				   SG::TransientAddress* /*pTAd*/,
