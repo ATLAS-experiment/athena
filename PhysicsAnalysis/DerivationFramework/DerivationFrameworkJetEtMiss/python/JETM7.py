@@ -211,13 +211,16 @@ def JETM7Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMPFlowJets",
                                             "EventInfo",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKt4EMPFlowByVertex"
+                                            "BTagging_AntiKt4EMPFlowByVertex",
                                             ]
 
     
     JETM7SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.btagIp_TrkOriginVtx.btagIp_TrkOriginVtx_idx.btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_trackDisplacement.btagIp_trackMomentum.btagIp_qOverP"]
-   #JETM7SlimmingHelper.AllVariables = ["BTagging_AntiKt4EMPFlow","BTagging_AntiKt4EMPFlowByVertex"] #ByVertex"]
+    JETM7SlimmingHelper.AllVariables = ["BTagging_AntiKt4EMPFlowByVertex",]
+    # Add BTagging containers
+    from DerivationFrameworkFlavourTag import FtagBaseContent
+    FtagBaseContent.add_baseline_slimming_smartcollections(JETM7SlimmingHelper)
+    FtagBaseContent.add_baseline_slimming_allvariables(JETM7SlimmingHelper)
     # Truth containers
     if flags.Input.isMC:
 
@@ -234,7 +237,7 @@ def JETM7Cfg(flags):
                                              "TruthVertices", "TruthEvents"]
         JETM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.truthMatchProbability", "TruthVertices.barcode.z"]
 
-
+    FtagBaseContent.add_truth_to_SlimmingHelper(JETM7SlimmingHelper)
     # Trigger content
     JETM7SlimmingHelper.IncludeTriggerNavigation = True
     JETM7SlimmingHelper.IncludeJetTriggerContent = False
