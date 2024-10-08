@@ -1,20 +1,8 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
-    result = ComponentAccumulator()
-    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
-    result.addEventAlgo(theAlg, primary=True)
-    return result
-
-
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, setupHistSvcCfg
     parser = SetupArgParser()
-    parser.add_argument("--skipSegmentFit", 
-                        help="Skip the segment fit step", action='store_true', default = False)
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="MuonBucketDump_2022_13p6TeV_00431493.root")
     parser.set_defaults(condTag="CONDBR2-BLKPA-2023-03")
@@ -33,34 +21,17 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonBucketDump"))
 
-
-    from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
-
-    if flags.Input.isMC:
-        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-        cfg.merge(MuonSimHitToMeasurementCfg(flags))
-        from MuonTruthAlgsR4.MuonTruthAlgsConfig import TruthSegmentMakerCfg, TruthHitAssociationCfg
-        cfg.merge(TruthSegmentMakerCfg(flags))
-        cfg.merge(TruthHitAssociationCfg(flags))
-
-    else:
-        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
-        cfg.merge(MuonByteStreamDecodersCfg(flags))
-        from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
-        cfg.merge(MuonRDOtoPRDConvertorsCfg(flags))
-
+    from MuonConfig.MuonDataPrepConfig  import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
+   
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
-
-    testerArgs = {}
-    if args.skipSegmentFit: 
-        testerArgs["SegmentKey"] = ""
-    else: 
-        cfg.merge(MuonSegmentFittingAlgCfg(flags))
-
+    cfg.merge(MuonSegmentFittingAlgCfg(flags))
+    
+    from MuonBucketDump.MuonBucketDumpConfig import MuonBucketDumpCfg
     cfg.merge(MuonBucketDumpCfg(flags))
 
     executeTest(cfg)

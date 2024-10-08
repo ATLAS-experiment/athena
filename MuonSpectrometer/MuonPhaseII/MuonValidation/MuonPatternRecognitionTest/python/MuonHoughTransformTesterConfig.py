@@ -43,16 +43,9 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
 
-    if flags.Input.isMC:
-        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-        cfg.merge(MuonSimHitToMeasurementCfg(flags))
-        from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
-        cfg.merge(MuonTruthAlgsCfg(flags))
-    else:
-        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
-        cfg.merge(MuonByteStreamDecodersCfg(flags))
-        from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
-        cfg.merge(MuonRDOtoPRDConvertorsCfg(flags))
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
+
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 

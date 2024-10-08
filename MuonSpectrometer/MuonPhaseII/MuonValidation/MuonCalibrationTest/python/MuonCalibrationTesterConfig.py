@@ -18,6 +18,8 @@ if __name__=="__main__":
     parser.set_defaults(eventPrintoutLevel = 1000)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
+    parser.set_defaults(noRpc=True)    
+    parser.set_defaults(noTgc=True)
     parser.set_defaults(nEvents=-1)
 
     args = parser.parse_args()
@@ -26,9 +28,8 @@ if __name__=="__main__":
     flags.PerfMon.doFullMonMT = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    if flags.Input.isMC:
-        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-        cfg.merge(MuonSimHitToMeasurementCfg(flags))
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MdtCalibDbAlgTest"))

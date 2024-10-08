@@ -18,11 +18,10 @@ if __name__=="__main__":
     args       = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
 
+    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
+    cfg.merge(xAODUncalibMeasPrepCfg(flags))
+
     if flags.Input.isMC:
-        from MuonConfig.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
-        cfg.merge(MuonSimHitToMeasurementCfg(flags))
-        from MuonTruthSegmentMaker.SegmentMakerConfig import TruthSegmentMakerCfg
-        cfg.merge(TruthSegmentMakerCfg(flags))
         from MuonHitCsvDump.MuonHitCsvDumpConfig import CsvMuonTruthSegmentDumpCfg
         cfg.merge(CsvMuonTruthSegmentDumpCfg(flags))
 
