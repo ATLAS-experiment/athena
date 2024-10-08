@@ -112,10 +112,6 @@ BOOST_AUTO_TEST_CASE(RangeBuildFromText){
   BOOST_CHECK_NO_THROW(r1.build(sctExample));
   const std::string wildCard="*";
   BOOST_CHECK_NO_THROW(r1.build(wildCard));
-  const std::string lowerBound="-5:";
-  BOOST_CHECK_NO_THROW(r1.build(lowerBound));
-  const std::string upperBound=":5";
-  BOOST_CHECK_NO_THROW(r1.build(upperBound));
   const std::string enumerated="1,2,3,4,10";
   BOOST_CHECK_NO_THROW(r1.build(enumerated));
   const std::string empty;

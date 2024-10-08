@@ -56,18 +56,6 @@ RangeIterator::RangeIterator (Range& range) : m_range (&range) {
           m_min << 0; 
           m_max << 0; 
           break; 
-        case Range::field::low_bounded: 
-          minimum = f.get_minimum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << minimum; 
-          break; 
-        case Range::field::high_bounded: 
-          maximum = f.get_maximum (); 
-          m_id << maximum; 
-          m_min << maximum; 
-          m_max << maximum; 
-          break; 
         case Range::field::both_bounded: 
         case Range::field::enumerated: 
           minimum = f.get_minimum (); 
@@ -185,18 +173,6 @@ ConstRangeIterator::ConstRangeIterator (const Range& range) :
           m_id << 0; 
           m_min << 0; 
           m_max << 0; 
-          break; 
-        case Range::field::low_bounded: 
-          minimum = f.get_minimum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << minimum; 
-          break; 
-        case Range::field::high_bounded: 
-          maximum = f.get_maximum (); 
-          m_id << maximum; 
-          m_min << maximum; 
-          m_max << maximum; 
           break; 
         case Range::field::both_bounded: 
         case Range::field::enumerated: 

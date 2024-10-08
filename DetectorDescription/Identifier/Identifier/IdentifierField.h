@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <iosfwd>
 #include <limits>
+#include <utility>
 
 
 /** 
@@ -52,21 +53,22 @@ class IdentifierField
 
   /// Create a full range specification (with explicit min and max) 
   IdentifierField (element_type minimum, element_type maximum); 
+  
+  /// Create with enumerated values
+  IdentifierField (const element_vector &values); 
 
   /// Some combined query functions on the specification mode 
   inline bool 
   is_valued () const {return (m_mode != unbounded);} 
   //
   inline bool 
-  has_minimum () const { return ((m_mode == low_bounded) ||  
-          (m_mode == both_bounded) ||  
-          (m_mode == enumerated)); 
+  has_minimum () const { 
+    return m_mode != unbounded; 
   }
   //
   inline bool 
-  has_maximum () const{ return ((m_mode == high_bounded) ||  
-          (m_mode == both_bounded) ||  
-          (m_mode == enumerated)); 
+  has_maximum () const{ return (
+    m_mode != unbounded);  
   }
   //
   inline bool 
@@ -77,6 +79,12 @@ class IdentifierField
   //
   inline element_type 
   get_minimum () const {return m_minimum;}
+  
+  //
+  inline std::pair<element_type, element_type>
+  get_minmax() const {
+    return {m_minimum, m_maximum};
+  }
   //
   inline element_type 
   get_maximum () const {return m_maximum;} 
@@ -104,8 +112,6 @@ class IdentifierField
   /// Set methods 
   void clear (); 
   void set (element_type minimum, element_type maximum); 
-  void set_minimum (element_type value); 
-  void set_maximum (element_type value); 
   void add_value (element_type value); 
   void set (const element_vector& values); 
   void set (bool wraparound); 
@@ -128,7 +134,8 @@ class IdentifierField
 
 private : 
   static constexpr int m_maxNumberOfIndices = 100;
-  
+  void set_minimum (element_type value); 
+  void set_maximum (element_type value); 
 
   /// Create index table from value table
   void create_index_table();
