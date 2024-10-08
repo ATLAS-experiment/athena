@@ -1697,6 +1697,9 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   
   m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
 
+  static const SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc ("g0data");
+  static const SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc ("g1data");
+  
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
   
