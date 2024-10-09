@@ -22,13 +22,13 @@ def GfexInputMonitoringConfig(flags):
     # path to the expert area for gFex Monitoring Plots
     trigPath = 'Expert/Inputs/gFEX'
 
-    from math import pi
     
     import numpy as np
-    eta_bins= [-4.9, -4.5, -3.9,-3.5,-3.3,-3.1,-2.9,-2.7,-2.5]
+    eta_bins= [-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5]
     for eta in np.arange (-2.2,2.2,0.2):
             eta_bins.append(eta)
-    eta_bins+= [2.2,2.5,2.7,2.9,3.1,3.3,3.5,3.9,4.5,4.9]
+    eta_bins+= [2.2,2.5,2.7,2.9,3.1,3.25,3.3,3.5,4.1,4.9]
+
 
     
     # histograms of gFex tower variables
@@ -47,15 +47,17 @@ def GfexInputMonitoringConfig(flags):
                            type='TH2F',
                            path=trigPath,
                            hanConfig={"description":"Look for hot spots with unusual high statistics; Check <a href='./detail/h_HotTowers_posVsLBN'>detail plot</a> to get timeseries for each location", "display":"SetPalette(55),Draw=COL1Z"},
-                           xbins=eta_bins, ybins=32,ymin=-pi,ymax=pi)
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
 
-    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;40(y-1)+x',
+                          
+
+    helper.defineHistogram('LBN,binNumber;h_HotTowers_posVsLBN',title='gFex Towers with Et > 2GeV;LB;binNumber',
                            path=f"{trigPath}/detail",
                            fillGroup = "highEtgTowers",
                            hanConfig={"description":"x and y correspond to axis bin numbers on <a href='h_HotTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
-                           ybins=32*40,ymin=0,ymax=32*40,
+                           ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
  #   helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_TowerHeatMapHotTowers', title='gFex Tower Average Et Distribution (gTowerEt > 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
@@ -71,7 +73,7 @@ def GfexInputMonitoringConfig(flags):
                            type='TH2F',
                            path=trigPath,
                            hanConfig={"description":"Look for cold spots with unusual high statistics; Check <a href='./detail/h_ColdTowers_posVsLBN'>detail plot</a> to get timeseries for each location ", "display":"SetPalette(55),Draw=COL1Z"},
-                           xbins=eta_bins, ybins=32,ymin=-pi,ymax=pi)
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
 
     helper.defineHistogram('LBN,binNumber;h_ColdTowers_posVsLBN',title='gFex Towers with Et < -2GeV;LB;40(y-1)+x',
                            path=f"{trigPath}/detail",
@@ -79,7 +81,7 @@ def GfexInputMonitoringConfig(flags):
                            hanConfig={"description":"x and y correspond to axis bin numbers on <a href='h_ColdTower_EtaPhiMap'/>eta-phi plot</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
-                           ybins=32*40,ymin=0,ymax=32*40,
+                           ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
 #    helper.defineHistogram('TowerEta,TowerPhi,TowerEt;h_TowerHeatMapColdTowers', title='gFex Tower Average Et Distribution (gTower Et < - 2 GeV) ;#eta;#phi;averageEt (count x 50 MeV)',
