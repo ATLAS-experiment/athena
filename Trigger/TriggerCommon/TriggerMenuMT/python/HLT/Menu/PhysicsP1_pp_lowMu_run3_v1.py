@@ -218,7 +218,7 @@ def getLowMuPhysicsSignatures():
 
         #Phase1
         #performace chains
-        ChainProp(name="HLT_j30_0eta290_020jvt_boffperf_pf_ftf_L1jTE50", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
+        ChainProp(name="HLT_j30_0eta290_020jvt_boffperf_pf_ftf_L1jTE50", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup, monGroups=['bJetMon:online', 'bJetMon:t0']),
         ChainProp(name="HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ40", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
         ChainProp(name="HLT_j60_0eta290_020jvt_boffperf_pf_ftf_L1jJ50", l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=PrimaryPhIGroup+SingleBjetGroup),
         ChainProp(name="HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ60", l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleBjetGroup),
