@@ -14,9 +14,11 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::initialize()
     ATH_CHECK(m_xAODStripClusterContainerKeys.initialize());
     ATH_CHECK(m_xAODSpacePointContainerKeys.initialize());
     ATH_CHECK(m_FPGARoadsKey.initialize(!m_isDataPrep));
-    ATH_CHECK(m_FPGAProtoTrackCollection.initialize(!m_isDataPrep));
+    ATH_CHECK(m_FPGAProtoTrackCollections.initialize(!m_isDataPrep));
     ATH_CHECK(m_FPGATracksKey.initialize(!m_isDataPrep));
-	      
+    ATH_CHECK(m_ActsTrackCollections.initialize(!m_isDataPrep));
+
+    ATH_CHECK(m_ActsInspectionTool.retrieve());
     return StatusCode::SUCCESS;
 }
 
@@ -52,30 +54,70 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         else {processxAODSpacePoints(spContainer);}
     }
     if (!m_isDataPrep.value()) {
-      // Process FPGATrackSim Roads
-      SG::ReadHandle<FPGATrackSimRoadCollection> FPGATrackSimRoads(m_FPGARoadsKey, ctx);
-      if (!FPGATrackSimRoads.isValid()) {
-        ATH_MSG_ERROR("Could not find FPGA Roads Collection with key " << FPGATrackSimRoads.key());
-        return StatusCode::FAILURE;
-      }
-      processFPGARoads(FPGATrackSimRoads);
-      
-      // Process FPGATrackSim Tracks
-      SG::ReadHandle<FPGATrackSimTrackCollection> FPGATrackSimTracks(m_FPGATracksKey, ctx);
-      if (!FPGATrackSimTracks.isValid()) {
-        ATH_MSG_ERROR("Could not find FPGA Track Collection with key " << FPGATrackSimTracks.key());
-        return StatusCode::FAILURE;
-      }
-      processFPGATracks(FPGATrackSimTracks);
-      
-      // Process FPGATrackSim Prototracks
-      SG::ReadHandle<ActsTrk::ProtoTrackCollection> FPGATrackSimProtoTracks(m_FPGAProtoTrackCollection, ctx);
-      if (!FPGATrackSimProtoTracks.isValid()) {
-        ATH_MSG_ERROR("Could not find FPGA Prototrack Collection with key " << FPGATrackSimProtoTracks.key());
-        return StatusCode::FAILURE;
-      }
-      processFPGAPrototracks(FPGATrackSimProtoTracks);
-    }
+        // Process FPGATrackSim Roads
+        SG::ReadHandle<FPGATrackSimRoadCollection> FPGATrackSimRoads(m_FPGARoadsKey, ctx);
+        if (!FPGATrackSimRoads.isValid()) {
+            ATH_MSG_ERROR("Could not find FPGA Roads Collection with key " << FPGATrackSimRoads.key());
+            return StatusCode::FAILURE;
+        }
+        processFPGARoads(FPGATrackSimRoads);
+
+        // Process FPGATrackSim Tracks
+        SG::ReadHandle<FPGATrackSimTrackCollection> FPGATrackSimTracks(m_FPGATracksKey, ctx);
+        if (!FPGATrackSimTracks.isValid()) {
+            ATH_MSG_ERROR("Could not find FPGA Track Collection with key " << FPGATrackSimTracks.key());
+            return StatusCode::FAILURE;
+        }
+        processFPGATracks(FPGATrackSimTracks);
+
+        // Process FPGATrackSim Prototracks
+        std::vector<SG::ReadHandle<ActsTrk::ProtoTrackCollection>> FPGATrackSimProtoTracks = m_FPGAProtoTrackCollections.makeHandles(ctx);
+        for (SG::ReadHandle<ActsTrk::ProtoTrackCollection>& prototrackContainer : FPGATrackSimProtoTracks)
+        {
+            if (!prototrackContainer.isValid()) {
+                ATH_MSG_ERROR("Invalid SG key " << prototrackContainer.key());
+                return StatusCode::FAILURE;
+            }
+            processFPGAPrototracks(prototrackContainer);
+        }
+
+        // Process Acts tracks
+        std::vector<SG::ReadHandle<ActsTrk::TrackContainer>> FPGAActsTracks = m_ActsTrackCollections.makeHandles(ctx);
+        for (SG::ReadHandle<ActsTrk::TrackContainer>& actsTrackContainer : FPGAActsTracks)
+        {
+            if (actsTrackContainer.cptr()) ATH_MSG_DEBUG("Proccessing " << actsTrackContainer.key());
+            else continue;
+            // initialize the ReadHandle pair if necessarys
+            m_allActsTracks.try_emplace(actsTrackContainer.key(), std::vector<FPGATrackSimActsEventTracks>{});
+
+            // fetch acts tracks
+            m_allActsTracks[actsTrackContainer.key()].push_back(std::move(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr()))));
+
+            // initialize ReadHandle stats map for all tracks if necessary
+            m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
+
+            m_actsTrackStats[actsTrackContainer.key()].emplace(
+                Acts::TrackStateFlag::OutlierFlag, std::vector<uint32_t>{});
+            m_actsTrackStats[actsTrackContainer.key()].emplace(
+                Acts::TrackStateFlag::HoleFlag, std::vector<uint32_t>{});
+            m_actsTrackStats[actsTrackContainer.key()].emplace(
+                Acts::TrackStateFlag::MeasurementFlag, std::vector<uint32_t>{});
+
+            for (const auto& track : m_allActsTracks[actsTrackContainer.key()].back()) {
+                uint32_t t_nOutliers = 0, t_nMeasurements = 0, t_nHoles = 0;
+                for (const auto& measurement : track->trackMeasurements)
+                {
+                    if (measurement->outlierFlag) ++t_nOutliers;
+                    if (measurement->measurementFlag) ++t_nMeasurements;
+                    if (measurement->holeFlag) ++t_nHoles;
+                }
+                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::OutlierFlag].push_back(t_nOutliers);
+                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HoleFlag].push_back(t_nHoles);
+                m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::MeasurementFlag].push_back(t_nMeasurements);
+            }
+            if (m_printoutForEveryEvent) ATH_MSG_INFO(m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
+        }
+    } // if it's not the data preparation chain
     return StatusCode::SUCCESS;
 }
 
@@ -138,6 +180,7 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::finalize()
       ATH_MSG_INFO( summaryTableFPGAPrototracks );
     }
 
+    ATH_MSG_INFO(m_ActsInspectionTool->getPrintoutStatistics(m_actsTrackStats));
     return StatusCode::SUCCESS;
 }
 

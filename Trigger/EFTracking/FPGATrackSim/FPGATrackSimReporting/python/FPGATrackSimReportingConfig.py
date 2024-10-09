@@ -3,6 +3,12 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def FPGATrackSimActsInspectionToolCfg():
+    acc  = ComponentAccumulator()
+    actsTrackInspection = CompFactory.FPGATrackSim.ActsTrackInspectionTool()
+    acc.setPrivateTools(actsTrackInspection)
+    return acc
+
 def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',**kwargs):
     acc = ComponentAccumulator()
     
@@ -13,12 +19,15 @@ def FPGATrackSimReportingCfg(flags,name='FPGATrackSimReportingAlg',**kwargs):
     xAODStripClustersOfInterest += ["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit","xAODSpacePoints_1stFromFPGASP"]
     
     kwargs.setdefault('perEventReports',True)
-    kwargs.setdefault('xAODPixelClusterContainersFromFPGA',["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"])
-    kwargs.setdefault('xAODStripClusterContainersFromFPGA',["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"])
+    kwargs.setdefault('xAODPixelClusterContainers',["ITkPixelClusters" ,"xAODPixelClusters_1stFromFPGACluster", "xAODPixelClusters_1stFromFPGAHit"])
+    kwargs.setdefault('xAODStripClusterContainers',["ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"])
     kwargs.setdefault('xAODSpacePointContainersFromFPGA',["xAODStripSpacePoints_1stFromFPGA","xAODPixelSpacePoints_1stFromFPGA"])
     kwargs.setdefault('FPGATrackSimTracks','FPGATracks_1st')
     kwargs.setdefault('FPGATrackSimRoads','FPGARoads_1st')
-    kwargs.setdefault('FPGATrackSimProtoTracks','ActsProtoTracks_1stFromFPGATrack')
+    kwargs.setdefault('FPGATrackSimProtoTracks',["ActsProtoTracks_1stFromFPGATrack"])
+    kwargs.setdefault('FPGAActsTracks',["ACTSProtoTrackChainTestTracks","ExtendedFPGATracks"])
     
+    reportinAlgorithm = CompFactory.FPGATrackSim.FPGATrackSimReportingAlg(name,**kwargs)
+    reportinAlgorithm.ActsInspectionTool = acc.getPrimaryAndMerge(FPGATrackSimActsInspectionToolCfg())
     acc.addEventAlgo(CompFactory.FPGATrackSim.FPGATrackSimReportingAlg(name,**kwargs))
     return acc
