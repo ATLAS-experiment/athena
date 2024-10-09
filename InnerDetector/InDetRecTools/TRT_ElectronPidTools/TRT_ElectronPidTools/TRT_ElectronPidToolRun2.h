@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -132,10 +132,13 @@ namespace InDet
 
     double inline sqr(double a) {return a*a;} 
 
-    const TRT_ID*              m_trtId;               // TRT ID helper (identifying barrel/wheels and global position)
-    unsigned int               m_minTRThits;          // Minimum number of TRT hits to give PID.
-    float                      m_ptMinNN;             // Minimum track pt to calculate NN response for PID
-    bool                       m_calculateNN;         // Decide whether to use NN PID
+    const TRT_ID* m_trtId{nullptr}; // TRT ID helper (identifying barrel/wheels and global position)
+    UnsignedIntegerProperty m_minTRThits{this, "MinimumTRThitsForIDpid", 5,
+      "Minimum number of TRT hits to give PID"};
+    FloatProperty m_ptMinNN{this, "MinimumTrackPtForNNPid", 2000.,
+      "Minimum track pt to calculate NN response for PID"};
+    BooleanProperty m_calculateNN{this, "CalculateNNPid", true,
+      "Decide whether to use NN PID"};
 
     ToolHandle<ITRT_ToT_dEdx> m_TRTdEdxTool{ this,
                                              "TRT_ToT_dEdx_Tool",

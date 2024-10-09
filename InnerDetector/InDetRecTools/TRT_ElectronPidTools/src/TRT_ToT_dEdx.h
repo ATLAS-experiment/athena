@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_TOT_DEDX_H
@@ -40,17 +40,13 @@
 
 class TRT_ID;
 class IChronoStatSvc;
-class ITRT_StrawSummaryTool;
 
 namespace InDet {
-   class ITRT_LocalOccupancy;
+  class ITRT_LocalOccupancy;
 }
 
 class TRT_ToT_dEdx final : virtual public ITRT_ToT_dEdx, public AthAlgTool 
 {
-public:
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; 
-
 public:
   //////////////////////////////////////////////////////////////////////////
   // enums
@@ -61,23 +57,35 @@ public:
   enum EGasType {kXenon,kArgon,kKrypton,kUnset};
 
 private:
+
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_rdhkEvtInfo {this
       , "averageInteractionsPerCrossingKey"
       , "EventInfo.averageInteractionsPerCrossing"
       , "Decoration for Average Interaction Per Crossing"};
-  const TRT_ID* m_trtId;                                                // ID TRT helper 
+  const TRT_ID* m_trtId{nullptr}; // ID TRT helper
+
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool
+    {this, "TRTStrawSummaryTool", "TRT_StrawStatusSummaryTool"};
 
   ToolHandle< Trk::IPRD_AssociationTool >  m_assoTool{this, "AssociationTool","InDet::InDetPRD_AssociationToolGangedPixels","PRD_AssociationTool"};
   ToolHandle< InDet::ITRT_LocalOccupancy > m_localOccTool{this, "TRT_LocalOccupancyTool","", "Local occupancy tool"}; 
 
   // Algorithm switchers
 
-  bool m_corrected{};                 // If true - make correction using rs-distributions
-  bool m_divideByL{};                 // If true - divide ToT to the L of track in straw.
+  BooleanProperty m_corrected{this, "TRT_dEdx_corrected", true,
+    "If true - make correction using rs-distributions"};
+  BooleanProperty m_divideByL{this, "TRT_dEdx_divideByL", true,
+    "If true - divide ToT to the L of track in straw"};
 
-  int  m_useTrackPartWithGasType{};   // If kUnset - use any gas for dEdX calculation;
-  int  m_toolScenario{};              // Algorithm type for dEdX estimator calculation;
-  int  m_correctionType{};            // Type of dEdx correction
+  IntegerProperty m_useTrackPartWithGasType
+    {this, "TRT_dEdx_useTrackPartWithGasType", kUnset,
+     "If kUnset - use any gas for dEdX calculation"};
+  IntegerProperty m_toolScenario
+    {this, "TRT_dEdx_toolScenario", kAlgReweightTrunkOne,
+     "Algorithm type for dEdX estimator calculation"};
+  IntegerProperty m_correctionType
+    {this, "TRT_dEdx_correctionType", kTrackBased, "Type of dEdx correction"};
+
   ////////////////////////////////////////////////////
   // Different cases for correctionType            //
   // kRSOnly: only r-S calibration                  //
@@ -88,13 +96,16 @@ private:
 
 
   // Event info
-  bool m_isData{};                  // Is Data?
+  BooleanProperty m_isData{this, "TRT_dEdx_isData", true};
 
   // Track info
-  float m_trackConfig_maxRtrack{};  // maximum track radius
-  float m_trackConfig_minRtrack{};  // maximum track radius
+  FloatProperty m_trackConfig_maxRtrack
+    {this, "TRT_dEdx_trackConfig_maxRtrack", 1.85, "maximum track radius"};
+  FloatProperty m_trackConfig_minRtrack
+    {this, "TRT_dEdx_trackConfig_minRtrack", 0.15, "maximum track radius"};
 
-  bool m_useZeroRHitCut{};  // skip tracks with where RHit=0
+  BooleanProperty m_useZeroRHitCut{this, "TRT_dEdx_useZeroRHitCut", true,
+    "skip tracks with where RHit=0"};
 
   unsigned int m_nTrunkateHits = 1;
 
@@ -349,8 +360,6 @@ private:
 
 public:
   // Setters and getters
-
-  void  setDefaultConfiguration();
 
   void  setStatusCorrection(bool value)       { m_corrected = value;        }
   bool  getStatusCorrection() const           { return m_corrected;         }
