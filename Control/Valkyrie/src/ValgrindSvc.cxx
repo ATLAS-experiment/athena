@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ValgrindSvc.cxx 
@@ -34,7 +34,7 @@
 ////////////////
 ValgrindSvc::ValgrindSvc( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
-  AthService(name, pSvcLocator),
+  base_class(name, pSvcLocator),
   m_eventCounter(0),
   m_profileCounter(0)
 {
@@ -58,9 +58,6 @@ ValgrindSvc::ValgrindSvc( const std::string& name,
   
   declareProperty( "IgnoreFirstNEvents", m_ignoreFirstNEvents = 0,
                    "Do not profile the first N events");
-
-  // for SvcHandle ? someday ?
-  //declareInterface<IValgrindSvc>(this);
 }
 
 // Destructor
@@ -117,19 +114,6 @@ StatusCode ValgrindSvc::initialize()
 StatusCode ValgrindSvc::finalize()
 {
   ATH_MSG_INFO ("Finalizing " << name() << "...");
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode ValgrindSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) 
-{
-  if ( IValgrindSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IValgrindSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 
