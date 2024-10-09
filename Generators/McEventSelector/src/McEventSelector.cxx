@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -200,24 +200,8 @@ McContext::~McContext() {
 }
 
 
-// IInterface::queryInterface
-StatusCode McEventSelector::queryInterface(const InterfaceID& riid,
-        void** ppvIf) {
-    if ( riid == IEvtSelector::interfaceID() )  {
-        *ppvIf = (IEvtSelector*)this;
-        addRef();
-        return StatusCode::SUCCESS;
-    } else if (riid == IEvtSelectorSeek::interfaceID() ) {
-        *ppvIf = dynamic_cast<IEvtSelectorSeek*>(this);
-        addRef();
-        return StatusCode::SUCCESS;
-    }
-    return AthService::queryInterface( riid, ppvIf );
-}
-
-
 McEventSelector::McEventSelector( const std::string& name, ISvcLocator* svcloc ) :
-    AthService( name, svcloc),
+    base_class( name, svcloc),
     m_ctx(0)
 {
 
@@ -272,12 +256,9 @@ StatusCode McEventSelector::initialize()     {
 StatusCode McEventSelector::stop()     {
     ATH_MSG_DEBUG ("............. stop .............");
 
-    const bool createIf = true;
-    IIncidentSvc* incSvc = 0;
-    if ( !service("IncidentSvc", incSvc, createIf).isSuccess() || 0 == incSvc ) {
-        ATH_MSG_ERROR ("Could not retrieve IncidentSvc ");
-        return StatusCode::FAILURE;
-    }
+    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+    ATH_CHECK( incSvc.retrieve() );
+
     Incident lastInputIncident(name(), "LastInput");
     incSvc->fireIncident(lastInputIncident);
 
