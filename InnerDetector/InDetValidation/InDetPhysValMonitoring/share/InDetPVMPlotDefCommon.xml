@@ -3134,7 +3134,27 @@
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
+<h id="ntracks_vs_truthMu_absEta_0_2p5" type="TH2" title="Number of tracks versus truth #GT#mu#LT">
+  <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_truthMu_pT_1GeV" type="TH2" title="Number of tracks versus truth #GT#mu#LT">
+  <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
 <h id="ntracks_vs_actualMu" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
+  <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_actualMu_absEta_0_2p5" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
+  <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_actualMu_pT_1GeV" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
   <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
@@ -3143,6 +3163,17 @@
   <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
+
+<h id="ntracks_vs_nvertices_absEta_0_2p5" type="TH2" title="Number of tracks versus number ofvertices">
+  <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_nvertices_pT_1GeV" type="TH2" title="Number of tracks versus number ofvertices">
+  <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
 <h id="vx_n_vs_truthMu" type="TH2" title="Number of vertices vs truth #mu;N vertices;Truth #mu;Entries">
   <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>

@@ -180,11 +180,12 @@ InDetRttPlots::fill(const xAOD::TrackParticle& particle, const float mu, const u
 }
 
 void
-InDetRttPlots::fill(const unsigned int ntracks, const unsigned int truthMu,
+InDetRttPlots::fill(const unsigned int ntracksFull, const unsigned int ntracksCentral,
+		    const unsigned int ntracksPt1GeV, const unsigned int truthMu,
 		    const float actualMu, const unsigned int nvertices,
 		    const float weight) {
 
-  if (m_nTracks) m_nTracks->fill(ntracks, truthMu, actualMu, nvertices, weight);
+  if (m_nTracks) m_nTracks->fill(ntracksFull, ntracksCentral, ntracksPt1GeV, truthMu, actualMu, nvertices, weight);
   
 }
 //
