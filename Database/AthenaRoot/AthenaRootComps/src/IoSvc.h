@@ -58,18 +58,18 @@ class IoSvc
   ///////////////////////////////////////////////////////////////////
 
   /// test if a given file descriptor `fd` is known to us
-  bool has_fd(Fd fd) const;
+  virtual bool has_fd(Fd fd) const override;
 
   /// retrieve the file descriptor associated with file `fname`
   /// @returns -1 if no such `fname` is known
-  Fd fd(const std::string& fname) const;
+  virtual Fd fd(const std::string& fname) const override;
 
   /// retrieve the file `fname` associated with file descriptor `fd`
   /// @returns empty string if no such `fd` is known
-  const std::string& fname(Fd fd) const;
+  virtual const std::string& fname(Fd fd) const override;
 
   /// retrieve the open mode associated with file descriptor `fd`
-  IoType mode(Fd fd) const;
+  virtual IoType mode(Fd fd) const override;
 
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
@@ -77,10 +77,10 @@ class IoSvc
 
   /// open file `fname` with open mode `mode`
   /// @returns -1 if not successful
-  Fd open(const std::string& fname, IoType mode);
+  virtual Fd open(const std::string& fname, IoType mode) override;
 
   /// close file `fd`
-  StatusCode close(Fd fd);
+  virtual StatusCode close(Fd fd) override;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 

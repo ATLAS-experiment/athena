@@ -55,11 +55,11 @@ public:
 
 /** incident service handle for EndEvent. Calls monitor. There should be more elegant way to get number of events passed.
 */
-  void handle( const Incident& incident );
+  virtual void handle( const Incident& incident ) override;
 
   // do the auditing, called from DataStore.cxx 
   virtual void SGAudit(const std::string& key, const CLID& id, 
-		       const int& fnc, const int& store_id);
+		       const int& fnc, const int& store_id) override;
 
   
 /** 
@@ -69,11 +69,11 @@ public:
 /** 
 * @brief For implementing custom increased granularity auditing of for instance tools.
 */
-  void setFakeCurrentAlg(const std::string&);
+  virtual void setFakeCurrentAlg(const std::string&) override;
 /** 
 * @brief For implementing custom increased granularity auditing of for instance tools.
 */
-  void clearFakeCurrentAlg();
+  virtual void clearFakeCurrentAlg() override;
  
   private: 
 
