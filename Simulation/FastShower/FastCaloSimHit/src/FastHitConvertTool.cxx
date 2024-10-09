@@ -2,10 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// FastHitConvertTool.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #include "FastHitConvertTool.h"
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -18,14 +14,10 @@
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/TileID.h"
 #include "CxxUtils/checker_macros.h"
-#include "EventInfo/PileUpEventInfo.h"
-#include "EventInfo/EventType.h"
 #include "LArSimEvent/LArHitFloat.h"
 #include "LArSimEvent/LArHitFloatContainer.h"
 #include "LArSimEvent/LArHit.h"
 #include "LArSimEvent/LArHitContainer.h"
-#include "PileUpTools/PileUpMergeSvc.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "TileIdentifier/TileHWID.h"
 #include "TileEvent/TileCellContainer.h"
 #include "TileSimEvent/TileHit.h"
@@ -37,8 +29,7 @@ FastHitConvertTool::FastHitConvertTool(const std::string& type,
                                        const std::string& name,
                                        const IInterface*  parent )
   :
-  base_class(type,name,parent),
-  m_storeGateFastCalo("StoreGateSvc/FastCalo",name)
+  base_class(type,name,parent)
 {
 }
 
@@ -53,13 +44,6 @@ FastHitConvertTool::FastHitConvertTool(const std::string& type,
 StatusCode FastHitConvertTool::initialize()
 {
 
-  //Service for Pileup
-  if(m_pileup)
-    {
-      CHECK(service("PileUpMergeSvc", m_pMergeSvc));
-      CHECK(m_storeGateFastCalo.retrieve());
-    }
-  ATH_MSG_DEBUG("StoreGateFastCalo Svc structure at Initialisation"<<(*m_storeGateFastCalo).dump());
   const CaloIdManager* caloIdManager = nullptr;
   CHECK(detStore()->retrieve(caloIdManager));
   m_larEmID=caloIdManager->getEM_ID();
@@ -90,10 +74,6 @@ StatusCode FastHitConvertTool::initialize()
   ATH_CHECK(m_fcalHitContainerKey.initialize());
   ATH_CHECK(m_hecHitContainerKey.initialize());
   ATH_CHECK(m_tileHitVectorKey.initialize());
-
-  // Inputs for pileup (only initialized if m_pileup==true)
-  ATH_CHECK(m_pileup_evt.initialize(m_pileup));
-  ATH_CHECK(m_pileup_pOverEvent.initialize(m_pileup));
 
   return StatusCode::SUCCESS;
 }
@@ -284,22 +264,5 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
   ATH_MSG_DEBUG(hecHitContainer.name()<<" : "<<hecHitContainer->size()<<" hits ");
   ATH_MSG_DEBUG(tileHitVector.name()<<" : "<<tileHitVector->size()<<" hits ");
 
-  if(m_pileup)
-    {
-      CHECK((*m_storeGateFastCalo).clearStore(true));
-      auto evt = SG::makeHandle<EventInfo>(m_pileup_evt, ctx);
-      auto newEvt=std::make_unique<EventInfo>(*evt);
-
-      // Migration note: this was an evtStore()->retrieve for a non-const pointer
-      // Using a const_cast to preserve the old behaviour, but this is MT-unfriendly
-      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
-         ATH_MSG_ERROR ("FastHitConvertTool doesn't support pileup in AthenaMT");
-         return StatusCode::FAILURE;
-      }
-      auto pOverEventHandle = SG::makeHandle<PileUpEventInfo>(m_pileup_pOverEvent, ctx);
-      auto pOverEvent ATLAS_THREAD_SAFE =  // we checked above that this is not MT
-        const_cast<PileUpEventInfo*>(pOverEventHandle.get());
-      pOverEvent->addSubEvt(0,PileUpTimeEventIndex::Signal,std::move(newEvt),&(*m_storeGateFastCalo));
-    }
   return StatusCode::SUCCESS;
 }

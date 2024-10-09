@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// FastHitConvertTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef FASTCALOSIMHIT_FASTHITCONVERTTOOL_H
 #define FASTCALOSIMHIT_FASTHITCONVERTTOOL_H
@@ -14,13 +10,11 @@
 #include "CaloInterface/ICaloCellMakerTool.h"
 #include "LArElecCalib/ILArfSampl.h"
 #include "LArSimEvent/LArHitContainer.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TileSimEvent/TileHitVector.h"
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileConditions/TileCablingSvc.h"
-#include "EventInfo/PileUpEventInfo.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -28,7 +22,6 @@ class LArHitFloat;
 class LArHitFloatContainer;
 class LArHit;
 class LArHitContainer;
-class PileUpMergeSvc;
 class TileInfo;
 class LArEM_ID;
 class LArFCAL_ID;
@@ -70,9 +63,6 @@ private:
   SG::WriteHandleKey<LArHitContainer> m_hecHitContainerKey{this,"hecHitContainername","LArHitHEC","Name of output FastSim LAr HEC Hit Container"};
   SG::WriteHandleKey<TileHitVector>   m_tileHitVectorKey{this,"tileHitContainername","TileHitVec","Name of output FastSim Tile Hit Container"};
 
-  ServiceHandle<StoreGateSvc> m_storeGateFastCalo;
-  PileUpMergeSvc *m_pMergeSvc{nullptr};
-
   SG::ReadCondHandleKey<ILArfSampl> m_fSamplKey{this,"fSamplKey","LArfSamplSym","SG Key of LArfSampl object"};
 
   /**
@@ -93,9 +83,5 @@ private:
   const TileID* m_tileID{nullptr};
   const TileHWID*     m_tileHWID{nullptr};
   const TileCablingService* m_tileCabling{nullptr};
-
-  Gaudi::Property<bool> m_pileup{this,"doPileup",false,"Pileup mode (default=false)"};
-  SG::ReadHandleKey<EventInfo> m_pileup_evt{this,"pileupEventInfo","MyEvent",""};
-  SG::ReadHandleKey<PileUpEventInfo> m_pileup_pOverEvent{this,"pileupOverlayEvent","OverlayEvent",""};
 };
 #endif          //FASTCALOSIMHIT_FASTHITCONVERTTOOL_H
