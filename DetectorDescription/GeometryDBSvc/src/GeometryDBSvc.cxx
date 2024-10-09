@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeometryDBSvc.h"
@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 GeometryDBSvc::GeometryDBSvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
-  AthService(name, pSvcLocator),
+  base_class(name, pSvcLocator),
   m_textParameters(0)
 {
   declareProperty("TextFileName",m_textFileName, "Text file name for overriding database.");
@@ -96,23 +96,6 @@ GeometryDBSvc::finalize()
   return StatusCode::SUCCESS;
 }
 
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode
-GeometryDBSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IGeometryDBSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IGeometryDBSvc *>(this);
-  }  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
 
 void 
 GeometryDBSvc::setParameterFileName(const std::string & filename)

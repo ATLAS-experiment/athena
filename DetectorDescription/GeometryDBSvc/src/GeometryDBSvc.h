@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GeometryDBSvc_h
@@ -22,7 +22,7 @@ class IRDBRecordset;
  * override entries from a text file.
 **/
 
-class GeometryDBSvc:  public AthService, virtual public IGeometryDBSvc
+class GeometryDBSvc:  public extends<AthService, IGeometryDBSvc>
 {
 public:
   GeometryDBSvc(const std::string& name, ISvcLocator* sl);
@@ -30,9 +30,6 @@ public:
 
   virtual StatusCode initialize();          //!< Service init
   virtual StatusCode finalize();            //!< Service finalize
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-
-  static const InterfaceID & interfaceID();
 
   virtual double getDouble(IRDBRecordset_ptr recordSet, const std::string & name, int index=0) const; 
   virtual int getInt(IRDBRecordset_ptr recordSet, const std::string & name, int index=0) const;
@@ -74,9 +71,5 @@ private:
 
 
 };
-
-inline const InterfaceID & GeometryDBSvc::interfaceID(){
-  return IGeometryDBSvc::interfaceID();
-}
 
 #endif                           
