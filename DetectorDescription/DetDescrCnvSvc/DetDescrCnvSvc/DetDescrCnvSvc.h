@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DETDESCRCNVSVC_DETDESCRCNVSVC_H
@@ -8,21 +8,14 @@
 #include "GaudiKernel/ConversionSvc.h"
 
 // Forward declarations
-template <class TYPE>
-class SvcFactory;
-
 class IOpaqueAddress;
 class StoreGateSvc;
 
 class DetDescrCnvSvc : public ConversionSvc {
-    /// Allow the factory class access to the constructor
-    friend class SvcFactory<DetDescrCnvSvc>;
 
    public:
     /// Initialize the service.
     virtual StatusCode initialize();
-    virtual StatusCode queryInterface(const InterfaceID &riid,
-                                      void **ppvInterface);
 
     /// Add new address to the Detector Store
     virtual StatusCode addToDetStore(const CLID &clid,
@@ -56,7 +49,7 @@ class DetDescrCnvSvc : public ConversionSvc {
 
     void initTDSItems();
 
-    StoreGateSvc *m_detStore{nullptr};
+    ServiceHandle<StoreGateSvc> m_detStore;
     StringArrayProperty m_detMgrs{this, "DetectorManagers", {}};
     StringArrayProperty m_detNodes{this, "DetectorNodes", {}};
     BooleanProperty m_decodeIdDict{this, "DecodeIdDict", true};
