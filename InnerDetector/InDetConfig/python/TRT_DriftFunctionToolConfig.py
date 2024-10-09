@@ -44,7 +44,6 @@ def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwarg
             kwargs.setdefault("TRTCalDbTool2", acc.popToolsAndMerge(TRT_MCCalDbToolCfg(flags)))
 
         kwargs.setdefault("IsOverlay", True)
-        kwargs.setdefault("IsMC", False)
 
     acc.setPrivateTools(CompFactory.TRT_DriftFunctionTool(name, **kwargs))
     return acc
