@@ -28,7 +28,7 @@
 #include <fstream>
 
 GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
-  : AthService(name,svc)
+  : base_class(name,svc)
   , m_pSvcLocator(svc)
 {
 }
@@ -118,24 +118,6 @@ StatusCode GeoModelSvc::finalize()
 {
   m_tagInfoMgr->removeListener(this);
   return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode GeoModelSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if(IGeoModelSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = (IGeoModelSvc*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  } 
-  else {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
 }
 
 StatusCode GeoModelSvc::geoInit()

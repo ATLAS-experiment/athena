@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELINTERFACES_IGEOMODELSVC_H
@@ -16,8 +16,8 @@ class IGeoModelTool;
 
 class IGeoModelSvc : virtual public IInterface {
 public:
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID();
+    /// Declare interface ID
+    DeclareInterfaceID(IGeoModelSvc, 1, 1);
 
     virtual const std::string & atlasVersion()         const =0;
     virtual const std::string & inDetVersion()         const =0;
@@ -55,17 +55,4 @@ public:
     virtual const  bool & isEmecStandard()       const=0;
 };
 
-inline
-const InterfaceID&
-IGeoModelSvc::interfaceID() {
-
-  static const InterfaceID IID(1011, 1, 1);
-
-  return IID;
-}
-
-
 #endif // GEOMODELINTERFACES_GEOMODELSVC_H
-
-
-

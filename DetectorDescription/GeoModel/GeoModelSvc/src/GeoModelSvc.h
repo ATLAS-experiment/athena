@@ -23,22 +23,16 @@
 
 class ISvcLocator;
 
-
-template <class TYPE> class SvcFactory;
-
-class GeoModelSvc : public AthService, virtual public IGeoModelSvc,
+class GeoModelSvc : public extends<AthService,
+                                   IGeoModelSvc>,
                     virtual public ITagInfoMgr::Listener
 {
 public:
-    friend class SvcFactory<GeoModelSvc>;
-
     // Standard Constructor
     GeoModelSvc(const std::string& name, ISvcLocator* svc);
 
     virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
     virtual StatusCode finalize() override;
-
-    virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
 
     /// Callback from TagInfoMgr on TagInfo change
     virtual void       tagInfoUpdated() override final;
