@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -92,8 +92,8 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
 
    // Force the Gaudi MessageSvc into existence. This gets rid of the
    // warnings from getMessageSvc().
-   IMessageSvc* msvc = 0;
-   if( Gaudi::svcLocator()->service( "MessageSvc", msvc, true ).isFailure() ) {
+   SmartIF<IMessageSvc> msvc{Gaudi::svcLocator()->service("MessageSvc")};
+   if( !msvc ) {
       REPORT_MESSAGE_WITH_CONTEXT( MSG::ERROR, "d3pdReaderMaker" )
          << "Couldn't set up the Gaudi message service";
       return 255;
