@@ -34,5 +34,6 @@ private:
   StatusCode fillRhoHistograms(const std::string& handleKey, const xAOD::gFexJetRoIContainer* container) const;
   StatusCode fillGlobalTobHistograms(const std::string& handleKey, const xAOD::gFexGlobalRoIContainer* container) const;
   FPGAType getFPGAType(const float& eta) const;
+  int getBinNumberJet (float ,float , int , int ) const;
 };
 #endif

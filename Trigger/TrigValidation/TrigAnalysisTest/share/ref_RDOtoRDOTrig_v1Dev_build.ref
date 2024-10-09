@@ -2210,6 +2210,16 @@ HLT_3j200_pf_ftf_presel3j150_L1jJ160:
   eventCount: 0
 HLT_3j20_020jvt_j20_0eta290_boffperf_pf_ftf_L1HT190-J15s5pETA21:
   eventCount: 0
+HLT_3j20_1j20_pf_ftf_presel3c20XX1c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25:
+  eventCount: 15
+  stepCounts:
+    0: 16
+    1: 16
+    2: 15
+  stepFeatures:
+    0: 32
+    1: 32
+    2: 338
 HLT_3j20c_pf_ftf_presel3c30_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
   eventCount: 16
   stepCounts:
