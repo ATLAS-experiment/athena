@@ -25,7 +25,6 @@
 #include "MuonSimData/MuonSimData.h"
 
 #include "RegSelLUT/RegSelSiLUT.h"
-#include "RegSelLUT/IRegionIDLUT_Creator.h"
 #include "IRegionSelector/IRegSelLUTCondData.h"
 
 #include "TrigT1NSWSimTools/IStripSegmentTool.h"
