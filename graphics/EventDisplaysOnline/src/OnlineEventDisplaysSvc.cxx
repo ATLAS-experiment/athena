@@ -13,7 +13,7 @@
 
 OnlineEventDisplaysSvc::OnlineEventDisplaysSvc( const std::string& name,
                           ISvcLocator* pSvcLocator ) :
-  AthService(name, pSvcLocator){}
+  base_class(name, pSvcLocator){}
 
 void OnlineEventDisplaysSvc::beginEvent(){
 
@@ -224,8 +224,8 @@ gid_t OnlineEventDisplaysSvc::setOwnershipToZpGrpOrDefault(){
 StatusCode OnlineEventDisplaysSvc::initialize(){
 
   ATH_MSG_DEBUG("Initializing " << name());
-  IIncidentSvc* incSvc = nullptr;
-  ATH_CHECK( service("IncidentSvc",incSvc) );
+  ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+  ATH_CHECK( incSvc.retrieve() );
   ATH_MSG_DEBUG("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
   for (std::string stream : m_streamsWanted){
     ATH_MSG_DEBUG(stream);
@@ -255,16 +255,4 @@ void OnlineEventDisplaysSvc::handle( const Incident& incident ){
   if ( incident.type() == "StoreCleared" && incident.source() == "StoreGateSvc" ){
     endEvent();
   }
-}
-
-StatusCode OnlineEventDisplaysSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IOnlineEventDisplaysSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IOnlineEventDisplaysSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }

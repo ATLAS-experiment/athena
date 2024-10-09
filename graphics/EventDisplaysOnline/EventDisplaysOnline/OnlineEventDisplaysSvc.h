@@ -16,21 +16,13 @@
 #include <unistd.h>
 #include <grp.h>
 
-template <class TYPE> class SvcFactory;
 
-class OnlineEventDisplaysSvc : public AthService, virtual public IOnlineEventDisplaysSvc, virtual public IIncidentListener {
-
-protected:
-  friend class SvcFactory<OnlineEventDisplaysSvc>;
-
+class OnlineEventDisplaysSvc : public extends<AthService,
+                                              IOnlineEventDisplaysSvc,
+                                              IIncidentListener> {
 public:
 
   OnlineEventDisplaysSvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  static const InterfaceID& interfaceID();
-
-  //To allow access to the IOnlineEventDisplaysSvc interface
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) override;
 
   StatusCode initialize() override;
   StatusCode finalize() override;
@@ -60,10 +52,5 @@ private:
   long m_eventNumber;
 
 };
-
-inline const InterfaceID& OnlineEventDisplaysSvc::interfaceID()
-{
-  return IOnlineEventDisplaysSvc::interfaceID();
-}
 
 #endif
