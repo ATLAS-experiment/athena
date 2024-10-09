@@ -154,7 +154,7 @@ namespace {
 
 // Standard Constructor
 AthenaOutputStream::AthenaOutputStream(const string& name, ISvcLocator* pSvcLocator)
-      : FilteredAlgorithm(name, pSvcLocator),
+      : base_class(name, pSvcLocator),
         m_dataStore("StoreGateSvc", name),
         m_metadataStore("MetaDataStore", name),
         m_currentStore(&m_dataStore),

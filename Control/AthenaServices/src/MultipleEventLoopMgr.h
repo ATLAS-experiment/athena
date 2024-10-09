@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_MULTIPLEEVENTLOOPMGR_H
@@ -8,7 +8,6 @@
     @brief A specialize AthenaEventLoopMgr that allows multiple passes over an 
     event collection.
     @author Paolo Calafiura - ATLAS Collaboration
-    $Id: MultipleEventLoopMgr.h,v 1.3 2007-06-16 00:55:22 calaf Exp $
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -16,18 +15,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 
 #include <string>
 
-#ifndef GAUDIKERNEL_PROPERTY_H
-# include "Gaudi/Property.h"
-#endif
-#ifndef GAUDIKERNEL_SERVICEHANDLE_H
-# include "GaudiKernel/ServiceHandle.h"
-#endif
-#ifndef GAUDIKERNEL_STATUSCODE_H
-# include "GaudiKernel/StatusCode.h"
-#endif
-#ifndef ATHENASERVICES_ATHENAEVENTLOOPMGR_H
-# include "AthenaEventLoopMgr.h"
-#endif
+#include "Gaudi/Property.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/StatusCode.h"
+#include "AthenaEventLoopMgr.h"
 
 // Forward declarations
 class IAlgManager;
@@ -51,8 +42,6 @@ template <class TYPE> class SvcFactory;
 */
 class MultipleEventLoopMgr : public AthenaEventLoopMgr   {
 public:
-  /// Your creator is your friend
-  friend class SvcFactory<MultipleEventLoopMgr>;
 
   /// Standard Constructor
   MultipleEventLoopMgr(const std::string& nam, ISvcLocator* svcLoc);

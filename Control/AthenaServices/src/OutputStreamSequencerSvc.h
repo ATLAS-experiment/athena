@@ -22,36 +22,30 @@
 // Forward declarations
 class MetaDataSvc;
 
-static const InterfaceID IID_OutputStreamSequencerSvc("OutputStreamSequencerSvc", 1, 0);
-
-template <class TYPE> class SvcFactory;
 
 /** @class OutputStreamSequencerSvc
  *  @brief This class provides configuration properties to enable OutputStream file sequences
  **/
-class OutputStreamSequencerSvc : public ::AthService,
-  virtual public IIncidentListener {
+class OutputStreamSequencerSvc : public extends<AthService,
+                                                IIncidentListener> {
 
  public:
+  using IService::interfaceID;
   typedef std::pair<std::string,std::string> RangeReport_t; // (RangeID,RangeFileName)
   typedef std::unique_ptr<RangeReport_t>     RangeReport_ptr;
 
 public: // Constructor and Destructor
+
    /// Standard Service Constructor
    OutputStreamSequencerSvc(const std::string& name, ISvcLocator* pSvcLocator);
    /// Destructor
    virtual ~OutputStreamSequencerSvc();
-
-   /// Retrieve interface ID
-   static const InterfaceID& interfaceID() { return IID_OutputStreamSequencerSvc; }
 
 public: // Non-static members
    /// Required of all Gaudi services:
    virtual StatusCode initialize() override final;
    /// Required of all Gaudi services:
    virtual StatusCode finalize() override final;
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override final;
 
    /// Incident service handle
    virtual void handle(const Incident& /*inc*/) override final;

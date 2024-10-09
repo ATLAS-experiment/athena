@@ -47,13 +47,12 @@ namespace yampl {
   class ISocket;
 }
 
-class AthenaMtesEventLoopMgr
-  : virtual public IEventSeek,
-    virtual public ICollectionSize,
-    virtual public IIncidentListener,
-    virtual public IHybridProcessorHelper,
-            public MinimalEventLoopMgr,
-            public Athena::TimeoutMaster
+class AthenaMtesEventLoopMgr : public extends<MinimalEventLoopMgr,
+                                              IEventSeek,
+                                              ICollectionSize,
+                                              IIncidentListener,
+                                              IHybridProcessorHelper>,
+                               public Athena::TimeoutMaster
 {
 public:
   typedef IEvtSelector::Context   EvtContext;
@@ -220,10 +219,6 @@ public:
 
   /// Drain the scheduler from all actions that may be queued
   virtual int drainScheduler(int& finishedEvents, bool report) override;
-
-  /// interface dispatcher
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface ) override;
 
   //FIXME hack to workaround pylcgdict problem...
   virtual const std::string& name() const  override { return Service::name(); } //FIXME 

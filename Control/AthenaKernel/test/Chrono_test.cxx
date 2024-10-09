@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -29,7 +29,7 @@ int count = 0;
 
 
 class ChronoSvcTest
-  : public IChronoSvc
+  : public implements<IChronoSvc>
 {
 public:
   virtual       ChronoEntity* chronoStart   ( const std::string& /*t*/ )
@@ -41,10 +41,6 @@ public:
   virtual void  chronoPrint   ( const ChronoTag& ) { std::abort(); }
   virtual ChronoStatus  chronoStatus ( const ChronoTag& ) { std::abort(); }
   virtual const ChronoEntity* chrono ( const ChronoTag& ) const { std::abort(); }
-  virtual unsigned long addRef() { std::abort(); }
-  virtual unsigned long release() { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &, void**) { std::abort(); }
-
 };
 
 

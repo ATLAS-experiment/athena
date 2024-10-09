@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EvtIdModifierSvc.h
@@ -26,8 +26,6 @@
 
 // Forward declaration
 class ISvcLocator;
-template <class TYPE>
-class SvcFactory;
 
 struct ItemModifier {
   EventID::number_type runnbr{0};
@@ -38,9 +36,7 @@ struct ItemModifier {
   int flags{0};
 };
 
-class EvtIdModifierSvc : virtual public ::IEvtIdModifierSvc,
-                         public ::AthService {
-  friend class SvcFactory<EvtIdModifierSvc>;
+class EvtIdModifierSvc : public extends<AthService, IEvtIdModifierSvc> {
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -52,8 +48,6 @@ class EvtIdModifierSvc : virtual public ::IEvtIdModifierSvc,
   /// Gaudi Service Implementation
   //@{
   virtual StatusCode initialize() override;
-  virtual StatusCode queryInterface(const InterfaceID& riid,
-                                    void** ppvInterface) override;
   //@}
 
   ///////////////////////////////////////////////////////////////////
@@ -67,8 +61,6 @@ class EvtIdModifierSvc : virtual public ::IEvtIdModifierSvc,
   ///////////////////////////////////////////////////////////////////
   // Non-const methods:
   ///////////////////////////////////////////////////////////////////
-
-  static const InterfaceID& interfaceID();
 
   /** @brief modify an `EventID`'s lumi block content.
    */
@@ -101,13 +93,5 @@ class EvtIdModifierSvc : virtual public ::IEvtIdModifierSvc,
   /// Running total of numEvts before each modifier
   std::vector<event_number_t> m_numEvtTotals;
 };
-
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
-
-inline const InterfaceID& EvtIdModifierSvc::interfaceID() {
-  return IEvtIdModifierSvc::interfaceID();
-}
 
 #endif  //> !ATHENASERVICES_EVTIDMODIFIERSVC_H

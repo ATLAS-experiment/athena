@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_ILOGGEDMESSAGESVC_H
@@ -12,10 +12,6 @@
 #include <functional>
 
 
-// Declaration of the interface ID ( interface id, major version, minor version) 
-static const InterfaceID IID_ILoggedMessageSvc(31, 1 , 1); 
-
-
 /** @class ILoggedMessageSvc ILoggedMessageSvc.h AthenaKernel/ILoggedMessageSvc.h
 
     Extends IMessageSvc to get logged messages
@@ -25,8 +21,8 @@ static const InterfaceID IID_ILoggedMessageSvc(31, 1 , 1);
 class ILoggedMessageSvc : virtual public IMessageSvc {
 public:
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_ILoggedMessageSvc; }
+  /// Declare interface ID
+  DeclareInterfaceID(ILoggedMessageSvc, 1, 1);
 
   struct LoggedMessage {
     int level;

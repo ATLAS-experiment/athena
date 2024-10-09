@@ -181,17 +181,6 @@ StatusCode MetaDataSvc::stop() {
    return(StatusCode::SUCCESS);
 }
 
-//_______________________________________________________________________
-StatusCode MetaDataSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (riid == this->interfaceID()) {
-      *ppvInterface = this;
-   } else {
-      // Interface is not directly available: try out a base class
-      return(base_class::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
 //________________________________________________________________________________
 StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::tadList& tads) {
    if (storeID != StoreID::METADATA_STORE) { // should this (also) run in the INPUT_METADATA_STORE?

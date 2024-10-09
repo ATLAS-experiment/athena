@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMPLICITCOLLECTION_COLLECTIONITERATOR_H
@@ -37,7 +37,7 @@ namespace pool {
    class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionQuery,
                                                             public ICollectionCursor,
                                                             virtual public IPositionSeek,
-                                                            virtual public ICollectionSize
+                                                            virtual public implements<ICollectionSize>
    {
   public:
      /// Constructor

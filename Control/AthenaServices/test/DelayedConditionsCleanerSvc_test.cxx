@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/DelayedConditionsCleanerSvc_test.cxx
@@ -34,15 +34,12 @@
 
 
 class RCUTest
-  : public Athena::IRCUSvc
+  : public implements<Athena::IRCUSvc>
 {
 public:
   virtual void add (Athena::IRCUObject*) override {  }
   virtual StatusCode remove (Athena::IRCUObject*) override { return StatusCode::SUCCESS; }
   virtual size_t getNumSlots() const override { return 1; }
-  virtual unsigned long addRef()override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface( const InterfaceID&, void** ) override { std::abort(); }
 
 };
 

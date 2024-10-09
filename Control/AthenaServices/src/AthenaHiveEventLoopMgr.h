@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_H
@@ -65,13 +65,10 @@ class IEvtIdModifierSvc;
     - 1: (DEFAULT) RECOVERABLE skips to next event, FAILURE terminates job.
     - 2: RECOVERABLE and FAILURE skip to next events
 */
-class AthenaHiveEventLoopMgr 
-  : virtual public IEventSeek,
-    virtual public ICollectionSize,
-    virtual public IIncidentListener,
-    public MinimalEventLoopMgr,
-    public Athena::TimeoutMaster,
-    public AthMessaging
+class AthenaHiveEventLoopMgr : public extends<MinimalEventLoopMgr,
+                                              IEventSeek, ICollectionSize, IIncidentListener>,
+                               public Athena::TimeoutMaster,
+                               public AthMessaging
 {
 public:
   typedef IEvtSelector::Context   EvtContext;
@@ -223,10 +220,6 @@ public:
   virtual int size() override;
   /// IIncidentListenet interfaces
   virtual void handle(const Incident& inc) override;
-
-  /// interface dispatcher
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface ) override;
 
   using AthMessaging::msg;
   using AthMessaging::msgLvl;

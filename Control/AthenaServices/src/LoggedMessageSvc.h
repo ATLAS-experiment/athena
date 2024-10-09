@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_LOGGEDMESSAGESVC_H
@@ -116,9 +116,6 @@ public:
 
   // Implementation of IMessageSvc::setOuputLevel()
   virtual void setOutputLevel(std::string_view source, int new_level) override;
-
-  // Implementation of IInterface::queryInterface()
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvUnknown) override;
 
   // Implementation of IMessageSvc::useColor()
   virtual bool useColor() const override { return m_color; }

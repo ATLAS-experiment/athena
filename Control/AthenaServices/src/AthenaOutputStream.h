@@ -51,9 +51,8 @@ namespace SG {
    * @brief algorithm that marks for write data objects in SG
    * @author srinir@bnl.gov
    */
-class AthenaOutputStream : public FilteredAlgorithm,
-                           virtual public IIncidentListener,
-                           virtual public IIoComponent {
+class AthenaOutputStream : public extends<FilteredAlgorithm,
+                                          IIncidentListener, IIoComponent> {
 
 public:
    typedef std::vector<SG::DataProxy*>     Items;

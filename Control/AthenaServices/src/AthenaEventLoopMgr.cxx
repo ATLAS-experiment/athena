@@ -62,7 +62,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 //=========================================================================
 AthenaEventLoopMgr::AthenaEventLoopMgr(const std::string& nam, 
 				       ISvcLocator* svcLoc)
-  : MinimalEventLoopMgr(nam, svcLoc), 
+  : base_class(nam, svcLoc),
     AthMessaging (nam),
     m_incidentSvc ( "IncidentSvc",  nam ), 
     m_eventStore( "StoreGateSvc", nam ), 
@@ -1005,30 +1005,8 @@ StatusCode AthenaEventLoopMgr::execAtPreFork(const EventContext& ctx) const {
   return sc;
 }
 
-//=========================================================================
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-//=========================================================================
-StatusCode 
-AthenaEventLoopMgr::queryInterface(const InterfaceID& riid, 
-				   void** ppvInterface) 
-{
-  if ( IEventSeek::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IEventSeek*>(this);
-  }
-  else if ( ICollectionSize::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<ICollectionSize*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return MinimalEventLoopMgr::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-StoreGateSvc* 
+
+StoreGateSvc*
 AthenaEventLoopMgr::eventStore() const {
   return m_eventStore.get();
 }

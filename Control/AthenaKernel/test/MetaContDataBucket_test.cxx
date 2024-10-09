@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/MetaContDataBucket_test.cxx
@@ -20,13 +20,10 @@
 
 
 class TestProxyDict
-  : public IProxyDict
+  : public implements<IProxyDict>
 {
 public:
   virtual const std::string& name() const override { std::abort(); }
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface( const InterfaceID&, void** ) override { std::abort(); }
 
   virtual
   sgkey_t stringToKey (const std::string&, CLID) override { std::abort(); }

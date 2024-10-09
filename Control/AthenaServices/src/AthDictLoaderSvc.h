@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthDictLoaderSvc.h 
@@ -30,15 +30,10 @@
 // Forward declaration
 class ITPCnvSvc;
 class ISvcLocator;
-template <class TYPE> class SvcFactory;
 
-class AthDictLoaderSvc
-  : virtual public ::IDictLoaderSvc,
-            public ::AthService
-{ 
-  friend class SvcFactory<AthDictLoaderSvc>;
-
-  /////////////////////////////////////////////////////////////////// 
+class AthDictLoaderSvc : public extends<::AthService, ::IDictLoaderSvc>
+{
+  ///////////////////////////////////////////////////////////////////
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
@@ -58,11 +53,7 @@ class AthDictLoaderSvc
   //@{
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface ) override;
   //@}
-
-  static const InterfaceID& interfaceID();
 
   /** @brief check a @c Reflex dictionary exists for a given type
    */
@@ -127,18 +118,5 @@ class AthDictLoaderSvc
   void load_recursive1 (const std::string& tnam, Memo_t& memo);
   void load_recursive1 (const RootType& typ, Memo_t& memo);
 }; 
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline 
-const InterfaceID& 
-AthDictLoaderSvc::interfaceID() 
-{ 
-  return IDictLoaderSvc::interfaceID(); 
-}
-
-
 
 #endif //> !ATHENASERVICES_ATHDICTLOADERSVC_H

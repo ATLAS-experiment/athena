@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IDictLoaderSvc.h 
@@ -39,6 +39,7 @@ class IDictLoaderSvc
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
+  DeclareInterfaceID(IDictLoaderSvc, 1, 0);
 
   /** Destructor: 
    */
@@ -48,8 +49,6 @@ class IDictLoaderSvc
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  static const InterfaceID& interfaceID();
-  
   /** @brief check a @c Reflex dictionary exists for a given type
    */
   virtual 
@@ -89,18 +88,5 @@ class IDictLoaderSvc
   const RootType load_type (CLID clid, bool recursive = false) = 0;
 
 }; 
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline 
-const InterfaceID& 
-IDictLoaderSvc::interfaceID() 
-{ 
-  static const InterfaceID IID_IDictLoaderSvc("IDictLoaderSvc", 1, 0);
-  return IID_IDictLoaderSvc; 
-}
-
 
 #endif //> !ATHENAKERNEL_IDICTLOADERSVC_H

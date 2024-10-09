@@ -1,21 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IPAGEACCESSCONTROLSVC_H
 #define ATHENAKERNEL_IPAGEACCESSCONTROLSVC_H
 
-/**
- * @file   IPageAccessControlSvc.h
- * @brief  Interface to a service that monitors memory page accesses
- * @author Paolo Calafiura
- *
- * $Id: IPageAccessControlSvc.h,v 1.1 2009-03-04 23:38:52 calaf Exp $
- */
+#include "GaudiKernel/IInterface.h"
 
-#ifndef GAUDIKERNEL_IINTERFACE_H
- #include "GaudiKernel/IInterface.h"
-#endif
+class PageAccessControl;
 
 /**
  * @class  IPageAccessControlSvc
@@ -24,13 +16,10 @@
  *
  * This interface allows to start and stop the monitoring and to print a report
  */
-
-class PageAccessControl;
-
 class IPageAccessControlSvc: virtual public IInterface {
 public:
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID();
+  /// Declare interface ID
+  DeclareInterfaceID(IPageAccessControlSvc, 1, 0);
 
   /// Virtualize D'tor
   virtual ~IPageAccessControlSvc() {}
@@ -51,12 +40,5 @@ public:
   ///protect/restore page access
   //hopefully not necessary  virtual PageAccessControl* pac() = 0;
 };
-
-
-inline const InterfaceID& IPageAccessControlSvc::interfaceID()
-{
-  static const InterfaceID IID_IPageAccessControlSvc("IPageAccessControlSvc", 1, 0);
-  return IID_IPageAccessControlSvc;
-}
 
 #endif // ATHENAKERNEL_IPAGEACCESSCONTROLSVC_H

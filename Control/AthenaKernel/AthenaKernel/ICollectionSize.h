@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ICollectionSize.h,v 1.1 2005-05-05 00:15:02 calaf Exp $
 /**
  * @file  ICollectionSize.h
  * @author scott snyder <snyder@bnl.gov>
@@ -17,27 +16,21 @@
 
 
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/INamedInterface.h"
-
-
-static const InterfaceID IID_ICollectionSize("ICollectionSize", 1 , 0);
-
+#include "GaudiKernel/IInterface.h"
 
 /**
  * @class ICollectionSize
  * @brief Abstract interface for finding the size of an event collection.
  */
-class ICollectionSize
+class ICollectionSize : virtual public IInterface
 {
 public:
+  DeclareInterfaceID( ICollectionSize, 1, 0 );
+
   /**
    * @brief Destructor.
    */
   virtual ~ICollectionSize () {};
-
-
-  static const InterfaceID& interfaceID() { return IID_ICollectionSize; }
-
 
   /**
    * @brief Return the size of the collection.

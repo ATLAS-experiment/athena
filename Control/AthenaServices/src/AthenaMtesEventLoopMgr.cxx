@@ -75,7 +75,7 @@ namespace {
 
 AthenaMtesEventLoopMgr::AthenaMtesEventLoopMgr(const std::string& nam
 					       , ISvcLocator* svcLoc)
-  : MinimalEventLoopMgr(nam, svcLoc)
+  : base_class(nam, svcLoc)
   , m_incidentSvc ( "IncidentSvc",  nam )
   , m_eventStore( "StoreGateSvc", nam )
   , m_evtSelector{nullptr}
@@ -970,31 +970,6 @@ void AthenaMtesEventLoopMgr::handle(const Incident& inc)
       error() << "Clear of Event data store failed" << endmsg;
     }
   }
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-AthenaMtesEventLoopMgr::queryInterface(const InterfaceID& riid, 
-				   void** ppvInterface) 
-{
-  if ( IEventSeek::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IEventSeek*>(this);
-  }
-  else if ( IEventProcessor::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IEventProcessor*>(this);
-  }
-  else if ( ICollectionSize::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<ICollectionSize*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return MinimalEventLoopMgr::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 // dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_PAGEACCESSCONTROLSVC_H
@@ -25,8 +25,6 @@
 #include "CxxUtils/PtrAccessSEGVHandler.h"
 #include "Gaudi/Property.h"   /*BooleanProperty*/
 
-// Forward declarations
-template <class TYPE> class SvcFactory;
 
 /**
  * @class  PageAccessControlSvc
@@ -48,9 +46,8 @@ template <class TYPE> class SvcFactory;
  *   AutoMonitor: when true start monitoring on initialize, stop on finalize;
  */
 
-class PageAccessControlSvc : virtual public IPageAccessControlSvc,
-  public AthService {
-public: 
+class PageAccessControlSvc : public extends<AthService, IPageAccessControlSvc> {
+public:
 
   /// Standard GAUDI constructor
   PageAccessControlSvc( const std::string& name, ISvcLocator* pSvcLocator ) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
@@ -78,7 +75,6 @@ public:
 
   /// \name Gaudi implementation
   //@{
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
   virtual StatusCode initialize();
   virtual StatusCode finalize();
   

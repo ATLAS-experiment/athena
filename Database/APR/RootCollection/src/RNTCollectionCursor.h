@@ -37,7 +37,7 @@ namespace pool {
        */
       class RNTCollectionCursor : public ICollectionCursor,
                                   virtual public IPositionSeek,
-                                  virtual public ICollectionSize
+                                  virtual public implements<ICollectionSize>
       {
       public:
 

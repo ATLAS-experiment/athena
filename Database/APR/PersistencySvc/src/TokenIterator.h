@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENCYSVC_TOKENITERATOR_H
@@ -8,6 +8,8 @@
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/IPositionSeek.h"
 #include "AthenaKernel/ICollectionSize.h"
+#include "GaudiKernel/implements.h"
+
 #include <string>
 
 namespace pool {
@@ -27,7 +29,7 @@ namespace pool {
 
     class TokenIterator : virtual public ITokenIterator,
 			  virtual public IPositionSeek,
-			  virtual public ICollectionSize
+			  virtual public implements<ICollectionSize>
       {
       public:
 	/** Constructor taking as argument a DbSelection object,
