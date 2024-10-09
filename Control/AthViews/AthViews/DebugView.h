@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_DEBUGVIEW_H
@@ -28,7 +28,6 @@ class DataObject;
 class DebugView : public SimpleView, AthMessaging
 {
   public:
-    DeclareInterfaceID( DebugView, 2, 0 );
 
     DebugView() = delete;
     DebugView( std::string const& Name, bool AllowFallThrough = true, std::string const& storeName = "StoreGateSvc" );

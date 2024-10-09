@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <stdexcept>
@@ -201,21 +201,6 @@ void SimpleView::unboundHandle( IResetable * handle )
   return m_store->unboundHandle( handle );
 }
 
-unsigned long SimpleView::addRef()
-{
-  throw std::runtime_error( "Not implemented: SimpleView::addRef" );
-  return 0;
-}
-unsigned long SimpleView::release()
-{
-  throw std::runtime_error( "Not implemented: SimpleView::release" );
-  return 0;
-}
-StatusCode SimpleView::queryInterface( const InterfaceID &/*ti*/, void** /*pp*/ )
-{
-  throw std::runtime_error( "Not implemented: SimpleView::queryInterface" );
-  return StatusCode::FAILURE;
-}
 const std::string& SimpleView::name() const
 {
   return m_name;

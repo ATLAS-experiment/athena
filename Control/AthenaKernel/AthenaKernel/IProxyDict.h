@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IPROXYDICT_H
@@ -40,14 +40,10 @@ class IConverter;
  * data.  This interface also provides methods for converting between
  * the two representations.
  *
- * 
  * @author Paolo Calafiura - ATLAS
- *  $Id: IProxyDict.h,v 1.5 2007-12-11 02:56:22 binet Exp $
  */
-class IProxyDict : virtual public IStringPool,
-                   virtual public IHiveStore,
-                   virtual public INamedInterface
-
+class IProxyDict : virtual public IStringPool,  // not a Gaudi interface
+                   virtual public extend_interfaces<IHiveStore, INamedInterface>
 {
 public:
   DeclareInterfaceID (IProxyDict, 2, 0);
