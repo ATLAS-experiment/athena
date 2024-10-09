@@ -37,8 +37,6 @@
 #include "PerfMonEvent/DataModel.h"
 
 // Forward declaration
-class ISvcLocator;
-template <class TYPE> class SvcFactory;
 class IChronoStatSvc;
 class StoreGateSvc;
 struct _object; typedef _object PyObject;
@@ -59,17 +57,12 @@ namespace PerfMon {
 
 namespace PMonSD { class SemiDetHelper; }
 
-class ATLAS_NOT_THREAD_SAFE PerfMonSvc : virtual public IPerfMonSvc,
-                                         virtual public IIncidentListener,
-                                         virtual public IIoComponent,
-                                         public AthService
-{ 
-
-protected:
-    
-  friend class SvcFactory<PerfMonSvc>;
-
-  /////////////////////////////////////////////////////////////////// 
+class ATLAS_NOT_THREAD_SAFE PerfMonSvc : public extends<AthService,
+                                                        IPerfMonSvc,
+                                                        IIncidentListener,
+                                                        IIoComponent>
+{
+  ///////////////////////////////////////////////////////////////////
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
 public: 
@@ -86,8 +79,6 @@ public:
   //@{
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface ) override;
   //@}
 
   /// @c IIoComponent interface

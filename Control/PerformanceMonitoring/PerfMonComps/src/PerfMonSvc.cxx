@@ -174,7 +174,7 @@ namespace {
 // Constructors
 ////////////////
 PerfMonSvc::PerfMonSvc( const std::string& name, ISvcLocator* pSvcLocator ) :
-  AthService ( name, pSvcLocator ),
+  base_class ( name, pSvcLocator ),
   m_pySvc    ( NULL ),
   m_chrono   ( "ChronoStatSvc/ChronoStatSvc", name ),
   m_ntuple   (      ),
@@ -684,24 +684,6 @@ StatusCode PerfMonSvc::finalize()
   /// loop over the perf-tools and harvest 'finalize' perf-data
   startAud( "fin", "PerfMonSlice" );
 
-  return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode
-PerfMonSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IPerfMonSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<IPerfMonSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -38,16 +38,13 @@
 #include <memory>
 #include <mutex>
 
-class PerfMonMTSvc : virtual public IPerfMonMTSvc, virtual public IIncidentListener, public AthService {
+class PerfMonMTSvc : public extends<AthService, IPerfMonMTSvc, IIncidentListener> {
  public:
   /// Standard Gaudi Service constructor
   PerfMonMTSvc(const std::string& name, ISvcLocator* pSvcLocator);
 
   // Destructor
   virtual ~PerfMonMTSvc() = default;
-
-  /// Function declaring the interface(s) implemented by the service
-  virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
   /// Incident service handle for post-finalize
   virtual void handle( const Incident& incident ) override;

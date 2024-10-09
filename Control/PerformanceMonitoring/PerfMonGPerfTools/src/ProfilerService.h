@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ProfilerService.h 496380 2012-04-18 12:28:09Z ritsch $
 #ifndef PERFMONGPERFTOOLS_PROFILERSERVICE_H
 #define PERFMONGPERFTOOLS_PROFILERSERVICE_H
 
@@ -30,13 +29,10 @@ namespace GPT {
     *         GPT through this service.
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-    *
-    * $Revision: 496380 $
-    * $Date: 2012-04-18 14:28:09 +0200 (Wed, 18 Apr 2012) $
     */
-   class ProfilerService : public AthService,
-                           public virtual IProfilerSvc,
-                           public virtual IIncidentListener {
+   class ProfilerService : public extends<AthService,
+                                          IProfilerSvc,
+                                          IIncidentListener> {
 
    public:
       /// Standard Gaudi service constructor
@@ -44,24 +40,20 @@ namespace GPT {
       /// Destructor
       virtual ~ProfilerService();
 
-      /// Function declaring the interface(s) implemented by the service
-      virtual StatusCode queryInterface( const InterfaceID& riid,
-                                         void** ppvIF );
-
       /// Standard Gaudi initialization function
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override;
       /// Standard Gaudi finalization function
-      virtual StatusCode finalize();
+      virtual StatusCode finalize() override;
 
       /// Start GPT profiling
-      virtual StatusCode startCPUProfiling( const std::string& filename );
+      virtual StatusCode startCPUProfiling( const std::string& filename ) override;
       /// Stop the GPT profiling
-      virtual StatusCode stopCPUProfiling();
+      virtual StatusCode stopCPUProfiling() override;
       /// Is the GPT profiling running at the moment?
-      virtual bool isCPUProfilingRunning() const;
+      virtual bool isCPUProfilingRunning() const override;
 
       /// Function handling incoming incidents
-      virtual void handle( const Incident& inc );
+      virtual void handle( const Incident& inc ) override;
 
    private:
       /// Handle to the incident service
