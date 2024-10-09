@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCANALYSISTOOL_H
@@ -10,18 +10,13 @@
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
-#include "xAODForward/ZdcModuleToString.h"
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
-
 
 #include "ZdcAnalysis/ZDCDataAnalyzer.h"
-#include "ZdcAnalysis/RPDDataAnalyzer.h"
 #include "ZdcAnalysis/ZDCTriggerEfficiency.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 
 #include "TF1.h"
-#include "TMath.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "CxxUtils/checker_macros.h"
@@ -175,20 +170,6 @@ private:
   bool m_fixTau2;
   float m_deltaTCut;
   float m_ChisqRatioCut;
-
-  unsigned int m_rpdNbaselineSamples;
-  unsigned int m_rpdEndSignalSample;
-  float m_rpdPulse2ndDerivThresh;
-  float m_rpdPostPulseFracThresh;
-  unsigned int m_rpdGoodPulseSampleStart;
-  unsigned int m_rpdGoodPulseSampleStop;
-  unsigned int m_rpdNominalBaseline;
-  float m_rpdPileupBaselineSumThresh;
-  float m_rpdPileupBaselineStdDevThresh;
-  unsigned int m_rpdNNegativesAllowed;
-  unsigned int m_rpdAdcOverflow;
-  std::vector<float> m_rpdSideCOutputCalibFactors;
-  std::vector<float> m_rpdSideAOutputCalibFactors;
   
   int m_LHCRun;
 
@@ -197,8 +178,6 @@ private:
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_40MHz;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_80MHz;
-
-  std::vector<std::unique_ptr<RPDDataAnalyzer> > m_rpdDataAnalyzer;
   
   ZDCDataAnalyzer::ZDCModuleIntArray m_peak2ndDerivMinSamples{};
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsHG{};
@@ -233,23 +212,6 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleT0SubLGRefit{this, "ZdcModuleT0SubLGRefit", "", "ZDC module subtracted t0 LG refit"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisqLGRefit{this, "ZdcModuleChisqLGRefit", "", "ZDC module LG refit chi square"};
 
-  // RPD data
-  //
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelBaseline{this, "RPDChannelBaseline", "", "RPD channel baseline"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupExpFitParams{this, "RPDChannelPileupExpFitParams", "", "RPD channel pileup exponential fit parameters: exp( [0] + [1]*sample )"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupStretchedExpFitParams{this, "RPDChannelPileupStretchedExpFitParams", "", "RPD channel pileup stretched exponential fit parameters: exp( [0] + [1]*(sample + 4)**0.5 + [2]*(sample + 4)**-0.5 )"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupExpFitParamErrs{this, "RPDChannelPileupExpFitParamErrs", "", "RPD channel pileup exponential fit parameter errors"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupStretchedExpFitParamErrs{this, "RPDChannelPileupStretchedExpFitParamErrs", "", "RPD channel pileup stretched exponential fit parameter errors"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupExpFitMSE{this, "RPDChannelPileupExpFitMSE", "", "RPD Channel pileup exponential fit mean squared error in baseline samples"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupStretchedExpFitMSE{this, "RPDChannelPileupStretchedExpFitMSE", "", "RPD channel pileup stretched exponential fit mean squared error in baseline samples"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitude{this, "RPDChannelAmplitude", "", "RPD channel sum ADC (baseline and pileup subtracted)"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitudeCalib{this, "RPDChannelAmplitudeCalib", "", "RPD channel sum ADC (baseline and pileup subtracted) with output calibration factors applied"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxADC{this, "RPDChannelMaxADC", "", "RPD channel max ADC (baseline and pileup subtracted)"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxADCCalib{this, "RPDChannelMaxADCCalib", "", "RPD channel max ADC (baseline and pileup subtracted) with output calibration factors applied"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxSample{this, "RPDChannelMaxSample", "", "RPD channel max sample"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelStatus{this, "RPDChannelStatus", "", "RPD channel status"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupFrac{this, "RPDChannelPileupFrac", "", "RPD channel pileup as fraction of total (nominal baseline-subtracted) sum ADC"};
-
   // decoration list for sums
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumUncalibSum{this, "ZdcSumUncalibSum", "", "ZDC side uncalibrated sum"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumUncalibSumErr{this, "ZdcSumUncalibSumErr", "", "ZDC side uncalibrated sum error"};
@@ -259,7 +221,6 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumAverageTime{this, "ZdcSumAverageTime", "", "ZDC side average time"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumStatus{this, "ZdcSumStatus", "", "ZDC side status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumModuleMask{this, "ZdcSumModuleMask", "", "ZDC side module mask"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumRPDStatus{this, "ZdcSumRPDStatus", "", "RPD side level status"};
 
 };
 

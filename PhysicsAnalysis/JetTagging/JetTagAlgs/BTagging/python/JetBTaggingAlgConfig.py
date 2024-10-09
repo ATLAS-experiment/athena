@@ -29,14 +29,15 @@ def JetBTaggingAlgCfg(flags,
         flags, TaggerList, PrimaryVertexCollectionName, SetupScheme))
 
     # setup the secondary vertexing tool
-    options['BTagSecVertexing'] = acc.popToolsAndMerge(
-        BTagLightSecVtxToolCfg(flags,
-                               'LightSecVx'+flags.BTagging.GeneralToolSuffix,
-                               JetCollection,
-                               VxSecVertexInfoNameList,
-                               secVtxFinderxAODBaseNameList,
-                               secVtxFinderTrackNameList,
-                               PrimaryVertexCollectionName))
+    if VxSecVertexInfoNameList:
+        options['BTagSecVertexing'] = acc.popToolsAndMerge(
+            BTagLightSecVtxToolCfg(flags,
+                                   'LightSecVx'+flags.BTagging.GeneralToolSuffix,
+                                   JetCollection,
+                                   VxSecVertexInfoNameList,
+                                   secVtxFinderxAODBaseNameList,
+                                   secVtxFinderTrackNameList,
+                                   PrimaryVertexCollectionName))
 
     # Set remaining options
     options['JetCollectionName'] = JetCollection
@@ -51,7 +52,7 @@ def JetBTaggingAlgCfg(flags,
     options['BTaggingLinkName'] = options['JetCollectionName'] + '.btaggingLink'
     options['BTaggingCollectionName'] = BTaggingCollection
     options['JetLinkName'] = options['BTaggingCollectionName'] + '.jetLink'
-    options['name'] = (options['BTaggingCollectionName'] + "_" + options['JetCollectionName'] + flags.BTagging.GeneralToolSuffix).lower()
+    options['name'] = 'JetBTaggingAlg' + (options['BTaggingCollectionName'] + "_" + options['JetCollectionName'] + flags.BTagging.GeneralToolSuffix).lower()
 
     # -- create main BTagging algorithm
     acc.addEventAlgo(CompFactory.Analysis.JetBTaggingAlg(**options))

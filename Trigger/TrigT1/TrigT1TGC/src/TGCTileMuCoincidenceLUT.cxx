@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTileMuCoincidenceLUT.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "PathResolver/PathResolver.h"
-
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
 
 #include <fstream>
 
@@ -24,13 +21,7 @@ TGCTileMuCoincidenceLUT::TGCTileMuCoincidenceLUT(LVL1TGCTrigger::TGCArguments* t
   if (!tgcArgs()->TILE_MU()) return;
   if (tgcArgs()->USE_CONDDB()) return;
 
-  //////////////////////////////
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) {
-    return;
-  }
-  MsgStream log(msgSvc, "LVL1TGC::TGCTileMuCoincidenceLUT");
+  MsgStream log(Athena::getMessageSvc(), "LVL1TGC::TGCTileMuCoincidenceLUT");
 
   // read Inner Coincidence Map 
   if (this->readMap()) {
@@ -52,12 +43,7 @@ TGCTileMuCoincidenceLUT::~TGCTileMuCoincidenceLUT()
 
 bool TGCTileMuCoincidenceLUT::readMap() 
 {
-  IMessageSvc* msgSvc = 0;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("MessageSvc", msgSvc) == StatusCode::FAILURE) {
-    return false;
-  }
-  MsgStream log(msgSvc, "LVL1TGC::TGCTileMuCoincidenceLUT");
+  MsgStream log(Athena::getMessageSvc(), "LVL1TGC::TGCTileMuCoincidenceLUT");
 
   // select right database according to a set of thresholds
   std::string dbname="";

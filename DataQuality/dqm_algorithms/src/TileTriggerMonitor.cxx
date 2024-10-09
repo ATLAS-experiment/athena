@@ -53,15 +53,21 @@ dqm_algorithms::TileTriggerMonitor::execute(const std::string & name,
   dqm_core::Result* result = new dqm_core::Result();
   //Count each category of the bins, if you find a red bin show red, if you find a yellow bin show yellow
   std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters());
-  std::string ignoredBinsString = dqm_algorithms::tools::GetFirstFromMap( "IgnoredBins", config.getGenericParameters(), "");
   std::set<int> ignoredBins;
-  if (!ignoredBinsString.empty()) {
-    std::string IgnoredBin;
-    std::istringstream is(ignoredBinsString);
-    while (std::getline(is, IgnoredBin, ',')) {
-      ignoredBins.insert(std::stoi(IgnoredBin));
+  const int oneIgnoredBin = static_cast<int>(dqm_algorithms::tools::GetFirstFromMap( "IgnoredBins", config.getParameters(), -1));
+  if (oneIgnoredBin > 0) {
+    ignoredBins.insert(oneIgnoredBin);
+  } else {
+    std::string ignoredBinsString = dqm_algorithms::tools::GetFirstFromMap( "IgnoredBins", config.getGenericParameters(), "");
+    if (!ignoredBinsString.empty()) {
+      std::string IgnoredBin;
+      std::istringstream is(ignoredBinsString);
+      while (std::getline(is, IgnoredBin, ';')) {
+        ignoredBins.insert(std::stoi(IgnoredBin));
+      }
     }
   }
+
   int worstStatus = -3;
   for ( int towerNum = range.at(0); towerNum <= range.at(1); ++towerNum ) {
     double inputCont = histogram->GetBinContent(towerNum);

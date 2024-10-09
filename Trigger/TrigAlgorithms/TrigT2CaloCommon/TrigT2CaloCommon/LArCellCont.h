@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -34,8 +34,6 @@ class CaloBCIDAverage;
 class LArRoIMap;
 class LArOnOffIdMapping;
 class CaloDetDescrManager;
-
-static std::vector<float> corrBCIDref_example;
 
 /** Class which contains statically allocated LArCellCollections */
 class LArCellCont : public std::vector<LArCellCollection*>

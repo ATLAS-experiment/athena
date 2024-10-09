@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TrigT2CaloCommon/LArCellCont.h"
-#include "GaudiKernel/ISvcLocator.h"
+#include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "LArRecUtils/MakeLArCellFromRaw.h"
 #include "LArRecConditions/LArRoIMap.h"
@@ -30,34 +30,16 @@ LArCellCont::initialize( const LArRoIMap& roiMap,
 std::cout << "LArCellCont \t\t DEBUG \t in initialize" << std::endl;
 #endif
 
- StatusCode sc;
- ISvcLocator* svcLoc = Gaudi::svcLocator( );
- IToolSvc* toolSvc = nullptr;
- sc = svcLoc->service( "ToolSvc",toolSvc);
- if(sc.isFailure()){
-   std::cout << "LArCellCont:initialize ERROR: Can not retrieve ToolSvc" << std::endl;
-   return StatusCode::FAILURE;
-}
- 
- StoreGateSvc* detStore = nullptr;
- sc=svcLoc->service("DetectorStore",detStore);
- if(sc.isFailure()){
-   std::cout << "LArCellCont:initialize ERROR: Can not retrieve DetectorStore" << std::endl;
-   return StatusCode::FAILURE;
- }
+ ServiceHandle<IToolSvc> toolSvc("ToolSvc", "LArCellCont");
+ CHECK_WITH_CONTEXT( toolSvc.retrieve(), "LArCellCont");
+
+ ServiceHandle<StoreGateSvc> detStore("DetectorStore", "LArCellCont");
+ CHECK_WITH_CONTEXT( detStore.retrieve(), "LArCellCont");
 
  const LArOnlineID* onlineId = nullptr;
- sc=detStore->retrieve(onlineId,"LArOnlineID");
- if(sc.isFailure()){
-   std::cout << "LArCellCont:initialize ERROR: Can not retrieve LArOnlineID" << std::endl;
-   return StatusCode::FAILURE;
- }
+ CHECK_WITH_CONTEXT( detStore->retrieve(onlineId,"LArOnlineID"), "LArCellCont" );
 
- sc = m_conv.initialize(febrod);
- if(sc.isFailure()){
-   std::cout << "Problems to initialize Hid2RESrcID" << std::endl;
-   return StatusCode::FAILURE;
- }
+ CHECK_WITH_CONTEXT( m_conv.initialize(febrod), "LArCellCont" );
  m_hash.initialize(0, febrod.getLArRoModIDvec() );
 
  HWIdentifier larrodid(0);
@@ -81,26 +63,17 @@ std::vector<const CaloCellCorrection*> LArCellCorrTools;
      
 MakeLArCellFromRaw makeCell;
 makeCell.setThreshold(-100);
-makeCell.initialize( roiMap, onOffMap, man, &LArCellCorrTools, 0 ); 
+makeCell.initialize( roiMap, onOffMap, man, &LArCellCorrTools, 0 );
 
+StatusCode sc = toolSvc->retrieveTool("LArBadFebMasker", m_badFebMasker);
+bool toolAvailable = sc.isSuccess();
 
-//sc = toolSvc->retrieveTool("LArBadChannelMasker", m_masker);
-//bool doCellMasking = sc.isSuccess() && m_masker->isMaskingOn();
-
-//if(!sc.isSuccess()) //not a critical error. LArCellCont can proceed as usual, without masking.
-//    std::cout << "LArCellCont\t\t INFO \t Failed to retrieve LArBadChannelMasker - no masking will be done." << std::endl;
-//std::cout << "doCellMasking "<<doCellMasking<<std::endl;
-
-sc = toolSvc->retrieveTool("LArBadFebMasker", m_badFebMasker);
-bool toolAvailable = sc.isSuccess(); 
-
-if(!sc.isSuccess()) //not a critical error. LArCellCont can proceed as usual, without masking.
-    std::cout << "LArCellCont\t\t INFO \t Failed to retrieve LArBadFebMasker - no masking will be done." << std::endl;
-std::cout <<"toolAvailable "<<toolAvailable<<std::endl;
+if(!toolAvailable) //not a critical error. LArCellCont can proceed as usual, without masking.
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::INFO, "LArCellCont") <<
+      "Failed to retrieve LArBadFebMasker - no masking will be done." << endmsg;
 
 std::vector<uint32_t> RobsFromMissingFeb;
 
-//std::map<HWIdentifier,int> m_indexset;
 int count = 0;
 std::vector<HWIdentifier>::const_iterator beg = onlineId->channel_begin();
 std::vector<HWIdentifier>::const_iterator end = onlineId->channel_end  ();

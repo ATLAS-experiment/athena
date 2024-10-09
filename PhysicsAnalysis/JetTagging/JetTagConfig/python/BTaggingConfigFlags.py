@@ -35,8 +35,8 @@ def getGrades(flags):
 def getTaggerList(flags):
     base = ['IP2D','IP3D','SV1','JetFitterNN']
     if flags.Trigger.doHLT:
-        base = ['SV1','JetFitterNN']
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        base = []
+    elif flags.GeoModel.Run >= LHCPeriod.Run4:
         base += ['MV2c10']
     flip = ['IP2DNeg', 'IP3DNeg','IP2DFlip', 'IP3DFlip','SV1Flip']
     if flags.BTagging.RunFlipTaggers:

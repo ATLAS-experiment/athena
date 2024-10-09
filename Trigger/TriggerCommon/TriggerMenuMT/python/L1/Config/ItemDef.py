@@ -1167,7 +1167,7 @@ class ItemDef:
 
         # MBTS
         MBTS_1   = d.MBTS_A | d.MBTS_C
-        MBTS_2   = (d.MBTS_A.x(2) | d.MBTS_C.x(2) | d.MBTS_A) & (d.MBTS_A.x(2) | d.MBTS_C.x(2) | d.MBTS_C)
+        MBTS_2   = (d.MBTS_C.x(2) | d.MBTS_A) & (d.MBTS_A.x(2) | d.MBTS_C)
         MBTS_1_1 = d.MBTS_A & d.MBTS_C
         MBTS_2_2 = d.MBTS_A.x(2) & d.MBTS_C.x(2)
         MBTS_1_A = d.MBTS_A.x(1)
@@ -1670,6 +1670,7 @@ class ItemDef:
         MenuItem('L1_eEM1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.eEM1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
         MenuItem('L1_eTAU1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.eTAU1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
         MenuItem('L1_jTAU1_TRT_ZDC_XOR_VjTE200' ).setLogic( d.jTAU1 & d.NIMTRT & ZDC_XOR & Not(d.jTE200)   & physcond)
+        MenuItem('L1_TRT_1ZDC_NZDC_VjTE200' ).setLogic( d.NIMTRT & PHYS_1ZDC_NZDC & Not(d.jTE200)   & physcond)
 
         #ATR-30020
         MenuItem('L1_ZDC_HELT15_jTE4000').setLogic( ZDC_HELT15 & d.jTE4000 & physcond )
@@ -1829,11 +1830,10 @@ class ItemDef:
         MenuItem('L1_BPTX0_BGRP12', ctpid=0xf1).setLogic(d.BPTX0 & bgrp12cond ).setTriggerType(TT.rand)
         MenuItem('L1_BPTX1_BGRP12', ctpid=0xf2).setLogic(d.BPTX1 & bgrp12cond ).setTriggerType(TT.rand)
 
-        #MenuItem('L1_RD4_FILLED'         ).setLogic( d.RNDM4 & physcond ).setTriggerType(TT.lardigital)
-        #MenuItem('L1_RD4_EMPTY'          ).setLogic( d.RNDM4 & cosmiccond ).setTriggerType(TT.lardigital)
-        #MenuItem('L1_RD1_FIRSTEMPTY'     ).setLogic( d.RNDM1 & firstempty ).setTriggerType(TT.lardigital)
-        #MenuItem('L1_RD1_BGRP7'          ).setLogic( d.RNDM1 & bgrp7cond ).setTriggerType(TT.lardigital)
-
+        MenuItem('L1_RD0_LAR_FILLED'         ).setLogic( d.RNDM0 & physcond ).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_EMPTY'          ).setLogic( d.RNDM0 & cosmiccond ).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_FIRSTEMPTY'     ).setLogic( d.RNDM0 & firstempty ).setTriggerType(TT.lardigital)
+        MenuItem('L1_RD0_LAR_BGRP7'          ).setLogic( d.RNDM0 & bgrp7cond ).setTriggerType(TT.lardigital)
 
         # lumi measurements
         MenuItem('L1_MLZ_A').setLogic( (d.MBTS_A|ZDC_A|d.LUCID_A) & physcond)

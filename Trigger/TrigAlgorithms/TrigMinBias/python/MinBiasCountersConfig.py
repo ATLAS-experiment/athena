@@ -5,22 +5,39 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDM import recordable
 
+
 @AccumulatorCache
 def SPCounterRecoAlgCfg(flags):
     acc = ComponentAccumulator()
     from TrigMinBias.TrigMinBiasMonitoring import SpCountMonitoring
-    alg = CompFactory.TrigCountSpacePoints( SpacePointsKey = recordable("HLT_SpacePointCounts"), 
-                                            MonTool = SpCountMonitoring(flags) )
+    alg = CompFactory.TrigCountSpacePoints(SpacePointsKey=recordable("HLT_SpacePointCounts"),
+                                           MonTool=SpCountMonitoring(flags))
     acc.addEventAlgo(alg)
     return acc
 
+
 def TrackCounterHypoAlgCfg(flags):
-    """"""
+    """ Configuration for MinBias track counting algorithm """
+
     acc = ComponentAccumulator()
     from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
-    alg = CompFactory.TrackCountHypoAlg(tracksKey=recordable(flags.Trigger.InDetTracking.minBias.tracks_IDTrig),
-                                        trackCountKey = recordable("HLT_TrackCount"))
-    alg.MonTool = TrackCountMonitoring(flags, alg) # monitoring tool configures itself using config of the hypo alg
+    alg = CompFactory.TrackCountHypoAlg(name='TrackCountHypoAlg',
+                                        tracksKey=recordable(flags.Trigger.InDetTracking.minBias.tracks_IDTrig),
+                                        trackCountKey=recordable("HLT_TrackCount"))
+    alg.MonTool = TrackCountMonitoring(flags, alg)  # monitoring tool configures itself using config of the hypo alg
+    acc.addEventAlgo(alg)
+    return acc
+
+
+def PixelTrackCounterHypoAlgCfg(flags):
+    """ Configuration for MinBias *Pixel* track counting algorithm """
+
+    acc = ComponentAccumulator()
+    from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
+    alg = CompFactory.TrackCountHypoAlg(name='PixelTrackCountHypoAlg',
+                                        tracksKey=recordable(flags.Trigger.InDetTracking.minBiasPixel.tracks_IDTrig),
+                                        trackCountKey=recordable("HLT_PixelTrackCount"))
+    alg.MonTool = TrackCountMonitoring(flags, alg)  # monitoring tool configures itself using config of the hypo alg
     acc.addEventAlgo(alg)
     return acc
 
@@ -30,12 +47,13 @@ if __name__ == '__main__':
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags = initConfigFlags()
-    flags.Input.Files=defaultTestFiles.RAW_RUN2 # or ESD or AOD or ...
+    flags.Input.Files = defaultTestFiles.RAW_RUN2  # or ESD or AOD or ...
     flags.lock()
 
     acc = ComponentAccumulator()
     acc.merge(SPCounterRecoAlgCfg(flags))
     acc.merge(TrackCounterHypoAlgCfg(flags))
+    acc.merge(PixelTrackCounterHypoAlgCfg(flags))
 
     acc.printConfig(withDetails=True, summariseProps=True)
     acc.wasMerged()

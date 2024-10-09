@@ -60,6 +60,9 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mu15_L1MU14FCH', stream=[PhysicsStream], groups=SingleMuonGroup+PrimaryL1MuGroup), #ATR-30147
         ChainProp(name='HLT_mu4noL1_L1MBTS_1', stream=[PhysicsStream], l1SeedThresholds=['FSNOSEED'], groups=SingleMuonGroup+SupportGroup),
 
+        # Bell measurement at low mu (ATR-30256)
+        ChainProp(name='HLT_2mu3_L12MU3V', stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup),
+
         #-- 2 mu
         ChainProp(name='HLT_2mu4_L12MU3V', stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='HLT_mu4_mu6_L12MU3V', stream=[PhysicsStream], groups=MultiMuonGroup+PrimaryL1MuGroup),
@@ -533,6 +536,9 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_noalg_L1AFP_A_AND_C_TOF_T0T1_jJ125', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_AND_C_TOF_jJ90', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1AFP_A_AND_C_TOF_jJ125', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+
+        ChainProp(name='HLT_noalg_L1AFP_A_AND_C_TOF_jJ50', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_AND_C_TOF_jJ60', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
 
         # Calibration AFP
         # all mu

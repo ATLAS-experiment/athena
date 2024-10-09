@@ -23,6 +23,8 @@ class TgcRawDataMonitorTool: public extends<AthAlgTool, ITgcRawDataMonitorTool> 
 			   int& etamapindex, int& phimapindex, int& globalphimapindex ) const override;
   virtual bool getMapIndex(const TGC::TgcChamber& tgcCham, int ilay,
 			   int& etamapindex, int& phimapindex, int& globalphimapindex ) const override;
+  virtual bool getMapIndexOnline(const std::string& chamber_type_name,
+				 int& etamap_index, int& phimap_index, int& phimap_global_index) const override;
  private:
 
   DoubleProperty m_fiduciFrame{this,"FiducialFrame",-200.0,"Fidicual Frame size"};
