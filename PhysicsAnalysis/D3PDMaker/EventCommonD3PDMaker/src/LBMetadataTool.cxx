@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -30,7 +30,7 @@ namespace D3PD {
 LBMetadataTool::LBMetadataTool (const std::string& type,
                                 const std::string& name,
                                 const IInterface* parent)
-  : AthAlgTool (type, name, parent)
+  : base_class (type, name, parent)
 {
   declareProperty ("Metakey", m_metakey = "Lumi",
                    "Key for output metadata.");
@@ -43,22 +43,6 @@ LBMetadataTool::LBMetadataTool (const std::string& type,
 StatusCode LBMetadataTool::initialize()
 {
   return AthAlgTool::initialize();
-}
-
-
-/**
- * @brief Standard Gaudi @c queryInterface method.
- */
-StatusCode
-LBMetadataTool::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == IMetadataTool::interfaceID() )  {
-    *ppvIf = static_cast<IMetadataTool*> (this);
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-
-  return AlgTool::queryInterface( riid, ppvIf );
 }
 
 

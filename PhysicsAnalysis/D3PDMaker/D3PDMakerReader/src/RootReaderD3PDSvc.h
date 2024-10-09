@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: RootReaderD3PDSvc.h 452707 2011-08-08 11:45:42Z krasznaa $
 #ifndef D3PDMAKERREADER_ROOTREADERD3PDSVC_H
 #define D3PDMAKERREADER_ROOTREADERD3PDSVC_H
 
@@ -30,28 +29,20 @@ namespace D3PD {
     *         will fail...)
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-    *
-    * $Revision: 452707 $
-    * $Date: 2011-08-08 13:45:42 +0200 (Mon, 08 Aug 2011) $
     */
-   class RootReaderD3PDSvc : public AthService,
-                             public ID3PDSvc {
+   class RootReaderD3PDSvc : public extends<AthService, ID3PDSvc> {
 
    public:
       /// Standard Service constructor
       RootReaderD3PDSvc( const std::string& name, ISvcLocator* svcloc );
 
       /// Standatd Gaudi initialization function
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override;
       /// Standard Gaudi finalization function
-      virtual StatusCode finalize();
+      virtual StatusCode finalize() override;
 
       /// Function implementing the ID3PDSvc interface
-      virtual StatusCode make( const std::string& name, ID3PD*& d3pd );
-
-      /// Gaudi framework function declaring the implemented interfaces
-      virtual StatusCode queryInterface( const InterfaceID& riid,
-                                         void** ppvIf );
+      virtual StatusCode make( const std::string& name, ID3PD*& d3pd ) override;
 
    private:
       /// Internal list of all the created D3PD objects

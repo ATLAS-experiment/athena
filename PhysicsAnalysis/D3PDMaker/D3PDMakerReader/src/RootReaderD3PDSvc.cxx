@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,7 +14,7 @@
 namespace D3PD {
 
    RootReaderD3PDSvc::RootReaderD3PDSvc( const std::string& name, ISvcLocator* svcloc )
-      : AthService( name, svcloc ) {
+      : base_class( name, svcloc ) {
 
       declareProperty( "Version", m_version = 2,
                        "Version of the D3PDReader code to be generated" );
@@ -72,18 +72,6 @@ namespace D3PD {
 
       // This function can actually never fail...
       return StatusCode::SUCCESS;
-   }
-
-   StatusCode RootReaderD3PDSvc::queryInterface( const InterfaceID& riid,
-                                                 void** ppvIf ) {
-
-      if( riid == ID3PDSvc::interfaceID() )  {
-         *ppvIf = static_cast< ID3PDSvc* >( this );
-         addRef();
-         return StatusCode::SUCCESS;
-      }
-
-      return AthService::queryInterface( riid, ppvIf );
    }
 
 } // namespace D3PD
