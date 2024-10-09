@@ -1,7 +1,7 @@
-Masking of Strip Modules in ITk can be done by:
+Masking of Strip Modules or Pixel Modules in ITk can be done by:
 
 - Reading bad module IDs from a JSON file.
-- Reading bad module IDs from the database.
+- Reading bad module IDs from the database (*not tested since April '24*).
 
 Creating a JSON file for masking:
 
@@ -9,17 +9,21 @@ Creating a JSON file for masking:
 
 - In order to make this selection first the entire list of modules has to be converted into a JSON file and then another script can be use to select specific modules from this list.
 
-- First run the script: /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/RunPrintSiDetElements.py using: python RunPrintSiDetElements.py
+- First run the script: /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/RunPrintSiDetElements.py using: python InDetDetDescrExample /RunPrintSiDetElements.py
 - This will create 2 files, one for Pixels and one for Strips, named `PixelGeometry.dat` and `StripGeometry.dat` containing the list of modules along with their specifications e.g. whether the module in the barrel or end cap (#barrel_ec), to which layer or disk does (#layer_disk) it belong to, its number in phi and eta (#phi_module and #eta_module) and which side of the detector does it belong to (#side) etc.
 - Use the python script /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/geometry_dat_to_json.py to convert a geometry.dat into a json file say geometry.json
 `python InDetDetDescrExample/geometry_dat_to_json.py --infile PixelGeometry.dat --outfile PixelGeometry.json`
 
-- Use /athena/InnerDetector/InDetConditions/SCT_ConditionsTools/share/module_selector_from_json.py to select modules from the geometry.json and create a separate json file.
 
-Masking Strip Modules using a JSON file:
-- To use a json file the reconstruction command should use just a preExec. In this example the jsonFile=/path/to/jsonfile is a variable with the absolute path to the json file with the modules to mask
-   --preExec "ConfigFlags.ITk.doStripModuleVeto = True; ConfigFlags.ITk.JsonPathStripModuleVeto=\"$jsonFile\"" \
-- The preExec command is the flag for masking Strip modules and passing the json path to all the ITkStripConditionSummaryTool instances
+- Use /athena/InnerDetector/InDetExample/InDetDetDescrExample/tools/module_selector_from_json.py to select modules from the geometry.json and create a separate json file.
+
+Masking Strip or Pixel Modules using a JSON file:
+- To use a json file the reconstruction command should use just a preExec. In this example the jsonFile=/path/to/jsonfile is a variable with the absolute path to the json file with the modules to mask.
+- For STRIPS:
+  `--preExec "flags.ITk.doStripModuleVeto = True; flags.ITk.JsonPathStripModuleVeto=\"$jsonFile\"" \`
+- For PIXELS:
+  `--preExec "flags.ITk.JsonPathPixelModuleVeto=\"$jsonFile\"" \`
+- The preExec command is the flag for masking Strip modules and passing the json path to all the ITkStripConditionSummaryTool instances. For Pixel passing the json file will be sufficient to activate the masking. 
 
 Job Example:
 
