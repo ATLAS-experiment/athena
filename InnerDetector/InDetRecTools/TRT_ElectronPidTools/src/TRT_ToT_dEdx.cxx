@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ToT_dEdx.h"
@@ -25,41 +25,18 @@
 #include <limits>
 
 namespace{
-bool
-inRange(const double val, const double lo, const double hi){
-  return (val>lo) and (val<hi);
-}
-
+  bool
+    inRange(const double val, const double lo, const double hi){
+    return (val>lo) and (val<hi);
+  }
 }
 
 // constructor
-TRT_ToT_dEdx::TRT_ToT_dEdx(const std::string& t, const std::string& n, const IInterface* p)
-  :
-  AthAlgTool(t,n,p),
-  m_TRTStrawSummaryTool("TRT_StrawStatusSummaryTool",this)
+TRT_ToT_dEdx::TRT_ToT_dEdx(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_ToT_dEdx>(this);
-  declareProperty("TRTStrawSummaryTool",    m_TRTStrawSummaryTool);
-
-  setDefaultConfiguration();
-
-  m_trtId = nullptr;
 }
 
-
-
-void TRT_ToT_dEdx::setDefaultConfiguration()
-{
-  declareProperty("TRT_dEdx_divideByL",m_divideByL=true);
-  declareProperty("TRT_dEdx_corrected",m_corrected=true);
-  declareProperty("TRT_dEdx_correctionType",m_correctionType=kTrackBased);
-  declareProperty("TRT_dEdx_useTrackPartWithGasType",m_useTrackPartWithGasType=kUnset);
-  declareProperty("TRT_dEdx_toolScenario",m_toolScenario=kAlgReweightTrunkOne);
-  declareProperty("TRT_dEdx_trackConfig_maxRtrack",m_trackConfig_maxRtrack=1.85);
-  declareProperty("TRT_dEdx_trackConfig_minRtrack",m_trackConfig_minRtrack=0.15);
-  declareProperty("TRT_dEdx_useZeroRHitCut",m_useZeroRHitCut=true);
-  declareProperty("TRT_dEdx_isData",m_isData=true);
-}
 
 // destructor
 TRT_ToT_dEdx::~TRT_ToT_dEdx() = default;
@@ -713,7 +690,7 @@ TRT_ToT_dEdx::correctNormalization(const EventContext& ctx, double nVtx) const
     return 0;
   }
 
-  EGasType gasType = static_cast<EGasType> (m_useTrackPartWithGasType);
+  EGasType gasType = static_cast<EGasType> (m_useTrackPartWithGasType.value());
   if (m_useTrackPartWithGasType==kUnset) gasType=kXenon;
   if (nVtx<=0) nVtx=dEdxCorrection->normNzero[gasType];
   double slope = dEdxCorrection->normSlopeTot[gasType];

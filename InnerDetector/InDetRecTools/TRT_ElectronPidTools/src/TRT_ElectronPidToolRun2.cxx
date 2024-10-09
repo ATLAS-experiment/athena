@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -66,17 +66,10 @@ void storeNNVariable(std::map<std::string, T>& theMap, const std::string& name, 
 
 InDet::TRT_ElectronPidToolRun2::TRT_ElectronPidToolRun2(const std::string& t, const std::string& n, const IInterface* p )
   :
-  AthAlgTool(t,n,p),
-  m_trtId(nullptr),
-  m_minTRThits(5),
-  m_ptMinNN(2000.),
-  m_calculateNN(true)
+  AthAlgTool(t,n,p)
 {
   declareInterface<ITRT_ElectronPidTool>(this);
   declareInterface<ITRT_ElectronToTTool>(this);
-  declareProperty("MinimumTRThitsForIDpid", m_minTRThits);
-  declareProperty("MinimumTrackPtForNNPid", m_ptMinNN);
-  declareProperty("CalculateNNPid", m_calculateNN);
 }
 
 
