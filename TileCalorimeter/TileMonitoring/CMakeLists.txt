@@ -131,7 +131,6 @@ atlas_add_test( TileTBMonitorAlgorithm_test
 atlas_add_test( TileJiveXMLConfig_test
                 SCRIPT python -m TileMonitoring.TileJiveXMLConfig
                 PROPERTIES TIMEOUT 600
-                           DISABLED TRUE  # remove once AA-64 is fixed
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( TileTBCellMonitorAlgorithm_test
