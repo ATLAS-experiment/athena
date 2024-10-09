@@ -10,6 +10,8 @@ def ContainersOnTheFly(flags=None):
     containers = [
         ['TruthEvents','xAOD::TruthEventContainer'],
         ['TruthEventsAux','xAOD::TruthEventAuxContainer'],
+        ['TruthLHEParticles','xAOD::TruthParticleContainer'],
+        ['TruthLHEParticlesAux','xAOD::TruthParticleAuxContainer'],
         ['MET_Truth','xAOD::MissingETContainer'],
         ['MET_TruthAux','xAOD::MissingETAuxContainer'],
         ['MET_TruthRegions','xAOD::MissingETContainer'],

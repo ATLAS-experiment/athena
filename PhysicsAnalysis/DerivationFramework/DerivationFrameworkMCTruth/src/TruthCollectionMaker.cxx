@@ -46,7 +46,6 @@ DerivationFramework::TruthCollectionMaker::~TruthCollectionMaker() {
 StatusCode DerivationFramework::TruthCollectionMaker::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
-    
     // Input truth particles
     ATH_CHECK( m_particlesKey.initialize() );
     ATH_MSG_INFO("Using " << m_particlesKey.key() << " as the input truth container key");
