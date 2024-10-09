@@ -18,7 +18,7 @@ def NRPCCablingConfigCfg(flags, name = "MuonNRPC_CablingAlg", **kwargs):
             if flags.GeoModel.Run <= LHCPeriod.Run3:   
                 cablingTag = "RpcNcablingJson-RUN3-FantasyCabling-2"
             else:
-                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-2"
+                cablingTag = "RpcNcablingJson-RUN4-FantasyCabling-3"
 
         result.merge(addFolders(flags, [cablingFolder], detDb=dbName, className='CondAttrListCollection', tag=cablingTag))
         kwargs.setdefault("MapFolders",  cablingFolder)
@@ -52,7 +52,8 @@ def RPCLegacyCablingConfigCfg(flags):
 
     acc.merge(addFolders(flags, [rpcTrigEta,rpcTrigPhi], dbName, className='CondAttrListCollection'))
 
-    RpcCablingAlg = CompFactory.RpcCablingCondAlg("RpcCablingCondAlg",DatabaseRepository=dbRepo)
+    RpcCablingCondAlg=CompFactory.RpcCablingCondAlg
+    RpcCablingAlg = RpcCablingCondAlg("RpcCablingCondAlg",DatabaseRepository=dbRepo)
     acc.addCondAlgo( RpcCablingAlg )
 
     return acc
