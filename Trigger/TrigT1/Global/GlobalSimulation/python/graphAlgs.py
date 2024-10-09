@@ -8,7 +8,7 @@ class DirectedCycle:
         self.onStack = [False for i in range(G.V)]
         self.marked = [False for i in range(G.V)]
         self.edgeTo = [-1 for i in range(G.V)]
-        self.cycle = []
+        self.cycle_ = []
         
         GV = G.V
         for v in range(GV):
@@ -16,27 +16,27 @@ class DirectedCycle:
                 self.dfs_(G, v)
 
     def has_cycle(self):
-        return len(self.cycle) > 0
+        return len(self.cycle_) > 0
 
     def cycle(self):
-        return self.cycle
+        return self.cycle_
 
     def dfs_(self, G, v):
         self.onStack[v] = True
         self.marked[v] = True
 
         for w in G.adj(v):
-            if self.cycle: return
+            if self.cycle_: return
             if not self.marked[w]:
                 self.edgeTo[w] = w
                 self.dfs_(G, w)
             elif self.onStack[w]:
                 x = v
                 while x != w:
-                    self.cycle.append(x)
+                    self.cycle_.append(x)
                     x = self.edgeTo(x)
-                self.cycle.append(w)
-                self.cycle.append(v)
+                self.cycle_.append(w)
+                self.cycle_.append(v)
 
         self.onStack[v] = False
                 

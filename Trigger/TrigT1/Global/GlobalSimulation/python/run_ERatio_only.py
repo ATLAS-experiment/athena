@@ -20,6 +20,7 @@ if __name__ == '__main__':
         formatter_class=RawTextHelpFormatter)
 
 
+    
     parser.add_argument(
         "-i",
         "--inputs",
@@ -121,6 +122,10 @@ if __name__ == '__main__':
     if flags.Input.Format == Format.POOL:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc.merge(PoolReadCfg(flags))
+
+        from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
+        acc.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey='')) 
+
     else:
         subsystems = ('eFex',)
         acc.merge(add_subsystems(flags, subsystems, args, OutputLevel=DEBUG))

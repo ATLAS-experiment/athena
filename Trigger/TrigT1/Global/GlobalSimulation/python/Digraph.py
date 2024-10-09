@@ -1,5 +1,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+# Data structure adapted from Sedgewick and Wayne, Algorithms v4 p569
+
 class Digraph:
     """Digraph is an implementation of digraphs which supports
     adding edges and reversal"""
