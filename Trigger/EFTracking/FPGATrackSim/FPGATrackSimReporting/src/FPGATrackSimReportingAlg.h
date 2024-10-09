@@ -18,6 +18,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "ActsEvent/ProtoTrackCollection.h"
+#include "ActsEvent/TrackContainer.h"
+
+#include "src/FPGATrackSimActsTrackInspectionTool.h"
 
 class FPGATrackSimTrack;
 
@@ -31,22 +34,24 @@ namespace FPGATrackSim {
                 virtual StatusCode execute(const EventContext& ctx) const override final;
                 virtual StatusCode finalize() override final;
 
-
         private:
                 mutable std::vector<uint32_t> m_pixelClustersPerFPGATrack ATLAS_THREAD_SAFE, m_stripClustersPerFPGATrack ATLAS_THREAD_SAFE;
                 mutable std::vector<uint32_t> m_pixelClustersPerPrototrack ATLAS_THREAD_SAFE, m_stripClustersPerPrototrack ATLAS_THREAD_SAFE;
                 
+                mutable std::map<std::string, std::vector<FPGATrackSimActsEventTracks> > m_allActsTracks ATLAS_THREAD_SAFE;
+                mutable std::map<std::string, std::map<uint32_t,std::vector<uint32_t>> > m_actsTrackStats ATLAS_THREAD_SAFE;
+
                 Gaudi::Property<bool> m_printoutForEveryEvent {this, "perEventReports", false, "A flag to enable per event printout"};
    	        Gaudi::Property<bool> m_isDataPrep {this, "isDataPrep", false, "If True, this is for data prep pipeline only"};
                 //_________________________________________________________________________________________________________________________
                 // xAOD Pixel clusters to monitor
                 SG::ReadHandleKeyArray <xAOD::PixelClusterContainer> m_xAODPixelClusterContainerKeys{
-                        this, "xAODPixelClusterContainersFromFPGA", {},
+                        this, "xAODPixelClusterContainers", {},
                         "input list of xAOD Pixel Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 
                 // xAOD Strip clusters to monitor
                 SG::ReadHandleKeyArray <xAOD::StripClusterContainer> m_xAODStripClusterContainerKeys{
-		  this, "xAODStripClusterContainersFromFPGA", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"},
+                        this, "xAODStripClusterContainers", {"ITkStripClusters" ,"xAODStripClusters_1stFromFPGACluster", "xAODStripClusters_1stFromFPGAHit"},
                         "input list of xAOD Strip Cluster Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 
                 // xAOD SpacePoints to monitor
@@ -54,14 +59,20 @@ namespace FPGATrackSim {
 		  this, "xAODSpacePointContainersFromFPGA", {"xAODStripSpacePoints_1stFromFPGA","xAODPixelSpacePoints_1stFromFPGA"},
                         "input list of xAOD SpacePoint Containers, as resulted from FPGATrackSim (hit/road) EDM conversion" };
                 // FPGA Cluster collection
+                // To be implemented
+                
                 // FPGA Road collection
                 SG::ReadHandleKey <FPGATrackSimRoadCollection> m_FPGARoadsKey{ this, "FPGATrackSimRoads","","FPGATrackSim Roads key" };
                 // FPGA Track collection
                 SG::ReadHandleKey <FPGATrackSimTrackCollection> m_FPGATracksKey{ this, "FPGATrackSimTracks","","FPGATrackSim Tracks key" };
                 
+                SG::ReadHandleKeyArray<ActsTrk::ProtoTrackCollection> m_FPGAProtoTrackCollections{this, "FPGATrackSimProtoTracks",{},"FPGATrackSim PrototrackCollection"};
 
-                
-                SG::ReadHandleKey<ActsTrk::ProtoTrackCollection> m_FPGAProtoTrackCollection{this, "FPGATrackSimProtoTracks","","FPGATrackSim PrototrackCollection"};
+                SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_ActsTrackCollections{this, "FPGAActsTracks",{},"Acts track collections from (C)KF"};
+
+                //_________________________________________________________________________________________________________________________              
+                // Tools
+                ToolHandle<FPGATrackSim::ActsTrackInspectionTool> m_ActsInspectionTool {this, "ActsInspectionTool", "FPGATrackSim::ActsTrackInspectionTool/ActsTrackInspectionTool", "Monitoring tool for acts tracks"};
 
                 //_________________________________________________________________________________________________________________________              
                 template <class XAOD_CLUSTER>
@@ -83,8 +94,8 @@ namespace FPGATrackSim {
                 
                 void processFPGAPrototracks(SG::ReadHandle<ActsTrk::ProtoTrackCollection> &FPGAPrototracks) const;
                 void printFPGAPrototracks(SG::ReadHandle<ActsTrk::ProtoTrackCollection> &FPGAPrototracks) const;
-
                 
+                void processActsTracks(SG::ReadHandle<ActsTrk::TrackContainer> &ActsTracks) const;
 
                 StatusCode summaryReportForEDMConversion();
         };

@@ -451,9 +451,6 @@ if __name__ == "__main__":
         acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
         if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
         
-        from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-        acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))        
-        
         from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
         acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
         acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
@@ -466,13 +463,13 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
         if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
 
-        # Add the truth decorators
-        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import AddDecoratorCfg
-        acc.merge(AddDecoratorCfg(flags))
-
-        # # IDPVM running
-        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
-        acc.merge(InDetPhysValMonitoringCfg(flags))
+        # Reporting algorithm (used for debugging - can be disabled)
+        from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+        acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))
+        
+        # IDTPM running
+        from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
+        acc.merge( InDetTrackPerfMonCfg(flags) )
     
     acc.store(open('AnalysisConfig.pkl','wb'))
 
