@@ -24,6 +24,7 @@ def TRUTH3Cfg(flags):
     TRUTH3SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD::EventAuxInfo',
                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
+                                               'TruthLHEParticles':'xAOD::TruthParticleContainer', 'TruthLHEParticlesAux':'xAOD::TruthParticleAuxContainer',
                                                'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
                                                'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
                                                'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
@@ -46,7 +47,8 @@ def TRUTH3Cfg(flags):
                                               }
 
     # Add EventInfo
-    TRUTH3SlimmingHelper.AllVariables = [ 'EventInfo' ]
+    TRUTH3SlimmingHelper.AllVariables = [ 'EventInfo',
+                                          'TruthLHEParticles']
 
     # Add TruthTau collections
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg

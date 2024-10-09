@@ -37,7 +37,8 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
             flags,
-            TruthCollections=["TruthElectrons", 
+            TruthCollections=["TruthLHEParticles",
+                              "TruthElectrons", 
                               "TruthMuons", 
                               "TruthPhotons", 
                               "TruthTaus", 

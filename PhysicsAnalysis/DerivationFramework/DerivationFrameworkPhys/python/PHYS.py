@@ -161,7 +161,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSSlimmingHelper)
-        PHYSSlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        PHYSSlimmingHelper.AllVariables += ['TruthLHEParticles', 'TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         PHYSSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                               "Muons.TruthLink",
                                               "Photons.TruthLink",
