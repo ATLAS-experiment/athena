@@ -441,6 +441,8 @@ InDetPhysValMonitoringTool::fillHistograms() {
   std::vector<const xAOD::TrackParticle*> selectedTracks {};
   selectedTracks.reserve(tracks->size());
   unsigned int nTrackTOT = 0;
+  unsigned int nTrackCentral = 0;
+  unsigned int nTrackPt1GeV = 0;
   for (const auto *const thisTrack: *tracks) {
     //FIXME: Why is this w.r.t the primary vertex?
     const asg::AcceptData& accept = m_trackSelectionTool->accept(*thisTrack, primaryvertex);
@@ -453,6 +455,10 @@ InDetPhysValMonitoringTool::fillHistograms() {
 
     //Fill plots for selected reco tracks, hits / perigee / ???
     nTrackTOT++;
+    if (thisTrack->pt() >= (1 * Gaudi::Units::GeV))
+	nTrackPt1GeV++;
+    if (std::abs(thisTrack->eta()) < 2.5)
+	nTrackCentral++;
     m_monPlots->fill(*thisTrack, beamSpotWeight);                                      
     m_monPlots->fill(*thisTrack, puEvents, nVertices, beamSpotWeight);  //fill mu dependent plots
     const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack);
@@ -538,7 +544,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     }
   }
 
-  m_monPlots->fill(nTrackTOT, truthMu, actualMu, nVertices, beamSpotWeight);
+  m_monPlots->fill(nTrackTOT, nTrackCentral, nTrackPt1GeV, truthMu, actualMu, nVertices, beamSpotWeight);
 
   //FIXME: I don't get why... this is here
   if (m_truthSelectionTool.get()) {

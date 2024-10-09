@@ -121,7 +121,9 @@ public:
   ///fill for things needing track only
   void fill(const xAOD::TrackParticle& particle, float weight=1.0);
   void fill(const xAOD::TrackParticle& particle, const float mu, const unsigned int nVtx, float weight=1.0); //mu dependent plots
-  void fill(const unsigned int nTracks, const unsigned int truthMu, const float actualMu, const unsigned nVtx, const float weight=1.0);
+  void fill(const unsigned int ntracksFull, const unsigned int ntracksCentral,
+	    const unsigned int ntracksPt1GeV, const unsigned int truthMu,
+	    const float actualMu, const unsigned int nvertices, const float weight=1.0);
 
   ///fill for things needing truth only
   void fill(const xAOD::TruthParticle& particle, float weight);
