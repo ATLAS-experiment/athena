@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,26 +40,11 @@
 
 // Constructor with parameters:
 TagInfoMgr::TagInfoMgr(const std::string &name, ISvcLocator *pSvcLocator) :
-    AthService(name, pSvcLocator)
+    base_class(name, pSvcLocator)
 {}
 
 TagInfoMgr::~TagInfoMgr() 
 {}
-
-
-/// Identify interfaces to which this service is responsive
-StatusCode
-TagInfoMgr::queryInterface( const InterfaceID& riid, void** ppvInterface ) 
-{
-    if ( ITagInfoMgr::interfaceID().versionMatch(riid) ) {
-        *ppvInterface = (ITagInfoMgr*)this;
-    }
-    else {
-        // Interface is not directly available: try out a base class
-        return(::AthService::queryInterface(riid, ppvInterface));
-    }
-    return StatusCode::SUCCESS;
-}
 
 // Initialize method:
 StatusCode TagInfoMgr::initialize()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTINFOMGT_ITAGINFOMGR_H
@@ -57,6 +57,9 @@ class MsgStream;
 class ITagInfoMgr : virtual public IInterface
 {
 public:
+    /// Declare interface ID
+    DeclareInterfaceID(ITagInfoMgr, 1, 0);
+
     /// @name typedefs: (a copy from TagInfo, to avoid dependencies)
     //@{
     typedef     std::pair<std::string, std::string>  NameTagPair;
@@ -77,10 +80,6 @@ public:
     /// Remove a Listener from the notification list for TagInfo changes
     virtual void              removeListener(Listener* listener) = 0;
       
-
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID();
-
     /// Method to allow clients to add in tags as: tag name, tag value
     virtual StatusCode        addTag(const std::string& tagName, 
 				     const std::string& tagValue) = 0;
@@ -104,16 +103,5 @@ public:
     /// Printout method
     virtual void              printTags(MsgStream& log) const = 0;
 };
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-
-inline const InterfaceID& 
-ITagInfoMgr::interfaceID() 
-{
-    static const InterfaceID IID_ITagInfoMgr("ITagInfoMgr", 1 , 0); 
-    return IID_ITagInfoMgr; 
-}
 
 #endif // EVENTINFOMGT_ITAGINFOMGR_H

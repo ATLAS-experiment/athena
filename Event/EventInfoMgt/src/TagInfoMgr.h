@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTINFOMGT_TAGINFOMGR_H
@@ -64,9 +64,9 @@ class CondAttrListCollection;
  *  TagInfoMgr. 
  *
  */
-class TagInfoMgr : virtual public AthService,
-                   virtual public ITagInfoMgr,
-                   virtual public IIncidentListener
+class TagInfoMgr : public extends<AthService,
+                                  ITagInfoMgr,
+                                  IIncidentListener>
 {
 public:
 
@@ -80,10 +80,6 @@ public:
     virtual StatusCode   start() override;
     virtual StatusCode   finalize() override;
   
-    /// Query the interfaces.
-    virtual StatusCode   queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-    //@}
-
     /// @name Interface methods
     //@{
     /// @name Method to allow clients add in tags as: tag name, tag value
