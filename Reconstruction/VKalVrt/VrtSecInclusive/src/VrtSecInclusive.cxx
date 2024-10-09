@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -83,8 +83,6 @@ namespace VKalVrtAthena {
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::initialize()
   {
-    //---------------- HBOOK
-    ITHistSvc*     hist_root=nullptr;
     ATH_MSG_INFO("initialize: begin");
     //
     // first instantiate tools
@@ -188,8 +186,9 @@ namespace VKalVrtAthena {
 
     
     // now make histograms/ntuples
-    
-    ATH_CHECK( service( "THistSvc", hist_root ) );
+
+    ServiceHandle<ITHistSvc> hist_root("THistSvc", name());
+    ATH_CHECK( hist_root.retrieve() );
     
     if( m_jp.FillHist ) {
       
