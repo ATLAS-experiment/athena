@@ -265,7 +265,7 @@ private: // properties
    IntegerProperty m_numberEventsPerWrite{this,"NumberEventsPerWrite",-1};
 
    /// If true, use only one DataHeaderForm per Stream
-   BooleanProperty m_oneDataHeaderForm { this, "OneDataHeaderForm", true };
+   BooleanProperty m_oneDataHeaderForm { this, "OneDataHeaderForm", false };
    /// Property for DataHeaderCnv input DHForm cache size
    IntegerProperty m_DHFormCacheSize { this, "maxDHFormCacheSize", 100 };
    /// Flag to control SG alias filtering when writing out DataHeader (see DataHeaderCnv_p6)
