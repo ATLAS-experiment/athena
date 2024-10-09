@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaBaseComps/test/AthAlgorithmDHUpdate_test.cxx
@@ -39,7 +39,7 @@ CLASS_DEF (C2, 132102085, 0)
 SG_BASE (C1, C2);
 
 class TestHolder
-  : public IDataHandleHolder
+  : public implements<IDataHandleHolder>
 {
 public:
   virtual std::vector<Gaudi::DataHandle*> inputHandles() const override
@@ -57,12 +57,6 @@ public:
   virtual void renounce(Gaudi::DataHandle&) override
   { std::abort(); }
   virtual bool renounceInput(const DataObjID&) override
-  { std::abort(); }
-  virtual unsigned long addRef() override
-  { std::abort(); }
-  virtual unsigned long release() override
-  { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID&, void**) override
   { std::abort(); }
   virtual const std::string& name() const override
   { std::abort(); }
