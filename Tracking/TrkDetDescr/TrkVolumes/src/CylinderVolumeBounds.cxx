@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ const std::vector<const Trk::Surface*>*
   // check if the transform is approximatively the identity
   bool isConcentric = transform.isApprox(Amg::Transform3D::Identity());
 
-  Amg::RotationMatrix3D discRot(transform.rotation());
+  Amg::RotationMatrix3D discRot = transform.linear();
   Amg::Vector3D cylCenter(transform.translation());
 
   // bottom Disc (negative z)
@@ -121,8 +121,7 @@ const std::vector<const Trk::Surface*>*
     bottomDiscBounds()));
   // top Disc (positive z)
   retsf->push_back(new Trk::DiscSurface(
-    Amg::Transform3D(
-      discRot * Amg::Translation3D(cylCenter + halflengthZ() * discRot.col(2))),
+    Amg::Transform3D(transform* Amg::Translation3D( Amg::Vector3D(0, 0, halflengthZ()) )),
     topDiscBounds()));
   // outer Cylinder
   if (!isConcentric)
