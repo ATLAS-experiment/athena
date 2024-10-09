@@ -76,8 +76,8 @@ TRT_DriftFunctionTool::TRT_DriftFunctionTool(const std::string& type,
   declareProperty("TrtDescrManageLocation",m_trt_mgr_location);
   declareProperty("ToTCorrectionsBarrelXe",m_tot_corrections_barrel_Xe);
   declareProperty("ToTCorrectionsEndcapXe",m_tot_corrections_endcap_Xe);
-  declareProperty("ToTCorrectionsBarrelAr",m_tot_corrections_barrel_Xe);
-  declareProperty("ToTCorrectionsEndcapAr",m_tot_corrections_endcap_Xe);
+  declareProperty("ToTCorrectionsBarrelAr",m_tot_corrections_barrel_Ar);
+  declareProperty("ToTCorrectionsEndcapAr",m_tot_corrections_endcap_Ar);
   declareProperty("HTCorrectionBarrelXe",m_ht_correction_barrel_Xe);
   declareProperty("HTCorrectionEndcapXe",m_ht_correction_endcap_Xe);
   declareProperty("HTCorrectionBarrelAr",m_ht_correction_barrel_Ar);
