@@ -17,3 +17,4 @@ atlas_add_component( InDetDetDescrExample
 
 atlas_install_runtime( tools/RunPrintSiDetElements.py )
 atlas_install_runtime( tools/geometry_dat_to_json.py )
+atlas_install_runtime( tools/module_selector_from_json.py )
