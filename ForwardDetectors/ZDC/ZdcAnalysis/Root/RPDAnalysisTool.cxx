@@ -112,7 +112,8 @@ void RPDAnalysisTool::readAOD(xAOD::ZdcModuleContainer const& moduleContainer) {
     // channel numbers are fixed in mapping in ZdcConditions, numbered 0-15
     unsigned int const channel = module->zdcChannel();
     ATH_MSG_DEBUG("RPD side " << side << " channel " << module->zdcChannel());
-    auto const& waveform = module->auxdataConst<std::vector<uint16_t>>("g0data");
+    SG::ConstAccessor<std::vector<uint16_t>> accessor("g0data");
+    auto const& waveform = accessor(*module);
     m_dataAnalyzers.at(side)->loadChannelData(channel, waveform);
   }
 }
