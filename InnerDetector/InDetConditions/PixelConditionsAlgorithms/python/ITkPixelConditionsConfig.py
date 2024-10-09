@@ -133,6 +133,8 @@ def ITkPixelDeadMapCondAlgCfg(flags, name="ITkPixelDeadMapCondAlg", **kwargs):
 
     # TODO: not enabled for ITk for now
     kwargs.setdefault("ReadKey", "")
+    # Use a json file to disable modules. If readKey!="" this option is ignored
+    kwargs.setdefault("JsonPath",flags.ITk.JsonPathPixelModuleVeto)
     kwargs.setdefault("WriteKey", "ITkPixelDeadMapCondData")
     acc.addCondAlgo(CompFactory.PixelDeadMapCondAlg(name, **kwargs))
     return acc
