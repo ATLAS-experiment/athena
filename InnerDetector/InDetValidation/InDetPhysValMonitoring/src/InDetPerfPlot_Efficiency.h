@@ -62,6 +62,7 @@ private:
   TEfficiency* m_efficiency_vs_truthMu{};
   TEfficiency* m_efficiency_vs_actualMu{};
 
+  TEfficiency* m_technical_efficiency_vs_pteta{};
   TEfficiency* m_technical_efficiency_vs_eta{};
   TEfficiency* m_technical_efficiency_vs_pt{};
   TEfficiency* m_technical_efficiency_vs_phi{};

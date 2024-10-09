@@ -982,6 +982,10 @@
   <x title="prod_Z [mm]" n="40" lo="0" hi="1000"/>
   <y title="Efficiency" lo="0.0" hi="2.0"/>
 </h>
+<h id="technical_efficiency_vs_pteta" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="p_{T} [GeV]" n="200" lo="0.0" hi="20"/>
+  <y title="#eta" n="27" lo="-&ETA;" hi="&ETA;"/>
+</h>
 <h id="technical_efficiency_vs_eta" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
   <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
   <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
