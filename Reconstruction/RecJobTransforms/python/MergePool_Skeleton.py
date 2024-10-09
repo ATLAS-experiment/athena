@@ -47,14 +47,15 @@ def fromRunArgs(runArgs):
         raise RuntimeError('Could NOT determine the stream type!')
 
     # Now set the output file name and add additional flags
-    # that are necessary for the derived formats
-    if 'DAOD' in streamToMerge or 'DESD' in streamToMerge:
+    # For known formats, e.g., ESD, AOD, we already have the associated flags
+    # However, for other formats, e.g., DAOD_XYZ, we need to create the flags
+    try:
+        setattr(flags.Output, f'{streamToMerge}FileName', outputFile)
+    except RuntimeError: # If a flag doesn't exist CA throws a runtime error
         flags.addFlag(f'Output.{streamToMerge}FileName', outputFile)
         flags.addFlag(f'Output.doWrite{streamToMerge}', True)
         if 'DAOD' in streamToMerge:
             flags.Output.doWriteDAOD = True
-    else:
-        setattr(flags.Output, f'{streamToMerge}FileName', outputFile)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
