@@ -15,9 +15,15 @@ atlas_add_component( MuonGeoModelTestR4
                                     xAODTruth xAODMuonSimHit CxxUtils)
 
 
+atlas_add_test( testR3Geometry
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
 atlas_add_test( testR4Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC 
-                PROPERTIES TIMEOUT 900
+                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db --condTag OFLCOND-MC21-SDR-RUN4-01 --geoTag ATLAS-P2-RUN4-01-00-00
+                PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
@@ -27,9 +33,15 @@ atlas_add_test( checkStripDesign
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
-atlas_add_test( testR4SensitiveDetectors
+atlas_add_test( testR3SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 
                 PROPERTIES TIMEOUT 1200
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( testR4SensitiveDetectors
+                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 2 --geoModelFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/ATLAS-R4-MUONTEST.db
+                PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 

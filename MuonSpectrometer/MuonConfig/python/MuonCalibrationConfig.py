@@ -100,7 +100,7 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     result = ComponentAccumulator()
     result.merge(MuonGeoModelCfg(flags))    
-    if False and flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
+    if flags.GeoModel.Run is LHCPeriod.Run4 and flags.Muon.usePhaseIIGeoSetup:
         alg = CompFactory.MuonCalibR4.MdtCalibDbAlg(name)
         result.addCondAlgo (alg, primary = True)
         return result
