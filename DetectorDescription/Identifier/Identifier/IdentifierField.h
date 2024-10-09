@@ -26,12 +26,10 @@ class IdentifierField
   static constexpr auto minimum_possible = std::numeric_limits<element_type>::min();
   static constexpr auto maximum_possible = std::numeric_limits<element_type>::max();
   /** 
-   *   Characterizes the four possible modes of any IdentifierField specification 
+   *   Characterizes the three possible modes of any IdentifierField specification 
    */ 
   enum mode{ 
     unbounded, 
-    low_bounded, 
-    high_bounded, 
     both_bounded, 
     enumerated,
     nModes
