@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -30,18 +30,10 @@
 
 namespace D3PD {
 
-
-/// Interface definition.
-static const InterfaceID IID_PhotonTruthTool ("D3PD::PhotonTruthTool", 1, 0);
-
-
 class PhotonTruthTool
   : public AthAlgTool
 {
 public:
-  /// Gaudi interface definition.
-  static const InterfaceID& interfaceID() { return IID_PhotonTruthTool; }
-
   /**
    * @brief Standard Gaudi tool constructor.
    * @param type The name of the tool type.
@@ -55,12 +47,6 @@ public:
 
   /// Standard Gaudi @c initialize method.
   virtual StatusCode initialize();
-
-
-  /// Standard Gaudi @c queryInterface method.
-  virtual StatusCode queryInterface( const InterfaceID& riid,
-                                     void** ppvIf );
-
 
   /**
    * @brief Go from a photon to a matching @c TruthParticle.

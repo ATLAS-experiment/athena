@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -28,7 +28,7 @@ namespace D3PD {
  * @brief Add luminosity metadata info to a D3PD.
  */
 class LBMetadataTool
-  : public AthAlgTool, public IMetadataTool
+  : public extends<AthAlgTool, IMetadataTool>
 {
 public:
   /**
@@ -43,19 +43,13 @@ public:
 
 
   /// Standard Gaudi initialize method.
-  virtual StatusCode initialize();
-
-
-  /// Standard Gaudi @c queryInterface method.
-  virtual StatusCode queryInterface( const InterfaceID& riid,
-                                     void** ppvIf );
-
+  virtual StatusCode initialize() override;
 
   /**
    * @brief Write metadata to a D3PD.
    * @param d3pd The D3PD to which to write.
    */
-  virtual StatusCode writeMetadata (ID3PD* d3pd);
+  virtual StatusCode writeMetadata (ID3PD* d3pd) override;
 
 
 private:

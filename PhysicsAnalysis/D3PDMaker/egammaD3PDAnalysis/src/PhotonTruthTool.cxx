@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -48,22 +48,6 @@ StatusCode PhotonTruthTool::initialize()
   CHECK( AthAlgTool::initialize() );
   CHECK( m_classifier.retrieve() );
   return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Standard Gaudi @c queryInterface method.
- */
-StatusCode
-PhotonTruthTool::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == PhotonTruthTool::interfaceID() )  {
-    *ppvIf = static_cast<PhotonTruthTool*> (this);
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-
-  return AthAlgTool::queryInterface( riid, ppvIf );
 }
 
 

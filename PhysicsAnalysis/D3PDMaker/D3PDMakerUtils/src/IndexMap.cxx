@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file D3PDMakerUtils/src/IndexMap.cxx
@@ -334,15 +334,5 @@ std::string IndexMap::formatLabels() const
   }
   return out;
 }
-
-
-/// Dummies needed to satisfy IInterface requirements.
-unsigned long IndexMap::addRef() { return 0; }
-unsigned long IndexMap::release() { return 0; }
-StatusCode IndexMap::queryInterface(const InterfaceID& /*riid*/,
-                                    void** /*ppvInterface*/)
-{ return StatusCode::FAILURE; }
-
-
 
 } // namespace D3PD
