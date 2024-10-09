@@ -44,6 +44,7 @@ namespace CP
       ANA_CHECK( m_charWriteHandles.back().second->initialize(m_systematicsList, m_tauHandle));
     }
     ANA_CHECK (m_truthDecayModeDecoration.initialize (m_systematicsList, m_tauHandle));
+    ANA_CHECK (m_truthParticleTypeDecoration.initialize (m_systematicsList, m_tauHandle));
     ANA_CHECK (m_systematicsList.initialize());
     return StatusCode::SUCCESS;
   }
@@ -95,6 +96,7 @@ namespace CP
         }
 
         m_truthDecayModeDecoration.set(*tau, TauAnalysisTools::getTruthDecayMode(*truthParticle), sys);
+        m_truthParticleTypeDecoration.set(*tau, static_cast<int>(TauAnalysisTools::getTruthParticleType(*tau)), sys);
       }
     }
     return StatusCode::SUCCESS;

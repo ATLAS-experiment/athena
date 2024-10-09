@@ -60,6 +60,8 @@ namespace CP
 
     SysWriteDecorHandle<int> m_truthDecayModeDecoration {
       this, "decayModeDecoration", "truth_DecayMode", "the decoration for the tau decay mode"};
+    SysWriteDecorHandle<int> m_truthParticleTypeDecoration {
+      this, "particleTypeDecoration", "truth_ParticleType", "the decoration for the tau particle type"};
   };
 }
 
