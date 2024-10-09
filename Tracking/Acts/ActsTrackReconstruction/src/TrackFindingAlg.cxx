@@ -95,6 +95,8 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_statEtaBins);
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
+    ATH_MSG_DEBUG("   " << m_branchStopperPtMinFactor);
+    ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
 
     // Read and Write handles
     ATH_CHECK(m_seedContainerKeys.initialize());
@@ -488,7 +490,7 @@ namespace ActsTrk
       if (typeIndex < m_ptMinMeasurements.size() &&
           !(track.nMeasurements() < m_ptMinMeasurements[typeIndex])) {
         double pT = std::sin(parameters[Acts::eBoundTheta]) / parameters[Acts::eBoundQOverP];
-        if (std::abs(pT) < cutSet.ptMin) {
+        if (std::abs(pT) < cutSet.ptMin * m_branchStopperPtMinFactor) {
           ++event_stat[category_i][kNStoppedTracksMinPt];
           ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
                         << pT << " after "
@@ -499,7 +501,7 @@ namespace ActsTrk
 
       if (typeIndex < m_absEtaMaxMeasurements.size() &&
           !(track.nMeasurements() < m_absEtaMaxMeasurements[typeIndex]) &&
-          !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back())) {
+          !(std::abs(eta) < trackSelectorCfg.absEtaEdges.back() + m_branchStopperAbsEtaMaxExtra)) {
         ++event_stat[category_i][kNStoppedTracksMaxEta];
         ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
                       << eta << " after "
