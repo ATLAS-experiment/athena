@@ -18,6 +18,9 @@ def algdata_from_menu(flags, do_dot=False, root_names=[]):
     from l1MenuGraph import l1MenuGraph
 
     G, alg_data_list = l1MenuGraph(flags)
+    if do_dot:
+        dot(G, "menu_graph.dot")
+
 
     algname2sn = {}
     for ad in alg_data_list:
@@ -25,10 +28,27 @@ def algdata_from_menu(flags, do_dot=False, root_names=[]):
 
     assert len(algname2sn) == len(alg_data_list)
 
+    if do_dot:
+        txt_l = ['%s %d' % (k, v) for k, v in algname2sn.items()]
+        txt = '\n'.join(txt_l)
+        txt += '\n\n'
+        txt_l = ['%d %s' % (v, k) for k, v in algname2sn.items()]
+        txt += '\n'.join(txt_l)
+        with open('algname2sn.txt', 'w') as fh:
+            fh.write(txt)
+            
     # allow running of sub graphs.
     # root_names contains the names of the roots of the subgraphs.
     if root_names:
-        roots = [algname2sn[name] for name in root_names]
+        roots = [algname2sn[name]
+                 for name in root_names if name in algname2sn]
+        if not roots:
+            logger.error("no requested root nodes present in menu")
+        elif len(roots) < len(root_names):
+            logger.debug(
+                'requested ' + str(len(root_names)),
+                'found  ' + str(len(roots)) +  'in menu')
+                                           
     else:
         # if no nodes are named as root nodes, use all
         # nodes except the node with sn = 0 for now.
@@ -36,6 +56,8 @@ def algdata_from_menu(flags, do_dot=False, root_names=[]):
         # the different components, and leaving them unjoined to node 0
         # facilitates the visualisation of the graph structure.i
         roots = [i for i in range(1, G.V)]
+
+        
 
     # find the executrion order of the AlgTools in terms of graph node
     # identifiers (ints)
