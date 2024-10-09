@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERMONKERNEL_IPERFMONMTSV_H
@@ -11,14 +11,12 @@
 /// Framework include
 #include "GaudiKernel/IService.h"
 
-//class IPerfMonMTSvc : virtual public IMonitorSvc
 class IPerfMonMTSvc : virtual public IService
 {
 
   public:
-
     /// Framework - Service InterfaceID
-    static const InterfaceID& interfaceID();
+    DeclareInterfaceID(IPerfMonMTSvc, 1, 0);
 
     /// Start Auditing
     virtual void startAud( const std::string& stepName,
@@ -30,14 +28,5 @@ class IPerfMonMTSvc : virtual public IService
 
 
 }; // class IPerfMonMTSvc
-
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
-inline const InterfaceID& IPerfMonMTSvc::interfaceID()
-{
-  static const InterfaceID IID_IPerfMonMTSvc("IPerfMonMTSvc", 1, 0);
-  return IID_IPerfMonMTSvc;
-}
 
 #endif // PERMONKERNEL_IPERFMONMTSV_H

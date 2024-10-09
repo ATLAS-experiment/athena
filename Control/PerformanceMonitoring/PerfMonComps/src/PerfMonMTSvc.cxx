@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -33,7 +33,7 @@
  * Constructor
  */
 PerfMonMTSvc::PerfMonMTSvc(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthService(name, pSvcLocator), m_isFirstEvent{false}, m_eventCounter{0}, m_eventLoopMsgCounter{0}, m_checkPointTime{0}, m_isEvtLoopStopped{false} {
+    : base_class(name, pSvcLocator), m_isFirstEvent{false}, m_eventCounter{0}, m_eventLoopMsgCounter{0}, m_checkPointTime{0}, m_isEvtLoopStopped{false} {
   // Five main snapshots : Configure, Initialize, FirstEvent, Execute, and Finalize
   m_motherPID = getpid();
   m_snapshotData.resize(NSNAPSHOTS); // Default construct
@@ -42,22 +42,6 @@ PerfMonMTSvc::PerfMonMTSvc(const std::string& name, ISvcLocator* pSvcLocator)
   m_measurementSnapshots.capture();
   m_snapshotData[CONFIGURE].addPointStop(m_measurementSnapshots);
   m_snapshotData[INITIALIZE].addPointStart(m_measurementSnapshots);
-}
-
-/*
- * Query Interface
- */
-StatusCode PerfMonMTSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (!ppvInterface) {
-    return StatusCode::FAILURE;
-  }
-
-  if (riid == IPerfMonMTSvc::interfaceID()) {
-    *ppvInterface = static_cast<IPerfMonMTSvc*>(this);
-    return StatusCode::SUCCESS;
-  }
-
-  return AthService::queryInterface(riid, ppvInterface);
 }
 
 /*

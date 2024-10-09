@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VTUNE_PROFILERSERVICE_H
@@ -24,18 +24,14 @@
 // Fwd declerations
 class IAuditorSvc;
 
-class VTuneProfilerService : public AthService,
-                             public virtual IVTuneProfilerSvc,
-                             public virtual IIncidentListener {
+class VTuneProfilerService : public extends<AthService,
+                                            IVTuneProfilerSvc,
+                                            IIncidentListener> {
 
   public:
 
       /// Standard Gaudi service constructor
       VTuneProfilerService( const std::string& name, ISvcLocator* svcloc );
-
-      /// Function declaring the interface(s) implemented by the service
-      virtual StatusCode queryInterface( const InterfaceID& riid,
-                                         void** ppvIF ) override;
 
       /// Standard Gaudi initialization function
       virtual StatusCode initialize() override;

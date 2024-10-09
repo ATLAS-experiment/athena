@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,7 +25,7 @@ namespace GPT {
    static const std::string ENDEVTLOOP_INCIDENT_NAME = "EndEvtLoop";
 
    ProfilerService::ProfilerService( const std::string& name, ISvcLocator* svcloc )
-      : AthService( name, svcloc ),
+      : base_class( name, svcloc ),
         m_incidentSvc( "IncidentSvc", name ),
         m_running( false ), m_fileName( "" ), m_processedEvents( 0 ) {
 
@@ -44,21 +44,6 @@ namespace GPT {
       if( m_running ) {
          stop().ignore();
       }
-   }
-
-   StatusCode ProfilerService::queryInterface( const InterfaceID& riid,
-                                               void** ppvIF ) {
-
-      if( ! ppvIF ) {
-         return StatusCode::FAILURE;
-      }
-
-      if( riid == IProfilerSvc::interfaceID() ) {
-         *ppvIF = static_cast< IProfilerSvc* >( this );
-         return StatusCode::SUCCESS;
-      }
-
-      return AthService::queryInterface( riid, ppvIF );
    }
 
    StatusCode ProfilerService::initialize() {

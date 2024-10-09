@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IPerfMonSvc.h 
@@ -40,6 +40,7 @@ class IPerfMonSvc : virtual public IMonitorSvc
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
+  DeclareInterfaceID(IPerfMonSvc, 1, 0);
 
   /** Destructor: 
    */
@@ -99,8 +100,6 @@ class IPerfMonSvc : virtual public IMonitorSvc
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
-
-  static const InterfaceID& interfaceID();
 
   /** Declare monitoring information
       @param name Monitoring information name knwon to the external system
@@ -192,15 +191,5 @@ class IPerfMonSvc : virtual public IMonitorSvc
   /// current state of the Gaudi's FSM
   PerfMon::State::Type m_monState;
 }; 
-
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-inline const InterfaceID& IPerfMonSvc::interfaceID() 
-{ 
-  static const InterfaceID IID_IPerfMonSvc("IPerfMonSvc", 1, 0);
-  return IID_IPerfMonSvc; 
-}
 
 #endif //> PERFMONKERNEL_IPERFMONSVC_H

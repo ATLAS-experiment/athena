@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VTUNE_IPROFILERSERVICE_H
 #define VTUNE_IPROFILERSERVICE_H
-
-/// Interface definition
-static const InterfaceID IID_IVTuneProfilerService( "IVTuneProfilerService", 0, 1 );
 
 class IVTuneProfilerSvc : public virtual IService {
 
   public:
   
     /// Interface ID definition
-    static const InterfaceID& interfaceID() { return IID_IVTuneProfilerService; }
+    DeclareInterfaceID(IVTuneProfilerSvc, 0, 1 );
 
     /// Resume profiling
     virtual StatusCode resumeProfiling() = 0;

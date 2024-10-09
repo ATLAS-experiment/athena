@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CallGraphBuilderSvc.cxx 
@@ -38,7 +38,7 @@ NodeId_t CallGraphBuilderSvc::m_uuid = 0;
 ////////////////
 CallGraphBuilderSvc::CallGraphBuilderSvc( const std::string& name, 
 					  ISvcLocator* pSvcLocator ) : 
-  AthService( name, pSvcLocator )
+  base_class( name, pSvcLocator )
 {
   //
   // Property declaration
@@ -91,26 +91,7 @@ StatusCode CallGraphBuilderSvc::finalize()
   return StatusCode::SUCCESS;
 }
 
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode 
-CallGraphBuilderSvc::queryInterface( const InterfaceID& riid, 
-				     void** ppvInterface )
-{
-  if ( ICallGraphBuilderSvc::interfaceID().versionMatch(riid) ) {
-    *ppvInterface = dynamic_cast<ICallGraphBuilderSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 // Non-const methods: 
 /////////////////////////////////////////////////////////////////// 
 

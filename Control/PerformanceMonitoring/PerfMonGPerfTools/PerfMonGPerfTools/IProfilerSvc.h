@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: IProfilerSvc.h 496380 2012-04-18 12:28:09Z ritsch $
 #ifndef PERFMONGPERFTOOLS_IPROFILERSVC_H
 #define PERFMONGPERFTOOLS_IPROFILERSVC_H
 
@@ -16,9 +15,6 @@
 
 namespace GPT {
 
-   /// Interface definition
-   static const InterfaceID IID_IProfilerSvc( "IProfilerSvc", 0, 1 );
-
    /**
     *  @short Simple interface for the profiler service
     *
@@ -27,15 +23,12 @@ namespace GPT {
     *         users don't actually have to use it.
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
-    *
-    * $Revision: 496380 $
-    * $Date: 2012-04-18 14:28:09 +0200 (Wed, 18 Apr 2012) $
     */
    class IProfilerSvc : public virtual IService {
 
    public:
       /// Interface ID definition
-      static const InterfaceID& interfaceID() { return IID_IProfilerSvc; }
+      DeclareInterfaceID(IProfilerSvc, 0, 1);
 
       /// Start GPT profiling
       /**

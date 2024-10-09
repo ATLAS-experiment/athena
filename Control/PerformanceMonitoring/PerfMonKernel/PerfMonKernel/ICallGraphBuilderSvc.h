@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ICallGraphBuilderSvc.h 
@@ -26,17 +26,13 @@ class ICallGraphBuilderSvc : virtual public IInterface
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
+  DeclareInterfaceID(ICallGraphBuilderSvc, 1, 0);
 
   /** Destructor: 
    */
   virtual ~ICallGraphBuilderSvc();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
   ///////////////////////////////////////////////////////////////////
-  static const InterfaceID& interfaceID();
-
-  /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
@@ -52,16 +48,5 @@ class ICallGraphBuilderSvc : virtual public IInterface
  private: 
 
 }; 
-
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-inline const InterfaceID& ICallGraphBuilderSvc::interfaceID() 
-{ 
-  static const InterfaceID 
-    IID_ICallGraphBuilderSvc("ICallGraphBuilderSvc", 1, 0);
-  return IID_ICallGraphBuilderSvc; 
-}
 
 #endif //> PERFMONKERNEL_ICALLGRAPHBUILDERSVC_H

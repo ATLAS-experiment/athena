@@ -19,7 +19,7 @@ static const std::string ENDEVTLOOP_INCIDENT_NAME = "EndEvtLoop";
  * Constructor
  */
 VTuneProfilerService::VTuneProfilerService( const std::string& name, ISvcLocator* svcloc )
-  : AthService( name, svcloc ),
+  : base_class( name, svcloc ),
     m_incidentSvc( "IncidentSvc", name ),
      m_processedEvents( 0 )  {
 
@@ -32,26 +32,6 @@ VTuneProfilerService::VTuneProfilerService( const std::string& name, ISvcLocator
                        "List of profiled algorithms." );
 
 }
-
-/**
- * QueryInterface
- */
-StatusCode VTuneProfilerService::queryInterface( const InterfaceID& riid,
-                                                 void** ppvIF ) {
-
-   if( ! ppvIF ) {
-      return StatusCode::FAILURE;
-   }
-
-   if( riid == IVTuneProfilerSvc::interfaceID() ) {
-      *ppvIF = static_cast< IVTuneProfilerSvc* >( this );
-      return StatusCode::SUCCESS;
-   }
-
-   return AthService::queryInterface( riid, ppvIF );
-
-}
-
 
 /**
  * Initalize the service

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CallGraphBuilderSvc.h 
@@ -31,21 +31,12 @@
 // PerfMonKernel includes
 #include "PerfMonKernel/ICallGraphBuilderSvc.h"
 
-// Forward declaration
-class ISvcLocator;
-template <class TYPE> class SvcFactory;
 
 namespace PerfMon {
 
-class CallGraphBuilderSvc : virtual public ICallGraphBuilderSvc,
- 	                            public AthService
-{ 
-
-protected:
-    
-  friend class SvcFactory<CallGraphBuilderSvc>;
-
-  /////////////////////////////////////////////////////////////////// 
+class CallGraphBuilderSvc : public extends<AthService, ICallGraphBuilderSvc>
+{
+  ///////////////////////////////////////////////////////////////////
   // Public typedefs: 
   /////////////////////////////////////////////////////////////////// 
  public: 
@@ -66,10 +57,8 @@ protected:
 
   /// Gaudi Service Implementation
   //@{
-  StatusCode initialize();
-  StatusCode finalize();
-  virtual StatusCode queryInterface( const InterfaceID& riid, 
-                                     void** ppvInterface );
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   //@}
 
 
@@ -77,13 +66,11 @@ protected:
   // Non-const methods: 
   /////////////////////////////////////////////////////////////////// 
 
-  static const InterfaceID& interfaceID();
-
   /// open a new node in the call graph tree
-  void openNode( const std::string& nodeName );
+  virtual void openNode( const std::string& nodeName ) override;
 
   /// close an existing node in the call graph tree
-  void closeNode( const std::string& nodeName );
+  virtual void closeNode( const std::string& nodeName ) override;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 
@@ -112,16 +99,6 @@ protected:
   CallGraph_t m_graph ATLAS_THREAD_SAFE;
 
 }; 
-
-
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline const InterfaceID& CallGraphBuilderSvc::interfaceID() 
-{ 
-   return ICallGraphBuilderSvc::interfaceID(); 
-}
 
 } // end namespace PerfMon
 
