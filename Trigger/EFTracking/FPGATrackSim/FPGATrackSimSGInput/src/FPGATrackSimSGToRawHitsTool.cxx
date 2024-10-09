@@ -773,7 +773,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
       const int bc = HepMC::barcode(particle); // FIXME update barcode-based syntax
-      const int uid = particle->id();
+      const int uid = HepMC::uniqueID(particle);
       if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; } // FIXME update barcode-based syntax
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
