@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -40,26 +40,11 @@
 
 // Constructor with parameters:
 TagInfoMgr::TagInfoMgr(const std::string &name, ISvcLocator *pSvcLocator) :
-    AthService(name, pSvcLocator)
+    base_class(name, pSvcLocator)
 {}
 
 TagInfoMgr::~TagInfoMgr() 
 {}
-
-
-/// Identify interfaces to which this service is responsive
-StatusCode
-TagInfoMgr::queryInterface( const InterfaceID& riid, void** ppvInterface ) 
-{
-    if ( ITagInfoMgr::interfaceID().versionMatch(riid) ) {
-        *ppvInterface = (ITagInfoMgr*)this;
-    }
-    else {
-        // Interface is not directly available: try out a base class
-        return(::AthService::queryInterface(riid, ppvInterface));
-    }
-    return StatusCode::SUCCESS;
-}
 
 // Initialize method:
 StatusCode TagInfoMgr::initialize()
@@ -414,27 +399,22 @@ TagInfoMgr::getRunNumber (unsigned int& runNumber)
     ATH_MSG_DEBUG( "getRunNumber: check if tag is set in jobOpts");
     // Get name of event selector from the application manager to
     // make sure we get the one for MC signal events
-    IProperty* propertyServer(0); 
-    StatusCode sc = serviceLocator()->service("ApplicationMgr", propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
-        ATH_MSG_ERROR( "getRunNumber: Cannot get ApplicationMgr "); 
-        return StatusCode::FAILURE;
-    }
+    SmartIF<IProperty> appMgr(serviceLocator()->service("ApplicationMgr"));
+    ATH_CHECK( appMgr.isValid() );
+
     StringProperty property("EvtSel", "");
-    sc = propertyServer->getProperty(&property);
+    StatusCode sc = appMgr->getProperty(&property);
     if (!sc.isSuccess()) {
         ATH_MSG_ERROR( "getRunNumber: unable to get EvtSel: found " << property.value());
         return StatusCode::FAILURE;
     }
     // Get EventSelector for ApplicationMgr
     std::string eventSelector = property.value();
-    sc = serviceLocator()->service(eventSelector, propertyServer); 
-    if (sc != StatusCode::SUCCESS ) {
-        ATH_MSG_ERROR( "getRunNumber: Cannot get EventSelector " << eventSelector); 
-        return StatusCode::FAILURE;
-    }
+    SmartIF<IProperty> evtSel(serviceLocator()->service(eventSelector));
+    ATH_CHECK( evtSel.isValid() );
+
     BooleanProperty overrideRunNumber = BooleanProperty("OverrideRunNumber", false);
-    sc = propertyServer->getProperty(&overrideRunNumber);
+    sc = evtSel->getProperty(&overrideRunNumber);
     if (!sc.isSuccess()) {
         // Not all EventSelectors have this property, but we should
         // not get here if the ES is not one for simulation => return failure
@@ -443,7 +423,7 @@ TagInfoMgr::getRunNumber (unsigned int& runNumber)
     }
     if (overrideRunNumber.value()) {
         IntegerProperty runNumberProp = IntegerProperty("RunNumber", 0);
-        sc = propertyServer->getProperty(&runNumberProp);
+        sc = evtSel->getProperty(&runNumberProp);
         if (!sc.isSuccess()) {
             ATH_MSG_ERROR( "getRunNumber: unable to get RunNumber from EventSelector: found " 
                 << runNumberProp.value());
