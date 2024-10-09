@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrkConverter/FPGAConversionAlgorithm.h"
+#include "FPGAConversionAlgorithm.h"
 #include "StoreGate/ReadHandle.h"
 #include <type_traits>
 

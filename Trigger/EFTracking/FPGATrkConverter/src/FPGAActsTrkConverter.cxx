@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-#include "FPGATrkConverter/FPGAActsTrkConverter.h"
+#include "FPGAActsTrkConverter.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
