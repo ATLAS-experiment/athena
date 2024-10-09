@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DetectorDescription_IGeometryDBSvc_h
@@ -20,6 +20,8 @@
 class IGeometryDBSvc: virtual public IInterface
 {
 public:
+  DeclareInterfaceID(IGeometryDBSvc, 1, 0);
+
   virtual ~IGeometryDBSvc(){}
  
   /// The following methods will first look in the text file if provided and then look in the database.
@@ -44,14 +46,6 @@ public:
 
   /// Print paramaters from text file which are not used. If section is supplied only consider the parameters in that section.
   virtual void printNotUsed(const std::string & section = "") const=0;
-
-  static const InterfaceID & interfaceID(); //!< reimplemented from IInterface
-
 };
-
-inline const InterfaceID & IGeometryDBSvc::interfaceID(){
-  static const InterfaceID IID_IGeometryDBSvc("IGeometryDBSvc",1,0);
-  return IID_IGeometryDBSvc;
-}
 
 #endif // DetectorDescription_IGeometryDBSvc_h

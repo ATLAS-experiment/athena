@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -23,28 +23,14 @@ constexpr long DetDescr_StorageType = 0x44;
 
 /// Standard constructor
 DetDescrCnvSvc::DetDescrCnvSvc(const std::string &name, ISvcLocator *svc)
-    : ConversionSvc(name, svc, DetDescr_StorageType) {}
+    : ConversionSvc(name, svc, DetDescr_StorageType),
+      m_detStore("DetectorStore", name)
+ {}
 
 //-------------------------------------------------------------------------
 
 /// Standard Destructor
 DetDescrCnvSvc::~DetDescrCnvSvc() = default;
-
-//-------------------------------------------------------------------------
-
-/// Identify interfaces to which this service is responsive
-StatusCode DetDescrCnvSvc::queryInterface(const InterfaceID &riid,
-                                          void **ppvInterface) {
-    if (riid == IConversionSvc::interfaceID()) {
-        *ppvInterface = dynamic_cast<IConversionSvc *>(this);
-    } else if (riid == IDetDescrCnvSvc::interfaceID()) {
-        *ppvInterface = dynamic_cast<IDetDescrCnvSvc *>(this);
-    } else {
-        return ConversionSvc::queryInterface(riid, ppvInterface);
-    }
-    addRef();
-    return StatusCode::SUCCESS;
-}
 
 //-------------------------------------------------------------------------
 
@@ -54,7 +40,7 @@ StatusCode DetDescrCnvSvc::initialize() {
     ATH_MSG_INFO(" initializing ");
 
     // get DetectorStore service
-    ATH_CHECK(service("DetectorStore", m_detStore));
+    ATH_CHECK( m_detStore.retrieve() );
     ATH_MSG_INFO("Found DetectorStore service");
 
     // fill in the Addresses for Transient Detector Store objects

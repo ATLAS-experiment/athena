@@ -140,12 +140,13 @@ RDBMaterialManager::RDBMaterialManager(ISvcLocator* pSvcLocator)
 
 StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 {
-  IGeoModelSvc*  iGeoModel{};		
-  IRDBAccessSvc* iAccessSvc{};
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 		
 
-  ATH_CHECK(pSvcLocator->service("GeoModelSvc",iGeoModel));
-  ATH_CHECK(pSvcLocator->service("RDBAccessSvc",iAccessSvc));
+  SmartIF<IGeoModelSvc> iGeoModel{pSvcLocator->service("GeoModelSvc")};
+  ATH_CHECK( iGeoModel.isValid() );
+
+  SmartIF<IRDBAccessSvc> iAccessSvc{pSvcLocator->service("RDBAccessSvc")};
+  ATH_CHECK( iAccessSvc.isValid() );
   
   auto warn = [&](const std::string & msg){
     if (log.level()<=MSG::WARNING){
