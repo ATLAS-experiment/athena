@@ -43,63 +43,60 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
     auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
     auto lbn = Monitored::Scalar<int>("LBN",GetEventInfo(ctx)->lumiBlock());
 	auto binNumber = Monitored::Scalar<int>("binNumber",0);
+	
+
 
 	unsigned int nTowers = 0;
-	auto maxet = 0.0;
-
+	//ATH_MSG_INFO("gTOWER" << "    Eta " << "   Eta Index" << "  Phi " << "   Phi index " );
 	for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){
-
 
 		Toweret=gfexTowerRoI->towerEt();
 		Towersaturationflag=gfexTowerRoI->isSaturated();
 		fill("gTowers",Toweret,Towersaturationflag);
 
-
 		float eta = gfexTowerRoI->eta();
 		float phi = gfexTowerRoI->phi();
-		Towereta = eta;
-		Towerphi = phi;
-		
-		uint8_t etaidx = gfexTowerRoI->iEta();
-		uint8_t phiidx = gfexTowerRoI->iPhi();
-		int x = etaidx+1;
-		int y = phiidx+1;
-		binNumber = 40*(y-1)+x;
-		
-		
-		if (Towersaturationflag == 1 && gfexTowerRoI->towerEt() >= maxet){
-				maxet = gfexTowerRoI->towerEt();
-		}
 
+		Towereta = eta;
+					
 		if(gfexTowerRoI->towerEt() >= 200 ){
 			nTowers++;
 		}
-		
+		//GREATER THAN 2GEV
 		if (gfexTowerRoI->towerEt() >= 10){
-			if (std::abs(eta) >= 3.3 ){
-				Towerphi = phi - M_PI/32;
+			if (std::abs(eta) >= 3.25 ){
+				Towerphi = phi- 0.1;
+				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("highEtgTowers",Towereta,Towerphi);
-				Towerphi = phi + M_PI/32;
+				fill("highEtgTowers",lbn,binNumber);	
+				Towerphi = phi + 0.1;
+				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
 				fill("highEtgTowers",Towereta,Towerphi);
 				fill("highEtgTowers",lbn,binNumber);
 			} else {
+				Towerphi = phi;
+				binNumber = getBinNumberTower(eta,phi,0,0);
 				fill("highEtgTowers",Towereta,Towerphi);
 				fill("highEtgTowers",lbn,binNumber);
 			}
 			
 		}
-     // only for h_gTower_coldtowers_etaphimap
+      //only for h_gTower_coldtowers_etaphimap
 		else if (gfexTowerRoI->towerEt() <= -10){
-			if (std::abs(eta) >= 3.3 ){
-				Towerphi = phi - M_PI/32;
+			if (std::abs(eta) >= 3.25 ){
+				Towerphi = phi- 0.1;
+				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("lowEtgTowers",Towereta,Towerphi);
-				Towerphi = phi + M_PI/32;
+				fill("lowEtgTowers",lbn,binNumber);	
+				Towerphi = phi + 0.1;
+				binNumber = getBinNumberTower(eta, phi+0.1,0,0);
 				fill("lowEtgTowers",Towereta,Towerphi);
 				fill("lowEtgTowers",lbn,binNumber);
 			} else {
+				Towerphi = phi;
+				binNumber = getBinNumberTower(eta,phi,0,0);
 				fill("lowEtgTowers",Towereta,Towerphi);
 				fill("lowEtgTowers",lbn,binNumber);
-				
 			}
 		}
 	}
@@ -107,7 +104,29 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 	nGfexTowers = nTowers;
 	fill ("highEtgTowers",lbn,nGfexTowers);
 
-
+    
 	return StatusCode::SUCCESS;
 }
+
+int GfexInputMonitorAlgorithm::getBinNumberTower (const float& inputEta, const float& inputPhi, int xbin, int ybin) const{
+   const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0,6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.3,3.25,3.5,4.1,4.9};
+
+   for (int i = 0; i <= 40; i++){ 
+       if (inputEta >= eta[i] && inputEta < eta[i+1]){
+           xbin = i+1;
+           continue;
+        }
+    }  
+    int j=1;
+	for (float phi = -3.2; phi <= 3.2;phi = phi+ 0.2){
+        if (inputPhi >= phi && inputPhi < phi+0.2){
+            ybin = j;
+            break;
+            }
+        j++;
+	}
+    int binN = 40*(ybin-1)+xbin; 
+    return binN;
+}
+
 
