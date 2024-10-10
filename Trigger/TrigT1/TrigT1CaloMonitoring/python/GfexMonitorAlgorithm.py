@@ -49,43 +49,24 @@ def GfexMonitoringConfig(flags):
 
     # Eta bins description
     import numpy as np
-    eta_bins= [-4.9, -4.5, -3.9,-3.5,-3.3,-3.1,-2.9,-2.7,-2.5,2.5,2.7,2.9,3.1,3.3,3.5,3.9,4.5,4.9]
-    eta_central = [-2.5,2.5]
-
+    eta_bins = [-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,2.5,2.7,2.9,3.1,3.3,3.25,3.5,4.1,4.9 ]
     for eta in np.arange (-2.2,2.4,0.2):
-            eta_bins.append(eta)
-            eta_central.append(eta)
-    
+        eta_bins.append(eta)
+        
     eta_bins = sorted(eta_bins)
-    eta_central = sorted (eta_central)
+       
+    nbins_total = 32*40
     
-    nbins_total = 32*len(eta_bins)
-    nbins_central = 32*len(eta_central)
-
-     #bins for LBN vs pos histogram with y axis = 40(j-1)+i
-    pos = []
-    for j in range(1,33):
-        for i in range(1,41):
-            y= 40*(j-1)+i
-            pos.append(y)
-    pos = sorted(pos)
-
-
-
-
 
     helper.defineDQAlgorithm("Gfex_etaPhiMapFilled_gJ",
                             hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
                             thresholdConfig={"NBins":[0,nbins_total]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
                             )
-    
+    #nned to put a condition on eta values
     helper.defineDQAlgorithm("Gfex_etaPhiMapFilled_gLJ",
                         hanConfig={"libname":"libdqm_summaries.so","name":"Bins_Equal_Threshold","BinThreshold":"0"}, # counts empty bins
-                        thresholdConfig={"NBins":[0,nbins_central]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
+                        thresholdConfig={"NBins":[0,nbins_total]}, # 0 bins expected empty, warning above that, error if entirely empty (save for known empties)
                         )
-
-
-
 
     # Jet TOB list
     for containerKey in gFexJetTobKeyList:
@@ -96,57 +77,55 @@ def GfexMonitoringConfig(flags):
                 containerKey = containerKey.split("+")[-1] # Needed to remove storeGate prefix if gFexJetTobKeyList is not set above
 
                 # 1D histograms
-                #histKey = containerKey + "{}" + ptCutString
-                #histKey += ";h_" + containerKey + "{}" + ptCutString
                 tobTypeStr = "gFex SRJet" if "SRJet" in containerKey else "gFex LRJet"
 
                 ptStrTitle = f" - tobEt [200 MeV Scale]>{ptCut}" if ptCut != -1 else ""
                 gPath = "gJ" if "SRJet" in containerKey else "gLJ"
-                #jPath += ptCutString
-
+               
                 helper.defineHistogram(f"{containerKey}Eta{ptCutString};h_{containerKey}Eta{ptCutString}", title="{} #eta{}; #eta; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{devPath}{gPath}/", xbins=eta_bins)
                 helper.defineHistogram(f"{containerKey}Phi{ptCutString};h_{containerKey}Phi{ptCutString}", title="{} #phi{}; #phi; counts".format(tobTypeStr, ptStrTitle), type='TH1F', fillGroup=groupName, path=f"{devPath}{gPath}", xbins=32,xmin=-math.pi,xmax=math.pi)
                 helper.defineHistogram(f"{containerKey}Pt{ptCutString};h_{containerKey}Pt{ptCutString}" , title="{} Pt{} ; Pt [MeV]  ; counts".format(tobTypeStr,  ptStrTitle), type='TH1F', fillGroup=groupName,path=f"{devPath}{gPath}",xbins=100,xmin=-1,xmax=4096)
 
                 # 2D histograms
                 if gPath == "gJ":
-                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap_{containerKey}_{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
                     type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
                     hanConfig={
                         "algorithm": "Gfex_etaPhiMapFilled_gJ",
-                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}_{ptCutString}_posVsLBN'>detail timeseries</a>",
+                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}{ptCutString}_posVsLBN'>detail timeseries</a>",
                         "display":"SetPalette(55),Draw=COL1Z"
                     },
                     opt=['kAlwaysCreate'],
-                    xbins=eta_bins,ybins=32,ymin=-math.pi,ymax=math.pi)
+                    xbins=eta_bins,ybins=32,ymin=-3.2,ymax=3.2)
+                                  
                 
-                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}_{ptCutString}_posVsLBN",title="{} {} LBN vs position = 40(y-1) + x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
-                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap_{containerKey}_{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap{containerKey}{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
-                           ybins=pos,
+                           ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
                 if (gPath == "gLJ"):
-                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap_{containerKey}_{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
+                    helper.defineHistogram(f"{containerKey}Eta{ptCutString},{containerKey}Phi{ptCutString};h_etaphiMap{containerKey}{ptCutString}", title="{} {} #eta vs #phi ; #eta; #phi".format(tobTypeStr, ptStrTitle),
                     type='TH2F',fillGroup=groupName, path=f"{expertPath}{gPath}/",
                     hanConfig={
                         "algorithm": "Gfex_etaPhiMapFilled_gLJ",
-                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}_{ptCutString}_posVsLBN'>detail timeseries</a>",
+                        "description":f"Inspect for hot/cold spots - check <a href='./detail/h_{containerKey}{ptCutString}_posVsLBN'>detail timeseries</a>",
                         "display":"SetPalette(55),Draw=COL1Z"
                     },
                     opt=['kAlwaysCreate'],
-                    xbins=eta_central, ybins=32,ymin=-math.pi,ymax=math.pi)
-                    
-                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}_{ptCutString}_LBN_pos",title="{} {} LBN vs position = 40(y-1) + x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
+                    xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+                                        
+                    helper.defineHistogram(f"{containerKey}LBN{ptCutString},{containerKey}binNumber{ptCutString};h_{containerKey}{ptCutString}_posVsLBN",title="{} {} LBN vs 40(y-1)+x; LBN; 40(y-1)+x".format(tobTypeStr, ptStrTitle),
                            path=f"{expertPath}{gPath}/detail",
                            fillGroup = groupName,
-                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap_{containerKey}_{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
+                           hanConfig={"description":f"x and y correspond to axis bin numbers on <a href='h_etaphiMap{containerKey}{ptCutString}</a>. Use this plot to check if hotspot/coldspots affected whole or part of run: turn on Projection X1 to see 1D hist of individual locations"},
                            type='TH2I',
                            xbins=1,xmin=0,xmax=10,
-                           ybins=pos,
+                           ybins=40*32,ymin=0.5,ymax=40*32+0.5,
                            opt=['kAddBinsDynamically','kAlwaysCreate'],merge="merge")
 
 

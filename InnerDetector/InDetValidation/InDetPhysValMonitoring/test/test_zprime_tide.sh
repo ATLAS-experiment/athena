@@ -2,6 +2,8 @@
 # art-description: Standard test for MC23a zprime for IDTIDE
 # art-input: mc23_13p6TeV:mc23_13p6TeV.801271.Py8EG_A14NNPDF23LO_flatpT_Zprime.merge.HITS.e8514_e8528_s4159_s4114
 # art-input-nfiles: 1
+# art-cores: 4
+# art-memory: 4096
 # art-type: grid
 # art-include: main/Athena
 # art-include: 24.0/Athena
@@ -14,10 +16,13 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
+relname="r24.0.65"
 
 lastref_dir=last_results
+
+artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_idtide=dcube_IDPVMPlots_idtide.xml
-dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/nightly_references/2024-05-30T2101/physval_test_zprime_tide_2024-05-30T2101.root"
+dcubeRef_idtide=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_zprime_tide.root
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_idtide -print -quit 2>/dev/null)

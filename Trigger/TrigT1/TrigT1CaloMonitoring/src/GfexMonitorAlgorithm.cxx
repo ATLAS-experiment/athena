@@ -113,39 +113,24 @@ StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey,
 	auto binNumber = Monitored::Scalar<int>(handleKey+"binNumber"+histNameExt,0);
 	auto lumiNumber = Monitored::Scalar<int>(handleKey+"LBN"+histNameExt, lbn );
 
+	
 
 
 	for(const xAOD::gFexJetRoI* gFexJetRoI : *container){
-		jetEta = gFexJetRoI->eta();
-		auto phi = gFexJetRoI->phi();
+			
+		float eta = gFexJetRoI->eta();
+		float phi = gFexJetRoI->phi();
 		jetPt  = gFexJetRoI->gFexTobEt();
-		
-		uint8_t etaidx = gFexJetRoI->iEta();
-		uint8_t phiidx = gFexJetRoI->iPhi();
-
-		int x = etaidx+1;
-		int y = phiidx+1;
-		binNumber = 40*(y-1)+x;
-
-
+			
 		if(jetPt > ptCutValue){
-			if (handleKey == "L1_gFexSRJetRoI"){
-				if (std::abs(jetEta)>=3.3){
-					jetPhi = phi - M_PI/32;
-					fill(m_packageName,jetEta,jetPhi);
-					jetPhi = phi + M_PI/32;
-					fill(m_packageName,jetEta,jetPhi,jetPt);
-					fill(m_packageName,lumiNumber,binNumber);
-				} else {
-					jetPhi = phi;
-					fill(m_packageName,jetEta,jetPhi,jetPt);
-					fill(m_packageName,lumiNumber,binNumber);
-				}	
-			}
+			jetEta = eta;
 			jetPhi = phi;
-			fill(m_packageName, jetEta, jetPhi, jetPt);
+			binNumber = getBinNumberJet(eta,phi,0,0);
+			fill(m_packageName,jetEta,jetPhi,jetPt);
 			fill(m_packageName,lumiNumber,binNumber);
+			
 		}
+		
 	}
 	return StatusCode::SUCCESS;
 }
@@ -185,3 +170,25 @@ GfexMonitorAlgorithm::FPGAType GfexMonitorAlgorithm::getFPGAType(const float& et
 	if(std::abs(eta) > 2.5 && std::abs(eta)) return FPGAType::FPGAc;
 	return FPGAType::None;
 }
+
+int GfexMonitorAlgorithm::getBinNumberJet (float inputEta, float inputPhi, int xbin, int ybin) const{
+   const std::vector<float> eta = {-4.9, -4.1,-3.5,-3.25,-3.2,-3.1,-2.9,-2.7,-2.5,-2.2,-2.0,-1.8,-1.6,-1.4,-1.2,-1.0,-0.8,-0,6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.1,3.3,3.25,3.5,4.1,4.9};
+   for (int i = 0; i <= 40; i++){ 
+       if (inputEta >= eta[i] && inputEta < eta[i+1]){
+           xbin = i+1;
+           continue;
+        }
+    }  
+    int j=1;
+		for (float phi = -3.2; phi <= 3.2;phi = phi+ 0.2){
+        if (inputPhi >= phi && inputPhi < phi+0.2){
+            ybin = j;
+            break;
+        }
+        j++;
+	}
+    int binN = 40*(ybin-1)+xbin; 
+    return binN;
+}
+
+
