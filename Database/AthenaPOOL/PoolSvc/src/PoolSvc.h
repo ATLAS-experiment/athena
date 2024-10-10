@@ -28,14 +28,11 @@ namespace pool {
    class IPersistencySvc;
 }
 
-template <class TYPE> class SvcFactory;
 
 /** @class PoolSvc
  *  @brief This class provides the interface to the LCG POOL persistency software.
  **/
-class PoolSvc : public ::AthService, virtual public IPoolSvc, virtual public IIoComponent {
-   // Allow the factory class access to the constructor
-   friend class SvcFactory<PoolSvc>;
+class PoolSvc : public extends<AthService, IPoolSvc, IIoComponent> {
 
 public: // Non-static members
    /// Required of all Gaudi services:
@@ -47,8 +44,6 @@ public: // Non-static members
    /// Required of all Gaudi services:
    virtual StatusCode finalize() override;
    virtual StatusCode io_finalize() override;
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
    /// @return a token to a Data Object written to Pool.
    /// @param placement [IN] pointer to the placement hint.
@@ -200,8 +195,8 @@ public: // Non-static members
    StatusCode setFrontierCache(const std::string& conn) override;
 
    /// Standard Service Constructor
-   using AthService::AthService;
-   //PoolSvc(const std::string& name, ISvcLocator* pSvcLocator);
+   using base_class::base_class;
+
    /// Destructor
    virtual ~PoolSvc();
 

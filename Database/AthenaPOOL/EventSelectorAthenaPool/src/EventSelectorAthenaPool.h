@@ -59,8 +59,6 @@ public: // Constructor and Destructor
    virtual StatusCode start() override;
    virtual StatusCode stop() override;
    virtual StatusCode finalize() override;
-   /// Does this object satisfy a given interface?  See Gaudi documentation for details.
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
 
    //-------------------------------------------------
    // IEventSelector

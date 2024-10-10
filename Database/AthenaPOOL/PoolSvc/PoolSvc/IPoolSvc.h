@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -28,7 +28,6 @@ class Placement;
 class StatusCode;
 class Token;
 
-static const InterfaceID IID_IPoolSvc("IPoolSvc", 1, 0);
 
 /** @class IPoolSvc
  *  @brief This class provides the interface to the LCG POOL persistency software.
@@ -40,8 +39,8 @@ public: // static members
    enum PoolStream { kInputStream, kOutputStream };
 
 public: // Non-static members
-   /// Retrieve interface ID
-   static const InterfaceID& interfaceID() { return(IID_IPoolSvc); }
+   /// Declare interface ID
+   DeclareInterfaceID(IPoolSvc, 1, 0);
 
    /// @return a token to a Data Object written to Pool.
    /// @param placement [IN] pointer to the placement hint.

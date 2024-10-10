@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  ATHENAPOOLSERVICES_IATHENAROOTSTREAMERSVC_H
@@ -32,16 +32,12 @@ class T_AthenaRootConverterBase;
  **    Properties:
  **
  **/
-
-static const InterfaceID IID_IAthenaRootStreamerSvc("IAthenaRootStreamerSvc", 2 , 0); 
-
-
 class IAthenaRootStreamerSvc : virtual public IService
 {
 public:    
   
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID();
+  /// Declare interface ID
+  DeclareInterfaceID(IAthenaRootStreamerSvc, 2 , 0);
 
   /// Create (or exetend) ROOT streamer
   /// Class name for which the streamer is added is extracted from the converter
@@ -65,14 +61,4 @@ public:
   virtual StatusCode AdoptAllStreamers() = 0;
 };
 
-
-
-inline const InterfaceID& 
-IAthenaRootStreamerSvc::interfaceID() 
-{
-    return IID_IAthenaRootStreamerSvc; 
-}
-
- 
-
-#endif 
+#endif

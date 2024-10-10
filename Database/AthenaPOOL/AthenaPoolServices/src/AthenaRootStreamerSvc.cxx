@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaRootStreamerSvc.cxx
@@ -26,7 +26,7 @@
 
 
 AthenaRootStreamerSvc::AthenaRootStreamerSvc(const std::string& name, ISvcLocator* pSvcLocator)
-      : AthService(name, pSvcLocator),
+      : base_class(name, pSvcLocator),
 	m_streamerMap()
 {
    declareProperty( "Streamers", m_streamerClassNames );
@@ -85,19 +85,6 @@ StatusCode AthenaRootStreamerSvc::finalize()
    m_streamerMap.clear();
 
    return AthService::finalize(); 
-}
-
-
-StatusCode AthenaRootStreamerSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IAthenaRootStreamerSvc::interfaceID().versionMatch(riid) ) {
-     *ppvInterface = dynamic_cast<AthenaRootStreamerSvc*>(this);
-   } else {
-      // Interface is not directly available: try out a base class
-      return(AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
 }
 
 
