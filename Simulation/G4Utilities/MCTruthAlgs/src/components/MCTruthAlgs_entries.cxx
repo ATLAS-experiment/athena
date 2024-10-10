@@ -1,4 +1,4 @@
-#include "MCTruthAlgs/TrackRecordFilter.h"
+#include "../TrackRecordFilter.h"
 
 DECLARE_COMPONENT( TrackRecordFilter ) 
 
