@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTDIGITIZATIONTOOL_H
@@ -26,6 +26,10 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "TRTDigit.h"
 
+// particle table
+#include "HepPDT/ParticleDataTable.hh"
+#include "GaudiKernel/IPartPropSvc.h"
+
 // For magneticfield
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
@@ -46,10 +50,6 @@ class TRTNoise;
 
 namespace CLHEP{
   class HepRandomEngine;
-}
-
-namespace HepPDT{
-  class ParticleDataTable;
 }
 
 #include "HitManagement/TimedHitCollection.h"
@@ -167,7 +167,11 @@ private:
   double m_minpileuptruthEkin{0.0};
   // const  ComTime* m_ComTime{};
   double m_cosmicEventPhase{0.0};     // local replacement for the comTime service
+
+  /// Handle on the particle property service
+  ServiceHandle<IPartPropSvc> m_ppSvc{this, "PartPropSvc", "PartPropSvc"};
   const HepPDT::ParticleDataTable* m_particleTable{};
+
   SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey{ this, "DigVersContainerKey", "", "" };
   bool m_first_event{true};
 

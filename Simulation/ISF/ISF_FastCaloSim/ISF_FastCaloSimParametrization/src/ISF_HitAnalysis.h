@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_ISF_HIT_ANALYSIS_H
@@ -261,6 +261,8 @@ private:
   double m_dCalo[CaloCell_ID_FCS::MaxSample][3];
   double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3];
 
+  /// Handle on the particle property service
+  ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
   HepPDT::ParticleDataTable*     m_particleDataTable{nullptr};
 

@@ -1,6 +1,6 @@
 """ComponentAccumulator config of tools for ISF_FastCaloSimParametrization
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -48,7 +48,8 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
     kwargs.setdefault("DoClusterInfo", doClusterInfo) #FIXME
     kwargs.setdefault("TimingCut", 999999)
 
-    result.addService(CompFactory.PartPropSvc(InputFile="PDGTABLE.MeV"))
+    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
+    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)).name)
 
     result.addEventAlgo(CompFactory.ISF_HitAnalysis(name,**kwargs))
     return result

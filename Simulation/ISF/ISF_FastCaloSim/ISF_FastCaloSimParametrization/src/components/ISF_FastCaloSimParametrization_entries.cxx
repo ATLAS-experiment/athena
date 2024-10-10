@@ -1,5 +1,5 @@
-#include "ISF_FastCaloSimParametrization/FastCaloSimParamAlg.h"
-#include "ISF_FastCaloSimParametrization/ISF_HitAnalysis.h"
+#include "../FastCaloSimParamAlg.h"
+#include "../ISF_HitAnalysis.h"
 
 #include "../FastCaloSimGeometryHelper.h"
 #include "../FastCaloSimCaloTransportation.h"
