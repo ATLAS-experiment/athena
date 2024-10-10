@@ -521,6 +521,16 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
+        from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
+        gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
+        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
+        # Strip will not be Gbts ... so we ignore it
+        ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                                                   name="ActsSiSpacePointsSeedMakerGbts",
+                                                                                                   SeedToolPixel=gbtsSeedToolPixel))
+        ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
+        MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
+        
         from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
         pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
         strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
@@ -536,6 +546,7 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
         kwargs.setdefault("SeedingTools",
                           PrivateToolHandleArray([ITkSiSpacePointsSeedMaker,
                                                   ActsITkSiSpacePointsSeedMaker,
+                                                  ActsGbtsITkSiSpacePointsSeedMaker,
                                                   ActsITkSiSpacePointsSeedMakerOrthogonal]))
 
     kwargs.setdefault("MonitorNames", MonitoringGroupNames)
