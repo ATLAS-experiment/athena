@@ -21,7 +21,7 @@ relname="r24.0.65"
 lastref_dir=last_results
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeXml_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_idtide.xml"
+dcubeXml_idtide=dcube_IDPVMPlots_idtide.xml
 dcubeRef_idtide=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_zprime_tide.root
 
 # search in $DATAPATH for matching file
