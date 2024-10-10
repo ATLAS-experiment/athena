@@ -39,8 +39,6 @@ namespace GlobalSim {
       "makeCaloCellContainerChecks",
       true,
       "flag to run checks on read-in CaloCellContainer"};
-  
-    const CaloCell_ID* m_calocell_id{nullptr};
   };
 }
 #endif

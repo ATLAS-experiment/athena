@@ -14,7 +14,6 @@ namespace GlobalSim {
 
   StatusCode EMB1CellsFromCaloCells::initialize() {
     CHECK(m_caloCellsKey.initialize());
-    CHECK(detStore()->retrieve (m_calocell_id, "CaloCell_ID"));
 
     return StatusCode::SUCCESS;
   }
@@ -39,10 +38,8 @@ namespace GlobalSim {
 
   
     // lambda to select EMB1 cells
-    auto EMB1_sel = [&calocell_id=m_calocell_id](const CaloCell* cell) {
-      return 
-	calocell_id->calo_sample(calocell_id->calo_cell_hash(cell->ID())) ==
-	CaloCell_Base_ID::EMB1;
+    auto EMB1_sel = [](const CaloCell* cell) {
+      return cell->caloDDE()->getSampling() == CaloCell_Base_ID::EMB1;
     };
     
 
