@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -15,7 +15,7 @@
 
 /// Standard constructor
 ByteStreamAddressProviderSvc::ByteStreamAddressProviderSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-	 ::AthService(name, pSvcLocator),
+	base_class(name, pSvcLocator),
 	m_clidSvc("ClassIDSvc", name),
 	m_storeID(StoreID::EVENT_STORE) {
   declareProperty("StoreID", m_storeID);

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGCOMPS_ADDRESSREMAPPINGSVC_H
@@ -37,7 +37,7 @@ class IRCUSvc;
  *  @brief This class provides the interface to the LCG POOL persistency software.
  **/
 class AddressRemappingSvc
-  : public extends<AthService, Athena::IInputRename>, public IAddressProvider
+  : public extends<AthService, Athena::IInputRename, IAddressProvider>
 {
 
 public: 

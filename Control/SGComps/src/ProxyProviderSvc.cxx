@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -50,7 +50,9 @@ const SG::BaseInfoBase* getBaseInfo (CLID clid)
 
 ProxyProviderSvc::ProxyProviderSvc(const std::string& name, 
                                    ISvcLocator* svcLoc): 
-  base_class(name, svcLoc){
+  base_class(name, svcLoc),
+  m_pDataLoader("EventPersistencySvc", name)
+{
   m_providerNames.declareUpdateHandler(&ProxyProviderSvc::providerNamesPropertyHandler, this);
 }
 
@@ -61,26 +63,15 @@ ProxyProviderSvc::initialize()
 {
   ATH_MSG_VERBOSE( "Initializing " << name() );
 
-  const bool CREATEIF(true);
-  // cache pointer to Persistency Service
-  if (!(service("EventPersistencySvc", m_pDataLoader, CREATEIF)).isSuccess()) {
-    m_pDataLoader = 0;
-    ATH_MSG_ERROR("Could not	 get pointer to Persistency Service");
-    return StatusCode::FAILURE;
-  } else {
-#ifdef DEBUGPPS
-    ATH_MSG_VERBOSE("Got pointer to Persistency Service " << m_pDataLoader);
-#endif
-  }
+  // retrieve Persistency Service
+  ATH_CHECK( m_pDataLoader.retrieve() );
 
-  //get properties set;	
-  if(!(AthService::initialize()).isSuccess()) {
-    return StatusCode::FAILURE;
-  }
+  // get properties set
+  ATH_CHECK( AthService::initialize() );
 
   // Take care of any pending preLoadProxies requests.
   for (IProxyRegistry* reg : m_pendingLoad) {
-    CHECK( doPreLoadProxies (*reg) );
+    ATH_CHECK( doPreLoadProxies (*reg) );
   }
   m_pendingLoad.clear();
 
@@ -197,7 +188,7 @@ ProxyProviderSvc::addAddress(IProxyRegistry& store,
   bool resetOnly(tAddr.name().substr(0,10) != std::string("HLTAutoKey"));
   // std::cout << "PPS:addAdress: proxy for key " << tAddr->name() << " has resetOnly " << resetOnly << std::endl;
   SG::DataProxy* dp = new SG::DataProxy(std::move(tAddr),
-                                        m_pDataLoader, true, resetOnly );
+                                        m_pDataLoader.get(), true, resetOnly );
 
   // Must add the primary CLID first.
   bool addedProxy = store.addToStore(dp->clID(), dp).isSuccess();
@@ -306,18 +297,14 @@ ProxyProviderSvc::providerNamesPropertyHandler( Gaudi::Details::PropertyBase& /*
   }
 
   for (const std::string& pName : providerNames) {
-    IService *pIS(0);
-    IAddressProvider *pAP(0);
-    Gaudi::Utils::TypeNameString tn(pName);
-    if (!(service(tn.type(), tn.name(), pIS)).isSuccess() ||
-	0 == (pAP = dynamic_cast<IAddressProvider*>(pIS))) {
+    SmartIF<IAddressProvider> pAP{service(pName)};
+    if (!pAP) {
       ATH_MSG_ERROR(" getting Address Provider "<< pName);
       throw GaudiException("Failed to locate address provider",
 			   "ProxyProviderSvc::providerNamesPropertyHandle", 
 			   StatusCode::FAILURE);
-
     } else {
-      ATH_MSG_DEBUG(" added Address Provider "<< pIS->name());
+      ATH_MSG_DEBUG(" added Address Provider "<< pName);
     }
     ProxyProviderSvc::addProvider(pAP);
   }
