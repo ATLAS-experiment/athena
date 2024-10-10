@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -17,11 +17,7 @@
 #include "CxxUtils/FloatCompressor.h"
 
 class xAODClusterCompressor :
-  virtual public IxAODClusterCompressor, public AthService { 
-  
- protected:   
-  friend class SvcFactory<xAODClusterCompressor>;
-
+  public extends<AthService, IxAODClusterCompressor> {
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
@@ -33,13 +29,9 @@ class xAODClusterCompressor :
   xAODClusterCompressor(const std::string& name, ISvcLocator* pSvcLocator);
 
   virtual StatusCode  initialize() override;
-  static const InterfaceID& interfaceID() { return IID_IxAODClusterCompressor;}
 
   virtual void compress(xAOD::CaloClusterContainer* clustercontainer) const override;
   
- virtual StatusCode queryInterface( const InterfaceID& riid, 
-				    void** ppvInterface ) override;
-
   //List of all moments
   typedef std::array< xAOD::CaloCluster::MomentType,60> momentList_t;
   momentList_t m_allMoments;
