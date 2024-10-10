@@ -45,7 +45,7 @@ ofstream outfile2("status.txt");
 #endif
 
 MixingEventSelector::MixingEventSelector(const string& name, ISvcLocator* svc) :
-  extends<AthService, IEvtSelector, IConverter>(name,svc),
+  base_class(name,svc),
   m_helperTools(this),
   m_trigList(), m_pCurrentTrigger(m_trigList.end()),
   m_eventPos(0), 
