@@ -5,11 +5,13 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsEvent/TrackContainer.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
-#include "xAODInDetMeasurement/StripClusterContainer.h"
+
 
 #include <deque>
-#include <format>
+#include <memory>
+#include <map>
+#include <vector>
+#include <string>
 
 namespace FPGATrackSim {
   class ActsTrackInspectionTool : public AthAlgTool {
