@@ -135,7 +135,7 @@ SCT_ID::getMaxField(const Identifier & id, const ExpandedIdIndices &fieldIndx) c
     const Range& range = useRange[i];
     if (range.match(expId)) {
       const Range::field& thisField = range[m_indices[fieldIndx]];
-      if (thisField.has_maximum()) {
+      if (not thisField.empty()) {
         auto thisMax= thisField.get_maximum();
         if (fieldIndx == ETA or fieldIndx == STRIP){
           result = std::max(result, thisMax);
@@ -165,7 +165,7 @@ SCT_ID::eta_module_min(const Identifier& id) const {
     const Range& range = m_full_wafer_range[i];
     if (range.match(expId)) {
       const Range::field& eta_field = range[m_indices[ETA]];
-      if (eta_field.has_minimum()) {
+      if (not eta_field.empty()) {
         int etamin = eta_field.get_minimum();
         if (-999 == result) {
           result = etamin;

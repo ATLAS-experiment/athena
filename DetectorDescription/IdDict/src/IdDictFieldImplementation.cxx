@@ -81,22 +81,15 @@ std::string IdDictFieldImplementation::show_to_string   (void) const
     pos = str.tellp();
     // indexes
     for (size_type i = 0; i < m_ored_field.get_indexes().size(); ++i) {
-	str << m_ored_field.get_indexes()[i] << " ";
+	    str << m_ored_field.get_indexes()[i] << " ";
     }
     nchar = (unsigned int)str.tellp() - pos;
     if (nchar < 20) tabify(20 - nchar, str);
     str << "mode  ";
-    switch (m_ored_field.get_mode()) { 
-    case Range::field::both_bounded: 
-	str << "both_bounded  ";
-	break; 
-    case Range::field::enumerated: 
-	str << "enumerated  ";
-	break; 
-    default:
-	str << "unknown  ";
-	break; 
-    } 
+    if (m_ored_field.isBounded()) str << "both_bounded  ";
+    else if  (m_ored_field.isEnumerated()) str << "enumerated  ";
+    else str << "unknown  ";
+    
 
     return (str.str());
 }

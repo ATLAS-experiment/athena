@@ -68,7 +68,7 @@ PixelID::layer_disk_max(const Identifier& id) const {
     const Range& range = m_full_wafer_range[i];
     if (range.match(expId)) {
       const Range::field& layer_disk_field = range[m_LAYER_DISK_INDEX];
-      if (layer_disk_field.has_maximum()) {
+      if (not layer_disk_field.empty()) {
         return(layer_disk_field.get_maximum());
       }
     }
@@ -86,7 +86,7 @@ PixelID::eta_module_max(const Identifier& id) const {
     const Range& range = m_full_wafer_range[i];
     if (range.match(expId)) {
       const Range::field& eta_field = range[m_ETA_MODULE_INDEX];
-      if (eta_field.has_maximum()) {
+      if (not eta_field.empty()) {
         return(eta_field.get_maximum());
       }
     }
@@ -103,7 +103,7 @@ int PixelID::eta_module_min(const Identifier& id) const {
     const Range& range = m_full_wafer_range[i];
     if (range.match(expId)) {
       const Range::field& eta_field = range[m_ETA_MODULE_INDEX];
-      if (eta_field.has_minimum()) {
+      if (not eta_field.empty()) {
         return(eta_field.get_minimum());
       }
     }
@@ -131,7 +131,7 @@ int PixelID::phi_module_max(const Identifier& id) const {
     const Range& range = m_full_wafer_range[i];
     if (range.match(expId)) {
       const Range::field& phi_field = range[m_PHI_MODULE_INDEX];
-      if (phi_field.has_maximum()) {
+      if (not phi_field.empty()) {
         return(phi_field.get_maximum());
       }
     }
@@ -150,7 +150,7 @@ PixelID::phi_index_max(const Identifier& id) const {
     const Range& range = m_full_pixel_range[i];
     if (range.match(expId)) {
       const Range::field& phi_field = range[m_PHI_INDEX_INDEX];
-      if (phi_field.has_maximum()) {
+      if (not phi_field.empty()) {
         return(phi_field.get_maximum());
       }
     }
@@ -169,7 +169,7 @@ PixelID::eta_index_max(const Identifier& id) const {
     const Range& range = m_full_pixel_range[i];
     if (range.match(expId)) {
       const Range::field& eta_field = range[m_ETA_INDEX_INDEX];
-      if (eta_field.has_maximum()) {
+      if (not eta_field.empty()) {
         return(eta_field.get_maximum());
       }
     }

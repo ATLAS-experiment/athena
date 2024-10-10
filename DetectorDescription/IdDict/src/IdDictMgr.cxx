@@ -797,19 +797,16 @@ IdDictDictionary::integrate_bits ()
     // for each FieldImplementation
 
     for (IdDictRegion* region : m_regions) {
-	size_t bits_offset = 0; 
-
-        for (IdDictFieldImplementation& impl : region->m_implementation) {
+	    size_t bits_offset = 0; 
+      for (IdDictFieldImplementation& impl : region->m_implementation) {
 	    impl.optimize(); // optimize for decoding
 	    impl.set_bits_offset(bits_offset);
 	    bits_offset += impl.bits();
 
 	    // Set whether or not to decode index
 	    Range::field field = impl.ored_field();
-	    if (Range::field::both_bounded != field.get_mode() ||
-		0 != field.get_minimum())
-            {
-		impl.set_decode_index(true); 
+	    if ((not field.isBounded()) || (0 != field.get_minimum()) ){
+		    impl.set_decode_index(true); 
 	    }
 	}
     }

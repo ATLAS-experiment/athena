@@ -79,7 +79,7 @@ int LArHEC_Base_ID::eta_min(const Identifier regId) const
       const Range& range = m_full_channel_range[i];
       if (range.match(expId)) {
 	const Range::field& eta_field = range[m_ETA_INDEX];
-	if (eta_field.has_minimum()) {
+	if (not eta_field.empty()) {
 	  int etamin = eta_field.get_minimum();
 	  if (-999 == result) {
 	    result = etamin;
@@ -105,7 +105,7 @@ int LArHEC_Base_ID::eta_max(const Identifier regId) const
       const Range& range = m_full_channel_range[i];
       if (range.match(expId)) {
 	const Range::field& eta_field = range[m_ETA_INDEX];
-	if (eta_field.has_maximum()) {
+	if (not eta_field.empty()) {
 	  int etamax = eta_field.get_maximum();
 	  if (result < etamax) result = etamax;
 	}
@@ -126,7 +126,7 @@ int LArHEC_Base_ID::phi_min_init(const Identifier regId) const
       const Range& range = m_full_channel_range[i];
       if (range.match(expId)) {
 	const Range::field& phi_field = range[m_PHI_INDEX];
-	if (phi_field.has_minimum()) {
+	if (not phi_field.empty()) {
 	  int phimin = phi_field.get_minimum();
 	  if (-999 == result) {
 	    result = phimin;
@@ -152,7 +152,7 @@ int LArHEC_Base_ID::phi_max(const Identifier regId) const
       const Range& range = m_full_channel_range[i];
       if (range.match(expId)) {
 	const Range::field& phi_field = range[m_PHI_INDEX];
-	if (phi_field.has_maximum()) {
+	if (not phi_field.empty()) {
 	  int phimax = phi_field.get_maximum();
 	  if (result < phimax) result = phimax;
 	}

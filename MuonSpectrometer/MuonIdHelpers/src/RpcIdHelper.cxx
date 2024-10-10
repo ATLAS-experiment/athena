@@ -250,7 +250,7 @@ int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                 const Range& range = m_full_channel_range[i];
                 if (range.match(expId)) {
                     const Range::field& gap_field = range[m_GASGAP_INDEX];
-                    if (gap_field.has_maximum()) {
+                    if (not gap_field.empty()) {
                         unsigned int max = (gap_field.get_maximum());
                         if (m_gasGapMax == UINT_MAX)
                             m_gasGapMax = max;
@@ -340,7 +340,7 @@ int RpcIdHelper::stationEtaMin(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
-                if (eta_field.has_minimum()) {
+                if (not eta_field.empty()) {
                     int etamin = eta_field.get_minimum();
                     if (-999 == result) {
                         result = etamin;
@@ -364,7 +364,7 @@ int RpcIdHelper::stationEtaMax(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
-                if (eta_field.has_maximum()) {
+                if (not eta_field.empty()) {
                     int etamax = eta_field.get_maximum();
                     if (result < etamax) result = etamax;
                 }
@@ -383,7 +383,7 @@ int RpcIdHelper::stationPhiMin(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_minimum()) { return (phi_field.get_minimum()); }
+                if (not phi_field.empty()) { return (phi_field.get_minimum()); }
             }
         }
     }
@@ -399,7 +399,7 @@ int RpcIdHelper::stationPhiMax(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_maximum()) { return (phi_field.get_maximum()); }
+                if (not phi_field.empty()) { return (phi_field.get_maximum()); }
             }
         }
     }
@@ -415,7 +415,7 @@ int RpcIdHelper::doubletRMin(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& r_field = range[m_DOUBLETR_INDEX];
-                if (r_field.has_minimum()) { return (r_field.get_minimum()); }
+                if (not r_field.empty()) { return (r_field.get_minimum()); }
             }
         }
     }
@@ -431,7 +431,7 @@ int RpcIdHelper::doubletRMax(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& r_field = range[m_DOUBLETR_INDEX];
-                if (r_field.has_maximum()) { return (r_field.get_maximum()); }
+                if (not r_field.empty()) { return (r_field.get_maximum()); }
             }
         }
     }
@@ -447,7 +447,7 @@ int RpcIdHelper::doubletZMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& z_field = range[m_DOUBLETZ_INDEX];
-                if (z_field.has_minimum()) { return (z_field.get_minimum()); }
+                if (not z_field.empty()) { return (z_field.get_minimum()); }
             }
         }
     }
@@ -463,7 +463,7 @@ int RpcIdHelper::doubletZMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& z_field = range[m_DOUBLETZ_INDEX];
-                if (z_field.has_maximum()) { return (z_field.get_maximum()); }
+                if (not z_field.empty()) { return (z_field.get_maximum()); }
             }
         }
     }
@@ -479,7 +479,7 @@ int RpcIdHelper::doubletPhiMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& dphi_field = range[m_DOUBLETPHI_INDEX];
-                if (dphi_field.has_minimum()) { return (dphi_field.get_minimum()); }
+                if (not dphi_field.empty()) { return (dphi_field.get_minimum()); }
             }
         }
     }
@@ -495,7 +495,7 @@ int RpcIdHelper::doubletPhiMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& dphi_field = range[m_DOUBLETPHI_INDEX];
-                if (dphi_field.has_maximum()) { return (dphi_field.get_maximum()); }
+                if (not dphi_field.empty()) { return (dphi_field.get_maximum()); }
             }
         }
     }
@@ -511,7 +511,7 @@ int RpcIdHelper::gasGapMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& gas_field = range[m_GASGAP_INDEX];
-                if (gas_field.has_minimum()) { return (gas_field.get_minimum()); }
+                if (not gas_field.empty()) { return (gas_field.get_minimum()); }
             }
         }
     }
@@ -527,7 +527,7 @@ int RpcIdHelper::gasGapMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& gap_field = range[m_GASGAP_INDEX];
-                if (gap_field.has_maximum()) { return (gap_field.get_maximum()); }
+                if (not gap_field.empty()) { return (gap_field.get_maximum()); }
             }
         }
     }
@@ -543,7 +543,7 @@ int RpcIdHelper::measuresPhiMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& mphi_field = range[m_MEASURESPHI_INDEX];
-                if (mphi_field.has_minimum()) { return (mphi_field.get_minimum()); }
+                if (not mphi_field.empty()) { return (mphi_field.get_minimum()); }
             }
         }
     }
@@ -559,7 +559,7 @@ int RpcIdHelper::measuresPhiMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& mphi_field = range[m_MEASURESPHI_INDEX];
-                if (mphi_field.has_maximum()) { return (mphi_field.get_maximum()); }
+                if (not mphi_field.empty()) { return (mphi_field.get_maximum()); }
             }
         }
     }
@@ -575,7 +575,7 @@ int RpcIdHelper::stripMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& strip_field = range[m_CHANNEL_INDEX];
-                if (strip_field.has_minimum()) { return (strip_field.get_minimum()); }
+                if (not strip_field.empty()) { return (strip_field.get_minimum()); }
             }
         }
     }
@@ -591,7 +591,7 @@ int RpcIdHelper::stripMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& strip_field = range[m_CHANNEL_INDEX];
-                if (strip_field.has_maximum()) { return (strip_field.get_maximum()); }
+                if (not strip_field.empty()) { return (strip_field.get_maximum()); }
             }
         }
     }

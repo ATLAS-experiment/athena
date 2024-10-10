@@ -46,29 +46,22 @@ RangeIterator::RangeIterator (Range& range) : m_range (&range) {
    *    m_max : the set of high bounds 
    */ 
   for (Range::size_type i = 0; i < range.fields (); ++i) { 
-      Range::element_type minimum; 
-      Range::element_type maximum; 
-      m_indices.push_back (0); 
-      const Range::field& f = range[i]; 
-      switch (f.get_mode ()) { 
-        case Range::field::unbounded: 
-          m_id << 0; 
-          m_min << 0; 
-          m_max << 0; 
-          break; 
-        case Range::field::both_bounded: 
-        case Range::field::enumerated: 
-          minimum = f.get_minimum (); 
-          maximum = f.get_maximum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << maximum; 
-          break; 
-        default:
-         throw std::runtime_error("Mode not recognised in RangeIterator::RangeIterator.");
-         break;
-        } 
-    } 
+    Range::element_type minimum; 
+    Range::element_type maximum; 
+    m_indices.push_back (0); 
+    const Range::field& f = range[i]; 
+    if (f.empty()){
+      m_id << 0; 
+      m_min << 0; 
+      m_max << 0; 
+    } else {
+      minimum = f.get_minimum (); 
+      maximum = f.get_maximum (); 
+      m_id << minimum; 
+      m_min << minimum; 
+      m_max << maximum; 
+    }
+  } 
 } 
 
 
@@ -94,7 +87,7 @@ RangeIterator::operator ++() {
       bool done = false; 
       Range::element_type value = 0; 
  
-      if (f.get_mode () == Range::field::enumerated) { 
+      if (f.isEnumerated()) { 
           Range::size_type index = m_indices[i]; 
           index++; 
           if (index < f.get_indices ()) { 
@@ -164,29 +157,22 @@ ConstRangeIterator::ConstRangeIterator (const Range& range) :
    *    m_max : the set of high bounds 
    */ 
   for (Range::size_type i = 0; i < range.fields (); ++i) { 
-      Range::element_type minimum; 
-      Range::element_type maximum; 
-      m_indices.push_back (0); 
-      const Range::field& f = range[i]; 
-      switch (f.get_mode ()) { 
-        case Range::field::unbounded: 
-          m_id << 0; 
-          m_min << 0; 
-          m_max << 0; 
-          break; 
-        case Range::field::both_bounded: 
-        case Range::field::enumerated: 
-          minimum = f.get_minimum (); 
-          maximum = f.get_maximum (); 
-          m_id << minimum; 
-          m_min << minimum; 
-          m_max << maximum; 
-          break;
-        default:
-          throw std::runtime_error("Mode not recognised in ConstRangeIterator::ConstRangeIterator");
-          break;
-        } 
-    } 
+    Range::element_type minimum; 
+    Range::element_type maximum; 
+    m_indices.push_back (0); 
+    const Range::field& f = range[i];
+    if (f.empty()){
+      m_id << 0; 
+      m_min << 0; 
+      m_max << 0; 
+    } else {
+      minimum = f.get_minimum (); 
+      maximum = f.get_maximum (); 
+      m_id << minimum; 
+      m_min << minimum; 
+      m_max << maximum; 
+    }
+  } 
 } 
 
  
@@ -209,7 +195,7 @@ ConstRangeIterator::operator ++() {
       bool done = false; 
       Range::element_type value = 0; 
  
-      if (f.get_mode () == Range::field::enumerated) { 
+      if (f.isEnumerated()) { 
           Range::size_type index = m_indices[i]; 
           index++; 
           if (index < f.get_indices ()) { 

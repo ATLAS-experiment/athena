@@ -27,7 +27,7 @@
 //--------------------------------------------------------------------------
 const Range::field& Range::operator [] (Range::size_type index) const { 
   if (index >= m_fields.size ()){ 
-      static constexpr field f; 
+      static const field f; 
       return (f); 
   } 
   return (m_fields[index]); 
@@ -132,7 +132,7 @@ int Range::match (const ExpandedIdentifier& id) const {
   const size_type id_fields = id.fields (); 
     // Remove trailing wild cards since they are meaningless. 
   while ((my_fields > 1) && 
-         (!m_fields[my_fields-1].is_valued ())){ 
+         (m_fields[my_fields-1].empty())){ 
       my_fields--; 
     } 
     // Ranges with only wild cards always match. 
@@ -160,7 +160,7 @@ ExpandedIdentifier Range::minimum () const {
   ExpandedIdentifier result; 
     // Remove trailing wild cards since they are meaningless. 
   while ((my_fields > 1) && 
-         (!m_fields[my_fields-1].has_minimum ())){ 
+         (m_fields[my_fields-1].empty())){ 
       my_fields--; 
   } 
     // Ranges with only wild cards: set first field of min to 0 
@@ -171,7 +171,7 @@ ExpandedIdentifier Range::minimum () const {
     // Copy fields to result - look for wild cards 
   for (size_type field_number = 0; field_number < my_fields; field_number++) { 
       const field& f = m_fields[field_number]; 
-      if (!f.has_minimum ()){ 
+      if (f.empty()){ 
             // Wilds card -> set field to 0 
           result << 0; 
         } else { 
@@ -190,7 +190,7 @@ ExpandedIdentifier Range::maximum () const {
     // Remove all by the last trailing wild card, extra ones are 
     // meaningless. 
   while ((my_fields > 1) && 
-         (!m_fields[my_fields-1].has_maximum ())) { 
+         (m_fields[my_fields-1].empty())) { 
       my_fields--; 
   } 
  
@@ -203,7 +203,7 @@ ExpandedIdentifier Range::maximum () const {
     // Copy fields to result - look for wild cards 
   for (size_type field_number = 0; field_number < my_fields; field_number++) { 
       const field& f = m_fields[field_number]; 
-      if (!f.has_maximum ()) { 
+      if (f.empty()) { 
             // Wilds card  
           if (field_number == 0) { 
                 // For 1st field set it to ExpandedIdentifier::max_value 
@@ -264,8 +264,8 @@ Range::size_type Range::cardinalityUpTo (const ExpandedIdentifier& id) const {
   for (; level < id.fields (); ++level) {
     const field& f = me[level]; 
     // Require all fields to be bounded or enumerated
-    if (!(f.get_mode() == Range::field::both_bounded || f.get_mode() == Range::field::enumerated)) return 0;
-    if (f.get_mode() == Range::field::enumerated) {
+    if (f.empty()) return 0;
+    if (f.isEnumerated()) {
       // Continue testing for a match
       size_type max = f.get_values().size() - 1;
       if (f.get_values()[max] < id[level]) {
@@ -365,7 +365,7 @@ Range::operator std::string () const {
   size_type my_fields = m_fields.size (); 
     // Remove trailing wild cards since they are meaningless. 
   while ((my_fields > 1) && 
-         (!m_fields[my_fields-1].is_valued ()))  { 
+         (m_fields[my_fields-1].empty()))  { 
       my_fields--; 
   } 
   if (my_fields == 0) return (result); 

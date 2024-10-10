@@ -296,7 +296,7 @@ int LArOnlineID_Base::channelInSlotMax(const HWIdentifier channelId) const
       const Range& range = m_full_laronline_range[i];
       if (range.match(expId)) {
         const Range::field& channel_in_slot_field = range[m_channel_in_slot_index];
-        if (channel_in_slot_field.has_maximum()) {
+        if (!channel_in_slot_field.empty()) {
           int channel_in_slotmax = channel_in_slot_field.get_maximum();
           if (result < channel_in_slotmax) result = channel_in_slotmax + 1;
         }
@@ -606,7 +606,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
             if (m_full_feb_range[i].match(ftExpId)) {
                 nrangesFound += 1;
                 const Range::field& slotField = m_full_feb_range[i][m_slot_index];
-                if (slotField.get_mode() == Range::field::enumerated) {
+                if (slotField.isEnumerated()) {
                     // save values
                     hc.m_slot_values = slotField.get_values();
                 }
@@ -620,7 +620,7 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
             for (unsigned int i = 0; i < m_full_feb_range.size(); ++i) {
                 if (m_full_feb_range[i].match(ftExpId)) {
                     const Range::field& slotField = m_full_feb_range[i][m_slot_index];
-                    if (slotField.get_mode() == Range::field::both_bounded) {
+                    if (slotField.isBounded()) {
                         // save values
                         unsigned int nvalues = slotField.get_maximum() - slotField.get_minimum() + 1;
                         hc.m_slot_values.reserve(hc.m_slot_values.size() + nvalues);
@@ -629,12 +629,13 @@ int  LArOnlineID_Base::initialize_from_dictionary (const IdDictMgr& dict_mgr)
                         }
                     }
                     else {
+                        
                         if(m_msgSvc) {
                            log << MSG::WARNING  << " *****  Warning feb range slot field is NOT both_bounded - id, slot mode: " 
-                               << show_to_string(min) << " " << slotField.get_mode() << endmsg;
+                               << show_to_string(min) << " enumerated" << endmsg;
                         } else {
                            std::cout << " *****  Error feb range slot field is NOT both_bounded - id, slot mode: " 
-                                     << show_to_string(min) << " " << slotField.get_mode() << std::endl;
+                                     << show_to_string(min) << " enumerated" << std::endl;
                         }
                     }
                 }
