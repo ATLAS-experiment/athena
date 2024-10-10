@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -14,6 +14,7 @@
 #define JpsiFinder_ee_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 
 #include "xAODEgamma/ElectronFwd.h"
 
@@ -100,6 +101,7 @@ namespace Analysis {
         ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
         ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
+        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
         bool m_egammaCuts;
         std::string m_elSelection;
         bool m_doTagAndProbe;
