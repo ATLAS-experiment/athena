@@ -1,7 +1,9 @@
 // Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "src/FPGATrackSimActsTrackInspectionTool.h"
-
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include <format>
 
 FPGATrackSim::ActsTrackInspectionTool::ActsTrackInspectionTool(const std::string& algname,
     const std::string& name, const IInterface* ifc)
@@ -29,7 +31,7 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
                         assert(static_cast<unsigned int>(measurement.type() < xAOD::UncalibMeasType::nTypes));
 
                         if (measurement.type() == xAOD::UncalibMeasType::PixelClusterType) {
-                            const xAOD::PixelCluster* pixelCluster = dynamic_cast<const xAOD::PixelCluster*>(&measurement);
+                            const xAOD::PixelCluster* pixelCluster = static_cast<const xAOD::PixelCluster*>(&measurement);
                             t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
                                 pixelCluster->identifier(),
                                 "Pixel",
@@ -43,7 +45,7 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
                                 state.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag) }));
                         }
                         else if (measurement.type() == xAOD::UncalibMeasType::StripClusterType) {
-                            const xAOD::StripCluster* stripCluster = dynamic_cast<const xAOD::StripCluster*>(&measurement);
+                            const xAOD::StripCluster* stripCluster = static_cast<const xAOD::StripCluster*>(&measurement);
                             t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
                                 stripCluster->identifier(),
                                 "Strip",
