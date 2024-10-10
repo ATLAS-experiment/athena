@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVGENPRODTOOLS_IEVGENOTFTOPUPSVC_H
@@ -12,11 +12,9 @@
 ///  algorithms that are running on the fly.  It's a bit tricky,
 ///  but this is mostly just a service for holding some numbers...
 ///
-
-static const InterfaceID IID_IEvgenOTFTopUpSvc("IEvgenOTFTopUpSvc", 1 , 0);
-
 class IEvgenOTFTopUpSvc : virtual public IInterface {
 public:
+  DeclareInterfaceID(IEvgenOTFTopUpSvc, 1, 0);
 
   // Getters
   virtual long   getNPerFile()    const = 0;
@@ -33,9 +31,6 @@ public:
 
   // New file grabbed by the showering generator
   virtual const std::string& getFile() = 0;
-
-  static const InterfaceID& interfaceID() { return IID_IEvgenOTFTopUpSvc; };
-
 };
 
 #endif

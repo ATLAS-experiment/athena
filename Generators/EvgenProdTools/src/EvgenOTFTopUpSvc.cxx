@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -7,7 +7,7 @@
 #include "EvgenProdTools/EvgenOTFTopUpSvc.h"
 
 EvgenOTFTopUpSvc::EvgenOTFTopUpSvc(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthService(name, pSvcLocator)
+  : base_class(name, pSvcLocator)
   , m_nUsedSoFar(0)
   , m_newFileFlag(false)
   , m_nTotal(0)
@@ -21,18 +21,6 @@ EvgenOTFTopUpSvc::EvgenOTFTopUpSvc(const std::string& name, ISvcLocator* pSvcLoc
 
 StatusCode EvgenOTFTopUpSvc::finalize() {
   ATH_MSG_INFO("Total on the fly generated events: " << m_nTotal << " over " << m_nIterations << " iterations.");
-  return StatusCode::SUCCESS;
-}
-
-/** Query the interfaces - this is copied and pasted :( */
-StatusCode EvgenOTFTopUpSvc::queryInterface(const InterfaceID& riid, void** ppvInterface){
-  if ( IID_IEvgenOTFTopUpSvc == riid ) 
-    *ppvInterface = (IEvgenOTFTopUpSvc*)this;
-  else  {
-    // Interface is not directly available: try out a base class
-    return Service::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 
