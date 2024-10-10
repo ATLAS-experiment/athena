@@ -29,7 +29,7 @@
 #include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/EventData/Seed.hpp"
 
-#include <cmath> //for M_PI
+#include <numbers>
 
 namespace ActsTrk {
 
@@ -108,11 +108,13 @@ namespace ActsTrk {
     Gaudi::Property< std::vector< float > > m_zBinEdges {this, "zBinEdges",
       {-3000., -2700., -2500., -1400., -925., -500., -250.,  250., 500., 925.,   1400.,  2500., 2700, 3000.},
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
+    Gaudi::Property< std::vector< float > > m_rBinEdges {this, "rBinEdges", {0., 1100 * Acts::UnitConstants::mm},
+      "enable non equidistant binning in radius"};
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
-    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", -M_PI,
+    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", -std::numbers::pi_v<float>,
       "phi min for space point grid formation"};
-    Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", M_PI,
+    Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", std::numbers::pi_v<float>,
       "phi max for space point grid formation"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
@@ -215,8 +217,8 @@ namespace ActsTrk {
 
     Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
       "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
-    Gaudi::Property<float> m_phiMin {this, "phiMin", -M_PI, ""};
-    Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
+    Gaudi::Property<float> m_phiMin {this, "phiMin", -std::numbers::pi_v<float>, ""};
+    Gaudi::Property<float> m_phiMax {this, "phiMax", std::numbers::pi_v<float>, ""};
     Gaudi::Property<float> m_rMin {this, "rMin", 0 * Acts::UnitConstants::mm, ""};    
     Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};
     Gaudi::Property<float> m_rAlign {this, "rAlign", 0 * Acts::UnitConstants::mm, ""};
@@ -254,6 +256,10 @@ namespace ActsTrk {
     Gaudi::Property< std::vector<std::pair<int, int>> > m_zBinNeighborsBottom{this, "zBinNeighborsBottom",
       {{0, 0}, {0, 1},  {0, 1},  {0, 1},  {0, 1}, {0, 1},  {0, 0},  {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {-1, 0}, {0, 0}},
       "vector containing the map of z bins in the top layers"};
+    Gaudi::Property< std::vector<std::pair<int, int>> > m_rBinNeighborsTop{this, "rBinNeighborsTop", {{0, 0}},
+      "vector containing the map of radius bins in the top layers"};
+    Gaudi::Property< std::vector<std::pair<int, int>> > m_rBinNeighborsBottom{this, "rBinNeighborsBottom", {{0, 0}},
+      "vector containing the map of radius bins in the bottom layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
 
