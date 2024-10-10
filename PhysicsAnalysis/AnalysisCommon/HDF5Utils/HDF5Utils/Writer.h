@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HDF_TUPLE_HH
 #define HDF_TUPLE_HH
@@ -294,9 +294,9 @@ namespace H5Utils {
       DSParameters(const std::vector<SharedConsumer<I> >& fillers,
                    const std::array<hsize_t,N>& extent,
                    hsize_t batch_size);
-      H5::CompType type;
-      std::array<hsize_t,N> extent;
-      hsize_t batch_size;
+      H5::CompType type{};
+      std::array<hsize_t,N> extent{};
+      hsize_t batch_size{};
     };
 
     // DS parameters
