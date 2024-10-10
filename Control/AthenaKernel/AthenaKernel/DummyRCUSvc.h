@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/DummyRCUSvc.h
@@ -22,7 +22,7 @@ namespace Athena_test {
 
 
 class DummyRCUSvc
-  : public Athena::IRCUSvc
+  : public implements<Athena::IRCUSvc>
 {
 public:
   virtual StatusCode remove (Athena::IRCUObject* /*obj*/) override
@@ -32,10 +32,6 @@ public:
   virtual size_t getNumSlots() const override { return 1; }
   virtual void add (Athena::IRCUObject* /*obj*/) override
   { }
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 };
 
 

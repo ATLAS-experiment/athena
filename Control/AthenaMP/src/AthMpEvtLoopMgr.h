@@ -14,24 +14,20 @@
 class IAthenaMPTool;
 class ISvcLocator;
 
-class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr
-   :virtual public ::IEventProcessor 
-   , public AthService
+class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
+                                                             IEventProcessor>
 {
  public:
   AthMpEvtLoopMgr(const std::string& name, ISvcLocator* svcLocator);
   virtual ~AthMpEvtLoopMgr();
 
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
 
-  virtual StatusCode queryInterface(const InterfaceID& riid, 
-				    void** ppvInterface);
-
-  virtual StatusCode nextEvent(int maxevt);
-  virtual StatusCode executeEvent(EventContext &&ctx);
-  virtual StatusCode executeRun(int maxevt);
-  virtual StatusCode stopRun();
+  virtual StatusCode nextEvent(int maxevt) override;
+  virtual StatusCode executeEvent(EventContext &&ctx) override;
+  virtual StatusCode executeRun(int maxevt) override;
+  virtual StatusCode stopRun() override;
 
   EventContext createEventContext();
 

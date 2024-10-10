@@ -40,7 +40,7 @@ namespace athenaMP_MemHelper
 
 AthMpEvtLoopMgr::AthMpEvtLoopMgr(const std::string& name
 				 , ISvcLocator* svcLocator)
-  : AthService(name,svcLocator)
+  : base_class(name,svcLocator)
   , m_evtProcessor("AthenaEventLoopMgr", name)
   , m_evtSelector(nullptr)
   , m_nWorkers(0)
@@ -137,20 +137,6 @@ StatusCode AthMpEvtLoopMgr::initialize()
 StatusCode AthMpEvtLoopMgr::finalize()
 {
   return StatusCode::SUCCESS;
-}
-
-StatusCode AthMpEvtLoopMgr::queryInterface(const InterfaceID& riid,
-					   void** ppvInterface)
-{
-  if(IEventProcessor::interfaceID().versionMatch(riid)) {
-    *ppvInterface = (IEventProcessor*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  } 
-  else {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
 }
 
 StatusCode AthMpEvtLoopMgr::nextEvent(int maxevt)
