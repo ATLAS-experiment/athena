@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //  file:   InDetRecStatisticsAlg.cxx
@@ -17,8 +17,6 @@
 //     o follow atlas naming conventions for all variable and method names
 
 #include "GaudiKernel/SmartDataPtr.h"
-#include "GaudiKernel/IPartPropSvc.h"
-#include "HepPDT/ParticleData.hh"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
@@ -64,7 +62,7 @@
 #include "InDetRecStatistics/TrackStatHelper.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "InDetRecStatistics//PileUpType.h"
-
+#include "TruthUtils/HepMCHelpers.h"
 
 
 
@@ -73,7 +71,6 @@ static const char * const s_linestr2 = "........................................
 
 InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator),
-  m_particleDataTable          (nullptr),
   m_trtID                      (nullptr),
   m_idDictMgr                  (nullptr),
   m_truthToTrack               ("Trk::TruthToTrack"),
@@ -400,22 +397,11 @@ StatusCode InDet :: InDetRecStatisticsAlg :: finalize() {
 
 StatusCode InDet :: InDetRecStatisticsAlg :: getServices ()
 {
-    // get the Particle Properties Service
-    IPartPropSvc* partPropSvc = nullptr;
-    StatusCode sc = evtStore()->service("PartPropSvc", partPropSvc, true);
-
-    if (sc.isFailure()) {
-        ATH_MSG_FATAL(" Could not initialize Particle Properties Service" );
-        return StatusCode::FAILURE;
-    }
-
-    m_particleDataTable = partPropSvc->PDT();
-
     //Set up ATLAS ID helper to be able to identify the RIO's det-subsystem.
 
     // Get the dictionary manager from the detector store
     const IdDictManager*  idDictMgr = nullptr;
-    sc = detStore()->retrieve(idDictMgr, "IdDict");
+    StatusCode sc = detStore()->retrieve(idDictMgr, "IdDict");
     if (sc.isFailure()) {
       ATH_MSG_FATAL("Could not get IdDictManager !");
       return StatusCode::FAILURE;
@@ -566,13 +552,8 @@ selectGenSignal  (const McEventCollection* SimTracks,
 	  // require stable particle from generation or simulation
 	  if (!MC::isStable(particle)) continue;
 	  int   pdgCode = particle->pdg_id();
-	  const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
-	  if (!pd) {
-	    ATH_MSG_DEBUG("Could not get particle data for particle "<< particle);
-	    ATH_MSG_DEBUG("GenParticle= " << particle);
-	    continue;
-	  }
-	  float charge = pd->charge();
+          if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
+	  float charge = MC::charge(pdgCode);
 	  if (std::abs(charge)<0.5) continue;
 	  if (std::abs(particle->momentum().perp()) >  m_minPt  &&
 	      std::abs(particle->momentum().pseudoRapidity()) < m_maxEta ) {

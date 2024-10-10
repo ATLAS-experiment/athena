@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkTrack/TrackCollection.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "InDetRecStatistics/TrackStatHelper.h"
 #include "Identifier/Identifier.h"
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
@@ -96,7 +95,6 @@ namespace InDet {
 
 
       std::vector <class TrackStatHelper *> m_SignalCounters;//!< Vector of TrackStatHelper objects, one for each track collection
-      const HepPDT::ParticleDataTable*      m_particleDataTable; //!< Atlas particle ID table
       const AtlasDetectorID*                m_idHelper;          //!< Used to find out the sub-det from PRD->identify().
       const PixelID*                        m_pixelID; //!< get pixel layer from hit ID
       const SCT_ID*                         m_sctID; //!< get sct layer from hit ID

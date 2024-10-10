@@ -20,10 +20,6 @@
 #include <string>
 #include <map>
 
-namespace HepPDT{
-  class ParticleDataTable;
-}
-
 namespace ITk {
 
   // Class-algorithm for track cluster association validation
@@ -131,8 +127,6 @@ namespace ITk {
         std::vector<InDet::TrackCollectionStat_t>  m_trackCollectionStat;
 	InDet::EventStat_t                         m_eventStat{};
       };
-
-      const HepPDT::ParticleDataTable*        m_particleDataTable{} ;
 
       ///////////////////////////////////////////////////////////////////
       // Protected methods

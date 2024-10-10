@@ -5,7 +5,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "TrkTrack/Track.h"
 #include "TrkSegment/TrackSegment.h"
@@ -21,6 +20,8 @@
 // ReadHandle
 #include "StoreGate/ReadHandle.h"
 
+#include "TruthUtils/HepMCHelpers.h"
+
 using HepGeom::Point3D;
 
 ///////////////////////////////////////////////////////////////////
@@ -30,7 +31,6 @@ using HepGeom::Point3D;
 InDet::SegmentDriftCircleAssValidation::SegmentDriftCircleAssValidation (const std::string& name,ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
   m_nprint            (0),
-  m_particleDataTable (nullptr),
   m_tcut              (0.),
   m_events            (0),
   m_ncircles          (0),
@@ -66,23 +66,6 @@ StatusCode InDet::SegmentDriftCircleAssValidation::initialize()
   // Get output print level
   //
   if(msgLvl(MSG::DEBUG)){m_nprint=0; msg(MSG::DEBUG) << (*this) << endmsg;}
-
-  // get the Particle Properties Service
-  //
-  IPartPropSvc* partPropSvc = nullptr;
-  sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << " Could not initialize Particle Properties Service" << endmsg;
-    return StatusCode::FAILURE;
-  }      
-
-  // Particle Data Table
-  //
-  m_particleDataTable = partPropSvc->PDT();
-  if(!m_particleDataTable) {
-    msg(MSG::FATAL) << " Could not initialize Particle Properties Service" << endmsg;
-    return StatusCode::FAILURE;
-  }
 
   // Erase statistics information
   //
@@ -497,8 +480,8 @@ std::list<int> InDet::SegmentDriftCircleAssValidation::kine
     // Charge != 0 test
     //
     int pdg = pa->pdg_id();  
-    const HepPDT::ParticleData* pd  = m_particleDataTable->particle(abs(pdg));
-    if(!pd ||  std::abs(pd->charge()) < .5) continue;
+    if (MC::isNucleus(pdg)) continue; // ignore nuclei from hadronic interactions
+    if(std::abs(MC::charge(pdg)) < .5) continue;
   
     // pT cut
     //
@@ -548,8 +531,8 @@ std::list<PRD_MultiTruthCollection::const_iterator> InDet::SegmentDriftCircleAss
     // Charge != 0 test
     //
     int pdg = pa->pdg_id();  
-    const HepPDT::ParticleData* pd  = m_particleDataTable->particle(abs(pdg));
-    if(!pd ||  std::abs(pd->charge()) < .5) continue;
+    if (MC::isNucleus(pdg)) continue; // ignore nuclei from hadronic interactions
+    if (std::abs(MC::charge(pdg)) < .5) continue;
   
     // pT cut
     //
