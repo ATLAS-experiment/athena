@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRECORDTOTRACK_H
@@ -11,10 +11,9 @@
 
 #include "TrkParameters/TrackParameters.h"
 #include <string>
-#include "StoreGate/ReadHandleKey.h" 
+#include "StoreGate/ReadHandleKey.h"
 #include "TrackRecord/TrackRecordCollection.h"
 
-namespace HepPDT { class ParticleDataTable; }
 #include "AtlasHepMC/GenParticle_fwd.h"
 
 namespace Trk {
@@ -63,12 +62,11 @@ namespace Trk {
     virtual const Trk::TrackParameters* makePerigeeParameters(const xAOD::TruthParticle* part) const;
 
   private:
-    const HepPDT::ParticleDataTable *m_particleDataTable;
     ToolHandle<Trk::IExtrapolator> m_extrapolator;
     SG::ReadHandleKey<TrackRecordCollection> m_reccollkey;
-    
+
     /** Forbid copying of Truth...ToTrack to not mess with the
-        internal pointers. */ 
+        internal pointers. */
     TruthTrackRecordToTrack(const TruthTrackRecordToTrack&) = delete;
     TruthTrackRecordToTrack& operator=(const TruthTrackRecordToTrack&) = delete;
   };

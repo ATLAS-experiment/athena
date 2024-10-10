@@ -8,17 +8,13 @@
 #include <cmath>
 #include <memory>
 
-#include "GaudiKernel/IPartPropSvc.h"
-
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/SimpleVector.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
-
-
-#include "HepPDT/ParticleDataTable.hh"
 
 #include "TrkExInterfaces/IExtrapolator.h"
 
@@ -26,7 +22,6 @@
 //================================================================
 Trk::TruthToTrack::TruthToTrack(const std::string& type, const std::string& name, const IInterface* parent)
   : ::AthAlgTool(type,name,parent)
-  , m_particleDataTable(nullptr)
   , m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
 {
   declareInterface<ITruthToTrack>(this);
@@ -35,20 +30,7 @@ Trk::TruthToTrack::TruthToTrack(const std::string& type, const std::string& name
 
 //================================================================
 StatusCode Trk::TruthToTrack::initialize() {
-  // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  StatusCode sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }
-  m_particleDataTable = partPropSvc->PDT();
-
-  if ( m_extrapolator.retrieve().isFailure() ) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
-    return StatusCode::FAILURE;
-  }
-
+  ATH_CHECK( m_extrapolator.retrieve() );
   return StatusCode::SUCCESS;
 }
 
@@ -58,7 +40,7 @@ StatusCode Trk::TruthToTrack::initialize() {
 const Trk::TrackParameters* Trk::TruthToTrack::makeProdVertexParameters(HepMC::ConstGenParticlePtr part) const {
   Trk::TrackParameters *result = nullptr;
 
-  if(part && part->production_vertex() && m_particleDataTable) {
+  if(part && part->production_vertex()) {
     HepMC::FourVector tv = part->production_vertex()->position();
     Amg::Vector3D hv(tv.x(),tv.y(),tv.z());
     const Amg::Vector3D& globalPos = hv;
@@ -67,13 +49,9 @@ const Trk::TrackParameters* Trk::TruthToTrack::makeProdVertexParameters(HepMC::C
     Amg::Vector3D hv2(fv.px(),fv.py(),fv.pz());
     const Amg::Vector3D& globalMom = hv2;
 
-    int id = part->pdg_id();
-    // the table seems to lack antiparticles, thus the use of abs()
-    const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(id));
-
-    if(pd) {
-      // pd could point to an antiparticle. recover the sign:
-      double charge = (id>0) ? pd->charge() : -pd->charge();
+    const int id = part->pdg_id();
+    if (id) {
+      const double charge = MC::charge(id);
       Amg::Translation3D tmpTransl(hv);
       Amg::Transform3D tmpTransf = tmpTransl * Amg::RotationMatrix3D::Identity();
       const Trk::PlaneSurface surface(tmpTransf);
@@ -92,20 +70,16 @@ const Trk::TrackParameters* Trk::TruthToTrack::makeProdVertexParameters(HepMC::C
 const Trk::TrackParameters* Trk::TruthToTrack::makeProdVertexParameters(const xAOD::TruthParticle* part) const {
   Trk::TrackParameters *result = nullptr;
 
-  if(part && part->hasProdVtx() && m_particleDataTable) {
+  if(part && part->hasProdVtx()) {
     Amg::Vector3D hv(part->prodVtx()->x(),part->prodVtx()->y(),part->prodVtx()->z());
     const Amg::Vector3D& globalPos = hv;
 
     Amg::Vector3D hv2(part->p4().Px(),part->p4().Py(),part->p4().Pz());
     const Amg::Vector3D& globalMom = hv2;
 
-    int id = part->pdgId();
-    // the table seems to lack antiparticles, thus the use of abs()
-    const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(id));
-
-    if(pd) {
-      // pd could point to an antiparticle. recover the sign:
-      double charge = (id>0) ? pd->charge() : -pd->charge();
+    const int id = part->pdg_id();
+    if (id) {
+      const double charge = MC::charge(id);
       Amg::Translation3D tmpTransl(hv);
       Amg::Transform3D tmpTransf = tmpTransl * Amg::RotationMatrix3D::Identity();
       const Trk::PlaneSurface surface(tmpTransf);
@@ -125,7 +99,7 @@ const Trk::TrackParameters* Trk::TruthToTrack::makeProdVertexParameters(const xA
 const Trk::TrackParameters* Trk::TruthToTrack::makePerigeeParameters(HepMC::ConstGenParticlePtr part) const {
   const Trk::TrackParameters* generatedTrackPerigee = nullptr;
 
-  if(part && part->production_vertex() && m_particleDataTable && m_extrapolator) {
+  if(part && part->production_vertex() && m_extrapolator) {
 
     std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(part) );
     if(productionVertexTrackParams) {
@@ -151,7 +125,7 @@ const Trk::TrackParameters* Trk::TruthToTrack::makePerigeeParameters(HepMC::Cons
 const Trk::TrackParameters* Trk::TruthToTrack::makePerigeeParameters(const xAOD::TruthParticle* part) const {
   const Trk::TrackParameters* generatedTrackPerigee = nullptr;
 
-  if(part && part->hasProdVtx() && m_particleDataTable && m_extrapolator) {
+  if(part && part->hasProdVtx() && m_extrapolator) {
 
     std::unique_ptr<const Trk::TrackParameters> productionVertexTrackParams( makeProdVertexParameters(part) );
     if(productionVertexTrackParams) {

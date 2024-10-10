@@ -6,15 +6,11 @@
 // InDetPrimaryConversionSelector.cxx
 //   Source file for class InDetPrimaryConversionSelector
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "TrkValTools/InDetPrimaryConversionSelector.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "CLHEP/Geometry/Point3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "HepPDT/ParticleData.hh"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -22,7 +18,6 @@
 Trk::InDetPrimaryConversionSelector::InDetPrimaryConversionSelector(const std::string& type, const std::string& name,
                                               const IInterface* parent)
   : AthAlgTool (type,name,parent),
-    m_particleDataTable{},
     m_minPt             ( 500.    ),
     m_maxEta            (   2.5   ),
     m_maxRStartAll      ( 800.0*CLHEP::mm),
@@ -41,16 +36,6 @@ Trk::InDetPrimaryConversionSelector::InDetPrimaryConversionSelector(const std::s
 /// initialize
 ///////////////////////////////
 StatusCode Trk::InDetPrimaryConversionSelector::initialize() {
-
-  // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  StatusCode sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL (" Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }
-  m_particleDataTable = partPropSvc->PDT();
-
   ATH_MSG_INFO ("initialise in " << name());
   return StatusCode::SUCCESS;
 }
@@ -90,13 +75,6 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
 
         int   pdgCode         = particle->pdg_id();
         if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
-        const HepPDT::ParticleData* pd = m_particleDataTable->particle(abs(pdgCode));
-
-        if (!pd) { // nuclei excluded, still problems with a given type?
-          ATH_MSG_INFO ("Could not get particle data for particle GenParticle= " << particle);
-          continue;
-        }
-
 	ATH_MSG_DEBUG ("found particle = " << particle);
 
 	// assume for the moment we're only running over single gamma MC files ...

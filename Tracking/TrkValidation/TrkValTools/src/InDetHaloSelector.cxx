@@ -1,27 +1,22 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // InDetHaloSelector.cxx
 //   Source file for class InDetHaloSelector
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "TrkValTools/InDetHaloSelector.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "CLHEP/Geometry/Point3D.h"
-#include "HepPDT/ParticleData.hh"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 Trk::InDetHaloSelector::InDetHaloSelector(const std::string& type, const std::string& name,
                                               const IInterface* parent)
-  : AthAlgTool (type,name,parent),
-  m_particleDataTable{}
+  : AthAlgTool (type,name,parent)
 
 {
   declareInterface<IGenParticleSelector>(this);
@@ -32,16 +27,6 @@ Trk::InDetHaloSelector::InDetHaloSelector(const std::string& type, const std::st
 /// initialize
 ///////////////////////////////
 StatusCode Trk::InDetHaloSelector::initialize() {
-
-  // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  StatusCode sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL (" Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }
-  m_particleDataTable = partPropSvc->PDT();
-
   ATH_MSG_DEBUG ("initialise in " << name());
   return StatusCode::SUCCESS;
 }
@@ -72,13 +57,8 @@ Trk::InDetHaloSelector::selectGenSignal (const McEventCollection* SimTracks) con
 
       int   pdgCode         = particle->pdg_id();
       if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
-      const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
       ATH_MSG_DEBUG( "Checking particle " <<  particle );
-      if (!pd) { // nuclei excluded, still problems with a given type?
-        ATH_MSG_INFO ("Could not get particle data for particle" << particle);
-	continue;
-      }
-      float charge          = pd->charge();
+      float charge          = MC::charge(pdgCode);
       ATH_MSG_DEBUG( "particle charge = " << charge );
       if (std::fabs(charge)<0.5) continue;
       
