@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -29,6 +29,7 @@
 
 #include "TMath.h"
 #include <iostream>
+#include <memory>
 
 using std::cout;
 using std::endl;
@@ -450,8 +451,8 @@ double History::allChi2(Chi2Params pars) const
 bool History::drawWithReference(int k, const TString& atlasTitle) const
 {
   if ((unsigned int)k >= nData()) return false;
-  SimpleShape* refShape = referenceShape(k);
-  SimpleShape* smpShape = referenceShape(k, -1, Definitions::none, true);
+  auto refShape = std::unique_ptr<SimpleShape>(referenceShape(k));
+  auto smpShape = std::unique_ptr<SimpleShape>(referenceShape(k, -1, Definitions::none, true));
   
   if (!refShape || !smpShape) return false;
   int pars = DataFirst | Legend;
@@ -463,9 +464,7 @@ bool History::drawWithReference(int k, const TString& atlasTitle) const
   else 
     title = Form("%s, run %d, event %d", cellInfo()->location(1).Data(), m_data[k]->run(), m_data[k]->event());
   ShapeDrawer drawer(pars);
-  bool result = drawer.draw(title, m_data[k], refShape, smpShape);
-  delete refShape;
-  delete smpShape;
+  bool result = drawer.draw(title, m_data[k], refShape.get(), smpShape.get());
   return result;
 }
 
@@ -526,7 +525,7 @@ bool History::drawResiduals(int k, bool errors, bool rescale) const
     if (k >= 0 && k != (int)i) continue;
     SimpleShape* shape = deltaShape(i);
     if (!errors) 
-      for (unsigned int k = 0; k < shape->nPoints(); k++) shape->setError(k, 0);
+      for (unsigned int idx = 0; idx < shape->nPoints(); idx++) shape->setError(idx, 0);
     if (!shape) continue;
     if (rescale) {
       SimpleShape* scaled = new SimpleShape(*shape, 1/m_data[i]->adcMax(), 9.0*i/nData() - m_data[i]->ofcTime());
