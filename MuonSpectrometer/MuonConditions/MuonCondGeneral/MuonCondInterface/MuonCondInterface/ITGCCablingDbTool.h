@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDINTERFACE_ITGCCABLINGDBTOOL_H
@@ -15,11 +15,11 @@
 #include <string>
 #include <vector>
 
-static const InterfaceID IID_ITGCCablingDbTool("ITGCCablingDbTool", 1, 0);
 
-class ITGCCablingDbTool : virtual public IAlgTool, virtual public IAddressProvider {
+
+class ITGCCablingDbTool : virtual public extend_interfaces<IAlgTool, IAddressProvider> {
 public:
-    static const InterfaceID& interfaceID() { return IID_ITGCCablingDbTool; };
+    DeclareInterfaceID(ITGCCablingDbTool, 1, 0);
 
     virtual StatusCode loadParameters(IOVSVC_CALLBACK_ARGS) = 0;
 

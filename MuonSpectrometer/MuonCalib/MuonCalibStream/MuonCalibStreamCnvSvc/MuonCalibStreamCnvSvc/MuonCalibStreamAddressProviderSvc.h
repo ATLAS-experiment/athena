@@ -9,13 +9,7 @@
 #include "GaudiKernel/ClassID.h"
 #include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
 
-// Forward declarations
-
-template <class TYPE> class SvcFactory;
-
-class MuonCalibStreamAddressProviderSvc : public virtual AthService, public virtual IAddressProvider {
-    /// Allow the factory class access to the constructor
-    friend class SvcFactory<MuonCalibStreamAddressProviderSvc>;
+class MuonCalibStreamAddressProviderSvc : public extends<AthService, IAddressProvider> {
 
 public:
     MuonCalibStreamAddressProviderSvc(const std::string &name, ISvcLocator *svcloc);
