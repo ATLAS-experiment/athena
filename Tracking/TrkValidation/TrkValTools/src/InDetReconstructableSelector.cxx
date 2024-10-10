@@ -1,19 +1,15 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // InDetReconstructableSelector.cxx
 //   Source file for class InDetReconstructableSelector
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "TrkValTools/InDetReconstructableSelector.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "HepPDT/ParticleData.hh"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -21,7 +17,6 @@
 Trk::InDetReconstructableSelector::InDetReconstructableSelector(const std::string& type, const std::string& name,
                                               const IInterface* parent)
   : AthAlgTool (type,name,parent),
-    m_particleDataTable{},
     m_minPt             (1000.),
     m_maxEta            (   3.0),
     m_selectPrimariesOnly(false),
@@ -46,16 +41,6 @@ Trk::InDetReconstructableSelector::InDetReconstructableSelector(const std::strin
 /// initialize
 ///////////////////////////////
 StatusCode Trk::InDetReconstructableSelector::initialize() {
-
-  // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  StatusCode sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL (" Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }
-  m_particleDataTable = partPropSvc->PDT();
-
   ATH_MSG_INFO ("initialise in " << name());
   return StatusCode::SUCCESS;
 }
@@ -102,13 +87,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
 
         int   pdgCode         = particle->pdg_id();
         if (MC::isNucleus(pdgCode)) continue; // ignore nuclei from hadronic interactions
-        const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
-
-        if (!pd) { // nuclei excluded, still problems with a given type?
-          ATH_MSG_INFO ("Could not get particle data for particle "<< particle);
-          continue;
-        }
-        float charge          = pd->charge();
+        const float charge = MC::charge(pdgCode);
         if (std::abs(charge)<0.5) continue;
 
         if (std::abs(particle->momentum().perp()) >  m_minPt  &&  std::abs(particle->momentum().pseudoRapidity()) < m_maxEta ) {

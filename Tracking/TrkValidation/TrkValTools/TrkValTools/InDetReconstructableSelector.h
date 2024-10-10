@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // InDetReconstructableSelector.h
 //   Header file for InDetReconstructableSelector
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef TRKVALTOOLS_GENPARTICLESELECTOR_H
 #define TRKVALTOOLS_GENPARTICLESELECTOR_H
 
 #include "TrkValInterfaces/IGenParticleSelector.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 namespace Trk {
@@ -45,7 +42,6 @@ namespace Trk {
       selectGenSignal (const McEventCollection*) const;
 
   private:
-    const HepPDT::ParticleDataTable* m_particleDataTable;
     float             m_minPt;
     float             m_maxEta;
     bool              m_selectPrimariesOnly;

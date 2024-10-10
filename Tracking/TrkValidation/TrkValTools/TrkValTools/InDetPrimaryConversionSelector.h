@@ -1,19 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
 // InDetPrimaryConversionSelector.h
 //   Header file for InDetPrimaryConversionSelector
 ///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef TRKVALTOOLS_PrimaryConversionSelector_H
 #define TRKVALTOOLS_PrimaryConversionSelector_H
 
 #include "TrkValInterfaces/IGenParticleSelector.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 namespace Trk {
@@ -45,7 +42,6 @@ namespace Trk {
       selectGenSignal (const McEventCollection*) const;
 
   private:
-    const HepPDT::ParticleDataTable* m_particleDataTable;
     float             m_minPt;
     float             m_maxEta;
     float             m_maxRStartAll; //!< Max R of start vertex for primaries and secondaries.

@@ -7,25 +7,22 @@
 #include <cmath>
 #include <memory>
 
-#include "GaudiKernel/IPartPropSvc.h"
-
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
 
-#include "HepPDT/ParticleDataTable.hh"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrackRecord/TrackRecord.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 //================================================================
 Trk::TruthTrackRecordToTrack::TruthTrackRecordToTrack(const std::string& type, const std::string& name,
                                             const IInterface* parent)
   : AthAlgTool(type,name,parent),
-    m_particleDataTable(nullptr),
     m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
 {
   declareInterface<ITruthToTrack>(this);
@@ -37,19 +34,7 @@ Trk::TruthTrackRecordToTrack::TruthTrackRecordToTrack(const std::string& type, c
 //================================================================
 StatusCode Trk::TruthTrackRecordToTrack::initialize() {
 
-  // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  StatusCode sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR ("Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }
-  m_particleDataTable = partPropSvc->PDT();
-
-  if ( m_extrapolator.retrieve().isFailure() ) {
-    ATH_MSG_FATAL ("Failed to retrieve tool " << m_extrapolator );
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK ( m_extrapolator.retrieve() );
 
   ATH_CHECK( m_reccollkey.initialize() );
 
@@ -59,7 +44,7 @@ StatusCode Trk::TruthTrackRecordToTrack::initialize() {
 //================================================================
 const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParameters(HepMC::ConstGenParticlePtr part) const {
 
-  if (part == nullptr || m_particleDataTable==nullptr) return nullptr;
+  if (part == nullptr) return nullptr;
 
   Trk::TrackParameters *result = nullptr;
   Amg::Vector3D prodVertexVector;
@@ -67,9 +52,6 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
   Amg::Vector3D globalPos;
   Amg::Vector3D globalMom;
   int id=0;
-  double charge = 0.0;
-  const HepPDT::ParticleData* pd = nullptr;
-
 
   SG::ReadHandle<TrackRecordCollection> trackRecordCollection(m_reccollkey);
 
@@ -81,42 +63,36 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (trackRecordCollection->empty()) ATH_MSG_WARNING ("action required but TrackRecordCollection size is 0");
 
-  for (const auto & trackRecord : *trackRecordCollection){
+  for (const auto & trackRecord : *trackRecordCollection) {
 
     if ( !HepMC::is_same_particle(trackRecord,part) ) continue;
 
-      id = trackRecord.GetPDGCode();
-      pd = m_particleDataTable->particle(std::abs(id));
-      if (!pd) {
-        ATH_MSG_WARNING ("Found particle with problematic PDG ID " << part << " , " << id);
-        continue;
-      }
+    id = trackRecord.GetPDGCode();
 
-      CLHEP::Hep3Vector tv = trackRecord.GetPosition();
-      prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
-      globalPos = prodVertexVector;
+    CLHEP::Hep3Vector tv = trackRecord.GetPosition();
+    prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
+    globalPos = prodVertexVector;
 
-      Amg::Vector3D hv2(trackRecord.GetMomentum().x(), trackRecord.GetMomentum().y(),
-                            trackRecord.GetMomentum().z());
-      globalMom = hv2;
+    Amg::Vector3D hv2(trackRecord.GetMomentum().x(), trackRecord.GetMomentum().y(),
+                      trackRecord.GetMomentum().z());
+    globalMom = hv2;
 
-      ATH_MSG_DEBUG("Found particle " << part << ", momentum " << hv2 << " production " << globalPos);
+    ATH_MSG_DEBUG("Found particle " << part << ", momentum " << hv2 << " production " << globalPos);
 
 
   }   // loop over G4 records
 
-  if (pd) {
-    charge = (id>0) ? pd->charge() : -pd->charge();
+  if (id) {
+    const double charge = MC::charge(id);
 
     Amg::Translation3D prodSurfaceCentre( prodVertexVector.x(),
-					  prodVertexVector.y(),
-					  prodVertexVector.z() );
+                                          prodVertexVector.y(),
+                                          prodVertexVector.z() );
 
     Amg::Transform3D tmpTransf =  prodSurfaceCentre *  Amg::RotationMatrix3D::Identity();
 
     Trk::PlaneSurface planeSurface(tmpTransf, 5., 5. );
     result = new Trk::AtaPlane(globalPos, globalMom, charge, planeSurface);
-
   } else {
     ATH_MSG_WARNING ("Could not get particle data for particle ID="<<id);
   }
@@ -128,17 +104,16 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 //================================================================
 const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParameters(const xAOD::TruthParticle* part) const {
 
-  if (part == nullptr || m_particleDataTable==nullptr) return nullptr;
+  if (part == nullptr) return nullptr;
 
-  Trk::TrackParameters *result = nullptr;
-  Amg::Vector3D prodVertexVector;
-  Amg::Vector3D globalPos;
-  Amg::Vector3D globalMom;
+  Trk::TrackParameters *result{};
+  Amg::Vector3D prodVertexVector(0., 0., 0.);
+  Amg::Vector3D globalPos(0., 0., 0.);
+  Amg::Vector3D globalMom(0., 0., 0.);
   int id=0;
   double charge = 0.0;
-  const HepPDT::ParticleData* pd = nullptr;
 
-   SG::ReadHandle<TrackRecordCollection> trackRecordCollection(m_reccollkey);
+  SG::ReadHandle<TrackRecordCollection> trackRecordCollection(m_reccollkey);
 
   if (trackRecordCollection.isValid()) {
     ATH_MSG_ERROR ("Could not get track record!");
@@ -149,36 +124,25 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (trackRecordCollection->empty()) ATH_MSG_WARNING ("action required but TrackRecordCollection size is 0");
 
-  for (const auto & trackRecord : *trackRecordCollection){
-
+  for (const auto & trackRecord : *trackRecordCollection) {
     if ( HepMC::is_same_particle(trackRecord,part) ) {
-
       id = trackRecord.GetPDGCode();
-      pd = m_particleDataTable->particle(std::abs(id));
-      if (!pd) {
-        ATH_MSG_WARNING ("found particle with problematic PDG ID" << part << " , " << id);
-        continue;
-      }
-
+      if (!id) continue;
       CLHEP::Hep3Vector  tv = trackRecord.GetPosition();
       prodVertexVector = Amg::Vector3D(tv.x(),tv.y(),tv.z());
       globalPos = prodVertexVector;
-
       Amg::Vector3D hv2(trackRecord.GetMomentum().x(), trackRecord.GetMomentum().y(), trackRecord.GetMomentum().z());
       globalMom = hv2;
-
       ATH_MSG_DEBUG("found particle " << part << ", momentum " << hv2 << " production " << globalPos);
-
-
     }
   }   // loop over G4 records
 
-  if (pd) {
-    charge = (id>0) ? pd->charge() : -pd->charge();
+  if (id) {
+    charge = MC::charge(id);
 
     Amg::Translation3D prodSurfaceCentre( prodVertexVector.x(),
-					  prodVertexVector.y(),
-					  prodVertexVector.z() );
+                                          prodVertexVector.y(),
+                                          prodVertexVector.z() );
 
     Amg::Transform3D tmpTransf =  prodSurfaceCentre *  Amg::RotationMatrix3D::Identity();
 
@@ -197,7 +161,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makePerigeeParameters(HepMC::ConstGenParticlePtr part) const {
   const Trk::TrackParameters* generatedTrackPerigee = nullptr;
 
-  if(part && part->production_vertex() && m_particleDataTable && m_extrapolator) {
+  if(part && part->production_vertex() && m_extrapolator) {
 
     MsgStream log(msgSvc(), name());
 
@@ -223,7 +187,7 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makePerigeeParameters(
 const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makePerigeeParameters(const xAOD::TruthParticle* part) const {
   const Trk::TrackParameters* generatedTrackPerigee = nullptr;
 
-  if(part && part->hasProdVtx() && m_particleDataTable && m_extrapolator) {
+  if(part && part->hasProdVtx() && m_extrapolator) {
 
     MsgStream log(msgSvc(), name());
 

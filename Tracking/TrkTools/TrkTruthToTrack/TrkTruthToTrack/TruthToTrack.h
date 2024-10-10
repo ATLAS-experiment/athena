@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -20,8 +20,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkParameters/TrackParameters.h"
-
-namespace HepPDT { class ParticleDataTable; }
 
 namespace Trk {
 
@@ -51,7 +49,6 @@ namespace Trk {
     virtual const Trk::TrackParameters* makePerigeeParameters(const xAOD::TruthParticle* part) const;
 
   private:
-    const HepPDT::ParticleDataTable *m_particleDataTable;
     ToolHandle<Trk::IExtrapolator> m_extrapolator;
   };
 }
