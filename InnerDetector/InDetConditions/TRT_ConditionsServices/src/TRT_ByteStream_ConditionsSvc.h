@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_BYTESTREAM_CONDITIONSSVC_H
@@ -30,10 +30,10 @@
 
 
 /// Service for retrieving ByteStream conditions information
-class TRT_ByteStream_ConditionsSvc : public AthService,
-  virtual public ITRT_ConditionsSvc,
-  virtual public ITRT_ByteStream_ConditionsSvc,
-  virtual public IIncidentListener
+class TRT_ByteStream_ConditionsSvc : public extends<AthService,
+                                                    ITRT_ConditionsSvc,
+                                                    ITRT_ByteStream_ConditionsSvc,
+                                                    IIncidentListener>
 {
 
  public:
@@ -43,8 +43,6 @@ class TRT_ByteStream_ConditionsSvc : public AthService,
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
 
   /// @name Functions inherited from ITRT_ConditionsSvc
   //@{
@@ -120,19 +118,5 @@ class TRT_ByteStream_ConditionsSvc : public AthService,
   //TRT_BSErrContainer* m_cont;
 
 };
-
-/// Query Interface
-inline StatusCode TRT_ByteStream_ConditionsSvc::queryInterface( const InterfaceID& riid, void** ppvIf ) {
-  if ( ITRT_ConditionsSvc::interfaceID() == riid ) {
-    *ppvIf = dynamic_cast<ITRT_ConditionsSvc*>(this);
-    addRef();
-  } else if ( ITRT_ByteStream_ConditionsSvc::interfaceID() == riid ) {
-    *ppvIf = dynamic_cast<ITRT_ByteStream_ConditionsSvc*>(this);
-    addRef();
-  } else {
-    return AthService::queryInterface( riid, ppvIf );
-  }
-  return StatusCode::SUCCESS;
-}
 
 #endif // TRT_BYTESTREAM_CONDITIONSSVC_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_AlignDbSvc.cxx
@@ -35,7 +35,7 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This class uses const_cast and regFcn (callback). Legacy code
 
 TRT_AlignDbSvc::TRT_AlignDbSvc( const std::string& name, ISvcLocator* pSvcLocator )
-  : AthService(name,pSvcLocator),
+  : base_class(name,pSvcLocator),
     m_detStore("DetectorStore",name),
     m_trtStrawAlignDbSvc("TRT_StrawAlignDbSvc",name),
     m_trtid(nullptr),

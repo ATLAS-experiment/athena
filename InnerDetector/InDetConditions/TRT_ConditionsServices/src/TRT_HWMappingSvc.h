@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_HWMappingSvc_H
@@ -26,7 +26,7 @@ class TRT_ID;
 class Identifier;
 
 /// AlgTool providing offline -> hardware mapping information
-class TRT_HWMappingSvc : public AthService, virtual public ITRT_HWMappingSvc {
+class TRT_HWMappingSvc : public extends<AthService, ITRT_HWMappingSvc> {
 
  public:
 
@@ -35,8 +35,6 @@ class TRT_HWMappingSvc : public AthService, virtual public ITRT_HWMappingSvc {
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-
-  virtual StatusCode queryInterface( const InterfaceID&, void** );
 
   /// Returns the HV pad for a barrel identifier
   int get_HV_BarrelPadNum( const Identifier );
@@ -81,17 +79,5 @@ class TRT_HWMappingSvc : public AthService, virtual public ITRT_HWMappingSvc {
   SG::ReadCondHandleKey<TRTCond::HWMap> m_HWMapReadKey{this,"HWMapReadKey","HWMap","HV map in-key"};
 
 };
-
-/// Query Interface
-inline StatusCode TRT_HWMappingSvc::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( ITRT_HWMappingSvc::interfaceID() == riid ) {
-    *ppvIf = dynamic_cast<ITRT_HWMappingSvc*>(this);
-    addRef();
-  } else {
-    return AthService::queryInterface( riid, ppvIf );
-  }
-  return StatusCode::SUCCESS;
-}
 
 #endif // TRT_HWMappingSvc_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_ConditionsTestSvc.cxx
@@ -16,7 +16,7 @@
 /////
 TRT_ConditionsTestSvc::TRT_ConditionsTestSvc( const std::string& name,
 					      ISvcLocator* pSvcLocator ) :
-  AthService( name, pSvcLocator )
+  base_class( name, pSvcLocator )
 {
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -21,7 +21,7 @@
 /////
 TRT_ByteStream_ConditionsSvc::TRT_ByteStream_ConditionsSvc( const std::string& name,
 							    ISvcLocator* pSvcLocator ) :
-  AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_evtStore("StoreGateSvc",name),
   m_num_l1id_errors(0),
   m_num_bcid_errors(0),

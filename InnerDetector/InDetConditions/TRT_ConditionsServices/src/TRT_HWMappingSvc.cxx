@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*---------------------------------------------------------
@@ -28,7 +28,7 @@
 /////
 TRT_HWMappingSvc::TRT_HWMappingSvc( const std::string& name,
 				    ISvcLocator* pSvcLocator ) :
-  AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_detStore("DetectorStore",name),
   m_TRT_ID_Helper(nullptr),
   m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc",name)

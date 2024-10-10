@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DCS_CONDITIONSSVC_H
@@ -30,9 +30,9 @@ class Identifier;
 class TH1D;
 
 /// Service for accessing DCS conditions information
-class TRT_DCS_ConditionsSvc : public AthService,
-  virtual public ITRT_ConditionsSvc,
-  virtual public ITRT_DCS_ConditionsSvc
+class TRT_DCS_ConditionsSvc : public extends<AthService,
+                                             ITRT_ConditionsSvc,
+                                             ITRT_DCS_ConditionsSvc>
   {
 
  public:
@@ -42,8 +42,6 @@ class TRT_DCS_ConditionsSvc : public AthService,
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
 
   /// Returns the DCS conditions StatusFlag for a given identifier.
   InDet::TRT_DCS_StatusFlag getFlag( const Identifier );
@@ -142,19 +140,5 @@ class TRT_DCS_ConditionsSvc : public AthService,
   int m_nEAEvts;
   int m_nECEvts;
 };
-
-/// Query Interface
-inline StatusCode TRT_DCS_ConditionsSvc::queryInterface( const InterfaceID& riid, void** ppvInterface ) {
-  if ( ITRT_ConditionsSvc::interfaceID() == riid ) {
-    *ppvInterface = dynamic_cast<ITRT_ConditionsSvc*>(this);
-    addRef();
-  } else if ( ITRT_DCS_ConditionsSvc::interfaceID() == riid ) {
-    *ppvInterface = dynamic_cast<ITRT_DCS_ConditionsSvc*>(this);
-    addRef();
-  } else {
-    return AthService::queryInterface( riid, ppvInterface );
-  }
-  return StatusCode::SUCCESS;
-}
 
 #endif // TRT_DCS_CONDITIONSSVC_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_StrawNeighbourSvc.cxx
@@ -42,7 +42,7 @@
 
 TRT_StrawNeighbourSvc::TRT_StrawNeighbourSvc( const std::string& name,
 					    ISvcLocator* pSvcLocator )
-  : AthService(name,pSvcLocator),
+  : base_class(name,pSvcLocator),
     m_detStore("DetectorStore",name),
     m_trtid(nullptr)
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DAQ_CONDITIONSSVC_H
@@ -26,9 +26,9 @@
 class CondAttrListCollection;
 
 // Class definition for this AlgTool
-class TRT_DAQ_ConditionsSvc : public AthService,
-  virtual public ITRT_ConditionsSvc,
-  virtual public ITRT_DAQ_ConditionsSvc
+class TRT_DAQ_ConditionsSvc : public extends<AthService,
+                                             ITRT_ConditionsSvc,
+                                             ITRT_DAQ_ConditionsSvc>
 {
 
  public:
@@ -41,9 +41,6 @@ class TRT_DAQ_ConditionsSvc : public AthService,
 
   // Return ROD identifier
   unsigned int RODid( const Identifier& );
-
-  /// Query Interface
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
 
   /// ConditionsSummaryStatus for a ROD ID
   /** Similar to ITRT_ConditionsSvc::condSummaryStatus,
@@ -75,19 +72,5 @@ class TRT_DAQ_ConditionsSvc : public AthService,
   SG::ReadCondHandleKey<CondAttrListCollection> m_RobinsReadKey{this,"RobinsReadKey","/TDAQ/Resources/ATLAS/TRT/Robins","Robins in-key"};
 
 };
-
-/// Query Interface
-inline StatusCode TRT_DAQ_ConditionsSvc::queryInterface( const InterfaceID& riid, void** ppvInterface ) {
-  if ( ITRT_ConditionsSvc::interfaceID() == riid ) {
-    *ppvInterface = dynamic_cast<ITRT_ConditionsSvc*>(this);
-    addRef();
-  } else if ( ITRT_DAQ_ConditionsSvc::interfaceID() == riid ) {
-    *ppvInterface = dynamic_cast<ITRT_DAQ_ConditionsSvc*>(this);
-    addRef();
-  } else {
-    return AthService::queryInterface( riid, ppvInterface );
-  }
-  return StatusCode::SUCCESS;
-}
 
 #endif // TRT_DAQ_CONDITIONSSVC_H
