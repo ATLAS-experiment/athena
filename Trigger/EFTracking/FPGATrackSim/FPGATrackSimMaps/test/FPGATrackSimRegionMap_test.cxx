@@ -45,8 +45,9 @@ int main(int, char**)
         return 1;
     }
 
-    string pmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/step3_01eta03_03phi05.pmap";
-    string rmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-23-00-01.rmap";
+    string pmap_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_9L/OtherFPGAPipelines/v0.20/eta0103phi0305.pmap";
+    string rmap_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_9L/OtherFPGAPipelines/v0.20/eta0103phi0305.rmap";
+    //string rmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-23-00-01.rmap";
 
     std::vector<std::unique_ptr<FPGATrackSimPlaneMap>>  test_pmaps;
     test_pmaps.push_back(std::unique_ptr< FPGATrackSimPlaneMap> (new FPGATrackSimPlaneMap(pmap_path, 0, 1))); 

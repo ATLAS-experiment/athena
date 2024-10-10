@@ -51,7 +51,7 @@ echo "... Maps Making, this part is done ..."
 mkdir -p maps
 mv MyMaps_region0.rmap maps/eta0103phi0305.rmap
 mv *.rmap maps/eta0103phi0305.subrmap
-mv MyMaps_region0.pmap maps/pmap
+mv MyMaps_region0.pmap maps/eta0103phi0305.pmap
 mv *_MeanRadii.txt maps/eta0103phi0305_radii.txt
 touch maps/moduleidmap
 

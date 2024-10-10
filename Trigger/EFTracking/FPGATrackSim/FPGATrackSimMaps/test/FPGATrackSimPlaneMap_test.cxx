@@ -25,8 +25,8 @@ using namespace std;
 void test(FPGATrackSimPlaneMap & pmap)
 {
     //assert(pmap.getNDetLayers() == 227);
-    assert(pmap.getNLogiLayers() == 8);
-    assert(pmap.getNCoords() == 9);
+    assert(pmap.getNLogiLayers() == 9);
+    assert(pmap.getNCoords() == 10);//why 10 when it was 9
 
     assert(pmap.isPixel(0));
     assert(pmap.isSCT(3));
@@ -36,7 +36,8 @@ void test(FPGATrackSimPlaneMap & pmap)
     assert(pmap.getDim(0) == 2);
 
     assert(pmap.getLayerInfo(0, 0).zone == DetectorZone::barrel);
-    assert(pmap.getLayerInfo(3, 0).physLayer == 3);
+    //assert(pmap.getLayerInfo(3, 0).physLayer == 3);
+    assert(pmap.getLayerInfo(3, 0).physLayer == 2);
     assert(pmap.getLayerSection(SiliconTech::strip, DetectorZone::barrel, 0).layer == 1);
 }
 
@@ -50,7 +51,7 @@ int main(int, char**)
         return 1;
     }
 
-    string pmap_path="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData//HTT/TrigHTTMaps/V1/map_file/step3_01eta03_03phi05.pmap";
+    string pmap_path="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/maps_9L/OtherFPGAPipelines/v0.20/eta0103phi0305.pmap";
     FPGATrackSimPlaneMap pmap(pmap_path, 0, 1);
 
     test(pmap);
