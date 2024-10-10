@@ -91,7 +91,7 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
             m_allActsTracks.try_emplace(actsTrackContainer.key(), std::vector<FPGATrackSimActsEventTracks>{});
 
             // fetch acts tracks
-            m_allActsTracks[actsTrackContainer.key()].push_back(std::move(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr()))));
+            m_allActsTracks[actsTrackContainer.key()].push_back(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr())));
 
             // initialize ReadHandle stats map for all tracks if necessary
             m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
