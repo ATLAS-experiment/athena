@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -20,9 +20,7 @@ using namespace std;
 ALFA_DetectorTool::ALFA_DetectorTool( const std::string& type, 
 				      const std::string& name, 
 				      const IInterface* parent )
-  : GeoModelTool( type, name, parent), 
-    m_pALFADetectorFactory(nullptr),
-    m_iovSvc( "IOVDbSvc", name )
+  : GeoModelTool( type, name, parent)
 {
 	m_Config.clear();
 
@@ -124,108 +122,59 @@ ALFA_DetectorTool::ALFA_DetectorTool( const std::string& type,
 	declareProperty("vecTransformInStationB7R1L", m_Config.vecTransformInStationB7R1L, "transformation data in the stationfor B7R1L RP");
 }
 
-ALFA_DetectorTool::~ALFA_DetectorTool()
-{
-}
-
+ALFA_DetectorTool::~ALFA_DetectorTool() = default;
 
 StatusCode ALFA_DetectorTool::create()
 { 
-  MsgStream log(msgSvc(), name()); 
-  
-  log << MSG::INFO << "Building ALFA_ geometry" << endmsg;
+  ATH_MSG_INFO("Building ALFA_ geometry");
 
   if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS){
-	  CHECK(m_iovSvc.retrieve());
+	  CHECK(m_iovDbSvc.retrieve());
   }
 
   // Retrieve GeoModel Experiment
-  GeoModelExperiment * theExpt; 
-  if (StatusCode::SUCCESS != detStore()->retrieve( theExpt, "ATLAS" )) 
-  { 
-    log << MSG::ERROR << "Could not find GeoModelExperiment ATLAS" << endmsg; 
-    return StatusCode::FAILURE; 
-  } 
+  GeoModelExperiment * theExpt{nullptr};
+  ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
   
-  if(nullptr == m_detector)
-  {
-    GeoPhysVol *world=&*theExpt->getPhysVol();
+  GeoPhysVol *world=theExpt->getPhysVol();
 
-    // Get pointer to the RDBAccessSvc
-    // Use this pointer later for Geometry DB access
-    IRDBAccessSvc* raccess = nullptr;
-    StatusCode sc = service("RDBAccessSvc",raccess);
-    if(sc.isFailure()) 
-    {
-      log << MSG::FATAL << "Could not locate RDBAccessSvc" << endmsg;
-      return StatusCode::FAILURE;
-    }
+  // Get pointer to the RDBAccessSvc
+  // Use this pointer later for Geometry DB access
+  SmartIF<IRDBAccessSvc> raccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
 
-	/*
-	int nChannel, nSign;
-	const CondAttrListCollection* listAttrColl;
-	CondAttrListCollection::const_iterator iterAttr;
-	if(detStore->retrieve(listAttrColl,COOLFOLDER_DETSWCORR )==StatusCode::SUCCESS){
-		for(iterAttr=listAttrColl->begin();iterAttr!=listAttrColl->end();iterAttr++){
-			nChannel=iterAttr->first; //RPot ID
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fXOffset=((iterAttr->second)[0]).data<float>();
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fTheta=((iterAttr->second)[1]).data<float>();
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fYOffset=((iterAttr->second)[2]).data<float>();
+  // Construct Factory
+  m_pALFADetectorFactory=new ALFA_DetectorFactory(detStore().operator->(),raccess,&m_Config);
 
-			nSign=(nChannel%2==0)? +1:-1;
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fXOffset=0.0;
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fTheta=0.0;
-			m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fYOffset=nSign*2.0;
-			if(nChannel==2) m_Config.GeometryConfig.CfgRPosParams[nChannel].swcorr.fYOffset=6.0;
-		 }
-	}
-	*/
+  // Build geometry
+  m_pALFADetectorFactory->create(world);
 
-	// Construct Factory
-	//ALFA_DetectorFactory theALFA_Factory(detStore,raccess,&m_Config);
-    m_pALFADetectorFactory=new ALFA_DetectorFactory(detStore().operator->(),raccess,&m_Config);
-
-	// Build geometry
-	//theALFA_Factory.create(world);
-	m_pALFADetectorFactory->create(world);
-
-    // Add ALFA_ manager to the Store Gate and GeoModel Experiment
-	//theExpt->addManager(theALFA_Factory.getDetectorManager());
-	//sc = detStore->record(theALFA_Factory.getDetectorManager(), theALFA_Factory.getDetectorManager()->getName());
-	theExpt->addManager(m_pALFADetectorFactory->getDetectorManager());
-	sc = detStore()->record(m_pALFADetectorFactory->getDetectorManager(), m_pALFADetectorFactory->getDetectorManager()->getName());
+  // Add ALFA_ manager to the Store Gate and GeoModel Experiment
+  theExpt->addManager(m_pALFADetectorFactory->getDetectorManager());
+  ATH_CHECK(detStore()->record(m_pALFADetectorFactory->getDetectorManager()
+			       , m_pALFADetectorFactory->getDetectorManager()->getName()));
     
-    if (sc.isFailure()) 
-    {
-      log << MSG::ERROR << "Could not register ALFA_ detector manager" << endmsg;
-      return StatusCode::FAILURE; 
-    }
-    return StatusCode::SUCCESS;
-  }
-  
-  return StatusCode::FAILURE;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode ALFA_DetectorTool::registerCallback()
 {
+  StatusCode sc=StatusCode::FAILURE;
 
-	StatusCode sc=StatusCode::FAILURE;
+  if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS) {
+    const DataHandle<CondAttrListCollection> DataPtr;
+    sc=detStore()->regFcn(&IGeoModelTool::align,dynamic_cast<IGeoModelTool*>(this), DataPtr, COOLFOLDER_DETSWCORR, true);
+    if(sc!=StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Cannot register COOL callback for folder '"<<COOLFOLDER_DETSWCORR <<"'");
+    }
+    else {
+      ATH_MSG_INFO("Call-back to ALFA_DetectorTool::align() against folder "<< COOLFOLDER_DETSWCORR <<" registered ");
+    }
+  }
+  else {
+    ATH_MSG_INFO("No callback registed");
+  }
 
-	if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS){
-		const DataHandle<CondAttrListCollection> DataPtr;
-		sc=detStore()->regFcn(&IGeoModelTool::align,dynamic_cast<IGeoModelTool*>(this), DataPtr, COOLFOLDER_DETSWCORR, true);
-		if(sc!=StatusCode::SUCCESS){
-		  msg(MSG::ERROR) << "Cannot register COOL callback for folder '"<<COOLFOLDER_DETSWCORR <<"'" << endmsg;
-		}
-		else
-		  msg(MSG::INFO) << "Call-back to ALFA_DetectorTool::align() against folder "<< COOLFOLDER_DETSWCORR <<" registered "<<endmsg;
-	}
-	else{
-	  msg(MSG::INFO) <<  "No callback registed" << endmsg;
-	  sc=StatusCode::FAILURE;
-	}
-
-	return sc;
+  return sc;
 }
 
 StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
@@ -245,7 +194,7 @@ StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
 			const GeoFullPhysVol* pPhysRPBox=pStPhysRPBox->getPhysVol();
 			const GeoTrf::Transform3D& xf= pPhysRPBox->getAbsoluteTransform();
 
-			msg(MSG::INFO) << "Translation of RPBOX: "<< xf.translation() << endmsg;
+			ATH_MSG_INFO("Translation of RPBOX: "<< xf.translation());
 		}
 
 		if(detStore()->retrieve(listAttrColl,COOLFOLDER_DETSWCORR )==StatusCode::SUCCESS){
@@ -263,11 +212,11 @@ StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
 			if(sc.isSuccess()){
 				const GeoFullPhysVol* pPhysRPBox=pStPhysRPBox->getPhysVol();
 				const GeoTrf::Transform3D& xf= pPhysRPBox->getAbsoluteTransform();
-				msg(MSG::INFO) << "Translation of RPBOX after update: "<< xf.translation() << endmsg;
+				ATH_MSG_INFO("Translation of RPBOX after update: "<< xf.translation());
 			}
 		}
 		else{
-			msg(MSG::ERROR) << "Folder '"<<"/FWD/ALFA/position_calibration"<<"' not found" << endmsg;
+		        ATH_MSG_ERROR("Folder '"<<"/FWD/ALFA/position_calibration"<<"' not found");
 			sc=StatusCode::FAILURE;
 		}
 	}
