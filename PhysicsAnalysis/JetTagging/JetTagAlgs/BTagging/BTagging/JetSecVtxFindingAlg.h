@@ -6,6 +6,7 @@
 #define BTAGGING_JETSECVTXFINDINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "CxxUtils/CachedValue.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <string>
@@ -43,6 +44,10 @@ namespace Analysis
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_TracksToTag { this, "TracksToTag", "", "Element Link vector from jet to IParticleContainer"};
         SG::ReadHandleKey<xAOD::VertexContainer> m_VertexCollectionName {this, "vxPrimaryCollectionName", "", "Input primary vertex container"};
         SG::WriteHandleKey<Trk::VxSecVertexInfoContainer> m_VxSecVertexInfoName {this, "BTagVxSecVertexInfoName", "", "Output VxSecVertexInfo container"};
+
+        /// List of the track decorations that we produce.
+        /// Filled in on the first call to execute().
+        CxxUtils::CachedValue<std::vector<SG::auxid_t> > m_decorIDs;
 
   }; // End class
 

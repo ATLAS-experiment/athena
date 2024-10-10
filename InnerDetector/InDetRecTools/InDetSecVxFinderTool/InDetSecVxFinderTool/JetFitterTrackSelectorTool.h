@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration     
+ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -51,7 +51,16 @@ namespace InDet {
 							 const TLorentzVector &jetMomentum,
 							 const std::vector<const xAOD::IParticle *> &inputTracks) const;
 
+        /// Return a list of the names of track decorations created by this tool,
+        /// in order to allow them to be locked when the calling algorithm
+        /// completes.
+        std::vector<std::string> trackDecorationNames() const;
+
+
     private:
+        /// Return the name of the decoration we produce.
+        std::string decorationName() const;
+
 	int computeTrackCompatibility( const xAOD::Vertex &primaryVertex,
 				       const TLorentzVector &jetMomentum,
 				       const xAOD::TrackParticle &trk_iter ) const;
