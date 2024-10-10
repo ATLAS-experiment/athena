@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatConditionSvc.h"
@@ -37,7 +37,7 @@
 
 
 LArFlatConditionSvc::LArFlatConditionSvc( const std::string& name, ISvcLocator* svc )
-  : AthService( name, svc ),
+  : base_class( name, svc ),
     m_IOVSvc     ("IOVSvc", name),
     m_detStore   ("DetectorStore", name),
     m_clidSvc    ("ClassIDSvc", name),

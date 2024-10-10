@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -18,15 +18,9 @@ class StoreGateSvc;
 class IClassIDSvc;
 class CondAttrListCollection;
 
-
-template <class TYPE> class SvcFactory;
-
-class LArFlatConditionSvc : public virtual IAddressProvider,
-			    public virtual IIncidentListener,
-			    public AthService {
-
-  friend class SvcFactory<LArFlatConditionSvc>;
-  
+class LArFlatConditionSvc : public extends<AthService,
+                                           IAddressProvider,
+                                           IIncidentListener> {
  public:
   LArFlatConditionSvc( const std::string& name, ISvcLocator* svc );
   virtual ~LArFlatConditionSvc();
@@ -37,13 +31,6 @@ class LArFlatConditionSvc : public virtual IAddressProvider,
   /// Service finalize
   virtual StatusCode finalize();
   
-  /// Query the interfaces.
-  //virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
-  //static const InterfaceID& interfaceID();
-  
-  /// Service type.
-  ///virtual const InterfaceID& type() const;
-
   /* IAddress provider interface */
 
   typedef IAddressProvider::tadList tadlist;
