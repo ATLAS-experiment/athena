@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHALGS_TRACKRECORDFILTER_H
@@ -10,12 +10,9 @@
 
 // the TrackRecordCollection
 #include "TrackRecord/TrackRecordCollection.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
-
-namespace HepPDT{
-   class ParticleDataTable;
-}
 
 class TrackRecordFilter : public AthReentrantAlgorithm {
 
@@ -29,10 +26,9 @@ public:
   StatusCode execute(const EventContext& ctx) const override;
 
 private:
-  SG::ReadHandleKey<TrackRecordCollection> m_inputKey;
-  SG::WriteHandleKey<TrackRecordCollection> m_outputKey;
-  double m_cutOff;
-  const HepPDT::ParticleDataTable* m_pParticleTable;
+  SG::ReadHandleKey<TrackRecordCollection> m_inputKey{this, "inputName", "MuonEntryLayer"};
+  SG::WriteHandleKey<TrackRecordCollection> m_outputKey{this, "outputName", "MuonEntryLayerFilter"};
+  DoubleProperty m_cutOff{this, "threshold", 100.*CLHEP::MeV};
 };
 
 #endif
