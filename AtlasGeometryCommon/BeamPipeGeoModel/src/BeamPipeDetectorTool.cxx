@@ -11,7 +11,6 @@
 #include "GeoModelUtilities/GeoModelExperiment.h"
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 
 #include "StoreGate/StoreGateSvc.h"
 
@@ -24,11 +23,8 @@
 BeamPipeDetectorTool::BeamPipeDetectorTool( const std::string& type,
 					    const std::string& name,
 					    const IInterface* parent ):
-  GeoModelTool(type,name,parent),
-  m_manager(nullptr),
-  m_mode("BeamPipe")
+  GeoModelTool(type,name,parent)
 {
-    declareProperty("BeamPipeMode",            m_mode); //m_mode="BeamPipe" by default, setting m_mode="AssemblyBeamPipe" will trigger optimised implementation using assembly volume
 }
 
 BeamPipeDetectorTool::~BeamPipeDetectorTool() = default;
@@ -36,78 +32,52 @@ BeamPipeDetectorTool::~BeamPipeDetectorTool() = default;
 
 StatusCode BeamPipeDetectorTool::create()
 {
-  MsgStream log(msgSvc(), name());
+  ATH_MSG_INFO("Building Beam Pipe");
 
-  log << MSG::INFO << "Building Beam Pipe" << endmsg;
-
-  IGeoDbTagSvc *geoDbTag;
-  StatusCode sc = service ("GeoDbTagSvc",geoDbTag);
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "Could not locate GeoDbTagSvc" << endmsg;
-    return StatusCode::FAILURE;
-  }
-
+  SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
 
   std::string atlasVersion = geoDbTag->atlasVersion();
-  if(atlasVersion == "AUTO")
-    atlasVersion = "ATLAS-00";
   std::string versionNode = "ATLAS";
 
-  GeoModelExperiment * theExpt;
-  if (StatusCode::SUCCESS != detStore()->retrieve( theExpt, "ATLAS" )) {
-    log << MSG::ERROR
-	<< "Could not find GeoModelExperiment ATLAS"
-	<< endmsg;
-    return (StatusCode::FAILURE);
+  GeoModelExperiment* theExpt{nullptr};
+  ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
+
+  GeoPhysVol* world=theExpt->getPhysVol();
+
+  ServiceHandle<IRDBAccessSvc> accessSvc(geoDbTag->getParamSvcName(),name());
+  ATH_CHECK(accessSvc.retrieve());
+
+  GeoModelIO::ReadGeoModel* sqliteReader  = geoDbTag->getSqliteReader();
+  if (sqliteReader) {
+    BeamPipeDetectorFactory_Lite theBeamPipeFactory;
+    theBeamPipeFactory.create(world);
+    m_manager = theBeamPipeFactory.getDetectorManager();
+  }
+  else {
+    // Check we have the beampipe and print its version
+    // Print the  version tag:
+    std::string beampipeVersionTag;
+    beampipeVersionTag = accessSvc->getChildTag("BeamPipe", atlasVersion,versionNode);
+    ATH_MSG_DEBUG("Beampipe Version: " << beampipeVersionTag);
+
+    if (beampipeVersionTag.empty()) {
+      ATH_MSG_INFO("No BeamPipe Version. Beam pipe will not be built.");
+    }
+    else {
+      BeamPipeDetectorFactory theBeamPipeFactory(detStore().operator->(),accessSvc.operator->());
+      theBeamPipeFactory.setTagNode(atlasVersion,versionNode,m_mode);
+      theBeamPipeFactory.create(world);
+      
+      m_manager = theBeamPipeFactory.getDetectorManager();
+    }
   }
 
-  if ( nullptr == m_detector )
-    {
-      GeoPhysVol *world=&*theExpt->getPhysVol();
+  if (m_manager) {
+    theExpt->addManager(m_manager);
+    ATH_CHECK(detStore()->record(m_manager,m_manager->getName()));
+    return StatusCode::SUCCESS;
+  }
 
-
-      ServiceHandle<IRDBAccessSvc> accessSvc(geoDbTag->getParamSvcName(),name());
-      ATH_CHECK( accessSvc.retrieve());
-
-
-      GeoModelIO::ReadGeoModel* sqliteReader  = geoDbTag->getSqliteReader();
-      if (sqliteReader) {
-	BeamPipeDetectorFactory_Lite theBeamPipeFactory;
-	theBeamPipeFactory.create(world);
-	m_manager = theBeamPipeFactory.getDetectorManager();
-
-      }
-      else {
-
-
-	// Check we have the beampipe and print its version
-	// Print the  version tag:
-	std::string beampipeVersionTag;
-	beampipeVersionTag = accessSvc->getChildTag("BeamPipe", atlasVersion,versionNode);
-	log << MSG::DEBUG << "Beampipe Version: " << beampipeVersionTag << endmsg;
-
-	if (beampipeVersionTag.empty()) {
-	  log << MSG::INFO << "No BeamPipe Version. Beam pipe will not be built." << endmsg;
-	}
-	else {
-	  BeamPipeDetectorFactory theBeamPipeFactory(detStore().operator->(),accessSvc.operator->());
-	  theBeamPipeFactory.setTagNode(atlasVersion,versionNode,m_mode);
-	  theBeamPipeFactory.create(world);
-
-	  m_manager = theBeamPipeFactory.getDetectorManager();
-	}
-      }
-
-      if (m_manager) {
-	theExpt->addManager(m_manager);
-	sc = detStore()->record(m_manager,m_manager->getName());
-	if (sc.isFailure()) {
-	  log << MSG::ERROR << "Could not register BeamPipe detector manager" << endmsg;
-	  return (StatusCode::FAILURE);
-	}
-	return StatusCode::SUCCESS;
-      }
-    }
   return StatusCode::FAILURE;
 }
 
