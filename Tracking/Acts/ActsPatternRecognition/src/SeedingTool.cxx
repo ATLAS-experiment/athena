@@ -28,6 +28,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Properties Summary:");
     ATH_MSG_DEBUG("   " << m_zBinNeighborsTop);
     ATH_MSG_DEBUG("   " << m_zBinNeighborsBottom);
+    ATH_MSG_DEBUG("   " << m_rBinNeighborsTop);
+    ATH_MSG_DEBUG("   " << m_rBinNeighborsBottom);
     ATH_MSG_DEBUG("   " << m_numPhiNeighbors);
 
     ATH_MSG_DEBUG(" *  Used by SpacePointGridConfig");
@@ -39,6 +41,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_gridPhiMin);
     ATH_MSG_DEBUG("   " << m_gridPhiMax);
     ATH_MSG_DEBUG("   " << m_zBinEdges);
+    ATH_MSG_DEBUG("   " << m_rBinEdges);
     ATH_MSG_DEBUG("   " << m_deltaRMax);
     ATH_MSG_DEBUG("   " << m_gridRMax);
     ATH_MSG_DEBUG("   " << m_phiBinDeflectionCoverage);
@@ -147,6 +150,20 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
+    if (m_rBinEdges.size() - 1 !=
+	m_rBinNeighborsTop.size() and
+	not m_rBinNeighborsTop.empty()) {
+      ATH_MSG_ERROR("Inconsistent config rBinNeighborsTop");
+      return StatusCode::FAILURE;
+    }
+    
+    if (m_rBinEdges.size() - 1 !=
+	m_rBinNeighborsBottom.size() and
+	not m_rBinNeighborsBottom.empty()) {
+      ATH_MSG_ERROR("Inconsistent config rBinNeighborsBottom");
+      return StatusCode::FAILURE;
+    }
+    
     if (m_zBinsCustomLooping.size() != 0) {
       // zBinsCustomLooping can contain a number of elements <= to the total number
       // of bin in zBinEdges 
@@ -160,8 +177,12 @@ namespace ActsTrk {
 
     ATH_CHECK( prepareConfiguration() );
 
-    m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(), 0);
-    m_topBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsTop.value(), 0);
+    m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(),
+								       m_zBinNeighborsBottom.value(),
+								       m_rBinNeighborsBottom.value());
+    m_topBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(),
+								    m_zBinNeighborsTop.value(),
+								    m_rBinNeighborsTop.value());
 
     m_navigation[0ul] = {};
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
@@ -431,6 +452,7 @@ namespace ActsTrk {
     m_gridCfg.phiMin = m_gridPhiMin;
     m_gridCfg.phiMax = m_gridPhiMax;
     m_gridCfg.zBinEdges = m_zBinEdges;
+    m_gridCfg.rBinEdges = m_rBinEdges;
     m_gridCfg.deltaRMax = m_deltaRMax;
     m_gridCfg.rMax = m_gridRMax;
     m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;

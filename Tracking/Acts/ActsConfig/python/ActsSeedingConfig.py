@@ -18,6 +18,8 @@ def ActsPixelSeedingToolCfg(flags,
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
     kwargs.setdefault("useVariableMiddleSPRange", False)
+    kwargs.setdefault("rMax", 320. * UnitConstants.mm)
+    kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("rRangeMiddleSP", [
         [0,0],
         [140, 260],
@@ -62,6 +64,8 @@ def ActsFastPixelSeedingToolCfg(flags,
              [40.0, 80.0]])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
+    kwargs.setdefault("rMax", 320 * UnitConstants.mm)
+    kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
 
     return ActsPixelSeedingToolCfg(flags, name, **kwargs)
 
@@ -100,7 +104,9 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
     # For seeding algorithm
     kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
-
+    # Any other
+    kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
+        
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
@@ -151,7 +157,7 @@ def ActsStripOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("useDeltaRorTopRadius" , False)
     kwargs.setdefault("rMinMiddle", 33. * UnitConstants.mm)
     kwargs.setdefault("rMaxMiddle", 1200. * UnitConstants.mm)
-
+    
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
     return acc
 
