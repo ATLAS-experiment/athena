@@ -46,8 +46,8 @@ def algdata_from_menu(flags, do_dot=False, root_names=[]):
             logger.error("no requested root nodes present in menu")
         elif len(roots) < len(root_names):
             logger.debug(
-                'requested ' + str(len(root_names)),
-                'found  ' + str(len(roots)) +  'in menu')
+                'requested ' + str(len(root_names)) + ' root nodes ' +
+                'found ' + str(len(roots)) +  ' in menu')
                                            
     else:
         # if no nodes are named as root nodes, use all
