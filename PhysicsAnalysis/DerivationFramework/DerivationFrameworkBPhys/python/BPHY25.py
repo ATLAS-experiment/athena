@@ -12,9 +12,11 @@ BPHYDerivationName = "BPHY25"
 streamName = "StreamDAOD_BPHY25"
 
 def BPHY25Cfg(flags):
+    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
+    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
 
     doLRT = True

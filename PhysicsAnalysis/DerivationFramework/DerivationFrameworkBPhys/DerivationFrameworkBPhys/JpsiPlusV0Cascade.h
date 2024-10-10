@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef JPSIPLUSV0CASCADE_H
 #define JPSIPLUSV0CASCADE_H
@@ -11,6 +11,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
@@ -24,7 +25,6 @@ namespace Trk {
     class IVertexCascadeFitter;
     class VxCascadeInfo;
     class V0Tools;
-    class ParticleDataTable;
 }
 
 namespace DerivationFramework {
@@ -70,6 +70,7 @@ namespace DerivationFramework {
         ToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter;
         ToolHandle < Trk::V0Tools > m_V0Tools;
         ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
         int         m_jpsi_trk_pdg; // PDG ID for J/psi tracks, can be either 11 or 13
         bool        m_refitPV;

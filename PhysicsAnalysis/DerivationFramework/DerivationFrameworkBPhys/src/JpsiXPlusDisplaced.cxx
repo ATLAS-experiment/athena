@@ -8,7 +8,6 @@
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkExInterfaces/IExtrapolator.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -321,9 +320,8 @@ namespace DerivationFramework {
     ATH_CHECK( m_RelinkContainers.initialize() );
     ATH_CHECK( m_v0VtxOutputKey.initialize(SG::AllowEmpty) );
 
-    IPartPropSvc* partPropSvc = nullptr;
-    ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-    auto pdt = partPropSvc->PDT();
+    ATH_CHECK( m_partPropSvc.retrieve() );
+    auto pdt = m_partPropSvc->PDT();
 
     // https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/TruthUtils/TruthUtils/AtlasPID.h
     m_mass_e = BPhysPVCascadeTools::getParticleMass(pdt, MC::ELECTRON);

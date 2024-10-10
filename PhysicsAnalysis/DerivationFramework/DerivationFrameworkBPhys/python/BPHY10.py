@@ -12,10 +12,12 @@ BPHYDerivationName = "BPHY10"
 streamName = "StreamDAOD_BPHY10"
 
 def BPHY10Cfg(flags):
+    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
 
     acc = ComponentAccumulator()
+    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
     BPHY10_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
                               name = "BPHY10_AugOriginalCounts",

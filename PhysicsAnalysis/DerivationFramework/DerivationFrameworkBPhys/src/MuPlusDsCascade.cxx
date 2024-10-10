@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // MuPlusDsCascade.cxx, (c) ATLAS Detector software
@@ -13,7 +13,6 @@
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 
-#include "GaudiKernel/IPartPropSvc.h"
 #include <algorithm>
 #include "HepPDT/ParticleDataTable.hh"
 
@@ -63,9 +62,8 @@ namespace DerivationFramework {
 
         ATH_CHECK( m_eventInfo_key.initialize() );
 
-        IPartPropSvc* partPropSvc = nullptr;
-        ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-        auto pdt = partPropSvc->PDT();
+        ATH_CHECK( m_partPropSvc.retrieve() );
+        auto pdt = m_partPropSvc->PDT();
         
         // Ds+/-        : K K π
         // D+/-         : K π π
