@@ -19,7 +19,7 @@ MdtCalibDbAlg::MdtCalibDbAlg(const std::string& name, ISvcLocator* pSvcLocator) 
     AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode MdtCalibDbAlg::initialize() {
-    ATH_MSG_ALWAYS("Initializing MdtCalibDbAlgR4");
+    ATH_MSG_VERBOSE("Initialize...");
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(detStore()->retrieve(m_r4detMgr));
@@ -27,7 +27,7 @@ StatusCode MdtCalibDbAlg::initialize() {
 }
 
 StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
-    ATH_MSG_ALWAYS("Executing MdtCalibDbAlgR4");
+    ATH_MSG_VERBOSE("Executing MdtCalibDbAlgR4");
     SG::WriteCondHandle<MuonCalib::MdtCalibDataContainer> writeHandle{m_writeKey, ctx};
     if(writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid.");
@@ -35,7 +35,7 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
     RegionGranularity gran{RegionGranularity::OnePerMultiLayer};
-    std::unique_ptr<MuonCalib::MdtCalibDataContainer> writeCdo = std::make_unique<MuonCalib::MdtCalibDataContainer>(m_idHelperSvc.get(), gran);
+    auto writeCdo = std::make_unique<MuonCalib::MdtCalibDataContainer>(m_idHelperSvc.get(), gran);
 
     ATH_CHECK(loadRt(*writeCdo));
     ATH_CHECK(loadTube(*writeCdo));
@@ -48,39 +48,19 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
 
 StatusCode MdtCalibDbAlg::loadRt(MuonCalib::MdtCalibDataContainer& writeHandle) const {
     ATH_MSG_DEBUG("loadRt " << name());
-    
-    std::vector<double> radii{};
-    std::vector<double> res{};
 
-    MuonCalib::CalibFunc::ParVec rtPars{};
-    rtPars.push_back(-10000);// Corresponds to tLower, what is it?
-    rtPars.push_back(10000.);// Corresponds to tUpper, what is it?
-    rtPars.insert(rtPars.end(), radii.begin(), radii.end());
-
+    MuonCalib::CalibFunc::ParVec rtPars{-10000, 10000};
     MuonCalib::CalibFunc::ParVec resoPars{-10000, 10000.};
-    resoPars.insert(resoPars.end(), res.begin(), res.end());
 
     //Create an RtSqrt
-    std::unique_ptr<MuonCalib::IRtRelation> rtRel{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
-    if(!rtRel) {
-        ATH_MSG_ERROR("Failed to create RtSqrt");
-        return StatusCode::FAILURE;
-    }
-    std::unique_ptr<MuonCalib::IRtResolution> rtRes{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
-    if(!rtRes) {
-        ATH_MSG_ERROR("Failed to create RtResolutionSqrt");
-        return StatusCode::FAILURE;
-    }
-    std::unique_ptr<MuonCalib::TrRelation> trRel{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
-    if(!trRel) {
-        ATH_MSG_ERROR("Failed to create TrSqrt");
-        return StatusCode::FAILURE;
-    }
-
+    auto rtRel{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
+    auto rtRes{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
+    auto trRel{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
+   
     //Loop over RT regions and store the RT in each
-    std::unique_ptr<MuonCalib::IRtRelation> rtRelRegion{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
-    std::unique_ptr<MuonCalib::IRtResolution> rtResRegion{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
-    std::unique_ptr<MuonCalib::TrRelation> trRelRegion{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
+    auto rtRelRegion{std::make_unique<MuonCalibR4::RtSqrt>(rtPars)};
+    auto rtResRegion{std::make_unique<MuonCalibR4::RtResolutionSqrt>(resoPars)};
+    auto trRelRegion{std::make_unique<MuonCalibR4::TrSqrt>(MuonCalibR4::RtSqrt(rtPars))};
     RtRelationPtr MdtRt = std::make_unique<MuonCalib::MdtRtRelation>(std::move(rtRelRegion), std::move(rtResRegion), std::move(trRelRegion), 0.);
     std::vector<const MuonGMR4::MdtReadoutElement*> detEls = m_r4detMgr->getAllMdtReadoutElements();
     for(const MuonGMR4::MuonReadoutElement* mdtDetEl : detEls) {
@@ -116,8 +96,10 @@ StatusCode MdtCalibDbAlg::loadTube(MuonCalib::MdtCalibDataContainer& writeCdo) c
             }
         }
         TubeContainerPtr tubes = std::make_unique<MuonCalib::MdtTubeCalibContainer>(m_idHelperSvc.get(), chamberId);
-        if (!writeCdo.storeData(chamberId, tubes, msgStream())) return StatusCode::FAILURE;
-
+        if (!writeCdo.storeData(chamberId, tubes, msgStream())) {
+            ATH_MSG_FATAL("Failed to store chamber data");
+            return StatusCode::FAILURE;
+        }
         for(size_t layer = 1; layer <= mdtDetEl->numLayers(); ++layer){
             for(size_t tube = 1; tube <= mdtDetEl->numTubesInLay(); ++tube){
                 MuonCalib::MdtTubeCalibContainer::SingleTubeCalib tubeCalib;
@@ -125,7 +107,11 @@ StatusCode MdtCalibDbAlg::loadTube(MuonCalib::MdtCalibDataContainer& writeCdo) c
                 tubeCalib.t0 = m_defaultT0;
                 tubeCalib.adcCal = 1.;
                 tubeCalib.inversePropSpeed = inversePropSpeed;
-                tubes->setCalib(std::move(tubeCalib), tubeId, msgStream());
+                if (!tubes->setCalib(std::move(tubeCalib), tubeId, msgStream())) {
+                    ATH_MSG_FATAL("Failed to store tube constants...");                    
+                    return StatusCode::FAILURE;
+
+                }
             }
         }
     }

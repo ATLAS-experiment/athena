@@ -76,6 +76,10 @@ namespace MuonR4 {
                 const double arrivalTime{simHit->globalTime()};
 
                 const MuonCalib::MdtFullCalibData* tubeConstants = calibData->getCalibData(hitId, msgStream());
+                assert(tubeConstants != nullptr);
+                assert(tubeConstants->tubeCalib  != nullptr);
+                assert(tubeConstants->tubeCalib->getCalib(hitId) != nullptr);
+
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
             
                 const double sigPropTime = tubeCalib.inversePropSpeed*distRO;

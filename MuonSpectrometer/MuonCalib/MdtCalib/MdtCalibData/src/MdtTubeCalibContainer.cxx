@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MdtCalibData/MdtTubeCalibContainer.h>
 namespace MuonCalib {
@@ -37,13 +37,15 @@ bool MdtTubeCalibContainer::setCalib(SingleTubeCalib&& val, const Identifier& tu
     }
     SingleTubeCalib& store = m_data[index];
     if (store) {
-        msg << MSG::ERROR<< __FILE__ << __LINE__<< " Data has already been stored for channel "
-            << m_idHelperSvc->toString(tubeId) << endmsg;
+        msg << MSG::ERROR<< __FILE__ <<":"<< __LINE__<< " Data has already been stored for channel "
+            << m_idHelperSvc->toString(tubeId) 
+            <<", layer max: "<<m_nLayers<<", tube max: "<<m_nTubes
+            << endmsg;
         return false;
     }
     store = std::move(val);
-    if (msg.level() <= MSG::DEBUG) {
-        msg << MSG::DEBUG<<" Succesfully stored calibration data for channel "<<m_idHelperSvc->toString(tubeId) << endmsg;
+    if (msg.level() <= MSG::VERBOSE) {
+        msg << MSG::VERBOSE<<" Succesfully stored calibration data for channel "<<m_idHelperSvc->toString(tubeId) << endmsg;
     }
     return true;
 }
