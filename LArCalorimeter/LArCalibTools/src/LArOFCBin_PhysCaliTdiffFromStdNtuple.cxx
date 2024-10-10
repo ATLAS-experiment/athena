@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArOFCBin_PhysCaliTdiffFromStdNtuple.h"
@@ -53,10 +53,10 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
   }
 
 
-  Int_t           channelId;
-  Int_t           FT, slot, channel;
-  Int_t           bin;
-  Double_t        tdiff;
+  Int_t           channelId{};
+  Int_t           FT{}, slot{}, channel{};
+  Int_t           bin{};
+  Double_t        tdiff{};
 
 
   Int_t           gain = 0; // LARHIGHGAIN = 0, LARMEDIUMGAIN = 1,  LARLOWGAIN = 2,
@@ -73,15 +73,15 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
   }
 
   // Create new objects
-  LArOFCBinComplete *larOFCParams = new LArOFCBinComplete();
+  auto larOFCParams = std::make_unique<LArOFCBinComplete>();
   ATH_CHECK ( larOFCParams->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larOFCParams->initialize() );
-  LArPhysCaliTdiffComplete *larTdiffParams = new LArPhysCaliTdiffComplete();
+  auto larTdiffParams = std::make_unique<LArPhysCaliTdiffComplete>();
   ATH_CHECK ( larTdiffParams->setGroupingType(m_groupingType, msg()) );
   ATH_CHECK ( larTdiffParams->initialize() );
 
 
-  unsigned int hwid;
+  unsigned int hwid{};
   //unsigned int uflag;
   // loop over entries in the Tuple, one entry = one channel
   Long64_t nentries = outfit->GetEntries();
@@ -109,18 +109,14 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
 
   // store 
   if(m_fillofc) {
-    ATH_CHECK( detStore()->record(larOFCParams,m_store_key_ofcbin) );
+    ATH_CHECK( detStore()->record(std::move(larOFCParams),m_store_key_ofcbin) );
   }
 
   if(m_filltdiff) {
-    ATH_CHECK( detStore()->record(larTdiffParams,m_store_key_tdiff) );
-  }
-
-  // and symlink
-
-  if(m_filltdiff) {
-     ILArPhysCaliTdiff *ilarTdiff = nullptr;
-     ATH_CHECK( detStore()->symLink(larTdiffParams,ilarTdiff) );
+    ATH_CHECK( detStore()->record(larTdiffParams.get(),m_store_key_tdiff) );
+    // and symlink
+    ILArPhysCaliTdiff *ilarTdiff = nullptr;
+    ATH_CHECK( detStore()->symLink(larTdiffParams.release(),ilarTdiff) );
   }
 
 
