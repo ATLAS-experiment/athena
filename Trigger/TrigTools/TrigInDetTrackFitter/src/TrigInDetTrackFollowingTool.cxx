@@ -676,11 +676,11 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 
   unsigned int seedSize = seed.size();
 
-  std::vector<unsigned int> seedHashes(seedSize,0);
+  std::vector<Identifier> seedIdents(seedSize);
 
   for(unsigned int spIdx=0;spIdx<seedSize;spIdx++) {
     const Trk::PrepRawData* prd  = seed.at(spIdx)->clusterList().first;
-    seedHashes[spIdx] = prd->detectorElement()->identifyHash();
+    seedIdents[spIdx] = prd->detectorElement()->identify();
   }
 
   //pre-assigning the hits contained in the input track seed
@@ -690,9 +690,9 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   int startModuleIdx = -1;
   
   for(int moduleIdx = 0;moduleIdx<nModules;moduleIdx++) {
-    unsigned int hash = road.at(moduleIdx)->identifyHash();
+    Identifier ident = road.at(moduleIdx)->identify();
     for(unsigned int spIdx=0;spIdx<seedSize;spIdx++) {
-      if(seedHashes[spIdx] != hash) continue;
+      if(seedIdents[spIdx] != ident) continue;
       
       assignedHits[moduleIdx] = seed.at(spIdx)->clusterList().first;
       moduleStatus[moduleIdx] = 1;//seed hit assigned
