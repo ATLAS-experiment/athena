@@ -56,10 +56,9 @@ StatusCode TRT_ByteStream_ConditionsSvc::initialize()
    * Ask to be informed at the beginning of each new event so that we
    * can reset.
    */
-  IIncidentSvc* incsvc;
-  StatusCode sc = service("IncidentSvc", incsvc);
-  int priority = 100;
-  if( sc.isSuccess() ) 
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
+  const int priority = 100;
+  if( incsvc.isValid() )
   {
     incsvc->addListener( this, "BeginEvent", priority);
   }

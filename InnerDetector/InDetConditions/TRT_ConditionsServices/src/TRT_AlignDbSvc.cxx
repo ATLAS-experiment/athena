@@ -540,8 +540,8 @@ StatusCode TRT_AlignDbSvc::registerAlignObjects(const std::string & tag, int run
   ATH_MSG_INFO( "Run/evt2 [" << run2 << "," << event2 << "]"  );
 
   // get pointer to registration svc
-  IIOVRegistrationSvc* regsvc;
-  ATH_CHECK( service("IOVRegistrationSvc",regsvc) );
+  SmartIF<IIOVRegistrationSvc> regsvc(service("IOVRegistrationSvc"));
+  ATH_CHECK( regsvc.isValid() );
   
   if (StatusCode::SUCCESS==regsvc->registerIOV("AlignableTransformContainer",m_alignroot,tag,run1,run2,event1,event2)){
     ATH_MSG_INFO( " Register AlignableTransformContainer object " 

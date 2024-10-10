@@ -31,7 +31,6 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/GaudiException.h"
 
@@ -100,17 +99,14 @@ StatusCode TRT_StrawNeighbourSvc::initialize()
 
   //Geometry db
   // RDBAccessSvc (Interface to the DD database).
-  ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap.h
-  IRDBAccessSvc* iAccessSvc = nullptr;
-  StatusCode result = svcLocator->service("RDBAccessSvc",iAccessSvc);
-  if ( result.isFailure()  ||  iAccessSvc == nullptr ) {
+  SmartIF<IRDBAccessSvc> iAccessSvc{service("RDBAccessSvc")};
+  if ( !iAccessSvc ) {
     msg(MSG::FATAL) << "Could not initialize RDBAccessSvc!" << endmsg;
     throw GaudiException("Could not initalize RDBAccessSvc","TRT_GeoModel",StatusCode::FAILURE);
   }
   
-  IGeoModelSvc *geoModel;
-  result = svcLocator->service ("GeoModelSvc",geoModel);
-  if ( result.isFailure()) {
+  SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
+  if ( !geoModel ) {
     msg(MSG::FATAL) << "Could not locate GeoModelSvc" << endmsg;
     throw GaudiException("Could not locate GeoModelSvc","TRT_GeoModel",StatusCode::FAILURE);
   }

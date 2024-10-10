@@ -53,12 +53,8 @@ TRT_ConditionsSummarySvc::initialize(){
   }
 
   // Get DetectorStore service
-  StoreGateSvc* detStore;
-  sc = service("DetectorStore", detStore);
-  if (sc.isFailure()){
-    msg(MSG::FATAL) << "DetectorStore service not found!" << endmsg;
-    return sc;
-  }
+  SmartIF<StoreGateSvc> detStore{service("DetectorStore")};
+  ATH_CHECK( detStore.isValid() );
   
   // Retrieve TRT_DetectorManager
   std::string managerName;

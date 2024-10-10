@@ -190,8 +190,8 @@ StatusCode TRT_StrawAlignDbSvc::registerObjects(std::string tag, int run1, int e
   ATH_MSG_INFO ("Run/evt2 [" << run2 << "," << event2 << "]");
   
   // get pointer to registration svc
-  IIOVRegistrationSvc* regsvc;
-  ATH_CHECK( service("IOVRegistrationSvc",regsvc) );
+  SmartIF<IIOVRegistrationSvc> regsvc{service("IOVRegistrationSvc")};
+  ATH_CHECK( regsvc.isValid() );
   
   if (StatusCode::SUCCESS==regsvc->registerIOV(StrawDxContainer::classname(),
 					       m_par_dxcontainerkey,tag,run1,run2,event1,event2))
