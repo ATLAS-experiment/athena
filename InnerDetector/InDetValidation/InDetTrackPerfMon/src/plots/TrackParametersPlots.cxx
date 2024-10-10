@@ -89,7 +89,7 @@ StatusCode IDTPM::TrackParametersPlots::fillPlots(
   float pnSiHits = nSiHits( particle );
   float pchi2 = chiSquared( particle );
   float pndof = ndof( particle );
-  float pchi2OverNdof = pchi2 / pndof;
+  float pchi2OverNdof = ( pndof > 0 ) ? pchi2 / pndof : 0.;
   std::vector< unsigned int > pauthor = author( particle );
 
   /// Fill the histograms
