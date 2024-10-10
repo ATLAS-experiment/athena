@@ -91,7 +91,7 @@ HGTD_ID::layer_max(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& layer_field = range[m_LAYER_INDEX];
-            if (layer_field.has_maximum()) {
+            if (not layer_field.empty()) {
                 return (layer_field.get_maximum());
             }
         }
@@ -110,7 +110,7 @@ HGTD_ID::phi_module_max(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& phi_module_field = range[m_PHI_MODULE_INDEX];
-            if (phi_module_field.has_maximum()) {
+            if (not phi_module_field.empty()) {
                 return (phi_module_field.get_maximum());
             }
         }
@@ -129,7 +129,7 @@ HGTD_ID::eta_module_max(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& eta_module_field = range[m_ETA_MODULE_INDEX];
-            if (eta_module_field.has_maximum()) {
+            if (not eta_module_field.empty()) {
                 return (eta_module_field.get_maximum());
             }
         }
@@ -148,7 +148,7 @@ HGTD_ID::eta_module_min(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& eta_module_field = range[m_ETA_MODULE_INDEX];
-            if (eta_module_field.has_minimum()) {
+            if (not eta_module_field.empty()) {
                 return (eta_module_field.get_minimum());
             }
         }
@@ -167,7 +167,7 @@ HGTD_ID::phi_index_max(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& phi_field = range[m_PHI_INDEX_INDEX];
-            if (phi_field.has_maximum()) {
+            if (not phi_field.empty()) {
                 return (phi_field.get_maximum());
             }
         }
@@ -186,7 +186,7 @@ HGTD_ID::eta_index_max(const Identifier& id) const
         const Range& range = m_full_wafer_range[i];
         if (range.match(expId)) {
             const Range::field& eta_field = range[m_ETA_INDEX_INDEX];
-            if (eta_field.has_maximum()) {
+            if (not eta_field.empty()) {
                 return (eta_field.get_maximum());
             }
         }

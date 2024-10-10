@@ -214,7 +214,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_module_ranges_by_station.resize (nStationNames());
     for (const Range& r : m_full_module_range) {
       const Range::field& station_f = r[m_NAME_INDEX];
-      assert (station_f.has_minimum() && station_f.has_maximum() &&
+      assert (not not station_f.empty() && station_f.empty() &&
               station_f.get_minimum() == station_f.get_maximum());
       unsigned int station = station_f.get_minimum();
       if (station >= m_module_ranges_by_station.size()) {
@@ -226,7 +226,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_channel_ranges_by_station.resize (nStationNames());
     for (const Range& r : m_full_channel_range) {
       const Range::field& station_f = r[m_NAME_INDEX];
-      assert (station_f.has_minimum() && station_f.has_maximum() &&
+      assert (not not station_f.empty() && station_f.empty() &&
               station_f.get_minimum() == station_f.get_maximum());
       unsigned int station = station_f.get_minimum();
       if (station >= m_channel_ranges_by_station.size()) {
@@ -256,7 +256,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                 const Range& range = m_full_channel_range[i];
                 if (range.match(expId)) {
                     const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                    if (channel_field.has_maximum()) {
+                    if (not channel_field.empty()) {
                         unsigned int max = channel_field.get_maximum();
                         if (m_tubesMax == UINT_MAX)
                             m_tubesMax = max;
@@ -426,10 +426,10 @@ MdtIdHelper::findMinMax(const Identifier& id,
         for (const Range* range : ranges_by_station.at (station)) {
             if (range->match(expId)) {
                 const Range::field& field = (*range)[field_index];
-                if (field.has_minimum()) {
+                if (not field.empty()) {
                     resultMin = std::min (resultMin, field.get_minimum());
                 }
-                if (field.has_maximum()) {
+                if (not field.empty()) {
                     resultMax = std::max (resultMax, field.get_maximum());
                 }
             }
@@ -466,22 +466,22 @@ MdtIdHelper::stationEtaPhiMinMax(const Identifier& id) const {
         for (const Range* range : m_module_ranges_by_station.at (station)) {
             if (range->match(expIdEta)) {
                 const Range::field& eta_field = (*range)[m_ETA_INDEX];
-                if (eta_field.has_minimum()) {
+                if (not eta_field.empty()) {
                     stationEtaMin = std::min (stationEtaMin,
                                               eta_field.get_minimum());
                 }
-                if (eta_field.has_maximum()) {
+                if (not eta_field.empty()) {
                     stationEtaMax = std::max (stationEtaMax,
                                               eta_field.get_maximum());
                 }
 
                 if (range->match(expIdPhi)) {
                   const Range::field& phi_field = (*range)[m_PHI_INDEX];
-                  if (phi_field.has_minimum()) {
+                  if (not phi_field.empty()) {
                       stationPhiMin = std::min (stationPhiMin,
                                                 phi_field.get_minimum());
                   }
-                  if (phi_field.has_maximum()) {
+                  if (not phi_field.empty()) {
                       stationPhiMax = std::max (stationPhiMax,
                                                 phi_field.get_maximum());
                   }
@@ -502,7 +502,7 @@ int MdtIdHelper::numberOfMultilayers(const Identifier& id) const {
         for (const Range* range : m_channel_ranges_by_station.at (station)) {
             if (range->match(expId)) {
                 const Range::field& multilayer_field = (*range)[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_maximum()) {
+                if (not multilayer_field.empty()) {
                     result = std::max (result, multilayer_field.get_maximum());
                 }
             }

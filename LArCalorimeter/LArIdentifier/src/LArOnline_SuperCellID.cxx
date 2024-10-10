@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdentifier/LArOnline_SuperCellID.h"
@@ -306,8 +306,7 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
         for (unsigned int i = 0; i < m_full_feb_range.size(); ++i) {
             if (m_full_feb_range[i].match(ftExpId)) {
                 const Range::field& slotField = m_full_feb_range[i][m_slot_index];
-                if (slotField.get_mode() == Range::field::both_bounded ||
-                    slotField.get_mode() == Range::field::enumerated) {
+                if (slotField.isBounded() || slotField.isEnumerated()) {
                     // save values
                     unsigned int nvalues = slotField.get_indices();
                     hc.m_slot_values.reserve(hc.m_slot_values.size() + nvalues);

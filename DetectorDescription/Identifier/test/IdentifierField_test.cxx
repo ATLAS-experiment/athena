@@ -34,10 +34,8 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldConstructors){
 
 BOOST_AUTO_TEST_CASE(DefaultIdentifierFieldProperties){
   IdentifierField f1;//default constructed...
-  BOOST_CHECK(not f1.has_minimum());
-  BOOST_CHECK(not f1.has_maximum());
   BOOST_CHECK(not f1.wrap_around());
-  BOOST_CHECK(f1.get_mode() == IdentifierField::unbounded);
+  BOOST_CHECK(f1.empty());
   BOOST_CHECK(f1.get_minimum() == 0); //is this sensible? optional for this case would have been better?
   BOOST_CHECK(f1.get_maximum() == 0);
   const auto & elementVec = f1.get_values();//should be empty
@@ -67,7 +65,6 @@ BOOST_AUTO_TEST_CASE(DefaultIdentifierFieldProperties){
   BOOST_TEST(f1.get_value_index(0) == 0);
   BOOST_TEST(f1.get_value_index(1) == 0);
   //
-  BOOST_TEST(f1.match_any());
   IdentifierField f2;//default constructed...
   BOOST_TEST(f1.overlaps_with(f2));
 }
@@ -75,14 +72,12 @@ BOOST_AUTO_TEST_CASE(DefaultIdentifierFieldProperties){
 BOOST_AUTO_TEST_CASE(UniqueIdentifierFieldProperties){
   const IdentifierField::element_type e =565;//randomly chosen unique value
   IdentifierField f1(e);
-  BOOST_CHECK(f1.has_minimum());
-  BOOST_CHECK(f1.has_maximum());
   BOOST_CHECK(not f1.wrap_around());
-  BOOST_TEST(f1.get_mode() == IdentifierField::both_bounded);
+  BOOST_TEST(not f1.empty());
   BOOST_TEST(f1.get_minimum() == e); //is this sensible? optional for this case would have been better?
   BOOST_TEST(f1.get_maximum() == e);
-  const auto & elementVec = f1.get_values();//should be empty
-  BOOST_CHECK(elementVec.empty());
+  BOOST_CHECK_NO_THROW([[maybe_unused]] auto & elementVec = f1.get_values());
+  //BOOST_CHECK(elementVec.empty());
   //
   IdentifierField::element_type e1{};
   IdentifierField::element_type e2(10);
@@ -108,7 +103,6 @@ BOOST_AUTO_TEST_CASE(UniqueIdentifierFieldProperties){
   BOOST_TEST(f1.get_value_index(0) == oddVal); //-565
   BOOST_TEST(f1.get_value_index(1) == oddVal + 1); //-564
   //
-  BOOST_TEST(not f1.match_any());
   IdentifierField f2(0);
   BOOST_TEST(not f1.overlaps_with(f2));//doesnt overlap with another unique value
   IdentifierField f3;
@@ -119,14 +113,11 @@ BOOST_AUTO_TEST_CASE(BoundedIdentifierFieldProperties){
   const IdentifierField::element_type e1 =-3;//randomly chosen unique value
   const IdentifierField::element_type e2 =5;//randomly chosen unique value
   IdentifierField f1(e1,e2);
-  BOOST_CHECK(f1.has_minimum());
-  BOOST_CHECK(f1.has_maximum());
   BOOST_CHECK(not f1.wrap_around());
-  BOOST_TEST(f1.get_mode() == IdentifierField::both_bounded);
+  BOOST_TEST(f1.isBounded());
   BOOST_TEST(f1.get_minimum() == e1); 
   BOOST_TEST(f1.get_maximum() == e2);
-  const auto & elementVec = f1.get_values();//should be empty
-  BOOST_CHECK(elementVec.empty());
+  BOOST_CHECK_NO_THROW([[maybe_unused]] auto & elementVec = f1.get_values());
   BOOST_TEST(f1.get_indices() == 9);
   //
   IdentifierField::element_type e{};
@@ -156,7 +147,6 @@ BOOST_AUTO_TEST_CASE(BoundedIdentifierFieldProperties){
   BOOST_TEST(f1.get_value_index(0) == oddVal); 
   BOOST_TEST(f1.get_value_index(1) == oddVal + 1);
   //
-  BOOST_TEST(not f1.match_any());
   IdentifierField f2(10);
   BOOST_TEST(not f1.overlaps_with(f2));//doesnt overlap with another unique value
   IdentifierField f3(1);
@@ -171,18 +161,20 @@ BOOST_AUTO_TEST_CASE(SetAndTestRangeFieldProperties){
    //
    IdentifierField f1(9,20);
    //lets check...
-   BOOST_TEST(f1.get_mode() == IdentifierField::both_bounded);
+   BOOST_TEST(f1.isBounded());
+   BOOST_TEST(f1.overlaps_with(10));
    //but 100 doesnt overlap now
    BOOST_TEST(not f1.overlaps_with(100));
    //add an individual value at -1
    BOOST_CHECK_NO_THROW(f1.add_value(-1));
    //what mode is it now? its *enumerated* 
-   BOOST_TEST(f1.get_mode() == IdentifierField::enumerated);
+   BOOST_TEST(f1.isEnumerated());
    //The "add_value method" cleared everything and changed the mode. 
    // Its not an additive procedure
    //does an overlap still pass for this type?
    //BOOST_TEST(f1.overlaps_with(10)); //no, it doesnt
    BOOST_TEST(not f1.overlaps_with(100));//expected
+   BOOST_TEST(f1.get_values() == std::vector<IdentifierField::element_type>(1,-1), boost::test_tools::per_element());
    BOOST_TEST(f1.overlaps_with(-1));//only this is active now
    //The adding an enumerated value 'clears' first, like this:
    BOOST_CHECK_NO_THROW(f1.clear());
@@ -195,10 +187,8 @@ BOOST_AUTO_TEST_CASE(EnumeratedIdentiferFieldProperties){
   //these are like SCT barrel eta values
   const std::vector<IdentifierField::element_type> ev{-6, -5, -4, -3, -2, -1 , 1, 2, 3, 4, 5, 6};
   IdentifierField f1(ev);
-  BOOST_TEST(f1.get_values() == ev);
-  BOOST_TEST(f1.get_mode() == IdentifierField::enumerated);
-  BOOST_CHECK(f1.has_minimum());
-  BOOST_CHECK(f1.has_maximum());
+  BOOST_TEST(f1.get_values() == ev,boost::test_tools::per_element());
+  BOOST_TEST(f1.isEnumerated());
   BOOST_CHECK(not f1.wrap_around());
   BOOST_TEST(f1.get_minimum() == -6);
   BOOST_TEST(f1.get_maximum() == 6);
@@ -247,24 +237,24 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOperators){
   os<<f2;
   BOOST_TEST(os.str() == std::string("0,1,2,3,4,5"));
 }
-BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
+BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(2)){
   //Field 'or' is the method for combining range fields, giving a superset of valid indices
   //start with an unbounded virgin field
   //UNBOUNDED
   const std::vector<IdentifierField::element_type> ev{0,1,2,3,4,5};
    IdentifierField  f1(ev); //f1 is now enumerated (check...)
   const auto enum1 = f1;//use this later
-  BOOST_CHECK(f1.get_mode() == IdentifierField::enumerated);
+  BOOST_CHECK(f1.isEnumerated());
   const IdentifierField f2;//unbounded
   BOOST_CHECK_NO_THROW(f1 |= f2); //or them into f1
-  BOOST_CHECK(f1.get_mode() == IdentifierField::unbounded);
+  BOOST_CHECK(f1.empty());
   //BOTH bounded
   //add overlapping bounded
   IdentifierField both1(0,6);//both bounded
-  BOOST_TEST(both1.get_mode() == IdentifierField::both_bounded);
+  BOOST_TEST(both1.isBounded());
   IdentifierField both2(3,8);//both bounded
   BOOST_CHECK_NO_THROW(both1 |= both2);
-  BOOST_TEST(both1.get_mode() == IdentifierField::both_bounded);
+  BOOST_TEST(both1.isBounded());
   BOOST_TEST(both1.get_minimum() == 0);
   BOOST_TEST(both1.get_maximum() == 8);
   //add a disjoint bounded region
@@ -273,7 +263,7 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   BOOST_TEST(both1.get_minimum() == 0);
   //the following would fail (as per comment in the code)
   BOOST_TEST(both1.get_maximum() == 20);
-  BOOST_TEST(both1.get_mode() == IdentifierField::both_bounded);
+  BOOST_TEST(both1.isBounded());
   //check mode
   const std::vector<IdentifierField::element_type> ev2{8,9,10,11};
   IdentifierField enum2(ev2);
@@ -283,7 +273,7 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   //...disjoint enumerated region
   BOOST_CHECK_NO_THROW(enumField |= enum2); //{8,9,10,11}, enumerated with enumerated
   BOOST_TEST(enumField.get_values().size() == 10); //disjoint; add entries
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);
+  BOOST_TEST(enumField.isEnumerated());
   BOOST_TEST(enumField.get_maximum() == 11);
   BOOST_TEST(enumField.get_minimum() == 0);
   BOOST_TEST(enumField.get_next(5,e));
@@ -296,7 +286,7 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   enum3.set(ev3);
   BOOST_CHECK_NO_THROW(enumField |= enum3);//{0,1,2,3,4,5,6,7,8}; it removes duplicates
   BOOST_TEST(enumField.get_values().size() == 9);
-  BOOST_TEST(enumField.get_mode() == IdentifierField::enumerated);
+  BOOST_TEST(enumField.isEnumerated());
  
   enumField.clear();
  
@@ -305,8 +295,7 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   enumField.set(ev);//{0,1,2,3,4,5}
   IdentifierField bounded(-1,10);
   BOOST_CHECK_NO_THROW(enumField |= bounded);
-  BOOST_TEST(enumField.get_mode() == IdentifierField::both_bounded);
-  BOOST_TEST(enumField.has_maximum() == true);
+  BOOST_TEST(enumField.isBounded());
   BOOST_TEST(enumField.get_maximum() == 10);
   BOOST_TEST(enumField.get_minimum() == -1);
   //with a disjoint both_bounded field
@@ -315,8 +304,7 @@ BOOST_AUTO_TEST_CASE(IdentifierFieldOrOperators, * utf::expected_failures(9)){
   bounded.clear();
   bounded.set(10, 20);
   BOOST_CHECK_NO_THROW(enumField |= bounded);
-  BOOST_TEST(enumField.get_mode() == IdentifierField::both_bounded);
-  BOOST_TEST(enumField.has_maximum() == true);
+  BOOST_TEST(enumField.isBounded());
   BOOST_TEST(enumField.get_maximum() == 20);
   BOOST_TEST(enumField.get_minimum() == 0);
   

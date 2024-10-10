@@ -405,7 +405,7 @@ int sTgcIdHelper::stationEtaMin(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
-                if (eta_field.has_minimum()) {
+                if (not eta_field.empty()) {
                     int etamin = eta_field.get_minimum();
                     if (-999 == result) {
                         result = etamin;
@@ -429,7 +429,7 @@ int sTgcIdHelper::stationEtaMax(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& eta_field = range[m_ETA_INDEX];
-                if (eta_field.has_maximum()) {
+                if (not eta_field.empty()) {
                     int etamax = eta_field.get_maximum();
                     if (result < etamax) result = etamax;
                 }
@@ -449,7 +449,7 @@ int sTgcIdHelper::stationPhiMin(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_minimum()) { return (phi_field.get_minimum()); }
+                if (not phi_field.empty()) { return (phi_field.get_minimum()); }
             }
         }
     }
@@ -466,7 +466,7 @@ int sTgcIdHelper::stationPhiMax(const Identifier& id) const {
             const Range& range = m_full_module_range[i];
             if (range.match(expId)) {
                 const Range::field& phi_field = range[m_PHI_INDEX];
-                if (phi_field.has_maximum()) { return (phi_field.get_maximum()); }
+                if (not phi_field.empty()) { return (phi_field.get_maximum()); }
             }
         }
     }
@@ -483,7 +483,7 @@ int sTgcIdHelper::numberOfMultilayers(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_maximum()) {
+                if (not multilayer_field.empty()) {
                     int multilayermax = multilayer_field.get_maximum();
                     if (result < multilayermax) result = multilayermax;
                 }
@@ -503,7 +503,7 @@ int sTgcIdHelper::multilayerMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_minimum()) {
+                if (not multilayer_field.empty()) {
                     int multilayermin = multilayer_field.get_minimum();
                     if (-999 == result) {
                         result = multilayermin;
@@ -527,7 +527,7 @@ int sTgcIdHelper::multilayerMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& multilayer_field = range[m_DETECTORELEMENT_INDEX];
-                if (multilayer_field.has_maximum()) {
+                if (not multilayer_field.empty()) {
                     int multilayermax = multilayer_field.get_maximum();
                     if (result < multilayermax) result = multilayermax;
                 }
@@ -547,7 +547,7 @@ int sTgcIdHelper::gasGapMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& gasgap_field = range[m_GASGAP_INDEX];
-                if (gasgap_field.has_minimum()) {
+                if (not gasgap_field.empty()) {
                     int gasgapmin = gasgap_field.get_minimum();
                     if (-999 == result) {
                         result = gasgapmin;
@@ -570,7 +570,7 @@ int sTgcIdHelper::gasGapMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& gasgap_field = range[m_GASGAP_INDEX];
-                if (gasgap_field.has_maximum()) { return (gasgap_field.get_maximum()); }
+                if (not gasgap_field.empty()) { return (gasgap_field.get_maximum()); }
             }
         }
     }
@@ -587,7 +587,7 @@ int sTgcIdHelper::channelTypeMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& channeltype_field = range[m_CHANNELTYPE_INDEX];
-                if (channeltype_field.has_minimum()) {
+                if (not channeltype_field.empty()) {
                     int channeltypemin = channeltype_field.get_minimum();
                     if (-999 == result) {
                         result = channeltypemin;
@@ -611,7 +611,7 @@ int sTgcIdHelper::channelTypeMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& channeltype_field = range[m_CHANNELTYPE_INDEX];
-                if (channeltype_field.has_maximum()) {
+                if (not channeltype_field.empty()) {
                     int channeltypemax = channeltype_field.get_maximum();
                     if (result < channeltypemax) result = channeltypemax;
                 }
@@ -631,7 +631,7 @@ int sTgcIdHelper::channelMin(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (channel_field.has_minimum()) {
+                if (not channel_field.empty()) {
                     int channelmin = channel_field.get_minimum();
                     if (-999 == result) {
                         result = channelmin;
@@ -655,7 +655,7 @@ int sTgcIdHelper::channelMax(const Identifier& id) const {
             const Range& range = m_full_channel_range[i];
             if (range.match(expId)) {
                 const Range::field& channel_field = range[m_CHANNEL_INDEX];
-                if (channel_field.has_maximum()) {
+                if (not channel_field.empty()) {
                     int channelmax = channel_field.get_maximum();
                     if (result < channelmax) result = channelmax;
                 }

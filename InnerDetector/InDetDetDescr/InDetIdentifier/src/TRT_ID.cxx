@@ -983,7 +983,7 @@ TRT_ID::straw_layer_max(const Identifier& id) const {
     const Range& range = m_full_straw_layer_range[i];
     if (range.match(expId)) {
       const Range::field& field = range[m_STRAW_LAYER_INDEX];
-      if (field.has_maximum()) {
+      if (not field.empty()) {
         int max = field.get_maximum();
         result = result > max ? result : max;
       }
@@ -1003,7 +1003,7 @@ TRT_ID::straw_max(const Identifier& id) const {
     const Range& range = m_full_straw_range[i];
     if (range.match(expId)) {
       const Range::field& field = range[m_STRAW_INDEX];
-      if (field.has_maximum()) {
+      if (not field.empty()) {
         return(field.get_maximum());
       }
     }

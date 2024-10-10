@@ -1584,7 +1584,7 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
         // Add on extra values to assure that one has a value per
         // bit. This is needed to avoid an overflow decoding error
         // when a pixel channel id is decoded
-        if(m_det_impl.ored_field().get_mode() != Range::field::enumerated) {
+        if(not m_det_impl.ored_field().isEnumerated()) {
             ATH_MSG_ERROR("initLevelsFromDict - ERROR det implementation is not enumerated: "
                           << m_det_impl.show_to_string());
         }

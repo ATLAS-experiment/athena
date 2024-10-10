@@ -11,6 +11,7 @@
 #include <iosfwd>
 #include <limits>
 #include <utility>
+#include <variant>
 
 
 /** 
@@ -22,19 +23,12 @@ class IdentifierField
   using element_type = ExpandedIdentifier::element_type ; 
   using size_type = ExpandedIdentifier::size_type; 
   using element_vector = std::vector <element_type>; 
-  using index_vector = std::vector <size_type>; 
+  using index_vector = std::vector <size_type>;
+  using BoundedRange = std::pair<element_type, element_type>;
   static constexpr auto minimum_possible = std::numeric_limits<element_type>::min();
   static constexpr auto maximum_possible = std::numeric_limits<element_type>::max();
-  /** 
-   *   Characterizes the three possible modes of any IdentifierField specification 
-   */ 
-  enum mode{ 
-    unbounded, 
-    both_bounded, 
-    enumerated,
-    nModes
-  } ; 
-
+  static constexpr auto invalidValues = element_vector{};
+ 
   enum continuation_mode{ 
     none, 
     has_next, 
@@ -55,28 +49,14 @@ class IdentifierField
   /// Create with enumerated values
   IdentifierField (const element_vector &values); 
 
-  /// Some combined query functions on the specification mode 
-  inline bool 
-  is_valued () const {return (m_mode != unbounded);} 
   //
   inline bool 
-  has_minimum () const { 
-    return m_mode != unbounded; 
-  }
-  //
-  inline bool 
-  has_maximum () const{ return (
-    m_mode != unbounded);  
-  }
-  //
-  inline bool 
-  wrap_around () const{ return (has_wrap_around == m_continuation_mode);}  
+  wrap_around() const{ return (has_wrap_around == m_continuation_mode);}  
   /// Query the values 
-  inline mode 
-  get_mode () const {return m_mode;}
+ 
   //
   inline element_type 
-  get_minimum () const {return m_minimum;}
+  get_minimum() const {return m_minimum;}
   
   //
   inline std::pair<element_type, element_type>
@@ -88,18 +68,18 @@ class IdentifierField
   get_maximum () const {return m_maximum;} 
   //
   inline const element_vector& 
-  get_values () const {return m_values;} 
+  get_values() const { 
+    if (isBounded()) return invalidValues;
+    return std::get<element_vector>(m_data);
+  } 
   ///  Returns false if previous/next is at end of range, or not possible
   bool get_previous (element_type current, element_type& previous) const; 
   bool get_next     (element_type current, element_type& next) const; 
-  size_type get_indices () const {return m_indices;}
+  size_type get_indices () const {return m_size;}
   const index_vector& get_indexes () const {return m_indexes;}
   size_type get_bits () const; 
   element_type get_value_at (size_type index) const; 
   size_type get_value_index (element_type value) const; 
-
-  /// Check if this is a pure wild card IdentifierField 
-  bool match_any () const {return (m_mode == unbounded);}
 
   /// The basic match operation 
   bool match (element_type value) const; 
@@ -129,7 +109,13 @@ class IdentifierField
   /// Optimize - try to switch mode to both_bounded, set up lookup
   /// table for finding index from value
   void optimize();
-
+  
+  ///
+  inline bool empty() const {return m_empty;}  
+  ///
+  inline bool isBounded() const {return std::holds_alternative<BoundedRange>(m_data);} 
+  inline bool isEnumerated() const {return std::holds_alternative<element_vector>(m_data);}
+  
 private : 
   static constexpr int m_maxNumberOfIndices = 100;
   void set_minimum (element_type value); 
@@ -137,18 +123,17 @@ private :
 
   /// Create index table from value table
   void create_index_table();
-
-  /// Set m_indices
-  void set_indices();
-
+  template <class T>
+  T * dataPtr(){return std::get_if<T>(&m_data);}
+  //
   element_type m_minimum{}; 
-  element_type m_maximum{}; 
-  element_vector m_values{}; 
+  element_type m_maximum{};
+  std::variant<element_vector, BoundedRange> m_data{};
   index_vector m_indexes{}; 
-  size_type    m_indices{};
+  size_type    m_size{};
   element_type m_previous{}; 
   element_type m_next{}; 
-  mode m_mode{unbounded}; 
+  bool m_empty{true};
   continuation_mode m_continuation_mode{none}; 
 }; 
 
@@ -157,15 +142,15 @@ IdentifierField::get_value_at(size_type index) const {
   // Only both_bounded and enumerated are valid to calculate the
   // value.
   // both_bounded is the more frequent case and so comes first.
-  if (both_bounded == m_mode) {
-    if (index >= (size_type) (m_maximum - m_minimum + 1)) {
+  if (m_empty) return 0;
+  if (const auto * p{std::get_if<BoundedRange>(&m_data)}; p) {
+    if (index >= (size_type) (p->second - p->first + 1)) {
       throw std::out_of_range("IdentifierField::get_value_at");
     }
-    return (m_minimum + index); 
-  } else if (enumerated == m_mode) {
-    return (m_values.at(index)); 
+    return (p->first + index); 
   }
-  return (0); 
+  return ((std::get<element_vector>(m_data)).at(index)); 
+
 } 
 
 std::ostream & 
