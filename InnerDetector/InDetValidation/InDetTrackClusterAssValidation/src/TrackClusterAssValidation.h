@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,10 +20,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include <string>
 #include <map>
-
-namespace HepPDT{
-  class ParticleDataTable;
-}
 
 namespace InDet {
 
@@ -127,8 +123,6 @@ namespace InDet {
         std::vector<TrackCollectionStat_t>         m_trackCollectionStat;
         EventStat_t                                m_eventStat{};
       };
-
-      const HepPDT::ParticleDataTable*        m_particleDataTable{} ;
 
       ///////////////////////////////////////////////////////////////////
       // Protected methods

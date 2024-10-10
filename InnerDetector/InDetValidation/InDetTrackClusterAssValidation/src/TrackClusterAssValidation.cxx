@@ -1,18 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/IPartPropSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "TrackClusterAssValidation.h"
 #include "StoreGate/ReadHandle.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <cmath>
 
@@ -50,7 +48,6 @@ InDet::TrackClusterAssValidation::TrackClusterAssValidation
   m_useOutliers            = false                            ;
   m_pdg                    = 0                                ;
   m_tcut                   = 0.                               ;
-  m_particleDataTable      = nullptr                                ;
 
   declareProperty("TracksLocation"        ,m_tracklocation         );
   declareProperty("SpacePointsSCTName"    ,m_spacepointsSCTname    );
@@ -100,23 +97,6 @@ StatusCode InDet::TrackClusterAssValidation::initialize()
     else {
       m_tcut = std::numeric_limits<double>::max();
     }
-  }
-
-  // get the Particle Properties Service
-  //
-  IPartPropSvc* partPropSvc = nullptr;
-  sc =  service("PartPropSvc", partPropSvc, true);
-  if (sc.isFailure()) {
-    msg(MSG::FATAL) << " Could not initialize Particle Properties Service" << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-  // Particle Data Table
-  //
-  m_particleDataTable = partPropSvc->PDT();
-  if(!m_particleDataTable) {
-    msg(MSG::FATAL) << " Could not initialize Particle Properties Service" << endmsg;
-    return StatusCode::FAILURE;
   }
 
   // Erase statistic information
@@ -1276,9 +1256,8 @@ int InDet::TrackClusterAssValidation::kine
     if(!pa or !pa->production_vertex()) continue;
 
     int pdg = std::abs(pa->pdg_id()); if(m_pdg && m_pdg != pdg ) continue;
-
-    const HepPDT::ParticleData* pd  = m_particleDataTable->particle(pdg);
-    if(!pd or  std::abs(pd->charge()) < .5) continue;
+    if (MC::isNucleus(pdg)) continue; // ignore nuclei from hadronic interactions
+    if (std::abs(MC::charge(pdg)) < .5) { continue; } // FIXME for fractionally charged particles
 
     // pT cut
     //
@@ -1542,9 +1521,8 @@ int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidat
 	ra > 1.6 ? rap = 2 : ra > .8 ?  rap = 1 : rap = 0;
 
       int                         pdg = pat->pdg_id();
-      const HepPDT::ParticleData* pd  = m_particleDataTable->particle(std::abs(pdg));
-      if(!pd) return 0;
-      double ch = pd->charge(); if(pdg < 0) ch = -ch;
+      if (MC::isNucleus(pdg)) { return 0; } // ignore nuclei from hadronic interactions
+      const double ch = MC::charge(pdg);
       if(ch >  .5) return  1;
       if(ch < -.5) return -1;
       return 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SegmentDriftCircleAssValidation_H
@@ -10,7 +10,6 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 ///Needed for the TRT track segments
@@ -60,7 +59,6 @@ namespace InDet {
 
       int                                           m_nprint                ;
       SG::ReadHandleKey<Trk::SegmentCollection>     m_origtrackKey{ this, "OrigTracksLocation", "TRTSegments", "TRT Segments collection name" };
-      const HepPDT::ParticleDataTable*              m_particleDataTable     ;
       SG::ReadHandleKey<PRD_MultiTruthCollection>   m_PRDTruthTRTKey{ this, "TruthNameTRT", "PRD_MultiTruthTRT", "PRD Multitruth collection name" };
       SG::ReadHandleKey<TRT_DriftCircleContainer>   m_circlesTRTKey{ this, "TRT_DriftCirclesName", "TRT_DriftCircles", "TRT Driftcircle container name" };
       double                                        m_pTmin                 ;
