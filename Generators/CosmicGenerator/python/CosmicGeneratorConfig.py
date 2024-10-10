@@ -147,7 +147,9 @@ class CavernPropertyCalculator(object):
 def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     ## Configuring the Athena application for a 'generator' job
     result = ComponentAccumulator()
-    result.addService(CompFactory.PartPropSvc(InputFile="PDGTABLE.MeV"))
+
+    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
+    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)).name) # Property from GenBase
 
     ## Set up random seeds FIXME
     from RngComps.RngCompsConfig import AthRNGSvcCfg

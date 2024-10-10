@@ -37,13 +37,6 @@
 #include "InDetRawData/TRT_LoLumRawData.h"
 #include "InDetRawData/TRT_RDO_Collection.h"
 
-// particle table
-#include "HepPDT/ParticleDataTable.hh"
-#include "GaudiKernel/IPartPropSvc.h"
-
-// for the tool
-#include "GaudiKernel/IToolSvc.h"
-
 // Gaudi includes
 #include "GaudiKernel/SmartDataPtr.h"
 #include "GaudiKernel/EventContext.h"
@@ -144,10 +137,8 @@ StatusCode TRTDigitizationTool::initialize()
   ATH_CHECK(m_rndmSvc.retrieve());
 
   // Get the Particle Properties Service
-  IPartPropSvc* p_PartPropSvc(nullptr);
-  static const bool CREATEIFNOTTHERE(true);
-  ATH_CHECK(service("PartPropSvc", p_PartPropSvc, CREATEIFNOTTHERE));
-  m_particleTable = p_PartPropSvc->PDT();
+  ATH_CHECK(m_ppSvc.retrieve());
+  m_particleTable = m_ppSvc->PDT();
 
   //locate the PileUpMergeSvc and initialize our local ptr
   if (m_onlyUseContainerName) {

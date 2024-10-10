@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorModules/GenBase.h"
@@ -19,10 +19,7 @@ StatusCode GenBase::initialize() {
   m_mcEventKey = m_mcevents_const.key();
 
   // Get the particle property service
-  if (m_ppSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Could not initialize ATLAS Particle Property Service");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_ppSvc.retrieve());
   return StatusCode::SUCCESS;
 }
 

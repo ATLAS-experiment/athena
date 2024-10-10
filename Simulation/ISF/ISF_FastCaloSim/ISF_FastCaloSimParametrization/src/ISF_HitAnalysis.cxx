@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ISF_FastCaloSimParametrization/ISF_HitAnalysis.h"
+#include "./ISF_HitAnalysis.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 
@@ -56,7 +56,6 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
 //#########################
@@ -202,15 +201,13 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK(m_thistSvc.retrieve());
 
   //#########################
-  IPartPropSvc* p_PartPropSvc = nullptr;
-  ATH_CHECK(service("PartPropSvc",p_PartPropSvc));
+  ATH_CHECK(m_partPropSvc.retrieve());
 
-  m_particleDataTable = (HepPDT::ParticleDataTable*) p_PartPropSvc->PDT();
-  if(m_particleDataTable == nullptr)
-    {
-      ATH_MSG_ERROR("PDG table not found");
-      return StatusCode::FAILURE;
-    }
+  m_particleDataTable = (HepPDT::ParticleDataTable*) m_partPropSvc->PDT();
+  if(m_particleDataTable == nullptr) {
+    ATH_MSG_ERROR("PDG table not found");
+    return StatusCode::FAILURE;
+  }
   //#########################
   std::unique_ptr<TFile> dummyFile = std::unique_ptr<TFile>(TFile::Open("dummyFile.root", "RECREATE")); //This is added to suppress the error messages about memory-resident trees
   m_tree = new TTree("FCS_ParametrizationInput", "FCS_ParametrizationInput");
