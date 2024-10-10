@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////////
@@ -18,8 +18,6 @@
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
-
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "AthContainers/DataVector.h"
 
@@ -125,10 +123,6 @@ StatusCode InDetAlignFillTrack::initialize() {
     ATH_CHECK(m_truthToTrack.retrieve());
     // Get Extrapolator Tool
     ATH_CHECK(m_extrapolator.retrieve());
-    // retrieve the PartPropSvc service (need for Cosmics)
-    IPartPropSvc* p_PartPropSvc;
-    static const bool CREATEIFNOTTHERE(true);
-    ATH_CHECK(svcLoc()->service("PartPropSvc", p_PartPropSvc, CREATEIFNOTTHERE));
   }
   // Book Ntuple
   bookNtuple();

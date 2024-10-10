@@ -20,8 +20,6 @@
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 
-#include "GaudiKernel/IPartPropSvc.h"
-
 #include "xAODTracking/TrackingPrimitives.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "TruthUtils/HepMCHelpers.h"
@@ -71,9 +69,8 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_MSG_DEBUG("Retrieved tool " << m_iGammaFitter);
 
   // get the Particle Properties Service
-  IPartPropSvc* partPropSvc = nullptr;
-  ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-  m_particleDataTable = partPropSvc->PDT();
+  ATH_CHECK(m_partPropSvc.retrieve());
+  m_particleDataTable = m_partPropSvc->PDT();
 
   // uploading the V0 tools
   ATH_CHECK( m_V0Tools.retrieve() );

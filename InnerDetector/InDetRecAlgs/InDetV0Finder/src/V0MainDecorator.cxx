@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetV0Finder/V0MainDecorator.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -74,9 +73,8 @@ StatusCode V0MainDecorator::initialize(){
 
   if (m_masses == 1) {
     // get the Particle Properties Service
-    IPartPropSvc* partPropSvc = nullptr;
-    ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-    auto *particleDataTable = partPropSvc->PDT();
+    ATH_CHECK(m_partPropSvc.retrieve());
+    auto *particleDataTable = m_partPropSvc->PDT();
   
     const HepPDT::ParticleData* pd_pi = particleDataTable->particle(MC::PIPLUS);
     const HepPDT::ParticleData* pd_p  = particleDataTable->particle(MC::PROTON);
