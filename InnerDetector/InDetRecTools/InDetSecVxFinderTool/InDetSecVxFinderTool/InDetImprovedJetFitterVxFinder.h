@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -75,6 +75,12 @@ namespace InDet {
     virtual Trk::VxSecVertexInfo* findSecVertex(const xAOD::Vertex & primaryVertex,
 						const TLorentzVector & jetMomentum,
 						const std::vector<const xAOD::IParticle*> & inputTracks) const override;
+
+    /// Return a list of the names of track decorations created by this tool,
+    /// in order to allow them to be locked when the calling algorithm
+    /// completes.
+    virtual std::vector<std::string> trackDecorationNames() const override;
+
 
   private:
 
