@@ -261,6 +261,9 @@ def createTriggerFlags(doTriggerRecoFlags):
                   prevFlags.Trigger.L1.doTopo and prevFlags.Trigger.enableL1CaloPhase1,
                   help='control Phase-I L1Topo simulation even if L1.doTopo is True')
 
+    flags.addFlag('Trigger.L1.doGlobal', lambda prevFlags: prevFlags.GeoModel.Run >= LHCPeriod.Run4,
+                  help='enable L0Global ByteStream conversion/simulation')
+
     flags.addFlag('Trigger.L1.doCTP', True,
                   help='enable CTP ByteStream conversion/simulation')
 

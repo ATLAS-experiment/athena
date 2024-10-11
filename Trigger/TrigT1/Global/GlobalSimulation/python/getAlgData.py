@@ -1,8 +1,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from graphAlgs import Topological
-from dot import dot
-
+from .graphAlgs import Topological
+from .dot import dot
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
 from AthenaCommon.Constants import VERBOSE
@@ -15,7 +14,7 @@ def algdata_from_menu(flags, do_dot=False, root_names=[]):
     configuration information that is used to configure a GlobalSim
     L1TopoAlgorithm AlgTool"""
     
-    from l1MenuGraph import l1MenuGraph
+    from .l1MenuGraph import l1MenuGraph
 
     G, alg_data_list = l1MenuGraph(flags)
 

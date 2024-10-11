@@ -5,8 +5,8 @@ from AthenaConfiguration.ComponentAccumulator import (ComponentAccumulator,)
 from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
-from getAlgData import algdata_from_menu
-from toolFromAlgData import toolFromAlgData
+from .getAlgData import algdata_from_menu
+from .toolFromAlgData import toolFromAlgData
 
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
@@ -15,9 +15,12 @@ logger.setLevel(VERBOSE)
 
 import sys, os
 
-def GlobalL1TopoSimulationCfg(flags, algLogLevel):
+def GlobalL1TopoSimulationCfg(flags, algLogLevel = None):
 
     acc = ComponentAccumulator()
+
+    if algLogLevel is None:
+        algLogLevel = flags.Exec.OutputLevel
 
     globalSimAlg = CompFactory.GlobalSim.GlobalSimulationAlg("GlobalL1TopoSim")
     globalSimAlg.OutputLevel = algLogLevel
@@ -44,8 +47,9 @@ def GlobalL1TopoSimulationCfg(flags, algLogLevel):
 
     acc.addEventAlgo(globalSimAlg)
     
-    histSvc = CompFactory.THistSvc(Output =["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
-    acc.addService(histSvc)
+    from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
+    acc.merge(TriggerHistSvcConfig(flags))
+
     return acc
 
 def add_subsystems(subsystems, acc, args):

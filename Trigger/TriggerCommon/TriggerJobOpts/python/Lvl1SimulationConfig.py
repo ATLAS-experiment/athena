@@ -7,8 +7,8 @@
 
 def Lvl1SimulationCfg(flags, seqName = None):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaCommon.CFElements import parOR
     if seqName:
-        from AthenaCommon.CFElements import parOR
         acc = ComponentAccumulator(sequence=parOR(seqName))
     else:
         acc = ComponentAccumulator()
@@ -37,6 +37,12 @@ def Lvl1SimulationCfg(flags, seqName = None):
         acc.addSequence(seqAND('L1TopoSimSeq'), parentName='L1SimSeq')
         from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
         acc.merge(L1TopoSimulationCfg(flags), sequenceName='L1TopoSimSeq')
+
+    if flags.Trigger.L1.doGlobal:
+        globalSimSeqName = 'L0GlobalSimSeq'
+        acc.addSequence(parOR(globalSimSeqName), parentName='L1SimSeq')
+        from GlobalSimulation.GlobalL1TopoSimulation import GlobalL1TopoSimulationCfg
+        acc.merge(GlobalL1TopoSimulationCfg(flags), sequenceName=globalSimSeqName)
 
     if flags.Trigger.doZDC:
         acc.addSequence(seqAND('L1ZDCSimSeq'),parentName='L1SimSeq')
