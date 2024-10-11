@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef LARG4FASTSIMSVC_LARG4FASTSIMSVC_H
 #define LARG4FASTSIMSVC_LARG4FASTSIMSVC_H
@@ -39,15 +39,9 @@ template <class TYPE> class SvcFactory;
    *
    */
 
-class LArG4FastSimSvc : public AthService, virtual public ILArG4FastSimSvc {
+class LArG4FastSimSvc : public extends<AthService, ILArG4FastSimSvc> {
 
  public:
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_ILArG4FastSimSvc; }
-
-  /// Query interface
-  StatusCode queryInterface(const InterfaceID& riid, void** ppvIF);
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();

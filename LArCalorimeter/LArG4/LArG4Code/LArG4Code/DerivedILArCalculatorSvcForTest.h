@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // defining this class is just used for testing since class ILArCalculatorSvc is a abstract class which needs to be instatiated in my test code
@@ -13,7 +13,7 @@
 #include "LArG4Code/ILArCalculatorSvc.h"
 #include "GaudiKernel/StateMachine.h"
 
-class DerivedILArCalculatorSvcForTest : public ILArCalculatorSvc {
+class DerivedILArCalculatorSvcForTest : public implements<ILArCalculatorSvc> {
 
 public:
 
@@ -59,19 +59,6 @@ public:
   }
 
   virtual void setServiceManager( ISvcManager* ) override { return; }
-
-  virtual unsigned long addRef() override { return 1; }
-
-  virtual unsigned long release() override { return 1; }
-
-  virtual 
-  StatusCode queryInterface( const InterfaceID& ti, void** pp ) override
-  { 
-    (void)ti; //to silence the unused-parameter warning, the same below
-    (void)pp;
-    StatusCode s7; 
-    return s7;
-  }
 
   virtual StatusCode configure() override
   {

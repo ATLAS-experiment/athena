@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef LARG4FASTSIMSVC_ILARG4FASTSIMSVC_H
 #define LARG4FASTSIMSVC_ILARG4FASTSIMSVC_H
@@ -9,14 +9,12 @@
 #include "G4ParticleDefinition.hh"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_ILArG4FastSimSvc("ILArG4FastSimSvc", 0 , 0);
 
 class ILArG4FastSimSvc : virtual public IInterface {
   public:
 
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID() { return IID_ILArG4FastSimSvc; }
+    /// Declare interface ID
+    DeclareInterfaceID(ILArG4FastSimSvc, 0 , 0);
 
     // actual interface definiton
 
