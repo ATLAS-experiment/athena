@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header file for class CutFlowSvc
@@ -41,9 +41,9 @@
 
 
 class CutFlowSvc :
-  virtual public ICutFlowSvc,
-  virtual public IIncidentListener,
-          public AthService
+  public extends<AthService,
+                 ICutFlowSvc,
+                 IIncidentListener>
 {
 
 public:
@@ -53,11 +53,6 @@ public:
   /// Gaudi Service Implementation
   //@{
   virtual StatusCode initialize() override final;
-  virtual StatusCode queryInterface(const InterfaceID& riid,
-                                    void** ppvi) override final;
-
-  /// Publish the interface for this service
-  static const InterfaceID& interfaceID();
   //@}
 
 
@@ -156,16 +151,6 @@ private:
   /// List of nominal-only filters
   std::unordered_set<CutIdentifier> m_nominalOnlyCuts;
 };
-
-
-
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
-
-inline const InterfaceID& CutFlowSvc::interfaceID() {
-  return ICutFlowSvc::interfaceID();
-}
 
 #endif // dual use
 

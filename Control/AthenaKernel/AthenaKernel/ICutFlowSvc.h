@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- //////////////////////////////////////////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header file for class ICutFlowSvc                                                                  //
@@ -39,10 +39,10 @@ class ICutFlowSvc
 
 public:
 
+  DeclareInterfaceID(ICutFlowSvc, 1, 0);
+
   virtual ~ICutFlowSvc();
 
-
-public:
 
   /// Register filter in the CutFlowSvc and returns the CutID of the
   /// corresponding EventBookkeeper.
@@ -86,20 +86,6 @@ public:
   /// Get number of accepted events for a cut
   virtual uint64_t getNAcceptedEvents( const CutIdentifier cutID ) const = 0;
 
-  /// Gaudi boilerplate
-  static const InterfaceID& interfaceID();
-
 };
-
-
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-inline
-const InterfaceID&
-ICutFlowSvc::interfaceID()
-{
-  static const InterfaceID IID_ICutFlowSvc("ICutFlowSvc", 1, 0);
-  return IID_ICutFlowSvc;
-}
-
 
 #endif //> !ATHENAKERNEL_ICUTFLOWSVC_H
