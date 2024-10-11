@@ -31,13 +31,6 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
     ATH_CHECK(m_testVectorTool->prepareTV(m_inputTV, pixelTV.inputTV));
     ATH_CHECK(m_testVectorTool->prepareTV(m_refTV, pixelTV.refTV));
 
-    // Convert input vector to 32-bit unsigned integers
-    std::vector<uint32_t> inputTV32;
-    for (auto &elem : pixelTV.inputTV)
-    {
-        inputTV32.push_back(static_cast<uint32_t>(elem));
-    }
-    
     // print the first 10 elements of the input vector
     for (int i = 0; i < 10; i++)
     {
@@ -45,14 +38,15 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
     }
 
     // Prepare output vector
-    std::vector<uint32_t> outputTV32(4096, 0);
+    // keep it the same size as the input vector for current development
+    std::vector<uint64_t> outputTV(pixelTV.inputTV.size(), 0);
 
     // Work with the accelerator
     cl_int err = 0;
 
     // Allocate buffers on accelerator
-    cl::Buffer acc_inbuff(m_context, CL_MEM_READ_WRITE, sizeof(uint32_t) * 4096, NULL, &err);
-    cl::Buffer acc_outbuff(m_context, CL_MEM_READ_WRITE, sizeof(uint32_t) * 4096, NULL, &err);
+    cl::Buffer acc_inbuff(m_context, CL_MEM_READ_ONLY, sizeof(uint64_t) * pixelTV.inputTV.size(), NULL, &err);
+    cl::Buffer acc_outbuff(m_context, CL_MEM_READ_WRITE, sizeof(uint64_t) * outputTV.size(), NULL, &err);
 
     // Prepare kernel
     cl::Kernel acc_kernel(m_program, m_kernelName.value().data(), &err);
@@ -63,7 +57,7 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
     // Make queue of commands
     cl::CommandQueue acc_queue(m_context, m_accelerator);
 
-    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, inputTV32.data(), NULL, NULL);
+    acc_queue.enqueueWriteBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint64_t) * pixelTV.inputTV.size(), pixelTV.inputTV.data(), NULL, NULL);
 
     err = acc_queue.enqueueTask(acc_kernel);
 
@@ -71,20 +65,13 @@ StatusCode PixelClustering::execute(const EventContext &ctx) const
 
     // The current implementation of the kernel Read/Write the same buffer
     // So the line below reads the inbuff insatead of outbuff
-    acc_queue.enqueueReadBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint32_t) * 4096, outputTV32.data(), NULL, NULL);
+    acc_queue.enqueueReadBuffer(acc_inbuff, CL_TRUE, 0, sizeof(uint64_t) * outputTV.size(), outputTV.data(), NULL, NULL);
 
     // Quick validation
     // Print the fist 10 elements of output vector
     for (int i = 0; i < 10; i++)
     {
-        ATH_MSG_DEBUG("outputTV[" << std::dec << i << "] = " << std::hex << outputTV32[i]);
-    }
-
-    // Convert the output vector to 64-bit unsigned integers
-    std::vector<uint64_t> outputTV;
-    for (auto &elem : outputTV32)
-    {
-        outputTV.push_back(static_cast<uint64_t>(elem));
+        ATH_MSG_DEBUG("outputTV[" << std::dec << i << "] = " << std::hex << outputTV[i]);
     }
 
     // Compare the output vector with the reference vector
