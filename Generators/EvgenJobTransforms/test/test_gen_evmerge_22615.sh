@@ -13,9 +13,9 @@ Gen_tf.py --ecmEnergy=13600 --jobConfig=421113 --maxEvents=10000 \
     --outputEVNTFile=test_minbias.EVNT.pool.root \
 
 
-EVNTMerge_tf.py --inputEVNTFile="test_minbias.EVNT.pool.root" --maxEvents="10000" --skipEvents="0" \ 
-    --outputEVNT_MRGFile="merge_minbias.EVNT.pool.root" --AMITag="e8455" \
-    --asetup "EVNTMerge:AthGeneration,22.6.15,gcc11,centos7"
+EVNTMerge_tf.py --inputEVNTFile "test_minbias.EVNT.pool.root" --maxEvents "10000" --skipEvents "0" \ 
+    --outputEVNT_MRGFile "merge_minbias.EVNT.pool.root" --AMITag "e8455" \
+    --asetup "EVNTMerge:AthGeneration,22.6.15,gcc11,centos7" \
     
 echo "art-result: $? generate"
 
