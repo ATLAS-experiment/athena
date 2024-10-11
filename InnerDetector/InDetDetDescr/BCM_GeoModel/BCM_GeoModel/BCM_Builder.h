@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCMBCMBUILDER_H
@@ -10,19 +10,16 @@
 #include "AthenaKernel/IOVSvcDefs.h"
 #include <vector>
 
-class AtlasDetectorID;
-class Identifier;
 class GeoVPhysVol;
 class StoreGateSvc;
 
 namespace InDetDD
 {
 
-  /** @class BCMBuilder
-
-  Beam Condition Monitor Builder
-      @author  Bostjan Macek <bostjan.macek@cern.ch>
-  */
+  /** @class   BCMBuilder
+   *  @brief   Beam Condition Monitor Builder
+   *  @author  Bostjan Macek <bostjan.macek@cern.ch>
+   */
 
   class BCM_Builder : public extends<AthAlgTool, IGeoSubDetTool>
     {
@@ -33,25 +30,23 @@ namespace InDetDD
       virtual ~BCM_Builder () = default;
 
        /** standard Athena-Algorithm method */
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override;
        /** standard Athena-Algorithm method */
-      virtual StatusCode finalize  ();
+      virtual StatusCode finalize() override;
        /** build the BCM geometry */
-      //virtual void build(GeoFullPhysVol*& Phys, StoredMaterialManager*& mat_mgr);
-      virtual StatusCode build(GeoVPhysVol* parent);
+      virtual StatusCode build(GeoVPhysVol* parent) override;
 
       /** For alignment */
       // Register callback function on ConDB object
-      virtual StatusCode registerCallback( StoreGateSvc* detStore );
+      virtual StatusCode registerCallback( StoreGateSvc* detStore ) override;
 
       // Callback function itself
-      virtual StatusCode align(IOVSVC_CALLBACK_ARGS);
+      virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
 
 
     private:
 
       /** member variables for algorithm properties: */
-      // int/double/bool  m_propertyName;
       std::vector<double> m_module0;
       std::vector<double> m_moduleI;
       std::vector<double> m_moduleII;
