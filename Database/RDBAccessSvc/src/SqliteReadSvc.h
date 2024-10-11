@@ -37,19 +37,13 @@ typedef std::map<std::string, IRDBRecordset_ptr> RecordsetPtrMap;
  *
  */
 
-class SqliteReadSvc final : public AthService, virtual public IRDBAccessSvc 
+class SqliteReadSvc final : public extends<AthService, IRDBAccessSvc>
 {
  public:
   /// Standard Service Constructor
   SqliteReadSvc(const std::string& name, ISvcLocator* svc);
 
   StatusCode finalize() override;
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-
-  friend class SvcFactory<SqliteReadSvc>;
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IRDBAccessSvc; }
 
   /// Open the SQLite database
   /// This method has no effect if the connection has already been opened

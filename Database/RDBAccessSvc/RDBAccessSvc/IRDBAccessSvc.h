@@ -28,9 +28,6 @@ typedef std::shared_ptr<IRDBRecordset> IRDBRecordset_ptr;
 
 typedef coral::AttributeList RDBTagDetails;
 
-// Declaration of the interface ID ( interface id, major version, minor version)
-static const InterfaceID IID_IRDBAccessSvc(1012, 1 , 0);
-
 /**
  * @class IRDBAccessSvc
  *
@@ -50,8 +47,8 @@ class IRDBAccessSvc : virtual public IInterface
 
  public:
 
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IRDBAccessSvc; }
+  /// Declare interface ID
+  DeclareInterfaceID(IRDBAccessSvc, 1 , 0);
 
   /// Provides access to the Recordset object containing HVS-tagged data.
   /// @param node [IN] name of the leaf HVS node

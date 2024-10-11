@@ -9,7 +9,6 @@
  *
  * @author Vakho Tsulaia <Vakhtang.Tsulaia@cern.ch>
  *
- * $Id: RDBAccessSvc.h,v 1.17 2008-10-13 12:24:09 tsulaia Exp $
  */
 
 #ifndef RDBACCESSSVC_RDBACCESSSVC_H
@@ -55,7 +54,7 @@ typedef std::map<std::string, TagNameIdByNode*> GlobalTagLookupMap; // Key - <Gl
  *
  */
 
-class RDBAccessSvc final : public AthService, virtual public IRDBAccessSvc 
+class RDBAccessSvc final : public extends<AthService, IRDBAccessSvc>
 {
  public:
   /// Standard Service Constructor
@@ -63,12 +62,6 @@ class RDBAccessSvc final : public AthService, virtual public IRDBAccessSvc
 
   StatusCode initialize() override;
   StatusCode finalize() override;
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-
-  friend class SvcFactory<RDBAccessSvc>;
-
-  /// Retrieve interface ID
-  static const InterfaceID& interfaceID() { return IID_IRDBAccessSvc; }
 
   /// Connect to the relational DB.
   /// If this method is called for already open connection the connection
