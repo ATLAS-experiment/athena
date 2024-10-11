@@ -211,8 +211,8 @@ namespace MCTesting {
                                                                 test::origin.first);
     }
     virtual void TearDown() override {
-      StoreGateSvc* pStore(nullptr);
-      ASSERT_TRUE(MCTesting::g_svcLoc->service("StoreGateSvc", pStore).isSuccess());
+      SmartIF<IService> smart_sg = MCTesting::g_svcLoc->service("StoreGateSvc");
+      StoreGateSvc *pStore = dynamic_cast<StoreGateSvc*>(smart_sg.get());
       pStore->clearStore(true).ignore(); // forceRemove=true to remove all proxies
     }
 

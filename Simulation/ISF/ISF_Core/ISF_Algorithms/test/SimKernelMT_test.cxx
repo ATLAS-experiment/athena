@@ -334,7 +334,8 @@ protected:
       m_mockParticleKillerTool = retrieveTool<MockParticleKillerTool>(mockParticleKillerToolName);
       m_mockSimulationSelector = retrieveTool<MockSimulationSelector>(mockSimulationSelectorName);
       m_mockEntryLayerTool = retrieveTool<MockEntryLayerTool>(mockEntryLayerToolName);
-      ASSERT_TRUE( m_svcLoc->service("StoreGateSvc", m_sg) );
+      SmartIF<IService> smart_sg = m_svcLoc->service("StoreGateSvc");
+      m_sg = dynamic_cast<StoreGateSvc*>(smart_sg.get());
     }
 
     virtual void TearDown() override {
@@ -425,18 +426,18 @@ protected:
     }
 
     // the tested AthAlgorithm
-    ISF::SimKernelMT* m_alg;
+    ISF::SimKernelMT* m_alg{};
 
     StoreGateSvc* m_sg{};
 
     // mocked Athena components
-    ISFTesting::MockGeoIDSvc* m_mockGeoIDSvc = nullptr;
-    ISFTesting::MockTruthSvc* m_mockTruthSvc = nullptr;
-    ISFTesting::MockInputConverter* m_mockInputConverter = nullptr;
-    ISFTesting::MockSimulatorTool* m_mockSimulatorTool = nullptr;
-    ISFTesting::MockParticleKillerTool* m_mockParticleKillerTool = nullptr;
-    ISFTesting::MockSimulationSelector* m_mockSimulationSelector = nullptr;
-    ISFTesting::MockEntryLayerTool* m_mockEntryLayerTool = nullptr;
+    ISFTesting::MockGeoIDSvc* m_mockGeoIDSvc{};
+    ISFTesting::MockTruthSvc* m_mockTruthSvc{};
+    ISFTesting::MockInputConverter* m_mockInputConverter{};
+    ISFTesting::MockSimulatorTool* m_mockSimulatorTool{};
+    ISFTesting::MockParticleKillerTool* m_mockParticleKillerTool{};
+    ISFTesting::MockSimulationSelector* m_mockSimulationSelector{};
+    ISFTesting::MockEntryLayerTool* m_mockEntryLayerTool{};
 
   };  // SimKernelMT_test fixture
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -55,7 +55,8 @@ namespace SimTesting {
   protected:
     virtual void SetUp() override {
       m_alg = new Simulation::BeamEffectsAlg{"BeamEffectsAlg", g_svcLoc};
-      ASSERT_TRUE( g_svcLoc->service("StoreGateSvc", m_sg) );
+      SmartIF<IService> smart_sg = g_svcLoc->service("StoreGateSvc");
+      m_sg = dynamic_cast<StoreGateSvc*>(smart_sg.get());
     }
 
     virtual void TearDown() override {
