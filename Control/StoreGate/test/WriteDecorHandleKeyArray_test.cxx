@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -27,16 +27,13 @@ CLASS_DEF (MyObj, 293847295, 1)
 
 
 class TestHolder
-  : public IDataHandleHolder
+  : public implements<IDataHandleHolder>
 {
 public:
   virtual std::vector<Gaudi::DataHandle*> inputHandles() const override;
   virtual std::vector<Gaudi::DataHandle*> outputHandles() const override;
   virtual void addDependency(const DataObjID&, const Gaudi::DataHandle::Mode&) override;
 
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &, void**) override { std::abort(); }
   virtual const std::string& name() const override { std::abort(); }
   
 

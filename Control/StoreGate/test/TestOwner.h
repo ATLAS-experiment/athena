@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file StoreGate/test/TestOwner.h
@@ -24,13 +24,9 @@
 
 
 class TestOwnerBase
-  : virtual public IProperty, virtual public INamedInterface, virtual public IDataHandleHolder
+  : virtual public extend_interfaces<IProperty, INamedInterface, IDataHandleHolder>
 {
 public:
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface( const InterfaceID& /*ti*/, void** /*pp*/ ) override
-  { std::abort(); }
   virtual const std::string& name() const override { return m_name; }
 
   virtual std::vector<Gaudi::DataHandle*> inputHandles() const  override { std::abort(); }
@@ -60,7 +56,7 @@ public:
 };
 
 class TestOwner
-  : public PropertyHolder<TestOwnerBase>
+  : public PropertyHolder<implements<TestOwnerBase>>
 {
 };
 
