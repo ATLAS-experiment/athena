@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -86,14 +86,10 @@ DataObject* TestAddress::dobj()
 
 
 class TestLoader
-  : public IConverter
+  : public implements<IConverter>
 {
 public:
   virtual StatusCode createObj( IOpaqueAddress* pAddress, DataObject*& refpObject ) override;
-
-  virtual unsigned long addRef() override { return 1;  }
-  virtual unsigned long release() override { return 1; }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 
   virtual StatusCode initialize() override
   { std::abort(); }
@@ -143,15 +139,10 @@ StatusCode TestLoader::createObj( IOpaqueAddress* pAddress, DataObject*& refpObj
 
 
 class TestDBSvc
-  : public IAddressProvider, public IIOVDbSvc
+  : public implements<IAddressProvider, IIOVDbSvc>
 {
 public:
   TestDBSvc();
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface( const InterfaceID& /*ti*/, void** /*pp*/ ) override
-  { std::abort(); }
 
   virtual StatusCode updateAddress(StoreID::type /*storeID*/,
 				   SG::TransientAddress* /*pTAd*/,
