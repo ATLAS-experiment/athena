@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaPrecisionElectronHypoAlg.h"
@@ -36,6 +36,13 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::initialize()
   ATH_CHECK( m_avgMuKey.initialize() );
   ATH_CHECK( m_electronsKey.initialize() );
   renounce( m_electronsKey );// electrons are made in views, so they are not in the EvtStore: hide them
+
+  renounce (m_decorD0Key);
+  renounce (m_decorClEtaKey);
+  renounce (m_decorClPhiKey);
+  ATH_CHECK( m_decorD0Key.initialize() );
+  ATH_CHECK( m_decorClEtaKey.initialize() );
+  ATH_CHECK( m_decorClPhiKey.initialize() );
 
   if (! m_monTool.empty() ) ATH_CHECK( m_monTool.retrieve() );
   return StatusCode::SUCCESS;
@@ -85,29 +92,46 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
     ATH_MSG_DEBUG ( "Precision Electron handle size: " << electronHandle->size() << "..." );
 
     // Make decorators to output track d0 and cluster eta/phi
-    static const SG::AuxElement::Decorator< float > decor_d0( "trk_d0" );
-    static const SG::AuxElement::Decorator< float > decor_clEta( "cl_eta2" );
-    static const SG::AuxElement::Decorator< float > decor_clPhi( "cl_phi2" );
+    auto decor_d0 = ViewHelper::makeHandle<float> (*viewEL, m_decorD0Key, context);
+    auto decor_clEta = ViewHelper::makeHandle<float> (*viewEL, m_decorClEtaKey, context);
+    auto decor_clPhi = ViewHelper::makeHandle<float> (*viewEL, m_decorClPhiKey, context);
+
+    // This algorithm adds a few decorations to the input electrons.
+    // But sometimes we can be given views on which another instance of this
+    // algorithm has already run.  We need to avoid redoing the decorations
+    // in that case, or we'll crash.
+    // We can even be given a mixture of views, some of which have
+    // the decorations already done and some not, so we can't really
+    // configure this statically.
+    // Test if the decoration is there, and trust that the overall
+    // configuration ensures that two threads won't try to write the
+    // same decoration at the same time.
+    bool hasDecor = decor_d0.isAvailable();
+
+    // Used for checking earlier decorations.
+    static const SG::ConstAccessor<float> acc_d0 (SG::decorKeyFromKey (m_decorD0Key.key()));
+    static const SG::ConstAccessor<float> acc_clEta (SG::decorKeyFromKey (m_decorClEtaKey.key()));
+    static const SG::ConstAccessor<float> acc_clPhi (SG::decorKeyFromKey (m_decorClPhiKey.key()));
 
     // Loop over the electronHandles
     size_t validelectrons=0;
-    for (size_t cl=0; cl< electronHandle->size(); cl++){
+    for (const xAOD::Electron* ele : *electronHandle) {
       
       {
-        auto el = ViewHelper::makeLink( *viewEL, electronHandle, cl );
+        auto el = ViewHelper::makeLink( *viewEL, electronHandle, ele->index() );
         ATH_MSG_DEBUG ( "Checking el.isValid()...");
         if( !el.isValid() ) {
-          ATH_MSG_DEBUG ( "Precision ElectronHandle in position " << cl << " -> invalid ElemntLink!. Skipping...");
+          ATH_MSG_DEBUG ( "Precision ElectronHandle in position " << ele->index() << " -> invalid ElemntLink!. Skipping...");
         }
 
         ATH_CHECK(el.isValid());
-        ATH_MSG_DEBUG ( "Precision ElectronHandle in position " << cl << " processing...");
+        ATH_MSG_DEBUG ( "Precision ElectronHandle in position " << ele->index() << " processing...");
         auto d = TCU::newDecisionIn( decisions, TCU::hypoAlgNodeName() );
         d->setObjectLink( TCU::featureString(),  el );
         TCU::linkToPrevious( d, decisionInput().key(), counter );
 
         // create the info
-        ITrigEgammaPrecisionElectronHypoTool::ElectronInfo info(d, roi, electronHandle.cptr()->at(cl), previousDecision);
+        ITrigEgammaPrecisionElectronHypoTool::ElectronInfo info(d, roi, ele, previousDecision);
 
         // Retrieve avgmu value from event info
         SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_avgMuKey, context);
@@ -121,7 +145,7 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
         // Decorate the info with all CB decisions
         for (std::size_t i = 0; i < m_cbNames.size(); ++i) {
           auto const& pidname = m_cbNames[i];
-          info.pidDecorator[pidname] = (bool)m_egammaElectronCBTools[i]->accept(context, electronHandle->at(cl));
+          info.pidDecorator[pidname] = (bool)m_egammaElectronCBTools[i]->accept(context, ele);
         }
 
         // Decorate the info with all LH decisions
@@ -131,14 +155,14 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
           timer_lh.start();
           if(eventInfoDecor.isPresent()) {
             float avg_mu = eventInfoDecor(0);
-            float lhvalue = m_egammaElectronLHTools[idx]->calculate(context, electronHandle.cptr()->at(cl),avg_mu);
+            float lhvalue = m_egammaElectronLHTools[idx]->calculate(context, ele,avg_mu);
             info.valueDecorator[pidname+"LHValue"] = lhvalue;
-            info.pidDecorator[pidname] = (bool)m_egammaElectronLHTools[idx]->accept(context, electronHandle.cptr()->at(cl),avg_mu);
+            info.pidDecorator[pidname] = (bool)m_egammaElectronLHTools[idx]->accept(context, ele,avg_mu);
           }else{
-            float lhvalue = m_egammaElectronLHTools[idx]->calculate(context, electronHandle.cptr()->at(cl));
+            float lhvalue = m_egammaElectronLHTools[idx]->calculate(context, ele);
             info.valueDecorator[pidname+"LHValue"] = lhvalue;
             ATH_MSG_WARNING("EventInfo decoration not available!");
-            info.pidDecorator[pidname] = (bool)m_egammaElectronLHTools[idx]->accept(context, electronHandle.cptr()->at(cl));
+            info.pidDecorator[pidname] = (bool)m_egammaElectronLHTools[idx]->accept(context, ele);
           }
           timer_lh.stop();
   
@@ -153,11 +177,11 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
           timer_dnn.start();
           if(eventInfoDecor.isPresent()) {
             float avg_mu = eventInfoDecor(0);
-            info.pidDecorator[pidname] = (bool)m_egammaElectronDNNTools[idx]->accept(context, electronHandle.cptr()->at(cl),avg_mu);
+            info.pidDecorator[pidname] = (bool)m_egammaElectronDNNTools[idx]->accept(context, ele,avg_mu);
             ATH_MSG_DEBUG("info.pidDecorator[pidname]: "<<info.pidDecorator[pidname]);
           }else{
             ATH_MSG_WARNING("EventInfo decoration not available!");
-            info.pidDecorator[pidname] = (bool)m_egammaElectronDNNTools[idx]->accept(context, electronHandle.cptr()->at(cl));
+            info.pidDecorator[pidname] = (bool)m_egammaElectronDNNTools[idx]->accept(context, ele);
             ATH_MSG_DEBUG("info.pidDecorator[pidname]: "<<info.pidDecorator[pidname]);
           }
           timer_dnn.stop();
@@ -165,9 +189,24 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
         }
 
         // Add track d0 and cluster eta/phi decorations for output electrons
-        decor_d0(*electronHandle.cptr()->at(cl)) = electronHandle.cptr()->at(cl)->trackParticle()->d0();
-        decor_clEta(*electronHandle.cptr()->at(cl)) = electronHandle.cptr()->at(cl)->caloCluster()->etaBE(2);
-        decor_clPhi(*electronHandle.cptr()->at(cl)) = electronHandle.cptr()->at(cl)->caloCluster()->phiBE(2);
+        if (hasDecor) {
+          // If the decorations are already there, verify that they
+          // match what we would write.
+          if (acc_d0(*ele) != ele->trackParticle()->d0() ||
+              acc_clEta(*ele) !=  ele->caloCluster()->etaBE(2) ||
+              acc_clPhi(*ele) != ele->caloCluster()->phiBE(2))
+          {
+            ATH_MSG_ERROR( "Decoration mismatch: "
+                           << acc_d0(*ele) << "<->" << ele->trackParticle()->d0()
+                           << acc_clEta(*ele) << "<->" << ele->caloCluster()->etaBE(2)
+                           << acc_clPhi(*ele) << "<->" << ele->caloCluster()->phiBE(2) );
+          }
+        }
+        else {
+          decor_d0(*ele) = ele->trackParticle()->d0();
+          decor_clEta(*ele) = ele->caloCluster()->etaBE(2);
+          decor_clPhi(*ele) = ele->caloCluster()->phiBE(2);
+        }
 
         toolInput.push_back( info );
         validelectrons++;
