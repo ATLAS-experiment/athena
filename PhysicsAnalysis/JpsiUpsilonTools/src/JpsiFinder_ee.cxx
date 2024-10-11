@@ -48,16 +48,13 @@ namespace Analysis {
         ATH_CHECK(m_vertexEstimator.retrieve());
 
 
-        // Get the Particle Properties Service
-        IPartPropSvc* partPropSvc = 0;
-        StatusCode sc = service("PartPropSvc", partPropSvc, true);
-        if (sc.isFailure()) {
-            ATH_MSG_ERROR("Could not initialize Particle Properties Service");
-            return StatusCode::FAILURE;
-        } else {
-            auto particleDataTable = partPropSvc->PDT();
-            const HepPDT::ParticleData* pd_el = particleDataTable->particle(MC::ELECTRON);
-            if (m_diElectrons) {m_trk1M = pd_el->mass(); m_trk2M = pd_el->mass();}
+        if (m_diElectrons) {
+          // Get the Particle Properties Service
+          ATH_CHECK(m_partPropSvc.retrieve());
+          auto particleDataTable = m_partPropSvc->PDT();
+          const HepPDT::ParticleData* pd_el = particleDataTable->particle(MC::ELECTRON);
+          m_trk1M = pd_el->mass();
+          m_trk2M = pd_el->mass();
         }
 
         if (m_doTagAndProbe) ATH_MSG_WARNING("You have requested tag and probe mode. Duplicate mu+trk pairs WILL be allowed, charge ordering WILL NOT be done. Tag track will be first in each candidate");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -14,20 +14,17 @@
 #define JPSIFINDER_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/Muon.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "JpsiUpsilonTools/ICandidateSearch.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "TrkVertexFitterInterfaces/IVertexFitter.h"
+#include "InDetConversionFinderTools/VertexPointEstimator.h"
 
 /////////////////////////////////////////////////////////////////////////////
-
-namespace Trk {
-    class IVertexFitter;
-    class ITrackSelectorTool;
-}
-
-namespace InDet { class VertexPointEstimator; }
 
 namespace Analysis {
     
@@ -99,10 +96,11 @@ namespace Analysis {
         SG::ReadHandleKey<xAOD::MuonContainer> m_muonCollectionKey{this, "muonCollectionKey", "Muons"};
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection {this, "TrackParticleCollection", "InDetTrackParticles" };
         SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_MuonTrackKeys{this, "MuonTrackKeys", {}};
-        ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
-        ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
-        ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-        ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
+        PublicToolHandle < Trk::IVertexFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
+        PublicToolHandle < Trk::IVertexFitter > m_iV0VertexFitter{this, "V0VertexFitterTool", "Trk::V0VertexFitter"};
+        PublicToolHandle < Trk::ITrackSelectorTool > m_trkSelector{this, "TrackSelectorTool", "InDet::TrackSelectorTool"};
+        PublicToolHandle < InDet::VertexPointEstimator > m_vertexEstimator{this, "VertexPointEstimator", "InDet::VertexPointEstimator"};
+        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
         bool m_mcpCuts;
         bool m_doTagAndProbe;
         bool m_forceTagAndProbe;

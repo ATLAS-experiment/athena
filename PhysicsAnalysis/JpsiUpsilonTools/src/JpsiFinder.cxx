@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -14,11 +14,7 @@
 
 #include "JpsiUpsilonTools/JpsiFinder.h"
 #include "xAODBPhys/BPhysHelper.h"
-#include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
-#include "InDetConversionFinderTools/VertexPointEstimator.h"
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "AthLinks/ElementLink.h"
 #include "xAODTracking/Vertex.h"
@@ -48,18 +44,15 @@ namespace Analysis {
         ATH_CHECK(m_TrkParticleCollection.initialize());
         ATH_CHECK(m_MuonTrackKeys.initialize(m_MuonTrackKeys.size() != 0));
 
-        // Get the Particle Properties Service
-        IPartPropSvc* partPropSvc = 0;
-        StatusCode sc = service("PartPropSvc", partPropSvc, true);
-        if (sc.isFailure()) {
-            ATH_MSG_ERROR("Could not initialize Particle Properties Service");
-            return StatusCode::SUCCESS;
-        } else {
-            auto particleDataTable = partPropSvc->PDT();
-            const HepPDT::ParticleData* pd_mu = particleDataTable->particle(MC::MUON);
-            if (m_diMuons) {m_trk1M = pd_mu->mass(); m_trk2M = pd_mu->mass();}
+        if (m_diMuons) {
+          // Get the Particle Properties Service
+          ATH_CHECK(m_partPropSvc.retrieve());
+          auto particleDataTable = m_partPropSvc->PDT();
+          const HepPDT::ParticleData* pd_mu = particleDataTable->particle(MC::MUON);
+          m_trk1M = pd_mu->mass();
+          m_trk2M = pd_mu->mass();
         }
-        
+
         if (m_doTagAndProbe) ATH_MSG_WARNING("You have requested tag and probe mode. Duplicate mu+trk pairs WILL be allowed, charge ordering WILL NOT be done. Tag track will be first in each candidate");
 
 
@@ -128,10 +121,6 @@ namespace Analysis {
     m_oppChOnly(true),
     m_sameChOnly(false),
     m_allChCombs(false),
-    m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_iV0VertexFitter("Trk::V0VertexFitter"),
-    m_trkSelector("InDet::TrackSelectorTool"),
-    m_vertexEstimator("InDet::VertexPointEstimator"),
     m_mcpCuts(true),
     m_doTagAndProbe(false),
     m_forceTagAndProbe(false) //forcing T&P method for any charge combinations
@@ -160,10 +149,6 @@ namespace Analysis {
         declareProperty("oppChargesOnly",m_oppChOnly);
         declareProperty("sameChargesOnly",m_sameChOnly);
         declareProperty("allChargeCombinations",m_allChCombs);
-        declareProperty("TrkVertexFitterTool",m_iVertexFitter);
-        declareProperty("V0VertexFitterTool",m_iV0VertexFitter);
-        declareProperty("TrackSelectorTool",m_trkSelector);
-        declareProperty("VertexPointEstimator",m_vertexEstimator);
         declareProperty("useMCPCuts",m_mcpCuts);
         declareProperty("doTagAndProbe",m_doTagAndProbe);
         declareProperty("forceTagAndProbe",m_forceTagAndProbe);

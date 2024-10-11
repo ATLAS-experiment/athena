@@ -237,15 +237,12 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
 
     vkalvrt = acc.popToolsAndMerge(
         BPHY_TrkVKalVrtFitterCfg(flags, tool_name_prefix))
-    acc.addPublicTool(vkalvrt)
 
     trackselect = acc.popToolsAndMerge(
         BPHY_InDetDetailedTrackSelectorToolCfg(flags, tool_name_prefix))
-    acc.addPublicTool(trackselect)
 
     vpest = acc.popToolsAndMerge(
         BPHY_VertexPointEstimatorCfg(flags, tool_name_prefix))
-    acc.addPublicTool(vpest)
 
     JpsiFinder = acc.popToolsAndMerge(JpsiFinderCfg(flags,
             name                        = tool_name_prefix+"JpsiFinder",
@@ -264,9 +261,9 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
             TrackParticleCollection     = "InDetTrackParticles",
             V0VertexFitterTool          = None,             # V0 vertex fitter
             useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
-            TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
-            TrackSelectorTool           = trackselect,
-            VertexPointEstimator        = vpest,
+            TrkVertexFitterTool         = acc.addPublicTool(vkalvrt),        # VKalVrt vertex fitter
+            TrackSelectorTool           = acc.addPublicTool(trackselect),
+            VertexPointEstimator        = acc.addPublicTool(vpest),
             useMCPCuts                  = False))
     acc.addPublicTool(JpsiFinder)
     JpsiSelectAndWrite   = CompFactory.DerivationFramework.Reco_Vertex(

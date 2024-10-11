@@ -27,7 +27,7 @@ def BPHY24Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
+    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags)).name
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
@@ -159,7 +159,8 @@ def BPHY24Cfg(flags):
         TrkVertexFitterTool         = vkalvrt,
         TrackSelectorTool           = trackselect,
         VertexPointEstimator        = vpest,
-        ElectronSelection             = "d0_or_nod0"
+        ElectronSelection             = "d0_or_nod0",
+        PartPropSvc = PartPropSvcName
         )
 
     BPHY24_SelectAndWrite_DiElectron = CompFactory.DerivationFramework.Reco_mumu(
