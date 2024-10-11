@@ -22,12 +22,6 @@ def CaloOffsetCorrectionCfg(flags):
 
     acc = ComponentAccumulator()
     if not flags.Input.isMC and flags.Common.isOnline:
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        acc.merge(addFolders(flags, "/LAR/ElecCalibFlat/OFC",'LAR_ONL', className = 'CondAttrListCollection'))
-        larCondSvc = CompFactory.LArFlatConditionSvc()
-        larCondSvc.OFCInput="/LAR/ElecCalibFlat/OFC"
-        acc.addService(larCondSvc)
-        acc.addService(CompFactory.ProxyProviderSvc(ProviderNames=[larCondSvc.name]))
         acc.addCondAlgo(CompFactory.getComp('LArFlatConditionsAlg<LArOFCFlat>')(ReadKey="/LAR/ElecCalibFlat/OFC", WriteKey='LArOFC'))
         from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
         acc.merge(LuminosityCondAlgCfg(flags))
