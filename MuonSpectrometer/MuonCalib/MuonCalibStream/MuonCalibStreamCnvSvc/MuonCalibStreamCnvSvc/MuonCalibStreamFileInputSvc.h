@@ -14,23 +14,25 @@
 #include <fstream>
 #include <TROOT.h>
 
+#include "MuonCalibStreamInputSvc.h"
+
+#include "AthenaBaseComps/AthService.h"
 #include "EventStorage/DataReader.h"
 #include "MuCalDecode/CalibDataLoader.h"
 #include "MuCalDecode/CalibEvent.h"
 #include "MuCalDecode/CalibUti.h"
 #include "MuCalDecode/DataBuffer.h"
-#include "MuonCalibStreamCnvSvc/MuonCalibStreamInputSvc.h"
 
-class MuonCalibStreamFileInputSvc : public MuonCalibStreamInputSvc {
+class MuonCalibStreamFileInputSvc : public extends<AthService, MuonCalibStreamInputSvc> {
 public:
     // Constructors:
     MuonCalibStreamFileInputSvc(const std::string &name, ISvcLocator *svcloc);
     // Destructor.
     virtual ~MuonCalibStreamFileInputSvc();
     // Implementation of the MuonCalibStreamInputSvc interface methods.
-    virtual StatusCode initialize();
-    virtual const LVL2_MUON_CALIBRATION::CalibEvent *nextEvent();
-    virtual const LVL2_MUON_CALIBRATION::CalibEvent *currentEvent() const;
+    virtual StatusCode initialize() override;
+    virtual const LVL2_MUON_CALIBRATION::CalibEvent *nextEvent() override;
+    virtual const LVL2_MUON_CALIBRATION::CalibEvent *currentEvent() const override;
 
 private:
     Long64_t m_fileEventCounter{0};

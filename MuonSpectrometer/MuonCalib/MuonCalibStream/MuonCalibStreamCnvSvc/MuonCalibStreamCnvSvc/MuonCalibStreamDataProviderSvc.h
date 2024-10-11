@@ -13,13 +13,12 @@
 
 class MuonCalibRunLumiBlockCoolSvc;
 
-class MuonCalibStreamDataProviderSvc : public AthService, virtual public IMuonCalibStreamDataProviderSvc {
+class MuonCalibStreamDataProviderSvc : public extends<AthService, IMuonCalibStreamDataProviderSvc> {
 
 public:
     MuonCalibStreamDataProviderSvc(const std::string &name, ISvcLocator *svcloc);
     virtual ~MuonCalibStreamDataProviderSvc();
     virtual StatusCode initialize();
-    virtual StatusCode queryInterface(const InterfaceID &riid, void **ppvInterface);
     virtual void setNextEvent(const LVL2_MUON_CALIBRATION::CalibEvent *re);
     virtual const LVL2_MUON_CALIBRATION::CalibEvent *getEvent();
 

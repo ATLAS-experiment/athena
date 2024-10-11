@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAMCNVSVC_EVENTINFOMUONCALIBSTREAMCNV_H
 #define MUONCALIBSTREAMCNVSVC_EVENTINFOMUONCALIBSTREAMCNV_H
@@ -10,22 +10,14 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
-
+#include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
 
 class IOpaqueAddress;
 class DataObject;
-class StatusCode;
-class MuonCalibStreamCnvSvc;
-class MuonCalibStreamDataProviderSvc;
 
 #include <string>
 
-// Abstract factory to create the converter
-template <class TYPE> class CnvFactory;
-
 class EventInfoMuonCalibStreamCnv : public Converter, public AthMessaging {
-    friend class CnvFactory<EventInfoMuonCalibStreamCnv>;
-
 public:
     virtual StatusCode initialize();
     virtual StatusCode createObj(IOpaqueAddress *pAddr, DataObject *&pObj);
@@ -39,7 +31,7 @@ public:
     EventInfoMuonCalibStreamCnv(ISvcLocator *svcloc);
 
 private:
-    MuonCalibStreamCnvSvc *m_MuonCalibStreamCnvSvc;
-    MuonCalibStreamDataProviderSvc *m_dataProvider;
+    ServiceHandle<IConversionSvc> m_MuonCalibStreamCnvSvc;
+    ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataProvider;
 };
 #endif

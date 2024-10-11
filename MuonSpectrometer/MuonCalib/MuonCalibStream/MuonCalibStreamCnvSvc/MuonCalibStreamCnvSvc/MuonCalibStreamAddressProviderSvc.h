@@ -28,7 +28,7 @@ public:
 private:
     // type and name of the objects to create the address for.
     std::vector<std::string> m_typeNames;
-    IMuonCalibStreamDataProviderSvc *m_dataSvc;
+    ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataSvc;
     std::map<CLID, std::set<std::string> > m_clidKey;
 };
 #endif

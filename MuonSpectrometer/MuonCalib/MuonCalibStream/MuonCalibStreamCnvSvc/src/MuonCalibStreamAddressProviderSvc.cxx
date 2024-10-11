@@ -10,7 +10,8 @@
 
 /// Standard constructor
 MuonCalibStreamAddressProviderSvc::MuonCalibStreamAddressProviderSvc(const std::string &name, ISvcLocator *svc) :
-    base_class(name, svc), m_dataSvc(nullptr) {
+    base_class(name, svc),
+    m_dataSvc("MuonCalibStreamDataProviderSvc", name) {
     m_typeNames.push_back("Muon::MdtPrepDataContainer/MDT_DriftCircles");
     m_typeNames.push_back("RpcPadContainer/RPCPAD");
     m_typeNames.push_back("TgcRdoContainer/TGCRDO");
@@ -24,7 +25,7 @@ MuonCalibStreamAddressProviderSvc::~MuonCalibStreamAddressProviderSvc() {}
 
 /// Initialize the service.
 StatusCode MuonCalibStreamAddressProviderSvc::initialize() {
-    ATH_CHECK(service("MuonCalibStreamDataProviderSvc", m_dataSvc));
+    ATH_CHECK(m_dataSvc.retrieve());
     ATH_MSG_INFO(" initialized ");
     return StatusCode::SUCCESS;
 }
@@ -43,8 +44,8 @@ StatusCode MuonCalibStreamAddressProviderSvc::preLoadAddresses(StoreID::type idp
     std::vector<std::string>::const_iterator it = m_typeNames.begin();
     std::vector<std::string>::const_iterator it_e = m_typeNames.end();
 
-    IClassIDSvc *clidSvc;
-    ATH_CHECK(service("ClassIDSvc", clidSvc));
+    SmartIF<IClassIDSvc> clidSvc{service("ClassIDSvc")};
+    ATH_CHECK(clidSvc.isValid());
 
     for (; it != it_e; ++it) {
         Gaudi::Utils::TypeNameString item(*it);

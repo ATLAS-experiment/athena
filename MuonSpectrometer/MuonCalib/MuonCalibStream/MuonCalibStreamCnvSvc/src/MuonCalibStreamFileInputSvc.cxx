@@ -21,7 +21,7 @@
 
 // Constructor.
 MuonCalibStreamFileInputSvc::MuonCalibStreamFileInputSvc(const std::string& name, ISvcLocator* svcloc) :
-    MuonCalibStreamInputSvc(name, svcloc) {}
+    base_class(name, svcloc) {}
 
 // Destructor.
 MuonCalibStreamFileInputSvc::~MuonCalibStreamFileInputSvc() {}

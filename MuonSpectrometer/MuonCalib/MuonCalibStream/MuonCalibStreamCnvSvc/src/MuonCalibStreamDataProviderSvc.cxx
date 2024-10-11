@@ -6,7 +6,7 @@
 
 // Constructor.
 MuonCalibStreamDataProviderSvc::MuonCalibStreamDataProviderSvc(const std::string &name, ISvcLocator *svcloc) :
-    AthService(name, svcloc),
+    base_class(name, svcloc),
     m_lumiBlockCoolSvc("MuonCalibRunLumiBlockCoolSvc", "MuonCalibRunLumiBlockCoolSvc"),
     m_run_number_from_cool(false),
     m_lumi_block_number_from_cool(false),
@@ -31,18 +31,6 @@ MuonCalibStreamDataProviderSvc::~MuonCalibStreamDataProviderSvc() {}
 // Initialization
 StatusCode MuonCalibStreamDataProviderSvc::initialize() {
     if (m_run_number_from_cool || m_lumi_block_number_from_cool) { ATH_CHECK(m_lumiBlockCoolSvc.retrieve()); }
-    return StatusCode::SUCCESS;
-}
-
-/// Query interface
-StatusCode MuonCalibStreamDataProviderSvc::queryInterface(const InterfaceID &riid, void **ppvInterface) {
-    if (IMuonCalibStreamDataProviderSvc::interfaceID().versionMatch(riid)) {
-        *ppvInterface = (IMuonCalibStreamDataProviderSvc *)this;
-    } else {
-        return AthService::queryInterface(riid, ppvInterface);
-    }
-
-    addRef();
     return StatusCode::SUCCESS;
 }
 
