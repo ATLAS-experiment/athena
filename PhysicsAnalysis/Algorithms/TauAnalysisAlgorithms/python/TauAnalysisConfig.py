@@ -65,7 +65,7 @@ class TauCalibrationConfig (ConfigBlock):
             alg.prefix = 'truth_'
 
             # these are "_ListHelper" objects, and not "list", need to copy to lists to allow concatenate
-            for var in ['DecayMode'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.charDecorations[:]:
+            for var in ['DecayMode', 'ParticleType'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.charDecorations[:]:
                 branchName = alg.prefix+var
                 config.addOutputVar (self.containerName, branchName, branchName, noSys=True)
 
