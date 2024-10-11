@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AddressRemappingSvc.cxx
@@ -33,7 +33,7 @@
 
 //________________________________________________________________________________
 AddressRemappingSvc::AddressRemappingSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-  extends1<AthService, Athena::IInputRename>(name, pSvcLocator),
+  base_class(name, pSvcLocator),
   m_clidSvc("ClassIDSvc", name),
   m_RCUSvc("Athena::RCUSvc", name),
   m_oldTads(),

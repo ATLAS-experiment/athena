@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddressProviderSvc.h"
 
@@ -10,7 +10,7 @@
 
 /// Standard constructor
 MuonCalibStreamAddressProviderSvc::MuonCalibStreamAddressProviderSvc(const std::string &name, ISvcLocator *svc) :
-    AthService(name, svc), m_dataSvc(nullptr) {
+    base_class(name, svc), m_dataSvc(nullptr) {
     m_typeNames.push_back("Muon::MdtPrepDataContainer/MDT_DriftCircles");
     m_typeNames.push_back("RpcPadContainer/RPCPAD");
     m_typeNames.push_back("TgcRdoContainer/TGCRDO");

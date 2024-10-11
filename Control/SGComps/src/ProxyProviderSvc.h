@@ -1,13 +1,12 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ProxyProviderSvc.h
     @brief manages the address providers and add proxies on demand to the store
   * @author Paolo Calafiura <pcalafiura@lbl.gov> - ATLAS Collaboration
-  * $Id: ProxyProviderSvc.h,v 1.3 2008-03-05 21:57:44 gemmeren Exp $
   */
 
 
@@ -110,7 +109,7 @@ private:
   /// the providers we know about. WE DON'T OWN THEM
   std::list<IAddressProvider*> m_providers; 
   /// Persistency Service
-  IConversionSvc* m_pDataLoader{nullptr};   
+  ServiceHandle<IConversionSvc> m_pDataLoader;
 
   /// List of pending stores on which to run preLoadProxies().
   std::vector<IProxyRegistry*> m_pendingLoad;

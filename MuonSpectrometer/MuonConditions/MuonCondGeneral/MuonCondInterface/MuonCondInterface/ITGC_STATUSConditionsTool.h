@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDINTERFACE_ITGC_STATUSCONDITIONSTOOL_H
@@ -18,11 +18,9 @@
 //* retrieving of tables from DB virtual interface
 //*********************************************************
 
-static const InterfaceID IID_ITGC_STATUSConditionsTool("ITGC_STATUSConditionsTool", 1, 0);
-
-class ITGC_STATUSConditionsTool : virtual public IAlgTool, virtual public IAddressProvider {
+class ITGC_STATUSConditionsTool : virtual public extend_interfaces<IAlgTool, IAddressProvider> {
 public:
-    static const InterfaceID& interfaceID() { return IID_ITGC_STATUSConditionsTool; };
+    DeclareInterfaceID(ITGC_STATUSConditionsTool, 1, 0);
 
     virtual std::string FolderName() const = 0;
 

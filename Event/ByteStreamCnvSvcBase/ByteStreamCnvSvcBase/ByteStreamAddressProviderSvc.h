@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_BYTESTREAMADDRESSPROVIDERSVC_H
@@ -16,14 +16,10 @@
 
 class IClassIDSvc;
 
-template <class TYPE> class SvcFactory;
-
 /** @class ByteStreamAddressProviderSvc
-    @brief An concrete IAddressProvider
+    @brief A concrete IAddressProvider
 */
-class ByteStreamAddressProviderSvc : public ::AthService, public virtual IAddressProvider {
-   /// Allow the factory class access to the constructor
-   friend class SvcFactory<ByteStreamAddressProviderSvc>;
+class ByteStreamAddressProviderSvc : public extends<AthService, IAddressProvider> {
 
 public:
    ByteStreamAddressProviderSvc(const std::string& name, ISvcLocator* pSvcLocator);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDINTERFACE_ITGCTRIGGERDBTOOL_H
@@ -10,15 +10,13 @@
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "GaudiKernel/IAlgTool.h"
 
-// class TgcIdHelper;
-
 #include <string>
 #include <vector>
 
-static const InterfaceID IID_ITGCTriggerDbTool("ITGCTriggerDbTool", 1, 0);
-
-class ITGCTriggerDbTool : virtual public IAlgTool, virtual public IAddressProvider {
+class ITGCTriggerDbTool : virtual public extend_interfaces<IAlgTool, IAddressProvider> {
 public:
+    DeclareInterfaceID(ITGCTriggerDbTool, 1, 0);
+
     enum { CW_BW = 0, CW_EIFI = 1, CW_TILE = 2, CW_NUM = 3 };
 
     virtual std::string getFolderName(int cwtype) const = 0;
@@ -29,8 +27,6 @@ public:
     virtual std::string getVersion(int cwtype, int channel = 0) const = 0;
     virtual std::string getType(int cwtype, int channel = 0) const = 0;
     virtual bool isActive(int cwtype, int channel = 0) const = 0;
-
-    static const InterfaceID& interfaceID() { return IID_ITGCTriggerDbTool; };
 
     virtual StatusCode loadParameters(IOVSVC_CALLBACK_ARGS) = 0;
 };
