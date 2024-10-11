@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHENAEVTLOOPPRESELECTTOOL_H
@@ -19,22 +19,14 @@
 
 class EventIDBase;
 
-class IAthenaEvtLoopPreSelectTool : virtual public IAlgTool {
+class IAthenaEvtLoopPreSelectTool : virtual public extend_interfaces<IAlgTool> {
 
 public:    
 
-  static const InterfaceID& interfaceID() {
-    static const InterfaceID IID_IAthenaEvtLoopPreSelectTool ("IAthenaEvtLoopPreSelectTool", 1, 0 );
-    return IID_IAthenaEvtLoopPreSelectTool;
-  }
-  
-  
-  /// Initialize AlgTool
-  virtual StatusCode initialize() = 0;
+  DeclareInterfaceID(IAthenaEvtLoopPreSelectTool, 1, 0 );
+
   /// called for each event to decide if the event should be passed to the EventSelector
   virtual bool passEvent(const EventIDBase& pEvent) = 0;
-  /// Finalize AlgTool
-  virtual StatusCode finalize() = 0;
 };
 
 #endif

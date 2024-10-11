@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GoodRunsLists_GoodRunsListSelectorTool_H
@@ -32,14 +32,11 @@ namespace Root {
   class TGoodRunsListReader;
 }
 
-class GoodRunsListSelectorTool : virtual public AthAlgTool, virtual public IGoodRunsListSelectorTool, virtual public IAthenaEvtLoopPreSelectTool
+class GoodRunsListSelectorTool : public extends<AthAlgTool, IGoodRunsListSelectorTool, IAthenaEvtLoopPreSelectTool>
 {
  public:    
   GoodRunsListSelectorTool( const std::string&, const std::string&, const IInterface* );
   virtual ~GoodRunsListSelectorTool();
-
-  /// To allow access to the IGoodRunsListSelectorTool interface
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
 
   /// Initialize AlgTool
   StatusCode initialize();
@@ -47,12 +44,6 @@ class GoodRunsListSelectorTool : virtual public AthAlgTool, virtual public IGood
   bool passEvent(const EventIDBase& pEvent) ;
   /// Finalize AlgTool
   StatusCode finalize();
-
-  ///// to resolve possible conflicts with IProperty::interfaceID()
-  //static const InterfaceID& interfaceID() { 
-  //  return IAthenaEvtLoopPreSelectTool::interfaceID();
-  //  //return IGoodRunsListSelectorTool::interfaceID(); 
-  //}
 
   /// called for each event by GoodRunsListSelectorAlg to decide if the event should be passed
   bool passRunLB( int runNumber, int lumiBlockNr,

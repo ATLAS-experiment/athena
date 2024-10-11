@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GoodRunsLists_TriggerRegistryTool_H
@@ -19,14 +19,11 @@
  *  @brief This file contains the class definition for the TriggerRegistryTool class.
  **/
 
-class TriggerRegistryTool : virtual public AthAlgTool, virtual public ITriggerRegistryTool
+class TriggerRegistryTool : public extends<AthAlgTool, ITriggerRegistryTool>
 {
  public:    
   TriggerRegistryTool( const std::string&, const std::string&, const IInterface* );
   virtual ~TriggerRegistryTool();
-
-  /// To allow access to the ITriggerRegistryTool interface
-  StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
 
   /// register trigger
   bool registerTriggerSelector(const TString& name, const TString& regexpr, const std::list<TString>& trigpar);

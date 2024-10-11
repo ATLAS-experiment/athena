@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GoodRunsLists_ITriggerRegistryTool_H
@@ -12,13 +12,10 @@
 
 typedef std::pair< TString, std::list<TString> > tvtPair;
 
-class ITriggerRegistryTool : virtual public IAlgTool {
+class ITriggerRegistryTool : virtual public extend_interfaces<IAlgTool> {
 public:
 
-   static const InterfaceID& interfaceID() {
-     static const InterfaceID ITriggerRegistryToolID( "ITriggerRegistryTool", 1, 0 );
-     return ITriggerRegistryToolID;
-   }
+   DeclareInterfaceID(ITriggerRegistryTool, 1, 0 );
 
    /// register grl/brl combination 
    virtual bool registerTriggerSelector(const TString& name, const TString& regexpr, const std::list<TString>& trigpar) = 0 ;

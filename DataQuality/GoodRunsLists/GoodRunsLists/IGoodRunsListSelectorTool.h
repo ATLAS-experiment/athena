@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GoodRunsLists_IGoodRunsListSelectorTool_H
@@ -16,13 +16,10 @@ namespace Root {
   class TGRLCollection;
 }
 
-class IGoodRunsListSelectorTool : virtual public IAlgTool {
+class IGoodRunsListSelectorTool : virtual public extend_interfaces<IAlgTool> {
 public:
 
-   static const InterfaceID& interfaceID() {
-     static const InterfaceID IGoodRunsListSelectorToolID( "IGoodRunsListSelectorTool", 1, 0 );
-     return IGoodRunsListSelectorToolID;
-   }
+   DeclareInterfaceID(IGoodRunsListSelectorTool, 1, 0 );
 
    /// DQ Test of run,LBs combination.
    virtual bool passRunLB( int runNumber, int lumiBlockNr,

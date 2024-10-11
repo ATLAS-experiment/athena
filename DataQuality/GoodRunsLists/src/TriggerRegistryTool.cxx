@@ -1,32 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "GoodRunsLists/TriggerRegistryTool.h"
 
 TriggerRegistryTool::TriggerRegistryTool( const std::string& type, const std::string& name, const IInterface* parent ) 
- : AthAlgTool( type, name, parent )
+ : base_class( type, name, parent )
 {
-  declareInterface<ITriggerRegistryTool>(this);
 }
 
 
 TriggerRegistryTool::~TriggerRegistryTool()
 {
-}
-
-
-StatusCode 
-TriggerRegistryTool::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == ITriggerRegistryTool::interfaceID() )  {
-     *ppvIf = (ITriggerRegistryTool*)this;
-     addRef();
-     return StatusCode::SUCCESS;
-  }
-
-  return AthAlgTool::queryInterface( riid, ppvIf );
 }
 
 
