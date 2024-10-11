@@ -31,6 +31,7 @@
 #include "src/ITkStripCablingAlg.h"
 #include "StoreGate/ReadHandleKey.h"
 #include <string>
+#include <sstream>      // std::ostringstream
 #include <memory>
 
 namespace utf = boost::unit_test;
@@ -106,6 +107,14 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
       IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
       auto pITkId=std::make_unique<SCT_ID>();
       BOOST_TEST(pITkId->initialize_from_dictionary(idd)==0);
+      std::ostringstream os;
+      ExpandedIdentifier e{};
+      for(auto i = pITkId->wafer_begin();i!=pITkId->wafer_end();++i){
+        pITkId->get_expanded_id(*i,e);
+        os<<*i<<" "<<e<<"\n";
+      }
+      BOOST_TEST_MESSAGE("Wafer Identifiers and Expanded Identifiers {2/2/Bec/LayerDisk/Phi/Eta/Side/0/0}:");
+      BOOST_TEST_MESSAGE(os.str());
       BOOST_TEST(detStore->record(std::move(pITkId), "SCT_ID").isSuccess());
     }//Now the ITkStripID is in StoreGate, ready to be used by the cabling
     ITkStripCablingAlg a("MyAlg", g.svcLoc);
@@ -132,6 +141,10 @@ BOOST_AUTO_TEST_SUITE(ITkStripCablingAlgTest )
     const EventIDRange* range2p = nullptr;
     BOOST_TEST (cc->find (eidRun1, data, &range2p));
     BOOST_TEST (not data->empty());
+    std::ostringstream s;
+    s<<*data<<std::endl;
+    BOOST_TEST_MESSAGE("Cabling entries: ");
+    BOOST_TEST_MESSAGE(s.str());
     //
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
