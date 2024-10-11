@@ -7,9 +7,9 @@
 
 
 
-from getMenu import getMenu
-from Digraph import Digraph
-from dot import dot
+from .getMenu import getMenu
+from .Digraph import Digraph
+from .dot import dot
 
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
