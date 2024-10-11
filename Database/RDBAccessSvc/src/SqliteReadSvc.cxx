@@ -17,7 +17,7 @@
 #include "RDBQuery.h"
 
 SqliteReadSvc::SqliteReadSvc(const std::string& name, ISvcLocator* svc)
-  : AthService(name,svc)
+  : base_class(name,svc)
 {
 }
 
@@ -26,19 +26,6 @@ StatusCode SqliteReadSvc::finalize()
   m_recordsets.clear();
   shutdown("");
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode SqliteReadSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if (IID_IRDBAccessSvc == riid) {
-    *ppvInterface = (IRDBAccessSvc*)this;
-  }
-  else { 
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-
-  addRef();
   return StatusCode::SUCCESS;
 }
 

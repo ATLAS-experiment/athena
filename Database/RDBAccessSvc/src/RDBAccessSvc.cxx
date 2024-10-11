@@ -9,7 +9,6 @@
  *
  * @author Vakho Tsulaia <Vakhtang.Tsulaia@cern.ch>
  *
- * $Id: RDBAccessSvc.cxx,v 1.41 2008-10-13 12:24:09 tsulaia Exp $
  */
 
 #include "RDBAccessSvc.h"
@@ -35,7 +34,7 @@
 #include <thread>
 
 RDBAccessSvc::RDBAccessSvc(const std::string& name, ISvcLocator* svc)
-  : AthService(name,svc)
+  : base_class(name,svc)
 {
 }
 
@@ -519,18 +518,5 @@ StatusCode RDBAccessSvc::finalize()
     shutdown(sessionName);
   }
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode RDBAccessSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if (IID_IRDBAccessSvc == riid) {
-    *ppvInterface = (IRDBAccessSvc*)this;
-  }
-  else { 
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-
-  addRef();
   return StatusCode::SUCCESS;
 }
