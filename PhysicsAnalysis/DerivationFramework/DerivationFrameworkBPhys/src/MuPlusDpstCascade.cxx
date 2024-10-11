@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // MuPlusDpstCascade.cxx, (c) ATLAS Detector software
@@ -8,7 +8,6 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -44,9 +43,8 @@ namespace DerivationFramework {
         ANA_CHECK(m_trackSelectionTools->initialize() );
         //=====================================================================
 
-        IPartPropSvc* partPropSvc = nullptr;
-        ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-        auto pdt = partPropSvc->PDT();
+        ATH_CHECK( m_partPropSvc.retrieve() );
+        auto pdt = m_partPropSvc->PDT();
 
         // retrieve particle masses
         if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);

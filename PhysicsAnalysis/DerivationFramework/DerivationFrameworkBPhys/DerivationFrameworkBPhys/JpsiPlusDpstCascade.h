@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef JPSIPLUSDPSTCASCADE_H
 #define JPSIPLUSDPSTCASCADE_H
@@ -11,6 +11,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
@@ -22,7 +23,6 @@ namespace Trk {
     class IVertexCascadeFitter;
     class VxCascadeInfo;
     class V0Tools;
-    class ParticleDataTable;
 }
 
 namespace DerivationFramework {
@@ -80,6 +80,7 @@ namespace DerivationFramework {
         ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
         ToolHandle < Trk::V0Tools >                      m_V0Tools;
         ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
         bool        m_refitPV;
         std::string m_refPVContainerName;

@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
@@ -26,7 +27,6 @@ namespace Trk {
     class VxCascadeInfo;
     class V0Tools;
     class IExtrapolator;
-    class ParticleDataTable;
 }
 namespace InDet { class VertexPointEstimator; }
 namespace DerivationFramework {
@@ -123,6 +123,7 @@ namespace DerivationFramework {
     ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
     ToolHandle < InDet::VertexPointEstimator >       m_vertexEstimator;
     ToolHandle < Trk::IExtrapolator >                m_extrapolator;
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool   m_refitPV;
     int    m_PV_max;

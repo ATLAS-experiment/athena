@@ -23,9 +23,11 @@ def BPHY24Cfg(flags):
     thinPassFlagsList = [] # List of pass-flags in the reconstructed candidates to se for the thinning
     finalCandidateList = []
 
+    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
+    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter

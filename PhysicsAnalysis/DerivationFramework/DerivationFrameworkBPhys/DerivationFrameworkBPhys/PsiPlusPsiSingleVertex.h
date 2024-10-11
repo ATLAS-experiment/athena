@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
@@ -16,7 +17,6 @@
 namespace Trk {
     class TrkVKalVrtFitter;
     class V0Tools;
-    class ParticleDataTable;
 }
 
 namespace DerivationFramework {
@@ -85,6 +85,7 @@ namespace DerivationFramework {
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
     ToolHandle < Trk::V0Tools >                      m_V0Tools;
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool        m_refitPV;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;

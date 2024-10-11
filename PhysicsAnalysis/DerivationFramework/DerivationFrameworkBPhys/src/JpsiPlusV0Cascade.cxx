@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // JpsiPlusV0Cascade.cxx, (c) ATLAS Detector software
@@ -8,7 +8,6 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -53,13 +52,8 @@ namespace DerivationFramework {
         }
 
         ATH_CHECK(m_eventInfo_key.initialize());
-        IPartPropSvc* partPropSvc = 0;
-        StatusCode sc = service("PartPropSvc", partPropSvc, true);
-        if (sc.isFailure()) {
-          msg(MSG::ERROR) << "Could not initialize Particle Properties Service" << endmsg;
-          return StatusCode::FAILURE;
-        }
-        const HepPDT::ParticleDataTable* pdt = partPropSvc->PDT();
+        ATH_CHECK( m_partPropSvc.retrieve() );
+        const HepPDT::ParticleDataTable* pdt = m_partPropSvc->PDT();
 
         // retrieve particle masses
         m_mass_electron = BPhysPVCascadeTools::getParticleMass(pdt, MC::ELECTRON);

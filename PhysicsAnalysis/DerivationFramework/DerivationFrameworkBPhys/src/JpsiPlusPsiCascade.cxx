@@ -7,7 +7,6 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -41,9 +40,8 @@ namespace DerivationFramework {
     ATH_CHECK( m_cascadeOutputsKeys.initialize() );
     ATH_CHECK( m_eventInfo_key.initialize() );
 
-    IPartPropSvc* partPropSvc = nullptr;
-    ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-    auto pdt = partPropSvc->PDT();
+    ATH_CHECK( m_partPropSvc.retrieve() );
+    auto pdt = m_partPropSvc->PDT();
 
     // retrieve particle masses
     // https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/TruthUtils/TruthUtils/AtlasPID.h

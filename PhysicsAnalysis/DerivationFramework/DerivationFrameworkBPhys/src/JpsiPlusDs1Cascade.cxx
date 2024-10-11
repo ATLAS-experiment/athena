@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // JpsiPlusDs1Cascade.cxx, (c) ATLAS Detector software
@@ -8,7 +8,6 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
@@ -44,9 +43,8 @@ namespace DerivationFramework {
         // Get the beam spot service
         ATH_CHECK(m_eventInfo_key.initialize());
 
-        IPartPropSvc* partPropSvc = nullptr;
-        ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-        m_particleDataTable = partPropSvc->PDT();
+        ATH_CHECK( m_partPropSvc.retrieve() );
+        m_particleDataTable = m_partPropSvc->PDT();
 
         // retrieve particle masses
         if(m_mass_jpsi < 0. ) m_mass_jpsi = getParticleMass(MC::JPSI);
