@@ -69,6 +69,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSeedsPerSpM);
     ATH_MSG_DEBUG("   " << m_interactionPointCut);
     ATH_MSG_DEBUG("   " << m_zBinsCustomLooping);
+    ATH_MSG_DEBUG("   " << m_rBinsCustomLooping);
     ATH_MSG_DEBUG("   " << m_useVariableMiddleSPRange);
     if ( m_useVariableMiddleSPRange ) {
       ATH_MSG_DEBUG("   " << m_deltaRMiddleMinSPRange);
@@ -175,6 +176,15 @@ namespace ActsTrk {
       }
     }
 
+    if (m_rBinsCustomLooping.size() != 0) {
+      for (std::size_t i : m_rBinsCustomLooping) {
+	if (i >= m_rBinEdges.size()) {
+	  ATH_MSG_ERROR("Inconsistent config rBinsCustomLooping contains bins that are not in rBinEdges");
+          return StatusCode::FAILURE;
+        }
+      }
+    }
+
     ATH_CHECK( prepareConfiguration() );
 
     m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 3ul > >(m_numPhiNeighbors.value(),
@@ -186,7 +196,7 @@ namespace ActsTrk {
 
     m_navigation[0ul] = {};
     m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
-    m_navigation[2ul] = {};
+    m_navigation[2ul] = m_rBinsCustomLooping.value();
     
     return StatusCode::SUCCESS;
   }
