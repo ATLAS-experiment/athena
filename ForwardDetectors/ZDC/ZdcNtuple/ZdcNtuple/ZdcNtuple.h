@@ -79,7 +79,9 @@ public:
   bool lhcf2022zdc;
   bool lhcf2022afp;
   bool pbpb2023;
-  bool enableRPD;
+  bool enableZDC; //
+  bool enableRPD; //
+  bool enableRPDAmp; //
   bool enableCentroid;
 
   bool doZdcCalib;
