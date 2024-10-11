@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 #include "InDetSecVxFinderTool/JetFitterTrackSelectorTool.h"
 #include <cassert>
@@ -95,17 +95,36 @@ using namespace InDet;
       return selectedTracks;
    }
 
+ 
+   /// Return the name of the decoration we produce.
+   std::string JetFitterTrackSelectorTool::decorationName() const
+   {
+     std::vector<std::string> out;
+     std::string toolname = this->name();
+     std::string delimiter = "_";
+     std::string::size_type firstDelimiter = toolname.find(delimiter);
+     std::string sub = toolname.substr(0, firstDelimiter);
+     if (m_revertFromPositiveToNegativeTags) {
+       sub += "FLIP_SIGN";
+     }
+     return std::string("JetFitter_TrackCompatibility_") + sub;
+   }
+
+   /// Return a list of the names of track decorations created by this tool,
+   /// in order to allow them to be locked when the calling algorithm
+   /// completes.
+   std::vector<std::string>
+   JetFitterTrackSelectorTool::trackDecorationNames() const
+   {
+     return std::vector<std::string> { decorationName() };
+   }
+
     int JetFitterTrackSelectorTool::computeTrackCompatibility( const xAOD::Vertex &primaryVertex,
 							    const TLorentzVector &jetMomentum,
 							       const xAOD::TrackParticle &track ) const {
 
       // Decorators for tracks
-      std::string toolname = this->name();
-      std::string delimiter = "_";
-      std::string::size_type firstDelimiter = toolname.find(delimiter);
-      std::string sub = toolname.substr(0, firstDelimiter);
-      std::string decoratorName = std::string("JetFitter_TrackCompatibility_") + sub;
-      SG::AuxElement::Decorator< float > compatibilityDecorator(decoratorName.c_str());
+      SG::AuxElement::Decorator< float > compatibilityDecorator(decorationName());
       
       // Apply track filter
       if ( !m_trkFilter->decision( track, &primaryVertex ) ) {

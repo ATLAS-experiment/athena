@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -65,7 +65,14 @@ public:
 						      const TLorentzVector & jetMomentum,
 						      const std::vector<const xAOD::IParticle*> & inputTracks) const=0;
     
-    
+
+    /// Return a list of the names of track decorations created by this tool,
+    /// in order to allow them to be locked when the calling algorithm
+    /// completes.  Return an empty list by default.
+    virtual std::vector<std::string> trackDecorationNames() const
+    {
+      return std::vector<std::string>();
+    }
   };
 }
 #endif
