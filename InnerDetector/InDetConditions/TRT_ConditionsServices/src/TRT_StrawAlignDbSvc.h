@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWALIGNDBSVC_H
@@ -30,7 +30,7 @@ namespace InDetDD {
 /** @class TRT_StrawAlignDbSvc
   interface to TRT straw alignment constants
 */
-class TRT_StrawAlignDbSvc: public AthService, virtual public ITRT_StrawAlignDbSvc
+class TRT_StrawAlignDbSvc: public extends<AthService, ITRT_StrawAlignDbSvc>
 {
  public:
   
@@ -45,9 +45,6 @@ class TRT_StrawAlignDbSvc: public AthService, virtual public ITRT_StrawAlignDbSv
 
   /// tool finalize
   virtual StatusCode finalize();
-
-  /// access to interfaceID
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) ;
 
   // methods to access straw alignment data
 
@@ -170,16 +167,6 @@ inline void
 TRT_StrawAlignDbSvc::setDx( const Identifier& id,float dx1, float dx2, float dxerr ) 
 {
   setDx( trtcondid(id,TRTCond::ExpandedIdentifier::STRAW), dx1, dx2, dxerr) ;
-}
-
-inline StatusCode TRT_StrawAlignDbSvc::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == ITRT_StrawAlignDbSvc::interfaceID() )  {
-    *ppvIf = dynamic_cast<ITRT_StrawAlignDbSvc*>(this);
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-  return AthService::queryInterface( riid, ppvIf );
 }
 
 #endif //  TRT_STRAWALIGNDBSVC_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CONDITIONSTESTSVC_H
@@ -16,9 +16,9 @@
 
 class Identifier;
 
-class TRT_ConditionsTestSvc : public AthService,
-  virtual public ITRT_ConditionsSvc,
-  virtual public ITRT_ConditionsTestSvc
+class TRT_ConditionsTestSvc : public extends<AthService,
+                                             ITRT_ConditionsSvc,
+                                             ITRT_ConditionsTestSvc>
 {
 
  public:
@@ -28,8 +28,6 @@ class TRT_ConditionsTestSvc : public AthService,
 
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface );
 
   /// @name Functions inherited from ITRT_ConditionsTestSvc
   //@{
@@ -57,24 +55,7 @@ class TRT_ConditionsTestSvc : public AthService,
 
 };
 
-/// Query Interface
-inline StatusCode TRT_ConditionsTestSvc::queryInterface( const InterfaceID& riid, void** ppvInterface ) {
-  if ( ITRT_ConditionsSvc::interfaceID() == riid ) {
-    ATH_MSG_DEBUG("TRT_ConditionsTestSvc interface queried as ITRT_ConditionsSvc.");
-    *ppvInterface = dynamic_cast<ITRT_ConditionsSvc*>(this);
-    addRef();
-  } else if ( ITRT_ConditionsTestSvc::interfaceID() == riid ) {
-    ATH_MSG_DEBUG("TRT_ConditionsTestSvc interface queried as ITRT_ConditionsTestSvc.");
-    *ppvInterface = dynamic_cast<ITRT_ConditionsTestSvc*>(this);
-    addRef();
-  } else {
-    ATH_MSG_DEBUG("TRT_ConditionsTestSvc interface queried as Service.");
-    return AthService::queryInterface( riid, ppvInterface );
-  }
-  return StatusCode::SUCCESS;
-}
-
-inline StatusCode TRT_ConditionsTestSvc::test( const Identifier& ) {  
+inline StatusCode TRT_ConditionsTestSvc::test( const Identifier& ) {
   ATH_MSG_INFO("Hello World! From TRT_ConditionsTestSvc.");
   return StatusCode::SUCCESS;
 }

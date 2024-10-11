@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_DCS_CONDITIONSSVC_H
@@ -43,6 +43,8 @@ namespace InDet {
 class ITRT_DCS_ConditionsSvc : virtual public IService {
 
  public:
+  /// Interface ID
+  DeclareInterfaceID(ITRT_DCS_ConditionsSvc,1,0);
 
   /// Returns the DCS conditions StatusFlag for a given identifier.
   virtual InDet::TRT_DCS_StatusFlag getFlag( const Identifier ) = 0;
@@ -70,15 +72,6 @@ class ITRT_DCS_ConditionsSvc : virtual public IService {
   virtual void monitorBarrel() = 0;
   virtual void monitorEndcapA() = 0;
   virtual void monitorEndcapC() = 0;
-
-  /// Interface ID
-  static const InterfaceID& interfaceID();
-
 };
-
-inline const InterfaceID& ITRT_DCS_ConditionsSvc::interfaceID() {
-  static const InterfaceID IID("ITRT_DCS_ConditionsSvc",1,0);
-  return IID;
-}
 
 #endif // ITRT_DCS_CONDITIONSSVC_H

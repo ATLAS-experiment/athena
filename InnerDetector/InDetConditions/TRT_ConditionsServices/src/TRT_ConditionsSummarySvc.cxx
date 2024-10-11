@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,7 +19,7 @@
 
 // Constructor
 TRT_ConditionsSummarySvc::TRT_ConditionsSummarySvc( const std::string& name, ISvcLocator* pSvcLocator ) : 
-  AthService(name, pSvcLocator),
+  base_class(name, pSvcLocator),
   m_svcCollection(name),
   m_manager(nullptr),
   m_trtid(nullptr)
@@ -53,12 +53,8 @@ TRT_ConditionsSummarySvc::initialize(){
   }
 
   // Get DetectorStore service
-  StoreGateSvc* detStore;
-  sc = service("DetectorStore", detStore);
-  if (sc.isFailure()){
-    msg(MSG::FATAL) << "DetectorStore service not found!" << endmsg;
-    return sc;
-  }
+  SmartIF<StoreGateSvc> detStore{service("DetectorStore")};
+  ATH_CHECK( detStore.isValid() );
   
   // Retrieve TRT_DetectorManager
   std::string managerName;

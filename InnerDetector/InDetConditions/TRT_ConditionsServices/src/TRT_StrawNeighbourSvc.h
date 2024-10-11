@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWNEIGHBOURSVC_H
@@ -19,8 +19,7 @@
 class TRT_ID;
 class StoreGateSvc;
 
-class TRT_StrawNeighbourSvc: public AthService,
-  virtual public ITRT_StrawNeighbourSvc
+class TRT_StrawNeighbourSvc: public extends<AthService, ITRT_StrawNeighbourSvc>
 {
  public:
   /// constructor
@@ -34,9 +33,6 @@ class TRT_StrawNeighbourSvc: public AthService,
 
   /// tool finalize
   virtual StatusCode finalize();
-
-  /// access to interfaceID
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) ;
 
   /// public methods
   void getPad(Identifier offlineID, int& pad);
@@ -106,22 +102,6 @@ class TRT_StrawNeighbourSvc: public AthService,
   int m_endcapChipMapC0[12]{};
   int m_endcapChipMapC8[12]{};
 };
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//  inline methods
-////////////////////////////////////////////////////////////////////////////////////////////
-inline StatusCode TRT_StrawNeighbourSvc::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == ITRT_StrawNeighbourSvc::interfaceID() )  {
-    *ppvIf = dynamic_cast<ITRT_StrawNeighbourSvc*>(this);
-    addRef();
-  } else {
-    return AthService::queryInterface( riid, ppvIf );
-  }
-  return StatusCode::SUCCESS;
-}
 
 
 inline int sign(int a) { return (a == 0) ? 0 : (a<0 ? -1 : 1); }

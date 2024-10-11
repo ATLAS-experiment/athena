@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_STRAWNEIGHBOURSVC_H
@@ -23,7 +23,8 @@ class ITRT_StrawNeighbourSvc: virtual public IService
 {
  public:
 
-  static const InterfaceID& interfaceID();  
+  DeclareInterfaceID(ITRT_StrawNeighbourSvc,1,0);
+
   virtual void getPad(Identifier , int& ) = 0;
 
   virtual void getChip(Identifier , int& ) = 0; 
@@ -54,18 +55,5 @@ class ITRT_StrawNeighbourSvc: virtual public IService
   virtual int getRing( const Identifier &id ) = 0;
 
 };
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//  inline methods
-////////////////////////////////////////////////////////////////////////////////////////////
-
-///  interfaces
-
-inline const InterfaceID& ITRT_StrawNeighbourSvc::interfaceID() {
-  static const InterfaceID IID("ITRT_StrawNeighbourSvc",1,0);
-  return IID;
-}
 
 #endif 

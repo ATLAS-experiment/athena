@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_ALIGNDBSVC_H
@@ -30,7 +30,7 @@ class ITRT_AlignDbSvc: virtual public IService
  public:
   
   /**  access to interfaceID */
-  static const InterfaceID& interfaceID() ;
+  DeclareInterfaceID(ITRT_AlignDbSvc,1,0);
   
   /** Call back function for alignment folders */
   virtual StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS) =0;
@@ -60,9 +60,4 @@ class ITRT_AlignDbSvc: virtual public IService
   virtual const Amg::Transform3D* getAlignmentTransformPtr(Identifier const& ident, unsigned int level) const =0;
 };
 
-
-inline const InterfaceID& ITRT_AlignDbSvc::interfaceID() {
-  static const InterfaceID id("ITRT_AlignDbSvc",1,0);
-  return id;
-}
-#endif 
+#endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -21,7 +21,7 @@
 /////
 TRT_ByteStream_ConditionsSvc::TRT_ByteStream_ConditionsSvc( const std::string& name,
 							    ISvcLocator* pSvcLocator ) :
-  AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_evtStore("StoreGateSvc",name),
   m_num_l1id_errors(0),
   m_num_bcid_errors(0),
@@ -56,10 +56,9 @@ StatusCode TRT_ByteStream_ConditionsSvc::initialize()
    * Ask to be informed at the beginning of each new event so that we
    * can reset.
    */
-  IIncidentSvc* incsvc;
-  StatusCode sc = service("IncidentSvc", incsvc);
-  int priority = 100;
-  if( sc.isSuccess() ) 
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
+  const int priority = 100;
+  if( incsvc.isValid() )
   {
     incsvc->addListener( this, "BeginEvent", priority);
   }

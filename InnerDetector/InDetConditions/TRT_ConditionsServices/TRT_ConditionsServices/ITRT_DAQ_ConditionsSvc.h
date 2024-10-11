@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_DAQ_CONDITIONSSVC_H
@@ -21,7 +21,7 @@ class ITRT_DAQ_ConditionsSvc : virtual public IService {
  public:
 
   /// Interface ID
-  static const InterfaceID& interfaceID();
+  DeclareInterfaceID(ITRT_DAQ_ConditionsSvc,1,0);
 
   /// ConditionsSummaryStatus for a ROD ID
   /** Similar to ITRT_ConditionsSvc::condSummaryStatus,
@@ -30,10 +30,5 @@ class ITRT_DAQ_ConditionsSvc : virtual public IService {
   virtual InDet::TRT_CondFlag condSummaryStatus( unsigned int ) = 0;
 
 };
-
-inline const InterfaceID& ITRT_DAQ_ConditionsSvc::interfaceID() {
-  static const InterfaceID IID("ITRT_DAQ_ConditionsSvc",1,0);
-  return IID;
-}
 
 #endif // ITRT_DAQ_CONDITIONSSVC_H

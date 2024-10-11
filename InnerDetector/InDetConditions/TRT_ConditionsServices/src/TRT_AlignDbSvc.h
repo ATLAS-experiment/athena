@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_ALIGNDBSVC_H
@@ -42,7 +42,7 @@ class TRT_ID ;
 /** @class TRT_AlignDbSvc
     Service to manage TRT alignment data
 */
-class TRT_AlignDbSvc: public AthService, virtual public ITRT_AlignDbSvc
+class TRT_AlignDbSvc: public extends<AthService, ITRT_AlignDbSvc>
 {
  public:
   
@@ -59,8 +59,6 @@ class TRT_AlignDbSvc: public AthService, virtual public ITRT_AlignDbSvc
   virtual StatusCode finalize();
 
   // TOOL METHODS
-  /// access to interfaceID
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) ;
 
   /** Call back function for alignment folders */
   StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS);
@@ -176,14 +174,4 @@ class TRT_AlignDbSvc: public AthService, virtual public ITRT_AlignDbSvc
   bool m_forceUserDBConfig;     // DB folder scheme is auto-config now; This allows user override
 };
 
-inline StatusCode TRT_AlignDbSvc::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == ITRT_AlignDbSvc::interfaceID() )  {
-    *ppvIf = dynamic_cast<ITRT_AlignDbSvc*>(this);
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-  return AthService::queryInterface( riid, ppvIf );
-}
-
-#endif 
+#endif

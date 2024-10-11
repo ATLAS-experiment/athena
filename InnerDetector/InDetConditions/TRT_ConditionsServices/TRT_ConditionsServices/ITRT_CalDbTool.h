@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_CALDBTOOL_H
@@ -22,7 +22,6 @@ namespace TRTCond {
   class RtRelation;
 }
 
-static const InterfaceID IID_ITRT_CalDbTool("ITRT_CalDbTool",1,0);
 
 /** @class ITRT_CalDbTool
  *  abstract interface to TRT calibration constants
@@ -30,11 +29,11 @@ static const InterfaceID IID_ITRT_CalDbTool("ITRT_CalDbTool",1,0);
 class ITRT_CalDbTool: virtual public IAlgTool
 {
  public:
+  DeclareInterfaceID(ITRT_CalDbTool,1,0);
+
   typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
   
-  static const InterfaceID& interfaceID();
-
   virtual float getT0( const Identifier& ,  int level = TRTCond::ExpandedIdentifier::STRAW ) const = 0;
   virtual const TRTCond::RtRelation* getRtRelation( const Identifier& , int level = TRTCond::ExpandedIdentifier::STRAW ) const  = 0;
   virtual const TRTCond::RtRelation* getErrors( const Identifier& , int level = TRTCond::ExpandedIdentifier::STRAW ) const  = 0;
@@ -49,9 +48,5 @@ class ITRT_CalDbTool: virtual public IAlgTool
   virtual const StrawT0Container* getT0Container() const = 0 ;
 
 };
-
-inline const InterfaceID& ITRT_CalDbTool::interfaceID() {
-  return IID_ITRT_CalDbTool;
-}
 
 #endif //  ITRT_CALDBTOOL_H

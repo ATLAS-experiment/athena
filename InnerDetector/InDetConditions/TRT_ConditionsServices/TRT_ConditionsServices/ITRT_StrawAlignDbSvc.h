@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_STRAWALIGNDBSVC_H
@@ -31,7 +31,8 @@ class ITRT_StrawAlignDbSvc: virtual public IService
 {
  public:
   typedef TRTCond::StrawDxContainer StrawDxContainer ;
-  static const InterfaceID& interfaceID() ;
+  DeclareInterfaceID(ITRT_StrawAlignDbSvc,1,0);
+
   virtual TRTCond::ExpandedIdentifier trtcondid( const Identifier&, int) const =0;
   virtual void setDx( const TRTCond::ExpandedIdentifier&, float, float, float ) =0;
   virtual StatusCode writeTextFile(const std::string&) const =0;
@@ -46,14 +47,5 @@ class ITRT_StrawAlignDbSvc: virtual public IService
   virtual void setDx( const Identifier&, float, float, float) =0;
   
 };
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//  inline methods
-////////////////////////////////////////////////////////////////////////////////////////////
-
-inline const InterfaceID& ITRT_StrawAlignDbSvc::interfaceID() {
-  static const InterfaceID id("ITRT_StrawAlignDbSvc",1,0);
-  return id;
-}
 
 #endif //  ITRT_STRAWALIGNDBTOOL_H

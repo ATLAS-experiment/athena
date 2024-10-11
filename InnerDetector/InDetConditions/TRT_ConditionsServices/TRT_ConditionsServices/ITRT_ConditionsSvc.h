@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_CONDITIONSSVC_H
@@ -33,18 +33,12 @@ class IdentifierHash;
 
 class ITRT_ConditionsSvc : virtual public IService {
  public:
+  DeclareInterfaceID(ITRT_ConditionsSvc,1,0);
 
   virtual ~ITRT_ConditionsSvc() {};
-
-  static const InterfaceID& interfaceID();
 
   virtual InDet::TRT_CondFlag condSummaryStatus( const Identifier& ) = 0;
 
 };
-
-inline const InterfaceID& ITRT_ConditionsSvc::interfaceID() {
-  static const InterfaceID IID("ITRT_ConditionsSvc",1,0);
-  return IID;
-}
 
 #endif // ITRT_CONDITIONSSVC_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_HWMappingSvc_H
@@ -20,6 +20,8 @@ class Identifier;
 class ITRT_HWMappingSvc : virtual public IService {
 
  public:
+  /// Interface ID declaration
+  DeclareInterfaceID(ITRT_HWMappingSvc,1,0);
 
   /// Returns the HV pad for a barrel identifier
   virtual int get_HV_BarrelPadNum( const Identifier ) = 0;
@@ -47,16 +49,6 @@ class ITRT_HWMappingSvc : virtual public IService {
 
   /// Dump HV-line/pad maps
   virtual void DumpMaps() = 0;
-
-  /// Interface ID declaration
-  static const InterfaceID& interfaceID();
-
 };
-
-/// Interface ID for this AlgTool
-inline const InterfaceID& ITRT_HWMappingSvc::interfaceID() {
-  static const InterfaceID IID("ITRT_HWMappingSvc",1,0);
-  return IID;
-}
 
 #endif // ITRT_HWMappingSvc_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_DCS_ConditionsSvc.cxx
@@ -25,7 +25,7 @@
 /////
 TRT_DCS_ConditionsSvc::TRT_DCS_ConditionsSvc( const std::string& name,
 					      ISvcLocator* pSvcLocator ) :
-  AthService( name, pSvcLocator ),
+  base_class( name, pSvcLocator ),
   m_evtStore("StoreGateSvc",name),
   m_detStore("DetectorStore",name),
   m_mapSvc("TRT_HWMappingSvc",name),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_BYTESTREAM_CONDITIONSSVC_H
@@ -29,7 +29,7 @@ namespace TRTByteStreamErrors {
 class ITRT_ByteStream_ConditionsSvc : virtual public IService {
  public:
 
-   static const InterfaceID& interfaceID() ;
+   DeclareInterfaceID(ITRT_ByteStream_ConditionsSvc,1,0);
 
    virtual void resetSets( void ) = 0;
    virtual void resetCounts( void ) = 0;
@@ -67,12 +67,6 @@ class ITRT_ByteStream_ConditionsSvc : virtual public IService {
    virtual void add_rob_error( uint32_t robSourceId, uint32_t robStatus ) = 0;
    
 };
-
-inline const InterfaceID& ITRT_ByteStream_ConditionsSvc::interfaceID() {
-  static const InterfaceID id("ITRT_ByteStream_ConditionsSvc",1,0);
-  return id; 
-}
-
 
 /*
  * !!! WARNING !!!
