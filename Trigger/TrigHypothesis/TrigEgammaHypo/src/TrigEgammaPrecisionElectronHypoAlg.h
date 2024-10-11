@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONHYPOALG_PRECISION_H
 #define TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONHYPOALG_PRECISION_H 1
@@ -53,6 +53,13 @@ class TrigEgammaPrecisionElectronHypoAlg : public ::HypoBase {
 
     ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
 
+
+  SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_decorD0Key
+    { this, "DecorD0Key", m_electronsKey, "trk_d0" };
+  SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_decorClEtaKey
+    { this, "DecorClEtaKey", m_electronsKey, "cl_eta2" };
+  SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_decorClPhiKey
+    { this, "DecorClPhiKey", m_electronsKey, "cl_phi2" };
 
 }; 
 
