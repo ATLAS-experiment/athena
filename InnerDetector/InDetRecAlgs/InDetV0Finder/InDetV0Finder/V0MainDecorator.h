@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETV0FINDER_V0MAINDECORATOR_H
@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODTracking/VertexContainerFwd.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-
+#include "GaudiKernel/IPartPropSvc.h"
 
 namespace InDet
 {
@@ -131,6 +131,7 @@ namespace InDet
     SG::WriteDecorHandleKey<xAOD::VertexContainer>  m_decorPz_lb 
                     { this, "Pz_lb", ".pz", "Pz for Lambdabar" };
 
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
   };
 
 }

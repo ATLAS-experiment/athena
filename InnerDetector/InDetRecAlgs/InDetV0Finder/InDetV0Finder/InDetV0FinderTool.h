@@ -26,6 +26,7 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "TrkParameters/TrackParameters.h"
 #include "GeoPrimitives/GeoPrimitives.h" //Needed for Amg::Vector3D
+#include "GaudiKernel/IPartPropSvc.h"
 #include <atomic>
 
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
@@ -232,6 +233,7 @@ namespace InDet
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers{this, "RelinkTracks", {}, "Track Containers if they need to be relinked through indirect use" };
     ElementLink<xAOD::TrackParticleContainer> makeLink(const xAOD::TrackParticle*, const std::vector<const xAOD::TrackParticleContainer*>&) const;
 
+    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
   };
 
 }//end of namespace InDet
