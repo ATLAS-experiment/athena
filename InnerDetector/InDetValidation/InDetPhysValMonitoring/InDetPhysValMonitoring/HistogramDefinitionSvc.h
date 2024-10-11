@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -16,7 +16,6 @@
 #include <map>
 #include "AthenaBaseComps/AthService.h"
 #include <memory>
-template <class TYPE> class SvcFactory;
 
 class IReadHistoDef;
 class ISvcLocator;
@@ -24,8 +23,7 @@ class StatusCode;
 class InterfaceID;
 
 
-class HistogramDefinitionSvc :virtual public IHistogramDefinitionSvc, public AthService{
-friend class SvcFactory<HistogramDefinitionSvc>;
+class HistogramDefinitionSvc : public extends<AthService, IHistogramDefinitionSvc> {
 public:
     HistogramDefinitionSvc(const std::string &name, ISvcLocator * svc);
     virtual ~HistogramDefinitionSvc();
@@ -33,8 +31,6 @@ public:
     //@{
     virtual StatusCode initialize();
     virtual StatusCode finalize();
-    //interfaceID() implementation is in the baseclass
-    virtual StatusCode queryInterface(const InterfaceID & riid, void** ppvInterface );
     //@}
     SingleHistogramDefinition definition(const std::string &name, const std::string & dirName="") const final;
     std::string histoType(const std::string &name, const std::string & dirName="") const final;
