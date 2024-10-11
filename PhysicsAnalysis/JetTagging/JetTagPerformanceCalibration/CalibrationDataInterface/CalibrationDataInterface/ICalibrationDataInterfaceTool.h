@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,13 +16,9 @@ class Jet;
 namespace Analysis 
 {
 
-  static const InterfaceID IID_ICalibrationDataInterfaceTool("Analysis::ICalibrationDataInterfaceTool", 1, 0);
-
   class ICalibrationDataInterfaceTool : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID() {
-      return IID_ICalibrationDataInterfaceTool;
-    }
+    DeclareInterfaceID(Analysis::ICalibrationDataInterfaceTool, 1, 0);
 
     /** retrieve either the total uncertainty or only the statistical or systematic components */
     enum Uncertainty { None, Total, Statistical, Systematic };

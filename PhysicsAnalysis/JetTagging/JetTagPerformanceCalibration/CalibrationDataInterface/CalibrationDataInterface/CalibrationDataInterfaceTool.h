@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ namespace Analysis
       @author  Frank Filthaut <F.Filthaut@science.ru.nl>
   */  
 
-  class CalibrationDataInterfaceTool :
-  public AthAlgTool, virtual public ICalibrationDataInterfaceTool, public CalibrationDataInterfaceBase
+  class CalibrationDataInterfaceTool : public extends<AthAlgTool, ICalibrationDataInterfaceTool>,
+                                       public CalibrationDataInterfaceBase
     {
     public:
       CalibrationDataInterfaceTool(const std::string&,const std::string&,const IInterface*);
@@ -70,9 +70,6 @@ namespace Analysis
        /** default destructor */
       virtual ~CalibrationDataInterfaceTool () = default;
       
-      /** allow access to the ICalibrationDataInterfaceTool interface */
-      StatusCode queryInterface( const InterfaceID& riid, void** ppvIf );
-
        /** standard Athena-Algorithm method */
       virtual StatusCode initialize() override;
 
