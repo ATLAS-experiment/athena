@@ -77,7 +77,7 @@ namespace MuonR4 {
 
                 const MuonCalib::MdtFullCalibData* tubeConstants = calibData->getCalibData(hitId, msgStream());
                 assert(tubeConstants != nullptr);
-                assert(tubeConstants->tubeCalib  != nullptr);
+                assert(tubeConstants->tubeCalib.get()  != nullptr);
                 assert(tubeConstants->tubeCalib->getCalib(hitId) != nullptr);
 
                 const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib& tubeCalib{*tubeConstants->tubeCalib->getCalib(hitId)};
