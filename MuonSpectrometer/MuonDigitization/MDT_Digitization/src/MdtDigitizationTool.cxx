@@ -33,8 +33,6 @@
 #include "MdtDigitizationTool.h"
 
 #include "MDT_Digitization/MdtDigiToolInput.h"
-#include "MDT_Digitization/chargeCalculator.h"
-#include "MDT_Digitization/particleGamma.h"
 
 // Gaudi - Core
 #include "PathResolver/PathResolver.h"
@@ -425,11 +423,29 @@ bool MdtDigitizationTool::handleMDTSimHit(const EventContext& ctx,
     double qgamma = -9999.;
 
     if (m_DoQballCharge) {
-      // chargeCalculator returns the value of electric charge for Qball particle.
-      // particleGamma returns the value of gamma for Qball particle.
-      qgamma = particleGamma(ctx, hit, phit.eventId());
-      qcharge = chargeCalculator(ctx, hit, phit.eventId());
-
+      // chargeCalculator returns the value of electric charge for multicharged particle.
+      // particleGamma returns the value of gamma for multicharged particle.
+      const HepMcParticleLink trkParticle = HepMcParticleLink::getRedirectedLink(hit.particleLink(),phit.eventId(), ctx); // This link should now correctly resolve to the TruthEvent McEventCollection in the main StoreGateSvc.
+      HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
+      if (genParticle) {
+        const int particleEncoding = genParticle->pdg_id();
+        if ((((int)(std::abs(particleEncoding) / 10000000) == 1) && ((int)(std::abs(particleEncoding) / 100000) == 100)) ||
+          (((int)(std::abs(particleEncoding) / 10000000) == 2) && ((int)(std::abs(particleEncoding) / 100000) == 200))) { // TODO Use functions from TruthUtils/AtlasPID.h instead?
+          const double QE = genParticle->momentum().e();
+          const double QM2 = genParticle->momentum().m2();
+          if (QM2 >= 0.) {
+              qgamma = QE / std::sqrt(QM2);
+          }
+        }
+        if (((int)(std::abs(particleEncoding) / 10000000) == 1) && ((int)(std::abs(particleEncoding) / 100000) == 100)) { // TODO use a function from TruthUtils/AtlasPID.h
+          qcharge = ((std::abs(particleEncoding) / 100000.0) - 100.0) * 1000.0;
+          if (particleEncoding < 0.0) qcharge = -qcharge;
+        }
+        else if (((int)(std::abs(particleEncoding) / 10000000) == 2) && ((int)(std::abs(particleEncoding) / 100000) == 200)) { // TODO use a function from TruthUtils/AtlasPID.h
+          qcharge = (double)((std::abs(particleEncoding) / 1000) % 100) / (double)((std::abs(particleEncoding) / 10) % 100);
+          if (particleEncoding < 0.0) qcharge = -qcharge;
+        }
+      }
       digiInput = MdtDigiToolInput{std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId};
     }
 
