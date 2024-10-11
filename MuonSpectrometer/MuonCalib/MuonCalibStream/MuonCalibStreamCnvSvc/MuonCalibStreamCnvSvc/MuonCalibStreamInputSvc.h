@@ -10,13 +10,13 @@
 #ifndef MUONCALIBSTREAMCNVSVC_MUONCALIBSTREAMINPUTSVC_H
 #define MUONCALIBSTREAMCNVSVC_MUONCALIBSTREAMINPUTSVC_H
 
-#include "AthenaBaseComps/AthService.h"
+#include "GaudiKernel/IInterface.h"
 #include "MuCalDecode/CalibEvent.h"
 
-class MuonCalibStreamInputSvc : public AthService {
+class MuonCalibStreamInputSvc : virtual public IInterface {
 public:
-    MuonCalibStreamInputSvc(const std::string &name, ISvcLocator *svcloc);
-    virtual ~MuonCalibStreamInputSvc() = default;
+    DeclareInterfaceID(MuonCalibStreamInputSvc, 1, 0);
+
     virtual const LVL2_MUON_CALIBRATION::CalibEvent *nextEvent() = 0;
     virtual const LVL2_MUON_CALIBRATION::CalibEvent *currentEvent() const = 0;
 };

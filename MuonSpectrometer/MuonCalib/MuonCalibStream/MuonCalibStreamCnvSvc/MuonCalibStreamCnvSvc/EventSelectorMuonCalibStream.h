@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAMCNVSVC_EVENTSELECTORMUONCALIBSTREAM_H
 #define MUONCALIBSTREAMCNVSVC_EVENTSELECTORMUONCALIBSTREAM_H
@@ -8,25 +8,24 @@
 // Include files.
 #include <map>
 
+#include "MuonCalibStreamInputSvc.h"
+#include "IMuonCalibStreamDataProviderSvc.h"
+
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IProperty.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "MuCalDecode/CalibEvent.h"
 
 // Forward declarations.
 class ISvcLocator;
 class EventContextMuonCalibStream;
-class MuonCalibStreamInputSvc;
-class IMuonCalibStreamDataProviderSvc;
-
-// Namespaces.
-using namespace std;
 
 // Class EventSelectorMuonCalibStream.
-class EventSelectorMuonCalibStream : virtual public AthService, virtual public IEvtSelector, virtual public IProperty {
+class EventSelectorMuonCalibStream : public extends<AthService, IEvtSelector> {
 public:
     // Standard Constructor.
-    EventSelectorMuonCalibStream(const string &name, ISvcLocator *svcloc);
+    EventSelectorMuonCalibStream(const std::string &name, ISvcLocator *svcloc);
 
     // Standard Destructor.
     ~EventSelectorMuonCalibStream();
@@ -48,24 +47,16 @@ public:
     virtual StatusCode releaseContext(Context *&it) const;
     virtual StatusCode resetCriteria(const std::string &criteria, Context &context) const;
 
-    // Implementation of IInterface methods.
-    virtual StatusCode queryInterface(const InterfaceID &riid, void **ppvInterface);
-
-    // make entries in StoreGate for this event
-
 private:
     // property
-    string m_eventSourceName;
+    Gaudi::Property<int> m_SkipEvents{this, "SkipEvents", 0, "Number of events to skip at the beginning"};
+    ServiceHandle<MuonCalibStreamInputSvc> m_eventSource{ this, "MuonCalibStreamInputSvc", "MuonCalibStreamFileInputSvc"};
+    ServiceHandle<IMuonCalibStreamDataProviderSvc> m_dataProvider{this, "DataProvider", "MuonCalibStreamDataProviderSvc"};
+
     EventContextMuonCalibStream *m_beginIter;
     EventContextMuonCalibStream *m_endIter;
-    MuonCalibStreamInputSvc *m_eventSource;
-    IMuonCalibStreamDataProviderSvc *m_dataProvider;
 
-    int m_SkipEvents;         // Number of events to skip at the beginning
-    //mutable int m_NumEvents;  // Number of Events read so far.
-    //std::atomic<long> m_NumEvents = 0;
-
-    mutable long m_NumEvents ATLAS_THREAD_SAFE = 0;
+    mutable std::atomic<long> m_NumEvents{0};  // Number of Events read so far.
 };
 
 #endif

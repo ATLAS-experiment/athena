@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamCnvSvc.h"
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
@@ -33,8 +33,8 @@ StatusCode MuonCalibStreamCnvSvc::initialize() {
 
     ATH_CHECK(AthCnvSvc::initialize());
 
-    IClassIDSvc *clidSvc;
-    ATH_CHECK(service("ClassIDSvc", clidSvc));
+    SmartIF<IClassIDSvc> clidSvc{service("ClassIDSvc")};
+    ATH_CHECK( clidSvc.isValid() );
 
     // Initialize the converters
     std::vector<std::string>::const_iterator it = m_initCnvs.begin();
@@ -53,19 +53,6 @@ StatusCode MuonCalibStreamCnvSvc::initialize() {
         }
     }
     return StatusCode::SUCCESS;
-}
-
-/// Query interface
-StatusCode MuonCalibStreamCnvSvc::queryInterface(const InterfaceID &riid, void **ppvInterface) {
-    // if ( IMuonCalibStreamEventAccess::interfaceID().versionMatch(riid) ) {
-    //  *ppvInterface = (IMuonCalibStreamEventAccess*)this;
-    //}
-    // else  {
-    return AthCnvSvc::queryInterface(riid, ppvInterface);
-    //}
-
-    // addRef();
-    // return StatusCode::SUCCESS;
 }
 
 /// Update state of the service

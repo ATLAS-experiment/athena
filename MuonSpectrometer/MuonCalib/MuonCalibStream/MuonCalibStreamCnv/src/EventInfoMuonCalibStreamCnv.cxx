@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStreamCnv/EventInfoMuonCalibStreamCnv.h"
 
@@ -30,8 +30,8 @@
 EventInfoMuonCalibStreamCnv::EventInfoMuonCalibStreamCnv(ISvcLocator *svcloc) :
     Converter(storageType(), classID(), svcloc),
     AthMessaging(msgSvc(), "EventInfoMuonCalibStreamCnv"),
-    m_MuonCalibStreamCnvSvc(0),
-    m_dataProvider(0)
+    m_MuonCalibStreamCnvSvc("MuonCalibStreamCnvSvc", "EventInfoMuonCalibStreamCnv"),
+    m_dataProvider("MuonCalibStreamDataProviderSvc", "EventInfoMuonCalibStreamCnv")
 {}
 
 const CLID &EventInfoMuonCalibStreamCnv::classID() { return ClassID_traits<xAOD::EventInfo>::ID(); }
@@ -41,23 +41,8 @@ StatusCode EventInfoMuonCalibStreamCnv::initialize() {
 
     ATH_CHECK(Converter::initialize());
 
-    // Check MuonCalibStreamCnvSvc
-    IService *svc;
-    ATH_CHECK(serviceLocator()->getService("MuonCalibStreamCnvSvc", svc));
-
-    m_MuonCalibStreamCnvSvc = dynamic_cast<MuonCalibStreamCnvSvc *>(svc);
-    if (m_MuonCalibStreamCnvSvc == 0) {
-        ATH_MSG_ERROR(" Cannot cast to  MuonCalibStreamCnvSvc ");
-        return StatusCode::FAILURE;
-    }
-
-    ATH_CHECK(serviceLocator()->getService("MuonCalibStreamDataProviderSvc", svc));
-
-    m_dataProvider = dynamic_cast<MuonCalibStreamDataProviderSvc *>(svc);
-    if (m_dataProvider == 0) {
-        ATH_MSG_ERROR(" Cannot cast to MuonCalibStreamDataProviderSvc ");
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK( m_MuonCalibStreamCnvSvc.retrieve() );
+    ATH_CHECK( m_dataProvider.retrieve() );
 
     return StatusCode::SUCCESS;
 }

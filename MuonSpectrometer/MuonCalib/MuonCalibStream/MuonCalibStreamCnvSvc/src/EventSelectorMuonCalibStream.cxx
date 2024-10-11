@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //	EventSelectorMuonCalibStream.cxx
@@ -8,35 +8,26 @@
 //
 // Include files.
 #include "MuonCalibStreamCnvSvc/EventSelectorMuonCalibStream.h"
+#include "MuonCalibStreamCnvSvc/EventContextMuonCalibStream.h"
+#include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
 
-#include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/StatusCode.h"
-#include "MuonCalibStreamCnvSvc/EventContextMuonCalibStream.h"
-#include "MuonCalibStreamCnvSvc/IMuonCalibStreamDataProviderSvc.h"
-#include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
-#include "MuonCalibStreamCnvSvc/MuonCalibStreamInputSvc.h"
+
+#include "xAODEventInfo/EventInfo.h"
 
 // Constructor.
-EventSelectorMuonCalibStream::EventSelectorMuonCalibStream(const string &name, ISvcLocator *svcloc) :
-    AthService(name, svcloc),
+EventSelectorMuonCalibStream::EventSelectorMuonCalibStream(const std::string &name, ISvcLocator *svcloc) :
+    base_class(name, svcloc),
     m_beginIter(nullptr),
-    m_endIter(nullptr),
-    m_eventSource(nullptr),
-    m_dataProvider(nullptr),
-    m_SkipEvents(0),
-    m_NumEvents(0) {
+    m_endIter(nullptr)
+{
     ATH_MSG_DEBUG("EventSelectorMuonCalibStream constructor");
-    m_eventSourceName = "MuonCalibStreamFileInputSvc";
-    m_SkipEvents = 0;
-    declareProperty("MuonCalibStreamInputSvc", m_eventSourceName);
-    declareProperty("SkipEvents", m_SkipEvents);
 }
 
 // Destructor.
 EventSelectorMuonCalibStream::~EventSelectorMuonCalibStream() {
-    // if(m_eventSource) m_eventSource->release();
     if (m_beginIter) delete m_beginIter;
     if (m_endIter) delete m_endIter;
 }
@@ -44,18 +35,11 @@ EventSelectorMuonCalibStream::~EventSelectorMuonCalibStream() {
 // EventSelectorMuonCalibStream::initialize().
 StatusCode EventSelectorMuonCalibStream::initialize() {
     ATH_MSG_INFO("EventSelectorMuonCalibStream::initialize");
+
     // Check MuonCalibStreamCnvSvc
-    IService *svc;
-    ATH_CHECK(serviceLocator()->getService(m_eventSourceName, svc));
+    ATH_CHECK( m_eventSource.retrieve() );
 
-    m_eventSource = dynamic_cast<MuonCalibStreamInputSvc *>(svc);
-    if (m_eventSource == 0) {
-        ATH_MSG_ERROR("Cannot cast to MuonCalibStreamInputSvc");
-        return StatusCode::FAILURE;
-    }
-    m_eventSource->addRef();
-
-    ATH_CHECK(service("MuonCalibStreamDataProviderSvc", m_dataProvider));
+    ATH_CHECK( m_dataProvider.retrieve() );
 
     // Create the begin and end iterators for this selector.
     m_beginIter = new EventContextMuonCalibStream(this);
@@ -153,17 +137,3 @@ StatusCode EventSelectorMuonCalibStream::createAddress(const IEvtSelector::Conte
 
 //________________________________________________________________________________
 StatusCode EventSelectorMuonCalibStream::releaseContext(IEvtSelector::Context *& /*it*/) const { return (StatusCode::SUCCESS); }
-
-// Implementation of IInterface::queryInterface.
-StatusCode EventSelectorMuonCalibStream::queryInterface(const InterfaceID &riid, void **ppvInterface) {
-    if (riid == IEvtSelector::interfaceID()) {
-        *ppvInterface = (IEvtSelector *)this;
-    } else if (riid == IProperty::interfaceID()) {
-        *ppvInterface = (IProperty *)this;
-    } else {
-        return AthService::queryInterface(riid, ppvInterface);
-    }
-
-    addRef();
-    return StatusCode::SUCCESS;
-}
