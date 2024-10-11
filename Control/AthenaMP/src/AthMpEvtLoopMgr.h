@@ -29,7 +29,7 @@ class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr : public extends<AthService,
   virtual StatusCode executeRun(int maxevt) override;
   virtual StatusCode stopRun() override;
 
-  EventContext createEventContext();
+  virtual EventContext createEventContext() override;
 
  private:
   ServiceHandle<IEventProcessor> m_evtProcessor;
