@@ -209,6 +209,7 @@ template<class T> inline bool isSUSY(const T& p){return isSUSY(p->pdg_id());}
 template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->pdg_id());}
 template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
 template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
+template<class T> inline bool isMonopole(const T& p){return isMonopole(p->pdg_id());}
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
@@ -268,6 +269,15 @@ template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p
 /// two nnr digits preserved in the combined code.
 template<> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) );}
 template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isKK(value_digits);}
+
+/// PDG rule 11i
+/// Magnetic monopoles and dyons are assumed to have one unit of Dirac monopole charge
+/// and a variable integer number nq1nq2 nq3 units of electric charge. Codes 411nq1nq2 nq3 0
+/// are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
+/// when they disagree, with the overall sign of the particle set by the magnetic charge. For
+/// now no spin information is provided.
+template<> inline bool isMonopole(const DecodedPID& p){return (p.ndigits() == 7 && p(0) == 4 && p(1) == 1  && (p(2) == 1 || p(2) == 2 ) && p(7) == 0);}
+template<> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(p); return isMonopole(value_digits);}
 
 
 /// PDG rule 11k
@@ -524,9 +534,17 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); }
   if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
   if (!classified && isSUSY(p)) { nq = 0;
+      classified = true;
       auto pp = p.shift(1); if (pp.ndigits() > 2) pp = pp.shift(1);
       return charge3(pp);
   }
+  if (!classified && isMonopole(p)) {
+///Codes 411nq1nq2 nq3 0  are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
+/// when they disagree, with the overall sign of the particle set by the magnetic charge.
+      result = 3*(p(3)*100 + p(4)*10 + p(5));
+      return ( (p.pid() > 0 && p(2) == 1) ||  (p.pid() < 0 && p(2) == 2) ) ? result : -result;
+  }
+
   for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
       result += triple_charge.at(*r)*sign;
       sign*=signmult;
@@ -541,7 +559,7 @@ template<> inline int charge3(const int& p){
 }
 
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
-template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0);}
+template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0 || isMonopole(p));}
 
 template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isLeptoQuark(p) || isHadron(p));}
