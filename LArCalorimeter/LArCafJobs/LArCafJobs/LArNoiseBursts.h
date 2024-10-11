@@ -12,7 +12,6 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "AnalysisTools/AnalysisTools.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 //LAr services:

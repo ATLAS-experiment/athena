@@ -13,7 +13,6 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "AnalysisTools/AnalysisTools.h"
 
 //LAr services:
 #include "Identifier/Range.h" 
