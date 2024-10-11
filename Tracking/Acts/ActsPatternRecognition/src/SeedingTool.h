@@ -153,6 +153,8 @@ namespace ActsTrk {
       "Enable cut on the compatibility between interaction point and SPs"};
     Gaudi::Property< std::vector< size_t > > m_zBinsCustomLooping {this, "zBinsCustomLooping",
       {2, 3, 4, 5, 12, 11, 10, 9, 7, 6, 8} , "defines order of z bins for looping"};
+    Gaudi::Property< std::vector<std::size_t> > m_rBinsCustomLooping {this, "rBinsCustomLooping", {1},
+      "defines order of r bins for looping"};
     Gaudi::Property< bool > m_useVariableMiddleSPRange {this, "useVariableMiddleSPRange", true,
       "Enable variable range to search for middle SPs"};
     Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP", 
