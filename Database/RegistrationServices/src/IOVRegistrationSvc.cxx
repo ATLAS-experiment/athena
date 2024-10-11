@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  * 
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  * 
- * $Id: IOVRegistrationSvc.cxx,v 1.36 2009-01-29 16:38:27 hawkings Exp $
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
@@ -51,7 +50,7 @@
 
 IOVRegistrationSvc::IOVRegistrationSvc( const std::string& name, ISvcLocator* svc )
     : 
-    AthService( name, svc ),
+    base_class( name, svc ),
     m_recreateFolders(false),
     m_beginRun(IOVTime::MINRUN),
     m_endRun(IOVTime::MAXRUN),
@@ -104,27 +103,6 @@ const InterfaceID& IOVRegistrationSvc::type() const
 { 
     return IIOVRegistrationSvc::interfaceID();
 }
-
-//--------------------------------------------------------------------------
-/// Identify interfaces to which this service is responsive
-StatusCode
-IOVRegistrationSvc::queryInterface( const InterfaceID& riid, void** ppvInterface ) 
-{
-    ATH_MSG_DEBUG ("in queryInterface()");
-
-    if ( IIOVRegistrationSvc::interfaceID().versionMatch(riid) ) {
-        ATH_MSG_DEBUG ("matched IIOVRegistrationSvc");
-	*ppvInterface = (IIOVRegistrationSvc*)this;
-    }
-    else {
-	// Interface is not directly available: try out a base class
-        ATH_MSG_DEBUG ("Default to Service interface");
-	return AthService::queryInterface(riid, ppvInterface);
-    }
-
-    return StatusCode::SUCCESS;
-}
-
 
 //--------------------------------------------------------------------------
 

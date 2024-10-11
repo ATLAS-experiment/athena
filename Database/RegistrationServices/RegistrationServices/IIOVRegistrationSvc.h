@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,7 +11,6 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  * @author Antoine Pérus <perus@lal.in2p3.fr>
  * 
- * $Id: IIOVRegistrationSvc.h,v 1.5 2007-02-09 15:28:57 hawkings Exp $
  */
 
 #ifndef REGISTRATIONSERVICES_IIOVREGISTRATIONSVC_H
@@ -53,8 +52,8 @@ class IIOVRegistrationSvc : virtual public IInterface
 
 public:    
   
-    /// Retrieve interface ID
-    static const InterfaceID& interfaceID();
+    /// Declare interface ID
+    DeclareInterfaceID(IIOVRegistrationSvc, 1 , 0);
 
     /// Register IOV DB for an object given its typeName - run/LB numbers
     ///   interval or times interval  and tag are taken from JobOptions
@@ -128,18 +127,5 @@ public:
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const = 0;
 };
-
-inline const InterfaceID& 
-IIOVRegistrationSvc::interfaceID() 
-{
-    static const InterfaceID IID_IIOVRegistrationSvc("IIOVRegistrationSvc", 1 , 0); 
-    return IID_IIOVRegistrationSvc; 
-}
-
- 
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // REGISTRATIONSERVICES_IIOVREGISTRATIONSVC_H

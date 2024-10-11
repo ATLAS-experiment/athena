@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,7 +22,6 @@
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ClassID.h"
-//#include "GaudiKernel/IProperty.h"
 #include "CoolKernel/StorageType.h"
 
 //<<<<<< FORWARD DECLARATIONS                                             >>>>>>
@@ -50,20 +49,14 @@ class IClassIDSvc;
  **    - IOVDbTag:<pre>        the tag to be used</pre>
  **    - IOVDbTimeStamp:<pre>  the flag for time versus run-LB use</pre>
  **/
-class IOVRegistrationSvc : public AthService,
-                           public virtual IIOVRegistrationSvc
+class IOVRegistrationSvc : public extends<AthService, IIOVRegistrationSvc>
 {
-  // Forward declarations
-  template <class TYPE> class SvcFactory;
-  
+
 public:    
   
     IOVRegistrationSvc( const std::string& name, ISvcLocator* svc );
 
     virtual ~IOVRegistrationSvc();
-
-    /// Query the interfaces.
-    virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface);
 
     /// Service type.
     virtual const InterfaceID& type() const;
