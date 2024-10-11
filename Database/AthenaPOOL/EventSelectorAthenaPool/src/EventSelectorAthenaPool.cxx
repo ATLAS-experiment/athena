@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file EventSelectorAthenaPool.cxx
@@ -464,26 +464,6 @@ StatusCode EventSelectorAthenaPool::finalize() {
    return(::AthService::finalize());
 }
 
-//________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (riid == IEvtSelector::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEvtSelector*>(this);
-   } else if (riid == IIoComponent::interfaceID()) {
-      *ppvInterface = dynamic_cast<IIoComponent*>(this);
-   } else if (riid == IProperty::interfaceID()) {
-      *ppvInterface = dynamic_cast<IProperty*>(this);
-   } else if (riid == IEvtSelectorSeek::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEvtSelectorSeek*>(this);
-   } else if (riid == IEventShare::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEventShare*>(this);
-   } else if (riid == ISecondaryEventSelector::interfaceID()) {
-      *ppvInterface = dynamic_cast<ISecondaryEventSelector*>(this);
-   } else {
-      return(::AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::createContext(IEvtSelector::Context*& ctxt) const {
    ctxt = new EventContextAthenaPool(this);

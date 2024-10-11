@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLSERVICES_ATHENAROOTSTREAMERSVC_H
@@ -26,8 +26,7 @@
 
 class AthenaRootStreamer;
 
-class AthenaRootStreamerSvc :  public virtual IAthenaRootStreamerSvc,
-                               public AthService
+class AthenaRootStreamerSvc : public extends<AthService, IAthenaRootStreamerSvc>
 {
 public: 
    /// Standard Service Constructor
@@ -40,9 +39,7 @@ public:
    virtual StatusCode initialize();
    /// Required of all Gaudi services:
    virtual StatusCode finalize();
-   /// Required of all Gaudi services:  see Gaudi documentation for details
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface);
-  /// Service type.
+   /// Service type.
    virtual const InterfaceID& type() const;
 
   // IAthenaRootStreamerSvc  interface implemenation

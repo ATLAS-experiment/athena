@@ -275,17 +275,6 @@ StatusCode PoolSvc::io_finalize() {
    clearState();
    return(StatusCode::SUCCESS);
 }
-//_______________________________________________________________________
-StatusCode PoolSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (IPoolSvc::interfaceID().versionMatch(riid)) {
-      *ppvInterface = dynamic_cast<IPoolSvc*>(this);
-   } else {
-      // Interface is not directly available: try out a base class
-      return(::AthService::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
 //__________________________________________________________________________
 Token* PoolSvc::registerForWrite(const Placement* placement,
                                  const void* obj,
