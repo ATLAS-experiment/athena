@@ -77,27 +77,29 @@ namespace CP
         double corrMEpT = getCorrectedPt(mu, mu.ME, MEcorrConstants);
         double corrCBpT = getCorrectedPt(mu, mu.CB, CBcorrConstants);
 
-	//Smearing can be positive and negative since it depends on Gaussians centered in 0 with sigma 1.
-	//However, the resolution correction factor depends on 1/(1+smearing) 
-	//and therefore if the smearing is less than -1 the pT turns out to have a negative value.
-	//Physically it means that the resolution has caused the pT to be reconstructed with a flip of the charge.
-	//Therefore in addition to correcting the pT, a flip of the charge is also done through the calib_charge variable.
+        //Smearing can be positive and negative since it depends on Gaussians centered in 0 with sigma 1.
+        //However, the resolution correction factor depends on 1/(1+smearing) 
+        //and therefore if the smearing is less than -1 the pT turns out to have a negative value.
+        //Physically it means that the resolution has caused the pT to be reconstructed with a flip of the charge.
+        //Therefore in addition to correcting the pT, a flip of the charge is also done through the calib_charge variable.
+
+        // First compute the calibrated CB pT under the recombination scheme with uncalibrated ID & ME pT
+        double corrCBpTWithIDME =  getCorrectedCBPtWithIDMSComb(mu, IDcorrConstants, MEcorrConstants);
 
         // Write the pT into the object (if negative pT, multiply it by -1)
-	//< 0.1 because sometimes the pT is -0.
+        //< 0.1 because sometimes the pT is -0.
         mu.ID.calib_pt = corrIDpT * ((corrIDpT < -0.1) ? -1 : 1);
         mu.ME.calib_pt = corrMEpT * ((corrMEpT < -0.1) ? -1 : 1);
-	mu.CB.calib_pt = corrCBpT * ((corrCBpT < -0.1) ? -1 : 1);
-	//charge calibration (flip of the charge if needed)
+        mu.CB.calib_pt = corrCBpT * ((corrCBpT < -0.1) ? -1 : 1);
+        //charge calibration (flip of the charge if needed)
         mu.ID.calib_charge = mu.ID.uncalib_charge * ((corrIDpT < -0.1) ? -1 : 1);
         mu.ME.calib_charge = mu.ME.uncalib_charge * ((corrMEpT < -0.1) ? -1 : 1);
-	mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpT < -0.1) ? -1 : 1);
+        mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpT < -0.1) ? -1 : 1);
 
-        double corrCBpTWithIDME =  getCorrectedCBPtWithIDMSComb(mu, IDcorrConstants, MEcorrConstants);
         if(!m_doDirectCBCalib) {
-	  mu.CB.calib_pt = corrCBpTWithIDME * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
-	  mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
-	}
+           mu.CB.calib_pt = corrCBpTWithIDME * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
+           mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
+        }
 
         // Return gracefully:
         return CorrectionCode::Ok;
