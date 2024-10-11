@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // The Cell Identifier for the EM Barrel readout cells
@@ -679,14 +679,11 @@ void LArBarrelCalculator::InitHV()
 
   if (m_doHV) {
     // initialize services
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc* pDetStore = nullptr;
-
-    if(svcLocator->service("DetectorStore", pDetStore).isFailure())
-      {
-        std::cout << "LArBarrelCalculator::InitHV() unable to get Detector Store! Use default HV values\n";
-        return;
-      }
+    SmartIF<StoreGateSvc> pDetStore{Gaudi::svcLocator()->service("DetectorStore")};
+    if (!pDetStore) {
+      ATH_MSG_WARNING("LArBarrelCalculator::InitHV() unable to get Detector Store! Use default HV values.");
+      return;
+    }
 
     // get EMBHV Manager
     const LArHVManager *manager = nullptr;

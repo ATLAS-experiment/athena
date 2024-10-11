@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationMixedCalculator
@@ -68,23 +68,18 @@ namespace LArG4 {
     CalibrationMixedCalculator::Parameters::Parameters()
     {
       // Access to DB to get parameters
-      StatusCode status;
-      // Access the GeoModelSvc:
-      ISvcLocator *svcLocator = Gaudi::svcLocator();
-      IGeoModelSvc *geoModel;
-      status = svcLocator->service ("GeoModelSvc",geoModel);
-      if (status != StatusCode::SUCCESS) {
-        throw std::runtime_error ("Cannot locate GeoModelSvc!!");
+      SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+      if (!geoModel) {
+        throw std::runtime_error ("Cannot locate GeoModelSvc!");
       }
-      IGeoDbTagSvc *geoDbTagSvc(nullptr);
-      status = svcLocator->service("GeoDbTagSvc",geoDbTagSvc);
-      if (status != StatusCode::SUCCESS) {
-	throw std::runtime_error ("Cannot locate GeoDbTagSvc");
+
+      SmartIF<IGeoDbTagSvc> geoDbTagSvc{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+      if (!geoDbTagSvc) {
+        throw std::runtime_error ("Cannot locate GeoDbTagSvc");
       }
-      // Access the geometry database:
-      IRDBAccessSvc *pAccessSvc;
-      status=svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc);
-      if (status != StatusCode::SUCCESS) {
+
+      SmartIF<IRDBAccessSvc> pAccessSvc{Gaudi::svcLocator()->service(geoDbTagSvc->getParamSvcName())};
+      if (!pAccessSvc) {
         throw std::runtime_error ("Cannot locate " + geoDbTagSvc->getParamSvcName());
       }
 
