@@ -31,6 +31,7 @@
 
 // Particle data table
 #include "HepPDT/ParticleData.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 // For the Athena-based random numbers.
 #include "CLHEP/Random/RandPoisson.h" //randpoissonq? (fixme)
@@ -395,7 +396,7 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
           // so here we convert them back to CLHEP units by multiplying by CLHEP::keV.
         }
       //Special treatment of magnetic monopoles && highly charged Qballs (charge > 10)
-      else if ( ((abs(particleEncoding)/100000==41) && (abs(particleEncoding)/10000000==0)) ||
+      else if ( (MC::isMonopole(particleEncoding)) ||
                 ((static_cast<int>(abs(particleEncoding)/10000000) == 1) &&
                  (static_cast<int>(abs(particleEncoding)/100000) == 100) &&
                  (static_cast<int>((abs(particleEncoding))-10000000)/100>10)) )

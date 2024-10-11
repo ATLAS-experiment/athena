@@ -10,6 +10,7 @@
 #include "G4RunManagerKernel.hh"
 #include "G4EventManager.hh"
 
+#include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -31,8 +32,7 @@ namespace G4UA
     int PDGcode = aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
 
     // check if PDG code compatible with HIP (Monopole:411xxx0 or Qball:100xxxx0)
-    if ( ((abs(PDGcode)/100000==41) && (PDGcode/10000000==0)) ||
-         ((int)(abs(PDGcode)/10000000) == 1) )
+    if ( MC::isMonopole(PDGcode) || ((int)(abs(PDGcode)/10000000) == 1) )
     {
       //std::cout << "SB: HIPKiller Step:" << PDGcode << ", energy="
       //          << aStep->GetTrack()->GetKineticEnergy() << std::endl;
