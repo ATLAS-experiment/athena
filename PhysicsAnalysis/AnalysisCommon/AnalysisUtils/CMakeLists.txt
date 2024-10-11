@@ -8,26 +8,15 @@ if (NOT XAOD_STANDALONE)
 # External dependencies:
 find_package( Boost )
 find_package( CLHEP )
-find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree )
 
 # Component(s) in the package:
 atlas_add_library( AnalysisUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS AnalysisUtils
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${HEPPDT_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils AthContainers EventKernel NavFourMom GaudiKernel ParticleEvent AraTool TruthUtils
-                   PRIVATE_LINK_LIBRARIES Particle egammaEvent )
-
-atlas_add_component( AnalysisUtils
-                     src/components/*.cxx
-                     LINK_LIBRARIES AnalysisUtilsLib)
-
-atlas_add_dictionary( AnalysisUtilsDict
-                      AnalysisUtils/AnalysisUtilsDict.h
-                      AnalysisUtils/selection.xml
-                      LINK_LIBRARIES AnalysisUtilsLib )
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils AthContainers EventKernel GaudiKernel ParticleEvent TruthUtils )
 
 else()
 
