@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExtParameterisedVolumeBuilder.h"
@@ -260,14 +260,14 @@ void ExtParameterisedVolumeBuilder::PrintSTInfo(const std::string& volume) const
 
 void ExtParameterisedVolumeBuilder::getMatEther()
 {
-  StoreGateSvc* pDetStore{nullptr};
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if(svcLocator->service("DetectorStore",pDetStore).isFailure()) {
+  SmartIF<IService> smartDetStore = Gaudi::svcLocator()->service("DetectorStore");
+  StoreGateSvc *pDetStore = dynamic_cast<StoreGateSvc*>(smartDetStore.get());
+  if (!pDetStore) {
     ATH_MSG_ERROR ( "ExtParameterisedVolumeBuilder: Unable to access Detector Store" );
   }
   else {
     StoredMaterialManager* theMaterialManager = pDetStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
-    if(theMaterialManager) {
+    if (theMaterialManager) {
       m_matEther = theMaterialManager->getMaterial("special::Ether");
       m_matHypUr = theMaterialManager->getMaterial("special::HyperUranium");
     }
