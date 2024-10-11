@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -8,15 +8,10 @@
  **/
 
 #include "InDetPlotBase.h"
-// bring Athena/Gaudi utilities in scope
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Service.h"
-#include "GaudiKernel/IToolSvc.h"
-// #include <iostream>
+#include "AthenaBaseComps/AthCheckMacros.h"
+
 #include "TEfficiency.h"
-// to retrieve HistogramDefinitionSvc
-#include "InDetPhysValMonitoring/HistogramDefinitionSvc.h"
+
 #include <cmath>
 
 namespace {
@@ -38,8 +33,10 @@ namespace {
 
 
 InDetPlotBase::InDetPlotBase(InDetPlotBase* pParent, const std::string& dirName) :
-  PlotBase(pParent, dirName), AthMessaging("InDetPlotBase"), m_histoDefSvc(nullptr) {
-  // nop
+  PlotBase(pParent, dirName),
+  AthMessaging("InDetPlotBase"),
+  m_histoDefSvc("HistogramDefinitionSvc", "InDetPlotBase")
+{
 }
 
 void
@@ -152,19 +149,11 @@ InDetPlotBase::fillHisto(TEfficiency* eff2d, const float xvalue, const float yva
 /**/
 SingleHistogramDefinition
 InDetPlotBase::retrieveDefinition(const std::string& histoIdentifier, const std::string& folder, const std::string & nameOverride) {
-  SingleHistogramDefinition s; // invalid result
 
-  if (not m_histoDefSvc) {
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    StatusCode sc = svcLoc->service("HistogramDefinitionSvc", m_histoDefSvc);
-    if (sc.isFailure()) {
-      ATH_MSG_FATAL("failed to retrieve HistogramDefinitionSvc in " << __FILE__);
-      throw std::runtime_error("Could initialise the HistogramDefinitionSvc");
-      return s;
-    }
-  }
+  ATH_CHECK( m_histoDefSvc.retrieve(), {} );
+
   bool folderDefault = (folder.empty() or folder == "default");
-  s = m_histoDefSvc->definition(histoIdentifier, folder);
+  SingleHistogramDefinition s = m_histoDefSvc->definition(histoIdentifier, folder);
   // "default" and empty string should be equivalent
   if (folderDefault and s.empty()) {
     const std::string otherDefault = (folder.empty()) ? ("default") : "";

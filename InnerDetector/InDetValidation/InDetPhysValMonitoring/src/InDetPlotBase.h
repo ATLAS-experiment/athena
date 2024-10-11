@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPLOTBASE
@@ -11,7 +11,9 @@
  **/
 #include "TrkValHistUtils/PlotBase.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "InDetPhysValMonitoring/SingleHistogramDefinition.h" // to make available to children
+#include "InDetPhysValMonitoring/IHistogramDefinitionSvc.h"
 
 #include <string>
 
@@ -83,7 +85,7 @@ protected:
   }
 
 private:
-  IHistogramDefinitionSvc* m_histoDefSvc;
+  ServiceHandle<IHistogramDefinitionSvc> m_histoDefSvc;
 };
 
 

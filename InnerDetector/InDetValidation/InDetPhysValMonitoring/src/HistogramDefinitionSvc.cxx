@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -23,7 +23,7 @@ namespace {
 
 
 HistogramDefinitionSvc::HistogramDefinitionSvc(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthService(name, pSvcLocator), m_format{UNKNOWN}, m_reader{} {
+  base_class(name, pSvcLocator), m_format{UNKNOWN}, m_reader{} {
   declareProperty("DefinitionSource", m_source);
   declareProperty("DefinitionFormat", m_formatString = "text/plain");
 }
@@ -220,18 +220,4 @@ HistogramDefinitionSvc::sourceExists() {
 bool
 HistogramDefinitionSvc::formatOk() {
   return (m_format < NFORMATS)and(m_format >= 0);
-}
-
-StatusCode
-HistogramDefinitionSvc::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-  if (IIncidentListener::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IIncidentListener*>(this);
-  } else if (IHistogramDefinitionSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IHistogramDefinitionSvc*>(this);
-  } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }

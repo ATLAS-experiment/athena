@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -19,9 +19,9 @@ class SingleHistogramDefinition;
 ///Interface class to get the histogram definition for a named histogram in a given directory
 class IHistogramDefinitionSvc:virtual public IInterface{
 public:
-	///reimplemented from IInterface
-	static const InterfaceID & interfaceID();
-  ///Format of the data source holding the histogram definition
+    DeclareInterfaceID(IHistogramDefinitionSvc,1,0);
+
+    ///Format of the data source holding the histogram definition
 	enum Formats{UNKNOWN,TEXT_XML,TEXT_PLAIN,NFORMATS};
 	///Virtual destructor does nothing
 	virtual ~IHistogramDefinitionSvc(){}
@@ -54,9 +54,5 @@ public:
 	//virtual bool initialise()=0;
 	
 };
-inline const InterfaceID & IHistogramDefinitionSvc::interfaceID(){
-  static const InterfaceID IID("IHistogramDefinitionSvc",1,0);
-  return IID;
-}
 
 #endif
