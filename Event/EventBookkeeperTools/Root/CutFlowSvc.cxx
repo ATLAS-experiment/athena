@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation file for class CutFlowSvc
@@ -22,7 +22,7 @@
 
 CutFlowSvc::CutFlowSvc(const std::string& name,
                        ISvcLocator* pSvcLocator ) :
-  AthService(name, pSvcLocator)
+  base_class(name, pSvcLocator)
 {
   assert( pSvcLocator );
 }
@@ -415,23 +415,5 @@ uint64_t CutFlowSvc::getNAcceptedEvents(const CutIdentifier cutID) const
   return cbk->nAcceptedEvents();
 }
 
-
-StatusCode
-CutFlowSvc::queryInterface( const InterfaceID& riid, void** ppvi )
-{
-  // valid placeholder?
-  if ( 0 == ppvi ) { return StatusCode::FAILURE ; }  // RETURN
-  if ( ICutFlowSvc::interfaceID() == riid ) {
-    *ppvi = static_cast<ICutFlowSvc*>(this);
-    addRef(); // NB! : increment the reference count!
-    return StatusCode::SUCCESS;                     // RETURN
-  } else if ( IIncidentListener::interfaceID() == riid ) {
-    *ppvi = static_cast<IIncidentListener*>(this);
-    addRef(); // NB! : increment the reference count!
-    return StatusCode::SUCCESS;                     // RETURN
-  }
-  // Interface is not directly available: try out a base class
-  return AthService::queryInterface( riid, ppvi );
-}
 
 #endif // dual use
