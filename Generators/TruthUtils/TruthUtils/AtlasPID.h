@@ -276,7 +276,7 @@ template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); re
 /// are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
 /// when they disagree, with the overall sign of the particle set by the magnetic charge. For
 /// now no spin information is provided.
-template<> inline bool isMonopole(const DecodedPID& p){return (p.ndigits() == 7 && p(0) == 4 && p(1) == 1  && (p(2) == 1 || p(2) == 2 ) && p(7) == 0);}
+template<> inline bool isMonopole(const DecodedPID& p){return (p.ndigits() == 7 && p(0) == 4 && p(1) == 1  && (p(2) == 1 || p(2) == 2 ) && p(6) == 0);}
 template<> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(p); return isMonopole(value_digits);}
 
 

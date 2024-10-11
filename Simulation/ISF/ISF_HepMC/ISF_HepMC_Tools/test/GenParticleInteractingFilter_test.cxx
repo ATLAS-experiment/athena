@@ -136,18 +136,22 @@ TEST_F(GenParticleInteractingFilter_test, allPropertiesUnset_stdParticle_expectN
 }
 
 
-TEST_F(GenParticleInteractingFilter_test, allPropertiesUnset_exoticParticle_expectNoPass) {
-  EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
+ // Temporarily commenting out as after MR!74633 Monopoles count as
+ // intercting without any special settings - need to use a different
+ // kind of exotic particle for this test - see ATLASSIM-7301
 
-  const HepMC::FourVector mom4(1.0*sin(150.*M_PI/180.), 0.0, 1.0*cos(150.*M_PI/180.), 1.0); // rho=1, eta=-1.32
-#ifdef HEPMC3
-  HepMC::GenParticlePtr part=HepMC::newGenParticlePtr(mom4, /*pdg id=*/4110000);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/4110000);
-#endif
+// TEST_F(GenParticleInteractingFilter_test, allPropertiesUnset_exoticParticle_expectNoPass) {
+//   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
-  ASSERT_FALSE( m_filterTool->pass(part) );
-}
+//   const HepMC::FourVector mom4(1.0*sin(150.*M_PI/180.), 0.0, 1.0*cos(150.*M_PI/180.), 1.0); // rho=1, eta=-1.32
+// #ifdef HEPMC3
+//   HepMC::GenParticlePtr part=HepMC::newGenParticlePtr(mom4, /*pdg id=*/4110000);
+// #else
+//   const HepMC::GenParticle part(mom4, /*pdg id=*/4110000);
+// #endif
+
+//   ASSERT_FALSE( m_filterTool->pass(part) );
+// }
 
 
 TEST_F(GenParticleInteractingFilter_test, stdParticle_expectPass) {
