@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef I_H5_FILE_SVC_H
 #define I_H5_FILE_SVC_H
@@ -22,14 +22,10 @@ namespace H5 {
 class IH5GroupSvc : virtual public IService
 {
 public:
+  DeclareInterfaceID(IH5GroupSvc, 1, 0);
+
   virtual ~IH5GroupSvc() {};
-  static const InterfaceID& interfaceID();
   virtual H5::Group* group() = 0;
 };
-
-inline const InterfaceID& IH5GroupSvc::interfaceID() {
-  static const InterfaceID id("IH5GroupSvc", 1, 0);
-  return id;
-}
 
 #endif
