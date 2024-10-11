@@ -6,6 +6,8 @@
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
+#include "AthContainers/AuxTypeRegistry.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace Analysis {
 
@@ -99,6 +101,7 @@ namespace Analysis {
 
     const xAOD::Vertex& PrimaryVtx = *primaryVertex;
 
+    const xAOD::IParticleContainer* trackContainer = nullptr;
     for (const auto *jetIter : *h_JetCollectionName) {
       const xAOD::Jet& jetToTag = *jetIter;
 
@@ -109,7 +112,11 @@ namespace Analysis {
         ATH_MSG_DEBUG("#BTAG# No track in Jet");
         h_VxSecVertexInfoName->push_back(nullptr);
         continue;
-      } 
+      }
+
+      if (!trackContainer) {
+        trackContainer = tracksInJet.front().getDataPtr();
+      }
 
       std::vector<const xAOD::IParticle*> inputIParticles;
        
@@ -125,6 +132,33 @@ namespace Analysis {
       ATH_MSG_DEBUG("#BTAG# Number of vertices found: " << myVertexInfo->vertices().size());
       h_VxSecVertexInfoName->push_back(myVertexInfo); 
     }// for loop on jets
+
+    // If we haven't done so yet, collect the IDs of the decorations
+    // that we produce.
+    if (!m_decorIDs.isValid()) {
+      std::vector<std::string> decorationNames =
+        m_secVertexFinderToolHandle->trackDecorationNames();
+      std::vector<SG::auxid_t> decorIDs;
+      decorIDs.reserve (decorationNames.size());
+      const auto& r = SG::AuxTypeRegistry::instance();
+      for (const std::string& s : decorationNames) {
+        SG::auxid_t id = r.findAuxID (s);
+        if (id != SG::null_auxid) {
+          decorIDs.push_back (id);
+        }
+      }
+      m_decorIDs.set (std::move (decorIDs));
+    }
+
+    // Explicitly lock the decorations.
+    if (trackContainer) {
+      // Ok --- we just made these decorations; no one else should be accessing
+      // them yet.
+      xAOD::IParticleContainer* trackContainer_nc ATLAS_THREAD_SAFE = const_cast<xAOD::IParticleContainer*>(trackContainer);
+      for (SG::auxid_t id : *m_decorIDs.ptr()) {
+        trackContainer_nc->lockDecoration (id);
+      }
+    }
 
     return StatusCode::SUCCESS;
   } 

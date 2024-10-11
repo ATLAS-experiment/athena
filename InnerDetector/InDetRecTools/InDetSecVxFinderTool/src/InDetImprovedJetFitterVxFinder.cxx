@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -247,5 +247,13 @@ namespace InDet
     
   }
 
+  /// Return a list of the names of track decorations created by this tool,
+  /// in order to allow them to be locked when the calling algorithm
+  /// completes.
+  std::vector<std::string>
+  InDetImprovedJetFitterVxFinder::trackDecorationNames() const
+  {
+    return m_theTrackSelector->trackDecorationNames();
+  }
 
 }//end namespace Rec

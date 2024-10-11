@@ -3,7 +3,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Small test transform which only runs HIST merging
-# @version $Id: HISTMerge_tf.py 603486 2014-06-25 09:07:28Z graemes $ 
+# @version $Id: HLTHistMerge_tf.py 601587 2014-06-13 07:01:23Z graemes $ 
 
 import sys
 import time
@@ -18,7 +18,7 @@ from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTra
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
-ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--checkEventCount', '--dumpPickle', '--env', '--execOnly', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputHISTFile', '--inputHIST_AODFile', '--inputHIST_ESDFile', '--orphanKiller', '--outputHIST_MRGFile', '--reportName', '--reportType', '--showGraph', '--showPath', '--showSteps', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--tcmalloc']
+ListOfDefaultPositionalKeys=['--amiConfig', '--amiMetadataTag', '--checkEventCount', '--env', '--execOnly', '--ignoreErrors', '--inputHIST_File', '--noimf', '--notcmalloc', '--outputHISTFile', '--reportName', '--showGraph', '--showPath', '--showSteps', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation','--excludeDir','--excludeHist','--run_post_processing','--is_incremental_merge']
 
 @stdTrfExceptionHandler
 @sigUsrStackTrace
@@ -35,7 +35,7 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    executorSet = DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD', 'HIST_AOD'), 'HIST'], outData = ['HIST_MRG'])
+    executorSet = DQMergeExecutor(name = 'HLTHistogramMerge', inData = ['HIST'], outData = ['HIST_MRG'])
     
     trf = transform(executor = executorSet)
     
@@ -47,20 +47,20 @@ def addMyArgs(parser):
     # Use arggroup to get these arguments in their own sub-section (of --help)
     parser.defineArgGroup('DQHistMerge_tf', 'DQ merge specific options')
     parser.add_argument('--inputHISTFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='input', runarg=True, type='hist'), 
-                        help='Input DQ HIST file', group='DQHistMerge_tf')
-    parser.add_argument('--inputHIST_AODFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='input', runarg=True, type='hist_aod',
+                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='input',
                                                       countable=False), 
-                        help='Input DQ AOD step monitoring file', group='DQHistMerge_tf')
-    parser.add_argument('--inputHIST_ESDFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='input', runarg=True, type='hist_esd',
-                                                      countable=False), 
-                        help='Input DQ AOD step monitoring file', group='DQHistMerge_tf')
-    parser.add_argument('--outputHIST_MRGFile', '--outputHISTFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', runarg=True, type='hist'), 
+                        help='Input DQ histogram file', group='DQHistMerge_tf')
+    parser.add_argument('--outputHIST_MRGFile', '--outputHISTFile',nargs='+', 
+                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', countable=False), 
                         help='Output DQ monitoring file', group='DQHistMerge_tf')
-
+    
+    parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge',group='DQHistMerge_tf')
+    parser.add_argument('--excludeHist', help='Regex pattern for histogram names to exclude from merge\n'
+                                            'Note that this is just the name - paths cannot be specified',group='DQHistMerge_tf')
+    
+    parser.add_argument('--run_post_processing', default=False, action="store_true",  help='False/True/0/1 default=0',group='DQHistMerge_tf')
+    parser.add_argument('--is_incremental_merge', default=False, action="store_true", help='False/True/0/1 default=0',group='DQHistMerge_tf')
+    
 
 if __name__ == '__main__':
     main()

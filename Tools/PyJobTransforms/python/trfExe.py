@@ -1949,8 +1949,21 @@ class DQMergeExecutor(scriptExecutor):
         outDataType = list(output)[0]
         self._cmd.append(self.conf.dataDictionary[outDataType].value[0])
         
-        # Set the run_post_processing to False
-        self._cmd.append('False')
+        # Set the run_post_processing to True/False
+        if (self.conf._argdict.get("run_post_processing",False)):
+            self._cmd.append('True')
+        else:
+            self._cmd.append('False')
+
+        if (self.conf._argdict.get("is_incremental_merge",False)):
+            self._cmd.append('True')
+        else:
+            self._cmd.append('False')
+
+        for k in ("excludeHist","excludeDir"):
+            if k in self.conf._argdict:
+                self._cmd.append("--{0}={1}".format(k,self.conf._argdict[k]))
+
 
     def validate(self):
         self.setValStart()
