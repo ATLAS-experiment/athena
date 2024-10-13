@@ -26,8 +26,7 @@ const G4double HVHelper::s_EtaLimit[s_NofEtaSection + 1] = {
 HVHelper::HVHelper(
     const LArWheelCalculator *calc,
     const G4String &version
-) :  AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >("MessageSvc"),
-                  "EMECHVHelper")
+) :  AthMessaging("EMECHVHelper")
   , m_calculator(calc)
   , m_WheelShift(calc->GetElecFocaltoWRP() + calc->GetdWRPtoFrontFace())
   , m_NofPhiSections(
@@ -193,11 +192,8 @@ void HVHelperV02::ReadMapFromFile(const G4String &version)
 
 void HVHelper::GetMapFromDB(void)
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  StoreGateSvc* pDetStore;
-
-  StatusCode status = svcLocator->service("DetectorStore", pDetStore);
-  if(status.isFailure()){
+  SmartIF<StoreGateSvc> pDetStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!pDetStore) {
     ATH_MSG_WARNING("unable to get Detector Store! Use default HV values");
     return;
   }

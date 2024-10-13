@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4RunControl/LArG4TBPosOptions.h"
@@ -10,21 +10,13 @@
 
 void LArG4TBPosOptions::saveMe()
 {
-  IService* pSvc;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  StatusCode result = svcLocator->service("DetectorStore",pSvc);
-
-  if(result.isSuccess())
-  {
-    StoreGateSvc* detStore = dynamic_cast<StoreGateSvc*>(pSvc);
-    if (!detStore){
-      std::cout << "LArG4TBPosOptions::saveMe ERROR Could not dynamic cast det store" << std::endl;
-      return;
-    }
-    result=detStore->record(this,"LArG4TBPosOptions");
-    if(!result.isSuccess())
-      std::cout << "Can not record LArG4BarrelOptions" << std::endl;
-
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore) {
+    std::cout << "LArG4TBPosOptions::saveMe ERROR Could not dynamic cast det store" << std::endl;
+    return;
+  }
+  if (!detStore->record(this,"LArG4TBPosOptions").isSuccess()) {
+    std::cout << "Can not record LArG4BarrelOptions" << std::endl;
   }
 }
 

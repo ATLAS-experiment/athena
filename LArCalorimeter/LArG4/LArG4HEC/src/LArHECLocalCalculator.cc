@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECLocalCalculator.h"
@@ -40,9 +40,7 @@ LArHECLocalCalculator::LArHECLocalCalculator(const std::string& name,  ISvcLocat
 
 StatusCode LArHECLocalCalculator::initialize()
 {
-   ISvcLocator *svcLocator = Gaudi::svcLocator();
-   StoreGateSvc* detStore(nullptr);
-   ATH_CHECK(svcLocator->service("DetectorStore", detStore));
+  SmartIF<StoreGateSvc> pSvc{Gaudi::svcLocator()->service("DetectorStore")};
    ATH_MSG_DEBUG("Constructing LArHECLocalCalculator");
 
    ATH_CHECK(m_Geometry.retrieve());

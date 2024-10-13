@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SingleTrackValidation.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandle.h"
-
-// For MC Truth information:
-#include "GeneratorObjects/McEventCollection.h"
 
 // In order to be able to Ntuple & cet:
 #include "GaudiKernel/NTuple.h"
@@ -20,7 +17,6 @@
 // To get the particle properties:
 #include "HepPDT/ParticleDataTable.hh"
 #include "HepPDT/ParticleData.hh"
-#include "GaudiKernel/IPartPropSvc.h"
 
 // To extrapolate:
 #include "AtlasBComponent.h"
@@ -35,9 +31,6 @@
 // pi etc
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "AthenaKernel/Units.h"
-
-// To have histograms:
-#include "GaudiKernel/ITHistSvc.h"
 
 // System libraries
 #include <signal.h>
@@ -165,10 +158,12 @@ StatusCode SingleTrackValidation::initialize() {
   // to obtain charge & type & other properties of the primary particle and  //
   // other particles that may turn up in the debris.                         //
   //                                                                         //
-
-  ATH_CHECK(service("PartPropSvc", m_c->partPropSvc));
-  ATH_CHECK(service("THistSvc", m_c->histSvc));
+  ATH_CHECK(m_ppSvc.retrieve());
+  m_c->partPropSvc = m_ppSvc.get();
+  ATH_CHECK(m_histSvc.retrieve());
+  m_c->histSvc = m_histSvc.get();
   ATH_CHECK(detStore()->retrieve(m_c->cellId, "CaloCell_ID"));
+  ATH_CHECK(m_truthKey.initialize());
   ATH_CHECK(m_caloMgrKey.initialize());
   ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
 
@@ -268,11 +263,6 @@ StatusCode SingleTrackValidation::execute() {
   m_c->cpuTime= getCpu()-m_c->cpuTime;
   m_histos[156]->Fill( m_c->cpuTime/100. , 1. );
 
-  StatusCode sc;
-
-  StoreGateSvc *stg;
-  sc=service("StoreGateSvc", stg);
-
   const EventContext& context = getContext();
   int RunNum=context.eventID().run_number();
   int EvtNum=context.eventID().event_number();
@@ -294,9 +284,7 @@ StatusCode SingleTrackValidation::execute() {
   fieldCondObj->getInitializedCache (fieldCache);
 
   // Get the MC Truth Information
-  const McEventCollection* mcEvent;
-  sc=stg->retrieve(mcEvent,"TruthEvent");
-  if (sc.isFailure()) return StatusCode::SUCCESS;
+  SG::ReadHandle<McEventCollection> mcEvent{m_truthKey};
   for (const HepMC::GenEvent* e : *mcEvent) {
 
     // Get just the primary, call it "theParticle"
@@ -451,15 +439,9 @@ StatusCode SingleTrackValidation::execute() {
         lArKey="LArHitFCAL";
       }
 
-      StatusCode status;
-      const LArHitContainer* iter;
-      status=stg->retrieve(iter,lArKey);
-
-      if (status==StatusCode::SUCCESS) {
-        LArHitContainer::const_iterator hi=(*iter).begin();//,he=(*iter).end();
-        for (hi = (*iter).begin();hi != (*iter).end(); ++hi){
-          const LArHit* larHit = *hi;
-
+      SG::ReadHandle<LArHitContainer> larHitContainer(lArKey, "StoreGateSvc");
+      if (larHitContainer.isValid()) {
+        for (const LArHit* larHit : *larHitContainer) {
           const CaloDetDescrElement *hitElement = caloMgr->get_element(larHit->cellID());
           int samplingLayer =  m_c->cellId->sampling(larHit->cellID());
           double energy     =  larHit->energy();

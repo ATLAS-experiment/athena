@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -91,22 +91,20 @@ namespace LArG4 {
       if (detStore->retrieve(m_ChannelMap)==StatusCode::FAILURE)
         throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot retrieve FCAL Channel Map!");
 
-      // get GeoModelSvc & RDBAccessSvc
-      ISvcLocator *svcLocator = Gaudi::svcLocator();
-      IGeoModelSvc *geoModel(nullptr);
-      StatusCode status = svcLocator->service ("GeoModelSvc",geoModel);
-      if (status != StatusCode::SUCCESS)
+      SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+      if (!geoModel) {
         throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoModelSvc!");
+      }
 
-      IGeoDbTagSvc *geoDbTagSvc(nullptr);
-      status=svcLocator->service("GeoDbTagSvc",geoDbTagSvc);
-      if (status != StatusCode::SUCCESS)
+      SmartIF<IGeoDbTagSvc> geoDbTagSvc{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+      if (!geoDbTagSvc) {
         throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate GeoDbTagSvc");
-      // Access the geometry database:
-      IRDBAccessSvc *pAccessSvc(nullptr);
-      status=svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc);
-      if (status != StatusCode::SUCCESS)
+      }
+
+      SmartIF<IRDBAccessSvc> pAccessSvc{Gaudi::svcLocator()->service(geoDbTagSvc->getParamSvcName())};
+      if (!pAccessSvc) {
         throw std::runtime_error ("LArFCALCalibCalculatorBase ERROR: Cannot locate " + geoDbTagSvc->getParamSvcName());
+      }
 
       // Obtain the geometry version information:
 

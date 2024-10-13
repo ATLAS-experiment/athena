@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6TriggerTimeTool.h"
@@ -25,12 +25,11 @@ LArTBH6TriggerTimeTool::LArTBH6TriggerTimeTool(const std::string& type,
 StatusCode LArTBH6TriggerTimeTool::initialize()
 {
 
-  IIncidentSvc* incsvc;
-  if (StatusCode::SUCCESS!=service("IncidentSvc",incsvc))
-    {
-      ATH_MSG_FATAL ( "Incident service not found" );
-      return StatusCode::FAILURE ;
-    }
+  SmartIF<IIncidentSvc> incsvc{Gaudi::svcLocator()->service("IncidentSvc")};
+  if (!incsvc) {
+    ATH_MSG_FATAL ( "Incident service not found" );
+    return StatusCode::FAILURE ;
+  }
 
   long int pri=100;
   incsvc->addListener(this,"BeginEvent",pri);
