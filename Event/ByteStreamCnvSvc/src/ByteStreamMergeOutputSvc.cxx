@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamMergeOutputSvc.h"
@@ -34,30 +34,17 @@ ByteStreamMergeOutputSvc::~ByteStreamMergeOutputSvc() {
 
 // setup input and output paths
 StatusCode ByteStreamMergeOutputSvc::initialize() {
-   StatusCode sc = ByteStreamOutputSvc::initialize();
-   if (sc != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Failed to initialize ByteStreamOutputSvc base class");
-      return(sc);
-   }
-   IService* svc;
-   sc = service(m_outSvcName.value(), svc);
-   if (sc != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot get ByteStreamOutputSvc");
-      return(sc);
-   }
-   m_outSvc = dynamic_cast<ByteStreamOutputSvc*>(svc);
-   if (m_outSvc == 0) {
+   ATH_CHECK(ByteStreamOutputSvc::initialize());
+   SmartIF<IService> svcOut = Gaudi::svcLocator()->service(m_outSvcName.value());
+   m_outSvc = dynamic_cast<ByteStreamOutputSvc*>(svcOut.get());
+   if (!m_outSvc) {
       ATH_MSG_ERROR("Cannot cast " << m_outSvcName << " to ByteStreamOutputSvc");
       return(StatusCode::FAILURE);
    }
 
-   sc = service(m_inSvcName.value(), svc);
-   if (sc != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot get ByteStreamInputSvc");
-      return(sc);
-   }
-   m_inSvc = dynamic_cast<ByteStreamInputSvc*>(svc);
-   if (m_inSvc == 0) {
+   SmartIF<IService> svcIn = Gaudi::svcLocator()->service(m_inSvcName.value());
+   m_inSvc = dynamic_cast<ByteStreamInputSvc*>(svcIn.get());
+   if (!m_inSvc) {
       ATH_MSG_ERROR("Cannot cast " << m_inSvcName << " to ByteStreamInputSvc");
       return(StatusCode::FAILURE);
    }
