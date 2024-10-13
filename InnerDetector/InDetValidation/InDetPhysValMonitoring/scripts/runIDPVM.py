@@ -119,6 +119,8 @@ if MyArgs.OnlyTrackingPreInclude:
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
 
+flags.PhysVal.doExample = False
+
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg

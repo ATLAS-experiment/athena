@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file PhysValMonitoringConfig.py
@@ -26,6 +26,7 @@ def PhysValExampleCfg(flags, **kwargs):
     # Keep this disabled for now
     kwargs.setdefault("DoExBtag", False)
     kwargs.setdefault("DoExMET", False)
+    kwargs.setdefault("DoExJet", flags.PhysVal.doJet)
     kwargs.setdefault("METContainerName", "")
 
     acc.setPrivateTools(CompFactory.PhysVal.PhysValExample(**kwargs))
@@ -46,7 +47,7 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
     kwargs.setdefault("Run", 1)
     kwargs.setdefault("LumiBlock", 1)
 
-    if flags.PhysVal.doExample and flags.PhysVal.doJet:
+    if flags.PhysVal.doExample:
         tools.append(acc.popToolsAndMerge(PhysValExampleCfg(flags)))
     if flags.PhysVal.doInDet:
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringToolCfg
