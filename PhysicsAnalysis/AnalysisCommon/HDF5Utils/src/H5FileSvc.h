@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef H5_FILE_SVC_H
 #define H5_FILE_SVC_H
@@ -15,16 +15,14 @@ namespace H5 {
   class H5File;
 }
 
-class H5FileSvc : public IH5GroupSvc, public AthService
+class H5FileSvc : public extends<AthService, IH5GroupSvc>
 {
 public:
   H5FileSvc(const std::string& name, ISvcLocator* pSvcLocator);
   ~H5FileSvc();
-  StatusCode initialize() override;
-  H5::Group* group() override;
+  virtual StatusCode initialize() override;
+  virtual H5::Group* group() override;
 private:
-  StatusCode queryInterface(const InterfaceID& riid,
-                            void** ppvInterface) override;
 
   std::unique_ptr<H5::H5File> m_file{nullptr};
   Gaudi::Property<std::string> m_file_path {this, "path", "", "path to file"};
