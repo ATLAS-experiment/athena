@@ -378,6 +378,8 @@ if __name__ == "__main__":
     ## override respective configurations from trkAnaCfgFile (in case something changes in the config file)
     flags.PhysVal.IDTPM.TrkAnaEF.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
     flags.PhysVal.IDTPM.TrkAnaDoubleRatio.TrigTrkKey = f"{FinalDataPrepTrackChainxAODTracksKeyPrefix}TrackParticles"
+
+    flags.PhysVal.doExample = False
     
     ############################################
     flags.Concurrency.NumThreads=1
