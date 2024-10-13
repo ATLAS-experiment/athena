@@ -503,7 +503,7 @@ namespace Athena_test
   //************************************************************************
 
   class TestConversion
-    : public IConversionSvc
+    : public implements<IConversionSvc>
   {
   public:
     virtual StatusCode addConverter(IConverter*) { abort(); }
@@ -532,12 +532,8 @@ namespace Athena_test
     virtual StatusCode fillRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
     virtual StatusCode updateRep(IOpaqueAddress*, DataObject*)  { abort(); }
     virtual StatusCode updateRepRefs(IOpaqueAddress*, DataObject*) { abort(); }
-    virtual StatusCode queryInterface(const InterfaceID&,
-                                      void**) { abort(); }
 
     virtual StatusCode createObj(IOpaqueAddress*, DataObject*&);
-    virtual unsigned long addRef() { return 0; }
-    virtual unsigned long release() { return 0; }
   };
 
 

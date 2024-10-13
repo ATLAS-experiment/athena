@@ -41,14 +41,9 @@ namespace
 
 
 class PropTest
-  : public IProperty
+  : public implements<IProperty>
 {
 public:
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual unsigned long refCount() const override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override
-  { std::abort(); }
 
   virtual StatusCode setProperty( const std::string& s ) override
   { return mgr.setProperty(s); }
