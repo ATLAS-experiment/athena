@@ -4,6 +4,7 @@
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
+#include "TrkVolumes/DoubleTrapezoidVolumeBounds.h"
 #include "TrkVolumes/Volume.h"
 
 #include "TrkVolumes/VolumeBounds.h"
@@ -15,6 +16,8 @@
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
+#include "TrkSurfaces/DiamondBounds.h"
+
 #include <array>
 #include <typeinfo>
 
@@ -179,6 +182,26 @@ namespace {
 
    }
    template <>
+   bool checkBounds<Trk::DiamondBounds>(const Trk::Volume &volume,
+                                        const Trk::Surface &surface,
+                                        const Trk::DiamondBounds& bounds,
+                                        AvVector *vertex_sum) {
+      std::vector<Amg::Vector3D>  vertices;
+      vertices.reserve(6);
+      double delta_minx = std::min(bounds.minHalflengthX()*1e-5,1e-3);
+      double delta_maxx = std::min(bounds.maxHalflengthX()*1e-5,1e-3);
+      double delta_y = std::min(std::min(bounds.halflengthY1(),bounds.halflengthY2())*1e-5,1e-3);
+      vertices.emplace_back(Amg::Vector3D{-bounds.minHalflengthX()+delta_minx, -2*bounds.halflengthY1()+delta_y,0. });
+      vertices.emplace_back(Amg::Vector3D{-bounds.medHalflengthX()+delta_maxx,  0.,0. });
+      vertices.emplace_back(Amg::Vector3D{-bounds.maxHalflengthX()+delta_maxx,  2*bounds.halflengthY2()-delta_y,0. });
+      vertices.emplace_back(Amg::Vector3D{ bounds.maxHalflengthX()-delta_maxx,  2*bounds.halflengthY2()-delta_y,0. });
+      vertices.emplace_back(Amg::Vector3D{ bounds.medHalflengthX()-delta_maxx,  0.,0. });
+      vertices.emplace_back(Amg::Vector3D{ bounds.minHalflengthX()-delta_minx, -2*bounds.halflengthY1()+delta_y,0. });
+
+      return checkVertices(volume, surface, vertices,vertex_sum);
+    }
+
+   template <>
    bool checkBounds<Trk::DiscBounds>(const Trk::Volume &volume, const Trk::Surface &surface, const Trk::DiscBounds& bounds,
                                      AvVector *vertex_sum) {
       std::vector<Amg::Vector3D>  vertices;
@@ -218,12 +241,11 @@ namespace {
       unsigned int outer_n = 6;
       unsigned int inner_n = 6;
       vertices.reserve( outer_n + inner_n);
-      // double phi_start = bounds.averagePhi() - bounds.halfPhiSector();
-      // double phi_end = bounds.averagePhi() + bounds.halfPhiSector();
       double phi_start = bounds.averagePhi() - bounds.halfPhiSector() + bounds.halfPhiSector() *relative_tolerance;
       double phi_end = bounds.averagePhi() + bounds.halfPhiSector() - bounds.halfPhiSector() *relative_tolerance;
-      double delta_rx = std::min((bounds.rMaxX()-bounds.rMinX()) * relative_tolerance, abs_dist_tolerance);
-      double delta_ry = std::min((bounds.rMaxY()-bounds.rMinY()) * relative_tolerance, abs_dist_tolerance);
+      double delta_rx = 0.;
+      double delta_ry = 0.;
+
       createArcVertices(phi_start, phi_end, bounds.rMinX()+delta_rx, bounds.rMinY()+delta_ry, 0., inner_n,  vertices);
       createArcVertices(phi_start, phi_end, bounds.rMaxX()-delta_rx, bounds.rMaxY()-delta_ry, 0., outer_n,  vertices);
       return checkVertices(volume, surface, vertices, vertex_sum);
@@ -250,6 +272,7 @@ namespace {
       if (auto [used, contained] = checkSpecificBounds<Trk::CylinderBounds>(*volume,surface,bounds, vertex_sum); used) { return contained; }
       if (auto [used, contained] = checkSpecificBounds<Trk::RotatedTrapezoidBounds>(*volume,surface,bounds, vertex_sum); used) { return contained; }
       if (auto [used, contained] = checkSpecificBounds<Trk::TrapezoidBounds>(*volume,surface,bounds, vertex_sum); used) { return contained; }
+      if (auto [used, contained] = checkSpecificBounds<Trk::DiamondBounds>(*volume,surface,bounds, vertex_sum); used) { return contained; }
       if (auto [used, contained] = checkSpecificBounds<Trk::EllipseBounds>(*volume,surface,bounds, vertex_sum); used) { return contained; }
 
       return false;
@@ -389,6 +412,29 @@ void  test_TrapezoidVolumeBounds2() {
    test_volumeBounds(trapezoid_bounds, rotation, center);
 }
 
+void test_DoubleTrapezoidVolumeBounds() {
+   {
+      Trk::DoubleTrapezoidVolumeBounds
+         double_trapezoid_volume_bounds(40.0000000, 40.0000000, 40.0000000, 786.1100000, 7.8900000, 637.4000000);
+
+      Amg::Vector3D  center(-2769.45, -8390.84, 12080);
+      Amg::RotationMatrix3D rotation;
+      rotation.col(0) = Amg::Vector3D(1, 0, 0);
+      rotation.col(1) = Amg::Vector3D(0, 1, 0);
+      rotation.col(2) = Amg::Vector3D(0, 0, 1);
+      test_volumeBounds(double_trapezoid_volume_bounds, rotation, center);
+   }
+   {
+      Trk::DoubleTrapezoidVolumeBounds
+         double_trapezoid_volume_bounds(906.8400000, 1055.5000000, 1055.5000000, 296.3000000, 280.2000000, 24.6700000);
+      Amg::Vector3D  center(2878.35, 2878.35, 7474);
+      Amg::RotationMatrix3D rotation;
+      rotation.col(0) = Amg::Vector3D(0.707107, -0.707107, 0);
+      rotation.col(1) = Amg::Vector3D(0.707107, 0.707107, 0);
+      rotation.col(2) = Amg::Vector3D(0, 0, 1);
+      test_volumeBounds(double_trapezoid_volume_bounds, rotation, center);
+   }
+}
 
 BOOST_AUTO_TEST_CASE(VolumeTests, *boost::unit_test::tolerance(1e-10)) {
    test_TrapezoidVolumeBounds();
@@ -397,4 +443,8 @@ BOOST_AUTO_TEST_CASE(VolumeTests, *boost::unit_test::tolerance(1e-10)) {
 
 BOOST_AUTO_TEST_CASE(CylinderVolumeBounds, *boost::unit_test::tolerance(1e-10)) {
    test_CylinderVolumeBounds();
+}
+
+BOOST_AUTO_TEST_CASE(DoubleTrapezoidVolumeBounds, *boost::unit_test::tolerance(1e-10)) {
+   test_DoubleTrapezoidVolumeBounds();
 }
