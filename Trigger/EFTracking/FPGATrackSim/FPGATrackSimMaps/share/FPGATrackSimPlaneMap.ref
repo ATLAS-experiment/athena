@@ -3,14 +3,18 @@
 Initializing Gaudi ApplicationMgr using job opts ../share/
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r13)
-                                          running on lxplus775.cern.ch on Mon Jun 12 17:32:14 2023
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v39r0)
+                                          running on login04.af.uchicago.edu on Sat Oct 12 23:44:43 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData//HTT/TrigHTTMaps/V1/map_file/step3_01eta03_03phi05.pmap
-Package.UserCode     INFO Allocating map for geometry ATLAS-P2-ITK-23-00-01 diskIndex size=8
-Package.UserCode     INFO Using 8 logical layers and 9 coordinates
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-RUN4-03-00-00 diskIndex size=9
+
