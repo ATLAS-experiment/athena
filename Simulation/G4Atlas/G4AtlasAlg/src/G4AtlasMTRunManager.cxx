@@ -81,13 +81,6 @@ void G4AtlasMTRunManager::InitializeGeometry()
     // Shouldn't we abort here?
     ATH_MSG_WARNING("User Detector not set!!! Geometry NOT initialized!!!");
   }
-
-  // Setup the sensitive detectors on master.
-  /*ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-    if (svcLocator->service("SensitiveDetectorSvc", m_senDetSvc).isFailure()){
-    ATH_MSG_ERROR ( "Could not retrieve the SD service" );
-    throw "CouldNotRetrieveSDService";
-    }*/
 }
 
 void G4AtlasMTRunManager::InitializePhysics()

@@ -464,13 +464,12 @@ StatusCode G4AtlasAlg::execute()
 
 void G4AtlasAlg::releaseGeoModel()
 {
-  ISvcLocator *svcLocator = Gaudi::svcLocator(); // from Bootstrap
-  IGeoModelSvc *geoModel(nullptr);
-  if(svcLocator->service("GeoModelSvc",geoModel).isFailure()) {
+  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+  if (!geoModel) {
     ATH_MSG_WARNING( " ----> Unable to retrieve GeoModelSvc" );
   }
   else {
-    if(geoModel->clear().isFailure()) {
+    if (geoModel->clear().isFailure()) {
       ATH_MSG_WARNING( " ----> GeoModelSvc::clear() failed" );
     }
     else {
