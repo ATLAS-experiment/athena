@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,8 +31,6 @@ Analysis::CalibrationDataInterfaceTool::CalibrationDataInterfaceTool(const strin
   AthAlgTool(t,n,p),
   m_broker("PerformanceBroker")
 {
-  declareInterface<Analysis::ICalibrationDataInterfaceTool>(this);
-
   declareProperty("taggerName", m_taggerName = "undefined",
 		  "tagging algorithm name");
   declareProperty("operatingPoints", m_operatingPoints,
@@ -56,20 +54,6 @@ Analysis::CalibrationDataInterfaceTool::CalibrationDataInterfaceTool(const strin
   declareProperty("PerformanceBroker", m_broker,
 		  "tool interfacing with COOL Database");
 }
-
-//================ Interface stuff ===============================================
-
-StatusCode Analysis::CalibrationDataInterfaceTool::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-   if ( riid == ICalibrationDataInterfaceTool::interfaceID() )  {
-      *ppvIf = (ICalibrationDataInterfaceTool*)this;
-      addRef();
-      return StatusCode::SUCCESS;
-   }
-
-   return AthAlgTool::queryInterface( riid, ppvIf );
-}
-
 
 
 StatusCode Analysis::CalibrationDataInterfaceTool::initialize()
