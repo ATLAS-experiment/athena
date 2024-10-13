@@ -214,7 +214,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_module_ranges_by_station.resize (nStationNames());
     for (const Range& r : m_full_module_range) {
       const Range::field& station_f = r[m_NAME_INDEX];
-      assert (not not station_f.empty() && station_f.empty() &&
+      assert (not station_f.empty() && 
               station_f.get_minimum() == station_f.get_maximum());
       unsigned int station = station_f.get_minimum();
       if (station >= m_module_ranges_by_station.size()) {
@@ -226,7 +226,7 @@ int MdtIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_channel_ranges_by_station.resize (nStationNames());
     for (const Range& r : m_full_channel_range) {
       const Range::field& station_f = r[m_NAME_INDEX];
-      assert (not not station_f.empty() && station_f.empty() &&
+      assert (not station_f.empty() &&
               station_f.get_minimum() == station_f.get_maximum());
       unsigned int station = station_f.get_minimum();
       if (station >= m_channel_ranges_by_station.size()) {
