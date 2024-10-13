@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,7 @@
 using namespace std;
 
 GoodRunsListSelectorTool::GoodRunsListSelectorTool( const std::string& type, const std::string& name, const IInterface* parent )
- : AthAlgTool( type, name, parent )
+ : base_class( type, name, parent )
  , m_reader(0)
  , m_boolop(0)
  , m_passthrough(true)
@@ -29,9 +29,6 @@ GoodRunsListSelectorTool::GoodRunsListSelectorTool( const std::string& type, con
  , m_rejectanybrl(false)
  , m_eventselectormode(false)
 {
-  declareInterface<IGoodRunsListSelectorTool>(this);
-  declareInterface<IAthenaEvtLoopPreSelectTool>(this);
-
   declareProperty( "GoodRunsListVec", m_goodrunslistVec, "list of input xml files" );
   declareProperty( "BlackRunsListVec", m_blackrunslistVec, "list of input xml files" );
   declareProperty( "BoolOperation", m_boolop );
@@ -59,19 +56,6 @@ GoodRunsListSelectorTool::~GoodRunsListSelectorTool()
     m_dqformula.erase(itr);
     delete form;
   }
-}
-
-
-StatusCode
-GoodRunsListSelectorTool::queryInterface( const InterfaceID& riid, void** ppvIf )
-{
-  if ( riid == IGoodRunsListSelectorTool::interfaceID() )  {
-     *ppvIf = (IGoodRunsListSelectorTool*)this;
-     addRef();
-     return StatusCode::SUCCESS;
-  }
-
-  return AthAlgTool::queryInterface( riid, ppvIf );
 }
 
 
