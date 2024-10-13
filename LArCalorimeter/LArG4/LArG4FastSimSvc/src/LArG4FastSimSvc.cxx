@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // include header file
@@ -17,7 +17,7 @@
 
 // default constructor
 LArG4FastSimSvc::LArG4FastSimSvc(const std::string& name, ISvcLocator* sl)
-  : AthService(name,sl),
+  : base_class(name,sl),
     m_generated_starting_points_file(),
     m_generate_starting_points(false),
     m_starting_points_file(),
@@ -108,21 +108,6 @@ StatusCode LArG4FastSimSvc::finalize()
   if (m_generate_starting_points) {
 	  delete m_starting_points_file;
   }
-  return StatusCode::SUCCESS;
-}
-
-
-// query interface
-StatusCode LArG4FastSimSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if ( IID_ILArG4FastSimSvc == riid )    {
-    *ppvInterface = (ILArG4FastSimSvc*)this;
-  }
-  else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
   return StatusCode::SUCCESS;
 }
 
