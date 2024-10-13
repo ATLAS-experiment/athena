@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,15 +21,8 @@
 // Constructor with parameters:
 EventInfoWriter::EventInfoWriter(const std::string &name, 
 				 ISvcLocator *pSvcLocator) :
-        AthAlgorithm(name,pSvcLocator),
-        m_createDummyTags(false),
-        m_removeDummyTags(false),
-        m_createDummyOverrideTags(false),
-        m_tagInfoMgr(nullptr)
+        AthAlgorithm(name,pSvcLocator)
 {
-    declareProperty("CreateDummyTags", m_createDummyTags);
-    declareProperty("RemoveDummyTags", m_removeDummyTags);
-    declareProperty("CreateDummyOverrideTags", m_createDummyOverrideTags);
 }
 
 // Initialize method:
@@ -42,12 +35,8 @@ StatusCode EventInfoWriter::initialize()
     ATH_MSG_DEBUG("RemoveDummyTags         " << m_removeDummyTags);
     ATH_MSG_DEBUG("CreateDummyOverrideTags " << m_createDummyOverrideTags);
 
-
     // get TagInfoMgr service
-    if (service("TagInfoMgr", m_tagInfoMgr).isFailure()) {
-	ATH_MSG_FATAL("TagInfoMgr service not found !");
-	return StatusCode::FAILURE;
-    } 
+    ATH_CHECK(m_tagInfoMgr.retrieve());
 
     // Insert a dummy tag into the TagInfoMgr
     if (m_tagInfoMgr->addTag("EventInfoWriterTag", "EIW-00-00-01").isFailure()) {
