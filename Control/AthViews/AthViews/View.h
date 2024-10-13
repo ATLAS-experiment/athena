@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_VIEW_H
@@ -22,7 +22,7 @@ class DataObject;
 // rewire implementations in the constructor
 // this is PIMPL for now
 namespace SG {
-class View : public IProxyDict {
+class View : public implements<IProxyDict> {
 public:
   View () = delete;
   View (const std::string& name, const int index, const bool AllowFallThrough = true, std::string const& storeName = "StoreGateSvc");
@@ -129,9 +129,6 @@ public:
     return m_implementation->tryELRemap(sgkey_in, index_in, sgkey_out, index_out);
   }
 
-  virtual unsigned long addRef(){ return m_implementation->addRef(); }
-  virtual unsigned long release(){ return m_implementation->release(); }
-  virtual StatusCode queryInterface(const InterfaceID &ti, void** pp){ return m_implementation->queryInterface(ti, pp); };
   virtual const std::string& name() const { return m_implementation->name(); }
 
   //IStringPool
