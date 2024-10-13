@@ -406,7 +406,7 @@ class EventSelectionConfig(ConfigBlock):
                 alg.objectSelection = f'{selection}&&{customBtag},as_char' if selection else f'{customBtag},as_char'
             else:
                 extraSel = self.check_string(items[1])
-                alg.objectSelection = "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
+                alg.objectSelection += "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
             alg.sign  = self.check_sign(items[2])
             alg.count = self.check_int(items[3])
         elif len(items) == 5:
