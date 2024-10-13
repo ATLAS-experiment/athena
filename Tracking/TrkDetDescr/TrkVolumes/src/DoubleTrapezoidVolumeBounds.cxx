@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -264,11 +264,11 @@ Trk::DoubleTrapezoidVolumeBounds::inside(const Amg::Vector3D& pos, double tol)
     return false;
   if (pos.y() < -2 * m_halfY1 - tol)
     return false;
-  if (pos.y() > 2 * m_halfY2 - tol)
+  if (pos.y() > 2 * m_halfY2 + tol)
     return false;
   Trk::DiamondBounds* faceXYBounds = this->faceXYDiamondBounds();
   Amg::Vector2D locp(pos.x(), pos.y());
-  bool inside(faceXYBounds->inside(locp, tol));
+  bool inside(faceXYBounds->inside(locp, tol, tol));
   delete faceXYBounds;
   return inside;
 }
