@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHENAIPCTOOL_H
@@ -10,11 +10,10 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 
-static const InterfaceID IID_IAthenaIPCTool( "IAthenaIPCTool", 1, 0 );
 
 class IAthenaIPCTool : virtual public ::IAlgTool {
 public:
-   static const InterfaceID& interfaceID() { return IID_IAthenaIPCTool; }
+   DeclareInterfaceID(IAthenaIPCTool, 1, 0);
  
    virtual StatusCode makeServer(int num, const std::string& streamPortSuffix) = 0;
    virtual bool isServer() const = 0;
