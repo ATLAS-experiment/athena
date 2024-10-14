@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -68,13 +68,9 @@ StatusCode TBTrackToCaloAlg::initialize()
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
 
-  // General access to Tools :
-  IToolSvc* p_toolSvc = 0;
-  ATH_CHECK( service("ToolSvc", p_toolSvc) );
-
   IAlgTool* algTool = 0;
 
-  StatusCode sc = p_toolSvc->retrieveTool("ExtrapolTrackToCaloTool", algTool,this);
+  StatusCode sc = toolSvc()->retrieveTool("ExtrapolTrackToCaloTool", algTool,this);
   //m_toCalo=dynamic_cast<IExtrapolTrackToCaloTool*>(algTool); 
   //m_toCalo=dynamic_cast<IExtrapolateToCaloTool*>(algTool); 
   m_toCalo=dynamic_cast<TBExtrapolTrackToCaloTool*>(algTool); 
@@ -84,7 +80,7 @@ StatusCode TBTrackToCaloAlg::initialize()
   }
   
   IAlgTool* tool = 0;
-  ATH_CHECK( p_toolSvc->retrieveTool("TBCaloCoordinate", tool) );
+  ATH_CHECK( toolSvc()->retrieveTool("TBCaloCoordinate", tool) );
   m_calo_tb_coord = dynamic_cast<ICaloCoordinateTool*>(tool);
 
   // retrived via the Extrapolator to make sure that jobOpt setting is consistent.

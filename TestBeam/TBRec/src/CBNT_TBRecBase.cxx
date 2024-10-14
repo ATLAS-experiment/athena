@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_TBRecBase.h"
@@ -78,12 +78,9 @@ StatusCode CBNT_TBRecBase::pre_execute() {
     //std::cout << "Basepath" << basepath << std::endl;
  
     // retrive pointer to THistSvc
-    ITHistSvc * tHistSvc = 0;
-    sc = Gaudi::svcLocator()->service("THistSvc", tHistSvc);
-    if (sc.isFailure()) {
-       *m_log << MSG::ERROR << "Unable to retrieve pointer to THistSvc" << endmsg;
-       return sc;
-    } 
+    ServiceHandle<ITHistSvc> tHistSvc("THistSvc", name());
+    ATH_CHECK( tHistSvc.retrieve() );
+
     // get TTree
     sc = tHistSvc->getTree(m_ntpath,m_nt);
     if (sc.isFailure()) {

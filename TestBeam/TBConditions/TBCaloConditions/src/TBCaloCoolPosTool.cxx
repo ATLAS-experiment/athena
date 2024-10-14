@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCaloCoolPosTool.h"
@@ -8,18 +8,15 @@
 // Gaudi includes
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
 
 
 TBCaloCoolPosTool::TBCaloCoolPosTool(const std::string& type, 
 			 const std::string& name, 
 			 const IInterface* parent)
     : 
-    AthAlgTool(type, name, parent),m_init(0)
+    base_class(type, name, parent),m_init(0)
 {
-
-    // Declare additional interface
-    declareInterface<ITBCaloPosTool>(this);
-
 }
 
 //--------------------------------------------------------------------------
@@ -37,15 +34,14 @@ StatusCode TBCaloCoolPosTool::initialize()
 {
     ATH_MSG_DEBUG ("in initialize()" );
 
-    IIncidentSvc* incSvc = nullptr;
-    ATH_CHECK( serviceLocator()->service("IncidentSvc", incSvc) );
-
-    if( initHandles() ) { 
+    if( initHandles() ) {
       m_init = true; 
     } else 
     { // wait for the begin run 
-      //start listening to "BeginRun"
-      int PRIORITY = 100;
+      // start listening to "BeginRun"
+      ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+      ATH_CHECK( incSvc.retrieve() );
+      const int PRIORITY = 100;
       incSvc->addListener(this, "BeginRun", PRIORITY);
     } 
 

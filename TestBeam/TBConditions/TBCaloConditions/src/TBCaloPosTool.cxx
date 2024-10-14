@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCaloPosTool.h"
@@ -37,15 +37,13 @@ StatusCode TBCaloPosTool::initialize()
 {
     ATH_MSG_DEBUG ("in initialize()" );
 
-    // Incident Service:
-    IIncidentSvc* incSvc = nullptr;
-    ATH_CHECK( serviceLocator()->service("IncidentSvc", incSvc) );
-
-    if( initHandles() ) { 
+    if( initHandles() ) {
       m_init = true; 
     } else 
     { // wait for the begin run 
-      //start listening to "BeginRun"
+      // start listening to "BeginRun"
+      ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+      ATH_CHECK( incSvc.retrieve() );
       int PRIORITY = 100;
       incSvc->addListener(this, "BeginRun", PRIORITY);
     } 

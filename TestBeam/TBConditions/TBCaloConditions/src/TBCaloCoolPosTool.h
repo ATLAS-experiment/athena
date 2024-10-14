@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCALOCONDITIONS_TBCALOCOOLPOSTOOL
@@ -22,8 +22,8 @@
 	
  **/
  
-class ATLAS_NOT_THREAD_SAFE TBCaloCoolPosTool : public AthAlgTool,
-      virtual public ITBCaloPosTool, public IIncidentListener
+class ATLAS_NOT_THREAD_SAFE TBCaloCoolPosTool : public extends<AthAlgTool,
+                                                               ITBCaloPosTool, IIncidentListener>
 {
 public:
 

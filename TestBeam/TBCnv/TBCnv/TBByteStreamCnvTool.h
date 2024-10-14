@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTBEAM_BYTESTREAMTOOL_H
@@ -88,8 +88,8 @@ private:
 
   static const eformat::SubDetector m_DontCheckRodSubDetID; //==0xff
 
-  ByteStreamCnvSvc* m_ByteStreamEventAccess;
-  IROBDataProviderSvc *m_rdpSvc;
+  ServiceHandle<ByteStreamCnvSvc> m_ByteStreamEventAccess;
+  ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
   EventID m_lastEventID;
   eformat::SubDetector m_subdet_id;
   std::vector<uint32_t> m_rodBlock; //For reading only : data fragment
