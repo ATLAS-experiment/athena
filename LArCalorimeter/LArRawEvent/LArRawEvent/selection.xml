@@ -28,9 +28,12 @@
     <field name="m_onlineId" transient="true" />
   </class>
 
-  <class name="LArFebHeaderContainer" />
-  <class name="DataVector<LArFebHeader>" />
+  <class name="LArFebHeader::RodHeader" />
+  <class name="LArFebHeader::DspHeader" />
   <class name="LArFebHeader" />
+  <class name="std::vector<LArFebHeader*>" />
+  <class name="DataVector<LArFebHeader>" />
+  <class name="LArFebHeaderContainer" id="6E1A1F08-1018-4767-8133-2F568B107C1B" />
   <class name="LArRawChannelContainer" />
   <class name="std::vector<LArRawChannel>" />
   <class name="LArRawChannel" />

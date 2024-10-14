@@ -17,3 +17,13 @@
 #include "LArRawEvent/LArRawSCContainer.h" 
 #include "LArRawEvent/LArFebHeaderContainer.h" 
 #include "LArRawEvent/LArRawChannelContainer.h" 
+
+struct GCCXML_DUMMY_INSTANTIATION_LARRAWCNV {
+  LArFebHeader::RodHeader m_rowHeader;
+  LArFebHeader::DspHeader m_dspHeader;
+  LArFebHeader m_febHeader;
+  DataVector<LArFebHeader> m_febHeaderDV;
+  std::vector<LArFebHeader*> m_febHeaderVPtr;
+  LArFebHeaderContainer m_febHeaderCont;
+
+};
