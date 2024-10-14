@@ -122,18 +122,6 @@ double RootTruthParticleCnvTool::chargeFromPdgId (int pdgId) const
   return MC::charge(pdgId);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-//
-//              Implementation of the IInterface function(s)
-
-StatusCode RootTruthParticleCnvTool::queryInterface( const InterfaceID&,
-                                                     void** ) { abort(); }
-unsigned long RootTruthParticleCnvTool::addRef() { abort(); }
-unsigned long RootTruthParticleCnvTool::release() { abort(); }
-unsigned long RootTruthParticleCnvTool::refCount() const { abort(); }
-
-//
-////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
 //
