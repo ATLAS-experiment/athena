@@ -131,7 +131,7 @@ def JETM7KernelCfg(flags, name='JETM7Kernel', **kwargs):
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, 
-                                      ThinningTools = thinningTools,
+                                      ThinningTools = [],
                                       SkimmingTools =[skimmingTool] if not flags.Input.isMC else []))   
 
 
