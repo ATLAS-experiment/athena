@@ -1055,26 +1055,6 @@ EventSelectorByteStream::releaseContext(IEvtSelector::Context*& /*it*/) const {
 }
 
 //________________________________________________________________________________
-StatusCode EventSelectorByteStream::queryInterface(const InterfaceID& riid, void** ppvInterface) {
-   if (riid == IEvtSelector::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEvtSelector*>(this);
-   } else if (riid == IIoComponent::interfaceID()) {
-      *ppvInterface = dynamic_cast<IIoComponent*>(this);
-   } else if (riid == IProperty::interfaceID()) {
-      *ppvInterface = dynamic_cast<IProperty*>(this);
-   } else if (riid == IEvtSelectorSeek::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEvtSelectorSeek*>(this);
-   } else if (riid == IEventShare::interfaceID()) {
-      *ppvInterface = dynamic_cast<IEventShare*>(this);
-   } else if (riid == ISecondaryEventSelector::interfaceID()) {
-      *ppvInterface = dynamic_cast<ISecondaryEventSelector*>(this);
-   } else {
-      return(Service::queryInterface(riid, ppvInterface));
-   }
-   addRef();
-   return(StatusCode::SUCCESS);
-}
-//________________________________________________________________________________
 StatusCode EventSelectorByteStream::io_reinit() {
    lock_t lock (m_mutex);
    ATH_MSG_INFO("I/O reinitialization...");

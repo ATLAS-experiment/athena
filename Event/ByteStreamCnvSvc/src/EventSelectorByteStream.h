@@ -54,9 +54,6 @@ public:
    virtual StatusCode stop() override;
    virtual StatusCode finalize() override;
 
-   // Implementation of IInterface methods.
-   virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvInterface) override;
-
    //-------------------------------------------------
    // IEventSelector
    /// @brief create context
