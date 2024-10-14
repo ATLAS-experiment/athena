@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_Z0PVTRACKCOMPATIBILITYESTIMATOR_H
@@ -41,7 +41,7 @@ namespace Trk{
  */
 
   
-  class Z0PVTrackCompatibilityEstimator : public AthAlgTool, virtual public IPVTrackCompatibilityEstimator{
+  class Z0PVTrackCompatibilityEstimator : public extends<AthAlgTool, IPVTrackCompatibilityEstimator> {
     
   public:
     Z0PVTrackCompatibilityEstimator(const std::string& type, const std::string& name, const IInterface* parent); 
@@ -50,9 +50,6 @@ namespace Trk{
     virtual StatusCode initialize();
     virtual StatusCode finalize();
     
-    static const InterfaceID& interfaceID();
-    virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) ;
-
     bool isCompatible(const xAOD::TrackParticle* track,
                       const xAOD::VertexContainer* pvContainer, unsigned int pvIndex = 0) const;
 
@@ -65,12 +62,6 @@ namespace Trk{
     double m_z0SignificanceMax;
     
   };
-  
-
-  inline const InterfaceID& Z0PVTrackCompatibilityEstimator::interfaceID(){
-    static const InterfaceID IID_Z0PVTrackCompatibilityEstimator("Z0PVTrackCompatibilityEstimator", 1, 0); 
-    return IID_Z0PVTrackCompatibilityEstimator;
-  }
 
 }
 
