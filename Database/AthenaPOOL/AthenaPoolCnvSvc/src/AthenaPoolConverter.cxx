@@ -25,16 +25,13 @@ AthenaPoolConverter::~AthenaPoolConverter() {
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::initialize() {
-   if (!::Converter::initialize().isSuccess()) {
-      ATH_MSG_FATAL("Cannot initialize Converter base class.");
-      return(StatusCode::FAILURE);
-   }
-   // Retrieve AthenaPoolCnvSvc
-   if (!m_athenaPoolCnvSvc.retrieve().isSuccess()) {
-      ATH_MSG_FATAL("Cannot get AthenaPoolCnvSvc.");
-      return(StatusCode::FAILURE);
-   }
-   IProperty* propertyServer(dynamic_cast<IProperty*>(m_athenaPoolCnvSvc.operator->()));
+   ATH_CHECK(::Converter::initialize());
+
+   // We do not retrieve m_detStore as that store may not always be available!
+
+   ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
+
+   IProperty* propertyServer(dynamic_cast<IProperty*>(m_athenaPoolCnvSvc.get()));
    StringProperty containerPrefixProp("PoolContainerPrefix", "CollectionTree");
    StringProperty containerNameHintProp("TopLevelContainerName", "");
    StringProperty branchNameHintProp("SubLevelBranchName", "<type>/<key>");
@@ -162,7 +159,8 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
 		::Converter(POOL_StorageType, myCLID, pSvcLocator),
 		::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
-	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", "AthenaPoolConverter"),
+	m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
+	m_athenaPoolCnvSvc("AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
 	m_classDesc(),
 	m_className(),
 	m_classDescs(),
