@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBSExtraction/TrigBStoxAODTool.h"
@@ -692,11 +692,9 @@ StatusCode TrigBStoxAODTool::classLabel2CLIDLabel(const std::vector<std::string>
 						  std::vector<std::pair<CLID,std::string> >& decoded,
 						  std::vector<std::pair<CLID,std::string> >& decodedNewNames) {
   // translate Class names into CLID numbers
-  IClassIDSvc* clidSvc{nullptr};
-  if( service("ClassIDSvc", clidSvc).isFailure() ) {
-    ATH_MSG_FATAL("Unable to get pointer to CLIDSvc Service");
-    return StatusCode::FAILURE;
-  }
+  SmartIF<IClassIDSvc> clidSvc{service("ClassIDSvc")};
+  ATH_CHECK( clidSvc.isValid() );
+
   if( property.size() != newProperty.size() ) {
     ATH_MSG_ERROR("vector sizes of new and old SG labels are different: "
 		  << newProperty.size() << " vs " << property.size() );
