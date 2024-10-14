@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthAnalysisAlgorithm.cxx 
@@ -150,17 +150,10 @@ TFile* AthAnalysisAlgorithm::currentFile(const char* evtSelName) {
    //get the EventSelector so we can get it's list of input files
    //dont get it with a ServiceHandle, because that invokes initialize, can get into init loop
 
-   IProperty* evtSelector = 0;
-   if(service(evtSelName,evtSelector,false).isFailure()) {
+   SmartIF<IProperty> evtSelector{service(evtSelName, false)};
+   if(!evtSelector) {
      ATH_MSG_ERROR("currentFile(): Couldn't find the service: " << evtSelName);return 0;
    }
-   //SmartIF<IProperty> evtSelector(mysel);
-   /*
-   ServiceHandle<IProperty> evtSelector(evtSelName,name());
-
-   if(evtSelector.retrieve().isFailure()) {
-      ATH_MSG_ERROR("currentFile(): Couldn't find the service: " << evtSelName);return 0;
-      }*/
 
    try {
       //get the list of input files - use this to determine which open file is the current input file
