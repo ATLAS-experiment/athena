@@ -127,18 +127,19 @@ bool AGDDController::WriteAGDDtoDBFile(const std::string& s)
 
 void AGDDController::UseGeoModelDetector ATLAS_NOT_THREAD_SAFE (const std::string& name)
 {
-	StoreGateSvc* pDetStore=0;
-	ISvcLocator* svcLocator = Gaudi::svcLocator();
-	StatusCode sc=svcLocator->service("DetectorStore",pDetStore);
-	if (sc.isFailure()) 
+	SmartIF<IService> svcDetStore = Gaudi::svcLocator()->service("DetectorStore");
+	StoreGateSvc* pDetStore=dynamic_cast<StoreGateSvc*>(svcDetStore.get());
+	if (!pDetStore)
 	{
 		std::cout<<"AGDDController could not get at the detector store!"<<std::endl;
+		return;
 	}
 	const GeoModelExperiment* theExpt = nullptr;
-	sc=pDetStore->retrieve( theExpt,"ATLAS");
+	StatusCode sc=pDetStore->retrieve( theExpt,"ATLAS");
 	if (sc.isFailure()) 
 	{
 		std::cout<<"AGDDController could not get GeoModelExperiment!"<<std::endl;
+		return;
 	}
 	else
 	{
