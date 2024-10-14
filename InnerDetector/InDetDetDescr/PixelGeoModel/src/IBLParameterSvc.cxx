@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "IBLParameterSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/PathResolver.h"
 
@@ -47,17 +47,6 @@ IBLParameterSvc::~IBLParameterSvc()
 {
 }
 
-inline StatusCode IBLParameterSvc::queryInterface(const InterfaceID& riid, void** ppvIf)
-{
-  if (riid == IBLParameterSvc::interfaceID()){
-    *ppvIf = dynamic_cast<IBLParameterSvc*>(this);
-    addRef();
-    return StatusCode::SUCCESS;
-  }
-  return base_class::queryInterface( riid, ppvIf );
-
-}
- 
 /**
  ** Initialize Service
  **/

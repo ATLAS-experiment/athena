@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCALIBALGS_PIXELCHARGETOTCONVERSION_H
@@ -10,7 +10,7 @@
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -31,7 +31,7 @@ class ATLAS_NOT_THREAD_SAFE PixelChargeToTConversion : public AthAlgorithm{
   StatusCode finalize();
   
  private:
-  ServiceHandle<IBLParameterSvc> m_IBLParameterSvc
+  ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc
   {this, "IBLParameterSvc", "IBLParameterSvc"};
 
   SG::ReadHandleKey<InDet::PixelClusterContainer> m_pixelsClustersKey

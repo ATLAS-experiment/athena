@@ -20,7 +20,7 @@
 // Pixels:
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetIdentifier/PixelID.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 
 // CLHEP:
 #include "CLHEP/Matrix/Vector.h"

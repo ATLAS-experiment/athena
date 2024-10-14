@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ changes : 11.02.04 added docu
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/TRT_ID.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 
 #include "InDetPrepRawData/PixelCluster.h"
 #include "InDetRecToolInterfaces/IInDetTestPixelLayerTool.h"
@@ -245,7 +245,7 @@ private:
     ""
   };
 
-  ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{
+  ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc{
     this,
     "IBLParameterSvc",
     "IBLParameterSvc"
