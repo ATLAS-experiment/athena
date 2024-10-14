@@ -569,6 +569,7 @@ namespace Athena_test {
     // Test that t->proxy map is set correctly for auto-created
     // objs with symlinks.
     TestConversion cnv;
+    cnv.addRef();
 
     IOpaqueAddress *pIOA(new TestIOA);
 
