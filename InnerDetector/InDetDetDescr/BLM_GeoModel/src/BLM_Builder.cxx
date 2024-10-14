@@ -26,10 +26,9 @@
 //================ Constructor =================================================
 
 InDetDD::BLM_Builder::BLM_Builder(const std::string& t,
-			  const std::string& n,
-			  const IInterface*  p )
-  :
-  base_class(t,n,p)
+				  const std::string& n,
+				  const IInterface*  p )
+  : base_class(t,n,p)
 {
   //default settings
   //          Z                              R                               PHI                        ROT_X                      ROT_Y                        ROT_Z                  DIAM_TRANS_X               DIAM_TRANS_Y              DIAM_TRANS_Z
@@ -101,16 +100,11 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
     return StatusCode::FAILURE;
   }
 
-//  ATH_MSG_INFO("BLMBuilder building..."); //commented out by D.Dobos on request by M.Elsing
- 
-  StoredMaterialManager * materialManager;
-  if (StatusCode::SUCCESS != detStore()->retrieve(materialManager, std::string("MATERIALS"))) {
-    ATH_MSG_ERROR("Failed to retrieve Material Manager");
-    return StatusCode::FAILURE;
-  }
+  StoredMaterialManager * materialManager{nullptr};
+  ATH_CHECK(detStore()->retrieve(materialManager, std::string("MATERIALS")));
 
   //create geometry manager
-  BLM_GeometryManager* manager = new BLM_GeometryManager;
+  std::unique_ptr<BLM_GeometryManager> manager = std::make_unique<BLM_GeometryManager>();
 
   StatusCode sc;
   if(m_BDparameters)
@@ -118,21 +112,13 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
       DecodeVersionKey versionKey("InnerDetector");
 
       // Issue error if AUTO.
-      if (versionKey.tag() == "AUTO")
-	{
-	  ATH_MSG_ERROR("AUTO Atlas version. Please select a version.");
-	}
+      if (versionKey.tag() == "AUTO") {
+	ATH_MSG_ERROR("AUTO Atlas version. Please select a version.");
+	return StatusCode::FAILURE;
+      }
 
       ATH_MSG_INFO("Building BLM with Version Tag: "<< versionKey.tag() << " at Node: " << versionKey.node());
-
-      IRDBAccessSvc *accessSvc;
-      sc = service("RDBAccessSvc",accessSvc);
-      if (sc.isFailure())
-	{
-	  ATH_MSG_FATAL("Could not locate RDBAccessSvc");
-	  delete manager;
-	  return StatusCode::FAILURE;
-	}
+      SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service("RDBAccessSvc")};
 
       // Print the BLM version tag:
       std::string BLMVersionTag;
@@ -140,36 +126,29 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
       ATH_MSG_INFO("BLM Version: " << BLMVersionTag);
 
       // Check if version is empty. If so, then the BLM cannot be built. This may or may not be intentional. We just issue an INFO message.
-      if (BLMVersionTag.empty())
-  	{
-	  ATH_MSG_INFO("No BLM Version. BLM will not be built.");
-	  delete manager;
-	  return StatusCode::SUCCESS;
-     	}
+      if (BLMVersionTag.empty()) {
+	ATH_MSG_INFO("No BLM Version. BLM will not be built.");
+	return StatusCode::SUCCESS;
+      }
 
       IRDBRecordset_ptr DBmodul = accessSvc->getRecordsetPtr("BLMModule", versionKey.tag(), versionKey.node());
-      //DBmodul = accessSvc->getRecordset("BLMModule", "InnerDetector-DC3-Dev", "InnerDetector");
-
       ATH_MSG_DEBUG(" --> Number of records fetched = " << DBmodul->size());
 
       //loop over all the records and putting them in module_property
 
       unsigned int ind;
       long moduleNo;
-      //std::vector<double>* module_property = NULL;
       for(ind = 0; ind < DBmodul->size(); ind++)
       {
 	  const IRDBRecord* rec = (*DBmodul)[ind];
-		//temp
  	  moduleNo = rec->getLong("MODULE_ID");
- 	  //check if this module is suposed to be builded
 
+ 	  //check if this module is suposed to be builded
  	  unsigned int mask = (1 << moduleNo);
- 	  if((mask & m_moduleon) != mask)
- 	    {
- 	      //this module is not sopoused to be built
- 	      continue;
- 	    }
+ 	  if((mask & m_moduleon) != mask) {
+	    //this module is not sopoused to be built
+	    continue;
+	  }
 
           std::vector<double> module_property;
  	  module_property.push_back(rec->getFloat("Z"));
@@ -185,7 +164,7 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
  	  //set the BCM_GeometryManeger
  	  manager->ModuleOn(moduleNo);
  	  manager->Module(moduleNo)->Set(moduleNo, &module_property);
- 	}
+      }
       ATH_MSG_DEBUG(" --> Number succesfully read from DB");
     }
   else
@@ -259,13 +238,8 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
 
   //save Geometry_manager in storegate
   ATH_MSG_DEBUG("Registering BLM_GeometryManager.");
-  sc = detStore()->record(manager, "BLMParameters");
+  ATH_CHECK(detStore()->record(std::move(manager), "BLMParameters"));
 
-  if (sc.isFailure())
-    {
-      ATH_MSG_INFO("Could not register BLM_GeometryManager");
-      return StatusCode::FAILURE;
-    }
   return StatusCode::SUCCESS;
 }
 
