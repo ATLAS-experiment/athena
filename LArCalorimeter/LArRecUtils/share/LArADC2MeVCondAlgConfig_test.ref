@@ -39,30 +39,10 @@ Py:ComponentAccumulator    INFO  \__ AthReadAlg_AllCalo (cond alg)
 Py:ComponentAccumulator    INFO      * Aliases: []
 Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
 Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/AllCalo
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_HLT_CaloCellContainer_TrigCaloCellLoF (cond alg)
+Py:ComponentAccumulator    INFO  \__ AthReadAlg_SCell (cond alg)
 Py:ComponentAccumulator    INFO      * Aliases: []
 Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/HLT_CaloCellContainer_TrigCaloCellLoF
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_HLT_CaloCellContainer_TrigCaloCellMaker_eGamma (cond alg)
-Py:ComponentAccumulator    INFO      * Aliases: []
-Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/HLT_CaloCellContainer_TrigCaloCellMaker_eGamma
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_HLT_CaloCellContainer_TrigCaloCellMaker_tau (cond alg)
-Py:ComponentAccumulator    INFO      * Aliases: []
-Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/HLT_CaloCellContainer_TrigCaloCellMaker_tau
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_HLT_CaloCellContainer_TrigT2CaloEgammaCells (cond alg)
-Py:ComponentAccumulator    INFO      * Aliases: []
-Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/HLT_CaloCellContainer_TrigT2CaloEgammaCells
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_HLT_CaloCellContainer_TrigT2CaloTauCells (cond alg)
-Py:ComponentAccumulator    INFO      * Aliases: []
-Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/HLT_CaloCellContainer_TrigT2CaloTauCells
-Py:ComponentAccumulator    INFO  \__ AthReadAlg_TauCommonPi0Cells (cond alg)
-Py:ComponentAccumulator    INFO      * Aliases: []
-Py:ComponentAccumulator    INFO      * ExtraInputs: {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'), ('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
-Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/TauCommonPi0Cells
+Py:ComponentAccumulator    INFO      * Key: CaloCellContainer/SCell
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: LArOnOffIdMap
 Py:ComponentAccumulator    INFO  \__ LArSymConditionsAlg<LArRampMC, LArRampSym> (cond alg)
