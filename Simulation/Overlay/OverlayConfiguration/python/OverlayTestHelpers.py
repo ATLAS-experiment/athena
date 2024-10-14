@@ -75,8 +75,8 @@ def overlayTestFlags(flags, args):
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
             flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
-            from Campaigns import MC21a
-            MC21a(flags)
+            from Campaigns import MC23a
+            MC23a(flags)
         elif args.run is LHCPeriod.Run4:
             flags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
             flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
