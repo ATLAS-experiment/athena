@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStreamTool.cxx
@@ -43,7 +43,7 @@ bool hasInputAlias (const SG::DataProxy& dp)
 /// Constructor
 AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 		const std::string& name,
-		const IInterface* parent) : ::AthAlgTool(type, name, parent),
+		const IInterface* parent) : base_class(type, name, parent),
 	m_store("DetectorStore", name),
 	m_conversionSvc("AthenaPoolCnvSvc", name),
 	m_clidSvc("ClassIDSvc", name),

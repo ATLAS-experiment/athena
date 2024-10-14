@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAOUTPUTSTREAMTOOL_H
@@ -28,7 +28,7 @@ namespace SG {
 /** @class AthenaOutputStreamTool
  *  @brief This is the implementation of IAthenaOutputStreamTool.
  **/
-class AthenaOutputStreamTool : public ::AthAlgTool, virtual public IAthenaOutputStreamTool {
+class AthenaOutputStreamTool : public extends<::AthAlgTool, IAthenaOutputStreamTool> {
 public:
    /// Standard AlgTool Constructor
    AthenaOutputStreamTool(const std::string& type,

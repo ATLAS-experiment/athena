@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootOutputStreamTool.h
@@ -30,7 +30,7 @@ namespace Athena {
 /** @class Athena::RootOutputStreamTool
  *  @brief This is the AthenaRoot version of AthenaServices/AthenaOutputStreamTool.
  **/
-class RootOutputStreamTool : virtual public ::IAthenaOutputStreamTool, public ::AthAlgTool {
+class RootOutputStreamTool : public extends<::AthAlgTool, ::IAthenaOutputStreamTool> {
 public:
   /// Standard AlgTool Constructor
   RootOutputStreamTool(const std::string& type, const std::string& name, const IInterface* parent);

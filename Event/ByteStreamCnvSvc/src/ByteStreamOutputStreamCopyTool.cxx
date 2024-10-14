@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ByteStreamOutputStreamCopyTool.cxx
@@ -18,7 +18,7 @@ ByteStreamOutputStreamCopyTool::ByteStreamOutputStreamCopyTool(
 		  const std::string& type,
 		  const std::string& name,
 		  const IInterface* parent) 
-  : AthAlgTool(type, name, parent),
+  : base_class(type, name, parent),
     m_outputSvc("ByteStreamEventStorageOutputSvc", name),
     m_inputSvc("ByteStreamEventStorageInputSvc", name)
 {
