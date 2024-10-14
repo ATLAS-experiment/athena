@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigOpMonitor.h"
@@ -71,7 +71,7 @@ StatusCode TrigOpMonitor::initialize()
 void TrigOpMonitor::handle( const Incident& incident ) {
   // One time fills after fork
   if (incident.type() == AthenaInterprocess::UpdateAfterFork::type()) {
-    if (!m_IOVDbSvc) service("IOVDbSvc", m_IOVDbSvc, /*createIf=*/false).ignore();
+    if (!m_IOVDbSvc) m_IOVDbSvc = service("IOVDbSvc", /*createIf=*/false);
     fillIOVDbHist();
     fillSubDetHist();
     const AthenaInterprocess::UpdateAfterFork& updinc = dynamic_cast<const AthenaInterprocess::UpdateAfterFork&>(incident);
@@ -82,7 +82,7 @@ void TrigOpMonitor::handle( const Incident& incident ) {
 StatusCode TrigOpMonitor::start()
 {
   m_previousLB = 0;
-  if (!m_IOVDbSvc) service("IOVDbSvc", m_IOVDbSvc, /*createIf=*/false).ignore();
+  if (!m_IOVDbSvc) m_IOVDbSvc = service("IOVDbSvc", /*createIf=*/false);
   ATH_CHECK(bookHists());
 
   fillReleaseDataHist();

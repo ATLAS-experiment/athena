@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEINPUTSVC_H
@@ -100,7 +100,6 @@ private:
    bool                      m_connect{false};
    std::auto_ptr<emon::EventIterator> m_eventIt;   //!< Event iterator
 
-   ITHistSvc*                m_histSvc{nullptr};
    OHRootProvider*           m_provider{nullptr};
 
    boost::regex              m_include_rex;
@@ -112,7 +111,7 @@ private:
    ServiceHandle<StoreGateSvc>         m_inputMetaDataStore;
    ServiceHandle<StoreGateSvc>         m_sgSvc;
    ServiceHandle<IROBDataProviderSvc>  m_robProvider;
-
+   ServiceHandle<ITHistSvc>            m_histSvc;
 };
 
 #endif
