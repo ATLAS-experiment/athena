@@ -15,17 +15,14 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/SGtests.h"
-
-
-#ifndef NOGAUDI
 #include "TestTools/initGaudi.h"
-using namespace Athena_test;
+
 using namespace std;
 
 int main() {
   cout << "*** ClearStore_test BEGINS ***" <<endl;
   ISvcLocator* pSvcLoc;
-  if (!initGaudi("StoreGateTestCommon.txt", pSvcLoc)) {
+  if (!Athena_test::initGaudi("StoreGate/StoreGate_jobOptions.txt", pSvcLoc)) {
     cerr << "This test can not be run" << endl;
     return 0;
   }  
@@ -35,7 +32,7 @@ int main() {
   assert(pStore);
   
   cout << "*** ClearStore_test run standard testRecord a first time ***" << endl;
-  testRecord(*pStore);
+  Athena_test::testRecord(*pStore);
   cout << "*** ClearStore_test clear the store ***" << endl;
   assert(pStore->clearStore().isSuccess());
   cout << "Testing dump: store should contain no data now \n -------->>\n" 
@@ -43,7 +40,7 @@ int main() {
        << "\n<<--------" << endl;
 
   cout << "\n\n\n*** ClearStore_test run standard testRecord a second time ***" << endl;
-  testRecord(*pStore);
+  Athena_test::testRecord(*pStore);
   cout << "*** ClearStore_test clear the store again ***" << endl;
   assert(pStore->clearStore().isSuccess());
 
@@ -63,17 +60,3 @@ int main() {
   cout << "*** ClearStore_test OK ***" <<endl;
   return 0;
 }
-#endif /*NOGAUDI*/
-
-
-
-
-
-
-
-
-
-
-
-
-

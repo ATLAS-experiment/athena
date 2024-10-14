@@ -14,18 +14,14 @@
 #undef NDEBUG
 
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/SGtests.h"
-
-
-#ifndef NOGAUDI
 #include "TestTools/initGaudi.h"
-using namespace Athena_test;
+
 using namespace std;
 
 int main() {
   cout << "*** StoreID_test BEGINS ***" <<endl;
   ISvcLocator* pSvcLoc;
-  if (!initGaudi("StoreGateTestCommon.txt", pSvcLoc)) {
+  if (!Athena_test::initGaudi("StoreGate/StoreID_test.txt", pSvcLoc)) {
     cerr << "This test can not be run" << endl;
     return 0;
   }  
@@ -46,17 +42,3 @@ int main() {
   cout << "*** StoreID_test OK ***" <<endl;
   return 0;
 }
-#endif /*NOGAUDI*/
-
-
-
-
-
-
-
-
-
-
-
-
-

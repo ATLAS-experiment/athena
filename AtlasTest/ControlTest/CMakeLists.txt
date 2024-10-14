@@ -51,23 +51,6 @@ atlas_add_test( ElementLinkVector_test
    LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}|ERROR.*known CLID.*7368883"  # duplicate CLID defined by test
    ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
-atlas_add_test( StoreGateSvcClient_test
-   SOURCES test/StoreGateSvcClient_test.cxx
-   LINK_LIBRARIES TestTools AthContainers AthenaKernel SGTools SGtests StoreGateLib CxxUtils
-   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}"
-   ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
-
-atlas_add_test( ClearStore_test
-   SOURCES test/ClearStore_test.cxx
-   LINK_LIBRARIES TestTools StoreGateLib SGtests
-   LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}"
-   ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
-
-atlas_add_test( StoreID
-   SOURCES test/StoreID_test.cxx
-   LINK_LIBRARIES TestTools StoreGateLib
-   ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
-
 atlas_add_test( FortranAlgorithm
    SCRIPT test/FortranAlgorithm.sh )
 

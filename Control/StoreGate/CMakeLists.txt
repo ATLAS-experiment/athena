@@ -34,7 +34,7 @@ function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib TestTools
+      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib SGtests TestTools
       ${extra_arg} )
 endfunction( _add_test )
 
@@ -47,7 +47,10 @@ _add_test( SGHive_test LOG_IGNORE_PATTERN "DataObject @0x|${_hivePatterns}" )
 _add_test( DataHandle_test LOG_IGNORE_PATTERN "this proxy 0x" )
 _add_test( SGIterator_test )
 _add_test( KeyConcept_test )
+_add_test( ClearStore_test LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}" )
 _add_test( StoreClearedIncident_test )
+_add_test( StoreGateSvcClient_test LOG_IGNORE_PATTERN "0x[0-9a-fA-F]{4,}" )
+_add_test( StoreID_test )
 _add_test( SegMemSvc_test )
 _add_test( exceptions_test )
 _add_test( VarHandleKey_parseKey_test )
@@ -77,7 +80,6 @@ _add_test( ThinningHandleKey_test )
 _add_test( ThinningHandleBase_test LOG_IGNORE_PATTERN "@0x" )
 _add_test( ThinningHandle_test )
 _add_test( ShallowCopyDecorDeps_test )
-
 
 # Install files from the package:
 atlas_install_joboptions( share/*.txt )
