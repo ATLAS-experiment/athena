@@ -21,6 +21,27 @@ class LArFebHeader
 {
  public:
 
+  /** @brief  ROD-Header, always present (is part of the FEB-Header) */
+  struct RodHeader {
+    uint32_t FormatVersion;
+    uint32_t SourceId;
+    uint32_t RunNumber;
+    uint16_t ELVL1Id;
+    uint16_t BCId;
+    uint32_t LVL1TigType;
+    uint32_t DetEventType;
+  }; 
+
+  /** @brief DSP-Header (most of it is actually in the DSP-Trailer) */
+  struct DspHeader {
+    uint32_t CodeVersion;  // DSP code version
+    uint32_t EventCounter; // DSP event counter
+  };
+
+
+  /** @brief for ROOT I/O */
+  LArFebHeader();
+
   /** @brief Constructor with FEB Id*/
   LArFebHeader(const HWIdentifier febid);
 
@@ -181,6 +202,9 @@ class LArFebHeader
   inline void SetFebSCA(const uint16_t sca)
     { m_SCA.push_back(degray(sca)); return; }
 
+ 
+
+
  private:
 
   /** @brief like explained in: http://mathworld.wolfram.com/GrayCode.html */
@@ -189,22 +213,9 @@ class LArFebHeader
   /** @brief Feb Identifier */
   const HWIdentifier m_FEBId;
 
-  /** @brief  ROD-Header, always present (is part of the FEB-Header) */
-  struct {
-    uint32_t FormatVersion;
-    uint32_t SourceId;
-    uint32_t RunNumber;
-    uint16_t ELVL1Id;
-    uint16_t BCId;
-    uint32_t LVL1TigType;
-    uint32_t DetEventType;
-  } m_RodHeader{};
+  RodHeader m_RodHeader;
 
-  /** @brief DSP-Header (most of it is actually in the DSP-Trailer) */
-  struct {
-    uint32_t CodeVersion;  // DSP code version
-    uint32_t EventCounter; // DSP event counter
-  } m_DspHeader{};
+  DspHeader m_DspHeader;
 
   /** @brief FEB EventId */
   uint16_t m_ELVL1Id;
@@ -237,4 +248,6 @@ class LArFebHeader
   std::vector<uint16_t> m_Ctrl3;
 };
 
+#include "AthenaKernel/CLASS_DEF.h"
+CLASS_DEF( LArFebHeader , 149839963 , 1 )
 #endif

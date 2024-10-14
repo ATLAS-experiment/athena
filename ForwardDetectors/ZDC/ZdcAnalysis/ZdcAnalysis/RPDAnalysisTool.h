@@ -11,6 +11,7 @@
 
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/RPDDataAnalyzer.h"
+#include "xAODEventInfo/EventInfo.h"
 
 namespace ZDC {
 
@@ -82,6 +83,12 @@ class ATLAS_NOT_THREAD_SAFE RPDAnalysisTool : public virtual IZdcAnalysisTool, p
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_chPileupFracKey {this, "RPDChannelPileupFrac", "", "RPD channel pileup as fraction of total (nominal baseline-subtracted) sum ADC"};
 
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_sideStatusKey {this, "ZdcSumRPDStatus", "", "RPD side level status"};
+
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
+    this, "EventInfoKey", "EventInfo",
+      "Location of the event info."};
+
+  
 };
 
 } // namespace ZDC

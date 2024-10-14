@@ -448,7 +448,7 @@ if __name__ == "__main__":
     log.setLevel(INFO)
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.ESD
+    flags.Input.Files = defaultTestFiles.ESD_RUN2_MC
     flags.Tile.RunType = TileRunType.PHY
     flags.Exec.MaxEvents = 4
     flags.fillFromArgs()

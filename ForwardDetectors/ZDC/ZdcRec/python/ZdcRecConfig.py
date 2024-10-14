@@ -152,6 +152,7 @@ def ZdcRecRun3Cfg(flags):
         config = "MonteCarloPbPb2023"
     elif flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
+        flags.Detector.EnableZDC_RPD = False # disable RPD for LHCf
     elif flags.Input.ProjectName == "data23_900GeV":
         config = "pp2023"
     elif flags.Input.ProjectName == "data23_comm":
@@ -166,13 +167,16 @@ def ZdcRecRun3Cfg(flags):
         doCalib = True
         doTimeCalib = True
 
-    doRPD = config != "LHCf2022"
+    doRPD = flags.Detector.EnableZDC_RPD #config != "LHCf2022"
 
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
+    print('RPD enable flag is '+str(doRPD))
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
-    rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags))
-    centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
+
+    if (doRPD):
+        rpdAnaTool = acc.popToolsAndMerge(RPDAnalysisToolCfg(flags))
+        centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
 
     if ( flags.Input.isMC ):
         zdcTools = [anaTool] # expand list as needed

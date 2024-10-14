@@ -17,6 +17,7 @@
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include "AthContainers/ConstAccessor.h"
+#include "ZdcUtils/ZdcEventInfo.h"
 
 namespace ZDC
 {
@@ -1659,7 +1660,15 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
   if (!eventInfo.isValid()) return StatusCode::FAILURE;
-    
+
+  // Check for decoding errors and bail out if ZDC error found
+  bool zdcErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+  if (zdcErr)
+    {
+      ATH_MSG_WARNING("ZDC decoding error found!");
+      return StatusCode::FAILURE;
+    }
+  
   // check for new run number, if new, possibly update configuration and/or calibrations
   //
   unsigned int thisRunNumber = eventInfo->runNumber();
@@ -1850,36 +1859,29 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
         if (zdcModule->zdcType() == 0) {
           // this is the main ZDC
           if (m_writeAux) {
-              if (m_doCalib) {
-                  float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
-		  zdcModuleCalibEnergy(*zdcModule) = calibEnergy;
-		  zdcModuleCalibTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
-              }
-              else
-              {
-		  zdcModuleCalibEnergy(*zdcModule) = -1000;
-		  zdcModuleCalibTime(*zdcModule) = -1000;
-              }
-
-	      zdcModuleAmplitude(*zdcModule) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
-	      zdcModuleStatus(*zdcModule) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
-	      zdcModuleTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
-
-              const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
-              zdcModuleChisq(*zdcModule) = pulseAna_p->GetChisq();
-	      zdcModuleFitAmp(*zdcModule) = pulseAna_p->GetFitAmplitude();
-	      zdcModuleFitAmpError(*zdcModule) =  pulseAna_p->GetAmpError();
-	      zdcModuleFitT0(*zdcModule) = pulseAna_p->GetFitT0();
-	      zdcModuleBkgdMaxFraction(*zdcModule) = pulseAna_p->GetBkgdMaxFraction();
-              zdcModulePreSampleAmp(*zdcModule) = pulseAna_p->GetPreSampleAmp();
-	      zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
-	      zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
-	      zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
-
-	      zdcModuleAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmp();
-	      zdcModuleT0LGRefit(*zdcModule) = pulseAna_p->getRefitLGTime();
-	      zdcModuleT0SubLGRefit(*zdcModule) = pulseAna_p->getRefitLGTimeSub();
-	      zdcModuleChisqLGRefit(*zdcModule) = pulseAna_p->getRefitLGChisq();
+	    float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
+	    zdcModuleCalibEnergy(*zdcModule) = calibEnergy;
+	    zdcModuleCalibTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
+	    
+	    zdcModuleAmplitude(*zdcModule) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
+	    zdcModuleStatus(*zdcModule) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
+	    zdcModuleTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
+	    
+	    const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
+	    zdcModuleChisq(*zdcModule) = pulseAna_p->GetChisq();
+	    zdcModuleFitAmp(*zdcModule) = pulseAna_p->GetFitAmplitude();
+	    zdcModuleFitAmpError(*zdcModule) =  pulseAna_p->GetAmpError();
+	    zdcModuleFitT0(*zdcModule) = pulseAna_p->GetFitT0();
+	    zdcModuleBkgdMaxFraction(*zdcModule) = pulseAna_p->GetBkgdMaxFraction();
+	    zdcModulePreSampleAmp(*zdcModule) = pulseAna_p->GetPreSampleAmp();
+	    zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
+	    zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
+	    zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
+	    
+	    zdcModuleAmpLGRefit(*zdcModule) = pulseAna_p->getRefitLGAmp();
+	    zdcModuleT0LGRefit(*zdcModule) = pulseAna_p->getRefitLGTime();
+	    zdcModuleT0SubLGRefit(*zdcModule) = pulseAna_p->getRefitLGTimeSub();
+	    zdcModuleChisqLGRefit(*zdcModule) = pulseAna_p->getRefitLGChisq();
 	  }
 	  //ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
           //                  << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));

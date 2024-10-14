@@ -5,6 +5,8 @@
 #include <AsgDataHandles/WriteDecorHandle.h>
 
 #include "ZdcAnalysis/RPDAnalysisTool.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "ZdcUtils/ZdcEventInfo.h"
 
 namespace ZDC {
 
@@ -70,6 +72,8 @@ StatusCode RPDAnalysisTool::initialize() {
 
   // initialize per-side decorations (in ZdcSums)
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_sideStatusKey, ".RPDStatus"));
+
+  ATH_CHECK( m_eventInfoKey.initialize());
 
   if (m_writeAux && !m_auxSuffix.empty()) {
     ATH_MSG_DEBUG("Suffix string = " << m_auxSuffix);
@@ -182,10 +186,20 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
 }
 
 StatusCode RPDAnalysisTool::recoZdcModules(xAOD::ZdcModuleContainer const& moduleContainer, xAOD::ZdcModuleContainer const& moduleSumContainer) {
-  if (moduleContainer.empty()) {
-    return StatusCode::SUCCESS; // if no modules, do nothing
-  }
-
+    if (moduleContainer.empty()) {
+      return StatusCode::SUCCESS; // if no modules, do nothing
+    }
+    
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);                     
+  if (!eventInfo.isValid()) return StatusCode::FAILURE;
+  
+  bool rpdErr = eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+  if (rpdErr)
+    {
+      ATH_MSG_WARNING("RPD decoding error found!");
+      return StatusCode::FAILURE;
+    }
+  
   reset();
   readAOD(moduleContainer);
   analyze();

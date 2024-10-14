@@ -112,7 +112,8 @@ StatusCode ZdcRecRun3::execute()
 	  if (zdcErr) errs += "* ZDC ";
 	  if (rpdErr) errs += "* RPD ";
 	  ATH_MSG_WARNING("Decoding error in LUCROD decoding:"+errs);
-	  return StatusCode::SUCCESS;
+	  // We no longer abandon the event now - the separate RPD and ZDC analysis tools check the errors and abandon the event separately.
+	  // return StatusCode::SUCCESS;
 	}
     }
 

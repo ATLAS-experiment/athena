@@ -216,6 +216,8 @@ def LArOutputCfg(flags):
             ItemList.append("LArDigitContainer#LArDigitContainer_MC_Thinned")
         if flags.Common.ProductionStep != ProductionStep.PileUpPresampling:
             ItemList.append("LArRawChannelContainer#LArRawChannels")
+        if flags.Overlay.DataOverlay and flags.Input.DataYear >= 2023:
+            ItemList.append("LArFebHeaderContainer#LArFebHeader")
         if flags.Digitization.EnableTruth:
             ItemList.append("CaloCalibrationHitContainer#*")
             acc.merge(TruthDigitizationOutputCfg(flags))
