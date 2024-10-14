@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -458,15 +458,15 @@ std::string CoreDumpSvc::dump() const
   os << "Event counter: " << m_eventCounter << "\n";  
 
 
-  IAlgExecStateSvc* algExecStateSvc(nullptr);
-  IAlgContextSvc* algContextSvc(nullptr);
+  SmartIF<IAlgExecStateSvc> algExecStateSvc;
+  SmartIF<IAlgContextSvc> algContextSvc;
 
   // Use AlgExecStateSvc in MT, otherwise AlgContextSvc
   if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 0) {
-    service("AlgExecStateSvc", algExecStateSvc, /*createIf=*/ false).ignore();
+    algExecStateSvc = service("AlgExecStateSvc", /*createIf=*/ false);
   }
   else {
-    service("AlgContextSvc", algContextSvc, /*createIf=*/ false).ignore();
+    algContextSvc = service("AlgContextSvc", /*createIf=*/ false);
   }
 
   // Loop over all slots
@@ -535,8 +535,8 @@ std::string CoreDumpSvc::dump() const
   os << " Note: to see line numbers in below stacktrace you might consider running following :\n";
   os << "  atlasAddress2Line --file <logfile>\n";
 
-  IAthenaSummarySvc *iass(nullptr);
-  if (service("AthenaSummarySvc",iass,false).isSuccess() && iass) {
+  SmartIF<IAthenaSummarySvc> iass{service("AthenaSummarySvc", /*createIf*/false)};
+  if (iass) {
     iass->addSummary("CoreDumpSvc",os.str());
     iass->setStatus(1);
     iass->createSummary().ignore();

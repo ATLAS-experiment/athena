@@ -460,8 +460,8 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
   }
 
   // Get Perfmon data
-  IPerfMonSvc *ipms;
-  if (service("PerfMonSvc",ipms,false).isFailure()) {
+  SmartIF<IPerfMonSvc> ipms{service("PerfMonSvc", /*createIf*/false)};
+  if (!ipms) {
     ATH_MSG_DEBUG("unable to get the PerfMonSvc: not printing perf summaries");
   } else {
 
@@ -605,8 +605,8 @@ AthenaSummarySvc::createDict( std::ofstream& ofd) {
   }
 
   // Get Perfmon data
-  IPerfMonSvc *ipms;
-  if (service("PerfMonSvc",ipms,false).isFailure()) {
+  SmartIF<IPerfMonSvc> ipms{service("PerfMonSvc", /*createIf*/false)};
+  if (!ipms) {
     ATH_MSG_DEBUG("unable to get the PerfMonSvc: not printing perf summaries");
   } else {
 
