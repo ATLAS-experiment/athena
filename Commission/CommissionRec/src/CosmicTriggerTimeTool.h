@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COSMICTRIGGERTIMETOOL_H
@@ -11,8 +11,7 @@
 
 class ComTime      ; 
 
-class CosmicTriggerTimeTool :public ITriggerTime, public AthAlgTool,
-virtual public IIncidentListener
+class CosmicTriggerTimeTool : public extends<AthAlgTool, ITriggerTime, IIncidentListener>
 {
 
 public:
