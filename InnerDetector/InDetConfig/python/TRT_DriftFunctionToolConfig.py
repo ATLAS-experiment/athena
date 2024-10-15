@@ -20,22 +20,18 @@ def TRT_DriftFunctionToolCfg(flags, name = "InDetTRT_DriftFunctionTool", **kwarg
     kwargs.setdefault("HTCorrectionBarrelAr", 1.5205)
     kwargs.setdefault("HTCorrectionEndcapAr", 1.2712)
     # --- set ToT corrections
-    kwargs.setdefault("ToTCorrectionsBarrelXe", [       0.,  4.358121,  3.032195,  1.631892,  0.7408397,
-                                                 -0.004113, -0.613288,  -0.73758, -0.623346,  -0.561229,
-                                                  -0.29828,  -0.21344, -0.322892, -0.386718,  -0.534751,
-                                                 -0.874178, -1.231799, -1.503689, -1.896464,  -2.385958])
-    kwargs.setdefault("ToTCorrectionsEndcapXe", [       0.,  5.514777,  3.342712,  2.056626, 1.08293693,
-                                                 0.3907979, -0.082819, -0.457485, -0.599706,  -0.427493,
-                                                 -0.328962, -0.403399, -0.663656, -1.029428,   -1.46008,
-                                                 -1.919092, -2.151582, -2.285481, -2.036822,   -2.15805])
-    kwargs.setdefault("ToTCorrectionsBarrelAr", [       0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.])
-    kwargs.setdefault("ToTCorrectionsEndcapAr", [       0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.,
-                                                        0.,        0.,        0.,        0.,         0.])
+    ToTCorrectionsBarrel = [       0.,  4.358121,  3.032195,  1.631892,  0.7408397,
+                            -0.004113, -0.613288,  -0.73758, -0.623346,  -0.561229,
+                             -0.29828,  -0.21344, -0.322892, -0.386718,  -0.534751,
+                            -0.874178, -1.231799, -1.503689, -1.896464,  -2.385958]
+    ToTCorrectionsEndcap = [       0.,  5.514777,  3.342712,  2.056626, 1.08293693,
+                            0.3907979, -0.082819, -0.457485, -0.599706,  -0.427493,
+                            -0.328962, -0.403399, -0.663656, -1.029428,   -1.46008,
+                            -1.919092, -2.151582, -2.285481, -2.036822,   -2.15805]
+    kwargs.setdefault("ToTCorrectionsBarrelXe", ToTCorrectionsBarrel)
+    kwargs.setdefault("ToTCorrectionsEndcapXe", ToTCorrectionsEndcap)
+    kwargs.setdefault("ToTCorrectionsBarrelAr", ToTCorrectionsBarrel)
+    kwargs.setdefault("ToTCorrectionsEndcapAr", ToTCorrectionsEndcap)
 
     # Second calibration DB Service in case pile-up and physics hits have different calibrations for data overlay
     if flags.Overlay.DataOverlay:
