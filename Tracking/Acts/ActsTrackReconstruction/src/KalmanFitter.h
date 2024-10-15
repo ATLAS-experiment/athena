@@ -27,7 +27,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/TrackFitting/KalmanFitter.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
-#include "Acts/Propagator/EigenStepper.hpp"
+#include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/EventData/TrackProxy.hpp"
@@ -200,10 +200,10 @@ private:
   std::unique_ptr<TrkMeasurementCalibrator> m_calibrator;
 
   /// Type erased track fitter function.
-    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::MutableTrackStateBackend>;
+    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::SympyStepper, Acts::Navigator>, ActsTrk::MutableTrackStateBackend>;
     std::unique_ptr<Fitter> m_fitter {nullptr};
 
-    using DirectFitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::DirectNavigator>, ActsTrk::MutableTrackStateBackend>;
+    using DirectFitter = Acts::KalmanFitter<Acts::Propagator<Acts::SympyStepper, Acts::DirectNavigator>, ActsTrk::MutableTrackStateBackend>;
     std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 
     Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> m_kfExtensions;
