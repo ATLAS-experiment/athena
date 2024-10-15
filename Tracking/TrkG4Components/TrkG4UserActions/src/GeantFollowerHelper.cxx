@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -91,8 +91,8 @@ StatusCode Trk::GeantFollowerHelper::initialize()
   m_validationTree->Branch("TrkStepLocY",  m_treeData->m_trk_ly,     "trkstepLY[g4steps]/F");
 
   // now register the Tree
-  ITHistSvc* tHistSvc = nullptr;
-  if (service("THistSvc",tHistSvc).isFailure()){
+  SmartIF<ITHistSvc> tHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+  if ( !tHistSvc ) {
     ATH_MSG_ERROR( "Could not find Hist Service -> Switching ValidationMode Off !" );
     delete m_validationTree; m_validationTree = nullptr;
   }
