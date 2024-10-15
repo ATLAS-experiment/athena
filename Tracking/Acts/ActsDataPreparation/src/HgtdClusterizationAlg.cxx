@@ -48,7 +48,7 @@ namespace ActsTrk {
             continue;
         }
 
-        ATH_CHECK(m_clusteringTool->clusterize(*rdoCollection, ctx, *clusterContainer));
+        ATH_CHECK(m_clusteringTool->clusterize(ctx, *rdoCollection, *clusterContainer));
     }
 
     return StatusCode::SUCCESS;

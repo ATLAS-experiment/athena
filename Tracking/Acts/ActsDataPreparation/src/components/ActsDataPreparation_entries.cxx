@@ -4,6 +4,7 @@
 
 #include "src/HgtdClusterizationAlg.h"
 #include "src/HgtdClusteringTool.h"
+#include "src/HgtdTimedClusteringTool.h"
 #include "src/PixelClusterizationAlg.h"
 #include "src/StripClusterizationAlg.h"
 #include "src/PixelSpacePointFormationAlg.h"
@@ -33,6 +34,7 @@ DECLARE_COMPONENT(ActsTrk::StripCacheSpacePointFormationAlg)
 
 // Tools
 DECLARE_COMPONENT(ActsTrk::HgtdClusteringTool)
+DECLARE_COMPONENT(ActsTrk::HgtdTimedClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelClusteringTool)
 DECLARE_COMPONENT(ActsTrk::StripClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationTool)

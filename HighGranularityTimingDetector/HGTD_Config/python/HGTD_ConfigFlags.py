@@ -1,12 +1,18 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import FlagEnum
+
+class ClusteringStrategy(FlagEnum):
+  SinglePad = "SinglePad"
+  MultiPad = "MultiPad"
 
 def createHGTD_ConfigFlags():
   hgtdcf = AthConfigFlags()
 
   hgtdcf.addFlag('HGTD.doMonitoring', False)
   hgtdcf.addFlag('HGTD.doActs', False)
+  hgtdcf.addFlag('HGTD.Acts.ClusteringStrategy', ClusteringStrategy.SinglePad, type=ClusteringStrategy)
   
   hgtdcf.addFlag("HGTD.Geometry.useGeoModelXml", True)
   hgtdcf.addFlag("HGTD.Geometry.isLocal", False)

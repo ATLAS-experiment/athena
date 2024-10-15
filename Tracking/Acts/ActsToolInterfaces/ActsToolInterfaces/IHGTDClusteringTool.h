@@ -6,7 +6,6 @@
 #define ACTSTOOLINTERFACES_IHGTDCLUSTERINGTOOL_H
 
 #include <GaudiKernel/IAlgTool.h>
-#include <HGTD_Identifier/HGTD_ID.h>
 #include <HGTD_RawData/HGTD_RDO_Container.h>
 #include <xAODInDetMeasurement/HGTDClusterContainer.h>
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
@@ -23,8 +22,8 @@ public:
     using ClusterAuxContainer = xAOD::HGTDClusterAuxContainer;
 
     virtual StatusCode
-    clusterize(const RawDataCollection& RDOs,
-	       const EventContext& ctx,
+    clusterize(const EventContext& ctx,
+	       const RawDataCollection& RDOs,
 	       ClusterContainer& container) const = 0;
 };
 
