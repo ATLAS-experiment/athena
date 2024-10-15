@@ -567,8 +567,6 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjector2024()
   ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{28, 28, 28, 28}, {28, 28, 28, 28}}};
     
-  ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
-
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       fixTau1Arr[side][module] = false;
@@ -585,6 +583,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeInjector2024()
     }
   }
   
+  ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+
   //  Construct the data analyzer                                                                             
   //                                                                                                          
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
