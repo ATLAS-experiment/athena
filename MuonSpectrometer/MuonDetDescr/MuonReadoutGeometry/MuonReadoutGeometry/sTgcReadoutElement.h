@@ -219,10 +219,6 @@ namespace MuonGM {
         int    m_ml{0};
         double m_offset{0.};
         
-        double m_sWidthChamber{0.}; // bottom base length (full chamber)
-        double m_lWidthChamber{0.}; // top base length (full chamber)
-        double m_lengthChamber{0.}; // radial size (full chamber)
-        double m_tckChamber{0.};    // thickness (full chamber)
         bool   m_diamondShape{false};
         const ALinePar*  m_ALinePar{nullptr};
         const BLinePar*  m_BLinePar{nullptr};

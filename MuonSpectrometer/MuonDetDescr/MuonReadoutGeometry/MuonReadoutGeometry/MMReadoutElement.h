@@ -168,10 +168,6 @@ namespace MuonGM {
         double m_maxHalfY{2000.};   // 0.5*top length (active area)
         double m_offset{0.};        // radial dist. of active area center w.r.t. chamber center
 
-        double m_sWidthChamber{0.}; // bottom base length (full chamber)
-        double m_lWidthChamber{0.}; // top base length (full chamber)
-        double m_lengthChamber{0.}; // radial size (full chamber)
-        double m_tckChamber{0.};    // thickness (full chamber)
         Amg::Transform3D m_delta{Amg::Transform3D::Identity()};
         const ALinePar*  m_ALinePar{nullptr};
         const BLinePar*  m_BLinePar{nullptr};

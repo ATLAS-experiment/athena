@@ -113,10 +113,11 @@ namespace MuonGM {
                 }
             }
     
-            m_sWidthChamber = nswdim->getDouble("BASE_WIDTH");;         // bottom base length (full chamber)
-            m_lWidthChamber = nswdim->getDouble("TOP_WIDTH");           // top base length (full chamber)
-            m_lengthChamber = nswdim->getDouble("LENGTH");              // height of the trapezoid (full chamber)
+            setSsize(nswdim->getDouble("BASE_WIDTH"));        // bottom base length (full chamber)
+            setLongSsize(nswdim->getDouble("TOP_WIDTH"));     // top base length (full chamber)
+            setRsize(nswdim->getDouble("LENGTH"));            // height of the trapezoid (full chamber)
     
+        
             const double gasTck = (*wstgcRec)[ind]->getDouble("gasTck");
             const double Tck = (*wstgcRec)[ind]->getDouble("Tck");
             const double xFrame = (*wstgcRec)[ind]->getDouble("xFrame");
@@ -165,7 +166,7 @@ namespace MuonGM {
     
     
             // Get frame widths
-            m_tckChamber    = Tck;            // thickness (full chamber)
+            setZsize(Tck);             // thickness (full chamber)
 
             double yCutout  = m_diamondShape ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
 
@@ -173,7 +174,7 @@ namespace MuonGM {
             // Radial shift of the local frame origin w.r.t. the center of the quadruplet.
             // For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
             // of the active area, therefore the shift is half the difference of the top and bottom frame widths.
-            m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
+            m_offset = (m_diamondShape) ? 0.5*getRsize() - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
 
             //-------------------
             // Strips
@@ -184,11 +185,11 @@ namespace MuonGM {
                 if (yCutout == 0.) {
                   m_etaDesign[il].defineTrapezoid(0.5 * sStripWidth, 
                                                   0.5 * lStripWidth, 
-                                                  0.5 * (m_lengthChamber - ysFrame - ylFrame));
+                                                  0.5 * (getRsize() - ysFrame - ylFrame));
                 } else { 
                   m_etaDesign[il].defineDiamond(0.5 * sStripWidth, 
                                                 0.5 * lStripWidth, 
-                                                0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+                                                0.5 * (getRsize() - ysFrame - ylFrame), yCutout);
                 }
                 m_etaDesign[il].inputPitch  = stripPitch;
                 m_etaDesign[il].inputWidth  = stripWidth;
@@ -208,15 +209,15 @@ namespace MuonGM {
               if (yCutout == 0.) {
                 m_phiDesign[il].defineTrapezoid(0.5 * sPadWidth, 
                                                 0.5 * lPadWidth, 
-                                                0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+                                                0.5 * (getRsize() - ysFrame - ylFrame) );
               } else { 
                 m_phiDesign[il].defineDiamond(0.5 * sPadWidth, 
                                               0.5 * lPadWidth, 
-                                              0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+                                              0.5 * (getRsize() - ysFrame - ylFrame), yCutout);
               }
               m_phiDesign[il].inputPitch  = wirePitch;
               m_phiDesign[il].inputWidth  = 0.015;
-              m_phiDesign[il].thickness   = m_tckChamber;
+              m_phiDesign[il].thickness   = getZsize();
               m_phiDesign[il].setFirstPos(firstWire[il]);      // Position of 1st wire, accounts for staggering
               m_phiDesign[il].firstPitch = firstWireGroup[il];                     // Number of Wires in 1st group, group staggering
               m_phiDesign[il].groupWidth  = wireGroupWidth;                           // Number of Wires normal group
@@ -231,10 +232,10 @@ namespace MuonGM {
             //-------------------
             double radius = absTransform().translation().perp() + m_offset;
             for (int il = 0; il < m_nlayers; il++) {
-                m_padDesign[il].Length  = m_lengthChamber;
-                m_padDesign[il].sWidth  = m_sWidthChamber;
-                m_padDesign[il].lWidth  = m_lWidthChamber;
-                m_padDesign[il].Size    = m_lengthChamber - ylFrame - ysFrame;
+                m_padDesign[il].Length  = getRsize();
+                m_padDesign[il].sWidth  = getSsize();
+                m_padDesign[il].lWidth  = getLongSsize();
+                m_padDesign[il].Size    = getRsize() - ylFrame - ysFrame;
                 m_padDesign[il].xFrame  = xFrame;
                 m_padDesign[il].ysFrame = ysFrame;
                 m_padDesign[il].ylFrame = ylFrame;
@@ -289,12 +290,12 @@ namespace MuonGM {
         MuonGM::sTGC_Technology *tech = stgc->GetTechnology();
         if (!tech) THROW_EXCEPTION(" Failed To get Technology for stgc element:"<< stgc->GetName());
      
-     
+             
         // Get Chamber length, width and frame widths
-        m_sWidthChamber = stgc->sWidth();         // bottom base length (full chamber)
-        m_lWidthChamber = stgc->lWidth();         // top base length (full chamber)
-        m_lengthChamber = stgc->Length();         // height of the trapezoid (full chamber)
-        m_tckChamber    = stgc->Tck();            // thickness (full chamber)
+        setSsize(stgc->sWidth());                 // bottom base length (full chamber)
+        setLongSsize(stgc->lWidth());             // top base length (full chamber)
+        setRsize(stgc->Length());                 // height of the trapezoid (full chamber)
+        setZsize(stgc->Tck());                    // thickness (full chamber)
         double ysFrame  = stgc->ysFrame();        // Frame thickness on short parallel edge
         double ylFrame  = stgc->ylFrame();        // Frame thickness on long parallel edge
         double xFrame   = stgc->xFrame();         // Frame thickness of non parallel edges
@@ -305,7 +306,7 @@ namespace MuonGM {
         // Radial shift of the local frame origin w.r.t. the center of the quadruplet.
         // For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
         // of the active area, therefore the shift is half the difference of the top and bottom frame widths.
-        m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
+        m_offset = (m_diamondShape) ? 0.5*getRsize() - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
      
         //-------------------
         // Strips
@@ -317,11 +318,11 @@ namespace MuonGM {
             if (yCutout == 0.) {
                 m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 
                                                 0.5 * roParam.lStripWidth, 
-                                                0.5 * (m_lengthChamber - ysFrame - ylFrame));
+                                                0.5 * (getRsize() - ysFrame - ylFrame));
             } else { 
                 m_etaDesign[il].defineDiamond(0.5 * roParam.sStripWidth, 
                                             0.5 * roParam.lStripWidth, 
-                                            0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+                                            0.5 * (getRsize() - ysFrame - ylFrame), yCutout);
             }
             m_etaDesign[il].inputPitch  = stgc->stripPitch();
             m_etaDesign[il].inputWidth  = stgc->stripWidth();
@@ -346,15 +347,15 @@ namespace MuonGM {
             if (yCutout == 0.) {
                 m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 
                                                 0.5 * roParam.lPadWidth, 
-                                                0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+                                                0.5 * (getRsize() - ysFrame - ylFrame) );
             } else { 
                 m_phiDesign[il].defineDiamond(0.5 * roParam.sPadWidth, 
                                             0.5 * roParam.lPadWidth, 
-                                            0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+                                            0.5 * (getRsize() - ysFrame - ylFrame), yCutout);
             }
             m_phiDesign[il].inputPitch  = stgc->wirePitch();
             m_phiDesign[il].inputWidth  = 0.015;
-            m_phiDesign[il].thickness   = m_tckChamber;
+            m_phiDesign[il].thickness   = getZsize();
             m_phiDesign[il].setFirstPos(roParam.firstWire[il]);      // Position of 1st wire, accounts for staggering
             m_phiDesign[il].firstPitch  = roParam.firstWireGroup[il]; // Number of Wires in 1st group, group staggering
             m_phiDesign[il].groupWidth  = roParam.wireGroupWidth;     // Number of Wires normal group
@@ -371,10 +372,10 @@ namespace MuonGM {
         //-------------------
         double radius = absTransform().translation().perp() + m_offset;
         for (int il = 0; il < m_nlayers; il++) {
-            m_padDesign[il].Length  = m_lengthChamber;
-            m_padDesign[il].sWidth  = m_sWidthChamber;
-            m_padDesign[il].lWidth  = m_lWidthChamber;
-            m_padDesign[il].Size    = m_lengthChamber - ylFrame - ysFrame;
+            m_padDesign[il].Length  = getRsize();
+            m_padDesign[il].sWidth  = getSsize();
+            m_padDesign[il].lWidth  = getLongSsize();
+            m_padDesign[il].Size    = getRsize() - ylFrame - ysFrame;
             m_padDesign[il].xFrame  = xFrame;
             m_padDesign[il].ysFrame = ysFrame;
             m_padDesign[il].ylFrame = ylFrame;
@@ -756,11 +757,11 @@ namespace MuonGM {
         double t0    = locPosML.x();
         double s0    = locPosML.y();
         double z0    = locPosML.z();
-        double width = m_sWidthChamber + (m_lWidthChamber - m_sWidthChamber)*(z0/m_lengthChamber + 0.5); // because z0 is in [-length/2, length/2]
+        double width = getSsize() + (getLongSsize() - getSsize())*(z0/getRsize() + 0.5); // because z0 is in [-length/2, length/2]
 
         double s_rel = s0/(width/2.);           // in [-1, 1]
-        double z_rel = z0/(m_lengthChamber/2.); // in [-1, 1]
-        double t_rel = t0/(m_tckChamber/2.);    // in [-1, 1]
+        double z_rel = z0/(getRsize()/2.); // in [-1, 1]
+        double t_rel = t0/(getZsize()/2.);    // in [-1, 1]
 
         // b-line parameters
         using Parameter = BLinePar::Parameter;
@@ -783,7 +784,7 @@ namespace MuonGM {
 
         if (tw != 0) {
             dt -= tw*s_rel*z_rel;
-            dz += tw*s_rel*t_rel*m_tckChamber/m_lengthChamber;
+            dz += tw*s_rel*t_rel*getZsize()/getRsize();
         }
 
         if (eg != 0) {
