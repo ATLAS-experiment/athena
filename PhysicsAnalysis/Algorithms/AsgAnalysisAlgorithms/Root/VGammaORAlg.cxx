@@ -36,10 +36,12 @@ namespace CP {
       ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
       m_inOverlapHandle.set(*evtInfo, in_vgamma_overlap, sys);
 
-      if (m_keepOverlap)
-	filter.setPassed(  in_vgamma_overlap );
-      else
-	filter.setPassed( !in_vgamma_overlap );
+      if (!m_noFilter.value()) {
+        if (m_keepOverlap)
+          filter.setPassed(  in_vgamma_overlap );
+        else
+          filter.setPassed( !in_vgamma_overlap );
+      }
     }
 
     return StatusCode::SUCCESS;
