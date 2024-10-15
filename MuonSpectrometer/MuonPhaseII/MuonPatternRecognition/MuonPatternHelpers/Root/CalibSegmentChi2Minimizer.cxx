@@ -4,7 +4,7 @@
 #include "MuonPatternHelpers/CalibSegmentChi2Minimizer.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
-#include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "GaudiKernel/PhysicalConstants.h"
 namespace {
     constexpr double c_inv{1./ Gaudi::Units::c_light};

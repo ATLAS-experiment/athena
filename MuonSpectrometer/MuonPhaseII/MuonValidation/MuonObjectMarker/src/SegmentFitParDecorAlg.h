@@ -54,7 +54,7 @@ namespace MuonR4{
 
             MeasKey_t m_keyTgc{this, "TgcKey", "xTgcStrips"};
             MeasKey_t m_keyRpc{this, "RpcKey", "xRpcMeasurements"};
-            MeasKey_t m_keyMdt{this, "MdtKey", "xAODMdtCircles"};
+            MeasKey_t m_keyMdt{this, "MdtKey", "xMdtMeasurements"};
             MeasKey_t m_keysTgc{this, "sTgcKey", "STGC_Measurements"};
             MeasKey_t m_keyMM{this, "MmKey", "MM_Measurements"};
 

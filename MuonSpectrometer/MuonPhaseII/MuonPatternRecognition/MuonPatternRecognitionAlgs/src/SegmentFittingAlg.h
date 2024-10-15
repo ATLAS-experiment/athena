@@ -7,11 +7,11 @@
 
 #include "MuonPatternEvent/MuonPatternContainer.h"
 
-
-#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSpacePoint/CalibratedSpacePoint.h"
-#include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternEvent/MuonHoughDefs.h"
 
@@ -19,8 +19,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-
-#include <TObject.h>
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 #include <set>
 
@@ -31,12 +30,10 @@ namespace ROOT {
   }
 }
 
-class TCanvas;
+
 
 namespace MuonR4{
-    class CalibSegmentChi2Minimizer;
-    
-    /// @brief Algorithm to handle segment fits  
+     /// @brief Algorithm to handle segment fits  
     /// 
     /// This is currently a placeholder to test ideas! 
     class SegmentFittingAlg: public AthReentrantAlgorithm{
@@ -45,7 +42,6 @@ namespace MuonR4{
             virtual ~SegmentFittingAlg();
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
-            virtual StatusCode finalize() override;
 
             using HitVec = SegmentFitResult::HitVec;
 
@@ -68,9 +64,7 @@ namespace MuonR4{
                                             const ActsGeometryContext& gctx,
                                             const Parameters& startPars,
                                             SegmentFitResult::HitVec&& calibHits) const;
-            /** @brief  */
-            const xAOD::MuonSegment* getTruthSegment(const EventContext& ctx,
-                                                     const std::unordered_set<const xAOD::MuonSimHit*>& matchedSeedHits) const;
+
 
             std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
                                                                  const ActsGeometryContext& gctx,
@@ -103,36 +97,30 @@ namespace MuonR4{
              *               if the time fit is activated
              *  @param candidate: Reference of the segment candidate to prune. */
             void eraseWrongHits(const ActsGeometryContext& gctx, SegmentFitResult& candidate) const;            
-            
+            /** @brief Converts the fit result into a segment object
+             *  @param locToGlobTrf: Local to global transform to translate the segment parameters into
+             *                       global parameters
+             *  @param parentSeed: Segment seed from which the segment was built
+             *  @param toConvert: Fitted segment that needs conversion */
+            static std::unique_ptr<Segment> convertToSegment(const Amg::Transform3D& locToGlobTrf, 
+                                                             const SegmentSeed* parentSeed,
+                                                             SegmentFitResult&& toConvert);
+           
             void resolveAmbiguities(const ActsGeometryContext& gctx,
                                     std::vector<std::unique_ptr<Segment>>& segmentCandidates) const;
-            
-            void visualizeFit(const EventContext& ctx,
-                              const SegmentFitResult& fitResult,
-                              const SpacePointBucket* bucket,
-                              const std::string& extraLabel,
-                              std::vector<std::unique_ptr<TObject>> primitives={}) const; 
-            
-            void visualizeFitPhi(const EventContext& ctx,
-                                 const SegmentFitResult& fitResult,
-                                 const SpacePointBucket* bucket,
-                                 const std::string& extraLabel) const;
 
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
-            /// ReadHandle for the truth segments (For validation purposes)
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegKey", "TruthSegmentsR4"};
-            
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentContainer> m_outSegments{this, "MuonSegmentContainer", "R4MuonSegments"};
-
             // access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-
+            /// IdHelperSvc
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-
+            /// Handle to the space point calibrator
             ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", "" };
+            /// Pattern visualization tool
+            ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
             
             /// Toggle the fitter
             Gaudi::Property<bool> m_useMinuit{this, "useMinuit", false};
@@ -145,21 +133,17 @@ namespace MuonR4{
 
             
             /** @brief Two mdt seeds are the same if their defining parameters match wihin */
-            Gaudi::Property<double> m_seedTanThetaReso{this, "ResoSeedTanTheta", 250. * Gaudi::Units::mrad};
-            Gaudi::Property<double> m_seedY0Reso{this, "ResoSeedY0", 500.*Gaudi::Units::micrometer};
             Gaudi::Property<double> m_seedHitChi2{this, "ResoSeedHitAssoc", 5. };
+            /** @brief Toggle seed recalibration. The two seed circles are recalibrated using 
+             *         the initial seed */
+            Gaudi::Property<bool> m_recalibSeed{this, "SeedRecalibrate", false};
+            /** @brief Toggle seed refit. The segment seed is fastly refitted 
+             *         using the collected seed drift circles */
+            Gaudi::Property<bool> m_refineSeed{this, "SeedRefine", false};
             /** Cut on the segment chi2 / nDoF to launch the outlier removal */
             Gaudi::Property<double> m_outlierRemovalCut{this, "OutlierRemoval", 5.};
             Gaudi::Property<double> m_recoveryPull{this, "RecoveryPull", 5.};
 
-
-            std::unique_ptr<TCanvas> m_allCan{};
-            Gaudi::Property<std::string> m_allCanName{this, "AllCanName", "AllSegmentFits"};
-            mutable std::atomic<unsigned int> m_canvCounter ATLAS_THREAD_SAFE{0};
-            /// Draw maximally 5000 segment fit visualizations
-            Gaudi::Property<unsigned int> m_nDrawCanvases{this, "MaxCanvases", 5000};
-
-            const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
     };
 }
 

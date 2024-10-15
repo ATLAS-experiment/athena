@@ -8,11 +8,18 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 ///
 #include <MuonPatternEvent/MuonHoughDefs.h>
-
+#include <xAODMuon/MuonSegment.h>
 
 class ActsGeometryContext;
 namespace MuonR4{
     class CalibratedSpacePoint;
+    
+    /** @brief Returns the hough tanTheta  [y] / [z]
+     *  @param v: Arbitrary direction vector */
+    double houghTanTheta(const Amg::Vector3D& v);
+    /** @brief: Returns the hough tanPhi [x] / [z] 
+      * @param v: Arbitrary direction vector */
+    double houghTanPhi(const Amg::Vector3D& v);
     namespace SegmentFit {
         /**  @brief Returns the parsed parameters into an Eigen line parametrization.
          *          The first operand is the position. The other is the direction. */
@@ -25,10 +32,12 @@ namespace MuonR4{
          *  @param tanPhi: Tangent of the [x] to [z] axis
          *  @param tanTheta: Tangent of the [y] to [z] axis  */
         Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta);
-        /** @brief Constructs a direction vector from the polar theta & phi angles */
-        /**  @brief phi: Polar angle in the [x]-[y] plane
-          * @brief theta: Azimuthal angle mesured from the positive [z]-axis */
+        /** @brief Constructs a direction vector from the polar theta & phi angles 
+          * @param phi: Polar angle in the [x]-[y] plane
+          * @param theta: Azimuthal angle mesured from the positive [z]-axis */
         Amg::Vector3D dirFromAngles(const double phi, const double theta);
+        /** @brief Returns the localSegPars decoration from a xAODMuon::Segment*/
+        Parameters localSegmentPars(const xAOD::MuonSegment& seg);
     }
 
 

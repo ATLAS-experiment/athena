@@ -27,6 +27,10 @@ namespace MuonR4 {
             
             /** @brief Configuration switches of the module  */
             struct Config{
+                /** @brief Cut on the theta angle */
+                std::array<double, 2> thetaRange{0, 180.*Gaudi::Units::deg};
+                /** @brief Cut on the intercept range */
+                std::array<double, 2> interceptRange{-20.*Gaudi::Units::m, 20.*Gaudi::Units::m};
                 /** @brief Upper cut on the hit chi2 w.r.t. seed in order to be associated to the seed*/
                 double hitPullCut{5.};
                 /** @brief Try at the first time the pattern seed as candidate */
@@ -44,19 +48,12 @@ namespace MuonR4 {
                 /** @brief Check whether a new seed candidate shares the same left-right solution with already accepted ones
                  *         Reject the seed if it has the same amount of hits */
                 bool overlapCorridor{true};
-                /** @brief Two seeds having an intercept within this parameter
-                 *         are considered to have the same intercept */
-                double interceptReso{200. * Gaudi::Units::micrometer};
-                /** @brief Two seeds having an angle within this parameter
-                 *         are considered to have the same angle. If intercept & angle
-                 *         are equivalent, then the second seed is rejected as duplicate */
-                double tanThetaReso{250.* Gaudi::Units::mrad};
                 /** @brief Recalibrate the seed drift circles from the initial estimate  */
                 bool recalibSeedCircles{false};
                 /** @brief Pointer to the space point calibrator */
                 const ISpacePointCalibrator* calibrator{nullptr};
-                /**  */
-                bool fastSeedFit{false};
+                /** @brief Toggle whether the seed is rapidly refitted */
+                bool fastSeedFit{true};
                 /** @brief Maximum number of iterations in the fast segment fit */
                 unsigned int nMaxIter{100};
                 /** @brief Precision cut off in the fast segment fit */
@@ -90,7 +87,8 @@ namespace MuonR4 {
         std::optional<DriftCircleSeed> nextSeed(const EventContext& ctx);
         /** @brief Returns how many seeds have been generated */
         unsigned int numGenerated() const;
-    
+        /** @brief Returns the current seed configuration */
+        const Config& config() const;
         private:
             /** @brief Sign combinations to draw the 4 lines tangent to 2 drift circles
              *         The first two are indicating whether the tangent is left/right to the

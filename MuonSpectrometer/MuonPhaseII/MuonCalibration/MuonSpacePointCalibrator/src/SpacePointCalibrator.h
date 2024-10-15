@@ -4,7 +4,7 @@
 #ifndef MUONSPACEPOINTCALIBRATOR_SPACEPOINTCALIBRATOR_H
 #define MUONSPACEPOINTCALIBRATOR_SPACEPOINTCALIBRATOR_H
 
-#include "MuonSpacePointCalibrator/ISpacePointCalibrator.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 
 
 #include "AthenaBaseComps/AthAlgTool.h"

@@ -10,6 +10,14 @@
 #include <format>
 
 namespace MuonR4{
+    double houghTanTheta(const Amg::Vector3D& v){ 
+        constexpr double eps = std::numeric_limits<float>::epsilon();
+        return v.y() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
+    }
+    double houghTanPhi(const Amg::Vector3D& v){            
+        constexpr double eps = std::numeric_limits<float>::epsilon();
+        return v.y() /  ( std::abs(v.z()) > eps ? v.z() : eps); 
+    }
     namespace SegmentFit {
         Amg::Vector3D dirFromTangents(const double tanPhi, const double tanTheta) {
             Amg::Vector3D dir = Amg::Vector3D(tanPhi, tanTheta, 1.).unit();
@@ -24,6 +32,10 @@ namespace MuonR4{
                                                 pars[toInt(ParamDefs::y0)],0.),
                                   dirFromAngles(pars[toInt(ParamDefs::phi)],
                                                 pars[toInt(ParamDefs::theta)]));
+        }
+        Parameters localSegmentPars(const xAOD::MuonSegment& seg) {
+            static const SG::Accessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc{"localSegPars"};
+            return xAOD::toEigen(xAOD::ConstVectorMap<toInt(ParamDefs::nPars)>{acc(seg).data()});
         }
         std::string makeLabel(const Parameters&pars) {
             std::stringstream sstr{};

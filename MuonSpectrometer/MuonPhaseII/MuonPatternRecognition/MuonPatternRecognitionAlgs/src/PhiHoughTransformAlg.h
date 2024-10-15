@@ -1,13 +1,12 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_PHIHOUGHTRANSFORMALG__H
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_PHIHOUGHTRANSFORMALG__H
 
-
-
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -51,7 +50,7 @@ namespace MuonR4{
             /// Books the accumulator and attaches it to the event data
             /// @param data: Event data object 
             /// @return a status code 
-            StatusCode prepareHoughPlane(HoughEventData & data) const; 
+            void prepareHoughPlane(HoughEventData & data) const; 
 
             /// @brief pre-processing for a given input eta-maximum
             /// Counts potential phi-hits and defines the search space 
@@ -59,9 +58,9 @@ namespace MuonR4{
             /// @param maximum: An (eta) maximum 
             /// @param data: Event data object  
             /// @return a status code 
-            StatusCode preProcessMaximum(const ActsGeometryContext& gctx,
-                                         const MuonR4::HoughMaximum & maximum,
-                                         HoughEventData & data) const; 
+            void preProcessMaximum(const ActsGeometryContext& gctx,
+                                   const MuonR4::HoughMaximum & maximum,
+                                   HoughEventData & data) const; 
 
             /// @brief extend an eta maximum with just a single attached phi measurement. 
             /// Uses the beam spot direction to guess an approximate phi-intercept and direction. 
@@ -73,10 +72,13 @@ namespace MuonR4{
             /// @brief perform a hough search for the most promising phi extension of an eta-maximum
             /// Performs a local hough transform using the phi-measurements on the maximum and returns
             /// the maxima ranked by their compatibility with the eta-measurements on the maximum. 
+            /// @param ctx: EventContext to access StoreGate
             /// @param data: event data object
             /// @param maximum: eta maximum to extend
             /// @return: The best maxima found by the extension (lowest number of eta measurements that would need to be discarded)  
-            std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> findRankedSegmentSeeds (HoughEventData & data, const MuonR4::HoughMaximum & maximum) const; 
+            std::vector<MuonR4::ActsPeakFinderForMuon::Maximum> findRankedSegmentSeeds(const EventContext& ctx,
+                                                                                       HoughEventData & data, 
+                                                                                       const MuonR4::HoughMaximum & maximum) const; 
 
             /// @brief helper to count the number of eta measurements that would be discarded for a given 
             /// phi extension candidate. Correct extensions should have a very small or zero number.
@@ -100,7 +102,8 @@ namespace MuonR4{
 
             // access to the ACTS geometry context 
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
-
+            /// Pattern visualization tool
+            ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
             // steers the target resolution in tan(phi) 
             DoubleProperty m_targetResoTanPhi{this, "ResolutionTargetTanAngle", 0.04};
             // steers the target resolution in the x-axis intercept

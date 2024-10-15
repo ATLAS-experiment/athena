@@ -27,6 +27,12 @@ def MdtMeasViewAlgCfg(flags, name="MdtMeasViewAlg", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def SegmentViewAlgCfg(flags, name="SegmentViewAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonR4.SegmentViewAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 
 def xAODViewAlgsCfg(flags):
     result = ComponentAccumulator()

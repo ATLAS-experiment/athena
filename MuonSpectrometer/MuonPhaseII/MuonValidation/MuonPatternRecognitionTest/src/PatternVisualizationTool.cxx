@@ -1,0 +1,637 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#include "PatternVisualizationTool.h"
+
+#include "MuonPatternEvent/SegmentFitterEventData.h"
+#include "MuonPatternEvent/HoughMaximum.h"
+#include "MuonPatternEvent/Segment.h"
+#include "MuonPatternEvent/SegmentSeed.h"
+
+#include "MuonPatternHelpers/SegmentFitHelperFunctions.h"
+
+#include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+
+#include "xAODMuonPrepData/MdtDriftCircle.h"
+#include "xAODMuonPrepData/RpcMeasurement.h"
+#include "xAODMuonPrepData/TgcStrip.h"
+
+#include <format>
+#include <sstream>
+#include <filesystem>
+
+
+#include "TCanvas.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TMarker.h"
+
+namespace {
+    std::string removeNonAlphaNum(std::string str) {
+        str.erase(std::remove_if(str.begin(),str.end(),
+                  [](const unsigned char c){
+                    return !std::isalnum(c);
+                   }), str.end());
+        return str;
+    }
+    std::vector<const MuonR4::SpacePoint*> stripSmartPtr(const MuonR4::SpacePointBucket& bucket) {
+        std::vector<const MuonR4::SpacePoint*> ret{};
+        std::transform(bucket.begin(), bucket.end(), std::back_inserter(ret), 
+                      [](const MuonR4::SpacePointBucket::value_type& sp){ return sp.get();});
+        return ret;
+    }
+    constexpr int truthColor = kOrange +2;
+    constexpr int parLineColor = kRed;
+    std::mutex s_mutex ATLAS_THREAD_SAFE{};
+    using SpacePointSet = std::unordered_set<const MuonR4::SpacePoint*>;
+}
+
+
+namespace MuonValR4 {
+    using namespace MuonR4;
+    using namespace SegmentFit;
+    using TruthSegmentSet = PatternVisualizationTool::TruthSegmentSet;
+
+    PatternVisualizationTool::PatternVisualizationTool(const std::string& type, const std::string& name, const IInterface* parent):
+            base_class{type,name,parent} {}
+
+    StatusCode PatternVisualizationTool::initialize(){        
+        if (m_canvasLimit > 0) {
+            if (m_canvasPrefix.value().empty() || m_allCanName.value().empty()) {
+                ATH_MSG_FATAL("Please define "<<m_canvasPrefix<<" && "<<m_allCanName);
+                return StatusCode::FAILURE;
+            }
+            if (m_saveSummaryPDF) {
+                m_allCan = std::make_unique<TCanvas>("all", "all", m_canvasWidth, m_canvasHeight);        
+                m_allCan->SaveAs((m_allCanName +".pdf[").c_str());
+            }
+            m_outFile = std::make_unique<TFile>( (m_allCanName +".root").c_str(), "RECREATE");
+            if (m_saveSinglePDFs) {
+                std::filesystem::create_directories("Plots/" + m_canvasPrefix);
+            }
+        }
+        ATH_CHECK(m_prepContainerKeys.initialize(!m_truthSegLinks.empty()));
+        m_truthLinkDecorKeys.clear();
+        ATH_MSG_INFO("Hits linked to the following segment decorations are considered as truth");
+        for (const std::string& decorName : m_truthSegLinks) {
+            ATH_MSG_INFO(" **** "<<decorName);
+            if (decorName.empty()) {
+                ATH_MSG_FATAL("Decoration must not be empty");
+                return StatusCode::FAILURE;
+            }
+            for (const SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer>& key : m_prepContainerKeys) {
+                m_truthLinkDecorKeys.emplace_back(key, decorName);
+                m_truthLinkDecors.push_back(SegLinkDecor_t{decorName});
+            }
+        }
+        ATH_CHECK(m_truthLinkDecorKeys.initialize());
+
+        ATH_CHECK(m_idHelperSvc.retrieve());
+        ATH_CHECK(m_geoCtxKey.initialize());
+        ATH_CHECK(detStore()->retrieve(m_detMgr));
+        return StatusCode::SUCCESS;
+    }
+    StatusCode PatternVisualizationTool::finalize(){
+        closeSummaryCanvas();
+        return StatusCode::SUCCESS;
+    }
+    bool PatternVisualizationTool::isTruthMatched(const MuonR4::SpacePoint& hit) const {
+        return isTruthMatched(*hit.primaryMeasurement()) || 
+              (hit.secondaryMeasurement() && isTruthMatched(*hit.secondaryMeasurement()));
+    }
+    bool PatternVisualizationTool::isTruthMatched(const xAOD::UncalibratedMeasurement& hit) const {
+        return std::find_if(m_truthLinkDecors.begin(), m_truthLinkDecors.end(),
+                            [&hit](const SegLinkDecor_t& decor){
+                                return !decor(hit).empty();
+                            }) != m_truthLinkDecors.end();
+    }
+
+    TruthSegmentSet PatternVisualizationTool::fetchTruthSegs(const std::vector<const MuonR4::SpacePoint*>& hits) const {
+        std::vector<const xAOD::UncalibratedMeasurement*> measurements{};
+        measurements.reserve(2* hits.size());
+        for (const SpacePoint* hit: hits) {
+            measurements.push_back(hit->primaryMeasurement());
+            if(hit->secondaryMeasurement()) {
+                measurements.push_back(hit->secondaryMeasurement());
+            }
+        }
+        return fetchTruthSegs(measurements);
+    }
+    TruthSegmentSet PatternVisualizationTool::fetchTruthSegs(const std::vector<const xAOD::UncalibratedMeasurement*>& hits) const {
+        TruthSegmentSet truthSegs{};
+        for (const xAOD::UncalibratedMeasurement* hit : hits) {
+            for (const SegLinkDecor_t& decor: m_truthLinkDecors) {
+                for (const SegLink_t& link : decor(*hit)) {
+                    truthSegs.insert(*link);
+                }
+            }
+        }
+        return truthSegs;
+    }
+    void PatternVisualizationTool::visualizeAccumulator(const EventContext& ctx,
+                                                        const MuonR4::HoughPlane& accumulator,
+                                                        const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
+                                                        const MaximumVec& maxima,
+                                                        const std::string& extraLabel) const {
+        PrimitiveVec primitives{};
+        visualizeAccumulator(ctx, accumulator, axisRanges, maxima, extraLabel, std::move(primitives));
+    }
+    void PatternVisualizationTool::visualizeAccumulator(const EventContext& ctx,
+                                                        const MuonR4::HoughPlane& accumulator,
+                                                        const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
+                                                        const MaximumVec& maxima,
+                                                        const std::string& extraLabel,
+                                                        PrimitiveVec&& primitives) const {
+
+        /** Check whether the canvas limit has been reached */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+        /** Enter the lock phase */
+        std::lock_guard guard{s_mutex};
+        /** Check again in case multiple threads are simultaneously in the lock phase */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+
+        auto accHisto = std::make_unique<TH2F>("AccumulatorHisto", "histo",
+                                                accumulator.nBinsX(), axisRanges.xMin, axisRanges.xMax,
+                                                accumulator.nBinsY(), axisRanges.yMin, axisRanges.yMax); 
+
+        accHisto->SetDirectory(nullptr);
+        accHisto->GetXaxis()->SetTitle(std::format("tan #{}", m_accumlIsEta ? "theta" : "phi" ).c_str());
+        accHisto->GetYaxis()->SetTitle( std::string{m_accumlIsEta ? "y_{0}" : "x_{0}"}.c_str());
+
+        std::vector<const SpacePoint*> spacePointsInAcc{};
+        for (const std::size_t bin : accumulator.getNonEmptyBins()) {
+            const auto [xBin, yBin] = accumulator.axisBins(bin);
+            const SpacePointSet& hitsInBin{accumulator.hitIds(xBin, yBin)};
+            spacePointsInAcc.insert(spacePointsInAcc.end(),hitsInBin.begin(), hitsInBin.end());
+            accHisto->SetBinContent(xBin+1, yBin+1, accumulator.nHits(bin));
+        }
+        const TruthSegmentSet truthSegs{fetchTruthSegs(spacePointsInAcc)};
+        for (const xAOD::MuonSegment* segment : truthSegs) {
+            const auto [pos, dir] = makeLine(localSegmentPars(*segment));
+            const double tan = m_accumlIsEta ? houghTanTheta(dir) : houghTanPhi(dir);
+            const double icept = pos[m_accumlIsEta ? objViewEta : objViewPhi];
+            auto truthMarker = std::make_unique<TMarker>(tan, icept, kFullCrossX);
+            truthMarker->SetMarkerColor(truthColor);
+            truthMarker->SetMarkerSize(8);
+            primitives.push_back(std::move(truthMarker));
+        }
+        for (const auto& maximum : maxima) {
+            auto maxMarker = std::make_unique<TMarker>(maximum.x, maximum.y, kFullTriangleUp);
+            maxMarker->SetMarkerColor(parLineColor);
+            maxMarker->SetMarkerSize(8);
+            primitives.push_back(std::move(maxMarker));
+        }
+        
+        auto canvas = std::make_unique<TCanvas>("can", "can", m_canvasWidth, m_canvasHeight);
+        canvas->cd();
+        accHisto->Draw("COLZ");
+        for (auto& prim : primitives) {
+            prim->Draw();
+        }
+        primitives.push_back(std::move(accHisto));
+        saveCanvas(ctx, spacePointsInAcc.front()->identify(), *canvas, extraLabel);
+        primitives.push_back(std::move(canvas));
+        
+        if (m_canvasLimit <= m_canvCounter) {
+            primitives.clear();
+            closeSummaryCanvas();
+        }
+    }
+
+    void PatternVisualizationTool::visualizeSeed(const EventContext& ctx,
+                                                 const MuonR4::SegmentSeed& seed,
+                                                 const std::string& extraLabel) const {
+        PrimitiveVec primitives{};
+        visualizeSeed(ctx, seed, extraLabel, std::move(primitives)); 
+    }
+    void PatternVisualizationTool::visualizeSeed(const EventContext& ctx,
+                                                 const MuonR4::SegmentSeed& seed,
+                                                 const std::string& extraLabel,
+                                                 PrimitiveVec&& primitives) const {
+        
+        /** Check whether the canvas limit has been reached */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+        /** Enter the lock phase */
+        std::lock_guard guard{s_mutex};
+        /** Check again in case multiple threads are simultaneously in the lock phase */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+
+        const TruthSegmentSet truthSegs{fetchTruthSegs(seed.getHitsInMax())};
+
+        std::array<double, 4> canvasDim{};
+        const std::size_t parsedPrimSize{primitives.size()};
+        for (const int view : {objViewEta, objViewPhi}) {
+            if ((view == objViewEta && !m_doEtaBucketViews) ||
+                (view == objViewPhi && !m_doPhiBucketViews)){
+                continue;
+            }
+            /** reset the primitives */
+            primitives.resize(parsedPrimSize);
+
+            if (!drawHits(*seed.parentBucket(), seed.getHitsInMax(), primitives, canvasDim, view)) {
+                continue;
+            }
+
+            for (const xAOD::MuonSegment* segment : truthSegs) {
+                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[2], canvasDim[3],
+                                               truthColor, kDotted, view));
+            }
+            primitives.push_back(drawLine(seed.parameters(), canvasDim[2], canvasDim[3],
+                                         parLineColor, kDashed, view));
+        
+            writeChi2(seed.parameters(), seed.getHitsInMax(), primitives);
+        
+            std::stringstream legendLabel{};
+            double chi2{0.};
+            unsigned nDoF{0};
+            legendLabel<<"Event: "<<ctx.eventID().event_number()<<", chamber : "<<m_idHelperSvc->toStringChamber(seed.getHitsInMax().front()->identify())
+                       <<" #chi^{2} /nDoF: "<<std::format("{:.2f}", chi2/std::max(1u, nDoF))
+                       <<", nDoF: "<<nDoF<<", #"<<(view ==objViewEta ? "eta" : "phi")<<"-view";;
+            
+            if (!extraLabel.empty()) {
+                legendLabel<<" ("<<extraLabel<<")";
+            }
+            primitives.push_back(drawLabel(legendLabel.str(), 0.1, 0.96));
+            primitives.push_back(drawLabel(makeLabel(seed.parameters()),0.25, 0.91));
+        
+            auto canvas = makeCanvas(ctx, canvasDim, view);
+            for (PrimitivePtr& prim : primitives) {
+               prim->Draw();
+            }
+            saveCanvas(ctx, seed.getHitsInMax().front()->identify(), *canvas, extraLabel);
+        }
+        if (m_canvasLimit <= m_canvCounter) {
+            primitives.clear();
+            closeSummaryCanvas();
+        }
+    }
+
+    void PatternVisualizationTool::visualizeBucket(const EventContext& ctx,
+                                                    const MuonR4::SpacePointBucket& bucket,
+                                                    const std::string& extraLabel) const {
+        PrimitiveVec primitives{};
+        visualizeBucket(ctx, bucket, extraLabel, std::move(primitives));
+    }
+    void PatternVisualizationTool::visualizeBucket(const EventContext& ctx,
+                                                   const MuonR4::SpacePointBucket& bucket,
+                                                   const std::string& extraLabel,
+                                                   PrimitiveVec&& primitives) const {
+        /** Check whether the canvas limit has been reached */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+        /** Enter the lock phase */
+        std::lock_guard guard{s_mutex};
+        /** Check again in case multiple threads are simultaneously in the lock phase */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+        std::array<double, 4> canvasDim{};        
+        TruthSegmentSet truthSegs{fetchTruthSegs(stripSmartPtr(bucket))};
+        const std::size_t parsedPrimSize{primitives.size()};
+        for (const int view : {objViewEta, objViewPhi}) {
+            if ((view == objViewEta && !m_doEtaBucketViews) ||
+                (view == objViewPhi && !m_doPhiBucketViews)){
+                continue;
+            }
+            /** reset the primitives */
+            primitives.resize(parsedPrimSize);
+            if (!drawHits(bucket, bucket, primitives, canvasDim, view)) {
+                continue;
+            }
+            for (const xAOD::MuonSegment* segment : truthSegs) {
+                primitives.push_back(drawLine(localSegmentPars(*segment), canvasDim[2], canvasDim[3],
+                                           truthColor, kDotted, view));
+            }
+            
+            std::stringstream legendLabel{};
+            legendLabel<<"Event: "<<ctx.eventID().event_number()
+                        <<", chamber : "<<m_idHelperSvc->toStringChamber(bucket.front()->identify())
+                        <<",#"<<(view ==objViewEta ? "eta" : "phi")<<"-view";
+            if (!extraLabel.empty()) {
+                legendLabel<<" ("<<extraLabel<<")";
+            }
+            primitives.push_back(drawLabel(legendLabel.str(), 0.4, 0.96));
+            auto can = makeCanvas(ctx , canvasDim, view);
+            for (PrimitivePtr& prim : primitives) {
+                prim->Draw();
+            }
+            saveCanvas(ctx, bucket.front()->identify(), *can, extraLabel);
+        }
+        if (m_canvasLimit <= m_canvCounter) {
+            primitives.clear();
+            closeSummaryCanvas();
+        }
+
+    }
+
+    void PatternVisualizationTool::visualizeSegment(const EventContext& ctx,
+                                                    const MuonR4::Segment& segment,
+                                                    const std::string& extraLabel) const {
+        PrimitiveVec primitives{};
+        visualizeSegment(ctx, segment,extraLabel, std::move(primitives));
+    }
+            
+    void PatternVisualizationTool::visualizeSegment(const EventContext& ctx,
+                                                    const MuonR4::Segment& segment,
+                                                    const std::string& extraLabel,
+                                                    PrimitiveVec&& primitives) const {
+        /** Check whether the canvas limit has been reached */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+        /** Enter the lock phase */
+        std::lock_guard guard{s_mutex};
+        /** Check again in case multiple threads are simultaneously in the lock phase */
+        if (m_canvCounter >= m_canvasLimit) {
+            return;
+        }
+
+        Parameters segPars{};
+        {
+            SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
+            const Amg::Transform3D trf{segment.chamber()->globalToLocalTrans(*geoCtx)};
+            const Amg::Vector3D locPos = trf * segment.position();
+            const Amg::Vector3D locDir = trf.linear() * segment.direction();
+            segPars[toInt(ParamDefs::x0)] = locPos.x();
+            segPars[toInt(ParamDefs::y0)] = locPos.y();
+            segPars[toInt(ParamDefs::theta)] = locDir.theta();
+            segPars[toInt(ParamDefs::phi)] = locDir.phi();
+            segPars[toInt(ParamDefs::time)] = segment.segementT0();
+        }
+        
+        std::array<double, 4> canvasDim{};
+        const std::size_t parsedPrimSize{primitives.size()};
+        for (const int view : {objViewEta, objViewPhi}) {
+            if ((view == objViewEta && !m_doEtaBucketViews) ||
+                (view == objViewPhi && !m_doPhiBucketViews)){
+                continue;
+            }
+            /** reset the primitives */
+            primitives.resize(parsedPrimSize);
+
+            if (!drawHits(*segment.parent()->parentBucket(), segment.measurements(), 
+                          primitives, canvasDim, view)) {
+                continue;
+            }
+            writeChi2(segPars, segment.measurements(), primitives);
+
+            primitives.push_back(drawLine(segPars, canvasDim[2], canvasDim[3],
+                                          parLineColor, kDashed, view));
+
+            auto canvas = makeCanvas(ctx, canvasDim, view);
+            for (PrimitivePtr& prim : primitives) {
+                prim->Draw();
+            }
+            saveCanvas(ctx, segment.parent()->getHitsInMax().front()->identify(), *canvas, extraLabel);
+        }
+        if (m_canvasLimit <= m_canvCounter) {
+            primitives.clear();
+            closeSummaryCanvas();
+        }
+    }
+
+    template<class SpacePointType>        
+        const SpacePoint* 
+            PatternVisualizationTool::drawHit(const SpacePointType& hit, PrimitiveVec& primitives,
+                                              std::array<double, 4>& canvasDim, const unsigned int view,
+                                              unsigned int fillStyle) const {
+        
+        static_assert(std::is_same_v<SpacePointType, SpacePoint> ||
+                      std::is_same_v<SpacePointType, CalibratedSpacePoint>, "Only usual & calibrated space points are supported");
+        /// Don't draw any hit which is not participating in the view
+        if ((view == objViewEta && !hit.measuresEta()) || (view == objViewPhi && !hit.measuresPhi())) {
+            return nullptr;
+        }
+        
+        if (hit.type() != xAOD::UncalibMeasType::Other) {
+            canvasDim[0] = std::min(canvasDim[0], hit.positionInChamber()[view] - hit.driftRadius());
+            canvasDim[1] = std::max(canvasDim[1], hit.positionInChamber()[view] + hit.driftRadius());
+            canvasDim[2] = std::min(canvasDim[2], hit.positionInChamber().z() - hit.driftRadius());
+            canvasDim[3] = std::max(canvasDim[3], hit.positionInChamber().z() + hit.driftRadius());
+        }
+
+        const SpacePoint* underlyingSp{nullptr};
+        /// Update the fill style accrodingly
+        constexpr int invalidCalibFill = 3305;
+        if constexpr (std::is_same_v<SpacePointType, SpacePoint>) {
+            underlyingSp = &hit;
+            if (hit.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit.primaryMeasurement());
+                if (dc->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+                    fillStyle = invalidCalibFill;
+                }
+            }
+        } else if constexpr(std::is_same_v<SpacePointType, CalibratedSpacePoint>) {
+            underlyingSp = hit.spacePoint();
+            if (hit.fitState() == CalibratedSpacePoint::State::Valid) {
+                fillStyle  = fullFilling;
+            } else if (hit.fitState() == CalibratedSpacePoint::State::FailedCalib) {
+                fillStyle = invalidCalibFill;
+            } else  {
+                fillStyle = hatchedFilling;
+            }
+        }
+        switch(hit.type()) {
+            case xAOD::UncalibMeasType::MdtDriftCircleType: {
+                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(underlyingSp->primaryMeasurement());
+                primitives.push_back(drawDriftCircle(hit.positionInChamber(), dc->readoutElement()->innerTubeRadius(), 
+                                                     kBlack, hollowFilling));
+
+                const int circColor = isTruthMatched(*dc) ? truthColor : kBlue;                    
+                primitives.push_back(drawDriftCircle(hit.positionInChamber(), hit.driftRadius(), circColor, fillStyle));
+                break;
+            } case xAOD::UncalibMeasType::RpcStripType: {
+                const auto* meas{static_cast<const xAOD::RpcMeasurement*>(underlyingSp->primaryMeasurement())};
+                const int boxColor = isTruthMatched(*meas) ? truthColor : kGreen +2;
+                const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
+                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                             boxColor, fillStyle));
+                break; 
+            } case xAOD::UncalibMeasType::TgcStripType: {
+                const auto* meas{static_cast<const xAOD::TgcStrip*>(underlyingSp->primaryMeasurement())};
+                const int boxColor = isTruthMatched(*meas) ? truthColor : kCyan + 2;
+                const double boxWidth = 0.5*std::sqrt(12)*underlyingSp->uncertainty()[view];
+                primitives.push_back(drawBox(hit.positionInChamber(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                             boxColor, fillStyle));
+                break; 
+            } case xAOD::UncalibMeasType::Other :{
+                break;
+            } default:
+                ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
+                break;
+        }
+        return underlyingSp;
+    }
+
+    template<class SpacePointType>      
+        bool PatternVisualizationTool::drawHits(const SpacePointBucket& bucket,
+                                                const std::vector<SpacePointType>& hitsToDraw,
+                                                std::vector<PrimitivePtr>& primitives,
+                                                std::array<double, 4>& canvasDim,
+                                                unsigned int view) const {
+
+        canvasDim[0] = canvasDim[2] = 100. *Gaudi::Units::m;
+        canvasDim[1] = canvasDim[3] = -100. *Gaudi::Units::m;
+        
+        SpacePointSet drawnPoints{};
+        for (const SpacePointType& hit : hitsToDraw) {            
+            drawnPoints.insert(drawHit(*hit, primitives, canvasDim, view, fullFilling));
+        }
+        if (m_displayBucket) {
+            for (const SpacePointBucket::value_type& hit : bucket) {
+                // Don't redraw the other points
+                if (drawnPoints.count(hit.get())) {
+                    continue;
+                }
+                drawHit(*hit, primitives, canvasDim, view, hollowFilling);
+            } 
+        }
+        double width =  (canvasDim[1] - canvasDim[0])*m_canvasExtraScale;
+        double height = (canvasDim[3] - canvasDim[2])*m_canvasExtraScale;
+        if (height > width) width = height; 
+        else height = width;
+
+        const double midPointX = 0.5 * (canvasDim[1] + canvasDim[0]);
+        const double midPointY = 0.5 * (canvasDim[3] + canvasDim[2]);
+        canvasDim[0] = midPointX - 0.5 * width;
+        canvasDim[1] = midPointY - 0.5 * height;
+        canvasDim[2] = midPointX + 0.5 * width;
+        canvasDim[3] = midPointY + 0.5 * height;        
+        return drawnPoints.size() - drawnPoints.count(nullptr) > 1;
+    }
+    template<class SpacePointType>
+        void PatternVisualizationTool::writeChi2(const MuonR4::SegmentFit::Parameters& pars,
+                                                 const std::vector<SpacePointType>& hits,
+                                                 PrimitiveVec& primitives,
+                                                 const double legX, double startLegY, 
+                                                 const double endLegY) const {
+        
+        const auto [locPos, locDir] = makeLine(pars);
+        for (const SpacePointType& hit : hits) { 
+            const SpacePoint* underlyingSp{nullptr};
+            double chi2{0.};
+            if constexpr( std::is_same_v<SpacePointType, Segment::MeasType>) {
+                underlyingSp = hit->spacePoint();
+                chi2 = SegmentFitHelpers::chiSqTerm(locPos, locDir, pars[toInt(AxisDefs::t0)], 
+                                                    std::nullopt, *hit, msgStream());
+            } else {
+                underlyingSp = hit;
+                chi2  = SegmentFitHelpers::chiSqTerm(locPos, locDir, *hit, msgStream());
+            }
+            
+            const Identifier hitId =  underlyingSp ? underlyingSp->identify(): Identifier{};
+            std::stringstream legendstream{};
+            switch(hit->type()) {
+                case xAOD::UncalibMeasType::MdtDriftCircleType: {
+                    const int driftSign{SegmentFitHelpers::driftSign(locPos, locDir, *hit, msgStream())};
+                    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
+                    legendstream<<", TL: "<<idHelper.tubeLayer(hitId);
+                    legendstream<<", T: "<<idHelper.tube(hitId);
+                    legendstream<<", "<<(driftSign == -1 ? "L" : "R");
+                    break;
+                } case xAOD::UncalibMeasType::RpcStripType: {
+                    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+                    legendstream<<"DR: "<<idHelper.doubletR(hitId);
+                    legendstream<<" DZ: "<<idHelper.doubletZ(hitId);
+                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
+                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
+                                << "/"<<(hit->measuresPhi() ? "si" : "nay");
+                    break;
+                } case xAOD::UncalibMeasType::TgcStripType: {
+                    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+                    legendstream<<"ST: "<<m_idHelperSvc->stationNameString(hitId);
+                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
+                    legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
+                                 << "/"<<(hit->measuresPhi() ? "si" : "nay");      
+                    break;
+                } case xAOD::UncalibMeasType::MMClusterType: {
+                    const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
+                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
+                    legendstream<<", stereo: "<<(idHelper.isStereo(hitId)? "si" : "nay");
+                    break;
+                } case xAOD::UncalibMeasType::sTgcStripType: {
+                    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+                    legendstream<<"ML: "<<idHelper.multilayer(hitId);
+                    legendstream<<", GAP: "<<idHelper.gasGap(hitId);
+                    switch (idHelper.channelType(hitId)) {
+                        case sTgcIdHelper::sTgcChannelTypes::Strip:
+                            legendstream<<", strip";
+                            break;
+                        case sTgcIdHelper::sTgcChannelTypes::Wire:
+                            legendstream<<", wire";
+                            break;
+                        case sTgcIdHelper::sTgcChannelTypes::Pad:
+                            legendstream<<", pad";
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                } 
+                default:
+                    break;
+            }
+            legendstream<<", #chi^{2}: "<<std::format("{:.2f}", chi2);
+            primitives.push_back(drawLabel(legendstream.str(), legX, startLegY, 14));
+            startLegY -= 0.05;
+            if (startLegY<= endLegY) {
+                break;
+            }
+        }
+    }
+    void PatternVisualizationTool::closeSummaryCanvas() const {
+        if (!m_outFile) return;
+        ATH_MSG_INFO("Close summary pdf & root file "<<m_allCanName);
+        if (m_allCan) {
+            m_allCan->cd();
+            m_allCan->SaveAs((m_allCanName +".pdf]").c_str());
+            m_allCan.reset();
+        }
+        m_outFile.reset();
+    }
+    std::unique_ptr<TCanvas> PatternVisualizationTool::makeCanvas(const EventContext& ctx,
+                                                                  const std::array<double, 4>& canvasDim,
+                                                                  const int view) const {
+        std::stringstream canvasName{};
+        canvasName<<name()<<"_"<<ctx.eventID().event_number()<<"_"<<m_canvCounter;
+        auto canvas = std::make_unique<TCanvas>(canvasName.str().c_str(), "all", m_canvasWidth, m_canvasHeight);
+        canvas->cd();
+        TH1F* frame = canvas->DrawFrame(canvasDim[0],canvasDim[1], canvasDim[2], canvasDim[3]);
+        frame->GetXaxis()->SetTitle(std::format("{:} [mm]", view == objViewEta ? 'y' : 'x').c_str());
+        frame->GetYaxis()->SetTitle("z [mm]");
+        return canvas;
+    }
+    void PatternVisualizationTool::saveCanvas(const EventContext& ctx,
+                                              const Identifier& chambId,
+                                              TCanvas& canvas,
+                                              const std::string& extraLabel) const {
+        // If an eta view closes the summary canvas & a phi view is processed
+        std::stringstream canvasName{};
+        canvasName<<m_canvasPrefix.value()<<"_"<<ctx.eventID().event_number()<<"_"<<(m_canvCounter++)<<"_"
+                  <<m_idHelperSvc->stationNameString(chambId)
+                  <<std::abs(m_idHelperSvc->stationEta(chambId))
+                  <<(m_idHelperSvc->stationEta(chambId) >0 ? "A" : "C")
+                  <<m_idHelperSvc->stationPhi(chambId);
+        if (!extraLabel.empty()) canvasName<<"_"<<removeNonAlphaNum(extraLabel);
+        ATH_MSG_VERBOSE("Save new plot "<<canvasName.str());
+        if (m_saveSinglePDFs) {
+            canvas.SaveAs(("Plots/" + m_canvasPrefix+"/" + canvasName.str()+".pdf").c_str());
+        }
+        if (m_saveSummaryPDF) {
+            canvas.SaveAs((m_allCanName+".pdf").c_str());
+        }
+        m_outFile->WriteObject(&canvas, canvasName.str().c_str());
+    }
+}

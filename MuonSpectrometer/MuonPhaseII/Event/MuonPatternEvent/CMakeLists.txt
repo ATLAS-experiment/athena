@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonPatternEvent )
@@ -7,7 +7,7 @@ atlas_subdir( MuonPatternEvent )
 find_package( Acts COMPONENTS Core )
 
 atlas_add_library( MuonPatternEvent
-    src/*.cxx 
-    PUBLIC_HEADERS MuonPatternEvent
-    LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase 
-                   MuonSpacePoint MuonStationIndexLib)
+                   src/*.cxx 
+                   PUBLIC_HEADERS MuonPatternEvent
+                   LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase 
+                                  xAODMuon MuonSpacePoint MuonStationIndexLib)

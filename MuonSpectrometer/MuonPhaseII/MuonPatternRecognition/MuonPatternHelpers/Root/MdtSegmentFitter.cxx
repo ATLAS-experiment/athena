@@ -3,7 +3,7 @@
 */
 #include <MuonPatternHelpers/MdtSegmentFitter.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
-#include <MuonSpacePointCalibrator/ISpacePointCalibrator.h>
+#include <MuonRecToolInterfacesR4/ISpacePointCalibrator.h>
 #include <TrkEventPrimitives/ParamDefs.h>
 #include <EventPrimitives/EventPrimitivesCovarianceHelpers.h>
 #include <GaudiKernel/PhysicalConstants.h>
@@ -43,7 +43,7 @@ namespace MuonR4{
             rng[toInt(ParamDefs::y0)] = std::array{-spatRang, spatRang};
             rng[toInt(ParamDefs::x0)] = std::array{-spatRang, spatRang};
             rng[toInt(ParamDefs::phi)] = std::array{-180.* Gaudi::Units::deg, 180. * Gaudi::Units::deg};
-            rng[toInt(ParamDefs::theta)] = std::array{0., 90. * Gaudi::Units::deg};
+            rng[toInt(ParamDefs::theta)] = std::array{-90. * Gaudi::Units::deg,  90. * Gaudi::Units::deg};
             rng[toInt(ParamDefs::time)] = std::array{-timeTange, timeTange};            
             return rng;
     }

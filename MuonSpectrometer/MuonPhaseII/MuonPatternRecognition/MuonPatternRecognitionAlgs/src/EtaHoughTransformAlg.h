@@ -1,12 +1,12 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_ETAHOUGHTRANSFORMALG__H
 
-
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -47,24 +47,28 @@ namespace MuonR4{
             /// @brief pre-processing method called once per event. 
             /// Populates the event data with the space points for each
             /// bucket and identifies the optimal search space in each bucket.
+            /// @param ctx: EventContext to parse to the visualization tool
             /// @param gctx: Geometry context to retrieve global positioning of the chambers
             /// @param spacePoints point list from store gate 
             /// @param data: event data object
-            StatusCode preProcess(const ActsGeometryContext& gctx,
-                                  const SpacePointContainer & spacePoints,
-                                  HoughEventData & data) const; 
+            void preProcess(const EventContext& ctx,
+                            const ActsGeometryContext& gctx,
+                            const SpacePointContainer & spacePoints,
+                            HoughEventData & data) const; 
 
             /// @brief prepare the accumulator and the peak finder once per event 
             /// @param data: event data object
-            StatusCode prepareHoughPlane(HoughEventData & data) const; 
+            void prepareHoughPlane(HoughEventData & data) const; 
             
             /// @brief process a bucket. 
             /// Performs the hough transform in the given bucket and adds the maxima
             /// to the event data. 
+            /// @param ctx: EventContext to parse to the visualization tool
             /// @param data: event data object
             /// @param currentBucket: bucket to process
-            StatusCode processBucket(HoughEventData & data, 
-                                     HoughSetupForBucket& currentBucket) const; 
+            void processBucket(const EventContext& ctx,
+                               HoughEventData & data, 
+                               HoughSetupForBucket& currentBucket) const; 
 
             /// @brief fill the accumulator from a given space point. 
             /// @param data: event data object 
@@ -109,12 +113,12 @@ namespace MuonR4{
 
             // input space points from SG
             SG::ReadHandleKey<SpacePointContainer> m_spacePointKey{this, "SpacePointContainer", "MuonSpacePoints"};
-            
             // output maxima for downstram processing
             SG::WriteHandleKey<EtaHoughMaxContainer> m_maxima{this, "EtaHoughMaxContainer", "MuonHoughStationMaxima"};
-
             // ACTS geometry context
             SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            /// Pattern visualization tool
+            ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
 
     };
 }
