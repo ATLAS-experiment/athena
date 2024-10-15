@@ -15,3 +15,11 @@ atlas_add_component( MuonRegionSelector
                      RegSelLUT GaudiKernel Identifier CSCcablingLib StoreGateLib MuonCablingData
                      MuonCondData MuonTGC_CablingLib RPC_CondCablingLib
                      MuonReadoutGeometry MuonNSWCommonDecode MuonAGDDDescription  )
+
+atlas_add_test( MuonRegSelUnitTest
+                PROPERTIES TIMEOUT 1000
+                     PRIVATE_WORKING_DIRECTORY
+                     LOG_SELECT_PATTERN "^RegSel.*"
+                     SCRIPT python -m RegionSelector.RegSelToolConfig MDT RPC TGC MM sTGC )
+
+atlas_install_data( share/*.ref )
