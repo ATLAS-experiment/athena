@@ -375,7 +375,7 @@ class SlimmingHelper:
                         from DerivationFrameworkTau.DiTauJetsCPContent import DiTauJetsCPContent
                         items.extend(DiTauJetsCPContent)
                 elif collectionName=="DiTauJetsLowPt":
-                        from DerivationFrameworkTau.DiTauJetsLowPtCPContent import DiTauJetsLowPtCPContent
+                        from DerivationFrameworkTau.DiTauJetsCPContent import DiTauJetsLowPtCPContent
                         items.extend(DiTauJetsLowPtCPContent)
                 elif collectionName=="TauJets_MuonRM":
                         from DerivationFrameworkTau.TauJets_LepRMCPContent import TauJets_MuonRMCPContent
