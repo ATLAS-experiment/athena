@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkEventTPCnv/TrkRIO_OnTrack/RIO_OnTrackCnv_p1.h"
 #include "TrkEventTPCnv/helpers/EigenHelpers.h"
+
+#include "AthenaKernel/errorcheck.h"
+
 
 void RIO_OnTrackCnv_p1::persToTrans( const Trk::RIO_OnTrack_p1 *persObj, Trk::RIO_OnTrack *transObj, MsgStream &log )
 {
@@ -62,38 +65,15 @@ void RIO_OnTrackCnv_p1::transToPers( const Trk::RIO_OnTrack * /**transObj*/, Trk
   throw std::runtime_error("RIO_OnTrackCnv_p1::transToPers is deprecated!"); 
 }
 
-StatusCode RIO_OnTrackCnv_p1::initialize(MsgStream &log) {
-   // Do not initialize again:
+StatusCode RIO_OnTrackCnv_p1::initialize(MsgStream & /*log*/) {
+  // Do not initialize again:
   m_isInitialized=true;
 
-   // Get Storegate, ID helpers, and so on
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-   // get StoreGate service
-  StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "StoreGate service not found !" << endmsg;
-    return StatusCode::FAILURE;
-  }
+  SmartIF<StoreGateSvc> detStore(Gaudi::svcLocator()->service("DetectorStore"));
+  CHECK( detStore.isValid() );
 
-   // get DetectorStore service
-  StoreGateSvc *detStore;
-  sc = svcLocator->service("DetectorStore", detStore);
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-    return StatusCode::FAILURE;
-  } 
-   //   else {
-   //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Found DetectorStore." << endmsg;
-   //   }
+  // Get the sct helper from the detector store
+  CHECK( detStore->retrieve(m_pixId, "PixelID") );
 
-   // Get the sct helper from the detector store
-  sc = detStore->retrieve(m_pixId, "PixelID");
-  if (sc.isFailure()) {
-    log << MSG::FATAL << "Could not get PixelID helper !" << endmsg;
-    return StatusCode::FAILURE;
-  } 
-
-
-   //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
   return StatusCode::SUCCESS;
 }
