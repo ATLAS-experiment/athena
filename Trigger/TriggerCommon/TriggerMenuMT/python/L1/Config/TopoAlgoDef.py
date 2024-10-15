@@ -2310,12 +2310,14 @@ class TopoAlgoDef:
             log.debug("Define %s", toponame)
             inputList = [d.otype1+d.olist1]
             algoname = AlgConf.DeltaPhiIncl1
+            ttconfig = tm.l1menu.thresholds.typeWideThresholdConfig(d.otype1)
+            ptMin = ttconfig["ptMinToTopo1"] if d.otype1=="jTAU" else ttconfig["ptMinToTopo"]
             alg = algoname( name = toponame, inputs = inputList, outputs = [ toponame ])
             alg.addgeneric('NumResultBits', 1)
             alg.addgeneric('InputWidth', d.nleading1)
             alg.addgeneric('MaxTob', d.nleading1)
             alg.addvariable('MinET1',      get_threshold_cut(d.otype1, d.ocut1)*_et_conversion)
-            alg.addvariable('MinET2',      get_threshold_cut(d.otype1, d.ocut1)*_et_conversion)
+            alg.addvariable('MinET2',      ptMin*_et_conversion)
             alg.addvariable('MinDeltaPhi', d.minDphi*_phi_conversion)
             alg.addvariable('MaxDeltaPhi', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
