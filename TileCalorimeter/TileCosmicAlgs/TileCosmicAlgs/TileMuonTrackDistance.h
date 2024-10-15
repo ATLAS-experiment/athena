@@ -53,11 +53,7 @@ namespace ROOT {
         }
 
         /** Provides Chi-square in function of parameter vector. */
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
-        virtual double operator()(std::span<const double>) const override;
-#else
         virtual double operator()(const std::vector<double>&) const override;
-#endif
         virtual double Up() const override {
           return 1.;
         }
