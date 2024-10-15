@@ -306,7 +306,7 @@ TauSelectionCutGNTauScoreSigTrans::TauSelectionCutGNTauScoreSigTrans(TauSelectio
 //______________________________________________________________________________
 void TauSelectionCutGNTauScoreSigTrans::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
-  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v0");
+  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v1trunc");
   hHist.Fill(acc(xTau));
 }
 //______________________________________________________________________________
@@ -320,7 +320,7 @@ bool TauSelectionCutGNTauScoreSigTrans::accept(const xAOD::TauJet& xTau,
                                              asg::AcceptData& acceptData)
 {
   // check GNTau score, if tau has a GNTau score in one of the regions requiered then return true; false otherwise
-  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v0");
+  SG::ConstAccessor<float> acc ("GNTauScoreSigTrans_v1trunc");
   double dGNTauScoreSigTrans = acc(xTau); 
   unsigned int iNumGNTauSigTransRegion = m_tTST->m_vGNTauSigTransRegion.size()/2;
   for( unsigned int iGNTauSigTransRegion = 0; iGNTauSigTransRegion < iNumGNTauSigTransRegion; iGNTauSigTransRegion++ )
@@ -407,22 +407,22 @@ bool TauSelectionCutJetIDWP::accept(const xAOD::TauJet& xTau,
     if (xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)) bPass = true;
     break;
   case JETIDGNTAUVERYLOOSE:
-    static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v0");
+    static const SG::ConstAccessor<char> acc_gnTauVeryLoose("GNTauVL_v1trunc");
     if (!acc_gnTauVeryLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau VeryLoose WP not available" << endmsg;
     else bPass = acc_gnTauVeryLoose(xTau);
     break;
   case JETIDGNTAULOOSE:
-    static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v0");
+    static const SG::ConstAccessor<char> acc_gnTauLoose("GNTauL_v1trunc");
     if (!acc_gnTauLoose.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Loose WP not available" << endmsg;
     else bPass = acc_gnTauLoose(xTau);
     break;
   case JETIDGNTAUMEDIUM:
-    static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v0");
+    static const SG::ConstAccessor<char> acc_gnTauMedium("GNTauM_v1trunc");
     if (!acc_gnTauMedium.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Medium WP not available" << endmsg;
     else bPass = acc_gnTauMedium(xTau);
     break;
   case JETIDGNTAUTIGHT:
-    static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v0");
+    static const SG::ConstAccessor<char> acc_gnTauTight("GNTauT_v1trunc");
     if (!acc_gnTauTight.isAvailable(xTau)) m_tTST->msg() << MSG::WARNING << "GnTau Tight WP not available" << endmsg;
     else bPass = acc_gnTauTight(xTau);
     break;
