@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  src/DataModelCompatSvc.cxx
@@ -48,9 +48,9 @@ StatusCode DataModelCompatSvc::initialize()
   // instantiations.  We can't do that, though, until the data file
   // has been open and we've set up the proxies.  So defer the real
   // work until there's a BeginProcessing/BeginEvent incident.
-  IIncidentSvc* incsvc = 0;
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
   ATH_MSG_DEBUG("running");
-  CHECK( service("IncidentSvc", incsvc) );
+  CHECK( incsvc.isValid() );
   incsvc->addListener (this, "BeginProcessing");
   incsvc->addListener (this, "BeginEvent");
 

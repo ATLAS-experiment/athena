@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVSvcTool.h"
@@ -152,16 +152,8 @@ IOVSvcTool::~IOVSvcTool() {
 StatusCode 
 IOVSvcTool::initialize() {
 
-  static const bool CREATEIF(true);
-
-  IIOVSvc* p_iovSvc(nullptr);
-  ATH_CHECK( service("IOVSvc", p_iovSvc,CREATEIF) );
-
-  IProperty* iovSvcProp = dynamic_cast<IProperty*>( p_iovSvc );
-  if (iovSvcProp == nullptr) {
-    ATH_MSG_ERROR("Unable to dcast the IOVSvc to an IProperty");
-    return StatusCode::FAILURE;
-  }
+  SmartIF<IProperty> iovSvcProp{service("IOVSvc")};
+  ATH_CHECK( iovSvcProp.isValid() );
 
   ATH_CHECK( setProperty( iovSvcProp->getProperty("preLoadRanges") ) );
   ATH_CHECK( setProperty( iovSvcProp->getProperty("preLoadData") ) );
@@ -311,8 +303,8 @@ IOVSvcTool::handle(const Incident &inc) {
 
     if (inc.type() == IncidentType::BeginRun) {
       // Signal BeginRun directly to IOVDbSvc
-      IIOVDbSvc *iovDB = 0;
-      if (StatusCode::SUCCESS != service("IOVDbSvc", iovDB, false)) {
+      SmartIF<IIOVDbSvc> iovDB{service("IOVDbSvc", false)};
+      if (!iovDB) {
         ATH_MSG_DEBUG("Unable to get the IOVDbSvc");
         return;
       }
@@ -357,8 +349,8 @@ IOVSvcTool::handle(const Incident &inc) {
       }
 
       // Signal EndProxyPreload directly to IOVDbSvc
-      IIOVDbSvc *iovDB = nullptr;
-      if (service("IOVDbSvc", iovDB, false).isSuccess()) {
+      SmartIF<IIOVDbSvc> iovDB{service("IOVDbSvc", false)};
+      if (iovDB) {
         iovDB->signalEndProxyPreload();
         ATH_MSG_DEBUG("Signaled end proxy preload to IOVDbSvc " << curTime);
       }
@@ -971,8 +963,7 @@ IOVSvcTool::preLoadProxies() {
 
   StatusCode scr(StatusCode::SUCCESS);
 
-  IIOVDbSvc *iovDB = nullptr;
-  service("IOVDbSvc", iovDB, false).ignore();
+  SmartIF<IIOVDbSvc> iovDB{service("IOVDbSvc", false)};
 
   std::map<BFCN*, std::list<std::string> > resetKeys;
   for (DataProxy* dp : m_proxies) {
