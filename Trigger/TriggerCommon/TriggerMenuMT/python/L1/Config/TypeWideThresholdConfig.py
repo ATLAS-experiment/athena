@@ -404,7 +404,7 @@ class L1Config_eTAU:
                    ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
-        confObj["ptMinToTopo"] = 1 if do_HI_tob_thresholds else 5 # PLACEHOLDER
+        confObj["ptMinToTopo"] = 0.2 if do_HI_tob_thresholds else 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
         confObj["minIsoEt"] = 13.0 # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
         confObj["maxEt"] = 50 # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
