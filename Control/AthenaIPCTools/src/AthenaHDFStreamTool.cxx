@@ -33,7 +33,7 @@ namespace{
 //___________________________________________________________________________
 AthenaHDFStreamTool::AthenaHDFStreamTool(const std::string& type,
 	const std::string& name,
-	const IInterface* parent) : AthAlgTool(type, name, parent),
+	const IInterface* parent) : base_class(type, name, parent),
 		m_file(nullptr),
 		m_group(nullptr),
 		m_token(""),
@@ -43,7 +43,6 @@ AthenaHDFStreamTool::AthenaHDFStreamTool(const std::string& type,
 		m_event_iter(0),
 		m_isClient(false),
 		m_incidentSvc("IncidentSvc", name) {
-   declareInterface<IAthenaIPCTool>(this);
 }
 
 //___________________________________________________________________________

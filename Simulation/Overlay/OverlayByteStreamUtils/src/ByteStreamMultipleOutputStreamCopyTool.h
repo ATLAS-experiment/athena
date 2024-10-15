@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  OVERLAYBYTESTREAMUTILS_BYTESTREAMMULTIPLEOUTPUTSTREAMCOPYTOOL_H
@@ -44,7 +44,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // this code is obsolete/unused (certainly i
  **
  **/
 
-class ByteStreamMultipleOutputStreamCopyTool  :  public AthAlgTool, virtual public IAthenaOutputStreamTool
+class ByteStreamMultipleOutputStreamCopyTool  :  public extends<AthAlgTool, IAthenaOutputStreamTool>
 {
 
 public:

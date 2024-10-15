@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHENAOUTPUTSTREAMTOOL_H
@@ -11,7 +11,6 @@
  * 
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  * 
- * $Id: IAthenaOutputStreamTool.h,v 1.4 2007-06-23 01:12:06 calaf Exp $
  */
 
 
@@ -70,7 +69,9 @@ class IAthenaOutputStreamTool : virtual public IAlgTool
 {
 
 public:    
-  
+    /// Declare interface ID
+    DeclareInterfaceID(IAthenaOutputStreamTool, 1, 0);
+
     /// Specify which data store and conversion service to use 
     /// and whether to extend provenence 
     ///   Only use if one wants to override jobOptions
@@ -110,15 +111,6 @@ public:
     /// Get ItemList from the OutputStreamTool (e.g. all input objects)
     virtual StatusCode getInputItemList(SG::IFolder* m_p2BWrittenFromTool) = 0;
 
-    /// Gaudi boilerplate
-    static const InterfaceID& interfaceID();
 };
-
-inline
-const InterfaceID& 
-IAthenaOutputStreamTool::interfaceID() {
-  static const InterfaceID IID("IAthenaOutputStreamTool", 1, 0);
-  return IID;
-}
 
 #endif // ATHENAKERNEL_IATHENAOUTPUTSTREAMTOOL_H

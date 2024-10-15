@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CosmicTriggerTimeTool.h"
@@ -16,7 +16,7 @@
 CosmicTriggerTimeTool::CosmicTriggerTimeTool(const std::string& type,
                                    const std::string& name,
                                    const IInterface* parent) :
-  AthAlgTool(type,name,parent), m_time(0), m_newEvent(true),
+  base_class(type,name,parent), m_time(0), m_newEvent(true),
   m_comTime(0) , m_useLArTime(false)
 {
 
