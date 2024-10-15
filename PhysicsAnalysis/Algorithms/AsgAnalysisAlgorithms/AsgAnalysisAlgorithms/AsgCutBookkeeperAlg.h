@@ -73,6 +73,10 @@ namespace CP
       float sumOfWeightsSquared {};
     };
 
+    /// \brief input streams that we can run the CutBookkeepers against
+  private:
+    std::vector<std::string> m_allowed_streams{"StreamAOD", "StreamEVGEN", "StreamEVNT"};
+
     /// \brief weights map
   private:
     std::unordered_map<size_t, WeightsGroup> m_weights;
