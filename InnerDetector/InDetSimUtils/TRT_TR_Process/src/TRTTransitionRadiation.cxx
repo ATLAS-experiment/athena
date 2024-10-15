@@ -113,12 +113,13 @@ void TRTTransitionRadiation::Initialize() {
 
   // Get material information from storegate.
   ISvcLocator *svcLocator = Gaudi::svcLocator(); // from Bootstrap
-  StoreGateSvc *detStore(nullptr);
-  if( StatusCode::SUCCESS != svcLocator->service( "DetectorStore", detStore ) ) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service( "DetectorStore")};
+  if (!detStore) {
     errorMessage = "Can not access Detector Store";
     ATH_MSG_FATAL (errorMessage);
     throw std::runtime_error(errorMessage);
-  };
+  }
+
   StoredMaterialManager* materialManager = detStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
   if(materialManager) {
     Geo2G4MaterialFactory geo2g4_material_fact;//Note - this is a very lightweight class!
@@ -131,16 +132,16 @@ void TRTTransitionRadiation::Initialize() {
   }
   else {
     ATH_MSG_INFO("GeoModel Material is not available. Construct TR materials using IRDBAccessSvc interface");
-    IGeoDbTagSvc *geoDbTagSvc{nullptr};
-    if(StatusCode::SUCCESS != svcLocator->service("GeoDbTagSvc",geoDbTagSvc)) {
+    SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service("GeoDbTagSvc")};
+    if (!geoDbTagSvc) {
       errorMessage = "Can not access GeoDbTagSvc";
       ATH_MSG_FATAL (errorMessage);
       throw std::runtime_error(errorMessage);
 
       return;
     };
-    IRDBAccessSvc *pAccessSvc{nullptr};
-    if(StatusCode::SUCCESS != svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc)) {
+    SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+    if ( !pAccessSvc) {
       errorMessage = "Can not access " + geoDbTagSvc->getParamSvcName();
       ATH_MSG_FATAL (errorMessage);
       throw std::runtime_error(errorMessage);
@@ -150,37 +151,37 @@ void TRTTransitionRadiation::Initialize() {
     std::map<std::string,G4Material*> materialMap;
     IRDBRecordset_ptr materialsRec = pAccessSvc->getRecordsetPtr("TRMaterials","","");
     // Step #1. Count elements per material
-    for(const IRDBRecord_ptr& material : *materialsRec) {
+    for (const IRDBRecord_ptr& material : *materialsRec) {
       std::string key = material->getString("NAME");
       auto mapIt = materialComponentsMap.find(key);
-      if(mapIt == materialComponentsMap.end()) {
-	materialComponentsMap.emplace(key,1);
+      if (mapIt == materialComponentsMap.end()) {
+        materialComponentsMap.emplace(key,1);
       }
       else {
-	materialComponentsMap.at(key) = mapIt->second + 1;
+        materialComponentsMap.at(key) = mapIt->second + 1;
       }
     }
     // Step #2. Build materials
-    for(const IRDBRecord_ptr& material :*materialsRec) {
+    for (const IRDBRecord_ptr& material :*materialsRec) {
       std::string key = material->getString("NAME");
       G4Material* g4Material{nullptr};
       if(materialMap.find(key)==materialMap.end()) {
-	auto itNElements = materialComponentsMap.find(key);
-	g4Material = new G4Material(key
-				    ,material->getDouble("DENSITY")*(CLHEP::gram / CLHEP::cm3)
-				    ,itNElements->second);
-	materialMap.emplace(key,g4Material);
+        auto itNElements = materialComponentsMap.find(key);
+        g4Material = new G4Material(key
+                                    ,material->getDouble("DENSITY")*(CLHEP::gram / CLHEP::cm3)
+                                    ,itNElements->second);
+        materialMap.emplace(key,g4Material);
       }
       else {
-	g4Material = materialMap.at(key);
+        g4Material = materialMap.at(key);
       }
 
       G4Element* g4Element = G4Element::GetElement(material->getString("ELEMENT_NAME"));
       if(!g4Element) {
-	errorMessage = "Wrong name for element " + material->getString("ELEMENT_NAME") 
-	  + " found in the description of material " + key;
-	ATH_MSG_FATAL (errorMessage);
-	throw std::runtime_error(errorMessage);
+        errorMessage = "Wrong name for element " + material->getString("ELEMENT_NAME")
+          + " found in the description of material " + key;
+        ATH_MSG_FATAL (errorMessage);
+        throw std::runtime_error(errorMessage);
       }
       g4Material->AddElement(g4Element,(G4int)material->getInt("N"));
     }
@@ -195,9 +196,9 @@ void TRTTransitionRadiation::Initialize() {
   m_WplasmaGas  = sqrt( PlasmaCof * g4mat_Gas->GetElectronDensity() );
 
   ATH_MSG_DEBUG("Foil material : " << g4mat_FoilMaterial->GetName()
-		<< "; plasma energy : " << m_WplasmaFoil/CLHEP::eV << " eV");
+                << "; plasma energy : " << m_WplasmaFoil/CLHEP::eV << " eV");
   ATH_MSG_DEBUG("Gas : " << g4mat_Gas->GetName()
-		<< "; plasma energy : " << m_WplasmaGas/CLHEP::eV << " eV");
+                << "; plasma energy : " << m_WplasmaGas/CLHEP::eV << " eV");
 
   m_Omg       = new G4double[m_NumBins];
   m_om        = new G4double[m_NumBins];
