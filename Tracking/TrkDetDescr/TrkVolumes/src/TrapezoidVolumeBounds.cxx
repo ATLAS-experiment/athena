@@ -130,9 +130,11 @@ const std::vector<const Trk::Surface*>*
   // face surfaces yz
   // transmute cyclical
   //   (3) - at point A, attached to alpha opening angle
-  //  the yz bound are created that the surface y-direction has to be come the z-direction.
-  //  this is achieved by rotating the plane surface by 90 degrees around the x-axis
-  //  Then, the plane has to be rotated around the z-axis by alpha:
+  //  the yz bound are created in such a way that the surface y-direction has to
+  //  become the z-direction. The resulting surface normal has to point in
+  //  y-direction. This is achieved by rotating the plane surface by -90
+  //  degrees around the x-axis.
+  //  Then, the plane has to be rotated around the z-axis by alpha.
   //
   //  double c=cos(M_PI/2);
   //  double s=sin(M_PI/2);
@@ -153,9 +155,9 @@ const std::vector<const Trk::Surface*>*
   {
   double s=sin(-alpha());
   double c=cos(-alpha());
-  rotateToFaceAlpha <<   c,  0.f,  -s,
-                        -s,  0.f,  -c,
-                       0.f,  1.f, 0.f;
+  rotateToFaceAlpha <<   c,  0.f,   s,
+                        -s,  0.f,   c,
+                       0.f, -1.f, 0.f;
   }
 
   RectangleBounds* faceAlphaBounds = this->faceAlphaRectangleBounds();
@@ -171,9 +173,9 @@ const std::vector<const Trk::Surface*>*
   {
   double s=sin(beta());
   double c=cos(beta());
-  rotateToFaceBeta  <<   c,  0.f,  -s,
-                        -s,  0.f,  -c,
-                       0.f,  1.f, 0.f;
+  rotateToFaceBeta  <<   c,  0.f,   s,
+                        -s,  0.f,   c,
+                       0.f, -1.f, 0.f;
   }
 
   RectangleBounds* faceBetaBounds = this->faceBetaRectangleBounds();

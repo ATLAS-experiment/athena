@@ -46,19 +46,38 @@ void   test_TrapezoidVolumeBounds() {
                                                        scale[(corner_i & (1<<2)) != 0] * hz};
    }
 
+   Amg::Vector3D center_of_gravity=Amg::Vector3D::Zero();
    for (const Amg::Vector3D &a_corner : corner) {
-      BOOST_TEST_MESSAGE( "Corner: " << a_corner[0] << " " << a_corner[1] << " " << a_corner[2] );
+      center_of_gravity += a_corner;
+   }
+   center_of_gravity /= corner.size();
+
+   BOOST_TEST_MESSAGE( "center-of-gravity "
+                       << center_of_gravity[0] << " " << center_of_gravity[1] << " " << center_of_gravity[2]);
+   unsigned int surf_i=0;
+   for(const Trk::Surface* a_surface : *bound_surfaces) {
       unsigned int counter=0;
-      unsigned int surf_i=0;
-      for(const Trk::Surface* a_surface : *bound_surfaces) {
+      Amg::Vector3D surface_center=Amg::Vector3D::Zero();
+      unsigned int corner_i=0;
+      for (const Amg::Vector3D &a_corner : corner) {
          bool on_surface  = a_surface->isOnSurface(a_corner, true /* BoundaryCheck */, 1e-3, 1e-3);
          if (on_surface) {
-            BOOST_TEST_MESSAGE( "On surface " << surf_i );
+            surface_center += a_corner;
+            BOOST_TEST_MESSAGE( "On surface " << surf_i << " corner " << corner_i << " "
+                                << a_corner[0] << " " << a_corner[1] << " " << a_corner[2]);
          }
          counter += on_surface;
-         ++surf_i;
+         ++corner_i;
       }
-      BOOST_CHECK( counter == 3 );
+      BOOST_CHECK( counter == 4 );
+      if (counter>0) {
+         surface_center /= counter;
+      }
+      BOOST_TEST_MESSAGE( "surface_center  " << surf_i << " "
+                          << surface_center[0] << " " << surface_center[1] << " " << surface_center[2]);
+      BOOST_TEST_MESSAGE( a_surface->normal().dot( surface_center - center_of_gravity ));
+      BOOST_CHECK( a_surface->normal().dot( surface_center - center_of_gravity )>0.);
+      ++surf_i;
    }
 }
 
