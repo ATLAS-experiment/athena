@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DL2_H
@@ -28,8 +28,8 @@ namespace FlavorTagDiscriminants {
     void decorateWithDefaults(const SG::AuxElement&) const;
     void decorate(const xAOD::Jet& jet, const SG::AuxElement& decorated) const;
 
-    // functions to report data depdedencies
-    FTagDataDependencyNames getDataDependencyNames() const;
+    // functions to report data dependencies
+    const FTagDataDependencyNames& getDataDependencyNames() const;
 
   private:
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;

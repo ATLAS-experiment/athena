@@ -386,7 +386,7 @@ namespace {
     }
 
     template <typename T>
-    SeqGetter<T>::SeqGetter(std::vector<InputVariableConfig> inputs, const FTagOptions& options)
+    SeqGetter<T>::SeqGetter(const std::vector<InputVariableConfig>& inputs, const FTagOptions& options)
     {
       std::map<std::string, std::string> remap = options.remap_scalar;
       for (const InputVariableConfig& input_cfg: inputs) {
@@ -449,11 +449,11 @@ namespace {
     }
 
     template <typename T>
-    std::set<std::string> SeqGetter<T>::getDependencies() const {
+    const std::set<std::string>& SeqGetter<T>::getDependencies() const {
       return m_deps;
     }
     template <typename T>
-    std::set<std::string> SeqGetter<T>::getUsedRemap() const {
+    const std::set<std::string>& SeqGetter<T>::getUsedRemap() const {
       return m_used_remap;
     }
 

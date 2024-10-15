@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagJetAugmenter.h"
@@ -454,7 +454,7 @@ bool BTagJetAugmenter::jfIsDefaults(const xAOD::BTagging& btag) const {
   return !(m_jf_vertices(btag).size() > 0 && (m_jf_nVtx(btag) > 0 || m_jf_nSingleTracks(btag) > 0));
 }
 
-double BTagJetAugmenter::getDmesonMass(int secondaryVtx_track_number, float secondaryVtx_charge, std::vector<TLorentzVector> secondaryVtx_4momentum_vector, std::vector<float> secondaryVtx_charge_vector, const float track_mass, const float track_kaon) const {
+double BTagJetAugmenter::getDmesonMass(int secondaryVtx_track_number, float secondaryVtx_charge, const std::vector<TLorentzVector>& secondaryVtx_4momentum_vector, const std::vector<float>& secondaryVtx_charge_vector, const float track_mass, const float track_kaon) const {
 
   double DmesonMass = -99.0;
   const float Dmeson_reference = 1864.83;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DL2.h"
@@ -61,7 +61,7 @@ namespace FlavorTagDiscriminants {
     m_dataDependencyNames += ipdd;
 
     // Update dependencies and used remap from the tracks loaders.
-    for (auto loader : m_tracksLoaders){
+    for (const auto& loader : m_tracksLoaders){
       m_dataDependencyNames += loader->getDependencies();
       rd.merge(loader->getUsedRemap());
     }
@@ -115,7 +115,7 @@ namespace FlavorTagDiscriminants {
     char invalid = 0;
     std::map<std::string, std::map<std::string, std::vector<double>>> seqs;
 
-    for (auto loader : m_tracksLoaders){
+    for (const auto& loader : m_tracksLoaders){
       std::map<std::string, std::vector<double>> feats;
       std::tie(invalid, feats) = loader->getDL2Data(jet, btag, m_invalid_track_checker);
       seqs[loader->getName()] = feats;
@@ -139,7 +139,7 @@ namespace FlavorTagDiscriminants {
     }
   }
 
-  FTagDataDependencyNames DL2::getDataDependencyNames() const {
+  const FTagDataDependencyNames& DL2::getDataDependencyNames() const {
     return m_dataDependencyNames;
   }
 }

@@ -83,7 +83,7 @@ namespace FlavorTagDiscriminants {
     m_dataDependencyNames += dd;
 
     // Update dependencies and used remap from the constituents loaders.
-    for (auto loader : m_constituentsLoaders){
+    for (const auto& loader : m_constituentsLoaders){
       m_dataDependencyNames += loader->getDependencies();
       rd.merge(loader->getUsedRemap());
     }
@@ -180,7 +180,7 @@ namespace FlavorTagDiscriminants {
     Tracks input_tracks;
     int64_t num_tracks = 0;
     bool  using_tracks = false;
-    for (auto loader : m_constituentsLoaders){
+    for (const auto& loader : m_constituentsLoaders){
       auto [input_name, input_data, input_objects] = loader->getData(jet, btag);
       if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V2) {
         input_name.pop_back();

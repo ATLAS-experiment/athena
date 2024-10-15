@@ -45,7 +45,7 @@ namespace FlavorTagDiscriminants {
     class TracksLoader : public IConstituentsLoader {
       public:
 
-        TracksLoader(ConstituentsInputConfig, const FTagOptions& options);
+        TracksLoader(const ConstituentsInputConfig&, const FTagOptions& options);
         std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override;

@@ -265,7 +265,7 @@ namespace FlavorTagDiscriminants {
     }
 
     TracksLoader::TracksLoader(
-        ConstituentsInputConfig cfg,
+        const ConstituentsInputConfig& cfg,
         const FTagOptions& options
     ):
         IConstituentsLoader(cfg),
@@ -314,7 +314,8 @@ namespace FlavorTagDiscriminants {
         }
         auto track_data_deps = trackFilter(cfg.selection, options).second;
         track_data_deps.merge(trackFlipper(options).second);
-        track_data_deps.merge(m_seqGetter.getDependencies());
+        track_data_deps.insert(m_seqGetter.getDependencies().begin(),
+                               m_seqGetter.getDependencies().end());
         m_deps.trackInputs.merge(track_data_deps);
         m_deps.bTagInputs.insert(options.track_link_name);
         m_used_remap = m_seqGetter.getUsedRemap();

@@ -33,7 +33,7 @@ namespace FlavorTagDiscriminants {
     // Subclass for IParticles loader inherited from abstract IConstituentsLoader class
     class IParticlesLoader : public IConstituentsLoader {
       public:
-        IParticlesLoader(ConstituentsInputConfig, const FTagOptions& options);
+        IParticlesLoader(const ConstituentsInputConfig&, const FTagOptions& options);
         std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override ;
