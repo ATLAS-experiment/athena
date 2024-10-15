@@ -12,3 +12,8 @@ atlas_add_library( MuonPatternHelpers
     LINK_LIBRARIES xAODMuonPrepData ActsCore Identifier MuonReadoutGeometryR4 xAODMeasurementBase MuonSpacePoint 
                    MuonPatternEvent MuonStationIndexLib
     PRIVATE_LINK_LIBRARIES MuonSpacePointCalibratorLib )
+
+atlas_add_test( CombinatorialSeedSolverTest
+    SOURCES test/CombinatorialSeedSolverTest.cxx 
+    LINK_LIBRARIES ${ROOT_LIBRARIES} MuonPatternHelpers
+    POST_EXEC_SCRIPT nopost.sh)
