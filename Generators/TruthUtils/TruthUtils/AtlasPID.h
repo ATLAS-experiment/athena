@@ -211,6 +211,7 @@ template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id()
 template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
 template<class T> inline bool isMonopole(const T& p){return isMonopole(p->pdg_id());}
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
+template<class T> inline bool isGenericMultichargedParticle(const T& p){return isGenericMultichargedParticle(p->pdg_id());}
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
 template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
@@ -287,6 +288,13 @@ template<> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(
 /// constituents charged or not under this, 4900022 is the γv of a non-confining field, and 4900 nqv1 nqv2 nJ a Hidden Valley meson.
 template<> inline bool isHiddenValley(const DecodedPID& p){return (p.ndigits() == 7 &&  p(0) == 4 && p(1) == 9 && isValid(p.shift(2)));}
 template<> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
+
+/// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
+/// These particles are assigned the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
+/// Note that no other quantum numbers besides the charge are considered for these generic multi-charged particles (e.g. isSUSY() is false for them).
+/// Such a model was used in previous Run-1 (1301.5272,1504.04188) and Run-2 (1812.03673,2303.13613) ATLAS searches.
+template<> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && p(0) == 1 && p(1) == 0 && p(2) == 0 && p(7) == 0);}
+template<> inline bool isGenericMultichargedParticle(const int& p){ auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
 
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
@@ -415,6 +423,7 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (isExcited(p)) return true;
   if (isKK(p)) return true;
   if (isHiddenValley(p)) return true;
+  if (isGenericMultichargedParticle(p)) return true;
   return false;
 }
 
@@ -509,7 +518,13 @@ template<class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p) 
 
 
 template<class T> inline int charge3( const T& p){return charge3(p->pdg_id());}
-template<class T> inline double charge( const T& p){ return 1.0*charge3(p)/3.0;}
+template<class T> inline double fractionalCharge(const T& p){return fractionalCharge(p->pdg_id());}
+template<class T> inline double charge( const T& p){
+  if (isGenericMultichargedParticle(p)) // BSM multi-charged particles might have a fractional charge that's not a multiple of 1/3
+    return fractionalCharge(p);
+  else 
+    return 1.0*charge3(p)/3.0; 
+}
 template<class T> inline double threeCharge( const T& p){ return charge3(p);}
 template<class T> inline bool isCharged( const T& p){ return charge3(p) != 0;}
 template<class T> inline bool isNeutral( const T& p){ return charge3(p) == 0;}
@@ -545,7 +560,11 @@ template<> inline int charge3(const DecodedPID& p) {
     result = 3*(p(3)*100 + p(4)*10 + p(5));
     return ( (p.pid() > 0 && p(2) == 1) ||  (p.pid() < 0 && p(2) == 2) ) ? result : -result;
   }
-
+  if (!classified && isGenericMultichargedParticle(p)) {
+    double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+    int abs_threecharge = static_cast<int>(std::round(abs_charge * 3.)); // the multi-charged particles might have a fractional charge that's not a multiple of 1/3, in that case round to the closest multiple of 1/3 for charge3 and threecharge
+    return p.pid() > 0 ? abs_threecharge : -1 * abs_threecharge;
+  }
   for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
     result += triple_charge.at(*r)*sign;
     sign*=signmult;
@@ -558,6 +577,13 @@ template<> inline int charge3(const int& p){
   auto value_digits = DecodedPID(p);
   return charge3(value_digits);
 }
+
+template<> inline double fractionalCharge(const DecodedPID& p) {
+  if(!isGenericMultichargedParticle(p)) return 1.0*charge3(p)/3.0; // this method is written for multi-charged particles, still make sure other cases are handled properly
+  double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+  return p.pid() > 0 ? abs_charge : -1 * abs_charge;
+}
+template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
 
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
 template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0 || isMonopole(p));}
