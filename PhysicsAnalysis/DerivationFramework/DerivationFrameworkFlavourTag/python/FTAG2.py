@@ -22,7 +22,7 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg
+    from DerivationFrameworkInDet.InDetToolsConfig import JetTrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg
 
 
     # filter leptons
@@ -47,13 +47,6 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    FTAG2AktVRJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
-        name            = "FTAG2AktVRJetTPThinningTool",
-        StreamName      = kwargs['StreamName'],
-        JetKey  = "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-        SelectionString = 'AntiKtVR30Rmax4Rmin02PV0TrackJets.pt > 7*GeV',
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-
     # Include inner detector tracks associated with muons
     FTAG2MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
         flags,
@@ -62,11 +55,19 @@ def FTAG2KernelCfg(flags, name='FTAG2Kernel', **kwargs):
         MuonKey                 = "Muons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
+    # Include inner detector tracks associated with electrons
+    FTAG2ElectronTPThinningTool = acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
+        flags,
+        name                    = "FTAG2ElectronTPThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SGKey                 = "Electrons",
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
+
     # Finally the kernel itself
     thinningTools = [
             FTAG2MuonTPThinningTool,
+            FTAG2ElectronTPThinningTool,
             FTAG2Akt4PFlowJetTPThinningTool,
-            FTAG2AktVRJetTPThinningTool,
             ]
     skimmingTools = [
             FTAG2LeptonSkimmingTool,
