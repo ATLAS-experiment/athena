@@ -32,7 +32,7 @@ namespace CP
         // Load the constants
         for(const auto & year: MCP::dataYearList)
         {
-            for(auto param: m_paramList)
+            for(const auto & param: m_paramList)
             {
                 m_IDparams[year][param] = MCP::CalibInitializer::createScaleResCorrMap(year, MCP::TrackType::ID, m_release, param);
                 m_MEparams[year][param] = MCP::CalibInitializer::createScaleResCorrMap(year, MCP::TrackType::ME, m_release, param);
@@ -113,7 +113,7 @@ namespace CP
         // Extra the constants from container into a simple map
         for(const auto& param: m_paramList)
         {
-            auto contantList = constants.at(param);
+            const auto & contantList = constants.at(param);
 
             double val = contantList.at(MCP::ScaleResCorrection::Nominal)->getCalibConstant(trk);
             if(direction.at(param) == MCP::SystVariation::Up)
@@ -468,10 +468,10 @@ namespace CP
     double MuonCalibIntScaleSmearTool::getExpectedResolution(const int &DetType, double pT, double eta, double phi, MCP::DataYear year, bool addMCCorrectionSmearing) const 
     {
 
-        auto IDcorrConstants = m_IDparams.at(year);
-        auto MEcorrConstants = m_MEparams.at(year);
-        auto IDExpectedResConstants = m_IDExpectedResparams.at(year);
-        auto MEExpectedResConstants = m_MEExpectedResparams.at(year);
+        const auto & IDcorrConstants = m_IDparams.at(year);
+        const auto & MEcorrConstants = m_MEparams.at(year);
+        const auto & IDExpectedResConstants = m_IDExpectedResparams.at(year);
+        const auto & MEExpectedResConstants = m_MEExpectedResparams.at(year);
 
         MCP::TrackType type = MCP::TrackType::ID;
         if(DetType == MCP::DetectorType::MS) type = MCP::TrackType::ME;
