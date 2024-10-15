@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAG_JET_AUGMENTER_HH
@@ -38,7 +38,7 @@ public:
 
 private:
   bool jfIsDefaults(const xAOD::BTagging &btag) const;
-  double getDmesonMass(int secondaryVtx_track_number, float secondaryVtx_charge, std::vector<TLorentzVector> secondaryVtx_4momentum_vector, std::vector<float> secondaryVtx_charge_vector, const float track_mass, const float track_kaon) const;
+  double getDmesonMass(int secondaryVtx_track_number, float secondaryVtx_charge, const std::vector<TLorentzVector>& secondaryVtx_4momentum_vector, const std::vector<float>& secondaryVtx_charge_vector, const float track_mass, const float track_kaon) const;
 
   float safelog_prob(float p_up, float p_down) const;
 

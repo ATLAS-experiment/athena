@@ -59,9 +59,9 @@ namespace FlavorTagDiscriminants {
     struct ConstituentsInputConfig {
         std::string name;
         std::string output_name;
-        ConstituentsType type;
+        ConstituentsType type = ConstituentsType::IPARTICLE;
         ConstituentsSortOrder order;
-        ConstituentsSelection selection;
+        ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
     };
 
@@ -74,8 +74,9 @@ namespace FlavorTagDiscriminants {
     // Virtual class to represent loader of any type of constituents
     class IConstituentsLoader {
         public:
-            IConstituentsLoader(ConstituentsInputConfig cfg) {
-              m_config = cfg;
+            IConstituentsLoader(const ConstituentsInputConfig& cfg)
+              : m_config (cfg)
+            {
             };
             virtual ~IConstituentsLoader() = default;
             virtual std::tuple<std::string, Inputs, std::vector<const xAOD::IParticle*>> getData(

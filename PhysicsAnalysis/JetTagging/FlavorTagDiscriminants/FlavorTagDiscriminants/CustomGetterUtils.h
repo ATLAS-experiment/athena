@@ -74,13 +74,13 @@ namespace FlavorTagDiscriminants {
               const xAOD::Jet&,
               const Const&)>;
 
-          SeqGetter(std::vector<InputVariableConfig> inputs, const FTagOptions& options);
+          SeqGetter(const std::vector<InputVariableConfig>& inputs, const FTagOptions& options);
 
           std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Jet& jet, const Const& constituents) const;
           std::map<std::string, std::vector<double>> getDL2Feats(const xAOD::Jet& jet, const Const& constituents) const;
 
-          std::set<std::string> getDependencies() const;
-          std::set<std::string> getUsedRemap() const;
+          const std::set<std::string>& getDependencies() const;
+          const std::set<std::string>& getUsedRemap() const;
 
         private:
           std::pair<InputSequence, std::set<std::string>> getNamedCustomSeqGetter(

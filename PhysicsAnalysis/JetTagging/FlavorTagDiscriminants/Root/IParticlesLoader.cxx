@@ -25,7 +25,7 @@ namespace FlavorTagDiscriminants {
     } // end of iparticle sort getter
 
     IParticlesLoader::IParticlesLoader(
-        ConstituentsInputConfig cfg,
+        const ConstituentsInputConfig& cfg,
         const FTagOptions& options
     ):
         IConstituentsLoader(cfg),
