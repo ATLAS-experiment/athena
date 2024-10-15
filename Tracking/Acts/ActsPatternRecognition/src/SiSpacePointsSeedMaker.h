@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SISPACEPOINTSSEEDMAKER_H
@@ -226,7 +226,7 @@ namespace ActsTrk {
 
     mutable std::mutex m_mutex;
 
-    ITHistSvc* m_thistSvc = nullptr;
+    ServiceHandle<ITHistSvc> m_thistSvc;
     TTree* m_outputTree = nullptr;
 
     mutable std::string m_treeName ATLAS_THREAD_SAFE = "";
