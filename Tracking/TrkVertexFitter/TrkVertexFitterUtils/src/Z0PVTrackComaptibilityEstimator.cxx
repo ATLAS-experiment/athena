@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,12 +20,11 @@ namespace Trk{
   Z0PVTrackCompatibilityEstimator::Z0PVTrackCompatibilityEstimator(const std::string& type, 
 							       const std::string& name,
 							       const IInterface* parent) :
-    AthAlgTool(type, name, parent),
+    base_class(type, name, parent),
     m_ipEstimator("Trk::TrackToVertexIPEstimator"),
     m_z0SignificanceMax(30.)
   {
-    declareInterface< Z0PVTrackCompatibilityEstimator >(this);
-    declareProperty("IPEstimator", m_ipEstimator, "Impact parameter estimator tool");   
+    declareProperty("IPEstimator", m_ipEstimator, "Impact parameter estimator tool");
     declareProperty("Z0SignificanceMax", m_z0SignificanceMax);
   }
 
@@ -119,22 +118,6 @@ namespace Trk{
     }
   
     return std::abs(ip->IPz0) / ip->sigmaz0 < m_z0SignificanceMax && !pileup;
-  }
-
-
-  StatusCode Z0PVTrackCompatibilityEstimator::queryInterface(const InterfaceID& riid, void** ppvIf){
-    if(interfaceID() == riid){
-      *ppvIf = dynamic_cast< Z0PVTrackCompatibilityEstimator* > (this);
-    } 
-    else if(IPVTrackCompatibilityEstimator::interfaceID() == riid){
-      *ppvIf = dynamic_cast< IPVTrackCompatibilityEstimator* > (this);
-    } 
-    else{
-      return AthAlgTool::queryInterface(riid, ppvIf);
-    }
-    
-    addRef();
-    return StatusCode::SUCCESS;
   }
 
 }

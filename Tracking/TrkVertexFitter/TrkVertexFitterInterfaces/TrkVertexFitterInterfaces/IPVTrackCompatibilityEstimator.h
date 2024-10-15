@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_IPVTRACKCOMPATIBILITYESTIMATOR_H
@@ -32,16 +32,13 @@
 namespace Trk
 {
 
- static const InterfaceID IID_IPVTrackCompatibilityEstimator("IPVTrackCompatibilityEstimator", 1, 0);
- 
  class IPVTrackCompatibilityEstimator : virtual public IAlgTool
  {
     
   public:
+    DeclareInterfaceID(IPVTrackCompatibilityEstimator, 1, 0);
 
     virtual ~IPVTrackCompatibilityEstimator(){};
-    
-    static const InterfaceID& interfaceID(){return IID_IPVTrackCompatibilityEstimator;}
     
     virtual bool isCompatible(const xAOD::TrackParticle* track,
                               const xAOD::VertexContainer* pvContainer, unsigned int pvIndex = 0) const = 0;
