@@ -85,9 +85,11 @@ namespace MuonGM {
         const PVConstLink pvc {getMaterialGeom()};
         const GeoTrd* trd=dynamic_cast<const GeoTrd *> (pvc->getLogVol()->getShape());
         if (trd) {
-            m_sWidthChamber = 2*trd->getYHalfLength1();       // bottom base length (full chamber)
-            m_lWidthChamber = 2*trd->getYHalfLength2();       // top base length (full chamber)
-            m_lengthChamber = 2*trd->getZHalfLength();        // height of the trapezoid (full chamber)         
+            setSsize(2*trd->getYHalfLength1());
+            setLongSsize( 2*trd->getYHalfLength2());
+            setRsize(2*trd->getZHalfLength());
+            setZsize(trd->getXHalfLength1());
+
         } else {
             ATH_MSG_DEBUG("Expected a GeoTrd but got "<<printGeoShape(pvc->getLogVol()->getShape()));
         }
@@ -174,7 +176,7 @@ namespace MuonGM {
             const double ylFrame = (*wmmRec)[ind]->getDouble("ylFrame");                
             const double ysFrame = (*wmmRec)[ind]->getDouble("ysFrame");                
         
-            m_tckChamber    = Tck;                              // thickness (full chamber)
+            setZsize(Tck);                                      // thickness (full chamber)
             m_halfX         = activeH / 2;                      // 0.5*radial_size (active area)
             m_minHalfY      = activeBottomLength / 2;           // 0.5*bottom length (active area)
             m_maxHalfY      = activeTopLength / 2;              // 0.5*top length (active area)
@@ -243,10 +245,14 @@ namespace MuonGM {
        double ylFrame  = mm->ylFrame();
        double ysFrame  = mm->ysFrame();
        double pitch    = roParam.stripPitch;
-       m_sWidthChamber = mm->sWidth();                   // bottom base length (full chamber)
-       m_lWidthChamber = mm->lWidth();                   // top base length (full chamber)
-       m_lengthChamber = mm->Length();                   // height of the trapezoid (full chamber)
-       m_tckChamber    = mm->Tck();                      // thickness (full chamber)
+       
+       
+       
+       
+       setSsize(mm->sWidth());                           // bottom base length (full chamber)
+       setLongSsize(mm->lWidth());                       // top base length (full chamber)
+       setRsize(mm->Length());                           // height of the trapezoid (full chamber)
+       setZsize(mm->Tck());                              // thickness (full chamber)
        m_halfX         = roParam.activeH / 2;            // 0.5*radial_size (active area)
        m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
        m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
@@ -395,11 +401,11 @@ namespace MuonGM {
         double t0    = locPosML.x();
         double s0    = locPosML.y();
         double z0    = locPosML.z();
-        double width = m_sWidthChamber + (m_lWidthChamber - m_sWidthChamber)*(z0/m_lengthChamber + 0.5); // because z0 is in [-length/2, length/2]
+        double width = getSsize() + (getLongSsize() - getSsize())*(z0/getRsize() + 0.5); // because z0 is in [-length/2, length/2]
 
         double s_rel = s0/(width/2.);           // in [-1, 1]
-        double z_rel = z0/(m_lengthChamber/2.); // in [-1, 1]
-        double t_rel = t0/(m_tckChamber/2.);    // in [-1, 1]
+        double z_rel = z0/(getRsize()/2.); // in [-1, 1]
+        double t_rel = t0/(getZsize()/2.);    // in [-1, 1]
 
         // b-line parameters
         using Parameter = BLinePar::Parameter;
@@ -422,7 +428,7 @@ namespace MuonGM {
 
         if (tw != 0) {
             dt -= tw*s_rel*z_rel;
-            dz += tw*s_rel*t_rel*m_tckChamber/m_lengthChamber;
+            dz += tw*s_rel*t_rel*getZsize()/getRsize();
         }
 
         if (eg != 0) {
