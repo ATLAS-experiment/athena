@@ -638,7 +638,8 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
     ATH_CHECK(createSCTCluster(clEq, rdoList, *xaod_scl));
 
     // Global position and covariance 
-    auto globalPos = xaod_scl->globalPosition();
+    
+    Eigen::Matrix<float,3,1> globalPos(clEq.getX(),clEq.getY(),clEq.getZ()); // global position from FPGATrackSim
 
     // Covariance
     // TODO: update to ITk? Can it be done as for pixel? (L728-729)?
@@ -669,7 +670,7 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
       ATH_CHECK(getRdoList(rdo, h));
       xAOD::StripCluster *meas = new xAOD::StripCluster();
       SPstripsCont->push_back(meas);
-      ATH_CHECK(createSCTCluster(h, rdo, *meas));
+      ATH_CHECK(createSCTCluster(h, rdo, *meas)); 
       measurements.push_back(meas);
     }
 
@@ -722,7 +723,8 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
     ATH_CHECK(createPixelCluster(clEq, rdoList, *xaod_pcl));
 
     // Global position and covariance 
-    auto globalPos = xaod_pcl->globalPosition();
+    
+    Eigen::Matrix<float,3,1> globalPos(clEq.getX(),clEq.getY(),clEq.getZ());
 
     // Covariance (to be cross-checked)
     float cov_r = xaod_pcl->localCovariance<1>()(0,0);
