@@ -267,7 +267,10 @@ IdentifierField::add_value(element_type value) {
 void 
 IdentifierField::set(const std::vector <element_type>& values) {
   auto * p = dataPtr<element_vector>();
-  if (not p) clear();
+  if (not p) {
+    clear();
+    p = dataPtr<element_vector>();
+  }
   p->insert(p->end(), values.begin(), values.end());
   std::ranges::sort (*p);
   //ensure duplicates are taken out
