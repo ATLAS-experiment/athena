@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_ATHENAPOOLCONVERTER_H
@@ -12,7 +12,9 @@
 
 #include "GaudiKernel/Converter.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "DataModelRoot/RootType.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCleanUp.h"
 #include "PoolSvc/IPoolSvc.h"
@@ -63,6 +65,9 @@ public:
    /// @param pObj [IN] pointer to the transient object.
    virtual StatusCode fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj) override;
 
+   /// Handle to DetectorStore
+   const ServiceHandle<StoreGateSvc>& detStore() const { return m_detStore; }
+
    /// @return storage type.
    static long storageType();
 
@@ -108,6 +113,7 @@ protected:
    bool compareClassGuid(const Guid &guid) const;
 
 protected: // data
+   ServiceHandle<StoreGateSvc> m_detStore;
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
    RootType              m_classDesc;
 
