@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -44,9 +44,8 @@ MinBiasScintillatorSD::MinBiasScintillatorSD(const G4String& name, const std::st
       m_numberOfHitsInCell(N_CELLS, 0),
       m_tempSimHit(N_CELLS, nullptr)
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  StoreGateSvc* detStore(NULL);
-  if (svcLocator->service("DetectorStore", detStore).isFailure()) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if ( !detStore ) {
     G4ExceptionDescription description;
     description << "MinBiasScintillatorSD constructor - can't find DetStore";
     G4Exception("MinBiasScintillatorSD", "NoDetStore", FatalException, description);
@@ -165,9 +164,6 @@ MinBiasScintillatorSD::MinBiasScintillatorSD(const G4String& name, const std::st
     G4cout << G4endl;
   }
   return;
-}
-
-MinBiasScintillatorSD::~MinBiasScintillatorSD() {
 }
 
 void MinBiasScintillatorSD::Initialize(G4HCofThisEvent* /* HCE */) {

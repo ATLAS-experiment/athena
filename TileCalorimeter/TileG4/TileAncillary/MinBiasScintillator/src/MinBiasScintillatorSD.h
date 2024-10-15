@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -37,7 +37,7 @@ class MinBiasScintillatorSD: public G4VSensitiveDetector {
   public:
     MinBiasScintillatorSD(const G4String& name, const std::string& hitCollectionName,
         const MinBiasScintSDOptions& opts);
-    ~MinBiasScintillatorSD();
+    ~MinBiasScintillatorSD() = default;
 
     virtual void Initialize(G4HCofThisEvent*) override final;
 
