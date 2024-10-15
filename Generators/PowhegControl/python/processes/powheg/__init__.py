@@ -34,7 +34,6 @@ from .LQ_s_chan import LQ_s_chan
 from .ssWWjj import ssWWjj
 from .t_sch import t_sch
 from .t_tch_4FS import t_tch_4FS
-from .tj import tj
 from .tt import tt
 from .tt_NLOdecays import tt_NLOdecays
 from .ttbb import ttbb
