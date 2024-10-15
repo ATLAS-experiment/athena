@@ -1,0 +1,23 @@
+LineNumber,VariableName,Type,Description
+1,definingParametersCovMatrixDiag,vector<vector<float> >,Diagonal components of the track covariance matrix
+2,definingParametersCovMatrixOffDiag,vector<vector<float> >,Off-diagonal components of the track covariance matrix
+3,phi,vector<float>,"Track kinematics in perigee representation of parameters, defined wrt beamspot"
+4,numberOfPixelHits,vector<unsigned char>,Track summary information
+5,numberOfPixelHoles,vector<unsigned char>,Track summary information
+6,numberOfSCTHits,vector<unsigned char>,Track summary information
+7,numberOfSCTHoles,vector<unsigned char>,Track summary information
+8,numberOfPixelDeadSensors,vector<unsigned char>,Track summary information
+9,numberOfSCTDeadSensors,vector<unsigned char>,Track summary information
+10,numberOfPrecisionLayers,vector<unsigned char>,Number of precision stations used for muon reconstruction
+11,numberOfPrecisionHoleLayers,vector<unsigned char>,Number of precision stations holes resulting from muon reconstruction
+12,qOverP,vector<float>,"Track kinematics in perigee representation of parameters, defined wrt beamspot"
+13,d0,vector<float>,"Transverse impact parameter, i.e. the distance of the closest point of the track to the beamspot on the transverse plane"
+14,z0,vector<float>,"Longitudinal impact parameter, i.e. the track's distance from the beamspot along the z-axis, calculated at the point of closest approach to the beamspot on the transverse plane"
+15,theta,vector<float>,"Track kinematics in perigee representation of parameters, defined wrt beamspot"
+16,vz,vector<float>,"The point of reference for the z0 calculation, i.e. the beamspot position along the z-axis"
+17,chiSquared,vector<float>,Track fit quality
+18,numberDoF,vector<float>,Track fit quality
+19,numberOfTRTHits,vector<unsigned char>,Track summary information
+20,numberOfTRTOutliers,vector<unsigned char>,Track summary information
+21,truthType,vector<int>,Truth type associated with Combined muon track
+22,truthOrigin,vector<int>,Truth origin associated with Combined muon track
