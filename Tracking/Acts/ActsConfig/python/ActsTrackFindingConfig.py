@@ -144,7 +144,7 @@ def ActsMainTrackFindingAlgCfg(flags,
             'FitterTool',
             acc.popToolsAndMerge(ActsFitterCfg(flags, 
                                                ReverseFilteringPt=0,
-                                               OutlierChi2Cut=30))
+                                               OutlierChi2Cut=float('inf')))
         )
 
     if 'PixelCalibrator' not in kwargs:
