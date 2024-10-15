@@ -775,6 +775,12 @@ def LLP1Cfg(flags):
                                         "MET_Core_AntiKt4EMTopo",
                                         "METAssoc_AntiKt4EMPFlow",
                                         "MET_Core_AntiKt4EMPFlow",
+                                        "PixelClusters",
+                                        "PixelMSOSs",
+                                        "DisappearingPixelMSOSs",
+                                        "SCT_Clusters",
+                                        "SCT_MSOSs",
+                                        "DisappearingSCT_MSOSs",
                                         ]
 
 
@@ -816,6 +822,8 @@ def LLP1Cfg(flags):
                                           "InDetTrackParticles.LLP1_ptcone20.LLP1_ptcone30.LLP1_ptcone40.LLP1_ptvarcone20.LLP1_ptvarcone30.LLP1_ptvarcone40.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
                                           "InDetTrackParticles.LLP1_topoetcone20.LLP1_topoetcone30.LLP1_topoetcone40.LLP1_topoetcone20NonCoreCone.LLP1_topoetcone30NonCoreCone.LLP1_topoetcone40NonCoreCone",
                                           "InDetTrackParticles.LLP1_CaloCelldEta.LLP1_CaloCelldPhi.LLP1_CaloCelldR.LLP1_CaloCelldX.LLP1_CaloCelldY.LLP1_CaloCelldZ.LLP1_CaloCellE.LLP1_CaloCellEta.LLP1_CaloCellGain.LLP1_CaloCellID.LLP1_CaloCellPhi.LLP1_CaloCellProvenance.LLP1_CaloCellQuality.LLP1_CaloCellR.LLP1_CaloCellSampling.LLP1_CaloCellTime.LLP1_CaloCellX.LLP1_CaloCellY.LLP1_CaloCellZ.LLP1_CaloCellEneDiff.LLP1_CaloCellTimeDiff",
+                                          "InDetTrackParticles.Reco_msosLink",
+
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.patternRecoInfo",
                                           "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
                                           "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.hitPattern.truthOrigin.truthType",
