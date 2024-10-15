@@ -33,16 +33,16 @@ public:
 
 static const int TABLESIZE = 100;
 static const std::array<int,TABLESIZE> triple_charge = {
-+0, -1, +2, -1, +2, -1, +2, -1, +2, +0,
-+0, -3, +0, -3, +0, -3, +0, -3, +0, +0,
-+0, +0, +0, +0, +3, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +3, +0, +0, +3, +0, +0,
-+0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-+0, +0, +0, +0, +0, +0, +0, +0, +0, +0
+  +0, -1, +2, -1, +2, -1, +2, -1, +2, +0,
+  +0, -3, +0, -3, +0, -3, +0, -3, +0, +0,
+  +0, +0, +0, +0, +3, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +3, +0, +0, +3, +0, +0,
+  +0, +0, -1, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
+  +0, +0, +0, +0, +0, +0, +0, +0, +0, +0
 };
 
 
@@ -225,7 +225,8 @@ template<class T> inline bool isTransportable(const T& p){return isTransportable
 template<class T> inline bool isGenSpecific(const T& p){return isGenSpecific(p->pdg_id());}
 template<class T> inline bool isGeantino(const T& p){return isGeantino(p->pdg_id());}
 template<class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
-template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p(0) == 9 && p(1) == 9 && p.ndigits() == 7 );}
+template<> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
+template<> inline bool isPythia8Specific(const int& p){ auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
 /// Main Table
 /// for MC internal use 81–100,901–930,998-999,1901–1930,2901–2930, and 3901–3930
 template<> inline bool isGenSpecific(const int& p){
@@ -292,8 +293,8 @@ template<> inline bool isHiddenValley(const int& p){ auto value_digits = Decoded
 /// APID: the diquarks with fourth generation are not diquarks
 template<> inline bool isDiquark(const DecodedPID& p){
   if ( p.ndigits() == 4 &&  p(0) >= p(1) && p(2) == 0 &&  p.last() % 2 == 1
-   && p.max_digit(1,3) <= 6
-  ) return true;
+       && p.max_digit(1,3) <= 6
+       ) return true;
   return false;
 }
 
@@ -373,8 +374,8 @@ template<> inline bool isBaryon(const DecodedPID& p){
 
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 &&
-  p.max_digit(1,6) <= 6  && p.min_digit(1,6) > 0 &&
-  ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
+          p.max_digit(1,6) <= 6  && p.min_digit(1,6) > 0 &&
+          ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
 /// PDG rule 14
 ///The 9-digit tetra-quark codes are±1nrnLnq1nq20nq3nq4nJ. For the particleq1q2is a diquarkand
@@ -384,10 +385,10 @@ template<> inline bool isPentaquark(const DecodedPID& p){
 /// Thenr,nL, andnJnumbers have the same meaningas for ordinary hadrons.
 template<> inline bool isTetraquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 &&
-      p.max_digit(1,3) <= 6  && p.min_digit(1,3) > 0 &&
-      p.max_digit(1+3,3+3) <= 6  && p.min_digit(1+3,3+3) > 0 &&
-     ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
-  );
+          p.max_digit(1,3) <= 6  && p.min_digit(1,3) > 0 &&
+          p.max_digit(1+3,3+3) <= 6  && p.min_digit(1+3,3+3) > 0 &&
+          ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
+          );
 }
 
 /// PDG rule 16:
@@ -534,20 +535,20 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); }
   if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
   if (!classified && isSUSY(p)) { nq = 0;
-      classified = true;
-      auto pp = p.shift(1); if (pp.ndigits() > 2) pp = pp.shift(1);
-      return charge3(pp);
+    classified = true;
+    auto pp = p.shift(1); if (pp.ndigits() > 2) pp = pp.shift(1);
+    return charge3(pp);
   }
   if (!classified && isMonopole(p)) {
-///Codes 411nq1nq2 nq3 0  are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
-/// when they disagree, with the overall sign of the particle set by the magnetic charge.
-      result = 3*(p(3)*100 + p(4)*10 + p(5));
-      return ( (p.pid() > 0 && p(2) == 1) ||  (p.pid() < 0 && p(2) == 2) ) ? result : -result;
+    ///Codes 411nq1nq2 nq3 0  are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
+    /// when they disagree, with the overall sign of the particle set by the magnetic charge.
+    result = 3*(p(3)*100 + p(4)*10 + p(5));
+    return ( (p.pid() > 0 && p(2) == 1) ||  (p.pid() < 0 && p(2) == 2) ) ? result : -result;
   }
 
   for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
-      result += triple_charge.at(*r)*sign;
-      sign*=signmult;
+    result += triple_charge.at(*r)*sign;
+    sign*=signmult;
   }
   return p.pid() > 0 ? result : -result;
 }
@@ -567,92 +568,93 @@ template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) ||
 template<class T> inline bool isParton(const T& p) { return isQuark(p)||isGluon(p);}
 
 namespace SUSY {
-static const int  SUSYGLUONCODE = 9;
-template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
-template<> inline bool isRGlueball(const DecodedPID& p) {
-  auto pp = p.shift(1).shift(1);
-  size_t ng = 0;
-  for (size_t i = 1; i + 1 < pp.ndigits(); ++i) {
-    if (pp(i) == SUSYGLUONCODE) ng++;
+  static const int  SUSYGLUONCODE = 9;
+  template<class T> inline bool isRGlueball(const T& p) { return isRGlueball(p->pdg_id()); }
+  template<> inline bool isRGlueball(const DecodedPID& p) {
+    if (p.ndigits() != 7) return false;
+    auto pp = p.shift(1).shift(1);
+    size_t ng = 0;
+    for (size_t i = 1; i + 1 < pp.ndigits(); ++i) {
+      if (pp(i) == SUSYGLUONCODE) ng++;
+    }
+    return p(1) == 9 && p(2) == 9 && ng > 0;
   }
-  return p(1) == 9 && p(2) == 9 && p.ndigits() == 7 && ng > 0;
-}
-template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
-template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
-template<> inline bool isRHadron(const DecodedPID& p){ auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isSUSY(p) && (isHadron(pp) || isRGlueball(p));}
-template<> inline bool isRHadron(const int& p){ auto value_digits = DecodedPID(p); return isRHadron(value_digits);}
+  template<> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
+  template<class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
+  template<> inline bool isRHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return (isHadron(pp) || isRGlueball(p));}
+  template<> inline bool isRHadron(const int& p){ auto value_digits = DecodedPID(p); return isRHadron(value_digits);}
 
-template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
-template<> inline bool isRMeson(const DecodedPID& p){ auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isSUSY(p) && isMeson(pp);}
-template<> inline bool isRMeson(const int& p){ auto value_digits = DecodedPID(p); return isRMeson(value_digits);}
+  template<class T> inline bool isRMeson(const T& p) { return isRMeson(p->pdg_id()); }
+  template<> inline bool isRMeson(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isMeson(pp);}
+  template<> inline bool isRMeson(const int& p){ auto value_digits = DecodedPID(p); return isRMeson(value_digits);}
 
-template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
-template<> inline bool isRBaryon(const DecodedPID& p){ auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isSUSY(p) && isBaryon(pp);}
-template<> inline bool isRBaryon(const int& p){ auto value_digits = DecodedPID(p); return isRBaryon(value_digits);}
+  template<class T> inline bool isRBaryon(const T& p) { return isRBaryon(p->pdg_id()); }
+  template<> inline bool isRBaryon(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBaryon(pp);}
+  template<> inline bool isRBaryon(const int& p){ auto value_digits = DecodedPID(p); return isRBaryon(value_digits);}
 
-template<class T> inline bool isRBottomHadron(const T& p) { return isRBottomHadron(p->pdg_id()); }
-template<> inline bool isRBottomHadron(const DecodedPID& p){ auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isSUSY(p) && isBottomHadron(pp);}
-template<> inline bool isRBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isRBottomHadron(value_digits);}
+  template<class T> inline bool isRBottomHadron(const T& p) { return isRBottomHadron(p->pdg_id()); }
+  template<> inline bool isRBottomHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isBottomHadron(pp);}
+  template<> inline bool isRBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isRBottomHadron(value_digits);}
 
-template<class T> inline bool isRTopHadron(const T& p) { return isRTopHadron(p->pdg_id()); }
-template<> inline bool isRTopHadron(const DecodedPID& p){ auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isSUSY(p) && isTopHadron(pp);}
-template<> inline bool isRTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isRTopHadron(value_digits);}
+  template<class T> inline bool isRTopHadron(const T& p) { return isRTopHadron(p->pdg_id()); }
+  template<> inline bool isRTopHadron(const DecodedPID& p){ if (!isSUSY(p)) return false; auto pp = p.shift(1); if ( pp(1) == 7 || pp(1) == 8 ) return false; if (pp.ndigits() > 2) pp = pp.shift(1); return isTopHadron(pp);}
+  template<> inline bool isRTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isRTopHadron(value_digits);}
 
 
-template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
-template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
-template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
+  template<class T> inline bool isSLepton(const T& p) { return isSLepton(p->pdg_id()); }
+  template<> inline bool isSLepton(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isLepton(pp);}
+  template<> inline bool isSLepton(const int& p){ auto value_digits = DecodedPID(p); return isSLepton(value_digits);}
 
-template<class T> inline bool isSTopHadron(const T& p) { return isSTopHadron(p->pdg_id()); }
-template<> inline bool isSTopHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopHadron(pp);}
-template<> inline bool isSTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isSTopHadron(value_digits);}
+  template<class T> inline bool isSTopHadron(const T& p) { return isSTopHadron(p->pdg_id()); }
+  template<> inline bool isSTopHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopHadron(pp);}
+  template<> inline bool isSTopHadron(const int& p){ auto value_digits = DecodedPID(p); return isSTopHadron(value_digits);}
 
-template<class T> inline bool isSBaryon(const T& p) { return isSBaryon(p->pdg_id()); }
-template<> inline bool isSBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBaryon(pp);}
-template<> inline bool isSBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBaryon(value_digits);}
-
-
-template<class T> inline bool isSMeson(const T& p) { return isSMeson(p->pdg_id()); }
-template<> inline bool isSMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isMeson(pp);}
-template<> inline bool isSMeson(const int& p){ auto value_digits = DecodedPID(p); return isSMeson(value_digits);}
+  template<class T> inline bool isSBaryon(const T& p) { return isSBaryon(p->pdg_id()); }
+  template<> inline bool isSBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBaryon(pp);}
+  template<> inline bool isSBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBaryon(value_digits);}
 
 
-template<class T> inline bool isSBottomHadron(const T& p) { return isSBottomHadron(p->pdg_id()); }
-template<> inline bool isSBottomHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomHadron(pp);}
-template<> inline bool isSBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isSBottomHadron(value_digits);}
-
-template<class T> inline bool isSTopMeson(const T& p) { return isSTopMeson(p->pdg_id()); }
-template<> inline bool isSTopMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopMeson(pp);}
-template<> inline bool isSTopMeson(const int& p){ auto value_digits = DecodedPID(p); return isSTopMeson(value_digits);}
-
-template<class T> inline bool isSBottomMeson(const T& p) { return isSBottomMeson(p->pdg_id()); }
-template<> inline bool isSBottomMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomMeson(pp);}
-template<> inline bool isSBottomMeson(const int& p){ auto value_digits = DecodedPID(p); return isSBottomMeson(value_digits);}
-
-template<class T> inline bool isSTopBaryon(const T& p) { return isSTopBaryon(p->pdg_id()); }
-template<> inline bool isSTopBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopBaryon(pp);}
-template<> inline bool isSTopBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSTopBaryon(value_digits);}
-
-template<class T> inline bool isSBottomBaryon(const T& p) { return isSBottomBaryon(p->pdg_id()); }
-template<> inline bool isSBottomBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomBaryon(pp);}
-template<> inline bool isSBottomBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBottomBaryon(value_digits);}
+  template<class T> inline bool isSMeson(const T& p) { return isSMeson(p->pdg_id()); }
+  template<> inline bool isSMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isMeson(pp);}
+  template<> inline bool isSMeson(const int& p){ auto value_digits = DecodedPID(p); return isSMeson(value_digits);}
 
 
-template<class T> inline bool spin(const T& p) { return spin(p->pdg_id()); }
-template<> inline bool spin(const int& p) { return p%10; }
+  template<class T> inline bool isSBottomHadron(const T& p) { return isSBottomHadron(p->pdg_id()); }
+  template<> inline bool isSBottomHadron(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomHadron(pp);}
+  template<> inline bool isSBottomHadron(const int& p){ auto value_digits = DecodedPID(p); return isSBottomHadron(value_digits);}
 
-inline std::vector<int> containedQuarks(int p) {
-  auto pp = DecodedPID(p);
-  if (isSUSY(pp)) {
-    pp = pp.shift(1);
-    if (pp.ndigits() > 2) pp = pp.shift(1);
+  template<class T> inline bool isSTopMeson(const T& p) { return isSTopMeson(p->pdg_id()); }
+  template<> inline bool isSTopMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopMeson(pp);}
+  template<> inline bool isSTopMeson(const int& p){ auto value_digits = DecodedPID(p); return isSTopMeson(value_digits);}
+
+  template<class T> inline bool isSBottomMeson(const T& p) { return isSBottomMeson(p->pdg_id()); }
+  template<> inline bool isSBottomMeson(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomMeson(pp);}
+  template<> inline bool isSBottomMeson(const int& p){ auto value_digits = DecodedPID(p); return isSBottomMeson(value_digits);}
+
+  template<class T> inline bool isSTopBaryon(const T& p) { return isSTopBaryon(p->pdg_id()); }
+  template<> inline bool isSTopBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isTopBaryon(pp);}
+  template<> inline bool isSTopBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSTopBaryon(value_digits);}
+
+  template<class T> inline bool isSBottomBaryon(const T& p) { return isSBottomBaryon(p->pdg_id()); }
+  template<> inline bool isSBottomBaryon(const DecodedPID& p){ auto pp = p.shift(1); return isSUSY(p) && isBottomBaryon(pp);}
+  template<> inline bool isSBottomBaryon(const int& p){ auto value_digits = DecodedPID(p); return isSBottomBaryon(value_digits);}
+
+
+  template<class T> inline bool spin(const T& p) { return spin(p->pdg_id()); }
+  template<> inline bool spin(const int& p) { return p%10; }
+
+  inline std::vector<int> containedQuarks(int p) {
+    auto pp = DecodedPID(p);
+    if (isSUSY(pp)) {
+      pp = pp.shift(1);
+      if (pp.ndigits() > 2) pp = pp.shift(1);
+    }
+    std::vector<int> quarks;
+    for (int i = 1; i<=6; ++i)
+      if (hasQuark(pp, i)) quarks.push_back(i);
+    return quarks;
   }
-  std::vector<int> quarks;
-  for (int i = 1; i<=6; ++i)
-    if (hasQuark(pp, i)) quarks.push_back(i);
-  return quarks;
-}
 
-}
+} // namespace SUSY
 
 #endif
