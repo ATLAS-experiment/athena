@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -30,7 +30,7 @@ public:
   /** Method creating the transient representation of @c Analysis::PRD_MultiTruthCollection
    *  from its persistent representation @c PRD_MultiTruthCollection_p1
    */
-  PRD_MultiTruthCollectionCnv_p1(): m_pixId{},m_storeGate{},m_isInitialized(0)  {};
+  PRD_MultiTruthCollectionCnv_p1(): m_pixId{}, m_isInitialized(0)  {};
 
   virtual void persToTrans( const Trk::PRD_MultiTruthCollection_p1* persObj, 
                             PRD_MultiTruthCollection* transObj, 
@@ -45,7 +45,6 @@ public:
 private:
 
   const PixelID *m_pixId;
-  StoreGateSvc *m_storeGate;
   bool m_isInitialized;
   StatusCode initialize(MsgStream &log);
 
