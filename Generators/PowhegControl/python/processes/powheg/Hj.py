@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 from ..external import ExternalNNLOReweighter
-from ..powheg_V2 import PowhegV2
+from ..powheg_RES import PowhegRES
 import os
 
 
-class Hj(PowhegV2):
+class Hj(PowhegRES):
     """! Default Powheg configuration for Higgs boson production plus one jet.
 
     Create a configurable object with all applicable Powheg options.
@@ -56,6 +56,7 @@ class Hj(PowhegV2):
         self.add_keyword("factsc2min")
         self.add_keyword("fastbtlbound")
         self.add_keyword("fixedgrid")
+        self.add_keyword("fixedscale",0)
         self.add_keyword("flg_debug")
         self.add_keyword("foldcsi", 5)
         self.add_keyword("foldphi", 2)
@@ -79,6 +80,8 @@ class Hj(PowhegV2):
         self.add_keyword("iupperfsr")
         self.add_keyword("iupperisr")
         self.add_keyword("iymax")
+        self.add_keyword("kappaQ",1)
+        self.add_keyword("largeptscales",1)
         self.add_keyword("lhans1", self.default_PDFs)
         self.add_keyword("lhans2", self.default_PDFs)
         self.add_keyword("lhapdf6maxsets")
@@ -93,8 +96,11 @@ class Hj(PowhegV2):
         self.add_keyword("maxseeds")
         self.add_keyword("minlo_nnll")
         self.add_keyword("minlo", 1)
+        self.add_keyword("minnlo", 0)
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
+        self.add_keyword("modlog_p",6)
+        self.add_keyword("mt-approx",0)
         self.add_keyword("ncall1", 150000)
         self.add_keyword("ncall1rm", 150000)
         self.add_keyword("ncall2", 150000)
@@ -113,17 +119,20 @@ class Hj(PowhegV2):
         self.add_keyword("ptsqmin")
         self.add_keyword("ptsupp")
         self.add_keyword("quarkmasseffects")
+        self.add_keyword("Q0",2)
         self.add_keyword("radregion")
         self.add_keyword("rand1")
         self.add_keyword("rand2")
         self.add_keyword("renscfact", self.default_scales[1])
+        self.add_keyword("run_mode", self.default_scales[1])
         self.add_keyword("runningscales")
         self.add_keyword("rwl_add")
         self.add_keyword("rwl_file")
         self.add_keyword("rwl_format_rwgt")
         self.add_keyword("rwl_group_events")
         self.add_keyword("skipextratests")
-        self.add_keyword("smartsig")
+        self.add_keyword("smartMiNLO",1)
+        self.add_keyword("smartsig")   
         self.add_keyword("softtest")
         self.add_keyword("stage2init")
         self.add_keyword("storeinfo_rwgt")
@@ -136,6 +145,7 @@ class Hj(PowhegV2):
         self.add_keyword("ubsigmadetails")
         self.add_keyword("use-old-grid")
         self.add_keyword("use-old-ubound")
+        self.add_keyword("whichscale",0)
         self.add_keyword("withdamp")
         self.add_keyword("withnegweights")
         self.add_keyword("withsubtr")
