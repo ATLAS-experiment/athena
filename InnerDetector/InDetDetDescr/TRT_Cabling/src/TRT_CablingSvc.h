@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -33,7 +33,7 @@
 #include <stdint.h> 
 
 
-class TRT_CablingSvc : virtual public ITRT_CablingSvc, public AthService
+class TRT_CablingSvc : public extends<AthService, ITRT_CablingSvc>
 {
 
 public:
@@ -44,14 +44,7 @@ public:
     // Destructor	
   virtual ~TRT_CablingSvc();
 
-
   virtual StatusCode initialize();
-
-  virtual StatusCode finalize();
-
-  virtual StatusCode queryInterface(const InterfaceID & riid, 
-				    void** ppvInterface );
-
 
     // Get Identifier for each straw from BS
 //  Identifier getIdentifier(const EventFormat::SubDetector& subdetector,

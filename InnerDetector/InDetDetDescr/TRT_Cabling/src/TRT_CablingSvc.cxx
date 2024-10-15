@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -22,7 +22,7 @@ using eformat::helper::SourceIdentifier;
   // Constructor
 TRT_CablingSvc::TRT_CablingSvc( const std::string& name, 
 			      ISvcLocator * pSvcLocator)
-   : AthService( name, pSvcLocator ),
+   : base_class( name, pSvcLocator ),
      m_manager                    ( nullptr ), 
      m_idHelper                   ( nullptr ),
      m_cabling                    ( nullptr ),
@@ -80,14 +80,9 @@ StatusCode TRT_CablingSvc::initialize( )
   m_cntx = m_idHelper->straw_layer_context();
 
   // Get ToolSvc
-  IToolSvc* toolSvc;
-  sc = service("ToolSvc",toolSvc);
-  if (sc.isFailure()) 
-  {
-    ATH_MSG_ERROR( "Can't get ToolSvc!" );
-    return StatusCode::FAILURE;
-  }
-  
+  SmartIF<IToolSvc> toolSvc{service("ToolSvc")};
+  ATH_CHECK( toolSvc.isValid() );
+
   // Get tool for filling of cabling data
   std::string toolType;
   if (m_manager->getLayout()=="TestBeam")
@@ -155,32 +150,6 @@ StatusCode TRT_CablingSvc::initialize( )
   ATH_MSG_INFO( "TRT_CablingSvc::initializiation finished" );
   
   return sc;
-}
-
-
-StatusCode TRT_CablingSvc::finalize()
-{
-
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode
-TRT_CablingSvc::queryInterface( const InterfaceID & riid, 
-				void** ppvInterface )
-{
-  if ( IIncidentListener::interfaceID().versionMatch(riid) )
-  {
-    *ppvInterface = dynamic_cast<IIncidentListener*>(this);
-  } else if ( ITRT_CablingSvc::interfaceID().versionMatch(riid) ) 
-         {
-	   *ppvInterface = dynamic_cast<ITRT_CablingSvc*>(this);
-	 } else {
-    // Interface is not directly available : try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
 
 
