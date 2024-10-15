@@ -309,7 +309,7 @@ class ThresholdDef:
 
         # jTE
         # additional heavy ion jTE threhsolds
-        for thrV in [3,4,5,10,20,50,100,200,600,1500,4000,6500,8300,9000,10000]:
+        for thrV in [3,4,5,10,20,50,100,200,600,1500,4000,6500,8300,9000,10000,12000]:
             TEThreshold('jTE%i' % thrV, 'jTE').setTE(thrV)
 
         for thrV in [200,]:

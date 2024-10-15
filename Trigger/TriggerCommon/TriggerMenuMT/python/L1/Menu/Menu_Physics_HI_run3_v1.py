@@ -82,6 +82,7 @@ def defineMenu():
         'L1_jTE8300',
         'L1_jTE9000',
         'L1_jTE10000',
+        'L1_jTE12000',
         'L1_VjTE10',
         'L1_VjTE200',
         'L1_VjTE600',
@@ -157,6 +158,7 @@ def defineMenu():
         'L1_VZDC_A_VZDC_C_gTE5_VjTE200','L1_ZDC_XOR_gTE5_VjTE200',
         'L1_1ZDC_NZDC_gTE5_VjTE200','L1_5ZDC_A_5ZDC_C_gTE5_VjTE200',
         'L1_VZDC_A_VZDC_C_gTE5_VjTE200_UNPAIRED_ISO','L1_ZDC_XOR_gTE5_VjTE200_UNPAIRED_ISO',
+        'L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200',
 
         #UPC hmt trk15
         'L1_MBTS_1_VZDC_A_ZDC_C_VjTE200', 'L1_MBTS_1_1ZDC_NZDC_VjTE200',
