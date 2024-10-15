@@ -59,7 +59,7 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
     ok = ok && (sline >> towerKey >> m_nregions);
     ok = ok && (towerKey == "towers");
     if((m_filepath.size()-7)==m_filepath.find("subrmap")){
-        if(m_pmaps.size()!= m_nregions){
+        if(int(m_pmaps.size())!= m_nregions){
             ANA_MSG_FATAL("Error Pmap slice size does not match Rmap: PMAP_SIZE:"<<m_pmaps.size()<<"  RMAP_SIZE:"<<m_nregions);
             throw ("Pmap slice size does not match Rmap:" );
         }
@@ -70,7 +70,7 @@ void FPGATrackSimRegionMap::allocateMap(ifstream & fin)
 
     m_map.resize(m_nregions);
     
-    for (int iRegion=0; iRegion<m_map.size(); iRegion++)
+    for (int iRegion=0; iRegion<int(m_map.size()); iRegion++)
     {
         m_map.at(iRegion).resize(m_pmaps.at(0)->getNLogiLayers());
         for (size_t l = 0; l < m_map.at(iRegion).size(); l++) m_map.at(iRegion).at(l).resize(m_pmaps.at(iRegion)->getNSections(l));

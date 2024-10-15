@@ -34,9 +34,9 @@ StatusCode FPGATrackSimMappingSvc::checkAllocs()
     }
     if (!m_numberOfPmaps)
         ATH_MSG_FATAL("Error with declared number of plane maps: " << m_pmap_path);
-    if (m_numberOfPmaps != m_pmap_vector_1st.size())
+    if (m_numberOfPmaps != int(m_pmap_vector_1st.size()))
         ATH_MSG_FATAL("Error using number of declared plane maps does not equal number of loaded plane maps: " << m_pmap_path<<"=/="<<m_pmap_vector_1st.size());
-    for (int a = 0 ; a < m_pmap_vector_1st.size() ;a++)
+    for (int a = 0 ; a < int(m_pmap_vector_1st.size()) ;a++)
     {
         if(!m_pmap_vector_1st.at(a))
             ATH_MSG_FATAL("Error using 1st stage plane map for slice: " << a <<" of "<< m_pmap_vector_1st.size());
