@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -96,17 +96,7 @@ StatusCode TRT_RegSelCondAlg::execute(const EventContext& ctx)  const
   ATH_MSG_DEBUG( "Retrieved Condition Object with TRT Detector Elements: " << m_trtDetEleContKey.fullKey() );
 
   
-  // Get Tool Service
-  IToolSvc* toolSvc;
-  if (StatusCode::SUCCESS != service("ToolSvc", toolSvc))    {
-    msg(MSG::ERROR) << " Can't get ToolSvc " << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-
-  
-  // Get TRT cabling mapping 
-  
+  // Get TRT cabling mapping
   ServiceHandle<ITRT_CablingSvc>  mapping( "TRT_CablingSvc", name() );
 
   if ( mapping.retrieve().isFailure() ) { 

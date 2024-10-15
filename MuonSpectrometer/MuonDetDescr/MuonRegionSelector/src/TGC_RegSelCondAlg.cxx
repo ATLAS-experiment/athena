@@ -55,14 +55,8 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
 
   /// now get the TGC cabling service ...
 
-  const MuonTGC_CablingSvc*   cabling = nullptr;
-
-  if ( service( "MuonTGC_CablingSvc", cabling ).isFailure() ) { 
-    ATH_MSG_ERROR( "Could not retrieve TGC cabling for " << name() );
-    return nullptr;
-  }
-
-
+  ServiceHandle<MuonTGC_CablingSvc> cabling("MuonTGC_CablingSvc", name());
+  ATH_CHECK( cabling.retrieve(), {} );
 
   const TgcIdHelper*  helper = manager->tgcIdHelper();
  
