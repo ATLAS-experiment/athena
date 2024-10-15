@@ -53,11 +53,27 @@ def TruthHitAssociationCfg(flags):
                                              AssocPull = 1. if cont_name=="xAODsTgcPads" else 3. ))
     return result
 
+def PrdMultiTruthMakerCfg(flags, name="PrdMultiTruthMaker", **kwargs):
+    result = ComponentAccumulator()
+    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+    kwargs.setdefault("PrdContainer", PrimaryMeasContNamesCfg(flags))
+
+    if not flags.Detector.GeometryMDT: kwargs.setdefault("MdtPrdKey", "")
+    if not flags.Detector.GeometryRPC: kwargs.setdefault("RpcPrdKey", "")
+    if not flags.Detector.GeometryTGC: kwargs.setdefault("TgcPrdKey", "")
+
+    if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcPrdKey", "")
+    if not flags.Detector.GeometryMM: kwargs.setdefault("MmPrdKey", "")
+    the_alg = CompFactory.MuonR4.PrdMultiTruthMaker(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 def MuonTruthAlgsCfg(flags):
     result = ComponentAccumulator()
     result.merge(TruthHitAssociationCfg(flags))
     from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
     PrdLinkInputs = [( "xAOD::UncalibratedMeasurementContainer" , 
                      "StoreGateSvc+{cont_name}.simHitLink".format(cont_name = cont_name)) for cont_name in PrimaryMeasContNamesCfg(flags) ]
-    result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs ))
+    result.merge(TruthSegmentMakerCfg(flags, ExtraInputs = PrdLinkInputs))
+    result.merge(PrdMultiTruthMakerCfg(flags))
     return result

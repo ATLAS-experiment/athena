@@ -150,6 +150,18 @@ namespace xAOD{
                                                    });
                     return m_begin != m_end;
                 }
+
+                bool loadView(const IdentifierHash& idHash) {
+                    static_assert(ChamberViewConcepts::hasIdentifyHash<element_type>::value, "Object needs to provide identify()" );
+                    m_begin = std::ranges::find_if(m_container,[this,&idHash](const auto& meas) {
+                                                        return meas->identifierHash() == idHash;
+                                                   });
+                    m_end = std::find_if(m_begin, m_container.end(),[this,&idHash](const auto& meas) {
+                                                        return meas->identifierHash() != idHash;
+                                                   });
+                     return m_begin != m_end;
+                }
+
             private:
                 /** @brief Returns the IdentifierHash from an Identifier */
                 IdentifierHash idHash(const Identifier& id) const {
