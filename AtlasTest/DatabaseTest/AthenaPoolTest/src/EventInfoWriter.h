@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLTEST_EVENTINFOWRITER_H
@@ -74,17 +74,17 @@ private:
     StatusCode fillTagInfo    ();
 
     /// For testing only: add in dummy tags
-    BooleanProperty m_createDummyTags;
+    BooleanProperty m_createDummyTags{this, "CreateDummyTags", false};
 
     /// For testing only: remove input dummy tags
-    BooleanProperty m_removeDummyTags;
+    BooleanProperty m_removeDummyTags{this, "RemoveDummyTags", false};
 
     /// For testing only: add in dummy tags which may override
     /// existing tags
-    BooleanProperty m_createDummyOverrideTags;
+    BooleanProperty m_createDummyOverrideTags{this, "CreateDummyOverrideTags", false};
 
     /// Access to the TagInfoMgr
-    ITagInfoMgr*    m_tagInfoMgr;
+    ServiceHandle<ITagInfoMgr> m_tagInfoMgr{this, "TagInfoMgr", "TagInfoMgr"};
 
     /// SG key for Event Info
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"};

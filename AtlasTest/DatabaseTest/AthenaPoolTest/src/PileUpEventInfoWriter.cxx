@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -8,8 +8,6 @@
  * @brief Test reading of PileUpEventInfo
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
- *
- * $Id: PileUpEventInfoWriter.cxx,v 1.5 2009-03-30 11:18:27 schaffer Exp $
  *
  */
 
@@ -34,13 +32,12 @@ PileUpEventInfoWriter::PileUpEventInfoWriter(const std::string &name,
 // Initialize method:
 StatusCode PileUpEventInfoWriter::initialize()
 {
-    // Set to be listener for end of event
-    IIncidentSvc* incSvc = nullptr;
-    ATH_CHECK( service("IncidentSvc",incSvc) );
-    long int pri=100;
-    incSvc->addListener( this, "EndEvent", pri);
+  // Set to be listener for end of event
+  SmartIF<IIncidentSvc> incSvc{Gaudi::svcLocator()->service("IncidentSvc")};
+  long int pri=100;
+  incSvc->addListener( this, "EndEvent", pri);
 
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 // Execute method:
