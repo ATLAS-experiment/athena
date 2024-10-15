@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ########################################################
 ##  AugmentedStreams & MultipleStreamManager classes  ##
@@ -428,7 +428,7 @@ class AugmentedRootStream( AugmentedStreamBase ):
                 raise AttributeError( "Stream name '%s' can't be used!" % StreamName )
         if not hasattr( topSequence, ParentStreamName + "AANTStream" ):
             try:
-                from AnalysisTools.AnalysisToolsConf import AANTupleStream
+                from AnalysisTools.AthAnalysisToolsConf import AANTupleStream
                 topSequence += AANTupleStream( ParentStreamName + "AANTStream",
                                                ExtraRefNames = ['StreamRDO',
                                                                 'StreamRAW',
@@ -439,7 +439,7 @@ class AugmentedRootStream( AugmentedStreamBase ):
                                                StreamName = ParentStreamName )
                 pass
             except ImportError:
-                print(self.Name,": INFO didn't find AnalysisTools.AnalysisToolsConf in release.")
+                print(self.Name,": INFO didn't find AnalysisTools.AthAnalysisToolsConf in release.")
                 import traceback
                 print(traceback.format_exc())
             pass

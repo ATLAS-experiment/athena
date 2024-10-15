@@ -26,8 +26,6 @@
 class TrigMuonEFTrack;
 class TrigMuonEFCbTrack;
 
-class IAnalysisTools;
-
 // fwd declare muon printing tool
 namespace Rec {
   class IMuonPrintingTool;
