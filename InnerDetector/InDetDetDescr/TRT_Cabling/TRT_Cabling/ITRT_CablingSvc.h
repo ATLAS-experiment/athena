@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -24,11 +24,9 @@ class ITRT_CablingSvc: virtual public IInterface
 {
 
 public:
+   DeclareInterfaceID(ITRT_CablingSvc, 1, 0 );
 
-  virtual ~ITRT_CablingSvc(){}
-
-   static const InterfaceID& interfaceID( ) ;
-
+   virtual ~ITRT_CablingSvc(){}
 
    // Get Identifiers of Collections for the given ROBID
    //   virtual const std::vector<IdentifierHash>& getCollID(uint32_t rob_id) = 0 ;
@@ -61,12 +59,5 @@ public:
    //   virtual void set_parameters() = 0;
 
 };
-
-inline const InterfaceID& ITRT_CablingSvc::interfaceID( )
-{
-   static const InterfaceID IID ( "ITRT_CablingSvc", 1, 0 );
-
-   return IID;
-}
 
 #endif     // ITRT_CABLINGSVC_H
