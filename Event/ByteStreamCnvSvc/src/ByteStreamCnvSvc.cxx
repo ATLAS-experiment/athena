@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamCnvSvc/ByteStreamCnvSvc.h"
@@ -62,29 +62,21 @@ StatusCode ByteStreamCnvSvc::initialize() {
          ioSvcNames.push_back(m_ioSvcName);
       }
    }
-   if (ioSvcNames.size() != 0) {
+   if (!ioSvcNames.empty()) {
       // Check ByteStreamCnvSvc
-      for (std::vector<std::string>::iterator itSvc = ioSvcNames.begin(), itSvcE = ioSvcNames.end();
-	      itSvc != itSvcE; ++itSvc) {
-         ATH_MSG_DEBUG("get " << *itSvc);
+      for (const std::string& svcName : ioSvcNames) {
+	 ATH_MSG_DEBUG("get " << svcName);
          // get service
-         IService* svc;
-         if (!service(*itSvc, svc).isSuccess()) {
-            ATH_MSG_FATAL("Cannot get ByteStreamOutputSvc");
-            return(StatusCode::FAILURE);
-         }
-         ByteStreamOutputSvc* ioSvc = dynamic_cast<ByteStreamOutputSvc*>(svc);
-         if (ioSvc == 0) {
+	 SmartIF<IService> svc = Gaudi::svcLocator()->service(svcName);
+         ByteStreamOutputSvc* ioSvc = dynamic_cast<ByteStreamOutputSvc*>(svc.get());
+         if (!ioSvc) {
             ATH_MSG_FATAL("Cannot cast to  ByteStreamOutputSvc");
             return(StatusCode::FAILURE);
          }
          // get stream name
          std::string bsOutputStreamName;
          SimpleProperty<std::string> propBSO("BSOutputStreamName", bsOutputStreamName);
-         if (!ioSvc->getProperty(&propBSO).isSuccess()) {
-            ATH_MSG_FATAL("Cannot get BSOutputStreamName from " << *itSvc);
-            return(StatusCode::FAILURE);
-         }
+	 ATH_CHECK(ioSvc->getProperty(&propBSO));
          bsOutputStreamName = propBSO.value();
          // append
          m_ioSvcMap[bsOutputStreamName] = ioSvc;
