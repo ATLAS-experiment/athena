@@ -3,10 +3,14 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonDetectorBuilderToolCfg(flags, name="MuonDetectorBuilderTool",
-                               DumpVisualization = False,
+                               dumpDetector = False,
+                               dumpPassive = False,
+                               dumpDetectorVolumes = False,
                                **kwargs):
     result = ComponentAccumulator()
-    kwargs['DumpVisualization'] = DumpVisualization
+    kwargs['dumpDetector'] = dumpDetector
+    kwargs['dumpPassive'] = dumpPassive
+    kwargs['dumpDetectorVolumes'] = dumpDetectorVolumes
     theTool = CompFactory.ActsTrk.MuonDetectorBuilderTool(name, **kwargs)
     result.addPublicTool(theTool, primary = True)
     return result

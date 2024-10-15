@@ -6,11 +6,12 @@
 
 # Declare the package name:
 atlas_subdir( ActsMuonDetector )
+find_package(Acts CONFIG COMPONENTS PluginGeoModel)
 
 atlas_add_component( ActsMuonDetector
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel GeoModelUtilities ActsGeometryLib MuonIdHelpersLib
-                                    GaudiKernel MuonReadoutGeometryR4 AthenaPoolUtilities)
+                                    GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities ActsPluginGeoModel)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
