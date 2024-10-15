@@ -1,15 +1,19 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBINFO_H
 #define TBREC_CBNTAA_TBINFO_H
 
 #include "CBNT_TBRecBase.h"
+
+#include "CaloDetDescr/ICaloCoordinateTool.h"
+#include "TBCondRunPar/TBCondRunParTool.h"
+
 #include <vector>
 
-class TBCaloCoordinate;
 class TBCondRunParTool;
+
 class CBNTAA_TBInfo : public CBNT_TBRecBase {
 public:
 	CBNTAA_TBInfo(const std::string &name, ISvcLocator *pSvcLocator);
@@ -29,8 +33,8 @@ private:
 	float SyncLossErr(float loss);
 	
 
-	TBCaloCoordinate* m_coord;
-	TBCondRunParTool* m_runpar;
+    ToolHandle<ICaloCoordinateTool> m_coord{this, "CaloCoordinateTool", "TBCaloCoordinate"};
+    ToolHandle<TBCondRunParTool> m_runpar{this, "CondRunParTool", "TBCondRunParTool"};
 	bool m_DBRead;
 	int m_beamener;
 	int m_beamtype;

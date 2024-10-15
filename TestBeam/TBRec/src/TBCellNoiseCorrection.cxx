@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCellNoiseCorrection.h"
@@ -109,16 +109,11 @@ StatusCode TBCellNoiseCorrection::initialize()
   ATH_MSG_DEBUG(" Got NoiseTree with "<<m_entries<<" entries" );
 
    /// Incident Service
-  IIncidentSvc* pIncSvc(0);
+  ServiceHandle<IIncidentSvc> pIncSvc("IncidentSvc", name());
+  ATH_CHECK( pIncSvc.retrieve() );
 
-  // set up the incident service:
-  if (!(service("IncidentSvc", pIncSvc, true)).isSuccess()) {
-    ATH_MSG_ERROR( "Could not locate IncidentSvc "  );
-    return StatusCode::FAILURE;
-  }
-  
   //start listening to "BeginEvent"
-  static const int PRIORITY = 100;
+  const int PRIORITY = 100;
   pIncSvc->addListener(this, "BeginEvent", PRIORITY);
 
   ATH_MSG_DEBUG( " TBCellNoiseCorrection initialization finished"  );

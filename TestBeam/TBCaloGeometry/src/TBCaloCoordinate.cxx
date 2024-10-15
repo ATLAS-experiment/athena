@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -39,15 +39,10 @@ using Amg::Translation3D;
 using Amg::RotationMatrix3D; 
 
 
-static const InterfaceID IID_TBCaloCoordinate("TBCaloCoordinate", 1, 0);
-
-const InterfaceID& TBCaloCoordinate::interfaceID( ) 
-{ return IID_TBCaloCoordinate; }
-
-TBCaloCoordinate::TBCaloCoordinate(const std::string& type, 
+TBCaloCoordinate::TBCaloCoordinate(const std::string& type,
 				   const std::string& name, 
 				   const IInterface* parent) :
-  AthAlgTool(type, name, parent),
+  base_class(type, name, parent),
   m_table_axis_data(0.), m_table_axis_MC(0.),
   m_table_proj_data(0.), m_table_proj_MC(0.),
   m_table_eta(0.), 
@@ -58,7 +53,6 @@ TBCaloCoordinate::TBCaloCoordinate(const std::string& type,
   m_table_calc_theta(0.),  m_table_calc_x(0.), 
   m_DBRead(-1), m_PoolRead(-1), m_runNumber(0), m_firstevt(0) 
 {
-  declareInterface<TBCaloCoordinate>( this );
 
   // by default, assume Atlas :  m_DBRead=-1, m_PoolRead=-1
   // other clients need to include the jobOpt fragment and set
@@ -298,15 +292,13 @@ TBCaloCoordinate:: read_data_position()
       return false;      
     }
     
-    IToolSvc* p_toolSvc = 0;
-    StatusCode sc = service("ToolSvc", p_toolSvc);
-    if (sc.isFailure()) {
+    if (!toolSvc()) {
       ATH_MSG_ERROR ( "Cannot find ToolSvc ??? " );
       m_DBRead = -1;
       return false;
     }
     else {
-      sc = p_toolSvc->retrieveTool("TBCaloPosTool", m_postool);
+      StatusCode sc = toolSvc()->retrieveTool("TBCaloPosTool", m_postool);
       if(sc.isFailure()) {
 	ATH_MSG_ERROR 
           ( "Cannot get Calo table position from DB : keep default" );

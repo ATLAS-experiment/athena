@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBInfo.h"
@@ -32,8 +32,6 @@ CBNT_TBRecBase(name, pSvcLocator)
   m_trim_equip = NULL;
   m_coll_file = NULL;
   m_coll_equip = NULL;  
-  m_coord = 0;
-  m_runpar = 0;
   m_B8_Bdl = 0;
   m_energy = 0;
   m_errAbsEnergy = 0;
@@ -140,40 +138,12 @@ StatusCode CBNTAA_TBInfo::CBNT_execute(){
     if((event > 0) && (m_prevrunNum==-1))
       m_prevrunNum=run;//initializing the prev run
 
-    IToolSvc* p_toolSvc = 0;
-    StatusCode sc = service("ToolSvc", p_toolSvc);
-    if (sc.isFailure())
-      {
-	ATH_MSG_ERROR( "Cannot find ToolSvc "  );
-	return(StatusCode::FAILURE);
-      }
-    
     // This tool handles the conversion between local and ctb coordinates
-    sc = p_toolSvc->retrieveTool("TBCaloCoordinate",m_coord);
-    
-    if(sc.isFailure() || !m_coord)
-      {
-	ATH_MSG_ERROR( "Cannot get TBCaloCoordinate tool" );
-	return(StatusCode::FAILURE);
-      }
-    else {
-      ATH_MSG_DEBUG( "Found TBCaloCoordinate tool" );
-    }
-    
+    ATH_CHECK( m_coord.retrieve() );
     m_runEta_nt = m_coord->beam_local_eta();
     
-    sc = p_toolSvc->retrieveTool("TBCondRunParTool",m_runpar);
+    ATH_CHECK( m_runpar.retrieve() );
     
-    if(sc.isFailure() || !m_runpar)
-      {
-	ATH_MSG_ERROR( "Cannot get TBCondParTool" );
-	return(StatusCode::FAILURE);
-      }
-    else 
-      {
-	ATH_MSG_DEBUG( "Found TBCondRunParTool" );
-      }
-
     if ( m_computeBeamEnergy ) {
 
     //below the calculation of all energies and their errors...

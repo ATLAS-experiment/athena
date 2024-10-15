@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -64,7 +64,7 @@ read_table_position() before hand.
 
  **/
 
-class TBCaloCoordinate : public AthAlgTool, virtual public ICaloCoordinateTool
+class TBCaloCoordinate : public extends<AthAlgTool, ICaloCoordinateTool>
 {
 public:
   
@@ -75,7 +75,6 @@ public:
 		  const IInterface* parent); 
 
   ~TBCaloCoordinate();
-  static const InterfaceID& interfaceID( ) ; 
   StatusCode initialize();
   StatusCode finalize();
 

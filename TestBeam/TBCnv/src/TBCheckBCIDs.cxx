@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,8 +17,7 @@
 TBCheckBCIDs::TBCheckBCIDs(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator),
     m_count(0),
-    //m_ByteStreamEventAccess(0),
-    m_rdpSvc(0),
+    m_rdpSvc("ROBDataProviderSvc", name),
     m_ntuplePtr(0)
 {
 }
@@ -28,21 +27,11 @@ TBCheckBCIDs::~TBCheckBCIDs() {}
 StatusCode TBCheckBCIDs::initialize()
 {
   ATH_MSG_DEBUG( " initialize "  );
-  IService* svc;
-  //Get ByteStreamInputSvc (only necessary for reading of digits, not for writing and for channels)
-  
-  if(StatusCode::SUCCESS != serviceLocator()->getService("ROBDataProviderSvc",svc)){
-     ATH_MSG_WARNING( " Can't get ByteStreamInputSvc interface."  );
-     return StatusCode::FAILURE;
-  }
-  m_rdpSvc=dynamic_cast<IROBDataProviderSvc*>(svc);
-  if(m_rdpSvc == 0 ) {
-     ATH_MSG_ERROR( "  LArDigitContByteStreamCnv: Can't cast to  ByteStreamInputSvc "  );
-    return StatusCode::FAILURE;
-  }
-  //Book Ntuple
 
-  
+  //Get ByteStreamInputSvc (only necessary for reading of digits, not for writing and for channels)
+  ATH_CHECK( m_rdpSvc.retrieve() );
+
+  //Book Ntuple
   NTupleFilePtr file1(ntupleSvc(),"/NTUPLES/FILE1");
   if (!file1) {
     ATH_MSG_ERROR( "Booking of NTuple failed"  );

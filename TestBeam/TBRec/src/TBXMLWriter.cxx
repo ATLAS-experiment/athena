@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -39,34 +39,17 @@ TBXMLWriter::~TBXMLWriter()
 
 StatusCode TBXMLWriter::initialize()
 {
-  //////////////
-  // Services //
-  //////////////
-
-  // tool service
-  IToolSvc* toolSvcPtr = 0;
-  ATH_CHECK( service("ToolSvc",toolSvcPtr) );
-
-  /////////////////////////
-  // Current Job Options //
-  /////////////////////////
-
-  /////////////////////
-  // Algorithm Tools //
-  /////////////////////
-
   // loop all writers
-
   for (const std::string& toolName : m_writerToolNames)
     {
       IAlgTool* algToolPtr;
       Gaudi::Utils::TypeNameString writerAlgoTool(toolName);
 
       // pick up tool
-      StatusCode checkOut = toolSvcPtr->retrieveTool(writerAlgoTool.type(),
-                                                     writerAlgoTool.name(),
-                                                     algToolPtr, 
-                                                     this);
+      StatusCode checkOut = toolSvc()->retrieveTool(writerAlgoTool.type(),
+                                                    writerAlgoTool.name(),
+                                                    algToolPtr,
+                                                    this);
       // not found
       if ( checkOut.isFailure() )
 	{

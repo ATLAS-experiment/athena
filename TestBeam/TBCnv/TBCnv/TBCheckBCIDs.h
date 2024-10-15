@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,8 +36,7 @@ class TBCheckBCIDs : public AthAlgorithm
 
  private:
   int m_count;
-  //ByteStreamCnvSvc* m_ByteStreamEventAccess;
-  IROBDataProviderSvc *m_rdpSvc;
+  ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
 
   template <class T>
     inline bool check_valid (const T* frag, MsgStream& log);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/TBByteStreamCnvTool.h"
@@ -39,7 +39,10 @@ const InterfaceID& TBByteStreamCnvTool::interfaceID( )
  
 TBByteStreamCnvTool::TBByteStreamCnvTool
 ( const std::string& type, const std::string& name,const IInterface* parent )
-  :  AthAlgTool(type,name,parent), m_lastEventID(0, UINT_MAX), m_subdet_id(eformat::TDAQ_BEAM_CRATE),
+  :  AthAlgTool(type,name,parent),
+     m_ByteStreamEventAccess("ByteStreamCnvSvc", name),
+     m_rdpSvc("ROBDataProviderSvc", name),
+     m_lastEventID(0, UINT_MAX), m_subdet_id(eformat::TDAQ_BEAM_CRATE),
      m_theRodBlock(0), m_theROB(0)
 { 
   declareInterface< TBByteStreamCnvTool  >( this );
@@ -72,41 +75,9 @@ StatusCode TBByteStreamCnvTool::initialize()
    logstr << MSG::DEBUG << " Found the LArOnlineID helper. " << endmsg;
  }
 
- IToolSvc* toolSvc;
- sc=service( "ToolSvc",toolSvc  );
- if (sc.isFailure()) {
-   logstr << MSG::ERROR << "Unable to retrieve ToolSvc" << endmsg;
-   return StatusCode::FAILURE;
- }
- 
- IService* svc;
- sc= service("ByteStreamCnvSvc",svc);
- if (sc!=StatusCode::SUCCESS)
-   {logstr << MSG::ERROR << " Can't get ByteStreamEventAccess interface " << endmsg;
-    return StatusCode::FAILURE;
-   }
- 
-  m_ByteStreamEventAccess=dynamic_cast<ByteStreamCnvSvc*>(svc);
-  if (m_ByteStreamEventAccess==NULL)
-    {
-      logstr <<MSG::ERROR<< " Can't cast to  ByteStreamCnvSvc " <<endmsg; 
-      return StatusCode::FAILURE ;
-    }
- 
-  sc=service("ROBDataProviderSvc",svc);
-  if (sc!=StatusCode::SUCCESS)
-   {logstr << MSG::WARNING << " Can't get ROBDataProviderSvc. Reading of ByteStream Data not possible " << endmsg;
-     m_rdpSvc=0;
-   }
-  else
-    {m_rdpSvc=dynamic_cast<IROBDataProviderSvc*>(svc);
-     if(m_rdpSvc == 0 )
-       {logstr <<MSG::ERROR<< "Can't cast to ROBDataProviderSvc " <<endmsg; 
-        return StatusCode::FAILURE;
-       }
-    }
+  ATH_CHECK( m_ByteStreamEventAccess.retrieve() );
+  ATH_CHECK( m_rdpSvc.retrieve() );
 
-  
   std::vector<std::string>::const_iterator it   = m_keys.begin();
   std::vector<std::string>::const_iterator it_e = m_keys.end();
   std::vector<std::string> keys;
