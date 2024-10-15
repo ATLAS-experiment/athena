@@ -543,29 +543,29 @@ for(int i=0; i<nVertices; i++)
 
 
 
-	ISvcLocator* svcLocator = Gaudi::svcLocator();       
-	// Access the GeoModelSvc:     
-        IGeoModelSvc *geoModel=0;
-	if (svcLocator->service ("GeoModelSvc",geoModel) !=StatusCode::SUCCESS) {
-	  G4Exception(
-		      "Geo2G4SolidFactory", "AccessGeoModel", FatalException,
-		      "Build cannot access GeoModelSvc");
-	} 
-        IGeoDbTagSvc *geoDbTagSvc(nullptr);
-        if ( svcLocator->service ("GeoDbTagSvc",geoDbTagSvc)!=StatusCode::SUCCESS ) {
-	  G4Exception(
-		      "Geo2G4SolidFactory", "AccessDbTagSvc", FatalException,
-		      "Build cannot access DbTagSvc");
-	} 
-	// Access the geometry database:                                                        
-        IRDBAccessSvc *pAccessSvc=0;
-	if ( svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc)!=StatusCode::SUCCESS) {
-	  G4Exception(
-		      "Geo2G4SolidFactory", "AccessAccessSvc", FatalException,
-		      "Build cannot access AccessSvc");
-	} 
+        ISvcLocator* svcLocator = Gaudi::svcLocator();
+        // Access the GeoModelSvc:
+        SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+        if ( !geoModel ) {
+          G4Exception(
+                      "Geo2G4SolidFactory", "AccessGeoModel", FatalException,
+                      "Build cannot access GeoModelSvc");
+        }
+        SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service ("GeoDbTagSvc")};
+        if ( !geoDbTagSvc ) {
+          G4Exception(
+                      "Geo2G4SolidFactory", "AccessDbTagSvc", FatalException,
+                      "Build cannot access DbTagSvc");
+        }
+        // Access the geometry database:
+        SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+        if ( !pAccessSvc ) {
+          G4Exception(
+                      "Geo2G4SolidFactory", "AccessAccessSvc", FatalException,
+                      "Build cannot access AccessSvc");
+        }
         DecodeVersionKey larVersionKey(geoModel, "LAr");
-	EMECData emecData=toEMECData(pAccessSvc,larVersionKey);
+        EMECData emecData=toEMECData(pAccessSvc,larVersionKey);
 
 
  
