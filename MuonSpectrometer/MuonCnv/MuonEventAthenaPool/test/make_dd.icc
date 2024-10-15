@@ -22,9 +22,8 @@
 
 void make_dd (IdDictParser& parser)
 {
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = 0;
-  assert ( svcLoc->service("DetectorStore", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{Gaudi::svcLocator()->service("DetectorStore")};
+  assert ( sg.isValid() );
 
   parser.register_external_entity ("InnerDetector",
                                    "IdDictInnerDetector.xml");
@@ -45,7 +44,7 @@ void make_dd (IdDictParser& parser)
 
 
 class TestRCUSvc
-  : public Athena::IRCUSvc
+  : public implements<Athena::IRCUSvc>
 {
 public:
   virtual StatusCode remove (Athena::IRCUObject* obj) override
@@ -57,10 +56,6 @@ public:
   { return 1; }
   virtual void add (Athena::IRCUObject* /*obj*/) override
   { }
-
-  virtual unsigned long addRef() override { std::abort(); }
-  virtual unsigned long release() override { std::abort(); }
-  virtual StatusCode queryInterface(const InterfaceID &/*ti*/, void** /*pp*/) override { std::abort(); }
 
   Athena::IRCUObject* m_removed = nullptr;
 };
