@@ -67,6 +67,8 @@ namespace CP
       }
     }
 
+    // input streams supported by the algorithm
+
     // Prepare for systematics
     ANA_CHECK (m_truthWeightTool.retrieve());
 
@@ -103,7 +105,8 @@ namespace CP
     {
       ANA_MSG_DEBUG ("Complete cbk name: " << cbk->name() << " - stream: " << cbk->inputStream());
 
-      if (cbk->cycle() > maxCycle && cbk->name() == "AllExecutedEvents" && cbk->inputStream() == "StreamAOD")
+      if (cbk->cycle() > maxCycle && cbk->name() == "AllExecutedEvents" 
+      && std::find(m_allowed_streams.begin(), m_allowed_streams.end(), cbk->inputStream()) != m_allowed_streams.end())
       {
         allEvents = cbk;
         maxCycle = cbk->cycle();
@@ -119,7 +122,8 @@ namespace CP
     size_t counter{};
     for (const xAOD::CutBookkeeper *cbk : *completeCBC)
     {
-      if (cbk->cycle() == maxCycle && cbk->name().find("AllExecutedEvents") == 0 && cbk->inputStream() == "StreamAOD")
+      if (cbk->cycle() == maxCycle && cbk->name().find("AllExecutedEvents") == 0 
+      && std::find(m_allowed_streams.begin(), m_allowed_streams.end(), cbk->inputStream()) != m_allowed_streams.end())
       {
         static const std::regex re ("AllExecutedEvents.*_([0-9]+)");
         // Get the CBK index
@@ -149,7 +153,8 @@ namespace CP
       ANA_CHECK (inputMetaStore()->retrieve(completeCBC, cbkName));
       for (const xAOD::CutBookkeeper *cbk : *completeCBC)
       {
-        if (cbk->cycle() == maxCycle && cbk->name().find("AllExecutedEvents") == 0 && cbk->inputStream() == "StreamAOD")
+        if (cbk->cycle() == maxCycle && cbk->name().find("AllExecutedEvents") == 0 
+        && std::find(m_allowed_streams.begin(), m_allowed_streams.end(), cbk->inputStream()) != m_allowed_streams.end())
         {
           processCutBookkeeper(cbk, index);
           counter++;
