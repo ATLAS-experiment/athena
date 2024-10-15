@@ -1,0 +1,40 @@
+RegSelCondAlg_MDT                                            0    INFO MuonRegSelCondAlg::initialize() 'ConditionStore+RegSelLUTCondData_MDT'
+RegSelCondAlg_RPC                                            0    INFO MuonRegSelCondAlg::initialize() 'ConditionStore+RegSelLUTCondData_RPC'
+RegSelCondAlg_TGC                                            0    INFO MuonRegSelCondAlg::initialize() 'ConditionStore+RegSelLUTCondData_TGC'
+RegSelCondAlg_MM                                             0    INFO MuonRegSelCondAlg::initialize() 'ConditionStore+RegSelLUTCondData_MM'
+RegSelCondAlg_sTGC                                           0    INFO MuonRegSelCondAlg::initialize() 'ConditionStore+RegSelLUTCondData_sTGC'
+RegSelCondAlg_sTGC                                     0     0    INFO RegSelCondAlg LUT recorded: 'ConditionStore+RegSelLUTCondData_sTGC'
+RegSelCondAlg_MM                                       0     0    INFO RegSelCondAlg LUT recorded: 'ConditionStore+RegSelLUTCondData_MM'
+RegSelCondAlg_TGC                                      0     0    INFO RegSelCondAlg LUT recorded: 'ConditionStore+RegSelLUTCondData_TGC'
+RegSelCondAlg_RPC                                      0     0    INFO RegSelCondAlg LUT recorded: 'ConditionStore+RegSelLUTCondData_RPC'
+RegSelCondAlg_MDT                                      0     0    INFO RegSelCondAlg LUT recorded: 'ConditionStore+RegSelLUTCondData_MDT'
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 1098 hash IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 264 ROB IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 12 hash IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 2 ROB IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 14 hash IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 7 ROB IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 600 hash IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 32 ROB IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 8 hash IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 2 ROB IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 0 hash IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 0 ROB IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 1530 hash IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 24 ROB IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 hash IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 ROB IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 8 hash IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 5 ROB IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 192 hash IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 96 ROB IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 hash IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 ROB IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 7 hash IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 21 ROB IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 384 hash IDs
+RegSelToolTester                                       0     0    INFO FullScan RoI  z: 0 (-225 - 225) eta: 0 (-5 - 5) phi: 0 (-3.14159 - 3.14159) - fullscan mapped to 128 ROB IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 hash IDs
+RegSelToolTester                                       0     0    INFO Central RoI  z: 0 (-225 - 225) eta: -0.2 (-0.3 - -0.1) phi: 0.65 (0.5 - 0.8) mapped to 0 ROB IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 7 hash IDs
+RegSelToolTester                                       0     0    INFO Forward RoI  z: 100 (50 - 200) eta: 3.5 (2.5 - 5) phi: 0 (-1 - 1) mapped to 28 ROB IDs
