@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,40 +7,39 @@
  -----------------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: DetDescrConverter.h,v 1.6 2008-12-14 02:24:44 ssnyder Exp $
-//<version>	$Name: not supported by cvs2svn $
-
 #ifndef DETDESCRCNVSVC_DETDESCRCONVERTER_H
 #define DETDESCRCNVSVC_DETDESCRCONVERTER_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "GaudiKernel/Converter.h"
+#include "GaudiKernel/ServiceHandle.h"
 
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
+#include "AthenaBaseComps/AthMessaging.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "StoreGate/StoreGateSvc.h"
 
 class DetDescrCnvSvc;
 class DetDescrAddress;
 class DataObject;
 
-// Abstract factory to create the converter
-template <class TYPE>
-class CnvFactory;
 
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
-
-class DetDescrConverter : public Converter {
+class DetDescrConverter : public Converter, public AthMessaging {
    public:
     virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj) = 0;
     virtual StatusCode fillObjRefs(IOpaqueAddress* pAddr, DataObject* pObj);
     virtual StatusCode createRep(DataObject* pObj, IOpaqueAddress*& pAddr);
     virtual StatusCode fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj);
 
+    /// Handle to DetectorStore
+    const ServiceHandle<StoreGateSvc>& detStore() const { return m_detStore; }
+
     /// Storage type for all DetDescrConverters
     static long storageType();
 
    protected:
-    DetDescrConverter(const CLID& myCLID, ISvcLocator* svcloc);
+    DetDescrConverter(const CLID& myCLID, ISvcLocator* svcloc, const char* name = nullptr);
+
+   private:
+    ServiceHandle<StoreGateSvc> m_detStore;
 };
 
 #endif  // DETDESCRCNVSVC_DETDESCRCONVERTER_H
