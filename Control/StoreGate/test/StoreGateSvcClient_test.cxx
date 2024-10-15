@@ -20,7 +20,6 @@
 #include "StoreGate/SGtests.h"
 #include "AthenaKernel/ILockable.h"
 
-#ifndef NOGAUDI
 #include "AthenaKernel/BaseInfo.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/ConstDataVector.h"
@@ -31,16 +30,10 @@
 using namespace Athena_test;
 using namespace std;
 
-namespace Athena_test {
-} //end namespace
-//-----------------------------------
-
 ////////////////////////////////////////////////////////////////////////////
 // Test DataVector conversions.
 // (This can't go in StoreGate since that doesn't have a DataModel dependency.
 //
-
-
 
 namespace Athena_test {
 
@@ -278,7 +271,7 @@ void test_lock (StoreGateSvc& sg)
 
 int main ATLAS_NOT_THREAD_SAFE () {
   ISvcLocator* pSvcLoc;
-  if (!initGaudi("StoreGateSvcClient_test.txt", pSvcLoc)) {
+  if (!initGaudi("StoreGate/StoreGate_jobOptions.txt", pSvcLoc)) {
     cerr << "This test can not be run" << endl;
     return 0;
   }  
@@ -343,4 +336,3 @@ int main ATLAS_NOT_THREAD_SAFE () {
   cout << "*** StoreGateSvcClient_test OK ***" <<endl;
   return 0;
 }
-#endif /*NOGAUDI*/
