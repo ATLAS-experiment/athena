@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -132,13 +132,7 @@ std::unique_ptr<RegSelectorHashMap> RegSelCondAlg_LAr::createTable (const LArRoI
   /// get all the tools, managers and helpers locally - done't need to create 
   /// class variables for any of these 
 
-  IToolSvc* toolSvc = nullptr;
-  if ( service( "ToolSvc", toolSvc).isFailure() ) { 
-    ATH_MSG_ERROR( "Failed to retrieve ToolSvc ");
-    return lut;
-  }
-
-  const CaloTTDescrManager* manager = nullptr; 
+  const CaloTTDescrManager* manager = nullptr;
   const CaloLVL1_ID*        helper = nullptr;
 
   if ( detStore()->retrieve(manager).isFailure() ) {

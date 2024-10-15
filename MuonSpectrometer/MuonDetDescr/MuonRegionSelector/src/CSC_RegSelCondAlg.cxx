@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -55,13 +55,8 @@ std::unique_ptr<RegSelSiLUT> CSC_RegSelCondAlg::createTable( const EventContext&
 
   /// now get the CSC cabling service ...
 
-  const CSCcablingSvc*   cabling = nullptr;
-
-  if ( service( "CSCcablingSvc", cabling ).isFailure() ) {  
-    ATH_MSG_ERROR( "Could not retrieve CSC cabling for " << name() );
-    return {nullptr};
-  }
-
+  ServiceHandle<CSCcablingSvc> cabling("CSCcablingSvc", name());
+  ATH_CHECK( cabling.retrieve(), {} );
 
   const CscIdHelper*  helper = manager->cscIdHelper();
   
