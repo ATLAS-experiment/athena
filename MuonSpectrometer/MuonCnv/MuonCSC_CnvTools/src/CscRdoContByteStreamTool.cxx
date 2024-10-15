@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscRdoContByteStreamTool.h"
@@ -24,13 +24,13 @@ StatusCode Muon::CscRdoContByteStreamTool::initialize() {
     ATH_MSG_DEBUG("Muon::CscRdoContByteStreamTool::initialize()");
 
     // get the cabling service
-    ATH_CHECK(serviceLocator()->service("CSCcablingSvc", m_cabling));
+    ATH_CHECK(m_cabling.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
 
     ATH_CHECK(m_byteStreamCnvSvc.retrieve());
 
     // create CSC RDO ID to source ID mapper
-    m_hid2re.set(m_cabling, &m_idHelperSvc->cscIdHelper());
+    m_hid2re.set(m_cabling.get(), &m_idHelperSvc->cscIdHelper());
     if (m_isCosmic) {
         m_hid2re.set_isCosmic();
         if (m_isOldCosmic) m_hid2re.set_isOldCosmic();
@@ -44,7 +44,7 @@ StatusCode Muon::CscRdoContByteStreamTool::convert(const CscRawDataContainer* co
     FullEventAssembler<CSC_Hid2RESrcID>* fea = nullptr;
     ATH_CHECK(m_byteStreamCnvSvc->getFullEventAssembler(fea, "CscRdoContByteStream"));
 
-    fea->idMap().set(m_cabling, &m_idHelperSvc->cscIdHelper());
+    fea->idMap().set(m_cabling.get(), &m_idHelperSvc->cscIdHelper());
     if (m_cabling->nROD() == 16)
         fea->setRodMinorVersion(0x400);
     else
