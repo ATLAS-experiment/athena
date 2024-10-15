@@ -66,7 +66,6 @@ StatusCode DataHeaderCnv::initialize()
          }
       }
    }
-   ATH_MSG_DEBUG("MN: OneDHForm val=" << m_oneDHForm);
    ATH_MSG_VERBOSE("Using DHForm cache size: " << m_inDHFMapMaxsize);
    if( doFilterDHAliases ) {
       ATH_MSG_VERBOSE("Will filter SG Aux aliases in DataHeader");
@@ -317,14 +316,6 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
       ATH_MSG_FATAL("Failed to convert DataHeader to persistent type: " << e.what());
       return(StatusCode::FAILURE);
    }
-   // Set the reference to the DHForm
-   if( m_oneDHForm ) {
-      // use the DHForm placement as a ref, the DHForm will be written out at the end only
-      persObj->setDhFormToken( form_placement_str );
-   } else {
-      // actuall Ref to the DHForm - but it may be updated later if a new form needs to be written
-      persObj->setDhFormToken( dhForm->getToken() );
-   }
    // Queue the DH for write
    Token* dh_token = m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc);
    if (dh_token == nullptr) {
@@ -336,8 +327,8 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
    m_tpOutConverter.insertDHRef(persObj, obj->getProcessTag(), dh_token->toString(), *dhForm);
 
    if( !m_oneDHForm  ) {
-      // Write DHForm if in legacy mode when it is modified (or new)
       if( dhForm->isModified() ) {
+         // Write DHForm if in legacy mode in case it was modified (or new)
          dhForm->setVersion( DataHeaderForm_p6::DHverFormRef );
          static const RootType dhFormType(typeid(*dhForm));
          Token* dhf_token = m_athenaPoolCnvSvc->registerForWrite(&dhf_placement, dhForm.get(), dhFormType);
@@ -351,12 +342,28 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
             ATH_MSG_DEBUG("Technology does not support setting DHF token for: " << dh_token->toString());
             dhForm->setToken("");
          }
-         dhf_token->release(); dhf_token = nullptr;
-         // Update DH with the new Form Ref
-         persObj->setDhFormToken( dhForm->getToken() );
-         dhForm->clearModified();
          ATH_MSG_DEBUG("wrote new DHForm with " << dhForm->sizeObj() << " SG object data");
+         dhf_token->release(); dhf_token = nullptr;
+         dhForm->clearModified();
       }
+      // update the Ref to the DHForm 
+      persObj->setDhFormToken( dhForm->getToken() );
+   }
+   else {
+      // use the DHForm placement as a Ref, as the DHForm will be written out at the end only
+      // but add DB ID to the placement str in case the filename is not unique between jobs
+      if( dhForm->getToken().empty() ) {
+         form_placement_str += std::format("[DB={}]", dh_token->dbID().toString());
+         dhForm->setToken( form_placement_str );
+      } else {
+         form_placement_str = dhForm->getToken();
+      }
+      // remove the [FILE= part as the DBID will be enough for reading back
+      auto b = form_placement_str.find("[FILE=");
+      auto e = form_placement_str.find("]", b);
+      form_placement_str.erase(b, e-b+1);
+      // store the modified DHForm placement in place of the Ref in the DH
+      persObj->setDhFormToken( form_placement_str );
    }
 
    const coral::AttributeList* list = obj->getAttributeList();
@@ -450,11 +457,12 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
          // Some technologies can't set DHF token, use DH token with new CLID.
          m_i_poolToken->setData(&formToken);
          formToken.setClassID( Guid("7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD") );
-      } else if( dbpos != std::string::npos ) {
-         // This is a regular Token string (contains "[DB=]" fragment)
+      } else if( dhFormToken.find("[OID=") != std::string::npos ) {
+         // This is a regular Token string (contains "[OID=]" fragment)
          formToken.fromString( dhFormToken );
          formToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
       } else {
+         // Partial Ref without OID, needs to be recreated
          Placement dhf_placement;
          dhf_placement.fromString( dhFormToken );
          formToken.setDb( m_i_poolToken->dbID() );
