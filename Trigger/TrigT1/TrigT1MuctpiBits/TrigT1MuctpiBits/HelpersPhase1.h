@@ -17,7 +17,7 @@ namespace LVL1::MuCTPIBits {
   enum class SubsysID : uint8_t {Undefined=0, Barrel, Forward, Endcap, MAX};
 
   // Mapping of the six RPC indexes into the 15 TGC indexes
-  const uint32_t RPCtoTGC_pt_map[6] = {2, 4, 6, 8, 10, 12};
+  const uint32_t RPCtoTGC_pt_map[7] = {0, 2, 4, 6, 8, 10, 12};
 
   // Status data word error definitions
   static constexpr std::array<std::string_view,16> DataStatusWordErrors = {
@@ -239,24 +239,24 @@ namespace LVL1::MuCTPIBits {
           type = getSubsysID(word);
           side = maskedWord(word, RUN3_SUBSYS_HEMISPHERE_SHIFT, RUN3_SUBSYS_HEMISPHERE_MASK);
           vetoFlag = maskedWord(word, RUN3_CAND_WORD_VETO_SHIFT, RUN3_CAND_WORD_VETO_MASK);
-		  sectorFlag_gtN = maskedWord(word, RUN3_CAND_WORD_SECTORFLAGS_GTN_SHIFT, RUN3_CAND_WORD_SECTORFLAGS_GTN_MASK);
-          pt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
+	  sectorFlag_gtN = maskedWord(word, RUN3_CAND_WORD_SECTORFLAGS_GTN_SHIFT, RUN3_CAND_WORD_SECTORFLAGS_GTN_MASK);
+	  pt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
           mappedPt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
-		  roi = maskedWord(word, RUN3_CAND_WORD_ROI_SHIFT, RUN3_CAND_WORD_ROI_MASK);
-		  sectorFlag_nswMon  = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_NSWMON_SHIFT, RUN3_CAND_WORD_CANDFLAGS_NSWMON_MASK); // for BA is zero
+	  roi = maskedWord(word, RUN3_CAND_WORD_ROI_SHIFT, RUN3_CAND_WORD_ROI_MASK);
+	  sectorFlag_nswMon  = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_NSWMON_SHIFT, RUN3_CAND_WORD_CANDFLAGS_NSWMON_MASK); // for BA is zero
           if(type==SubsysID::Endcap) {
               candFlag_GoodMF    = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
               candFlag_InnerCoin = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
               candFlag_BW23      = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
               candFlag_Charge    = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
               num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, ENDCAP_SECTORID_MASK);
-			  subsystem = 1;			  
+	      subsystem = 1;			  
 		  }
-		  else if(type==SubsysID::Barrel)
+	  else if(type==SubsysID::Barrel)
           {
               candFlag_phiOverlap = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK);
               candFlag_gt1CandRoi = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_MASK);
-			  subsystem = 0;
+	      subsystem = 0;
               num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
           }
           else
@@ -266,7 +266,7 @@ namespace LVL1::MuCTPIBits {
               candFlag_BW23      = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
               candFlag_Charge    = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
               num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
-			  subsystem = 2;
+	      subsystem = 2;
           }
       }
       void print() const//this function has only debug purposes
