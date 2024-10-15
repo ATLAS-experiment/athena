@@ -21,9 +21,9 @@ public:
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode clusterize(const RawDataCollection& RDOs,
-               const EventContext& ctx,
-               ClusterContainer& container) const override;
+    virtual StatusCode clusterize(const EventContext& ctx,
+				  const RawDataCollection& RDOs,
+				  ClusterContainer& container) const override;
 
 private:
     const HGTD_DetectorManager* m_hgtd_det_mgr{nullptr};

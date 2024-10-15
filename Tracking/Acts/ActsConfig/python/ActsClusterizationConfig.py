@@ -9,7 +9,14 @@ def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name,**kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name, **kwargs))    
+    return acc
+
+def ActsHgtdTimedClusteringToolCfg(flags,
+                                   name: str = "ActsHgtdTimedClusteringTool",
+                                   **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ActsTrk.HgtdTimedClusteringTool(name, **kwargs))    
     return acc
 
 def ActsHgtdClusterizationAlgCfg(flags,
@@ -27,7 +34,11 @@ def ActsHgtdClusterizationAlgCfg(flags,
     kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
 
     if 'ClusteringTool' not in kwargs:
-        kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdClusteringToolCfg(flags)))
+        from HGTD_Config.HGTD_ConfigFlags import  ClusteringStrategy
+        if flags.HGTD.Acts.ClusteringStrategy is ClusteringStrategy.SinglePad:
+            kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdClusteringToolCfg(flags)))
+        else:
+            kwargs.setdefault('ClusteringTool', acc.popToolsAndMerge(ActsHgtdTimedClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg

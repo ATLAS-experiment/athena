@@ -21,9 +21,9 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HgtdClusteringTool::clusterize(const RawDataCollection& RDOs,
-				 const EventContext&,
-				 ClusterContainer& container) const
+  StatusCode HgtdClusteringTool::clusterize(const EventContext&,
+					    const RawDataCollection& RDOs,
+					    ClusterContainer& container) const
   {
     ATH_MSG_DEBUG("Clustering hits...");
 

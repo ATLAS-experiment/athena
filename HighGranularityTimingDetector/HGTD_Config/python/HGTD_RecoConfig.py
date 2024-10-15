@@ -17,7 +17,7 @@ def HGTD_RecoCfg(flags):
     else:
         from ActsConfig.ActsClusterizationConfig import ActsHgtdClusterizationAlgCfg
         result.merge(ActsHgtdClusterizationAlgCfg(flags))
-
+            
         from InDetConfig.InDetPrepRawDataFormationConfig import HGTDXAODToInDetClusterConversionCfg
         result.merge(HGTDXAODToInDetClusterConversionCfg(flags))
         
