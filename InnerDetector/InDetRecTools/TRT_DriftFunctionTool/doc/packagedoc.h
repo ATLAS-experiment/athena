@@ -23,8 +23,6 @@ drift radius using various conditions data.
  - ForcedDigiVersion : the other digi version (an integer)
  - AllowDataMCOverride : Permit using data tools for retrieving MC constants or vice versa
  - ForceData : use only data tools to access constants
- - OverrideCalibrationSimulation : use constants supplied by text file
- - DriftFunctionFile : the text file (a string, see code for format of file)
  - ForceUniversalErrors : a time-independent resolution is used
  - UniversalError : the time-independent resolution
  - DummyMode : the drift time info is not used

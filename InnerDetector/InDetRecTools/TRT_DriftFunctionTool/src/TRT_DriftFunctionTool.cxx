@@ -22,8 +22,6 @@
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
 #include "InDetReadoutGeometry/Version.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
-
 #include <cmath> 
 #include <fstream>
 #include <iostream>
@@ -34,55 +32,8 @@
 TRT_DriftFunctionTool::TRT_DriftFunctionTool(const std::string& type,
 				     const std::string& name,
 				     const IInterface* parent)
-  : base_class(type, name, parent),
-    m_TRTCalDbTool("TRT_CalDbTool",this),
-    m_TRTCalDbTool2("",this),
-    m_drifttimeperbin(3.125 * CLHEP::ns),
-    m_error(0.17),
-    m_ismc(true),
-    m_isoverlay(false),
-    m_istestbeam(false),
-    m_dummy(false),
-    m_err_fudge(1.0),
-    m_allow_digi_version_override(false),
-    m_forced_digiversion(11),
-    m_override_simcal(false),
-    m_force_universal_errors(false),
-    m_uni_error(0.136),
-    m_inputfile(""),
-    m_key(""),
-    m_trt_mgr_location("TRT"),
-    m_ht_correction_barrel_Xe(0.0), // initialised from python
-    m_ht_correction_endcap_Xe(0.0), // initialised from python
-    m_ht_correction_barrel_Ar(0.0), // initialised from python
-    m_ht_correction_endcap_Ar(0.0), // initialised from python
-    m_tot_corrections_barrel_Xe(20, 0.), // initialised from python
-    m_tot_corrections_endcap_Xe(20, 0.), // initialised from python
-    m_tot_corrections_barrel_Ar(20, 0.), // initialised from python
-    m_tot_corrections_endcap_Ar(20, 0.) // initialised from python
+  : base_class(type, name, parent)
 {
-  declareProperty("IsMC",m_ismc);
-  declareProperty("AllowDigiVersionOverride",m_allow_digi_version_override);
-  declareProperty("ForcedDigiVersion",m_forced_digiversion);
-  declareProperty("IsOverlay",m_isoverlay=false);
-  declareProperty("OverrideSimulationCalibration",m_override_simcal);
-  declareProperty("ForceUniversalErrors",m_force_universal_errors);
-  declareProperty("UniversalError",m_uni_error);
-  declareProperty("DummyMode",m_dummy);
-  declareProperty("ErrorFudgeFactor",m_err_fudge);
-  declareProperty("TRTCalDbTool", m_TRTCalDbTool);
-  declareProperty("TRTCalDbTool2", m_TRTCalDbTool2);
-  declareProperty("DriftFunctionFile", m_inputfile);
-  declareProperty("TrtDescrManageLocation",m_trt_mgr_location);
-  declareProperty("ToTCorrectionsBarrelXe",m_tot_corrections_barrel_Xe);
-  declareProperty("ToTCorrectionsEndcapXe",m_tot_corrections_endcap_Xe);
-  declareProperty("ToTCorrectionsBarrelAr",m_tot_corrections_barrel_Ar);
-  declareProperty("ToTCorrectionsEndcapAr",m_tot_corrections_endcap_Ar);
-  declareProperty("HTCorrectionBarrelXe",m_ht_correction_barrel_Xe);
-  declareProperty("HTCorrectionEndcapXe",m_ht_correction_endcap_Xe);
-  declareProperty("HTCorrectionBarrelAr",m_ht_correction_barrel_Ar);
-  declareProperty("HTCorrectionEndcapAr",m_ht_correction_endcap_Ar);
-
   // make sure all arrays are initialized - use DC3version2 as default
   for (int i=0; i<3; i++) m_t0_barrel[i] = 15.625;
   for (int i=0; i<14; i++) m_t0_endcap[i] = 14.2;
@@ -96,7 +47,6 @@ TRT_DriftFunctionTool::TRT_DriftFunctionTool(const std::string& type,
     m_radius[i]=2.;
     m_errors[i]=m_uni_error;
   }
-
 }
 
 //
@@ -167,8 +117,7 @@ StatusCode TRT_DriftFunctionTool::initialize()
   m_key=versionKey.tag();
 
   int numB = m_manager->getNumerology()->getNBarrelPhi();
-  ATH_MSG_DEBUG(" Number of Barrel elements "<< numB);      
-      
+  ATH_MSG_DEBUG(" Number of Barrel elements "<< numB);
   m_istestbeam = numB==2;
 
   setupRtRelation();
@@ -192,13 +141,13 @@ double TRT_DriftFunctionTool::approxDriftTime(double driftradius) const
   double t = 0.;
   int i=0;
   if(driftradius<0.100) {
-    t = 2.5*m_drifttimeperbin*driftradius/0.1;
+    t = 2.5*s_drifttimeperbin*driftradius/0.1;
   } else if(driftradius<1.99) {
     while(driftradius>=m_radius[i]) ++i;
     if(i>0) i--;
-    t=(i+0.5+(driftradius-m_radius[i])/(m_radius[i+1]-m_radius[i]))*m_drifttimeperbin;
+    t=(i+0.5+(driftradius-m_radius[i])/(m_radius[i+1]-m_radius[i]))*s_drifttimeperbin;
   } else {
-    t = m_drifttimeperbin*( 19. + (driftradius-1.99)/0.08 );
+    t = s_drifttimeperbin*( 19. + (driftradius-1.99)/0.08 );
   }
 
   return t;
@@ -208,18 +157,18 @@ double TRT_DriftFunctionTool::approxDriftTime(double driftradius) const
 double TRT_DriftFunctionTool::driftRadius(double drifttime) const
 {
   if( !isValidTime(drifttime) ) return 0;
-  int drifttimebin = std::max(int(drifttime/m_drifttimeperbin),0); 
+  int drifttimebin = std::max(int(drifttime/s_drifttimeperbin),0);
 
   // Interpolate linearly 
-  if(drifttime < (drifttimebin+0.5)*m_drifttimeperbin) {
+  if(drifttime < (drifttimebin+0.5)*s_drifttimeperbin) {
     if (drifttimebin-1 > -1)
         return m_radius[drifttimebin-1]+
          (m_radius[drifttimebin]-m_radius[drifttimebin-1])*
-	  (drifttime - (drifttimebin-0.5)*m_drifttimeperbin)/m_drifttimeperbin;
+	  (drifttime - (drifttimebin-0.5)*s_drifttimeperbin)/s_drifttimeperbin;
   } else if (drifttimebin+1 < 20) {
         return m_radius[drifttimebin]+
          (m_radius[drifttimebin+1]-m_radius[drifttimebin])*
-	  (drifttime - (drifttimebin+0.5)*m_drifttimeperbin)/m_drifttimeperbin;
+	  (drifttime - (drifttimebin+0.5)*s_drifttimeperbin)/s_drifttimeperbin;
   }
 
   return m_radius[drifttimebin];
@@ -293,10 +242,10 @@ double TRT_DriftFunctionTool::errorOfDriftRadius(double drifttime, Identifier id
   else {  //interpolate
     if(drifttime<=0.) {
       return m_errors[0];
-    } else if(drifttime >= 18.*m_drifttimeperbin) {
+    } else if(drifttime >= 18.*s_drifttimeperbin) {
       return m_errors[18];
     } else {
-      float drifttimeinbins = 	drifttime/m_drifttimeperbin;
+      float drifttimeinbins = 	drifttime/s_drifttimeperbin;
       int drifttimebin = (int)drifttimeinbins;
       float fracbin = drifttimeinbins-drifttimebin;
       return (1-fracbin)*m_errors[drifttimebin]+fracbin*m_errors[drifttimebin+1];
@@ -308,7 +257,7 @@ double TRT_DriftFunctionTool::errorOfDriftRadius(double drifttime, Identifier id
 // returns the time over threshold correction in ns
 double TRT_DriftFunctionTool::driftTimeToTCorrection(double tot, Identifier id, bool isArgonStraw) const
 {
-  int tot_index = tot/m_drifttimeperbin;
+  int tot_index = tot/s_drifttimeperbin;
   if (tot_index < 0) tot_index = 0;
   if (tot_index > 19) tot_index = 19;
 
@@ -389,6 +338,5 @@ void TRT_DriftFunctionTool::setupRtRelation()
       m_errors[i] = s_errors_default[i]*m_err_fudge;
     }
   }
-    
-  m_error = 0.136;
+
 }

@@ -25,8 +25,6 @@ class ITRT_DriftFunctionTool : virtual public IAlgTool {
 
   virtual bool isValidTime(double drifttime) const = 0;
 
-  virtual bool isTestBeamData() const = 0;
-
   virtual double rawTime(int tdcvalue) const = 0;
 
   virtual double driftRadius(double rawtime, Identifier id, double& t0, bool& isOK, unsigned int word=0) const = 0;
