@@ -24,6 +24,9 @@ class TRT_ID;
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "GaudiKernel/ToolHandle.h"
+
+#include "CLHEP/Units/SystemOfUnits.h"
+
 /**
  @class TRT_DriftFunctionTool
   
@@ -50,9 +53,6 @@ public:
 
   /** Returns True for drifttimes between -10 and 75ns */
   virtual bool isValidTime(double drifttime) const override;
-
-  /** Returns True for CTB real data */
-  virtual bool isTestBeamData() const override;
 
   /** Returns center of leading edge bin in ns for bin number = tdcvalue.
     * note, that the binwidth can vary with run type. */
@@ -87,50 +87,67 @@ public:
 private:
   
   /** Tool to fetch data from database */
-  ToolHandle< ITRT_CalDbTool >   m_TRTCalDbTool;
-  ToolHandle< ITRT_CalDbTool >   m_TRTCalDbTool2;
+  ToolHandle< ITRT_CalDbTool > m_TRTCalDbTool {this, "TRTCalDbTool",  "TRT_CalDbTool"};
+  ToolHandle< ITRT_CalDbTool > m_TRTCalDbTool2{this, "TRTCalDbTool2", ""};
 
   /** DetectorManager and helper */
   const InDetDD::TRT_DetectorManager* m_manager{};
   const TRT_ID* m_trtid{};
 
-
-  double m_drifttimeperbin;            //!< 3.125ns
-  double m_error;                      //!< universal error
+  static constexpr double s_drifttimeperbin = 3.125 * CLHEP::ns;
   
-  enum ETimeBins { MaxTimeBin = 50 } ; //!< number of time bins
+  enum ETimeBins { MaxTimeBin = 50 } ;   //!< number of time bins
   double m_radius[MaxTimeBin]{};         //!< most probable radius in each bin
   double m_errors[MaxTimeBin]{};         //!< width of radius dist in each bin
 
-  bool m_ismc;                         //!< flag for mc
-  bool m_isoverlay;                    //!< flag for overlay
-  bool m_istestbeam;                   //!< flag for CTB data or mc
+  BooleanProperty m_ismc{this, "IsMC", true};
+  BooleanProperty m_isoverlay{this, "IsOverlay", false};
+  BooleanProperty m_dummy{this, "DummyMode", false,
+    "flag for ignoring drift time info"};
 
-  bool m_dummy;                        //!< flag for ignoring drift time info
+  bool m_istestbeam = false;
 
-  double m_err_fudge;                  //!< fudge_factor for error scaling
+  DoubleProperty m_err_fudge{this, "ErrorFudgeFactor", 1.0,
+    "fudge_factor for error scaling"};
 
-  bool  m_allow_digi_version_override; //!< flag for using constants for 
-  int m_forced_digiversion;            //!< this digi version
+  BooleanProperty m_allow_digi_version_override
+    {this, "AllowDigiVersionOverride", false}; //!< flag for using constants for
+  IntegerProperty m_forced_digiversion
+    {this, "ForcedDigiVersion", 11};           //!< this digi version
 
-  bool m_override_simcal;              //!< flag for reading constants from
-  bool m_force_universal_errors;       //!< use one universal error
-  double m_uni_error;                  //!< namely this one
+  BooleanProperty m_force_universal_errors
+    {this, "ForceUniversalErrors", false}; //!< use one universal error
+  DoubleProperty m_uni_error{this, "UniversalError", 0.136}; //!< namely this one
 
-  std::string m_inputfile;             //!< file overriding MC constants
-  std::string m_key;                   //!< GeoModel version key
-  std::string m_trt_mgr_location;      //!< Name of TRT detector manager
+  std::string m_key = ""; //!< GeoModel version key
+  StringProperty m_trt_mgr_location
+    {this, "TrtDescrManageLocation", "TRT", "Name of TRT detector manager"};
+
   double m_t0_barrel[3]{};               //!< t0 for the 3 barrel rings
   double m_t0_endcap[18]{};              //!< t0 for the 14(18) endcap wheels
   double m_t0_shift;                   //!< digiversion dependent t0 shift
-  double m_ht_correction_barrel_Xe;    //!< HT correction for Xe straws in barrel
-  double m_ht_correction_endcap_Xe;    //!< HT correction for Xe straws in barrel
-  double m_ht_correction_barrel_Ar;    //!< HT correction for Ar straws in barrel
-  double m_ht_correction_endcap_Ar;    //!< HT correction for Ar straws in barrel
-  std::vector<double> m_tot_corrections_barrel_Xe; //!< ToT corrections for 20 ToT bins in Xe barrel straws
-  std::vector<double> m_tot_corrections_endcap_Xe; //!< ToT corrections for 20 ToT bins in Xe endcap straws
-  std::vector<double> m_tot_corrections_barrel_Ar; //!< ToT corrections for 20 ToT bins in Ar barrel straws
-  std::vector<double> m_tot_corrections_endcap_Ar; //!< ToT corrections for 20 ToT bins in Ar endcap straws
+
+  DoubleProperty m_ht_correction_barrel_Xe{this, "HTCorrectionBarrelXe", 0.,
+    "HT correction for Xe straws in barrel"};
+  DoubleProperty m_ht_correction_endcap_Xe{this, "HTCorrectionEndcapXe", 0.,
+    "HT correction for Xe straws in endcaps"};
+  DoubleProperty m_ht_correction_barrel_Ar{this, "HTCorrectionBarrelAr", 0.,
+    "HT correction for Ar straws in barrel"};
+  DoubleProperty m_ht_correction_endcap_Ar{this, "HTCorrectionEndcapAr", 0.,
+    "HT correction for Ar straws in endcaps"};
+
+  DoubleArrayProperty m_tot_corrections_barrel_Xe
+    {this, "ToTCorrectionsBarrelXe", {},
+     "ToT corrections for 20 ToT bins in Xe barrel straws"};
+  DoubleArrayProperty m_tot_corrections_endcap_Xe
+    {this, "ToTCorrectionsEndcapXe", {},
+     "ToT corrections for 20 ToT bins in Xe endcap straws"};
+  DoubleArrayProperty m_tot_corrections_barrel_Ar
+    {this, "ToTCorrectionsBarrelAr", {},
+     "ToT corrections for 20 ToT bins in Ar barrel straws"};
+  DoubleArrayProperty m_tot_corrections_endcap_Ar
+    {this, "ToTCorrectionsEndcapAr", {},
+     "ToT corrections for 20 ToT bins in Ar endcap straws"};
 
   static const size_t s_size_default = 19;
   static constexpr double s_radius_default[s_size_default] = {
@@ -159,12 +176,9 @@ private:
 inline bool TRT_DriftFunctionTool::isValidTime(double drifttime) const
 { return (drifttime>-10. && drifttime<75.); }
 
-inline bool TRT_DriftFunctionTool::isTestBeamData() const
-{ return m_istestbeam; }
-
 inline double TRT_DriftFunctionTool::rawTime(int tdcvalue) const
 {
-  double time = (tdcvalue+0.5)*m_drifttimeperbin ;
+  double time = (tdcvalue+0.5)*s_drifttimeperbin ;
   return m_istestbeam ? 0.5*time : time;
 }
 
