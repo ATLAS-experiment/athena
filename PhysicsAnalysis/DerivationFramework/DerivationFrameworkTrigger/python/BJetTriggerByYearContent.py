@@ -60,7 +60,7 @@ def getBJetTriggerContent(flags):
 
         triggerContent += jetCollections[year]
         return triggerContent
-    elif flags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion >= 3: # NOTE: Currently re-using the Run 3 EDM for Run 4.
         triggerContent = [
             "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets",
             "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux.pt.eta.phi.m",
