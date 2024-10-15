@@ -20,6 +20,7 @@
 
 #include "TClass.h"
 #include "TKey.h"
+#include "CxxUtils/StringUtils.h"
 
 namespace {
   void
@@ -55,29 +56,42 @@ namespace {
     return result;
   }
   void
-  writeToFile(TDirectory* pDir, TH1F* pH1, TH1F* pH2, TH1F* pH3 = nullptr){
+  writeToFile(TDirectory* pDir, TH1F* pH1, TH1F* pH2 = nullptr, TH1F* pH3 = nullptr){
     if (not pDir) return; //do nothing
     pDir->cd();
     writeIfValid(pH1);
     writeIfValid(pH2);
     writeIfValid(pH3);
   }
+  auto
+  safelyTakeLog(auto f){
+    if (f > 0) {
+     return log10(f);
+    }
+    return -10.;
+  }
+  bool
+  isASide( TH1F* pH, int idx){
+    return (idx>pH->GetNbinsX() / 2);
+  }
+  void 
+  fillAorC(bool isA, TH1F* pA, TH1F* pC, double val){
+    if (isA){
+      fillIfValid(pA,val);
+    } else {
+      fillIfValid(pC,val);
+    }
+  }
 }
 
 namespace dqutils {
   void
   MonitoringFile::RPCPostProcess(const std::string& inFilename, bool /* isIncremental */) {
-    // std::cout << "Running RPC post processing \n" ;
-
     bool applyEffThreshold = true;
     bool EffThreshold = false;
     bool printout = true;
     float Minimum_efficiency = 0.5;
-
-
-
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
-
     if (f == 0) {
       std::cerr << "MonitoringFile::RPCPostProcess(): "
                 << "Input file not opened \n";
@@ -102,12 +116,10 @@ namespace dqutils {
         if (tdir_run_name.find("run") != std::string::npos) {
           run_dir = std::move(tdir_run_name);
 
-          int run_number;
-          run_number = atoi((run_dir.substr(4, run_dir.size() - 4)).c_str());
+          int run_number = CxxUtils::atoi(run_dir.substr(4, run_dir.size() - 4));
           std::cout << "run_number rpc monitoring " << run_number << std::endl;
 
           std::string pathRawMon = run_dir + "/Muon/MuonRawDataMonitoring/RPC/";
-          //std::string pathTrackMon   = run_dir + "/Muon/MuonTrackMonitoring/NoTrigger/RPCStandAloneTrackMon/" ;
           std::string pathTrackMon = run_dir + "/Muon/MuonRawDataMonitoring/RPCStandAloneTrackMon/";
 
           std::string dir_ov_raw = pathRawMon + "Overview/";
@@ -216,142 +228,139 @@ namespace dqutils {
             int nb = hist_METracks->GetNbinsX();
             double Ly_eff, Ly_effErr;
             auto calculateErr = [](float hitOn, float trPrj) -> double {
-                                  return std::sqrt(std::abs(hitOn) / trPrj) *
-                                         std::sqrt(1. - std::abs(hitOn) / trPrj) /
-                                         std::sqrt(trPrj);
-                                };
+              return std::sqrt(std::abs(hitOn) / trPrj) *
+                std::sqrt(1. - std::abs(hitOn) / trPrj) / std::sqrt(trPrj);
+            };
             for (int ib = 0; ib != nb; ib++) {
               float n_Ly_hitOn = hist_MuctpiThr0->GetBinContent(ib + 1);
               float n_Ly_TrPrj = hist_METracks->GetBinContent(ib + 1);
+              if (n_Ly_TrPrj<= 0) continue;
+              //MuctpiThr0
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff0->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff0->SetBinError(ib + 1, Ly_effErr);
 
-              if (n_Ly_TrPrj > 0) {
-                //MuctpiThr0
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              //MuctpiThr1
+              n_Ly_hitOn = hist_MuctpiThr1->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff1->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff1->SetBinError(ib + 1, Ly_effErr);
+              //MuctpiThr2
+              n_Ly_hitOn = hist_MuctpiThr2->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff0->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff0->SetBinError(ib + 1, Ly_effErr);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff2->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff2->SetBinError(ib + 1, Ly_effErr);
+              //MuctpiThr3
+              n_Ly_hitOn = hist_MuctpiThr3->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                //MuctpiThr1
-                n_Ly_hitOn = hist_MuctpiThr1->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff1->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff1->SetBinError(ib + 1, Ly_effErr);
-                //MuctpiThr2
-                n_Ly_hitOn = hist_MuctpiThr2->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff3->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff3->SetBinError(ib + 1, Ly_effErr);
+              //MuctpiThr4
+              n_Ly_hitOn = hist_MuctpiThr4->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff2->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff2->SetBinError(ib + 1, Ly_effErr);
-                //MuctpiThr3
-                n_Ly_hitOn = hist_MuctpiThr3->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff4->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff4->SetBinError(ib + 1, Ly_effErr);
+              //MuctpiThr5
+              n_Ly_hitOn = hist_MuctpiThr5->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff3->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff3->SetBinError(ib + 1, Ly_effErr);
-                //MuctpiThr4
-                n_Ly_hitOn = hist_MuctpiThr4->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_MuctpiThr_eff5->SetBinContent(ib + 1, Ly_eff);
+              hist_MuctpiThr_eff5->SetBinError(ib + 1, Ly_effErr);
+              //PadThr0
+              n_Ly_hitOn = hist_PadThr0->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff4->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff4->SetBinError(ib + 1, Ly_effErr);
-                //MuctpiThr5
-                n_Ly_hitOn = hist_MuctpiThr5->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff0->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff0->SetBinError(ib + 1, Ly_effErr);
+              //PadThr1
+              n_Ly_hitOn = hist_PadThr1->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_MuctpiThr_eff5->SetBinContent(ib + 1, Ly_eff);
-                hist_MuctpiThr_eff5->SetBinError(ib + 1, Ly_effErr);
-                //PadThr0
-                n_Ly_hitOn = hist_PadThr0->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff1->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff1->SetBinError(ib + 1, Ly_effErr);
+              //PadThr2
+              n_Ly_hitOn = hist_PadThr2->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff0->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff0->SetBinError(ib + 1, Ly_effErr);
-                //PadThr1
-                n_Ly_hitOn = hist_PadThr1->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff2->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff2->SetBinError(ib + 1, Ly_effErr);
+              //PadThr3
+              n_Ly_hitOn = hist_PadThr3->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff1->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff1->SetBinError(ib + 1, Ly_effErr);
-                //PadThr2
-                n_Ly_hitOn = hist_PadThr2->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff3->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff3->SetBinError(ib + 1, Ly_effErr);
+              //PadThr4
+              n_Ly_hitOn = hist_PadThr4->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff2->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff2->SetBinError(ib + 1, Ly_effErr);
-                //PadThr3
-                n_Ly_hitOn = hist_PadThr3->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff4->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff4->SetBinError(ib + 1, Ly_effErr);
+              //PadThr5
+              n_Ly_hitOn = hist_PadThr5->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff3->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff3->SetBinError(ib + 1, Ly_effErr);
-                //PadThr4
-                n_Ly_hitOn = hist_PadThr4->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PadThr_eff5->SetBinContent(ib + 1, Ly_eff);
+              hist_PadThr_eff5->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr0
+              n_Ly_hitOn = hist_PhiEtaCoinThr0->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff4->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff4->SetBinError(ib + 1, Ly_effErr);
-                //PadThr5
-                n_Ly_hitOn = hist_PadThr5->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff0->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff0->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr1
+              n_Ly_hitOn = hist_PhiEtaCoinThr1->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PadThr_eff5->SetBinContent(ib + 1, Ly_eff);
-                hist_PadThr_eff5->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr0
-                n_Ly_hitOn = hist_PhiEtaCoinThr0->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff1->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff1->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr2
+              n_Ly_hitOn = hist_PhiEtaCoinThr2->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff0->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff0->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr1
-                n_Ly_hitOn = hist_PhiEtaCoinThr1->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff2->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff2->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr3
+              n_Ly_hitOn = hist_PhiEtaCoinThr3->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff1->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff1->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr2
-                n_Ly_hitOn = hist_PhiEtaCoinThr2->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff3->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff3->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr4
+              n_Ly_hitOn = hist_PhiEtaCoinThr4->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff2->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff2->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr3
-                n_Ly_hitOn = hist_PhiEtaCoinThr3->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff4->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff4->SetBinError(ib + 1, Ly_effErr);
+              //PhiEtaCoinThr5
+              n_Ly_hitOn = hist_PhiEtaCoinThr5->GetBinContent(ib + 1);
+              Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
 
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff3->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff3->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr4
-                n_Ly_hitOn = hist_PhiEtaCoinThr4->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
-
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff4->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff4->SetBinError(ib + 1, Ly_effErr);
-                //PhiEtaCoinThr5
-                n_Ly_hitOn = hist_PhiEtaCoinThr5->GetBinContent(ib + 1);
-                Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
-
-                Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
-                hist_PhiEtaCoinThr_eff5->SetBinContent(ib + 1, Ly_eff);
-                hist_PhiEtaCoinThr_eff5->SetBinError(ib + 1, Ly_effErr);
-              }
+              Ly_effErr = calculateErr(n_Ly_hitOn, n_Ly_TrPrj);
+              hist_PhiEtaCoinThr_eff5->SetBinContent(ib + 1, Ly_eff);
+              hist_PhiEtaCoinThr_eff5->SetBinError(ib + 1, Ly_effErr);
+            
             }
 
             // write out histogram
@@ -400,7 +409,6 @@ namespace dqutils {
 
               if (n_Ly_TrPrj > 0) {
                 Ly_eff = float(n_Ly_hitOn) / float(n_Ly_TrPrj);
-
                 Ly_effErr = sqrt(fabs(n_Ly_hitOn) / n_Ly_TrPrj) *
                             sqrt(1. - fabs(n_Ly_hitOn) / n_Ly_TrPrj) /
                             sqrt(n_Ly_TrPrj);
@@ -411,11 +419,7 @@ namespace dqutils {
 
             // write out histogram
             TDirectory* dir = f->GetDirectory(dir_glob_track.c_str());
-            if (dir != 0) {
-              dir->cd();
-              //hist_LyEff->Write();
-              hist_LyEff->Write("", TObject::kOverwrite);
-            }
+            writeToFile(dir, hist_LyEff);
           }
 
 
@@ -425,9 +429,9 @@ namespace dqutils {
           LyPrj_SideA_name = dir_sideA_track + "Layer_TrackProj_sideA";
           LyEff_SideA_name = dir_sideA_track + "Layer_Efficiency_sideA";
 
-          if (RPCCheckHistogram(f,
-                                LyHit_SideA_name.c_str()) &&
-              RPCCheckHistogram(f, LyPrj_SideA_name.c_str()) && RPCCheckHistogram(f, LyEff_SideA_name.c_str())) {
+          if (RPCCheckHistogram(f, LyHit_SideA_name.c_str()) &&
+              RPCCheckHistogram(f, LyPrj_SideA_name.c_str()) && 
+              RPCCheckHistogram(f, LyEff_SideA_name.c_str())) {
             TH1I* hist_LyHit_SideA = (TH1I*) (f->Get(LyHit_SideA_name.c_str()));
             TH1I* hist_LyPrj_SideA = (TH1I*) (f->Get(LyPrj_SideA_name.c_str()));
             TH1F* hist_LyEff_SideA = (TH1F*) (f->Get(LyEff_SideA_name.c_str()));
@@ -451,11 +455,8 @@ namespace dqutils {
 
             // write out histogram
             TDirectory* dir = f->GetDirectory(dir_sideA_track.c_str());
-            if (dir != 0) {
-              dir->cd();
-              //hist_LyEff->Write();
-              hist_LyEff_SideA->Write("", TObject::kOverwrite);
-            }
+            writeToFile(dir, hist_LyEff_SideA);
+            
           }
 
           // layer efficiency Side C
@@ -464,9 +465,9 @@ namespace dqutils {
           LyPrj_SideC_name = dir_sideC_track + "Layer_TrackProj_sideC";
           LyEff_SideC_name = dir_sideC_track + "Layer_Efficiency_sideC";
 
-          if (RPCCheckHistogram(f,
-                                LyHit_SideC_name.c_str()) &&
-              RPCCheckHistogram(f, LyPrj_SideC_name.c_str()) && RPCCheckHistogram(f, LyEff_SideC_name.c_str())) {
+          if (RPCCheckHistogram(f, LyHit_SideC_name.c_str()) &&
+              RPCCheckHistogram(f, LyPrj_SideC_name.c_str()) && 
+              RPCCheckHistogram(f, LyEff_SideC_name.c_str())) {
             TH1I* hist_LyHit_SideC = (TH1I*) (f->Get(LyHit_SideC_name.c_str()));
             TH1I* hist_LyPrj_SideC = (TH1I*) (f->Get(LyPrj_SideC_name.c_str()));
             TH1F* hist_LyEff_SideC = (TH1F*) (f->Get(LyEff_SideC_name.c_str()));
@@ -489,11 +490,8 @@ namespace dqutils {
             }
             // write out histogram
             TDirectory* dir = f->GetDirectory(dir_sideC_track.c_str());
-            if (dir != 0) {
-              dir->cd();
-              //hist_LyEff->Write();
-              hist_LyEff_SideC->Write("", TObject::kOverwrite);
-            }
+            writeToFile(dir, hist_LyEff_SideC);
+            
           }
 
 
@@ -757,12 +755,8 @@ namespace dqutils {
                 h_Eff->SetBinContent(ib + 1, panel_eff);
                 h_Eff->SetBinError(ib + 1, panel_err_eff);
                 if (h_EffSecDist) h_EffSecDist->Fill(panel_eff);
-                if (ib > (h_TrackProj->GetNbinsX() / 2)) {
-                  fillIfValid(h_AverageEff_A, panel_eff);
-                } else {
-                  fillIfValid(h_AverageEff_C, panel_eff);
-                }
-                //}
+                bool aSide = isASide(h_TrackProj, ib);
+                fillAorC(aSide, h_AverageEff_A, h_AverageEff_C, panel_eff);
               }
               // write out histogram
               TDirectory* dir = f->GetDirectory(dir_sum_track.c_str());
@@ -800,12 +794,9 @@ namespace dqutils {
                 }
                 h_GapEff->SetBinContent(ib + 1, gapEff);
                 h_GapEff->SetBinError(ib + 1, gapErrEff);
+                const bool isA = isASide(h_TrackProj, ib);
+                fillAorC(isA, h_AverageGapEff_A, h_AverageGapEff_C, gapEff);
                 fillIfValid(h_GapEffSecDist, gapEff);
-                if (ib > (h_TrackProj->GetNbinsX() / 2)) {
-                  fillIfValid(h_AverageGapEff_A, gapEff);
-                } else {
-                  fillIfValid(h_AverageGapEff_C, gapEff);
-                }
               }
               TDirectory* dir = f->GetDirectory(dir_sum_track.c_str());
               writeToFile(dir, h_GapEff, h_GapEffSecDist);
@@ -824,18 +815,13 @@ namespace dqutils {
                   res_mean = (h_Res_CS1_s->GetBinContent(ib + 1)) / (h_Res_CS1_entries->GetBinContent(ib + 1));
                   res2_mean = (h_Res_CS1_square->GetBinContent(ib + 1)) / (h_Res_CS1_entries->GetBinContent(ib + 1));
                   res_RMS = sqrt((fabs(res2_mean - res_mean * res_mean)) / (h_Res_CS1_entries->GetBinContent(ib + 1)));
-
                   h_Res_CS1->SetBinContent(ib + 1, res_mean);
                   h_Res_CS1->SetBinError(ib + 1, res_RMS);
                   fillIfValid(h_Res_CS1SecDist, res_mean);
                   fillIfValid(h_Res_CS1_rmsSecDist, res_RMS);
-                  if (ib > (h_Res_CS1->GetNbinsX() / 2)) {
-                    fillIfValid(h_AverageRes_CS1_A, res_mean);
-                    fillIfValid(h_AverageRes_CS1rms_A, res_RMS);
-                  } else {
-                    fillIfValid(h_AverageRes_CS1_C, res_mean);
-                    fillIfValid(h_AverageRes_CS1rms_C, res_RMS);
-                  }
+                  bool isA = isASide(h_Res_CS1, ib);
+                  fillAorC(isA, h_AverageRes_CS1_A, h_AverageRes_CS1_C, res_mean);
+                  fillAorC(isA, h_AverageRes_CS1rms_A, h_AverageRes_CS1rms_C, res_RMS);
                 }
               } // end for bins
               TDirectory* dirRes1 = f->GetDirectory(dir_sum_track.c_str());
@@ -853,18 +839,13 @@ namespace dqutils {
                   res_mean = (h_Res_CS2_s->GetBinContent(ib + 1)) / (h_Res_CS2_entries->GetBinContent(ib + 1));
                   res2_mean = (h_Res_CS2_square->GetBinContent(ib + 1)) / (h_Res_CS2_entries->GetBinContent(ib + 1));
                   res_RMS = sqrt(fabs((res2_mean - res_mean * res_mean) / (h_Res_CS2_entries->GetBinContent(ib + 1))));
-
                   h_Res_CS2->SetBinContent(ib + 1, res_mean);
                   h_Res_CS2->SetBinError(ib + 1, res_RMS);
                   fillIfValid(h_Res_CS2SecDist, res_mean);
                   fillIfValid(h_Res_CS2_rmsSecDist, res_RMS);
-                  if (ib > (h_Res_CS2->GetNbinsX() / 2)) {
-                    fillIfValid(h_AverageRes_CS2_A, res_mean);
-                    fillIfValid(h_AverageRes_CS2rms_A, res_RMS);
-                  } else {
-                    fillIfValid(h_AverageRes_CS2_C, res_mean);
-                    fillIfValid(h_AverageRes_CS2rms_C, res_RMS);
-                  }
+                  bool isA = isASide(h_Res_CS2, ib);
+                  fillAorC(isA, h_AverageRes_CS2_A, h_AverageRes_CS2_C, res_mean);
+                  fillAorC(isA, h_AverageRes_CS2rms_A, h_AverageRes_CS2rms_C, res_RMS);
                 }
               }
               TDirectory* dirRes2 = f->GetDirectory(dir_sum_track.c_str());
@@ -889,13 +870,9 @@ namespace dqutils {
                   h_Res_CSmore2->SetBinError(ib + 1, res_RMS);
                   fillIfValid(h_Res_CSmore2SecDist, res_mean);
                   fillIfValid(h_Res_CSmore2_rmsSecDist, res_RMS);
-                  if (ib > (h_Res_CSmore2->GetNbinsX() / 2)) {
-                    fillIfValid(h_AverageRes_CSmore2_A, res_mean);
-                    fillIfValid(h_AverageRes_CSmore2rms_A, res_RMS);
-                  } else {
-                    fillIfValid(h_AverageRes_CSmore2_C, res_mean);
-                    fillIfValid(h_AverageRes_CSmore2rms_C, res_RMS);
-                  }
+                  bool isA = isASide(h_Res_CSmore2, ib);
+                  fillAorC(isA, h_AverageRes_CSmore2_A, h_AverageRes_CSmore2_C, res_mean);
+                  fillAorC(isA, h_AverageRes_CSmore2rms_A, h_AverageRes_CSmore2rms_C, res_RMS);
                 }
               }
               TDirectory* dirResp2 = f->GetDirectory(dir_sum_track.c_str());
@@ -911,18 +888,10 @@ namespace dqutils {
 
                 h_Occupancy->SetBinContent(ib + 1, panel_occ);
                 h_Occupancy->SetBinError(ib + 1, sqrt(panel_occ));
-
-                if (panel_occ > 0) {
-                  panel_occ = log10(panel_occ);
-                } else {
-                  panel_occ = -10;
-                }
+                panel_occ = safelyTakeLog(panel_occ);
                 fillIfValid(h_OccupancySecDist, panel_occ);
-                if (h_PanelId and(ib > (h_PanelId->GetNbinsX() / 2))) {
-                  fillIfValid(h_AverageOccupancy_A, panel_occ);
-                } else {
-                  fillIfValid(h_AverageOccupancy_C, panel_occ);
-                }
+                bool isA = isASide(h_PanelId, ib);
+                fillAorC(isA, h_AverageOccupancy_A, h_AverageOccupancy_C, panel_occ);
               }
               // write occupancy histograms
               TDirectory* dirOcc = f->GetDirectory(dir_sum_track.c_str());
@@ -941,16 +910,11 @@ namespace dqutils {
                   panelCS_mean = panelCS / panelCS_entries;
                   panelCS2_mean = panelCS2 / panelCS_entries;
                   panelCS_RMS = sqrt(fabs((panelCS2_mean - panelCS_mean * panelCS_mean) / panelCS_entries));
-
                   h_CS->SetBinContent(ib + 1, panelCS_mean);
                   h_CS->SetBinError(ib + 1, panelCS_RMS);
-
                   fillIfValid(h_CSSecDist, panelCS_mean);
-                  if (ib > (h_CS->GetNbinsX() / 2)) {
-                    fillIfValid(h_AverageCS_A, panelCS_mean);
-                  } else {
-                    fillIfValid(h_AverageCS_C, panelCS_mean);
-                  }
+                  bool isA = isASide(h_CS, ib);
+                  fillAorC(isA, h_AverageCS_A, h_AverageCS_C, panelCS_mean);
                 }
               }
               // write CS histograms
@@ -971,11 +935,8 @@ namespace dqutils {
                   h_Time->SetBinError(ib + 1, Time_RMS);
 
                   fillIfValid(h_TimeSecDist, Time_mean);
-                  if (ib > (h_Time->GetNbinsX() / 2)) {
-                    fillIfValid(h_AverageTime_A, Time_mean);
-                  } else {
-                    fillIfValid(h_AverageTime_C, Time_mean);
-                  }
+                  bool isA = isASide(h_Time, ib);
+                  fillAorC(isA, h_AverageTime_A, h_AverageTime_C, Time_mean);
                 }
               }
               // write time histograms
@@ -1003,14 +964,9 @@ namespace dqutils {
                 h_NoiseTot->SetBinError(ib + 1, noiseTotErr);
 
                 fillIfValid(h_NoiseTotSecDist, noiseTot);
-
-                if (ib > (h_NoiseCorr->GetNbinsX() / 2)) {
-                  fillIfValid(h_AverageNoiseTot_A, noiseTot);
-                  fillIfValid(h_AverageNoiseCorr_A, noiseCorr);
-                } else {
-                  fillIfValid(h_AverageNoiseTot_C, noiseTot);
-                  fillIfValid(h_AverageNoiseCorr_C, noiseCorr);
-                }
+                bool isA = isASide(h_NoiseCorr, ib);
+                fillAorC(isA, h_AverageNoiseTot_A, h_AverageNoiseTot_C, noiseTot);
+                fillAorC(isA, h_AverageNoiseCorr_A, h_AverageNoiseCorr_C, noiseCorr);
               }
               TDirectory* dirNoise = f->GetDirectory(dir_sum_track.c_str());
               if (dirNoise != 0) {
@@ -1346,14 +1302,10 @@ namespace dqutils {
 
                       if ((int) h_stripId->GetBinContent(Nstrips) ==
                           (int) h_stripId->GetBinContent(Nstrips + 1)) StripsOnPanel++;
-                      //std::cout <<Nstrips<<" "<< h_stripId-> GetBinCenter(Nstrips)<< " "<< SingleStripsStatus <<"
-                      // PanelStripsStatus " << PanelStripsStatus <<" PanelStripsId " << PanelStripId <<std::endl;
 
                       if ((int) h_stripId->GetBinContent(Nstrips) != (int) h_stripId->GetBinContent(Nstrips + 1)) {
-                        //std::cout <<StripsOnPanel<<" StripsOnPanel "<< std::endl;
 
                         if (h_stripId->GetBinCenter(Nstrips) < 0) {
-                          //std::cout << " PanelStripsStatus " << PanelStripsStatus <<std::endl;
                           std::reverse(PanelStripsStatus.begin(), PanelStripsStatus.end());
                           std::reverse(PanelStripsStatusOK.begin(), PanelStripsStatusOK.end());
                         }
@@ -1367,14 +1319,9 @@ namespace dqutils {
                             }
                             //if(n_tr_peta >0){
                             if (h_PanelId) Binposition = (int) h_PanelId->GetBinCenter(ibin);
-                            int ibin_perp = 0;
-                            if (Binposition > 0) {
-                              ibin_perp = ibin + 1;
-                              eta_effphi = getBinContentIfValid(h_Eff, ibin + 1);
-                            } else {
-                              ibin_perp = ibin - 1;
-                              eta_effphi = getBinContentIfValid(h_Eff, ibin - 1);
-                            }
+                            int ibin_perp = (Binposition > 0) ? ibin + 1: ibin - 1;
+                            eta_effphi = getBinContentIfValid(h_Eff, ibin_perp);
+                            
                             gapeff = getBinContentIfValid(h_GapEff, ibin);
                             errgapeff = getBinErrorIfValid(h_GapEff, ibin);
                             effeta = getBinContentIfValid(h_Eff, ibin);
@@ -1513,18 +1460,11 @@ namespace dqutils {
                             //if(n_tr_pphi >0){
 
                             if (h_PanelId) Binposition = (int) h_PanelId->GetBinCenter(ibin);
-                            int ibin_perp = 0;
-                            if (Binposition > 0) {
-                              ibin_perp = ibin - 1;
-                              gapeff = getBinContentIfValid(h_GapEff, ibin - 1);
-                              errgapeff = getBinErrorIfValid(h_GapEff, ibin - 1);
-                              phi_effeta = getBinContentIfValid(h_Eff, ibin - 1);
-                            } else {
-                              ibin_perp = ibin + 1;
-                              gapeff = getBinContentIfValid(h_GapEff, ibin + 1);
-                              errgapeff = getBinErrorIfValid(h_GapEff, ibin + 1);
-                              phi_effeta = getBinContentIfValid(h_Eff, ibin + 1);
-                            }
+                            int ibin_perp = (Binposition > 0) ? ibin - 1: ibin + 1;
+                            gapeff = getBinContentIfValid(h_GapEff, ibin_perp);
+                            errgapeff = getBinErrorIfValid(h_GapEff, ibin_perp);
+                            phi_effeta = getBinContentIfValid(h_Eff, ibin_perp);
+                            
                             effphi = getBinContentIfValid(h_Eff, ibin);
                             erreffphi = getBinErrorIfValid(h_Eff, ibin);
                             gapeffphi = gapeff;
