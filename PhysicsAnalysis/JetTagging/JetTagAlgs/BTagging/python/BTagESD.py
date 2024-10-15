@@ -74,7 +74,7 @@ def BTagHLTaggersCfg(inputFlags, JetCollection = []):
 def RunHighLevelTaggersCfg(inputFlags, jet, tracks, Associator, taggers):
     result = ComponentAccumulator()
 
-    BTagCollection = inputFlags.BTagging.OutputFiles.Prefix+JetCollection
+    BTagCollection = f'BTagging_{JetCollection}'
     result.merge(BTagJetAugmenterAlgCfg(inputFlags, JetCollection=jet, BTagCollection=BTagCollection, Associator=Associator, TrackCollection=tracks) )
     for dl2 in taggers:
         result.merge(FlavorTagNNCfg(inputFlags, BTagCollection, TrackCollection=tracks, NNFile=dl2) )
@@ -145,7 +145,7 @@ def registerOutputBTaggingContainers(flags, JetCollection, suffix = ''):
       OutputFilesBaseNameJFSecVtx = "xAOD::BTagVertexContainer#"
       OutputFilesBaseAuxNameJFSecVtx= "xAOD::BTagVertexAuxContainer#"
 
-      author = flags.BTagging.OutputFiles.Prefix + JetCollection
+      author = f'BTagging_{JetCollection}'
       # SecVert
       ItemList.append(OutputFilesBaseNameSecVtx + author + OutputFilesSVname)
       ItemList.append(OutputFilesBaseAuxNameSecVtx + author + OutputFilesSVname + 'Aux.-vxTrackAtVertex')

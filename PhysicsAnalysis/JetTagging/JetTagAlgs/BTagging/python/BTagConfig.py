@@ -212,7 +212,7 @@ def BTagAlgsCfg(
         jetcol_no_suffix = jet.replace("Track", "PV0Track")
         jetcol = jetcol.replace("Track", "PV0Track")
     if BTagCollection is None:
-        BTagCollection = inputFlags.BTagging.OutputFiles.Prefix + jet
+        BTagCollection = f'BTagging_{jet}'
 
     # Names of element link vectors that are stored on the jet and
     # BTagging object. These are added and read out by the packages
