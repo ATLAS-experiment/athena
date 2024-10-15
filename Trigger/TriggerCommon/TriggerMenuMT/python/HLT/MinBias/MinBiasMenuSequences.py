@@ -38,7 +38,7 @@ def SPCountHypoToolGen(chainDict):
         hypo.pixQ2mod = 0.4 # to be adjusted
     if "mb_pixsptrk_" in chainDict["chainName"]: #to be adjusted
         hypo.pixCL = 2
-        hypo.sctSP = 3
+        hypo.sctSP = 0
 
     return hypo
 
