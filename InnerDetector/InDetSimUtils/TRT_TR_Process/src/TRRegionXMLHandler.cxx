@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -31,9 +31,7 @@
 
 TRRegionXMLHandler::TRRegionXMLHandler(TRTTransitionRadiation *tr) :
   AthMessaging("TRRegionXMLHandler"),
-  m_theProcess(tr),
-  m_storeGate(nullptr),
-  m_initialLayoutIdDict(false)
+  m_theProcess(tr)
 {}
 
 void TRRegionXMLHandler::Process(const std::string& name)
@@ -42,19 +40,19 @@ void TRRegionXMLHandler::Process(const std::string& name)
 
   ATH_MSG_DEBUG("This is TRRegionXMLHandler. Handler called");
 
-  StatusCode sc = svcLocator->service("StoreGateSvc", m_storeGate);
-  if( sc.isFailure() ) {
+  SmartIF<StoreGateSvc> smartSG{svcLocator->service("StoreGateSvc")};
+  if (smartSG) { m_storeGate = smartSG.get(); }
+  if( !m_storeGate ) {
     ATH_MSG_ERROR("Unable to locate StoreGate! Stopping!");
     throw std::runtime_error("Unable to locate StoreGate!");
   }
-  StoreGateSvc* detStore = nullptr;
-  sc = svcLocator->service( "DetectorStore", detStore);
-  if( sc.isFailure() ) {
+  SmartIF<StoreGateSvc> detStore{svcLocator->service( "DetectorStore")};
+  if( !detStore ) {
     ATH_MSG_ERROR("Unable to locate DetectorStore! Leaving!");
     throw std::runtime_error("Unable to locate DetectorStore!");
   }
 
-  const IdDictManager * idDictMgr = nullptr;
+  const IdDictManager * idDictMgr{};
   if (StatusCode::SUCCESS == detStore->retrieve(idDictMgr, "IdDict")) {
     if (idDictMgr) {
       std::string tag = idDictMgr->manager()->tag();

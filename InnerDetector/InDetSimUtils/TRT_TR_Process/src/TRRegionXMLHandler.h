@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRREGIONXMLHANDLER_H
@@ -17,9 +17,9 @@ public:
   void Process(const std::string& name);
 
 private:
-  TRTTransitionRadiation * m_theProcess;
-  StoreGateSvc* m_storeGate;
-  bool m_initialLayoutIdDict;
+  TRTTransitionRadiation *m_theProcess{};
+  StoreGateSvc* m_storeGate{};
+  bool m_initialLayoutIdDict{false};
 };
 
 #endif
