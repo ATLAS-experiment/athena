@@ -90,7 +90,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
       }
     }
   }
-  for (std::string stream : streams){
+  for (const std::string& stream : streams){
     ATH_MSG_DEBUG("streams where a trigger fired and in your desired streams list: " << stream);
   }
   std::random_shuffle(streams.begin(), streams.end());
@@ -181,7 +181,7 @@ std::string OnlineEventDisplaysSvc::getEntireOutputStr(){
 std::string OnlineEventDisplaysSvc::getStreamName(){
   return m_outputStreamDir;
 }
-void OnlineEventDisplaysSvc::createWriteableDir(std::string directory, gid_t zpgid){
+void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gid_t zpgid){
 
   const char* char_dir = directory.c_str();
 
@@ -227,7 +227,7 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
   ATH_CHECK( incSvc.retrieve() );
   ATH_MSG_DEBUG("You have requested to only output JiveXML and ESD files when a trigger in the following streams was fired: ");
-  for (std::string stream : m_streamsWanted){
+  for (const std::string& stream : m_streamsWanted){
     ATH_MSG_DEBUG(stream);
   }
   if(m_BeamSplash){

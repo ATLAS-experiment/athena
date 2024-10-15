@@ -29,7 +29,7 @@ public:
   void beginEvent();
   void endEvent();
   void handle(const Incident& incident ) override;
-  void createWriteableDir(std::string directory, gid_t zpgid);
+  void createWriteableDir(const std::string& directory, gid_t zpgid);
   gid_t setOwnershipToZpGrpOrDefault();
   std::string getFileNamePrefix() override;
   std::string getEntireOutputStr() override;
