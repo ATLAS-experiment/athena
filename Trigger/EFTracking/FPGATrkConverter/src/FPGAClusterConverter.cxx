@@ -725,8 +725,8 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
     auto globalPos = xaod_pcl->globalPosition();
 
     // Covariance (to be cross-checked)
-    float cov_r = xaod_pcl->localCovariance<1>()(0,0);
-    float cov_z = xaod_pcl->localCovariance<1>()(1,0);
+    float cov_r = xaod_pcl->localCovariance<2>()(0,0);
+    float cov_z = xaod_pcl->localCovariance<2>()(1,0);
 
     // idHash and measurements
     unsigned int idHash = clEq.getIdentifierHash();
