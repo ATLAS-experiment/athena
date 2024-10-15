@@ -52,7 +52,7 @@
 //=========================================================================
 PileUpEventLoopMgr::PileUpEventLoopMgr(const std::string& name,
                                        ISvcLocator* svcLoc)
-  : MinimalEventLoopMgr(name, svcLoc)
+  : base_class(name, svcLoc)
   , AthMessaging (name)
   , m_incidentSvc("IncidentSvc", name) //FIXME should this be configurable?
   , m_mergeSvc("PileUpMergeSvc", name)
@@ -694,17 +694,4 @@ StatusCode PileUpEventLoopMgr::executeEvent( EventContext&& ctx )
   // Check if there was an error processing current event
   //------------------------------------------------------------------------
   return eventFailed?StatusCode::FAILURE:StatusCode::SUCCESS;
-}
-
-StatusCode PileUpEventLoopMgr::queryInterface(const InterfaceID& riid,void** ppvInterface)
-{
-  if (IEventSeek::interfaceID().versionMatch(riid)) {
-    *ppvInterface = dynamic_cast<IEventSeek*>(this);
-  }
-  else {
-    // Interface is not directly available : try out a base class
-    return MinimalEventLoopMgr::queryInterface(riid, ppvInterface);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
 }
