@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ElectronPhotonVariableCorrectionBase_H
@@ -89,7 +89,7 @@ public:
     const CP::CorrectionCode correctedCopy( const xAOD::Electron& in_electron, xAOD::Electron*& out_electron) const;
 
     //! @brief Returns the variable which should be corrected according to the passed configuration file
-    const std::string getCorrectionVariable() { return m_correctionVariable; };
+    const std::string& getCorrectionVariable() { return m_correctionVariable; };
 
     /** @brief Define the categories of EGamma objects tool can be applied to
      * @details The tool can be applied to electrons and photons, but the latter could also have different corrections according to whether they are
