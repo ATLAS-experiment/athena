@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -48,7 +48,7 @@
 TruthParticleCnvTool::TruthParticleCnvTool( const std::string& type, 
 					    const std::string& name, 
 					    const IInterface* parent ) : 
-  AthAlgTool( type, name, parent ),
+  base_class( type, name, parent ),
   m_dataType         ( ParticleDataType::True ),
   m_vxCandidatesName ( ),
   m_pdt              ( nullptr ),

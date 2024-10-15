@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ITruthParticleCnvTool.h 
@@ -34,16 +34,16 @@ class TruthParticle;
 class TruthParticleContainer;
 class EventContext;
 
-static const InterfaceID IID_ITruthParticleCnvTool("ITruthParticleCnvTool", 1, 0);
 
-class ITruthParticleCnvTool : virtual public IAlgTool,
-                              virtual public IProperty
+class ITruthParticleCnvTool : virtual public extend_interfaces<IAlgTool, IProperty>
 { 
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
+  // Declare interface ID
+  DeclareInterfaceID(ITruthParticleCnvTool, 1, 0);
 
   /** Destructor: 
    */
@@ -52,15 +52,6 @@ class ITruthParticleCnvTool : virtual public IAlgTool,
   // Athena algorithm's Hooks
   virtual StatusCode  execute() const    = 0;
   virtual StatusCode  execute(const EventContext& ctx) const    = 0;
-
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-  static const InterfaceID& interfaceID();
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
 
   /** Convert a @c McEventCollection into an @c TruthParticleContainer.
    *  @in  mcEvts the @c McEventCollection holding the @c HepMC::GenEvent we
@@ -92,21 +83,12 @@ class ITruthParticleCnvTool : virtual public IAlgTool,
   /** @}
    */
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
- protected: 
-
 }; 
 
 
 /////////////////////////////////////////////////////////////////// 
 /// Inline methods: 
 /////////////////////////////////////////////////////////////////// 
-inline const InterfaceID& ITruthParticleCnvTool::interfaceID() 
-{ 
-   return IID_ITruthParticleCnvTool; 
-}
 
 inline StatusCode
 ITruthParticleCnvTool::convert( const McEventCollection* mcCollection, 

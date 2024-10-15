@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCPARTICLEEVENTTPCNV_ROOTTRUTHPARTICLECNVTOOL_H
@@ -11,7 +11,7 @@
 #include "Gaudi/Property.h"
 
 class RootTruthParticleCnvTool
-  : public ITruthParticleCnvTool
+  : public implements<ITruthParticleCnvTool>
 {
 public:
   /// @name Function(s) inherited from ITruthParticleCnvTool
@@ -40,16 +40,6 @@ public:
   /** Helper method to get the charge of a particle given its PDG Id.
    */
   double chargeFromPdgId( int pdgId ) const;
-
-
-  /// @name Function(s) inherited from IInterface
-  /// @{
-  virtual StatusCode queryInterface( const InterfaceID& riid,
-                                     void** ppvInterface ) override;
-  virtual unsigned long addRef() override;
-  virtual unsigned long release() override;
-  virtual unsigned long refCount() const override;
-  /// @}
 
   /// @name Function(s) inherited from IProperty
   /// @{

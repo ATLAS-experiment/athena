@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleCnvTool.h 
@@ -56,8 +56,7 @@ class McEventCollection;
 class TruthParticle;
 class ITruthIsolationTool;
 
-class TruthParticleCnvTool :  virtual public ITruthParticleCnvTool, 
-			              public AthAlgTool   
+class TruthParticleCnvTool : public extends<AthAlgTool, ITruthParticleCnvTool>
 {
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
