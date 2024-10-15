@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -17,8 +17,6 @@
 #include "TProfile.h"
 #include "TEfficiency.h"
 #include "TProfile2D.h"
-
-#include "GaudiKernel/ITHistSvc.h"
 
 #include "StoreGate/StoreGateSvc.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -155,7 +153,8 @@ ByteStreamEmonInputSvc::ByteStreamEmonInputSvc(const std::string& name, ISvcLoca
     ByteStreamInputSvc(name,svcloc),
     m_inputMetaDataStore("StoreGateSvc/InputMetaDataStore", name ),
     m_sgSvc("StoreGateSvc", name),
-    m_robProvider("ROBDataProviderSvc", name)
+    m_robProvider("ROBDataProviderSvc", name),
+    m_histSvc("THistSvc", name)
 {
 }
 
@@ -183,7 +182,7 @@ StatusCode ByteStreamEmonInputSvc::initialize()
 
     m_connect = true;
 
-    if (service("THistSvc", m_histSvc, true).isFailure()) {
+    if (m_histSvc.retrieve().isFailure()) {
         ATH_MSG_ERROR("Unable to locate THistSvc");
         m_is_server.clear();
     } else {

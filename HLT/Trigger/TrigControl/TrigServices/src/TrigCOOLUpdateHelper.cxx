@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,8 +11,6 @@
 #include "TrigCOOLUpdateHelper.h"
 
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/IIOVDbSvc.h"
-#include "AthenaKernel/IIOVSvc.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVRange.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -41,8 +39,8 @@ TrigCOOLUpdateHelper::TrigCOOLUpdateHelper(const std::string &type,
 StatusCode TrigCOOLUpdateHelper::initialize()
 {
   // Do not create these services if they are not available already
-  service("IOVSvc", m_iovSvc, /*createIf=*/false).ignore();
-  service("IOVDbSvc", m_iovDbSvc, /*createIf=*/false).ignore();
+  m_iovSvc = service("IOVSvc", /*createIf=*/false);
+  m_iovDbSvc = service("IOVDbSvc", /*createIf=*/false);
 
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
@@ -76,7 +74,7 @@ StatusCode TrigCOOLUpdateHelper::stop()
 //=========================================================================
 StatusCode TrigCOOLUpdateHelper::readFolderInfo()
 {
-  if (m_iovDbSvc==nullptr) return StatusCode::SUCCESS;
+  if (!m_iovDbSvc) return StatusCode::SUCCESS;
 
   m_folderInfo.clear();
   // Loop over all keys registered with IOVDbSvc
@@ -134,7 +132,7 @@ StatusCode TrigCOOLUpdateHelper::resetFolder(const std::string& folder)
 {
   // Force a reset of folders by setting an IOVRange in the past
 
-  if (m_iovSvc==nullptr || m_iovDbSvc==nullptr) return StatusCode::SUCCESS;
+  if (!m_iovSvc || !m_iovDbSvc) return StatusCode::SUCCESS;
   
   const auto& f = m_folderInfo.find(folder);
   if ( f==m_folderInfo.end() ) {
@@ -183,7 +181,7 @@ StatusCode TrigCOOLUpdateHelper::hltCoolUpdate(const EventContext& ctx)
           
     if (f.needsUpdate) {
 
-      if ( m_iovSvc==nullptr || m_coolFolderName.empty() ) {
+      if ( !m_iovSvc || m_coolFolderName.empty() ) {
         ATH_MSG_DEBUG("Request to reload COOL folder ID " << idx << " for IOV change in lumiblock "
                       << f.lumiBlock << " but running without IOVSvc. Current event: "  << ctx.eventID());
         f.needsUpdate = false;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGONLINEMONITOR_TRIGOPMONITOR_H
@@ -70,7 +70,7 @@ private:
   ServiceHandle<IIncidentSvc> m_incidentSvc{ this, "IncidentSvc", "IncidentSvc", "Incident service"};
   ServiceHandle<ITHistSvc> m_histSvc{this, "THistSvc", "THistSvc"};
 
-  IIOVDbSvc* m_IOVDbSvc{nullptr};
+  SmartIF<IIOVDbSvc> m_IOVDbSvc;
 
   TH2I* m_magFieldHist{nullptr};
   TH2I* m_iovChangeHist{nullptr};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSERVICES_TRIGCOOLUPDATEHELPER_H
@@ -20,6 +20,8 @@
 #include "GaudiKernel/StatusCode.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/IIOVDbSvc.h"
+#include "AthenaKernel/IIOVSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/EventIDBase.h"
@@ -27,9 +29,6 @@
 
 // TDAQ includes
 #include "CTPfragment/CTPExtraWordsFormat.h"
-
-class IIOVSvc;
-class IIOVDbSvc;
 
 /**
  * Struct to hold CLID <-> folder name mapping
@@ -117,8 +116,8 @@ private:
   std::map<CTPfragment::FolderIndex, std::string> m_folderNames;
 
   // Services and Tools
-  IIOVSvc*                           m_iovSvc{nullptr};
-  IIOVDbSvc*                         m_iovDbSvc{nullptr};
+  SmartIF<IIOVSvc>                   m_iovSvc;
+  SmartIF<IIOVDbSvc>                 m_iovDbSvc;
   ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc;
 
   // Properties
