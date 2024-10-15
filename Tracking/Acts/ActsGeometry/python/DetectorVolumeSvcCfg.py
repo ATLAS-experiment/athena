@@ -7,8 +7,8 @@ def DetectorVolumeSvcCfg(flags, name="DetectorVolumeSvc", **kwargs):
     detBuilders = []
     if flags.Detector.GeometryMuon:
         from ActsMuonDetector.ActsMuonDetectorCfg import MuonDetectorBuilderToolCfg
-        detBuilders +=[result.getPrimaryAndMerge(MuonDetectorBuilderToolCfg(flags))]
         detBuilders += [result.getPrimaryAndMerge(ActsSimpleCylinderDetBuilderToolCfg(flags))]
+        detBuilders += [result.getPrimaryAndMerge(MuonDetectorBuilderToolCfg(flags))]
     kwargs.setdefault("DetectorBuilders", detBuilders)
     theSvc = CompFactory.ActsTrk.DetectorVolumeSvc(name, **kwargs)
     result.addService(theSvc, primary=True)
