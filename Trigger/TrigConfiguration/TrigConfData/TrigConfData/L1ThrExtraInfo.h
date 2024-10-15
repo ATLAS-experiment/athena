@@ -413,8 +413,8 @@ namespace TrigConf {
       unsigned int seedThresholdCounts(const std::string& module) const { return energyInCounts(seedThresholdMeV(module), 25 /*jFEX internal resolution!*/); }
       unsigned int seedThresholdMeV(const std::string& module) const {
           if(module=="1C" || module=="1A") return m_seedThresholdMeV1;
-          if(module=="2C" || module=="2A") return m_seedThresholdMeV1;
-          if(module=="3C" || module=="3A") return m_seedThresholdMeV1;
+          if(module=="2C" || module=="2A") return m_seedThresholdMeV2;
+          if(module=="3C" || module=="3A") return m_seedThresholdMeV3;
           throw std::runtime_error("L1ThrExtraInfo: Module" + module + " not recongnised for jJ seedThreshold");
       }
    private:

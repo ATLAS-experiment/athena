@@ -402,7 +402,7 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.ESD
+    flags.Input.Files = defaultTestFiles.ESD_RUN2_MC
     flags.Output.HISTFileName = 'TileMBTSMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False

@@ -8,6 +8,7 @@ atlas_add_poolcnv_library( LArAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES LArRawEvent/LArRawChannelContainer.h LArRawEvent/LArDigitContainer.h
          LArRawEvent/LArTTL1Container.h LArRawEvent/LArFebErrorSummary.h LArRawEvent/LArLATOMEHeaderContainer.h
+         LArRawEvent/LArFebHeaderContainer.h
          LArRecEvent/LArNoisyROSummary.h
    LINK_LIBRARIES AthenaPoolUtilities CaloDetDescrLib AthenaKernel StoreGateLib
                   AthenaPoolCnvSvcLib GaudiKernel LArTPCnv LArRawEvent

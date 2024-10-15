@@ -129,7 +129,10 @@ def createDetectorConfigFlags():
 
     # Forward detectors (disabled by default)
     dcf.addFlag('Detector.EnableLucid',     lambda prevFlags : prevFlags.Detector.GeometryLucid)
+    # EnableZDC enables the overall ZDC system, while _ZDC and _RPD refer to the subsystems, which are now independent 
     dcf.addFlag('Detector.EnableZDC',       lambda prevFlags : prevFlags.Detector.GeometryZDC)
+    dcf.addFlag('Detector.EnableZDC_ZDC',   lambda prevFlags : prevFlags.Detector.GeometryZDC)
+    dcf.addFlag('Detector.EnableZDC_RPD',   lambda prevFlags : prevFlags.Detector.GeometryZDC)
     dcf.addFlag('Detector.EnableALFA',      lambda prevFlags : prevFlags.Detector.GeometryALFA)
     dcf.addFlag('Detector.EnableAFP',       lambda prevFlags : prevFlags.Detector.GeometryAFP)
     dcf.addFlag('Detector.EnableFwdRegion', lambda prevFlags : prevFlags.Detector.GeometryFwdRegion)

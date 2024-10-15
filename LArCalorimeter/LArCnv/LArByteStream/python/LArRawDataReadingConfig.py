@@ -15,7 +15,7 @@ def LArRawDataReadingCfg(configFlags, **kwargs):
 
     if configFlags.Overlay.DataOverlay:
         kwargs.setdefault("LArDigitKey", configFlags.Overlay.BkgPrefix + "FREE")
-
+        kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
     if configFlags.LAr.RawChannelSource is RawChannelSource.Calculated or configFlags.Overlay.DataOverlay:
         kwargs.setdefault("LArRawChannelKey", "")
 
