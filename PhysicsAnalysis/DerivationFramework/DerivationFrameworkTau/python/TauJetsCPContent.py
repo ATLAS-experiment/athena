@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#! Note: Please check the TauJets_MuonRMCPContent and TauJets_EleRMCPContent if any new containers is added here. 
+#! Note: Please check the TauJets_LepRMCPContent if any new containers is added here. 
 
 TauJetsCPContent = [
     "TauJets",
