@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -29,9 +29,8 @@ CombinedScintillatorSD::CombinedScintillatorSD(const std::string& name, const st
     m_hit(),
     m_HitColl(hitCollectionName)
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  StoreGateSvc* detStore(nullptr);
-  if (svcLocator->service("DetectorStore", detStore).isFailure()) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if ( !detStore ) {
     G4ExceptionDescription description;
     description << "Constructor: DetectorStoreSvc not found!";
     G4Exception("CombinedScintillatorSD", "NoDetStore", FatalException, description);
@@ -52,9 +51,6 @@ CombinedScintillatorSD::CombinedScintillatorSD(const std::string& name, const st
   for (int channel = 0; channel < N_CELLS; ++channel) {
     m_id[channel] = m_tileTBID->channel_id(type, module, channel);
   }
-}
-
-CombinedScintillatorSD::~CombinedScintillatorSD() {
 }
 
 void CombinedScintillatorSD::StartOfAthenaEvent() {

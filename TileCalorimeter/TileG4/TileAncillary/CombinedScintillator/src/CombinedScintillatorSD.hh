@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -29,7 +29,7 @@ class CombinedScintillatorSD : public G4VSensitiveDetector
 {
 public:
   CombinedScintillatorSD(const std::string& name, const std::string& hitCollectionName);
-  ~CombinedScintillatorSD();
+  ~CombinedScintillatorSD() = default;
 
   void StartOfAthenaEvent();   // Called from CombinedScintillatorSDTool::SetupEvent
   void Initialize(G4HCofThisEvent*) override final;
