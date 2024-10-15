@@ -93,8 +93,41 @@ int main(int argc, char** argv) {
         TEST_FUNCTION(isZ)
         /*TEST_FUNCTION(leadingQuark)*/
         TEST_FUNCTION(threeCharge)
-
+        /* NEW **/
+        TEST_FUNCTION(isBBbarMeson)
+        TEST_FUNCTION(isCCbarMeson)
+        TEST_FUNCTION(isExcited)
+        TEST_FUNCTION(isGeantino)
+        TEST_FUNCTION(isHiddenValley)
+        TEST_FUNCTION(isKK)
+        TEST_FUNCTION(isMonopole)
+        TEST_FUNCTION(isPythia8Specific)
+        TEST_FUNCTION(SUSY::isRBaryon)
+        TEST_FUNCTION(SUSY::isRBottomHadron)
+        TEST_FUNCTION(SUSY::isRGlueball)
+        TEST_FUNCTION(SUSY::isRHadron)
+        TEST_FUNCTION(SUSY::isRMeson)
+        TEST_FUNCTION(SUSY::isRTopHadron)
+        TEST_FUNCTION(SUSY::isSBaryon)
+        TEST_FUNCTION(SUSY::isSBottomBaryon)
+        TEST_FUNCTION(SUSY::isSBottomHadron)
+        TEST_FUNCTION(SUSY::isSBottomMeson)
+        TEST_FUNCTION(SUSY::isSLepton)
+        TEST_FUNCTION(isSMLepton)
+        TEST_FUNCTION(isSMNeutrino)
+        TEST_FUNCTION(SUSY::isSMeson)
+        TEST_FUNCTION(SUSY::isSTopBaryon)
+        TEST_FUNCTION(SUSY::isSTopHadron)
+        TEST_FUNCTION(SUSY::isSTopMeson)
+        TEST_FUNCTION(isTetraquark)
+        TEST_FUNCTION(isTopBaryon)
+        TEST_FUNCTION(isTopHadron)
+        TEST_FUNCTION(isTopMeson)
+        TEST_FUNCTION(isTrajectory)
+        TEST_FUNCTION(leadingQuark)
+        TEST_FUNCTION(SUSY::spin)
         if  (myline!=current) { printf("reference :%s\ncalculated:%s\n",myline.c_str(),current.c_str()); return 1; }
+        //printf("%s\n",current.c_str());
         processed=true;
     }
     return 0;
