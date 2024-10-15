@@ -135,7 +135,7 @@ def PLR_HitAnalysisCfg(flags, name='PLR_HitAnalysis', **kwargs):
     acc.merge(HitAnalysisOutputCfg(flags))
 
     return acc
-    
+
 
 def BCMPrimeHitAnalysisCfg(flags, name='BCMPrimeHitAnalysis', **kwargs):
     from BCMPrimeGeoModelXml.BCMPrimeGeoModelConfig import BCMPrimeGeometryCfg
@@ -165,7 +165,7 @@ def SiHitAnalysisCfg(flags):
 
     if flags.Detector.EnablePLR:
         acc.merge(PLR_HitAnalysisCfg(flags))
-        
+
     if flags.Detector.EnableBCMPrime:
         acc.merge(BCMPrimeHitAnalysisCfg(flags))
 
@@ -179,10 +179,12 @@ def CaloHitAnalysisCfg(flags, name='CaloHitAnalysis', **kwargs):
     if flags.Detector.GeometryLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
         acc.merge(LArGMCfg(flags))
+    kwargs.setdefault("UseLAr", flags.Detector.GeometryLAr)
 
     if flags.Detector.GeometryTile:
         from TileGeoModel.TileGMConfig import TileGMCfg
         acc.merge(TileGMCfg(flags))
+    kwargs.setdefault("UseTile", flags.Detector.GeometryTile)
 
     kwargs.setdefault('HistPath', f'/{name}/')
     acc.addEventAlgo(CompFactory.CaloHitAnalysis(name, **kwargs))
