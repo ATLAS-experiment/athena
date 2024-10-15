@@ -347,10 +347,12 @@ def decisionToolFromAlgData(flags, ad):
         tool.MaxRSqr = int(variableValue(ad, 'MaxRSqr'))
         tool.MinET = int(variableValue(ad, 'MinET'))
 
-        numResultBits = fixedValue(ad, 'NumResultBits')
-         # not sure how the list of cuts is specified if NumResultBits > 1
-        assert numResultBits == 1
+        # in some previous version of the menu NumResultBits was set to 1.
+        # not sure how the list of cuts is specified if NumResultBits > 1
+        # now hardwire NumResultBits=1
+        numResultBits = 1
 
+        
         tool.MinSumET = [int(variableValue(ad, 'MinSumET'))]
         
    
