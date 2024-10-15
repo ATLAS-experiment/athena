@@ -20,7 +20,7 @@
 #include "Acts/EventData/Types.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/Propagator/EigenStepper.hpp"
+#include "Acts/Propagator/SympyStepper.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -186,10 +186,10 @@ StatusCode KalmanFitter::initialize() {
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
 
   // Fitter
-  Acts::EigenStepper<> stepper(field);
+  Acts::SympyStepper stepper(field);
   Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
 			     logger().cloneWithSuffix("Navigator"));
-  Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(stepper, 
+  Acts::Propagator<Acts::SympyStepper, Acts::Navigator> propagator(stepper, 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
 
@@ -198,7 +198,7 @@ StatusCode KalmanFitter::initialize() {
 
   // Direct Fitter
   Acts::DirectNavigator directNavigator( logger().cloneWithSuffix("DirectNavigator") );
-  Acts::Propagator<Acts::EigenStepper<>, Acts::DirectNavigator> directPropagator(std::move(stepper),
+  Acts::Propagator<Acts::SympyStepper, Acts::DirectNavigator> directPropagator(std::move(stepper),
 										 std::move(directNavigator),
 										 logger().cloneWithSuffix("DirectPropagator"));
 
