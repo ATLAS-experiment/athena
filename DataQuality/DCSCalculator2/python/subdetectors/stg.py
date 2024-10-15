@@ -29,7 +29,7 @@ class STG(DCSC_DefectTranslate_Subdetector):
     # If you change this please consult with the Muon groups.
     # It was decided to make it the same across CSC, MDT, RPC and TGC.
     dead_fraction_caution = None
-    dead_fraction_bad = 0.1
+    dead_fraction_bad = 0.5
 
     def __init__(self, *args, **kwargs):
 
