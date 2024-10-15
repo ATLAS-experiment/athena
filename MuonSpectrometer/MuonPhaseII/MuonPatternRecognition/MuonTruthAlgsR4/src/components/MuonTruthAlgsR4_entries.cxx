@@ -5,6 +5,7 @@
 */
 #include "../TruthSegmentMaker.h"
 #include "../PrepDataToSimHitAssocAlg.h"
-
+#include "../PrdMultiTruthMaker.h"
 DECLARE_COMPONENT(MuonR4::TruthSegmentMaker)
 DECLARE_COMPONENT(MuonR4::PrepDataToSimHitAssocAlg)
+DECLARE_COMPONENT(MuonR4::PrdMultiTruthMaker)

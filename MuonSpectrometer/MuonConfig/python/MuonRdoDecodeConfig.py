@@ -330,11 +330,20 @@ def CscClusterBuildCfg(flags, name="CscThresholdClusterBuilder"):
 
 def MuonPRD_MultiTruthMakerCfg(flags, name="MuonPRD_MultiTruthMaker", **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    acc = MuonIdHelperSvcCfg(flags)
-    kwargs.setdefault("TGC_PrepRawDataContainer", 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
-    # The availability of the other containers, e.g. CSC is controlled in MuonPRD_MultiTruthMaker::initialize() by checking m_idHelperSvc
-    acc.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker(name, **kwargs))
-    return acc
+    result = ComponentAccumulator()
+    result.merge(MuonIdHelperSvcCfg(flags))
+    
+    if not flags.Detector.GeometryMDT: kwargs.setdefault("MdtPrdKey", "")
+    if not flags.Detector.GeometryRPC: kwargs.setdefault("RpcPrdKey", "")
+    if not flags.Detector.GeometryTGC: kwargs.setdefault("TgcPrdKey", "")
+    if not flags.Detector.GeometryCSC: kwargs.setdefault("CscPrdKey", "")
+
+    if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcPrdKey", "")
+    if not flags.Detector.GeometryMM: kwargs.setdefault("MmPrdKey", "")
+
+    kwargs.setdefault("TgcPrdKey", 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    result.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker(name, **kwargs), primary = True)
+    return result
 
 
 def MuonRDOtoPRDConvertorsCfg(flags):
@@ -361,7 +370,7 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         acc.merge(CscRDODecodeCfg(flags))
         acc.merge(CscClusterBuildCfg(flags))
 
-    if flags.Input.isMC:
+    if flags.Input.isMC and not flags.Muon.usePhaseIIGeoSetup:
         acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
 
     return acc
