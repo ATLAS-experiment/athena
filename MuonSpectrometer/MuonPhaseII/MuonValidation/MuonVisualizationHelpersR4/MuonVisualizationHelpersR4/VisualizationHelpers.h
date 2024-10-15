@@ -1,0 +1,71 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONR4_MUONVISUALIZATIONHELPERS_H
+#define MUONR4_MUONVISUALIZATIONHELPERS_H
+
+#include <memory>
+#include <GeoPrimitives/GeoPrimitives.h>
+#include <MuonPatternEvent/SegmentFitterEventData.h>
+
+
+#include "TEllipse.h"
+#include "TBox.h"
+#include "TLatex.h"
+#include "TLine.h"
+
+namespace MuonValR4 {
+    /** @brief Filling codes for hollow / fullFilling / hatched filling */
+    constexpr int hollowFilling = 0;
+    constexpr int fullFilling = 1001;
+    constexpr int hatchedFilling = 3344;
+    
+    /** @brief ObjectView */
+    constexpr int objViewEta = MuonR4::SegmentFit::toInt(MuonR4::SegmentFit::AxisDefs::eta);
+    constexpr int objViewPhi = MuonR4::SegmentFit::toInt(MuonR4::SegmentFit::AxisDefs::phi);
+    
+    /** @brief Create a TEllipse for drawing a drift circle
+     *  @param center: Position of the drift cirle expressed in the chambers frame
+     *                  y-coordinate corresponds to the tube layer
+     *                  z-coordinate corresponds to the tube in the layer
+     *  @param radius: Radius of the drift circle to draw
+     *  @param color: Color of the circle to draw
+     *  @param fillStyle: Style to pick the filling of the circle */
+    std::unique_ptr<TEllipse> drawDriftCircle(const Amg::Vector3D& center,
+                                              const double radius,
+                                              const int color = kViolet,
+                                              const int fillStyle = hollowFilling);
+
+    
+    /** @brief Creates a box for drawing, e.g strip measurements
+     *  @param boxCenter: Center of the box to be placed expressed in chamber frame coordinates
+     *  @param boxWidth: Width of the drawn box
+     *  @param boxHeight: Height of the drawn box
+     *  @param color: Color of the surrounding line & filling
+     *  @param fillStyle: Box fill style
+     *  @param view: Is the box placed in the y-z or in the x-z plane */
+    std::unique_ptr<TBox> drawBox(const Amg::Vector3D& boxCenter,
+                                  const double boxWidth,
+                                  const double boxHeight,
+                                  const int color = kGreen +2,
+                                  const int fillStyle = hollowFilling,
+                                  const int view = objViewEta);
+    
+    std::unique_ptr<TLine> drawLine(const MuonR4::SegmentFit::Parameters& pars,
+                                    const double lowEnd, const double highEnd,
+                                    const int color = kRed +1,
+                                    const int lineStyle = kDashed,
+                                    const int view = objViewEta);
+    /** @brief Create a TLatex label,
+     *  @param text: Label text
+     *  @param xPos: x-position of the label on the Canvas
+     *  @param yPos: y-position of the label on the Canvas
+     *  @param fontSize: Size of the label font */
+    std::unique_ptr<TLatex> drawLabel(const std::string& text, 
+                                      const double xPos, 
+                                      const double yPos,
+                                      const unsigned int fontSize = 18);
+
+
+}
+#endif

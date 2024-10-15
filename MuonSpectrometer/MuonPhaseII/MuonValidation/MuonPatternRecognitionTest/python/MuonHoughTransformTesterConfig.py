@@ -1,26 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-
-def MuonHoughTransformTesterCfg(flags, name = "MuonHoughTransformTester", **kwargs):
-    result = ComponentAccumulator()
-    theAlg = CompFactory.MuonValR4.MuonHoughTransformTester(name, **kwargs) 
-    result.addEventAlgo(theAlg, primary=True)
-    return result
-
-def MdtCalibDbAlgTestCfg(flags, name = "MdtCalibDbAlgTest", **kwargs):
-    result = ComponentAccumulator()
-    theAlg = CompFactory.MuonValR4.MdtCalibDbAlgTest(name, **kwargs)    
-    result.addEventAlgo(theAlg, primary=True)
-    return result
-
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest,setupHistSvcCfg
     parser = SetupArgParser()
-    parser.add_argument("--skipSegmentFit", 
-                        help="Skip the segment fit step", action='store_true', default = False)
+    parser.add_argument("--noMonitorPlots", help="If set to true, there're no monitoring plots", default = False,
+                                            action='store_true')
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(noMM=True)
     parser.set_defaults(noSTGC=True)
@@ -45,19 +29,29 @@ if __name__=="__main__":
 
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
     cfg.merge(xAODUncalibMeasPrepCfg(flags))
-
+    
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
     from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionTest.PatternTestConfig import MuonHoughTransformTesterCfg, PatternVisualizationToolCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
+    cfg.merge(MuonSegmentFittingAlgCfg(flags))
+    cfg.merge(MuonHoughTransformTesterCfg(flags))    
 
-    testerArgs = {}
-    if args.skipSegmentFit: 
-        testerArgs["SegmentKey"] = ""
-    else: 
-        cfg.merge(MuonSegmentFittingAlgCfg(flags))
-    cfg.merge(MuonHoughTransformTesterCfg(flags, **testerArgs))    
-    
+    if not args.noMonitorPlots:
+        cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="EtaHoughPlotValid",
+                                                                                                AllCanvasName="AllEtaHoughiDiPuffPlots",
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+        cfg.getEventAlgo("MuonPhiHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="PhiHoughPlotValid",
+                                                                                                AllCanvasName="AllPhiHoughiDiPuffPlots",
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= False))
+        cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="SegmentPlotValid",
+                                                                                                AllCanvasName="AllSegmentFitPlots",
+                                                                                                saveSinglePDFs = False, saveSummaryPDF= True))
+
     executeTest(cfg)
     

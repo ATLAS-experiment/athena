@@ -1,0 +1,56 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
+
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
+namespace MuonValR4{
+    using namespace MuonR4;
+    using namespace SegmentFit;
+    std::unique_ptr<TEllipse> drawDriftCircle(const Amg::Vector3D& center,
+                                              const double radius, const int color,
+                                              const int fillStyle) {
+        auto ellipse = std::make_unique<TEllipse>(center.y(), center.z(), radius);
+        ellipse->SetFillColor(color);
+        ellipse->SetLineColor(color);
+        ellipse->SetFillStyle(fillStyle);
+        ellipse->SetFillColorAlpha(color, 0.8);
+        return ellipse;
+    }
+
+    std::unique_ptr<TLatex> drawLabel(const std::string& text, 
+                                      const double xPos, const double yPos,
+                                      const unsigned int fontSize) {
+        auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
+        tl->SetNDC();
+        tl->SetTextFont(53); 
+        tl->SetTextSize(fontSize); 
+        return tl;
+    }
+     std::unique_ptr<TBox> drawBox(const Amg::Vector3D& boxCenter,
+                                   const double boxWidth, const double boxHeight,
+                                   const int color, const int fillStyle,
+                                   const int view) {
+        auto box = std::make_unique<TBox>(boxCenter[view] - 0.5*boxWidth, boxCenter.z() - 0.5*boxHeight,
+                                          boxCenter[view] + 0.5*boxWidth, boxCenter.z() + 0.5*boxHeight);
+        box->SetFillColor(color);
+        box->SetLineColor(color);
+        box->SetFillStyle(fillStyle);
+        box->SetFillColorAlpha(color, 0.8);
+        return box;
+    }
+    std::unique_ptr<TLine> drawLine(const Parameters& pars,
+                                    const double lowEnd, const double highEnd,
+                                    const int color, const int lineStyle,
+                                    const int view) {
+        const auto [pos, dir] = makeLine(pars);
+        const double x1 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), lowEnd).value_or(0.)* dir)[view];
+        const double x2 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), highEnd).value_or(0.)* dir)[view];
+        auto seedLine = std::make_unique<TLine>(x1, lowEnd, x2, highEnd);
+        seedLine->SetLineColor(color);
+        seedLine->SetLineWidth(2);
+        seedLine->SetLineStyle(lineStyle);
+        return seedLine;
+    }
+}

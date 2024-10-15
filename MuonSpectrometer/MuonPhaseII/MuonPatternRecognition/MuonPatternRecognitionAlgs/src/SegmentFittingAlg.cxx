@@ -24,52 +24,31 @@
 #include <Minuit2/Minuit2Minimizer.h>
 #include <Math/Minimizer.h>
 
-#include <format>
-#include "TCanvas.h"
-#include "TLine.h"
-#include "TArrow.h"
-#include "TMarker.h"
-#include "TEllipse.h"
-#include "TLatex.h"
-#include "TH1F.h"
-#include "TBox.h"
+#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
 
 
 namespace MuonR4 {
     using namespace SegmentFit;
+    using namespace MuonValR4;
 
     constexpr double inv_c = 1./ Gaudi::Units::c_light;
     
-    std::unique_ptr<TLine> drawLine(const MuonR4::SegmentFit::Parameters& pars,
-                                    const double z1 = 300.*Gaudi::Units::mm,
-                                    const double z2 = -300.*Gaudi::Units::mm,
-                                    const int color = kViolet,
-                                    unsigned int coord = toInt(AxisDefs::eta)) {
-        using namespace MuonR4::SegmentFit;
-        const auto [pos, dir] = makeLine(pars);
-        const double y1 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), z1).value_or(0.)* dir)[coord];
-        const double y2 = (pos + Amg::intersect<3>(pos,dir,Amg::Vector3D::UnitZ(), z2).value_or(0.)* dir)[coord];
-        auto seedLine = std::make_unique<TLine>(y1, z1, y2, z2);
-        seedLine->SetLineColor(color);
-        seedLine->SetLineWidth(2);
-        seedLine->SetLineStyle(7);
-        return seedLine;
-    }
-    std::unique_ptr<TLatex> drawLabel(const std::string& text, const double xPos, const double yPos,
-                                      unsigned int fontSize = 18) {
-        auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
-        tl->SetNDC();
-        tl->SetTextFont(53); 
-        tl->SetTextSize(fontSize); 
-        return tl;
-    }
+  
     MuonR4::SegmentFitResult::HitVec copy(const MuonR4::SegmentFitResult::HitVec& hits) {
         MuonR4::SegmentFitResult::HitVec copied{};
         copied.reserve(hits.size());
         std::ranges::transform(hits, std::back_inserter(copied), 
                                [](const auto& hit) { return std::make_unique<MuonR4::CalibratedSpacePoint>(*hit);});
         return copied;
+    }
+    MuonR4::SegmentFitResult copy(const MuonR4::SegmentFitResult& toCopy) {
+        MuonR4::SegmentFitResult toRet{};
+        toRet.segmentPars = toCopy.segmentPars;
+        toRet.calibMeasurements = copy(toCopy.calibMeasurements);
+        toRet.chi2 = toCopy.chi2;
+        toRet.nDoF = toCopy.nDoF;
+        return toRet;
     }
     bool removeBeamSpot(MuonR4::SegmentFitResult::HitVec& hits){
         std::size_t before = hits.size();
@@ -79,15 +58,8 @@ namespace MuonR4 {
                 }), hits.end());
         return before != hits.size();
     }
-    std::string removeNonAlphaNum(std::string str) {
-        str.erase(std::remove_if(str.begin(),str.end(),[](const unsigned char c){return !std::isalnum(c);}), str.end());
-        return str;
-    }  
-    Parameters truthPars(const xAOD::MuonSegment& truthSeg) {
-        static const SG::Accessor<xAOD::MeasVector<toInt(ParamDefs::nPars)>> acc_localSegPars{"localSegPars"};
-        return xAOD::toEigen(xAOD::ConstVectorMap<toInt(ParamDefs::nPars)>{acc_localSegPars(truthSeg).data()});
 
-    }
+    using PrimitiveVec = MuonValR4::IPatternVisualizationTool::PrimitiveVec;
 
     SegmentFittingAlg::~SegmentFittingAlg() = default;
     SegmentFittingAlg::SegmentFittingAlg(const std::string& name, ISvcLocator* pSvcLocator): 
@@ -99,17 +71,9 @@ namespace MuonR4 {
         ATH_CHECK(m_outSegments.initialize());  
         ATH_CHECK(m_calibTool.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_truthSegKey.initialize(!m_truthSegKey.empty()));
-        ATH_CHECK(detStore()->retrieve(m_detMgr));
-        m_allCan = std::make_unique<TCanvas>("all", "all", 800,600.);
-        m_allCan->SaveAs( (m_allCanName +".pdf[").c_str());
+        ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
         return StatusCode::SUCCESS;
     }
-    StatusCode SegmentFittingAlg::finalize() {
-        if (m_allCan) m_allCan->SaveAs( (m_allCanName +".pdf]").c_str());
-        return StatusCode::SUCCESS;
-    }
-
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
     
         const ActsGeometryContext* gctx{nullptr};
@@ -117,7 +81,7 @@ namespace MuonR4 {
         const SegmentSeedContainer* segmentSeeds=nullptr; 
         ATH_CHECK(retrieveContainer(ctx, m_seedKey, segmentSeeds));
     
-        SG::WriteHandle<SegmentContainer> writeSegments{m_outSegments, ctx};
+        SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
         std::vector<std::unique_ptr<Segment>> allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
@@ -142,42 +106,11 @@ namespace MuonR4 {
                 ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
                 return StatusCode::SUCCESS;
             }
-            SG::ReadHandle<ContainerType> readHandle{key, ctx};
+            SG::ReadHandle readHandle{key, ctx};
             ATH_CHECK(readHandle.isPresent());
             contToPush = readHandle.cptr();
             return StatusCode::SUCCESS;
         }
-
-    const xAOD::MuonSegment* SegmentFittingAlg::getTruthSegment(const EventContext& ctx,
-                                                                const std::unordered_set<const xAOD::MuonSimHit*>& truthRecoHits) const{
-        const xAOD::MuonSegmentContainer* truthSegs{nullptr};
-        if (!retrieveContainer(ctx, m_truthSegKey, truthSegs).isSuccess()){
-            THROW_EXCEPTION("Failed to retrieve segment container "<<m_truthSegKey.fullKey());
-        }
-        const ActsGeometryContext* gctx{};
-        retrieveContainer(ctx,m_geoCtxKey, gctx).ignore();
-        if (!truthSegs){
-            return nullptr;
-        }
-        const xAOD::MuonSegment* bestSeg{nullptr};
-        unsigned int mostHits{0};
-        for (const xAOD::MuonSegment* segment : *truthSegs){
-            std::unordered_set<const xAOD::MuonSimHit*> truthHits{getTruthMatchedHits(*segment)};
-           ATH_MSG_VERBOSE("Compare associated hits "<<toString(truthPars(*segment))<<" "
-                <<Amg::toString(makeLine(truthPars(*segment)).second) );
-            const unsigned matchedHits = std::accumulate(truthHits.begin(), truthHits.end(),0 ,
-                [&truthRecoHits](unsigned int n, const xAOD::MuonSimHit* simHit){
-                    return n + truthRecoHits.count(simHit);
-                });
-            if (matchedHits > mostHits) {
-                mostHits = matchedHits;
-                bestSeg = segment;
-            }
-        }
-
-        return bestSeg;
-    }
-
 
     SegmentFitResult SegmentFittingAlg::fitSegmentHits(const EventContext& ctx,
                                                        const ActsGeometryContext& gctx,
@@ -311,63 +244,39 @@ namespace MuonR4 {
 
         MdtSegmentSeedGenerator::Config genCfg{};
         genCfg.hitPullCut = m_seedHitChi2;
-        genCfg.interceptReso = m_seedY0Reso;
-        genCfg.tanThetaReso = m_seedTanThetaReso;
+        genCfg.recalibSeedCircles = m_recalibSeed;
+        genCfg.fastSeedFit = m_refineSeed;
         genCfg.calibrator = m_calibTool.get();
+        
+
         /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
         genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[toInt(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
         /** Draw the pattern with all possible seeds */
-        if (m_canvCounter < m_nDrawCanvases) {
-            SegmentFitResult data{};
-            data.segmentPars = patternSeed->parameters();
-            const Amg::Vector3D seedPos{patternSeed->positionInChamber()};
-            const Amg::Vector3D seedDir{patternSeed->directionInChamber()};
-        
-            data.calibMeasurements = m_calibTool->calibrate(ctx, patternSeed->getHitsInMax(), seedPos, seedDir, 
-                                                            data.segmentPars[toInt(ParamDefs::time)]);
-
-            for (const std::unique_ptr<CalibratedSpacePoint>& meas : data.calibMeasurements) {
-                data.chi2PerMeasurement.push_back(SegmentFitHelpers::chiSqTerm(seedPos, seedDir, 0., std::nullopt, *meas, msgStream()));
-            } 
-            data.chi2 = std::accumulate(data.chi2PerMeasurement.begin(), data.chi2PerMeasurement.end(), 0.);
-            data.nDoF = 1;
-
-            // /** Draw the full pattern seed */
-            std::vector<std::unique_ptr<TObject>> seedLines{};
+        if (m_visionTool.isEnabled()) { 
+            PrimitiveVec seedLines{};
             MdtSegmentSeedGenerator drawMe{name(), patternSeed, genCfg};
             while(auto s = drawMe.nextSeed(ctx)) {
-                seedLines.push_back(drawLine(s->parameters));
+                seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
             }
-            seedLines.push_back(drawLabel("possible seeds: "+std::to_string(drawMe.numGenerated()),0.15, 0.85, 14));
-            visualizeFit(ctx, data, patternSeed->parentBucket(), "pattern", std::move(seedLines));
+            seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.15, 0.85, 14));
+            m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern");
         }
-        MdtSegmentSeedGenerator seedGen{name(),patternSeed, std::move(genCfg)};
 
+        MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
         while (auto seed = seedGen.nextSeed(ctx)) {
-
             SegmentFitResult data{};
             data.segmentPars = seed->parameters;
-            data.calibMeasurements = std::move(seed->measurements);
-            
+            data.calibMeasurements = std::move(seed->measurements);            
             /// Draw the prefit
-            if (m_canvCounter < m_nDrawCanvases) {
-                const auto [seedPos, seedDir] = SegmentFit::makeLine(data.segmentPars);
-                for (const std::unique_ptr<CalibratedSpacePoint>& meas : data.calibMeasurements) {
-                    data.chi2PerMeasurement.push_back(SegmentFitHelpers::chiSqTerm(seedPos, seedDir, 0., std::nullopt, *meas, msgStream()));
-                }
-                data.chi2 = std::accumulate(data.chi2PerMeasurement.begin(), data.chi2PerMeasurement.end(), 0.);
-
-                std::vector<std::unique_ptr<TObject>> primitives{};
-                primitives.push_back(drawLine(seed->parameters));
-
-                visualizeFit(ctx, data, patternSeed->parentBucket(), 
-                             std::format("Pre fit {:d}", seedGen.numGenerated()), std::move(primitives));
-            }
+            if (m_visionTool.isEnabled()) {
+                auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
+                m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Pre fit {:d}", seedGen.numGenerated()));
+            } 
             data = fitSegmentHits(ctx, gctx, seed->parameters, std::move(data.calibMeasurements));
             data.nIter +=  seed->nIter;
-            if (data.converged) {
-                visualizeFit(ctx, data, patternSeed->parentBucket(), 
-                             std::format("Intermediate fit {:d}", seedGen.numGenerated()));
+            if (m_visionTool.isEnabled() && data.converged) {
+                auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
+                m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Intermediate fit {:d}", seedGen.numGenerated()));
             }
             if (!removeOutliers(ctx, gctx, *patternSeed, data)) {
                 continue;
@@ -375,30 +284,32 @@ namespace MuonR4 {
             if (!plugHoles(ctx, gctx, *patternSeed, data)) {
                 continue;
             }
-
-            visualizeFit(ctx, data, patternSeed->parentBucket(), 
-                        std::format("Final fit {:d}", seedGen.numGenerated()));
-
-            const auto [locPos, locDir] = data.makeLine();
-            Amg::Vector3D globPos = locToGlob * locPos;
-            Amg::Vector3D globDir = locToGlob.linear()* locDir;
-
-
-            auto finalSeg = std::make_unique<Segment>(std::move(globPos), std::move(globDir),
-                                                      patternSeed,
-                                                      std::move(data.calibMeasurements),
-                                                      data.chi2,
-                                                      data.nDoF);
-            finalSeg->setCallsToConverge(data.nIter);
-            finalSeg->setChi2PerMeasurement(std::move(data.chi2PerMeasurement));
-            finalSeg->setParUncertainties(std::move(data.segmentParErrs));
-            if (data.timeFit) {
-                finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
+            if (m_visionTool.isEnabled()) {
+                auto seedCopy = convertToSegment(locToGlob, patternSeed, copy(data));
+                m_visionTool->visualizeSegment(ctx, *seedCopy, std::format("Final fit {:d}", seedGen.numGenerated()));
             }
-            segments.push_back(std::move(finalSeg));
-
+            segments.push_back(convertToSegment(locToGlob, patternSeed, std::move(data)));
         }
         return segments;
+    }
+     std::unique_ptr<Segment> SegmentFittingAlg::convertToSegment(const Amg::Transform3D& locToGlob, 
+                                                                  const SegmentSeed* patternSeed,
+                                                                  SegmentFitResult&& data) {
+        const auto [locPos, locDir] = data.makeLine();
+        Amg::Vector3D globPos = locToGlob * locPos;
+        Amg::Vector3D globDir = locToGlob.linear()* locDir;
+
+
+        auto finalSeg = std::make_unique<Segment>(std::move(globPos), std::move(globDir),
+                                                  patternSeed, std::move(data.calibMeasurements),
+                                                  data.chi2, data.nDoF);
+        finalSeg->setCallsToConverge(data.nIter);
+        finalSeg->setChi2PerMeasurement(std::move(data.chi2PerMeasurement));
+        finalSeg->setParUncertainties(std::move(data.segmentParErrs));
+        if (data.timeFit) {
+            finalSeg->setSegmentT0(data.segmentPars[toInt(ParamDefs::time)]);
+        }
+        return finalSeg;
     }
 
     bool SegmentFittingAlg::removeOutliers(const EventContext& ctx,
@@ -451,348 +362,14 @@ namespace MuonR4 {
         if (newAttempt.converged) {
             newAttempt.nIter+=data.nIter;
             data = std::move(newAttempt);
-            visualizeFit(ctx, data, seed.parentBucket(), "bad fit recovery");
+            if (m_visionTool.isEnabled()) {
+                auto seedCopy = convertToSegment(seed.chamber()->globalToLocalTrans(gctx), &seed, copy(data));
+                m_visionTool->visualizeSegment(ctx, *seedCopy, "Bad fit recovery");
+            }
         } else {
             data.calibMeasurements = std::move(newAttempt.calibMeasurements);
         }
         return removeOutliers(ctx, gctx, seed, data);
-    }
-    void SegmentFittingAlg::visualizeFitPhi(const EventContext& ctx,
-                                            const SegmentFitResult& fitResult,
-                                            const SpacePointBucket* bucket,
-                                            const std::string& extraLabel) const{
-        
-        std::vector<std::unique_ptr<TObject>> primitives{};
-
-        std::unordered_set<const SpacePoint*> usedSpacePoint{}, outliers{};
-        for (const HitVec::value_type& hit : fitResult.calibMeasurements) {
-            usedSpacePoint.insert(hit->spacePoint());
-            if (hit->fitState() != CalibratedSpacePoint::State::Valid) {
-                outliers.insert(hit->spacePoint());
-            }
-        }
-        const xAOD::MuonSegment* truthMatched{getTruthSegment(ctx, getTruthMatchedHits(*bucket))};
-
-        double xMin{std::numeric_limits<double>::max()}, xMax{-std::numeric_limits<double>::max()},
-               zMin{std::numeric_limits<double>::max()}, zMax{-std::numeric_limits<double>::max()};
-        
-        Identifier refId{};
-        unsigned int updated{0};
-        for (const SpacePointBucket::value_type& spInBucket : *bucket) {            
-            if (!spInBucket->measuresPhi()) {
-                continue;
-            }
-            if (usedSpacePoint.count(spInBucket.get())) {
-                refId = m_idHelperSvc->chamberId(spInBucket->identify());
-            }
-            const Amg::Vector3D& hitPos{spInBucket->positionInChamber()};
-            if (refId == m_idHelperSvc->chamberId(spInBucket->identify())) {
-                 xMin = std::min(xMin, hitPos.x());
-                 xMax = std::max(xMax, hitPos.x());
-                 zMax = std::max(zMax, hitPos.z());
-                 zMin = std::min(zMin, hitPos.z());
-                 ++updated;
-            }
-            switch (spInBucket->type()) {
-                case xAOD::UncalibMeasType::RpcStripType: {
-                    const auto* prd = static_cast<const xAOD::RpcMeasurement*>(spInBucket->primaryMeasurement());
-                    const double boxX = 0.5*std::sqrt(12)*spInBucket->uncertainty().x();
-                    const double boxZ = 0.5*prd->readoutElement()->gasGapPitch();
-                    auto stripBox = std::make_unique<TBox>(hitPos.x() - boxX, hitPos.z() - boxZ,
-                                                           hitPos.x() + boxX, hitPos.z() + boxZ);
-                    stripBox->SetFillColor(kGreen +2);
-                    stripBox->SetLineColor(kGreen +2);
-                    stripBox->SetFillColorAlpha(stripBox->GetFillColor(), 0.8);
-                    stripBox->SetFillStyle(0);
-                    if (outliers.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(3344);
-                    }else if (usedSpacePoint.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(1001);
-                    }
-                    primitives.insert(primitives.begin(), std::move(stripBox));
-                    break;
-                } case xAOD::UncalibMeasType::TgcStripType: {
-                    const auto* prd = static_cast<const xAOD::TgcStrip*>(spInBucket->primaryMeasurement());
-                    const double boxX = 0.5*std::sqrt(12)*spInBucket->uncertainty().x();
-                    const double boxZ = 0.5*prd->readoutElement()->gasGapPitch();
-                    auto stripBox = std::make_unique<TBox>(hitPos.x() - boxX, hitPos.z() - boxZ,
-                                                           hitPos.x() + boxX, hitPos.z() + boxZ);
-                    stripBox->SetFillColor(kCyan +2);
-                    stripBox->SetLineColor(kCyan +2);
-                    stripBox->SetFillColorAlpha(stripBox->GetFillColor(), 0.8);
-                    stripBox->SetFillStyle(0);
-                    if (outliers.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(3344);
-                    } else if (usedSpacePoint.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(1001);
-                    }
-                    primitives.insert(primitives.begin(), std::move(stripBox));
-                    break;
-                } default: 
-                    continue;
-            }
-        }
-        if (updated < 2) {
-            return;
-        }
-
-        auto  myCanvas = std::make_unique<TCanvas>("can","can",800,600); 
-        myCanvas->cd();
-
-        double width =  std::max(10. *Gaudi::Units::cm ,(xMax - xMin)*1.3);
-        double height = std::max(10. *Gaudi::Units::cm ,(zMax - zMin)*1.3);
-        if (height > width) width = height; 
-        else height = width;
-
-        const double midPointX = 0.5 * (xMax + xMin);
-        const double midPointZ = 0.5 * (zMax + zMin);
-        const double x0 = midPointX - 0.5 * width;
-        const double z0 = midPointZ - 0.5 * height;
-        const double x1 = midPointX + 0.5 * width;
-        const double z1 = midPointZ + 0.5 * height;
-        auto frame = myCanvas->DrawFrame(x0,z0,x1,z1);
-        frame->GetXaxis()->SetTitle("x [mm]");
-        frame->GetYaxis()->SetTitle("z [mm]");
-
-        primitives.push_back(drawLine(fitResult.segmentPars, z0, z1, kRed, toInt(AxisDefs::phi)));
- 
-        if (truthMatched){
-            primitives.push_back(drawLine(truthPars(*truthMatched), z0, z1, kOrange + 1, toInt(AxisDefs::phi)));
-            ATH_MSG_VERBOSE("Truth matched segment with parameters "<<toString(truthPars(*truthMatched)));
-        }
-         
-        {
-            std::stringstream legendLabel{};
-            legendLabel<<"Event: "<<ctx.eventID().event_number()<<", chamber : "<<m_idHelperSvc->toStringChamber(bucket->at(0)->identify())
-                       <<" #chi^{2} /nDoF: "<<std::format("{:.2f}", fitResult.chi2/std::max(1, fitResult.nDoF))
-                       <<", nDoF: "<<fitResult.nDoF;
-            if (!extraLabel.empty()) {
-                legendLabel<<" ("<<extraLabel<<")";
-            }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.1, 0.96));
-        }
-        primitives.push_back(drawLabel(makeLabel(fitResult.segmentPars),0.25,0.91));
-
-        for (auto& drawMe: primitives) {
-            drawMe->Draw();
-        }
-        std::stringstream canvasName;
-        canvasName<<"SegmenFitDisplays_"<<ctx.eventID().event_number()<<"_"<<(m_canvCounter)<<"P_"
-                  <<m_idHelperSvc->stationNameString(refId)
-                  <<std::abs(m_idHelperSvc->stationEta(refId))
-                  <<(m_idHelperSvc->stationEta(refId) >0 ? "A" : "C")
-                  <<m_idHelperSvc->stationPhi(refId);
-        if (!extraLabel.empty()) canvasName<<"_"<<removeNonAlphaNum(extraLabel);
-        canvasName<<".pdf";
-        myCanvas->SaveAs(canvasName.str().c_str());
-        myCanvas->SaveAs((m_allCanName+".pdf").c_str());
-
-    }
-    void SegmentFittingAlg::visualizeFit(const EventContext& ctx,
-                                         const SegmentFitResult& fitResult,
-                                         const SpacePointBucket* bucket,
-                                         const std::string& extraLabel,
-                                         std::vector<std::unique_ptr<TObject>> primitives) const {
-        
-
-        static std::mutex mutex{};
-        if(m_canvCounter >= m_nDrawCanvases) return;
-        std::lock_guard guard{mutex};
-        if(m_canvCounter >= m_nDrawCanvases) return;
-        
-        
-        
-        std::unordered_set<const SpacePoint*> usedSpacePoint{}, outliers{};
-        for (const HitVec::value_type& hit : fitResult.calibMeasurements) {
-            usedSpacePoint.insert(hit->spacePoint());
-            if (hit->fitState() != CalibratedSpacePoint::State::Valid) {
-                outliers.insert(hit->spacePoint());
-            }
-        }
-        const xAOD::MuonSegment* truthMatched{getTruthSegment(ctx, getTruthMatchedHits(*bucket))};
-        std::unordered_set<const xAOD::MuonSimHit*> truthSpHits{};
-        if (truthMatched) {
-            truthSpHits = getTruthMatchedHits(*truthMatched);
-        }
-        const auto [locPos, locDir] = fitResult.makeLine();
-
-        ATH_MSG_VERBOSE("visualizeFit() -- segment "<<Amg::toString(locPos)<<", "<<Amg::toString(locDir)
-                        <<", counter: "<<m_canvCounter<<", chi2: "<<fitResult.chi2<<", nDoF: "<<fitResult.nDoF<<", "
-                        <<fitResult.chi2 /std::max(fitResult.nDoF, 1));
-
-        double yMin{std::numeric_limits<double>::max()}, yMax{-std::numeric_limits<double>::max()},
-               zMin{std::numeric_limits<double>::max()}, zMax{-std::numeric_limits<double>::max()};
-        Identifier refId{};
-        unsigned updated{0};
-        for (const SpacePointBucket::value_type& spInBucket : *bucket) {
-            
-            if (usedSpacePoint.count(spInBucket.get())) {
-                refId = m_idHelperSvc->chamberId(spInBucket->identify());
-            }
-            const Amg::Vector3D& hitPos{spInBucket->positionInChamber()};
-            if (refId == m_idHelperSvc->chamberId(spInBucket->identify())) {
-                 yMin = std::min(yMin, hitPos.y());
-                 yMax = std::max(yMax, hitPos.y());
-                 zMax = std::max(zMax, hitPos.z());
-                 zMin = std::min(zMin, hitPos.z());
-                 ++updated;
-            }
-            switch (spInBucket->type()) {
-                case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                    auto circle = std::make_unique<TEllipse>(hitPos.y(), hitPos.z(), spInBucket->driftRadius());
-                    if (truthSpHits.count(getTruthMatchedHit(*spInBucket->primaryMeasurement()))){                        
-                        circle->SetFillColor(kOrange +1); 
-                        circle->SetLineColor(kOrange +1); 
-                    } else {
-                        circle->SetFillColor(kBlue); 
-                        circle->SetLineColor(kBlue);
-                    }
-                    
-                    circle->SetFillStyle(0);
-                    circle->SetFillColorAlpha(circle->GetFillColor(), 0.8);
-                    if (outliers.count(spInBucket.get())) {
-                        circle->SetFillStyle(3344);
-                    } else if (usedSpacePoint.count(spInBucket.get())) {
-                        circle->SetFillStyle(1001);                        
-                    }
-                    primitives.insert(primitives.begin(), std::move(circle));
-                    const auto* prd = static_cast<const xAOD::MdtDriftCircle*>(spInBucket->primaryMeasurement());
-                    circle = std::make_unique<TEllipse>(hitPos.y(), hitPos.z(), prd->readoutElement()->innerTubeRadius());
-                    circle->SetLineStyle(2);
-                    circle->SetLineColor(kBlack);
-                    primitives.insert(primitives.begin(), std::move(circle));
-                    break;
-                } case xAOD::UncalibMeasType::RpcStripType: {
-                    const auto* prd = static_cast<const xAOD::RpcMeasurement*>(spInBucket->primaryMeasurement());
-                    const double boxY = 0.5*std::sqrt(12)*spInBucket->uncertainty().y();
-                    const double boxZ = 0.5*prd->readoutElement()->gasGapPitch();
-                    auto stripBox = std::make_unique<TBox>(hitPos.y() - boxY, hitPos.z() - boxZ,
-                                                           hitPos.y() + boxY, hitPos.z() + boxZ);
-                    stripBox->SetFillColor(kGreen +2);
-                    stripBox->SetLineColor(kGreen +2);
-                    stripBox->SetFillColorAlpha(stripBox->GetFillColor(), 0.8);
-                    stripBox->SetFillStyle(0);
-                    if (outliers.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(3344);
-                    } else if (usedSpacePoint.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(1001);
-                    }
-                    primitives.insert(primitives.begin(), std::move(stripBox));
-                    break;
-                } case xAOD::UncalibMeasType::TgcStripType: {
-                    const auto* prd = static_cast<const xAOD::TgcStrip*>(spInBucket->primaryMeasurement());
-                    const double boxY = 0.5*std::sqrt(12)*spInBucket->uncertainty().y();
-                    const double boxZ = 0.5*prd->readoutElement()->gasGapPitch();
-                    auto stripBox = std::make_unique<TBox>(hitPos.y() - boxY, hitPos.z() - boxZ,
-                                                           hitPos.y() + boxY, hitPos.z() + boxZ);
-                    stripBox->SetFillColor(kCyan +2);
-                    stripBox->SetLineColor(kCyan +2);
-                    stripBox->SetFillColorAlpha(stripBox->GetFillColor(), 0.8);
-                    stripBox->SetFillStyle(0);
-                    if (outliers.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(3344);
-                    } else if (usedSpacePoint.count(spInBucket.get())) {
-                        stripBox->SetFillStyle(1001);
-                    }
-                    primitives.insert(primitives.begin(), std::move(stripBox));
-                    break;
-                } default: 
-                    continue;
-            }
-        }
-        if (updated < 2) {
-            --m_canvCounter;
-            return;
-        }
-        visualizeFitPhi(ctx, fitResult, bucket, extraLabel);
-        
-        auto  myCanvas = std::make_unique<TCanvas>("can","can",800,600); 
-        myCanvas->cd();
-
-        double width = (yMax - yMin)*1.3;
-        double height = (zMax - zMin)*1.3;
-        if (height > width) width = height; 
-        else height = width;
-
-        const double midPointY = 0.5 * (yMax + yMin);
-        const double midPointZ = 0.5 * (zMax + zMin);
-        const double y0 = midPointY - 0.5 * width;
-        const double z0 = midPointZ - 0.5 * height;
-        const double y1 = midPointY + 0.5 * width;
-        const double z1 = midPointZ + 0.5 * height;
-        auto frame = myCanvas->DrawFrame(y0,z0,y1,z1);
-        frame->GetXaxis()->SetTitle("y [mm]");
-        frame->GetYaxis()->SetTitle("z [mm]");
-
-        primitives.push_back(drawLine(fitResult.segmentPars, z0, z1, kRed));
-        if (truthMatched){
-            primitives.push_back(drawLine(truthPars(*truthMatched), z0, z1, kOrange + 1));
-            ATH_MSG_VERBOSE("Truth matched segment with parameters "<<toString(truthPars(*truthMatched)));
-        }
-         
-        {
-            std::stringstream legendLabel{};
-            legendLabel<<"Event: "<<ctx.eventID().event_number()<<", chamber : "<<m_idHelperSvc->toStringChamber(bucket->at(0)->identify())
-                       <<" #chi^{2} /nDoF: "<<std::format("{:.2f}", fitResult.chi2/std::max(1, fitResult.nDoF))
-                       <<", nDoF: "<<fitResult.nDoF;
-            if (!extraLabel.empty()) {
-                legendLabel<<" ("<<extraLabel<<")";
-            }
-            primitives.push_back(drawLabel(legendLabel.str(), 0.1, 0.96));
-        }
-        primitives.push_back(drawLabel(makeLabel(fitResult.segmentPars),0.25,0.91));
-
-      
-        double legX{0.15};
-        double legY{0.8};
-        for (size_t ihit = 0; ihit < fitResult.calibMeasurements.size(); ++ihit) {
-            const HitVec::value_type& hit{fitResult.calibMeasurements[ihit]};
-            if (hit->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
-                std::stringstream legendstream{};
-                const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-                legendstream<<"ML: "<<idHelper.multilayer(hit->spacePoint()->identify());
-                legendstream<<", TL: "<<idHelper.tubeLayer(hit->spacePoint()->identify());
-                legendstream<<", T: "<<idHelper.tube(hit->spacePoint()->identify());
-                legendstream<<", #chi^{2}: "<<std::format("{:.2f}", fitResult.chi2PerMeasurement[ihit]);
-                legendstream<<", "<<(SegmentFitHelpers::driftSign(locPos, locDir, hit->spacePoint(), msgStream()) == -1 ? "L" : "R");
-                primitives.push_back(drawLabel(legendstream.str(), legX, legY, 14));
-            } else if (hit->type() == xAOD::UncalibMeasType::RpcStripType) {
-                std::stringstream legendstream{};
-                const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-                legendstream<<" DR: "<<idHelper.doubletR(hit->spacePoint()->identify());
-                legendstream<<" DZ: "<<idHelper.doubletZ(hit->spacePoint()->identify());
-                legendstream<<", GAP: "<<idHelper.gasGap(hit->spacePoint()->identify());
-                legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                            << "/"<<(hit->measuresPhi() ? "si" : "nay");
-                legendstream<<", #chi^{2}: "<<std::format("{:.2f}",fitResult.chi2PerMeasurement[ihit]);
-                primitives.push_back(drawLabel(legendstream.str(), legX, legY, 14)); 
-            } else if (hit->type() == xAOD::UncalibMeasType::TgcStripType){
-               std::stringstream legendstream{};            
-               const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-               legendstream<<"ST: "<<m_idHelperSvc ->stationNameString(hit->spacePoint()->identify());            
-               legendstream<<", GAP: "<<idHelper.gasGap(hit->spacePoint()->identify());
-               legendstream<<", #eta/#phi: "<<(hit->measuresEta() ? "si" : "nay") 
-                            << "/"<<(hit->measuresPhi() ? "si" : "nay");
-                legendstream<<", #chi^{2}: "<<std::format("{:.2f}", fitResult.chi2PerMeasurement[ihit]);
-                primitives.push_back(drawLabel(legendstream.str(), legX, legY, 14)); 
-            } else {
-                continue;
-            }
-            legY-=0.05;
-        }
-        for (auto& drawMe: primitives) {
-            drawMe->Draw();
-        }
-        std::stringstream canvasName;
-        canvasName<<"SegmenFitDisplays_"<<ctx.eventID().event_number()<<"_"<<(m_canvCounter++)<<"E_"
-                  <<m_idHelperSvc->stationNameString(refId)
-                  <<std::abs(m_idHelperSvc->stationEta(refId))
-                  <<(m_idHelperSvc->stationEta(refId) >0 ? "A" : "C")
-                  <<m_idHelperSvc->stationPhi(refId);
-        if (!extraLabel.empty()) canvasName<<"_"<<removeNonAlphaNum(extraLabel);
-        canvasName<<".pdf";
-        myCanvas->SaveAs(canvasName.str().c_str());
-        myCanvas->SaveAs((m_allCanName+".pdf").c_str());
     }
 
     bool SegmentFittingAlg::plugHoles(const EventContext& ctx,

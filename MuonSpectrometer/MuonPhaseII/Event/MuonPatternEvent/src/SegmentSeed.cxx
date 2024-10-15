@@ -28,14 +28,8 @@ namespace MuonR4{
             m_pars[toInt(ParamDefs::theta)] = dir.theta();
             m_pars[toInt(ParamDefs::phi)] = dir.phi();
     }
-    double SegmentSeed::tanPhi() const{ 
-        const Amg::Vector3D dir{directionInChamber()};
-        return dir.x() / dir.z() ; 
-    }
-    double SegmentSeed::tanTheta() const { 
-        const Amg::Vector3D dir{directionInChamber()};
-        return dir.y() / dir.z();
-    }
+    double SegmentSeed::tanPhi() const {  return houghTanPhi(directionInChamber()); }
+    double SegmentSeed::tanTheta() const { return houghTanTheta(directionInChamber()); }
     double SegmentSeed::interceptX() const { return m_pars[toInt(ParamDefs::x0)]; }
     double SegmentSeed::interceptY() const {return m_pars[toInt(ParamDefs::y0)]; }
     const Parameters& SegmentSeed::parameters() const { return m_pars; }

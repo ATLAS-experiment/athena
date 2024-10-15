@@ -3,7 +3,7 @@
 */
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonPatternHelpers/SegmentFitHelperFunctions.h>
-#include <MuonSpacePointCalibrator/ISpacePointCalibrator.h>
+#include <MuonRecToolInterfacesR4/ISpacePointCalibrator.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <EventPrimitives/EventPrimitivesHelpers.h>
@@ -20,12 +20,18 @@ namespace MuonR4{
             return Amg::error(cov, toInt(AxisDefs::eta));
         }, dcHit.covariance());
     }
+    constexpr bool passRangeCut(const std::array<double, 2>& cutRange, const double value) {
+        return cutRange[0] <= value && value <= cutRange[1];
+    }
 
     std::ostream& MdtSegmentSeedGenerator::SeedSolution::print(std::ostream& ostr) const{
         ostr<<"two circle solution with ";
         ostr<<"theta: "<<theta / Gaudi::Units::deg<<" pm "<<dTheta / Gaudi::Units::deg<<", ";
         ostr<<"y0: "<<Y0<<" pm "<<dY0;
         return ostr;
+    }
+    const MdtSegmentSeedGenerator::Config& MdtSegmentSeedGenerator::config() const {
+        return m_cfg;
     }
     MdtSegmentSeedGenerator::~MdtSegmentSeedGenerator() = default;
     MdtSegmentSeedGenerator::MdtSegmentSeedGenerator(const std::string& name,
@@ -81,7 +87,6 @@ namespace MuonR4{
     unsigned int MdtSegmentSeedGenerator::numGenerated() const {
         return m_nGenSeeds;
     }
-    
     inline void MdtSegmentSeedGenerator::moveToNextCandidate() {
         const HitVec& lower = m_hitLayers.mdtHits()[m_lowerLayer];
         const HitVec& upper = m_hitLayers.mdtHits()[m_upperLayer];
@@ -202,6 +207,11 @@ namespace MuonR4{
         
         candidateSeed.parameters[toInt(ParamDefs::theta)] = theta;
         candidateSeed.parameters[toInt(ParamDefs::y0)] = Y0 / seedDir.z();
+        /// Check that the is within the predefined window
+        if (!passRangeCut(m_cfg.thetaRange, theta) || 
+            !passRangeCut(m_cfg.interceptRange, candidateSeed.parameters[toInt(ParamDefs::y0)])) {
+            return std::nullopt;
+        }
 
         const Amg::Vector3D seedPos = Y0 / seedDir.z() * Amg::Vector3D::UnitY();
 
@@ -285,8 +295,7 @@ namespace MuonR4{
 
         // Combine the seed with the phi estimate
         {
-            const Amg::Vector3D patternDir = m_segmentSeed->directionInChamber();
-            Amg::Vector3D parDir{patternDir.x() / patternDir.z(), std::tan(theta), 1.};
+            const Amg::Vector3D parDir = dirFromTangents(m_segmentSeed->tanPhi(), std::tan(theta));
             candidateSeed.parameters[toInt(ParamDefs::theta)] = parDir.theta();
             candidateSeed.parameters[toInt(ParamDefs::phi)] = parDir.phi();
         }
@@ -298,7 +307,7 @@ namespace MuonR4{
                 HoughHitType bestHit{nullptr};
                 double bestPull{m_cfg.hitPullCut};
                 for (const HoughHitType testMe : hitsInLayer){
-                    const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(seedPos, seedDir, testMe, msg())) 
+                    const double pull = std::sqrt(SegmentFitHelpers::chiSqTermStrip(seedPos, seedDir, *testMe, msg())) 
                                       / testMe->dimension();
                     ATH_MSG_VERBOSE("Test hit "<<idHelperSvc->toString(testMe->identify())
                                 <<" "<<Amg::toString(testMe->positionInChamber())<<", pull: "<<pull);
@@ -360,6 +369,8 @@ namespace MuonR4{
         const double thetaMin =  - (Tzzyy  - Try) / (4* Tyz + Trz);
         const double thetaDet =  std::pow(Tzzyy -Try,2) + 4*(Tyz + Trz)*(2*Tyz + 0.5*Trz);
         const double thetaGuess =  thetaMin  + (theta > thetaMin ? 1. : -1.)*std::sqrt(thetaDet) / (4*Tyz + Trz);
+        // const double thetaGuess = std::atan2( 2.*(Tyz - Trz), Tzzyy) / 2.;
+
         ATH_MSG_VERBOSE("Start fast fit seed: "<<theta<<", guess: "<<thetaGuess
                     <<", y0: "<<y0<<", fitY0: "<<fitY0<<", centre: "<<Amg::toString(centerOfGravity));
         //// 
@@ -392,7 +403,7 @@ namespace MuonR4{
            return;
         }
         inSeed.parameters[toInt(ParamDefs::theta)] = theta;
-        inSeed.parameters[toInt(ParamDefs::y0)] = (centerOfGravity.y() *seedDir.z() - centerOfGravity.z() * seedDir.y() + fitY0);
+        inSeed.parameters[toInt(ParamDefs::y0)] = (centerOfGravity.y() *seedDir.z() - centerOfGravity.z() * seedDir.y() + fitY0) / std::cos(theta);
         ATH_MSG_VERBOSE("Drift circle fit converged within "<<inSeed.nIter
                     <<" iterations giving "<<toString(inSeed.parameters)<<", chi2: "<<inSeed.chi2);
     }

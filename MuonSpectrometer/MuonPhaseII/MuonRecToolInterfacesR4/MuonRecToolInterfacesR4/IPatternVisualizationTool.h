@@ -1,0 +1,110 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
+#define MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
+
+
+#include <GaudiKernel/IAlgTool.h>
+#include <GeoPrimitives/GeoPrimitives.h>
+#include <MuonPatternEvent/MuonHoughDefs.h>
+#include <memory>
+
+class EventContext;
+class TObject;
+
+namespace MuonR4 {
+    class SpacePointBucket;
+    class SegmentSeed;
+    class Segment;
+}
+
+namespace MuonValR4{
+    /** @brief Helper tool to visualize a pattern recogntion incident or a certain stage of the segment fit. */
+
+    class IPatternVisualizationTool : virtual public IAlgTool {
+        public:
+            DeclareInterfaceID(IPatternVisualizationTool, 1, 0);
+            
+            using PrimitivePtr = std::unique_ptr<TObject>;
+            using PrimitiveVec = std::vector<PrimitivePtr>;
+            using MaximumVec = std::vector<MuonR4::ActsPeakFinderForMuon::Maximum>;
+
+            virtual ~IPatternVisualizationTool() = default;
+            
+            /** @brief Draws the content of the bucket on a TCanvas
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param bucket: Spacepoint bucket to draw
+             *  @param extraLabel: Extra label for the legend */
+            virtual void visualizeBucket(const EventContext& ctx,
+                                         const MuonR4::SpacePointBucket& bucket,
+                                         const std::string& extraLabel) const = 0;
+            /** @brief Draws the content of the bucket on a TCanvas
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param bucket: Spacepoint bucket to draw
+             *  @param extraLabel: Extra label for the legend
+             *  @param extraPaints: Other objects that shall be painted onto the canvas */
+            virtual void visualizeBucket(const EventContext& ctx,
+                                         const MuonR4::SpacePointBucket& bucket,
+                                         const std::string& extraLabel,
+                                         PrimitiveVec&& extraPaints) const = 0;
+            /** @brief Visualize the content of the Hough accumulator in a TH2 histogram
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param accumulator: Hough accumulator to visualize
+             *  @param axisRanges: Current axis ranges to interpret the accumulator bins
+             *  @param maxima: Extracted maxima from the accumulator
+             *  @param extraLabel: Extra label for the legend */            
+            virtual void visualizeAccumulator(const EventContext& ctx,
+                                              const MuonR4::HoughPlane& accumulator,
+                                              const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
+                                              const MaximumVec& maxima,
+                                              const std::string& extraLabel) const = 0;
+            /** @brief Visualize the content of the Hough accumulator in a TH2 histogram
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param accumulator: Hough accumulator to visualize
+             *  @param axisRanges: Current axis ranges to interpret the accumulator bins
+             *  @param maxima: Extracted maxima from the accumulator
+             *  @param extraLabel: Extra label for the legend
+             *  @param extraPaints: Other objects that shall be painted onto the canvas  */            
+            virtual void visualizeAccumulator(const EventContext& ctx,
+                                              const MuonR4::HoughPlane& accumulator,
+                                              const Acts::HoughTransformUtils::HoughAxisRanges& axisRanges,
+                                              const MaximumVec& maxima,
+                                              const std::string& extraLabel,
+                                              PrimitiveVec&& extraPaints) const = 0;
+            
+            /** @brief  Visualize the used space points of the seed together with the seed parameters
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param seed: Reference to the seed to visualize 
+             *  @param extraLabel: Extra label for the legend */
+            virtual void visualizeSeed(const EventContext& ctx,
+                                       const MuonR4::SegmentSeed& seed,
+                                       const std::string& extraLabel) const = 0;
+            /** @brief  Visualize the used space points of the seed together with the seed parameters
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param seed: Reference to the seed to visualize 
+             *  @param extraLabel: Extra label for the legend 
+             *  @param extraPaints: Other objects that shall be painted onto the canvas  */            
+            virtual void visualizeSeed(const EventContext& ctx,
+                                       const MuonR4::SegmentSeed& seed,
+                                       const std::string& extraLabel,
+                                       PrimitiveVec&& extraPaints) const = 0;
+            /** @brief  Visualize the used space points of the segment together with the seed parameters
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param segment: Reference to the segment to visualize 
+             *  @param extraLabel: Extra label for the legend */
+            virtual void visualizeSegment(const EventContext& ctx,
+                                          const MuonR4::Segment& segment,
+                                          const std::string& extraLabel) const = 0;
+            /** @brief  Visualize the used space points of the segment together with the seed parameters
+             *  @param ctx: EventContext to fetch calibration & alignment
+             *  @param segment: Reference to the segment to visualize 
+             *  @param extraLabel: Extra label for the legend 
+             *  @param extraPaints: Other objects that shall be painted onto the canvas  */            
+            virtual void visualizeSegment(const EventContext& ctx,
+                                          const MuonR4::Segment& segment,
+                                          const std::string& extraLabel,
+                                          PrimitiveVec&& extraPaints) const = 0;
+    };
+}
+#endif

@@ -13,6 +13,7 @@ class MsgStream;
 
 namespace MuonR4{
     class CalibratedSpacePoint;
+    class SpacePoint;
 
     namespace SegmentFitHelpers{
       /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated measurement.
@@ -24,7 +25,7 @@ namespace MuonR4{
        *              then all relevant parameters are printed */
       double chiSqTerm(const Amg::Vector3D& posInChamber,
                        const Amg::Vector3D& dirInChamber,
-                       const HoughHitType& measurement,
+                       const SpacePoint& measurement,
                        MsgStream& msg);
       /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated Mdt measurement.
        *  @param posInChamber: Position of the chamber crossing expressed at z=0
@@ -34,7 +35,7 @@ namespace MuonR4{
        *              then all relevant parameters are printed */
       double chiSqTermMdt(const Amg::Vector3D& posInChamber,
                           const Amg::Vector3D& dirInChamber,
-                          const HoughHitType& measurement,
+                          const SpacePoint& measurement,
                           MsgStream& msg);
       /** @brief Calculates the chi2 contribuation to a linear segment line from an uncalibrated strip measurement.
        *         Currently only Tgc & Rpc are supported
@@ -45,7 +46,7 @@ namespace MuonR4{
        *              then all relevant parameters are printed */
       double chiSqTermStrip(const Amg::Vector3D& posInChamber,
                             const Amg::Vector3D& dirInChamber,
-                            const HoughHitType& measurement,
+                            const SpacePoint& measurement,
                             MsgStream& msg);
 
 
@@ -112,29 +113,40 @@ namespace MuonR4{
         *              then all relevant parameters are printed */
       std::vector<int> driftSigns(const Amg::Vector3D& posInChamber,
                                   const Amg::Vector3D& dirInChamber,
-                                  const std::vector<HoughHitType>& uncalibHits,
+                                  const std::vector<const SpacePoint*>& uncalibHits,
                                   MsgStream& msg);
       
        /** @brief Calculates whether a segement line travereses the tube measurement on the left (-1) or 
         *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
         *  @param posInChamber: Position of the segment in the chamber frame
         *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
-        *  @param uncalibHit: List of uncalibrated measurements
+        *  @param uncalibHit:  Uncalibrated hit to consider
         *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
         *              then all relevant parameters are printed */
       int driftSign (const Amg::Vector3D& posInChamber,
                      const Amg::Vector3D& dirInChamber,
-                     const HoughHitType& uncalibHit,
+                     const SpacePoint& uncalibHit,
                      MsgStream& msg);
 
+       /** @brief Calculates whether a segement line travereses the tube measurement on the left (-1) or 
+        *         right (1) side of the tube wire. Strip measurements & nullptrs are assigned with 0
+        *  @param posInChamber: Position of the segment in the chamber frame
+        *  @param dirInChamber: Direction of flight of the  segment expressed in the chamber frame
+        *  @param calibHit: Calibrated hit to consider
+        *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+        *              then all relevant parameters are printed */
       int driftSign(const Amg::Vector3D& posInChamber,
                     const Amg::Vector3D& dirInChamber,
                     const CalibratedSpacePoint& calibHit,
                     MsgStream& msg);
 
       /** @brief Calculates the chi2 per measurement and the chi2 itself after the fit is finished. Outlier hits have a non-vanishing entry
-       *         in the chi2 per measurements but do not contribute to the overall chi2. Hits which cannot be calibrated do not contribute.
-       */
+       *         in the chi2 per measurements but do not contribute to the overall chi2. Hits which cannot be calibrated do not contribute. 
+       *  @param segPars: Predicted segment parameters to which the chi2 is evaluated
+       *  @param arrivalTime: Nominal time of arrival at the chamber centre,
+       *  @param hits: Vector of calibrated hits
+       *  @param msg: Reference to the callers msgStream. If the level is VERBOSE,
+       *               then all relevant parameters are printed */
       std::pair<std::vector<double>, double> postFitChi2PerMas(const SegmentFit::Parameters& segPars,
                                                                std::optional<double> arrivalTime,
                                                                std::vector<std::unique_ptr<CalibratedSpacePoint>>& hits,

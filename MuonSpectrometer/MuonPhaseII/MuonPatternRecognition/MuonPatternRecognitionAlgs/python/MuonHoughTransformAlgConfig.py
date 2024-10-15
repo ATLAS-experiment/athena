@@ -28,9 +28,6 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("fitSegmentT0", False)
     kwargs.setdefault("doBeamspotConstraint", True)
     
-    if not flags.Input.isMC:
-        kwargs.setdefault("TruthSegKey", "")
-
     theAlg = CompFactory.MuonR4.SegmentFittingAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result

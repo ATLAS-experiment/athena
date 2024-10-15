@@ -244,8 +244,8 @@ namespace MuonValR4 {
         m_out_gen_nRPCHits = (segment->chamberIndex() <= Muon::MuonStationIndex::ChIndex::BEE ? segment->nPhiLayers() + segment->nTrigEtaLayers() : 0);
 
 
-        m_out_gen_tantheta = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.y()/chamberDir.z() : 1.e10); 
-        m_out_gen_tanphi   = (std::abs(chamberDir.z()) > 1.e-8 ? chamberDir.x()/chamberDir.z() : 1.e10); 
+        m_out_gen_tantheta = houghTanPhi(chamberDir); 
+        m_out_gen_tanphi   = houghTanTheta(chamberDir);
         m_out_gen_y0 = chamberPos.y(); 
         m_out_gen_x0 = chamberPos.x(); 
         m_out_gen_time = segment->t0();
@@ -328,8 +328,8 @@ namespace MuonValR4 {
         }
         const Amg::Vector3D locPos = trf * segment->position();
         const Amg::Vector3D locDir = trf.linear()* segment->direction();
-        m_out_segment_tanphi   = locDir.x() / locDir.z();
-        m_out_segment_tantheta = locDir.y() / locDir.z();
+        m_out_segment_tanphi   = houghTanPhi(locDir);
+        m_out_segment_tantheta = houghTanTheta(locDir);
         m_out_segment_y0 = locPos.y();
         m_out_segment_x0 = locPos.x();
         m_out_segment_time = segment->segementT0() + segment->position().mag() * c_inv;

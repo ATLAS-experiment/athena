@@ -35,7 +35,7 @@ namespace MuonR4{
                 ATH_MSG_VERBOSE("No key has been parsed for object "<< typeid(ContainerType).name());
                 return StatusCode::SUCCESS;
             }
-            SG::ReadHandle<ContainerType> readHandle{key, ctx};
+            SG::ReadHandle readHandle{key, ctx};
             ATH_CHECK(readHandle.isPresent());
             contToPush = readHandle.cptr();
             return StatusCode::SUCCESS;

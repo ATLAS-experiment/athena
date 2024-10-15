@@ -8,21 +8,8 @@
 #include <StoreGate/ReadCondHandle.h>
 
 #include "MuonPatternHelpers/HoughHelperFunctions.h"
-
-namespace {
-    void sortHits(std::vector<MuonR4::HoughHitType>& hits) {
-        std::ranges::sort(hits, 
-              [](const MuonR4::HoughHitType&a, const MuonR4::HoughHitType& b){   
-                    const Amg::Vector3D& hitA{a->positionInChamber()};
-                    const Amg::Vector3D& hitB{b->positionInChamber()};
-                    constexpr double layerTol = 1.*Gaudi::Units::mm;
-                    if (std::abs(hitA.z() - hitB.z()) > layerTol) {
-                        return hitA.z() < hitB.z();
-                    }
-                    return hitA.y() < hitB.y();
-              });
-    }
-}
+#include "MuonPatternEvent/SegmentSeed.h"
+#include "MuonSpacePoint/UtilFunctions.h"
 
 namespace MuonR4{
 EtaHoughTransformAlg::EtaHoughTransformAlg(const std::string& name,
@@ -33,21 +20,21 @@ StatusCode EtaHoughTransformAlg::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());
     ATH_CHECK(m_spacePointKey.initialize());
     ATH_CHECK(m_maxima.initialize());
-
+    ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
     return StatusCode::SUCCESS;
 }
 
 template <class ContainerType>
-StatusCode EtaHoughTransformAlg::retrieveContainer(
-    const EventContext& ctx, const SG::ReadHandleKey<ContainerType>& key,
-    const ContainerType*& contToPush) const {
+StatusCode EtaHoughTransformAlg::retrieveContainer(const EventContext& ctx, 
+                                                  const SG::ReadHandleKey<ContainerType>& key,
+                                                  const ContainerType*& contToPush) const {
     contToPush = nullptr;
     if (key.empty()) {
         ATH_MSG_VERBOSE("No key has been parsed for object "
                         << typeid(ContainerType).name());
         return StatusCode::SUCCESS;
     }
-    SG::ReadHandle<ContainerType> readHandle{key, ctx};
+    SG::ReadHandle readHandle{key, ctx};
     ATH_CHECK(readHandle.isPresent());
     contToPush = readHandle.cptr();
     return StatusCode::SUCCESS;
@@ -69,15 +56,15 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     HoughEventData data{};
 
     /// pre-populate the event data - sort PRDs by station
-    ATH_CHECK(preProcess(*gctx, *spacePoints, data));
+    preProcess(ctx, *gctx, *spacePoints, data);
 
     /// book the hough plane
-    ATH_CHECK(prepareHoughPlane(data));
+    prepareHoughPlane(data);
     /// now perform the actual HT for each station
     for (auto& [station, stationHoughBuckets] : data.houghSetups) {
         // reset the list of maxima
         for (auto& bucket : stationHoughBuckets) {
-            ATH_CHECK(processBucket(data, bucket));
+            processBucket(ctx, data, bucket);
         }
         for (HoughMaximum& max : data.maxima) {
             writeMaxima->push_back(std::make_unique<HoughMaximum>(std::move(max)));
@@ -90,12 +77,16 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
               });
     return StatusCode::SUCCESS;
 }
-StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
-                                            const SpacePointContainer& spacePoints,
-                                            HoughEventData& data) const {
+void EtaHoughTransformAlg::preProcess(const EventContext& ctx,
+                                      const ActsGeometryContext& gctx,
+                                      const SpacePointContainer& spacePoints,
+                                      HoughEventData& data) const {
 
     ATH_MSG_DEBUG("Load " << spacePoints.size() << " space point buckets");
     for (const SpacePointBucket* bucket : spacePoints) {
+        if (m_visionTool.isEnabled()) {
+            m_visionTool->visualizeBucket(ctx, *bucket, "bucket");
+        }
         std::vector<HoughSetupForBucket>& buckets = data.houghSetups[bucket->front()->chamber()];        
         HoughSetupForBucket& hs{buckets.emplace_back(bucket)};
         const Amg::Transform3D globToLoc{hs.bucket->chamber()->globalToLocalTrans(gctx)};
@@ -128,7 +119,6 @@ StatusCode EtaHoughTransformAlg::preProcess(const ActsGeometryContext& gctx,
         }
         hs.searchWindowIntercept = {ymin, ymax};
     }
-    return StatusCode::SUCCESS;
 }
 bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
     switch (hit->type()){
@@ -139,7 +129,7 @@ bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
         }
         case xAOD::UncalibMeasType::MMClusterType:
         case xAOD::UncalibMeasType::sTgcStripType:
-            return true;
+            return hit->measuresEta();
             break;
         default:
             break;
@@ -147,7 +137,7 @@ bool EtaHoughTransformAlg::isPrecisionHit(const HoughHitType& hit) {
     return false;
 }
 
-StatusCode EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
+void EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     HoughPlaneConfig cfg;
     cfg.nBinsX = m_nBinsTanTheta;
     cfg.nBinsY = m_nBinsIntercept;
@@ -157,12 +147,11 @@ StatusCode EtaHoughTransformAlg::prepareHoughPlane(HoughEventData& data) const {
     peakFinderCfg.minSpacingBetweenPeaks = {m_minMaxDistTheta, m_minMaxDistIntercept};
     data.houghPlane = std::make_unique<HoughPlane>(cfg);
     data.peakFinder = std::make_unique<ActsPeakFinderForMuon>(peakFinderCfg);
-
-    return StatusCode::SUCCESS;
 }
 
-StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data, 
-                                               HoughSetupForBucket& bucket) const {
+void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
+                                         HoughEventData& data, 
+                                         HoughSetupForBucket& bucket) const {
     /// tune the search space
 
     double chamberCenter = 0.5 * (bucket.searchWindowIntercept.first +
@@ -180,16 +169,12 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     // also treat tan(theta)
     double tanThetaMean = 0.5 * (bucket.searchWindowTanAngle.first +
                                  bucket.searchWindowTanAngle.second);
-    double searchStartTanTheta =
-        tanThetaMean - 0.5 * data.houghPlane->nBinsX() * m_targetResoTanTheta;
-    double searchEndTanTheta =
-        tanThetaMean + 0.5 * data.houghPlane->nBinsX() * m_targetResoTanTheta;
-    searchStartTanTheta =
-        std::min(searchStartTanTheta,
-                 bucket.searchWindowTanAngle.first - m_minSigmasSearchTanTheta * m_targetResoTanTheta);
-    searchEndTanTheta =
-        std::max(searchEndTanTheta, bucket.searchWindowTanAngle.second +
-                                        m_minSigmasSearchTanTheta * m_targetResoTanTheta);
+    double searchStartTanTheta = tanThetaMean - 0.5 * data.houghPlane->nBinsX() * m_targetResoTanTheta;
+    double searchEndTanTheta = tanThetaMean + 0.5 * data.houghPlane->nBinsX() * m_targetResoTanTheta;
+    searchStartTanTheta = std::min(searchStartTanTheta, bucket.searchWindowTanAngle.first - 
+                                   m_minSigmasSearchTanTheta * m_targetResoTanTheta);
+    searchEndTanTheta = std::max(searchEndTanTheta, bucket.searchWindowTanAngle.second +
+                                 m_minSigmasSearchTanTheta * m_targetResoTanTheta);
 
     data.currAxisRanges = Acts::HoughTransformUtils::HoughAxisRanges{
         searchStartTanTheta, searchEndTanTheta, searchStart, searchEnd};
@@ -198,8 +183,11 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
     for (const SpacePointBucket::value_type& hit : *(bucket.bucket)) {
         fillFromSpacePoint(data, hit.get());
     }
-    auto maxima =
-        data.peakFinder->findPeaks(*(data.houghPlane), data.currAxisRanges);
+    auto maxima = data.peakFinder->findPeaks(*(data.houghPlane), data.currAxisRanges);
+    if (m_visionTool.isEnabled()) {
+        m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, maxima,
+                                           "#eta Hough accumulator");
+    }
     if (maxima.empty()) {
         ATH_MSG_DEBUG("Station "<<bucket.bucket->chamber()->stationName() 
             <<" eta "<<bucket.bucket->chamber()->stationEta()
@@ -218,7 +206,7 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
             <<"] and ["<<searchStart<<" - "<<searchEnd
             <<"] with "<<m_nBinsTanTheta<<" and "
             <<m_nBinsIntercept<<" bins.");  
-        return StatusCode::SUCCESS;
+        return;
     }
     for (const auto& max : maxima) {
         /// TODO: Proper weighted hit counting...
@@ -235,11 +223,13 @@ StatusCode EtaHoughTransformAlg::processBucket(HoughEventData& data,
         }
         size_t nHits = hitList.size();
         extendWithPhiHits(hitList, bucket);
-        sortHits(hitList);
-        data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket);
+        sortByLayer(hitList);
+        const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
+        if (m_visionTool.isEnabled()) {
+            const SegmentSeed seed{houghMax};
+            m_visionTool->visualizeSeed(ctx, seed, "#eta-HoughSeed");
+        }
     }
-
-    return StatusCode::SUCCESS;
 }
 void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughHitType& SP) const {
 
