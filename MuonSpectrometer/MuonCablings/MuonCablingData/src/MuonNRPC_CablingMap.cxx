@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingData/MuonNRPC_CablingMap.h"
@@ -15,12 +15,11 @@ MuonNRPC_CablingMap::MuonNRPC_CablingMap() {
 
     // retrieve the RpcIdHelper
     ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc* detStore = nullptr;
-    StatusCode sc = svcLocator->service("DetectorStore", detStore);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if (!detStore) {
         throw std::runtime_error("Could not find the detctor store");
     }
-    sc = detStore->retrieve(m_rpcIdHelper, "RPCIDHELPER");
+    StatusCode sc = detStore->retrieve(m_rpcIdHelper, "RPCIDHELPER");
     if (sc != StatusCode::SUCCESS) {
         throw std::runtime_error("Could not retrieve the RpcIdHelper");
     }
