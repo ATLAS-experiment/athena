@@ -287,7 +287,7 @@ StatusCode TauSelectionTool::initialize()
 
   // initialise the ReadDecorHandleKey if GNTau is applied
   if (m_iSelectionCuts & CutJetIDWP) {
-    ATH_CHECK( m_GNTauDecorKey.assign(m_tauContainerKey.key()+".GNTauScoreSigTrans_v0"));
+    ATH_CHECK( m_GNTauDecorKey.assign(m_tauContainerKey.key()+".GNTauScoreSigTrans_v1trunc"));
   }
   ATH_CHECK( m_GNTauDecorKey.initialize( m_iSelectionCuts & CutJetIDWP ) );
 
