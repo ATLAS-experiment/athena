@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // File holding the implementation of the xAOD::TEvent functions that implement
 // the IProxyDict interface. Just to make TEvent.cxx a little smaller.
@@ -449,26 +449,10 @@ namespace xAOD {
                                 "implemented" );
    }
 
-   unsigned long TEvent::addRef() {
-
-      return 0;
-   }
-
-   long unsigned int TEvent::release() {
-
-      return 0;
-   }
-
    const std::string& TEvent::name() const {
 
       static const std::string NAME = "xAOD::TEvent";
       return NAME;
-   }
-
-   StatusCode TEvent::queryInterface( const InterfaceID&, void** ) {
-
-      // Return without doing anything:
-      return StatusCode::SUCCESS;
    }
 
 } // namespace xAOD

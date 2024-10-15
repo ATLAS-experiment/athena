@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_IPROXYDICT_H
 #define XAODROOTACCESS_TOOLS_IPROXYDICT_H
@@ -84,17 +84,8 @@ public:
                  bool allowMods,
                  bool returnExisting ) = 0;
 
-   /// Increment the reference count of Interface instance
-   virtual unsigned long addRef() = 0;
-
-   /// Release Interface instance
-   virtual long unsigned int release() = 0;
-
    /// Get the name of the instance
    virtual const std::string& name() const = 0;
-
-   /// Set the void** to the pointer to the requested interface of the instance
-   virtual StatusCode queryInterface( const InterfaceID&, void** ) = 0;
 
 }; // class IProxyDict
 

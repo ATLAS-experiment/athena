@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_H
 #define XAODROOTACCESS_TEVENT_H
@@ -77,9 +77,12 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class TEvent : public TVirtualEvent,
-                  public IProxyDict {
 
+#ifdef XAOD_STANDALONE
+   class TEvent : public TVirtualEvent, IProxyDict {
+#else
+   class TEvent : public TVirtualEvent, public implements<IProxyDict> {
+#endif
       // Declare the friend functions/classes:
       friend ::TTree* MakeTransientTree( TEvent&, const char* );
       friend class ::xAODTEventBranch;
@@ -342,18 +345,8 @@ namespace xAOD {
                     bool allowMods,
                     bool returnExisting ) override;
 
-      /// Increment the reference count of Interface instance
-      unsigned long addRef() override;
-
-      /// Release Interface instance
-      long unsigned int release() override;
-
       /// Get the name of the instance
       const std::string& name() const override;
-
-      /// Set the void** to the pointer to the requested interface of the
-      /// instance
-      StatusCode queryInterface( const InterfaceID&, void** ) override;
 
       /// @}
 
