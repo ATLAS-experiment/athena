@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Algs/VP1Alg.h"
@@ -27,7 +27,7 @@
 //____________________________________________________________________
 VP1Alg::VP1Alg(const std::string& name, ISvcLocator* svcLocator):
   AthAlgorithm(name, svcLocator),
-  m_toolSvc(0),m_vp1gui(0)
+  m_vp1gui(0)
 {
 
     
@@ -83,13 +83,6 @@ StatusCode VP1Alg::initialize()
 {
   msg(MSG::INFO) << " in initialize() " << endmsg;
 
-  //ToolSvc
-  StatusCode status = service("ToolSvc",m_toolSvc);
-  if (status.isFailure()||!m_toolSvc) {
-    msg(MSG::ERROR) << " Unable to get ToolSvc!" << endmsg;
-    return status;
-  }
-
   std::vector<std::string>::iterator it, itE = m_initialvp1files.end();
   for (it = m_initialvp1files.begin();it!=itE;++it) {
     std::string file = PathResolver::find_file (*it, "DATAPATH");
@@ -100,20 +93,15 @@ StatusCode VP1Alg::initialize()
   }
 
   // use the incident service to register a handler
-  IIncidentSvc* incsvc = 0;
-  status = service("IncidentSvc", incsvc, true);
-
-  if(status.isFailure() || incsvc==0) {
-    msg(MSG::WARNING) << "Unable to get IncidentSvc! MF mechanism is disabled" << endmsg;
-    return StatusCode::SUCCESS;
-  }
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
+  ATH_CHECK( incsvc.isValid() );
 
   std::string endfilekey("EndTagFile");
   incsvc->addListener(this, endfilekey, 0);
   msg(MSG::DEBUG) << "Added listener on "<<endfilekey << endmsg;
   
   //Create VP1 gui object and see if it considers settings to be valid.
-  m_vp1gui = new VP1Gui(&(*evtStore()),&(*detStore()),serviceLocator(),m_toolSvc,
+  m_vp1gui = new VP1Gui(&(*evtStore()),&(*detStore()),serviceLocator(),toolSvc(),
 			m_initialvp1files,
 			m_cruiseInitialMode,
 			m_cruiseInitialUpdateSeconds,

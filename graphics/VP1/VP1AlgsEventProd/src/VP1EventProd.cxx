@@ -53,10 +53,9 @@ StatusCode VP1EventProd::initialize()
   StatusCode result = StatusCode::SUCCESS;
 
   // use the incident service to register a handle
-  IIncidentSvc* incsvc = 0;
-  StatusCode status = service("IncidentSvc", incsvc, true);
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
 
-  if(status.isFailure() || incsvc==0)
+  if(!incsvc)
     ATH_MSG_WARNING("Unable to get IncidentSvc!");
   else
     incsvc->addListener(this, "BeginEvent", 0);

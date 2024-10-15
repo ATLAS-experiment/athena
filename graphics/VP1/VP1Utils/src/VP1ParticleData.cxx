@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -56,9 +56,8 @@ const HepPDT::ParticleData * VP1ParticleData::particleData( const int& pdgcode )
       return 0;
     }
 
-    IPartPropSvc* partPropSvc;
-    StatusCode status = svcLocator->service( "PartPropSvc",partPropSvc,true/*createifnotthere*/ );
-    if(!status.isSuccess()||!partPropSvc) {
+    SmartIF<IPartPropSvc> partPropSvc{svcLocator->service( "PartPropSvc" )};
+    if(!partPropSvc) {
       VP1Msg::message("VP1ParticleData ERROR: Could not get particle property service.");
       Imp::m_badInit = true;
       return 0;

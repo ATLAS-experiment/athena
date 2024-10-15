@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -526,11 +526,10 @@ void VP1TrackingGeometrySystem::retrieveTrackingGeometry()
   message( "Trying to retrieve TrackingGeometrySvc '" +
            m_d->lineEdit_TrackingGeometrySvcName->text().trimmed() + "'");
 
-  Trk::ITrackingGeometrySvc* trackingGeometrySvc;
-  StatusCode status =
-      svcLoc->service( m_d->lineEdit_TrackingGeometrySvcName->text().trimmed().toStdString(), trackingGeometrySvc);
+  auto trackingGeometrySvc =
+    svcLoc->service<Trk::ITrackingGeometrySvc>( m_d->lineEdit_TrackingGeometrySvcName->text().trimmed().toStdString() );
 
-  if( !status.isSuccess())
+  if( !trackingGeometrySvc )
   {
     message("Error: Could not retrieve TrackingGeometrySvc '" +
             m_d->lineEdit_TrackingGeometrySvcName->text().trimmed() + "'\n"

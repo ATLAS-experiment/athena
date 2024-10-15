@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1TrkAuxAlgs/VP1TrkInitializer.h"
@@ -15,8 +15,7 @@
 
 //____________________________________________________________________
 VP1TrkInitializer::VP1TrkInitializer(const std::string& name, ISvcLocator* svcLocator):
-  AthAlgorithm(name, svcLocator),
-  m_toolSvc(0)
+  AthAlgorithm(name, svcLocator)
 {
   // Tool initialization
   declareProperty("ForceExtrapolatorTools",m_forceExtrapolatorTools=false);
@@ -32,13 +31,6 @@ VP1TrkInitializer::~VP1TrkInitializer()
 StatusCode VP1TrkInitializer::initialize()
 {
   msg(MSG::INFO) << " in initialize() " << endmsg;
-
-  //ToolSvc
-  StatusCode status = service("ToolSvc",m_toolSvc);
-  if (status.isFailure()||!m_toolSvc) {
-    msg(MSG::ERROR) << " Unable to get ToolSvc!" << endmsg;
-    return status;
-  }
 
   // Initialize tools (if needed)
   if(m_forceExtrapolatorTools) {
@@ -78,8 +70,8 @@ StatusCode VP1TrkInitializer::finalize()
 template <typename T> 
 void VP1TrkInitializer::initTools(QStringList& toolTypes, QString env)
 {
-  VP1ToolAccessHelper toolAccessHelper(m_toolSvc);
-  VP1AvailableToolsHelper availTools(m_toolSvc);
+  VP1ToolAccessHelper toolAccessHelper(toolSvc());
+  VP1AvailableToolsHelper availTools(toolSvc());
   availTools.addMonitoredTypes(toolTypes);
   QStringList existingTools = availTools.availableTools();
 

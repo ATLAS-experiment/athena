@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HepPDT/ParticleDataTable.hh"
@@ -35,7 +35,7 @@ public:
   VP1MCSystem * theclass;
   Ui::VP1MCSystemControllerForm ui{};
   QTreeWidget *tw;
-  IPartPropSvc *pps;
+  SmartIF<IPartPropSvc> pps;
 
   void handle(QTreeWidgetItem *item, const HepMC::GenParticle &particle);
 
@@ -43,16 +43,15 @@ public:
   void zeroFormat(QTreeWidgetItem *item);
 };
 
-VP1MCSystem::Imp::Imp(VP1MCSystem *tc):theclass(tc),tw(0),pps(0) {
+VP1MCSystem::Imp::Imp(VP1MCSystem *tc):theclass(tc),tw(0)  {
 
   ISvcLocator* svcLoc = theclass->serviceLocator();
   if (!svcLoc) {
     theclass->message("Error: Got NULL pointer to the service locator!");
     return;
   }
-  StatusCode status = svcLoc->service( "PartPropSvc",pps );
-  if(!status.isSuccess()) {
-    pps=0;
+  pps = svcLoc->service( "PartPropSvc" );
+  if(!pps) {
     theclass->message("Error: Could not retrieve PartPropSvc!!");
     return;
   }
