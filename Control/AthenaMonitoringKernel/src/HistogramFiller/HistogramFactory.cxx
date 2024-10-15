@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 
 #include "TH1.h"
 #include "TH2.h"
+#include "TGraph.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TTree.h"
@@ -19,6 +20,14 @@ HistogramFactory::HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc,
                                    std::string histoPath)
 : m_histSvc(histSvc)
 {
+  // The Gaudi/offline THistSvc does not delete objects on de-registration,
+  // but the online TrigMonTHistSvc does. We detect the latter case by checking
+  // the existence of one of its properties.
+  SmartIF<IProperty> hs{histSvc.get()};
+  if (hs && hs->hasProperty("IncludeName")) {
+    m_deleteOnRemove = false;
+  }
+
   size_t whereToStart = 0;
   // do we have a leading slash? This distinguishes temporary streams in THistSvc
   if (! histoPath.empty() && histoPath[0] == '/') {
@@ -307,25 +316,31 @@ std::string HistogramFactory::getFullName(const HistogramDef& def) const {
 }
 
 void HistogramFactory::remove(const HistogramDef& def) {
-  std::string path = getFullName( def );
+  const std::string path = getFullName( def );
 
-  bool exists = false;
+  TObject* obj = nullptr;
   if (def.type=="TEfficiency") {
-    exists = m_histSvc->existsEfficiency(path);
+    TEfficiency* e;
+    m_histSvc->getEfficiency(path, e).ignore();
+    obj = e;
   } else if (def.type=="TGraph") {
-    exists = m_histSvc->existsGraph(path);
+    TGraph* g;
+    m_histSvc->getGraph(path, g).ignore();
+    obj = g;
   } else if (def.type=="TTree") {
-    exists = m_histSvc->existsTree(path);
+    TTree* t;
+    m_histSvc->getTree(path, t).ignore();
+    obj = t;
   } else {
-    exists = m_histSvc->existsHist(path);
+    TH1* h;
+    m_histSvc->getHist(path, h).ignore();
+    obj = h;
   }
 
-  // see docu here:
-  // https://acode-browser1.usatlas.bnl.gov/lxr/source/Gaudi/GaudiSvc/src/THistSvc/THistSvc.h#0146
-  // and here:
-  // https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/HLT/Trigger/TrigControl/TrigServices/src/TrigMonTHistSvc.cxx#0216
-  // online implementation actually claims ownership of the object and we ever need to call this in online situation
-  //
-  if (exists)
-    m_histSvc->deReg(path).ignore(); // we actually ignore if that was sucessfull as we plan to use is eagerly to cleanup LumiBlock histograms history
+  if (obj) {
+    m_histSvc->deReg(path).ignore();
+    if (m_deleteOnRemove) {
+      delete obj;
+    }
+  }
 }
