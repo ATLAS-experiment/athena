@@ -34,7 +34,8 @@
 namespace ActsTrk {
 
   SiSpacePointsSeedMaker::SiSpacePointsSeedMaker(const std::string &t, const std::string &n, const IInterface *p)
-    : base_class(t, n, p)
+    : base_class(t, n, p),
+      m_thistSvc("THistSvc", n)
   {}
 
   StatusCode SiSpacePointsSeedMaker::initialize()
@@ -80,7 +81,7 @@ namespace ActsTrk {
   StatusCode
   SiSpacePointsSeedMaker::InitTree()
   {
-    ATH_CHECK( service("THistSvc", m_thistSvc)  );
+    ATH_CHECK( m_thistSvc.retrieve() );
     std::string tree_name = std::string("SeedTree_") + name();
     std::replace( tree_name.begin(), tree_name.end(), '.', '_' );
 
