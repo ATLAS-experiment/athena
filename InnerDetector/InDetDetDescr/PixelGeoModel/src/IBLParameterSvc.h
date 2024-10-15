@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,8 +23,6 @@
 class IGeoDbTagSvc;
 class IRDBAccessSvc;
 
-static const InterfaceID IID_IIBLParameterSvc("IBLParameterSvc",1,0); 
-
 class IBLParameterSvc
   : public extends<AthService, IIBLParameterSvc>
 {
@@ -36,13 +34,10 @@ public:
   
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-    // Can get rid of these once all clients are using IIBLParameterSvc
-    // rather than IBLParameterSvc.
-    virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvIf ) override;
-    static const InterfaceID& interfaceID();
-    bool containsIBL();
-    bool contains3D();
-    bool containsDBM();
+
+    virtual bool containsIBL() override {return m_IBLpresent;}
+    virtual bool contains3D() override {return m_LayerFEsPerHalfModule_3d>0;}
+    virtual bool containsDBM() override {return m_DBMpresent;}
 
     std::string setStringParameters(const std::string& param,const std::string& paramName) {
         if (m_IBLpresent) {
@@ -96,13 +91,6 @@ private:
   bool m_disableDCS;
 
   StatusCode setIblParameters(); 
-  };
+};
 
-  inline bool IBLParameterSvc::containsIBL() {return m_IBLpresent;}
-  inline bool IBLParameterSvc::contains3D() {return m_LayerFEsPerHalfModule_3d>0;}
-  inline bool IBLParameterSvc::containsDBM() {return m_DBMpresent;}
-
-  inline const InterfaceID& IBLParameterSvc::interfaceID(){
-         return IID_IIBLParameterSvc;
-}
 #endif

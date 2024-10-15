@@ -1,6 +1,6 @@
 // Hey emacs, this is -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,6 +26,10 @@ public:
   DeclareInterfaceID (IIBLParameterSvc, 1, 0);
 
   virtual void setBoolParameters(bool& param, const std::string& paramName) = 0;
+  virtual bool containsIBL() = 0;
+  virtual bool contains3D() = 0;
+  virtual bool containsDBM() = 0;
+
 };
 
 

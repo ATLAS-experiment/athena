@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /** 
  * @file PixelToTPIDTool/PixelToTPIDTool.h
@@ -24,7 +24,7 @@
 class AtlasDetectorID;
 class Identifier;
 class PixelID;
-class IBLParameterSvc;
+class IIBLParameterSvc;
 
 namespace Trk {
   class Track;
@@ -56,7 +56,7 @@ namespace InDet {
                             int nGoodPixels) const override final;
 
     private:
-      ServiceHandle<IBLParameterSvc> m_IBLParameterSvc;
+      ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc;
       const PixelID* m_pixelid;
       double m_conversionfactor;
 

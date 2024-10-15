@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_PIXELDETECTORTOOL_H
@@ -11,7 +11,7 @@
 
 #include "GeoModelInterfaces/IGeoSubDetTool.h"
 #include "GeometryDBSvc/IGeometryDBSvc.h"
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
 #include "CxxUtils/checker_macros.h"
@@ -46,7 +46,7 @@ private:
   bool m_services{true};
   bool m_servicesOnLadder{true}; //JBdV
   std::string m_detectorName{"PixelDetector"};
-  ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{this,"IBLParameterSvc","IBLParameterSvc",""};
+  ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc{this,"IBLParameterSvc","IBLParameterSvc",""};
   bool m_dc1Geometry{false};
   bool m_alignable{true};
   bool m_tweakIBLDist{true}; // whether to tweak L3 transforms with IBLDist

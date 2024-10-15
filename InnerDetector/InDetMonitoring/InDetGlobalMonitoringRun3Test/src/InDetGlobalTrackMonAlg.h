@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,7 @@
 
 #include "GaudiKernel/EventContext.h"
 
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 
 
 //Detector Managers
@@ -67,7 +67,7 @@ class InDetGlobalTrackMonAlg : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::VertexContainer> m_vxContainerName{this,"vxContainerName","PrimaryVertices","Primary Vertices for Global Monitoring"};
   SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerName{this,"jetCollection","AntiKt4EMTopoJets","Jet Collection for Global Track Monitoring"};
 
-  ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{this, "IBLParameterSvc", "IBLParameterSvc"};
+  ServiceHandle<IIBLParameterSvc> m_IBLParameterSvc{this, "IBLParameterSvc", "IBLParameterSvc"};
 
   BooleanProperty m_doIBL{this, "DoIBL", true, "IBL present?"};
   BooleanProperty m_doTide{this, "DoTide", true, "Make TIDE plots?"};
