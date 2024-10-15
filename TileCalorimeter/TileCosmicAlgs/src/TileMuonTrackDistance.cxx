@@ -59,11 +59,7 @@ namespace ROOT {
 
     }
     /*==========================================================================*/
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
-    double TileMuonTrackDistance::operator()(std::span<const double> par) const
-#else
     double TileMuonTrackDistance::operator()(const std::vector<double>& par) const
-#endif
     {
       double distSum2 = 0;
       std::vector<double> fourPar;
