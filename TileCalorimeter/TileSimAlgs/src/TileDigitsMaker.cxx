@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -42,8 +42,6 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
-// Pile up
-#include "PileUpTools/PileUpMergeSvc.h"
 
 // Gaudi includes
 
@@ -144,13 +142,12 @@ StatusCode TileDigitsMaker::initialize() {
     m_calibRun = false;
     if (m_allChannels<0) m_allChannels = 2; // create all channels with noise in overlay by default
 
-    ATH_MSG_INFO( "Pileup and/or noise added by overlaying digits of random events");
+    ATH_MSG_DEBUG( "Pileup and/or noise added by overlaying digits of random events");
 
     // locate the PileUpMergeSvc and initialize our local ptr
     if (m_onlyUseContainerName) {
-      ATH_CHECK( service("PileUpMergeSvc", m_mergeSvc) );
-
-      ATH_MSG_INFO( "PileUpMergeSvc successfully initialized");
+      ATH_CHECK( m_mergeSvc.retrieve() );
+      ATH_MSG_DEBUG( "PileUpMergeSvc successfully initialized");
     }
 
     ATH_CHECK( m_DQstatusKey.initialize() );
@@ -160,33 +157,33 @@ StatusCode TileDigitsMaker::initialize() {
 
     if (m_allChannels<0) m_allChannels = 0;                 // do not create all channels by default
     if (m_tileNoise || m_tileCoherNoise) m_allChannels = 2; // unless noise is set to True
-    if (msgLvl(MSG::INFO)) {
-      msg(MSG::INFO) << "Obtained info from TileInfo" << endmsg;
-      msg(MSG::INFO) << "tileNoise=" << ((m_tileNoise) ? "true" : "false")
+    if (msgLvl(MSG::DEBUG)) {
+      msg(MSG::DEBUG) << "Obtained info from TileInfo" << endmsg;
+      msg(MSG::DEBUG) << "tileNoise=" << ((m_tileNoise) ? "true" : "false")
                      << ", tileCoherNoise=" << ((m_tileCoherNoise) ? "true" : "false")
                      << ", tileThresh=" << ((m_tileThresh) ? "true" : "false");
       if (m_tileThresh)
-        msg(MSG::INFO) << ", thresh(hi,lo)=" << m_tileThreshHi << "," << m_tileThreshLo << endmsg;
+        msg(MSG::DEBUG) << ", thresh(hi,lo)=" << m_tileThreshHi << "," << m_tileThreshLo << endmsg;
       else
-        msg(MSG::INFO) << endmsg;
+        msg(MSG::DEBUG) << endmsg;
     }
   }
 
   if (m_allChannels>1)
-    ATH_MSG_INFO( "Create all channels with noise: true");
+    ATH_MSG_DEBUG( "Create all channels with noise: true");
   else if (m_allChannels>0)
-    ATH_MSG_INFO( "Create all channels without noise: true");
+    ATH_MSG_DEBUG( "Create all channels without noise: true");
   else
-    ATH_MSG_INFO( "Create all channels: false");
+    ATH_MSG_DEBUG( "Create all channels: false");
 
   if (m_calibRun) {
     m_filteredDigitsContainerKey = "";
   }
 
   if (!m_filteredDigitsContainerKey.key().empty()) {
-    ATH_MSG_INFO( "Keep digits with hit energy above " << m_filterThreshold / MeV
+    ATH_MSG_DEBUG( "Keep digits with hit energy above " << m_filterThreshold / MeV
                   << " MeV in " << m_filteredDigitsContainerKey.key() << " container");
-    ATH_MSG_INFO( "Keep digits from MBTS with original G4 hit energy above "
+    ATH_MSG_DEBUG( "Keep digits from MBTS with original G4 hit energy above "
                  << m_filterThresholdMBTS / MeV << " MeV ");
 
     ATH_CHECK( m_filteredDigitsContainerKey.initialize() );
@@ -256,7 +253,7 @@ StatusCode TileDigitsMaker::initialize() {
   ATH_CHECK( m_hitContainerKey.initialize() );
   ATH_CHECK( m_digitsContainerKey.initialize() );
 
-  ATH_MSG_INFO( "TileDigitsMaker initialization completed");
+  ATH_MSG_DEBUG( "TileDigitsMaker initialization completed");
 
   return StatusCode::SUCCESS;
 }
@@ -1089,7 +1086,7 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
 }
 
 StatusCode TileDigitsMaker::finalize() {
-  ATH_MSG_INFO( "TileDigitsMaker finalized successfully");
+  ATH_MSG_DEBUG( "TileDigitsMaker finalized successfully");
 
   return StatusCode::SUCCESS;
 }

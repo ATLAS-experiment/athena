@@ -59,11 +59,6 @@
 #include <CLHEP/Random/Randomize.h>
 #include <CLHEP/Units/SystemOfUnits.h>
 
-
-// pileup
-#include "PileUpTools/PileUpMergeSvc.h"
-
-
 using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
 using CLHEP::MeV;
@@ -86,7 +81,6 @@ TilePulseForTileMuonReceiver::TilePulseForTileMuonReceiver(const std::string& na
   , m_nBinsPerX(0)
   , m_binTime0(0)
   , m_timeStep(0.0)
-  , m_mergeSvc(nullptr)
   , m_runPeriod(0)
 {
 }
@@ -183,7 +177,7 @@ StatusCode TilePulseForTileMuonReceiver::initialize() {
     ATH_MSG_INFO( "Pileup and/or noise added by overlaying digits of random events");
     // locate the PileUpMergeSvc and initialize our local ptr
     if (m_onlyUseContainerName) {
-      ATH_CHECK( service("PileUpMergeSvc", m_mergeSvc) );
+      ATH_CHECK( m_mergeSvc.retrieve() );
       ATH_MSG_INFO( "PileUpMergeSvc successfully initialized");
     }
   }

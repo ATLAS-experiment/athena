@@ -48,6 +48,9 @@
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileRecUtils/TileRawChannelBuilderMF.h"
 
+// pileup
+#include "PileUpTools/PileUpMergeSvc.h"
+
 // Atlas includes
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -170,7 +173,7 @@ class TilePulseForTileMuonReceiver: public AthAlgorithm {
     int m_binTime0;     //!< Index of time=0 bin for pulse shape
     double m_timeStep;  //!< Time step in pulse shape: 25.0 / nBinsPerX
 
-    PileUpMergeSvc* m_mergeSvc;         //!< Pointer to PileUpMergeService
+    ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc"};
     // vector container for the pulse shape
     //
     std::vector<double> m_shapeMuonReceiver;//!< Muon receiver pulse shape
