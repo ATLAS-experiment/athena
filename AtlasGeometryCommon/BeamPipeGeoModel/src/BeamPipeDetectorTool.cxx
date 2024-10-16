@@ -35,6 +35,7 @@ StatusCode BeamPipeDetectorTool::create()
   ATH_MSG_INFO("Building Beam Pipe");
 
   SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+  ATH_CHECK(geoDbTag.isValid());
 
   std::string atlasVersion = geoDbTag->atlasVersion();
   std::string versionNode = "ATLAS";

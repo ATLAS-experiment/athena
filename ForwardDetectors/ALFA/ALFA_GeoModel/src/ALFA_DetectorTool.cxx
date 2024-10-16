@@ -141,6 +141,7 @@ StatusCode ALFA_DetectorTool::create()
   // Get pointer to the RDBAccessSvc
   // Use this pointer later for Geometry DB access
   SmartIF<IRDBAccessSvc> raccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  ATH_CHECK(raccess.isValid());
 
   // Construct Factory
   m_pALFADetectorFactory=new ALFA_DetectorFactory(detStore().operator->(),raccess,&m_Config);

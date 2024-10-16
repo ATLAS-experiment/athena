@@ -142,6 +142,10 @@ CaloTowerBuilderToolBase* CaloTowerContainerCnv::getTool(
 const std::string& type, const std::string& nm)
 {
   SmartIF<IToolSvc> myToolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+  if(!myToolSvc.isValid()) {
+    ATH_MSG_ERROR("Cannot locate ToolSvc");
+    return 0;
+  }
 
   ////////////////////
   // Allocate Tools //
