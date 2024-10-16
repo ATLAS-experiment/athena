@@ -69,10 +69,6 @@ class VP1Alg: public AthAlgorithm,
       "Flag to turn OFF the GUI. Default: FALSE (i.e., GUI is ON)"};
 
 
-
-
-
-  IToolSvc* m_toolSvc;
   VP1Gui * m_vp1gui;
 /* 
   // Work In Progress 

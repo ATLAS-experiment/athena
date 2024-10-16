@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -35,7 +35,6 @@ class VP1TrkInitializer: public AthAlgorithm
   StatusCode finalize();
 
  private:
-  IToolSvc* m_toolSvc;
 
   // Properties for forcing Tool initialization
   bool m_forceExtrapolatorTools;

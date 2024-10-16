@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1BanksSystems/VP1BanksSystem.h"
@@ -21,7 +21,7 @@ public:
   Ui::VP1BanksSystemControllerForm ui{};
 
   QString idToName(const CLID&) const;
-  IClassIDSvc *clidSvc;
+  SmartIF<IClassIDSvc> clidSvc;
 
   QStringList lastEmitted_keys;
   QStringList lastEmitted_types;
@@ -48,7 +48,6 @@ VP1BanksSystem::VP1BanksSystem()
 	       "Joe Boudreau <boudreau@pitt.edu> (original), Thomas.Kittelmann@cern.ch (VP1 implementation)"),
     m_d(new Imp(this))
 {
-  m_d->clidSvc=0;
   m_d->ui.radioButton_store_event = 0;
   m_d->ui.radioButton_store_detector = 0;
   m_d->ui.pushButton_refresh = 0;
@@ -93,9 +92,9 @@ void VP1BanksSystem::create( StoreGateSvc* /*detstore*/ )
     message("Error: Got NULL pointer to the service locator!");
     return;
   }
-  StatusCode status = svcLoc->service( "ClassIDSvc",m_d->clidSvc );
-  if(!status.isSuccess()) {
-    m_d->clidSvc=0;
+
+  m_d->clidSvc = svcLoc->service( "ClassIDSvc" );
+  if(!m_d->clidSvc) {
     message("Error: Could not retrieve ClassIDSvc!!");
     return;
   }
