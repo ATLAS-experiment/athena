@@ -1741,7 +1741,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    }
 	  else if (m_LHCRun==2)
 	    {
-	      if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
+	      
 	      
               static const SG::ConstAccessor<std::vector<uint16_t> > g0d1dataAcc ("g0d1data");
               static const SG::ConstAccessor<std::vector<uint16_t> > g1d1dataAcc ("g1d1data");
