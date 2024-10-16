@@ -586,7 +586,7 @@ template<> inline double fractionalCharge(const DecodedPID& p) {
 template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
 
 template<class T> inline bool isEMInteracting(const T& p){return isEMInteracting(p->pdg_id());}
-template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || charge3(p) != 0 || isMonopole(p));}
+template<> inline bool isEMInteracting(const int& p) {return (isPhoton(p) || isZ(p) || std::abs(charge(p))>std::numeric_limits<double>::epsilon() || isMonopole(p));}
 
 template<class T> inline bool isStrongInteracting(const T& p){return isStrongInteracting(p->pdg_id());}
 template<> inline bool isStrongInteracting(const int& p) { return (isGluon(p) || isQuark(p) || isDiquark(p) || isLeptoQuark(p) || isHadron(p));}
