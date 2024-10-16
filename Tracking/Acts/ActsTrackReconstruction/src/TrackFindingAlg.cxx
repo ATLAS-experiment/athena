@@ -658,11 +658,6 @@ namespace ActsTrk
           m_trackStatePrinter->printTrack(tgContext, tracksContainerTemp, track, measurementContainerOffsets);
         }
 
-        // Fill the track infos into the duplicate seed detector
-        if (m_skipDuplicateSeeds) {
-          storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector);
-        }
-
         ++ntracks;
         ++event_stat[category_i][kNOutputTracks];
 
@@ -671,6 +666,11 @@ namespace ActsTrk
           auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
           destProxy.copyFrom(track, true);  // make sure we copy track states!
           ++event_stat[category_i][kNSelectedTracks];
+
+          // Fill the track infos into the duplicate seed detector
+          if (m_skipDuplicateSeeds) {
+            storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector);
+          }
         } else {
           ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
         }
