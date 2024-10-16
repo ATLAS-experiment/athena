@@ -163,7 +163,10 @@ def collectDecisionObjects(  hypos, filters, hltSeeding, hltSummary ):
     decisionObjects.update(decObjHypo)
     decisionObjects.update(decObjFilter)
     decisionObjects.update(decObjSummary)
-    return list(sorted(decisionObjects))
+    __log.info( "Number of decision objects found in HLT CF %d of which %d are the outputs of hypos",
+                len(decisionObjects), len(decObjHypo) )
+    __log.debug( decisionObjects )
+    return list(sorted(decisionObjects)), decObjHypo
 
 def triggerSummaryCfg(flags, hypos):
     """
@@ -679,11 +682,8 @@ def triggerRunCfg( flags, menu=None ):
     acc.merge( monitoringAcc, sequenceName="HLTEndSeq" )
     acc.addEventAlgo( monitoringAlg, sequenceName="HLTEndSeq" )
 
-    decObj = collectDecisionObjects( hypos, filters, hltSeedingAlg, summaryAlg )
-    decObjHypoOut = collectHypoDecisionObjects(hypos, inputs=False, outputs=True)
-    __log.info( "Number of decision objects found in HLT CF %d of which %d are the outputs of hypos",
-                len(decObj), len(decObjHypoOut) )
-    __log.debug( decObj )
+    decObj, decObjHypoOut = collectDecisionObjects( hypos, filters, hltSeedingAlg, summaryAlg )
+    
 
     # configure components need to normalise output before writing out
     viewMakers = collectViewMakers( HLTSteps )
