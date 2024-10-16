@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArTPCnv/test/LArDigitContainerCnv_p3_test.cxx
@@ -106,8 +106,8 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   // StoreGate service to be passed to converter for container name lookup
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* storeGateSvc = nullptr;
-  assert (svcLoc->service("StoreGateSvc", storeGateSvc).isSuccess());
+  SmartIF<StoreGateSvc> storeGateSvc{ svcLoc->service("StoreGateSvc") };
+  assert (storeGateSvc.isValid());
   // name must not contain 'SC' to be handled as standard cells in transient->persistent conversion
   assert (storeGateSvc->record(&trans, "myLArDigitContainer").isSuccess());
   // name must contain 'SC' to be handled as supercells in transient->persistent conversion
