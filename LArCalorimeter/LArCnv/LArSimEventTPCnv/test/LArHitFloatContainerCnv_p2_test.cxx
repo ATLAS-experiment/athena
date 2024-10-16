@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArSimEventTPCnv/test/LArHitFloatContainerCnv_p2_test.cxx
@@ -104,8 +104,8 @@ const CaloCell_ID& make_dd (ISvcLocator* svcLoc)
                                           tile_id);
   assert (calo_id->initialize_from_dictionary (idd) == 0);
 
-  StoreGateSvc* detStore = nullptr;
-  assert (svcLoc->service( "DetectorStore", detStore ).isSuccess());
+  SmartIF<StoreGateSvc> detStore (svcLoc->service( "DetectorStore" ));
+  assert (detStore.isValid());
   assert (detStore->record (calo_id, "CaloCell_ID").isSuccess());
   return *calo_id;
 }
