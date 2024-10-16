@@ -13,11 +13,11 @@
 //  Version 00-00-11 05/02/2009 Daniel Dobos for BCM
 ///////////////////////////////////////////////////////////////////
 
-#include "BCM_RawDataByteStreamCnv/BCM_RawContByteStreamTool.h"
+#include "BCM_RawContByteStreamTool.h"
 
 #include "InDetBCM_RawData/InDetBCM_RawDataCLASS_DEF.h"
 
-#include "BCM_RawDataByteStreamCnv/BCM_RodEncoder.h"
+#include "BCM_RodEncoder.h"
 
 #include <cstdint>
 #include <map>

@@ -11,7 +11,7 @@
 //  Version 00-00-01 12/05/2008 Daniel Dobos
 ///////////////////////////////////////////////////////////////////
 
-#include "BCM_RawDataByteStreamCnv/BCM_RodEncoder.h" 
+#include "BCM_RodEncoder.h" 
 
 ////////////////////////
 // constructor

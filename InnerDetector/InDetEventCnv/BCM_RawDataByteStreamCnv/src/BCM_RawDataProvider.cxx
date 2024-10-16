@@ -11,8 +11,8 @@
 //  Version 00-00-11 09/02/2009 Daniel Dobos
 ///////////////////////////////////////////////////////////////////
 
-#include "BCM_RawDataByteStreamCnv/BCM_RawDataProvider.h"
-#include "BCM_RawDataByteStreamCnv/BCM_RawDataProviderTool.h"
+#include "BCM_RawDataProvider.h"
+#include "BCM_RawDataProviderTool.h"
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
 
 ////////////////////////
