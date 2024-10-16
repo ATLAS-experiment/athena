@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTowerContainerCnv.h"
@@ -20,34 +20,9 @@
 CaloTowerContainerCnv::CaloTowerContainerCnv(ISvcLocator* svcloc)
     :
     // Base class constructor
-    CaloTowerContainerCnvBase(svcloc),
-    m_emHecTowerBldr(0),
-    m_fcalTowerBldr(0),
-    m_tileTowerBldr(0),
-    p0_guid("8F94A938-3C19-4509-BBAA-E8EB0A64B524"),
-    p1_guid("E56D5471-A9E2-4787-B413-D3BD9F2AC55D")
+    CaloTowerContainerCnvBase(svcloc)
 {}
 
-
-
-CaloTowerContainerCnv::~CaloTowerContainerCnv()
-{}
-
-
-// StatusCode CaloTowerContainerCnv::initialize()
-// {
-//     // Call base clase initialize
-//     AthenaPoolConverter::initialize();
-
-//     // Get the messaging service, print where you are
-//     MsgStream log(msgSvc(), "CaloTowerContainerCnv");
-//     log << MSG::INFO << "initialize()" << endmsg;
-
-//     return StatusCode::SUCCESS;
-// }
-
-
-//StatusCode CaloTowerContainerCnv::PoolToDataObject(DataObject*& pObj,const std::string &token)
 CaloTowerContainer* CaloTowerContainerCnv::createTransient() {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     MsgStream log(msgSvc(), "CaloTowerContainerCnv::createTransient" );
@@ -166,32 +141,20 @@ CaloTowerContainerPERS* CaloTowerContainerCnv::createPersistent(CaloTowerContain
 CaloTowerBuilderToolBase* CaloTowerContainerCnv::getTool(
 const std::string& type, const std::string& nm)
 {
-  IToolSvc* myToolSvc;
-  StatusCode sc = service("ToolSvc",myToolSvc);
-
-  MsgStream log(msgSvc(), "CaloTowerContainerCnv");
-  if ( sc.isFailure() )
-    {
-      log << MSG::ERROR
-          << "Tool Service not found"
-          << endmsg;
-      return 0 ; 
-    }
+  SmartIF<IToolSvc> myToolSvc{Gaudi::svcLocator()->service("ToolSvc")};
 
   ////////////////////
   // Allocate Tools //
   ////////////////////
 
-  IAlgTool* algToolPtr;
-  sc = myToolSvc->retrieveTool(type,nm,algToolPtr);
+  IAlgTool* algToolPtr{nullptr};
+  StatusCode sc = myToolSvc->retrieveTool(type,nm,algToolPtr);
   // tool not found
   if ( sc.isFailure() )
    {
-          log << MSG::INFO
-              << "Cannot find tool named <"
-              << type << "/" << nm 
-              << ">"
-              << endmsg;
+     ATH_MSG_INFO("Cannot find tool named <"
+		  << type << "/" << nm 
+		  << ">");
           return 0; 
     }
   return   dynamic_cast<CaloTowerBuilderToolBase*>(algToolPtr);
