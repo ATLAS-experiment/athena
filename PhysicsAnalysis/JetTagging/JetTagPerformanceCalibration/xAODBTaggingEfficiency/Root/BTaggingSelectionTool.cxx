@@ -466,7 +466,7 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tag_
           acceptData.setCutResult( "WorkingPoint", true );
         }
       } else {
-        if ( tag_weight < m_continuouscuts.at(bin-2) ) {
+        if ( tag_weight > m_continuouscuts.at(bin-2) ) {
           acceptData.setCutResult( "WorkingPoint", true );
         }
       }
