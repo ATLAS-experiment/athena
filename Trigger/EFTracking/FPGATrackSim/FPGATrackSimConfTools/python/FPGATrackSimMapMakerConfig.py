@@ -16,6 +16,7 @@ def FPGATrackSimMapMakerCfg(flags):
         trim=flags.trim,
         globalTrim=flags.globalTrim,
         doSpacePoints=flags.Trigger.FPGATrackSim.spacePoints,
+        doInsideOut=flags.doInsideOut,
         InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))        
         )
 
@@ -32,6 +33,8 @@ if __name__ == "__main__":
     flags.addFlag("nSlices", 10)
     flags.addFlag("trim", 0.1)
     flags.addFlag("globalTrim", 0)
+    flags.addFlag('doInsideOut', False)
+    
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
 

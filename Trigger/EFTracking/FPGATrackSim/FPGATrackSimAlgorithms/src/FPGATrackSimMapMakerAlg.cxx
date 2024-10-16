@@ -44,8 +44,13 @@ StatusCode FPGATrackSimMapMakerAlg::initialize()
     // We need to select this before calling parseKeyString() in case the user
     // has specified a plane (logical layer) as the keystring.
     if (m_doSpacePoints) {
+        ATH_MSG_INFO("Using Space Point Configuration");
         m_planes = &m_planes_sp;
+    } else if (m_insideout) {
+        ATH_MSG_INFO("Using Inside-Out Configuration");
+        m_planes = &m_planes_insideout;
     } else {
+        ATH_MSG_INFO("Using Default Configuration");
         m_planes = &m_planes_default;
     }
 
