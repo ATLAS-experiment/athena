@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_DIGITIZATION_TOOL_H
@@ -66,10 +66,6 @@ private:
   std::string m_SimHitCollectionName;
   std::string m_digitsContainerName;
   std::string m_key_digitCnt;
-
-  LUCID_DigitizationToolBox *m_digitToolBox{};
-
-  ITHistSvc  *m_digitHistSvc{};
 
   LUCID_SimHitCollection* m_mergedhitList{};
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_DIGITIZATION_TOOLBOX_H
@@ -8,7 +8,6 @@
 #include "TTree.h"
 #include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "LUCID_SimEvent/LUCID_SimHitCollection.h"
@@ -44,7 +43,7 @@ class LUCID_DigitizationToolBox {
   StatusCode fillDigitContainer(TimedHitCollection<LUCID_SimHit>&, CLHEP::HepRandomEngine*);
   StatusCode fillDigitContainer(LUCID_SimHitCollection*          , CLHEP::HepRandomEngine*);
   
-  StatusCode setDebugTree(ITHistSvc*);
+  StatusCode setDebugTree();
   
  protected:
 

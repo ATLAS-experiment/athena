@@ -12,6 +12,8 @@
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Random/RandPoissonQ.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 //--------------------------------------------------------------------------
 LUCID_DigitizationToolBox::LUCID_DigitizationToolBox(): 
@@ -96,8 +98,10 @@ LUCID_DigitizationToolBox::LUCID_DigitizationToolBox(int    numTubes,
 }
 
 //--------------------------------------------------------------------------
-StatusCode LUCID_DigitizationToolBox::setDebugTree(ITHistSvc* digitHistSvc) {
-  
+StatusCode LUCID_DigitizationToolBox::setDebugTree() {
+  SmartIF<ITHistSvc> digitHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+  if (!digitHistSvc) { return StatusCode::FAILURE; }
+
   m_tubeInfo = new TTree("t", "LUCID_LUMI_SUMMARY");
   
   StatusCode sc = digitHistSvc->regTree("/AANT/LUCID_LUMI_SUMMARY", m_tubeInfo);

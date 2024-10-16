@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_PileUpTool.h"
@@ -9,8 +9,6 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 
-
-#include "GaudiKernel/ITHistSvc.h"
 
 #include <map>
 #include <algorithm>
@@ -90,32 +88,11 @@ StatusCode LUCID_PileUpTool::initialize()
   ATH_CHECK(m_mergeSvc.retrieve());
   ATH_MSG_DEBUG ( "Retrieved PileUpMergeSvc" );
 
-  m_digitToolBox = new LUCID_DigitizationToolBox(m_numTubes,
-                                                 m_qdcChannelsPerPE,
-                                                 m_qdcPedestal,
-                                                 m_qdcFedNoiseFactor,
-                                                 m_tdcPmtNoiseFactor,
-                                                 m_tdcFedNoiseFactor,
-                                                 m_TotalPMTgain,
-                                                 m_AmpFactor,
-                                                 m_Q1bin,
-                                                 m_NoiseCharge,
-                                                 m_numDyinodes,
-                                                 m_dynodeGammaFactor,
-                                                 m_pmtSmearing,
-                                                 m_pmtScaling,
-                                                 m_gasScaling,
-                                                 m_npeThreshold,
-                                                 m_fillRootTree);
-
   m_mergedhitList = new LUCID_SimHitCollection();
 
   if (m_fillRootTree)
     {
-      CHECK(service("THistSvc", m_digitHistSvc));
-      ATH_MSG_DEBUG ( "Retrieved Histogram Service" );
-
-      CHECK(m_digitToolBox->setDebugTree(m_digitHistSvc));
+      ATH_CHECK(setDebugTree());
       ATH_MSG_DEBUG ( "Retrieved ROOT tree" );
     }
 
@@ -127,7 +104,7 @@ StatusCode LUCID_PileUpTool::prepareEvent(const EventContext& /*ctx*/, const uns
 {
   ATH_MSG_DEBUG ( "prepareEvent() called for " << nInputEvents << " input events" );
 
-  CHECK(m_digitToolBox->recordContainers(this->evtStore(), m_key_digitCnt));
+  CHECK(recordContainers(this->evtStore(), m_key_digitCnt));
   ATH_MSG_DEBUG ( " Digit container is recorded in StoreGate " );
 
   m_mergedhitList->clear();
@@ -182,7 +159,7 @@ StatusCode LUCID_PileUpTool::mergeEvent(const EventContext& ctx)
   ATHRNG::RNGWrapper* rngWrapper = m_randomSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
   CLHEP::HepRandomEngine* rngEngine = rngWrapper->getEngine(ctx);
-  ATH_CHECK(m_digitToolBox->fillDigitContainer(m_mergedhitList, rngEngine));
+  ATH_CHECK(fillDigitContainer(m_mergedhitList, rngEngine));
   ATH_MSG_DEBUG ( " LUCID_DigitContainer successfully registered in StoreGate " );
 
   return StatusCode::SUCCESS;
@@ -219,13 +196,13 @@ StatusCode LUCID_PileUpTool::processAllSubEvents(const EventContext& ctx)
     }
 
 
-  ATH_CHECK(m_digitToolBox->recordContainers(this->evtStore(), m_key_digitCnt));
+  ATH_CHECK(recordContainers(this->evtStore(), m_key_digitCnt));
   ATH_MSG_DEBUG ( " Digit container is recorded in StoreGate " );
 
   ATHRNG::RNGWrapper* rngWrapper = m_randomSvc->getEngine(this, m_randomStreamName);
   rngWrapper->setSeed( m_randomStreamName, ctx );
   CLHEP::HepRandomEngine* rngEngine = rngWrapper->getEngine(ctx);
-  ATH_CHECK(m_digitToolBox->fillDigitContainer(thpclucid, rngEngine));
+  ATH_CHECK(fillDigitContainer(thpclucid, rngEngine));
   ATH_MSG_DEBUG ( " Digit container was filled successfully " );
 
   return StatusCode::SUCCESS;

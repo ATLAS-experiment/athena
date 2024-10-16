@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LArHitMerger_H
@@ -9,9 +9,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "Gaudi/Property.h"
 #include <vector>
+// Pile up
+#include "PileUpTools/PileUpMergeSvc.h"
 
-class StoreGateSvc;
-class PileUpMergeSvc;
+
 class LArEM_ID;
 class LArHEC_ID;
 class LArFCAL_ID;
@@ -22,28 +23,28 @@ class LArHitMerger : public AthAlgorithm
 //
  public:
   LArHitMerger(const std::string& name, ISvcLocator* pSvcLocator);
-  ~LArHitMerger();
+  ~LArHitMerger() = default;
   virtual StatusCode initialize();
   virtual StatusCode execute();
   virtual StatusCode finalize();
 
  private:
 
-  PileUpMergeSvc *p_mergeSvc;
-  
+  ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc"};
+
   std::vector<bool> m_SubDetFlag;
   std::vector <std::string> m_HitContainer; // hit container name list
   std::vector<int> m_CaloType;
 
-  std::string m_SubDetectors;      // subdetectors  
-  std::string m_EmBarrelHitContainerName; 
-  std::string m_EmEndCapHitContainerName;
-  std::string m_HecHitContainerName;
-  std::string m_ForWardHitContainerName;
- 
-  const LArEM_ID*        m_larem_id;
-  const LArHEC_ID*       m_larhec_id;
-  const LArFCAL_ID*      m_larfcal_id;
+  StringProperty m_SubDetectors{this, "SubDetectors", "LAr_All", "subdetector selection"};      // subdetectors
+  StringProperty m_EmBarrelHitContainerName{this, "EmBarrelHitContainerName", "LArHitEMB", "Hit container name for EMB"};
+  StringProperty m_EmEndCapHitContainerName{this, "EmEndCapHitContainerName", "LArHitEMEC", "Hit container name for EMEC"};
+  StringProperty m_HecHitContainerName{this, "HecHitContainerName", "LArHitHEC", "Hit container name for HEC"};
+  StringProperty m_ForWardHitContainerName{this, "ForWardHitContainerName", "LArHitFCAL", "Hit container name for FCAL"};
+
+  const LArEM_ID*        m_larem_id{};
+  const LArHEC_ID*       m_larhec_id{};
+  const LArFCAL_ID*      m_larfcal_id{};
 };
 
 #endif

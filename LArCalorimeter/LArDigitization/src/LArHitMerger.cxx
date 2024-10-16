@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -18,31 +18,10 @@
 //#include "LArDigitization/LArHitEMap.h"
 #include "CaloIdentifier/CaloIdManager.h"
 
-// Pile up
-#include "PileUpTools/PileUpMergeSvc.h"
-
 LArHitMerger::LArHitMerger(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    p_mergeSvc(nullptr),
-    m_SubDetectors ("LAr_All"),
-    m_EmBarrelHitContainerName ("LArHitEMB"),
-    m_EmEndCapHitContainerName ("LArHitEMEC"),
-    m_HecHitContainerName ("LArHitHEC"),
-    m_ForWardHitContainerName ("LArHitFCAL"),
-    m_larem_id(nullptr),m_larhec_id(nullptr),m_larfcal_id(nullptr)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  //
-  // ........ declare the private data as properties
-  //
-  declareProperty("SubDetectors",m_SubDetectors,"subdetector selection");
-  declareProperty("EmBarrelHitContainerName",m_EmBarrelHitContainerName,"Hit container name for EMB");
-  declareProperty("EmEndCapHitContainerName",m_EmEndCapHitContainerName,"Hit container name for EMEC");
-  declareProperty("HecHitContainerName",m_HecHitContainerName,"Hit container name for HEC");
-  declareProperty("ForWardHitContainerName",m_ForWardHitContainerName,"Hit container name for FCAL");
 }
-
-
-LArHitMerger::~LArHitMerger() = default;
 
 
 StatusCode LArHitMerger::initialize()
@@ -136,15 +115,9 @@ StatusCode LArHitMerger::initialize()
 //
 // locate the PileUpMergeSvc and initialize our local ptr
 //
-  if (!(service("PileUpMergeSvc", p_mergeSvc)).isSuccess() ||
-       nullptr == p_mergeSvc) {
-     ATH_MSG_ERROR("Could not find PileUpMergeSvc");
-     return StatusCode::FAILURE;
-  }
-  else
-  {
-    ATH_MSG_INFO("PileUpMergeSvc successfully initialized");
-  }
+  ATH_CHECK(m_mergeSvc.retrieve());
+  ATH_MSG_DEBUG("PileUpMergeSvc successfully initialized");
+
 
 
   //retrieve ID helpers
@@ -261,7 +234,7 @@ StatusCode LArHitMerger::execute()
 //
 // retrieve list of pairs (time,container) from PileUp service
 
-    if (!(p_mergeSvc->retrieveSubEvtsData(m_HitContainer[iHitContainer]
+    if (!(m_mergeSvc->retrieveSubEvtsData(m_HitContainer[iHitContainer]
           ,hitContList).isSuccess()) && hitContList.empty()) {
        ATH_MSG_ERROR(" Could not fill TimedHitContList" );
        return StatusCode::FAILURE;
