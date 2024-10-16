@@ -226,32 +226,36 @@ bool RPDDataAnalyzer::doPileupExpFit(unsigned int channel, std::vector<std::pair
  */
 bool RPDDataAnalyzer::doPileupStretchedExpFit(unsigned int channel, std::vector<std::pair<unsigned int, float>> const& pileupFitPoints)
 {
-  TLinearFitter fitter(1, "1 ++ (x + 4)**(0.5) ++ (x + 4)**(-0.5)");
+  auto pFitter = std::make_unique<TLinearFitter>(1, "1 ++ (x + 4)**(0.5) ++ (x + 4)**(-0.5)");
   double x {};
   for (auto const& [sample, y] : pileupFitPoints) {
     x = sample;
-    fitter.AddPoint(&x, std::log(y));
+    pFitter->AddPoint(&x, std::log(y));
   }
-  if (fitter.Eval()) {
+  if (pFitter->Eval()) {
     (*m_msgFunc_p)(ZDCMsg::Warn, "RPDDataAnalyzer::doPileupStretchedExpFit: there was an error while evaluating TLinearFitter!");
     m_chStatus.at(channel).set(PileupStretchedExpFitFailBit, true);
     return false;
   }
-  m_chPileupStretchedExpFitParams.at(channel) = {static_cast<float>(fitter.GetParameter(0)), static_cast<float>(fitter.GetParameter(1)), static_cast<float>(fitter.GetParameter(2))};
-  m_chPileupStretchedExpFitParamErrs.at(channel) = {static_cast<float>(fitter.GetParError(0)), static_cast<float>(fitter.GetParError(1)), static_cast<float>(fitter.GetParError(2))};
-  m_ch2ndOrderStretchedExpPileupFuncs.at(channel) = [p0 = fitter.GetParameter(0), p1 = fitter.GetParameter(1), p2 = fitter.GetParameter(2)](unsigned int sample) {
+  auto getFitParam = [&pFitter](int i){return pFitter->GetParameter(i);};
+  auto fGetFitErr = [&pFitter](int i){return static_cast<float>(pFitter->GetParError(i));};
+  auto fGetFitParam = [&pFitter](int i){return static_cast<float>(pFitter->GetParameter(i));};
+  //
+  m_chPileupStretchedExpFitParams.at(channel) = {fGetFitParam(0), fGetFitParam(1), fGetFitParam(2)};
+  m_chPileupStretchedExpFitParamErrs.at(channel) = {fGetFitErr(0), fGetFitErr(1), fGetFitErr(2)};
+  m_ch2ndOrderStretchedExpPileupFuncs.at(channel) = [p0 = getFitParam(0), p1 = getFitParam(1), p2 = getFitParam(2)](unsigned int sample) {
     return std::exp(p0 + p1*std::pow(sample + 4, 0.5) + p2*std::pow(sample + 4, -0.5));
   };
   m_ch2ndOrderStretchedExpPileupMSE.at(channel) = calculateBaselineSamplesMSE(channel, m_ch2ndOrderStretchedExpPileupFuncs.at(channel));
 
   // check for exponential growth in parameters - we definitely don't want that for a function that describes pileup
-  if (fitter.GetParameter(1) >= 0) {
-    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupStretchedExpFit: p1 is " + std::to_string(fitter.GetParameter(1)) + " > 0 -> there is exponential growth in fit function!");
+  if (getFitParam(1) >= 0) {
+    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupStretchedExpFit: p1 is " + std::to_string(getFitParam(1)) + " > 0 -> there is exponential growth in fit function!");
     m_chStatus.at(channel).set(PileupStretchedExpGrowthBit, true);
     return false;
   }
-  if (fitter.GetParameter(2)/fitter.GetParameter(1) - 4 > 0) {
-    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupStretchedExpFit: 1st deriv max occurs at sample " + std::to_string(fitter.GetParameter(1)) + " > 0 -> fit probably looks like a pulse (and not like pileup)");
+  if (getFitParam(2)/getFitParam(1) - 4 > 0) {
+    (*m_msgFunc_p)(ZDCMsg::Debug, "RPDDataAnalyzer::doPileupStretchedExpFit: 1st deriv max occurs at sample " + std::to_string(getFitParam(1)) + " > 0 -> fit probably looks like a pulse (and not like pileup)");
     m_chStatus.at(channel).set(PileupStretchedExpPulseLikeBit, true);
     // analysis remains valid (for now)
   }
