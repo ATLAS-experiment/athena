@@ -22,10 +22,10 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
 # --------------------------------------------------------------------------------------------------
 
-    nLEDs = 3
-    nSides = 2
-    nModules = 4
-    nChannels = 16
+    LEDs = ["Blue1", "Green", "Blue2"]
+    sides = ["C","A"]
+    modules = ["0","1","2","3"]
+    channels = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
 
     n_energy_bins_default = 200
     n_adc_sum_fine_bins = 800
@@ -41,8 +41,8 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 # --------------------------------------------------------------------------------------------------
     zdcLEDAllEventsDiagMonTool = helper.addGroup(zdcLEDMonAlg, 'ZdcLEDAllEventsDiagnosis','ZDC/AllLEDEventsDiagnosis/')
 
-    zdcModLEDMonToolArr = helper.addArray([nLEDs,nSides,nModules],zdcLEDMonAlg,'ZdcModLEDMonitor', topPath='ZDC/ZDCLED/')
-    rpdChanLEDMonToolArr = helper.addArray([nLEDs,nSides,nChannels],zdcLEDMonAlg,'RPDChanLEDMonitor', topPath='ZDC/RPDLED/')
+    zdcModLEDMonToolArr = helper.addArray([LEDs,sides,modules],zdcLEDMonAlg,'ZdcModLEDMonitor', topPath='ZDC/ZDCLED/')
+    rpdChanLEDMonToolArr = helper.addArray([LEDs,sides,channels],zdcLEDMonAlg,'RPDChanLEDMonitor', topPath='ZDC/RPDLED/')
 
 # ------------------------- All-event (including bad events) diagnostic histograms -------------------------
 

@@ -21,6 +21,7 @@ atlas_add_component( ZdcMonitoring
         xAODHIEvent
         ZdcAnalysisLib
         ZdcUtilsLib
+        ZdcConditions
 )
 
 # Install files from the package:

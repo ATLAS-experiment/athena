@@ -393,6 +393,8 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("writeOnlyTriggers = " << writeOnlyTriggers);
   ANA_MSG_INFO("enableOutputSamples = " << enableOutputSamples);
   ANA_MSG_INFO("enableTrigger = " << enableTrigger);
+  ANA_MSG_INFO("enableRPD = " << enableRPD);
+  ANA_MSG_INFO("enableCentroid = " << enableCentroid);
   ANA_MSG_INFO("zdcCalib = " << zdcCalib);
   ANA_MSG_INFO("zdcLaser = " << zdcLaser);
   ANA_MSG_INFO("zdcConfig = " << zdcConfig);
@@ -718,7 +720,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
       ANA_MSG_DEBUG( "accessing ZdcSums" );
       for (const auto zdcSum : *zdcSums)
 	{
-	  if (zdcSum->zdcSide()==0)
+	  if (zdcSum->zdcSide()==0 && enableCentroid)
 	    {
 	      // new global sum
 	      t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
