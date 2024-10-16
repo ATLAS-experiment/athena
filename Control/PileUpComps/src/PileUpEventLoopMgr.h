@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPEVENTLOOPMGR_H
@@ -40,8 +40,7 @@ class IEvtIdModifierSvc;
     @brief The ATLAS event loop for pile-up applications.
 */
 
-class PileUpEventLoopMgr : virtual public IEventSeek,
-                           public MinimalEventLoopMgr,
+class PileUpEventLoopMgr : public extends<MinimalEventLoopMgr, IEventSeek>,
                            public AthMessaging
 {
 public:
@@ -69,9 +68,6 @@ public:
   virtual int curEvent() const;
 
   virtual void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
-
-  virtual StatusCode queryInterface(const InterfaceID& riid,
-                                    void** ppvInterface);
 
   using AthMessaging::msg;
   using AthMessaging::msgLvl;
