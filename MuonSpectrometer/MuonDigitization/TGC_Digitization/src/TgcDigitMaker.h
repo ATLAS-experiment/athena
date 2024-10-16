@@ -41,9 +41,9 @@ class TgcDigitMaker : public AthMessaging {
    public:
     TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
                   const MuonGM::MuonDetectorManager* mdManager,
-                  unsigned int runperiod, const bool doFourBunch);
+                  const bool doFourBunch);
 
-    virtual ~TgcDigitMaker();
+    virtual ~TgcDigitMaker() = default;
 
     /**
        Initializes TgcHitIdHelper, TgcIdHelper and random number
@@ -175,7 +175,9 @@ class TgcDigitMaker : public AthMessaging {
                                   const TgcSensor sensor,
                                   const unsigned int index_prob) ;
 
-   private:
+    /** Determine the run period */
+    unsigned int getRunPeriod() const;
+
     /** Energy threshold value for each chamber */
     double m_energyThreshold[N_STATIONNAME][N_STATIONETA][N_STATIONPHI]
                             [N_GASGAP][N_ISSTRIP]{};
@@ -187,11 +189,10 @@ class TgcDigitMaker : public AthMessaging {
 
     std::vector<std::vector<float> > m_vecAngle_Time;
 
-    const TgcHitIdHelper* m_hitIdHelper;
-    unsigned int m_runperiod;
+    const TgcHitIdHelper* m_hitIdHelper{};
     const MuonGM::MuonDetectorManager*
-        m_mdManager;  // cannot use ReadCondHandleKey since no athena component
-    const TgcIdHelper* m_idHelper;
+    m_mdManager{};  // cannot use ReadCondHandleKey since no athena component
+    const TgcIdHelper* m_idHelper{};
     float m_efficiency[N_SENSOR]{};
 
     /**

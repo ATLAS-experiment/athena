@@ -150,52 +150,85 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("Output digits: '" << m_outputDigitCollectionKey.key() << "'");
 
     // set the configuration based on run1/run2
-    // Retrieve geometry config information from the database (RUN1, RUN2, etc...)
-    IRDBAccessSvc* rdbAccess(nullptr);
-    ATH_CHECK(service("RDBAccessSvc", rdbAccess));
-
-    enum DataPeriod {Unknown, Run1, Run2, Run3, Run4 };
-    DataPeriod run = Unknown;
-
-    std::string configVal = "";
-    const IGeoModelSvc* geoModel(nullptr);
-    ATH_CHECK(service("GeoModelSvc", geoModel));
-    // check the DetDescr version
-    std::string atlasVersion = geoModel->atlasVersion();
-
-    IRDBRecordset_ptr atlasCommonRec = rdbAccess->getRecordsetPtr("AtlasCommon", atlasVersion, "ATLAS");
-    if (atlasCommonRec->size() == 0) {
-        run = Run1;
-    } else {
-        configVal = (*atlasCommonRec)[0]->getString("CONFIG");
-        ATH_MSG_INFO("From DD Database, Configuration is " << configVal);
-        if (configVal == "RUN1") {
-            run = Run1;
-        } else if (configVal == "RUN2") {
-            run = Run2;
-        } else if (configVal == "RUN3") {
-            run = Run3;
-        } else if (configVal == "RUN4") {
-            run = Run4;
-        } 
-        if (run == DataPeriod::Unknown) {
-            ATH_MSG_FATAL("Unexpected value for geometry config read from the database: " << configVal);
-            return StatusCode::FAILURE;
-        }
-    }
-    if (run == Run3 && m_idHelper->gasGapMax() < 3)
-        ATH_MSG_WARNING("Run3,  configVal = " << configVal << " and GasGapMax =" << m_idHelper->gasGapMax());
+    ATH_CHECK(initializeRunDependentParameters());
     
-    if (run == Run1)
-        ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN1 or MuonGeometry = R.06");
-    else if (run == Run2)
-        ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN2 or MuonGeometry = R.07");
-    else if (run == Run3)
-        ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN3 or MuonGeometry = R.09");
-    else if (run == Run4)
-        ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN4 or MuonGeometry = R.10");
+    ATH_MSG_DEBUG("Ready to read parameters for cluster simulation from file");
 
-    if (m_ignoreRunDepConfig == false) {
+    ATH_CHECK(m_rndmSvc.retrieve());
+
+    // fill the taginfo information
+    ATH_CHECK(fillTagInfo());
+
+    ATH_CHECK(m_readKey.initialize(m_RPCInfoFromDb));
+
+    ///////////////////// special test
+    //  m_turnON_clustersize=false;
+    m_BOF_id = m_idHelper->stationNameIndex("BOF");
+    m_BOG_id = m_idHelper->stationNameIndex("BOG");
+    m_BOS_id = m_idHelper->stationNameIndex("BOS");
+    m_BIL_id = m_idHelper->stationNameIndex("BIL");
+    m_BIS_id = m_idHelper->stationNameIndex("BIS");
+    m_muonHelper = RpcHitIdHelper::GetHelper(m_idHelper->gasGapMax());
+
+    return StatusCode::SUCCESS;
+}
+
+StatusCode RpcDigitizationTool::initializeRunDependentParameters() {
+  // TODO This should all be in a conditions Alg
+  // Retrieve geometry config information from the database (RUN1, RUN2, etc...)
+  SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+  if ( !geoModel ) {
+    ATH_MSG_ERROR("Could not locate GeoModelSvc");
+    return StatusCode::FAILURE;
+  }
+
+  // check the DetDescr version
+  std::string atlasVersion = geoModel->atlasVersion();
+
+  SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  if ( !rdbAccess ) {
+    ATH_MSG_ERROR("Could not locate RDBAccessSvc");
+    return StatusCode::FAILURE;
+  }
+
+  enum DataPeriod {Unknown, Run1, Run2, Run3, Run4 };
+  DataPeriod run = Unknown;
+
+  std::string configVal = "";
+
+  IRDBRecordset_ptr atlasCommonRec = rdbAccess->getRecordsetPtr("AtlasCommon", atlasVersion, "ATLAS");
+  if (atlasCommonRec->size() == 0) {
+    run = Run1;
+  } else {
+    configVal = (*atlasCommonRec)[0]->getString("CONFIG");
+    ATH_MSG_INFO("From DD Database, Configuration is " << configVal);
+    if (configVal == "RUN1") {
+      run = Run1;
+    } else if (configVal == "RUN2") {
+      run = Run2;
+    } else if (configVal == "RUN3") {
+      run = Run3;
+    } else if (configVal == "RUN4") {
+      run = Run4;
+    }
+    if (run == DataPeriod::Unknown) {
+      ATH_MSG_FATAL("Unexpected value for geometry config read from the database: " << configVal);
+      return StatusCode::FAILURE;
+    }
+  }
+  if (run == Run3 && m_idHelper->gasGapMax() < 3)
+    ATH_MSG_WARNING("Run3,  configVal = " << configVal << " and GasGapMax =" << m_idHelper->gasGapMax());
+
+  if (run == Run1)
+    ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN1 or MuonGeometry = R.06");
+  else if (run == Run2)
+    ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN2 or MuonGeometry = R.07");
+  else if (run == Run3)
+    ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN3 or MuonGeometry = R.09");
+  else if (run == Run4)
+    ATH_MSG_INFO("From Geometry DB: MuonSpectrometer configuration is: RUN4 or MuonGeometry = R.10");
+
+  if (m_ignoreRunDepConfig == false) {
         m_BOG_BOF_DoubletR2_OFF = false;
         m_Efficiency_fromCOOL = false;
         m_ClusterSize_fromCOOL = false;
@@ -244,26 +277,6 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("......RPC KillDeadStrips         " << m_kill_deadstrips);
     ATH_MSG_DEBUG("......RPC CutProjectedTracks     " << m_CutProjectedTracks);
 
-    ATH_MSG_DEBUG("Ready to read parameters for cluster simulation from file");
-
-    ATH_CHECK(m_rndmSvc.retrieve());
-
-    // get TagInfoMgr
-    ATH_CHECK(service("TagInfoMgr", m_tagInfoMgr));
-
-    // fill the taginfo information
-    ATH_CHECK(fillTagInfo());
-
-    ATH_CHECK(m_readKey.initialize(m_RPCInfoFromDb));
-
-    ///////////////////// special test
-    //  m_turnON_clustersize=false;
-    m_BOF_id = m_idHelper->stationNameIndex("BOF");
-    m_BOG_id = m_idHelper->stationNameIndex("BOG");
-    m_BOS_id = m_idHelper->stationNameIndex("BOS");
-    m_BIL_id = m_idHelper->stationNameIndex("BIL");
-    m_BIS_id = m_idHelper->stationNameIndex("BIS");
-    m_muonHelper = RpcHitIdHelper::GetHelper(m_idHelper->gasGapMax());
 
     return StatusCode::SUCCESS;
 }
@@ -1043,7 +1056,9 @@ void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& 
 
 //--------------------------------------------
 StatusCode RpcDigitizationTool::fillTagInfo() {
-    if (!m_tagInfoMgr) return StatusCode::FAILURE;
+    // get TagInfoMgr
+    SmartIF<ITagInfoMgr> tagInfoMgr{Gaudi::svcLocator()->service("TagInfoMgr")};  // Tag Info Manager
+    if (!tagInfoMgr) { return StatusCode::FAILURE; }
 
     std::string RpctimeSchema = "";
     std::stringstream RpctimeShift;
@@ -1055,14 +1070,14 @@ StatusCode RpcDigitizationTool::fillTagInfo() {
         RpctimeSchema = "G4like_TOFon_TimeShift" + RpctimeShift.str() + "nsec";
     }
 
-    StatusCode sc = m_tagInfoMgr->addTag(m_RPC_TimeSchema, RpctimeSchema);
+    StatusCode sc = tagInfoMgr->addTag(m_RPC_TimeSchema, RpctimeSchema);
 
     if (sc.isFailure()) {
         ATH_MSG_WARNING(m_RPC_TimeSchema << " " << RpctimeSchema << " not added to TagInfo ");
         return sc;
-    } else {
-        ATH_MSG_DEBUG(m_RPC_TimeSchema << " " << RpctimeSchema << " added to TagInfo ");
     }
+
+    ATH_MSG_DEBUG(m_RPC_TimeSchema << " " << RpctimeSchema << " added to TagInfo ");
 
     return StatusCode::SUCCESS;
 }
