@@ -210,7 +210,7 @@ class ComboHypoNode(AlgNode):
     def __init__(self, name, comboHypoCfg):
         self.prop1 = "MultiplicitiesMap"
         self.prop2 = "LegToInputCollectionMap"
-        self.comboHypoCfg = comboHypoCfg        
+        self.comboHypoCfg = comboHypoCfg
         self.acc = self.create( name )        
         thealgs= self.acc.getEventAlgos()
         if thealgs is None:
@@ -231,8 +231,8 @@ class ComboHypoNode(AlgNode):
         self.acc.wasMerged()
 
     def create (self, name):
-        log.debug("ComboHypoNode.create %s",name)        
-        return self.comboHypoCfg(name=name)  
+        log.debug("ComboHypoNode.create %s",name)
+        return self.comboHypoCfg(name=name)
 
     """
     AlgNode automatically de-duplicates input ReadHandles upon repeated calls to addInput.
@@ -623,7 +623,8 @@ class Chain(object):
 # next: can we describe emtpy steps with isEmpty flag only (not via multiplicity and setting comboHypoCfg=None)?
 class ChainStep(object):
     """Class to describe one step of a chain; if multiplicity is greater than 1, the step is combo/combined.  Set one multiplicity value per sequence"""
-    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg, comboToolConfs = None, isEmpty = False, createsGhostLegs = False): 
+    #TODO remove default argument comboHypoCfg
+    def __init__(self, name,  SequenceGens = None, chainDicts = None, comboHypoCfg = ComboHypoCfg , comboToolConfs = None, isEmpty = False, createsGhostLegs = False):
 
         # default mutable values must be initialized to None
         if SequenceGens is None:  SequenceGens = []
@@ -763,16 +764,32 @@ class ChainStep(object):
         #this function does not add tools, it just adds one tool. do not pass it a list!
         self.comboToolConfs.append(tool)
 
+    def getComboHypoFncName(self):
+        return self.comboHypoCfg.func.__name__ if isinstance(self.comboHypoCfg, functools.partial) else self.comboHypoCfg
+
     def makeCombo(self):
         """ Configure the Combo Hypo Alg and generate the corresponding function, without instantiation which is done in createSequences() """ 
         self.combo = None        
         if self.isEmpty or self.comboHypoCfg is None:
             return        
-        comboName = CFNaming.comboHypoName(self.name)
-        key = hash((comboName, self.comboHypoCfg))
+        comboNameFromStep = CFNaming.comboHypoName(self.name) # name expected from the step name
+        funcName = self.getComboHypoFncName() # name of the function generator
+        key = hash((comboNameFromStep, funcName))
         if key not in _ComboHypoPool:            
-            _ComboHypoPool[key] = ComboHypoNode(comboName, self.comboHypoCfg)
-        self.combo = _ComboHypoPool[key]            
+            tmpCombo = ComboHypoNode(comboNameFromStep, self.comboHypoCfg)                
+            # exceptions for BLS chains that re-use the same custom CH in differnt steps
+            # this breaks the run one CH per step, but the BLS CH are able to handle decisions internally
+            if comboNameFromStep+"Node" != tmpCombo.name:
+                log.info("WARNING Created ComboHypo with name %s, expected from the step is instead %s. This is accepted only for allowed custom ComboHypos", tmpCombo.name, comboNameFromStep)
+                key = hash((tmpCombo.name, funcName))
+            _ComboHypoPool[key] = tmpCombo
+        self.combo = _ComboHypoPool[key] 
+        log.debug("Created combo %s with name %s, step comboName %s, key %s", funcName, self.combo.name, comboNameFromStep,key)
+
+        
+
+        
+                       
 
     def createComboHypoTools(self, flags, chainName):
         chainDict = HLTMenuConfig.getChainDictFromChainName(chainName)

@@ -382,7 +382,8 @@ def TIDAminbias( flags, key, toolkey, tools, monlevel, mcTruth ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_mb_sptrk.*:key=HLT_IDTrack_MinBias_IDTrig" ] ,monlevel )
+                            [ "HLT_mb_sptrk.*:key=HLT_IDTrack_MinBias_IDTrig",
+                              "HLT_mb_.*pix.*:key=HLT_IDTrack_MinBiasPixel_IDTrig" ], monlevel )
 
         if len(chains)>0 : 
                         

@@ -1029,6 +1029,7 @@ class ItemDef:
         MenuItem('L1_jTE8300'    ).setLogic( d.jTE8300 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE9000'    ).setLogic( d.jTE9000 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jTE10000'   ).setLogic( d.jTE10000 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jTE12000'   ).setLogic( d.jTE12000 & physcond).setTriggerType(TT.calo)
         # additional VjTE items for 2023 heavy ion runs
         MenuItem('L1_VjTE10'    ).setLogic( Not(d.jTE10)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_VjTE50'    ).setLogic( Not(d.jTE50)  & physcond).setTriggerType(TT.calo)
@@ -1644,6 +1645,7 @@ class ItemDef:
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20)  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & GAPAC  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20) & GAPAC  & physcond)
+        MenuItem('L1_TRT_VZDC_A_VZDC_C_jTE5_VjTE200' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & d.jTE5 & Not(d.jTE200)   & physcond)
         MenuItem('L1_eEM1_TRT_VjTE100' ).setLogic( d.eEM1 & d.NIMTRT & Not(d.jTE100)   & physcond)
         MenuItem('L1_eEM1_TRT_VjTE200' ).setLogic( d.eEM1 & d.NIMTRT & Not(d.jTE200)   & physcond)
         MenuItem('L1_eTAU1_TRT_VjTE100' ).setLogic( d.eTAU1 & d.NIMTRT & Not(d.jTE100)   & physcond)

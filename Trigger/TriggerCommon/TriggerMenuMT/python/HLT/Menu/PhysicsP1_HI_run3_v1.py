@@ -212,6 +212,9 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        #backup with TRT_jTE5
+        ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_jTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         #UPC jets - primary candidates with gTE5
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
         ChainProp(name='HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ZDC_XOR_gTE5_VjTE200', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=SingleJetGroup+SupportPhIGroup),
@@ -493,7 +496,10 @@ def getPhysicsHISignatures():
     chains['HeavyIon'] += [
         ChainProp(name='HLT_hi_uccTh1_L1jTE8300', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_hi_uccTh2_L1jTE9000', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_hi_uccTh2_L1jTE10000', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_hi_uccTh2_L1jTE12000', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
         ChainProp(name='HLT_hi_uccTh3_L1jTE10000', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
+        ChainProp(name='HLT_hi_uccTh3_L1jTE12000', l1SeedThresholds=['FSNOSEED'], stream=[UCCStream], groups=MinBiasGroup+SupportGroup, monGroups=['mbMon:t0']),
 
     ]
 

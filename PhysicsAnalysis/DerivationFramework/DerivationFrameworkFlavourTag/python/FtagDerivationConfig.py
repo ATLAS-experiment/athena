@@ -8,7 +8,6 @@ from BTagging.JetBTagginglessConfig import JetBTagginglessAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
-from FlavorTagDiscriminants.FoldDecoratorConfig import FoldDecoratorCfg
 from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
 from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
@@ -62,26 +61,23 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
 
     # Treat large-R jets as a special case
     largeRJetCollection = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    if largeRJetCollection in jet_cols:
-        acc.merge(BTagLargeRDecoration(cfgFlags, largeRJetCollection))
-        jet_cols.remove(largeRJetCollection)
 
     # Run flavour tagging on each jet collection
     for jet_col, pv_col in zip(jet_cols, pv_cols):
 
-        # pflow jets need the jet fold hash to run GN2v01
-        if jet_col == PFLOW_JETS:
-            acc.merge(FoldDecoratorCfg(cfgFlags, jetCollection=jet_col))
-        
-        # Run flavour tagging on this jet collection
-        acc.merge(
-            tagSingleJetCollection(
-                cfgFlags, jet_col, pv_col,
-                trackAugmenterPrefix=trackAugmenterPrefix
+        if jet_col == largeRJetCollection:
+            acc.merge(BTagLargeRDecoration(cfgFlags, largeRJetCollection))
+        else:
+            # Run flavour tagging on this jet collection
+            acc.merge(
+                tagSingleJetCollection(
+                    cfgFlags, jet_col, pv_col,
+                    trackAugmenterPrefix=trackAugmenterPrefix
+                )
             )
-        )
     
-    if cfgFlags.BTagging.GNNVertexFitter:
+
+    if  cfgFlags.BTagging.GNNVertexFitter  and cfgFlags.GeoModel.Run < LHCPeriod.Run4:
       from GNNVertexFitter.GNNVertexFitterConfig import GNNVertexFitterAlgCfg
       acc.merge(GNNVertexFitterAlgCfg(cfgFlags))
       acc.merge(GNNVertexFitterAlgCfg(cfgFlags, inclusive=True))

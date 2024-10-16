@@ -60,19 +60,19 @@ void TRTCalib_StrawStatusReport(){
 
 	c1->Print( "allPlots.pdf["); 
 	
-	TH1F *h1 = new TH1F("h1", "", 100, 0., 1.);
+	TH1F *h1 = new TH1F("h1", "", 110, 0., 1.1);
 	ntuple->Project("h1", "eff");
 	h1->GetXaxis()->SetTitle( "Straw hit efficiency" );
 	h1->GetYaxis()->SetTitle( Form("Number of straws (run %d)", run) );
 	h1->Draw();
 	
-	TH1F *h1a = new TH1F("h1a", "", 100, 0., 1.);
+	TH1F *h1a = new TH1F("h1a", "", 110, 0., 1.1);
 	ntuple->Project("h1a", "eff", "status>0");	
 	h1a->SetFillStyle(1001);
 	h1a->SetFillColor(kOrange);
 	h1a->Draw("same");
 	
-	TH1F *h1b = new TH1F("h1b", "", 100, 0., 1.);
+	TH1F *h1b = new TH1F("h1b", "", 110, 0., 1.1);
 	ntuple->Project("h1b", "eff", "status==42");	
 	h1b->SetFillStyle(1001);
 	h1b->SetFillColor(2);

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
+import AthenaCommon.SystemOfUnits as Units
 
 def createIDPVMConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -10,8 +11,9 @@ def createIDPVMConfigFlags():
     icf.addFlag("doValidateLooseTracks", False )
     icf.addFlag("doValidateTightPrimaryTracks", False )
     icf.addFlag("doValidateHILoose", False )
-    icf.addFlag("doValidateTracksInJets", False )
-    icf.addFlag("doValidateTracksInBJets", False )
+    icf.addFlag("doIDTIDE", False) # for IDTIDE derivation
+    icf.addFlag("doValidateTracksInJets", lambda pcf : pcf.PhysVal.IDPVM.doIDTIDE)
+    icf.addFlag("doValidateTracksInBJets", lambda pcf : pcf.PhysVal.IDPVM.doIDTIDE)
     icf.addFlag("doValidateTruthToRecoNtuple", False )
     icf.addFlag("doValidateMuonMatchedTracks", False )
     icf.addFlag("doValidateElectronMatchedTracks", False )
@@ -36,7 +38,6 @@ def createIDPVMConfigFlags():
     icf.addFlag("hardScatterStrategy", 0 ) # The hard-scatter vertex selection strategy to use when running hard-scatter efficiency / performance plots in IDPVM. 0 corresponds to sumPt^2, 1 corresponds to sumPt
     icf.addFlag("truthMinPt", lambda pcf : 500 if pcf.GeoModel.Run <= LHCPeriod.Run3 else 1000) # Configurable pT cut for determining a "reconstructable" particle
     icf.addFlag("GRL", [])
-    icf.addFlag("doIDTIDE", False ) # for IDTIDE derivation
     icf.addFlag("doTechnicalEfficiency", False) # for enabling the filling of technical efficiency
     icf.addFlag("doPRW", False)
     icf.addFlag("doActs", False)
@@ -45,5 +46,10 @@ def createIDPVMConfigFlags():
     icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
     icf.addFlag('PrimaryVertexContainer', 'PrimaryVertices')
     
+    icf.addFlag("jetCollection", "AntiKt4EMPflowJets")
+    icf.addFlag("maxTrkJetDR", 0.4)
+    icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
+    icf.addFlag('JetPtMin', 100.*Units.GeV)
+    icf.addFlag('JetPtMax', 5000.*Units.GeV)
     return icf
 
