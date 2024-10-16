@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-//Dear emacs, this is -*-c++-*-
 #ifndef CaloTopoTowerContainerCnv_H
 #define CaloTopoTowerContainerCnv_H
 
@@ -26,29 +25,22 @@ typedef T_AthenaPoolCustomCnv<CaloTopoTowerContainer,CaloTopoTowerContainerPERS>
 
 class CaloTopoTowerContainerCnv : public CaloTopoTowerContainerCnvBase
 {
-   friend class CnvFactory<CaloTopoTowerContainerCnv >;
+  friend class CnvFactory<CaloTopoTowerContainerCnv >;
 public:
-    CaloTopoTowerContainerCnv(ISvcLocator* svcloc);
-    virtual ~CaloTopoTowerContainerCnv();
+  CaloTopoTowerContainerCnv(ISvcLocator* svcloc);
 
-    /// initialization
-    //virtual StatusCode initialize();
-
-    /// Extend base-class conversion method to modify when reading in
-    //virtual StatusCode     PoolToDataObject(DataObject*& pObj,const std::string &token);
-
-    virtual CaloTopoTowerContainer* createTransient();
-    virtual CaloTopoTowerContainerPERS* createPersistent(CaloTopoTowerContainer*);
+  virtual CaloTopoTowerContainer* createTransient() override;
+  virtual CaloTopoTowerContainerPERS* createPersistent(CaloTopoTowerContainer*) override;
 
 
-    CaloTopoTowerBuilderToolBase* getTool(const std::string& type,
+  CaloTopoTowerBuilderToolBase* getTool(const std::string& type,
 					const std::string& nm); 
 
-    CaloTopoTowerBuilderToolBase* m_TopoTowerBldr;
-    pool::Guid  p0_guid;
-    pool::Guid  p1_guid;
-    CaloTopoTowerContainerCnv_p1 m_converter;
-
+  CaloTopoTowerBuilderToolBase* m_TopoTowerBldr{nullptr};
+  pool::Guid  p0_guid{"00B7F56C-1E49-4469-BEBA-C74620575A00"};
+  pool::Guid  p1_guid{"4ED29686-28E9-426F-B076-C4E4600F66A7"};
+  CaloTopoTowerContainerCnv_p1 m_converter;
+  
 };
 
 #endif
