@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -21,6 +21,7 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -32,17 +33,11 @@
 #include <iostream>
 #include <iomanip>
 
-static const InterfaceID IID_LArRecoSimpleGeomTool("LArRecoSimpleGeomTool", 1, 0);
-
-const InterfaceID& LArRecoSimpleGeomTool::interfaceID( ) 
-{ return IID_LArRecoSimpleGeomTool; }
-
-LArRecoSimpleGeomTool::LArRecoSimpleGeomTool(const std::string& type, 
-				   const std::string& name, 
-				   const IInterface* parent) :
-  AthAlgTool(type, name, parent)
+LArRecoSimpleGeomTool::LArRecoSimpleGeomTool(const std::string& type,
+					     const std::string& name,
+					     const IInterface* parent)
+  : base_class(type, name, parent)
 {
-  declareInterface<LArRecoSimpleGeomTool>( this );
 }
 
 StatusCode
@@ -52,63 +47,56 @@ LArRecoSimpleGeomTool::initialize()
   ATH_CHECK( detStore()->retrieve (m_calo_id, "CaloCell_ID") );
   
   // Decode tag ( via GeoModel ) and fix it for TestBeam :
-  m_tag = "ATLAS-00";
-  m_node = "ATLAS";
-  m_geoModelSvc  = nullptr;
+  std::string strTag = "ATLAS-00";
+  std::string strNode = "ATLAS";
 
-  StatusCode status = this->service("GeoModelSvc",m_geoModelSvc);
-  if (status.isFailure()) {
-    ATH_MSG_ERROR ("Unable to get pointer to GeoModel service");
-    return status;
-  }
-  else {
-    DecodeVersionKey detectorKey = DecodeVersionKey(m_geoModelSvc, "LAr");
-    ATH_MSG_INFO ("DecodeVersionKey found : " << detectorKey.tag()
-                  << " " << detectorKey.tag());
-    if ( detectorKey.tag() != "LAr-H8-00" &&  detectorKey.tag() != "LAr-H6-00"
-	 && detectorKey.tag() != "LAr-G3-00")
-      {
-	m_tag =  detectorKey.tag();
-	m_node =  detectorKey.node();
-      }
-  }  
-  ATH_MSG_INFO ("LAr simplified geometry will use : " << m_tag << " " << m_node);
-    
-  // Acess the DB service :    
-  status = this->service("RDBAccessSvc",m_iAccessSvc);
-  if (status.isFailure()) 
+  SmartIF<IGeoModelSvc> geoModelSvc{service("GeoModelSvc")};
+  ATH_CHECK(geoModelSvc.isValid());
+
+  DecodeVersionKey detectorKey = DecodeVersionKey(geoModelSvc, "LAr");
+  ATH_MSG_INFO ("DecodeVersionKey found : " << detectorKey.tag()
+		<< " " << detectorKey.tag());
+  if ( detectorKey.tag() != "LAr-H8-00" &&  detectorKey.tag() != "LAr-H6-00"
+       && detectorKey.tag() != "LAr-G3-00")
     {
-      ATH_MSG_ERROR ("Unable to get RDBAccessSvc.");
-      return status;
+      strTag =  detectorKey.tag();
+      strNode =  detectorKey.node();
     }
-  else
-    ATH_MSG_INFO (" did access RDBAccessSvc ");
+  ATH_MSG_INFO ("LAr simplified geometry will use : " << strTag << " " << strNode);
 
-  m_recCryoCyl = m_iAccessSvc->getRecordsetPtr("CryoCylinders",m_tag,m_node);
+  // Acess the DB service :
+  SmartIF<IGeoDbTagSvc> geoDbTag{service("GeoDbTagSvc")};
+  ATH_CHECK(geoDbTag.isValid());
+  SmartIF<IRDBAccessSvc> rdbSvc{service(geoDbTag->getParamSvcName())};
+  ATH_CHECK(rdbSvc.isValid());
+
+  ATH_MSG_INFO (" did access RDBAccessSvc ");
+
+  m_recCryoCyl = rdbSvc->getRecordsetPtr("CryoCylinders",strTag,strNode);
   if (m_recCryoCyl->size()==0)
-    m_recCryoCyl = m_iAccessSvc->getRecordsetPtr("CryoCylinders","CryoCylinders-00");
+    m_recCryoCyl = rdbSvc->getRecordsetPtr("CryoCylinders","CryoCylinders-00");
 
-  m_recPresGeo = m_iAccessSvc->getRecordsetPtr("PresamplerGeometry",m_tag,m_node);
+  m_recPresGeo = rdbSvc->getRecordsetPtr("PresamplerGeometry",strTag,strNode);
   if (m_recPresGeo->size()==0)
-    m_recPresGeo = m_iAccessSvc->getRecordsetPtr("PresamplerGeometry","PresamplerGeometry-00");
+    m_recPresGeo = rdbSvc->getRecordsetPtr("PresamplerGeometry","PresamplerGeometry-00");
 
-  m_recBarrGeo = m_iAccessSvc->getRecordsetPtr("BarrelGeometry",m_tag,m_node);
+  m_recBarrGeo = rdbSvc->getRecordsetPtr("BarrelGeometry",strTag,strNode);
   if (m_recBarrGeo->size()==0)
-    m_recBarrGeo = m_iAccessSvc->getRecordsetPtr("BarrelGeometry","BarrelGeometry-00");
+    m_recBarrGeo = rdbSvc->getRecordsetPtr("BarrelGeometry","BarrelGeometry-00");
 
   if ( m_geometry == "ATLAS" ) {
-    DecodeVersionKey detectorKeyAtl = DecodeVersionKey(m_geoModelSvc, "ATLAS");
-    m_recPresPos = m_iAccessSvc->getRecordsetPtr("PresamplerPosition",detectorKeyAtl.tag(),detectorKeyAtl.node());
+    DecodeVersionKey detectorKeyAtl = DecodeVersionKey(geoModelSvc, "ATLAS");
+    m_recPresPos = rdbSvc->getRecordsetPtr("PresamplerPosition",detectorKeyAtl.tag(),detectorKeyAtl.node());
   }
   else {
-    m_recPresPos = m_iAccessSvc->getRecordsetPtr("PresamplerPosition",m_tag,m_node);
+    m_recPresPos = rdbSvc->getRecordsetPtr("PresamplerPosition",strTag,strNode);
   }
 
-  m_EmecGeo = m_iAccessSvc->getRecordsetPtr("EmecGeometry",m_tag,m_node);
+  m_EmecGeo = rdbSvc->getRecordsetPtr("EmecGeometry",strTag,strNode);
 
-  m_HEC = m_iAccessSvc->getRecordsetPtr("HadronicEndcap",m_tag,m_node);
+  m_HEC = rdbSvc->getRecordsetPtr("HadronicEndcap",strTag,strNode);
   if (m_HEC->size()==0)
-    m_HEC = m_iAccessSvc->getRecordsetPtr("HadronicEndcap","HadronicEndcap-00");
+    m_HEC = rdbSvc->getRecordsetPtr("HadronicEndcap","HadronicEndcap-00");
 
   ATH_MSG_INFO (" LArRecoSimpleGeomTool successfully initialized ");
   return StatusCode::SUCCESS;

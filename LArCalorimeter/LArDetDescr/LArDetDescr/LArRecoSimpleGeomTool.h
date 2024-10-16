@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -19,8 +19,6 @@
 class IMessageSvc;
 class LArDetDescrManager;
 
-class IGeoModelSvc;
-
 //<<<<<< INCLUDES >>>>>>
 
 /** This class implements the CaloDetDescr/ICaloRecoSimpleGeomTool and provides the
@@ -30,7 +28,7 @@ class IGeoModelSvc;
 
  */
 
-class LArRecoSimpleGeomTool : public AthAlgTool, virtual public ICaloRecoSimpleGeomTool
+class LArRecoSimpleGeomTool : public extends<AthAlgTool, ICaloRecoSimpleGeomTool>
 {
 public:
   
@@ -86,19 +84,12 @@ private:
   // Access to DDDb :
   std::string m_geometry;
 
-  IRDBAccessSvc* m_iAccessSvc = nullptr;
-  const IGeoModelSvc* m_geoModelSvc = nullptr;
-
   IRDBRecordset_ptr m_recCryoCyl;
   IRDBRecordset_ptr m_recPresGeo;
   IRDBRecordset_ptr m_recBarrGeo;
   IRDBRecordset_ptr m_recPresPos;
   IRDBRecordset_ptr m_EmecGeo;
   IRDBRecordset_ptr m_HEC;
-
-  std::string m_tag;
-  std::string m_node;
-
 };
 
 #endif // LARDETDESCR_LARSIMPLEGEOMTOOL_H
