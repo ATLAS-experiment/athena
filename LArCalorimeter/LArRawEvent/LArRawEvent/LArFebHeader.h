@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARFEBHEADER_H
 #define LARFEBHEADER_H
 
 #include "Identifier/HWIdentifier.h"
-#include <stdint.h>
+#include <cstdint>
 
 
 /**
@@ -23,19 +23,19 @@ class LArFebHeader
 
   /** @brief  ROD-Header, always present (is part of the FEB-Header) */
   struct RodHeader {
-    uint32_t FormatVersion;
-    uint32_t SourceId;
-    uint32_t RunNumber;
-    uint16_t ELVL1Id;
-    uint16_t BCId;
-    uint32_t LVL1TigType;
-    uint32_t DetEventType;
+    uint32_t FormatVersion{};
+    uint32_t SourceId{};
+    uint32_t RunNumber{};
+    uint16_t ELVL1Id{};
+    uint16_t BCId{};
+    uint32_t LVL1TigType{};
+    uint32_t DetEventType{};
   }; 
 
   /** @brief DSP-Header (most of it is actually in the DSP-Trailer) */
   struct DspHeader {
-    uint32_t CodeVersion;  // DSP code version
-    uint32_t EventCounter; // DSP event counter
+    uint32_t CodeVersion{};  // DSP code version
+    uint32_t EventCounter{}; // DSP event counter
   };
 
 
@@ -211,29 +211,29 @@ class LArFebHeader
   static int degray(unsigned int x);
 
   /** @brief Feb Identifier */
-  const HWIdentifier m_FEBId;
+  const HWIdentifier m_FEBId{};
 
-  RodHeader m_RodHeader;
+  RodHeader m_RodHeader{};
 
-  DspHeader m_DspHeader;
+  DspHeader m_DspHeader{};
 
   /** @brief FEB EventId */
-  uint16_t m_ELVL1Id;
+  uint16_t m_ELVL1Id{};
 
   /** @brief FEB BCId */
-  uint16_t m_BCId;
+  uint16_t m_BCId{};
 
-  uint16_t m_Results1Size;
-  uint16_t m_Results2Size;
-  uint16_t m_RawDataSize;
-  uint16_t m_NbSweetCells1;
-  uint16_t m_NbSweetCells2;
-  uint16_t m_NbSamples;
-  uint32_t m_OnlineChecksum;
-  uint32_t m_OfflineChecksum;
+  uint16_t m_Results1Size{};
+  uint16_t m_Results2Size{};
+  uint16_t m_RawDataSize{};
+  uint16_t m_NbSweetCells1{};
+  uint16_t m_NbSweetCells2{};
+  uint16_t m_NbSamples{};
+  uint32_t m_OnlineChecksum{1};
+  uint32_t m_OfflineChecksum{};
 
   /** @brief ROD Status word */
-  uint32_t m_Status;
+  uint32_t m_Status{};
 
   /** @brief SCA number for each samples */
   std::vector<uint16_t> m_SCA;

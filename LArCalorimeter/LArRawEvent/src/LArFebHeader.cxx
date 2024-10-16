@@ -8,29 +8,7 @@ LArFebHeader::LArFebHeader() {}
 
 //Constructor
 LArFebHeader::LArFebHeader(const HWIdentifier febid):m_FEBId(febid) {
-   m_RodHeader.FormatVersion=0;
-   m_RodHeader.SourceId=0;
-   m_RodHeader.RunNumber=0;
-   m_RodHeader.ELVL1Id=0;
-   m_RodHeader.BCId=0;
-   m_RodHeader.LVL1TigType=0;
-   m_RodHeader.DetEventType=0;
-
-   m_DspHeader.CodeVersion=0;
-   m_DspHeader.EventCounter=0;
-
-   m_ELVL1Id=0;
-   m_BCId=0;
-   m_Status=0;
-
-   m_Results1Size=0;
-   m_Results2Size=0;
-   m_RawDataSize=0;
-   m_NbSweetCells1=0;
-   m_NbSweetCells2=0;
-   m_NbSamples=0;
-   m_OfflineChecksum=0;
-   m_OnlineChecksum=1;
+  
 }
 
 int LArFebHeader::degray(unsigned int x)
