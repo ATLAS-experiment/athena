@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,22 +30,9 @@
 
 InDet::SimpleTRT_SeededSpacePointFinder_ATL::SimpleTRT_SeededSpacePointFinder_ATL
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_useROI(true),
-    m_maxHoles(1),
-    m_perigeeCut(200),
-    m_directionPhiCut(0.05),
-    m_sctId(nullptr),
-    m_trtId(nullptr)
+  : AthAlgTool(t,n,p)
 {
-
   declareInterface<ITRT_SeededSpacePointFinder>(this);
-
-  declareProperty("RestrictROI"           ,m_useROI                );
-  declareProperty("MaxHoles"              ,m_maxHoles              );
-  declareProperty("PerigeeCut"            ,m_perigeeCut            );
-  declareProperty("DirectionPhiCut"       ,m_directionPhiCut       );
-
 }
 
 ///////////////////////////////////////////////////////////////////

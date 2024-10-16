@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -87,18 +87,18 @@ namespace InDet{
 	  It is set true, if an AssociationTool is specified in the setup */
 
       /** controls if the ROI is restricted around the TRT trackparameters */
-      bool                                   m_useROI;
+      BooleanProperty m_useROI{this, "RestrictROI", true};
 
       ///////////////////////////////////////////////////////////////////
       // Overall selection criteria cuts. See source code for explanation
       ///////////////////////////////////////////////////////////////////
       /** controls how many not considered SCT layers are allowed between two SP in order
           to form a seed pair */
-      int                            m_maxHoles;
+      IntegerProperty m_maxHoles{this, "MaxHoles", 1};
 
       /** rough cuts on the quality of the suggested SP pair */
-      double                         m_perigeeCut;
-      double                         m_directionPhiCut;
+      DoubleProperty m_perigeeCut{this, "PerigeeCut", 200.};
+      DoubleProperty m_directionPhiCut{this, "DirectionPhiCut", 0.05};
 
 
       ///////////////////////////////////////////////////////////////////
@@ -121,10 +121,10 @@ namespace InDet{
        ToolHandle<IRegSelTool> m_pRegionSelector{ this, "RegSelTool_SCT", "RegSelTool/RegSelTool_SCT" };
 
        /**ID SCT helper*/
-       const SCT_ID* m_sctId;
+       const SCT_ID* m_sctId = nullptr;
 
        /**ID TRT helper*/
-       const TRT_ID* m_trtId;
+       const TRT_ID* m_trtId = nullptr;
 
        
        /** List with SP pairs as seed for the Si part of the back-track. It is cleared and filled  in

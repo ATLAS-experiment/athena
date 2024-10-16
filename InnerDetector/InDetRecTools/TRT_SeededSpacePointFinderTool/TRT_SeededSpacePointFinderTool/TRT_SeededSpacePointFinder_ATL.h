@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************************
@@ -118,33 +118,38 @@ namespace InDet{
       /** Protected data and methods                                   */
       ///////////////////////////////////////////////////////////////////
 
-      std::string                            m_fieldmode             ;  /** Magnetic field mode  */
+      StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+	  "Magnetic field mode"};
 
       Trk::MagneticFieldProperties           m_fieldprop             ;  /** Magnetic field properties  */
 
 
       /**ID SCT helper*/
-      const SCT_ID* m_sctId;
+      const SCT_ID* m_sctId = nullptr;
 
       ///////////////////////////////////////////////////////////////////
       /** Seed selection criteria                                      */
       ///////////////////////////////////////////////////////////////////
 
-      double                         m_ptmin                         ;  /** Minimum pT cut   */
-      double                         m_r_rmin                        ;  /** Minimum SCT radius to be searched  */
-      double                         m_r_rmax                        ;  /** Maximum STC radius to be searched  */
-      double                         m_r_rstep                       ;  /** Step size for space point storage  */
-      double                         m_r1max                         ;  /** Max radius of last SCT layer  */
-      double                         m_r12min                        ;  /** Min radius of last SCT layer  */
-      double                         m_r2min                         ;  /** Min radius to search for SP pairs  */
-      double                         m_dzdrmin                       ;  /** Min R-z direction cut  */
-      double                         m_dzdrmax                       ;  /** Max R-z direction cut  */
-      double                         m_xiC                           ;  /** qOverP based chi2 cut  */
-      double                         m_xiTC                          ;  /** theta based chi2 cut  */
-      double                         m_xiFC                          ;  /** phi based chi2 cut  */
-      bool                           m_search                        ;  /** Do full neighbor search  */
-      bool                           m_loadFull                      ;  /** Load full Si space point container  */
-      bool                           m_doCosmics                     ;  /** Disable seed selection cuts during reconstruction of cosmics tracks  */
+      DoubleProperty m_ptmin{this, "pTmin", 500., "Minimum pT cut"};
+
+      static constexpr double m_r_rmin = 0.;  /** Minimum SCT radius to be searched  */
+      static constexpr double m_r_rmax = 600.;  /** Maximum STC radius to be searched  */
+      static constexpr double m_r_rstep = 10.;  /** Step size for space point storage  */
+      static constexpr double m_r1max = 560.;  /** Max radius of last SCT layer  */
+      static constexpr double m_r12min = 400.;  /** Min radius of last SCT layer  */
+      static constexpr double m_r2min = 340.;  /** Min radius to search for SP pairs  */
+      static constexpr double m_dzdrmin = -4.;  /** Min R-z direction cut  */
+      static constexpr double m_dzdrmax = 4.;  /** Max R-z direction cut  */
+
+      DoubleProperty m_xiC{this, "Xi2C", 100., "qOverP based chi2 cut"};
+      DoubleProperty m_xiTC{this, "Xi2TC", 100., "theta based chi2 cut"};
+      DoubleProperty m_xiFC{this, "Xi2FC", 100., "phi based chi2 cut"};
+      BooleanProperty m_search{this, "NeighborSearch", true, "Do full neighbor search"};
+      BooleanProperty m_loadFull{this, "LoadFull", true,
+	"Load full Si space point container"};
+      BooleanProperty m_doCosmics{this, "DoCosmics", false,
+	"Disable seed selection cuts during reconstruction of cosmics tracks"};
 
       ///////////////////////////////////////////////////////////////////
       /** Tables for 2 space points seeds search                       */
