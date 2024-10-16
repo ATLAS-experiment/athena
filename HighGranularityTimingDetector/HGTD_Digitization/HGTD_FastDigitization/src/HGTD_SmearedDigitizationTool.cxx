@@ -44,7 +44,7 @@ StatusCode HGTD_SmearedDigitizationTool::initialize() {
   ATH_CHECK(m_merge_svc.retrieve());
 
   if (m_write_tree) {
-    ATH_CHECK(service("THistSvc", m_hist_svc));
+    ATH_CHECK(m_hist_svc.retrieve());
     m_output_file = std::make_unique<TFile>("HGTD_SmearedDigiOutput.root", "RECREATE");
     m_tree = std::make_unique<TTree>("SmearedDigiTree", "SmearedDigiTree");
     m_tree->Branch("m_x_hit", &m_x_hit);

@@ -84,7 +84,6 @@ SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, co
   m_SmearPixel(true), //true: smear pixel --- false: smear SCT
   m_emulateAtlas(true), // error rotation for endcap SCT
   m_checkSmear(false),
-  m_thistSvc(nullptr),
   m_outputFile(nullptr),
   m_currentTree(nullptr),
   m_x_pixel(0),
@@ -182,10 +181,7 @@ StatusCode SiSmearedDigitizationTool::initialize()
   if (m_checkSmear){
 
     // get THistSvc
-    if (service("THistSvc",m_thistSvc).isFailure()) {
-      ATH_MSG_ERROR("Cannot find THistSvc ");
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(m_thistSvc.retrieve());
 
     if (m_SmearPixel){
       m_outputFile = new TFile("CheckSmearing_Pixel.root","RECREATE");
