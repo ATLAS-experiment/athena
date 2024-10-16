@@ -3,6 +3,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
@@ -13,8 +14,9 @@ from pathlib import Path
 def JetBTagginglessAlgCfg(
         cfgFlags,
         JetCollection,
-        pv_col=None,
-        trackAugmenterPrefix=None):
+        pv_col='PrimaryVertices',
+        trackAugmenterPrefix=None,
+        fast=False):
 
     """
     Run flavour tagging on jet collection in derivations.
@@ -25,12 +27,22 @@ def JetBTagginglessAlgCfg(
 
     acc = ComponentAccumulator()
 
-    acc.merge(BTagTrackAugmenterAlgCfg(
-        cfgFlags,
-        TrackCollection='InDetTrackParticles',
-        PrimaryVertexCollectionName=pv_col,
-        prefix=trackAugmenterPrefix,
-    ))
+    if fast:
+        acc.merge(
+            _fastCfg(
+                cfgFlags,
+                tc=trackCollection,
+                pv=pv_col,
+                pfx=trackAugmenterPrefix,
+            )
+        )
+    else:
+        acc.merge(BTagTrackAugmenterAlgCfg(
+            cfgFlags,
+            TrackCollection='InDetTrackParticles',
+            PrimaryVertexCollectionName=pv_col,
+            prefix=trackAugmenterPrefix,
+        ))
 
     acc.merge(JetParticleAssociationAlgCfg(
         cfgFlags,
@@ -59,3 +71,18 @@ def JetBTagginglessAlgCfg(
         acc.merge(MultifoldGNNCfg(**args))
 
         return acc
+
+
+def _fastCfg(flags, pv, tc, pfx):
+    acc = ComponentAccumulator()
+    name = f'PoorMansAugmenter_{tc}_{pv}_{pfx}'
+    prefix = pfx or 'btagIp_'
+    acc.addEventAlgo(
+        CompFactory.FlavorTagDiscriminants.PoorMansIpAugmenterAlg(
+            name=name,
+            trackContainer=tc,
+            primaryVertexContainer=pv,
+            prefix=prefix
+        )
+    )
+    return acc
