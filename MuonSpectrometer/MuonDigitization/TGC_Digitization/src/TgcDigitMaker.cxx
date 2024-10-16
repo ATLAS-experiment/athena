@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitMaker.h"
@@ -22,6 +22,12 @@
 #include "MuonSimEvent/TgcHitIdHelper.h"
 #include "PathResolver/PathResolver.h"
 
+// run number from geometry DB
+#include "GaudiKernel/Bootstrap.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBRecord.h"
+#include "RDBAccessSvc/IRDBRecordset.h"
 
 //---------------------------------------------------
 //  Constructor and Destructor
@@ -29,12 +35,10 @@
 
 //----- Constructor
 TgcDigitMaker::TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
-                             const MuonGM::MuonDetectorManager* mdManager,
-                             unsigned int runperiod, const bool doFourBunch)
+                             const MuonGM::MuonDetectorManager* mdManager, const bool doFourBunch)
     : AthMessaging("TgcDigitMaker"), m_doFourBunchDigitization(doFourBunch) {
     m_hitIdHelper = hitIdHelper;
     m_mdManager = mdManager;
-    m_runperiod = runperiod;
     m_idHelper = nullptr;
     m_efficiency[kWIRE] = m_efficiency[kSTRIP] =
         1.000;  // 100% efficiency for TGCSimHit_p1
@@ -48,9 +52,6 @@ TgcDigitMaker::TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
         45.09;                    // 45.09ns = 26ns + 23 * 0.83ns(inner station)
     m_bunchCrossingTime = 24.95;  // 24.95 ns =(40.08 MHz)^(-1)
 }
-
-//----- Destructor
-TgcDigitMaker::~TgcDigitMaker() = default;
 
 //------------------------------------------------------
 // Initialize
@@ -768,7 +769,53 @@ StatusCode TgcDigitMaker::readFileOfEnergyThreshold() {
     return StatusCode::SUCCESS;
 }
 
+//--------------------------------------------
+unsigned int TgcDigitMaker::getRunPeriod() const
+{
+    // Used to determine the version of the TGC Dead Chambers text file to read.
+    // TODO There must be a better way of doing this -> ConditionsAlg?
+    SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+    if (!geoModel) {
+      ATH_MSG_ERROR("getRunPeriod() Failed to find GeoModelSvc");
+      return 0;
+    }
+    std::string atlasVersion = geoModel->atlasVersion();
+
+    SmartIF<IRDBAccessSvc> rdbAccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
+    if (!rdbAccess) {
+      ATH_MSG_ERROR("getRunPeriod() Failed to find RDBAccessSvc");
+      return 0;
+    }
+
+    IRDBRecordset_ptr atlasCommonRec =
+        rdbAccess->getRecordsetPtr("AtlasCommon", atlasVersion, "ATLAS");
+    unsigned int runperiod = 1;
+    if (atlasCommonRec->size() == 0)
+      runperiod = 1;
+    else {
+        std::string configVal = (*atlasCommonRec)[0]->getString("CONFIG");
+        if (configVal == "RUN1")
+            runperiod = 1;
+        else if (configVal == "RUN2")
+            runperiod = 2;
+        else if (configVal == "RUN3")
+            runperiod =
+                3;  // currently runperiod 3 means no masking => ok for upgrade
+        else if (configVal == "RUN4")
+            runperiod =
+                3;  // currently runperiod 3 means no masking => ok for upgrade
+        else {
+          runperiod = 0;
+          ATH_MSG_ERROR(
+                        "Unexpected value for geometry config read from the database: "
+                        << configVal);
+        }
+    }
+    return runperiod;
+}
+
 StatusCode TgcDigitMaker::readFileOfDeadChamber() {
+    // TODO There must be a better way of doing this -> ConditionsAlg?
     // Indices to be used
     int iStationName, stationEta, stationPhi, gasGap;
 
@@ -783,16 +830,22 @@ StatusCode TgcDigitMaker::readFileOfDeadChamber() {
         }
     }
 
+    unsigned int runperiod = getRunPeriod();
+    if (runperiod==0) {
+      ATH_MSG_FATAL("Could not determine run period.");
+      return StatusCode::FAILURE;
+    }
+
     // Find path to the TGC_Digitization_deadChamber.dat file
     std::string fileName;
-    if (m_runperiod == 1)
+    if (runperiod == 1)
         fileName = "TGC_Digitization_deadChamber.dat";
-    else if (m_runperiod == 2)
+    else if (runperiod == 2)
         fileName = "TGC_Digitization_2016deadChamber.dat";
-    else if (m_runperiod == 3)
+    else if (runperiod == 3)
         fileName = "TGC_Digitization_NOdeadChamber.dat";
     else {
-        ATH_MSG_ERROR("Run Period " << m_runperiod
+        ATH_MSG_ERROR("Run Period " << runperiod
                                     << " is unexpected in TgcDigitMaker - "
                                        "using NOdeadChamber configuration.");
         return StatusCode::FAILURE;

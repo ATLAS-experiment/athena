@@ -56,7 +56,6 @@ class RpcHitIdHelper;
 
 
 class RpcIdHelper;
-class ITagInfoMgr;
 
 namespace CLHEP {
     class HepRandomEngine;
@@ -87,7 +86,8 @@ public:
     virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
 private:
-    
+    StatusCode initializeRunDependentParameters();
+
     template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
                                                           const SG::ReadCondHandleKey<CondType>& key,
                                                           const CondType* & condPtr) const;
@@ -223,7 +223,6 @@ protected:
     SG::WriteHandleKey<RPCSimHitCollection> m_simHitValidKey{this, "SimHitValidationKey", "InputRpcHits"};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
 
-    ITagInfoMgr* m_tagInfoMgr{};  // Tag Info Manager
     Gaudi::Property<std::string> m_RPC_TimeSchema{this, "RPC_TimeSchema", "RPC_TimeSchema", "Tag info name of Rpc Time Info"};
     Gaudi::Property<bool> m_sdoAreOnlyDigits{this, "RPCSDOareRPCDigits", true,
                                              "decide is SDO deposits are saved for all G4 hits or only for those accepted as digits"};
