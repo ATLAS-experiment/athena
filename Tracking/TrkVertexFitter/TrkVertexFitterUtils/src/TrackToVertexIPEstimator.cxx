@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitterUtils/TrackToVertexIPEstimator.h"
@@ -17,9 +17,8 @@ namespace Trk
 {
 
  TrackToVertexIPEstimator::TrackToVertexIPEstimator(const std::string& t, const std::string& n, const IInterface*  p):
-  AthAlgTool(t,n,p)
+  base_class(t,n,p)
  {
-  declareInterface<ITrackToVertexIPEstimator>(this);
  }
 
  TrackToVertexIPEstimator::~TrackToVertexIPEstimator()= default;
@@ -304,27 +303,6 @@ namespace Trk
     return (zs>=0. ? 1. : -1.);
   }
 
-
-/*
-  StatusCode TrackToVertexIPEstimator::queryInterface(const InterfaceID& riid, void** ppvIf)
-  {
-
-
-    if(interfaceID() == riid){
-      *ppvIf = dynamic_cast< TrackToVertexIPEstimator* > (this);
-    }
-    else if(ITrackToVertexIPEstimator::interfaceID() == riid){
-      *ppvIf = dynamic_cast<ITrackToVertexIPEstimator*> (this);
-    }
-    else{
-      return AthAlgTool::queryInterface(riid, ppvIf);
-    }
-
-    addRef();
-    return StatusCode::SUCCESS;
-
-  }
-*/
 
 ///// ANTHONY ADDITION
 

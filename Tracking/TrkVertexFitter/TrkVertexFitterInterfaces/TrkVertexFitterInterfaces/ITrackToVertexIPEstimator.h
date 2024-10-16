@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERINTERFACES_ITRACKTOVERTEXIPESTIMATOR_H
@@ -42,17 +42,13 @@ struct ImpactParametersAndSigma {
   double PVsigmaz0SinTheta;
 };
 
-static const InterfaceID IID_ITrackToVertexCompatibilityEstimator(
-    "ITrackToVertexIPEstimator", 1, 0);
 
 class ITrackToVertexIPEstimator : virtual public IAlgTool {
 
  public:
-  virtual ~ITrackToVertexIPEstimator(){};
+  DeclareInterfaceID(ITrackToVertexIPEstimator, 1, 0);
 
-  static const InterfaceID& interfaceID() {
-    return IID_ITrackToVertexCompatibilityEstimator;
-  };
+  virtual ~ITrackToVertexIPEstimator(){};
 
   /**
    * Estimate methods returning a d0 and its calculated sigma.
