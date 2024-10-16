@@ -154,7 +154,7 @@ public:
 
   bool       m_checkSmear;
 
-  ITHistSvc* m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this, "THistSvc", "THistSvc"};
   TFile*              m_outputFile;  //!< the root file
   TTree*              m_currentTree; //!< the tree to store information from pixel and SCT (before and after smearing)
 

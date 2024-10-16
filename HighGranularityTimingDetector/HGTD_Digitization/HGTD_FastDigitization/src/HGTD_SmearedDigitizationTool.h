@@ -105,7 +105,7 @@ private:
 
   // variables used only for writing out validation tree (not written by default)
 
-  ITHistSvc* m_hist_svc{};
+  ServiceHandle<ITHistSvc> m_hist_svc{this, "THistSvc", "THistSvc"};
   std::unique_ptr<TFile> m_output_file;
   std::unique_ptr<TTree> m_tree;
 
