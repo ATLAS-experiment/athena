@@ -213,4 +213,3 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doActsAmbiguityResolution = True
     icf.doActsToAthenaResolvedTrack = True
     return icf
-

@@ -8,6 +8,11 @@ class SeedingStrategy(FlagEnum):
     Orthogonal = "Orthogonal"
     Gbts = "Gbts"
 
+class AmbiguitySolverStrategy(FlagEnum):
+    Greedy = "GreedySolver"
+    ScoreBased = "ScoreBasedAmbiguitySolver"
+
+
 # This is temporary during the integration of ACTS.
 class SpacePointStrategy(FlagEnum):
     ActsCore = "ActsCore" # ACTS-based SP formation
@@ -74,6 +79,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.reverseTrackFindingForStrips', False) # track finding starts going inward for strip seeds
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
+    actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
 
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections

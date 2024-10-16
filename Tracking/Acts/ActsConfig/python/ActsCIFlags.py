@@ -8,7 +8,15 @@ def actsAloneWorkflowFlags(flags) -> None:
     flags.Reco.EnableHGTDExtension = False
     flags.Acts.doAmbiguityResolution = True
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
-    
+
+def actsAloneScoreBasedAmbiguityWorkflowFlags(flags) -> None:
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
+    from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doAmbiguityResolution = True
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased
+        
 def actsHeavyIonFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
     flags.Acts.doAmbiguityResolution = False
@@ -82,7 +90,7 @@ def actsValidateResolvedTracksFlags(flags) -> None:
 
 def actsValidateAmbiguityResolutionFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use Acts Ambiguity Resolution after Athena reconstruction"""
-    flags.Reco.EnableHGTDExtension = False
+    flags.Reco.EnableHGTDExtension = False 
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateAmbiguityResolution]
 
 def actsValidateGSFFlags(flags) -> None:

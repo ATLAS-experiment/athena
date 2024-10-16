@@ -51,6 +51,7 @@ class TrackingComponent(FlagEnum):
     ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
+        
     # GNN
     GNNChain = "GNNChain"
     # FPGA
