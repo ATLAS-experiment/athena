@@ -24,7 +24,7 @@ def CombinedTrackingPassFlagSets(flags):
         TrackingComponent.ActsValidateConversionSeeds : "ActsValidateConversionSeeds",
         TrackingComponent.ActsValidateLargeRadiusSeeds: "ActsValidateLargeRadiusSeeds",
         TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
-        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution"
+        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
     }
     
     # Athena Pass
@@ -382,6 +382,7 @@ def ITkTrackFinalCfg(flags,
             f"PRDtoTrackMapMerge_{TrackContainer}"),
         isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
         'ActsValidateAmbiguityResolution' in splitProbName or \
+        'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
         'ActsConversion' in splitProbName or \
         'ActsLargeRadius' in splitProbName or \
         'ActsLowPt' in splitProbName or \

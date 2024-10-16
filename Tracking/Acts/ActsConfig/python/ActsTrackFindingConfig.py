@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
 from ActsInterop import UnitConstants
+from math import pi as M_PI
 
 # Tools
 
@@ -231,6 +232,41 @@ def ActsTrackFindingCfg(flags,
     
     return acc
 
+
+def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
+                                      name: str = "ActsScoreBasedAmbiguityResolutionAlg",
+                                      **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('TracksLocation', 'ActsTracks')
+    kwargs.setdefault('ResolvedTracksLocation', 'ActsResolvedTracks')
+    kwargs.setdefault('MinScore', 0.0)
+    kwargs.setdefault('MinScoreSharedTracks', 0.0)
+    kwargs.setdefault('MaxSharedTracksPerMeasurement', 7)
+    kwargs.setdefault('MaxShared', 5)
+    kwargs.setdefault('PTMin', 0.0)
+    kwargs.setdefault('PTMax', 100000.0)
+    kwargs.setdefault('PhiMin', -M_PI)
+    kwargs.setdefault('PhiMax', M_PI)
+    kwargs.setdefault('EtaMin', -5.0)
+    kwargs.setdefault('EtaMax', 5.0)
+    kwargs.setdefault('UseAmbiguityFunction', False)
+    kwargs.setdefault('jsonFileName', 'ActsAmbiguityConfig.json')
+
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
+            ActsAmbiguityResolutionMonitoringToolCfg(flags)))
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.ScoreBasedAmbiguityResolutionAlg(name, **kwargs))
+    return acc
+
+
 def ActsMainAmbiguityResolutionAlgCfg(flags,
                                       name: str = "ActsAmbiguityResolutionAlg",
                                       **kwargs) -> ComponentAccumulator:
@@ -261,10 +297,16 @@ def ActsAmbiguityResolutionCfg(flags,
     acc = ComponentAccumulator()
     kwargs.setdefault('TracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('ResolvedTracksLocation', f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks")
-    acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
-                                                name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
-                                                **kwargs))
-
+    from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
+            
+    if flags.Acts.AmbiguitySolverStrategy is AmbiguitySolverStrategy.ScoreBased:
+        acc.merge(ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
+                                                    name=f"{flags.Tracking.ActiveConfig.extension}ScoreBasedAmbiguityResolutionAlg",
+                                                    **kwargs))
+    else:
+        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
+                                                    name=f"{flags.Tracking.ActiveConfig.extension}AmbiguityResolutionAlg",
+                                                    **kwargs))
     # Analysis extensions
     if flags.Acts.doAnalysis:
         from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg

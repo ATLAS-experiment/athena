@@ -4,6 +4,7 @@
 
 #include "src/TrackFindingAlg.h"
 #include "src/AmbiguityResolutionAlg.h"
+#include "src/ScoreBasedAmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
 #include "src/TrackToTrackParticleCnvAlg.h"
 // Tools
@@ -20,6 +21,7 @@
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
 DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
+DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )

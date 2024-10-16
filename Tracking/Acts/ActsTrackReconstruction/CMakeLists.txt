@@ -52,5 +52,6 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODInDetMeasurement
 		       xAODMeasurementBase
 		       xAODTracking
+			   PathResolver
                      )
 
