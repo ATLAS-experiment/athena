@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IINDETETADEPENDENTCUTSSVC_H
@@ -9,9 +9,7 @@
 
 namespace InDet {
   
-  static const InterfaceID IID_IInDetEtaDependentCutsSvc("IInDetEtaDependentCutsSvc", 1, 0);
-
-  enum CutName {  
+  enum CutName {
     etaBins, etaWidthBrem, maxdImpactSSSSeeds, maxDoubleHoles,
     maxHoles, maxPixelHoles, maxPrimaryImpact, maxSctHoles, 
     maxShared, maxZImpact, minClusters, minPixelHits, minInPixelHits, minStripHits, minPT,
@@ -26,12 +24,9 @@ namespace InDet {
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
   public: 
-    
+    DeclareInterfaceID(IInDetEtaDependentCutsSvc, 1, 0);
+
     virtual ~IInDetEtaDependentCutsSvc() {};
-    
-    static const InterfaceID& interfaceID();
-    
-    virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF)=0;
     
     virtual void getValue(const InDet::CutName cutName, std::vector < double >& cut) = 0;
     virtual void getValue(const InDet::CutName cutName, std::vector < int >& cut) = 0;
@@ -54,14 +49,6 @@ namespace InDet {
     virtual int     getMinStripHitsAtEta    (const double eta) const = 0;
       
   };
-  
-  /////////////////////////////////////////////////////////////////// 
-  /// Inline methods: 
-  /////////////////////////////////////////////////////////////////// 
-  inline const InterfaceID& IInDetEtaDependentCutsSvc::interfaceID() 
-  { 
-    return IID_IInDetEtaDependentCutsSvc; 
-  }
 
 }// end namespace
 

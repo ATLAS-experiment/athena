@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERUTILS_TRACKTOVERTEXIPESTIMATOR_H
@@ -68,8 +68,8 @@ class TrackParticleBase;
  *
  */
 
-class TrackToVertexIPEstimator : public AthAlgTool,
-                                 virtual public ITrackToVertexIPEstimator {
+class TrackToVertexIPEstimator : public extends<AthAlgTool,
+                                                ITrackToVertexIPEstimator> {
 
  public:
   /**
