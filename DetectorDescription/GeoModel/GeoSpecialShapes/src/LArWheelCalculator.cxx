@@ -105,10 +105,8 @@ LArWheelCalculator::LArWheelCalculator(const EMECData & emecData, LArG4::LArWhee
 
 #ifndef PORTABLE_LAR_SHAPE
   // Get pointer to the message service
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  IMessageSvc* msgSvc;
-  StatusCode status = svcLocator->service("MessageSvc", msgSvc);
-  if(status.isFailure()){
+  SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+  if(!msgSvc.isValid()){
     throw std::runtime_error("LArWheelCalculator constructor: cannot initialze message service");
   }
   MsgStream msg(msgSvc, "LArWheelCalculator");
