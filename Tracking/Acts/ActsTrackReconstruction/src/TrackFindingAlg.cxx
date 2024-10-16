@@ -582,7 +582,8 @@ namespace ActsTrk
       ++event_stat[category_i][kNUsedSeeds];
 
       std::unique_ptr<Acts::BoundTrackParameters> seedParameters;
-      if (m_refitSeeds)
+      const bool refitSeeds = (typeIndex < m_refitSeeds.size() && m_refitSeeds[typeIndex]);
+      if (refitSeeds)
       {
         // Perform KF before CKF
         const auto fittedSeedCollection = m_fitterTool->fit(ctx, *(*seeds)[iseed], *initialParameters,
