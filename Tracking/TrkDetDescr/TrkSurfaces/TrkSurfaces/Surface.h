@@ -86,7 +86,7 @@ public:
     inline Transforms(const Amg::Transform3D& atransform)
       : transform(atransform)
       , center(transform.translation())
-      , normal(transform.rotation().col(2))
+      , normal(transform.linear().col(2))
     {
     }
 
@@ -95,7 +95,7 @@ public:
                       const Amg::Vector3D& acenter)
       : transform(atransform)
       , center(acenter)
-      , normal(transform.rotation().col(2))
+      , normal(transform.linear().col(2))
     {
     }
 

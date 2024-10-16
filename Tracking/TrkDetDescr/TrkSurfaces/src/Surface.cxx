@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -134,9 +134,23 @@ Trk::Surface::isOnSurface(const Amg::Vector3D& glopo,
 Amg::RotationMatrix3D
 Trk::Surface::measurementFrame(const Amg::Vector3D&, const Amg::Vector3D&) const
 {
-  return transform().rotation();
+  return transform().linear();
 }
 
+namespace {
+   bool checkTransform(const Trk::Surface &surface) {
+      Amg::RotationMatrix3D rot = surface.transform().rotation();
+      Amg::RotationMatrix3D lin = surface.transform().linear();
+      if (rot.cols() != lin.cols() || rot.rows() != lin.rows()) return false;
+      bool ret=true;
+      for (unsigned int col_i=0; col_i<rot.cols(); ++col_i){
+         for (unsigned int row_i=0; row_i<rot.rows(); ++row_i){
+            ret &= (std::abs( rot(row_i,col_i) - lin(row_i,col_i))<1e-5);
+         }
+      }
+      return ret;
+   }
+}
 
 // overload dump for MsgStream operator
 MsgStream&
@@ -150,7 +164,7 @@ Trk::Surface::dump(MsgStream& sl) const
   }
   sl << "     Center position  (x, y, z) = (" << center().x() << ", " << center().y() << ", " << center().z() << ")"
      << std::endl;
-  Amg::RotationMatrix3D rot(transform().rotation());
+  Amg::RotationMatrix3D rot(transform().linear());
   Amg::Vector3D rotX(rot.col(0));
   Amg::Vector3D rotY(rot.col(1));
   Amg::Vector3D rotZ(rot.col(2));
@@ -159,6 +173,9 @@ Trk::Surface::dump(MsgStream& sl) const
   sl << "                           colY = (" << rotY(0) << ", " << rotY(1) << ", " << rotY(2) << ")" << std::endl;
   sl << "                           colZ = (" << rotZ(0) << ", " << rotZ(1) << ", " << rotZ(2) << ")" << std::endl;
   sl << "     Bounds  : " << bounds();
+  if (!checkTransform(*this)) {
+     sl << std::endl << "     NOT a strict rotation matrix." << std::endl;
+  }
   sl << std::setprecision(-1);
   return sl;
 }
@@ -175,7 +192,7 @@ Trk::Surface::dump(std::ostream& sl) const
   }
   sl << "     Center position  (x, y, z) = (" << center().x() << ", " << center().y() << ", " << center().z() << ")"
      << std::endl;
-  Amg::RotationMatrix3D rot(transform().rotation());
+  Amg::RotationMatrix3D rot(transform().linear());
   Amg::Vector3D rotX(rot.col(0));
   Amg::Vector3D rotY(rot.col(1));
   Amg::Vector3D rotZ(rot.col(2));
@@ -184,6 +201,9 @@ Trk::Surface::dump(std::ostream& sl) const
   sl << "                           colY = (" << rotY(0) << ", " << rotY(1) << ", " << rotY(2) << ")" << std::endl;
   sl << "                           colZ = (" << rotZ(0) << ", " << rotZ(1) << ", " << rotZ(2) << ")" << std::endl;
   sl << "     Bounds  : " << bounds();
+  if (!checkTransform(*this)) {
+     sl << std::endl << "     NOT a strict rotation matrix." << std::endl;
+  }
   sl << std::setprecision(-1);
   return sl;
 }
