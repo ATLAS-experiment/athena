@@ -50,8 +50,6 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--PrimaryVertexContainer", help='Name of the primary vertex container', choices=['PrimaryVertices', 'ActsPrimaryVertices', 'HggPrimaryVertices'], default='PrimaryVertices')
     IDPVMparser.add_argument("--OnlyTrackingPreInclude", help='Disable all flags related to detectors/domains beyond tracking', action='store_true', default=False)
     IDPVMparser.add_argument("--jetCollection", help='Jet collection for track-in-jet plots', default="AntiKt4EMPFlowJets")
-    IDPVMparser.add_argument("--maxTrkJetDR", help='the maximum dR to jets to allow for track-in-jet plots', type=float, default=0.4)
-    IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
     IDPVMparser.add_argument("--JetPtMin", help='Minimum pt for jet selection in GeV', type=float, default=100)
     IDPVMparser.add_argument("--JetPtMax", help='Maximum pt for jet selection in GeV', type=float, default=5000)
     return IDPVMparser.parse_args()
