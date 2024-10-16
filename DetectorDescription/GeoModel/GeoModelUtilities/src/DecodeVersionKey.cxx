@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/DecodeVersionKey.h"
@@ -22,10 +22,8 @@ DecodeVersionKey::DecodeVersionKey(const IGeoDbTagSvc * geoDbTag, const std::str
 
 DecodeVersionKey::DecodeVersionKey(const std::string & node)
 {
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  IGeoDbTagSvc* geoDbTag{nullptr};
-  if(svcLocator->service("GeoDbTagSvc",geoDbTag).isFailure())
-    throw std::runtime_error("DecodeVersionKey constructor: cannot access GeoDbTagSvc");
+  SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+  if(!geoDbTag.isValid()) throw std::runtime_error("DecodeVersionKey constructor: cannot access GeoDbTagSvc");
   defineTag<IGeoDbTagSvc>(geoDbTag,node);
 }
 

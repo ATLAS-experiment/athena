@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PORTABLE_LAR_SHAPE
@@ -38,12 +38,9 @@ namespace LArWheelCalculator_Impl
 
     // Get pointer to the message service
 #ifndef PORTABLE_LAR_SHAPE
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    IMessageSvc* msgSvc;
-    StatusCode status = svcLocator->service("MessageSvc", msgSvc);
-    if(status.isFailure()){
-      throw std::runtime_error("LArWheelCalculator constructor: \
-          cannot initialze message service");
+    SmartIF<IMessageSvc> msgSvc{Gaudi::svcLocator()->service("MessageSvc")};
+    if(!msgSvc.isValid()) {
+      throw std::runtime_error("LArWheelCalculator constructor: cannot initialze message service");
     }
     MsgStream msg(msgSvc, "LArWheelCalculator_Impl::DistanceCalculatorSaggingOn");
 #else
