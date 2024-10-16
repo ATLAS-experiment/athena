@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -43,8 +43,6 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
-#include "GeoModelInterfaces/IGeoModelSvc.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 
 #include "GeoSpecialShapes/EMECData.h"
@@ -63,7 +61,6 @@
 #include "globals.hh"
 
 #include "LArG4Code/LArG4BirksLaw.h"
-#include "LArG4Code/ILArCalibCalculatorSvc.h"
 
 #include "EnergyCalculator.h"
 #include "AthenaKernel/Units.h"
@@ -155,47 +152,14 @@ G4bool EnergyCalculator::Process_Default(const G4Step* step, std::vector<LArHitD
 // ****************************************************************************
 EnergyCalculator::EnergyCalculator(const std::string& name, ISvcLocator *pSvcLocator)
   : LArCalculatorSvcImp(name, pSvcLocator)
-  , m_supportCalculator("EMECSupportCalibrationCalculator",name)
-  , m_corrProp(8)
-  , m_correction_type(EMEC_ECOR_CHCL1)
-    // PhiGapNumber(0),
-    // PhiHalfGapNumber(0),
-    // HalfWaveNumber(0),
-    // SignofZinHalfWave(0),
-    // SignofSlopeofHalfWave(0),
-    // SinPhiGap(0),
-    // CosPhiGap(0),
-    // ZinHalfWave(0),
-    // HalfEleThickness(0),
-    // ChCollWheelType(0),
-    // ChCollFoldType(0),
-    // PointFoldMapArea(0),
-    // calculatorPhiGap(0),
-    // chcollPhiGap(0),
-  , m_solidtypeProp(0)
-  , m_solidtype(LArG4::InnerAbsorberWheel)
-  , m_zside(1)
-  , m_birksLaw(nullptr)
-  , m_lwc(nullptr)
-    // ****************************************************************************
 {
-  ATH_MSG_DEBUG("constructor started");
-
-  declareProperty("EMECHVEnable",m_DB_HV=false);
-  // get power of gap in signal calculation
-  declareProperty("EMECGapPower",m_GApower=1.4);
-  // pick up surface_suppression_range
-  declareProperty("EMECEsr",m_CHC_Esr=0.2*CLHEP::mm);
-  declareProperty("EMECHVMap",m_HVMapVersion="v02");
-  declareProperty("EMECChMap", m_suffix="v03");
-
-  declareProperty("SupportCalculator",m_supportCalculator);
   declareProperty("WheelType",m_solidtypeProp);
   m_solidtypeProp.declareUpdateHandler(&EnergyCalculator::SolidTypeHandler, this);
   declareProperty("EnergyCorrection",m_corrProp);
   m_corrProp.declareUpdateHandler(&EnergyCalculator::CorrectionTypeHandler, this);
-  declareProperty("zSide",m_zside);
 }
+// ****************************************************************************
+
 
 void EnergyCalculator::CorrectionTypeHandler(Gaudi::Details::PropertyBase&)
 {
@@ -260,26 +224,12 @@ void EnergyCalculator::SolidTypeHandler(Gaudi::Details::PropertyBase&)
 
 StatusCode EnergyCalculator::initialize()
 {
-
-
-
-
-  ISvcLocator *svcLocator=Gaudi::svcLocator();
-
-  // Access the GeoModelSvc:
-  IGeoModelSvc *geoModel=nullptr;
-  ATH_CHECK(svcLocator->service ("GeoModelSvc",geoModel));
-
-  IGeoDbTagSvc *geoDbTagSvc(nullptr);
-  ATH_CHECK(svcLocator->service ("GeoDbTagSvc",geoDbTagSvc));
-
   // Access the geometry database:
-  IRDBAccessSvc *pAccessSvc=nullptr;
-  ATH_CHECK(svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc));
+  SmartIF<IRDBAccessSvc> pAccessSvc{Gaudi::svcLocator()->service(m_geoDbTagSvc->getParamSvcName())};
 
-  DecodeVersionKey larVersionKey(geoModel, "LAr");
+  DecodeVersionKey larVersionKey(&(*m_geoModel), "LAr");
   std::string larKey, larNode;
-  if(geoDbTagSvc->getSqliteReader()==nullptr) {
+  if(m_geoDbTagSvc->getSqliteReader()==nullptr) {
     larKey = larVersionKey.tag();
     larNode = larVersionKey.node();
   }
@@ -427,7 +377,7 @@ StatusCode EnergyCalculator::initialize()
                 "EnergyCalculator: unknown correction type");
   }
 
-  m_HVHelper = HVHelper::CreateHelper(lwc(), m_HVMapVersion, m_DB_HV);
+  m_HVHelper = HVHelper::CreateHelper(lwc(), m_HVMapVersion.value(), m_DB_HV);
 
   // if charge collection is required
   if(m_correction_type == EMEC_ECOR_CHCL ||  m_correction_type ==  EMEC_ECOR_CHCL1) {
