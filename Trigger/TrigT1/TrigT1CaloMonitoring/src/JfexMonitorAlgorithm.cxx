@@ -156,6 +156,13 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
                 fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,jFexEMeta,jFexEMphi,weight);
             }
 
+            for (auto& [eta, phi] : jFEXMapEmptyBinCentersJetsOnly) {
+                jFexSRJeteta = eta;
+                jFexSRJetphi = phi;
+                fill(m_Groupmaps,jFexSRJeteta,jFexSRJetphi,weight);
+                fill(m_GroupmapsHighPt,jFexSRJeteta,jFexSRJetphi,weight);
+            }
+
             // central region without jEM
             for (int ieta=-23; ieta<23; ieta++){
                 jFexEMeta = 0.1 * ieta + 0.05;
