@@ -5,18 +5,16 @@
 
 '''@file ZdcMonitorAlgorithm.py
 @author Y. Guo
-@author S. Mohapatra
 @date 2023-08-01
 @brief python configuration for ZDC monitoring under the Run III DQ framework
-       will be run in the ZDC calibration stream & physics MinBias stream
-       see https://acode-browser1.usatlas.bnl.gov/lxr/source/athenAControl/AthenaMonitoring/python/ExampleMonitorAlgorithm.py
-       for details of structure of monitoring-configuration files
+    will be run in the ZDC calibration stream & physics MinBias stream
+    see https://acode-browser1.usatlas.bnl.gov/lxr/source/athenAControl/AthenaMonitoring/python/ExampleMonitorAlgorithm.py
+    for details of structure of monitoring-configuration files
 @reference https://twiki.cern.ch/twiki/bin/view/Atlas/DQRun3FrameworkTutorial
 '''
 
 
 import numpy as np
-import os
 
 def create_log_bins(min_value, max_value, num_bins):
     # Calculate the logarithmic bin edges
@@ -37,22 +35,31 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcMonAlg = helper.addAlgorithm(CompFactory.ZdcMonitorAlgorithm,'ZdcMonAlg')
 
     # Edit properties of a algorithm
-    zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger
+    zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger # added for online: enable trigger if we are running in ATLAS partition (DQ.useTrigger flag not set offline)
     zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'express_express' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias or express_express
     zdcMonAlg.IsOnline = inputFlags.Common.isOnline # if running online select a subset of histograms & use coarser binnings
-    zdcMonAlg.IsInjectedPulse = (os.getenv("ZDC_STREAM_NAME") == 'ZDCInjCalib') if zdcMonAlg.IsOnline else (inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib') # if running online select a subset of histograms & use coarser binnings
+    zdcMonAlg.IsInjectedPulse = inputFlags.Input.TriggerStream == 'calibration_ZDCInjCalib' or inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
+    zdcMonAlg.IsStandalone = inputFlags.Input.TriggerStream == 'calibration_DcmDummyProcessor'
+    
+    zdcMonAlg.EnableZDC = inputFlags.Detector.EnableZDC_ZDC
+    zdcMonAlg.EnableZDCPhysics = zdcMonAlg.EnableZDC and not zdcMonAlg.IsInjectedPulse # no physical pulse (neutrons) for injector pulse
+    zdcMonAlg.EnableRPD = inputFlags.Detector.EnableZDC_RPD and not zdcMonAlg.IsInjectedPulse
+    zdcMonAlg.EnableRPDAmp = zdcMonAlg.EnableRPD
+    zdcMonAlg.EnableCentroid = zdcMonAlg.EnableRPD
 
-
-    genZdcMonTool = helper.addGroup(
-        zdcMonAlg,
-        'genZdcMonTool'
-    )
+    print ("IsInjectedPulse? ",zdcMonAlg.IsInjectedPulse)
+    if (zdcMonAlg.EnableZDCPhysics or zdcMonAlg.EnableRPDAmp or zdcMonAlg.EnableCentroid):
+        genZdcMonTool = helper.addGroup(
+            zdcMonAlg,
+            'genZdcMonTool'
+        )
 
 # --------------------------------------------------------------------------------------------------
     # Configure histograms
 
     # (potentially run-type dependent) range settings
     lumi_block_max = 2000
+    n_lumi_block_bins_coarse = 200
     bcid_max = 3564
     n_energy_bins_default = 200
     n_time_centroid_bins_default = 100
@@ -122,10 +129,10 @@ def ZdcMonitoringConfig(inputFlags, run_type):
         module_calib_amp_1Nmonitor_xmax = 5000 #about 5N / 4 * 2.7TeV
 
 
-    elif run_type == "PbPb2023":
+    elif run_type == "PbPb2023" or run_type == "Injector2024":
         print ("looking at pbpb run")
         energy_sum_xmax = 200000.0
-        energy_sum_zoomin_xmax = 20000.0
+        energy_sum_zoomin_xmax = 13000.0
         uncalib_amp_sum_zoomin_xmax = 6000.0
         time_in_data_buffer = 75. #75 ns (3 BCID's) in buffer
         x_centroid_min = -20 #small amplitude sum --> large range for x, y position
@@ -133,17 +140,18 @@ def ZdcMonitoringConfig(inputFlags, run_type):
         y_centroid_min = -20
         y_centroid_max = 20
         zdc_amp_sum_xmax = 163840.0
-        rpd_channel_amp_min = - 2048. 
+        rpd_channel_amp_min = - 2000. 
         rpd_amp_sum_xmax = 245760.0 #not the full range but a reasonable value
         rpd_max_adc_sum_xmax = 40960.0
         module_amp_xmax = 40960.0
+        rpd_sum_adc_max = 25000.
         module_calib_amp_xmax = 100000.0 #about the full dynamic range: 160 N / 4 * 2.5TeV
         module_amp_1Nmonitor_xmax = 1250.0 #about 5N / 4 * 2.7TeV
         module_calib_amp_1Nmonitor_xmax = 3400.0 #about 5N / 4 * 2.7TeV
+        pulse_voltage_max = 2.5
 
     # #bins for RPD channel amplitude, including negative values - determined by the ratio between the negative amplitude range & positive amplitude range
-    n_rpd_amp_bins_full_range = int((abs(rpd_channel_amp_min) + module_amp_xmax) / module_amp_xmax * n_energy_bins_default)
-    n_rpd_amp_bins_half_range = int((abs(rpd_channel_amp_min) + module_amp_xmax/2.) / (module_amp_xmax/2.) * n_energy_bins_default)
+    n_rpd_amp_bins_full_range = int((abs(rpd_channel_amp_min) + rpd_sum_adc_max) / rpd_sum_adc_max * n_energy_bins_default)
     rpd_sub_amp_min = - module_amp_xmax / 4.
     rpd_sub_amp_max = module_amp_xmax / 2.
     n_rpd_sub_amp_bins = int((abs(rpd_sub_amp_min) + rpd_sub_amp_max) / rpd_sub_amp_max * n_energy_bins_default)
@@ -153,155 +161,34 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 # ---------------------- (Including Event-level / A-C side correlations) ----------------------
 # --------------------------------------------------------------------------------------------------
 
-    genZdcMonTool.defineHistogram('zdcEnergySumA',title='ZDC Side A Energy Sum;E_{ZDC,A}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax) # 2.5TeV * 80 neutrons
-    genZdcMonTool.defineHistogram('zdcEnergySumC',title='ZDC Side C Energy Sum;E_{ZDC,C}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax)
-    genZdcMonTool.defineHistogram('zdcEnergySumA;zdcEnergySumA_zoomin_wTrigSelec',title='ZDC Side A Energy Sum (few neutrons, triggered on side C);E_{ZDC,A}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            cutmask = 'passTrigSideC', 
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
-    genZdcMonTool.defineHistogram('zdcEnergySumC;zdcEnergySumC_zoomin_wTrigSelec',title='ZDC Side C Energy Sum (few neutrons, triggered on side A);E_{ZDC,C}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            cutmask = 'passTrigSideA', 
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax)
-    genZdcMonTool.defineHistogram('zdcEnergySumA;zdcEnergySumA_zoomin_noTrigSelec',title='ZDC Side A Energy Sum (few neutrons, no trigger selection);E_{ZDC,A}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
-    genZdcMonTool.defineHistogram('zdcEnergySumC;zdcEnergySumC_zoomin_noTrigSelec',title='ZDC Side C Energy Sum (few neutrons, no trigger selection);E_{ZDC,C}[GeV];Events',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax)
-    
-    genZdcMonTool.defineHistogram('zdcUncalibSumA',title='ZDC Side A Uncalibrated Sum;[ADC Counts];Events',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax)
-    genZdcMonTool.defineHistogram('zdcUncalibSumC',title='ZDC Side C Uncalibrated Sum;[ADC Counts];Events',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax)
+    if (zdcMonAlg.EnableZDCPhysics):
+        genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC', type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
+                                path='/EXPERT/Global/SideACCorr',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
 
-    # 2D vars: x vs y
+        genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
+                                path='/EXPERT/Global/ReactionPlane',
+                                cutmask='bothHasCentroid', # only require both sides to have centroid
+                                xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
+        if (not zdcMonAlg.IsOnline):
+            genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle;rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
+                                    path='/EXPERT/Global/ReactionPlane',
+                                    cutmask='bothReactionPlaneAngleValid', # require centroid calculation on both sides to be valid
+                                    xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
 
-    genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumA;zdcEnergySumA_vs_lb_noTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumC;zdcEnergySumC_vs_lb_noTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumA;zdcEnergySumA_vs_lb_wTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumC;zdcEnergySumC_vs_lb_wTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_noTrig', type='TH2F', title=';lumi block;ZDC amp A[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_noTrig', type='TH2F', title=';lumi block;ZDC amp C[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_wTrig', type='TH2F', title=';lumi block;ZDC amp A[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_wTrig', type='TH2F', title=';lumi block;ZDC amp C[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-
-    genZdcMonTool.defineHistogram('bcid, zdcEnergySumA;zdcEnergySumA_vs_bcid_noTrig', type='TH2F', title=';BCID;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcEnergySumC;zdcEnergySumC_vs_bcid_noTrig', type='TH2F', title=';BCID;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcEnergySumA;zdcEnergySumA_vs_bcid_wTrig', type='TH2F', title=';BCID;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideA',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideC',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcEnergySumC;zdcEnergySumC_vs_bcid_wTrig', type='TH2F', title=';BCID;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/Energy/SideC',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideA',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-
-    genZdcMonTool.defineHistogram('bcid, zdcUncalibSumA;zdcUncalibSumA_vs_bcid_noTrig', type='TH2F', title=';BCID;ZDC amp A[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcUncalibSumC;zdcUncalibSumC_vs_bcid_noTrig', type='TH2F', title=';BCID;ZDC amp C[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcUncalibSumA;zdcUncalibSumA_vs_bcid_wTrig', type='TH2F', title=';BCID;ZDC amp A[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideC',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('bcid, zdcUncalibSumC;zdcUncalibSumC_vs_bcid_wTrig', type='TH2F', title=';BCID;ZDC amp C[ADC counts]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideA',
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
-                            ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
-                            ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
-    
-    genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC', type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
-                            path='ZDC/Global/SideACCorr',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
-
-    genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
-                            path='ZDC/Global/ReactionPlane',
-                            cutmask='bothHasCentroid', # only require both sides to have centroid
-                            xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
-    genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle;rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
-                            path='ZDC/Global/ReactionPlane',
-                            cutmask='bothReactionPlaneAngleValid', # require centroid calculation on both sides to be valid
-                            xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
-
-    # FCal E_T vs ZDC E_T
-    # to be run on min bias stream
-    if (zdcMonAlg.CalInfoOn):
-        genZdcMonTool.defineHistogram('fcalEtA, zdcEnergySumA', type='TH2F', title=';E_{FCal, A} [GeV];E_{ZDC,A} [GeV]',
-                            path='ZDC/Global/ZDCFcalCorr',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
-        genZdcMonTool.defineHistogram('fcalEtC, zdcEnergySumC', type='TH2F', title=';E_{FCal, C} [GeV];E_{ZDC,C} [GeV]',
-                            path='ZDC/Global/ZDCFcalCorr',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
-        genZdcMonTool.defineHistogram('fcalEtA, fcalEtC', type='TH2F', title=';E_{FCal, A} [GeV];E_{FCal, C} [GeV]',
-                            path='ZDC/Global/SideACCorr',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=5000)
+        # FCal E_T vs ZDC E_T
+        # to be run on min bias stream
+        if (zdcMonAlg.CalInfoOn):
+            genZdcMonTool.defineHistogram('fcalEtA, fcalEtC', type='TH2F', title=';E_{FCal, A} [GeV];E_{FCal, C} [GeV]',
+                                path='/EXPERT/Global/SideACCorr',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=5000)
 
 # --------------------------------------------------------------------------------------------------
-    nSides = 2
-    nModules = 4
-    nChannels = 16
+    sides = ["C","A"]
+    modules = ["0","1","2","3"]
+    channels = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
 
     nZdcStatusBits = 18
     nRpdStatusBits = 15
@@ -311,321 +198,511 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 # ---------------------------------- Per-ZDC-arm/side observables ---------------------------------- 
 # --------------------------------------------------------------------------------------------------
 
-    zdcSideMonToolArr = helper.addArray([nSides],zdcMonAlg,'ZdcSideMonitor')
+    if (zdcMonAlg.EnableZDCPhysics or zdcMonAlg.EnableRPDAmp or zdcMonAlg.EnableCentroid):
+
+        zdcSideMonToolArr = helper.addArray([sides],zdcMonAlg,'ZdcSideMonitor')
 
 
-    zdcSideMonToolArr.defineHistogram('zdcAvgTime',title='ZDC Side Average Time;t[ns];Events', cutmask = 'zdcModuleMask',
-                            path='ZDC/ZDC/PerArm/AvgTime',
-                            xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+    # ---------------------------- Calorimeter per-arm variables ---------------------------- 
+    # ---------------------------- Calorimeter energy/amplitude sum ----------------------------
+    if (zdcMonAlg.EnableZDCPhysics):
+        zdcSideMonToolArr.defineHistogram('zdcEnergySum',title='ZDC Side {0} Energy Sum;Side {0} Energy [GeV];Events',
+                                path='/EXPERT/ZDC/PerArm/Energy',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax) # 2.5TeV * 80 neutrons
+        zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_wTrigSelec',title='ZDC Side {0} Energy Sum (few neutrons, require opposite-side trigger);Side {0} Energy[GeV];Events',
+                                path='/SHIFT/ZDC/PerArm/Energy',
+                                cutmask = 'passTrigOppSide', 
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
+        zdcSideMonToolArr.defineHistogram('zdcEnergySum;zdcEnergySum_zoomin_noTrigSelec',title='ZDC Side {0} Energy Sum (few neutrons, no trigger selection);Side {0} Energy[GeV];Events',
+                                path='/SHIFT/ZDC/PerArm/Energy',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
+        
+        zdcSideMonToolArr.defineHistogram('zdcUncalibSum',title='ZDC Side {0} Uncalibrated Sum;[ADC];Events',
+                                path='/EXPERT/ZDC/PerArm/UncalibAmp',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax)
 
-    zdcSideMonToolArr.defineHistogram('lumiBlock, zdcAvgTime;zdcAvgTime_vs_lb', type='TH2F', title='ZDC Side Average Time versus Lumi block;lumi block;t[ns]',
-                            path='ZDC/ZDC/PerArm/AvgTime',
-                            cutmask = 'zdcModuleMask',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default,ymin=-10.0,ymax=10.0)
+    # ---------------------------- Calorimeter energy/amplitude sum: LB dependence ----------------------------
+        if (not zdcMonAlg.IsOnline): # offline - use fine LB binnings
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcEnergySum;zdcEnergySum_vs_lb_noTrig', type='TH2F', title=';lumi block;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcEnergySum;zdcEnergySum_vs_lb_wTrig', type='TH2F', title=';lumi block;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, 
+                                    cutmask = 'passTrigOppSide',
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+        else: # online - use coarse LB binnings
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcEnergySum;zdcEnergySum_vs_lb_noTrig', type='TH2F', title=';lumi block;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcEnergySum;zdcEnergySum_vs_lb_wTrig', type='TH2F', title=';lumi block;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max, 
+                                    cutmask = 'passTrigOppSide',
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
-    zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
-                            path='ZDC/Global/Centroid',
-                            xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
-                            xlabels=['ValidBit', 'HasCentroidBit', 'ZDCInvalidBit', 'InsufficientZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'EMInvalidBit', 'InsufficientEMEnergyBit', 'ExcessiveEMEnergyBit', 'RPDInvalidBit', 'PileupBit', 'ExcessivePileupBit', 'ZeroSumBit', 'ExcessiveSubtrUnderflowBit', 'Row0ValidBit', 'Row1ValidBit', 'Row2ValidBit', 'Row3ValidBit', 'Col0ValidBit', 'Col1ValidBit', 'Col2ValidBit', 'Col3ValidBit'])
+        if (not zdcMonAlg.IsOnline): #only offline
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcUncalibSum;zdcUncalibSum_vs_lb_noTrig', type='TH2F', title=';lumi block;ZDC Side {0} Uncalibrated Sum [ADC]',
+                                    path='/EXPERT/ZDC/PerArm/UncalibAmp',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcUncalibSum;zdcUncalibSum_vs_lb_wTrig', type='TH2F', title=';lumi block;ZDC Side {0} Uncalibrated Sum [ADC]',
+                                    path='/EXPERT/ZDC/PerArm/UncalibAmp',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, 
+                                    cutmask = 'passTrigOppSide',
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
-    zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='ZDC/Global/Centroid',
-                            xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
-    zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle',title=';Reaction Plane Angle;Events',
-                            path='ZDC/Global/ReactionPlane',
-                            xbins=64,xmin=-3.141593,xmax=3.141593)
+    # ---------------------------- Calorimeter energy/amplitude sum: BCID dependence ----------------------------
+        if (not zdcMonAlg.IsOnline): #only offline
+            zdcSideMonToolArr.defineHistogram('bcid, zdcEnergySum;zdcEnergySum_vs_bcid_noTrig', type='TH2F', title=';BCID;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=bcid_max,xmin=0.0,xmax=bcid_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+            zdcSideMonToolArr.defineHistogram('bcid, zdcEnergySum;zdcEnergySum_vs_bcid_wTrig', type='TH2F', title=';BCID;Side {0} Energy [GeV]',
+                                    path='/EXPERT/ZDC/PerArm/Energy',
+                                    xbins=bcid_max,xmin=0.0,xmax=bcid_max, 
+                                    cutmask = 'passTrigOppSide',
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
+        
+        if (zdcMonAlg.CalInfoOn):
+            zdcSideMonToolArr.defineHistogram('fcalEt, zdcEnergySum', type='TH2F', title=';E_{FCal, {0}} [GeV];Side {0} Energy [GeV]',
+                                path='/EXPERT/ZDC/PerArm/ZDCFcalCorr',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
 
-    zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid;yCentroid_vs_xCentroid_requireValid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='ZDC/Global/Centroid',
-                            cutmask='centroidValid',
-                            xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
-    zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle;ReactionPlaneAngle_requireValid',title=';Reaction Plane Angle;Events',
-                            path='ZDC/Global/ReactionPlane',
-                            cutmask='centroidValid',
-                            xbins=64,xmin=-3.141593,xmax=3.141593)
+    # ---------------------------- Calorimeter average time & LB dependence ---------------------------- 
+
+        zdcSideMonToolArr.defineHistogram('zdcAvgTime',title='ZDC Side Average Time;t[ns];Events', cutmask = 'zdcModuleMask',
+                                path='/EXPERT/ZDC/PerArm/AvgTime',
+                                xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+
+        if (not zdcMonAlg.IsOnline): #only offline
+            zdcSideMonToolArr.defineHistogram('lumiBlock, zdcAvgTime;zdcAvgTime_vs_lb', type='TH2F', title='ZDC Side Average Time versus Lumi block;lumi block;t[ns]',
+                                    path='/EXPERT/ZDC/PerArm/AvgTime',
+                                    cutmask = 'zdcModuleMask',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_time_centroid_bins_default,ymin=-10.0,ymax=10.0)
+
+    # ---------------------------- RPD (centroid-related) per-arm variables ---------------------------- 
+    # ---------------------------- centroid status ---------------------------- 
+        zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
+                                path='/EXPERT/RPD/PerArm/Centroid',
+                                xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
+                                xlabels=['ValidBit', 'HasCentroidBit', 'ZDCInvalidBit', 'InsufficientZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'EMInvalidBit', 'InsufficientEMEnergyBit', 'ExcessiveEMEnergyBit', 'RPDInvalidBit', 'PileupBit', 'ExcessivePileupBit', 'ZeroSumBit', 'ExcessiveSubtrUnderflowBit', 'Row0ValidBit', 'Row1ValidBit', 'Row2ValidBit', 'Row3ValidBit', 'Col0ValidBit', 'Col1ValidBit', 'Col2ValidBit', 'Col3ValidBit'])
+
+        zdcSideMonToolArr.defineHistogram('centroidValidBitFloat;centroidValidBit_RequireMinZDCEnergy',title='Centroid valid bit;;Events',
+                                path='/SHIFT/RPD/PerArm/Centroid',
+                                cutmask='passMinZDCEnergyCutForCentroidValidEvaluation',
+                                xbins=2,xmin=0,xmax=2,
+                                xlabels=['Valid','Invalid'])
+
+    # ---------------------------- x, y centroid & reaction plane angle requiring centroid ValidBit ---------------------------- 
+        zdcSideMonToolArr.defineHistogram('xCentroid',title=';Centroid x position [mm];Events',
+                                path='/SHIFT/RPD/PerArm/Centroid',
+                                cutmask='centroidValid',
+                                xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max)
+
+        zdcSideMonToolArr.defineHistogram('yCentroid',title=';Centroid y position [mm];Events',
+                                path='/SHIFT/RPD/PerArm/Centroid',
+                                cutmask='centroidValid',
+                                xbins=n_time_centroid_bins_default,xmin=y_centroid_min,xmax=y_centroid_max)
+
+        zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
+                                path='/EXPERT/RPD/PerArm/Centroid',
+                                cutmask='centroidValid',
+                                xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
+                                ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
+    
+        zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle',title=';Reaction Plane Angle;Events',
+                                path='/EXPERT/RPD/PerArm/ReactionPlane',
+                                cutmask='centroidValid',
+                                xbins=64,xmin=-3.141593,xmax=3.141593)
+    
+    # ---------------------------- x, y centroid & reaction plane angle requiring only HasCentroidBit ---------------------------- 
+        
+        if (not zdcMonAlg.IsOnline): #only offline
+            zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid;yCentroid_vs_xCentroid_requireOnlyHasCentroidBit',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
+                                    path='/EXPERT/RPD/PerArm/Centroid',
+                                    xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
+                                    ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
+            zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle;ReactionPlaneAngle_requireOnlyHasCentroidBit',title=';Reaction Plane Angle;Events',
+                                        path='/EXPERT/RPD/PerArm/ReactionPlane',
+                                        xbins=64,xmin=-3.141593,xmax=3.141593)
 
 
-    zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid x position [mm]',
-                            path='ZDC/Global/CentroidLBdep',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
-    zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid y position [mm]',
-                            path='ZDC/Global/CentroidLBdep',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
+    # ---------------------------- Centroid LB dependence ---------------------------- 
+        if (not zdcMonAlg.IsOnline): #only offline        
+            zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb_requireOnlyHasCentroidBit', type='TH2F', title=';lumi block;Centroid x position [mm]',
+                                    path='/EXPERT/RPD/PerArm/CentroidLBdep',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
+            zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb_requireOnlyHasCentroidBit', type='TH2F', title=';lumi block;Centroid y position [mm]',
+                                    path='/EXPERT/RPD/PerArm/CentroidLBdep',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
 
-    zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb_requireValid', type='TH2F', title=';lumi block;Centroid x position [mm]',
-                            path='ZDC/Global/CentroidLBdep',
-                            cutmask='centroidValid',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
-    zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb_requireValid', type='TH2F', title=';lumi block;Centroid y position [mm]',
-                            path='ZDC/Global/CentroidLBdep',
-                            cutmask='centroidValid',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
+            zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid x position [mm]',
+                                    path='/EXPERT/RPD/PerArm/CentroidLBdep',
+                                    cutmask='centroidValid',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
+            zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid y position [mm]',
+                                    path='/EXPERT/RPD/PerArm/CentroidLBdep',
+                                    cutmask='centroidValid',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
 
-    zdcSideMonToolArr.defineHistogram('rpdSubAmpSum', title=';RPD Subtracted Amp Sum (AorC) [ADC counts]',
-                            path='ZDC/RPD/PerArm',
-                            cutmask='centroidValid',
-                            xbins=n_energy_bins_default,xmin = - rpd_amp_sum_xmax / 16., xmax=rpd_amp_sum_xmax / 4.) # try a value for now
-
-    zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdMaxADCSum', type='TH2F', title=';E ZDC side [TeV];RPD Max ADC Sum (AorC) [ADC counts]',
-                            path='ZDC/ZdcRpdPerSideCorr',
-                            cutmask='RPDSideValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_max_adc_sum_xmax) # try a value for now
-    zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdAmplitudeCalibSum', type='TH2F', title=';E ZDC side [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
-                            path='ZDC/ZdcRpdPerSideCorr',
-                            cutmask='RPDSideValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
-    zdcSideMonToolArr.defineHistogram('zdcEMModuleEnergy, rpdAmplitudeCalibSum', type='TH2F', title=';E EM module AorC [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
-                            path='ZDC/ZdcRpdPerSideCorr',
-                            cutmask='RPDSideValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2., # divide by 2 to make a more zoomed-in plot (not full range)
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
+    # ---------------------------- ZDC-RPD correlations ---------------------------- 
+        zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdMaxADCSum', type='TH2F', title=';E ZDC side [TeV];RPD Max ADC Sum (AorC) [ADC counts]',
+                                path='/EXPERT/ZdcRpdPerSideCorr',
+                                cutmask='RPDSideValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_max_adc_sum_xmax) # try a value for now
+        zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdAmplitudeCalibSum', type='TH2F', title=';E ZDC side [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
+                                path='/EXPERT/ZdcRpdPerSideCorr',
+                                cutmask='RPDSideValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
+        zdcSideMonToolArr.defineHistogram('zdcEMModuleEnergySameSide, rpdAmplitudeCalibSum', type='TH2F', title=';E EM module AorC [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
+                                path='/EXPERT/ZdcRpdPerSideCorr',
+                                cutmask='RPDSideValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2., # divide by 2 to make a more zoomed-in plot (not full range)
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
 
 # --------------------------------------------------------------------------------------------------
 # ------------------------------------- ZDC-module observables ------------------------------------- 
 # --------------------------------------------------------------------------------------------------
 
 
-    zdcModuleMonToolArr = helper.addArray([nSides,nModules],zdcMonAlg,'ZdcModuleMonitor', topPath='ZDC/ZDC/ZdcModule/')
+    zdcModuleMonToolArr = helper.addArray([sides,modules],zdcMonAlg,'ZdcModuleMonitor')
 
     # ---------------------------- ZDC-module status ---------------------------- 
 
     zdcModuleMonToolArr.defineHistogram('zdcStatusBits',title=';;Events',
-                            path='ModuleStatusBits',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleStatusBits',
                             xbins=nZdcStatusBits,xmin=0.0,xmax=nZdcStatusBits,opt='kVec',
                             xlabels=['PulseBit', 'LowGainBit', 'FailBit', 'HGOverflowBit', 'HGUnderflowBit', 'PSHGOverUnderflowBit', 'LGOverflowBit', 'LGUnderflowBit', 'PrePulseBit', 'PostPulseBit', 'FitFailedBit', 'BadChisqBit', 'BadT0Bit', 'ExcludeEarlyLGBit', 'ExcludeLateLGBit', 'preExpTailBit', 'FitMinAmpBit', 'RepassPulseBit'])
 
     # ---------------------------- ZDC-module amplitudes & amplitude fractions ---------------------------- 
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
-                            path='ModuleAmp',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
+                            path='/SHIFT/ZDC/ZdcModule/ModuleAmp',
+                            xbins=n_energy_bins_default * 2,xmin=0.0,xmax=module_amp_xmax)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC',title=';Module Max ADC;Events',
-                            path='ModuleAmp',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmp',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_LG',title=';Module Amplitude LG [ADC Counts];Events',
-                            path='ModuleAmp',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmp',
                             cutmask='zdcModuleLG', # require to use LG
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10',title=';LG-Refit Amplitude * 10. [ADC Counts];Events',
-                            path='ModuleAmp',
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
-    
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_halfrange',title=';Module Amplitude [ADC Counts];Events',
-                            path='ModuleAmp',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
+    if (zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10',title=';LG-Refit Amplitude * 10. [ADC Counts];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmp',
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
+        
+    if (not zdcMonAlg.IsOnline and not zdcMonAlg.IsInjectedPulse): # only offline
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_halfrange',title=';Module Amplitude [ADC Counts];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmp',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
     
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp;zdcModuleAmp_HG',title=';Module Amplitude HG [ADC Counts];Events',
-                            path='ModuleAmp', 
+                            path='/EXPERT/ZDC/ZdcModule/ModuleAmp', 
                             cutmask='zdcModuleHGValid',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC;zdcModuleMaxADC_HG',title=';Module Max ADC HG;Events',
-                            path='ModuleAmp', 
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
+    if (zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC;zdcModuleMaxADC_HG',title=';Module Max ADC HG;Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmp', 
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
+        zdcModuleMonToolArr.defineHistogram('zdcModuleMaxADC,zdcModuleAmpToMaxADCRatio;zdcModuleAmpToMaxADCRatio_vs_zdcModuleMaxADC_profile',type='TProfile',title=';Module Max ADC HG;Avg Amp/Max ADC',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmp', 
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_FPGA_max_ADC)
     
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
-                            path='ModuleFraction',
-                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
-                            path='ModuleFraction',
-                            cutmask='zdcAbove20NCurrentSide',
-                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
-    zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
-                            path='ModuleFraction',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax / 2.,
-                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
-    zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcUncalibSumCurrentSide_zoomedin', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
-                            path='ModuleFraction',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
+    # ---------------------------- ZDC-module amplitude fractions & correlations with energy deposits ---------------------------- 
+    
+    if (zdcMonAlg.IsInjectedPulse): # no real energy deposit --> do not require minimum ZDC energy
+        zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
+                                path='/SHIFT/ZDC/ZdcModule/ModuleFraction',
+                                xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
+    else:
+        zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above_cut',title=';Module Amplitude Fraction;Events',
+                                path='/SHIFT/ZDC/ZdcModule/ModuleFraction',
+                                cutmask='zdcEnergyAboveModuleFractCut',
+                                xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
+        zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcEnergySum_fullrange', type='TH2F', title=';ZDC Energy Sum Current Side [GeV];Module Amplitude Fraction',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleFraction',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
+                                ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
+        zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcEnergySum_profile', type='TProfile', title=';ZDC Energy Sum Current Side [GeV];Module Amplitude Fraction',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleFraction',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax)
+        zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcEnergySum_zoomedin', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleFraction',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=10000,
+                                ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
+        if (not zdcMonAlg.IsOnline): # only offline
+            zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleFraction',
+                                    xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
+            zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
+                                    path='/EXPERT/ZDC/ZdcModule/ModuleFraction',
+                                    cutmask='zdcAbove20NCurrentSide',
+                                    xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
-                            path='ModuleCalibAmp',
-                            xbins=2*n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax) # 2.5TeV * 40
-    zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp;zdcModuleCalibAmp_halfrange',title=';Module Calibrated Amplitude [GeV];Events',
-                            path='ModuleCalibAmp',
-                            xbins=2*n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2.) # 2.5TeV * 40
+    if (not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleCalibAmp',
+                                xbins=2*n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax) # 2.5TeV * 40
+        
+    if (not zdcMonAlg.IsOnline and not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp;zdcModuleCalibAmp_halfrange',title=';Module Calibrated Amplitude [GeV];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleCalibAmp',
+                                xbins=2*n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2.) # 2.5TeV * 40
+
+    # ---------------------------- ZDC-module reco amplitude versus input voltage ---------------------------- 
+    if (zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp', type='TH2F', title='Pulse amp [V];Signal Amp [ADC Counts];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpVsInputVoltage',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max,
+                                ybins=n_energy_bins_default,ymin=0.0,ymax=module_amp_xmax)
+
+        zdcModuleMonToolArr.defineHistogram('injectedPulseInputVoltage,zdcModuleAmp;zdcModuleAmp_vs_injectedPulseInputVoltage_profile', type='TProfile', title='Pulse amp [V];Signal Amp [ADC Counts];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpVsInputVoltage',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=pulse_voltage_max)
 
     # ---------------------------- ZDC-module times ---------------------------- 
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime',title=';Module Time [ns];Events',
-                            path='ModuleTime',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleTime',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
-
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0',title=';Module FitT0 [ns];Events',
-                            path='ModuleFitT0',
-                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_LG',title=';Module FitT0 LG [ns];Events',
-                            path='ModuleFitT0',
-                            cutmask='zdcModuleLG',                            
-                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
-    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_HG',title=';Module FitT0 HG [ns];Events',
-                            path='ModuleFitT0',
-                            cutmask='zdcModuleHG',
-                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
-
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_LG',title=';Module Time [ns];Events',
-                            path='ModuleTime',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleTime',
                             cutmask='zdcModuleLG',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
     zdcModuleMonToolArr.defineHistogram('zdcModuleTime;zdcModuleTime_HG',title=';Module Time [ns];Events',
-                            path='ModuleTime',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleTime',
                             cutmask='zdcModuleHG',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0',title=';Module FitT0 [ns];Events',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleFitT0',
+                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_LG',title=';Module FitT0 LG [ns];Events',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleFitT0',
+                            cutmask='zdcModuleLG',                            
+                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFitT0;zdcModuleFitT0_HG',title=';Module FitT0 HG [ns];Events',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleFitT0',
+                            cutmask='zdcModuleHG',
+                            xbins=n_time_centroid_bins_default,xmin=0.0,xmax=time_in_data_buffer)
+
     
-    zdcModuleMonToolArr.defineHistogram('zdcModuleCalibTime',title=';Module Calibrated Time [ns];Events',
-                            path='ModuleCalibTime',
-                            xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
+    if (not zdcMonAlg.IsOnline and not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleCalibTime',title=';Module Calibrated Time [ns];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleCalibTime',
+                                xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
     
     # ---------------------------- ZDC-module pulse-fitting chi squares (pulse fitting goodness) ---------------------------- 
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisq',title=';Module Chi-square;Events',
-                            path='ModuleChisq',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleChisq',
                             weight='zdcModuleChisqEventWeight',
                             xbins=create_log_bins(module_chisq_min, module_chisq_max, module_chisq_nbins))
     zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp',title=';Module Chi-square / Amplitude;Events',
-                            path='ModuleChisq',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleChisq',
                             weight='zdcModuleChisqOverAmpEventWeight',
                             xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleChisqOverAmp',type='TH2F',title=';Module Amplitude [ADC Counts];Module Chi-square / Amplitude',
-                            path='ModuleChisq',
-                            weight='zdcModuleChisqOverAmpEventWeight',
-                            # xbins=create_log_bins(module_chisq_over_amp_min, module_amp_xmax./2., module_chisq_over_amp_nbins),
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.,
-                            ybins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
-    zdcModuleMonToolArr.defineHistogram('zdcModuleChisq;zdcModuleChisq_unweighted',title=';Module Chi-square;Events',
-                            path='ModuleChisq',
-                            xbins=create_log_bins(module_chisq_min, module_chisq_max, module_chisq_nbins))
-    zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp;zdcModuleChisqOverAmp_unweighted',title=';Module Chi-square / Amplitude;Events',
-                            path='ModuleChisq',
-                            xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
+    if (not zdcMonAlg.IsOnline):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleChisqOverAmp',type='TH2F',title=';Module Amplitude [ADC Counts];Module Chi-square / Amplitude',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleChisq',
+                                weight='zdcModuleChisqOverAmpEventWeight',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.,
+                                ybins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, module_chisq_over_amp_nbins))
 
 
     # ---------------------------- LG & HG comparisons ---------------------------- 
-    # zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatio',title=';Module Amplitude [ADC Counts];Events',
-    #                         path='ModuleHGLGCompr',
-    #                         cutmask='zdcModuleHGValid',
-    #                         xbins=n_HG_LG_amp_ratio_bins,xmin=0.6,xmax=1.4)
+    zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGAmpRatio',title=';Module Amplitude [ADC Counts];Events',
+                            path='/SHIFT/ZDC/ZdcModule/ModuleHGLGCompr',
+                            cutmask='zdcModuleHGValid',
+                            xbins=n_HG_LG_amp_ratio_bins,xmin=0.6,xmax=1.4)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC HG Amplitude [ADC Counts];HG-to-LG Amplitude Raio;Events',
-                            path='ModuleHGLGCompr',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
                             cutmask='zdcModuleHGValid',
                             xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic,
                             ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC LG Amplitude * 10. [ADC Counts];HG-to-LG Amplitude Raio;Events',
-                            path='ModuleHGLGCompr',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp, zdcModuleHGtoLGAmpRatio;zdcModuleHGtoLGAmpRatio_vs_zdcModuleAmp_profile', type='TProfile', title=';ZDC HG Amplitude [ADC Counts];Average HG-to-LG Amplitude Raio;Events',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
                             cutmask='zdcModuleHGValid',
-                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic,
-                            ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
+                            xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff',title=';HG-LG T0 Difference [ns];Events',
-                            path='ModuleHGLGCompr',
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_HG_LG_time_diff_bins,xmin=-10.0,xmax=10.0)
+    if (not zdcMonAlg.IsOnline):
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';ZDC LG Amplitude * 10. [ADC Counts];HG-to-LG Amplitude Raio;Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic,
+                                ybins=n_HG_LG_amp_ratio_bins,ymin=0.7,ymax=1.3)
+        zdcModuleMonToolArr.defineHistogram('zdcModuleAmpLGRefitTimes10, zdcModuleHGtoLGAmpRatio;zdcModuleHGtoLGAmpRatio_vs_zdcModuleAmpLGRefitTimes10_profile', type='TProfile', title=';ZDC LG Amplitude * 10. [ADC Counts];Average HG-to-LG Amplitude Raio;Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_module_amp_fine_bins, xmin=0.0, xmax=module_HG_ampl_realistic)
 
-    zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';HG-LG T0 Difference [ns];HG-to-LG Amplitude Raio;Events',
-                            path='ModuleHGLGCompr',
-                            cutmask='zdcModuleHGValid',
-                            xbins=n_HG_LG_time_diff_bins,xmin=2.0,xmax=4.0, # zoomed in to see potential correlations
-                            ybins=n_HG_LG_amp_ratio_bins,ymin=0.9,ymax=1.2)
+        zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff',title=';HG-LG T0 Difference [ns];Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_HG_LG_time_diff_bins,xmin=-10.0,xmax=10.0)
+
+        zdcModuleMonToolArr.defineHistogram('zdcModuleHGtoLGT0Diff, zdcModuleHGtoLGAmpRatio', type='TH2F', title=';HG-LG T0 Difference [ns];HG-to-LG Amplitude Raio;Events',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleHGLGCompr',
+                                cutmask='zdcModuleHGValid',
+                                xbins=n_HG_LG_time_diff_bins,xmin=2.0,xmax=4.0, # zoomed in to see potential correlations
+                                ybins=n_HG_LG_amp_ratio_bins,ymin=0.9,ymax=1.2)
 
 
     # ---------------------------- LB and BCID-dep ZDC-module-level observables ---------------------------- 
     # ---------------------------- ZDC-module amplitudes ---------------------------- 
 
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleAmp;zdcModuleAmp_vs_lb', type='TH2F', title=';lumi block;Module Amplitude [ADC counts]',
-                            path='ModuleAmpLBdep',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_amp_1Nmonitor_xmax)
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibAmp;zdcModuleCalibAmp_vs_lb', type='TH2F', title=';lumi block;Module Calib Amplitude',
-                            path='ModuleCalibAmpLBdep',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleFract;zdcModuleFract_above20N_vs_lb', type='TH2F',title=';lumi block;Module Amplitude Fraction',
-                            path='ModuleFractionLBdep',
-                            cutmask='zdcAbove20NCurrentSide',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
+    if (not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleCalibAmp;zdcModuleCalibAmp_vs_lb', type='TH2F', title=';lumi block;Module Calib Amplitude',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleCalibAmpLBdep',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
+    if (not zdcMonAlg.IsOnline):
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleAmp;zdcModuleAmp_vs_lb', type='TH2F', title=';lumi block;Module Amplitude [ADC counts]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleAmpLBdep',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_amp_1Nmonitor_xmax)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleFract;zdcModuleFract_above20N_vs_lb', type='TH2F',title=';lumi block;Module Amplitude Fraction',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleFractionLBdep',
+                                cutmask='zdcAbove20NCurrentSide',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
 
-    zdcModuleMonToolArr.defineHistogram('bcid, zdcModuleCalibAmp', type='TH2F', title=';BCID;Module Calib Amplitude',
-                            path='ModuleCalibAmpBCIDdep',
-                            xbins=bcid_max,xmin=0.0,xmax=bcid_max,
-                            ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
+    if (not zdcMonAlg.IsOnline and not zdcMonAlg.IsInjectedPulse):
+        zdcModuleMonToolArr.defineHistogram('bcid, zdcModuleCalibAmp', type='TH2F', title=';BCID;Module Calib Amplitude',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleCalibAmpBCIDdep',
+                                xbins=bcid_max,xmin=0.0,xmax=bcid_max,
+                                ybins=n_module_amp_coarse_bins, ymin=0.0, ymax=module_calib_amp_1Nmonitor_xmax)
 
     # ---------------------------- ZDC-module times ---------------------------- 
 
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
-                            path='ModuleTimeLBdep',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_LG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
-                            path='ModuleTimeLBdep',
+    if (not zdcMonAlg.IsOnline): #offline - fine binnings
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_LG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleLG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleHG',
+                                xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+    else: #online - coarse binnings
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_LG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleLG',
+                                xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+        zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
+                                path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
+                                cutmask='zdcModuleHG',
+                                xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
+                                ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+
+    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_LG_vs_lb_profile', type='TProfile', title=';lumi block;Module Time [ns]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
                             cutmask='zdcModuleLG',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
-    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb', type='TH2F', title=';lumi block;Module Time [ns]',
-                            path='ModuleTimeLBdep',
+                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max)
+    zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleTime;zdcModuleTime_HG_vs_lb_profile', type='TProfile', title=';lumi block;Module Time [ns]',
+                            path='/EXPERT/ZDC/ZdcModule/ModuleTimeLBdep',
                             cutmask='zdcModuleHG',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_time_centroid_bins_default, ymin=-10.0, ymax=10.0)
+                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max)
 
 # --------------------------------------------------------------------------------------------------
 # ------------------------------------ RPD-channel observables ------------------------------------- 
 # --------------------------------------------------------------------------------------------------
 
-    rpdChannelMonToolArr = helper.addArray([nSides,nChannels],zdcMonAlg,'RpdChannelMonitor', topPath='ZDC/RPD/RPDChannel/')
+    if (zdcMonAlg.EnableRPDAmp):
 
-    rpdChannelMonToolArr.defineHistogram('RPDStatusBits',title=';;Events',
-                            path='StatusBits',
-                            xbins=nRpdStatusBits,xmin=0,xmax=nRpdStatusBits,opt='kVec',
-                            xlabels=['ValidBit', 'OutOfTimePileupBit', 'OverflowBit', 'PrePulseBit', 'PostPulseBit', 'NoPulseBit', 'BadAvgBaselineSubtrBit', 'InsufficientPileupFitPointsBit', 'PileupStretchedExpFitFailBit', 'PileupStretchedExpGrowthBit', 'PileupBadStretchedExpSubtrBit', 'PileupExpFitFailBit', 'PileupExpGrowthBit', 'PileupBadExpSubtrBit', 'PileupStretchedExpPulseLike'])
+        rpdChannelMonToolArr = helper.addArray([sides,channels],zdcMonAlg,'RpdChannelMonitor')
 
-    rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib', title=';RPD Channel Calibrated Amplitude;Events',
-                            path='CalibAmp',
-                            cutmask='RPDChannelValid',
-                            xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_halfrange', title=';RPD Channel Calibrated Amplitude;Events',
-                            path='CalibAmp',
-                            cutmask='RPDChannelValid',
-                            xbins=n_rpd_amp_bins_half_range,xmin=rpd_channel_amp_min,xmax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('RPDChannelSubAmp', title=';RPD Channel Subtracted Amplitude;Events',
-                            path='SubAmp',
-                            cutmask='RPDChannelCentroidValid',
-                            xbins=n_rpd_sub_amp_bins,xmin=rpd_sub_amp_min,xmax=rpd_sub_amp_max) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC', title=';Max ADC [ADC Counts];Events',
-                            path='MaxADC',
-                            cutmask='RPDChannelValid',
-                            xbins=n_energy_bins_default,xmin=0.0,xmax=4096.0)
-    rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
-                            path='CalibAmpLBdep',
-                            cutmask='RPDChannelValid',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_rpd_amp_bins_full_range,ymin=rpd_channel_amp_min,ymax=module_amp_xmax) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_halfrange_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
-                            path='CalibAmpLBdep',
-                            cutmask='RPDChannelValid',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_rpd_amp_bins_half_range,ymin=rpd_channel_amp_min,ymax=module_amp_xmax / 2.) # NOT energy calibration - calibration factor is 1 for now
-    rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelMaxADC;RPDChannelMaxADC_vs_lb', type='TH2F', title=';lumi block;Max ADC [ADC Counts]',
-                            path='MaxADCLBdep',
-                            cutmask='RPDChannelValid',
-                            xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
+    # ---------------------------- amplitudes ---------------------------- 
+        rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib', title=';RPD Channel Calibrated Amplitude;Events',
+                                path='/SHIFT/RPD/RPDChannel/CalibAmp',
+                                cutmask='RPDChannelValid',
+                                xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=rpd_sum_adc_max) # NOT energy calibration - calibration factor is 1 for now
+        rpdChannelMonToolArr.defineHistogram('RPDChannelMaxADC', title=';Max ADC [ADC Counts];Events',
+                                path='/EXPERT/RPD/RPDChannel/MaxADC',
+                                cutmask='RPDChannelValid',
+                                xbins=n_energy_bins_default,xmin=0.0,xmax=4096.0)
+
+        if (not zdcMonAlg.IsOnline):
+            rpdChannelMonToolArr.defineHistogram('RPDChannelSubAmp', title=';RPD Channel Subtracted Amplitude;Events',
+                                    path='/EXPERT/RPD/RPDChannel/SubAmp',
+                                    cutmask='RPDChannelCentroidValid',
+                                    xbins=n_rpd_sub_amp_bins,xmin=rpd_sub_amp_min,xmax=rpd_sub_amp_max) # NOT energy calibration - calibration factor is 1 for now
+
+        # max ADC versus sum ADC
+        if (not zdcMonAlg.IsOnline):
+            rpdChannelMonToolArr.defineHistogram('RPDChannelAmplitudeCalib,RPDChannelMaxADC', type='TH2F', title=';Sum ADC [ADC Counts];Max ADC [ADC Counts]',
+                                    path='/EXPERT/RPD/RPDChannel/MaxADCVsSumADC',
+                                    cutmask='RPDChannelValid',
+                                    xbins=n_rpd_amp_bins_full_range,xmin=rpd_channel_amp_min,xmax=rpd_sum_adc_max, #change to xmax=20000 for zoomed in
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0) # change to ymax=3000.0 for zoomed in
+    # ---------------------------- timing (max sample) ---------------------------- 
+        rpdChannelMonToolArr.defineHistogram('RPDChannelMaxSample', title=';Max Sample;Events',
+                                path='/EXPERT/RPD/RPDChannel/MaxSample',
+                                cutmask='RPDChannelValid',
+                                xbins=24,xmin=0.0,xmax=24.)
+
+
+    # ---------------------------- status bits ---------------------------- 
+        rpdChannelMonToolArr.defineHistogram('RPDStatusBits',title=';;Events',
+                                path='/EXPERT/RPD/RPDChannel/StatusBits',
+                                xbins=nRpdStatusBits,xmin=0,xmax=nRpdStatusBits,opt='kVec',
+                                xlabels=['ValidBit', 'OutOfTimePileupBit', 'OverflowBit', 'PrePulseBit', 'PostPulseBit', 'NoPulseBit', 'BadAvgBaselineSubtrBit', 'InsufficientPileupFitPointsBit', 'PileupStretchedExpFitFailBit', 'PileupStretchedExpGrowthBit', 'PileupBadStretchedExpSubtrBit', 'PileupExpFitFailBit', 'PileupExpGrowthBit', 'PileupBadExpSubtrBit', 'PileupStretchedExpPulseLike'])
+
+        rpdChannelMonToolArr.defineHistogram('RPDChannelValidBitFloat;RPDChannelValidBit',title='RPD Channel valid bit;;Events',
+                                path='/SHIFT/RPD/RPDChannel/StatusBits',
+                                xbins=2,xmin=0,xmax=2,
+                                xlabels=['Valid','Invalid'])
+
+    # ---------------------------- LB dependence ---------------------------- 
+        if (not zdcMonAlg.IsOnline): #offline
+            rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
+                                    path='/EXPERT/RPD/RPDChannel/CalibAmpLBdep',
+                                    cutmask='RPDChannelValid',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_rpd_amp_bins_full_range,ymin=rpd_channel_amp_min,ymax=rpd_sum_adc_max) # NOT energy calibration - calibration factor is 1 for now
+            rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelMaxADC;RPDChannelMaxADC_vs_lb', type='TH2F', title=';lumi block;Max ADC [ADC Counts]',
+                                    path='/EXPERT/RPD/RPDChannel/MaxADCLBdep',
+                                    cutmask='RPDChannelValid',
+                                    xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
+        else: #online
+            rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelAmplitudeCalib;RPDChannelAmplitudeCalib_vs_lb', type='TH2F', title=';lumi block;RPD Channel Calibrated Amplitude',
+                                    path='/EXPERT/RPD/RPDChannel/CalibAmpLBdep',
+                                    cutmask='RPDChannelValid',
+                                    xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_rpd_amp_bins_full_range,ymin=rpd_channel_amp_min,ymax=rpd_sum_adc_max) # NOT energy calibration - calibration factor is 1 for now
+            rpdChannelMonToolArr.defineHistogram('lumiBlock, RPDChannelMaxADC;RPDChannelMaxADC_vs_lb', type='TH2F', title=';lumi block;Max ADC [ADC Counts]',
+                                    path='/EXPERT/RPD/RPDChannel/MaxADCLBdep',
+                                    cutmask='RPDChannelValid',
+                                    xbins=n_lumi_block_bins_coarse,xmin=0.0,xmax=lumi_block_max,
+                                    ybins=n_energy_bins_default,ymin=0.0,ymax=4096.0)
 
 
     ### STEP 6 ###
@@ -677,7 +754,7 @@ if __name__=='__main__':
     cfg = MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
 
-    run_type = "PbPb2023"
+    run_type = 'Injector2024' if flags.Input.TriggerStream == 'calibration_ZDCInjCalib' or flags.Input.TriggerStream == 'calibration_DcmDummyProcessor' else 'PbPb2023'
 
     zdcMonitorAcc = ZdcMonitoringConfig(flags, run_type)
     cfg.merge(zdcMonitorAcc)
