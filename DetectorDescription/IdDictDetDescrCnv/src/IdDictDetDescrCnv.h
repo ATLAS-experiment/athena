@@ -14,12 +14,10 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
- * $Id: IdDictDetDescrCnv.h,v 1.8 2009-02-15 13:08:19 schaffer Exp $
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
 
-#include "AthenaBaseComps/AthMessaging.h"
 #include "DetDescrCnvSvc/DetDescrConverter.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "IdDictParser/IdDictParser.h"
@@ -41,7 +39,7 @@ class IdDictManager;
  *
  */
 
-class IdDictDetDescrCnv : public DetDescrConverter, public AthMessaging {
+class IdDictDetDescrCnv : public DetDescrConverter {
    public:
     virtual long int repSvcType() const override;
     virtual StatusCode initialize() override;
