@@ -7,6 +7,8 @@
 inputBS=$1
 dcubeRef=$2
 lastref_dir=$3
+conditions=$4
+geotag=$5
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_data_baseline.xml
@@ -18,8 +20,8 @@ run  Reco_tf.py \
   --inputBSFile "$inputBS" \
   --maxEvents 1000 \
   --autoConfiguration everything \
-  --conditionsTag   'CONDBR2-BLKPA-RUN2-11' \
-  --geometryVersion="ATLAS-R2-2016-01-00-01" \
+  --conditionsTag   "$conditions" \
+  --geometryVersion "$geotag" \
   --outputAODFile   physval.AOD.root \
   --steering        doRAWtoALL \
   --checkEventCount False \
