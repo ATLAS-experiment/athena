@@ -18,7 +18,7 @@ namespace InDet {
   ////////////////
   InDetEtaDependentCutsSvc::InDetEtaDependentCutsSvc(const std::string& name, 
                                                      ISvcLocator* sl):
-    AthService(name, sl)
+    base_class(name, sl)
     {}
 
     ///////////////
@@ -27,19 +27,6 @@ namespace InDet {
     InDetEtaDependentCutsSvc::~InDetEtaDependentCutsSvc() = default;
     
     
-    ///////////////
-    // queryInterface
-    ///////////////
-    StatusCode InDetEtaDependentCutsSvc::queryInterface(const InterfaceID& riid, void** ppvIF) {
-      if( IID_IInDetEtaDependentCutsSvc == riid ) {
-        *ppvIF = dynamic_cast< IInDetEtaDependentCutsSvc* >(this); 
-      } else{ 
-        return AthService::queryInterface(riid, ppvIF); 
-      }
-      addRef();
-      return StatusCode::SUCCESS; 
-    }
-
     ///////////////
     // Initialize
     ///////////////

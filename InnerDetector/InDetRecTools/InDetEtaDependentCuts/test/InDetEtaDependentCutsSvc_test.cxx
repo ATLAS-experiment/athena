@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,9 +49,8 @@ BOOST_AUTO_TEST_SUITE(EtaDependentCutsSvcTest)
     BOOST_TEST (idEDCSvc.retrieve().isSuccess());
   }
   BOOST_AUTO_TEST_CASE( interfaceID ){
-    InterfaceID testId("IInDetEtaDependentCutsSvc",1,0);
     ServiceHandle<IInDetEtaDependentCutsSvc> idEDCSvc ("InDet::InDetEtaDependentCutsSvc", "test");
-    BOOST_TEST(idEDCSvc->interfaceID()==testId);
+    BOOST_TEST(idEDCSvc->interfaceID()==IInDetEtaDependentCutsSvc::interfaceID());
   }
   
   BOOST_AUTO_TEST_CASE(publicMethods){

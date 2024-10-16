@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef INDETETADEPENDENTCUTS_INDETETADEPENDENTCUTSSVC_H
 #define INDETETADEPENDENTCUTS_INDETETADEPENDENTCUTSSVC_H
@@ -19,7 +19,7 @@
 
 namespace InDet {
   class InDetEtaDependentCutsSvc final
-    : virtual public IInDetEtaDependentCutsSvc, public AthService
+    : public extends<AthService, IInDetEtaDependentCutsSvc>
   {
     /////////////////////////////////////////////////////////////////// 
     // Public methods: 
@@ -31,8 +31,6 @@ namespace InDet {
       
       /// Destructor: 
       virtual ~InDetEtaDependentCutsSvc() override final; 
-      
-      virtual StatusCode queryInterface(const InterfaceID& riid, void** ppvIF) final; 
       
       StatusCode  initialize() override final;
       StatusCode  finalize() override final;
