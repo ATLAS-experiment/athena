@@ -18,6 +18,8 @@
 
 #include "xAODTruth/TruthVertex.h"
 
+#include <fstream>
+
 using namespace Acts::UnitLiterals;
 
 //Struct that is passed as an actor to ACTS that records all state information during propagation
