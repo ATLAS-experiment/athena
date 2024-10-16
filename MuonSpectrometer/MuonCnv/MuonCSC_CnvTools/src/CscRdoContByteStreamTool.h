@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCSC_CNVTOOLS_CSCRDOCONTRAWEVENTTOOL_H
@@ -50,10 +50,9 @@ namespace Muon {
 
         ServiceHandle<ByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamCnvSvc", "ByteStreamCnvSvc"};
 
+        ServiceHandle<CSCcablingSvc> m_cabling{this, "CablingSvc", "CSCcablingSvc"};
+
         uint16_t m_rodVersion{};
-
-        CSCcablingSvc* m_cabling{};
-
         bool m_isCosmic{};
         bool m_isOldCosmic{};
     };
