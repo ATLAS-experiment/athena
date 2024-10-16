@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EC::PresamplerGeometry
@@ -60,13 +60,22 @@ namespace LArG4 {
     {
       // Access the GeoModelSvc:
       ISvcLocator *svcLocator = Gaudi::svcLocator();
-      IGeoModelSvc *geoModel(nullptr);
-      ATH_CHECK(svcLocator->service ("GeoModelSvc",geoModel));
-      IGeoDbTagSvc *geoDbTagSvc(nullptr);
-      ATH_CHECK(svcLocator->service ("GeoDbTagSvc",geoDbTagSvc));
+      SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+      if (!geoModel) {
+        ATH_MSG_ERROR ("Failed to find GeoModelSvc");
+        return StatusCode::FAILURE;
+      }
+      SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service ("GeoDbTagSvc")};
+      if (!geoDbTagSvc) {
+        ATH_MSG_ERROR ("Failed to find GeoDbTagSvc");
+        return StatusCode::FAILURE;
+      }
       // Access the geometry database:
-      IRDBAccessSvc *pAccessSvc(nullptr);
-      ATH_CHECK(svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc));
+      SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+      if (!pAccessSvc) {
+        ATH_MSG_ERROR ("Failed to find " << geoDbTagSvc->getParamSvcName());
+        return StatusCode::FAILURE;
+      }
       // Obtain the geometry version information:
       const std::string AtlasVersion = geoModel->atlasVersion();
       

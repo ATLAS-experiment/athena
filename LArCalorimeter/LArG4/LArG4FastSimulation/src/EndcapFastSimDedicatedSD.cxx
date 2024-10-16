@@ -50,27 +50,27 @@ EndcapFastSimDedicatedSD::EndcapFastSimDedicatedSD(StoreGateSvc* detStore, bool 
 
   ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-  // Access the GeoModelSvc:                                                                                                                                                         
-  IGeoModelSvc *geoModel=nullptr;
-  if (svcLocator->service ("GeoModelSvc",geoModel) !=StatusCode::SUCCESS) {
+  // Access the GeoModelSvc:
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+  if ( !geoModel ) {
     G4Exception(
-		"LArWheelSliceSolid", "AccessGeoModel", FatalException,
-		"createSolid cannot access GeoModelSvc");
+                "LArWheelSliceSolid", "AccessGeoModel", FatalException,
+                "createSolid cannot access GeoModelSvc");
   }
 
-  IGeoDbTagSvc *geoDbTagSvc(nullptr);
-  if ( svcLocator->service ("GeoDbTagSvc",geoDbTagSvc)!=StatusCode::SUCCESS ) {
+  SmartIF<IGeoDbTagSvc> geoDbTagSvc{svcLocator->service ("GeoDbTagSvc")};
+  if ( !geoDbTagSvc ) {
     G4Exception(
-		"LArWheelSliceSolid", "AccessDbTagSvc", FatalException,
-		"createSolid cannot access DbTagSvc");
+                "LArWheelSliceSolid", "AccessDbTagSvc", FatalException,
+                "createSolid cannot access DbTagSvc");
   }
 
-  // Access the geometry database:                                                                                                                                                   
-  IRDBAccessSvc *pAccessSvc=nullptr;
-  if ( svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc)!=StatusCode::SUCCESS) {
+  // Access the geometry database:
+  SmartIF<IRDBAccessSvc> pAccessSvc{svcLocator->service(geoDbTagSvc->getParamSvcName())};
+  if ( !pAccessSvc ) {
     G4Exception(
-		"LArWheelSliceSolid", "AccessAccessSvc", FatalException,
-		"createSolid cannot access AccessSvc");
+                "LArWheelSliceSolid", "AccessAccessSvc", FatalException,
+                "createSolid cannot access AccessSvc");
   }
 
   DecodeVersionKey larVersionKey(geoModel, "LAr");
@@ -171,7 +171,7 @@ void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
                        << regionIndex
                        << etaIndex
                        << phiBin;
-        // call process to add this to the collection 
+        // call process to add this to the collection
         SimpleHit(m_larID, spot.GetTime(), spot.GetEnergy());
         return;
       }

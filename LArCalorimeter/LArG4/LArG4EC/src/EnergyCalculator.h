@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator.h
@@ -31,9 +31,13 @@
 #include "LArG4Code/LArG4Identifier.h"
 #include "LArG4Code/LArCalculatorSvcImp.h"
 #include "LArG4Code/LArG4EnumDefs.h"
+#include "LArG4Code/ILArCalibCalculatorSvc.h"
 
 #include "GeoSpecialShapes/LArWheelCalculator.h"
 #include "GeoSpecialShapes/LArWheelCalculatorEnums.h"
+
+#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 #include "G4ThreeVector.hh"
 #include "HVHelper.h"
@@ -94,7 +98,7 @@ namespace LArG4 {
       }
       G4double distance_to_the_nearest_electrode_Barrett(const G4ThreeVector &p, G4double Barret_PhiStart) const;
 
-      ServiceHandle<ILArCalibCalculatorSvc> m_supportCalculator;
+      ServiceHandle<ILArCalibCalculatorSvc> m_supportCalculator{this, "SupportCalculator", "EMECSupportCalibrationCalculator"};
 
       void SetConst_OuterBarrett(void); // used only for initialization
       G4bool GetVolumeIndex(const G4Step *, G4int &, G4int &) const;
@@ -118,8 +122,8 @@ namespace LArG4 {
       G4double m_rlim[50];    // used as const after init
       G4double m_zlim[4];     // used as const after init
 
-      UnsignedIntegerProperty m_corrProp;
-      EnergyCorrection_t m_correction_type;
+      UnsignedIntegerProperty m_corrProp{8};
+      EnergyCorrection_t m_correction_type{EMEC_ECOR_CHCL1};
 
       G4double (EnergyCalculator::*m_ecorr_method) (G4double, const G4ThreeVector&, const G4ThreeVector&, G4double /*Barret_PhiStart*/) const{};
       G4double dummy_correction_method(G4double e, const G4ThreeVector&, const G4ThreeVector&,
@@ -134,7 +138,8 @@ namespace LArG4 {
       G4double CalculateChargeCollection(G4double, const G4ThreeVector&, const G4ThreeVector&, G4double /*Barret_PhiStart*/) const;
       G4double CalculateChargeCollection1(G4double, const G4ThreeVector&, const G4ThreeVector&, G4double /*Barret_PhiStart*/) const;
 
-      G4double m_GApower;  // used as const after init
+      // get power of gap in signal calculation
+      DoubleProperty m_GApower{this, "EMECGapPower", 1.4};  // used as const after init
       inline G4double GApower() const { return m_GApower; };
 
       // **************************************************************************
@@ -234,8 +239,8 @@ namespace LArG4 {
       };
       void SetFoldArea(G4double, FoldArea & ) const;
 
-      std::string m_HVMapVersion; // used only for initialization
-      G4bool m_DB_HV;
+      StringProperty m_HVMapVersion{this, "EMECHVMap", "v02"}; // used only for initialization
+      BooleanProperty m_DB_HV{this, "EMECHVEnable", false};
 
       static const G4double s_AverageHV;
       static const G4double s_AverageEfield;
@@ -287,7 +292,8 @@ namespace LArG4 {
       G4double GetWeightfromFieldMap(G4int,G4double,G4double, const FoldArea & fa) const;
       G4double HalfLArGapSizeOld(G4double) const;
 
-      G4double m_CHC_Esr;  // used as const after init
+      // pick up surface_suppression_range
+      DoubleProperty m_CHC_Esr{this, "EMECRsr", 0.2*CLHEP::mm};  // used as const after init
       inline G4double CHC_Esr() const { return m_CHC_Esr; };
 
 #ifdef DEBUG_CHCL // non thread-safe debug of charge collection
@@ -308,17 +314,19 @@ namespace LArG4 {
       //  public:
       G4double distance_to_the_nearest_electrode(const G4ThreeVector &p) const;
 
-      UnsignedIntegerProperty m_solidtypeProp;
-      LArG4::LArWheelCalculator_t m_solidtype;
-      int m_zside;
-      LArG4BirksLaw *m_birksLaw;
-      LArWheelCalculator *m_lwc;
+      UnsignedIntegerProperty m_solidtypeProp{0};
+      LArG4::LArWheelCalculator_t m_solidtype{LArG4::InnerAbsorberWheel};
+      IntegerProperty m_zside{this, "zSide", 1};
+      LArG4BirksLaw *m_birksLaw{};
+      LArWheelCalculator *m_lwc{};
       const LArWheelCalculator * lwc() const { return m_lwc; }
 
-      std::string m_suffix;
+      ServiceHandle<IGeoModelSvc> m_geoModel{this, "GeoModelSvc", "GeoModelSvc"};
+      ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc"};
+      StringProperty m_suffix{this, "EMECChMap", "v03"};
 
       // Aug 2007 AMS, lost Aug 2008, restored May 2009
-      LArWheelCalculator *m_electrode_calculator = nullptr;
+      LArWheelCalculator *m_electrode_calculator{};
       const LArWheelCalculator * elc() const { return m_electrode_calculator; }
 
       G4double GetCurrent1(const G4ThreeVector &, const G4ThreeVector &, G4double) const;

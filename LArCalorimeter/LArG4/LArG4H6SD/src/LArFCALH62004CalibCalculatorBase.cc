@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFCALH62004CalibCalculatorBase.h"
@@ -88,13 +88,14 @@ StatusCode LArFCALH62004CalibCalculatorBase::initialize()
   ATH_CHECK(detStore->retrieve(m_ChannelMap));
 
   ISvcLocator  *svcLocator = Gaudi::svcLocator();
-  IRDBAccessSvc* rdbAccess;
-  IGeoModelSvc * geoModel;
-
-  if(svcLocator->service ("GeoModelSvc",geoModel) == StatusCode::FAILURE)
+  SmartIF<IGeoModelSvc> geoModel{svcLocator->service ("GeoModelSvc")};
+  if ( !geoModel ) {
     throw std::runtime_error("Error in FCALConstruction, cannot access GeoModelSvc");
-  if(svcLocator->service ("RDBAccessSvc",rdbAccess) == StatusCode::FAILURE)
+  }
+  SmartIF<IRDBAccessSvc> rdbAccess{svcLocator->service ("RDBAccessSvc")};
+  if ( !rdbAccess ) {
     throw std::runtime_error("Error in FCALConstruction, cannot access RDBAccessSvc");
+  }
   DecodeVersionKey larVersionKey(geoModel, "LAr");
 
   m_fcalMod = rdbAccess->getRecordsetPtr("FCalMod", larVersionKey.tag(),larVersionKey.node());

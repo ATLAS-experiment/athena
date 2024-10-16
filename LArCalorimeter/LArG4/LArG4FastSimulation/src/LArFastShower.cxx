@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFastShower.h"
@@ -92,10 +92,10 @@ IFastSimDedicatedSD* LArFastShower::fastShowerSD()
 
 ILArG4ShowerLibSvc* LArFastShower::showerLibSvc()
 {
-  if (!m_showerLibSvc ) {
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StatusCode sc = svcLocator->service(m_configuration.m_showerLibSvcName, m_showerLibSvc);
-    if (sc.isFailure()) {
+  if ( !m_showerLibSvc ) {
+    SmartIF<ILArG4ShowerLibSvc> smartShowerLibSvc{Gaudi::svcLocator()->service(m_configuration.m_showerLibSvcName)};
+    if ( smartShowerLibSvc ) { m_showerLibSvc = smartShowerLibSvc.get(); }
+    if ( !m_showerLibSvc ) {
       throw std::runtime_error("LArFastShower: cannot retrieve LArG4ShowerLibSvc");
     }
   }
