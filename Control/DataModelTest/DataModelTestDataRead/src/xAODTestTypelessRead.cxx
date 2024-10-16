@@ -47,29 +47,6 @@
 namespace DMTest {
 
 
-/**
- * @brief Constructor.
- * @param name The algorithm name.
- * @param svc The service locator.
- */
-xAODTestTypelessRead::xAODTestTypelessRead (const std::string &name,
-                                            ISvcLocator *pSvcLocator)
-  : AthAlgorithm (name, pSvcLocator),
-    m_count(0)
-{
-  declareProperty ("WritePrefix", m_writePrefix);
-}
-  
-
-/**
- * @brief Algorithm initialization; called at the beginning of the job.
- */
-StatusCode xAODTestTypelessRead::initialize()
-{
-  return StatusCode::SUCCESS;
-}
-
-
 namespace {
 
 
@@ -341,7 +318,7 @@ void copy (DMTest::PLinks& to, const DMTest::PLinks& from)
 
 template <class OBJ, class AUX>
 StatusCode
-xAODTestTypelessRead::testit (const char* key)
+xAODTestTypelessRead::testit (const std::string& key)
 {
   const OBJ* obj = nullptr;
   CHECK( evtStore()->retrieve (obj, key) );
@@ -380,7 +357,7 @@ xAODTestTypelessRead::testit (const char* key)
 
 template <class OBJ>
 StatusCode
-xAODTestTypelessRead::testit_view (const char* key)
+xAODTestTypelessRead::testit_view (const std::string& key)
 {
   const OBJ* obj = nullptr;
   CHECK( evtStore()->retrieve (obj, key) );
@@ -413,24 +390,21 @@ StatusCode xAODTestTypelessRead::execute()
   CHECK(( testit<C,    CInfoAuxContainer> ("cinfo") ));
   CHECK(( testit<CVec, CTrigAuxContainer> ("ctrig") ));
   CHECK(( testit<CVecWithData, CAuxContainer> ("cvecWD") ));
-  CHECK(( testit_view<CView> ("cview") ));
-  CHECK(( testit<PVec, PAuxContainer>     ("pvec") ));
+  if (!m_cviewKey.empty()) {
+    CHECK(( testit_view<CView> (m_cviewKey) ));
+  }
+  if (!m_pvecKey.empty()) {
+    CHECK(( testit<PVec, PAuxContainer>     (m_pvecKey) ));
+  }
   CHECK(( testit<HVec, HAuxContainer>     ("hvec") ));
-  CHECK(( testit_view<HView> ("hview") ));
+  if (!m_hviewKey.empty()) {
+    CHECK(( testit_view<HView> (m_hviewKey) ));
+  }
   CHECK(( testit<JVecContainer, JVecAuxContainer> ("jvecContainer") ));
   CHECK(( testit<JVec, JVecAuxInfo> ("jvecInfo") ));
   CHECK(( testit<PLinksContainer, PLinksAuxContainer> ("plinksContainer") ));
   CHECK(( testit<PLinks, PLinksAuxInfo> ("plinksInfo") ));
 
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Algorithm finalization; called at the end of the job.
- */
-StatusCode xAODTestTypelessRead::finalize()
-{
   return StatusCode::SUCCESS;
 }
 

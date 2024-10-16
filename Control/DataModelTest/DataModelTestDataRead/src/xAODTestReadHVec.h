@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file src/xAODTestReadHVec.h
  * @author scott snyder <snyder@bnl.gov>
@@ -34,12 +31,7 @@ class xAODTestReadHVec
   : public AthReentrantAlgorithm
 {
 public:
-  /**
-   * @brief Constructor.
-   * @param name The algorithm name.
-   * @param svc The service locator.
-   */
-  xAODTestReadHVec (const std::string &name, ISvcLocator *pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   
 
   /**
@@ -54,17 +46,15 @@ public:
   virtual StatusCode execute (const EventContext& ctx) const override;
 
 
-  /**
-   * @brief Algorithm finalization; called at the end of the job.
-   */
-  virtual StatusCode finalize() override;
-
-
 private:
-  SG::ReadHandleKey<DMTest::HVec> m_hvecKey;
-  SG::ReadHandleKey<DMTest::HVec> m_hviewKey;
-  SG::WriteHandleKey<DMTest::HVec> m_vecWriteKey;
-  SG::WriteHandleKey<DMTest::HView> m_viewWriteKey;
+  SG::ReadHandleKey<DMTest::HVec> m_hvecKey
+  { this, "HVecKey", "hvec" };
+  SG::ReadHandleKey<DMTest::HVec> m_hviewKey
+  { this, "HViewKey", "hview" };
+  SG::WriteHandleKey<DMTest::HVec> m_vecWriteKey
+  { this, "VecWriteKey", "" };
+  SG::WriteHandleKey<DMTest::HView> m_viewWriteKey
+  { this, "ViewWriteKey", "" };
 };
 
 

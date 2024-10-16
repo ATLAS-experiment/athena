@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file src/xAODTestTypelessRead.h
  * @author scott snyder <snyder@bnl.gov>
@@ -30,18 +27,7 @@ class xAODTestTypelessRead
   : public AthAlgorithm
 {
 public:
-  /**
-   * @brief Constructor.
-   * @param name The algorithm name.
-   * @param svc The service locator.
-   */
-  xAODTestTypelessRead (const std::string &name, ISvcLocator *pSvcLocator);
-  
-
-  /**
-   * @brief Algorithm initialization; called at the beginning of the job.
-   */
-  virtual StatusCode initialize();
+  using AthAlgorithm::AthAlgorithm;
 
 
   /**
@@ -50,24 +36,26 @@ public:
   virtual StatusCode execute(); 
 
 
-  /**
-   * @brief Algorithm finalization; called at the end of the job.
-   */
-  virtual StatusCode finalize();
-
-
 private:
   template <class OBJ, class AUX>
-  StatusCode testit (const char* key);
+  StatusCode testit (const std::string& key);
 
   template <class OBJ>
-  StatusCode testit_view (const char* key);
-
-  /// Parameter: Prefix for names written to SG.  Null for no write.
-  std::string m_writePrefix;
+  StatusCode testit_view (const std::string& key);
 
   /// Event counter.
-  int m_count;
+  int m_count = 0;
+
+  /// Prefix for names written to SG.  Null for no write.
+  StringProperty m_writePrefix
+    { this, "WritePrefix", "cview", "" };
+
+  StringProperty m_cviewKey
+    { this, "CViewKey", "cview", "" };
+  StringProperty m_pvecKey
+    { this, "PVecKey", "pvec", "" };
+  StringProperty m_hviewKey
+    { this, "HViewKey", "hview", "" };
 };
 
 
