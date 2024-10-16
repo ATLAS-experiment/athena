@@ -11,6 +11,7 @@ from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
 from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+from AthenaConfiguration.Enums import LHCPeriod
 
 PFLOW_JETS = 'AntiKt4EMPFlowJets'
 
