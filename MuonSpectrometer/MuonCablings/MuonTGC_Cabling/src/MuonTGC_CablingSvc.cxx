@@ -66,8 +66,8 @@ StatusCode MuonTGC_CablingSvc::initialize(void)
 { 
   ATH_MSG_INFO("for 1/12 sector initialize");
 
-  StoreGateSvc* detStore=nullptr;
-  ATH_CHECK(serviceLocator()->service("DetectorStore", detStore));
+  SmartIF<StoreGateSvc> detStore{serviceLocator()->service("DetectorStore")};
+  ATH_CHECK(detStore.isValid());
   ATH_CHECK(m_idHelperSvc.retrieve());
 
   // private databases

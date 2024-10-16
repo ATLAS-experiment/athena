@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -39,12 +39,11 @@ StatusCode CSCcablingSvc::initialize() {
   ATH_CHECK( AthService::initialize() );
 
   // Retrieve geometry config information from the database (RUN1, RUN2, etc...)
-  IRDBAccessSvc* rdbAccess = nullptr;
-  ATH_CHECK( service("RDBAccessSvc",rdbAccess) );
+  SmartIF<IRDBAccessSvc> rdbAccess{service("RDBAccessSvc")};
+  ATH_CHECK( rdbAccess.isValid() );
 
-  const IGeoModelSvc* geoModel = nullptr;
-  StatusCode sc = service("GeoModelSvc", geoModel);
-  if (sc.isFailure()) {
+  SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
+  if (!geoModel) {
       ATH_MSG_ERROR( "Could not locate GeoModelSvc"  );
   } else {
       // check the DetDescr version

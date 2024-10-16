@@ -26,12 +26,11 @@ MuonMDT_CablingMap::MuonMDT_CablingMap() {
 
     // retrieve the MdtIdHelper
     ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StoreGateSvc* detStore = nullptr;
-    StatusCode sc = svcLocator->service("DetectorStore", detStore);
-    if (sc != StatusCode::SUCCESS) {
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    if (!detStore) {
         THROW_EXCEPTION("Could not find the detctor store");
     }
-    sc = detStore->retrieve(m_mdtIdHelper, "MDTIDHELPER");
+    StatusCode sc = detStore->retrieve(m_mdtIdHelper, "MDTIDHELPER");
     if (sc != StatusCode::SUCCESS) {
         THROW_EXCEPTION("Could not retrieve the MdtIdHelper");
     }
