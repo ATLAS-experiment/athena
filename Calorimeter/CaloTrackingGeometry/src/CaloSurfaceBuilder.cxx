@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
 // CaloSurfacaBuilder.cxx, (c) ATLAS detector software
 //****************************************************************************
 
-#include "CaloTrackingGeometry/CaloSurfaceBuilder.h"
+#include "CaloSurfaceBuilder.h"
 
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Bootstrap.h"
@@ -56,12 +56,11 @@
 CaloSurfaceBuilder::CaloSurfaceBuilder(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
-  : AthAlgTool(type, name, parent)
+  : base_class(type, name, parent)
   , m_tile_dd(nullptr)
   , m_lar_mat("LArRecoMaterialTool")
   , m_lar_simplegeom("LArRecoSimpleGeomTool")
 {
-  declareInterface<ICaloSurfaceBuilder>(this);
   declareProperty("LArRecoMaterialTool", m_lar_mat);
   declareProperty("LarRecoSimpleGeometryTool", m_lar_simplegeom);
 }
