@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -37,6 +37,9 @@
 #include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
+
+// Pile up
+#include "PileUpTools/PileUpMergeSvc.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -154,7 +157,7 @@ class TileDigitsMaker: public AthReentrantAlgorithm {
     Gaudi::Property<int> m_allChannels{this,
          "AllChannels", -1, "Create all channels, use 0 or 1 or 2 (default=-1 - unset)"};
 
-    PileUpMergeSvc* m_mergeSvc{nullptr}; //!< Pointer to PileUpMergeService
+    ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc"};
 
     const TileID* m_tileID{nullptr};
     const TileTBID* m_tileTBID{nullptr};
