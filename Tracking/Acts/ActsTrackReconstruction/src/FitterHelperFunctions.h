@@ -11,6 +11,7 @@
 // ACTS
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
+#include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // PACKAGE  
 #include "ActsGeometry/ATLASSourceLink.h"
@@ -31,6 +32,15 @@ namespace ActsTrk::FitterHelperFunctions {
                 size_t entryIndex, 
                 const Acts::Logger& logger) {
     Acts::GainMatrixSmoother smoother;
+    return smoother.template operator()<trajectory_t>(gctx, trajectory, entryIndex, logger);
+  }
+
+  template<typename trajectory_t>
+  Acts::Result<void> mbfSmoother(const Acts::GeometryContext& gctx,
+                trajectory_t& trajectory, 
+                size_t entryIndex, 
+                const Acts::Logger& logger) {
+    Acts::MbfSmoother smoother;
     return smoother.template operator()<trajectory_t>(gctx, trajectory, entryIndex, logger);
   }
 
