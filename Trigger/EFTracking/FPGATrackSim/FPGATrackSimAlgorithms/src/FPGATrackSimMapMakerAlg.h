@@ -87,6 +87,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
 	Gaudi::Property<std::string> m_geoTag {this, "GeometryVersion", "ATLAS-P2-ITK-22-02-00", "Geometry tag that this set of maps is for. TODO can we store/read from wrappers?"};
 	Gaudi::Property<bool> m_remapModules {this, "remapModules", false, "Allow maps to be drawn that slice modules more finely, by remapping module indices"};
 	Gaudi::Property<bool> m_drawSlices {this, "drawSlices", false, "Draw the huge 2D slice histograms"};
+    Gaudi::Property<bool> m_insideout {this, "doInsideOut", false, "5 layers pixel-only configuration"};
 
         // Instance of the module remap object.
         FPGATrackSimModuleRelabel* m_moduleRelabel = nullptr;
@@ -209,6 +210,43 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"},{"sb0"},{"sb1"},{"sb2"},{"sb3"},{"sb4"},{"sb5"},{"sb6"},{"sb7"}
             },
         };
+
+        const std::vector <std::vector <std::vector <std::string> > > m_planes_insideout = // inside-out 5 layers pixel only
+         {
+             { // region 0
+                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
+             },
+             { // region 1
+                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}                
+             },
+             { // region 2
+                 {"-1"},{"-1"},{"-1"},{"-1"},{"-1"}
+             },
+             { // region 3
+                 {"pb0", "pe0+","pe1+","pe2+","pe3+","pe4+","pe5+", "pe6+", "pe7+", "pe8+", "pe9+","pe10+","pe11+", "pe12+", "pe13+", "pe14+", "pe15+", "pe16+", },
+                                      {"pb1",   "pe19+",  "pe23+",  "pe25+", },         
+                   {"pb2",  
+                    "pe31+", "pe32+", "pe33+", "pe34+", "pe35+", "pe36+", "pe37+", "pe38+", "pe39+", "pe40+",
+                    "pe41+", "pe42+", "pe43+", "pe44+", "pe45+", "pe46+", 
+                  "pe47+", "pe48+", "pe49+", "pe50+", "pe51+", "pe52+", "pe53+", "pe54+", "pe55+", "pe56+", },
+                   {"pb3",
+                  "pe57+","pe58+","pe59+", "pe60+", "pe61+", "pe62+", "pe63+", "pe64+", "pe65+", "pe66+","pe67+","pe68+","pe69+"},
+                   {"pb4","pe70+","pe71+","pe72+", "pe73+", "pe74+", "pe75+", "pe76+", "pe77+", "pe78+", "pe79+",
+                    "pe80+","pe81+","pe82+", "pe83+", "pe84+", "pe85+", "pe86+", "pe87+", "pe88+", "pe89+",}
+             },
+             { // region 4
+                 {"pe0+"},{"pe1+"},{"pe2+"},{"pe3+"},{"pe4+"}
+             },
+             { // region 5 - same eta as region 0, different phi
+                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
+             },
+             { // region 6 - same eta as region 0, different phi
+                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
+             },
+             { // region 7 - same eta as region 0, different phi
+                 {"pb0"},{"pb1"},{"pb2"},{"pb3"},{"pb4"}
+             },
+         };
 
         std::map <std::string, std::set<int>> m_keylayer; // key layer used in z-slicing, defined by user with KeyString run arg and set using parseKeyString()
         std::map <std::string, std::set<int>> m_keylayer2; // for 2D slicing

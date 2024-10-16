@@ -126,8 +126,7 @@ class FPGATrackSimPlaneMap
                     }
                 }
             }
-            // TMP HACK FIX REMOVE ME
-            return m_map.at(1).at(0).at(0);
+            return m_inValidLayerSection;
         }
 
         const LayerSection & getLayerSection(LayerInfo const & mi) const
@@ -174,6 +173,8 @@ class FPGATrackSimPlaneMap
         // Module relabel object for remapping pixel endcap hits.
         std::unique_ptr<FPGATrackSimModuleRelabel> m_moduleRelabel{};
 
+        // this is used when the getLayerSection needs to return a reference to an invalid LayerSection
+        const LayerSection m_inValidLayerSection{};
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions
