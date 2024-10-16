@@ -16,32 +16,24 @@
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
-class IMessageSvc;
-class LArDetDescrManager;
-
-//<<<<<< INCLUDES >>>>>>
-
-/** This class implements the CaloDetDescr/ICaloRecoSimpleGeomTool and provides the
-    simplified geometry needed for the LAr part of the Calorimeter/CaloTrackingGeometry 
-    volumes.
-
-
- */
+/**
+ *  @class LArRecoSimpleGeomTool
+ *  @brief This class implements the CaloDetDescr/ICaloRecoSimpleGeomTool and provides the
+ *         simplified geometry needed for the LAr part of the Calorimeter/CaloTrackingGeometry 
+ *         volumes.
+ **/
 
 class LArRecoSimpleGeomTool : public extends<AthAlgTool, ICaloRecoSimpleGeomTool>
 {
 public:
   
-  // Constructors:
-
+  // Constructor:
   LArRecoSimpleGeomTool(const std::string& type, 
-		  const std::string& name, 
-		  const IInterface* parent); 
+			const std::string& name,
+			const IInterface* parent);
 
-  virtual ~LArRecoSimpleGeomTool();
-  static const InterfaceID& interfaceID( ) ; 
+  virtual ~LArRecoSimpleGeomTool() = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
   
   /** the enum ALIGNVOL covers all LAr pieces, including cryostats and coil */
   

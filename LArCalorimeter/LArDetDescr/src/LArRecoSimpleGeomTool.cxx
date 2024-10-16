@@ -7,7 +7,7 @@
 // -------------------------------------------------------------
 //****************************************************************************
 
-#include "LArDetDescr/LArRecoSimpleGeomTool.h"
+#include "LArRecoSimpleGeomTool.h"
 
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IService.h"
@@ -102,16 +102,6 @@ LArRecoSimpleGeomTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-LArRecoSimpleGeomTool::~LArRecoSimpleGeomTool()
-{
-}
-
-StatusCode
-LArRecoSimpleGeomTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-  
 bool 
 LArRecoSimpleGeomTool::get_cylinder_surface (CaloSubdetNames::ALIGNVOL alvol,
 			     Amg::Transform3D& htrans,double& hphi,

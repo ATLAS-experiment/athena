@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -14,18 +14,13 @@
 #include "CaloDetDescr/ICaloRecoMaterialTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-//done in the interface : #include "CLHEP/Geometry/Transform3D.h"
-
 class CaloCell_ID;
 class CaloDM_ID;
-class IMessageSvc;
 
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoLogVol.h"
 
 #include <string>
-
-//<<<<<< INCLUDES >>>>>>
 
 /** This class implements the CaloDetDescr/ICaloRecoMaterialTool and provides the average
     materials needed for the LAr part of the Calorimeter/CaloTrackingGeometry volumes.
@@ -40,21 +35,17 @@ class IMessageSvc;
 
  **/
 
-class LArRecoMaterialTool : public AthAlgTool,
-  virtual public ICaloRecoMaterialTool
+class LArRecoMaterialTool : public extends<AthAlgTool, ICaloRecoMaterialTool>
 {
 public:
   
-  // Constructors:
-
+  // Constructor:
   LArRecoMaterialTool(const std::string& type, 
-		  const std::string& name, 
-		  const IInterface* parent); 
+		      const std::string& name,
+		      const IInterface* parent);
 
-  ~LArRecoMaterialTool();
-  static const InterfaceID& interfaceID( ) ; 
+  ~LArRecoMaterialTool() = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
 
   virtual
   bool get_material (CaloSubdetNames::ALIGNVOL alvol, 
@@ -141,8 +132,8 @@ private:
   std::string map_av(CaloSubdetNames::ALIGNVOL alvol);
 
 
-  const CaloCell_ID*        m_calo_id;
-  const CaloDM_ID*          m_dm_id;
+  const CaloCell_ID*        m_calo_id{nullptr};
+  const CaloDM_ID*          m_dm_id{nullptr};
 
   // Store results per ALIGNVOL :
   std::vector<CaloSubdetNames::ALIGNVOL>  m_alignvol_number;
