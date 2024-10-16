@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "ByteStreamData/RawEvent.h" 
-#include "BCM_RawDataByteStreamCnv/BCM_RodDecoder.h"
+#include "BCM_RodDecoder.h"
 #include <inttypes.h>
 #include <atomic>
 

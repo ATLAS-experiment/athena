@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,9 +13,9 @@
 //  Version 00-00-39 05/03/2007 Daniel Dobos for pixels
 ///////////////////////////////////////////////////////////////////
 
-#include "BCM_RawDataByteStreamCnv/BCM_RawContByteStreamCnv.h"
+#include "BCM_RawContByteStreamCnv.h"
 
-#include "BCM_RawDataByteStreamCnv/BCM_RawContByteStreamTool.h"
+#include "BCM_RawContByteStreamTool.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/StorableConversions.h"
@@ -46,8 +46,8 @@ StatusCode BCM_RawContByteStreamCnv::initialize() {
   ATH_CHECK( AthConstConverter::initialize() );
 
   // retrieve Tool
-  IToolSvc* toolSvc = nullptr;
-  ATH_CHECK( service("ToolSvc",toolSvc) );
+  SmartIF<IToolSvc> toolSvc{Gaudi::svcLocator()->service("ToolSvc")};
+  ATH_CHECK( toolSvc.isValid() );
   ATH_CHECK( toolSvc->retrieveTool("BCM_RawContByteStreamTool", m_BCMRawContBSTool) );
   return StatusCode::SUCCESS;
 }

@@ -12,7 +12,7 @@
 //  Version 00-00-11 05/02/2009 Daniel Dobos
 ///////////////////////////////////////////////////////////////////
 
-#include "BCM_RawDataByteStreamCnv/BCM_RodDecoder.h"
+#include "BCM_RodDecoder.h"
 
 #include <cinttypes>
 
