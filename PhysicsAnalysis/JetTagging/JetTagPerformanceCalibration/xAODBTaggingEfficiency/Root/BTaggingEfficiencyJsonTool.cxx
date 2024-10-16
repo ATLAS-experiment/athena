@@ -62,7 +62,15 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   auto& json_config_OP = m_json_config[m_taggerName][m_jetAuthor][m_OP];
   for (auto& label : m_labelMap) {
     std::string labelString = label.second;
-    m_ptMap[labelString] = json_config_OP[labelString]["pt"].get<std::vector<float>>();
+
+    for (const auto& pt : json_config_OP[labelString]["pt"]) {
+      if (pt.is_string() && pt.get<std::string>() == "inf") {
+        m_ptMap[labelString].push_back(std::numeric_limits<float>::infinity());
+      } else {
+        m_ptMap[labelString].push_back(pt.get<float>());
+      }
+    }
+
     m_sfMap[labelString] = json_config_OP[labelString]["nominal"].get<std::vector<float>>();
     for (auto& [systematicName, values] : json_config_OP[labelString]["systematics"].items()){
       m_sysMap[labelString][systematicName] = values.get<std::vector<float>>();

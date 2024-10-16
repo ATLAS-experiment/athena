@@ -59,7 +59,15 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   m_pTbins.clear();
   m_massbins.clear();
   auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
-  m_pTbins = pT_mass_2d_cutvalue["pTbins"].get<std::vector<float>>();;
+
+  for (const auto& pt : pT_mass_2d_cutvalue["pTbins"]) {
+    if (pt.is_string() && pt.get<std::string>() == "inf") {
+      m_pTbins.push_back(std::numeric_limits<float>::infinity());
+    } else {
+      m_pTbins.push_back(pt.get<float>());
+    }
+  }
+
   for (const auto& item : pT_mass_2d_cutvalue.items()) {
     std::string pT_key = item.key();
     if ( pT_key == "pTbins" ) continue;
