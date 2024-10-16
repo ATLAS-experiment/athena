@@ -22,3 +22,13 @@ atlas_add_component( BTagging
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} ) 
 
+# install test scripts
+atlas_install_scripts(
+  bin/testBTagging
+  )
+atlas_add_test(BTaggingTest
+  SCRIPT testBTagging --n-events 20
+  POST_EXEC_SCRIPT nopost.sh )
+atlas_add_test(FasterBTaggingTest
+  SCRIPT testBTagging --n-events 20 --fast
+  POST_EXEC_SCRIPT nopost.sh )
