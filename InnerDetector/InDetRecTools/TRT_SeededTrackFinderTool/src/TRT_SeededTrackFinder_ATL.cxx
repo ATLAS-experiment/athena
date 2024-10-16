@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -33,20 +33,8 @@
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 #include "TrkTrack/TrackInfo.h"
 
-//Updator tool
-#include "TrkToolInterfaces/IUpdator.h"
-
-//Propagator tool
-#include "TrkExInterfaces/IPropagator.h"
-
 // For SiCombinatorialTrackFinder_xk
 #include "SiSPSeededTrackFinderData/SiCombinatorialTrackFinderData_xk.h"
-
-//Tool for getting the SiDetElements from geometry
-#include "InDetRecToolInterfaces/ISiDetElementsRoadMaker.h"
-
-//Needed for the RIO_OnTrackCreator
-#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
 //Space point seed finding tool
 
@@ -87,55 +75,9 @@ namespace{
 
 InDet::TRT_SeededTrackFinder_ATL::TRT_SeededTrackFinder_ATL
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_fieldmode("MapSolenoid"),
-    m_roadmaker("InDet::SiDetElementsRoadMaker_xk"),
-    m_proptool("Trk::RungeKuttaPropagator/InDetPropagator"),
-    m_updatorTool("Trk::KalmanUpdator_xk/InDetPatternUpdator"),
-    m_tracksfinder("InDet::SiCombinatorialTrackFinder_xk", this),
-    m_trtId(nullptr),
-    m_errorScale {1., 1., 1., 1., 1.}
+  : AthAlgTool(t,n,p)
 {
-  m_xi2max       = 15.              ;   //Maximum chi2 per DOF to accept track candidate
-  m_xi2maxNoAdd  = 50.              ;   //Chi2 to accept as hit
-  m_xi2maxlink   = 100.             ;   //Chi2 during cluster search
-  m_nholesmax    = 1                ;   //Maximum number of holes
-  m_dholesmax    = 1                ;   //Maximum hole gap
-  m_nclusmin     = 4                ;   //Minimum number of clusters
-  m_nwclusmin    = 4                ;   //Minimum number of weighted clusters
-  m_pTmin        = 500.             ;   //Minimal Pt cut
-  m_bremCorrect  = false            ;   //Repeat seed search after brem correction
-  m_propR        = false            ;   //Clean-up seeds by propagating to the first endcap hit
-  m_useassoTool  = false            ;   //Use prd-track association tool during combinatorial track finding
-  m_outlierCut   = 25.              ;
-  m_searchInCaloROI   = false       ;
-  m_phiWidth     = .3               ;
-
-
   declareInterface<ITRT_SeededTrackFinder>(this);
-
-  declareProperty("PropagatorTool"          ,m_proptool      );
-  declareProperty("UpdatorTool"             ,m_updatorTool   );
-  declareProperty("RoadTool"                ,m_roadmaker     );
-  declareProperty("SeedTool"                ,m_seedmaker     );
-  declareProperty("CombinatorialTrackFinder",m_tracksfinder  );
-  declareProperty("MagneticFieldMode"       ,m_fieldmode     );
-  declareProperty("Xi2max"                  ,m_xi2max        );
-  declareProperty("Xi2maxNoAdd"             ,m_xi2maxNoAdd   );
-  declareProperty("Xi2maxlink"              ,m_xi2maxlink    );
-  declareProperty("pTmin"                   ,m_pTmin         );
-  declareProperty("nHolesMax"               ,m_nholesmax     );
-  declareProperty("nHolesGapMax"            ,m_dholesmax     );
-  declareProperty("nClustersMin"            ,m_nclusmin      );
-  declareProperty("nWClustersMin"           ,m_nwclusmin     );
-  declareProperty("ErrorScaling"            ,m_errorScale    );
-  declareProperty("BremCorrection"          ,m_bremCorrect   );
-  declareProperty("ConsistentSeeds"         ,m_propR         );
-  declareProperty("UseAssociationTool"      ,m_useassoTool   );
-  declareProperty("OutlierCut"              ,m_outlierCut    );
-  declareProperty("SearchInCaloROI"         ,m_searchInCaloROI);
-  declareProperty("phiWidth"                ,m_phiWidth    );
-
 }
 
 InDet::TRT_SeededTrackFinder_ATL::~TRT_SeededTrackFinder_ATL()= default;;

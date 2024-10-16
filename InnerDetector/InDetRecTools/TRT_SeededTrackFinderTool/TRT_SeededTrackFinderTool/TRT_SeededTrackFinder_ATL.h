@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -45,6 +45,15 @@
 //
 #include "InDetRecToolInterfaces/ISiCombinatorialTrackFinder.h"
 
+//Tool for getting the SiDetElements from geometry
+#include "InDetRecToolInterfaces/ISiDetElementsRoadMaker.h"
+
+//Updator tool
+#include "TrkToolInterfaces/IUpdator.h"
+
+//Propagator tool
+#include "TrkExInterfaces/IPropagator.h"
+
 //ReadHandle key
 //
 #include "StoreGate/ReadHandleKey.h"
@@ -56,12 +65,6 @@
 
 class MsgStream;
 class TRT_ID   ;
-
-namespace Trk{
-  class IUpdator;
-  class IPropagator;
-  class IRIO_OnTrackCreator;
-}
 
 namespace InDet{
   class ISiDetElementsRoadMaker;
@@ -156,40 +159,57 @@ namespace InDet{
       /** Protected Data                                               */
       ///////////////////////////////////////////////////////////////////
 
-      std::string                         m_fieldmode     ;  /** Magnetic field mode       */
+      StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid",
+	"Magnetic field mode"};
 
       Trk::MagneticFieldProperties        m_fieldprop     ;  /** Magnetic field properties */
 
       /** Tools used  */
 
-      ToolHandle<InDet::ISiDetElementsRoadMaker>     m_roadmaker  ;  /** Road maker tool     */
-      ToolHandle<InDet::ITRT_SeededSpacePointFinder> m_seedmaker  ;  /** Seed maker tool     */
-      ToolHandle<Trk::IPropagator>                   m_proptool   ;  /** Propagator tool     */
-      ToolHandle<Trk::IUpdator>                      m_updatorTool;  /** Updator tool        */
-      ToolHandle<InDet::ISiCombinatorialTrackFinder> m_tracksfinder; /** Combinatorial track finder tool */
+      ToolHandle<InDet::ISiDetElementsRoadMaker> m_roadmaker
+	{this, "RoadTool", "InDet::SiDetElementsRoadMaker_xk"};
+      ToolHandle<InDet::ITRT_SeededSpacePointFinder> m_seedmaker
+	{this, "SeedTool", ""};
+      ToolHandle<Trk::IPropagator> m_proptool
+	{this, "PropagatorTool", "Trk::RungeKuttaPropagator/InDetPropagator"};
+      ToolHandle<Trk::IUpdator> m_updatorTool
+	{this, "UpdatorTool", "Trk::KalmanUpdator_xk/InDetPatternUpdator"};
+      ToolHandle<InDet::ISiCombinatorialTrackFinder> m_tracksfinder
+	{this, "CombinatorialTrackFinder", "InDet::SiCombinatorialTrackFinder_xk"};
 
       SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj",
         "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
       /**ID TRT helper*/
-      const TRT_ID* m_trtId{};
+      const TRT_ID* m_trtId = nullptr;
 
       /** Track quality cuts to be passed to the combinatorial track finder */
-      double                       m_xi2max        ; /** max Xi2 for updators */
-      double                       m_xi2maxNoAdd   ; /** max Xi2 for outliers */
-      double                       m_xi2maxlink    ; /** max Xi2 for clusters */
-      double                       m_pTmin         ; /** min pT  */
-      int                          m_nholesmax     ; /** Max number holes  */
-      int                          m_dholesmax     ; /** Max gap between holes */
-      int                          m_nclusmin      ; /** Min number clusters */
-      int                          m_nwclusmin     ; /** Min number weighted clusters */
-      bool                         m_bremCorrect   ; /** Optional Brem correction */
-      bool                         m_propR         ; /** Check seed-TRT segment consistency at large etas */
-      bool                         m_useassoTool   ; /** Use prd-track association tool */
+      DoubleProperty m_xi2max{this, "Xi2max", 15., "max Xi2 for updators"};
+      DoubleProperty m_xi2maxNoAdd{this, "Xi2maxNoAdd", 50.,
+	"max Xi2 for outliers"};
+      DoubleProperty m_xi2maxlink{this, "Xi2maxlink", 100.,
+	"max Xi2 for clusters"};
+      DoubleProperty m_pTmin{this, "pTmin", 500., "min pT"};
+      IntegerProperty m_nholesmax{this, "nHolesMax", 1, "Max number holes"};
+      IntegerProperty m_dholesmax{this, "nHolesGapMax", 1,
+	"Max gap between holes"};
+      IntegerProperty m_nclusmin{this, "nClustersMin", 4, "Min number clusters"};
+      IntegerProperty m_nwclusmin{this, "nWClustersMin", 4,
+	"Min number weighted clusters"};
+      BooleanProperty m_bremCorrect{this, "BremCorrection", false,
+	"Optional Brem correction"};
+      BooleanProperty m_propR{this, "ConsistentSeeds", false,
+	"Check seed-TRT segment consistency at large eta"};
+      BooleanProperty m_useassoTool{this, "UseAssociationTool", false,
+	"Use prd-track association tool"};
       InDet::TrackQualityCuts      m_trackquality  ;
-      std::vector<double>          m_errorScale    ; /** Optional error scaling of track parameters  */
-      double                       m_outlierCut    ; /** Outlier chi2 cut when propagating through the seed */
-      bool                         m_searchInCaloROI; /** Outlier chi2 cut when propagating through the seed */
+      DoubleArrayProperty m_errorScale
+	{this, "ErrorScaling", {1., 1., 1., 1., 1.},
+	 "Optional error scaling of track parameters"};
+      DoubleProperty m_outlierCut{this, "OutlierCut", 25.,
+	"Outlier chi2 cut when propagating through the seed"};
+      BooleanProperty m_searchInCaloROI{this, "SearchInCaloROI", false,
+	"Outlier chi2 cut when propagating through the seed"};
       SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{this, "EMROIPhiRZContainer", ""};
 
 
@@ -254,7 +274,7 @@ namespace InDet{
 
       /** Only propagate to the Si if the TRT segment is compatible with a calo measurement */
       bool isCaloCompatible(const Trk::TrackParameters&, const InDet::TRT_SeededTrackFinder_ATL::EventData &event_data) const;
-      double m_phiWidth{};
+      DoubleProperty m_phiWidth{this, "phiWidth", 0.3};
 
       MsgStream&    dumpconditions(MsgStream&    out) const;
 

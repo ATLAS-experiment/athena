@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,38 +42,9 @@ using namespace std;
 
 InDet::TRT_SeededSpacePointFinder_ATL::TRT_SeededSpacePointFinder_ATL
 (const std::string& t,const std::string& n,const IInterface* p)
-  : AthAlgTool(t,n,p),
-    m_fieldmode("MapSolenoid"),
-    m_sctId(nullptr)
+  : AthAlgTool(t,n,p)
 {
-  m_ptmin     =   500.  ;  //Lowest pT of track.Up to 2000MeV bending in (r,phi) is +-4
-  m_r_rmax      = 600.  ;  //Max radial extend of Si ID
-  m_r_rmin      = 0.    ;  //Min radial extend for loading SPs in ID
-  m_r_rstep     =  10.  ;  //Step size for SP and SCT histogramming
-  m_r1max     = 560.    ;  //Max radius of 1st SCT layer
-  m_r12min    = 400.    ;  //Min radius of 2nd SCT layer
-  m_r2min     = 340.    ;  //Min radius of 3rd SCT layer.Never search below that
-  m_dzdrmin   = -4.00   ;  //Min pseudorapidity cut
-  m_dzdrmax   = +4.00   ;  //Max pseudorapidity cut
-  m_xiC      = 100.     ;  //Momentum chi2 cut between seed and TRT segment estimate
-  m_xiTC     = 100.     ;  //Polar angle chi2 cut between seed and TRT segment estimate
-  m_xiFC     = 100.     ;  //Azimuthal angle chi2 cut between seed and TRT segment estimate
-  m_search    = true    ;  //Search into neighboring sectors
-  m_loadFull  = true    ;  //Load all the Si space points, otherwise only from the last 3 SCT layers
-  m_doCosmics = false   ;  //Disable seed selection cuts when reconstructing cosmics tracks
-
-
   declareInterface<ITRT_SeededSpacePointFinder>(this);
-
-  declareProperty("MagneticFieldMode"     ,m_fieldmode             );
-  declareProperty("pTmin"                 ,m_ptmin                 );
-  declareProperty("NeighborSearch"        ,m_search                );
-  declareProperty("LoadFull"              ,m_loadFull              );
-  declareProperty("DoCosmics"             ,m_doCosmics             );
-  declareProperty("Xi2C"                  ,m_xiC                   );
-  declareProperty("Xi2TC"                 ,m_xiTC                  );
-  declareProperty("Xi2FC"                 ,m_xiFC                  );
-
 }
 
 ///////////////////////////////////////////////////////////////////

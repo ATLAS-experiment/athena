@@ -12,41 +12,37 @@ def TRT_SeededTrackFinder_ATLCfg(
     #
     # --- TRT seeded back tracking tool
     #
-    from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
-    InDetPatternPropagator = acc.popToolsAndMerge(
-        RungeKuttaPropagatorCfg(flags, name="InDetPatternPropagator"))
-    acc.addPublicTool(InDetPatternPropagator)
-    kwargs.setdefault("PropagatorTool", InDetPatternPropagator)
+    if "PropagatorTool" not in kwargs:
+        from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
+        kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
+            RungeKuttaPropagatorCfg(flags)))
 
-    from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdator_xkCfg
-    InDetPatternUpdator = acc.popToolsAndMerge(
-        KalmanUpdator_xkCfg(flags, name="InDetPatternUpdator"))
-    acc.addPublicTool(InDetPatternUpdator)
-    kwargs.setdefault("UpdatorTool", InDetPatternUpdator)
+    if "UpdatorTool" not in kwargs:
+        from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdator_xkCfg
+        kwargs.setdefault("UpdatorTool", acc.popToolsAndMerge(
+            KalmanUpdator_xkCfg(flags)))
 
-    from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
-        SiCombinatorialTrackFinder_xkCfg)
-    kwargs.setdefault("CombinatorialTrackFinder", acc.popToolsAndMerge(
-        SiCombinatorialTrackFinder_xkCfg(flags)))
+    if "CombinatorialTrackFinder" not in kwargs:
+        from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
+            SiCombinatorialTrackFinder_xkCfg)
+        kwargs.setdefault("CombinatorialTrackFinder", acc.popToolsAndMerge(
+            SiCombinatorialTrackFinder_xkCfg(flags)))
 
-    if (flags.Tracking.ActiveConfig.usePixel and
-        flags.Tracking.ActiveConfig.useSCT):
+    if ("RoadTool" not in kwargs and
+        flags.Tracking.ActiveConfig.usePixel and flags.Tracking.ActiveConfig.useSCT):
         from InDetConfig.SiDetElementsRoadToolConfig import (
             SiDetElementsRoadMaker_xk_TRT_Cfg)
-        InDetTRT_SeededSiRoadMaker = acc.popToolsAndMerge(
-            SiDetElementsRoadMaker_xk_TRT_Cfg(flags))
-        acc.addPublicTool(InDetTRT_SeededSiRoadMaker)
-        kwargs.setdefault("RoadTool", InDetTRT_SeededSiRoadMaker)
+        kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
+            SiDetElementsRoadMaker_xk_TRT_Cfg(flags)))
 
     #
     # --- decide which TRT seed space point finder to use
     #
-    from InDetConfig.TRT_SeededSpacePointFinderToolConfig import (
-        TRT_SeededSpacePointFinder_ATLCfg)
-    InDetTRT_SeededSpacePointFinder = acc.popToolsAndMerge(
-        TRT_SeededSpacePointFinder_ATLCfg(flags, InputCollections=InputCollections))
-    acc.addPublicTool(InDetTRT_SeededSpacePointFinder)
-    kwargs.setdefault("SeedTool", InDetTRT_SeededSpacePointFinder)
+    if "SeedTool" not in kwargs:
+        from InDetConfig.TRT_SeededSpacePointFinderToolConfig import (
+            TRT_SeededSpacePointFinder_ATLCfg)
+        kwargs.setdefault("SeedTool", acc.popToolsAndMerge(
+            TRT_SeededSpacePointFinder_ATLCfg(flags, InputCollections=InputCollections)))
 
     kwargs.setdefault("pTmin", flags.Tracking.BackTracking.minPt)
     kwargs.setdefault("nHolesMax", flags.Tracking.BackTracking.nHolesMax)
