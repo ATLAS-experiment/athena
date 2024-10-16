@@ -119,6 +119,7 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
 
       ATH_MSG_INFO("Building BLM with Version Tag: "<< versionKey.tag() << " at Node: " << versionKey.node());
       SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service("RDBAccessSvc")};
+      ATH_CHECK(accessSvc.isValid());
 
       // Print the BLM version tag:
       std::string BLMVersionTag;

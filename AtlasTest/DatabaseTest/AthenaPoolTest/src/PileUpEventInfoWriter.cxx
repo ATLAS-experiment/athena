@@ -34,6 +34,7 @@ StatusCode PileUpEventInfoWriter::initialize()
 {
   // Set to be listener for end of event
   SmartIF<IIncidentSvc> incSvc{Gaudi::svcLocator()->service("IncidentSvc")};
+  ATH_CHECK(incSvc.isValid());
   long int pri=100;
   incSvc->addListener( this, "EndEvent", pri);
 
