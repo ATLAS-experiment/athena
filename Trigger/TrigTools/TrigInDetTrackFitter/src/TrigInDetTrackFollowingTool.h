@@ -125,7 +125,7 @@ private:
   
   Gaudi::Property<bool> m_useHitErrors {this, "UseHitErrors", false, "use PrepRawData errors"};
   Gaudi::Property<bool> m_useDetectorThickness {this, "UseDetectorThickness", false, "get Si-modules thickness from InDet Geometry"};
-  Gaudi::Property<double> m_nominalRadLength {this, "ModuleRadLength", 0.05, "fixed radiation thickness of the detector modules"};
+  Gaudi::Property<double> m_nominalRadLength {this, "ModuleRadLength", 0.04, "fixed radiation thickness of the detector modules"};
 
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
   SG::ReadHandleKey<InDet::PixelClusterContainer> m_pixcontainerkey{this, "PixelClusterContainer","ITkPixelClusters"};

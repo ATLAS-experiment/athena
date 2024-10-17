@@ -673,34 +673,43 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
   std::vector<const Trk::PrepRawData*> assignedHits(nModules, nullptr);//assuming maximum one assigned hit per detector element
 
   std::vector<int>  moduleStatus(nModules, 0);//initial status: unchecked
-
-  unsigned int seedSize = seed.size();
-
-  std::vector<Identifier> seedIdents(seedSize);
-
-  for(unsigned int spIdx=0;spIdx<seedSize;spIdx++) {
-    const Trk::PrepRawData* prd  = seed.at(spIdx)->clusterList().first;
-    seedIdents[spIdx] = prd->detectorElement()->identify();
+  
+  std::vector<Identifier> seedIdents;
+  std::vector<const Trk::PrepRawData*> seedHits;
+  
+  for(const auto& sp : seed) {
+    const Trk::PrepRawData* prd  = sp->clusterList().first;
+    seedIdents.push_back(prd->detectorElement()->identify());
+    seedHits.push_back(prd);
+    prd  = sp->clusterList().second;
+    if(prd == nullptr) continue;
+    seedIdents.push_back(prd->detectorElement()->identify());//the second cluster of a strip SP
+    seedHits.push_back(prd);
   }
 
   //pre-assigning the hits contained in the input track seed
-
+  
+  unsigned int seedSize = seedIdents.size();
   int nUnassigned = seedSize;
  
   int startModuleIdx = -1;
   
   for(int moduleIdx = 0;moduleIdx<nModules;moduleIdx++) {
+    
     Identifier ident = road.at(moduleIdx)->identify();
-    for(unsigned int spIdx=0;spIdx<seedSize;spIdx++) {
-      if(seedIdents[spIdx] != ident) continue;
+
+    for(unsigned int clIdx=0;clIdx<seedSize;clIdx++) {
       
-      assignedHits[moduleIdx] = seed.at(spIdx)->clusterList().first;
+      if(seedIdents[clIdx] != ident) continue;
+      
+      assignedHits[moduleIdx] = seedHits[clIdx];
       moduleStatus[moduleIdx] = 1;//seed hit assigned
       
       startModuleIdx = moduleIdx;
       --nUnassigned;
       break;
     }
+    
     if(nUnassigned == 0) break;
   }
 
@@ -773,7 +782,7 @@ Trk::Track* TrigInDetTrackFollowingTool::getTrack(const std::vector<const Trk::S
 	if(moduleStatus[moduleIdx] < 0) continue;//checked and rejected
 	
 	if (assignedHits[moduleIdx] != nullptr) {//we have a pre-assigned hit, so keep it
-	  hitLinks.emplace_back(std::make_tuple(-1.0,assignedHits[moduleIdx],moduleIdx));//force accept
+	  hitLinks.emplace_back(std::make_tuple(-1.0,assignedHits[moduleIdx],moduleIdx));// negative distance forces accept
 	  continue;
 	}
 	
@@ -1095,36 +1104,30 @@ int TrigInDetTrackFollowingTool::extrapolateTrackState(TrigFTF_ExtendedTrackStat
   
   double lV = Az[0]*gV[0] + Az[1]*gV[1] + Az[2]*gV[2];
   
-  double xOverX0 = 0.0;
+  double xOverX0 = m_nominalRadLength;
 
-  if(m_useDetectorThickness) {
-    const InDetDD::SiDetectorElement* pDE = dynamic_cast<const InDetDD::SiDetectorElement*>(ETS.m_pS->associatedDetectorElement());
-    if(pDE!=nullptr) {
+  const InDetDD::SiDetectorElement* pDE = dynamic_cast<const InDetDD::SiDetectorElement*>(ETS.m_pS->associatedDetectorElement());
+  if(pDE!=nullptr) {
+    if(m_useDetectorThickness) {
       xOverX0 = pDE->design().thickness()/93.7;//Radiation length of silicon according to PDG
     }
+    else {
+      if(pDE->isPixel() && std::abs(Trf(2,2)) >= 1.0) xOverX0 = 0.05;//increase for endcap Pixel modules
+    }
   }
-  else {
-    xOverX0 = m_nominalRadLength;
-  }
-
-  double radLength = xOverX0/std::fabs(lV);
   
-  double sigmaMS = 13.6 * std::fabs(Re[4]) * std::sqrt(radLength) * (1.0 + 0.038 * std::log(radLength));
-  double s2 = sigmaMS * sigmaMS;
-  double a = 1.0 / sint;
-  double a2 = a * a;
+  double lenCorr = 1/std::fabs(lV);
+  
+  double radLength = xOverX0*lenCorr;
+  
+  double qpCorr = Re[4]*(1.0 + 0.038 * std::log(radLength));
+  double sigmaMS2 = 185.0 * radLength * qpCorr*qpCorr; //Highland formula
 
   //multiple scattering
-
-  ETS.m_Gk[2][2] += s2 * a2;
-  ETS.m_Gk[3][3] += s2;
-  ETS.m_Gk[2][3] += s2 * a;
-  ETS.m_Gk[3][2] = ETS.m_Gk[2][3];
   
-  //energy loss
+  ETS.m_Gk[2][2] += sigmaMS2/(sint*sint);
+  ETS.m_Gk[3][3] += sigmaMS2;
   
-  ETS.m_Gk[4][4] += Re[4] * Re[4] * radLength * (0.415 - 0.744 * radLength);
-
   //Sym. product J*C*J^T  
 
   double Be[5][5];//upper off-diagonal block
