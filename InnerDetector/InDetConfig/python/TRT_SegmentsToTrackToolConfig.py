@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SegmentsToTrackTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_SegmentToTrackTool', **kwargs):
+def TRT_Standalone_SegmentToTrackToolCfg(
+        flags, name ='InDetTRT_Standalone_SegmentToTrackTool', **kwargs):
     from MagFieldServices.MagFieldServicesConfig import (
         AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags)
@@ -30,17 +31,14 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        InDetExtrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-        acc.addPublicTool(InDetExtrapolator)
-        kwargs.setdefault("Extrapolator", InDetExtrapolator)
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
             InDetTRT_StandaloneScoringToolCfg)
-        ScoringTool = acc.popToolsAndMerge(
-            InDetTRT_StandaloneScoringToolCfg(flags))
-        acc.addPublicTool(ScoringTool)    
-        kwargs.setdefault("ScoringTool", ScoringTool)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetTRT_StandaloneScoringToolCfg(flags)))
 
     kwargs.setdefault("FinalRefit", True)
     kwargs.setdefault("MaxSharedHitsFraction", 0.7)
@@ -50,16 +48,15 @@ def TRT_Standalone_SegmentToTrackToolCfg(flags, name ='InDetTRT_Standalone_Segme
     return acc
 
 
-def TRT_TrackSegment_SegmentToTrackToolCfg(flags, name ='InDetTRT_TrackSegment_SegmentToTrackTool',  **kwargs):
+def TRT_TrackSegment_SegmentToTrackToolCfg(
+        flags, name ='InDetTRT_TrackSegment_SegmentToTrackTool',  **kwargs):
     acc = ComponentAccumulator()
 
     if "ScoringTool" not in kwargs:
         from InDetConfig.InDetTrackScoringToolsConfig import (
             InDetTRT_TrackSegmentScoringToolCfg)
-        ScoringTool = acc.popToolsAndMerge(
-            InDetTRT_TrackSegmentScoringToolCfg(flags))
-        acc.addPublicTool(ScoringTool)    
-        kwargs.setdefault("ScoringTool", ScoringTool)
+        kwargs.setdefault("ScoringTool", acc.popToolsAndMerge(
+            InDetTRT_TrackSegmentScoringToolCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_Standalone_SegmentToTrackToolCfg(flags, name, **kwargs)))

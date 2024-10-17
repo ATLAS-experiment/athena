@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,11 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
+///Needed for the track refitter
+//Extrapolator tool
+#include "TrkExInterfaces/IExtrapolator.h"
+//Scoring tool
+#include "TrkToolInterfaces/ITrackScoringTool.h"
 
 #include "TrkEventPrimitives/TrackScore.h"
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,12 +94,16 @@ namespace InDet {
       virtual std::ostream& dump(std::ostream& out) const override;
 
     private:
-      bool                               m_doRefit;//!< Do final careful refit of tracks
-      double                             m_fieldUnitConversion;
-      double                             m_sharedFrac         ;  //!< Maximum fraction of shared TRT drift circles
-      bool                               m_suppressHoleSearch ;  //!< Suppress hole search during the track summary creation
+      BooleanProperty m_doRefit{this, "FinalRefit", false,
+	  "Do final careful refit of tracks"};
+      static constexpr double m_fieldUnitConversion = 1000.;
+      DoubleProperty m_sharedFrac{this, "MaxSharedHitsFraction", 0.3,
+	"Maximum fraction of shared TRT drift circles"};
+      BooleanProperty m_suppressHoleSearch{this, "SuppressHoleSearch", false,
+	"Suppress hole search during the track summary creation"};
 
-      ToolHandle<Trk::IExtrapolator>         m_extrapolator  ;  //!< Track extrapolator tool
+      ToolHandle<Trk::IExtrapolator> m_extrapolator
+	{this, "Extrapolator", "Trk::Extrapolator/InDetExtrapolator"};
 
       ToolHandle<Trk::ITrackFitter> m_fitterTool{ this, "RefitterTool", "" };
       ToolHandle<Trk::IPRDtoTrackMapTool> m_assoTool{
@@ -108,7 +117,8 @@ namespace InDet {
         "InDetTrackSummaryToolNoHoleSearch"
       };
 
-      ToolHandle<Trk::ITrackScoringTool>     m_scoringTool   ;  //!< Track scoring tool
+      ToolHandle<Trk::ITrackScoringTool> m_scoringTool
+	{this, "ScoringTool", "Trk::TrackScoringTool/TrackScoringTool"};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // Read handle for conditions object to get the field cache
@@ -118,7 +128,7 @@ namespace InDet {
 
 
       /**ID TRT helper*/
-      const TRT_ID* m_trtId;
+      const TRT_ID* m_trtId = nullptr;
 
       /**Tracks that will be passed out of AmbiProcessor.
          Recreated anew each time process() is called*/ 
