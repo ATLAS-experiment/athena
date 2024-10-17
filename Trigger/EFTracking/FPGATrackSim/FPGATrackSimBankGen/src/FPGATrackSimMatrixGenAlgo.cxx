@@ -681,7 +681,6 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
 
   for (int i = 0; i < m_nLayers; ++i) {
     if (sector_hits[i].getHitType() != HitType::wildcard) {
-      std::shared_ptr<const FPGATrackSimHit> hit = std::make_shared<const FPGATrackSimHit>(sector_hits[i]);
 
       double target_r = m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i);
 
@@ -694,10 +693,10 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
 
       std::vector<float> coords_tmp;
       if ( m_ideal_geom > 1 ) {
-        coords_tmp = computeIdealCoords(hit, x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::Second);
+        coords_tmp = computeIdealCoords(sector_hits[i], x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::Second);
       }
       else {
-        coords_tmp = computeIdealCoords(hit, x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::None);
+        coords_tmp = computeIdealCoords(sector_hits[i], x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::None);
       }
 
       // Create phi for any hits that are not spacepoints, as well as "inner" spacepoints.

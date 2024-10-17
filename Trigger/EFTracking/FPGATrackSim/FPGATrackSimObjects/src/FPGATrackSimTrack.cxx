@@ -45,13 +45,11 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
     target_r = (target_r + m_idealRadii[other_layer]) / 2.;
   }
 
-  // std::shared_ptr<const FPGATrackSimHit> hit = &m_hits[ilayer];
-  std::shared_ptr<const FPGATrackSimHit> hit = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer]);
   double hough_x =  getHoughX();
   double hough_y =  getHoughY();
   
   // Use the centralized computeIdealCoords function from FPGATrackSimFunctions
-  std::vector<float> coords = ::computeIdealCoords(hit, hough_x, hough_y, target_r,  m_doDeltaGPhis, m_trackCorrType);
+  std::vector<float> coords = ::computeIdealCoords(m_hits[ilayer], hough_x, hough_y, target_r,  m_doDeltaGPhis, m_trackCorrType);
 
   return coords;
 }

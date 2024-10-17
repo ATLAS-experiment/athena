@@ -122,6 +122,6 @@ std::vector<std::vector<int>> getComboIndices(std::vector<size_t> const & sizes)
 double rms95(TH1 const * h);
 
 
-std::vector<float> computeIdealCoords(std::shared_ptr<const FPGATrackSimHit> hit, const double hough_x, const double hough_y, const double target_r, const bool doDeltaGPhis, const TrackCorrType trackCorrType);
+std::vector<float> computeIdealCoords(const FPGATrackSimHit &hit, const double hough_x, const double hough_y, const double target_r, const bool doDeltaGPhis, const TrackCorrType trackCorrType);
 
 #endif // FPGATrackSimFUNCTIONS_H
