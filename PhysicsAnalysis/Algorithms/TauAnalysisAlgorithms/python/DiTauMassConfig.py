@@ -70,6 +70,8 @@ class DiTauMassBlock(ConfigBlock):
                    info='save information about the reconstruction with the best-fit neutrino kinematics.')
     self.addOption('doMAXW', False, type=bool,
                    info='save information about the reconstruction with the maximum-weight estimator.')
+    self.addOption('saveLlhHisto', False, type=bool,
+                   info='save likelihood histograms for debugging purpose. If enabled, it can slow down MMC running time.')
 
   def makeAlgs(self, config):
 
@@ -95,6 +97,7 @@ class DiTauMassBlock(ConfigBlock):
     alg.mmcTool.UseEfficiencyRecovery = self.useEfficiencyRecovery
     alg.mmcTool.UseMETDphiLL          = self.useMETdphiLL
     alg.mmcTool.ParamFilePath         = self.paramFilePath
+    alg.mmcTool.SaveLlhHisto          = self.saveLlhHisto
 
     if config.geometry() is LHCPeriod.Run2:
       alg.mmcTool.BeamEnergy = 6500.0

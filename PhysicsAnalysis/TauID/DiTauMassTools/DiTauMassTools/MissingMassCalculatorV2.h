@@ -87,7 +87,7 @@ class MissingMassCalculatorV2 {
 
   PtEtaPhiMVector m_tautau_tmp;
 
-  bool m_debugThisIteration, m_lfvLeplepRefit;
+  bool m_debugThisIteration, m_lfvLeplepRefit, m_SaveLlhHisto;
   
   int m_nCallprobCalculatorV9fast;
   
@@ -390,6 +390,7 @@ public:
   void SetUseFloatStopping(const bool val) { m_fUseFloatStopping=val; } // switch for floating stopping criterion
   void SetBeamEnergy(const double val) { m_beamEnergy=val; }
   void SetLFVLeplepRefit(const bool val) { m_lfvLeplepRefit=val; }
+  void SaveLlhHisto(const bool val) { m_SaveLlhHisto=val; }
 
   double GetmMaxError() const {return m_PrintmMaxError;}
   double GetmMeanError() const { return m_PrintmMeanError;}
