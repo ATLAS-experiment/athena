@@ -9,7 +9,18 @@
 #include "GaudiKernel/MsgStream.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <cstdlib>  // For std::rand() and std::srand()
+#include <sys/stat.h>  //mkdir
+#include <unistd.h>  //chown
+#include <stdexcept>
 #include "Python.h"
+
+namespace{
+  template<typename ...Ptr>
+  bool
+  anyNullPtr(Ptr&&...p){
+    return ((p==nullptr) or ...);
+  }
+}
 
 OnlineEventDisplaysSvc::OnlineEventDisplaysSvc( const std::string& name,
                           ISvcLocator* pSvcLocator ) :
@@ -104,8 +115,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
   }
 
   m_entireOutputStr = m_outputDirectory + "/" + m_outputStreamDir;
-  std::string FileNamePrefix = m_entireOutputStr + "/JiveXML";
-  m_FileNamePrefix = FileNamePrefix;
+  m_FileNamePrefix = m_entireOutputStr + "/JiveXML";;
 
   gid_t zpgid = setOwnershipToZpGrpOrDefault();
   createWriteableDir(m_outputDirectory, zpgid);
@@ -143,6 +153,9 @@ void OnlineEventDisplaysSvc::endEvent(){
         PyErr_Print();
       }
     }
+    if (anyNullPtr(cleanDirectory)){
+      throw std::runtime_error("OnlineEventDisplaysSvc::endEvent: Py_DECREF on nullptr argument");
+    }
     Py_DECREF(cleanDirectory);
   }
 
@@ -153,15 +166,20 @@ void OnlineEventDisplaysSvc::endEvent(){
     PyObject* pArgs_zip = PyTuple_Pack(2, pDirectory, pJiveXMLFileName);
     PyObject* zipXMLFile = PyObject_GetAttrString(pModule, "zipXMLFile");
     if (!zipXMLFile) {
-    PyErr_Print();
-    ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventUtils.zipXMLFile");
-    }
-    else {
+      PyErr_Print();
+      ATH_MSG_WARNING("Failed to import EventDisplaysOnline.EventUtils.zipXMLFile");
+    } else {
       PyObject_CallObject(zipXMLFile, pArgs_zip);
+    }
+    if (anyNullPtr(pJiveXMLFileName, zipXMLFile, pArgs_zip)){
+      throw std::runtime_error("OnlineEventDisplaysSvc::endEvent: Py_DECREF on nullptr argument");
     }
     Py_DECREF(pJiveXMLFileName);
     Py_DECREF(zipXMLFile);
     Py_DECREF(pArgs_zip);
+  }
+  if (anyNullPtr(pModule, pArgs, pCheckPair, pMaxEvents, pDirectory)){
+    throw std::runtime_error("OnlineEventDisplaysSvc::endEvent: Py_DECREF on nullptr argument");
   }
   Py_DECREF(pModule);
   Py_DECREF(pArgs);
@@ -199,12 +217,17 @@ void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gi
     }
   } else {
     try {
-      mkdir(char_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-      chown(char_dir, -1, zpgid);
+      auto rc = mkdir(char_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+      if (rc !=0){
+        ATH_MSG_ERROR("mkdir failed for directory: " << directory);
+      }
+      rc = chown(char_dir, -1, zpgid);
+      if (rc !=0){
+         ATH_MSG_ERROR( "chown failed for directory: " << directory);
+      }
       ATH_MSG_DEBUG("Created output directory " << directory);
     } catch (const std::system_error& err) {
-      std::cerr << "Failed to create output directory " << directory
-                << err.what() << std::endl;
+      ATH_MSG_ERROR( "Failed to create output directory " << directory << err.what());
     }
   }
 }
