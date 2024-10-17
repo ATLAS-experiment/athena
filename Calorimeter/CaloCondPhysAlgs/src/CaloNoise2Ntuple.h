@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloNoise2Ntuple.h
@@ -48,7 +48,7 @@ class CaloNoise2Ntuple : public AthAlgorithm {
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-  ITHistSvc* m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
   const CaloCell_ID*       m_calo_id;
 

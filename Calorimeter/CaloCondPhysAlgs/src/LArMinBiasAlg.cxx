@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArMinBiasAlg.h"
@@ -41,7 +41,7 @@
     
     ATH_MSG_INFO ( " LArMinBiasAlg initialize() " );
 
-    ATH_CHECK( service("THistSvc",m_thistSvc) );
+    ATH_CHECK( m_thistSvc.retrieve() );
 
 
     m_tree = new TTree("m_tree","Offset ntuple");

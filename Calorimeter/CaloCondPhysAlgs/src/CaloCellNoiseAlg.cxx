@@ -109,7 +109,7 @@ StatusCode CaloCellNoiseAlg::initialize()
   m_treeData->m_luminosity = 0.;
   m_lumiblockOld = 0;
 
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
 
   if( !m_trigDecTool.empty() ) {
     ATH_CHECK( m_trigDecTool.retrieve() );

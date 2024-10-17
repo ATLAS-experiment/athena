@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloAddCellPedShift.h
@@ -58,7 +58,7 @@ class ATLAS_NOT_THREAD_SAFE /* CallBacks*/CaloAddCellPedShift : public AthAlgori
   std::string m_fname;
   std::string m_folderName;
 
-  ITHistSvc* m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };

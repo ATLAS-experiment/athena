@@ -42,7 +42,7 @@ class CaloCellPosition2Ntuple : public AthAlgorithm {
   // Member variables
   //---------------------------------------------------
 
-  ITHistSvc* m_thistSvc = nullptr;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
   const CaloCell_ID* m_calo_id = nullptr;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellEnergyCorr2Ntuple.h"
@@ -18,7 +18,6 @@
 //Constructor
 CaloCellEnergyCorr2Ntuple::CaloCellEnergyCorr2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
-  m_thistSvc(nullptr),
   m_calo_id(nullptr),
   m_key("EnergyCorr"), 
   m_FolderName("/LAR/CellCorrOfl/EnergyCorr"), 
@@ -48,7 +47,7 @@ StatusCode CaloCellEnergyCorr2Ntuple::initialize()
 {
   ATH_MSG_DEBUG ("CaloCellEnergyCorr2Ntuple initialize()" );
 
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK(m_thistSvc.retrieve());
 
   const CaloIdManager* mgr = nullptr;
   ATH_CHECK( detStore()->retrieve( mgr ) );
