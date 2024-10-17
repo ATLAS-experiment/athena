@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETGEOMODELUTILS_DISTORTEDMATERIALMANAGER_H
@@ -7,10 +7,11 @@
 
 class StoredMaterialManager;
 #include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 namespace InDetDD {
 
-class DistortedMaterialManager
+class DistortedMaterialManager : public AthMessaging
 {
 public:
   DistortedMaterialManager();  
@@ -18,6 +19,8 @@ public:
   StoredMaterialManager * materialManager() {return  m_materialManager;}
 
 private:
+  StatusCode initialize();
+
   StoredMaterialManager * m_materialManager{nullptr};
   IRDBRecordset_ptr  m_xMatTable;
 };
