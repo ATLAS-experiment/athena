@@ -257,13 +257,6 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
     } else
       ATH_MSG_VERBOSE( "Successfully retrieved " << m_particleDecayer );
 
-    ITHistSvc* tHistSvc = nullptr;
-    if (m_validationMode || m_bremValidation || m_edValidation){
-       // now register the Tree
-        if (service("THistSvc",tHistSvc).isFailure())
-           ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
-     }
-
     // ISF Services
     if (m_particleBroker.retrieve().isFailure()){
         ATH_MSG_FATAL( "Could not retrieve " << m_particleBroker );
@@ -279,79 +272,86 @@ StatusCode iFatras::McMaterialEffectsUpdator::initialize()
     // retrieve the physics validation tool
     ATH_CHECK( m_validationTool.retrieve( DisableTool{ m_validationTool.empty() || !m_validationMode } ) );
 
-    if (m_validationMode){
-      ATH_MSG_VERBOSE( "Booking material validation TTree ... " );
+    if (m_validationMode || m_bremValidation || m_edValidation) {
+      SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+      if (!tHistSvc) {
+        ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
+      }
 
-      // create the new Tree
-      m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+      if (m_validationMode) {
+        ATH_MSG_VERBOSE( "Booking material validation TTree ... " );
 
-      // counter for material effects
-      m_validationTree->Branch("LayerIndex"      ,  &m_layerIndex,   "layerIdx/I");
-      m_validationTree->Branch("PathInX0"        ,  &m_tInX0,        "tInX0/F");
-      m_validationTree->Branch("ThetaMS"         ,  &m_thetaMSproj,  "thetaMS/F");
-      m_validationTree->Branch("ThetaMSphi"      ,  &m_thetaMSphi,   "thetaMSphi/F");
-      m_validationTree->Branch("ThetaMStheta"    ,  &m_thetaMStheta, "thetaMStheta/F");
-      m_validationTree->Branch("DeltaP"          ,  &m_deltaP,       "deltaP/F");
-      m_validationTree->Branch("DeltaPsigma"     ,  &m_deltaPsigma,  "deltaPsigma/F");
+        // create the new Tree
+        m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+
+        // counter for material effects
+        m_validationTree->Branch("LayerIndex"      ,  &m_layerIndex,   "layerIdx/I");
+        m_validationTree->Branch("PathInX0"        ,  &m_tInX0,        "tInX0/F");
+        m_validationTree->Branch("ThetaMS"         ,  &m_thetaMSproj,  "thetaMS/F");
+        m_validationTree->Branch("ThetaMSphi"      ,  &m_thetaMSphi,   "thetaMSphi/F");
+        m_validationTree->Branch("ThetaMStheta"    ,  &m_thetaMStheta, "thetaMStheta/F");
+        m_validationTree->Branch("DeltaP"          ,  &m_deltaP,       "deltaP/F");
+        m_validationTree->Branch("DeltaPsigma"     ,  &m_deltaPsigma,  "deltaPsigma/F");
 
 
-      if ((tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isFailure()) {
-	ATH_MSG_ERROR( "initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
-	delete m_validationTree; m_validationTree = nullptr;
-      } else
-	ATH_MSG_INFO( "TTree for MaterialEffects validation booked." );
-
-    }
-    // the validation setup -------------------------------- PART 2: Brem Photons -----------------------------
-    if (m_bremValidation){
+        if ((tHistSvc->regTree(m_validationTreeFolder, m_validationTree)).isFailure()) {
+          ATH_MSG_ERROR( "initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
+          delete m_validationTree; m_validationTree = nullptr;
+        } else {
+          ATH_MSG_INFO( "TTree for MaterialEffects validation booked." );
+        }
+      }
+      // the validation setup -------------------------------- PART 2: Brem Photons -----------------------------
+      if (m_bremValidation){
 
         ATH_MSG_VERBOSE( "Booking bremstrahlung validation TTree ... " );
 
         // create the new Tree
         m_bremValidationTree = new TTree(m_bremValidationTreeName.c_str(), m_bremValidationTreeDescription.c_str());
 
-           // counter for bremstrahlung
-           m_bremValidationTree->Branch("BremPositionX"    ,  &m_bremPointX, "bremX/F");
-           m_bremValidationTree->Branch("BremPositionY"    ,  &m_bremPointY, "bremY/F");
-           m_bremValidationTree->Branch("BremPositionR"    ,  &m_bremPointR, "bremR/F");
-           m_bremValidationTree->Branch("BremPositionZ"    ,  &m_bremPointZ, "bremZ/F");
-           m_bremValidationTree->Branch("BremMotherEnergy" ,  &m_bremMotherEnergy,   "bremMotherE/F");
-           m_bremValidationTree->Branch("BremPhotonEnergy" ,  &m_bremPhotonEnergy,   "bremPhotonE/F");
-           m_bremValidationTree->Branch("BremPhotonAngle"  ,  &m_bremPhotonAngle,    "bremPhotondA/F");
+        // counter for bremstrahlung
+        m_bremValidationTree->Branch("BremPositionX"    ,  &m_bremPointX, "bremX/F");
+        m_bremValidationTree->Branch("BremPositionY"    ,  &m_bremPointY, "bremY/F");
+        m_bremValidationTree->Branch("BremPositionR"    ,  &m_bremPointR, "bremR/F");
+        m_bremValidationTree->Branch("BremPositionZ"    ,  &m_bremPointZ, "bremZ/F");
+        m_bremValidationTree->Branch("BremMotherEnergy" ,  &m_bremMotherEnergy,   "bremMotherE/F");
+        m_bremValidationTree->Branch("BremPhotonEnergy" ,  &m_bremPhotonEnergy,   "bremPhotonE/F");
+        m_bremValidationTree->Branch("BremPhotonAngle"  ,  &m_bremPhotonAngle,    "bremPhotondA/F");
 
         if ((tHistSvc->regTree(m_bremValidationTreeFolder, m_bremValidationTree)).isFailure()) {
-           ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
-           delete m_bremValidationTree; m_bremValidationTree = nullptr;
+          ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
+          delete m_bremValidationTree; m_bremValidationTree = nullptr;
         } else
-           ATH_MSG_INFO( "TTree for Bremsstrahlung validation booked." );
+          ATH_MSG_INFO( "TTree for Bremsstrahlung validation booked." );
 
-    } // ------------- end of validation mode -----------------------------------------------------------------
+      } // ------------- end of validation mode -----------------------------------------------------------------
 
-    // the validation setup -------------------------------- PART 3: Brem Photons -----------------------------
-    if (m_edValidation){
+      // the validation setup -------------------------------- PART 3: Brem Photons -----------------------------
+      if (m_edValidation){
 
         ATH_MSG_VERBOSE( "Booking Energy deposition validation TTree ... " );
 
         // create the new Tree
         m_edValidationTree = new TTree(m_edValidationTreeName.c_str(), m_edValidationTreeDescription.c_str());
 
-           // counter for boundary surfaces
-           m_edValidationTree->Branch("EdepositPositionX"    ,  &m_edLayerIntersectX,    "edX/F");
-           m_edValidationTree->Branch("EdepositPositionY"    ,  &m_edLayerIntersectY,    "edY/F");
-           m_edValidationTree->Branch("EdepositPositionR"    ,  &m_edLayerIntersectR,    "edR/F");
-           m_edValidationTree->Branch("EdepositPositionZ"    ,  &m_edLayerIntersectZ,    "edZ/F");
-           m_edValidationTree->Branch("Edeposit"             ,  &m_edLayerEnergyDeposit, "ed/F");
-           m_edValidationTree->Branch("EdepositLayerSample"  ,  &m_edLayerSample,        "edLayerSample/F");
+        // counter for boundary surfaces
+        m_edValidationTree->Branch("EdepositPositionX"    ,  &m_edLayerIntersectX,    "edX/F");
+        m_edValidationTree->Branch("EdepositPositionY"    ,  &m_edLayerIntersectY,    "edY/F");
+        m_edValidationTree->Branch("EdepositPositionR"    ,  &m_edLayerIntersectR,    "edR/F");
+        m_edValidationTree->Branch("EdepositPositionZ"    ,  &m_edLayerIntersectZ,    "edZ/F");
+        m_edValidationTree->Branch("Edeposit"             ,  &m_edLayerEnergyDeposit, "ed/F");
+        m_edValidationTree->Branch("EdepositLayerSample"  ,  &m_edLayerSample,        "edLayerSample/F");
 
         if ((tHistSvc->regTree(m_edValidationTreeFolder, m_edValidationTree)).isFailure()) {
-           ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
-           delete m_edValidationTree; m_edValidationTree = nullptr;
+          ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
+          delete m_edValidationTree; m_edValidationTree = nullptr;
         } else
-           ATH_MSG_INFO( "TTree for Energy deposition validation booked." );
+          ATH_MSG_INFO( "TTree for Energy deposition validation booked." );
 
 
 
-    } // ------------- end of validation mode -----------------------------------------------------------------
+      } // ------------- end of validation mode -----------------------------------------------------------------
+    }
     ATH_MSG_DEBUG( "finalize() successful" );
     return StatusCode::SUCCESS;
 }

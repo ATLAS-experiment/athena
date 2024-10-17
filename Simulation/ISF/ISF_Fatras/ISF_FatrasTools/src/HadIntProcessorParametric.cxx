@@ -132,47 +132,45 @@ StatusCode iFatras::HadIntProcessorParametric::initialize()
 
     if (m_hadIntValidation){
 
-      ITHistSvc* tHistSvc = nullptr;
-      // now register the Tree
-      if (service("THistSvc",tHistSvc).isFailure())
-           ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
-      else {
+      SmartIF<ITHistSvc> tHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+      if (!tHistSvc) {
+        ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
+      }
+      ATH_MSG_VERBOSE( "Booking hadronic interaction validation TTree ... " );
 
-        ATH_MSG_VERBOSE( "Booking hadronic interaction validation TTree ... " );
+      // create the new Tree
+      m_hadIntValidationTree = new TTree(m_hadIntValidationTreeName.c_str(), m_hadIntValidationTreeDescription.c_str());
 
-        // create the new Tree
-        m_hadIntValidationTree = new TTree(m_hadIntValidationTreeName.c_str(), m_hadIntValidationTreeDescription.c_str());
+      // counter for boundary surfaces
+      m_hadIntValidationTree->Branch("HadIntPointX"    ,  &m_hadIntPointX, "hintX/F");
+      m_hadIntValidationTree->Branch("HadIntPointY"    ,  &m_hadIntPointY, "hintY/F");
+      m_hadIntValidationTree->Branch("HadIntPointR"    ,  &m_hadIntPointR, "hintR/F");
+      m_hadIntValidationTree->Branch("HadIntPointZ"    ,  &m_hadIntPointZ, "hintZ/F");
+      m_hadIntValidationTree->Branch("HadIntMotherPdg"    ,  &m_hadIntMotherPdg,       "hintMotherPdg/I");
+      m_hadIntValidationTree->Branch("HadIntMotherBarcode"    ,  &m_hadIntMotherBarcode, "hintMotherBarcode/I");
+      m_hadIntValidationTree->Branch("HadIntMotherP" ,  &m_hadIntMotherP,    "hintMotherP/F");
+      m_hadIntValidationTree->Branch("HadIntMotherPt" ,  &m_hadIntMotherPt,    "hintMotherPt/F");
+      m_hadIntValidationTree->Branch("HadIntMotherPhi"    ,  &m_hadIntMotherPhi,       "hintMotherPhi/F");
+      m_hadIntValidationTree->Branch("HadIntMotherEta"    ,  &m_hadIntMotherEta,       "hintMohterEta/F");
 
-           // counter for boundary surfaces
-           m_hadIntValidationTree->Branch("HadIntPointX"    ,  &m_hadIntPointX, 			"hintX/F");
-           m_hadIntValidationTree->Branch("HadIntPointY"    ,  &m_hadIntPointY, 			"hintY/F");
-           m_hadIntValidationTree->Branch("HadIntPointR"    ,  &m_hadIntPointR, 			"hintR/F");
-           m_hadIntValidationTree->Branch("HadIntPointZ"    ,  &m_hadIntPointZ, 			"hintZ/F");
-           m_hadIntValidationTree->Branch("HadIntMotherPdg"    ,  &m_hadIntMotherPdg,       "hintMotherPdg/I");
-           m_hadIntValidationTree->Branch("HadIntMotherBarcode"    ,  &m_hadIntMotherBarcode, "hintMotherBarcode/I");
-           m_hadIntValidationTree->Branch("HadIntMotherP" ,  &m_hadIntMotherP,    "hintMotherP/F");
-           m_hadIntValidationTree->Branch("HadIntMotherPt" ,  &m_hadIntMotherPt,    "hintMotherPt/F");
-           m_hadIntValidationTree->Branch("HadIntMotherPhi"    ,  &m_hadIntMotherPhi,       "hintMotherPhi/F");
-           m_hadIntValidationTree->Branch("HadIntMotherEta"    ,  &m_hadIntMotherEta,       "hintMohterEta/F");
-
-           m_hadIntValidationTree->Branch("HadIntChildren"     ,  &m_hadIntChildren,        "hintcs/I");
-           m_hadIntValidationTree->Branch("HadIntChildE  "     ,  &m_hadIntChildE,          "hintce/F");
-           m_hadIntValidationTree->Branch("HadIntChildPdg"     ,  m_hadIntChildPdg,         "hintChildPdg[hintcs]/I");
-           m_hadIntValidationTree->Branch("HadIntChildP"  ,  m_hadIntChildP,      "hintChildP[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildPcms"  ,  m_hadIntChildPcms,      "hintChildPcms[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildTh"  ,  m_hadIntChildTh,      "hintChildTh[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildThc"  ,  m_hadIntChildThc,      "hintChildThc[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildPhi"     ,  m_hadIntChildPhi,         "hintChildPhi[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildEta"     ,  m_hadIntChildEta,         "hintChildEta[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildDeltaPhi",  m_hadIntChildDeltaPhi,    "hintChildPhi[hintcs]/F");
-           m_hadIntValidationTree->Branch("HadIntChildDeltaEta",  m_hadIntChildDeltaEta,    "hintChildEta[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildren"     ,  &m_hadIntChildren,        "hintcs/I");
+      m_hadIntValidationTree->Branch("HadIntChildE  "     ,  &m_hadIntChildE,          "hintce/F");
+      m_hadIntValidationTree->Branch("HadIntChildPdg"     ,  m_hadIntChildPdg,         "hintChildPdg[hintcs]/I");
+      m_hadIntValidationTree->Branch("HadIntChildP"  ,  m_hadIntChildP,      "hintChildP[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildPcms"  ,  m_hadIntChildPcms,      "hintChildPcms[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildTh"  ,  m_hadIntChildTh,      "hintChildTh[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildThc"  ,  m_hadIntChildThc,      "hintChildThc[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildPhi"     ,  m_hadIntChildPhi,         "hintChildPhi[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildEta"     ,  m_hadIntChildEta,         "hintChildEta[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildDeltaPhi",  m_hadIntChildDeltaPhi,    "hintChildPhi[hintcs]/F");
+      m_hadIntValidationTree->Branch("HadIntChildDeltaEta",  m_hadIntChildDeltaEta,    "hintChildEta[hintcs]/F");
 
 
-        if ((tHistSvc->regTree(m_hadIntValidationTreeFolder, m_hadIntValidationTree)).isFailure()) {
-           ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
-           delete m_hadIntValidationTree; m_hadIntValidationTree = nullptr;
-        } else
-           ATH_MSG_INFO( "TTree for Hadronic Interactions validation booked." );
+      if ((tHistSvc->regTree(m_hadIntValidationTreeFolder, m_hadIntValidationTree)).isFailure()) {
+        ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
+        delete m_hadIntValidationTree; m_hadIntValidationTree = nullptr;
+      } else {
+        ATH_MSG_INFO( "TTree for Hadronic Interactions validation booked." );
       }
     } // ------------- end of validation mode -----------------------------------------------------------------
     ATH_MSG_DEBUG( "finalize() successful" );
