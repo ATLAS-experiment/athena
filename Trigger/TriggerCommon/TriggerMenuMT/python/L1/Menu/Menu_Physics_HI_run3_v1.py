@@ -22,6 +22,9 @@ def defineMenu():
         # ATR-22061
         "L1_eEM9_EMPTY",
         "L1_eEM15_EMPTY",
+        #ATR-30312
+        "L1_eEM1_EMPTY",
+        "L1_eTAU1_EMPTY",
 
         ## 
         # MU
