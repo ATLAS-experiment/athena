@@ -22,10 +22,10 @@ echo "Running over " $RDO_EVT " events"
 
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
-BANKS_VERSION="v0.10" # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
+BANKS_VERSION="v0.20" # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 COMBINED_MATRIX="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/banks_9L/${BANKS_VERSION}/combined_matrix.root"
 
-#make wrapper file
+# make wrapper file
 echo "... RDO to AOD with sim"
 Reco_tf.py --CA \
     --steering doRAWtoALL \
@@ -57,9 +57,9 @@ touch maps/moduleidmap
 
 echo "... Banks generation"
 python -m FPGATrackSimBankGen.FPGATrackSimBankGenConfig \
---filesInput=${RDO} \
---evtMax=${RDO_EVT} \
-Trigger.FPGATrackSim.mapsDir=maps 
+    --filesInput=${RDO} \
+    --evtMax=${RDO_EVT} \
+    Trigger.FPGATrackSim.mapsDir=maps
 ls -l
 echo "... Banks generation, this part is done ..."
 

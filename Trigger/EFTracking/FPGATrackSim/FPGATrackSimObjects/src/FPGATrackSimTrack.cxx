@@ -6,6 +6,7 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
+#include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include <iostream>
 #include <iomanip>
 #include <cmath>
@@ -37,63 +38,20 @@ std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 
 std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
 {
-  std::vector<float> coords;
-
-  // rho = 0.33 m * (pT / GeV) / (B/T)
-  // B = 2 T so
-  // rho = 0.33 m * (pT / GeV) / (2)
-  // and then 2*rho =  0.33 m * (pT / GeV)
-  // but distances for us are in mm, so 2*rho = 330 * (pT / GeV)
-  // and 1/(2*rho) = (1 / (pT in GeV)) / 330
-
+  
   double target_r = m_idealRadii[ilayer];
   if (m_hits[ilayer].getHitType() == HitType::spacepoint) {
     unsigned other_layer = (m_hits[ilayer].getSide() == 0) ? ilayer + 1 : ilayer - 1;
     target_r = (target_r + m_idealRadii[other_layer]) / 2.;
   }
 
-  double hitGPhi = m_hits[ilayer].getGPhi();
-  double houghRho = 0.0003 * getHoughY(); //A*q/pT
-
-  if (m_doDeltaGPhis) {
-    double expectedGPhi = getHoughX();
-
-    hitGPhi += (m_hits[ilayer].getR() - target_r) * houghRho; //first order
-    expectedGPhi -= target_r * houghRho; //first order
-
-    if (m_trackCorrType == TrackCorrType::Second) {
-      hitGPhi += (std::pow(m_hits[ilayer].getR() * houghRho, 3.0) / 6.0); //higher order
-      expectedGPhi -= (std::pow(target_r * houghRho, 3.0) / 6.0); //higher order
-    }
-
-    double hitZ = m_hits[ilayer].getZ();
-    if (m_hits[ilayer].getR() > 1e-8) {
-      hitZ -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - target_r); //first order
-      if (m_trackCorrType == TrackCorrType::Second)
-        hitZ -= (m_hits[ilayer].getGCotTheta() * std::pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
-    }
-
-    coords.push_back(hitZ);
-    coords.push_back(hitGPhi - expectedGPhi);
-  }
-  else {
-    double houghRho = 0.0003 * getHoughY(); //A*q/pT
-
-    hitGPhi += (m_hits[ilayer].getR() - target_r) * houghRho; //first order
-    if (m_trackCorrType == TrackCorrType::Second) {
-      hitGPhi += (pow(m_hits[ilayer].getR() * houghRho, 3.0) / 6.0); //higher order
-    }
-
-    double z = m_hits[ilayer].getZ();
-    if (m_hits[ilayer].getR() > 1e-8) {
-      z -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - target_r); //first order
-      if (m_trackCorrType == TrackCorrType::Second)
-        z -= m_hits[ilayer].getGCotTheta() * (std::pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
-    }
-
-    coords.push_back(z);
-    coords.push_back(hitGPhi);
-  }
+  // std::shared_ptr<const FPGATrackSimHit> hit = &m_hits[ilayer];
+  std::shared_ptr<const FPGATrackSimHit> hit = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer]);
+  double hough_x =  getHoughX();
+  double hough_y =  getHoughY();
+  
+  // Use the centralized computeIdealCoords function from FPGATrackSimFunctions
+  std::vector<float> coords = ::computeIdealCoords(hit, hough_x, hough_y, target_r,  m_doDeltaGPhis, m_trackCorrType);
 
   return coords;
 }

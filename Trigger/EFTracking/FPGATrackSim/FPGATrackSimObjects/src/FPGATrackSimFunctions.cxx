@@ -112,3 +112,49 @@ double rms95(TH1 const * h)
     return rms * 1.1479538518;
 }
 
+
+std::vector<float> computeIdealCoords(std::shared_ptr<const FPGATrackSimHit> hit, const double hough_x, const double hough_y, const double target_r, const bool doDeltaGPhis, const TrackCorrType trackCorrType) {
+  
+  std::vector<float> idealized_coordinates;
+
+  float hitGPhi = (float) hit->getGPhi();
+  float hitZ = (float) hit->getZ();
+
+  // rho = 0.33 m * (pT / GeV) / (B/T)
+  // B = 2 T so
+  // rho = 0.33 m * (pT / GeV) / (2)
+  double houghRho = 0.0003 * hough_y; //A*q/pT
+
+  hitGPhi += (hit->getR() - target_r) * houghRho; //first order
+  
+  if (trackCorrType == TrackCorrType::Second) {
+    hitGPhi += (pow(hit->getR() * houghRho, 3.0) / 6.0); //higher order
+  }
+
+  if (hit->getR() > 1e-8) {
+    hitZ -= hit->getGCotTheta() * (hit->getR() - target_r); //first order
+    if (trackCorrType == TrackCorrType::Second)
+      hitZ -= (hit->getGCotTheta() * std::pow(hit->getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
+  }
+  
+  idealized_coordinates.push_back(hitZ);
+
+  if (doDeltaGPhis) {
+    double expectedGPhi = hough_x;
+
+    expectedGPhi -= target_r * houghRho; //first order
+
+    if (trackCorrType == TrackCorrType::Second) {
+      expectedGPhi -= (std::pow(target_r * houghRho, 3.0) / 6.0); //higher order
+    }
+
+    idealized_coordinates.push_back(hitGPhi - expectedGPhi);
+  }
+  else {
+    idealized_coordinates.push_back(hitGPhi);
+  }
+
+
+  return idealized_coordinates;
+
+}
