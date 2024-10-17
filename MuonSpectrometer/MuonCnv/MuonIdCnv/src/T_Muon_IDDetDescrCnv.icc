@@ -1,0 +1,44 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "AthenaKernel/StorableConversions.h"
+#include "DetDescrCnvSvc/DetDescrConverter.h"
+#include "IdDictDetDescr/IdDictManager.h"
+
+
+/// Constructor
+template <class IDHELPER>
+T_Muon_IDDetDescrCnv<IDHELPER>::T_Muon_IDDetDescrCnv(ISvcLocator* svcloc, const char* name)
+   : DetDescrConverter(ClassID_traits<IDHELPER>::ID(), svcloc, name)
+{}
+
+
+template <class IDHELPER>
+StatusCode
+T_Muon_IDDetDescrCnv<IDHELPER>::initialize()
+{
+   ATH_CHECK( DetDescrConverter::initialize() );
+   return StatusCode::SUCCESS;
+}
+
+
+template <class IDHELPER>
+StatusCode
+T_Muon_IDDetDescrCnv<IDHELPER>::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
+{
+   ATH_MSG_DEBUG("in createObj: creating a helper object in the detector store");
+
+   // Get the dictionary manager from the detector store.
+   const IdDictManager* idDictMgr = nullptr;
+   ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
+
+   // Create the helper.
+   auto id_helper = new IDHELPER;
+   ATH_CHECK( idDictMgr->initializeHelper(*id_helper)==0 );
+
+   // Pass a pointer to the container to the Persistency service by reference.
+   pObj = SG::asStorable(id_helper);
+
+   return StatusCode::SUCCESS;
+}

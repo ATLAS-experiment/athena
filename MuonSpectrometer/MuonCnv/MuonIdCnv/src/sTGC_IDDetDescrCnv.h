@@ -1,51 +1,22 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/***************************************************************************
- Muon DetDescrCnv package
- -----------------------------------------
-***************************************************************************/
+#ifndef MUONCNV_STGC_IDDETDESCRCNV_H
+#define MUONCNV_STGC_IDDETDESCRCNV_H
 
-#ifndef INDETMGRDETDESCRCNV_STGC_IDDETDESCRCNV_H
-#define INDETMGRDETDESCRCNV_STGC_IDDETDESCRCNV_H
-
-//<<<<<< INCLUDES                                                       >>>>>>
-
-#include "DetDescrCnvSvc/DetDescrConverter.h"
-
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
+#include "T_Muon_IDDetDescrCnv.h"
+#include "MuonIdHelpers/sTgcIdHelper.h"
 
 
 /**
- **  This class is a converter for the sTGC_IdHelper an IdHelper which is
- **  stored in the detector store. This class derives from
- **  DetDescrConverter which is a converter of the DetDescrCnvSvc.
- **
+ ** Converter for sTgcIdHelper.
  **/
-
-class sTGC_IDDetDescrCnv: public DetDescrConverter {
-
- public:
-  virtual long int   repSvcType() const;
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
-
-  // Storage type and class ID (used by CnvFactory)
-  static long  storageType();
-  static const CLID& classID();
-
-  sTGC_IDDetDescrCnv(ISvcLocator* svcloc);
+class sTGC_IDDetDescrCnv: public T_Muon_IDDetDescrCnv<sTgcIdHelper> {
+public:
+   sTGC_IDDetDescrCnv(ISvcLocator* svcloc) :
+     T_Muon_IDDetDescrCnv(svcloc, "sTGC_IDDetDescrCnv") {}
 
 };
 
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-
-#endif // INDETMGRDETDESCRCNV_STGC_IDDETDESCRCNV_H
+#endif
