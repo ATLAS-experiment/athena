@@ -613,7 +613,7 @@ namespace ActsTrk
 
           seedParameters.reset(new Acts::BoundTrackParameters(fittedSeed.referenceSurface().getSharedPtr(),
                                                               fittedSeed.parameters(),
-                                                              fittedSeed.covariance(),
+                                                              initialParameters->covariance(),
                                                               fittedSeed.particleHypothesis()));
           printSeed(iseed, *seedParameters, true);
 
