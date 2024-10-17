@@ -66,14 +66,26 @@ def isLRT(name):
   return "LRT" in name
 
 #Returns relevant track collection name
-def getIDTracks(flags, name=''):
+def getIDTracks(flags, name='', muonIDreuse=False, precision=False):
 
-  if isLRT(name):
-    return flags.Trigger.InDetTracking.muonLRT.tracks_FTF
-  elif isCosmic(flags):
-    return flags.Trigger.InDetTracking.cosmics.tracks_IDTrig
+  if muonIDreuse:
+    if isLRT(name):
+      return 'HLT_IDTrack_MuonComb_FTF_LRT'
+    elif isCosmic(flags):
+      return 'HLT_IDTrack_MuonComb_FTF'
+    else:
+      return 'HLT_IDTrack_MuonComb_FTF'
+
   else:
-    return flags.Trigger.InDetTracking.muon.tracks_FTF
+    if precision:
+      return flags.Tracking.ActiveConfig.tracks_IDTrig
+    else:
+      if isLRT(name):
+        return flags.Trigger.InDetTracking.muonLRT.tracks_FTF
+      elif isCosmic(flags):
+        return flags.Trigger.InDetTracking.cosmics.tracks_IDTrig
+      else:
+        return flags.Trigger.InDetTracking.muon.tracks_FTF
 
 
 def MuDataPrepViewDataVerifierCfg(flags):
@@ -387,7 +399,6 @@ def VDVPrecMuTrkCfg(flags, name):
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
-
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
@@ -426,19 +437,19 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
   if isCosmic(flags) and 'LRT' not in name:
-    trackParticles = getIDTracks(flags)
+     trackParticles=getIDTracks(flags)
   elif 'LRT' in name:
-    muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
-    trackParticles = muLrtFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
+     trackParticles=getIDTracks(muLrtFlags, name, precision=True)
   elif 'FS' in name:
-    muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
-    trackParticles = muFsFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
+     trackParticles = getIDTracks(muFsFlags, precision=True)
   else:
-    muFlags = getFlagsForActiveConfig(flags, "muon", log)
-    acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
-    trackParticles = muFlags.Tracking.ActiveConfig.tracks_IDTrig
+     muFlags = getFlagsForActiveConfig(flags, "muon", log)
+     acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
+     trackParticles=getIDTracks(muFlags, precision=True)
 
 
   #Make InDetCandidates
