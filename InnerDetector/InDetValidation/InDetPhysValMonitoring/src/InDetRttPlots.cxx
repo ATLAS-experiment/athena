@@ -273,7 +273,7 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake,
   if (m_missingTruthFakePlots) m_missingTruthFakePlots->fill(track, !isAssociatedTruth, weight, mu);
   if(isAssociatedTruth) {
     if (m_fakePlots) m_fakePlots->fill(track, isFake, weight, mu);
-    if (m_hitsFakeTracksPlots) m_hitsFakeTracksPlots->fill(track, mu, weight);
+    if (m_hitsFakeTracksPlots and isFake) m_hitsFakeTracksPlots->fill(track, mu, weight);
     if(m_config.doFakesPerAuthor){
         std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = track.patternRecoInfo();
         
