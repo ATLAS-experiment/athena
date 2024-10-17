@@ -16,6 +16,8 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names (not "
             "needed if running a single instance of MET)")
+        self.addOption ('useJVT', True, type=bool,
+            info="whether to use the JVT decision in the calculation")
         self.addOption ('useFJVT', False, type=bool,
             info="whether to use the forward JVT decision in the calculation")
         self.addOption ('treatPUJets', False, type=bool,
@@ -74,14 +76,18 @@ class MetAnalysisConfig (ConfigBlock):
         # Set up the met maker algorithm:
         alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' + postfix)
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
-        config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
         alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
-        alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
+
+        alg.doJetJVT = self.useJVT
+        if self.useJVT:
+            config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
+            alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
+        if self.useFJVT:
+            alg.makerTool.JetRejectionDec = 'passFJVT_internal'
+
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale
-        if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'passFJVT_internal'
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
