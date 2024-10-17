@@ -29,6 +29,7 @@
 
 #include <iterator>
 #include <unordered_map>
+#include <fstream>
 
 using Acts::Surface;
 using Acts::Transform3;
