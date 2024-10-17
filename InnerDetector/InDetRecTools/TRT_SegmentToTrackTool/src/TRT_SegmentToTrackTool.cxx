@@ -8,11 +8,6 @@
 #include "InDetIdentifier/TRT_ID.h"
 #include "TrkSurfaces/Surface.h"
 
-///Needed for the track refitter
-//Extrapolator tool
-#include "TrkExInterfaces/IExtrapolator.h"
-//Scoring tool
-#include "TrkToolInterfaces/ITrackScoringTool.h"
 #include <cmath>
 
 using Amg::Vector3D;
@@ -30,21 +25,9 @@ namespace InDet {
   TRT_SegmentToTrackTool::TRT_SegmentToTrackTool(const std::string &type,
 							     const std::string &name,
 							     const IInterface *parent) :
-    AthAlgTool(type,name,parent),
-    m_fieldUnitConversion(1000.),
-    m_extrapolator("Trk::Extrapolator/InDetExtrapolator"),
-    m_scoringTool("Trk::TrackScoringTool/TrackScoringTool"),
-    m_trtId(nullptr)
+    AthAlgTool(type,name,parent)
   {
     declareInterface<InDet::ITRT_SegmentToTrackTool>( this );
-    m_doRefit            = false                                ;       //Do a final careful refit of tracks
-    m_suppressHoleSearch = false                                ;       //Suppress hole search
-    m_sharedFrac         = 0.3                                  ;       //Maximum fraction of shared hits !!!!!!!!!!!!!!!!!!!!!! offline 0.3!!!!!!!!!!!!!!!!!!!!!!!
-    declareProperty("FinalRefit"                 ,m_doRefit           ); //Do a final careful refit of tracks
-    declareProperty("SuppressHoleSearch"         ,m_suppressHoleSearch); //Suppress hole search during the track summary creation
-    declareProperty("MaxSharedHitsFraction"      ,m_sharedFrac        ); //Maximum fraction of shared drift circles
-    declareProperty("Extrapolator"               ,m_extrapolator      ); //Extrapolator tool
-    declareProperty("ScoringTool"                ,m_scoringTool       ); //Track scoring tool
   }
 
   TRT_SegmentToTrackTool::~TRT_SegmentToTrackTool()
