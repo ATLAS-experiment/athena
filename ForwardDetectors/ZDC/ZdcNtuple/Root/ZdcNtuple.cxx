@@ -10,6 +10,7 @@
 #include "xAODCore/ShallowCopy.h"
 
 #include <ZdcNtuple/ZdcNtuple.h>
+#include <ZdcUtils/ZdcEventInfo.h>
 
 // this is needed to distribute the algorithm to the workers
 //ClassImp(ZdcNtuple)
@@ -715,12 +716,15 @@ void ZdcNtuple::processZdcNtupleFromModules()
       return;
     }
   
+  bool rpdErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::RPDDECODINGERROR );
+  bool zdcErr = m_eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::ZDCDECODINGERROR );
+
   if (zdcSums.ptr())
     {
       ANA_MSG_DEBUG( "accessing ZdcSums" );
       for (const auto zdcSum : *zdcSums)
 	{
-	  if (zdcSum->zdcSide()==0 && enableCentroid)
+	  if (zdcSum->zdcSide()==0 && enableCentroid && !rpdErr)
 	    {
 	      // new global sum
 	      t_centroidEventValid = zdcSum->auxdataConst<char>("centroidEventValid" + auxSuffix);
@@ -733,7 +737,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
 	  //t_ZdcEnergy[iside] = acc(*zdcSum);
 	  
-	  if (enableZDC)
+	  if (enableZDC && !zdcErr)
 	    {
 	      t_ZdcEnergy[iside] = zdcSum->auxdataConst<float>("CalibEnergy"+auxSuffix);
 	      t_ZdcEnergyErr[iside] = zdcSum->auxdataConst<float>("CalibEnergyErr"+auxSuffix);
@@ -764,11 +768,11 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  
 	  if (enableRPD)
 	    {
-	      if (enableRPDAmp)
+	      if (enableRPDAmp && !rpdErr)
 		{
 		  t_RpdSideStatus[iside] = zdcSum->auxdataConst<unsigned int>("RPDStatus" + auxSuffix);
 		}
-	      if (enableCentroid)
+	      if (enableCentroid && !rpdErr)
 		{
 		  t_centroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
 		  std::vector<float> const& rpdChannelSubtrAmp = zdcSum->auxdataConst<std::vector<float>>("RPDChannelSubtrAmp" + auxSuffix);
@@ -791,6 +795,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     }
   
   ANA_MSG_DEBUG(  "accessing ZdcModules" );
+  
   if (zdcModules.ptr())
     {
       for (const auto zdcMod : *zdcModules)
@@ -816,7 +821,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  
 	  ANA_MSG_VERBOSE ("Module " << zdcMod->zdcSide() << " " << zdcMod->zdcModule() << " amp:" << zdcMod->auxdataConst<float>("Amplitude"));
 	  
-	  if (zdcMod->zdcType() == 0)
+	  if (zdcMod->zdcType() == 0 && !zdcErr)
 	    {
 	      // ZDC energy type modules
 	      t_ZdcModuleCalibAmp[iside][imod] = zdcMod->auxdataConst<float>("CalibEnergy" + auxSuffix);
@@ -850,7 +855,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	      if (zdcMod->isAvailable<float>("MaxADC"))
 		t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
 	      
-	      if (enableOutputSamples)
+	      if (enableOutputSamples && !zdcErr)
 		{
 		  for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
 		    {
@@ -883,7 +888,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	      // this is the RPD
 	      if (enableRPD)
 		{
-		  if (enableRPDAmp)
+		  if (enableRPDAmp && !rpdErr)
 		    {
 		      t_RpdChannelBaseline[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelBaseline" + auxSuffix);
 		      std::vector<float> const &rpdChannelPileupExpFitParams = zdcMod->auxdataConst<std::vector<float>>("RPDChannelPileupExpFitParams" + auxSuffix);
