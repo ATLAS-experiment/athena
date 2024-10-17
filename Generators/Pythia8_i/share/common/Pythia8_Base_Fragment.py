@@ -51,11 +51,6 @@ else:
         "ParticleDecays:limitTau0 = on",
         "ParticleDecays:tau0Max = 10.0"]
 
-## Control storing LHE in the HepMC record
-if "StoreLHE" in genSeq.Pythia8.__slots__.keys():
-   print ("Pythia8_Base_Fragment.py: DISABLING storage of LHE record in HepMC by default. Please re-enable storage if desired")
-   genSeq.Pythia8.StoreLHE = False
-
 ## Switch to single core
 # Helper for resetting process number
 from MCJobOptionUtils.JOsupport import check_reset_proc_number
