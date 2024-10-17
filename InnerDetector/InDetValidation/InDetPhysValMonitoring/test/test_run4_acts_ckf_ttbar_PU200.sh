@@ -34,7 +34,7 @@ run () {
     rc=$?
     # Only report hard failures for comparison Acts-Trk since we know
     # they are different. We do not expect these tests to succeed
-    [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" ] && [ $rc -ne 255 ] && rc=0
+    [ "${name}" = "dcube-ckf-ambi" -o "${name}" = "dcube-ckf-athena" -o "${name}" = "dcube-ambi-greedy-scored"] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -122,6 +122,45 @@ if [ $ckf_rc != 0 -a $ambi_rc != 0 ]; then
     exit $exit_rc
 fi
 
+echo "Running Reconstruction-ambi-scored ..."
+Reco_tf.py \
+    --steering doRAWtoALL \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
+    --preExec "flags.Acts.doMonitoring=True; \
+               from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy; \
+               flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased;" \
+    --ignorePatterns "${ignore_pattern}" \
+    --inputRDOFile ${rdo} \
+    --outputAODFile AOD.ambi.scored.root \
+    --perfmon fullmonmt \
+    --maxEvents ${n_events} \
+    --multithreaded
+
+reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.AMBI.SCORED
+mv acts-expert-monitoring.root acts-expert-monitoring.ambi.scored.root
+
+if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
+    exit $reco_rc
+fi
+
+run "IDPVM-ambi-scored" \
+    runIDPVM.py \
+    --filesInput AOD.ambi.scored.root \
+    --outputFile idpvm.ambi.scored.root \
+    --OnlyTrackingPreInclude \
+    --doTightPrimary \
+    --doHitLevelPlots \
+    --HSFlag All \
+    --doExpertPlots
+
+ambi_scored_rc=$?
+if [ $ambi_scored_rc != 0 ]; then
+    exit $ambi_scored_rc
+fi
+
+
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
@@ -146,7 +185,7 @@ if [ $ckf_rc == 0 ]; then
         idpvm.ckf.root
         # -c ${dcubeXmlTechEffAbsPath} \
 fi
-
+    
 if [ $ambi_rc == 0 ]; then
     run "dcube-ambi-last" \
         $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
@@ -166,6 +205,26 @@ if [ $ckf_rc == 0 -a $ambi_rc == 0 ]; then
         -M "ckf" \
         -R "ambi" \
         idpvm.ambi.root
+fi
+
+if [ $ambi_scored_rc == 0 ]; then
+    run "dcube-ambi-scored-last" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ambi_scored_last \
+        -c ${dcubeXmlAbsPath} \
+        -r ${lastref_dir}/idpvm.ambi.scored.root \
+        idpvm.ambi.scored.root
+fi
+
+if [ $ambi_rc == 0 -a $ambi_scored_rc == 0 ]; then
+    run "dcube-ambi-greedy-scored" \
+        $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+        -p -x dcube_ambi_greedy_scored \
+        -c ${dcubeXmlAbsPath} \
+        -r idpvm.ambi.root \
+        -M "ScoreBased" \
+        -R "Greedy" \
+        idpvm.ambi.scored.root
 fi
 
 exit $exit_rc
