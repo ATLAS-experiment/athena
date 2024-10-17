@@ -72,8 +72,8 @@ FPGATrackSimMatrixAccumulator(unsigned nLayers, unsigned nCoords) :
   // The hit_* vectors have size nCoords. For example, hit_x_phi stores the hit
   // coordinates times phi for each track, so after accumulation
   //      hit_x_phi[i] = sum_tracks(track.hit_coords[i] * track.phi)
-  std::vector<double> hit_coords; // hit coordinates
-  std::vector<double> hit_coordsG; // hit global coordinates
+  std::vector<float> hit_coords; // hit coordinates
+  std::vector<float> hit_coordsG; // hit global coordinates
   std::vector<double> hit_x_QoP;  // hit coordinate * half inverse pt
   std::vector<double> hit_xG_HIP;  // global hit coordinate * half inverse pt
   std::vector<double> hit_x_d0;   // hit coordinate * d0

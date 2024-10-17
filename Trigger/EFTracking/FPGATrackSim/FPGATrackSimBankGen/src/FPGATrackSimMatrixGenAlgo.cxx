@@ -14,6 +14,7 @@
 #include "FPGATrackSimMatrixAccumulator.h"
 #include "FPGATrackSimConfTools/FPGATrackSimRegionSlices.h"
 #include "FPGATrackSimObjects/FPGATrackSimConstants.h"
+#include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #include "TH1.h"
@@ -671,109 +672,59 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   }
 
 
-  // rho = (0.33 m) (pT/GeV) / (B/T)
-  // 0.33 in m -> 330.0 mm. Track pt -> GeV. 2.0 Tesla
-  // inverse, x2 for convenience
-
-  // rho =    330 mm * track.getPT() / 2 T
-  // 2 rho =  330 mm * track.getPT()
-  //    1/ (2rho) = 1./(330 * pT) for pT in GeV
-  // or 1./(0.33 * pt) for pT in MeV
-
-  double const trackTwoRhoInv = track.getQ() * 1.0 / ( 0.33 * track.getPt() );
-
   // Hough Constants parameters
   double y = accumulator.second.pars.qOverPt;
   double x = accumulator.second.pars.phi;
-  double const houghRho = fpgatracksim::A * y; // Aq/pT
 
   // Vectorize (flatten) coordinates
-  std::vector<double> coords;
-  std::vector<double> coordsG;
+  std::vector<float> coords;
+
   for (int i = 0; i < m_nLayers; ++i) {
     if (sector_hits[i].getHitType() != HitType::wildcard) {
-      double hitGPhi = sector_hits[i].getGPhi(); // need to be careful about 2 pi boundary in the future!
-      
+      std::shared_ptr<const FPGATrackSimHit> hit = std::make_shared<const FPGATrackSimHit>(sector_hits[i]);
+
+      double target_r = m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i);
+
       // If this is a spacepoint the target R should be the average of the two layers.
       // TODO, get this to be loaded in from a mean radii file into the mapping infrastructure.
-      double target_r = m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, i);
       if (sector_hits[i].getHitType() == HitType::spacepoint) {
         int other_layer = (sector_hits[i].getSide() == 0) ? i + 1 : i - 1;
         target_r = (target_r + m_FPGATrackSimMapping->RegionMap_1st()->getAvgRadius(0, other_layer)) / 2.;
       }
 
+      std::vector<float> coords_tmp;
+      if ( m_ideal_geom > 1 ) {
+        coords_tmp = computeIdealCoords(hit, x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::Second);
+      }
+      else {
+        coords_tmp = computeIdealCoords(hit, x, y, target_r, m_doDeltaPhiConsts, TrackCorrType::None);
+      }
+
       // Create phi for any hits that are not spacepoints, as well as "inner" spacepoints.
       // but not outer spacepoints. this avoids duplicate coordinates.
       if (sector_hits[i].getHitType() != HitType::spacepoint || sector_hits[i].getSide() == 0) {
-
-        if (m_doHoughConstants){
-          double expectedGPhi = x; // to get the intersection of the hough road with detector layer
-
-          hitGPhi += ( sector_hits[i].getR() - target_r ) * houghRho; //first order
-          expectedGPhi -= target_r * houghRho; //first order
-
-          if ( m_ideal_geom > 1 ) {
-            hitGPhi += ( pow( sector_hits[i].getR() * houghRho, 3.0 ) / 6.0 ); //higher order
-            expectedGPhi -= ( pow( target_r * houghRho, 3.0 ) / 6.0 ); //higher order
-          }
-
-          if (m_doDeltaPhiConsts) {
-            coords.push_back(hitGPhi - expectedGPhi);
-            coordsG.push_back(hitGPhi - expectedGPhi);
-          } else {
-            coords.push_back(hitGPhi);
-            coordsG.push_back(hitGPhi);
-            ATH_MSG_DEBUG("Pushed back phi coord = " << hitGPhi);
-          }
-        }
-        else {
-          // Idealise phi coordinate if requested
-          if ( m_ideal_geom > 0 ) {
-            hitGPhi += ( sector_hits[i].getR() - target_r ) * trackTwoRhoInv; //first order
-          }
-          if ( m_ideal_geom > 1 ) {
-            hitGPhi += ( pow( sector_hits[i].getR() * trackTwoRhoInv, 3.0 ) / 6.0 ); //higher order
-          }
-          coords.push_back(hitGPhi);
-          coordsG.push_back(hitGPhi);
-        }
+        // get idealized gPhi
+        coords.push_back(coords_tmp[1]);
       }
-      
-      // Create a z coordinate for the "outer" layer of the spacepoint and for 2D pixel hits.
+
+       // Create a z coordinate for the "outer" layer of the spacepoint and for 2D pixel hits.
       // This means that a spacepoint will write out (phi, eta) pairs, but (0, phi) or (phi, 0) if it's missing.
       if (sector_hits[i].getDim() == 2 || (sector_hits[i].getHitType() == HitType::spacepoint && (sector_hits[i].getPhysLayer() % 2) == 1)) {
-        double hitZ = sector_hits[i].getZ();
-
-        if(m_doHoughConstants){
-          hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - target_r);
-          if ( m_ideal_geom > 1 )
-            hitZ -= (sector_hits[i].getGCotTheta() * pow (sector_hits[i].getR(), 3.0) * houghRho * houghRho) / 6.0;
-        }
-        else{
-          if ( m_ideal_geom > 0 ) {
-            hitZ -= sector_hits[i].getGCotTheta() * (sector_hits[i].getR() - target_r);
-          }
-          if ( m_ideal_geom > 1 ) {
-            hitZ -= sector_hits[i].getGCotTheta() * ( pow (sector_hits[i].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0;
-          }
-        }
-
-        coords.push_back(hitZ);
-        coordsG.push_back(hitZ);
-        ATH_MSG_DEBUG("Pushed back z coord = " << hitZ);
+        // get idealized z
+        coords.push_back(coords_tmp[0]);
       }
-
     }
     else {
+      if (m_pmap->getDim(i) == 2) {
+        coords.push_back(0);
+      }
       coords.push_back(0);
-      coordsG.push_back(0);
-      if (m_pmap->getDim(i) == 2) coords.push_back(0);
-      if (m_pmap->getDim(i) == 2) coordsG.push_back(0);
     }
   }
+
   assert(coords.size() == (size_t)m_nDim);
   acc.hit_coords = coords;
-  acc.hit_coordsG = coordsG;
+  acc.hit_coordsG = coords;
   
   // Get the track parameters
   acc.pars = track.getPars();
@@ -797,18 +748,18 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   for (int i = 0; i < m_nDim; i++)
     {
       acc.hit_x_QoP[i] = coords[i] * acc.pars.qOverPt;
-      acc.hit_xG_HIP[i] = coordsG[i] * acc.pars.qOverPt;
+      acc.hit_xG_HIP[i] = coords[i] * acc.pars.qOverPt;
       acc.hit_x_d0[i]  = coords[i] * acc.pars.d0;
       acc.hit_x_z0[i]  = coords[i] * acc.pars.z0;
       acc.hit_x_eta[i] = coords[i] * acc.pars.eta;
-      acc.hit_xG_eta[i] = coordsG[i] * acc.pars.eta;
+      acc.hit_xG_eta[i] = coords[i] * acc.pars.eta;
       acc.hit_x_phi[i] = coords[i] * acc.pars.phi;
 
       for (int j = i; j < m_nDim; j++)
 	acc.covariance[i * m_nDim + j] = coords[i] * coords[j];
 
       for (int j = i; j < m_nDim; j++)
-	acc.covarianceG[i * m_nDim + j] = coordsG[i] * coordsG[j];
+	acc.covarianceG[i * m_nDim + j] = coords[i] * coords[j];
     }
 
   accumulator = {modules, acc};

@@ -137,6 +137,7 @@ FPGATrackSimMatrixWriter::FPGATrackSimMatrixWriter(TTree *tree, int nLayers, int
   // Dummy variables for typing (the branch address will be set for each sector)
   int anInt;
   double aDouble;
+  float aFloat;
 
   m_tree->Branch("ndim",      &m_nCoords,  "ndim/I");
   m_tree->Branch("ndim2",     &m_nCoords2, "ndim2/I");
@@ -151,8 +152,8 @@ FPGATrackSimMatrixWriter::FPGATrackSimMatrixWriter(TTree *tree, int nLayers, int
   m_tree->Branch("tmpCoto",   &aDouble, "tmpCoto/D");
   m_tree->Branch("tmpZ",      &aDouble, "tmpZ/D");
 
-  m_tree->Branch("Vec",       &aDouble, "Vec[ndim]/D");
-  m_tree->Branch("VecG",      &aDouble, "VecG[ndim]/D");
+  m_tree->Branch("Vec",       &aFloat, "Vec[ndim]/F");
+  m_tree->Branch("VecG",      &aFloat, "VecG[ndim]/F");
   m_tree->Branch("tmpxC",     &aDouble, "tmpxC[ndim]/D");
   m_tree->Branch("tmpxGC",    &aDouble, "tmpxGC[ndim]/D");
   m_tree->Branch("tmpxD",     &aDouble, "tmpxD[ndim]/D");
