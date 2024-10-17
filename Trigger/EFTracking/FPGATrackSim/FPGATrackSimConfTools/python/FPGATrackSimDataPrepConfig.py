@@ -382,6 +382,7 @@ def runDataPrepChain():
 
     flags.PhysVal.doExample = False
     
+    flags.PhysVal.doExample = False
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Scheduler.ShowDataDeps=True
