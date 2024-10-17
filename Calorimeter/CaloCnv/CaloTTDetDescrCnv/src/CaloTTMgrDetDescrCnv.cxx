@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -45,6 +45,7 @@ CaloTTMgrDetDescrCnv::initialize()
 {
     // First call parent init
     StatusCode sc = DetDescrConverter::initialize();
+
     MsgStream log(msgSvc(), "CaloTTMgrDetDescrCnv");
     if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "in initialize" << endmsg;
 
@@ -85,58 +86,22 @@ CaloTTMgrDetDescrCnv::finalize()
 //--------------------------------------------------------------------
 
 StatusCode
-CaloTTMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
+CaloTTMgrDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
     MsgStream log(msgSvc(), "CaloTTMgrDetDescrCnv");
     log << MSG::INFO << "in createObj: creating a CaloTTDescrManager object in the detector store" << endmsg;
     int outputLevel = msgSvc()->outputLevel( "CaloTTMgrDetDescrCnv" );
 
     // Create a new CaloTTDescrManager
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-	log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string mgrKey  = *( ddAddr->par() );
-    
-    if (outputLevel <= MSG::DEBUG) {
-    if ("" == mgrKey) {
-	log << MSG::DEBUG << "No Manager key " << endmsg;
-    }
-    else {
-	log << MSG::DEBUG << "Manager key is " << mgrKey << endmsg;
-    }
-    }
-    
-    // Create the manager
     CaloTTDescrManager* caloTTMgr = new CaloTTDescrManager(); 
 
     // Pass a pointer to the container to the Persistency service by reference.
     pObj = SG::asStorable(caloTTMgr);
 
-    // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-	log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-	return StatusCode::FAILURE;
-    } else {}
- 
     // Get idhelper from detector store and add to mgr
     //const DataHandle<CaloLVL1_ID> lvl1_id;
     const CaloLVL1_ID* lvl1_id = nullptr;
-    status = detStore->retrieve(lvl1_id, "CaloLVL1_ID");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get CaloLVL1_ID helper !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-      if (outputLevel <= MSG::DEBUG) log << MSG::DEBUG << " Found the CaloLVL1_ID helper. " << endmsg;
-    }
+    ATH_CHECK(detStore()->retrieve(lvl1_id, "CaloLVL1_ID"));
     caloTTMgr->set_helper(lvl1_id);
     log << MSG::INFO << "Set CaloLVL1_ID helper in CaloTTMgr " 
 	<< endmsg;
@@ -148,27 +113,15 @@ CaloTTMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     //     to Calo alignment changes. Hence, it is OK to write CaloTTDescrManager
     //     into DetStore
     SG::ReadCondHandleKey<CaloDetDescrManager> caloMgrKey {"CaloDetDescrManager"};
-    status = caloMgrKey.initialize();
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not initialize RCHK for CaloDetDescrManager !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-      if (outputLevel <= MSG::DEBUG) log << MSG::DEBUG << " Initialized RCHK for CaloDetDescrManager " << endmsg;
-    }
+    ATH_CHECK(caloMgrKey.initialize());
     SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{caloMgrKey};
     const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 
-    IToolSvc* toolSvc;
-    status   = service( "ToolSvc",toolSvc  );
-    if(! status.isSuccess()) { 
-      return status;
-    }  
+    SmartIF<IToolSvc> toolSvc{service("ToolSvc")};
+    ATH_CHECK(toolSvc.isValid());
 
-    CaloTriggerTowerService*    ttSvc; 
-    status =toolSvc->retrieveTool("CaloTriggerTowerService",ttSvc);
-    if(!status.isSuccess() ) return status;
-    
+    CaloTriggerTowerService*    ttSvc{nullptr};
+    ATH_CHECK(toolSvc->retrieveTool("CaloTriggerTowerService",ttSvc));
 
     // Initialize the caloTT mgr
     //  We protect here in case this has been initialized elsewhere
@@ -186,7 +139,6 @@ CaloTTMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
       int nFcal=0;
 
       // Initialize the manager ...
-
       const CaloLVL1_ID* lvl1_helper = lvl1_id;
       
       std::vector<Identifier>::const_iterator itId = lvl1_id->region_begin();
