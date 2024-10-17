@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import os
+import glob
 from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 
@@ -31,13 +32,6 @@ class ggF_HH(PowhegV2):
         # At the moment these files are stored or linked locally, so we use ${PWD}
         # but we may use self.executable.replace("pwhg_main", "Virtual") instead at some point
         os.environ["PYTHONPATH"] += ":" + os.environ["PWD"]
-
-        # need to use libraries compatible with the environment used at compilation (so centos7)
-        # would need to use ${LHAPDF_INSTAL_PATH}/lib/python3.9/site-packages when/if the process compiles in alma9 eventually
-        lhapdf_python_path = "/cvmfs/sft.cern.ch/lcg/releases/LCG_101/MCGenerators/lhapdf/6.3.0/x86_64-centos7-gcc8-opt/lib/python3.9/site-packages"
-        os.environ["PYTHONPATH"] += ":" + lhapdf_python_path
-
-        logger.info('PYTHONPATH is now:\n{}'.format(os.environ["PYTHONPATH"]))
 
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("alphas_from_lhapdf")
@@ -175,7 +169,19 @@ class ggF_HH(PowhegV2):
 
         # need to override lhapdf python path while the powheg process has been compiled in a different platform
         py_path_save = os.environ["PYTHONPATH"]
-        py_path_temp = os.environ["LHAPDF_INSTAL_PATH"] + "/lib/python3.9/site-packages" + ":" + py_path_save
+        base_path = os.environ["LHAPDF_INSTAL_PATH"]
+
+        # Search for the Python version in the lib folder
+        python_lib_path = glob.glob(os.path.join(base_path, "lib", "python*"))
+
+        # Ensure at least one matching path is found
+        if python_lib_path:
+            python_lib_path = python_lib_path[0]
+        else:
+            raise ValueError("No Python version found in lib folder")
+
+        # Build the temporary path
+        py_path_temp = python_lib_path + "/site-packages" + ":" + py_path_save
         os.environ["PYTHONPATH"] = py_path_temp
         logger.debug(f'Temporarily setting PYTHONPATH to:\n{py_path_temp}')
 
