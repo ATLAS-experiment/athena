@@ -95,6 +95,7 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
   std::string m_param_file_path;
   double m_beam_energy;
   bool m_lfv_leplep_refit;
+  bool m_save_llh_histo;
 
 };
 } // namespace DiTauMassTools  

@@ -35,6 +35,7 @@ MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(nam
   declareProperty("ParamFilePath",		m_param_file_path = "MMC_params_v1_fixed.root");
   declareProperty("BeamEnergy",     m_beam_energy = 6500.0);
   declareProperty("LFVLeplepRefit", m_lfv_leplep_refit = true);
+  declareProperty("SaveLlhHisto", m_save_llh_histo = false, "Save MMC LLh histograms for debugging purpose. If enabled, it can slow down MMC running time");
 }
 
 // Copy constructor
@@ -76,6 +77,7 @@ StatusCode MissingMassToolV2::initialize()
   if (m_use_mnu_probability) m_MMC->Prob->SetUseMnuProbability(m_use_mnu_probability);
   if (m_beam_energy) m_MMC->SetBeamEnergy(m_beam_energy);
   if (!m_lfv_leplep_refit) m_MMC->SetLFVLeplepRefit(false);
+  if (m_save_llh_histo) m_MMC->SaveLlhHisto(true);
 
   // could be made a property but maybe not with the enum
   // What about a string argument ?

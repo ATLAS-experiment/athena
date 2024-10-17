@@ -11,8 +11,6 @@
 
 // if histogram smoothing
 //#define SMOOTH
-//#define SAVELIKELIHOODHISTO // use with caution: increases run-time by a
-// factor of ~10
 
 #include "DiTauMassTools/MissingMassCalculatorV2.h" // this is for RootCore package
 #include <fstream>
@@ -134,21 +132,22 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
 
   m_fMfit_all = std::make_shared<TH1F>("MMC_h1", "M", hNbins, 0.0,
                                      hEmax); // all solutions
-#ifdef SAVELIKELIHOODHISTO
-  m_fMEtP_all = std::make_shared<TH1F>("MEtP_h1", "M", hNbins, -100.0,
+  if(m_SaveLlhHisto){
+     m_fMEtP_all = std::make_shared<TH1F>("MEtP_h1", "M", hNbins, -100.0,
                                      100.); // all solutions
-  m_fMEtL_all = std::make_shared<TH1F>("MEtL_h1", "M", hNbins, -100.0,
+     m_fMEtL_all = std::make_shared<TH1F>("MEtL_h1", "M", hNbins, -100.0,
                                      100.); // all solutions
-  m_fMnu1_all = std::make_shared<TH1F>("Mnu1_h1", "M", hNbins, 0.0,
+     m_fMnu1_all = std::make_shared<TH1F>("Mnu1_h1", "M", hNbins, 0.0,
                                      hEmax); // all solutions
-  m_fMnu2_all = std::make_shared<TH1F>("Mnu2_h1", "M", hNbins, 0.0,
+     m_fMnu2_all = std::make_shared<TH1F>("Mnu2_h1", "M", hNbins, 0.0,
                                      hEmax); // all solutions
-  m_fPhi1_all = std::make_shared<TH1F>("Phi1_h1", "M", hNbins, -10.0,
+     m_fPhi1_all = std::make_shared<TH1F>("Phi1_h1", "M", hNbins, -10.0,
                                      10.); // all solutions
-  m_fPhi2_all = std::make_shared<TH1F>("Phi2_h1", "M", hNbins, -10.0,
+     m_fPhi2_all = std::make_shared<TH1F>("Phi2_h1", "M", hNbins, -10.0,
                                      10.);     // all solutions
-  m_fMfit_allGraph = std::make_shared<TGraph>(); // all solutions
-#endif
+     m_fMfit_allGraph = std::make_shared<TGraph>(); // all solutions
+  }
+
   m_fMfit_all->Sumw2(); // allow proper error bin calculation. Slightly slower but
                       // completely negligible
   // these histograms are used for the floating stopping criterion
@@ -168,14 +167,16 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
     m_fPhi1_split2 = std::make_shared<TH1F>("Phi1_h1_2", "M", hNbins, -10.0, 10.0);
     m_fPhi2_split2 = std::make_shared<TH1F>("Phi2_h1_2", "M", hNbins, -10.0, 10.0);
   }
-#ifdef SAVELIKELIHOODHISTO
-  m_fMEtP_all->Sumw2();
-  m_fMEtL_all->Sumw2();
-  m_fMnu1_all->Sumw2();
-  m_fMnu2_all->Sumw2();
-  m_fPhi1_all->Sumw2();
-  m_fPhi2_all->Sumw2();
-#endif
+
+  if(m_SaveLlhHisto){
+    m_fMEtP_all->Sumw2();
+    m_fMEtL_all->Sumw2();
+    m_fMnu1_all->Sumw2();
+    m_fMnu2_all->Sumw2();
+    m_fPhi1_all->Sumw2();
+    m_fPhi2_all->Sumw2();
+  }
+
   // these histograms are used for the floating stopping criterion
   if (m_fUseFloatStopping) {
     m_fMmass_split1->Sumw2();
@@ -212,14 +213,16 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
                                    hEmax); // Pz for tau2
 
   m_fMfit_all->SetDirectory(0);
-#ifdef SAVELIKELIHOODHISTO
-  m_fMEtP_all->SetDirectory(0);
-  m_fMEtL_all->SetDirectory(0);
-  m_fMnu1_all->SetDirectory(0);
-  m_fMnu2_all->SetDirectory(0);
-  m_fPhi1_all->SetDirectory(0);
-  m_fPhi2_all->SetDirectory(0);
-#endif
+
+  if(m_SaveLlhHisto){
+     m_fMEtP_all->SetDirectory(0);
+     m_fMEtL_all->SetDirectory(0);
+     m_fMnu1_all->SetDirectory(0);
+     m_fMnu2_all->SetDirectory(0);
+     m_fPhi1_all->SetDirectory(0);
+     m_fPhi2_all->SetDirectory(0);
+  }
+
   m_fMfit_allNoWeight->SetDirectory(0);
   m_fPXfit1->SetDirectory(0);
   m_fPYfit1->SetDirectory(0);
@@ -324,34 +327,36 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
     }
     OutputInfo.m_FitStatus = DitauMassCalculatorV9lfv(false);
   }
-#ifdef SAVELIKELIHOODHISTO
-  TFile *outFile = TFile::Open("MMC_likelihoods.root", "UPDATE");
-  outFile->cd();
-  auto path = std::to_string(m_eventNumber);
-  if (!outFile->GetDirectory(path.c_str()))
-    outFile->mkdir(path.c_str());
-  outFile->cd(path.c_str());
-  m_fMfit_all->Write(m_fMfit_all->GetName(), TObject::kOverwrite);
-  m_fMEtP_all->Write(m_fMEtP_all->GetName(), TObject::kOverwrite);
-  m_fMEtL_all->Write(m_fMEtL_all->GetName(), TObject::kOverwrite);
-  m_fMnu1_all->Write(m_fMnu1_all->GetName(), TObject::kOverwrite);
-  m_fMnu2_all->Write(m_fMnu2_all->GetName(), TObject::kOverwrite);
-  m_fPhi1_all->Write(m_fPhi1_all->GetName(), TObject::kOverwrite);
-  m_fPhi2_all->Write(m_fPhi2_all->GetName(), TObject::kOverwrite);
-  m_fMfit_allNoWeight->Write(m_fMfit_allNoWeight->GetName(), TObject::kOverwrite);
-  m_fMfit_allGraph->Write("Graph", TObject::kOverwrite);
-  TH1D *nosol = new TH1D("nosol", "nosol", 7, 0, 7);
-  nosol->SetBinContent(1, m_testptn1);
-  nosol->SetBinContent(2, m_testptn2);
-  nosol->SetBinContent(3, m_testdiscri1);
-  nosol->SetBinContent(4, m_testdiscri2);
-  nosol->SetBinContent(5, m_nosol1);
-  nosol->SetBinContent(6, m_nosol1);
-  nosol->SetBinContent(7, m_iterNuPV3);
-  nosol->Write(nosol->GetName(), TObject::kOverwrite);
-  outFile->Write();
-  outFile->Close();
-#endif
+
+  if(m_SaveLlhHisto){
+     TFile *outFile = TFile::Open("MMC_likelihoods.root", "UPDATE");
+     outFile->cd();
+     auto path = std::to_string(m_eventNumber);
+     if (!outFile->GetDirectory(path.c_str()))
+        outFile->mkdir(path.c_str());
+     outFile->cd(path.c_str());
+     m_fMfit_all->Write(m_fMfit_all->GetName(), TObject::kOverwrite);
+     m_fMEtP_all->Write(m_fMEtP_all->GetName(), TObject::kOverwrite);
+     m_fMEtL_all->Write(m_fMEtL_all->GetName(), TObject::kOverwrite);
+     m_fMnu1_all->Write(m_fMnu1_all->GetName(), TObject::kOverwrite);
+     m_fMnu2_all->Write(m_fMnu2_all->GetName(), TObject::kOverwrite);
+     m_fPhi1_all->Write(m_fPhi1_all->GetName(), TObject::kOverwrite);
+     m_fPhi2_all->Write(m_fPhi2_all->GetName(), TObject::kOverwrite);
+     m_fMfit_allNoWeight->Write(m_fMfit_allNoWeight->GetName(), TObject::kOverwrite);
+     m_fMfit_allGraph->Write("Graph", TObject::kOverwrite);
+     TH1D *nosol = new TH1D("nosol", "nosol", 7, 0, 7);
+     nosol->SetBinContent(1, m_testptn1);
+     nosol->SetBinContent(2, m_testptn2);
+     nosol->SetBinContent(3, m_testdiscri1);
+     nosol->SetBinContent(4, m_testdiscri2);
+     nosol->SetBinContent(5, m_nosol1);
+     nosol->SetBinContent(6, m_nosol1);
+     nosol->SetBinContent(7, m_iterNuPV3);
+     nosol->Write(nosol->GetName(), TObject::kOverwrite);
+     outFile->Write();
+     outFile->Close();
+  }
+
   DoOutputInfo();
   PrintResults();
   preparedInput.ClearInput();
@@ -870,14 +875,16 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
   OutputInfo.m_AveSolRMS = 0.;
 
   m_fMfit_all->Reset();
-#ifdef SAVELIKELIHOODHISTO
-  m_fMEtP_all->Reset();
-  m_fMEtL_all->Reset();
-  m_fMnu1_all->Reset();
-  m_fMnu2_all->Reset();
-  m_fPhi1_all->Reset();
-  m_fPhi2_all->Reset();
-#endif
+
+  if(m_SaveLlhHisto){
+    m_fMEtP_all->Reset();
+    m_fMEtL_all->Reset();
+    m_fMnu1_all->Reset();
+    m_fMnu2_all->Reset();
+    m_fPhi1_all->Reset();
+    m_fPhi2_all->Reset();
+  }
+
   m_fMfit_allNoWeight->Reset();
   m_fPXfit1->Reset();
   m_fPYfit1->Reset();
@@ -2294,16 +2301,18 @@ void MissingMassCalculatorV2::handleSolutions()
              1; // incremented only when a point is rejected, hence need to add 1
 
     m_fMfit_all->Fill(mtautau, weight);
-#ifdef SAVELIKELIHOODHISTO
-    m_fMEtP_all->Fill(m_MEtP, weight);
-    m_fMEtL_all->Fill(m_MEtL, weight);
-    m_fMnu1_all->Fill(m_Mnu1, weight);
-    m_fMnu2_all->Fill(m_Mnu2, weight);
-    m_fPhi1_all->Fill(m_Phi1, weight);
-    m_fPhi2_all->Fill(m_Phi2, weight);
-    if (mtautau != 0. && weight != 0.)
-      m_fMfit_allGraph->SetPoint(m_iter0, mtautau, -TMath::Log(weight));
-#endif
+
+    if(m_SaveLlhHisto){
+       m_fMEtP_all->Fill(m_MEtP, weight);
+       m_fMEtL_all->Fill(m_MEtL, weight);
+       m_fMnu1_all->Fill(m_Mnu1, weight);
+       m_fMnu2_all->Fill(m_Mnu2, weight);
+       m_fPhi1_all->Fill(m_Phi1, weight);
+       m_fPhi2_all->Fill(m_Phi2, weight);
+       if (mtautau != 0. && weight != 0.)
+          m_fMfit_allGraph->SetPoint(m_iter0, mtautau, -TMath::Log(weight));
+    }
+
     m_fMfit_allNoWeight->Fill(mtautau, 1.);
 
     //      m_fPXfit1->Fill(nuvec1_tmpj.Px(),weight);
