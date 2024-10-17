@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -141,11 +141,9 @@ InDet::SCT_OverlapDescriptor::reachableSurfaces(
 bool InDet::SCT_OverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceIntersection>& surfaces) const {
   
   if (m_sctIdHelper==nullptr) {
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    
     // get DetectorStore service
-    StoreGateSvc* detStore = nullptr;
-    if (svcLocator->service("DetectorStore", detStore).isFailure()) {
+    SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+    if (!detStore.isValid()) {
       return false;
     }
 
