@@ -910,6 +910,20 @@ def createVtxLumiTrackingPassFlags():
 
     return icf
 
+## VtxLumiHeavyIon mode ################
+def createVtxLumiHeavyIonTrackingPassFlags():
+    icf = createTrackingPassFlags()
+    icf.extension               = "VtxLumiHeavyIon"
+    icf.minClusters             = 7
+    icf.maxPixelHoles           = 1
+    icf.radMax                  = 600. * Units.mm
+    icf.nHolesMax               = 2
+    icf.nHolesGapMax            = 1
+    icf.useTRT                  = False
+    icf.doBremRecoverySi        = False
+
+    return icf
+
 ## VtxBeamSpot mode ########################
 def createVtxBeamSpotTrackingPassFlags():
     icf = createTrackingPassFlags()
