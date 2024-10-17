@@ -440,8 +440,6 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
 
   m_pythiaToHepMC.fill_next_event(*m_pythia, evt, m_internal_event_number);
 
-  if(m_lheFile != "" && m_storeLHE) addLHEToHepMC(evt);
-
   // in debug mode you can check whether the pdf information is stored
   if(evt->pdf_info()){
 #ifdef HEPMC3
@@ -679,98 +677,6 @@ StatusCode Pythia8_i::genFinalize(){
       
 
   return StatusCode::SUCCESS;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
-constexpr int LHESTATUS = 1003;
-#ifdef HEPMC3
-  HepMC::GenEvent *procEvent = new HepMC::GenEvent();
-
-  // Adding the LHE event to the HepMC results in undecayed partons in the event record.
-  // Pythia's HepMC converter throws up undecayed partons, so we ignore that
-  // (expected) exception this time
-  m_pythiaToHepMC.fill_next_event(m_pythia->process, procEvent, evt->event_number(), &m_pythia->info, &m_pythia->settings);
-
-  for(auto  p: *procEvent){
-    p->set_status(LHESTATUS);
-  }
-
-  //This code and the HepMC2 version below assume a correct input, e.g. beams[0]->end_vertex() exists.
-  for(auto&  v: procEvent->vertices()) v->set_status(1);
-  auto beams=evt->beams();
-  auto procBeams=procEvent->beams();
-  if(beams[0]->momentum().pz() * procBeams[0]->momentum().pz() < 0.) std::swap(procBeams[0],procBeams[1]);
-  for (auto p: procBeams[0]->end_vertex()->particles_out())  beams[0]->end_vertex()->add_particle_out(p);
-  for (auto p: procBeams[1]->end_vertex()->particles_out())  beams[1]->end_vertex()->add_particle_out(p);
-   
-  HepMC::fillBarcodesAttribute(procEvent);
-#else
-  HepMC::GenEvent *procEvent = new HepMC::GenEvent(evt->momentum_unit(), evt->length_unit());
-
-  // Adding the LHE event to the HepMC results in undecayed partons in the event record.
-  // Pythia's HepMC converter throws up undecayed partons, so we ignore that
-  // (expected) exception this time
-  try{
-    m_pythiaToHepMC.fill_next_event(m_pythia->process, procEvent, evt->event_number(), &m_pythia->info, &m_pythia->settings);
-  }catch(HepMC::PartonEndVertexException &ignoreIt){}
-
-  for(HepMC::GenEvent::particle_iterator p = procEvent->particles_begin();
-      p != procEvent->particles_end(); ++p){
-    (*p)->set_status(LHESTATUS);
-  }
-
-  std::vector<HepMC::GenParticle*> beams;
-  std::vector<HepMC::GenParticle*> procBeams;
-  beams.push_back(evt->beam_particles().first);
-  beams.push_back(evt->beam_particles().second);
-
-  if(beams[0]->momentum().pz() * procEvent->beam_particles().first->momentum().pz() > 0.){
-    procBeams.push_back(procEvent->beam_particles().first);
-    procBeams.push_back(procEvent->beam_particles().second);
-  }else{
-    procBeams.push_back(procEvent->beam_particles().second);
-    procBeams.push_back(procEvent->beam_particles().first);
-  }
-
-  std::map<const HepMC::GenVertex*, HepMC::GenVertex*> vtxCopies;
-
-  for(HepMC::GenEvent::vertex_const_iterator v = procEvent->vertices_begin();
-      v != procEvent->vertices_end(); ++v ) {
-    if(*v == procBeams[0]->end_vertex() || *v == procBeams[1]->end_vertex()) continue;
-    HepMC::GenVertex* vCopy = new HepMC::GenVertex((*v)->position(), (*v)->id(), (*v)->weights());
-    vCopy->suggest_barcode(-(evt->vertices_size()));
-    vCopy->set_id(1);
-    vtxCopies[*v] = vCopy;
-    evt->add_vertex(vCopy);
-  }
-
-  for(HepMC::GenEvent::particle_const_iterator p = procEvent->particles_begin();
-      p != procEvent->particles_end(); ++p ){
-    if((*p)->is_beam()) continue;
-
-    HepMC::GenParticle *pCopy = new HepMC::GenParticle(*(*p));
-    pCopy->suggest_barcode(evt->particles_size());
-
-    std::map<const HepMC::GenVertex*, HepMC::GenVertex*>::iterator vit;
-    for(size_t ii =0; ii != 2; ++ii){
-      if((*p)->production_vertex() == procBeams[ii]->end_vertex()){
-        beams[ii]->end_vertex()->add_particle_out(pCopy);
-        break;
-      }
-
-      if(ii == 1){
-        vit = vtxCopies.find((*p)->production_vertex());
-        if(vit != vtxCopies.end()) vit->second->add_particle_out(pCopy);
-      }
-    }
-
-    vit = vtxCopies.find((*p)->end_vertex());
-    if(vit != vtxCopies.end()) vit->second->add_particle_in(pCopy);
-  }
-#endif
-
-  return;
 }
 
 ////////////////////////////////////////////////////////////////////////

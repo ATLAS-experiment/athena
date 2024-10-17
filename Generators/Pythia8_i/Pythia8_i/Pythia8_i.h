@@ -102,7 +102,6 @@ protected:
 private:
 
   static std::string findValue(const std::string &command, const std::string &key);
-  void addLHEToHepMC(HepMC::GenEvent *evt);
 
   int m_internal_event_number{0};
 
@@ -123,7 +122,6 @@ private:
 
   StringProperty m_lheFile{this, "LHEFile", ""};
 
-  BooleanProperty m_storeLHE{this, "StoreLHE", false};
   BooleanProperty m_doCKKWLAcceptance{this, "CKKWLAcceptance", false};
   BooleanProperty m_doFxFxXS{this, "FxFxXS", false};
   BooleanProperty m_computeEfficiency{this, "computeEfficiency", false};
