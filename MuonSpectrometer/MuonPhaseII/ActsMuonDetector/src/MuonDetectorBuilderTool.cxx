@@ -70,7 +70,8 @@ namespace ActsTrk {
             //Loop through the parent, skipping the fullphysvol which are the readOutElements
             const std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(parentVolume, false);
             for(const GeoChildNodeWithTrf& childNode : children){
-                if(typeid(*(childNode.volume)) != typeid(GeoFullPhysVol)){
+	        auto& childVol = *(childNode.volume);
+                if(typeid(childVol) != typeid(GeoFullPhysVol)){
                     ATH_MSG_VERBOSE("Processing " << childNode.nodeName);
                     const GeoShape* shape = childNode.volume->getLogVol()->getShape();
                     if(shape->typeID() == GeoSimplePolygonBrep::getClassTypeID() or 
