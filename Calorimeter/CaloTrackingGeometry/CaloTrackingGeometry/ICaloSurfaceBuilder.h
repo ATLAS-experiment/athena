@@ -38,18 +38,16 @@ class DiscLayer;
 /** Interface to CaloSurfaceBuilder
 
  */
-static const InterfaceID IID_ICaloSurfaceBuilder("ICaloSurfaceBuilder", 1, 0);
 
 class ICaloSurfaceBuilder : virtual public IAlgTool
 {
 
-
 public:
   /**Virtual destructor*/
-  virtual ~ICaloSurfaceBuilder() {}
+  virtual ~ICaloSurfaceBuilder() = default;
 
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ICaloSurfaceBuilder; }
+  /** Declare interface */
+  DeclareInterfaceID( ICaloSurfaceBuilder, 1, 0 );
 
   virtual CaloDepthTool* getCaloDepth() = 0;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,6 +36,7 @@
 class ICaloRecoSimpleGeomTool : virtual public IAlgTool
 {
 public:
+  DeclareInterfaceID( ICaloRecoSimpleGeomTool, 1, 0 );
 
   /** @brief the enum ALIGNVOL covers all LAr pieces, including cryostats and coil 
    */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -16,34 +16,24 @@
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
-class IMessageSvc;
-class LArDetDescrManager;
+/**
+ *  @class LArRecoSimpleGeomTool
+ *  @brief This class implements the CaloDetDescr/ICaloRecoSimpleGeomTool and provides the
+ *         simplified geometry needed for the LAr part of the Calorimeter/CaloTrackingGeometry 
+ *         volumes.
+ **/
 
-class IGeoModelSvc;
-
-//<<<<<< INCLUDES >>>>>>
-
-/** This class implements the CaloDetDescr/ICaloRecoSimpleGeomTool and provides the
-    simplified geometry needed for the LAr part of the Calorimeter/CaloTrackingGeometry 
-    volumes.
-
-
- */
-
-class LArRecoSimpleGeomTool : public AthAlgTool, virtual public ICaloRecoSimpleGeomTool
+class LArRecoSimpleGeomTool : public extends<AthAlgTool, ICaloRecoSimpleGeomTool>
 {
 public:
   
-  // Constructors:
-
+  // Constructor:
   LArRecoSimpleGeomTool(const std::string& type, 
-		  const std::string& name, 
-		  const IInterface* parent); 
+			const std::string& name,
+			const IInterface* parent);
 
-  virtual ~LArRecoSimpleGeomTool();
-  static const InterfaceID& interfaceID( ) ; 
+  virtual ~LArRecoSimpleGeomTool() = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
   
   /** the enum ALIGNVOL covers all LAr pieces, including cryostats and coil */
   
@@ -86,19 +76,12 @@ private:
   // Access to DDDb :
   std::string m_geometry;
 
-  IRDBAccessSvc* m_iAccessSvc = nullptr;
-  const IGeoModelSvc* m_geoModelSvc = nullptr;
-
   IRDBRecordset_ptr m_recCryoCyl;
   IRDBRecordset_ptr m_recPresGeo;
   IRDBRecordset_ptr m_recBarrGeo;
   IRDBRecordset_ptr m_recPresPos;
   IRDBRecordset_ptr m_EmecGeo;
   IRDBRecordset_ptr m_HEC;
-
-  std::string m_tag;
-  std::string m_node;
-
 };
 
 #endif // LARDETDESCR_LARSIMPLEGEOMTOOL_H

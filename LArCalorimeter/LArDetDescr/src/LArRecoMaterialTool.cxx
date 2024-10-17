@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -7,7 +7,7 @@
 // -------------------------------------------------------------
 //****************************************************************************
 
-#include "LArDetDescr/LArRecoMaterialTool.h"
+#include "LArRecoMaterialTool.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "Gaudi/Property.h"
@@ -26,18 +26,11 @@
 #include <iostream>
 #include <iomanip>
 
-static const InterfaceID IID_LArRecoMaterialTool("LArRecoMaterialTool", 1, 0);
-
-const InterfaceID& LArRecoMaterialTool::interfaceID( ) 
-{ return IID_LArRecoMaterialTool; }
-
 LArRecoMaterialTool::LArRecoMaterialTool(const std::string& type, 
-				   const std::string& name, 
-				   const IInterface* parent) :
-  AthAlgTool(type, name, parent),
-  m_calo_id(nullptr),m_dm_id(nullptr)
+					 const std::string& name,
+					 const IInterface* parent)
+  : base_class(type, name, parent)
 {
-  declareInterface<LArRecoMaterialTool>( this );
 }
 
 StatusCode
@@ -71,17 +64,6 @@ LArRecoMaterialTool::initialize()
   ATH_MSG_INFO (" LArRecoMaterialTool successfully initialized ");
   return StatusCode::SUCCESS;
 }
-
-LArRecoMaterialTool::~LArRecoMaterialTool()
-{
-}
-
-StatusCode
-LArRecoMaterialTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
 
 bool 
 LArRecoMaterialTool::get_material (CaloSubdetNames::ALIGNVOL alvol, 

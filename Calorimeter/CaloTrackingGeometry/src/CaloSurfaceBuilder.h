@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -53,9 +53,7 @@ class ITrackingVolumeBuilder;
     All numbers are provided by the CaloDetDescr tools
  */
 
-class CaloSurfaceBuilder
-  : public AthAlgTool
-  , virtual public ICaloSurfaceBuilder
+class CaloSurfaceBuilder : public extends<AthAlgTool, ICaloSurfaceBuilder>
 
 {
 

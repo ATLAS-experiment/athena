@@ -1,5 +1,5 @@
-#include "LArDetDescr/LArRecoMaterialTool.h"
-#include "LArDetDescr/LArRecoSimpleGeomTool.h"
+#include "../LArRecoMaterialTool.h"
+#include "../LArRecoSimpleGeomTool.h"
 
 DECLARE_COMPONENT( LArRecoMaterialTool )
 DECLARE_COMPONENT( LArRecoSimpleGeomTool )
