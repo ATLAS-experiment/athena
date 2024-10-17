@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloAddCellPedShift.h"
@@ -18,7 +18,6 @@
 //Constructor
 CaloAddCellPedShift::CaloAddCellPedShift(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
-  m_thistSvc(nullptr),
   m_calo_id(nullptr),
   m_onlineID(nullptr),
   m_caloCoolIdTool("CaloCoolIdTool"),
@@ -66,7 +65,7 @@ StatusCode CaloAddCellPedShift::initialize()
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
   ATH_CHECK( detStore()->retrieve(m_onlineID,"LArOnlineID") );
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
 
   m_tree = new TTree("mytree","Calo Ped ntuple");
   m_tree->Branch("iCool",&m_iCool,"iCool/I");

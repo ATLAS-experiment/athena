@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloRescaleNoise.h"
@@ -12,7 +12,6 @@
 //Constructor
 CaloRescaleNoise::CaloRescaleNoise(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
-  m_thistSvc(nullptr),
   m_calo_id(nullptr),
   m_iCool(0),
   m_SubHash(0),
@@ -41,7 +40,7 @@ CaloRescaleNoise::~CaloRescaleNoise()
 StatusCode CaloRescaleNoise::initialize()
 {
   ATH_MSG_DEBUG ("CaloRescaleNoise initialize()" );
-  ATH_CHECK(service("THistSvc",m_thistSvc) );
+  ATH_CHECK(m_thistSvc.retrieve());
 
   const CaloIdManager* mgr = nullptr;
   ATH_CHECK( detStore()->retrieve( mgr ) );

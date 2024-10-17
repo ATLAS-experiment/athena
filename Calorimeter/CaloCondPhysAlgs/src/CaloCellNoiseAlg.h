@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TheCaloCellNoiseAlg.h
@@ -58,7 +58,7 @@
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-    ITHistSvc* m_thistSvc{nullptr};
+    ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
       , "CaloDetDescrManager"

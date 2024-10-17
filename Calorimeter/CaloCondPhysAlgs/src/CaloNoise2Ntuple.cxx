@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloNoise2Ntuple.h"
@@ -12,7 +12,6 @@
 //Constructor
 CaloNoise2Ntuple::CaloNoise2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
-  m_thistSvc(nullptr),
   m_calo_id(nullptr),
   m_iCool(0),
   m_SubHash(0),
@@ -43,7 +42,7 @@ StatusCode CaloNoise2Ntuple::initialize()
 {
   ATH_MSG_DEBUG ("CaloNoise2Ntuple initialize()" );
 
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
 
   const CaloIdManager* mgr = nullptr;
   ATH_CHECK( detStore()->retrieve( mgr ) );

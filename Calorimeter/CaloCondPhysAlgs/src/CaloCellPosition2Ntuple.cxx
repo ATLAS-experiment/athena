@@ -27,7 +27,7 @@ CaloCellPosition2Ntuple::CaloCellPosition2Ntuple(const std::string& name, ISvcLo
 StatusCode CaloCellPosition2Ntuple::initialize()
 {
   ATH_MSG_DEBUG ("CaloCellPosition2Ntuple initialize()" );
-  ATH_CHECK( service("THistSvc",m_thistSvc) );
+  ATH_CHECK( m_thistSvc.retrieve() );
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
 

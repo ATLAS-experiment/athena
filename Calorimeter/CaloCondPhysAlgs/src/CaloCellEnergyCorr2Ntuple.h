@@ -53,7 +53,7 @@ class CaloCellEnergyCorr2Ntuple : public AthAlgorithm {
   // Member variables
   //---------------------------------------------------
   //=== blob storage
-  ITHistSvc* m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
 
   const CaloCell_ID*       m_calo_id;
 

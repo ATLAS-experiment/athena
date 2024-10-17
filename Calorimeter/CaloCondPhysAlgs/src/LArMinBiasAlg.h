@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,7 +73,7 @@ class ITHistSvc;
   std::vector<double> m_eCell;
   
 
-  ITHistSvc* m_thistSvc = nullptr;
+  ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
   TTree* m_tree = nullptr;
   int m_nevt_total = 0;
   int m_n1 = 0;
