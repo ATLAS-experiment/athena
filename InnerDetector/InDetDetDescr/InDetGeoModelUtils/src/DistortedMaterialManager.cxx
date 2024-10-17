@@ -1,7 +1,6 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
-
 
 #include "InDetGeoModelUtils/DistortedMaterialManager.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -12,35 +11,42 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
 
 namespace InDetDD {
-  DistortedMaterialManager::DistortedMaterialManager() {
-    ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
+  DistortedMaterialManager::DistortedMaterialManager()
+    : AthMessaging("ExtraMaterialManager")
+  {
+    if(initialize().isFailure())
+      throw std::runtime_error("Failed to initialize DistortedMaterialManager!");
+  }
 
-    MsgStream log(Athena::getMessageSvc(), "ExtraMaterialManager");
-    log << MSG::DEBUG << "Initialized InDet Distorted Material Manager" << endmsg;
+  StatusCode DistortedMaterialManager::initialize() {
+    ISvcLocator* svcLocator = Gaudi::svcLocator();
 
-    StoreGateSvc* detStore{nullptr};
-    StatusCode sc = svcLocator->service("DetectorStore", detStore);
-    if (sc.isFailure()) log << MSG::FATAL << "Could not locate DetectorStore" << endmsg;
+    SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+    ATH_CHECK(detStore.isValid());
 
-    IGeoDbTagSvc* geoDbTag{nullptr};
-    sc = svcLocator->service("GeoDbTagSvc",geoDbTag);
-    if (sc.isFailure()) log << MSG::FATAL << "Could not locate GeoDbTagSvc" << endmsg;
+    SmartIF<IGeoDbTagSvc> geoDbTag{svcLocator->service("GeoDbTagSvc")};
+    ATH_CHECK(geoDbTag.isValid());
 
-    IRDBAccessSvc* rdbSvc{nullptr};
-    sc = svcLocator->service(geoDbTag->getParamSvcName(), rdbSvc);
-    if (sc.isFailure()) log << MSG::FATAL << "Could not locate " << geoDbTag->getParamSvcName() << endmsg;
+    SmartIF<IRDBAccessSvc> rdbSvc{svcLocator->service(geoDbTag->getParamSvcName())};
+    ATH_CHECK(rdbSvc.isValid());
 
     // Get version tag and node for InDet.
     DecodeVersionKey versionKey("InnerDetector");
     const std::string& detectorKey = versionKey.tag();
     const std::string& detectorNode = versionKey.node();
 
-    log << MSG::DEBUG << "Retrieving Record Sets from database ..." << endmsg;
-    log << MSG::DEBUG << "Key = " << detectorKey << " Node = " << detectorNode << endmsg;
+    ATH_MSG_DEBUG("Retrieving Record Sets from database ...");
+    ATH_MSG_DEBUG("Key = " << detectorKey << " Node = " << detectorNode);
 
     m_xMatTable = rdbSvc->getRecordsetPtr("InDetExtraMaterial", detectorKey, detectorNode);
     m_materialManager = detStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
+
+    ATH_MSG_DEBUG("Initialized InDet Distorted Material Manager");
+
+    return StatusCode::SUCCESS;
   }
+
 } // end namespace
