@@ -23,7 +23,7 @@ def initConfigFlags():
     #Flags steering the job execution:
     from AthenaCommon.Constants import INFO
     acf.addFlag('Exec.OutputLevel', INFO, help='Global OutputLevel')
-    acf.addFlag('Exec.QuietMode', False, help='Suppress excess output for grid running')
+    acf.addFlag('Exec.QuietMode', True, help='Suppress excess output for grid running')
     acf.addFlag('Exec.PrintAlgsSequence', False, help='print algorithm sequence in ApplicationMgr')
     acf.addFlag('Exec.MaxEvents', -1, type=int, help='number of events to proceess (-1 for all)')
     acf.addFlag('Exec.SkipEvents', 0, type=int, help='number of events to skip')
