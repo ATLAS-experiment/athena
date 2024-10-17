@@ -330,7 +330,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
 	  return StatusCode::SUCCESS;
       }
   }
- 
+
   std::vector<const xAOD::TruthParticle*> truthParticlesVec = getTruthParticles(ctx);
 
   // Mark the truth particles in our vector as "selected". 
@@ -403,7 +403,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
       ATH_MSG_WARNING("Skipping vertexing plots.");
     }
   }
-
 
   if( not m_truthVertexContainerName.key().empty()){
     // get truth vertex container name - m_truthVertexContainerName
@@ -743,10 +742,10 @@ InDetPhysValMonitoringTool::procHistograms() {
 
 const std::vector<const xAOD::TruthParticle*>
 InDetPhysValMonitoringTool::getTruthParticles(const EventContext& ctx) const {
-  // truthParticles.clear();
-  std::vector<const xAOD::TruthParticle*> tempVec {};
-  if (m_pileupSwitch == "All") {
 
+  std::vector<const xAOD::TruthParticle*> tempVec {};
+
+  if (m_pileupSwitch == "All") {
     if (m_truthParticleName.key().empty()) {
       return tempVec;
     }
@@ -760,41 +759,41 @@ InDetPhysValMonitoringTool::getTruthParticles(const EventContext& ctx) const {
       // get truthevent container to separate out pileup and hardscatter truth particles
       if (not m_truthEventName.key().empty()) {
 	SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer( m_truthEventName, ctx);
-      const xAOD::TruthEvent* event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
-      if (not event) {
-        return tempVec;
-      }
-      const auto& links = event->truthParticleLinks();
-      tempVec.reserve(event->nTruthParticles());
-      for (const auto& link : links) {
-        if (link.isValid()){
-          tempVec.push_back(*link);
-        }
-      }
+	const xAOD::TruthEvent* event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
+	if (not event) {
+	  return tempVec;
+	}
+	const auto& links = event->truthParticleLinks();
+	tempVec.reserve(event->nTruthParticles());
+	for (const auto& link : links) {
+	  if (link.isValid()){
+	    tempVec.push_back(*link);
+	  }
+	}
       }
     } else if (m_pileupSwitch == "PileUp") {
       if (not m_truthPileUpEventName.key().empty()) {
-      ATH_MSG_VERBOSE("getting TruthPileupEvents container");
-      // get truth particles from all pileup events
-      SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName, ctx);
-      if (truthPileupEventContainer.isValid()) {
-        const unsigned int nPileup = truthPileupEventContainer->size();
-        tempVec.reserve(nPileup * 200); // quick initial guess, will still save some time
-        for (unsigned int i(0); i != nPileup; ++i) {
-          const auto *eventPileup = truthPileupEventContainer->at(i);
-          // get truth particles from each pileup event
-          int ntruth = eventPileup->nTruthParticles();
-          ATH_MSG_VERBOSE("Adding " << ntruth << " truth particles from TruthPileupEvents container");
-          const auto& links = eventPileup->truthParticleLinks();
-          for (const auto& link : links) {
-            if (link.isValid()){
-              tempVec.push_back(*link);
-            }
-          }
-        }
-      } else {
-        ATH_MSG_ERROR("no entries in TruthPileupEvents container!");
-      }
+	ATH_MSG_VERBOSE("getting TruthPileupEvents container");
+	// get truth particles from all pileup events
+	SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName, ctx);
+	if (truthPileupEventContainer.isValid()) {
+	  const unsigned int nPileup = truthPileupEventContainer->size();
+	  tempVec.reserve(nPileup * 200); // quick initial guess, will still save some time
+	  for (unsigned int i(0); i != nPileup; ++i) {
+	    const auto *eventPileup = truthPileupEventContainer->at(i);
+	    // get truth particles from each pileup event
+	    int ntruth = eventPileup->nTruthParticles();
+	    ATH_MSG_VERBOSE("Adding " << ntruth << " truth particles from TruthPileupEvents container");
+	    const auto& links = eventPileup->truthParticleLinks();
+	    for (const auto& link : links) {
+	      if (link.isValid()){
+		tempVec.push_back(*link);
+	      }
+	    }
+	  }
+	} else {
+	  ATH_MSG_ERROR("no entries in TruthPileupEvents container!");
+	}
       }
     } else {
       ATH_MSG_ERROR("bad value for PileUpSwitch");
@@ -868,7 +867,7 @@ InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
         }
       }
       else {
-        ATH_MSG_ERROR("No entries in TruthPileupEvents container!");
+        ATH_MSG_DEBUG("No entries in TruthPileupEvents container");
       }
     }
   }
@@ -1031,7 +1030,7 @@ StatusCode InDetPhysValMonitoringTool::fillHistogramsTrackingInDenseEnvironment(
 
 bool
 InDetPhysValMonitoringTool::passJetCuts(const xAOD::Jet& jet) const {
-  const float jetPt = jet.pt() / Gaudi::Units::GeV;
+  const float jetPt = jet.pt();
   const float jetEta = std::abs(jet.eta());
   
   if (jetEta < m_jetAbsEtaMin) return false;

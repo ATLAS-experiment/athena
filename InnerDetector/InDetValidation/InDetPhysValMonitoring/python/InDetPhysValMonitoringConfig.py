@@ -127,13 +127,27 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         from DerivationFrameworkHiggs.HIGG1D1CustomVertexConfig import DiPhotonVertexCfg
         acc.merge(DiPhotonVertexCfg(flags))
 
-
-
-
     if flags.PhysVal.IDPVM.GRL:
         kwargs.setdefault("useGRL", True)
         kwargs.setdefault('GoodRunsListSelectionTool', acc.popToolsAndMerge(
             GoodRunsListSelectionToolCfg(flags)))
+
+    kwargs.setdefault("doIDTIDEPlots", flags.PhysVal.IDPVM.doIDTIDE)
+
+    if flags.PhysVal.IDPVM.doValidateTracksInJets:
+        kwargs.setdefault("JetContainerName", flags.PhysVal.IDPVM.jetCollection)
+        kwargs.setdefault("FillTrackInJetPlots", True)
+        kwargs.setdefault('JetAbsEtaMin', 0)
+        kwargs.setdefault('JetAbsEtaMax', flags.PhysVal.IDPVM.JetAbsEtaMax)
+        kwargs.setdefault('JetPtMin', flags.PhysVal.IDPVM.JetPtMin)
+        kwargs.setdefault('JetPtMax', flags.PhysVal.IDPVM.JetPtMax)
+        kwargs.setdefault('maxTrkJetDR', flags.PhysVal.IDPVM.maxTrkJetDR)
+        kwargs.setdefault("FillTrackInBJetPlots",
+                          flags.PhysVal.IDPVM.doValidateTracksInBJets)
+    else:
+        kwargs.setdefault("JetContainerName", '')
+        kwargs.setdefault("FillTrackInJetPlots", False)
+
 
     if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
@@ -158,23 +172,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         if doHyyHSSelection:
             assert flags.PhysVal.IDPVM.PrimaryVertexContainer == 'HggPrimaryVertices'
 
-        if flags.PhysVal.IDPVM.doValidateTracksInJets:
-            kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
-            kwargs.setdefault("FillTrackInJetPlots", True)
-
-            if ("xAOD::JetContainer#AntiKt4TruthJets"
-                    not in flags.Input.TypedCollections):
-                from InDetPhysValMonitoring.addTruthJetsConfig import (
-                    AddTruthJetsIfNotExistingCfg)
-                acc.merge(AddTruthJetsIfNotExistingCfg(flags))
-
-            if flags.PhysVal.IDPVM.doValidateTracksInBJets:
-                kwargs.setdefault("FillTrackInBJetPlots", True)
-
-        else:
-            kwargs.setdefault("JetContainerName", '')
-            kwargs.setdefault("FillTrackInJetPlots", False)
-
         kwargs.setdefault("FillTruthToRecoNtuple",
                           flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple)
         kwargs.setdefault("doTruthOriginPlots",
@@ -187,9 +184,10 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
                           flags.PhysVal.IDPVM.doHitLevelPlots)
 
         # adding the VertexTruthMatchingTool
-        kwargs.setdefault("useVertexTruthMatchTool", True)
-        kwargs.setdefault("VertexTruthMatchTool", acc.popToolsAndMerge(
-            InDetVertexTruthMatchToolCfg(flags)))
+        if not flags.PhysVal.IDPVM.doIDTIDE:
+            kwargs.setdefault("useVertexTruthMatchTool", True)
+            kwargs.setdefault("VertexTruthMatchTool", acc.popToolsAndMerge(
+                InDetVertexTruthMatchToolCfg(flags)))
 
         if "trackTruthOriginTool" not in kwargs:
             from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
@@ -215,10 +213,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("TruthEvents", '')
         kwargs.setdefault("TruthPileupEvents", '')
         kwargs.setdefault("TruthSelectionTool", None)
-        # the jet container is actually meant to be a truth jet container
-        kwargs.setdefault("JetContainerName", '')
-        kwargs.setdefault("FillTrackInJetPlots", False)
-        kwargs.setdefault("FillTrackInBJetPlots", False)
         kwargs.setdefault("FillTruthToRecoNtuple", False)
 
     if flags.Detector.GeometryITk:

@@ -2,6 +2,8 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+# For using GeV units
+import AthenaCommon.SystemOfUnits as Units
 
 Run1Grades = [ "Good", "BlaShared", "PixShared", "SctShared", "0HitBLayer" ]
 Run2Grades = [ "0HitIn0HitNInExp2","0HitIn0HitNInExpIn","0HitIn0HitNInExpNIn","0HitIn0HitNIn",
@@ -73,9 +75,6 @@ def isRun3Derivation(flags):
 def runFlipTag(flags):
     return isRun3Derivation(flags)
 
-def vetoZeroTracks(flags):
-    return not flags.Trigger.doHLT
-
 def getNNs(flags):
     # dummy for now
     caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
@@ -119,17 +118,13 @@ def createBTaggingConfigFlags():
 
     # Taggers for validation
     btagcf.addFlag("BTagging.SaveSV1Probabilities", saveSv1)
-    #Do we really need this in AthConfigFlags?
-    #Comments in BTaggingConfiguration.py
-    btagcf.addFlag("BTagging.OutputFiles.Prefix", "BTagging_")
-    btagcf.addFlag("BTagging.GeneralToolSuffix",'') #Not sure it will stay like that later on. Was '', 'Trig, or 'AODFix'
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", runFlipTag)
 
    # Trackless approach
     btagcf.addFlag("BTagging.Trackless", False)
     btagcf.addFlag("BTagging.Trackless_JetCollection", "AntiKt4EMPFlowJets")
-    btagcf.addFlag("BTagging.Trackless_JetPtMin", 250) #in GeV
+    btagcf.addFlag("BTagging.Trackless_JetPtMin", 250*Units.GeV)
     btagcf.addFlag("BTagging.Trackless_dR", 0.4)
 
     # more aggressive trackless approach

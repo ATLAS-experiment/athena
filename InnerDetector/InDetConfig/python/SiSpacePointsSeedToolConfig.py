@@ -184,6 +184,8 @@ def TrigSiSpacePointsSeedMakerCfg(flags, **kwargs):
     #
     if flags.Tracking.ActiveConfig.input_name=="cosmics":
         return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.input_name=="minBiasPixel":
+        return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
     # elif flags.Reco.EnableHI:   #2023fix - in principle minBias and HI should use specific versions too
     #     return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     # elif flags.Tracking.ActiveConfig.isLowPt:

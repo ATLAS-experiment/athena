@@ -61,7 +61,7 @@ namespace Monitored {
     std::string getFullName(const HistogramDef& def) const;
 
     /**
-     * @brief Removes histogram (used online to get rid of old LB tagged histograms)
+     * @brief Removes histogram (used to get rid of old LB tagged histograms)
      **/
     virtual void remove(const HistogramDef& def);
 
@@ -167,6 +167,7 @@ namespace Monitored {
     std::string m_streamName; //!< defines the stream for THistSvc
     std::string m_groupName;  //!< defines location of group of histograms
 
+    bool m_deleteOnRemove{true};  //!< delete histogram during remove
     mutable std::mutex m_createLock;
     inline static std::mutex s_histDirMutex;
   };

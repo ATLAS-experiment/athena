@@ -43,8 +43,9 @@ private:
 
     // the i-th element (or (i,j)-th element for 2D vector) here gives the index of the generic monitoring tool (GMT)
     // in the array of all GMT's --> allows faster tool retrieving and hence faster histogram filling
-    std::vector<std::vector<std::vector<int>>> m_ZDCModuleLEDToolIndices;
-    std::vector<std::vector<std::vector<int>>> m_RPDChannelLEDToolIndices;
+    std::map<std::string,std::map<std::string,std::map<std::string,int>>> m_ZDCModuleLEDToolIndices;
+    std::map<std::string,std::map<std::string,std::map<std::string,int>>> m_RPDChannelLEDToolIndices;
+
 
     //---------------------------------------------------
     

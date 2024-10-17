@@ -3,7 +3,7 @@
 
 from glob import glob
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+import AthenaCommon.SystemOfUnits as Units
 
 def GetCustomAthArgs():
     from argparse import ArgumentParser
@@ -49,6 +49,9 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
     IDPVMparser.add_argument("--PrimaryVertexContainer", help='Name of the primary vertex container', choices=['PrimaryVertices', 'ActsPrimaryVertices', 'HggPrimaryVertices'], default='PrimaryVertices')
     IDPVMparser.add_argument("--OnlyTrackingPreInclude", help='Disable all flags related to detectors/domains beyond tracking', action='store_true', default=False)
+    IDPVMparser.add_argument("--jetCollection", help='Jet collection for track-in-jet plots', default="AntiKt4EMPFlowJets")
+    IDPVMparser.add_argument("--JetPtMin", help='Minimum pt for jet selection in GeV', type=float, default=100)
+    IDPVMparser.add_argument("--JetPtMax", help='Maximum pt for jet selection in GeV', type=float, default=5000)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -72,9 +75,11 @@ flags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
 flags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
-flags.PhysVal.IDPVM.doValidateTracksInBJets = MyArgs.doTracksInBJets
-flags.PhysVal.IDPVM.doValidateTracksInJets = MyArgs.doTracksInJets
 flags.PhysVal.IDPVM.doIDTIDE= MyArgs.doIDTIDE
+if MyArgs.doTracksInJets:
+    flags.PhysVal.IDPVM.doValidateTracksInJets = True
+if MyArgs.doTracksInBJets:
+    flags.PhysVal.IDPVM.doValidateTracksInBJets = True
 flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
 flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose
@@ -104,6 +109,9 @@ flags.PhysVal.IDPVM.doActs = MyArgs.doActs
 flags.PhysVal.IDPVM.doHGTD = MyArgs.doHGTD
 flags.PhysVal.IDPVM.maxTrkJetDR = MyArgs.maxTrkJetDR
 flags.PhysVal.IDPVM.PrimaryVertexContainer = MyArgs.PrimaryVertexContainer
+flags.PhysVal.IDPVM.jetCollection = MyArgs.jetCollection
+flags.PhysVal.IDPVM.JetPtMin = MyArgs.JetPtMin * Units.GeV
+flags.PhysVal.IDPVM.JetPtMax = MyArgs.JetPtMax * Units.GeV
 if MyArgs.JetAbsEtaMax != -1:
     flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 

@@ -35,8 +35,12 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
     ATH_CHECK( m_LEDMaxSampleKey.initialize() );
     ATH_CHECK( m_LEDAvgTimeKey.initialize() );
 
-    m_ZDCModuleLEDToolIndices = buildToolMap<std::vector<std::vector<int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames.size(),m_nSides,m_nModules);
-    m_RPDChannelLEDToolIndices = buildToolMap<std::vector<std::vector<int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames.size(),m_nSides,m_nChannels);
+    std::vector<std::string> sides = {"C","A"};
+    std::vector<std::string> modules = {"0","1","2","3"};
+    std::vector<std::string> channels = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
+
+    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,modules);
+    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,sides,channels);
 
     //---------------------------------------------------
     // initialize superclass
@@ -91,6 +95,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
 
     // LED type (event-level info saved in the glocal sum entry of zdcSums)
     unsigned int iLEDType = 1000;
+    std::string led_type_str;
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcLEDTypeHandle(m_LEDTypeKey, ctx);
     if (!zdcLEDTypeHandle.isAvailable()){
         ATH_MSG_WARNING("CANNOT find the variable " << m_LEDTypeKey << "!");
@@ -102,6 +107,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
     for (const auto& zdcSum : *zdcSums) { 
         if (zdcSum->zdcSide() == 0){
             iLEDType = zdcLEDTypeHandle(*zdcSum);
+            led_type_str = m_LEDNames[iLEDType];
         }
     }
 
@@ -127,11 +133,13 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
 
     auto zdcLEDADCSum = Monitored::Scalar<int>("zdcLEDADCSum",-1000);
     auto zdcLEDMaxADC = Monitored::Scalar<int>("zdcLEDMaxADC",-1000);
+    auto zdcLEDMaxADCtoADCSumRatio = Monitored::Scalar<int>("zdcLEDMaxADCtoADCSumRatio",-1000);
     auto zdcLEDMaxSample = Monitored::Scalar<unsigned int>("zdcLEDMaxSample",1000);
     auto zdcLEDAvgTime = Monitored::Scalar<float>("zdcLEDAvgTime",-1000);
 
     auto rpdLEDADCSum = Monitored::Scalar<int>("rpdLEDADCSum",-1000);
     auto rpdLEDMaxADC = Monitored::Scalar<int>("rpdLEDMaxADC",-1000);
+    auto rpdLEDMaxADCtoADCSumRatio = Monitored::Scalar<int>("rpdLEDMaxADCtoADCSumRatio",-1000);
     auto rpdLEDMaxSample = Monitored::Scalar<unsigned int>("rpdLEDMaxSample",1000);
     auto rpdLEDAvgTime = Monitored::Scalar<float>("rpdLEDAvgTime",-1000);
 
@@ -150,18 +158,25 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
 
     for (const auto zdcMod : *zdcModules){
         int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
+        std::string side_str = (iside == 0)? "C" : "A";
     
         if (zdcMod->zdcType() == 0){ // zdc
             int imod = zdcMod->zdcModule();
+            std::string module_str = std::to_string(imod);
+
             zdcLEDADCSum = LEDADCSumHandle(*zdcMod);
             zdcLEDMaxADC = LEDMaxADCHandle(*zdcMod);
             zdcLEDMaxSample = LEDMaxSampleHandle(*zdcMod);
             zdcLEDAvgTime = LEDAvgTimeHandle(*zdcMod);
 
-            fill(m_tools[m_ZDCModuleLEDToolIndices[iLEDType][iside][imod]], lumiBlock, bcid, zdcLEDADCSum, zdcLEDMaxADC, zdcLEDMaxSample, zdcLEDAvgTime);
+            zdcLEDMaxADCtoADCSumRatio = (zdcLEDADCSum == 0)? -1000. : zdcLEDMaxADC * 1. / zdcLEDADCSum;
+
+            fill(m_tools[m_ZDCModuleLEDToolIndices.at(led_type_str).at(side_str).at(module_str)], lumiBlock, bcid, zdcLEDADCSum, zdcLEDMaxADC, zdcLEDMaxSample, zdcLEDAvgTime, zdcLEDMaxADCtoADCSumRatio);
         } 
         else if (zdcMod->zdcType() == 1) { // rpd
             int ichannel = zdcMod->zdcChannel();
+            std::string channel_str = std::to_string(ichannel);
+
             if (ichannel >= m_nChannels){
                 ATH_MSG_WARNING("The current channel number exceeds the zero-based limit (15): it is " << ichannel);
                 continue;
@@ -171,7 +186,9 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
             rpdLEDMaxSample = LEDMaxSampleHandle(*zdcMod);
             rpdLEDAvgTime = LEDAvgTimeHandle(*zdcMod);
 
-            fill(m_tools[m_RPDChannelLEDToolIndices[iLEDType][iside][ichannel]], lumiBlock, bcid, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime);
+            rpdLEDMaxADCtoADCSumRatio = (rpdLEDADCSum == 0)? -1000. : rpdLEDMaxADC * 1. / rpdLEDADCSum;
+
+            fill(m_tools[m_RPDChannelLEDToolIndices.at(led_type_str).at(side_str).at(channel_str)], lumiBlock, bcid, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime, rpdLEDMaxADCtoADCSumRatio);
         }
     }
     

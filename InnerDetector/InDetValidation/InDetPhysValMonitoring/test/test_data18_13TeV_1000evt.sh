@@ -20,7 +20,7 @@ dcubeRef=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physva
 lastref_dir=last_results
 
 
-script=test_data_reco.sh
+script=test_data_reco_Run2.sh
 
 echo "Executing script ${script}"
 echo " "

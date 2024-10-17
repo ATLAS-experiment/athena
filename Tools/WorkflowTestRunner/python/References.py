@@ -25,7 +25,7 @@ references_map = {
     "d1912": "v6",
     # Reco
     "q442": "v67",
-    "q449": "v105",
+    "q449": "v106",
     "q452": "v26",
     "q454": "v38",
     # Derivations

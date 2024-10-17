@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCMONITORALGORITHM_H
@@ -18,6 +18,7 @@
 #include "xAODHIEvent/HIEventShapeContainer.h"
 //---------------------------------------------------
 #include "ZdcUtils/ZdcEventInfo.h"
+#include "ZdcConditions/ZdcInjPulserAmpMap.h"
 
 class ZdcMonitorAlgorithm : public AthMonitorAlgorithm {
 public:
@@ -31,18 +32,14 @@ private:
     void calculate_log_bin_edges(float min_value, float max_value, int num_bins, std::vector<float>& bin_edges);
     float calculate_inverse_bin_width(float event_value, std::string variable_name, const std::vector<float>& bin_edges) const;
     
-    // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
-    // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
-    // input to constructor: owner, name, value, title = "" (by default)
-    Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
-    Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
-    Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
-    Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
-
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
+    
     Gaudi::Property<float> m_expected1N{this, "Expected1NADC", 1000., "Expected 1N position in ADC"}; // only needs to indicate the rough scale, only used in the >20N cut mask
+    
+    Gaudi::Property<float> m_energyCutForModuleFractMonitor{this, "EnergyCutForModuleFractMonitor", 13400., "Minimum energy sum required on each side for event to enter module fraction monitoring (default at 5 * 2680 GeV)"};
+    Gaudi::Property<float> m_ZDCEnergyCutForCentroidValidBitMonitor{this, "ZDCEnergyCutForCentroidValidBitMonitor", 13400., "Minimum energy required in ZDC for event to enter centroid valid bit monitoring (default at 5 * 2680 GeV)"};
     
     Gaudi::Property<float> m_moduleChisqHistMinValue{this, "ZDCModuleChisqHistMinValue", 1000., "Min value for logarithmic binning for ZDC module chisq distribution"}; // to manually calculate inverse-bin-width weight
     Gaudi::Property<float> m_moduleChisqHistMaxvalue{this, "ZDCModuleChisqHistMaxvalue", 1000., "Max value for logarithmic binning for ZDC module chisq distribution"}; // to manually calculate inverse-bin-width weight
@@ -63,15 +60,31 @@ private:
     static const int m_nRpdStatusBits = 15; // ignoring the last one
     static const int m_nRpdCentroidStatusBits = 21; // ignoring the last one
 
-    // the i-th element (or (i,j)-th element for 2D vector) here gives the index of the generic monitoring tool (GMT)
-    // in the array of all GMT's --> allows faster tool retrieving and hence faster histogram filling
-    std::vector<int> m_ZDCSideToolIndices;
-    std::vector<std::vector<int>> m_ZDCModuleToolIndices;
-    std::vector<std::vector<int>> m_RPDChannelToolIndices;
+    // the 2D mapping maps a string "pair" to an integer: the index of the corresponding generic monitoring tool (GMT) in the array of all GMT's
+    std::map<std::string,int> m_ZDCSideToolIndices;
+    std::map<std::string,std::map<std::string,int>> m_ZDCModuleToolIndices;
+    std::map<std::string,std::map<std::string,int>> m_RPDChannelToolIndices;
 
     std::vector<float> m_ZdcModuleChisqBinEdges;
     std::vector<float> m_ZdcModuleChisqOverAmpBinEdges;
+
+    std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
     //---------------------------------------------------
+    
+protected:
+    // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
+    // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
+    // input to constructor: owner, name, value, title = "" (by default)
+    Gaudi::Property<bool> m_isOnline {this,"IsOnline",false};
+    Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
+    Gaudi::Property<bool> m_enableTrigger {this,"EnableTrigger",true};
+    Gaudi::Property<bool> m_isInjectedPulse {this,"IsInjectedPulse",false};
+    Gaudi::Property<bool> m_isStandalone {this,"IsStandalone",false}; // determine if standalone via metadata
+    Gaudi::Property<bool> m_enableZDC {this,"EnableZDC",true};
+    Gaudi::Property<bool> m_enableZDCPhysics {this,"EnableZDCPhysics",true};
+    Gaudi::Property<bool> m_enableRPD {this,"EnableRPD",true};
+    Gaudi::Property<bool> m_enableRPDAmp {this,"EnableRPDAmp",true};
+    Gaudi::Property<bool> m_enableCentroid {this,"EnableCentroid",true};
     
     // owner, name (allows us to modify the key in python configuration), key
     SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumContainerKey {this, "ZdcSumContainerKey", "ZdcSums"};
@@ -108,18 +121,10 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeKey {this, "RPDChannelAmplitudeKey", m_zdcModuleContainerName + ".RPDChannelAmplitude" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeCalibKey {this, "RPDChannelAmplitudeCalibKey", m_zdcModuleContainerName + ".RPDChannelAmplitudeCalib" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCKey {this, "RPDChannelMaxADCKey", m_zdcModuleContainerName + ".RPDChannelMaxADC" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxSampleKey {this, "RPDChannelMaxSampleKey", m_zdcModuleContainerName + ".RPDChannelMaxSample" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelStatusKey {this, "RPDChannelStatusKey", m_zdcModuleContainerName + ".RPDChannelStatus" + m_auxSuffix};
     
     
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDrowKey { // needed since the subtracted amplitudes for each side are written in a nrow * ncol matrix and saved in zdcSums
-        this, "rowKey", m_zdcModuleContainerName + ".row" + m_auxSuffix, // need to convert channel to row & column to plot the subtracted amplitudes using rpdChannelMonToolArr (reading in the row and column for each RPD channel, instead of using an analytical expression, allows flexibility for future different RPD geometry / run conditions)
-        "Row index of RPD channel"
-    };
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcolKey { // needed since the subtracted amplitudes for each side are written in a nrow * ncol matrix and saved in zdcSums
-        this, "colKey", m_zdcModuleContainerName + ".col" + m_auxSuffix, // need to convert channel to row & column to plot the subtracted amplitudes using rpdChannelMonToolArr (reading in the row and column for each RPD channel, instead of using an analytical expression, allows flexibility for future different RPD geometry / run conditions)
-        "Column index of RPD channel"
-    };
-
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupExpFitParamsKey{
         this, "RpdChannelPileupExpFitParamsKey", m_zdcModuleContainerName+".RPDChannelPileupExpFitParams"+m_auxSuffix, 
         "RPD channel pileup exponential fit parameters: exp( [0] + [1]*sample )"};

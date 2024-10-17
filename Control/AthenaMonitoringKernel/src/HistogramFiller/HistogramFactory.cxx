@@ -20,6 +20,14 @@ HistogramFactory::HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc,
                                    const std::string& histoPath)
 : m_histSvc(histSvc)
 {
+  // The Gaudi/offline THistSvc does not delete objects on de-registration,
+  // but the online TrigMonTHistSvc does. We detect the latter case by checking
+  // the existence of one of its properties.
+  SmartIF<IProperty> hs{histSvc.get()};
+  if (hs && hs->hasProperty("IncludeName")) {
+    m_deleteOnRemove = false;
+  }
+
   size_t whereToStart = 0;
   // do we have a leading slash? This distinguishes temporary streams in THistSvc
   if (! histoPath.empty() && histoPath[0] == '/') {
@@ -328,9 +336,7 @@ void HistogramFactory::remove(const HistogramDef& def) {
 
   if (obj) {
     m_histSvc->deReg(path).ignore();
-    // The Gaudi/offline THistSvc does not delete the object on de-registration,
-    // but the online TrigMonTHistSvc does:
-    if (m_histSvc.type()=="THistSvc") {
+    if (m_deleteOnRemove) {
       delete obj;
     }
   }

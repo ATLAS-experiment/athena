@@ -32,7 +32,7 @@ def JetBTaggingAlgCfg(flags,
     if VxSecVertexInfoNameList:
         options['BTagSecVertexing'] = acc.popToolsAndMerge(
             BTagLightSecVtxToolCfg(flags,
-                                   'LightSecVx'+flags.BTagging.GeneralToolSuffix,
+                                   'LightSecVx',
                                    JetCollection,
                                    VxSecVertexInfoNameList,
                                    secVtxFinderxAODBaseNameList,
@@ -52,7 +52,7 @@ def JetBTaggingAlgCfg(flags,
     options['BTaggingLinkName'] = options['JetCollectionName'] + '.btaggingLink'
     options['BTaggingCollectionName'] = BTaggingCollection
     options['JetLinkName'] = options['BTaggingCollectionName'] + '.jetLink'
-    options['name'] = 'JetBTaggingAlg' + (options['BTaggingCollectionName'] + "_" + options['JetCollectionName'] + flags.BTagging.GeneralToolSuffix).lower()
+    options['name'] = 'JetBTaggingAlg' + (options['BTaggingCollectionName'] + "_" + options['JetCollectionName']).lower()
 
     # -- create main BTagging algorithm
     acc.addEventAlgo(CompFactory.Analysis.JetBTaggingAlg(**options))
