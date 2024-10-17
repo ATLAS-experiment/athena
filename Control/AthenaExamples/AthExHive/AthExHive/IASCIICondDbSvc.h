@@ -12,7 +12,7 @@
 #include <string>
 
 
-class GAUDI_API IASCIICondDbSvc: virtual public IService {
+class IASCIICondDbSvc: virtual public IService {
 public:
   DeclareInterfaceID(IASCIICondDbSvc, 1, 0);
 

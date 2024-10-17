@@ -7,7 +7,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 
-class GAUDI_API IHiveTool : virtual public IAlgTool {
+class IHiveTool : virtual public IAlgTool {
 public:
    virtual StatusCode doSomething() const = 0;
    virtual ~IHiveTool() {};
