@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,9 @@ namespace AtlasCLHEP_RandomGenerators {
   //__________________________________________________________________________
   StatusCode AtlasCLHEP_RandomGenerators_test::initialize()
   {
-    if(!serviceLocator()->service("ChronoStatSvc" , m_chrono ).isSuccess()){
+    SmartIF<IChronoStatSvc> smartChrono{serviceLocator()->service("ChronoStatSvc")};
+    m_chrono = smartChrono.get();
+    if (!m_chrono) {
       ATH_MSG_FATAL( "Cannot retrieve ChronoStatSvc ");
       return StatusCode::FAILURE;
     }
@@ -83,8 +85,9 @@ namespace AtlasCLHEP_RandomGenerators {
       msg(MSG::ERROR)<< "Could not get random engine '" << m_randomEngineName2 << "'" << endmsg;
       return StatusCode::FAILURE;
     }
-    
-    if((service("THistSvc", m_histSvc)).isFailure()) {
+    SmartIF<ITHistSvc> smartHistSvc{serviceLocator()->service("THistSvc")};
+    m_histSvc = smartHistSvc.get();
+    if (!m_histSvc) {
       msg(MSG::ERROR) << "Cannot allocate THistSvc service" << endmsg;
       return StatusCode::FAILURE;
     }

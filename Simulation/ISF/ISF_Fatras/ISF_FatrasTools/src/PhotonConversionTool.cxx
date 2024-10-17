@@ -153,8 +153,8 @@ StatusCode iFatras::PhotonConversionTool::initialize()
       m_validationTree->Branch("ConversionChildAngle  " ,  &m_conversionChildAngle,   "convChildA/F");
     
       // now register the Tree
-      ITHistSvc* tHistSvc = nullptr;
-      if (service("THistSvc",tHistSvc).isFailure()){ 
+      SmartIF<ITHistSvc> tHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+      if (!tHistSvc) {
 	ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
 	delete m_validationTree; m_validationTree = nullptr;
       }
