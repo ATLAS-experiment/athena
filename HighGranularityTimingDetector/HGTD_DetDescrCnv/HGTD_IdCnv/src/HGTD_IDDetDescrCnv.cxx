@@ -35,35 +35,13 @@ HGTD_IDDetDescrCnv::initialize()
 //--------------------------------------------------------------------
 
 StatusCode
-HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
+HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
     ATH_MSG_INFO( "in createObj: creating a HGTD_ID helper object in the detector store" );
 
-    // Create a new HGTD_ID
-    
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-        ATH_MSG_FATAL( "Could not cast to DetDescrAddress." );
-        return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
-        ATH_MSG_DEBUG( "No Helper key " );
-    }
-    else {
-        ATH_MSG_DEBUG( "Helper key is " << helperKey );
-    }
-
-    // get DetectorStore service
-    SmartIF<StoreGateSvc> detStore{serviceLocator()->service("DetectorStore")};
-    ATH_CHECK( detStore.isValid() );
-
     // Get the dictionary manager from the detector store
     const IdDictManager* idDictMgr;
-    ATH_CHECK( detStore->retrieve(idDictMgr, "IdDict") );
+    ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // Only initialize helper if it is the first pass or if there is a
     // change in the the file or tag
@@ -159,8 +137,7 @@ HGTD_IDDetDescrCnv::classID() {
 //--------------------------------------------------------------------
 HGTD_IDDetDescrCnv::HGTD_IDDetDescrCnv(ISvcLocator* svcloc)
     :
-    DetDescrConverter(ClassID_traits<HGTD_ID>::ID(), svcloc),
-    AthMessaging(svcloc->service< IMessageSvc >( "MessageSvc" ),"HGTD_IDDetDescrCnv"),
+    DetDescrConverter(ClassID_traits<HGTD_ID>::ID(), svcloc, "HGTD_IDDetDescrCnv"),
     m_hgtdId(),
     m_doChecks(false)
 

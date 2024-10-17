@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
  Detector description conversion service package
  -----------------------------------------------
  ***************************************************************************/
-
-//<doc><file>	$Id: DetDescrConverter.cxx,v 1.6 2008-12-14 02:24:44 ssnyder Exp
-//$ <version>	$Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "DetDescrCnvSvc/DetDescrConverter.h"
 
@@ -36,5 +31,11 @@ long DetDescrConverter::storageType() {
     return DetDescr_StorageType;
 }
 
-DetDescrConverter::DetDescrConverter(const CLID& myCLID, ISvcLocator* svcloc)
-    : Converter(DetDescr_StorageType, myCLID, svcloc) {}
+DetDescrConverter::DetDescrConverter(const CLID& myCLID,
+                                     ISvcLocator* svcloc,
+                                     const char* name /*= nullptr*/)
+  : Converter(DetDescr_StorageType, myCLID, svcloc),
+    AthMessaging(svcloc != nullptr ? msgSvc() : nullptr,
+                 name ? name : "DetDescrConverter"),
+    m_detStore("DetectorStore", name ? name : "DetDescrConverter")
+{}

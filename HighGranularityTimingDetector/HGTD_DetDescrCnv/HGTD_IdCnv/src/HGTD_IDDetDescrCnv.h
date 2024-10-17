@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_IDCNV_HGTD_IDDETDESCRCNV_H
 # define HGTD_IDCNV_HGTD_IDDETDESCRCNV_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "DetDescrCnvSvc/DetDescrConverter.h"
-#include "AthenaBaseComps/AthMessaging.h"
 
 #include "HGTD_Identifier/HGTD_ID.h"
 
@@ -19,7 +16,7 @@
  **
  **/
 
-class HGTD_IDDetDescrCnv: public DetDescrConverter, AthMessaging {
+class HGTD_IDDetDescrCnv: public DetDescrConverter {
 
 public:
 
@@ -51,8 +48,5 @@ private:
 
 };
 
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // HGTD_IDCNV_HGTD_IDDETDESCRCNV_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -240,8 +240,8 @@ const CLID &IdDictDetDescrCnv::classID() {
 
 //--------------------------------------------------------------------
 IdDictDetDescrCnv::IdDictDetDescrCnv(ISvcLocator *svcloc)
-    : DetDescrConverter(ClassID_traits<IdDictManager>::ID(), svcloc),
-      AthMessaging{"IdDictDetDescrCnv"} {}
+    : DetDescrConverter(ClassID_traits<IdDictManager>::ID(), svcloc, "IdDictDetDescrCnv")
+{}
 //--------------------------------------------------------------------
 void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
    
