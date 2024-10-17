@@ -525,15 +525,20 @@ namespace ActsTrk
     };
 
     options.extensions.branchStopper.connect(stopBranch);
-    if (m_doTwoWay)
-      secondOptions->extensions.branchStopper.connect(stopBranch);
+    if (m_doTwoWay) {
+      // If we extend the track inwards we can utilize the CKF propagation
+      // as extrapolator and therefore do not need to stop branches.
+      // This only works for outside-in extensions.
+      if (reverseSearch)
+        secondOptions->extensions.branchStopper.connect(stopBranch);
+    }
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActorList<Acts::MaterialInteractor>>
     extrapolationOptions(tgContext, mfContext);
 
     Acts::TrackExtrapolationStrategy extrapolationStrategy =
-        Acts::TrackExtrapolationStrategy::firstOrLast;
+        Acts::TrackExtrapolationStrategy::first;
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
