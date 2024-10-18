@@ -37,7 +37,7 @@
 #include "DetDescrConditions/AlignableTransformContainer.h"
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 
-#include "InDetAlignGenTools/InDetAlignDBTool.h"
+#include "InDetAlignDBTool.h"
 
 // alignment DBS ntuple 9002 definition
 NTuple::Item<long> nt_dettype;

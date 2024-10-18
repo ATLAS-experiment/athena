@@ -41,7 +41,7 @@
 #include "CLHEP/Geometry/Point3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 
-#include "InDetAlignGenTools/InDetAlignFillTrack.h"
+#include "InDetAlignFillTrack.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 

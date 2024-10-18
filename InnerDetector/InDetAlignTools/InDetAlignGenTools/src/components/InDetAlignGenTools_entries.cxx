@@ -1,11 +1,11 @@
-#include "InDetAlignGenTools/InDetAlignDBTool.h"
-#include "InDetAlignGenTools/InDetAlignTrackSelTool.h"
-#include "InDetAlignGenTools/InDetAlignFillTrack.h"
+#include "../InDetAlignDBTool.h"
+#include "../InDetAlignTrackSelTool.h"
+#include "../InDetAlignFillTrack.h"
 
-#include "InDetAlignGenTools/InDetAlignOverlapTool.h"
-#include "InDetAlignGenTools/InDetAlignFillSiCluster.h"
-#include "InDetAlignGenTools/RefitSiOnlyTool.h"
-#include "InDetAlignGenTools/InDetAlignHitQualSelTool.h"
+#include "../InDetAlignOverlapTool.h"
+#include "../InDetAlignFillSiCluster.h"
+#include "../RefitSiOnlyTool.h"
+#include "../InDetAlignHitQualSelTool.h"
 
 
 DECLARE_COMPONENT( InDetAlignDBTool )

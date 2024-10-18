@@ -14,7 +14,7 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "InDetIdentifier/SCT_ID.h"
 
-#include "InDetAlignGenTools/InDetAlignHitQualSelTool.h"
+#include "InDetAlignHitQualSelTool.h"
 
 using namespace std ;
 

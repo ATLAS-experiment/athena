@@ -9,7 +9,7 @@
 #include "InDetAlignGenTools/IInDetAlignOverlapTool.h"
 
 #include "InDetAlignGenTools/IInDetAlignFillTrack.h"
-#include "InDetAlignGenTools/AlignSiModuleList.h"
+#include "AlignSiModuleList.h"
 #include <vector>
 //#include "AthContainers/DataVector.h"
 

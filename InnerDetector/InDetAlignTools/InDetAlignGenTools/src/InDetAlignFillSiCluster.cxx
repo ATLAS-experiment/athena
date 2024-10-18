@@ -24,7 +24,7 @@
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 
-#include "InDetAlignGenTools/InDetAlignFillSiCluster.h"
+#include "InDetAlignFillSiCluster.h"
 
 #include <string>
 

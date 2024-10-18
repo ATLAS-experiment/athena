@@ -15,8 +15,8 @@
 #include "InDetAlignTrkInfo/AlignTrkContainer.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "InDetAlignTrkInfo/AlignSiHit.h"
-#include "InDetAlignGenTools/InDetAlignOverlapTool.h"
-#include "InDetAlignGenTools/AlignSiModuleList.h"
+#include "InDetAlignOverlapTool.h"
+#include "AlignSiModuleList.h"
 
 
 using namespace std;
