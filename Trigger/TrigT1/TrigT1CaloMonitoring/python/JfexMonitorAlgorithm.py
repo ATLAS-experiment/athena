@@ -80,10 +80,12 @@ def JfexMonitoringConfig(flags):
     # number of bins above |eta| = 3.2 that will never be filled with TOBs
     # due to the low granularity and irregular structure of the FCAL
     # (given by the length of the list of empty bin in JfexMapForwardEmptyBins.h)
-    n_empty_bins_fcal = 2132
+    n_empty_bins_fcal = 2036
+    # number of bins in 3.15 < |eta| < 3.2 where no jets are produced
+    n_empty_bins_fcal_overlap = 96
 
     # all bins should be filled with jets, except the always empty ones in FCAL
-    n_expected_filled_bins_jJ = n_bins_total_jets - n_empty_bins_fcal
+    n_expected_filled_bins_jJ = n_bins_total_jets - n_empty_bins_fcal - n_empty_bins_fcal_overlap
     # taus are only produced for |eta| < 2.5
     n_expected_filled_bins_jTAU = n_bins_eta_2p5
     # forward electrons are produced for |eta| > 2.3

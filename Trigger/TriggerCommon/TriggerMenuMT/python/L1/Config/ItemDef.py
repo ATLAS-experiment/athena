@@ -211,6 +211,7 @@ class ItemDef:
         MenuItem('L1_eEM26T'    ).setLogic( d.eEM26T     & physcond).setTriggerType( TT.calo ) 
         MenuItem('L1_eEM28M'    ).setLogic( d.eEM28M     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eEM40L'    ).setLogic( d.eEM40L     & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eEM1_EMPTY'        ).setLogic(d.eEM1 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM5_EMPTY'        ).setLogic(d.eEM5 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_eEM9_EMPTY'        ).setLogic(d.eEM9 & cosmiccond      ).setTriggerType( TT.calo )
         MenuItem('L1_2eEM9_EMPTY'       ).setLogic(d.eEM9.x(2) & cosmiccond ).setTriggerType( TT.calo )
@@ -545,6 +546,7 @@ class ItemDef:
         MenuItem('L1_eTAU80'  ).setLogic( d.eTAU80   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU140' ).setLogic( d.eTAU140  & physcond).setTriggerType( TT.calo )
 
+        MenuItem('L1_eTAU1_EMPTY').setLogic(d.eTAU1 & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_eTAU12_EMPTY').setLogic(d.eTAU12 & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_eTAU12_FIRSTEMPTY').setLogic(d.eTAU12 & firstempty).setTriggerType(TT.calo)
         MenuItem('L1_eTAU12_UNPAIRED_ISO').setLogic(d.eTAU12 & unpaired_isocond).setTriggerType(TT.calo)

@@ -66,14 +66,26 @@ def isLRT(name):
   return "LRT" in name
 
 #Returns relevant track collection name
-def getIDTracks(flags, name=''):
+def getIDTracks(flags, name='', muonIDreuse=False, precision=False):
 
-  if isLRT(name):
-    return flags.Trigger.InDetTracking.muonLRT.tracks_FTF
-  elif isCosmic(flags):
-    return flags.Trigger.InDetTracking.cosmics.tracks_IDTrig
+  if muonIDreuse:
+    if isLRT(name):
+      return 'HLT_IDTrack_MuonComb_FTF_LRT'
+    elif isCosmic(flags):
+      return 'HLT_IDTrack_MuonComb_FTF'
+    else:
+      return 'HLT_IDTrack_MuonComb_FTF'
+
   else:
-    return flags.Trigger.InDetTracking.muon.tracks_FTF
+    if precision:
+      return flags.Tracking.ActiveConfig.tracks_IDTrig
+    else:
+      if isLRT(name):
+        return flags.Trigger.InDetTracking.muonLRT.tracks_FTF
+      elif isCosmic(flags):
+        return flags.Trigger.InDetTracking.cosmics.tracks_IDTrig
+      else:
+        return flags.Trigger.InDetTracking.muon.tracks_FTF
 
 
 def MuDataPrepViewDataVerifierCfg(flags):
@@ -449,11 +461,11 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
      if flags.Muon.enableTrigIDtrackReuse:
         trackParticles='HLT_IDTrack_MuonComb_FTF_LRT'
      else:
-        trackParticles = muLrtFlags.Tracking.ActiveConfig.tracks_IDTrig
+        trackParticles = getIDTracks(muLrtFlags, name, precision=True)
   elif 'FS' in name:
      muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
-     trackParticles = muFsFlags.Tracking.ActiveConfig.tracks_IDTrig
+     trackParticles = getIDTracks(muFsFlags, precision=True)
   else:
      muFlags = getFlagsForActiveConfig(flags, "muon", log)
      acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
@@ -461,7 +473,7 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
      if flags.Muon.enableTrigIDtrackReuse:
         trackParticles='HLT_IDTrack_MuonComb_FTF'
      else:
-        trackParticles = muFlags.Tracking.ActiveConfig.tracks_IDTrig
+        trackParticles = getIDTracks(muFlags, precision=True)
 
   # phase-ii EFCB muon flag here
   if flags.Muon.enableTrigIDtrackReuse:
@@ -472,7 +484,6 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
                                       MuonInsideOutContainerLocation=muNames.L2CBName+'IOmode',
                                       MuonL2mtContainerLocation=muNames.L2CBName+'l2mtmode',
                                       IDtrackOutputLocation="HLT_IDTrack_MuonComb_FTF"))
-
 
 
   #Make InDetCandidates
