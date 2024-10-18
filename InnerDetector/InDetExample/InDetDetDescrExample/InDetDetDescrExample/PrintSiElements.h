@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetDetDescrExample_PrintSiElements_h
@@ -21,9 +21,9 @@
 class PrintSiElements : public AthAlgorithm {
 public:
   PrintSiElements (const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
 
   StatusCode printElements(const std::string & managerName);
 
@@ -40,7 +40,7 @@ private:
   bool m_aligned;
   bool m_fullRotationMatrix;
   std::string m_outputFileName;
-  ServiceHandle<IGeoModelSvc> m_geoModelSvc;
+  ServiceHandle<IGeoModelSvc> m_geoModelSvc{this, "GeoModelSvc", "GeoModelSvc"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_ITkPixelDetEleCollKey{this, "ITkPixelDetEleCollKey", "ITkPixelDetectorElementCollection", "Key of SiDetectorElementCollection for ITkPixel"};
