@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONAGDD_MUONAGDDTOOLHELPER_H
@@ -11,7 +11,7 @@
 
 namespace MuonGM 
 {
-	class MuonDetectorManager;
+  class MuonDetectorManager;
 }
 class IRDBAccessSvc;
 class IGeoModelSvc;
@@ -19,23 +19,23 @@ class IGeoModelSvc;
 class MuonAGDDToolHelper
 {
 public:
-	MuonAGDDToolHelper();
-	
-	std::vector<std::string> ReadAGDDFlags();
-	
-	void SetNSWComponents();
-	
-	std::string GetAGDD(const bool dumpIt, const std::string& tableName, const std::string& outFileName);
-	
-	static bool BuildMScomponents() ;
+  MuonAGDDToolHelper();
 
-	void setAGDDtoGeoSvcName(const std::string& name);
+  std::vector<std::string> ReadAGDDFlags();
+
+  void SetNSWComponents();
+
+  std::string GetAGDD(const bool dumpIt, const std::string& tableName, const std::string& outFileName);
+
+  static bool BuildMScomponents() ;
+
+  void setAGDDtoGeoSvcName(const std::string& name);
 
 private:
 
-	IRDBAccessSvc* p_RDBAccessSvc;
-	IGeoModelSvc* p_GeoModelSvc;
-	std::string m_svcName;
+  IRDBAccessSvc* m_rdbAccessSvc{nullptr};
+  IGeoModelSvc* m_geoModelSvc{nullptr};
+  std::string m_svcName{"AGDDtoGeoSvc"};
 	
 };
 
