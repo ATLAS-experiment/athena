@@ -160,7 +160,7 @@ namespace LArG4 {
               m_g4historyDepth=level+1;
               m_depthHist=true;
               m_withMother=true;
-              ATH_MSG_INFO(" G4Depth of HEC::LiquidArgon " << m_g4historyDepth
+              ATH_MSG_DEBUG(" G4Depth of HEC::LiquidArgon " << m_g4historyDepth
                            << "  The HEC Wheel is embedded in a HEC Mother");
             }
           else
@@ -171,9 +171,9 @@ namespace LArG4 {
                 {
                   m_g4historyDepth=level2;
                   m_depthHist=true;
-                  ATH_MSG_INFO(" G4Depth of HEC::LiquidArgon " << m_g4historyDepth);
+                  ATH_MSG_DEBUG(" G4Depth of HEC::LiquidArgon " << m_g4historyDepth);
                   m_withMother=false;
-                  ATH_MSG_INFO("The HEC Wheel is independent (no Mother)");
+                  ATH_MSG_DEBUG("The HEC Wheel is independent (no Mother)");
                 }
               else
                 {

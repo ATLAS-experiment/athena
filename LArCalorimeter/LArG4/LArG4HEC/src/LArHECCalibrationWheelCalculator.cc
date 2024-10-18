@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHECCalibrationWheelCalculator.h"
@@ -48,7 +48,7 @@ namespace LArG4 {
 
     StatusCode LArHECCalibrationWheelCalculator::initialize() {
 
-      ATH_MSG_INFO("Use the LArHECCalibrationWheelCalculator for the HEC");
+      ATH_MSG_DEBUG("Use the LArHECCalibrationWheelCalculator for the HEC");
       ATH_CHECK(m_geometryCalculator.retrieve());
       return StatusCode::SUCCESS;
     }

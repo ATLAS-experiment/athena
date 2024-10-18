@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTOOLS_REGIONCREATOR_H
@@ -41,6 +41,7 @@ private:
   Gaudi::Property<double> m_positronCut{this, "PositronCut", 1., "Cut to be applied for positrons"};
   Gaudi::Property<double> m_protonCut{this, "ProtonCut", 1., "Cut to be applied for gammas"};
   Gaudi::Property<std::vector<std::string> > m_logicalVolumes{this, "VolumeList", {}, "List of volumes to be included in this region"};
+  BooleanProperty m_dumpRegion{this, "DumpRegion", false, ""};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Base class
@@ -20,7 +20,7 @@ RegionCreator::RegionCreator(const std::string& type, const std::string& name, c
 // Athena method, called at initialization time
 StatusCode RegionCreator::initialize()
 {
-  ATH_MSG_INFO(" initializing RegionCreator "<<name() );
+  ATH_MSG_VERBOSE(" initializing RegionCreator "<<name() );
   if (m_regionName.empty()) {
     m_regionName = this->name();
     // re-initialize m_regionName in order to take the real tool name rather than the path to it
@@ -30,7 +30,7 @@ StatusCode RegionCreator::initialize()
       ATH_MSG_VERBOSE( "m_regionName: " << m_regionName.value() << " needs to be reset.");
       m_regionName=m_regionName.value().substr(ipos+1,length-ipos-1);
     }
-    ATH_MSG_INFO( "m_regionName default value reset to "<<m_regionName.value());
+    ATH_MSG_VERBOSE( "m_regionName default value reset to "<<m_regionName.value());
   }
   return StatusCode::SUCCESS;
 }
@@ -61,7 +61,7 @@ void RegionCreator::Construct()
     nVolumes += nVolumesCurrent;
   }
 
-  ATH_MSG_INFO("A total of "<<nVolumes<<" volumes was assigned to region "<<m_regionName.value() );
+  if (m_dumpRegion) { ATH_MSG_INFO("A total of "<<nVolumes<<" volumes was assigned to region "<<m_regionName.value() ); }
 
   // create a G4ProductionCuts object and set appropriate values
   G4ProductionCuts* cuts=new G4ProductionCuts();
@@ -73,7 +73,7 @@ void RegionCreator::Construct()
   // assign cuts to the region and return succesfully
   theRegion->SetProductionCuts(cuts);
 
-  Dump();
+  if (m_dumpRegion) { Dump(); }
 }
 
 void RegionCreator::Dump()

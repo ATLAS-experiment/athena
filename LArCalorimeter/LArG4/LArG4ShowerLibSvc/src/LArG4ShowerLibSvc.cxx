@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4ShowerLibSvc/LArG4ShowerLibSvc.h"
@@ -43,7 +43,7 @@ LArG4ShowerLibSvc::~LArG4ShowerLibSvc()
 
 StatusCode LArG4ShowerLibSvc::initialize()
 {
-  ATH_MSG_INFO("Initializing");
+  ATH_MSG_DEBUG("Initializing");
 
   // iterate through filenames in list
   for (const std::string& fileName : m_fileNameList) {
@@ -52,7 +52,7 @@ StatusCode LArG4ShowerLibSvc::initialize()
       ATH_MSG_WARNING("Could not resolve input filename " << (fileName) << ". Ignoring!");
       continue;
     } else {
-      ATH_MSG_INFO("Resolving input filename to " << resolvedFilename);
+      ATH_MSG_DEBUG("Resolving input filename to " << resolvedFilename);
     }
 
     TFile rootfile(resolvedFilename.c_str(),"READ");
@@ -98,16 +98,16 @@ StatusCode LArG4ShowerLibSvc::initialize()
   if (m_libraryMap.empty()) {
     ATH_MSG_WARNING("No library files found");
   } else {
-    ATH_MSG_INFO("List of loaded libraries:");
+    ATH_MSG_DEBUG("List of loaded libraries:");
     for (const auto& m : m_libraryMap) {
-      ATH_MSG_INFO("      " << m_locations[m.first] << ": " << m.second->comment());
+      ATH_MSG_DEBUG("      " << m_locations[m.first] << ": " << m.second->comment());
 #ifdef DEBUG_FrozenShowers
       m_statisticsMap[m.second] = m.second->createStatistics();
 #endif
     }
   }
 
-  ATH_MSG_INFO("Shower library successfully initialized.");
+  ATH_MSG_DEBUG("Shower library successfully initialized.");
 
   return StatusCode::SUCCESS;
 }
@@ -115,17 +115,17 @@ StatusCode LArG4ShowerLibSvc::initialize()
 StatusCode LArG4ShowerLibSvc::finalize()
 {
 
-  ATH_MSG_INFO("Finalizing shower library service.");
+  ATH_MSG_DEBUG("Finalizing shower library service.");
 
   libmap::const_iterator iter;
 
   for (iter = m_libraryMap.begin(); iter != m_libraryMap.end(); ++iter) {
-    ATH_MSG_INFO("Found ShowerLib at location " << m_locations[(*iter).first]);
-    ATH_MSG_INFO(std::endl << (*iter).second->statistics());
+    ATH_MSG_DEBUG("Found ShowerLib at location " << m_locations[(*iter).first]);
+    ATH_MSG_DEBUG(std::endl << (*iter).second->statistics());
     if (m_statisticsMap.find((*iter).second) != m_statisticsMap.end())
-      ATH_MSG_INFO(m_statisticsMap.find((*iter).second)->second->statistics());
+      ATH_MSG_DEBUG(m_statisticsMap.find((*iter).second)->second->statistics());
     else
-      ATH_MSG_INFO("No statistics available for this kind of library");
+      ATH_MSG_DEBUG("No statistics available for this kind of library");
     // delete the library:
     delete (*iter).second ;
   }

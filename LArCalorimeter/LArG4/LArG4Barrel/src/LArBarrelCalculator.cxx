@@ -392,7 +392,7 @@ G4bool LArBarrelCalculator::Process(const G4Step* step, std::vector<LArHitData>&
       G4double x0=currentCellData.x0;
       G4double y0=currentCellData.y0;
       if (x0<1500 || x0>1960 || y0>30 || y0<-30) {
-        ATH_MSG_INFO("weird x0,y0 " << x0 << " " << y0);
+        ATH_MSG_WARNING("weird x0,y0 " << x0 << " " << y0);
       }
 #ifdef DEBUGSTEP
       G4double rr = sqrt(x0*x0+y0*y0);
@@ -660,13 +660,13 @@ G4bool LArBarrelCalculator::FiducialCuts(G4double radloc,G4double zloc,G4double 
 //    some HV imperfections
 void LArBarrelCalculator::InitHV()
 {
-  ATH_MSG_INFO(" **** in LArBarrelCalculator::InitHV() ");
+  ATH_MSG_DEBUG(" **** in LArBarrelCalculator::InitHV() ");
 
 
 
 
   float defaultHvVal=2000.;
-  ATH_MSG_INFO(" defaultHvVal " << defaultHvVal);
+  ATH_MSG_DEBUG(" defaultHvVal " << defaultHvVal);
   for (int ipm=0;ipm<2;ipm++) {
     for (int ielec=0;ielec<1024;ielec++) {
       for (int ieta=0;ieta<7;ieta++) {
@@ -690,7 +690,7 @@ void LArBarrelCalculator::InitHV()
     if (pDetStore->retrieve(manager)==StatusCode::SUCCESS) {
       const EMBHVManager& hvManager=manager->getEMBHVManager();
       const EMBHVManager::EMBHVData hvdata = hvManager.getDataSim();
-      ATH_MSG_INFO(" got HV Manager ");
+      ATH_MSG_DEBUG(" got HV Manager ");
       // loop over HV modules
       for (unsigned int iSide=0;iSide<2;iSide++) {
         for (unsigned int iPhi=0;iPhi<16;iPhi++) {

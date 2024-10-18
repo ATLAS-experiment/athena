@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFastShowerTool.h"
@@ -61,8 +61,8 @@ G4VFastSimulationModel* LArFastShowerTool::makeFastSimModel()
   ATH_MSG_DEBUG( "Initializing Fast Sim Model" );
   IFastSimDedicatedSD* fastSD = dynamic_cast<IFastSimDedicatedSD*>(
     G4SDManager::GetSDMpointer()->FindSensitiveDetector(m_fastSimDedicatedSD, false) );
-  if (fastSD){
-    ATH_MSG_INFO( "SD " << m_fastSimDedicatedSD << " already created." );
+  if (fastSD) {
+    ATH_MSG_DEBUG( "SD " << m_fastSimDedicatedSD << " already created." );
   } else if ("BarrelFastSimDedicatedSD" == m_fastSimDedicatedSD){
     fastSD = new BarrelFastSimDedicatedSD( &*detStore(), msgLevel(MSG::DEBUG) );
   } else if ("EndcapFastSimDedicatedSD" == m_fastSimDedicatedSD){

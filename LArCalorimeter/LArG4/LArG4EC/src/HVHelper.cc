@@ -53,7 +53,7 @@ FILE * HVHelper::OpenFileAndCheckVersion(const G4String &version)
         PathResolver::find_file(partialPath, "ATLASCALDATA");
     const G4String localFile = "HVEMECMap.dat";
 
-    ATH_MSG_INFO("reading maps from file: " << mapLocation);
+    ATH_MSG_DEBUG("reading maps from file: " << mapLocation);
 
     FILE *F = fopen(mapLocation.c_str(), "r");
     if(F == nullptr){
@@ -76,7 +76,7 @@ FILE * HVHelper::OpenFileAndCheckVersion(const G4String &version)
     char *v = buf + 9;
     if(version == "v02" || version == "v99") v ++;
     v[2] = 0;
-    ATH_MSG_INFO("actual HV Map Version = " << buf);
+    ATH_MSG_DEBUG("actual HV Map Version = " << buf);
     G4int iv = atoi(v);
     G4bool version_ok = false;
     if(version == "v00" && iv == 0)  version_ok = true;
@@ -206,7 +206,7 @@ void HVHelper::GetMapFromDB(void)
       isInner? EMECHVModule::INNER: EMECHVModule::OUTER
     );
     const EMECHVManager::EMECHVData hvdata = hvManager.getDataSim();
-    ATH_MSG_INFO("got LAr HV Manager for "
+    ATH_MSG_DEBUG("got LAr HV Manager for "
                  << (isInner? "inner": "outer") << " wheel");
     const EMECHVDescriptor& dsc = hvManager.getDescriptor();
     const unsigned int nFans = lwc()->GetNumberOfFans();
@@ -246,7 +246,7 @@ void HVHelper::GetMapFromDB(void)
                               << m_Values[jSide][jEta][iGap][jElec]
                               << " -> " << hv);
                 if(fabs((m_Values[jSide][jEta][iGap][jElec] - hv)/m_Values[jSide][jEta][iGap][jElec]) > 0.05){
-                  ATH_MSG_INFO("eta: " << dsc.getEtaBinning().binCenter(iEta) * (jSide == 0? 1: -1) << " "
+                  ATH_MSG_VERBOSE("eta: " << dsc.getEtaBinning().binCenter(iEta) * (jSide == 0? 1: -1) << " "
                                << "phi: " << dsc.getPhiBinning().binCenter(iPhi) << " "
                                << "ele phi: " << electrode.getPhi()
                                << " side " << iGap
@@ -264,7 +264,7 @@ void HVHelper::GetMapFromDB(void)
         }
       }
     }
-    ATH_MSG_INFO(counter << "HV values updated from DB");
+    ATH_MSG_DEBUG(counter << "HV values updated from DB");
   } else {
     ATH_MSG_WARNING("Unable to find LAr HV Manager");
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -127,19 +127,19 @@ StatusCode TileGeoG4SDCalc::initialize() {
   // Include or not tilecal optical model
   if (m_options.uShape == -1) {
     m_options.uShape = uShapeFromGM; // U-shape not set, take value from GeoModel
-    ATH_MSG_INFO("Using U-shape flag from GeoModel = " << uShapeFromGM <<
+    ATH_MSG_DEBUG("Using U-shape flag from GeoModel = " << uShapeFromGM <<
                  ( (m_options.uShape > 0) ? "  Scintillator width is equal to width of master plate "
                    : "  Scintillator width is smaller than width of master plate "));
   } else if (m_options.uShape == uShapeFromGM) {
-    ATH_MSG_INFO("Using U-shape = " << m_options.uShape <<
+    ATH_MSG_DEBUG("Using U-shape = " << m_options.uShape <<
                  ((m_options.uShape > 0) ? "  Scintillator width is equal to width of master plate "
                   : "  Scintillator width is smaller than width of master plate "));
   } else {
     if (uShapeFromGM > 0 && m_options.uShape > 0) { // both are > 0, so it's fine to use value from SimOptions
-      ATH_MSG_INFO("Using U-shape from Simulation flags = " << m_options.uShape <<
+      ATH_MSG_DEBUG("Using U-shape from Simulation flags = " << m_options.uShape <<
                    "  Scintillator width is equal to width of master plate ");
     } else if (uShapeFromGM == 0 && m_options.uShape < -1) { // special case - negative value below -1
-      ATH_MSG_INFO("Using U-shape from Simulation flags = " << m_options.uShape <<
+      ATH_MSG_DEBUG("Using U-shape from Simulation flags = " << m_options.uShape <<
                    "  Scintillator width is smaller than width of master plate ");
     } else {
       ATH_MSG_ERROR("U-shape flag in GeoModel = " << uShapeFromGM);
@@ -173,13 +173,13 @@ StatusCode TileGeoG4SDCalc::initialize() {
     }
     G4cout << "and " << delta / CLHEP::ns << " ns outside this window" << G4endl;
   } else {
-    ATH_MSG_INFO("Using deltaTHit = " << deltaT / CLHEP::ns << " ns. ");
+    ATH_MSG_DEBUG("Using deltaTHit = " << deltaT / CLHEP::ns << " ns. ");
   }
-  ATH_MSG_INFO("Using timeCut = " << m_options.timeCut / CLHEP::ns << " ns. ");
-  ATH_MSG_INFO("Using doBirk = " << (m_options.doBirk ? "true" : "false"));
-  ATH_MSG_INFO("Using doTOFCorr = " << (m_options.doTOFCorrection ? "true" : "false"));
-  ATH_MSG_INFO("Using doTileRow = " << (m_options.doTileRow ? "true" : "false"));
-  ATH_MSG_INFO("Using doCalibHitParticleID = " << (m_options.doCalibHitParticleID ? "true" : "false"));
+  ATH_MSG_DEBUG("Using timeCut = " << m_options.timeCut / CLHEP::ns << " ns. ");
+  ATH_MSG_DEBUG("Using doBirk = " << (m_options.doBirk ? "true" : "false"));
+  ATH_MSG_DEBUG("Using doTOFCorr = " << (m_options.doTOFCorrection ? "true" : "false"));
+  ATH_MSG_DEBUG("Using doTileRow = " << (m_options.doTileRow ? "true" : "false"));
+  ATH_MSG_DEBUG("Using doCalibHitParticleID = " << (m_options.doCalibHitParticleID ? "true" : "false"));
 
   if (deltaT > 0.0) {
     m_keepHitTime = true;
@@ -201,7 +201,7 @@ StatusCode TileGeoG4SDCalc::initialize() {
   }
 
   m_lateHitTime = m_tileSizeDeltaT - deltaT;
-  ATH_MSG_INFO("All hits with time above " << m_options.timeCut / CLHEP::ns << " ns will be stored with time = "
+  ATH_MSG_DEBUG("All hits with time above " << m_options.timeCut / CLHEP::ns << " ns will be stored with time = "
                << m_lateHitTime / CLHEP::ns << " ns.");
 
   // Read attenuation lengths from file and store them in tilerow
@@ -212,7 +212,7 @@ StatusCode TileGeoG4SDCalc::initialize() {
     std::string attFile = PathResolver::find_file(attFileName, "DATAPATH");
     std::string ratioFile = PathResolver::find_file(ratioFileName, "DATAPATH");
     m_row = std::make_unique<TileRow>(attFile, ratioFile); //holds attenuation lengths for tiles
-    ATH_MSG_INFO("Using Optical Ratio = " << m_row->OpticalRatio[0].at(0));
+    ATH_MSG_DEBUG("Using Optical Ratio = " << m_row->OpticalRatio[0].at(0));
   }
 
   return StatusCode::SUCCESS;

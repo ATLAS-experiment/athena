@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::LocalGeometry
@@ -123,8 +123,7 @@ namespace LArG4 {
       std::string detectorKey  = LArVersion.empty() ? AtlasVersion : LArVersion;
       std::string detectorNode = LArVersion.empty() ? "ATLAS" : "LAr";
 
-      ATH_MSG_INFO("Constructing local HEC geometry helper ");
-      ATH_MSG_DEBUG(" detectorKey: "<<detectorKey<<" detectorNode: "<<detectorNode);
+      ATH_MSG_DEBUG("Constructing local HEC geometry helper:  detectorKey: "<<detectorKey<<" detectorNode: "<<detectorNode);
 
       IRDBRecordset_ptr hecPad = accessSvc->getRecordsetPtr("HecPad",detectorKey, detectorNode);
       if (hecPad->size()==0)
