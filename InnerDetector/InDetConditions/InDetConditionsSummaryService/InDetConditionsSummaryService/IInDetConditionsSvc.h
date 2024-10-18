@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,10 +23,12 @@ class IdentifierHash;
 **/
 class IInDetConditionsSvc: virtual public IInterface{
 public:
+  /// Declare interface ID
+  DeclareInterfaceID(IInDetConditionsSvc, 1, 0);
+
   virtual ~IInDetConditionsSvc(){
     //nop, needed for derived classes
   }
-  static const InterfaceID & interfaceID(); //!< reimplemented from IInterface
  
   //@name isActive methods reveal whether the element should return data
   //@{
@@ -49,8 +51,4 @@ public:
    
 };
 
-inline const InterfaceID & IInDetConditionsSvc::interfaceID(){
-  static const InterfaceID IID_IInDetConditionsSvc("IInDetConditionsSvc",1,0);
-  return IID_IInDetConditionsSvc;
-}
 #endif
