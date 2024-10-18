@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow.h
@@ -17,6 +17,7 @@
 #include <math.h>
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "FlowAfterburner/GenAccessIO.h"
+#include "GeneratorObjects/HijingEventParams.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1.h"
@@ -34,31 +35,32 @@ public:
   StatusCode finalize();
 
 private:
-  std::string     m_key;
-  bool            m_produceHistogram;
+  //Declare the algorithm's properties
+  StringProperty  m_key{this, "McEventKey", "FLOW_EVENT"};
+  BooleanProperty  m_produceHistogram{this, "HistogramFlag", true};
 
-  double          m_bcut_min;
-  double          m_bcut_max;
-  double          m_ptcut_min;
-  double          m_ptcut_max;
-  double          m_rapcut_min;
-  double          m_rapcut_max;
+  DoubleProperty  m_bcut_min{this, "ImpactCutMin", 0.};
+  DoubleProperty  m_bcut_max{this, "ImpactCutMax", 99.};
+  DoubleProperty  m_ptcut_min{this, "PtCutMin", 0.};
+  DoubleProperty  m_ptcut_max{this, "PtCutMax", 999999.};
+  DoubleProperty  m_rapcut_min{this, "RapidityCutMin", 0.};
+  DoubleProperty  m_rapcut_max{this, "RapidityCutMax", 5.5};
 
   //Histograms, used if m_produceHistogram is true = 1
-  TH1F*   m_hgenerated;
-  TH1F*   m_b;
-  TH1F*   m_phi;
-  TH1F*   m_phiR;
-  TH1F*   m_phi_vs_phiR;
-  TH2F*   m_phiv1reco_vs_phiR;
-  TH2F*   m_phiv2reco_vs_phiR;
-  TH1F*   m_phi_vs_phiR_etap;
-  TH1F*   m_phi_vs_phiR_etan;
-  TH3F*   m_v2betapth;
-  TH3F*   m_ebetapth;
+  TH1F*   m_hgenerated{};
+  TH1F*   m_b{};
+  TH1F*   m_phi{};
+  TH1F*   m_phiR{};
+  TH1F*   m_phi_vs_phiR{};
+  TH2F*   m_phiv1reco_vs_phiR{};
+  TH2F*   m_phiv2reco_vs_phiR{};
+  TH1F*   m_phi_vs_phiR_etap{};
+  TH1F*   m_phi_vs_phiR_etan{};
+  TH3F*   m_v2betapth{};
+  TH3F*   m_ebetapth{};
 
-  StoreGateSvc*   m_sgSvc;
-  TruthHelper::GenAccessIO*    m_tesIO;
+  SG::ReadHandleKey<HijingEventParams> m_hijingKey{this, "HijingEventParmsKey","Hijing_event_params"};
+  TruthHelper::GenAccessIO*    m_tesIO{};
 };
 
 #endif

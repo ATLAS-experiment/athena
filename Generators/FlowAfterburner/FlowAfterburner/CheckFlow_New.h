@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow.h
@@ -17,6 +17,7 @@
 #include <math.h>
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "FlowAfterburner/GenAccessIO.h"
+#include "GeneratorObjects/HijingEventParams.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1.h"
@@ -34,15 +35,16 @@ public:
   StatusCode finalize();
 
 private:
-  std::string     m_key;
-  bool            m_produceHistogram;
+  //Declare the algorithm's properties
+  StringProperty  m_key{this, "McEventKey", "FLOW_EVENT"};
+  BooleanProperty  m_produceHistogram{this, "HistogramFlag", true};
 
-  double          m_bcut_min;
-  double          m_bcut_max;
-  double          m_ptcut_min;
-  double          m_ptcut_max;
-  double          m_rapcut_min;
-  double          m_rapcut_max;
+  DoubleProperty  m_bcut_min{this, "ImpactCutMin", 0.};
+  DoubleProperty  m_bcut_max{this, "ImpactCutMax", 99.};
+  DoubleProperty  m_ptcut_min{this, "PtCutMin", 0.};
+  DoubleProperty  m_ptcut_max{this, "PtCutMax", 999999.};
+  DoubleProperty  m_rapcut_min{this, "RapidityCutMin", 0.};
+  DoubleProperty  m_rapcut_max{this, "RapidityCutMax", 5.5};
 
   enum{
   n_ptbin=16,
@@ -64,11 +66,10 @@ private:
   TProfile *m_profile_pt_dep_reco [6][n_etabin]; 
   TProfile *m_profile_eta_dep_reco[6][n_ptbin ]; 
 
-  TProfile *m_profile_resolution;
+  TProfile *m_profile_resolution{};
 
-  StoreGateSvc*   m_sgSvc;
-  ITHistSvc*      m_thistSvc;
-  TruthHelper::GenAccessIO*    m_tesIO;
+  SG::ReadHandleKey<HijingEventParams> m_hijingKey{this, "HijingEventParmsKey","Hijing_event_params"};
+  TruthHelper::GenAccessIO*    m_tesIO{};
 };
 
 #endif

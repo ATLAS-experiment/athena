@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BEAMHALOGENERATORALG_H
@@ -72,7 +72,7 @@ private:
   BooleanProperty m_doMonitoringPlots{this, "doMonitoringPlots", false};
   
   /** A pointer to the THist service for validation plots. */
-  ITHistSvc *m_tHistSvc{};
+  ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc", "THistSvc"};
   
   /** Name of the random number stream */
   StringProperty m_randomStream{this, "randomStream", "BeamHalo"};
