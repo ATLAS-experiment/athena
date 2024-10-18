@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,6 @@ namespace Trk
   class Track;
   class TrackStateOnSurface;
   using TrackStates = DataVector<const Trk::TrackStateOnSurface>;
-  static const InterfaceID IID_ITrackHoleSearchTool("Trk::ITrackHoleSearchTool", 1, 0);
 
   /** @brief interface for searching, counting and adding holes on
              tracks anywhere in ATLAS.
@@ -30,7 +29,7 @@ namespace Trk
 
   class ITrackHoleSearchTool : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID( ) ;
+    DeclareInterfaceID(ITrackHoleSearchTool,1,0);
 
     /** Input : track, partHyp
 	Output: Changes in information
@@ -74,11 +73,6 @@ namespace Trk
 
       
   };
-
-  inline const InterfaceID& Trk::ITrackHoleSearchTool::interfaceID()
-    { 
-      return IID_ITrackHoleSearchTool; 
-    }
 
 } // end of namespace
 
