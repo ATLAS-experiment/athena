@@ -37,7 +37,6 @@ BarrelConstruction                                   INFO   Use sagging in geome
 EMECConstruction                                     INFO multi-layered version of absorbers activated, parameter value is 1
 EMECConstruction                                     INFO activating LAr::EMEC::Pos::InnerWheel
 EMECConstruction                                     INFO activating LAr::EMEC::Pos::OuterWheel
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID                                             INFO initialize_from_dictionary 
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 EndcapDMConstruction                                 INFO Start building EC electronics geometry
@@ -57,41 +56,25 @@ CondInputLoader                                      INFO created CondCont<Athen
 ApplicationMgr                                       INFO Application Manager Started successfully
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArEM_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArHEC_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID                                       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDescrCnv                                 INFO in createObj: creating a CaloDescrManager object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID                                            INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID                                          INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TTOnlineID helper object in the detector store
 TTOnlineID                                           INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloCell_SuperCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArEM_SuperCell_ID helper object in the detector store
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArHEC_SuperCell_ID helper object in the detector store
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArFCAL_SuperCell_ID helper object in the detector store
-AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a Tile_SuperCell_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIdMgrDetDescrCnv                                 INFO  Finished 
-CaloIdMgrDetDescrCnv                                 INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
+AtlasDetectorID                                      INFO initialize_from_dictionary - OK
+AtlasDetectorID                                      INFO initialize_from_dictionary - OK
+AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 DetectorStore                                     WARNING retrieve(default): No valid proxy for default object 
  of type TileDetDescrManager(CLID 2941)
 buildCaloDetDescr                                 WARNING Could not get the TileDetectorManager. No Calo Elements will be built for Tile

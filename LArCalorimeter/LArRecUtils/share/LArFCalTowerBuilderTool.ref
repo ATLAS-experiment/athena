@@ -92,7 +92,6 @@ EMECConstruction                                     INFO multi-layered version 
 EMECConstruction                                     INFO activating LAr::EMEC::Pos::InnerWheel
 EMECConstruction                                     INFO activating LAr::EMEC::Pos::OuterWheel
 ClassIDSvc                                           INFO getRegistryEntries: read 6770 CLIDRegistry entries for module ALL
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID                                             INFO initialize_from_dictionary 
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 EndcapDMConstruction                                 INFO Start building EC electronics geometry
@@ -107,24 +106,18 @@ TileDddbManager                                      INFO n_cuts = 9
 TileDddbManager                                      INFO n_saddle = 1
 TileDddbManager                                      INFO n_tilb = 21
 TileDddbManager                                      INFO n_tileSwitches = 1
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileNeighbour                                        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/TileNeighbour_reduced.txt
 TileHWIDDetDescrCnv                                  INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID                                             INFO initialize_from_dictionary 
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 ClassIDSvc                                           INFO getRegistryEntries: read 55 CLIDRegistry entries for module ALL
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArEM_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArHEC_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCal2DNeighbors-April2011.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCal3DNeighborsNext-April2011.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCal3DNeighborsPrev-April2011.txt
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID                                       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
@@ -151,31 +144,21 @@ IOVDbSvc                                             INFO   AlgTool: ToolSvc.IOV
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 CaloIdMgrDetDescrCnv                                 INFO in createObj: creating a CaloDescrManager object in the detector store
 ClassIDSvc                                           INFO getRegistryEntries: read 240 CLIDRegistry entries for module ALL
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID                                            INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID                                          INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TTOnlineID helper object in the detector store
 TTOnlineID                                           INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloCell_SuperCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArEM_SuperCell_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArHEC_SuperCell_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArFCAL_SuperCell_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells2DNeighborsNew-April2014.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells3DNeighborsNextNew-April2014.txt
 LArFCAL_Base_ID                                      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/FCalSuperCells3DNeighborsPrevNew-April2014.txt
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a Tile_SuperCell_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileNeighbour                                        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/main_Athena_x86_64-el9-gcc13-opt/2024-01-23T2101/Athena/24.0.22/InstallArea/x86_64-el9-gcc13-opt/share/TileSuperCellNeighbour.txt
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIdMgrDetDescrCnv                                 INFO  Finished 
-CaloIdMgrDetDescrCnv                                 INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
 CaloAlignCondAlg                                     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [4294967294,l:4294967294]}
 test1
 towers
