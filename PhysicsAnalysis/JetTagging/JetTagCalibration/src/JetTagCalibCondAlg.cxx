@@ -27,6 +27,7 @@ namespace Analysis {
 
   JetTagCalibCondAlg::JetTagCalibCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
     : ::AthAlgorithm( name, pSvcLocator ),
+    m_poolsvc("PoolSvc", name),
     m_Likelihood_smoothNTimes(1),
     m_JetFitterNN_calibrationDirectory("JetFitter"),
     m_JetFitterNN_calibrationSubDirectory("NeuralNetwork"),
@@ -60,7 +61,7 @@ namespace Analysis {
     ATH_MSG_DEBUG("initialize " << name());
 
     // PoolSvc
-    ATH_CHECK(service("PoolSvc",m_poolsvc));
+    ATH_CHECK( m_poolsvc.retrieve() );
   
     // Condition Handles
     ATH_CHECK( m_readKey.initialize() );

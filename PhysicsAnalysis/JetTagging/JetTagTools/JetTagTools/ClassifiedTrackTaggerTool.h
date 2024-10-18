@@ -73,7 +73,7 @@ namespace Analysis {
 
    private:
     //debugging
-    IChronoStatSvc* m_timingProfile{};
+    SmartIF<IChronoStatSvc> m_timingProfile;
 
     //variables for retrieving the CTT classification score given the TCT weights
     std::unique_ptr<MVAUtils::BDT> m_CTTBDT;
