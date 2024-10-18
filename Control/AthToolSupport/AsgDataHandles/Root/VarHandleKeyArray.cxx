@@ -20,7 +20,6 @@
 //  * case of setting a property from a string, @c s will contain quote marks.
 //  */
 //     StatusCode 
-//     GAUDI_API
 //     parse(SG::VarHandleKeyArray& v, const std::string& s)
 //     {
 //       std::vector<std::string> vp;
@@ -47,7 +46,6 @@
 //  * by quote marks.
 //  */
 //     std::ostream& 
-//     GAUDI_API
 //     toStream(const SG::VarHandleKeyArray& v, std::ostream& o)
 //     {
 //       o << "[" << v.toString() << "]";      

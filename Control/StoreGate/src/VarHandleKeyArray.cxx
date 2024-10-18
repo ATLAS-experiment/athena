@@ -17,8 +17,7 @@ namespace Gaudi {
  * Note that @c s is a representation of the property setting; thus, in the
  * case of setting a property from a string, @c s will contain quote marks.
  */
-    StatusCode 
-    GAUDI_API
+    StatusCode
     parse(SG::VarHandleKeyArray& v, const std::string& s)
     {
       std::vector<std::string> vp;
@@ -44,8 +43,7 @@ namespace Gaudi {
  * Note that if the representation is a string, it should be surrounded
  * by quote marks.
  */
-    std::ostream& 
-    GAUDI_API
+    std::ostream&
     toStream(const SG::VarHandleKeyArray& v, std::ostream& o)
     {
       o << "[" << v.toString() << "]";      

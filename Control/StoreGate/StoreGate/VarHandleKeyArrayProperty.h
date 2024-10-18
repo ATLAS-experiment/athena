@@ -20,19 +20,17 @@
 
 namespace Gaudi { 
   namespace Parsers {
-    GAUDI_API
     StatusCode parse(SG::VarHandleKeyArray& v, const std::string& s);    
   }
   
   namespace Utils {
-    GAUDI_API
     std::ostream& toStream(const SG::VarHandleKeyArray& v, std::ostream& o);    
   }
 }
 
 namespace SG {
 
-  class GAUDI_API VarHandleKeyArrayProperty
+  class VarHandleKeyArrayProperty
     : public ::PropertyWithHandlers <>
   {
   public:

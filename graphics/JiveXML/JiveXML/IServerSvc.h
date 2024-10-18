@@ -16,8 +16,8 @@ namespace JiveXML {
    * events from Athena to the server and do not require the service also to
    * serve events (which it doesn't e.g in case of the ExternalONCRPCServerSvc). 
    */
-  class GAUDI_API IServerSvc : virtual public IService,
-			       virtual public IEventReceiver {
+  class IServerSvc : virtual public IService,
+                     virtual public IEventReceiver {
   public:
 
      DeclareInterfaceID(IServerSvc,2,0);

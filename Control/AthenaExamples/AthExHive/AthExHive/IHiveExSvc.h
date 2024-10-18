@@ -16,7 +16,7 @@
 #include <string>
 
 
-class GAUDI_API IHiveExSvc : virtual public IService {
+class IHiveExSvc : virtual public IService {
 
  public:
   

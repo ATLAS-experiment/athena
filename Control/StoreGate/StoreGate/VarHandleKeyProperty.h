@@ -44,7 +44,6 @@ namespace Parsers {
  * Note that @c s is a representation of the property setting; thus, in the
  * case of setting a property from a string, @c s will contain quote marks.
  */
-GAUDI_API
 StatusCode parse(SG::VarHandleKey& v, const std::string& s);
 
 } //> ns Parsers
@@ -61,7 +60,6 @@ namespace Utils {
  * Note that if the representation is a string, it should be surrounded
  * by quote marks.
  */
-GAUDI_API
 std::ostream& toStream(const SG::VarHandleKey& v, std::ostream& o);
 
 } //> ns Utils
@@ -77,7 +75,7 @@ namespace SG {
  * The Property object refers to an instance of @c SG::VarHandleKey
  * (the value object) and provides generic methods for manipulating it.
  */
-class GAUDI_API VarHandleKeyProperty : public DataHandleProperty
+class VarHandleKeyProperty : public DataHandleProperty
 {
 public:
 
