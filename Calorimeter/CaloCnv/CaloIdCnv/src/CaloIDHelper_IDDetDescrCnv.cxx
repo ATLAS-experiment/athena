@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -35,36 +35,24 @@ StatusCode CaloIDHelper_IDDetDescrCnv::createObj (IOpaqueAddress* pAddr,
 {
   // Get the a name of the class we're converting.
   std::string type_name;
-  IClassIDSvc* clidsvc = 0;
-  CHECK( service ("ClassIDSvc", clidsvc) );
+  SmartIF<IClassIDSvc> clidsvc{ service ("ClassIDSvc") };
+  CHECK( clidsvc.isValid() );
   CHECK( clidsvc->getTypeNameOfID (objType(), type_name) );
-
-  MsgStream log(msgSvc(), "CaloIDHelper_IDDetDescrCnv");
-  log << MSG::INFO << "in createObj: creating a " << type_name
-      << " helper object in the detector store" << endmsg;
 
   // Get the SG key.
   DetDescrAddress* ddAddr;
-  ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-  if(!ddAddr) {
-    log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-    return StatusCode::FAILURE;
-  }
+  CHECK( (ddAddr = dynamic_cast<DetDescrAddress*> (pAddr)) != nullptr );
   std::string helperKey  = *( ddAddr->par() );
-  if ("" == helperKey) {
-    log << MSG::DEBUG << "No Helper key " << endmsg;
+  if (helperKey.empty()) {
+    ATH_MSG_DEBUG("No Helper key ");
   }
   else {
-    log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;
+    ATH_MSG_DEBUG("Helper key is " << helperKey);
   }
-    
-  // get DetectorStore service
-  StoreGateSvc * detStore = 0;
-  CHECK( service("DetectorStore", detStore) );
- 
+
   // Get the dictionary manager from the detector store
   const IdDictManager* idDictMgr = 0;
-  CHECK( detStore->retrieve(idDictMgr, "IdDict") );
+  CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
   // Create the helper.
   IdHelper* idhelper = 0;
@@ -73,11 +61,11 @@ StatusCode CaloIDHelper_IDDetDescrCnv::createObj (IOpaqueAddress* pAddr,
   // Initialize the helper.
   idhelper->setMessageSvc (msgSvc());
   if (idDictMgr->initializeHelper(*idhelper)) {
-    log << MSG::ERROR << "Unable to initialize " << type_name << endmsg;
+    ATH_MSG_ERROR("Unable to initialize " << type_name);
     return StatusCode::FAILURE;
   } 
   else {
-    log << MSG::DEBUG << " Initialized " << type_name << endmsg;
+    ATH_MSG_DEBUG("Initialized " << type_name);
   }
 
   return StatusCode::SUCCESS; 
@@ -100,7 +88,7 @@ long int CaloIDHelper_IDDetDescrCnv::repSvcType() const
  */
 CaloIDHelper_IDDetDescrCnv::CaloIDHelper_IDDetDescrCnv (const CLID& clid,
                                                         ISvcLocator* svcloc)
-  : DetDescrConverter (clid, svcloc)
+  : DetDescrConverter (clid, svcloc, "CaloIDHelper_IDDetDescrCnv")
 {
 }
 

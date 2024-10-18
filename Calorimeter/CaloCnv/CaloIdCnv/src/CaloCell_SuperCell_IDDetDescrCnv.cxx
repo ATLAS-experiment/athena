@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdCnv/src/CaloCell_SuperCell_IDDetDescrCnv.cxx
@@ -29,8 +29,8 @@ StatusCode make_CaloIDHelper (ISvcLocator* svcloc,
 {
   const char* ctx = "CaloCell_SuperCell_IDDetDescrCnv";
   // get DetectorStore service
-  StoreGateSvc * detStore = 0;
-  CHECK_WITH_CONTEXT( svcloc->service("DetectorStore", detStore),  ctx );
+  SmartIF<StoreGateSvc> detStore{svcloc->service("DetectorStore")};
+  CHECK_WITH_CONTEXT( detStore.isValid(),  ctx );
 
   // retrieve LAr and Tile helpers
 #define GET_HELPER(TYPE, HELPER) \

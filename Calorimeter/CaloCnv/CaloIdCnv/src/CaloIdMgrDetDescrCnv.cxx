@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
  Calo Det Descr converter package
  -----------------------------------------
  ***************************************************************************/
-
-//<doc><file>	$Id: CaloIdMgrDetDescrCnv.cxx,v 1.7 2009-02-10 14:09:21 fledroit Exp $
-//<version>	$Name: not supported by cvs2svn $
-
 
 #include "CaloIdCnv/CaloIdMgrDetDescrCnv.h"
 #include "CaloIdentifier/CaloIdManager.h"
@@ -49,28 +45,10 @@ StatusCode
 CaloIdMgrDetDescrCnv::initialize()
 {
     // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "CaloIdMgrDetDescrCnv");
-    log << MSG::DEBUG << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-	return sc;
-    }
-
+    ATH_CHECK( DetDescrConverter::initialize() );
     return StatusCode::SUCCESS;
 }
 
-//--------------------------------------------------------------------
-
-StatusCode
-CaloIdMgrDetDescrCnv::finalize()
-{
-    MsgStream log(msgSvc(), "CaloIdMgrDetDescrCnv");
-    log << MSG::DEBUG << "in finalize" << endmsg;
-
-    return StatusCode::SUCCESS;
-}
 
 //--------------------------------------------------------------------
 
@@ -79,7 +57,7 @@ namespace {
 
 
 template <class T>
-StatusCode set_helper (StoreGateSvc* detStore,
+StatusCode set_helper (const ServiceHandle<StoreGateSvc>& detStore,
                        const char* sgkey,
                        CaloIdManager* mgr,
                        MsgStream& log)
@@ -95,30 +73,9 @@ StatusCode set_helper (StoreGateSvc* detStore,
 } // anonymous namespace
 
 StatusCode
-CaloIdMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
+CaloIdMgrDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
-    MsgStream log(msgSvc(), "CaloIdMgrDetDescrCnv");
-    log << MSG::INFO
-	<< "in createObj: creating a CaloDescrManager object in the detector store"
-	<< endmsg;
-
-    // Create a new CaloIdManager
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-	log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string mgrKey  = *( ddAddr->par() );
-    if ("" == mgrKey) {
-	log << MSG::DEBUG << "No Manager key " << endmsg;
-    }
-    else {
-	log << MSG::DEBUG << "Manager key is " << mgrKey << endmsg;
-    }
+    ATH_MSG_INFO("in createObj: creating a CaloDescrManager object in the detector store");
 
     // Create the manager
     CaloIdManager* caloIdMgr = new CaloIdManager();
@@ -126,12 +83,8 @@ CaloIdMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     // Pass a pointer to the container to the Persistency service by reference.
     pObj = SG::asStorable(caloIdMgr);
 
-    // get DetectorStore service
-    StoreGateSvc * detStore = 0;
-    CHECK( serviceLocator()->service("DetectorStore", detStore) );
-
     // Initialize manager with all helpers.
-#define SET_HELPER(H) CHECK( set_helper<H> (detStore, #H, caloIdMgr, log) )
+#define SET_HELPER(H) CHECK( set_helper<H> (detStore(), #H, caloIdMgr, msg()) )
 
     SET_HELPER (CaloCell_ID);
 
@@ -164,15 +117,11 @@ CaloIdMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 
 #undef SET_HELPER
 
-
-    log << MSG::INFO << " Finished " << endmsg;
-
     // Initialize the calo mgr
     //  We protect here in case this has been initialized elsewhere
     if (!caloIdMgr->isInitialized()) {
 
-      log << MSG::INFO << "Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv "
-	  << endmsg;
+      ATH_MSG_DEBUG("Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv");
 
       // Initialize the manager ...
 
@@ -203,5 +152,5 @@ CaloIdMgrDetDescrCnv::classID() {
 //--------------------------------------------------------------------
 CaloIdMgrDetDescrCnv::CaloIdMgrDetDescrCnv(ISvcLocator* svcloc)
     :
-    DetDescrConverter(ClassID_traits<CaloIdManager>::ID(), svcloc)
+    DetDescrConverter(ClassID_traits<CaloIdManager>::ID(), svcloc, "CaloIdMgrDetDescrCnv")
 {}

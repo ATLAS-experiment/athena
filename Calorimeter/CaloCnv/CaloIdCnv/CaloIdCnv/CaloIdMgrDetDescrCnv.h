@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,13 +7,8 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<doc><file>	$Id: CaloIdMgrDetDescrCnv.h,v 1.7 2009-02-10 14:09:21 fledroit Exp $
-//<version>	$Name: not supported by cvs2svn $
-
 #ifndef CALOIDMGRDETDESCRCNV_CALOIDMGRDETDESCRCNV_H
 #define CALOIDMGRDETDESCRCNV_CALOIDMGRDETDESCRCNV_H
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "DetDescrCnvSvc/DetDescrConverter.h"
 
@@ -35,10 +30,9 @@
 class CaloIdMgrDetDescrCnv: public DetDescrConverter {
 
 public:
-    virtual long int   repSvcType() const;
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
+    virtual long int   repSvcType() const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj) override;
 
     /** Storage type (used by CnvFactory) */
     static long storageType();
