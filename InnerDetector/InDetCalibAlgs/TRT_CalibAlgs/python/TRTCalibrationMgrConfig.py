@@ -131,7 +131,7 @@ if __name__ == '__main__':
     flags.Exec.MaxEvents = args.evtMax
     
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"     
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2024-03"     
     
     CalibConfig(flags)    
     
