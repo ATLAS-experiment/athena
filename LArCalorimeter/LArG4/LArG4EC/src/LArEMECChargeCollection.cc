@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArEMECChargeCollection.cc
@@ -132,7 +132,7 @@ void LArG4::EC::EnergyCalculator::CreateArrays(Wheel_Efield_Map &wheel, G4int n)
 // ***************************************************************************
 void LArG4::EC::EnergyCalculator::IniGeomforFieldMaps(void){
   // ***************************************************************************
-  ATH_MSG_INFO("***IniGeomforFieldMaps() called for FieldMapVersion = "
+  ATH_MSG_DEBUG("***IniGeomforFieldMaps() called for FieldMapVersion = "
                << m_FieldMapVersion);
 
   if(m_FieldMapVersion == "v00" || m_FieldMapVersion == "v01" ||
@@ -147,7 +147,7 @@ void LArG4::EC::EnergyCalculator::IniGeomforFieldMaps(void){
     if(m_FieldMapVersion == "v00") {
 
       G4int nlayer=6; // number of radial layers
-      ATH_MSG_INFO(" ***IniGeomforFieldMaps calls CreateArrays");
+      ATH_MSG_VERBOSE(" ***IniGeomforFieldMaps calls CreateArrays");
       CreateArrays(m_ChCollInner,nlayer);
       CreateArrays(m_ChCollOuter,nlayer);
 
@@ -393,7 +393,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String& fname){
   G4int foldtypemx=0;
   char fieldmapversion[10] = { 0 };
 
-  ATH_MSG_INFO("GetFieldMaps from file = " << fname);
+  ATH_MSG_DEBUG("GetFieldMaps from file = " << fname);
 
   FILE *lun = fopen(fname, "r");
 
@@ -406,7 +406,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String& fname){
     if (fscanf(lun, "%9s", fieldmapversion) < 1) {
       ATH_MSG_ERROR("GetFieldMaps Error reading field map");
     }
-    ATH_MSG_INFO("This file contains fieldmap of version '" << fieldmapversion << "'");
+    ATH_MSG_DEBUG("This file contains fieldmap of version '" << fieldmapversion << "'");
   }
 
   // Check which fold should have a map
@@ -465,7 +465,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String& fname){
             }
           } // end for points
         }
-        ATH_MSG_INFO(" foldtype="<<foldtype<< " wheeltype="<<wheeltype
+        ATH_MSG_VERBOSE(" foldtype="<<foldtype<< " wheeltype="<<wheeltype
                      <<" ilayer = " << i << " zmin, max = "
                      << ChCollFoldType->MinZofLayer[i] << " "
                      << ChCollFoldType->MaxZofLayer[i] << " "
@@ -553,7 +553,7 @@ void LArG4::EC::EnergyCalculator::PrepareFieldMap(Wheel_Efield_Map* ChCollWheelT
   //G4int npoints;
   G4double maxz=0.;
 
-  ATH_MSG_INFO("PrepareFieldMap for solidtype = "
+  ATH_MSG_DEBUG("PrepareFieldMap for solidtype = "
                << LArWheelCalculator::LArWheelCalculatorTypeString(lwc()->type()));
 
   const G4int nlayer = ChCollWheelType->NumberOfRadialLayer; // should be the same for Fold0 and Fold1

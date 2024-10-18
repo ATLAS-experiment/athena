@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -102,7 +102,7 @@ LArG4GenShowerLib::LArG4GenShowerLib(const std::string& name, ISvcLocator* pSvcL
 
 StatusCode LArG4GenShowerLib::initialize()
 {
-  ATH_MSG_INFO ( "Initializing" );
+  ATH_MSG_DEBUG ( "Initializing" );
 
   ShowerLib::IShowerLib* library = nullptr;
 
@@ -136,7 +136,7 @@ StatusCode LArG4GenShowerLib::initialize()
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO ( "LArG4GenShowerLib " << this->name() << " initialized" );
+  ATH_MSG_DEBUG ( "LArG4GenShowerLib " << this->name() << " initialized" );
 
   return StatusCode::SUCCESS;
 }
@@ -482,21 +482,21 @@ StatusCode LArG4GenShowerLib::finalize()
     libr.Close();
   }
   if (m_stat_numshowers> 0) {
-    ATH_MSG_INFO ( "********Statistics for GenShowerLib********" );
-    ATH_MSG_INFO ( "Total number of showers: " << m_stat_numshowers
+    ATH_MSG_DEBUG ( "********Statistics for GenShowerLib********" );
+    ATH_MSG_DEBUG ( "Total number of showers: " << m_stat_numshowers
                    << ", valid: "<< m_stat_valid << " (" << (m_stat_valid*100)/m_stat_numshowers << "%)"
                    << ", invalid: " << m_stat_invalid << " (" << (m_stat_invalid*100)/m_stat_numshowers << "%)" );
     for (itr = m_libraries.begin();itr != m_libraries.end();++itr){
-      ATH_MSG_INFO ( "*******************************************" );
+      ATH_MSG_DEBUG ( "*******************************************" );
       std::stringstream ss((*itr).second->statistics());
       for(std::string line; std::getline(ss,line);)
-        ATH_MSG_INFO ( line );
-      ATH_MSG_INFO ( "Saved: " << m_stat_lib_saved[(*itr).second] << " Rejected: " << m_stat_lib_notsaved[(*itr).second] );
+        ATH_MSG_DEBUG ( line );
+      ATH_MSG_DEBUG ( "Saved: " << m_stat_lib_saved[(*itr).second] << " Rejected: " << m_stat_lib_notsaved[(*itr).second] );
     }
-    ATH_MSG_INFO ( "*******************************************" );
-    ATH_MSG_INFO ( "Showers with no corresponding library: " << m_stat_nolib << " (" << (m_stat_nolib*100)/m_stat_numshowers << "%)" );
+    ATH_MSG_DEBUG ( "*******************************************" );
+    ATH_MSG_DEBUG ( "Showers with no corresponding library: " << m_stat_nolib << " (" << (m_stat_nolib*100)/m_stat_numshowers << "%)" );
   }
-  ATH_MSG_INFO ( "Finalized." );
+  ATH_MSG_DEBUG ( "Finalized." );
 
   return StatusCode::SUCCESS;
 }

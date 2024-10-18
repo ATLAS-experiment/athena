@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Prepared 05-Dec-2002 Bill Seligman
@@ -67,7 +67,7 @@ StatusCode LArBarrelPresamplerCalculator::initialize()
 
   if (m_IflCur)
     {
-      ATH_MSG_INFO(" LArBarrelPresamplerCalculator: start reading current maps");
+      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator: start reading current maps");
       m_psmap = PsMap::GetPsMap();
     }
 
@@ -78,12 +78,12 @@ StatusCode LArBarrelPresamplerCalculator::initialize()
     {
       const double Birks_LAr_density = 1.396;
       m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
-      ATH_MSG_INFO(" LArBarrelPresamplerCalculator: Birks' law ON ");
-      ATH_MSG_INFO(" LArBarrelPresamplerCalculator:   parameter k    " << m_birksLaw->k());
+      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator: Birks' law ON ");
+      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator:   parameter k    " << m_birksLaw->k());
     }
   else
     {
-      ATH_MSG_INFO(" LArBarrelPresamplerCalculator: Birks' law OFF");
+      ATH_MSG_DEBUG(" LArBarrelPresamplerCalculator: Birks' law OFF");
     }
 
   if(m_detectorName.empty()) m_volname="LAr::Barrel::Presampler";
@@ -163,7 +163,7 @@ G4bool LArBarrelPresamplerCalculator::Process(const G4Step* a_step, std::vector<
 #endif
 
   if (idep<0) {
-     ATH_MSG_INFO(" LArBarrelPresamplerCalculator::Process  Presampler volume not found !!");
+     ATH_MSG_WARNING(" LArBarrelPresamplerCalculator::Process  Presampler volume not found !!");
      return false;
   }
 
@@ -303,7 +303,7 @@ G4bool LArBarrelPresamplerCalculator::Process(const G4Step* a_step, std::vector<
 #endif
 	const CurrMap* cm = m_psmap->GetMap(imodule);
         if (!cm) {
-          ATH_MSG_INFO(" LArBarrelPresamplerCalculator: cannot get map for module " << imodule);
+          ATH_MSG_WARNING(" LArBarrelPresamplerCalculator: cannot get map for module " << imodule);
           continue;
         }
         double current0,current1,current2,gap;

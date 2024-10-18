@@ -364,7 +364,7 @@ StatusCode EnergyCalculator::initialize()
   case EMEC_ECOR_CHCL1:
     if(lwc()->GetisBarrette()){
       m_ecorr_method = &EnergyCalculator::CalculateChargeCollection;
-      ATH_MSG_INFO("CHCOLL energy correction is user for Barettes"
+      ATH_MSG_DEBUG("CHCOLL energy correction is user for Barettes"
                    << " instead of CHCOLL1");
     } else {
       m_ecorr_method = &EnergyCalculator::CalculateChargeCollection1;

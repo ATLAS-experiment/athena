@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArEndcapPresamplerCalculator
@@ -54,12 +54,12 @@ StatusCode LArEndcapPresamplerCalculator::initialize()
     {
       const double Birks_LAr_density = 1.396;
       m_birksLaw = new LArG4BirksLaw(Birks_LAr_density,m_Birksk);
-      ATH_MSG_INFO(" LArEndcapPresamplerCalculator: Birks' law ON ");
-      ATH_MSG_INFO(" LArEndcapPresamplerCalculator:   parameter k    " << m_birksLaw->k());
+      ATH_MSG_DEBUG(" LArEndcapPresamplerCalculator: Birks' law ON ");
+      ATH_MSG_DEBUG(" LArEndcapPresamplerCalculator:   parameter k    " << m_birksLaw->k());
     }
   else
     {
-      ATH_MSG_INFO(" LArEndcapPresamplerCalculator: Birks' law OFF");
+      ATH_MSG_DEBUG(" LArEndcapPresamplerCalculator: Birks' law OFF");
     }
 
   // Get the geometry routine.
