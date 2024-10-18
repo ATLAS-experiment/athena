@@ -14,7 +14,8 @@ atlas_add_component( MuonRegionSelector
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps IRegionSelector
                      RegSelLUT GaudiKernel Identifier CSCcablingLib StoreGateLib MuonCablingData
                      MuonCondData MuonTGC_CablingLib RPC_CondCablingLib
-                     MuonReadoutGeometry MuonNSWCommonDecode MuonAGDDDescription  )
+
+                     MuonReadoutGeometry MuonNSWCommonDecode)
 
 atlas_add_test( MuonRegSelUnitTest
                 PROPERTIES TIMEOUT 1000

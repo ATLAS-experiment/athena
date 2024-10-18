@@ -26,8 +26,6 @@
 
 /// sTGC naming convention headers
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "MuonAGDDDescription/sTGCDetectorHelper.h"
-#include "MuonAGDDDescription/sTGCDetectorDescription.h"
 
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
@@ -85,25 +83,22 @@ std::unique_ptr<RegSelSiLUT> sTGC_RegSelCondAlg::createTable( const EventContext
 
       char side     = stationEta < 0 ? 'C' : 'A';
 
-      char sector_l = stationName.substr(2,1)=="L" ? 'L' : 'S';
 
-      sTGCDetectorHelper aHelper;
-      sTGCDetectorDescription* md = aHelper.Get_sTGCDetector( sector_l, std::abs(stationEta), stationPhi, multilayer, side );
   
-      Amg::Vector3D mmPos = stgc->center();      
+      Amg::Vector3D sTgcPos = stgc->center();      
   
-      double swidth = md->sWidth();
-      double lwidth = md->lWidth();
+      double swidth = stgc->getSsize();
+      double lwidth = stgc->getLongSsize();
 
-      double ycutout = md->yCutout();
+      double ycutout = stgc->getPadDesign(1)->yCutout;
 
-      double length = md->Length();
-      double depth  = md->Tck();
+      double length = stgc->getRsize();
+      double depth  = stgc->getZsize();
 
-      double moduleR = std::sqrt( mmPos.mag()*mmPos.mag() -  mmPos.z()*mmPos.z());
+      double moduleR = std::sqrt( sTgcPos.mag()*sTgcPos.mag() -  sTgcPos.z()*sTgcPos.z());
 
-      double zmin = mmPos.z()-0.5*depth;
-      double zmax = mmPos.z()+0.5*depth;
+      double zmin = sTgcPos.z()-0.5*depth;
+      double zmax = sTgcPos.z()+0.5*depth;
 
       double rmin = moduleR-0.5*length;
       double rmax = std::sqrt( (moduleR+0.5*length)*(moduleR+0.5*length) + lwidth*lwidth/4 );
@@ -114,13 +109,13 @@ std::unique_ptr<RegSelSiLUT> sTGC_RegSelCondAlg::createTable( const EventContext
       double dphi = ( dphi1 > dphi2 ? dphi1 : dphi2 );
 
       if ( ycutout > 0 ) { 
-	double rcutout = moduleR+0.5*length - ycutout;
-	double dphicutout = std::atan( (0.5*lwidth)/rcutout );
+        double rcutout = moduleR+0.5*length - ycutout;
+        double dphicutout = std::atan( (0.5*lwidth)/rcutout );
         if ( dphi < dphicutout ) dphi = dphicutout;
       }
 
-      double phimin = mmPos.phi()-dphi;
-      double phimax = mmPos.phi()+dphi;
+      double phimin = sTgcPos.phi()-dphi;
+      double phimax = sTgcPos.phi()+dphi;
 
       if ( phimin >  M_PI ) phimin -= 2*M_PI;
       if ( phimin < -M_PI ) phimin += 2*M_PI;
