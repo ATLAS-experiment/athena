@@ -64,7 +64,6 @@ TileDddbManager                                      INFO n_saddle = 1
 TileDddbManager                                      INFO n_tilb = 20
 TileDddbManager                                      INFO n_tileSwitches = 1
 EventPersistencySvc                                  INFO Added successfully Conversion service:DetDescrCnvSvc
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileID helper object in the detector store
 IdDictDetDescrCnv                                    INFO in initialize
 IdDictDetDescrCnv                                    INFO in createObj: creating a IdDictManager object in the detector store
 IdDictDetDescrCnv                                    INFO IdDictName:  IdDictParser/ATLAS_IDS.xml
@@ -89,14 +88,9 @@ AtlasDetectorID                                      INFO initialize_from_dictio
 TileHWIDDetDescrCnv                                  INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID                                             INFO initialize_from_dictionary 
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArEM_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArHEC_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID                                       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
@@ -109,10 +103,8 @@ TileHid2RESrcIDCondAlg.TileCondProxyCool_ROD         INFO Creating TileCondProxy
 ROBDataProviderSvc                                   INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
 ROBDataProviderSvc                                   INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
 ROBDataProviderSvc                                   INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID                                          INFO initialize_from_dictionary
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                           INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID                                             INFO initialize_from_dictionary 
 AtlasDetectorID                                      INFO initialize_from_dictionary - OK
 TileCablingSvc                                       INFO Setting Cabling type to 2
@@ -205,7 +197,6 @@ TileDddbManager                                                   INFO n_saddle 
 TileDddbManager                                                   INFO n_tilb = 20
 TileDddbManager                                                   INFO n_tileSwitches = 1
 EventPersistencySvc                                               INFO Added successfully Conversion service:DetDescrCnvSvc
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a TileID helper object in the detector store
 IdDictDetDescrCnv                                                 INFO in initialize
 IdDictDetDescrCnv                                                 INFO in createObj: creating a IdDictManager object in the detector store
 IdDictDetDescrCnv                                                 INFO IdDictName:  IdDictParser/ATLAS_IDS.xml
@@ -230,14 +221,9 @@ AtlasDetectorID                                                   INFO initializ
 TileHWIDDetDescrCnv                                               INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID                                                          INFO initialize_from_dictionary 
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a CaloCell_ID helper object in the detector store
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a LArEM_ID helper object in the detector store
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a LArHEC_ID helper object in the detector store
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a LArFCAL_ID helper object in the detector store
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                                        INFO in createObj: creating a LArMiniFCAL_ID helper object in the detector store
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
 LArMiniFCAL_ID                                                    INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
@@ -245,10 +231,8 @@ TileDetDescrManager                                               INFO Entering 
 ROBDataProviderSvc                                           0    INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
 ROBDataProviderSvc                                           0    INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
 ROBDataProviderSvc                                           0    INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
-CaloIDHelper_IDDetDescrCnv                                   0    INFO in createObj: creating a CaloLVL1_ID helper object in the detector store
 CaloLVL1_ID                                                  0    INFO initialize_from_dictionary
 AtlasDetectorID                                              0    INFO initialize_from_dictionary - OK
-CaloIDHelper_IDDetDescrCnv                                   0    INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID                                                     0    INFO initialize_from_dictionary 
 AtlasDetectorID                                              0    INFO initialize_from_dictionary - OK
 TileCablingSvc                                               0    INFO Setting Cabling type to 2
