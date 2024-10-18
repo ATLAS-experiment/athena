@@ -2,6 +2,8 @@
 
   <class name="JetCalibrationTool" />
   <class name="JetCalibTool" />
+  <class name="BJetCorrectionTool" />
+  <class name="MuonInJetCorrectionTool" />
 
 <!-- <class name="JetCalibratorAthena" /> -->
 <!-- <class name="MCNumInversionResponse" /> -->

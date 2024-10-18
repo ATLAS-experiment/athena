@@ -101,6 +101,8 @@
 #include <JetAnalysisAlgorithms/JvtEfficiencyAlg.h>
 #include <JetAnalysisAlgorithms/JvtUpdateAlg.h>
 #include <JetCalibTools/JetCalibrationTool.h>
+#include <JetCalibTools/BJetCorrectionTool.h>
+#include <JetCalibTools/MuonInJetCorrectionTool.h>
 #include <JetJvtEfficiency/NNJvtSelectionTool.h>
 #include <JetMomentTools/JetVertexNNTagger.h>
 #include <JetUncertainties/JetUncertaintiesTool.h>
@@ -282,6 +284,8 @@ namespace CP
     ANA_CHECK (asg::registerToolFactory<DiTauMassTools::MissingMassToolV2> ("DiTauMassTools::MissingMassToolV2"));
     ANA_CHECK (asg::registerToolFactory<GoodRunsListSelectionTool> ("GoodRunsListSelectionTool"));
     ANA_CHECK (asg::registerToolFactory<JetCalibrationTool> ("JetCalibrationTool"));
+    ANA_CHECK (asg::registerToolFactory<BJetCorrectionTool> ("BJetCorrectionTool"));
+    ANA_CHECK (asg::registerToolFactory<MuonInJetCorrectionTool> ("MuonInJetCorrectionTool"));
     ANA_CHECK (asg::registerToolFactory<JetPileupTag::JetVertexNNTagger> ("JetPileupTag::JetVertexNNTagger"));
     ANA_CHECK (asg::registerToolFactory<JetUncertaintiesTool> ("JetUncertaintiesTool"));
     ANA_CHECK (asg::registerToolFactory<ORUtils::DeltaROverlapTool> ("ORUtils::DeltaROverlapTool"));
