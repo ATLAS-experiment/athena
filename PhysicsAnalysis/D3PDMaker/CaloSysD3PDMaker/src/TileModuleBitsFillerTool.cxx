@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -26,9 +26,7 @@ namespace D3PD {
     }
 
     StatusCode TileModuleBitsFillerTool::initialize() {
-        StoreGateSvc* detStore;
-        CHECK(service("DetectorStore",detStore));
-        return StatusCode::SUCCESS; 
+        return StatusCode::SUCCESS;
     }
 
     StatusCode TileModuleBitsFillerTool::book(){
