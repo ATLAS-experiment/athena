@@ -107,10 +107,9 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
    * For athenaHLT this should be UpdateAfterFork
    */   
 
-  IIncidentSvc* incsvc;
-  StatusCode sc = service("IncidentSvc", incsvc);
-  int priority = 100;
-  if( sc.isSuccess() ) {
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
+  const int priority = 100;
+  if( incsvc ) {
     const bool is_multiprocess = (Gaudi::Concurrency::ConcurrencyFlags::numProcs() > 0);
     if (is_multiprocess) {
       incsvc->addListener( this, AthenaInterprocess::UpdateAfterFork::type(), priority);
