@@ -4,6 +4,7 @@
 
 #include "OfflineTrackQualitySelectionTool.h"
 #include "TrackAnalysisCollections.h"
+#include "TrackParametersHelper.h"
 namespace IDTPM {
 
 OfflineTrackQualitySelectionTool::OfflineTrackQualitySelectionTool(const std::string& name)
@@ -20,7 +21,7 @@ StatusCode OfflineTrackQualitySelectionTool::selectTracks(
 
   std::vector< const xAOD::TrackParticle* > selected;
   for ( auto trkPtr: trkAnaColls.offlTrackVec(TrackAnalysisCollections::FS)) {
-    if ( m_offlineTool->accept(trkPtr)) // TODO vertex needs to be provided here
+    if ( m_offlineTool->accept(trkPtr) and this->accept(trkPtr)) // TODO vertex needs to be provided here
       selected.push_back(trkPtr);
   }
   ATH_MSG_DEBUG("Out of " << trkAnaColls.offlTrackVec(TrackAnalysisCollections::FS).size() << " tracks, selected " << selected.size() );
@@ -34,5 +35,29 @@ StatusCode OfflineTrackQualitySelectionTool::selectTracksInRoI(
   ATH_MSG_FATAL( "using selectTracksInRoI implementation for this tool is an invalid use case" );
   return StatusCode::FAILURE;
 }
+
+
+bool OfflineTrackQualitySelectionTool::accept(const xAOD::TrackParticle* track) {
+  if (m_maxPt!=-9999.   and (pT(*track)) > m_maxPt )              return false;  
+  if (m_maxEta!=-9999.  and (eta(*track)) > m_maxEta )              return false;
+  if (m_minEta!=-9999.  and (eta(*track)) < m_minEta )              return false; 
+  if (m_minPhi!=-9999.  and (phi(*track)) < m_minPhi )              return false; 
+  if (m_maxPhi!=-9999.  and (phi(*track)) > m_maxPhi )              return false;  
+  if (m_minD0!=-9999.   and (d0(*track)) < m_minD0 )                return false; 
+  if (m_minZ0!=-9999.   and (z0(*track)) < m_minZ0 )                return false; 
+  if (m_minQoPT!=-9999. and (qOverPT(*track)) < m_minQoPT )         return false; 
+  if (m_maxQoPT!=-9999. and (qOverPT(*track)) > m_maxQoPT )         return false; 
+  if (m_minAbsEta!=-9999.  and std::fabs(eta(*track)) < m_minAbsEta )       return false; 
+  if (m_minAbsPhi!=-9999.  and std::fabs(phi(*track)) < m_minAbsPhi )       return false; 
+  if (m_maxAbsPhi!=-9999.  and std::fabs(phi(*track)) > m_maxAbsPhi )       return false;  
+  if (m_minAbsD0!=-9999.   and std::fabs(d0(*track)) < m_minAbsD0 )         return false; 
+  if (m_maxAbsD0!=-9999.   and std::fabs(d0(*track)) > m_maxAbsD0 )         return false; 
+  if (m_minAbsZ0!=-9999.   and std::fabs(z0(*track)) < m_minAbsZ0 )         return false; 
+  if (m_maxAbsZ0!=-9999.   and std::fabs(z0(*track)) > m_maxAbsZ0 )         return false; 
+  if (m_minAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) < m_minAbsQoPT )  return false; 
+  if (m_maxAbsQoPT!=-9999. and std::fabs(qOverPT(*track)) > m_maxAbsQoPT )  return false; 
+  return true;
+}
+
 
 }  // namespace IDTPM

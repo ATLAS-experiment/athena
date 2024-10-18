@@ -60,12 +60,74 @@ def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwarg
 def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
 
+    kwargs_InDetTrackSelectionTool = {}
+
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinPt!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minPt", flags.PhysVal.IDTPM.currentTrkAna.offlMinPt )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxAbsEta", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0SinTheta!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxZ0SinTheta", flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0SinTheta )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0 )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxD0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0 )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNInnermostLayerHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minNInnermostLayerHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNInnermostLayerHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNBothInnermostLayersHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minNBothInnermostLayersHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNBothInnermostLayersHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNInnermostLayerSharedHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNInnermostLayerSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNInnermostLayerSharedHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNSiHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minNSiHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNSiHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiSharedHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNSiSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiSharedHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiHoles!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNSiHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiHoles )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNPixelHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minNPixelHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNPixelHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelSharedHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNPixelSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelSharedHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelHoles!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNPixelHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelHoles )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNSctHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minNSctHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNSctHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctHoles!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSq", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSqperNdf", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf )
+    if flags.PhysVal.IDTPM.currentTrkAna.offlMinProb!=-9999.: 
+        kwargs_InDetTrackSelectionTool.setdefault( "minProb", flags.PhysVal.IDTPM.currentTrkAna.offlMinProb )
+    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP )
+
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
-    offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags ) )
-    offlineSelectionTool.CutLevel = flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP
+    offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
+    kwargs.setdefault( "maxPt", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPt )
+    kwargs.setdefault( "minEta", flags.PhysVal.IDTPM.currentTrkAna.offlMinEta )
+    kwargs.setdefault( "minPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMinPhi )
+    kwargs.setdefault( "maxPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPhi )
+    kwargs.setdefault( "minD0", flags.PhysVal.IDTPM.currentTrkAna.offlMinD0 )
+    kwargs.setdefault( "minZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMinZ0 )
+    kwargs.setdefault( "minQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMinQoPT )
+    kwargs.setdefault( "maxQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMaxQoPT )
+    kwargs.setdefault( "minAbsEta", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsEta )
+    kwargs.setdefault( "minAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsPhi )
+    kwargs.setdefault( "maxAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsPhi )
+    kwargs.setdefault( "minAbsD0", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsD0 )
+    kwargs.setdefault( "maxAbsD0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsD0 )
+    kwargs.setdefault( "minAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsZ0 )
+    kwargs.setdefault( "maxAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsZ0 )
+    kwargs.setdefault( "minAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsQoPT )
+    kwargs.setdefault( "maxAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsQoPT )
+
     acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( name, **kwargs ) )
+
     return acc    
 
 
@@ -151,7 +213,7 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
     acc = ComponentAccumulator()
 
     ## Offline tracks quality selection
-    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "":
+    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "" or flags.PhysVal.IDTPM.currentTrkAna.DoOfflineSelection:
         kwargs.setdefault( "DoOfflineSelection", True )
     
         kwargs.setdefault( "OfflineSelectionTool", acc.popToolsAndMerge(
