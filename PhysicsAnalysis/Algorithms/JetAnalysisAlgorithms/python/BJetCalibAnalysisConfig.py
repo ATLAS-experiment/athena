@@ -8,12 +8,12 @@ import AthenaCommon.SystemOfUnits as Units
 class BJetCalibAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the b-jet calibration sequence"""
 
-    def __init__ (self, jetContainerName='', muonContainerName='') :
+    def __init__ (self, containerName='', muonContainerName='') :
         super (BJetCalibAnalysisConfig, self).__init__ ()
         self.setBlockName('BJetCalib')
         self.addDependency('FTag', required=False)
         self.addDependency('Muons', required=True)
-        self.addOption ('jetContainerName', jetContainerName, type=str,
+        self.addOption ('containerName', containerName, type=str,
             noneAction='error',
             info="the name of the input jet container.")
         self.addOption ('muonContainerName', muonContainerName, type=str,
@@ -29,26 +29,26 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
     def makeAlgs(self, config):
 
         # Set up kinematic selection for which ftag selection should be used downstream
-        jetPreselection = config.getFullSelection(self.jetContainerName, self.jetPreselection)
+        jetPreselection = config.getFullSelection(self.containerName, self.jetPreselection)
         if jetPreselection:
             alg = config.createAlgorithm('CP::AsgSelectionAlg',
-                                         'FtagPTEtaCutAlg' + self.jetContainerName)
+                                         'FtagPTEtaCutAlg' + self.containerName)
             alg.selectionDecoration = 'selectPtEtaFtag'
             config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
             alg.selectionTool.maxEta = 2.5
             alg.selectionTool.minPt = 20. * Units.GeV
-            alg.particles = config.readName(self.jetContainerName)
-            alg.preselection = config.getPreselection(self.jetContainerName, '')
+            alg.particles = config.readName(self.containerName)
+            alg.preselection = config.getPreselection(self.containerName, '')
             jetPreselection = "selectPtEtaFtag&&"+jetPreselection
 
         alg = config.createAlgorithm('CP::BJetCalibrationAlg',
-                                     'BJetCalibAlg_' + self.jetContainerName)
+                                     'BJetCalibAlg_' + self.containerName)
         alg.muons = config.readName(self.muonContainerName)
         alg.muonPreselection = config.getPreselection(self.muonContainerName,
                                                       self.muonPreselection)
-        alg.jets = config.readName(self.jetContainerName)
+        alg.jets = config.readName(self.containerName)
         alg.jetPreselection = jetPreselection
-        alg.jetsOut = config.copyName(self.jetContainerName)
+        alg.jetsOut = config.copyName(self.containerName)
 
         config.addPrivateTool('muonInJetTool', 'MuonInJetCorrectionTool')
         # Adjust dR matching for large-R jets
