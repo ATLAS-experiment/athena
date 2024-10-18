@@ -1,31 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/***************************************************************************
- InDet DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
-//<doc><file>	$Id: PixelIDDetDescrCnv.h,v 1.3 2007-01-01 10:47:17 dquarrie Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #ifndef INDETMGRDETDESCRCNV_PIXELIDDETDESCRCNV_H
 # define INDETMGRDETDESCRCNV_PIXELIDDETDESCRCNV_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "DetDescrCnvSvc/DetDescrConverter.h"
-
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class PixelID;
 
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  **  This class is a converter for the PixelID an IdHelper which is
@@ -38,10 +21,9 @@ class PixelIDDetDescrCnv: public DetDescrConverter {
 
 public:
 
-    virtual long int   repSvcType() const;
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
+    virtual long int   repSvcType() const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj) override;
 
     // Storage type and class ID (used by CnvFactory)
     static long storageType();
@@ -66,9 +48,5 @@ private:
     bool          m_doChecks;
 
 };
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // INDETMGRDETDESCRCNV_PIXELIDDETDESCRCNV_H

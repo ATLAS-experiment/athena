@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -20,7 +20,7 @@
 //--------------------------------------------------------------------
 
 PLR_IDDetDescrCnv::PLR_IDDetDescrCnv(ISvcLocator* svcloc)
-    : DetDescrConverter(ClassID_traits<PLR_ID>::ID(), svcloc)
+    : DetDescrConverter(ClassID_traits<PLR_ID>::ID(), svcloc, "PLR_IDDetDescrCnv")
 {}
 
 //--------------------------------------------------------------------
@@ -36,61 +36,18 @@ PLR_IDDetDescrCnv::repSvcType() const
 StatusCode
 PLR_IDDetDescrCnv::initialize()
 {
-    // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "PLR_IDDetDescrCnv");
-    log << MSG::DEBUG << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-        return sc;
-    }
-
+    ATH_CHECK( DetDescrConverter::initialize() );
     return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
 StatusCode
-PLR_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
+PLR_IDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
-    MsgStream log(msgSvc(), "PLR_IDDetDescrCnv");
-    log << MSG::INFO << "in createObj: creating a PLR_ID helper object in the detector store" << endmsg;
-
-    // Create a new PLR_ID
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-        log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-        return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
-        log << MSG::DEBUG << "No Helper key " << endmsg;
-    } else {
-        log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;
-    }
-
-    // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-        log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-        return StatusCode::FAILURE;
-    }
-
     // Get the dictionary manager from the detector store
     const IdDictManager* idDictMgr;
-    status = detStore->retrieve(idDictMgr, "IdDict");
-    if (status.isFailure()) {
-        log << MSG::FATAL << "Could not get IdDictManager !" << endmsg;
-        return StatusCode::FAILURE;
-    } else {
-        log << MSG::DEBUG << " Found the IdDictManager." << endmsg;
-    }
-
+    ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // Only initialize helper if it is the first pass or if there is a
     // change in the the file or tag
@@ -106,7 +63,7 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 
     IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");
     if (!dict) {
-        log << MSG::ERROR << "unable to find idDict for InnerDetector" << endmsg;
+        ATH_MSG_ERROR("unable to find idDict for InnerDetector");
         return StatusCode::FAILURE;
     }
 
@@ -121,28 +78,22 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
         if (inDetIDTag != m_inDetIDTag) {
             // Internal InDet id tag
             initHelper = true;
-            log << MSG::DEBUG << " Changed internal InDet id tag: "
-            << inDetIDTag << endmsg;
+            ATH_MSG_DEBUG(" Changed internal InDet id tag: " << inDetIDTag);
         }
         if (inDetIDFileName != m_inDetIDFileName) {
             // File to be read for InDet ids
             initHelper = true;
-            log << MSG::DEBUG << " Changed InDetFileName: "
-            << inDetIDFileName << endmsg;
+            ATH_MSG_DEBUG(" Changed InDetFileName: " << inDetIDFileName);
         }
         if (inDetIdDictTag != m_inDetIdDictTag) {
             // Tag of RDB record for InDet ids
             initHelper = true;
-            log << MSG::DEBUG << " Changed InDetIdDictTag: "
-            << inDetIdDictTag
-            << endmsg;
+            ATH_MSG_DEBUG(" Changed InDetIdDictTag: " << inDetIdDictTag);
         }
         if (doChecks != m_doChecks) {
             // DoChecks flag
             initHelper = true;
-            log << MSG::DEBUG << " Changed doChecks flag: "
-            << doChecks
-            << endmsg;
+            ATH_MSG_DEBUG(" Changed doChecks flag: " << doChecks);
             }
     } else {
         // create the helper
@@ -153,10 +104,8 @@ PLR_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     if (initHelper) {
-        if (idDictMgr->initializeHelper(*m_plrId)) {
-            log << MSG::ERROR << "Unable to initialize PLR_ID" << endmsg;
-            return StatusCode::FAILURE;
-        }
+        ATH_CHECK( idDictMgr->initializeHelper(*m_plrId) == 0 );
+
         // Save state:
         m_inDetIDTag      = inDetIDTag;
         m_inDetIDFileName = inDetIDFileName;

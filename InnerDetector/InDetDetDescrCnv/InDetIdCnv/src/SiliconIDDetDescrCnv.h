@@ -1,31 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/***************************************************************************
- InDet DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
-//<doc><file>	$Id: SiliconIDDetDescrCnv.h,v 1.3 2007-01-01 10:47:18 dquarrie Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #ifndef INDETMGRDETDESCRCNV_SILICONIDDETDESCRCNV_H
 # define INDETMGRDETDESCRCNV_SILICONIDDETDESCRCNV_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "DetDescrCnvSvc/DetDescrConverter.h"
-
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class SiliconID;
 
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  **  This class is a converter for the SiliconID an IdHelper which is
@@ -38,10 +21,9 @@ class SiliconIDDetDescrCnv: public DetDescrConverter {
 
 public:
 
-    virtual long int   repSvcType() const;
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
+    virtual long int   repSvcType() const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj) override;
 
     // Storage type and class ID (used by CnvFactory)
     static long storageType();
@@ -54,9 +36,5 @@ private:
     SiliconID*       m_siliconId;
 
 };
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // INDETMGRDETDESCRCNV_SILICONIDDETDESCRCNV_H

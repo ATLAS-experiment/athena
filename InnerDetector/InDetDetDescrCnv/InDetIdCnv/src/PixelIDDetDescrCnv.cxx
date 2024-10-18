@@ -1,12 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/***************************************************************************
- InDet DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
 
 #include "PixelIDDetDescrCnv.h"
 
@@ -16,7 +10,6 @@
 #include "StoreGate/StoreGateSvc.h" 
 
 #include "IdDictDetDescr/IdDictManager.h"
-//#include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/PixelID.h"
 
 
@@ -33,91 +26,18 @@ PixelIDDetDescrCnv::repSvcType() const
 StatusCode 
 PixelIDDetDescrCnv::initialize()
 {
-    // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "PixelIDDetDescrCnv");
-    log << MSG::DEBUG << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-	return sc;
-    }
-
-    // The following is an attempt to "bootstrap" the loading of a
-    // proxy for PixelID into the detector store. However,
-    // PixelIDDetDescrCnv::initialize is NOT called by the conversion
-    // service.  So for the moment, this cannot be use. Instead the
-    // DetDescrCnvSvc must do the bootstrap from a parameter list.
-
-
-//      // Add InDet_DetDescrManager proxy as entry point to the detector store
-//      // - this is ONLY needed for the manager of each system
-//      sc = addToDetStore(classID(), "PidelID");
-//      if (sc.isFailure()) {
-//  	log << MSG::FATAL << "Unable to add proxy for PixelID to the Detector Store!" << endmsg;
-//  	return StatusCode::FAILURE;
-//      } else {}
-
-    return StatusCode::SUCCESS; 
-}
-
-//--------------------------------------------------------------------
-
-StatusCode 
-PixelIDDetDescrCnv::finalize()
-{
-    MsgStream log(msgSvc(), "PixelIDDetDescrCnv");
-    log << MSG::DEBUG << "in finalize" << endmsg;
-
-    return StatusCode::SUCCESS; 
+    ATH_CHECK( DetDescrConverter::initialize() );
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
 StatusCode
-PixelIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
+PixelIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
-    //StatusCode sc = StatusCode::SUCCESS;
-    MsgStream log(msgSvc(), "PixelIDDetDescrCnv");
-    log << MSG::INFO << "in createObj: creating a PixelID helper object in the detector store" << endmsg;
-
-    // Create a new PixelID
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-	log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
-	log << MSG::DEBUG << "No Helper key " << endmsg;
-    }
-    else {
-	log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;
-    }
-    
-    // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-	log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-	return StatusCode::FAILURE;
-    } else {}
- 
     // Get the dictionary manager from the detector store
     const IdDictManager* idDictMgr;
-    status = detStore->retrieve(idDictMgr, "IdDict");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get IdDictManager !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Found the IdDictManager. " << endmsg;
-    }
-
+    ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // Only initialize helper if it is the first pass or if there is a
     // change in the the file or tag
@@ -133,10 +53,8 @@ PixelIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 
     IdDictDictionary* dict = mgr->find_dictionary("InnerDetector");  
     if (!dict) {
-	log << MSG::ERROR 
-	    << "unable to find idDict for InnerDetector" 
-	    << endmsg;
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("unable to find idDict for InnerDetector");
+	    return StatusCode::FAILURE;
     }
 
     // File to be read for InDet ids
@@ -153,28 +71,22 @@ PixelIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
 	if (inDetIDTag != m_inDetIDTag) { 
 	    // Internal InDet id tag
 	    initHelper = true;
-	    log << MSG::DEBUG << " Changed internal InDet id tag: " 
-		<< inDetIDTag << endmsg;
+	    ATH_MSG_DEBUG(" Changed internal InDet id tag: " << inDetIDTag);
 	}
 	if (inDetIDFileName != m_inDetIDFileName) {
 	    // File to be read for InDet ids
 	    initHelper = true;
-	    log << MSG::DEBUG << " Changed InDetFileName:" 
-		<< inDetIDFileName << endmsg;
+	    ATH_MSG_DEBUG(" Changed InDetFileName:" << inDetIDFileName);
 	}
 	if (inDetIdDictTag != m_inDetIdDictTag) {
 	    // Tag of RDB record for InDet ids
 	    initHelper = true;
-	    log << MSG::DEBUG << " Changed InDetIdDictTag: "
-		<< inDetIdDictTag 
-		<< endmsg;
+	    ATH_MSG_DEBUG(" Changed InDetIdDictTag: " << inDetIdDictTag);
 	}
 	if (doChecks != m_doChecks) {
 	    // DoChecks flag
 	    initHelper = true;
-	    log << MSG::DEBUG << " Changed doChecks flag: "
-		<< doChecks
-		<< endmsg;
+	    ATH_MSG_DEBUG(" Changed doChecks flag: " << doChecks);
         }
     }
     else {
@@ -186,17 +98,15 @@ PixelIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
 
     if (initHelper) {
-	if (idDictMgr->initializeHelper(*m_pixelId)) {
-	    log << MSG::ERROR << "Unable to initialize PixelID" << endmsg;
-	    return StatusCode::FAILURE;
-	} 
-	// Save state:
-	m_inDetIDTag      = inDetIDTag;
-	m_inDetIDFileName = inDetIDFileName;
-	m_inDetIdDictTag  = inDetIdDictTag;
-	m_doChecks        = doChecks;
+        ATH_CHECK( idDictMgr->initializeHelper(*m_pixelId) == 0 );
+
+        // Save state:
+        m_inDetIDTag      = inDetIDTag;
+        m_inDetIDFileName = inDetIDFileName;
+        m_inDetIdDictTag  = inDetIdDictTag;
+        m_doChecks        = doChecks;
     }
-    
+
     // Pass a pointer to the container to the Persistency service by reference.
     pObj = SG::asStorable(m_pixelId);
 
@@ -221,7 +131,7 @@ PixelIDDetDescrCnv::classID() {
 //--------------------------------------------------------------------
 PixelIDDetDescrCnv::PixelIDDetDescrCnv(ISvcLocator* svcloc) 
     :
-    DetDescrConverter(ClassID_traits<PixelID>::ID(), svcloc),
+    DetDescrConverter(ClassID_traits<PixelID>::ID(), svcloc, "PixelIDDetDescrCnv"),
     m_pixelId(nullptr),
     m_doChecks(false)
 
