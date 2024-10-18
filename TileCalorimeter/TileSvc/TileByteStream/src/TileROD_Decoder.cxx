@@ -4273,8 +4273,8 @@ void TileROD_Decoder::initHid2re() {
   
   // Check whether we want to overwrite default ROB IDs
   
-  IProperty* propertyServer(0);
-  if (serviceLocator()->service("ByteStreamCnvSvc", propertyServer).isSuccess()) {
+  SmartIF<IProperty> propertyServer{service("ByteStreamCnvSvc")};
+  if (propertyServer) {
     
     std::vector<std::string> vecProp;
     StringArrayProperty vecProperty("ROD2ROBmap", vecProp);
@@ -4285,8 +4285,8 @@ void TileROD_Decoder::initHid2re() {
         ATH_MSG_DEBUG( "Length of ROD2ROBmap is and odd value, "
                        << " means that we'll scan event for all fragments to create proper map" );
         
-        IROBDataProviderSvc* robSvc;
-        if (service("ROBDataProviderSvc", robSvc).isSuccess()) {
+        SmartIF<IROBDataProviderSvc> robSvc{service("ROBDataProviderSvc")};
+        if (robSvc) {
           const eformat::FullEventFragment<const uint32_t*> * event = robSvc->getEvent(Gaudi::Hive::currentContext());
           try {
             event->check_tree();
