@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDT_Hid2RESrcID.h"
 
+#include "AthenaKernel/getMessageSvc.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IMessageSvc.h"
@@ -33,12 +34,7 @@ uint32_t MDT_Hid2RESrcID::getRodID(const Identifier& offlineId) const {
     // this method returns a RESrcID for the ROD, for a
     // given MDT ID offline ID
 
-    IMessageSvc* msgSvc = nullptr;
-    ISvcLocator* svcLocator = Gaudi::svcLocator();
-    StatusCode sc = svcLocator->service("MessageSvc", msgSvc);
-    if (sc == StatusCode::FAILURE) throw std::runtime_error("Unable to get MessageSvc");
-
-    MsgStream log(msgSvc, "MDT_Hid2RESrcID::getRodID");
+    MsgStream log(Athena::getMessageSvc(), "MDT_Hid2RESrcID::getRodID");
 
     log << MSG::DEBUG << "Getting RODId of the Station " << MSG::hex << offlineId << MSG::dec << endmsg;
 

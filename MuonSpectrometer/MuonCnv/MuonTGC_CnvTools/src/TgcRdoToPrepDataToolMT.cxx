@@ -2914,8 +2914,8 @@ Muon::TgcRdoToPrepDataToolMT::getCabling() const
 
   // get TGC Cabling Svc
   CablingInfo cinfo;
-  StatusCode sc = service("MuonTGC_CablingSvc", cinfo.m_tgcCabling);
-  if (sc.isFailure()) {
+  cinfo.m_tgcCabling = service("MuonTGC_CablingSvc");
+  if (!cinfo.m_tgcCabling) {
     ATH_MSG_ERROR( "Could not get MuonTGC_CablingSvc!" );
     return nullptr;
   }
