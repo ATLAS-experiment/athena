@@ -68,9 +68,11 @@ private:
     std::optional<std::pair<std::vector<Cell>, bool>>
     unpackRDOs(const InDetRawDataCollection<StripRDORawData>& RDOs,
 	       const StripID& idHelper,
-	       const InDet::SiDetectorElementStatus *sctDetElStatus) const;
+	       const InDet::SiDetectorElementStatus *sctDetElStatus,
+         const EventContext& ctx) const;
 
-    bool isBadStrip(const InDet::SiDetectorElementStatus *sctDetElStatus,
+    bool isBadStrip(const EventContext& ctx,
+        const InDet::SiDetectorElementStatus *sctDetElStatus,
 		    const StripID& idHelper,
 		    IdentifierHash waferHash,
 		    Identifier stripId) const;
