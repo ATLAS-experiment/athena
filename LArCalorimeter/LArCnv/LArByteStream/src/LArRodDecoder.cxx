@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of LArRodDecoder class 
@@ -84,13 +84,6 @@ LArRodDecoder::initialize ATLAS_NOT_THREAD_SAFE ()
     return sc;
   } 
 
-  IToolSvc* toolSvc;
-  sc = service( "ToolSvc",toolSvc);
-  if (sc.isFailure())
-    {msg(MSG::ERROR) << "Unable to get ToolSvc" << endmsg;
-    return sc;
-   }
-    
  ATH_CHECK( m_evt.initialize() );
 
  std::vector<std::string>::const_iterator it = m_LArCellCorrNames.begin(); 
@@ -99,7 +92,7 @@ LArRodDecoder::initialize ATLAS_NOT_THREAD_SAFE ()
    {IAlgTool* tool; 
     CaloCellCorrection* corr; 
     Gaudi::Utils::TypeNameString li(*it);
-    if((toolSvc->retrieveTool(li.type(), li.name(), tool)).isFailure() ) 
+    if((toolSvc()->retrieveTool(li.type(), li.name(), tool)).isFailure() )
       {msg(MSG::ERROR) << " Can't get AlgTool for CaloCellCorrection " << endmsg;
        return StatusCode::FAILURE; 
       }

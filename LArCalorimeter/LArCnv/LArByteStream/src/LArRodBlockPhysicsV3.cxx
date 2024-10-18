@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of the LArRODBlockStructure_3 class
@@ -39,14 +39,12 @@ m_logstr(Athena::getMessageSvc(), BlockType())
 {  
   // retrieve onlineHelper
   const LArOnlineID* online_id;
-  StoreGateSvc* detStore = 0;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc =svcLoc->service( "DetectorStore", detStore );
-  if (sc.isFailure()) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore) {
     m_logstr << MSG::ERROR << "Unable to locate DetectorStore" << endmsg;
     std::abort();
   }    
-  sc = detStore->retrieve(online_id, "LArOnlineID");
+  StatusCode sc = detStore->retrieve(online_id, "LArOnlineID");
   if (sc.isFailure()) {
     m_logstr << MSG::FATAL << "Could not get LArOnlineID helper !" << endmsg;
     std::abort();

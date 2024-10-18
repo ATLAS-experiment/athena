@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -49,15 +49,12 @@ LArRodBlockPhysicsV6::LArRodBlockPhysicsV6()
   m_OffTimeCut=0;  //FIXME: Nowhere set to a sensible value ???
   m_numberHotCellOffTime=0;
   // retrieve onlineHelper
-  //const LArOnlineID* online_id;
-  StoreGateSvc* detStore = 0;
-  ISvcLocator* svcLoc = Gaudi::svcLocator( );
-  StatusCode sc =svcLoc->service( "DetectorStore", detStore );
-  if (sc.isFailure()) {
+  SmartIF<StoreGateSvc> detStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!detStore) {
     std::cout << "Unable to locate DetectorStore" << std::endl;
     std::abort();
   }
-  sc = detStore->retrieve(m_onlineHelper, "LArOnlineID");
+  StatusCode sc = detStore->retrieve(m_onlineHelper, "LArOnlineID");
   if (sc.isFailure()) {
     std::cout << "Could not get LArOnlineID helper !" << std::endl;
     std::abort();
