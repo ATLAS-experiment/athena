@@ -26,7 +26,7 @@
 
 
 
-#define THROW_EXCEPTION(MSG)                                                                            \
+#define THROW_EXCEPTION_RE(MSG)                                                                            \
      {                                                                                                  \
         std::stringstream sstr{};                                                                       \
         sstr<<"RpcReadoutElement - "<<idHelperSvc()->toStringDetEl(identify())<<" "<<__LINE__<<": ";    \
@@ -57,17 +57,17 @@ namespace MuonGM {
     void RpcReadoutElement::setDoubletPhi(int doubletPhi) { m_dbPhi = doubletPhi; }
     double RpcReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
         const MuonStripDesign* design = getDesign(id);
-        THROW_EXCEPTION("Method is not implemented");
+        THROW_EXCEPTION_RE("Method is not implemented");
         return design ? design->distanceToReadout(pos) : 0.;
     }
     double RpcReadoutElement::localStripSCoord(int doubletPhi, bool measphi, int strip) const {
         bool notintheribs = !inTheRibs();
         if ((doubletPhi != m_dbPhi && NphiStripPanels() == 1 && notintheribs) ||
             (NphiStripPanels() != 1 && (doubletPhi < 1 || doubletPhi > NphiStripPanels()))) {
-            THROW_EXCEPTION("doublet Z"<<doubletPhi<<" outside range 1-"<<NphiStripPanels()<<" with doubletZ: "<<m_dbPhi);
+            THROW_EXCEPTION_RE("doublet Z"<<doubletPhi<<" outside range 1-"<<NphiStripPanels()<<" with doubletZ: "<<m_dbPhi);
         }
         if (strip < 1 || strip > Nstrips(measphi)) {
-            THROW_EXCEPTION("strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);
+            THROW_EXCEPTION_RE("strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);
         }
 
         double local_s = 0.;
@@ -86,7 +86,7 @@ namespace MuonGM {
     }
     double RpcReadoutElement::localStripZCoord(bool measphi, int strip) const {
         if (strip < 1 ||  strip > Nstrips(measphi)) {
-            THROW_EXCEPTION("Strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);
+            THROW_EXCEPTION_RE("Strip "<<strip<<" outside range 1-"<<Nstrips(measphi)<<" for measphi="<<measphi);
         }
 
         double local_z{0};
@@ -326,7 +326,7 @@ namespace MuonGM {
             phiDesign.firstStripPos = locStripPos1.block<2,1>(0,0);
             if (locStripPos2.x() - locStripPos1.x() < 0.) {
                 phiDesign.stripPitch *= -1.;
-                THROW_EXCEPTION("Define a positive definite phi pitch...");
+                THROW_EXCEPTION_RE("Define a positive definite phi pitch...");
             }
             phiDesign.invStripPitch = 1. / phiDesign.stripPitch;
 
@@ -335,7 +335,7 @@ namespace MuonGM {
             phiDesign.stripPosition(2, pos2);
 
             if (std::abs(pos1.x() - locStripPos1.x()) > 1e-6) {
-                THROW_EXCEPTION(" bad local strip pos "<<
+                THROW_EXCEPTION_RE(" bad local strip pos "<<
                     std::endl<<" phi local strip positions " << Amg::toString(locStripPos1) << "   " 
                              <<Amg::toString(locStripPos2) << " first strip " << phiDesign.firstStripPos 
                              << " pitch " << phiDesign.stripPitch << " from calc " << locStripPos2.x() - locStripPos1.x() <<
@@ -360,7 +360,7 @@ namespace MuonGM {
             etaDesign.stripPosition(2, pos2);
 
             if (std::abs(pos1.x() - locStripPosEta1.x()) > 1e-6) {                
-                THROW_EXCEPTION(" bad local strip pos "<<std::endl
+                THROW_EXCEPTION_RE(" bad local strip pos "<<std::endl
                               <<" eta local strip positions " << Amg::toString(locStripPosEta1) 
                               << "   " <<Amg::toString(locStripPosEta2)<< " first strip "
                               << etaDesign.firstStripPos << " pitch " << etaDesign.stripPitch << " from calc "

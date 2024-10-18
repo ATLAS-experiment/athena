@@ -137,13 +137,12 @@ namespace MuonGM {
     //============================================================================
     void MMReadoutElement::initDesignSqLite(){
       
-        ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-        IGeoDbTagSvc* geoDbTag{nullptr};
-        if (svcLocator->service("GeoDbTagSvc",geoDbTag).isFailure()) {
+        SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+        if (!geoDbTag) {
             THROW_EXCEPTION("Could not locate GeoDbTagSvc");
         }
-        IRDBAccessSvc *accessSvc{nullptr};
-        if (svcLocator->service(geoDbTag->getParamSvcName(),accessSvc).isFailure()) {            
+        SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
+        if (!accessSvc) {            
             THROW_EXCEPTION("Could not locate " << geoDbTag->getParamSvcName() );
         }
         const char sector_l = getStationName()[2];
@@ -225,9 +224,8 @@ namespace MuonGM {
            return;
        }
        // Get the detector configuration.
-       ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-       IGeoDbTagSvc* geoDbTag{nullptr};
-       if (svcLocator->service("GeoDbTagSvc",geoDbTag).isFailure()) {
+       SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+       if (!geoDbTag) {
             THROW_EXCEPTION("Could not locate GeoDbTagSvc");
        }
        if (geoDbTag->getSqliteReader()) {
