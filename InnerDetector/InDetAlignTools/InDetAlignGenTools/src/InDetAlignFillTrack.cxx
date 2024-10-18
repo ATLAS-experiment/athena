@@ -56,7 +56,6 @@ InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
                                           const std::string& name,
                                           const IInterface* parent)
   : AthAlgTool(type, name, parent),
-  m_ntupleSvc(nullptr),
   m_totaltrks(0),
   m_totalhits(0),
   m_totalPixhits(0),
@@ -114,7 +113,7 @@ InDetAlignFillTrack::~InDetAlignFillTrack() {}
 StatusCode InDetAlignFillTrack::initialize() {
   ATH_MSG_DEBUG("Initialize() of FillTrack");
   // retrieve the NTuple Service
-  ATH_CHECK(service("NTupleSvc", m_ntupleSvc));
+  ATH_CHECK(m_ntupleSvc.retrieve());
   // get TrackParticleCreatorTool
   ATH_CHECK(m_particleCreator.retrieve());
   // if Truth...
@@ -126,9 +125,9 @@ StatusCode InDetAlignFillTrack::initialize() {
   }
   // Book Ntuple
   bookNtuple();
-  if (m_inputUpCol != "") bookUpNtuple();
-  if (m_inputLowCol != "") bookLowNtuple();
-  if (m_doMatching && m_inputUpCol != "" && m_inputLowCol != "") bookMatchingNtuple();
+  if (!m_inputUpCol.empty()) bookUpNtuple();
+  if (!m_inputLowCol.empty()) bookLowNtuple();
+  if (m_doMatching && !m_inputUpCol.empty() && !m_inputLowCol.empty()) bookMatchingNtuple();
   ATH_MSG_DEBUG("Initialize() of FillTrack successful");
   return StatusCode::SUCCESS;
 }
@@ -540,11 +539,11 @@ StatusCode InDetAlignFillTrack::FillTrack() {
 void InDetAlignFillTrack::bookNtuple() {
   ATH_MSG_DEBUG("Booking Trk::Track Info...");
 
-  NTupleFilePtr file1(m_ntupleSvc, m_ntupleName);
+  NTupleFilePtr file1(m_ntupleSvc.get(), m_ntupleName);
   std::string nt0id = m_ntupleName + "/TrkTrack";
   std::string comments = "Trk::Track Information";
 
-  NTuplePtr nt0(m_ntupleSvc, nt0id);
+  NTuplePtr nt0(m_ntupleSvc.get(), nt0id);
   if (nt0) {
     ATH_MSG_DEBUG("Ntuple is already booked");
   } else {
@@ -634,7 +633,7 @@ void InDetAlignFillTrack::bookUpNtuple() {
   std::string nt1id = m_ntupleName + "/TrkTrack_Up";
   std::string comments = "Trk::UpTrack Information";
 
-  NTuplePtr nt1(m_ntupleSvc, nt1id);
+  NTuplePtr nt1(m_ntupleSvc.get(), nt1id);
   if (nt1) {
     ATH_MSG_DEBUG("Ntuple is already booked");
   } else {
@@ -693,7 +692,7 @@ void InDetAlignFillTrack::bookLowNtuple() {
   std::string nt2id = m_ntupleName + "/TrkTrack_Low";
   std::string comments = "Trk::LowTrack Information";
 
-  NTuplePtr nt2(m_ntupleSvc, nt2id);
+  NTuplePtr nt2(m_ntupleSvc.get(), nt2id);
   if (nt2) {
     ATH_MSG_DEBUG("Ntuple is already booked");
   } else {
@@ -751,7 +750,7 @@ void InDetAlignFillTrack::bookMatchingNtuple() {
   std::string nt3id = m_ntupleName + "/TrkTrack_Matching";
   std::string comments = "Matching between Up and Low Trk::Track Collections";
 
-  NTuplePtr nt3(m_ntupleSvc, nt3id);
+  NTuplePtr nt3(m_ntupleSvc.get(), nt3id);
   if (nt3) {
     ATH_MSG_DEBUG("Ntuple is already booked");
   } else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,6 @@
 // AthAlgTool to fill silicon cluster information in a ntuple
 
 #include "GaudiKernel/NTuple.h"
-#include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/SmartDataPtr.h"
 
 #include "TrkEventPrimitives/ParamDefs.h"
@@ -39,7 +38,6 @@ InDetAlignFillSiCluster::InDetAlignFillSiCluster(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent)
   : AthAlgTool(type,name,parent),
-    m_ntupleSvc(nullptr),
     m_pixelid(nullptr),
     m_sctID(nullptr),
     m_Pixel_clcontainer(nullptr),
@@ -53,13 +51,6 @@ InDetAlignFillSiCluster::InDetAlignFillSiCluster(const std::string& type,
   declareProperty("NtupleName", m_ntupleName="/NTUPLES/GLOBFILE");
 }
 
-
-//=====================================================================
-// ~FillSiCluster()
-//=====================================================================
-InDetAlignFillSiCluster::~InDetAlignFillSiCluster() {}
-
-
 //=====================================================================
 // initialize()
 //===================================================================== 
@@ -68,31 +59,21 @@ StatusCode InDetAlignFillSiCluster::initialize() {
   ATH_MSG_DEBUG("In Initialize() of FillSiCluster()");
   
   // ID Helper
-  
-  if (detStore()->retrieve(m_sctID, "SCT_ID").isFailure()){
-    msg(MSG::FATAL) << "Could not get SCT ID helper" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  else if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "SCT ID is : "<< m_sctID <<endmsg ;
-  
-  if (detStore()->retrieve(m_pixelid, "PixelID").isFailure()){
-    msg(MSG::FATAL) << "Could not get PIXEL ID helper" << endmsg;
-    return StatusCode::FAILURE;
-  }
-  else if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Pixel ID is : " << m_pixelid << endmsg;
+  ATH_CHECK(detStore()->retrieve(m_sctID, "SCT_ID"));
+  ATH_MSG_DEBUG("SCT ID is : "<< m_sctID);
+
+  ATH_CHECK(detStore()->retrieve(m_pixelid, "PixelID"));
+  ATH_MSG_DEBUG("Pixel ID is : " << m_pixelid);
   
   // retrieve the NTuple Service
-  if (StatusCode::SUCCESS != service("NTupleSvc", m_ntupleSvc)) {
-    ATH_MSG_FATAL ("NTupleSvc service not found!");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_ntupleSvc.retrieve());
   
   bookNtuple();
 
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   ATH_CHECK(m_SCTDetEleCollKey.initialize());
 
-  if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Initialize() of FillSiCluster successful" << endmsg;
+  ATH_MSG_DEBUG("Initialize() of FillSiCluster successful");
   return StatusCode::SUCCESS;
 }
 
@@ -120,7 +101,7 @@ StatusCode InDetAlignFillSiCluster::finalize() {
 //===================================================================== 
 StatusCode InDetAlignFillSiCluster::FillSiCluster() {
 
-  if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "In FillSiCluster()" << endmsg;
+  ATH_MSG_DEBUG("In FillSiCluster()");
 
   StatusCode sc;
 
@@ -132,7 +113,7 @@ StatusCode InDetAlignFillSiCluster::FillSiCluster() {
     
   std::string nt0id = m_ntupleName + "/SiCluster";
   sc = m_ntupleSvc->writeRecord(nt0id);
-  if (sc.isFailure()) if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Could not write " << nt0id << "!" << endmsg;
+  if (sc.isFailure()) ATH_MSG_DEBUG("Could not write " << nt0id << "!");
 
   return StatusCode::SUCCESS;
 }
@@ -145,13 +126,13 @@ void InDetAlignFillSiCluster::bookNtuple() {
 
   ATH_MSG_DEBUG ("Booking Trk::Track Info...");
     
-  NTupleFilePtr file1(m_ntupleSvc, m_ntupleName);
+  NTupleFilePtr file1(m_ntupleSvc.get(), m_ntupleName);
   std::string nt0id    = m_ntupleName + "/SiCluster";
   std::string comments = "Silicon Cluster Information";
 
   StatusCode sc;
 
-  NTuplePtr nt0(m_ntupleSvc, nt0id);
+  NTuplePtr nt0(m_ntupleSvc.get(), nt0id);
   if (nt0) ATH_MSG_DEBUG ("Ntuple is already booked");
   else {
     ATH_MSG_DEBUG ("Attempting to book general ntuple");

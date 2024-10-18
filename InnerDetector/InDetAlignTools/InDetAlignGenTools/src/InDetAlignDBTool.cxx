@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignDBTool.cxx
@@ -501,10 +501,10 @@ void InDetAlignDBTool::dispGroup(const int dettype, const int bec,
   ATH_MSG_DEBUG( "dispGroup called: level " << level << " syst " << syst);
   int nmod=0;
   // random number service
-  IRndmGenSvc* randsvc;
-  if (StatusCode::SUCCESS!=service("RndmGenSvc",randsvc,true))
-    ATH_MSG_ERROR("Cannot find RndmGenSvc" );
-  Rndm::Numbers gauss(randsvc,Rndm::Gauss(0.,1.));
+  SmartIF<IRndmGenSvc> randsvc{Gaudi::svcLocator()->service("RndmGenSvc")};
+  if(!randsvc.isValid()) ATH_MSG_ERROR("Cannot find RndmGenSvc" );
+
+  Rndm::Numbers gauss(randsvc.get(),Rndm::Gauss(0.,1.));
   if (skip>0) {
     ATH_MSG_DEBUG("Skip random numbers " << skip ); 
     for (int i=0;i<skip;++i) gauss();
@@ -632,11 +632,10 @@ void InDetAlignDBTool::dispGroup(const int dettype, const int bec,
 void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file) 
   const {
   std::ofstream* outfile=nullptr;
-  INTupleSvc* ntsvc;
-  if (StatusCode::SUCCESS!=service("NTupleSvc",ntsvc,true))
-    ATH_MSG_ERROR("Cannot find NTupleSvc" );
+  SmartIF<INTupleSvc> ntsvc{Gaudi::svcLocator()->service("NTupleSvc")};
+  if(!ntsvc.isValid()) ATH_MSG_ERROR("Cannot find NTupleSvc" );
   const std::string path=file+"/9002";
-  NTuplePtr nt(ntsvc,path);
+  NTuplePtr nt(ntsvc.get(),path);
 
   if (ntuple) {
     ATH_MSG_DEBUG( "writeFile: Write AlignableTransforms on ntuple 9002, path: " << file );
@@ -956,11 +955,10 @@ void InDetAlignDBTool::readTextFile(const std::string& file) const {
 
 void InDetAlignDBTool::readNtuple(const std::string& file) const {
   ATH_MSG_DEBUG("readNtuple - set alignment constants from ntuple path: " << file );
-  INTupleSvc* ntsvc;
-  if (StatusCode::SUCCESS!=service("NTupleSvc",ntsvc,true))
-    ATH_MSG_ERROR("Cannot find NTupleSvc" );
+  SmartIF<INTupleSvc> ntsvc{Gaudi::svcLocator()->service("NTupleSvc")};
+  if(!ntsvc.isValid()) ATH_MSG_ERROR("Cannot find NTupleSvc" );
   const std::string path=file+"/9002";
-  NTuplePtr nt(ntsvc,path);
+  NTuplePtr nt(ntsvc.get(),path);
   if (nt) {
     StatusCode sc;
     sc=nt->item( "MODPROP/DetType",nt_dettype);
@@ -1239,9 +1237,8 @@ void InDetAlignDBTool::fillDB(const std::string& tag,
   ATH_MSG_DEBUG("Run/evt2 [" << run2 << "," << event2 << "]" );
 
   // get pointer to registration svc
-  IIOVRegistrationSvc* regsvc;
-  if (StatusCode::SUCCESS!=
-      service("IOVRegistrationSvc",regsvc)) {
+  SmartIF<IIOVRegistrationSvc> regsvc{Gaudi::svcLocator()->service("IOVRegistrationSvc")};
+  if (!regsvc.isValid()) {
     ATH_MSG_FATAL( "IOVRegistrationSvc not found" );
     return;
   }

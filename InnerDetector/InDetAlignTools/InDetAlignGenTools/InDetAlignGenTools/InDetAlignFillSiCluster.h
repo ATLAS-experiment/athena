@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_INDETALIGNFILLSICLUSTER_H
@@ -26,6 +26,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "InDetAlignGenTools/IInDetAlignFillSiCluster.h"
+#include "GaudiKernel/INTupleSvc.h"
 
 // Forward declaration
 class PixelID;
@@ -40,15 +41,15 @@ class InDetAlignFillSiCluster: virtual public IInDetAlignFillSiCluster, public A
   InDetAlignFillSiCluster(const std::string& type, 
 			  const std::string& name,
 			  const IInterface* parent);
-  virtual ~InDetAlignFillSiCluster();
+  virtual ~InDetAlignFillSiCluster() = default;
   
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   
-  virtual StatusCode FillSiCluster();
+  virtual StatusCode FillSiCluster() override;
 
  private:
-  INTupleSvc*                           m_ntupleSvc;
+  ServiceHandle<INTupleSvc>  m_ntupleSvc{this,"NTupleSvc","NTupleSvc"};
 
   const PixelID*                        m_pixelid;              //!< Pixel ID helper  
   const SCT_ID*                         m_sctID;                //!< SCT ID helper

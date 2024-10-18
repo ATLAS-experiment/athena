@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_INDETALIGNFILLTRACK_H
@@ -42,10 +42,10 @@ class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgToo
 		      const IInterface* parent);
   virtual ~InDetAlignFillTrack();
   
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
   
-  virtual StatusCode FillTrack();
+  virtual StatusCode FillTrack() override;
 
   virtual int GetTrks() const { return m_totaltrks; }
   virtual int GetTrkHits() const { return m_totalhits; }
@@ -54,7 +54,7 @@ class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgToo
   virtual int GetTrkTRTHits() const { return m_totalTRThits; }
 
  private:
-  INTupleSvc*                           m_ntupleSvc; 
+  ServiceHandle<INTupleSvc> m_ntupleSvc{this,"NTupleSvc","NTupleSvc"};
 
   // member functions
   void bookNtuple();
