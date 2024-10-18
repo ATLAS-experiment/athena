@@ -13,7 +13,7 @@
 // Momentum, pt, number of shared hits, number of holes and chi2 probability. 
 // Returns 0 in case a track is not accepted, otherwise 1
 
-#include "InDetAlignGenTools/InDetAlignTrackSelTool.h"
+#include "InDetAlignTrackSelTool.h"
 
 #include "xAODTracking/TrackParticle.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"

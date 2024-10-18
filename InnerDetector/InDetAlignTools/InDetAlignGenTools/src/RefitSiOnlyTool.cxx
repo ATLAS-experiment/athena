@@ -30,7 +30,7 @@
 
 #include "InDetPrepRawData/SiCluster.h"
 
-#include "InDetAlignGenTools/RefitSiOnlyTool.h"
+#include "RefitSiOnlyTool.h"
 
 namespace InDetAlignment {
  

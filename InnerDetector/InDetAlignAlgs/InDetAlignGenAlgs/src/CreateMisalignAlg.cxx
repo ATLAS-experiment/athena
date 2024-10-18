@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -156,8 +156,8 @@ namespace InDetAlignment
 		ATH_CHECK(detStore()->retrieve(m_idHelper, "AtlasID"));
 
 		// Retrieve the Histo Service
-		ITHistSvc* hist_svc;
-		ATH_CHECK(service("THistSvc",hist_svc));
+		SmartIF<ITHistSvc> hist_svc{Gaudi::svcLocator()->service("THistSvc")};
+		ATH_CHECK(hist_svc.isValid());
 		//Registering TTree for Visualization Lookup
 		m_VisualizationLookupTree = new TTree("IdentifierTree", "Visualization Identifier Lookup Tree");
 		ATH_CHECK(hist_svc->regTree("/IDENTIFIERTREE/IdentifierTree", m_VisualizationLookupTree));
@@ -437,15 +437,11 @@ namespace InDetAlignment
 	StatusCode  CreateMisalignAlg::GenerateMisaligment()
 	{
 
-		IRndmGenSvc* randsvc;
-		if (StatusCode::SUCCESS!=service("RndmGenSvc",randsvc,true)) {
-			ATH_MSG_WARNING( "Cannot find RndmGenSvc" );
-		}
-		else {
-      ATH_MSG_DEBUG( "Got RndmGenSvc" );
-		}
+	  SmartIF<IRndmGenSvc> randsvc{Gaudi::svcLocator()->service("RndmGenSvc")};
+	  ATH_CHECK(randsvc.isValid());
+	  ATH_MSG_DEBUG( "Got RndmGenSvc" );
 		
-		int i = 0;
+	  int i = 0;
 		
 		/*
 		 ===================================

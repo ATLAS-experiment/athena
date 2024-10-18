@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetDetDescrExample/PrintSiElements.h"
@@ -32,7 +32,6 @@ namespace{
 PrintSiElements::PrintSiElements(const std::string& name, ISvcLocator* pSvcLocator) 
   : AthAlgorithm(name, pSvcLocator), 
     m_firstEvent(true),
-    m_geoModelSvc("GeoModelSvc",name),
     m_detManagerNames{"Pixel","SCT"}
 {  
   // Get parameter values from jobOptions file
@@ -42,7 +41,6 @@ PrintSiElements::PrintSiElements(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("AlignedPosition", m_aligned = false, "Print out aligned geometry");
   declareProperty("FullRotationMatrix", m_fullRotationMatrix = false, "If true prints the 9 elements of the rotation matrix");
   declareProperty("OutputFile", m_outputFileName = "geometry.dat", "Output file name");
-  declareProperty("GeoModelSvc", m_geoModelSvc);
   declareProperty("DetectorManagerNames", m_detManagerNames);
 }
 
@@ -50,8 +48,7 @@ PrintSiElements::PrintSiElements(const std::string& name, ISvcLocator* pSvcLocat
 
 StatusCode PrintSiElements::initialize(){
   // Get GeoModelSvc
-  const IGeoModelSvc * geoModel;
-  ATH_CHECK(service("GeoModelSvc",geoModel));
+  ATH_CHECK(m_geoModelSvc.retrieve());
   m_fileout.open(m_outputFileName.c_str());
   ATH_MSG_DEBUG( "Opening output file " << m_outputFileName );
   if (!m_fileout) {
@@ -59,11 +56,11 @@ StatusCode PrintSiElements::initialize(){
     return StatusCode::FAILURE;
   }
   // Print version infomration
-  m_fileout << "# ATLAS tag: " << geoModel->atlasVersion() << std::endl;
-  m_fileout << "# InDet tag: " << geoModel->inDetVersionOverride() << std::endl;
-  m_fileout << "# Pixel tag: " << geoModel->pixelVersionOverride() << std::endl;
-  m_fileout << "# SCT   tag: " << geoModel->SCT_VersionOverride() << std::endl;
-  m_fileout << "# TRT   tag: " << geoModel->TRT_VersionOverride() << std::endl;
+  m_fileout << "# ATLAS tag: " << m_geoModelSvc->atlasVersion() << std::endl;
+  m_fileout << "# InDet tag: " << m_geoModelSvc->inDetVersionOverride() << std::endl;
+  m_fileout << "# Pixel tag: " << m_geoModelSvc->pixelVersionOverride() << std::endl;
+  m_fileout << "# SCT   tag: " << m_geoModelSvc->SCT_VersionOverride() << std::endl;
+  m_fileout << "# TRT   tag: " << m_geoModelSvc->TRT_VersionOverride() << std::endl;
   // ReadCondHandleKey
   ATH_CHECK(m_pixelDetEleCollKey.initialize(std::find(m_detManagerNames.begin(), m_detManagerNames.end(), "Pixel") != m_detManagerNames.end()));
   ATH_CHECK(m_SCTDetEleCollKey.initialize(std::find(m_detManagerNames.begin(), m_detManagerNames.end(), "SCT") != m_detManagerNames.end()));
