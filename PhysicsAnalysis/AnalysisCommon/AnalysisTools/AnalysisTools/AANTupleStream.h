@@ -1,7 +1,7 @@
 // dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTOOLS_AANTUPLESTREAM_H
@@ -130,7 +130,7 @@ private:
   std::vector<std::string> m_acceptNames;
 
   /// Vector of Algorithms that this stream accepts
-  std::vector<Algorithm*> m_acceptAlgs;
+  std::vector<IAlgorithm*> m_acceptAlgs;
 
   /// TTree
   TTree * m_tree;

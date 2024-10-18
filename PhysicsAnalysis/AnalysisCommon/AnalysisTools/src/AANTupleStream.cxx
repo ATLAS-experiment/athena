@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisTools/AANTupleStream.h"
@@ -82,14 +82,9 @@ StatusCode AANTupleStream::initialize()
   // register with the I/O component manager
   {
     ServiceHandle<IIoComponentMgr> iomgr ("IoComponentMgr", this->name());
-    if ( !iomgr.retrieve().isSuccess() ) {
-      ATH_MSG_ERROR ("Could not retrieve IIoComponentMgr/IoComponentMgr !");
-      return StatusCode::FAILURE;
-    }
-    if ( !iomgr->io_register (this).isSuccess() ) {
-      ATH_MSG_ERROR ("Could not register with the I/O component mgr !");
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK( iomgr.retrieve() );
+    ATH_CHECK( iomgr->io_register (this) );
+
     if ( !iomgr->io_register (this,
 			      IIoComponentMgr::IoMode::WRITE,
 			      m_fileName).isSuccess() ) {
@@ -100,20 +95,10 @@ StatusCode AANTupleStream::initialize()
   }
 
   // StoreGateSvc
-  StatusCode sc = evtStore().retrieve();
-  if ( !sc.isSuccess() )
-    {
-      ATH_MSG_ERROR ("Could not locate default store");
-      return sc;
-    }
+  ATH_CHECK( evtStore().retrieve() );
 
   // set up the persistency service:
-  sc = m_persSvc.retrieve();
-  if ( !sc.isSuccess() )
-    {
-      ATH_MSG_ERROR ("Could not locate persistency service");
-      return sc;
-    }
+  ATH_CHECK( m_persSvc.retrieve() );
 
   // instantiate AttrListSpec and add attributes for Run# and Event# 
   m_attribSpec = new coral::AttributeListSpecification;
@@ -121,35 +106,21 @@ StatusCode AANTupleStream::initialize()
   m_attribSpec->extend( name_EventNumber, "unsigned int" );
 
   // Add on specification for extra refs
-  std::vector<std::string> extraRefs = m_extraRefNames.value();
-  for (unsigned int i = 0; i < extraRefs.size(); ++i)
+  for (const std::string& ref : m_extraRefNames.value())
     {
       // Append _ref to name of attribute
-      std::string name = extraRefs[i] + "_ref";
-      m_attribSpec->extend(name, "string");
+      m_attribSpec->extend(ref + "_ref", "string");
     }
 
   if (!m_lateSchema) {
-    sc = initSchema();
-    if (sc.isFailure())
-      return sc;
+    ATH_CHECK( initSchema() );
   }
 
   // initialize sub-algos
-  sc = initialize_subAlgos();
-  if ( sc.isFailure() )
-    {
-      ATH_MSG_ERROR ("Could not initialize sub-algos");
-      return sc;
-    }      
+  ATH_CHECK( initialize_subAlgos() );
 
   // get filters
-  sc = getFilters();
-  if ( sc.isFailure() )
-    {
-      ATH_MSG_ERROR ("Could not get filters");
-      return sc;
-    }      
+  ATH_CHECK( getFilters() );
 
   ATH_MSG_DEBUG ("End initialize ");
 
@@ -293,17 +264,9 @@ StatusCode AANTupleStream::execute()
     {
       // Try to get the xAOD::EventInfo
       const xAOD::EventInfo* eventInfoX{nullptr};
-      sc = evtStore()->retrieve(eventInfoX);
-      if (sc.isFailure())
-        {
-          ATH_MSG_ERROR ("Cannot get event info.");
-          return sc;
-        }
-      else
-        {
-          runNumber   = eventInfoX->runNumber();
-          eventNumber = eventInfoX->eventNumber();
-        }
+      ATH_CHECK( evtStore()->retrieve(eventInfoX) );
+      runNumber   = eventInfoX->runNumber();
+      eventNumber = eventInfoX->eventNumber();
     }
   else
     {
@@ -568,9 +531,7 @@ StatusCode AANTupleStream::initialize_subAlgos()
   StatusCode sc = StatusCode::SUCCESS;
   
   Algorithm* algo;
-  std::vector<std::string>::const_iterator it;
-  std::vector<std::string>::const_iterator itend = m_membersNames.end( );
-  for (it = m_membersNames.begin(); it != itend; ++it)
+  for (const std::string& name : m_membersNames)
     {
       // Parse the name for a syntax of the form:
       //
@@ -578,16 +539,14 @@ StatusCode AANTupleStream::initialize_subAlgos()
       //
       // Where <name> is the algorithm instance name, and <type> is the
       // algorithm class type (being a subclass of Algorithm).
-      Gaudi::Utils::TypeNameString foo(*it);
-      std::string theType = foo.type();
-      std::string theName = foo.name();
+      Gaudi::Utils::TypeNameString tn(name);
 
       // create sub-algorithm
-      ATH_MSG_INFO (" -> creating sub-algorithm " << (*it));
-      sc =  createSubAlgorithm( theType,theName, algo );
+      ATH_MSG_INFO (" -> creating sub-algorithm " << name);
+      sc = createSubAlgorithm( tn.type(), tn.name(), algo );
       if (sc.isFailure())
         {
-          ATH_MSG_FATAL (" ERROR creating sub-alg." << (*it));
+          ATH_MSG_FATAL (" ERROR creating sub-alg." << name);
           return StatusCode::FAILURE;
         }
     }
@@ -633,53 +592,21 @@ StatusCode AANTupleStream::getFilters()
   if (m_acceptNames.empty())
     return StatusCode::SUCCESS;
 
-
-
-  // old way to get ApplicationMgr crash with gaudi 21 (dynamic_cast fails)
-  //  IAlgManager* theAlgMgr;
-//   IInterface* ptmp;
-//   StatusCode sc = serviceLocator()->getService("ApplicationMgr",
-//                                                IAlgManager::interfaceID(),
-//                                                ptmp);
-
-//   if (sc.isFailure())
-//     {
-//       ATH_MSG_FATAL ("Can't locate ApplicationMgr!!!");
-//       return sc;
-//     }
-//   theAlgMgr = dynamic_cast<IAlgManager*> (ptmp);
-
-  // new safe way to get ApplicationMgr (gaudi 21 and backward compatible)
   ServiceHandle<IAlgManager> theAlgMgr("ApplicationMgr", this->name());
-  if (theAlgMgr==0){
-    ATH_MSG_FATAL ("Can't locate    ApplicationMgr!!!");
-    return StatusCode::FAILURE;
-  }
-  
+  ATH_CHECK( theAlgMgr.retrieve() );
 
   // loop over all alg names
-  std::vector<std::string>::const_iterator it;
-  std::vector<std::string>::const_iterator itend = m_acceptNames.end();
-  for (it = m_acceptNames.begin(); it != itend; ++it)
+  for (const std::string& name : m_acceptNames)
     {
-      IAlgorithm* ialg;
-      // get Alg
-      StatusCode sc = theAlgMgr->getAlgorithm(*it, ialg);
-
-      if (sc.isFailure() )
+      SmartIF<IAlgorithm> ialg{theAlgMgr->algorithm(name)};
+      if (!ialg )
 	{
-	  ATH_MSG_ERROR ("Can't get Filter Alg : " << *it);
+	  ATH_MSG_ERROR ("Can't get Filter Alg : " << name);
 	  return StatusCode::FAILURE;
 	}
-      Algorithm *theAlg = dynamic_cast<Algorithm*>(ialg);
-      if (theAlg==0 )
-	{
-	  ATH_MSG_ERROR ("Can't cast Filter Alg : " << *it);
-	  return StatusCode::FAILURE;
-	}
-      ATH_MSG_DEBUG (" -> getting Filter Alg success " << *it);
+      ATH_MSG_DEBUG (" -> getting Filter Alg success " << name);
       // push back
-      m_acceptAlgs.push_back(theAlg);
+      m_acceptAlgs.push_back(ialg);
     }
   return StatusCode::SUCCESS;
 }
@@ -698,13 +625,10 @@ bool AANTupleStream::isEventAccepted() const
   const EventContext& ctx = Gaudi::Hive::currentContext();
   
   // loop over all algs
-  std::vector<Algorithm*>::const_iterator it;
-  std::vector<Algorithm*>::const_iterator itend = m_acceptAlgs.end();
-  for (it = m_acceptAlgs.begin(); it != itend; ++it)
+  for (const IAlgorithm* alg : m_acceptAlgs)
     {
-      const Algorithm* theAlgorithm = (*it);
-      if ( theAlgorithm->execState(ctx).state() == AlgExecState::State::Done &&
-             ( ! theAlgorithm->execState(ctx).filterPassed() ) )
+      if ( alg->execState(ctx).state() == AlgExecState::State::Done &&
+             ( ! alg->execState(ctx).filterPassed() ) )
 	return false;
     }
 
@@ -716,49 +640,28 @@ AANTupleStream::initSchema()
 {
   m_schemaDone = true;
 
-  StatusCode sc = m_tHistSvc.retrieve();
-  if (sc.isFailure())
-  {
-    ATH_MSG_ERROR ("Unable to retrieve pointer to THistSvc");
-    return sc;
-  }
+  ATH_CHECK( m_tHistSvc.retrieve() );
 
   // initialize output collection
-  sc = initCollection();
-  if ( sc.isFailure() )
-  {
-    ATH_MSG_ERROR ("Could not init collection");
-    return sc;
-  }
+  ATH_CHECK( initCollection() );
 
   // register TTree to THistSvc
-  sc = m_tHistSvc->regTree("/"+m_streamName+"/"+m_treeName, m_tree);
-  if ( sc.isFailure() )
-  {
-    ATH_MSG_ERROR ("Could not register TTree");
-    return sc;
-  }
+  ATH_CHECK( m_tHistSvc->regTree("/"+m_streamName+"/"+m_treeName, m_tree) );
 
   /// dump
   m_tree->Print();
 
-  return sc;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode
 AANTupleStream::io_reinit()
 {
   ServiceHandle<IIoComponentMgr> iomgr ("IoComponentMgr", this->name());
-  if ( !iomgr.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR ("Could not retrieve IIoComponentMgr/IoComponentMgr !");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( iomgr.retrieve() );
 
   ServiceHandle<Gaudi::Interfaces::IOptionsSvc> josvc ("JobOptionsSvc", this->name());
-  if ( !josvc.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR ("Could not retrieve IOptionsSvc/JobOptionsSvc !");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( josvc.retrieve() );
 
   // check the I/O manager knows about me
   if ( !iomgr->io_hasitem (this) ) {
