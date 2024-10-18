@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -44,8 +44,8 @@ StatusCode TileCellCont::initialize() {
 
   ISvcLocator* svcLoc = Gaudi::svcLocator();
 
-  StoreGateSvc* detStore = 0;
-  if (svcLoc->service("DetectorStore", detStore).isFailure()) {
+  SmartIF<StoreGateSvc> detStore{svcLoc->service("DetectorStore")};
+  if (!detStore) {
     std::cout << "Could not locate DetectorStore" << std::endl;
     return StatusCode::FAILURE;
   }
