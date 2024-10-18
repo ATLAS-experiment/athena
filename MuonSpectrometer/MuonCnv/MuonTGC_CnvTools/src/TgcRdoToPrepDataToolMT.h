@@ -103,7 +103,7 @@ namespace Muon
       StatusCode setupState(const EventContext& ctx, State& state) const;
 
       struct CablingInfo {
-        const MuonTGC_CablingSvc* m_tgcCabling{nullptr};
+        SmartIF<MuonTGC_CablingSvc> m_tgcCabling;
         /** Conversion from hash to onlineId */  
         std::vector<uint16_t> m_hashToOnlineId;
         int m_MAX_N_ROD = 0;

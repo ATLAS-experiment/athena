@@ -11,6 +11,7 @@
 #include <cassert>
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/GaudiException.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -281,10 +282,7 @@ namespace Muon {
         // ===================================
         // Print check ROB fragment statistics
         // ===================================
-        IMessageSvc* msgSvc = 0;
-        StatusCode sc = service("MessageSvc", msgSvc);
-        if (sc == StatusCode::FAILURE) throw GaudiException("RpcROD_Decoder::printcheckformat: MessageSvc not found", name(), sc);
-        MsgStream log(msgSvc, "RpcROD_Decoder::printcheckformat");
+        MsgStream log(Athena::getMessageSvc(), "RpcROD_Decoder::printcheckformat");
         log << MSG::INFO << " ============ FINAL RPC DATA FORMAT STAT. =========== " << endmsg;
         int tmp = m_RPCcheckfail[0].load();
         log << MSG::INFO << " RX Header Errors............." << tmp << endmsg;

@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCBYTESTREAMDATA_H
 #define MUONTGC_CNVTOOLS_TGCBYTESTREAMDATA_H
 
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IMessageSvc.h"
+#include "AthenaKernel/errorcheck.h"
 
 #include <cstring> // This file is needed to use memset. 
 
@@ -334,13 +331,8 @@ inline int fragmentCount(uint32_t data, int id)
   fromBS32(data, counter);
   if(counter.id != (unsigned int)id)
     {
-      IMessageSvc* msgSvc = 0;
-      ISvcLocator* svcLocator = Gaudi::svcLocator();
-      StatusCode sc = svcLocator->service("MessageSvc", msgSvc);
-      if(!sc.isFailure()) {
-	MsgStream log(msgSvc, "Muon TgcByteStreamData fragmentCount");
-	log << MSG::ERROR << "Requested count of frament " << id << ", data is for fragment " << counter.id << endmsg;
-      }
+      REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "TgcByteStreamData")
+        << "Requested count of frament " << id << ", data is for fragment " << counter.id << endmsg;
       return 0;
     }
   return counter.count;
