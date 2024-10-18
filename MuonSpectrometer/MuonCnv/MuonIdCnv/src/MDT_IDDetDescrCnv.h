@@ -1,55 +1,22 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/***************************************************************************
- Muon DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
+#ifndef MUONCNV_MDT_IDDETDESCRCNV_H
+#define MUONCNV_MDT_IDDETDESCRCNV_H
 
-//<doc><file>	$Id: MDT_IDDetDescrCnv.h,v 1.4 2004/06/04 03:30:03 ketevi Exp $
-//<version>	$Name:  $
-
-#ifndef INDETMGRDETDESCRCNV_MDT_IDDETDESCRCNV_H
-# define INDETMGRDETDESCRCNV_MDT_IDDETDESCRCNV_H
-
-//<<<<<< INCLUDES                                                       >>>>>>
-
-#include "DetDescrCnvSvc/DetDescrConverter.h"
-
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
+#include "T_Muon_IDDetDescrCnv.h"
+#include "MuonIdHelpers/MdtIdHelper.h"
 
 
 /**
- **  This class is a converter for the MDT_IdHelper an IdHelper which is
- **  stored in the detector store. This class derives from
- **  DetDescrConverter which is a converter of the DetDescrCnvSvc.
- **
+ ** Converter for MdtIdHelper.
  **/
-
-class MDT_IDDetDescrCnv: public DetDescrConverter {
-
+class MDT_IDDetDescrCnv: public T_Muon_IDDetDescrCnv<MdtIdHelper> {
 public:
-    virtual long int   repSvcType() const;
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
-
-    // Storage type and class ID (used by CnvFactory)
-    static long  storageType();
-    static const CLID& classID();
-
-    MDT_IDDetDescrCnv(ISvcLocator* svcloc);
+   MDT_IDDetDescrCnv(ISvcLocator* svcloc) :
+     T_Muon_IDDetDescrCnv(svcloc, "MDT_IDDetDescrCnv") {}
 
 };
 
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
-
-#endif // INDETMGRDETDESCRCNV_MDT_IDDETDESCRCNV_H
+#endif
