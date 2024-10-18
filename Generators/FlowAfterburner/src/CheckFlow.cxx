@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow.h
@@ -27,41 +27,15 @@
 typedef std::vector<HepMC::ConstGenParticlePtr>  MCparticleCollection ;
 
 CheckFlow::CheckFlow(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_hgenerated ( NULL ),
-  m_b ( NULL ),
-  m_phi ( NULL ),
-  m_phiR ( NULL ),
-  m_phi_vs_phiR ( NULL ),
-  m_phiv1reco_vs_phiR ( NULL ),
-  m_phiv2reco_vs_phiR ( NULL ),
-  m_phi_vs_phiR_etap ( NULL ),
-  m_phi_vs_phiR_etan ( NULL ),
-  m_v2betapth ( NULL ),
-  m_ebetapth ( NULL ),
-  m_sgSvc ( NULL ),
-  m_tesIO ( NULL ) 
+  AthAlgorithm(name, pSvcLocator)
 {
-  //Declare the algorithm's properties
-  declareProperty("McEventKey",     m_key="FLOW_EVENT");
-  declareProperty("HistogramFlag", m_produceHistogram = true );
-  declareProperty("ImpactCutMin", m_bcut_min = 0 );
-  declareProperty("ImpactCutMax", m_bcut_max = 99 );
-  declareProperty("PtCutMin", m_ptcut_min = 0 );
-  declareProperty("PtCutMax", m_ptcut_max = 999999 );
-  declareProperty("RapidityCutMin", m_rapcut_min = 0 );
-  declareProperty("RapidityCutMax", m_rapcut_max = 5.5 );
 }
 
 StatusCode CheckFlow::initialize(){
-  StatusCode result = StatusCode::SUCCESS;
-  msg(MSG::INFO) << ">>> CheckFlow from Initialize" << endmsg;
 
-  StatusCode sc = service("StoreGateSvc", m_sgSvc);
-  if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not find StoreGateSvc" << endmsg;
-    return sc;
-  }
+  ATH_CHECK(m_hijingKey.initialize());
+
+  ATH_MSG_INFO(">>> CheckFlow from Initialize");
 
   m_hgenerated = new TH1F("ngen","Generated",100,0,100000);
   m_b = new TH1F("b","Impact parameter",35,0.,35.0);
@@ -85,9 +59,9 @@ StatusCode CheckFlow::initialize(){
 				 "Tracks vs b, eta, pt",
 				 20,0,20, 30,-7.5,7.5, 25,0,5000);
 
-  ITHistSvc *rootHistSvc;
-  if (!service("THistSvc", rootHistSvc, true).isSuccess()) {
-    msg(MSG::ERROR) << "Unable to locate THistSvc" << endmsg;
+  SmartIF<ITHistSvc> rootHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+  if (!rootHistSvc) {
+    ATH_MSG_ERROR( "Unable to locate THistSvc" );
     return StatusCode::FAILURE;
   }
 
@@ -152,7 +126,7 @@ StatusCode CheckFlow::initialize(){
 
   m_tesIO = new TruthHelper::GenAccessIO();
 
-  return result;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode CheckFlow::execute() {
@@ -161,24 +135,7 @@ StatusCode CheckFlow::execute() {
   //
   // Event parameters
   //
-
-
-
-//---------------------------------------------------------------------------------------------------
-  const HijingEventParams *hijing_pars;
-  //HijingEventParams *hijing_pars;
-//---------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-  if ( m_sgSvc->retrieve(hijing_pars, "Hijing_event_params").isFailure() ) {
-    msg(MSG::ERROR) << "Could not retrieve Hijing_event_params"
-	   << endmsg;
-    return StatusCode::FAILURE;
-  }
+  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey};
   float b = hijing_pars->get_b();
   float phiR = hijing_pars->get_bphi();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloGeneratorAlg.h"
@@ -58,11 +58,7 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
   // Retrieve pointer to THistSvc if monitoring plots are requested
   /// @todo Use ServiceHandle system instead
   if(m_doMonitoringPlots) {
-    StatusCode sc = service("THistSvc", m_tHistSvc);
-    if (sc.isFailure() || !m_tHistSvc) {
-      ATH_MSG_FATAL("Unable to locate Service THistSvc");
-      return sc;
-    }
+    ATH_CHECK(m_tHistSvc.retrieve());
 
     // Create log10 bins for x-axis of E plots.
     const Int_t nbins_E = 60;
@@ -94,21 +90,21 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
     m_validationPlots[SP_PZ_MUONS] = new TH1F("scoringPlanePz_muons",";p_{z}   [GeV];Particles/[GeV]",350,0., 3500.);
     m_validationPlots[SP_PT_MUONS] = new TH1F("scoringPlanePt_muons",";p_{T}   [GeV];Particles/[GeV]",500,0., 50.);  
 
-    if((sc = m_tHistSvc->regHist("/BeamHalo/primaryR", m_validationPlots[PRI_R])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/primaryZ", m_validationPlots[PRI_Z])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/primaryZ_TCT", m_validationPlots[PRI_Z_TCT])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_all", m_validationPlots[SP_R_ALL])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_all", m_validationPlots[SP_E_ALL])) == StatusCode::FAILURE) return sc; 
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_all", m_validationPlots[SP_PZ_ALL])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_all", m_validationPlots[SP_PT_ALL])) == StatusCode::FAILURE) return sc; 
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_protons", m_validationPlots[SP_R_PROTONS])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_protons", m_validationPlots[SP_E_PROTONS])) == StatusCode::FAILURE) return sc;     
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_protons", m_validationPlots[SP_PZ_PROTONS])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_protons", m_validationPlots[SP_PT_PROTONS])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_muons", m_validationPlots[SP_R_MUONS])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_muons", m_validationPlots[SP_E_MUONS])) == StatusCode::FAILURE) return sc;     
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_muons", m_validationPlots[SP_PZ_MUONS])) == StatusCode::FAILURE) return sc;
-    if((sc = m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_muons", m_validationPlots[SP_PT_MUONS])) == StatusCode::FAILURE) return sc;
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/primaryR", m_validationPlots[PRI_R]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/primaryZ", m_validationPlots[PRI_Z]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/primaryZ_TCT", m_validationPlots[PRI_Z_TCT]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_all", m_validationPlots[SP_R_ALL]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_all", m_validationPlots[SP_E_ALL]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_all", m_validationPlots[SP_PZ_ALL]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_all", m_validationPlots[SP_PT_ALL]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_protons", m_validationPlots[SP_R_PROTONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_protons", m_validationPlots[SP_E_PROTONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_protons", m_validationPlots[SP_PZ_PROTONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_protons", m_validationPlots[SP_PT_PROTONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneR_muons", m_validationPlots[SP_R_MUONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlaneE_muons", m_validationPlots[SP_E_MUONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePz_muons", m_validationPlots[SP_PZ_MUONS]));
+    ATH_CHECK(m_tHistSvc->regHist("/BeamHalo/scoringPlanePt_muons", m_validationPlots[SP_PT_MUONS]));
   }
 
   // Check the input type string

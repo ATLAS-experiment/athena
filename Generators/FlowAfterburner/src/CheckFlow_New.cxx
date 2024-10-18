@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/CheckFlow_New.h
@@ -35,22 +35,6 @@
 CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator)
 {
-  //Declare the algorithm's properties
-  declareProperty("McEventKey",     m_key="FLOW_EVENT");
-  declareProperty("HistogramFlag", m_produceHistogram = true );
-  declareProperty("ImpactCutMin", m_bcut_min = 0 );
-  declareProperty("ImpactCutMax", m_bcut_max = 99 );
-  declareProperty("PtCutMin", m_ptcut_min = 0 );
-  declareProperty("PtCutMax", m_ptcut_max = 999999 );
-  declareProperty("RapidityCutMin", m_rapcut_min = 0 );
-  declareProperty("RapidityCutMax", m_rapcut_max = 5.5 );
-
-  m_profile_resolution=0;
-
-  m_sgSvc = 0;
-  m_tesIO = 0;
-  m_thistSvc = 0;
-
   for ( int i = 0; i< 6; i++  ){
     m_hist_Psi_n_true[i] = 0;
     m_hist_Psi_n_reco[i] = 0;
@@ -63,33 +47,21 @@ CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) 
     m_hist_psi_corr_true[i] = 0;
     m_hist_psi_corr_reco[i] = 0;
   }
-
-
 }
 
 
-
-
-
 StatusCode CheckFlow_New::initialize(){
-  StatusCode result = StatusCode::SUCCESS;
-  
-  msg(MSG::INFO) << ">>> CheckFlow_New from Initialize" << endmsg;
+  ATH_CHECK(m_hijingKey.initialize());
+
+  ATH_MSG_INFO(">>> CheckFlow_New from Initialize");
 
   float pt_binvals[n_ptbin+1]={0.0,0.25,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,6.0,8.0,12.0,16.0,20.0,30.0,40.0};
   float eta_bin_max = 4.0;
 
 
-  StatusCode sc = service("StoreGateSvc", m_sgSvc);
-  if (sc.isFailure()) {
-     msg(MSG::ERROR) << "Could not find StoreGateSvc" << endmsg;
-    return sc;
-  }
-
-
-  ITHistSvc *rootHistSvc;
-  if (!service("THistSvc", rootHistSvc, true).isSuccess()) {
-     msg(MSG::ERROR) << "Unable to locate THistSvc" << endmsg;
+  SmartIF<ITHistSvc> rootHistSvc{Gaudi::svcLocator()->service("THistSvc")};
+  if (!rootHistSvc) {
+    ATH_MSG_ERROR( "Unable to locate THistSvc" );
     return StatusCode::FAILURE;
   }
 
@@ -232,7 +204,7 @@ StatusCode CheckFlow_New::initialize(){
 
   msg(MSG::DEBUG) << "Histograms have been booked " << endmsg;
   m_tesIO = new TruthHelper::GenAccessIO();
-  return result;
+  return StatusCode::SUCCESS;
 }
 
 
@@ -243,14 +215,7 @@ StatusCode CheckFlow_New::execute() {
   float pt_binvals[n_ptbin+1]={0.0,0.25,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,6.0,8.0,12.0,16.0,20.0,30.0,40.0};
   float eta_bin_max = 4.0;
 
-  const HijingEventParams *hijing_pars;
-
-
-  if ( m_sgSvc->retrieve(hijing_pars, "Hijing_event_params").isFailure() ) {
-    msg(MSG::ERROR) << "Could not retrieve Hijing_event_params"<< endmsg;
-    return StatusCode::FAILURE;
-  }
-
+  SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey};
   float b = hijing_pars->get_b();
   float Psi_n[6],Psi_n_reco[6];
   float Psi_n_reco_pos[6],Psi_n_reco_neg[6];
