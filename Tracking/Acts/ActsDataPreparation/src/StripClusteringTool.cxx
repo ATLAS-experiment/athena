@@ -140,7 +140,7 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 	m_stripDetElStatus.empty() ? nullptr : status.cptr();
 
     std::optional<std::pair<CellCollection,bool>> unpckd
-	= unpackRDOs(RDOs, stripID, stripDetElStatus);
+	= unpackRDOs(RDOs, stripID, stripDetElStatus, ctx);
     if (not unpckd.has_value()) {
 	ATH_MSG_FATAL("Error encountered while unpacking strip RDOs!");
 	return StatusCode::FAILURE;
@@ -265,7 +265,8 @@ bool StripClusteringTool::passTiming(const std::bitset<3>& timePattern) const {
 }
 
 
-bool StripClusteringTool::isBadStrip(const InDet::SiDetectorElementStatus *stripDetElStatus,
+bool StripClusteringTool::isBadStrip(const EventContext& ctx,
+					 const InDet::SiDetectorElementStatus *stripDetElStatus,
 				     const StripID& stripID,
 				     IdentifierHash waferHash,
 				     Identifier stripId) const
@@ -278,7 +279,6 @@ bool StripClusteringTool::isBadStrip(const InDet::SiDetectorElementStatus *strip
 	    m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP));
 	return not stripDetElStatus->isCellGood(waferHash.value(), strip_i) ;
     }
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
     return not m_conditionsTool->isGood(stripId, InDetConditions::SCT_STRIP, ctx);
 }
 
@@ -286,7 +286,8 @@ bool StripClusteringTool::isBadStrip(const InDet::SiDetectorElementStatus *strip
 std::optional<std::pair<StripClusteringTool::CellCollection, bool>>
 StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& RDOs,
 				const StripID& stripID,
-				const InDet::SiDetectorElementStatus *stripDetElStatus) const
+				const InDet::SiDetectorElementStatus *stripDetElStatus,
+				const EventContext& ctx) const
 {
     CellCollection cells;
     bool badStripOnModule{false};
@@ -315,7 +316,7 @@ StripClusteringTool::unpackRDOs(const InDetRawDataCollection<StripRDORawData>& R
 
 	for (size_t i = iFirstStrip; i < iMaxStrip; i++) {
 	    Identifier stripIdent = stripID.strip_id(waferId, i);
-	    if (isBadStrip(stripDetElStatus, stripID, waferHash, stripIdent)) {
+	    if (isBadStrip(ctx, stripDetElStatus, stripID, waferHash, stripIdent)) {
 		// Bad strip, throw it out to minimize useless work.
 		ATH_MSG_DEBUG("Bad strip encountered:" << stripIdent
 			      << ", wafer is: " << waferId);
