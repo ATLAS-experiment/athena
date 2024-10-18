@@ -13,8 +13,12 @@ but remember that this is an external address and that you should not discuss an
 
 # How to use Rivet
 
-Rivet has a growing [wiki](https://gitlab.com/hepcedar/rivet/-/wikis/home) of its own with many useful examples
+Rivet has a growing [README](https://gitlab.com/hepcedar/rivet#welcome) with many useful examples
 for using standalone Rivet. This tutorial will focus on the Athena wrapper around Rivet.
+
+Rivet uses the YODA histogramming package. YODA is written in C++, with an additional Python API and
+plotting support based on the `matplotlib` library.
+See also the YODA documentation [here](https://gitlab.com/hepcedar/yoda#tell-me-more-about-).
 
 # Setup
 
@@ -43,7 +47,11 @@ _Please note this also allow you to run all native Rivet/Yoda commands without t
 
 The Rivet3 series comes with automatic handling of multiweights as well as couple of syntax changes.
 For a quick tutorial on how to make a Rivet2-style routine compatible with Rivet3,
-[check this out](https://gitlab.com/hepcedar/rivet/blob/release-3-1-x/doc/tutorials/mig2to3.md).
+[check this out](https://gitlab.com/hepcedar/rivet/blob/release-4-0-x/doc/tutorials/mig2to3.md).
+In YODA2, the histogram classes have been redesigned underneath the hood in order to support
+arbitrary dimensions as well as discrete axes. The Rivet4 series supports YODA2 and cleaned up
+some of the API. For a quick tutorial on how to make Rivet3-style routine compatible with Rivet4,
+[check this out](https://gitlab.com/hepcedar/rivet/blob/release-4-0-x/doc/tutorials/mig3to4.md).
 
 
 ## Older Rivet versions
@@ -55,6 +63,7 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 
 | Rivet version | Athena release | Comments |
 | :----:  | :-------:| :----- |
+| v4.0.1 | `23.6.38,AthGeneration` | |
 | v3.1.10 | `23.6.26,AthGeneration` | |
 | v3.1.9 | `23.6.22,AthGeneration` | |
 | v3.1.8 | `23.6.13,AthGeneration` | |
@@ -402,42 +411,7 @@ This section will be populated from the mailing list questions/answers.
 
 ## Converting YODA files to ROOT format
 
-To first order YODA can do what ROOT can, minus all the ROOT bugs,
-but if you _really_ need the data in ROOT format, it is
-straightforward to convert them using Python, e.g.
-
-
-```python
-from array import array
-import ROOT as rt
-import yoda
-
-fName = 'myYODAfile.yoda'
-yodaAOs = yoda.read(fName)
-rtFile = rt.TFile(fName[:fName.find('.yoda')] + '.root', 'recreate')
-for name in yodaAOs:
-  yodaAO = yodaAOs[name];  rtAO = None
-  if 'Histo1D' in str(yodaAO):
-    rtAO = rt.TH1D(name, '', yodaAO.numBins(), array('d', yodaAO.xEdges()))
-    rtAO.Sumw2(); rtErrs = rtAO.GetSumw2()
-    for i in range(rtAO.GetNbinsX()):
-      rtAO.SetBinContent(i + 1, yodaAO.bin(i).sumW())
-      rtErrs.AddAt(yodaAO.bin(i).sumW2(), i+1)
-  elif 'Scatter2D' in str(yodaAO):
-    rtAO = rt.TGraphAsymmErrors(yodaAO.numPoints())
-    for i in range(yodaAO.numPoints()):
-      x = yodaAO.point(i).x(); y = yodaAO.point(i).y()
-      xLo, xHi = yodaAO.point(i).xErrs()
-      yLo, yHi = yodaAO.point(i).yErrs()
-      rtAO.SetPoint(i, x, y)
-      rtAO.SetPointError(i, xLo, xHi, yLo, yHi)
-  else:
-    continue
-  rtAO.Write(name)
-rtFile.Close()
-```
-
-We've added this as a script to the repo too.
+An example is provided [here](examples/convert2root).
 
 
 ## How to use cross-section in a Rivet run:
@@ -470,29 +444,50 @@ from a reference yoda file, with the numbers corresponding to `d`, `x` and `y` f
 
 ```
 FinalState fs(Cuts::abseta < 4.5);
-FastJets(fs, 0.4, ANTIKT, JetAlg::Muons::NONE, JetAlg::Invisibles::NONE)
+FastJets(fs, 0.4, JetAlg::ANTIKT, JetMuons::NONE, JetInvisibles::NONE);
 ```
 
 ### AntiKt4TruthWZJets
 
 ```
 // Photons
-FinalState photons(Cuts::abspid == PID::PHOTON);
+PromptFinalState photons(Cuts::abspid == PID::PHOTON, TauDecaysAs::PROMPT, MuDecaysAs::PROMPT);
 
-// Muons
-PromptFinalState bare_mu(Cuts::abspid == PID::MUON, true); // true = use muons from prompt tau decays
-DressedLeptons all_dressed_mu(photons, bare_mu, 0.1, Cuts::abseta < 2.5, true);
+// Leptons
+PromptFinalState bare_leps(Cuts::abspid == PID::MUON || Cuts::abspid == PID::ELECTRON, TauDecaysAs::PROMPT);
+DressedLeptons dressed_leps(photons, bare_leps, 0.1);
 
-// Electrons
-PromptFinalState bare_el(Cuts::abspid == PID::ELECTRON, true); // true = use electrons from prompt tau decays
-DressedLeptons all_dressed_el(photons, bare_el, 0.1, Cuts::abseta < 2.5, true);
+// Invisibles
+InvisibleFinalState invis(OnlyPrompt::YES, TauDecayAs::PROMPT);
 
-//Jet forming
-VetoedFinalState vfs(FinalState(Cuts::abseta < 4.5));
-vfs.addVetoOnThisFinalState(all_dressed_el);
-vfs.addVetoOnThisFinalState(all_dressed_mu);
+// Jet clustering
+VetoedFinalState vfs(FinalState(Cuts::abseta < 5.0));
+vfs.addVetoOnThisFinalState(dressed_leps);
+vfs.addVetoOnThisFinalState(invis);
 
-FastJets jet(vfs, FastJets::ANTIKT, 0.4, JetAlg::Muons::ALL, JetAlg::Invisibles::DECAY);
+FastJets jet(vfs, JetAlg::ANTIKT, 0.4, JetMuons::ALL, JetInvisibles::ALL);
+```
+
+
+### AntiKt4TruthDressedWZJets
+
+```
+// Photons
+PromptFinalState photons(Cuts::abspid == PID::PHOTON, TauDecaysAs::PROMPT, MuDecaysAs::PROMPT);
+
+// Leptons
+PromptFinalState bare_leps(Cuts::abspid == PID::MUON || Cuts::abspid == PID::ELECTRON, TauDecaysAs::PROMPT);
+DressedLeptons dressed_leps(photons, bare_leps, 0.1);
+
+// Invisibles
+InvisibleFinalState invis(OnlyPrompt::YES, TauDecayAs::PROMPT);
+
+// Jet clustering
+VetoedFinalState vfs(FinalState(Cuts::abseta < 5.0));
+vfs.addVetoOnThisFinalState(dressed_leps);
+vfs.addVetoOnThisFinalState(invis);
+
+FastJets jet(vfs, JetAlg::ANTIKT, 0.4, JetMuons::ALL, JetInvisibles::ALL);
 ```
 
 
@@ -530,7 +525,7 @@ Include the following header:
 ```
 In `execute`:
 ```
-fastjet::contrib::SoftDrop sd(1.0, 0.1);
+fjcontrib::SoftDrop sd(1.0, 0.1);
 for (const Jet& fjet : fjets) {
    sd_ljets += sd(fjet);
 }
@@ -546,7 +541,7 @@ Include the following header:
 ```
 As above, but:
 ```
-fastjet::contrib::BottomUpSoftDrop busd(1.0, 0.05);
+fjcontrib::BottomUpSoftDrop busd(1.0, 0.05);
 ```
 
 ### AntiKt10TruthRecursiveSoftDropBeta100Zcut5NinfJets
@@ -557,7 +552,7 @@ Include the following header:
 ```
 As above, but:
 ```
-fastjet::contrib::RecursiveSoftDrop rsd(1.0, 0.05);
+fjcontrib::RecursiveSoftDrop rsd(1.0, 0.05);
 ```
 
 
