@@ -100,16 +100,12 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
   def spacePointFormation(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg,ActsStripSpacePointFormationAlgCfg,ActsPixelSpacePointPreparationAlgCfg,ActsStripSpacePointPreparationAlgCfg,ActsStripOverlapSpacePointPreparationAlgCfg
+    from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg,ActsPixelSpacePointPreparationAlgCfg
 
     acc.merge(ActsPixelSpacePointFormationAlgCfg(self.flags,name="PixelSPFormation_"+self.signature,useCache=self.flags.Acts.useCache, PixelClusters = "ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature, PixelSpacePoints = "ITkPixelSpacepoints_"+self.signature))
-        
-    acc.merge(ActsStripSpacePointFormationAlgCfg(self.flags,name="StripSPFormation_"+self.signature,useCache=self.flags.Acts.useCache, StripClusters = "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature, StripSpacePoints="ITkStripSpacepoints_"+self.signature, StripOverlapSpacePoints="ITkStripOverlapSpacepoints_"+self.signature))
     
     if self.flags.Acts.useCache:
       acc.merge(ActsPixelSpacePointPreparationAlgCfg(self.flags,name="PixelSPVF_"+self.signature,useCache=True, RoIs=self.rois, OutputCollection="ITkPixelSpacePoints_Cached", InputIDC="ActsPixelSpacePointCache"))
-      acc.merge(ActsStripSpacePointPreparationAlgCfg(self.flags, name="StripSPVF_"+self.signature,useCache=True, RoIs=self.rois, OutputCollection="ITkStripSpacePoints_Cached", InputIDC="ActsStripSpacePointCache"))
-      acc.merge(ActsStripOverlapSpacePointPreparationAlgCfg(self.flags, name="StripOSPVF_"+self.signature,useCache=True, RoIs=self.rois, OutputCollection="ITkStripOverlapSpacePoints_Cached", InputIDC="ActsStripOverlapSpacePointCache"))
 
     return acc
 
@@ -118,10 +114,9 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                       inputTracksName : str = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsSeedingConfig import ActsPixelSeedingAlgCfg, ActsStripSeedingAlgCfg
+    from ActsConfig.ActsSeedingConfig import ActsPixelSeedingAlgCfg
 
-    acc.merge(ActsPixelSeedingAlgCfg(self.flags, name="ActsPixelSeedingAlg_"+self.signature, InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature]))
-    acc.merge(ActsStripSeedingAlgCfg(self.flags, name="ActsStripSeedingAlg_"+self.signature, InputSpacePoints=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkStripSpacepoints_'+self.signature, 'ITkStripOverlapSpacepoints_'+self.signature]))
+    acc.merge(ActsPixelSeedingAlgCfg(self.flags, name="ActsPixelSeedingAlg_"+self.signature, InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], useFastTracking=True))
 
     from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
 
