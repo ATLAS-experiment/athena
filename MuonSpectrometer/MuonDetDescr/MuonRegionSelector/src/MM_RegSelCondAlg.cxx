@@ -27,9 +27,6 @@
 #include "MuonReadoutGeometry/MuonReadoutElement.h" 
 
 #include "MuonReadoutGeometry/MMReadoutElement.h"
-#include "MuonAGDDDescription/MMDetectorHelper.h"
-#include "MuonAGDDDescription/MMDetectorDescription.h"
-
 #include "MuonReadoutGeometry/MuonStation.h"
 
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
@@ -72,7 +69,6 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
   
   std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>(RegSelSiLUT::MM);
 
-
   for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; ++i ) {
 
       Identifier     Id = *i;
@@ -90,21 +86,14 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
 
       char side     = mm->getStationEta() < 0 ? 'C' : 'A';
 
-      char sector_l = stationName.substr(2,1)=="L" ? 'L' : 'S';
-
-      MMDetectorHelper aHelper;
-      MMDetectorDescription* md = aHelper.Get_MMDetector( sector_l, std::abs(stationEta), stationPhi, multilayer, side );
-
       /// now calculate the required limits
-
       Amg::Vector3D mmPos = mm->center();      
-  
-      
-      double swidth = md->sWidth();
-      double lwidth = md->lWidth();
 
-      double length = md->Length();
-      double depth  = md->Tck();
+      double swidth = mm->getSsize();
+      double lwidth = mm->getLongSsize();
+
+      double length = mm->getRsize();
+      double depth  = mm->getZsize();
 
       double moduleR = std::sqrt( mmPos.mag()*mmPos.mag() -  mmPos.z()*mmPos.z());
 
