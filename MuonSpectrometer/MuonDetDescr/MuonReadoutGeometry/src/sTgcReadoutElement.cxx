@@ -43,7 +43,7 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
-#define THROW_EXCEPTION(MSG)                                                                            \
+#define THROW_EXCEPTION_RE(MSG)                                                                            \
      {                                                                                                  \
         std::stringstream sstr{};                                                                       \
         sstr<<"sTgcReadoutElement - "<<idHelperSvc()->toStringDetEl(identify())<<" "<<__LINE__<<": ";   \
@@ -75,12 +75,9 @@ namespace MuonGM {
 
     //============================================================================
     void sTgcReadoutElement::initDesignFromSQLite(double thickness) {
-      ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-      IGeoDbTagSvc* geoDbTag{nullptr};
-      svcLocator->service("GeoDbTagSvc",geoDbTag).ignore();
+      SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+      SmartIF<IRDBAccessSvc> accessSvc{Gaudi::svcLocator()->service(geoDbTag->getParamSvcName())};
 
-      IRDBAccessSvc *accessSvc{nullptr};
-      svcLocator->service(geoDbTag->getParamSvcName(),accessSvc).ignore();
       IRDBRecordset_ptr nswdimRec = accessSvc->getRecordsetPtr("NSWDIM","","");
       IRDBRecordset_ptr wstgcRec  = accessSvc->getRecordsetPtr("WSTGC","","");
       IRDBRecordset_ptr nswPars   = accessSvc->getRecordsetPtr("NSWPARS","","");
@@ -90,7 +87,7 @@ namespace MuonGM {
       std::string pVName=parent->getNameOfChildVol(index);
       float yCutoutCathode(0);
       if (nswPars->size()==0) {
-        THROW_EXCEPTION("Error, cannot access NSWPARS record!");
+        THROW_EXCEPTION_RE("Error, cannot access NSWPARS record!");
       } else {
         yCutoutCathode=(*nswPars)[0]->getFloat("NSW_sTGC_yCutoutCathode");
       }
@@ -288,7 +285,7 @@ namespace MuonGM {
         ATH_MSG_DEBUG( "Found sTGC Detector " << stgc->GetName() );
      
         MuonGM::sTGC_Technology *tech = stgc->GetTechnology();
-        if (!tech) THROW_EXCEPTION(" Failed To get Technology for stgc element:"<< stgc->GetName());
+        if (!tech) THROW_EXCEPTION_RE(" Failed To get Technology for stgc element:"<< stgc->GetName());
      
              
         // Get Chamber length, width and frame widths
@@ -447,10 +444,8 @@ namespace MuonGM {
             assert(m_nlayers ==  llay);             
         }
 
-        ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-        IGeoDbTagSvc* geoDbTag{nullptr};
-        StatusCode sc = svcLocator->service("GeoDbTagSvc",geoDbTag);
-        if (sc.isFailure()) THROW_EXCEPTION( "Could not locate GeoDbTagSvc" );
+        SmartIF<IGeoDbTagSvc> geoDbTag{Gaudi::svcLocator()->service("GeoDbTagSvc")};
+        if (!geoDbTag) THROW_EXCEPTION_RE( "Could not locate GeoDbTagSvc" );
         if (geoDbTag->getSqliteReader()) initDesignFromSQLite(thickness);
         else initDesignFromAGDD(thickness);
 
