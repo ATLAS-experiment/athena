@@ -2,12 +2,6 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-/***************************************************************************
- InDet DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
-
 #include "SiliconIDDetDescrCnv.h"
 
 #include "DetDescrCnvSvc/DetDescrConverter.h"
@@ -16,7 +10,6 @@
 #include "StoreGate/StoreGateSvc.h" 
 
 #include "IdDictDetDescr/IdDictManager.h"
-//#include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/SiliconID.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -35,128 +28,35 @@ SiliconIDDetDescrCnv::repSvcType() const
 StatusCode 
 SiliconIDDetDescrCnv::initialize()
 {
-    // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "SiliconIDDetDescrCnv");
-    log << MSG::DEBUG << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-	return sc;
-    }
-
-    // The following is an attempt to "bootstrap" the loading of a
-    // proxy for SiliconID into the detector store. However,
-    // SiliconIDDetDescrCnv::initialize is NOT called by the conversion
-    // service.  So for the moment, this cannot be use. Instead the
-    // DetDescrCnvSvc must do the bootstrap from a parameter list.
-
-
-//      // Add InDet_DetDescrManager proxy as entry point to the detector store
-//      // - this is ONLY needed for the manager of each system
-//      sc = addToDetStore(classID(), "PidelID");
-//      if (sc.isFailure()) {
-//  	log << MSG::FATAL << "Unable to add proxy for SiliconID to the Detector Store!" << endmsg;
-//  	return StatusCode::FAILURE;
-//      } else {}
-
-    return StatusCode::SUCCESS; 
-}
-
-//--------------------------------------------------------------------
-
-StatusCode 
-SiliconIDDetDescrCnv::finalize()
-{
-    MsgStream log(msgSvc(), "SiliconIDDetDescrCnv");
-    log << MSG::DEBUG << "in finalize" << endmsg;
-
-    return StatusCode::SUCCESS; 
+    ATH_CHECK( DetDescrConverter::initialize() );
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
 StatusCode
-SiliconIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
+SiliconIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
-    //StatusCode sc = StatusCode::SUCCESS;
-    MsgStream log(msgSvc(), "SiliconIDDetDescrCnv");
-    log << MSG::INFO << "in createObj: creating a SiliconID helper object in the detector store" << endmsg;
-
-    // Create a new SiliconID
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-	log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
-	log << MSG::DEBUG << "No Helper key " << endmsg;
-    }
-    else {
-	log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;
-    }
-    
-
-    // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-	log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-	return StatusCode::FAILURE;
-    } else {}
- 
     // Get the dictionary manager from the detector store
     const IdDictManager* idDictMgr = nullptr;
-    status = detStore->retrieve(idDictMgr, "IdDict");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get IdDictManager !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Found the IdDictManager. " << endmsg;
-    }
+    ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // Get both Pixel and SCT id helpers
     const PixelID* pixelID = nullptr;
-    status = detStore->retrieve(pixelID, "PixelID");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get PixelID helper !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Found the PixelID. " << endmsg;
-    }
+    ATH_CHECK( detStore()->retrieve(pixelID, "PixelID") );
 
     const SCT_ID* sctID = nullptr;
-    status = detStore->retrieve(sctID, "SCT_ID");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get SCT_ID helper !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Found the SCT_ID. " << endmsg;
-    }
+    ATH_CHECK( detStore()->retrieve(sctID, "SCT_ID") );
 
     if (!m_siliconId) {
-	// create the helper only once
-	log << MSG::DEBUG << " Create SiliconID. " << endmsg;
-	m_siliconId = new SiliconID(pixelID, sctID);
+	    // create the helper only once
+	    ATH_MSG_DEBUG(" Create SiliconID. ");
+	    m_siliconId = new SiliconID(pixelID, sctID);
         m_siliconId->setMessageSvc(msgSvc());
     }
     
-    if (idDictMgr->initializeHelper(*m_siliconId)) {
-	log << MSG::ERROR << "Unable to initialize SiliconID" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Initialized SiliconID. " << endmsg;
-    }
-    
+    ATH_CHECK( idDictMgr->initializeHelper(*m_siliconId) == 0 );
+
     // Pass a pointer to the container to the Persistency service by reference.
     pObj = SG::asStorable(m_siliconId);
 
@@ -181,7 +81,7 @@ SiliconIDDetDescrCnv::classID() {
 //--------------------------------------------------------------------
 SiliconIDDetDescrCnv::SiliconIDDetDescrCnv(ISvcLocator* svcloc) 
     :
-    DetDescrConverter(ClassID_traits<SiliconID>::ID(), svcloc),
+    DetDescrConverter(ClassID_traits<SiliconID>::ID(), svcloc, "SiliconIDDetDescrCnv"),
     m_siliconId(nullptr)
 
 {}
