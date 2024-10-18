@@ -1,30 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/***************************************************************************
- InDet DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
-//<doc><file>	$Id: LArHVLineIDDetDescrCnv.h,v 1.3 2009-02-11 04:50:25 ssnyder Exp $
-//<version>	$Name: not supported by cvs2svn $
 
 #ifndef LARIDCNV_LARHVLINEIDDETDESCRCNV_H
 # define LARIDCNV_LARHVLINEIDDETDESCRCNV_H
 
-//<<<<<< INCLUDES 
-
-/////                                                      >>>>>>
-
 #include "DetDescrCnvSvc/DetDescrConverter.h"
 
-//<<<<<< PUBLIC DEFINES                                                 >>>>>>
-//<<<<<< PUBLIC CONSTANTS                                               >>>>>>
-//<<<<<< PUBLIC TYPES                                                   >>>>>>
-//<<<<<< PUBLIC VARIABLES                                               >>>>>>
-//<<<<<< PUBLIC FUNCTIONS                                               >>>>>>
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /**
  **  This class is a converter for the LArHVLineID an IdHelper which is
@@ -36,10 +18,9 @@
 class LArHVLineIDDetDescrCnv: public DetDescrConverter {
 
 public:
-    virtual long int   repSvcType() const;
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj);
+    virtual long int   repSvcType() const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode createObj(IOpaqueAddress* pAddr, DataObject*& pObj) override;
 
     // Storage type and class ID (used by CnvFactory)
     static long  storageType();
@@ -47,9 +28,5 @@ public:
 
     LArHVLineIDDetDescrCnv(ISvcLocator* svcloc);
 };
-
-
-//<<<<<< INLINE PUBLIC FUNCTIONS                                        >>>>>>
-//<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
 #endif // LARIDCNV_LARHVLINEIDDETDESCRCNV_H

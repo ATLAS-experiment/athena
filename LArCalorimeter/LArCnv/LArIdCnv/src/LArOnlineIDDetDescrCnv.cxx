@@ -1,12 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-/***************************************************************************
- LAr DetDescrCnv package
- -----------------------------------------
- ***************************************************************************/
-
 
 #include "LArIdCnv/LArOnlineIDDetDescrCnv.h"
 
@@ -29,90 +23,27 @@ StatusCode
 LArOnlineIDDetDescrCnv::initialize()
 {
     // First call parent init
-    StatusCode sc = DetDescrConverter::initialize();
-    MsgStream log(msgSvc(), "LArOnlineIDDetDescrCnv");
-    log << MSG::DEBUG << "in initialize" << endmsg;
-
-    if (sc.isFailure()) {
-        log << MSG::ERROR << "DetDescrConverter::initialize failed" << endmsg;
-	return sc;
-    }
-
-    return StatusCode::SUCCESS; 
-}
-
-//--------------------------------------------------------------------
-
-StatusCode 
-LArOnlineIDDetDescrCnv::finalize()
-{
-    MsgStream log(msgSvc(), "LArOnlineIDDetDescrCnv");
-    log << MSG::DEBUG << "in finalize" << endmsg;
-
-    return StatusCode::SUCCESS; 
+    ATH_CHECK( DetDescrConverter::initialize() );
+    return StatusCode::SUCCESS;
 }
 
 //--------------------------------------------------------------------
 
 StatusCode
-LArOnlineIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) 
+LArOnlineIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 {
-    //StatusCode sc = StatusCode::SUCCESS;
-    MsgStream log(msgSvc(), "LArOnlineIDDetDescrCnv");
-    log << MSG::INFO << "in createObj: creating a LArOnlineID helper object in the detector store" << endmsg;
+    ATH_MSG_INFO("in createObj: creating a LArOnlineID helper object in the detector store");
 
-    // Create a new LArOnlineID
-
-    DetDescrAddress* ddAddr;
-    ddAddr = dynamic_cast<DetDescrAddress*> (pAddr);
-    if(!ddAddr) {
-	log << MSG::FATAL << "Could not cast to DetDescrAddress." << endmsg;
-	return StatusCode::FAILURE;
-    }
-
-    // Get the StoreGate key of this container.
-    std::string helperKey  = *( ddAddr->par() );
-    if ("" == helperKey) {
-	log << MSG::DEBUG << "No Helper key " << endmsg;
-    }
-    else {
-	log << MSG::DEBUG << "Helper key is " << helperKey << endmsg;
-    }
-    
-
-    // get DetectorStore service
-    StoreGateSvc * detStore;
-    StatusCode status = serviceLocator()->service("DetectorStore", detStore);
-    if (status.isFailure()) {
-	log << MSG::FATAL << "DetectorStore service not found !" << endmsg;
-	return StatusCode::FAILURE;
-    } else {}
- 
     // Get the dictionary manager from the detector store
-    //const DataHandle<IdDictManager> idDictMgr;
     const IdDictManager* idDictMgr;
-    status = detStore->retrieve(idDictMgr, "IdDict");
-    if (status.isFailure()) {
-	log << MSG::FATAL << "Could not get IdDictManager !" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Found the IdDictManager. " << endmsg;
-    }
-
+    ATH_CHECK( detStore()->retrieve(idDictMgr, "IdDict") );
 
     // create the helper
     LArOnlineID* online_id = new LArOnlineID;
     // pass a pointer to IMessageSvc to the helper
     online_id->setMessageSvc(msgSvc());
 
-    if (idDictMgr->initializeHelper(*online_id)) {
-	log << MSG::ERROR << "Unable to initialize LArOnlineID" << endmsg;
-	return StatusCode::FAILURE;
-    } 
-    else {
-	log << MSG::DEBUG << " Initialized LArOnlineID. " << endmsg;
-    }
+    ATH_CHECK( idDictMgr->initializeHelper(*online_id) == 0 );
 
     // Pass a pointer to the container to the Persistency service by reference.
     pObj = SG::asStorable(online_id);
@@ -138,7 +69,7 @@ LArOnlineIDDetDescrCnv::classID() {
 //--------------------------------------------------------------------
 LArOnlineIDDetDescrCnv::LArOnlineIDDetDescrCnv(ISvcLocator* svcloc) 
     :
-    DetDescrConverter(ClassID_traits<LArOnlineID>::ID(), svcloc)
+    DetDescrConverter(ClassID_traits<LArOnlineID>::ID(), svcloc, "LArOnlineIDDetDescrCnv")
 {}
 
 
