@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
+#include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
 #include <fstream>
 
@@ -64,11 +64,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     std::string labelString = label.second;
 
     for (const auto& pt : json_config_OP[labelString]["pt"]) {
-      if (pt.is_string() && pt.get<std::string>() == "inf") {
-        m_ptMap[labelString].push_back(std::numeric_limits<float>::infinity());
-      } else {
-        m_ptMap[labelString].push_back(pt.get<float>());
-      }
+      m_ptMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
     }
 
     m_sfMap[labelString] = json_config_OP[labelString]["nominal"].get<std::vector<float>>();

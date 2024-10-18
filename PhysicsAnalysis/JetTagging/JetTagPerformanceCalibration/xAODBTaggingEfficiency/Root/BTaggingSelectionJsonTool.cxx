@@ -1,6 +1,7 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
 #include <fstream>
 
@@ -61,11 +62,7 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
   auto& pT_mass_2d_cutvalue = m_json_config[m_taggerName][m_jetAuthor][m_OP]["pT_mass_2d_cutvalue"];
 
   for (const auto& pt : pT_mass_2d_cutvalue["pTbins"]) {
-    if (pt.is_string() && pt.get<std::string>() == "inf") {
-      m_pTbins.push_back(std::numeric_limits<float>::infinity());
-    } else {
-      m_pTbins.push_back(pt.get<float>());
-    }
+    m_pTbins.push_back(BTaggingToolUtil::getExtendedFloat(pt));
   }
 
   for (const auto& item : pT_mass_2d_cutvalue.items()) {
