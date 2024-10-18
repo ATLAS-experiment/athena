@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -59,18 +59,9 @@ StatusCode TileMuonFillerTool::initialize(){
     ATH_MSG_DEBUG("TileMuonFillerTool::initialize()");
     CHECK( D3PD::BlockFillerTool<xAOD::Muon>::initialize() ); 
 
-    // CHECK WHETHER STOREGATE CAN BE RETRIEVED
-    StatusCode sc = StatusCode::SUCCESS; 
-
-    sc = service("StoreGateSvc",m_storeGate);
-    if(sc.isFailure()) {
-        ATH_MSG_ERROR("StoreGate service not found !");
-        return StatusCode::FAILURE;
-    } // IF
-
     //THIS NEEDS TO MODIFY TO WORK ON xAODs
     // MONTE CARLO EVENT COLLECTION
-    m_truthRetrieved = m_storeGate->retrieve(m_MCtruth,m_MCeventCollection);
+    m_truthRetrieved = evtStore()->retrieve(m_MCtruth,m_MCeventCollection);
     if(m_truthRetrieved.isFailure()) if(m_LevelOfDetails > 6) ATH_MSG_ERROR("NO TRUTH INFORMATION");
 
     // RETRIEVE CALORIMETER EXTRAPOLATION TOOLS

@@ -40,7 +40,6 @@ TileEventFillerTool::TileEventFillerTool(const std::string& type,
   declareProperty("LevelOfDetails", m_LevelOfDetails);
   declareProperty("METContainer", m_metContainer = "MET_Reference_AntiKt4LCTopo"); // 'MET_RefFinal' in r19
 
-  m_storeGate =	0;
   m_trigDec = 0;
   m_pVertex = 0;
         // PILE-UP
@@ -150,17 +149,9 @@ StatusCode TileEventFillerTool::initialize(){
     
     ATH_MSG_DEBUG(" NOW IN TILEMUONEVENTFILLERTOOL::INITIALIZE() ");
 
-    // RETRIEVE STOREGATE SERVICE
-    if(service("StoreGateSvc",m_storeGate).isFailure()){
-        ATH_MSG_ERROR("STOREGATE SERVICE NOT FOUND!");
-        return StatusCode::FAILURE;
-    } // IF
-
-
-
     // RETRIEVE TRIGGER DECISION TOOL
     if(m_LevelOfDetails > 4){
-        if( ! m_storeGate->retrieve( m_trigDec , "xTrigDecision").isSuccess() ){
+       if( ! evtStore()->retrieve( m_trigDec , "xTrigDecision").isSuccess() ){
           ATH_MSG_WARNING("TRIGGER DECISIONS ARE NOT LOADED PROPERLY.");
           return StatusCode::FAILURE;
         }
@@ -319,7 +310,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
     // NUMBER OF MUONS
     if(m_LevelOfDetails > 2){
          const xAOD::MuonContainer *MuonsCont = 0;
-         CHECK( m_storeGate->retrieve( MuonsCont, "Muons" ) );
+         CHECK( evtStore()->retrieve( MuonsCont, "Muons" ) );
          *m_N_mu        = MuonsCont->size();
     } // IF
 
@@ -332,7 +323,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
     if(m_LevelOfDetails > 3 && m_isMissingEtAvailable){
       // SET WHICH MISSING ENERGY VARIABLES SHOULD BE ADDED TO D3PD
       const xAOD::MissingETContainer* missingEtContainer = nullptr;
-      if(!m_storeGate->retrieve(missingEtContainer, m_metContainer).isFailure()) {
+      if(!evtStore()->retrieve(missingEtContainer, m_metContainer).isFailure()) {
 
         const MissingET* finalClus = (*missingEtContainer)["FinalClus"]; 
         if (!finalClus) {
@@ -428,7 +419,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
     if(m_LevelOfDetails > 5){
         // STORE NUMBER OF VERTICES
         // RETRIEVE PRIMARY VERTICES
-        if(m_storeGate->retrieve( m_pVertex, "VxPrimaryCandidate").isFailure()){
+        if(evtStore()->retrieve( m_pVertex, "VxPrimaryCandidate").isFailure()){
             ATH_MSG_WARNING("No VxPrimaryCandidate container found in TES");
         } // IF
         *m_nVtx           = m_pVertex ? m_pVertex->size() : -1;

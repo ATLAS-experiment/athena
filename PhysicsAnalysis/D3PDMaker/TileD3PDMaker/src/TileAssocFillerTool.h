@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -38,8 +38,7 @@ namespace D3PD{
     std::string m_branchName; 
     std::string m_containerName; 
     ASSOCCONTAINER* m_container;
-    StoreGateSvc* m_storeGate;
-  
+
   };
   
 } 

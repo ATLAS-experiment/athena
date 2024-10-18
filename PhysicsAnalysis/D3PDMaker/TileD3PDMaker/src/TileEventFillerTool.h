@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -173,9 +173,6 @@ class TileEventFillerTool:public D3PD::BlockFillerTool<xAOD::EventInfo>{
 
         //size of Muons container
         int *m_N_mu;
-
-        // TOOLHANDLES
-        StoreGateSvc* m_storeGate;
 
 }; // TILEMUONEVENTFILLERTOOL
 

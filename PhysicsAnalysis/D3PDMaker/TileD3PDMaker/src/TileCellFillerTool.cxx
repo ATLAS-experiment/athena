@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -47,16 +47,12 @@ StatusCode TileCellFillerTool::initialize(){
 
     ATH_MSG_DEBUG("TileCellFillerTool::initialize()");
 
-    IToolSvc* toolsvc;
-    CHECK(service("ToolSvc",toolsvc));
-
     if(m_LevelOfDetails > 1){
         // RETRIEVE CALORIMETER EXTRAPOLATOR TOOLS
         CHECK(m_trackInCalo.retrieve());
     } // IF
 
-    // RETRIEVE STOREGATE AND SERVICES
-    CHECK(service("StoreGateSvc",m_storeGate));
+    // RETRIEVE SERVICES
     if(m_LevelOfDetails > 2){
         CHECK(detStore()->retrieve(m_tileID));
         CHECK(detStore()->retrieve(m_tileHWID));
@@ -260,7 +256,7 @@ StatusCode TileCellFillerTool::fill (const CaloCell& p){
         const MUONCONTAINER* muons = 0;
 
         // MUONS
-        CHECK( m_storeGate->retrieve( muons, m_muonContainerName ) );
+        CHECK( evtStore()->retrieve( muons, m_muonContainerName ) );
 
         MUONCONTAINER::const_iterator muonItr = muons->begin();
         MUONCONTAINER::const_iterator muonEnd = muons->end();

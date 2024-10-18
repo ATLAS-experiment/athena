@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -36,9 +36,6 @@ StatusCode TileAssocFillerTool::initialize(){
   /* Initialize the tool by calling the parent */
   CHECK( BlockFillerTool<void>::initialize() );
 
-  /* Get storegate for later use */
-  CHECK( service("StoreGateSvc",m_storeGate) );
- 
   /* Create the object that will contain the association */
   m_container = new ASSOCCONTAINER_CONSTRUCTOR(0);
   
@@ -61,7 +58,7 @@ StatusCode TileAssocFillerTool::fill(){
   
   /* Get the association from storegate */
   ASSOCCONTAINER * cont;
-  CHECK( m_storeGate->retrieve(cont,m_containerName));   
+  CHECK( evtStore()->retrieve(cont,m_containerName));
 
   /* Copy the association to the local variable for the D3PD */
   m_container->clear();
