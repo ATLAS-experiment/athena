@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -44,14 +44,6 @@ m_chronoSvc("ChronoStatSvc", name)
 StatusCode DerivationFramework::CommonAugmentation::initialize() {
     
     ATH_MSG_INFO("Initializing the common selections in " << name());
-    
-    // get the tool service
-    IToolSvc* toolSvc;
-    StatusCode sc = service("ToolSvc",toolSvc);
-    if (StatusCode::SUCCESS != sc) {
-        ATH_MSG_FATAL("Unable to retrieve ToolSvc");
-        return StatusCode::FAILURE;
-    }
     
     // get the augmentation tools
     if( m_augmentationTools.retrieve().isFailure() ) {
