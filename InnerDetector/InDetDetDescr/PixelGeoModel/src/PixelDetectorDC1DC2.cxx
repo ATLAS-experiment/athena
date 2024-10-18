@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file is basically a concatenation of all the *.cxx files.
@@ -1580,14 +1580,13 @@ OraclePixGeoManager::OraclePixGeoManager()
 
   ATH_MSG_DEBUG("Using ORACLE PIXEL GEOMETRY MANAGER");
 
-  // Get the DetStore 
-  StatusCode sc = svcLocator->service("DetectorStore", m_pDetStore );
-  if (sc.isFailure()) ATH_MSG_FATAL("Could not locate DetectorStore");
-
+  // Get the DetStore
+  SmartIF<StoreGateSvc> detStore{svcLocator->service("DetectorStore")};
+  if (!detStore.isValid()) ATH_MSG_FATAL("Could not locate DetectorStore");
+  m_pDetStore = detStore.get();
  
-  IRDBAccessSvc *rdbSvc;
-  sc = svcLocator->service("RDBAccessSvc",rdbSvc);
-  if (sc.isFailure()) ATH_MSG_FATAL("Could not locate RDBAccessSvc");
+  SmartIF<IRDBAccessSvc> rdbSvc{svcLocator->service("RDBAccessSvc")};
+  if (!rdbSvc.isValid()) ATH_MSG_FATAL("Could not locate RDBAccessSvc");
 
 
   // Get version tag and node for Pixel.
