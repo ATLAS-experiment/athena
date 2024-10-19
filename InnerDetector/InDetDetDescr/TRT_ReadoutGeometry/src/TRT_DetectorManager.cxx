@@ -20,10 +20,6 @@
 #include "DetDescrConditions/AlignableTransformContainer.h"
 
 #include "StoreGate/StoreGateSvc.h"
-
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "TRT_ConditionsData/StrawDxContainer.h"
 
 namespace InDetDD {
@@ -39,13 +35,7 @@ namespace InDetDD {
         m_digvers(9999),
         m_digversname("ERROR:DIGVERSNOTSET!")
     {
-      m_elementContainer.setNumerology(m_numerology);
-
-    // If detstore no passed then get it from bootstrap.
-        if (m_detStore == nullptr) {
-            StatusCode sc = Gaudi::svcLocator()->service("DetectorStore", m_detStore);
-            if (sc.isFailure()) msg(MSG::ERROR) << "Could not locate DetectorStore" << endmsg;
-        }
+        m_elementContainer.setNumerology(m_numerology);
 
         m_barrelXF[0]=m_barrelXF[1]=m_barrelXF[2]=nullptr;
         m_endcapXF[0]=m_endcapXF[1]=m_endcapXF[2]=nullptr;

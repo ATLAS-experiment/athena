@@ -70,7 +70,7 @@ namespace InDetDD {
   public:
 
     // Constructor
-    TRT_DetectorManager(StoreGateSvc * detStore = 0);
+    TRT_DetectorManager(StoreGateSvc * detStore);
 
     // Destructor
     ~TRT_DetectorManager();
