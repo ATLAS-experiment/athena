@@ -9,7 +9,6 @@
 
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/PixelID.h"
-#include "StoreGate/StoreGateSvc.h"
 
 #include <string>
 #include <vector>
@@ -47,7 +46,6 @@ class PixelClusterErrorData
      // map to store all ITk Analogue Clustering constants and errors
      std::map< const Identifier, std::vector<double> > m_constmap;
 
-     StoreGateSvc* m_detStore{nullptr};
      const PixelID* m_pixelID{nullptr};
 
 };

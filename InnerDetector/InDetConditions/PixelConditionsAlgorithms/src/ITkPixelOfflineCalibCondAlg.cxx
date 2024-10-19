@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkPixelOfflineCalibCondAlg.h"
@@ -22,8 +22,7 @@ PixelOfflineCalibCondAlg::PixelOfflineCalibCondAlg(const std::string& name, ISvc
 StatusCode PixelOfflineCalibCondAlg::initialize() {
   ATH_MSG_DEBUG("ITkPixelOfflineCalibCondAlg::initialize()");
 
-  ATH_CHECK(service("DetectorStore", m_detStore));
-  ATH_CHECK(m_detStore->retrieve(m_pixelid, "PixelID")) ;
+  ATH_CHECK(detStore()->retrieve(m_pixelid, "PixelID")) ;
 
   if (m_inputSource==2 && m_readKey.key().empty()) {
     ATH_MSG_ERROR("The database is set to be input source (2) but the ReadKey is empty.");
