@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -87,11 +87,6 @@ InDet::TRT_TrackExtensionTool_xk::~TRT_TrackExtensionTool_xk()
 StatusCode InDet::TRT_TrackExtensionTool_xk::initialize()
 {
 
-  // Get tTools service
-  //
-  IToolSvc* toolSvc;
-  ATH_CHECK(service("ToolSvc", toolSvc));
-  
   // Get magnetic field service
   //
   if(m_fieldmode != "NoField" ) {

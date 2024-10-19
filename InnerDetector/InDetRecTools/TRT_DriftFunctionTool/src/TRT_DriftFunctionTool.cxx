@@ -106,12 +106,8 @@ StatusCode TRT_DriftFunctionTool::initialize()
 
   //
   // Get GeoModel version key
-  IGeoModelSvc *geomodel;
-  sc=service("GeoModelSvc",geomodel);
-  if(sc.isFailure()){
-    ATH_MSG_FATAL(" Could not locate GeoModelSvc ");
-    return sc;
-  }
+  SmartIF<IGeoModelSvc> geomodel{service("GeoModelSvc")};
+  ATH_CHECK( geomodel.isValid() );
 
   DecodeVersionKey versionKey(geomodel,"TRT");
   m_key=versionKey.tag();

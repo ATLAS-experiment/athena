@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -66,14 +66,6 @@ InDet::TRT_TrackSegmentsMaker_ATLxk::~TRT_TrackSegmentsMaker_ATLxk()
 StatusCode InDet::TRT_TrackSegmentsMaker_ATLxk::initialize()
 {
   StatusCode sc = AlgTool::initialize(); 
-
-  // Get tTools servise
-  //
-  IToolSvc* toolSvc;
-  if((sc=service("ToolSvc", toolSvc)).isFailure()){
-    ATH_MSG_FATAL("Tool service not found !");
-    return sc;
-  }
 
   // Initiate magnetic field properties
   //

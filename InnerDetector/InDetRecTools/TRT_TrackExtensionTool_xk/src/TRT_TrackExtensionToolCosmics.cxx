@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,14 +57,6 @@ InDet::TRT_TrackExtensionToolCosmics::~TRT_TrackExtensionToolCosmics()
 StatusCode InDet::TRT_TrackExtensionToolCosmics::initialize()
 {
   StatusCode sc = AlgTool::initialize(); 
-
-  // Get tTools servise
-  //
-  IToolSvc* toolSvc;
-  if ((sc=service("ToolSvc", toolSvc)).isFailure())  {
-    ATH_MSG_FATAL("Tool service not found !");
-    return StatusCode::FAILURE;
-  }
 
   // Get RIO_OnTrack creator without drift time information
   //
