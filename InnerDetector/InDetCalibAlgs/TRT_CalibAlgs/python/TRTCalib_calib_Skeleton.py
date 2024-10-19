@@ -50,12 +50,17 @@ def fromRunArgs(runArgs):
     listOfStrawFiles = glob.glob("*.merged.straw.txt")
     listOfTrackFiles = glob.glob("*.tracktuple.root")
     
-    if not listOfStrawFiles or not listOfTrackFiles:
+    if not listOfStrawFiles or (not listOfTrackFiles and runArgs.piecetoken != "all"):
         print("ERROR: Empty array of \"*.merged.straw.txt\" (size %d) or \"*.tracktuple.root\" (size %d) files" % (len(listOfStrawFiles), len(listOfTrackFiles)))
         exit(1)
     
     command  = "mv -v %s %s.merged.straw.txt; " % (listOfStrawFiles[0],outputFile)
-    command += "mv -v %s %s.tracktuple.root; " % (listOfTrackFiles[0],outputFile)
+
+    if(runArgs.piecetoken == "all"):
+        print("INFO: piecetoken equal to \"all\". Saving *tracktuple.root file")
+        command += "mv -v %s %s.tracktuple.root; " % (listOfTrackFiles[0],outputFile)
+    else:
+        print("INFO: piecetoken different than \"all\". Not need to rename *tracktuple.root file")
     
     tryError(command, "Renaming *straw.txt and *tracktuple.root files\n")
     

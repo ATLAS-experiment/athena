@@ -5,5 +5,6 @@ from .SimulationHelpers import enableCalHits as CalHits
 from .SimulationHelpers import enableParticleID as ParticleID
 from .SimulationHelpers import enableFastCaloSim as FastCaloSim
 from .SimulationHelpers import useVerboseTracking, useSimpleRungeStepper, useClassicalRK4Stepper, useNystromRK4Stepper
+from .SimulationHelpers import enableFastIDKiller as enableFastIDKiller
 
-__all__ = ['G4SignalCavern', 'CalHits', 'ParticleID', 'FastCaloSim', 'useVerboseTracking', 'useSimpleRungeStepper', 'useClassicalRK4Stepper', 'useNystromRK4Stepper']
+__all__ = ['G4SignalCavern', 'CalHits', 'ParticleID', 'FastCaloSim', 'useVerboseTracking', 'useSimpleRungeStepper', 'useClassicalRK4Stepper', 'useNystromRK4Stepper', 'enableFastIDKiller']

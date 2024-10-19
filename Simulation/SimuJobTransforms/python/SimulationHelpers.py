@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, LArParameterization, SimulationFlavour
 
 
@@ -108,3 +108,8 @@ def useClassicalRK4Stepper(flags):
 
 def useNystromRK4Stepper(flags):
     flags.Sim.G4Stepper = 'NystromRK4'
+
+
+def enableFastIDKiller(flags):
+    """ """
+    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerToolCfg']
