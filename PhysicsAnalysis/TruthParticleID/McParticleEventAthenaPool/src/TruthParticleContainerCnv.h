@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleContainerCnv.h 
@@ -19,6 +19,7 @@
 
 // McParticleEvent includes
 #include "McParticleEvent/TruthParticleContainer.h"
+#include "McParticleKernel/ITruthParticleCnvTool.h"
 
 // McParticleEventTPCnv includes
 #include "McParticleEventTPCnv/TruthParticleContainer_p6.h"
@@ -65,14 +66,10 @@ protected:
   /////////////////////////////////////////////////////////////////// 
  protected:
 
-  /** Pointer to the StoreGateSvc
-   */
-  StoreGateSvc* m_storeGate;
-
-  /** Pointer to the McEventCollection -> TruthParticleContainer converter
+  /** Handle to the McEventCollection -> TruthParticleContainer converter
    *  tool.
    */
-  ITruthParticleCnvTool* m_cnvTool;
+  ToolHandle<ITruthParticleCnvTool> m_cnvTool{"TruthParticleCnvTool", this};
 
 };
 

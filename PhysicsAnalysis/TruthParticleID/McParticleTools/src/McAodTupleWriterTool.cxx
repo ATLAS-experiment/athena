@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -178,15 +178,14 @@ StatusCode McAodTupleWriterTool::write( const TruthParticleContainer* mc )
 
 void McAodTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outputFileName*/ )
 {
-  const bool createIf = false;
-  IProperty * tSvc = nullptr;
-  if ( !service( m_tupleSvc.name(), tSvc, createIf ).isSuccess() ) {
+  if ( m_tupleSvc.retrieve().isFailure() ) {
     ATH_MSG_ERROR("Could not retrieve THistSvc handle !!");
     throw GaudiException( "Could not retrieve THistSvc", 
 			  name(), 
 			  StatusCode::FAILURE );
   }
 
+  SmartIF<IProperty> tSvc(m_tupleSvc.get());
   const std::string streamName = m_outputStreamName.value();
 
   const std::string propName = "Output";

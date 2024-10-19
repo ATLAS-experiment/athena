@@ -533,12 +533,8 @@ int main()
   assert(pSvcLoc);
 
   // Load an instance of StoreGateSvc because we'll need it to store objects
-  IService * pStoreGate = 0;
-  static const bool CREATE(true);
-  bool sc = ( pSvcLoc->service( "StoreGateSvc", 
-				 pStoreGate, CREATE) ).isSuccess();
-  assert( sc );
-  assert( 0 != pStoreGate );
+  SmartIF<StoreGateSvc> storeGate{pSvcLoc->service("StoreGateSvc")};
+  assert( storeGate.isValid() );
 
   std::cout << " *** TruthParticle test in progress: " << std::endl;
   

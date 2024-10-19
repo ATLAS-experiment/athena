@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleContainerCnv.cxx 
@@ -20,6 +20,7 @@
 // McParticleKernel includes
 #include "McParticleKernel/ITruthParticleCnvTool.h"
 
+
 // McParticleEventTPCnv includes
 #include "McParticleEventTPCnv/TruthParticleContainerCnv_p5.h"
 #include "McParticleEventTPCnv/TruthParticleContainerCnv_p6.h"
@@ -29,32 +30,10 @@
 
 TruthParticleContainerCnv::TruthParticleContainerCnv(ISvcLocator* svcLocator) :
   T_AthenaPoolCustomCnv<TruthParticleContainer, 
-                        TruthParticleContainer_PERS>(svcLocator),
-  m_storeGate( 0 ),
-  m_cnvTool  ( 0 )
+                        TruthParticleContainer_PERS>(svcLocator)
 {
-  if ( 0 == svcLocator ) {
-    throw std::runtime_error("NULL pointer to ISvcLocator !!");
-  }
-
-  IToolSvc* toolSvc = 0; 
-  if ( svcLocator->service("ToolSvc",toolSvc).isFailure() || 0 == toolSvc ) {
-    throw std::runtime_error("Could not fetch ToolSvc !!");
-  } 
-
-  IAlgTool * algTool = 0;
-  if ( toolSvc->retrieveTool( "TruthParticleCnvTool", algTool ).isFailure() ) {
+  if ( m_cnvTool.retrieve().isFailure() ) {
     throw std::runtime_error("Could not fetch TruthParticleCnvTool !!");
-  } else {
-    m_cnvTool = dynamic_cast<ITruthParticleCnvTool*>(algTool);
-    if ( 0 == m_cnvTool ) {
-      throw std::runtime_error("Could not dyn-cast to ITruthParticleCnvTool !!");
-    }
-  }
-
-  if ( svcLocator->service("StoreGateSvc",m_storeGate).isFailure() || 
-       0 == m_storeGate ) {
-    throw std::runtime_error("Could not fetch StoreGateSvc !!");
   }
 }
 
@@ -64,7 +43,7 @@ TruthParticleContainerCnv::createPersistent(TruthParticleContainer* trans)
 {
   MsgStream log( msgSvc(), "TruthParticleContainerCnv" );
 
-  TruthParticleContainerCnv_p6 cnv( m_cnvTool );
+  TruthParticleContainerCnv_p6 cnv( m_cnvTool.get() );
   TruthParticleContainer_PERS *pers = cnv.createPersistent(trans, log);
 
   log << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
@@ -83,13 +62,13 @@ TruthParticleContainer* TruthParticleContainerCnv::createTransient()
    if ( compareClassGuid(p6_guid) ) {
      
      std::unique_ptr<TruthParticleContainer_p6> pers( poolReadObject<TruthParticleContainer_p6>() );
-     TruthParticleContainerCnv_p6 cnv( m_cnvTool );
+     TruthParticleContainerCnv_p6 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
 
    } else if ( compareClassGuid(p5_guid) ) {
      
      std::unique_ptr<TruthParticleContainer_p5> pers( poolReadObject<TruthParticleContainer_p5>() );
-     TruthParticleContainerCnv_p5 cnv( m_cnvTool );
+     TruthParticleContainerCnv_p5 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
      
    } else {
