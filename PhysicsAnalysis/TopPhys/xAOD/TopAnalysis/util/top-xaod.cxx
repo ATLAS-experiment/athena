@@ -129,6 +129,9 @@ int main(int argc, char** argv) {
   settings->loadFromFile(settingsFilename);
   ATH_MSG_INFO("Configuration:\n" << *settings << "\n");
 
+  // on run if the AcknowledgeDeprication setting has been set!
+  settings->checkDeprecationSetting();
+
   // only after printing full configuration check if there are issues and inform user and crash if necessary
   settings->checkSettings();
 

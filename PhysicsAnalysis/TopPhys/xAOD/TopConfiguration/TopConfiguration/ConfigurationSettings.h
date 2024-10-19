@@ -64,6 +64,11 @@ namespace top {
     void loadFromFile(const std::string& filename);
 
     /**
+     * @brief AnalysisTop is now deprecated, inform user and instruct how to avoid crash to continue
+     */
+    void checkDeprecationSetting();
+
+    /**
      * @brief Validate that configured options make sense. This involves checking  if unsupported options are not specified.
      */
     void checkSettings();

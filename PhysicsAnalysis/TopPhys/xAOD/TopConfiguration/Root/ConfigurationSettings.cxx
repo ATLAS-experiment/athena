@@ -800,6 +800,7 @@ namespace top {
     registerParameter("RedefineMCMCMap",
                       "Dictionary for translating the shower names from TopDataPreparation. Format: \"shower1:shower2,shower3:shower4\".",
                       " ");
+    registerParameter("DeprecationAcknowledged", "EXPERT OPTION! Acknowledge deprecation of AnalysisTop and continue using code", "False");
   }
 
   ConfigurationSettings* ConfigurationSettings::get() {
@@ -1027,6 +1028,22 @@ namespace top {
 
     input.close();
     m_configured = true;
+  }
+
+  void ConfigurationSettings::checkDeprecationSetting() {
+
+    bool deprecationAcknowledged = false;
+
+    if(strings_.find("DeprecationAcknowledged") != strings_.end()){
+      retrieve("DeprecationAcknowledged", deprecationAcknowledged);
+    }
+
+    if( !deprecationAcknowledged ){
+      ATH_MSG_ERROR("\n\nAnalysisTop is now DEPRECATED in ALL RELEASES as of September 2024!!!!\n"
+                    << "Support is limited to major bug fixes for a short time depending on their impact. Technical support, minor bug fixes and updates to CP recommendations are no longer offered.\n"
+                    << "Up to date documentation can be found at top-reco.docs.cern.ch and please consider switching to the new framework in R25 TopCPToolkit: topcptoolkit.docs.cern.ch\n");
+      throw std::runtime_error("If you understand the risks associated running unsupported and wish to continue using the code set DeprecationAcknowledged to true in the config file.\n\n");
+    }
   }
 
   void ConfigurationSettings::checkSettings() {
