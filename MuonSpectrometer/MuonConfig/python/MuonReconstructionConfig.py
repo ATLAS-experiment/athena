@@ -225,14 +225,20 @@ def MuonReconstructionCfg(flags):
         result.merge(StandaloneMuonOutputCfg(flags))
     return result
 
+# Run with python -m MuonConfig.MuonReconstructionConfig
+def MuonReconstructionConfigTest(flags=None):
 
-if __name__ == "__main__":
-    # To run this, do e.g.
-    # python -m MuonConfig.MuonReconstructionConfig --threads=1
-    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneCA
+    if flags is None:
+        from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags
+        args, flags = SetupMuonStandaloneConfigFlags()
+    else:
+        args = flags.args()
+        if args is None:
+            raise RuntimeError("MuonReconstructionConfigTest requires flags.fillFromArgs() to be run before flags.lock()")
 
-    args, flags = SetupMuonStandaloneConfigFlags()
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
     cfg = SetupMuonStandaloneCA(args, flags)
+
     # Run the actual test.
     acc = MuonReconstructionCfg(flags)
     cfg.merge(acc)
@@ -252,10 +258,15 @@ if __name__ == "__main__":
     f = open("MuonReconstruction.pkl", "wb")
     cfg.store(f)
     f.close()
-    if not args.config_only:
-        sc = cfg.run(20)
+
+    if args.config_only:
+        cfg.wasMerged()
+    else:
+        sc = cfg.run()
         if not sc.isSuccess():
             import sys
             sys.exit("Execution failed")
-    else:
-        cfg.wasMerged()
+
+if __name__ == "__main__":
+    MuonReconstructionConfigTest()
+
