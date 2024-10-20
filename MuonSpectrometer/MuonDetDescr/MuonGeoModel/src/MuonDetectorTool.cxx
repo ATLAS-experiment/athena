@@ -117,8 +117,8 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
                     << " Show properties (user sett.s or default): IncludeCtbBis              " << m_includeCtbBis);
 
     // Get the detector configuration.
-    IGeoModelSvc *geoModel;
-    ATH_CHECK(service("GeoModelSvc", geoModel));
+    SmartIF<IGeoModelSvc> geoModel{Gaudi::svcLocator()->service("GeoModelSvc")};
+    ATH_CHECK(geoModel.isValid());
 
     std::string AtlasVersion = geoModel->atlasVersion();
     std::string MuonVersion = geoModel->muonVersionOverride();
@@ -245,10 +245,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
     }
 
     if (nullptr == m_detector) {
-        IRDBAccessSvc *access = nullptr;
-        ATH_CHECK(service("RDBAccessSvc", access));
-
-    
 
         theFactory.setDBAtlasVersion(AtlasVersion);
         theFactory.setDBMuonVersion(MuonVersion);
@@ -267,7 +263,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
         if (m_stationSelection > 0)
             theFactory.setSelection(m_selectedStations, m_selectedStEta, m_selectedStPhi);
 
-        theFactory.setRDBAccess(access);
+        theFactory.setRDBAccess(accessSvc.get());
         // theFactory.setUseRDB(1);
         theFactory.setAltAsciiDBMap(altAsciiDBMap);
         try {

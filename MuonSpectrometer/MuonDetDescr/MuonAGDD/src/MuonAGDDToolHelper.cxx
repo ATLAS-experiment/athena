@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAGDDToolHelper.h"
@@ -43,34 +43,27 @@
 
 using namespace MuonGM;
 
-MuonAGDDToolHelper::MuonAGDDToolHelper() :
-    p_RDBAccessSvc(nullptr),
-    p_GeoModelSvc(nullptr),
-    m_svcName("AGDDtoGeoSvc") {
-	StatusCode result;
+MuonAGDDToolHelper::MuonAGDDToolHelper()
+{
+  SmartIF<IGeoModelSvc> geomodel{Gaudi::svcLocator()->service("GeoModelSvc")};
+  if(!geomodel.isValid()) throw std::runtime_error("MuonAGDDToolHelper failed to access GeoModelSvc");
+  SmartIF<IRDBAccessSvc> rdbaccess{Gaudi::svcLocator()->service("RDBAccessSvc")};
+  if(!rdbaccess.isValid()) throw std::runtime_error("MuonAGDDToolHelper failed to access RDBAccessSvc");
 
-	result=Gaudi::svcLocator()->service("GeoModelSvc",p_GeoModelSvc);
-  	if (result.isFailure())
-    {
-	std::cout<<"MuonAGDDToolHelper\tunable to access GeoModelSvc "<<std::endl;
-    }
-    result=Gaudi::svcLocator()->service("RDBAccessSvc",p_RDBAccessSvc);
-    if (result.isFailure())
-    {
-	std::cout<<"MuonAGDDToolHelper\tunable to access RBDAccessSvc "<<std::endl;
-    }
+  m_geoModelSvc = geomodel.get();
+  m_rdbAccessSvc = rdbaccess.get();
 }
 
 std::vector<std::string> MuonAGDDToolHelper::ReadAGDDFlags()
 {
    std::vector<std::string> structuresFromFlags;
-   std::string agdd2geoVersion = p_RDBAccessSvc->getChildTag("AGDD2GeoSwitches",p_GeoModelSvc->muonVersion(),"MuonSpectrometer");
+   std::string agdd2geoVersion = m_rdbAccessSvc->getChildTag("AGDD2GeoSwitches",m_geoModelSvc->muonVersion(),"MuonSpectrometer");
 
    if(!agdd2geoVersion.empty())
    {
      std::string TheKEYNAME;
      int TheKEYVALUE;
-     IRDBRecordset_ptr pIRDBRecordset = p_RDBAccessSvc->getRecordsetPtr("AGDD2GeoSwitches",p_GeoModelSvc->muonVersion(),"MuonSpectrometer");
+     IRDBRecordset_ptr pIRDBRecordset = m_rdbAccessSvc->getRecordsetPtr("AGDD2GeoSwitches",m_geoModelSvc->muonVersion(),"MuonSpectrometer");
      for(unsigned int i=0; i<pIRDBRecordset->size(); i++)
      {
        const IRDBRecord* record = (*pIRDBRecordset)[i];
@@ -92,15 +85,8 @@ std::vector<std::string> MuonAGDDToolHelper::ReadAGDDFlags()
 
 std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& tableName, const std::string& outFileName)
 {
-
-   const IGeoModelSvc * geoModel=p_GeoModelSvc;
-   if(!geoModel) return "";
-
-   IRDBAccessSvc * accessSvc=p_RDBAccessSvc;
-   if(!accessSvc) return "";
-
-   std::string AtlasVersion = geoModel->atlasVersion();
-   std::string MuonVersion  = geoModel->muonVersionOverride();
+   std::string AtlasVersion = m_geoModelSvc->atlasVersion();
+   std::string MuonVersion  = m_geoModelSvc->muonVersionOverride();
 
    std::string detectorKey  = MuonVersion.empty() ? AtlasVersion : MuonVersion;
    std::string detectorNode = MuonVersion.empty() ? "ATLAS" : "MuonSpectrometer";
@@ -109,8 +95,7 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
      detectorNode = "ATLAS"  ;
    }
 
-
-   IRDBRecordset_ptr recordsetAGDD = accessSvc->getRecordsetPtr(tableName.c_str(),detectorKey,detectorNode);
+   IRDBRecordset_ptr recordsetAGDD = m_rdbAccessSvc->getRecordsetPtr(tableName.c_str(),detectorKey,detectorNode);
    if(!recordsetAGDD) return "";
 
    const IRDBRecord *recordAGDD =  (*recordsetAGDD)[0];
@@ -122,21 +107,18 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
    std::ofstream  GeneratedFile;
    if (dumpIt)
    {
-	 	std::ofstream GeneratedFile;
-	 	GeneratedFile.open(outFileName);
-		GeneratedFile<<AgddString;
-		GeneratedFile.close();
+     std::ofstream GeneratedFile;
+     GeneratedFile.open(outFileName);
+     GeneratedFile<<AgddString;
+     GeneratedFile.close();
    }
-
    return AgddString;
-
 }
 
 bool MuonAGDDToolHelper::BuildMScomponents()
 {
-  StoreGateSvc* pDetStore=nullptr;
-  ISvcLocator* svcLocator = Gaudi::svcLocator();
-  if (svcLocator->service("DetectorStore",pDetStore).isFailure()) return false;
+  SmartIF<StoreGateSvc> pDetStore{Gaudi::svcLocator()->service("DetectorStore")};
+  if (!pDetStore.isValid()) return false;
   MuonGM::MuonDetectorManager* muonMgr=nullptr;
   if (pDetStore->retrieve(muonMgr).isFailure()) return false;
   bool readoutGeoDone =  BuildNSWReadoutGeometry::BuildReadoutGeometry(muonMgr, nullptr/*, GetMSdetectors*/);
@@ -145,8 +127,8 @@ bool MuonAGDDToolHelper::BuildMScomponents()
 
 void MuonAGDDToolHelper::SetNSWComponents()
 {
-  IAGDDtoGeoSvc* agddsvc = nullptr;
-  if (Gaudi::svcLocator()->service(m_svcName,agddsvc).isFailure()) {
+  SmartIF<IAGDDtoGeoSvc> agddsvc{Gaudi::svcLocator()->service(m_svcName)};
+  if(!agddsvc.isValid()) {
     throw std::runtime_error("MuonAGDDToolHelper::SetNSWComponents() - Could not retrieve "
                              + m_svcName + " from ServiceLocator");
   }
