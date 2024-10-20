@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArNoisyROSummaryCnv.h"
 
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "LArTPCnv/LArNoisyROSummaryCnv_p1.h"
 #include "LArTPCnv/LArNoisyROSummaryCnv_p2.h"
@@ -14,22 +13,20 @@
 
 
 LArNoisyROSummaryCnv::LArNoisyROSummaryCnv(ISvcLocator* svcLoc) : 
-  LArNoisyROSummaryCnvBase(svcLoc)
+  LArNoisyROSummaryCnvBase(svcLoc, "LArNoisyROSummaryConverter")
 {}
 
 
 LArNoisyROSummary_PERSISTENT*
 LArNoisyROSummaryCnv::createPersistent(LArNoisyROSummary* transCont)
 {
-  MsgStream log(msgSvc(), "LArNoisyROSummaryConverter" );
-  LArNoisyROSummary_p5      *persObj = m_converter.createPersistent( transCont, log );
+  LArNoisyROSummary_p5      *persObj = m_converter.createPersistent( transCont, msg() );
   return persObj; 
 }
 
 LArNoisyROSummary*
 LArNoisyROSummaryCnv::createTransient()
 {
-  MsgStream log(msgSvc(), "LArNoisyROSummaryConverter" );
   LArNoisyROSummary         *trans = NULL;
   
   // GUID for persistent classes
@@ -41,30 +38,29 @@ LArNoisyROSummaryCnv::createTransient()
 
   if( compareClassGuid(guid_p5) ) {
      std::unique_ptr<LArNoisyROSummary_p5> col_vect( poolReadObject<LArNoisyROSummary_p5>() );
-     trans = m_converter.createTransient( col_vect.get(), log );
+     trans = m_converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p4) ) {
      LArNoisyROSummaryCnv_p4   converter;
      std::unique_ptr<LArNoisyROSummary_p4> col_vect( poolReadObject<LArNoisyROSummary_p4>() );
-     trans = converter.createTransient( col_vect.get(), log );
+     trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p3) ) {
       LArNoisyROSummaryCnv_p3   converter;
       std::unique_ptr<LArNoisyROSummary_p3> col_vect( poolReadObject<LArNoisyROSummary_p3>() );
-      trans = converter.createTransient( col_vect.get(), log );
+      trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p2) ) {
       LArNoisyROSummaryCnv_p2   converter;
       std::unique_ptr<LArNoisyROSummary_p2> col_vect( poolReadObject<LArNoisyROSummary_p2>() );
-      trans = converter.createTransient( col_vect.get(), log );
+      trans = converter.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(guid_p1) ) {
       LArNoisyROSummaryCnv_p1   converter;
       std::unique_ptr<LArNoisyROSummary_p1> col_vect( poolReadObject<LArNoisyROSummary_p1>() );
-      trans = converter.createTransient( col_vect.get(), log );
+      trans = converter.createTransient( col_vect.get(), msg() );
   }
   else {
-    //      log << MSG::ERROR << "failed trying to read : " << m_token << endmsg;
       throw std::runtime_error("Unsupported persistent version of LArNoisyROSummary ") ;
     }
   return trans;

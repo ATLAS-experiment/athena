@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// Framework includes
-#include "GaudiKernel/MsgStream.h"
 
 // LArTPCnv includes
 #include "LArTPCnv/LArTTL1ContainerCnv_p1.h"
@@ -14,19 +11,13 @@
 LArTTL1Container_PERS* 
 LArTTL1ContainerCnv::createPersistent( LArTTL1Container* transCont ) 
 {
-  MsgStream msg( msgSvc(), "LArTTL1ContainerCnv" );
-
   LArTTL1ContainerCnv_p1 cnv;
-  LArTTL1Container_PERS *persObj = cnv.createPersistent( transCont, msg );
+  LArTTL1Container_PERS *persObj = cnv.createPersistent( transCont, msg() );
 
-  if (msg.level()<=MSG::DEBUG)
-    msg << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
   return persObj;
 }
 
 LArTTL1Container* LArTTL1ContainerCnv::createTransient() {
-
-  MsgStream msg( msgSvc(), "LArTTL1ContainerCnv" );
 
   LArTTL1Container *transObj = 0;
 
@@ -43,7 +34,7 @@ LArTTL1Container* LArTTL1ContainerCnv::createTransient() {
     // using unique_ptr ensures deletion of the persistent object
     std::unique_ptr<LArTTL1Container_p1> persObj( poolReadObject<LArTTL1Container_p1>() );
     LArTTL1ContainerCnv_p1 cnv;
-    transObj = cnv.createTransient( persObj.get(), msg );
+    transObj = cnv.createTransient( persObj.get(), msg() );
   } else {
     throw std::runtime_error("Unsupported persistent version of LArTTL1Container");
   }
