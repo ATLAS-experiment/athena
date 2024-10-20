@@ -59,7 +59,7 @@ class IdDictDetDescrCnv : public DetDescrConverter {
     ServiceHandle<IRDBAccessSvc> m_rdbAccessSvc{"RDBAccessSvc/RDBAccessSvc", "IdDictDetDescrCnv"};
 
     /// Propxy to the DetDescrCnvSvc
-    const IProperty *m_detDescrProxy{nullptr};
+    SmartIF<IProperty> m_detDescrProxy;
 
     /// Loads the property from the DetDecrCnvSvc and pipes its value
     /// Returns failure if either the service, the property don't exist or
