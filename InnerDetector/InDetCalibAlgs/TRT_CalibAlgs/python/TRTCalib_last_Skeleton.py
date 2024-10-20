@@ -25,7 +25,7 @@ def tryError(command, error):
 def send_statusmail(itera, runNumber, mto, outdir, a, b, c, d, e, f, g, h) :
     mserver = 'cernmx.cern.ch'
     mfrom   = 'no-reply@cern.ch'
-    msubject = "TRT CALIB TESTING TIER0 - Exit Status for Run %d" % (runNumber)
+    msubject = "TRT CALIB TIER0 - Exit Status for Run %d" % (runNumber)
 
     # assemble mail body
     mbody  = " Calibration job finished for run %d, iteration: %s \n\n" % (runNumber, itera)
@@ -246,7 +246,7 @@ def fromRunArgs(runArgs):
     nextstep("Copying files to AFS Directory")
     ################################################################################################## 
     
-    outDIR = "%s/run_%d_test" % (runArgs.attrtcal_dir, runNumber)
+    outDIR = "%s/run_%d" % (runArgs.attrtcal_dir, runNumber)
     
     # Extracting iteration from Tier0 and for emails
     outputFile_split = outputFile.split('.')

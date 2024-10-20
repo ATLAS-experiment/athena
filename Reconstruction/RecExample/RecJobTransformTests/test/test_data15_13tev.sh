@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: Reco_tf runs on 2015 13 TeV collision data with all streams
+# art-description: Reco_tf runs on 2015 13 TeV collision data with all streams. Report issues to https://its.cern.ch/jira/projects/ATLASRECTS/
 # art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
@@ -11,7 +11,13 @@
 #Also note that it is believed the bunch structure value no longer needs to be changed to avoid crashes and so is not included.
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py  --CA --multithreaded --inputBSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data15_13TeV.00283429.physics_Main.daq.RAW._lb0154._SFO-1._0001.data --maxEvents 300 --autoConfiguration everything --conditionsTag="CONDBR2-BLKPA-RUN2-11" --geometryVersion="ATLAS-R2-2016-01-00-01" --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root
+INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RAW_RUN2_DATA15[0])")
+CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
+
+Reco_tf.py  --CA --multithreaded --maxEvents 300 --autoConfiguration everything \
+--inputBSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
+--outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root
 
 RES=$?
 echo "art-result: $RES Reco"
