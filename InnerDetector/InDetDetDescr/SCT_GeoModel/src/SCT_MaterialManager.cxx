@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_GeoModel/SCT_MaterialManager.h"
@@ -7,9 +7,6 @@
 #include "GeoModelKernel/GeoElement.h"
 #include "SCT_GeoModel/SCT_DataBase.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <iostream>
@@ -17,15 +14,7 @@
 // Constructor 
 SCT_MaterialManager::SCT_MaterialManager(SCT_DataBase* db)
 {
-  // Get my material manager.
-  ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
-  StoreGateSvc* detStore;
-  StatusCode sc = svcLocator->service("DetectorStore", detStore );
-  if (sc.isFailure()) {
-    std::cout << "Could not locate DetectorStore" << std::endl;
-    return;
-  }
-  
+  // Make my material manager.
   m_materialManager = std::make_unique<InDetMaterialManager>("SCT_MaterialManager", db->athenaComps());
   m_materialManager->addWeightTable(db->weightTable(), "sct");
   m_materialManager->addScalingTable(db->scalingTable());
