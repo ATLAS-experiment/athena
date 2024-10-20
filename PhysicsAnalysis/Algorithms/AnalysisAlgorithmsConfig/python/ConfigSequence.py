@@ -102,9 +102,9 @@ class ConfigSequence:
                             continue
                         # find dep with largest idx
                         if dep in blocks:
-                            tmpIdx = blocks.index(dep.blockName)
-                            if tmpIdx > depIdx:
-                                depIdx = tmpIdx
+                            lastIdx = max(index for index,value in enumerate(blocks) if value == dep.blockName)
+                            if lastIdx > depIdx:
+                                depIdx = lastIdx
                         elif dep.required:
                             raise ValueError(f"{dep} block is required"
                                 f" for {block} but was not found.")
@@ -118,12 +118,12 @@ class ConfigSequence:
             return True
         MAXTRIES = 1000
         for _ in range(MAXTRIES):
-             if moveBlock(self._blocks):
+            if moveBlock(self._blocks):
                 # sorted
                 break
         else:
             raise Exception("Could not order blocks based on dependencies"
-                f" in {MAXTRIES} moves.")
+                            f" in {MAXTRIES} moves.")
 
 
     def fullConfigure (self, config) :

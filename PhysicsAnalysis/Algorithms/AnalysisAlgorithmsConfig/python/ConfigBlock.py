@@ -115,7 +115,7 @@ class ConfigBlock:
         """Set blockName"""
         self._blockName = name
 
-    def getBlockName(self, name):
+    def getBlockName(self):
         """Get blockName"""
         return self._blockName
 
