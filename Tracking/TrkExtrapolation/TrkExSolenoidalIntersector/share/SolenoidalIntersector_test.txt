@@ -1,1 +1,1 @@
-
+ApplicationMgr.ExtSvc += {"StoreGateSvc/ConditionStore"};

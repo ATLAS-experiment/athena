@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -167,8 +167,8 @@ StatusCode Trk::EnergyLossExtrapolationValidation::initialize()
   m_validationRunTree->Branch("AvgRecordedLayers", &m_avgRecordedLayers, "avgRecLayers/F");
 
 	// now register the Trees
-	ITHistSvc* tHistSvc = nullptr;
-	if (service("THistSvc",tHistSvc).isFailure()){
+    SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+	if (!tHistSvc){
 		ATH_MSG_ERROR( "initialize() Could not find Hist Service -> Switching ValidationMode Off !" );
 		delete m_validationTree; m_validationTree = nullptr;
 		delete m_validationRunTree; m_validationRunTree = nullptr;

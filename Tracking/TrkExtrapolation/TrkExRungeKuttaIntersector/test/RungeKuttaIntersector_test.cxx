@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file TrkExRungeKuttaIntersector/test/RungeKuttaIntersector_test.cxx
@@ -332,9 +332,6 @@ int main()
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
   ISvcLocator* svcloc = nullptr;
   Athena_test::initGaudi ("RungeKuttaIntersector_test.txt", svcloc);
-
-  StoreGateSvc *cs=nullptr;
-  assert (svcloc->service("StoreGateSvc/ConditionStore",cs).isSuccess());
 
   SGTest::TestStore dumstore;
   createAtlasFieldCacheCondObj(dumstore);

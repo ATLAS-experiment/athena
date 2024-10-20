@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file TrkExSolenoidalIntersector/test/SolenoidalIntersector_test.cxx
@@ -358,9 +358,6 @@ int main()
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
   ISvcLocator* svcloc = nullptr;
   Athena_test::initGaudi ("SolenoidalIntersector_test.txt", svcloc);
-
-  StoreGateSvc *cs=nullptr;
-  assert (svcloc->service("StoreGateSvc/ConditionStore",cs).isSuccess());
 
   SGTest::TestStore dumstore;
   createSolenoidParametrizationCondData(dumstore);

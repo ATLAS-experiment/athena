@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -421,8 +421,8 @@ StatusCode Trk::ExtrapolationEngineTest::bookTree() {
   }
 
   // now register the Tree
-  ITHistSvc* tHistSvc = nullptr;
-  if (service("THistSvc", tHistSvc).isFailure()) {
+  SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+  if (!tHistSvc) {
     ATH_MSG_ERROR("initialize() Could not find Hist Service  -> Switching Tree output off !");
     delete m_tree;
     m_tree = nullptr;
