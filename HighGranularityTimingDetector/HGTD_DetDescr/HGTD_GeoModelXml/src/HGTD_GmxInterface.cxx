@@ -114,9 +114,9 @@ void HGTD_GmxInterface::makeLgadModule(const std::string &typeName,
 
     std::shared_ptr<const InDetDD::PixelDiodeMatrix> normalCell = InDetDD::PixelDiodeMatrix::construct(xPitch, yPitch);
     std::shared_ptr<const InDetDD::PixelDiodeMatrix> singleRow  = InDetDD::PixelDiodeMatrix::construct(InDetDD::PixelDiodeMatrix::phiDir, 0,
-                                                                          normalCell, padColumns, 0);
+                                                                          std::move(normalCell), padColumns, 0);
     std::shared_ptr<const InDetDD::PixelDiodeMatrix> fullMatrix = InDetDD::PixelDiodeMatrix::construct(InDetDD::PixelDiodeMatrix::etaDir, 0,
-                                                                          singleRow, padRows, 0);
+                                                                          std::move(singleRow), padRows, 0);
 
 
     InDetDD::DetectorDesign::Axis yDirection = InDetDD::DetectorDesign::yAxis;
@@ -125,7 +125,7 @@ void HGTD_GmxInterface::makeLgadModule(const std::string &typeName,
                                                                         circuitsPerColumn, circuitsPerRow,
                                                                         padColumns, padRows/2,
                                                                         padColumns, padRows/2,
-                                                                        fullMatrix,
+                                                                        std::move(fullMatrix),
                                                                         InDetDD::CarrierType::electrons, 1, yDirection );
 
 

@@ -1200,15 +1200,15 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
 
   std::shared_ptr<const PixelDiodeMatrix> singleChipRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
 							  bigCell, 
-							  normalCell, 
+							  std::move(normalCell),
 							  DiodeColPerCirc-2,
 							  bigCell);
 
   std::shared_ptr<const PixelDiodeMatrix> singleRow = PixelDiodeMatrix::construct(PixelDiodeMatrix::etaDir,
-						      nullptr, singleChipRow, CircPerRow, nullptr);
+						      nullptr, std::move(singleChipRow), CircPerRow, nullptr);
 
   std::shared_ptr<const PixelDiodeMatrix> fullMatrix = PixelDiodeMatrix::construct(PixelDiodeMatrix::phiDir,
-						       nullptr, singleRow, DiodeRowPerCirc, nullptr);
+						       nullptr, std::move(singleRow), DiodeRowPerCirc, nullptr);
 
   std::unique_ptr<PixelModuleDesign> p_barrelDesign2 = std::make_unique<PixelModuleDesign>(thickness,
 							     CircPerCol,
