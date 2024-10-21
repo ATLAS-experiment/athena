@@ -27,9 +27,9 @@ references_map = {
     "q452": "v7",
     "q454": "v17",
     # Derivations
-    "data_PHYS_Run2": "v1",
-    "data_PHYS_Run3": "v1",
-    "mc_PHYS_Run2": "v1",
-    "mc_PHYS_Run3": "v1",
-    "af3_PHYS_Run3": "v1",
+    "data_PHYS_Run2": "v2",
+    "data_PHYS_Run3": "v2",
+    "mc_PHYS_Run2": "v2",
+    "mc_PHYS_Run3": "v2",
+    "af3_PHYS_Run3": "v2",
 }

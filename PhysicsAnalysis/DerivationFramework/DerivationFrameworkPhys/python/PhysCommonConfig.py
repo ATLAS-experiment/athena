@@ -86,7 +86,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # for AOD produced before 24.0.17, the electron removal tau is not available
     if kwargs.get('TauJets_EleRM_in_input', False): 
         acc.merge(AddTauIDDecorationCfg(flags, TauContainerName="TauJets_EleRM"))
-    FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
+    FTagJetColl = ['AntiKt4EMPFlowJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
     acc.merge(FtagJetCollectionsCfg(flags,FTagJetColl))
