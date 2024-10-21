@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHIO_HEPMCREADFROMFILE_H
@@ -15,9 +15,9 @@ class HepMCReadFromFile : public GenBase {
 public:
 
   HepMCReadFromFile(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
 
 private:
 
@@ -25,8 +25,6 @@ private:
   int m_event_number;
   double m_sum_xs;
   
-  StoreGateSvc* m_sgSvc;
-
 #ifdef HEPMC3
   std::shared_ptr<HepMC3::Reader> m_hepmcio;
 #else
