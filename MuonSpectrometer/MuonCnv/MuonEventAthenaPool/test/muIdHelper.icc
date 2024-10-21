@@ -10,8 +10,8 @@
 Muon::MuonIdHelperSvc* muIdHelperSvc (IdDictParser& parser)
 {
   ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StoreGateSvc* sg = nullptr;
-  assert ( svcLoc->service("DetectorStore", sg).isSuccess() );
+  SmartIF<StoreGateSvc> sg{svcLoc->service("DetectorStore")};
+  assert ( sg.isValid() );
 
   parser.register_external_entity("MuonSpectrometer", "IdDictMuonSpectrometer_R.03.xml");
   IdDictMgr& idd = parser.parse("IdDictParser/ATLAS_IDS.xml");
