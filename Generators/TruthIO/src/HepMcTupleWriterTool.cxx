@@ -152,9 +152,8 @@ StatusCode HepMcTupleWriterTool::write( const HepMC::GenEvent* evt )
 
 void HepMcTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outputFileName*/ )
 {
-  const bool createIf = false;
-  IProperty * tSvc = nullptr;
-  if ( !service( m_tupleSvc.name(), tSvc, createIf ).isSuccess() ) {
+  SmartIF<IProperty> tSvc{m_tupleSvc.get()};
+  if ( !tSvc ) {
     ATH_MSG_ERROR("Could not retrieve THistSvc handle !!");
     throw GaudiException( "Could not retrieve THistSvc",   name(),   StatusCode::FAILURE );
   }

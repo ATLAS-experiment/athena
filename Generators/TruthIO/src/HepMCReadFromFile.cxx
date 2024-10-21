@@ -15,8 +15,7 @@
 
 
 HepMCReadFromFile::HepMCReadFromFile(const std::string& name, ISvcLocator* pSvcLocator) :
-  GenBase(name, pSvcLocator),
-  m_sgSvc(0)
+  GenBase(name, pSvcLocator)
 {
   declareProperty("InputFile", m_input_file="events.hepmc");
   m_event_number = 0;
@@ -26,12 +25,6 @@ HepMCReadFromFile::HepMCReadFromFile(const std::string& name, ISvcLocator* pSvcL
 
 StatusCode HepMCReadFromFile::initialize() {
   CHECK(GenBase::initialize());
-  
-  StatusCode sc = service("StoreGateSvc", m_sgSvc);   
-  if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not find StoreGateSvc" << endmsg;
-    return sc;
-  }
   
   // Initialize input file and event number
 #ifdef HEPMC3
@@ -48,13 +41,13 @@ StatusCode HepMCReadFromFile::execute() {
 
   McEventCollection* mcEvtColl = nullptr;
 
-  if ( m_sgSvc->contains<McEventCollection>(m_mcEventKey) && m_sgSvc->retrieve(mcEvtColl, m_mcEventKey).isSuccess() ) {
+  if ( evtStore()->contains<McEventCollection>(m_mcEventKey) && evtStore()->retrieve(mcEvtColl, m_mcEventKey).isSuccess() ) {
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "found an McEventCollecion in store" << endmsg;
   } else {
     // McCollection doesn't exist. Create it (empty)
     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "create new McEventCollecion in store" << endmsg;
     mcEvtColl = new McEventCollection;
-    StatusCode status = m_sgSvc->record( mcEvtColl, m_mcEventKey );
+    StatusCode status = evtStore()->record( mcEvtColl, m_mcEventKey );
     if (status.isFailure()) {
       msg(MSG::ERROR) << "Could not record McEventCollection" << endmsg;
       return status;
