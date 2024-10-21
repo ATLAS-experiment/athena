@@ -39,6 +39,10 @@ StatusCode IdDictDetDescrCnv::initialize() {
     ATH_MSG_INFO("in initialize");
     // Must set indet tag to EMPTY
     m_inDetIDTag = "EMPTY";
+
+    m_detDescrProxy = serviceLocator()->service("DetDescrCnvSvc");
+    ATH_CHECK(m_detDescrProxy.isValid());
+
     return StatusCode::SUCCESS;
 }
 StatusCode IdDictDetDescrCnv::finalize() {
@@ -634,9 +638,7 @@ StatusCode IdDictDetDescrCnv::registerInfoWithDicts() {
 template <class dType>
 StatusCode IdDictDetDescrCnv::loadProperty(const std::string &propertyName,
                                            dType &pipeTo) {
-    if (!m_detDescrProxy)
-        ATH_CHECK(serviceLocator()->service("DetDescrCnvSvc", m_detDescrProxy));
-    // cppcheck-suppress nullPointerRedundantCheck; false positive
+
     if (!m_detDescrProxy->hasProperty(propertyName)) {
         ATH_MSG_FATAL("DetDescrSvc does not have the property "
                       << propertyName);
