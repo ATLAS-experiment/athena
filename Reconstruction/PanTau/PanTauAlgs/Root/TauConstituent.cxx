@@ -183,23 +183,6 @@ bool PanTau::TauConstituent::isNeutralType(int tauConstituentType) {
   return false;
 }
 
-
-bool PanTau::TauConstituent::isCoreType(int tauConstituentType) {
-  PanTau::TauConstituent::Type type = (PanTau::TauConstituent::Type)tauConstituentType;
-  switch(type) {
-  case PanTau::TauConstituent::t_Charged: return true;
-  case PanTau::TauConstituent::t_Neutral: return true;
-  case PanTau::TauConstituent::t_Pi0Neut: return true;
-  case PanTau::TauConstituent::t_OutNeut: return false;
-  case PanTau::TauConstituent::t_OutChrg: return false;
-  case PanTau::TauConstituent::t_NeutLowA: return true;
-  case PanTau::TauConstituent::t_NeutLowB: return true;
-  default: return false;
-  }
-  return false;
-}
-
-
 //the non static getType name, which returns
 std::vector<std::string> PanTau::TauConstituent::getTypeName() const {
   std::vector<std::string> res;
