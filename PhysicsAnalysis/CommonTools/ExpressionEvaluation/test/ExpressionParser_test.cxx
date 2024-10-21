@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -255,8 +255,8 @@ int main(int argc, char **argv)
   ISvcLocator* svcloc = nullptr;
   //  Athena_test::initGaudi ("ExpressionParser_test.txt", svcloc);
   Athena_test::initGaudi ("", svcloc);
-  StoreGateSvc *storegate_svc;
-  assert( svcloc->service("StoreGateSvc", storegate_svc).isSuccess());
+  SmartIF<StoreGateSvc> storegate_svc{svcloc->service("StoreGateSvc")};
+  assert( storegate_svc.isValid() );
   //  SGTest::TestStore dumstore;
   unsigned int run_number=100000;
   EventContext::ContextEvt_t event_id=1;

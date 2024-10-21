@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -80,14 +80,6 @@ m_runSkimmingFirst(false)
 StatusCode DerivationFramework::DerivationKernel::initialize() {
     
     ATH_MSG_INFO("Initializing the derivation framework kernel " << name());
-    
-    // get the tool service
-    IToolSvc* toolSvc;
-    StatusCode sc = service("ToolSvc",toolSvc);
-    if (StatusCode::SUCCESS != sc) {
-        ATH_MSG_FATAL("Unable to retrieve ToolSvc");
-        return StatusCode::FAILURE;
-    }
     
     // get the skimming tools
     if( m_skimmingTools.retrieve().isFailure() ) {

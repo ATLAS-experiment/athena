@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -149,8 +149,6 @@ class TileCellFillerTool:public BlockFillerTool<CaloCell>{
 
         // TOOLHANDLES
         ToolHandle<ITrackTools> m_trackInCalo;
-
-        StoreGateSvc* m_storeGate;
 
         // CELL POSITIONING
         const TileID * m_tileID;

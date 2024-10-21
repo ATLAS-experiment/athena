@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -45,10 +45,7 @@ StatusCode TileTrackFillerTool::initialize(){
     // CHECK WHETHER BLOCKFILLERTOOL HAS BEEN INITIALIZED
     CHECK( D3PD::BlockFillerTool<xAOD::TrackParticle>::initialize());
     
-    // RETRIEVE STOREGATE SERVICE
-    CHECK( service("StoreGateSvc",m_storeGate));
-
-    CHECK(m_trackInCalo.retrieve()); 
+    CHECK(m_trackInCalo.retrieve());
 
     CHECK(m_trackToVertexTool.retrieve()); 
    

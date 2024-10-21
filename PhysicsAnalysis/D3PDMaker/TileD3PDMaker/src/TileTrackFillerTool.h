@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -105,7 +105,6 @@ class TileTrackFillerTool:public D3PD::BlockFillerTool<xAOD::TrackParticle>{
 	std::vector<float>* m_z;
 
         // TOOLHANDLES
-        StoreGateSvc* m_storeGate;
         ToolHandle<ITrackTools>      m_trackInCalo;
         ToolHandle<Reco::ITrackToVertex>   m_trackToVertexTool;
         std::string m_calocellContainerName;         // INPUT CELL CONTAINER
