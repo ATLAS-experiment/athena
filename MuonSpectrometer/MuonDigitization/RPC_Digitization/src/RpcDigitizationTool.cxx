@@ -37,6 +37,7 @@
 
 // Truth
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeoModelHelpers/throwExcept.h"
 // Random Numbers
@@ -1327,9 +1328,8 @@ std::pair<bool,bool> RpcDigitizationTool::detectionEfficiency(const EventContext
     // link to truth particles and calculate the charge and betagamma
     HepMC::ConstGenParticlePtr genparticle = trkParticle.cptr();
     if (genparticle) {
-        const int particlePdgId = genparticle->pdg_id();
         // only apply efficiency correction to fractional-charged particles based on pdgId betagamma
-        if ((static_cast<int>(std::abs(particlePdgId) / 10000000) == 2) && (static_cast<int>(std::abs(particlePdgId) / 100000) == 200)) {
+        if (MC::isGenericMultichargedParticle(genparticle)) {
             const double eff_sf = FCPEfficiency(genparticle);
             // Apply scale factor to the 3 Eff.
             PhiAndEtaEff = PhiAndEtaEff * eff_sf;
