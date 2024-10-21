@@ -250,8 +250,8 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   std::string tune = resolve_alias(tuneIn);
 
   if (tune.empty()) { }
-  else if ("es2022_21.0_Precision" == tune) {
-    add_scale("run2_alt_with_layer2_r21_Precision");
+  else if ("es2022_22.0_Precision" == tune) {
+    add_scale("run2_alt_with_layer2_r22_Precision");
   }
   else if ("es2018_21.0_v0" == tune) {
     add_scale("run2_alt_with_layer2_r21_v1");
@@ -275,8 +275,8 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE2(InputModifier::SUBTRACT), new GetAmountPileupE2(m_pileup_tool));
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
   }
-  //Run 2
-  else if ("run2_alt_with_layer2_r21_Precision"==tune) {
+  //Run 2 release 22
+  else if ("run2_alt_with_layer2_r22_Precision"==tune) {
     add_scale("layer2_alt_el_mu_comb_r21_v0");
     add_scale("ps_mu_r21_v0");
     if(m_doSaccCorrections) add_scale("acc_zee_r22_v0");

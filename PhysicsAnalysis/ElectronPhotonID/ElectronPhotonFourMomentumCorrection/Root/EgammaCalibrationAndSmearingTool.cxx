@@ -169,7 +169,7 @@ std::unique_ptr<egammaLayerRecalibTool> egammaLayerRecalibToolFactory(
       tune = "es2018_21.0_v0";
       break;
     case egEnergyCorr::es2023_R22_Run2_v0:
-      tune = "es2022_21.0_Precision";
+      tune = "es2022_22.0_Precision";
       break;
     default:
       return nullptr;
