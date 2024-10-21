@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -30,9 +30,8 @@ StatusCode TauVertexFinder::initialize() {
   ATH_CHECK( m_trackPartInputContainer.initialize(SG::AllowEmpty) );
 
   if (m_useTJVA) ATH_MSG_INFO("using TJVA to determine tau vertex");
-  if (m_useTJVA_Tiebreak) ATH_MSG_INFO("using tiebreak criteria in TJVA");
  
-  if( m_useTJVA || m_useTJVA_Tiebreak) {
+  if( m_useTJVA) {
      ATH_CHECK( m_TrackSelectionToolForTJVA.retrieve() );
      ATH_CHECK( m_trkVertexAssocTool.retrieve() );
   }
@@ -214,7 +213,6 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   // Store sum(deltaz(track-vertex)) and jet vertex fraction scores
   std::vector<float> sumDz;
   std::vector<float> v_jvf;
-  size_t iVertex = 0;
   size_t maxIndex = 0;
   for (const xAOD::Vertex* vert : vertices) {
     float jvf = 0.0;
@@ -227,28 +225,23 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
     
     if (jvf > maxJVF) {
       maxJVF = jvf;
-      maxIndex = iVertex;
+      maxIndex = vert->index();
     }
-    ++iVertex;
   }
 
-  if (m_useTJVA_Tiebreak){
-    ATH_MSG_DEBUG("First TJVA");
-    ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() << " i_vtx = " << maxIndex << "jvf = " << maxJVF);
-    ATH_MSG_DEBUG("highest pt vtx found at z (i=0): " << vertices.at(0)->z());
+  ATH_MSG_DEBUG("First TJVA");
+  ATH_MSG_DEBUG("TJVA vtx found at z: " << vertices.at(maxIndex)->z() << " i_vtx = " << maxIndex << "jvf = " << maxJVF);
+  ATH_MSG_DEBUG("highest pt vtx found at z (i=0): " << vertices.at(0)->z());
 
-    float min_sumDz = 99999999.;
-    iVertex = 0;
-    for (const xAOD::Vertex* vert : vertices) {
-      ATH_MSG_DEBUG("i_vtx=" << iVertex << ", z=" << vert->z() << ", JVF=" << v_jvf[iVertex] << ", sumDz=" << sumDz[iVertex]);
-      if ( v_jvf[iVertex] == maxJVF ){
-        // in case of 0 tracks, first vertex will have sumDz=0, and be selected
-        if (sumDz[iVertex] < min_sumDz){
-          min_sumDz = sumDz[iVertex];
-          maxIndex = iVertex;
-        }
+  float min_sumDz = 99999999.;
+  for (const xAOD::Vertex* vert : vertices) {
+    ATH_MSG_DEBUG("i_vtx=" << vert->index() << ", z=" << vert->z() << ", JVF=" << v_jvf[vert->index()] << ", sumDz=" << sumDz[vert->index()]);
+    if ( v_jvf[vert->index()] == maxJVF ){
+      // in case of 0 tracks, first vertex will have sumDz=0, and be selected
+      if (sumDz[vert->index()] < min_sumDz){
+        min_sumDz = sumDz[vert->index()];
+        maxIndex = vert->index();
       }
-      ++iVertex;
     }
   }
 

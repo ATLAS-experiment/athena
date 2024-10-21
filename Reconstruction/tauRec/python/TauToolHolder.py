@@ -41,7 +41,6 @@ def TauVertexFinderCfg(flags):
     TauVertexFinder = CompFactory.getComp("TauVertexFinder")
     TauVertexFinder = TauVertexFinder(name = _name,
                                       UseTJVA                 = flags.Tau.doTJVA,
-                                      UseTJVA_Tiebreak        = flags.Tau.doTJVATiebreak,
                                       AssociatedTracks="GhostTrack", # OK??
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
                                       Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
