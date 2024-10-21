@@ -297,9 +297,8 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
       theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionTool1DCfg(flags))
     else:
       theFPGATrackSimLogicalHitsProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
-
-
-    if (flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter):
+      
+    if flags.Trigger.FPGATrackSim.ActiveConfig.etaPatternFilter:
         EtaPatternFilter = CompFactory.FPGATrackSimEtaPatternFilterTool()
         EtaPatternFilter.FPGATrackSimMappingSvc = FPGATrackSimMaping
         EtaPatternFilter.threshold = flags.Trigger.FPGATrackSim.Hough1D.threshold[0]
@@ -318,6 +317,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags):
         
         theFPGATrackSimLogicalHitsProcessAlg.RoadFilter2 = RoadFilter2
         theFPGATrackSimLogicalHitsProcessAlg.FilterRoads2 = True
+
 
     theFPGATrackSimLogicalHitsProcessAlg.HoughRootOutputTool = result.getPrimaryAndMerge(FPGATrackSimHoughRootOutputToolCfg(flags))
 
@@ -370,6 +370,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     
+    
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     
@@ -412,68 +413,109 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
-    if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
-        log.info("wrapperFile is string, converting to list")
-        flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-        flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
 
-    flags.lock()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
-    acc=MainServicesCfg(flags)
+    assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-4'),"ERROR You are trying to run an F-4* pipeline! This is not yet supported!"
+    assert not flags.Trigger.FPGATrackSim.pipeline.startswith('F-5'),"ERROR You are trying to run an F-5* pipeline! This is not yet supported!"
 
-    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
-    acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
-    acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+    if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')):
+        print("You are trying to run an F-!* pipeline! I am going to run the Data Prep chain for you and nothing else!")
+        FPGATrackSimDataPrepConfig.runDataPrepChain()
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-2')):
+        print("You are trying to run an F-2* pipeline! I am auto-configuring the 1D bitshift for you, iuncluding eta pattern filters and phi road filters")
+        flags.Trigger.FPGATrackSim.Hough.etaPatternFilter = True
+        flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = True
+        flags.Trigger.FPGATrackSim.Hough.hough1D = True
+        flags.Trigger.FPGATrackSim.Hough.hough = False
+    elif (flags.Trigger.FPGATrackSim.pipeline.startswith('F-3')):
+        print("You are trying to run an F-3* pipeline! I am auto-configuring the 2D HT for you, and disabling the eta pattern filter and phi road filter. Whether you wanted to or not")
+        flags.Trigger.FPGATrackSim.Hough.etaPatternFilter = False
+        flags.Trigger.FPGATrackSim.Hough.phiRoadFilter = False
+        flags.Trigger.FPGATrackSim.Hough.hough1D = False
+        flags.Trigger.FPGATrackSim.Hough.hough = True
+    elif (flags.Trigger.FPGATrackSim.pipeline != ""):
+        raise AssertionError("ERROR You are trying to run the pipeline " + flags.Trigger.FPGATrackSim.pipeline + " which is not yet supported!")
 
-    
-    if not flags.Trigger.FPGATrackSim.wrapperFileName:
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        acc.merge(PoolReadCfg(flags))
-    
-        if flags.Input.isMC:
-            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-            acc.merge(GEN_AOD2xAODCfg(flags))
-
-            from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-            acc.merge(addTruthPileupJetsToOutputCfg(flags))
-        
-        if flags.Detector.EnableCalo:
-            from CaloRec.CaloRecoConfig import CaloRecoCfg
-            acc.merge(CaloRecoCfg(flags))
-
-        if flags.Tracking.recoChain:
-            from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-            acc.merge(InDetTrackRecoCfg(flags))
-
-    # Configure both the dataprep and logical hits algorithms.
-    acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
-    acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
-
-    if flags.Trigger.FPGATrackSim.doEDMConversion:
-        acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
-        if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
-        
-        from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
-        acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
-        acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
-        if not flags.Trigger.FPGATrackSim.wrapperFileName:
-            from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
-            acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
-
-        if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags, stage = '_1st'))
-        if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
-        if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
-        if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
-
-        # Reporting algorithm (used for debugging - can be disabled)
-        from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
-        acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))
-        
-        # IDTPM running
-        from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
-        acc.merge( InDetTrackPerfMonCfg(flags) )
-    
-    acc.store(open('AnalysisConfig.pkl','wb'))
-
-    statusCode = acc.run(flags.Exec.MaxEvents)
-    assert statusCode.isSuccess() is True, "Application execution did not succeed"
+    if (not flags.Trigger.FPGATrackSim.pipeline.startswith('F-1')): ### if DP pipeline skip everything else!
+       
+       splitPipeline=flags.Trigger.FPGATrackSim.pipeline.split('-')
+       trackingOption=9999999
+       if (len(splitPipeline) > 1): trackingOption=int(splitPipeline[1])
+       if (trackingOption < 9999999):
+           trackingOptionMod = (trackingOption % 100)
+           if (trackingOptionMod == 0):
+               print("You are trying to run the linearized chi2 fit as part of a pipeline! I am going to enable this for you whether you want to or not")
+               flags.Trigger.FPGATrackSim.tracking = True
+           elif (trackingOptionMod == 1):
+               raise AssertionError("ERROR You are trying to run the NN fake removal as part of a pipeline! This is not yet supported!")
+           else:
+               raise AssertionError("ERROR Your tracking option for the pipeline = " + str(trackingOption) + " is not yet supported!")
+   
+   
+       if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
+           log.info("wrapperFile is string, converting to list")
+           flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
+           flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+   
+       flags.lock()
+       flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+       acc=MainServicesCfg(flags)
+   
+       acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+   
+       if (flags.Trigger.FPGATrackSim.Hough.houghRootoutput):
+               acc.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimHOUGHOUTPUT DATAFILE='HoughRootOutput.root', OPT='RECREATE'"]))
+   
+       acc.addService(CompFactory.THistSvc(Output = ["FPGATRACKSIMOUTPUT DATAFILE='test.root', OPT='RECREATE'"]))
+   
+       
+       if not flags.Trigger.FPGATrackSim.wrapperFileName:
+           from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+           acc.merge(PoolReadCfg(flags))
+       
+           if flags.Input.isMC:
+               from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+               acc.merge(GEN_AOD2xAODCfg(flags))
+   
+               from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
+               acc.merge(addTruthPileupJetsToOutputCfg(flags))
+           
+           if flags.Detector.EnableCalo:
+               from CaloRec.CaloRecoConfig import CaloRecoCfg
+               acc.merge(CaloRecoCfg(flags))
+   
+           if flags.Tracking.recoChain:
+               from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+               acc.merge(InDetTrackRecoCfg(flags))
+   
+       # Configure both the dataprep and logical hits algorithms.
+       acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))
+       acc.merge(FPGATrackSimLogicalHitsProcessAlgCfg(flags))
+   
+       if flags.Trigger.FPGATrackSim.doEDMConversion:
+           acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_1st', stage = '_1st', doActsTrk=True))
+           if flags.Trigger.FPGATrackSim.spacePoints : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgSpacePoints_1st', stage = '_1st', doSP = True, doClusters = False, doHits = False)) 
+           
+           from FPGATrackSimPrototrackFitter.FPGATrackSimPrototrackFitterConfig import FPGATruthDecorationCfg, FPGAProtoTrackFitCfg
+           acc.merge(FPGAProtoTrackFitCfg(flags,stage='_1st')) # Run ACTS KF for 1st stage
+           acc.merge(FPGATruthDecorationCfg(flags,FinalProtoTrackChainxAODTracksKey=FinalProtoTrackChainxAODTracksKey,stage='_1st')) # Run ACTS KF for 1st stage
+           if not flags.Trigger.FPGATrackSim.wrapperFileName:
+               from FPGATrackSimConfTools.FPGATrackExtensionConfig import FPGATrackExtensionAlgCfg
+               acc.merge(FPGATrackExtensionAlgCfg(flags, enableTrackStatePrinter=False, name="FPGATrackExtension", ProtoTracksLocation="ActsProtoTracks_1stFromFPGATrack")) # run CKF track extension on FPGA tracks
+   
+           if flags.Trigger.FPGATrackSim.writeToAOD: acc.merge(FPGATrackSimDataPrepConfig.WriteToAOD(flags, stage = '_1st'))
+           if flags.Trigger.FPGATrackSim.Hough.secondStage : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlg_2nd', stage = '_2nd')) # Default disabled, doesn't work if enabled
+           if flags.Trigger.FPGATrackSim.convertUnmappedHits: acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgUnmapped_1st', stage = 'Unmapped_1st', doClusters = False))
+           if flags.Trigger.FPGATrackSim.Hough.hitFiltering : acc.merge(FPGATrackSimDataPrepConfig.FPGAConversionAlgCfg(flags, name = 'FPGAConversionAlgFiltered_1st', stage = 'Filtered_1st', doHits = False)) # Default disabled, works if enabled
+   
+           # Reporting algorithm (used for debugging - can be disabled)
+           from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+           acc.merge(FPGATrackSimReportingCfg(flags,perEventReports=False))
+           
+           # IDTPM running
+           from InDetTrackPerfMon.InDetTrackPerfMonConfig import InDetTrackPerfMonCfg
+           acc.merge( InDetTrackPerfMonCfg(flags) )
+       
+       acc.store(open('AnalysisConfig.pkl','wb'))
+   
+       statusCode = acc.run(flags.Exec.MaxEvents)
+       assert statusCode.isSuccess() is True, "Application execution did not succeed"

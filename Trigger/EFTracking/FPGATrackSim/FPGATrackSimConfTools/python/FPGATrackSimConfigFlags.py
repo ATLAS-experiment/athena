@@ -3,6 +3,7 @@
 def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
+    cf.addFlag('pipeline', '')
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
     cf.addFlag('wrapperFileName2', [])
@@ -74,6 +75,8 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('houghRootoutput', False)
     cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
+    cf.addFlag('etaPatternFilter', False)
+    cf.addFlag('phiRoadFilter', False)    
 
     # NN filtering
     cf.addFlag('trackNNAnalysis', False)
@@ -143,10 +146,6 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('lrtMonPhiRange', (0.2, 0.5))
     cf.addFlag('lrtMonD0Range', (-100,100))
     cf.addFlag('lrtMonZ0Range', (-300,300)) 
-
-    # FPGATrackSimLogicalHitsProcessAlg
-    # cf.addFlag('etaPatternRoadFilter', None) #TO DO (will be uncomment when the value is known)
-    # cf.addFlag('phiRoadFilter', None) #TO DO (will be uncomment when the value is known)
     cf.addFlag('sampleType', '')
 
     return cf
@@ -168,6 +167,7 @@ def createHough1dFPGATrackSimConfigFlags():
     cf.addFlag('phiRangeCut', True)
     cf.addFlag('splitpt', 1)
     cf.addFlag('phifilterwindow', 0.005)
+
     cf.outputHitTxt = ""
 
     return cf
@@ -179,8 +179,7 @@ def createHoughFPGATrackSimConfigFlags():
     cf.name = 'hough'
     cf.hough = True
 
-    cf.addFlag('etaPatternFilter', False)
-    cf.addFlag('phiRoadFilter', False)    
+
     cf.phiMin = 0.3
     cf.phiMax = 0.5
     cf.xBins = 216
