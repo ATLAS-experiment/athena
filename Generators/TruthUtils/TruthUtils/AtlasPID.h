@@ -291,9 +291,11 @@ template<> inline bool isHiddenValley(const int& p){ auto value_digits = Decoded
 
 /// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
 /// These particles are assigned the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
+/// or +/-200XXYY0, where the charge is XX/YY.
+/// The case of +/-200XXYY0 is legacy, see https://gitlab.cern.ch/atlas/athena/-/merge_requests/25862
 /// Note that no other quantum numbers besides the charge are considered for these generic multi-charged particles (e.g. isSUSY() is false for them).
 /// Such a model was used in previous Run-1 (1301.5272,1504.04188) and Run-2 (1812.03673,2303.13613) ATLAS searches.
-template<> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && p(0) == 1 && p(1) == 0 && p(2) == 0 && p(7) == 0);}
+template<> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && (p(0) == 1 || p(0) == 2) && p(1) == 0 && p(2) == 0 && p(7) == 0);}
 template<> inline bool isGenericMultichargedParticle(const int& p){ auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
 
 /// PDG rule 4
@@ -561,7 +563,9 @@ template<> inline int charge3(const DecodedPID& p) {
     return ( (p.pid() > 0 && p(2) == 1) ||  (p.pid() < 0 && p(2) == 2) ) ? result : -result;
   }
   if (!classified && isGenericMultichargedParticle(p)) {
-    double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+    double abs_charge = 0.0;
+    if (p(0) == 1) abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+    if (p(0) == 2) abs_charge = (p(3)*10. + p(4))/(p(5)*10.0 + p(6)); // multi-charged particle PDG ID is +/-200XXYY0, where the charge is XX/YY
     int abs_threecharge = static_cast<int>(std::round(abs_charge * 3.)); // the multi-charged particles might have a fractional charge that's not a multiple of 1/3, in that case round to the closest multiple of 1/3 for charge3 and threecharge
     return p.pid() > 0 ? abs_threecharge : -1 * abs_threecharge;
   }
@@ -580,7 +584,9 @@ template<> inline int charge3(const int& p){
 
 template<> inline double fractionalCharge(const DecodedPID& p) {
   if(!isGenericMultichargedParticle(p)) return 1.0*charge3(p)/3.0; // this method is written for multi-charged particles, still make sure other cases are handled properly
-  double abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+  double abs_charge = 0;
+  if (p(0) == 1) abs_charge = p(3)*100. + p(4)*10. + p(5)*1 + p(6)*0.1; // multi-charged particle PDG ID is +/-100XXXY0, where the charge is XXX.Y
+  if (p(0) == 2) abs_charge = (p(3)*10. + p(4))/(p(5)*10.0 + p(6)); // multi-charged particle PDG ID is +/-200XXYY0, where the charge is XX/YY 
   return p.pid() > 0 ? abs_charge : -1 * abs_charge;
 }
 template<> inline double fractionalCharge(const int& p){auto value_digits = DecodedPID(p); return fractionalCharge(value_digits);}
