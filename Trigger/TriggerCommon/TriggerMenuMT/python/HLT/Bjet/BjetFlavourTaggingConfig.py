@@ -48,7 +48,6 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         muons=inputMuons,
         primaryVertices=inputVertex,
         BTagCollection=BTagName,
-        renameTrackJets=False,
         AddedJetSuffix='Jets',
         SecVertexers = [],
     ))
