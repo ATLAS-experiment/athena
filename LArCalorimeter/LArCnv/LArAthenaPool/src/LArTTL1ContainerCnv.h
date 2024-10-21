@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LAREVENTATHENAPOOL_LARTTL1CONTAINERCNV_H 
@@ -46,7 +46,7 @@ protected:
 };
 
 inline LArTTL1ContainerCnv::LArTTL1ContainerCnv( ISvcLocator* svcLocator ) :
-  T_AthenaPoolCustomCnv<LArTTL1Container, LArTTL1Container_PERS>(svcLocator)
+  T_AthenaPoolCustomCnv<LArTTL1Container, LArTTL1Container_PERS>(svcLocator, "LArTTL1ContainerCnv")
 {}
 
 #endif //> LAREVENTATHENAPOOL_LARTTL1CONTAINERCNV_H
