@@ -44,10 +44,6 @@ namespace PanTau {
         
         virtual double stddev(double sumOfSquares, double sumOfValues, int numConsts) const;
         virtual double deltaRprime(const TVector3& vec1, const TVector3& vec2) const;
-        
-        virtual int                 iPow(int man, int exp) const;
-        virtual double              ulAngle(double x, double y) const;
-        virtual double              sign(double a, double b) const;
 
 #ifdef XAOD_ANALYSIS
 	template<class T>

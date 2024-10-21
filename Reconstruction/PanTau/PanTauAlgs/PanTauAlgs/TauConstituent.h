@@ -57,7 +57,6 @@ namespace PanTau {
     
     static std::string  getTypeName(PanTau::TauConstituent::Type aType);
     static bool         isNeutralType(int tauConstituentType);
-    static bool         isCoreType(int tauConstituentType);    
 
       
     /** Default Constructor for POOL. Do not use! */
