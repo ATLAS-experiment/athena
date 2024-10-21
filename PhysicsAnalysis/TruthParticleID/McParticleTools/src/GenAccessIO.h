@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHHELPER_GENACCESSIO_H
@@ -24,8 +24,8 @@ namespace TruthHelper {
 class GenAccessIO {
 public:
 
-    GenAccessIO() : m_sgSvc(0) {
-        if (Gaudi::svcLocator()->service("StoreGateSvc", m_sgSvc).isFailure()) {
+    GenAccessIO() {
+        if (m_sgSvc.retrieve().isFailure()) {
             throw StatusCode::FAILURE;
         }
     }
@@ -80,7 +80,7 @@ public:
         return m_sgSvc->record(storee, key);
     }
 private:
-    StoreGateSvc* m_sgSvc;
+    ServiceHandle<StoreGateSvc> m_sgSvc{"StoreGateSvc", "GenAccessIO"};
 };
 }
 
