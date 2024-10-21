@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COMMISSIONREC_COMTIMEREC
@@ -17,9 +17,8 @@ public:
   ComTimeRec(const std::string& name, ISvcLocator* pSvcLocator);
   ~ComTimeRec();
 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
 private:
 

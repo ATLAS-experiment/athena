@@ -9,7 +9,7 @@
 #include "GaudiKernel/IIncidentListener.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-class ComTime      ; 
+class ComTime;
 
 class CosmicTriggerTimeTool : public extends<AthAlgTool, ITriggerTime, IIncidentListener>
 {
@@ -20,14 +20,14 @@ public:
 			 const IInterface* parent);
 
 
-   virtual StatusCode initialize() ; 
+   virtual StatusCode initialize() override;
 
    virtual ~CosmicTriggerTimeTool() {}
 
    /// returns the time offset of the current trigger
-   virtual double time() ;
+   virtual double time() override;
 
-   virtual void handle(const Incident& incident);
+   virtual void handle(const Incident& incident) override;
 
     double larTime(); 
     double trackRecordTime()   ; 
